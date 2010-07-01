@@ -42,8 +42,8 @@ public class BooleanConverter implements Converter
     = "javax.faces.converter.STRING";
   
   public Object getAsObject(FacesContext context,
-			    UIComponent component,
-			    String value)
+                            UIComponent component,
+                            String value)
     throws ConverterException
   {
     if (context == null || component == null)
@@ -61,14 +61,14 @@ public class BooleanConverter implements Converter
       return Boolean.valueOf(value);
     } catch (Exception e) {
       String summary = Util.l10n(context, BOOLEAN_ID,
-				 "{1}: \"{0}\" must be 'true' or 'false'.",
-				 value, 
-				 Util.getLabel(context, component));
+                                 "{1}: \"{0}\" must be 'true' or 'false'.",
+                                 value,
+                                 Util.getLabel(context, component));
       
       String detail = Util.l10n(context, BOOLEAN_ID + "_detail",
-				"{1}: \"{0}\" must be 'true' or 'false'.  Any value other than 'true' will evaluate to 'false'.",
-				value, 
-				Util.getLabel(context, component));
+                                "{1}: \"{0}\" must be 'true' or 'false'.  Any value other than 'true' will evaluate to 'false'.",
+                                value,
+                                Util.getLabel(context, component));
 
       FacesMessage msg = new FacesMessage(summary, detail);
       
@@ -77,8 +77,8 @@ public class BooleanConverter implements Converter
   }
   
   public String getAsString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
     throws ConverterException
   {
     if (context == null || component == null)

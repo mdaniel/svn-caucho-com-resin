@@ -48,8 +48,8 @@ public class FloatValueExpression extends AbstractValueExpression
   private Class _expectedType;
 
   public FloatValueExpression(Expr expr,
-			      String expressionString,
-			      Class expectedType)
+                              String expressionString,
+                              Class expectedType)
   {
     super(expr, expressionString);
 
@@ -57,7 +57,7 @@ public class FloatValueExpression extends AbstractValueExpression
   }
 
   public FloatValueExpression(Expr expr,
-				String expressionString)
+                                String expressionString)
   {
     super(expr, expressionString);
   }
@@ -82,7 +82,7 @@ public class FloatValueExpression extends AbstractValueExpression
   @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return new Float((float) _expr.evalDouble(context));
   }

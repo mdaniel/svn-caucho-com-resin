@@ -36,7 +36,7 @@ import javax.faces.context.*;
 public abstract class MethodBinding
 {
   public abstract Object invoke(FacesContext context,
-				Object []params)
+                                Object []params)
     throws EvaluationException, MethodNotFoundException;
 
   public abstract Class getType(FacesContext context)

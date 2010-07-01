@@ -50,7 +50,7 @@ abstract public class AbstractHttpProtocol extends AbstractProtocol {
     
     if (_server == null)
       throw new ConfigException(L.l("{0} needs an active Resin Server.",
-				    getClass().getName()));
+                                    getClass().getName()));
   }
 
   /**

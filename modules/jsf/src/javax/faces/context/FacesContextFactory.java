@@ -33,8 +33,8 @@ import javax.faces.lifecycle.*;
 
 public abstract class FacesContextFactory {
   public abstract FacesContext getFacesContext(Object context,
-					       Object request,
-					       Object response,
-					       Lifecycle lifecycle)
+                                               Object request,
+                                               Object response,
+                                               Lifecycle lifecycle)
     throws FacesException;
 }

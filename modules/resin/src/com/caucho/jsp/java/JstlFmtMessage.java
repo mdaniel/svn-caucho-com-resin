@@ -208,7 +208,7 @@ public class JstlFmtMessage extends JstlNode {
     for (node = getParent(); node != null; node = node.getParent()) {
       if (node instanceof JstlFmtBundle) {
         prefix = ((JstlFmtBundle) node).getPrefixCode();
-	break;
+        break;
       }
     }
     */
@@ -316,7 +316,7 @@ public class JstlFmtMessage extends JstlNode {
 
       if (_bundleAttr != null) {
         value = ("pageContext.getLocalizedMessage(" +
-		 _bundleAttr.generateValue() + ", " +
+                 _bundleAttr.generateValue() + ", " +
                  prefix + keyExpr + ", " + paramVar + ", null)");
       }
       else if (_bundle != null) {

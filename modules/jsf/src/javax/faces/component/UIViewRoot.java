@@ -139,7 +139,7 @@ public class UIViewRoot extends UIComponentBase
 
     if (locale == null) {
       ViewHandler viewHandler = context.getApplication().getViewHandler();
-			  
+
       locale = viewHandler.calculateLocale(context);
     }
 
@@ -173,19 +173,19 @@ public class UIViewRoot extends UIComponentBase
   {
     if ("renderKitId".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_renderKitId = (String) expr.getValue(null);
-	return;
+        _renderKitId = (String) expr.getValue(null);
+        return;
       }
       else
-	_renderKitIdExpr = expr;
+        _renderKitIdExpr = expr;
     }
     else if ("locale".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_locale = toLocale(expr.getValue(null));
-	return;
+        _locale = toLocale(expr.getValue(null));
+        return;
       }
       else
-	_localeExpr = expr;
+        _localeExpr = expr;
     }
 
     super.setValueExpression(name, expr);
@@ -195,7 +195,7 @@ public class UIViewRoot extends UIComponentBase
   {
     if (_phaseListeners == null)
       _phaseListeners = new ArrayList<PhaseListener>();
-	
+
     _phaseListeners.add(listener);
   }
 
@@ -319,15 +319,15 @@ public class UIViewRoot extends UIComponentBase
   {
     if (_eventList != null) {
       for (int i = 0; i < _eventList.size(); i++) {
-	FacesEvent event = _eventList.get(i);
-	PhaseId eventPhaseId = event.getPhaseId();
+        FacesEvent event = _eventList.get(i);
+        PhaseId eventPhaseId = event.getPhaseId();
 
-	if (phaseId.equals(eventPhaseId)
-	    || PhaseId.ANY_PHASE.equals(eventPhaseId)) {
-	  event.getComponent().broadcast(event);
-	  _eventList.remove(i);
-	  i--;
-	}
+        if (phaseId.equals(eventPhaseId)
+            || PhaseId.ANY_PHASE.equals(eventPhaseId)) {
+          event.getComponent().broadcast(event);
+          _eventList.remove(i);
+          i--;
+        }
       }
     }
   }
@@ -339,20 +339,20 @@ public class UIViewRoot extends UIComponentBase
 
     if (_afterPhaseListener != null) {
       try {
-	_afterPhaseListener.invoke(context.getELContext(),
-				   new Object[] { event });
+        _afterPhaseListener.invoke(context.getELContext(),
+                                   new Object[] { event });
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new FacesException(e);
+        throw new FacesException(e);
       }
     }
 
     if (_phaseListeners != null) {
       for (int i = 0; i < _phaseListeners.size(); i++) {
-	PhaseListener listener = _phaseListeners.get(i);
+        PhaseListener listener = _phaseListeners.get(i);
 
-	listener.afterPhase(event);
+        listener.afterPhase(event);
       }
     }
   }
@@ -364,20 +364,20 @@ public class UIViewRoot extends UIComponentBase
 
     if (_beforePhaseListener != null) {
       try {
-	_beforePhaseListener.invoke(context.getELContext(),
-				   new Object[] { event });
+        _beforePhaseListener.invoke(context.getELContext(),
+                                   new Object[] { event });
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new FacesException(e);
+        throw new FacesException(e);
       }
     }
 
     if (_phaseListeners != null) {
       for (int i = 0; i < _phaseListeners.size(); i++) {
-	PhaseListener listener = _phaseListeners.get(i);
+        PhaseListener listener = _phaseListeners.get(i);
 
-	listener.beforePhase(event);
+        listener.beforePhase(event);
       }
     }
   }
@@ -386,13 +386,13 @@ public class UIViewRoot extends UIComponentBase
   {
     if (_lifecycle == null) {
       LifecycleFactory factory = (LifecycleFactory)
-	FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
+        FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
 
       ExternalContext extContext = context.getExternalContext();
       String id = extContext.getInitParameter(FacesServlet.LIFECYCLE_ID_ATTR);
     
       if (id == null)
-	id = LifecycleFactory.DEFAULT_LIFECYCLE;
+        id = LifecycleFactory.DEFAULT_LIFECYCLE;
     
       _lifecycle = factory.getLifecycle(id);
     }
@@ -442,11 +442,11 @@ public class UIViewRoot extends UIComponentBase
       String []values = sValue.split("[-_]");
 
       if (values.length > 2)
-	return new Locale(values[0], values[1], values[2]);
+        return new Locale(values[0], values[1], values[2]);
       else if (values.length > 1)
-	return new Locale(values[0], values[1]);
+        return new Locale(values[0], values[1]);
       else
-	return new Locale(sValue);
+        return new Locale(sValue);
     }
     else if (value == null)
       return null;

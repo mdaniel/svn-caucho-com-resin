@@ -72,7 +72,7 @@ public class RemoteAdminService
 
     if (_server == null)
       throw new ConfigException(L.l("<admin:{0}> may only be instantiated in an active server",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -98,7 +98,7 @@ public class RemoteAdminService
       mapping.addURLPattern("/hmtp");
       mapping.setServletClass("com.caucho.remote.HmtpServlet");
       mapping.setInitParam("authentication-required",
-			   String.valueOf(_isAuthenticationRequired));
+                           String.valueOf(_isAuthenticationRequired));
       mapping.setInitParam("admin", "true");
       mapping.init();
 
@@ -107,7 +107,7 @@ public class RemoteAdminService
       _server.addHost(hostConfig);
 
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " enabled at http://" + _hostName + "/hmtp");
+        log.finer(this + " enabled at http://" + _hostName + "/hmtp");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

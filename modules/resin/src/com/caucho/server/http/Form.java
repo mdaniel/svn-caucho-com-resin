@@ -76,9 +76,9 @@ public class Form {
    * @param javaEncoding the Java name for the charset
    */
   public void parseQueryString(HashMapImpl<String,String[]> table,
-			       String query,
-			       String javaEncoding,
-			       boolean isTop)
+                               String query,
+                               String javaEncoding,
+                               boolean isTop)
     throws IOException
   {
     CharCursor is = new StringCharCursor(query);
@@ -117,17 +117,17 @@ public class Form {
       if (key == null || key.equals("")) {
       }
       else if (oldValue == null)
-	table.put(key, new String[] { value });
+        table.put(key, new String[] { value });
       else if (isTop) {
-	String []newValue = new String[oldValue.length + 1];
-	System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
-	newValue[oldValue.length] = value;
-	table.put(key, newValue);
+        String []newValue = new String[oldValue.length + 1];
+        System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
+        newValue[oldValue.length] = value;
+        table.put(key, newValue);
       } else {
-	String []newValue = new String[oldValue.length + 1];
-	System.arraycopy(oldValue, 0, newValue, 1, oldValue.length);
-	newValue[0] = value;
-	table.put(key, newValue);
+        String []newValue = new String[oldValue.length + 1];
+        System.arraycopy(oldValue, 0, newValue, 1, oldValue.length);
+        newValue[0] = value;
+        table.put(key, newValue);
       }
     }
   }
@@ -141,7 +141,7 @@ public class Form {
    * @param ch the next character
    */
   private static void readChar(ByteToChar converter, CharCursor is,
-			       int ch, boolean isTop)
+                               int ch, boolean isTop)
     throws IOException
   {
     if (ch == '+') {
@@ -184,7 +184,7 @@ public class Form {
    * @param javaEncoding the Java name for the charset
    */
   void parsePostData(HashMapImpl<String,String[]> table, InputStream is,
-		     String javaEncoding)
+                     String javaEncoding)
     throws IOException
   {
     ByteToChar converter = _converter;
@@ -215,8 +215,8 @@ public class Form {
       converter.clear(); 
       if (ch == '=') {
         ch = is.read();
-	for (; Character.isWhitespace((char) ch); ch = is.read()) {
-	}
+        for (; Character.isWhitespace((char) ch); ch = is.read()) {
+        }
       }
       
       for (; ch >= 0 && ch != '&'; ch = is.read())
@@ -234,12 +234,12 @@ public class Form {
       if (key == null || key.equals("")) {
       }
       else if (oldValue == null)
-	table.put(key, new String[] { value });
+        table.put(key, new String[] { value });
       else {
-	String []newValue = new String[oldValue.length + 1];
-	System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
-	newValue[oldValue.length] = value;
-	table.put(key, newValue);
+        String []newValue = new String[oldValue.length + 1];
+        System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
+        newValue[oldValue.length] = value;
+        table.put(key, newValue);
       }
     }
   }

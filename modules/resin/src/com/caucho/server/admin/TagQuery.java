@@ -93,6 +93,6 @@ public class TagQuery implements Serializable {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _tag + ",host=" + _host + ",url=" + _url + "]");
+            + "[" + _tag + ",host=" + _host + ",url=" + _url + "]");
   }
 }

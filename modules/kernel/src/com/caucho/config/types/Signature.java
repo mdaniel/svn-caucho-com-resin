@@ -241,8 +241,8 @@ public class Signature {
       ch = skipWhitespace(read());
 
       for (;
-	   Character.isJavaIdentifierPart((char) ch) || ch == '.';
-	   ch = read()) {
+           Character.isJavaIdentifierPart((char) ch) || ch == '.';
+           ch = read()) {
       }
       
       if (ch == ',')
@@ -282,18 +282,18 @@ public class Signature {
       }
 
       if (ch == '[') {
-	ch = read();
-	
-	if (ch != ']')
-	  throw new ConfigException(L.l("function syntax is `ret-type name(arg1, ..., argn)' in `{0}'",
+        ch = read();
+
+        if (ch != ']')
+          throw new ConfigException(L.l("function syntax is `ret-type name(arg1, ..., argn)' in `{0}'",
                                         _signature));
 
-	cb.append("[]");
+        cb.append("[]");
 
-	ch = read();
+        ch = read();
       }
       else
-	break;
+        break;
     }
 
     

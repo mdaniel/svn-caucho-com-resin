@@ -63,8 +63,8 @@ public class burlapURLContextFactory implements ObjectFactory {
       BurlapModel model = _model;
 
       if (model == null) {
-	model = new BurlapModel();
-	_model = model;
+        model = new BurlapModel();
+        _model = model;
       }
 
       return new BurlapContextImpl(model, env);

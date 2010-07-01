@@ -134,23 +134,23 @@ public class PDFStream {
   }
 
   public void curveTo(double x1, double y1,
-		      double x2, double y2,
-		      double x3, double y3)
+                      double x2, double y2,
+                      double x3, double y3)
   {
     flushToGraph();
 
     if (x1 == x2 && y1 == y2) {
       println(x1 + " " + y1 + " " +
-		   x3 + " " + y3 + " y");
+                   x3 + " " + y3 + " y");
     }
     else if (x2 == x3 && y2 == y3) {
       println(x1 + " " + y1 + " " +
-		   x2 + " " + y2 + " v");
+                   x2 + " " + y2 + " v");
     }
     else {
       println(x1 + " " + y1 + " " +
-		   x2 + " " + y2 + " " +
-		   x3 + " " + y3 + " c");
+                   x2 + " " + y2 + " " +
+                   x3 + " " + y3 + " c");
     }
 
     _x = x3;
@@ -226,7 +226,7 @@ public class PDFStream {
   public static int BOTH = 3;
 
   public boolean setcolor(String fstype, String colorspace,
-			  double c1, double c2, double c3, double c4)
+                          double c1, double c2, double c3, double c4)
   {
     flushToGraph();
 
@@ -242,25 +242,25 @@ public class PDFStream {
 
     if ("gray".equals(colorspace)) {
       if ((type & STROKE) != 0)
-	println(c1 + " G");
+        println(c1 + " G");
       if ((type & FILL) != 0)
-	println(c1 + " g");
+        println(c1 + " g");
 
       return true;
     }
     else if ("rgb".equals(colorspace)) {
       if ((type & STROKE) != 0)
-	println(c1 + " " + c2 + " " + c3 + " RG");
+        println(c1 + " " + c2 + " " + c3 + " RG");
       if ((type & FILL) != 0)
-	println(c1 + " " + c2 + " " + c3 + " rg");
+        println(c1 + " " + c2 + " " + c3 + " rg");
 
       return true;
     }
     else if ("cmyk".equals(colorspace)) {
       if ((type & STROKE) != 0)
-	println(c1 + " " + c2 + " " + c3 + " " + c4 + " K");
+        println(c1 + " " + c2 + " " + c3 + " " + c4 + " K");
       if ((type & FILL) != 0)
-	println(c1 + " " + c2 + " " + c3 + " " + c4 + " k");
+        println(c1 + " " + c2 + " " + c3 + " " + c4 + " k");
 
       return true;
     }
@@ -304,10 +304,10 @@ public class PDFStream {
   }
 
   public boolean concat(double a, double b, double c,
-			double d, double e, double f)
+                        double d, double e, double f)
   {
     println(String.format("%.4f %.4f %.4f %.4f %.4f %.4f cm",
-			  a, b, c, d, e, f));
+                          a, b, c, d, e, f));
 
     return true;
   }
@@ -356,8 +356,8 @@ public class PDFStream {
       flush();
 
       if (! _hasGraphicsPos) {
-	_out.println(_x + " " + _y + " m");
-	_hasGraphicsPos = true;
+        _out.println(_x + " " + _y + " m");
+        _hasGraphicsPos = true;
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -377,8 +377,8 @@ public class PDFStream {
   {
     try {
       if (_inText) {
-	_out.println("ET");
-	_inText = false;
+        _out.println("ET");
+        _inText = false;
       }
 
       _out.flush();

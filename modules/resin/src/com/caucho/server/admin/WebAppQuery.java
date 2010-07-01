@@ -70,6 +70,6 @@ public class WebAppQuery implements Serializable {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _tag + "," + _host + "," + _url + "]");
+            + "[" + _tag + "," + _host + "," + _url + "]");
   }
 }

@@ -57,11 +57,11 @@ abstract public class AbstractValueConfig
 
     for (Method method : type.getDeclaredMethods()) {
       if (! method.getName().equals(name))
-	continue;
+        continue;
       else if (method.getParameterTypes().length != 0)
-	continue;
+        continue;
       else if (Modifier.isStatic(method.getModifiers()))
-	continue;
+        continue;
 
       return method;
     }
@@ -76,11 +76,11 @@ abstract public class AbstractValueConfig
 
     for (Method method : type.getDeclaredMethods()) {
       if (! method.getName().equals(name))
-	continue;
+        continue;
       else if (method.getParameterTypes().length != 1)
-	continue;
+        continue;
       else if (Modifier.isStatic(method.getModifiers()))
-	continue;
+        continue;
 
       return method;
     }

@@ -80,7 +80,7 @@ public class MessageListenerTask implements Work {
     Destination queue = _ra.getDestination();
 
     if (queue instanceof Queue &&
-	factory instanceof QueueConnectionFactory) {
+        factory instanceof QueueConnectionFactory) {
       QueueConnectionFactory queueFactory;
       queueFactory = (QueueConnectionFactory) factory;
       
@@ -90,7 +90,7 @@ public class MessageListenerTask implements Work {
       _queueConnection.start();
     }
     else if (queue instanceof Topic &&
-	     factory instanceof TopicConnectionFactory) {
+             factory instanceof TopicConnectionFactory) {
       TopicConnectionFactory topicFactory;
       topicFactory = (TopicConnectionFactory) factory;
       
@@ -114,23 +114,23 @@ public class MessageListenerTask implements Work {
   {
     while (! _isClosed) {
       try {
-	Message msg;
+        Message msg;
 
-	if (_consumer != null)
-	  msg = _consumer.receive(60000);
-	else if (_queueConsumer != null)
-	  msg = _queueConsumer.receive(60000);
-	else if (_topicConsumer != null)
-	  msg = _topicConsumer.receive(60000);
-	else {
-	  _isClosed = true;
-	  throw new IllegalStateException();
-	}
+        if (_consumer != null)
+          msg = _consumer.receive(60000);
+        else if (_queueConsumer != null)
+          msg = _queueConsumer.receive(60000);
+        else if (_topicConsumer != null)
+          msg = _topicConsumer.receive(60000);
+        else {
+          _isClosed = true;
+          throw new IllegalStateException();
+        }
 
-	if (msg != null)
-	  _listener.onMessage(msg);
+        if (msg != null)
+          _listener.onMessage(msg);
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -145,7 +145,7 @@ public class MessageListenerTask implements Work {
     Connection connection = _connection;
     try {
       if (connection != null)
-	connection.stop();
+        connection.stop();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -162,11 +162,11 @@ public class MessageListenerTask implements Work {
     
     try {
       if (consumer != null)
-	consumer.close();
+        consumer.close();
       if (session != null)
-	session.close();
+        session.close();
       if (connection != null)
-	connection.close();
+        connection.close();
     } catch (Throwable e) {
     }
 

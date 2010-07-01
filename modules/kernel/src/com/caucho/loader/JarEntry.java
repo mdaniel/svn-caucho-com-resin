@@ -70,7 +70,7 @@ class JarEntry {
 
     try {
       _codeSource = new CodeSource(new URL(jarPath.getURL()),
-				   (Certificate []) jarPath.getCertificates());
+                                   (Certificate []) jarPath.getCertificates());
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -173,29 +173,29 @@ class JarEntry {
 
       String name = attr.getValue(ext + "-Extension-Name");
       if (name == null)
-	continue;
+        continue;
 
       Package pkg = Package.getPackage(name);
 
       if (pkg == null) {
-	log.warning(L.l("package {0} is missing.  {1} requires package {0}.",
-			name, manifestName));
-	continue;
+        log.warning(L.l("package {0} is missing.  {1} requires package {0}.",
+                        name, manifestName));
+        continue;
       }
 
       String version = attr.getValue(ext + "-Specification-Version");
 
       if (version == null)
-	continue;
+        continue;
 
       if (pkg.getSpecificationVersion() == null ||
-	  pkg.getSpecificationVersion().equals("")) {
-	log.warning(L.l("installed {0} is not compatible with version `{1}'.  {2} requires version {1}.",
-		     name, version, manifestName));
+          pkg.getSpecificationVersion().equals("")) {
+        log.warning(L.l("installed {0} is not compatible with version `{1}'.  {2} requires version {1}.",
+                     name, version, manifestName));
       }
       else if (! pkg.isCompatibleWith(version)) {
-	log.warning(L.l("installed {0} is not compatible with version `{1}'.  {2} requires version {1}.",
-		     name, version, manifestName));
+        log.warning(L.l("installed {0} is not compatible with version `{1}'.  {2} requires version {1}.",
+                     name, version, manifestName));
       }
     }
   }
@@ -233,7 +233,7 @@ class JarEntry {
       Path jarPath = _jarPath.lookup(path);
       
       Certificate []certificates = jarPath.getCertificates();
-	
+
       return new CodeSource(new URL(jarPath.getURL()), certificates);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

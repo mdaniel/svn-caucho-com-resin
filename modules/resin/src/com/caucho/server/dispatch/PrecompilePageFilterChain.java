@@ -83,18 +83,18 @@ public class PrecompilePageFilterChain implements FilterChain {
     String tail = query.substring(p + "jsp_precompile".length());
 
     if (tail.startsWith("=\"true\"") ||
-	tail.startsWith("=true") ||
-	! tail.startsWith("=")) {
+        tail.startsWith("=true") ||
+        ! tail.startsWith("=")) {
       if (invocation instanceof Invocation) {
-	Invocation inv = (Invocation) invocation;
+        Invocation inv = (Invocation) invocation;
 
-	inv.setDependency(AlwaysModified.create());
+        inv.setDependency(AlwaysModified.create());
       }
       
       return new PrecompilePageFilterChain(pageChain.getServlet());
     }
     else if (tail.startsWith("=\"false\"") ||
-	     tail.startsWith("=false")) {
+             tail.startsWith("=false")) {
       // jsp/1910
       return pageChain;
     }

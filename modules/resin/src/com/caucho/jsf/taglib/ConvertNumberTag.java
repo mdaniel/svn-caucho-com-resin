@@ -132,7 +132,7 @@ public class ConvertNumberTag extends ConverterELTag
       converter = (NumberConverter) app.createConverter(id);
 
       if (_bindingExpr != null)
-	_bindingExpr.setValue(elContext, converter);
+        _bindingExpr.setValue(elContext, converter);
     }
 
     String type = null;
@@ -156,9 +156,9 @@ public class ConvertNumberTag extends ConverterELTag
       Object value = _localeExpr.getValue(elContext);
 
       if (value instanceof Locale)
-	converter.setLocale((Locale) value);
+        converter.setLocale((Locale) value);
       else if (value != null)
-	converter.setLocale(new Locale(value.toString()));
+        converter.setLocale(new Locale(value.toString()));
     }
 
     if (_maxFractionDigitsExpr != null) {

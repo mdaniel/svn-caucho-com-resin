@@ -107,7 +107,7 @@ public class DataOption implements java.io.Serializable {
 
     if (_value != null) {
       for (int i = 0; i < _value.length; i++) {
-	sb.append(",value=").append(_value[i]);
+        sb.append(",value=").append(_value[i]);
       }
     }
 

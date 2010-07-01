@@ -192,8 +192,8 @@ public class CacheConfig
   public long getExpireCheckWindow()
   {
     return (_expireTimeoutWindow > 0
-	    ? _expireTimeoutWindow
-	    : _expireTimeout / 4);
+            ? _expireTimeoutWindow
+            : _expireTimeout / 4);
   }
 
   /**
@@ -250,8 +250,8 @@ public class CacheConfig
   public long getIdleCheckWindow()
   {
     return (_idleTimeoutWindow > 0
-	    ? _idleTimeoutWindow
-	    : _idleTimeout / 4);
+            ? _idleTimeoutWindow
+            : _idleTimeout / 4);
   }
 
   /**

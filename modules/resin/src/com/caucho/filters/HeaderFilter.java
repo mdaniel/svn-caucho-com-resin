@@ -60,7 +60,7 @@ public class HeaderFilter implements Filter
    * Creates a wrapper to compress the output.
    */
   public void doFilter(ServletRequest request,
-		       ServletResponse response,
+                       ServletResponse response,
                        FilterChain nextFilter)
     throws ServletException, IOException
   {

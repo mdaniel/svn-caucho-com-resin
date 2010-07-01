@@ -76,37 +76,37 @@ public class JspDirectiveVariable extends JspNode
     JavaTagGenerator gen = (JavaTagGenerator) _gen;
     if (NAME_GIVEN.equals(name)) {
       if (gen.findVariable(value) != null) {
-	throw error(L.l("@variable name-given '{0}' is already used by another variable.",
-			value));
+        throw error(L.l("@variable name-given '{0}' is already used by another variable.",
+                        value));
       }
       else if (gen.findNameFromAttributeVariable(value) != null) {
-	throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
-			value));
+        throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
+                        value));
       }
       else if (gen.findAttribute(value) != null) {
-	throw error(L.l("@variable name-given '{0}' is already used by an attribute.",
-			value));
+        throw error(L.l("@variable name-given '{0}' is already used by an attribute.",
+                        value));
       }
       else if (value.equals(gen.getDynamicAttributes())) {
-	throw error(L.l("@variable name-given '{0}' cannot be the same as the tag's dynamic-attributes.",
-			value));
+        throw error(L.l("@variable name-given '{0}' cannot be the same as the tag's dynamic-attributes.",
+                        value));
       }
       
       _nameGiven = value;
     }
     else if (NAME_FROM_ATTRIBUTE.equals(name)) {
       if (gen.findVariable(value) != null) {
-	throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
-			value));
+        throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
+                        value));
       }
       else if (gen.findNameFromAttributeVariable(value) != null) {
-	throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
-			value));
+        throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
+                        value));
       }
       /*
       else if (gen.findAttribute(value) != null) {
-	throw error(L.l("@variable name-from-attribute '{0}' is already used by an attribute.",
-			value));
+        throw error(L.l("@variable name-from-attribute '{0}' is already used by an attribute.",
+                        value));
       }
       */
       
@@ -114,8 +114,8 @@ public class JspDirectiveVariable extends JspNode
     }
     else if (ALIAS.equals(name)) {
       if (gen.findAttribute(value) != null) {
-	throw error(L.l("@variable alias '{0}' is already used by an attribute.",
-			value));
+        throw error(L.l("@variable alias '{0}' is already used by an attribute.",
+                        value));
       }
       
       _alias = value;
@@ -126,10 +126,10 @@ public class JspDirectiveVariable extends JspNode
       _isDeclare = attributeToBoolean(name.getName(), value);
     else if (SCOPE.equals(name)) {
       if (! "NESTED".equals(value) &&
-	  ! "AT_BEGIN".equals(value) &&
-	  ! "AT_END".equals(value))
-	throw error(L.l("'{0}' is an illegal scope value.  NESTED, AT_BEGIN, and AT_END are the only accepted values.",
-			value));
+          ! "AT_BEGIN".equals(value) &&
+          ! "AT_END".equals(value))
+        throw error(L.l("'{0}' is an illegal scope value.  NESTED, AT_BEGIN, and AT_END are the only accepted values.",
+                        value));
 
       _scope = value;
     }
@@ -232,21 +232,21 @@ public class JspDirectiveVariable extends JspNode
       TldAttribute attr = attributes.get(i);
 
       if (! attr.getName().equals(_nameFromAttribute))
-	continue;
+        continue;
 
       if (! String.class.equals(attr.getType()))
-	throw error(L.l("name-from-attribute variable '{0}' needs a matching String attribute, not '{1}', because the JSP 2.1 specification requires a String.",
-			_nameFromAttribute, attr.getType().getName()));
+        throw error(L.l("name-from-attribute variable '{0}' needs a matching String attribute, not '{1}', because the JSP 2.1 specification requires a String.",
+                        _nameFromAttribute, attr.getType().getName()));
 
       if (! attr.getRequired() && attr.getRequiredVar() != null)
-	throw error(L.l("name-from-attribute '{0}' needs an attribute declaration with the required=\"true\" attribute, according to the JSP 2.1 specification.",
-			_nameFromAttribute));
+        throw error(L.l("name-from-attribute '{0}' needs an attribute declaration with the required=\"true\" attribute, according to the JSP 2.1 specification.",
+                        _nameFromAttribute));
 
       return;
     }
     
     throw error(L.l("name-from-attribute variable '{0}' needs a matching String attribute.",
-		    _nameFromAttribute));
+                    _nameFromAttribute));
   }
 
   /**

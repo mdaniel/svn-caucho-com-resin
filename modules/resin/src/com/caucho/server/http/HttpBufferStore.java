@@ -44,7 +44,7 @@ public final class HttpBufferStore
 {
   private static final FreeList<HttpBufferStore> _freeList
     = new FreeList<HttpBufferStore>(256);
-				    
+
   private final byte []_logBuffer = null;//new byte[1024];
   
   private final byte []_uri;              // "/path/test.jsp/Junk?query=7"

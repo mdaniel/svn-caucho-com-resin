@@ -210,12 +210,12 @@ public class ViewFileServlet extends GenericServlet {
       String requestContext = ((HttpServletRequest) request).getContextPath();
 
       if (cp != null && cp.startsWith(requestContext))
-	cp = cp.substring(requestContext.length());
+        cp = cp.substring(requestContext.length());
 
       CharBuffer cb = new CharBuffer();
 
       if (cp != null)
-	cb.append(cp);
+        cb.append(cp);
 
       cb.append('/');
       cb.append(f);

@@ -79,13 +79,13 @@ public class JsfTagNode extends JsfNode
     String name = qName.getName();
 
     String setterName = ("set" + Character.toUpperCase(name.charAt(0))
-			 + name.substring(1));
+                         + name.substring(1));
 
     if (name.equals("action")
-	&& ActionSource2.class.isAssignableFrom(_componentClass))
+        && ActionSource2.class.isAssignableFrom(_componentClass))
       setterName = "setActionExpression";
     else if (name.equals("actionListener")
-	     && ActionSource2.class.isAssignableFrom(_componentClass))
+             && ActionSource2.class.isAssignableFrom(_componentClass))
       setterName = "addActionListener";
     else if (name.equals("escape") &&
              UISelectItem.class.isAssignableFrom(_componentClass))
@@ -98,9 +98,9 @@ public class JsfTagNode extends JsfNode
     }
     else if (name.equals("binding")) {
       if (! value.startsWith("#{"))
-	throw error(L.l("JSF binding attribute requires a deferred value at '{0}'",
-			value));
-	
+        throw error(L.l("JSF binding attribute requires a deferred value at '{0}'",
+                        value));
+
       Attr attr = new Attr(name, method, value);
 
       _bindingAttr = attr;
@@ -127,16 +127,16 @@ public class JsfTagNode extends JsfNode
       String name = qName.getName();
 
       String setterName = ("set" + Character.toUpperCase(name.charAt(0))
-			   + name.substring(1));
+                           + name.substring(1));
 
       Method method = findSetter(_componentClass, setterName);
 
       if (method != null) {
-	_attrList.add(new Attr(name, method, value));
+        _attrList.add(new Attr(name, method, value));
       }
       else {
-	super.addAttribute(qName, value);
-	return;
+        super.addAttribute(qName, value);
+        return;
       }
     }
   }
@@ -154,13 +154,13 @@ public class JsfTagNode extends JsfNode
       final QName qName = _parent.getQName();
 
       if ((qName.getNamespaceURI().indexOf("http://java.sun.com/jsf/core") > -1)
-	  && "facet".equals(qName.getLocalName())) {
+          && "facet".equals(qName.getLocalName())) {
 
-	final Object facetName = ((CustomTag) _parent).getAttribute("name");
-	
-	if (facetName instanceof String) {
-	  _facetName = facetName.toString();
-	}
+        final Object facetName = ((CustomTag) _parent).getAttribute("name");
+
+        if (facetName instanceof String) {
+          _facetName = facetName.toString();
+        }
       }
     }
 
@@ -214,18 +214,18 @@ public class JsfTagNode extends JsfNode
       
     for (int i = 0; i < children.size(); i++) {
       JspNode child = children.get(i);
-	
-      if (child == this)
-	return isJsfIdRequired;
-      else if (child instanceof JsfTagNode) {
-	JsfTagNode jsfNode = (JsfTagNode) child;
-	String id = jsfNode.getJsfId();
 
-	if (id != null)
-	  isJsfIdRequired = false;
+      if (child == this)
+        return isJsfIdRequired;
+      else if (child instanceof JsfTagNode) {
+        JsfTagNode jsfNode = (JsfTagNode) child;
+        String id = jsfNode.getJsfId();
+
+        if (id != null)
+          isJsfIdRequired = false;
       }
       else if (child.isJsfParentRequired())
-	isJsfIdRequired = true;
+        isJsfIdRequired = true;
     }
 
     return false;
@@ -241,17 +241,17 @@ public class JsfTagNode extends JsfNode
       boolean isFound = false;
       
       for (int i = children.size() - 1; i >= 0; i--) {
-	JspNode child = children.get(i);
-	
-	if (child == this)
-	  isFound = true;
-	else if (isFound && child instanceof JsfTagNode) {
-	  JsfTagNode jsfNode = (JsfTagNode) child;
-	  String id = jsfNode.getJsfId();
+        JspNode child = children.get(i);
 
-	  if (id != null)
-	    return id;
-	}
+        if (child == this)
+          isFound = true;
+        else if (isFound && child instanceof JsfTagNode) {
+          JsfTagNode jsfNode = (JsfTagNode) child;
+          String id = jsfNode.getJsfId();
+
+          if (id != null)
+            return id;
+        }
       }
     }
 
@@ -269,21 +269,21 @@ public class JsfTagNode extends JsfNode
       JsfTagNode jsfNode = (JsfTagNode) node;
 
       if (jsfNode._idAttr != null)
-	return;
+        return;
       
       jsfNode._idAttr = jsfNode.findAttribute("id");
 
       if (jsfNode._idAttr == null) {
-	Method method = jsfNode.findSetter(jsfNode._componentClass, "setId");
+        Method method = jsfNode.findSetter(jsfNode._componentClass, "setId");
 
-	if (method == null)
-	  throw new IllegalStateException(jsfNode._componentClass + " id");
+        if (method == null)
+          throw new IllegalStateException(jsfNode._componentClass + " id");
       
-	String id = "j_id_" + jsfNode._gen.generateJspId();
-	
-	jsfNode._idAttr = new Attr("id", method, id);
+        String id = "j_id_" + jsfNode._gen.generateJspId();
 
-	jsfNode._attrList.add(jsfNode._idAttr);
+        jsfNode._idAttr = new Attr("id", method, id);
+
+        jsfNode._attrList.add(jsfNode._idAttr);
       }
     }
   }
@@ -294,7 +294,7 @@ public class JsfTagNode extends JsfNode
       Attr attr = _attrList.get(i);
       
       if (attr.getName().equals(name))
-	return attr;
+        return attr;
     }
 
     return null;
@@ -351,7 +351,7 @@ public class JsfTagNode extends JsfNode
       oldParentVar = "_jsp_jsf_parent_" + _gen.uniqueId();
 
       out.println("Object " + oldParentVar
-		  + " = request.getAttribute(\"caucho.jsf.parent\");");
+                  + " = request.getAttribute(\"caucho.jsf.parent\");");
     }
 
     if (_prevJsfId != null)
@@ -361,9 +361,9 @@ public class JsfTagNode extends JsfNode
 
     if (parentBodyVar != null) {
       out.println("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		  + parentVar
-		  + ", " + prevId
-		  + ", " + parentBodyVar + ");");
+                  + parentVar
+                  + ", " + prevId
+                  + ", " + parentBodyVar + ");");
     }
 
     if (! hasBodyContent()) {
@@ -374,7 +374,7 @@ public class JsfTagNode extends JsfNode
       _bodyVar = "_jsp_body" + _gen.uniqueId();
 
       out.println("com.caucho.jsp.BodyContentImpl " + _bodyVar
-		  + " = (com.caucho.jsp.BodyContentImpl) pageContext.pushBody();");
+                  + " = (com.caucho.jsp.BodyContentImpl) pageContext.pushBody();");
       out.println("out =  " + _bodyVar + ";");
     }
 
@@ -389,58 +389,58 @@ public class JsfTagNode extends JsfNode
 
     if (_bindingAttr != null) {
       bindingVar = ("_caucho_value_expr_" +
-		    _gen.addValueExpr(_bindingAttr.getValue(),
-				      UIComponent.class.getName()));
+                    _gen.addValueExpr(_bindingAttr.getValue(),
+                                      UIComponent.class.getName()));
     }
 
     if (_facetName != null) {
       out.print(_var + " = (" + className + ")");
       out.println(" com.caucho.jsp.jsf.JsfTagUtil.findFacet("
-		  + contextVar
-		  + ", request"
-		  + ", " + parentVar
-		  + ", \"" + _facetName + "\");");
+                  + contextVar
+                  + ", request"
+                  + ", " + parentVar
+                  + ", \"" + _facetName + "\");");
 
       out.println("if (" + _var + " == null) {");
       out.pushDepth();
       
       out.print(_var + " = (" + className + ")");
       out.println(" com.caucho.jsp.jsf.JsfTagUtil.addFacet("
-		  + contextVar
-		  + ", request"
-		  + ", " + parentVar
-		  + ", \"" + _facetName + "\""
-		  + ", " + bindingVar
-		  + ", " + _componentClass.getName() + ".class);");
+                  + contextVar
+                  + ", request"
+                  + ", " + parentVar
+                  + ", \"" + _facetName + "\""
+                  + ", " + bindingVar
+                  + ", " + _componentClass.getName() + ".class);");
     }
     else if (_idAttr != null) {
       out.print(_var + " = (" + className + ")");
       out.println(" com.caucho.jsp.jsf.JsfTagUtil.findPersistent("
-		  + contextVar
-		  + ", request"
-		  + ", " + parentVar
-		  + ", \"" + _idAttr.getValue() + "\");");
+                  + contextVar
+                  + ", request"
+                  + ", " + parentVar
+                  + ", \"" + _idAttr.getValue() + "\");");
 
       out.println("if (" + _var + " == null) {");
       out.pushDepth();
       
       out.print(_var + " = (" + className + ")");
       out.println(" com.caucho.jsp.jsf.JsfTagUtil.addPersistent("
-		  + contextVar
-		  + ", request"
-		  + ", " + parentVar
-		  + ", " + bindingVar
-		  + ", " + _componentClass.getName() + ".class);");
+                  + contextVar
+                  + ", request"
+                  + ", " + parentVar
+                  + ", " + bindingVar
+                  + ", " + _componentClass.getName() + ".class);");
     }
     else {
       out.print(_var + " = (" + className + ")");
 
       out.println(" com.caucho.jsp.jsf.JsfTagUtil.addTransient("
-		  + contextVar
-		  + ", request"
-		  + ", " + parentVar
-		  + ", " + prevId
-		  + ", " + _componentClass.getName() + ".class);");
+                  + contextVar
+                  + ", request"
+                  + ", " + parentVar
+                  + ", " + prevId
+                  + ", " + _componentClass.getName() + ".class);");
     }
 
     for (int i = 0; i < _attrList.size(); i++) {
@@ -450,79 +450,79 @@ public class JsfTagNode extends JsfNode
       Class type = null;
 
       if (method != null)
-	type = method.getParameterTypes()[0];
+        type = method.getParameterTypes()[0];
       else if (attr.getName().equals("binding"))
-	type = UIComponent.class;
+        type = UIComponent.class;
       
       JspAttribute jspAttr = attr.getAttr();
       String value = attr.getValue();
 
       if (jspAttr != null) {
-	generateSetParameter(out, _var, jspAttr, method,
-			     true, null, false, false, null);
+        generateSetParameter(out, _var, jspAttr, method,
+                             true, null, false, false, null);
       }
       else if (ActionListener.class.isAssignableFrom(type)) {
-	String exprVar = "_caucho_method_expr_" + _gen.addMethodExpr(value, "void foo(javax.faces.event.ActionEvent)");
-	
-	out.println(_var + ".addActionListener(new javax.faces.event.MethodExpressionActionListener(" + exprVar + "));");
+        String exprVar = "_caucho_method_expr_" + _gen.addMethodExpr(value, "void foo(javax.faces.event.ActionEvent)");
+
+        out.println(_var + ".addActionListener(new javax.faces.event.MethodExpressionActionListener(" + exprVar + "));");
       }
       else if ("validator".equals(attr.getName())
-	       && UIInput.class.isAssignableFrom(_componentClass)) {
-	out.print("((javax.faces.component.UIInput)" + _var + ").addValidator(new javax.faces.validator.MethodExpressionValidator(");
+               && UIInput.class.isAssignableFrom(_componentClass)) {
+        out.print("((javax.faces.component.UIInput)" + _var + ").addValidator(new javax.faces.validator.MethodExpressionValidator(");
 
-	String signature
-	  = "void foo(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)";
+        String signature
+          = "void foo(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)";
 
-	String exprVar = "_caucho_method_expr_" +
-			 _gen.addMethodExpr(value, signature);
+        String exprVar = "_caucho_method_expr_" +
+                         _gen.addMethodExpr(value, signature);
 
-	out.println(exprVar + "));");
+        out.println(exprVar + "));");
       }
       else if ("valueChangeListener".equals(attr.getName())
-	       && UIInput.class.isAssignableFrom(_componentClass)) {
-	out.print("((javax.faces.component.UIInput)" + _var + ").addValueChangeListener(new javax.faces.event.MethodExpressionValueChangeListener(");
+               && UIInput.class.isAssignableFrom(_componentClass)) {
+        out.print("((javax.faces.component.UIInput)" + _var + ").addValueChangeListener(new javax.faces.event.MethodExpressionValueChangeListener(");
 
-	String signature = "void foo(javax.faces.event.ValueChangeEvent)";
+        String signature = "void foo(javax.faces.event.ValueChangeEvent)";
 
-	String exprVar = "_caucho_method_expr_" +
-			 _gen.addMethodExpr(value, signature);
+        String exprVar = "_caucho_method_expr_" +
+                         _gen.addMethodExpr(value, signature);
 
-	out.println(exprVar + "));");
+        out.println(exprVar + "));");
       }
       else if (_bindingAttr != null && ! "id".equals(attr.getName())
-	       || (value.indexOf("#{") >= 0
-		   && ! ValueExpression.class.isAssignableFrom(type)
-		   && ! MethodExpression.class.isAssignableFrom(type))) {
-	// jsf/3153
-	out.print(_var + ".setValueExpression(\"" + attr.getName() + "\", ");
+               || (value.indexOf("#{") >= 0
+                   && ! ValueExpression.class.isAssignableFrom(type)
+                   && ! MethodExpression.class.isAssignableFrom(type))) {
+        // jsf/3153
+        out.print(_var + ".setValueExpression(\"" + attr.getName() + "\", ");
 
-	String exprVar = "_caucho_value_expr_" + _gen.addValueExpr(value, type.getName());
-	
-	out.println(exprVar + ");");
+        String exprVar = "_caucho_value_expr_" + _gen.addValueExpr(value, type.getName());
+
+        out.println(exprVar + ");");
       }
       else {
-	out.print(_var + "." + method.getName() + "(");
+        out.print(_var + "." + method.getName() + "(");
 
-	out.print(generateParameterValue(type, value, true, null, false));
-	
-	out.println(");");
+        out.print(generateParameterValue(type, value, true, null, false));
+
+        out.println(");");
       }
     }
 
     if (_idAttr != null || _facetName != null) {
       if (oldParentVar != null)
-	out.println("request.setAttribute(\"caucho.jsf.parent\""
-		    + ", new com.caucho.jsp.jsf.JsfComponentTag("
-		    + _var + ", true, " + _bodyVar + "));");
+        out.println("request.setAttribute(\"caucho.jsf.parent\""
+                    + ", new com.caucho.jsp.jsf.JsfComponentTag("
+                    + _var + ", true, " + _bodyVar + "));");
       
       out.popDepth();
       out.println("}");
 
       if (oldParentVar != null) {
-	out.println("else");
-	out.println("  request.setAttribute(\"caucho.jsf.parent\""
-		    + ", new com.caucho.jsp.jsf.JsfComponentTag("
-		    + _var + ", false, " + _bodyVar + "));");
+        out.println("else");
+        out.println("  request.setAttribute(\"caucho.jsf.parent\""
+                    + ", new com.caucho.jsp.jsf.JsfComponentTag("
+                    + _var + ", false, " + _bodyVar + "));");
       }
     }
 
@@ -530,7 +530,7 @@ public class JsfTagNode extends JsfNode
 
     if (oldParentVar != null) {
       out.println("request.setAttribute(\"caucho.jsf.parent\", "
-		  + oldParentVar + ");");
+                  + oldParentVar + ");");
     }
 
     if (_bodyVar != null && parentBodyVar == null) {

@@ -36,6 +36,6 @@ public interface XATopicConnection extends XAConnection, TopicConnection {
     throws JMSException;
   
   public TopicSession createTopicSession(boolean transacted,
-					 int acknowledgeMode)
+                                         int acknowledgeMode)
     throws JMSException;
 }

@@ -79,7 +79,7 @@ public class HempDomainManager extends DomainManager
 
     if (domainRef != null) {
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " remove " + name);
+        log.finer(this + " remove " + name);
       
       return domainRef.get();
     }

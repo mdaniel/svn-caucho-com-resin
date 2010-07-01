@@ -60,7 +60,7 @@ class NativeObject extends Native {
     resin.objProto = new ESObject("Object", esBase);
 
     NativeWrapper obj = new NativeWrapper(resin, nativeObj,
-					  resin.objProto, ESThunk.OBJ_THUNK);
+                                          resin.objProto, ESThunk.OBJ_THUNK);
 
     put(resin.objProto, "toString", TO_STRING, 0, DONT_ENUM);
     put(resin.objProto, "valueOf", VALUE_OF, 0, DONT_ENUM);
@@ -76,7 +76,7 @@ class NativeObject extends Native {
   }
   
   private static void put(ESObject obj, String name, int n, int len, 
-			  int flags)
+                          int flags)
   {
     ESId id = ESId.intern(name);
     NativeObject fun = new NativeObject(name, n, len);
@@ -97,34 +97,34 @@ class NativeObject extends Native {
       ESBase arg = eval.getArg(-1);
 
       if (arg instanceof ESObject)
-	return toString((ESObject) arg);
+        return toString((ESObject) arg);
       else
-	return toString(arg.toObject());
+        return toString(arg.toObject());
 
     case VALUE_OF:
       arg = eval.getArg(-1);
       if (arg instanceof ESWrapper) {
-	ESWrapper obj = (ESWrapper) arg;
+        ESWrapper obj = (ESWrapper) arg;
 
-	if (obj.value instanceof ESBase)
-	  return (ESBase) obj.value;
-	else
-	  return obj.toStr();
+        if (obj.value instanceof ESBase)
+          return (ESBase) obj.value;
+        else
+          return obj.toStr();
       }
       return arg;
 
     case TO_OBJECT:
       if (length <= 0 ||
-	  (arg = eval.getArg(0)) == ESBase.esNull || 
-	  arg == ESBase.esUndefined ||
-	  arg == ESBase.esEmpty)
-	return Global.getGlobalProto().createObject();
+          (arg = eval.getArg(0)) == ESBase.esNull ||
+          arg == ESBase.esUndefined ||
+          arg == ESBase.esEmpty)
+        return Global.getGlobalProto().createObject();
 
       else if (length > 1)
         return createObjectLiteral(eval, length);
 
       else
-	return arg.toObject();
+        return arg.toObject();
 
     case TO_SOURCE:
       arg = eval.getThis();
@@ -136,14 +136,14 @@ class NativeObject extends Native {
 
     case WATCH:
       if (length < 2)
-	throw new ESException("watch expects two arguments");
+        throw new ESException("watch expects two arguments");
 
       ESBase obj = eval.getThis();
 
       ESString key = eval.getArg(0).toStr();
       ESBase fun = eval.getArg(1);
       if (! (fun instanceof ESClosure) && ! (fun instanceof Native))
-	throw new ESException("watch requires function");
+        throw new ESException("watch requires function");
 
       ((ESObject) obj).watch(key, fun);
 
@@ -151,7 +151,7 @@ class NativeObject extends Native {
 
     case UNWATCH:
       if (length < 1)
-	throw new ESException("unwatch expects one argument");
+        throw new ESException("unwatch expects one argument");
 
       obj = eval.getThis();
 
@@ -172,7 +172,7 @@ class NativeObject extends Native {
       return super.construct(eval, length);
 
     if (length == 0 || eval.getArg(0) == esNull || 
-	eval.getArg(0) == esUndefined || eval.getArg(0) == esEmpty) {
+        eval.getArg(0) == esUndefined || eval.getArg(0) == esEmpty) {
       return Global.getGlobalProto().createObject();
     }
     if (length > 1) {

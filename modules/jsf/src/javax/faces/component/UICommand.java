@@ -162,7 +162,7 @@ public class UICommand extends UIComponentBase
       ActionListener listener = context.getApplication().getActionListener();
 
       if (listener != null) {
-	listener.processAction(actionEvent);
+        listener.processAction(actionEvent);
       }
     }
   }
@@ -172,8 +172,8 @@ public class UICommand extends UIComponentBase
   {
     if (event instanceof ActionEvent) {
       event.setPhaseId(isImmediate()
-		       ? PhaseId.APPLY_REQUEST_VALUES
-		       : PhaseId.INVOKE_APPLICATION);
+                       ? PhaseId.APPLY_REQUEST_VALUES
+                       : PhaseId.INVOKE_APPLICATION);
     }
 
     super.queueEvent(event);
@@ -212,7 +212,7 @@ public class UICommand extends UIComponentBase
 
     for (int i = 0; i < listeners.length; i++) {
       if (listeners[i] instanceof ActionListenerAdapter) {
-	return ((ActionListenerAdapter) listeners[i]).getBinding();
+        return ((ActionListenerAdapter) listeners[i]).getBinding();
       }
     }
 
@@ -231,9 +231,9 @@ public class UICommand extends UIComponentBase
 
     for (int i = 0; i < listeners.length; i++) {
       if (listeners[i] instanceof ActionListenerAdapter) {
-	listeners[i] = new ActionListenerAdapter(action);
-	_actionListeners = null;
-	return;
+        listeners[i] = new ActionListenerAdapter(action);
+        _actionListeners = null;
+        return;
       }
     }
 
@@ -254,7 +254,7 @@ public class UICommand extends UIComponentBase
   {
     if (_actionListeners == null) {
       _actionListeners =
-	(ActionListener[]) getFacesListeners(ActionListener.class);
+        (ActionListener[]) getFacesListeners(ActionListener.class);
     }
 
     return _actionListeners;
@@ -425,19 +425,19 @@ public class UICommand extends UIComponentBase
       throws EvaluationException, javax.faces.el.MethodNotFoundException
     {
       if (context == null)
-	throw new NullPointerException();
+        throw new NullPointerException();
     
       try {
-	return _expr.invoke(context.getELContext(), param);
+        return _expr.invoke(context.getELContext(), param);
       } catch (javax.el.MethodNotFoundException e) {
-	throw new javax.faces.el.MethodNotFoundException(e);
+        throw new javax.faces.el.MethodNotFoundException(e);
       } catch (ELException e) {
-	if (e.getCause() != null)
-	  throw new EvaluationException(e.getCause());
-	else
-	  throw new EvaluationException(e);
+        if (e.getCause() != null)
+          throw new EvaluationException(e.getCause());
+        else
+          throw new EvaluationException(e);
       } catch (Exception e) {
-	throw new EvaluationException(e);
+        throw new EvaluationException(e);
       }
     }
 
@@ -448,15 +448,15 @@ public class UICommand extends UIComponentBase
       throws EvaluationException, javax.faces.el.PropertyNotFoundException
     {
       try {
-	MethodInfo info = _expr.getMethodInfo(context.getELContext());
+        MethodInfo info = _expr.getMethodInfo(context.getELContext());
 
-	return info.getReturnType();
+        return info.getReturnType();
       } catch (javax.el.MethodNotFoundException e) {
-	throw new javax.faces.el.MethodNotFoundException(e);
+        throw new javax.faces.el.MethodNotFoundException(e);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new EvaluationException(e);
+        throw new EvaluationException(e);
       }
     }
 
@@ -486,7 +486,7 @@ public class UICommand extends UIComponentBase
     public void processAction(ActionEvent event)
     {
       _binding.invoke(FacesContext.getCurrentInstance(),
-		      new Object[] { event });
+                      new Object[] { event });
     }
     
     public Object saveState(FacesContext context)

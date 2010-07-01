@@ -58,7 +58,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
    */
   public EmbeddedExpr(PathExpr parent,
                       EmbeddableType embeddableType,
-		      ArrayList<EmbeddedSubField> subFields)
+                      ArrayList<EmbeddedSubField> subFields)
   {
     _parent = parent;
     _embeddableType = embeddableType;
@@ -90,7 +90,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
       EmbeddedSubField subField = _subFields.get(i);
 
       if (subField.getName().equals(fieldName))
-	return subField.getColumn();
+        return subField.getColumn();
     }
 
     return null;
@@ -181,8 +181,8 @@ public class EmbeddedExpr extends AbstractPathExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (_childFromItem == from && type == IS_INNER_JOIN
-	    || _fromItem == from
-	    || _parent.usesFrom(from, type));
+            || _fromItem == from
+            || _parent.usesFrom(from, type));
   }
 
   /**
@@ -225,7 +225,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
   {
     for (int i = 0; i < _subFields.size(); i++) {
       if (i > 0)
-	cb.append(", ");
+        cb.append(", ");
       
       cb.append(_subFields.get(i).generateSelect(null));
     }
@@ -252,7 +252,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
     EmbeddedExpr embedded = (EmbeddedExpr) o;
 
     return (_parent.equals(embedded._parent)
-	    && _subFields.equals(embedded._subFields));
+            && _subFields.equals(embedded._subFields));
   }
 
   public String toString()

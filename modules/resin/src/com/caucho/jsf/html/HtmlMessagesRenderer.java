@@ -142,86 +142,86 @@ class HtmlMessagesRenderer extends Renderer
       FacesMessage msg = iter.next();
 
       if (isFirst) {
-	if ("table".equals(layout))
-	  out.startElement("table", component);
-	else
-	  out.startElement("ul", component);
+        if ("table".equals(layout))
+          out.startElement("table", component);
+        else
+          out.startElement("ul", component);
 
         if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
           out.writeAttribute("id", component.getClientId(context), "id");
 
         if (dir != null)
-	  out.writeAttribute("dir", dir, "dir");
+          out.writeAttribute("dir", dir, "dir");
 
-	if (lang != null)
-	  out.writeAttribute("lang", lang, "lang");
+        if (lang != null)
+          out.writeAttribute("lang", lang, "lang");
 
-	if (style != null)
-	  out.writeAttribute("style", style, "style");
+        if (style != null)
+          out.writeAttribute("style", style, "style");
 
-	if (styleClass != null)
-	  out.writeAttribute("class", styleClass, "styleClass");
+        if (styleClass != null)
+          out.writeAttribute("class", styleClass, "styleClass");
 
-	if (title != null)
-	  out.writeAttribute("title", title, "title");
+        if (title != null)
+          out.writeAttribute("title", title, "title");
       }
       isFirst = false;
       
       if ("table".equals(layout)) {
-	out.startElement("tr", component);
-	out.startElement("td", component);
+        out.startElement("tr", component);
+        out.startElement("td", component);
       }
       else
-	out.startElement("li", component);
+        out.startElement("li", component);
 
       if (FacesMessage.SEVERITY_ERROR.equals(msg.getSeverity())) {
-	if (errorClass != null)
-	  out.writeAttribute("class", errorClass, "errorClass");
-	
-	if (errorStyle != null)
-	  out.writeAttribute("style", errorStyle, "errorStyle");
+        if (errorClass != null)
+          out.writeAttribute("class", errorClass, "errorClass");
+
+        if (errorStyle != null)
+          out.writeAttribute("style", errorStyle, "errorStyle");
       }
       else if (FacesMessage.SEVERITY_FATAL.equals(msg.getSeverity())) {
-	if (fatalClass != null)
-	  out.writeAttribute("class", fatalClass, "fatalClass");
-	
-	if (fatalStyle != null)
-	  out.writeAttribute("style", fatalStyle, "fatalStyle");
+        if (fatalClass != null)
+          out.writeAttribute("class", fatalClass, "fatalClass");
+
+        if (fatalStyle != null)
+          out.writeAttribute("style", fatalStyle, "fatalStyle");
       }
       else if (FacesMessage.SEVERITY_INFO.equals(msg.getSeverity())) {
-	if (infoClass != null)
-	  out.writeAttribute("class", infoClass, "infoClass");
-	
-	if (infoStyle != null)
-	  out.writeAttribute("style", infoStyle, "infoStyle");
+        if (infoClass != null)
+          out.writeAttribute("class", infoClass, "infoClass");
+
+        if (infoStyle != null)
+          out.writeAttribute("style", infoStyle, "infoStyle");
       }
       else if (FacesMessage.SEVERITY_WARN.equals(msg.getSeverity())) {
-	if (warnClass != null)
-	  out.writeAttribute("class", warnClass, "warnClass");
-	
-	if (warnStyle != null)
-	  out.writeAttribute("style", warnStyle, "warnStyle");
+        if (warnClass != null)
+          out.writeAttribute("class", warnClass, "warnClass");
+
+        if (warnStyle != null)
+          out.writeAttribute("style", warnStyle, "warnStyle");
       }
 
       if (isShowSummary)
-	out.writeText(msg.getSummary(), "summary");
+        out.writeText(msg.getSummary(), "summary");
       
       if (isShowDetail)
-	out.writeText(msg.getDetail(), "detail");
+        out.writeText(msg.getDetail(), "detail");
       
       if ("table".equals(layout)) {
-	out.endElement("td");
-	out.endElement("tr");
+        out.endElement("td");
+        out.endElement("tr");
       }
       else
-	out.endElement("li");
+        out.endElement("li");
     }
     
     if (! isFirst) {
       if ("table".equals(layout))
-	out.endElement("table");
+        out.endElement("table");
       else
-	out.endElement("ul");
+        out.endElement("ul");
     }
   }
 

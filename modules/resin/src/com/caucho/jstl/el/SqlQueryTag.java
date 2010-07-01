@@ -173,10 +173,10 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
         for (int i = 0; i < params.size(); i++) {
           Object paramValue = params.get(i);
 
-	  if (paramValue == null)
-	    pstmt.setNull(i + 1, Types.VARCHAR);
-	  else
-	    pstmt.setObject(i + 1, paramValue);
+          if (paramValue == null)
+            pstmt.setNull(i + 1, Types.VARCHAR);
+          else
+            pstmt.setObject(i + 1, paramValue);
         }
 
         rs = pstmt.executeQuery();

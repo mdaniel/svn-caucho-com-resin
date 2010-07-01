@@ -65,7 +65,7 @@ public class JspGenELContext extends ELContext {
     {
       public Method resolveFunction(String prefix, String localName)
       {
-	return _gen.resolveFunction(prefix, localName);
+        return _gen.resolveFunction(prefix, localName);
       }
     };
 }

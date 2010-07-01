@@ -167,7 +167,7 @@ class HtmlOutputLabelRenderer
     if (forValue != null) {
       UIComponent forComponent = component.findComponent(forValue);
       if (forComponent != null)
-	out.writeAttribute("for", forComponent.getClientId(context), "for");
+        out.writeAttribute("for", forComponent.getClientId(context), "for");
     }
 
     if (tabindex != null)

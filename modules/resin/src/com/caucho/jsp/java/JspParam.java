@@ -59,8 +59,8 @@ public class JspParam extends JspNode {
       _name = value;
 
       if (hasRuntimeAttribute(value) || hasELAttribute(value))
-	throw error(L.l("'name' attribute may not have a runtime value at {0}",
-			value));
+        throw error(L.l("'name' attribute may not have a runtime value at {0}",
+                        value));
     }
     else if (VALUE.equals(name))
       _value = value;

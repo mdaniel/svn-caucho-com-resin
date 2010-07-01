@@ -70,7 +70,7 @@ import java.util.ResourceBundle;
  *
  * public class Hello extends HttpServlet {
  *   public void doGet(HttpServletRequest request,
- *   		       HttpServletResponse response)
+ *                          HttpServletResponse response)
  *     throws ServletException, IOException
  *   {
  *     response.setContentType("text/html");
@@ -117,7 +117,7 @@ public abstract class HttpServlet extends GenericServlet
           doHead(req, res);
         else
           doGet(req, res);
-	return;
+        return;
       }
 
       char []newETag = null;
@@ -141,7 +141,7 @@ public abstract class HttpServlet extends GenericServlet
 
       long requestLastModified = req.getDateHeader("If-Modified-Since");
       if ((lastModified / 1000) == (requestLastModified / 1000)) {
-	res.sendError(res.SC_NOT_MODIFIED);
+        res.sendError(res.SC_NOT_MODIFIED);
         return;
       }
 

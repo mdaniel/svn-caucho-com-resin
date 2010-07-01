@@ -100,12 +100,12 @@ public class DirectoryNode extends BaseNode {
       BaseNode []children = new BaseNode[list.length];
 
       for (int i = 0; i < list.length; i++) {
-	Path childPath = _path.lookup(list[i]);
+        Path childPath = _path.lookup(list[i]);
 
-	if (childPath.isDirectory())
-	  children[i] = new DirectoryNode(_session, childPath);
-	else
-	  children[i] = new FileNode(_session, childPath);
+        if (childPath.isDirectory())
+          children[i] = new DirectoryNode(_session, childPath);
+        else
+          children[i] = new FileNode(_session, childPath);
       }
 
       return new BaseNodeIterator(children);

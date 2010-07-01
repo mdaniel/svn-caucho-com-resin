@@ -137,7 +137,7 @@ public class EnvironmentModel extends AbstractModel
   {
     if (_children.get(name) != null) {
       throw new NamingException(L.l("can't create subcontext: {0} {1}",
-				    name, _children.get(name)));
+                                    name, _children.get(name)));
     }
 
     String childName;
@@ -196,7 +196,7 @@ public class EnvironmentModel extends AbstractModel
   {
     for (String key : _children.keySet()) {
       if (! values.contains(key))
-	values.add(key);
+        values.add(key);
     }
 
     ClassLoader loader = _root.getClassLoader();
@@ -211,7 +211,7 @@ public class EnvironmentModel extends AbstractModel
       EnvironmentModel parentModel = parentRoot.get(_name);
 
       if (parentModel != null) {
-	parentModel.fillList(values);
+        parentModel.fillList(values);
       }
     }
   }

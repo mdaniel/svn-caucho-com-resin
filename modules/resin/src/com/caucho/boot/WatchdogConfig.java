@@ -190,7 +190,7 @@ class WatchdogConfig
 
     for (String cp : item.split("[" + File.pathSeparatorChar + "]")) {
       if (! _jvmClasspath.contains(cp))
-	_jvmClasspath.add(cp);
+        _jvmClasspath.add(cp);
     }
   }
   

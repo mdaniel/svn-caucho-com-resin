@@ -44,7 +44,7 @@ public interface HmuxExtension {
    * the caller.
    */
   public int handleRequest(HmuxRequest request,
-			   ReadStream is,
-			   WriteStream os)
+                           ReadStream is,
+                           WriteStream os)
     throws IOException;
 }

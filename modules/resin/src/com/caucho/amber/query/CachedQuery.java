@@ -73,8 +73,8 @@ public class CachedQuery {
       _argValues = new Object[_argLength];
 
       for (int i = _argLength - 1; i >= 0; i--) {
-	_argTypes[i] = argTypes[i];
-	_argValues[i] = argValues[i];
+        _argTypes[i] = argTypes[i];
+        _argValues[i] = argValues[i];
       }
     }
 
@@ -117,14 +117,14 @@ public class CachedQuery {
       long now = Alarm.getCurrentTime();
 
       if (now < _loadTime + maxAge || _isLoading && _loadTime > 0) {
-	int length = _values.size();
-	
-	for (int i = 0; i < length; i++) {
-	  Object key = _values.get(i);
+        int length = _values.size();
 
-	  list.add(aConn.loadLazy(cl.getName(), entityType.getName(), (java.io.Serializable) key));
-	}
-	return;
+        for (int i = 0; i < length; i++) {
+          Object key = _values.get(i);
+
+          list.add(aConn.loadLazy(cl.getName(), entityType.getName(), (java.io.Serializable) key));
+        }
+        return;
       }
 
       _isLoading = true;
@@ -137,19 +137,19 @@ public class CachedQuery {
       ResultSetImpl rs = executeQuery(aConn);
 
       while (rs.next()) {
-	values.add(rs.getKey(1));
-	
-	list.add(rs.getObject(1));
+        values.add(rs.getKey(1));
+
+        list.add(rs.getObject(1));
       }
 
       rs.close();
       
       synchronized (this) {
-	if (_isValidLoad) {
-	  _values = values;
+        if (_isValidLoad) {
+          _values = values;
 
-	  _loadTime = Alarm.getCurrentTime();
-	}
+          _loadTime = Alarm.getCurrentTime();
+        }
       }
     } finally {
       _isLoading = false;
@@ -172,7 +172,7 @@ public class CachedQuery {
     
     for (int i = 0; i < _argLength; i++) {
       if (_argValues[i] != null)
-	_argTypes[i].setParameter(pstmt, i + 1, _argValues[i]);
+        _argTypes[i].setParameter(pstmt, i + 1, _argValues[i]);
     }
 
     ResultSet rs = pstmt.executeQuery();

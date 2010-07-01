@@ -303,7 +303,7 @@ public class MatchRule
   }
 
   public FilterChain dispatch(String uri,
-			      String queryString,
+                              String queryString,
                               FilterChain accept,
                               FilterChainMapper next)
     throws ServletException
@@ -351,10 +351,10 @@ public class MatchRule
     else {
       long time = _depend.getCheckInterval();
       if (time >= 0 && time < 5000)
-	time = 5000;
+        time = 5000;
 
       if (time > 0) {
-	alarm.queue(time);
+        alarm.queue(time);
       }
     }
   }

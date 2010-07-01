@@ -68,7 +68,7 @@ abstract public class Skeleton {
    * @param rawOs the raw output stream to the servlet response
    */
   public void _service(InputStream rawIs, OutputStream rawOs,
-				Throwable e)
+                                Throwable e)
     throws Exception
   {
     throw new UnsupportedOperationException(getClass().getName());

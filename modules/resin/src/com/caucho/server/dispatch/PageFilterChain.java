@@ -140,26 +140,26 @@ public class PageFilterChain implements FilterChain
 
     if (page == null || page._caucho_isModified()) {
       try {
-	_pageRef = null;
-	
-	page = compilePage(page, req, res);
+        _pageRef = null;
 
-	if (page != null) {
-	  _pageRef = new SoftReference<Page>(page);
+        page = compilePage(page, req, res);
+
+        if (page != null) {
+          _pageRef = new SoftReference<Page>(page);
       
-	  _isSingleThread = page instanceof SingleThreadModel;
-	}
+          _isSingleThread = page instanceof SingleThreadModel;
+        }
       } catch (FileNotFoundException e) {
-	page = null;
+        page = null;
 
-	notFound = e;
+        notFound = e;
       }
     }
 
     if (page == null) {
       // jsp/01cg
       if (notFound == null)
-	return;
+        return;
       
       String errorUri = (String) req.getAttribute("javax.servlet.error.request_uri");
       String uri = (String) req.getAttribute("javax.servlet.include.request_uri");
@@ -167,47 +167,47 @@ public class PageFilterChain implements FilterChain
 
       // jsp/01ch
       if (uri != null) {
-	//throw new FileNotFoundException(uri);
-	throw notFound;
+        //throw new FileNotFoundException(uri);
+        throw notFound;
       }
       else if (forward != null) {
-	//throw new FileNotFoundException(req.getRequestURI());
-	throw notFound;
+        //throw new FileNotFoundException(req.getRequestURI());
+        throw notFound;
       }
       else if (errorUri != null) {
-	//throw new FileNotFoundException(errorUri);
-	throw notFound;
+        //throw new FileNotFoundException(errorUri);
+        throw notFound;
       }
       else {
-	log.log(Level.FINER, notFound.toString(), notFound);
+        log.log(Level.FINER, notFound.toString(), notFound);
       }
-	
+
       ((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
     }
     else if (req instanceof HttpServletRequest) {
       try {
-	if (_isSingleThread) {
-	  synchronized (page) {
-	    page.pageservice(req, res);
-	  }
-	}
-	else
-	  page.pageservice(req, res);
+        if (_isSingleThread) {
+          synchronized (page) {
+            page.pageservice(req, res);
+          }
+        }
+        else
+          page.pageservice(req, res);
       } catch (ServletException e) {
-	request.setAttribute(SERVLET_EXN, e);
-	if (_config != null)
-	  request.setAttribute(SERVLET_NAME, _config.getServletName());
-	throw e;
+        request.setAttribute(SERVLET_EXN, e);
+        if (_config != null)
+          request.setAttribute(SERVLET_NAME, _config.getServletName());
+        throw e;
       } catch (IOException e) {
-	request.setAttribute(SERVLET_EXN, e);
-	if (_config != null)
-	  request.setAttribute(SERVLET_NAME, _config.getServletName());
-	throw e;
+        request.setAttribute(SERVLET_EXN, e);
+        if (_config != null)
+          request.setAttribute(SERVLET_NAME, _config.getServletName());
+        throw e;
       } catch (RuntimeException e) {
-	request.setAttribute(SERVLET_EXN, e);
-	if (_config != null)
-	  request.setAttribute(SERVLET_NAME, _config.getServletName());
-	throw e;
+        request.setAttribute(SERVLET_EXN, e);
+        if (_config != null)
+          request.setAttribute(SERVLET_NAME, _config.getServletName());
+        throw e;
       }
     }
   }
@@ -216,42 +216,42 @@ public class PageFilterChain implements FilterChain
    * Compiles the page, returning the new page.
    */
   private Page compilePage(Page oldPage,
-			   HttpServletRequest req,
-			   HttpServletResponse res)
+                           HttpServletRequest req,
+                           HttpServletResponse res)
     throws ServletException, FileNotFoundException
   {
     Page newPage = null;
-	
+
     if (oldPage != null && ! oldPage.startRecompiling()) {
       return oldPage;
     }
 
     try {
       if (_jspFile != null) {
-	req.setAttribute("caucho.jsp.jsp-file", _jspFile);
-	req.setAttribute("caucho.jsp.servlet-config", _config);
+        req.setAttribute("caucho.jsp.jsp-file", _jspFile);
+        req.setAttribute("caucho.jsp.servlet-config", _config);
       }
 
       if (_config != null)
-	newPage = (Page) _config.createServlet(false);
+        newPage = (Page) _config.createServlet(false);
       else {
-	newPage = _servlet.getPage(req, res);
+        newPage = _servlet.getPage(req, res);
 
-	if (newPage != null && ! newPage.isInit()) {
-	  ServletConfigImpl config = new ServletConfigImpl();
-	  config.setServletContext(_application);
-	  config.setServletName(req.getServletPath());
-	  newPage.caucho_init(config);
-	}
+        if (newPage != null && ! newPage.isInit()) {
+          ServletConfigImpl config = new ServletConfigImpl();
+          config.setServletContext(_application);
+          config.setServletName(req.getServletPath());
+          newPage.caucho_init(config);
+        }
       }
 
       // XXX: In theory, should let the requests drain.  In practice,
       // the JSP destroy() method doesn't do anything.
       if (oldPage != null && ! oldPage.isDead())
-	oldPage.destroy();
+        oldPage.destroy();
 
       if (newPage != null)
-	newPage._caucho_use();
+        newPage._caucho_use();
 
       return newPage;
     } catch (ServletException e) {
@@ -264,8 +264,8 @@ public class PageFilterChain implements FilterChain
       throw new ServletException(e);
     } finally {
       if (_jspFile != null) {
-	req.removeAttribute("caucho.jsp.jsp-file");
-	req.removeAttribute("caucho.jsp.servlet-config");
+        req.removeAttribute("caucho.jsp.jsp-file");
+        req.removeAttribute("caucho.jsp.servlet-config");
       }
     }
   }

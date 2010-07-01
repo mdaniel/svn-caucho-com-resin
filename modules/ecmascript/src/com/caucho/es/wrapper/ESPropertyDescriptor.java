@@ -51,8 +51,8 @@ class ESPropertyDescriptor extends PropertyDescriptor {
   }
 
   public ESPropertyDescriptor(String propertyName, Field field,
-			      ESMethodDescriptor getter, 
-			      ESMethodDescriptor setter)
+                              ESMethodDescriptor getter,
+                              ESMethodDescriptor setter)
     throws IntrospectionException
   {
     super(propertyName, null, null);

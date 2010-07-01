@@ -68,12 +68,12 @@ public class QName implements Comparable, Serializable {
       
       int p = qName.indexOf(':');
       if (p > 0) {
-	_prefix = qName.substring(0, p);
-	_localName = qName.substring(p + 1);
+        _prefix = qName.substring(0, p);
+        _localName = qName.substring(p + 1);
       }
       else {
-	_prefix = null;
-	_localName = _fullName;
+        _prefix = null;
+        _localName = _fullName;
       }
     }
   }

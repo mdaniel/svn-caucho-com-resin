@@ -59,7 +59,7 @@ public class TopicConnectionImpl extends ConnectionImpl
    */
   public ConnectionConsumer
     createConnectionConsumer(Topic topic, String messageSelector,
-			     ServerSessionPool sessionPool, int maxMessages)
+                             ServerSessionPool sessionPool, int maxMessages)
     throws JMSException
   {
     throw new UnsupportedOperationException();

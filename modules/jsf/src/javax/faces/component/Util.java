@@ -99,7 +99,7 @@ final class Util
   }
 
   static String save(ValueExpression expr,
-		     FacesContext context)
+                     FacesContext context)
   {
     if (expr != null)
       return expr.getExpressionString();
@@ -108,18 +108,18 @@ final class Util
   }
 
   static Object saveWithType(ValueExpression expr,
-			       FacesContext context)
+                               FacesContext context)
   {
     if (expr != null) {
       return new Object[] { expr.getExpressionString(),
-			    expr.getExpectedType() };
+                            expr.getExpectedType() };
     }
     else
       return null;
   }
 
   static ValueExpression restoreWithType(Object value,
-					 FacesContext context)
+                                         FacesContext context)
   {
     if (value == null)
       return null;
@@ -133,8 +133,8 @@ final class Util
     ExpressionFactory factory = app.getExpressionFactory();
     
     return factory.createValueExpression(context.getELContext(),
-					 expr,
-					 type);
+                                         expr,
+                                         type);
   }
 
   static ValueExpression restoreBoolean(Object value, FacesContext context)
@@ -148,8 +148,8 @@ final class Util
   }
 
   static ValueExpression restore(Object value,
-				 Class type,
-				 FacesContext context)
+                                 Class type,
+                                 FacesContext context)
   {
     if (value == null)
       return null;
@@ -160,12 +160,12 @@ final class Util
     ExpressionFactory factory = app.getExpressionFactory();
     
     return factory.createValueExpression(context.getELContext(),
-					 expr,
-					 type);
+                                         expr,
+                                         type);
   }
 
   public static String l10n(FacesContext context, String id,
-			    String defaultMessage, Object ... args)
+                            String defaultMessage, Object ... args)
   {
     String message = getMessage(context, id, defaultMessage);
     
@@ -176,18 +176,18 @@ final class Util
       char ch = message.charAt(i);
 
       if (ch == '{' && i + 2 < len
-	  && '0' <= message.charAt(i + 1)
-	  && message.charAt(i + 1) <= '9'
-	  && message.charAt(i + 2) == '}') {
-	int index = message.charAt(i + 1) - '0';
+          && '0' <= message.charAt(i + 1)
+          && message.charAt(i + 1) <= '9'
+          && message.charAt(i + 2) == '}') {
+        int index = message.charAt(i + 1) - '0';
 
-	if (index < args.length)
-	  sb.append(args[index]);
+        if (index < args.length)
+          sb.append(args[index]);
 
-	i += 2;
+        i += 2;
       }
       else
-	sb.append(ch);
+        sb.append(ch);
     }
     
     return sb.toString();
@@ -204,8 +204,8 @@ final class Util
   }
   
   private static String getMessage(FacesContext context,
-				   String messageId,
-				   String defaultMessage)
+                                   String messageId,
+                                   String defaultMessage)
   {
     Application app = context.getApplication();
 

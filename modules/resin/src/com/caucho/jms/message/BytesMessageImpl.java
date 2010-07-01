@@ -126,13 +126,13 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     try {
       // XXX: test for null
       if (_ws != null)
-	_ws.close();
+        _ws.close();
 
       if (_tempStream != null) {
-	if (_rs != null)
-	  _rs.close();
-	
-	_rs = _tempStream.openReadAndSaveBuffer();
+        if (_rs != null)
+          _rs.close();
+
+        _rs = _tempStream.openReadAndSaveBuffer();
       }
     } catch (IOException e) {
       throw new JmsExceptionWrapper(e);
@@ -379,8 +379,8 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
 
           len -= 3;
         }
-	else
-	  throw new MessageFormatException(L.l("invalid UTF-8 in bytes message"));
+        else
+          throw new MessageFormatException(L.l("invalid UTF-8 in bytes message"));
       }
     } catch (JMSException e) {
       throw e;
@@ -716,10 +716,10 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
 
     try {
       if (_ws != null)
-	_ws.flush();
+        _ws.flush();
 
       if (_tempStream != null)
-	newMsg._tempStream = _tempStream.copy();
+        newMsg._tempStream = _tempStream.copy();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

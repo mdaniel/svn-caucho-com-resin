@@ -75,21 +75,21 @@ public class GroovyCompiler extends AbstractJavaCompiler {
 
     if (_groovyCompilerClass == null) {
       try {
-	_groovyCompilerClass = Class.forName(GROOVY_COMPILER);
-	_setClasspath =
-	  _groovyCompilerClass.getMethod("setClasspath",
-					 new Class[] { String.class });
-	
-	_setOutputDir =
-	  _groovyCompilerClass.getMethod("setOutputDir",
-					 new Class[] { String.class });
+        _groovyCompilerClass = Class.forName(GROOVY_COMPILER);
+        _setClasspath =
+          _groovyCompilerClass.getMethod("setClasspath",
+                                         new Class[] { String.class });
 
-	_compile =
-	  _groovyCompilerClass.getMethod("compile",
-					 new Class[] { String[].class });
+        _setOutputDir =
+          _groovyCompilerClass.getMethod("setOutputDir",
+                                         new Class[] { String.class });
+
+        _compile =
+          _groovyCompilerClass.getMethod("compile",
+                                         new Class[] { String[].class });
 
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 
@@ -118,8 +118,8 @@ public class GroovyCompiler extends AbstractJavaCompiler {
 
       ArrayList<String> argList = new ArrayList<String>();
       for (int i = 0; i < paths.length; i++) {
-	Path javaPath = _compiler.getSourceDir().lookup(paths[i]);
-	argList.add(javaPath.getNativePath());
+        Path javaPath = _compiler.getSourceDir().lookup(paths[i]);
+        argList.add(javaPath.getNativePath());
       }
 
       String []files = new String[argList.size()];

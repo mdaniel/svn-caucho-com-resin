@@ -68,7 +68,7 @@ public class ScriptException extends Exception {
    * Creates a ScriptException.
    */
   public ScriptException(String message, String fileName,
-			 int lineNumber, int columnNumber)
+                         int lineNumber, int columnNumber)
   {
     super(message);
 

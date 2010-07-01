@@ -107,13 +107,13 @@ class DispatchRequest extends RequestAdapter {
   }
 
   void init(Invocation invocation,
-	    WebApp webApp,
+            WebApp webApp,
             WebApp oldWebApp,
             HttpServletRequest request,
             HttpServletResponse response,
-	    String method, String uri,
-	    String servletPath, String pathInfo,
-	    String queryString, String addedQuery)
+            String method, String uri,
+            String servletPath, String pathInfo,
+            String queryString, String addedQuery)
     throws ServletException
   {
     super.init(request, response, webApp);
@@ -313,11 +313,11 @@ class DispatchRequest extends RequestAdapter {
 
     if (_addedQuery != null) {
       try {
-	if (_formParser == null)
-	  _formParser = new Form();
-	_formParser.parseQueryString(table, _addedQuery, javaEncoding, false);
+        if (_formParser == null)
+          _formParser = new Form();
+        _formParser.parseQueryString(table, _addedQuery, javaEncoding, false);
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
 
@@ -330,14 +330,14 @@ class DispatchRequest extends RequestAdapter {
       if (oldValues == null) {
       }
       else if (newValues == null)
-	table.put(key, oldValues);
+        table.put(key, oldValues);
       else {
-	String []next = new String[oldValues.length + newValues.length];
-	System.arraycopy(newValues, 0, next, 0, newValues.length);
-	System.arraycopy(oldValues, 0, next, newValues.length,
-			 oldValues.length);
+        String []next = new String[oldValues.length + newValues.length];
+        System.arraycopy(newValues, 0, next, 0, newValues.length);
+        System.arraycopy(oldValues, 0, next, newValues.length,
+                         oldValues.length);
 
-	table.put(key, next);
+        table.put(key, next);
       }
     }
 
@@ -484,18 +484,18 @@ class DispatchRequest extends RequestAdapter {
 
     if (id != null && id.length() > 6) {
       session = manager.getSession(id, now, create,
-				   isRequestedSessionIdFromCookie());
+                                   isRequestedSessionIdFromCookie());
       if (session == null) {
       }
       else if (session.isValid()) {
         if (session != null)
           setHasCookie();
         if (! session.getId().equals(id) && manager.enableSessionCookies()) {
-	  HttpServletResponse response = getResponse();
+          HttpServletResponse response = getResponse();
 
-	  if (response instanceof CauchoResponse)
-	    ((CauchoResponse) getResponse()).setSessionId(session.getId());
-	}
+          if (response instanceof CauchoResponse)
+            ((CauchoResponse) getResponse()).setSessionId(session.getId());
+        }
 
         return session;
       }
@@ -513,7 +513,7 @@ class DispatchRequest extends RequestAdapter {
     // session.
 
     session = manager.createSession(id, now, this,
-				    isRequestedSessionIdFromCookie());
+                                    isRequestedSessionIdFromCookie());
 
     if (session != null)
       setHasCookie();
@@ -525,7 +525,7 @@ class DispatchRequest extends RequestAdapter {
       HttpServletResponse response = getResponse();
 
       if (response instanceof CauchoResponse)
-	((CauchoResponse) getResponse()).setSessionId(session.getId());
+        ((CauchoResponse) getResponse()).setSessionId(session.getId());
     }
 
     return session;
@@ -562,7 +562,7 @@ class DispatchRequest extends RequestAdapter {
       String linkRole = roleMap.get(role);
       
       if (linkRole != null)
-	role = linkRole;
+        role = linkRole;
     }
 
     return super.isUserInRole(role);

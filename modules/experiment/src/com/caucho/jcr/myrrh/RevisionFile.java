@@ -98,14 +98,14 @@ public class RevisionFile {
 
     try {
       if (offset <= 0) {
-	out.write(0);
-	out.write(1);
-	offset = 2;
+        out.write(0);
+        out.write(1);
+        offset = 2;
       }
       
       CRC32 crc = new CRC32();
       CheckedOutputStream crcOut = new CheckedOutputStream(out, crc);
-	
+
       int len = ts.getLength() + 37;
     
       writeInt(crcOut, len); // length
@@ -115,9 +115,9 @@ public class RevisionFile {
       writeInt(crcOut, 0); // no base
 
       if (_isAllowCompress)
-	crcOut.write('d');
+        crcOut.write('d');
       else
-	crcOut.write(0);
+        crcOut.write(0);
       
       ts.writeToStream(crcOut);
       ts.destroy();
@@ -153,7 +153,7 @@ public class RevisionFile {
       int len;
 
       while ((len = in.read(buffer, 0, buffer.length)) > 0) {
-	md.update(buffer, 0, len);
+        md.update(buffer, 0, len);
       }
 
       return md.digest();

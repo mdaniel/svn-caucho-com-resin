@@ -100,11 +100,11 @@ public class UIForm extends UIComponentBase implements NamingContainer
   {
     if ("prependId".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_isPrependId = Util.booleanValueOf(expr.getValue(null));
-	return;
+        _isPrependId = Util.booleanValueOf(expr.getValue(null));
+        return;
       }
       else
-	_isPrependIdExpr = expr;
+        _isPrependIdExpr = expr;
     }
 
     super.setValueExpression(name, expr);
@@ -134,10 +134,10 @@ public class UIForm extends UIComponentBase implements NamingContainer
       return getClientId(context);
     else {
       for (UIComponent comp = getParent();
-	   comp != null;
-	   comp = comp.getParent()) {
-	if (comp instanceof NamingContainer)
-	  return comp.getContainerClientId(context);
+           comp != null;
+           comp = comp.getParent()) {
+        if (comp instanceof NamingContainer)
+          return comp.getContainerClientId(context);
       }
       
       return null;
@@ -165,9 +165,9 @@ public class UIForm extends UIComponentBase implements NamingContainer
     if (isSubmitted()) {
       Iterator iter = getFacetsAndChildren();
       while (iter.hasNext()) {
-	UIComponent child = (UIComponent) iter.next();
-	
-	child.processDecodes(context);
+        UIComponent child = (UIComponent) iter.next();
+
+        child.processDecodes(context);
       }
     }
   }

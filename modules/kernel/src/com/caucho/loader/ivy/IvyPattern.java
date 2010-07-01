@@ -68,11 +68,11 @@ public class IvyPattern {
 
     for (Segment segment : _segments) {
       if (segment instanceof VarSegment
-	  && "revision".equals(((VarSegment) segment).getVar())) {
-	sb.append("[revision]");
+          && "revision".equals(((VarSegment) segment).getVar())) {
+        sb.append("[revision]");
       }
       else
-	segment.resolve(sb, props);
+        segment.resolve(sb, props);
     }
 
     return sb.toString();
@@ -88,14 +88,14 @@ public class IvyPattern {
       int head = pattern.indexOf('[', i);
 
       if (head < 0) {
-	_segments.add(new TextSegment(pattern.substring(i)));
-	return;
+        _segments.add(new TextSegment(pattern.substring(i)));
+        return;
       }
 
       int tail = pattern.indexOf(']', head);
       if (tail < 0) {
-	throw new ConfigException(L.l("'{0}' is an invalid ivy pattern",
-				      pattern));
+        throw new ConfigException(L.l("'{0}' is an invalid ivy pattern",
+                                      pattern));
       }
 
       _segments.add(new TextSegment(pattern.substring(i, head)));

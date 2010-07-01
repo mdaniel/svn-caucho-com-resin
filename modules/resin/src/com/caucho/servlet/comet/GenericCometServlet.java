@@ -48,8 +48,8 @@ abstract public class GenericCometServlet extends GenericServlet
    * @return true for keepalive, false for the end of the request
    */
   abstract public boolean service(ServletRequest request,
-				  ServletResponse response,
-				  CometController controller)
+                                  ServletResponse response,
+                                  CometController controller)
     throws IOException, ServletException;
 
   /**
@@ -62,8 +62,8 @@ abstract public class GenericCometServlet extends GenericServlet
    * @return true for keepalive, false for the end of the request
    */
   public boolean resume(ServletRequest request,
-			ServletResponse response,
-			CometController controller)
+                        ServletResponse response,
+                        CometController controller)
     throws IOException, ServletException
   {
     return false;
@@ -73,7 +73,7 @@ abstract public class GenericCometServlet extends GenericServlet
    * Implementation of the servlet's request.
    */
   public final void service(ServletRequest request,
-			    ServletResponse response)
+                            ServletResponse response)
     throws IOException, ServletException
   {
     throw new IllegalStateException(getClass().getName() + " should never have its service() called.");

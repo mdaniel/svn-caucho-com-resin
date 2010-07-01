@@ -24,9 +24,9 @@ public class ResinPlatform extends ServerPlatformBase {
 
     @SuppressWarnings("unchecked")
     public Class getExternalTransactionControllerClass() {
-    	if (externalTransactionControllerClass == null){
-    		externalTransactionControllerClass = ResinTransactionController.class;
-    	}
+            if (externalTransactionControllerClass == null){
+                    externalTransactionControllerClass = ResinTransactionController.class;
+            }
         return externalTransactionControllerClass;
     }
 }

@@ -61,9 +61,9 @@ public class ElementCollectionExpr extends AbstractPathExpr {
    * Creates a new expression to the child objects.
    */
   public ElementCollectionExpr(QueryParser parser,
-			       PathExpr parent,
-			       LinkColumns linkColumns,
-			       ElementType targetType)
+                               PathExpr parent,
+                               LinkColumns linkColumns,
+                               ElementType targetType)
   {
     _parent = parent;
     _targetType = targetType;
@@ -109,7 +109,7 @@ public class ElementCollectionExpr extends AbstractPathExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (from == _childFromItem
-	    || type == IS_INNER_JOIN && _parent.usesFrom(from, type));
+            || type == IS_INNER_JOIN && _parent.usesFrom(from, type));
   }
 
   /**
@@ -231,6 +231,6 @@ public class ElementCollectionExpr extends AbstractPathExpr {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" +  _parent + "," + _linkColumns + "]");
+            + "[" +  _parent + "," + _linkColumns + "]");
   }
 }

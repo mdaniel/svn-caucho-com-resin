@@ -73,10 +73,10 @@ public class JspRoot extends JspContainerNode {
   {
     if (VERSION.equals(name)) {
       if (! value.equals("2.1")
-	  && ! value.equals("2.0")
-	  && ! value.equals("1.2"))
-	throw error(L.l("'{0}' is an unsupported jsp:root version.",
-			value));
+          && ! value.equals("2.0")
+          && ! value.equals("1.2"))
+        throw error(L.l("'{0}' is an unsupported jsp:root version.",
+                        value));
 
       _version = value;
     }
@@ -94,10 +94,10 @@ public class JspRoot extends JspContainerNode {
   {
     for (int i = 0; i < text.length(); i++) {
       if (! XmlChar.isWhitespace(text.charAt(i))) {
-	JspNode node = new StaticText(_gen, text, this);
-	
+        JspNode node = new StaticText(_gen, text, this);
+
         addChild(node);
-	
+
         return node;
       }
     }
@@ -198,7 +198,7 @@ public class JspRoot extends JspContainerNode {
       String encoding = _gen.getCharacterEncoding();
 
       if (encoding == null)
-	encoding = "UTF-8";
+        encoding = "UTF-8";
 
       out.addText("<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>\n");
     }
@@ -208,16 +208,16 @@ public class JspRoot extends JspContainerNode {
       out.addText(_gen.getDoctypeRootElement());
 
       if (_gen.getDoctypePublic() != null) {
-	out.addText(" PUBLIC \"");
-	out.addText(_gen.getDoctypePublic());
-	out.addText("\" \"");
-	out.addText(_gen.getDoctypeSystem());
-	out.addText("\"");
+        out.addText(" PUBLIC \"");
+        out.addText(_gen.getDoctypePublic());
+        out.addText("\" \"");
+        out.addText(_gen.getDoctypeSystem());
+        out.addText("\"");
       }
       else {
-	out.addText(" SYSTEM \"");
-	out.addText(_gen.getDoctypeSystem());
-	out.addText("\"");
+        out.addText(" SYSTEM \"");
+        out.addText(_gen.getDoctypeSystem());
+        out.addText("\"");
       }
       
       out.addText(">\n");

@@ -66,14 +66,14 @@ public class UISelectOne extends UIInput
 
     if (! hasValue) {
       String summary = Util.l10n(context, INVALID_MESSAGE_ID,
-				 "{0}: Validation Error: UISelectOne value '{1}' does not match a valid option.",
-				 Util.getLabel(context, this),
-				 value);
+                                 "{0}: Validation Error: UISelectOne value '{1}' does not match a valid option.",
+                                 Util.getLabel(context, this),
+                                 value);
 
       String detail = summary;
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
-	
+
       context.addMessage(getClientId(context), msg);
       
       setValid(false);
@@ -95,7 +95,7 @@ public class UISelectOne extends UIInput
       UIComponent child = children.get(i);
       
       if (child instanceof UISelectItem) {
-	UISelectItem item = (UISelectItem) child;
+        UISelectItem item = (UISelectItem) child;
 
         SelectItem selectItem = (SelectItem) item.getValue();
 
@@ -112,15 +112,15 @@ public class UISelectOne extends UIInput
           optionValue = selectItem.getValue();
         }
         
-	if (value.equals(optionValue)) {
-	  return true;
-	}
+        if (value.equals(optionValue)) {
+          return true;
+        }
       }
       else if (child instanceof UISelectItems) {
-	UISelectItems items = (UISelectItems) child;
+        UISelectItems items = (UISelectItems) child;
 
-	if (matchItems(expressionFactory, items.getValue(), value, type))
-	  return true;
+        if (matchItems(expressionFactory, items.getValue(), value, type))
+          return true;
       }
     }
 
@@ -135,10 +135,10 @@ public class UISelectOne extends UIInput
       SelectItem []items = ((SelectItemGroup) selectValue).getSelectItems();
 
       if (items != null) {
-	for (int i = 0; i < items.length; i++) {
-	  if (matchItems(expressionFactory, items[i], value, type))
-	    return true;
-	}
+        for (int i = 0; i < items.length; i++) {
+          if (matchItems(expressionFactory, items[i], value, type))
+            return true;
+        }
       }
     }
     else if (selectValue instanceof SelectItem) {
@@ -170,7 +170,7 @@ public class UISelectOne extends UIInput
         }
 
         if (value.equals(optionValue) && ! item[i].isDisabled())
-	  return true;
+          return true;
       }
     }
     else if (selectValue instanceof List) {
@@ -178,8 +178,8 @@ public class UISelectOne extends UIInput
 
       int size = list.size();
       for (int i = 0; i < size; i++) {
-	if (matchItems(expressionFactory, list.get(i), value, type))
-	  return true;
+        if (matchItems(expressionFactory, list.get(i), value, type))
+          return true;
       }
     }
     else if (selectValue instanceof Map) {

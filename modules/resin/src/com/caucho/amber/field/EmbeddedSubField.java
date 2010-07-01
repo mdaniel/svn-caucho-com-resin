@@ -69,8 +69,8 @@ public class EmbeddedSubField implements AmberField {
   private int _index;
 
   public EmbeddedSubField(EntityEmbeddedField embeddedField,
-			  AmberField embeddableField,
-			  int index)
+                          AmberField embeddableField,
+                          int index)
     throws ConfigException
   {
     _embeddedField = embeddedField;
@@ -84,15 +84,15 @@ public class EmbeddedSubField implements AmberField {
     }
     else
       throw new IllegalStateException(L.l("'{0}' is an unknown field type of @Embeddable bean.",
-					  embeddableField.getClass().getName()));
+                                          embeddableField.getClass().getName()));
     
 
     if (embeddableColumn == null)
       throw new IllegalStateException(embeddableField + " column is null");
 
     _column = new AmberColumn(_embeddedField.getTable(),
-			 embeddableColumn.getName(),
-			 embeddableColumn.getType());
+                         embeddableColumn.getName(),
+                         embeddableColumn.getType());
   }
   
   /**
@@ -401,9 +401,9 @@ public class EmbeddedSubField implements AmberField {
     String fieldType = getColumn().getType().getForeignType().getJavaTypeName();
     
     return ("((" + fieldType + ") "
-	    + "((Embeddable) "
-	    + _embeddedField.generateGet(objThis)
-	    + ").__caucho_get_field(" + _index + "))");
+            + "((Embeddable) "
+            + _embeddedField.generateGet(objThis)
+            + ").__caucho_get_field(" + _index + "))");
   }
 
   /**

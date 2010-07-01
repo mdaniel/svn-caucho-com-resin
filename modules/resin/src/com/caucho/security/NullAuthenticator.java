@@ -47,8 +47,8 @@ import com.caucho.security.BasicPrincipal;
 public class NullAuthenticator extends AbstractAuthenticator {
   @Override
   protected Principal authenticate(Principal user,
-				   PasswordCredentials cred,
-				   Object details)
+                                   PasswordCredentials cred,
+                                   Object details)
   {
     return new BasicPrincipal(user.getName());
   }

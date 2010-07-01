@@ -68,38 +68,38 @@ public class DomainName {
 
     try {
       while (index < length) {
-	char ch = source.charAt(index + 0);
+        char ch = source.charAt(index + 0);
       
-	if (isFirst && index + 4 < length &&
-	    source.charAt(index + 0) == 'x' &&
-	    source.charAt(index + 1) == 'n' &&
-	    source.charAt(index + 2) == '-' &&
-	    source.charAt(index + 3) == '-') {
-	  int p = source.indexOf('.', index);
-	  String seq;
-	
-	  if (p < 0)
-	    seq = source.substring(index + 4);
-	  else
-	    seq = source.substring(index + 4, p);
-	
-	  decode(result, cb, seq);
+        if (isFirst && index + 4 < length &&
+            source.charAt(index + 0) == 'x' &&
+            source.charAt(index + 1) == 'n' &&
+            source.charAt(index + 2) == '-' &&
+            source.charAt(index + 3) == '-') {
+          int p = source.indexOf('.', index);
+          String seq;
 
-	  index += 4 + seq.length();
-	  continue;
-	}
+          if (p < 0)
+            seq = source.substring(index + 4);
+          else
+            seq = source.substring(index + 4, p);
 
-	index++;
-	
-	isFirst = false;
+          decode(result, cb, seq);
 
-	if (ch == '.') {
-	  isFirst = true;
+          index += 4 + seq.length();
+          continue;
+        }
 
-	  result.append(ch);
-	}
-	else
-	  result.append(Character.toLowerCase(ch));
+        index++;
+
+        isFirst = false;
+
+        if (ch == '.') {
+          isFirst = true;
+
+          result.append(ch);
+        }
+        else
+          result.append(Character.toLowerCase(ch));
       }
 
       return result.close();
@@ -128,36 +128,36 @@ public class DomainName {
       
       int i = head;
       for (; i < length; i++) {
-	char ch = source.charAt(i);
+        char ch = source.charAt(i);
 
-	if (ch == '.') {
-	  cb.append(ch);
-	  break;
-	}
-	else if (ch <= 0x7f)
-	  cb.append(ch);
-	else {
-	  isAscii = false;
-	  break;
-	}
+        if (ch == '.') {
+          cb.append(ch);
+          break;
+        }
+        else if (ch <= 0x7f)
+          cb.append(ch);
+        else {
+          isAscii = false;
+          break;
+        }
       }
 
       if (isAscii) {
-	head = i + 1;
-	result.append(cb);
-	continue;
+        head = i + 1;
+        result.append(cb);
+        continue;
       }
 
       cb.clear();
       i = head;
       for (; i < length; i++) {
-	char ch = source.charAt(i);
+        char ch = source.charAt(i);
 
-	if (ch == '.')
-	  break;
+        if (ch == '.')
+          break;
 
-	//cb.append(Character.toLowerCase(ch));
-	cb.append(ch);
+        //cb.append(Character.toLowerCase(ch));
+        cb.append(ch);
       }
       head = i;
 
@@ -182,7 +182,7 @@ public class DomainName {
       char ch = seq.charAt(i);
 
       if (ch == '-')
-	b = i;
+        b = i;
     }
 
     for (int i = 0; i < b; i++) {
@@ -202,23 +202,23 @@ public class DomainName {
       int w = 1;
 
       for (int k = base; true; k += base) {
-	char ch = seq.charAt(in++);
-	int digit = DECODE[ch];
+        char ch = seq.charAt(in++);
+        int digit = DECODE[ch];
 
-	i += digit * w;
+        i += digit * w;
 
-	int t;
-	if (k <= bias)
-	  t = tmin;
-	else if (bias + tmax <= k)
-	  t = tmax;
-	else
-	  t = k - bias;
+        int t;
+        if (k <= bias)
+          t = tmin;
+        else if (bias + tmax <= k)
+          t = tmax;
+        else
+          t = k - bias;
 
-	if (digit < t)
-	  break;
+        if (digit < t)
+          break;
 
-	w *= (base - t);
+        w *= (base - t);
       }
 
       bias = adapt(i - oldi, out + 1, oldi == 0);
@@ -253,8 +253,8 @@ public class DomainName {
     for (int i = 0; i < length; i++) {
       char ch = seq.charAt(i);
       if (ch < 0x80) {
-	cb.append(ch);
-	b++;
+        cb.append(ch);
+        b++;
       }
     }
 
@@ -267,10 +267,10 @@ public class DomainName {
       int m = 0xffff;
       
       for (int i = 0; i < length; i++) {
-	char ch = seq.charAt(i);
+        char ch = seq.charAt(i);
 
-	if (n <= ch && ch < m)
-	  m = ch;
+        if (n <= ch && ch < m)
+          m = ch;
       }
 
       // XXX: overflow
@@ -278,37 +278,37 @@ public class DomainName {
       n = m;
 
       for (int i = 0; i < length; i++) {
-	int ch = seq.charAt(i);
+        int ch = seq.charAt(i);
 
-	if (ch < n) {
-	  delta++;
-	}
+        if (ch < n) {
+          delta++;
+        }
 
-	if (ch == n) {
-	  int q = delta;
-	  
-	  for (int k = base; true; k += base) {
-	    int t;
+        if (ch == n) {
+          int q = delta;
 
-	    if (k <= bias)
-	      t = tmin;
-	    else if (bias + tmax <= k)
-	      t = tmax;
-	    else
-	      t = k - bias;
+          for (int k = base; true; k += base) {
+            int t;
 
-	    if (q < t)
-	      break;
+            if (k <= bias)
+              t = tmin;
+            else if (bias + tmax <= k)
+              t = tmax;
+            else
+              t = k - bias;
 
-	    cb.append(ENCODE[t + (q - t) % (base - t)]);
-	    q = (q - t) / (base - t);
-	  }
+            if (q < t)
+              break;
 
-	  cb.append(ENCODE[q]);
-	  bias = adapt(delta, h + 1, h == b);
-	  delta = 0;
-	  h++;
-	}
+            cb.append(ENCODE[t + (q - t) % (base - t)]);
+            q = (q - t) / (base - t);
+          }
+
+          cb.append(ENCODE[q]);
+          bias = adapt(delta, h + 1, h == b);
+          delta = 0;
+          h++;
+        }
       }
 
       delta++;

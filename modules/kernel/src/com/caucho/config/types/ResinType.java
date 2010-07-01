@@ -95,11 +95,11 @@ public class ResinType {
    */
   public Object create(Class targetClass)
     throws ClassNotFoundException,
-	   InstantiationException,
-	   IllegalAccessException,
-	   ConfigException,
-	   InvocationTargetException,
-	   ELException
+           InstantiationException,
+           IllegalAccessException,
+           ConfigException,
+           InvocationTargetException,
+           ELException
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
@@ -107,14 +107,14 @@ public class ResinType {
 
     if (targetClass != null && ! (targetClass.isAssignableFrom(cl)))
       throw new ConfigException(L.l("{0} is not assignable to {1}",
-				    targetClass.getName(), _className));
-	
+                                    targetClass.getName(), _className));
+
 
     Constructor constructor = getConstructor(cl);
 
     if (constructor == null)
       throw new ConfigException(L.l("Can't find a matching public constructor for '{0}'",
-				    _signature));
+                                    _signature));
 
     Object []args = new Object[_args.size()];
 
@@ -133,10 +133,10 @@ public class ResinType {
 
     for (int i = 0; i < cons.length; i++) {
       if (! Modifier.isPublic(cons[i].getModifiers()))
-	continue;
+        continue;
       
       if (cons[i].getParameterTypes().length == _args.size())
-	return cons[i];
+        return cons[i];
     }
 
     return null;
@@ -168,20 +168,20 @@ public class ResinType {
       cb.clear();
 
       while (ch > 0 && ch != ',' && ch != ')') {
-	cb.append((char) ch);
-	
-	if (ch == '\'' || ch == '"') {
-	  int end = ch;
+        cb.append((char) ch);
 
-	  for (ch = read(); ch > 0 && ch != end; ch = read()) {
-	    cb.append((char) ch);
-	  }
+        if (ch == '\'' || ch == '"') {
+          int end = ch;
 
-	  if (ch > 0)
-	    cb.append((char) ch);
-	}
+          for (ch = read(); ch > 0 && ch != end; ch = read()) {
+            cb.append((char) ch);
+          }
 
-	ch = read();
+          if (ch > 0)
+            cb.append((char) ch);
+        }
+
+        ch = read();
       }
 
       _args.add(cb.toString());
@@ -218,18 +218,18 @@ public class ResinType {
       }
 
       if (ch == '[') {
-	ch = read();
-	
-	if (ch != ']')
-	  throw new ConfigException(L.l("function syntax is `ret-type name(arg1, ..., argn)' in `{0}'",
+        ch = read();
+
+        if (ch != ']')
+          throw new ConfigException(L.l("function syntax is `ret-type name(arg1, ..., argn)' in `{0}'",
                                         _signature));
 
-	cb.append("[]");
+        cb.append("[]");
 
-	ch = read();
+        ch = read();
       }
       else
-	break;
+        break;
     }
 
     

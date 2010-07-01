@@ -121,7 +121,7 @@ public class StaticPage extends Page {
     rs.setEncoding("UTF-8");
     try {
       while ((len = rs.read(cBuf, 0, cBuf.length)) > 0) {
-	out.write(cBuf, 0, len);
+        out.write(cBuf, 0, len);
       }
     } finally {
       rs.close();
@@ -136,23 +136,23 @@ public class StaticPage extends Page {
   }
 
   public static void writeDepend(Path dependPath,
-				 ArrayList<PersistentDependency> dependList)
+                                 ArrayList<PersistentDependency> dependList)
     throws IOException
   {
     WriteStream os = dependPath.openWrite();
     try {
       for (int i = 0; i < dependList.size(); i++) {
-	PersistentDependency dependency = dependList.get(i);
+        PersistentDependency dependency = dependList.get(i);
 
-	if (dependency instanceof Depend) {
-	  Depend depend = (Depend) dependency;
+        if (dependency instanceof Depend) {
+          Depend depend = (Depend) dependency;
 
-	  os.print('"');
-	  os.print(depend.getPath().getNativePath());
-	  os.print("\" \"");
-	  os.print(depend.getDigest());
-	  os.println("\"");
-	}
+          os.print('"');
+          os.print(depend.getPath().getNativePath());
+          os.print("\" \"");
+          os.print(depend.getDigest());
+          os.println("\"");
+        }
       }
     } finally {
       os.close();
@@ -169,11 +169,11 @@ public class StaticPage extends Page {
       String name;
 
       while ((name = parseName(is)) != null) {
-	long digest = Long.parseLong(parseName(is));
+        long digest = Long.parseLong(parseName(is));
 
-	Depend depend = new Depend(dependPath.lookup(name), digest);
+        Depend depend = new Depend(dependPath.lookup(name), digest);
 
-	dependList.add(depend);
+        dependList.add(depend);
       }
 
       return dependList;

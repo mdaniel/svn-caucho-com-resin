@@ -44,12 +44,12 @@ public interface ServiceFactory
    * Creates a new service
    */
   public Object getService(Bundle bundle,
-			   ServiceRegistration registration);
+                           ServiceRegistration registration);
   
   /**
    * Releases a service
    */
   public void ungetService(Bundle bundle,
-			   ServiceRegistration registration,
-			   Object service);
+                           ServiceRegistration registration,
+                           Object service);
 }

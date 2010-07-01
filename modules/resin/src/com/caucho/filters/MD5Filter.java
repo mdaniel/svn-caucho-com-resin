@@ -52,7 +52,7 @@ public class MD5Filter implements Filter
    * Creates a wrapper to compress the output.
    */
   public void doFilter(ServletRequest request,
-		       ServletResponse response,
+                       ServletResponse response,
                        FilterChain nextFilter)
     throws ServletException, IOException
   {
@@ -105,13 +105,13 @@ public class MD5Filter implements Filter
       throws IOException, ServletException
     {
       if (_digestStream != null)
-	_digestStream.flush();
+        _digestStream.flush();
 
       close();
       
       if (_digestStream != null) {
-	_digestStream.flush();
-	super.setFooter("Content-MD5", _digestStream.getDigest());
+        _digestStream.flush();
+        super.setFooter("Content-MD5", _digestStream.getDigest());
       }
     }
   }
@@ -125,11 +125,11 @@ public class MD5Filter implements Filter
       _os = os;
 
       try {
-	_digest = MessageDigest.getInstance("MD5");
+        _digest = MessageDigest.getInstance("MD5");
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 

@@ -52,9 +52,9 @@ class MBeanWrapper implements DynamicMBean {
   private ObjectInstance _instance;
   
   protected MBeanWrapper(MBeanContext context,
-			 ObjectName name,
-			 Object object,
-			 DynamicMBean mbean)
+                         ObjectName name,
+                         Object object,
+                         DynamicMBean mbean)
   {
     _context = context;
 
@@ -171,9 +171,9 @@ class MBeanWrapper implements DynamicMBean {
    */
   public void setAttribute(Attribute attr)
     throws ReflectionException,
-	   AttributeNotFoundException,
-	   InvalidAttributeValueException,
-	   MBeanException
+           AttributeNotFoundException,
+           InvalidAttributeValueException,
+           MBeanException
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -208,8 +208,8 @@ class MBeanWrapper implements DynamicMBean {
    * Invokes the operation.
    */
   public Object invoke(String operation,
-		       Object []params,
-		       String[]signature)
+                       Object []params,
+                       String[]signature)
     throws ReflectionException, MBeanException
   {
     Thread thread = Thread.currentThread();
@@ -241,8 +241,8 @@ class MBeanWrapper implements DynamicMBean {
    * Adds a notification listener.
    */
   public void addNotificationListener(NotificationListener listener,
-				      NotificationFilter filter,
-				      Object handback)
+                                      NotificationFilter filter,
+                                      Object handback)
   {
     getBroadcaster().addNotificationListener(listener, filter, handback);
   }
@@ -260,8 +260,8 @@ class MBeanWrapper implements DynamicMBean {
    * Removes a notification listener.
    */
   public void removeNotificationListener(NotificationListener listener,
-					 NotificationFilter filter,
-					 Object handback)
+                                         NotificationFilter filter,
+                                         Object handback)
     throws ListenerNotFoundException
   {
     Object obj = getObject();

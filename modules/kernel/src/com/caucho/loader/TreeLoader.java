@@ -170,14 +170,14 @@ public class TreeLoader extends JarListLoader implements Dependency
       String []list = dir.list();
 
       for (int j = 0; list != null && j < list.length; j++) {
-	Path path = dir.lookup(list[j]);
+        Path path = dir.lookup(list[j]);
 
-	if (list[j].endsWith(".jar") || list[j].endsWith(".zip")) {
-	  addJar(path);
-	}
-	else if (path.isDirectory()) {
-	  fillJars(path);
-	}
+        if (list[j].endsWith(".jar") || list[j].endsWith(".zip")) {
+          addJar(path);
+        }
+        else if (path.isDirectory()) {
+          fillJars(path);
+        }
       }
       
     } catch (IOException e) {

@@ -80,7 +80,7 @@ class ClobWriter extends Writer {
    * Initialize the output stream.
    */
   public void init(StoreTransaction xa, BlockStore store,
-		   byte []inode, int inodeOffset)
+                   byte []inode, int inodeOffset)
   {
     if (xa == null)
       xa = RawTransaction.create();
@@ -131,20 +131,20 @@ class ClobWriter extends Writer {
     
     while (length > 0) {
       if (_bufferEnd <= byteOffset) {
-	_offset = byteOffset;
-	flushBlock();
-	byteOffset = _offset;
+        _offset = byteOffset;
+        flushBlock();
+        byteOffset = _offset;
       }
 
       int sublen = (_bufferEnd - byteOffset) >> 1;
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       for (int i = 0; i < sublen; i++) {
-	char ch = buffer[offset + i];
-	
-	byteBuffer[byteOffset++] = (byte) (ch >> 8);
-	byteBuffer[byteOffset++] = (byte) (ch);
+        char ch = buffer[offset + i];
+
+        byteBuffer[byteOffset++] = (byte) (ch >> 8);
+        byteBuffer[byteOffset++] = (byte) (ch);
       }
 
       offset += sublen;
@@ -188,7 +188,7 @@ class ClobWriter extends Writer {
       _tempBuffer = null;
     } finally {
       if (_inode != null)
-	_inode.closeOutputStream();
+        _inode.closeOutputStream();
     }
   }
 
@@ -214,14 +214,14 @@ class ClobWriter extends Writer {
   private static long readLong(byte []buffer, int offset)
   {
     return (((buffer[offset + 0] & 0xffL) << 56) |
-	    ((buffer[offset + 1] & 0xffL) << 48) |
-	    ((buffer[offset + 2] & 0xffL) << 40) |
-	    ((buffer[offset + 3] & 0xffL) << 32) |
-	    
-	    ((buffer[offset + 4] & 0xffL) << 24) |
-	    ((buffer[offset + 4] & 0xffL) << 16) |
-	    ((buffer[offset + 4] & 0xffL) << 8) |
-	    ((buffer[offset + 4] & 0xffL)));
+            ((buffer[offset + 1] & 0xffL) << 48) |
+            ((buffer[offset + 2] & 0xffL) << 40) |
+            ((buffer[offset + 3] & 0xffL) << 32) |
+
+            ((buffer[offset + 4] & 0xffL) << 24) |
+            ((buffer[offset + 4] & 0xffL) << 16) |
+            ((buffer[offset + 4] & 0xffL) << 8) |
+            ((buffer[offset + 4] & 0xffL)));
   }
 
   /**
@@ -239,6 +239,6 @@ class ClobWriter extends Writer {
   private static int readShort(byte []buffer, int offset)
   {
     return (((buffer[offset + 0] & 0xff) << 8) |
-	    ((buffer[offset + 1] & 0xff)));
+            ((buffer[offset + 1] & 0xff)));
   }
 }

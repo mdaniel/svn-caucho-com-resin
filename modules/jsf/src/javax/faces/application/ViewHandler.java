@@ -54,13 +54,13 @@ public abstract class ViewHandler
   public abstract String calculateRenderKitId(FacesContext context);
 
   public abstract UIViewRoot createView(FacesContext context,
-					String viewId);
+                                        String viewId);
 
   public abstract String getActionURL(FacesContext context,
-				      String viewId);
+                                      String viewId);
 
   public abstract String getResourceURL(FacesContext context,
-					String path);
+                                        String path);
 
   public void initView(FacesContext context)
     throws FacesException
@@ -69,7 +69,7 @@ public abstract class ViewHandler
       String encoding = calculateCharacterEncoding(context);
 
       if (encoding != null)
-	context.getExternalContext().setRequestCharacterEncoding(encoding);
+        context.getExternalContext().setRequestCharacterEncoding(encoding);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -78,11 +78,11 @@ public abstract class ViewHandler
   }
 
   public abstract void renderView(FacesContext context,
-				  UIViewRoot viewToRender)
+                                  UIViewRoot viewToRender)
     throws IOException, FacesException;
 
   public abstract UIViewRoot restoreView(FacesContext context,
-					 String viewId)
+                                         String viewId)
     throws FacesException;
 
   public abstract void writeState(FacesContext context)

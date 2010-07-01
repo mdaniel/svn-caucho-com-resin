@@ -65,21 +65,21 @@ class ESArray extends ESObject {
       int newLength;
 
       try { 
-	oldLength = getProperty(LENGTH).toInt32();
-	newLength = value.toInt32();
+        oldLength = getProperty(LENGTH).toInt32();
+        newLength = value.toInt32();
       } catch (ESException e) {
-	return;
+        return;
       }
  
       for (int i = newLength; i < oldLength; i++) {
-	try {
-	  delete(ESString.create(i));
-	} catch (Exception e) {
-	}
+        try {
+          delete(ESString.create(i));
+        } catch (Exception e) {
+        }
       }
 
       if (newLength < 0)
-	newLength = 0;
+        newLength = 0;
 
       super.setProperty(LENGTH, ESNumber.create(newLength));
       return;
@@ -92,7 +92,7 @@ class ESArray extends ESObject {
       int length = getProperty(LENGTH).toInt32();
 
       if (keyValue >= length)
-	super.setProperty(LENGTH, ESNumber.create(keyValue + 1));
+        super.setProperty(LENGTH, ESNumber.create(keyValue + 1));
     } catch (Exception e) {
     }
   }
@@ -126,19 +126,19 @@ class ESArray extends ESObject {
     cb.append("[");
     for (int i = 0; i < len; i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       ESBase value = obj.hasProperty(i);
 
       if (value != null && value != esNull &&
-	  value != esUndefined && value != esEmpty) {
-	if (isLoopPass)
-	  value.toSource(map, isLoopPass);
-	else
-	  cb.append(value.toSource(map, isLoopPass));
+          value != esUndefined && value != esEmpty) {
+        if (isLoopPass)
+          value.toSource(map, isLoopPass);
+        else
+          cb.append(value.toSource(map, isLoopPass));
       }
       else if (i + 1 == len)
-	cb.append(",");
+        cb.append(",");
     }
     cb.append("]");
 

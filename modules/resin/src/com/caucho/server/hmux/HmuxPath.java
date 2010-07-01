@@ -93,7 +93,7 @@ public class HmuxPath extends FilesystemPath {
    */
   HmuxPath(FilesystemPath root,
            String userPath, Map<String,Object> newAttributes,
-	   String path, String query)
+           String path, String query)
   {
     super(root, userPath, path);
 
@@ -161,7 +161,7 @@ public class HmuxPath extends FilesystemPath {
    */
   protected Path schemeWalk(String userPath,
                             Map<String,Object> attributes,
-			    String uri,
+                            String uri,
                             int offset)
   {
     int length = uri.length();
@@ -175,7 +175,7 @@ public class HmuxPath extends FilesystemPath {
     int i = 2 + offset;
     int ch = 0;
     for (; i < length && (ch = uri.charAt(i)) != ':' && ch != '/' && ch != '?';
-	 i++) {
+         i++) {
       buf.append((char) ch);
     }
 
@@ -186,7 +186,7 @@ public class HmuxPath extends FilesystemPath {
     int port = 0;
     if (ch == ':') {
       for (i++; i < length && (ch = uri.charAt(i)) >= '0' && ch <= '9'; i++) {
-	port = 10 * port + uri.charAt(i) - '0';
+        port = 10 * port + uri.charAt(i) - '0';
       }
     }
 
@@ -209,8 +209,8 @@ public class HmuxPath extends FilesystemPath {
    * @return the found path.
    */
   public Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String uri)
+                        Map<String,Object> attributes,
+                        String uri)
   {
     String path;
     String query = null;
@@ -234,7 +234,7 @@ public class HmuxPath extends FilesystemPath {
 
   protected HmuxPath create(FilesystemPath root,
                             String userPath,
-			    Map<String,Object> newAttributes,
+                            Map<String,Object> newAttributes,
                             String path, String query)
   {
     return new HmuxPath(root, userPath, newAttributes, path, query);
@@ -256,9 +256,9 @@ public class HmuxPath extends FilesystemPath {
     int port = getPort();
 
     return (getScheme() + "://" + getHost() + 
-	    (port == 80 ? "" : ":" + getPort()) + 
-	    getPath() + 
-	    (_query == null ? "" : "?" + _query));
+            (port == 80 ? "" : ":" + getPort()) +
+            getPath() +
+            (_query == null ? "" : "?" + _query));
   }
 
   /**
@@ -466,8 +466,8 @@ public class HmuxPath extends FilesystemPath {
   protected Path cacheCopy()
   {
     return new HmuxPath(getRoot(), getUserPath(),
-			null,
-			getPath(), _query);
+                        null,
+                        getPath(), _query);
   }
   
   /**
@@ -531,14 +531,14 @@ public class HmuxPath extends FilesystemPath {
     }
 
     public void startElement (String uri, String localName,
-			      String qName, Attributes attributes)
+                              String qName, Attributes attributes)
     {
       if (localName.equals("href"))
         _inHref = true;
     }
 
     public void characters(char []data, int offset, int length)
-	throws SAXException
+        throws SAXException
     {
       if (! _inHref)
         return;
@@ -562,7 +562,7 @@ public class HmuxPath extends FilesystemPath {
     }
 
     public void endElement (String uri, String localName, String qName)
-	throws SAXException
+        throws SAXException
     {
       if (localName.equals("href"))
         _inHref = false;

@@ -67,31 +67,31 @@ public class MemoryAdmin extends AbstractManagedObject
       ObjectName query = new ObjectName("java.lang:type=MemoryPool,*");
 
       ObjectName codeCacheName
-	= new ObjectName("java.lang:type=MemoryPool,name=Code Cache");
+        = new ObjectName("java.lang:type=MemoryPool,name=Code Cache");
       ObjectName edenName
-	= new ObjectName("java.lang:type=MemoryPool,name=Eden Space");
+        = new ObjectName("java.lang:type=MemoryPool,name=Eden Space");
       ObjectName permGenName
-	= new ObjectName("java.lang:type=MemoryPool,name=Perm Gen");
+        = new ObjectName("java.lang:type=MemoryPool,name=Perm Gen");
       ObjectName survivorName
-	= new ObjectName("java.lang:type=MemoryPool,name=Survivor Space");
+        = new ObjectName("java.lang:type=MemoryPool,name=Survivor Space");
       ObjectName tenuredName
-	= new ObjectName("java.lang:type=MemoryPool,name=Tenured Gen");
+        = new ObjectName("java.lang:type=MemoryPool,name=Tenured Gen");
       
       for (ObjectName objName : _mbeanServer.queryNames(query, null)) {
-	String name = objName.getKeyProperty("name");
+        String name = objName.getKeyProperty("name");
 
-	if (name.toLowerCase().contains("code"))
-	  codeCacheName = objName;
-	else if (name.toLowerCase().contains("eden"))
-	  edenName = objName;
-	else if (name.toLowerCase().contains("perm"))
-	  permGenName = objName;
-	else if (name.toLowerCase().contains("surv"))
-	  survivorName = objName;
-	else if (name.toLowerCase().contains("tenured"))
-	  tenuredName = objName;
-	else if (name.toLowerCase().contains("old"))
-	  tenuredName = objName;
+        if (name.toLowerCase().contains("code"))
+          codeCacheName = objName;
+        else if (name.toLowerCase().contains("eden"))
+          edenName = objName;
+        else if (name.toLowerCase().contains("perm"))
+          permGenName = objName;
+        else if (name.toLowerCase().contains("surv"))
+          survivorName = objName;
+        else if (name.toLowerCase().contains("tenured"))
+          tenuredName = objName;
+        else if (name.toLowerCase().contains("old"))
+          tenuredName = objName;
       }
       
       _codeCacheName = codeCacheName;
@@ -121,7 +121,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -135,7 +135,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -149,7 +149,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -163,7 +163,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -177,7 +177,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -191,7 +191,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -205,7 +205,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -219,7 +219,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -233,7 +233,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -247,7 +247,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -261,7 +261,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -275,7 +275,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -289,7 +289,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -303,7 +303,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -317,7 +317,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -331,7 +331,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -345,7 +345,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -359,7 +359,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -373,7 +373,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 
@@ -387,7 +387,7 @@ public class MemoryAdmin extends AbstractManagedObject
   {
     try {
       CompositeData data
-	= (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+        = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
 
       MemoryUsage usage = MemoryUsage.from(data);
 

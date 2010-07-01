@@ -72,9 +72,9 @@ public class ExistsQuery extends SelectQuery {
    * Executes the query.
    */
   private boolean execute(SelectResult result,
-		       TableIterator []rows,
-		       QueryContext context,
-		       Transaction transaction)
+                       TableIterator []rows,
+                       QueryContext context,
+                       Transaction transaction)
     throws SQLException, IOException
   {
     FromItem []fromItems = getFromItems();

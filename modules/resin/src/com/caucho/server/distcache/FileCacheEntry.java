@@ -46,9 +46,9 @@ public class FileCacheEntry extends DistCacheEntry {
   private final FileCacheManager _manager;
 
   public FileCacheEntry(Object key,
-			HashKey keyHash,
-			ClusterPod.Owner owner,
-			FileCacheManager manager)
+                        HashKey keyHash,
+                        ClusterPod.Owner owner,
+                        FileCacheManager manager)
   {
     super(key, keyHash, owner);
 
@@ -56,10 +56,10 @@ public class FileCacheEntry extends DistCacheEntry {
   }
 
   public FileCacheEntry(Object key,
-			HashKey keyHash,
-			ClusterPod.Owner owner,
-			FileCacheManager manager,
-			CacheConfig config)
+                        HashKey keyHash,
+                        ClusterPod.Owner owner,
+                        FileCacheManager manager,
+                        CacheConfig config)
   {
     super(key, keyHash, owner, config);
 
@@ -110,8 +110,8 @@ public class FileCacheEntry extends DistCacheEntry {
    */
   @Override
   public ExtCacheEntry put(InputStream is,
-			   CacheConfig config,
-			   long idleTimeout)
+                           CacheConfig config,
+                           long idleTimeout)
     throws IOException
   {
     return _manager.putStream(this, is, config, idleTimeout);

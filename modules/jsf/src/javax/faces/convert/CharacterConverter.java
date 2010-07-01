@@ -41,8 +41,8 @@ public class CharacterConverter implements Converter
     = "javax.faces.converter.STRING";
   
   public Object getAsObject(FacesContext context,
-			    UIComponent component,
-			    String value)
+                            UIComponent component,
+                            String value)
     throws ConverterException
   {
     // XXX: incorrect
@@ -58,8 +58,8 @@ public class CharacterConverter implements Converter
   }
   
   public String getAsString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
     throws ConverterException
   {
     // XXX: incorrect

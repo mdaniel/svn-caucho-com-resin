@@ -49,7 +49,7 @@ public class SelectItem implements java.io.Serializable
   }
 
   public SelectItem(Object value,
-		    String label)
+                    String label)
   {
     setValue(value);
     setLabel(label);
@@ -57,8 +57,8 @@ public class SelectItem implements java.io.Serializable
   }
 
   public SelectItem(Object value,
-		    String label,
-		    String description)
+                    String label,
+                    String description)
   {
     setValue(value);
     setLabel(label);
@@ -67,9 +67,9 @@ public class SelectItem implements java.io.Serializable
   }
 
   public SelectItem(Object value,
-		    String label,
-		    String description,
-		    boolean disabled)
+                    String label,
+                    String description,
+                    boolean disabled)
   {
     setValue(value);
     setLabel(label);
@@ -79,10 +79,10 @@ public class SelectItem implements java.io.Serializable
   }
 
   public SelectItem(Object value,
-		    String label,
-		    String description,
-		    boolean disabled,
-		    boolean escape)
+                    String label,
+                    String description,
+                    boolean disabled,
+                    boolean escape)
   {
     setValue(value);
     setLabel(label);

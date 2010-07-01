@@ -114,8 +114,8 @@ public class NameContextSkeleton extends Skeleton {
   }
 
   private void executeLookup(Object []args,
-			     Hessian2Input in,
-			     Hessian2Output out)
+                             Hessian2Input in,
+                             Hessian2Output out)
     throws Throwable
   {
     String name = (String) args[0];
@@ -139,9 +139,9 @@ public class NameContextSkeleton extends Skeleton {
       out.startReply();
 
       if (home != null)
-	out.writeObject(home);
+        out.writeObject(home);
       else // if (server instanceof 
-	out.writeObject(server.getRemoteObject(server.getRemoteHomeClass(), "hessian"));
+        out.writeObject(server.getRemoteObject(server.getRemoteHomeClass(), "hessian"));
 
       out.completeReply();
       */
@@ -153,19 +153,19 @@ public class NameContextSkeleton extends Skeleton {
       String serverId;
 
       if (_prefix.endsWith("/") || name.startsWith("/"))
-	serverId = _prefix + name;
+        serverId = _prefix + name;
       else
-	serverId = _prefix + '/' + name;
-	
+        serverId = _prefix + '/' + name;
+
       if (serverId.startsWith("/"))
         serverId = serverId.substring(1);
 
       String url;
       String prefix = _protocol.getURLPrefix();
       if (prefix.endsWith("/"))
-	url = prefix + serverId;
+        url = prefix + serverId;
       else
-	url = prefix + '/' + serverId;
+        url = prefix + '/' + serverId;
 
       out.writeObject(new HessianRemote(NameServerRemote.class.getName(), url));
       
@@ -180,8 +180,8 @@ public class NameContextSkeleton extends Skeleton {
   }
 
   private void executeList(Object []args,
-			   Hessian2Input in,
-			   Hessian2Output out)
+                           Hessian2Input in,
+                           Hessian2Output out)
     throws Throwable
   {
     EjbProtocolManager container = _protocol.getProtocolManager();
@@ -225,9 +225,9 @@ public class NameContextSkeleton extends Skeleton {
    * @param out the hessian output stream
    */
   protected void executeUnknown(String method,
-				Object []args,
+                                Object []args,
                                 Hessian2Input in,
-				Hessian2Output out)
+                                Hessian2Output out)
     throws Exception
   {
     if (method.equals("_hessian_getAttribute")) {

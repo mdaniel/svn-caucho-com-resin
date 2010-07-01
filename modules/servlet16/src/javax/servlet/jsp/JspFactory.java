@@ -51,12 +51,12 @@ public abstract class JspFactory {
   }
 
   public abstract PageContext getPageContext(Servlet servlet,
-					     ServletRequest request,
-					     ServletResponse response,
-					     String errorPageURL,
-					     boolean needsSession,
-					     int buffer,
-					     boolean autoflush);
+                                             ServletRequest request,
+                                             ServletResponse response,
+                                             String errorPageURL,
+                                             boolean needsSession,
+                                             int buffer,
+                                             boolean autoflush);
 
   public abstract void releasePageContext(PageContext pc);
 

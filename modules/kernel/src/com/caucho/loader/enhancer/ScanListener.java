@@ -75,6 +75,6 @@ public interface ScanListener {
    * Callback to note the class matches
    */
   public void classMatchEvent(EnvironmentClassLoader loader,
-			      Path root,
-			      String className);
+                              Path root,
+                              String className);
 }

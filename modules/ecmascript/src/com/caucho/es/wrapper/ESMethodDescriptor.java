@@ -52,7 +52,7 @@ public class ESMethodDescriptor extends MethodDescriptor {
    * @param staticVirtual true if this is a "static-virtual" method.
    */
   public ESMethodDescriptor(Method method, boolean overwrite,
-			    boolean staticVirtual)
+                            boolean staticVirtual)
     throws IntrospectionException
   {
     super(method);
@@ -150,9 +150,9 @@ public class ESMethodDescriptor extends MethodDescriptor {
   {
     if (declaringClass == null) {
       if (staticVirtual)
-	declaringClass = getMethod().getParameterTypes()[0];
+        declaringClass = getMethod().getParameterTypes()[0];
       else
-	declaringClass = getMethod().getDeclaringClass();
+        declaringClass = getMethod().getDeclaringClass();
     }
 
     return declaringClass;

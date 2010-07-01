@@ -69,10 +69,10 @@ public class EjbGenerator extends ValueGenerator {
   private boolean _isBound;
 
   EjbGenerator(Class type,
-	       String mappedName,
-	       String beanName,
-	       String jndiName,
-	       String location)
+               String mappedName,
+               String beanName,
+               String jndiName,
+               String location)
   {
     _type = type;
     _mappedName = mappedName;
@@ -104,48 +104,48 @@ public class EjbGenerator extends ValueGenerator {
       WebBeansContainer webBeans = WebBeansContainer.create();
 
       if (_mappedName != null && ! "".equals(_mappedName)) {
-	_component = webBeans.bind("error", _type, _mappedName);
-	
-	if (_component == null) {
-	  Object value = getJndiValue(_type);
+        _component = webBeans.bind("error", _type, _mappedName);
 
-	  if (value != null)
-	    return value;
-	  
-	  throw new ConfigException(_location + L.l("'{0}' with mappedName='{1}' is an unknown @EJB", _type.getName(), _mappedName));
-	}
+        if (_component == null) {
+          Object value = getJndiValue(_type);
+
+          if (value != null)
+            return value;
+
+          throw new ConfigException(_location + L.l("'{0}' with mappedName='{1}' is an unknown @EJB", _type.getName(), _mappedName));
+        }
       }
       else if (_beanName != null && ! "".equals(_beanName)) {
-	_component = webBeans.bind("error", _type, _beanName);
-	
-	if (_component == null) {
-	  Object value = getJndiValue(_type);
+        _component = webBeans.bind("error", _type, _beanName);
 
-	  if (value != null)
-	    return value;
+        if (_component == null) {
+          Object value = getJndiValue(_type);
 
-	  throw new ConfigException(_location + L.l("'{0}' with beanName='{1}' is an unknown @EJB", _type.getName(), _beanName));
-	}
+          if (value != null)
+            return value;
+
+          throw new ConfigException(_location + L.l("'{0}' with beanName='{1}' is an unknown @EJB", _type.getName(), _beanName));
+        }
       }
       else {
-	_component = webBeans.bind("error", _type);
-	
-	if (_component == null) {
-	  Object value = getJndiValue(_type);
+        _component = webBeans.bind("error", _type);
 
-	  if (value != null)
-	    return value;
+        if (_component == null) {
+          Object value = getJndiValue(_type);
 
-	  throw new ConfigException(_location + L.l("'{0}'  is an unknown @EJB", _type.getName()));
-	}
+          if (value != null)
+            return value;
+
+          throw new ConfigException(_location + L.l("'{0}'  is an unknown @EJB", _type.getName()));
+        }
       }
 
       if (_component != null && _jndiName != null && ! "".equals(_jndiName)) {
-	try {
-	  Jndi.bindDeepShort(_jndiName, _component);
-	} catch (NamingException e) {
-	  throw ConfigException.create(e);
-	}
+        try {
+          Jndi.bindDeepShort(_jndiName, _component);
+        } catch (NamingException e) {
+          throw ConfigException.create(e);
+        }
       }
     }
 
@@ -166,9 +166,9 @@ public class EjbGenerator extends ValueGenerator {
       Object value = Jndi.lookup(_jndiName);
 
       if (value != null)
-	return PortableRemoteObject.narrow(value, type);
+        return PortableRemoteObject.narrow(value, type);
       else
-	return null;
+        return null;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 

@@ -47,6 +47,6 @@ public interface CometFilterChain extends FilterChain
    * @return true for keepalive, false for the end of the request
    */
   abstract public boolean doResume(ServletRequest request,
-				   ServletResponse response)
+                                   ServletResponse response)
     throws IOException, ServletException;
 }

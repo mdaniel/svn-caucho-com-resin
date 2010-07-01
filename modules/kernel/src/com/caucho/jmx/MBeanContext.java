@@ -85,9 +85,9 @@ public class MBeanContext
   private MBeanView _globalView;
 
   MBeanContext(AbstractMBeanServer mbeanServer,
-	       ClassLoader loader,
-	       MBeanServerDelegate delegate,
-	       MBeanContext globalContext)
+               ClassLoader loader,
+               MBeanServerDelegate delegate,
+               MBeanContext globalContext)
   {
     loader = Environment.getEnvironmentClassLoader(loader);
 
@@ -110,11 +110,11 @@ public class MBeanContext
     _globalView = new MBeanView(mbeanServer, _loader, "resin");
 
     if (_loader != null
-	&& _loader != ClassLoader.getSystemClassLoader()) {
+        && _loader != ClassLoader.getSystemClassLoader()) {
       _parent = _mbeanServer.createContext(_loader.getParent());
 
       if (_parent == this) {
-	_parent = null;
+        _parent = null;
       }
     }
   }
@@ -188,15 +188,15 @@ public class MBeanContext
       char ch = name.charAt(i);
 
       if (ch == ':')
-	return new ObjectName(name);
+        return new ObjectName(name);
       else if ('a' <= ch && ch <= 'z'
-	       || 'A' <= ch && ch <= 'Z'
-	       || '0' <= ch && ch <= '9'
-	       || ch == '-' || ch == '_' || ch == '.') {
-	continue;
+               || 'A' <= ch && ch <= 'Z'
+               || '0' <= ch && ch <= '9'
+               || ch == '-' || ch == '_' || ch == '.') {
+        continue;
       }
       else
-	break;
+        break;
     }
     
     LinkedHashMap<String,String> properties;
@@ -228,14 +228,14 @@ public class MBeanContext
    * @return the instantiated object.
    */
   ObjectInstance registerMBean(MBeanWrapper mbean,
-			       ObjectName name)
+                               ObjectName name)
     throws InstanceAlreadyExistsException,
-	   MBeanRegistrationException,
-	   NotCompliantMBeanException
+           MBeanRegistrationException,
+           NotCompliantMBeanException
   {
     if (mbean == null)
       throw new NotCompliantMBeanException(L.l("{0} is a null mbean",
-					       name));
+                                               name));
     if (_mbeans.get(name) != null)
       throw new InstanceAlreadyExistsException(String.valueOf(name));
 
@@ -254,7 +254,7 @@ public class MBeanContext
     }
 
     if (log.isLoggable(Level.FINEST)
-	&& ! name.equals(_mbeanServer.SERVER_DELEGATE_NAME)) {
+        && ! name.equals(_mbeanServer.SERVER_DELEGATE_NAME)) {
       log.finest(getDebugName(name, mbean) + " registered in " + this);
     }
 
@@ -275,7 +275,7 @@ public class MBeanContext
 
     try {
       if (registration != null)
-	registration.postRegister(new Boolean(true));
+        registration.postRegister(new Boolean(true));
     } catch (Exception e) {
       throw new MBeanRegistrationException(e);
     }
@@ -293,7 +293,7 @@ public class MBeanContext
    */
   public void unregisterMBean(ObjectName name)
     throws InstanceNotFoundException,
-	   MBeanRegistrationException
+           MBeanRegistrationException
   {
     if (_mbeans == null) {
       removeMBean(name);
@@ -316,21 +316,21 @@ public class MBeanContext
 
     try {
       if (registration != null) {
-	try {
-	  registration.preDeregister();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString());
-	}
+        try {
+          registration.preDeregister();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString());
+        }
       }
 
       removeMBean(name);
        
       if (registration != null) {
-	try {
-	  registration.postDeregister();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString());
-	}
+        try {
+          registration.postDeregister();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString());
+        }
       }
     } catch (Exception e) {
       throw new MBeanRegistrationException(e);
@@ -403,13 +403,13 @@ public class MBeanContext
     sendRegisterNotification(name);
 
     for (MBeanContext parentContext = _parent;
-	 parentContext != null;
-	 parentContext = parentContext._parent) {
+         parentContext != null;
+         parentContext = parentContext._parent) {
       if (parentContext._globalView == null) {
-	log.finer("global view is empty");
+        log.finer("global view is empty");
       }
       else if (parentContext._globalView.add(name, mbean, false))
-	parentContext.sendRegisterNotification(name);
+        parentContext.sendRegisterNotification(name);
     }
   }
 
@@ -431,9 +431,9 @@ public class MBeanContext
 
     if (_globalView != null && _globalView.remove(name) != null) {
       try {
-	sendUnregisterNotification(name);
+        sendUnregisterNotification(name);
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -452,9 +452,9 @@ public class MBeanContext
    * @param handback context to be returned to the listener
    */
   void addNotificationListener(ObjectName name,
-			       NotificationListener listener,
-			       NotificationFilter filter,
-			       Object handback)
+                               NotificationListener listener,
+                               NotificationFilter filter,
+                               Object handback)
   {
     synchronized (_listeners) {
       _listeners.add(new Listener(name, listener, filter, handback));
@@ -468,14 +468,14 @@ public class MBeanContext
    * @param listener the listener object
    */
   public void removeNotificationListener(ObjectName mbean,
-					 NotificationListener listener)
+                                         NotificationListener listener)
   {
     synchronized (_listeners) {
       for (int i = _listeners.size() - 1; i >= 0; i--) {
-	Listener oldListener = _listeners.get(i);
+        Listener oldListener = _listeners.get(i);
 
-	if (oldListener.match(mbean, listener))
-	  _listeners.remove(i);
+        if (oldListener.match(mbean, listener))
+          _listeners.remove(i);
       }
     }
   }
@@ -489,16 +489,16 @@ public class MBeanContext
    * @param handback context to be returned to the listener
    */
   public void removeNotificationListener(ObjectName mbean,
-					 NotificationListener listener,
-					 NotificationFilter filter,
-					 Object handback)
+                                         NotificationListener listener,
+                                         NotificationFilter filter,
+                                         Object handback)
   {
     synchronized (_listeners) {
       for (int i = _listeners.size() - 1; i >= 0; i--) {
-	Listener oldListener = _listeners.get(i);
+        Listener oldListener = _listeners.get(i);
 
-	if (oldListener.match(mbean, listener, filter, handback))
-	  _listeners.remove(i);
+        if (oldListener.match(mbean, listener, filter, handback))
+          _listeners.remove(i);
       }
     }
   }
@@ -509,7 +509,7 @@ public class MBeanContext
   void sendRegisterNotification(ObjectName name)
   {
     serverNotification(name,
-		       MBeanServerNotification.REGISTRATION_NOTIFICATION);
+                       MBeanServerNotification.REGISTRATION_NOTIFICATION);
   }
 
   /**
@@ -518,7 +518,7 @@ public class MBeanContext
   void sendUnregisterNotification(ObjectName name)
   {
     serverNotification(name,
-		       MBeanServerNotification.UNREGISTRATION_NOTIFICATION);
+                       MBeanServerNotification.UNREGISTRATION_NOTIFICATION);
   }
 
   /**
@@ -542,7 +542,7 @@ public class MBeanContext
   {
     try {
       if (_mbeans == null)
-	return;
+        return;
     
       log.finest(this + " destroy");
     
@@ -551,28 +551,28 @@ public class MBeanContext
       ArrayList<Listener> listeners = new ArrayList<Listener>(_listeners);
 
       for (int i = 0; i < listeners.size(); i++) {
-	Listener listener = listeners.get(i);
+        Listener listener = listeners.get(i);
 
-	try {
-	  MBeanWrapper mbean = _globalView.getMBean(listener.getName());
+        try {
+          MBeanWrapper mbean = _globalView.getMBean(listener.getName());
 
-	  if (mbean != null)
-	    mbean.removeNotificationListener(listener.getListener(),
-					     listener.getFilter(),
-					     listener.getHandback());
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+          if (mbean != null)
+            mbean.removeNotificationListener(listener.getListener(),
+                                             listener.getFilter(),
+                                             listener.getHandback());
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
 
       for (int i = 0; i < list.size(); i++) {
-	ObjectName name = list.get(i);
+        ObjectName name = list.get(i);
 
-	try {
-	  unregisterMBean(name);
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+        try {
+          unregisterMBean(name);
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
 
       _mbeanServer.removeContext(this, _loader);
@@ -639,18 +639,18 @@ public class MBeanContext
     private WeakReference<Object> _handbackRef;
 
     Listener(ObjectName name,
-	     NotificationListener listener,
-	     NotificationFilter filter,
-	     Object handback)
+             NotificationListener listener,
+             NotificationFilter filter,
+             Object handback)
     {
       _name = name;
       _listenerRef = new WeakReference<NotificationListener>(listener);
 
       if (filter != null)
-	_filterRef = new WeakReference<NotificationFilter>(filter);
+        _filterRef = new WeakReference<NotificationFilter>(filter);
 
       if (handback != null)
-	_handbackRef = new WeakReference<Object>(handback);
+        _handbackRef = new WeakReference<Object>(handback);
     }
 
     ObjectName getName()
@@ -674,43 +674,43 @@ public class MBeanContext
     }
 
     boolean match(ObjectName name,
-		  NotificationListener listener,
-		  NotificationFilter filter,
-		  Object handback)
+                  NotificationListener listener,
+                  NotificationFilter filter,
+                  Object handback)
     {
       if (! _name.equals(name))
-	return false;
+        return false;
 
       else if (listener != _listenerRef.get())
-	return false;
+        return false;
 
       else if (filter == null && _filterRef != null)
-	return false;
+        return false;
       
       else if (_filterRef != null && _filterRef.get() != filter)
-	return false;
+        return false;
 
       else if (handback == null && _handbackRef != null)
-	return false;
+        return false;
       
       else if (_handbackRef != null && _handbackRef.get() != handback)
-	return false;
+        return false;
       
       else
-	return true;
+        return true;
     }
 
     boolean match(ObjectName name,
-		  NotificationListener listener)
+                  NotificationListener listener)
     {
       if (! _name.equals(name))
-	return false;
+        return false;
 
       else if (listener != _listenerRef.get())
-	return false;
+        return false;
       
       else
-	return true;
+        return true;
     }
   }
 

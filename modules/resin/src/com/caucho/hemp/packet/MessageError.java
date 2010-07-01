@@ -46,9 +46,9 @@ public class MessageError extends Packet {
    * @param to the target jid
    */
   public MessageError(String to,
-		      String from,
-		      Serializable value,
-		      ActorError error)
+                      String from,
+                      Serializable value,
+                      ActorError error)
   {
     super(to, from);
 

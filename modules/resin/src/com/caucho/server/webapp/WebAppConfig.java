@@ -85,7 +85,7 @@ public class WebAppConfig extends DeployConfig {
   {
     if (! path.startsWith("/"))
       throw new ConfigException(L.l("context-path '{0}' must start with '/'.",
-				    path));
+                                    path));
     
     _contextPath = path;
   }

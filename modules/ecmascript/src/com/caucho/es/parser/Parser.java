@@ -558,11 +558,11 @@ public class Parser {
     boolean isFirst = true;
     while (lexer.peek() != ')') {
       if (! isFirst && lexer.next() != ',')
-	throw expect("`,'");
+        throw expect("`,'");
       isFirst = false;
 
       if (lexer.next() != Lexer.IDENTIFIER)
-	throw expect(L.l("formal argument"));
+        throw expect(L.l("formal argument"));
 
       ESId argId = lexer.getId();
       
@@ -584,12 +584,12 @@ public class Parser {
     }
 
     if (lexer.next() != '{')
-	throw expect("`{'");
+        throw expect("`{'");
 
     parseBlock(false);
 
     if (lexer.next() != '}') {
-	throw expect("`}'");
+        throw expect("`}'");
     }
 
     block.finish();
@@ -751,9 +751,9 @@ public class Parser {
       lexer.next();
       if (lexer.peek() == Lexer.IDENTIFIER && ! lexer.seenLineFeed()) {
         block.doBreak(lexer.getId());
-	lexer.next();
+        lexer.next();
       } else
-	block.doBreak();
+        block.doBreak();
       parseStatementEnd();
       break;
 
@@ -761,7 +761,7 @@ public class Parser {
       lexer.next();
       if (lexer.peek() == Lexer.IDENTIFIER && ! lexer.seenLineFeed()) {
         block.doContinue(lexer.getId());
-	lexer.next();
+        lexer.next();
       } else
         block.doContinue();
       
@@ -772,10 +772,10 @@ public class Parser {
       lexer.next();
 
       if (lexer.peek() == ';' || lexer.peek() == '}' || 
-	  lexer.seenLineFeed()) {
+          lexer.seenLineFeed()) {
         block.doReturn();
       } else {
-	block.doReturn(parseExpression(PREC_MAX, true));
+        block.doReturn(parseExpression(PREC_MAX, true));
       }
       
       parseStatementEnd();
@@ -826,7 +826,7 @@ public class Parser {
       lexer.next();
       parseBlock(false);
       if (lexer.next() != '}')
-	throw expect("`}'");
+        throw expect("`}'");
       break;
 
     default:
@@ -839,7 +839,7 @@ public class Parser {
     if (lexer.peek() == ';')
       lexer.next();
     else if (lexer.peek() == '}' ||
-	     lexer.peek() == Lexer.EOF || lexer.seenLineFeed()) {
+             lexer.peek() == Lexer.EOF || lexer.seenLineFeed()) {
     } else {
       throw expect("`;'");
     }
@@ -921,13 +921,13 @@ public class Parser {
       lexer.next();
 
       if (lexer.next() != '(')
-	throw expect("`('");
+        throw expect("`('");
 
       block.startIf(parseBooleanExpression(PREC_MAX), ! isFirst);
       isFirst = false;
 
       if (lexer.next() != ')')
-	throw expect("`)'");
+        throw expect("`)'");
 
       parseStatement();
 
@@ -1153,7 +1153,7 @@ public class Parser {
       lexer.next();
     
       if (lexer.next() != Lexer.IDENTIFIER)
-	throw expect(L.l("identifier"));
+        throw expect(L.l("identifier"));
 
       ESId name = lexer.getId();
 
@@ -1168,7 +1168,7 @@ public class Parser {
       block.defVar(name, type);
       
       if (lexer.peek() == '=') {
-	lexer.next();
+        lexer.next();
 
         Expr var = block.newVar(name, type);
         Expr value = parseExpression(Parser.PREC_ASSIGN + 1, true);
@@ -1237,37 +1237,37 @@ public class Parser {
       block.isDead = false;
     
       if (hasCatchall)
-	throw error(L.l("catch () must be last catch clause"));
+        throw error(L.l("catch () must be last catch clause"));
 
       lexer.next();
       if (lexer.next() != '(')
-	throw expect("`('");
+        throw expect("`('");
 
       String exceptionClass = "";
       while (lexer.peek() == Lexer.IDENTIFIER) {
-	lexer.next();
-	exceptionClass = exceptionClass + lexer.getText();
+        lexer.next();
+        exceptionClass = exceptionClass + lexer.getText();
 
-	if (lexer.peek() != '.')
-	  break;
+        if (lexer.peek() != '.')
+          break;
 
-	lexer.next();
-	exceptionClass = exceptionClass + ".";
-	if (lexer.peek() != Lexer.IDENTIFIER)
-	  throw expect(L.l("identifier"));
+        lexer.next();
+        exceptionClass = exceptionClass + ".";
+        if (lexer.peek() != Lexer.IDENTIFIER)
+          throw expect(L.l("identifier"));
       }
 
       ESId name = null;
       if (lexer.peek() == Lexer.IDENTIFIER) {
-	name = lexer.getId();
-	lexer.next();
+        name = lexer.getId();
+        lexer.next();
       }
 
       if (lexer.next() != ')') {
-	if (exceptionClass.equals(""))
-	  throw expect(L.l("identifier"));
-	else
-	  throw expect("`)'");
+        if (exceptionClass.equals(""))
+          throw expect(L.l("identifier"));
+        else
+          throw expect("`)'");
       }
 
       if (name == null) {
@@ -1398,14 +1398,14 @@ public class Parser {
       }
 
       if (lexer.peek() != Lexer.IDENTIFIER)
-	throw expect(L.l("identifier"));
+        throw expect(L.l("identifier"));
 
       path.append(lexer.getText());
 
       lexer.next();
 
       if (lexer.peek() != '.')
-	break;
+        break;
 
       lexer.next();
       path.append('.');
@@ -1507,10 +1507,10 @@ public class Parser {
 
       switch (lexer.peek()) {
       case '=':
-	if (op != 0 && lex != ',')
-	  throw error(L.l("illegal left hand side of assignment"));
-	if (isBool)
-	  throw error(L.l("assignment used as boolean needs parentheses"));
+        if (op != 0 && lex != ',')
+          throw error(L.l("illegal left hand side of assignment"));
+        if (isBool)
+          throw error(L.l("assignment used as boolean needs parentheses"));
 
       case Lexer.BIN_OP:
         // careful with and/or for unassigned local variables
@@ -1520,28 +1520,28 @@ public class Parser {
       case ',':
       case Lexer.BANDU_OP:
       case '?': 
-	nextLex = lexer.peek();
-	nextOp = lexer.getOp();
-	nextPrec = lexer.getPrecedence();
-	isRightAssoc = lexer.isRightAssoc();
-	doLookahead = true;
-	break;
+        nextLex = lexer.peek();
+        nextOp = lexer.getOp();
+        nextPrec = lexer.getPrecedence();
+        isRightAssoc = lexer.isRightAssoc();
+        doLookahead = true;
+        break;
 
       default:
-	return op != 0 ? lexpr.binaryOp(lex, op, rexpr) : lexpr;
+        return op != 0 ? lexpr.binaryOp(lex, op, rexpr) : lexpr;
       }
 
       if (nextPrec >= prevPrec) {
-	return op != 0 ? lexpr.binaryOp(lex, op, rexpr) : lexpr;
+        return op != 0 ? lexpr.binaryOp(lex, op, rexpr) : lexpr;
       }
       else if (prec == 0) {
       }
       else if (nextPrec < prec) {
-	rexpr = parseExprRec(rexpr, prec, isBool, isTop);
-	continue;
+        rexpr = parseExprRec(rexpr, prec, isBool, isTop);
+        continue;
       }
       else {
-	lexpr = op != 0 ? lexpr.binaryOp(lex, op, rexpr) : lexpr;
+        lexpr = op != 0 ? lexpr.binaryOp(lex, op, rexpr) : lexpr;
       }
 
       prec = nextPrec;
@@ -1549,25 +1549,25 @@ public class Parser {
       op = nextOp;
       
       if (doLookahead)
-	lexer.next();
+        lexer.next();
 
       if (isRightAssoc) {
-	/* XXX: is this the right thing to do? + 1 */
-	rexpr = parseExpression(prec + 1, isTop);
+        /* XXX: is this the right thing to do? + 1 */
+        rexpr = parseExpression(prec + 1, isTop);
       }
       else if (op == '?') {
         function.setVars();
-	Expr mexpr = parseExpression(Parser.PREC_ASSIGN + 1);
-	if (lexer.peek() != ':')
-	  throw expect("`:'");
-	lexer.next();
-	rexpr = parseExpression(Parser.PREC_ASSIGN + 1, isTop);
+        Expr mexpr = parseExpression(Parser.PREC_ASSIGN + 1);
+        if (lexer.peek() != ':')
+          throw expect("`:'");
+        lexer.next();
+        rexpr = parseExpression(Parser.PREC_ASSIGN + 1, isTop);
 
-	lexpr = lexpr.conditional(mexpr, rexpr);
-	op = 0;
+        lexpr = lexpr.conditional(mexpr, rexpr);
+        op = 0;
       }
       else
-	rexpr = parseTerm(isTop);
+        rexpr = parseTerm(isTop);
     }
   }
 
@@ -1653,7 +1653,7 @@ public class Parser {
       /*
       return parseTermTail(block.newRegexp(lexer.getLiteral(),
                                           lexer.getFlags()),
-			   hasNew, isTop);
+                           hasNew, isTop);
       */
       throw new UnsupportedOperationException();
     
@@ -1666,31 +1666,31 @@ public class Parser {
 
     case Lexer.EVAL:
       if (lexer.peek() != '(')
-	throw expect("`('");
+        throw expect("`('");
       function.setArguments();
       return parseTermTail(block.newVar(ESId.intern("eval")), hasNew, false);
 
     case '(':
       expr = parseExpression(PREC_MAX);
       if (lexer.next() != ')')
-	throw expect("`)'");
+        throw expect("`)'");
       return parseTermTail(expr, hasNew, isTop);
 
     case '{':
       expr = parseObjectLiteral(-1);
       if (lexer.next() != '}')
-	throw expect("`}'");
+        throw expect("`}'");
       return parseTermTail(expr, hasNew, isTop);
 
     case '[':
       expr = parseArrayLiteral(-1);
       if (lexer.next() != ']')
-	throw expect("`]'");
+        throw expect("`]'");
       return parseTermTail(expr, hasNew, isTop);
 
     case Lexer.FUNCTION:
       Function newFun = parseFunction();
-	    
+
       //function.addFunction(newFun);
       function.addVariable(block, newFun.id, null);
       block.newVar(newFun.id).getVar().setType(Expr.TYPE_ES);
@@ -1700,37 +1700,37 @@ public class Parser {
     case Lexer.HASH_DEF:
       switch (lexer.peek()) {
       case '{':
-	lexer.next();
-	expr = parseObjectLiteral(lexer.intValue);
-	if (lexer.next() != '}')
-	  throw expect("`}'");
-	return parseTermTail(expr, hasNew, isTop);
+        lexer.next();
+        expr = parseObjectLiteral(lexer.intValue);
+        if (lexer.next() != '}')
+          throw expect("`}'");
+        return parseTermTail(expr, hasNew, isTop);
 
       case '[':
-	lexer.next();
-	expr = parseArrayLiteral(lexer.intValue);
-	if (lexer.next() != ']')
-	  throw expect("`]'");
-	return parseTermTail(expr, hasNew, isTop);
+        lexer.next();
+        expr = parseArrayLiteral(lexer.intValue);
+        if (lexer.next() != ']')
+          throw expect("`]'");
+        return parseTermTail(expr, hasNew, isTop);
 
       default:
         /* XXX:
-	expr = parseLhs(hasNew, isTop);
-	int var = code.newVar();
-	code.store(var);
-	hashes.add(lexer.intValue, var);
-	code.load(var);
+        expr = parseLhs(hasNew, isTop);
+        int var = code.newVar();
+        code.store(var);
+        hashes.add(lexer.intValue, var);
+        code.load(var);
         */
-	return expr;
+        return expr;
       }
       /*
     case Lexer.HASH_REF:
       if (hashes.size() <= lexer.intValue ||
-	  hashes.get(lexer.intValue) <= 0)
-	throw error("bad sharp reference at " + getToken());
+          hashes.get(lexer.intValue) <= 0)
+        throw error("bad sharp reference at " + getToken());
 
       return parseTermTail(code.load(hashes.get(lexer.intValue)), 
-			   hasNew, isTop);
+                           hasNew, isTop);
       */
     default:
       throw expect(L.l("term"));
@@ -1754,36 +1754,36 @@ public class Parser {
     while (true) {
       switch (lexer.peek()) {
       case '.':
-	lexer.next();
-	if (lexer.next() != Lexer.IDENTIFIER)
-	  throw expect(L.l("property name"));
+        lexer.next();
+        if (lexer.next() != Lexer.IDENTIFIER)
+          throw expect(L.l("property name"));
 
-	term = term.fieldReference(lexer.getId());
-	break;
+        term = term.fieldReference(lexer.getId());
+        break;
 
       case '(':
-	if (isTop && lexer.seenLineFeed())
-	  return term;
+        if (isTop && lexer.seenLineFeed())
+          return term;
 
-	lexer.next();
-	
-	int n = 0;
+        lexer.next();
+
+        int n = 0;
         CallExpr call;
         if (hasNew)
           call = term.startNew();
         else
           call = term.startCall();
         
-	while (lexer.peek() != ')') {
-	  if (n != 0 && lexer.peek() != ',')
-	    throw expect("`,'");
-	  else if (n != 0)
-	    lexer.next();
+        while (lexer.peek() != ')') {
+          if (n != 0 && lexer.peek() != ',')
+            throw expect("`,'");
+          else if (n != 0)
+            lexer.next();
 
-	  call.addCallParam(parseExpression(PREC_COMMA));
-	  n++;
-	}
-	lexer.next();
+          call.addCallParam(parseExpression(PREC_COMMA));
+          n++;
+        }
+        lexer.next();
 
         if (hasNew)
           return call;
@@ -1792,37 +1792,37 @@ public class Parser {
         break;
 
       case '[':
-	if (isTop && lexer.seenLineFeed())
-	  return term;
+        if (isTop && lexer.seenLineFeed())
+          return term;
 
-	lexer.next();
-	term = term.fieldReference(parseExpression(PREC_MAX));
+        lexer.next();
+        term = term.fieldReference(parseExpression(PREC_MAX));
 
-	if (lexer.next() != ']')
-	  throw expect("`]'");
-	break;
+        if (lexer.next() != ']')
+          throw expect("`]'");
+        break;
 
       case Lexer.POSTFIX:
-	if (hasNew)
-	  return term.startNew();
+        if (hasNew)
+          return term.startNew();
 
-	if (lexer.seenLineFeed())
-	  return term;
+        if (lexer.seenLineFeed())
+          return term;
 
-	term = term.postfix(lexer.getOp());
+        term = term.postfix(lexer.getOp());
 
-	lexer.next();
-	break;
+        lexer.next();
+        break;
 
       case '@':
-	lexer.next();
+        lexer.next();
 
-	term = term.cast(parseType());
-	break;
+        term = term.cast(parseType());
+        break;
 
       default:
-	if (hasNew)
-	  return term.startNew();
+        if (hasNew)
+          return term.startNew();
         else
           return term;
       }
@@ -1837,7 +1837,7 @@ public class Parser {
     /*
     if (hash >= 0) {
       if (hashes.size() <= hash)
-	hashes.setLength(hash + 1);
+        hashes.setLength(hash + 1);
       hashes.add(hash, var);
     }
     */
@@ -1849,22 +1849,22 @@ public class Parser {
     }
 
     while (lexer.peek() == Lexer.LITERAL ||
-	   lexer.peek() == Lexer.IDENTIFIER) {
+           lexer.peek() == Lexer.IDENTIFIER) {
       ESId id;
 
       if (lexer.next() == Lexer.LITERAL)
         id = ESId.intern(lexer.literal.toString());
       else
-	id = lexer.getId();
+        id = lexer.getId();
 
       if (lexer.next() != ':')
-	throw expect("`:'");
+        throw expect("`:'");
 
       call.addCallParam(block.newLiteral(id));
       call.addCallParam(parseExpression(PREC_COMMA));
 
       if (lexer.peek() != ',')
-	break;
+        break;
       lexer.next();
     }
 
@@ -1881,10 +1881,10 @@ public class Parser {
     boolean isFirst = true;
     while (lexer.peek() != ']') {
       if (lexer.peek() == ',') {
-	lexer.next();
+        lexer.next();
         call.addCallParam(block.newLiteral(ESBase.esUndefined));
         isFirst = false;
-	continue;
+        continue;
       }
 
       Expr value = parseExpression(PREC_COMMA);
@@ -1894,7 +1894,7 @@ public class Parser {
 
       if (lexer.peek() != ',') {
         call.addCallParam(value);
-	break;
+        break;
       }
       
       lexer.next();

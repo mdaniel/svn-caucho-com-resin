@@ -77,22 +77,22 @@ public class ThrottleFilter implements Filter {
       int count = _throttleCache.get(ip);
 
       if (count <= 0)
-	count = 0;
+        count = 0;
 
       if (count < _maxConcurrentRequests) {
-	isOverflow = false;
-	_throttleCache.put(ip, count + 1);
+        isOverflow = false;
+        _throttleCache.put(ip, count + 1);
       }
       else
-	isOverflow = true;
+        isOverflow = true;
     }
 
     if (isOverflow) {
       log.info(L.l("'{0}' has too many concurrent requests -- throttling.",
-		   ip));
+                   ip));
 
       if (response instanceof HttpServletResponse)
-	((HttpServletResponse) response).sendError(503);
+        ((HttpServletResponse) response).sendError(503);
       return;
     }
 
@@ -100,12 +100,12 @@ public class ThrottleFilter implements Filter {
       nextFilter.doFilter(request, response);
     } finally {
       synchronized (this) {
-	int count = _throttleCache.get(ip);
+        int count = _throttleCache.get(ip);
 
-	if (count <= 1)
-	  _throttleCache.remove(ip);
-	else
-	  _throttleCache.put(ip, count - 1);
+        if (count <= 1)
+          _throttleCache.remove(ip);
+        else
+          _throttleCache.put(ip, count - 1);
       }
     }
   }

@@ -48,8 +48,8 @@ public class StringValueExpression extends AbstractValueExpression
   private Class _expectedType;
 
   public StringValueExpression(Expr expr,
-			       String expressionString,
-			       Class expectedType)
+                               String expressionString,
+                               Class expectedType)
   {
     super(expr, expressionString);
 
@@ -57,7 +57,7 @@ public class StringValueExpression extends AbstractValueExpression
   }
 
   public StringValueExpression(Expr expr,
-			       String expressionString)
+                               String expressionString)
   {
     super(expr, expressionString);
   }
@@ -81,7 +81,7 @@ public class StringValueExpression extends AbstractValueExpression
 
   public Class<?> getType(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return String.class;
   }
@@ -89,7 +89,7 @@ public class StringValueExpression extends AbstractValueExpression
   @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return _expr.evalString(context);
   }

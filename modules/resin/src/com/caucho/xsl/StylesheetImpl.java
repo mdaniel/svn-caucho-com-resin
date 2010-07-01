@@ -125,9 +125,9 @@ public class StylesheetImpl extends AbstractStylesheet  {
   }
 
   protected void setSpaces(HashMap<String,String> preserve,
-			   HashMap<String,String> preservePrefix,
+                           HashMap<String,String> preservePrefix,
                            HashMap<String,String> strip,
-			   HashMap<String,String> stripPrefix)
+                           HashMap<String,String> stripPrefix)
   {
     _preserve = preserve;
     _strip = strip;
@@ -340,8 +340,8 @@ public class StylesheetImpl extends AbstractStylesheet  {
       Template subtemplate = templateList[i];
 
       if (min <= subtemplate.maxImportance &&
-	  subtemplate.maxImportance <= max &&
-	  subtemplate.pattern.match(node, env)) {
+          subtemplate.maxImportance <= max &&
+          subtemplate.pattern.match(node, env)) {
         return subtemplate;
       }
     }
@@ -366,7 +366,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
     case Node.CDATA_SECTION_NODE:
       if (_generateLocation && node instanceof QAbstractNode)
         out.setLocation(((QAbstractNode) node).getBaseURI(),
-			((QAbstractNode) node).getFilename(),
+                        ((QAbstractNode) node).getFilename(),
                         ((QAbstractNode) node).getLine());
       String value = node.getNodeValue();
       out.print(value);
@@ -406,16 +406,16 @@ public class StylesheetImpl extends AbstractStylesheet  {
     switch (node.getNodeType()) {
     case Node.ELEMENT_NODE:
       for (Node child = node.getFirstChild();
-	   child != null;
-	   child = child.getNextSibling()) {
-	switch (child.getNodeType()) {
-	case Node.ELEMENT_NODE:
-	case Node.TEXT_NODE:
-	case Node.CDATA_SECTION_NODE:
-	case Node.ENTITY_REFERENCE_NODE:
-	  nodeValue(cb, child);
-	  break;
-	}
+           child != null;
+           child = child.getNextSibling()) {
+        switch (child.getNodeType()) {
+        case Node.ELEMENT_NODE:
+        case Node.TEXT_NODE:
+        case Node.CDATA_SECTION_NODE:
+        case Node.ENTITY_REFERENCE_NODE:
+          nodeValue(cb, child);
+          break;
+        }
       }
       break;
 
@@ -443,7 +443,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
   }
 
   protected ArrayList xslSort(Node node, Env env, AbstractPattern pattern,
-			      Sort []sortList)
+                              Sort []sortList)
     throws Exception
   {
     ArrayList<Node> sortKeys = new ArrayList<Node>();
@@ -494,11 +494,11 @@ public class StylesheetImpl extends AbstractStylesheet  {
       String lang = null;
 
       if (langExpr != null) {
-	lang = langExpr.evalString(node, env);
+        lang = langExpr.evalString(node, env);
       }
 
       if (lang != null)
-	comparatorList[i] = getComparator(lang);
+        comparatorList[i] = getComparator(lang);
     }
 
     int []caseOrderList = new int[sortList.length];
@@ -506,7 +506,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
     for (int i = 0; i < caseOrderList.length; i++) {
       Expr caseOrder = sortList[i].getCaseOrder();
       if (caseOrder == null)
-	caseOrderList[i] = Sort.NO_CASE_ORDER;
+        caseOrderList[i] = Sort.NO_CASE_ORDER;
       else if (caseOrder.evalBoolean(node, env))
         caseOrderList[i] = Sort.UPPER_FIRST;
       else
@@ -514,7 +514,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
     }
 
     sort(values, sortList, comparatorList, ascendingList, caseOrderList,
-	 0, map.length, map, workMap);
+         0, map.length, map, workMap);
 
     ArrayList sortedKeys = new ArrayList();
 
@@ -551,15 +551,15 @@ public class StylesheetImpl extends AbstractStylesheet  {
       int q = lang.indexOf(p + 1, '-');
 
       if (q < 0) {
-	String country = lang.substring(p + 1);
+        String country = lang.substring(p + 1);
 
-	locale = new Locale(language, country);
+        locale = new Locale(language, country);
       }
       else {
-	String country = lang.substring(p + 1, q);
-	String variant = lang.substring(q);
+        String country = lang.substring(p + 1, q);
+        String variant = lang.substring(q);
 
-	locale = new Locale(language, country, variant);
+        locale = new Locale(language, country, variant);
       }
     }
 
@@ -573,9 +573,9 @@ public class StylesheetImpl extends AbstractStylesheet  {
    * @param tail the tail of the subsequence
    */
   private void sort(Object []values, Sort []sortList,
-		    Comparator []comparatorList,
-		    boolean []ascendingList,
-		    int []caseOrder,
+                    Comparator []comparatorList,
+                    boolean []ascendingList,
+                    int []caseOrder,
                     int head, int tail,
                     int map[], int []workMap)
   {
@@ -589,7 +589,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
       int b = map[head + 1];
 
       if (lessThan(values, sortList, comparatorList,
-		   ascendingList, caseOrder, b, a)) {
+                   ascendingList, caseOrder, b, a)) {
         map[head] = b;
         map[head + 1] = a;
       }
@@ -602,7 +602,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
       int c = map[head + 2];
       
       if (lessThan(values, sortList, comparatorList,
-		   ascendingList, caseOrder, b, a)) {
+                   ascendingList, caseOrder, b, a)) {
         map[head] = b;
         map[head + 1] = a;
         a = map[head];
@@ -610,10 +610,10 @@ public class StylesheetImpl extends AbstractStylesheet  {
       }
 
       if (! lessThan(values, sortList, comparatorList,
-		     ascendingList, caseOrder, c, b)) {
+                     ascendingList, caseOrder, c, b)) {
       }
       else if (lessThan(values, sortList, comparatorList,
-			ascendingList, caseOrder, c, a)) {
+                        ascendingList, caseOrder, c, a)) {
         map[head] = c;
         map[head + 1] = a;
         map[head + 2] = b;
@@ -633,7 +633,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
     // values greater than the pivot value are put in the work map
     for (int i = tail - 1; i >= head; i--) {
       if (lessThan(values, sortList, comparatorList,
-		   ascendingList, caseOrder, pivot, map[i])) {
+                   ascendingList, caseOrder, pivot, map[i])) {
         workMap[--top] = map[i];
         map[i] = -1;
       }
@@ -644,7 +644,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
       // values greater than the pivot value are put in the work map
       for (int i = tail - 1; i >= head; i--) {
         if (! lessThan(values, sortList, comparatorList,
-		       ascendingList, caseOrder, map[i], pivot)) {
+                       ascendingList, caseOrder, map[i], pivot)) {
           workMap[--top] = map[i];
           map[i] = -1;
         }
@@ -669,9 +669,9 @@ public class StylesheetImpl extends AbstractStylesheet  {
       map[i] = workMap[i];
 
     sort(values, sortList, comparatorList, ascendingList, caseOrder,
-	 head, center, map, workMap);
+         head, center, map, workMap);
     sort(values, sortList, comparatorList, ascendingList, caseOrder,
-	 center, tail, map, workMap);
+         center, tail, map, workMap);
   }
 
   /**
@@ -691,9 +691,9 @@ public class StylesheetImpl extends AbstractStylesheet  {
    */
   private boolean lessThan(Object []values,
                            Sort []sortList,
-			   Comparator []comparatorList,
-			   boolean []ascendingList,
-			   int []caseOrder,
+                           Comparator []comparatorList,
+                           boolean []ascendingList,
+                           int []caseOrder,
                            int ai, int bi)
   {
     int len = sortList.length;
@@ -703,20 +703,20 @@ public class StylesheetImpl extends AbstractStylesheet  {
       Object b = values[len * bi + i];
 
       int cmp = sortList[i].cmp(a, b, comparatorList[i],
-				ascendingList[i], caseOrder[i]);
+                                ascendingList[i], caseOrder[i]);
       if (cmp < 0)
-	return true;
+        return true;
       else if (cmp > 0)
-	return false;
+        return false;
     }
 
     return false;
   }
 
   public void singleNumber(XslWriter out, Node node, Env env,
-			   AbstractPattern countPattern,
-			   AbstractPattern fromPattern,
-			   XslNumberFormat format)
+                           AbstractPattern countPattern,
+                           AbstractPattern fromPattern,
+                           XslNumberFormat format)
     throws Exception
   {
     if (countPattern == null)
@@ -725,11 +725,11 @@ public class StylesheetImpl extends AbstractStylesheet  {
     IntArray numbers = new IntArray();
     for (; node != null; node = node.getParentNode()) {
       if (countPattern.match(node, env)) {
-	numbers.add(countPreviousSiblings(node, env, countPattern));
-	break;
+        numbers.add(countPreviousSiblings(node, env, countPattern));
+        break;
       }
       if (fromPattern != null && fromPattern.match(node, env))
-	break;
+        break;
     }
     if (fromPattern != null && ! findFromAncestor(node, env, fromPattern))  
       numbers.clear();
@@ -738,9 +738,9 @@ public class StylesheetImpl extends AbstractStylesheet  {
   }
 
   public void multiNumber(XslWriter out, Node node, Env env,
-			  AbstractPattern countPattern,
-			  AbstractPattern fromPattern,
-			  XslNumberFormat format)
+                          AbstractPattern countPattern,
+                          AbstractPattern fromPattern,
+                          XslNumberFormat format)
     throws Exception
   {
     if (countPattern == null)
@@ -749,10 +749,10 @@ public class StylesheetImpl extends AbstractStylesheet  {
     IntArray numbers = new IntArray();
     for (; node != null; node = node.getParentNode()) {
       if (countPattern.match(node, env))
-	numbers.add(countPreviousSiblings(node, env, countPattern));
+        numbers.add(countPreviousSiblings(node, env, countPattern));
 
       if (fromPattern != null && fromPattern.match(node, env))
-	break;
+        break;
     }
     if (fromPattern != null && ! findFromAncestor(node, env, fromPattern))  
       numbers.clear();
@@ -761,9 +761,9 @@ public class StylesheetImpl extends AbstractStylesheet  {
   }
 
   public void anyNumber(XslWriter out, Node node, Env env,
-			AbstractPattern countPattern,
-			AbstractPattern fromPattern,
-			XslNumberFormat format)
+                        AbstractPattern countPattern,
+                        AbstractPattern fromPattern,
+                        XslNumberFormat format)
     throws Exception
   {
     if (countPattern == null)
@@ -773,10 +773,10 @@ public class StylesheetImpl extends AbstractStylesheet  {
     int count = 0;
     for (; node != null; node = XmlUtil.getPrevious(node)) {
       if (countPattern.match(node, env))
-	count++;
+        count++;
 
       if (fromPattern != null && fromPattern.match(node, env))
-	break;
+        break;
     }
     numbers.add(count);
     if (fromPattern != null && ! findFromAncestor(node, env, fromPattern))
@@ -786,7 +786,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
   }
 
   public void exprNumber(XslWriter out, Node node, Env env, Expr expr,
-			 XslNumberFormat format)
+                         XslNumberFormat format)
     throws Exception
   {
     IntArray numbers = new IntArray();
@@ -799,11 +799,11 @@ public class StylesheetImpl extends AbstractStylesheet  {
   {
     int count = 1;
     for (node = node.getPreviousSibling();
-	 node != null;
-	 node = node.getPreviousSibling()) {
+         node != null;
+         node = node.getPreviousSibling()) {
       if (node.getNodeType() == node.ELEMENT_NODE &&
-	  node.getNodeName().equals(name))
-	count++;
+          node.getNodeName().equals(name))
+        count++;
     }
 
     return count;
@@ -814,10 +814,10 @@ public class StylesheetImpl extends AbstractStylesheet  {
   {
     int count = 1;
     for (node = node.getPreviousSibling();
-	 node != null;
-	 node = node.getPreviousSibling()) {
+         node != null;
+         node = node.getPreviousSibling()) {
       if (pattern.match(node, env))
-	count++;
+        count++;
     }
 
     return count;
@@ -828,7 +828,7 @@ public class StylesheetImpl extends AbstractStylesheet  {
   {
     for (; node != null; node = node.getParentNode())
       if (pattern.match(node, env))
-	return true;
+        return true;
 
     return false;
   }
@@ -844,24 +844,24 @@ public class StylesheetImpl extends AbstractStylesheet  {
       Node next = child.getNextSibling();
       
       if (child instanceof Element) {
-	stripSpaces(child);
+        stripSpaces(child);
       }
       else if (child instanceof Text) {
-	String data = ((Text) child).getData();
+        String data = ((Text) child).getData();
 
-	boolean hasContent = false;
-	for (int i = data.length() - 1; i >= 0; i--) {
-	  char ch = data.charAt(i);
+        boolean hasContent = false;
+        for (int i = data.length() - 1; i >= 0; i--) {
+          char ch = data.charAt(i);
 
-	  if (! XmlChar.isWhitespace(ch)) {
-	    hasContent = true;
-	    break;
-	  }
-	}
+          if (! XmlChar.isWhitespace(ch)) {
+            hasContent = true;
+            break;
+          }
+        }
 
-	if (! hasContent && isStripSpaces(node)) {
-	  node.removeChild(child);
-	}
+        if (! hasContent && isStripSpaces(node)) {
+          node.removeChild(child);
+        }
       }
 
       child = next;
@@ -877,12 +877,12 @@ public class StylesheetImpl extends AbstractStylesheet  {
     
     for (Node ptr = node; ptr != null; ptr = ptr.getParentNode()) {
       if (ptr instanceof Element) {
-	Element elt = (Element) ptr;
-	String space = elt.getAttribute("xml:space");
-	if (space != null && space.equals("preserve"))
-	  return false;
-	else if (space != null)
-	  break;
+        Element elt = (Element) ptr;
+        String space = elt.getAttribute("xml:space");
+        if (space != null && space.equals("preserve"))
+          return false;
+        else if (space != null)
+          break;
       }
     }
     String name = node.getNodeName();

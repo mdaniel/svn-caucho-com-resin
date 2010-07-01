@@ -84,8 +84,8 @@ public interface Repository {
    */
   public Session login(Credentials credentials, String workspaceName)
     throws LoginException,
-	   NoSuchWorkspaceException,
-	   RepositoryException;
+           NoSuchWorkspaceException,
+           RepositoryException;
 
   /**
    * Opens a new session with the default workspace.
@@ -103,13 +103,13 @@ public interface Repository {
    */
   public Session login(String workspaceName)
     throws LoginException,
-	   NoSuchWorkspaceException,
-	   RepositoryException;
+           NoSuchWorkspaceException,
+           RepositoryException;
 
   /**
    * Opens a new session with the default workspace and security credentials.
    */
   public Session login()
     throws LoginException,
-	   RepositoryException;
+           RepositoryException;
 }

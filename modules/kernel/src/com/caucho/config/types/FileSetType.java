@@ -142,27 +142,27 @@ public class FileSetType {
   {
     if (path.isDirectory()) {
       try {
-	String []list = path.list();
+        String []list = path.list();
 
-	for (int i = 0; i < list.length; i++)
-	  getPaths(paths, path.lookup(list[i]), prefix);
+        for (int i = 0; i < list.length; i++)
+          getPaths(paths, path.lookup(list[i]), prefix);
       } catch (IOException e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
     else if (path.exists()) {
       // server/2438 - logging on unreadable
       //  if (path.canRead()) {
       if (isMatch(path, prefix)) {
-	String suffix = "";
-	String fullPath = path.getPath();
+        String suffix = "";
+        String fullPath = path.getPath();
 
-	if (prefix.length() < fullPath.length())
-	  suffix = path.getPath().substring(prefix.length());
+        if (prefix.length() < fullPath.length())
+          suffix = path.getPath().substring(prefix.length());
 
-	path.setUserPath(_userPathPrefix + suffix);
+        path.setUserPath(_userPathPrefix + suffix);
 
-	paths.add(path);
+        paths.add(path);
       }
     }
   }
@@ -182,7 +182,7 @@ public class FileSetType {
       PathPatternType pattern = _excludeList.get(i);
 
       if (pattern.isMatch(suffix))
-	return false;
+        return false;
     }
 
     if (_includeList == null)
@@ -192,7 +192,7 @@ public class FileSetType {
       PathPatternType pattern = _includeList.get(i);
 
       if (pattern.isMatch(suffix))
-	return true;
+        return true;
     }
 
     return false;

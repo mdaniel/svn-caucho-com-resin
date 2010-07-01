@@ -58,7 +58,7 @@ public class Functions {
       _expr = expr;
 
       if (expr == null)
-	throw new XPathParseException(L.l("fn:base-uri requires a single argument"));
+        throw new XPathParseException(L.l("fn:base-uri requires a single argument"));
     }
 
     /**

@@ -104,8 +104,8 @@ public class ClassType extends BaseType
       return false;
     else if (type.getParameters().length > 0) {
       for (BaseType param : type.getParameters()) {
-	if (! OBJECT_TYPE.isParamAssignableFrom(param))
-	  return false;
+        if (! OBJECT_TYPE.isParamAssignableFrom(param))
+          return false;
       }
 
       return true;

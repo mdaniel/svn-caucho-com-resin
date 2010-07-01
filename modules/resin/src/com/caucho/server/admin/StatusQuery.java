@@ -47,8 +47,8 @@ public class StatusQuery
   }
 
   public StatusQuery(String tag,
-		     String status,
-		     String message)
+                     String status,
+                     String message)
   {
     _tag = tag;
     _status = status;

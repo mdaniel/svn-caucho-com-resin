@@ -36,8 +36,8 @@ class NumberExpr extends Expr {
     throws SQLException
   {
     if (lexeme.indexOf('.') >= 0 ||
-	lexeme.indexOf('e') >= 0 ||
-	lexeme.indexOf('E') >= 0)
+        lexeme.indexOf('e') >= 0 ||
+        lexeme.indexOf('E') >= 0)
       return new DoubleExpr(Double.parseDouble(lexeme));
     else {
       long value = Long.parseLong(lexeme);

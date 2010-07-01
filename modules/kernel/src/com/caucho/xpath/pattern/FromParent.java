@@ -57,14 +57,14 @@ public class FromParent extends Axis {
       return false;
 
     if (node.getNodeType() != node.ELEMENT_NODE &&
-	node.getNodeType() != node.DOCUMENT_NODE)
+        node.getNodeType() != node.DOCUMENT_NODE)
       return false;
 
     for (node = node.getFirstChild();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       if (_parent.match(node, env))
-	return true;
+        return true;
     }
     
     return false;

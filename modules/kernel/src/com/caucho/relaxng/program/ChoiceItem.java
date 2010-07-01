@@ -103,7 +103,7 @@ public class ChoiceItem extends Item {
       }
       
       if (item instanceof GroupItem
-	  && subItem instanceof GroupItem) {
+          && subItem instanceof GroupItem) {
         GroupItem group1 = (GroupItem) item;
         GroupItem group2 = (GroupItem) subItem;
 
@@ -128,7 +128,7 @@ public class ChoiceItem extends Item {
     else if (_allowEmpty && _items.size() == 0)
       return EmptyItem.create();
     else if (_items.size() == 1
-	     && (! _allowEmpty || _items.get(0).allowEmpty()))
+             && (! _allowEmpty || _items.get(0).allowEmpty()))
       return _items.get(0);
     else
       return this;
@@ -473,20 +473,20 @@ public class ChoiceItem extends Item {
     for (int i = 0; i < _items.size(); i++) {
       Item item = _items.get(i);
       if (! item.isSimpleSyntax())
-	isSimple = false;
+        isSimple = false;
 
       if (i == 0) {
-	if (! isSimple)
-	  cb.append(" ");
+        if (! isSimple)
+          cb.append(" ");
       }
       else if (isSimple) {
-	cb.append(" | ");
+        cb.append(" | ");
       }
       else {
-	addSyntaxNewline(cb, depth);
-	cb.append("| ");
+        addSyntaxNewline(cb, depth);
+        cb.append("| ");
       }
-	
+
       cb.append(item.toSyntaxDescription(depth + 2));
     }
 

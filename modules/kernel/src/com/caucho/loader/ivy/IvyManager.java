@@ -111,7 +111,7 @@ public class IvyManager {
   {
     for (IvyModule module : _moduleList) {
       if (ivyFile.equals(module.getIvyPath()))
-	return module;
+        return module;
     }
 
     return null;
@@ -125,22 +125,22 @@ public class IvyManager {
       ArrayList<IvyModule> list = new ArrayList<IvyModule>(_moduleList);
     
       for (IvyModule module : list) {
-	for (IvyDependency depend : module.getDependencyList()) {
-	  resolve(depend);
-	}
+        for (IvyDependency depend : module.getDependencyList()) {
+          resolve(depend);
+        }
       }
 
       ArrayList<IvyDependency> depList
-	= new ArrayList<IvyDependency>(_dependencyList);
+        = new ArrayList<IvyDependency>(_dependencyList);
       for (IvyDependency dependency : depList) {
-	for (IvyCache cache : _cacheList) {
-	  Path path = dependency.resolve(cache);
+        for (IvyCache cache : _cacheList) {
+          Path path = dependency.resolve(cache);
 
-	  if (path != null && path.canRead()) {
-	    addJar(path);
-	    break;
-	  }
-	}
+          if (path != null && path.canRead()) {
+            addJar(path);
+            break;
+          }
+        }
       }
     }
 
@@ -165,13 +165,13 @@ public class IvyManager {
       IvyDependency merge = dep.merge(dependency);
 
       if (merge != null) {
-	_dependencyList.set(i, merge);
-	return merge;
+        _dependencyList.set(i, merge);
+        return merge;
       }
     }
 
     IvyModuleKey key = new IvyModuleKey(dependency.getOrg(),
-					dependency.getName());
+                                        dependency.getName());
 
     String []versions = getVersions(dependency);
 
@@ -228,9 +228,9 @@ public class IvyManager {
     public boolean equals(Object o)
     {
       if (this == o)
-	return true;
+        return true;
       else if (! (o instanceof IvyModuleKey))
-	return false;
+        return false;
 
       IvyModuleKey key = (IvyModuleKey) o;
 

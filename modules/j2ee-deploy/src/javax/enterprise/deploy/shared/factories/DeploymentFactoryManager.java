@@ -82,8 +82,8 @@ public final class DeploymentFactoryManager {
    * Returns the matchnig manager.
    */
   public DeploymentManager getDeploymentManager(String uri,
-						String username,
-						String password)
+                                                String username,
+                                                String password)
     throws DeploymentManagerCreationException
   {
     return getDeploymentFactory(uri).getDeploymentManager(uri, username, password);

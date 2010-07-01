@@ -98,9 +98,9 @@ public class SpecialIdentifierSelector extends Selector  {
     switch (_type) {
     case JMS_DELIVERY_MODE:
       if (message.getJMSDeliveryMode() == DeliveryMode.PERSISTENT)
-	return "PERSISTENT";
+        return "PERSISTENT";
       else
-	return "NON_PERSISTENT";
+        return "NON_PERSISTENT";
     case JMS_PRIORITY:
       return new Integer(message.getJMSPriority());
     case JMS_MESSAGE_ID:

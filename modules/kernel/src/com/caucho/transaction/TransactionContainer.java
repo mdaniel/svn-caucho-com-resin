@@ -57,19 +57,19 @@ public class TransactionContainer {
       _container = new TransactionContainer();
 
       try {
-	InitialContext ic = new InitialContext();
+        InitialContext ic = new InitialContext();
 
-	UserTransaction userTM;
-	userTM = (UserTransaction) ic.lookup("java:comp/UserTransaction");
+        UserTransaction userTM;
+        userTM = (UserTransaction) ic.lookup("java:comp/UserTransaction");
 
-	_container.setUserTransaction(userTM);
+        _container.setUserTransaction(userTM);
 
-	TransactionManager tm;
-	tm = (TransactionManager) ic.lookup("java:comp/TransactionManager");
-	
-	_container.setTransactionManager(tm);
+        TransactionManager tm;
+        tm = (TransactionManager) ic.lookup("java:comp/TransactionManager");
+
+        _container.setTransactionManager(tm);
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -105,7 +105,7 @@ public class TransactionContainer {
       Transaction currentTrans = _tm.getTransaction();
 
       if (currentTrans != null)
-	return currentTrans;
+        return currentTrans;
       
       // _userTransaction.setTransactionTimeout((int) (_transactionTimeout / 1000L));
       _userTM.begin();
@@ -130,7 +130,7 @@ public class TransactionContainer {
       Transaction oldTrans = _tm.getTransaction();
 
       if (oldTrans != null)
-	oldTrans = _tm.suspend();
+        oldTrans = _tm.suspend();
 
       // _userTransaction.setTransactionTimeout((int) (_transactionTimeout / 1000L));
       _userTM.begin();
@@ -154,7 +154,7 @@ public class TransactionContainer {
       Transaction oldTrans = _tm.getTransaction();
 
       if (oldTrans == null)
-	throw new TransactionRuntimeException(L.l("'Mandatory' transaction boundary requires a transaction."));
+        throw new TransactionRuntimeException(L.l("'Mandatory' transaction boundary requires a transaction."));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -171,7 +171,7 @@ public class TransactionContainer {
       Transaction oldTrans = _tm.getTransaction();
 
       if (oldTrans != null)
-	throw new TransactionRuntimeException(L.l("'Never' transaction boundary must not have a transaction."));
+        throw new TransactionRuntimeException(L.l("'Never' transaction boundary must not have a transaction."));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -190,7 +190,7 @@ public class TransactionContainer {
       Transaction oldTrans = _tm.getTransaction();
 
       if (oldTrans != null)
-	oldTrans = _tm.suspend();
+        oldTrans = _tm.suspend();
 
       return oldTrans;
     } catch (RuntimeException e) {
@@ -218,20 +218,20 @@ public class TransactionContainer {
       if (currentTrans == null) {
       }
       else if (currentTrans.getStatus() != Status.STATUS_MARKED_ROLLBACK)
-	_userTM.commit();
+        _userTM.commit();
       else
-	_userTM.rollback();
+        _userTM.rollback();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new TransactionRuntimeException(e);
     } finally {
       if (oldTransaction != null) {
-	try {
-	  _tm.resume(oldTransaction);
-	} catch (Exception e) {
-	  throw new TransactionRuntimeException(e);
-	}
+        try {
+          _tm.resume(oldTransaction);
+        } catch (Exception e) {
+          throw new TransactionRuntimeException(e);
+        }
       }
     }
   }
@@ -245,18 +245,18 @@ public class TransactionContainer {
       Transaction currentTrans = _tm.getTransaction();
 
       if (currentTrans != null)
-	_userTM.rollback();
+        _userTM.rollback();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new TransactionRuntimeException(e);
     } finally {
       if (oldTransaction != null) {
-	try {
-	  _tm.resume(oldTransaction);
-	} catch (Exception e) {
-	  throw new TransactionRuntimeException(e);
-	}
+        try {
+          _tm.resume(oldTransaction);
+        } catch (Exception e) {
+          throw new TransactionRuntimeException(e);
+        }
       }
     }
   }

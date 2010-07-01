@@ -94,7 +94,7 @@ public class EJBCompiler {
     if (_appDir != null) {
       loader.addLoader(new SimpleLoader(loader,
                                         _appDir.lookup("WEB-INF/classes"),
-					null));
+                                        null));
     }
 
     Thread.currentThread().setContextClassLoader(loader);
@@ -104,23 +104,23 @@ public class EJBCompiler {
       EjbServerManager container = new EjbServerManager();
       container.setValidateDatabaseSchema(false);
       if (_classDir == null)
-	container.setWorkPath(Vfs.lookup("."));
+        container.setWorkPath(Vfs.lookup("."));
       else {
-	container.setWorkPath(_classDir);
+        container.setWorkPath(_classDir);
       }
 
       MergePath mergePath = new MergePath();
       mergePath.addClassPath(loader);
       if (_appDir != null)
-	mergePath.addMergePath(_appDir.lookup("WEB-INF"));
+        mergePath.addMergePath(_appDir.lookup("WEB-INF"));
       if (_classDir != null)
-	mergePath.addMergePath(_classDir);
+        mergePath.addMergePath(_classDir);
 
       // container.setSearchPath(mergePath);
 
       for (int i = 0; i < _ejbPath.size(); i++) {
         Path path = mergePath.lookup(_ejbPath.get(i));
-	container.addEJBPath(path, path);
+        container.addEJBPath(path, path);
       }
 
       container.build();

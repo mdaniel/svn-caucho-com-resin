@@ -157,7 +157,7 @@ public class FileQueueImpl<E extends Serializable>
       digest.update(env.getBytes());
       
       if (Server.getCurrent() != null)
-	digest.update(Server.getCurrent().getServerId().getBytes());
+        digest.update(Server.getCurrent().getServerId().getBytes());
       
       digest.update(getClass().getSimpleName().getBytes());
       digest.update(getName().getBytes());
@@ -204,7 +204,7 @@ public class FileQueueImpl<E extends Serializable>
       payload = entry.getPayloadRef();
 
       if (payload == null)
-	payload = (E) _store.readMessage(entry.getId());
+        payload = (E) _store.readMessage(entry.getId());
       
       entry.setPayload(payload);
     }
@@ -220,8 +220,8 @@ public class FileQueueImpl<E extends Serializable>
    * Callback from startup
    */
   protected void addEntry(long id, String msgId, long leaseTimeout,
-			  int priority, long expireTime,
-			  E payload)
+                          int priority, long expireTime,
+                          E payload)
   {
     FileQueueEntry<E> entry
       = new FileQueueEntry<E>(id, msgId, leaseTimeout,

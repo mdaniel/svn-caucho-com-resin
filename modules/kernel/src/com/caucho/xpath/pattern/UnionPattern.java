@@ -99,9 +99,9 @@ public class UnionPattern extends AbstractPattern {
     throws XPathException
   {
     NodeIterator leftIter = _left.createNodeIterator(node, env,
-						     _left.copyPosition());
+                                                     _left.copyPosition());
     NodeIterator rightIter = _right.createNodeIterator(node, env, 
-						       _right.copyPosition());
+                                                       _right.copyPosition());
 
     return new UnionIterator(env, leftIter, rightIter);
   }
@@ -114,7 +114,7 @@ public class UnionPattern extends AbstractPattern {
     int i = 1;
     while (iter.hasNext()) {
       if (iter.next() == node)
-	return i;
+        return i;
       i++;
     }
 

@@ -87,32 +87,32 @@ public class SubExpr extends Expr {
     }
     else if (isDouble(aObj)) {
       if (bObj instanceof BigInteger) {
-	BigDecimal a = toBigDecimal(aObj, env);
-	BigDecimal b = toBigDecimal(bObj, env);
+        BigDecimal a = toBigDecimal(aObj, env);
+        BigDecimal b = toBigDecimal(bObj, env);
 
-	return a.subtract(b);
+        return a.subtract(b);
       }
       else {
-	double a = toDouble(aObj, env);
-	double b = toDouble(bObj, env);
-	double dValue = a - b;
+        double a = toDouble(aObj, env);
+        double b = toDouble(bObj, env);
+        double dValue = a - b;
 
-	return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
+        return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
       }
     }
     else if (isDouble(bObj)) {
       if (aObj instanceof BigInteger) {
-	BigDecimal a = toBigDecimal(aObj, env);
-	BigDecimal b = toBigDecimal(bObj, env);
+        BigDecimal a = toBigDecimal(aObj, env);
+        BigDecimal b = toBigDecimal(bObj, env);
 
-	return a.subtract(b);
+        return a.subtract(b);
       }
       else {
-	double a = toDouble(aObj, env);
-	double b = toDouble(bObj, env);
-	double dValue = a - b;
+        double a = toDouble(aObj, env);
+        double b = toDouble(bObj, env);
+        double dValue = a - b;
 
-	return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
+        return Double.isNaN(dValue) ? new Double(0) : new Double(dValue);
       }
     }
     else if (aObj instanceof BigInteger || bObj instanceof BigInteger) {

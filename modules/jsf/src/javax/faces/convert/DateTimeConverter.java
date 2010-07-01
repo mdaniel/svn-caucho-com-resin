@@ -168,8 +168,8 @@ public class DateTimeConverter
   }
   
   public Object getAsObject(FacesContext context,
-			    UIComponent component,
-			    String value)
+                            UIComponent component,
+                            String value)
     throws ConverterException
   {
     if (context == null || component == null)
@@ -187,50 +187,50 @@ public class DateTimeConverter
 
     try {
       synchronized (format) {
-	return format.parse(value);
+        return format.parse(value);
       }
     } catch (ParseException e) {
       String summary;
       String detail;
       
       if ("date".equals(_type)) {
-	summary = Util.l10n(context, DATE_ID,
-			    "{2}: \"{0}\" could not be understood as a date.",
-			    value,
-			    getExample(context),
-			    Util.getLabel(context, component));
+        summary = Util.l10n(context, DATE_ID,
+                            "{2}: \"{0}\" could not be understood as a date.",
+                            value,
+                            getExample(context),
+                            Util.getLabel(context, component));
       
-	detail = Util.l10n(context, DATE_ID + "_detail",
-			   "{2}: \"{0}\" could not be understood as a percentage. Example: {1}.",
-			   value,
-			   getExample(context),
-			   Util.getLabel(context, component));
+        detail = Util.l10n(context, DATE_ID + "_detail",
+                           "{2}: \"{0}\" could not be understood as a percentage. Example: {1}.",
+                           value,
+                           getExample(context),
+                           Util.getLabel(context, component));
       }
       else if ("time".equals(_type)) {
-	summary = Util.l10n(context, TIME_ID,
-			    "{2}: \"{0}\" could not be understood as a time.",
-			    value,
-			    getExample(context),
-			    Util.getLabel(context, component));
+        summary = Util.l10n(context, TIME_ID,
+                            "{2}: \"{0}\" could not be understood as a time.",
+                            value,
+                            getExample(context),
+                            Util.getLabel(context, component));
       
-	detail = Util.l10n(context, TIME_ID + "_detail",
-			   "{2}: \"{0}\" could not be understood as a time. Example: {1}.",
-			   value,
-			   getExample(context),
-			   Util.getLabel(context, component));
+        detail = Util.l10n(context, TIME_ID + "_detail",
+                           "{2}: \"{0}\" could not be understood as a time. Example: {1}.",
+                           value,
+                           getExample(context),
+                           Util.getLabel(context, component));
       }
       else {
-	summary = Util.l10n(context, DATETIME_ID,
-			    "{2}: \"{0}\" could not be understood as a date and time.",
-			    value,
-			    getExample(context),
-			    Util.getLabel(context, component));
+        summary = Util.l10n(context, DATETIME_ID,
+                            "{2}: \"{0}\" could not be understood as a date and time.",
+                            value,
+                            getExample(context),
+                            Util.getLabel(context, component));
       
-	detail = Util.l10n(context, DATETIME_ID + "_detail",
-			   "{2}: \"{0}\" could not be understood as a date and time. Example: {1}.",
-			   value,
-			   getExample(context),
-			   Util.getLabel(context, component));
+        detail = Util.l10n(context, DATETIME_ID + "_detail",
+                           "{2}: \"{0}\" could not be understood as a date and time. Example: {1}.",
+                           value,
+                           getExample(context),
+                           Util.getLabel(context, component));
       }
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -242,8 +242,8 @@ public class DateTimeConverter
   }
   
   public String getAsString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
     throws ConverterException
   {
     if (context == null || component == null)
@@ -255,7 +255,7 @@ public class DateTimeConverter
       DateFormat format = getFormat(context);
 
       synchronized (format) {
-	return format.format((Date) value);
+        return format.format((Date) value);
       }
     }
     else
@@ -266,12 +266,12 @@ public class DateTimeConverter
   {
     synchronized (this) {
       if (_locale == null) {
-	Locale locale = context.getViewRoot().getLocale();
-	
-	return createFormat(locale);
+        Locale locale = context.getViewRoot().getLocale();
+
+        return createFormat(locale);
       }
       else if (_format == null) {
-	_format = createFormat(_locale);
+        _format = createFormat(_locale);
       }
 
       return _format;
@@ -324,28 +324,28 @@ public class DateTimeConverter
 
     if (_type == null || "date".equals(_type)) {
       if (locale != null)
-	format = DateFormat.getDateInstance(dateStyle, locale);
+        format = DateFormat.getDateInstance(dateStyle, locale);
       else
-	format = DateFormat.getDateInstance(dateStyle);
+        format = DateFormat.getDateInstance(dateStyle);
     }
     else if ("time".equals(_type)) {
       if (locale != null)
-	format = DateFormat.getTimeInstance(timeStyle, locale);
+        format = DateFormat.getTimeInstance(timeStyle, locale);
       else
-	format = DateFormat.getTimeInstance(timeStyle);
+        format = DateFormat.getTimeInstance(timeStyle);
     }
     else if ("both".equals(_type)) {
       if (locale != null)
-	format = DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
+        format = DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
       else
-	format = DateFormat.getDateTimeInstance(dateStyle, timeStyle);
+        format = DateFormat.getDateTimeInstance(dateStyle, timeStyle);
     }
     else
       throw new ConverterException("'" + _type + "' is an unknown type");
 
     try {
       if (_pattern != null && format instanceof SimpleDateFormat)
-	((SimpleDateFormat) format).applyPattern(_pattern);
+        ((SimpleDateFormat) format).applyPattern(_pattern);
     } catch (Exception e) {
       throw new ConverterException(e);
     }

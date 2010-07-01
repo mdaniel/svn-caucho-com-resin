@@ -60,7 +60,7 @@ public class ESException extends Exception {
       byte []b = cb.toString().getBytes();
 
       try {
-	os.write(b, 0, b.length);
+        os.write(b, 0, b.length);
       } catch (IOException e1) {
       }
     } else
@@ -131,23 +131,23 @@ public class ESException extends Exception {
       }
 
       for (; i < end && Character.isWhitespace(array[i]); i++) {
-	fun.append(array[i]);
+        fun.append(array[i]);
       }
 
       // skip 'at'
       for (; i < end && ! Character.isWhitespace(array[i]); i++) {
-	fun.append(array[i]);
+        fun.append(array[i]);
       }
 
       if (! fun.endsWith("at")) {
-	for (i = start; i < end; i++) {
-	  buf.append(array[i]);
-	}
-	i = end + 1;
+        for (i = start; i < end; i++) {
+          buf.append(array[i]);
+        }
+        i = end + 1;
 
-	buf.append('\n');
-	
-	continue;
+        buf.append('\n');
+
+        continue;
       }
 
       for (; i < end && Character.isWhitespace(array[i]); i++) {
@@ -155,44 +155,44 @@ public class ESException extends Exception {
 
       fun.clear();
       for (; i < end && ! Character.isWhitespace(array[i]) &&
-	     array[i] != '('; i++) {
-	fun.append(array[i]);
+             array[i] != '('; i++) {
+        fun.append(array[i]);
       }
 
       if (fun.startsWith("com.caucho.es.")) {
         i = end + 1;
-	continue;
+        continue;
       }
 
       /*
       if (! fun.startsWith("_js.")) {
-	if (hasJavaScript) {
-	  i = end + 1;
-	  continue;
-	}
+        if (hasJavaScript) {
+          i = end + 1;
+          continue;
+        }
 
-	for (i = start; i < end; i++) {
-	  buf.append(array[i]);
-	}
-	i = end + 1;
+        for (i = start; i < end; i++) {
+          buf.append(array[i]);
+        }
+        i = end + 1;
 
-	buf.append('\n');
-	
-	continue;
+        buf.append('\n');
+
+        continue;
       }
       */
 
       if (i < end && array[i] == '(')
-	i++;
+        i++;
 
       for (; i < end && array[i] != ')'; i++) {
-	file.append(array[i]);
+        file.append(array[i]);
       }
 
       i = end + 1;
 
       if (fun.endsWith(".call"))
-	continue;
+        continue;
 
       int p = fun.lastIndexOf('.');
       String className;

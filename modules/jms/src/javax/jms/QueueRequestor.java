@@ -57,9 +57,9 @@ public class QueueRequestor {
       QueueReceiver receiver = _session.createReceiver(tempQueue);
 
       try {
-	return receiver.receive();
+        return receiver.receive();
       } finally {
-	receiver.close();
+        receiver.close();
       }
     } finally {
       tempQueue.delete();

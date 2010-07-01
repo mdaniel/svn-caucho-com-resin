@@ -47,8 +47,8 @@ public interface StatServiceMXBean extends ManagedObjectMXBean
    * Returns statistics data over a time range.
    */
   public StatServiceValue []statisticsData(String name,
-					   long beginTime,
-					   long endTime,
+                                           long beginTime,
+                                           long endTime,
                                            long stepTime);
 
   /**

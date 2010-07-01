@@ -55,16 +55,16 @@ public interface Item {
    */
   public Item getAncestor(int depth)
     throws ItemNotFoundException,
-	   AccessDeniedException,
-	   RepositoryException;
+           AccessDeniedException,
+           RepositoryException;
 
   /**
    * Returns the parent node.
    */
   public Node getParent()
     throws ItemNotFoundException,
-	   AccessDeniedException,
-	   RepositoryException;
+           AccessDeniedException,
+           RepositoryException;
 
   /**
    * Returns the current depth of the item.
@@ -110,14 +110,14 @@ public interface Item {
    */
   public void save()
     throws AccessDeniedException,
-	   ItemExistsException,
-	   ConstraintViolationException,
-	   InvalidItemStateException,
-	   ReferentialIntegrityException,
-	   VersionException,
-	   LockException,
-	   NoSuchNodeTypeException,
-	   RepositoryException;
+           ItemExistsException,
+           ConstraintViolationException,
+           InvalidItemStateException,
+           ReferentialIntegrityException,
+           VersionException,
+           LockException,
+           NoSuchNodeTypeException,
+           RepositoryException;
 
   /**
    * Refreshes data from the backing store.
@@ -126,14 +126,14 @@ public interface Item {
    */
   public void refresh(boolean keepChanges)
     throws InvalidItemStateException,
-	   RepositoryException;
+           RepositoryException;
 
   /**
    * Removes the item from the store.
    */
   public void remove()
     throws VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
 }

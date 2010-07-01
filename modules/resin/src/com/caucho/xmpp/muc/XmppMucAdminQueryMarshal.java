@@ -112,7 +112,7 @@ public class XmppMucAdminQueryMarshal extends AbstractXmppMarshal {
 
     if (items != null) {
       for (MucUserItem item : items) {
-	toXml(out, item);
+        toXml(out, item);
       }
     }
 
@@ -167,22 +167,22 @@ public class XmppMucAdminQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	mucAdmin.setItemList(itemList);
-	
-	return mucAdmin;
+        mucAdmin.setItemList(itemList);
+
+        return mucAdmin;
       }
 
       if (XMLStreamReader.START_ELEMENT == tag
-	       && "item".equals(in.getLocalName())) {
-	itemList.add(parseItem(in));
+               && "item".equals(in.getLocalName())) {
+        itemList.add(parseItem(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();
@@ -219,30 +219,30 @@ public class XmppMucAdminQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return item;
+        return item;
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "actor".equals(in.getLocalName())) {
-	item.setActor(in.getAttributeValue(null, "jid"));
+               && "actor".equals(in.getLocalName())) {
+        item.setActor(in.getAttributeValue(null, "jid"));
 
-	skipToEnd(in, "actor");
+        skipToEnd(in, "actor");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "continue".equals(in.getLocalName())) {
-	String thread = in.getAttributeValue(null, "thread");
-	
-	item.setContinue(new MucContinue(thread));
+               && "continue".equals(in.getLocalName())) {
+        String thread = in.getAttributeValue(null, "thread");
 
-	skipToEnd(in, "continue");
+        item.setContinue(new MucContinue(thread));
+
+        skipToEnd(in, "continue");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "reason".equals(in.getLocalName())) {
-	item.setReason(in.getElementText());
+               && "reason".equals(in.getLocalName())) {
+        item.setReason(in.getElementText());
 
-	skipToEnd(in, "reason");
+        skipToEnd(in, "reason");
       }
 
       tag = in.nextTag();

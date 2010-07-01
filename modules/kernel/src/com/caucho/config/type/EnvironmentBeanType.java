@@ -81,7 +81,7 @@ public class EnvironmentBeanType extends InlineBeanType
     ArrayList<Dependency> dependencyList = env.getDependencyList();
     if (dependencyList != null) {
       for (Dependency depend : dependencyList) {
-	Environment.addDependency(depend);
+        Environment.addDependency(depend);
       }
     }
     

@@ -195,9 +195,9 @@ public class RotateLog {
       throw new ConfigException(L.l("`path' is a required attribute of <{0}>.  Each <{0}> must configure the destination stream.", getTagName()));
 
     if (_path != null && _path.exists() && ! _path.canRead() &&
-	(_rolloverPeriod != null ||
-	 _rolloverSize != null ||
-	 _archiveFormat != null)) {
+        (_rolloverPeriod != null ||
+         _rolloverSize != null ||
+         _archiveFormat != null)) {
       throw new ConfigException(L.l("log path '{0}' is not readable and therefore cannot be rotated.", _path.getURL()));
     }
 

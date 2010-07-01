@@ -75,8 +75,8 @@ public interface EntityManager {
    * @since JPA 2.0
    */
   public <T> T find(Class<T> entityCLass,
-		    Object primaryKey,
-		    LockModeType lockMode);
+                    Object primaryKey,
+                    LockModeType lockMode);
 
   /**
    * Find based on the primary key.
@@ -84,9 +84,9 @@ public interface EntityManager {
    * @since JPA 2.0
    */
   public <T> T find(Class<T> entityCLass,
-		    Object primaryKey,
-		    LockModeType lockMode,
-		    Map<String,Object> properties);
+                    Object primaryKey,
+                    LockModeType lockMode,
+                    Map<String,Object> properties);
 
   /**
    * Gets an instance whose state may be lazily fetched.
@@ -119,8 +119,8 @@ public interface EntityManager {
    * @since JPA 2.0
    */
   public void lock(Object entity,
-		   LockModeType lockMode,
-		   Map<String,Object> properties);
+                   LockModeType lockMode,
+                   Map<String,Object> properties);
 
   /**
    * Update the state of the instance from the database.

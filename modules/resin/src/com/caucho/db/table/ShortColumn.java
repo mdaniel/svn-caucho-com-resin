@@ -201,8 +201,8 @@ class ShortColumn extends Column {
    */
   @Override
   void setExpr(Transaction xa,
-	       byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
     throws SQLException
   {
     if (expr.isNull(null))
@@ -241,7 +241,7 @@ class ShortColumn extends Column {
    */
   @Override
   int evalToBuffer(byte []block, int rowOffset,
-		   byte []buffer, int bufferOffset)
+                   byte []buffer, int bufferOffset)
     throws SQLException
   {
     if (isNull(block, rowOffset))
@@ -260,7 +260,7 @@ class ShortColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block1, int rowOffset1,
-			 byte []block2, int rowOffset2)
+                         byte []block2, int rowOffset2)
   {
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
@@ -269,7 +269,7 @@ class ShortColumn extends Column {
     int startOffset2 = rowOffset2 + _columnOffset;
 
     return (block1[startOffset1 + 0] == block2[startOffset2 + 0]
-	    && block1[startOffset1 + 1] == block2[startOffset2 + 1]);
+            && block1[startOffset1 + 1] == block2[startOffset2 + 1]);
   }
   
   /**
@@ -281,8 +281,8 @@ class ShortColumn extends Column {
    */
   @Override
   void setIndex(Transaction xa,
-		byte []block, int rowOffset,
-		long rowAddr, QueryContext context)
+                byte []block, int rowOffset,
+                long rowAddr, QueryContext context)
     throws SQLException
   {
     BTree index = getIndex();
@@ -301,8 +301,8 @@ class ShortColumn extends Column {
   {
     iter.setDirty();
     setInteger(iter.getTransaction(),
-	       iter.getBuffer(), iter.getRowOffset(),
-	       (int) expr.evalLong(context));
+               iter.getBuffer(), iter.getRowOffset(),
+               (int) expr.evalLong(context));
   }
   
   /**

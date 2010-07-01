@@ -100,17 +100,17 @@ public class ServerAuthManager {
   {
     try {
       if (_authKeyPair == null) {
-	KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
 
-	_authKeyPair = gen.generateKeyPair();
+        _authKeyPair = gen.generateKeyPair();
       }
 
       PublicKey publicKey = _authKeyPair.getPublic();
 
       GetPublicKeyQuery result
-	= new GetPublicKeyQuery(publicKey.getAlgorithm(),
-				publicKey.getFormat(),
-				publicKey.getEncoded());
+        = new GetPublicKeyQuery(publicKey.getAlgorithm(),
+                                publicKey.getFormat(),
+                                publicKey.getEncoded());
       
       return result;
     } catch (Exception e) {
@@ -134,8 +134,8 @@ public class ServerAuthManager {
   }
   
   public Object decrypt(String msgAlgorithm,
-			byte []msgKey,
-			byte []data)
+                        byte []msgKey,
+                        byte []data)
   {
     try {
       Key key = decryptKey(msgAlgorithm, msgKey);

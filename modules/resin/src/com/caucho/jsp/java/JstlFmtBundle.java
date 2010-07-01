@@ -81,7 +81,7 @@ public class JstlFmtBundle extends JstlNode {
   public boolean hasScripting()
   {
     return (super.hasScripting() ||
-	    hasScripting(_prefix) || hasScripting(_prefixAttr));
+            hasScripting(_prefix) || hasScripting(_prefixAttr));
   }
 
   /**

@@ -53,7 +53,7 @@ class UnaryExpr extends Expr {
     switch (_op) {
     case '-':
       if (! newSub.isDouble())
-	throw new SQLException(L.l("unary minus requires a numeric expression at '{0}'", newSub));
+        throw new SQLException(L.l("unary minus requires a numeric expression at '{0}'", newSub));
       break;
     }
 
@@ -71,9 +71,9 @@ class UnaryExpr extends Expr {
     switch (_op) {
     case '-':
       if (_sub.isLong())
-	return long.class;
+        return long.class;
       else
-	return double.class;
+        return double.class;
 
     default:
       return Object.class;
@@ -164,9 +164,9 @@ class UnaryExpr extends Expr {
     switch (_op) {
     case '-':
       if (isLong())
-	return String.valueOf(evalLong(context));
+        return String.valueOf(evalLong(context));
       else
-	return String.valueOf(evalDouble(context));
+        return String.valueOf(evalDouble(context));
 
     default:
       throw new IllegalStateException();

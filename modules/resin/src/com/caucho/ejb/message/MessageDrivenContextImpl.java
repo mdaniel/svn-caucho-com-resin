@@ -113,9 +113,9 @@ public class MessageDrivenContextImpl extends AbstractContext
       Transaction trans = tm.getTransaction();
 
       if (trans != null)
-	trans.setRollbackOnly();
+        trans.setRollbackOnly();
       else
-	throw new IllegalStateException(L.l("setRollbackOnly called with no active transaction"));
+        throw new IllegalStateException(L.l("setRollbackOnly called with no active transaction"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -138,9 +138,9 @@ public class MessageDrivenContextImpl extends AbstractContext
       Transaction trans = tm.getTransaction();
 
       if (trans != null)
-	return trans.getStatus() == Status.STATUS_MARKED_ROLLBACK;
+        return trans.getStatus() == Status.STATUS_MARKED_ROLLBACK;
       else
-	throw new IllegalStateException("getRollbackOnly requires a valid container-managed transaction");
+        throw new IllegalStateException("getRollbackOnly requires a valid container-managed transaction");
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

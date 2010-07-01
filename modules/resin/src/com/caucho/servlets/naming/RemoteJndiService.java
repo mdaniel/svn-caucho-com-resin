@@ -58,23 +58,23 @@ public class RemoteJndiService implements NamingProxy
   {
     try {
       if (name.startsWith("/"))
-	name = name.substring(1);
+        name = name.substring(1);
       
       InitialContext ic = new InitialContext();
       Object v = ic.lookup(_jndiPath);
 
       if (v == null || name.equals(""))
-	return v;
+        return v;
       else if (v instanceof Context)
-	v = ((Context) v).lookup(name);
+        v = ((Context) v).lookup(name);
 
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " lookup '" + name + "' -> " + v);
+        log.finer(this + " lookup '" + name + "' -> " + v);
 
       if (v instanceof Context)
-	return new RemoteContext(name);
+        return new RemoteContext(name);
       else
-	return v;
+        return v;
     } catch (NamingException e) {
       e.printStackTrace();
       

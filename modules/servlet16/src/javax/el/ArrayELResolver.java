@@ -62,7 +62,7 @@ public class ArrayELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
-							   Object base)
+                                                           Object base)
   {
     if (base == null)
       return null;
@@ -77,8 +77,8 @@ public class ArrayELResolver extends ELResolver {
 
   @Override
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     if (base == null)
       return null;
@@ -88,7 +88,7 @@ public class ArrayELResolver extends ELResolver {
       int index = getIndex(property);
 
       if (index < 0 || Array.getLength(base) <= index)
-	throw new PropertyNotFoundException("array index '" + index + "' is invalid");
+        throw new PropertyNotFoundException("array index '" + index + "' is invalid");
 
       return base.getClass().getComponentType();
     }
@@ -108,8 +108,8 @@ public class ArrayELResolver extends ELResolver {
    */
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base == null)
       return null;
@@ -119,9 +119,9 @@ public class ArrayELResolver extends ELResolver {
       int index = getIndex(property);
 
       if (0 <= index && index < Array.getLength(base))
-	return Array.get(base, index);
+        return Array.get(base, index);
       else
-	return null;
+        return null;
     }
     else {
       return null;
@@ -130,8 +130,8 @@ public class ArrayELResolver extends ELResolver {
 
   @Override
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     if (base == null)
       return false;
@@ -151,9 +151,9 @@ public class ArrayELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base == null) {
     }
@@ -174,9 +174,9 @@ public class ArrayELResolver extends ELResolver {
           + " cannot be cast to "
           + componentType.getName());
       } else if (0 <= index && index < Array.getLength(base))
-	Array.set(base, index, value);
+        Array.set(base, index, value);
       else
-	throw new PropertyNotFoundException("array index '" + index + "' is invalid");
+        throw new PropertyNotFoundException("array index '" + index + "' is invalid");
     }
   }
 
@@ -186,9 +186,9 @@ public class ArrayELResolver extends ELResolver {
       return ((Number) property).intValue();
     else if (property instanceof String) {
       try {
-	return Integer.parseInt((String) property);
+        return Integer.parseInt((String) property);
       } catch (Exception e) {
-	throw new IllegalArgumentException("can't convert '" + property + "' to long.");
+        throw new IllegalArgumentException("can't convert '" + property + "' to long.");
       }
     }
     else

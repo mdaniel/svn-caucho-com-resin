@@ -57,8 +57,8 @@ public class ValidatorTag extends TagSupport
     ExpressionFactory factory = app.getExpressionFactory();
 
     _binding = factory.createValueExpression(context.getELContext(),
-					     binding,
-					     Validator.class);
+                                             binding,
+                                             Validator.class);
   }
 
   public int doStartTag()
@@ -75,7 +75,7 @@ public class ValidatorTag extends TagSupport
 
     if (parent.getCreated()) {
       if (! (comp instanceof EditableValueHolder))
-	throw new JspException("UIComponent parent of validator must be a EditableValueHolder.");
+        throw new JspException("UIComponent parent of validator must be a EditableValueHolder.");
 
       EditableValueHolder valueHolder = (EditableValueHolder) comp;
 
@@ -95,16 +95,16 @@ public class ValidatorTag extends TagSupport
       Validator validator;
 
       if (_binding != null) {
-	validator = (Validator) _binding.getValue(context.getELContext());
+        validator = (Validator) _binding.getValue(context.getELContext());
 
-	if (validator != null)
-	  return validator;
+        if (validator != null)
+          return validator;
       }
     
       validator = context.getApplication().createValidator(_id);
 
       if (_binding != null)
-	_binding.setValue(context.getELContext(), validator);
+        _binding.setValue(context.getELContext(), validator);
 
       return validator;
     } catch (Exception e) {

@@ -84,7 +84,7 @@ public class ReadWritePairEcmaWrap {
       os.writeStream(((ReadWritePair) obj).getReadStream());
     else
       throw new IllegalArgumentException("expected read stream at " +
-					 obj.getClass().getName());
+                                         obj.getClass().getName());
   }
 
   public static WriteStream getOutputStream(ReadWritePair s)
@@ -133,7 +133,7 @@ public class ReadWritePairEcmaWrap {
       int ch = is.readChar();
 
       if (ch < 0)
-	break;
+        break;
 
       cb.append((char) ch);
     }
@@ -166,7 +166,7 @@ public class ReadWritePairEcmaWrap {
       int ch = is.readChar();
 
       if (ch < 0)
-	break;
+        break;
 
       cb.append((char) ch);
     }

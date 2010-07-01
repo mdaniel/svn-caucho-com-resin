@@ -161,19 +161,19 @@ public abstract class UIComponentBase extends UIComponent
     
     if ("rendered".equals(name)) {
       if (expr.isLiteralText()) {
-	_isRendered = Util.booleanValueOf(expr.getValue(null));
-	return;
+        _isRendered = Util.booleanValueOf(expr.getValue(null));
+        return;
       }
       else
-	_isRenderedExpr = expr;
+        _isRenderedExpr = expr;
     }
     else if ("rendererType".equals(name)) {
       if (expr.isLiteralText()) {
-	_rendererType = String.valueOf(expr.getValue(null));
-	return;
+        _rendererType = String.valueOf(expr.getValue(null));
+        return;
       }
       else
-	_rendererTypeExpr = expr;
+        _rendererTypeExpr = expr;
     }
     else if ("binding".equals(name)) {
       _bindingExpr = expr;
@@ -181,18 +181,18 @@ public abstract class UIComponentBase extends UIComponent
 
     try {
       if (expr != null) {
-	if (expr.isLiteralText()) {
-	  getAttributes().put(name, expr.getValue(null));
-	}
-	else {
-	  if (bindings == null)
-	    bindings = new HashMap<String,ValueExpression>();
-	  
-	  bindings.put(name, expr);
-	}
+        if (expr.isLiteralText()) {
+          getAttributes().put(name, expr.getValue(null));
+        }
+        else {
+          if (bindings == null)
+            bindings = new HashMap<String,ValueExpression>();
+
+          bindings.put(name, expr);
+        }
       }
       else if (bindings != null)
-	bindings.remove(name);
+        bindings.remove(name);
     } catch (ELException e) {
       throw new FacesException(e);
     }
@@ -214,8 +214,8 @@ public abstract class UIComponentBase extends UIComponent
 
     for (UIComponent ptr = getParent(); ptr != null; ptr = ptr.getParent()) {
       if (ptr instanceof NamingContainer) {
-	parentId = ptr.getContainerClientId(context);
-	break;
+        parentId = ptr.getContainerClientId(context);
+        break;
       }
     }
 
@@ -265,11 +265,11 @@ public abstract class UIComponentBase extends UIComponent
       ch = id.charAt(i);
       
       if (! ('a' <= ch && ch <= 'z'
-	     || 'A' <= ch && ch <= 'Z'
-	     || '0' <= ch && ch <= '9'
-	     || ch == '_'
-	     || ch == '-'))
-	throw new IllegalArgumentException();
+             || 'A' <= ch && ch <= 'Z'
+             || '0' <= ch && ch <= '9'
+             || ch == '_'
+             || ch == '-'))
+        throw new IllegalArgumentException();
     }
 
     _id = id;
@@ -354,8 +354,8 @@ public abstract class UIComponentBase extends UIComponent
     }
     else {
       for (base = this;
-	   base.getParent() != null && ! (base instanceof NamingContainer);
-	   base = base.getParent()) {
+           base.getParent() != null && ! (base instanceof NamingContainer);
+           base = base.getParent()) {
       }
     }
 
@@ -363,18 +363,18 @@ public abstract class UIComponentBase extends UIComponent
       String v = values[i];
 
       if ("".equals(v))
-	continue;
+        continue;
 
       base = findComponent(base, v);
 
       if (i + 1 == values.length)
-	return base;
+        return base;
 
       if (base == null)
         return base;
 
       if (! (base instanceof NamingContainer)) {
-	throw new IllegalArgumentException("'" + v + "' in expression '" + expr + "' does not match an intermediate NamingContainer.");
+        throw new IllegalArgumentException("'" + v + "' in expression '" + expr + "' does not match an intermediate NamingContainer.");
       }
     }
     
@@ -391,13 +391,13 @@ public abstract class UIComponentBase extends UIComponent
       UIComponent child = (UIComponent) iter.next();
 
       if (id.equals(child.getId()))
-	return child;
+        return child;
       
       if (! (child instanceof NamingContainer)) {
-	UIComponent desc = findComponent(child, id);
+        UIComponent desc = findComponent(child, id);
 
-	if (desc != null)
-	  return desc;
+        if (desc != null)
+          return desc;
       }
     }
 
@@ -429,23 +429,23 @@ public abstract class UIComponentBase extends UIComponent
   {
     if (_facetsAndChildren == null) {
       if (_children == null && _facets == null)
-	_facetsAndChildren = NULL_FACETS_AND_CHILDREN;
+        _facetsAndChildren = NULL_FACETS_AND_CHILDREN;
       else {
-	int facetCount = getFacetCount();
-	int childCount = getChildCount();
-	
-	_facetsAndChildren = new UIComponent[facetCount + childCount];
+        int facetCount = getFacetCount();
+        int childCount = getChildCount();
 
-	int i = 0;
-	if (_facets != null) {
-	  for (UIComponent facet : _facets.values()) {
-	    _facetsAndChildren[i++] = facet;
-	  }
-	}
-	
-	for (int j = 0; j < childCount; j++) {
-	  _facetsAndChildren[i++] = _children.get(j);
-	}
+        _facetsAndChildren = new UIComponent[facetCount + childCount];
+
+        int i = 0;
+        if (_facets != null) {
+          for (UIComponent facet : _facets.values()) {
+            _facetsAndChildren[i++] = facet;
+          }
+        }
+
+        for (int j = 0; j < childCount; j++) {
+          _facetsAndChildren[i++] = _children.get(j);
+        }
       }
     }
 
@@ -480,14 +480,14 @@ public abstract class UIComponentBase extends UIComponent
     int count = 0;
     for (int i = _facesListeners.length - 1; i >= 0; i--) {
       if (cl.isAssignableFrom(_facesListeners[i].getClass()))
-	count++;
+        count++;
     }
 
     FacesListener []array = (FacesListener []) Array.newInstance(cl, count);
     count = 0;
     for (int i = _facesListeners.length - 1; i >= 0; i--) {
       if (cl.isAssignableFrom(_facesListeners[i].getClass())) {
-	array[count++] = _facesListeners[i];
+        array[count++] = _facesListeners[i];
       }
     }
 
@@ -502,14 +502,14 @@ public abstract class UIComponentBase extends UIComponent
     int length = _facesListeners.length;
     for (int i = 0; i < length; i++) {
       if (listener.equals(_facesListeners[i])) {
-	FacesListener []newListeners = new FacesListener[length - 1];
-	System.arraycopy(_facesListeners, 0, newListeners, 0, i);
-	System.arraycopy(_facesListeners, i + 1, newListeners, i,
-			 length - i - 1);
+        FacesListener []newListeners = new FacesListener[length - 1];
+        System.arraycopy(_facesListeners, 0, newListeners, 0, i);
+        System.arraycopy(_facesListeners, i + 1, newListeners, i,
+                         length - i - 1);
 
-	_facesListeners = newListeners;
+        _facesListeners = newListeners;
 
-	return;
+        return;
       }
     }
   }
@@ -529,7 +529,7 @@ public abstract class UIComponentBase extends UIComponent
   {
     for (int i = 0; i < _facesListeners.length; i++) {
       if (event.isAppropriateListener(_facesListeners[i])) {
-	event.processListener(_facesListeners[i]);
+        event.processListener(_facesListeners[i]);
       }
     }
   }
@@ -630,21 +630,21 @@ public abstract class UIComponentBase extends UIComponent
       Renderer renderer = getRenderer(context);
 
       if (renderer != null)
-	renderer.encodeBegin(context, this);
+        renderer.encodeBegin(context, this);
 
     } catch (IOException e) {
       if (e.getMessage().startsWith("id="))
-	throw e;
+        throw e;
       else
-	throw new IOExceptionWrapper("id=" + getClientId(context)
-				     + " " + e.toString(), e);
+        throw new IOExceptionWrapper("id=" + getClientId(context)
+                                     + " " + e.toString(), e);
     } catch (RuntimeException e) {
       if (e.getMessage() != null
-	  && e.getMessage().startsWith("id="))
-	throw e;
+          && e.getMessage().startsWith("id="))
+        throw e;
       else
-	throw new FacesException("id=" + getClientId(context)
-				 + " " + e.toString(), e);
+        throw new FacesException("id=" + getClientId(context)
+                                 + " " + e.toString(), e);
     }
   }
 
@@ -724,21 +724,21 @@ public abstract class UIComponentBase extends UIComponent
       List<UIComponent> children = getChildren();
       
       for (int i = 0; i < childSize; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (child.isTransient())
-	  continue;
-	
-	k++;
-	
-	Object childState = child.processSaveState(context);
+        if (child.isTransient())
+          continue;
 
-	if (childState != null) {
-	  if (childSaveState == null)
-	    childSaveState = new Object[1 + childSize + 2 * facetSize];
+        k++;
+
+        Object childState = child.processSaveState(context);
+
+        if (childState != null) {
+          if (childSaveState == null)
+            childSaveState = new Object[1 + childSize + 2 * facetSize];
       
-	  childSaveState[k - 1] = childState;
-	}
+          childSaveState[k - 1] = childState;
+        }
       }
     }
 
@@ -746,22 +746,22 @@ public abstract class UIComponentBase extends UIComponent
       Map<String,UIComponent> facetMap = getFacets();
 
       for (Map.Entry<String,UIComponent> entry : facetMap.entrySet()) {
-	UIComponent facet = entry.getValue();
+        UIComponent facet = entry.getValue();
 
-	if (facet.isTransient())
-	  continue;
-	
-	k += 2;
+        if (facet.isTransient())
+          continue;
 
-	Object facetState = facet.processSaveState(context);
+        k += 2;
 
-	if (facetState != null) {
-	  if (childSaveState == null)
-	    childSaveState = new Object[1 + childSize + 2 * facetSize];
+        Object facetState = facet.processSaveState(context);
+
+        if (facetState != null) {
+          if (childSaveState == null)
+            childSaveState = new Object[1 + childSize + 2 * facetSize];
       
-	  childSaveState[k - 2] = entry.getKey();
-	  childSaveState[k - 1] = facetState;
-	}
+          childSaveState[k - 2] = entry.getKey();
+          childSaveState[k - 1] = facetState;
+        }
       }
     }
 
@@ -776,7 +776,7 @@ public abstract class UIComponentBase extends UIComponent
   }
 
   public void processRestoreState(FacesContext context,
-				  Object state)
+                                  Object state)
   {
     if (context == null)
       throw new NullPointerException();
@@ -804,23 +804,23 @@ public abstract class UIComponentBase extends UIComponent
       List<UIComponent> children = getChildren();
       
       for (int i = 0; i < childSize; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (child.isTransient()) {
-	  continue;
-	}
-	
-	k++;
-	
-	Object childState;
-	
-	if (k <= baseState.length)
-	  childState = baseState[k - 1];
-	else
-	  childState = null;
+        if (child.isTransient()) {
+          continue;
+        }
 
-	if (childState != null)
-	  child.processRestoreState(context, childState);
+        k++;
+
+        Object childState;
+
+        if (k <= baseState.length)
+          childState = baseState[k - 1];
+        else
+          childState = null;
+
+        if (childState != null)
+          child.processRestoreState(context, childState);
       }
     }
       
@@ -828,15 +828,15 @@ public abstract class UIComponentBase extends UIComponent
       Map<String,UIComponent> facetMap = getFacets();
 
       for (; k < baseState.length; k += 2) {
-	String facetName = (String) baseState[k];
-	Object facetState = baseState[k + 1];
+        String facetName = (String) baseState[k];
+        Object facetState = baseState[k + 1];
 
-	if (facetName != null && facetState != null) {
-	  UIComponent facet = facetMap.get(facetName);
+        if (facetName != null && facetState != null) {
+          UIComponent facet = facetMap.get(facetName);
 
-	  if (facet != null)
-	    facet.processRestoreState(context, facetState);
-	}
+          if (facet != null)
+            facet.processRestoreState(context, facetState);
+        }
       }
     }
   }
@@ -909,9 +909,9 @@ public abstract class UIComponentBase extends UIComponent
       Object []savedListeners = new Object[2 * _facesListeners.length];
 
       for (int i = 0; i < _facesListeners.length; i++) {
-	FacesListener listener = _facesListeners[i];
+        FacesListener listener = _facesListeners[i];
 
-	int index = 2 * i;
+        int index = 2 * i;
 
         if (listener instanceof java.io.Serializable) {
           savedListeners[index] = java.io.Serializable.class;
@@ -919,7 +919,7 @@ public abstract class UIComponentBase extends UIComponent
         } else if (listener instanceof StateHolder) {
           savedListeners[index] = listener.getClass();
           StateHolder holder = (StateHolder) listener;
-	  savedListeners[index + 1] = holder.saveState(context);
+          savedListeners[index + 1] = holder.saveState(context);
         } else {
           savedListeners[index] = listener.getClass();
         }
@@ -944,7 +944,7 @@ public abstract class UIComponentBase extends UIComponent
 
     if (bindings != null) {
       for (Map.Entry<String,ValueExpression> entry : bindings.entrySet()) {
-	setValueExpression(entry.getKey(), entry.getValue());
+        setValueExpression(entry.getKey(), entry.getValue());
       }
     }
 
@@ -957,12 +957,12 @@ public abstract class UIComponentBase extends UIComponent
       _rendererType = _codeToRendererMap.get(rendererCode);
     else
       _rendererType = rendererString;
-	
+
     Object extMapState = state[5];
 
     if (extMapState != null) {
       if (_attributeMap == null)
-	_attributeMap = new AttributeMap(this);
+        _attributeMap = new AttributeMap(this);
 
       _attributeMap.restoreState(context, extMapState);
     }
@@ -1005,7 +1005,7 @@ public abstract class UIComponentBase extends UIComponent
   }
 
   private Object saveExprMap(FacesContext context,
-			     Map<String,ValueExpression> exprMap)
+                             Map<String,ValueExpression> exprMap)
   {
     if (exprMap == null)
       return null;
@@ -1047,9 +1047,9 @@ public abstract class UIComponentBase extends UIComponent
       Class type = (Class) state[i++];
 
       ValueExpression expr
-	= exprFactory.createValueExpression(context.getELContext(),
-					    exprString,
-					    type);
+        = exprFactory.createValueExpression(context.getELContext(),
+                                            exprString,
+                                            type);
 
       map.put(key, expr);
     }
@@ -1071,21 +1071,21 @@ public abstract class UIComponentBase extends UIComponent
   {
     if (_children != null) {
       if (_children.remove(child))
-	return;
+        return;
     }
     
     if (_facets != null) {
       for (Map.Entry<String,UIComponent> entry : _facets.entrySet()) {
-	if (entry.getValue() == child) {
-	  _facets.remove(entry.getKey());
-	  return;
-	}
+        if (entry.getValue() == child) {
+          _facets.remove(entry.getKey());
+          return;
+        }
       }
     }
   }
 
   public static Object saveAttachedState(FacesContext context,
-					 Object attachedObject)
+                                         Object attachedObject)
   {
     if (attachedObject == null)
       return null;
@@ -1096,7 +1096,7 @@ public abstract class UIComponentBase extends UIComponent
       int len = list.size();
       
       for (int i = 0; i < len; i++) {
-	values.add(saveAttachedState(context, list.get(i)));
+        values.add(saveAttachedState(context, list.get(i)));
       }
 
       return values;
@@ -1110,7 +1110,7 @@ public abstract class UIComponentBase extends UIComponent
   }
 
   public static Object restoreAttachedState(FacesContext context,
-					    Object stateObject)
+                                            Object stateObject)
   {
     if (stateObject == null)
       return null;
@@ -1121,7 +1121,7 @@ public abstract class UIComponentBase extends UIComponent
       int size = list.size();
 
       for (int i = 0; i < size; i++) {
-	values.add(restoreAttachedState(context, list.get(i)));
+        values.add(restoreAttachedState(context, list.get(i)));
       }
       
       return values;
@@ -1145,20 +1145,20 @@ public abstract class UIComponentBase extends UIComponent
       _class = value.getClass();
 
       if (value instanceof StateHolder)
-	_state = ((StateHolder) value).saveState(context);
+        _state = ((StateHolder) value).saveState(context);
     }
 
     public Object restore(FacesContext context)
     {
       try {
-	Object value = _class.newInstance();
+        Object value = _class.newInstance();
 
-	if (value instanceof StateHolder)
-	  ((StateHolder) value).restoreState(context, _state);
+        if (value instanceof StateHolder)
+          ((StateHolder) value).restoreState(context, _state);
 
-	return value;
+        return value;
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
   }
@@ -1205,9 +1205,9 @@ public abstract class UIComponentBase extends UIComponent
       boolean isChange = false;
       
       for (UIComponent child : list) {
-	setParent(child);
+        setParent(child);
 
-	_list.add(i++, child);
+        _list.add(i++, child);
 
         isChange = true;
       }
@@ -1237,8 +1237,8 @@ public abstract class UIComponentBase extends UIComponent
       UIComponent old = _list.remove(i);
 
       if (old != null)
-	old.setParent(null);
-	
+        old.setParent(null);
+
       setParent(child);
 
       _list.add(i, child);
@@ -1254,7 +1254,7 @@ public abstract class UIComponentBase extends UIComponent
       UIComponent old = _list.remove(i);
 
       if (old != null) {
-	old.setParent(null);
+        old.setParent(null);
       }
 
       _parent._facetsAndChildren = null;
@@ -1268,14 +1268,14 @@ public abstract class UIComponentBase extends UIComponent
       UIComponent comp = (UIComponent) v;
       
       if (_list.remove(comp)) {
-	comp.setParent(null);
+        comp.setParent(null);
 
-	_parent._facetsAndChildren = null;
+        _parent._facetsAndChildren = null;
       
-	return true;
+        return true;
       }
       else
-	return false;
+        return false;
     }
 
     @Override
@@ -1291,10 +1291,10 @@ public abstract class UIComponentBase extends UIComponent
       if (parent == null) {
       }
       else if (parent instanceof UIComponentBase) {
-	((UIComponentBase) parent).removeChild(child);
+        ((UIComponentBase) parent).removeChild(child);
       }
       else {
-	parent.getChildren().remove(child);
+        parent.getChildren().remove(child);
       }
 
       child.setParent(_parent);
@@ -1334,7 +1334,7 @@ public abstract class UIComponentBase extends UIComponent
     public UIComponent put(String key, UIComponent o)
     {
       if (key == null)
-	throw new NullPointerException();
+        throw new NullPointerException();
 
       _parent._facetsAndChildren = null;
       
@@ -1342,7 +1342,7 @@ public abstract class UIComponentBase extends UIComponent
 
       UIComponent parent = child.getParent();
       if (parent instanceof UIComponentBase) {
-	((UIComponentBase) parent).removeChild(child);
+        ((UIComponentBase) parent).removeChild(child);
       }
 
       child.setParent(_parent);
@@ -1350,7 +1350,7 @@ public abstract class UIComponentBase extends UIComponent
       UIComponent oldChild = super.put(key, o);
 
       if (oldChild != null && oldChild != o) {
-	oldChild.setParent(null);
+        oldChild.setParent(null);
       }
 
       return oldChild;
@@ -1360,14 +1360,14 @@ public abstract class UIComponentBase extends UIComponent
     public UIComponent remove(Object key)
     {
       if (key == null)
-	throw new NullPointerException();
+        throw new NullPointerException();
 
       _parent._facetsAndChildren = null;
 
       UIComponent oldChild = super.remove(key);
 
       if (oldChild != null) {
-	oldChild.setParent(null);
+        oldChild.setParent(null);
       }
 
       return oldChild;
@@ -1392,9 +1392,9 @@ public abstract class UIComponentBase extends UIComponent
     public UIComponent next()
     {
       if (_index < _children.length)
-	return _children[_index++];
+        return _children[_index++];
       else
-	return null;
+        return null;
     }
 
     public void remove()
@@ -1417,12 +1417,12 @@ public abstract class UIComponentBase extends UIComponent
       Class cl = obj.getClass();
       
       synchronized (cl) {
-	HashMap<String,Property> propMap = _compMap.get(cl);
+        HashMap<String,Property> propMap = _compMap.get(cl);
 
-	if (propMap == null) {
-	  propMap = introspectComponent(cl);
-	  _compMap.put(cl, propMap);
-	}
+        if (propMap == null) {
+          propMap = introspectComponent(cl);
+          _compMap.put(cl, propMap);
+        }
       
         _propertyMap = propMap;
       }
@@ -1443,11 +1443,11 @@ public abstract class UIComponentBase extends UIComponent
       Property prop = _propertyMap.get(name);
 
       if (prop != null)
-	return false;
+        return false;
       else if (_extMap != null)
-	return _extMap.containsKey(name);
+        return _extMap.containsKey(name);
       else
-	return false;
+        return false;
     }
 
     @Override
@@ -1458,25 +1458,25 @@ public abstract class UIComponentBase extends UIComponent
       Property prop = _propertyMap.get(name);
 
       if (prop == null) {
-	if (_extMap != null)
-	  return _extMap.get(name);
-	else {
-	  // XXX: ValueExpression?
-	  return null;
-	}
+        if (_extMap != null)
+          return _extMap.get(name);
+        else {
+          // XXX: ValueExpression?
+          return null;
+        }
       }
 
       Method getter = prop.getGetter();
       
       if (getter == null)
-	throw new IllegalArgumentException(name + " is not readable");
+        throw new IllegalArgumentException(name + " is not readable");
 
       try {
-	return getter.invoke(_obj);
+        return getter.invoke(_obj);
       } catch (InvocationTargetException e) {
-	throw new FacesException(e.getCause());
+        throw new FacesException(e.getCause());
       } catch (Exception e) {
-	throw new FacesException(e);
+        throw new FacesException(e);
       }
     }
 
@@ -1484,24 +1484,24 @@ public abstract class UIComponentBase extends UIComponent
     public Object put(String name, Object value)
     {
       if (name == null || value == null)
-	throw new NullPointerException();
+        throw new NullPointerException();
 
       Property prop = _propertyMap.get(name);
 
       if (prop == null) {
-	if (_extMap == null)
-	  _extMap = new HashMap<String,Object>(8);
+        if (_extMap == null)
+          _extMap = new HashMap<String,Object>(8);
 
-	return _extMap.put(name, value);
+        return _extMap.put(name, value);
       }
 
       if (prop.getSetter()  == null)
-	throw new IllegalArgumentException(name + " is not writable");
+        throw new IllegalArgumentException(name + " is not writable");
 
       try {
-	return prop.getSetter().invoke(_obj, value);
+        return prop.getSetter().invoke(_obj, value);
       } catch (Exception e) {
-	throw new FacesException(e);
+        throw new FacesException(e);
       }
     }
 
@@ -1511,10 +1511,10 @@ public abstract class UIComponentBase extends UIComponent
       Property prop = _propertyMap.get(name);
 
       if (prop == null) {
-	if (_extMap != null)
-	  return _extMap.remove(name);
-	else
-	  return null;
+        if (_extMap != null)
+          return _extMap.remove(name);
+        else
+          return null;
       }
 
       throw new IllegalArgumentException(name + " cannot be removed");
@@ -1523,9 +1523,9 @@ public abstract class UIComponentBase extends UIComponent
     public Set<Map.Entry<String,Object>> entrySet()
     {
       if (_extMap != null)
-	return _extMap.entrySet();
+        return _extMap.entrySet();
       else
-	return Collections.EMPTY_SET;
+        return Collections.EMPTY_SET;
     }
 
     private static HashMap<String,Property> introspectComponent(Class cl)
@@ -1536,10 +1536,10 @@ public abstract class UIComponentBase extends UIComponent
         BeanInfo info = Introspector.getBeanInfo(cl, Object.class);
 
         for (PropertyDescriptor propDesc : info.getPropertyDescriptors()) {
-  	  Property prop = new Property(propDesc.getReadMethod(),
-				       propDesc.getWriteMethod());
+            Property prop = new Property(propDesc.getReadMethod(),
+                                       propDesc.getWriteMethod());
 
-	  map.put(propDesc.getName(), prop);
+          map.put(propDesc.getName(), prop);
         }
       } catch (Exception e) {
         throw new FacesException(e);
@@ -1629,7 +1629,7 @@ public abstract class UIComponentBase extends UIComponent
     public boolean equals(Object o)
     {
       if (! (o instanceof ValueExpression))
-	return false;
+        return false;
 
       ValueExpression expr = (ValueExpression) o;
       

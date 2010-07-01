@@ -95,7 +95,7 @@ public class IfCookie implements RequestPredicate
   {
     if (_name == null)
       throw new ConfigException(L.l("'name' is a required attribute for {0}",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
   }
 
   /**
@@ -110,11 +110,11 @@ public class IfCookie implements RequestPredicate
 
     if (cookies != null) {
       for (int i = 0; i < cookies.length; i++) {
-	Cookie cookie = cookies[i];
-	
-	if (cookie.getName().equals(_name)) {
-	  return _regexp == null || _regexp.matcher(cookie.getValue()).find();
-	}
+        Cookie cookie = cookies[i];
+
+        if (cookie.getName().equals(_name)) {
+          return _regexp == null || _regexp.matcher(cookie.getValue()).find();
+        }
       }
     }
 

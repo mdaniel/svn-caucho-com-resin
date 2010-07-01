@@ -59,7 +59,7 @@ public class Namespace {
   {
     for (; ptr != null; ptr = ptr._next) {
       if (ptr._prefix.equals(prefix))
-	return ptr._uri;
+        return ptr._uri;
     }
 
     return null;
@@ -69,7 +69,7 @@ public class Namespace {
   {
     for (; ptr != null; ptr = ptr._next) {
       if (ptr._uri.equals(uri))
-	return ptr._prefix;
+        return ptr._prefix;
     }
 
     return null;

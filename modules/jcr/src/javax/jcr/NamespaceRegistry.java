@@ -30,17 +30,17 @@
 package javax.jcr;
 
 public interface NamespaceRegistry {
-  public void	registerNamespace(String prefix, String uri)
+  public void        registerNamespace(String prefix, String uri)
     throws NamespaceException,
-	   UnsupportedRepositoryOperationException,
-	   AccessDeniedException,
-	   RepositoryException;
+           UnsupportedRepositoryOperationException,
+           AccessDeniedException,
+           RepositoryException;
 
   public void unregisterNamespace(String prefix)
     throws NamespaceException,
-	   UnsupportedRepositoryOperationException,
-	   AccessDeniedException,
-	   RepositoryException;
+           UnsupportedRepositoryOperationException,
+           AccessDeniedException,
+           RepositoryException;
   
   public String[] getPrefixes()
     throws RepositoryException;
@@ -50,9 +50,9 @@ public interface NamespaceRegistry {
   
   public String getURI(String prefix)
     throws NamespaceException,
-	   RepositoryException;
+           RepositoryException;
   
   public String getPrefix(String uri)
     throws NamespaceException,
-	   RepositoryException;
+           RepositoryException;
 }

@@ -53,9 +53,9 @@ public class ArtifactVersionRange
   private final boolean _isStrict;
   
   public ArtifactVersionRange(ArtifactVersion min,
-			      boolean isMinInclusive,
-			      ArtifactVersion max,
-			      boolean isMaxInclusive)
+                              boolean isMinInclusive,
+                              ArtifactVersion max,
+                              boolean isMaxInclusive)
   {
     _min = min;
     _isMinInclusive = isMinInclusive;
@@ -116,10 +116,10 @@ public class ArtifactVersionRange
       String maxValue = values[1].trim();
 
       if (minValue.length() > 0)
-	min = ArtifactVersion.create(minValue);
+        min = ArtifactVersion.create(minValue);
       
       if (maxValue.length() > 0)
-	max = ArtifactVersion.create(maxValue);
+        max = ArtifactVersion.create(maxValue);
     }
     else {
       min = max = ArtifactVersion.create(value);
@@ -127,7 +127,7 @@ public class ArtifactVersionRange
 
     if (isStrict) {
       return new ArtifactVersionRange(min, isMinInclusive,
-				      max, isMaxInclusive);
+                                      max, isMaxInclusive);
     }
     else
       return new ArtifactVersionRange(min);
@@ -142,14 +142,14 @@ public class ArtifactVersionRange
       int cmp = version.compareTo(_min);
 
       if (cmp < 0 || cmp == 0 && ! _isMinInclusive)
-	return false;
+        return false;
     }
 
     if (_max != null) {
       int cmp = version.compareTo(_max);
 
       if (cmp > 0 || cmp == 0 && ! _isMaxInclusive)
-	return false;
+        return false;
     }
     
     return true;
@@ -173,7 +173,7 @@ public class ArtifactVersionRange
       sb.append(",");
 
       if (_max != null)
-	sb.append(_max.toDebugString());
+        sb.append(_max.toDebugString());
     }
 
     if (! _isStrict) {
@@ -207,7 +207,7 @@ public class ArtifactVersionRange
       sb.append(",");
 
       if (_max != null)
-	sb.append(_max.toDebugString());
+        sb.append(_max.toDebugString());
     }
 
     if (! _isStrict)

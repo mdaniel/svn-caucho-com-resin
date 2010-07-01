@@ -78,7 +78,7 @@ public class ResinEmbed
       throw ConfigException.create(e);
     } finally {
       try {
-	is.close();
+        is.close();
       } catch (IOException e) {
       }
     }
@@ -93,7 +93,7 @@ public class ResinEmbed
   }
 
   public void addWebApp(String contextPath,
-			String rootDirectory)
+                        String rootDirectory)
   {
     try {
       start();

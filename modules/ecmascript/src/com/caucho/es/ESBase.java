@@ -293,7 +293,7 @@ public class ESBase {
 
     if (primA instanceof ESString || primB instanceof ESString) {
       return ESString.create(primA.toStr().toString() + 
-			     primB.toStr().toString());
+                             primB.toStr().toString());
     }
     else {
       return ESNumber.create(primA.toNum() + primB.toNum());
@@ -312,9 +312,9 @@ public class ESBase {
       double db = b.toNum();
 
       if (Double.isNaN(da) || Double.isNaN(db))
-	return false;
+        return false;
       else
-	return (da < db) != neg;
+        return (da < db) != neg;
     }
   }
 

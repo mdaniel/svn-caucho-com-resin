@@ -123,22 +123,22 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
       HashMap<String,Object> varMap = new HashMap<String,Object>();
         
       for (int j = 0; j <= matcher.groupCount(); j++) {
-	vars.add(matcher.group(j));
-	varMap.put("host" + j, matcher.group(j));
+        vars.add(matcher.group(j));
+        varMap.put("host" + j, matcher.group(j));
       }
 
       varMap.put("regexp", vars);
 
       if (_config.getHostName() != null) {
-	try {
-	  hostName = Config.evalString(_config.getHostName(), varMap);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          hostName = Config.evalString(_config.getHostName(), varMap);
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       HostController controller
-	= new HostController(name, _config, _container, varMap);
+        = new HostController(name, _config, _container, varMap);
 
       controller.setRegexpName(name);
 
@@ -152,35 +152,35 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
       // _controller.setJarPath(_archivePath);
 
       for (int i = 0; i < _hostDefaults.size(); i++)
-	controller.addConfigDefault(_hostDefaults.get(i));
+        controller.addConfigDefault(_hostDefaults.get(i));
 
       controller.init();
     
       Path rootDir = controller.getRootDirectory();
 
       if (rootDir == null || ! rootDir.isDirectory()) {
-	// server/0522
-	controller.destroy();
-	return null;
+        // server/0522
+        controller.destroy();
+        return null;
       }
 
       synchronized (_entries) {
-	for (int i = 0; i < _entries.size(); i++) {
-	  HostController oldController = _entries.get(i);
+        for (int i = 0; i < _entries.size(); i++) {
+          HostController oldController = _entries.get(i);
 
-	  if (rootDir.equals(oldController.getRootDirectory()))
-	    return oldController;
-	}
+          if (rootDir.equals(oldController.getRootDirectory()))
+            return oldController;
+        }
       
-	_entries.add(controller);
+        _entries.add(controller);
       }
 
       // registers mbean
       /*
       try {
-	controller.deployHost();
+        controller.deployHost();
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
       */
       

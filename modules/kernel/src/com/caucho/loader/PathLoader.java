@@ -97,15 +97,15 @@ public class PathLoader extends Loader implements Dependency {
 
     if (path != null && path.canRead() && path.getLength() > 0) {
       ClassEntry entry = new ClassEntry(getClassLoader(), name, path,
-					path, getCodeSource(path));
+                                        path, getCodeSource(path));
 
       /*
       int p = name.lastIndexOf('.');
       String pkg;
       if (p > 0)
-	pkg = name.substring(0, p);
+        pkg = name.substring(0, p);
       else
-	pkg = "";
+        pkg = "";
 
       ClassPackage classPackage = jarEntry.getPackage(pkg);
 

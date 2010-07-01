@@ -161,8 +161,8 @@ public class XtpManager extends PageManager {
    * @return the page or null for not found
    */
   Page createPage(Path path, String uri, String className,
-		  ServletConfig config,
-		  ArrayList<PersistentDependency> dependList)
+                  ServletConfig config,
+                  ArrayList<PersistentDependency> dependList)
     throws Exception
   {
     if (path == null || ! path.canRead() || path.isDirectory())

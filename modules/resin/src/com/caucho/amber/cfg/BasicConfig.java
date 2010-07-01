@@ -80,10 +80,10 @@ class BasicConfig extends AbstractConfig
   private EnumType _enumerated;
 
   BasicConfig(BaseConfigIntrospector introspector,
-	      BeanType sourceType,
-	      AccessibleObject field,
-	      String fieldName,
-	      Class fieldType)
+              BeanType sourceType,
+              AccessibleObject field,
+              String fieldName,
+              Class fieldType)
   {
     _introspector = introspector;
     
@@ -222,7 +222,7 @@ class BasicConfig extends AbstractConfig
     }
     else
       throw error(_field, L.l("{0} is an invalid @Basic type for {1}.",
-			      _fieldType, _fieldName));
+                              _fieldType, _fieldName));
 
     Basic basicAnn = _field.getAnnotation(Basic.class);
  
@@ -334,13 +334,13 @@ class BasicConfig extends AbstractConfig
     int precision = _column.getPrecision();
     if (precision < 0) {
       throw error(_field, L.l("{0} @Column precision cannot be less than 0.",
-			     _fieldName));
+                             _fieldName));
     }
 
     int scale = _column.getScale();
     if (scale < 0) {
       throw error(_field, L.l("{0} @Column scale cannot be less than 0.",
-			     _fieldName));
+                             _fieldName));
     }
 
     // this test implicitly works for case where
@@ -348,7 +348,7 @@ class BasicConfig extends AbstractConfig
     // and scale is set
     if (precision < scale) {
       throw error(_field, L.l("{0} @Column scale cannot be greater than precision. Must set precision to a non-zero value before setting scale.",
-			     _fieldName));
+                             _fieldName));
     }
 
     if (precision > 0) {

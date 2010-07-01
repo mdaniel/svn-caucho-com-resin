@@ -65,7 +65,7 @@ public class TagFileManager {
       String originalLocation = location;
       
       if (location.startsWith("urn:jsptagdir:"))
-	location = location.substring("urn:jsptagdir:".length());
+        location = location.substring("urn:jsptagdir:".length());
 
       TagTaglib taglib = new TagTaglib(prefix, originalLocation);
       
@@ -74,21 +74,21 @@ public class TagFileManager {
       TagInfo tag = null;
 
       try {
-	tag = getTag(uri, taglib);
-	if (tag != null)
-	  return tag;
+        tag = getTag(uri, taglib);
+        if (tag != null)
+          return tag;
       } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
       
       if (! location.endsWith("/"))
-	location = location + "/";
+        location = location + "/";
       
       uri = location + shortName + ".tag";
       
       tag = getTag(uri, taglib);
       if (tag != null)
-	return tag;
+        return tag;
 
       uri = location + shortName + ".tagx";
       return getTag(uri, taglib);
@@ -139,24 +139,24 @@ public class TagFileManager {
 
     try {
       if (location.endsWith(".tag")) {
-	JspCompilerInstance tagCompiler;
+        JspCompilerInstance tagCompiler;
 
-	tagCompiler = _jspCompiler.getCompilerInstance(path, location);
-	tagCompiler.setXML(false);
+        tagCompiler = _jspCompiler.getCompilerInstance(path, location);
+        tagCompiler.setXML(false);
 
-	return tagCompiler.compileTag(taglib);
+        return tagCompiler.compileTag(taglib);
       }
       else if (location.endsWith(".tagx")) {
-	JspCompilerInstance tagCompiler;
+        JspCompilerInstance tagCompiler;
 
-	tagCompiler = _jspCompiler.getCompilerInstance(path, location);
-	tagCompiler.setXML(true);
+        tagCompiler = _jspCompiler.getCompilerInstance(path, location);
+        tagCompiler.setXML(true);
 
-	return tagCompiler.compileTag(taglib);
+        return tagCompiler.compileTag(taglib);
       }
       else
-	throw new JspParseException(L.l("tag file '{0}' must end with .tag or .tagx",
-					location));
+        throw new JspParseException(L.l("tag file '{0}' must end with .tag or .tagx",
+                                        location));
     } catch (Exception e) {
       throw JspParseException.create(e);
     }

@@ -108,7 +108,7 @@ abstract public class JspFragmentNode extends JspContainerNode
     
     for (int i = 0; i < _children.size(); i++) {
       if (! _children.get(i).isStatic())
-	return false;
+        return false;
     }
 
     return true;
@@ -203,8 +203,8 @@ abstract public class JspFragmentNode extends JspContainerNode
     cb.append(_fragmentName + "(pageContext, ");
 
     for (;
-	 parent != null && parent.isTagFileTag();
-	 parent = parent.getParent()) {
+         parent != null && parent.isTagFileTag();
+         parent = parent.getParent()) {
     }
 
     if (parent == null || parent.getId() == TagInstance.TOP_TAG)

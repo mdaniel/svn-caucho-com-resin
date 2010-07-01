@@ -132,17 +132,17 @@ public class IvyInfo {
     IvyInfo info = (IvyInfo) o;
 
     return (_organisation.equals(info._organisation)
-	    && _module.equals(info._module)
-	    && _revision.equals(info._revision));
+            && _module.equals(info._module)
+            && _revision.equals(info._revision));
   }
 
   @Override
   public String toString()
   {
     return (getClass().getSimpleName() + "["
-	    + _organisation
-	    + "," + _module
-	    + "," + _revision
-	    + "," + _status + "]");
+            + _organisation
+            + "," + _module
+            + "," + _revision
+            + "," + _status + "]");
   }
 }

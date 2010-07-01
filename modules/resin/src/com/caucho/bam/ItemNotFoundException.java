@@ -61,7 +61,7 @@ public class ItemNotFoundException extends ErrorPacketException {
       return error;
 
     return new ActorError(ActorError.TYPE_CANCEL,
-			  ActorError.ITEM_NOT_FOUND,
-			  getMessage());
+                          ActorError.ITEM_NOT_FOUND,
+                          getMessage());
   }
 }

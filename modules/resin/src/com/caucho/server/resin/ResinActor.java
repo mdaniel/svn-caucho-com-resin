@@ -107,9 +107,9 @@ public class ResinActor extends SimpleActor
 
   @QuerySet
   public void stop(long id,
-		   String to,
-		   String from,
-		   WatchdogStopQuery query)
+                   String to,
+                   String from,
+                   WatchdogStopQuery query)
   {
     log.info(_resin + " stop request from watchdog '" + from + "'");
 

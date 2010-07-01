@@ -70,16 +70,16 @@ public class FacesServletImpl extends GenericServlet
     throws ServletException
   {
     initFactory(FactoryFinder.APPLICATION_FACTORY,
-		"com.caucho.jsf.application.ApplicationFactoryImpl");
+                "com.caucho.jsf.application.ApplicationFactoryImpl");
 
     initFactory(FactoryFinder.LIFECYCLE_FACTORY,
-		"com.caucho.jsf.lifecycle.LifecycleFactoryImpl");
+                "com.caucho.jsf.lifecycle.LifecycleFactoryImpl");
 
     initFactory(FactoryFinder.RENDER_KIT_FACTORY,
-		"com.caucho.jsf.render.RenderKitFactoryImpl");
+                "com.caucho.jsf.render.RenderKitFactoryImpl");
 
     initFactory(FactoryFinder.FACES_CONTEXT_FACTORY,
-		"com.caucho.jsf.context.FacesContextFactoryImpl");
+                "com.caucho.jsf.context.FacesContextFactoryImpl");
     
     ApplicationFactory appFactory = (ApplicationFactory)
       FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
@@ -95,8 +95,8 @@ public class FacesServletImpl extends GenericServlet
     try {
       Enumeration e = loader.getResources("META-INF/faces-config.xml");
       while (e != null && e.hasMoreElements()) {
-	URL url = (URL) e.nextElement();
-	initPath(app, Vfs.lookup(url.toString()));
+        URL url = (URL) e.nextElement();
+        initPath(app, Vfs.lookup(url.toString()));
       }
     } catch (IOException e) {
       throw ConfigException.create(e);
@@ -150,13 +150,13 @@ public class FacesServletImpl extends GenericServlet
     Iterator iter = lifecycleFactory.getLifecycleIds();
     while (iter.hasNext()) {
       Lifecycle lifecycle
-	= lifecycleFactory.getLifecycle((String) iter.next());
+        = lifecycleFactory.getLifecycle((String) iter.next());
 
       if (developerAidListener != null)
         lifecycle.addPhaseListener(developerAidListener);
       
       for (PhaseListener listener : _phaseListenerList) {
-	lifecycle.addPhaseListener(listener);
+        lifecycle.addPhaseListener(listener);
       }
     }
 
@@ -191,21 +191,21 @@ public class FacesServletImpl extends GenericServlet
       InputStream is = loader.getResourceAsStream("META-INF/services/" + factoryName);
 
       try {
-	if (is != null) {
-	  BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-	  String line = reader.readLine();
+        if (is != null) {
+          BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+          String line = reader.readLine();
 
-	  if (line != null) {
-	    if (line.indexOf('#') >= 0)
-	      line = line.substring(0, line.indexOf('#'));
-	    
-	    return line.trim();
-	  }
-	}
+          if (line != null) {
+            if (line.indexOf('#') >= 0)
+              line = line.substring(0, line.indexOf('#'));
+
+            return line.trim();
+          }
+        }
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
-	is.close();
+        is.close();
       }
     } catch (Exception e) {
     }
@@ -218,61 +218,61 @@ public class FacesServletImpl extends GenericServlet
   {
     if (facesPath.canRead() && ! facesPath.isDirectory()) {
       try {
-	FacesConfig facesConfig = new FacesConfig();
+        FacesConfig facesConfig = new FacesConfig();
 
-	Config config = new Config();
+        Config config = new Config();
 
-	config.setEL(false);
-	
-	config.configure(facesConfig, facesPath, FACES_SCHEMA);
+        config.setEL(false);
 
-	if (app instanceof ApplicationImpl) {
-	  ApplicationImpl appImpl = (ApplicationImpl) app;
+        config.configure(facesConfig, facesPath, FACES_SCHEMA);
 
-	  // jsf/4409
-	  NavigationHandlerImpl navigationHandler
-	    = appImpl.getDefaultNavigationHandler();
+        if (app instanceof ApplicationImpl) {
+          ApplicationImpl appImpl = (ApplicationImpl) app;
 
-	  List<NavigationRule> navigationRules
-	    = facesConfig.getNavigationRules();
+          // jsf/4409
+          NavigationHandlerImpl navigationHandler
+            = appImpl.getDefaultNavigationHandler();
 
-	  for (NavigationRule navigationRule : navigationRules) {
-	    navigationHandler.addRule(navigationRule);
-	  }
+          List<NavigationRule> navigationRules
+            = facesConfig.getNavigationRules();
 
-	  facesConfig.configure(appImpl);
+          for (NavigationRule navigationRule : navigationRules) {
+            navigationHandler.addRule(navigationRule);
+          }
 
-	  facesConfig.configurePhaseListeners(_phaseListenerList);
-	  
-	  for (ManagedBeanConfig bean : facesConfig.getManagedBeans()) {
-	    appImpl.addManagedBean(bean.getName(), bean);
-	  }
+          facesConfig.configure(appImpl);
 
-	  ApplicationConfig appConfig = facesConfig.getApplication();
+          facesConfig.configurePhaseListeners(_phaseListenerList);
 
-	  if (appConfig != null) {
-	    appConfig.configure(appImpl);
-	    
-	    for (ResourceBundleConfig bundle
-		   : appConfig.getResourceBundleList()) {
-	      appImpl.addResourceBundle(bundle.getVar(), bundle);
-	    }
-	  }
-	}
+          for (ManagedBeanConfig bean : facesConfig.getManagedBeans()) {
+            appImpl.addManagedBean(bean.getName(), bean);
+          }
+
+          ApplicationConfig appConfig = facesConfig.getApplication();
+
+          if (appConfig != null) {
+            appConfig.configure(appImpl);
+
+            for (ResourceBundleConfig bundle
+                   : appConfig.getResourceBundleList()) {
+              appImpl.addResourceBundle(bundle.getVar(), bundle);
+            }
+          }
+        }
       } catch (ConfigException e) {
-	_configException = e;
-	
-	throw e;
+        _configException = e;
+
+        throw e;
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new ServletException(e);
+        throw new ServletException(e);
       }
     }
   }
 
   public void service(ServletRequest request,
-		      ServletResponse response)
+                      ServletResponse response)
     throws IOException, ServletException
   {
     throw new UnsupportedOperationException();

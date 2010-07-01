@@ -89,7 +89,7 @@ public class ExternalCompiler extends AbstractJavaCompiler {
 
       ArrayList<String> args = _compiler.getArgs();
       if (args != null)
-	argList.addAll(args);
+        argList.addAll(args);
 
       ArrayList<String> envList = new ArrayList();
 
@@ -178,7 +178,7 @@ public class ExternalCompiler extends AbstractJavaCompiler {
       }
       /*
       finally {
-	
+
         if (alarm != null)
           alarm.dequeue();
       }
@@ -190,23 +190,23 @@ public class ExternalCompiler extends AbstractJavaCompiler {
 
       error.close();
       tempStream.close();
-	
-      if (log.isLoggable(Level.FINE)) {
-	ReadStream read = tempStream.openReadAndSaveBuffer();
-	CharBuffer cb = new CharBuffer();
-	int ch;
 
-	while ((ch = read.read()) >= 0)
-	  cb.append((char) ch);
-	read.close();
-	final String msg = cb.toString();
-	
-	new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
-	  public void run()
-	  {
-	    log.fine(msg);
-	  }
-	};
+      if (log.isLoggable(Level.FINE)) {
+        ReadStream read = tempStream.openReadAndSaveBuffer();
+        CharBuffer cb = new CharBuffer();
+        int ch;
+
+        while ((ch = read.read()) >= 0)
+          cb.append((char) ch);
+        read.close();
+        final String msg = cb.toString();
+
+        new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
+          public void run()
+          {
+            log.fine(msg);
+          }
+        };
       }
 
       ReadStream read = tempStream.openReadAndSaveBuffer();
@@ -219,7 +219,7 @@ public class ExternalCompiler extends AbstractJavaCompiler {
       read.close();
 
       if (errors != null)
-	errors = errors.trim();
+        errors = errors.trim();
 
       if (status == 0 && classFile.getLength() > 0) {
         if (errors != null && ! errors.equals("")) {
@@ -358,23 +358,23 @@ public class ExternalCompiler extends AbstractJavaCompiler {
   {
     if (_inputStream != null) {
       try {
-	_inputStream.close();
+        _inputStream.close();
       } catch (Throwable e) {
       }
     }
       
     if (_errorStream != null) {
       try {
-	_errorStream.close();
+        _errorStream.close();
       } catch (Throwable e) {
       }
     }
 
     if (_process != null) {
       try {
-	_process.destroy();
+        _process.destroy();
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -511,11 +511,11 @@ public class ExternalCompiler extends AbstractJavaCompiler {
     {
       try {
       } finally {
-	_isDone = true;
+        _isDone = true;
 
-	synchronized (this) {
-	  notifyAll();
-	}
+        synchronized (this) {
+          notifyAll();
+        }
       }
     }
   }

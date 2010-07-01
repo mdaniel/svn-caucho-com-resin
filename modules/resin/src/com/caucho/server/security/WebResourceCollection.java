@@ -114,7 +114,7 @@ public class WebResourceCollection {
   {
     if (! Pattern.matches("[a-zA-Z]+", method)) {
       throw new ConfigException(L.l("'{0}' is not a valid http-method.",
-				    method));
+                                    method));
     }
     
     /*

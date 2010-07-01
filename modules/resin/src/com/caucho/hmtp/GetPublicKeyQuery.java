@@ -50,8 +50,8 @@ public class GetPublicKeyQuery implements java.io.Serializable {
    * Constructor for the result
    */
   public GetPublicKeyQuery(String algorithm,
-			   String format,
-			   byte []encoded)
+                           String format,
+                           byte []encoded)
   {
     _algorithm = algorithm;
     _format = format;
@@ -78,7 +78,7 @@ public class GetPublicKeyQuery implements java.io.Serializable {
   {
     if (_algorithm != null) {
       return (getClass().getSimpleName()
-	    + "[" + _algorithm + "," + _format + "]");
+            + "[" + _algorithm + "," + _format + "]");
     }
     else {
       return (getClass().getSimpleName() + "[]");

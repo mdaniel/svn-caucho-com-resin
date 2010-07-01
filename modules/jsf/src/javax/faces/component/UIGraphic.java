@@ -105,7 +105,7 @@ public class UIGraphic extends UIComponentBase
       switch (_propMap.get(name)) {
       case URL:
       case VALUE:
-	return _urlExpr;
+        return _urlExpr;
       }
     }
 
@@ -124,13 +124,13 @@ public class UIGraphic extends UIComponentBase
       switch (prop) {
       case URL:
       case VALUE:
-	if (expr != null && expr.isLiteralText()) {
-	  _url = (String) expr.getValue(null);
-	  return;
-	}
-	else
-	  _urlExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _url = (String) expr.getValue(null);
+          return;
+        }
+        else
+          _urlExpr = expr;
+        break;
       }
     }
 

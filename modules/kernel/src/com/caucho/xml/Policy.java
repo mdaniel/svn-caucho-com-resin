@@ -181,15 +181,15 @@ class Policy {
       ns = NamespaceMap.get(namespaces, prefix);
 
       if (ns != null) {
-	localName = source.substring(i + 1);
+        localName = source.substring(i + 1);
       }
       else if ("xml".equals(prefix)) {
-	ns = XmlParser.XML;
-	localName = source.substring(i + 1);
+        ns = XmlParser.XML;
+        localName = source.substring(i + 1);
       }
       else {
-	prefix = null;
-	localName = source.toString();
+        prefix = null;
+        localName = source.toString();
       }
     }
 
@@ -233,11 +233,11 @@ class Policy {
       ns = NamespaceMap.get(namespaces, prefix);
 
       if (ns != null) {
-	localName = source.substring(i + 1);
+        localName = source.substring(i + 1);
       }
       else {
-	prefix = null;
-	localName = source.toString();
+        prefix = null;
+        localName = source.toString();
       }
     }
 
@@ -298,7 +298,7 @@ class Policy {
   {
     for (int i = s.length() - 1; i >= 0; i--)
       if (! XmlChar.isWhitespace(s.charAt(i)))
-	return false;
+        return false;
 
     return true;
   }
@@ -323,19 +323,19 @@ class Policy {
 
       switch (next.getNodeType()) {
       case Node.TEXT_NODE:
-	if (isWhitespaceOnly(next.getNodeValue()))
-	  return PUSH; // XXX: ignore
-	break;
+        if (isWhitespaceOnly(next.getNodeValue()))
+          return PUSH; // XXX: ignore
+        break;
 
       case Node.COMMENT_NODE:
       case Node.PROCESSING_INSTRUCTION_NODE:
-	return PUSH;
+        return PUSH;
       }
 
       if (document.getDocumentElement() == null &&
-	  next.getNodeType() == Node.ELEMENT_NODE) {
-	document.setDocumentElement((Element) next);
-	return PUSH;
+          next.getNodeType() == Node.ELEMENT_NODE) {
+        document.setDocumentElement((Element) next);
+        return PUSH;
       }
 
       Element elt = document.getDocumentElement();
@@ -368,13 +368,13 @@ class Policy {
     else {
       String expect = nodeName;
       if (expect.equals("#document"))
-	expect = L.l("end of document");
+        expect = L.l("end of document");
       else
-	expect = "`</" + expect + ">'";
+        expect = "`</" + expect + ">'";
       if (tagEnd.equals(""))
-	tagEnd = L.l("end of file");
+        tagEnd = L.l("end of file");
       else
-	tagEnd = "`</" + tagEnd + ">'";
+        tagEnd = "`</" + tagEnd + ">'";
 
       throw parser.error(L.l("expected {0} at {1}", expect, tagEnd));
     }

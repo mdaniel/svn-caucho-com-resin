@@ -114,7 +114,7 @@ public class ThreadConnectionManager {
       ManagedPoolItem aConn = _activeConnections.get(i).get();
 
       if (aConn == null || aConn == conn)
-	_activeConnections.remove(i);
+        _activeConnections.remove(i);
     }
   }
 }

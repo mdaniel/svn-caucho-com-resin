@@ -82,7 +82,7 @@ public abstract class FacesContext {
   public abstract void setViewRoot(UIViewRoot root);
 
   public abstract void addMessage(String clientId,
-				  FacesMessage message);
+                                  FacesMessage message);
 
   public abstract void release();
 

@@ -102,9 +102,9 @@ public class HtmlColumn extends UIColumn
     if (prop != null) {
       switch (prop) {
       case HEADER_CLASS:
-	return _headerClassExpr;
+        return _headerClassExpr;
       case FOOTER_CLASS:
-	return _footerClassExpr;
+        return _footerClassExpr;
       }
     }
 
@@ -122,22 +122,22 @@ public class HtmlColumn extends UIColumn
     if (prop != null) {
       switch (prop) {
       case HEADER_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _headerClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _headerClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _headerClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _headerClassExpr = expr;
+        break;
+
       case FOOTER_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _footerClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _footerClassExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _footerClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _footerClassExpr = expr;
+        break;
       }
     }
 

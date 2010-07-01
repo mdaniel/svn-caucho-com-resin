@@ -94,7 +94,7 @@ public class BamLogService
       _level = Level.SEVERE;
     else
       throw new ConfigException(L.l("'{0}' is an unknown logging level",
-				    level));
+                                    level));
   }
 
   /**
@@ -118,16 +118,16 @@ public class BamLogService
     }
     else if (value instanceof TextMessage) {
       try {
-	text = ((TextMessage) value).getText();
+        text = ((TextMessage) value).getText();
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
     else if (value instanceof ObjectMessage) {
       try {
-	text = String.valueOf(((ObjectMessage) value).getObject());
+        text = String.valueOf(((ObjectMessage) value).getObject());
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
     

@@ -644,12 +644,12 @@ public class OneToManyField extends CollectionField {
     
     if (! getEntitySourceType().isFieldAccess()) {
       type = JTypeWrapper.create(getGetterMethod().getGenericReturnType(),
-				 loader);
+                                 loader);
     }
     else {
       Field field = EntityType.getField(getBeanClass(), getName());
       type = JTypeWrapper.create(field.getGenericType(),
-				 loader);
+                                 loader);
     }
 
     out.println();

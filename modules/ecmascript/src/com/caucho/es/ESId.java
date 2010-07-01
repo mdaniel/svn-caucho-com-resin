@@ -47,8 +47,8 @@ final public class ESId extends ESString {
   {
     if (intern == null) {
       synchronized (LOCK) {
-	if (intern == null)
-	  intern = new Hashtable();
+        if (intern == null)
+          intern = new Hashtable();
       }
     }
 

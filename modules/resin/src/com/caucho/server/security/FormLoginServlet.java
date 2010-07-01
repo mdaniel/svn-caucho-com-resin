@@ -86,8 +86,8 @@ public class FormLoginServlet extends GenericServlet {
         ((CauchoResponse) res).setNoCache(true);
       }
       else {
-	res.setDateHeader("Expires", 0);
-	res.setHeader("Cache-Control", "no-cache");
+        res.setDateHeader("Expires", 0);
+        res.setHeader("Cache-Control", "no-cache");
       }
       
       disp.error(req, res);
@@ -131,7 +131,7 @@ public class FormLoginServlet extends GenericServlet {
 
     if (uri.indexOf('\n') >= 0 || uri.indexOf('\r') >= 0)
       throw new ServletException(L.l("Forwarding URI '{0}' is invalid.",
-				     uri));
+                                     uri));
 
     String uriPwd = req.getRequestURI();
     int p = uriPwd.indexOf("/j_security_check");
@@ -159,8 +159,8 @@ public class FormLoginServlet extends GenericServlet {
     boolean useInternalForward = login.getInternalForward();
     
     if (useInternalForward
-	&& uri.startsWith(uriPwd)
-	&& uri.indexOf('/', uriPwd.length() + 1) < 0) {
+        && uri.startsWith(uriPwd)
+        && uri.indexOf('/', uriPwd.length() + 1) < 0) {
       WebApp newApp = (WebApp) app.getContext(uri);
       String suffix = uri.substring(newApp.getContextPath().length());
       
@@ -168,8 +168,8 @@ public class FormLoginServlet extends GenericServlet {
       // bypasses authorization
       RequestDispatcher disp = newApp.getLoginDispatcher(suffix);
       if (disp != null) {
-	disp.forward(req, res);
-	return;
+        disp.forward(req, res);
+        return;
       }
     }
     

@@ -189,8 +189,8 @@ abstract public class LoadExpr extends AbstractAmberExpr {
       EntityType parentType = (EntityType) type;
 
       while (parentType.getParentType() != null
-	     && parentType.getParentType() instanceof EntityType) {
-	parentType = parentType.getParentType();
+             && parentType.getParentType() instanceof EntityType) {
+        parentType = parentType.getParentType();
       }
 
       item = _rootItem;

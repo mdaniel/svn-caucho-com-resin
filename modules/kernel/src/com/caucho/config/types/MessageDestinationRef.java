@@ -121,7 +121,7 @@ public class MessageDestinationRef
     boolean bind = false;
 
     if (_link == null && _foreignName == null) {
-    	/*
+            /*
       EJBServer server = EJBServer.getLocal();
 
       if (server != null)
@@ -200,8 +200,8 @@ public class MessageDestinationRef
   private Object lookupByLink(String link, Class type)
     throws NamingException
   {
-	return null;
-	/*
+        return null;
+        /*
     Object target = null;
 
     String archiveName;
@@ -226,9 +226,9 @@ public class MessageDestinationRef
 
       if (ejbContainer != null) {
 
-	if (true)
-	  throw new IllegalStateException();
-	
+        if (true)
+          throw new IllegalStateException();
+
         if (dest != null) {
 
           target = dest.getResolvedDestination();

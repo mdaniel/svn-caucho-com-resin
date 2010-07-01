@@ -121,7 +121,7 @@ class HtmlSelectManyListboxRenderer extends SelectRenderer
 
     if (component instanceof HtmlSelectManyListbox) {
       HtmlSelectManyListbox htmlComponent
-	= (HtmlSelectManyListbox) component;
+        = (HtmlSelectManyListbox) component;
 
       accesskey = htmlComponent.getAccesskey();
       dir = htmlComponent.getDir();

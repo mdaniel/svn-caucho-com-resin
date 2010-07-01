@@ -80,68 +80,68 @@ public class XmppStreamReaderImpl extends XMLStreamReaderImpl
 
     while (true) {
       if (XMLStreamReader.START_ELEMENT == getEventType()) {
-	depth++;
+        depth++;
 
-	String prefix = getPrefix();
-	
-	sb.append("<");
+        String prefix = getPrefix();
 
-	if (! "".equals(prefix)) {
-	  sb.append(prefix);
-	  sb.append(":");
-	}
-	
-	sb.append(getLocalName());
+        sb.append("<");
 
-	if (getNamespaceURI() != null) {
-	  if ("".equals(prefix))
-	    sb.append(" xmlns");
-	  else
-	    sb.append(" xmlns:").append(prefix);
-	    
-	  sb.append("=\"");
-	  sb.append(getNamespaceURI()).append("\"");
-	}
+        if (! "".equals(prefix)) {
+          sb.append(prefix);
+          sb.append(":");
+        }
 
-	for (int i = 0; i < getAttributeCount(); i++) {
-	  sb.append(" ");
-	  sb.append(getAttributeLocalName(i));
-	  sb.append("=\"");
-	  sb.append(getAttributeValue(i));
-	  sb.append("\"");
-	}
-	sb.append(">");
+        sb.append(getLocalName());
 
-	log.finest(this + " " + sb);
+        if (getNamespaceURI() != null) {
+          if ("".equals(prefix))
+            sb.append(" xmlns");
+          else
+            sb.append(" xmlns:").append(prefix);
+
+          sb.append("=\"");
+          sb.append(getNamespaceURI()).append("\"");
+        }
+
+        for (int i = 0; i < getAttributeCount(); i++) {
+          sb.append(" ");
+          sb.append(getAttributeLocalName(i));
+          sb.append("=\"");
+          sb.append(getAttributeValue(i));
+          sb.append("\"");
+        }
+        sb.append(">");
+
+        log.finest(this + " " + sb);
       }
       else if (XMLStreamReader.END_ELEMENT == getEventType()) {
-	depth--;
+        depth--;
 
-	sb.append("</");
+        sb.append("</");
 
-	String prefix = getPrefix();
-	if (! "".equals(prefix))
-	  sb.append(prefix).append(":");
-	
-	sb.append(getLocalName());
-	sb.append(">");
+        String prefix = getPrefix();
+        if (! "".equals(prefix))
+          sb.append(prefix).append(":");
 
-	if (depth == 0)
-	  return sb.toString();
+        sb.append(getLocalName());
+        sb.append(">");
+
+        if (depth == 0)
+          return sb.toString();
       }
       else if (XMLStreamReader.CHARACTERS == getEventType()) {
-	sb.append(getText());
+        sb.append(getText());
       }
       else {
-	log.finer(this + " tag=" + getEventType());
+        log.finer(this + " tag=" + getEventType());
 
-	return sb.toString();
+        return sb.toString();
       }
 
       if (next() < 0) {
-	log.finer(this + " unexpected end of file");
-	
-	return sb.toString();
+        log.finer(this + " unexpected end of file");
+
+        return sb.toString();
       }
     }
   }

@@ -68,9 +68,9 @@ public class QDateType extends ConfigType
   {
     try {
       if (text == null)
-	return null;
+        return null;
       else if ("".equals(text))
-	return new QDate();
+        return new QDate();
       
       QDate date = new QDate();
 

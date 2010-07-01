@@ -98,33 +98,33 @@ public class DebugStore {
 
       switch (code) {
       case BlockStore.ALLOC_FREE:
-	out.print('.');
-	break;
+        out.print('.');
+        break;
       case BlockStore.ALLOC_ROW:
-	out.print('r');
-	break;
+        out.print('r');
+        break;
       case BlockStore.ALLOC_USED:
-	out.print('u');
-	break;
-	/*
+        out.print('u');
+        break;
+        /*
       case BlockStore.ALLOC_FRAGMENT:
-	out.print('f');
-	break;
-	*/
+        out.print('f');
+        break;
+        */
       case BlockStore.ALLOC_MINI_FRAG:
-	out.print('m');
-	break;
+        out.print('m');
+        break;
       case BlockStore.ALLOC_INDEX:
-	out.print('i');
-	break;
+        out.print('i');
+        break;
       default:
-	out.print('?');
+        out.print('?');
       }
       
       if (i % 64 == 63)
-	out.println();
+        out.println();
       else if (i % 8 == 7)
-	out.print(' ');
+        out.print(' ');
     }
     
     out.println();
@@ -142,24 +142,24 @@ public class DebugStore {
 
       /*
       if (code == BlockStore.ALLOC_FRAGMENT) {
-	int fragCount = 0;
-	
-	for (int j = 0; j < 8; j++) {
-	  if ((allocTable[i + 1] & (1 << j)) != 0)
-	    fragCount++;
-	}
+        int fragCount = 0;
 
-	totalUsed += fragCount;
+        for (int j = 0; j < 8; j++) {
+          if ((allocTable[i + 1] & (1 << j)) != 0)
+            fragCount++;
+        }
 
-	out.println();
-	
-	out.print("Fragment Block " + (i / 2) + ": ");
-	for (int j = 0; j < 8; j++) {
-	  if ((allocTable[i + 1] & (1 << j)) != 0)
-	    out.print("1");
-	  else
-	    out.print(".");
-	}
+        totalUsed += fragCount;
+
+        out.println();
+
+        out.print("Fragment Block " + (i / 2) + ": ");
+        for (int j = 0; j < 8; j++) {
+          if ((allocTable[i + 1] & (1 << j)) != 0)
+            out.print("1");
+          else
+            out.print(".");
+        }
       }
       */
     }

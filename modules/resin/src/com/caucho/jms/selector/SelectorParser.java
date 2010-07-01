@@ -92,7 +92,7 @@ public class SelectorParser  {
 
     if (! selector.isUnknown() && ! selector.isBoolean())
       throw new InvalidSelectorException(L.l("selector '{0}' must be a boolean",
-					     selector));
+                                             selector));
 
     return selector;
   }
@@ -204,14 +204,14 @@ public class SelectorParser  {
       char escape = '\\';
       
       if (peekToken() == ESCAPE) {
-	scanToken();
-	
-	token = scanToken();
-	if (token != STRING)
-	  throw error("ESCAPE needs string pattern");
+        scanToken();
 
-	if (_lexeme.length() > 0)
-	  escape = _lexeme.charAt(0);	
+        token = scanToken();
+        if (token != STRING)
+          throw error("ESCAPE needs string pattern");
+
+        if (_lexeme.length() > 0)
+          escape = _lexeme.charAt(0);
       }
 
       left = new LikeSelector(left, pattern, escape);
@@ -341,19 +341,19 @@ public class SelectorParser  {
       break;
     case INTEGER:
       if (hasSign)
-	return new LiteralSelector(Long.decode("-" + _lexeme));
+        return new LiteralSelector(Long.decode("-" + _lexeme));
       else
-	return new LiteralSelector(Long.decode(_lexeme));
+        return new LiteralSelector(Long.decode(_lexeme));
     case LONG:
       if (hasSign)
-	return new LiteralSelector(Long.decode("-" + _lexeme));
+        return new LiteralSelector(Long.decode("-" + _lexeme));
       else
-	return new LiteralSelector(Long.decode(_lexeme));
+        return new LiteralSelector(Long.decode(_lexeme));
     case DOUBLE:
       if (hasSign)
-	return new LiteralSelector(new Double("-" + _lexeme));
+        return new LiteralSelector(new Double("-" + _lexeme));
       else
-	return new LiteralSelector(new Double(_lexeme));
+        return new LiteralSelector(new Double(_lexeme));
 
     case '(':
       value = parseExpr();
@@ -471,25 +471,25 @@ public class SelectorParser  {
         _cb.append((char) ch);
 
       if ((ch == 'x' || ch == 'X')
-	  && _cb.length() == 1 && _cb.charAt(0) == '0') {
-	
-	_cb.append('x');
-	for (ch = read();
-	     '0' <= ch && ch <= '9'
-	       || 'a' <= ch && ch <= 'f'
-	       || 'A' <= ch && ch <= 'F';
-	     ch = read()) {
-	  _cb.append((char) ch);
-	}
+          && _cb.length() == 1 && _cb.charAt(0) == '0') {
 
-	_lexeme = _cb.toString();
+        _cb.append('x');
+        for (ch = read();
+             '0' <= ch && ch <= '9'
+               || 'a' <= ch && ch <= 'f'
+               || 'A' <= ch && ch <= 'F';
+             ch = read()) {
+          _cb.append((char) ch);
+        }
 
-	if (ch == 'l' || ch == 'L')
-	  return LONG;
-	else {
-	  unread(ch);
-	  return INTEGER;
-	}
+        _lexeme = _cb.toString();
+
+        if (ch == 'l' || ch == 'L')
+          return LONG;
+        else {
+          unread(ch);
+          return INTEGER;
+        }
       }
 
       if (ch == '.') {
@@ -536,7 +536,7 @@ public class SelectorParser  {
 
       for (ch = read(); ch >= 0; ch = read()) {
         if (ch == end) {
-	  int ch1;
+          int ch1;
           if ((ch1 = read()) == end)
             _cb.append((char) end);
           else {
@@ -549,7 +549,7 @@ public class SelectorParser  {
       }
 
       if (ch < 0)
-	throw error(L.l("unexpected end of selector"));
+        throw error(L.l("unexpected end of selector"));
 
       _lexeme = _cb.toString();
 

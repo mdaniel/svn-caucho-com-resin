@@ -186,9 +186,9 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
       String foreignName;
 
       if (_factoryClass != null)
-	foreignName = _foreignName;
+        foreignName = _foreignName;
       else
-	foreignName = Jndi.getFullName(_foreignName);
+        foreignName = Jndi.getFullName(_foreignName);
 
       try {
         Object value = context.lookup(foreignName);
@@ -218,22 +218,22 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
 
     if (factoryClass != null) {
       if (_props == null)
-	_props = new Hashtable<String,String>();
+        _props = new Hashtable<String,String>();
 
       _props.put("java.naming.factory.initial", factoryClass.getName());
     }
 
     if (log.isLoggable(Level.CONFIG)) {
       if (_foreignName != null)
-	log.config("jndi-link[jndi-name=" + _jndiName
-		   + ", foreign-name=" + _foreignName + "] configured");
+        log.config("jndi-link[jndi-name=" + _jndiName
+                   + ", foreign-name=" + _foreignName + "] configured");
       else if (_factoryClass != null)
-	log.config("jndi-link[jndi-name=" + _jndiName
-		   + ", factory=" + _factoryClass.getName() + "] configured");
+        log.config("jndi-link[jndi-name=" + _jndiName
+                   + ", factory=" + _factoryClass.getName() + "] configured");
     }
 
     if (_foreignName != null
-	&& Jndi.getFullName(_jndiName).equals(Jndi.getFullName(_foreignName)))
+        && Jndi.getFullName(_jndiName).equals(Jndi.getFullName(_foreignName)))
       return;
 
     // server/155a - not a short link since it needs to be able to bind

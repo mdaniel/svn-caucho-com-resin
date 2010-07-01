@@ -113,11 +113,11 @@ public class JspExpression extends JspNode {
       char ch = _text.charAt(i);
 
       if (ch == '/' && i + 1 < length && _text.charAt(i + 1) == '/')
-	hasSlashes = true;
+        hasSlashes = true;
 
       // destLine needs incrementing for newlines
       if (ch == '\n') {
-	hasSlashes = false;
+        hasSlashes = false;
         out.println();
       }
       else 

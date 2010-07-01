@@ -98,7 +98,7 @@ public class ResinInclude extends ResinControl {
     }
     else {
       throw new ConfigException(L.l("Required file '{0}' can not be read for resin:include.",
-				    _path.getNativePath()));
+                                    _path.getNativePath()));
     }
     
     Object object = getObject();

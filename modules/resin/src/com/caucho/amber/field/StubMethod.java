@@ -75,7 +75,7 @@ public class StubMethod {
     JClass []paramTypes = _method.getParameterTypes();
     for (int i = 0; i < paramTypes.length; i++) {
       if (i != 0)
-	out.print(", ");
+        out.print(", ");
 
       out.print(paramTypes[i].getPrintName());
       out.print(" a" + i);
@@ -85,9 +85,9 @@ public class StubMethod {
     JClass []exnTypes = _method.getExceptionTypes();
     for (int i = 0; i < exnTypes.length; i++) {
       if (i == 0)
-	out.print("  throws ");
+        out.print("  throws ");
       else
-	out.print(", ");
+        out.print(", ");
 
       out.print(exnTypes[i].getPrintName());
     }

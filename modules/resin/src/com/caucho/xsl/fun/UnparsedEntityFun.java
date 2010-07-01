@@ -53,7 +53,7 @@ public class UnparsedEntityFun extends XPathFun {
    * @param args The evaluated arguments
    */
   public Object eval(Node node, ExprEnvironment env,
-		     AbstractPattern pattern, ArrayList args)
+                     AbstractPattern pattern, ArrayList args)
     throws XPathException
   {
     if (args.size() < 1)

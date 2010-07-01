@@ -116,7 +116,7 @@ public class LocalDeployServlet extends GenericServlet
 
     if (! _isEnable) {
       log.warning(L.l("LocalDeployServlet[] non-enabled access from IP='{0}'",
-		      req.getRemoteAddr()));
+                      req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
 
@@ -127,7 +127,7 @@ public class LocalDeployServlet extends GenericServlet
     
     if (! addr.startsWith("127.")) {
       log.warning(L.l("LocalDeployServlet[] non-local access from IP='{0}'",
-		      req.getRemoteAddr()));
+                      req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
       
@@ -136,8 +136,8 @@ public class LocalDeployServlet extends GenericServlet
 
     if (_role != null && ! req.isUserInRole(_role)) {
       log.warning(L.l("LocalDeployServlet[] user not in role '{0}' from IP='{1}'",
-		      _role,
-		      req.getRemoteAddr()));
+                      _role,
+                      req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
       
@@ -151,7 +151,7 @@ public class LocalDeployServlet extends GenericServlet
     }
     else {
       log.warning(L.l("LocalDeployServlet[] unknown action '{0}' from IP='{1}'",
-		      action, req.getRemoteAddr()));
+                      action, req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
       
@@ -163,7 +163,7 @@ public class LocalDeployServlet extends GenericServlet
    * Adds a new web-app
    */
   private void addWebApp(HttpServletRequest req,
-			 HttpServletResponse res)
+                         HttpServletResponse res)
     throws IOException, ServletException
   {
     String contextPath = req.getParameter("context-path");
@@ -178,7 +178,7 @@ public class LocalDeployServlet extends GenericServlet
 
     if (contextPath == null || "".equals(contextPath)) {
       log.warning(L.l("LocalDeployServlet[] add-web-app requires context-path from IP='{0}'",
-		      req.getRemoteAddr()));
+                      req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
 
@@ -187,7 +187,7 @@ public class LocalDeployServlet extends GenericServlet
 
     if (root == null && war == null) {
       log.warning(L.l("LocalDeployServlet[] add-web-app requires root or war from IP='{0}'",
-		      req.getRemoteAddr()));
+                      req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
 
@@ -210,8 +210,8 @@ public class LocalDeployServlet extends GenericServlet
       Path warPath = containerRoot.lookup(war);
 
       if (! warPath.exists()) {
-	log.warning(L.l("LocalDeployServlet[] add-web-app war='{0}' cannot be read, from IP='{0}'",
-		      warPath.getURL(), req.getRemoteAddr()));
+        log.warning(L.l("LocalDeployServlet[] add-web-app war='{0}' cannot be read, from IP='{0}'",
+                      warPath.getURL(), req.getRemoteAddr()));
       }
     }
 

@@ -91,7 +91,7 @@ public class ClassEnhancerConfig implements ClassEnhancer {
     }
     else
       throw new ConfigException(L.l("'{0}' is an unsupported class enhancer type.  ClassEnhancer is required.",
-				    type.getName()));
+                                    type.getName()));
   }
 
   /**
@@ -140,8 +140,8 @@ public class ClassEnhancerConfig implements ClassEnhancer {
    * Enhances the class by adding to the GenClass.
    */
   public void enhance(GenClass genClass,
-		      JClass baseClass,
-		      String extClassName)
+                      JClass baseClass,
+                      String extClassName)
     throws Exception
   {
     _enhancer.enhance(genClass, baseClass, extClassName);

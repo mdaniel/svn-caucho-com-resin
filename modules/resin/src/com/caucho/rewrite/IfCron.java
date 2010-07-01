@@ -84,11 +84,11 @@ public class IfCron implements RequestPredicate
   {
     if (_enableAt == null)
       throw new ConfigException(L.l("{0} requires 'enable-at' attribute",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
     
     if (_disableAt == null)
       throw new ConfigException(L.l("{0} requires 'disable-at' attribute",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
   }
 
   /**

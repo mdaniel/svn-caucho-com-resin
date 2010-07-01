@@ -72,7 +72,7 @@ public class ESBeanWrapper extends ESBase {
     sbuf.append("(");
     for (int i = 0; formals != null && i < formals.length; i++) {
       if (i != 0)
-	sbuf.append(", ");
+        sbuf.append(", ");
       sbuf.append(formals[i]);
     }
       

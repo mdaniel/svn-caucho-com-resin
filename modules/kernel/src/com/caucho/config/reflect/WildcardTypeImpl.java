@@ -114,12 +114,12 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
   {
     for (BaseType bound : _lowerBounds) {
       if (! type.isAssignableFrom(bound))
-	return false;
+        return false;
     }
     
     for (BaseType bound : _upperBounds) {
       if (! bound.isAssignableFrom(type))
-	return false;
+        return false;
     }
     
     return true;

@@ -51,17 +51,17 @@ public class NodeSetExpr extends Expr {
   public static Expr create(AbstractPattern pattern)
   {
     if (pattern instanceof NodeTypePattern
-	&& pattern.getParent() instanceof FromSelf
-	&& pattern.toString().equals("."))
+        && pattern.getParent() instanceof FromSelf
+        && pattern.toString().equals("."))
       return new ObjectExpr(SELF, ".");
     else if (pattern instanceof FromContext
-	     && ((FromContext) pattern).getCount() == 0
-	     && pattern.getParent() == null)
+             && ((FromContext) pattern).getCount() == 0
+             && pattern.getParent() == null)
       return new ObjectExpr(SELF, ".");
     else if (pattern instanceof NodePattern
-	     && pattern.getParent() instanceof FromAttributes
-	     && pattern.getParent().getParent() instanceof FromContext
-	     && ((FromContext) pattern.getParent().getParent()).getCount() == 0)
+             && pattern.getParent() instanceof FromAttributes
+             && pattern.getParent().getParent() instanceof FromContext
+             && ((FromContext) pattern.getParent().getParent()).getCount() == 0)
       return new ObjectExpr(ATTRIBUTE, ((NodePattern) pattern).getNodeName());
     else
       return new NodeSetExpr(pattern);

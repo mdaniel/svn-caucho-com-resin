@@ -94,13 +94,13 @@ public class GitTree {
 
       int len = mode.length();
       for (int i = 0; i < len; i++)
-	out.write(mode.charAt(i));
+        out.write(mode.charAt(i));
 
       out.write(' ');
       
       len = key.length();
       for (int i = 0; i < len; i++)
-	out.write(key.charAt(i));
+        out.write(key.charAt(i));
       
       out.write(0);
 
@@ -157,8 +157,8 @@ public class GitTree {
     public String toString()
     {
       return ("GitTree.Entry[" + _name
-	      + "," + String.format("%o", _mode)
-	      + "," + _sha1 + "]");
+              + "," + String.format("%o", _mode)
+              + "," + _sha1 + "]");
     }
   }
 }

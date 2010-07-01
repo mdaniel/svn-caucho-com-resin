@@ -192,6 +192,6 @@ public class StreamHandler extends Handler {
       return "StreamHandler@" + System.identityHashCode(this) + "[]";
     else
       return ("StreamHandler@" + System.identityHashCode(this)
-	      + "[" + _os.getPath() + "]");
+              + "[" + _os.getPath() + "]");
   }
 }

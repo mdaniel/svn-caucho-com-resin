@@ -73,9 +73,9 @@ public class Rewrite extends AbstractTargetDispatchRule
   }
   
   public FilterChain map(String uri,
-			 String queryString,
-			 FilterChain next,
-			 FilterChain tail)
+                         String queryString,
+                         FilterChain next,
+                         FilterChain tail)
     throws ServletException
   {
     return next;

@@ -295,7 +295,7 @@ abstract public class Column {
    * @param value the value to store
    */
   abstract void setString(Transaction xa,
-			  byte []block, int rowOffset, String value)
+                          byte []block, int rowOffset, String value)
     throws SQLException;
   
   /**
@@ -324,7 +324,7 @@ abstract public class Column {
    * @param value the value to store
    */
   void setInteger(Transaction xa,
-		  byte []block, int rowOffset, int value)
+                  byte []block, int rowOffset, int value)
     throws SQLException
   {
     setString(xa, block, rowOffset, String.valueOf(value));
@@ -356,7 +356,7 @@ abstract public class Column {
    * @param value the value to store
    */
   void setLong(Transaction xa,
-	       byte []block, int rowOffset, long value)
+               byte []block, int rowOffset, long value)
     throws SQLException
   {
     setString(xa, block, rowOffset, String.valueOf(value));
@@ -388,7 +388,7 @@ abstract public class Column {
    * @param value the value to store
    */
   void setDouble(Transaction xa,
-		 byte []block, int rowOffset, double value)
+                 byte []block, int rowOffset, double value)
     throws SQLException
   {
     setString(xa, block, rowOffset, String.valueOf(value));
@@ -402,8 +402,8 @@ abstract public class Column {
    * @param expr the expression to store
    */
   void setExpr(Transaction xa,
-	       byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
     throws SQLException
   {
     if (expr.isNull(context))
@@ -448,7 +448,7 @@ abstract public class Column {
    * @return the length of the value
    */
   int evalToBuffer(byte []block, int rowOffset,
-		   byte []buffer, int bufferOffset)
+                   byte []buffer, int bufferOffset)
     throws SQLException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -458,7 +458,7 @@ abstract public class Column {
    * Returns true if the bytes are equal.
    */
   public boolean isEqual(byte []block, int rowOffset,
-			 byte []buffer, int offset, int length)
+                         byte []buffer, int offset, int length)
   {
     return false;
   }
@@ -467,7 +467,7 @@ abstract public class Column {
    * Returns true if the bytes are equal.
    */
   public boolean isEqual(byte []buffer1, int rowOffset1,
-			 byte []buffer2, int rowOffset2)
+                         byte []buffer2, int rowOffset2)
   {
     throw new UnsupportedOperationException();
   }
@@ -493,11 +493,11 @@ abstract public class Column {
    * Sets based on an iterator.
    */
   public void set(Transaction xa,
-		  TableIterator iter, Expr expr, QueryContext context)
+                  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
     setString(xa, iter.getBuffer(), iter.getRowOffset(),
-	      expr.evalString(context));
+              expr.evalString(context));
     
     iter.setDirty();
   }
@@ -510,8 +510,8 @@ abstract public class Column {
    * @param rowAddr the address of the row
    */
   void setIndex(Transaction xa,
-		byte []block, int rowOffset,
-		long rowAddr, QueryContext context)
+                byte []block, int rowOffset,
+                long rowAddr, QueryContext context)
     throws SQLException
   {
     BTree index = getIndex();
@@ -523,12 +523,12 @@ abstract public class Column {
     IndexCache manager = IndexCache.create();
 
     manager.insert(index,
-		   block, rowOffset + getColumnOffset(), getLength(),
-		   rowAddr,
-		   xa);
+                   block, rowOffset + getColumnOffset(), getLength(),
+                   rowAddr,
+                   xa);
     */
     index.insert(block, rowOffset + getColumnOffset(), getLength(),
-		 rowAddr, false);
+                 rowAddr, false);
   }
   
   /**
@@ -550,8 +550,8 @@ abstract public class Column {
     IndexCache manager = IndexCache.create();
 
     manager.delete(index,
-		   block, rowOffset + getColumnOffset(), getLength(),
-		   xa);
+                   block, rowOffset + getColumnOffset(), getLength(),
+                   xa);
     */
 
     index.remove(block, rowOffset + getColumnOffset(), getLength());

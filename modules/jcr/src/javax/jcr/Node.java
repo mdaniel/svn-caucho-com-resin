@@ -52,11 +52,11 @@ public interface Node extends Item {
    */
   public Node addNode(String relPath)
     throws ItemExistsException,
-	   PathNotFoundException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   RepositoryException;
+           PathNotFoundException,
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           RepositoryException;
   
   /**
    * Creates a new node given by the relative path.
@@ -65,14 +65,14 @@ public interface Node extends Item {
    * @param primaryNodeTypeName the node type of the new node
    */
   public Node addNode(String relPath,
-		      String primaryNodeTypeName)
+                      String primaryNodeTypeName)
     throws ItemExistsException,
-	   PathNotFoundException,
-	   NoSuchNodeTypeException,
-	   LockException,
-	   VersionException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           PathNotFoundException,
+           NoSuchNodeTypeException,
+           LockException,
+           VersionException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Moves the source node before the dest
@@ -81,13 +81,13 @@ public interface Node extends Item {
    * @param destChildRelPath relative path to the destination item
    */
   public void orderBefore(String srcChildRelPath,
-			  String destChildRelPath)
+                          String destChildRelPath)
     throws UnsupportedRepositoryOperationException,
-	   VersionException,
-	   ConstraintViolationException,
-	   ItemNotFoundException,
-	   LockException,
-	   RepositoryException;
+           VersionException,
+           ConstraintViolationException,
+           ItemNotFoundException,
+           LockException,
+           RepositoryException;
 
   /**
    * Sets a property of the node.
@@ -97,10 +97,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, Value value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node.
@@ -111,10 +111,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, Value value, int type)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node with a value array.
@@ -124,10 +124,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, Value[] values)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node with a value array.
@@ -137,13 +137,13 @@ public interface Node extends Item {
    * @param type the expected type of the property
    */
   public Property setProperty(String name,
-			      Value[] values,
-			      int type)
+                              Value[] values,
+                              int type)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node with an array of string values
@@ -153,10 +153,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, String[] values)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
 
   /**
    * Sets a property of the node with an array of string values
@@ -167,10 +167,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, String[] values, int type)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
 
   /**
    * Sets a property of the node with a single string value
@@ -181,10 +181,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, String value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
 
   /**
    * Sets a property of the node with a single string value
@@ -195,10 +195,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, String value, int type)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node from an input stream
@@ -208,10 +208,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, InputStream value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node from a boolean
@@ -221,10 +221,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, boolean value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node from a double
@@ -234,10 +234,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, double value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node from a long
@@ -247,10 +247,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, long value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Sets a property of the node from a date
@@ -260,10 +260,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, Calendar value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
 
   /**
    * Sets a property of the node from a based on a reference to a node
@@ -273,10 +273,10 @@ public interface Node extends Item {
    */
   public Property setProperty(String name, Node value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException;
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException;
   
   /**
    * Returns the node with the given relative path.
@@ -285,7 +285,7 @@ public interface Node extends Item {
    */
   public Node getNode(String relPath)
     throws PathNotFoundException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns the direct child nodes.
@@ -304,7 +304,7 @@ public interface Node extends Item {
    */
   public Property getProperty(String relPath)
     throws PathNotFoundException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns the an iterator of the properties of the node.
@@ -324,14 +324,14 @@ public interface Node extends Item {
    */
   public Item getPrimaryItem()
     throws ItemNotFoundException,
-	   RepositoryException;
+           RepositoryException;
 
   /**
    * Returns the node's UUID
    */
   public String getUUID()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns the node's index
@@ -396,27 +396,27 @@ public interface Node extends Item {
    */
   public void addMixin(String mixinName)
     throws NoSuchNodeTypeException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   RepositoryException;
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           RepositoryException;
   
   /**
    * Removes a mixin type to the node.
    */
   public void removeMixin(String mixinName)
     throws NoSuchNodeTypeException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   RepositoryException;
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           RepositoryException;
   
   /**
    * Returns true if the given mixin type can be added to the node.
    */
   public boolean canAddMixin(String mixinName)
     throws NoSuchNodeTypeException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns a description of the node.
@@ -429,66 +429,66 @@ public interface Node extends Item {
    */
   public Version checkin()
     throws VersionException,
-	   UnsupportedRepositoryOperationException,
-	   InvalidItemStateException,
-	   LockException,
-	   RepositoryException;
+           UnsupportedRepositoryOperationException,
+           InvalidItemStateException,
+           LockException,
+           RepositoryException;
   
   /**
    * Checks out a version.
    */
   public void checkout()
     throws UnsupportedRepositoryOperationException,
-	   LockException,
-	   RepositoryException;
+           LockException,
+           RepositoryException;
   
   /**
    * Mark the version merge as complete.
    */
   public void doneMerge(Version version)
     throws VersionException,
-	   InvalidItemStateException,
-	   UnsupportedRepositoryOperationException,
-	   RepositoryException;
+           InvalidItemStateException,
+           UnsupportedRepositoryOperationException,
+           RepositoryException;
   
   /**
    * Cancel a version merge.
    */
   public void cancelMerge(Version version)
     throws VersionException,
-	   InvalidItemStateException,
-	   UnsupportedRepositoryOperationException,
-	   RepositoryException;
+           InvalidItemStateException,
+           UnsupportedRepositoryOperationException,
+           RepositoryException;
   
   /**
    * Updates a workspace
    */
   public void update(String srcWorkspaceName)
     throws NoSuchWorkspaceException,
-	   AccessDeniedException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException;
+           AccessDeniedException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException;
   
   /**
    * Merges child nodes.
    */
   public NodeIterator merge(String srcWorkspace, boolean bestEffort)
     throws NoSuchWorkspaceException,
-	   AccessDeniedException,
-	   MergeException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException;
+           AccessDeniedException,
+           MergeException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException;
   
   /**
    * Returns the node path to a workspace.
    */
   public String getCorrespondingNodePath(String workspaceName)
     throws ItemNotFoundException,
-	   NoSuchWorkspaceException,
-	   AccessDeniedException,
-	   RepositoryException;
+           NoSuchWorkspaceException,
+           AccessDeniedException,
+           RepositoryException;
   
   /**
    * Returns true for a checked out node.
@@ -501,91 +501,91 @@ public interface Node extends Item {
    */
   public void restore(String versionName, boolean removeExisting)
     throws VersionException,
-	   ItemExistsException,
-	   UnsupportedRepositoryOperationException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException;
+           ItemExistsException,
+           UnsupportedRepositoryOperationException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException;
   
   /**
    * Restore the node based on an older version.
    */
   public void restore(Version version, boolean removeExisting)
     throws VersionException,
-	   ItemExistsException,
-	   UnsupportedRepositoryOperationException,
-	   LockException,
-	   RepositoryException;
+           ItemExistsException,
+           UnsupportedRepositoryOperationException,
+           LockException,
+           RepositoryException;
   
   /**
    * Restore the node based on an older version.
    */
   public void restore(Version version,
-		      String relPath,
-		      boolean removeExisting)
+                      String relPath,
+                      boolean removeExisting)
     throws PathNotFoundException,
-	   ItemExistsException,
-	   VersionException,
-	   ConstraintViolationException,
-	   UnsupportedRepositoryOperationException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException;
+           ItemExistsException,
+           VersionException,
+           ConstraintViolationException,
+           UnsupportedRepositoryOperationException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException;
   
   /**
    * Restore the node based on an older version.
    */
   public void restoreByLabel(String versionLabel,
-			     boolean removeExisting)
+                             boolean removeExisting)
     throws VersionException,
-	   ItemExistsException,
-	   UnsupportedRepositoryOperationException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException;
+           ItemExistsException,
+           UnsupportedRepositoryOperationException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException;
   
   /**
    * Returns the node's version history.
    */
   public VersionHistory getVersionHistory()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns the base version.
    */
   public Version getBaseVersion()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Lock the node.
    */
   public Lock lock(boolean isDeep, boolean isSessionScoped)
     throws UnsupportedRepositoryOperationException,
-	   LockException,
-	   AccessDeniedException,
-	   InvalidItemStateException,
-	   RepositoryException;
+           LockException,
+           AccessDeniedException,
+           InvalidItemStateException,
+           RepositoryException;
   
   /**
    * Returns the current lock.
    */
   public Lock getLock()
     throws UnsupportedRepositoryOperationException,
-	   LockException,
-	   AccessDeniedException,
-	   RepositoryException;
+           LockException,
+           AccessDeniedException,
+           RepositoryException;
   
   /**
    * Unlocks the node.
    */
   public void unlock()
     throws UnsupportedRepositoryOperationException,
-	   LockException,
-	   AccessDeniedException,
-	   InvalidItemStateException,
-	   RepositoryException;
+           LockException,
+           AccessDeniedException,
+           InvalidItemStateException,
+           RepositoryException;
   
   /**
    * Returns true if the node owns a lock.

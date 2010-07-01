@@ -59,9 +59,9 @@ public class NodePattern extends AbstractPattern {
   public double getPriority()
   {
     if (_parent == null ||
-	_parent instanceof FromChildren &&
-	(_parent._parent instanceof FromAny ||
-	 _parent._parent instanceof FromContext))
+        _parent instanceof FromChildren &&
+        (_parent._parent instanceof FromAny ||
+         _parent._parent instanceof FromContext))
       return 0;
     else
       return 0.5;
@@ -129,9 +129,9 @@ public class NodePattern extends AbstractPattern {
     NodePattern bPattern = (NodePattern) b;
     
     return (_nodeType == bPattern._nodeType
-	    && _tag.equals(bPattern._tag)
-	    && (_parent == bPattern._parent
-		|| (_parent != null && _parent.equals(bPattern._parent))));
+            && _tag.equals(bPattern._tag)
+            && (_parent == bPattern._parent
+                || (_parent != null && _parent.equals(bPattern._parent))));
   }
 
   /**

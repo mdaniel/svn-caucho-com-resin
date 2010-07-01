@@ -155,10 +155,10 @@ public class FromPrevious extends Axis {
 
     int count = 0;
     for (Node ptr = axis;
-	 ptr != null;
-	 ptr = XmlUtil.getPrevious(ptr)) {
+         ptr != null;
+         ptr = XmlUtil.getPrevious(ptr)) {
       if (pattern.match(ptr, env) && ! isDescendant(ptr, axis))
-	count++;
+        count++;
     }
 
     return count;
@@ -236,7 +236,7 @@ public class FromPrevious extends Axis {
 
     while ((axis = XmlUtil.getNext(axis)) != null) {
       if (! isDescendant(axis, node) && _parent.match(axis, env))
-	return axis;
+        return axis;
     }
     
     return null;
@@ -245,8 +245,8 @@ public class FromPrevious extends Axis {
   private boolean isDescendant(Node descendant, Node node)
   {
     for (;
-	 descendant != node && descendant != null;
-	 descendant = descendant.getParentNode()) {
+         descendant != node && descendant != null;
+         descendant = descendant.getParentNode()) {
     }
 
     return descendant != null;

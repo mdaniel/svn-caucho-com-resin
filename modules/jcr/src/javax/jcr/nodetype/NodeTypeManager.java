@@ -34,7 +34,7 @@ import javax.jcr.RepositoryException;
 public interface NodeTypeManager {
   public NodeType getNodeType(String nodeTypeName)
     throws NoSuchNodeTypeException,
-	   RepositoryException;
+           RepositoryException;
   
   public NodeTypeIterator getAllNodeTypes()
     throws RepositoryException;

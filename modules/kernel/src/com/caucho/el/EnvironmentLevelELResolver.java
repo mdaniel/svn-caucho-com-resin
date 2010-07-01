@@ -77,12 +77,12 @@ public class EnvironmentLevelELResolver extends ELResolver {
 
     if (elResolver == null) {
       for (; loader != null; loader = loader.getParent()) {
-	if (loader instanceof EnvironmentClassLoader) {
-	  elResolver = new EnvironmentLevelELResolver(loader);
-	  _local.set(elResolver, loader);
+        if (loader instanceof EnvironmentClassLoader) {
+          elResolver = new EnvironmentLevelELResolver(loader);
+          _local.set(elResolver, loader);
 
-	  return elResolver;
-	}
+          return elResolver;
+        }
       }
 
       loader = ClassLoader.getSystemClassLoader();
@@ -112,8 +112,8 @@ public class EnvironmentLevelELResolver extends ELResolver {
    */
   @Override
   public Class<?> getType(ELContext context,
-			Object base,
-			Object property)
+                        Object base,
+                        Object property)
   {
     Object value = getValue(context, base, property);
 
@@ -124,7 +124,7 @@ public class EnvironmentLevelELResolver extends ELResolver {
   }
 
   public Class<?> getCommonPropertyType(ELContext context,
-					Object base)
+                                        Object base)
   {
     return null;
   }
@@ -140,8 +140,8 @@ public class EnvironmentLevelELResolver extends ELResolver {
    */
   @Override
   public Object getValue(ELContext env,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base != null)
       return null;
@@ -154,9 +154,9 @@ public class EnvironmentLevelELResolver extends ELResolver {
       Object value = _beanResolver.getValue(env, base, property);
 
       if (value != null) {
-	env.setPropertyResolved(true);
-	
-	return value;
+        env.setPropertyResolved(true);
+
+        return value;
       }
     }
 
@@ -178,9 +178,9 @@ public class EnvironmentLevelELResolver extends ELResolver {
    */
   @Override
   public void setValue(ELContext env,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base != null || ! (property instanceof String))
       return;

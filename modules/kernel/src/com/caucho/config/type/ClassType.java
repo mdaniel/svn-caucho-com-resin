@@ -73,33 +73,33 @@ public final class ClassType extends ConfigType
       Class type = _primitiveTypes.get(text);
 
       if (type != null)
-	return type;
+        return type;
       
       try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	int bracketIdx = text.indexOf('[');
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-	if (bracketIdx > 0) {
-	  String componentTypeName = text.substring(0, bracketIdx);
-	  
-	  Class componentClass = _primitiveTypes.get(componentTypeName);
+        int bracketIdx = text.indexOf('[');
 
-	  if (componentClass == null)
-	    componentClass = Class.forName(componentTypeName, false, loader);
+        if (bracketIdx > 0) {
+          String componentTypeName = text.substring(0, bracketIdx);
 
-	  while (bracketIdx > 0) {
-	    componentClass = Array.newInstance(componentClass, 0).getClass();
-	    bracketIdx = text.indexOf('[', (bracketIdx + 1));
-	  }
+          Class componentClass = _primitiveTypes.get(componentTypeName);
 
-	  return componentClass;
-	}
-	else {
-	  return Class.forName(text, false, loader);
-	}
+          if (componentClass == null)
+            componentClass = Class.forName(componentTypeName, false, loader);
+
+          while (bracketIdx > 0) {
+            componentClass = Array.newInstance(componentClass, 0).getClass();
+            bracketIdx = text.indexOf('[', (bracketIdx + 1));
+          }
+
+          return componentClass;
+        }
+        else {
+          return Class.forName(text, false, loader);
+        }
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
   }
@@ -117,7 +117,7 @@ public final class ClassType extends ConfigType
       return valueOf((String) value);
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to an Class",
-				    value));
+                                    value));
   }
 
   static {

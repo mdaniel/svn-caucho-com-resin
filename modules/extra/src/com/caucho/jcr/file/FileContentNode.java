@@ -83,7 +83,7 @@ public class FileContentNode extends BaseNode {
    */
   public Property getProperty(String relPath)
     throws PathNotFoundException,
-	   RepositoryException
+           RepositoryException
   {
     if (relPath.equals("jcr:data")) {
       return new FileDataProperty(_path);

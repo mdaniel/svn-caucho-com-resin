@@ -38,7 +38,7 @@ class QAttributeDef {
   String _deflt;
 
   QAttributeDef(String name, String type, ArrayList enumeration,
-		String qualifier, String deflt)
+                String qualifier, String deflt)
   {
     _name = name;
     _type = type;

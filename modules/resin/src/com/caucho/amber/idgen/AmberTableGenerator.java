@@ -63,8 +63,8 @@ public class AmberTableGenerator extends IdGenerator {
    * Creates the table generator.
    */
   public AmberTableGenerator(AmberPersistenceUnit manager,
-			     GeneratorTableType table,
-			     String name)
+                             GeneratorTableType table,
+                             String name)
   {
     _manager = manager;
     _table = table;
@@ -92,20 +92,20 @@ public class AmberTableGenerator extends IdGenerator {
     while (retry-- > 0) {
       ResultSet rs = selectStmt.executeQuery();
       if (rs.next()) {
-	long value = rs.getLong(1);
-	rs.close();
+        long value = rs.getLong(1);
+        rs.close();
 
-	updateStmt.setLong(1, value + groupSize);
-	updateStmt.setLong(3, value);
+        updateStmt.setLong(1, value + groupSize);
+        updateStmt.setLong(3, value);
 
-	if (updateStmt.executeUpdate() == 1)
-	  return value;
+        if (updateStmt.executeUpdate() == 1)
+          return value;
       }
       rs.close();
     }
 
     throw new SQLException(L.l("Can't allocate id from table '{0}'",
-			       _table.getTable().getName()));
+                               _table.getTable().getName()));
   }
 
   /**
@@ -119,34 +119,34 @@ public class AmberTableGenerator extends IdGenerator {
     _isInit = true;
 
     _selectSQL = ("select " + _table.getValueColumn() +
-		  " from " + _table.getTable().getName() +
-		  " where " + _table.getKeyColumn() + "=?");
+                  " from " + _table.getTable().getName() +
+                  " where " + _table.getKeyColumn() + "=?");
 
     _updateSQL = ("update " + _table.getTable().getName() +
-		  " set " + _table.getValueColumn() + "=?" +
-		  " where " + _table.getKeyColumn() + "=? " +
-		  "  and " + _table.getValueColumn() + "=?");
+                  " set " + _table.getValueColumn() + "=?" +
+                  " where " + _table.getKeyColumn() + "=? " +
+                  "  and " + _table.getValueColumn() + "=?");
     
     DataSource ds = amberPersistenceUnit.getDataSource();
     Connection conn = ds.getConnection();
     try {
       try {
-	PreparedStatement pstmt = conn.prepareStatement(_selectSQL);
+        PreparedStatement pstmt = conn.prepareStatement(_selectSQL);
 
-	pstmt.setString(1, _name);
+        pstmt.setString(1, _name);
 
-	ResultSet rs = pstmt.executeQuery();
-	if (rs.next()) {
-	  rs.close();
-	  return;
-	}
+        ResultSet rs = pstmt.executeQuery();
+        if (rs.next()) {
+          rs.close();
+          return;
+        }
       } catch (SQLException e) {
       }
 
       String sql = ("INSERT INTO " + _table.getTable().getName() + " (" +
-		    _table.getKeyColumn() + "," +
-		    _table.getValueColumn() + ") VALUES " +
-		    "('" + _name + "', 1)");
+                    _table.getKeyColumn() + "," +
+                    _table.getValueColumn() + ") VALUES " +
+                    "('" + _name + "', 1)");
 
       Statement stmt = conn.createStatement();
       stmt.executeUpdate(sql);

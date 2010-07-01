@@ -69,6 +69,6 @@ public class XslCopyOf extends XslNode {
     throws Exception
   {
     out.println("out.copyOf(_exprs[ " + _gen.addExpr(parseExpr(_select)) +
-		"].evalObject(node, env));");
+                "].evalObject(node, env));");
   }
 }

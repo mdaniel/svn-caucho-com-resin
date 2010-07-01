@@ -55,7 +55,7 @@ public class ESString extends ESBase {
       LENGTH = ESId.intern("length");
 
       for (int i = 0; i < ints.length; i++)
-	ints[i] = ESId.intern(String.valueOf(i));
+        ints[i] = ESId.intern(String.valueOf(i));
     }
 
     prototype = esNull;
@@ -136,7 +136,7 @@ public class ESString extends ESBase {
     ESObject obj = new ESWrapper("String", Global.getGlobalProto().stringProto, this);
 
     obj.put(LENGTH, ESNumber.create(this.string.length()),
-	    DONT_ENUM|DONT_DELETE|READ_ONLY);
+            DONT_ENUM|DONT_DELETE|READ_ONLY);
 
     return obj;
   }
@@ -163,9 +163,9 @@ public class ESString extends ESBase {
     else if (b instanceof ESObject) {
       ESBase pb = b.toPrimitive(NONE);
       if (pb instanceof ESString)
-	return equals(pb);
+        return equals(pb);
       else
-	return toNum() == pb.toNum();
+        return toNum() == pb.toNum();
     } else {
       return toNum() == b.toNum();
     }
@@ -263,7 +263,7 @@ public class ESString extends ESBase {
     int len = string.length();
     for (int i = 0; i <= len; i++) {
       if (string.regionMatches(i, sb.string, 0, sb.length()))
-	return ESBoolean.TRUE;
+        return ESBoolean.TRUE;
     } 
 
     return ESBoolean.FALSE;
@@ -303,7 +303,7 @@ public class ESString extends ESBase {
   {
     for (; i < string.length(); i++) {
       if (! isWhitespace(string.charAt(i))) {
-	return 0.0/0.0;
+        return 0.0/0.0;
       }
     }
 
@@ -324,7 +324,7 @@ public class ESString extends ESBase {
 
     int radix = 10;
     if (hexOkay && i + 1 < len && (ch = string.charAt(i)) == '0' &&
-	((ch = string.charAt(i + 1)) == 'x' || ch == 'X')) {
+        ((ch = string.charAt(i + 1)) == 'x' || ch == 'X')) {
       i += 2;
       radix = 16;
     }
@@ -339,9 +339,9 @@ public class ESString extends ESBase {
 
     if (radix == 10 && string.regionMatches(i, "Infinity", 0, 8)) {
       if (hexOkay)
-	return checkTail(sign * (1.0/0.0), string, i + 8);
+        return checkTail(sign * (1.0/0.0), string, i + 8);
       else
-	return sign * (1.0/0.0);
+        return sign * (1.0/0.0);
     }
     double value = 0.0;
     boolean hasDigit = false;
@@ -349,16 +349,16 @@ public class ESString extends ESBase {
       ch = string.charAt(i);
 
       if ('0' <= ch && ch <= '9') {
-	value = radix * value + string.charAt(i) - '0';
-	hasDigit = true;
+        value = radix * value + string.charAt(i) - '0';
+        hasDigit = true;
       } else if (radix > 10 && ('a' <= ch && ch <= 'a' + radix - 11)) {
-	value = radix * value + string.charAt(i) - 'a' + 10;
-	hasDigit = true;
+        value = radix * value + string.charAt(i) - 'a' + 10;
+        hasDigit = true;
       } else if (radix > 10 && ('A' <= ch && ch <= 'A' + radix - 11)) {
-	value = radix * value + string.charAt(i) - 'A' + 10;
-	hasDigit = true;
+        value = radix * value + string.charAt(i) - 'A' + 10;
+        hasDigit = true;
       } else
-	break;
+        break;
     }
 
     if (radix == 16 && ! hasDigit)
@@ -372,14 +372,14 @@ public class ESString extends ESBase {
 
       int power = 1;
       for (; i < len && (ch = string.charAt(i)) >= '0' && ch <= '9'; i++) {
-	if (ch == '0')
-	  power++;
-	else {
-	  value = value * Math.pow(10, power) + ch - '0';
-	  expt -= power;
-	  power = 1;
-	}
-	hasDigit = true;
+        if (ch == '0')
+          power++;
+        else {
+          value = value * Math.pow(10, power) + ch - '0';
+          expt -= power;
+          power = 1;
+        }
+        hasDigit = true;
       }
     }
 
@@ -390,22 +390,22 @@ public class ESString extends ESBase {
       i++;
       int exptSign = 1;
       if (i < len && (ch = string.charAt(i)) == '+')
-	i++;
+        i++;
       else if (i < len && ch == '-') {
-	exptSign = -1;
-	i++;
+        exptSign = -1;
+        i++;
       }
 
       hasDigit = false;
 
       int newExpt = 0;
       for (; i < len && (ch = string.charAt(i)) >= '0' && ch <= '9'; i++) {
-	newExpt = 10 * newExpt + ch - '0';
-	hasDigit = true;
+        newExpt = 10 * newExpt + ch - '0';
+        hasDigit = true;
       }
 
       if (! hasDigit)
-	return 0.0/0.0;
+        return 0.0/0.0;
 
       expt += exptSign * newExpt;
     }

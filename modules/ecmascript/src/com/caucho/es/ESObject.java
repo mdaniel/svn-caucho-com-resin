@@ -123,20 +123,20 @@ public class ESObject extends ESBase {
 
     for (int i = 0; i < propNames.length; i++) {
       if (propValues[i] == null && (propFlags[i] & WATCH) == 0)
-	continue;
+        continue;
 
       int hash = propNames[i].hashCode() & mask;
 
       while (true) {
-	if (newNames[hash] == null) {
-	  newNames[hash] = propNames[i];
-	  newValues[hash] = propValues[i];
-	  newFlags[hash] = propFlags[i];
-	  if (newWatch != null)
-	    newWatch[hash] = propWatch[i];
-	  break;
-	}
-	hash = (hash + 1) & mask;
+        if (newNames[hash] == null) {
+          newNames[hash] = propNames[i];
+          newValues[hash] = propValues[i];
+          newFlags[hash] = propFlags[i];
+          if (newWatch != null)
+            newWatch[hash] = propWatch[i];
+          break;
+        }
+        hash = (hash + 1) & mask;
       }
     }
 
@@ -151,23 +151,23 @@ public class ESObject extends ESBase {
   {
     for (int i = 0; i < propNames.length; i++) {
       if (propValues[i] == null && (propFlags[i] & WATCH) == 0) {
-	propNames[i] = null;
-	continue;
+        propNames[i] = null;
+        continue;
       }
 
       int hash = propNames[i].hashCode() & mask;
 
       while (true) {
-	if (propValues[hash] == null && (propFlags[hash] & WATCH) == 0) {
-	  propNames[hash] = propNames[i];
-	  propValues[hash] = propValues[i];
-	  propFlags[hash] = propFlags[i];
-	  propNames[i] = null;
-	  propValues[i] = null;
-	  propFlags[i] = 0;
-	  break;
-	}
-	hash = (hash + 1) & mask;
+        if (propValues[hash] == null && (propFlags[hash] & WATCH) == 0) {
+          propNames[hash] = propNames[i];
+          propValues[hash] = propValues[i];
+          propFlags[hash] = propFlags[i];
+          propNames[i] = null;
+          propValues[i] = null;
+          propFlags[i] = 0;
+          break;
+        }
+        hash = (hash + 1) & mask;
       }
     }
 
@@ -185,14 +185,14 @@ public class ESObject extends ESBase {
       ESString propName = propNames[hash];
 
       if (propName == name || name.equals(propName)) {
-	ESBase value = propValues[hash];
-	return value == null ? prototype.getProperty(name) : value;
+        ESBase value = propValues[hash];
+        return value == null ? prototype.getProperty(name) : value;
       }
       else if (propName == null) {
-	ESBase value = prototype.getProperty(name);
-	if (snapPrototype)
-	  setProperty(name, value);
-	return value;
+        ESBase value = prototype.getProperty(name);
+        if (snapPrototype)
+          setProperty(name, value);
+        return value;
       }
 
       hash = (hash + 1) & mask;
@@ -207,12 +207,12 @@ public class ESObject extends ESBase {
       ESString propName = propNames[hash];
 
       if (name.equals(propName) && propValues[hash] != null)
-	return (propFlags[hash] & READ_ONLY) == 0;
+        return (propFlags[hash] & READ_ONLY) == 0;
       else if (propName == null) {
-	if (prototype instanceof ESObject)
-	  return ((ESObject) prototype).canPut(name);
-	else
-	  return true;
+        if (prototype instanceof ESObject)
+          return ((ESObject) prototype).canPut(name);
+        else
+          return true;
       }
 
       hash = (hash + 1) & mask;
@@ -248,7 +248,7 @@ public class ESObject extends ESBase {
   {
     if (copyState != DIRTY) {
       if (copyState == COW)
-	copyAll();
+        copyAll();
       copyState = DIRTY;
     }
 
@@ -261,43 +261,43 @@ public class ESObject extends ESBase {
       ESString propName = propNames[hash];
 
       if (propValues[hash] == null) {
-	if (! prototype.canPut(name))
-	  return;
+        if (! prototype.canPut(name))
+          return;
 
-	if (propName == null)
-	  fill++;
+        if (propName == null)
+          fill++;
 
-	propNames[hash] = name;
+        propNames[hash] = name;
         /*
-	if ((propFlags[hash] & WATCH) != 0)
-	  value = callWatch(name, hash, value);
+        if ((propFlags[hash] & WATCH) != 0)
+          value = callWatch(name, hash, value);
         */
-	propValues[hash] = value;
-	propFlags[hash] = 0;
+        propValues[hash] = value;
+        propFlags[hash] = 0;
 
-	size++;
+        size++;
 
-	if (propNames.length <= 4 * size) {
-	  resize(4 * propNames.length);
-	}
-	else if (propNames.length <= 2 * fill)
-	  refill();
+        if (propNames.length <= 4 * size) {
+          resize(4 * propNames.length);
+        }
+        else if (propNames.length <= 2 * fill)
+          refill();
 
-	return;
+        return;
       }
       else if (propName != name && ! propName.equals(name)) {
-	hash = (hash + 1) & mask;
-	continue;
+        hash = (hash + 1) & mask;
+        continue;
       }
       else if ((propFlags[hash] & READ_ONLY) != 0)
-	return;
+        return;
       else {
         /*
-	if ((propFlags[hash] & WATCH) != 0)
-	  value = callWatch(name, hash, value);
+        if ((propFlags[hash] & WATCH) != 0)
+          value = callWatch(name, hash, value);
         */
-	propValues[hash] = value;
-	return;
+        propValues[hash] = value;
+        return;
       }
     }
   }
@@ -310,23 +310,23 @@ public class ESObject extends ESBase {
       ESString propName = propNames[hash];
 
       if (propName == null ||
-	  propValues[hash] == null || propName.equals(name)) {
-	if (propName == null)
-	  fill++;
-	if (propValues[hash] == null)
-	  size++;
+          propValues[hash] == null || propName.equals(name)) {
+        if (propName == null)
+          fill++;
+        if (propValues[hash] == null)
+          size++;
 
-	propNames[hash] = name;
-	propValues[hash] = value;
-	propFlags[hash] = flags;
+        propNames[hash] = name;
+        propValues[hash] = value;
+        propFlags[hash] = flags;
 
-	if (propNames.length <= 4 * size) {
-	  resize(4 * propNames.length);
-	}
-	else if (propNames.length <= 2 * fill)
-	  refill();
+        if (propNames.length <= 4 * size) {
+          resize(4 * propNames.length);
+        }
+        else if (propNames.length <= 2 * fill)
+          refill();
 
-	return;
+        return;
       }
 
       hash = (hash + 1) & mask;
@@ -347,7 +347,7 @@ public class ESObject extends ESBase {
   {
     if (copyState != DIRTY) {
       if (copyState == COW)
-	copyAll();
+        copyAll();
       copyState = DIRTY;
     }
 
@@ -357,15 +357,15 @@ public class ESObject extends ESBase {
       ESString hashName = propNames[hash];
 
       if (hashName == null)
-	return ESBoolean.FALSE;
+        return ESBoolean.FALSE;
       else if (propValues[hash] != null && hashName.equals(name)) {
-	if ((propFlags[hash] & DONT_DELETE) != 0)
-	  return ESBoolean.FALSE;
-	else {
-	  propValues[hash] = null;
-	  size--;
-	  return ESBoolean.TRUE;
-	}
+        if ((propFlags[hash] & DONT_DELETE) != 0)
+          return ESBoolean.FALSE;
+        else {
+          propValues[hash] = null;
+          size--;
+          return ESBoolean.TRUE;
+        }
       }
 
       hash = (hash + 1) & mask;
@@ -376,7 +376,7 @@ public class ESObject extends ESBase {
   {
     if (copyState != DIRTY) {
       if (copyState == COW)
-	copyAll();
+        copyAll();
       copyState = DIRTY;
     }
 
@@ -386,41 +386,41 @@ public class ESObject extends ESBase {
       ESString propName = propNames[hash];
 
       if (propValues[hash] == null) {
-	if (! prototype.canPut(name))
-	  return;
+        if (! prototype.canPut(name))
+          return;
 
-	if (propName == null)
-	  fill++;
+        if (propName == null)
+          fill++;
 
-	propNames[hash] = name;
-	propValues[hash] = esEmpty;
-	propFlags[hash] = WATCH;
-	if (propWatch == null)
-	  propWatch = new ESBase[propFlags.length];
-	propWatch[hash] = fun;
+        propNames[hash] = name;
+        propValues[hash] = esEmpty;
+        propFlags[hash] = WATCH;
+        if (propWatch == null)
+          propWatch = new ESBase[propFlags.length];
+        propWatch[hash] = fun;
 
-	size++;
+        size++;
 
-	if (propNames.length <= 4 * size)
-	  resize(4 * propNames.length);
-	else if (propNames.length <= 2 * fill)
-	  refill();
+        if (propNames.length <= 4 * size)
+          resize(4 * propNames.length);
+        else if (propNames.length <= 2 * fill)
+          refill();
 
-	return;
+        return;
       }
       else if (propName != name && ! propName.equals(name)) {
-	hash = (hash + 1) & mask;
-	continue;
+        hash = (hash + 1) & mask;
+        continue;
       }
       else if ((propFlags[hash] & READ_ONLY) != 0)
-	return;
+        return;
       else {
-	propFlags[hash] |= WATCH;
-	if (propWatch == null)
-	  propWatch = new ESBase[propFlags.length];
+        propFlags[hash] |= WATCH;
+        if (propWatch == null)
+          propWatch = new ESBase[propFlags.length];
 
-	propWatch[hash] = fun;
-	return;
+        propWatch[hash] = fun;
+        return;
       }
     }
   }
@@ -429,7 +429,7 @@ public class ESObject extends ESBase {
   {
     if (copyState != DIRTY) {
       if (copyState == COW)
-	copyAll();
+        copyAll();
       copyState = DIRTY;
     }
 
@@ -439,11 +439,11 @@ public class ESObject extends ESBase {
       ESString propName = propNames[hash];
 
       if (propName == null)
-	return;
+        return;
       else if (propName.equals(name)) {
-	propFlags[hash] &= ~WATCH;
+        propFlags[hash] &= ~WATCH;
 
-	return;
+        return;
       }
     }
   }
@@ -479,23 +479,23 @@ public class ESObject extends ESBase {
       ESBase fun = hasProperty(hint == STRING ? TO_STRING : VALUE_OF);
 
       if (fun instanceof ESClosure || fun instanceof Native) {
-	eval.stack[0] = this;
-	eval.top = 1; 
-	ESBase value = fun.call(eval, 0);
+        eval.stack[0] = this;
+        eval.top = 1;
+        ESBase value = fun.call(eval, 0);
 
-	if (value instanceof ESBase && ! (value instanceof ESObject))
-	  return value;
+        if (value instanceof ESBase && ! (value instanceof ESObject))
+          return value;
       }
 
       fun = hasProperty(hint == STRING ? VALUE_OF : TO_STRING);
 
       if (fun instanceof ESClosure || fun instanceof Native) {
-	eval.stack[0] = this;
-	eval.top = 1; 
-	ESBase value = fun.call(eval, 0);
+        eval.stack[0] = this;
+        eval.top = 1;
+        ESBase value = fun.call(eval, 0);
 
-	if (value instanceof ESBase && ! (value instanceof ESObject))
-	  return value;
+        if (value instanceof ESBase && ! (value instanceof ESObject))
+          return value;
       }
 
       throw new ESException("cannot convert object to primitive type");
@@ -566,7 +566,7 @@ public class ESObject extends ESBase {
     boolean isFirst = true;
     while (e.hasNext()) {
       if (! isFirst)
-	cb.append(", ");
+        cb.append(", ");
       isFirst = false;
 
       ESString key = (ESString) e.next();
@@ -575,9 +575,9 @@ public class ESObject extends ESBase {
       cb.append(":");
       ESBase value = getProperty(key);
       if (isLoopPass)
-	value.toSource(map, isLoopPass);
+        value.toSource(map, isLoopPass);
       else
-	cb.append(value.toSource(map, isLoopPass));
+        cb.append(value.toSource(map, isLoopPass));
     }
 
     cb.append("}");

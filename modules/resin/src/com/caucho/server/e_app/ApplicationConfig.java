@@ -175,8 +175,8 @@ public class ApplicationConfig {
       throws ConfigException
     {
       if (! path.canRead())
-	throw new ConfigException(L.l("<java> module {0} must be a valid path.",
-				      path));
+        throw new ConfigException(L.l("<java> module {0} must be a valid path.",
+                                      path));
       
       _javaModules.add(path);
     }

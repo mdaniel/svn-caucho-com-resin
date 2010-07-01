@@ -70,24 +70,24 @@ abstract public class Resolver
   }
 
   public final DataSource resolveArtifact(String org,
-					  String module,
-					  String rev,
-					  String ext)
+                                          String module,
+                                          String rev,
+                                          String ext)
   {
     return resolveArtifact(org, module, module, rev, ext);
   }
   
   abstract public DataSource resolveArtifact(String org,
-					     String module,
-					     String artifact,
-					     String rev,
-					     String ext);
+                                             String module,
+                                             String artifact,
+                                             String rev,
+                                             String ext);
 
   protected String resolveArtifactString(String org,
-					 String module,
-					 String artifact,
-					 String rev,
-					 String ext)
+                                         String module,
+                                         String artifact,
+                                         String rev,
+                                         String ext)
   {
     if (_artifactPattern == null)
       return null;
@@ -108,8 +108,8 @@ abstract public class Resolver
   }
 
   protected void validateSignature(DataSource source,
-				   String hash,
-				   String algorithm)
+                                   String hash,
+                                   String algorithm)
     throws NoSuchAlgorithmException
   {
     if (hash == null)
@@ -125,7 +125,7 @@ abstract public class Resolver
       int len;
 
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	digest.update(buffer, 0, len);
+        digest.update(buffer, 0, len);
       }
 
       byte []bytes = digest.digest();
@@ -133,15 +133,15 @@ abstract public class Resolver
       String hexBytes = Hex.toHex(bytes);
 
       if (! hash.equals(hexBytes))
-	throw new ModuleNotFoundException(L.l("{0} signature for '{1}' does not properly match",
-					      algorithm, source.getName()));
+        throw new ModuleNotFoundException(L.l("{0} signature for '{1}' does not properly match",
+                                              algorithm, source.getName()));
     } catch (IOException e) {
       throw new RuntimeException(e);
     } finally {
       TempBuffer.free(tempBuffer);
 
       try {
-	is.close();
+        is.close();
       } catch (IOException e) {
       }
     }

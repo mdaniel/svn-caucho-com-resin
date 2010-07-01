@@ -935,19 +935,19 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       DriverConfig driver = _driverList.get(i);
 
       if (driver.getUser() == null)
-	driver.setUser(_user);
+        driver.setUser(_user);
       if (driver.getPassword() == null)
-	driver.setPassword(_password);
+        driver.setPassword(_password);
 
       driver.initDriver();
       driver.initDataSource(_isTransactional, _isSpy);
 
       if (_mcf == null)
-	_mcf = driver.getManagedConnectionFactory();
+        _mcf = driver.getManagedConnectionFactory();
 
       /*
       if (driver.getXADataSource() == null)
-	_isTransactional = false;
+        _isTransactional = false;
       */
     }
 
@@ -958,15 +958,15 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       DriverConfig driver = _backupDriverList.get(i);
 
       if (driver.getUser() == null)
-	driver.setUser(_user);
+        driver.setUser(_user);
       if (driver.getPassword() == null)
-	driver.setPassword(_password);
+        driver.setPassword(_password);
 
       driver.initDriver();
       driver.initDataSource(_isTransactional, _isSpy);
       /*
       if (driver.getXADataSource() == null)
-	_isTransactional = false;
+        _isTransactional = false;
       */
     }
 

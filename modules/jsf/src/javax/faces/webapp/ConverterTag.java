@@ -62,8 +62,8 @@ public class ConverterTag extends TagSupport
     ExpressionFactory factory = app.getExpressionFactory();
 
     _binding = factory.createValueExpression(context.getELContext(),
-					     binding,
-					     Converter.class);
+                                             binding,
+                                             Converter.class);
   }
 
   public int doStartTag()
@@ -80,7 +80,7 @@ public class ConverterTag extends TagSupport
 
     if (parent.getCreated()) {
       if (! (comp instanceof ValueHolder))
-	throw new JspException("UIComponent parent of converter must be a ValueHolder.");
+        throw new JspException("UIComponent parent of converter must be a ValueHolder.");
 
       ValueHolder valueHolder = (ValueHolder) comp;
 
@@ -100,16 +100,16 @@ public class ConverterTag extends TagSupport
       Converter converter;
 
       if (_binding != null) {
-	converter = (Converter) _binding.getValue(context.getELContext());
+        converter = (Converter) _binding.getValue(context.getELContext());
 
-	if (converter != null)
-	  return converter;
+        if (converter != null)
+          return converter;
       }
     
       converter = context.getApplication().createConverter(_id);
 
       if (_binding != null)
-	_binding.setValue(context.getELContext(), converter);
+        _binding.setValue(context.getELContext(), converter);
 
       return converter;
     } catch (Exception e) {

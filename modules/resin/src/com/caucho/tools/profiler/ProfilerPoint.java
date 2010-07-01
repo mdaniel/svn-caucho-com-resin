@@ -76,13 +76,13 @@ public class ProfilerPoint
   {
     synchronized (this) {
       if (_children == null)
-	_children = new LruCache<String,ProfilerPoint>(1024);
+        _children = new LruCache<String,ProfilerPoint>(1024);
     
       ProfilerPoint child = _children.get(name);
 
       if (child == null) {
-	child = create(name);
-	_children.put(name, child);
+        child = create(name);
+        _children.put(name, child);
       }
 
       return child;
@@ -131,7 +131,7 @@ public class ProfilerPoint
 
       Iterator<ProfilerPoint> iter = _children.values();
       while (iter.hasNext())
-	children.add(iter.next());
+        children.add(iter.next());
       
       return children;
     }
@@ -152,10 +152,10 @@ public class ProfilerPoint
       }
 
       if (totalTime < _minTime)
-	_minTime = totalTime;
+        _minTime = totalTime;
 
       if (_maxTime < totalTime)
-	_maxTime = totalTime;
+        _maxTime = totalTime;
     }
   }
 
@@ -242,14 +242,14 @@ public class ProfilerPoint
 
   static {
     NOOP_PROFILER = new Profiler() {
-	public void finish()
-	{
-	}
+        public void finish()
+        {
+        }
 
-	public String toString()
-	{
-	  return "NoopProfiler[]";
-	}
+        public String toString()
+        {
+          return "NoopProfiler[]";
+        }
       };
   }
 }

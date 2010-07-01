@@ -423,18 +423,18 @@ public class InterleaveItem extends Item {
       Item item = _items.get(i);
 
       if (! item.isSimpleSyntax())
-	isSimple = false;
+        isSimple = false;
       
       if (i == 0) {
-	if (! isSimple)
-	  cb.append(" ");
+        if (! isSimple)
+          cb.append(" ");
       }
       else if (isSimple) {
-	cb.append(" & ");
+        cb.append(" & ");
       }
       else {
-	addSyntaxNewline(cb, depth);
-	cb.append("& ");
+        addSyntaxNewline(cb, depth);
+        cb.append("& ");
       }
       
       cb.append(item.toSyntaxDescription(depth + 2));

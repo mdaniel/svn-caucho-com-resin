@@ -161,13 +161,13 @@ public class RmiRegistry extends AbstractResourceAdapter
         reg.list();  // Verify it's alive and well
         if (log.isLoggable(Level.CONFIG))
           log.config(L.l("found RMI Registry on port `{0}'",
-			 _port));
+                         _port));
       }
       catch (Exception e) {
         // couldn't find a valid registry so create one
         if (log.isLoggable(Level.CONFIG))
           log.config(L.l("creating RMI Registry on port `{0}'", _port));
-	    
+
         LocateRegistry.createRegistry(_port);
       }
     } catch (Exception ex)  {

@@ -58,8 +58,8 @@ public class StatServiceAttribute implements java.io.Serializable
   }
 
   public StatServiceAttribute(String name,
-			      String attribute,
-			      String description)
+                              String attribute,
+                              String description)
   {
     _name = name;
     _attribute = attribute;
@@ -84,9 +84,9 @@ public class StatServiceAttribute implements java.io.Serializable
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _name
-	    + "," + _attribute
-	    + "," + _description
-	    + "]");
+            + "[" + _name
+            + "," + _attribute
+            + "," + _description
+            + "]");
   }
 }

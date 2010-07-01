@@ -56,8 +56,8 @@ abstract class BaseRenderer extends Renderer
 
   @Override
   public Object getConvertedValue(FacesContext context,
-				  UIComponent component,
-				  Object submittedValue)
+                                  UIComponent component,
+                                  Object submittedValue)
     throws ConverterException
   {
     if (context == null || component == null)
@@ -67,8 +67,8 @@ abstract class BaseRenderer extends Renderer
       Converter converter = ((ValueHolder) component).getConverter();
       
       if (converter != null)
-	return converter.getAsObject(context, component,
-				     (String) submittedValue);
+        return converter.getAsObject(context, component,
+                                     (String) submittedValue);
     }
 
     ValueExpression valueExpr = component.getValueExpression("value");
@@ -91,16 +91,16 @@ abstract class BaseRenderer extends Renderer
   }
 
   protected String toString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
   {
     if (component instanceof ValueHolder) {
       Converter converter = ((ValueHolder) component).getConverter();
 
       if (converter != null) {
-	String result = converter.getAsString(context, component, value);
-	
-	return result;
+        String result = converter.getAsString(context, component, value);
+
+        return result;
       }
     }
 

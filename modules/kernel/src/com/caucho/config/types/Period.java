@@ -142,50 +142,50 @@ public class Period {
       char ch;
 
       for (; i < length && (ch = value.charAt(i)) >= '0' && ch <= '9'; i++)
-	delta = 10 * delta + ch - '0';
+        delta = 10 * delta + ch - '0';
 
       if (length <= i)
-	period += defaultUnits * delta;
+        period += defaultUnits * delta;
       else {
         ch = value.charAt(i++);
-	switch (ch) {
-	case 's':
-	  period += 1000 * delta;
-	  break;
+        switch (ch) {
+        case 's':
+          period += 1000 * delta;
+          break;
 
-	case 'm':
+        case 'm':
           if (i < value.length() && value.charAt(i) == 's') {
             i++;
             period += delta;
           }
           else
             period += 60 * 1000 * delta;
-	  break;
+          break;
 
-	case 'h':
-	  period += 60L * 60 * 1000 * delta;
-	  break;
+        case 'h':
+          period += 60L * 60 * 1000 * delta;
+          break;
 
-	case 'D':
-	  period += DAY * delta;
-	  break;
+        case 'D':
+          period += DAY * delta;
+          break;
 
         case 'W':
-	  period += 7L * DAY * delta;
-	  break;
+          period += 7L * DAY * delta;
+          break;
 
-	case 'M':
-	  period += 30L * DAY * delta;
-	  break;
+        case 'M':
+          period += 30L * DAY * delta;
+          break;
 
-	case 'Y':
-	  period += 365L * DAY * delta;
-	  break;
+        case 'Y':
+          period += 365L * DAY * delta;
+          break;
 
         default:
           throw new ConfigException(L.l("Unknown unit `{0}' in period `{1}'. Valid units are:\n  '10ms' milliseconds\n  '10s' seconds\n  '10m' minutes\n  '10h' hours\n  '10D' days\n  '10W' weeks\n  '10M' months\n  '10Y' years",
                                         String.valueOf(ch), value));
-	}
+        }
       }
     }
 

@@ -35,18 +35,18 @@ import javax.faces.context.*;
 public abstract class RenderKit
 {
   public abstract void addRenderer(String family,
-				   String rendererType,
-				   Renderer renderer);
+                                   String rendererType,
+                                   Renderer renderer);
   
   public abstract Renderer getRenderer(String family,
-				       String rendererType);
+                                       String rendererType);
 
   public abstract ResponseStateManager getResponseStateManager();
 
   public abstract ResponseWriter
     createResponseWriter(Writer writer,
-			 String contentTypeList,
-			 String characterEncoding);
+                         String contentTypeList,
+                         String characterEncoding);
 
   public abstract ResponseStream createResponseStream(OutputStream out);
 }

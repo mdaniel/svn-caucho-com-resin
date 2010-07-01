@@ -50,7 +50,7 @@ public class WorkThread implements ThreadTask {
    * Constructor.
    */
   WorkThread(WorkManagerImpl manager, Work work,
-	     ClassLoader classLoader, WorkListener listener)
+             ClassLoader classLoader, WorkListener listener)
   {
     _manager = manager;
     _work = work;
@@ -78,7 +78,7 @@ public class WorkThread implements ThreadTask {
 
     try {
       synchronized (this) {
-	notifyAll();
+        notifyAll();
       }
     } catch (Exception e) {
     }
@@ -87,9 +87,9 @@ public class WorkThread implements ThreadTask {
       _work.run();
 
       if (_listener != null)
-	_listener.workCompleted(new WorkEvent(_manager,
-					      WorkEvent.WORK_COMPLETED,
-					      _work, null, 0));
+        _listener.workCompleted(new WorkEvent(_manager,
+                                              WorkEvent.WORK_COMPLETED,
+                                              _work, null, 0));
     } finally {
       _manager.completeWork(_work);
     }

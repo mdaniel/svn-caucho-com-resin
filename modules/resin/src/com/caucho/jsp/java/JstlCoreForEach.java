@@ -123,10 +123,10 @@ public class JstlCoreForEach extends JstlNode {
   public boolean hasScripting()
   {
     return (super.hasScripting() ||
-	    hasScripting(_items) || hasScripting(_itemsAttr) ||
-	    hasScripting(_begin) || hasScripting(_beginAttr) ||
-	    hasScripting(_end) || hasScripting(_endAttr) ||
-	    hasScripting(_step) || hasScripting(_stepAttr));
+            hasScripting(_items) || hasScripting(_itemsAttr) ||
+            hasScripting(_begin) || hasScripting(_beginAttr) ||
+            hasScripting(_end) || hasScripting(_endAttr) ||
+            hasScripting(_step) || hasScripting(_stepAttr));
   }
 
   /**
@@ -241,7 +241,7 @@ public class JstlCoreForEach extends JstlNode {
       TagInfo tagInfo = _gen.getTag(getQName());
 
       _tag = parent.addTag(_gen, getQName(), tagInfo, null,
-			   _attributeNames, _attributeValues, false);
+                           _attributeNames, _attributeValues, false);
 
       String id = "_jsp_loop_" + _gen.uniqueId();
 
@@ -250,9 +250,9 @@ public class JstlCoreForEach extends JstlNode {
       _tagVar = _tag.getId();
 
       if (isInteger())
-	out.println("com.caucho.jsp.IntegerLoopSupportTag " + _tagVar + " = null;");
+        out.println("com.caucho.jsp.IntegerLoopSupportTag " + _tagVar + " = null;");
       else
-	out.println("com.caucho.jsp.IteratorLoopSupportTag " + _tagVar + " = null;");
+        out.println("com.caucho.jsp.IteratorLoopSupportTag " + _tagVar + " = null;");
     }
 
     generatePrologueChildren(out);
@@ -273,10 +273,10 @@ public class JstlCoreForEach extends JstlNode {
 
     for (; ! (node instanceof JspSegmentNode); node = node.getParent()) {
       if (node instanceof JstlCoreForEach) {
-	JstlCoreForEach forEach = (JstlCoreForEach) node;
+        JstlCoreForEach forEach = (JstlCoreForEach) node;
 
-	if (forEach.isInteger() == isInteger())
-	  depth++;
+        if (forEach.isInteger() == isInteger())
+          depth++;
       }
     }
 
@@ -307,24 +307,24 @@ public class JstlCoreForEach extends JstlNode {
       JstlCoreForEach forEach = (JstlCoreForEach) node;
 
       if (forEach.isInteger() == isInteger()
-	  && forEach.getDepth() == depth
-	  && forEach.hasDeclaration())
-	return 0;
+          && forEach.getDepth() == depth
+          && forEach.hasDeclaration())
+        return 0;
     }
     
     if (node instanceof JspContainerNode) {
       ArrayList<JspNode> children = ((JspContainerNode) node).getChildren();
 
       if (children == null)
-	return -1;
+        return -1;
 
       for (int i = 0; i < children.size(); i++) {
-	JspNode child = children.get(i);
+        JspNode child = children.get(i);
 
-	int result = isFirst(child, depth);
+        int result = isFirst(child, depth);
 
-	if (result >= 0)
-	  return result;
+        if (result >= 0)
+          return result;
       }
     }
     
@@ -364,7 +364,7 @@ public class JstlCoreForEach extends JstlNode {
 
     if (_tagVar != null) {
       out.println(_tagVar + " = _jsp_state.get" + _tagVar
-		  + "(pageContext, _jsp_parent_tag);");
+                  + "(pageContext, _jsp_parent_tag);");
     }
 
     String beginVar = "_jsp_begin_" + uniqueId;
@@ -391,9 +391,9 @@ public class JstlCoreForEach extends JstlNode {
       out.print("int " + stepVar + " = ");
       
       if (_stepAttr != null)
-	out.print(_stepAttr.generateValue(int.class));
+        out.print(_stepAttr.generateValue(int.class));
       else
-	out.print(generateValue(int.class, _step));
+        out.print(generateValue(int.class, _step));
       
       out.println(";");
     }
@@ -476,7 +476,7 @@ public class JstlCoreForEach extends JstlNode {
 
     if (_tagVar != null) {
       out.println(_tagVar + " = _jsp_state.get" + _tagVar
-		  + "(pageContext, _jsp_parent_tag);");
+                  + "(pageContext, _jsp_parent_tag);");
     }
 
     String itemsVar = "_jsp_items_" + uniqueId;
@@ -517,9 +517,9 @@ public class JstlCoreForEach extends JstlNode {
       beginVar = "_jsp_begin_" + uniqueId;
       out.print("int " + beginVar + " = ");
       if (_beginAttr != null)
-	out.print(_beginAttr.generateValue(int.class));
+        out.print(_beginAttr.generateValue(int.class));
       else
-	out.print(generateValue(int.class, _begin));
+        out.print(generateValue(int.class, _begin));
       out.println(";");
     }
 
@@ -536,9 +536,9 @@ public class JstlCoreForEach extends JstlNode {
       
       out.print("int " + endVar + " = ");
       if (_endAttr != null)
-	out.print(_endAttr.generateValue(int.class));
+        out.print(_endAttr.generateValue(int.class));
       else
-	out.print(generateValue(int.class, _end));
+        out.print(generateValue(int.class, _end));
       out.println(";");
     }
     
@@ -548,9 +548,9 @@ public class JstlCoreForEach extends JstlNode {
       out.print("int " + stepVar + " = ");
       
       if (_stepAttr != null)
-	out.print(_stepAttr.generateValue(int.class));
+        out.print(_stepAttr.generateValue(int.class));
       else
-	out.print(generateValue(int.class, _step));
+        out.print(generateValue(int.class, _step));
       
       out.println(";");
     }
@@ -560,14 +560,14 @@ public class JstlCoreForEach extends JstlNode {
     if (_tagVar != null) {
       out.print(_tagVar + ".init(");
       if (beginVar != null)
-	out.print(beginVar + ", ");
+        out.print(beginVar + ", ");
       else
-	out.print("0, ");
+        out.print("0, ");
       
       if (endVar != null)
-	out.print(endVar + ", ");
+        out.print(endVar + ", ");
       else
-	out.print("Integer.MAX_VALUE, ");
+        out.print("Integer.MAX_VALUE, ");
 
       out.print(stepVar + ", ");
       out.print((_begin != null) + ", ");

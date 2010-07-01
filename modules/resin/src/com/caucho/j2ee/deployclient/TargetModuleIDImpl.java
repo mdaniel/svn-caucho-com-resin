@@ -106,7 +106,7 @@ public class TargetModuleIDImpl implements TargetModuleID, java.io.Serializable 
     TargetModuleIDImpl id = (TargetModuleIDImpl) o;
 
     return (_target.equals(id.getTarget())
-	    && _moduleID.equals(id.getModuleID()));
+            && _moduleID.equals(id.getModuleID()));
   }
 
   public String toString()

@@ -66,8 +66,8 @@ public class TransportConstraint extends AbstractConstraint {
    * Returns true if the user is authorized for the resource.
    */
   public AuthorizationResult isAuthorized(HttpServletRequest request,
-					  HttpServletResponse response,
-					  ServletContext application)
+                                          HttpServletResponse response,
+                                          ServletContext application)
     throws ServletException, IOException
   {
     if (_transport == null)
@@ -82,12 +82,12 @@ public class TransportConstraint extends AbstractConstraint {
 
     if (secureHost != null) {
       String url = ("https://" + secureHost + app.getContextPath() +
-		    request.getServletPath());
+                    request.getServletPath());
 
       if (request.getPathInfo() != null)
-	url += request.getPathInfo();
+        url += request.getPathInfo();
       if (request.getQueryString() != null)
-	url += "?" + request.getQueryString();
+        url += "?" + request.getQueryString();
 
       response.sendRedirect(url);
       

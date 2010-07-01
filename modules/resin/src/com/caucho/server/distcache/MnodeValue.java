@@ -70,18 +70,18 @@ public final class MnodeValue implements ExtCacheEntry {
   private SoftReference _valueRef;
 
   public MnodeValue(HashKey valueHash,
-		    Object value,
-		    HashKey cacheHash,
-		    int flags,
-		    long version,
-		    long expireTimeout,
-		    long idleTimeout,
-		    long leaseTimeout,
-		    long localReadTimeout,
-		    long lastAccessTime,
-		    long lastUpdateTime,
-		    boolean isServerVersionValid,
-		    boolean isImplicitNull)
+                    Object value,
+                    HashKey cacheHash,
+                    int flags,
+                    long version,
+                    long expireTimeout,
+                    long idleTimeout,
+                    long leaseTimeout,
+                    long localReadTimeout,
+                    long lastAccessTime,
+                    long lastUpdateTime,
+                    boolean isServerVersionValid,
+                    boolean isImplicitNull)
   {
     _valueHash = valueHash;
     _cacheHash = cacheHash;
@@ -106,8 +106,8 @@ public final class MnodeValue implements ExtCacheEntry {
   }
 
   public MnodeValue(MnodeValue oldMnodeValue,
-		    long idleTimeout,
-		    long lastUpdateTime)
+                    long idleTimeout,
+                    long lastUpdateTime)
   {
     _valueHash = oldMnodeValue.getValueHashKey();
     _cacheHash = oldMnodeValue.getCacheHashKey();
@@ -246,7 +246,7 @@ public final class MnodeValue implements ExtCacheEntry {
     }
     else {
       _leaseOwner = -1;
-	
+
       _leaseExpireTime = 0;
     }
   }
@@ -257,7 +257,7 @@ public final class MnodeValue implements ExtCacheEntry {
   public final void clearLease()
   {
     _leaseOwner = -1;
-	
+
     _leaseExpireTime = 0;
   }
 
@@ -453,10 +453,10 @@ public final class MnodeValue implements ExtCacheEntry {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[value=" + _valueHash
-	    + ",flags=0x" + Integer.toHexString(_flags)
-	    + ",version=" + _version
-	    + ",lease=" + _leaseOwner
-	    + "]");
+            + "[value=" + _valueHash
+            + ",flags=0x" + Integer.toHexString(_flags)
+            + ",version=" + _version
+            + ",lease=" + _leaseOwner
+            + "]");
   }
 }

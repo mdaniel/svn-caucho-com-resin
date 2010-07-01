@@ -111,8 +111,8 @@ public class ResponseWriterImpl extends ResponseWriter
   }
 
   public void writeAttribute(String name,
-			     Object value,
-			     String property)
+                             Object value,
+                             String property)
     throws IOException
   {
     _out.write(' ');
@@ -123,8 +123,8 @@ public class ResponseWriterImpl extends ResponseWriter
   }
 
   public void writeURIAttribute(String name,
-				Object value,
-				String property)
+                                Object value,
+                                String property)
     throws IOException
   {
     writeAttribute(name, value, property);
@@ -142,7 +142,7 @@ public class ResponseWriterImpl extends ResponseWriter
   }
 
   public void writeText(Object text,
-			String property)
+                        String property)
     throws IOException
   {
     if (_inElement)

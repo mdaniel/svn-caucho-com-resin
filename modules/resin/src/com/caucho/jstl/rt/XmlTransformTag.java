@@ -197,9 +197,9 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       }
 
       if (_xml != null)
-	source = getSource(_xml, getCanonicalURL(pageContext, _xmlSystemId));
+        source = getSource(_xml, getCanonicalURL(pageContext, _xmlSystemId));
       else {
-	BodyContent body = getBodyContent();
+        BodyContent body = getBodyContent();
         
         TempCharReader tempReader = (TempCharReader) body.getReader();
         int ch;
@@ -210,12 +210,12 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
         if (ch >= 0)
           tempReader.unread();
         
-	source = new StreamSource(tempReader);
+        source = new StreamSource(tempReader);
 
-	if (_xmlSystemId != null)
-	  source.setSystemId(getCanonicalURL(pageContext, _xmlSystemId));
-	else
-	  source.setSystemId(((HttpServletRequest) pageContext.getRequest()).getRequestURI());
+        if (_xmlSystemId != null)
+          source.setSystemId(getCanonicalURL(pageContext, _xmlSystemId));
+        else
+          source.setSystemId(((HttpServletRequest) pageContext.getRequest()).getRequestURI());
       }
 
       Result result;
@@ -287,14 +287,14 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       
     if (url != null) {
       if (url.startsWith("/"))
-	url = app.getRealPath(url);
+        url = app.getRealPath(url);
       else if (url.indexOf(':') > 0 &&
-	       url.indexOf(':') < url.indexOf('/')) {
+               url.indexOf(':') < url.indexOf('/')) {
       }
       else {
-	url = pageContext.getRequest().getRealPath(url);
+        url = pageContext.getRequest().getRealPath(url);
       }
-	
+
       url = appDir.lookup(url).getURL();
     }
 

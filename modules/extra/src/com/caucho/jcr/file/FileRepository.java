@@ -105,8 +105,8 @@ public class FileRepository extends BaseRepository {
    */
   public Session login(Credentials credentials, String workspaceName)
     throws LoginException,
-	   NoSuchWorkspaceException,
-	   RepositoryException
+           NoSuchWorkspaceException,
+           RepositoryException
   {
     return new FileSession(this);
   }

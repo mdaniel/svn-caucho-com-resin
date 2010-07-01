@@ -107,7 +107,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    * Sets the context implementation.
    */
   abstract protected void setCurrentContext(MBeanContext context,
-					    ClassLoader loader);
+                                            ClassLoader loader);
 
   /**
    * Returns the context implementation.
@@ -465,7 +465,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
         Class ifc = interfaces[i];
 
         if (ifc.getName().endsWith(mbeanName)
-	    || ifc.getName().endsWith(mxbeanName))
+            || ifc.getName().endsWith(mxbeanName))
           return ifc;
       }
     }

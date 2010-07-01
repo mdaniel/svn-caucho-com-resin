@@ -81,10 +81,10 @@ public class SessionStateManager extends StateManager
       byte []state = bos.toByteArray();
 
       if (log.isLoggable(Level.FINE)) {
-	log.fine("JSF[" + root.getViewId() + "] serialize (" + state.length + " bytes)");
+        log.fine("JSF[" + root.getViewId() + "] serialize (" + state.length + " bytes)");
 
-	if (log.isLoggable(Level.FINER))
-	  debugState(state);
+        if (log.isLoggable(Level.FINER))
+          debugState(state);
       }
 
       if (! isSavingStateInClient(context)) {
@@ -148,7 +148,7 @@ public class SessionStateManager extends StateManager
 
   @Deprecated
   public void writeState(FacesContext context,
-			 SerializedView state)
+                         SerializedView state)
     throws IOException
   {
     Object [] stateArray = new Object [2];
@@ -172,16 +172,16 @@ public class SessionStateManager extends StateManager
 
   @Override
   public UIViewRoot restoreView(FacesContext context,
-				String viewId,
-				String renderKitId)
+                                String viewId,
+                                String renderKitId)
   {
 
     RenderKit renderKit = context.getRenderKit();
     
     if (renderKit == null) {
       RenderKitFactory renderKitFactory
-	= (RenderKitFactory) FactoryFinder.getFactory(
-	FactoryFinder.RENDER_KIT_FACTORY);
+        = (RenderKitFactory) FactoryFinder.getFactory(
+        FactoryFinder.RENDER_KIT_FACTORY);
       
       renderKit = renderKitFactory.getRenderKit(context, renderKitId);
     }
@@ -218,9 +218,9 @@ public class SessionStateManager extends StateManager
   }
 
   private void serialize(StateSerializationWriter out,
-			 FacesContext context,
-			 UIComponent comp,
-			 HashSet<String> idMap)
+                         FacesContext context,
+                         UIComponent comp,
+                         HashSet<String> idMap)
     throws IOException
   {
     if (comp.isTransient())
@@ -228,7 +228,7 @@ public class SessionStateManager extends StateManager
 
     if (idMap.contains(comp.getId()))
       throw new IllegalStateException(L.l("'{0}' is a duplicate component during serialization.",
-					  comp.getId()));
+                                          comp.getId()));
 
     if (comp.getId() != null)
       idMap.add(comp.getId());
@@ -248,18 +248,18 @@ public class SessionStateManager extends StateManager
       List<UIComponent> children = comp.getChildren();
 
       for (int i = 0; i < fullChildCount; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (! child.isTransient())
-	  childCount++;
+        if (! child.isTransient())
+          childCount++;
       }
 
       out.writeInt(childCount);
 
       for (int i = 0; i < fullChildCount; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	serialize(out, context, child, idMap);
+        serialize(out, context, child, idMap);
       }
     }
     else
@@ -270,9 +270,9 @@ public class SessionStateManager extends StateManager
 
     if (facetCount > 0) {
       for (Map.Entry<String,UIComponent> entry : comp.getFacets().entrySet()) {
-	out.writeString(entry.getKey());
+        out.writeString(entry.getKey());
 
-	serialize(out, context, entry.getValue(), idMap);
+        serialize(out, context, entry.getValue(), idMap);
       }
     }
 
@@ -302,9 +302,9 @@ public class SessionStateManager extends StateManager
                                   FacesContext context,
                                   String renderKitId)
   throws IOException,
-	   ClassNotFoundException,
-	   InstantiationException,
-	   IllegalAccessException
+           ClassNotFoundException,
+           InstantiationException,
+           IllegalAccessException
   {
     int typeId = in.readInt();
 
@@ -317,7 +317,7 @@ public class SessionStateManager extends StateManager
       String typeName = in.readString();
       
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
+
       type = Class.forName(typeName, false, loader);
     }
 
@@ -367,22 +367,22 @@ public class SessionStateManager extends StateManager
   {
     for (int i = 0; i < state.length; i++) {
       if (i != 0 && i % 40 == 0)
-	System.out.println();
+        System.out.println();
 
       int ch = state[i];
 
       if ('a' <= ch && ch <= 'z'
-	  || 'A' <= ch && ch <= 'Z'
-	  || '0' <= ch && ch <= '9'
-	  || ch == ' ' || ch == '[' || ch == '.' || ch == ']'
-	  || ch == '/' || ch == '\\'
-	  || ch == '-' || ch == '_' || ch == '{' || ch == '}'
-	  || ch == '#' || ch == '$' || ch == ':')
-	System.out.print((char) ch);
+          || 'A' <= ch && ch <= 'Z'
+          || '0' <= ch && ch <= '9'
+          || ch == ' ' || ch == '[' || ch == '.' || ch == ']'
+          || ch == '/' || ch == '\\'
+          || ch == '-' || ch == '_' || ch == '{' || ch == '}'
+          || ch == '#' || ch == '$' || ch == ':')
+        System.out.print((char) ch);
       else {
-	System.out.print("x"
-			 + Integer.toHexString((ch / 16) & 0xf)
-			 + Integer.toHexString(ch & 0xf));
+        System.out.print("x"
+                         + Integer.toHexString((ch / 16) & 0xf)
+                         + Integer.toHexString(ch & 0xf));
       }
     }
     System.out.println();

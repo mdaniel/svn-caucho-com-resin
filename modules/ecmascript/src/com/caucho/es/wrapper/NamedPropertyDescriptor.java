@@ -73,12 +73,12 @@ class NamedPropertyDescriptor extends ESPropertyDescriptor {
   }
 
   public NamedPropertyDescriptor(String propertyName,
-				 ESMethodDescriptor getter, 
-				 ESMethodDescriptor setter, 
-				 ESMethodDescriptor namedGetter, 
-				 ESMethodDescriptor namedSetter,
-				 ESMethodDescriptor namedRemover,
-				 ESMethodDescriptor namedIterator)
+                                 ESMethodDescriptor getter,
+                                 ESMethodDescriptor setter,
+                                 ESMethodDescriptor namedGetter,
+                                 ESMethodDescriptor namedSetter,
+                                 ESMethodDescriptor namedRemover,
+                                 ESMethodDescriptor namedIterator)
     throws IntrospectionException
   {
     super(propertyName, null, getter, setter);

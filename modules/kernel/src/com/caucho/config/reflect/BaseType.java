@@ -75,7 +75,7 @@ abstract public class BaseType
       TypeVariable<?> []typeParam = cl.getTypeParameters();
       
       if (typeParam == null || typeParam.length == 0)
-	return ClassType.create(cl);
+        return ClassType.create(cl);
 
       if (! isClassFillParamObject)
         return createClass(cl);
@@ -87,12 +87,12 @@ abstract public class BaseType
       for (int i = 0; i < args.length; i++) {
         // ioc/0246
         args[i] = TargetObjectType.OBJECT_TYPE;
-	
-	if (args[i] == null) {
-	  throw new NullPointerException("unsupported BaseType: " + type);
-	}
-	
-	newParamMap.put(typeParam[i].getName(), args[i]);
+
+        if (args[i] == null) {
+          throw new NullPointerException("unsupported BaseType: " + type);
+        }
+
+        newParamMap.put(typeParam[i].getName(), args[i]);
       }
 
       return new GenericParamType(cl, args, newParamMap);
@@ -107,11 +107,11 @@ abstract public class BaseType
       BaseType []args = new BaseType[typeArgs.length];
 
       for (int i = 0; i < args.length; i++) {
-	args[i] = create(typeArgs[i], paramMap, true);
-	
-	if (args[i] == null) {
-	  throw new NullPointerException("unsupported BaseType: " + type);
-	}
+        args[i] = create(typeArgs[i], paramMap, true);
+
+        if (args[i] == null) {
+          throw new NullPointerException("unsupported BaseType: " + type);
+        }
       }
       
       HashMap<String,BaseType> newParamMap = new HashMap<String,BaseType>();
@@ -119,7 +119,7 @@ abstract public class BaseType
       TypeVariable<?> []typeVars = rawType.getTypeParameters();
 
       for (int i = 0; i < typeVars.length; i++) {
-	newParamMap.put(typeVars[i].getName(), args[i]);
+        newParamMap.put(typeVars[i].getName(), args[i]);
       }
 
       return new ParamType(rawType, args, newParamMap);
@@ -138,23 +138,23 @@ abstract public class BaseType
       BaseType actualType = null;
 
       if (paramMap != null)
-	actualType = (BaseType) paramMap.get(aType.getName());
+        actualType = (BaseType) paramMap.get(aType.getName());
 
       if (actualType != null)
-	return actualType;
+        return actualType;
 
       BaseType []baseBounds;
 
       if (aType.getBounds() != null) {
-	Type []bounds = aType.getBounds();
-	
-	baseBounds = new BaseType[bounds.length];
+        Type []bounds = aType.getBounds();
 
-	for (int i = 0; i < bounds.length; i++)
-	  baseBounds[i] = create(bounds[i], paramMap, true);
+        baseBounds = new BaseType[bounds.length];
+
+        for (int i = 0; i < bounds.length; i++)
+          baseBounds[i] = create(bounds[i], paramMap, true);
       }
       else
-	baseBounds = new BaseType[0];
+        baseBounds = new BaseType[0];
       
       return new VarType(aType.getName(), baseBounds);
     }
@@ -189,11 +189,11 @@ abstract public class BaseType
 
     for (int i = 0; i < args.length; i++) {
       args[i] = create(typeParam[i], newParamMap, true);
-	
+
       if (args[i] == null) {
-	throw new NullPointerException("unsupported BaseType: " + type);
+        throw new NullPointerException("unsupported BaseType: " + type);
       }
-	
+
       newParamMap.put(typeParam[i].getName(), args[i]);
     }
     

@@ -191,11 +191,11 @@ public class MBeanConfig {
 
     for (int i = 0; i < constructors.length; i++) {
       if (constructors[i].getParameterTypes().length == len)
-	return constructors[i];
+        return constructors[i];
     }
 
     throw new ConfigException(L.l("`{0}' has no matching constructors.",
-				  _type.getName()));
+                                  _type.getName()));
   }
 
   MBeanInfo getMBeanInfo()
@@ -228,8 +228,8 @@ public class MBeanConfig {
     {
       MBeanAttributeInfo attr = getAttribute(attrName);
       if (attr == null)
-	throw new ConfigException(L.l("`{0}' is an unknown attribute for {1}",
-				      attrName, _mbeanName));
+        throw new ConfigException(L.l("`{0}' is an unknown attribute for {1}",
+                                      attrName, _mbeanName));
 
       String typeName = attr.getType();
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -250,11 +250,11 @@ public class MBeanConfig {
       MBeanAttributeInfo []attrs = info.getAttributes();
 
       if (attrs == null)
-	return null;
+        return null;
 
       for (int i = 0; i < attrs.length; i++) {
-	if (attrs[i].getName().equals(key))
-	  return attrs[i];
+        if (attrs[i].getName().equals(key))
+          return attrs[i];
       }
 
       return null;
@@ -296,7 +296,7 @@ public class MBeanConfig {
       MBeanServer server = Jmx.getMBeanServer();
 
       server.addNotificationListener(mbeanName, listenerName,
-				     _filter, _handback);
+                                     _filter, _handback);
       
     }
   }

@@ -90,7 +90,7 @@ public class GitInputStream extends InputStream {
 
     if (sublen > 0) {
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       System.arraycopy(_buffer, _bufferOffset, buffer, offset, sublen);
 
@@ -103,11 +103,11 @@ public class GitInputStream extends InputStream {
       int readLength = _is.read(buffer, offset, length);
 
       if (readLength > 0)
-	return sublen + readLength;
+        return sublen + readLength;
       else if (sublen > 0)
-	return sublen;
+        return sublen;
       else
-	return -1;
+        return -1;
     }
     else
       return sublen;

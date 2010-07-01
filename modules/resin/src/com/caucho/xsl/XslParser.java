@@ -136,32 +136,32 @@ class XslParser {
     if (ch == '<') {
       ch = read();
       if (ch == '?') {
-	ProcessingInstruction pi = parsePi();
-	if (pi.getNodeName().equals("xml")) {
-	  encoding = XmlUtil.getPIAttribute(pi.getNodeValue(), "encoding");
-	  if (encoding != null)
-	    is.setEncoding(encoding);
-	}
-	else
-	  top.appendChild(pi);
-	ch = read();
+        ProcessingInstruction pi = parsePi();
+        if (pi.getNodeName().equals("xml")) {
+          encoding = XmlUtil.getPIAttribute(pi.getNodeValue(), "encoding");
+          if (encoding != null)
+            is.setEncoding(encoding);
+        }
+        else
+          top.appendChild(pi);
+        ch = read();
       } else {
-	peek = ch;
-	ch = '<';
+        peek = ch;
+        ch = '<';
       }
     }
-	
+
     parseNode(top, "", true, ch);
 
     QElement elt = null;
     for (Node node = top.getFirstChild();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       if (node.getNodeType() == Node.ELEMENT_NODE &&
-	  node.getNodeName().equals("xsl:stylesheet")) {
-	if (elt != null)
-	  throw error(L.l("xsl:stylesheet must be sole top element"));
-	elt = (QElement) node;
+          node.getNodeName().equals("xsl:stylesheet")) {
+        if (elt != null)
+          throw error(L.l("xsl:stylesheet must be sole top element"));
+        elt = (QElement) node;
       }
     }
     if (elt == null) {
@@ -204,7 +204,7 @@ class XslParser {
    * @param parent parsed children are attached to the parent node
    */
   private void parseNode(Node parent, String tagEnd,
-			 boolean isSpecial, int ch)
+                         boolean isSpecial, int ch)
     throws IOException, XslParseException
   {
     boolean hasContent = false;
@@ -217,31 +217,31 @@ class XslParser {
       switch (ch) {
       case '\\':
         hasContent = true;
-	ch = read();
-	if (ch == '<') {
-	  addText('<');
-	  ch = read();
-	}
-	else
-	  addText('\\');
-	break;
+        ch = read();
+        if (ch == '<') {
+          addText('<');
+          ch = read();
+        }
+        else
+          addText('\\');
+        break;
 
       case '<':
         hasContent = true;
-	ch = read();
+        ch = read();
 
-	if (ch == '/') {
-	  ch = readTag(read());
-	  String tag = this.tag.toString();
-	  if (tag.equals(tagEnd)) {
-	    ch = skipWhitespace(ch);
-	    if (ch != '>')
-	      throw error(L.l("expected `{0}' at {1}", ">", badChar(ch)));
-	    addText(parent);
+        if (ch == '/') {
+          ch = readTag(read());
+          String tag = this.tag.toString();
+          if (tag.equals(tagEnd)) {
+            ch = skipWhitespace(ch);
+            if (ch != '>')
+              throw error(L.l("expected `{0}' at {1}", ">", badChar(ch)));
+            addText(parent);
             if (tag.equals("xsl:template"))
               inTemplate = false;
-	    return;
-	  }
+            return;
+          }
           else if (rawText) {
             addText("</" + tag + ">");
             ch = read();
@@ -250,56 +250,56 @@ class XslParser {
           else {
             throw error(L.l("`</{0}>' has no matching open tag", tag));
           }
-	} else if (ch == '#') {
-	  addText(parent);
-	  ch = parseScriptlet(parent);
-	  break;
-	} else if (ch == '?') {
-	  addText(parent);
-	  ProcessingInstruction pi = parsePi();
-	  parent.appendChild(pi);
-	  ch = read();
-	  break;
-	} else if (ch == '!') {
-	  addText(parent);
-	  ch = parseDecl(parent);
-	  break;
-	} else if (ch == '{') {
-	  addText(parent);
-	  parseValueOf(parent);
-	  ch = read();
-	  break;
-	}
+        } else if (ch == '#') {
+          addText(parent);
+          ch = parseScriptlet(parent);
+          break;
+        } else if (ch == '?') {
+          addText(parent);
+          ProcessingInstruction pi = parsePi();
+          parent.appendChild(pi);
+          ch = read();
+          break;
+        } else if (ch == '!') {
+          addText(parent);
+          ch = parseDecl(parent);
+          break;
+        } else if (ch == '{') {
+          addText(parent);
+          parseValueOf(parent);
+          ch = read();
+          break;
+        }
 
-	ch = readTag(ch);
-	String tag = this.tag.toString();
+        ch = readTag(ch);
+        String tag = this.tag.toString();
 
-	// treat the tag as XML when it has a known prefix or we aren't
-	// in rawText mode
-	if (! rawText && ! tag.equals("") ||
-	    tag.startsWith("xsl:") ||
-	    tag.startsWith("jsp:") || tag.startsWith("xtp:") ||
-	    macros.get(tag) != null) {
-	  addText(parent);
+        // treat the tag as XML when it has a known prefix or we aren't
+        // in rawText mode
+        if (! rawText && ! tag.equals("") ||
+            tag.startsWith("xsl:") ||
+            tag.startsWith("jsp:") || tag.startsWith("xtp:") ||
+            macros.get(tag) != null) {
+          addText(parent);
 
-	  parseElement(parent, tag, ch, isSpecial);
+          parseElement(parent, tag, ch, isSpecial);
 
-	  ch = read();
-	}
-	// otherwise tread the tag as text
-	else {
-	  addText("<");
-	  addText(tag);
-	}
-	break;
+          ch = read();
+        }
+        // otherwise tread the tag as text
+        else {
+          addText("<");
+          addText(tag);
+        }
+        break;
 
       case '>':
-	int ch1 = read();
-	if (ch1 == '>' && tagEnd == ">>") {
-	  if (text.length() > 0 && text.charAt(text.length() - 1) == '\n')
-	    text.setLength(text.length() - 1);
-	  if (text.length() > 0 && text.charAt(text.length() - 1) == '\r')
-	    text.setLength(text.length() - 1);
+        int ch1 = read();
+        if (ch1 == '>' && tagEnd == ">>") {
+          if (text.length() > 0 && text.charAt(text.length() - 1) == '\n')
+            text.setLength(text.length() - 1);
+          if (text.length() > 0 && text.charAt(text.length() - 1) == '\r')
+            text.setLength(text.length() - 1);
           if (! hasContent) {
             Element elt = xsl.createElementNS(XSLNS, "xsl:text");
             parent.appendChild(elt);
@@ -307,18 +307,18 @@ class XslParser {
           }
           else
             addText(parent);
-	  return;
-	}
-	else {
+          return;
+        }
+        else {
           hasContent = true;
-	  addText('>');
-	  ch = ch1;
-	}
-	break;
+          addText('>');
+          ch = ch1;
+        }
+        break;
 
       case '$':
         hasContent = true;
-	ch = read();
+        ch = read();
         if (ch == '$') {
           addText('$');
           ch = read();
@@ -331,7 +331,7 @@ class XslParser {
           ch = parseExtension(parent, name);
         }
         else if (ch == '(') {
-	  addText(parent);
+          addText(parent);
           Element elt = xsl.createElementNS(XSLNS, "xsl:value-of");
           CharBuffer test = CharBuffer.allocate();
           lexToRparen(test);
@@ -346,9 +346,9 @@ class XslParser {
         break;
 
       case ' ': case '\t': case '\n': case '\r':
-	addText((char) ch);
-	ch = read();
-	break;
+        addText((char) ch);
+        ch = read();
+        break;
 
       case '&':
         ch = parseEntityReference();
@@ -356,15 +356,15 @@ class XslParser {
 
       default:
         hasContent = true;
-	if (isSpecial) {
-	  parseSpecial(parent, ch);
-	  ch = read();
-	}
-	else {
-	  addText((char) ch);
-	  ch = read();
-	}
-	break;
+        if (isSpecial) {
+          parseSpecial(parent, ch);
+          ch = read();
+        }
+        else {
+          addText((char) ch);
+          ch = read();
+        }
+        break;
       }
     }
 
@@ -386,7 +386,7 @@ class XslParser {
    * @return the new child element
    */
   private Element parseElement(Node parent, String name,
-			       int ch, boolean isSpecial)
+                               int ch, boolean isSpecial)
     throws IOException, XslParseException
   {
     HashMap<String,String> oldNamespaces = _namespaces;
@@ -417,7 +417,7 @@ class XslParser {
 
     if (name.equals("xsl:stylesheet")) {
       if (element.getAttribute("parsed-content").equals("false")) {
-	rawText = true;
+        rawText = true;
         Element child = xsl.createElementNS(XSLNS, "xsl:output");
         child.setAttribute("disable-output-escaping", "yes");
         element.appendChild(child);
@@ -425,14 +425,14 @@ class XslParser {
     }
 
     if (rawText && (name.startsWith("xsl") || name.startsWith("xtp")) &&
-	element.getAttribute("xml:space").equals(""))
+        element.getAttribute("xml:space").equals(""))
       element.setAttribute("xml:space", "default");
 
     if (name.equals("xsl:template")) {
       inTemplate = true;
       String macroName = element.getAttribute("name");
       if (! macroName.equals(""))
-	macros.put(macroName, macroName);
+        macros.put(macroName, macroName);
     }
 
     String oldMode = defaultMode;
@@ -446,10 +446,10 @@ class XslParser {
 
     if (ch == '>') {
       parseNode(parent, name, isSpecial && name.equals("xsl:stylesheet"),
-		read());
+                read());
     } else if (ch == '/') {
       if ((ch = read()) != '>')
-	throw error(L.l("expected `{0}' at {1}", ">", badChar(ch)));
+        throw error(L.l("expected `{0}' at {1}", ">", badChar(ch)));
     } else
       throw error(L.l("expected `{0}' at {1}", ">", badChar(ch)));
 
@@ -576,14 +576,14 @@ class XslParser {
     text.clear();
     while (ch >= 0) {
       if (ch == '#') {
-	ch = read();
-	if (ch == '>')
-	  break;
-	else
-	  addText('#');
+        ch = read();
+        if (ch == '>')
+          break;
+        else
+          addText('#');
       } else {
-	addText((char) ch);
-	ch = read();
+        addText((char) ch);
+        ch = read();
       }
     }
 
@@ -621,7 +621,7 @@ class XslParser {
     if (name.equals("page")) {
       String contentType = elt.getAttribute("contentType");
       if (! contentType.equals(""))
-	parseContentType(parent, contentType);
+        parseContentType(parent, contentType);
     }
   }
   
@@ -952,8 +952,8 @@ class XslParser {
       buf.clear();
       delimScanner.scan(cursor, buf);
       if (buf.length() > 0) {
-	output.setAttribute("encoding", Encoding.getMimeName(buf.toString()));
-	is.setEncoding(buf.toString());
+        output.setAttribute("encoding", Encoding.getMimeName(buf.toString()));
+        is.setEncoding(buf.toString());
       }
     }
   }
@@ -982,9 +982,9 @@ class XslParser {
       ch = skipWhitespace(ch);
       String value = null;
       if (ch == '=') {
-	ch = skipWhitespace(read());
-	ch = readValue(ch);
-	ch = skipWhitespace(ch);
+        ch = skipWhitespace(read());
+        ch = readValue(ch);
+        ch = skipWhitespace(ch);
 
         value = tag.toString();
       }
@@ -992,7 +992,7 @@ class XslParser {
       int p;
       if (isDirective && name.equals("import")) {
         Element copy = (Element) elt.cloneNode(false);
-	copy.setAttribute(name, value);
+        copy.setAttribute(name, value);
         parent.appendChild(copy);
       }
       else if (name.startsWith("xmlns")) {
@@ -1030,7 +1030,7 @@ class XslParser {
           elt.setAttribute(name, value);
       }
       else {
-	elt.setAttribute(name, value);
+        elt.setAttribute(name, value);
       }
     }
 
@@ -1054,17 +1054,17 @@ class XslParser {
     text.clear();
     while (ch >= 0) {
       if (ch == '?') {
-	if ((ch = read()) == '>') {
-	  ProcessingInstruction pi;
-	  pi =  xsl.createProcessingInstruction(name, text.toString());
-	  text.clear();
-	  return pi;
-	}
-	else
-	  addText('?');
+        if ((ch = read()) == '>') {
+          ProcessingInstruction pi;
+          pi =  xsl.createProcessingInstruction(name, text.toString());
+          text.clear();
+          return pi;
+        }
+        else
+          addText('?');
       } else {
-	addText((char) ch);
-	ch = read();
+        addText((char) ch);
+        ch = read();
       }
     }
 
@@ -1133,11 +1133,11 @@ class XslParser {
 
     while (ch >= 0) {
       if ((ch = read()) == '-') {
-	ch = read();
-	while (ch == '-') {
-	  if ((ch = read()) == '>')
-	    return read();
-	}
+        ch = read();
+        while (ch == '-') {
+          if ((ch = read()) == '>')
+            return read();
+        }
       }
     }
 
@@ -1153,22 +1153,22 @@ class XslParser {
     int ch = read();
     while (ch >= 0) {
       if (ch == '}') {
-	ch = read();
-	if (ch == '>') {
-	  QElement elt;
-	  elt = (QElement) xsl.createElementNS(XSLNS, "xsl:value-of");
-	  elt.setAttribute("select", text.toString());
-	  elt.setLocation(is.getURL(), is.getUserPath(), line, 0);
-	  parent.appendChild(elt);
-	  text.clear();
-	  return;
-	}
-	else
-	  addText('}');
+        ch = read();
+        if (ch == '>') {
+          QElement elt;
+          elt = (QElement) xsl.createElementNS(XSLNS, "xsl:value-of");
+          elt.setAttribute("select", text.toString());
+          elt.setLocation(is.getURL(), is.getUserPath(), line, 0);
+          parent.appendChild(elt);
+          text.clear();
+          return;
+        }
+        else
+          addText('}');
       }
       else {
-	addText((char) ch);
-	ch = read();
+        addText((char) ch);
+        ch = read();
       }
     }
   }
@@ -1195,29 +1195,29 @@ class XslParser {
     int line = this.line;
     while (ch >= 0) {
       if (ch == '<') {
-	filename = is.getUserPath();
-	line = this.line;
-	ch = read();
-	if (ch == '#') {
-	  tail = '#';
-	  ch = read();
-	  if (ch == '=') {
-	    ch = read();
-	    element = "xtp:expression";
-	  }
-	  break;
-	}
-	else if (ch == '<') {
-	  tail = '>';
-	  break;
-	}
-	else if (ch == '\\') {
-	  addText((char) read());
-	  ch = read();
-	}
+        filename = is.getUserPath();
+        line = this.line;
+        ch = read();
+        if (ch == '#') {
+          tail = '#';
+          ch = read();
+          if (ch == '=') {
+            ch = read();
+            element = "xtp:expression";
+          }
+          break;
+        }
+        else if (ch == '<') {
+          tail = '>';
+          break;
+        }
+        else if (ch == '\\') {
+          addText((char) read());
+          ch = read();
+        }
       } else {
-	addText((char) ch);
-	ch = read();
+        addText((char) ch);
+        ch = read();
       }
     }
 
@@ -1250,7 +1250,7 @@ class XslParser {
 
     if (tail == '>') {
       if (rawText)
-	template.setAttribute("xml:space", "preserve");
+        template.setAttribute("xml:space", "preserve");
       parseNode(template, ">>", false, read());
       inTemplate = false;
       return;
@@ -1261,14 +1261,14 @@ class XslParser {
 
     while (ch >= 0) {
       if (ch == tail) {
-	ch = read();
-	if (ch == '>')
-	  break;
-	else
-	  addText(tail);
+        ch = read();
+        if (ch == '>')
+          break;
+        else
+          addText(tail);
       } else {
-	addText((char) ch);
-	ch = read();
+        addText((char) ch);
+        ch = read();
       }
     }
 
@@ -1312,7 +1312,7 @@ class XslParser {
     
     if (tail == '>') {
       if (rawText)
-	((Element) parent).setAttribute("xml:space", "preserve");
+        ((Element) parent).setAttribute("xml:space", "preserve");
       parseNode(parent, ">>", false, read());
       return;
     }
@@ -1322,14 +1322,14 @@ class XslParser {
 
     while (ch >= 0) {
       if (ch == tail) {
-	ch = read();
-	if (ch == '>')
-	  break;
-	else
-	  addText(tail);
+        ch = read();
+        if (ch == '>')
+          break;
+        else
+          addText(tail);
       } else {
-	addText((char) ch);
-	ch = read();
+        addText((char) ch);
+        ch = read();
       }
     }
 
@@ -1396,7 +1396,7 @@ class XslParser {
       }
 
       if (ch != '\'')
-	throw error(L.l("expected `{0}' at {1}", "'", badChar(ch)));
+        throw error(L.l("expected `{0}' at {1}", "'", badChar(ch)));
       return read();
     } else if (ch == '"') {
       for (ch = read(); ch >= 0 && ch != '"'; ch = read()) {
@@ -1411,12 +1411,12 @@ class XslParser {
       }
 
       if (ch != '\"')
-	throw error(L.l("expected `{0}' at {1}", "\"", badChar(ch)));
+        throw error(L.l("expected `{0}' at {1}", "\"", badChar(ch)));
 
       return read();
     } else if (XmlChar.isNameChar(ch)) {
       for (; XmlChar.isNameChar(ch); ch = read())
-	tag.append((char) ch);
+        tag.append((char) ch);
 
       return ch;
     } else
@@ -1511,7 +1511,7 @@ class XslParser {
     int ch = is.readChar();
     if (ch == '\r') {
       if ((ch = is.readChar()) != '\n') {
-	if (ch >= 0) {
+        if (ch >= 0) {
           if (ch == '\r')
             peek = '\n';
           else

@@ -52,13 +52,13 @@ public class X509Parser {
       String line;
 
       while ((line = is.readLine()) != null) {
-	
-	if (line.startsWith("-----BEGIN CERTIFICATE---"))
-	  return parseCertificateContent(is);
+
+        if (line.startsWith("-----BEGIN CERTIFICATE---"))
+          return parseCertificateContent(is);
       }
 
       throw new IOException(L.l("Can't find certificate in '{0}'",
-				path));
+                                path));
     } finally {
       is.close();
     }
@@ -74,9 +74,9 @@ public class X509Parser {
 
     while ((line = is.readLine()) != null) {
       if (line.startsWith("-----END CERTIFICATE-----")) {
-	System.out.println("TOTAL-LEN: " + os.getLength());
-			   
-	return parseCertificateDer(os.openRead());
+        System.out.println("TOTAL-LEN: " + os.getLength());
+
+        return parseCertificateDer(os.openRead());
       }
 
       reader.init(line);
@@ -215,8 +215,8 @@ public class X509Parser {
     while (length > 0) {
       int code = is.read();
       if (code != 0x31)
-	throw new IOException(L.l("expected 0x31 at {0}",
-				  Integer.toHexString(code)));
+        throw new IOException(L.l("expected 0x31 at {0}",
+                                  Integer.toHexString(code)));
 
       int len = parseLength(is);
       length -= 2 + len;
@@ -254,55 +254,55 @@ public class X509Parser {
     switch (code) {
     case 0x02: // integer
       {
-	is.unread();
-	return parseInteger(is);
+        is.unread();
+        return parseInteger(is);
       }
       
     case 0x03: // bit string
       {
-	is.unread();
-	return parseBitString(is);
+        is.unread();
+        return parseBitString(is);
       }
       
     case 0x05: // null
       {
-	int len = parseLength(is);
-	is.skip(len);
-	return null;
+        int len = parseLength(is);
+        is.skip(len);
+        return null;
       }
       
     case 0x06: // oid
       {
-	is.unread();
+        is.unread();
 
-	return parseOid(is);
+        return parseOid(is);
       }
 
     case 0x13: // printablestring
       {
-	is.unread();
-	return parsePrintableString(is);
+        is.unread();
+        return parsePrintableString(is);
       }
 
     case 0x16: // ia5string
       {
-	is.unread();
-	return parseIa5String(is);
+        is.unread();
+        return parseIa5String(is);
       }
 
     case 0x30: // sequence
       {
-	is.unread();
-	return parseSequence(is);
+        is.unread();
+        return parseSequence(is);
       }
 
     default:
       {
-	System.out.println(String.format("UNKNOWN: %x", code));
-	
-	int len = parseLength(is);
-	is.skip(len);
-	return null;
+        System.out.println(String.format("UNKNOWN: %x", code));
+
+        int len = parseLength(is);
+        is.skip(len);
+        return null;
       }
     }
   }
@@ -314,7 +314,7 @@ public class X509Parser {
 
     if (ch != 0x30)
       throw new IOException(L.l("expected 0x17 at '0x{0}'",
-				Integer.toHexString(ch)));
+                                Integer.toHexString(ch)));
 
     int len = parseLength(is);
     long end = is.getPosition() + len;
@@ -425,7 +425,7 @@ public class X509Parser {
 
     if (ch != 0x30)
       throw new IOException(L.l("expected sequence 0x30 at {0}",
-				Integer.toHexString(ch)));
+                                Integer.toHexString(ch)));
 
     return parseLength(is);
   }
@@ -452,7 +452,7 @@ public class X509Parser {
 
     if (ch != 0x02)
       throw new IOException(L.l("expected sequence 0x02 at {0}",
-				Integer.toHexString(ch)));
+                                Integer.toHexString(ch)));
 
     int len = parseLength(is);
 
@@ -471,7 +471,7 @@ public class X509Parser {
 
     if (ch != 0x05)
       throw new IOException(L.l("expected sequence 0x05 at {0}",
-				Integer.toHexString(ch)));
+                                Integer.toHexString(ch)));
 
     int len = parseLength(is);
 
@@ -485,8 +485,8 @@ public class X509Parser {
 
     if (code != 0 && ch != code)
       throw new IOException(L.l("expected value {0} at {1}",
-				Integer.toHexString(code),
-				Integer.toHexString(ch)));
+                                Integer.toHexString(code),
+                                Integer.toHexString(ch)));
 
     int len = parseLength(is);
 
@@ -530,7 +530,7 @@ public class X509Parser {
     public int read()
     {
       if (_offset < _length)
-	return _string.charAt(_offset++);
+        return _string.charAt(_offset++);
 
       return -1;
     }
@@ -538,8 +538,8 @@ public class X509Parser {
     public int read(char []buffer, int offset, int length)
     {
       if (_offset < _length) {
-	buffer[offset] = _string.charAt(_offset++);
-	return 1;
+        buffer[offset] = _string.charAt(_offset++);
+        return 1;
       }
 
       return -1;

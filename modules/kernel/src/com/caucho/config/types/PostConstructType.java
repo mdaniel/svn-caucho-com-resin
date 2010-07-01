@@ -70,7 +70,7 @@ public class PostConstructType
   {
     if (cl == null) {
       throw new ConfigException(L.l("'{0}' is an unknown callback method.",
-				    _methodName));
+                                    _methodName));
     }
 
     if (_declaringClass != null && ! _declaringClass.equals(cl.getName()))
@@ -82,8 +82,8 @@ public class PostConstructType
       Method method = methods[i];
 
       if (method.getName().equals(_methodName)
-	  && method.getParameterTypes().length == 0) {
-	return new PostConstructProgram(method);
+          && method.getParameterTypes().length == 0) {
+        return new PostConstructProgram(method);
       }
     }
 

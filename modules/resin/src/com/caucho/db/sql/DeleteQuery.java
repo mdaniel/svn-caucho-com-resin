@@ -70,13 +70,13 @@ class DeleteQuery extends Query {
       context.init(xa, rows, isReadOnly());
       
       if (! start(rows, rows.length, context, xa)) {
-	return;
+        return;
       }
 
       do {
-	rows[0].delete();
-	
-	context.setRowUpdateCount(++count);
+        rows[0].delete();
+
+        context.setRowUpdateCount(++count);
       } while (nextTuple(rows, rows.length, context, xa));
     } finally {
       // autoCommitWrite must be before freeRows in case freeRows

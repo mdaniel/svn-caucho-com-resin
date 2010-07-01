@@ -84,6 +84,6 @@ public final class ShortPrimitiveType extends ConfigType
       return new Short(((Number) value).shortValue());
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to a short",
-				    value));
+                                    value));
   }
 }

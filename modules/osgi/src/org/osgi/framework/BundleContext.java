@@ -59,7 +59,7 @@ public interface BundleContext
    * Installs a bundle from an input stream.
    */
   public Bundle installBundle(String location,
-			      InputStream is)
+                              InputStream is)
     throws BundleException;
 
   /**
@@ -76,7 +76,7 @@ public interface BundleContext
    * Adds a listener for service events
    */
   public void addServiceListener(ServiceListener listener,
-				 String filter)
+                                 String filter)
     throws InvalidSyntaxException;
 
   /**
@@ -113,28 +113,28 @@ public interface BundleContext
    * Registers a service
    */
   public ServiceRegistration registerService(String []classNames,
-					     Object service,
-					     Dictionary properties);
+                                             Object service,
+                                             Dictionary properties);
 
   /**
    * Registers a service
    */
   public ServiceRegistration registerService(String className,
-					     Object service,
-					     Dictionary properties);
+                                             Object service,
+                                             Dictionary properties);
 
   /**
    * Returns matching services.
    */
   public ServiceReference []getServiceReferences(String className,
-						 String filter)
+                                                 String filter)
     throws InvalidSyntaxException;
 
   /**
    * Returns all matching services.
    */
   public ServiceReference []getAllServiceReferences(String className,
-						    String filter)
+                                                    String filter)
     throws InvalidSyntaxException;
 
   /**

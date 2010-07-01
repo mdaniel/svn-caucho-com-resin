@@ -117,49 +117,49 @@ public class TimestampFilter extends StreamImpl {
       char ch = timestamp.charAt(i);
 
       if (ch == '%') {
-	ch = timestamp.charAt(i + 1);
-	switch (ch) {
-	case 'a': case 'A': case 'b': case 'B': case 'c': case 'd':
-	case 'H': case 'I': case 'j': case 'm': case 'M': case 'p':
-	case 'S': case 's': case 'W': case 'w': case 'x': case 'X':
-	case 'y': case 'Y': case 'Z': case 'z':
-	  if (sb.length() > 0)
-	    timestampList.add(new Text(sb.toString()));
-	  sb.setLength(0);
-	  timestampList.add(new Code(ch));
-	  i++;
-	  break;
+        ch = timestamp.charAt(i + 1);
+        switch (ch) {
+        case 'a': case 'A': case 'b': case 'B': case 'c': case 'd':
+        case 'H': case 'I': case 'j': case 'm': case 'M': case 'p':
+        case 'S': case 's': case 'W': case 'w': case 'x': case 'X':
+        case 'y': case 'Y': case 'Z': case 'z':
+          if (sb.length() > 0)
+            timestampList.add(new Text(sb.toString()));
+          sb.setLength(0);
+          timestampList.add(new Code(ch));
+          i++;
+          break;
 
-	case '{':
-	  if (sb.length() > 0)
-	    timestampList.add(new Text(sb.toString()));
-	  sb.setLength(0);
-	  for (i += 2;
-	       i < timestamp.length() && timestamp.charAt(i) != '}';
-	       i++) {
-	    sb.append((char) timestamp.charAt(i));
-	  }
-	  String type = sb.toString();
-	  sb.setLength(0);
+        case '{':
+          if (sb.length() > 0)
+            timestampList.add(new Text(sb.toString()));
+          sb.setLength(0);
+          for (i += 2;
+               i < timestamp.length() && timestamp.charAt(i) != '}';
+               i++) {
+            sb.append((char) timestamp.charAt(i));
+          }
+          String type = sb.toString();
+          sb.setLength(0);
 
-	  if ("thread".equals(type)) {
-	    timestampList.add(new ThreadTimestamp());
-	  }
-	  else if ("env".equals(type)) {
-	    timestampList.add(new EnvTimestamp());
-	  }
-	  else {
-	    sb.append("%{" + type + "}");
-	  }
-	  break;
-	  
-	default:
-	  sb.append('%');
-	  break;
-	}
+          if ("thread".equals(type)) {
+            timestampList.add(new ThreadTimestamp());
+          }
+          else if ("env".equals(type)) {
+            timestampList.add(new EnvTimestamp());
+          }
+          else {
+            sb.append("%{" + type + "}");
+          }
+          break;
+
+        default:
+          sb.append('%');
+          break;
+        }
       }
       else
-	sb.append(ch);
+        sb.append(ch);
     }
 
     if (sb.length() > 0)
@@ -218,25 +218,25 @@ public class TimestampFilter extends StreamImpl {
       int ch = buffer[offset + i];
 
       if (ch == 0)
-	continue;
+        continue;
 
       if (! _isLineBegin) {
       }
       else if (_isRecordBegin) {
-	long start = _stream.getPosition();
-	
-	QDate localDate = QDate.allocateLocalDate();
+        long start = _stream.getPosition();
 
-	localDate.setGMTTime(now);
-	  
-	int len = _timestamp.length;
-	for (int j = 0; j < len; j++) {
-	  _timestamp[j].print(_stream, localDate);
-	}
-	
-	QDate.freeLocalDate(localDate);
+        QDate localDate = QDate.allocateLocalDate();
 
-	_timestampLength = (int) (_stream.getPosition() - start);
+        localDate.setGMTTime(now);
+
+        int len = _timestamp.length;
+        for (int j = 0; j < len; j++) {
+          _timestamp[j].print(_stream, localDate);
+        }
+
+        QDate.freeLocalDate(localDate);
+
+        _timestampLength = (int) (_stream.getPosition() - start);
         _isLineBegin = false;
         _isRecordBegin = false;
       }
@@ -244,9 +244,9 @@ public class TimestampFilter extends StreamImpl {
         _isLineBegin = false;
         _isRecordBegin = false;
 
-	for (int j = _timestampLength - 1; j >= 0; j--) {
-	  _stream.write(' ');
-	}
+        for (int j = _timestampLength - 1; j >= 0; j--) {
+          _stream.write(' ');
+        }
       }
 
       _stream.write(ch);
@@ -254,31 +254,31 @@ public class TimestampFilter extends StreamImpl {
       if (ch == '\n') {
         _isLineBegin = true;
 
-	if (i + 1 < length && buffer[offset + i + 1] == 0) {
-	  _isRecordBegin = true;
-	}
+        if (i + 1 < length && buffer[offset + i + 1] == 0) {
+          _isRecordBegin = true;
+        }
 
-	// env/02d4
-	/*
-	if (! _isNullDelimited) {
-	  _isRecordBegin = true;
-	}
-	*/
-      }
-      else if (ch == '\r'
-	       && i + 1 < length && buffer[offset + i + 1] != '\n') {
-        _isLineBegin = true;
-
-	if (i + 2 < length && buffer[offset + i + 2] == 0) {
-	  _isRecordBegin = true;
-	}
-
-	// env/02d4
-	/*
+        // env/02d4
+        /*
         if (! _isNullDelimited) {
           _isRecordBegin = true;
         }
-	*/
+        */
+      }
+      else if (ch == '\r'
+               && i + 1 < length && buffer[offset + i + 1] != '\n') {
+        _isLineBegin = true;
+
+        if (i + 2 < length && buffer[offset + i + 2] == 0) {
+          _isRecordBegin = true;
+        }
+
+        // env/02d4
+        /*
+        if (! _isNullDelimited) {
+          _isRecordBegin = true;
+        }
+        */
       }
     }
     
@@ -343,88 +343,88 @@ public class TimestampFilter extends StreamImpl {
     {
       switch (_code) {
       case 'a':
-	out.print(SHORT_WEEKDAY[cal.getDayOfWeek() - 1]);
-	break;
+        out.print(SHORT_WEEKDAY[cal.getDayOfWeek() - 1]);
+        break;
 
       case 'A':
-	out.print(LONG_WEEKDAY[cal.getDayOfWeek() - 1]);
-	break;
+        out.print(LONG_WEEKDAY[cal.getDayOfWeek() - 1]);
+        break;
 
       case 'b':
-	out.print(SHORT_MONTH[cal.getMonth()]);
-	break;
+        out.print(SHORT_MONTH[cal.getMonth()]);
+        break;
 
       case 'B':
-	out.print(LONG_MONTH[cal.getMonth()]);
-	break;
+        out.print(LONG_MONTH[cal.getMonth()]);
+        break;
 
       case 'c':
-	out.print(cal.printLocaleDate());
-	break;
+        out.print(cal.printLocaleDate());
+        break;
 
       case 'd':
-	out.print((cal.getDayOfMonth()) / 10);
-	out.print((cal.getDayOfMonth()) % 10);
-	break;
+        out.print((cal.getDayOfMonth()) / 10);
+        out.print((cal.getDayOfMonth()) % 10);
+        break;
 
       case 'H':
-	int hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
-	out.print(hour / 10);
-	out.print(hour % 10);
-	break;
+        int hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
+        out.print(hour / 10);
+        out.print(hour % 10);
+        break;
 
       case 'I':
-	hour = (int) (cal.getTimeOfDay() / 3600000) % 12;
-	if (hour == 0)
-	  hour = 12;
-	out.print(hour / 10);
-	out.print(hour % 10);
-	break;
+        hour = (int) (cal.getTimeOfDay() / 3600000) % 12;
+        if (hour == 0)
+          hour = 12;
+        out.print(hour / 10);
+        out.print(hour % 10);
+        break;
 
       case 'j':
-	out.print((cal.getDayOfYear() + 1) / 100);
-	out.print((cal.getDayOfYear() + 1) / 10 % 10);
-	out.print((cal.getDayOfYear() + 1) % 10);
-	break;
+        out.print((cal.getDayOfYear() + 1) / 100);
+        out.print((cal.getDayOfYear() + 1) / 10 % 10);
+        out.print((cal.getDayOfYear() + 1) % 10);
+        break;
 
       case 'm':
-	out.print((cal.getMonth() + 1) / 10);
-	out.print((cal.getMonth() + 1) % 10);
-	break;
+        out.print((cal.getMonth() + 1) / 10);
+        out.print((cal.getMonth() + 1) % 10);
+        break;
 
       case 'M':
-	out.print((cal.getTimeOfDay() / 600000) % 6);
-	out.print((cal.getTimeOfDay() / 60000) % 10);
-	break;
+        out.print((cal.getTimeOfDay() / 600000) % 6);
+        out.print((cal.getTimeOfDay() / 60000) % 10);
+        break;
 
       case 'p':
-	hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
-	if (hour < 12)
-	  out.print("am");
-	else
-	  out.print("pm");
-	break;
+        hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
+        if (hour < 12)
+          out.print("am");
+        else
+          out.print("pm");
+        break;
 
       case 'S':
-	out.print((cal.getTimeOfDay() / 10000) % 6);
-	out.print((cal.getTimeOfDay() / 1000) % 10);
-	break;
+        out.print((cal.getTimeOfDay() / 10000) % 6);
+        out.print((cal.getTimeOfDay() / 1000) % 10);
+        break;
 
       case 's':
-	out.print((cal.getTimeOfDay() / 100) % 10);
-	out.print((cal.getTimeOfDay() / 10) % 10);
-	out.print(cal.getTimeOfDay() % 10);
-	break;
+        out.print((cal.getTimeOfDay() / 100) % 10);
+        out.print((cal.getTimeOfDay() / 10) % 10);
+        out.print(cal.getTimeOfDay() % 10);
+        break;
 
       case 'W':
-	int week = cal.getWeek();
-	out.print((week + 1) / 10);
-	out.print((week + 1) % 10);
-	break;
+        int week = cal.getWeek();
+        out.print((week + 1) / 10);
+        out.print((week + 1) % 10);
+        break;
 
       case 'w':
-	out.print(cal.getDayOfWeek() - 1);
-	break;
+        out.print(cal.getDayOfWeek() - 1);
+        break;
 
       case 'x':
         out.print(cal.printShortLocaleDate());
@@ -435,29 +435,29 @@ public class TimestampFilter extends StreamImpl {
         break;
     
       case 'y':
-	{
-	  int year = cal.getYear();
-	  out.print(year / 10 % 10);
-	  out.print(year % 10);
-	  break;
-	}
+        {
+          int year = cal.getYear();
+          out.print(year / 10 % 10);
+          out.print(year % 10);
+          break;
+        }
 
       case 'Y':
-	{
-	  int year = cal.getYear();
-	  out.print(year / 1000 % 10);
-	  out.print(year / 100 % 10);
-	  out.print(year / 10 % 10);
-	  out.print(year % 10);
-	  break;
-	}
+        {
+          int year = cal.getYear();
+          out.print(year / 1000 % 10);
+          out.print(year / 100 % 10);
+          out.print(year / 10 % 10);
+          out.print(year % 10);
+          break;
+        }
 
       case 'Z':
         if (cal.getZoneName() == null)
           out.print("GMT");
         else
           out.print(cal.getZoneName());
-	break;
+        break;
 
       case 'z':
         long offset = cal.getZoneOffset();
@@ -473,7 +473,7 @@ public class TimestampFilter extends StreamImpl {
         out.print((offset / 3600000) % 10);
         out.print((offset / 600000) % 6);
         out.print((offset / 60000) % 10);
-	break;
+        break;
       }
     }
   }

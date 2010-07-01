@@ -61,8 +61,8 @@ abstract public class Enhancer {
    * Enhances the class.
    */
   protected void enhance(GenClass genClass,
-			 JavaClass baseClass,
-			 String extClassName)
+                         JavaClass baseClass,
+                         String extClassName)
     throws Exception
   {
   }

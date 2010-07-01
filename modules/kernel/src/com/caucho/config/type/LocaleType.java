@@ -74,20 +74,20 @@ public final class LocaleType extends ConfigType
       Locale locale = _localeMap.get(text);
 
       if (locale == null) {
-	String []values = text.split("[-_]");
+        String []values = text.split("[-_]");
 
-	if (values.length == 1)
-	  locale = new Locale(values[0]);
-	else if (values.length == 2)
-	  locale = new Locale(values[0], values[1]);
-	else if (values.length == 3)
-	  locale = new Locale(values[0], values[1], values[2]);
-	else
-	  throw new ConfigException(L.l("'{0}' is an invalid Locale", text));
+        if (values.length == 1)
+          locale = new Locale(values[0]);
+        else if (values.length == 2)
+          locale = new Locale(values[0], values[1]);
+        else if (values.length == 3)
+          locale = new Locale(values[0], values[1], values[2]);
+        else
+          throw new ConfigException(L.l("'{0}' is an invalid Locale", text));
 
-	_localeMap.put(text, locale);
+        _localeMap.put(text, locale);
       }
-	
+
       return locale;
     }
   }

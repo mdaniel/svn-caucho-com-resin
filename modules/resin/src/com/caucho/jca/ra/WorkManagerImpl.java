@@ -73,9 +73,9 @@ public class WorkManagerImpl implements WorkManager {
    * the work instance completes.
    */
   public void doWork(Work work,
-		     long startTimeout,
-		     ExecutionContext context,
-		     WorkListener listener)
+                     long startTimeout,
+                     ExecutionContext context,
+                     WorkListener listener)
     throws WorkException
   {
     boolean isStart = false;
@@ -84,42 +84,42 @@ public class WorkManagerImpl implements WorkManager {
       WorkException exn = null;
       
       synchronized (this) {
-	if (_isClosed)
-	  exn = new WorkException(L.l("Work task can't be started from closed context."));
-	else if (_activeTasks.contains(work))
-	  exn = new WorkException(L.l("Reentrant Work tasks are not allowed."));
-	else {
-	  isStart = true;
+        if (_isClosed)
+          exn = new WorkException(L.l("Work task can't be started from closed context."));
+        else if (_activeTasks.contains(work))
+          exn = new WorkException(L.l("Reentrant Work tasks are not allowed."));
+        else {
+          isStart = true;
 
-	  _activeTasks.add(work);
-	}
+          _activeTasks.add(work);
+        }
       }
 
       if (listener == null) {
       }
       else if (isStart)
-	listener.workAccepted(new WorkEvent(this, WorkEvent.WORK_ACCEPTED,
-					    work, null, 0));
+        listener.workAccepted(new WorkEvent(this, WorkEvent.WORK_ACCEPTED,
+                                            work, null, 0));
       else {
-	listener.workRejected(new WorkEvent(this, WorkEvent.WORK_REJECTED,
-					    work, exn, 0));
+        listener.workRejected(new WorkEvent(this, WorkEvent.WORK_REJECTED,
+                                            work, exn, 0));
       }
       
       if (exn != null)
-	throw exn;
+        throw exn;
 
       if (listener != null)
-	listener.workStarted(new WorkEvent(this, WorkEvent.WORK_STARTED,
-					   work, null, 0));
+        listener.workStarted(new WorkEvent(this, WorkEvent.WORK_STARTED,
+                                           work, null, 0));
       
       work.run();
 
       if (listener != null)
-	listener.workCompleted(new WorkEvent(this, WorkEvent.WORK_COMPLETED,
-					     work, null, 0));
+        listener.workCompleted(new WorkEvent(this, WorkEvent.WORK_COMPLETED,
+                                             work, null, 0));
     } finally {
       synchronized (this) {
-	_activeTasks.remove(work);
+        _activeTasks.remove(work);
       }
     }
   }
@@ -139,9 +139,9 @@ public class WorkManagerImpl implements WorkManager {
    * the work instance starts, but does not wait not until the completion.
    */
   public long startWork(Work work,
-			long startTimeout,
-			ExecutionContext context,
-			WorkListener listener)
+                        long startTimeout,
+                        ExecutionContext context,
+                        WorkListener listener)
     throws WorkException
   {
     long start = Alarm.getCurrentTime();
@@ -165,9 +165,9 @@ public class WorkManagerImpl implements WorkManager {
    * Schedules a work instance.
    */
   public void scheduleWork(Work work,
-			   long startTimeout,
-			   ExecutionContext context,
-			   WorkListener listener)
+                           long startTimeout,
+                           ExecutionContext context,
+                           WorkListener listener)
     throws WorkException
   {
     startWork(work, startTimeout, context, listener, false);
@@ -178,10 +178,10 @@ public class WorkManagerImpl implements WorkManager {
    * the work instance starts, but does not wait not until the completion.
    */
   private long startWork(Work work,
-			 long startTimeout,
-			 ExecutionContext context,
-			 WorkListener listener,
-			 boolean waitForStart)
+                         long startTimeout,
+                         ExecutionContext context,
+                         WorkListener listener,
+                         boolean waitForStart)
     throws WorkException
   {
     boolean isStart = false;
@@ -190,39 +190,39 @@ public class WorkManagerImpl implements WorkManager {
 
     try {
       synchronized (this) {
-	if (_isClosed)
-	  exn = new WorkException(L.l("Work task can't be started from closed context."));
-	else if (_activeTasks.contains(work))
-	  exn = new WorkException(L.l("Reentrant Work tasks are not allowed."));
-	else
-	  _activeTasks.add(work);
+        if (_isClosed)
+          exn = new WorkException(L.l("Work task can't be started from closed context."));
+        else if (_activeTasks.contains(work))
+          exn = new WorkException(L.l("Reentrant Work tasks are not allowed."));
+        else
+          _activeTasks.add(work);
       }
 
       if (exn != null) {
-	if (listener != null)
-	  listener.workRejected(new WorkEvent(this, WorkEvent.WORK_REJECTED,
-					      work, exn, 0));
-	throw exn;
+        if (listener != null)
+          listener.workRejected(new WorkEvent(this, WorkEvent.WORK_REJECTED,
+                                              work, exn, 0));
+        throw exn;
       }
       else if (listener != null)
-	listener.workAccepted(new WorkEvent(this, WorkEvent.WORK_ACCEPTED,
-					    work, null, 0));
+        listener.workAccepted(new WorkEvent(this, WorkEvent.WORK_ACCEPTED,
+                                            work, null, 0));
 
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       WorkThread workThread = new WorkThread(this, work, loader, listener);
 
       if (listener != null)
-	listener.workStarted(new WorkEvent(this, WorkEvent.WORK_STARTED,
-					   work, null, 0));
+        listener.workStarted(new WorkEvent(this, WorkEvent.WORK_STARTED,
+                                           work, null, 0));
 
       if (waitForStart)
-	isStart = ThreadPool.getThreadPool().start(workThread, startTimeout);
+        isStart = ThreadPool.getThreadPool().start(workThread, startTimeout);
       else
-	isStart = ThreadPool.getThreadPool().schedule(workThread, startTimeout);
+        isStart = ThreadPool.getThreadPool().schedule(workThread, startTimeout);
     } finally {
       synchronized (this) {
-	if (! isStart)
-	  _activeTasks.remove(work);
+        if (! isStart)
+          _activeTasks.remove(work);
       }
     }
 
@@ -243,8 +243,8 @@ public class WorkManagerImpl implements WorkManager {
   {
     synchronized (this) {
       if (_isClosed)
-	return;
-	  
+        return;
+
       _isClosed = true;
     }
 

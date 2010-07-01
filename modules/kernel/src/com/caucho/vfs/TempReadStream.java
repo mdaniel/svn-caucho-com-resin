@@ -80,7 +80,7 @@ public class TempReadStream extends StreamImpl {
       _cursor = cursor._next;
 
       if (_freeWhenDone) {
-	cursor._next = null;
+        cursor._next = null;
         TempBuffer.free(cursor);
         cursor = null;
       }

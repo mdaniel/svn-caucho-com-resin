@@ -194,15 +194,15 @@ class HtmlPolicy extends Policy {
     case DOCUMENT:
       switch (nextCode) {
       case HTML:
-	return PUSH;
+        return PUSH;
 
       case COMMENT:
         return PUSH;
 
       case HEAD: case TITLE: case ISINDEX: case BASE: case SCRIPT: 
       case STYLE: case META: case LINK: case OBJECT:
-	opt = htmlName;
-	return PUSH_OPT;
+        opt = htmlName;
+        return PUSH_OPT;
 
       case WHITESPACE:
         return IGNORE;
@@ -215,29 +215,29 @@ class HtmlPolicy extends Policy {
           return PUSH;
         
         autoHtml = true;
-	opt = htmlName;
-	return PUSH_OPT;
+        opt = htmlName;
+        return PUSH_OPT;
       }
 
     case HTML:
       switch (nextCode) {
       case HTML:
-	return ERROR;
+        return ERROR;
 
       case HEAD:
       case COMMENT:
       case FRAMESET:
-	return PUSH;
+        return PUSH;
         
       case BODY:
         hasBody = true;
-	return PUSH;
+        return PUSH;
 
       case TITLE: case ISINDEX: case BASE: case SCRIPT: 
       case STYLE: case META: case LINK: case OBJECT:
-	opt = headName;
+        opt = headName;
         autoHead = true;
-	return PUSH_OPT;
+        return PUSH_OPT;
 
       case WHITESPACE:
         return PUSH;
@@ -250,25 +250,25 @@ class HtmlPolicy extends Policy {
           return PUSH;
         
         hasBody = true;
-	opt = bodyName;
-	return PUSH_OPT;
+        opt = bodyName;
+        return PUSH_OPT;
       }
 
     case HEAD:
       switch (nextCode) {
       case META:
-	// checkMetaEncoding((Element) next);
-	return PUSH_EMPTY;
+        // checkMetaEncoding((Element) next);
+        return PUSH_EMPTY;
 
       case LINK: case ISINDEX: case BASE: 
-	return PUSH_EMPTY;
+        return PUSH_EMPTY;
         
       case SCRIPT: case STYLE:
         return PUSH_VERBATIM;
         
       case TITLE:
       case OBJECT:
-	return PUSH;
+        return PUSH;
 
       case WHITESPACE:
         return PUSH;
@@ -281,24 +281,24 @@ class HtmlPolicy extends Policy {
           return PUSH;
 
       default:
-	return POP;
+        return POP;
       }
 
     case LI:
       switch (nextCode) {
       case LI:
-	return POP;
+        return POP;
 
       case BASEFONT: case BR: case AREA: case LINK: case IMG: case PARAM: 
       case HR: case INPUT: case COL: case FRAME: case ISINDEX: 
       case BASE: case META:
-	return PUSH_EMPTY;
+        return PUSH_EMPTY;
 
       case SCRIPT: case STYLE:
         return PUSH_VERBATIM;
 
       default:
-	return PUSH;
+        return PUSH;
       }
 
     case OPTION:
@@ -308,52 +308,52 @@ class HtmlPolicy extends Policy {
         return PUSH;
 
       default:
-	return POP;
+        return POP;
       }
 
     case DD:
       switch (nextCode) {
       case DD: case DT:
-	return POP;
+        return POP;
 
       case BASEFONT: case BR: case AREA: case LINK: case IMG: case PARAM: 
       case HR: case INPUT: case COL: case FRAME: case ISINDEX: 
       case BASE: case META:
-	return PUSH_EMPTY;
+        return PUSH_EMPTY;
 
       case SCRIPT: case STYLE:
         return PUSH_VERBATIM;
 
       default:
-	return PUSH;
+        return PUSH;
       }
 
     case THEAD: case TFOOT: case COLGROUP:
       switch (nextCode) {
       case THEAD: case TFOOT: case TBODY: case COLGROUP: case COL:
-	return POP;
+        return POP;
 
       case BASEFONT: case BR: case AREA: case LINK: case IMG: case PARAM: 
       case HR: case INPUT: case FRAME: case ISINDEX: 
       case BASE: case META:
-	return PUSH_EMPTY;
+        return PUSH_EMPTY;
 
       case SCRIPT: case STYLE:
         return PUSH_VERBATIM;
 
       default:
-	return PUSH;
+        return PUSH;
       }
 
     case TR:
       switch (nextCode) {
       case THEAD: case TFOOT: case TBODY: case COLGROUP: case COL: case TR:
-	return POP;
+        return POP;
 
       case BASEFONT: case BR: case AREA: case LINK: case IMG: case PARAM: 
       case HR: case INPUT: case FRAME: case ISINDEX: 
       case BASE: case META:
-	return PUSH_EMPTY;
+        return PUSH_EMPTY;
 
       case TD: case TH:
         return PUSH;
@@ -369,18 +369,18 @@ class HtmlPolicy extends Policy {
       switch (nextCode) {
       case THEAD: case TFOOT: case TBODY: case COLGROUP: case COL: case TR:
       case TD: case TH:
-	return POP;
+        return POP;
 
       case BASEFONT: case BR: case AREA: case LINK: case IMG: case PARAM: 
       case HR: case INPUT: case FRAME: case ISINDEX: 
       case BASE: case META:
-	return PUSH_EMPTY;
+        return PUSH_EMPTY;
 
       case SCRIPT: case STYLE:
         return PUSH_VERBATIM;
 
       default:
-	return PUSH;
+        return PUSH;
       }
 
     case P: case DT:
@@ -388,33 +388,33 @@ class HtmlPolicy extends Policy {
       case BLOCK: case P: case TABLE: case CAPTION: case THEAD:
       case TFOOT: case COLGROUP: case TBODY: case TR: case TD: 
       case TH: case DT: case LI:
-	return POP;
+        return POP;
 
       case BASEFONT: case BR: case AREA: case LINK: case IMG: case PARAM: 
       case HR: case INPUT: case COL: case FRAME: case ISINDEX: 
       case BASE: case META:
-	return PUSH_EMPTY;
+        return PUSH_EMPTY;
 
       case SCRIPT: case STYLE:
         return PUSH_VERBATIM;
 
       default:
-	return PUSH;
+        return PUSH;
       }
 
     case TABLE:
       switch (nextCode) {
       case CAPTION: case THEAD: case TFOOT: case COL: case COLGROUP:
       case TBODY: case TR:
-	return PUSH;
+        return PUSH;
 
       case SCRIPT: case STYLE:
         return PUSH_VERBATIM;
 
       default:
         /*
-	opt = "tr";
-	return PUSH_OPT;
+        opt = "tr";
+        return PUSH_OPT;
         */
         return PUSH;
       }
@@ -424,13 +424,13 @@ class HtmlPolicy extends Policy {
       case BASEFONT: case BR: case AREA: case LINK: case IMG: case PARAM: 
       case HR: case INPUT: case COL: case FRAME: case ISINDEX: 
       case BASE: case META:
-	return PUSH_EMPTY;
+        return PUSH_EMPTY;
 
       case SCRIPT: case STYLE:
         return PUSH_VERBATIM;
 
       default:
-	return PUSH;
+        return PUSH;
       }
     }
   }
@@ -442,7 +442,7 @@ class HtmlPolicy extends Policy {
     String http = elt.getAttribute("http-equiv");
     String content = elt.getAttribute("content");
     if (http.equals("") || content.equals("") ||
-	! http.equalsIgnoreCase("content-type"))
+        ! http.equalsIgnoreCase("content-type"))
       return;
 
     CharCursor cursor = new StringCharCursor(content);
@@ -453,16 +453,16 @@ class HtmlPolicy extends Policy {
       buf.clear();
       charsetScanner.scan(cursor, buf);
       if (buf.toString().equalsIgnoreCase("charset")) {
-	charsetScanner.skip(cursor);
-	buf.clear();
-	charsetScanner.scan(cursor, buf);
-	if (buf.length() > 0) {
-	  try {
-	    is.setEncoding(buf.close());
-	  } catch (IOException e) {
-	  }
-	  return;
-	}
+        charsetScanner.skip(cursor);
+        buf.clear();
+        charsetScanner.scan(cursor, buf);
+        if (buf.length() > 0) {
+          try {
+            is.setEncoding(buf.close());
+          } catch (IOException e) {
+          }
+          return;
+        }
       }
     }
   }
@@ -546,12 +546,12 @@ class HtmlPolicy extends Policy {
 
       if (forgiving) {
         /*
-	Node parent = node;
-	for (; parent != null; parent = parent.getParentNode()) {
-	  if (parent.getNodeName().equals(tagEnd))
-	    return POP_AND_LOOP;
-	}
-	return IGNORE;
+        Node parent = node;
+        for (; parent != null; parent = parent.getParentNode()) {
+          if (parent.getNodeName().equals(tagEnd))
+            return POP_AND_LOOP;
+        }
+        return IGNORE;
         */
         return POP_AND_LOOP;
       }
@@ -568,7 +568,7 @@ class HtmlPolicy extends Policy {
                                L.l("end of document"), errorTagEnd));
       }
       else
-	expect = "`</" + nodeName + ">'";
+        expect = "`</" + nodeName + ">'";
 
       throw parser.error(L.l("expected {0} at {1} (open at {2})",
                              expect, errorTagEnd,

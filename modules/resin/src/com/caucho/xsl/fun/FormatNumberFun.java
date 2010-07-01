@@ -71,7 +71,7 @@ public class FormatNumberFun extends XPathFun {
    * @param args The evaluated arguments
    */
   public Object eval(Node node, ExprEnvironment env, 
-		     AbstractPattern pattern, ArrayList args)
+                     AbstractPattern pattern, ArrayList args)
     throws XPathException
   {
     if (args.size() < 2)
@@ -95,7 +95,7 @@ public class FormatNumberFun extends XPathFun {
       DecimalFormat form;
 
       if (symbols == null)
-	form = new DecimalFormat(format);
+        form = new DecimalFormat(format);
       else {
         form = new DecimalFormat(format, symbols);
       }

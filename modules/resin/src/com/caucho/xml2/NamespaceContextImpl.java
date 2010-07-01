@@ -95,13 +95,13 @@ public class NamespaceContextImpl
       ArrayList<Decl> oldBinding = eltBinding.getOldBindingList();
 
       for (int i = 0; oldBinding != null && i < oldBinding.size(); i++) {
-	Decl decl = oldBinding.get(i);
-	NamespaceBinding binding = decl.getBinding();
+        Decl decl = oldBinding.get(i);
+        NamespaceBinding binding = decl.getBinding();
 
-	_version++;
-	
-	binding.setUri(decl.getOldUri());
-	binding.setVersion(_version);
+        _version++;
+
+        binding.setUri(decl.getOldUri());
+        binding.setVersion(_version);
       }
 
       eltBinding.clear();
@@ -271,10 +271,10 @@ public class NamespaceContextImpl
     }
     
     public void addOldBinding(NamespaceBinding binding, String prefix,
-			      String oldUri, String newUri)
+                              String oldUri, String newUri)
     {
       if (_declList == null)
-	_declList = new ArrayList<Decl>();
+        _declList = new ArrayList<Decl>();
 
       _declList.add(new Decl(binding, prefix, oldUri, newUri));
     }
@@ -297,7 +297,7 @@ public class NamespaceContextImpl
     private final String _newUri;
 
     Decl(NamespaceBinding binding, String prefix,
-	 String oldUri, String newUri)
+         String oldUri, String newUri)
     {
       _binding = binding;
       _prefix = prefix;

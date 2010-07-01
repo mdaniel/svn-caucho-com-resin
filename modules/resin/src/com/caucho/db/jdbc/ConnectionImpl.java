@@ -114,7 +114,7 @@ public class ConnectionImpl implements java.sql.Connection {
       _xa = Transaction.create(this);
       
       if (log.isLoggable(Level.FINER))
-	log.finer("start transaction " + this + " " + _xa);
+        log.finer("start transaction " + this + " " + _xa);
     }
 
     _xa.setAutoCommit(false);
@@ -143,7 +143,7 @@ public class ConnectionImpl implements java.sql.Connection {
 
     if (xa != null) {
       if (log.isLoggable(Level.FINER))
-	log.finer("rollback " + this + " " + _xa);
+        log.finer("rollback " + this + " " + _xa);
     
       xa.rollback();
     }
@@ -161,7 +161,7 @@ public class ConnectionImpl implements java.sql.Connection {
       _statement = stmt;
     else {
       if (_statements == null)
-	_statements = new ArrayList<StatementImpl>();
+        _statements = new ArrayList<StatementImpl>();
       _statements.add(stmt);
     }
     
@@ -169,7 +169,7 @@ public class ConnectionImpl implements java.sql.Connection {
   }
 
   public java.sql.Statement createStatement(int resultSetType,
-					    int resultSetConcurrency)
+                                            int resultSetConcurrency)
     throws SQLException
   {
     return createStatement();
@@ -188,7 +188,7 @@ public class ConnectionImpl implements java.sql.Connection {
       _xa = null;
     
       if (xa != null)
-	xa.commit();
+        xa.commit();
     }
     
     _isAutoCommit = autoCommit;
@@ -336,7 +336,7 @@ public class ConnectionImpl implements java.sql.Connection {
       _statement = stmt;
     else {
       if (_statements == null)
-	_statements = new ArrayList<StatementImpl>();
+        _statements = new ArrayList<StatementImpl>();
       _statements.add(stmt);
     }
     
@@ -406,7 +406,7 @@ public class ConnectionImpl implements java.sql.Connection {
   {
     synchronized (this) {
       if (_isClosed)
-	return;
+        return;
       
       _isClosed = true;
       _db = null;
@@ -420,9 +420,9 @@ public class ConnectionImpl implements java.sql.Connection {
 
     if (_statements != null) {
       for (int i = 0; i < _statements.size(); i++) {
-	stmt = _statements.get(i);
+        stmt = _statements.get(i);
 
-	stmt.close();
+        stmt.close();
       }
     }
 

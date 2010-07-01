@@ -127,19 +127,19 @@ public class FilterIterator extends NodeIterator {
             return node;
         }
         else if (_expr.isBoolean()) {
-	  if (_expr.evalBoolean(node, parentIter))
-	    return node;
+          if (_expr.evalBoolean(node, parentIter))
+            return node;
         }
-	else {
-	  Object value = _expr.evalObject(node, parentIter);
+        else {
+          Object value = _expr.evalObject(node, parentIter);
 
-	  if (value instanceof Number) {
-	    if (Expr.toDouble(value) == parentIter.getContextPosition())
-	      return node;
-	  }
-	  else if (Expr.toBoolean(value))
-	    return node;
-	}
+          if (value instanceof Number) {
+            if (Expr.toDouble(value) == parentIter.getContextPosition())
+              return node;
+          }
+          else if (Expr.toBoolean(value))
+            return node;
+        }
       }
 
       if (parentIter == null || (node = parentIter.nextNode()) == null) {

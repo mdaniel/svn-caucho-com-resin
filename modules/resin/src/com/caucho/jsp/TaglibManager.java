@@ -74,8 +74,8 @@ public class TaglibManager {
   private volatile boolean _isInit;
 
   public TaglibManager(JspResourceManager resourceManager,
-		       WebApp webApp,
-		       TagFileManager tagFileManager)
+                       WebApp webApp,
+                       TagFileManager tagFileManager)
     throws JspParseException, IOException
   {
     _resourceManager = resourceManager;
@@ -149,7 +149,7 @@ public class TaglibManager {
       return null;
     else if (prefix != null && prefix.startsWith("jsp")) {
       throw new JspParseException(L.l("tag prefix '{0}' may not start with 'jsp'.",
-				      prefix));
+                                      prefix));
     }
       
     try {
@@ -165,12 +165,12 @@ public class TaglibManager {
       String mapLocation = _uriLocationMap.get(uri);
 
       if (mapLocation != null)
-	location = mapLocation;
+        location = mapLocation;
 
       taglib = readTaglib(prefix, uri, location);
 
       if (taglib != null)
-	_taglibMap.put(uri, taglib);
+        _taglibMap.put(uri, taglib);
     }
 
     if (taglib != null)
@@ -199,8 +199,8 @@ public class TaglibManager {
     TldTaglib tldTaglib = new TldTaglib();
     
     taglib = new Taglib(prefix, "urn:jsptagdir:" + dir,
-			tldTaglib,
-			_tagFileManager);
+                        tldTaglib,
+                        _tagFileManager);
 
     if (taglib != null)
       _taglibDirMap.put(dir, taglib);
@@ -212,15 +212,15 @@ public class TaglibManager {
    * Returns the taglib with the given prefix and uri.
    */
   public void addTaglibFunctions(HashMap<String,Method> functionMap,
-				 String prefix,
-				 String uri)
+                                 String prefix,
+                                 String uri)
     throws JspParseException
   {
     Taglib taglib = getTaglib(prefix, uri, uri);
 
     if (taglib == null)
       return;
-			 
+
     ArrayList<TldFunction> functions = taglib.getFunctionList();
 
     for (int i = 0; i < functions.size(); i++) {
@@ -244,11 +244,11 @@ public class TaglibManager {
       if (tldTaglib != null) {
       }
       else {
-	String mapLocation = _uriLocationMap.get(uri);
+        String mapLocation = _uriLocationMap.get(uri);
 
-	if ((location == null || location.equals("")) &&
-	    (mapLocation == null || mapLocation.equals("")))
-	  return null;
+        if ((location == null || location.equals("")) &&
+            (mapLocation == null || mapLocation.equals("")))
+          return null;
 
         tldTaglib = _tldManager.parseTld(uri, mapLocation, location);
 
@@ -256,13 +256,13 @@ public class TaglibManager {
       }
 
       if (tldTaglib != null) {
-	if (tldTaglib.getConfigException() != null)
-	  throw JspParseException.create(tldTaglib.getConfigException());
-	
-	return new Taglib(prefix, uri, tldTaglib, _tagFileManager);
+        if (tldTaglib.getConfigException() != null)
+          throw JspParseException.create(tldTaglib.getConfigException());
+
+        return new Taglib(prefix, uri, tldTaglib, _tagFileManager);
       }
       else
-	return null;
+        return null;
     } catch (JspParseException e) {
       throw e;
     } catch (Exception e) {

@@ -95,7 +95,7 @@ public class RenderKitConfig extends DescriptionGroupConfig
   @PostConstruct
   public void init()
     throws InstantiationException,
-	   IllegalAccessException
+           IllegalAccessException
   {
     if (_class != null)
       _renderKit = (RenderKit) _class.newInstance();
@@ -113,37 +113,37 @@ public class RenderKitConfig extends DescriptionGroupConfig
 
     if (_class != null) {
       if (oldRenderKit != null) {
-	try {
-	  Constructor ctor
-	    = _class.getConstructor(new Class[] { RenderKit.class });
+        try {
+          Constructor ctor
+            = _class.getConstructor(new Class[] { RenderKit.class });
 
-	  renderKit = (RenderKit) ctor.newInstance(oldRenderKit);
-	} catch (NoSuchMethodException e) {
-	} catch (RuntimeException e) {
-	  throw e;
-	} catch (Exception e) {
-	  throw ConfigException.create(e);
-	}
+          renderKit = (RenderKit) ctor.newInstance(oldRenderKit);
+        } catch (NoSuchMethodException e) {
+        } catch (RuntimeException e) {
+          throw e;
+        } catch (Exception e) {
+          throw ConfigException.create(e);
+        }
       }
 
       try {
-	renderKit = (RenderKit) _class.newInstance();
+        renderKit = (RenderKit) _class.newInstance();
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
 
       if (_name == null)
-	throw new ConfigException(L.l("'{0}' is an unknown render-kit-id.",
-				      _name));
-	
+        throw new ConfigException(L.l("'{0}' is an unknown render-kit-id.",
+                                      _name));
+
       factory.addRenderKit(_name, renderKit);
     }
 
     if (renderKit == null)
       throw new ConfigException(L.l("'{0}' is an unknown render-kit-id.",
-				    _name));
+                                    _name));
     
     for (RendererConfig renderer : _rendererList)
       renderer.configure(renderKit);

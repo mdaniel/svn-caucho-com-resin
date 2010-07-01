@@ -79,35 +79,35 @@ public class AfmParser {
       String id = parseIdentifier();
 
       if ("FontName".equals(id)) {
-	font.setFontName(parseString());
+        font.setFontName(parseString());
       }
       else if ("Weight".equals(id)) {
-	font.setWeight(parseString());
+        font.setWeight(parseString());
       }
       else if ("FontBBox".equals(id)) {
-	font.setBBox(parseNumber(), parseNumber(),
-		     parseNumber(), parseNumber());
+        font.setBBox(parseNumber(), parseNumber(),
+                     parseNumber(), parseNumber());
       }
       else if ("CapHeight".equals(id)) {
-	font.setCapHeight(parseNumber());
+        font.setCapHeight(parseNumber());
       }
       else if ("XHeight".equals(id)) {
-	font.setXHeight(parseNumber());
+        font.setXHeight(parseNumber());
       }
       else if ("Ascender".equals(id)) {
-	font.setAscender(parseNumber());
+        font.setAscender(parseNumber());
       }
       else if ("Descender".equals(id)) {
-	font.setDescender(parseNumber());
+        font.setDescender(parseNumber());
       }
       else if ("UnderlinePosition".equals(id)) {
-	font.setUnderlinePosition(parseNumber());
+        font.setUnderlinePosition(parseNumber());
       }
       else if ("UnderlineThickness".equals(id)) {
-	font.setUnderlineThickness(parseNumber());
+        font.setUnderlineThickness(parseNumber());
       }
       else if ("C".equals(id)) {
-	font.addChar(parseCharacter());
+        font.addChar(parseCharacter());
       }
 
       skipToEndOfLine();
@@ -190,7 +190,7 @@ public class AfmParser {
     int ch;
 
     while ('0' <= (ch = _is.read()) && ch <= '9' ||
-	   ch == '.' || ch == '-' || ch == '+') {
+           ch == '.' || ch == '-' || ch == '+') {
       sb.append((char) ch);
     }
 

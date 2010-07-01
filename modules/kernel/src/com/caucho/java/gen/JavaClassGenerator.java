@@ -87,11 +87,11 @@ public class JavaClassGenerator {
       char ch = className.charAt(i);
 
       if (ch == '.' || ch == '/')
-	cb.append('.');
+        cb.append('.');
       else if (Character.isJavaIdentifierPart(ch))
-	cb.append(ch);
+        cb.append(ch);
       else
-	cb.append('_');
+        cb.append('_');
     }
 
     return cb.toString();
@@ -164,7 +164,7 @@ public class JavaClassGenerator {
     /*
     if (_loader == null) {
       _loader = SimpleLoader.create(getParentLoader(),
-				    getWorkDir());
+                                    getWorkDir());
     }
     
     return _loader;
@@ -195,9 +195,9 @@ public class JavaClassGenerator {
 
       /*
       if (_preloadLoader instanceof EnhancingClassLoader) {
-	EnhancingClassLoader enhancingLoader;
-	enhancingLoader = (EnhancingClassLoader) _preloadLoader;
-	_preloadLoader = enhancingLoader.getRawLoader();
+        EnhancingClassLoader enhancingLoader;
+        enhancingLoader = (EnhancingClassLoader) _preloadLoader;
+        _preloadLoader = enhancingLoader.getRawLoader();
       }
       */
   }
@@ -305,9 +305,9 @@ public class JavaClassGenerator {
     WriteStream os = javaPath.openWrite();
     try {
       if (_encoding != null)
-	os.setEncoding(_encoding);
+        os.setEncoding(_encoding);
       else
-	os.setEncoding("JAVA");
+        os.setEncoding("JAVA");
       
       JavaWriter out = new JavaWriter(os);
 
@@ -557,8 +557,8 @@ public class JavaClassGenerator {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       if (_parentLoader != null)
-	thread.setContextClassLoader(_parentLoader);
-	
+        thread.setContextClassLoader(_parentLoader);
+
       Method method = cl.getMethod(_initMethod, new Class[] { Path.class });
       method.invoke(null, new Object[] { searchPath });
 

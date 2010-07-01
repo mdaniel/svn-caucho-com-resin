@@ -92,7 +92,7 @@ public interface Session {
    */
   public Node getNodeByUUID(String uuid)
     throws ItemNotFoundException,
-	   RepositoryException;
+           RepositoryException;
 
   /**
    * Returns an item based on an absolute path.
@@ -103,7 +103,7 @@ public interface Session {
    */
   public Item getItem(String absPath)
     throws PathNotFoundException,
-	   RepositoryException;
+           RepositoryException;
 
   /**
    * Returns true if the item named by the path exists.
@@ -121,23 +121,23 @@ public interface Session {
    */
   public void move(String srcAbsPath, String destAbsPath)
     throws ItemExistsException,
-	   PathNotFoundException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   RepositoryException;
+           PathNotFoundException,
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           RepositoryException;
 
   /**
    * Saves changes to the workspace.
    */
   public void save()
     throws AccessDeniedException,
-	   ItemExistsException,
-	   ConstraintViolationException,
-	   InvalidItemStateException,
-	   VersionException, LockException,
-	   NoSuchNodeTypeException,
-	   RepositoryException;
+           ItemExistsException,
+           ConstraintViolationException,
+           InvalidItemStateException,
+           VersionException, LockException,
+           NoSuchNodeTypeException,
+           RepositoryException;
 
   /**
    * Updates changes from the repository.
@@ -156,7 +156,7 @@ public interface Session {
    */
   public ValueFactory getValueFactory()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException;
+           RepositoryException;
 
   /**
    * Checks if the session can perform the given actions for the path.
@@ -166,7 +166,7 @@ public interface Session {
    */
   public void checkPermission(String absPath, String actions)
     throws java.security.AccessControlException,
-	   RepositoryException;
+           RepositoryException;
 
   /**
    * Returns a SAX ContentHandler to important data.
@@ -174,12 +174,12 @@ public interface Session {
    * @param parentAbsPath the absolute path of the parent node
    */
   public ContentHandler getImportContentHandler(String parentAbsPath,
-						int uuidBehavior)
+                                                int uuidBehavior)
     throws PathNotFoundException,
-	   ConstraintViolationException,
-	   VersionException,
-	   LockException,
-	   RepositoryException;
+           ConstraintViolationException,
+           VersionException,
+           LockException,
+           RepositoryException;
 
   /**
    * Import data based on an XML stream.
@@ -188,16 +188,16 @@ public interface Session {
    * @param in InputStream to the XML data
    */
   public void importXML(String parentAbsPath,
-			InputStream in,
-			int uuidBehavior)
+                        InputStream in,
+                        int uuidBehavior)
     throws IOException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   ConstraintViolationException,
-	   VersionException,
-	   InvalidSerializedDataException,
-	   LockException,
-	   RepositoryException;
+           PathNotFoundException,
+           ItemExistsException,
+           ConstraintViolationException,
+           VersionException,
+           InvalidSerializedDataException,
+           LockException,
+           RepositoryException;
 
   /**
    * Exports XML data from the given node based on the system view.
@@ -206,12 +206,12 @@ public interface Session {
    * @param contentHandler SAX ContentHandler to receive the XML
    */
   public void exportSystemView(String absPath,
-			       ContentHandler contentHandler,
-			       boolean skipBinary,
-			       boolean noRecurse)
+                               ContentHandler contentHandler,
+                               boolean skipBinary,
+                               boolean noRecurse)
     throws PathNotFoundException,
-	   SAXException,
-	   RepositoryException;
+           SAXException,
+           RepositoryException;
   
   /**
    * Exports XML data from the given node based on the system view.
@@ -220,12 +220,12 @@ public interface Session {
    * @param out OutputStream to receive the XML
    */
   public void exportSystemView(String absPath,
-			       OutputStream out,
-			       boolean skipBinary,
-			       boolean noRecurse)
+                               OutputStream out,
+                               boolean skipBinary,
+                               boolean noRecurse)
     throws IOException,
-	   PathNotFoundException,
-	   RepositoryException;
+           PathNotFoundException,
+           RepositoryException;
   
   /**
    * Exports XML data from the given node based on the document view.
@@ -234,12 +234,12 @@ public interface Session {
    * @param out OutputStream to receive the XML
    */
   public void exportDocumentView(String absPath,
-				 ContentHandler contentHandler,
-				 boolean skipBinary,
-				 boolean noRecurse)
+                                 ContentHandler contentHandler,
+                                 boolean skipBinary,
+                                 boolean noRecurse)
     throws PathNotFoundException,
-	   SAXException,
-	   RepositoryException;
+           SAXException,
+           RepositoryException;
   
   /**
    * Exports XML data from the given node based on the document view.
@@ -248,12 +248,12 @@ public interface Session {
    * @param out OutputStream to receive the XML
    */
   public void exportDocumentView(String absPath,
-				 OutputStream out,
-				 boolean skipBinary,
-				 boolean noRecurse)
+                                 OutputStream out,
+                                 boolean skipBinary,
+                                 boolean noRecurse)
     throws IOException,
-	   PathNotFoundException,
-	   RepositoryException;
+           PathNotFoundException,
+           RepositoryException;
   
   /**
    * Exports XML data from the given node based on the document view.
@@ -262,9 +262,9 @@ public interface Session {
    * @param out OutputStream to receive the XML
    */
   public void setNamespacePrefix(String newPrefix,
-				 String existingUri)
+                                 String existingUri)
     throws NamespaceException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns the session's namespace prefixes.
@@ -277,14 +277,14 @@ public interface Session {
    */
   public String getNamespaceURI(String prefix)
     throws NamespaceException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns the prefix for a given URI.
    */
   public String getNamespacePrefix(String uri)
     throws NamespaceException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Close the session.
@@ -301,7 +301,7 @@ public interface Session {
    */
   public void addLockToken(String lt)
     throws LockException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns the current lock tokens.

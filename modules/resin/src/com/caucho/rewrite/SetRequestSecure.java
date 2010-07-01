@@ -47,8 +47,8 @@ public class SetRequestSecure extends AbstractRewriteFilter
   private static final L10N L = new L10N(SetRequestSecure.class);
 
   protected FilterChain createFilterChain(String uri,
-					  String queryString,
-					  FilterChain next)
+                                          String queryString,
+                                          FilterChain next)
   {
     return new SetRequestSecureFilterChain(next, true);
   }

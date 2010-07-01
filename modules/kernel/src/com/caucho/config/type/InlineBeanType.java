@@ -452,7 +452,7 @@ public class InlineBeanType<T> extends ConfigType<T>
       try {
         return _replaceObject.invoke(bean);
       } catch (Exception e) {
-	throw ConfigException.create(_replaceObject, e);
+        throw ConfigException.create(_replaceObject, e);
       }
     }
     else
@@ -613,9 +613,9 @@ public class InlineBeanType<T> extends ConfigType<T>
       ConfigType parentType = TypeFactory.getType(parentClass);
 
       if (parentType instanceof InlineBeanType) {
-	InlineBeanType parentBean = (InlineBeanType) parentType;
+        InlineBeanType parentBean = (InlineBeanType) parentType;
 
-	return parentBean.isIntrospecting();
+        return parentBean.isIntrospecting();
       }
     }
 
@@ -954,7 +954,7 @@ public class InlineBeanType<T> extends ConfigType<T>
   }
 
   private void fillSetterMap(HashMap<String,Method> setterMap,
-			     Method []methods)
+                             Method []methods)
   {
     for (Method method : methods) {
       String name = method.getName();

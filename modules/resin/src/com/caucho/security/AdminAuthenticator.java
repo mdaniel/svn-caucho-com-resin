@@ -92,7 +92,7 @@ public class AdminAuthenticator extends XmlAuthenticator
       PasswordDigest digest = getPasswordDigest();
 
       if (digest != null)
-	hash = digest.getPasswordDigest(userName, hash);
+        hash = digest.getPasswordDigest(userName, hash);
       
       return new PasswordUser(userName, hash);
     }
@@ -109,19 +109,19 @@ public class AdminAuthenticator extends XmlAuthenticator
       long crc64 = 0;
 
       for (PasswordUser user : getUserMap().values()) {
-	if (user.isDisabled())
-	  continue;
+        if (user.isDisabled())
+          continue;
 
-	crc64 = Crc64.generate(crc64, user.getPrincipal().getName());
-	crc64 = Crc64.generate(crc64, ":");
-	crc64 = Crc64.generate(crc64, new String(user.getPassword()));
+        crc64 = Crc64.generate(crc64, user.getPrincipal().getName());
+        crc64 = Crc64.generate(crc64, ":");
+        crc64 = Crc64.generate(crc64, new String(user.getPassword()));
       }
 
       if (crc64 != 0) {
-	StringBuilder cb = new StringBuilder();
-	Base64.encode(cb, crc64);
+        StringBuilder cb = new StringBuilder();
+        Base64.encode(cb, crc64);
 
-	_remoteCookie = cb.toString();
+        _remoteCookie = cb.toString();
       }
     }
 

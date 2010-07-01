@@ -86,9 +86,9 @@ public class PathExpr extends Expr {
       Expr index = array.getIndex();
       
       if (index instanceof StringLiteral) {
-	StringLiteral string = (StringLiteral) index;
+        StringLiteral string = (StringLiteral) index;
 
-	return new MethodExpr(array.getExpr(), string.getValue(), args);
+        return new MethodExpr(array.getExpr(), string.getValue(), args);
       }
     }
     else if (_expr instanceof ArrayResolverExpr) {
@@ -97,9 +97,9 @@ public class PathExpr extends Expr {
       Expr index = array.getIndex();
       
       if (index instanceof StringLiteral) {
-	StringLiteral string = (StringLiteral) index;
+        StringLiteral string = (StringLiteral) index;
 
-	return new MethodExpr(array.getExpr(), string.getValue(), args);
+        return new MethodExpr(array.getExpr(), string.getValue(), args);
       }
     }
       
@@ -185,8 +185,8 @@ public class PathExpr extends Expr {
    */
   @Override
   public MethodInfo getMethodInfo(ELContext env,
-				  Class<?> retType,
-				  Class<?> []argTypes)
+                                  Class<?> retType,
+                                  Class<?> []argTypes)
     throws ELException
   {
     return _expr.getMethodInfo(env, retType, argTypes);

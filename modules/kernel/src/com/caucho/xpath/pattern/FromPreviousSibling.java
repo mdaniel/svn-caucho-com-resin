@@ -61,10 +61,10 @@ public class FromPreviousSibling extends Axis {
       return false;
 
     for (node = node.getNextSibling();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       if (_parent.match(node, env))
-	return true;
+        return true;
     }
     
     return false;
@@ -143,7 +143,7 @@ public class FromPreviousSibling extends Axis {
       }
 
       if (pattern.match(node, env))
-	count++;
+        count++;
     }
 
     return count;

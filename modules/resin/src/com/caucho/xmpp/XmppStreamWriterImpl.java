@@ -65,11 +65,11 @@ public class XmppStreamWriterImpl extends XMLStreamWriterImpl
     }
     else {
       String name = value.getClass().getName();
-	
+
       XmppMarshal marshal = _marshalFactory.getSerialize(name);
 
       if (marshal == null)
-	throw new IllegalArgumentException(L.l("'{0}' is an unknown XMPP marshal class", name));
+        throw new IllegalArgumentException(L.l("'{0}' is an unknown XMPP marshal class", name));
 
       marshal.toXml(this, value);
     }

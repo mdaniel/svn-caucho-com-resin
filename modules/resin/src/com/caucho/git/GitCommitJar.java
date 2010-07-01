@@ -104,18 +104,18 @@ public class GitCommitJar {
       ZipEntry entry;
       
       while ((entry = zin.getNextEntry()) != null) {
-	String path = entry.getName();
-	long length = entry.getSize();
+        String path = entry.getName();
+        long length = entry.getSize();
 
-	if (entry.isDirectory())
-	  continue;
+        if (entry.isDirectory())
+          continue;
 
-	Long lengthValue = lengthMap.get(path);
+        Long lengthValue = lengthMap.get(path);
 
-	if (lengthValue != null)
-	  length = lengthValue;
+        if (lengthValue != null)
+          length = lengthValue;
 
-	_commit.addFile(path, 0664, zin, length);
+        _commit.addFile(path, 0664, zin, length);
       }
     } finally {
       is.close();
@@ -147,22 +147,22 @@ public class GitCommitJar {
       ZipEntry entry;
       
       while ((entry = zin.getNextEntry()) != null) {
-	String path = entry.getName();
-	long length = entry.getSize();
+        String path = entry.getName();
+        long length = entry.getSize();
 
-	if (entry.isDirectory())
-	  continue;
-	
-	if (length < 0) {
-	  length = 0;
-	  int ch;
+        if (entry.isDirectory())
+          continue;
 
-	  while ((ch = zin.read()) >= 0) {
-	    length++;
-	  }
-	}
+        if (length < 0) {
+          length = 0;
+          int ch;
 
-	lengthMap.put(path, length);
+          while ((ch = zin.read()) >= 0) {
+            length++;
+          }
+        }
+
+        lengthMap.put(path, length);
       }
     } finally {
       is.close();
@@ -197,16 +197,16 @@ public class GitCommitJar {
       ZipFile file = new ZipFile(_jar.getNativePath());
 
       try {
-	ZipEntry entry = file.getEntry(path);
-	InputStream is = file.getInputStream(entry);
+        ZipEntry entry = file.getEntry(path);
+        InputStream is = file.getInputStream(entry);
 
-	try {
-	  return _commit.writeBlob(is, entry.getSize());
-	} finally {
-	  is.close();
-	}
+        try {
+          return _commit.writeBlob(is, entry.getSize());
+        } finally {
+          is.close();
+        }
       } finally {
-	file.close();
+        file.close();
       }
     }
   }
@@ -215,9 +215,9 @@ public class GitCommitJar {
   {
     if (_tempJar != null) {
       try {
-	_tempJar.remove();
+        _tempJar.remove();
       } catch (IOException e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
   }

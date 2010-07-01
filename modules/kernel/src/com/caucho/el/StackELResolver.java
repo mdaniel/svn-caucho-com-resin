@@ -82,7 +82,7 @@ public class StackELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
-							   Object base)
+                                                           Object base)
   {
     ArrayList<FeatureDescriptor> descriptors = null;
 
@@ -90,18 +90,18 @@ public class StackELResolver extends ELResolver {
       ELResolver resolver = _resolverStack.get(i);
 
       Iterator<FeatureDescriptor> iter
-	= resolver.getFeatureDescriptors(env, base);
+        = resolver.getFeatureDescriptors(env, base);
 
       if (iter == null)
-	continue;
+        continue;
 
       if (descriptors == null)
-	descriptors = new ArrayList<FeatureDescriptor>();
+        descriptors = new ArrayList<FeatureDescriptor>();
 
       while (iter.hasNext()) {
-	FeatureDescriptor desc = iter.next();
+        FeatureDescriptor desc = iter.next();
 
-	descriptors.add(desc);
+        descriptors.add(desc);
       }
     }
 
@@ -113,8 +113,8 @@ public class StackELResolver extends ELResolver {
 
   @Override
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     context.setPropertyResolved(false);
 
@@ -124,7 +124,7 @@ public class StackELResolver extends ELResolver {
       Class type = resolver.getType(context, base, property);
 
       if (context.isPropertyResolved())
-	return type;
+        return type;
     }
 
     return null;
@@ -132,8 +132,8 @@ public class StackELResolver extends ELResolver {
 
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     context.setPropertyResolved(false);
 
@@ -143,7 +143,7 @@ public class StackELResolver extends ELResolver {
       Object value = resolver.getValue(context, base, property);
 
       if (context.isPropertyResolved()) {
-	return value;
+        return value;
       }
     }
 
@@ -152,8 +152,8 @@ public class StackELResolver extends ELResolver {
 
   @Override
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     context.setPropertyResolved(false);
 
@@ -163,7 +163,7 @@ public class StackELResolver extends ELResolver {
       boolean isReadOnly = resolver.isReadOnly(context, base, property);
 
       if (context.isPropertyResolved())
-	return isReadOnly;
+        return isReadOnly;
     }
 
     return false;
@@ -171,9 +171,9 @@ public class StackELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     context.setPropertyResolved(false);
 
@@ -183,7 +183,7 @@ public class StackELResolver extends ELResolver {
       resolver.setValue(context, base, property, value);
 
       if (context.isPropertyResolved()) {
-	return;
+        return;
       }
     }
   }

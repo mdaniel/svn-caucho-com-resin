@@ -127,7 +127,7 @@ public class IvyLoader extends JarListLoader {
 
     for (Path path : _manager.resolve()) {
       if (log.isLoggable(Level.FINE))
-	log.fine("ivy-loader add " + path);
+        log.fine("ivy-loader add " + path);
       
       addJar(path);
     }

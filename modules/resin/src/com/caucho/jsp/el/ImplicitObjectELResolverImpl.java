@@ -40,7 +40,7 @@ import java.util.Iterator;
 public class ImplicitObjectELResolverImpl extends ImplicitObjectELResolver {
   @Override
   public Class<String> getCommonPropertyType(ELContext context,
-					     Object base)
+                                             Object base)
   {
     if (base == null)
       return String.class;
@@ -57,8 +57,8 @@ public class ImplicitObjectELResolverImpl extends ImplicitObjectELResolver {
 
   @Override
   public Class getType(ELContext context,
-		       Object base,
-		       Object property)
+                       Object base,
+                       Object property)
   {
     Object value = getValue(context, base, property);
 
@@ -70,25 +70,25 @@ public class ImplicitObjectELResolverImpl extends ImplicitObjectELResolver {
 
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     return null;
   }
 
   @Override
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     return true;
   }
 
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
   }
 }

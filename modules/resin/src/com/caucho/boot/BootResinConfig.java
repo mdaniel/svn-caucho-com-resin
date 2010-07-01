@@ -228,11 +228,11 @@ public class BootResinConfig implements EnvironmentBean
 
     if (cluster == null)
       throw new ConfigException(L.l("'{0}' is an unknown cluster. -dynamic-server must specify an existing cluster",
-				    clusterId));
+                                    clusterId));
 
     if (! cluster.isDynamicServerEnable()) {
       throw new ConfigException(L.l("cluster '{0}' does not have <dynamic-server-enable>. -dynamic-server requires a <dynamic-server-enable> tag.",
-				    clusterId));
+                                    clusterId));
     }
 
     WatchdogConfig config = cluster.createServer();
@@ -287,7 +287,7 @@ public class BootResinConfig implements EnvironmentBean
       BootClusterConfig cluster = _clusterList.get(i);
 
       if (id.equals(cluster.getId()))
-	return cluster;
+        return cluster;
     }
 
     return null;

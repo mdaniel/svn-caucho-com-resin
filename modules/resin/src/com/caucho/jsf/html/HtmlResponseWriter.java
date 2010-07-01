@@ -125,8 +125,8 @@ public class HtmlResponseWriter extends ResponseWriter
   }
 
   public void writeAttribute(String name,
-			     Object value,
-			     String property)
+                             Object value,
+                             String property)
     throws IOException
   {
     /*
@@ -145,8 +145,8 @@ public class HtmlResponseWriter extends ResponseWriter
   }
 
   public void writeURIAttribute(String name,
-				Object value,
-				String property)
+                                Object value,
+                                String property)
     throws IOException
   {
     writeAttribute(name, value, property);
@@ -164,7 +164,7 @@ public class HtmlResponseWriter extends ResponseWriter
   }
 
   public void writeText(Object text,
-			String property)
+                        String property)
     throws IOException
   {
     if (_inElement)

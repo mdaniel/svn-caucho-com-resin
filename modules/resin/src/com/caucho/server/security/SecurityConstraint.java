@@ -220,7 +220,7 @@ public class SecurityConstraint {
     
     for (int i = 0;
          _webResourceCollectionList != null
-	   && i < _webResourceCollectionList.size();
+           && i < _webResourceCollectionList.size();
          i++) {
       WebResourceCollection resource = _webResourceCollectionList.get(i);
 

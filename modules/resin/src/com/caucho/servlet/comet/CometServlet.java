@@ -47,8 +47,8 @@ public interface CometServlet extends Servlet
    * @return true for keepalive, false for the end of the request
    */
   abstract public boolean service(ServletRequest request,
-				  ServletResponse response,
-				  CometController controller)
+                                  ServletResponse response,
+                                  CometController controller)
     throws IOException, ServletException;
 
   /**
@@ -61,7 +61,7 @@ public interface CometServlet extends Servlet
    * @return true for keepalive, false for the end of the request
    */
   abstract public boolean resume(ServletRequest request,
-				 ServletResponse response,
-				 CometController controller)
+                                 ServletResponse response,
+                                 CometController controller)
     throws IOException, ServletException;
 }

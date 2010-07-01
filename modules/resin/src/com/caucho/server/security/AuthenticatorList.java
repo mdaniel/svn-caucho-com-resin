@@ -187,16 +187,16 @@ public class AuthenticatorList implements ServletAuthenticator {
   }
   
   public void logout(ServletContext application,
-		     HttpSession timeoutSession,
+                     HttpSession timeoutSession,
                      String sessionId,
                      Principal user)
     throws ServletException
   {
     for (ServletAuthenticator authenticator : _authenticators) {
       authenticator.logout(application,
-			   timeoutSession,
-			   sessionId,
-			   user );
+                           timeoutSession,
+                           sessionId,
+                           user );
     }
   }
 }

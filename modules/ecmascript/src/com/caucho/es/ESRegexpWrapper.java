@@ -105,7 +105,7 @@ class ESRegexpWrapper extends NativeWrapper {
 
     if (reg.length() > 0)
       put(LAST_PAREN, string.substring(reg.getBegin(reg.length() - 1),
-				       reg.getEnd(reg.length() - 1)), flags);
+                                       reg.getEnd(reg.length() - 1)), flags);
     else
       put(LAST_PAREN, string.NULL, flags);
 
@@ -113,7 +113,7 @@ class ESRegexpWrapper extends NativeWrapper {
       put(LEFT_CONTEXT, ESString.NULL, flags);
     else
       put(LEFT_CONTEXT, string.substring(regexp.lastStart, reg.getBegin(0)), 
-	  flags);
+          flags);
 
     put(RIGHT_CONTEXT, string.substring(reg.getEnd(0)), flags);
     */

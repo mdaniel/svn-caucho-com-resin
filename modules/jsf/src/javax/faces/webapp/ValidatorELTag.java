@@ -47,14 +47,14 @@ public abstract class ValidatorELTag
 
     if (parent == null)
       throw new JspException(
-	"ValidatorELTag must be nested inside a UIComponent tag.");
+        "ValidatorELTag must be nested inside a UIComponent tag.");
 
     UIComponent comp = parent.getComponentInstance();
 
     if (parent.getCreated()) {
       if (!(comp instanceof EditableValueHolder))
-	throw new JspException(
-	  "UIComponent parent of validator must be a EditableValueHolder.");
+        throw new JspException(
+          "UIComponent parent of validator must be a EditableValueHolder.");
 
       EditableValueHolder valueHolder = (EditableValueHolder) comp;
 

@@ -127,14 +127,14 @@ public class XmppPubSubItemsQueryMarshal extends AbstractXmppMarshal {
 
     if (itemList != null) {
       for (PubSubItem item : itemList) {
-	out.writeStartElement("item");
+        out.writeStartElement("item");
 
-	if (item.getId() != null)
-	  out.writeAttribute("id", item.getId());
+        if (item.getId() != null)
+          out.writeAttribute("id", item.getId());
 
-	out.writeValue(item.getValue());
+        out.writeValue(item.getValue());
       
-	out.writeEndElement(); // </item>
+        out.writeEndElement(); // </item>
       }
     }
     

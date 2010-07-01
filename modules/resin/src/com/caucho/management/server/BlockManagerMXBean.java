@@ -68,13 +68,13 @@ public interface BlockManagerMXBean extends ManagedObjectMXBean {
    * Returns the block LRU cache hit count.
    */
   @Description("The hit count is the number of block accesses found in"
-	       + " the cache.")
+               + " the cache.")
   public long getHitCountTotal();
 
   /**
    * Returns the proxy cache miss count.
    */
   @Description("The hit count is the number of block accesses missing in"
-	       + " the cache.")
+               + " the cache.")
   public long getMissCountTotal();
 }

@@ -103,8 +103,8 @@ public class ServletMappingEmbed
    * @param servletClass the servlet-class
    */
   public ServletMappingEmbed(String servletName,
-			     String urlPattern,
-			     String servletClass)
+                             String urlPattern,
+                             String servletClass)
   {
     setUrlPattern(urlPattern);
     setServletName(servletName);
@@ -195,24 +195,24 @@ public class ServletMappingEmbed
   {
     try {
       if (_urlPattern != null)
-	servletMapping.addURLPattern(_urlPattern);
+        servletMapping.addURLPattern(_urlPattern);
     
       servletMapping.setServletName(_servletName);
 
       if (_servletClass != null)
-	servletMapping.setServletClass(_servletClass);
+        servletMapping.setServletClass(_servletClass);
 
       for (Map.Entry<String,String> entry : _initParamMap.entrySet()) {
-	servletMapping.setInitParam(entry.getKey(), entry.getValue());
+        servletMapping.setInitParam(entry.getKey(), entry.getValue());
       }
 
       servletMapping.setInit(_init);
 
       if (_loadOnStartup >= 0)
-	servletMapping.setLoadOnStartup(_loadOnStartup);
+        servletMapping.setLoadOnStartup(_loadOnStartup);
 
       if (_protocol != null) {
-	servletMapping.setProtocol(_protocol.createProtocol());
+        servletMapping.setProtocol(_protocol.createProtocol());
       }
 
       servletMapping.init();

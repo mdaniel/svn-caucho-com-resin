@@ -67,7 +67,7 @@ public class ListELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
-							   Object base)
+                                                           Object base)
   {
     if (base instanceof List) {
       context.setPropertyResolved(true);
@@ -81,8 +81,8 @@ public class ListELResolver extends ELResolver {
 
   @Override
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     if (context == null)
       throw new NullPointerException();
@@ -115,8 +115,8 @@ public class ListELResolver extends ELResolver {
    */
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base instanceof List) {
       List list = (List) base;
@@ -126,7 +126,7 @@ public class ListELResolver extends ELResolver {
       int index = ArrayELResolver.getIndex(property);
 
       if (0 <= index && index < list.size())
-	return list.get(index);
+        return list.get(index);
       else
         return null;
     }
@@ -137,8 +137,8 @@ public class ListELResolver extends ELResolver {
 
   @Override
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     if (base instanceof List) {
       context.setPropertyResolved(true);

@@ -54,21 +54,21 @@ public class Services
       ReadStream is = Vfs.lookup(url.toString()).openRead();
 
       try {
-	String line;
+        String line;
 
-	while ((line = is.readLine()) != null) {
-	  int p = line.indexOf('#');
-	  if (p > 0)
-	    line = line.substring(0, p);
+        while ((line = is.readLine()) != null) {
+          int p = line.indexOf('#');
+          if (p > 0)
+            line = line.substring(0, p);
 
-	  line = line.trim();
+          line = line.trim();
 
-	  if (line.length() > 0) {
-	    services.add(line);
-	  }
-	}
+          if (line.length() > 0) {
+            services.add(line);
+          }
+        }
       } finally {
-	is.close();
+        is.close();
       }
     }
 

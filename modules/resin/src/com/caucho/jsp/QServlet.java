@@ -310,7 +310,7 @@ abstract public class QServlet implements Servlet {
     if (servletPath != null && ! servletPath.equals("")) {
       // server/0035
       throw new FileNotFoundException(L.l("{0} was not found on this server.",
-					  uri));
+                                          uri));
       // return null;
     }
 
@@ -321,7 +321,7 @@ abstract public class QServlet implements Servlet {
     subcontext = getPagePath(uri);
     if (subcontext == null)
       throw new FileNotFoundException(L.l("{0} was not found on this server.",
-					  uri));
+                                          uri));
     
     return _manager.getPage(uri, subcontext);
   }

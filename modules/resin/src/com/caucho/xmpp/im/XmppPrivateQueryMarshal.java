@@ -112,21 +112,21 @@ public class XmppPrivateQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	if (query != null)
-	  return query;
-	else
-	  return new PrivateQuery();
+        if (query != null)
+          return query;
+        else
+          return new PrivateQuery();
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	String name = in.getLocalName();
-	String uri = in.getNamespaceURI();
+        String name = in.getLocalName();
+        String uri = in.getNamespaceURI();
 
-	String data = in.readAsXmlString();
+        String data = in.readAsXmlString();
 
-	query = new PrivateQuery(name, uri, data);
+        query = new PrivateQuery(name, uri, data);
       }
 
       tag = in.next();

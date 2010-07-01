@@ -401,7 +401,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       Path path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
 
       if (true)
-	throw new IllegalStateException();
+        throw new IllegalStateException();
  
       if (false) throw new NamingException();
     }

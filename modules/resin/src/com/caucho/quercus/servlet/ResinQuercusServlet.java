@@ -134,7 +134,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
   {
     synchronized (this) {
       if (_quercus == null)
-	_quercus = new ResinQuercus();
+        _quercus = new ResinQuercus();
     }
 
     return _quercus;

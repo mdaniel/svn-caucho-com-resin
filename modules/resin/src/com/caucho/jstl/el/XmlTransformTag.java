@@ -197,12 +197,12 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       }
 
       if (_xml != null)
-	source = getSource(_xml, _xmlSystemId);
+        source = getSource(_xml, _xmlSystemId);
       else {
-	BodyContent bodyContent = getBodyContent();
+        BodyContent bodyContent = getBodyContent();
 
-	source = new StreamSource(bodyContent.getReader());
-	source.setSystemId(((HttpServletRequest) pageContext.getRequest()).getRequestURI());
+        source = new StreamSource(bodyContent.getReader());
+        source.setSystemId(((HttpServletRequest) pageContext.getRequest()).getRequestURI());
       }
 
       Result result;
@@ -241,7 +241,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       Source source = null;
 
       if (systemIdExpr != null)
-	systemId = systemIdExpr.evalString(pageContext.getELContext());
+        systemId = systemIdExpr.evalString(pageContext.getELContext());
       
       source = convertToSource(xmlObj, systemId);
 
@@ -277,10 +277,10 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       ArrayList list = (ArrayList) xmlObj;
 
       if (list.size() > 0)
-	return convertToSource(list.get(0), systemId);
+        return convertToSource(list.get(0), systemId);
     }
     
     throw new JspException(L.l("unknown xml object type '{0}' '{1}'",
-			       xmlObj, xmlObj.getClass()));
+                               xmlObj, xmlObj.getClass()));
   }
 }

@@ -69,8 +69,8 @@ public class HessianHmuxProxy implements InvocationHandler {
       loader = ClassLoader.getSystemClassLoader();
     
     return (X) Proxy.newProxyInstance(loader,
-				      new Class[] { api },
-				      new HessianHmuxProxy(url));
+                                      new Class[] { api },
+                                      new HessianHmuxProxy(url));
   }
 
   /**
@@ -119,20 +119,20 @@ public class HessianHmuxProxy implements InvocationHandler {
       String code = (String) is.getAttribute("status");
 
       if (! "200".equals(code)) {
-	CharBuffer sb = new CharBuffer();
+        CharBuffer sb = new CharBuffer();
 
-	int count = 1024;
+        int count = 1024;
 
-	while (is.readLine(sb, false) && count-- >= 0) {
-	}
+        while (is.readLine(sb, false) && count-- >= 0) {
+        }
 
-	throw new HessianProtocolException(code + ": " + sb);
+        throw new HessianProtocolException(code + ": " + sb);
       }
 
       int ch = is.read();
 
       if (ch != 'H')
-	throw new HessianProtocolException(L.l("expected 'H' at '{0}'", ch));
+        throw new HessianProtocolException(L.l("expected 'H' at '{0}'", ch));
 
       int major = is.read();
       int minor = is.read();
@@ -144,8 +144,8 @@ public class HessianHmuxProxy implements InvocationHandler {
       throw new RuntimeException(e);
     } finally {
       try {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       } catch (Throwable e) {
       }
     }
@@ -169,24 +169,24 @@ public class HessianHmuxProxy implements InvocationHandler {
       return is;
     } catch (IOException e) {
       try {
-	os.close();
+        os.close();
       } catch (Exception e1) {
       }
       
       try {
-	is.close();
+        is.close();
       } catch (Exception e1) {
       }
 
       throw e;
     } catch (RuntimeException e) {
       try {
-	os.close();
+        os.close();
       } catch (Exception e1) {
       }
       
       try {
-	is.close();
+        is.close();
       } catch (Exception e1) {
       }
 

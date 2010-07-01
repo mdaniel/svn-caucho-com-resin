@@ -78,7 +78,7 @@ public class IfMethod implements RequestPredicate
   {
     if (_method == null)
       throw new ConfigException(L.l("'method' is a required attribute for {0}",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
   }
 
   /**

@@ -300,10 +300,10 @@ public class TransformerImpl extends javax.xml.transform.Transformer {
           WriteStream os = Vfs.openWrite(writer);
 
           if (writer instanceof OutputStreamWriter) {
-	    String javaEncoding = ((OutputStreamWriter) writer).getEncoding();
-	    String mimeEncoding = Encoding.getMimeName(javaEncoding);
+            String javaEncoding = ((OutputStreamWriter) writer).getEncoding();
+            String mimeEncoding = Encoding.getMimeName(javaEncoding);
             transform(node, os, mimeEncoding, result.getSystemId());
-	  }
+          }
           else
             transform(node, os, null, result.getSystemId());
 
@@ -321,8 +321,8 @@ public class TransformerImpl extends javax.xml.transform.Transformer {
         }
       }
       else if (result instanceof DOMResult) {
-	DOMResult domResult = (DOMResult) result;
-	
+        DOMResult domResult = (DOMResult) result;
+
         Node resultNode = domResult.getNode();
 
         domResult.setNode(transform(node, resultNode));
@@ -347,7 +347,7 @@ public class TransformerImpl extends javax.xml.transform.Transformer {
     if (os instanceof WriteStream) {
       String encoding = ((WriteStream) os).getEncoding();
       if (encoding == null)
-	encoding = "ISO-8859-1";
+        encoding = "ISO-8859-1";
 
       transform(node, os, encoding, null);
     }
@@ -361,7 +361,7 @@ public class TransformerImpl extends javax.xml.transform.Transformer {
    * @param os the destination stream
    */
   public void transform(Node node, OutputStream os,
-			String encoding, String systemId)
+                        String encoding, String systemId)
     throws TransformerException
   {
     if (node == null)
@@ -374,18 +374,18 @@ public class TransformerImpl extends javax.xml.transform.Transformer {
       WriteStream ws;
 
       if (os instanceof WriteStream)
-	ws = (WriteStream) os;
+        ws = (WriteStream) os;
       else {
-	ws = Vfs.openWrite(os);
+        ws = Vfs.openWrite(os);
 
-	if (systemId != null)
-	  ws.setPath(Vfs.lookup(systemId));
-	else if (node instanceof QNode) {
-	  String baseURI = ((QNode) node).getBaseURI();
+        if (systemId != null)
+          ws.setPath(Vfs.lookup(systemId));
+        else if (node instanceof QNode) {
+          String baseURI = ((QNode) node).getBaseURI();
 
-	  if (baseURI != null)
-	    ws.setPath(Vfs.lookup(baseURI));
-	}
+          if (baseURI != null)
+            ws.setPath(Vfs.lookup(baseURI));
+        }
       }
 
       XmlPrinter out = new XmlPrinter(ws);
@@ -535,9 +535,9 @@ public class TransformerImpl extends javax.xml.transform.Transformer {
       String string = ((StringSource) source).getString();
 
       if (string != null)
-	return parseStringDocument(string, source.getSystemId());
+        return parseStringDocument(string, source.getSystemId());
       else
-	return new QDocument();
+        return new QDocument();
     }
     else if (source instanceof SAXSource) {
       SAXSource saxSource = (SAXSource) source;
@@ -545,7 +545,7 @@ public class TransformerImpl extends javax.xml.transform.Transformer {
       XMLReader reader = saxSource.getXMLReader();
 
       if (reader == null)
-	return new QDocument();
+        return new QDocument();
       
       InputSource inputSource = saxSource.getInputSource();
 

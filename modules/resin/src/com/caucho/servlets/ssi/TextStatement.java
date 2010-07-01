@@ -57,8 +57,8 @@ public class TextStatement extends Statement{
    * @param response the servlet response
    */
   public void apply(WriteStream out,
-		    HttpServletRequest request,
-		    HttpServletResponse response)
+                    HttpServletRequest request,
+                    HttpServletResponse response)
     throws IOException, ServletException
   {
     out.write(_buffer, 0, _buffer.length);

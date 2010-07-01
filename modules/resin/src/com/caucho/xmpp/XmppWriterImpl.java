@@ -124,67 +124,67 @@ class XmppWriterImpl
       }
       
       synchronized (out) {
-	out.writeStartElement("", "message", JABBERC_NS);
-	out.writeDefaultNamespace(JABBERC_NS);
+        out.writeStartElement("", "message", JABBERC_NS);
+        out.writeDefaultNamespace(JABBERC_NS);
 
-	if (to != null)
-	  out.writeAttribute("to", to);
+        if (to != null)
+          out.writeAttribute("to", to);
 
-	if (from != null)
-	  out.writeAttribute("from", from);
+        if (from != null)
+          out.writeAttribute("from", from);
 
-	if (type != null)
-	  out.writeAttribute("type", type);
+        if (type != null)
+          out.writeAttribute("type", type);
 
-	if (subjects != null) {
-	  for (Text subject : subjects) {
-	    out.writeStartElement("subject");
+        if (subjects != null) {
+          for (Text subject : subjects) {
+            out.writeStartElement("subject");
 
-	    if (subject.getLang() != null)
-	      out.writeAttribute("xml", "http://xml.org", "lang", subject.getLang());
-	    
-	    out.writeCharacters(subject.getValue());
-	    out.writeEndElement(); // </subject>
-	  }
-	}
-	
-	if (bodys != null) {
-	  for (Text body : bodys) {
-	    out.writeStartElement("body");
+            if (subject.getLang() != null)
+              out.writeAttribute("xml", "http://xml.org", "lang", subject.getLang());
 
-	    if (body.getLang() != null)
-	      out.writeAttribute("xml", "http://xml.org", "lang",
-				 body.getLang());
-	    
-	    out.writeCharacters(body.getValue());
-	    out.writeEndElement(); // </body>
-	  }
-	}
+            out.writeCharacters(subject.getValue());
+            out.writeEndElement(); // </subject>
+          }
+        }
 
-	if (thread != null) {
-	  out.writeStartElement("thread");
-	  out.writeCharacters(thread);
-	  out.writeEndElement(); // </thread>
-	}
+        if (bodys != null) {
+          for (Text body : bodys) {
+            out.writeStartElement("body");
+
+            if (body.getLang() != null)
+              out.writeAttribute("xml", "http://xml.org", "lang",
+                                 body.getLang());
+
+            out.writeCharacters(body.getValue());
+            out.writeEndElement(); // </body>
+          }
+        }
+
+        if (thread != null) {
+          out.writeStartElement("thread");
+          out.writeCharacters(thread);
+          out.writeEndElement(); // </thread>
+        }
 
         if (extra != null) {
           out.writeValue(extra);
         }
         
-	if (extras != null) {
-	  for (Serializable extraItem : extras) {
-	    out.writeValue(extraItem);
-	  }
-	}
+        if (extras != null) {
+          for (Serializable extraItem : extras) {
+            out.writeValue(extraItem);
+          }
+        }
 
-	out.writeEndElement(); // </message>
+        out.writeEndElement(); // </message>
 
-	out.flush();
+        out.flush();
       }
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendMessage to=" + to + " from=" + from
-		  + " msg=" + value);
+        log.finer(this + " sendMessage to=" + to + " from=" + from
+                  + " msg=" + value);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -195,37 +195,37 @@ class XmppWriterImpl
    * Sends a query get message to the stream
    */
   public void sendQuery(String id, String to, String from,
-			Serializable value, String type,
+                        Serializable value, String type,
                         ActorError error)
   {
     try {
       XmppStreamWriterImpl out = _out;
 
       synchronized (out) {
-	out.writeStartElement("iq");
-	out.writeDefaultNamespace(JABBERC_NS);
+        out.writeStartElement("iq");
+        out.writeDefaultNamespace(JABBERC_NS);
 
-	out.writeAttribute("id", id);
+        out.writeAttribute("id", id);
 
-	out.writeAttribute("type", type);
+        out.writeAttribute("type", type);
 
-	if (to != null)
-	  out.writeAttribute("to", to);
+        if (to != null)
+          out.writeAttribute("to", to);
 
-	if (from != null)
-	  out.writeAttribute("from", from);
+        if (from != null)
+          out.writeAttribute("from", from);
 
-	out.writeValue(value);
+        out.writeValue(value);
 
-	out.writeEndElement(); // </iq>
+        out.writeEndElement(); // </iq>
 
-	out.flush();
+        out.flush();
       }
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendQuery type=" + type + " id=" + id
-		  + " to=" + to + " from=" + from
-		  + " query=" + value);
+        log.finer(this + " sendQuery type=" + type + " id=" + id
+                  + " to=" + to + " from=" + from
+                  + " query=" + value);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -236,18 +236,18 @@ class XmppWriterImpl
    * Sends a presence message to the stream
    */
   void sendPresence(String to, String from,
-		    Serializable value,
-		    String type,
+                    Serializable value,
+                    String type,
                     ActorError error)
   {
     try {
       XmppStreamWriterImpl out = _out;
 
       synchronized (out) {
-	out.writeStartElement("presence");
-	out.writeDefaultNamespace(JABBERC_NS);
+        out.writeStartElement("presence");
+        out.writeDefaultNamespace(JABBERC_NS);
 
-	ImPresence imPresence = null;
+        ImPresence imPresence = null;
         Text status = null;
 
         if (value instanceof ImPresence) {
@@ -262,38 +262,38 @@ class XmppWriterImpl
           status = imPresence.getStatus();
         }
 
-	if (to != null)
-	  out.writeAttribute("to", to);
+        if (to != null)
+          out.writeAttribute("to", to);
 
-	if (from != null)
-	  out.writeAttribute("from", from);
+        if (from != null)
+          out.writeAttribute("from", from);
 
-	if (type != null)
-	  out.writeAttribute("type", type);
+        if (type != null)
+          out.writeAttribute("type", type);
 
-	if (status != null) {
-	  out.writeStartElement("status");
+        if (status != null) {
+          out.writeStartElement("status");
 
-	  if (status.getLang() != null)
-	    out.writeAttribute("xml", "http://xml.org", "lang",
-			       status.getLang());
-	    
-	  out.writeCharacters(status.getValue());
-	  out.writeEndElement(); // </status>
-	}
+          if (status.getLang() != null)
+            out.writeAttribute("xml", "http://xml.org", "lang",
+                               status.getLang());
+
+          out.writeCharacters(status.getValue());
+          out.writeEndElement(); // </status>
+        }
 
         if (imPresence == null)
           out.writeValue(value);
 
-	out.writeEndElement(); // </presence>
+        out.writeEndElement(); // </presence>
 
-	out.flush();
+        out.flush();
       }
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresence type=" + type
-		  + " to=" + to + " from=" + from
-		  + " value=" + value);
+        log.finer(this + " sendPresence type=" + type
+                  + " to=" + to + " from=" + from
+                  + " value=" + value);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);

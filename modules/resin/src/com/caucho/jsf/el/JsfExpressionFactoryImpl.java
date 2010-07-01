@@ -78,9 +78,9 @@ public class JsfExpressionFactoryImpl extends ExpressionFactory {
       return new Double(Expr.toDouble(obj, null));
     case STRING:
       if (obj == null)
-	return "";
+        return "";
       else
-	return obj.toString();
+        return obj.toString();
     case BIG_DECIMAL:
       return Expr.toBigDecimal(obj, null);
     case BIG_INTEGER:
@@ -92,9 +92,9 @@ public class JsfExpressionFactoryImpl extends ExpressionFactory {
 
   public MethodExpression
     createMethodExpression(ELContext context,
-			   String expression,
-			   Class<?> expectedReturnType,
-			   Class<?>[] expectedParamTypes)
+                           String expression,
+                           Class<?> expectedReturnType,
+                           Class<?>[] expectedParamTypes)
     throws ELException
   {
     JsfELParser parser = new JsfELParser(context, expression);
@@ -102,14 +102,14 @@ public class JsfExpressionFactoryImpl extends ExpressionFactory {
     Expr expr = parser.parse();
 
     return new MethodExpressionImpl(expr, expression,
-				    expectedReturnType,
-				    expectedParamTypes);
+                                    expectedReturnType,
+                                    expectedParamTypes);
   }
 
   public ValueExpression
     createValueExpression(ELContext context,
-			  String expression,
-			  Class<?> expectedType)
+                          String expression,
+                          Class<?> expectedType)
     throws ELException
   {
     JsfELParser parser = new JsfELParser(context, expression);
@@ -120,8 +120,8 @@ public class JsfExpressionFactoryImpl extends ExpressionFactory {
   }
 
   public static ValueExpression createValueExpression(Expr expr,
-						      String expression,
-						      Class<?> expectedType)
+                                                      String expression,
+                                                      Class<?> expectedType)
   {
     CoerceType type = _coerceMap.get(expectedType);
 
@@ -158,7 +158,7 @@ public class JsfExpressionFactoryImpl extends ExpressionFactory {
 
   public ValueExpression
     createValueExpression(Object instance,
-			  Class<?> expectedType)
+                          Class<?> expectedType)
     throws ELException
   {
     throw new UnsupportedOperationException();

@@ -172,8 +172,8 @@ public class JarMap {
 
             // server/249b
             /*
-	      if (name.endsWith("/"))
-	      name = name.substring(0, name.length() - 1);
+              if (name.endsWith("/"))
+              name = name.substring(0, name.length() - 1);
              */
           }
 
@@ -197,8 +197,8 @@ public class JarMap {
 
           // server/249b
           /*
-	    if (name.endsWith("/"))
-	    name = name.substring(0, name.length() - 1);
+            if (name.endsWith("/"))
+            name = name.substring(0, name.length() - 1);
            */
         }
 
@@ -300,7 +300,7 @@ public class JarMap {
       int hash = 37;
       
       for (int i = _length - 1; i >= 0; i--) {
-	hash = 65521 * hash + name[i];
+        hash = 65521 * hash + name[i];
       }
 
       return hash;
@@ -346,10 +346,10 @@ public class JarMap {
     JarKeyIterator()
     {
       for (; _index < _entries.length; _index++) {
-	_entry = _entries[_index];
+        _entry = _entries[_index];
 
-	if (_entry != null)
-	  break;
+        if (_entry != null)
+          break;
       }
     }
 
@@ -363,21 +363,21 @@ public class JarMap {
       JarList next = _entry;
       
       if (_entry != null)
-	_entry = _entry._nextHash;
+        _entry = _entry._nextHash;
       
       if (_entry == null) {
-	for (_index++; _index < _entries.length; _index++) {
-	  _entry = _entries[_index];
+        for (_index++; _index < _entries.length; _index++) {
+          _entry = _entries[_index];
 
-	  if (_entry != null)
-	    break;
-	}
+          if (_entry != null)
+            break;
+        }
       }
 
       if (next != null)
-	return next.getNameString();
+        return next.getNameString();
       else
-	return null;
+        return null;
     }
 
     public void remove()

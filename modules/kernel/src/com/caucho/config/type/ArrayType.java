@@ -118,7 +118,7 @@ public class ArrayType extends ConfigType
       List list = (List) value;
 
       Object []array
-	= (Object []) Array.newInstance(_componentClass, list.size());
+        = (Object []) Array.newInstance(_componentClass, list.size());
 
       list.toArray(array);
 
@@ -129,7 +129,7 @@ public class ArrayType extends ConfigType
       value = _componentType.replaceObject(value);
 
       Object []array
-	= (Object []) Array.newInstance(_componentClass, 1);
+        = (Object []) Array.newInstance(_componentClass, 1);
 
       Array.set(array, 0, value);
       

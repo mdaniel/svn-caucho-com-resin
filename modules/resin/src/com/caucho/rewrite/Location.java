@@ -79,9 +79,9 @@ public class Location extends AbstractDispatchRule
 
   @Override
   public FilterChain map(String uri,
-			 String queryString,
-			 FilterChain next,
-			 FilterChain tail)
+                         String queryString,
+                         FilterChain next,
+                         FilterChain tail)
     throws ServletException
   {
     return super.map(uri, queryString, next, next);
@@ -89,20 +89,20 @@ public class Location extends AbstractDispatchRule
 
   @Override
   protected FilterChain createDispatch(String uri,
-				       String queryString,
-				       String target,
-				       FilterChain next)
+                                       String queryString,
+                                       String target,
+                                       FilterChain next)
   {
     return mapChain(0, uri, queryString, next);
   }
 
   private FilterChain mapChain(int index,
-			       String uri, String queryString,
-			       FilterChain chain)
+                               String uri, String queryString,
+                               FilterChain chain)
   {
     try {
       if (_rules.length <= index)
-	return chain;
+        return chain;
 
       DispatchRule rule = _rules[index];
     

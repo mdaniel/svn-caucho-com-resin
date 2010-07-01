@@ -136,7 +136,7 @@ public class AnnotatedMethodImpl<T>
 
     for (int i = 0; i < paramA.length; i++) {
       if (! paramA[i].equals(paramB[i]))
-	return false;
+        return false;
     }
 
     return true;

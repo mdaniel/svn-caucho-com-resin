@@ -34,5 +34,5 @@ import javax.faces.context.*;
 public interface ContextCallback
 {
   public void invokeContextCallback(FacesContext context,
-				    UIComponent target);
+                                    UIComponent target);
 }

@@ -36,17 +36,17 @@ public class IntKeyCompare extends KeyCompare {
    * Compares the key to the block data.
    */
   public int compare(byte []keyBuffer, int keyOffset,
-		     byte []block, int offset, int length)
+                     byte []block, int offset, int length)
   {
     int key = (((keyBuffer[keyOffset + 0] & 0xff) << 24) +
-	       ((keyBuffer[keyOffset + 1] & 0xff) << 16) +
-	       ((keyBuffer[keyOffset + 2] & 0xff) << 8) +
-	       ((keyBuffer[keyOffset + 3] & 0xff) << 0));
+               ((keyBuffer[keyOffset + 1] & 0xff) << 16) +
+               ((keyBuffer[keyOffset + 2] & 0xff) << 8) +
+               ((keyBuffer[keyOffset + 3] & 0xff) << 0));
     
     int value = (((block[offset + 0] & 0xff) << 24) +
-		 ((block[offset + 1] & 0xff) << 16) +
-		 ((block[offset + 2] & 0xff) << 8) +
-		 ((block[offset + 3] & 0xff) << 0));
+                 ((block[offset + 1] & 0xff) << 16) +
+                 ((block[offset + 2] & 0xff) << 8) +
+                 ((block[offset + 3] & 0xff) << 0));
 
     if (key == value)
       return 0;
@@ -63,9 +63,9 @@ public class IntKeyCompare extends KeyCompare {
   public String toString(byte []keyBuffer, int keyOffset, int length)
   {
     int key = (((keyBuffer[keyOffset + 0] & 0xff) << 24) +
-	       ((keyBuffer[keyOffset + 1] & 0xff) << 16) +
-	       ((keyBuffer[keyOffset + 2] & 0xff) << 8) +
-	       ((keyBuffer[keyOffset + 3] & 0xff) << 0));
+               ((keyBuffer[keyOffset + 1] & 0xff) << 16) +
+               ((keyBuffer[keyOffset + 2] & 0xff) << 8) +
+               ((keyBuffer[keyOffset + 3] & 0xff) << 0));
 
     return String.valueOf(key);
   }

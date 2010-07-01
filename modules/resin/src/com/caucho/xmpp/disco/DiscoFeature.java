@@ -78,6 +78,6 @@ public class DiscoFeature implements java.io.Serializable {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _var + "]");
+            + "[" + _var + "]");
   }
 }

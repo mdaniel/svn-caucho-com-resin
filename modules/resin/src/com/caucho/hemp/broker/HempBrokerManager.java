@@ -88,7 +88,7 @@ public class HempBrokerManager
 
     if (brokerRef != null) {
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " remove " + name);
+        log.finer(this + " remove " + name);
       
       return brokerRef.get();
     }

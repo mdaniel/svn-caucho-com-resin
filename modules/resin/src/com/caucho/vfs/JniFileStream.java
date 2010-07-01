@@ -240,11 +240,11 @@ public class JniFileStream extends StreamImpl
    * Native to open a file for writing
    */
   private static native int nativeOpenWrite(byte []name, int length,
-					    boolean isAppend);
+                                            boolean isAppend);
 
   /*
   private static native void nativeChown(byte []path, int length,
-					 String user, String group);
+                                         String user, String group);
   */
 
   /**

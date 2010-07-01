@@ -55,8 +55,8 @@ public final class InternQName {
   String _localName;
 
   InternQName(InternQName next,
-	      char []buf, int offset, int length,
-	      int colon)
+              char []buf, int offset, int length,
+              int colon)
   {
     _next = next;
       
@@ -75,7 +75,7 @@ public final class InternQName {
       
     for (length--; length >= 0; length--) {
       if (entryBuf[length] != buf[offset + length])
-	return false;
+        return false;
     }
 
     return true;
@@ -98,9 +98,9 @@ public final class InternQName {
   {
     if (_localName == null) {
       if (_colon == 0)
-	_localName = _name;
+        _localName = _name;
       else
-	_localName = new String(_buf, _colon + 1, _buf.length - _colon - 1);
+        _localName = new String(_buf, _colon + 1, _buf.length - _colon - 1);
     }
 
     return _localName;

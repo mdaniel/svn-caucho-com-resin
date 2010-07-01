@@ -95,7 +95,7 @@ public class DependencyComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("_caucho_depend = new com.caucho.vfs.Dependency[" +
-		_dependList.size() + "];");
+                _dependList.size() + "];");
 
     Path searchPath = _searchPath;
     
@@ -121,7 +121,7 @@ public class DependencyComponent extends ClassComponent {
           else
             relativePath = fullPath;
         }
-	
+
         out.print("path.lookup(\"" + relativePath + "\"), ");
     
         out.println(depend.getDigest() + "L, "
@@ -163,7 +163,7 @@ public class DependencyComponent extends ClassComponent {
     throws IOException
   {
     out.println("if (com.caucho.server.util.CauchoSystem.getVersionId() != " +
-		"0x" + Long.toHexString(CauchoSystem.getVersionId()) + "L)");
+                "0x" + Long.toHexString(CauchoSystem.getVersionId()) + "L)");
     out.println("  return true;");
   }
 }

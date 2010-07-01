@@ -57,7 +57,7 @@ public class WatchdogStartQuery implements Serializable {
 
     for (int i = 0; _argv != null && i < _argv.length; i++) {
       if (i != 0)
-	sb.append(", ");
+        sb.append(", ");
 
       sb.append(_argv[i]);
     }

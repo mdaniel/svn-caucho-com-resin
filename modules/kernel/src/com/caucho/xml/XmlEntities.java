@@ -72,7 +72,7 @@ class XmlEntities extends Entities {
 
       switch (ch) {
       case '\t': 
-	os.print(ch);
+        os.print(ch);
         break;
         
       case '\n':
@@ -87,51 +87,51 @@ class XmlEntities extends Entities {
         break;
 
       case '<':
-	  os.print("&lt;");
+          os.print("&lt;");
           /*
-	if (! attr)
-	  os.print("&lt;");
-	else
-	  os.print("<");
+        if (! attr)
+          os.print("&lt;");
+        else
+          os.print("<");
           */
-	break;
+        break;
 
       case '>':
-	  os.print("&gt;");
+          os.print("&gt;");
           /*
-	if (! attr)
-	  os.print("&gt;");
-	else
-	  os.print("<");
+        if (! attr)
+          os.print("&gt;");
+        else
+          os.print("<");
           */
-	break;
+        break;
         
       case '&':
         os.print("&amp;");
         break;
         
       case '"':
-	if (attr)
-	  os.print("&quot;");
-	else
-	  os.print('"');
-	break;
+        if (attr)
+          os.print("&quot;");
+        else
+          os.print('"');
+        break;
 
       default:
-	if (ch >= 0x20 && ch < 0x7f || XmlChar.isChar(ch)) {
-	  try {
-	    os.print(ch);
-	  } catch (IOException e) {
-	    os.print("&#");
-	    os.print((int) ch);
-	    os.print(';');
-	  }
-	}
-	else {
-	  os.print("&#");
-	  os.print((int) ch);
-	  os.print(';');
-	}
+        if (ch >= 0x20 && ch < 0x7f || XmlChar.isChar(ch)) {
+          try {
+            os.print(ch);
+          } catch (IOException e) {
+            os.print("&#");
+            os.print((int) ch);
+            os.print(';');
+          }
+        }
+        else {
+          os.print("&#");
+          os.print((int) ch);
+          os.print(';');
+        }
       }
     }
   }

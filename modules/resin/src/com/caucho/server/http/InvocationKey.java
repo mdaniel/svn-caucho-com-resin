@@ -60,8 +60,8 @@ public class InvocationKey {
    * @param port the request's port
    */
   InvocationKey(boolean isSecure,
-		CharSequence host, int port,
-		byte []uri, int uriLength)
+                CharSequence host, int port,
+                byte []uri, int uriLength)
   {
     _isSecure = isSecure;
     
@@ -86,8 +86,8 @@ public class InvocationKey {
    * @param urlLength the length of the uri in the byte array
    */
   public void init(boolean isSecure,
-		   CharSequence host, int port,
-		   byte []uri, int uriLength)
+                   CharSequence host, int port,
+                   byte []uri, int uriLength)
   {
     _isSecure = isSecure;
     

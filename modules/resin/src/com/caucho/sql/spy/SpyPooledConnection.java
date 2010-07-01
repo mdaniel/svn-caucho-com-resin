@@ -83,9 +83,9 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
       String connId = null;
       
       if (log.isLoggable(Level.FINE)) {
-	connId = _spyDataSource.createConnectionId();
+        connId = _spyDataSource.createConnectionId();
 
-	log.fine(_id + ":connect() -> " + connId + ":" + conn);
+        log.fine(_id + ":connect() -> " + connId + ":" + conn);
       }
 
       return new SpyConnection(conn, _spyDataSource, connId);

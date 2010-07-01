@@ -80,7 +80,7 @@ public class Escapifier {
   }
 
   public static void escape(char []buffer, int offset, int len,
-			    WriteStream out)
+                            WriteStream out)
     throws IOException
   {
     for (int i = 0; i < len; i++) {
@@ -88,29 +88,29 @@ public class Escapifier {
       
       switch (ch) {
       case '&':
-	out.print("&amp;");
-	break;
+        out.print("&amp;");
+        break;
       case '<':
-	out.print("&lt;");
-	break;
+        out.print("&lt;");
+        break;
       case '>':
-	out.print("&gt;");
-	break;
+        out.print("&gt;");
+        break;
       // case '\'': out.print("&apos;"); break; // TCK compliance
       case '\"':
-	out.print("&quot;");
-	break;
+        out.print("&quot;");
+        break;
 
       case ' ': case '\t': case '\r': case '\n':
-	out.print(ch);
-	break;
-	
+        out.print(ch);
+        break;
+
       default:
-	if (32 <= ch && ch <= 127)
-	  out.print(ch);
-	else
-	  out.print("&#" + ((int) ch) + ";");
-	break;
+        if (32 <= ch && ch <= 127)
+          out.print(ch);
+        else
+          out.print("&#" + ((int) ch) + ";");
+        break;
       }
     }
   }

@@ -109,8 +109,8 @@ public class GitWorkingTree {
     writeTree(out);
 
     GitInputStream is = new GitInputStream("tree",
-					   out.getLength(),
-					   out.openRead());
+                                           out.getLength(),
+                                           out.openRead());
 
     out = new TempOutputStream();
     DeflaterOutputStream zipOut = new DeflaterOutputStream(out);
@@ -135,14 +135,14 @@ public class GitWorkingTree {
       GitWorkingTree subTree = entry.getSubTree();
 
       if (subTree != null) {
-	String subPath;
+        String subPath;
 
-	if (! "".equals(path))
-	  subPath = path + "/" + entry.getName();
-	else
-	  subPath = entry.getName();
-	
-	entry.setSha1(subTree.commit(commit, subPath));
+        if (! "".equals(path))
+          subPath = path + "/" + entry.getName();
+        else
+          subPath = entry.getName();
+
+        entry.setSha1(subTree.commit(commit, subPath));
       }
     }
 
@@ -172,7 +172,7 @@ public class GitWorkingTree {
       InputStream is = out.openRead();
 
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	md.update(buffer, 0, len);
+        md.update(buffer, 0, len);
       }
 
       is.close();
@@ -197,13 +197,13 @@ public class GitWorkingTree {
 
       int len = mode.length();
       for (int i = 0; i < len; i++)
-	out.write(mode.charAt(i));
+        out.write(mode.charAt(i));
 
       out.write(' ');
       
       len = key.length();
       for (int i = 0; i < len; i++)
-	out.write(key.charAt(i));
+        out.write(key.charAt(i));
       
       out.write(0);
 
@@ -265,13 +265,13 @@ public class GitWorkingTree {
 
       int len = mode.length();
       for (int i = 0; i < len; i++)
-	out.write(mode.charAt(i));
+        out.write(mode.charAt(i));
 
       out.write(' ');
       
       len = key.length();
       for (int i = 0; i < len; i++)
-	out.write(key.charAt(i));
+        out.write(key.charAt(i));
       
       out.write(0);
 
@@ -336,8 +336,8 @@ public class GitWorkingTree {
     public String toString()
     {
       return ("GitTree.Entry[" + _name
-	      + "," + String.format("%o", _mode)
-	      + "," + _sha1 + "]");
+              + "," + String.format("%o", _mode)
+              + "," + _sha1 + "]");
     }
   }
 }

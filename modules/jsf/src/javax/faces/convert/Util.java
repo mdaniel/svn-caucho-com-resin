@@ -37,7 +37,7 @@ import javax.faces.component.*;
 class Util
 {
   public static String l10n(FacesContext context, String id,
-			    String defaultMessage, Object ... args)
+                            String defaultMessage, Object ... args)
   {
     String message = defaultMessage;
     
@@ -48,18 +48,18 @@ class Util
       char ch = message.charAt(i);
 
       if (ch == '{' && i + 2 < len
-	  && '0' <= message.charAt(i + 1)
-	  && message.charAt(i + 1) <= '9'
-	  && message.charAt(i + 2) == '}') {
-	int index = message.charAt(i + 1) - '0';
+          && '0' <= message.charAt(i + 1)
+          && message.charAt(i + 1) <= '9'
+          && message.charAt(i + 2) == '}') {
+        int index = message.charAt(i + 1) - '0';
 
-	if (index < args.length)
-	  sb.append(args[index]);
+        if (index < args.length)
+          sb.append(args[index]);
 
-	i += 2;
+        i += 2;
       }
       else
-	sb.append(ch);
+        sb.append(ch);
     }
     
     return sb.toString();

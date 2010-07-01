@@ -217,32 +217,32 @@ public class JspTop extends JspContainerNode implements JspSegmentNode {
   {
     if (! _hasRoot) {
       if (! _gen.isOmitXmlDeclaration()) {
-	String encoding = _gen.getCharacterEncoding();
+        String encoding = _gen.getCharacterEncoding();
 
-	if (encoding == null)
-	  encoding = "UTF-8";
+        if (encoding == null)
+          encoding = "UTF-8";
 
-	out.addText("<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>\n");
+        out.addText("<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>\n");
       }
 
       if (_gen.getDoctypeSystem() != null) {
-	out.addText("<!DOCTYPE ");
-	out.addText(_gen.getDoctypeRootElement());
+        out.addText("<!DOCTYPE ");
+        out.addText(_gen.getDoctypeRootElement());
 
-	if (_gen.getDoctypePublic() != null) {
-	  out.addText(" PUBLIC \"");
-	  out.addText(_gen.getDoctypePublic());
-	  out.addText("\" \"");
-	  out.addText(_gen.getDoctypeSystem());
-	  out.addText("\"");
-	}
-	else {
-	  out.addText(" SYSTEM \"");
-	  out.addText(_gen.getDoctypeSystem());
-	  out.addText("\"");
-	}
+        if (_gen.getDoctypePublic() != null) {
+          out.addText(" PUBLIC \"");
+          out.addText(_gen.getDoctypePublic());
+          out.addText("\" \"");
+          out.addText(_gen.getDoctypeSystem());
+          out.addText("\"");
+        }
+        else {
+          out.addText(" SYSTEM \"");
+          out.addText(_gen.getDoctypeSystem());
+          out.addText("\"");
+        }
       
-	out.addText(">\n");
+        out.addText(">\n");
       }
     }
     

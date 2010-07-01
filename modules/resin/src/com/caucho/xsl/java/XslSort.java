@@ -62,11 +62,11 @@ public class XslSort extends XslNode {
     }
     else if (name.getName().equals("case-order")) {
       if (value.equals("upper-first") ||
-	  value.equals("lower-first"))
-	_caseOrder = value;
+          value.equals("lower-first"))
+        _caseOrder = value;
       else
-	throw error(L.l("'{0}' is not a valid case-order for xsl:sort.",
-			value));
+        throw error(L.l("'{0}' is not a valid case-order for xsl:sort.",
+                        value));
     }
     else if (name.getName().equals("order")) {
       _order = value;
@@ -75,7 +75,7 @@ public class XslSort extends XslNode {
       _dataType = value;
     }
     else if (name.getName().equals("xsl:lang") ||
-	     name.getName().equals("lang")) {
+             name.getName().equals("lang")) {
       _lang = value;
     }
     else
@@ -117,9 +117,9 @@ public class XslSort extends XslNode {
       String lang = _lang;
       
       if (lang.startsWith("{") && lang.endsWith("}"))
-	lang = lang.substring(1, lang.length() - 1);
+        lang = lang.substring(1, lang.length() - 1);
       else
-	lang = "'" + lang + "'";
+        lang = "'" + lang + "'";
 
       sort = Sort.create(expr, isAscending, parseExpr(lang));
     }

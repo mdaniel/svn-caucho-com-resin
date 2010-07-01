@@ -236,10 +236,10 @@ public class DispatchServer implements Dependency {
 
       // server/10r2
       if (oldInvocation != null && ! oldInvocation.isModified())
-	return oldInvocation;
+        return oldInvocation;
 
       if (invocation.getURLLength() < _maxURLLength) {
-	invocationCache.put(protocolKey, invocation);
+        invocationCache.put(protocolKey, invocation);
       }
     }
 
@@ -278,17 +278,17 @@ public class DispatchServer implements Dependency {
 
     if (invocationCache != null) {
       synchronized (invocationCache) {
-	Iterator<LruCache.Entry<Object,Invocation>> iter;
-	iter = invocationCache.iterator();
+        Iterator<LruCache.Entry<Object,Invocation>> iter;
+        iter = invocationCache.iterator();
 
-	while (iter.hasNext()) {
-	  LruCache.Entry<Object,Invocation> entry = iter.next();
-	  Invocation value = entry.getValue();
+        while (iter.hasNext()) {
+          LruCache.Entry<Object,Invocation> entry = iter.next();
+          Invocation value = entry.getValue();
 
-	  if (value != null && matcher.isMatch(value)) {
-	    iter.remove();
-	  }
-	}
+          if (value != null && matcher.isMatch(value)) {
+            iter.remove();
+          }
+        }
       }
     }
   }
@@ -305,10 +305,10 @@ public class DispatchServer implements Dependency {
       ArrayList<Invocation> invocationList = new ArrayList<Invocation>();
       
       synchronized (invocationCache) {
-	Iterator<Invocation> iter;
-	iter = invocationCache.values();
+        Iterator<Invocation> iter;
+        iter = invocationCache.values();
 
-	while (iter.hasNext()) {
+        while (iter.hasNext()) {
           invocationList.add(iter.next());
         }
       }

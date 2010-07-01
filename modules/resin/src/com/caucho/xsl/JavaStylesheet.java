@@ -70,8 +70,8 @@ public class JavaStylesheet extends StylesheetImpl {
       Template subtemplate = templateList[i];
 
       if (min <= subtemplate.maxImportance &&
-	  subtemplate.maxImportance <= max &&
-	  subtemplate.pattern.match(node, env)) {
+          subtemplate.maxImportance <= max &&
+          subtemplate.pattern.match(node, env)) {
         funId = subtemplate.funId;
         break;
       }

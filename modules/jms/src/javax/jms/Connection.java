@@ -43,17 +43,17 @@ public interface Connection {
 
   public ConnectionConsumer
     createConnectionConsumer(Destination destination,
-			     String messageSelector,
-			     ServerSessionPool sessionPool,
-			     int maxMessages)
+                             String messageSelector,
+                             ServerSessionPool sessionPool,
+                             int maxMessages)
     throws JMSException;
 
   public ConnectionConsumer
     createDurableConnectionConsumer(Topic topic,
-				    String subscriptionName,
-				    String messageSelector,
-				    ServerSessionPool sessionPool,
-				    int maxMessages)
+                                    String subscriptionName,
+                                    String messageSelector,
+                                    ServerSessionPool sessionPool,
+                                    int maxMessages)
     throws JMSException;
 
   public ConnectionMetaData getMetaData()

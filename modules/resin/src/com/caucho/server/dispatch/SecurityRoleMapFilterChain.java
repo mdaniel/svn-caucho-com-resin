@@ -60,7 +60,7 @@ public class SecurityRoleMapFilterChain implements FilterChain {
    * @param filter the user's filter
    */
   public SecurityRoleMapFilterChain(FilterChain next,
-				    HashMap<String,String> roleMap)
+                                    HashMap<String,String> roleMap)
   {
     _next = next;
     if (_next == null)
@@ -90,12 +90,12 @@ public class SecurityRoleMapFilterChain implements FilterChain {
       wrapper = (ServletRequestWrapper) ptr;
 
       if (ptr instanceof CauchoRequest) {
-	break;
+        break;
       }
       else if (wrapper.getRequest() != null)
-	ptr = wrapper.getRequest();
+        ptr = wrapper.getRequest();
       else
-	break;
+        break;
     }
 
     if (ptr instanceof CauchoRequest) {
@@ -109,7 +109,7 @@ public class SecurityRoleMapFilterChain implements FilterChain {
     } finally {
       /*
       if (req != null)
-	req.setRoleMap(oldMap);
+        req.setRoleMap(oldMap);
       */
     }
   }

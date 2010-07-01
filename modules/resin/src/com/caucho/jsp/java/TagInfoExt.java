@@ -51,23 +51,23 @@ public class TagInfoExt extends TagInfo {
     = new ArrayList<PersistentDependency>();
 
   public TagInfoExt(String tagName,
-		    String tagClassName,
-		    String bodyContent,
-		    String infoString,
-		    TagLibraryInfo taglib,
-		    TagExtraInfo tagExtraInfo,
-		    TagAttributeInfo []attributeInfo,
-		    String displayName,
-		    String smallIcon,
-		    String largeIcon,
-		    TagVariableInfo []tvi,
-		    boolean hasDynamicAttributes,
-		    String dynamicAttributesName,
-		    ArrayList<Dependency> dependList)
+                    String tagClassName,
+                    String bodyContent,
+                    String infoString,
+                    TagLibraryInfo taglib,
+                    TagExtraInfo tagExtraInfo,
+                    TagAttributeInfo []attributeInfo,
+                    String displayName,
+                    String smallIcon,
+                    String largeIcon,
+                    TagVariableInfo []tvi,
+                    boolean hasDynamicAttributes,
+                    String dynamicAttributesName,
+                    ArrayList<Dependency> dependList)
   {
     super(tagName, tagClassName, bodyContent, infoString,
-	  taglib, tagExtraInfo, attributeInfo, displayName,
-	  smallIcon, largeIcon, tvi, hasDynamicAttributes);
+          taglib, tagExtraInfo, attributeInfo, displayName,
+          smallIcon, largeIcon, tvi, hasDynamicAttributes);
 
     _dynamicAttributesName = dynamicAttributesName;
     

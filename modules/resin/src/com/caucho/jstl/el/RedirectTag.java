@@ -85,7 +85,7 @@ public class RedirectTag extends TagSupport implements NameValueTag {
       String context = null;
 
       if (_contextExpr != null)
-	context = _contextExpr.evalString(pageContext.getELContext());
+        context = _contextExpr.evalString(pageContext.getELContext());
     
       _url = UrlTag.normalizeURL(pageContext, value, context);
 

@@ -68,7 +68,7 @@ public class XtpScriptlet extends XslNode {
     }
     else
       throw error(L.l("'{0}' is not allowed as an xtp:scriptlet child.",
-		      node));
+                      node));
   }
 
   /**

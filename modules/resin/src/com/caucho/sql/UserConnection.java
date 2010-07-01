@@ -321,7 +321,7 @@ public class UserConnection implements java.sql.Connection {
 
     if (stmt == null)
       throw new IllegalStateException(L.l("prepareStatement returned empty SQL\n{0}",
-					  sql));
+                                          sql));
 
     addStatement(stmt);
 

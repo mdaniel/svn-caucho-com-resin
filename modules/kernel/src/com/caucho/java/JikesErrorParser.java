@@ -74,70 +74,70 @@ class JikesErrorParser extends ErrorParser {
     while (ch >= 0) {
       int colOffset = 0;
       for (; ch >= 0 && (ch == ' ' || ch == '\t'); ch = is.read())
-	colOffset++;
+        colOffset++;
 
       int line = 0;
       for (; ch >= 0 && ch >= '0' && ch <= '9'; ch = is.read()) {
-	line = 10 * line + ch - '0';
-	colOffset++;
+        line = 10 * line + ch - '0';
+        colOffset++;
       }
 
       if (ch < 0)
-	return;
+        return;
       else if (colOffset == 0 && ! Character.isWhitespace((char) ch)) {
-	ch = scanUnknownLine(is, ch, errors);
+        ch = scanUnknownLine(is, ch, errors);
       }
       else if (ch != '.') {
-	ch = skipToNewline(is, ch);
-	continue;
+        ch = skipToNewline(is, ch);
+        continue;
       }
 
       sourceLine.clear();
       for (ch = is.read(); ch >= 0 && ch != '\n'; ch = is.read())
-	sourceLine.addByte(ch);
+        sourceLine.addByte(ch);
       sourceLine.addChar('\n');
 
       int column = 0;
       for (ch = is.read(); ch >= 0 && ch != '\n'; ch = is.read()) {
-	if (ch == '^')
-	  break;
-	else if (ch == ' ')
-	  column++;
-	else if (ch == '\t')
-	  column = ((column + 8) / 8) * 8;
+        if (ch == '^')
+          break;
+        else if (ch == ' ')
+          column++;
+        else if (ch == '\t')
+          column = ((column + 8) / 8) * 8;
       }
       for (int i = colOffset + 1; i < column; i++)
-	sourceLine.addChar(' ');
+        sourceLine.addChar(' ');
       sourceLine.addChar('^');
       sourceLine.addChar('\n');
 
       ch = skipToNewline(is, ch);
       if (ch != '*')
-	continue;
+        continue;
 
       buf.clear();
       for (; ch >= 0 && ch != ':' && ch != '\n'; ch = is.read()) {
       }
 
       if (ch != ':') {
-	ch = skipToNewline(is, ch);
-	continue;
+        ch = skipToNewline(is, ch);
+        continue;
       }
 
       for (ch = is.read();
-	   ch >= 0 && (ch == ' ' || ch == ' ');
-	   ch = is.read()) {
+           ch >= 0 && (ch == ' ' || ch == ' ');
+           ch = is.read()) {
       }
 
       for (; ch >= 0 && ch != '\n'; ch = is.read())
-	buf.addByte(ch);
+        buf.addByte(ch);
 
       String message = buf.getConvertedString();
 
       if (lineMap != null)
-	errors.append(lineMap.convertError(filename, line, 0, message));
+        errors.append(lineMap.convertError(filename, line, 0, message));
       else
-	errors.append(filename + ":" + line + ": " + message);
+        errors.append(filename + ":" + line + ": " + message);
       errors.append('\n');
       errors.append(sourceLine.getConvertedString());
     }
@@ -149,8 +149,8 @@ class JikesErrorParser extends ErrorParser {
     token.clear();
     token.addByte(ch);
     for (ch = is.read();
-	 ch > 0 && ! Character.isWhitespace((char) ch); 
-	 ch = is.read()) {
+         ch > 0 && ! Character.isWhitespace((char) ch);
+         ch = is.read()) {
     }
 
     if (token.equals("Found")) {
@@ -161,15 +161,15 @@ class JikesErrorParser extends ErrorParser {
       }
       token.clear();
       for (; ch > 0 && ch != '\n' && ch != ':'; ch = is.read()) {
-	token.addByte(ch);
+        token.addByte(ch);
       }
       
       if (token.equals("Warning"))
-	return skipToNewline(is, ch);
+        return skipToNewline(is, ch);
 
       token.clear();
       for (ch = is.read(); ch > 0 && ch != '\n'; ch = is.read())
-	token.addByte(ch);
+        token.addByte(ch);
       token.addChar('\n');
 
       errors.append(token.getConvertedString());
@@ -191,8 +191,8 @@ class JikesErrorParser extends ErrorParser {
 
     token.clear();
     for (ch = is.read(); 
-	 ch >= 0 && ch != '"' && ch != '\n';
-	 ch = is.read()) {
+         ch >= 0 && ch != '"' && ch != '\n';
+         ch = is.read()) {
       token.addByte(ch);
     }
 

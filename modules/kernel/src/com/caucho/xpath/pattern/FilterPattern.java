@@ -104,7 +104,7 @@ public class FilterPattern extends AbstractPattern {
 
     if (envPosition > 0) {
       if (_expr.isBoolean()) {
-	return _expr.evalBoolean(node, env);
+        return _expr.evalBoolean(node, env);
       }
       else if (_expr.isNumber()) {
         double test = _expr.evalNumber(node, env);
@@ -112,12 +112,12 @@ public class FilterPattern extends AbstractPattern {
         return (envPosition == (int) test);
       }
       else {
-	Object value = _expr.evalObject(node, env);
+        Object value = _expr.evalObject(node, env);
 
-	if (value instanceof Number)
-	  return (envPosition == ((Number) value).intValue());
-	
-	return Expr.toBoolean(value);
+        if (value instanceof Number)
+          return (envPosition == ((Number) value).intValue());
+
+        return Expr.toBoolean(value);
       }
     }
 
@@ -136,29 +136,29 @@ public class FilterPattern extends AbstractPattern {
         if (_expr.isNumber()) {
           double test = _expr.evalNumber(node, env);
           double position = _parent.position(node, globalEnv,
-					     _parent.copyPosition());
+                                             _parent.copyPosition());
 
           if (position == test)
             return true;
         }
-	else if (_expr.isBoolean()) {
-	  if (_expr.evalBoolean(node, env))
-	    return true;
-	}
-	else {
-	  Object value = _expr.evalObject(node, env);
+        else if (_expr.isBoolean()) {
+          if (_expr.evalBoolean(node, env))
+            return true;
+        }
+        else {
+          Object value = _expr.evalObject(node, env);
 
-	  if (value instanceof Number) {
-	    double test = ((Number) value).doubleValue();
-	    double position = _parent.position(node, globalEnv,
-					       _parent.copyPosition());
+          if (value instanceof Number) {
+            double test = ((Number) value).doubleValue();
+            double position = _parent.position(node, globalEnv,
+                                               _parent.copyPosition());
 
-	    if (position == test)
-	      return true;
-	  }
-	  else if (Expr.toBoolean(value))
-	    return true;
-	}
+            if (position == test)
+              return true;
+          }
+          else if (Expr.toBoolean(value))
+            return true;
+        }
       }
 
       return false;

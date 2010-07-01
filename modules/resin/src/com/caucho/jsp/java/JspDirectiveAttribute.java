@@ -86,12 +86,12 @@ public class JspDirectiveAttribute extends JspNode {
     
     if (NAME.equals(name)) {
       if (gen.findVariable(value) != null) {
-	throw error(L.l("@attribute name '{0}' is already used by a variable.",
-			value));
+        throw error(L.l("@attribute name '{0}' is already used by a variable.",
+                        value));
       }
       else if (gen.findAttribute(value) != null) {
-	throw error(L.l("@attribute name '{0}' is already used by another attribute.",
-			value));
+        throw error(L.l("@attribute name '{0}' is already used by another attribute.",
+                        value));
       }
       
       _name = value;
@@ -108,35 +108,35 @@ public class JspDirectiveAttribute extends JspNode {
       _description = value;
     else if (DEFERRED_VALUE.equals(name)) {
       if (_gen.isPre21())
-	throw error("deferredValue requires JSP 2.1 or later tag file");
+        throw error("deferredValue requires JSP 2.1 or later tag file");
       
       _deferredValue = attributeToBoolean(name.getName(), value);
       if (_deferredValue)
-	_type = "javax.el.ValueExpression";
+        _type = "javax.el.ValueExpression";
     }
     else if (DEFERRED_VALUE_TYPE.equals(name)) {
       if (_gen.isPre21())
-	throw error("deferredValueType requires JSP 2.1 or later tag file");
+        throw error("deferredValueType requires JSP 2.1 or later tag file");
       
       _type = "javax.el.ValueExpression";
       _deferredValueType = value;
     }
     else if (DEFERRED_METHOD.equals(name)) {
       if (_gen.isPre21())
-	throw error("deferredMethod requires JSP 2.1 or later tag file");
+        throw error("deferredMethod requires JSP 2.1 or later tag file");
       
       _deferredMethod = attributeToBoolean(name.getName(), value);
       if (Boolean.TRUE.equals(_deferredMethod))
-	_type = "javax.el.MethodExpression";
+        _type = "javax.el.MethodExpression";
     }
     else if (DEFERRED_METHOD_SIGNATURE.equals(name)) {
       if (_gen.isPre21())
-	throw error("deferredMethodSignature requires JSP 2.1 or later tag file");
+        throw error("deferredMethodSignature requires JSP 2.1 or later tag file");
       
       try {
-	new Signature(value);
+        new Signature(value);
       } catch (Exception e) {
-	throw error(e.getMessage());
+        throw error(e.getMessage());
       }
 
       _type = "javax.el.MethodExpression";
@@ -202,14 +202,14 @@ public class JspDirectiveAttribute extends JspNode {
       throw error(L.l("@attribute deferredMethod and deferredMethodSignature may not both be specified"));
     
     if ((_deferredValue != null || _deferredValueType != null)
-	&& (_deferredMethod != null || _deferredMethodSignature != null))
+        && (_deferredMethod != null || _deferredMethodSignature != null))
       throw error(L.l("@attribute deferredValue and deferredMethod may not both be specified"));
 
     if (Boolean.TRUE.equals(_deferredValue) || _deferredValueType != null) {
       attr.setDeferredValue(new TldAttribute.DeferredValue());
 
       if (_deferredValueType != null)
-	attr.getDeferredValue().setType(_deferredValueType);
+        attr.getDeferredValue().setType(_deferredValueType);
     }
 
     if (Boolean.TRUE.equals(_deferredMethod)
@@ -217,7 +217,7 @@ public class JspDirectiveAttribute extends JspNode {
       attr.setDeferredMethod(new TldAttribute.DeferredMethod());
 
       if (_deferredMethodSignature != null)
-	attr.getDeferredMethod().setMethodSignature(new Signature(_deferredMethodSignature));
+        attr.getDeferredMethod().setMethodSignature(new Signature(_deferredMethodSignature));
     }
 
     tagGen.addAttribute(attr);

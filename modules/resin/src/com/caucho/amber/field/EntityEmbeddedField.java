@@ -63,7 +63,7 @@ public class EntityEmbeddedField extends AbstractField
   private boolean _isUpdate = true;
 
   public EntityEmbeddedField(EntityType ownerType,
-			     EmbeddableType embeddableType,
+                             EmbeddableType embeddableType,
                              String name)
     throws ConfigException
   {
@@ -73,7 +73,7 @@ public class EntityEmbeddedField extends AbstractField
   }
 
   public EntityEmbeddedField(EntityType ownerType,
-			     EmbeddableType embeddableType)
+                             EmbeddableType embeddableType)
   {
     super(ownerType);
 
@@ -197,7 +197,7 @@ public class EntityEmbeddedField extends AbstractField
     throws IOException
   {
     if (! isFieldAccess() && (getGetterMethod() == null
-			      || getSetterMethod() == null && ! isAbstract()))
+                              || getSetterMethod() == null && ! isAbstract()))
       return;
 
     out.println();
@@ -249,8 +249,8 @@ public class EntityEmbeddedField extends AbstractField
    * Generates code to copy to an object.
    */
   public void generateCopy(JavaWriter out,
-			   String dest,
-			   String source)
+                           String dest,
+                           String source)
     throws IOException
   {
     // XXX: how to make a new instance?
@@ -280,7 +280,7 @@ public class EntityEmbeddedField extends AbstractField
 
     for (int i = 0; i < _subFields.size(); i++) {
       if (i > 0)
-	sb.append(", ");
+        sb.append(", ");
 
       sb.append(_subFields.get(i).generateSelect(id));
     }
@@ -297,7 +297,7 @@ public class EntityEmbeddedField extends AbstractField
 
     for (int i = 0; i < _subFields.size(); i++) {
       if (i > 0)
-	sb.append(" and ");
+        sb.append(" and ");
 
       sb.append(_subFields.get(i).generateWhere(id));
     }
@@ -312,7 +312,7 @@ public class EntityEmbeddedField extends AbstractField
   {
     if (_isInsert) {
       for (int i = 0; i < _subFields.size(); i++) {
-	_subFields.get(i).generateInsertColumns(columns);
+        _subFields.get(i).generateInsertColumns(columns);
       }
     }
   }
@@ -326,10 +326,10 @@ public class EntityEmbeddedField extends AbstractField
       boolean isFirst = true;
       
       for (int i = 0; i < _subFields.size(); i++) {
-	if (i > 0)
+        if (i > 0)
           sql.append(", ");
-	  
-	_subFields.get(i).generateUpdate(sql);
+
+        _subFields.get(i).generateUpdate(sql);
       }
     }
   }
@@ -451,8 +451,8 @@ public class EntityEmbeddedField extends AbstractField
 
     // jpa/0w01
     String value = (_embeddableType.getJavaTypeName()
-		    + ".__caucho_make(aConn, rs, "
-		    + indexVar + " + " + index + ")");
+                    + ".__caucho_make(aConn, rs, "
+                    + indexVar + " + " + index + ")");
 
     // XXX: should cound
     index += _subFields.size();

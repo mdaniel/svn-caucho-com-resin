@@ -51,9 +51,9 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
   private boolean _isSubscriptionClosed;
   
   TopicSubscriberImpl(JmsSession session,
-		      AbstractTopic topic,
-		      String messageSelector,
-		      boolean noLocal)
+                      AbstractTopic topic,
+                      String messageSelector,
+                      boolean noLocal)
     throws JMSException
   {
     super(session, topic.createSubscriber(session, messageSelector, noLocal),
@@ -64,10 +64,10 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
   }
   
   TopicSubscriberImpl(JmsSession session,
-		      AbstractTopic topic,
-		      AbstractQueue subscription,
-		      String messageSelector,
-		      boolean noLocal)
+                      AbstractTopic topic,
+                      AbstractQueue subscription,
+                      String messageSelector,
+                      boolean noLocal)
     throws JMSException
   {
     super(session, subscription, messageSelector, noLocal);

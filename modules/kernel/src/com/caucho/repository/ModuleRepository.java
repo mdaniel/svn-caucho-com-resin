@@ -92,10 +92,10 @@ abstract public class ModuleRepository
    * Returns the path to the named artifact if it exists.
    */
   public Path findArtifact(String org,
-			   String module,
-			   String name,
-			   String rev,
-			   String ext)
+                           String module,
+                           String name,
+                           String rev,
+                           String ext)
   {
     if (name == null)
       throw new NullPointerException(L.l("'name' is required in findArtifact"));
@@ -113,15 +113,15 @@ abstract public class ModuleRepository
     for (Resolver resolver : _resolverList) {
       DataSource source = null;
       try {
-	source = resolver.resolveArtifact(org, module, name, rev, ext);
+        source = resolver.resolveArtifact(org, module, name, rev, ext);
       } catch (ModuleNotFoundException e) {
-	log.log(Level.FINEST, e.toString(), e);
-	
-	exn = e;
+        log.log(Level.FINEST, e.toString(), e);
+
+        exn = e;
       }
 
       if (source != null) {
-	return fillCache(org, module, name, rev, ext, source);
+        return fillCache(org, module, name, rev, ext, source);
       }
     }
 
@@ -132,11 +132,11 @@ abstract public class ModuleRepository
   }
 
   private Path fillCache(String org,
-			 String module,
-			 String artifact,
-			 String rev,
-			 String ext,
-			 DataSource dataSource)
+                         String module,
+                         String artifact,
+                         String rev,
+                         String ext,
+                         DataSource dataSource)
   {
     try {
       Path path = getRoot().lookup(org);
@@ -148,13 +148,13 @@ abstract public class ModuleRepository
 
       WriteStream os = path.openWrite();
       try {
-	InputStream is = dataSource.openInputStream();
+        InputStream is = dataSource.openInputStream();
 
-	os.writeStream(is);
+        os.writeStream(is);
 
-	is.close();
+        is.close();
       } finally {
-	os.close();
+        os.close();
       }
 
       return path;
@@ -168,10 +168,10 @@ abstract public class ModuleRepository
   }
 
   private Path findArtifactInCache(String org,
-				   String module,
-				   String name,
-				   String rev,
-				   String ext)
+                                   String module,
+                                   String name,
+                                   String rev,
+                                   String ext)
   {
     Path path = findModuleInCache(org, module);
 
@@ -182,7 +182,7 @@ abstract public class ModuleRepository
       ArrayList<String> revList = findRevList(path, name + "-", "." + ext);
 
       if (revList == null || revList.size() == 0)
-	return null;
+        return null;
 
       Collections.sort(revList);
 
@@ -200,23 +200,23 @@ abstract public class ModuleRepository
   }
 
   private Path findModuleInCache(String org,
-				 String module)
+                                 String module)
   {
     try {
       Path root = getRoot();
     
       if (org != null) {
-	Path path = root.lookup(org).lookup(module);
+        Path path = root.lookup(org).lookup(module);
 
-	if (! path.isDirectory() || ! path.canRead())
-	  return null;
+        if (! path.isDirectory() || ! path.canRead())
+          return null;
       }
 
       for (String orgName : root.list()) {
-	Path path = root.lookup(orgName).lookup(module);
+        Path path = root.lookup(orgName).lookup(module);
 
-	if (path.isDirectory() && path.canRead())
-	  return path;
+        if (path.isDirectory() && path.canRead())
+          return path;
       }
 
       return null;
@@ -228,35 +228,35 @@ abstract public class ModuleRepository
   }
 
   private Path findArtifactInCacheValidate(String org,
-					   String module,
-					   String artifact,
-					   String rev,
-				   String ext)
+                                           String module,
+                                           String artifact,
+                                           String rev,
+                                   String ext)
   {
     Path path = getRoot().lookup(org);
 
     if (! (path.isDirectory() && path.canRead()))
       throw new ConfigException(L.l("org='{0}' is an unknown module organization.",
-				    org));
+                                    org));
 
     path = path.lookup(module);
 
     if (! (path.isDirectory() && path.canRead()))
       throw new ConfigException(L.l("org={0},module={1} is an unknown module.",
-				    org, module));
+                                    org, module));
 
     path = path.lookup(ext + "s");
 
     if (! (path.isDirectory() && path.canRead()))
       throw new ConfigException(L.l("org={0},module={1} does not have any {2}s.",
-				    org, module, ext));
+                                    org, module, ext));
 
     if (rev == null) {
       ArrayList<String> revList = findRevList(path, artifact + "_", "." + ext);
 
       if (revList == null || revList.size() == 0) {
-	throw new ConfigException(L.l("org={0}, module={1} has no valid {2}s version.",
-				    org, module, ext));
+        throw new ConfigException(L.l("org={0}, module={1} has no valid {2}s version.",
+                                    org, module, ext));
       }
 
       // XXX: not proper
@@ -271,27 +271,27 @@ abstract public class ModuleRepository
 
     if (! (path.canRead() && path.isFile())) {
       throw new ConfigException(L.l("org={0}, module={1}, rev={2} is an unknown {3} version.",
-				    org, module, rev, ext));
+                                    org, module, rev, ext));
     }
     
     return path;
   }
 
   private ArrayList<String> findRevList(Path path,
-					String prefix,
-					String suffix)
+                                        String prefix,
+                                        String suffix)
   {
     ArrayList<String> revList = new ArrayList<String>();
     
     try {
       for (String name : path.list()) {
-	if (name.startsWith(prefix) && name.endsWith(suffix)) {
-	  int len = name.length() - prefix.length();
-	  
-	  String rev = name.substring(prefix.length(), len);
+        if (name.startsWith(prefix) && name.endsWith(suffix)) {
+          int len = name.length() - prefix.length();
 
-	  revList.add(rev);
-	}
+          String rev = name.substring(prefix.length(), len);
+
+          revList.add(rev);
+        }
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

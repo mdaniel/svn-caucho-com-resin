@@ -193,14 +193,14 @@ public class JstlCoreSet extends JstlNode {
     else {
       out.print("com.caucho.el.Expr.setProperty(");
       if (_targetAttr != null)
-	out.print(_targetAttr.generateValue() + ", ");
+        out.print(_targetAttr.generateValue() + ", ");
       else
-	out.print(generateValue(Object.class, _target) + ", ");
+        out.print(generateValue(Object.class, _target) + ", ");
 
       if (_propertyAttr != null)
-	out.print(_propertyAttr.generateValue() + ", ");
+        out.print(_propertyAttr.generateValue() + ", ");
       else
-	out.print(generateValue(String.class, _property) + ", ");
+        out.print(generateValue(String.class, _property) + ", ");
       
       out.println(value + ");");
     }

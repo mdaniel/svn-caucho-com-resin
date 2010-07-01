@@ -68,17 +68,17 @@ class IncludeDispatchRequest extends DispatchRequest {
   }
 
   void init(Invocation invocation,
-	    WebApp webApp,
+            WebApp webApp,
             WebApp oldWebApp,
             HttpServletRequest request,
             HttpServletResponse response,
-	    String method, String uri,
-	    String servletPath, String pathInfo,
-	    String queryString, String addedQuery)
+            String method, String uri,
+            String servletPath, String pathInfo,
+            String queryString, String addedQuery)
     throws ServletException
   {
     super.init(invocation, webApp, oldWebApp, request, response,
-	       method, uri, servletPath, pathInfo, queryString, addedQuery);
+               method, uri, servletPath, pathInfo, queryString, addedQuery);
     
     _headers = null;
   }
@@ -103,7 +103,7 @@ class IncludeDispatchRequest extends DispatchRequest {
     // The included file must ignore caching directives from the
     // original request
     if (key.equalsIgnoreCase("If-Modified-Since")
-	|| key.equalsIgnoreCase("If-None-Match"))
+        || key.equalsIgnoreCase("If-None-Match"))
       return null;
     else {
       return super.getHeader(key);
@@ -141,7 +141,7 @@ class IncludeDispatchRequest extends DispatchRequest {
       _headers = headers;
 
       if (headers != null)
-	_headerIter = headers.keySet().iterator();
+        _headerIter = headers.keySet().iterator();
     }
     
     /**
@@ -150,32 +150,32 @@ class IncludeDispatchRequest extends DispatchRequest {
     public boolean hasMoreElements()
     {
       if (_nextHeader != null)
-	return true;
+        return true;
       
       if (_parent == null && _headerIter == null)
-	return false;
+        return false;
 
       if (_parent != null) {
-	while (_parent.hasMoreElements() && _nextHeader == null) {
-	  _nextHeader = (String) _parent.nextElement();
+        while (_parent.hasMoreElements() && _nextHeader == null) {
+          _nextHeader = (String) _parent.nextElement();
 
-	  if (_nextHeader == null) {
-	  }
-	  else if (_nextHeader.equalsIgnoreCase("If-Modified-Since") ||
-		   _nextHeader.equalsIgnoreCase("If-None-Match") ||
-		   _headers != null && _headers.get(_nextHeader) != null) {
-	    _nextHeader = null;
-	  }
-	}
+          if (_nextHeader == null) {
+          }
+          else if (_nextHeader.equalsIgnoreCase("If-Modified-Since") ||
+                   _nextHeader.equalsIgnoreCase("If-None-Match") ||
+                   _headers != null && _headers.get(_nextHeader) != null) {
+            _nextHeader = null;
+          }
+        }
 
-	if (_nextHeader == null)
-	  _parent = null;
-	else
-	  return true;
+        if (_nextHeader == null)
+          _parent = null;
+        else
+          return true;
       }
 
       if (_headerIter != null) {
-	_nextHeader = _headerIter.next();
+        _nextHeader = _headerIter.next();
       }
 
       return _nextHeader != null;
@@ -184,7 +184,7 @@ class IncludeDispatchRequest extends DispatchRequest {
     public Object nextElement()
     {
       if (! hasMoreElements())
-	return null;
+        return null;
 
       Object value = _nextHeader;
       _nextHeader = null;

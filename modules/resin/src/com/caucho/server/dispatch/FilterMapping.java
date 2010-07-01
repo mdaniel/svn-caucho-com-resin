@@ -187,7 +187,7 @@ public class FilterMapping extends FilterConfigImpl {
       String matchName = _servletNames.get(i);
 
       if (matchName.equals(servletName) || "*".equals(matchName))
-	return true;
+        return true;
     }
 
     return false;
@@ -226,9 +226,9 @@ public class FilterMapping extends FilterConfigImpl {
 
       switch (value) {
       case Match.INCLUDE:
-	return true;
+        return true;
       case Match.EXCLUDE:
-	return false;
+        return false;
       }
     }
 
@@ -342,9 +342,9 @@ public class FilterMapping extends FilterConfigImpl {
       Pattern regexp;
       
       if (CauchoSystem.isCaseInsensitive())
-	regexp = urlPatternToRegexp(pattern, Pattern.CASE_INSENSITIVE);
+        regexp = urlPatternToRegexp(pattern, Pattern.CASE_INSENSITIVE);
       else
-	regexp = urlPatternToRegexp(pattern, 0);
+        regexp = urlPatternToRegexp(pattern, 0);
 
       _hasInclude = true;
       
@@ -364,9 +364,9 @@ public class FilterMapping extends FilterConfigImpl {
       Pattern regexp;
       
       if (CauchoSystem.isCaseInsensitive())
-	regexp = urlPatternToRegexp(pattern, Pattern.CASE_INSENSITIVE);
+        regexp = urlPatternToRegexp(pattern, Pattern.CASE_INSENSITIVE);
       else
-	regexp = urlPatternToRegexp(pattern, 0);
+        regexp = urlPatternToRegexp(pattern, 0);
 
       _hasInclude = true;
       
@@ -384,9 +384,9 @@ public class FilterMapping extends FilterConfigImpl {
       Pattern regexp;
       
       if (CauchoSystem.isCaseInsensitive())
-	regexp = urlPatternToRegexp(pattern, Pattern.CASE_INSENSITIVE);
+        regexp = urlPatternToRegexp(pattern, Pattern.CASE_INSENSITIVE);
       else
-	regexp = urlPatternToRegexp(pattern, 0);
+        regexp = urlPatternToRegexp(pattern, 0);
 
       _matchList.add(Match.createExclude(regexp));
     }
@@ -401,9 +401,9 @@ public class FilterMapping extends FilterConfigImpl {
       Pattern regexp;
       
       if (CauchoSystem.isCaseInsensitive())
-	regexp = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+        regexp = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
       else
-	regexp = Pattern.compile(pattern, 0);
+        regexp = Pattern.compile(pattern, 0);
 
       _hasInclude = true;
       
@@ -420,9 +420,9 @@ public class FilterMapping extends FilterConfigImpl {
       Pattern regexp;
       
       if (CauchoSystem.isCaseInsensitive())
-	regexp = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+        regexp = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
       else
-	regexp = Pattern.compile(pattern, 0);
+        regexp = Pattern.compile(pattern, 0);
 
       _matchList.add(Match.createExclude(regexp));
     }
@@ -435,8 +435,8 @@ public class FilterMapping extends FilterConfigImpl {
       throws Exception
     {
       if (_matchList.size() > 0 && ! _hasInclude) {
-	Pattern regexp = Pattern.compile("");
-	_matchList.add(Match.createInclude(regexp));
+        Pattern regexp = Pattern.compile("");
+        _matchList.add(Match.createInclude(regexp));
       }
     }
   }
@@ -477,9 +477,9 @@ public class FilterMapping extends FilterConfigImpl {
     int match(String uri)
     {
       if (_regexp.matcher(uri).find())
-	return _value;
+        return _value;
       else
-	return NO_MATCH;
+        return NO_MATCH;
     }
   }
 }

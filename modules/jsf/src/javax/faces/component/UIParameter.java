@@ -113,19 +113,19 @@ public class UIParameter extends UIComponentBase
   {
     if ("name".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_name = String.valueOf(expr.getValue(null));
-	return;
+        _name = String.valueOf(expr.getValue(null));
+        return;
       }
       else
-	_nameExpr = expr;
+        _nameExpr = expr;
     }
     else if ("value".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_value = String.valueOf(expr.getValue(null));
-	return;
+        _value = String.valueOf(expr.getValue(null));
+        return;
       }
       else
-	_valueExpr = expr;
+        _valueExpr = expr;
     }
 
     super.setValueExpression(name, expr);

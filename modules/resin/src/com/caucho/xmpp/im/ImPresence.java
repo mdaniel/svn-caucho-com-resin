@@ -86,11 +86,11 @@ public class ImPresence implements Serializable {
   }
 
   public ImPresence(String to,
-		    String from,
-		    String show,
-		    Text status,
-		    int priority,
-		    ArrayList<Serializable> extraList)
+                    String from,
+                    String show,
+                    Text status,
+                    int priority,
+                    ArrayList<Serializable> extraList)
   {
     _to = to;
     _from = from;
@@ -152,7 +152,7 @@ public class ImPresence implements Serializable {
 
     if (_extra != null) {
       for (Serializable extra : _extra) {
-	sb.append(",").append(extra);
+        sb.append(",").append(extra);
       }
     }
     

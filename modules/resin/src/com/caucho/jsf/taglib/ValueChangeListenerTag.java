@@ -73,7 +73,7 @@ public class ValueChangeListenerTag extends TagSupport
 
     if (parent.getCreated()) {
       if (! (comp instanceof EditableValueHolder))
-	throw new JspException("f:valueChangeListener parent of validator must be a EditableValueHolder.");
+        throw new JspException("f:valueChangeListener parent of validator must be a EditableValueHolder.");
 
       EditableValueHolder valueHolder = (EditableValueHolder) comp;
 
@@ -101,17 +101,17 @@ public class ValueChangeListenerTag extends TagSupport
       String type = (String) _type.getValue(elContext);
       
       try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-	Class cl = Class.forName(type, false, loader);
+        Class cl = Class.forName(type, false, loader);
 
-	listener = (ValueChangeListener) cl.newInstance();
+        listener = (ValueChangeListener) cl.newInstance();
       } catch (Exception e) {
-	throw new JspException(e);
+        throw new JspException(e);
       }
 
       if (_binding != null)
-	_binding.setValue(elContext, listener);
+        _binding.setValue(elContext, listener);
     }
 
     return listener;

@@ -109,26 +109,26 @@ public class XmppMucOwnerQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return mucOwner;
+        return mucOwner;
       }
 
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "jabber:x:data".equals(in.getNamespaceURI())) {
-	DataForm form = (DataForm) in.readValue();
+          && "jabber:x:data".equals(in.getNamespaceURI())) {
+        DataForm form = (DataForm) in.readValue();
 
-	mucOwner = new MucOwnerFormQuery(form);
+        mucOwner = new MucOwnerFormQuery(form);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "destroy".equals(in.getLocalName())) {
-	mucOwner = parseDestroy(in);
+               && "destroy".equals(in.getLocalName())) {
+        mucOwner = parseDestroy(in);
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();

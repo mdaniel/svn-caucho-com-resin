@@ -103,17 +103,17 @@ public class FileRepository extends Repository
    * @param version symbolic version name for the commit
    */
   public boolean setTag(String tag,
-			String root,
-			String user,
-			String server,
-			String message,
-			String version)
+                        String root,
+                        String user,
+                        String server,
+                        String message,
+                        String version)
   {
     RepositoryTagMap tagMap;
 
     do {
       tagMap = addTagData(tag, root, user,
-			  server, message, version);
+                          server, message, version);
 
     } while (! setTagMap(tagMap));
 
@@ -131,9 +131,9 @@ public class FileRepository extends Repository
    * @param version symbolic version name for the commit
    */
   public boolean removeTag(String tag,
-			   String user,
-			   String server,
-			   String message)
+                           String user,
+                           String server,
+                           String message)
   {
     RepositoryTagMap tagMap;
 
@@ -154,10 +154,10 @@ public class FileRepository extends Repository
    * @param message user's message for the commit
    */
   public boolean removeTag(String tag,
-			   String sha1,
-			   String user,
-			   String server,
-			   String message)
+                           String sha1,
+                           String user,
+                           String server,
+                           String message)
   {
     return false;
   }
@@ -318,21 +318,21 @@ public class FileRepository extends Repository
       is = _git.open(sha1);
     
       if (is.getType() != GitType.BLOB)
-	throw new RepositoryException(L.l("'{0}' is an unexpected type, expected 'blob'",
-						is.getType()));
+        throw new RepositoryException(L.l("'{0}' is an unexpected type, expected 'blob'",
+                                                is.getType()));
 
       WriteStream out = null;
 
       if (os instanceof WriteStream)
-	out = (WriteStream) os;
+        out = (WriteStream) os;
       else
-	out = Vfs.openWrite(os);
+        out = Vfs.openWrite(os);
 
       try {
-	out.writeStream(is.getInputStream());
+        out.writeStream(is.getInputStream());
       } finally {
-	if (out != null && out != os)
-	  out.close();
+        if (out != null && out != os)
+          out.close();
       }
     } catch (IOException e) {
       throw new RepositoryException(e);

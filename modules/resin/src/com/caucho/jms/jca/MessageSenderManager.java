@@ -71,7 +71,7 @@ public class MessageSenderManager
   {
     if (! (adapter instanceof ResourceAdapterImpl))
       throw new ResourceException(L.l("'{0}' is not a valid resource-adapter for MessageSenderManager.",
-				      adapter.getClass().getName()));
+                                      adapter.getClass().getName()));
 
     _ra = (ResourceAdapterImpl) adapter;
   }
@@ -108,13 +108,13 @@ public class MessageSenderManager
    */
   public ManagedConnection
     createManagedConnection(Subject subject,
-			    ConnectionRequestInfo requestInfo)
+                            ConnectionRequestInfo requestInfo)
     throws ResourceException
   {
     ResourceAdapterImpl ra = _ra;
     
     return new ManagedSessionImpl(ra.getConnectionFactory(),
-				  ra.getDestination());
+                                  ra.getDestination());
   }
 
   /**
@@ -122,8 +122,8 @@ public class MessageSenderManager
    */
   public ManagedConnection
     matchManagedConnections(Set connSet,
-			    Subject subject,
-			    ConnectionRequestInfo requestInfo)
+                            Subject subject,
+                            ConnectionRequestInfo requestInfo)
     throws ResourceException
   {
     Iterator<ManagedSessionImpl> iter = (Iterator<ManagedSessionImpl>) connSet.iterator();

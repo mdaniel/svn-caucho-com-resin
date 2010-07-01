@@ -126,8 +126,8 @@ public class JspApplicationContextImpl implements JspApplicationContext
     ELContextListener []listenerArray
       = new ELContextListener[_listenerArray.length + 1];
     System.arraycopy(_listenerArray, 0,
-		     listenerArray, 0,
-		     _listenerArray.length);
+                     listenerArray, 0,
+                     _listenerArray.length);
 
     listenerArray[_listenerArray.length] = listener;
     
@@ -152,8 +152,8 @@ public class JspApplicationContextImpl implements JspApplicationContext
     
     ELResolver []resolverArray = new ELResolver[_resolverArray.length + 1];
     System.arraycopy(_resolverArray, 0,
-		     resolverArray, 0,
-		     _resolverArray.length);
+                     resolverArray, 0,
+                     _resolverArray.length);
 
     resolverArray[_resolverArray.length] = resolver;
     

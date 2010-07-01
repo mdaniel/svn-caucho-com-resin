@@ -107,7 +107,7 @@ public class EJBServlet extends GenericServlet {
 
     if (_ejbManager == null) {
       throw new ServletException(L.l("No <ejb-server> detected.  '{0}' requires a configured <ejb-server>",
-				     getClass().getName()));
+                                     getClass().getName()));
     }
 
     _workPath = CauchoSystem.getWorkPath();
@@ -163,7 +163,7 @@ public class EJBServlet extends GenericServlet {
 
     if (! req.getMethod().equals("POST")) {
       if (log.isLoggable(Level.FINE))
-	log.log(Level.FINE, this + " unexpected method " + req.getMethod());
+        log.log(Level.FINE, this + " unexpected method " + req.getMethod());
       
       String protocol = _protocolContainer.getName();
       res.setStatus(500, protocol + " Protocol Error");
@@ -196,33 +196,33 @@ public class EJBServlet extends GenericServlet {
         if (_exception != null)
           throw _exception;
 
-	try {
-	  if (pathInfo == null)
-	    pathInfo = "";
-	  
-	  skeleton = _protocolContainer.getSkeleton(pathInfo, queryString);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	  
-	  skeleton = _protocolContainer.getExceptionSkeleton();
+        try {
+          if (pathInfo == null)
+            pathInfo = "";
 
-	  if (skeleton != null) {
-	    skeleton._service(req.getInputStream(), res.getOutputStream(), e);
+          skeleton = _protocolContainer.getSkeleton(pathInfo, queryString);
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
 
-	    return;
-	  }
-	  else
-	    throw e;
-	}
+          skeleton = _protocolContainer.getExceptionSkeleton();
+
+          if (skeleton != null) {
+            skeleton._service(req.getInputStream(), res.getOutputStream(), e);
+
+            return;
+          }
+          else
+            throw e;
+        }
 
         if (skeleton == null)
           throw new ServletException(L.l("Can't load skeleton for '{0}?{1}'",
                                          pathInfo, queryString));
 
         if (skeleton != null) {
-	  skeleton.setDebug(_isDebug);
+          skeleton.setDebug(_isDebug);
           _beanMap.put(cb, skeleton);
-	}
+        }
       }
 
       skeleton._service(req.getInputStream(), res.getOutputStream());
@@ -283,7 +283,7 @@ public class EJBServlet extends GenericServlet {
     CharBuffer cb = CharBuffer.allocate();
 
     if (! "default".equals(app.getAdmin().getHost().getName())
-	&& ! "".equals(app.getAdmin().getHost().getName())) {
+        && ! "".equals(app.getAdmin().getHost().getName())) {
       String hostName = app.getAdmin().getHost().getURL();
 
       cb.append(hostName);

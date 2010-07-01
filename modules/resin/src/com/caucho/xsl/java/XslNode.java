@@ -449,75 +449,75 @@ public abstract class XslNode {
       char ch = string.charAt(i);
 
       if (ch == '\n') {
-	cb.append("\\n");
+        cb.append("\\n");
       }
       else if (ch == '"') {
-	cb.append("\\\"");
+        cb.append("\\\"");
       }
       else if (ch == '{' && i + 1 < length) {
-	// {{ is treated as a single {
-	if (string.charAt(i + 1) == '{') {
-	  cb.append('{');
-	  i++;
-	}
-	// the value is computed from an XPath expr
-	else {
-	  // print the gathered text if any
-	  if (cb.length() > 0) {
-	    out.print("out.print(\"");
-	    out.printJavaString(cb.toString());
-	    out.println("\");");
-	  }
+        // {{ is treated as a single {
+        if (string.charAt(i + 1) == '{') {
+          cb.append('{');
+          i++;
+        }
+        // the value is computed from an XPath expr
+        else {
+          // print the gathered text if any
+          if (cb.length() > 0) {
+            out.print("out.print(\"");
+            out.printJavaString(cb.toString());
+            out.println("\");");
+          }
 
-	  // scan the contents of '{' ... '}'
-	  cb.clear();
-	  for (i++; i < length && string.charAt(i) != '}'; i++)
-	    cb.append(string.charAt(i));
+          // scan the contents of '{' ... '}'
+          cb.clear();
+          for (i++; i < length && string.charAt(i) != '}'; i++)
+            cb.append(string.charAt(i));
 
-	  printStringExpr(out, cb.toString());
+          printStringExpr(out, cb.toString());
 
-	  cb.clear();
-	  first = false;
-	}
+          cb.clear();
+          first = false;
+        }
       }
       // }} is treated as a single }
       else if (ch == '}' && i + 1 < length) {
-	if (string.charAt(i + 1) == '}') {
-	  cb.append('}');
-	  i++;
-	}
-	else
-	  cb.append('}');
+        if (string.charAt(i + 1) == '}') {
+          cb.append('}');
+          i++;
+        }
+        else
+          cb.append('}');
       }
       // <#= interpolates
       else if (i + 2 < length && ch == '<' && 
-	       string.charAt(i + 1) == '#' &&
-	       string.charAt(i + 2) == '=') {
-	// print the gathered text if any
-	if (cb.length() > 0) {
-	  out.print("out.print(\"");
-	  out.printJavaString(cb.toString());
-	  out.println("\");");
-	}
+               string.charAt(i + 1) == '#' &&
+               string.charAt(i + 2) == '=') {
+        // print the gathered text if any
+        if (cb.length() > 0) {
+          out.print("out.print(\"");
+          out.printJavaString(cb.toString());
+          out.println("\");");
+        }
 
-	// scan the contents of '{' ... '}'
-	cb.clear();
-	for (i += 3;
-	     i + 1 < length && string.charAt(i) != '#' &&
-	       string.charAt(i + 1) != '>';
-	     i++)
-	  cb.append(string.charAt(i));
+        // scan the contents of '{' ... '}'
+        cb.clear();
+        for (i += 3;
+             i + 1 < length && string.charAt(i) != '#' &&
+               string.charAt(i + 1) != '>';
+             i++)
+          cb.append(string.charAt(i));
 
-	i++;
-	
-	// and add the results
-	out.println("out.print(" + cb + ");");
-	
-	cb.clear();
-	first = false;
+        i++;
+
+        // and add the results
+        out.println("out.print(" + cb + ");");
+
+        cb.clear();
+        first = false;
       }
       else
-	cb.append((char) ch);
+        cb.append((char) ch);
     }
 
     // add any trailing text
@@ -546,112 +546,112 @@ public abstract class XslNode {
       char ch = string.charAt(i);
 
       if (ch == '\n') {
-	cb.append("\\n");
+        cb.append("\\n");
       }
       else if (ch == '"') {
-	cb.append("\\\"");
+        cb.append("\\\"");
       }
       else if (ch == '{' && i + 1 < length) {
-	// {{ is treated as a single {
-	if (string.charAt(i + 1) == '{') {
-	  cb.append('{');
-	  i++;
-	}
-	// the value is computed from an XPath expr
-	else {
-	  // print the gathered text if any
-	  if (mode == ',') {
-	    if (cb.length() > 0)
-	      out.println("out.print(\"" + cb.toString() + "\");");
-	  }
-	  else {
-	    if (! first)
-	      out.print((char) mode);
+        // {{ is treated as a single {
+        if (string.charAt(i + 1) == '{') {
+          cb.append('{');
+          i++;
+        }
+        // the value is computed from an XPath expr
+        else {
+          // print the gathered text if any
+          if (mode == ',') {
+            if (cb.length() > 0)
+              out.println("out.print(\"" + cb.toString() + "\");");
+          }
+          else {
+            if (! first)
+              out.print((char) mode);
 
-	    if (cb.length() > 0) {
-	      out.print("\"");
-	      out.print(cb.toString());
-	      out.print("\"");
-	      out.print((char) mode);
-	    }
-	  }
+            if (cb.length() > 0) {
+              out.print("\"");
+              out.print(cb.toString());
+              out.print("\"");
+              out.print((char) mode);
+            }
+          }
 
-	  // scan the contents of '{' ... '}'
-	  cb.clear();
-	  for (i++; i < length && string.charAt(i) != '}'; i++)
-	    cb.append(string.charAt(i));
+          // scan the contents of '{' ... '}'
+          cb.clear();
+          for (i++; i < length && string.charAt(i) != '}'; i++)
+            cb.append(string.charAt(i));
 
-	  // and add the results
-	  if (mode == ',')
-	    printStringExpr(out, cb.toString());
-	  else
-	    stringExpr(out, cb.toString());
-	  cb.clear();
-	  first = false;
-	}
+          // and add the results
+          if (mode == ',')
+            printStringExpr(out, cb.toString());
+          else
+            stringExpr(out, cb.toString());
+          cb.clear();
+          first = false;
+        }
       }
       // }} is treated as a single }
       else if (ch == '}' && i + 1 < length) {
-	if (string.charAt(i + 1) == '}') {
-	  cb.append('}');
-	  i++;
-	}
-	else
-	  cb.append('}');
+        if (string.charAt(i + 1) == '}') {
+          cb.append('}');
+          i++;
+        }
+        else
+          cb.append('}');
       }
       // <#= interpolates
       else if (i + 2 < length && ch == '<' && 
-	       string.charAt(i + 1) == '#' &&
-	       string.charAt(i + 2) == '=') {
-	// print the gathered text if any
-	if (mode == ',') {
-	  if (cb.length() > 0)
-	    out.println("out.print(\"" + cb.toString() + "\");");
-	}
-	else {
-	  if (! first)
-	    out.print((char) mode);
+               string.charAt(i + 1) == '#' &&
+               string.charAt(i + 2) == '=') {
+        // print the gathered text if any
+        if (mode == ',') {
+          if (cb.length() > 0)
+            out.println("out.print(\"" + cb.toString() + "\");");
+        }
+        else {
+          if (! first)
+            out.print((char) mode);
 
-	  if (cb.length() > 0) {
-	    out.print("\"");
-	    out.print(cb.toString());
-	    out.print("\"");
-	    out.print((char) mode);
-	  }
-	}
+          if (cb.length() > 0) {
+            out.print("\"");
+            out.print(cb.toString());
+            out.print("\"");
+            out.print((char) mode);
+          }
+        }
 
-	// scan the contents of '{' ... '}'
-	cb.clear();
-	for (i += 3;
-	     i + 1 < length && string.charAt(i) != '#' &&
-	       string.charAt(i + 1) != '>';
-	     i++)
-	  cb.append(string.charAt(i));
+        // scan the contents of '{' ... '}'
+        cb.clear();
+        for (i += 3;
+             i + 1 < length && string.charAt(i) != '#' &&
+               string.charAt(i + 1) != '>';
+             i++)
+          cb.append(string.charAt(i));
 
-	i++;
-	
-	// and add the results
-	if (mode == ',')
-	  out.println("out.print(" + cb + ");");
-	else {
-	  out.print("(" + cb + ")");
-	}
-	cb.clear();
-	first = false;
+        i++;
+
+        // and add the results
+        if (mode == ',')
+          out.println("out.print(" + cb + ");");
+        else {
+          out.print("(" + cb + ")");
+        }
+        cb.clear();
+        first = false;
       }
       else
-	cb.append((char) ch);
+        cb.append((char) ch);
     }
 
     // add any trailing text
     if (cb.length() > 0) {
       if (mode == ',') 
-	out.println("out.print(\"" + cb + "\");");
+        out.println("out.print(\"" + cb + "\");");
       else {
-	if (! first)
-	  out.print((char) mode);
+        if (! first)
+          out.print((char) mode);
 
-	out.print("\"" + cb + "\"");
+        out.print("\"" + cb + "\"");
       }
     } else if (first && mode == '+')
       out.print("\"\"");
@@ -721,7 +721,7 @@ public abstract class XslNode {
     }
 
     out.println("out.valueOf(_exprs[" + addExpr(exprString) +
-		"].evalObject(node, " + _gen.getEnv() + "));");
+                "].evalObject(node, " + _gen.getEnv() + "));");
   }
 
   protected void stringExpr(JavaWriter out, String exprString)
@@ -756,15 +756,15 @@ public abstract class XslNode {
    * Prints iterator code to start a select.
    */
   protected String printSelectBegin(JavaWriter out,
-				    AbstractPattern select,
-				    boolean isForEach, String loopVar)
+                                    AbstractPattern select,
+                                    boolean isForEach, String loopVar)
     throws IOException, XslParseException
   {
     if (select == null)
       throw new NullPointerException();
     
     if (select instanceof FromContext
-	&& ((FromContext) select).getCount() == 0)
+        && ((FromContext) select).getCount() == 0)
       return "node";
 
     else if (select instanceof FromRoot)
@@ -784,7 +784,7 @@ public abstract class XslNode {
         out.println("env.setCurrentNode(node);");
       
       out.println("Iterator " + iterName + " = _select_patterns[" +
-		  _gen.addSelect(select) + "].select(" + name + ", env);");
+                  _gen.addSelect(select) + "].select(" + name + ", env);");
       
       if (loopVar != null && _gen.getSelectLoopDepth() == 0)
         out.println(loopVar + ":");
@@ -989,7 +989,7 @@ public abstract class XslNode {
     throws IOException
   {
     out.print("_exprs[" + id + "].evalBoolean(" + node + 
-	      ", " + getEnv() + ")");
+              ", " + getEnv() + ")");
   }
 
   public AbstractPattern parseMatch(String pattern)
@@ -1027,8 +1027,8 @@ public abstract class XslNode {
   {
     try {
       return XPath.parseExpr(pattern,
-			     getMatchNamespace(),
-			     _gen.getNodeListContext());
+                             getMatchNamespace(),
+                             _gen.getNodeListContext());
     } catch (Exception e) {
       throw error(e);
     }

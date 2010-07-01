@@ -53,16 +53,16 @@ public abstract class Provider {
   }
 
   public abstract Endpoint createAndPublishEndpoint(String address,
-						    Object implementor);
+                                                    Object implementor);
 
 
   public abstract Endpoint createEndpoint(String bindingId,
-					  Object implementor);
+                                          Object implementor);
 
   public abstract ServiceDelegate
     createServiceDelegate(URL wsdlDocumentLocation,
-			  QName serviceName,
-			  Class serviceClass);
+                          QName serviceName,
+                          Class serviceClass);
 
 
   /** XXX */
@@ -73,20 +73,20 @@ public abstract class Provider {
     
     try {
       synchronized (_providerMap) {
-	String className = _providerMap.get(loader);
+        String className = _providerMap.get(loader);
 
-	if (className == null) {
-	  className = findServiceName(loader);
+        if (className == null) {
+          className = findServiceName(loader);
 
-	  if (log.isLoggable(Level.FINER) && className != null)
-	    log.finer("jaxws.Provider implementation " + className);
+          if (log.isLoggable(Level.FINER) && className != null)
+            log.finer("jaxws.Provider implementation " + className);
 
-	  _providerMap.put(loader, className);
-	}
-	
-	Class cl = Class.forName(className, false, loader);
+          _providerMap.put(loader, className);
+        }
 
-	return (Provider) cl.newInstance();
+        Class cl = Class.forName(className, false, loader);
+
+        return (Provider) cl.newInstance();
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -100,23 +100,23 @@ public abstract class Provider {
       is = loader.getResourceAsStream("META-INF/services/javax.xml.ws.spi.Provider");
 
       if (is != null) {
-	StringBuilder sb = new StringBuilder();
-	int ch;
+        StringBuilder sb = new StringBuilder();
+        int ch;
 
-	while (Character.isWhitespace((ch = is.read()))) {
-	}
+        while (Character.isWhitespace((ch = is.read()))) {
+        }
 
-	for (; ch >= 0 && ! Character.isWhitespace(ch); ch = is.read()) {
-	  sb.append((char) ch);
-	}
+        for (; ch >= 0 && ! Character.isWhitespace(ch); ch = is.read()) {
+          sb.append((char) ch);
+        }
 
-	return sb.toString();
+        return sb.toString();
       }
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     } finally {
       if (is != null)
-	try { is.close(); } catch (IOException e) {}
+        try { is.close(); } catch (IOException e) {}
     }
 
     String name = System.getProperty("javax.xml.ws.spi.Provider");

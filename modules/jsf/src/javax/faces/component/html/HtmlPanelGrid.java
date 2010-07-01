@@ -606,65 +606,65 @@ public class HtmlPanelGrid extends UIPanel
     if (prop != null) {
       switch (prop) {
       case BGCOLOR:
-	return _bgcolorExpr;
+        return _bgcolorExpr;
       case BORDER:
-	return _borderExpr;
+        return _borderExpr;
       case CAPTION_CLASS:
-	return _captionClassExpr;
+        return _captionClassExpr;
       case CAPTION_STYLE:
-	return _captionStyleExpr;
+        return _captionStyleExpr;
       case CELLPADDING:
-	return _cellpaddingExpr;
+        return _cellpaddingExpr;
       case CELLSPACING:
-	return _cellspacingExpr;
+        return _cellspacingExpr;
       case COLUMN_CLASSES:
-	return _columnClassesExpr;
+        return _columnClassesExpr;
       case COLUMNS:
-	return _columnsExpr;
+        return _columnsExpr;
       case DIR:
-	return _dirExpr;
+        return _dirExpr;
       case FOOTER_CLASS:
-	return _footerClassExpr;
+        return _footerClassExpr;
       case FRAME:
-	return _frameExpr;
+        return _frameExpr;
       case HEADER_CLASS:
-	return _headerClassExpr;
+        return _headerClassExpr;
       case LANG:
-	return _langExpr;
+        return _langExpr;
       case ONCLICK:
-	return _onclickExpr;
+        return _onclickExpr;
       case ONDBLCLICK:
-	return _ondblclickExpr;
+        return _ondblclickExpr;
       case ONKEYDOWN:
-	return _onkeydownExpr;
+        return _onkeydownExpr;
       case ONKEYPRESS:
-	return _onkeypressExpr;
+        return _onkeypressExpr;
       case ONKEYUP:
-	return _onkeyupExpr;
+        return _onkeyupExpr;
       case ONMOUSEDOWN:
-	return _onmousedownExpr;
+        return _onmousedownExpr;
       case ONMOUSEMOVE:
-	return _onmousemoveExpr;
+        return _onmousemoveExpr;
       case ONMOUSEOUT:
-	return _onmouseoutExpr;
+        return _onmouseoutExpr;
       case ONMOUSEOVER:
-	return _onmouseoverExpr;
+        return _onmouseoverExpr;
       case ONMOUSEUP:
-	return _onmouseupExpr;
+        return _onmouseupExpr;
       case ROW_CLASSES:
-	return _rowClassesExpr;
+        return _rowClassesExpr;
       case RULES:
-	return _rulesExpr;
+        return _rulesExpr;
       case STYLE:
-	return _styleExpr;
+        return _styleExpr;
       case STYLE_CLASS:
-	return _styleClassExpr;
+        return _styleClassExpr;
       case SUMMARY:
-	return _summaryExpr;
+        return _summaryExpr;
       case TITLE:
-	return _titleExpr;
+        return _titleExpr;
       case WIDTH:
-	return _widthExpr;
+        return _widthExpr;
       }
     }
     
@@ -682,274 +682,274 @@ public class HtmlPanelGrid extends UIPanel
     if (prop != null) {
       switch (prop) {
       case BGCOLOR:
-	if (expr != null && expr.isLiteralText()) {
-	  _bgcolor = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _bgcolorExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _bgcolor = Util.evalString(expr);
+          return;
+        }
+        else
+          _bgcolorExpr = expr;
+        break;
+
       case BORDER:
-	if (expr != null && expr.isLiteralText()) {
-	  _border = Util.evalInt(expr);
-	  return;
-	}
-	else
-	  _borderExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _border = Util.evalInt(expr);
+          return;
+        }
+        else
+          _borderExpr = expr;
+        break;
+
       case CAPTION_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _captionClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _captionClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _captionClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _captionClassExpr = expr;
+        break;
+
       case CAPTION_STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _captionStyle = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _captionStyleExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _captionStyle = Util.evalString(expr);
+          return;
+        }
+        else
+          _captionStyleExpr = expr;
+        break;
+
       case CELLPADDING:
-	if (expr != null && expr.isLiteralText()) {
-	  _cellpadding = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _cellpaddingExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _cellpadding = Util.evalString(expr);
+          return;
+        }
+        else
+          _cellpaddingExpr = expr;
+        break;
+
       case CELLSPACING:
-	if (expr != null && expr.isLiteralText()) {
-	  _cellspacing = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _cellspacingExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _cellspacing = Util.evalString(expr);
+          return;
+        }
+        else
+          _cellspacingExpr = expr;
+        break;
+
       case COLUMN_CLASSES:
-	if (expr != null && expr.isLiteralText()) {
-	  _columnClasses = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _columnClassesExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _columnClasses = Util.evalString(expr);
+          return;
+        }
+        else
+          _columnClassesExpr = expr;
+        break;
+
       case COLUMNS:
-	if (expr != null && expr.isLiteralText()) {
-	  _columns = Util.evalInt(expr);
-	  return;
-	}
-	else
-	  _columnsExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _columns = Util.evalInt(expr);
+          return;
+        }
+        else
+          _columnsExpr = expr;
+        break;
 
       case DIR:
-	if (expr != null && expr.isLiteralText()) {
-	  _dir = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _dirExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _dir = Util.evalString(expr);
+          return;
+        }
+        else
+          _dirExpr = expr;
+        break;
+
       case FOOTER_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _footerClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _footerClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _footerClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _footerClassExpr = expr;
+        break;
+
       case FRAME:
-	if (expr != null && expr.isLiteralText()) {
-	  _frame = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _frameExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _frame = Util.evalString(expr);
+          return;
+        }
+        else
+          _frameExpr = expr;
+        break;
+
       case HEADER_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _headerClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _headerClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _headerClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _headerClassExpr = expr;
+        break;
+
       case LANG:
-	if (expr != null && expr.isLiteralText()) {
-	  _lang = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _langExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _lang = Util.evalString(expr);
+          return;
+        }
+        else
+          _langExpr = expr;
+        break;
+
       case ONCLICK:
-	if (expr != null && expr.isLiteralText()) {
-	  _onclick = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onclickExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onclick = Util.evalString(expr);
+          return;
+        }
+        else
+          _onclickExpr = expr;
+        break;
 
       case ONDBLCLICK:
-	if (expr != null && expr.isLiteralText()) {
-	  _ondblclick = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _ondblclickExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _ondblclick = Util.evalString(expr);
+          return;
+        }
+        else
+          _ondblclickExpr = expr;
+        break;
 
       case ONKEYDOWN:
-	if (expr != null && expr.isLiteralText()) {
-	  _onkeydown = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onkeydownExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _onkeydown = Util.evalString(expr);
+          return;
+        }
+        else
+          _onkeydownExpr = expr;
+        break;
+
       case ONKEYPRESS:
-	if (expr != null && expr.isLiteralText()) {
-	  _onkeypress = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onkeypressExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onkeypress = Util.evalString(expr);
+          return;
+        }
+        else
+          _onkeypressExpr = expr;
+        break;
 
       case ONKEYUP:
-	if (expr != null && expr.isLiteralText()) {
-	  _onkeyup = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onkeyupExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onkeyup = Util.evalString(expr);
+          return;
+        }
+        else
+          _onkeyupExpr = expr;
+        break;
 
       case ONMOUSEDOWN:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmousedown = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmousedownExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmousedown = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmousedownExpr = expr;
+        break;
 
       case ONMOUSEMOVE: 
-	if (expr != null && expr.isLiteralText()) {
-	  _onmousemove = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmousemoveExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmousemove = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmousemoveExpr = expr;
+        break;
 
       case ONMOUSEOUT:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmouseout = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmouseoutExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmouseout = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmouseoutExpr = expr;
+        break;
 
       case ONMOUSEOVER:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmouseover = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmouseoverExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmouseover = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmouseoverExpr = expr;
+        break;
 
       case ONMOUSEUP:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmouseup = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmouseupExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmouseup = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmouseupExpr = expr;
+        break;
 
       case ROW_CLASSES:
-	if (expr != null && expr.isLiteralText()) {
-	  _rowClasses = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _rowClassesExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _rowClasses = Util.evalString(expr);
+          return;
+        }
+        else
+          _rowClassesExpr = expr;
+        break;
 
       case RULES:
-	if (expr != null && expr.isLiteralText()) {
-	  _rules = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _rulesExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _rules = Util.evalString(expr);
+          return;
+        }
+        else
+          _rulesExpr = expr;
+        break;
 
       case STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _style = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _style = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleExpr = expr;
+        break;
 
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _styleClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleClassExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _styleClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleClassExpr = expr;
+        break;
 
       case SUMMARY:
-	if (expr != null && expr.isLiteralText()) {
-	  _summary = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _summaryExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _summary = Util.evalString(expr);
+          return;
+        }
+        else
+          _summaryExpr = expr;
+        break;
 
       case TITLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _title = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _titleExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _title = Util.evalString(expr);
+          return;
+        }
+        else
+          _titleExpr = expr;
+        break;
 
       case WIDTH:
-	if (expr != null && expr.isLiteralText()) {
-	  _width = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _widthExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _width = Util.evalString(expr);
+          return;
+        }
+        else
+          _widthExpr = expr;
+        break;
       }
     }
     

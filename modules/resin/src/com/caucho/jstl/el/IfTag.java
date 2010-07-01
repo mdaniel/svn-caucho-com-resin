@@ -85,7 +85,7 @@ public class IfTag extends TagSupport {
       if (_var == null) {
       }
       else
-	CoreSetTag.setValue(pageContext, _var, _scope, value);
+        CoreSetTag.setValue(pageContext, _var, _scope, value);
 
       return test ? EVAL_BODY_INCLUDE : SKIP_BODY;
     } catch (Exception e) {

@@ -85,7 +85,7 @@ public class YadisXrd
   {
     for (YadisService service : getServiceList()) {
       if (service.getTypeList().contains(type))
-	return service.getUri();
+        return service.getUri();
     }
 
     return null;

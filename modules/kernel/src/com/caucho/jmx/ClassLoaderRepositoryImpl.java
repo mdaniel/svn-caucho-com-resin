@@ -62,16 +62,16 @@ public class ClassLoaderRepositoryImpl implements ClassLoaderRepository {
       ClassLoader loader = _loaders.get(i);
 
       try {
-	Class cl = loader.loadClass(className);
+        Class cl = loader.loadClass(className);
 
-	if (cl != null)
-	  return cl;
+        if (cl != null)
+          return cl;
       } catch (ClassNotFoundException e) {
       }
     }
 
     throw new ClassNotFoundException(L.l("can't load class {0}",
-					 className));
+                                         className));
   }
   
   /**
@@ -84,19 +84,19 @@ public class ClassLoaderRepositoryImpl implements ClassLoaderRepository {
       ClassLoader loader = _loaders.get(i);
 
       if (loader == stop)
-	break;
+        break;
 
       try {
-	Class cl = loader.loadClass(className);
+        Class cl = loader.loadClass(className);
 
-	if (cl != null)
-	  return cl;
+        if (cl != null)
+          return cl;
       } catch (ClassNotFoundException e) {
       }
     }
 
     throw new ClassNotFoundException(L.l("can't load class {0}",
-					 className));
+                                         className));
   }
   
   /**
@@ -109,18 +109,18 @@ public class ClassLoaderRepositoryImpl implements ClassLoaderRepository {
       ClassLoader loader = _loaders.get(i);
 
       if (loader == exclude)
-	continue;
+        continue;
 
       try {
-	Class cl = loader.loadClass(className);
+        Class cl = loader.loadClass(className);
 
-	if (cl != null)
-	  return cl;
+        if (cl != null)
+          return cl;
       } catch (ClassNotFoundException e) {
       }
     }
 
     throw new ClassNotFoundException(L.l("can't load class {0}",
-					 className));
+                                         className));
   }
 }

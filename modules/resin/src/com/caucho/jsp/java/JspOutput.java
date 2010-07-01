@@ -74,7 +74,7 @@ public class JspOutput extends JspNode {
 
       if (oldValue != null && ! oldValue.equals(value)) {
         throw error(L.l("jsp:output doctype-system '{0}' conflicts with previous value '{1}'.  The doctype-system attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
       }
 
       _gen.setDoctypeSystem(value);
@@ -85,7 +85,7 @@ public class JspOutput extends JspNode {
 
       if (oldValue != null && ! oldValue.equals(value)) {
         throw error(L.l("jsp:output doctype-public '{0}' conflicts with previous value '{1}'.  The doctype-public attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
       }
 
       _gen.setDoctypePublic(value);
@@ -96,7 +96,7 @@ public class JspOutput extends JspNode {
 
       if (oldValue != null && ! oldValue.equals(value)) {
         throw error(L.l("jsp:output doctype-root-element '{0}' conflicts with previous value '{1}'.  The doctype-root-element attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
       }
 
       _gen.setDoctypeRootElement(value);

@@ -304,7 +304,7 @@ public class CompilingLoader extends Loader implements Make {
       String scheme = _classDir.getScheme();
       
       if (scheme != null && ! scheme.equals("memory"))
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
     }
     
     super.init();
@@ -349,7 +349,7 @@ public class CompilingLoader extends Loader implements Make {
   {
     synchronized (this) {
       if (Alarm.getCurrentTime() < _lastMakeTime + 2000)
-	return;
+        return;
       
       makeImpl();
 
@@ -652,7 +652,7 @@ public class CompilingLoader extends Loader implements Make {
       compiler.setCompileParent(! isMake);
       compiler.setSourceExtension(_sourceExt);
       if (_compiler != null)
-	compiler.setCompiler(_compiler);
+        compiler.setCompiler(_compiler);
 
       //LineMap lineMap = new LineMap(javaFile.getNativePath());
       // The context path is obvious from the browser url

@@ -50,7 +50,7 @@ public class ContainerConstraint extends AbstractConstraint {
       _constraints.add(subConstraint);
 
       if (subConstraint.needsAuthentication())
-	_needsAuthentication = true;
+        _needsAuthentication = true;
     }
   }
   
@@ -77,8 +77,8 @@ public class ContainerConstraint extends AbstractConstraint {
    * @return true if the request is authorized.
    */
   public AuthorizationResult isAuthorized(HttpServletRequest request,
-					  HttpServletResponse response,
-					  ServletContext application)
+                                          HttpServletResponse response,
+                                          ServletContext application)
     throws ServletException, IOException
   {
     AuthorizationResult result = AuthorizationResult.NONE;
@@ -89,7 +89,7 @@ public class ContainerConstraint extends AbstractConstraint {
       result = constraint.isAuthorized(request, response, application);
 
       if (! result.isFallthrough())
-	return result;
+        return result;
     }
 
     return result;

@@ -128,9 +128,9 @@ public class WrapperResponseStream extends AbstractResponseStream {
   {
     if (offset > 0) {
       try {
-	print(_charBuffer, 0, offset);
+        print(_charBuffer, 0, offset);
       } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -159,7 +159,7 @@ public class WrapperResponseStream extends AbstractResponseStream {
   {
     if (_writer == null) {
       if (_next == null)
-	return;
+        return;
       
       _writer = _next.getWriter();
     }
@@ -182,7 +182,7 @@ public class WrapperResponseStream extends AbstractResponseStream {
     
     if (_writer == null) {
       if (_next == null)
-	return;
+        return;
       
       _writer = _next.getWriter();
     }
@@ -205,9 +205,9 @@ public class WrapperResponseStream extends AbstractResponseStream {
   {
     if (offset > 0) {
       try {
-	write(_byteBuffer, 0, offset);
+        write(_byteBuffer, 0, offset);
       } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -244,7 +244,7 @@ public class WrapperResponseStream extends AbstractResponseStream {
   {
     if (_os == null) {
       if (_next == null)
-	return;
+        return;
       
       _os = _next.getOutputStream();
     }
@@ -267,7 +267,7 @@ public class WrapperResponseStream extends AbstractResponseStream {
     
     if (_os == null) {
       if (_next == null)
-	return;
+        return;
       
       _os = _next.getOutputStream();
     }
@@ -299,7 +299,7 @@ public class WrapperResponseStream extends AbstractResponseStream {
   {
     if (_writer == null) {
       if (_next == null)
-	return;
+        return;
       
       _writer = _next.getWriter();
     }
@@ -316,7 +316,7 @@ public class WrapperResponseStream extends AbstractResponseStream {
   {
     if (_os == null) {
       if (_next == null)
-	return;
+        return;
       
       _os = _next.getOutputStream();
     }
@@ -381,9 +381,9 @@ public class WrapperResponseStream extends AbstractResponseStream {
 
     if (writer != null) {
       try {
-	writer.close();
+        writer.close();
       } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
 
@@ -392,9 +392,9 @@ public class WrapperResponseStream extends AbstractResponseStream {
     
     if (os != null) {
       try {
-	os.close();
+        os.close();
       } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
 

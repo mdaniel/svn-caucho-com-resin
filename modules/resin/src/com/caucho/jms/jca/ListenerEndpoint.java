@@ -74,7 +74,7 @@ public class ListenerEndpoint implements MessageEndpoint, MessageListener {
       MessageListener listener = _listener;
       
       if (listener != null)
-	listener.onMessage(message);
+        listener.onMessage(message);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

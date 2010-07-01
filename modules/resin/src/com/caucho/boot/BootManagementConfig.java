@@ -122,14 +122,14 @@ public class BootManagementConfig
   {
     try {
       if (_auth != null) {
-	_auth.init();
+        _auth.init();
       
-	InjectManager manager = InjectManager.create();
-	BeanBuilder factory = manager.createBeanFactory(Authenticator.class);
-	factory.type(Authenticator.class);
-	factory.type(AdminAuthenticator.class);
+        InjectManager manager = InjectManager.create();
+        BeanBuilder factory = manager.createBeanFactory(Authenticator.class);
+        factory.type(Authenticator.class);
+        factory.type(AdminAuthenticator.class);
 
-	manager.addBean(factory.singleton(_auth));
+        manager.addBean(factory.singleton(_auth));
       }
     } catch (Exception e) {
       e.printStackTrace();

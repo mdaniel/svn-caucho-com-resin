@@ -139,7 +139,7 @@ public class HtmlInputBaseTag
 
     if (_validatorExpression != null) {
       _validator = new MethodExpressionValidator(
-	_validatorExpression);
+        _validatorExpression);
     }
   }
 
@@ -154,7 +154,7 @@ public class HtmlInputBaseTag
 
     if (_valueChangeExpression != null)
       _valueChangeListener = new MethodExpressionValueChangeListener(
-	_valueChangeExpression);
+        _valueChangeExpression);
   }
 
   public ValueExpression getImmediate()
@@ -180,7 +180,7 @@ public class HtmlInputBaseTag
 
     if (_map != null)
       for (String attribute : _map.keySet()) {
-	component.setValueExpression(attribute, _map.get(attribute));
+        component.setValueExpression(attribute, _map.get(attribute));
       }
 
     UIInput input = (UIInput) component;
@@ -190,26 +190,26 @@ public class HtmlInputBaseTag
 
       MethodExpressionValidator validator = null;
       for (int i = 0; i < validators.length; i++)
-	if (_validator == validators[i])
-	  validator = _validator;
+        if (_validator == validators[i])
+          validator = _validator;
 
       if (validator == null)
-	input.addValidator(_validator);
+        input.addValidator(_validator);
     }
 
     if (_valueChangeExpression != null) {
       ValueChangeListener[] valueChangeListeners
-	= input.getValueChangeListeners();
+        = input.getValueChangeListeners();
 
       MethodExpressionValueChangeListener listener = null;
 
       for (int i = 0; i < valueChangeListeners.length; i++)
-	if (_valueChangeListener == valueChangeListeners[i])
-	  listener
-	    = (MethodExpressionValueChangeListener) valueChangeListeners[i];
+        if (_valueChangeListener == valueChangeListeners[i])
+          listener
+            = (MethodExpressionValueChangeListener) valueChangeListeners[i];
 
       if (listener == null)
-	input.addValueChangeListener(_valueChangeListener);
+        input.addValueChangeListener(_valueChangeListener);
     }
 
   }

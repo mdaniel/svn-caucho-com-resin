@@ -169,7 +169,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   }
 
   public Dispatch<Object> createDispatch(QName portName,
-					                               JAXBContext context,
+                                                                       JAXBContext context,
                                          Service.Mode mode)
     throws WebServiceException
   {
@@ -323,7 +323,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   public String toString()
   {
     return ("ServiceDelegateImpl[" + getServiceName().getNamespaceURI()
-	    + "," + getServiceName().getLocalPart() + "]");
+            + "," + getServiceName().getLocalPart() + "]");
   }
 
   private String findEndpointAddress()

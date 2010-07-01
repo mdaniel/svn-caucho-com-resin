@@ -159,7 +159,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     try {
       if (host != null)
-	host.updateWebAppDeploy(name);
+        host.updateWebAppDeploy(name);
     } catch (Throwable e) {
       throw new DeployException(e);
     }
@@ -175,7 +175,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     try {
       if (host != null)
-	host.updateEarDeploy(name);
+        host.updateEarDeploy(name);
     } catch (Throwable e) {
       throw new DeployException(e);
     }

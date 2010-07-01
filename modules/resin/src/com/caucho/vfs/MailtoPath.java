@@ -97,23 +97,23 @@ public class MailtoPath extends Path {
     if (cursor.current() == '?') {
       char ch = cursor.next();
       while (isUserChar(ch)) {
-	buf.clear();
-	for (; isUserChar(ch); ch = cursor.next())
-	  buf.append(ch);
-	String key = buf.toString();
+        buf.clear();
+        for (; isUserChar(ch); ch = cursor.next())
+          buf.append(ch);
+        String key = buf.toString();
 
-	if (ch != '=')
-	  throw new RuntimeException("broken attribute at: " + ch);
-	buf.clear();
-	for (ch = cursor.next();
-	     ch != cursor.DONE && ch != '&';
-	     ch = cursor.next())
-	  buf.append(ch);
+        if (ch != '=')
+          throw new RuntimeException("broken attribute at: " + ch);
+        buf.clear();
+        for (ch = cursor.next();
+             ch != cursor.DONE && ch != '&';
+             ch = cursor.next())
+          buf.append(ch);
 
-	attr.put(key, buf.toString());
+        attr.put(key, buf.toString());
 
-	while (ch == '&' || ch == ' ' || ch == '\t')
-	  ch = cursor.next();
+        while (ch == '&' || ch == ' ' || ch == '\t')
+          ch = cursor.next();
       }
     }
 
@@ -139,27 +139,27 @@ public class MailtoPath extends Path {
     while (isUserChar(ch)) {
       buf.clear();
       for (; isUserChar(ch); ch = cursor.next())
-	buf.append(ch);
+        buf.append(ch);
 
       Recipient rcpt = new Recipient();
       to.add(rcpt);
       rcpt.user = buf.toString();
 
       if (ch == '@') {
-	ch = cursor.next();
-	if (! isUserChar(ch))
-	  throw new RuntimeException("bad url");
+        ch = cursor.next();
+        if (! isUserChar(ch))
+          throw new RuntimeException("bad url");
 
-	buf.clear();
-	for (; isUserChar(ch); ch = cursor.next())
-	  buf.append(ch);
+        buf.clear();
+        for (; isUserChar(ch); ch = cursor.next())
+          buf.append(ch);
 
-	rcpt.host = buf.toString();
+        rcpt.host = buf.toString();
       }
 
       while (ch == ',' || ch == ' ' || ch == '\t' ||
-	     ch == '\n' || ch == '\r') {
-	ch = cursor.next();
+             ch == '\n' || ch == '\r') {
+        ch = cursor.next();
       }
     }
 
@@ -178,8 +178,8 @@ public class MailtoPath extends Path {
 
     default:
       return (ch >= 'a' && ch <= 'z' ||
-	      ch >= 'A' && ch <= 'Z' ||
-	      ch >= '0' && ch <= '9');
+              ch >= 'A' && ch <= 'Z' ||
+              ch >= '0' && ch <= '9');
     }
   }
 

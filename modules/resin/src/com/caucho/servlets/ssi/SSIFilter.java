@@ -142,17 +142,17 @@ public class SSIFilter implements Filter {
       ReadStream is = _tempStream.openRead();
       Statement stmt = null;
       try {
-	stmt = new SSIParser(_factory).parse(is);
+        stmt = new SSIParser(_factory).parse(is);
       } finally {
-	is.close();
+        is.close();
       }
 
       try {
-	WriteStream out = Vfs.openWrite(res.getOutputStream());
-	stmt.apply(out, req, res);
-	out.close();
+        WriteStream out = Vfs.openWrite(res.getOutputStream());
+        stmt.apply(out, req, res);
+        out.close();
       } catch (Exception e) {
-	e.printStackTrace();
+        e.printStackTrace();
       }
     }
   }

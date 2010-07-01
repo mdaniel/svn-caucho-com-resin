@@ -62,29 +62,29 @@ public class EnvironmentMBeanServerBuilder { // extends MBeanServerBuilder {
    * Creates the mbean server
    */
   public MBeanServer newMBeanServer(String defaultDomain,
-				    MBeanServer outer,
-				    MBeanServerDelegate delegate)
+                                    MBeanServer outer,
+                                    MBeanServerDelegate delegate)
   {
     if (! _isInit) {
       _isInit = true;
 
       try {
-	Class cl = Class.forName("java.lang.management.ManagementFactory");
+        Class cl = Class.forName("java.lang.management.ManagementFactory");
 
-	Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
+        Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
 
-	_mbeanServer = (MBeanServer) method.invoke(null, new Object[0]);
+        _mbeanServer = (MBeanServer) method.invoke(null, new Object[0]);
 
-	return _mbeanServer;
+        return _mbeanServer;
       } catch (ClassNotFoundException e) {
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
     if (_mbeanServer == null) {
       if (defaultDomain == null)
-	defaultDomain = "resin";
+        defaultDomain = "resin";
     
       //_mbeanServer = new EnvironmentMBeanServer(defaultDomain);
     }
@@ -99,7 +99,7 @@ public class EnvironmentMBeanServerBuilder { // extends MBeanServerBuilder {
   {
     if (_globalServer == null) {
       if (defaultDomain == null)
-	defaultDomain = "resin";
+        defaultDomain = "resin";
 
       MBeanServerDelegateImpl delegate;
       delegate = new MBeanServerDelegateImpl("Resin-JMX");

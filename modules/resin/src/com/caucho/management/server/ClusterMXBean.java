@@ -81,7 +81,7 @@ public interface ClusterMXBean extends ManagedObjectMXBean {
    * Returns the persistent-store ObjectName.
    */
   @Description("The PersistentStore saves persistent and distributed session" +
-	       " information")
+               " information")
   public PersistentStoreMXBean getPersistentStore();
 
   /**

@@ -54,9 +54,9 @@ public class SecurityGenerator<X> extends AbstractAspectGenerator<X> {
  
   public SecurityGenerator(SecurityFactory<X> factory,
                            AnnotatedMethod<? super X> method,
-			   AspectGenerator<X> next,
-			   String []roleNames,
-			   String runAs)
+                           AspectGenerator<X> next,
+                           String []roleNames,
+                           String runAs)
   {
     super(factory, method, next);
     
@@ -160,7 +160,7 @@ public class SecurityGenerator<X> extends AbstractAspectGenerator<X> {
 
     if (_runAs != null) {
       out.print("String oldRunAs ="
-		+ " com.caucho.security.SecurityContext.runAs(\"");
+                + " com.caucho.security.SecurityContext.runAs(\"");
       out.printJavaString(_runAs);
       out.println("\");");
     }

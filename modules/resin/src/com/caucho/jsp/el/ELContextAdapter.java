@@ -71,17 +71,17 @@ public class ELContextAdapter extends ELContext {
     public Object getValue(ELContext context, Object base, Object property)
     {
       if (base == null && property instanceof String) {
-	if (context != null)
-	  context.setPropertyResolved(true);
+        if (context != null)
+          context.setPropertyResolved(true);
 
-	try {
-	  return _resolver.resolveVariable((String) property);
-	} catch (Exception e) {
-	  throw new ELException(e);
-	}
+        try {
+          return _resolver.resolveVariable((String) property);
+        } catch (Exception e) {
+          throw new ELException(e);
+        }
       }
       else
-	return null;
+        return null;
     }
     
   }

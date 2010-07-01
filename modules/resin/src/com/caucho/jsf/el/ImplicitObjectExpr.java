@@ -154,52 +154,52 @@ public class ImplicitObjectExpr extends Expr {
 
   static {
     _exprMap.put("application",
-		 new ImplicitObjectExpr("application",
-					ImplicitEnum.APPLICATION));
+                 new ImplicitObjectExpr("application",
+                                        ImplicitEnum.APPLICATION));
     _exprMap.put("applicationScope",
-		 new ImplicitObjectExpr("applicationScope",
-					ImplicitEnum.APPLICATION_SCOPE));
+                 new ImplicitObjectExpr("applicationScope",
+                                        ImplicitEnum.APPLICATION_SCOPE));
 //    _exprMap.put("component",
-//		 new ImplicitObjectExpr("component",
-//					ImplicitEnum.COMPONENT));
+//                 new ImplicitObjectExpr("component",
+//                                        ImplicitEnum.COMPONENT));
     _exprMap.put("cookie",
-		 new ImplicitObjectExpr("cookie",
-					ImplicitEnum.COOKIE));
+                 new ImplicitObjectExpr("cookie",
+                                        ImplicitEnum.COOKIE));
     _exprMap.put("facesContext",
-		 new ImplicitObjectExpr("facesContext",
-					ImplicitEnum.FACES_CONTEXT));
+                 new ImplicitObjectExpr("facesContext",
+                                        ImplicitEnum.FACES_CONTEXT));
     _exprMap.put("header",
-		 new ImplicitObjectExpr("header",
-					ImplicitEnum.HEADER));
+                 new ImplicitObjectExpr("header",
+                                        ImplicitEnum.HEADER));
     _exprMap.put("headerValues",
-		 new ImplicitObjectExpr("headerValues",
-					ImplicitEnum.HEADER_VALUES));
+                 new ImplicitObjectExpr("headerValues",
+                                        ImplicitEnum.HEADER_VALUES));
     _exprMap.put("initParam",
-		 new ImplicitObjectExpr("initParam",
-					ImplicitEnum.INIT_PARAM));
+                 new ImplicitObjectExpr("initParam",
+                                        ImplicitEnum.INIT_PARAM));
     _exprMap.put("param",
-		 new ImplicitObjectExpr("param",
-					ImplicitEnum.PARAM));
+                 new ImplicitObjectExpr("param",
+                                        ImplicitEnum.PARAM));
     _exprMap.put("paramValues",
-		 new ImplicitObjectExpr("paramValues",
-					ImplicitEnum.PARAM_VALUES));
+                 new ImplicitObjectExpr("paramValues",
+                                        ImplicitEnum.PARAM_VALUES));
     _exprMap.put("request",
-		 new ImplicitObjectExpr("request",
-					ImplicitEnum.REQUEST));
+                 new ImplicitObjectExpr("request",
+                                        ImplicitEnum.REQUEST));
     _exprMap.put("requestScope",
-		 new ImplicitObjectExpr("requestScope",
-					ImplicitEnum.REQUEST_SCOPE));
+                 new ImplicitObjectExpr("requestScope",
+                                        ImplicitEnum.REQUEST_SCOPE));
     _exprMap.put("resource",
-		 new ImplicitObjectExpr("resource",
-					ImplicitEnum.RESOURCE));
+                 new ImplicitObjectExpr("resource",
+                                        ImplicitEnum.RESOURCE));
     _exprMap.put("session",
-		 new ImplicitObjectExpr("session",
-					ImplicitEnum.SESSION));
+                 new ImplicitObjectExpr("session",
+                                        ImplicitEnum.SESSION));
     _exprMap.put("sessionScope",
-		 new ImplicitObjectExpr("sessionScope",
-					ImplicitEnum.SESSION_SCOPE));
+                 new ImplicitObjectExpr("sessionScope",
+                                        ImplicitEnum.SESSION_SCOPE));
     _exprMap.put("view",
-		 new ImplicitObjectExpr("view",
-					ImplicitEnum.VIEW));
+                 new ImplicitObjectExpr("view",
+                                        ImplicitEnum.VIEW));
   }
 }

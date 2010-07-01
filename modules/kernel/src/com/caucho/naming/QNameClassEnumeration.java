@@ -106,9 +106,9 @@ public class QNameClassEnumeration implements NamingEnumeration {
       String name = (String) list.get(i);
       try {
         Object value = _context.lookup(name);
-	if (i != 0)
-	  cb.append(' ');
-	
+        if (i != 0)
+          cb.append(' ');
+
         if (value != null)
           cb.append("{" + name + ", " + value.getClass() + "}");
         else

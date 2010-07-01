@@ -45,9 +45,9 @@ public class SelectItemGroup extends SelectItem
   }
 
   public SelectItemGroup(String label,
-			 String description,
-			 boolean disabled,
-			 SelectItem []items)
+                         String description,
+                         boolean disabled,
+                         SelectItem []items)
   {
     if (label == null || items == null)
       throw new NullPointerException();

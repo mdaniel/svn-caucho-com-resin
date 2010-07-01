@@ -52,7 +52,7 @@ public class ResinModuleContext extends ModuleContext {
 
   @Override
   protected JavaClassDef createDefaultJavaClassDef(String className,
-						                           Class type)
+                                                                           Class type)
   {
     if (CompositeData.class.isAssignableFrom(type))
       return new CompositeDataClassDef(this, className, type);

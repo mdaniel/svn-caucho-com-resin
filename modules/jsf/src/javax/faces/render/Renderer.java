@@ -37,7 +37,7 @@ import javax.faces.context.*;
 
 public abstract class Renderer {
   public void decode(FacesContext context,
-		     UIComponent component)
+                     UIComponent component)
   {
   }
 
@@ -78,8 +78,8 @@ public abstract class Renderer {
   }
 
   public Object getConvertedValue(FacesContext context,
-				  UIComponent component,
-				  Object submittedValue)
+                                  UIComponent component,
+                                  Object submittedValue)
     throws ConverterException
   {
     if (context == null || component == null)

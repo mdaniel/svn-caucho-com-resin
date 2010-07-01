@@ -90,17 +90,17 @@ public class SingleSignonEntry {
       SessionImpl session = ref.get();
 
       try {
-	if (session == timeoutSession) {
-	  sessions.remove(i);
-	  // session.logout();
-	  // XXX: invalidate?
-	}
-	else if (session == null)
-	  sessions.remove(i);
-	else
-	  isEmpty = false;
+        if (session == timeoutSession) {
+          sessions.remove(i);
+          // session.logout();
+          // XXX: invalidate?
+        }
+        else if (session == null)
+          sessions.remove(i);
+        else
+          isEmpty = false;
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -120,12 +120,12 @@ public class SingleSignonEntry {
       SessionImpl session = ref.get();
 
       try {
-	if (session != null) {
-	  // session.logout();
-	  session.invalidateLogout();  // #599,  server/12i3
-	}
+        if (session != null) {
+          // session.logout();
+          session.invalidateLogout();  // #599,  server/12i3
+        }
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

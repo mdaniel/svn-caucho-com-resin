@@ -86,10 +86,10 @@ public class DataItem implements java.io.Serializable {
 
     if (_field != null) {
       for (int i = 0; i < _field.length; i++) {
-	if (i != 0)
-	  sb.append(",");
-	
-	sb.append("field=").append(_field[i]);
+        if (i != 0)
+          sb.append(",");
+
+        sb.append("field=").append(_field[i]);
       }
     }
 

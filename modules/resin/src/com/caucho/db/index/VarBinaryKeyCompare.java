@@ -37,7 +37,7 @@ public class VarBinaryKeyCompare extends KeyCompare {
    * Compares the key to the block data.
    */
   public int compare(byte []keyBuffer, int keyOffset,
-		     byte []block, int offset, int length)
+                     byte []block, int offset, int length)
   {
     int keyLen = keyBuffer[keyOffset] & 0xff;
     int blockLen = block[offset] & 0xff;
@@ -51,9 +51,9 @@ public class VarBinaryKeyCompare extends KeyCompare {
       int ch2 = block[offset + i] & 0xff;
 
       if (ch1 < ch2)
-	return -1;
+        return -1;
       else if (ch2 < ch1)
-	return 1;
+        return 1;
     }
 
     if (keyLen == blockLen)
@@ -77,22 +77,22 @@ public class VarBinaryKeyCompare extends KeyCompare {
       int ch = buffer[offset + 1 + j] & 0xff;
 
       if (ch == 0)
-	break;
+        break;
 
       if (ch < 0x80)
-	sb.append((char) ch);
+        sb.append((char) ch);
       else if ((ch & 0xe0) == 0xc0) {
-	int ch1 = buffer[offset + 1 + j] & 0xff;
-	sb.append((char) (((ch & 0x0f) << 6) + (ch & 0x3f)));
-	j++;
+        int ch1 = buffer[offset + 1 + j] & 0xff;
+        sb.append((char) (((ch & 0x0f) << 6) + (ch & 0x3f)));
+        j++;
       }
       else {
-	int ch2 = buffer[offset + 1 + j] & 0xff;
-	int ch3 = buffer[offset + 2 + j] & 0xff;
-	sb.append((char) (((ch & 0x0f) << 12)
-			  + ((ch & 0x3f) << 6)
-			  + ((ch & 0x3f))));
-	j += 2;
+        int ch2 = buffer[offset + 1 + j] & 0xff;
+        int ch3 = buffer[offset + 2 + j] & 0xff;
+        sb.append((char) (((ch & 0x0f) << 12)
+                          + ((ch & 0x3f) << 6)
+                          + ((ch & 0x3f))));
+        j += 2;
       }
     }
 

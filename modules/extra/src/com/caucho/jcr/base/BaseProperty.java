@@ -64,10 +64,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(Value value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     _value = value;
   }
@@ -77,10 +77,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(Value[] values)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -90,10 +90,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(String value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     setValue(_factory.createValue(value));
   }
@@ -103,10 +103,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(String[] values)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException();
   }
@@ -116,10 +116,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(InputStream value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     setValue(_factory.createValue(value));
   }
@@ -129,10 +129,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(long value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     setValue(_factory.createValue(value));
   }
@@ -142,10 +142,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(double value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     setValue(_factory.createValue(value));
   }
@@ -155,10 +155,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(Calendar value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     setValue(_factory.createValue(value));
   }
@@ -168,10 +168,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(boolean value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     setValue(_factory.createValue(value));
   }
@@ -181,10 +181,10 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public void setValue(Node value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     setValue(_factory.createValue(value));
   }
@@ -194,7 +194,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public Value getValue()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return _value;
   }
@@ -204,7 +204,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public Value[] getValues()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -214,7 +214,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public String getString()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return getValue().getString();
   }
@@ -224,7 +224,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public InputStream getStream()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return getValue().getStream();
   }
@@ -234,7 +234,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public long getLong()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return getValue().getLong();
   }
@@ -244,7 +244,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public double getDouble()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return getValue().getDouble();
   }
@@ -254,7 +254,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public Calendar getDate()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return getValue().getDate();
   }
@@ -264,7 +264,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public boolean getBoolean()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return getValue().getBoolean();
   }
@@ -274,7 +274,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public Node getNode()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedOperationException();
   }
@@ -284,7 +284,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public long getLength()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return 0;
   }
@@ -294,7 +294,7 @@ public class BaseProperty extends BaseItem implements Property {
    */
   public long[] getLengths()
     throws ValueFormatException,
-	   RepositoryException
+           RepositoryException
   {
     return new long[0];
   }

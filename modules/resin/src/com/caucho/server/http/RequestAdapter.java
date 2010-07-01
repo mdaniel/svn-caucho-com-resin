@@ -97,7 +97,7 @@ public class RequestAdapter extends RequestWrapper
    * Creates a new RequestAdapter.
    */
   public static RequestAdapter create(HttpServletRequest request,
-				      WebApp app)
+                                      WebApp app)
   {
     RequestAdapter reqAdapt = _freeList.allocate();
 
@@ -135,8 +135,8 @@ public class RequestAdapter extends RequestWrapper
     _webApp = app;
 
     if (request == this
-	|| (request instanceof CauchoRequest
-	    && ((CauchoRequest) request).getRequestDepth(0) > MAX_DEPTH)) {
+        || (request instanceof CauchoRequest
+            && ((CauchoRequest) request).getRequestDepth(0) > MAX_DEPTH)) {
       throw new ServletException(L.l("too many servlet includes `{0}'",
                                      request.getRequestURI()));
     }
@@ -318,14 +318,14 @@ public class RequestAdapter extends RequestWrapper
     ServletRequest req = getRequest();
     while (req != null) {
       if (req instanceof CauchoRequest)
-	return ((CauchoRequest) req).getRequestDepth(depth + 1);
+        return ((CauchoRequest) req).getRequestDepth(depth + 1);
       else if (req instanceof ServletRequestWrapper) {
-	ServletRequestWrapper reqWrap = (ServletRequestWrapper) req;
+        ServletRequestWrapper reqWrap = (ServletRequestWrapper) req;
 
-	req = reqWrap.getRequest();
+        req = reqWrap.getRequest();
       }
       else
-	break;
+        break;
     }
 
     return depth + 2;
@@ -583,7 +583,7 @@ public class RequestAdapter extends RequestWrapper
       String newRole = _roleMap.get(role);
       
       if (newRole != null)
-	role = newRole;
+        role = newRole;
     }
 
     return super.isUserInRole(role);

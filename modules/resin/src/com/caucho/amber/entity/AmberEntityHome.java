@@ -231,7 +231,7 @@ public class AmberEntityHome implements Comparable {
       throw new NullPointerException("HOME:" + this);
 
     entity = aConn.getSubEntity(_homeBean.getClass(),
-				rs.getObject(index));
+                                rs.getObject(index));
 
     if (entity != null) {
       if (entity.__caucho_getEntityState().isManaged())

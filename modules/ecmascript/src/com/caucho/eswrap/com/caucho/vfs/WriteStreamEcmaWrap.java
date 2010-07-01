@@ -51,7 +51,7 @@ public class WriteStreamEcmaWrap {
       String string = call.getArgString(i, length);
 
       if (string == null)
-	string = "null";
+        string = "null";
 
       os.print(string);
     }
@@ -64,12 +64,12 @@ public class WriteStreamEcmaWrap {
       String string = call.getArgString(i, length);
 
       if (string == null)
-	string = "null";
+        string = "null";
 
       if (i + 1 == length)
-	os.println(string);
+        os.println(string);
       else
-	os.print(string);
+        os.print(string);
     }
 
     if (length == 0)
@@ -121,7 +121,7 @@ public class WriteStreamEcmaWrap {
     }
     else
       throw new IllegalArgumentException("expected stream at " +
-					 obj.getClass().getName());
+                                         obj.getClass().getName());
   }
 }
 

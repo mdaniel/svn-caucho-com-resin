@@ -91,8 +91,8 @@ class StringExpr extends Expr {
    */
   @Override
   public int evalToBuffer(QueryContext context,
-			  byte []buffer,
-			  int offset)
+                          byte []buffer,
+                          int offset)
     throws SQLException
   {
     String v = evalString(context);

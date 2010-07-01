@@ -109,8 +109,8 @@ public class ParseTagManager {
       return tag;
     
     tag = _tagFileManager.getTag(qname.getPrefix(),
-				 qname.getLocalName(),
-				 qname.getNamespaceURI());
+                                 qname.getLocalName(),
+                                 qname.getNamespaceURI());
     _tagMap.put(qname, tag);
 
     if (tag != null)
@@ -127,7 +127,7 @@ public class ParseTagManager {
       int p = name.lastIndexOf(':');
 
       if (p < 0)
-	return null;
+        return null;
     
       tail = name.substring(p + 1);
     }
@@ -140,27 +140,27 @@ public class ParseTagManager {
       Path path = taglib.getPath();
 
       if (path != null && tagLocation != null) {
-	path = path.lookup(tagLocation);
+        path = path.lookup(tagLocation);
 
-	tag = _tagFileManager.getTag(path, qname.getPrefix(), tagLocation);
+        tag = _tagFileManager.getTag(path, qname.getPrefix(), tagLocation);
 
-	if (tag != null) {
-	  return tag;
-	}
+        if (tag != null) {
+          return tag;
+        }
       }
       
       if (tagLocation != null) {
-	tag = _tagFileManager.getTag(qname.getPrefix(), tagLocation);
+        tag = _tagFileManager.getTag(qname.getPrefix(), tagLocation);
 
-	if (tag == null)
-	  throw new JspParseException(L.l("'{0}' is an unknown tag-file in tag library '{1}'.",
-					  tagLocation, taglib.getURI()));
+        if (tag == null)
+          throw new JspParseException(L.l("'{0}' is an unknown tag-file in tag library '{1}'.",
+                                          tagLocation, taglib.getURI()));
       }
     }
 
     if (tag == null)
       throw new JspParseException(L.l("'{0}' is an unknown tag in tag library '{1}'.",
-				      tail, taglib.getURI()));
+                                      tail, taglib.getURI()));
 
     _tagMap.put(qname, tag);
 
@@ -257,8 +257,8 @@ public class ParseTagManager {
    * Adds a taglib.
    */
   public synchronized Taglib addTaglib(String prefix,
-				       String uri,
-				       String location)
+                                       String uri,
+                                       String location)
     throws JspParseException
   {
     Taglib taglib = _taglibManager.getTaglib(prefix, uri, location);
@@ -276,8 +276,8 @@ public class ParseTagManager {
 
     for (Taglib oldTaglib : _taglibMap.values()) {
       if (oldTaglib != null) {
-	oldTaglib.addTaglib(taglib);
-	taglib.addTaglib(oldTaglib);
+        oldTaglib.addTaglib(taglib);
+        taglib.addTaglib(oldTaglib);
       }
     }
     

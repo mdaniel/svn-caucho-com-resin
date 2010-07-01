@@ -89,7 +89,7 @@ public class TagInstance {
   }
   
   public TagInstance(ParseTagManager manager,
-		     String id)
+                     String id)
   {
     _manager = manager;
     _top = this;
@@ -97,10 +97,10 @@ public class TagInstance {
   }
   
   TagInstance(JspGenerator gen,
-	      TagInstance parent,
-	      TagInfo tagInfo,
-	      QName qname,
-	      Class cl)
+              TagInstance parent,
+              TagInfo tagInfo,
+              QName qname,
+              Class cl)
   {
     _gen = gen;
     _qname = qname;
@@ -117,7 +117,7 @@ public class TagInstance {
       String className = tagInfo.getTagClassName();
       int p = className.lastIndexOf('.');
       if (p >= 0)
-	className = className.substring(p + 1);
+        className = className.substring(p + 1);
       _tagId = "_jsp_" + className + "_" + _gen.uniqueId();
     }
     
@@ -301,12 +301,12 @@ public class TagInstance {
    * @param values the array of attribute values
    */
   public TagInstance addTag(JspGenerator gen,
-			    QName tagName,
-			    TagInfo tagInfo,
+                            QName tagName,
+                            TagInfo tagInfo,
                             Class cl,
                             ArrayList<QName> names,
                             ArrayList<Object> values,
-			    boolean hasBodyContent)
+                            boolean hasBodyContent)
   {
     TagInstance child = null;//findTag(tagName, names);
     if (child == null)
@@ -344,12 +344,12 @@ public class TagInstance {
    * Adds a new tag.  Always create a new tag.
    */
   public TagInstance addNewTag(JspGenerator gen,
-			       QName tagName,
-			       TagInfo tagInfo,
+                               QName tagName,
+                               TagInfo tagInfo,
                                Class cl,
-			       ArrayList<QName> names,
+                               ArrayList<QName> names,
                                ArrayList<String> values,
-			       boolean hasBodyContent)
+                               boolean hasBodyContent)
   {
     TagInstance child = null;
     if (child == null)
@@ -441,8 +441,8 @@ public class TagInstance {
    * Finds the matching tag.
    */
   public TagInstance findTag(QName tagName,
-			     ArrayList<QName> names,
-			     boolean hasBodyContent)
+                             ArrayList<QName> names,
+                             boolean hasBodyContent)
   {
     for (int i = 0; i < _children.size(); i++) {
       TagInstance child = _children.get(i);

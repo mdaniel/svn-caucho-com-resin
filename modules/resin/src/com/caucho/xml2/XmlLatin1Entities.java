@@ -48,7 +48,7 @@ class XmlLatin1Entities extends XmlEntities {
 
       switch (ch) {
       case '\t': 
-	os.print(ch); break;
+        os.print(ch); break;
         
       case '\n':
       case '\r': 
@@ -83,21 +83,21 @@ class XmlLatin1Entities extends XmlEntities {
         break;
         
       case '"':
-	if (attr)
-	  os.print("&quot;");
-	else
-	  os.print('"');
-	break;
+        if (attr)
+          os.print("&quot;");
+        else
+          os.print('"');
+        break;
 
       default:
-	if (ch >= 0x20 && ch < 0x7f || ch > 160 && ch < 255) {
-	  os.print(ch);
-	}
-	else {
-	  os.print("&#");
-	  os.print((int) ch);
-	  os.print(';');
-	}
+        if (ch >= 0x20 && ch < 0x7f || ch > 160 && ch < 255) {
+          os.print(ch);
+        }
+        else {
+          os.print("&#");
+          os.print((int) ch);
+          os.print(';');
+        }
       }
     }
   }

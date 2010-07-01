@@ -60,7 +60,7 @@ public class JstlFmtParam extends JstlNode {
   public boolean hasScripting()
   {
     return (super.hasScripting()
-	    || hasScripting(_value) || hasScripting(_valueAttr));
+            || hasScripting(_value) || hasScripting(_valueAttr));
   }
 
   /**
@@ -97,14 +97,14 @@ public class JstlFmtParam extends JstlNode {
   {
     if (_value != null) {
       if (! getRuntimeAttribute(_value).equals(_value)) {
-	// jsp/1c3s
-	
-	out.println(lhs + " = String.valueOf(" + getRuntimeAttribute(_value) + ");");
+        // jsp/1c3s
+
+        out.println(lhs + " = String.valueOf(" + getRuntimeAttribute(_value) + ");");
       }
       else {
-	int paramIndex = _gen.addExpr(_value);
+        int paramIndex = _gen.addExpr(_value);
 
-	out.println(lhs + " = _caucho_expr_" + paramIndex + ".evalObject(_jsp_env);");
+        out.println(lhs + " = _caucho_expr_" + paramIndex + ".evalObject(_jsp_env);");
       }
     }
     else {

@@ -223,10 +223,10 @@ public class FormatNumberTag extends BodyTagSupport {
       if (_hasValue)
         rawValue = _value;
       else if (body != null) {
-	String value = body.getTrimString();
+        String value = body.getTrimString();
 
-	if (! value.equals(""))
-	  rawValue = Double.parseDouble(value);
+        if (! value.equals(""))
+          rawValue = Double.parseDouble(value);
       }
 
       if (rawValue != null && Double.isNaN(rawValue))
@@ -299,7 +299,7 @@ public class FormatNumberTag extends BodyTagSupport {
 
         dSymbols = dFormat.getDecimalFormatSymbols();
 
-	if (_currencyCode != null && dSymbols != null)
+        if (_currencyCode != null && dSymbols != null)
           dSymbols.setInternationalCurrencySymbol(_currencyCode);
         else if (_currencySymbol != null && dSymbols != null)
           dSymbols.setCurrencySymbol(_currencySymbol);

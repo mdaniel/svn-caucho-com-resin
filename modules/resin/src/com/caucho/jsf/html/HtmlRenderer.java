@@ -43,8 +43,8 @@ import javax.faces.render.*;
 abstract class HtmlRenderer extends BaseRenderer
 {
   protected static void escapeText(ResponseWriter out,
-				   String text,
-				   String prop)
+                                   String text,
+                                   String prop)
     throws IOException
   {
     int length = text.length();
@@ -54,17 +54,17 @@ abstract class HtmlRenderer extends BaseRenderer
 
       switch (ch) {
       case '<':
-	out.writeText("&lt;", prop);
-	break;
+        out.writeText("&lt;", prop);
+        break;
       case '>':
-	out.writeText("&gt;", prop);
-	break;
+        out.writeText("&gt;", prop);
+        break;
       case '&':
-	out.writeText("&amp;", prop);
-	break;
+        out.writeText("&amp;", prop);
+        break;
       default:
-	out.write(ch);
-	break;
+        out.write(ch);
+        break;
       }
     }
   }

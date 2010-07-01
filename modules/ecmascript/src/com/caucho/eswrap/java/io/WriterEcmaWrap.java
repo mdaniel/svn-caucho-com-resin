@@ -82,7 +82,7 @@ public class WriterEcmaWrap {
     try {
       int length;
       while ((length = stream.read(buf, 0, buf.length)) > 0) {
-	os.write(buf, 0, length);
+        os.write(buf, 0, length);
       }
     } finally {
       stream.close();
@@ -102,25 +102,25 @@ public class WriterEcmaWrap {
     if (obj instanceof ReadStream) {
       ReadStream is = (ReadStream) obj;
       while ((len = is.read(buf, 0, buf.length)) > 0) {
-	os.write(buf, 0, len);
+        os.write(buf, 0, len);
       }
     }
     else if (obj instanceof InputStream) {
       int ch;
       InputStream is = (InputStream) obj;
       while ((ch = is.read()) >= 0)
-	os.write(ch);
+        os.write(ch);
     }
     else if (obj instanceof Reader) {
       int ch;
       Reader is = (Reader) obj;
       while ((len = is.read(buf, 0, buf.length)) > 0) {
-	os.write(buf, 0, len);
+        os.write(buf, 0, len);
       }
     }
     else
       throw new IllegalArgumentException("expected stream at " +
-					 obj.getClass().getName());
+                                         obj.getClass().getName());
   }
 }
 

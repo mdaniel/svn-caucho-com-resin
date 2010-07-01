@@ -189,7 +189,7 @@ public class UserTransactionImpl
     try {
       Transaction xa = _transactionManager.getTransaction();
       if (xa != null)
-	resource.begin(xa);
+        resource.begin(xa);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -223,7 +223,7 @@ public class UserTransactionImpl
       UserPoolItem item = poolItem.allocateXA(mcf, subject, info);
 
       if (item != null)
-	return item;
+        return item;
     }
 
     return null;

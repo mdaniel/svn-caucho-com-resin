@@ -74,7 +74,7 @@ public class LifecycleConfig extends DescriptionGroupConfig
   {
     try {
       for (int i = 0; i < _phaseListenerList.size(); i++)
-	list.add((PhaseListener) _phaseListenerList.get(i).newInstance());
+        list.add((PhaseListener) _phaseListenerList.get(i).newInstance());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

@@ -63,13 +63,13 @@ abstract public class AbstractXmppMarshal implements XmppMarshal
     int tag = in.getEventType();
     for (; tag > 0; tag = in.next()) {
       if (log.isLoggable(Level.FINEST))
-	debug(in);
-	
+        debug(in);
+
       if (tag == XMLStreamReader.START_ELEMENT) {
       }
       else if (tag == XMLStreamReader.END_ELEMENT) {
-	if (tagName.equals(in.getLocalName()))
-	  return;
+        if (tagName.equals(in.getLocalName()))
+          return;
       }
     }
   }
@@ -85,11 +85,11 @@ abstract public class AbstractXmppMarshal implements XmppMarshal
   {
     if (tag != XMLStreamReader.END_ELEMENT)
       throw new IllegalStateException("expected </" + tagName + ">"
-				      + " at <" + in.getLocalName() + ">");
+                                      + " at <" + in.getLocalName() + ">");
 
     else if (! tagName.equals(in.getLocalName()))
       throw new IllegalStateException("expected </" + tagName + ">"
-				      + " at </" + in.getLocalName() + ">");
+                                      + " at </" + in.getLocalName() + ">");
   }
 
   protected void debug(XMLStreamReader in)
@@ -100,14 +100,14 @@ abstract public class AbstractXmppMarshal implements XmppMarshal
       sb.append("<").append(in.getLocalName());
 
       if (in.getNamespaceURI() != null)
-	sb.append("{").append(in.getNamespaceURI()).append("}");
+        sb.append("{").append(in.getNamespaceURI()).append("}");
 
       for (int i = 0; i < in.getAttributeCount(); i++) {
-	sb.append(" ");
-	sb.append(in.getAttributeLocalName(i));
-	sb.append("='");
-	sb.append(in.getAttributeValue(i));
-	sb.append("'");
+        sb.append(" ");
+        sb.append(in.getAttributeLocalName(i));
+        sb.append("='");
+        sb.append(in.getAttributeValue(i));
+        sb.append("'");
       }
       sb.append(">");
 
@@ -120,7 +120,7 @@ abstract public class AbstractXmppMarshal implements XmppMarshal
       String text = in.getText().trim();
 
       if (! "".equals(text))
-	log.finest(this + " text='" + text + "'");
+        log.finest(this + " text='" + text + "'");
     }
     else
       log.finest(this + " tag=" + in.getEventType());

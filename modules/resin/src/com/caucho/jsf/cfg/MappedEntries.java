@@ -103,29 +103,29 @@ public class MappedEntries extends AbstractValueConfig
     
     for (int i = 0; i < size; i++) {
       map.put(_keyList.get(i).getValue(context),
-	      _valueList.get(i).getValue(context));
+              _valueList.get(i).getValue(context));
     }
     
     return map;
   }
 
   public void addProgram(ArrayList<BeanProgram> program,
-			 String name,
-			 Class type)
+                         String name,
+                         Class type)
   {
     String getterName = ("get"
-			 + Character.toUpperCase(name.charAt(0))
-			 + name.substring(1));
+                         + Character.toUpperCase(name.charAt(0))
+                         + name.substring(1));
     String setterName = ("set"
-			 + Character.toUpperCase(name.charAt(0))
-			 + name.substring(1));
+                         + Character.toUpperCase(name.charAt(0))
+                         + name.substring(1));
     
     Method getter = findGetter(type, getterName);
     Method setter = findSetter(type, setterName);
 
     program.add(new MapPropertyBeanProgram(getter, setter,
-					   _keyList, _valueList,
-					   name));
+                                           _keyList, _valueList,
+                                           name));
   }
 
   public static class MapEntry {

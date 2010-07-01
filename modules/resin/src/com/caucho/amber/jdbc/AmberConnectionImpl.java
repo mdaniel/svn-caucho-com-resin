@@ -171,8 +171,8 @@ public class AmberConnectionImpl implements Connection {
     throws SQLException
   {
     return getConnection().createStatement(resultSetType,
-					   resultSetConcurrency,
-					   resultSetHoldability);
+                                           resultSetConcurrency,
+                                           resultSetHoldability);
   }
 
 
@@ -190,11 +190,11 @@ public class AmberConnectionImpl implements Connection {
   }
 
   public PreparedStatement prepareStatement(String sql, int resultSetType,
-					    int resultSetConcurrency)
+                                            int resultSetConcurrency)
     throws SQLException
   {
     return getConnection().prepareStatement(sql, resultSetType,
-					    resultSetConcurrency);
+                                            resultSetConcurrency);
   }
 
   public PreparedStatement prepareStatement(String sql,
@@ -204,8 +204,8 @@ public class AmberConnectionImpl implements Connection {
     throws SQLException
   {
     return getConnection().prepareStatement(sql, resultSetType,
-					    resultSetConcurrency,
-					    resultSetHoldability);
+                                            resultSetConcurrency,
+                                            resultSetHoldability);
   }
   
   public PreparedStatement prepareStatement(String sql,
@@ -229,11 +229,11 @@ public class AmberConnectionImpl implements Connection {
   }
 
   public CallableStatement prepareCall(String sql, int resultSetType,
-				       int resultSetConcurrency)
+                                       int resultSetConcurrency)
     throws SQLException
   {
     return getConnection().prepareCall(sql, resultSetType,
-				       resultSetConcurrency);
+                                       resultSetConcurrency);
   }
 
   public CallableStatement prepareCall(String sql,
@@ -243,8 +243,8 @@ public class AmberConnectionImpl implements Connection {
     throws SQLException
   {
     return getConnection().prepareCall(sql, resultSetType,
-				       resultSetConcurrency,
-				       resultSetHoldability);
+                                       resultSetConcurrency,
+                                       resultSetHoldability);
   }
 
   public boolean getAutoCommit()

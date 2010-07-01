@@ -255,8 +255,8 @@ abstract public class BeanType extends AbstractEnhancedType
     for (AmberField field : _selfFields) {
       // ejb/0602
       if (getPersistenceUnit().isJPA()) {
-	if (field instanceof ManyToOneField)
-	  ((ManyToOneField) field).init((EntityType) this);
+        if (field instanceof ManyToOneField)
+          ((ManyToOneField) field).init((EntityType) this);
       }
     }
   }
@@ -274,22 +274,22 @@ abstract public class BeanType extends AbstractEnhancedType
    * Generates the select clause for a load.
    */
   public void generateLoadSelect(StringBuilder sb,
-				 AmberTable table,
-				 String id,
-				 int loadGroup)
+                                 AmberTable table,
+                                 String id,
+                                 int loadGroup)
   {
     // jpa/0l14, jpa/0ge3
     for (AmberField field : getFields()) {
       // jpa/0gg3
       if (field.getLoadGroupIndex() == loadGroup) {
-	String propSelect = field.generateLoadSelect(table, id);
+        String propSelect = field.generateLoadSelect(table, id);
 
-	if (propSelect != null) {
-	  if (sb.length() > 0)
-	    sb.append(", ");
+        if (propSelect != null) {
+          if (sb.length() > 0)
+            sb.append(", ");
 
-	  sb.append(propSelect);
-	}
+          sb.append(propSelect);
+        }
       }
     }
   }
@@ -321,7 +321,7 @@ abstract public class BeanType extends AbstractEnhancedType
     for (AmberField field : getFields()) {
       // jpa/0gg3
       if (field.getLoadGroupIndex() == loadGroupIndex)
-	index = field.generateLoad(out, rs, indexVar, index);
+        index = field.generateLoad(out, rs, indexVar, index);
     }
 
     return index;

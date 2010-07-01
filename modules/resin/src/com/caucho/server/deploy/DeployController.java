@@ -215,7 +215,7 @@ abstract public class DeployController<I extends DeployInstance>
       return STARTUP_MANUAL;
     else {
       throw new ConfigException(L.l("'{0}' is an unknown startup-mode.  'automatic', 'lazy', and 'manual' are the acceptable values.",
-				    mode));
+                                    mode));
     }
   }
 
@@ -264,7 +264,7 @@ abstract public class DeployController<I extends DeployInstance>
       return REDEPLOY_MANUAL;
     else
       throw new ConfigException(L.l("'{0}' is an unknown redeploy-mode.  'automatic', 'lazy', and 'manual' are the acceptable values.",
-				    mode));
+                                    mode));
   }
 
   /**
@@ -339,23 +339,23 @@ abstract public class DeployController<I extends DeployInstance>
       initBegin();
 
       if (_startupMode == STARTUP_MANUAL) {
-	if (_redeployMode == REDEPLOY_AUTOMATIC) {
-	  throw new IllegalStateException(L.l("startup='manual' and redeploy='automatic' is an unsupported combination."));
-	}
-	else
-	  _strategy = StartManualRedeployManualStrategy.create();
+        if (_redeployMode == REDEPLOY_AUTOMATIC) {
+          throw new IllegalStateException(L.l("startup='manual' and redeploy='automatic' is an unsupported combination."));
+        }
+        else
+          _strategy = StartManualRedeployManualStrategy.create();
       }
       else if (_startupMode == STARTUP_LAZY) {
-	if (_redeployMode == REDEPLOY_MANUAL)
-	  _strategy = StartLazyRedeployManualStrategy.create();
-	else
-	  _strategy = StartLazyRedeployAutomaticStrategy.create();
+        if (_redeployMode == REDEPLOY_MANUAL)
+          _strategy = StartLazyRedeployManualStrategy.create();
+        else
+          _strategy = StartLazyRedeployAutomaticStrategy.create();
       }
       else {
-	if (_redeployMode == STARTUP_MANUAL)
-	  _strategy = StartAutoRedeployManualStrategy.create();
-	else
-	  _strategy = StartAutoRedeployAutoStrategy.create();
+        if (_redeployMode == STARTUP_MANUAL)
+          _strategy = StartAutoRedeployManualStrategy.create();
+        else
+          _strategy = StartAutoRedeployAutoStrategy.create();
       }
 
       initEnd();
@@ -480,7 +480,7 @@ abstract public class DeployController<I extends DeployInstance>
     DeployInstance instance = getDeployInstance();
 
     return (instance != null
-	    && instance.getConfigException() != null);
+            && instance.getConfigException() != null);
   }
 
   /**
@@ -494,7 +494,7 @@ abstract public class DeployController<I extends DeployInstance>
     DeployInstance instance = getDeployInstance();
 
     return (instance != null
-	    && instance.getConfigException() != null);
+            && instance.getConfigException() != null);
   }
 
   /**
@@ -519,11 +519,11 @@ abstract public class DeployController<I extends DeployInstance>
       ClassLoader loader = thread.getContextClassLoader();
 
       try {
-	thread.setContextClassLoader(instance.getClassLoader());
+        thread.setContextClassLoader(instance.getClassLoader());
       
-	return instance.logModified(log);
+        return instance.logModified(log);
       } finally {
-	thread.setContextClassLoader(loader);
+        thread.setContextClassLoader(loader);
       }
     }
     else
@@ -547,16 +547,16 @@ abstract public class DeployController<I extends DeployInstance>
   {
     synchronized (this) {
       if (_deployInstance == null) {
-	Thread thread = Thread.currentThread();
-	ClassLoader oldLoader = thread.getContextClassLoader();
+        Thread thread = Thread.currentThread();
+        ClassLoader oldLoader = thread.getContextClassLoader();
 
-	try {
-	  thread.setContextClassLoader(_parentLoader);
-	  
-	  _deployInstance = instantiateDeployInstance();
-	} finally {
-	  thread.setContextClassLoader(oldLoader);
-	}
+        try {
+          thread.setContextClassLoader(_parentLoader);
+
+          _deployInstance = instantiateDeployInstance();
+        } finally {
+          thread.setContextClassLoader(oldLoader);
+        }
       }
 
       return _deployInstance;
@@ -747,10 +747,10 @@ abstract public class DeployController<I extends DeployInstance>
 
       // server/
       if (loader instanceof DynamicClassLoader)
-	((DynamicClassLoader) loader).clearModified();
+        ((DynamicClassLoader) loader).clearModified();
 
       if (_alarm != null)
-	_alarm.queue(_redeployCheckInterval); // XXX: strategy-controlled
+        _alarm.queue(_redeployCheckInterval); // XXX: strategy-controlled
 
       thread.setContextClassLoader(oldLoader);
     }
@@ -797,7 +797,7 @@ abstract public class DeployController<I extends DeployInstance>
       isStopping = _lifecycle.toStopping();
 
       if (! isStopping)
-	return;
+        return;
 
       synchronized (this) {
         oldInstance = _deployInstance;
@@ -805,14 +805,14 @@ abstract public class DeployController<I extends DeployInstance>
       }
 
       if (oldInstance != null) {
-	oldInstance.destroy();
+        oldInstance.destroy();
       }
     } finally  {
       if (isStopping) {
-	_lifecycle.toStop();
-	
-	if (_deployItem != null)
-	  _deployItem.toStop();
+        _lifecycle.toStop();
+
+        if (_deployItem != null)
+          _deployItem.toStop();
       }
       
       thread.setContextClassLoader(oldLoader);
@@ -851,7 +851,7 @@ abstract public class DeployController<I extends DeployInstance>
       _strategy.alarm(this);
     } finally {
       if (! _lifecycle.isDestroyed())
-	alarm.queue(_redeployCheckInterval);
+        alarm.queue(_redeployCheckInterval);
     }
   }
 

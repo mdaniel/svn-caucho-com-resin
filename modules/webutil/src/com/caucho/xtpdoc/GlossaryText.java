@@ -51,7 +51,7 @@ public class GlossaryText implements ContentItem {
   {
     out.writeStartElement("a");
     out.writeAttribute("href", 
-		       "http://wiki.caucho.com/" + _value);
+                       "http://wiki.caucho.com/" + _value);
 
     out.writeCharacters(_value);
 

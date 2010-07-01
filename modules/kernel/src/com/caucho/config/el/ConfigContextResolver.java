@@ -50,7 +50,7 @@ public class ConfigContextResolver extends ELResolver {
   }
   
   public Class<?> getCommonPropertyType(ELContext context,
-					Object base)
+                                        Object base)
   {
     return Object.class;
   }
@@ -64,8 +64,8 @@ public class ConfigContextResolver extends ELResolver {
   }
 
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     Object value = getValue(context, base, property);
 
@@ -76,10 +76,10 @@ public class ConfigContextResolver extends ELResolver {
   }
 
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     if (base != null || ! (property instanceof String))
       return null;
@@ -103,21 +103,21 @@ public class ConfigContextResolver extends ELResolver {
   }
 
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return true;
   }
 
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
     throws PropertyNotFoundException,
-	   PropertyNotWritableException,
-	   ELException
+           PropertyNotWritableException,
+           ELException
   {
   }
 }

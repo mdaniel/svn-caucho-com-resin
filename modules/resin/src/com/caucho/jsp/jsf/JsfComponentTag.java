@@ -49,8 +49,8 @@ public class JsfComponentTag extends UIComponentClassicTagBase
   private boolean _isCreated;
 
   public JsfComponentTag(UIComponent component,
-			 boolean isCreated,
-			 BodyContent bodyContent)
+                         boolean isCreated,
+                         BodyContent bodyContent)
   {
     _component = component;
     _isCreated = isCreated;
@@ -89,7 +89,7 @@ public class JsfComponentTag extends UIComponentClassicTagBase
   }
 
   protected UIComponent createComponent(FacesContext context,
-					String newId)
+                                        String newId)
     throws JspException
   {
     return null;

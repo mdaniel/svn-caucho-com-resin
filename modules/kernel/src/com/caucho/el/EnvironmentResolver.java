@@ -53,21 +53,21 @@ public class EnvironmentResolver extends AbstractVariableResolver {
    * Returns the named variable value.
    */
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     String var = (String) base;
     
     for (ClassLoader loader = _loader;
-	 loader != null;
-	 loader = loader.getParent()) {
+         loader != null;
+         loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	Object value = EL.getLevelVar(var, loader);
+        Object value = EL.getLevelVar(var, loader);
 
-	if (value == EL.NULL)
-	  return null;
-	else if (value != null)
-	  return value;
+        if (value == EL.NULL)
+          return null;
+        else if (value != null)
+          return value;
       }
     }
 

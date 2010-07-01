@@ -52,11 +52,11 @@ public class EnvironmentELResolver extends ELResolver {
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	EnvironmentLevelELResolver resolver
-	  = EnvironmentLevelELResolver.create(loader);
+        EnvironmentLevelELResolver resolver
+          = EnvironmentLevelELResolver.create(loader);
 
-	if (! _resolvers.contains(resolver))
-	  _resolvers.add(resolver);
+        if (! _resolvers.contains(resolver))
+          _resolvers.add(resolver);
       }
     }
     
@@ -110,8 +110,8 @@ public class EnvironmentELResolver extends ELResolver {
    */
   @Override
   public Class<?> getType(ELContext context,
-			Object base,
-			Object property)
+                        Object base,
+                        Object property)
   {
     Object value = getValue(context, base, property);
 
@@ -122,7 +122,7 @@ public class EnvironmentELResolver extends ELResolver {
   }
 
   public Class<?> getCommonPropertyType(ELContext context,
-					Object base)
+                                        Object base)
   {
     return null;
   }
@@ -138,8 +138,8 @@ public class EnvironmentELResolver extends ELResolver {
    */
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base != null)
       return null;
@@ -151,7 +151,7 @@ public class EnvironmentELResolver extends ELResolver {
       Object value = _resolvers.get(i).getValue(context, base, property);
 
       if (context.isPropertyResolved())
-	return value;
+        return value;
     }
 
     return null;
@@ -162,9 +162,9 @@ public class EnvironmentELResolver extends ELResolver {
    */
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base != null || ! (property instanceof String))
       return;
@@ -174,7 +174,7 @@ public class EnvironmentELResolver extends ELResolver {
       _resolvers.get(i).setValue(context, base, property, value);
       
       if (context.isPropertyResolved()) {
-	return;
+        return;
       }
     }
   }

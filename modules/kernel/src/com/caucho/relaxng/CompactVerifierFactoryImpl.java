@@ -46,7 +46,7 @@ import java.util.HashMap;
 public class CompactVerifierFactoryImpl implements VerifierFactory {
   private static HashMap<Path,SoftReference<Schema>> _schemaMap =
     new HashMap<Path,SoftReference<Schema>>();
-			 
+
   /**
    * Reads the schema from the classpath.
    */
@@ -57,7 +57,7 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
 
     MergePath mp = new MergePath();
     mp.addClassPath();
-	
+
     return factory.compileSchema(mp.lookup(schemaName));
   }
   
@@ -96,7 +96,7 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
       schema = compileSchema(source);
 
       if (schema != null)
-	_schemaMap.put(path, new SoftReference<Schema>(schema));
+        _schemaMap.put(path, new SoftReference<Schema>(schema));
     } finally {
       is.close();
     }

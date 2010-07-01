@@ -100,10 +100,10 @@ public class UrlResolver extends Resolver
   }
   
   public DataSource resolveArtifact(String org,
-				    String module,
-				    String artifact,
-				    String rev,
-				    String ext)
+                                    String module,
+                                    String artifact,
+                                    String rev,
+                                    String ext)
   {
     String urlString = resolveArtifactString(org, module, artifact, rev, ext);
 
@@ -114,79 +114,79 @@ public class UrlResolver extends Resolver
       String md5 = null;
 
       if (sha1 == null)
-	md5 = loadChecksum(urlString, "md5");
+        md5 = loadChecksum(urlString, "md5");
 
       URL url = null;
 
       try {
-	url = new URL(urlString);
+        url = new URL(urlString);
       } catch (MalformedURLException e) {
-	throw new ConfigException(L.l("'{0}' is an invalid URL", urlString));
+        throw new ConfigException(L.l("'{0}' is an invalid URL", urlString));
       }
 
       URLConnection conn = url.openConnection();
 
       if (conn == null)
-	return null;
+        return null;
 
       InputStream is = null;
       try {
-	conn.connect();
-	int length = conn.getContentLength();
-	
-	is = conn.getInputStream();
+        conn.connect();
+        int length = conn.getContentLength();
 
-	OutputStream out = inode.openOutputStream();
+        is = conn.getInputStream();
 
-	TempBuffer tempBuffer = TempBuffer.allocate();
-	byte []buffer = tempBuffer.getBuffer();
-	
-	int readLength = 0;
-	int len;
+        OutputStream out = inode.openOutputStream();
 
-	log.info("ModuleRepository[] loading " + urlString);
+        TempBuffer tempBuffer = TempBuffer.allocate();
+        byte []buffer = tempBuffer.getBuffer();
 
-	while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	  out.write(buffer, 0, len);
-	  readLength += len;
-	}
+        int readLength = 0;
+        int len;
 
-	out.close();
+        log.info("ModuleRepository[] loading " + urlString);
 
-	TempBuffer.free(tempBuffer);
+        while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+          out.write(buffer, 0, len);
+          readLength += len;
+        }
 
-	InodeDataSource dataSource
-	  = new InodeDataSource(urlString, inode);
+        out.close();
 
-	if (md5 != null)
-	  validateSignature(dataSource, md5, "MD5");
+        TempBuffer.free(tempBuffer);
 
-	if (sha1 != null)
-	  validateSignature(dataSource, sha1, "SHA1");
-	
-	inode = null;
+        InodeDataSource dataSource
+          = new InodeDataSource(urlString, inode);
 
-	return dataSource;
+        if (md5 != null)
+          validateSignature(dataSource, md5, "MD5");
+
+        if (sha1 != null)
+          validateSignature(dataSource, sha1, "SHA1");
+
+        inode = null;
+
+        return dataSource;
       } finally {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       }
     } catch (SecurityException e) {
       throw new ModuleNotFoundException(L.l("{0} failed signature validation",
-					    urlString, e));
+                                            urlString, e));
     } catch (MalformedURLException e) {
       throw new ModuleNotFoundException(e);
     } catch (IOException e) {
       throw new ModuleNotFoundException(L.l("{0} is an unknown module",
-					    urlString),
-					e);
+                                            urlString),
+                                        e);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
       if (inode != null)
-	inode.free();
+        inode.free();
     }
   }
 
@@ -207,7 +207,7 @@ public class UrlResolver extends Resolver
       }
 
       for (; ch >= 0 && ! Character.isWhitespace(ch); ch = is.read()) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
       
       log.fine(urlString + "." + ext + " loaded " + sb);
@@ -219,8 +219,8 @@ public class UrlResolver extends Resolver
       log.log(Level.FINER, e.toString(), e);
     } finally {
       try {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       } catch (IOException e) {
       }
     }

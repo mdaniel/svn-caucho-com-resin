@@ -81,8 +81,8 @@ public class EnhancerManager implements ClassFileTransformer
   private EnhancerManager(ClassLoader loader)
   {
     for (;
-	 loader != null && ! (loader instanceof DynamicClassLoader);
-	 loader = loader.getParent()) {
+         loader != null && ! (loader instanceof DynamicClassLoader);
+         loader = loader.getParent()) {
     }
 
     _loader = (DynamicClassLoader) loader;
@@ -105,10 +105,10 @@ public class EnhancerManager implements ClassFileTransformer
       _localEnhancer.set(enhancer, loader);
 
       for (; loader != null; loader = loader.getParent()) {
-	if (loader instanceof DynamicClassLoader) {
-	  ((DynamicClassLoader) loader).addTransformer(enhancer);
-	  break;
-	}
+        if (loader instanceof DynamicClassLoader) {
+          ((DynamicClassLoader) loader).addTransformer(enhancer);
+          break;
+        }
       }
     }
 
@@ -175,65 +175,65 @@ public class EnhancerManager implements ClassFileTransformer
    * Returns the enhanced .class or null if no enhancement.
    */
   public byte[] transform(ClassLoader loader,
-			  String className,
-			  Class<?> oldClass,
-			  ProtectionDomain domain,
-			  byte []buffer)
+                          String className,
+                          Class<?> oldClass,
+                          ProtectionDomain domain,
+                          byte []buffer)
   {
     if (isClassMatch(className)) {
       try {
-	ClassLoader tempLoader
-	  = ((DynamicClassLoader) loader).getNewTempClassLoader();
-	DynamicClassLoader workLoader
-	  = SimpleLoader.create(tempLoader, getPostWorkPath());
-	workLoader.setServletHack(true);
-	boolean isModified = true;
+        ClassLoader tempLoader
+          = ((DynamicClassLoader) loader).getNewTempClassLoader();
+        DynamicClassLoader workLoader
+          = SimpleLoader.create(tempLoader, getPostWorkPath());
+        workLoader.setServletHack(true);
+        boolean isModified = true;
 
-	Thread thread = Thread.currentThread();
-	ClassLoader oldLoader = thread.getContextClassLoader();
-	
-	try {
-	  Class<?> cl = Class.forName(className.replace('/', '.'),
-				   false,
-				   workLoader);
+        Thread thread = Thread.currentThread();
+        ClassLoader oldLoader = thread.getContextClassLoader();
 
-	  thread.setContextClassLoader(tempLoader);
-	  
-	  Method init = cl.getMethod("_caucho_init", new Class[] { Path.class });
-	  Method modified = cl.getMethod("_caucho_is_modified", new Class[0]);
+        try {
+          Class<?> cl = Class.forName(className.replace('/', '.'),
+                                   false,
+                                   workLoader);
 
-	  init.invoke(null, Vfs.lookup());
+          thread.setContextClassLoader(tempLoader);
 
-	  isModified = (Boolean) modified.invoke(null);
-	} catch (Exception e) {
-	  log.log(Level.FINEST, e.toString(), e);
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
-	} finally {
-	  thread.setContextClassLoader(oldLoader);
-	}
+          Method init = cl.getMethod("_caucho_init", new Class[] { Path.class });
+          Method modified = cl.getMethod("_caucho_is_modified", new Class[0]);
 
-	if (! isModified) {
-	  try {
-	    return load(className);
-	  } catch (Exception e) {
-	    log.log(Level.FINER, e.toString(), e);
-	  }
-	}
-	
-	ByteCodeParser parser = new ByteCodeParser();
-	parser.setClassLoader(_jClassLoader);
-	
-	ByteArrayInputStream is;
-	is = new ByteArrayInputStream(buffer, 0, buffer.length);
+          init.invoke(null, Vfs.lookup());
+
+          isModified = (Boolean) modified.invoke(null);
+        } catch (Exception e) {
+          log.log(Level.FINEST, e.toString(), e);
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        } finally {
+          thread.setContextClassLoader(oldLoader);
+        }
+
+        if (! isModified) {
+          try {
+            return load(className);
+          } catch (Exception e) {
+            log.log(Level.FINER, e.toString(), e);
+          }
+        }
+
+        ByteCodeParser parser = new ByteCodeParser();
+        parser.setClassLoader(_jClassLoader);
+
+        ByteArrayInputStream is;
+        is = new ByteArrayInputStream(buffer, 0, buffer.length);
       
-	JavaClass jClass = parser.parse(is);
+        JavaClass jClass = parser.parse(is);
 
-	return enhance(jClass);
+        return enhance(jClass);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new EnhancerRuntimeException(e);
+        throw new EnhancerRuntimeException(e);
       }
     }
 
@@ -255,9 +255,9 @@ public class EnhancerManager implements ClassFileTransformer
       prepare.setClassLoader(_loader);
 
       for (ClassEnhancer enhancer : _classEnhancerList) {
-	if (enhancer.shouldEnhance(className)) {
-	  prepare.addEnhancer(enhancer);
-	}
+        if (enhancer.shouldEnhance(className)) {
+          prepare.addEnhancer(enhancer);
+        }
       }
 
       //prepare.renameClass(className, extClassName);
@@ -273,23 +273,23 @@ public class EnhancerManager implements ClassFileTransformer
     genClass.setSuperClassName(className);
     for (ClassEnhancer enhancer : _classEnhancerList) {
       if (enhancer.shouldEnhance(className)) {
-	try {
-	  hasEnhancer = true;
-	  enhancer.enhance(genClass, jClass, extClassName);
-	} catch (RuntimeException e) {
-	  throw e;
-	} catch (Exception e) {
-	  throw new RuntimeException(e);
-	}
+        try {
+          hasEnhancer = true;
+          enhancer.enhance(genClass, jClass, extClassName);
+        } catch (RuntimeException e) {
+          throw e;
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
       }
     }
     // XXX: class-wide enhancements need to go first
 
     try {
       if (hasEnhancer) {
-	_javaGen.setWorkDir(getPreWorkPath());
-	_javaGen.generate(genClass);
-	_javaGen.compilePendingJava();
+        _javaGen.setWorkDir(getPreWorkPath());
+        _javaGen.generate(genClass);
+        _javaGen.compilePendingJava();
       }
 
       EnhancerFixup fixup = new EnhancerFixup();
@@ -298,9 +298,9 @@ public class EnhancerManager implements ClassFileTransformer
       fixup.setWorkPath(getWorkPath());
 
       for (ClassEnhancer enhancer : _classEnhancerList) {
-	if (enhancer.shouldEnhance(className)) {
-	  fixup.addEnhancer(enhancer);
-	}
+        if (enhancer.shouldEnhance(className)) {
+          fixup.addEnhancer(enhancer);
+        }
       }
       
       fixup.fixup(className, extClassName);
@@ -349,18 +349,18 @@ public class EnhancerManager implements ClassFileTransformer
       char ch = 0;
 
       if (p + 1 < className.length())
-	ch = className.charAt(p + 1);
+        ch = className.charAt(p + 1);
 
       if ('0' <= ch && ch <= '9')
-	return false;
+        return false;
     }
     else if (className.indexOf('+') > 0
-	     || className.indexOf('-') > 0)
+             || className.indexOf('-') > 0)
       return false;
     
     for (int i = 0; i < _classEnhancerList.size(); i++) {
       if (_classEnhancerList.get(i).shouldEnhance(className)) {
-	return true;
+        return true;
       }
     }
 

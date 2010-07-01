@@ -81,8 +81,8 @@ public class Deny extends SecurityConstraint
     String regexpPattern = UrlMap.urlPatternToRegexpPattern(pattern);
 
     int flags = (CauchoSystem.isCaseInsensitive()
-		 ? Pattern.CASE_INSENSITIVE
-		 : 0);
+                 ? Pattern.CASE_INSENSITIVE
+                 : 0);
     try {
       _patternList.add(Pattern.compile(regexpPattern, flags));
     } catch (PatternSyntaxException e) {
@@ -107,7 +107,7 @@ public class Deny extends SecurityConstraint
       Pattern pattern = _patternList.get(i);
 
       if (pattern.matcher(url).find())
-	return true;
+        return true;
     }
 
     return false;
@@ -164,12 +164,12 @@ public class Deny extends SecurityConstraint
     }
 
     public AuthorizationResult isAuthorized(HttpServletRequest request,
-					    HttpServletResponse response,
-					    ServletContext webApp)
+                                            HttpServletResponse response,
+                                            ServletContext webApp)
     {
       for (RequestPredicate predicate : _predicateList) {
-	if (! predicate.isMatch(request))
-	  return AuthorizationResult.DEFAULT_ALLOW;
+        if (! predicate.isMatch(request))
+          return AuthorizationResult.DEFAULT_ALLOW;
       }
 
       return AuthorizationResult.DENY;

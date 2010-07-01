@@ -82,21 +82,21 @@ class QContentParticle {
 
     for (int i = 0; i < _children.size(); i++) {
       if (i != 0) {
-	if (_separator == ',')
-	  os.print(", ");
-	else {
-	  os.print(" ");
-	  os.print((char) _separator);
-	  os.print(" ");
-	}
+        if (_separator == ',')
+          os.print(", ");
+        else {
+          os.print(" ");
+          os.print((char) _separator);
+          os.print(" ");
+        }
       }
 
       Object child = _children.get(i);
 
       if (child instanceof QContentParticle)
-	((QContentParticle) child).print(os);
+        ((QContentParticle) child).print(os);
       else
-	os.print(String.valueOf(child));
+        os.print(String.valueOf(child));
     }
 
     os.print(")");

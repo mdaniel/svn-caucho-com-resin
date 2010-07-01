@@ -67,8 +67,8 @@ public class SpyConnection implements java.sql.Connection {
    * Creates a new SpyConnection.
    */
   public SpyConnection(Connection conn,
-		       SpyDataSource spyDataSource,
-		       String id)
+                       SpyDataSource spyDataSource,
+                       String id)
   {
     _spyDataSource = spyDataSource;
     _conn = conn;
@@ -324,8 +324,8 @@ public class SpyConnection implements java.sql.Connection {
       String stmtId = null;
 
       if (log.isLoggable(Level.FINE)) {
-	stmtId = createStatementId();
-	log.fine(stmtId + ":createStatement()");
+        stmtId = createStatementId();
+        log.fine(stmtId + ":createStatement()");
       }
       
       Statement stmt;
@@ -353,10 +353,10 @@ public class SpyConnection implements java.sql.Connection {
       String stmtId = null;
 
       if (log.isLoggable(Level.FINE)) {
-	stmtId = createStatementId();
+        stmtId = createStatementId();
       
-	log.fine(stmtId + ":createStatement(type=" + resultSetType +
-		 ",concurrency=" + resultSetConcurrency + ")");
+        log.fine(stmtId + ":createStatement(type=" + resultSetType +
+                 ",concurrency=" + resultSetConcurrency + ")");
       }
       
       Statement stmt;
@@ -379,11 +379,11 @@ public class SpyConnection implements java.sql.Connection {
       String stmtId = null;
 
       if (log.isLoggable(Level.FINE)) {
-	stmtId = createStatementId();
+        stmtId = createStatementId();
       
-	log.fine(stmtId + ":createStatement(type=" + resultSetType +
-		 ",concurrency=" + resultSetConcurrency +
-		 ",holdability=" + resultSetHoldability + ")");
+        log.fine(stmtId + ":createStatement(type=" + resultSetType +
+                 ",concurrency=" + resultSetConcurrency +
+                 ",holdability=" + resultSetHoldability + ")");
       }
       
       Statement stmt;
@@ -407,8 +407,8 @@ public class SpyConnection implements java.sql.Connection {
       String stmtId = null;
 
       if (log.isLoggable(Level.FINE)) {
-	stmtId = createStatementId();
-	log.fine(stmtId + ":prepareStatement(" + sql + ")");
+        stmtId = createStatementId();
+        log.fine(stmtId + ":prepareStatement(" + sql + ")");
       }
       
       PreparedStatement stmt;
@@ -431,8 +431,8 @@ public class SpyConnection implements java.sql.Connection {
       String stmtId = null;
 
       if (log.isLoggable(Level.FINE)) {
-	stmtId = createStatementId();
-	log.fine(stmtId + ":prepareStatement(" + sql + ",type=" + resultSetType + ")");
+        stmtId = createStatementId();
+        log.fine(stmtId + ":prepareStatement(" + sql + ",type=" + resultSetType + ")");
       }
       
       PreparedStatement stmt;
@@ -448,17 +448,17 @@ public class SpyConnection implements java.sql.Connection {
   }
 
   public PreparedStatement prepareStatement(String sql, int resultSetType,
-					    int resultSetConcurrency)
+                                            int resultSetConcurrency)
     throws SQLException
   {
     try {
       String stmtId = null;
 
       if (log.isLoggable(Level.FINE)) {
-	stmtId = createStatementId();
-	
-	log.fine(stmtId + ":prepareStatement(" + sql + ",type=" + resultSetType +
-		 ",concurrency=" + resultSetConcurrency + ")");
+        stmtId = createStatementId();
+
+        log.fine(stmtId + ":prepareStatement(" + sql + ",type=" + resultSetType +
+                 ",concurrency=" + resultSetConcurrency + ")");
       }
       
       PreparedStatement stmt;
@@ -501,7 +501,7 @@ public class SpyConnection implements java.sql.Connection {
   {
     try {
       if (log.isLoggable(Level.FINE))
-	log.fine(getId() + ":prepareCall(" + sql + ")");
+        log.fine(getId() + ":prepareCall(" + sql + ")");
       
       CallableStatement stmt;
       
@@ -516,12 +516,12 @@ public class SpyConnection implements java.sql.Connection {
   }
 
   public CallableStatement prepareCall(String sql, int resultSetType,
-				       int resultSetConcurrency)
+                                       int resultSetConcurrency)
     throws SQLException
   {
     try {
       if (log.isLoggable(Level.FINE))
-	log.fine(getId() + ":prepareCall(" + sql + ",type=" + resultSetType +
+        log.fine(getId() + ":prepareCall(" + sql + ",type=" + resultSetType +
               ",concurrency=" + resultSetConcurrency + ")");
       
       CallableStatement stmt;

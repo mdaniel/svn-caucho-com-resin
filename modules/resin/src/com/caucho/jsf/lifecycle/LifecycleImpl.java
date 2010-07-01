@@ -107,7 +107,7 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       if (isFiner)
-	log.finer("JSF[] before restore view");
+        log.finer("JSF[] before restore view");
       
       restoreView(context);
     } finally {
@@ -123,7 +123,7 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       if (isFiner)
-	log.finer(context.getViewRoot() + " before process decodes");
+        log.finer(context.getViewRoot() + " before process decodes");
       
       viewRoot.processDecodes(context);
     }
@@ -145,7 +145,7 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       if (isFiner)
-	log.finer(context.getViewRoot() + " before process validators");
+        log.finer(context.getViewRoot() + " before process validators");
       
       viewRoot.processValidators(context);
     } finally {
@@ -163,12 +163,12 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       if (isFiner)
-	log.finer(context.getViewRoot() + " before process updates");
+        log.finer(context.getViewRoot() + " before process updates");
       
       viewRoot.processUpdates(context);
     } catch (RuntimeException e) {
       if (sendError(context, "processUpdates", e))
-	return;
+        return;
     } finally {
       afterPhase(context, PhaseId.UPDATE_MODEL_VALUES);
     }
@@ -184,7 +184,7 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       if (isFiner)
-	log.finer(context.getViewRoot() + " before process application");
+        log.finer(context.getViewRoot() + " before process application");
       
       viewRoot.processApplication(context);
     } finally {
@@ -231,18 +231,18 @@ public class LifecycleImpl extends Lifecycle
       viewRoot = view.restoreView(context,  viewId);
 
       if (viewRoot != null) {
-	doSetBindings(context.getELContext(), viewRoot);
+        doSetBindings(context.getELContext(), viewRoot);
       }
       else {
-	// XXX: backward compat issues with ViewHandler and StateManager
-	
-	// throw new ViewExpiredException(L.l("{0} is an expired view", viewId));
+        // XXX: backward compat issues with ViewHandler and StateManager
 
-	context.renderResponse();
+        // throw new ViewExpiredException(L.l("{0} is an expired view", viewId));
+
+        context.renderResponse();
       
-	viewRoot = view.createView(context, viewId);
+        viewRoot = view.createView(context, viewId);
 
-	context.setViewRoot(viewRoot);
+        context.setViewRoot(viewRoot);
       }
       
       context.setViewRoot(viewRoot);
@@ -303,17 +303,17 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       if (log.isLoggable(Level.FINER))
-	log.finer(context.getViewRoot() + " before render view");
+        log.finer(context.getViewRoot() + " before render view");
       
       view.renderView(context, context.getViewRoot());
     } catch (java.io.IOException e) {
       if (sendError(context, "renderView", e))
-	return;
+        return;
       
       throw new FacesException(e);
     } catch (RuntimeException e) {
       if (sendError(context, "renderView", e))
-	return;
+        return;
 
       throw e;
     } finally {
@@ -330,9 +330,9 @@ public class LifecycleImpl extends Lifecycle
       PhaseId id = listener.getPhaseId();
 
       if (id == phase || id == PhaseId.ANY_PHASE) {
-	PhaseEvent event = new PhaseEvent(context, phase, this);
+        PhaseEvent event = new PhaseEvent(context, phase, this);
 
-	listener.beforePhase(event);
+        listener.beforePhase(event);
       }
     }
   }
@@ -344,9 +344,9 @@ public class LifecycleImpl extends Lifecycle
       PhaseId id = listener.getPhaseId();
 
       if (phase == id || id == PhaseId.ANY_PHASE) {
-	PhaseEvent event = new PhaseEvent(context, phase, this);
-	
-	listener.afterPhase(event);
+        PhaseEvent event = new PhaseEvent(context, phase, this);
+
+        listener.afterPhase(event);
       }
     }
   }
@@ -365,17 +365,17 @@ public class LifecycleImpl extends Lifecycle
       FacesMessage msg = iter.next();
 
       if (log.isLoggable(Level.FINE)) {
-	if (msg.getDetail() != null)
-	  log.fine(viewId + " [ " + msg.getSeverity() + "] " + msg.getSummary() + " " + msg.getDetail());
-	else
-	  log.fine(viewId + " [ " + msg.getSeverity() + "] " + msg.getSummary());
+        if (msg.getDetail() != null)
+          log.fine(viewId + " [ " + msg.getSeverity() + "] " + msg.getSummary() + " " + msg.getDetail());
+        else
+          log.fine(viewId + " [ " + msg.getSeverity() + "] " + msg.getSummary());
       }
     }
   }
 
   private boolean sendError(FacesContext context,
-			    String lifecycle,
-			    Exception e)
+                            String lifecycle,
+                            Exception e)
   {
     for (Throwable cause = e; cause != null; cause = cause.getCause()) {
       if (cause instanceof DisplayableException) {
@@ -397,9 +397,9 @@ public class LifecycleImpl extends Lifecycle
       context.renderResponse();
 
       if (e instanceof RuntimeException)
-	throw (RuntimeException) e;
+        throw (RuntimeException) e;
       else
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
     }
 
     log.log(Level.WARNING, e.toString(), e);
@@ -428,8 +428,8 @@ public class LifecycleImpl extends Lifecycle
       String errorId = null;
       
       if (e instanceof FacesException && msg.startsWith("id=")) {
-	int p = msg.indexOf(' ');
-	errorId = msg.substring(3, p);
+        int p = msg.indexOf(' ');
+        errorId = msg.substring(3, p);
       }
 
       printComponentTree(out, errorId, context, context.getViewRoot(), 0);
@@ -437,13 +437,13 @@ public class LifecycleImpl extends Lifecycle
       out.println("</pre></code>");
 
       if (! Alarm.isTest()) {
-	out.println("<h3>Stack Trace</h3>");
-	out.println("<pre>");
-	if (e.getCause() != null)
-	  e.getCause().printStackTrace(out);
-	else
-	  e.printStackTrace(out);
-	out.println("</pre>");
+        out.println("<h3>Stack Trace</h3>");
+        out.println("<pre>");
+        if (e.getCause() != null)
+          e.getCause().printStackTrace(out);
+        else
+          e.printStackTrace(out);
+        out.println("</pre>");
       }
       
       out.println("</body>");
@@ -468,10 +468,10 @@ public class LifecycleImpl extends Lifecycle
   }
 
   private void printComponentTree(PrintWriter out,
-				  String errorId,
-				  FacesContext context,
-				  UIComponent comp,
-				  int depth)
+                                  String errorId,
+                                  FacesContext context,
+                                  UIComponent comp,
+                                  int depth)
   {
     for (int i = 0; i < depth; i++)
       out.print(' ');
@@ -488,19 +488,19 @@ public class LifecycleImpl extends Lifecycle
 
     for (Method method : comp.getClass().getMethods()) {
       if (! method.getName().startsWith("get")
-	  && ! method.getName().startsWith("is"))
-	continue;
+          && ! method.getName().startsWith("is"))
+        continue;
       else if (method.getParameterTypes().length != 0)
-	continue;
+        continue;
 
       String name;
 
       if (method.getName().startsWith("get"))
-	name = method.getName().substring(3);
+        name = method.getName().substring(3);
       else if (method.getName().startsWith("is"))
-	name = method.getName().substring(2);
+        name = method.getName().substring(2);
       else
-	continue;
+        continue;
 
       // XXX: getURL
       name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
@@ -510,21 +510,21 @@ public class LifecycleImpl extends Lifecycle
       Class type = method.getReturnType();
 
       if (expr != null) {
-	out.print(" " + name + "=\"" + expr.getExpressionString() + "\"");
+        out.print(" " + name + "=\"" + expr.getExpressionString() + "\"");
       }
       else if (method.getDeclaringClass().equals(UIComponent.class)
-	       || method.getDeclaringClass().equals(UIComponentBase.class)) {
+               || method.getDeclaringClass().equals(UIComponentBase.class)) {
       }
       else if (name.equals("family")) {
       }
       else if (String.class.equals(type)) {
-	try {
-	  Object value = method.invoke(comp);
+        try {
+          Object value = method.invoke(comp);
 
-	  if (value != null)
-	    out.print(" " + name + "=\"" + value + "\"");
-	} catch (Exception e) {
-	}
+          if (value != null)
+            out.print(" " + name + "=\"" + value + "\"");
+        } catch (Exception e) {
+        }
       }
     }
 
@@ -535,7 +535,7 @@ public class LifecycleImpl extends Lifecycle
       out.print("/>");
 
       if (isError)
-	out.print("</span>");
+        out.print("</span>");
 
       out.println();
       return;
@@ -547,7 +547,7 @@ public class LifecycleImpl extends Lifecycle
 
     for (int i = 0; i < childCount; i++) {
       printComponentTree(out, errorId, context,
-			 comp.getChildren().get(i), depth + 1);
+                         comp.getChildren().get(i), depth + 1);
     }
     
     for (int i = 0; i < depth; i++)

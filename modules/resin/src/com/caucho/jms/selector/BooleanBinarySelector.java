@@ -53,30 +53,30 @@ public class BooleanBinarySelector extends Selector  {
     case SelectorParser.GT:
     case SelectorParser.GE:
       if (! _left.isUnknown() && ! _left.isNumber())
-	throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					       this));
+        throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
+                                               this));
       if (! _right.isUnknown() && ! _right.isNumber())
-	throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					       this));
+        throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
+                                               this));
       break;
     case SelectorParser.EQ:
     case SelectorParser.NE:
       if (_left.isUnknown() || _right.isUnknown()) {
       }
       else if (_left.isNumber() != _right.isNumber()) {
-	throw new InvalidSelectorException(L.l("'{0}' test must have matching types.",
-					       this));
+        throw new InvalidSelectorException(L.l("'{0}' test must have matching types.",
+                                               this));
       }
       break;
       
     case SelectorParser.AND:
     case SelectorParser.OR:
       if (! _left.isUnknown() && ! _left.isBoolean())
-	throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					       this));
+        throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
+                                               this));
       if (! _right.isUnknown() && ! _right.isBoolean())
-	throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					       this));
+        throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
+                                               this));
       break;
     }
   }
@@ -121,35 +121,35 @@ public class BooleanBinarySelector extends Selector  {
     case SelectorParser.NE:
       if (lvalue instanceof Number && rvalue instanceof Number)
         return toBoolean(! (((Number) lvalue).doubleValue() ==
-			    ((Number) rvalue).doubleValue()));
+                            ((Number) rvalue).doubleValue()));
       else
         return toBoolean(! lvalue.equals(rvalue));
       
     case SelectorParser.LT:
       if (lvalue instanceof Number && rvalue instanceof Number)
         return toBoolean(((Number) lvalue).doubleValue() <
-			 ((Number) rvalue).doubleValue());
+                         ((Number) rvalue).doubleValue());
       else
         return Boolean.FALSE;
         
     case SelectorParser.LE:
       if (lvalue instanceof Number && rvalue instanceof Number)
         return toBoolean(((Number) lvalue).doubleValue() <=
-			 ((Number) rvalue).doubleValue());
+                         ((Number) rvalue).doubleValue());
       else
         return Boolean.FALSE;
         
     case SelectorParser.GT:
       if (lvalue instanceof Number && rvalue instanceof Number)
         return toBoolean(((Number) lvalue).doubleValue() >
-			 ((Number) rvalue).doubleValue());
+                         ((Number) rvalue).doubleValue());
       else
         return Boolean.FALSE;
         
     case SelectorParser.GE:
       if (lvalue instanceof Number && rvalue instanceof Number)
         return toBoolean(((Number) lvalue).doubleValue() >=
-			 ((Number) rvalue).doubleValue());
+                         ((Number) rvalue).doubleValue());
       else
         return Boolean.FALSE;
         

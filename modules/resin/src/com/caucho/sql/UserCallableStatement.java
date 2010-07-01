@@ -52,7 +52,7 @@ public class UserCallableStatement extends UserPreparedStatement
   private boolean _isClosed;
 
   UserCallableStatement(UserConnection conn,
-			CallableStatement cStmt)
+                        CallableStatement cStmt)
   {
     super(conn, cStmt);
     
@@ -507,7 +507,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Registers the out parameter.
    */
   public void registerOutParameter(int parameterIndex, int sqlType,
-				   String typeName)
+                                   String typeName)
     throws SQLException
   {
     _cstmt.registerOutParameter(parameterIndex, sqlType, typeName);
@@ -535,7 +535,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Registers the out parameter.
    */
   public void registerOutParameter(String parameterName, int sqlType,
-				   String typeName)
+                                   String typeName)
     throws SQLException
   {
     _cstmt.registerOutParameter(parameterName, sqlType, typeName);
@@ -545,8 +545,8 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the asciiStream
    */
   public void setAsciiStream(String parameterName,
-			     InputStream x,
-			     int length)
+                             InputStream x,
+                             int length)
     throws SQLException
   {
     _cstmt.setAsciiStream(parameterName, x, length);
@@ -556,7 +556,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the bigDecimal
    */
   public void setBigDecimal(String parameterName,
-			    BigDecimal x)
+                            BigDecimal x)
     throws SQLException
   {
     _cstmt.setBigDecimal(parameterName, x);
@@ -566,8 +566,8 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the binaryStream
    */
   public void setBinaryStream(String parameterName,
-			      InputStream x,
-			      int length)
+                              InputStream x,
+                              int length)
     throws SQLException
   {
     _cstmt.setBinaryStream(parameterName, x, length);
@@ -577,7 +577,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the boolean
    */
   public void setBoolean(String parameterName,
-			 boolean x)
+                         boolean x)
     throws SQLException
   {
     _cstmt.setBoolean(parameterName, x);
@@ -587,7 +587,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the byte
    */
   public void setByte(String parameterName,
-		      byte x)
+                      byte x)
     throws SQLException
   {
     _cstmt.setByte(parameterName, x);
@@ -597,7 +597,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the bytes
    */
   public void setBytes(String parameterName,
-		       byte []x)
+                       byte []x)
     throws SQLException
   {
     _cstmt.setBytes(parameterName, x);
@@ -607,8 +607,8 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the character stream
    */
   public void setCharacterStream(String parameterName,
-				 Reader reader,
-				 int length)
+                                 Reader reader,
+                                 int length)
     throws SQLException
   {
     _cstmt.setCharacterStream(parameterName, reader, length);
@@ -618,7 +618,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the date
    */
   public void setDate(String parameterName,
-		      Date x)
+                      Date x)
     throws SQLException
   {
     _cstmt.setDate(parameterName, x);
@@ -628,8 +628,8 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the date
    */
   public void setDate(String parameterName,
-		      Date x,
-		      Calendar cal)
+                      Date x,
+                      Calendar cal)
     throws SQLException
   {
     _cstmt.setDate(parameterName, x, cal);
@@ -639,7 +639,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the double
    */
   public void setDouble(String parameterName,
-			double x)
+                        double x)
     throws SQLException
   {
     _cstmt.setDouble(parameterName, x);
@@ -649,7 +649,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the float
    */
   public void setFloat(String parameterName,
-			float x)
+                        float x)
     throws SQLException
   {
     _cstmt.setFloat(parameterName, x);
@@ -659,7 +659,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the int
    */
   public void setInt(String parameterName,
-			int x)
+                        int x)
     throws SQLException
   {
     _cstmt.setInt(parameterName, x);
@@ -669,7 +669,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the long
    */
   public void setLong(String parameterName,
-			long x)
+                        long x)
     throws SQLException
   {
     _cstmt.setLong(parameterName, x);
@@ -679,7 +679,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the null
    */
   public void setNull(String parameterName,
-		      int sqlType)
+                      int sqlType)
     throws SQLException
   {
     _cstmt.setNull(parameterName, sqlType);
@@ -689,8 +689,8 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the null
    */
   public void setNull(String parameterName,
-		      int sqlType,
-		      String typeName)
+                      int sqlType,
+                      String typeName)
     throws SQLException
   {
     _cstmt.setNull(parameterName, sqlType, typeName);
@@ -700,7 +700,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the object
    */
   public void setObject(String parameterName,
-			Object x)
+                        Object x)
     throws SQLException
   {
     _cstmt.setObject(parameterName, x);
@@ -710,7 +710,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the object
    */
   public void setObject(String parameterName,
-			Object x, int type)
+                        Object x, int type)
     throws SQLException
   {
     _cstmt.setObject(parameterName, x, type);
@@ -720,7 +720,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the object
    */
   public void setObject(String parameterName,
-			Object x, int type, int scale)
+                        Object x, int type, int scale)
     throws SQLException
   {
     _cstmt.setObject(parameterName, x, type, scale);
@@ -730,7 +730,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the short
    */
   public void setShort(String parameterName,
-			short x)
+                        short x)
     throws SQLException
   {
     _cstmt.setShort(parameterName, x);
@@ -740,7 +740,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the string
    */
   public void setString(String parameterName,
-			String x)
+                        String x)
     throws SQLException
   {
     _cstmt.setString(parameterName, x);
@@ -750,7 +750,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the time
    */
   public void setTime(String parameterName,
-		      Time x)
+                      Time x)
     throws SQLException
   {
     _cstmt.setTime(parameterName, x);
@@ -760,8 +760,8 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the time
    */
   public void setTime(String parameterName,
-		      Time x,
-		      Calendar cal)
+                      Time x,
+                      Calendar cal)
     throws SQLException
   {
     _cstmt.setTime(parameterName, x, cal);
@@ -771,7 +771,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the timestamp
    */
   public void setTimestamp(String parameterName,
-			   Timestamp x)
+                           Timestamp x)
     throws SQLException
   {
     _cstmt.setTimestamp(parameterName, x);
@@ -781,8 +781,8 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the timestamp
    */
   public void setTimestamp(String parameterName,
-		      Timestamp x,
-		      Calendar cal)
+                      Timestamp x,
+                      Calendar cal)
     throws SQLException
   {
     _cstmt.setTimestamp(parameterName, x, cal);
@@ -792,7 +792,7 @@ public class UserCallableStatement extends UserPreparedStatement
    * Sets the URL
    */
   public void setURL(String parameterName,
-			   URL x)
+                           URL x)
     throws SQLException
   {
     _cstmt.setURL(parameterName, x);
@@ -815,7 +815,7 @@ public class UserCallableStatement extends UserPreparedStatement
   {
     synchronized (this) {
       if (_isClosed)
-	return;
+        return;
       _isClosed = true;
     }
     

@@ -252,13 +252,13 @@ public class QElement extends QAttributedNode implements CauchoElement {
       }
 
       for (QAttr attr = (QAttr) elt.getFirstAttribute();
-	   attr != null;
-	   attr = (QAttr) attr.getNextSibling()) {
-	name = attr._name;
+           attr != null;
+           attr = (QAttr) attr.getNextSibling()) {
+        name = attr._name;
 
-	if (name.getNamespaceURI() != "") {
-	  addNamespace(name);
-	}
+        if (name.getNamespaceURI() != "") {
+          addNamespace(name);
+        }
       }
     }
 
@@ -282,18 +282,18 @@ public class QElement extends QAttributedNode implements CauchoElement {
 
     while (node != null) {
       if (node.getNodeType() == TEXT_NODE &&
-	  node.getNextSibling() != null &&
-	  node.getNextSibling().getNodeType() == TEXT_NODE) {
-	Text text = (Text) node;
-	Text next = (Text) node.getNextSibling();
-	text.appendData(next.getData());
-	removeChild(next);
+          node.getNextSibling() != null &&
+          node.getNextSibling().getNodeType() == TEXT_NODE) {
+        Text text = (Text) node;
+        Text next = (Text) node.getNextSibling();
+        text.appendData(next.getData());
+        removeChild(next);
       } else if (node.getNodeType() == ELEMENT_NODE) {
-	Element elt = (Element) node;
-	elt.normalize();
-	node = node.getNextSibling();
+        Element elt = (Element) node;
+        elt.normalize();
+        node = node.getNextSibling();
       } else
-	node = node.getNextSibling();
+        node = node.getNextSibling();
     }
   }
 

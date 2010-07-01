@@ -103,7 +103,7 @@ public class BootClusterConfig {
       
     if (_resin.findClient(config.getId()) != null)
       throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
-				    config.getId()));
+                                    config.getId()));
       
     _resin.addServer(config);
     _resin.addClient(new WatchdogClient(_resin, config));

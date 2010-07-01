@@ -200,8 +200,8 @@ class IdentityColumn extends Column {
    */
   @Override
   void setExpr(Transaction xa,
-	       byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
     throws SQLException
   {
     long value = expr.evalLong(context);
@@ -212,7 +212,7 @@ class IdentityColumn extends Column {
    */
   @Override
   public void set(Transaction xa,
-		  TableIterator iter, Expr expr, QueryContext context)
+                  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
       throw new UnsupportedOperationException(getClass().getName());
@@ -240,7 +240,7 @@ class IdentityColumn extends Column {
    */
   @Override
   int evalToBuffer(byte []block, int rowOffset,
-		   byte []buffer, int bufferOffset)
+                   byte []buffer, int bufferOffset)
     throws SQLException
   {
       throw new UnsupportedOperationException(getClass().getName());
@@ -251,7 +251,7 @@ class IdentityColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block1, int rowOffset1,
-			 byte []block2, int rowOffset2)
+                         byte []block2, int rowOffset2)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

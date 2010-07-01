@@ -240,7 +240,7 @@ public class EmbeddableComponent extends ClassComponent {
       out.print("  " + prop.getJavaTypeName() + " a" + i);
       
       if (i + 1 < fields.size())
-	out.println(",");
+        out.println(",");
     }
 
     out.println(")");

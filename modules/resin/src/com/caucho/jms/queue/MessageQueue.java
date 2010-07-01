@@ -10,9 +10,9 @@ public interface MessageQueue<E>
    * Sends a message to the destination
    */
   public void send(String msgId,
-		   E msg,
-		   int priority,
-		   long expires)
+                   E msg,
+                   int priority,
+                   long expires)
     throws MessageException;
   
   /**

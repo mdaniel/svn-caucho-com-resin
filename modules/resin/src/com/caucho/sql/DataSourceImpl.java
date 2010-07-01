@@ -71,13 +71,13 @@ public class DataSourceImpl implements DataSource {
   {
     try {
       return (Connection) _connManager.allocateConnection(_managedFactory,
-							  null);
+                                                          null);
     } catch (ResourceException e) {
       Throwable cause;
 
       for (cause = e; cause != null; cause = cause.getCause()) {
-	if (cause instanceof SQLException)
-	  throw (SQLException) cause;
+        if (cause instanceof SQLException)
+          throw (SQLException) cause;
       }
 
       throw new SQLExceptionWrapper(e);
@@ -94,16 +94,16 @@ public class DataSourceImpl implements DataSource {
       Credential credential = null;
 
       if (username != null || password != null)
-	credential = new Credential(username, password);
+        credential = new Credential(username, password);
 
       return (Connection)  _connManager.allocateConnection(_managedFactory,
-							   credential);
+                                                           credential);
     } catch (ResourceException e) {
       Throwable cause;
 
       for (cause = e; cause != null; cause = cause.getCause()) {
-	if (cause instanceof SQLException)
-	  throw (SQLException) cause;
+        if (cause instanceof SQLException)
+          throw (SQLException) cause;
       }
 
       throw new SQLExceptionWrapper(e);

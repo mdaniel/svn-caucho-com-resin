@@ -84,6 +84,6 @@ public final class IntegerType extends ConfigType
       return new Integer(((Number) value).intValue());
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
-				    value));
+                                    value));
   }
 }

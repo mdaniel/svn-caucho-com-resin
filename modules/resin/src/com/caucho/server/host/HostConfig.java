@@ -72,12 +72,12 @@ public class HostConfig extends DeployConfig {
 
     if (_hostName.indexOf("${") < 0) {
       for (int i = 0; i < _hostName.length(); i++) {
-	char ch = _hostName.charAt(i);
+        char ch = _hostName.charAt(i);
 
-	if (ch == ' ' || ch == '\t' || ch == ',') {
-	  throw new ConfigException(L.l("Host name `{0}' must not contain multiple names.  Use <host-alias> to specify aliases for a host.",
-					_hostName));
-	}
+        if (ch == ' ' || ch == '\t' || ch == ',') {
+          throw new ConfigException(L.l("Host name `{0}' must not contain multiple names.  Use <host-alias> to specify aliases for a host.",
+                                        _hostName));
+        }
       }
     }
 
@@ -133,12 +133,12 @@ public class HostConfig extends DeployConfig {
 
     if (hostName.indexOf("${") < 0) {
       for (int i = 0; i < hostName.length(); i++) {
-	char ch = hostName.charAt(i);
+        char ch = hostName.charAt(i);
 
-	if (ch == ' ' || ch == '\t' || ch == ',') {
-	  throw new ConfigException(L.l("Host name `{0}' must not contain multiple names.  Use <host-alias> to specify aliases for a host.",
-					hostName));
-	}
+        if (ch == ' ' || ch == '\t' || ch == ',') {
+          throw new ConfigException(L.l("Host name `{0}' must not contain multiple names.  Use <host-alias> to specify aliases for a host.",
+                                        hostName));
+        }
       }
     }
 
@@ -155,12 +155,12 @@ public class HostConfig extends DeployConfig {
 
     if (name.indexOf("${") < 0) {
       for (int i = 0; i < name.length(); i++) {
-	char ch = name.charAt(i);
+        char ch = name.charAt(i);
 
-	if (ch == ' ' || ch == '\t' || ch == ',') {
-	  throw new ConfigException(L.l("<host-alias> `{0}' must not contain multiple names.  Use multiple <host-alias> tags to specify aliases for a host.",
-					name));
-	}
+        if (ch == ' ' || ch == '\t' || ch == ',') {
+          throw new ConfigException(L.l("<host-alias> `{0}' must not contain multiple names.  Use multiple <host-alias> tags to specify aliases for a host.",
+                                        name));
+        }
       }
     }
 
@@ -246,6 +246,6 @@ public class HostConfig extends DeployConfig {
   {
     if (_regexp != null && getHostName() == null)
       log.config(L.l("<host regexp=\"{0}\"> should include a <host-name> tag.",
-		     _regexp.pattern()));
+                     _regexp.pattern()));
   }
 }

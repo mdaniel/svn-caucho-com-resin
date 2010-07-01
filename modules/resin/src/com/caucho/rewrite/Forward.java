@@ -82,8 +82,8 @@ public class Forward extends AbstractDispatchRule
 
   @Override
   protected String rewriteTarget(Matcher matcher,
-				 String uri,
-				 String queryString)
+                                 String uri,
+                                 String queryString)
   {
     if (_target != null)
       uri = matcher.replaceAll(_target);
@@ -99,7 +99,7 @@ public class Forward extends AbstractDispatchRule
 
     if (_target == null) {
       throw new ConfigException(L.l("'target' is a required attribute of '{0}' because Resin needs to know the destination URL.",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
     }
 
     /*
@@ -110,9 +110,9 @@ public class Forward extends AbstractDispatchRule
 
   @Override
   public FilterChain createDispatch(String uri,
-				    String queryString,
-				    String target,
-				    FilterChain next)
+                                    String queryString,
+                                    String target,
+                                    FilterChain next)
   {
     if (_isAbsolute)
       return new ForwardAbsoluteFilterChain(target, WebApp.getCurrent());

@@ -62,7 +62,7 @@ public interface ByteStreamCache
    * @param is stream to contain the value
    */
   public ExtCacheEntry put(Object key, InputStream is,
-			   long idleTimeout)
+                           long idleTimeout)
     throws IOException;
   
   /**
@@ -76,8 +76,8 @@ public interface ByteStreamCache
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       long oldVersion,
-			       InputStream is)
+                               long oldVersion,
+                               InputStream is)
     throws IOException;
 
   /**

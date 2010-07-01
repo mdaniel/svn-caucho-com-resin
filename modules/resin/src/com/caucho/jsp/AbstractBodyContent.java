@@ -94,7 +94,7 @@ abstract class AbstractBodyContent extends AbstractJspWriter {
       int sublen = _tempCharBuffer.length;
       
       if (len < sublen)
-	sublen = len;
+        sublen = len;
       
       s.getChars(off, off + sublen, _tempCharBuffer, 0);
 

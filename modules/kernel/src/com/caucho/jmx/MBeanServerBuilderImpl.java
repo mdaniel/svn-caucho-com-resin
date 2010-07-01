@@ -59,8 +59,8 @@ public class MBeanServerBuilderImpl extends MBeanServerBuilder {
    * Creates the mbean server
    */
   public MBeanServer newMBeanServer(String defaultDomain,
-				    MBeanServer outer,
-				    MBeanServerDelegate delegate)
+                                    MBeanServer outer,
+                                    MBeanServerDelegate delegate)
   {
     // return EnvironmentMBeanServerBuilder.getGlobal(defaultDomain);
     EnvironmentMBeanServerBuilder.getGlobal(defaultDomain);
@@ -71,11 +71,11 @@ public class MBeanServerBuilderImpl extends MBeanServerBuilder {
       StackTraceElement []stackTrace = e.getStackTrace();
 
       for (int i = 0; i < stackTrace.length; i++) {
-	if (stackTrace[i].getClassName().equals("java.lang.management.ManagementFactory")) {
-	  _isJdkManagementInit = true;
-	  
-	  return Jmx.getGlobalMBeanServer();
-	}
+        if (stackTrace[i].getClassName().equals("java.lang.management.ManagementFactory")) {
+          _isJdkManagementInit = true;
+
+          return Jmx.getGlobalMBeanServer();
+        }
       }
     }
 

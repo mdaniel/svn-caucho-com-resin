@@ -57,9 +57,9 @@ abstract class AttributeMap extends AbstractMap<String,Object>
 
       Enumeration e = getNames();
       while (e.hasMoreElements()) {
-	count++;
+        count++;
 
-	e.nextElement();
+        e.nextElement();
       }
 
       return count;
@@ -128,9 +128,9 @@ abstract class AttributeMap extends AbstractMap<String,Object>
     public boolean equals(Object o)
     {
       if (this == o)
-	return true;
+        return true;
       else if (! (o instanceof AttrEntry))
-	return false;
+        return false;
 
       AttrEntry entry = (AttrEntry) o;
 

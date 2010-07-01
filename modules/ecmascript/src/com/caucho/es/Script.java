@@ -142,7 +142,7 @@ abstract public class Script {
 
     try {
       Global resin = new Global(properties, proto, classDir,
-				scriptPath, getClass().getClassLoader());
+                                scriptPath, getClass().getClassLoader());
     
       resin.begin();
       
@@ -151,9 +151,9 @@ abstract public class Script {
       ESBase value = global.execute();
 
       if (value == null)
-	return null;
+        return null;
       else
-	return value.toStr().toString();
+        return value.toStr().toString();
     } finally {
       Global.end(oldGlobal);
       
@@ -193,7 +193,7 @@ abstract public class Script {
     } finally {
       resin.end(oldGlobal);
       if (doExit)
-	Exit.exit();
+        Exit.exit();
     }
   }
 

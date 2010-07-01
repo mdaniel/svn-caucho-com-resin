@@ -44,9 +44,9 @@ public class DynamicServerResult implements java.io.Serializable {
   }
 
   public DynamicServerResult(String id,
-			     int index,
-			     String address,
-			     int port)
+                             int index,
+                             String address,
+                             int port)
   {
     _id = id;
     _index = index;
@@ -78,8 +78,8 @@ public class DynamicServerResult implements java.io.Serializable {
   public String toString()
   {
     return (getClass().getSimpleName() + "[" + _id
-	    + ",index=" + _index
-	    + ",address=" + _address + ":" + _port
-	    + "]");
+            + ",index=" + _index
+            + ",address=" + _address + ":" + _port
+            + "]");
   }
 }

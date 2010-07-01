@@ -138,7 +138,7 @@ abstract public class AbstractField implements AmberField {
       }
       else {
         _type = JTypeWrapper.create(_getterMethod.getGenericReturnType(),
-				    loader);
+                                    loader);
 
         _setterMethod = BeanType.getSetter(getBeanClass(), setter);
       }
@@ -886,9 +886,9 @@ abstract public class AbstractField implements AmberField {
     boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
 
     if (isJPA
-	&& ! (dst.equals("cacheEntity")
-	      || dst.equals("super")
-	      || dst.equals("item"))) {
+        && ! (dst.equals("cacheEntity")
+              || dst.equals("super")
+              || dst.equals("item"))) {
       // jpa/0j5fn: merge()
       out.println("if (isFullMerge)");
       out.println("  " + generateSet(dst, value) + ";");
@@ -906,7 +906,7 @@ abstract public class AbstractField implements AmberField {
    * Updates the cached copy.
    */
   public void generateMergeFrom(JavaWriter out,
-				String dst, String src)
+                                String dst, String src)
     throws IOException
   {
     // jpa/0g0l

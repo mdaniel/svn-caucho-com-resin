@@ -260,15 +260,15 @@ public class ClassEntry implements Dependency {
       
     else if (_sourcePath.getLastModified() != _sourceLastModified) {
       log.info("source modified time: " + _sourcePath +
-	       " old:" + QDate.formatLocal(_sourceLastModified) +
-	       " new:" + QDate.formatLocal(_sourcePath.getLastModified()));
+               " old:" + QDate.formatLocal(_sourceLastModified) +
+               " new:" + QDate.formatLocal(_sourcePath.getLastModified()));
 
       return true;
     }
     else if (_sourcePath.getLength() != _sourceLength) {
       log.info("source modified length: " + _sourcePath +
-	       " old:" + _sourceLength +
-	       " new:" + _sourcePath.getLength());
+               " old:" + _sourceLength +
+               " new:" + _sourcePath.getLength());
 
       return true;
     }

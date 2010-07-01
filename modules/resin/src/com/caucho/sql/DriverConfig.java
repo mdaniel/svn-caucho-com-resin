@@ -195,8 +195,8 @@ public class DriverConfig
 
     for (Method method : cl.getMethods()) {
       if (method.getName().equals("setDriverType")
-	  && method.getParameterTypes().length == 1) {
-	return true;
+          && method.getParameterTypes().length == 1) {
+        return true;
       }
     }
 
@@ -245,10 +245,10 @@ public class DriverConfig
     _driverClass = driverClass;
 
     if (! Driver.class.isAssignableFrom(driverClass)
-	&& ! XADataSource.class.isAssignableFrom(driverClass)
-	&& ! ConnectionPoolDataSource.class.isAssignableFrom(driverClass)
-	&& ! ManagedConnectionFactory.class.isAssignableFrom(driverClass)
-	&& ! DataSource.class.isAssignableFrom(driverClass)) {
+        && ! XADataSource.class.isAssignableFrom(driverClass)
+        && ! ConnectionPoolDataSource.class.isAssignableFrom(driverClass)
+        && ! ManagedConnectionFactory.class.isAssignableFrom(driverClass)
+        && ! DataSource.class.isAssignableFrom(driverClass)) {
       throw new ConfigException(L.l("'{0}' is not a valid database type, because it does not implement Driver, XADataSource, ConnectionPoolDataSource, ManagedConnectionFactory, or DataSource..",
                                     driverClass.getName()));
     }
@@ -529,8 +529,8 @@ public class DriverConfig
 
       /*
       if (! isTransactional && _xaDataSource != null) {
-	throw new SQLExceptionWrapper(L.l("XADataSource '{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
-					  _xaDataSource));
+        throw new SQLExceptionWrapper(L.l("XADataSource '{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
+                                          _xaDataSource));
       }
       */
     }
@@ -620,16 +620,16 @@ public class DriverConfig
 
       /*
       if (! _isTransactional) {
-	throw new SQLExceptionWrapper(L.l("XADataSource '{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
-					  _xaDataSource));
+        throw new SQLExceptionWrapper(L.l("XADataSource '{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
+                                          _xaDataSource));
       }
       */
     }
     else if (_poolDataSource != null) {
       /*
       if (_isTransactional) {
-	throw new SQLExceptionWrapper(L.l("ConnectionPoolDataSource '{0}' can not be configured as transactional.  Either use the database's XADataSource driver or the old java.sql.Driver driver.",
-					  _poolDataSource));
+        throw new SQLExceptionWrapper(L.l("ConnectionPoolDataSource '{0}' can not be configured as transactional.  Either use the database's XADataSource driver or the old java.sql.Driver driver.",
+                                          _poolDataSource));
       }
       */
 
@@ -669,30 +669,30 @@ public class DriverConfig
       properties.putAll(getInfo());
 
       if (user != null)
-	properties.put("user", user);
+        properties.put("user", user);
       else
-	properties.put("user", "");
+        properties.put("user", "");
 
       if (password != null)
-	properties.put("password", password);
+        properties.put("password", password);
       else
-	properties.put("password", "");
+        properties.put("password", "");
 
       Connection conn;
       if (driver != null)
-	conn = driver.connect(url, properties);
+        conn = driver.connect(url, properties);
       else
-	conn = java.sql.DriverManager.getConnection(url, properties);
+        conn = java.sql.DriverManager.getConnection(url, properties);
 
       synchronized (this) {
-	_connectionCountTotal++;
+        _connectionCountTotal++;
       }
 
       return conn;
     } catch (SQLException e) {
       synchronized (this) {
-	_connectionFailCountTotal++;
-	_lastFailTime = Alarm.getCurrentTime();
+        _connectionFailCountTotal++;
+        _lastFailTime = Alarm.getCurrentTime();
       }
       
       throw e;
@@ -703,26 +703,26 @@ public class DriverConfig
   public void init()
   {
     if (_driverClass == null
-	&& _poolDataSource == null
-	&& _xaDataSource == null) {
+        && _poolDataSource == null
+        && _xaDataSource == null) {
       if (_driverURL == null)
-	throw new ConfigException(L.l("<driver> requires a 'type' or 'url'"));
+        throw new ConfigException(L.l("<driver> requires a 'type' or 'url'"));
 
       String driver = findDriverByUrl(_driverURL);
 
       if (driver == null)
-	throw new ConfigException(L.l("url='{0}' does not have a known driver.  The driver class must be specified by a 'type' parameter.",
-				      _driverURL));
+        throw new ConfigException(L.l("url='{0}' does not have a known driver.  The driver class must be specified by a 'type' parameter.",
+                                      _driverURL));
 
       Class driverClass = null;
       try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	driverClass = Class.forName(driver, false, loader);
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+        driverClass = Class.forName(driver, false, loader);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
 
       setType(driverClass);
@@ -754,28 +754,28 @@ public class DriverConfig
     // server/14g1
     if (_driverURL != null) {
       if (! configType.setProperty(driverObject, URL, _driverURL)) {
-	if (! (driverObject instanceof Driver)) {
-	  throw new ConfigException(L.l("database: 'url' is an unknown property of '{0}'",
-					driverObject.getClass().getName()));
-	}
+        if (! (driverObject instanceof Driver)) {
+          throw new ConfigException(L.l("database: 'url' is an unknown property of '{0}'",
+                                        driverObject.getClass().getName()));
+        }
       }
     }
     
     if (_user != null) {
       if (! configType.setProperty(driverObject, USER, _user)) {
-	if (! (driverObject instanceof Driver)) {
-	  throw new ConfigException(L.l("database: 'user' is an unknown property of '{0}'",
-					driverObject.getClass().getName()));
-	}
+        if (! (driverObject instanceof Driver)) {
+          throw new ConfigException(L.l("database: 'user' is an unknown property of '{0}'",
+                                        driverObject.getClass().getName()));
+        }
       }
     }
     
     if (_password != null) {
       if (! configType.setProperty(driverObject, PASSWORD, _password)) {
-	if (! (driverObject instanceof Driver)) {
-	  throw new ConfigException(L.l("database: 'password' is an unknown property of '{0}'",
-					driverObject.getClass().getName()));
-	}
+        if (! (driverObject instanceof Driver)) {
+          throw new ConfigException(L.l("database: 'password' is an unknown property of '{0}'",
+                                        driverObject.getClass().getName()));
+        }
       }
     }
 
@@ -799,14 +799,14 @@ public class DriverConfig
       String methodName = method.getName();
       
       if (! methodName.startsWith("set"))
-	continue;
+        continue;
       else if (method.getParameterTypes().length != 1)
-	continue;
+        continue;
 
       methodName = methodName.substring(3).toLowerCase();
 
       if (methodName.equals(name))
-	return true;
+        return true;
     }
 
     return false;
@@ -824,12 +824,12 @@ public class DriverConfig
       Enumeration e = loader.getResources("META-INF/services/java.sql.Driver");
 
       while (e.hasMoreElements()) {
-	URL serviceUrl = (URL) e.nextElement();
+        URL serviceUrl = (URL) e.nextElement();
 
-	driver = testDriver(url, serviceUrl);
+        driver = testDriver(url, serviceUrl);
 
-	if (driver != null)
-	  return driver;
+        if (driver != null)
+          return driver;
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -849,26 +849,26 @@ public class DriverConfig
       ReadStream in = Vfs.openRead(is);
       String line;
       while ((line = in.readLine()) != null) {
-	int p = line.indexOf('#');
-	if (p >= 0)
-	  line = line.substring(p);
+        int p = line.indexOf('#');
+        if (p >= 0)
+          line = line.substring(p);
 
-	line = line.trim();
+        line = line.trim();
 
-	if (line.length() == 0)
-	  continue;
+        if (line.length() == 0)
+          continue;
 
-	try {
-	  Class cl = Class.forName(line, false, loader);
+        try {
+          Class cl = Class.forName(line, false, loader);
 
-	  Driver driver = (Driver) cl.newInstance();
+          Driver driver = (Driver) cl.newInstance();
 
-	  System.out.println("NOM: " + driver.acceptsURL(url) + " " + url + " " + driver);
-	  if (driver.acceptsURL(url))
-	    return cl.getName();
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+          System.out.println("NOM: " + driver.acceptsURL(url) + " " + url + " " + driver);
+          if (driver.acceptsURL(url))
+            return cl.getName();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

@@ -90,41 +90,41 @@ public class NamespaceNode extends QAbstractNode implements CauchoNode {
       String prefix = elt.getPrefix();
       String url = elt.getNamespaceURI();
       if (url == null)
-	url = "";
+        url = "";
       
       if (map.get(prefix) == null) {
-	map.put(prefix, url);
-	if (! url.equals(""))
-	  nodes = new NamespaceNode(top, nodes, prefix, url);
+        map.put(prefix, url);
+        if (! url.equals(""))
+          nodes = new NamespaceNode(top, nodes, prefix, url);
       }
 
       QAttr attr = (QAttr) elt.getFirstAttribute();
       for (; attr != null; attr = (QAttr) attr.getNextSibling()) {
-	String name = attr.getNodeName();
-	prefix = null;
-	url = "";
+        String name = attr.getNodeName();
+        prefix = null;
+        url = "";
 
-	if (name.startsWith("xmlns:")) {
-	  prefix = name.substring(6);
-	  url = attr.getNodeValue();
-	}
-	else if (name.equals("xmlns")) {
-	  prefix = "";
-	  url = attr.getNodeValue();
-	}
-	else {
-	  prefix = attr.getPrefix();
-	  url = attr.getNamespaceURI();
-	}
-	
-	if (url == null)
-	  url = "";
+        if (name.startsWith("xmlns:")) {
+          prefix = name.substring(6);
+          url = attr.getNodeValue();
+        }
+        else if (name.equals("xmlns")) {
+          prefix = "";
+          url = attr.getNodeValue();
+        }
+        else {
+          prefix = attr.getPrefix();
+          url = attr.getNamespaceURI();
+        }
+
+        if (url == null)
+          url = "";
       
-	if (map.get(prefix) == null) {
-	  map.put(prefix, url);
-	  if (! url.equals(""))
-	    nodes = new NamespaceNode(top, nodes, prefix, url);
-	}
+        if (map.get(prefix) == null) {
+          map.put(prefix, url);
+          if (! url.equals(""))
+            nodes = new NamespaceNode(top, nodes, prefix, url);
+        }
       }
     }
 

@@ -103,17 +103,17 @@ public class XmppDiscoItemsQueryMarshal extends AbstractXmppMarshal {
 
     if (items != null) {
       for (DiscoItem item : items) {
-	out.writeStartElement("item");
+        out.writeStartElement("item");
 
-	out.writeAttribute("jid", item.getJid());
+        out.writeAttribute("jid", item.getJid());
 
-	if (item.getName() != null)
-	  out.writeAttribute("name", item.getName());
+        if (item.getName() != null)
+          out.writeAttribute("name", item.getName());
 
-	if (item.getNode() != null)
-	  out.writeAttribute("node", item.getNode());
-	
-	out.writeEndElement(); // </item>
+        if (item.getNode() != null)
+          out.writeAttribute("node", item.getNode());
+
+        out.writeEndElement(); // </item>
       }
     }
     
@@ -137,22 +137,22 @@ public class XmppDiscoItemsQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	discoItems.setItemList(itemList);
-	
-	return discoItems;
+        discoItems.setItemList(itemList);
+
+        return discoItems;
       }
 
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "item".equals(in.getLocalName())) {
-	itemList.add(parseItem(in));
+          && "item".equals(in.getLocalName())) {
+        itemList.add(parseItem(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();

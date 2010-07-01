@@ -89,8 +89,8 @@ public class QueryGet extends Packet {
    */
   @Override
   public void dispatchError(ActorStream handler,
-			    ActorStream toSource,
-			    ActorError error)
+                            ActorStream toSource,
+                            ActorError error)
   {
     toSource.queryError(getId(), getFrom(), getTo(), getValue(), error);
   }

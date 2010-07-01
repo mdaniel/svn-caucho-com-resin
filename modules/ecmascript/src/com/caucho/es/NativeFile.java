@@ -60,7 +60,7 @@ class NativeFile extends Native {
   }
   
   private static void put(Global resin, String name, int n, int len, 
-			  int flags)
+                          int flags)
   {
     ESId id = ESId.intern(name);
 
@@ -143,7 +143,7 @@ class NativeFile extends Native {
 
     try {
       for (int i = 0; i < length; i++)
-	stream.print(eval.getArg(i).toString());
+        stream.print(eval.getArg(i).toString());
     } catch (IOException e) {
       return ESBoolean.FALSE;
     }
@@ -157,7 +157,7 @@ class NativeFile extends Native {
 
     try {
       for (int i = 0; i < length; i++)
-	stream.print(eval.getArg(i).toString());
+        stream.print(eval.getArg(i).toString());
       stream.println();
     } catch (IOException e) {
       return ESBoolean.FALSE;

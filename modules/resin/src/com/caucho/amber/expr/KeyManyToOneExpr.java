@@ -148,14 +148,14 @@ public class KeyManyToOneExpr extends AbstractPathExpr
 
     if (_fromItem != null)
       _childFromItem = _fromItem.getQuery().createFromItem(getTargetType().getTable(),
-							   parser.createTableName());
+                                                           parser.createTableName());
     else
       _childFromItem = parser.getSelectQuery().createFromItem(getTargetType().getTable(),
-							parser.createTableName());
+                                                        parser.createTableName());
 
     JoinExpr link = new ManyToOneJoinExpr(_manyToOne.getLinkColumns(),
-					  _fromItem,
-					  _childFromItem);
+                                          _fromItem,
+                                          _childFromItem);
 
     _childFromItem.setJoinExpr(link);
     
@@ -232,6 +232,6 @@ public class KeyManyToOneExpr extends AbstractPathExpr
     KeyManyToOneExpr manyToOne = (KeyManyToOneExpr) o;
 
     return (_parent.equals(manyToOne._parent) &&
-	    getField().equals(manyToOne.getField()));
+            getField().equals(manyToOne.getField()));
   }
 }

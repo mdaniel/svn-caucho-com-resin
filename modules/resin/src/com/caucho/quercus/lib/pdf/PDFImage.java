@@ -102,17 +102,17 @@ public class PDFImage extends PDFObject {
 
     if (ch == 'G') {
       if (_is.read() != 'I' ||
-	  _is.read() != 'F' ||
-	  _is.read() != '8' ||
-	  _is.read() != '7' ||
-	  _is.read() != 'a')
-	return false;
+          _is.read() != 'F' ||
+          _is.read() != '8' ||
+          _is.read() != '7' ||
+          _is.read() != 'a')
+        return false;
 
       return parseGIF();
     }
     else if (ch == 0xff) {
       if (_is.read() != 0xd8)
-	return false;
+        return false;
 
       TempStream ts = new TempStream();
 
@@ -189,8 +189,8 @@ public class PDFImage extends PDFObject {
 
     for (int i = 0; i < values.length; i++) {
       int value = (0x10000 * (_is.read() & 0xff) +
-		   0x100 * (_is.read() & 0xff) +
-		   0x1 * (_is.read() & 0xff));
+                   0x100 * (_is.read() & 0xff) +
+                   0x1 * (_is.read() & 0xff));
 
       values[i] = value;
     }
@@ -214,12 +214,12 @@ public class PDFImage extends PDFObject {
       int prev = 0;
 
       for (int i = 0; i < blockCount; i++) {
-	int data = _is.read();
+        int data = _is.read();
 
-	if (i == 0) {
-	  System.out.println("C: " + data);
-	  System.out.println("C: " + (data & _codeMask));
-	}
+        if (i == 0) {
+          System.out.println("C: " + data);
+          System.out.println("C: " + (data & _codeMask));
+        }
       }
     }
     */
@@ -229,7 +229,7 @@ public class PDFImage extends PDFObject {
     throws IOException
   {
     if (_is.read() != 0xff ||
-	_is.read() != 0xd8)
+        _is.read() != 0xd8)
       return false;
 
     int ch;
@@ -238,28 +238,28 @@ public class PDFImage extends PDFObject {
       ch = _is.read();
 
       if (ch == 0xff) {
-	_is.unread();
+        _is.unread();
       }
       else if (0xd0 <= ch && ch <= 0xd9) {
-	// rst
+        // rst
       }
       else if (0x01 == ch) {
-	// rst
+        // rst
       }
       else if (ch == 0xc0) {
-	int len = 256 * _is.read() + _is.read();
+        int len = 256 * _is.read() + _is.read();
 
-	_bits = _is.read();
-	_height = 256 * _is.read() + _is.read();
-	_width = 256 * _is.read() + _is.read();
-	_type = "jpeg";
+        _bits = _is.read();
+        _height = 256 * _is.read() + _is.read();
+        _width = 256 * _is.read() + _is.read();
+        _type = "jpeg";
 
-	return true;
+        return true;
       }
       else {
-	int len = 256 * _is.read() + _is.read();
+        int len = 256 * _is.read() + _is.read();
 
-	_is.skip(len - 2);
+        _is.skip(len - 2);
       }
     }
 
@@ -322,14 +322,14 @@ public class PDFImage extends PDFObject {
       throws IOException
     {
       if (_blockSize < 0)
-	return -1;
+        return -1;
       else if (_blockSize == 0) {
-	_blockSize = _is.read();
+        _blockSize = _is.read();
 
-	if (_blockSize == 0) {
-	  _blockSize = -1;
-	  return -1;
-	}
+        if (_blockSize == 0) {
+          _blockSize = -1;
+          return -1;
+        }
       }
 
       _blockSize--;

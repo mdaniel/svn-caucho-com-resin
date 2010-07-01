@@ -142,21 +142,21 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
 
     if (invites != null) {
       for (MucInvite invite : invites) {
-	out.writeStartElement("invite");
+        out.writeStartElement("invite");
 
-	if (invite.getTo() != null)
-	  out.writeAttribute("to", invite.getTo());
+        if (invite.getTo() != null)
+          out.writeAttribute("to", invite.getTo());
 
-	if (invite.getFrom() != null)
-	  out.writeAttribute("from", invite.getFrom());
+        if (invite.getFrom() != null)
+          out.writeAttribute("from", invite.getFrom());
 
-	if (invite.getReason() != null) {
-	  out.writeStartElement("reason");
-	  out.writeCharacters(invite.getReason());
-	  out.writeEndElement(); // </reason>
-	}
-	
-	out.writeEndElement(); // </invite>
+        if (invite.getReason() != null) {
+          out.writeStartElement("reason");
+          out.writeCharacters(invite.getReason());
+          out.writeEndElement(); // </reason>
+        }
+
+        out.writeEndElement(); // </invite>
       }
     }
 
@@ -165,17 +165,17 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
       out.writeStartElement("decline");
 
       if (decline.getTo() != null)
-	out.writeAttribute("to", decline.getTo());
+        out.writeAttribute("to", decline.getTo());
 
       if (decline.getFrom() != null)
-	out.writeAttribute("from", decline.getFrom());
+        out.writeAttribute("from", decline.getFrom());
 
       if (decline.getReason() != null) {
-	out.writeStartElement("reason");
-	out.writeCharacters(decline.getReason());
-	out.writeEndElement(); // </reason>
+        out.writeStartElement("reason");
+        out.writeCharacters(decline.getReason());
+        out.writeEndElement(); // </reason>
       }
-	
+
       out.writeEndElement(); // </decline>
     }
 
@@ -184,14 +184,14 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
       out.writeStartElement("destroy");
 
       if (destroy.getJid() != null)
-	out.writeAttribute("jid", destroy.getJid());
+        out.writeAttribute("jid", destroy.getJid());
 
       if (destroy.getReason() != null) {
-	out.writeStartElement("reason");
-	out.writeCharacters(destroy.getReason());
-	out.writeEndElement(); // </reason>
+        out.writeStartElement("reason");
+        out.writeCharacters(destroy.getReason());
+        out.writeEndElement(); // </reason>
       }
-	
+
       out.writeEndElement(); // </destroy>
     }
     
@@ -199,11 +199,11 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
 
     if (statusList != null) {
       for (MucStatus status : statusList) {
-	out.writeStartElement("status");
+        out.writeStartElement("status");
 
-	out.writeAttribute("code", String.valueOf(status.getCode()));
-	
-	out.writeEndElement(); // </status>
+        out.writeAttribute("code", String.valueOf(status.getCode()));
+
+        out.writeEndElement(); // </status>
       }
     }
     
@@ -258,34 +258,34 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	mucUser.setInviteList(inviteList);
-	mucUser.setStatusList(statusList);
-	
-	return mucUser;
+        mucUser.setInviteList(inviteList);
+        mucUser.setStatusList(statusList);
+
+        return mucUser;
       }
 
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "decline".equals(in.getLocalName())) {
-	mucUser.setDecline(parseDecline(in));
+          && "decline".equals(in.getLocalName())) {
+        mucUser.setDecline(parseDecline(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "destroy".equals(in.getLocalName())) {
-	mucUser.setDestroy(parseDestroy(in));
+               && "destroy".equals(in.getLocalName())) {
+        mucUser.setDestroy(parseDestroy(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "invite".equals(in.getLocalName())) {
-	inviteList.add(parseInvite(in));
+               && "invite".equals(in.getLocalName())) {
+        inviteList.add(parseInvite(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "item".equals(in.getLocalName())) {
-	mucUser.setItem(parseItem(in));
+               && "item".equals(in.getLocalName())) {
+        mucUser.setItem(parseItem(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "status".equals(in.getLocalName())) {
-	statusList.add(parseStatus(in));
+               && "status".equals(in.getLocalName())) {
+        statusList.add(parseStatus(in));
       }
 
       tag = in.nextTag();
@@ -308,16 +308,16 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return new MucInvite(to, from, reason);
+        return new MucInvite(to, from, reason);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "reason".equals(in.getLocalName())) {
-	reason = in.getElementText();
+               && "reason".equals(in.getLocalName())) {
+        reason = in.getElementText();
 
-	skipToEnd(in, "reason");
+        skipToEnd(in, "reason");
       }
 
       tag = in.nextTag();
@@ -340,16 +340,16 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return new MucDecline(to, from, reason);
+        return new MucDecline(to, from, reason);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "reason".equals(in.getLocalName())) {
-	reason = in.getElementText();
+               && "reason".equals(in.getLocalName())) {
+        reason = in.getElementText();
 
-	skipToEnd(in, "reason");
+        skipToEnd(in, "reason");
       }
 
       tag = in.nextTag();
@@ -371,16 +371,16 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return new MucDestroy(jid, reason);
+        return new MucDestroy(jid, reason);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "reason".equals(in.getLocalName())) {
-	reason = in.getElementText();
+               && "reason".equals(in.getLocalName())) {
+        reason = in.getElementText();
 
-	skipToEnd(in, "reason");
+        skipToEnd(in, "reason");
       }
 
       tag = in.nextTag();
@@ -417,30 +417,30 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return item;
+        return item;
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "actor".equals(in.getLocalName())) {
-	item.setActor(in.getAttributeValue(null, "jid"));
+               && "actor".equals(in.getLocalName())) {
+        item.setActor(in.getAttributeValue(null, "jid"));
 
-	skipToEnd(in, "actor");
+        skipToEnd(in, "actor");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "continue".equals(in.getLocalName())) {
-	String thread = in.getAttributeValue(null, "thread");
-	
-	item.setContinue(new MucContinue(thread));
+               && "continue".equals(in.getLocalName())) {
+        String thread = in.getAttributeValue(null, "thread");
 
-	skipToEnd(in, "continue");
+        item.setContinue(new MucContinue(thread));
+
+        skipToEnd(in, "continue");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "reason".equals(in.getLocalName())) {
-	item.setReason(in.getElementText());
+               && "reason".equals(in.getLocalName())) {
+        item.setReason(in.getElementText());
 
-	skipToEnd(in, "reason");
+        skipToEnd(in, "reason");
       }
 
       tag = in.nextTag();
@@ -465,10 +465,10 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return new MucStatus(code);
+        return new MucStatus(code);
       }
 
       tag = in.nextTag();

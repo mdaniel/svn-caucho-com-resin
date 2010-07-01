@@ -158,10 +158,10 @@ class XPathParser {
 
     while (ch >= 0) {
       if (ch == '|') {
-	AbstractPattern tail = parseUnion(parseTop(root), root);
-	left = new UnionPattern(left, tail);
+        AbstractPattern tail = parseUnion(parseTop(root), root);
+        left = new UnionPattern(left, tail);
       } else
-	break;
+        break;
 
       for (ch = read(); XmlChar.isWhitespace(ch); ch = read()) {
       }
@@ -215,8 +215,8 @@ class XPathParser {
       if (ch == '/') {
         pattern = new FromRoot();
         pattern = new FromDescendants(pattern, false);
-	pattern = parseBasis(pattern);
-	pattern = parseFilter(pattern);
+        pattern = parseBasis(pattern);
+        pattern = parseFilter(pattern);
         pattern = parsePath(pattern);
 
         return pattern;
@@ -225,7 +225,7 @@ class XPathParser {
       ch = skipWhitespace(ch);
 
       if (ch == -1)
-	return pattern;
+        return pattern;
     }
 
     unread();
@@ -251,14 +251,14 @@ class XPathParser {
       ch = read();
 
       if (ch == '/') {
-	pattern = new FromDescendants(pattern, false);
-	pattern = parseBasis(pattern);
-	pattern = parseFilter(pattern);
+        pattern = new FromDescendants(pattern, false);
+        pattern = parseBasis(pattern);
+        pattern = parseFilter(pattern);
       }
       else {
-	unread();
-	pattern = parseBasis(pattern);
-	pattern = parseFilter(pattern);
+        unread();
+        pattern = parseBasis(pattern);
+        pattern = parseFilter(pattern);
       }
 
       ch = skipWhitespace(read());
@@ -283,7 +283,7 @@ class XPathParser {
 
       ch = skipWhitespace(read());
       if (ch !=  ']')
-	throw error(L.l("expected `{0}' at {1}", "]", badChar(ch)));
+        throw error(L.l("expected `{0}' at {1}", "]", badChar(ch)));
 
       ch = skipWhitespace(read());
     }
@@ -312,7 +312,7 @@ class XPathParser {
 
     if (ch == '@') {
       if (pattern instanceof FromDescendants)
-	pattern = NodeTypePattern.create(pattern, NodeTypePattern.NODE);
+        pattern = NodeTypePattern.create(pattern, NodeTypePattern.NODE);
       
       pattern = new FromAttributes(pattern);
       nodeType = Node.ATTRIBUTE_NODE;
@@ -322,10 +322,10 @@ class XPathParser {
     else if (ch == '.') {
       ch = read();
       if (ch == '.')
-	return NodeTypePattern.create(new FromParent(pattern),
+        return NodeTypePattern.create(new FromParent(pattern),
                                       NodeTypePattern.NODE);
       else {
-	unread();
+        unread();
         if (pattern != null)
           return pattern;
         else
@@ -337,7 +337,7 @@ class XPathParser {
       Expr expr = parseExpr(null, null);
 
       if ((ch = read()) != ')')
-	throw error(L.l("expected `{0}' at {1}", ")", badChar(ch)));
+        throw error(L.l("expected `{0}' at {1}", ")", badChar(ch)));
 
       return new FromExpr(pattern, expr);
     }
@@ -348,12 +348,12 @@ class XPathParser {
 
     else if (XmlChar.isNameStart(ch)) {
       for (; XmlChar.isNameChar(ch); ch = read())
-	tag.append((char) ch);
+        tag.append((char) ch);
 
       if (ch == '*' && tag.endsWith(":"))
-	tag.append('*');
+        tag.append('*');
       else
-	unread();
+        unread();
     }
     else
       unread();
@@ -384,55 +384,55 @@ class XPathParser {
     switch (axisMap.get(axis)) {
     case ANCESTOR_AXIS:
       return parseNodeTest(new FromAncestors(pattern, false),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case ANCESTOR_OR_SELF_AXIS:
       return parseNodeTest(new FromAncestors(pattern, true),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case ATTRIBUTE_AXIS:
       return parseNodeTest(new FromAttributes(pattern),
-			   name, false, Node.ATTRIBUTE_NODE);
+                           name, false, Node.ATTRIBUTE_NODE);
 
     case CHILD_AXIS:
       return parseNodeTest(new FromChildren(pattern),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case DESCENDANT_AXIS:
       return parseNodeTest(new FromDescendants(pattern, false),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case DESCENDANT_OR_SELF_AXIS:
       return parseNodeTest(new FromDescendants(pattern, true),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case FOLLOWING_AXIS:
       return parseNodeTest(new FromNext(pattern),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case FOLLOWING_SIBLING_AXIS:
       return parseNodeTest(new FromNextSibling(pattern),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case NAMESPACE_AXIS:
       return parseNodeTest(new FromNamespace(pattern),
-			   name, false, Node.ATTRIBUTE_NODE);
+                           name, false, Node.ATTRIBUTE_NODE);
 
     case PARENT_AXIS:
       return parseNodeTest(new FromParent(pattern),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case PRECEDING_AXIS:
       return parseNodeTest(new FromPrevious(pattern),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case PRECEDING_SIBLING_AXIS:
       return parseNodeTest(new FromPreviousSibling(pattern),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     case SELF_AXIS:
       return parseNodeTest(new FromSelf(pattern),
-			   name, false, Node.ELEMENT_NODE);
+                           name, false, Node.ELEMENT_NODE);
 
     default:
       return parseNodeTest(pattern, name, fromChildren, nodeType);
@@ -471,34 +471,34 @@ class XPathParser {
     }
     else {
       if (fromChildren)
-	pattern = new FromChildren(pattern);
+        pattern = new FromChildren(pattern);
 
       if (name.equals("*"))
-	pattern = NodeTypePattern.create(pattern, nodeType);
+        pattern = NodeTypePattern.create(pattern, nodeType);
       else if (name.endsWith(":*")) {
-	pattern = new NamespacePattern(pattern,
-				       name.substring(0, name.length() - 2),
-				       nodeType);
+        pattern = new NamespacePattern(pattern,
+                                       name.substring(0, name.length() - 2),
+                                       nodeType);
       }
       else {
-	int p = name.indexOf(':');
-	String ns = null;
-	String local = name;
+        int p = name.indexOf(':');
+        String ns = null;
+        String local = name;
 
-	if (p > 0) {
-	  String prefix = name.substring(0, p);
-	  ns = NamespaceContext.find(_namespace, prefix);
-	  local = name.substring(p + 1);
-	}
-	else if (nodeType != Node.ATTRIBUTE_NODE)
-	  ns = _namespace.find(_namespace, "");
-	else
-	  ns = null; // _namespace.find(_namespace, "");
+        if (p > 0) {
+          String prefix = name.substring(0, p);
+          ns = NamespaceContext.find(_namespace, prefix);
+          local = name.substring(p + 1);
+        }
+        else if (nodeType != Node.ATTRIBUTE_NODE)
+          ns = _namespace.find(_namespace, "");
+        else
+          ns = null; // _namespace.find(_namespace, "");
 
-	if (ns == null)
-	  pattern = new NodePattern(pattern, name, nodeType);
-	else
-	  pattern = new NSNamePattern(pattern, ns, local, nodeType);
+        if (ns == null)
+          pattern = new NodePattern(pattern, name, nodeType);
+        else
+          pattern = new NSNamePattern(pattern, ns, local, nodeType);
       }
     }
     unread();
@@ -519,33 +519,33 @@ class XPathParser {
       int token = scanToken();
       switch (token) {
       case Expr.OR:
-	left = parseOrExpr(token, left, parseTerm(parent, listParent),
-			   parent, listParent);
-	break;
+        left = parseOrExpr(token, left, parseTerm(parent, listParent),
+                           parent, listParent);
+        break;
 
       case Expr.AND:
-	left = parseAndExpr(token, left, parseTerm(parent, listParent),
-			    parent, listParent);
-	break;
+        left = parseAndExpr(token, left, parseTerm(parent, listParent),
+                            parent, listParent);
+        break;
 
       case Expr.EQ: case Expr.NEQ: case Expr.LT:
       case Expr.LE: case Expr.GT: case Expr.GE:
-	left = parseCmpExpr(token, left, parseTerm(parent, listParent),
-			    parent, listParent);
-	break;
+        left = parseCmpExpr(token, left, parseTerm(parent, listParent),
+                            parent, listParent);
+        break;
 
       case Expr.ADD: case Expr.SUB:
-	left = parseAddExpr(token, left, parseTerm(parent, listParent),
-			    parent, listParent);
-	break;
+        left = parseAddExpr(token, left, parseTerm(parent, listParent),
+                            parent, listParent);
+        break;
 
       case Expr.MUL: case Expr.DIV: case Expr.QUO: case Expr.MOD:
-	left = parseMulExpr(token, left, parseTerm(parent, listParent),
-			    parent, listParent);
-	break;
+        left = parseMulExpr(token, left, parseTerm(parent, listParent),
+                            parent, listParent);
+        break;
 
       default:
-	return left;
+        return left;
       }
     }
   }
@@ -555,42 +555,42 @@ class XPathParser {
    *           | and-expr
    */
   private Expr parseOrExpr(int code, Expr left, Expr right,
-			   AbstractPattern parent, AbstractPattern listParent)
+                           AbstractPattern parent, AbstractPattern listParent)
     throws XPathParseException
   {
     while (true) {
       int token = scanToken();
       switch (token) {
       case Expr.OR:
-	left = new BooleanExpr(code, left, right);
-	code = token;
-	right = parseTerm(parent, listParent);
-	break;
+        left = new BooleanExpr(code, left, right);
+        code = token;
+        right = parseTerm(parent, listParent);
+        break;
 
       case Expr.AND:
-	right = parseAndExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseAndExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       case Expr.EQ: case Expr.NEQ: case Expr.LT:
       case Expr.LE: case Expr.GT: case Expr.GE:
-	right = parseCmpExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseCmpExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       case Expr.ADD: case Expr.SUB:
-	right = parseAddExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseAddExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       case Expr.MUL: case Expr.DIV: case Expr.QUO: case Expr.MOD:
-	right = parseMulExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseMulExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       default:
-	undoToken(token);
-	return new BooleanExpr(code, left, right);
+        undoToken(token);
+        return new BooleanExpr(code, left, right);
       }
     }
   }
@@ -600,37 +600,37 @@ class XPathParser {
    *            | cmp-expr
    */
   private Expr parseAndExpr(int code, Expr left, Expr right,
-			    AbstractPattern parent, AbstractPattern listParent)
+                            AbstractPattern parent, AbstractPattern listParent)
     throws XPathParseException
   {
     while (true) {
       int token = scanToken();
       switch (token) {
       case Expr.AND:
-	left = new BooleanExpr(code, left, right);
-	code = token;
-	right = parseTerm(parent, listParent);
-	break;
+        left = new BooleanExpr(code, left, right);
+        code = token;
+        right = parseTerm(parent, listParent);
+        break;
 
       case Expr.EQ: case Expr.NEQ: case Expr.LT:
       case Expr.LE: case Expr.GT: case Expr.GE:
-	right = parseCmpExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseCmpExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       case Expr.ADD: case Expr.SUB:
-	right = parseAddExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseAddExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       case Expr.MUL: case Expr.DIV: case Expr.QUO: case Expr.MOD:
-	right = parseMulExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseMulExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       default:
-	undoToken(token);
-	return new BooleanExpr(code, left, right);
+        undoToken(token);
+        return new BooleanExpr(code, left, right);
       }
     }
   }
@@ -640,7 +640,7 @@ class XPathParser {
    *            | add-expr
    */
   private Expr parseCmpExpr(int code, Expr left, Expr right,
-			    AbstractPattern parent, AbstractPattern listParent)
+                            AbstractPattern parent, AbstractPattern listParent)
     throws XPathParseException
   {
     while (true) {
@@ -648,24 +648,24 @@ class XPathParser {
       switch (token) {
       case Expr.EQ: case Expr.NEQ: case Expr.LT:
       case Expr.LE: case Expr.GT: case Expr.GE:
-	left = new BooleanExpr(code, left, right);
-	code = token;
-	right = parseTerm(parent, listParent);
-	break;
+        left = new BooleanExpr(code, left, right);
+        code = token;
+        right = parseTerm(parent, listParent);
+        break;
 
       case Expr.ADD: case Expr.SUB:
-	right = parseAddExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseAddExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       case Expr.MUL: case Expr.DIV: case Expr.QUO: case Expr.MOD:
-	right = parseMulExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseMulExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       default:
-	undoToken(token);
-	return new BooleanExpr(code, left, right);
+        undoToken(token);
+        return new BooleanExpr(code, left, right);
       }
     }
   }
@@ -675,26 +675,26 @@ class XPathParser {
    *            | mul-expr
    */
   private Expr parseAddExpr(int code, Expr left, Expr right,
-			    AbstractPattern parent, AbstractPattern listParent)
+                            AbstractPattern parent, AbstractPattern listParent)
     throws XPathParseException
   {
     while (true) {
       int token = scanToken();
       switch (token) {
       case Expr.ADD: case Expr.SUB:
-	left = new NumericExpr(code, left, right);
-	code = token;
-	right = parseTerm(parent, listParent);
-	break;
+        left = new NumericExpr(code, left, right);
+        code = token;
+        right = parseTerm(parent, listParent);
+        break;
 
       case Expr.MUL: case Expr.DIV: case Expr.QUO: case Expr.MOD:
-	right = parseMulExpr(token, right, parseTerm(parent, listParent),
-			     parent, listParent);
-	break;
+        right = parseMulExpr(token, right, parseTerm(parent, listParent),
+                             parent, listParent);
+        break;
 
       default:
-	undoToken(token);
-	return new NumericExpr(code, left, right);
+        undoToken(token);
+        return new NumericExpr(code, left, right);
       }
     }
   }
@@ -704,21 +704,21 @@ class XPathParser {
    *            | term
    */
   private Expr parseMulExpr(int code, Expr left, Expr right,
-			    AbstractPattern parent, AbstractPattern listParent)
+                            AbstractPattern parent, AbstractPattern listParent)
     throws XPathParseException
   {
     while (true) {
       int token = scanToken();
       switch (token) {
       case Expr.MUL: case Expr.DIV: case Expr.QUO: case Expr.MOD:
-	left = new NumericExpr(code, left, right);
-	code = token;
-	right = parseTerm(parent, listParent);
-	break;
+        left = new NumericExpr(code, left, right);
+        code = token;
+        right = parseTerm(parent, listParent);
+        break;
 
       default:
-	undoToken(token);
-	return new NumericExpr(code, left, right);
+        undoToken(token);
+        return new NumericExpr(code, left, right);
       }
     }
   }
@@ -740,7 +740,7 @@ class XPathParser {
 
       if (ch == '(' && ! pattern.isStrictlyAscending())
         pattern = new FromExpr(null, expr);
-	
+
       return NodeSetExpr.create(parseUnion(parsePath(parseFilter(pattern)),
                                            pattern));
     }
@@ -774,7 +774,7 @@ class XPathParser {
       unread();
       unread();
       if (! ('0' <= ch && ch <= '9')) {
-	return NodeSetExpr.create(parseUnion(parseBasisTop(parent), parent));
+        return NodeSetExpr.create(parseUnion(parseBasisTop(parent), parent));
       }
       ch = read();
       // fall through to parse the number
@@ -782,18 +782,18 @@ class XPathParser {
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
       {
-	long value = 0;
-	double exp = 1;
+        long value = 0;
+        double exp = 1;
         int digits = 0;
-	for (; ch >= '0' && ch <= '9'; ch = read())
-	  value = 10 * value + ch - '0';
-	if (ch == '.') {
-	  for (ch = read(); ch >= '0' && ch <= '9'; ch = read()) {
-	    value = 10 * value + ch - '0';
-	    exp *= 10;
+        for (; ch >= '0' && ch <= '9'; ch = read())
+          value = 10 * value + ch - '0';
+        if (ch == '.') {
+          for (ch = read(); ch >= '0' && ch <= '9'; ch = read()) {
+            value = 10 * value + ch - '0';
+            exp *= 10;
             digits--;
-	  }
-	}
+          }
+        }
 
         if (ch == 'e' || ch == 'E') {
           int sign = 1;
@@ -817,8 +817,8 @@ class XPathParser {
           return new NumericExpr((double) value * (double) exp);
         }
         
-	unread();
-	return new NumericExpr((double) value / (double) exp);
+        unread();
+        return new NumericExpr((double) value / (double) exp);
       }
 
     case '-':
@@ -829,11 +829,11 @@ class XPathParser {
 
     case '(':
       {
-	Expr expr = parseExpr(parent, listParent);
-	if ((ch = skipWhitespace(read())) != ')')
-	  throw error(L.l("expected `{0}' at {1}", ")", badChar(ch)));
-	
-	return expr;
+        Expr expr = parseExpr(parent, listParent);
+        if ((ch = skipWhitespace(read())) != ')')
+          throw error(L.l("expected `{0}' at {1}", ")", badChar(ch)));
+
+        return expr;
       }
 
     case '/': case '@': case '*':
@@ -842,8 +842,8 @@ class XPathParser {
 
     case '\'': case '"':
       {
-	int end = ch;
-	CharBuffer cb = new CharBuffer();
+        int end = ch;
+        CharBuffer cb = new CharBuffer();
         for (ch = read(); ch >= 0; ch = read()) {
           if (ch != end)
             cb.append((char) ch);
@@ -855,18 +855,18 @@ class XPathParser {
           }
         }
 
-	return new StringExpr(cb.toString());
+        return new StringExpr(cb.toString());
       }
 
     case '$':
       {
-	String name = readName(read());
-	return new VarExpr(name);
+        String name = readName(read());
+        return new VarExpr(name);
       }
 
     default:
       if (! XmlChar.isNameStart(ch))
-	throw error(L.l("unknown character at {0}", badChar(ch)));
+        throw error(L.l("unknown character at {0}", badChar(ch)));
 
       String name = readName(ch);
 
@@ -875,18 +875,18 @@ class XPathParser {
 
       // make sure axis are treated as node sets
       if (ch == '(' && axisIndex < 0) {
-	return parseFunction(parent, listParent, name, true);
+        return parseFunction(parent, listParent, name, true);
       }
       else if (ch == '(') {
-	String axis = name.substring(0, axisIndex);
-	if (axisMap.get(axis) <= 0)
-	  return parseFunction(parent, listParent, name, true);
+        String axis = name.substring(0, axisIndex);
+        if (axisMap.get(axis) <= 0)
+          return parseFunction(parent, listParent, name, true);
       }
       
       unread();
 
       if (parent == null)
-	parent = new FromContext();
+        parent = new FromContext();
       return parseNodeSetExpr(parent, name, Node.ELEMENT_NODE);
     }
   }
@@ -900,7 +900,7 @@ class XPathParser {
   Expr parseFunction(AbstractPattern parent,
                      AbstractPattern listParent,
                      String name,
-		     boolean fromChildren)
+                     boolean fromChildren)
     throws XPathParseException
   {
     int ch = skipWhitespace(read());
@@ -909,7 +909,7 @@ class XPathParser {
 
     for (; ch >= 0 && ch != ')'; ch = skipWhitespace(read())) {
       if (ch != ',')
-	unread();
+        unread();
       Expr expr = parseExpr(parent, listParent);
 
       if (expr == null)
@@ -935,7 +935,7 @@ class XPathParser {
 
     case Expr.COUNT: case Expr.SUM:
       if (args.size() == 0)
-	args.add(NodeSetExpr.create(new FromContext()));
+        args.add(NodeSetExpr.create(new FromContext()));
       return new NumericExpr(code, ((Expr) args.get(0)).toNodeList());
 
 
@@ -952,16 +952,16 @@ class XPathParser {
     case Expr.LOCAL_PART: case Expr.NAMESPACE:
     case Expr.QNAME: case Expr.GENERATE_ID:
       if (args.size() == 0)
-	args.add(NodeSetExpr.create(new FromContext()));
+        args.add(NodeSetExpr.create(new FromContext()));
       return new StringExpr(code, args);
 
     case Expr.ID:
       if (args.size() == 0) {
-	args.add(NodeSetExpr.create(parent));
-	return new IdExpr(args);
+        args.add(NodeSetExpr.create(parent));
+        return new IdExpr(args);
       }
       else
-	return new IdExpr(args);
+        return new IdExpr(args);
 
     case Expr.IF:
       if (args.size() != 3)
@@ -977,42 +977,42 @@ class XPathParser {
 
     case TEXT:
       if (fromChildren)
-	parent = new FromChildren(parent);
+        parent = new FromChildren(parent);
       AbstractPattern pattern = NodeTypePattern.create(parent, Node.TEXT_NODE);
       return NodeSetExpr.create(pattern);
 
     case COMMENT:
       if (fromChildren)
-	parent = new FromChildren(parent);
+        parent = new FromChildren(parent);
       pattern = NodeTypePattern.create(parent, Node.COMMENT_NODE);
       return NodeSetExpr.create(pattern);
 
     case ER:
       if (fromChildren)
-	parent = new FromChildren(parent);
+        parent = new FromChildren(parent);
       pattern = NodeTypePattern.create(parent, Node.ENTITY_REFERENCE_NODE);
       return NodeSetExpr.create(pattern);
 
     case PI:
       if (fromChildren)
-	parent = new FromChildren(parent);
+        parent = new FromChildren(parent);
       if (args.size() == 1) {
-	Expr expr = (Expr) args.get(0);
-	String value = null;
-	if (expr instanceof StringExpr)
-	  value = ((StringExpr) expr).getValue();
-	if (value == null)
-	  throw error(L.l("processing-instruction expects string literal"));
-	pattern = new NodePattern(parent, value,
-				  Node.PROCESSING_INSTRUCTION_NODE);
+        Expr expr = (Expr) args.get(0);
+        String value = null;
+        if (expr instanceof StringExpr)
+          value = ((StringExpr) expr).getValue();
+        if (value == null)
+          throw error(L.l("processing-instruction expects string literal"));
+        pattern = new NodePattern(parent, value,
+                                  Node.PROCESSING_INSTRUCTION_NODE);
       }
       else
-	pattern = NodeTypePattern.create(parent, Node.PROCESSING_INSTRUCTION_NODE);
+        pattern = NodeTypePattern.create(parent, Node.PROCESSING_INSTRUCTION_NODE);
       return NodeSetExpr.create(pattern);
 
     case NODE:
       if (fromChildren)
-	parent = new FromChildren(parent);
+        parent = new FromChildren(parent);
       pattern = NodeTypePattern.create(parent, NodeTypePattern.NODE);
       return NodeSetExpr.create(pattern);
 
@@ -1026,7 +1026,7 @@ class XPathParser {
       Expr function = constructorFunction(name, args);
 
       if (function != null)
-	return function;
+        return function;
       
       int p = name.lastIndexOf(':');
       String prefix;
@@ -1034,16 +1034,16 @@ class XPathParser {
       if (p > 0)
         prefix = name.substring(0, p);
       else
-	prefix = "";
+        prefix = "";
       
       String context = NamespaceContext.find(_namespace, prefix);
 
       if (context == null) {
       }
       else if (context.startsWith("java:"))
-	name = context + "." + name.substring(p + 1);
+        name = context + "." + name.substring(p + 1);
       else if (context.indexOf(':') < 0)
-	name = "java:" + context + "." + name.substring(p + 1);
+        name = "java:" + context + "." + name.substring(p + 1);
       
       if (name.startsWith("java:")) {
         p = name.lastIndexOf('.');
@@ -1106,7 +1106,7 @@ class XPathParser {
         return new StaticJavaExpr(method, args);
       }
       else if (name.equals(""))
-	throw error(L.l("expected node-test at `{0}'", "("));
+        throw error(L.l("expected node-test at `{0}'", "("));
 
       return new FunExpr(name, parent, args);
     }
@@ -1124,7 +1124,7 @@ class XPathParser {
 
     if (params.length < args.size())
       throw error(L.l("`{0}' needs {1} arguments",
-		      name, "" + params.length));
+                      name, "" + params.length));
 
     Object []values = new Object[params.length];
     
@@ -1172,44 +1172,44 @@ class XPathParser {
     case '!':
       ch = read();
       if (ch == '=')
-	return Expr.NEQ;
+        return Expr.NEQ;
       else
-	throw error(L.l("expected `{0}' at {1}", "=", badChar(ch)));
+        throw error(L.l("expected `{0}' at {1}", "=", badChar(ch)));
 
     case '<':
       ch = read();
       if (ch == '=')
-	return Expr.LE;
+        return Expr.LE;
       else {
-	unread();
-	return Expr.LT;
+        unread();
+        return Expr.LT;
       }
 
     case '>':
       ch = read();
       if (ch == '=')
-	return Expr.GE;
+        return Expr.GE;
       else {
-	unread();
-	return Expr.GT;
+        unread();
+        return Expr.GT;
       }
 
     default:
       if (XmlChar.isNameStart(ch)) {
-	String name = readName(ch);
+        String name = readName(ch);
 
-	if (name.equals("div"))
-	  return Expr.DIV;
-	else if (name.equals("quo"))
-	  return Expr.QUO;
-	else if (name.equals("mod"))
-	  return Expr.MOD;
-	else if (name.equals("and"))
-	  return Expr.AND;
-	else if (name.equals("or"))
-	  return Expr.OR;
-	else
-	  throw error(L.l("expected binary operation at `{0}'", name));
+        if (name.equals("div"))
+          return Expr.DIV;
+        else if (name.equals("quo"))
+          return Expr.QUO;
+        else if (name.equals("mod"))
+          return Expr.MOD;
+        else if (name.equals("and"))
+          return Expr.AND;
+        else if (name.equals("or"))
+          return Expr.OR;
+        else
+          throw error(L.l("expected binary operation at `{0}'", name));
       }
 
       unread();

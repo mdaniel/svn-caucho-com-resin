@@ -152,19 +152,19 @@ public class IdExpr extends Expr {
     
     while ((ptr = XmlUtil.getNext(ptr)) != null) {
       if (ptr instanceof Element) {
-	Element elt = (Element) ptr;
+        Element elt = (Element) ptr;
 
-	QDocumentType dtd;
-	dtd = (QDocumentType) elt.getOwnerDocument().getDoctype();
-	String id = null;
-	if (dtd != null)
-	  id = (String) dtd.getElementId(elt.getNodeName());
+        QDocumentType dtd;
+        dtd = (QDocumentType) elt.getOwnerDocument().getDoctype();
+        String id = null;
+        if (dtd != null)
+          id = (String) dtd.getElementId(elt.getNodeName());
 
-	if (id != null) {
-	  String idValue = elt.getAttribute(id);
-	  if (idList.contains(idValue) && ! list.contains(elt))
-	    list.add(elt);
-	}
+        if (id != null) {
+          String idValue = elt.getAttribute(id);
+          if (idList.contains(idValue) && ! list.contains(elt))
+            list.add(elt);
+        }
       }
     }
 
@@ -190,7 +190,7 @@ public class IdExpr extends Expr {
 
       int length = list.getLength();
       for (int i = 0; i < length; i++) {
-	Node value = list.item(i);
+        Node value = list.item(i);
 
         addText(idList, XmlUtil.textValue(value));
       }
@@ -199,7 +199,7 @@ public class IdExpr extends Expr {
       ArrayList list = (ArrayList) obj;
 
       for (int i = 0; i < list.size(); i++) {
-	Node value = (Node) list.get(i);
+        Node value = (Node) list.get(i);
 
         addText(idList, XmlUtil.textValue(value));
       }
@@ -208,9 +208,9 @@ public class IdExpr extends Expr {
       Iterator iter = (Iterator) obj;
 
       while (iter.hasNext()) {
-	Node value = (Node) iter.next();
+        Node value = (Node) iter.next();
 
-	addText(idList, XmlUtil.textValue(value));
+        addText(idList, XmlUtil.textValue(value));
       }
     }
     else
@@ -234,7 +234,7 @@ public class IdExpr extends Expr {
     while (i < len) {
       cb.clear();
       for (; i < len && ! XmlChar.isWhitespace(text.charAt(i)); i++)
-	cb.append(text.charAt(i));
+        cb.append(text.charAt(i));
 
       idList.add(cb.toString());
 

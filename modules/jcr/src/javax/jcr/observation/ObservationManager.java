@@ -33,12 +33,12 @@ import javax.jcr.RepositoryException;
 
 public interface ObservationManager {
   public void addEventListener(EventListener listener,
-			       int eventTypes,
-			       String absPath,
-			       boolean isDeep,
-			       String[] uuid,
-			       String[] nodeTypeName,
-			       boolean noLocal)
+                               int eventTypes,
+                               String absPath,
+                               boolean isDeep,
+                               String[] uuid,
+                               String[] nodeTypeName,
+                               boolean noLocal)
     throws RepositoryException;
   
   public void removeEventListener(EventListener listener)

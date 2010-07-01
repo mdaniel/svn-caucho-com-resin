@@ -65,9 +65,9 @@ public class WebAppVersioningController extends WebAppController {
   private AtomicBoolean _isUpdating = new AtomicBoolean();
 
   public WebAppVersioningController(String versionContextPath,
-				    String baseContextPath,
-				    WebAppExpandDeployGenerator generator,
-				    WebAppContainer container)
+                                    String baseContextPath,
+                                    WebAppExpandDeployGenerator generator,
+                                    WebAppContainer container)
   {
     super(versionContextPath, baseContextPath, null, container);
 
@@ -244,57 +244,57 @@ public class WebAppVersioningController extends WebAppController {
       int indexB = 0;
 
       while (indexA < lengthA && indexB < lengthB) {
-	int valueA = 0;
-	int valueB = 0;
-	char chA;
-	char chB;
+        int valueA = 0;
+        int valueB = 0;
+        char chA;
+        char chB;
 
-	for (;
-	     indexA < lengthA
-	       && '0' <= (chA = versionA.charAt(indexA)) && chA <= '9';
-	     indexA++) {
-	  valueA = 10 * valueA + chA - '0';
-	}
+        for (;
+             indexA < lengthA
+               && '0' <= (chA = versionA.charAt(indexA)) && chA <= '9';
+             indexA++) {
+          valueA = 10 * valueA + chA - '0';
+        }
 
-	for (;
-	     indexB < lengthB
-	       && '0' <= (chB = versionB.charAt(indexB)) && chB <= '9';
-	     indexB++) {
-	  valueB = 10 * valueB + chB - '0';
-	}
+        for (;
+             indexB < lengthB
+               && '0' <= (chB = versionB.charAt(indexB)) && chB <= '9';
+             indexB++) {
+          valueB = 10 * valueB + chB - '0';
+        }
 
-	if (valueA < valueB)
-	  return 1;
-	else if (valueB < valueA)
-	  return -1;
+        if (valueA < valueB)
+          return 1;
+        else if (valueB < valueA)
+          return -1;
 
-	while (indexA < lengthA && indexB < lengthB
-	       && ! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9')
-	       && ! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9')) {
+        while (indexA < lengthA && indexB < lengthB
+               && ! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9')
+               && ! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9')) {
 
-	  if (chA < chB)
-	    return 1;
-	  else if (chB < chA)
-	    return -1;
+          if (chA < chB)
+            return 1;
+          else if (chB < chA)
+            return -1;
 
-	  indexA++;
-	  indexB++;
-	}
+          indexA++;
+          indexB++;
+        }
 
-	if (indexA < lengthA
-	    && ! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9'))
-	  return 1;
-	else if (indexB < lengthB
-		 && ! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9'))
-	  return -1;
+        if (indexA < lengthA
+            && ! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9'))
+          return 1;
+        else if (indexB < lengthB
+                 && ! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9'))
+          return -1;
       }
 
       if (indexA != lengthA)
-	return 1;
+        return 1;
       else if (indexB != lengthB)
-	return -1;
+        return -1;
       else
-	return 0;
+        return 0;
     }
   }
 }

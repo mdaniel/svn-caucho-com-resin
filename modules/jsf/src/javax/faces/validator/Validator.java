@@ -37,7 +37,7 @@ public interface Validator extends java.util.EventListener
     = "javax.faces.validator.NOT_IN_RANGE";
 
   public void validate(FacesContext context,
-		       UIComponent component,
-		       Object value)
+                       UIComponent component,
+                       Object value)
     throws ValidatorException;
 }

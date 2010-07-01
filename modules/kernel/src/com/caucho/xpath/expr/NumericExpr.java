@@ -179,16 +179,16 @@ public class NumericExpr extends Expr {
 
     case QUO: 
       return (int) (_left.evalNumber(node, env) /
-		    _right.evalNumber(node, env));
+                    _right.evalNumber(node, env));
 
     case MOD:
       return (_left.evalNumber(node, env) % _right.evalNumber(node, env));
 
     case NUMBER:
       if (_left != null)
-	return _left.evalNumber(node, env);
+        return _left.evalNumber(node, env);
       else
-	return toDouble(node);
+        return toDouble(node);
 
     case FLOOR:
       return Math.floor(_left.evalNumber(node, env));
@@ -214,9 +214,9 @@ public class NumericExpr extends Expr {
     case STRING_LENGTH:
       String str = _left.evalString(node, env);
       if (str == null)
-	return 0;
+        return 0;
       else
-	return str.length();
+        return str.length();
 
     default:
       throw new RuntimeException("unknown code: " + (char) _code);

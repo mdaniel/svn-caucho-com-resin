@@ -46,19 +46,19 @@ public class LifecycleNotification extends Notification {
   }
   
   public LifecycleNotification(String type, Object source, long sequence,
-			       long timestamp)
+                               long timestamp)
   {
     super(type, source, sequence, timestamp);
   }
   
   public LifecycleNotification(String type, Object source, long sequence,
-			       long timestamp, String message)
+                               long timestamp, String message)
   {
     super(type, source, sequence, timestamp, message);
   }
   
   public LifecycleNotification(String type, Object source, long sequence,
-			       String message)
+                               String message)
   {
     super(type, source, sequence, Alarm.getCurrentTime(), message);
   }

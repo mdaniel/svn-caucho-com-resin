@@ -162,44 +162,44 @@ public class SubversionClient {
       int ch = _in.read();
 
       if (ch == '(') {
-	String name = _in.readString();
-	String type = _in.readLiteral();
-	long length = _in.readLong();
-	boolean bValue = ! "false".equals(_in.readLiteral());
-	long version = _in.readLong();
+        String name = _in.readString();
+        String type = _in.readLiteral();
+        long length = _in.readLong();
+        boolean bValue = ! "false".equals(_in.readLiteral());
+        long version = _in.readLong();
 
-	_in.expect('(');
-	String modified = _in.readString();
-	_in.expect(')');
-	
-	_in.expect('(');
-	String user = _in.readString();
-	_in.expect(')');
-	_in.expect(')');
+        _in.expect('(');
+        String modified = _in.readString();
+        _in.expect(')');
 
-	SubversionNode node;
+        _in.expect('(');
+        String user = _in.readString();
+        _in.expect(')');
+        _in.expect(')');
 
-	if ("dir".equals(type))
-	  node = new SubversionFolder(name);
-	else if ("file".equals(type)) {
-	  SubversionFile file = new SubversionFile(name);
-	  file.setLength(length);
-	  node = file;
-	}
-	else
-	  node = new SubversionNode(name);
-	
-	node.setVersion(version);
-	node.setUser(user);
+        SubversionNode node;
 
-	results.add(node);
+        if ("dir".equals(type))
+          node = new SubversionFolder(name);
+        else if ("file".equals(type)) {
+          SubversionFile file = new SubversionFile(name);
+          file.setLength(length);
+          node = file;
+        }
+        else
+          node = new SubversionNode(name);
+
+        node.setVersion(version);
+        node.setUser(user);
+
+        results.add(node);
       }
       else if (ch == ')')
-	break;
+        break;
       else {
-	throw error(L.l("Expected '(' at {0} (0x{1})",
-			String.valueOf(ch),
-			Integer.toHexString(ch)));
+        throw error(L.l("Expected '(' at {0} (0x{1})",
+                        String.valueOf(ch),
+                        Integer.toHexString(ch)));
       }
     }
       
@@ -215,18 +215,18 @@ public class SubversionClient {
     boolean recurse = true;
     
     println("( update ( " +
-	    " ( " + version + " ) " +
-	    s.length() + ":" + s + " " +
-	    recurse + " ) )");
+            " ( " + version + " ) " +
+            s.length() + ":" + s + " " +
+            recurse + " ) )");
     
     readSuccess();
     
     boolean startEmpty = true;
     
     println("( set-path ( " +
-	    s.length() + ":" + s + " " +
-	    version + " " +
-	    startEmpty + " ) )");
+            s.length() + ":" + s + " " +
+            version + " " +
+            startEmpty + " ) )");
     
     println("( finish-report ( ) )");
     
@@ -242,7 +242,7 @@ public class SubversionClient {
       System.out.println("CMD: " + cmd);
 
       if ("close-edit".equals(cmd))
-	break;
+        break;
     }
     
     return "ok";
@@ -254,9 +254,9 @@ public class SubversionClient {
     boolean startEmpty = true;
     
     println("( set-path ( " +
-	    s.length() + ":" + s + " " +
-	    version + " " +
-	    startEmpty + " ) )");
+            s.length() + ":" + s + " " +
+            version + " " +
+            startEmpty + " ) )");
     
     println("( finish-report ( ) )");
     
@@ -342,7 +342,7 @@ public class SubversionClient {
 
     if (! "success".equals(token))
       throw error(L.l("Expected 'success' at {0}",
-		      token));
+                      token));
   }
 
   private void println(String msg)
@@ -371,7 +371,7 @@ public class SubversionClient {
 
     if (os != null) {
       try {
-	os.close();
+        os.close();
       } catch (IOException e) {
       }
     }

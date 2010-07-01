@@ -92,52 +92,52 @@ public class TimestampFormatter extends Formatter {
       char ch = timestamp.charAt(i);
 
       if (ch == '%') {
-	ch = timestamp.charAt(i + 1);
-	switch (ch) {
-	case 'a': case 'A': case 'b': case 'B': case 'c': case 'd':
-	case 'H': case 'I': case 'j': case 'm': case 'M': case 'p':
-	case 'S': case 's': case 'W': case 'w': case 'x': case 'X':
-	case 'y': case 'Y': case 'Z': case 'z':
-	  if (sb.length() > 0)
-	    timestampList.add(new Text(sb.toString()));
-	  sb.setLength(0);
-	  timestampList.add(new Code(ch));
-	  i++;
-	  break;
+        ch = timestamp.charAt(i + 1);
+        switch (ch) {
+        case 'a': case 'A': case 'b': case 'B': case 'c': case 'd':
+        case 'H': case 'I': case 'j': case 'm': case 'M': case 'p':
+        case 'S': case 's': case 'W': case 'w': case 'x': case 'X':
+        case 'y': case 'Y': case 'Z': case 'z':
+          if (sb.length() > 0)
+            timestampList.add(new Text(sb.toString()));
+          sb.setLength(0);
+          timestampList.add(new Code(ch));
+          i++;
+          break;
 
-	case '{':
-	  if (sb.length() > 0)
-	    timestampList.add(new Text(sb.toString()));
-	  sb.setLength(0);
-	  for (i += 2;
-	       i < timestamp.length() && timestamp.charAt(i) != '}';
-	       i++) {
-	    sb.append((char) timestamp.charAt(i));
-	  }
-	  String type = sb.toString();
-	  sb.setLength(0);
+        case '{':
+          if (sb.length() > 0)
+            timestampList.add(new Text(sb.toString()));
+          sb.setLength(0);
+          for (i += 2;
+               i < timestamp.length() && timestamp.charAt(i) != '}';
+               i++) {
+            sb.append((char) timestamp.charAt(i));
+          }
+          String type = sb.toString();
+          sb.setLength(0);
 
-	  if ("thread".equals(type)) {
-	    timestampList.add(new ThreadTimestamp());
-	  }
-	  else if ("level".equals(type)) {
-	    timestampList.add(new LevelTimestamp());
-	  }
-	  else if ("env".equals(type)) {
-	    timestampList.add(new EnvTimestamp());
-	  }
-	  else {
-	    sb.append("%{" + type + "}");
-	  }
-	  break;
-	  
-	default:
-	  sb.append('%');
-	  break;
-	}
+          if ("thread".equals(type)) {
+            timestampList.add(new ThreadTimestamp());
+          }
+          else if ("level".equals(type)) {
+            timestampList.add(new LevelTimestamp());
+          }
+          else if ("env".equals(type)) {
+            timestampList.add(new EnvTimestamp());
+          }
+          else {
+            sb.append("%{" + type + "}");
+          }
+          break;
+
+        default:
+          sb.append('%');
+          break;
+        }
       }
       else
-	sb.append(ch);
+        sb.append(ch);
     }
 
     if (sb.length() > 0)
@@ -169,7 +169,7 @@ public class TimestampFormatter extends Formatter {
     QDate localDate = QDate.allocateLocalDate();
 
     localDate.setGMTTime(now);
-	  
+
     int len = _timestamp.length;
     for (int j = 0; j < len; j++) {
       _timestamp[j].format(sb, localDate, log);
@@ -216,88 +216,88 @@ public class TimestampFormatter extends Formatter {
     {
       switch (_code) {
       case 'a':
-	sb.append(SHORT_WEEKDAY[cal.getDayOfWeek() - 1]);
-	break;
+        sb.append(SHORT_WEEKDAY[cal.getDayOfWeek() - 1]);
+        break;
 
       case 'A':
-	sb.append(LONG_WEEKDAY[cal.getDayOfWeek() - 1]);
-	break;
+        sb.append(LONG_WEEKDAY[cal.getDayOfWeek() - 1]);
+        break;
 
       case 'b':
-	sb.append(SHORT_MONTH[cal.getMonth()]);
-	break;
+        sb.append(SHORT_MONTH[cal.getMonth()]);
+        break;
 
       case 'B':
-	sb.append(LONG_MONTH[cal.getMonth()]);
-	break;
+        sb.append(LONG_MONTH[cal.getMonth()]);
+        break;
 
       case 'c':
-	sb.append(cal.printLocaleDate());
-	break;
+        sb.append(cal.printLocaleDate());
+        break;
 
       case 'd':
-	sb.append((cal.getDayOfMonth()) / 10);
-	sb.append((cal.getDayOfMonth()) % 10);
-	break;
+        sb.append((cal.getDayOfMonth()) / 10);
+        sb.append((cal.getDayOfMonth()) % 10);
+        break;
 
       case 'H':
-	int hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
-	sb.append(hour / 10);
-	sb.append(hour % 10);
-	break;
+        int hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
+        sb.append(hour / 10);
+        sb.append(hour % 10);
+        break;
 
       case 'I':
-	hour = (int) (cal.getTimeOfDay() / 3600000) % 12;
-	if (hour == 0)
-	  hour = 12;
-	sb.append(hour / 10);
-	sb.append(hour % 10);
-	break;
+        hour = (int) (cal.getTimeOfDay() / 3600000) % 12;
+        if (hour == 0)
+          hour = 12;
+        sb.append(hour / 10);
+        sb.append(hour % 10);
+        break;
 
       case 'j':
-	sb.append((cal.getDayOfYear() + 1) / 100);
-	sb.append((cal.getDayOfYear() + 1) / 10 % 10);
-	sb.append((cal.getDayOfYear() + 1) % 10);
-	break;
+        sb.append((cal.getDayOfYear() + 1) / 100);
+        sb.append((cal.getDayOfYear() + 1) / 10 % 10);
+        sb.append((cal.getDayOfYear() + 1) % 10);
+        break;
 
       case 'm':
-	sb.append((cal.getMonth() + 1) / 10);
-	sb.append((cal.getMonth() + 1) % 10);
-	break;
+        sb.append((cal.getMonth() + 1) / 10);
+        sb.append((cal.getMonth() + 1) % 10);
+        break;
 
       case 'M':
-	sb.append((cal.getTimeOfDay() / 600000) % 6);
-	sb.append((cal.getTimeOfDay() / 60000) % 10);
-	break;
+        sb.append((cal.getTimeOfDay() / 600000) % 6);
+        sb.append((cal.getTimeOfDay() / 60000) % 10);
+        break;
 
       case 'p':
-	hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
-	if (hour < 12)
-	  sb.append("am");
-	else
-	  sb.append("pm");
-	break;
+        hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
+        if (hour < 12)
+          sb.append("am");
+        else
+          sb.append("pm");
+        break;
 
       case 'S':
-	sb.append((cal.getTimeOfDay() / 10000) % 6);
-	sb.append((cal.getTimeOfDay() / 1000) % 10);
-	break;
+        sb.append((cal.getTimeOfDay() / 10000) % 6);
+        sb.append((cal.getTimeOfDay() / 1000) % 10);
+        break;
 
       case 's':
-	sb.append((cal.getTimeOfDay() / 100) % 10);
-	sb.append((cal.getTimeOfDay() / 10) % 10);
-	sb.append(cal.getTimeOfDay() % 10);
-	break;
+        sb.append((cal.getTimeOfDay() / 100) % 10);
+        sb.append((cal.getTimeOfDay() / 10) % 10);
+        sb.append(cal.getTimeOfDay() % 10);
+        break;
 
       case 'W':
-	int week = cal.getWeek();
-	sb.append((week + 1) / 10);
-	sb.append((week + 1) % 10);
-	break;
+        int week = cal.getWeek();
+        sb.append((week + 1) / 10);
+        sb.append((week + 1) % 10);
+        break;
 
       case 'w':
-	sb.append(cal.getDayOfWeek() - 1);
-	break;
+        sb.append(cal.getDayOfWeek() - 1);
+        break;
 
       case 'x':
         sb.append(cal.printShortLocaleDate());
@@ -308,29 +308,29 @@ public class TimestampFormatter extends Formatter {
         break;
     
       case 'y':
-	{
-	  int year = cal.getYear();
-	  sb.append(year / 10 % 10);
-	  sb.append(year % 10);
-	  break;
-	}
+        {
+          int year = cal.getYear();
+          sb.append(year / 10 % 10);
+          sb.append(year % 10);
+          break;
+        }
 
       case 'Y':
-	{
-	  int year = cal.getYear();
-	  sb.append(year / 1000 % 10);
-	  sb.append(year / 100 % 10);
-	  sb.append(year / 10 % 10);
-	  sb.append(year % 10);
-	  break;
-	}
+        {
+          int year = cal.getYear();
+          sb.append(year / 1000 % 10);
+          sb.append(year / 100 % 10);
+          sb.append(year / 10 % 10);
+          sb.append(year % 10);
+          break;
+        }
 
       case 'Z':
         if (cal.getZoneName() == null)
           sb.append("GMT");
         else
           sb.append(cal.getZoneName());
-	break;
+        break;
 
       case 'z':
         long offset = cal.getZoneOffset();
@@ -346,7 +346,7 @@ public class TimestampFormatter extends Formatter {
         sb.append((offset / 3600000) % 10);
         sb.append((offset / 600000) % 6);
         sb.append((offset / 60000) % 10);
-	break;
+        break;
       }
     }
   }

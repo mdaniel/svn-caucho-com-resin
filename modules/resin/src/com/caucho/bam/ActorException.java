@@ -62,7 +62,7 @@ public class ActorException extends RuntimeException {
   public ActorError createActorError()
   {
     return new ActorError(ActorError.TYPE_CANCEL,
-			  ActorError.INTERNAL_SERVER_ERROR,
-			  toString());
+                          ActorError.INTERNAL_SERVER_ERROR,
+                          toString());
   }
 }

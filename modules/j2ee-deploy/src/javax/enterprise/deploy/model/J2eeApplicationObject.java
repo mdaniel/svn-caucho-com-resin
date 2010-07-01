@@ -63,14 +63,14 @@ public interface J2eeApplicationObject extends DeployableObject {
    * Adds a listener for changes in the xpath.
    */
   public void addXpathListener(ModuleType type,
-			       String xpath,
-			       XpathListener xpl);
+                               String xpath,
+                               XpathListener xpl);
   
   /**
    * Removes a listener for changes in the xpath.
    */
   public void removeXpathListener(ModuleType type,
-				  String xpath,
-				  XpathListener xpl);
+                                  String xpath,
+                                  XpathListener xpl);
 }
 

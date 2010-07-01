@@ -184,14 +184,14 @@ public class ScriptEngineManager {
       Enumeration resources = loader.getResources("META-INF/services/javax.script.ScriptEngineFactory");
 
       while (resources.hasMoreElements()) {
-	URL url = (URL) resources.nextElement();
+        URL url = (URL) resources.nextElement();
 
-	InputStream is = url.openStream();
-	try {
-	  readFactoryFile(is);
-	} finally {
-	  is.close();
-	}
+        InputStream is = url.openStream();
+        try {
+          readFactoryFile(is);
+        } finally {
+          is.close();
+        }
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -211,12 +211,12 @@ public class ScriptEngineManager {
       int p = line.indexOf('#');
 
       if (p >= 0)
-	line = line.substring(0, p);
+        line = line.substring(0, p);
 
       line = line.trim();
 
       if (line.length() > 0) {
-	addFactoryClass(line);
+        addFactoryClass(line);
       }
     }
   }
@@ -235,22 +235,22 @@ public class ScriptEngineManager {
       ScriptEngineFactory factory = (ScriptEngineFactory) cl.newInstance();
 
       if (this.engineSpis.contains(cl))
-	return;
+        return;
 
       _engineFactories.add(factory);
 
       this.engineSpis.add(cl);
 
       for (String name : factory.getNames()) {
-	registerEngineName(name, cl);
+        registerEngineName(name, cl);
       }
 
       for (String mimeType : factory.getMimeTypes()) {
-	registerEngineMimeType(mimeType, cl);
+        registerEngineMimeType(mimeType, cl);
       }
 
       for (String ext : factory.getExtensions()) {
-	registerEngineExtension(ext, cl);
+        registerEngineExtension(ext, cl);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -286,7 +286,7 @@ public class ScriptEngineManager {
       factory = (ScriptEngineFactory) _engineFactories.get(i);
 
       if (factory.getClass().equals(cl))
-	return factory;
+        return factory;
     }
 
     return null;

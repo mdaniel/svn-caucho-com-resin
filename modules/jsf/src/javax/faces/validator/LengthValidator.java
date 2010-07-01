@@ -92,8 +92,8 @@ public class LengthValidator
   }
 
   public void validate(FacesContext context,
-		       UIComponent component,
-		       Object value)
+                       UIComponent component,
+                       Object value)
     throws ValidatorException
   {
     if (context == null || component == null)
@@ -108,31 +108,31 @@ public class LengthValidator
 
     if (len < getMinimum()) {
       String summary = Util.l10n(context, MINIMUM_MESSAGE_ID,
-				 "{1}: Validation Error: Value is less than allowable minimum of '{0}'.",
-				 getMinimum(),
-				 Util.getLabel(context, component));
-	
+                                 "{1}: Validation Error: Value is less than allowable minimum of '{0}'.",
+                                 getMinimum(),
+                                 Util.getLabel(context, component));
+
       String detail = summary;
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
                                           detail);
-	
+
       throw new ValidatorException(msg);
     }
 
     if (getMaximum() < len) {
       String summary = Util.l10n(context, MAXIMUM_MESSAGE_ID,
-				 "{1}: Validation Error: Value is greater than allowable maximum of '{0}'.",
-				 getMaximum(),
-				 Util.getLabel(context, component));
-	
+                                 "{1}: Validation Error: Value is greater than allowable maximum of '{0}'.",
+                                 getMaximum(),
+                                 Util.getLabel(context, component));
+
       String detail = summary;
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
                                           detail);
-	
+
       throw new ValidatorException(msg);
     }
   }
@@ -165,6 +165,6 @@ public class LengthValidator
     LengthValidator validator = (LengthValidator) o;
 
     return (_minimum == validator._minimum
-	    && _maximum == validator._maximum);
+            && _maximum == validator._maximum);
   }
 }

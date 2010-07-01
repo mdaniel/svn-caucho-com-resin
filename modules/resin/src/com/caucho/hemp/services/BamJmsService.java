@@ -92,11 +92,11 @@ public class BamJmsService
   {
     if (_factory == null)
       throw new ConfigException(L.l("{0} requires a JMS ConnectionFactory",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
 
     if (_queue == null)
       throw new ConfigException(L.l("{0} requires a JMS destination",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
 
     _conn = _factory.createConnection();
     _session = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);

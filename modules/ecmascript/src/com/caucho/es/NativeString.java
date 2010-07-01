@@ -81,14 +81,14 @@ class NativeString extends Native {
   {
     NativeString nativeString = new NativeString("String", NEW, 1);
     ESObject stringProto = new ESWrapper("String", resin.objProto,
-					 ESString.NULL);
+                                         ESString.NULL);
     NativeWrapper string;
     string = new NativeWrapper(resin, nativeString,
-			       stringProto, ESThunk.STRING_THUNK);
+                               stringProto, ESThunk.STRING_THUNK);
     resin.stringProto = stringProto;
 
     stringProto.put("length", ESNumber.create(0), 
-		    DONT_ENUM|DONT_DELETE|READ_ONLY);
+                    DONT_ENUM|DONT_DELETE|READ_ONLY);
 
     put(stringProto, "valueOf", VALUE_OF, 0);
     put(stringProto, "toString", TO_STRING, 0);
@@ -136,9 +136,9 @@ class NativeString extends Native {
     switch (n) {
     case NEW:
       if (length == 0)
-	return ESString.create("");
+        return ESString.create("");
       else
-	return eval.getArg(0).toStr();
+        return eval.getArg(0).toStr();
 
     case FROM_CHAR_CODE:
       return fromCharCode(eval, length);
@@ -146,15 +146,15 @@ class NativeString extends Native {
     case VALUE_OF:
     case TO_STRING:
       try {
-	return (ESBase) ((ESWrapper) eval.getArg(-1)).value;
+        return (ESBase) ((ESWrapper) eval.getArg(-1)).value;
       } catch (ClassCastException e) {
-	if (eval.getArg(-1) instanceof ESString)
-	  return eval.getArg(-1);
+        if (eval.getArg(-1) instanceof ESString)
+          return eval.getArg(-1);
 
-	if (eval.getArg(-1) instanceof ESThunk)
-	  return (ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value;
+        if (eval.getArg(-1) instanceof ESThunk)
+          return (ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value;
 
-	throw new ESException("toString expects string object");
+        throw new ESException("toString expects string object");
       }
 
     case CHAR_AT:
@@ -204,27 +204,27 @@ class NativeString extends Native {
 
     case CONTAINS:
       if (length < 1)
-	return ESBoolean.FALSE;
+        return ESBoolean.FALSE;
       else
-	return eval.getArg(-1).toStr().contains(eval.getArg(0));
+        return eval.getArg(-1).toStr().contains(eval.getArg(0));
 
     case STARTS_WITH:
       if (length < 1)
-	return ESBoolean.FALSE;
+        return ESBoolean.FALSE;
       else
-	return eval.getArg(-1).toStr().startsWith(eval.getArg(0));
+        return eval.getArg(-1).toStr().startsWith(eval.getArg(0));
 
     case ENDS_WITH:
       if (length < 1)
-	return ESBoolean.FALSE;
+        return ESBoolean.FALSE;
       else
-	return eval.getArg(-1).toStr().endsWith(eval.getArg(0));
+        return eval.getArg(-1).toStr().endsWith(eval.getArg(0));
 
     case GET_BYTES:
       if (length < 1)
-	return eval.wrap(eval.getArgString(-1, length).getBytes());
+        return eval.wrap(eval.getArgString(-1, length).getBytes());
       else
-	return eval.wrap(eval.getArgString(-1, length).getBytes(eval.getArgString(0, length)));
+        return eval.wrap(eval.getArgString(-1, length).getBytes(eval.getArgString(0, length)));
 
     default:
       throw new ESException("Unknown object function");
@@ -335,12 +335,12 @@ class NativeString extends Native {
       case '\\': case '-': case '[': case ']': case '(': case ')': 
       case '$': case '^': case '|': case '?': case '*': case '{':
       case '}': case '.':
-	cb.append('\\');
-	cb.append((char) ch);
-	break;
+        cb.append('\\');
+        cb.append((char) ch);
+        break;
 
       default:
-	cb.append((char) ch);
+        cb.append((char) ch);
       }
     }
 
@@ -369,14 +369,14 @@ class NativeString extends Native {
       String []values = string.toString().split(arg);
 
       for (int i = 0; i < values.length; i++) {
-	array.setProperty(i, ESString.create(values[i]));
+        array.setProperty(i, ESString.create(values[i]));
       }
       
       /*
       if (arg.length() == 1 && arg.charAt(0) == ' ') {
-	splitter = new ESRegexp("\\s", "g");
+        splitter = new ESRegexp("\\s", "g");
       } else
-	splitter = new ESRegexp(escapeRegexp(arg), "g");
+        splitter = new ESRegexp(escapeRegexp(arg), "g");
       */
     }
 
@@ -455,8 +455,8 @@ class NativeString extends Native {
 
     if (! regexp.regexp.isGlobal()) {
       for (int i = 0; i < regexp.regexp.length(); i++) {
-	array.setProperty(i, string.substring(regexp.regexp.getBegin(i), 
-					      regexp.regexp.getEnd(i)));
+        array.setProperty(i, string.substring(regexp.regexp.getBegin(i),
+                                              regexp.regexp.getEnd(i)));
       }
 
       return array;
@@ -465,7 +465,7 @@ class NativeString extends Native {
     int i = 0;
     do {
       array.setProperty(i, string.substring(regexp.regexp.getBegin(0), 
-					    regexp.regexp.getEnd(0)));
+                                            regexp.regexp.getEnd(0)));
       i++;
     } while (regexp.exec(string));
 
@@ -475,7 +475,7 @@ class NativeString extends Native {
   }
 
   private void replaceFun(CharBuffer result, String pattern, 
-			  ESRegexp regexp, ESBase fun)
+                          ESRegexp regexp, ESBase fun)
     throws Throwable
   {
     /*
@@ -501,7 +501,7 @@ class NativeString extends Native {
 
   /*
   private void replaceString(CharBuffer result, String pattern, 
-			     Pattern regexp, String replacement)
+                             Pattern regexp, String replacement)
     throws Throwable
   {
     int len = replacement.length();
@@ -510,41 +510,41 @@ class NativeString extends Native {
       char ch = replacement.charAt(i);
       
       if (ch == '$' && i + 1 < len) {
-	i++;
-	ch = replacement.charAt(i);
+        i++;
+        ch = replacement.charAt(i);
 
-	if (ch >= '0' && ch <= '9') {
-	  int index = ch - '0';
+        if (ch >= '0' && ch <= '9') {
+          int index = ch - '0';
 
-	  if (index < regexp.length()) {
-	    int begin = regexp.getBegin(index);
-	    int end = regexp.getEnd(index);
-	    result.append(pattern.substring(begin, end));
-	  }
-	} else if (ch == '$')
-	  result.append('$');
-	else if (ch == '&') {
-	  int begin = regexp.getBegin(0);
-	  int end = regexp.getEnd(0);
-	  result.append(pattern.substring(begin, end));
-	} else if (ch == '+') {
-	  int begin = regexp.getBegin(regexp.length() - 1);
-	  int end = regexp.getEnd(regexp.length() - 1);
-	  result.append(pattern.substring(begin, end));
-	} else if (ch == '`') {
-	  int begin = 0;
-	  int end = regexp.getBegin(0);
-	  result.append(pattern.substring(begin, end));
-	} else if (ch == '\'') {
-	  int begin = regexp.getEnd(0);
-	  int end = pattern.length();
-	  result.append(pattern.substring(begin, end));
-	} else {
-	  result.append('$');
-	  result.append(ch);
-	}
+          if (index < regexp.length()) {
+            int begin = regexp.getBegin(index);
+            int end = regexp.getEnd(index);
+            result.append(pattern.substring(begin, end));
+          }
+        } else if (ch == '$')
+          result.append('$');
+        else if (ch == '&') {
+          int begin = regexp.getBegin(0);
+          int end = regexp.getEnd(0);
+          result.append(pattern.substring(begin, end));
+        } else if (ch == '+') {
+          int begin = regexp.getBegin(regexp.length() - 1);
+          int end = regexp.getEnd(regexp.length() - 1);
+          result.append(pattern.substring(begin, end));
+        } else if (ch == '`') {
+          int begin = 0;
+          int end = regexp.getBegin(0);
+          result.append(pattern.substring(begin, end));
+        } else if (ch == '\'') {
+          int begin = regexp.getEnd(0);
+          int end = pattern.length();
+          result.append(pattern.substring(begin, end));
+        } else {
+          result.append('$');
+          result.append(ch);
+        }
       } else {
-	result.append(ch);
+        result.append(ch);
       }
     }
   }
@@ -585,16 +585,16 @@ class NativeString extends Native {
       last = regexp.regexp.getEnd(0);
 
       if (replace instanceof ESClosure) {
-	replaceFun(result, pattern, regexp, replace);
+        replaceFun(result, pattern, regexp, replace);
       } else {
-	if (stringPattern == null)
-	  stringPattern = replace == null ? "" : replace.toString();
+        if (stringPattern == null)
+          stringPattern = replace == null ? "" : replace.toString();
 
-	replaceString(result, pattern, regexp.regexp, stringPattern);
+        replaceString(result, pattern, regexp.regexp, stringPattern);
       }
 
       if (! regexp.regexp.isGlobal())
-	break;
+        break;
 
     }
         result.append(pattern.substring(last));

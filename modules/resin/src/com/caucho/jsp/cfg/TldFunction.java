@@ -205,8 +205,8 @@ public class TldFunction {
   public FunctionInfo toFunctionInfo()
   {
     return new FunctionInfo(_name,
-			    _functionClass.getName(),
-			    _signature.getSignature());
+                            _functionClass.getName(),
+                            _signature.getSignature());
   }
 
   public String toString()

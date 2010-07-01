@@ -63,10 +63,10 @@ public class QueryError extends Packet {
    * @param error the query error
    */
   public QueryError(long id,
-		    String to,
-		    String from,
-		    Serializable value,
-		    ActorError error)
+                    String to,
+                    String from,
+                    Serializable value,
+                    ActorError error)
   {
     super(to, from);
 
@@ -106,7 +106,7 @@ public class QueryError extends Packet {
   public void dispatch(ActorStream handler, ActorStream toSource)
   {
     handler.queryError(getId(), getTo(), getFrom(),
-			   getValue(), getError());
+                           getValue(), getError());
   }
 
   @Override

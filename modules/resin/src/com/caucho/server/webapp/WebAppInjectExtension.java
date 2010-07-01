@@ -109,11 +109,11 @@ public class WebAppInjectExtension implements Extension
           = _beanManager.createBeanFactory(annotatedType);
 
           /*
-	  factory.name(bean.getName());
+          factory.name(bean.getName());
 
-	  for (Type type : bean.getTypes()) {
-	    factory.type(type);
-	  }
+          for (Type type : bean.getTypes()) {
+            factory.type(type);
+          }
 
            */
           for (Annotation binding : annotated.getAnnotations()) {

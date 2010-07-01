@@ -136,13 +136,13 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   {
     synchronized (_streams) {
       for (WeakReference<RotateStream> streamRef : _streams.values()) {
-	try {
-	  RotateStream stream = streamRef.get();
+        try {
+          RotateStream stream = streamRef.get();
 
-	  if (stream != null)
-	    stream.closeImpl();
-	} catch (Throwable e) {
-	}
+          if (stream != null)
+            stream.closeImpl();
+        } catch (Throwable e) {
+        }
       }
       
       _streams.clear();
@@ -150,13 +150,13 @@ public class RotateStream extends StreamImpl implements AlarmListener {
     
     synchronized (_formatStreams) {
       for (WeakReference<RotateStream> streamRef : _formatStreams.values()) {
-	try {
-	  RotateStream stream = streamRef.get();
+        try {
+          RotateStream stream = streamRef.get();
 
-	  if (stream != null)
-	    stream.closeImpl();
-	} catch (Throwable e) {
-	}
+          if (stream != null)
+            stream.closeImpl();
+        } catch (Throwable e) {
+        }
       }
       
       _formatStreams.clear();
@@ -208,7 +208,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   {
     synchronized (this) {
       if (_isInit)
-	return;
+        return;
       _isInit = true;
     }
 
@@ -289,15 +289,15 @@ public class RotateStream extends StreamImpl implements AlarmListener {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (! _isClosed) {
-	long nextTime = _rolloverLog.getNextRolloverCheckTime();
-	long now = Alarm.getCurrentTime();
+        long nextTime = _rolloverLog.getNextRolloverCheckTime();
+        long now = Alarm.getCurrentTime();
 
-	long delta = nextTime - now;
+        long delta = nextTime - now;
 
-	if (delta < 60000)
-	  delta = 60000;
-	
-	_alarm.queue(delta);
+        if (delta < 60000)
+          delta = 60000;
+
+        _alarm.queue(delta);
       }
     }
   }

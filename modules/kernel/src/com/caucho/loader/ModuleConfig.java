@@ -64,7 +64,7 @@ public class ModuleConfig
   {
     if (! path.getTail().endsWith(".jar"))
       throw new ConfigException(L.l("module path='{0}' must be a jar file.",
-				    path));
+                                    path));
 
     _path = path;
   }
@@ -131,10 +131,10 @@ public class ModuleConfig
       ArtifactRepository repository = ArtifactRepository.getCurrent();
 
       if (repository == null)
-	throw new IllegalStateException(L.l("Cannot find dependency because no repositories are configured."));
+        throw new IllegalStateException(L.l("Cannot find dependency because no repositories are configured."));
 
       ArtifactDependency dependency
-	= new ArtifactDependency(_org, null, _name, _version);
+        = new ArtifactDependency(_org, null, _name, _version);
 
       EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 
@@ -147,7 +147,7 @@ public class ModuleConfig
       ModuleRepository repository = ModuleRepository.getCurrent();
 
       if (repository == null)
-	throw new IllegalStateException(L.l("ModuleRepository is not properly initialized"));
+        throw new IllegalStateException(L.l("ModuleRepository is not properly initialized"));
 
       path = repository.findArtifact(_org, _module, _name, _rev, "jar");
     }
@@ -155,7 +155,7 @@ public class ModuleConfig
 
     if (path == null)
       throw new ConfigException(L.l("Can't find artifact '{0}'",
-				    _name));
+                                    _name));
 
     EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 

@@ -301,7 +301,7 @@ class IncludeResponse extends CauchoResponseWrapper
       _hasWriter = true;
 
       if (_charEncoding != null && _responseStream != null)
-	_responseStream.setEncoding(_charEncoding);
+        _responseStream.setEncoding(_charEncoding);
     }
     */
     

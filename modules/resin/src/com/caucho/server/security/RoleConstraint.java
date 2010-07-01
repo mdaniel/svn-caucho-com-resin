@@ -66,8 +66,8 @@ public class RoleConstraint extends AbstractConstraint {
    */
   public AuthorizationResult
     isAuthorized(HttpServletRequest request,
-		 HttpServletResponse response,
-		 ServletContext application)
+                 HttpServletResponse response,
+                 ServletContext application)
     throws ServletException, IOException
   {
     Principal user = request.getUserPrincipal();

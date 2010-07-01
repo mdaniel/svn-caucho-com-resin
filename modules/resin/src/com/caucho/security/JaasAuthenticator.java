@@ -93,7 +93,7 @@ public class JaasAuthenticator extends AbstractAuthenticator {
 
     if (! LoginModule.class.isAssignableFrom(loginModuleClass))
       throw new ConfigException(L.l("'{0}' must implement javax.security.auth.spi.LoginModule",
-				    loginModuleClass.getName()));
+                                    loginModuleClass.getName()));
   }
 
   public void setInitParam(InitParam init)
@@ -124,8 +124,8 @@ public class JaasAuthenticator extends AbstractAuthenticator {
    */
   @Override
   protected Principal authenticate(Principal principal,
-				   PasswordCredentials cred,
-				   Object details)
+                                   PasswordCredentials cred,
+                                   Object details)
   {
     try {
       String userName = principal.getName();
@@ -140,13 +140,13 @@ public class JaasAuthenticator extends AbstractAuthenticator {
       state.put("javax.security.auth.login.password", password);
 
       login.initialize(subject,
-		       new Handler(userName, password),
-		       state, _options);
+                       new Handler(userName, password),
+                       state, _options);
 
       try {
-	login.login();
+        login.login();
       } catch (Exception e) {
-	login.abort();
+        login.abort();
       }
 
       login.commit();
@@ -154,11 +154,11 @@ public class JaasAuthenticator extends AbstractAuthenticator {
       Set principals = subject.getPrincipals();
 
       if (principals == null || principals.size() == 0)
-	return null;
+        return null;
 
       Iterator iter = principals.iterator();
       if (iter.hasNext())
-	return (Principal) iter.next();
+        return (Principal) iter.next();
 
       return null;
     } catch (LoginException e) {
@@ -204,18 +204,18 @@ public class JaasAuthenticator extends AbstractAuthenticator {
       throws IOException, UnsupportedCallbackException
     {
       for (int i = 0; i < callbacks.length; i++) {
-	Callback cb = callbacks[i];
+        Callback cb = callbacks[i];
 
-	if (cb instanceof NameCallback) {
-	  NameCallback name = (NameCallback) cb;
+        if (cb instanceof NameCallback) {
+          NameCallback name = (NameCallback) cb;
 
-	  name.setName(_userName);
-	}
-	else if (cb instanceof PasswordCallback) {
-	  PasswordCallback password = (PasswordCallback) cb;
+          name.setName(_userName);
+        }
+        else if (cb instanceof PasswordCallback) {
+          PasswordCallback password = (PasswordCallback) cb;
 
-	  password.setPassword(_password.toCharArray());
-	}
+          password.setPassword(_password.toCharArray());
+        }
       }
     }
   }

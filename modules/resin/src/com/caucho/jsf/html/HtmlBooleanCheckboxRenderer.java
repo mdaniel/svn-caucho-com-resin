@@ -80,8 +80,8 @@ class HtmlBooleanCheckboxRenderer extends Renderer
     String value = paramMap.get(clientId);
 
     if ("on".equalsIgnoreCase(value)
-	|| "true".equalsIgnoreCase(value)
-	|| "yes".equalsIgnoreCase(value)) {
+        || "true".equalsIgnoreCase(value)
+        || "yes".equalsIgnoreCase(value)) {
       ((EditableValueHolder) component).setSubmittedValue("true");
     }
     else

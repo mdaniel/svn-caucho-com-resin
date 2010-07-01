@@ -78,7 +78,7 @@ public class TransactionLog
       Server server = Server.getCurrent();
 
       if (server == null)
-	return;
+        return;
 
       String serverId = server.getServerId();
 
@@ -104,9 +104,9 @@ public class TransactionLog
 
     try {
       if (_manager.getPath() != null)
-	_xaLog.setPath(_manager.getPath().lookup(_path));
+        _xaLog.setPath(_manager.getPath().lookup(_path));
       else
-	_xaLog.setPath(Vfs.lookup(_path));
+        _xaLog.setPath(Vfs.lookup(_path));
 
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
 

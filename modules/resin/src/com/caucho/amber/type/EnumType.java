@@ -175,15 +175,15 @@ public class EnumType extends AmberType {
   {
     if (_isOrdinal) {
       out.print("(" + getName() + ") com.caucho.amber.type.EnumType.toEnum("
-		+ "rs.getInt(columnNames[" + index + "]), "
-		+ "rs.wasNull(), "
-		+ getName() + ".values())");
+                + "rs.getInt(columnNames[" + index + "]), "
+                + "rs.wasNull(), "
+                + getName() + ".values())");
     }
     else {
       out.print("(" + getName() + ") com.caucho.amber.type.EnumType.toEnum("
-		+ "rs.getString(columnNames[" + index + "]), "
-		+ "rs.wasNull(), "
-		+ getName() + ".class)");
+                + "rs.getString(columnNames[" + index + "]), "
+                + "rs.wasNull(), "
+                + getName() + ".class)");
     }
 
     return index + 1;

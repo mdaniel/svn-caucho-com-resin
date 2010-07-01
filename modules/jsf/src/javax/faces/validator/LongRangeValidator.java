@@ -96,8 +96,8 @@ public class LongRangeValidator
   }
 
   public void validate(FacesContext context,
-		       UIComponent component,
-		       Object value)
+                       UIComponent component,
+                       Object value)
     throws ValidatorException
   {
     if (context == null || component == null)
@@ -108,33 +108,33 @@ public class LongRangeValidator
 
     if (value instanceof String) {
       try {
-	value = Long.parseLong((String) value);
+        value = Long.parseLong((String) value);
       } catch (Exception e) {
-	String summary = Util.l10n(context, TYPE_MESSAGE_ID,
-				   "{0}: Validation Error: Value is not of the correct type.",
-				   Util.getLabel(context, component));
-	
-	String detail = summary;
+        String summary = Util.l10n(context, TYPE_MESSAGE_ID,
+                                   "{0}: Validation Error: Value is not of the correct type.",
+                                   Util.getLabel(context, component));
+
+        String detail = summary;
 
         FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                             summary,
                                             detail);
-	
-	throw new ValidatorException(msg, e);
+
+        throw new ValidatorException(msg, e);
       }
     }
 
     if (! (value instanceof Number)) {
       String summary = Util.l10n(context, TYPE_MESSAGE_ID,
-				 "{0}: Validation Error: Value is not of the correct type.",
-				 Util.getLabel(context, component));
-	
+                                 "{0}: Validation Error: Value is not of the correct type.",
+                                 Util.getLabel(context, component));
+
       String detail = summary;
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
                                           detail);
-	
+
       throw new ValidatorException(msg);
     }
 
@@ -142,31 +142,31 @@ public class LongRangeValidator
 
     if (v.longValue() < getMinimum()) {
       String summary = Util.l10n(context, MINIMUM_MESSAGE_ID,
-				 "{1}: Validation Error: Value is less than allowable minimum of '{0}'.",
-				 getMinimum(),
-				 Util.getLabel(context, component));
-	
+                                 "{1}: Validation Error: Value is less than allowable minimum of '{0}'.",
+                                 getMinimum(),
+                                 Util.getLabel(context, component));
+
       String detail = summary;
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
                                           detail);
-	
+
       throw new ValidatorException(msg);
     }
 
     if (getMaximum() < v.longValue()) {
       String summary = Util.l10n(context, MAXIMUM_MESSAGE_ID,
-				 "{1}: Validation Error: Value is greater than allowable maximum of '{0}'.",
-				 getMaximum(),
-				 Util.getLabel(context, component));
-	
+                                 "{1}: Validation Error: Value is greater than allowable maximum of '{0}'.",
+                                 getMaximum(),
+                                 Util.getLabel(context, component));
+
       String detail = summary;
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
                                           detail);
-	
+
       throw new ValidatorException(msg);
     }
   }
@@ -199,6 +199,6 @@ public class LongRangeValidator
     LongRangeValidator validator = (LongRangeValidator) o;
 
     return (_minimum == validator._minimum
-	    && _maximum == validator._maximum);
+            && _maximum == validator._maximum);
   }
 }

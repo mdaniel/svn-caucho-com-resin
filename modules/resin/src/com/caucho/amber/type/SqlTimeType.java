@@ -88,7 +88,7 @@ public class SqlTimeType extends AmberType {
    */
   @Override
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getTime(" + indexVar + " + " + index + ")");
@@ -113,7 +113,7 @@ public class SqlTimeType extends AmberType {
    */
   @Override
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");

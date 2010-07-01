@@ -51,7 +51,7 @@ public class ListPropertyBeanProgram extends BeanProgram
   private String _propertyName;
 
   public ListPropertyBeanProgram(Method getter, Method setter,
-				List<AbstractValue> values, String propertyName)
+                                List<AbstractValue> values, String propertyName)
   {
     _getter = getter;
     _setter = setter;
@@ -70,31 +70,31 @@ public class ListPropertyBeanProgram extends BeanProgram
       boolean listNew = false;
 
       if (_getter != null)
-	list = (List) _getter.invoke(bean);
+        list = (List) _getter.invoke(bean);
 
       if (list == null) {
-	if (_setter == null) {
-	  if (log.isLoggable(Level.CONFIG)) {
-	    log.log(Level.CONFIG,
-		    L.l("Setter for {0} not found in type {1}",
-			_propertyName,
-			bean.getClass().getName()));
-	  }
+        if (_setter == null) {
+          if (log.isLoggable(Level.CONFIG)) {
+            log.log(Level.CONFIG,
+                    L.l("Setter for {0} not found in type {1}",
+                        _propertyName,
+                        bean.getClass().getName()));
+          }
 
-	  return;
-	}
+          return;
+        }
 
-	list = new ArrayList();
-	listNew = true;
+        list = new ArrayList();
+        listNew = true;
       }
 
       for (int i = 0; i < _values.size(); i++) {
-	AbstractValue value = _values.get(i);
-	list.add(value.getValue(context));
+        AbstractValue value = _values.get(i);
+        list.add(value.getValue(context));
       }
 
       if (listNew) {
-	_setter.invoke(bean, list);
+        _setter.invoke(bean, list);
       }
     }
     catch (RuntimeException e) {

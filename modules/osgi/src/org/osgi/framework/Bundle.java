@@ -174,8 +174,8 @@ public interface Bundle
    * Returns entries matching a pattern.
    */
   public Enumeration findEntries(String path,
-				 String filePattern,
-				 boolean recurse);
+                                 String filePattern,
+                                 boolean recurse);
 
   /**
    * Returns the bundle's context

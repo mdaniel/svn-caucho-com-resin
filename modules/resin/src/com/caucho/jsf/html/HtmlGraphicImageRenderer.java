@@ -132,7 +132,7 @@ class HtmlGraphicImageRenderer extends Renderer
       height = (String) attrMap.get("height");
       Boolean bValue = (Boolean) attrMap.get("ismap");
       if (bValue != null)
-	ismap = bValue;
+        ismap = bValue;
       lang = (String) attrMap.get("lang");
       longdesc = (String) attrMap.get("longdesc");
       

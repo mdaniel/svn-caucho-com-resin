@@ -56,8 +56,8 @@ public class ConfigStatement extends Statement{
   static Statement create(HashMap<String,String> attr, Path path)
   {
     return new ConfigStatement(attr.get("errmsg"),
-			       attr.get("sizefmt"),
-			       attr.get("timefmt"));
+                               attr.get("sizefmt"),
+                               attr.get("timefmt"));
   }
   
   /**
@@ -68,8 +68,8 @@ public class ConfigStatement extends Statement{
    * @param response the servlet response
    */
   public void apply(WriteStream out,
-		    HttpServletRequest request,
-		    HttpServletResponse response)
+                    HttpServletRequest request,
+                    HttpServletResponse response)
     throws IOException, ServletException
   {
     if (_sizefmt != null)

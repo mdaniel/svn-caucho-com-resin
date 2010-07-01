@@ -110,7 +110,7 @@ public class QBindingEnumeration implements NamingEnumeration {
         // server/158a, for QA comparison
         if (valueName.indexOf('@') >= 0)
           valueName = valueName.substring(0, valueName.indexOf('@'));
-	
+
         cb.append("{" + name + ", " + valueName + "}");
       } catch (Exception e) {
         cb.append("{" + name + ", " + e + "}");

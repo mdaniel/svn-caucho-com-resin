@@ -147,7 +147,7 @@ public class LogMessage implements java.io.Serializable
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _name + ", " + _level
-	    + ", " + _thread + ", " + _message + "]");
+            + "[" + _name + ", " + _level
+            + ", " + _thread + ", " + _message + "]");
   }
 }

@@ -206,8 +206,8 @@ class IntColumn extends Column {
    */
   @Override
   void setExpr(Transaction xa,
-	       byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
     throws SQLException
   {
     if (expr.isNull(context))
@@ -246,7 +246,7 @@ class IntColumn extends Column {
    */
   @Override
   int evalToBuffer(byte []block, int rowOffset,
-		   byte []buffer, int bufferOffset)
+                   byte []buffer, int bufferOffset)
     throws SQLException
   {
     if (isNull(block, rowOffset))
@@ -265,7 +265,7 @@ class IntColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block1, int rowOffset1,
-			 byte []block2, int rowOffset2)
+                         byte []block2, int rowOffset2)
   {
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
@@ -274,9 +274,9 @@ class IntColumn extends Column {
     int startOffset2 = rowOffset2 + _columnOffset;
 
     return (block1[startOffset1 + 0] == block2[startOffset2 + 0] &&
-	    block1[startOffset1 + 1] == block2[startOffset2 + 1] &&
-	    block1[startOffset1 + 2] == block2[startOffset2 + 2] &&
-	    block1[startOffset1 + 3] == block2[startOffset2 + 3]);
+            block1[startOffset1 + 1] == block2[startOffset2 + 1] &&
+            block1[startOffset1 + 2] == block2[startOffset2 + 2] &&
+            block1[startOffset1 + 3] == block2[startOffset2 + 3]);
   }
 
   /**
@@ -284,7 +284,7 @@ class IntColumn extends Column {
    */
   @Override
   public void set(Transaction xa,
-		  TableIterator iter, Expr expr, QueryContext context)
+                  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
     iter.setDirty();

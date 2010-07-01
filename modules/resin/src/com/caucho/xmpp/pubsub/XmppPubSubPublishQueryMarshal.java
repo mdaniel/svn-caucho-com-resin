@@ -120,7 +120,7 @@ public class XmppPubSubPublishQueryMarshal extends AbstractXmppMarshal {
       out.writeStartElement("item");
 
       if (item.getId() != null)
-	out.writeAttribute("id", item.getId());
+        out.writeAttribute("id", item.getId());
 
       out.writeValue(item.getValue());
       

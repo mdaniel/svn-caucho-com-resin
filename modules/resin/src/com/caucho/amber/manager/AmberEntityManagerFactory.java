@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  */
 public class AmberEntityManagerFactory
   implements EntityManagerFactory, java.io.Serializable,
-	     HandleAware
+             HandleAware
 {
   private static final Logger log
     = Logger.getLogger(AmberEntityManagerFactory.class.getName());

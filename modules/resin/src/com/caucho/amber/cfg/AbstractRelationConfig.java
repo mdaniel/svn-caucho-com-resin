@@ -228,15 +228,15 @@ abstract class AbstractRelationConfig extends AbstractConfig
 
     for (IdField field : fields) {
       if (field.getName().equals(name))
-	return field;
+        return field;
     }
 
     if (name == null || name.equals(""))
       throw new ConfigException(L.l("{0}: '{1}' requires a referencedColumnName value because it has multiple target keys.",
-				    getTargetEntity(), getName()));
+                                    getTargetEntity(), getName()));
 
     throw new ConfigException(L.l("{0}: '{1}' is an unknown field for {2}",
-				  getTargetEntity(), name, getName()));
+                                  getTargetEntity(), name, getName()));
   }
 
   IdField getKey(ArrayList<IdField> keys, String name)
@@ -246,7 +246,7 @@ abstract class AbstractRelationConfig extends AbstractConfig
 
     for (IdField key : keys) {
       if (key.getName().equals(name))
-	return key;
+        return key;
     }
 
     return null;
@@ -282,7 +282,7 @@ abstract class AbstractRelationConfig extends AbstractConfig
   }
 
   ArrayList<ForeignColumn> calculateColumns(AmberTable mapTable,
-					    EntityType type)
+                                            EntityType type)
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 

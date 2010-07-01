@@ -107,13 +107,13 @@ class HtmlPanelGroupRenderer extends Renderer
       List<UIComponent> children = component.getChildren();
 
       for (int i = 0; i < childCount; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (child.isRendered()) {
-	  child.encodeBegin(context);
-	  child.encodeChildren(context);
-	  child.encodeEnd(context);
-	}
+        if (child.isRendered()) {
+          child.encodeBegin(context);
+          child.encodeChildren(context);
+          child.encodeEnd(context);
+        }
       }
     }
     

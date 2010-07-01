@@ -121,7 +121,7 @@ public class ChoiceNameItem extends NameClassItem {
     
     for (int i = 0; i < _items.size(); i++) {
       if (i != 0)
-	cb.append(" | ");
+        cb.append(" | ");
       
       cb.append(_items.get(i).toSyntaxDescription(prefix));
     }

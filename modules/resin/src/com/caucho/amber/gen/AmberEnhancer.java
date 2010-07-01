@@ -303,7 +303,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       genClass.addImport("com.caucho.amber.type.*");
 
       AmberMappedComponent componentGenerator
-	= (AmberMappedComponent) type.getComponentGenerator();
+        = (AmberMappedComponent) type.getComponentGenerator();
       
 
       componentGenerator.setRelatedType((EntityType) type);
@@ -419,7 +419,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     if (componentGenerator instanceof AmberMappedComponent) {
       AmberMappedComponent entityGenerator
-	= (AmberMappedComponent) componentGenerator;
+        = (AmberMappedComponent) componentGenerator;
       
       // type is EntityType or MappedSuperclassType
 
@@ -453,7 +453,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     }
     else if (componentGenerator instanceof EmbeddableComponent) {
       EmbeddableComponent embeddable
-	= (EmbeddableComponent) componentGenerator;
+        = (EmbeddableComponent) componentGenerator;
       
       javaClass.addInterfaceName("com.caucho.amber.entity.Embeddable");
 
@@ -480,17 +480,17 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     try {
       ClassLoader loader = _amberContainer.getParentClassLoader();
       ClassLoader tempLoader
-	= ((DynamicClassLoader) loader).getNewTempClassLoader();
+        = ((DynamicClassLoader) loader).getNewTempClassLoader();
       DynamicClassLoader workLoader
-	= SimpleLoader.create(tempLoader, getPostWorkDir());
+        = SimpleLoader.create(tempLoader, getPostWorkDir());
       workLoader.setServletHack(true);
-	
+
       Class cl = Class.forName(className.replace('/', '.'),
-			       false,
-			       workLoader);
+                               false,
+                               workLoader);
 
       thread.setContextClassLoader(tempLoader);
-	  
+
       Method init = cl.getMethod("_caucho_init", new Class[] { Path.class });
       Method modified = cl.getMethod("_caucho_is_modified", new Class[0]);
 
@@ -586,16 +586,16 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
         continue;
       
       if (type instanceof EmbeddableType)
-	continue;
+        continue;
 
       if (type instanceof EntityType) {
         EntityType entityType = (EntityType) type;
 
-	/*
+        /*
         for (AmberField field : entityType.getId().getKeys()) {
           fieldMaps.add(new FieldMap(baseClass, field.getName()));
         }
-	*/
+        */
       }
 
       for (AmberField field : type.getFields()) {
@@ -607,13 +607,13 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       FieldFixupAnalyzer analyzer = new FieldFixupAnalyzer(fieldMaps);
 
       for (JavaMethod javaMethod : baseClass.getMethodList()) {
-	if (javaMethod.getName().startsWith("__caucho_get_"))
-	  continue;
-	else if (javaMethod.getName().startsWith("__caucho_set_"))
-	  continue;
-	else if (javaMethod.getName().startsWith("__caucho_super_"))
-	  continue;
-	
+        if (javaMethod.getName().startsWith("__caucho_get_"))
+          continue;
+        else if (javaMethod.getName().startsWith("__caucho_set_"))
+          continue;
+        else if (javaMethod.getName().startsWith("__caucho_super_"))
+          continue;
+
         CodeVisitor visitor = new CodeVisitor(baseClass, javaMethod.getCode());
 
         visitor.analyze(analyzer, true);

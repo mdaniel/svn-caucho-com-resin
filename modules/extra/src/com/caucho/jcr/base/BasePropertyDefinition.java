@@ -49,8 +49,8 @@ public class BasePropertyDefinition
   private boolean _isMultiple;
 
   public BasePropertyDefinition(String name,
-				NodeType nodeType,
-				int requiredType)
+                                NodeType nodeType,
+                                int requiredType)
   {
     super(name, nodeType);
 

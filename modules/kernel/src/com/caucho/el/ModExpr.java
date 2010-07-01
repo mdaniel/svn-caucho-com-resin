@@ -80,16 +80,16 @@ public class ModExpr extends Expr {
     Object bObj = _right.getValue(env);
 
     if (aObj instanceof BigDecimal
-	|| isDouble(aObj)
-	|| bObj instanceof BigDecimal
-	|| isDouble(bObj)) {
+        || isDouble(aObj)
+        || bObj instanceof BigDecimal
+        || isDouble(bObj)) {
       double a = toDouble(aObj, env);
       double b = toDouble(bObj, env);
       
       return new Double(a % b);
     }
     else if (aObj instanceof BigInteger
-	     || bObj instanceof BigInteger) {
+             || bObj instanceof BigInteger) {
       BigInteger a = toBigInteger(aObj, env);
       BigInteger b = toBigInteger(bObj, env);
       

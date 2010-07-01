@@ -73,9 +73,9 @@ public final class IndexCache
       int size;
       
       if (Alarm.isTest())
-	size = 8 * 1024;
+        size = 8 * 1024;
       else
-	size = 64 * 1024;
+        size = 64 * 1024;
       
       _staticCache = new IndexCache(size);
     }
@@ -92,8 +92,8 @@ public final class IndexCache
    * Gets the index entry.
    */
   public long lookup(BTree btree,
-		     byte []buffer, int offset, int length,
-		     Transaction xa)
+                     byte []buffer, int offset, int length,
+                     Transaction xa)
     throws SQLException
   {
     IndexKey value = lookupValue(btree, buffer, offset, length);
@@ -122,9 +122,9 @@ public final class IndexCache
    * Gets the index entry.
    */
   public void insert(BTree btree,
-		     byte []buffer, int offset, int length,
-		     long value,
-		     Transaction xa)
+                     byte []buffer, int offset, int length,
+                     long value,
+                     Transaction xa)
     throws SQLException
   {
     IndexKey key = IndexKey.create(btree, buffer, offset, length, value);
@@ -156,8 +156,8 @@ public final class IndexCache
    * Remove the index entry.
    */
   public void delete(BTree btree,
-		     byte []buffer, int offset, int length,
-		     Transaction xa)
+                     byte []buffer, int offset, int length,
+                     Transaction xa)
     throws SQLException
   {
     IndexKey value = lookupValue(btree, buffer, offset, length);
@@ -171,7 +171,7 @@ public final class IndexCache
   }
 
   private IndexKey lookupValue(BTree btree,
-			       byte []buffer, int offset, int length)
+                               byte []buffer, int offset, int length)
   {
     IndexKey key = _freeKey.getAndSet(null);
 
@@ -184,16 +184,16 @@ public final class IndexCache
 
     if (value == null)  {
       synchronized (_writeQueue) {
-	int size = _writeQueue.size();
+        int size = _writeQueue.size();
 
-	for (int i = 0; i < size; i++) {
-	  IndexKey writeKey = _writeQueue.get(i);
+        for (int i = 0; i < size; i++) {
+          IndexKey writeKey = _writeQueue.get(i);
 
-	  if (key.equals(writeKey)) {
-	    value = writeKey;
-	    _cache.compareAndPut(null, value, value);
-	  }
-	}
+          if (key.equals(writeKey)) {
+            value = writeKey;
+            _cache.compareAndPut(null, value, value);
+          }
+        }
       }
     }
 
@@ -239,7 +239,7 @@ public final class IndexCache
         IndexKey key = null;
 
         Thread.interrupted();
-	  
+
         synchronized (_writeQueue) {
           if (_writeQueue.size() == 0)
             return;
@@ -261,7 +261,7 @@ public final class IndexCache
             btree.remove(key.getBuffer(), key.getOffset(), key.getLength());
           }
         }
-	  
+
         synchronized (_writeQueue) {
           if (key != null)
             _writeQueue.remove(0);

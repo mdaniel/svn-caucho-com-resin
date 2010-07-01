@@ -92,46 +92,46 @@ public class SSIParser {
 
     while ((ch = is.read()) >= 0) {
       if (ch != '<') {
-	if (ch == '\n')
-	  _line++;
-	  
-	bb.append(ch);
+        if (ch == '\n')
+          _line++;
+
+        bb.append(ch);
       }
       else if ((ch = is.read()) != '!') {
-	bb.append('<');
+        bb.append('<');
 
-	is.unread();
+        is.unread();
       }
       else if ((ch = is.read()) != '-') {
-	bb.append('<');
-	bb.append('!');
-	
-	is.unread();
+        bb.append('<');
+        bb.append('!');
+
+        is.unread();
       }
       else if ((ch = is.read()) != '-') {
-	bb.append('<');
-	bb.append('!');
-	bb.append('-');
-	
-	is.unread();
+        bb.append('<');
+        bb.append('!');
+        bb.append('-');
+
+        is.unread();
       }
       else if ((ch = is.read()) != '#') {
-	bb.append('<');
-	bb.append('!');
-	bb.append('-');
-	bb.append('-');
-	
-	is.unread();
+        bb.append('<');
+        bb.append('!');
+        bb.append('-');
+        bb.append('-');
+
+        is.unread();
       }
       else {
-	if (bb.getLength() > 0) {
-	  TextStatement text;
+        if (bb.getLength() > 0) {
+          TextStatement text;
 
-	  text = new TextStatement(bb.getBuffer(), 0, bb.getLength());
-	    
-	  statements.add(text);
-	  bb.clear();
-	}
+          text = new TextStatement(bb.getBuffer(), 0, bb.getLength());
+
+          statements.add(text);
+          bb.clear();
+        }
 
         Statement stmt = parseCommand(is);
 
@@ -228,14 +228,14 @@ public class SSIParser {
       StringBuilder key = new StringBuilder();
 
       for (; Character.isLetterOrDigit(ch); ch = is.read()) {
-	key.append((char) ch);
+        key.append((char) ch);
       }
 
       for (; Character.isWhitespace(ch); ch = is.read()) {
       }
 
       if (ch != '=')
-	return attr;
+        return attr;
 
       for (ch = is.read(); Character.isWhitespace(ch); ch = is.read()) {
       }
@@ -243,27 +243,27 @@ public class SSIParser {
       StringBuilder value = new StringBuilder();
 
       if (ch == '\'' || ch == '"') {
-	int end = ch;
+        int end = ch;
 
-	for (ch = is.read(); ch > 0 && ch != end; ch = is.read()) {
-	  if (ch == '\\') {
-	    ch = is.read();
+        for (ch = is.read(); ch > 0 && ch != end; ch = is.read()) {
+          if (ch == '\\') {
+            ch = is.read();
 
-	    if (ch == '\'' || ch == '\"')
-	      value.append((char) ch);
-	    else {
-	      value.append('\\');
-	      is.unread();
-	    }
-	  }
-	  else
-	    value.append((char) ch);
-	}
+            if (ch == '\'' || ch == '\"')
+              value.append((char) ch);
+            else {
+              value.append('\\');
+              is.unread();
+            }
+          }
+          else
+            value.append((char) ch);
+        }
       }
       else {
-	for (; ch > 0 && ! Character.isWhitespace(ch); ch = is.read()) {
-	  value.append((char) ch);
-	}
+        for (; ch > 0 && ! Character.isWhitespace(ch); ch = is.read()) {
+          value.append((char) ch);
+        }
       }
 
       attr.put(key.toString(), value.toString());

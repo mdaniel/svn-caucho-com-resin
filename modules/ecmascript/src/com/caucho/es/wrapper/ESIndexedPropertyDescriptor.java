@@ -46,9 +46,9 @@ class ESIndexedPropertyDescriptor extends ESPropertyDescriptor {
   }
 
   public ESIndexedPropertyDescriptor(String propertyName,
-				     ESMethodDescriptor getter, 
-				     ESMethodDescriptor setter,
-				     ESMethodDescriptor size)
+                                     ESMethodDescriptor getter,
+                                     ESMethodDescriptor setter,
+                                     ESMethodDescriptor size)
     throws IntrospectionException
   {
     super(propertyName, null, null, null);

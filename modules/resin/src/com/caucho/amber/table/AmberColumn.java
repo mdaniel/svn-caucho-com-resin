@@ -277,7 +277,7 @@ public class AmberColumn {
     String generatorType = _generatorType;
     
     if ("auto".equals(_generatorType)
-	&& manager.getMetaData().supportsIdentity())
+        && manager.getMetaData().supportsIdentity())
       generatorType = "identity";
 
     if ("identity".equals(generatorType))

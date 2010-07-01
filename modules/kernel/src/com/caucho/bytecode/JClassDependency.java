@@ -131,10 +131,10 @@ public class JClassDependency implements PersistentDependency {
   {
     try {
       if (_className == null || "".equals(_className))
-	return "";
+        return "";
       
       DynamicClassLoader loader
-	= (DynamicClassLoader) Thread.currentThread().getContextClassLoader();
+        = (DynamicClassLoader) Thread.currentThread().getContextClassLoader();
 
       ClassLoader tmpLoader = loader.getNewTempClassLoader();
       
@@ -164,17 +164,17 @@ public class JClassDependency implements PersistentDependency {
       if (_checkFields) {
         for (Field field : fields) {
           if (Modifier.isPrivate(field.getModifiers())
-	      && ! _checkPrivate)
+              && ! _checkPrivate)
             continue;
           if (Modifier.isProtected(field.getModifiers())
-	      && ! _checkProtected)
+              && ! _checkProtected)
             continue;
           
           addDigest(digest, field.getName());
           addDigest(digest, field.getModifiers());
           addDigest(digest, field.getType().getName());
 
-	  addDigest(digest, field.getAnnotations());
+          addDigest(digest, field.getAnnotations());
         }
       }
 
@@ -204,8 +204,8 @@ public class JClassDependency implements PersistentDependency {
         Class []exn = method.getExceptionTypes();
         for (int j = 0; j < exn.length; j++)
           addDigest(digest, exn[j].getName());
-	
-	addDigest(digest, method.getAnnotations());
+
+        addDigest(digest, method.getAnnotations());
       }
       
       byte []digestBytes = new byte[256];
@@ -311,21 +311,21 @@ public class JClassDependency implements PersistentDependency {
     public int compare(Field a, Field b)
     {
       if (a == b)
-	return 0;
+        return 0;
       else if (a == null)
-	return -1;
+        return -1;
       else if (b == null)
-	return 1;
+        return 1;
       else if (a.equals(b))
-	return 0;
+        return 0;
 
       int cmp = a.getName().compareTo(b.getName());
       if (cmp != 0)
-	return cmp;
+        return cmp;
       
       cmp = a.getDeclaringClass().getName().compareTo(b.getDeclaringClass().getName());
       if (cmp != 0)
-	return cmp;
+        return cmp;
       
       return a.getType().getName().compareTo(b.getType().getName());
     }
@@ -335,35 +335,35 @@ public class JClassDependency implements PersistentDependency {
     public int compare(Method a, Method b)
     {
       if (a == b)
-	return 0;
+        return 0;
       else if (a == null)
-	return -1;
+        return -1;
       else if (b == null)
-	return 1;
+        return 1;
       else if (a.equals(b))
-	return 0;
+        return 0;
 
       int cmp = a.getName().compareTo(b.getName());
       if (cmp != 0)
-	return cmp;
+        return cmp;
 
       Class []paramA = a.getParameterTypes();
       Class []paramB = b.getParameterTypes();
 
       if (paramA.length < paramB.length)
-	return -1;
+        return -1;
       else if (paramB.length < paramA.length)
-	return 1;
+        return 1;
 
       for (int i = 0; i < paramA.length; i++) {
-	cmp = paramA[i].getName().compareTo(paramB[i].getName());
-	if (cmp != 0)
-	  return cmp;
+        cmp = paramA[i].getName().compareTo(paramB[i].getName());
+        if (cmp != 0)
+          return cmp;
       }
       
       cmp = a.getDeclaringClass().getName().compareTo(b.getDeclaringClass().getName());
       if (cmp != 0)
-	return cmp;
+        return cmp;
       
       return a.getReturnType().getName().compareTo(b.getReturnType().getName());
     }

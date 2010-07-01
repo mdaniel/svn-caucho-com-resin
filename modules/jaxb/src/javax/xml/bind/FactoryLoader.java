@@ -111,7 +111,7 @@ class FactoryLoader {
 
     for (int i = 0; i < pkgs.length; i++) {
       String pkg = pkgs[i].replaceAll("\\.",
-				      escapeSeparator(File.separator));
+                                      escapeSeparator(File.separator));
       
       String fileName = pkg + File.separatorChar + "jaxb.properties";
 

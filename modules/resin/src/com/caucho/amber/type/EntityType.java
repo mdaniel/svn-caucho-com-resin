@@ -830,7 +830,7 @@ public class EntityType extends BeanType {
     
     if (mappedFields == null)
       return getFields();
-	
+
     ArrayList<AmberField> resultFields = new ArrayList<AmberField>();
 
     resultFields.addAll(getFields());
@@ -874,35 +874,35 @@ public class EntityType extends BeanType {
       _isSequenceGenerator = true;
 
       if (! md.supportsSequences())
-	throw new ConfigException(L.l("'{0}' does not support sequences",
-				      md.getDatabaseName()));
+        throw new ConfigException(L.l("'{0}' does not support sequences",
+                                      md.getDatabaseName()));
     }
     else if ("identity".equals(idGenField.getGenerator())) {
       _isIdentityGenerator = true;
       _isSequenceGenerator = false;
 
       if (! md.supportsIdentity())
-	throw new ConfigException(L.l("'{0}' does not support identity",
-				      md.getDatabaseName()));
+        throw new ConfigException(L.l("'{0}' does not support identity",
+                                      md.getDatabaseName()));
     }
     else if ("auto".equals(idGenField.getGenerator())) {
       if (md.supportsIdentity())
-	_isIdentityGenerator = true;
+        _isIdentityGenerator = true;
       else if (md.supportsSequences())
-	_isSequenceGenerator = true;
+        _isSequenceGenerator = true;
     }
 
     if (! _isIdentityGenerator
-	&& getGenerator(idGenField.getName()) == null) {
+        && getGenerator(idGenField.getName()) == null) {
       IdGenerator gen;
       
       if (_isSequenceGenerator) {
-	String name = getTable().getName() + "_cseq";
-	
-	gen = getPersistenceUnit().createSequenceGenerator(name, 1);
+        String name = getTable().getName() + "_cseq";
+
+        gen = getPersistenceUnit().createSequenceGenerator(name, 1);
       }
       else
-	gen = getPersistenceUnit().getTableGenerator("caucho");
+        gen = getPersistenceUnit().getTableGenerator("caucho");
 
       _idGenMap.put(idGenField.getName(), gen);
     }
@@ -910,15 +910,15 @@ public class EntityType extends BeanType {
     // XXX: really needs to be called from the table-init code
     for (IdGenerator idGen : _idGenMap.values()) {
       try {
-	if (idGen instanceof SequenceIdGenerator) {
-	  ((SequenceIdGenerator) idGen).init(_amberPersistenceUnit);
-	}
-	else if (idGen instanceof AmberTableGenerator) {
-	  // jpa/0g60
-	  ((AmberTableGenerator) idGen).init(_amberPersistenceUnit);
-	}
+        if (idGen instanceof SequenceIdGenerator) {
+          ((SequenceIdGenerator) idGen).init(_amberPersistenceUnit);
+        }
+        else if (idGen instanceof AmberTableGenerator) {
+          // jpa/0g60
+          ((AmberTableGenerator) idGen).init(_amberPersistenceUnit);
+        }
       } catch (SQLException e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
   }
@@ -1024,7 +1024,7 @@ public class EntityType extends BeanType {
    * Generates loading code after the basic fields.
    */
   public int generatePostLoadSelect(JavaWriter out, int index,
-				    int loadGroupIndex)
+                                    int loadGroupIndex)
     throws IOException
   {
     if (loadGroupIndex == 0 && getDiscriminator() != null)
@@ -1033,7 +1033,7 @@ public class EntityType extends BeanType {
     // jpa/0l40
     for (EntityType type = this; type != null; type = type.getParentType()) {
       index = generatePostLoadSelect(out, index,
-				     type.getMappedSuperclassFields());
+                                     type.getMappedSuperclassFields());
 
       index = generatePostLoadSelect(out, index, type.getFields());
     }
@@ -1042,16 +1042,16 @@ public class EntityType extends BeanType {
   }
 
   private int generatePostLoadSelect(JavaWriter out,
-				     int index,
-				     ArrayList<AmberField> fields)
+                                     int index,
+                                     ArrayList<AmberField> fields)
     throws IOException
   {
     if (fields != null) {
       for (int i = 0; i < fields.size(); i++) {
-	AmberField field = fields.get(i);
+        AmberField field = fields.get(i);
 
-	// jpa/0l40 if (field.getLoadGroupIndex() == loadGroupIndex)
-	index = field.generatePostLoadSelect(out, index);
+        // jpa/0l40 if (field.getLoadGroupIndex() == loadGroupIndex)
+        index = field.generatePostLoadSelect(out, index);
       }
     }
 
@@ -1338,7 +1338,7 @@ public class EntityType extends BeanType {
    */
   @Override
   public void generateLoadSelect(StringBuilder sb, AmberTable table,
-				 String id, int loadGroup)
+                                 String id, int loadGroup)
   {
     if (_parentType != null)
       _parentType.generateLoadSelect(sb, table, id, loadGroup);
@@ -1378,7 +1378,7 @@ public class EntityType extends BeanType {
 
     for (IdField field : getId().getKeys()) {
       if (isAuto && field.getGenerator() != null)
-	continue;
+        continue;
       
       for (AmberColumn key : field.getColumns()) {
         String name;

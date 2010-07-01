@@ -116,7 +116,7 @@ public class SpyXAResource implements XAResource {
     try {
       if (resource instanceof SpyXAResource)
         resource = ((SpyXAResource) resource).getXAResource();
-	    
+
       boolean same = _xaResource.isSameRM(resource);
       
       log.fine(_id + ":is-same-rm(resource=" + resource + ")->" + same);
@@ -251,13 +251,13 @@ public class SpyXAResource implements XAResource {
       String flagString = "";
 
       if ((flags & XAResource.TMSTARTRSCAN) != 0)
-	flagString += "start";
+        flagString += "start";
 
       if ((flags & XAResource.TMENDRSCAN) != 0) {
-	if (! flagString.equals(""))
-	  flagString += ",";
-	    
-	flagString += "end";
+        if (! flagString.equals(""))
+          flagString += ",";
+
+        flagString += "end";
       }
       
       log.fine(_id + ":recover(flags=" + flagString + ")");

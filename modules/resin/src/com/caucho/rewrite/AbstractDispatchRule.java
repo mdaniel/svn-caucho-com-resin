@@ -109,9 +109,9 @@ abstract public class AbstractDispatchRule implements DispatchRule
   }
   
   public FilterChain map(String uri,
-			 String queryString,
-			 FilterChain next,
-			 FilterChain tail)
+                         String queryString,
+                         FilterChain next,
+                         FilterChain tail)
     throws ServletException
   {
     Matcher matcher = null;
@@ -122,11 +122,11 @@ abstract public class AbstractDispatchRule implements DispatchRule
       FilterChain chain = createDispatch(uri, queryString, target, tail);
 
       for (int i = _filters.length - 1; i >= 0; i--) {
-	chain = _filters[i].map(uri, queryString, chain);
+        chain = _filters[i].map(uri, queryString, chain);
       }
 
       if (_predicates.length > 0)
-	chain = new MatchFilterChain(_predicates, chain, next);
+        chain = new MatchFilterChain(_predicates, chain, next);
 
       return chain;
     }
@@ -135,16 +135,16 @@ abstract public class AbstractDispatchRule implements DispatchRule
   }
 
   protected FilterChain createDispatch(String uri,
-				       String queryString,
-				       String target,
-				       FilterChain next)
+                                       String queryString,
+                                       String target,
+                                       FilterChain next)
   {
     return next;
   }
 
   protected String rewriteTarget(Matcher matcher,
-				 String uri,
-				 String queryString)
+                                 String uri,
+                                 String queryString)
   {
     if (queryString == null)
       return uri;

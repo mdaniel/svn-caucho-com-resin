@@ -131,19 +131,19 @@ public class JspJavaWriter extends JavaWriter {
       switch (ch) {
       case '\\':
         print("\\\\");
-	break;
+        break;
       case '\'':
         print("\\'");
-	break;
+        break;
       case '\n':
         print("\\n");
-	break;
+        break;
       case '\r':
         print("\\r");
-	break;
+        break;
       default:
-	print((char) ch);
-	break;
+        print((char) ch);
+        break;
       }
 
       println("');");

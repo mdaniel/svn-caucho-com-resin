@@ -62,10 +62,10 @@ public class TcpConnectionInfo implements java.io.Serializable
   }
 
   public TcpConnectionInfo(int id,
-			   long threadId,
-			   String portName,
-			   String state,
-			   long requestTime)
+                           long threadId,
+                           String portName,
+                           String state,
+                           long requestTime)
   {
     _id = id;
     _threadId = threadId;
@@ -102,8 +102,8 @@ public class TcpConnectionInfo implements java.io.Serializable
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _id
-	    + "," + _portName
-	    + "]");
+            + "[" + _id
+            + "," + _portName
+            + "]");
   }
 }

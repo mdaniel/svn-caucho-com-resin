@@ -64,9 +64,9 @@ public class Taglib extends TagLibraryInfo
     = new ArrayList<Taglib>();
   
   Taglib(String prefix,
-	 String uri,
-	 TldTaglib tldTaglib,
-	 TagFileManager tagFileManager)
+         String uri,
+         TldTaglib tldTaglib,
+         TagFileManager tagFileManager)
     throws JspParseException
   {
     super(prefix, uri);
@@ -138,7 +138,7 @@ public class Taglib extends TagLibraryInfo
    * </pre>
    */
   private void fillTagLibraryInfo(TldTaglib taglib,
-				  TagFileManager tagFileManager)
+                                  TagFileManager tagFileManager)
     throws Exception
   {
     this.tlibversion = taglib.getTlibVersion();
@@ -168,9 +168,9 @@ public class Taglib extends TagLibraryInfo
       TagInfo tagInfo;
       
       if (tag.getBaseTag() != null)
-	tagInfo = new TagInfoImpl(tag, tag.getBaseTag(), this);
+        tagInfo = new TagInfoImpl(tag, tag.getBaseTag(), this);
       else
-	tagInfo = new TagInfoImpl(tag, this);
+        tagInfo = new TagInfoImpl(tag, this);
 
       tags[i] = tagInfo;
     }
@@ -183,8 +183,8 @@ public class Taglib extends TagLibraryInfo
       TldTagFile tagFile = tagFileList.get(i);
       
       TagFileInfo tagFileInfo = new TagFileInfoExt(tagFileManager,
-						   tagFile.getName(),
-						   tagFile.getPath());
+                                                   tagFile.getName(),
+                                                   tagFile.getPath());
 
       this.tagFiles[i] = tagFileInfo;
     }
@@ -255,7 +255,7 @@ public class Taglib extends TagLibraryInfo
     
     for (int i = 0; i < tags.length; i++) {
       if (tags[i].getTagName().equals(name))
-	return tags[i];
+        return tags[i];
     }
 
     return null;
@@ -275,7 +275,7 @@ public class Taglib extends TagLibraryInfo
       TldTagFile tagFile = tagFiles.get(i);
 
       if (tagFile.getName().equals(name))
-	return tagFile.getPath();
+        return tagFile.getPath();
     }
 
     /*
@@ -299,7 +299,7 @@ public class Taglib extends TagLibraryInfo
     throws JspParseException
   {
     return new Taglib(getPrefixString(), getURI(),
-		      _tldTaglib, _tagFileManager);
+                      _tldTaglib, _tagFileManager);
   }
 
   @Override
@@ -332,11 +332,11 @@ public class Taglib extends TagLibraryInfo
     public TagInfo getTagInfo()
     {
       if (_tagInfo == null) {
-	try {
-	  _tagInfo = _manager.getTag("", getName(), getPath());
-	} catch (JspParseException e) {
-	  throw new RuntimeException(e);
-	}
+        try {
+          _tagInfo = _manager.getTag("", getName(), getPath());
+        } catch (JspParseException e) {
+          throw new RuntimeException(e);
+        }
       }
 
       return _tagInfo;

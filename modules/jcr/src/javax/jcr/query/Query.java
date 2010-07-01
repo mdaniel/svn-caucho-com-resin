@@ -51,14 +51,14 @@ public interface Query {
   
   public String getStoredQueryPath()
     throws ItemNotFoundException,
-	   RepositoryException;
+           RepositoryException;
   
   public Node storeAsNode(String absPath)
     throws ItemExistsException,
-	   PathNotFoundException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   UnsupportedRepositoryOperationException,
-	   RepositoryException;
+           PathNotFoundException,
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           UnsupportedRepositoryOperationException,
+           RepositoryException;
 }

@@ -87,15 +87,15 @@ public class SetLocaleTag extends TagSupport {
       Locale locale = null;
 
       if (valueObj instanceof Locale) {
-	locale = (Locale) valueObj;
+        locale = (Locale) valueObj;
       }
       else if (valueObj instanceof String) {
-	String variant = null;
+        String variant = null;
 
-	if (_variantExpr != null)
-	  variant = _variantExpr.evalString(env);
+        if (_variantExpr != null)
+          variant = _variantExpr.evalString(env);
 
-	locale = pageContext.getLocale((String) valueObj, variant);
+        locale = pageContext.getLocale((String) valueObj, variant);
       }
 
       CoreSetTag.setValue(pageContext, Config.FMT_LOCALE, _scope, locale);

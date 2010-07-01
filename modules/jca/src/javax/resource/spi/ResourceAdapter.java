@@ -53,14 +53,14 @@ public interface ResourceAdapter {
    * Called during activation of a message endpoint.
    */
   public void endpointActivation(MessageEndpointFactory endpointFactory,
-				 ActivationSpec spec)
+                                 ActivationSpec spec)
     throws NotSupportedException, ResourceException;
   
   /**
    * Called during deactivation of a message endpoint.
    */
   public void endpointDeactivation(MessageEndpointFactory endpointFactory,
-				   ActivationSpec spec);
+                                   ActivationSpec spec);
   
   /**
    * Called during crash recovery.

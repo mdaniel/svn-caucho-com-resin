@@ -57,7 +57,7 @@ public class RenderKitFactoryImpl extends RenderKitFactory {
    * Adds a new named RenderKit to the factory map.
    */
   public void addRenderKit(String name,
-			   RenderKit renderKit)
+                           RenderKit renderKit)
   {
     if (name == null)
       throw new NullPointerException();
@@ -71,7 +71,7 @@ public class RenderKitFactoryImpl extends RenderKitFactory {
    * Returns the named render kit.
    */
   public RenderKit getRenderKit(FacesContext context,
-				String name)
+                                String name)
   {
     return _renderKitMap.get(name);
   }

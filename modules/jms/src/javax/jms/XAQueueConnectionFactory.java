@@ -37,6 +37,6 @@ public interface XAQueueConnectionFactory
     throws JMSException;
   
   public XAQueueConnection createXAQueueConnection(String userName,
-						   String password)
+                                                   String password)
     throws JMSException;
 }

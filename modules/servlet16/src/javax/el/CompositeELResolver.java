@@ -64,7 +64,7 @@ public class CompositeELResolver extends ELResolver {
       Class cl = resolver.getCommonPropertyType(env, base);
 
       if (cl == null)
-	continue;
+        continue;
 
       commonClass = cl;
     }
@@ -74,7 +74,7 @@ public class CompositeELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
-							   Object base)
+                                                           Object base)
   {
     ArrayList<FeatureDescriptor> descriptors
       = new ArrayList<FeatureDescriptor>();
@@ -84,15 +84,15 @@ public class CompositeELResolver extends ELResolver {
       ELResolver resolver = _resolvers.get(i);
 
       Iterator<FeatureDescriptor> iter
-	= resolver.getFeatureDescriptors(env, base);
+        = resolver.getFeatureDescriptors(env, base);
       
       if (iter == null)
-	continue;
+        continue;
 
       while (iter.hasNext()) {
-	FeatureDescriptor desc = iter.next();
+        FeatureDescriptor desc = iter.next();
 
-	descriptors.add(desc);
+        descriptors.add(desc);
       }
     }
 
@@ -101,8 +101,8 @@ public class CompositeELResolver extends ELResolver {
 
   @Override
   public Class<?> getType(ELContext env,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     env.setPropertyResolved(false);
 
@@ -113,7 +113,7 @@ public class CompositeELResolver extends ELResolver {
       Class type = resolver.getType(env, base, property);
 
       if (env.isPropertyResolved())
-	return type;
+        return type;
     }
 
     return null;
@@ -121,8 +121,8 @@ public class CompositeELResolver extends ELResolver {
 
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     context.setPropertyResolved(false);
 
@@ -133,7 +133,7 @@ public class CompositeELResolver extends ELResolver {
       Object value = resolver.getValue(context, base, property);
 
       if (context.isPropertyResolved())
-	return value;
+        return value;
     }
 
     return null;
@@ -141,8 +141,8 @@ public class CompositeELResolver extends ELResolver {
 
   @Override
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     context.setPropertyResolved(false);
 
@@ -153,7 +153,7 @@ public class CompositeELResolver extends ELResolver {
       boolean value = resolver.isReadOnly(context, base, property);
 
       if (context.isPropertyResolved())
-	return value;
+        return value;
     }
     
     return true;
@@ -161,9 +161,9 @@ public class CompositeELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     context.setPropertyResolved(false);
 
@@ -174,7 +174,7 @@ public class CompositeELResolver extends ELResolver {
       resolver.setValue(context, base, property, value);
 
       if (context.isPropertyResolved())
-	return;
+        return;
     }
   }
 }

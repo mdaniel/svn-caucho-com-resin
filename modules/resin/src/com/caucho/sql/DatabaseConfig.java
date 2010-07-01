@@ -99,9 +99,9 @@ public class DatabaseConfig {
 
     if (defaultList != null) {
       for (int i = 0; i < defaultList.size(); i++) {
-	DatabaseConfig config = defaultList.get(i);
+        DatabaseConfig config = defaultList.get(i);
 
-	config.getBuilderProgram().configure(pool);
+        config.getBuilderProgram().configure(pool);
       }
     }
   }

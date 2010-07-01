@@ -143,10 +143,10 @@ public class JspPlugin extends JspNode {
   {
     if (hasELAttribute(value))
       throw error(L.l("'{0}' may not have EL expression '{1}'",
-		      attribute, value));
+                      attribute, value));
     else if (hasRuntimeAttribute(value))
       throw error(L.l("'{0}' may not have RT expression '{1}'",
-		      attribute, value));
+                      attribute, value));
   }
 
   /**
@@ -178,7 +178,7 @@ public class JspPlugin extends JspNode {
       JspBody body = (JspBody) node;
 
       for (JspNode child : body.getChildren())
-	addChild(child);
+        addChild(child);
     }
     else
       super.addChildEnd(node);
@@ -298,23 +298,23 @@ public class JspPlugin extends JspNode {
 
       if (isEmbed) {
         printText(out, " " + name + "=\"");
-	
-	if (hasRuntimeAttribute(value))
-	  out.println("out.print(" + getRuntimeAttribute(value) + ");");
-	else
-	  printText(out, value);
 
-	printText(out, "\"");
+        if (hasRuntimeAttribute(value))
+          out.println("out.print(" + getRuntimeAttribute(value) + ");");
+        else
+          printText(out, value);
+
+        printText(out, "\"");
       }
       else {
         printText(out, "<param name=\"" + name + "\" value=\"");
-	
-	if (hasRuntimeAttribute(value))
-	  out.println("out.print(" + getRuntimeAttribute(value) + ");");
-	else
-	  printText(out, value);
 
-	printText(out, "\">\n");
+        if (hasRuntimeAttribute(value))
+          out.println("out.print(" + getRuntimeAttribute(value) + ");");
+        else
+          printText(out, value);
+
+        printText(out, "\">\n");
       }
     }
 

@@ -42,8 +42,8 @@ public class ShortConverter implements Converter
     = "javax.faces.converter.STRING";
   
   public Object getAsObject(FacesContext context,
-			    UIComponent component,
-			    String value)
+                            UIComponent component,
+                            String value)
     throws ConverterException
   {
     // XXX: incorrect
@@ -59,16 +59,16 @@ public class ShortConverter implements Converter
       return Short.decode(value);
     } catch (NumberFormatException e) {
       String summary = Util.l10n(context, SHORT_ID,
-				 "{2}: \"{0}\" must be a number between -32768 and 32767.",
-				 value,
-				 getExample(),
-				 Util.getLabel(context, component));
+                                 "{2}: \"{0}\" must be a number between -32768 and 32767.",
+                                 value,
+                                 getExample(),
+                                 Util.getLabel(context, component));
       
       String detail = Util.l10n(context, SHORT_ID + "_detail",
-				"{2}: \"{0}\" must be a valid number -32768 and 32767. Example: {1}.",
-				value,
-				getExample(),
-				Util.getLabel(context, component));
+                                "{2}: \"{0}\" must be a valid number -32768 and 32767. Example: {1}.",
+                                value,
+                                getExample(),
+                                Util.getLabel(context, component));
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
@@ -79,8 +79,8 @@ public class ShortConverter implements Converter
   }
   
   public String getAsString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
     throws ConverterException
   {
     // XXX: incorrect

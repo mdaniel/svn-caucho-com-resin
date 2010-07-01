@@ -102,10 +102,10 @@ public class MucAdminQuery implements java.io.Serializable {
 
     if (_items != null) {
       for (int i = 0; i < _items.length; i++) {
-	if (i > 0)
-	  sb.append(",");
+        if (i > 0)
+          sb.append(",");
 
-	sb.append("item=").append(_items[i]);
+        sb.append("item=").append(_items[i]);
       }
     }
 

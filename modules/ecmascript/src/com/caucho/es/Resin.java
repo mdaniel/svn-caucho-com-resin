@@ -108,26 +108,26 @@ public class Resin {
       int shift = 0;
 
       while (argv.length > shift) {
-	if (argv[shift].equals("-v")) {
-	  verbose = true;
-	  shift++;
-	} else if (shift + 1 < argv.length && argv[shift].equals("-conf")) {
-	  resinConf = argv[shift + 1];
-	  shift += 2;
-	} else if (argv[shift].equals("--version")) {
-	  System.out.println(VersionFactory.getVersion());
-	  System.exit(0);
-	} else
-	  break;
+        if (argv[shift].equals("-v")) {
+          verbose = true;
+          shift++;
+        } else if (shift + 1 < argv.length && argv[shift].equals("-conf")) {
+          resinConf = argv[shift + 1];
+          shift += 2;
+        } else if (argv[shift].equals("--version")) {
+          System.out.println(VersionFactory.getVersion());
+          System.exit(0);
+        } else
+          break;
       }
 
       if (argv.length == shift) {
-	is = VfsStream.openRead(System.in);
-	name = "stdin";
+        is = VfsStream.openRead(System.in);
+        name = "stdin";
       }
       else {
-	is = Vfs.lookupNative(argv[shift]).openRead();
-	name = argv[shift++];
+        is = Vfs.lookupNative(argv[shift]).openRead();
+        name = argv[shift++];
       }
 
       Path conf = Vfs.lookup(resinConf);
@@ -135,17 +135,17 @@ public class Resin {
 
       String []args;
       if (argv.length > shift)
-	args = new String[argv.length - shift];
+        args = new String[argv.length - shift];
       else
-	args = new String[0];
+        args = new String[0];
       for (int i = 0; i < argv.length - shift; i++)
-	args[i] = argv[i + shift];
+        args[i] = argv[i + shift];
 
       Path scriptPath = null;
 
       int p;
       if ((p = name.lastIndexOf('/')) >= 0) {
-	Path subpath = Vfs.lookupNative(name.substring(0, p));
+        Path subpath = Vfs.lookupNative(name.substring(0, p));
 
         MergePath mergePath = new MergePath();
         mergePath.addMergePath(Vfs.lookup());
@@ -174,9 +174,9 @@ public class Resin {
     } catch (ESException e) {
       System.err.println(e.getMessage());
       if (verbose)
-	e.printStackTrace();
+        e.printStackTrace();
       else
-	e.printESStackTrace();
+        e.printESStackTrace();
     } catch (Throwable e) {
       System.out.println("Exception: " + e);
       e.printStackTrace();

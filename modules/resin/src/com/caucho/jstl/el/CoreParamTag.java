@@ -76,7 +76,7 @@ public class CoreParamTag extends BodyTagSupport {
   {
     try {
       if (_valueExpr == null)
-	return EVAL_BODY_BUFFERED;
+        return EVAL_BODY_BUFFERED;
 
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
       ELContext env = pageContext.getELContext();
@@ -84,22 +84,22 @@ public class CoreParamTag extends BodyTagSupport {
       String name = _nameExpr.evalString(env);
 
       if (name == null)
-	return SKIP_BODY;
+        return SKIP_BODY;
       
       String value = _valueExpr.evalString(env);
     
       Tag parent = getParent();
       for (; parent != null; parent = parent.getParent()) {
-	if (parent instanceof NameValueTag) {
-	  NameValueTag tag = (NameValueTag) parent;
+        if (parent instanceof NameValueTag) {
+          NameValueTag tag = (NameValueTag) parent;
 
-	  if (value == null)
-	    tag.addParam(name, "");
-	  else
-	    tag.addParam(name, value);
-	
-	  return SKIP_BODY;
-	}
+          if (value == null)
+            tag.addParam(name, "");
+          else
+            tag.addParam(name, value);
+
+          return SKIP_BODY;
+        }
       }
       
       throw new JspException(L.l("c:param requires c:url or c:import parent.")); 
@@ -118,14 +118,14 @@ public class CoreParamTag extends BodyTagSupport {
   {
     try {
       if (_valueExpr != null)
-	return EVAL_PAGE;
+        return EVAL_PAGE;
       
       String value;
 
       if (bodyContent != null)
-	value = bodyContent.getString().trim();
+        value = bodyContent.getString().trim();
       else
-	value = "";
+        value = "";
     
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
       ELContext env = pageContext.getELContext();
@@ -134,17 +134,17 @@ public class CoreParamTag extends BodyTagSupport {
 
       Object parent = getParent();
       if (! (parent instanceof NameValueTag))
-	throw new JspException(L.l("c:param requires c:url or c:import parent.")); 
+        throw new JspException(L.l("c:param requires c:url or c:import parent."));
 
       if (name == null)
-	return EVAL_PAGE;
+        return EVAL_PAGE;
 
       NameValueTag tag = (NameValueTag) parent;
 
       if (value == null)
-	tag.addParam(name, "");
+        tag.addParam(name, "");
       else
-	tag.addParam(name, value);
+        tag.addParam(name, value);
     
       return EVAL_PAGE;
     } catch (Exception e) {

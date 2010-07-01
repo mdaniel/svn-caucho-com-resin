@@ -58,7 +58,7 @@ public class IfRemoteUser implements RequestPredicate
   {
     if (_remoteUser == null)
       throw new ConfigException(L.l("'value' is a required attribute for {0}",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
   }
 
   public boolean isMatch(HttpServletRequest request)

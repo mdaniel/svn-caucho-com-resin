@@ -52,7 +52,7 @@ abstract public class CauchoBean<T> implements Bean<T>
   {
     for (Annotation ann : getAnnotations()) {
       if (ann.annotationType().equals(annType))
-	return true;
+        return true;
     }
 
     return false;

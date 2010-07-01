@@ -95,7 +95,7 @@ public class ResinSet {
     //BeanFactory factory = webBeans.createBeanFactory(value.getClass());
     //factory.name(name);
     //factory.type();
-	
+
     // webBeans.addBean(factory.singleton(value));
 
     Config.setProperty(name, value);
@@ -112,27 +112,27 @@ public class ResinSet {
       InjectManager webBeans = InjectManager.create();
 
       if (_value != null) {
-	Config.setProperty(_var, _value);
+        Config.setProperty(_var, _value);
       }
       else if (_default != null) {
-	if (Config.getProperty(_var) == null)
-	  Config.setProperty(_var, _default);
+        if (Config.getProperty(_var) == null)
+          Config.setProperty(_var, _default);
       }
       
       /*
       if (_value != null) {
-	BeanFactory factory = webBeans.createBeanFactory(_value.getClass());
-	factory.name(_var);
-	factory.type();
-	
-	webBeans.addBean(factory.singleton(_value));
+        BeanFactory factory = webBeans.createBeanFactory(_value.getClass());
+        factory.name(_var);
+        factory.type();
+
+        webBeans.addBean(factory.singleton(_value));
       }
       else if (_default != null && webBeans.findByName(_var) == null) {
-	BeanFactory factory = webBeans.createBeanFactory(_default.getClass());
-	factory.name(_var);
-	factory.type();
-	
-	webBeans.addBean(factory.singleton(_default));
+        BeanFactory factory = webBeans.createBeanFactory(_default.getClass());
+        factory.name(_var);
+        factory.type();
+
+        webBeans.addBean(factory.singleton(_default));
       }
       */
     }

@@ -59,19 +59,19 @@ public class ClientAuthManager {
   public PublicKey getPublicKey(GetPublicKeyQuery query)
   {
     return getPublicKey(query.getAlgorithm(),
-			query.getFormat(),
-			query.getEncoded());
+                        query.getFormat(),
+                        query.getEncoded());
   }
   
   public PublicKey getPublicKey(String algorithm,
-				String format,
-				byte []encData)
+                                String format,
+                                byte []encData)
   {
     try {
       KeyRep keyRep = new KeyRep(KeyRep.Type.PUBLIC,
-				 algorithm,
-				 format,
-				 encData);
+                                 algorithm,
+                                 format,
+                                 encData);
 
       PublicKey publicKey = (PublicKey) _keyRepReadResolve.invoke(keyRep);
 
@@ -95,15 +95,15 @@ public class ClientAuthManager {
   }
 
   public EncryptedObject encrypt(Secret secret,
-				 PublicKey publicKey,
-				 Object object)
+                                 PublicKey publicKey,
+                                 Object object)
   {
     byte []encKey = wrapSecret(secret.getKey(), publicKey);
     byte []encData = encode(secret.getKey(), object);
 
     return new EncryptedObject(secret.getAlgorithm(),
-			       encKey,
-			       encData);
+                               encKey,
+                               encData);
   }
 
   public byte []wrapSecret(SecretKey secretKey, PublicKey publicKey)
@@ -204,8 +204,8 @@ public class ClientAuthManager {
   static {
     for (Method method : KeyRep.class.getDeclaredMethods()) {
       if (method.getName().equals("readResolve")) {
-	_keyRepReadResolve = method;
-	method.setAccessible(true);
+        _keyRepReadResolve = method;
+        method.setAccessible(true);
       }
     }
   }

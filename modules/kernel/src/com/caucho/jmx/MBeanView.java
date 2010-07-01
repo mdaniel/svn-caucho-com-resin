@@ -59,9 +59,9 @@ public class MBeanView {
             String agentId)
   {
     for (; loader != null
-	   && loader != ClassLoader.getSystemClassLoader()
-	   && ! (loader instanceof EnvironmentClassLoader);
-	 loader = loader.getParent()) {
+           && loader != ClassLoader.getSystemClassLoader()
+           && ! (loader instanceof EnvironmentClassLoader);
+         loader = loader.getParent()) {
     }
 
     if (loader == null)
@@ -151,12 +151,12 @@ public class MBeanView {
     synchronized (_mbeans) {
       Iterator<ObjectName> names = _mbeans.keySet().iterator();
       while (names.hasNext()) {
-	ObjectName name = names.next();
+        ObjectName name = names.next();
 
-	String domain = name.getDomain();
+        String domain = name.getDomain();
 
-	if (! domains.contains(domain))
-	  domains.add(domain);
+        if (! domains.contains(domain))
+          domains.add(domain);
       }
     }
 
@@ -171,9 +171,9 @@ public class MBeanView {
    */
   public Set<ObjectName> queryNames(ObjectName queryName, QueryExp query)
     throws BadStringOperationException,
-	   BadBinaryOpValueExpException,
-	   BadAttributeValueExpException,
-	   InvalidApplicationException
+           BadBinaryOpValueExpException,
+           BadAttributeValueExpException,
+           InvalidApplicationException
   {
     // TreeSet would be better but it causes jconsole to fail
     HashSet<ObjectName> set = new HashSet<ObjectName>();
@@ -187,12 +187,12 @@ public class MBeanView {
    * Finds names matching the query.
    */
   protected void queryNames(Set<ObjectName> set,
-			    ObjectName queryName,
-			    QueryExp query)
+                            ObjectName queryName,
+                            QueryExp query)
     throws BadStringOperationException,
-	   BadBinaryOpValueExpException,
-	   BadAttributeValueExpException,
-	   InvalidApplicationException
+           BadBinaryOpValueExpException,
+           BadAttributeValueExpException,
+           InvalidApplicationException
   {
     synchronized (_mbeans) {
       Iterator<ObjectName> iter = _mbeans.keySet().iterator();
@@ -217,9 +217,9 @@ public class MBeanView {
    */
   public Set<ObjectInstance> queryMBeans(ObjectName name, QueryExp query)
     throws BadStringOperationException,
-	   BadBinaryOpValueExpException,
-	   BadAttributeValueExpException,
-	   InvalidApplicationException
+           BadBinaryOpValueExpException,
+           BadAttributeValueExpException,
+           InvalidApplicationException
   {
     HashSet<ObjectInstance> set = new HashSet<ObjectInstance>();
 
@@ -232,12 +232,12 @@ public class MBeanView {
    * Finds names matching the query.
    */
   protected void queryMBeans(Set<ObjectInstance> set,
-			     ObjectName name,
-			     QueryExp query)
+                             ObjectName name,
+                             QueryExp query)
     throws BadStringOperationException,
-	   BadBinaryOpValueExpException,
-	   BadAttributeValueExpException,
-	   InvalidApplicationException
+           BadBinaryOpValueExpException,
+           BadAttributeValueExpException,
+           InvalidApplicationException
   {
     synchronized (_mbeans) {
       Iterator<ObjectName> iter = _mbeans.keySet().iterator();
@@ -246,10 +246,10 @@ public class MBeanView {
         ObjectName testName = iter.next();
 
         if (isMatch(testName, name, query)) {
-	  MBeanWrapper mbean = _mbeans.get(testName);
+          MBeanWrapper mbean = _mbeans.get(testName);
 
-	  if (mbean != null)
-	    set.add(mbean.getObjectInstance());
+          if (mbean != null)
+            set.add(mbean.getObjectInstance());
         }
       }
     }
@@ -270,9 +270,9 @@ public class MBeanView {
                           ObjectName queryName,
                           QueryExp query)
     throws BadStringOperationException,
-	   BadBinaryOpValueExpException,
-	   BadAttributeValueExpException,
-	   InvalidApplicationException
+           BadBinaryOpValueExpException,
+           BadAttributeValueExpException,
+           InvalidApplicationException
   {
     if (queryName == null)
       return true;
@@ -324,12 +324,12 @@ public class MBeanView {
   {
     synchronized (_mbeans) {
       if (overwrite || _mbeans.get(name) == null) {
-	_mbeans.put(name, mbean);
+        _mbeans.put(name, mbean);
 
-	return true;
+        return true;
       }
       else
-	return false;
+        return false;
     }
   }
 
@@ -350,7 +350,7 @@ public class MBeanView {
   {
     synchronized (_mbeans) {
       if (mbean != null && _mbeans.get(name) != mbean)
-	return null;
+        return null;
     
       return _mbeans.remove(name);
     }
@@ -364,10 +364,10 @@ public class MBeanView {
     synchronized (_mbeans) {
       MBeanWrapper mbean = _mbeans.get(name);
       if (mbean != null)
-	return mbean;
+        return mbean;
 
       if (_classLoader == null)
-	return null;
+        return null;
     }
 
     MBeanView parentView = getParentView();

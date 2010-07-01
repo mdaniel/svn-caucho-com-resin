@@ -82,7 +82,7 @@ p   */
    * Sets the location
    */
   public void setLocation(String systemId, String filename,
-			  int line, int column);
+                          int line, int column);
 
   /**
    * Prints the node to a stream

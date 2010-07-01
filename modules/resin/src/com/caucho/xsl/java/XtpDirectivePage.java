@@ -73,7 +73,7 @@ public class XtpDirectivePage extends XslNode implements XslTopNode {
     }
     else
       throw error(L.l("'{0}' is not allowed as an xtp:directive.page child.",
-		      node));
+                      node));
   }
 
   /**

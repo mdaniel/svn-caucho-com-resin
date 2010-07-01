@@ -60,14 +60,14 @@ public interface DeploymentConfiguration {
    * Restores a config bean
    */
   public DConfigBeanRoot restoreDConfigBean(InputStream archiveStream,
-					    DDBeanRoot bean)
+                                            DDBeanRoot bean)
     throws ConfigurationException;
   
   /**
    * Saves a config bean
    */
   public void saveDConfigBean(OutputStream archiveStream,
-			      DDBeanRoot bean)
+                              DDBeanRoot bean)
     throws ConfigurationException;
   
   /**

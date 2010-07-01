@@ -94,9 +94,9 @@ class NativeGlobal extends Native {
 
     case PARSE_FLOAT:
       if (length < 1)
-	return ESNumber.NaN;
+        return ESNumber.NaN;
       else {
-	return ESNumber.create(ESString.parseFloat(eval.getArg(0).toStr()));
+        return ESNumber.create(ESString.parseFloat(eval.getArg(0).toStr()));
       }
 
     case ESCAPE:
@@ -107,23 +107,23 @@ class NativeGlobal extends Native {
 
     case IS_NAN:
       if (length < 1)
-	return esUndefined;
+        return esUndefined;
       else
-	return ESBoolean.create(Double.isNaN(eval.getArg(0).toNum()));
+        return ESBoolean.create(Double.isNaN(eval.getArg(0).toNum()));
 
     case IS_FINITE:
       if (length < 1)
-	return esUndefined;
+        return esUndefined;
       else {
-	double value = eval.getArg(0).toNum();
-	if (Double.isNaN(value))
-	  return ESBoolean.create(false);
-	else if (value == 1.0/0.0)
-	  return ESBoolean.create(false);
-	else if (value == -1.0/0.0)
-	  return ESBoolean.create(false);
-	else
-	  return ESBoolean.create(true);
+        double value = eval.getArg(0).toNum();
+        if (Double.isNaN(value))
+          return ESBoolean.create(false);
+        else if (value == 1.0/0.0)
+          return ESBoolean.create(false);
+        else if (value == -1.0/0.0)
+          return ESBoolean.create(false);
+        else
+          return ESBoolean.create(true);
       }
 
     case PRINT:
@@ -135,13 +135,13 @@ class NativeGlobal extends Native {
       String []args = new String[3];
       Process process;
       try {
-	args[0] = "sh";
-	args[1] = "-c";
-	args[2] = arg;
-	process = Runtime.getRuntime().exec(args);
-	return ESNumber.create(process.waitFor());
+        args[0] = "sh";
+        args[1] = "-c";
+        args[2] = arg;
+        process = Runtime.getRuntime().exec(args);
+        return ESNumber.create(process.waitFor());
       } catch (Exception e) {
-	throw new ESWrapperException(e);
+        throw new ESWrapperException(e);
       }
 
     default:
@@ -206,12 +206,12 @@ class NativeGlobal extends Native {
       if (radix == 0) {
       }
       else if (radix < 2 || radix > 36)
-	return ESNumber.NaN;
+        return ESNumber.NaN;
       else if (radix == 16 && i + 1 < length &&
-	       string.charAt(i) == '0' &&
-	       (string.charAt(i + 1) == 'x' ||
-		string.charAt(i + 1) == 'X'))
-	i += 2;
+               string.charAt(i) == '0' &&
+               (string.charAt(i + 1) == 'x' ||
+                string.charAt(i + 1) == 'X'))
+        i += 2;
     }
     
     if (radix != 0) {
@@ -221,7 +221,7 @@ class NativeGlobal extends Native {
     else if (string.charAt(i) != '0')
       radix = 10;
     else if (i + 1 < len && 
-	     (string.charAt(i + 1) == 'x' || string.charAt(i + 1) == 'X')) {
+             (string.charAt(i + 1) == 'x' || string.charAt(i + 1) == 'X')) {
       radix = 16;
       i += 2;
     } else {
@@ -234,19 +234,19 @@ class NativeGlobal extends Native {
       int ch = string.charAt(i);
 
       if (radix <= 10 && ('0' <= ch && ch <= '0' + radix - 1)) {
-	value = radix * value + string.charAt(i) - '0';
-	hasDigit = true;
+        value = radix * value + string.charAt(i) - '0';
+        hasDigit = true;
       } else if (radix > 10 && ('0' <= ch && ch <= '9')) {
-	value = radix * value + string.charAt(i) - '0';
-	hasDigit = true;
+        value = radix * value + string.charAt(i) - '0';
+        hasDigit = true;
       } else if (radix > 10 && ('a' <= ch && ch <= 'a' + radix - 11)) {
-	value = radix * value + string.charAt(i) - 'a' + 10;
-	hasDigit = true;
+        value = radix * value + string.charAt(i) - 'a' + 10;
+        hasDigit = true;
       } else if (radix > 10 && ('A' <= ch && ch <= 'A' + radix - 11)) {
-	value = radix * value + string.charAt(i) - 'A' + 10;
-	hasDigit = true;
+        value = radix * value + string.charAt(i) - 'A' + 10;
+        hasDigit = true;
       } else
-	break;
+        break;
     }
 
     if (hasDigit)
@@ -267,21 +267,21 @@ class NativeGlobal extends Native {
       int ch = string.charAt(i);
 
       if (ch >= 'a' && ch <= 'z' ||
-	  ch >= 'A' && ch <= 'Z' ||
-	  ch >= '0' && ch <= '9' ||
-	  ch == '@' || ch == '*' || ch == '.' || ch == '_' ||
-	  ch == '+' || ch == '-' || ch == '/') {
-	sbuf.append((char) ch);
+          ch >= 'A' && ch <= 'Z' ||
+          ch >= '0' && ch <= '9' ||
+          ch == '@' || ch == '*' || ch == '.' || ch == '_' ||
+          ch == '+' || ch == '-' || ch == '/') {
+        sbuf.append((char) ch);
       } else if (ch < 256) {
-	sbuf.append('%');
-	sbuf.append(Integer.toHexString(ch >> 4));
-	sbuf.append(Integer.toHexString(ch & 0xf));
+        sbuf.append('%');
+        sbuf.append(Integer.toHexString(ch >> 4));
+        sbuf.append(Integer.toHexString(ch & 0xf));
       } else {
-	sbuf.append("%u");
-	sbuf.append(Integer.toHexString(ch >> 12));
-	sbuf.append(Integer.toHexString((ch >> 8) & 0xf));
-	sbuf.append(Integer.toHexString((ch >> 4) & 0xf));
-	sbuf.append(Integer.toHexString(ch & 0xf));
+        sbuf.append("%u");
+        sbuf.append(Integer.toHexString(ch >> 12));
+        sbuf.append(Integer.toHexString((ch >> 8) & 0xf));
+        sbuf.append(Integer.toHexString((ch >> 4) & 0xf));
+        sbuf.append(Integer.toHexString(ch & 0xf));
       }
     } 
 
@@ -300,36 +300,36 @@ class NativeGlobal extends Native {
       int ch = string.charAt(i);
 
       if (ch == '%' && i + 2 < string.length()) {
-	int limit = 2;
-	int start = 1;
+        int limit = 2;
+        int start = 1;
 
-	if (string.charAt(i + 1) == 'u') {
-	  limit = 4;
-	  start = 2;
-	}
+        if (string.charAt(i + 1) == 'u') {
+          limit = 4;
+          start = 2;
+        }
 
-	int newCh = 0;
-	int j = 0;
-	for (; j < limit && i + j + start < string.length(); j++) {
-	  if ((ch = string.charAt(i + j + start)) >= '0' && ch <= '9')
-	    newCh = 16 * newCh + ch - '0';
-	  else if (ch >= 'a' && ch <= 'f')
-	    newCh = 16 * newCh + ch - 'a' + 10;
-	  else if (ch >= 'A' && ch <= 'F')
-	    newCh = 16 * newCh + ch - 'A' + 10;
-	  else
-	    break;
-	}
+        int newCh = 0;
+        int j = 0;
+        for (; j < limit && i + j + start < string.length(); j++) {
+          if ((ch = string.charAt(i + j + start)) >= '0' && ch <= '9')
+            newCh = 16 * newCh + ch - '0';
+          else if (ch >= 'a' && ch <= 'f')
+            newCh = 16 * newCh + ch - 'a' + 10;
+          else if (ch >= 'A' && ch <= 'F')
+            newCh = 16 * newCh + ch - 'A' + 10;
+          else
+            break;
+        }
 
-	if (j != limit) {
-	  sbuf.append('%');
-	} else {
-	  sbuf.append((char) newCh);
-	  i += limit + start - 1;
-	}
+        if (j != limit) {
+          sbuf.append('%');
+        } else {
+          sbuf.append((char) newCh);
+          i += limit + start - 1;
+        }
       }
       else
-	sbuf.append((char) ch);
+        sbuf.append((char) ch);
     }
 
     return ESString.create(sbuf.toString());

@@ -71,7 +71,7 @@ public class FromExpr extends AbstractPattern {
       Node subnode = iter.nextNode();
       
       if (subnode == node)
-	return true;
+        return true;
     }
 
     return false;
@@ -104,7 +104,7 @@ public class FromExpr extends AbstractPattern {
     int i = 1;
     while (iter.hasNext()) {
       if (iter.next() == node)
-	return i;
+        return i;
       i++;
     }
 

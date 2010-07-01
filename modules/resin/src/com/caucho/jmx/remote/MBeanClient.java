@@ -87,11 +87,11 @@ public class MBeanClient {
   {
     if (_jmxProxy == null) {
       try {
-	HessianProxyFactory proxy = new HessianProxyFactory();
-	proxy.getSerializerFactory().addFactory(new JMXSerializerFactory());
-	_jmxProxy = (RemoteJMX) proxy.create(_url);
+        HessianProxyFactory proxy = new HessianProxyFactory();
+        proxy.getSerializerFactory().addFactory(new JMXSerializerFactory());
+        _jmxProxy = (RemoteJMX) proxy.create(_url);
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 

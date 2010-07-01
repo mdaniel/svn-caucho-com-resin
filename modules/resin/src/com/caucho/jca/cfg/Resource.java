@@ -281,19 +281,19 @@ public class Resource {
   {
     try {
       if (_isPreInit)
-	return;
+        return;
       _isPreInit = true;
 
       Object oldObject = null;
 
       if (_jndiName != null) {
-	try {
-	  String jndiName = Jndi.getFullName(_jndiName);
+        try {
+          String jndiName = Jndi.getFullName(_jndiName);
 
-	  Context ic = new InitialContext();
-	  oldObject = ic.lookup(_jndiName);
-	} catch (Exception e) {
-	}
+          Context ic = new InitialContext();
+          oldObject = ic.lookup(_jndiName);
+        } catch (Exception e) {
+        }
       }
     
       MBeanServer mbeanServer = Jmx.getMBeanServer();
@@ -301,20 +301,20 @@ public class Resource {
       ObjectName mbeanName = null;
 
       if (_mbeanName != null)
-	mbeanName = Jmx.getObjectName(_mbeanName);
+        mbeanName = Jmx.getObjectName(_mbeanName);
 
       if (_type != null) {
       }
       else if (oldObject != null) {
-	_object = oldObject;
-	return;
+        _object = oldObject;
+        return;
       }
       else if (mbeanName != null &&
-	       mbeanServer.getMBeanInfo(mbeanName) != null) {
-	return;
+               mbeanServer.getMBeanInfo(mbeanName) != null) {
+        return;
       }
       else
-	throw new ConfigException(L.l("<resource> configuration needs a <type>.  The <type> is the class name of the resource bean."));
+        throw new ConfigException(L.l("<resource> configuration needs a <type>.  The <type> is the class name of the resource bean."));
 
       Constructor constructor = getConstructor(_args.size());
 
@@ -323,22 +323,22 @@ public class Resource {
       Object []args = new Object[_args.size()];
 
       /*
-	for (int i = 0; i < args.length; i++)
-	args[i] = _args.get(i).configure(params[i]);
+        for (int i = 0; i < args.length; i++)
+        args[i] = _args.get(i).configure(params[i]);
       */
       for (int i = 0; i < args.length; i++)
-	args[i] = _args.get(i);
+        args[i] = _args.get(i);
 
       _object = constructor.newInstance(args);
 
       if (mbeanName != null) {
-	Object mbean = _object;
+        Object mbean = _object;
 
-	if (_mbeanInterface != null)
-	  mbean = new IntrospectionMBean(mbean, _mbeanInterface);
+        if (_mbeanInterface != null)
+          mbean = new IntrospectionMBean(mbean, _mbeanInterface);
       
-	Jmx.register(mbean, mbeanName);
-	_mbeanInfo = mbeanServer.getMBeanInfo(mbeanName);
+        Jmx.register(mbean, mbeanName);
+        _mbeanInfo = mbeanServer.getMBeanInfo(mbeanName);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -355,11 +355,11 @@ public class Resource {
 
     for (int i = 0; i < constructors.length; i++) {
       if (constructors[i].getParameterTypes().length == len)
-	return constructors[i];
+        return constructors[i];
     }
 
     throw new ConfigException(L.l("`{0}' has no matching constructors.",
-				  _type.getName()));
+                                  _type.getName()));
   }
 
   /**
@@ -399,10 +399,10 @@ public class Resource {
 
     if (_object instanceof ManagedConnectionFactory) {
       ResourceManagerImpl rm = ResourceManagerImpl.createLocalManager();
-	
+
       ManagedConnectionFactory mcf;
       mcf = (ManagedConnectionFactory) _object;
-	
+
       ConnectionPool cm = rm.createConnectionPool();
 
       cm.setShareable(_shareable);
@@ -526,8 +526,8 @@ public class Resource {
     {
       MBeanAttributeInfo attr = getAttribute(attrName);
       if (attr == null)
-	throw new ConfigException(L.l("`{0}' is an unknown attribute for {1}",
-				      attrName, _mbeanName));
+        throw new ConfigException(L.l("`{0}' is an unknown attribute for {1}",
+                                      attrName, _mbeanName));
 
       String typeName = attr.getType();
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -538,7 +538,7 @@ public class Resource {
       MBeanServer server = Jmx.getMBeanServer();
       
       server.setAttribute(getObjectName(),
-			  new Attribute(attr.getName(), value));
+                          new Attribute(attr.getName(), value));
     }
 
     private MBeanAttributeInfo getAttribute(String key)
@@ -549,16 +549,16 @@ public class Resource {
       MBeanAttributeInfo []attrs = info.getAttributes();
 
       if (attrs == null)
-	return null;
+        return null;
 
       for (int i = 0; i < attrs.length; i++) {
-	if (attrs[i].getName().equals(key))
-	  return attrs[i];
+        if (attrs[i].getName().equals(key))
+          return attrs[i];
       }
 
       for (int i = 0; i < attrs.length; i++) {
-	if (convertName(attrs[i].getName()).equals(key))
-	  return attrs[i];
+        if (convertName(attrs[i].getName()).equals(key))
+          return attrs[i];
       }
 
       return null;
@@ -569,23 +569,23 @@ public class Resource {
       CharBuffer cb = CharBuffer.allocate();
 
       for (int i = 0; i < key.length(); i++) {
-	char ch = key.charAt(i);
+        char ch = key.charAt(i);
 
-	if (! Character.isUpperCase(ch))
-	  cb.append(ch);
-	else if (i == 0)
-	  cb.append(Character.toLowerCase(ch));
-	else if (Character.isLowerCase(key.charAt(i - 1))) {
-	  cb.append('-');
-	  cb.append(Character.toLowerCase(ch));
-	}
-	else if (i + 1 != key.length() &&
-		 Character.isLowerCase(key.charAt(i + 1))) {
-	  cb.append('-');
-	  cb.append(Character.toLowerCase(ch));
-	}
-	else
-	  cb.append(Character.toLowerCase(ch));
+        if (! Character.isUpperCase(ch))
+          cb.append(ch);
+        else if (i == 0)
+          cb.append(Character.toLowerCase(ch));
+        else if (Character.isLowerCase(key.charAt(i - 1))) {
+          cb.append('-');
+          cb.append(Character.toLowerCase(ch));
+        }
+        else if (i + 1 != key.length() &&
+                 Character.isLowerCase(key.charAt(i + 1))) {
+          cb.append('-');
+          cb.append(Character.toLowerCase(ch));
+        }
+        else
+          cb.append(Character.toLowerCase(ch));
       }
 
       return cb.close();
@@ -621,21 +621,21 @@ public class Resource {
     public void init()
     {
       try {
-	if (_mbeanName != null) {
-	  ObjectName mbeanName = Jmx.getObjectName(_mbeanName);
+        if (_mbeanName != null) {
+          ObjectName mbeanName = Jmx.getObjectName(_mbeanName);
 
-	  ObjectName listenerName = getObjectName();
+          ObjectName listenerName = getObjectName();
 
-	  MBeanServer server = Jmx.getMBeanServer();
+          MBeanServer server = Jmx.getMBeanServer();
 
-	  server.addNotificationListener(mbeanName, listenerName,
-					 _filter, _handback);
+          server.addNotificationListener(mbeanName, listenerName,
+                                         _filter, _handback);
 
-	}
-	else
-	  throw new ConfigException(L.l("mbean name is required"));
+        }
+        else
+          throw new ConfigException(L.l("mbean name is required"));
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
   }

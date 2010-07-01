@@ -44,9 +44,9 @@ public class ArtifactDependency
   private final ArtifactVersionRange _version;
 
   public ArtifactDependency(String org,
-			    String module,
-			    String name,
-			    ArtifactVersionRange version)
+                            String module,
+                            String name,
+                            ArtifactVersionRange version)
   {
     _org = org;
     if (org == null)
@@ -100,9 +100,9 @@ public class ArtifactDependency
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[org=" + _org
-	    + ",name=" + _name
-	    + ",version=" + _version
-	    + "]");
+            + "[org=" + _org
+            + ",name=" + _name
+            + ",version=" + _version
+            + "]");
   }
 }

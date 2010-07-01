@@ -48,12 +48,12 @@ class HtmlEntities extends Entities {
   {
     if (version == 0 || version >= 4.0) {
       if (_html40 == null)
-	_html40 = new HtmlEntities(4.0);
+        _html40 = new HtmlEntities(4.0);
       return _html40;
     }
     else {
       if (_html32 == null)
-	_html32 = new HtmlEntities(3.2);
+        _html32 = new HtmlEntities(3.2);
       return _html32;
     }
   }
@@ -86,9 +86,9 @@ class HtmlEntities extends Entities {
       char []value = getSparseEntity(i);
 
       if (value != null)
-	_latin1[i] = value;
+        _latin1[i] = value;
       else
-	_latin1[i] = ("&#" + i + ";").toCharArray();
+        _latin1[i] = ("&#" + i + ";").toCharArray();
     }
 
     _attrLatin1 = new char[256][];
@@ -120,12 +120,12 @@ class HtmlEntities extends Entities {
       char ch = text[offset + i];
 
       if (ch == '&') {
-	if (i + 1 < length && text[offset + i + 1] == '{')
-	  os.print('&');
+        if (i + 1 < length && text[offset + i + 1] == '{')
+          os.print('&');
         else if (attr)
           os.print(_attrLatin1[ch]);
         else
-	  os.print(_latin1[ch]);
+          os.print(_latin1[ch]);
       }
       else if (ch < 256) {
         if (attr)
@@ -134,14 +134,14 @@ class HtmlEntities extends Entities {
           os.print(_latin1[ch]);
       }
       else {
-	char []value = getSparseEntity(ch);
-	if (value != null) {
-	  os.print(value);
-	} else {
-	  os.print("&#");
-	  os.print((int) ch);
-	  os.print(";");
-	}
+        char []value = getSparseEntity(ch);
+        if (value != null) {
+          os.print(value);
+        } else {
+          os.print("&#");
+          os.print((int) ch);
+          os.print(";");
+        }
       }
     }
   }
@@ -426,8 +426,8 @@ class HtmlEntities extends Entities {
     if (i < 0)
       i = -i;
     for (;
-	 _sparseChar[i] != ch && _sparseEntity[i] != null;
-	 i = (i + 1) % size) {
+         _sparseChar[i] != ch && _sparseEntity[i] != null;
+         i = (i + 1) % size) {
     }
 
     return _sparseEntity[i];
@@ -443,8 +443,8 @@ class HtmlEntities extends Entities {
     if (i < 0)
       i = -i;
     for (;
-	 _sparseChar[i] != ch && _sparseEntity[i] != null;
-	 i = (i + 1) % size) {
+         _sparseChar[i] != ch && _sparseEntity[i] != null;
+         i = (i + 1) % size) {
     }
 
     _sparseChar[i] = (char) ch;

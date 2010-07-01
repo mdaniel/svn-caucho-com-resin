@@ -181,10 +181,10 @@ public class BaseMethod extends ClassComponent {
       out.print("  throws ");
 
       for (int i = 0; i < exceptionTypes.length; i++) {
-	if (i != 0)
-	  out.print(", ");
+        if (i != 0)
+          out.print(", ");
 
-	out.printClass(exceptionTypes[i]);
+        out.printClass(exceptionTypes[i]);
       }
       out.println();
     }
@@ -223,15 +223,15 @@ public class BaseMethod extends ClassComponent {
     
     for (int i = 0; i < args.length; i++) {
       if (i != 0)
-	out.print(", ");
+        out.print(", ");
 
       // ejb/0f7a
       if (i + 1 == args.length && getMethod().isVarArgs()) {
-	out.printClass(parameterTypes[i].getComponentType());
-	out.print("...");
+        out.printClass(parameterTypes[i].getComponentType());
+        out.print("...");
       }
       else
-	out.printClass(parameterTypes[i]);
+        out.printClass(parameterTypes[i]);
       
       args[i] = "a" + i;
       out.print(" " + args[i]);

@@ -150,8 +150,8 @@ abstract public class AbstractParser implements XMLReader, Parser
   {
     /*
     _isXmlnsPrefix = (_isNamespaceAware ||
-		      _isSAXNamespaces ||
-		      _isNamespacePrefixes);
+                      _isSAXNamespaces ||
+                      _isNamespacePrefixes);
     */
     _isXmlnsPrefix = _isNamespaceAware || _isNamespacePrefixes;
     _isXmlnsAttribute = _isNamespacePrefixes || ! _isNamespaceAware;
@@ -487,9 +487,9 @@ abstract public class AbstractParser implements XMLReader, Parser
     }
     else if (source.getSystemId() != null) {
       InputStream is = openStream(source.getSystemId(),
-				  source.getPublicId(),
-				  null,
-				  true);
+                                  source.getPublicId(),
+                                  null,
+                                  true);
       stream = Vfs.openRead(is);
       encoding = source.getEncoding();
     }
@@ -813,7 +813,7 @@ abstract public class AbstractParser implements XMLReader, Parser
    * Looks up an input stream from the system id.
    */
   public InputStream openStream(String systemId, String publicId,
-				EntityResolver entityResolver)
+                                EntityResolver entityResolver)
     throws IOException, SAXException
   {
     return openStream(systemId, publicId, entityResolver, false);
@@ -823,8 +823,8 @@ abstract public class AbstractParser implements XMLReader, Parser
    * Looks up an input stream from the system id.
    */
   protected InputStream openStream(String systemId, String publicId,
-				   EntityResolver entityResolver,
-				   boolean isTop)
+                                   EntityResolver entityResolver,
+                                   boolean isTop)
     throws IOException, SAXException
   {
     int colon = systemId.indexOf(':');
@@ -873,7 +873,7 @@ abstract public class AbstractParser implements XMLReader, Parser
     }
 
     if (! isTop &&
-	isAbsolute && ! systemId.startsWith("file:") &&
+        isAbsolute && ! systemId.startsWith("file:") &&
         ! systemId.startsWith("jar:") &&
         ! (colon == 1 && CauchoSystem.isWindows())) {
       throw new RemoteURLException(L.l("URL `{0}' was not opened because it is a remote URL.  Any URL scheme other than file: must be handled by a custom entity resolver.",

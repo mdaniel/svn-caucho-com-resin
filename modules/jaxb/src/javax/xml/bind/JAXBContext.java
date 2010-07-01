@@ -121,12 +121,12 @@ public abstract class JAXBContext {
   public static JAXBContext newInstance(String contextPath) throws JAXBException
   {
     return newInstance(contextPath,
-		       Thread.currentThread().getContextClassLoader(),
-		       null);
+                       Thread.currentThread().getContextClassLoader(),
+                       null);
   }
 
   public static JAXBContext newInstance(String contextPath,
-					ClassLoader classLoader)
+                                        ClassLoader classLoader)
     throws JAXBException
   {
     return newInstance(contextPath, classLoader, null);

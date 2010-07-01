@@ -58,8 +58,8 @@ public class UserPreparedStatement extends UserStatement
   private ActiveTimeSample _timeProbe;
   
   UserPreparedStatement(UserConnection conn,
-			PreparedStatement pStmt,
-			PreparedStatementCacheItem cacheItem)
+                        PreparedStatement pStmt,
+                        PreparedStatementCacheItem cacheItem)
   {
     super(conn, pStmt);
     
@@ -72,7 +72,7 @@ public class UserPreparedStatement extends UserStatement
   }
   
   UserPreparedStatement(UserConnection conn,
-			PreparedStatement pStmt)
+                        PreparedStatement pStmt)
   {
     this(conn, pStmt, null);
   }
@@ -800,7 +800,7 @@ public class UserPreparedStatement extends UserStatement
   {
     synchronized (this) {
       if (_isClosed)
-	return;
+        return;
       _isClosed = true;
     }
     

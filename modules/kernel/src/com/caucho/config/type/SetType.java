@@ -60,7 +60,7 @@ public class SetType extends ConfigType
     _setClass = setClass;
 
     if (! _setClass.isInterface()
-	&& Modifier.isAbstract(_setClass.getModifiers())) {
+        && Modifier.isAbstract(_setClass.getModifiers())) {
       _instanceClass = _setClass;
     }
     else
@@ -101,6 +101,6 @@ public class SetType extends ConfigType
   public Object valueOf(String text)
   {
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
-				  _setClass.getName(), text));
+                                  _setClass.getName(), text));
   }
 }

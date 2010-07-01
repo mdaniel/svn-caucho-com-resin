@@ -105,8 +105,8 @@ public class BaseRepository implements Repository {
    */
   public Session login(Credentials credentials, String workspaceName)
     throws LoginException,
-	   NoSuchWorkspaceException,
-	   RepositoryException
+           NoSuchWorkspaceException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -130,8 +130,8 @@ public class BaseRepository implements Repository {
    */
   public Session login(String workspaceName)
     throws LoginException,
-	   NoSuchWorkspaceException,
-	   RepositoryException
+           NoSuchWorkspaceException,
+           RepositoryException
   {
     return login(null, workspaceName);
   }
@@ -141,7 +141,7 @@ public class BaseRepository implements Repository {
    */
   public Session login()
     throws LoginException,
-	   RepositoryException
+           RepositoryException
   {
     return login(null, null);
   }

@@ -191,40 +191,40 @@ public class Database
       Table table = _tables.get(name);
 
       if (table != null)
-	return table;
+        return table;
       
       Path dir = _dir;
     
       if (dir == null)
-	return null;
+        return null;
 
       try {
-	table = Table.loadFromFile(this, name);
+        table = Table.loadFromFile(this, name);
 
-	if (table == null)
-	  return null;
+        if (table == null)
+          return null;
 
-	table.init();
+        table.init();
 
-	_tables.put(name, table);
+        _tables.put(name, table);
 
-	return table;
+        return table;
       } catch (Exception e) {
-	if (log.isLoggable(Level.FINER))
-	  log.log(Level.FINER, e.toString(), e);
-	
-	if (_removeOnError) {
-	  if (log.isLoggable(Level.FINER))
-	    log.log(Level.FINER, e.toString(), e);
-	  else
-	    log.warning(e.toString());
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, e.toString(), e);
 
-	  try {
-	    dir.lookup(name + ".db").remove();
-	  } catch (IOException e1) {
-	    log.log(Level.FINEST, e.toString(), e);
-	  }
-	}
+        if (_removeOnError) {
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, e.toString(), e);
+          else
+            log.warning(e.toString());
+
+          try {
+            dir.lookup(name + ".db").remove();
+          } catch (IOException e1) {
+            log.log(Level.FINEST, e.toString(), e);
+          }
+        }
       }
     }
 
@@ -243,8 +243,8 @@ public class Database
       table = getTable(name);
       
       if (table == null)
-	throw new SQLException(L.l("Table {0} does not exist.  DROP TABLE can only drop an existing table.",
-				   name));
+        throw new SQLException(L.l("Table {0} does not exist.  DROP TABLE can only drop an existing table.",
+                                   name));
 
       _tables.remove(name);
 
@@ -311,12 +311,12 @@ public class Database
 
     try {
       synchronized (databaseLock) {
-	if (xa.hasReadLock(databaseLock))
-	  return;
+        if (xa.hasReadLock(databaseLock))
+          return;
 
-	databaseLock.lockRead(xa, _timeout);
+        databaseLock.lockRead(xa, _timeout);
 
-	xa.addReadLock(databaseLock);
+        xa.addReadLock(databaseLock);
       }
     } catch (SQLException e) {
       xa.setRollbackOnly(e);
@@ -334,9 +334,9 @@ public class Database
 
     for (Table table : _tables.values()) {
       try {
-	table.close();
+        table.close();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

@@ -1218,7 +1218,7 @@ public class WriteStream extends OutputStreamWithBuffer
       int len = _writeLength;
       if (len > 0) {
         _writeLength = 0;
-	
+
         if (s != null)
           s.write(_writeBuffer, 0, len, true);
       }

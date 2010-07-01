@@ -104,15 +104,15 @@ class BlobColumn extends Column {
    */
   @Override
   void setString(Transaction xa,
-		 byte []block, int rowOffset, String str)
+                 byte []block, int rowOffset, String str)
   {
     if (! isNull(block, rowOffset)) {
       long length = Inode.readLong(block, rowOffset + _columnOffset);
 
       if (Table.INLINE_BLOB_SIZE <= length) {
-	Inode inode = new Inode();
-	inode.init(getTable(), xa, block, rowOffset + _columnOffset);
-	xa.addDeleteInode(inode);
+        Inode inode = new Inode();
+        inode.init(getTable(), xa, block, rowOffset + _columnOffset);
+        xa.addDeleteInode(inode);
       }
     }
     
@@ -127,23 +127,23 @@ class BlobColumn extends Column {
     
     try {
       os = new BlobOutputStream(xa, getTable(),
-				block, rowOffset + _columnOffset);
+                                block, rowOffset + _columnOffset);
 
       int length = str.length();
       for (int i = 0; i < length; i++) {
-	int ch = str.charAt(i);
+        int ch = str.charAt(i);
 
-	if (ch < 0x80)
-	  os.write(ch);
-	else if (ch < 0x800) {
-	  os.write(0xc0 + (ch >> 6));
-	  os.write(0x80 + (ch & 0x3f));
-	}
-	else {
-	  os.write(0xe0 + (ch >> 12));
-	  os.write(0x80 + ((ch >> 6) & 0x3f));
-	  os.write(0x80 + (ch & 0x3f));
-	}
+        if (ch < 0x80)
+          os.write(ch);
+        else if (ch < 0x800) {
+          os.write(0xc0 + (ch >> 6));
+          os.write(0x80 + (ch & 0x3f));
+        }
+        else {
+          os.write(0xe0 + (ch >> 12));
+          os.write(0x80 + ((ch >> 6) & 0x3f));
+          os.write(0x80 + (ch & 0x3f));
+        }
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -160,16 +160,16 @@ class BlobColumn extends Column {
    * @param str the string value
    */
   private void setStream(Transaction xa,
-			 byte []block, int rowOffset,
-			 InputStream value)
+                         byte []block, int rowOffset,
+                         InputStream value)
   {
     if (! isNull(block, rowOffset)) {
       long length = Inode.readLong(block, rowOffset + _columnOffset);
 
       if (Table.INLINE_BLOB_SIZE <= length) {
-	Inode inode = new Inode();
-	inode.init(getTable(), xa, block, rowOffset + _columnOffset);
-	xa.addDeleteInode(inode);
+        Inode inode = new Inode();
+        inode.init(getTable(), xa, block, rowOffset + _columnOffset);
+        xa.addDeleteInode(inode);
       }
     }
 
@@ -183,7 +183,7 @@ class BlobColumn extends Column {
     try {
       BlobOutputStream os;
       os = new BlobOutputStream(xa, getTable(),
-				block, rowOffset + _columnOffset);
+                                block, rowOffset + _columnOffset);
 
       os.writeFromStream(value);
 
@@ -209,7 +209,7 @@ class BlobColumn extends Column {
       long length = Inode.readLong(block, rowOffset + _columnOffset);
 
       if (length < Table.INLINE_BLOB_SIZE)
-	return;
+        return;
       
       Inode inode = new Inode();
       inode.init(getTable(), xa, block, rowOffset + _columnOffset);
@@ -231,22 +231,22 @@ class BlobColumn extends Column {
       StringBuilder cb = new StringBuilder();
 
       while ((ch = is.read()) >= 0) {
-	if (ch < 0x80)
-	  cb.append((char) ch);
-	else if ((ch & 0xe0) == 0xc0) {
-	  int ch1 = is.read();
-	  
-	  cb.append((char) (((ch & 0x3f) << 6) +
-			    (ch1 & 0x3f)));
-	}
-	else {
-	  int ch1 = is.read();
-	  int ch2 = is.read();
-	  
-	  cb.append((char) (((ch & 0xf) << 12) +
-			    ((ch1 & 0x3f) << 6) +
-			    ((ch2 & 0x3f))));
-	}
+        if (ch < 0x80)
+          cb.append((char) ch);
+        else if ((ch & 0xe0) == 0xc0) {
+          int ch1 = is.read();
+
+          cb.append((char) (((ch & 0x3f) << 6) +
+                            (ch1 & 0x3f)));
+        }
+        else {
+          int ch1 = is.read();
+          int ch2 = is.read();
+
+          cb.append((char) (((ch & 0xf) << 12) +
+                            ((ch1 & 0x3f) << 6) +
+                            ((ch2 & 0x3f))));
+        }
       }
 
       is.close();
@@ -264,7 +264,7 @@ class BlobColumn extends Column {
    */
   @Override
   public void set(Transaction xa,
-		  TableIterator iter, Expr expr, QueryContext context)
+                  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
     byte []block = iter.getBuffer();
@@ -289,8 +289,8 @@ class BlobColumn extends Column {
    */
   @Override
   void setExpr(Transaction xa,
-	       byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
     throws SQLException
   {
     if (expr.isNull(context)) {
@@ -309,7 +309,7 @@ class BlobColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block1, int rowOffset1,
-			 byte []block2, int rowOffset2)
+                         byte []block2, int rowOffset2)
   {
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
@@ -320,7 +320,7 @@ class BlobColumn extends Column {
 
     for (int i = 128 - 1; i >= 0; i--) {
       if (block1[startOffset1 + i] != block2[startOffset2 + i])
-	return false;
+        return false;
     }
 
     return true;
@@ -331,7 +331,7 @@ class BlobColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block, int rowOffset,
-			 byte []buffer, int offset, int length)
+                         byte []buffer, int offset, int length)
   {
     if (isNull(block, rowOffset))
       return false;

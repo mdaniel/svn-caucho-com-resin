@@ -50,15 +50,15 @@ public final class CacheData {
   private final long _localReadTimeout;
 
   public CacheData(HashKey key,
-		   HashKey value,
-		   HashKey cacheKey,
-		   int flags,
-		   long version,
-		   long accessTime,
-		   long expireTimeout,
-		   long idleTimeout,
-		   long leaseTimeout,
-		   long localReadTimeout)
+                   HashKey value,
+                   HashKey cacheKey,
+                   int flags,
+                   long version,
+                   long accessTime,
+                   long expireTimeout,
+                   long idleTimeout,
+                   long leaseTimeout,
+                   long localReadTimeout)
   {
     _key = key;
     _value = value;
@@ -127,10 +127,10 @@ public final class CacheData {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[key=" + _key
-	    + ",value=" + _value
-	    + ",flags=" + Integer.toHexString(_flags)
-	    + ",version=" + _version
-	    + "]");
+            + "[key=" + _key
+            + ",value=" + _value
+            + ",flags=" + Integer.toHexString(_flags)
+            + ",version=" + _version
+            + "]");
   }
 }

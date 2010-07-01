@@ -85,13 +85,13 @@ public class ProjectJarRepository implements ArtifactResolver
   }
 
   public void resolve(ArrayList<Artifact> artifactList,
-		      ArtifactDependency dependency)
+                      ArtifactDependency dependency)
   {
     for (Entry entry : _entryList) {
       Artifact artifact = entry.getArtifact();
 
       if (artifact != null && artifact.isMatch(dependency))
-	artifactList.add(artifact);
+        artifactList.add(artifact);
     }
   }
 
@@ -101,9 +101,9 @@ public class ProjectJarRepository implements ArtifactResolver
 
     for (Path jarPath : jarList) {
       if (! jarPath.canRead()) {
-	log.warning(L.l("{0}: '{1}' is an unreadable repository jar",
-			this, jarPath));
-	continue;
+        log.warning(L.l("{0}: '{1}' is an unreadable repository jar",
+                        this, jarPath));
+        continue;
       }
 
       Entry entry = readJar(jarPath);
@@ -123,17 +123,17 @@ public class ProjectJarRepository implements ArtifactResolver
       String key = keyIter.next();
 
       if (! key.endsWith("/pom.xml"))
-	continue;
+        continue;
 
       String lowerKey = key.toLowerCase();
 
       if (! lowerKey.startsWith("meta-inf/maven/"))
-	continue;
+        continue;
 
       Artifact artifact = readPom(jarPath, key);
 
       if (artifact != null)
-	return new Entry(jarPath, artifact, jarMap);
+        return new Entry(jarPath, artifact, jarMap);
     }
 
     return new Entry(jarPath, null, null);
@@ -164,11 +164,11 @@ public class ProjectJarRepository implements ArtifactResolver
     
     try {
       for (String name : _path.list()) {
-	if (name.endsWith(".jar")) {
-	  Path jar = _path.lookup(name);
+        if (name.endsWith(".jar")) {
+          Path jar = _path.lookup(name);
 
-	  jarList.add(jar);
-	}
+          jarList.add(jar);
+        }
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);

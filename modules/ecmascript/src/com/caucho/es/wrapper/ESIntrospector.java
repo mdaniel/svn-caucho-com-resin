@@ -107,7 +107,7 @@ public class ESIntrospector {
    */
   private static void
     analyzeProperty(ESBeanInfo info, Class cl, ESMethodDescriptor md,
-		    boolean overwrite)
+                    boolean overwrite)
     throws IntrospectionException
   {
     Method method = md.getMethod();
@@ -123,111 +123,111 @@ public class ESIntrospector {
     Class []params = md.getParameterTypes();
 
     if (name.equals("keys") && params.length == 0 &&
-	(returnName.equals("java.util.Iterator") ||
-	 (returnName.equals("java.util.Enumeration")))) {
+        (returnName.equals("java.util.Iterator") ||
+         (returnName.equals("java.util.Enumeration")))) {
       info.iterator = md;
     }
     else if (name.equals("iterator") && params.length == 0 &&
-	     (returnName.equals("java.util.Iterator") ||
-	      (returnName.equals("java.util.Enumeration")))) {
+             (returnName.equals("java.util.Iterator") ||
+              (returnName.equals("java.util.Enumeration")))) {
       // keys has priority over iterator
       if (info.iterator == null)
-	info.iterator = md;
+        info.iterator = md;
     }
     else if (name.startsWith("get") && ! name.equals("get")) {
       propName = Introspector.decapitalize(name.substring(3));
 
       // kill match?
       if (returnName.equals("void") && params.length < 2) {
-	// XXX: props.put(propName, BAD);
-	return;
+        // XXX: props.put(propName, BAD);
+        return;
       }
 
       // name keys
       if (params.length == 0 &&
-	  (propName.endsWith("Keys") && ! propName.equals("Keys") ||
-	   propName.endsWith("Names") && ! propName.equals("Names")) &&
-	  (returnName.equals("java.util.Iterator") ||
-	   (returnName.equals("java.util.Enumeration")))) {
-	if (propName.endsWith("Keys"))
-	  info.addNamedProp(propName.substring(0, propName.length() - 4),
-			    null, null, null, md);
-	else
-	  info.addNamedProp(propName.substring(0, propName.length() - 5),
-			    null, null, null, md);
+          (propName.endsWith("Keys") && ! propName.equals("Keys") ||
+           propName.endsWith("Names") && ! propName.equals("Names")) &&
+          (returnName.equals("java.util.Iterator") ||
+           (returnName.equals("java.util.Enumeration")))) {
+        if (propName.endsWith("Keys"))
+          info.addNamedProp(propName.substring(0, propName.length() - 4),
+                            null, null, null, md);
+        else
+          info.addNamedProp(propName.substring(0, propName.length() - 5),
+                            null, null, null, md);
       }
       // index length
       else if (params.length == 0 &&
-	       (propName.endsWith("Size") && ! propName.equals("Size") ||
-		propName.endsWith("Length") && ! propName.equals("Length")) &&
-	       (returnName.equals("int"))) {
-	info.addProp(propName, null, md, null);
-	if (propName.endsWith("Size"))
-	  info.addIndexedProp(propName.substring(0, propName.length() - 4),
-			      null, null, md);
-	else
-	  info.addIndexedProp(propName.substring(0, propName.length() - 6),
-			      null, null, md);
+               (propName.endsWith("Size") && ! propName.equals("Size") ||
+                propName.endsWith("Length") && ! propName.equals("Length")) &&
+               (returnName.equals("int"))) {
+        info.addProp(propName, null, md, null);
+        if (propName.endsWith("Size"))
+          info.addIndexedProp(propName.substring(0, propName.length() - 4),
+                              null, null, md);
+        else
+          info.addIndexedProp(propName.substring(0, propName.length() - 6),
+                              null, null, md);
       }
       else if (params.length == 0)
-	info.addProp(propName, null, md, null);
+        info.addProp(propName, null, md, null);
       else if (params.length == 1 && 
-	       params[0].getName().equals("java.lang.String")) {
-	info.addNamedProp(propName, md, null, null, null);
+               params[0].getName().equals("java.lang.String")) {
+        info.addNamedProp(propName, md, null, null, null);
       } else if (params.length == 1 && 
-	       params[0].getName().equals("int")) {
-	info.addIndexedProp(propName, md, null, null);
+               params[0].getName().equals("int")) {
+        info.addIndexedProp(propName, md, null, null);
       } else if (params.length == 1) {
-	// xxx: add bad?
+        // xxx: add bad?
       }
     } else if (name.startsWith("set") && ! name.equals("set")) {
       propName = Introspector.decapitalize(name.substring(3));
 
       if (params.length == 0)
-	return;
+        return;
 
-	  // kill match?
+          // kill match?
       if (! returnType.getName().equals("void") && params.length < 3) {
-	// XXX: add bad? props.put(propName, NULL);
-	return;
+        // XXX: add bad? props.put(propName, NULL);
+        return;
       }
 
       if (params.length == 1)
-	info.addProp(propName, null, null, md);
+        info.addProp(propName, null, null, md);
       else if (params.length == 2 &&
-	       params[0].getName().equals("java.lang.String")) {
-	info.addNamedProp(propName, null, md, null, null);
+               params[0].getName().equals("java.lang.String")) {
+        info.addNamedProp(propName, null, md, null, null);
       } else if (params.length == 2 && 
-		 params[0].getName().equals("int")) {
-	info.addIndexedProp(propName, null, md, null);
+                 params[0].getName().equals("int")) {
+        info.addIndexedProp(propName, null, md, null);
       } else if (params.length == 2) {
-	// XXX: props.put(propName, NULL);
+        // XXX: props.put(propName, NULL);
       }
     } else if (name.startsWith("remove") && ! name.equals("remove") ||
-	       name.startsWith("delete") && ! name.equals("remove")) {
+               name.startsWith("delete") && ! name.equals("remove")) {
       propName = Introspector.decapitalize(name.substring(6));
 
       if (params.length == 0)
-	return;
+        return;
 
-	  // kill match?
+          // kill match?
       if (! returnType.getName().equals("void") && params.length < 2) {
-	// XXX: add bad? props.put(propName, NULL);
-	return;
+        // XXX: add bad? props.put(propName, NULL);
+        return;
       }
 
       //if (params.length == 0)
-      //	info.addProp(propName, null, null, md);
+      //        info.addProp(propName, null, null, md);
       if (params.length == 1 &&
-	  params[0].getName().equals("java.lang.String")) {
-	info.addNamedProp(propName, null, null, md, null);
+          params[0].getName().equals("java.lang.String")) {
+        info.addNamedProp(propName, null, null, md, null);
       } 
       /*
       else if (params.length == 2 && 
-		 params[0].getName().equals("int")) {
-	info.addIndexedProp(propName, null, md, null);
+                 params[0].getName().equals("int")) {
+        info.addIndexedProp(propName, null, md, null);
       } else if (params.length == 2) {
-	// XXX: props.put(propName, NULL);
+        // XXX: props.put(propName, NULL);
       }
       */
     }
@@ -245,14 +245,14 @@ public class ESIntrospector {
       int modifiers = methods[i].getModifiers();
 
       if (! Modifier.isStatic(modifiers))
-	continue;
+        continue;
 
       ESMethodDescriptor md = info.createMethodDescriptor(methods[i], true);
 
       if ((mask & METHOD) != 0)
-	info.addMethod(md);
+        info.addMethod(md);
       if ((mask & PROPERTY) != 0)
-	analyzeProperty(info, cl, md, true);
+        analyzeProperty(info, cl, md, true);
     }  
   }
 
@@ -277,32 +277,32 @@ public class ESIntrospector {
       String testName;
 
       if (path[i].equals(""))
-	testName = name + "EcmaWrap";
+        testName = name + "EcmaWrap";
       else
-	testName = path[i] + "." + name + "EcmaWrap";
+        testName = path[i] + "." + name + "EcmaWrap";
 
       try {
-	Class wrapCl = CauchoSystem.loadClass(testName, false, loader);
+        Class wrapCl = CauchoSystem.loadClass(testName, false, loader);
 
-	if (wrapCl != null) {
-	  addEcmaMethods(info, cl, wrapCl, mask);
-	  return;
-	}
+        if (wrapCl != null) {
+          addEcmaMethods(info, cl, wrapCl, mask);
+          return;
+        }
       } catch (ClassNotFoundException e) {
       }
 
       if (path[i].equals(""))
-	testName = tail + "EcmaWrap";
+        testName = tail + "EcmaWrap";
       else
-	testName = path[i] + "." + tail + "EcmaWrap";
+        testName = path[i] + "." + tail + "EcmaWrap";
 
       try {
-	Class wrapCl = CauchoSystem.loadClass(testName, false, loader);
+        Class wrapCl = CauchoSystem.loadClass(testName, false, loader);
 
-	if (wrapCl != null) {
-	  addEcmaMethods(info, cl, wrapCl, mask);
-	  return;
-	}
+        if (wrapCl != null) {
+          addEcmaMethods(info, cl, wrapCl, mask);
+          return;
+        }
       } catch (ClassNotFoundException e) {
       }
     }
@@ -323,22 +323,22 @@ public class ESIntrospector {
       
       Class beanClass = CauchoSystem.loadClass(name, false, cl.getClassLoader());
       if (beanClass == null)
-	return MASK;
+        return MASK;
       BeanInfo beanInfo = (BeanInfo) beanClass.newInstance();
 
       MethodDescriptor []mds = beanInfo.getMethodDescriptors();
       if (mds == null)
-	return MASK;
+        return MASK;
 
       for (int i = 0; i < mds.length; i++) {
-	Method method = mds[i].getMethod();
-	int modifiers = method.getModifiers();
+        Method method = mds[i].getMethod();
+        int modifiers = method.getModifiers();
 
-	if (! Modifier.isStatic(modifiers) &&
-	    ! method.getDeclaringClass().isAssignableFrom(cl))
-	  continue;
+        if (! Modifier.isStatic(modifiers) &&
+            ! method.getDeclaringClass().isAssignableFrom(cl))
+          continue;
 
-	info.addMethod(mds[i], true);
+        info.addMethod(mds[i], true);
       }
 
       return MASK & ~METHOD;
@@ -353,7 +353,7 @@ public class ESIntrospector {
       String name = cl.getName() + "BeanInfo";
       Class beanClass = CauchoSystem.loadClass(name, false, cl.getClassLoader());
       if (beanClass == null)
-	return;
+        return;
       BeanInfo beanInfo = (BeanInfo) beanClass.newInstance();
 
       PropertyDescriptor []props = beanInfo.getPropertyDescriptors();
@@ -391,9 +391,9 @@ public class ESIntrospector {
       ESBeanInfo subInfo = getBeanInfo(interfaces[i]);
 
       if ((mask & METHOD) != 0)
-	info.addMethods(subInfo);
+        info.addMethods(subInfo);
       if ((mask & PROPERTY) != 0)
-	info.addProps(subInfo);
+        info.addProps(subInfo);
     }
 
     Class superClass = cl.getSuperclass();
@@ -401,9 +401,9 @@ public class ESIntrospector {
       ESBeanInfo subInfo = getBeanInfo(superClass);
 
       if ((mask & METHOD) != 0)
-	info.addMethods(subInfo);
+        info.addMethods(subInfo);
       if ((mask & PROPERTY) != 0)
-	info.addProps(subInfo);
+        info.addProps(subInfo);
     }
 
     int modifiers = cl.getModifiers();
@@ -411,17 +411,17 @@ public class ESIntrospector {
       Method []methods = cl.getDeclaredMethods();
       int len = methods == null ? 0 : methods.length;
       for (int i = 0; i < len; i++) {
-	ESMethodDescriptor md = info.createMethodDescriptor(methods[i], false);
+        ESMethodDescriptor md = info.createMethodDescriptor(methods[i], false);
 
-	if ((mask & METHOD) != 0)
-	  info.addMethod(md);
-	if ((mask & PROPERTY) != 0)
-	  analyzeProperty(info, cl, md, false);
+        if ((mask & METHOD) != 0)
+          info.addMethod(md);
+        if ((mask & PROPERTY) != 0)
+          analyzeProperty(info, cl, md, false);
       }
 
       Field []fields = cl.getDeclaredFields();
       for (int i = 0; fields != null && i < fields.length; i++) {
-	info.addField(fields[i]);
+        info.addField(fields[i]);
       }
     }
 

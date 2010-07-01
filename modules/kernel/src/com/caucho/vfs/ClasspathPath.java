@@ -55,8 +55,8 @@ public class ClasspathPath extends FilesystemPath {
    * @param query any query string
    */
   public ClasspathPath(FilesystemPath root,
-		       String userPath,
-		       String path)
+                       String userPath,
+                       String path)
   {
     super(root, userPath, path);
 
@@ -74,8 +74,8 @@ public class ClasspathPath extends FilesystemPath {
    * @return the selected path
    */
   public Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String path)
+                        Map<String,Object> attributes,
+                        String path)
   {
     return new ClasspathPath(_root, userPath, path);
   }

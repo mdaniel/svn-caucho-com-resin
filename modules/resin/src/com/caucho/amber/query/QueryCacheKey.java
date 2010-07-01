@@ -71,9 +71,9 @@ public class QueryCacheKey {
       Object v = args[i];
 
       if (v == null)
-	hash = 65537 * hash + 17;
+        hash = 65537 * hash + 17;
       else
-	hash = 65537 * hash + 17 * v.hashCode();
+        hash = 65537 * hash + 17 * v.hashCode();
     }
 
     return hash;
@@ -111,7 +111,7 @@ public class QueryCacheKey {
       Object b = argsB[i];
 
       if (a != b && (a == null || ! a.equals(b))) {
-	return false;
+        return false;
       }
     }
 

@@ -68,7 +68,7 @@ public class OpenIdRelay
     HttpURLConnection conn = null;
     try {
       if (! urlString.startsWith("http"))
-	urlString = "http://" + urlString;
+        urlString = "http://" + urlString;
 
       URL url = new URL(urlString);
 
@@ -81,7 +81,7 @@ public class OpenIdRelay
       host = host.substring(p + 3);
       p = host.indexOf('/');
       if (p > 0)
-	host = host.substring(0, p);
+        host = host.substring(0, p);
 
       conn.addRequestProperty("Host", host);
 
@@ -90,19 +90,19 @@ public class OpenIdRelay
       String location = conn.getHeaderField("X-XRDS-Location");
 
       if (location != null)
-	return location;
+        return location;
       else if (code != 200)
-	return null;
+        return null;
       
       if ("application/xrds+xml".equals(conn.getHeaderField("Content-Type")))
-	return urlString;
+        return urlString;
 
       return null;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
       if (conn != null)
-	conn.disconnect();
+        conn.disconnect();
     }
   }
 
@@ -122,8 +122,8 @@ public class OpenIdRelay
       String contentType = conn.getHeaderField("Content-Type");
 
       if (code != 200 || ! "application/xrds+xml".equals(contentType))
-	throw new RuntimeException(L.l("bad code '{0}' or content-type '{1}' for URL='{2}'",
-				       code, contentType, urlString));
+        throw new RuntimeException(L.l("bad code '{0}' or content-type '{1}' for URL='{2}'",
+                                       code, contentType, urlString));
       
       InputStream is = conn.getInputStream();
       int ch;
@@ -138,7 +138,7 @@ public class OpenIdRelay
       throw new RuntimeException(e);
     } finally {
       if (conn != null)
-	conn.disconnect();
+        conn.disconnect();
     }
   }
 

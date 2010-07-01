@@ -313,9 +313,9 @@ public class DeploymentManagerImpl
       String archiveName;
 
       if (archive != null)
-	archiveName = String.valueOf(archive);
+        archiveName = String.valueOf(archive);
       else
-	archiveName = "stream";
+        archiveName = "stream";
 
       if (status.getMessage() == null)
         result.completed(L.l("application {0} deployed from {1}",

@@ -133,14 +133,14 @@ abstract public class JarListLoader extends Loader implements Dependency {
   {
     if (! jar.exists()) {
       log.fine(jar.getTail() + " does not exist"
-		  + " (path=" + jar.getNativePath() + ")");
+                  + " (path=" + jar.getNativePath() + ")");
       return;
     }
     else if (! jar.canRead()) {
       log.warning(jar.getTail() + " is unreadable"
-		  + " (uid=" + jar.getUser() + " mode="
-		  + String.format("%o", jar.getMode())
-		  + " path=" + jar.getNativePath() + ")");
+                  + " (uid=" + jar.getUser() + " mode="
+                  + String.format("%o", jar.getMode())
+                  + " path=" + jar.getNativePath() + ")");
       return;
     }
     
@@ -149,7 +149,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
 
     if (getClassLoader() != null) {
       if (! getClassLoader().addURL(jarPath))
-	return;
+        return;
     }
 
     // skip duplicates
@@ -182,7 +182,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
       String path = jar.getContainer().getNativePath();
 
       if (! pathList.contains(path))
-	pathList.add(path);
+        pathList.add(path);
     }
   }
 
@@ -198,24 +198,24 @@ abstract public class JarListLoader extends Loader implements Dependency {
       JarMap.JarList jarEntryList = _pathMap.get(pathName);
 
       if (jarEntryList != null) {
-	JarEntry jarEntry = jarEntryList.getEntry();
-	
-	Path filePath = jarEntry.getJarPath().lookup(pathName);
+        JarEntry jarEntry = jarEntryList.getEntry();
 
-	return createEntry(name, pathName, jarEntry, filePath);
+        Path filePath = jarEntry.getJarPath().lookup(pathName);
+
+        return createEntry(name, pathName, jarEntry, filePath);
       }
     }
     else {
       // Find the path corresponding to the class
       for (int i = 0; i < _jarList.size(); i++) {
-	JarEntry jarEntry = _jarList.get(i);
-	Path path = jarEntry.getJarPath();
+        JarEntry jarEntry = _jarList.get(i);
+        Path path = jarEntry.getJarPath();
 
-	Path filePath = path.lookup(pathName);
+        Path filePath = path.lookup(pathName);
       
-	if (filePath.canRead() && filePath.getLength() > 0) {
-	  return createEntry(name, pathName, jarEntry, filePath);
-	}
+        if (filePath.canRead() && filePath.getLength() > 0) {
+          return createEntry(name, pathName, jarEntry, filePath);
+        }
       }
     }
 
@@ -223,9 +223,9 @@ abstract public class JarListLoader extends Loader implements Dependency {
   }
 
   private ClassEntry createEntry(String name,
-				 String pathName,
-				 JarEntry jarEntry,
-				 Path filePath)
+                                 String pathName,
+                                 JarEntry jarEntry,
+                                 Path filePath)
   {
     String pkg = "";
     int p = pathName.lastIndexOf('/');
@@ -233,8 +233,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
       pkg = pathName.substring(0, p + 1);
 
     ClassEntry entry = new ClassEntry(getClassLoader(), name, filePath,
-				      filePath,
-				      jarEntry.getCodeSource(pathName));
+                                      filePath,
+                                      jarEntry.getCodeSource(pathName));
 
     ClassPackage classPackage = jarEntry.getPackage(pkg);
 
@@ -252,38 +252,38 @@ abstract public class JarListLoader extends Loader implements Dependency {
       JarMap.JarList jarEntryList = _pathMap.get(name);
 
       for (; jarEntryList != null; jarEntryList = jarEntryList.getNext()) {
-	JarEntry jarEntry = jarEntryList.getEntry();
-	Path path = jarEntry.getJarPath();
+        JarEntry jarEntry = jarEntryList.getEntry();
+        Path path = jarEntry.getJarPath();
 
-	path = path.lookup(name);
+        path = path.lookup(name);
 
-	try {
-	  URL url = new URL(path.getURL());
+        try {
+          URL url = new URL(path.getURL());
 
-	  if (! vector.contains(url))
-	    vector.add(url);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+          if (! vector.contains(url))
+            vector.add(url);
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
     else {
       for (int i = 0; i < _jarList.size(); i++) {
-	JarEntry jarEntry = _jarList.get(i);
-	Path path = jarEntry.getJarPath();
+        JarEntry jarEntry = _jarList.get(i);
+        Path path = jarEntry.getJarPath();
 
-	path = path.lookup(name);
+        path = path.lookup(name);
 
-	if (path.exists()) {
-	  try {
-	    URL url = new URL(path.getURL());
+        if (path.exists()) {
+          try {
+            URL url = new URL(path.getURL());
 
-	    if (! vector.contains(url))
-	      vector.add(url);
-	  } catch (Exception e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	}
+            if (! vector.contains(url))
+              vector.add(url);
+          } catch (Exception e) {
+            log.log(Level.WARNING, e.toString(), e);
+          }
+        }
       }
     }
   }
@@ -301,18 +301,18 @@ abstract public class JarListLoader extends Loader implements Dependency {
       JarMap.JarList jarEntryList = _pathMap.get(pathName);
 
       if (jarEntryList != null) {
-	return jarEntryList.getEntry().getJarPath().lookup(pathName);
+        return jarEntryList.getEntry().getJarPath().lookup(pathName);
       }
     }
     else {
       for (int i = 0; i < _jarList.size(); i++) {
-	JarEntry jarEntry = _jarList.get(i);
-	Path path = jarEntry.getJarPath();
+        JarEntry jarEntry = _jarList.get(i);
+        Path path = jarEntry.getJarPath();
 
-	Path filePath = path.lookup(pathName);
+        Path filePath = path.lookup(pathName);
 
-	if (filePath.exists())
-	  return filePath;
+        if (filePath.exists())
+          return filePath;
       }
     }
 
@@ -329,14 +329,14 @@ abstract public class JarListLoader extends Loader implements Dependency {
       _jarList.clear();
 
       if (_pathMap != null)
-	_pathMap.clear();
+        _pathMap.clear();
     
       for (int i = 0; i < jars.size(); i++) {
-	JarEntry jarEntry = jars.get(i);
+        JarEntry jarEntry = jars.get(i);
 
-	JarPath jarPath = jarEntry.getJarPath();
+        JarPath jarPath = jarEntry.getJarPath();
 
-	jarPath.closeJar();
+        jarPath.closeJar();
       }
     }
   }

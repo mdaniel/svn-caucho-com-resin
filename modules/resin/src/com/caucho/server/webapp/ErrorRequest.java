@@ -53,8 +53,8 @@ public class ErrorRequest extends ForwardRequest {
   }
   
   public ErrorRequest(HttpServletRequest request,
-		      HttpServletResponse response,
-		      Invocation invocation)
+                      HttpServletResponse response,
+                      Invocation invocation)
   {
     super(request, response, invocation);
   }

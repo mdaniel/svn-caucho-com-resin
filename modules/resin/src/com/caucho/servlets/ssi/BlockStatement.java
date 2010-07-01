@@ -54,8 +54,8 @@ public class BlockStatement extends Statement {
    * Executes the SSI statements.
    */
   public void apply(WriteStream out,
-		    HttpServletRequest request,
-		    HttpServletResponse response)
+                    HttpServletRequest request,
+                    HttpServletResponse response)
     throws IOException, ServletException
   {
     for (int i = 0; i < _statements.length; i++)

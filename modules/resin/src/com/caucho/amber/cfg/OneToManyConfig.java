@@ -82,10 +82,10 @@ class OneToManyConfig extends AbstractRelationConfig
   private ArrayList<Boolean> _orderByAscending = null;
 
   OneToManyConfig(BaseConfigIntrospector introspector,
-		   EntityType sourceType,
-		   AccessibleObject field,
-		   String fieldName,
-		   Class fieldType)
+                   EntityType sourceType,
+                   AccessibleObject field,
+                   String fieldName,
+                   Class fieldType)
   {
     _introspector = introspector;
     
@@ -223,7 +223,7 @@ class OneToManyConfig extends AbstractRelationConfig
       int index = orderBy.indexOf(",", i);
 
       if (index < 0)
-	index = len;
+        index = len;
 
       String orderByField = orderBy.substring(i, index);
 
@@ -235,24 +235,24 @@ class OneToManyConfig extends AbstractRelationConfig
       Boolean asc = Boolean.TRUE;
 
       if (index > 1) {
-	if (orderByField.charAt(index - 1) != 'E') {
-	  // field ASC or default
-	  if (orderByField.charAt(index - 1) == 'A' &&
-	      Character.isSpaceChar(orderByField.charAt(index - 2))) {
-	    index -= 2;
-	  }
-	}
-	else if (index > 2 &&
-		 orderByField.charAt(index - 2) == 'D' &&
-		 Character.isSpaceChar(orderByField.charAt(index - 3))) {
+        if (orderByField.charAt(index - 1) != 'E') {
+          // field ASC or default
+          if (orderByField.charAt(index - 1) == 'A' &&
+              Character.isSpaceChar(orderByField.charAt(index - 2))) {
+            index -= 2;
+          }
+        }
+        else if (index > 2 &&
+                 orderByField.charAt(index - 2) == 'D' &&
+                 Character.isSpaceChar(orderByField.charAt(index - 3))) {
 
-	  asc = Boolean.FALSE;
-	  index -= 3;
-	}
+          asc = Boolean.FALSE;
+          index -= 3;
+        }
       }
 
       if (index > 0)
-	orderByField = orderByField.substring(0, index).trim();
+        orderByField = orderByField.substring(0, index).trim();
 
       _orderByFields.add(orderByField);
       _orderByAscending.add(asc);
@@ -290,15 +290,15 @@ class OneToManyConfig extends AbstractRelationConfig
 
     if (targetEntity == null)
       throw error(_field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
-			      _fieldName));
+                              _fieldName));
 
     EntityType targetType = persistenceUnit.getEntityType(targetEntity);
       
     if (targetType == null) {
       throw error(_field,
-		  L.l("targetEntity '{0}' is not an @Entity bean for {1}.  The targetEntity of a @OneToMany collection must be an @Entity bean.",
-		      targetEntity.getName(),
-		      _fieldName));
+                  L.l("targetEntity '{0}' is not an @Entity bean for {1}.  The targetEntity of a @OneToMany collection must be an @Entity bean.",
+                      targetEntity.getName(),
+                      _fieldName));
     }
 
     if (_orderBy != null)
@@ -318,20 +318,20 @@ class OneToManyConfig extends AbstractRelationConfig
 
     if (joinTableConfig != null) {
       throw error(_field,
-		  L.l("Bidirectional @ManyToOne property {0} may not have a @JoinTable annotation.",
-		      _fieldName));
+                  L.l("Bidirectional @ManyToOne property {0} may not have a @JoinTable annotation.",
+                      _fieldName));
     }
       
     String mappedBy = getMappedBy();
 
     ManyToOneField sourceField = getSourceField(targetType,
-						mappedBy,
-						null);
+                                                mappedBy,
+                                                null);
 
     if (sourceField == null)
       throw error(_field, L.l("'{1}' is an unknown column in '{0}' for @ManyToOne(mappedBy={1}).",
-			      targetType.getName(),
-			      mappedBy));
+                              targetType.getName(),
+                              mappedBy));
 
     OneToManyField oneToMany;
 
@@ -367,7 +367,7 @@ class OneToManyConfig extends AbstractRelationConfig
     ManyToManyField manyToManyField;
 
     manyToManyField = new ManyToManyField(_sourceType, _fieldName, 
-					  getCascade());
+                                          getCascade());
     manyToManyField.setType(targetType);
 
     String sqlTable = _sourceType.getTable().getName() + "_" + targetType.getTable().getName();
@@ -388,7 +388,7 @@ class OneToManyConfig extends AbstractRelationConfig
       HashMap<String, JoinColumnConfig> inverseJoinColumnsConfig = null;
 
       if (! joinTableConfig.getName().equals(""))
-	sqlTable = joinTableConfig.getName();
+        sqlTable = joinTableConfig.getName();
 
       joinColumnsConfig = joinTableConfig.getJoinColumnMap();
       inverseJoinColumnsConfig = joinTableConfig.getInverseJoinColumnMap();
@@ -396,40 +396,40 @@ class OneToManyConfig extends AbstractRelationConfig
       mapTable = persistenceUnit.createTable(sqlTable);
 
       sourceColumns
-	= calculateColumns(_field, _fieldName, mapTable,
-			   _sourceType.getTable().getName() + "_",
-			   _sourceType,
-			   joinColumnsConfig);
+        = calculateColumns(_field, _fieldName, mapTable,
+                           _sourceType.getTable().getName() + "_",
+                           _sourceType,
+                           joinColumnsConfig);
 
       targetColumns = calculateColumns(_field, _fieldName, mapTable,
-				       targetType.getTable().getName() + "_",
-				       targetType,
-				       inverseJoinColumnsConfig);
+                                       targetType.getTable().getName() + "_",
+                                       targetType,
+                                       inverseJoinColumnsConfig);
     }
     else {
       mapTable = persistenceUnit.createTable(sqlTable);
 
       sourceColumns = calculateColumns(mapTable,
-				       _sourceType.getTable().getName() + "_",
-				       _sourceType);
+                                       _sourceType.getTable().getName() + "_",
+                                       _sourceType);
 
       targetColumns
-	= calculateColumns(mapTable,
-			   // jpa/0j40
-			   toSqlName(_fieldName) + "_",
-			   targetType);
+        = calculateColumns(mapTable,
+                           // jpa/0j40
+                           toSqlName(_fieldName) + "_",
+                           targetType);
     }
 
     manyToManyField.setAssociationTable(mapTable);
     manyToManyField.setTable(sqlTable);
 
     manyToManyField.setSourceLink(new LinkColumns(mapTable,
-						  _sourceType.getTable(),
-						  sourceColumns));
+                                                  _sourceType.getTable(),
+                                                  sourceColumns));
 
     manyToManyField.setTargetLink(new LinkColumns(mapTable,
-						  targetType.getTable(),
-						  targetColumns));
+                                                  targetType.getTable(),
+                                                  targetColumns));
       /*
       if (mapKey != null) {
 
@@ -458,8 +458,8 @@ class OneToManyConfig extends AbstractRelationConfig
   }
 
   ManyToOneField getSourceField(EntityType targetType,
-				String mappedBy,
-				EntityType sourceType)
+                                String mappedBy,
+                                EntityType sourceType)
   {
     do {
       ArrayList<AmberField> fields = targetType.getFields();

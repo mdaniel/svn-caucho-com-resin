@@ -71,10 +71,10 @@ public class TempFileManager
       String serverId = "";
 
       if (resin != null)
-	serverId = resin.getUniqueServerName();
+        serverId = resin.getUniqueServerName();
 
       if ("".equals(serverId))
-	serverId = "default";
+        serverId = "default";
 
       String name = "temp_file_" + serverId;
 
@@ -83,8 +83,8 @@ public class TempFileManager
       storePath.remove();
 
       if (storePath.exists()) {
-	log.warning(L.l("Removal of old temp file '{0}' failed. Please check permissions.",
-				      storePath.getNativePath()));
+        log.warning(L.l("Removal of old temp file '{0}' failed. Please check permissions.",
+                                      storePath.getNativePath()));
       }
     
       _store = new BlockStore(database, name, null, storePath);

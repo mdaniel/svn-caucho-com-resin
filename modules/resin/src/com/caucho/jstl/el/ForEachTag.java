@@ -136,46 +136,46 @@ public class ForEachTag extends TagSupport
       ELContext env = pageContext.getELContext();
 
       if (_beginExpr != null)
-	_begin = (int) _beginExpr.evalLong(env);
+        _begin = (int) _beginExpr.evalLong(env);
       else
-	_begin = -1;
+        _begin = -1;
 
       if (_endExpr != null)
-	_end = (int) _endExpr.evalLong(env);
+        _end = (int) _endExpr.evalLong(env);
       else
-	_end = Integer.MAX_VALUE;
+        _end = Integer.MAX_VALUE;
 
       if (_stepExpr != null)
-	_step = (int) _stepExpr.evalLong(env);
+        _step = (int) _stepExpr.evalLong(env);
       else
-	_step = 0;
+        _step = 0;
     
       Object items = null;
 
       if (_itemsExpr != null) {
-	items = _itemsExpr.evalObject(env);
+        items = _itemsExpr.evalObject(env);
 
-	_iterator = getIterator(items);
+        _iterator = getIterator(items);
 
-	while (_index < _begin && _iterator.hasNext()) {
-	  _index++;
-	  _iterator.next();
-	}
+        while (_index < _begin && _iterator.hasNext()) {
+          _index++;
+          _iterator.next();
+        }
       }
       else if (_beginExpr == null)
-	throw new JspException(L.l("c:forEach must specify `items' or `begin'"));
+        throw new JspException(L.l("c:forEach must specify `items' or `begin'"));
       else if (_endExpr == null)
-	throw new JspException(L.l("c:forEach must specify `items' or `begin'"));
+        throw new JspException(L.l("c:forEach must specify `items' or `begin'"));
       else {
-	_iterator = new RangeIterator(_begin, _end);
-	_end = -1;
+        _iterator = new RangeIterator(_begin, _end);
+        _end = -1;
       }
 
       if (_varStatus != null)
-	pageContext.setAttribute(_varStatus, this);
+        pageContext.setAttribute(_varStatus, this);
 
       if (_var != null)
-	_initialVar = pageContext.getAttribute(_var);
+        _initialVar = pageContext.getAttribute(_var);
 
       return doAfterBody();
     } catch (Exception e) {
@@ -187,8 +187,8 @@ public class ForEachTag extends TagSupport
   {
     if (_iterator == null) {
       if (_var != null)
-	pageContext.setAttribute(_var, _initialVar);
-	
+        pageContext.setAttribute(_var, _initialVar);
+
       return SKIP_BODY;
     }
     else if (_iterator.hasNext()) {
@@ -201,11 +201,11 @@ public class ForEachTag extends TagSupport
 
       for (; stepCount > 0; stepCount--) {
         if (! _iterator.hasNext()) {
-	  if (_var != null)
-	    pageContext.setAttribute(_var, _initialVar);
-	
+          if (_var != null)
+            pageContext.setAttribute(_var, _initialVar);
+
           return SKIP_BODY;
-	}
+        }
         
         _index++;
         _current = _iterator.next();
@@ -219,16 +219,16 @@ public class ForEachTag extends TagSupport
       if (_index - 1 <= _end || _end < 0)
         return EVAL_BODY_AGAIN;
       else {
-	if (_var != null)
-	  pageContext.setAttribute(_var, _initialVar);
-	
+        if (_var != null)
+          pageContext.setAttribute(_var, _initialVar);
+
         return SKIP_BODY;
       }
     }
     else {
       if (_var != null)
-	pageContext.setAttribute(_var, _initialVar);
-	
+        pageContext.setAttribute(_var, _initialVar);
+
       return SKIP_BODY;
     }
   }

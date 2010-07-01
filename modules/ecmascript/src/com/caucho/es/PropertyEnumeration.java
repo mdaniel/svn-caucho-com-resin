@@ -44,14 +44,14 @@ class PropertyEnumeration implements Iterator {
 
     if (object.propNames != null) {
       for (; index < object.propNames.length; index++) {
-	if (object.propValues[index] != null &&
-	    (object.propFlags[index] & ESObject.DONT_ENUM) == 0 &&
-	    completed.get(object.propNames[index]) != 1) {
-	  index++;
-	  completed.put(object.propNames[index - 1], 1);
+        if (object.propValues[index] != null &&
+            (object.propFlags[index] & ESObject.DONT_ENUM) == 0 &&
+            completed.get(object.propNames[index]) != 1) {
+          index++;
+          completed.put(object.propNames[index - 1], 1);
 
-	  return object.propNames[index - 1];
-	}
+          return object.propNames[index - 1];
+        }
       }
     }
 
@@ -74,15 +74,15 @@ class PropertyEnumeration implements Iterator {
 
     if (object.propNames != null) {
       for (; index < object.propNames.length; index++) {
-	if (object.propValues[index] != null &&
-	    (object.propFlags[index] & ESObject.DONT_ENUM) == 0 &&
-	    completed.get(object.propNames[index]) != 1) {
-	  break;
-	}
+        if (object.propValues[index] != null &&
+            (object.propFlags[index] & ESObject.DONT_ENUM) == 0 &&
+            completed.get(object.propNames[index]) != 1) {
+          break;
+        }
       }
 
       if (index < object.propNames.length)
-	return true;
+        return true;
     }
 
     if (object.prototype instanceof ESObject) {

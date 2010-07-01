@@ -80,10 +80,10 @@ public class Jms
   }
 
   public void send(Destination dest,
-		   Message msg,
-		   int deliveryMode,
-		   int priority,
-		   long ttl)
+                   Message msg,
+                   int deliveryMode,
+                   int priority,
+                   long ttl)
   {
     Session session = null;
     
@@ -114,10 +114,10 @@ public class Jms
       throw new RuntimeException(e);
     } finally {
       try {
-	if (consumer != null)
-	  consumer.close();
+        if (consumer != null)
+          consumer.close();
       } catch (JMSException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
       
       freeSession(session);
@@ -150,8 +150,8 @@ public class Jms
    * Creates a session and listener.
    */
   public Session createListener(Connection conn,
-				Destination queue,
-				MessageListener listener)
+                                Destination queue,
+                                MessageListener listener)
     throws JmsRuntimeException
   {
     try {
@@ -179,7 +179,7 @@ public class Jms
   {
     try {
       if (session != null)
-	session.close();
+        session.close();
     } catch (JMSException e) {
       throw new JmsRuntimeException(e);
     }

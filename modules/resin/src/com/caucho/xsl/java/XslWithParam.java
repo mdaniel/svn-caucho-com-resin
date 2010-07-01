@@ -90,8 +90,8 @@ public class XslWithParam extends XslNode {
     if (_select != null) {
       out.print("_exprs[" + addExpr(_select) + "]");
       out.println(".addVar(_xsl_arg" + _gen.getCallDepth() + ", \"" +
-		  _name + "\", " +
-		  "node, env);");
+                  _name + "\", " +
+                  "node, env);");
     }
     else {
       String frag = "_xsl_frag_" + _gen.generateId();

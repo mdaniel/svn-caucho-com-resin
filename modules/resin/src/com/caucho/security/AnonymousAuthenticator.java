@@ -50,8 +50,8 @@ public class AnonymousAuthenticator extends AbstractAuthenticator
    */
   @Override
   protected Principal authenticate(Principal user,
-				   PasswordCredentials cred,
-				   Object details)
+                                   PasswordCredentials cred,
+                                   Object details)
   {
     return _user;
   }

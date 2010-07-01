@@ -96,7 +96,7 @@ public class ESBeanInfo {
       Object value = props.get(key);
 
       if (value != BAD)
-	count++;
+        count++;
     }
 
     PropertyDescriptor []descriptors = new PropertyDescriptor[count];
@@ -108,8 +108,8 @@ public class ESBeanInfo {
       Object value = props.get(key);
 
       if (value != BAD) {
-	descriptors[count] = (PropertyDescriptor) value;
-	count++;
+        descriptors[count] = (PropertyDescriptor) value;
+        count++;
       }
     }
 
@@ -117,25 +117,25 @@ public class ESBeanInfo {
   }
 
   void addProp(String name, Field field, 
-	       ESMethodDescriptor getter, 
-	       ESMethodDescriptor setter,
-	       boolean overwrite)
+               ESMethodDescriptor getter,
+               ESMethodDescriptor setter,
+               boolean overwrite)
     throws IntrospectionException
   {
     Object value = propMap.get(name);
 
     if (value instanceof ESPropertyDescriptor &&
-	! (value instanceof ESIndexedPropertyDescriptor) &&
-	! (value instanceof NamedPropertyDescriptor)) {
+        ! (value instanceof ESIndexedPropertyDescriptor) &&
+        ! (value instanceof NamedPropertyDescriptor)) {
       ESPropertyDescriptor prop = (ESPropertyDescriptor) value;
       
       
       if (field != null)
-	prop.field = field;
+        prop.field = field;
       if (getter != null)
-	prop.getter = getter;
+        prop.getter = getter;
       if (setter != null)
-	prop.setter = setter;
+        prop.setter = setter;
 
       propMap.put(name, prop);
     } else if (value == null || overwrite) {
@@ -152,7 +152,7 @@ public class ESBeanInfo {
   }
 
   void addIndexedProp(String name, ESMethodDescriptor getter, ESMethodDescriptor setter, ESMethodDescriptor size,
-		      boolean overwrite)
+                      boolean overwrite)
     throws IntrospectionException
   {
     Object value = propMap.get(name);
@@ -161,16 +161,16 @@ public class ESBeanInfo {
       ESIndexedPropertyDescriptor prop = (ESIndexedPropertyDescriptor) value;
       
       if (getter != null)
-	prop.getter = getter;
+        prop.getter = getter;
       if (setter != null)
-	prop.setter = setter;
+        prop.setter = setter;
       if (size != null)
-	prop.size = size;
+        prop.size = size;
 
       propMap.put(name, prop);
     } else if (value == null || overwrite) {
       propMap.put(name, new ESIndexedPropertyDescriptor(name, getter, setter,
-							size));
+                                                        size));
     } else
       propMap.put(name, BAD);
   }
@@ -182,11 +182,11 @@ public class ESBeanInfo {
   }
 
   void addNamedProp(String name, 
-		    ESMethodDescriptor getter, 
-		    ESMethodDescriptor setter, 
-		    ESMethodDescriptor remover, 
-		    ESMethodDescriptor iterator,
-		    boolean overwrite)
+                    ESMethodDescriptor getter,
+                    ESMethodDescriptor setter,
+                    ESMethodDescriptor remover,
+                    ESMethodDescriptor iterator,
+                    boolean overwrite)
     throws IntrospectionException
   {
     Object value = propMap.get(name);
@@ -195,29 +195,29 @@ public class ESBeanInfo {
       NamedPropertyDescriptor prop = (NamedPropertyDescriptor) value;
       
       if (getter != null)
-	prop.namedGetter = getter;
+        prop.namedGetter = getter;
       if (setter != null)
-	prop.namedSetter = setter;
+        prop.namedSetter = setter;
       if (remover != null)
-	prop.namedRemover = remover;
+        prop.namedRemover = remover;
       if (iterator != null)
-	prop.namedIterator = iterator;
+        prop.namedIterator = iterator;
     } else if (value == null || overwrite) {
       try {
-	propMap.put(name, new NamedPropertyDescriptor(name, null, null,
-						      getter, setter, 
-						      remover, iterator));
+        propMap.put(name, new NamedPropertyDescriptor(name, null, null,
+                                                      getter, setter,
+                                                      remover, iterator));
       } catch (Exception e) {
-	propMap.put(name, BAD);
+        propMap.put(name, BAD);
       }
     } else
       propMap.put(name, BAD);
   }
 
   void addNamedProp(String name, ESMethodDescriptor getter, 
-		    ESMethodDescriptor setter, 
-		    ESMethodDescriptor remover, 
-		    ESMethodDescriptor iterator)
+                    ESMethodDescriptor setter,
+                    ESMethodDescriptor remover,
+                    ESMethodDescriptor iterator)
     throws IntrospectionException
   {
     addNamedProp(name, getter, setter, remover, iterator, false);
@@ -287,7 +287,7 @@ public class ESBeanInfo {
     }
     else {
       while (overload.size() <= length)
-	overload.add(null);
+        overload.add(null);
       overload.set(length, constructor);
     }
   }
@@ -341,7 +341,7 @@ public class ESBeanInfo {
     throws IntrospectionException
   {
     ESMethodDescriptor md = createMethodDescriptor(oldMd.getMethod(), 
-						   overwrite);
+                                                   overwrite);
     md.setName(oldMd.getName());
     addMethod(_methodMap, md, false);
     addMethod(_staticMethodMap, md, true);
@@ -430,7 +430,7 @@ public class ESBeanInfo {
 
     if (length >= overload.size()) {
       while (overload.size() <= length)
-	overload.add(null);
+        overload.add(null);
     }
     
     ESMethodDescriptor []oldMethods;
@@ -485,24 +485,24 @@ public class ESBeanInfo {
       Object value = entry.getValue();
 
       if (value == BAD) {
-	// XXX: else add bad?
-	continue;
+        // XXX: else add bad?
+        continue;
       }
 
       if (value instanceof NamedPropertyDescriptor) {
-	NamedPropertyDescriptor pd = (NamedPropertyDescriptor) value;
+        NamedPropertyDescriptor pd = (NamedPropertyDescriptor) value;
 
-	addNamedProp(pd.getName(), pd.namedGetter, pd.namedSetter, 
-		     pd.namedRemover, pd.namedIterator);
+        addNamedProp(pd.getName(), pd.namedGetter, pd.namedSetter,
+                     pd.namedRemover, pd.namedIterator);
       } else if (value instanceof ESIndexedPropertyDescriptor) {
-	ESIndexedPropertyDescriptor pd = (ESIndexedPropertyDescriptor) value;
+        ESIndexedPropertyDescriptor pd = (ESIndexedPropertyDescriptor) value;
 
-	addIndexedProp(pd.getName(), pd.getESReadMethod(), 
-		       pd.getESWriteMethod(), pd.getESSizeMethod());
+        addIndexedProp(pd.getName(), pd.getESReadMethod(),
+                       pd.getESWriteMethod(), pd.getESSizeMethod());
       } else if (value instanceof ESPropertyDescriptor) {
-	ESPropertyDescriptor pd = (ESPropertyDescriptor) value;
+        ESPropertyDescriptor pd = (ESPropertyDescriptor) value;
 
-	addProp(pd.getName(), pd.field, pd.getter, pd.setter);
+        addProp(pd.getName(), pd.field, pd.getter, pd.setter);
       }
       // XXX: else add bad?
     }

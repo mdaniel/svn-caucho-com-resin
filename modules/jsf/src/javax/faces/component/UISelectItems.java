@@ -95,7 +95,7 @@ public class UISelectItems extends UIComponentBase
     if ("value".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
         _value = expr.getValue(null);
-	return;
+        return;
       }
       else
         _valueExpr = expr;

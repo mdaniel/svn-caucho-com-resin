@@ -47,8 +47,8 @@ public class LifecycleInvocationContext implements InvocationContext {
   private HashMap<String,Object> _map;
 
   public LifecycleInvocationContext(Object target,
-				    Method []chainMethods,
-				    Object []chainObjects)
+                                    Method []chainMethods,
+                                    Object []chainObjects)
   {
     _target = target;
     _chainMethods = chainMethods;
@@ -95,19 +95,19 @@ public class LifecycleInvocationContext implements InvocationContext {
   {
     try {
       if (_index < _chainMethods.length) {
-	int i = _index++;
+        int i = _index++;
 
-	return _chainMethods[i].invoke(_chainObjects[i], this);
+        return _chainMethods[i].invoke(_chainObjects[i], this);
       }
       else
-	return null;
+        return null;
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
 
       if (cause instanceof Exception)
-	throw (Exception) cause;
+        throw (Exception) cause;
       else
-	throw e;
+        throw e;
     }
   }
 }

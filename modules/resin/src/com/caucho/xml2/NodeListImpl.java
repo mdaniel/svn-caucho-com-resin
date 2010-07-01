@@ -93,7 +93,7 @@ public class NodeListImpl implements NodeList {
     cb.append("NodeListImpl[");
     for (int i = 0; i < getLength(); i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
       cb.append(item(i));
     }
     cb.append("]");

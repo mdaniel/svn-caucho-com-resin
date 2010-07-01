@@ -128,28 +128,28 @@ class HtmlOutputLinkRenderer extends BaseRenderer
       UIComponent child = component.getChildren().get(i);
 
       if (child instanceof UIParameter) {
-	if (sb == null) {
-	  sb = new StringBuilder().append(href);
-	  
-	  if (href.indexOf('?') < 0)
-	    sb.append('?');
-	  else
-	    sb.append('&');
-	}
-	else
-	  sb.append('&');
-	
-	UIParameter param = (UIParameter) child;
+        if (sb == null) {
+          sb = new StringBuilder().append(href);
 
-	String name = param.getName();
-	Object paramValue = param.getValue();
+          if (href.indexOf('?') < 0)
+            sb.append('?');
+          else
+            sb.append('&');
+        }
+        else
+          sb.append('&');
 
-	if (name != null) {
-	  sb.append(name);
-	  sb.append('=');
-	}
+        UIParameter param = (UIParameter) child;
 
-	sb.append(toString(context, param, paramValue));
+        String name = param.getName();
+        Object paramValue = param.getValue();
+
+        if (name != null) {
+          sb.append(name);
+          sb.append('=');
+        }
+
+        sb.append(toString(context, param, paramValue));
       }
     }
 
@@ -162,16 +162,16 @@ class HtmlOutputLinkRenderer extends BaseRenderer
       List<UIComponent> children = component.getChildren();
 
       for (int i = 0; i < childCount; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (child instanceof UIParameter)
-	  continue;
+        if (child instanceof UIParameter)
+          continue;
       
-	if (child.isRendered()) {
-	  child.encodeBegin(context);
-	  child.encodeChildren(context);
-	  child.encodeEnd(context);
-	}
+        if (child.isRendered()) {
+          child.encodeBegin(context);
+          child.encodeChildren(context);
+          child.encodeEnd(context);
+        }
       }
     }
     

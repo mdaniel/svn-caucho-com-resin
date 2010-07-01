@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * A deploy controller for an environment.
  */
 abstract public class DeployControllerAdmin<C extends EnvironmentDeployController>
-  extends AbstractManagedObject						      
+  extends AbstractManagedObject
   implements DeployControllerMXBean,
              NotificationEmitter,
              LifecycleListener,
@@ -229,7 +229,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     /*
     AttributeChangeNotification notification
       = new AttributeChangeNotification(this, _sequence++,
-					timestamp, message, "State", "java.lang.String", oldValue, newValue);
+                                        timestamp, message, "State", "java.lang.String", oldValue, newValue);
 
     _broadcaster.sendNotification(notification);
     */

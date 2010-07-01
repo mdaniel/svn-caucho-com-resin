@@ -66,9 +66,9 @@ public class SpringModule
       _webAppContext = context;
 
       if (context == null) {
-	env.notice(L.l("Can't find Spring context in '{0}'", webApp));
+        env.notice(L.l("Can't find Spring context in '{0}'", webApp));
 
-	return null;
+        return null;
       }
     }
 

@@ -245,8 +245,8 @@ public class IPConstraint extends AbstractConstraint {
    * Returns true if the user is authorized for the resource.
    */
   public AuthorizationResult isAuthorized(HttpServletRequest request,
-					  HttpServletResponse response,
-					  ServletContext application)
+                                          HttpServletResponse response,
+                                          ServletContext application)
     throws ServletException, IOException
   {
     String remoteAddr = request.getRemoteAddr();
@@ -263,8 +263,8 @@ public class IPConstraint extends AbstractConstraint {
             response.sendError(_errorCode, _errorMessage);
 
           return (allow
-		  ? AuthorizationResult.ALLOW
-		  : AuthorizationResult.DENY_SENT_RESPONSE);
+                  ? AuthorizationResult.ALLOW
+                  : AuthorizationResult.DENY_SENT_RESPONSE);
         }
       }
       
@@ -313,8 +313,8 @@ public class IPConstraint extends AbstractConstraint {
 
 
     return (allow
-	    ? AuthorizationResult.ALLOW
-	    : AuthorizationResult.DENY_SENT_RESPONSE);
+            ? AuthorizationResult.ALLOW
+            : AuthorizationResult.DENY_SENT_RESPONSE);
   }
 
 }

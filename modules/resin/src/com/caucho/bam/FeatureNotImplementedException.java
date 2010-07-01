@@ -68,7 +68,7 @@ public class FeatureNotImplementedException
       return error;
 
     return new ActorError(ActorError.TYPE_CANCEL,
-			  ActorError.FEATURE_NOT_IMPLEMENTED,
-			  getMessage());
+                          ActorError.FEATURE_NOT_IMPLEMENTED,
+                          getMessage());
   }
 }

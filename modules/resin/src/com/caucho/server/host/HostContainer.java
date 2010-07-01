@@ -331,21 +331,21 @@ public class HostContainer implements DispatchBuilder {
 
       FilterChain chain = invocation.getFilterChain();
       FilterChain rewriteChain = _rewriteDispatch.map(url,
-						      queryString,
-						      chain);
+                                                      queryString,
+                                                      chain);
 
       if (rewriteChain != chain) {
         Server server = (Server) _dispatchServer;
-	WebApp webApp = server.getDefaultWebApp();
+        WebApp webApp = server.getDefaultWebApp();
         invocation.setWebApp(webApp);
 
-	if (webApp != null) {
-	  rewriteChain = new WebAppFilterChain(rewriteChain, webApp);
+        if (webApp != null) {
+          rewriteChain = new WebAppFilterChain(rewriteChain, webApp);
 
           if (webApp.getAccessLog() != null)
             rewriteChain = new AccessLogFilterChain(rewriteChain, webApp);
         }
-	
+
         invocation.setFilterChain(rewriteChain);
         isAlwaysModified = false;
       }
@@ -423,10 +423,10 @@ public class HostContainer implements DispatchBuilder {
 
     synchronized (_hostMap) {
       if (hostController != null && ! hostController.isDestroyed())
-	_hostMap.put(fullHost, hostController);
+        _hostMap.put(fullHost, hostController);
       else {
-	hostController = null;
-	_hostMap.remove(fullHost);
+        hostController = null;
+        _hostMap.remove(fullHost);
       }
     }
 
@@ -454,20 +454,20 @@ public class HostContainer implements DispatchBuilder {
   public WebApp getErrorWebApp()
   {
     if (_errorWebApp == null
-	&& _classLoader != null
-	&& ! _classLoader.isModified()) {
+        && _classLoader != null
+        && ! _classLoader.isModified()) {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
       try {
-	thread.setContextClassLoader(_classLoader);
+        thread.setContextClassLoader(_classLoader);
 
-	_errorWebApp = new WebApp(getRootDirectory().lookup("caucho-host-error"));
-	_errorWebApp.init();
-	_errorWebApp.start();
+        _errorWebApp = new WebApp(getRootDirectory().lookup("caucho-host-error"));
+        _errorWebApp.init();
+        _errorWebApp.start();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
-	thread.setContextClassLoader(loader);
+        thread.setContextClassLoader(loader);
       }
     }
 

@@ -97,12 +97,12 @@ public interface Session extends Runnable {
     throws JMSException;
 
   public MessageConsumer createConsumer(Destination destination,
-					String selector)
+                                        String selector)
     throws JMSException;
 
   public MessageConsumer createConsumer(Destination destination,
-					String selector,
-					boolean noLocal)
+                                        String selector,
+                                        boolean noLocal)
     throws JMSException;
 
   public Queue createQueue(String queueName)
@@ -112,20 +112,20 @@ public interface Session extends Runnable {
     throws JMSException;
 
   public TopicSubscriber createDurableSubscriber(Topic topic,
-						 String queue)
+                                                 String queue)
     throws JMSException;
 
   public TopicSubscriber createDurableSubscriber(Topic topic,
-						 String queue,
-						 String messageSelector,
-						 boolean noLocal)
+                                                 String queue,
+                                                 String messageSelector,
+                                                 boolean noLocal)
     throws JMSException;
 
   public QueueBrowser createBrowser(Queue queue)
     throws JMSException;
 
   public QueueBrowser createBrowser(Queue queue,
-				    String messageSelector)
+                                    String messageSelector)
     throws JMSException;
 
   public TemporaryQueue createTemporaryQueue()

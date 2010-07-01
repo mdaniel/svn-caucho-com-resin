@@ -53,12 +53,12 @@ public class NavigationHandlerImpl extends NavigationHandler
   }
   
   public void handleNavigation(FacesContext context,
-			       String fromAction,
-			       String outcome)
+                               String fromAction,
+                               String outcome)
   {
     if (outcome == null) {
       if (log.isLoggable(Level.FINE))
-	log.fine("Jsf[" + context.getViewRoot().getViewId() + "] action " + fromAction + " has no outcome");
+        log.fine("Jsf[" + context.getViewRoot().getViewId() + "] action " + fromAction + " has no outcome");
       
       return;
     }
@@ -71,7 +71,7 @@ public class NavigationHandlerImpl extends NavigationHandler
       ruleList = _ruleMap.get(viewId);
 
       if (ruleList== null) {
-	ruleList = findRuleList(viewId);
+        ruleList = findRuleList(viewId);
       }
 
       _ruleMap.put(viewId, ruleList);
@@ -79,7 +79,7 @@ public class NavigationHandlerImpl extends NavigationHandler
 
     for (int i = 0; i < ruleList.length; i++) {
       if (ruleList[i].handleNavigation(context, fromAction, outcome))
-	return;
+        return;
     }
     
     if (log.isLoggable(Level.FINE)) {
@@ -95,7 +95,7 @@ public class NavigationHandlerImpl extends NavigationHandler
       NavigationRule rule = _ruleList.get(i);
 
       if (rule.isMatch(viewId))
-	ruleList.add(rule);
+        ruleList.add(rule);
     }
 
     NavigationRule []rules = new NavigationRule[ruleList.size()];

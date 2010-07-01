@@ -60,8 +60,8 @@ public class XmppBindCallback extends AbstractActorStream
 
   @Override
   public void querySet(long id,
-			  String to, String from,
-			  Serializable value)
+                          String to, String from,
+                          Serializable value)
   {
     if (value instanceof ImBindQuery) {
       ImBindQuery bind = (ImBindQuery) value;

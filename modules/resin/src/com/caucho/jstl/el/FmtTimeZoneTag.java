@@ -70,19 +70,19 @@ public class FmtTimeZoneTag extends TagSupport implements TryCatchFinally {
       TimeZone timeZone = null;
 
       if (valueObj instanceof TimeZone) {
-	timeZone = (TimeZone) valueObj;
+        timeZone = (TimeZone) valueObj;
       }
       else if (valueObj instanceof String) {
-	String string = (String) valueObj;
-	string = string.trim();
+        String string = (String) valueObj;
+        string = string.trim();
 
-	if (string.equals(""))
-	  timeZone = TimeZone.getTimeZone("GMT");
-	else
-	  timeZone = TimeZone.getTimeZone(string);
+        if (string.equals(""))
+          timeZone = TimeZone.getTimeZone("GMT");
+        else
+          timeZone = TimeZone.getTimeZone(string);
       }
       else
-	timeZone = TimeZone.getTimeZone("GMT");
+        timeZone = TimeZone.getTimeZone("GMT");
 
       pc.setAttribute("com.caucho.time-zone", timeZone);
 

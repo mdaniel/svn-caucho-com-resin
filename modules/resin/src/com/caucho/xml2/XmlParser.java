@@ -201,7 +201,7 @@ public class XmlParser extends AbstractParser {
     if (_systemId == null) {
       _systemId = _is.getPath().getURL();
       if ("null:".equals(_systemId) || "string:".equals(_systemId))
-	_systemId = "stream";
+        _systemId = "stream";
     }
 
     if (_filename == null)
@@ -215,7 +215,7 @@ public class XmlParser extends AbstractParser {
     
     if (_builder != null) {
       if (! "string:".equals(_systemId) && ! "stream".equals(_systemId))
-	_builder.setSystemId(_systemId);
+        _builder.setSystemId(_systemId);
       _builder.setFilename(_is.getPath().getURL());
     }
 
@@ -279,135 +279,135 @@ public class XmlParser extends AbstractParser {
       int ch;
 
       if (inputOffset < inputLength)
-	ch = inputBuffer[inputOffset++];
+        ch = inputBuffer[inputOffset++];
       else if (fillBuffer()) {
-	inputBuffer = _inputBuffer;
-	inputOffset = _inputOffset;
-	inputLength = _inputLength;
-	
-	ch = inputBuffer[inputOffset++];
+        inputBuffer = _inputBuffer;
+        inputOffset = _inputOffset;
+        inputLength = _inputLength;
+
+        ch = inputBuffer[inputOffset++];
       }
       else {
-	if (valueOffset > 0)
-	  addText(valueBuffer, 0, valueOffset, isWhitespace);
-	
-	_inputOffset = inputOffset;
-	_inputLength = inputLength;
+        if (valueOffset > 0)
+          addText(valueBuffer, 0, valueOffset, isWhitespace);
 
-	close();
-	return;
+        _inputOffset = inputOffset;
+        _inputLength = inputLength;
+
+        close();
+        return;
       }
 
       switch (ch) {
       case '\n':
-	_line++;
-	valueBuffer[valueOffset++] = (char) ch;
-	break;
-	
+        _line++;
+        valueBuffer[valueOffset++] = (char) ch;
+        break;
+
       case ' ': case '\t': case '\r':
-	valueBuffer[valueOffset++] = (char) ch;
-	break;
+        valueBuffer[valueOffset++] = (char) ch;
+        break;
 
       case 0xffff:
-	// marker for end of text for serialization (?)
-	if (valueOffset > 0)
-	  addText(valueBuffer, 0, valueOffset, isWhitespace);
-	
-	_inputOffset = inputOffset;
-	_inputLength = inputLength;
-	return;
+        // marker for end of text for serialization (?)
+        if (valueOffset > 0)
+          addText(valueBuffer, 0, valueOffset, isWhitespace);
+
+        _inputOffset = inputOffset;
+        _inputLength = inputLength;
+        return;
 
       case '&':
-	if (valueOffset > 0)
-	  addText(valueBuffer, 0, valueOffset, isWhitespace);
-	
-	_inputOffset = inputOffset;
-	_inputLength = inputLength;
-	
+        if (valueOffset > 0)
+          addText(valueBuffer, 0, valueOffset, isWhitespace);
+
+        _inputOffset = inputOffset;
+        _inputLength = inputLength;
+
         parseEntityReference();
-	
-	inputOffset = _inputOffset;
-	inputLength = _inputOffset;
-	break;
+
+        inputOffset = _inputOffset;
+        inputLength = _inputOffset;
+        break;
 
       case '<':
-	if (valueOffset > 0)
-	  addText(valueBuffer, 0, valueOffset, isWhitespace);
-	
-	_inputOffset = inputOffset;
-	_inputLength = inputLength;
+        if (valueOffset > 0)
+          addText(valueBuffer, 0, valueOffset, isWhitespace);
 
-	ch = read();
+        _inputOffset = inputOffset;
+        _inputLength = inputLength;
 
-	if (ch == '/') {
-	  SaxIntern.Entry entry = parseName(0, false);
+        ch = read();
 
-	  ch = read();
+        if (ch == '/') {
+          SaxIntern.Entry entry = parseName(0, false);
+
+          ch = read();
 
           if (ch != '>') {
-	    throw error(L.l("'</{0}>' expected '>' at {1}.  Closing tags must close immediately after the tag name.",
-			    entry.getName(), badChar(ch)));
+            throw error(L.l("'</{0}>' expected '>' at {1}.  Closing tags must close immediately after the tag name.",
+                            entry.getName(), badChar(ch)));
           }
 
-	  _namespace.pop(entry);
-	} 
-	// element: <tag attr=value ... attr=value> ...
-	else if (XmlChar.isNameStart(ch)) {
-	  parseElement(ch);
-	  ch = read();
-	}
-	// <! ...
-	else if (ch == '!') {
-	  // <![CDATA[ ... ]]>
-	  if ((ch = read()) == '[') {
-	    parseCdata();
-	    ch = read();
-	  }
-	  // <!-- ... -->
+          _namespace.pop(entry);
+        }
+        // element: <tag attr=value ... attr=value> ...
+        else if (XmlChar.isNameStart(ch)) {
+          parseElement(ch);
+          ch = read();
+        }
+        // <! ...
+        else if (ch == '!') {
+          // <![CDATA[ ... ]]>
+          if ((ch = read()) == '[') {
+            parseCdata();
+            ch = read();
+          }
+          // <!-- ... -->
           else if (ch == '-') {
-	    parseComment();
+            parseComment();
 
-	    ch = read();
-	  } 
-	  else if (XmlChar.isNameStart(ch)) {
-	    unread(ch);
-	    
-	    SaxIntern.Entry entry = parseName(0, false);
+            ch = read();
+          }
+          else if (XmlChar.isNameStart(ch)) {
+            unread(ch);
 
-	    String declName = entry.getName();
-	    if (declName.equals("DOCTYPE")) {
-	      parseDoctype();
+            SaxIntern.Entry entry = parseName(0, false);
+
+            String declName = entry.getName();
+            if (declName.equals("DOCTYPE")) {
+              parseDoctype();
               if (_contentHandler instanceof DOMBuilder)
                 ((DOMBuilder) _contentHandler).dtd(_dtd);
-	    }
-	    else
-	      throw error(L.l("expected '<!DOCTYPE' declaration at {0}", declName));
-	  }
-	  else
-	    throw error(L.l("expected '<!DOCTYPE' declaration at {0}", badChar(ch)));
-	} 
-	// PI: <?tag attr=value ... attr=value?>
-	else if (ch == '?') {
-	  parsePI();
-	} 
-	else {
-	  throw error(L.l("expected tag name after '<' at {0}.  Open tag names must immediately follow the open brace like '<foo ...>'", badChar(ch)));
+            }
+            else
+              throw error(L.l("expected '<!DOCTYPE' declaration at {0}", declName));
+          }
+          else
+            throw error(L.l("expected '<!DOCTYPE' declaration at {0}", badChar(ch)));
         }
-	
-	inputOffset = _inputOffset;
-	inputLength = _inputLength;
-	break;
-	
+        // PI: <?tag attr=value ... attr=value?>
+        else if (ch == '?') {
+          parsePI();
+        }
+        else {
+          throw error(L.l("expected tag name after '<' at {0}.  Open tag names must immediately follow the open brace like '<foo ...>'", badChar(ch)));
+        }
+
+        inputOffset = _inputOffset;
+        inputLength = _inputLength;
+        break;
+
       default:
-	isWhitespace = false;
-	valueBuffer[valueOffset++] = (char) ch;
-	break;
+        isWhitespace = false;
+        valueBuffer[valueOffset++] = (char) ch;
+        break;
       }
 
       if (valueOffset == valueLength) {
-	addText(valueBuffer, 0, valueOffset, isWhitespace);
+        addText(valueBuffer, 0, valueOffset, isWhitespace);
 
-	valueOffset = 0;
+        valueOffset = 0;
       }
     }
   }
@@ -451,25 +451,25 @@ public class XmlParser extends AbstractParser {
         pushInclude(_extPublicId, _extSystemId);
         hasInclude = true;
       } catch (Exception e) {
-	if (log.isLoggable(Level.FINEST))
-	  log.log(Level.FINER, e.toString(), e);
-	else
-	  log.finer(e.toString());
+        if (log.isLoggable(Level.FINEST))
+          log.log(Level.FINER, e.toString(), e);
+        else
+          log.finer(e.toString());
       }
 
       if (hasInclude) {
         _stopOnIncludeEnd = true;
-	try {
-	  DtdParser dtdParser = new DtdParser(this, _dtd);
-	  ch = dtdParser.parseDoctypeDecl(_dtd);
-	} catch (XmlParseException e) {
-	  if (_extSystemId != null &&
-	      _extSystemId.startsWith("http")) {
-	    log.log(Level.FINE, e.toString(), e);
-	  }
-	  else
-	    throw e;
-	}
+        try {
+          DtdParser dtdParser = new DtdParser(this, _dtd);
+          ch = dtdParser.parseDoctypeDecl(_dtd);
+        } catch (XmlParseException e) {
+          if (_extSystemId != null &&
+              _extSystemId.startsWith("http")) {
+            log.log(Level.FINE, e.toString(), e);
+          }
+          else
+            throw e;
+        }
         _stopOnIncludeEnd = false;
 
         while (_reader != null && _reader != oldReader)
@@ -524,24 +524,24 @@ public class XmlParser extends AbstractParser {
     }
     
     _contentHandler.startElement(entry.getUri(),
-				 entry.getLocalName(),
-				 entry.getName(),
-				 _attributes);
+                                 entry.getLocalName(),
+                                 entry.getName(),
+                                 _attributes);
 
     _hasTopElement = true;
 
     if (ch == '/') {
       // empty tag: <foo/>
       if ((ch = read()) == '>') {
-	_contentHandler.endElement(entry.getUri(),
-				   entry.getLocalName(),
-				   entry.getName());
+        _contentHandler.endElement(entry.getUri(),
+                                   entry.getLocalName(),
+                                   entry.getName());
 
-	_namespace.pop(entry);
+        _namespace.pop(entry);
       }
       // short tag: </foo/some text here/>
       else {
-	throw error(L.l("unexpected character {0} after '/', expected '/>'",
+        throw error(L.l("unexpected character {0} after '/', expected '/>'",
                       badChar(ch), entry.getName()));
       }
     }
@@ -568,19 +568,19 @@ public class XmlParser extends AbstractParser {
 
     while (ch != -1) {
       boolean hasWhitespace = false;
-	
+
       while (ch <= 0x20
-	     && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
-	hasWhitespace = true;
-	ch = read();
+             && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
+        hasWhitespace = true;
+        ch = read();
       }
-	
+
       if (! XmlChar.isNameStart(ch)) {
-	break;
+        break;
       }
 
       if (! hasWhitespace)
-	throw error(L.l("attributes must be separated by whitespace"));
+        throw error(L.l("attributes must be separated by whitespace"));
 
       hasWhitespace = false;
 
@@ -592,22 +592,22 @@ public class XmlParser extends AbstractParser {
 
 
       while (ch <= 0x20
-	     && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
-	ch = read();
+             && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
+        ch = read();
       }
 
       String value = null;
 
       if (ch != '=') {
-	throw error(L.l("attribute '{0}' expects value at {1}.  XML requires attributes to have explicit values.",
+        throw error(L.l("attribute '{0}' expects value at {1}.  XML requires attributes to have explicit values.",
                         entry.getName(), badChar(ch)));
       }
 
       ch = read();
       
       while (ch <= 0x20
-	     && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
-	ch = read();
+             && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
+        ch = read();
       }
 
       value = parseValue(ch);
@@ -615,27 +615,27 @@ public class XmlParser extends AbstractParser {
       ch = read();
 
       if (entry.isXmlns()) {
-	String prefix;
-	
-	if (entry.getPrefix() != null)
-	  prefix = entry.getLocalName();
-	else
-	  prefix = "";
-	  
-	String uri = value;
-	
+        String prefix;
+
+        if (entry.getPrefix() != null)
+          prefix = entry.getLocalName();
+        else
+          prefix = "";
+
+        String uri = value;
+
         if (_isXmlnsPrefix) {
           _contentHandler.startPrefixMapping(prefix, uri);
-	}
+        }
 
-	// needed for xml/032e
-	if (isElement && _isXmlnsAttribute) {
+        // needed for xml/032e
+        if (isElement && _isXmlnsAttribute) {
           _attributes.add(entry.getQName(), uri);
-	}
+        }
       }
       else {
-	_attrNames.add(entry);
-	_attrValues.add(value);
+        _attrNames.add(entry);
+        _attrValues.add(value);
       }
     }
 
@@ -678,11 +678,11 @@ public class XmlParser extends AbstractParser {
       ch = _reader.parseName(_buf, ch);
 
       if (ch != ';' && _strictXml)
-	throw error(L.l("'&{0};' expected ';' at {0}.  Entity references have a '&name;' syntax.", _buf, badChar(ch)));
+        throw error(L.l("'&{0};' expected ';' at {0}.  Entity references have a '&name;' syntax.", _buf, badChar(ch)));
       else if (ch != ';') {
-	addText('&');
-	addText(_buf.toString());
-	return ch;
+        addText('&');
+        addText(_buf.toString());
+        return ch;
       }
 
       addEntityReference(_buf.toString());
@@ -712,13 +712,13 @@ public class XmlParser extends AbstractParser {
     int value = 0;
     for (; ch != ';'; ch = read()) {
       if (ch >= '0' && ch <= '9')
-	value = radix * value + ch - '0';
+        value = radix * value + ch - '0';
       else if (radix == 16 && ch >= 'a' && ch <= 'f')
-	value = radix * value + ch - 'a' + 10;
+        value = radix * value + ch - 'a' + 10;
       else if (radix == 16 && ch >= 'A' && ch <= 'F')
-	value = radix * value + ch - 'A' + 10;
+        value = radix * value + ch - 'A' + 10;
       else
-	throw error(L.l("malformed entity ref at {0}", badChar(ch)));
+        throw error(L.l("malformed entity ref at {0}", badChar(ch)));
     }
 
     if (value > 0xffff)
@@ -764,7 +764,7 @@ public class XmlParser extends AbstractParser {
     }
     else if (entity != null) {
       if (entity._isSpecial && entity._value != null)
-	addText(entity._value);
+        addText(entity._value);
       else if (entity.getSystemId() != null) {
         if (pushSystemEntity(entity)) {
         }
@@ -780,7 +780,7 @@ public class XmlParser extends AbstractParser {
           addText("&" + name + ";");
       }
       else if (expand && entity._value != null)
-	setMacro(entity._value);
+        setMacro(entity._value);
       else
         addText("&" + name + ";");
     }
@@ -921,34 +921,34 @@ public class XmlParser extends AbstractParser {
 
     if (! _skipComments)
       _buf.clear();
-	      
+
   comment:
     while (ch != -1) {
       if (ch == '-') {
-	ch = read();
+        ch = read();
 
-	while (ch == '-') {
-	  if ((ch = read()) == '>')
-	    break comment;
-	  else if (_strictComments)
-	    throw error(L.l("XML forbids '--' in comments"));
-	  else if (ch == '-') {
+        while (ch == '-') {
+          if ((ch = read()) == '>')
+            break comment;
+          else if (_strictComments)
+            throw error(L.l("XML forbids '--' in comments"));
+          else if (ch == '-') {
             if (! _skipComments)
               _buf.append('-');
           }
-	  else {
+          else {
             if (! _skipComments)
               _buf.append("--");
-	    break;
+            break;
           }
-	}
+        }
 
         _buf.append('-');
       } else if (! XmlChar.isChar(ch)) {
         throw error(L.l("bad character {0}", hex(ch)));
       } else {
-	_buf.append((char) ch);
-	ch = read();
+        _buf.append((char) ch);
+        ch = read();
       }
     }
 
@@ -977,11 +977,11 @@ public class XmlParser extends AbstractParser {
     int ch;
 
     if ((ch = read()) != 'C' ||
-	(ch = read()) != 'D' ||
-	(ch = read()) != 'A' ||
-	(ch = read()) != 'T' ||
-	(ch = read()) != 'A' ||
-	(ch = read()) != '[') {
+        (ch = read()) != 'D' ||
+        (ch = read()) != 'A' ||
+        (ch = read()) != 'T' ||
+        (ch = read()) != 'A' ||
+        (ch = read()) != '[') {
       throw error(L.l("expected '<![CDATA[' at {0}", badChar(ch)));
     }
 
@@ -994,25 +994,25 @@ public class XmlParser extends AbstractParser {
   cdata:
     while (ch != -1) {
       if (ch == ']') {
-	ch = read();
+        ch = read();
 
-	while (ch == ']') {
-	  if ((ch = read()) == '>')
-	    break cdata;
-	  else if (ch == ']')
-	    addText(']');
-	  else {
-	    addText(']');
-	    break;
-	  }
-	}
+        while (ch == ']') {
+          if ((ch = read()) == '>')
+            break cdata;
+          else if (ch == ']')
+            addText(']');
+          else {
+            addText(']');
+            break;
+          }
+        }
 
-	addText(']');
+        addText(']');
       } else if (_strictCharacters && ! isChar(ch)) {
-	throw error(L.l("expected character in cdata at {0}", badChar(ch)));
+        throw error(L.l("expected character in cdata at {0}", badChar(ch)));
       } else {
-	addText((char) ch);
-	ch = read();
+        addText((char) ch);
+        ch = read();
       }
     }
     
@@ -1050,13 +1050,13 @@ public class XmlParser extends AbstractParser {
       int ch = text.charAt(i);
 
       if (ch == '"') {
-	text.delete(i, i + 1);
-	text.insert(i, "&#34;");
-	i--;
+        text.delete(i, i + 1);
+        text.insert(i, "&#34;");
+        i--;
       } else if (ch == '\'') {
-	text.delete(i, i + 1);
-	text.insert(i, "&#39;");
-	i--;
+        text.delete(i, i + 1);
+        text.insert(i, "&#39;");
+        i--;
       }
     }
 
@@ -1081,8 +1081,8 @@ public class XmlParser extends AbstractParser {
       ch = skipWhitespace(read());
 
       if (_extPublicId.indexOf('&') > 0)
-	throw error(L.l("Illegal character '&' in PUBLIC identifier '{0}'",
-			_extPublicId));
+        throw error(L.l("Illegal character '&' in PUBLIC identifier '{0}'",
+                        _extPublicId));
 
       _extSystemId = parseValue(ch);
       ch = skipWhitespace(read());
@@ -1138,16 +1138,16 @@ public class XmlParser extends AbstractParser {
 
     while (ch >= 0 && ch != end) {
       if (ch == '&') {
-	if ((ch = read()) == '#') {
-	  valueBuffer[valueLength++] = (char) parseCharacterReference();
-	}
+        if ((ch = read()) == '#') {
+          valueBuffer[valueLength++] = (char) parseCharacterReference();
+        }
         else if (XmlChar.isNameStart(ch)) {
-	  ch = _reader.parseName(_buf, ch);
-	  String name = _buf.toString();
+          ch = _reader.parseName(_buf, ch);
+          String name = _buf.toString();
 
-	  if (ch != ';')
-	    throw error(L.l("expected '{0}' at {1}", ";", badChar(ch)));
-	  else {
+          if (ch != ';')
+            throw error(L.l("expected '{0}' at {1}", ";", badChar(ch)));
+          else {
             int lookup = _entities.getEntity(name);
 
             if (lookup >= 0 && lookup <= 0xffff) {
@@ -1156,13 +1156,13 @@ public class XmlParser extends AbstractParser {
               continue;
             }
             
-	    QEntity entity = _dtd == null ? null : _dtd.getEntity(name);
-	    if (entity != null && entity._value != null)
+            QEntity entity = _dtd == null ? null : _dtd.getEntity(name);
+            if (entity != null && entity._value != null)
               setMacroAttr(entity._value);
-	    else
-	      throw error(L.l("expected local reference at '&{0};'", name));
-	  }
-	}
+            else
+              throw error(L.l("expected local reference at '&{0};'", name));
+          }
+        }
       }
       else {
         if (ch == '\r') {
@@ -1172,7 +1172,7 @@ public class XmlParser extends AbstractParser {
             continue;
           }
         }
-	
+
         valueBuffer[valueLength++] = (char) ch;
       }
 
@@ -1190,10 +1190,10 @@ public class XmlParser extends AbstractParser {
   private boolean isChar(int ch)
   {
     return (ch >= 0x20 && ch <= 0xd7ff ||
-	    ch == 0x9 ||
-	    ch == 0xa ||
-	    ch == 0xd ||
-	    ch >= 0xe000 && ch <= 0xfffd);
+            ch == 0x9 ||
+            ch == 0xa ||
+            ch == 0xd ||
+            ch >= 0xe000 && ch <= 0xfffd);
   }
 
   /**
@@ -1206,9 +1206,9 @@ public class XmlParser extends AbstractParser {
     for (int b = 3; b >= 0; b--) {
       int v = (value >> (4 * b)) & 0xf;
       if (v < 10)
-	cb.append((char) (v + '0'));
+        cb.append((char) (v + '0'));
       else
-	cb.append((char) (v - 10 + 'a'));
+        cb.append((char) (v - 10 + 'a'));
     }
 
     return cb.close();
@@ -1315,7 +1315,7 @@ public class XmlParser extends AbstractParser {
    * Flushes the text buffer to the SAX callback.
    */
   private void addText(char []buffer, int offset, int length,
-		       boolean isWhitespace)
+                       boolean isWhitespace)
     throws IOException, SAXException
   {
     if (length <= 0)
@@ -1323,11 +1323,11 @@ public class XmlParser extends AbstractParser {
     
     if (_namespace.getDepth() == 1) {
       if (! isWhitespace) {
-	throw error(L.l("expected top element at '{0}'",
-			new String(buffer, offset, length)));
+        throw error(L.l("expected top element at '{0}'",
+                        new String(buffer, offset, length)));
       }
       else {
-	_contentHandler.ignorableWhitespace(buffer, offset, length);
+        _contentHandler.ignorableWhitespace(buffer, offset, length);
       }
     }
     else
@@ -1351,31 +1351,31 @@ public class XmlParser extends AbstractParser {
 
     while (true) {
       if (inputOffset < inputLength) {
-	char ch = inputBuf[inputOffset++];
+        char ch = inputBuf[inputOffset++];
 
-	if (XML_NAME_CHAR[ch]) {
-	  valueBuf[valueLength++] = ch;
-	}
-	else if (ch == ':') {
-	  if (colon <= 0)
-	    colon = valueLength;
-	  
-	  valueBuf[valueLength++] = ch;
-	}
-	else {
-	  _inputOffset = inputOffset - 1;
+        if (XML_NAME_CHAR[ch]) {
+          valueBuf[valueLength++] = ch;
+        }
+        else if (ch == ':') {
+          if (colon <= 0)
+            colon = valueLength;
 
-	  return _intern.add(valueBuf, offset, valueLength - offset,
-			     colon, isAttribute);
-	}
+          valueBuf[valueLength++] = ch;
+        }
+        else {
+          _inputOffset = inputOffset - 1;
+
+          return _intern.add(valueBuf, offset, valueLength - offset,
+                             colon, isAttribute);
+        }
       }
       else if (fillBuffer()) {
-	inputLength = _inputLength;
-	inputOffset = 0;
+        inputLength = _inputLength;
+        inputOffset = 0;
       }
       else {
-	return _intern.add(valueBuf, offset, valueLength - offset,
-			   colon, isAttribute);
+        return _intern.add(valueBuf, offset, valueLength - offset,
+                           colon, isAttribute);
       }
     }
   }
@@ -1414,9 +1414,9 @@ public class XmlParser extends AbstractParser {
       if (ch == '\'')
         _macro.add("&#39;");
       else if (ch == '"')
-	_macro.add("&#34;");
+        _macro.add("&#34;");
       else
-	_macro.add((char) ch);
+        _macro.add((char) ch);
     }
   }
 
@@ -1570,8 +1570,8 @@ public class XmlParser extends AbstractParser {
     if (ch == 0xfe) {
       ch = _is.read();
       if (ch == 0xff) {
-	_owner.setAttribute("encoding", "UTF-16");
-	_is.setEncoding("utf-16");
+        _owner.setAttribute("encoding", "UTF-16");
+        _is.setEncoding("utf-16");
 
         reader = new Utf16Reader(this, _is);
         
@@ -1582,8 +1582,8 @@ public class XmlParser extends AbstractParser {
     else if (ch == 0xff) {
       ch = _is.read();
       if (ch == 0xfe) {
-	_owner.setAttribute("encoding", "UTF-16");
-	_is.setEncoding("utf-16");
+        _owner.setAttribute("encoding", "UTF-16");
+        _is.setEncoding("utf-16");
 
         reader = new Utf16Reader(this, _is);
         ((Utf16Reader) reader).setReverse(true);
@@ -1632,14 +1632,14 @@ public class XmlParser extends AbstractParser {
       int ch2 = _is.read();
 
       if (ch2 == 0x00) {
-	_owner.setAttribute("encoding", "UTF-16LE");
-	_is.setEncoding("utf-16le");
+        _owner.setAttribute("encoding", "UTF-16LE");
+        _is.setEncoding("utf-16le");
 
         reader = new Utf16Reader(this, _is);
         ((Utf16Reader) reader).setReverse(true);
       }
       else if (ch2 > 0)
-	_is.unread();
+        _is.unread();
     }
 
     if (reader != null && reader != oldReader) {
@@ -1683,7 +1683,7 @@ public class XmlParser extends AbstractParser {
 
       ch = read();
       if (ch != '<')
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       
       parseXMLDecl(_reader);
     }
@@ -1732,14 +1732,14 @@ public class XmlParser extends AbstractParser {
             ! encoding.equalsIgnoreCase("UTF-8") &&
             ! encoding.equalsIgnoreCase("UTF-16") &&
             ! (_is.getSource() instanceof ReaderWriterStream)) {
-	  _is.setEncoding(encoding);
+          _is.setEncoding(encoding);
 
-	  XmlReader oldReader = _reader;
-	  
-	  _reader = new XmlReader(this, _is);
-	  // _reader.setNext(oldReader);
-	  
-	  _reader.setLine(oldReader.getLine());
+          XmlReader oldReader = _reader;
+
+          _reader = new XmlReader(this, _is);
+          // _reader.setNext(oldReader);
+
+          _reader.setLine(oldReader.getLine());
 
           _reader.setSystemId(_filename);
           _reader.setPublicId(null);
@@ -1817,12 +1817,12 @@ public class XmlParser extends AbstractParser {
     if (node.getFirstChild() != null) {
       s.println("<" + node.getNodeName() + ">");
       for (Node child = node.getFirstChild();
-	   child != null;
-	   child = child.getNextSibling()) {
-	printDebugNode(s, child, depth + 2);
+           child != null;
+           child = child.getNextSibling()) {
+        printDebugNode(s, child, depth + 2);
       }
       for (int i = 0; i < depth; i++)
-	s.print(' ');
+        s.print(' ');
       s.println("</" + node.getNodeName() + ">");
     }
     else

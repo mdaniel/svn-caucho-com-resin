@@ -74,19 +74,19 @@ public class XslChoose extends XslNode {
   {
     if (_tests.size() == 0) {
       if (_otherwise != null)
-	_otherwise.generate(out);
+        _otherwise.generate(out);
     }
     else {
       for (int i = 0; i < _tests.size(); i++) {
-	if (i != 0)
-	  out.print("else ");
+        if (i != 0)
+          out.print("else ");
 
-	_tests.get(i).generate(out);
+        _tests.get(i).generate(out);
       }
 
       if (_otherwise != null) {
-	out.print("else ");
-	_otherwise.generate(out);
+        out.print("else ");
+        _otherwise.generate(out);
       }
     }
   }

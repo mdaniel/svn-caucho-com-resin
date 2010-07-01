@@ -63,7 +63,7 @@ public class BlobOutputStream extends OutputStream {
    * @param store the output store
    */
   public BlobOutputStream(Transaction xa, BlockStore store,
-			  byte []inode, int inodeOffset)
+                          byte []inode, int inodeOffset)
   {
     init(store, inode, inodeOffset);
 
@@ -136,12 +136,12 @@ public class BlobOutputStream extends OutputStream {
   {
     while (length > 0) {
       if (_bufferEnd <= _offset) {
-	flushBlock();
+        flushBlock();
       }
 
       int sublen = _bufferEnd - _offset;
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       System.arraycopy(buffer, offset, _buffer, _offset, sublen);
 
@@ -157,7 +157,7 @@ public class BlobOutputStream extends OutputStream {
   {
     while (true) {
       if (_bufferEnd <= _offset) {
-	flushBlock();
+        flushBlock();
       }
 
       int sublen = _bufferEnd - _offset;
@@ -165,7 +165,7 @@ public class BlobOutputStream extends OutputStream {
       sublen = is.read(_buffer, _offset, sublen);
 
       if (sublen < 0)
-	return;
+        return;
 
       _offset += sublen;
     }
@@ -180,7 +180,7 @@ public class BlobOutputStream extends OutputStream {
   {
     try {
       if (_tempBuffer == null)
-	return;
+        return;
       
       flushBlock();
     } finally {
@@ -188,7 +188,7 @@ public class BlobOutputStream extends OutputStream {
       _inode = null;
       
       if (inode != null)
-	inode.closeOutputStream();
+        inode.closeOutputStream();
 
       _inodeBuffer = null;
 
@@ -196,7 +196,7 @@ public class BlobOutputStream extends OutputStream {
       _tempBuffer = null;
 
       if (tempBuffer != null) {
-	TempBuffer.freeLarge(tempBuffer);
+        TempBuffer.freeLarge(tempBuffer);
       }
     }
   }
@@ -211,7 +211,7 @@ public class BlobOutputStream extends OutputStream {
     _offset = 0;
     
     Inode.append(_inodeBuffer, _inodeOffset,
-		 _store, _xa,
-		 _buffer, 0, length);
+                 _store, _xa,
+                 _buffer, 0, length);
   }
 }

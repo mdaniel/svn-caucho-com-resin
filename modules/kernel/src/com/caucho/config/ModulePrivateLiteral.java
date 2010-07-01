@@ -45,12 +45,12 @@ public final class ModulePrivateLiteral {
 
   static {
     LITERAL = new ModulePrivate() {
-	public Class annotationType() { return ModulePrivate.class; }
-	
-	public String toString()
-	{
-	  return "@ModulePrivate()";
-	}
+        public Class annotationType() { return ModulePrivate.class; }
+
+        public String toString()
+        {
+          return "@ModulePrivate()";
+        }
       };
   }
 }

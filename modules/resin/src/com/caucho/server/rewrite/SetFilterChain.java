@@ -50,13 +50,13 @@ public class SetFilterChain
   private String _responseCharacterEncoding;
 
   public SetFilterChain(String uri,
-			String queryString,
-			FilterChain accept,
-			FilterChainMapper nextFilterChainMapper,
-			String requestCharacterEncoding,
-			Boolean isRequestSecure,
-			String responseCharacterEncoding,
-			String responseContentType)
+                        String queryString,
+                        FilterChain accept,
+                        FilterChainMapper nextFilterChainMapper,
+                        String requestCharacterEncoding,
+                        Boolean isRequestSecure,
+                        String responseCharacterEncoding,
+                        String responseContentType)
   {
     super(uri, queryString, accept, nextFilterChainMapper);
 
@@ -85,16 +85,16 @@ public class SetFilterChain
     }
     else {
       CauchoRequest cauchoRequest
-	= new SetRequestSecureFilterChain.SecureServletRequestWrapper((HttpServletRequest) request,
-								      _isRequestSecure);
+        = new SetRequestSecureFilterChain.SecureServletRequestWrapper((HttpServletRequest) request,
+                                                                      _isRequestSecure);
 
       /* XXX:
       if (response instanceof CauchoResponse
-	  && cauchoRequest.getWebApp() != null) {
-	cauchoResponse = ((CauchoResponse) response).getAbstractHttpResponse();
+          && cauchoRequest.getWebApp() != null) {
+        cauchoResponse = ((CauchoResponse) response).getAbstractHttpResponse();
 
-	oldRequest = cauchoResponse.getRequest();
-	cauchoResponse.setRequest(cauchoRequest);
+        oldRequest = cauchoResponse.getRequest();
+        cauchoResponse.setRequest(cauchoRequest);
       }
       */
 
@@ -115,7 +115,7 @@ public class SetFilterChain
       super.doFilter(request, response);
     } finally {
       if (cauchoResponse != null && request != oldRequest)
-	cauchoResponse.setRequest(oldRequest);
+        cauchoResponse.setRequest(oldRequest);
     }
     */
   }

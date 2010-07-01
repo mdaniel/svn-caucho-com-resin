@@ -67,7 +67,7 @@ public class HostExpandDeployGenerator
    * Creates the new host deploy.
    */
   public HostExpandDeployGenerator(DeployContainer<HostController> container,
-				   HostContainer hostContainer)
+                                   HostContainer hostContainer)
   {
     super(container, hostContainer.getRootDirectory());
     
@@ -171,26 +171,26 @@ public class HostExpandDeployGenerator
     controller.setArchivePath(jarPath);
     
     if (rootDirectory.isDirectory()
-	&& ! isValidDirectory(rootDirectory, name))
+        && ! isValidDirectory(rootDirectory, name))
       return null;
     else if (! rootDirectory.isDirectory()
-	     && ! jarPath.isFile())
+             && ! jarPath.isFile())
       return null;
 
     try {
       String hostNamePattern = getHostName();
 
       if (hostNamePattern != null) {
-	ELContext parentEnv = Config.getEnvironment();
-	ELResolver resolver
-	  = new MapVariableResolver(controller.getVariableMap());
+        ELContext parentEnv = Config.getEnvironment();
+        ELResolver resolver
+          = new MapVariableResolver(controller.getVariableMap());
 
-	ELContext env = new ConfigELContext(resolver);
-	
-	controller.setHostName(EL.evalString(hostNamePattern, env));
+        ELContext env = new ConfigELContext(resolver);
+
+        controller.setHostName(EL.evalString(hostNamePattern, env));
       }
       else
-	controller.setHostName(hostName);
+        controller.setHostName(hostName);
 
       controller.addDepend(jarPath);
     } catch (Throwable e) {
@@ -207,7 +207,7 @@ public class HostExpandDeployGenerator
    * Adds configuration to the current controller
    */
   protected HostController mergeController(HostController controller,
-					   String key)
+                                           String key)
   {
     try {
       Path expandDirectory = getExpandDirectory();
@@ -221,7 +221,7 @@ public class HostExpandDeployGenerator
       controller.setStartupMode(getStartupMode());
     
       for (int i = 0; i < _hostDefaults.size(); i++)
-	controller.addConfigDefault(_hostDefaults.get(i));
+        controller.addConfigDefault(_hostDefaults.get(i));
     } catch (ConfigException e) {
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);
@@ -254,7 +254,7 @@ public class HostExpandDeployGenerator
     Path expandPath = getExpandDirectory();
     Path deployExpandPath = deploy.getExpandDirectory();
     if (expandPath != deployExpandPath &&
-	(expandPath == null || ! expandPath.equals(deployExpandPath)))
+        (expandPath == null || ! expandPath.equals(deployExpandPath)))
       return false;
 
     return true;

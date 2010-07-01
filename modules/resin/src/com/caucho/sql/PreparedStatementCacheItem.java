@@ -50,8 +50,8 @@ class PreparedStatementCacheItem implements CacheListener {
   private boolean _isRemoved;
 
   PreparedStatementCacheItem(PreparedStatementKey key,
-			     PreparedStatement pStmt,
-			     ManagedConnectionImpl mConn)
+                             PreparedStatement pStmt,
+                             ManagedConnectionImpl mConn)
   {
     if (pStmt == null)
       throw new NullPointerException();
@@ -80,7 +80,7 @@ class PreparedStatementCacheItem implements CacheListener {
     
     synchronized (this) {
       if (_isActive)
-	return null;
+        return null;
       _isActive = true;
     }
 
@@ -93,21 +93,21 @@ class PreparedStatementCacheItem implements CacheListener {
 
     synchronized (this) {
       if (_isRemoved) {
-	_isRemoved = true;
-	doClose = _isActive;
+        _isRemoved = true;
+        doClose = _isActive;
       }
       _isActive = false;
     }
 
     if (doClose) {
       try {
-	PreparedStatement pStmt = _pStmtRef.get();
-	_pStmtRef = null;
+        PreparedStatement pStmt = _pStmtRef.get();
+        _pStmtRef = null;
 
-	if (pStmt != null)
-	  pStmt.close();
+        if (pStmt != null)
+          pStmt.close();
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -129,20 +129,20 @@ class PreparedStatementCacheItem implements CacheListener {
 
     synchronized (this) {
       if (! _isRemoved) {
-	_isRemoved = true;
-	doClose = ! _isActive;
+        _isRemoved = true;
+        doClose = ! _isActive;
       }
     }
 
     if (doClose) {
       try {
-	PreparedStatement pStmt = _pStmtRef.get();
-	_pStmtRef = null;
+        PreparedStatement pStmt = _pStmtRef.get();
+        _pStmtRef = null;
 
-	if (pStmt != null)
-	  pStmt.close();
+        if (pStmt != null)
+          pStmt.close();
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -158,11 +158,11 @@ class PreparedStatementCacheItem implements CacheListener {
       PreparedStatement pStmt = ref.get();
 
       if (pStmt != null) {
-	try {
-	  pStmt.close();
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+        try {
+          pStmt.close();
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
   }

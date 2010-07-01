@@ -75,7 +75,7 @@ public class XslTemplate extends XslNode implements XslTopNode {
 
     if (_name != null) {
       _macroName = ("_xsl_macro_" + _gen.toJavaIdentifier(_name) + "__" +
-		    _gen.uniqueId());
+                    _gen.uniqueId());
       
       _gen.addMacro(_name, _macroName);
     }
@@ -93,13 +93,13 @@ public class XslTemplate extends XslNode implements XslTopNode {
     
     if (_match != null) {
       fun = _gen.createTemplatePattern(_name, parseMatch(_match),
-				       _mode, _priority);
+                                       _mode, _priority);
 
       out.println();
       out.print("// '" + _match.replace('\n', ' ') + "'");
       
       if (_mode != null) {
-	_gen.addMode(_mode);
+        _gen.addMode(_mode);
         out.println(" mode '" + _mode + "'");
       }
       else
@@ -109,7 +109,7 @@ public class XslTemplate extends XslNode implements XslTopNode {
       out.println();
       
       out.println("private void " + fun +
-		  "(XslWriter out, Node inputNode, Env env)");
+                  "(XslWriter out, Node inputNode, Env env)");
       out.println("  throws Exception");
       out.println("{");
       out.pushDepth();
@@ -120,9 +120,9 @@ public class XslTemplate extends XslNode implements XslTopNode {
 
       boolean isRawText = _gen.getDisableOutputEscaping();
       if (isRawText)
-	out.println("boolean oldEscaping = out.disableEscaping(true);");
+        out.println("boolean oldEscaping = out.disableEscaping(true);");
       else
-	out.println("boolean oldEscaping = out.disableEscaping(false);");
+        out.println("boolean oldEscaping = out.disableEscaping(false);");
 
       String filename = getBaseURI();
       if (filename != null) {
@@ -137,7 +137,7 @@ public class XslTemplate extends XslNode implements XslTopNode {
       generateChildren(out);
       /*
       if (node.getLocalName().equals("template") ||
-	  node.getLocalName().equals("xsl:template"))
+          node.getLocalName().equals("xsl:template"))
         generateChildren(node);
       else
         generateChild((QAbstractNode) node);
@@ -145,7 +145,7 @@ public class XslTemplate extends XslNode implements XslTopNode {
 
       /*
       if (! _isCacheable)
-	println("out.setNotCacheable();");
+        println("out.setNotCacheable();");
       */
 
       out.println("out.disableEscaping(oldEscaping);");
@@ -157,18 +157,18 @@ public class XslTemplate extends XslNode implements XslTopNode {
 
     if (_name != null) {
       out.println("void " + _macroName +
-	      "(XslWriter out, Node inputNode, Env env)");
+              "(XslWriter out, Node inputNode, Env env)");
       out.println("  throws Exception");
       out.println("{");
       out.pushDepth();
 
       if (_match == null) {
-	out.println("Object _xsl_tmp;");
-	out.println("Node node = inputNode;");
-	generateChildren(out);
+        out.println("Object _xsl_tmp;");
+        out.println("Node node = inputNode;");
+        generateChildren(out);
       }
       else {
-	out.println(fun + "(out, inputNode, env);");
+        out.println(fun + "(out, inputNode, env);");
       }
       
       out.popDepth();

@@ -76,9 +76,9 @@ public class StreamTransformerImpl extends TransformerImpl {
   {
     for (; top != null; top = top.getNextSibling()) {
       if (top instanceof Text)
-	out.print(top.getNodeValue());
+        out.print(top.getNodeValue());
       else
-	printText(out, top.getFirstChild());
+        printText(out, top.getFirstChild());
     }
   }
 }

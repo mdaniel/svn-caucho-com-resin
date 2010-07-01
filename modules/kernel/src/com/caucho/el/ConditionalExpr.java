@@ -64,8 +64,8 @@ public class ConditionalExpr extends Expr {
   public boolean isConstant()
   {
     return (_test.isConstant() &&
-	    _trueExpr.isConstant() &&
-	    _falseExpr.isConstant());
+            _trueExpr.isConstant() &&
+            _falseExpr.isConstant());
   }
   
   /**

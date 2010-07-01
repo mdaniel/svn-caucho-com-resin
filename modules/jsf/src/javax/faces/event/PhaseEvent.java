@@ -66,7 +66,7 @@ public class PhaseEvent extends EventObject
   public String toString()
   {
     return (getClass().getName()
-	    + "[source=" + getSource()
-	    + ",phaseId=" + getPhaseId() + "]");
+            + "[source=" + getSource()
+            + ",phaseId=" + getPhaseId() + "]");
   }
 }

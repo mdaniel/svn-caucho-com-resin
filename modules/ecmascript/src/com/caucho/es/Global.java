@@ -205,7 +205,7 @@ public class Global extends ESBase {
   {
     synchronized (LOCK) {
       if (goldGlobal == null)
-	goldGlobal = new Global(true);
+        goldGlobal = new Global(true);
     }
 
     root = this;
@@ -379,14 +379,14 @@ public class Global extends ESBase {
       ESBase value = prototype == null ? null : prototype.getProperty(id);
       Object obj;
       if (value != null && value != esEmpty)
-	return snap(id, value);
+        return snap(id, value);
       else if (properties != null &&
-	       (obj = properties.get(id.toString())) != null)
-	return snap(id, objectWrap(obj));
+               (obj = properties.get(id.toString())) != null)
+        return snap(id, objectWrap(obj));
       else if ((value = (ESBase) globalProperties.get(id)) != null)
-	return snap(id, value);
+        return snap(id, value);
       else {
-	return esEmpty;
+        return esEmpty;
       }
     }
   }
@@ -474,10 +474,10 @@ public class Global extends ESBase {
       Script script = null;
       
       if (_runtimeScripts != null) {
-	SoftReference<Script> ref = _runtimeScripts.get(className);
+        SoftReference<Script> ref = _runtimeScripts.get(className);
 
-	if (ref != null)
-	  script = ref.get();
+        if (ref != null)
+          script = ref.get();
       }
 
       if (script != null)
@@ -590,10 +590,10 @@ public class Global extends ESBase {
       ESBase clWrapper = values[0];
       wrapper = values[1];
       if (wrapper.getClass().getClassLoader().getParent().equals(getClass().getClassLoader())) {
-	synchronized (_staticWraps) {
-	  _staticClassWraps.put(cl, clWrapper);
-	  _staticWraps.put(cl, wrapper);
-	}
+        synchronized (_staticWraps) {
+          _staticClassWraps.put(cl, clWrapper);
+          _staticWraps.put(cl, wrapper);
+        }
       }
     }
 
@@ -634,8 +634,8 @@ public class Global extends ESBase {
       ESBase wrapper = values[1];
       
       synchronized (_staticWraps) {
-	_staticWraps.put(cl, wrapper);
-	_staticClassWraps.put(cl, clWrapper);
+        _staticWraps.put(cl, wrapper);
+        _staticClassWraps.put(cl, clWrapper);
       }
     }
 

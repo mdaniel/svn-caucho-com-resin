@@ -77,17 +77,17 @@ public class MessageFormatter extends Formatter {
             ! message.equals(thrown.getMessage()))
           os.println(message);
 
-	Throwable rootExn = thrown;
+        Throwable rootExn = thrown;
 
-	// server/023g
-	/*
-	for (;
-	     rootExn != null && rootExn.getCause() != null;
-	     rootExn = rootExn.getCause()) {
-	}
-	*/
+        // server/023g
+        /*
+        for (;
+             rootExn != null && rootExn.getCause() != null;
+             rootExn = rootExn.getCause()) {
+        }
+        */
         rootExn.printStackTrace(os.getPrintWriter());
-	
+
         message = sw.getString();
       }
     } catch (Throwable e) {

@@ -105,24 +105,24 @@ public class ELFormatter extends MessageFormatter {
       LogRecord oldLogRecord = _threadLogRecord.get();
       
       try {
-	_threadLogRecord.set(logRecord);
+        _threadLogRecord.set(logRecord);
 
-	ELContext context = _freeContextList.allocate();
-	
-	if (context == null) {
-	  ELFormatterVariableResolver vr = new ELFormatterVariableResolver();
-	  context = new ConfigELContext(vr);
-	}
+        ELContext context = _freeContextList.allocate();
+
+        if (context == null) {
+          ELFormatterVariableResolver vr = new ELFormatterVariableResolver();
+          context = new ConfigELContext(vr);
+        }
 
         ret = _expr.evalString(context);
 
-	_freeContextList.free(context);
+        _freeContextList.free(context);
       } 
       catch (Exception ex) {
         throw new RuntimeException(ex);
       }
       finally {
-	_threadLogRecord.set(oldLogRecord);
+        _threadLogRecord.set(oldLogRecord);
       }
     }
 
@@ -138,44 +138,44 @@ public class ELFormatter extends MessageFormatter {
       throws ELException 
     {
       if (base != null || ! (property instanceof String))
-	return null;
+        return null;
 
       if ("log".equals(property)) {
-	env.setPropertyResolved(true);
-	
+        env.setPropertyResolved(true);
+
         return _logRecord;
       }
       else if ("request".equals(property)) {
-	env.setPropertyResolved(true);
-	
+        env.setPropertyResolved(true);
+
         return ThreadRequestFactory.getCurrentHttpRequest();
       }
       else if ("cookie".equals(property)) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
+        HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
 
-	if (req != null) {
-	  Cookie []cookies = req.getCookies();
+        if (req != null) {
+          Cookie []cookies = req.getCookies();
 
-	  if (cookies != null)
-	    return new CookieMap(cookies);
-	}
+          if (cookies != null)
+            return new CookieMap(cookies);
+        }
 
-	return null;
+        return null;
       }
       else if ("session".equals(property)) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
         HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
         
-	if (req != null) {
-	  HttpSession session = req.getSession(false);
+        if (req != null) {
+          HttpSession session = req.getSession(false);
 
-	  return session;
-	}
+          return session;
+        }
 
-	return null;
+        return null;
       }
 
       return null;
@@ -390,8 +390,8 @@ public class ELFormatter extends MessageFormatter {
     public Object get(Object key)
     {
       for (Cookie cookie : _cookies) {
-	if (cookie.getName().equals(key))
-	  return cookie;
+        if (cookie.getName().equals(key))
+          return cookie;
       }
       return null;
     }

@@ -54,8 +54,8 @@ public final class OwnerServerTriad
    * Creates the server triad for a ClusterTriad.Owner
    */
   public OwnerServerTriad(ClusterServer primary,
-			  ClusterServer secondary,
-			  ClusterServer tertiary)
+                          ClusterServer secondary,
+                          ClusterServer tertiary)
   {
     _primary = primary;
     _secondary = secondary;
@@ -290,9 +290,9 @@ public final class OwnerServerTriad
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[primary=" + _primary
-	    + ",seconary=" + _secondary
-	    + ",tertiary=" + _tertiary
-	    + "]");
+            + "[primary=" + _primary
+            + ",seconary=" + _secondary
+            + ",tertiary=" + _tertiary
+            + "]");
   }
 }

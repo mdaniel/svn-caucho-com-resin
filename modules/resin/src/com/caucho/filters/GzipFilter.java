@@ -142,7 +142,7 @@ public class GzipFilter implements Filter {
       GzipResponse gzipResponse = _freeList.allocate();
       
       if (gzipResponse == null)
-	gzipResponse = new GzipResponse();
+        gzipResponse = new GzipResponse();
       
       gzipResponse.setUseDeflate(encoding == DEFLATE);
       gzipResponse.init(res);
@@ -161,7 +161,7 @@ public class GzipFilter implements Filter {
       GzipPlainResponse plainRes = _plainFreeList.allocate();
 
       if (plainRes == null)
-	plainRes = new GzipPlainResponse();
+        plainRes = new GzipPlainResponse();
 
       plainRes.init(res);
       // addVaryHeader(res);
@@ -181,7 +181,7 @@ public class GzipFilter implements Filter {
     else if (_useVary) {
       // #3043, server/183q
       if (! response.containsHeader("Vary"))
-	response.addHeader("Vary", "Accept-Encoding");
+        response.addHeader("Vary", "Accept-Encoding");
     }
     else
       response.setHeader("Cache-Control", "private");
@@ -191,7 +191,7 @@ public class GzipFilter implements Filter {
    * Returns true if the GZip is allowed.
    */
   protected int allowGzip(HttpServletRequest req,
-			  HttpServletResponse res)
+                          HttpServletResponse res)
   {
     String acceptEncoding = req.getHeader("Accept-Encoding");
 
@@ -260,28 +260,28 @@ public class GzipFilter implements Filter {
       super.setContentType(value);
 
       if (_contentTypeMap == null) {
-	return;
+        return;
       }
 
       int p = value.indexOf(';');
 
       if (p > 0)
-	value = value.substring(0, p);
+        value = value.substring(0, p);
       
       AllowEntry entry = _contentTypeMap.get(value);
 
       if (entry == ALLOW)
-	_allowGzip = true;
+        _allowGzip = true;
       else if (entry == DENY) {
-	_useVary = false;
-	_allowGzip = false;
+        _useVary = false;
+        _allowGzip = false;
       }
       else if (! _hasDeny) {
-	_useVary = false;
-	_allowGzip = false;
+        _useVary = false;
+        _allowGzip = false;
       }
       else {
-	_allowGzip = true;
+        _allowGzip = true;
       }
     }
 
@@ -291,13 +291,13 @@ public class GzipFilter implements Filter {
     public void setHeader(String header, String value)
     {
       if (header.equalsIgnoreCase("Content-Type"))
-	setContentType(value);
+        setContentType(value);
       else if (header.equalsIgnoreCase("Content-Encoding")) {
-	_allowGzip = false;
-	super.setHeader(header, value);
+        _allowGzip = false;
+        super.setHeader(header, value);
       }
       else
-	super.setHeader(header, value);
+        super.setHeader(header, value);
     }
 
     /**
@@ -306,13 +306,13 @@ public class GzipFilter implements Filter {
     public void addHeader(String header, String value)
     {
       if (header.equalsIgnoreCase("Content-Type"))
-	setContentType(value);
+        setContentType(value);
       else if (header.equalsIgnoreCase("Content-Encoding")) {
-	_allowGzip = false;
-	super.addHeader(header, value);
+        _allowGzip = false;
+        super.addHeader(header, value);
       }
       else
-	super.addHeader(header, value);
+        super.addHeader(header, value);
     }
 
     /**
@@ -331,8 +331,8 @@ public class GzipFilter implements Filter {
       super.setStatus(status, message);
 
       if (_gzipStream != null) {
-	_gzipStream.setEnable(false);
-	_response.setHeader("Content-Encoding", "plain");
+        _gzipStream.setEnable(false);
+        _response.setHeader("Content-Encoding", "plain");
       }
 
       _allowGzip = false;
@@ -346,7 +346,7 @@ public class GzipFilter implements Filter {
       super.setStatus(status);
 
       if (status == 206 || status == 200)
-	return;
+        return;
 
       _allowGzip = false;
     }
@@ -359,7 +359,7 @@ public class GzipFilter implements Filter {
       super.reset();
 
       if (_gzipStream != null)
-	_gzipStream.reset();
+        _gzipStream.reset();
     }
 
     /**
@@ -368,17 +368,17 @@ public class GzipFilter implements Filter {
     public OutputStream getStream() throws IOException
     {
       if (_useVary)
-	addVaryHeader(_response);
+        addVaryHeader(_response);
     
       if (! _allowGzip)
-	return _response.getOutputStream();
+        return _response.getOutputStream();
       
       OutputStream os = _response.getOutputStream();
 
       if (_useDeflate)
-	_response.setHeader("Content-Encoding", "deflate");
+        _response.setHeader("Content-Encoding", "deflate");
       else
-	_response.setHeader("Content-Encoding", "gzip");
+        _response.setHeader("Content-Encoding", "gzip");
       
       _gzipStream = _savedGzipStream;
       _gzipStream.setGzip(! _useDeflate);
@@ -391,21 +391,21 @@ public class GzipFilter implements Filter {
       throws IOException
     {
       try {
-	super.close();
+        super.close();
       } finally {
-	_useVary = true;
-	_allowGzip = true;
-	_useDeflate = false;
-	
-	GzipStream gzipStream = _gzipStream;
-	_gzipStream = null;
+        _useVary = true;
+        _allowGzip = true;
+        _useDeflate = false;
+
+        GzipStream gzipStream = _gzipStream;
+        _gzipStream = null;
       
-	if (gzipStream != null) {
-	  if (gzipStream.isData())
-	    gzipStream.close();
-	  else
-	    gzipStream.free();
-	}
+        if (gzipStream != null) {
+          if (gzipStream.isData())
+            gzipStream.close();
+          else
+            gzipStream.free();
+        }
       }
     }
   }
@@ -423,24 +423,24 @@ public class GzipFilter implements Filter {
       super.setContentType(value);
 
       if (_contentTypeMap == null) {
-	return;
+        return;
       }
 
       int p = value.indexOf(';');
 
       if (p > 0)
-	value = value.substring(0, p);
+        value = value.substring(0, p);
       
       AllowEntry entry = _contentTypeMap.get(value);
 
       if (entry == ALLOW)
-	_useVary = true;
+        _useVary = true;
       else if (entry == DENY)
-	_useVary = false;
+        _useVary = false;
       else if (! _hasDeny)
-	_useVary = false;
+        _useVary = false;
       else
-	_useVary = true;
+        _useVary = true;
     }
 
     /**
@@ -449,7 +449,7 @@ public class GzipFilter implements Filter {
     public OutputStream getStream() throws IOException
     {
       if (_useVary)
-	addVaryHeader(_response);
+        addVaryHeader(_response);
       
       return _response.getOutputStream();
     }
@@ -458,9 +458,9 @@ public class GzipFilter implements Filter {
       throws IOException
     {
       try {
-	super.close();
+        super.close();
       } finally {
-	_useVary = true;
+        _useVary = true;
       }
     }
   }

@@ -113,9 +113,9 @@ public class XslNumber extends XslNode {
     int size = 0;
 
     for (int i = 0; i < _groupingSize.length(); i++) {
-	char ch = _groupingSize.charAt(i);
-	if (ch >= '0' && ch <= '9')
-	    size = 10 * size + ch - '0';
+        char ch = _groupingSize.charAt(i);
+        if (ch >= '0' && ch <= '9')
+            size = 10 * size + ch - '0';
     }
 
     boolean isAlphabetic = true;
@@ -164,7 +164,7 @@ public class XslNumber extends XslNode {
   void printNumber(JavaWriter out, String level,
                    AbstractPattern countPattern,
                    AbstractPattern fromPattern,
-		   XslNumberFormat format)
+                   XslNumberFormat format)
     throws Exception
   {
     if (level.equals("single"))
@@ -175,7 +175,7 @@ public class XslNumber extends XslNode {
       out.print("anyNumber(out, ");
     else
       throw error(L.l("xsl:number cannot understand level='{0}'",
-		      level));
+                      level));
 
     out.print("node, env, ");
     printPattern(out, countPattern);

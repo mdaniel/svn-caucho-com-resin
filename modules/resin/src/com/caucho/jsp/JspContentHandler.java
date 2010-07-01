@@ -94,13 +94,13 @@ public class JspContentHandler extends DefaultHandler {
       setLocation();
 
       if (_builder.getGenerator().isELIgnore()
-	  || _builder.isTagDependent()) {
-	String s = new String(buf, offset, length);
+          || _builder.isTagDependent()) {
+        String s = new String(buf, offset, length);
       
-	_builder.text(s);
+        _builder.text(s);
       }
       else
-	addText(buf, offset, length);
+        addText(buf, offset, length);
     } catch (JspParseException e) {
       throw new SAXException(e);
     }
@@ -117,50 +117,50 @@ public class JspContentHandler extends DefaultHandler {
 
     while (offset < end) {
       if (buf[offset] != '$')
-	offset++;
+        offset++;
       else if (end <= offset + 1)
-	offset++;
+        offset++;
       else if (buf[offset + 1] != '{')
-	offset++;
+        offset++;
       else {
-	if (begin < offset)
-	  _builder.text(new String(buf, begin, offset - begin));
+        if (begin < offset)
+          _builder.text(new String(buf, begin, offset - begin));
 
-	begin = offset;
-	offset += 2;
-	while (offset < end && buf[offset] != '}') {
-	  if (buf[offset] == '\'') {
-	    for (offset++; offset < end && buf[offset] != '\''; offset++) {
-	    }
+        begin = offset;
+        offset += 2;
+        while (offset < end && buf[offset] != '}') {
+          if (buf[offset] == '\'') {
+            for (offset++; offset < end && buf[offset] != '\''; offset++) {
+            }
 
-	    if (offset < end)
-	      offset++;
-	  }
-	  else if (buf[offset] == '"') {
-	    for (offset++; offset < end && buf[offset] != '"'; offset++) {
-	    }
+            if (offset < end)
+              offset++;
+          }
+          else if (buf[offset] == '"') {
+            for (offset++; offset < end && buf[offset] != '"'; offset++) {
+            }
 
-	    if (offset < end)
-	      offset++;
-	  }
-	  else
-	    offset++;
-	}
+            if (offset < end)
+              offset++;
+          }
+          else
+            offset++;
+        }
 
-	if (offset < end)
-	  offset++;
-	
-	String value = new String(buf, begin, offset - begin);
+        if (offset < end)
+          offset++;
 
-	QName qname = new QName("resin-c", "out", JspParser.JSTL_CORE_URI);
+        String value = new String(buf, begin, offset - begin);
 
-	_builder.startElement(qname);
-	_builder.attribute(new QName("value"), value);
-	_builder.attribute(new QName("escapeXml"), "false");
-	_builder.endAttributes();
-	_builder.endElement("resin-c:out");
+        QName qname = new QName("resin-c", "out", JspParser.JSTL_CORE_URI);
 
-	begin = offset;
+        _builder.startElement(qname);
+        _builder.attribute(new QName("value"), value);
+        _builder.attribute(new QName("escapeXml"), "false");
+        _builder.endAttributes();
+        _builder.endElement("resin-c:out");
+
+        begin = offset;
       }
     }
 
@@ -216,7 +216,7 @@ public class JspContentHandler extends DefaultHandler {
    * Starts an element.
    */
   public void startElement(String uri, String localName,
-			   String qName, Attributes atts)
+                           String qName, Attributes atts)
     throws SAXException
   {
     try {
@@ -224,9 +224,9 @@ public class JspContentHandler extends DefaultHandler {
       _builder.startElement(new QName(qName, uri));
 
       for (int i = 0; i < atts.getLength(); i++) {
-	setLocation();
-	_builder.attribute(new QName(atts.getQName(i), atts.getURI(i)),
-			   atts.getValue(i));
+        setLocation();
+        _builder.attribute(new QName(atts.getQName(i), atts.getURI(i)),
+                           atts.getValue(i));
       }
       
       setLocation();
@@ -270,8 +270,8 @@ public class JspContentHandler extends DefaultHandler {
   {
     if (_locator != null) {
       _builder.setLocation(Vfs.lookup(_locator.getSystemId()),
-			   _locator.getSystemId(),
-			   _locator.getLineNumber());
+                           _locator.getSystemId(),
+                           _locator.getLineNumber());
     }
   }
 }

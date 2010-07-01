@@ -167,14 +167,14 @@ public class XsltFilter implements Filter {
         contentType = contentType.substring(0, p);
 
       if (! _isConditional ||
-	  contentType.equals("x-application/xslt") ||
+          contentType.equals("x-application/xslt") ||
           contentType.equals("x-application/xsl") ||
           contentType.equals("x-application/stylescript")) {
         _chainingType = contentType;
 
-	if (log.isLoggable(Level.FINER))
-	  log.finer(L.l("'{0}' chaining xslt with {1}",
-			_request.getRequestURI(), contentType));
+        if (log.isLoggable(Level.FINER))
+          log.finer(L.l("'{0}' chaining xslt with {1}",
+                        _request.getRequestURI(), contentType));
 
         if (_xsltStream == null)
           _xsltStream = new XsltTempStream(_response);
@@ -203,7 +203,7 @@ public class XsltFilter implements Filter {
       super.flushBuffer();
       
       if (_stream != null)
-	_stream.flush();
+        _stream.flush();
     }
 
     /**
@@ -214,7 +214,7 @@ public class XsltFilter implements Filter {
       throws IOException, ServletException
     {
       try {
-	flushBuffer();
+        flushBuffer();
 
         if (_chainingType == null)
           return;
@@ -241,7 +241,7 @@ public class XsltFilter implements Filter {
 
         if (href == null)
           href = getStylesheetHref(doc);
-	
+
         if (href == null)
           href = "default.xsl";
 
@@ -257,47 +257,47 @@ public class XsltFilter implements Filter {
             factory = new StyleScript();
           else {
             factory = TransformerFactory.newInstance();
-	  }
+          }
 
-	  if (factory instanceof AbstractStylesheetFactory)
-	    ((AbstractStylesheetFactory) factory).setStylePath(_stylePath);
+          if (factory instanceof AbstractStylesheetFactory)
+            ((AbstractStylesheetFactory) factory).setStylePath(_stylePath);
 
-	  Path path = null;
-	  
-	  if (href.startsWith("/"))
-	    path = Vfs.getPwd().lookup(_application.getRealPath(href));
-	  else {
-	    String servletPath = RequestAdapter.getPageServletPath(req);
-	  
-	    Path pwd = Vfs.getPwd();
-	    pwd = pwd.lookup(_application.getRealPath(servletPath));
-	    path = pwd.getParent().lookup(href);
-	  }
+          Path path = null;
 
-	  if (! path.canRead()) {
-	    Thread thread = Thread.currentThread();
-	    ClassLoader loader = thread.getContextClassLoader();
-	    
-	    URL url = loader.getResource(href);
+          if (href.startsWith("/"))
+            path = Vfs.getPwd().lookup(_application.getRealPath(href));
+          else {
+            String servletPath = RequestAdapter.getPageServletPath(req);
 
-	    if (url != null) {
-	      Path newPath = Vfs.getPwd().lookup(url.toString());
-	      if (newPath.canRead())
-		path = newPath;
-	    }
-	  }
-	  
-	  Source source;
-	  if (path.canRead())
-	    source = new StreamSource(path.getURL());
-	  else
-	    source = new StreamSource(href);
+            Path pwd = Vfs.getPwd();
+            pwd = pwd.lookup(_application.getRealPath(servletPath));
+            path = pwd.getParent().lookup(href);
+          }
 
-	  if (log.isLoggable(Level.FINE))
-	    log.fine(L.l("'{0}' XSLT filter using stylesheet {1}",
-			 req.getRequestURI(), source.getSystemId()));
+          if (! path.canRead()) {
+            Thread thread = Thread.currentThread();
+            ClassLoader loader = thread.getContextClassLoader();
 
-	  stylesheet = factory.newTemplates(source);
+            URL url = loader.getResource(href);
+
+            if (url != null) {
+              Path newPath = Vfs.getPwd().lookup(url.toString());
+              if (newPath.canRead())
+                path = newPath;
+            }
+          }
+
+          Source source;
+          if (path.canRead())
+            source = new StreamSource(path.getURL());
+          else
+            source = new StreamSource(href);
+
+          if (log.isLoggable(Level.FINE))
+            log.fine(L.l("'{0}' XSLT filter using stylesheet {1}",
+                         req.getRequestURI(), source.getSystemId()));
+
+          stylesheet = factory.newTemplates(source);
         } finally {
           // is.close();
         }
@@ -306,9 +306,9 @@ public class XsltFilter implements Filter {
 
         transformer = (Transformer) stylesheet.newTransformer();
 
-	TransformerImpl cauchoTransformer = null;
-	if (transformer instanceof TransformerImpl)
-	  cauchoTransformer = (TransformerImpl) transformer;
+        TransformerImpl cauchoTransformer = null;
+        if (transformer instanceof TransformerImpl)
+          cauchoTransformer = (TransformerImpl) transformer;
 
         String mediaType = (String) transformer.getOutputProperty(OutputKeys.MEDIA_TYPE);
         String encoding = (String) transformer.getOutputProperty(OutputKeys.ENCODING);
@@ -335,10 +335,10 @@ public class XsltFilter implements Filter {
           encoding = "ISO-8859-1";
         transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 
-	ArrayList params = null;;
-	if (cauchoTransformer != null) {
-	  params = (ArrayList) cauchoTransformer.getProperty(CauchoStylesheet.GLOBAL_PARAM);
-	}
+        ArrayList params = null;;
+        if (cauchoTransformer != null) {
+          params = (ArrayList) cauchoTransformer.getProperty(CauchoStylesheet.GLOBAL_PARAM);
+        }
 
         for (int i = 0; params != null && i < params.size(); i++) {
           String param = (String) params.get(i);
@@ -346,19 +346,19 @@ public class XsltFilter implements Filter {
           transformer.setParameter(param, req.getParameter(param));
         }
 
-	DOMSource domSource = new DOMSource(doc);
-	domSource.setSystemId(userPath.getUserPath());
+        DOMSource domSource = new DOMSource(doc);
+        domSource.setSystemId(userPath.getUserPath());
 
-	Result result = getResult(res.getOutputStream());
+        Result result = getResult(res.getOutputStream());
 
         transformer.transform(domSource, result);
       } catch (IOException e) {
         throw e;
       } catch (Exception e) {
         if (e instanceof CompileException)
-	  throw new ServletException(e.getMessage(), e);
-	else
-	  throw new ServletException(e.toString(), e);
+          throw new ServletException(e.getMessage(), e);
+        else
+          throw new ServletException(e.toString(), e);
       }
     }
 

@@ -94,12 +94,12 @@ class SmtpStream extends MemoryStream {
       Iterator<String> iter = attributes.keySet().iterator();
  
       while (iter.hasNext()) {
- 	String key = iter.next();
+         String key = iter.next();
  
- 	try {
- 	  setAttribute(key, attributes.get(key));
- 	} catch (IOException e) {
- 	}
+         try {
+           setAttribute(key, attributes.get(key));
+         } catch (IOException e) {
+         }
       }
     }
   }
@@ -134,8 +134,8 @@ class SmtpStream extends MemoryStream {
   {
     name = name.toLowerCase();
     if (name.equals("date") || 
-	name.equals("received") || name.equals("return-path") ||
-	name.equals("message-id"))
+        name.equals("received") || name.equals("return-path") ||
+        name.equals("message-id"))
       throw new IOException("cannot set property `" + name + "'");
 
     if (name.equals("to")) {
@@ -200,7 +200,7 @@ class SmtpStream extends MemoryStream {
       _cc = list;
     else {
       for (int i = 0; i < list.size(); i++)
-	_cc.add(list.get(i));
+        _cc.add(list.get(i));
     }
   }
 
@@ -220,7 +220,7 @@ class SmtpStream extends MemoryStream {
       _bcc = list;
     else {
       for (int i = 0; i < list.size(); i++)
-	_bcc.add(list.get(i));
+        _bcc.add(list.get(i));
     }
   }
 
@@ -267,10 +267,10 @@ class SmtpStream extends MemoryStream {
       value = 0;
       int ch;
       if ((ch = is.read()) >= '0' && ch <= '9') {
-	for (; ch >= '0' && ch <= '9'; ch = is.read()) {
-	  msg.append((char) ch);
-	  value = 10 * value + ch - '0';
-	}
+        for (; ch >= '0' && ch <= '9'; ch = is.read()) {
+          msg.append((char) ch);
+          value = 10 * value + ch - '0';
+        }
       }
 
       // Multiline responses, e.g. "200-Foo", indicate there will be a
@@ -280,10 +280,10 @@ class SmtpStream extends MemoryStream {
         value = 0;
 
       for (; ch != '\r' && ch != '\n'; ch = is.read())
-	msg.append((char) ch);
+        msg.append((char) ch);
 
       if (ch == '\r')
-	ch = is.read();
+        ch = is.read();
     } while (value == 0);
 
     if (log.isLoggable(Level.FINE))
@@ -313,8 +313,8 @@ class SmtpStream extends MemoryStream {
       os.print("RCPT TO: ");
       os.print(rcpt.user);
       if (rcpt.host != null) {
-	os.print("@");
-	os.print(rcpt.host);
+        os.print("@");
+        os.print(rcpt.host);
       }
       os.print("\r\n");
 
@@ -322,7 +322,7 @@ class SmtpStream extends MemoryStream {
         log.fine("RCPT TO: " + rcpt.user + "@" + rcpt.host);
 
       if (readResponse(is, msg) / 100 != 2)
-	throw new IOException("Expected '221' from SMTP: " + msg);
+        throw new IOException("Expected '221' from SMTP: " + msg);
     }
   }
 
@@ -346,19 +346,19 @@ class SmtpStream extends MemoryStream {
 
     while (ch >= 0) {
       if (ch == '\n') {
-	ch = is.read();
-	if (ch == '.') {
-	  os.print("\r\n..");
+        ch = is.read();
+        if (ch == '.') {
+          os.print("\r\n..");
           ch = is.read();
         }
-	else if (ch <= 0) {
-	  os.print("\r\n.\r\n");
-	  return;
-	} else {
-	  os.print("\r\n");
-	}
+        else if (ch <= 0) {
+          os.print("\r\n.\r\n");
+          return;
+        } else {
+          os.print("\r\n");
+        }
       } else {
-	os.write(ch);
+        os.write(ch);
         ch = is.read();
       }
     }
@@ -402,10 +402,10 @@ class SmtpStream extends MemoryStream {
       Object value = getAttribute(key);
 
       if (value != null) {
-	os.print(key);
-	os.print(": ");
-	os.print(String.valueOf(value));
-	os.print("\r\n");
+        os.print(key);
+        os.print(": ");
+        os.print(String.valueOf(value));
+        os.print("\r\n");
       }
     }
 
@@ -439,12 +439,12 @@ class SmtpStream extends MemoryStream {
       MailtoPath.Recipient rcpt = list.get(i);
 
       if (i != 0)
-	os.print(", ");
+        os.print(", ");
       
       os.print(rcpt.user);
       if (rcpt.host != null) {
-	os.print("@");
-	os.print(rcpt.host);
+        os.print("@");
+        os.print(rcpt.host);
       }
     }
 
@@ -478,18 +478,18 @@ class SmtpStream extends MemoryStream {
     WriteStream os = null;
     try {
       ReadWritePair s = VfsStream.openReadWrite(sock.getInputStream(),
-						sock.getOutputStream());
+                                                sock.getOutputStream());
       is = s.getReadStream();
       os = s.getWriteStream();
 
       if (readResponse(is, msg) / 100 != 2)
-	throw new IOException("Expected '220' from SMTP");
+        throw new IOException("Expected '220' from SMTP");
 
       os.print("HELO ");
       os.print(CauchoSystem.getLocalHost());
       os.print("\r\n");
       if (readResponse(is, msg) / 100 != 2)
-	throw new IOException("Expected '220' from SMTP");
+        throw new IOException("Expected '220' from SMTP");
 
       os.print("MAIL FROM: ");
       String sender = getSender();
@@ -502,34 +502,34 @@ class SmtpStream extends MemoryStream {
       }
       os.print("\r\n");
       if (readResponse(is, msg) / 100 != 2)
-	throw new IOException("Expected '250' from SMTP: " + msg);
+        throw new IOException("Expected '250' from SMTP: " + msg);
 
       sendRecipients(is, os, _to, msg);
       if (_cc != null)
-	sendRecipients(is, os, _cc, msg);
+        sendRecipients(is, os, _cc, msg);
       if (_bcc != null)
-	sendRecipients(is, os, _bcc, msg);
+        sendRecipients(is, os, _bcc, msg);
 
       os.print("DATA\r\n");
       if (readResponse(is, msg) / 100 != 3)
-	throw new IOException("Expected '354' from SMTP: " + msg);
+        throw new IOException("Expected '354' from SMTP: " + msg);
 
       writeMessage(os);
 
       if (readResponse(is, msg) / 100 != 2)
-	throw new IOException("Expected '200' from SMTP: " + msg);
+        throw new IOException("Expected '200' from SMTP: " + msg);
 
       os.print("QUIT\r\n");
       if (readResponse(is, msg) / 100 != 2)
-      	throw new IOException("Expected '250' from SMTP: " + msg);
+              throw new IOException("Expected '250' from SMTP: " + msg);
     } finally {
       try {
-	if (is != null)
-	  is.close();
-	if (os != null)
-	  os.close();
+        if (is != null)
+          is.close();
+        if (os != null)
+          os.close();
       } finally {
-	sock.close();
+        sock.close();
       }
       destroy();
     }

@@ -77,7 +77,7 @@ public class LogManagerImpl extends LogManager {
       EnvironmentLogger parent = buildParentTree(name);
 
       if (parent != null)
-	envLogger.setParent(parent);
+        envLogger.setParent(parent);
     }
 
     // handle custom logger

@@ -72,8 +72,8 @@ public class WebAppRegexpDeployGenerator
    * Creates the new host deploy.
    */
   public WebAppRegexpDeployGenerator(DeployContainer<WebAppController> deployContainer,
-			    WebAppContainer container,
-			    WebAppConfig config)
+                            WebAppContainer container,
+                            WebAppConfig config)
   {
     super(deployContainer);
     
@@ -140,12 +140,12 @@ public class WebAppRegexpDeployGenerator
       String appDirPath = _config.getDocumentDirectory();
 
       if (appDirPath == null)
-	appDirPath = "./" + matcher.group(0);
+        appDirPath = "./" + matcher.group(0);
       
       appDir = PathBuilder.lookupPath(appDirPath, varMap);
 
       if (! appDir.isDirectory() || ! appDir.canRead()) {
-	return null;
+        return null;
       }
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
@@ -162,26 +162,26 @@ public class WebAppRegexpDeployGenerator
       thread.setContextClassLoader(getParentClassLoader());
       
       synchronized (_entries) {
-	for (int i = 0; i < _entries.size(); i++) {
-	  controller = _entries.get(i);
+        for (int i = 0; i < _entries.size(); i++) {
+          controller = _entries.get(i);
 
-	  if (appDir.equals(controller.getRootDirectory()))
-	    return controller;
-	}
+          if (appDir.equals(controller.getRootDirectory()))
+            return controller;
+        }
 
-	controller = new WebAppController(name, name, appDir, _container);
+        controller = new WebAppController(name, name, appDir, _container);
 
-	// XXX: not dynamic-deploy in the sense that the mappings are known
-	//controller.setDynamicDeploy(true);
-	controller.getVariableMap().putAll(varMap);
-	controller.setRegexpValues(vars);
-	controller.setConfig(_config);
-	// _controller.setJarPath(_archivePath);
+        // XXX: not dynamic-deploy in the sense that the mappings are known
+        //controller.setDynamicDeploy(true);
+        controller.getVariableMap().putAll(varMap);
+        controller.setRegexpValues(vars);
+        controller.setConfig(_config);
+        // _controller.setJarPath(_archivePath);
 
-	for (int i = 0; i < _webAppDefaults.size(); i++)
-	  controller.addConfigDefault(_webAppDefaults.get(i));
+        for (int i = 0; i < _webAppDefaults.size(); i++)
+          controller.addConfigDefault(_webAppDefaults.get(i));
       
-	_entries.add(controller);
+        _entries.add(controller);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

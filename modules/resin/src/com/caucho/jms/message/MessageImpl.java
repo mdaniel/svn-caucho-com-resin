@@ -619,14 +619,14 @@ public class MessageImpl implements Message, java.io.Serializable
       throw new IllegalArgumentException();
     if (isReserved(name))
       throw new JMSException(L.l("'{0}' is a reserved property name.",
-				 name));
+                                 name));
 
     if (! (value == null
-	   || value instanceof Number
-	   || value instanceof String
-	   || value instanceof Boolean))
+           || value instanceof Number
+           || value instanceof String
+           || value instanceof Boolean))
       throw new MessageFormatException(L.l("{0} is an illegal object property value",
-					   value.getClass().getName()));
+                                           value.getClass().getName()));
     
     if (_properties == null)
       _properties = new HashMap<String,Object>();

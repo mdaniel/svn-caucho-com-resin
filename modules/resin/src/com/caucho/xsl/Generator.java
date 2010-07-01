@@ -359,7 +359,7 @@ abstract class Generator {
     }
 
     if ("stylesheet".equals(getXslLocal(top)) ||
-	"transform".equals(getXslLocal(top))) {
+        "transform".equals(getXslLocal(top))) {
       generateStylesheet(top, true);
     }
     else {
@@ -484,10 +484,10 @@ abstract class Generator {
       ch = commaDelimScanner.scan(cursor, cb);
 
       if (cb.length() != 0) {
-	addImport(cb.toString());
+        addImport(cb.toString());
       }
       else if (ch != cursor.DONE)
-	throw error(L.l("illegal `import' directive"));
+        throw error(L.l("illegal `import' directive"));
     }
   }
 
@@ -518,12 +518,12 @@ abstract class Generator {
       addDepend(file.getPath());
       
       if (_isStyleScript) {
-	XslParser parser = new XslParser();
-	
-	return parser.parse(file);
+        XslParser parser = new XslParser();
+
+        return parser.parse(file);
       }
       else
-	return new Xml().parseDocument(file);
+        return new Xml().parseDocument(file);
     } catch (org.xml.sax.SAXException e) {
       throw new XslParseException(e);
     } finally {
@@ -571,17 +571,17 @@ abstract class Generator {
     String xslSpace = element.getAttribute("xsl-space");
     ArrayList<XslNode> children = new ArrayList<XslNode>();
     for (Node child = element.getFirstChild();
-	 child != null;
-	 child = child.getNextSibling()) {
+         child != null;
+         child = child.getNextSibling()) {
       if (! (child instanceof Element))
         continue;
       
       int code = -1;
       String name = getXslLocal(child);
       if (name != null)
-	code = _tags.get(name);
+        code = _tags.get(name);
       else if ((name = getXtpLocal(child)) != null)
-	code = _xtpTags.get(name);
+        code = _xtpTags.get(name);
       else {
         String childName = child.getNodeName();
         
@@ -589,7 +589,7 @@ abstract class Generator {
             childName.equals("jsp:declaration") ||
             childName.equals("jsp:scriptlet"))
           addGlobalAction((Element) child);
-	continue;
+        continue;
       }
 
       NamespaceContext oldNamespace = addNamespace((Element) child);
@@ -615,7 +615,7 @@ abstract class Generator {
   
   abstract protected XslNode createChild(XslNode parent, Node child)
     throws Exception;
-	   
+
   private void addGlobalAction(Element elt)
   {
     _globalActions.add(elt);
@@ -637,11 +637,11 @@ abstract class Generator {
     if (! excludeNamespace.equals("")) {
       for (String prefix : excludeNamespace.split("[,\\s]+")) {
 
-	String ns = elt.getNamespace(prefix);
-	if (ns == null)
-	  throw error(elt, L.l("`{0}' must be a namespace prefix",
+        String ns = elt.getNamespace(prefix);
+        if (ns == null)
+          throw error(elt, L.l("`{0}' must be a namespace prefix",
                                prefix));
-	_excludedNamespaces.put(ns, "");
+        _excludedNamespaces.put(ns, "");
       }
     }
   }
@@ -674,24 +674,24 @@ abstract class Generator {
     int ch = 0;
     int len = attr.length();
     for (;
-	 i < len && XmlChar.isWhitespace((ch = attr.charAt(i))) || ch == ',';
-	 i++) {
+         i < len && XmlChar.isWhitespace((ch = attr.charAt(i))) || ch == ',';
+         i++) {
     }
     CharBuffer cb = new CharBuffer();
     while (i < len) {
       cb.clear();
       for (;
-	   i < len && ! XmlChar.isWhitespace((ch = attr.charAt(i))) &&
-	     ch != ',';
-	   i++) {
-	cb.append((char) ch);
+           i < len && ! XmlChar.isWhitespace((ch = attr.charAt(i))) &&
+             ch != ',';
+           i++) {
+        cb.append((char) ch);
       }
 
       _cacheDepends.add(cb.toString());
 
       for (;
-	   i < len && XmlChar.isWhitespace((ch = attr.charAt(i))) || ch == ',';
-	   i++) {
+           i < len && XmlChar.isWhitespace((ch = attr.charAt(i))) || ch == ',';
+           i++) {
       }
     }
   }
@@ -706,24 +706,24 @@ abstract class Generator {
     int ch = 0;
     int len = attr.length();
     for (;
-	 i < len && XmlChar.isWhitespace((ch = attr.charAt(i))) || ch == ',';
-	 i++) {
+         i < len && XmlChar.isWhitespace((ch = attr.charAt(i))) || ch == ',';
+         i++) {
     }
     CharBuffer cb = new CharBuffer();
     while (i < len) {
       cb.clear();
       for (;
-	   i < len && ! XmlChar.isWhitespace((ch = attr.charAt(i))) &&
-	     ch != ',';
-	   i++) {
-	cb.append((char) ch);
+           i < len && ! XmlChar.isWhitespace((ch = attr.charAt(i))) &&
+             ch != ',';
+           i++) {
+        cb.append((char) ch);
       }
 
       printCacheDepends(cb.toString());
 
       for (;
-	   i < len && XmlChar.isWhitespace((ch = attr.charAt(i))) || ch == ',';
-	   i++) {
+           i < len && XmlChar.isWhitespace((ch = attr.charAt(i))) || ch == ',';
+           i++) {
       }
     }
   }
@@ -748,9 +748,9 @@ abstract class Generator {
 
     if (! priority.equals("")) {
       try {
-	dPriority = Double.valueOf(priority).doubleValue();
+        dPriority = Double.valueOf(priority).doubleValue();
       } catch (Exception e) {
-	throw error("xsl:template expects `priority' must be a double.");
+        throw error("xsl:template expects `priority' must be a double.");
       }
     }
 
@@ -782,10 +782,10 @@ abstract class Generator {
 
     QElement top = (QElement) xsl.getDocumentElement();
     if (top == null ||
-	! "stylesheet".equals(getXslLocal(top)) &&
-	! "transform".equals(getXslLocal(top))) {
+        ! "stylesheet".equals(getXslLocal(top)) &&
+        ! "transform".equals(getXslLocal(top))) {
       throw error("imported stylesheet `" + href + 
-		  "' missing xsl:stylesheet.");
+                  "' missing xsl:stylesheet.");
     }
 
     int oldMinImportance = _minImportance;
@@ -842,22 +842,22 @@ abstract class Generator {
     
     Element top = (Element) xsl.getDocumentElement();
     if (top == null ||
-	! "stylesheet".equals(getXslLocal(top)) &&
-	! "transform".equals(getXslLocal(top))) {
+        ! "stylesheet".equals(getXslLocal(top)) &&
+        ! "transform".equals(getXslLocal(top))) {
       throw error("imported stylesheet `" + href + 
-		  "' missing xsl:stylesheet.");
+                  "' missing xsl:stylesheet.");
     }
 
     Path oldContext = _context;
     _context = path;
 
     for (Node node = top.getFirstChild();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       XslNode child = createChild(parent, node);
 
       if (child != null)
-	parent.addChild(child);
+        parent.addChild(child);
     }
     
     // generateStylesheet(top, false);
@@ -880,7 +880,7 @@ abstract class Generator {
 
     if (xsl != null)
       throw new IllegalStateException(L.l("'{0}' is a duplicated path",
-					  virtualPath.getPath()));
+                                          virtualPath.getPath()));
     
     ReadStream rs;
 
@@ -1005,7 +1005,7 @@ abstract class Generator {
   }
 
   public void addNamespaceAlias(String stylesheetPrefix,
-				String resultPrefix)
+                                String resultPrefix)
   {
     /*
     String stylesheetNs = getNamespace(stylesheetPrefix);
@@ -1050,12 +1050,12 @@ abstract class Generator {
 
     for (; child != null; child = child.getNextSibling()) {
       if (! "attribute-set".equals(getXslLocal(child)))
-	continue;
+        continue;
 
       QElement elt = (QElement) child;
       String name = elt.getAttribute("name");
       if (name.equals(""))
-	throw error(L.l("xsl:attribute-set expects `name' attribute."));
+        throw error(L.l("xsl:attribute-set expects `name' attribute."));
 
       generateAttributeSet(element, name);
     }
@@ -1076,12 +1076,12 @@ abstract class Generator {
 
     for (; child != null; child = child.getNextSibling()) {
       if (! "attribute-set".equals(getXslLocal(child)))
-	continue;
+        continue;
 
       QElement elt = (QElement) child;
       String name = elt.getAttribute("name");
       if (name.equals(""))
-	throw error(L.l("xsl:attribute-set expects `name' attribute."));
+        throw error(L.l("xsl:attribute-set expects `name' attribute."));
 
       if (! name.equals(setName))
         continue;
@@ -1095,42 +1095,42 @@ abstract class Generator {
 
       // add any attributes from use-attribute-sets
       for (Node attr = elt.getFirstAttribute();
-	   attr != null;
-	   attr = attr.getNextSibling()) {
-	if (attr.getNodeName().equals("use-attribute-sets")) {
-	  HashMap<String,String> subset = generateAttributeSet(element, attr.getNodeValue());
+           attr != null;
+           attr = attr.getNextSibling()) {
+        if (attr.getNodeName().equals("use-attribute-sets")) {
+          HashMap<String,String> subset = generateAttributeSet(element, attr.getNodeValue());
           
-	  if (subset == null)
-	    throw error(elt, L.l("Unknown attribute-set `{0}'.  Each use-attribute-sets needs a matching xsl:attribute-set.", attr.getNodeValue()));
-	  Iterator<String> iter = subset.keySet().iterator();
-	  while (iter.hasNext()) {
-	    String key = iter.next();
-	    set.put(key, subset.get(key));
-	  }
-	}
+          if (subset == null)
+            throw error(elt, L.l("Unknown attribute-set `{0}'.  Each use-attribute-sets needs a matching xsl:attribute-set.", attr.getNodeValue()));
+          Iterator<String> iter = subset.keySet().iterator();
+          while (iter.hasNext()) {
+            String key = iter.next();
+            set.put(key, subset.get(key));
+          }
+        }
       }
 
       for (Node attr = elt.getFirstChild();
-	   attr != null;
-	   attr = attr.getNextSibling()) {
-	if (! "attribute".equals(getXslLocal(attr)))
-	  continue;
-	Element attrElt = (Element) attr;
-	String attrName = attrElt.getAttribute("name");
-	if (attrName.equals(""))
-	  throw error(L.l("xsl:attribute expects `name' attribute."));
+           attr != null;
+           attr = attr.getNextSibling()) {
+        if (! "attribute".equals(getXslLocal(attr)))
+          continue;
+        Element attrElt = (Element) attr;
+        String attrName = attrElt.getAttribute("name");
+        if (attrName.equals(""))
+          throw error(L.l("xsl:attribute expects `name' attribute."));
 
-	set.put(attrName, ((QElement) attr).getTextValue());
+        set.put(attrName, ((QElement) attr).getTextValue());
       }
 
       for (Attr attr = ((QElement) elt).getFirstAttribute();
-	   attr != null;
-	   attr = (Attr) attr.getNextSibling()) {
-	if (attr.getNodeName().equals("name") ||
-	    attr.getNodeName().equals("use-attribute-sets"))
-	  continue;
+           attr != null;
+           attr = (Attr) attr.getNextSibling()) {
+        if (attr.getNodeName().equals("name") ||
+            attr.getNodeName().equals("use-attribute-sets"))
+          continue;
 
-	set.put(attr.getNodeName(), attr.getNodeValue());
+        set.put(attr.getNodeName(), attr.getNodeValue());
       }
 
       return set;
@@ -1216,7 +1216,7 @@ abstract class Generator {
       cb.clear();
 
       for (; i < len && ! XmlChar.isWhitespace(elements.charAt(i)); i++)
-	cb.append(elements.charAt(i));
+        cb.append(elements.charAt(i));
 
       _preserve.put(cb.toString(), "true");
 
@@ -1250,7 +1250,7 @@ abstract class Generator {
       cb.clear();
 
       for (; i < len && ! XmlChar.isWhitespace(elements.charAt(i)); i++) {
-	cb.append(elements.charAt(i));
+        cb.append(elements.charAt(i));
       }
 
       _strip.put(cb.toString(), "true");
@@ -1271,7 +1271,7 @@ abstract class Generator {
       cb.clear();
 
       for (; i < len && ! XmlChar.isWhitespace(elements.charAt(i)); i++) {
-	cb.append(elements.charAt(i));
+        cb.append(elements.charAt(i));
       }
 
       _preserve.put(cb.toString(), "true");
@@ -1287,7 +1287,7 @@ abstract class Generator {
     _vars.add(0);
     for (Node child = node.getFirstChild();
          child != null;
-	 child = child.getNextSibling()) {
+         child = child.getNextSibling()) {
       generateChild(child);
     }
     int count = _vars.pop();
@@ -1428,24 +1428,24 @@ abstract class Generator {
 
     case EXPRESSION:
       if (! _defaultCacheable)
-	_isCacheable = false;
+        _isCacheable = false;
       printExpression((Element) child);
       break;
 
     case SCRIPTLET:
       if (! _defaultCacheable)
-	_isCacheable = false;
+        _isCacheable = false;
       printScriptlet((Element) child);
       break;
 
     case DIRECTIVE_CACHE:
       generateCacheDepends(((Element) child).getAttribute("file"));
       if (! ((Element) child).getAttribute("no-cache").equals("")) {
-	_isCacheable = false;
-	_defaultCacheable = false;
+        _isCacheable = false;
+        _defaultCacheable = false;
       }
       else
-	_defaultCacheable = true;
+        _defaultCacheable = true;
       break;
 
     case WHILE:
@@ -1466,21 +1466,21 @@ abstract class Generator {
     default:
       if (child instanceof QElement &&
           XSLNS.equals(((QElement) child).getNamespaceURI()) &&
-	  _version != null && _version.equals("1.0"))
-	throw error(child, "unknown XSL element `" +
-		    child.getNodeName() + "'");
+          _version != null && _version.equals("1.0"))
+        throw error(child, "unknown XSL element `" +
+                    child.getNodeName() + "'");
       else {
-	Node subchild = child.getFirstChild();
-	boolean hasFallback = false;
-	for (; subchild != null; subchild = subchild.getNextSibling()) {
-	  String local = getXslLocal(subchild);
-	  if (local != null && local.equals("fallback")) {
-	    hasFallback = true;
-	    generateChildren(subchild);
-	  }
-	}
-	if (! hasFallback) // && child.getNamespace().equals(XSLNS))
-	  printError(L.l("expected xsl tag at `{0}'",
+        Node subchild = child.getFirstChild();
+        boolean hasFallback = false;
+        for (; subchild != null; subchild = subchild.getNextSibling()) {
+          String local = getXslLocal(subchild);
+          if (local != null && local.equals("fallback")) {
+            hasFallback = true;
+            generateChildren(subchild);
+          }
+        }
+        if (! hasFallback) // && child.getNamespace().equals(XSLNS))
+          printError(L.l("expected xsl tag at `{0}'",
                          child.getNodeName()));
       }
       break;
@@ -1512,13 +1512,13 @@ abstract class Generator {
   private boolean stripNode(Node node)
   {
     for (node = node.getParentNode();
-	 node != null;
-	 node = node.getParentNode()) {
+         node != null;
+         node = node.getParentNode()) {
       if (node instanceof Element) {
-	Element elt = (Element) node;
-	String space = elt.getAttribute("xml:space");
-	if (! space.equals(""))
-	  return ! space.equals("preserve");
+        Element elt = (Element) node;
+        String space = elt.getAttribute("xml:space");
+        if (! space.equals(""))
+          return ! space.equals("preserve");
       }
     }
 
@@ -1530,10 +1530,10 @@ abstract class Generator {
   {
     _text.clear();
     for (Node child = element.getFirstChild();
-	 child != null;
-	 child = child.getNextSibling()) {
+         child != null;
+         child = child.getNextSibling()) {
       if (! (child instanceof Text))
-	continue;
+        continue;
 
       String data = child.getNodeValue();
       int length = data.length();
@@ -1661,8 +1661,8 @@ abstract class Generator {
 
     pushCall();
     for (Node node = elt.getFirstAttribute();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       String argName = node.getNodeName();
       String argValue = node.getNodeValue();
 
@@ -1677,20 +1677,20 @@ abstract class Generator {
     throws Exception
   {
     for (Node node = element.getFirstChild(); node != null;
-	 node = node.getNextSibling()) {
+         node = node.getNextSibling()) {
       String localName = getXslLocal(node);
 
       if ("with-param".equals(localName)) {
-	String key = ((Element) node).getAttribute("name");
-	String expr = ((Element) node).getAttribute("select");
-	if (key.equals(""))
-	  throw error(L.l("{0} requires `{1}' attribute",
+        String key = ((Element) node).getAttribute("name");
+        String expr = ((Element) node).getAttribute("select");
+        if (key.equals(""))
+          throw error(L.l("{0} requires `{1}' attribute",
                           "xsl:with-param", "name"));
 
-	if (! expr.equals(""))
-	  printParam(key, parseExpr(expr));
-	else
-	  printParam(key, node);
+        if (! expr.equals(""))
+          printParam(key, parseExpr(expr));
+        else
+          printParam(key, node);
       }
     }
   }
@@ -1819,15 +1819,15 @@ abstract class Generator {
     ArrayList<Sort> sorts = new ArrayList<Sort>();
   sort:
     for (Node child = node.getFirstChild();
-	 child != null;
-	 child = child.getNextSibling()) {
+         child != null;
+         child = child.getNextSibling()) {
       if (child.getNodeType() == child.TEXT_NODE) {
-	String data = child.getNodeValue();
-	for (int i = 0; i < data.length(); i++) {
-	  if (! XmlChar.isWhitespace(data.charAt(i)))
-	    break sort;
-	}
-	continue;
+        String data = child.getNodeValue();
+        for (int i = 0; i < data.length(); i++) {
+          if (! XmlChar.isWhitespace(data.charAt(i)))
+            break sort;
+        }
+        continue;
       }
       else if (child.getNodeType() == child.COMMENT_NODE ||
                child.getNodeType() == child.PROCESSING_INSTRUCTION_NODE)
@@ -1835,12 +1835,12 @@ abstract class Generator {
 
       String name = getXslLocal(child);
       if (! "sort".equals(name))
-	break;
+        break;
 
       Element elt = (Element) child;
       String select = elt.getAttribute("select");
       if (select.equals(""))
-	throw error(L.l("{0} expects attribute `{1}'",
+        throw error(L.l("{0} expects attribute `{1}'",
                         "xsl:sort", "select"));
 
       Expr expr = parseExpr(select);
@@ -1862,20 +1862,20 @@ abstract class Generator {
       String dataType = elt.getAttribute("data-type");
       boolean isText = true;
       if (dataType.equals("number"))
-	isText = false;
+        isText = false;
 
       String lang = elt.getAttribute("lang");
       if (lang.equals("")) {
         sorts.add(Sort.create(expr, isAscending, isText));
       }
       else {
-	if (lang.startsWith("{") && lang.endsWith("}"))
-	  lang = lang.substring(1, lang.length() - 1);
-	else
-	  lang = "'" + lang + "'";
+        if (lang.startsWith("{") && lang.endsWith("}"))
+          lang = lang.substring(1, lang.length() - 1);
+        else
+          lang = "'" + lang + "'";
 
         sorts.add(Sort.create(expr, isAscending, parseExpr(lang)));
-	/*
+        /*
         int p = lang.indexOf('-');
         Locale locale = null;
 
@@ -1901,7 +1901,7 @@ abstract class Generator {
         }
 
         sorts.add(Sort.create(expr, isAscending, lang));
-	*/
+        */
       }
     }
 
@@ -1936,27 +1936,27 @@ abstract class Generator {
   {
     boolean first = true;
     for (Node child = element.getFirstChild();
-	 child != null;
-	 child = child.getNextSibling()) {
+         child != null;
+         child = child.getNextSibling()) {
       if (! (child instanceof Element))
-	continue;
+        continue;
       
       String name = getXslLocal(child);
 
       if ("when".equals(name)) {
-	Element elt = (Element) child;
-	String test = elt.getAttribute("test");
-	if (test.equals(""))
-	  throw error(L.l("{0} expects `{1}' attribute", "xsl:when", "test"));
+        Element elt = (Element) child;
+        String test = elt.getAttribute("test");
+        if (test.equals(""))
+          throw error(L.l("{0} expects `{1}' attribute", "xsl:when", "test"));
 
-	printChoose(elt, parseExpr(test), first);
-	first = false;
+        printChoose(elt, parseExpr(test), first);
+        first = false;
       }
       else if ("otherwise".equals(name)) {
-	printOtherwise((Element) child, first);
+        printOtherwise((Element) child, first);
       }
       else
-	throw error(L.l("xsl:choose expects `xsl:when' or `xsl:otherwise' at `{0}'",
+        throw error(L.l("xsl:choose expects `xsl:when' or `xsl:otherwise' at `{0}'",
                         child.getNodeName()));
     }
   }
@@ -2010,9 +2010,9 @@ abstract class Generator {
 
     int size = 0;
     for (int i = 0; i < size_name.length(); i++) {
-	char ch = size_name.charAt(i);
-	if (ch >= '0' && ch <= '9')
-	    size = 10 * size + ch - '0';
+        char ch = size_name.charAt(i);
+        if (ch >= '0' && ch <= '9')
+            size = 10 * size + ch - '0';
     }
 
     boolean isAlphabetic = true;
@@ -2056,7 +2056,7 @@ abstract class Generator {
   void printNumber(String level,
                    AbstractPattern countPattern,
                    AbstractPattern fromPattern,
-		   XslNumberFormat format)
+                   XslNumberFormat format)
     throws Exception
   {
     
@@ -2070,7 +2070,7 @@ abstract class Generator {
   {
     if (node instanceof QAbstractNode) {
       setLocation(((QAbstractNode) node).getBaseURI(),
-		  ((QAbstractNode) node).getFilename(),
+                  ((QAbstractNode) node).getFilename(),
                   ((QAbstractNode) node).getLine());
     }
   }
@@ -2106,8 +2106,8 @@ abstract class Generator {
     throws Exception;
 
   abstract protected void printTemplate(Element node,
-					String name, String pattern,
-					String mode, double priority)
+                                        String name, String pattern,
+                                        String mode, double priority)
     throws Exception;
 
 
@@ -2119,7 +2119,7 @@ abstract class Generator {
   {
     if (node instanceof QAbstractNode) {
       printLocation(((QAbstractNode) node).getBaseURI(),
-		    ((QAbstractNode) node).getFilename(),
+                    ((QAbstractNode) node).getFilename(),
                     ((QAbstractNode) node).getLine());
     }
   }
@@ -2182,7 +2182,7 @@ abstract class Generator {
     throws Exception;
 
   abstract protected void printForEach(Element element, String select,
-				       Sort []sort)
+                                       Sort []sort)
     throws Exception;
 
   protected void printIf(Element element, Expr expr)
@@ -2324,8 +2324,8 @@ abstract class Generator {
                 function + " mode:" + mode + " priority:" + priority);
 
     Template template = new Template(pattern, mode,
-				     _minImportance, _importance,
-				     priority, _templateCount++,
+                                     _minImportance, _importance,
+                                     priority, _templateCount++,
                                      function, funId);
 
     addTemplate(pattern.getNodeName(), template);
@@ -2346,8 +2346,8 @@ abstract class Generator {
       Template item = templateList.get(i);
 
       if (template.compareTo(item) <= 0) {
-	templateList.add(i + 1, template);
-	return;
+        templateList.add(i + 1, template);
+        return;
       }
     }
 
@@ -2450,8 +2450,8 @@ abstract class Generator {
     
     if (filename != null)
       return new XslParseException(filename + ":" +
-				   line + ": " +
-				   message);
+                                   line + ": " +
+                                   message);
     else
       return error(message);
   }
@@ -2475,8 +2475,8 @@ abstract class Generator {
 
     if (ns == null || ns.equals("")) {
       return (elt.getNodeName().startsWith("xsl:") ?
-	      elt.getNodeName().substring(4) :
-	      null);
+              elt.getNodeName().substring(4) :
+              null);
     }
     else if (ns.startsWith(XSLNS) &&
              (ns.length() == XSLNS.length() || ns.charAt(XSLNS.length()) == '/'))
@@ -2497,8 +2497,8 @@ abstract class Generator {
 
     if (ns == null || ns.equals("")) {
       return (elt.getNodeName().startsWith("xtp:") ?
-	      elt.getNodeName().substring(4) :
-	      null);
+              elt.getNodeName().substring(4) :
+              null);
     }
     else if (ns.startsWith(XTPNS))
       return elt.getLocalName();
@@ -2537,9 +2537,9 @@ abstract class Generator {
       String name = attr.getNodeName();
 
       if (name.startsWith("xmlns:"))
-	name = name.substring(6);
+        name = name.substring(6);
       else if (name.equals("xmlns"))
-	name = "";
+        name = "";
       else
         continue;
 
@@ -2550,7 +2550,7 @@ abstract class Generator {
         continue;
 
       if (url.startsWith("quote:"))
-	url = url.substring(6);
+        url = url.substring(6);
 
       _namespace = new NamespaceContext(_namespace, name, url);
     }

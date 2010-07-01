@@ -341,7 +341,7 @@ public class XPath {
    * @return the compiled expression
    */
   public static Expr parseExpr(String query, NamespaceContext namespace,
-			       AbstractPattern nodeList)
+                               AbstractPattern nodeList)
     throws XPathParseException
   {
     XPathParser parser = new XPathParser(query, namespace);

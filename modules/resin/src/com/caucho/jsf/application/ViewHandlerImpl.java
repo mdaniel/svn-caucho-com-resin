@@ -59,31 +59,31 @@ public class ViewHandlerImpl extends ViewHandler
   }
 
   public UIViewRoot createView(FacesContext context,
-			       String viewId)
+                               String viewId)
   {
     return new UIViewRoot();
   }
 
   public String getActionURL(FacesContext context,
-			     String viewId)
+                             String viewId)
   {
     throw new UnsupportedOperationException();
   }
 
   public String getResourceURL(FacesContext context,
-			       String path)
+                               String path)
   {
     throw new UnsupportedOperationException();
   }
 
   public void renderView(FacesContext context,
-			 UIViewRoot viewToRender)
+                         UIViewRoot viewToRender)
     throws IOException, FacesException
   {
   }
 
   public UIViewRoot restoreView(FacesContext context,
-				String viewId)
+                                String viewId)
     throws FacesException
   {
     return null;

@@ -246,46 +246,46 @@ public class BodyContentImpl extends AbstractBodyContent {
       int offset = 0;
 
       if (! hasData) {
-	for (offset = 0; offset < end; offset++) {
-	  if (! Character.isWhitespace(cbuf[offset])) {
-	    hasData = true;
-	    break;
-	  }
-	}
+        for (offset = 0; offset < end; offset++) {
+          if (! Character.isWhitespace(cbuf[offset])) {
+            hasData = true;
+            break;
+          }
+        }
       }
 
       if (head.getNext() == null) {
-	for (; offset < end; end--) {
-	  if (! Character.isWhitespace(cbuf[end - 1]))
-	    break;
-	}
+        for (; offset < end; end--) {
+          if (! Character.isWhitespace(cbuf[end - 1]))
+            break;
+        }
 
-	if (buf != null) {
-	  System.arraycopy(cbuf, offset, buf, totalLength, end - offset);
-	  totalLength += end - offset;
-	  
-	  return new String(buf, 0, totalLength);
-	}
-	else if (offset == end)
-	  return "";
-	else
-	  return new String(cbuf, offset, end - offset);
-	
+        if (buf != null) {
+          System.arraycopy(cbuf, offset, buf, totalLength, end - offset);
+          totalLength += end - offset;
+
+          return new String(buf, 0, totalLength);
+        }
+        else if (offset == end)
+          return "";
+        else
+          return new String(cbuf, offset, end - offset);
+
       }
       else if (buf == null) {
-	int length = 0;
+        int length = 0;
 
-	for (TempCharBuffer ptr = head; ptr != null; ptr = ptr.getNext())
-	  length += ptr.getLength();
+        for (TempCharBuffer ptr = head; ptr != null; ptr = ptr.getNext())
+          length += ptr.getLength();
 
-	buf = new char[length];
+        buf = new char[length];
 
-	System.arraycopy(cbuf, offset, buf, 0, end - offset);
-	totalLength += end - offset;
+        System.arraycopy(cbuf, offset, buf, 0, end - offset);
+        totalLength += end - offset;
       }
       else {
-	System.arraycopy(cbuf, offset, buf, totalLength, end - offset);
-	totalLength += end - offset;
+        System.arraycopy(cbuf, offset, buf, totalLength, end - offset);
+        totalLength += end - offset;
       }
     }
 
@@ -302,19 +302,19 @@ public class BodyContentImpl extends AbstractBodyContent {
       boolean isFirst = true;
 
       for (; head != null; head = head.getNext()) {
-	int offset = 0;
-	int length = head.getLength();
-	char []cbuf = head.getBuffer();
+        int offset = 0;
+        int length = head.getLength();
+        char []cbuf = head.getBuffer();
 
-	if (isFirst && length > 0 && cbuf[0] == 0xfeff) {
-	  // skip byte-order-mark
-	  offset = 1;
-	  length--;
-	}
+        if (isFirst && length > 0 && cbuf[0] == 0xfeff) {
+          // skip byte-order-mark
+          offset = 1;
+          length--;
+        }
 
-	out.write(cbuf, offset, length);
+        out.write(cbuf, offset, length);
 
-	isFirst = false;
+        isFirst = false;
       }
     } catch (IOException e) {
     }

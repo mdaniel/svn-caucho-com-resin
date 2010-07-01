@@ -85,9 +85,9 @@ public class ServletFacesContextImpl extends FacesContext
   private HashMap<Object, Object> _attributes;
 
   protected ServletFacesContextImpl(FacesContextFactoryImpl factory,
-				    ServletContext webApp,
-				    HttpServletRequest request,
-				    HttpServletResponse response)
+                                    ServletContext webApp,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response)
   {
     _factory = factory;
 
@@ -113,7 +113,7 @@ public class ServletFacesContextImpl extends FacesContext
     
     if (_externalContext == null) {
       _externalContext
-	= new ServletExternalContext(_webApp, _request, _response);
+        = new ServletExternalContext(_webApp, _request, _response);
     }
 
     return _externalContext;
@@ -186,7 +186,7 @@ public class ServletFacesContextImpl extends FacesContext
     /*
     if (_uiViewRoot == null) {
       _uiViewRoot = getApplication().getViewHandler().createView(this,
-								 null);
+                                                                 null);
     }
     
     return _uiViewRoot;
@@ -256,7 +256,7 @@ public class ServletFacesContextImpl extends FacesContext
   }
 
   public void addMessage(String clientId,
-			 FacesMessage message)
+                         FacesMessage message)
   {
     if (_isClosed)
       throw new IllegalStateException("FacesContext is closed");

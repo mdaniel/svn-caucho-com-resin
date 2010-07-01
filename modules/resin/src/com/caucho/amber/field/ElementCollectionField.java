@@ -77,7 +77,7 @@ public class ElementCollectionField extends AssociationField {
   private ElementType _elementType;
 
   public ElementCollectionField(EntityType sourceType,
-				String name)
+                                String name)
     throws ConfigException
   {
     super(sourceType, name, null);
@@ -185,7 +185,7 @@ public class ElementCollectionField extends AssociationField {
    */
   @Override
   public void generateStatementSet(JavaWriter out, String pstmt,
-				   String obj, String index)
+                                   String obj, String index)
     throws IOException
   {
   }
@@ -221,7 +221,7 @@ public class ElementCollectionField extends AssociationField {
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
     return new ElementCollectionExpr(parser, parent, _sourceLink,
-				     _elementType);
+                                     _elementType);
   }
 
   /**
@@ -244,7 +244,7 @@ public class ElementCollectionField extends AssociationField {
     out.println(generateSet(dst, value) + ";");
 
     out.println(generateAccessor(dst, var)
-		+ " = " + generateAccessor(src, var) + ";");
+                + " = " + generateAccessor(src, var) + ";");
 
     if (! dst.equals("super")) { // || isLazy())) {
       String oThis = "((" + getRelatedType().getInstanceClassName() + ") " + dst + ")";
@@ -967,13 +967,13 @@ public class ElementCollectionField extends AssociationField {
     
     if (! getSourceType().isFieldAccess()) {
       type = JTypeWrapper.create(getGetterMethod().getGenericReturnType(),
-				 loader);
+                                 loader);
     }
     else {
       Field field = EntityType.getField(getBeanClass(), getName());
       
       type = JTypeWrapper.create(field.getGenericType(),
-				 loader);
+                                 loader);
     }
 
     out.println();

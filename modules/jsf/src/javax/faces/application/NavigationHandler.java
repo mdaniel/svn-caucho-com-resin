@@ -33,6 +33,6 @@ import javax.faces.context.*;
 public abstract class NavigationHandler
 {
   public abstract void handleNavigation(FacesContext context,
-					String fromAction,
-					String outcome);
+                                        String fromAction,
+                                        String outcome);
 }

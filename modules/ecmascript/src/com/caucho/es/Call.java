@@ -236,7 +236,7 @@ public final class Call extends ESBase {
   {
     for (int i = scopeLength - 1; i > 0; i--) {
       if (scope[i].getProperty(id) != esEmpty)
-	return scope[i];
+        return scope[i];
     }
 
     return global;
@@ -247,7 +247,7 @@ public final class Call extends ESBase {
     for (int i = scopeLength - 1; i >= 0; i--) {
       ESBase value;
       if ((value = scope[i].getProperty(id)) != esEmpty)
-	return value.typeof();
+        return value.typeof();
     }
 
     return esEmpty.typeof();
@@ -378,7 +378,7 @@ public final class Call extends ESBase {
     for (int i = scopeLength - 1; i >= 0; i--) {
       ESBase value;
       if ((value = scope[i].getProperty(id)) != esEmpty) {
-	return value;
+        return value;
       }
     }
 
@@ -411,7 +411,7 @@ public final class Call extends ESBase {
     for (int i = scopeLength - 1; i >= 0; i--) {
       ESBase value;
       if ((value = scope[i].getProperty(id)) != esEmpty)
-	return value;
+        return value;
     }
 
     return esEmpty;
@@ -424,8 +424,8 @@ public final class Call extends ESBase {
 
     for (int i = scopeLength - 1; i > 0; i--) {
       if (scope[i].getProperty(id) != esEmpty) {
-	scope[i].setProperty(id, value);
-	return value;
+        scope[i].setProperty(id, value);
+        return value;
       }
     }
 
@@ -438,7 +438,7 @@ public final class Call extends ESBase {
   {
     for (int i = scopeLength - 1; i > 0; i--) {
       if (scope[i].getProperty(id) != esEmpty)
-	return scope[i].delete(id);
+        return scope[i].delete(id);
     }
 
     return global.delete(id);
@@ -452,8 +452,8 @@ public final class Call extends ESBase {
       ESBase value; 
 
       if ((value = scope[j].getProperty(id)) != esEmpty) {
-	stack[i] = global;
-	return value;
+        stack[i] = global;
+        return value;
       }
     }
 
@@ -479,8 +479,8 @@ public final class Call extends ESBase {
 
       if ((value = scope[j].getProperty(id)) != esEmpty) {
         callee = value;
-	stack[i] = scope[j];
-	return value.call(this, 0);
+        stack[i] = scope[j];
+        return value.call(this, 0);
       }
     }
 
@@ -498,9 +498,9 @@ public final class Call extends ESBase {
 
       if ((value = scope[j].getProperty(id)) != esEmpty) {
         callee = value;
-	stack[i] = scope[j];
-	stack[i + 1] = a;
-	return value.call(this, 1);
+        stack[i] = scope[j];
+        stack[i + 1] = a;
+        return value.call(this, 1);
       }
     }
 
@@ -519,10 +519,10 @@ public final class Call extends ESBase {
 
       if ((value = scope[j].getProperty(id)) != esEmpty) {
         callee = value;
-	stack[i] = scope[j];
-	stack[i + 1] = a;
-	stack[i + 2] = b;
-	return value.call(this, 2);
+        stack[i] = scope[j];
+        stack[i + 1] = a;
+        stack[i + 2] = b;
+        return value.call(this, 2);
       }
     }
 
@@ -541,11 +541,11 @@ public final class Call extends ESBase {
       ESBase value;
       if ((value = scope[j].getProperty(id)) != esEmpty) {
         callee = value;
-	stack[i] = scope[j];
-	stack[i + 1] = a;
-	stack[i + 2] = b;
-	stack[i + 3] = c;
-	return value.call(this, length);
+        stack[i] = scope[j];
+        stack[i + 1] = a;
+        stack[i + 2] = b;
+        stack[i + 3] = c;
+        return value.call(this, length);
       }
     }
 
@@ -660,8 +660,8 @@ public final class Call extends ESBase {
 
       if ((value = scope[j].getProperty(id)) != esEmpty) {
         callee = value;
-	stack[i] = global;
-	return value.construct(this, 0);
+        stack[i] = global;
+        return value.construct(this, 0);
       }
     }
 
@@ -679,9 +679,9 @@ public final class Call extends ESBase {
 
       if ((value = scope[j].getProperty(id)) != esEmpty) {
         callee = value;
-	stack[i] = global;
-	stack[i + 1] = a;
-	return value.construct(this, 1);
+        stack[i] = global;
+        stack[i + 1] = a;
+        return value.construct(this, 1);
       }
     }
 
@@ -700,10 +700,10 @@ public final class Call extends ESBase {
 
       if ((value = scope[j].getProperty(id)) != esEmpty) {
         callee = value;
-	stack[i] = global;
-	stack[i + 1] = a;
-	stack[i + 2] = b;
-	return value.construct(this, 2);
+        stack[i] = global;
+        stack[i + 1] = a;
+        stack[i + 2] = b;
+        return value.construct(this, 2);
       }
     }
 
@@ -711,7 +711,7 @@ public final class Call extends ESBase {
   }
 
   public ESBase newScope(ESString id, int i, ESBase a, ESBase b, ESBase c,
-			  int length)
+                          int length)
     throws Throwable
   {
     top = i + 1; 
@@ -723,11 +723,11 @@ public final class Call extends ESBase {
 
       if ((value = scope[j].getProperty(id)) != esEmpty) {
         callee = value;
-	stack[i] = global;
-	stack[i + 1] = a;
-	stack[i + 2] = b;
-	stack[i + 3] = c;
-	return value.construct(this, length);
+        stack[i] = global;
+        stack[i + 1] = a;
+        stack[i + 2] = b;
+        stack[i + 3] = c;
+        return value.construct(this, length);
       }
     }
 
@@ -889,7 +889,7 @@ public final class Call extends ESBase {
       String eString = eClass.getName();
 
       if (testString.equals(eString) || eString.endsWith(dotted))
-	return true;
+        return true;
     }
 
     return false;

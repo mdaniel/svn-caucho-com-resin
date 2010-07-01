@@ -74,8 +74,8 @@ public class StringLiteral extends Expr {
    */
   @Override
   public MethodInfo getMethodInfo(ELContext env,
-				  Class<?> returnType,
-				  Class<?> []argTypes)
+                                  Class<?> returnType,
+                                  Class<?> []argTypes)
     throws ELException
   {
     return new MethodInfo(_value, returnType, argTypes);
@@ -132,8 +132,8 @@ public class StringLiteral extends Expr {
    */
   @Override
   public boolean print(WriteStream out,
-		       ELContext env,
-		       boolean isEscape)
+                       ELContext env,
+                       boolean isEscape)
     throws IOException, ELException
   {
     if (isEscape)

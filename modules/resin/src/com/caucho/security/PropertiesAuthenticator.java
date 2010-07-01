@@ -154,25 +154,25 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
     
     synchronized (this) {
       try {
-	_lastCheck = Alarm.getCurrentTime();
-	_depend = new Depend(_path);
+        _lastCheck = Alarm.getCurrentTime();
+        _depend = new Depend(_path);
 
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " loading users from " + _path);
+        if (log.isLoggable(Level.FINE))
+          log.fine(this + " loading users from " + _path);
       
-	_userMap = new Hashtable<String,PasswordUser>();
+        _userMap = new Hashtable<String,PasswordUser>();
 
-	Properties props = new Properties();
-	InputStream is = _path.openRead();
-	try {
-	  props.load(is);
-	} finally {
-	  is.close();
-	}
+        Properties props = new Properties();
+        InputStream is = _path.openRead();
+        try {
+          props.load(is);
+        } finally {
+          is.close();
+        }
 
-	setValue(props);
+        setValue(props);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
   }
@@ -188,8 +188,8 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
 
     if (values.length < 1) {
       return new PasswordUser(principal, new char[0],
-			      true, false,
-			      new String[0]);
+                              true, false,
+                              new String[0]);
     }
 
     String password = values[0].trim();
@@ -199,11 +199,11 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
       
     for (int i = 1; i < values.length; i++) {
       String item = values[i].trim();
-	
+
       if (item.equals("disabled"))
-	isDisabled = true;
+        isDisabled = true;
       else if (! item.equals(""))
-	roles.add(item);
+        roles.add(item);
     }
 
     if (roles.size() == 0)
@@ -213,8 +213,8 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
     roles.toArray(roleArray);
 
     return new PasswordUser(principal, password.toCharArray(),
-			    isDisabled, isAnonymous,
-			    roleArray);
+                            isDisabled, isAnonymous,
+                            roleArray);
   }
 
   private boolean isModified()
@@ -246,7 +246,7 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
 
     if (getPasswordDigest() != null) {
       if (! hasValue)
-	sb.append(",");
+        sb.append(",");
       
       sb.append(getPasswordDigest());
     }

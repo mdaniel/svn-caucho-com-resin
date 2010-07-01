@@ -80,18 +80,18 @@ public class ImplicitFieldExpr extends Expr {
 
     case ImplicitObjectExpr.SESSION_SCOPE:
       {
-	HttpSession session = page.getSession();
+        HttpSession session = page.getSession();
 
-	if (session != null) {
-	  return session.getAttribute(fieldString);
-	}
-	else
-	  return null;
+        if (session != null) {
+          return session.getAttribute(fieldString);
+        }
+        else
+          return null;
       }
 
     case ImplicitObjectExpr.REQUEST_SCOPE:
       {
-	return page.getRequest().getAttribute(fieldString);
+        return page.getRequest().getAttribute(fieldString);
       }
 
     case ImplicitObjectExpr.PAGE_SCOPE:

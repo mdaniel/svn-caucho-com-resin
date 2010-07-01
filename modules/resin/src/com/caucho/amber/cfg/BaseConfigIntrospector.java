@@ -371,7 +371,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     for (int i = 1; i < n; i++) {
       getInternalCallbackConfig(i, jClass, method, methodName,
-				_annotationCfg);
+                                _annotationCfg);
 
       if (! _annotationCfg.isNull()) {
         validateCallback(ListenerType.CALLBACK_CLASS[i].getName(),
@@ -615,19 +615,19 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       Completion completion = _linkCompletions.remove(0);
 
       try {
-	completion.complete();
+        completion.complete();
       } catch (Exception e) {
-	if (e instanceof ConfigException) {
-	  log.warning(e.getMessage());
-	  log.log(Level.FINEST, e.toString(), e);
-	}
-	else
-	  log.log(Level.WARNING, e.toString(), e);
-	  
-	completion.getRelatedType().setConfigException(e);
+        if (e instanceof ConfigException) {
+          log.warning(e.getMessage());
+          log.log(Level.FINEST, e.toString(), e);
+        }
+        else
+          log.log(Level.WARNING, e.toString(), e);
 
-	if (exn == null)
-	  exn = ConfigException.create(e);
+        completion.getRelatedType().setConfigException(e);
+
+        if (exn == null)
+          exn = ConfigException.create(e);
       }
     }
 
@@ -647,19 +647,19 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       Completion completion = _depCompletions.remove(0);
 
       try {
-	completion.complete();
+        completion.complete();
       } catch (Exception e) {
-	if (e instanceof ConfigException) {
-	  log.warning(e.getMessage());
-	  log.log(Level.FINEST, e.toString(), e);
-	}
-	else
-	  log.log(Level.WARNING, e.toString(), e);
+        if (e instanceof ConfigException) {
+          log.warning(e.getMessage());
+          log.log(Level.FINEST, e.toString(), e);
+        }
+        else
+          log.log(Level.WARNING, e.toString(), e);
 
-	completion.getRelatedType().setConfigException(e);
+        completion.getRelatedType().setConfigException(e);
 
-	if (exn == null)
-	  exn = ConfigException.create(e);
+        if (exn == null)
+          exn = ConfigException.create(e);
       }
     }
 
@@ -741,8 +741,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       if (idField != null) {
         // @EmbeddedId was used.
         com.caucho.amber.field.EmbeddedId id
-	  = new com.caucho.amber.field.EmbeddedId(entityType, (EmbeddedIdField) idField);
-	
+          = new com.caucho.amber.field.EmbeddedId(entityType, (EmbeddedIdField) idField);
+
         entityType.setId(id);
       }
     }
@@ -861,9 +861,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     for (Field field : type.getDeclaredFields()) {
       for (Class annType : _annTypes) {
-	if (field.getAnnotation(annType) != null) {
-	  return true;
-	}
+        if (field.getAnnotation(annType) != null) {
+          return true;
+        }
       }
     }
 
@@ -897,11 +897,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     AmberColumn keyColumn = null;
     keyColumn = createColumn(entityType,
-			     field,
-			     fieldName,
-			     column,
-			     amberType,
-			     columnConfig);
+                             field,
+                             fieldName,
+                             column,
+                             amberType,
+                             columnConfig);
 
 
     if (entityType.getTable() != null) {
@@ -921,28 +921,28 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       try {
         metaData = persistenceUnit.getMetaData();
       } catch (ConfigException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
         throw new ConfigException(L.l("Unable to get meta data for database. Meta data is needed for generated values."), e);
       }
       */
 
       if (GenerationType.IDENTITY.equals(gen.strategy())) {
-	/* XXX: validation later
+        /* XXX: validation later
         if (! metaData.supportsIdentity())
           throw new ConfigException(L.l("'{0}' does not support identity.",
                                         metaData.getDatabaseName()));
-	*/
+        */
 
         keyColumn.setGeneratorType("identity");
         idField.setGenerator("identity");
       }
       else if (GenerationType.SEQUENCE.equals(gen.strategy())) {
-	/* XXX: validation later
+        /* XXX: validation later
         if (! metaData.supportsSequences())
           throw new ConfigException(L.l("'{0}' does not support sequence.",
                                         metaData.getDatabaseName()));
-	*/
+        */
 
         addSequenceIdGenerator(persistenceUnit, idField, gen);
       }
@@ -953,7 +953,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         keyColumn.setGeneratorType("auto");
         idField.setGenerator("auto");
 
-	/* XXX: validation later
+        /* XXX: validation later
         if (metaData.supportsIdentity()) {
           keyColumn.setGeneratorType("identity");
           idField.setGenerator("identity");
@@ -964,7 +964,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         else {
           addTableIdGenerator(persistenceUnit, idField, id);
         }
-	*/
+        */
       }
     }
 
@@ -1053,7 +1053,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       ForeignColumn linkColumn;
 
       PrimaryKeyJoinColumn joinAnn
-	= getJoinColumn(joinColumnsAnn, column.getName());
+        = getJoinColumn(joinColumnsAnn, column.getName());
       String name;
 
       if (joinAnn == null)
@@ -1188,8 +1188,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         propName = methodName.substring(3);
       }
       else if (methodName.startsWith("is")
-	       && (method.getReturnType().equals(boolean.class)
-		   || method.getReturnType().equals(Boolean.class))) {
+               && (method.getReturnType().equals(boolean.class)
+                   || method.getReturnType().equals(Boolean.class))) {
         propName = methodName.substring(2);
       }
       else {
@@ -1209,8 +1209,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         
         try {
           setter = getMethod(type,
-			     "set" + propName,
-			     new Class[] { method.getReturnType() });
+                             "set" + propName,
+                             new Class[] { method.getReturnType() });
         } catch (Exception e) {
           log.log(Level.FINEST, e.toString(), e);
         }
@@ -1262,16 +1262,16 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     loop:
     for (Method method : cl.getDeclaredMethods()) {
       if (! method.getName().equals(name))
-	continue;
+        continue;
 
       Class []types = method.getParameterTypes();
 
       if (types.length != param.length)
-	continue;
+        continue;
       
       for (int i = 0; i < types.length; i++) {
-	if (! param[i].equals(types[i]))
-	  continue loop;
+        if (! param[i].equals(types[i]))
+          continue loop;
       }
 
       return method;
@@ -1376,7 +1376,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         oneToOneConfig = attributesConfig.getOneToOne(fieldName);
 
         oneToManyConfig = attributesConfig.getOneToMany(fieldName);
-	
+
         elementCollectionConfig = null; // attributesConfig.getOneToMany(fieldName);
 
         manyToOneConfig = attributesConfig.getManyToOne(fieldName);
@@ -1388,7 +1388,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     if (idConfig != null
-	|| field.isAnnotationPresent(javax.persistence.Id.class)) {
+        || field.isAnnotationPresent(javax.persistence.Id.class)) {
       validateAnnotations(field, fieldName, "@Id", _idAnnotations);
 
       if (! _idTypes.contains(fieldType.getName())) {
@@ -1397,7 +1397,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       }
     }
     else if (basicConfig != null
-	     || field.isAnnotationPresent(javax.persistence.Basic.class)) {
+             || field.isAnnotationPresent(javax.persistence.Basic.class)) {
       validateAnnotations(field, fieldName, "@Basic", _basicAnnotations);
 
       BasicConfig basic
@@ -1406,7 +1406,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       basic.complete();
     }
     else if ((versionConfig != null)
-	     || field.isAnnotationPresent(javax.persistence.Version.class)) {
+             || field.isAnnotationPresent(javax.persistence.Version.class)) {
       validateAnnotations(field, fieldName, "@Version", _versionAnnotations);
 
       addVersion((EntityType) sourceType, field,
@@ -1451,13 +1451,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       entityType.setHasDependent(true);
 
       _linkCompletions.add(new ManyToOneConfig(this,
-					       entityType,
-					       field,
-					       fieldName,
-					       fieldType));
+                                               entityType,
+                                               field,
+                                               fieldName,
+                                               fieldType));
     }
     else if (oneToManyConfig != null
-	     || field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
+             || field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
       validateAnnotations(field, fieldName, "@OneToMany", _oneToManyAnnotations);
 
       if (field.isAnnotationPresent(javax.persistence.MapKey.class)) {
@@ -1476,13 +1476,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       EntityType entityType = (EntityType) sourceType;
 
       _depCompletions.add(new OneToManyConfig(this,
-					      entityType,
-					      field,
-					      fieldName,
-					      fieldType));
+                                              entityType,
+                                              field,
+                                              fieldName,
+                                              fieldType));
     }
     else if ((oneToOneConfig != null)
-	     || field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
+             || field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
       validateAnnotations(field, fieldName, "@OneToOne", _oneToOneAnnotations);
 
       EntityType entityType = (EntityType) sourceType;
@@ -1498,7 +1498,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       }
     }
     else if ((manyToManyConfig != null)
-	     || field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
+             || field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
 
       if (field.isAnnotationPresent(javax.persistence.MapKey.class)) {
         if (! fieldType.getName().equals("java.util.Map")) {
@@ -1509,7 +1509,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       }
 
       ManyToManyConfig manyToMany
-	= new ManyToManyConfig(this, (EntityType) sourceType, field, fieldName, fieldType);
+        = new ManyToManyConfig(this, (EntityType) sourceType, field, fieldName, fieldType);
 
       if (manyToMany.isOwningSide())
         _linkCompletions.add(manyToMany);
@@ -1517,7 +1517,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         _depCompletions.add(manyToMany);
     }
     else if (elementCollectionConfig != null
-	     || field.isAnnotationPresent(javax.persistence.ElementCollection.class)) {
+             || field.isAnnotationPresent(javax.persistence.ElementCollection.class)) {
       validateAnnotations(field, fieldName, "@ElementCollection", _elementCollectionAnnotations);
       if (! _elementCollectionTypes.contains(fieldType.getName())) {
         throw error(field, L.l("'{0}' is an illegal @ElementCollection type for {1}.  @ElementCollection must be a java.util.Collection, java.util.List or java.util.Map",
@@ -1528,10 +1528,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       EntityType entityType = (EntityType) sourceType;
 
       ElementCollectionConfig comp
-	= new ElementCollectionConfig(entityType,
-				      field,
-				      fieldName,
-				      fieldType);
+        = new ElementCollectionConfig(entityType,
+                                      field,
+                                      fieldName,
+                                      fieldType);
 
       _depCompletions.add(comp);
     }
@@ -1684,7 +1684,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   public static JoinColumn getJoinColumn(JoinColumns joinColumns,
-					 String keyName)
+                                         String keyName)
   {
     if (joinColumns == null)
       return null;
@@ -1722,7 +1722,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   public static PrimaryKeyJoinColumn getJoinColumn(PrimaryKeyJoinColumn []columnsAnn,
-						   String keyName)
+                                                   String keyName)
   {
     if (columnsAnn == null || columnsAnn.length == 0)
       return null;
@@ -1767,7 +1767,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       throws ConfigException
     {
       getInternalAttributeOverrideConfig(_entityType.getBeanClass(),
-					 _annotationCfg);
+                                         _annotationCfg);
       AttributeOverride attributeOverrideAnn = (AttributeOverride) _annotationCfg.getAnnotation();
       AttributeOverrideConfig attributeOverrideConfig = _annotationCfg.getAttributeOverrideConfig();
 
@@ -1836,15 +1836,15 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                 notNull = ! columnAnn.nullable();
                 unique = columnAnn.unique();
 
-		subField.getColumn().setName(columnName);
-		subField.getColumn().setNotNull(notNull);
-		subField.getColumn().setUnique(unique);
+                subField.getColumn().setName(columnName);
+                subField.getColumn().setNotNull(notNull);
+                subField.getColumn().setUnique(unique);
               }
             }
           }
         }
 
-	/*
+        /*
         AmberType amberType = _persistenceUnit.createType(fields.get(i).getJavaType().getName());
 
         AmberColumn column = sourceTable.createColumn(columnName, amberType);
@@ -1854,7 +1854,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
         embeddedColumns.put(columnName, column);
         fieldNameByColumn.put(columnName, embeddedFieldName);
-	*/
+        */
       }
 
       /*
@@ -1897,7 +1897,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalEmbeddableConfig(Class type,
-				   AnnotationConfig annotationCfg)
+                                   AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, Embeddable.class);
 
@@ -1919,7 +1919,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalMappedSuperclassConfig(Class type,
-					 AnnotationConfig annotationCfg)
+                                         AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, MappedSuperclass.class);
 
@@ -1930,7 +1930,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalEntityListenersConfig(Class type,
-					AnnotationConfig annotationCfg)
+                                        AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, EntityListeners.class);
 
@@ -1943,7 +1943,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalExcludeDefaultListenersConfig(Class type,
-						AnnotationConfig annotationCfg)
+                                                AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, ExcludeDefaultListeners.class);
 
@@ -1958,7 +1958,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalExcludeSuperclassListenersConfig(Class type,
-						   AnnotationConfig annotationCfg)
+                                                   AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, ExcludeSuperclassListeners.class);
 
@@ -1973,7 +1973,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalInheritanceConfig(Class type,
-				    AnnotationConfig annotationCfg)
+                                    AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, Inheritance.class);
 
@@ -1996,7 +1996,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalNamedNativeQueryConfig(Class type,
-					 AnnotationConfig annotationCfg)
+                                         AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, NamedNativeQuery.class);
 
@@ -2008,7 +2008,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalSqlResultSetMappingConfig(Class type,
-					    AnnotationConfig annotationCfg)
+                                            AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, SqlResultSetMapping.class);
 
@@ -2020,7 +2020,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalTableConfig(Class type,
-			      AnnotationConfig annotationCfg)
+                              AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, javax.persistence.Table.class);
 
@@ -2032,7 +2032,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalSecondaryTableConfig(Class type,
-				       AnnotationConfig annotationCfg)
+                                       AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, SecondaryTable.class);
 
@@ -2044,7 +2044,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalIdClassConfig(Class type,
-				AnnotationConfig annotationCfg)
+                                AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, IdClass.class);
 
@@ -2058,7 +2058,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalPrimaryKeyJoinColumnConfig(Class type,
-					     AnnotationConfig annotationCfg)
+                                             AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, PrimaryKeyJoinColumn.class);
 
@@ -2070,7 +2070,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void getInternalDiscriminatorColumnConfig(Class type,
-					    AnnotationConfig annotationCfg)
+                                            AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, DiscriminatorColumn.class);
 
@@ -2084,7 +2084,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalOneToOneConfig(Class type,
                                  AccessibleObject field,
                                  String fieldName,
-				 AnnotationConfig annotationCfg)
+                                 AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(field, OneToOne.class);
 
@@ -2106,7 +2106,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalOneToManyConfig(Class type,
                                   AccessibleObject field,
                                   String fieldName,
-				  AnnotationConfig annotationCfg)
+                                  AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(field, OneToMany.class);
 
@@ -2128,7 +2128,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalManyToOneConfig(Class type,
                                   AccessibleObject field,
                                   String fieldName,
-				  AnnotationConfig annotationCfg)
+                                  AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(field, ManyToOne.class);
 
@@ -2150,7 +2150,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalManyToManyConfig(Class type,
                                    AccessibleObject field,
                                    String fieldName,
-				   AnnotationConfig annotationCfg)
+                                   AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(field, ManyToMany.class);
 
@@ -2172,7 +2172,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalIdConfig(Class type,
                            AccessibleObject method,
                            String fieldName,
-			   AnnotationConfig annotationCfg)
+                           AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(method, javax.persistence.Id.class);
 
@@ -2196,7 +2196,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                  Class type,
                                  AccessibleObject method,
                                  String fieldName,
-				 AnnotationConfig annotationCfg)
+                                 AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(method, ListenerType.CALLBACK_CLASS[callback]);
 
@@ -2244,7 +2244,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalEmbeddedIdConfig(Class type,
                                    AccessibleObject method,
                                    String fieldName,
-				   AnnotationConfig annotationCfg)
+                                   AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(method, EmbeddedId.class);
   }
@@ -2252,7 +2252,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalVersionConfig(Class type,
                                 AccessibleObject method,
                                 String fieldName,
-				AnnotationConfig annotationCfg)
+                                AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(method, Version.class);
   }
@@ -2260,7 +2260,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalJoinColumnConfig(Class type,
                                    AccessibleObject field,
                                    String fieldName,
-				   AnnotationConfig annotationCfg)
+                                   AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(field, JoinColumn.class);
   }
@@ -2268,7 +2268,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalJoinTableConfig(Class type,
                                   AccessibleObject field,
                                   String fieldName,
-				  AnnotationConfig annotationCfg)
+                                  AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(field, JoinTable.class);
   }
@@ -2276,13 +2276,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void getInternalMapKeyConfig(Class type,
                                AccessibleObject field,
                                String fieldName,
-			       AnnotationConfig annotationCfg)
+                               AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(field, MapKey.class);
   }
 
   void getInternalAttributeOverrideConfig(Class type,
-					  AnnotationConfig annotationCfg)
+                                          AnnotationConfig annotationCfg)
   {
     annotationCfg.reset(type, AttributeOverride.class);
   }

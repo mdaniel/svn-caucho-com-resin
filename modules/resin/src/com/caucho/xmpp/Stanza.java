@@ -64,13 +64,13 @@ public class Stanza {
       String name = in.getAttributeLocalName(i);
 
       if ("id".equals(name))
-	_id = in.getAttributeValue(i);
+        _id = in.getAttributeValue(i);
       else if ("type".equals(name))
-	_type = in.getAttributeValue(i);
+        _type = in.getAttributeValue(i);
       else if ("from".equals(name))
-	_from = in.getAttributeValue(i);
+        _from = in.getAttributeValue(i);
       else if ("to".equals(name))
-	_to = in.getAttributeValue(i);
+        _to = in.getAttributeValue(i);
     }
   }
 
@@ -113,6 +113,6 @@ public class Stanza {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _id + "," + _type + ",from=" + _from + ",to=" + _to + "]");
+            + "[" + _id + "," + _type + ",from=" + _from + ",to=" + _to + "]");
   }
 }

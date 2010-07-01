@@ -54,18 +54,18 @@ public class WelcomeFileList {
     while (i < len) {
       char ch = 0;
       for (;
-	   i < len && (ch = text.charAt(i)) == ' ' || ch == ',' || ch == '\t';
-	   i++) {
+           i < len && (ch = text.charAt(i)) == ' ' || ch == ',' || ch == '\t';
+           i++) {
       }
 
       if (i >= len)
-	break;
+        break;
 
       cb.clear();
       for (;
-	   i < len && (ch = text.charAt(i)) != ' ' && ch != ',' && ch != '\t';
-	   i++) {
-	cb.append(ch);
+           i < len && (ch = text.charAt(i)) != ' ' && ch != ',' && ch != '\t';
+           i++) {
+        cb.append(ch);
       }
 
       _welcomeFileList.add(cb.toString());

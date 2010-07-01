@@ -42,13 +42,13 @@ public class ResinSessionArrayValue extends SessionArrayValue
     = Logger.getLogger(ResinSessionArrayValue.class.getName());
 
   public ResinSessionArrayValue(String id, long now, 
-				long maxInactiveInterval)
+                                long maxInactiveInterval)
   {
     super(id, now, maxInactiveInterval);
   }
   
   public ResinSessionArrayValue(String id, long now,
-				long maxInactiveInterval, ArrayValue array)
+                                long maxInactiveInterval, ArrayValue array)
   {
     super(id, now, maxInactiveInterval, array);
   }
@@ -63,7 +63,7 @@ public class ResinSessionArrayValue extends SessionArrayValue
 
     ResinSessionArrayValue copy = 
       new ResinSessionArrayValue(getId(), accessTime, getMaxInactiveInterval(),
-				 (ArrayValue) getArray().copy(env, map));
+                                 (ArrayValue) getArray().copy(env, map));
 
     // copy.setClusterObject(_clusterObject);
 

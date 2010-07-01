@@ -197,13 +197,13 @@ public class DataForm implements java.io.Serializable {
     
     if (_instructions != null) {
       for (int i = 0; i < _instructions.length; i++) {
-	sb.append(",instruction='").append(_instructions[i]).append("'");
+        sb.append(",instruction='").append(_instructions[i]).append("'");
       }
     }
 
     if (_field != null) {
       for (int i = 0; i < _field.length; i++) {
-	sb.append(",field=").append(_field[i]);
+        sb.append(",field=").append(_field[i]);
       }
     }
 
@@ -212,7 +212,7 @@ public class DataForm implements java.io.Serializable {
 
     if (_item != null) {
       for (int i = 0; i < _item.length; i++) {
-	sb.append(",item='").append(_item[i]);
+        sb.append(",item='").append(_item[i]);
       }
     }
 

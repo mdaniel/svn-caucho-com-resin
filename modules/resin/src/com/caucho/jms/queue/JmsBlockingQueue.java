@@ -136,18 +136,18 @@ public class JmsBlockingQueue extends java.util.AbstractQueue
   {
     try {
       synchronized (_writeLock) {
-	MessageProducer producer = getWriteProducer();
+        MessageProducer producer = getWriteProducer();
 
-	Message msg;
+        Message msg;
 
-	if (value instanceof Message)
-	  msg = (Message) value;
-	else
-	  msg = _writeSession.createObjectMessage((Serializable) value);
-	
-	producer.send(_destination, msg, 0, 0, Integer.MAX_VALUE);
+        if (value instanceof Message)
+          msg = (Message) value;
+        else
+          msg = _writeSession.createObjectMessage((Serializable) value);
 
-	return true;
+        producer.send(_destination, msg, 0, 0, Integer.MAX_VALUE);
+
+        return true;
       }
     } catch (RuntimeException e) {
       throw e;
@@ -160,23 +160,23 @@ public class JmsBlockingQueue extends java.util.AbstractQueue
   {
     try {
       synchronized (_readLock) {
-	MessageConsumer consumer = getReadConsumer();
+        MessageConsumer consumer = getReadConsumer();
 
-	long msTimeout = unit.toMillis(timeout);
+        long msTimeout = unit.toMillis(timeout);
 
-	Message msg = consumer.receive(msTimeout);
+        Message msg = consumer.receive(msTimeout);
 
-	if (msg instanceof ObjectMessage) {
-	  return ((ObjectMessage) msg).getObject();
-	}
-	else if (msg instanceof TextMessage) {
-	  return ((TextMessage) msg).getText();
-	}
-	else if (msg == null)
-	  return null;
-	else
-	  throw new JmsRuntimeException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
-					    msg));
+        if (msg instanceof ObjectMessage) {
+          return ((ObjectMessage) msg).getObject();
+        }
+        else if (msg instanceof TextMessage) {
+          return ((TextMessage) msg).getText();
+        }
+        else if (msg == null)
+          return null;
+        else
+          throw new JmsRuntimeException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
+                                            msg));
       }
     } catch (RuntimeException e) {
       throw e;
@@ -230,16 +230,16 @@ public class JmsBlockingQueue extends java.util.AbstractQueue
   {
     synchronized (this) {
       if (_conn == null) {
-	_conn = _factory.createConnection();
-	_conn.start();
+        _conn = _factory.createConnection();
+        _conn.start();
       }
     
       if (_writeSession == null) {
-	_writeSession = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        _writeSession = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
       }
 
       if (_producer == null) {
-	_producer = _writeSession.createProducer(_destination);
+        _producer = _writeSession.createProducer(_destination);
       }
     }
 
@@ -251,16 +251,16 @@ public class JmsBlockingQueue extends java.util.AbstractQueue
   {
     synchronized (this) {
       if (_conn == null) {
-	_conn = _factory.createConnection();
-	_conn.start();
+        _conn = _factory.createConnection();
+        _conn.start();
       }
     
       if (_readSession == null) {
-	_readSession = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        _readSession = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
       }
     
       if (_consumer == null) {
-	_consumer = _readSession.createConsumer(_destination);
+        _consumer = _readSession.createConsumer(_destination);
       }
     }
 
@@ -286,35 +286,35 @@ public class JmsBlockingQueue extends java.util.AbstractQueue
 
     try {
       if (consumer != null)
-	consumer.close();
+        consumer.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
     try {
       if (producer != null)
-	producer.close();
+        producer.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
     try {
       if (readSession != null)
-	readSession.close();
+        readSession.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
     try {
       if (writeSession != null)
-	writeSession.close();
+        writeSession.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
     try {
       if (conn != null)
-	conn.close();
+        conn.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

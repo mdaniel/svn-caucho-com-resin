@@ -89,7 +89,7 @@ public class LoggerAdmin extends AbstractManagedObject implements LoggerMXBean
       level = Level.ALL;
     else
       throw new IllegalArgumentException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging",
-					     levelName));
+                                             levelName));
   }
 
   public String getLevel()

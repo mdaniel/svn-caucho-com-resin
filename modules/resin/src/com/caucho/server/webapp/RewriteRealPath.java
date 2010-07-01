@@ -112,7 +112,7 @@ public class RewriteRealPath {
       String realPath = program.toRealPath(uri);
 
       if (realPath != null)
-	return _appDir.lookup(realPath).getNativePath();
+        return _appDir.lookup(realPath).getNativePath();
     }
 
     return pathMappingToRealPath(uri);
@@ -209,9 +209,9 @@ public class RewriteRealPath {
       throws ConfigException
     {
       if (_regexp == null)
-	throw new ConfigException(L.l("rewrite needs 'regexp' attribute."));
+        throw new ConfigException(L.l("rewrite needs 'regexp' attribute."));
       if (_replacement == null)
-	throw new ConfigException(L.l("rewrite needs 'replacement' attribute."));
+        throw new ConfigException(L.l("rewrite needs 'replacement' attribute."));
     }
     
     public String rewrite(String uri)
@@ -219,11 +219,11 @@ public class RewriteRealPath {
       Matcher matcher = _regexp.matcher(uri);
 
       if (matcher.find()) {
-	matcher.reset();
-	return matcher.replaceAll(_replacement);
+        matcher.reset();
+        return matcher.replaceAll(_replacement);
       }
       else
-	return uri;
+        return uri;
     }
   }
 
@@ -248,15 +248,15 @@ public class RewriteRealPath {
 
       int length = target.length();
       for (int i = 0; i < length; i++) {
-	char ch = target.charAt(i);
-	char ch1;
+        char ch = target.charAt(i);
+        char ch1;
 
-	if (ch == '\\' && i + 1 < length
-	    && ! ('0' <= (ch1 = target.charAt(i + 1)) && ch1 <= '9')) {
-	  sb.append("\\\\");
-	}
-	else
-	  sb.append(ch);
+        if (ch == '\\' && i + 1 < length
+            && ! ('0' <= (ch1 = target.charAt(i + 1)) && ch1 <= '9')) {
+          sb.append("\\\\");
+        }
+        else
+          sb.append(ch);
       }
       
       _target = sb.toString();
@@ -270,9 +270,9 @@ public class RewriteRealPath {
       throws ConfigException
     {
       if (_regexp == null)
-	throw new ConfigException(L.l("real-path needs 'regexp' attribute."));
+        throw new ConfigException(L.l("real-path needs 'regexp' attribute."));
       if (_target == null)
-	throw new ConfigException(L.l("real-path needs 'target' attribute."));
+        throw new ConfigException(L.l("real-path needs 'target' attribute."));
     }
     
     public String toRealPath(String uri)
@@ -280,12 +280,12 @@ public class RewriteRealPath {
       Matcher matcher = _regexp.matcher(uri);
 
       if (matcher.find()) {
-	matcher.reset();
-	
-	return matcher.replaceAll(_target);
+        matcher.reset();
+
+        return matcher.replaceAll(_target);
       }
       else
-	return null;
+        return null;
     }
   }
 }

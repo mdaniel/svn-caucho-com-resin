@@ -55,7 +55,7 @@ public class ResinApplicationFactory implements IWebApplicationFactory
 
     if (className == null)
       throw new ConfigException(L.l("filter does not define '{0}'",
-				    APP_NAME));
+                                    APP_NAME));
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -69,7 +69,7 @@ public class ResinApplicationFactory implements IWebApplicationFactory
       throw e;
     } catch (Exception e) {
       throw new ConfigException(L.l("Can't load application class '{0}'\n{1}",
-				    className, e, e));
+                                    className, e, e));
     }
   }
 }

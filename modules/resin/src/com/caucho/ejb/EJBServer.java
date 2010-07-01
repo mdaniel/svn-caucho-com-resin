@@ -509,9 +509,9 @@ public class EJBServer
   {
     try {
       log.fine("Initializing ejb-server : local-jndi="
-	       + _ejbContainer.getProtocolManager().getLocalJndiPrefix()
+               + _ejbContainer.getProtocolManager().getLocalJndiPrefix()
                + " remote-jndi="
-	       + _ejbContainer.getProtocolManager().getRemoteJndiPrefix());
+               + _ejbContainer.getProtocolManager().getRemoteJndiPrefix());
 
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());

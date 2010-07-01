@@ -83,7 +83,7 @@ public class InterceptorEntry<X> {
   {
     for (QualifierBinding binding : _bindings) {
       if (! isMatch(binding, bindingAnn)) {
-	return false;
+        return false;
       }
     }
 
@@ -104,7 +104,7 @@ public class InterceptorEntry<X> {
         continue;
       
       if (binding.isMatch(ann))
-	return true;
+        return true;
       
       if (isMatch(binding, annType.getAnnotations()))
         return true;

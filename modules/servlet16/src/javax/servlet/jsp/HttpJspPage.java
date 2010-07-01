@@ -51,6 +51,6 @@ public interface HttpJspPage extends JspPage {
    * @param response the servlet response.
    */
   public void _jspService(HttpServletRequest request,
-			  HttpServletResponse response)
+                          HttpServletResponse response)
     throws ServletException, IOException;
 }

@@ -104,7 +104,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
       
     for (int i = 0; i < fromItems.length; i++) {
       if (_rows[i] == null)
-	_rows[i] = new TableIterator();
+        _rows[i] = new TableIterator();
       _rows[i].init(fromItems[i].getTable());
     }
 
@@ -152,65 +152,65 @@ public class SelectResultSetImpl extends ResultSetImpl {
       
       int hasData = rs.read();
       if (hasData <= 0)
-	return false;
+        return false;
 
       int length = 0;
       int fields = _exprs.length;
 
       byte []buffer = _buffer;
       for (int i = 0; i < fields; i++) {
-	int type = rs.read();
+        int type = rs.read();
 
-	int sublen = 0;
+        int sublen = 0;
 
-	if (type < 0)
-	  return false;
-	    
-	ColumnType cType = ColumnType.values()[type];
+        if (type < 0)
+          return false;
 
-	switch (cType) {
-	case NONE:
-	  sublen = -1;
-	  break;
-	  
-	case VARCHAR:
-	  int l0 = rs.read();
-	  int l1 = rs.read();
-	  int l2 = rs.read();
-	  int l3 = rs.read();
-	
-	  sublen = ((l0 << 24) +
-		    (l1 << 16) +
-		    (l2 << 8) +
-		    (l3));
-	  break;
+        ColumnType cType = ColumnType.values()[type];
 
-	case INT:
-	  sublen = 4;
-	  break;
-	case LONG:
-	case DOUBLE:
-	case DATE:
-	  sublen = 8;
-	  break;
-	  
-	case BLOB:
-	  sublen = 128;
-	  break;
-	  
-	default:
-	  throw new SQLException("Unknown column: " + type);
-	}
+        switch (cType) {
+        case NONE:
+          sublen = -1;
+          break;
 
-	_types[i] = cType;
-	_offsets[i] = length;
-	_lengths[i] = sublen;
+        case VARCHAR:
+          int l0 = rs.read();
+          int l1 = rs.read();
+          int l2 = rs.read();
+          int l3 = rs.read();
 
-	if (sublen > 0) {
-	  rs.read(buffer, length, sublen);
+          sublen = ((l0 << 24) +
+                    (l1 << 16) +
+                    (l2 << 8) +
+                    (l3));
+          break;
 
-	  length += sublen;
-	}
+        case INT:
+          sublen = 4;
+          break;
+        case LONG:
+        case DOUBLE:
+        case DATE:
+          sublen = 8;
+          break;
+
+        case BLOB:
+          sublen = 128;
+          break;
+
+        default:
+          throw new SQLException("Unknown column: " + type);
+        }
+
+        _types[i] = cType;
+        _offsets[i] = length;
+        _lengths[i] = sublen;
+
+        if (sublen > 0) {
+          rs.read(buffer, length, sublen);
+
+          length += sublen;
+        }
       }
 
       return true;
@@ -227,7 +227,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
   {
     for (int i = 0; i < _exprs.length; i++) {
       if (_exprs[i].getName().equals(name))
-	return i + 1;
+        return i + 1;
     }
 
     throw new SQLException(L.l("column `{0}' does not exist.", name));
@@ -251,51 +251,51 @@ public class SelectResultSetImpl extends ResultSetImpl {
       
     case INT:
       {
-	int value = (((buffer[offset] & 0xff) << 24) +
-		     ((buffer[offset + 1] & 0xff) << 16) +
-		     ((buffer[offset + 2] & 0xff) << 8) +
-		     ((buffer[offset + 3] & 0xff)));
+        int value = (((buffer[offset] & 0xff) << 24) +
+                     ((buffer[offset + 1] & 0xff) << 16) +
+                     ((buffer[offset + 2] & 0xff) << 8) +
+                     ((buffer[offset + 3] & 0xff)));
 
-	return String.valueOf(value);
+        return String.valueOf(value);
       }
       
     case LONG:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return String.valueOf(value);
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return String.valueOf(value);
       }
       
     case DOUBLE:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return String.valueOf(Double.longBitsToDouble(value));
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return String.valueOf(Double.longBitsToDouble(value));
       }
       
     case DATE:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return QDate.formatGMT(value);
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return QDate.formatGMT(value);
       }
 
     case VARCHAR:
@@ -353,8 +353,8 @@ public class SelectResultSetImpl extends ResultSetImpl {
 
       int ch;
       while ((ch = is.read()) >= 0) {
-	if (ch < 0x80)
-	  cb.append((char) ch);
+        if (ch < 0x80)
+          cb.append((char) ch);
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
@@ -378,34 +378,34 @@ public class SelectResultSetImpl extends ResultSetImpl {
       
     case INT:
       return (((buffer[offset + 0] & 0xff) << 24) +
-	      ((buffer[offset + 1] & 0xff) << 16) +
-	      ((buffer[offset + 2] & 0xff) << 8) +
-	      ((buffer[offset + 3] & 0xff)));
+              ((buffer[offset + 1] & 0xff) << 16) +
+              ((buffer[offset + 2] & 0xff) << 8) +
+              ((buffer[offset + 3] & 0xff)));
       
     case LONG:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return (int) value;
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return (int) value;
       }
       
     case DOUBLE:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return (int) Double.longBitsToDouble(value);
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return (int) Double.longBitsToDouble(value);
       }
 
     case VARCHAR:
@@ -431,35 +431,35 @@ public class SelectResultSetImpl extends ResultSetImpl {
       
     case INT:
       return (((buffer[offset] & 0xff) << 24) +
-	      ((buffer[offset + 1] & 0xff) << 16) +
-	      ((buffer[offset + 2] & 0xff) << 8) +
-	      ((buffer[offset + 3] & 0xff)));
+              ((buffer[offset + 1] & 0xff) << 16) +
+              ((buffer[offset + 2] & 0xff) << 8) +
+              ((buffer[offset + 3] & 0xff)));
       
     case LONG:
     case DATE:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return value;
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return value;
       }
       
     case DOUBLE:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return (long) Double.longBitsToDouble(value);
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return (long) Double.longBitsToDouble(value);
       }
 
     case VARCHAR:
@@ -488,34 +488,34 @@ public class SelectResultSetImpl extends ResultSetImpl {
       
     case INT:
       return (((buffer[offset + 0] & 0xff) << 24) +
-	      ((buffer[offset + 1] & 0xff) << 16) +
-	      ((buffer[offset + 2] & 0xff) << 8) +
-	      ((buffer[offset + 3] & 0xff)));
+              ((buffer[offset + 1] & 0xff) << 16) +
+              ((buffer[offset + 2] & 0xff) << 8) +
+              ((buffer[offset + 3] & 0xff)));
       
     case LONG:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return value;
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return value;
       }
       
     case DOUBLE:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return Double.longBitsToDouble(value);
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return Double.longBitsToDouble(value);
       }
 
     case VARCHAR:
@@ -542,32 +542,32 @@ public class SelectResultSetImpl extends ResultSetImpl {
     case LONG:
     case DATE:
       {
-	long value = (((buffer[offset + 0] & 0xffL) << 56) +
-		      ((buffer[offset + 1] & 0xffL) << 48) +
-		      ((buffer[offset + 2] & 0xffL) << 40) +
-		      ((buffer[offset + 3] & 0xffL) << 32) +
-		      ((buffer[offset + 4] & 0xffL) << 24) +
-		      ((buffer[offset + 5] & 0xffL) << 16) +
-		      ((buffer[offset + 6] & 0xffL) << 8) +
-		      ((buffer[offset + 7] & 0xffL)));
-	return value;
+        long value = (((buffer[offset + 0] & 0xffL) << 56) +
+                      ((buffer[offset + 1] & 0xffL) << 48) +
+                      ((buffer[offset + 2] & 0xffL) << 40) +
+                      ((buffer[offset + 3] & 0xffL) << 32) +
+                      ((buffer[offset + 4] & 0xffL) << 24) +
+                      ((buffer[offset + 5] & 0xffL) << 16) +
+                      ((buffer[offset + 6] & 0xffL) << 8) +
+                      ((buffer[offset + 7] & 0xffL)));
+        return value;
       }
 
     case VARCHAR:
     case BLOB:
       {
-	String value = getString(index);
-	
-	if (value == null)
-	  return 0;
-	
-	synchronized (_date) {
-	  try {
-	    return _date.parseDate(value);
-	  } catch (Exception e) {
-	    throw new SQLExceptionWrapper(e);
-	  }
-	}
+        String value = getString(index);
+
+        if (value == null)
+          return 0;
+
+        synchronized (_date) {
+          try {
+            return _date.parseDate(value);
+          } catch (Exception e) {
+            throw new SQLExceptionWrapper(e);
+          }
+        }
       }
 
     default:

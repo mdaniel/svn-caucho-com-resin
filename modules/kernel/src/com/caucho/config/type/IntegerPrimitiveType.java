@@ -84,6 +84,6 @@ public final class IntegerPrimitiveType extends ConfigType
       return new Integer(((Number) value).intValue());
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to an int",
-				    value));
+                                    value));
   }
 }

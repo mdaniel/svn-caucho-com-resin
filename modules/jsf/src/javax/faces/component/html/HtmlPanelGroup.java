@@ -120,11 +120,11 @@ public class HtmlPanelGroup extends UIPanel
     if (prop != null) {
       switch (prop) {
       case LAYOUT:
-	return _layoutExpr;
+        return _layoutExpr;
       case STYLE:
-	return _styleExpr;
+        return _styleExpr;
       case STYLE_CLASS:
-	return _styleClassExpr;
+        return _styleClassExpr;
       }
     }
     
@@ -142,31 +142,31 @@ public class HtmlPanelGroup extends UIPanel
     if (prop != null) {
       switch (prop) {
       case LAYOUT:
-	if (expr != null && expr.isLiteralText()) {
-	  _layout = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _layoutExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _layout = Util.evalString(expr);
+          return;
+        }
+        else
+          _layoutExpr = expr;
+        break;
 
       case STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _style = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _style = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleExpr = expr;
+        break;
 
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _styleClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleClassExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _styleClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleClassExpr = expr;
+        break;
       }
     }
     

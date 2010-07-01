@@ -66,19 +66,19 @@ class MessageSenderImpl implements MessageSender {
       Message message;
       
       if (value == null) {
-	message = session.getSession().createMessage();
+        message = session.getSession().createMessage();
       }
       else if (value instanceof String) {
-	message = session.getSession().createTextMessage((String) value);
+        message = session.getSession().createTextMessage((String) value);
       }
       else if (value instanceof java.io.Serializable) {
-	ObjectMessage objMessage = session.getSession().createObjectMessage();
-	objMessage.setObject((java.io.Serializable) value);
-	message = objMessage;
+        ObjectMessage objMessage = session.getSession().createObjectMessage();
+        objMessage.setObject((java.io.Serializable) value);
+        message = objMessage;
       }
       else {
-	throw new MessageServiceException(L.l("value '{0}' must be serializable",
-					      value));
+        throw new MessageServiceException(L.l("value '{0}' must be serializable",
+                                              value));
       }
 
       session.send(message);
@@ -89,7 +89,7 @@ class MessageSenderImpl implements MessageSender {
       throw new MessageServiceException(e);
     } finally {
       if (session != null)
-	session.close();
+        session.close();
     }
   }
 }

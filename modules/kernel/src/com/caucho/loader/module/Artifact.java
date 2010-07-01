@@ -52,12 +52,12 @@ public class Artifact implements Comparable
   private final ArtifactDependency []_dependencies;
 
   public Artifact(Path path,
-		  String org,
-		  String module,
-		  String name,
-		  ArtifactVersion version,
-		  ArtifactDependency parent,
-		  ArrayList<ArtifactDependency> dependencyList)
+                  String org,
+                  String module,
+                  String name,
+                  ArtifactVersion version,
+                  ArtifactDependency parent,
+                  ArrayList<ArtifactDependency> dependencyList)
   {
     _path = path;
     
@@ -161,7 +161,7 @@ public class Artifact implements Comparable
       return false;
 
     if (dependency.getVersion() != null
-	&& ! dependency.getVersion().isMatch(_version)) {
+        && ! dependency.getVersion().isMatch(_version)) {
       return false;
     }
 
@@ -172,9 +172,9 @@ public class Artifact implements Comparable
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[org=" + _org
-	    + ",name=" + _name
-	    + ",version=" + _version
-	    + "]");
+            + "[org=" + _org
+            + ",name=" + _name
+            + ",version=" + _version
+            + "]");
   }
 }

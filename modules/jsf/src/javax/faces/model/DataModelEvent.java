@@ -36,8 +36,8 @@ public class DataModelEvent extends EventObject
   private int index;
 
   public DataModelEvent(DataModel model,
-			int index,
-			Object data)
+                        int index,
+                        Object data)
   {
     super(model);
 

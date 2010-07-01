@@ -231,12 +231,12 @@ public class XslForEach extends XslNode {
     println("Node " + oldCur + " = env.getCurrentNode();");
     
     out.println("ArrayList " + list +
-	    " = xslSort(node, env" +
-	    ", _select_patterns[" + _gen.addSelect(select) + "]" + 
-	    ", _xsl_sorts[" + sortIndex + "]);");
+            " = xslSort(node, env" +
+            ", _select_patterns[" + _gen.addSelect(select) + "]" +
+            ", _xsl_sorts[" + sortIndex + "]);");
     out.println("env.setContextSize(" + list + ".size());");
     out.println("for (int " + pos + " = 1; " + pos +
-	    " <= " + list + ".size(); " + pos + "++) {");
+            " <= " + list + ".size(); " + pos + "++) {");
     _gen.pushLoop();
     out.pushDepth();
     out.println("Node " + _gen.getElement() + " = node;");
@@ -299,12 +299,12 @@ public class XslForEach extends XslNode {
     out.println("Node " + oldCur + " = env.getCurrentNode();");
     
     out.println("ArrayList " + list +
-	    " = xslSort(node, env" +
-	    ", _select_patterns[" + _gen.addSelect(select) + "]" + 
-	    ", _xsl_sorts[" + sortIndex + "]);");
+            " = xslSort(node, env" +
+            ", _select_patterns[" + _gen.addSelect(select) + "]" +
+            ", _xsl_sorts[" + sortIndex + "]);");
     out.println("env.setContextSize(" + list + ".size());");
     out.println("for (int " + pos + " = 1; " + pos +
-	    " <= " + list + ".size(); " + pos + "++) {");
+            " <= " + list + ".size(); " + pos + "++) {");
     _gen.pushLoop();
     out.pushDepth();
     out.println("Node " + _gen.getElement() + " = node;");

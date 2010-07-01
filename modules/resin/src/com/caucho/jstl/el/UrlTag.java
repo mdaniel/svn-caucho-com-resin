@@ -153,11 +153,11 @@ public class UrlTag extends TagSupport implements NameValueTag {
 
       if (context != null) {
         value.append(context);
-	
-	if (context.endsWith("/"))
-	  value.append(url, 1, url.length() - 1);
-	else
-	  value.append(url);
+
+        if (context.endsWith("/"))
+          value.append(url, 1, url.length() - 1);
+        else
+          value.append(url);
       }
       else {
         value.append(request.getContextPath());
@@ -167,7 +167,7 @@ public class UrlTag extends TagSupport implements NameValueTag {
     else {
       if (context != null) {
         value.append(context);
-	value.append(url);
+        value.append(url);
       }
       else
         value.append(url);

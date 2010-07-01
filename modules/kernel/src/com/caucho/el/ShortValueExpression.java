@@ -48,8 +48,8 @@ public class ShortValueExpression extends AbstractValueExpression
   private Class _expectedType;
 
   public ShortValueExpression(Expr expr,
-			      String expressionString,
-			      Class expectedType)
+                              String expressionString,
+                              Class expectedType)
   {
     super(expr, expressionString);
 
@@ -57,7 +57,7 @@ public class ShortValueExpression extends AbstractValueExpression
   }
 
   public ShortValueExpression(Expr expr,
-				String expressionString)
+                                String expressionString)
   {
     super(expr, expressionString);
   }
@@ -82,7 +82,7 @@ public class ShortValueExpression extends AbstractValueExpression
   @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return new Short((short) _expr.evalLong(context));
   }

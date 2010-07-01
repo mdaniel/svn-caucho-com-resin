@@ -75,9 +75,9 @@ public class LdapAuthenticator extends AbstractAuthenticator {
   public LdapAuthenticator()
   {
     _jndiEnv.put(Context.INITIAL_CONTEXT_FACTORY,
-		 "com.sun.jndi.ldap.LdapCtxFactory");
+                 "com.sun.jndi.ldap.LdapCtxFactory");
     _jndiEnv.put(Context.PROVIDER_URL,
-		 "ldap://localhost:389");
+                 "ldap://localhost:389");
   }
   
   public void setDNPrefix(String prefix)
@@ -178,44 +178,44 @@ public class LdapAuthenticator extends AbstractAuthenticator {
       String query = _userAttribute + '=' + userName;
 
       if (_baseDn != null && ! _baseDn.equals(""))
-	query = _baseDn + ',' + query;
+        query = _baseDn + ',' + query;
 
       if (_dnPrefix != null && ! _dnPrefix.equals(""))
-	query = _dnPrefix + ',' + query;
+        query = _dnPrefix + ',' + query;
 
       if (_dnSuffix != null && ! _dnSuffix.equals(""))
-	query = query + ',' + _dnSuffix;
+        query = query + ',' + _dnSuffix;
 
       Attributes attributes = ic.getAttributes(query);
 
       if (log.isLoggable(Level.FINE))
-	log.fine("ldap-authenticator: " + query + "->" + (attributes != null));
+        log.fine("ldap-authenticator: " + query + "->" + (attributes != null));
 
       if (attributes == null)
-	return null;
+        return null;
 
       Attribute passwordAttr = attributes.get(_passwordAttribute);
 
       String ldapPassword = (String) passwordAttr.get();
 
       if (passwordAttr == null)
-	return null;
+        return null;
 
       String []roles = null;
       
       if (_roleAttribute != null) {
-	Attribute roleAttr = attributes.get(_roleAttribute);
+        Attribute roleAttr = attributes.get(_roleAttribute);
 
-	if (roleAttr != null) {
-	  String roleSet = (String) roleAttr.get();
+        if (roleAttr != null) {
+          String roleSet = (String) roleAttr.get();
 
-	  if (roleSet != null)
-	    roles = roleSet.split("[, ]+");
-	}
+          if (roleSet != null)
+            roles = roleSet.split("[, ]+");
+        }
       }
 
       if (roles == null)
-	roles = new String[] { "user" };
+        roles = new String[] { "user" };
       
       Principal principal = new BasicPrincipal(userName);
 
@@ -223,8 +223,8 @@ public class LdapAuthenticator extends AbstractAuthenticator {
       boolean isAnonymous = false;
       
       return new PasswordUser(principal, ldapPassword.toCharArray(),
-			      isDisabled, isAnonymous,
-			      roles);
+                              isDisabled, isAnonymous,
+                              roles);
     } catch (NamingException e) {
       log.log(Level.FINE, e.toString(), e);
 

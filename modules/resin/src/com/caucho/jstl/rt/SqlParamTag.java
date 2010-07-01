@@ -103,8 +103,8 @@ public class SqlParamTag extends BodyTagSupport {
 
     Tag parent = getParent();
     for (;
-	 parent != null && ! (parent instanceof SQLExecutionTag);
-	 parent = parent.getParent()) {
+         parent != null && ! (parent instanceof SQLExecutionTag);
+         parent = parent.getParent()) {
     }
 
     if (parent == null)

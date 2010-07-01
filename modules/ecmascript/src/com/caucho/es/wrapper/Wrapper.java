@@ -191,7 +191,7 @@ public class Wrapper {
       wrapper = (ESBeanWrapper) cl.newInstance();
 
       if (! wrapper.isModified() && wrapper.getVersionId() == CauchoSystem.getVersionId())
-	return wrapper;
+        return wrapper;
     } catch (Throwable e) {
     }
     
@@ -1427,7 +1427,7 @@ public class Wrapper {
     println("try {");
     println("  Class cl = Class.forName(\"" + cl.getName() + "\", false, Thread.currentThread().getContextClassLoader());");
     println("  return new com.caucho.make.ClassDependency(\""
-	    + cl.getName() + "\", " + dep.getDigest() + "L).isModified();");
+            + cl.getName() + "\", " + dep.getDigest() + "L).isModified();");
     println("} catch (Throwable e) {");
     println("  return true;");
     println("}");

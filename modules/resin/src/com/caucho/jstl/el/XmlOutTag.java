@@ -99,8 +99,8 @@ public class XmlOutTag extends TagSupport {
    * Process the tag.
    */
   public static void toStream(JspWriter out, PageContextImpl pageContext,
-			      com.caucho.xpath.Expr select,
-			      boolean doEscape)
+                              com.caucho.xpath.Expr select,
+                              boolean doEscape)
     throws JspException, XPathException, IOException
   {
     try {

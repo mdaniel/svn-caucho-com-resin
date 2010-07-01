@@ -88,15 +88,15 @@ public class UrlType extends ConfigType
   {
     try {
       if (value instanceof URL)
-	return value;
+        return value;
       else if (value instanceof Path)
-	return new URL(((Path) value).getURL());
+        return new URL(((Path) value).getURL());
       else if (value instanceof String)
-	return valueOf((String) value);
+        return valueOf((String) value);
       else if (value == null)
-	return null;
+        return null;
       else
-	return valueOf(String.valueOf(value));
+        return valueOf(String.valueOf(value));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

@@ -77,6 +77,6 @@ public final class MethodExpressionType extends ConfigType
     Expr expr = parser.parse();
 
     return new MethodExpressionImpl(expr, text,
-				    Object.class, new Class[0]);
+                                    Object.class, new Class[0]);
   }
 }

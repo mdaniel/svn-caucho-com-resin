@@ -97,9 +97,9 @@ public class ObjectExpr extends Expr {
     switch (_code) {
     case IF:
       if (_left.evalBoolean(node, env))
-	return _right.evalBoolean(node, env);
+        return _right.evalBoolean(node, env);
       else
-	return _third.evalBoolean(node, env);
+        return _third.evalBoolean(node, env);
 
     case ATTRIBUTE:
       if (node instanceof Element)
@@ -127,9 +127,9 @@ public class ObjectExpr extends Expr {
     switch (_code) {
     case IF:
       if (_left.evalBoolean(node, env))
-	return _right.evalNumber(node, env);
+        return _right.evalNumber(node, env);
       else
-	return _third.evalNumber(node, env);
+        return _third.evalNumber(node, env);
 
     case ATTRIBUTE:
       if (node instanceof Element)
@@ -159,9 +159,9 @@ public class ObjectExpr extends Expr {
     switch (_code) {
     case IF:
       if (_left.evalBoolean(node, env))
-	return _right.evalString(node, env);
+        return _right.evalString(node, env);
       else
-	return _third.evalString(node, env);
+        return _third.evalString(node, env);
       
     case ATTRIBUTE:
       if (node instanceof Element)
@@ -191,9 +191,9 @@ public class ObjectExpr extends Expr {
     switch (_code) {
     case IF:
       if (_left.evalBoolean(node, env))
-	return _right.evalObject(node, env);
+        return _right.evalObject(node, env);
       else
-	return _third.evalObject(node, env);
+        return _third.evalObject(node, env);
 
     case SELF:
       return node;
@@ -221,9 +221,9 @@ public class ObjectExpr extends Expr {
     switch (_code) {
     case IF:
       if (_left.evalBoolean(node, env))
-	return _right.evalNodeSet(node, env);
+        return _right.evalNodeSet(node, env);
       else
-	return _third.evalNodeSet(node, env);
+        return _third.evalNodeSet(node, env);
 
     case SELF:
       return new SingleNodeIterator(env, node);

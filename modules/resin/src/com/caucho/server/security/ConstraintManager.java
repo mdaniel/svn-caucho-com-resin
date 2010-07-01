@@ -84,7 +84,7 @@ public class ConstraintManager extends FilterChainBuilder {
     String lower = uri.toLowerCase();
 
     if (lower.startsWith("/web-inf")
-	|| lower.startsWith("/meta-inf")) {
+        || lower.startsWith("/meta-inf")) {
       return new ErrorFilterChain(HttpServletResponse.SC_NOT_FOUND);
     }
 
@@ -99,64 +99,64 @@ public class ConstraintManager extends FilterChainBuilder {
       SecurityConstraint constraint = _constraints.get(i);
 
       if (constraint.isMatch(uri)) {
-	AbstractConstraint absConstraint = constraint.getConstraint();
+        AbstractConstraint absConstraint = constraint.getConstraint();
 
-	if (absConstraint != null) {
-	  ArrayList<String> methods = constraint.getMethods(uri);
+        if (absConstraint != null) {
+          ArrayList<String> methods = constraint.getMethods(uri);
 
-	  for (int j = 0; methods != null && j < methods.size(); j++) {
-	    String method = methods.get(j);
+          for (int j = 0; methods != null && j < methods.size(); j++) {
+            String method = methods.get(j);
 
-	    AbstractConstraint []methodList = methodMap.get(method);
+            AbstractConstraint []methodList = methodMap.get(method);
 
-	    if (methodList == null)
-	      methodList = absConstraint.toArray();
-	    // server/12ba - the first constraint matches, following are
-	    // ignored
-	    /*
-	    else {
-	      
-	      AbstractConstraint []newMethods = absConstraint.toArray();
-		
-	      AbstractConstraint []newList;
-		
-	      newList = new AbstractConstraint[methodList.length
-					       + newMethods.length];
+            if (methodList == null)
+              methodList = absConstraint.toArray();
+            // server/12ba - the first constraint matches, following are
+            // ignored
+            /*
+            else {
 
-	      System.arraycopy(methodList, 0, newList, 0, methodList.length);
-	      System.arraycopy(newMethods, 0, newList,
-			       methodList.length, newMethods.length);
+              AbstractConstraint []newMethods = absConstraint.toArray();
 
-	      methodList = newList;
-	    }
-	    */
+              AbstractConstraint []newList;
 
-	    methodMap.put(method, methodList);
-	  }
+              newList = new AbstractConstraint[methodList.length
+                                               + newMethods.length];
+
+              System.arraycopy(methodList, 0, newList, 0, methodList.length);
+              System.arraycopy(newMethods, 0, newList,
+                               methodList.length, newMethods.length);
+
+              methodList = newList;
+            }
+            */
+
+            methodMap.put(method, methodList);
+          }
           
-	  if (methods == null || methods.size() == 0) {
-	    AbstractConstraint []constArray = absConstraint.toArray();
-	    for (int k = 0; k < constArray.length; k++)
-	      constraints.add(constArray[k]);
+          if (methods == null || methods.size() == 0) {
+            AbstractConstraint []constArray = absConstraint.toArray();
+            for (int k = 0; k < constArray.length; k++)
+              constraints.add(constArray[k]);
 
-	    // server/12ba - the first constraint matches, following are
-	    // ignored
+            // server/12ba - the first constraint matches, following are
+            // ignored
 
-	    if (! constraint.isFallthrough())
-	      break loop;
-	  }
-	}
-	else {
-	  // server/1233
-	  
-	  if (! constraint.isFallthrough())
-	    break loop;
-	}
+            if (! constraint.isFallthrough())
+              break loop;
+          }
+        }
+        else {
+          // server/1233
+
+          if (! constraint.isFallthrough())
+            break loop;
+        }
       }
     }
 
     if (uri.endsWith("/j_security_check")
-	&& app.getLogin() instanceof FormLogin) {
+        && app.getLogin() instanceof FormLogin) {
       RequestDispatcher disp = app.getNamedDispatcher("j_security_check");
       if (disp == null)
         throw new IllegalStateException(L.l("j_security_check is an undefined servlet"));

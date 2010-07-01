@@ -76,9 +76,9 @@ public class MBeanHandle implements java.io.Serializable {
       Class cl = Class.forName(className, false, loader);
 
       return MBeanServerInvocationHandler.newProxyInstance(server,
-							   _name,
-							   cl,
-							   false);
+                                                           _name,
+                                                           cl,
+                                                           false);
     } catch (ObjectStreamException e) {
       e.printStackTrace();
       
@@ -108,9 +108,9 @@ public class MBeanHandle implements java.io.Serializable {
       server = (MBeanServer) ic.lookup("java:comp/env/jmx/GlobalMBeanServer");
 
       if (server != null) {
-	_globalMBeanServer = new SoftReference<MBeanServer>(server);
+        _globalMBeanServer = new SoftReference<MBeanServer>(server);
 
-	return server;
+        return server;
       }
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
@@ -124,9 +124,9 @@ public class MBeanHandle implements java.io.Serializable {
       server = (MBeanServer) method.invoke(null, new Object[0]);
 
       if (server != null) {
-	_globalMBeanServer = new SoftReference<MBeanServer>(server);
+        _globalMBeanServer = new SoftReference<MBeanServer>(server);
 
-	return server;
+        return server;
       }
     } catch (Throwable e) {
     }

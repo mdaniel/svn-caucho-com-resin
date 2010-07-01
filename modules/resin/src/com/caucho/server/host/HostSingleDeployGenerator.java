@@ -62,8 +62,8 @@ public class HostSingleDeployGenerator
    * Creates the new host deploy.
    */
   public HostSingleDeployGenerator(DeployContainer<HostController> container,
-				   HostContainer hostContainer,
-				   HostConfig config)
+                                   HostContainer hostContainer,
+                                   HostConfig config)
   {
     super(container);
     
@@ -116,21 +116,21 @@ public class HostSingleDeployGenerator
       id = Config.evalString(rawId);
 
       if (id.equals("*"))  // server/1f20
-	id = "";
+        id = "";
     }
 
     if (rawHostName != null) {
       hostName = Config.evalString(rawHostName);
 
       if (rawHostName.equals("*"))  // server/1f20
-	hostName = "";
+        hostName = "";
     }
 
     if (hostName != null) {
       _controller = new HostController(hostName, _config, _container, null);
 
       if (id != null)
-	_controller.addHostAlias(id);
+        _controller.addHostAlias(id);
     }
     else if (id != null)
       _controller = new HostController(id, _config, _container, null);
@@ -153,7 +153,7 @@ public class HostSingleDeployGenerator
   {
     if (_controller.isNameMatch(name)) {
       return new HostController(_controller.getName(), _config,
-				_container, null);
+                                _container, null);
     }
     else
       return null;
@@ -163,7 +163,7 @@ public class HostSingleDeployGenerator
    * Merges the controllers.
    */
   public HostController mergeController(HostController controller,
-					String name)
+                                        String name)
   {
     // if directory matches, merge the two controllers.  The
     // last controller has priority.

@@ -90,7 +90,7 @@ public class GtExpr extends AbstractBooleanExpr {
 
       return a.compareTo(b) > 0;
     }
-	
+
     if (aType == Double.class || aType == Float.class ||
         bType == Double.class || bType == Float.class) {
       double a = toDouble(aObj, env);

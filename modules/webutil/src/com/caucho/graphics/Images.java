@@ -49,20 +49,20 @@ public class Images implements ImageConsumer {
       Image img = toolkit.getImage(filename);
 
       if (img == null)
-	return null;
+        return null;
 
       Images image = new Images();
 
       img.getSource().startProduction(image);
 
       synchronized (image) {
-	image.wait(100);
+        image.wait(100);
       }
 
       if (image.width > 0 && image.height > 0)
-	return image;
+        return image;
       else
-	return null;
+        return null;
     } catch (Throwable e) {
       return null;
     }

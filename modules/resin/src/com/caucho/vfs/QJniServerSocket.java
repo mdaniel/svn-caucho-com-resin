@@ -72,8 +72,8 @@ public class QJniServerSocket {
    * Creates the SSL ServerSocket.
    */
   public static QServerSocket create(InetAddress host, int port,
-				     int listenBacklog,
-				     boolean isEnableJni)
+                                     int listenBacklog,
+                                     boolean isEnableJni)
     throws IOException
   {
     if (isEnableJni) {
@@ -92,14 +92,14 @@ public class QJniServerSocket {
 
     for (int i = 0; i < 10; i++) {
       try {
-	ServerSocket ss = new ServerSocket(port, listenBacklog, host);
+        ServerSocket ss = new ServerSocket(port, listenBacklog, host);
       
-	return new QServerSocketWrapper(ss);
+        return new QServerSocketWrapper(ss);
       } catch (BindException e) {
       }
 
       try {
-	Thread.currentThread().sleep(1);
+        Thread.currentThread().sleep(1);
       } catch (Throwable e) {
       }
     }
@@ -110,9 +110,9 @@ public class QJniServerSocket {
       return new QServerSocketWrapper(ss);
     } catch (BindException e) {
       if (host != null)
-	throw new BindException(L.l("{0}\nCan't bind to {1}:{2}.\nCheck for another server listening to that port.", e.getMessage(), host, String.valueOf(port)));
+        throw new BindException(L.l("{0}\nCan't bind to {1}:{2}.\nCheck for another server listening to that port.", e.getMessage(), host, String.valueOf(port)));
       else
-	throw new BindException(L.l("{0}\nCan't bind to *:{1}.\nCheck for another server listening to that port.", e.getMessage(), String.valueOf(port)));
+        throw new BindException(L.l("{0}\nCan't bind to *:{1}.\nCheck for another server listening to that port.", e.getMessage(), String.valueOf(port)));
     }
 
   }
@@ -131,21 +131,21 @@ public class QJniServerSocket {
                                false, loader);
 
       Method method = cl.getMethod("create",
-				   new Class[] { String.class,
-						 int.class });
+                                   new Class[] { String.class,
+                                                 int.class });
 
       String hostAddress;
 
       if (host != null)
-	hostAddress = host.getHostAddress();
+        hostAddress = host.getHostAddress();
       else {
-	hostAddress = null;
+        hostAddress = null;
       }
 
       try {
-	return (QServerSocket) method.invoke(null, hostAddress, port);
+        return (QServerSocket) method.invoke(null, hostAddress, port);
       } catch (InvocationTargetException e) {
-	throw e.getTargetException();
+        throw e.getTargetException();
       }
     } catch (IOException e) {
       throw e;
@@ -170,12 +170,12 @@ public class QJniServerSocket {
       Class cl = Class.forName("com.caucho.vfs.JniServerSocketImpl");
 
       Method method = cl.getMethod("open", new Class[] { int.class,
-							 int.class});
+                                                         int.class});
 
       try {
-	return (QServerSocket) method.invoke(null, fd, port);
+        return (QServerSocket) method.invoke(null, fd, port);
       } catch (InvocationTargetException e) {
-	throw e.getTargetException();
+        throw e.getTargetException();
       }
     } catch (IOException e) {
       throw e;

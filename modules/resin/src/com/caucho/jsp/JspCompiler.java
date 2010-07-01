@@ -234,50 +234,50 @@ public class JspCompiler implements EnvironmentBean {
   {
     synchronized (this) {
       if (_taglibManager == null) {
-	WebApp app = getWebApp();
-	
-	Path appDir = getAppDir();
-	if (appDir == null && app != null)
-	  appDir = app.getAppDir();
+        WebApp app = getWebApp();
 
-	JspResourceManager resourceManager = getResourceManager();
-	if (resourceManager != null) {
-	}
-	else if (app != null)
-	  resourceManager = new AppResourceManager(app);
-	else {
-	  resourceManager = new AppDirResourceManager(appDir);
-	}
-	
-	_taglibManager = new TaglibManager(resourceManager,
-					   app,
-					   _tagFileManager);
-	_taglibManager.setWebApp(app);
+        Path appDir = getAppDir();
+        if (appDir == null && app != null)
+          appDir = app.getAppDir();
 
-	JspConfig jspConfig = null;
+        JspResourceManager resourceManager = getResourceManager();
+        if (resourceManager != null) {
+        }
+        else if (app != null)
+          resourceManager = new AppResourceManager(app);
+        else {
+          resourceManager = new AppDirResourceManager(appDir);
+        }
 
-	if (app != null)
-	  jspConfig = (JspConfig) app.getExtension("jsp-config");
+        _taglibManager = new TaglibManager(resourceManager,
+                                           app,
+                                           _tagFileManager);
+        _taglibManager.setWebApp(app);
 
-	if (jspConfig != null) {
-	  ArrayList<JspTaglib> tldMapList = jspConfig.getTaglibList();
-	  for (int i = 0; i < tldMapList.size(); i++) {
-	    JspTaglib taglib = tldMapList.get(i);
+        JspConfig jspConfig = null;
 
-	    _taglibManager.addLocationMap(taglib.getTaglibUri(),
-					  taglib.getTaglibLocation());
-	  }
-	}
+        if (app != null)
+          jspConfig = (JspConfig) app.getExtension("jsp-config");
 
-	if (app != null) {
-	  ArrayList<JspTaglib> taglibs = app.getTaglibList();
-	  for (int i = 0; taglibs != null && i < taglibs.size(); i++) {
-	    JspTaglib taglib = taglibs.get(i);
+        if (jspConfig != null) {
+          ArrayList<JspTaglib> tldMapList = jspConfig.getTaglibList();
+          for (int i = 0; i < tldMapList.size(); i++) {
+            JspTaglib taglib = tldMapList.get(i);
 
-	    _taglibManager.addLocationMap(taglib.getTaglibUri(),
-					  taglib.getTaglibLocation());
-	  }
-	}
+            _taglibManager.addLocationMap(taglib.getTaglibUri(),
+                                          taglib.getTaglibLocation());
+          }
+        }
+
+        if (app != null) {
+          ArrayList<JspTaglib> taglibs = app.getTaglibList();
+          for (int i = 0; taglibs != null && i < taglibs.size(); i++) {
+            JspTaglib taglib = taglibs.get(i);
+
+            _taglibManager.addLocationMap(taglib.getTaglibUri(),
+                                          taglib.getTaglibLocation());
+          }
+        }
       }
     }
 
@@ -333,7 +333,7 @@ public class JspCompiler implements EnvironmentBean {
         rootDirectory = getAppDir();
       
       WebAppController controller
-	= new WebAppController("",  "", rootDirectory, null);
+        = new WebAppController("",  "", rootDirectory, null);
 
       _app = controller.getDeployInstance();
     }
@@ -448,7 +448,7 @@ public class JspCompiler implements EnvironmentBean {
    * Returns the compilation instance.
    */
   public JspCompilerInstance getCompilerInstance(Path jspPath,
-						 String uri)
+                                                 String uri)
     throws Exception
   {
     return getCompilerInstance(jspPath, uri, null);
@@ -464,8 +464,8 @@ public class JspCompiler implements EnvironmentBean {
    * Returns the compilation instance.
    */
   public JspCompilerInstance getCompilerInstance(Path jspPath,
-						 String uri,
-						 String className)
+                                                 String uri,
+                                                 String className)
     throws Exception
   {
     JspCompilerInstance instance = new JspCompilerInstance(this);
@@ -602,11 +602,11 @@ public class JspCompiler implements EnvironmentBean {
       ArrayList<String> pendingClasses = new ArrayList<String>();
 
       if (i == args.length) {
-	compiler.compilePath(pendingClasses, ".");
+        compiler.compilePath(pendingClasses, ".");
       }
 
       for (; i < args.length; i++) {
-	String uri = args[i];
+        String uri = args[i];
 
         compiler.compilePath(pendingClasses, uri);
       }
@@ -658,81 +658,81 @@ public class JspCompiler implements EnvironmentBean {
       boolean hasConf = false;
 
       while (i < args.length) {
-	if (args[i].equals("-app-dir")) {
-	  Path appDir = Vfs.lookup(args[i + 1]);
+        if (args[i].equals("-app-dir")) {
+          Path appDir = Vfs.lookup(args[i + 1]);
 
-	  WebApp app = createWebApp(appDir);
+          WebApp app = createWebApp(appDir);
 
-	  setWebApp(app);
-	  setAppDir(appDir);
+          setWebApp(app);
+          setAppDir(appDir);
 
-	  i += 2;
-	}
-	else if (args[i].equals("-class-dir") || args[i].equals("-d")) {
-	  setClassDirectory(Vfs.lookup(args[i + 1]));
-	  i += 2;
-	}
-	else if (args[i].equals("-compiler")) {
-	  JavacConfig.getLocalConfig().setCompiler(args[i + 1]);
+          i += 2;
+        }
+        else if (args[i].equals("-class-dir") || args[i].equals("-d")) {
+          setClassDirectory(Vfs.lookup(args[i + 1]));
+          i += 2;
+        }
+        else if (args[i].equals("-compiler")) {
+          JavacConfig.getLocalConfig().setCompiler(args[i + 1]);
 
-	  i += 2;
-	}
-	else if (args[i].equals("-conf")) {
-	  Path path = Vfs.lookup(args[i + 1]);
+          i += 2;
+        }
+        else if (args[i].equals("-conf")) {
+          Path path = Vfs.lookup(args[i + 1]);
 
-	  new Config().configureBean(this, path);
-	  hasConf = true;
+          new Config().configureBean(this, path);
+          hasConf = true;
 
-	  i += 2;
-	}
-	else
-	  break;
+          i += 2;
+        }
+        else
+          break;
       }
 
       WebApp app = getWebApp();
       if (app != null && ! hasConf) {
-	Path appDir = app.getAppDir();
+        Path appDir = app.getAppDir();
 
-	DynamicClassLoader dynLoader = app.getEnvironmentClassLoader();
-	dynLoader.addLoader(new CompilingLoader(dynLoader, appDir.lookup("WEB-INF/classes")));
-	dynLoader.addLoader(new DirectoryLoader(dynLoader, appDir.lookup("WEB-INF/lib")));
+        DynamicClassLoader dynLoader = app.getEnvironmentClassLoader();
+        dynLoader.addLoader(new CompilingLoader(dynLoader, appDir.lookup("WEB-INF/classes")));
+        dynLoader.addLoader(new DirectoryLoader(dynLoader, appDir.lookup("WEB-INF/lib")));
 
-	Path webXml = appDir.lookup("WEB-INF/web.xml");
+        Path webXml = appDir.lookup("WEB-INF/web.xml");
 
-	if (webXml.canRead()) {
-	  try {
-	    new Config().configureBean(app, webXml);
-	  } catch (Exception e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	}
+        if (webXml.canRead()) {
+          try {
+            new Config().configureBean(app, webXml);
+          } catch (Exception e) {
+            log.log(Level.WARNING, e.toString(), e);
+          }
+        }
       }
 
       Path appDir = null;
 
       if (app == null && getAppDir() != null) {
-	app = createWebApp(null);
+        app = createWebApp(null);
 
-	app.setRootDirectory(getAppDir());
-	setWebApp(app);
+        app.setRootDirectory(getAppDir());
+        setWebApp(app);
       }
 
       if (app != null) {
         app.setCompileContext(true);
         
-	app.init();
+        app.init();
 
-	appDir = getWebApp().getAppDir();
-	setClassLoader(getWebApp().getClassLoader());
+        appDir = getWebApp().getAppDir();
+        setClassLoader(getWebApp().getClassLoader());
       }
 
       if (appDir == null) {
-	appDir = Vfs.lookup();
+        appDir = Vfs.lookup();
 
-	if (getAppDir() == null && getWebApp() == null) {
-	  System.err.println(L.l("-app-dir must be specified for JspCompiler"));
-	  return -1;
-	}
+        if (getAppDir() == null && getWebApp() == null) {
+          System.err.println(L.l("-app-dir must be specified for JspCompiler"));
+          return -1;
+        }
       }
 
       setResourceManager(new AppDirResourceManager(appDir));
@@ -755,9 +755,9 @@ public class JspCompiler implements EnvironmentBean {
       Path path = Vfs.lookup(uri);
 
       if (path.isDirectory())
-	compileDirectory(path, getAppDir(), this, pendingClasses);
+        compileDirectory(path, getAppDir(), this, pendingClasses);
       else
-	compileJsp(path, getAppDir(), this, pendingClasses);
+        compileJsp(path, getAppDir(), this, pendingClasses);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -782,32 +782,32 @@ public class JspCompiler implements EnvironmentBean {
   }
 
   private static void compileDirectory(Path path,
-				       Path appDir,
-				       JspCompiler compiler,
-				       ArrayList<String> pendingClasses)
+                                       Path appDir,
+                                       JspCompiler compiler,
+                                       ArrayList<String> pendingClasses)
     throws Exception
   {
     if (path.isDirectory()) {
       String []list = path.list();
 
       for (int i = 0; i < list.length; i++) {
-	Path subpath = path.lookup(list[i]);
+        Path subpath = path.lookup(list[i]);
 
-	compileDirectory(subpath, appDir, compiler, pendingClasses);
+        compileDirectory(subpath, appDir, compiler, pendingClasses);
       }
     }
     else if (path.getPath().endsWith(".jsp")
-	     || path.getPath().endsWith(".jsfx")
-	     || path.getPath().endsWith(".jspx") ||
-	     path.getPath().endsWith(".jsfx")) {
+             || path.getPath().endsWith(".jsfx")
+             || path.getPath().endsWith(".jspx") ||
+             path.getPath().endsWith(".jsfx")) {
       compileJsp(path, appDir, compiler, pendingClasses);
     }
   }
 
   private static void compileJsp(Path path,
-				 Path appDir,
-				 JspCompiler compiler,
-				 ArrayList<String> pendingClasses)
+                                 Path appDir,
+                                 JspCompiler compiler,
+                                 ArrayList<String> pendingClasses)
     throws Exception
   {
     String uri;

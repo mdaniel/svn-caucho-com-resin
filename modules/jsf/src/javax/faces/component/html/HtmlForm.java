@@ -444,47 +444,47 @@ public class HtmlForm extends UIForm
     if (prop != null) {
       switch (prop) {
       case ACCEPT:
-	return _acceptExpr;
+        return _acceptExpr;
       case ACCEPTCHARSET:
-	return _acceptcharsetExpr;
+        return _acceptcharsetExpr;
       case DIR:
-	return _dirExpr;
+        return _dirExpr;
       case ENCTYPE:
-	return _enctypeExpr;
+        return _enctypeExpr;
       case LANG:
-	return _langExpr;
+        return _langExpr;
       case ONCLICK:
-	return _onclickExpr;
+        return _onclickExpr;
       case ONDBLCLICK:
-	return _ondblclickExpr;
+        return _ondblclickExpr;
       case ONKEYDOWN:
-	return _onkeydownExpr;
+        return _onkeydownExpr;
       case ONKEYPRESS:
-	return _onkeypressExpr;
+        return _onkeypressExpr;
       case ONKEYUP:
-	return _onkeyupExpr;
+        return _onkeyupExpr;
       case ONMOUSEDOWN:
-	return _onmousedownExpr;
+        return _onmousedownExpr;
       case ONMOUSEMOVE:
-	return _onmousemoveExpr;
+        return _onmousemoveExpr;
       case ONMOUSEOUT:
-	return _onmouseoutExpr;
+        return _onmouseoutExpr;
       case ONMOUSEOVER:
-	return _onmouseoverExpr;
+        return _onmouseoverExpr;
       case ONMOUSEUP:
-	return _onmouseupExpr;
+        return _onmouseupExpr;
       case ONRESET:
-	return _onresetExpr;
+        return _onresetExpr;
       case ONSUBMIT:
-	return _onsubmitExpr;
+        return _onsubmitExpr;
       case STYLE:
-	return _styleExpr;
+        return _styleExpr;
       case STYLE_CLASS:
-	return _styleClassExpr;
+        return _styleClassExpr;
       case TARGET:
-	return _targetExpr;
+        return _targetExpr;
       case TITLE:
-	return _titleExpr;
+        return _titleExpr;
       }
     }
     
@@ -502,193 +502,193 @@ public class HtmlForm extends UIForm
     if (prop != null) {
       switch (prop) {
       case ACCEPT:
-	if (expr != null && expr.isLiteralText()) {
-	  _accept = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _acceptExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _accept = Util.evalString(expr);
+          return;
+        }
+        else
+          _acceptExpr = expr;
+        break;
+
       case ACCEPTCHARSET:
-	if (expr != null && expr.isLiteralText()) {
-	  _acceptcharset = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _acceptcharsetExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _acceptcharset = Util.evalString(expr);
+          return;
+        }
+        else
+          _acceptcharsetExpr = expr;
+        break;
 
       case DIR:
-	if (expr != null && expr.isLiteralText()) {
-	  _dir = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _dirExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _dir = Util.evalString(expr);
+          return;
+        }
+        else
+          _dirExpr = expr;
+        break;
+
       case ENCTYPE:
-	if (expr != null && expr.isLiteralText()) {
-	  _enctype = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _enctypeExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _enctype = Util.evalString(expr);
+          return;
+        }
+        else
+          _enctypeExpr = expr;
+        break;
+
       case LANG:
-	if (expr != null && expr.isLiteralText()) {
-	  _lang = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _langExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _lang = Util.evalString(expr);
+          return;
+        }
+        else
+          _langExpr = expr;
+        break;
+
       case ONCLICK:
-	if (expr != null && expr.isLiteralText()) {
-	  _onclick = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onclickExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onclick = Util.evalString(expr);
+          return;
+        }
+        else
+          _onclickExpr = expr;
+        break;
 
       case ONDBLCLICK:
-	if (expr != null && expr.isLiteralText()) {
-	  _ondblclick = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _ondblclickExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _ondblclick = Util.evalString(expr);
+          return;
+        }
+        else
+          _ondblclickExpr = expr;
+        break;
 
       case ONKEYDOWN:
-	if (expr != null && expr.isLiteralText()) {
-	  _onkeydown = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onkeydownExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _onkeydown = Util.evalString(expr);
+          return;
+        }
+        else
+          _onkeydownExpr = expr;
+        break;
+
       case ONKEYPRESS:
-	if (expr != null && expr.isLiteralText()) {
-	  _onkeypress = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onkeypressExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onkeypress = Util.evalString(expr);
+          return;
+        }
+        else
+          _onkeypressExpr = expr;
+        break;
 
       case ONKEYUP:
-	if (expr != null && expr.isLiteralText()) {
-	  _onkeyup = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onkeyupExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onkeyup = Util.evalString(expr);
+          return;
+        }
+        else
+          _onkeyupExpr = expr;
+        break;
 
       case ONMOUSEDOWN:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmousedown = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmousedownExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmousedown = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmousedownExpr = expr;
+        break;
 
       case ONMOUSEMOVE:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmousemove = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmousemoveExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmousemove = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmousemoveExpr = expr;
+        break;
 
       case ONMOUSEOUT:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmouseout = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmouseoutExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmouseout = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmouseoutExpr = expr;
+        break;
 
       case ONMOUSEOVER:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmouseover = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmouseoverExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmouseover = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmouseoverExpr = expr;
+        break;
 
       case ONMOUSEUP:
-	if (expr != null && expr.isLiteralText()) {
-	  _onmouseup = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onmouseupExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onmouseup = Util.evalString(expr);
+          return;
+        }
+        else
+          _onmouseupExpr = expr;
+        break;
 
       case ONRESET:
-	if (expr != null && expr.isLiteralText()) {
-	  _onreset = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onresetExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onreset = Util.evalString(expr);
+          return;
+        }
+        else
+          _onresetExpr = expr;
+        break;
 
       case ONSUBMIT:
-	if (expr != null && expr.isLiteralText()) {
-	  _onsubmit = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _onsubmitExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _onsubmit = Util.evalString(expr);
+          return;
+        }
+        else
+          _onsubmitExpr = expr;
+        break;
 
       case STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _style = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _style = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleExpr = expr;
+        break;
 
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _styleClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleClassExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _styleClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleClassExpr = expr;
+        break;
 
       case TARGET:
-	if (expr != null && expr.isLiteralText()) {
-	  _target = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _targetExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _target = Util.evalString(expr);
+          return;
+        }
+        else
+          _targetExpr = expr;
+        break;
 
       case TITLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _title = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _titleExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _title = Util.evalString(expr);
+          return;
+        }
+        else
+          _titleExpr = expr;
+        break;
       }
     }
     

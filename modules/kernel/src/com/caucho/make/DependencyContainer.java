@@ -68,8 +68,8 @@ public class DependencyContainer implements Dependency
     
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof DynamicClassLoader) {
-	_checkInterval = ((DynamicClassLoader) loader).getDependencyCheckInterval();
-	break;
+        _checkInterval = ((DynamicClassLoader) loader).getDependencyCheckInterval();
+        break;
       }
     }
   }
@@ -206,13 +206,13 @@ public class DependencyContainer implements Dependency
       _checkExpiresTime = now + _checkInterval;
 
       for (int i = _dependencyList.size() - 1; i >= 0; i--) {
-	Dependency dependency = _dependencyList.get(i);
+        Dependency dependency = _dependencyList.get(i);
 
-	if (dependency.isModified()) {
-	  setModified(true);
+        if (dependency.isModified()) {
+          setModified(true);
         
-	  return _isModified;
-	}
+          return _isModified;
+        }
       }
       
       return _isModified;
@@ -233,8 +233,8 @@ public class DependencyContainer implements Dependency
       Dependency dependency = _dependencyList.get(i);
 
       if (dependency.logModified(log)) {
-	_isModifiedLog = true;
-	return true;
+        _isModifiedLog = true;
+        return true;
       }
     }
       

@@ -73,9 +73,9 @@ public class EnvironmentVariableResolver extends AbstractVariableResolver {
    * Sets the value for the named variable.
    */
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     _map.put((String) base, value);
   }

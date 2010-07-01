@@ -147,7 +147,7 @@ public class DigestLogin extends AbstractLogin {
     byte []clientDigest = decodeDigest(digest);
 
     if (clientDigest == null || username == null
-	|| uri == null || nonce == null)
+        || uri == null || nonce == null)
       return null;
 
     Authenticator auth = getAuthenticator();
@@ -178,7 +178,7 @@ public class DigestLogin extends AbstractLogin {
    * Sends a challenge for basic authentication.
    */
   protected void loginChallenge(HttpServletRequest req,
-				HttpServletResponse res)
+                                HttpServletResponse res)
     throws ServletException, IOException
   {
     String realm = getRealmName();
@@ -286,7 +286,7 @@ public class DigestLogin extends AbstractLogin {
         cb.append((char) ch);
 
       if (ch != cursor.DONE)
-	cursor.previous();
+        cursor.previous();
     }
 
     return cb.close();

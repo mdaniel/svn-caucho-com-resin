@@ -68,13 +68,13 @@ public class JspViewHandler extends ViewHandler
       locale = iter.next();
 
       for (int i = 0; i < supportedLocales.size(); i++) {
-	Locale supLocale = supportedLocales.get(i);
+        Locale supLocale = supportedLocales.get(i);
 
-	if (supLocale.equals(locale))
-	  return supLocale;
-	else if ("".equals(supLocale.getCountry())
-		 && locale.getLanguage().equals(supLocale.getLanguage()))
-	  return supLocale;
+        if (supLocale.equals(locale))
+          return supLocale;
+        else if ("".equals(supLocale.getCountry())
+                 && locale.getLanguage().equals(supLocale.getLanguage()))
+          return supLocale;
       }
     }
     
@@ -102,16 +102,16 @@ public class JspViewHandler extends ViewHandler
       int p = contentType.indexOf("charset=");
 
       if (p > 0) {
-	int q = contentType.indexOf(';', p + 9);
+        int q = contentType.indexOf(';', p + 9);
 
-	String charset;
+        String charset;
 
-	if (q > 0)
-	  charset = contentType.substring(p + 8, q).trim();
-	else
-	  charset = contentType.substring(p + 8).trim();
+        if (q > 0)
+          charset = contentType.substring(p + 8, q).trim();
+        else
+          charset = contentType.substring(p + 8).trim();
 
-	return charset;
+        return charset;
       }
     }
 
@@ -121,7 +121,7 @@ public class JspViewHandler extends ViewHandler
       Object value = sessionMap.get(CHARACTER_ENCODING_KEY);
 
       if (value != null)
-	return value.toString();
+        return value.toString();
     }
     
     return "utf-8";
@@ -154,7 +154,7 @@ public class JspViewHandler extends ViewHandler
   }
 
   public UIViewRoot createView(FacesContext context,
-			       String viewId)
+                               String viewId)
   {
     if (context == null)
       throw new NullPointerException();
@@ -238,13 +238,13 @@ public class JspViewHandler extends ViewHandler
     int dot;
 
     if (servletPath != null
-	&& (dot = servletPath.lastIndexOf('.')) > 0
-	&& servletPath.lastIndexOf('/') < dot) {
+        && (dot = servletPath.lastIndexOf('.')) > 0
+        && servletPath.lastIndexOf('/') < dot) {
       String suffix
-	= extContext.getInitParameter(ViewHandler.DEFAULT_SUFFIX_PARAM_NAME);
+        = extContext.getInitParameter(ViewHandler.DEFAULT_SUFFIX_PARAM_NAME);
 
       if (suffix == null)
-	suffix = ViewHandler.DEFAULT_SUFFIX;
+        suffix = ViewHandler.DEFAULT_SUFFIX;
       
       // /test/foo.jsp
 
@@ -275,12 +275,12 @@ public class JspViewHandler extends ViewHandler
 
     int dot;
     if ((dot = viewId.lastIndexOf('.')) > 0
-	&& viewId.lastIndexOf('/') < dot) {
+        && viewId.lastIndexOf('/') < dot) {
       String suffix
-	= extContext.getInitParameter(ViewHandler.DEFAULT_SUFFIX_PARAM_NAME);
+        = extContext.getInitParameter(ViewHandler.DEFAULT_SUFFIX_PARAM_NAME);
 
       if (suffix == null)
-	suffix = ViewHandler.DEFAULT_SUFFIX;
+        suffix = ViewHandler.DEFAULT_SUFFIX;
       
       return viewId.substring(0, dot) + suffix;
     }
@@ -289,7 +289,7 @@ public class JspViewHandler extends ViewHandler
   }
 
   public String getActionURL(FacesContext context,
-			     String viewId)
+                             String viewId)
   {
     if (context == null || viewId == null)
       throw new NullPointerException();
@@ -312,10 +312,10 @@ public class JspViewHandler extends ViewHandler
       final int suffixDot = servletPath.lastIndexOf('.');
 
       return contextPath +
-	     (lastDot == -1 || suffixDot == -1
-	      ? viewId
-	      : viewId.substring(0, lastDot) +
-		servletPath.substring(suffixDot));
+             (lastDot == -1 || suffixDot == -1
+              ? viewId
+              : viewId.substring(0, lastDot) +
+                servletPath.substring(suffixDot));
     }
     else /*prefix mapping*/ {
 
@@ -324,13 +324,13 @@ public class JspViewHandler extends ViewHandler
   }
 
   public String getResourceURL(FacesContext context,
-			       String path)
+                               String path)
   {
     if (path.startsWith("/")) {
       ExternalContext extContext = context.getExternalContext();
 
       HttpServletRequest request
-	= (HttpServletRequest) extContext.getRequest();
+        = (HttpServletRequest) extContext.getRequest();
     
       return request.getContextPath() + path;
     }
@@ -339,7 +339,7 @@ public class JspViewHandler extends ViewHandler
   }
 
   public void renderView(FacesContext context,
-			 UIViewRoot viewToRender)
+                         UIViewRoot viewToRender)
     throws IOException, FacesException
   {
     if (! viewToRender.isRendered())
@@ -385,8 +385,8 @@ public class JspViewHandler extends ViewHandler
     extContext.setResponse(response);
     
     out = renderKit.createResponseWriter(response.getWriter(),
-					 null,
-					 encoding);
+                                         null,
+                                         encoding);
 
     context.setResponseWriter(out);
     
@@ -409,7 +409,7 @@ public class JspViewHandler extends ViewHandler
 
   @Override
   public UIViewRoot restoreView(FacesContext context,
-				String viewId)
+                                String viewId)
     throws FacesException
   {
     if (context == null)

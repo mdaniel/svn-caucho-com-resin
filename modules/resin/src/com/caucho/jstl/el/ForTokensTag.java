@@ -65,19 +65,19 @@ public class ForTokensTag extends ForEachTag {
       ELContext env = pageContext.getELContext();
 
       if (_beginExpr != null)
-	_begin = (int) _beginExpr.evalLong(env);
+        _begin = (int) _beginExpr.evalLong(env);
       else
-	_begin = -1;
+        _begin = -1;
 
       if (_endExpr != null)
-	_end = (int) _endExpr.evalLong(env);
+        _end = (int) _endExpr.evalLong(env);
       else
-	_end = Integer.MAX_VALUE;
+        _end = Integer.MAX_VALUE;
 
       if (_stepExpr != null)
-	_step = (int) _stepExpr.evalLong(env);
+        _step = (int) _stepExpr.evalLong(env);
       else
-	_step = 0;
+        _step = 0;
     
       String items = _itemsExpr.evalString(env);
       String delims = _delimsExpr.evalString(env);
@@ -85,12 +85,12 @@ public class ForTokensTag extends ForEachTag {
       _iterator = new TokenIterator(items, delims);
 
       while (_index < _begin && _iterator.hasNext()) {
-	_index++;
-	_iterator.next();
+        _index++;
+        _iterator.next();
       }
 
       if (_varStatus != null)
-	pageContext.setAttribute(_varStatus, this);
+        pageContext.setAttribute(_varStatus, this);
 
       return doAfterBody();
     } catch (Exception e) {

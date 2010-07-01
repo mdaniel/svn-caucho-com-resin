@@ -70,10 +70,10 @@ public class FromAncestors extends Axis {
       node = XmlUtil.getNext(node);
     
     for (;
-	 node != null && node != lastNode;
-	 node = XmlUtil.getNext(node)) {
+         node != null && node != lastNode;
+         node = XmlUtil.getNext(node)) {
       if (_parent.match(node, env))
-	return true;
+        return true;
     }
     
     return false;
@@ -154,7 +154,7 @@ public class FromAncestors extends Axis {
     int count = 0;
     for (; axis != null; axis = axis.getParentNode()) {
       if (pattern.match(axis, env))
-	count++;
+        count++;
 
       if (node == axis)
         break;

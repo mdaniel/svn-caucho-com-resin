@@ -85,9 +85,9 @@ class JavacErrorParser extends ErrorParser {
     int ch = is.read();
     for (; ch >= 0; ch = is.read()) {
       try {
-	_lineBuf.clear();
+        _lineBuf.clear();
 
-	for (; ch >= 0 && ch != '\n'; ch = is.read()) {
+        for (; ch >= 0 && ch != '\n'; ch = is.read()) {
           try {
             _lineBuf.addByte((byte) ch);
           } catch (Exception e) {
@@ -98,23 +98,23 @@ class JavacErrorParser extends ErrorParser {
                             _encoding,
                             e.toString()));
           }
-	}
+        }
       
-	_lineBuf.addByte('\n');
+        _lineBuf.addByte('\n');
 
-	String lineString = _lineBuf.getConvertedString();
+        String lineString = _lineBuf.getConvertedString();
 
-	StringCharCursor cursor = new StringCharCursor(lineString);
+        StringCharCursor cursor = new StringCharCursor(lineString);
 
-	String line = parseLine(cursor, lineMap);
-	if (line == null)
-	  result.append(lineString);
-	else
-	  result.append(line);
+        String line = parseLine(cursor, lineMap);
+        if (line == null)
+          result.append(lineString);
+        else
+          result.append(line);
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-	
-	result.append(e).append("\n");
+        log.log(Level.WARNING, e.toString(), e);
+
+        result.append(e).append("\n");
       }
     }
 
@@ -142,22 +142,22 @@ class JavacErrorParser extends ErrorParser {
   line:
     for (; ch != is.DONE; ch = is.read()) {
       while (ch == ':') {
-	line = 0;
-	for (ch = is.read(); ch >= '0' && ch <= '9'; ch = is.read())
-	  line = 10 * line + ch - '0';
-	if (ch == ':' && line > 0) {
-	  filename = _token.toString();
-	  break line;
-	}
-	else {
-	  _token.append(':');
-	  if (line > 0)
-	    _token.append(line);
-	}
+        line = 0;
+        for (ch = is.read(); ch >= '0' && ch <= '9'; ch = is.read())
+          line = 10 * line + ch - '0';
+        if (ch == ':' && line > 0) {
+          filename = _token.toString();
+          break line;
+        }
+        else {
+          _token.append(':');
+          if (line > 0)
+            _token.append(line);
+        }
       }
 
       if (ch != is.DONE)
-	_token.append((char) ch);
+        _token.append((char) ch);
     }
 
     if (filename == null)

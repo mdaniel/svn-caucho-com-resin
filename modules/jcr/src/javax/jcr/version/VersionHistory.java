@@ -46,39 +46,39 @@ public interface VersionHistory extends Node {
   
   public Version getVersion(String versionName)
     throws VersionException,
-	   RepositoryException;
+           RepositoryException;
   
   public Version getVersionByLabel(String label)
     throws RepositoryException;
   
   public void addVersionLabel(String versionName,
-			      String label,
-			      boolean moveLabel)
+                              String label,
+                              boolean moveLabel)
     throws VersionException,
-	   RepositoryException;
+           RepositoryException;
   
   public void removeVersionLabel(String label)
     throws VersionException,
-	   RepositoryException;
+           RepositoryException;
   
   public boolean hasVersionLabel(String label)
     throws RepositoryException;
   
   public boolean hasVersionLabel(Version version, String label)
     throws VersionException,
-	   RepositoryException;
+           RepositoryException;
   
   public String[] getVersionLabels()
     throws RepositoryException;
   
   public String[] getVersionLabels(Version version)
     throws VersionException,
-	   RepositoryException;
+           RepositoryException;
 
   public void removeVersion(String versionName)
     throws ReferentialIntegrityException,
-	   AccessDeniedException,
-	   UnsupportedRepositoryOperationException,
-	   VersionException,
-	   RepositoryException;
+           AccessDeniedException,
+           UnsupportedRepositoryOperationException,
+           VersionException,
+           RepositoryException;
 }

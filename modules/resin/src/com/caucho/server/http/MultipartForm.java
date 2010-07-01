@@ -94,22 +94,22 @@ class MultipartForm {
 
         WriteStream os = tempFile.openWrite();
 
-	TempBuffer tempBuffer = TempBuffer.allocate();
-	byte []buf = tempBuffer.getBuffer();
+        TempBuffer tempBuffer = TempBuffer.allocate();
+        byte []buf = tempBuffer.getBuffer();
 
-	int totalLength = 0;
+        int totalLength = 0;
 
         try {
-	  int len;
-	  
-	  while ((len = is.read(buf, 0, buf.length)) > 0) {
-	    os.write(buf, 0, len);
-	    totalLength += len;
-	  }
+          int len;
+
+          while ((len = is.read(buf, 0, buf.length)) > 0) {
+            os.write(buf, 0, len);
+            totalLength += len;
+          }
         } finally {
           os.close();
 
-	  TempBuffer.free(tempBuffer);
+          TempBuffer.free(tempBuffer);
           tempBuffer = null;
         }
 
@@ -118,7 +118,7 @@ class MultipartForm {
                            "" + tempFile.getLength());
           request.setAttribute("caucho.multipart.form.error", msg);
           request.setAttribute("caucho.multipart.form.error.size",
-			       new Long(tempFile.getLength()));
+                               new Long(tempFile.getLength()));
           
           tempFile.remove();
           
@@ -131,31 +131,31 @@ class MultipartForm {
 
           throw new IllegalStateException(msg);
         }
-	else if (tempFile.getLength() != totalLength) {
+        else if (tempFile.getLength() != totalLength) {
           String msg = L.l("multipart form upload failed (possibly due to full disk).");
-	  
+
           request.setAttribute("caucho.multipart.form.error", msg);
           request.setAttribute("caucho.multipart.form.error.size",
-			       new Long(tempFile.getLength()));
+                               new Long(tempFile.getLength()));
           
           tempFile.remove();
           
           throw new IOException(msg);
-	}
+        }
 
-	// server/136u, server/136v, #2578
-	if (table.get(name + ".filename") == null) {
-	  table.put(name, new String[] { tempFile.getNativePath() });
-	  table.put(name + ".file", new String[] { tempFile.getNativePath() });
-	  table.put(name + ".filename", new String[] { filename });
-	  table.put(name + ".content-type", new String[] { contentType });
-	}
-	else {
-	  addTable(table, name, tempFile.getNativePath());
-	  addTable(table, name + ".file", tempFile.getNativePath());
-	  addTable(table, name + ".filename", filename);
-	  addTable(table, name + ".content-type", contentType);
-	}
+        // server/136u, server/136v, #2578
+        if (table.get(name + ".filename") == null) {
+          table.put(name, new String[] { tempFile.getNativePath() });
+          table.put(name + ".file", new String[] { tempFile.getNativePath() });
+          table.put(name + ".filename", new String[] { filename });
+          table.put(name + ".content-type", new String[] { contentType });
+        }
+        else {
+          addTable(table, name, tempFile.getNativePath());
+          addTable(table, name + ".file", tempFile.getNativePath());
+          addTable(table, name + ".filename", filename);
+          addTable(table, name + ".content-type", contentType);
+        }
 
       if (log.isLoggable(Level.FINE))
           log.fine("mp-file: " + name + "(filename:" + filename + ")");

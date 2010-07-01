@@ -225,14 +225,14 @@ public class JsseSSLFactory implements SSLFactory {
       Key key = _keyStore.getKey(_alias, _password.toCharArray());
 
       if (key == null)
-	throw new ConfigException(L.l("JSSE alias '{0}' does not have a corresponding key.",
-				  _alias));
+        throw new ConfigException(L.l("JSSE alias '{0}' does not have a corresponding key.",
+                                  _alias));
 
       Certificate []certChain = _keyStore.getCertificateChain(_alias);
       
       if (certChain == null)
-	throw new ConfigException(L.l("JSSE alias '{0}' does not have a corresponding certificate chain.",
-				  _alias));
+        throw new ConfigException(L.l("JSSE alias '{0}' does not have a corresponding certificate chain.",
+                                  _alias));
 
       _keyStore = KeyStore.getInstance(_keyStoreType);
       _keyStore.load(null, _password.toCharArray());
@@ -253,7 +253,7 @@ public class JsseSSLFactory implements SSLFactory {
       SSLContext sslContext = SSLContext.getInstance(_sslContext);
 
       KeyManagerFactory kmf
-	= KeyManagerFactory.getInstance(_keyManagerFactory);
+        = KeyManagerFactory.getInstance(_keyManagerFactory);
     
       kmf.init(_keyStore, _password.toCharArray());
       
@@ -261,10 +261,10 @@ public class JsseSSLFactory implements SSLFactory {
 
       /*
       if (_cipherSuites != null)
-	sslContext.createSSLEngine().setEnabledCipherSuites(_cipherSuites);
+        sslContext.createSSLEngine().setEnabledCipherSuites(_cipherSuites);
 
       if (_protocols != null)
-	sslContext.createSSLEngine().setEnabledProtocols(_protocols);
+        sslContext.createSSLEngine().setEnabledProtocols(_protocols);
       */
 
       factory = sslContext.getServerSocketFactory();

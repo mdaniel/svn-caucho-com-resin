@@ -85,7 +85,7 @@ public class Credential implements ConnectionRequestInfo
     Credential credential = (Credential) o;
 
     return (getUserName().equals(credential.getUserName())
-	    && getPassword().equals(credential.getPassword()));
+            && getPassword().equals(credential.getPassword()));
   }
 
 

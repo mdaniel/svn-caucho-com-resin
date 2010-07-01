@@ -217,7 +217,7 @@ class XtpPage extends Page {
       res.sendError(503, "Server busy: XTP generation delayed");
     } finally {
       if (resAdapt != null)
-	resAdapt.close();
+        resAdapt.close();
     }
   }
     
@@ -257,12 +257,12 @@ class XtpPage extends Page {
     
     if (page == null) {
       if (_varyMap != null) {
-	varyName = generateVaryName(req);
+        varyName = generateVaryName(req);
 
-	if (varyName != null) {
-	  SoftReference<Page> ref = _varyMap.get(varyName);
-	  page = ref != null ? ref.get() : null;
-	}
+        if (varyName != null) {
+          SoftReference<Page> ref = _varyMap.get(varyName);
+          page = ref != null ? ref.get() : null;
+        }
       }
     }
 
@@ -277,53 +277,53 @@ class XtpPage extends Page {
     Thread.interrupted();
     if (_compileSemaphore.tryAcquire(timeout, TimeUnit.SECONDS)) {
       try {
-	varyName = generateVaryName(req);
+        varyName = generateVaryName(req);
 
-	page = getPrecompiledPage(req, varyName);
+        page = getPrecompiledPage(req, varyName);
 
-	if (page == null) {
-	  CauchoDocument doc;
+        if (page == null) {
+          CauchoDocument doc;
 
-	  try {
-	    doc = parseXtp();
-	  } catch (FileNotFoundException e) {
-	    res.sendError(404);
-	    throw e;
-	  }
+          try {
+            doc = parseXtp();
+          } catch (FileNotFoundException e) {
+            res.sendError(404);
+            throw e;
+          }
 
-	  Templates stylesheet = compileStylesheet(req, doc);
+          Templates stylesheet = compileStylesheet(req, doc);
 
-	  // the new stylesheet affects the vary name
-	  varyName = generateVaryName(req);
+          // the new stylesheet affects the vary name
+          varyName = generateVaryName(req);
 
-	  page = getPrecompiledPage(req, varyName);
+          page = getPrecompiledPage(req, varyName);
 
-	  if (page == null)
-	    page = compileJspPage(req, res, doc, stylesheet, varyName);
-	}
+          if (page == null)
+            page = compileJspPage(req, res, doc, stylesheet, varyName);
+        }
 
-	if (page != null) {
-	  ServletConfigImpl config = new ServletConfigImpl();
-	  config.setServletContext(_webApp);
+        if (page != null) {
+          ServletConfigImpl config = new ServletConfigImpl();
+          config.setServletContext(_webApp);
 
-	  page.init(config);
+          page.init(config);
 
-	  if (varyName != null && _varyMap == null)
-	    _varyMap = new HashMap<String,SoftReference<Page>>(8);
+          if (varyName != null && _varyMap == null)
+            _varyMap = new HashMap<String,SoftReference<Page>>(8);
         
-	  if (varyName != null)
-	    _varyMap.put(varyName, new SoftReference<Page>(page));
-	  else
-	    _page = page;
-	}
-	else if (deadPage != null) {
-	  _page = null;
+          if (varyName != null)
+            _varyMap.put(varyName, new SoftReference<Page>(page));
+          else
+            _page = page;
+        }
+        else if (deadPage != null) {
+          _page = null;
 
-	  if (varyName != null && _varyMap != null)
-	    _varyMap.remove(varyName);
-	}
+          if (varyName != null && _varyMap != null)
+            _varyMap.remove(varyName);
+        }
       } finally {
-	_compileSemaphore.release();
+        _compileSemaphore.release();
       }
     }
     else {
@@ -353,13 +353,13 @@ class XtpPage extends Page {
     
     try {
       page = _jspManager.preload(className,
-				 _webApp.getClassLoader(),
-				 _webApp.getAppDir(),
-				 null);
+                                 _webApp.getClassLoader(),
+                                 _webApp.getAppDir(),
+                                 null);
 
       if (page != null) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine("XTP using precompiled page " + className);
+        if (log.isLoggable(Level.FINE))
+          log.fine("XTP using precompiled page " + className);
       
         return page;
       }
@@ -381,14 +381,14 @@ class XtpPage extends Page {
       XmlParser parser;
       
       if (_strictXml) {
-	parser = new Xml();
-	parser.setEntitiesAsText(_entitiesAsText);
+        parser = new Xml();
+        parser.setEntitiesAsText(_entitiesAsText);
       }
       else {
-	parser = new Html();
-	parser.setAutodetectXml(true);
-	parser.setEntitiesAsText(true);
-	// parser.setXmlEntitiesAsText(entitiesAsText);
+        parser = new Html();
+        parser.setAutodetectXml(true);
+        parser.setEntitiesAsText(true);
+        // parser.setXmlEntitiesAsText(entitiesAsText);
         parser.setToLower(_toLower);
       }
 
@@ -431,9 +431,9 @@ class XtpPage extends Page {
     } catch (XslParseException e) {
       JspParseException jspE;
       if (e.getException() != null)
-	jspE = new JspParseException(e.getException());
+        jspE = new JspParseException(e.getException());
       else
-	jspE = new JspParseException(e);
+        jspE = new JspParseException(e);
 
       jspE.setErrorPage(_errorPage);
 
@@ -461,8 +461,8 @@ class XtpPage extends Page {
         _paramNames = new ArrayList<String>();
 
       if (param.equals("xtp:context_path") ||
-	  param.equals("xtp:servlet_path"))
-	continue;
+          param.equals("xtp:servlet_path"))
+        continue;
       
       if (! _paramNames.contains(param))
         _paramNames.add(param);
@@ -588,7 +588,7 @@ class XtpPage extends Page {
    */
   private Page getJspPage(CauchoDocument doc, Templates stylesheet,
                           CauchoRequest req, CauchoResponse res,
-			  String className)
+                          String className)
     throws IOException, ServletException, JspException, TransformerConfigurationException
   {
     Path workDir = _jspManager.getClassDir();
@@ -703,7 +703,7 @@ class XtpPage extends Page {
 
       ServletConfig config = null;
       Page page = _jspManager.createGeneratedPage(path, _uri, className,
-						  config, depends);
+                                                  config, depends);
       
       return page;
     } catch (IOException e) {
@@ -744,11 +744,11 @@ class XtpPage extends Page {
     if (xform != null)
       errorPage = (String) xform.getProperty("caucho.error.page");
     pageContext = factory.getPageContext(this,
-					 req, res,
+                                         req, res,
                                          errorPage,
-					 false,
-					 8192, // bufferSize,
-					 false); // autoFlush);
+                                         false,
+                                         8192, // bufferSize,
+                                         false); // autoFlush);
 
     try {
       if (xform != null) {
@@ -793,14 +793,14 @@ class XtpPage extends Page {
     throws XPathException
   {
     Iterator iter = XPath.select("//processing-instruction('xml-stylesheet')",
-				 doc);
+                                 doc);
     while (iter.hasNext()) {
       ProcessingInstruction pi = (ProcessingInstruction) iter.next();
       String value = pi.getNodeValue();
       String piMedia = XmlUtil.getPIAttribute(value, "media");
       
       if (piMedia == null || piMedia.equals(media))
-	return XmlUtil.getPIAttribute(value, "href");
+        return XmlUtil.getPIAttribute(value, "href");
     }
 
     return "default.xsl"; // xslManager.getDefaultStylesheet();
@@ -814,14 +814,14 @@ class XtpPage extends Page {
     throws XPathException
   {
     Iterator iter = XPath.select("//processing-instruction('xml-stylesheet')",
-				 doc);
+                                 doc);
     while (iter.hasNext()) {
       ProcessingInstruction pi = (ProcessingInstruction) iter.next();
       String value = pi.getNodeValue();
       String piMedia = XmlUtil.getPIAttribute(value, "media");
       
       if (piMedia != null)
-	return true;
+        return true;
     }
 
     return false;

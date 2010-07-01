@@ -34,44 +34,44 @@ package javax.faces.el;
 public abstract class PropertyResolver
 {
   public abstract Object getValue(Object base,
-				  Object property)
+                                  Object property)
     throws EvaluationException,
-	   PropertyNotFoundException;
+           PropertyNotFoundException;
   
   public abstract Object getValue(Object base,
-				  int index)
+                                  int index)
     throws EvaluationException,
-	   PropertyNotFoundException;
+           PropertyNotFoundException;
   
   public abstract void setValue(Object base,
-				Object property,
-				Object value)
+                                Object property,
+                                Object value)
     throws EvaluationException,
-	   PropertyNotFoundException;
+           PropertyNotFoundException;
   
   public abstract void setValue(Object base,
-				int index,
-				Object value)
+                                int index,
+                                Object value)
     throws EvaluationException,
-	   PropertyNotFoundException;
+           PropertyNotFoundException;
   
   public abstract boolean isReadOnly(Object base,
-				     Object property)
+                                     Object property)
     throws EvaluationException,
-	   PropertyNotFoundException;
+           PropertyNotFoundException;
   
   public abstract boolean isReadOnly(Object base,
-				     int index)
+                                     int index)
     throws EvaluationException,
-	   PropertyNotFoundException;
+           PropertyNotFoundException;
   
   public abstract Class getType(Object base,
-				Object property)
+                                Object property)
     throws EvaluationException,
-	   PropertyNotFoundException;
+           PropertyNotFoundException;
   
   public abstract Class getType(Object base,
-				int index)
+                                int index)
     throws EvaluationException,
-	   PropertyNotFoundException;
+           PropertyNotFoundException;
 }

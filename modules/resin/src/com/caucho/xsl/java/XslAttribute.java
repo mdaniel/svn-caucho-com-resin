@@ -105,27 +105,27 @@ public class XslAttribute extends XslNode {
       out.print("XMLWriter " + var + " = ");
       
       if (_namespace != null) {
-	out.print("out.pushAttributeNs(");
+        out.print("out.pushAttributeNs(");
     
-	generateString(out, _name, '+');
+        generateString(out, _name, '+');
       
-	out.print(", ");
-	generateString(out, _namespace, '+');
-	
+        out.print(", ");
+        generateString(out, _namespace, '+');
+
       
-	out.println(");");
+        out.println(");");
       }
       else {
-	out.print("out.pushAttribute(");
+        out.print("out.pushAttribute(");
     
-	generateString(out, _name, '+');
+        generateString(out, _name, '+');
       
-	if (getOutputNamespace() != null) {
-	  out.print(", ");
-	  printNamespace(out, getOutputNamespace());
-	}
+        if (getOutputNamespace() != null) {
+          out.print(", ");
+          printNamespace(out, getOutputNamespace());
+        }
     
-	out.println(");");
+        out.println(");");
       }
       
       generateChildren(out);
@@ -138,8 +138,8 @@ public class XslAttribute extends XslNode {
       generateString(out, _name, '+');
 
       if (getOutputNamespace() != null) {
-	out.print(", ");
-	printNamespace(out, getOutputNamespace());
+        out.print(", ");
+        printNamespace(out, getOutputNamespace());
       }
 
       out.println(", \"\");");

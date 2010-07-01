@@ -67,42 +67,42 @@ abstract public class AbstractActorStreamFilter implements ActorStream
    * @param payload the message payload
    */
   public void messageError(String to,
-			   String from,
-			   Serializable payload,
-			   ActorError error)
+                           String from,
+                           Serializable payload,
+                           ActorError error)
   {
     getNext().messageError(to, from, payload, error);
   }
   
   public void queryGet(long id,
-		       String to,
-		       String from,
-		       Serializable payload)
+                       String to,
+                       String from,
+                       Serializable payload)
   {
     getNext().queryGet(id, to, from, payload);
   }
   
   public void querySet(long id,
-		       String to,
-		       String from,
-		       Serializable payload)
+                       String to,
+                       String from,
+                       Serializable payload)
   {
     getNext().querySet(id, to, from, payload);
   }
   
   public void queryResult(long id,
-			  String to,
-			  String from,
-			  Serializable payload)
+                          String to,
+                          String from,
+                          Serializable payload)
   {
     getNext().queryResult(id, to, from, payload);
   }
   
   public void queryError(long id,
-			 String to,
-			 String from,
-			 Serializable payload,
-			 ActorError error)
+                         String to,
+                         String from,
+                         Serializable payload,
+                         ActorError error)
   {
     getNext().queryError(id, to, from, payload, error);
   }

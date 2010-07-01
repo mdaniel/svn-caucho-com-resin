@@ -49,8 +49,8 @@ public interface HttpScriptContext extends ScriptContext {
    * Initialize the context with the current servlet.
    */
   public void initialize(Servlet servlet,
-			 HttpServletRequest request,
-			 HttpServletResponse response)
+                         HttpServletRequest request,
+                         HttpServletResponse response)
     throws ServletException;
 
   /**

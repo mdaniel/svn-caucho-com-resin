@@ -121,15 +121,15 @@ abstract public class AbstractStringExpr extends Expr {
     boolean lastIsWhitespace = false;
     for (; i < len; i++) {
       if (XmlChar.isWhitespace(string.charAt(i))) {
-	lastIsWhitespace = true;
+        lastIsWhitespace = true;
       }
       else if (lastIsWhitespace) {
-	result.append(' ');
-	result.append(string.charAt(i));
-	lastIsWhitespace = false;
+        result.append(' ');
+        result.append(string.charAt(i));
+        lastIsWhitespace = false;
       }
       else
-	result.append(string.charAt(i));
+        result.append(string.charAt(i));
     }
 
     return result.toString();

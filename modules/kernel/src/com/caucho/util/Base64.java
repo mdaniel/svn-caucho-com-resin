@@ -181,7 +181,7 @@ public class Base64 {
   }
 
   public static void oldEncode(CharBuffer cb, byte []buffer,
-			       int offset, int length)
+                               int offset, int length)
   {
     while (length >= 3) {
       int data = (buffer[offset] & 0xff) << 16;
@@ -253,8 +253,8 @@ public class Base64 {
   }
 
   public static String encodeFromByteArray(byte[] value,
-					   int offset,
-					   int length)
+                                           int offset,
+                                           int length)
   {
     try {
       StringWriter sw = new StringWriter();
@@ -275,35 +275,35 @@ public class Base64 {
       int value3 = i.read();
 
       if (value3 >= 0) {
-	long chunk = (value1 & 0xff);
-	chunk = (chunk << 8) + (value2 & 0xff);
-	chunk = (chunk << 8) + (value3 & 0xff);
+        long chunk = (value1 & 0xff);
+        chunk = (chunk << 8) + (value2 & 0xff);
+        chunk = (chunk << 8) + (value3 & 0xff);
         
-	w.write(encode(chunk >> 18));
-	w.write(encode(chunk >> 12));
-	w.write(encode(chunk >> 6));
-	w.write(encode(chunk));
-	continue;
+        w.write(encode(chunk >> 18));
+        w.write(encode(chunk >> 12));
+        w.write(encode(chunk >> 6));
+        w.write(encode(chunk));
+        continue;
       }
     
       if (value2 >= 0) {
-	long chunk = (value1 & 0xff);
-	chunk = (chunk << 8) + (value2 & 0xff);
-	chunk <<= 8;
-	
-	w.write(encode(chunk >> 18));
-	w.write(encode(chunk >> 12));
-	w.write(encode(chunk >> 6));
-	w.write('=');
+        long chunk = (value1 & 0xff);
+        chunk = (chunk << 8) + (value2 & 0xff);
+        chunk <<= 8;
+
+        w.write(encode(chunk >> 18));
+        w.write(encode(chunk >> 12));
+        w.write(encode(chunk >> 6));
+        w.write('=');
       }
       else if (value1 >= 0) {
-	long chunk = (value1 & 0xff);
-	chunk <<= 16;
-	
-	w.write(encode(chunk >> 18));
-	w.write(encode(chunk >> 12));
-	w.write('=');
-	w.write('=');
+        long chunk = (value1 & 0xff);
+        chunk <<= 16;
+
+        w.write(encode(chunk >> 18));
+        w.write(encode(chunk >> 12));
+        w.write('=');
+        w.write('=');
       }
       break;
     }
@@ -326,7 +326,7 @@ public class Base64 {
   {
     try {
       if (value == null)
-	return new byte[0];
+        return new byte[0];
       
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       decode(new StringReader(value), baos);
@@ -375,9 +375,9 @@ public class Base64 {
         ch3 = '=';
       
       int chunk = ((_decode[ch0] << 18)
-		   + (_decode[ch1] << 12)
-		   + (_decode[ch2] << 6)
-		   + (_decode[ch3]));
+                   + (_decode[ch1] << 12)
+                   + (_decode[ch2] << 6)
+                   + (_decode[ch3]));
       
       os.write((byte) ((chunk >> 16) & 0xff));
       

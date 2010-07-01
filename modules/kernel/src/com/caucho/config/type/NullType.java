@@ -63,7 +63,7 @@ public final class NullType extends ConfigType
       return null;
     else
       throw new ConfigException(L.l("'{0}' is an illegal value for <null/>",
-				    text));
+                                    text));
   }
   
   /**

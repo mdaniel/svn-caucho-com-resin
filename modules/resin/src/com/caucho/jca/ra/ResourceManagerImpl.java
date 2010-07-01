@@ -109,8 +109,8 @@ public class ResourceManagerImpl implements BootstrapContext {
       rm = _localManager.getLevel();
 
       if (rm == null) {
-	rm = new ResourceManagerImpl();
-	_localManager.set(rm);
+        rm = new ResourceManagerImpl();
+        _localManager.set(rm);
       }
     }
 
@@ -171,7 +171,7 @@ public class ResourceManagerImpl implements BootstrapContext {
   {
     synchronized (this) {
       if (_workManager == null)
-	_workManager = new WorkManagerImpl();
+        _workManager = new WorkManagerImpl();
     }
 
     return _workManager;
@@ -212,13 +212,13 @@ public class ResourceManagerImpl implements BootstrapContext {
     
     synchronized (_timers) {
       for (int i = _timers.size(); i >= 0; i--) {
-	SoftReference<Timer> timerRef = _timers.get(i);
-	Timer oldTimer = timerRef.get();
+        SoftReference<Timer> timerRef = _timers.get(i);
+        Timer oldTimer = timerRef.get();
 
-	if (oldTimer == null)
-	  _timers.remove(i);
-	else if (oldTimer == timer)
-	  _timers.remove(i);
+        if (oldTimer == null)
+          _timers.remove(i);
+        else if (oldTimer == timer)
+          _timers.remove(i);
       }
     }
   }
@@ -249,7 +249,7 @@ public class ResourceManagerImpl implements BootstrapContext {
     
     synchronized (this) {
       if (_isClosed)
-	return;
+        return;
       _isClosed = true;
       
       connectionManagers = _connectionManagers;
@@ -268,10 +268,10 @@ public class ResourceManagerImpl implements BootstrapContext {
       Timer timer = timerRef.get();
 
       try {
-	if (timer != null)
-	  timer.cancel();
+        if (timer != null)
+          timer.cancel();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -283,9 +283,9 @@ public class ResourceManagerImpl implements BootstrapContext {
       ConnectionPool connectionManager = connectionManagers.get(i);
 
       try {
-	connectionManager.destroy();
+        connectionManager.destroy();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -294,9 +294,9 @@ public class ResourceManagerImpl implements BootstrapContext {
       ResourceAdapter resource = resources.get(i);
 
       try {
-	resource.stop();
+        resource.stop();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

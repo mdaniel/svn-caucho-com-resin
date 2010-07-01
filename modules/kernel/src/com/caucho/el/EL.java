@@ -87,7 +87,7 @@ public class EL {
    * Sets the environment map.
    */
   public static void setVariableMap(HashMap<String,Object> map,
-				    ClassLoader loader)
+                                    ClassLoader loader)
   {
     _envVar.set(map, loader);
   }

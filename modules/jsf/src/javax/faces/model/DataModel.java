@@ -69,16 +69,16 @@ public abstract class DataModel
 
     for (int i = _listeners.length - 1; i >= 0; i--) {
       if (_listeners[i].equals(listener)) {
-	DataModelListener []newListeners
-	  = new DataModelListener[_listeners.length - 1];
+        DataModelListener []newListeners
+          = new DataModelListener[_listeners.length - 1];
 
-	System.arraycopy(_listeners, 0, newListeners, 0, i);
-	System.arraycopy(_listeners, i + 1, newListeners, i,
-			 _listeners.length - i - 1);
+        System.arraycopy(_listeners, 0, newListeners, 0, i);
+        System.arraycopy(_listeners, i + 1, newListeners, i,
+                         _listeners.length - i - 1);
 
-	_listeners = newListeners;
+        _listeners = newListeners;
 
-	return;
+        return;
       }
     }
   }

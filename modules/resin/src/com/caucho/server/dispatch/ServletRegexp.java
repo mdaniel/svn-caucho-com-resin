@@ -132,8 +132,8 @@ public class ServletRegexp {
    * Initialize for a regexp.
    */
   String initRegexp(ServletContext application,
-		    ServletManager manager,
-		    ArrayList<String> vars)
+                    ServletManager manager,
+                    ArrayList<String> vars)
     throws ServletException
   {
     ELContext env = EL.getEnvironment();
@@ -153,7 +153,7 @@ public class ServletRegexp {
       String servletName = EL.evalString(rawName, mapEnv);
 
       if (manager.getServletConfig(servletName) != null)
-	return servletName;
+        return servletName;
       
       String className = EL.evalString(rawClassName, mapEnv);
 

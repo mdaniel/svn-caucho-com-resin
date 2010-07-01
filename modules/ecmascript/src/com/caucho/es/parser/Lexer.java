@@ -348,7 +348,7 @@ class Lexer {
   {
     try {
       if (lexeme == START) {
-	lexeme = lex();
+        lexeme = lex();
       }
       
       lastLexeme = lexeme;
@@ -368,7 +368,7 @@ class Lexer {
       int value = lexeme;
 
       if (value == START) {
-	value = lex();
+        value = lex();
       }
 
       lastLexeme = value;
@@ -436,227 +436,227 @@ class Lexer {
 
       switch (ch) {
       case -1:
-	isEof = true;
-	return EOF;
+        isEof = true;
+        return EOF;
 
       case ' ': case '\t': case '\f': case 0x0b: /* vertical tab */
-	break;
-	
+        break;
+
       case '\n': 
-	newline();
-	hasLf = true;
-	break;
+        newline();
+        hasLf = true;
+        break;
 
       case '+': case '-': case '*': case '!': case ',': case '^':
       case '<': case '>': case '&': case '|': case '=': case '~':
       case '?':
-	regexpOk = true; // exception ++/--
-	return lexOp(ch);
+        regexpOk = true; // exception ++/--
+        return lexOp(ch);
 
       case ')': case ']': 
-	regexpOk = false;
-	return ch;
+        regexpOk = false;
+        return ch;
 
       case ':': case ';': case '(': 
       case '[': case '{': case '}':
-	regexpOk = true;
-	return ch;
+        regexpOk = true;
+        return ch;
 
       case '.':
-	{
-	  int ch2 = read();
+        {
+          int ch2 = read();
 
-	  if (ch2 >= '0' && ch2 <= '9') {
-	    regexpOk = false;
-	    return lexFloat(0, ch2);
-	  }
-	  else {
-	    regexpOk = true;
-	    ungetc(ch2);
-	    return lexOp(ch);
-	  }
-	}
+          if (ch2 >= '0' && ch2 <= '9') {
+            regexpOk = false;
+            return lexFloat(0, ch2);
+          }
+          else {
+            regexpOk = true;
+            ungetc(ch2);
+            return lexOp(ch);
+          }
+        }
 
       case '/':
-	{
-	  int ch2 = read();
+        {
+          int ch2 = read();
 
-	  if (ch2 == '/') {
-	    for (ch2 = read(); 
-		 ch2 > 0 && ch2 != '\n';
-		 ch2 = read()) {
-	    }
+          if (ch2 == '/') {
+            for (ch2 = read();
+                 ch2 > 0 && ch2 != '\n';
+                 ch2 = read()) {
+            }
 
-	    ungetc(ch2);
-	    break;
-	  }
-	  else if (ch2 == '*') {
-	    boolean seenStar = false;
-	    for (ch2 = read(); 
-		 ch2 > 0 && (! seenStar || ch2 != '/');
-		 ch2 = read()) {
-	      if (ch2 == '/') {
-		ch2 = read();
-		if (ch2 == '*')
-		  throw error(L.l("comments can't nest"));
-	      }
-
-	      seenStar = ch2 == '*';
-
-	      if (ch2 == '\n') {
-		newline();
-		hasLf = true;
+            ungetc(ch2);
+            break;
+          }
+          else if (ch2 == '*') {
+            boolean seenStar = false;
+            for (ch2 = read();
+                 ch2 > 0 && (! seenStar || ch2 != '/');
+                 ch2 = read()) {
+              if (ch2 == '/') {
+                ch2 = read();
+                if (ch2 == '*')
+                  throw error(L.l("comments can't nest"));
               }
-	    }
-	    break;
-	  }
-	  else if (regexpOk) {
-	    regexpOk = false;
 
-	    ungetc(ch2);
-	    lexString('/', null, true, false);
+              seenStar = ch2 == '*';
 
-	    readRegexpFlags();
-	    try {
-	      Pattern regexp = Pattern.compile(literal.toString(), _flags);
-	      // checking for errors
-	    } catch (Exception e) {
-	      // e.printStackTrace();
-	      throw error(String.valueOf(e));
-	    }
+              if (ch2 == '\n') {
+                newline();
+                hasLf = true;
+              }
+            }
+            break;
+          }
+          else if (regexpOk) {
+            regexpOk = false;
 
-	    return REGEXP;
-	  } else {
-	    ungetc(ch2);
-	    return lexOp(ch);
-	  }
-	}
+            ungetc(ch2);
+            lexString('/', null, true, false);
+
+            readRegexpFlags();
+            try {
+              Pattern regexp = Pattern.compile(literal.toString(), _flags);
+              // checking for errors
+            } catch (Exception e) {
+              // e.printStackTrace();
+              throw error(String.valueOf(e));
+            }
+
+            return REGEXP;
+          } else {
+            ungetc(ch2);
+            return lexOp(ch);
+          }
+        }
 
       case '0': case '1': case '2': case '3': case '4': 
       case '5': case '6': case '7': case '8': case '9':
-	regexpOk = false;
-	return lexNumber(ch);
+        regexpOk = false;
+        return lexNumber(ch);
 
       case '"': case '\'':
-	regexpOk = false;
-	return lexString((char) ch, null, false, false);
+        regexpOk = false;
+        return lexString((char) ch, null, false, false);
 
       case '@':
-	{
-	  int ch2 = read();
+        {
+          int ch2 = read();
 
-	  switch (ch2) {
-	  case '"':
-	    CharBuffer macro = new CharBuffer();
-	    macro.append('(');
-	    interpolate(macro, '"', null, "\"", "\"", false, false);
-	    macro.append(')');
-	    pushMacro(macro);
-	    break;
+          switch (ch2) {
+          case '"':
+            CharBuffer macro = new CharBuffer();
+            macro.append('(');
+            interpolate(macro, '"', null, "\"", "\"", false, false);
+            macro.append(')');
+            pushMacro(macro);
+            break;
 
-	  case '\'':
-	    macro = new CharBuffer();
-	    macro.append('(');
-	    interpolate(macro, '\'', null, "\'", "\'", false, false);
-	    macro.append(')');
-	    pushMacro(macro);
-	    break;
+          case '\'':
+            macro = new CharBuffer();
+            macro.append('(');
+            interpolate(macro, '\'', null, "\'", "\'", false, false);
+            macro.append(')');
+            pushMacro(macro);
+            break;
 
-	  case '@':
-	    if ((ch2 = read()) < 0)
-	      throw error(L.l("unexpected end of file"));
-	    switch (ch2) {
-	    case '{': ch2 = '}'; break;
-	    case '<': ch2 = '>'; break;
-	    case '(': ch2 = ')'; break;
-	    case '[': ch2 = ']'; break;
-	    }
+          case '@':
+            if ((ch2 = read()) < 0)
+              throw error(L.l("unexpected end of file"));
+            switch (ch2) {
+            case '{': ch2 = '}'; break;
+            case '<': ch2 = '>'; break;
+            case '(': ch2 = ')'; break;
+            case '[': ch2 = ']'; break;
+            }
 
-	    return lexString((char) ch2, null, true, false);
+            return lexString((char) ch2, null, true, false);
 
-	  case '<':
-	    if ((ch2 = read()) != '<')
-	      throw error(L.l("illegal character at `@'"));
-	    if (scanMultiline())
-	      return LITERAL;
-	    break;
+          case '<':
+            if ((ch2 = read()) != '<')
+              throw error(L.l("illegal character at `@'"));
+            if (scanMultiline())
+              return LITERAL;
+            break;
 
-	  case '/':
-	    macro = new CharBuffer();
-	    macro.append("new RegExp(");
-	    interpolate(macro, '/', null, "@@/", "/", true, false);
-	    macro.append(",");
-	    macro.append(readRegexpFlags());
-	    macro.append(")");
-	    pushMacro(macro);
-	    break;
+          case '/':
+            macro = new CharBuffer();
+            macro.append("new RegExp(");
+            interpolate(macro, '/', null, "@@/", "/", true, false);
+            macro.append(",");
+            macro.append(readRegexpFlags());
+            macro.append(")");
+            pushMacro(macro);
+            break;
 
-	  default:
+          default:
             return lexOp('@');
-	  }
-	  break;
-	}
+          }
+          break;
+        }
 
       case '%':
-	{
-	  int ch2 = read();
+        {
+          int ch2 = read();
 
-	  regexpOk = true;
-	  ungetc(ch2);
-	  return lexOp(ch);
-	}
+          regexpOk = true;
+          ungetc(ch2);
+          return lexOp(ch);
+        }
 
       case '#':
-	{
-	  int ch2 = read();
-	  if (line == 1 && lineCh == 2 && ch2 == '!') {
-	    for (; ch2 > 0 && ch2 != '\n'; ch2 = read()) {
-	    }
+        {
+          int ch2 = read();
+          if (line == 1 && lineCh == 2 && ch2 == '!') {
+            for (; ch2 > 0 && ch2 != '\n'; ch2 = read()) {
+            }
 
-	    ungetc(ch2);
-	    break;
-	  }
+            ungetc(ch2);
+            break;
+          }
 
-	  if (ch2 >= 'a' && ch2 <= 'z' || ch2 >= 'A' && ch2 <= 'Z') {
-	    temp.clear();
-	    for (; ch2 >= 'a' && ch2 <= 'z' || ch2 >= 'A' && ch2 <= 'Z';
-		 ch2 = read()) {
-	      temp.append((char) ch2);
-	    }
+          if (ch2 >= 'a' && ch2 <= 'z' || ch2 >= 'A' && ch2 <= 'Z') {
+            temp.clear();
+            for (; ch2 >= 'a' && ch2 <= 'z' || ch2 >= 'A' && ch2 <= 'Z';
+                 ch2 = read()) {
+              temp.append((char) ch2);
+            }
 
-	    if (temp.toString().equals("line"))
-	      scanLine(ch2);
-	    else if (temp.toString().equals("file"))
-	      scanFile(ch2);
-	    else
-	      throw error(L.l("expected pragma at `{0}'", temp));
+            if (temp.toString().equals("line"))
+              scanLine(ch2);
+            else if (temp.toString().equals("file"))
+              scanFile(ch2);
+            else
+              throw error(L.l("expected pragma at `{0}'", temp));
 
-	    break;
-	  }
+            break;
+          }
 
-	  if (ch2 < '0' || ch2 > '9')
-	    throw error(L.l("expected digit at {0}", badChar(ch2)));
-	  intValue = 0;
+          if (ch2 < '0' || ch2 > '9')
+            throw error(L.l("expected digit at {0}", badChar(ch2)));
+          intValue = 0;
 
-	  for (; ch2 >= '0' && ch2 <= '9'; ch2 = read())
-	    intValue = 10 * intValue + ch2 - '0';
+          for (; ch2 >= '0' && ch2 <= '9'; ch2 = read())
+            intValue = 10 * intValue + ch2 - '0';
 
-	  if (ch2 == '=')
-	    return HASH_DEF;
-	  else if (ch2 == '#')
-	    return HASH_REF;
-	  else
-	    throw error(L.l("expected sharp variable at {0}", badChar(ch)));
-	}
+          if (ch2 == '=')
+            return HASH_DEF;
+          else if (ch2 == '#')
+            return HASH_REF;
+          else
+            throw error(L.l("expected sharp variable at {0}", badChar(ch)));
+        }
 
       default:
-	if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' ||
-	    ch == '_' || ch == '$') { 
-	  regexpOk = false;
-	  return lexId(ch);
-	} else {
-	  throw error(L.l("illegal character at {0}", badChar(ch)));
-	}
+        if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' ||
+            ch == '_' || ch == '$') {
+          regexpOk = false;
+          return lexId(ch);
+        } else {
+          throw error(L.l("illegal character at {0}", badChar(ch)));
+        }
       }
     }
   }
@@ -687,7 +687,7 @@ class Lexer {
   ESParseException error(String text)
   {
     return new ESParseException(filename, beginLine, beginLineCh,
-				line, lineCh, text);
+                                line, lineCh, text);
   }
 
   private String hex(int value)
@@ -697,9 +697,9 @@ class Lexer {
     for (int b = 3; b >= 0; b--) {
       int v = (value >> (4 * b)) & 0xf;
       if (v < 10)
-	cb.append((char) (v + '0'));
+        cb.append((char) (v + '0'));
       else
-	cb.append((char) (v - 10 + 'a'));
+        cb.append((char) (v - 10 + 'a'));
     }
 
     return cb.toString();
@@ -813,18 +813,18 @@ class Lexer {
 
       int sign = 1;
       if (ch == '-') {
-	sign = -1;
-	ch = read();
+        sign = -1;
+        ch = read();
       } else if (ch == '+') {
-	ch = read();
+        ch = read();
       }
 
       if (ch < '0' || ch > '9')
-	throw error(L.l("expected exponent at {0}", badChar(ch)));
+        throw error(L.l("expected exponent at {0}", badChar(ch)));
 
       int userExpt = 0;
       for (; ch >= '0' && ch <= '9'; ch = read()) {
-	userExpt = 10 * userExpt + ch - '0';
+        userExpt = 10 * userExpt + ch - '0';
       }
 
       expt += sign * userExpt;
@@ -850,31 +850,31 @@ class Lexer {
     if (ch == '0') {
       ch = read();
       if (ch >= '0' && ch <= '9')
-	radix = 8;
+        radix = 8;
       else if (ch == 'x' || ch == 'X') {
-	hasChar = false;
-	radix = 16;
-	ch = read();
+        hasChar = false;
+        radix = 16;
+        ch = read();
       }
     }
 
     for (; ch >= 0; ch = read()) {
       if (ch >= '0' && ch <= '9') {
-	value = radix * value + ch - '0';
-	hasChar = true;
-	
-	if (radix == 8 && ch >= '8')
-	  throw error(L.l("expected octal digit at {0}", badChar(ch)));
+        value = radix * value + ch - '0';
+        hasChar = true;
+
+        if (radix == 8 && ch >= '8')
+          throw error(L.l("expected octal digit at {0}", badChar(ch)));
       } else if (radix == 16 && ch >= 'a' && ch <= 'f') {
-	hasChar = true;
-	value = radix * value + ch - 'a' + 10;
+        hasChar = true;
+        value = radix * value + ch - 'a' + 10;
       }
       else if (radix == 16 && ch >= 'A' && ch <= 'F') {
-	hasChar = true;
-	value = radix * value + ch - 'A' + 10;
+        hasChar = true;
+        value = radix * value + ch - 'A' + 10;
       }
       else
-	break;
+        break;
     }
 
     if (! hasChar)
@@ -884,11 +884,11 @@ class Lexer {
       ch = read();
       
       if (ch >= '0' && ch <= '9')
-	return lexFloat(value, ch);
+        return lexFloat(value, ch);
       else {
-	ungetc(ch);
-	literal = ESNumber.create(value);
-	return LITERAL;
+        ungetc(ch);
+        literal = ESNumber.create(value);
+        return LITERAL;
       }
     } else if (radix == 10 && (ch == 'e' || ch == 'E'))
       return lexFloat(value, ch);
@@ -918,9 +918,9 @@ class Lexer {
    * Lexeme for a string.
    */
   private int lexString(char endCh,
-			String endTail,
-			boolean isRegexp, 
-			boolean isMultiline)
+                        String endTail,
+                        boolean isRegexp,
+                        boolean isMultiline)
     throws ESParseException
   {
     text.setLength(0);
@@ -930,24 +930,24 @@ class Lexer {
       if (ch == '\n') {
         if (isMultiline) {
         }
-	else if (isRegexp)
-	  throw error(L.l("unexpected end of line in regular expression"));
+        else if (isRegexp)
+          throw error(L.l("unexpected end of line in regular expression"));
         else
-	  throw error(L.l("unexpected end of line in string"));
-	newline();
+          throw error(L.l("unexpected end of line in string"));
+        newline();
       }
 
       if (ch != endCh) {
       }
       else if (endTail == null) {
-	literal = ESString.create(text.toString());
-	return LITERAL;
+        literal = ESString.create(text.toString());
+        return LITERAL;
       }
       else if (! text.endsWith(endTail)) {
       }
       else if (text.length() == endTail.length()) {
-	literal = ESString.create("");
-	return LITERAL;
+        literal = ESString.create("");
+        return LITERAL;
       }
       else {
         char tailCh = text.charAt(text.length() - endTail.length() - 1);
@@ -960,129 +960,129 @@ class Lexer {
       }
 
       if (ch == '\\') {
-	ch = read();
-	switch (ch) {
-	case -1:
+        ch = read();
+        switch (ch) {
+        case -1:
           if (isRegexp)
             throw error(L.l("unexpected end of file in regular expression"));
           else
             throw error(L.l("unexpected end of file in string"));
 
-	case '\n':
+        case '\n':
           if (isRegexp)
             throw error(L.l("unexpected end of line in regular expression"));
           else
             throw error(L.l("unexpected end of line in string"));
 
-	case 'b':
-	  if (isRegexp)
-	    text.append("\\b");
-	  else
-	    text.append('\b');
-	  break;
+        case 'b':
+          if (isRegexp)
+            text.append("\\b");
+          else
+            text.append('\b');
+          break;
 
-	case 'e':
-	  text.append((char) 0x1b);
-	  break;
+        case 'e':
+          text.append((char) 0x1b);
+          break;
 
-	case 'f':
-	  text.append('\f');
-	  break;
+        case 'f':
+          text.append('\f');
+          break;
 
-	case 'n':
-	  text.append('\n');
-	  break;
+        case 'n':
+          text.append('\n');
+          break;
 
-	case 'r':
-	  text.append('\r');
-	  break;
+        case 'r':
+          text.append('\r');
+          break;
 
-	case 't':
-	  text.append('\t');
-	  break;
+        case 't':
+          text.append('\t');
+          break;
 
-	case 'v':
-	  text.append((char) 0xb);
-	  break;
+        case 'v':
+          text.append((char) 0xb);
+          break;
 
-	case 'c':
-	  {
-	    ch = read();
-	    if (ch >= 'a' && ch <= 'z')
-	      text.append((char) (ch - 'a' + 1));
-	    else if (ch >= 'A' && ch <= 'Z')
-	      text.append((char) (ch - 'A' + 1));
-	    else if (ch - '@' >= 0 && ch - '@' < ' ')
-	      text.append((char) (ch - '@'));
-	    else
-	      throw error(L.l("expected control character at {0}",
+        case 'c':
+          {
+            ch = read();
+            if (ch >= 'a' && ch <= 'z')
+              text.append((char) (ch - 'a' + 1));
+            else if (ch >= 'A' && ch <= 'Z')
+              text.append((char) (ch - 'A' + 1));
+            else if (ch - '@' >= 0 && ch - '@' < ' ')
+              text.append((char) (ch - '@'));
+            else
+              throw error(L.l("expected control character at {0}",
                               badChar(ch)));
-	  }
-	  break;
+          }
+          break;
 
-	case 'o':
-	  {
-	    int value = 0;
-	    while ((ch = read()) >= '0' && ch <= '8') {
-	      value = 8 * value + ch - '0';
-	    }
-	    ungetc(ch);
-	    text.append((char) value);
-	  }
-	  break;
+        case 'o':
+          {
+            int value = 0;
+            while ((ch = read()) >= '0' && ch <= '8') {
+              value = 8 * value + ch - '0';
+            }
+            ungetc(ch);
+            text.append((char) value);
+          }
+          break;
 
-	case 'x':
-	  {
-	    int value = 16 * hexDigit(read());
-	    value += hexDigit(read());
-	    text.append((char) value);
-	  }
-	  break;
+        case 'x':
+          {
+            int value = 16 * hexDigit(read());
+            value += hexDigit(read());
+            text.append((char) value);
+          }
+          break;
 
-	case 'u':
-	  {
-	    int value = 4096 * hexDigit(read());
-	    value += 256 * hexDigit(read());
-	    value += 16 * hexDigit(read());
-	    value += hexDigit(read());
-	    text.append((char) value);
-	  }
-	  break;
+        case 'u':
+          {
+            int value = 4096 * hexDigit(read());
+            value += 256 * hexDigit(read());
+            value += 16 * hexDigit(read());
+            value += hexDigit(read());
+            text.append((char) value);
+          }
+          break;
 
-	case '0': case '1': case '2': case '3':
-	case '4': case '5': case '6': case '7':
-	  {
-	    int value = ch - '0';
+        case '0': case '1': case '2': case '3':
+        case '4': case '5': case '6': case '7':
+          {
+            int value = ch - '0';
 
-	    if (ch != '0' && isRegexp) {
-	      text.append('\\');
-	      text.append((char) ch);
-	      break;
-	    }
+            if (ch != '0' && isRegexp) {
+              text.append('\\');
+              text.append((char) ch);
+              break;
+            }
 
-	    if ((ch = read()) >= '0' && ch <= '7') {
-	      value = 8 * value + ch - '0';
+            if ((ch = read()) >= '0' && ch <= '7') {
+              value = 8 * value + ch - '0';
 
-	      if (value >= 040) {
-	      }
-	      else if ((ch = read()) >= '0' && ch <= '7')
-		value = 8 * value + ch - '0';
-	      else
-		ungetc(ch);
-	    } else
-	      ungetc(ch);
-	    text.append((char) value);
-	  }
-	  break;
+              if (value >= 040) {
+              }
+              else if ((ch = read()) >= '0' && ch <= '7')
+                value = 8 * value + ch - '0';
+              else
+                ungetc(ch);
+            } else
+              ungetc(ch);
+            text.append((char) value);
+          }
+          break;
 
-	default:
-	  if (isRegexp)
-	    text.append('\\');
-	  text.append((char) ch);
-	  break;
-	}
+        default:
+          if (isRegexp)
+            text.append('\\');
+          text.append((char) ch);
+          break;
+        }
       } else {
-	text.append((char) ch);
+        text.append((char) ch);
       }
     }
 
@@ -1099,7 +1099,7 @@ class Lexer {
   }
 
   private void scanMacroStatement(CharBuffer macro, int end,
-				  boolean isRegexp, boolean multiline)
+                                  boolean isRegexp, boolean multiline)
    throws ESParseException
   {
     int ch;
@@ -1109,60 +1109,60 @@ class Lexer {
 
       switch (ch) {
       case '\\':
-	ch = read();
-	macro.append((char) ch);
-	break;
+        ch = read();
+        macro.append((char) ch);
+        break;
 
       case '\'':
       case '"':
- 	int testch = ch;
- 	      
-	while ((ch = read()) >= 0) {
- 	  if (ch == '\\') {
- 	    macro.append((char) ch);
- 	    ch = read();
- 	  }
- 	  else if (ch == testch) {
- 	    macro.append((char) ch);
- 	    break;
- 	  } else if (ch == '\n') {
- 	    if (! multiline)
- 	      throw error("unexpected end of line in " +
-			  (isRegexp ? "regular expression" : "string"));
- 	    newline();
- 	  }
+         int testch = ch;
+
+        while ((ch = read()) >= 0) {
+           if (ch == '\\') {
+             macro.append((char) ch);
+             ch = read();
+           }
+           else if (ch == testch) {
+             macro.append((char) ch);
+             break;
+           } else if (ch == '\n') {
+             if (! multiline)
+               throw error("unexpected end of line in " +
+                          (isRegexp ? "regular expression" : "string"));
+             newline();
+           }
   
- 	  macro.append((char) ch);
- 	}
-	break;
+           macro.append((char) ch);
+         }
+        break;
 
       case '(':
-	scanMacroStatement(macro, ')', isRegexp, multiline);
-	macro.append(')');
-	break;
+        scanMacroStatement(macro, ')', isRegexp, multiline);
+        macro.append(')');
+        break;
 
       case '{':
-	scanMacroStatement(macro, '}', isRegexp, multiline);
-	macro.append('}');
-	break;
+        scanMacroStatement(macro, '}', isRegexp, multiline);
+        macro.append('}');
+        break;
 
       case '\n':
-	if (! multiline)
-	  throw error("unexpected end of line in " + 
-		      (isRegexp ? "regular expression" : "string"));
-	newline();
-	break;
+        if (! multiline)
+          throw error("unexpected end of line in " +
+                      (isRegexp ? "regular expression" : "string"));
+        newline();
+        break;
 
       default:
-	break;
+        break;
       }
     }
   }
 
   private void interpolate(CharBuffer macro, int tail,
-			   String matchText,
-			   String beginStr, String endStr,
-			   boolean isRegexp, boolean multiline)
+                           String matchText,
+                           String beginStr, String endStr,
+                           boolean isRegexp, boolean multiline)
     throws ESParseException
   {
     int ch = read();
@@ -1174,75 +1174,75 @@ class Lexer {
     for (; ch >= 0; ch = read()) {
       switch (ch) {
       case '\\':
-	macro.append((char) ch);
-	ch = read();
-	if (ch != -1)
-	  macro.append((char) ch);
-	break;
+        macro.append((char) ch);
+        ch = read();
+        if (ch != -1)
+          macro.append((char) ch);
+        break;
 
       case '$':
-	if ((ch = read()) == -1)
-	  break;
+        if ((ch = read()) == -1)
+          break;
 
-	if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' ||
-	    ch == '_' || ch == '$') { 
-	  macro.append(endStr);
-	  macro.append("+(");
-	  macro.append((char) ch);
+        if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' ||
+            ch == '_' || ch == '$') {
+          macro.append(endStr);
+          macro.append("+(");
+          macro.append((char) ch);
 
-	  while ((ch = read()) >= 0 && 
-		 (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
-		 (ch >= '0' && ch <= '9') || ch == '_' || ch == '$') {
-	    macro.append((char) ch);
-	  }
-	  ungetc(ch);
-	  macro.append(")+");
-	  macro.append(beginStr);
-	} else if (ch == '{') {
-	  macro.append(endStr);
-	  macro.append("+(");
-	  scanMacroStatement(macro, '}', isRegexp, multiline);
-	  macro.append(")+");
-	  macro.append(beginStr);
-	} else if (ch == '(') {
-	  macro.append(endStr);
-	  macro.append("+(");
-	  scanMacroStatement(macro, ')', isRegexp, multiline);
-	  macro.append(")+");
-	  macro.append(beginStr);
-	} else {
-	  ungetc(ch);
-	  macro.append('$');
-	}
-	break;
-	
+          while ((ch = read()) >= 0 &&
+                 (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+                 (ch >= '0' && ch <= '9') || ch == '_' || ch == '$') {
+            macro.append((char) ch);
+          }
+          ungetc(ch);
+          macro.append(")+");
+          macro.append(beginStr);
+        } else if (ch == '{') {
+          macro.append(endStr);
+          macro.append("+(");
+          scanMacroStatement(macro, '}', isRegexp, multiline);
+          macro.append(")+");
+          macro.append(beginStr);
+        } else if (ch == '(') {
+          macro.append(endStr);
+          macro.append("+(");
+          scanMacroStatement(macro, ')', isRegexp, multiline);
+          macro.append(")+");
+          macro.append(beginStr);
+        } else {
+          ungetc(ch);
+          macro.append('$');
+        }
+        break;
+
       default:
-	if (ch == '\n') {
-	  newline();
-	  if (! multiline) 
-	    throw error("unexpected end of line in " +
-			(isRegexp ? "regular expression" : "string"));
-	}
+        if (ch == '\n') {
+          newline();
+          if (! multiline)
+            throw error("unexpected end of line in " +
+                        (isRegexp ? "regular expression" : "string"));
+        }
 
-	if (ch != tail) {
-	}
-	else if (matchText == null) {
-	  break loop;
-	}
-	else if (! macro.endsWith(matchText)) {
-	}
-	else if (macro.length() - start == matchText.length()) {
-	  macro.setLength(start);
-	  break loop;
-	}
-	else if (macro.charAt(macro.length() - matchText.length() - 1) == '\n') {
-	  macro.setLength(macro.length() - matchText.length() - 1);
-	  break loop;
-	}
+        if (ch != tail) {
+        }
+        else if (matchText == null) {
+          break loop;
+        }
+        else if (! macro.endsWith(matchText)) {
+        }
+        else if (macro.length() - start == matchText.length()) {
+          macro.setLength(start);
+          break loop;
+        }
+        else if (macro.charAt(macro.length() - matchText.length() - 1) == '\n') {
+          macro.setLength(macro.length() - matchText.length() - 1);
+          break loop;
+        }
 
-	macro.append((char) ch);
+        macro.append((char) ch);
 
-	break;
+        break;
       }
     }
 
@@ -1257,43 +1257,43 @@ class Lexer {
     boolean endNewline = true;
 
     if ((ch = read()) >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' ||
-	ch == '_' || ch == '$') {
+        ch == '_' || ch == '$') {
       for (; ch >= 0 && ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' ||
-	     ch == '_' || ch == '$' || ch >= '0' && ch <= '9';
-	   ch = read()) {
-	end.append((char) ch);
+             ch == '_' || ch == '$' || ch >= '0' && ch <= '9';
+           ch = read()) {
+        end.append((char) ch);
       }
     } else if (ch == '\'') {
       interpolate = false;
       for (ch = read();
            ch >= 0 && ch != '\'' && ch != '\n';
            ch = read()) {
-	end.append((char) ch);
+        end.append((char) ch);
       }
 
       if (ch != '\'')
-	throw error(L.l("multiline escape error at {0}", badChar(ch)));
+        throw error(L.l("multiline escape error at {0}", badChar(ch)));
       ch = read();
     } else if (ch == '`') {
       interpolate = false;
       for (ch = read();
            ch >= 0 && ch != '`' && ch != '\n';
            ch = read()) {
-	end.append((char) ch);
+        end.append((char) ch);
       }
 
       if (ch != '`')
-	throw error(L.l("multiline escape error at {0}", badChar(ch)));
+        throw error(L.l("multiline escape error at {0}", badChar(ch)));
       endNewline = false;
     } else if (ch == '\"') {
       for (ch = read();
            ch >= 0 && ch != '\"' && ch != '\n';
            ch = read()) {
-	end.append((char) ch);
+        end.append((char) ch);
       }
 
       if (ch != '\"')
-	throw error(L.l("multiline escape error at {0}", badChar(ch)));
+        throw error(L.l("multiline escape error at {0}", badChar(ch)));
       ch = read();
     }
     
@@ -1303,15 +1303,15 @@ class Lexer {
     if (endNewline) {
       lineTail = new CharBuffer();
       for (; ch >= 0 && ch != '\n'; ch = read()) {
-	lineTail.append((char) ch);
+        lineTail.append((char) ch);
       }
       if (ch == '\r') {
         lineTail.append((char) ch);
         ch = read();
       }
       if (ch == '\n') {
-	newline();
-	lineTail.append((char) ch);
+        newline();
+        lineTail.append((char) ch);
       }
     }
 
@@ -1321,16 +1321,16 @@ class Lexer {
       macro = new CharBuffer();
       macro.append('(');
       interpolate(macro, '\n', endString, "@<<`" + endString + "`", 
-		  "\n" + endString + '\n', false, true);
+                  "\n" + endString + '\n', false, true);
       macro.append("+'\\n')");
     } else {
       if (endNewline) {
-	lexString('\n', endString, false, true);
-	text.append('\n');
-	literal = ESString.create(text);
+        lexString('\n', endString, false, true);
+        text.append('\n');
+        literal = ESString.create(text);
       } else {
-	lexString('\n', endString, false, true);
-	line -= 2;
+        lexString('\n', endString, false, true);
+        line -= 2;
       }
     }
 
@@ -1353,21 +1353,21 @@ class Lexer {
     while (true) {
       switch ((ch = read())) {
       case 'x':
-	_flags |= Pattern.COMMENTS;
-	break;
+        _flags |= Pattern.COMMENTS;
+        break;
       case 'i':
-	_flags |= Pattern.CASE_INSENSITIVE;
-	break;
+        _flags |= Pattern.CASE_INSENSITIVE;
+        break;
       case 'g':
-	break;
+        break;
       case 'm':
-	_flags |= Pattern.MULTILINE;
-	break;
+        _flags |= Pattern.MULTILINE;
+        break;
       case 's':
-	break;
+        break;
       default:
-	ungetc(ch);
-	return _flags;
+        ungetc(ch);
+        return _flags;
       }
     }
   }
@@ -1386,12 +1386,12 @@ class Lexer {
       ch = read();
 
       if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' ||
-	  ch == '_' || ch == '$' || ch >= '0' && ch <= '9') { 
-	text.append((char) ch);
+          ch == '_' || ch == '$' || ch >= '0' && ch <= '9') {
+        text.append((char) ch);
       } else {
-	ungetc(ch);
+        ungetc(ch);
 
-	break;
+        break;
       }
     }
 
@@ -1406,20 +1406,20 @@ class Lexer {
 
       switch (intValue) {
       case NULL: 
-	literal = ESBase.esNull;
-	return LITERAL;
+        literal = ESBase.esNull;
+        return LITERAL;
 
       case UNDEFINED: 
-	literal = ESBase.esUndefined;
-	return LITERAL;
+        literal = ESBase.esUndefined;
+        return LITERAL;
 
       case FALSE: 
-	literal = ESBoolean.create(false);
-	return LITERAL;
+        literal = ESBoolean.create(false);
+        return LITERAL;
 
       case TRUE: 
-	literal = ESBoolean.create(true);
-	return LITERAL;
+        literal = ESBoolean.create(true);
+        return LITERAL;
 
       default: return value.intValue();
       }
@@ -1440,19 +1440,19 @@ class Lexer {
       case '+': case '-': case '*': case '/': case '%': case '!':
       case '<': case '.': case '>': case '&': case '|': case '=':
       case '^': case '?':
-	text.append((char) ch);
+        text.append((char) ch);
 
-	op = (Op) ops.get(text);
-	if (op == null) {
-	  text.setLength(text.length() - 1);
-	  ungetc(ch);
-	  break loop;
-	}
-	break;
+        op = (Op) ops.get(text);
+        if (op == null) {
+          text.setLength(text.length() - 1);
+          ungetc(ch);
+          break loop;
+        }
+        break;
 
       default:
-	ungetc(ch);
-	break loop;
+        ungetc(ch);
+        break loop;
       }
     }
 
@@ -1559,20 +1559,20 @@ class Lexer {
 
     while (macroText != null) {
       if (macroIndex < macroText.length()) {
-	int ch = macroText.charAt(macroIndex++);
-	lineText.append((char) ch);
-	return ch;
+        int ch = macroText.charAt(macroIndex++);
+        lineText.append((char) ch);
+        return ch;
       }
 
       line = macroOldLine;
 
       if (macros.size() == 0)
-	macroText = null;
+        macroText = null;
       else {
-	Macro macro = (Macro) macros.remove(macros.size() - 1);
-	macroText = macro.text;
-	macroIndex = macro.index;
-	macroOldLine = macro.oldLine;
+        Macro macro = (Macro) macros.remove(macros.size() - 1);
+        macroText = macro.text;
+        macroIndex = macro.index;
+        macroOldLine = macro.oldLine;
       }
     }
 

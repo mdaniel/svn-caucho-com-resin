@@ -71,7 +71,7 @@ public interface Transaction {
    */
   public void commit()
     throws IllegalStateException, RollbackException, HeuristicMixedException,
-	   HeuristicRollbackException, SecurityException, SystemException;
+           HeuristicRollbackException, SecurityException, SystemException;
   
   /**
    * Rolls the transaction back.

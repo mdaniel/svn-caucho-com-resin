@@ -87,7 +87,7 @@ public class NotAnd implements RequestPredicate {
   {
     for (RequestPredicate predicate : _predicates) {
       if (! predicate.isMatch(request))
-	return true;
+        return true;
     }
 
     return false;

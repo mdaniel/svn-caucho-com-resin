@@ -205,12 +205,12 @@ public class FormatNumberTag extends BodyTagSupport {
       if (_valueExpr != null)
         number = _valueExpr.evalDouble(env);
       else if (body != null) {
-	String value = body.getTrimString();
+        String value = body.getTrimString();
 
-	if (! value.equals(""))
-	  number = Double.parseDouble(value);
-	else
-	  number = 0.0;
+        if (! value.equals(""))
+          number = Double.parseDouble(value);
+        else
+          number = 0.0;
       }
       else
         number = 0.0;
@@ -250,65 +250,65 @@ public class FormatNumberTag extends BodyTagSupport {
 
       String type = null;
       if (_typeExpr != null)
-	type = _typeExpr.evalString(env);
+        type = _typeExpr.evalString(env);
 
       if (type == null || type.equals("") || type.equals("number")) {
-	if (locale != null)
-	  format = NumberFormat.getInstance(locale);
-	else
-	  format = NumberFormat.getInstance();
+        if (locale != null)
+          format = NumberFormat.getInstance(locale);
+        else
+          format = NumberFormat.getInstance();
 
-	DecimalFormat decimalFormat = (DecimalFormat) format;
+        DecimalFormat decimalFormat = (DecimalFormat) format;
 
-	if (_patternExpr != null)
-	  decimalFormat.applyPattern(_patternExpr.evalString(env));
+        if (_patternExpr != null)
+          decimalFormat.applyPattern(_patternExpr.evalString(env));
       }
       else if (type.equals("percent")) {
-	if (locale != null)
-	  format = NumberFormat.getPercentInstance(locale);
-	else
-	  format = NumberFormat.getPercentInstance();
+        if (locale != null)
+          format = NumberFormat.getPercentInstance(locale);
+        else
+          format = NumberFormat.getPercentInstance();
       }
       else if (type.equals("currency")) {
-	if (locale != null)
-	  format = NumberFormat.getCurrencyInstance(locale);
-	else
-	  format = NumberFormat.getCurrencyInstance();
+        if (locale != null)
+          format = NumberFormat.getCurrencyInstance(locale);
+        else
+          format = NumberFormat.getCurrencyInstance();
 
-	if ((_currencyCodeExpr != null || _currencySymbolExpr != null) &&
-	    format instanceof DecimalFormat) {
-	  DecimalFormat dFormat = (DecimalFormat) format;
-	  DecimalFormatSymbols dSymbols;
+        if ((_currencyCodeExpr != null || _currencySymbolExpr != null) &&
+            format instanceof DecimalFormat) {
+          DecimalFormat dFormat = (DecimalFormat) format;
+          DecimalFormatSymbols dSymbols;
 
-	  dSymbols = dFormat.getDecimalFormatSymbols();
+          dSymbols = dFormat.getDecimalFormatSymbols();
 
-	  if (_currencyCodeExpr != null && dSymbols != null)
-	    dSymbols.setInternationalCurrencySymbol(_currencyCodeExpr.evalString(env));
+          if (_currencyCodeExpr != null && dSymbols != null)
+            dSymbols.setInternationalCurrencySymbol(_currencyCodeExpr.evalString(env));
 
-	  if (_currencySymbolExpr != null && dSymbols != null)
-	    dSymbols.setCurrencySymbol(_currencySymbolExpr.evalString(env));
+          if (_currencySymbolExpr != null && dSymbols != null)
+            dSymbols.setCurrencySymbol(_currencySymbolExpr.evalString(env));
 
-	  dFormat.setDecimalFormatSymbols(dSymbols);
-	}
+          dFormat.setDecimalFormatSymbols(dSymbols);
+        }
       }
       else
-	throw new JspException(L.l("unknown formatNumber type `{0}'",
-				   type));
+        throw new JspException(L.l("unknown formatNumber type `{0}'",
+                                   type));
 
       if (_groupingUsedExpr != null)
-	format.setGroupingUsed(_groupingUsedExpr.evalBoolean(env));
+        format.setGroupingUsed(_groupingUsedExpr.evalBoolean(env));
 
       if (_minIntegerDigitsExpr != null)
-	format.setMinimumIntegerDigits((int) _minIntegerDigitsExpr.evalLong(env));
+        format.setMinimumIntegerDigits((int) _minIntegerDigitsExpr.evalLong(env));
       
       if (_maxIntegerDigitsExpr != null)
-	format.setMaximumIntegerDigits((int) _maxIntegerDigitsExpr.evalLong(env));
+        format.setMaximumIntegerDigits((int) _maxIntegerDigitsExpr.evalLong(env));
 
       if (_minFractionDigitsExpr != null)
-	format.setMinimumFractionDigits((int) _minFractionDigitsExpr.evalLong(env));
+        format.setMinimumFractionDigits((int) _minFractionDigitsExpr.evalLong(env));
       
       if (_maxFractionDigitsExpr != null)
-	format.setMaximumFractionDigits((int) _maxFractionDigitsExpr.evalLong(env));
+        format.setMaximumFractionDigits((int) _maxFractionDigitsExpr.evalLong(env));
 
       return format;
     } catch (Exception e) {

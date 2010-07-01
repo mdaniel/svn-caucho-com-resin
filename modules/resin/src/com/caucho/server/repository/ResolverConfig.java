@@ -76,11 +76,11 @@ public class ResolverConfig
       ContainerProgram program = factory.getUrlProgram(uri);
 
       if (program != null)
-	program.configure(_resolver);
+        program.configure(_resolver);
     } catch (Exception e) {
       throw new ConfigException(L.l("<resolver> can't instantiate '{0}'",
-				    cl.getName()),
-				e);
+                                    cl.getName()),
+                                e);
     }
     */
   }

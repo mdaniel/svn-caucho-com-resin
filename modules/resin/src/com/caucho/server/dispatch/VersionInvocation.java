@@ -56,8 +56,8 @@ public class VersionInvocation extends Invocation
   private final long _expireTime;
 
   public VersionInvocation(Invocation invocation, WebApp webApp,
-			   Invocation oldInvocation, WebApp oldWebApp,
-			   long expireTime)
+                           Invocation oldInvocation, WebApp oldWebApp,
+                           long expireTime)
   {
     _invocation = invocation;
     _webApp = webApp;
@@ -93,7 +93,7 @@ public class VersionInvocation extends Invocation
     
     if (_expireTime < now) {
       log.info(L.l("{0}: versioning rollover complete.", _webApp));
-	       
+
       return true;
     }
     else
@@ -122,7 +122,7 @@ public class VersionInvocation extends Invocation
     SessionManager oldSessionManager = _oldWebApp.getSessionManager();
 
     if (oldSessionManager != null
-	&& oldSessionManager.containsSession(sessionId)) {
+        && oldSessionManager.containsSession(sessionId)) {
       return _oldInvocation;
     }
     else

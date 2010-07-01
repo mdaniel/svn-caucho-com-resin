@@ -125,7 +125,7 @@ public class SubEntityType extends EntityType {
       if (_parent.isEntity()) {
         _loadGroupIndex++;
 
-	_defaultLoadGroupIndex = _loadGroupIndex;
+        _defaultLoadGroupIndex = _loadGroupIndex;
       }
     }
 
@@ -140,9 +140,9 @@ public class SubEntityType extends EntityType {
     if (_defaultLoadGroupIndex < 0) {
       // initialized by getLoadGroupIndex()
       if (getParentType().isEntity())
-	getLoadGroupIndex();
+        getLoadGroupIndex();
       else
-	_defaultLoadGroupIndex = _parent.getDefaultLoadGroupIndex();
+        _defaultLoadGroupIndex = _parent.getDefaultLoadGroupIndex();
     }
 
     return _defaultLoadGroupIndex;

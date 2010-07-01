@@ -80,24 +80,24 @@ public class PhaseListenerTag extends TagSupport
       ELContext elContext = context.getELContext();
 
       if (_bindingExpr != null)
-	listener = (PhaseListener) _bindingExpr.getValue(elContext);
+        listener = (PhaseListener) _bindingExpr.getValue(elContext);
 
       if (listener == null && _typeExpr != null) {
-	String type = (String) _typeExpr.getValue(elContext);
+        String type = (String) _typeExpr.getValue(elContext);
 
-	try {
-	  ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	  Class cl = Class.forName(type, false, loader);
+        try {
+          ClassLoader loader = Thread.currentThread().getContextClassLoader();
+          Class cl = Class.forName(type, false, loader);
 
-	  // XXX: messages
+          // XXX: messages
 
-	  listener = (PhaseListener) cl.newInstance();
-	} catch (Exception e) {
-	  throw new JspException(e);
-	}
+          listener = (PhaseListener) cl.newInstance();
+        } catch (Exception e) {
+          throw new JspException(e);
+        }
 
-	if (_bindingExpr != null)
-	  _bindingExpr.setValue(elContext, listener);
+        if (_bindingExpr != null)
+          _bindingExpr.setValue(elContext, listener);
       }
 
       viewRoot.addPhaseListener(listener);
@@ -112,7 +112,7 @@ public class PhaseListenerTag extends TagSupport
     
     for (Tag tag = this; tag != null; tag = tag.getParent()) {
       if (! (tag instanceof UIComponentTagBase))
-	continue;
+        continue;
 
       compTag = (UIComponentTagBase) tag;
     }

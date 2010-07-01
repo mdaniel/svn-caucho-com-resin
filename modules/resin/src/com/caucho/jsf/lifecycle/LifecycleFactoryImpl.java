@@ -56,7 +56,7 @@ public class LifecycleFactoryImpl extends LifecycleFactory
   {
     if (_lifecycleMap.get(name) != null)
       throw new IllegalArgumentException(L.l("'{0}' is a duplicate lifecycle name.",
-					  name));
+                                          name));
     _lifecycleMap.put(name, lifecycle);
   }
 
@@ -69,7 +69,7 @@ public class LifecycleFactoryImpl extends LifecycleFactory
 
     if (lifecycle == null)
       throw new IllegalArgumentException(L.l("'{0}' is an unknown lifecycle name.",
-					  name));
+                                          name));
 
     return lifecycle;
   }

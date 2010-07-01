@@ -121,12 +121,12 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
 
     } catch (ConfigException e) {
       if (embeddableType != null)
-	embeddableType.setConfigException(e);
+        embeddableType.setConfigException(e);
 
       throw e;
     } catch (RuntimeException e) {
       if (embeddableType != null)
-	embeddableType.setConfigException(e);
+        embeddableType.setConfigException(e);
 
       throw e;
     }
@@ -142,8 +142,8 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
       Annotation ann[] = method.getDeclaredAnnotations();
 
       for (int i = 0; ann != null && i < ann.length; i++) {
-	if (isPropertyAnnotation(ann[i]))
-	  return false;
+        if (isPropertyAnnotation(ann[i]))
+          return false;
       }
     }
 

@@ -156,10 +156,10 @@ public class FormatDateTag extends BodyTagSupport {
       Object value = _valueExpr.evalObject(pageContext.getELContext());
 
       if (value == null) {
-	if (_var != null)
-	  CoreSetTag.setValue(pageContext, _var, _scope, null);
+        if (_var != null)
+          CoreSetTag.setValue(pageContext, _var, _scope, null);
       
-	return EVAL_PAGE;
+        return EVAL_PAGE;
       }
 
       long time = 0;

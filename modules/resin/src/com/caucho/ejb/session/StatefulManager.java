@@ -330,7 +330,7 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
       /*
       // ejb/0fe2
       if (cxt == null)
-	throw new NoSuchEJBException("no matching object:" + key);
+        throw new NoSuchEJBException("no matching object:" + key);
       */
     }
   }

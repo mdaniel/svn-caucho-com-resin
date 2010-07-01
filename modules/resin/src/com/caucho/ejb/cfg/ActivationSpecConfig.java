@@ -71,7 +71,7 @@ public class ActivationSpecConfig extends BeanConfig {
 
     if (! ActivationSpec.class.isAssignableFrom(cl))
       throw new ConfigException(L.l("<activation-spec> class '{0}' must implement javax.resource.spi.ActivationSpec",
-				    cl.getName()));
+                                    cl.getName()));
   }
 
   @Override

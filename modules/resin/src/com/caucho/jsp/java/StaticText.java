@@ -97,7 +97,7 @@ public class StaticText extends JspNode {
       
     for (int i = text.length() - 1; i >= 0; i--) {
       if (! XmlChar.isWhitespace(text.charAt(i)))
-	return false ;
+        return false ;
     }
 
     return true;
@@ -187,19 +187,19 @@ public class StaticText extends JspNode {
       switch (ch) {
       case '\\':
         out.print("\\\\");
-	break;
+        break;
       case '\'':
         out.print("\\'");
-	break;
+        break;
       case '\n':
         out.print("\\n");
-	break;
+        break;
       case '\r':
         out.print("\\r");
-	break;
+        break;
       default:
-	out.print((char) ch);
-	break;
+        out.print((char) ch);
+        break;
       }
 
       out.println("');");

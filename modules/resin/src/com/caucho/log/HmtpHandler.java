@@ -95,9 +95,9 @@ public class HmtpHandler extends Handler {
 
       Formatter formatter = getFormatter();
       if (formatter != null)
-	value = formatter.format(record);
+        value = formatter.format(record);
       else
-	value = record.getMessage();
+        value = record.getMessage();
 
       _conn.message(_to, value);
     } catch (RuntimeException e) {

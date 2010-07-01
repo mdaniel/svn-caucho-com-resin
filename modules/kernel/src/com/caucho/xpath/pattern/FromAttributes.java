@@ -82,10 +82,10 @@ public class FromAttributes extends Axis {
     int count = 1;
 
     for (node = node.getPreviousSibling();
-	 node != null;
-	 node = node.getPreviousSibling()) {
+         node != null;
+         node = node.getPreviousSibling()) {
       if (pattern.match(node, env))
-	count++;
+        count++;
     }
 
     return count;
@@ -105,7 +105,7 @@ public class FromAttributes extends Axis {
          node != null;
          node = node.getNextSibling()) {
       if (pattern.match(node, env))
-	count++;
+        count++;
     }
 
     return count;
@@ -137,7 +137,7 @@ public class FromAttributes extends Axis {
 
       NodeIterator parentIter;
       parentIter = _parent.createNodeIterator(node, env,
-					      _parent.copyPosition());
+                                              _parent.copyPosition());
 
       return new AttributeIterator(parentIter, this, null, env, match);
     }

@@ -158,10 +158,10 @@ public class BaseClass extends ClassComponent {
   {
     for (ClassComponent component : _components) {
       if (component instanceof BaseMethod) {
-	BaseMethod baseMethod = (BaseMethod) component;
-	
-	if (baseMethod.getMethod().equals(method))
-	  return baseMethod;
+        BaseMethod baseMethod = (BaseMethod) component;
+
+        if (baseMethod.getMethod().equals(method))
+          return baseMethod;
       }
     }
 
@@ -215,10 +215,10 @@ public class BaseClass extends ClassComponent {
       out.print(" implements ");
       
       for (int i = 0; i < _interfaceNames.size(); i++) {
-	if (i != 0)
-	  out.print(", ");
+        if (i != 0)
+          out.print(", ");
 
-	out.print(_interfaceNames.get(i));
+        out.print(_interfaceNames.get(i));
       }
     }
 
@@ -248,7 +248,7 @@ public class BaseClass extends ClassComponent {
   {
     for (int i = 0; i < _components.size(); i++) {
       if (i != 0)
-	out.println();
+        out.println();
 
       _components.get(i).generate(out);
     }

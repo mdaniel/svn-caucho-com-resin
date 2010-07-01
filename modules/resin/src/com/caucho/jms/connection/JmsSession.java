@@ -119,7 +119,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   private volatile boolean _hasMessage;
 
   public JmsSession(ConnectionImpl connection,
-		     boolean isTransacted, int ackMode,
+                     boolean isTransacted, int ackMode,
                      boolean isXA)
     throws JMSException
   {
@@ -139,8 +139,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       case CLIENT_ACKNOWLEDGE:
       case DUPS_OK_ACKNOWLEDGE:
       case AUTO_ACKNOWLEDGE:
-	_acknowledgeMode = ackMode;
-	break;
+        _acknowledgeMode = ackMode;
+        break;
       default:
         try {
           log.warning(L.l("JmsSession {0} is an illegal acknowledge mode",
@@ -452,7 +452,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
     else
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
-						destination));
+                                                destination));
 
     
     addConsumer(consumer);
@@ -476,7 +476,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     
     if (! (destination instanceof AbstractDestination))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS destination for Session.createProducer.",
-						destination));
+                                                destination));
 
     AbstractDestination dest = (AbstractDestination) destination;
 
@@ -511,10 +511,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     
     if (! (queue instanceof AbstractQueue))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown queue.  The queue must be a Resin JMS Queue for Session.createBrowser.",
-						queue));
+                                                queue));
     
     return new MessageBrowserImpl(this, (AbstractQueue) queue,
-				  messageSelector);
+                                  messageSelector);
   }
 
   /**
@@ -597,7 +597,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     
     if (! (topic instanceof AbstractTopic))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
-						topic));
+                                                topic));
     
     AbstractTopic topicImpl = (AbstractTopic) topic;
 
@@ -606,7 +606,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       // unsubscribe(name);
       /*
       throw new JMSException(L.l("'{0}' is already an active durable subscriber",
-				 name));
+                                 name));
       */
     }
 
@@ -614,7 +614,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     TopicSubscriberImpl consumer;
     consumer = new TopicSubscriberImpl(this, topicImpl, queue,
-				       messageSelector, noLocal);
+                                       messageSelector, noLocal);
     
     _connection.putDurableSubscriber(name, consumer);
     
@@ -653,7 +653,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     synchronized (_consumers) {
       for (MessageConsumerImpl consumer : _consumers) {
-	consumer.start();
+        consumer.start();
       }
     }
     
@@ -671,28 +671,28 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     synchronized (_consumers) {
       long timeout = Alarm.getCurrentTime() + SHUTDOWN_WAIT_TIME;
       while (_isRunning && Alarm.getCurrentTime() < timeout) {
-	try {
-	  _consumers.wait(SHUTDOWN_WAIT_TIME);
-	
-	  if (Alarm.isTest()) {
-	    return;
-	  }
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+        try {
+          _consumers.wait(SHUTDOWN_WAIT_TIME);
+
+          if (Alarm.isTest()) {
+            return;
+          }
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
 
       ArrayList<MessageConsumerImpl> consumers
-	= new ArrayList<MessageConsumerImpl>(_consumers);
+        = new ArrayList<MessageConsumerImpl>(_consumers);
       
       for (MessageConsumerImpl consumer : consumers) {
-	try {
-	  // XXX: should be stop()?
-	  
-	  consumer.stop();
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+        try {
+          // XXX: should be stop()?
+
+          consumer.stop();
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
   }
@@ -728,10 +728,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     
     try {
       for (int i = 0; i < messages.size(); i++) {
-	TransactedMessage msg = messages.get(i);
+        TransactedMessage msg = messages.get(i);
 
-	if (msg != null)
-	  msg.commit();
+        if (msg != null)
+          msg.commit();
       }
     } finally {
       messages.clear();
@@ -752,13 +752,13 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     if (_transactedMessages != null) {
       for (int i = _transactedMessages.size() - 1; i >= 0; i--) {
-	TransactedMessage msg = _transactedMessages.get(i);
+        TransactedMessage msg = _transactedMessages.get(i);
 
-	if (msg instanceof ReceiveMessage) {
-	  _transactedMessages.remove(i);
+        if (msg instanceof ReceiveMessage) {
+          _transactedMessages.remove(i);
 
-	  msg.commit();
-	}
+          msg.commit();
+        }
       }
     }
   }
@@ -776,13 +776,13 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     if (_transactedMessages != null) {
       for (int i = _transactedMessages.size() - 1; i >= 0; i--) {
-	TransactedMessage msg = _transactedMessages.get(i);
+        TransactedMessage msg = _transactedMessages.get(i);
 
-	if (msg instanceof ReceiveMessage) {
-	  _transactedMessages.remove(i);
+        if (msg instanceof ReceiveMessage) {
+          _transactedMessages.remove(i);
 
-	  msg.rollback();
-	}
+          msg.rollback();
+        }
       }
     }
   }
@@ -809,7 +809,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     if (_transactedMessages != null) {
       for (int i = 0; i < _transactedMessages.size(); i++)
-	_transactedMessages.get(i).rollback();
+        _transactedMessages.get(i).rollback();
 
       _transactedMessages.clear();
     }
@@ -836,11 +836,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       _transactedMessages = null;
       
       try {
-	for (int i = 0; i < messages.size(); i++) {
-	  messages.get(i).close();
-	}
+        for (int i = 0; i < messages.size(); i++) {
+          messages.get(i).close();
+        }
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -848,9 +848,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       MessageConsumerImpl consumer = _consumers.get(i);
 
       try {
-	consumer.close();
+        consumer.close();
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -885,7 +885,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       _hasMessage = true;
 
       if (_isRunning || ! _isAsynchronous || ! isActive())
-	return false;
+        return false;
 
       _isRunning = true;
     }
@@ -895,7 +895,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (Alarm.isTest()) {
       // the yield is only needed for the regressions
       try {
-	Thread.sleep(10);
+        Thread.sleep(10);
       } catch (Exception e) {
       }
     }
@@ -964,11 +964,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     
     if (_isTransacted || isXA) {
       if (_transactedMessages == null)
-	_transactedMessages = new ArrayList<TransactedMessage>();
+        _transactedMessages = new ArrayList<TransactedMessage>();
 
       TransactedMessage transMsg = new SendMessage(queue,
-						   message,
-						   expireTime);
+                                                   message,
+                                                   expireTime);
       
       _transactedMessages.add(transMsg);
 
@@ -977,7 +977,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
     else {
       if (log.isLoggable(Level.FINE))
-	log.fine(queue + " sending " + message);
+        log.fine(queue + " sending " + message);
 
       queue.send(message.getJMSMessageID(), message, priority, expireTime, this);
     }
@@ -1015,7 +1015,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    * Adds a message to the session message queue.
    */
   void addTransactedReceive(AbstractDestination queue,
-			    MessageImpl message)
+                            MessageImpl message)
   {
     message.setSession(this);
     
@@ -1160,28 +1160,28 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     while (isValid) {
       isValid = false;
       _hasMessage = false;
-	
+
       try {
-	for (int i = 0; i < _consumers.size(); i++) {
-	  MessageConsumerImpl consumer = _consumers.get(i);
+        for (int i = 0; i < _consumers.size(); i++) {
+          MessageConsumerImpl consumer = _consumers.get(i);
 
-	  while (isActive() && consumer.handleMessage(_messageListener)) {
-	  }
-	}
+          while (isActive() && consumer.handleMessage(_messageListener)) {
+          }
+        }
 
-	isValid = isActive();
+        isValid = isActive();
       } finally {
-	synchronized (_consumers) {
-	  if (! isValid)
-	    _isRunning = false;
-	  else if (! _hasMessage) {
-	    _isRunning = false;
-	    isValid = false;
-	  }
+        synchronized (_consumers) {
+          if (! isValid)
+            _isRunning = false;
+          else if (! _hasMessage) {
+            _isRunning = false;
+            isValid = false;
+          }
 
-	  // notification, e.g. for shutdown
-	  _consumers.notifyAll();
-	}
+          // notification, e.g. for shutdown
+          _consumers.notifyAll();
+        }
       }
     }
   }
@@ -1241,8 +1241,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     private final long _expires;
     
     SendMessage(AbstractDestination queue,
-		MessageImpl message,
-		long expires)
+                MessageImpl message,
+                long expires)
     {
       _queue = queue;
       _message = message;
@@ -1253,9 +1253,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       throws JMSException
     {
       _queue.send(_message.getJMSMessageID(),
-		  _message,
-		  _message.getJMSPriority(),
-		  _expires);
+                  _message,
+                  _message.getJMSPriority(),
+                  _expires);
     }
 
     void rollback()
@@ -1280,10 +1280,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       _message = message;
 
       if (queue == null)
-	throw new NullPointerException();
+        throw new NullPointerException();
       
       if (_message == null || message.getJMSMessageID() == null)
-	throw new NullPointerException();
+        throw new NullPointerException();
     }
 
     void commit()

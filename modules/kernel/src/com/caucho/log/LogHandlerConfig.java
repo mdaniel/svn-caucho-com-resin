@@ -289,7 +289,7 @@ public class LogHandlerConfig extends BeanConfig {
 
     if (! (logger instanceof EnvironmentLogger)) {
       CloseListener listener = new CloseListener(_handler);
-	  
+
       Environment.addClassLoaderListener(listener);
     }
     

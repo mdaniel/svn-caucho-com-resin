@@ -53,19 +53,19 @@ public class TagInfoImpl extends TagInfoExt {
   TagInfoImpl(TldTag tag, Taglib taglib)
   {
     super(tag.getName(),
-	  tag.getTagClassName(),
-	  tag.getBodyContent(),
-	  tag.getDescription() != null ? tag.getDescription() : tag.getInfo(),
-	  taglib,
-	  tag.getTagExtraInfo(),
-	  tag.getAttributes(),
-	  tag.getDisplayName(),
-	  tag.getSmallIcon(),
-	  tag.getLargeIcon(),
-	  tag.getVariables(),
-	  tag.getDynamicAttributes(),
-	  tag.getDynamicAttributeName(),
-	  tag.getDependencyList());
+          tag.getTagClassName(),
+          tag.getBodyContent(),
+          tag.getDescription() != null ? tag.getDescription() : tag.getInfo(),
+          taglib,
+          tag.getTagExtraInfo(),
+          tag.getAttributes(),
+          tag.getDisplayName(),
+          tag.getSmallIcon(),
+          tag.getLargeIcon(),
+          tag.getVariables(),
+          tag.getDynamicAttributes(),
+          tag.getDynamicAttributeName(),
+          tag.getDependencyList());
 
     _tldTag = tag;
   }

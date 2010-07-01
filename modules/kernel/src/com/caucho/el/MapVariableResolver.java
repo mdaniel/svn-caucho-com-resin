@@ -87,9 +87,9 @@ public class MapVariableResolver extends ELResolver {
    */
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (! (base instanceof String) || property != null)
       return;
@@ -128,8 +128,8 @@ public class MapVariableResolver extends ELResolver {
    */
   @Override
   public Class<?> getType(ELContext context,
-			Object base,
-			Object property)
+                        Object base,
+                        Object property)
   {
     Object value = getValue(context, base, property);
 
@@ -140,7 +140,7 @@ public class MapVariableResolver extends ELResolver {
   }
 
   public Class<?> getCommonPropertyType(ELContext context,
-					Object base)
+                                        Object base)
   {
     return null;
   }

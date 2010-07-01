@@ -52,8 +52,8 @@ public class MethodExpressionValidator
   }
 
   public void validate(FacesContext context,
-		       UIComponent component,
-		       Object value)
+                       UIComponent component,
+                       Object value)
     throws ValidatorException
   {
     try {
@@ -66,7 +66,7 @@ public class MethodExpressionValidator
       Throwable t = e.getCause();
 
       if (t instanceof ValidatorException) {
-	throw (ValidatorException) t;
+        throw (ValidatorException) t;
       }
       
       throw e;

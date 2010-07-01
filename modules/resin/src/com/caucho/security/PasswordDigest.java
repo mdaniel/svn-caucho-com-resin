@@ -194,8 +194,8 @@ public class PasswordDigest {
    * @param password the cleartext password
    */
   public String getPasswordDigest(String user,
-				  String password,
-				  HttpServletRequest request)
+                                  String password,
+                                  HttpServletRequest request)
   {
     return getPasswordDigest(user, password, _realm, request);
   }
@@ -213,22 +213,22 @@ public class PasswordDigest {
    * @param realm the security realm
    */
   public String getPasswordDigest(String user,
-				  String password,
-				  String realm,
-				  HttpServletRequest request)
+                                  String password,
+                                  String realm,
+                                  HttpServletRequest request)
   {
     if (_digest == null) {
       init();
 
       if (_digest == null)
-	return null;
+        return null;
     }
     
     try {
       synchronized (_digest) {
         _digest.reset();
 
-	updateDigest(_digest, user, password.toCharArray(), realm);
+        updateDigest(_digest, user, password.toCharArray(), realm);
 
         int len = _digest.digest(_digestBytes, 0, _digestBytes.length);
 
@@ -251,7 +251,7 @@ public class PasswordDigest {
    * @param realm the security realm
    */
   public char []getPasswordDigest(String user,
-				  char []password)
+                                  char []password)
   {
     return getPasswordDigest(user, password, _realm);
   }
@@ -268,25 +268,25 @@ public class PasswordDigest {
    * @param realm the security realm
    */
   public char []getPasswordDigest(String user,
-				  char []password,
-				  String realm)
+                                  char []password,
+                                  String realm)
   {
     if (_digest == null) {
       init();
 
       if (_digest == null)
-	return null;
+        return null;
     }
 
     try {
       synchronized (_digest) {
         _digest.reset();
 
-	updateDigest(_digest, user, password, realm);
+        updateDigest(_digest, user, password, realm);
 
         int len = _digest.digest(_digestBytes, 0, _digestBytes.length);
 
-	return digestToCharArray(_digestBytes, len);
+        return digestToCharArray(_digestBytes, len);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -297,18 +297,18 @@ public class PasswordDigest {
    * Updates the digest based on the user:realm:password
    */
   protected void updateDigest(MessageDigest digest,
-			      String user, char []password, String realm)
+                              String user, char []password, String realm)
   {
     if (user != null) {
       addDigestUTF8(digest, user);
       digest.update((byte) ':');
     }
-	
+
     if (realm != null && ! realm.equals("none")) {
       addDigestUTF8(digest, realm);
       digest.update((byte) ':');
     }
-	
+
     addDigestUTF8(digest, password);
   }
 

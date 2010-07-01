@@ -835,14 +835,14 @@ public class Jar implements CacheListener {
       _is = null;
       
       try {
-	if (zis != null)
-	  zis.close();
+        if (zis != null)
+          zis.close();
       } catch (Throwable e) {
       }
 
       try {
-	if (zipFile != null)
-	  zipFile.close();
+        if (zipFile != null)
+          zipFile.close();
       } catch (Throwable e) {
       }
 
@@ -978,8 +978,8 @@ public class Jar implements CacheListener {
       long digest = _depend.getDigest();
       
       return ("new com.caucho.vfs.Jar.createDepend(" +
-	      "com.caucho.vfs.Vfs.lookup(\"" + sourcePath + "\"), " +
-	      digest + "L)");
+              "com.caucho.vfs.Vfs.lookup(\"" + sourcePath + "\"), " +
+              digest + "L)");
     }
   }
 }

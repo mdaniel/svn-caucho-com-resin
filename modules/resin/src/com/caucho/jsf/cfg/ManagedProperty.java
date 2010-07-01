@@ -106,8 +106,8 @@ public class ManagedProperty extends DescriptionGroupConfig
     }
     
     String name = ("set"
-		   + Character.toUpperCase(_name.charAt(0))
-		   + _name.substring(1));
+                   + Character.toUpperCase(_name.charAt(0))
+                   + _name.substring(1));
     
     Method setter = findSetter(type, name);
 

@@ -89,8 +89,8 @@ public class ResourceBundleELResolver extends ELResolver {
 
   @Override
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     if (base instanceof ResourceBundle) {
       context.setPropertyResolved(true);
@@ -103,8 +103,8 @@ public class ResourceBundleELResolver extends ELResolver {
 
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base instanceof ResourceBundle) {
       context.setPropertyResolved(true);
@@ -116,9 +116,9 @@ public class ResourceBundleELResolver extends ELResolver {
       String value = bundle.getString(key);
 
       if (value != null)
-	return value;
+        return value;
       else
-	return "???" + key + "???";
+        return "???" + key + "???";
     }
     
     return null;
@@ -126,8 +126,8 @@ public class ResourceBundleELResolver extends ELResolver {
 
   @Override
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     if (base instanceof ResourceBundle) {
       context.setPropertyResolved(true);
@@ -140,9 +140,9 @@ public class ResourceBundleELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base instanceof ResourceBundle) {
       context.setPropertyResolved(true);

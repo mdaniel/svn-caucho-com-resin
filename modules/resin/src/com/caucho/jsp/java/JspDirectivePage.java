@@ -106,7 +106,7 @@ public class JspDirectivePage extends JspNode {
       _parseState.setContentType(value);
       String charEncoding = parseCharEncoding(value);
       if (charEncoding != null)
-	_parseState.setCharEncoding(charEncoding);
+        _parseState.setCharEncoding(charEncoding);
     }
     else if (PAGE_ENCODING.equals(name)) {
       String oldEncoding = _parseState.getPageEncoding();
@@ -114,11 +114,11 @@ public class JspDirectivePage extends JspNode {
       /*
       // jsp/01f1
       if (oldEncoding != null) {
-	String oldCanonical = Encoding.getMimeName(oldEncoding);
-	String newCanonical = Encoding.getMimeName(value);
+        String oldCanonical = Encoding.getMimeName(oldEncoding);
+        String newCanonical = Encoding.getMimeName(value);
 
-	if (! newCanonical.equals(oldCanonical))
-	  throw error(L.l("pageEncoding '{0}' conflicts with previous value of pageEncoding '{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
+        if (! newCanonical.equals(oldCanonical))
+          throw error(L.l("pageEncoding '{0}' conflicts with previous value of pageEncoding '{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
       }
       */
 
@@ -174,9 +174,9 @@ public class JspDirectivePage extends JspNode {
       _parseState.setErrorPage(newErrorPage);
 
       if (errorPage != null && ! errorPage.equals(newErrorPage)) {
-	_parseState.setErrorPage(null);
+        _parseState.setErrorPage(null);
         throw error(L.l("errorPage is assigned different value '{0}'.",
-			newErrorPage));
+                        newErrorPage));
       }
     }
     else if (IS_ERROR_PAGE.equals(name)) {
@@ -289,9 +289,9 @@ public class JspDirectivePage extends JspNode {
     for (; i < value.length(); i++) {
       char ch = value.charAt(i);
       if (ch >= '0' && ch <= '9')
-	kb = 10 * kb + ch - '0';
+        kb = 10 * kb + ch - '0';
       else
-	break;
+        break;
     }
 
     if (! value.substring(i).equals("kb"))
@@ -321,28 +321,28 @@ public class JspDirectivePage extends JspNode {
     while ((i = type.indexOf(';')) >= 0 && i < type.length()) {
       i++;
       while (i < type.length() && ((ch = type.charAt(i)) == ' ' || ch == '\t'))
-	i++;
+        i++;
 
       if (i >= type.length())
-	return null;
+        return null;
 
       type = type.substring(i);
       i = type.indexOf('=');
       if (i >= 0) {
-	if (! type.startsWith("charset"))
-	  continue;
+        if (! type.startsWith("charset"))
+          continue;
 
-	for (i++;
-	     i < type.length() && ((ch = type.charAt(i)) == ' ' || ch == '\t');
-	     i++) {
-	}
+        for (i++;
+             i < type.length() && ((ch = type.charAt(i)) == ' ' || ch == '\t');
+             i++) {
+        }
 
-	type = type.substring(i);
+        type = type.substring(i);
       }
       
       for (i = 0;
-	   i < type.length() && (ch = type.charAt(i)) != ';' && ch != ' ';
-	   i++) {
+           i < type.length() && (ch = type.charAt(i)) != ';' && ch != ' ';
+           i++) {
       }
 
       return type.substring(0, i);
@@ -393,9 +393,9 @@ public class JspDirectivePage extends JspNode {
     if (imports != null && imports.size() != 0) {
       os.print(" import='");
       for (int i = 0; i < imports.size(); i++) {
-	if (i != 0)
-	  os.print(',');
-	os.print(imports.get(i));
+        if (i != 0)
+          os.print(',');
+        os.print(imports.get(i));
       }
       os.print("'");
     }

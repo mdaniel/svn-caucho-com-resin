@@ -49,9 +49,9 @@ public interface WorkManager {
    * the work instance completes.
    */
   public void doWork(Work work,
-		     long startTimeout,
-		     ExecutionContext context,
-		     WorkListener workListener)
+                     long startTimeout,
+                     ExecutionContext context,
+                     WorkListener workListener)
     throws WorkException;
 
   /**
@@ -66,9 +66,9 @@ public interface WorkManager {
    * the work instance starts, but does not wait not until the completion.
    */
   public long startWork(Work work,
-			long startTimeout,
-			ExecutionContext context,
-			WorkListener listener)
+                        long startTimeout,
+                        ExecutionContext context,
+                        WorkListener listener)
     throws WorkException;
 
   /**
@@ -81,8 +81,8 @@ public interface WorkManager {
    * Schedules a work instance.
    */
   public void scheduleWork(Work work,
-			   long startTimeout,
-			   ExecutionContext context,
-			   WorkListener listener)
+                           long startTimeout,
+                           ExecutionContext context,
+                           WorkListener listener)
     throws WorkException;
 }

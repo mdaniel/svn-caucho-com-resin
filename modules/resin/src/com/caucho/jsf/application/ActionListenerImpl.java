@@ -83,15 +83,15 @@ public class ActionListenerImpl implements ActionListener
       value = actionExpr.invoke(elContext, NULL_ARG);
 
       if (value != null)
-	logicalOutcome = value.toString();
+        logicalOutcome = value.toString();
     }
     else if (action != null) {
       fromAction = action.getExpressionString();
-	
+
       Object value = action.invoke(context, NULL_ARG);
 
       if (value != null)
-	logicalOutcome = value.toString();
+        logicalOutcome = value.toString();
     }
 
     Application app = context.getApplication();
@@ -102,7 +102,7 @@ public class ActionListenerImpl implements ActionListener
       handler.handleNavigation(context, fromAction, logicalOutcome);
     else {
       if (log.isLoggable(Level.FINE))
-	log.fine("Jsf[" + context.getViewRoot().getViewId() + "] has no navigationHandler for " + app);
+        log.fine("Jsf[" + context.getViewRoot().getViewId() + "] has no navigationHandler for " + app);
     }
   }
 

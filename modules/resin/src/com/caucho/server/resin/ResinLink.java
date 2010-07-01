@@ -66,7 +66,7 @@ public class ResinLink extends HmtpLink implements Runnable {
       super.run();
     } finally {
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " finishing main thread");
+        log.fine(this + " finishing main thread");
       
       _resinActor.destroy();
     }

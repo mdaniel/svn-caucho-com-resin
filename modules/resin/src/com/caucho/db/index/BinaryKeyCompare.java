@@ -44,7 +44,7 @@ public class BinaryKeyCompare extends KeyCompare {
    * Compares the key to the block data.
    */
   public int compare(byte []keyBuffer, int keyOffset,
-		     byte []block, int offset, int length)
+                     byte []block, int offset, int length)
   {
     int end = _length;
     
@@ -53,9 +53,9 @@ public class BinaryKeyCompare extends KeyCompare {
       int ch2 = block[offset + i] & 0xff;
 
       if (ch1 < ch2)
-	return -1;
+        return -1;
       else if (ch2 < ch1)
-	return 1;
+        return 1;
     }
 
     return 0;
@@ -74,14 +74,14 @@ public class BinaryKeyCompare extends KeyCompare {
       int d2 = (ch) & 0xf;
 
       if (d1 < 10)
-	sb.append((char) ('0' + d1));
+        sb.append((char) ('0' + d1));
       else
-	sb.append((char) ('a' + d1 - 10));
+        sb.append((char) ('a' + d1 - 10));
 
       if (d2 < 10)
-	sb.append((char) ('0' + d2));
+        sb.append((char) ('0' + d2));
       else
-	sb.append((char) ('a' + d2 - 10));
+        sb.append((char) ('a' + d2 - 10));
     }
 
     return sb.toString();

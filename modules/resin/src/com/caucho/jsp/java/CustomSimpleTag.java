@@ -88,9 +88,9 @@ public class CustomSimpleTag extends GenericTag
       JspNode node = (JspNode) _children.get(i);
 
       if (node instanceof JspBody) {
-	if (_body != null)
-	  throw error(L.l("Only one <jsp:body> is allowed as a child of a tag."));
-		      
+        if (_body != null)
+          throw error(L.l("Only one <jsp:body> is allowed as a child of a tag."));
+
         _body = (JspBody) node;
         _children.remove(i);
         return;
@@ -108,7 +108,7 @@ public class CustomSimpleTag extends GenericTag
       JspNode node = _children.get(i);
 
       if (! (node instanceof JspAttribute))
-	_body.addChild(node);
+        _body.addChild(node);
       
       _body.setEndLocation(node.getFilename(), node.getEndLine());
     }
@@ -143,7 +143,7 @@ public class CustomSimpleTag extends GenericTag
     if (hasCustomTag()) {
       // jsp/18ei, jsp/18e8
       if (_tag.generateAdapterDeclaration()) {
-	out.println("javax.servlet.jsp.tagext.Tag " + _tag.getId() + "_adapter = null;");
+        out.println("javax.servlet.jsp.tagext.Tag " + _tag.getId() + "_adapter = null;");
       }
     }
   }
@@ -219,7 +219,7 @@ public class CustomSimpleTag extends GenericTag
       String shortName = className;
       int p = shortName.lastIndexOf('.');
       if (p >= 0)
-	shortName = shortName.substring(p + 1);
+        shortName = shortName.substring(p + 1);
 
       out.print(var + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");      
     }
@@ -232,7 +232,7 @@ public class CustomSimpleTag extends GenericTag
 
     /*
     if (_tag.getAnalyzedTag() != null
-	&& _tag.getAnalyzedTag().getHasInjection()) {
+        && _tag.getAnalyzedTag().getHasInjection()) {
       out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");
     }
     */
@@ -250,7 +250,7 @@ public class CustomSimpleTag extends GenericTag
         continue;
 
       generateSetAttribute(out, var, name, value, false, false,
-			   _tag.getAttributeInfo(name.getLocalName()));
+                           _tag.getAttributeInfo(name.getLocalName()));
     }
   }
 }

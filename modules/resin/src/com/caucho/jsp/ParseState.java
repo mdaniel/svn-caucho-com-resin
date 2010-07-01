@@ -435,9 +435,9 @@ public class ParseState {
     
     /*
     if (_charEncoding != null &&
-	! _charEncoding.equalsIgnoreCase(charEncoding))
+        ! _charEncoding.equalsIgnoreCase(charEncoding))
       throw new JspParseException(L.l("Cannot change character encoding to '{0}' (old value '{1}').  The character encoding may only be set once.",
-				      charEncoding, _charEncoding));
+                                      charEncoding, _charEncoding));
     */
     
     _charEncoding = charEncoding;
@@ -474,18 +474,18 @@ public class ParseState {
       pageEncoding = "UTF-16LE";
 
     if (_pageEncoding == null
-	|| _pageEncoding.equalsIgnoreCase(pageEncoding)) {
+        || _pageEncoding.equalsIgnoreCase(pageEncoding)) {
       _pageEncoding = pageEncoding;
     }
     else if (("UTF-16".equalsIgnoreCase(_pageEncoding)
-	      || "UTF-16LE".equalsIgnoreCase(_pageEncoding))
-	     && ("UTF-16LE".equalsIgnoreCase(pageEncoding)
-		 || "UTF-16BE".equalsIgnoreCase(pageEncoding))) {
+              || "UTF-16LE".equalsIgnoreCase(_pageEncoding))
+             && ("UTF-16LE".equalsIgnoreCase(pageEncoding)
+                 || "UTF-16BE".equalsIgnoreCase(pageEncoding))) {
       _pageEncoding = pageEncoding;
     }
     else if ("UTF-16LE".equalsIgnoreCase(pageEncoding)
-	     && ("UTF-16LE".equalsIgnoreCase(_pageEncoding)
-		 || "UTF-16BE".equalsIgnoreCase(_pageEncoding))) {
+             && ("UTF-16LE".equalsIgnoreCase(_pageEncoding)
+                 || "UTF-16BE".equalsIgnoreCase(_pageEncoding))) {
     }
     else {
       String oldPageEncoding = _pageEncoding;
@@ -713,7 +713,7 @@ public class ParseState {
       String value = imports[i];
 
       if (value.equals(""))
-	continue;
+        continue;
       
       if (value.equals("static") && i + 1 < imports.length) {
         value = "static " + imports[i + 1];
@@ -817,9 +817,9 @@ public class ParseState {
       String uri = Namespace.find(_namespaces, prefix);
 
       if (uri != null)
-	return new QName(name, uri);
+        return new QName(name, uri);
       else
-	return new QName(name);
+        return new QName(name);
     }
   }
 

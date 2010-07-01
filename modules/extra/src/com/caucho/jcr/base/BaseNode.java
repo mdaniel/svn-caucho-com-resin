@@ -64,11 +64,11 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Node addNode(String relPath)
     throws ItemExistsException,
-	   PathNotFoundException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   RepositoryException
+           PathNotFoundException,
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -80,14 +80,14 @@ public class BaseNode extends BaseItem implements Node {
    * @param primaryNodeTypeName the node type of the new node
    */
   public Node addNode(String relPath,
-		      String primaryNodeTypeName)
+                      String primaryNodeTypeName)
     throws ItemExistsException,
-	   PathNotFoundException,
-	   NoSuchNodeTypeException,
-	   LockException,
-	   VersionException,
-	   ConstraintViolationException,
-	   RepositoryException
+           PathNotFoundException,
+           NoSuchNodeTypeException,
+           LockException,
+           VersionException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -99,13 +99,13 @@ public class BaseNode extends BaseItem implements Node {
    * @param destChildRelPath relative path to the destination item
    */
   public void orderBefore(String srcChildRelPath,
-			  String destChildRelPath)
+                          String destChildRelPath)
     throws UnsupportedRepositoryOperationException,
-	   VersionException,
-	   ConstraintViolationException,
-	   ItemNotFoundException,
-	   LockException,
-	   RepositoryException
+           VersionException,
+           ConstraintViolationException,
+           ItemNotFoundException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -119,10 +119,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, Value value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -136,10 +136,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, Value value, int type)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -152,10 +152,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, Value[] values)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -168,13 +168,13 @@ public class BaseNode extends BaseItem implements Node {
    * @param type the expected type of the property
    */
   public Property setProperty(String name,
-			      Value[] values,
-			      int type)
+                              Value[] values,
+                              int type)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -187,10 +187,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, String[] values)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -204,10 +204,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, String[] values, int type)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -221,10 +221,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, String value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -238,10 +238,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, String value, int type)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -254,10 +254,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, InputStream value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -270,10 +270,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, boolean value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -286,10 +286,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, double value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -302,10 +302,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, long value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -318,10 +318,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, Calendar value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -334,10 +334,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property setProperty(String name, Node value)
     throws ValueFormatException,
-	   VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           VersionException,
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -349,7 +349,7 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Node getNode(String relPath)
     throws PathNotFoundException,
-	   RepositoryException
+           RepositoryException
   {
     String []segments = relPath.split("/");
 
@@ -358,23 +358,23 @@ public class BaseNode extends BaseItem implements Node {
       String subPath = segments[i];
 
       if (subPath.length() == 0)
-	continue;
+        continue;
 
       Node nextNode = null;
       
       NodeIterator iter = node.getNodes();
       while (iter.hasNext()) {
-	Node subNode = iter.nextNode();
+        Node subNode = iter.nextNode();
 
-	if (subPath.equals(subNode.getName())) {
-	  nextNode = subNode;
-	  break;
-	}
+        if (subPath.equals(subNode.getName())) {
+          nextNode = subNode;
+          break;
+        }
       }
 
       if (nextNode == null) {
-	throw new PathNotFoundException(L.l("'{0}' is an unknown node in {1}",
-					    relPath, this));
+        throw new PathNotFoundException(L.l("'{0}' is an unknown node in {1}",
+                                            relPath, this));
       }
 
       node = nextNode;
@@ -406,7 +406,7 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Property getProperty(String relPath)
     throws PathNotFoundException,
-	   RepositoryException
+           RepositoryException
   {
     int p = relPath.lastIndexOf('/');
 
@@ -418,7 +418,7 @@ public class BaseNode extends BaseItem implements Node {
     }
 
     throw new PathNotFoundException(L.l("'{0}' is an unknown property in {1}'",
-					relPath, this));
+                                        relPath, this));
   }
   
   /**
@@ -445,7 +445,7 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Item getPrimaryItem()
     throws ItemNotFoundException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -455,7 +455,7 @@ public class BaseNode extends BaseItem implements Node {
    */
   public String getUUID()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -559,7 +559,7 @@ public class BaseNode extends BaseItem implements Node {
     
     for (int i = superTypes.length - 1; i >= 0; i--) {
       if (superTypes[i].getName().equals(nodeTypeName))
-	return true;
+        return true;
     }
 
     return false;
@@ -570,10 +570,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void addMixin(String mixinName)
     throws NoSuchNodeTypeException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   RepositoryException
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -583,10 +583,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void removeMixin(String mixinName)
     throws NoSuchNodeTypeException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   RepositoryException
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -596,7 +596,7 @@ public class BaseNode extends BaseItem implements Node {
    */
   public boolean canAddMixin(String mixinName)
     throws NoSuchNodeTypeException,
-	   RepositoryException
+           RepositoryException
   {
     return false;
   }
@@ -615,10 +615,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Version checkin()
     throws VersionException,
-	   UnsupportedRepositoryOperationException,
-	   InvalidItemStateException,
-	   LockException,
-	   RepositoryException
+           UnsupportedRepositoryOperationException,
+           InvalidItemStateException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -628,8 +628,8 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void checkout()
     throws UnsupportedRepositoryOperationException,
-	   LockException,
-	   RepositoryException
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -639,9 +639,9 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void doneMerge(Version version)
     throws VersionException,
-	   InvalidItemStateException,
-	   UnsupportedRepositoryOperationException,
-	   RepositoryException
+           InvalidItemStateException,
+           UnsupportedRepositoryOperationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -651,9 +651,9 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void cancelMerge(Version version)
     throws VersionException,
-	   InvalidItemStateException,
-	   UnsupportedRepositoryOperationException,
-	   RepositoryException
+           InvalidItemStateException,
+           UnsupportedRepositoryOperationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -663,10 +663,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void update(String srcWorkspaceName)
     throws NoSuchWorkspaceException,
-	   AccessDeniedException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException
+           AccessDeniedException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -676,11 +676,11 @@ public class BaseNode extends BaseItem implements Node {
    */
   public NodeIterator merge(String srcWorkspace, boolean bestEffort)
     throws NoSuchWorkspaceException,
-	   AccessDeniedException,
-	   MergeException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException
+           AccessDeniedException,
+           MergeException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -690,9 +690,9 @@ public class BaseNode extends BaseItem implements Node {
    */
   public String getCorrespondingNodePath(String workspaceName)
     throws ItemNotFoundException,
-	   NoSuchWorkspaceException,
-	   AccessDeniedException,
-	   RepositoryException
+           NoSuchWorkspaceException,
+           AccessDeniedException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -711,11 +711,11 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void restore(String versionName, boolean removeExisting)
     throws VersionException,
-	   ItemExistsException,
-	   UnsupportedRepositoryOperationException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException
+           ItemExistsException,
+           UnsupportedRepositoryOperationException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -725,10 +725,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void restore(Version version, boolean removeExisting)
     throws VersionException,
-	   ItemExistsException,
-	   UnsupportedRepositoryOperationException,
-	   LockException,
-	   RepositoryException
+           ItemExistsException,
+           UnsupportedRepositoryOperationException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -737,16 +737,16 @@ public class BaseNode extends BaseItem implements Node {
    * Restore the node based on an older version.
    */
   public void restore(Version version,
-		      String relPath,
-		      boolean removeExisting)
+                      String relPath,
+                      boolean removeExisting)
     throws PathNotFoundException,
-	   ItemExistsException,
-	   VersionException,
-	   ConstraintViolationException,
-	   UnsupportedRepositoryOperationException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException
+           ItemExistsException,
+           VersionException,
+           ConstraintViolationException,
+           UnsupportedRepositoryOperationException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -755,13 +755,13 @@ public class BaseNode extends BaseItem implements Node {
    * Restore the node based on an older version.
    */
   public void restoreByLabel(String versionLabel,
-			     boolean removeExisting)
+                             boolean removeExisting)
     throws VersionException,
-	   ItemExistsException,
-	   UnsupportedRepositoryOperationException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException
+           ItemExistsException,
+           UnsupportedRepositoryOperationException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -771,7 +771,7 @@ public class BaseNode extends BaseItem implements Node {
    */
   public VersionHistory getVersionHistory()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -781,7 +781,7 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Version getBaseVersion()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -791,10 +791,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Lock lock(boolean isDeep, boolean isSessionScoped)
     throws UnsupportedRepositoryOperationException,
-	   LockException,
-	   AccessDeniedException,
-	   InvalidItemStateException,
-	   RepositoryException
+           LockException,
+           AccessDeniedException,
+           InvalidItemStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -804,9 +804,9 @@ public class BaseNode extends BaseItem implements Node {
    */
   public Lock getLock()
     throws UnsupportedRepositoryOperationException,
-	   LockException,
-	   AccessDeniedException,
-	   RepositoryException
+           LockException,
+           AccessDeniedException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -816,10 +816,10 @@ public class BaseNode extends BaseItem implements Node {
    */
   public void unlock()
     throws UnsupportedRepositoryOperationException,
-	   LockException,
-	   AccessDeniedException,
-	   InvalidItemStateException,
-	   RepositoryException
+           LockException,
+           AccessDeniedException,
+           InvalidItemStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

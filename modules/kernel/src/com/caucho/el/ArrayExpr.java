@@ -153,12 +153,12 @@ public class ArrayExpr extends Expr
       int ref = (int) toLong(fieldObj, null);
 
       try {
-	List list = (List) aObj;
+        List list = (List) aObj;
 
-	if (ref < 0 || list.size() < ref)
-	  return null;
-	else
-	  return list.get(ref);
+        if (ref < 0 || list.size() < ref)
+          return null;
+        else
+          return list.get(ref);
       } catch (IndexOutOfBoundsException e) {
       } catch (Exception e) {
         return invocationError(e);
@@ -186,7 +186,7 @@ public class ArrayExpr extends Expr
         if (_lastClass == aClass && _lastField.equals(fieldName))
           getMethod = _lastMethod;
         else {
-	  // XXX: the Introspection is a memory hog
+          // XXX: the Introspection is a memory hog
           // BeanInfo info = Introspector.getBeanInfo(aClass);
           getMethod = BeanUtil.getGetMethod(aClass, fieldName);
           _lastClass = aClass;

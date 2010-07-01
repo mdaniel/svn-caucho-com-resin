@@ -68,7 +68,7 @@ public class XslTransform extends XslStylesheet {
       throw error(L.l("xsl:stylesheet needs a 'version' attribute."));
     else if (! _version.equals("1.0"))
       throw error(L.l("'{0}' is an unknown xsl:stylesheet version.",
-		      _version));
+                      _version));
   }
 
   /**

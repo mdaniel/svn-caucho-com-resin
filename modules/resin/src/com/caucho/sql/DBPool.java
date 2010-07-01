@@ -880,13 +880,13 @@ public class DBPool
   private DataSource getDataSource()
   {
     if (_dataSource == null ||
-	_resinDataSource != null && _resinDataSource.isClosed()) {
+        _resinDataSource != null && _resinDataSource.isClosed()) {
       _dataSource = _localDataSourceImpl.get();
 
       if (_dataSource instanceof DataSourceImpl)
-	_resinDataSource = (DataSourceImpl) _dataSource;
+        _resinDataSource = (DataSourceImpl) _dataSource;
       else
-	_resinDataSource = null;
+        _resinDataSource = null;
 
       if (_dataSource == null)
         throw new IllegalStateException(L.l("DBPool `{0}' no longer exists.",

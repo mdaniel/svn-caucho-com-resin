@@ -128,11 +128,11 @@ public class SystemClassLoader
     try {
       String boot = System.getProperty("sun.boot.class.path");
       if (boot != null) {
-	initClasspath(boot);
-	_hasBootClassPath = true;
+        initClasspath(boot);
+        _hasBootClassPath = true;
 
-	initExtDirs("java.ext.dirs");
-	initExtDirs("java.endorsed.dirs");
+        initExtDirs("java.ext.dirs");
+        initExtDirs("java.endorsed.dirs");
       }
     
       initClasspath(System.getProperty("java.class.path"));
@@ -142,7 +142,7 @@ public class SystemClassLoader
       e.printStackTrace();
     } finally {
       if (! isValid)
-	_hasBootClassPath = false;
+        _hasBootClassPath = false;
     }
   }
 
@@ -158,19 +158,19 @@ public class SystemClassLoader
       Path dir = Vfs.lookup(extDir);
 
       for (String fileName : dir.list()) {
-	Path root = dir.lookup(fileName);
+        Path root = dir.lookup(fileName);
 
-	try {
-	  // #2659
-	  if (root.isDirectory()
-	      || root.isFile() && (root.getPath().endsWith(".jar")
-				   || root.getPath().endsWith(".zip"))) {
-	    addRoot(root);
-	  }
-	} catch (Throwable e) {
-	  _hasBootClassPath = false;
-	  e.printStackTrace();
-	}
+        try {
+          // #2659
+          if (root.isDirectory()
+              || root.isFile() && (root.getPath().endsWith(".jar")
+                                   || root.getPath().endsWith(".zip"))) {
+            addRoot(root);
+          }
+        } catch (Throwable e) {
+          _hasBootClassPath = false;
+          e.printStackTrace();
+        }
       }
     }
   }
@@ -183,11 +183,11 @@ public class SystemClassLoader
       Path root = Vfs.lookup(classpathElement);
 
       try {
-	if (root.exists())
-	  addRoot(root);
+        if (root.exists())
+          addRoot(root);
       } catch (Throwable e) {
-	_hasBootClassPath = false;
-	e.printStackTrace();
+        _hasBootClassPath = false;
+        e.printStackTrace();
       }
     }
   }

@@ -115,25 +115,25 @@ public class Xsl extends AbstractStylesheetFactory {
 
     while (i < args.length) {
       if (args[i].equals("-xsl")) {
-	xslName = args[i + 1];
-	i += 2;
+        xslName = args[i + 1];
+        i += 2;
       }
       else if (args[i].equals("-lite") ||
                args[i].equals("-stylescript")) {
-	isStrict = false;
-	i += 1;
+        isStrict = false;
+        i += 1;
       }
       else if (args[i].equals("-o")) {
-	dest = args[i + 1];
-	i += 2;
+        dest = args[i + 1];
+        i += 2;
       }
       else if (args[i].equals("-suffix")) {
-	suffix = args[i + 1];
-	i += 2;
+        suffix = args[i + 1];
+        i += 2;
       }
       else if (args[i].startsWith("-A")) {
-	argList.add(args[i].substring(2));
-	i += 1;
+        argList.add(args[i].substring(2));
+        i += 1;
       }
       else if (args[i].startsWith("-P")) {
         String v = args[i].substring(2);
@@ -153,24 +153,24 @@ public class Xsl extends AbstractStylesheetFactory {
         keyList.add(key);
         valueList.add(value);
 
-	i += 1;
+        i += 1;
       }
       else if (args[i].equals("-conf")) {
-	conf = args[i + 1];
-	i += 2;
+        conf = args[i + 1];
+        i += 2;
       }
       else if (args[i].equals("-h") || args[i].equals("-help")) {
-	usage();
-	return;
+        usage();
+        return;
       } else
-	break;
+        break;
     }
 
     /*
     Path cfg = CauchoSystem.getResinHome().lookup(conf);
     if (cfg.exists()) {
       try {
-	Registry.setRegistry(Registry.parse(cfg));
+        Registry.setRegistry(Registry.parse(cfg));
       } catch (IOException e) {
       } catch (SAXException e) {
       }
@@ -184,7 +184,7 @@ public class Xsl extends AbstractStylesheetFactory {
       destDir = Vfs.lookup("stdout:");
 
     if (args.length - i  > 1 && (dest == null || destDir.isFile()) &&
-	suffix == null) {
+        suffix == null) {
       System.err.println("multiple sources require a destination directory");
       System.exit(1);
     }
@@ -198,10 +198,10 @@ public class Xsl extends AbstractStylesheetFactory {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
       if (loader instanceof DynamicClassLoader) {
-	DynamicClassLoader dynLoader
-	  = (DynamicClassLoader) loader;
-	String resourcePath = dynLoader.getResourcePathSpecificFirst();
-	stylePath.addClassPath(resourcePath);
+        DynamicClassLoader dynLoader
+          = (DynamicClassLoader) loader;
+        String resourcePath = dynLoader.getResourcePathSpecificFirst();
+        stylePath.addClassPath(resourcePath);
       }
 
       // stylePath.addClassPath(

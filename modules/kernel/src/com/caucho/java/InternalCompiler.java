@@ -211,8 +211,8 @@ public class InternalCompiler extends AbstractJavaCompiler {
           throw new IOExceptionWrapper(e);
         }
       
-	error.close();
-	tempStream.close();
+        error.close();
+        tempStream.close();
       } finally {
         thread.setContextClassLoader(oldLoader);
       }

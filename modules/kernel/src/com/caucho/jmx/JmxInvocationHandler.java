@@ -52,8 +52,8 @@ public class JmxInvocationHandler implements InvocationHandler {
    * Creates the invocation handler.
    */
   public JmxInvocationHandler(MBeanServer mbeanServer,
-			      ClassLoader loader,
-			      ObjectName objectName)
+                              ClassLoader loader,
+                              ObjectName objectName)
   {
     _server = mbeanServer;
     _loader = loader;
@@ -64,10 +64,10 @@ public class JmxInvocationHandler implements InvocationHandler {
    * Creates a new proxy instance.
    */
   public static Object newProxyInstance(MBeanServer server,
-					ClassLoader loader,
-					ObjectName objectName,
-					Class interfaceClass,
-					boolean notificationBroadcaster)
+                                        ClassLoader loader,
+                                        ObjectName objectName,
+                                        Class interfaceClass,
+                                        boolean notificationBroadcaster)
   {
     Class []interfaces;
 
@@ -81,8 +81,8 @@ public class JmxInvocationHandler implements InvocationHandler {
     handler = new JmxInvocationHandler(server, loader, objectName);
     
     return Proxy.newProxyInstance(interfaceClass.getClassLoader(),
-				  interfaces,
-				  handler);
+                                  interfaces,
+                                  handler);
   }
 
   /**
@@ -100,7 +100,7 @@ public class JmxInvocationHandler implements InvocationHandler {
 
     // equals and hashCode are special cased
     if (methodName.equals("equals")
-	&& params.length == 1 && params[0].equals(Object.class)) {
+        && params.length == 1 && params[0].equals(Object.class)) {
       Object value = args[0];
       if (value == null || ! Proxy.isProxyClass(value.getClass()))
         return Boolean.FALSE;
@@ -125,7 +125,7 @@ public class JmxInvocationHandler implements InvocationHandler {
       return marshall(_server.getAttribute(_name, attrName), returnType);
     }
     else if (params.length == 1 && returnType.equals(void.class) &&
-	     methodName.startsWith("set") && len > 3) {
+             methodName.startsWith("set") && len > 3) {
       attrName = methodName.substring(3);
 
       Attribute attr = new Attribute(attrName, args[0]);
@@ -138,48 +138,48 @@ public class JmxInvocationHandler implements InvocationHandler {
       if (args.length != 3) {
       }
       else if (args[0] instanceof NotificationListener) {
-	_server.addNotificationListener(_name,
-					(NotificationListener) args[0],
-					(NotificationFilter) args[1],
-					args[2]);
-	return null;
+        _server.addNotificationListener(_name,
+                                        (NotificationListener) args[0],
+                                        (NotificationFilter) args[1],
+                                        args[2]);
+        return null;
       }
       else if (args[0] instanceof ObjectName) {
-	_server.addNotificationListener(_name,
-					(ObjectName) args[0],
-					(NotificationFilter) args[1],
-					args[2]);
-	return null;
+        _server.addNotificationListener(_name,
+                                        (ObjectName) args[0],
+                                        (NotificationFilter) args[1],
+                                        args[2]);
+        return null;
       }
     }
     else if (methodName.equals("removeNotificationListener")) {
       if (args.length == 3) {
-	if (args[0] instanceof NotificationListener) {
-	  _server.removeNotificationListener(_name,
-					     (NotificationListener) args[0],
-					     (NotificationFilter) args[1],
-					     args[2]);
-	  return null;
-	}
-	else if (args[0] instanceof ObjectName) {
-	  _server.removeNotificationListener(_name,
-					     (ObjectName) args[0],
-					     (NotificationFilter) args[1],
-					     args[2]);
-	  return null;
-	}
+        if (args[0] instanceof NotificationListener) {
+          _server.removeNotificationListener(_name,
+                                             (NotificationListener) args[0],
+                                             (NotificationFilter) args[1],
+                                             args[2]);
+          return null;
+        }
+        else if (args[0] instanceof ObjectName) {
+          _server.removeNotificationListener(_name,
+                                             (ObjectName) args[0],
+                                             (NotificationFilter) args[1],
+                                             args[2]);
+          return null;
+        }
       }
       else if (args.length == 1) {
-	if (args[0] instanceof NotificationListener) {
-	  _server.removeNotificationListener(_name,
-					     (NotificationListener) args[0]);
-	  return null;
-	}
-	else if (args[0] instanceof ObjectName) {
-	  _server.removeNotificationListener(_name, (ObjectName) args[0]);
+        if (args[0] instanceof NotificationListener) {
+          _server.removeNotificationListener(_name,
+                                             (NotificationListener) args[0]);
+          return null;
+        }
+        else if (args[0] instanceof ObjectName) {
+          _server.removeNotificationListener(_name, (ObjectName) args[0]);
 
-	  return null;
-	}
+          return null;
+        }
       }
     }
 
@@ -196,18 +196,18 @@ public class JmxInvocationHandler implements InvocationHandler {
   private Object marshall(Object value, Class retType)
   {
     if (retType == null || value == null ||
-	retType.isAssignableFrom(value.getClass()))
+        retType.isAssignableFrom(value.getClass()))
       return value;
-	
+
     if (value instanceof ObjectName) {
       ObjectName name = (ObjectName) value;
 
       Object proxy = Jmx.find(name, _loader, _server);
 
       if (retType.isInstance(proxy))
-	return proxy;
+        return proxy;
       else
-	return value;
+        return value;
     }
     else if (value instanceof ObjectName[] && retType.isArray()) {
       Class type = retType.getComponentType();
@@ -216,19 +216,19 @@ public class JmxInvocationHandler implements InvocationHandler {
       Object proxies = Array.newInstance(type, names.length);
 
       for (int i = 0; i < names.length; i++) {
-	Object proxy = Jmx.find(names[i], _loader, _server);
+        Object proxy = Jmx.find(names[i], _loader, _server);
 
-	if (proxy == null) {
-	  Array.set(proxies, i, null);
-	  continue;
-	}
-	
-	if (! type.isInstance(proxy))
-	  return value;
+        if (proxy == null) {
+          Array.set(proxies, i, null);
+          continue;
+        }
 
-	Array.set(proxies, i, Jmx.find(names[i], _loader, _server));
+        if (! type.isInstance(proxy))
+          return value;
+
+        Array.set(proxies, i, Jmx.find(names[i], _loader, _server));
       }
-					   
+
       return proxies;
     }
 

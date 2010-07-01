@@ -67,8 +67,8 @@ public class PasswordFilter implements Filter {
   }
     
   public void doFilter(ServletRequest request,
-		       ServletResponse response,
-		       FilterChain next)
+                       ServletResponse response,
+                       FilterChain next)
     throws IOException, ServletException
   {
     HttpServletRequest req = (HttpServletRequest) request;

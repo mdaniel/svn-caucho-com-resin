@@ -69,7 +69,7 @@ public class OutboundResourceAdapterConfig {
       _trans = trans;
     else
       throw new ConfigException(L.l("'{0}' is an unknown transaction-support type",
-				    trans));
+                                    trans));
   }
 
   /**

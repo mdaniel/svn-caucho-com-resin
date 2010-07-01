@@ -766,7 +766,7 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
 
     if (_map != null) {
       for (Map.Entry<String,ValueExpression> entry : _map.entrySet()) {
-	component.setValueExpression(entry.getKey(), entry.getValue());
+        component.setValueExpression(entry.getKey(), entry.getValue());
       }
     }
   }

@@ -83,7 +83,7 @@ class QElementDef extends QNode {
   }
 
   public void addAttribute(String name, String type, ArrayList enumeration,
-			   String qualifier, String deflt)
+                           String qualifier, String deflt)
   {
     if (_attr == null)
       _attr = new ArrayList<QAttributeDef>();
@@ -104,12 +104,12 @@ class QElementDef extends QNode {
     for (int i = 0; i < _attr.size(); i++) {
       QAttributeDef attrDef = _attr.get(i);
       if (attrDef._deflt != null && 
-	  element.getAttribute(attrDef._name).equals("")) {
-	QAttr attr = (QAttr) element._owner.createAttribute(attrDef._name,
-							    attrDef._deflt);
-	attr._owner = element._owner;
-	attr.setSpecified(false);
-	element.setAttributeNode(attr);
+          element.getAttribute(attrDef._name).equals("")) {
+        QAttr attr = (QAttr) element._owner.createAttribute(attrDef._name,
+                                                            attrDef._deflt);
+        attr._owner = element._owner;
+        attr.setSpecified(false);
+        element.setAttributeNode(attr);
       }
     }
   }
@@ -122,8 +122,8 @@ class QElementDef extends QNode {
     for (int i = 0; i < _attr.size(); i++) {
       QAttributeDef attrDef = _attr.get(i);
       if (attrDef._deflt != null && 
-	  attributes.getIndex(attrDef._name) < 0) {
-	attributes.add(new QName(null, attrDef._name, null), attrDef._deflt);
+          attributes.getIndex(attrDef._name) < 0) {
+        attributes.add(new QName(null, attrDef._name, null), attrDef._deflt);
       }
     }
   }
@@ -135,9 +135,9 @@ class QElementDef extends QNode {
       os.print(_name);
       os.print(" ");
       if (_content instanceof QContentParticle)
-	((QContentParticle) _content).print(os);
+        ((QContentParticle) _content).print(os);
       else
-	os.print(String.valueOf(_content));
+        os.print(String.valueOf(_content));
       os.println(">");
     }
 
@@ -146,47 +146,47 @@ class QElementDef extends QNode {
       os.print(_name);
 
       for (int i = 0; i < _attr.size(); i++) {
-	QAttributeDef attribute = _attr.get(i);
+        QAttributeDef attribute = _attr.get(i);
 
-	if (_attr.size() == 1)
-	  os.print(" ");
-	else
-	  os.print("\n  ");
-	os.print(attribute._name);
-	if (attribute._type.equals("#ENUM")) {
-	  os.print(" (");
-	  for (int j = 0; j < attribute._enumeration.size(); j++) {
-	    String enumType = attribute._enumeration.get(j);
+        if (_attr.size() == 1)
+          os.print(" ");
+        else
+          os.print("\n  ");
+        os.print(attribute._name);
+        if (attribute._type.equals("#ENUM")) {
+          os.print(" (");
+          for (int j = 0; j < attribute._enumeration.size(); j++) {
+            String enumType = attribute._enumeration.get(j);
 
-	    if (j != 0)
-	      os.print(" | ");
-	    os.print(enumType);
-	  }
-	  os.print(")");
-	} else if (attribute._type.equals("NOTATION")) {
-	  os.print(" NOTATION (");
-	  for (int j = 0; j < attribute._enumeration.size(); j++) {
-	    String enumType = attribute._enumeration.get(j);
+            if (j != 0)
+              os.print(" | ");
+            os.print(enumType);
+          }
+          os.print(")");
+        } else if (attribute._type.equals("NOTATION")) {
+          os.print(" NOTATION (");
+          for (int j = 0; j < attribute._enumeration.size(); j++) {
+            String enumType = attribute._enumeration.get(j);
 
-	    if (j != 0)
-	      os.print(" | ");
-	    os.print(enumType);
-	  }
-	  os.print(")");
-	} else {
-	  os.print(" ");
-	  os.print(attribute._type);
-	}
+            if (j != 0)
+              os.print(" | ");
+            os.print(enumType);
+          }
+          os.print(")");
+        } else {
+          os.print(" ");
+          os.print(attribute._type);
+        }
 
-	if (attribute._qualifier != null) {
-	  os.print(" ");
-	  os.print(attribute._qualifier);
-	}
-	if (attribute._deflt != null) {
-	  os.print(" \"");
-	  os.print(attribute._deflt);
-	  os.print("\"");
-	}
+        if (attribute._qualifier != null) {
+          os.print(" ");
+          os.print(attribute._qualifier);
+        }
+        if (attribute._deflt != null) {
+          os.print(" \"");
+          os.print(attribute._deflt);
+          os.print("\"");
+        }
       }
       os.println(">");
     }

@@ -223,7 +223,7 @@ class OneToOneConfig extends AbstractRelationConfig
 
     ManyToOneField manyToOneField;
     manyToOneField = new ManyToOneField(_sourceType, _fieldName,
-					getCascade(), false);
+                                        getCascade(), false);
 
     manyToOneField.setType(targetType);
 
@@ -254,7 +254,7 @@ class OneToOneConfig extends AbstractRelationConfig
 
     if (sourceField == null) {
       throw error(_field, L.l("OneToOne target '{0}' does not have a matching ManyToOne relation.",
-			      targetType.getName()));
+                              targetType.getName()));
     }
 
     DependentEntityOneToOneField oneToOne;
@@ -268,8 +268,8 @@ class OneToOneConfig extends AbstractRelationConfig
   }
 
   private ManyToOneField getSourceField(EntityType targetType,
-				String mappedBy,
-				EntityType sourceType)
+                                String mappedBy,
+                                EntityType sourceType)
   {
     do {
       ArrayList<AmberField> fields = targetType.getFields();

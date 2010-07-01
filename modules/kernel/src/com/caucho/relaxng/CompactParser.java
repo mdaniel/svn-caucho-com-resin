@@ -616,12 +616,12 @@ public class CompactParser {
       cbuf[i++] = (char) ch;
 
       if (_offset < _length) {
-	ch = _buffer[_offset++] & 0xff;
-	if (ch == '\n')
-	  _line++;
+        ch = _buffer[_offset++] & 0xff;
+        if (ch == '\n')
+          _line++;
       }
       else
-	ch = read();
+        ch = read();
     }
     _cb.setLength(i);
     
@@ -656,7 +656,7 @@ public class CompactParser {
         throw error(L.l("'{0}' does not match a defined namespace.", lexeme));
       
       if (ns == null) {// && isElement) {
-	pattern = createNamePattern(lexeme, "");
+        pattern = createNamePattern(lexeme, "");
 
         return pattern;
       }
@@ -727,19 +727,19 @@ public class CompactParser {
       
     while (true)  {
       if (_offset < _length) {
-	ch = _buffer[_offset++];
-	if (ch == '\n')
-	  _line++;
+        ch = _buffer[_offset++];
+        if (ch == '\n')
+          _line++;
       }
       else
-	ch = read();
+        ch = read();
 
       switch (ch) {
       case ' ':
       case '\t':
       case '\n':
       case '\r':
-	break;
+        break;
       
       case '?':
       case '*':
@@ -752,79 +752,79 @@ public class CompactParser {
       case '(':
       case ')':
       case '=':
-	return ch;
+        return ch;
 
       case '\"':
       case '\'':
-	unread();
-	_lexeme = parseLiteral();
-	return LITERAL;
+        unread();
+        _lexeme = parseLiteral();
+        return LITERAL;
 
       case '#':
-	do {
-	  ch = read();
-	  if (ch != '#')
-	    throw error(L.l("expected '#' at '{0}'", String.valueOf((char) ch)));
+        do {
+          ch = read();
+          if (ch != '#')
+            throw error(L.l("expected '#' at '{0}'", String.valueOf((char) ch)));
         
-	  if (_cb.length() > 0)
-	    _cb.append('\n');
+          if (_cb.length() > 0)
+            _cb.append('\n');
 
-	  for (ch = read(); ch > 0 && ch != '\n' && ch != '\r'; ch = read())
-	    _cb.append((char) ch);
+          for (ch = read(); ch > 0 && ch != '\n' && ch != '\r'; ch = read())
+            _cb.append((char) ch);
 
-	  if (ch == '\r') {
-	    ch = read();
-	    if (ch != '\n')
-	      unread();
-	  }
+          if (ch == '\r') {
+            ch = read();
+            if (ch != '\n')
+              unread();
+          }
 
-	  ch = read();
-	} while (ch == '#');
+          ch = read();
+        } while (ch == '#');
 
-	unread();
-	return COMMENT;
+        unread();
+        return COMMENT;
 
       case -1:
-	_cb.append("end of file");
-	return -1;
+        _cb.append("end of file");
+        return -1;
 
       default:
-	if (XmlChar.isNameStart(ch)) {
-	  char []cbuf = _cb.getBuffer();
-	  int i = 0;
-	  
-	  while (ch > 0 && ch < 256 && NAME_CHAR[ch]) {
-	    cbuf[i++] = (char) ch;
+        if (XmlChar.isNameStart(ch)) {
+          char []cbuf = _cb.getBuffer();
+          int i = 0;
 
-	    if (_offset < _length) {
-	      ch = _buffer[_offset++] & 0xff;
-	      if (ch == '\n')
-		_line++;
-	    }
-	    else
-	      ch = read();
-	  }
-	  _cb.setLength(i);
-	  unread();
+          while (ch > 0 && ch < 256 && NAME_CHAR[ch]) {
+            cbuf[i++] = (char) ch;
 
-	  int token = _tokenMap.get(_cb);
+            if (_offset < _length) {
+              ch = _buffer[_offset++] & 0xff;
+              if (ch == '\n')
+                _line++;
+            }
+            else
+              ch = read();
+          }
+          _cb.setLength(i);
+          unread();
 
-	  if (token > 0) {
-	    _lexeme = null;
-	    return token;
-	  }
-	  else {
-	    _lexeme = _cb.toString().intern();
-	    return IDENTIFIER;
-	  }
-	}
-	else if (ch < 0) {
-	  _cb.append("end of file");
-	  return -1;
-	}
-	else {
-	  throw error(L.l("Unknown character '{0}'", String.valueOf((char) ch)));
-	}
+          int token = _tokenMap.get(_cb);
+
+          if (token > 0) {
+            _lexeme = null;
+            return token;
+          }
+          else {
+            _lexeme = _cb.toString().intern();
+            return IDENTIFIER;
+          }
+        }
+        else if (ch < 0) {
+          _cb.append("end of file");
+          return -1;
+        }
+        else {
+          throw error(L.l("Unknown character '{0}'", String.valueOf((char) ch)));
+        }
       }
     }
   }
@@ -932,7 +932,7 @@ public class CompactParser {
       fillBuffer();
 
       if (_length < 0)
-	return -1;
+        return -1;
     }
     
     int ch = _buffer[_offset++];
@@ -943,7 +943,7 @@ public class CompactParser {
       _line++;
 
       if (_length <= _offset)
-	fillBuffer();
+        fillBuffer();
       
       ch = _buffer[_offset++];
       
@@ -969,7 +969,7 @@ public class CompactParser {
       _offset--;
       int ch = _buffer[_offset];
       if (ch == '\n') {
-	_line--;
+        _line--;
       }
     }
   }
@@ -995,7 +995,7 @@ public class CompactParser {
     NAME_CHAR = new boolean[256];
     for (int i = 0; i < NAME_CHAR.length; i++) {
       if (XmlChar.isNameChar((char) i))
-	NAME_CHAR[i] = true;
+        NAME_CHAR[i] = true;
     }
   }
 }

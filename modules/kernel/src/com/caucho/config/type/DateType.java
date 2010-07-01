@@ -68,9 +68,9 @@ public class DateType extends ConfigType
   {
     try {
       if (text == null)
-	return null;
+        return null;
       else if ("".equals(text))
-	return new Date(Alarm.getCurrentTime());
+        return new Date(Alarm.getCurrentTime());
       
       QDate date = new QDate();
       date.parseDate(text);

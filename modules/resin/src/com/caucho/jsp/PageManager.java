@@ -117,10 +117,10 @@ abstract public class PageManager {
       _autoCompile = jspPropertyGroup.isAutoCompile();
 
       if (jspPropertyGroup.getJspMax() > 0)
-	_pageCacheMax = jspPropertyGroup.getJspMax();
+        _pageCacheMax = jspPropertyGroup.getJspMax();
 
       if (jspPropertyGroup.getDependencyCheckInterval() != Long.MIN_VALUE)
-	interval = jspPropertyGroup.getDependencyCheckInterval();
+        interval = jspPropertyGroup.getDependencyCheckInterval();
     }
 
     if (interval < 0)
@@ -262,8 +262,8 @@ abstract public class PageManager {
     * @return the compiled JSP (or XTP) page.
     */
   public Page getPage(String uri, String pageURI,
-		      Path path,
-		      ServletConfig config)
+                      Path path,
+                      ServletConfig config)
     throws Exception
   {
     return getPage(uri, pageURI, path, config, null);
@@ -415,7 +415,7 @@ abstract public class PageManager {
         try {
           if (page != null && ! page.isDead()) {
             page.destroy();
-	  }
+          }
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         }
@@ -439,7 +439,7 @@ abstract public class PageManager {
       _page = page;
       
       if (page != null)
-	page._caucho_setEntry(this);
+        page._caucho_setEntry(this);
     }
     
     Page getPage()

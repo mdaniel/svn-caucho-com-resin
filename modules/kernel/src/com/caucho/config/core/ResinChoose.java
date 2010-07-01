@@ -73,7 +73,7 @@ public class ResinChoose extends ResinControl implements FlowBean {
       ResinWhen when = _whenList.get(i);
 
       if (when.configure(object))
-	return;
+        return;
     }
 
     if (_otherwise != null)

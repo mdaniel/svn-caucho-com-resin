@@ -92,11 +92,11 @@ public class XslAttributeNode extends XslNode {
       out.print(name == null ? ", null" : (", \"" + name + "\""));
       out.print(", ");
       if (_value == null)
-	out.print("null");
+        out.print("null");
       else {
-	out.print("\"");
-	out.printJavaString(_value);
-	out.print("\"");
+        out.print("\"");
+        out.printJavaString(_value);
+        out.print("\"");
       }
       out.println(");");
     }
@@ -115,11 +115,11 @@ public class XslAttributeNode extends XslNode {
       out.print(name == null ? "null" : ("\"" + name + "\""));
       out.print(", ");
       if (_value == null)
-	out.print("null");
+        out.print("null");
       else {
-	out.print("\"");
-	out.printJavaString(_value);
-	out.print("\"");
+        out.print("\"");
+        out.printJavaString(_value);
+        out.print("\"");
       }
       out.println(");");
     }

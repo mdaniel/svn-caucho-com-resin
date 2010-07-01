@@ -187,9 +187,9 @@ public class ReflectionAnnotatedType<T>
         // ioc/0p23
         _fieldSet.add(new AnnotatedFieldImpl<T>(this, field));
       } catch (ConfigException e) {
-	throw e;
+        throw e;
       } catch (Throwable e) {
-	throw ConfigException.create(L.l("{0}: {1}\n", field, e), e);
+        throw ConfigException.create(L.l("{0}: {1}\n", field, e), e);
       }
     }
   }

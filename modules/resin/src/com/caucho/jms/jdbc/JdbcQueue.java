@@ -149,10 +149,10 @@ public class JdbcQueue<E> extends PollingQueue<E> {
   {
     try {
       if (_jdbcManager.getDataSource() == null)
-	throw new ConfigException(L.l("JdbcQueue requires a <data-source> element."));
+        throw new ConfigException(L.l("JdbcQueue requires a <data-source> element."));
     
       if (getName() == null)
-	throw new ConfigException(L.l("JdbcQueue requires a <queue-name> element."));
+        throw new ConfigException(L.l("JdbcQueue requires a <queue-name> element."));
 
       _jdbcManager.init();
 
@@ -169,8 +169,8 @@ public class JdbcQueue<E> extends PollingQueue<E> {
    */
   /*
   public MessageConsumerImpl createConsumer(JmsSession session,
-					    String selector,
-					    boolean noWait)
+                                            String selector,
+                                            boolean noWait)
     throws JMSException
   {
     return new JdbcQueueConsumer(session, selector, _jdbcManager, this);
@@ -193,9 +193,9 @@ public class JdbcQueue<E> extends PollingQueue<E> {
    */
   @Override
   public void send(String msgId,
-		   E payload,
-		   int priority,
-		   long expireTime)
+                   E payload,
+                   int priority,
+                   long expireTime)
     throws MessageException
   {
     // JdbcMessage jdbcMessage = _jdbcManager.getJdbcMessage();
@@ -219,73 +219,73 @@ public class JdbcQueue<E> extends PollingQueue<E> {
     
       Connection conn = dataSource.getConnection();
       try {
-	String sql = ("SELECT m_id, msg_type, msg_id, delivered, body, header" +
-		      " FROM " + messageTable
-		      + " WHERE ?<m_id AND queue=?"
-		      + "   AND consumer IS NULL AND ?<=expire"
-		      + " ORDER BY m_id");
+        String sql = ("SELECT m_id, msg_type, msg_id, delivered, body, header" +
+                      " FROM " + messageTable
+                      + " WHERE ?<m_id AND queue=?"
+                      + "   AND consumer IS NULL AND ?<=expire"
+                      + " ORDER BY m_id");
 
-	PreparedStatement selectStmt = conn.prepareStatement(sql);
+        PreparedStatement selectStmt = conn.prepareStatement(sql);
 
-	try {
-	  selectStmt.setFetchSize(1);
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+        try {
+          selectStmt.setFetchSize(1);
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
 
-	if (isAutoAck) {
-	  sql = ("DELETE FROM " + messageTable +
-		 " WHERE m_id=? AND consumer IS NULL");
-	}
-	else
-	  sql = ("UPDATE " + messageTable +
-		 " SET consumer=?, delivered=1" +
-		 " WHERE m_id=? AND consumer IS NULL");
+        if (isAutoAck) {
+          sql = ("DELETE FROM " + messageTable +
+                 " WHERE m_id=? AND consumer IS NULL");
+        }
+        else
+          sql = ("UPDATE " + messageTable +
+                 " SET consumer=?, delivered=1" +
+                 " WHERE m_id=? AND consumer IS NULL");
 
-	PreparedStatement updateStmt = conn.prepareStatement(sql);
+        PreparedStatement updateStmt = conn.prepareStatement(sql);
 
-	long id = -1;
-	while (true) {
-	  id = -1;
+        long id = -1;
+        while (true) {
+          id = -1;
 
-	  selectStmt.setLong(1, minId);
-	  selectStmt.setInt(2, getId());
-	  selectStmt.setLong(3, Alarm.getCurrentTime());
+          selectStmt.setLong(1, minId);
+          selectStmt.setInt(2, getId());
+          selectStmt.setLong(3, Alarm.getCurrentTime());
 
-	  MessageImpl msg = null;
+          MessageImpl msg = null;
 
-	  ResultSet rs = selectStmt.executeQuery();
-	  while (rs.next()) {
-	    id = rs.getLong(1);
+          ResultSet rs = selectStmt.executeQuery();
+          while (rs.next()) {
+            id = rs.getLong(1);
 
-	    minId = id;
+            minId = id;
 
-	    msg = jdbcMessage.readMessage(rs);
+            msg = jdbcMessage.readMessage(rs);
 
-	    if (true)
-	      break;
-	  }
+            if (true)
+              break;
+          }
 
-	  rs.close();
+          rs.close();
 
-	  if (msg == null)
-	    return null;
+          if (msg == null)
+            return null;
 
-	  if (isAutoAck) {
-	    updateStmt.setLong(1, id);
-	  }
-	  else {
-	    updateStmt.setLong(1, _consumerId);
-	    updateStmt.setLong(2, id);
-	  }
-	  
-	  int updateCount = updateStmt.executeUpdate();
-	
-	  if (updateCount == 1)
-	    return msg;
-	}
+          if (isAutoAck) {
+            updateStmt.setLong(1, id);
+          }
+          else {
+            updateStmt.setLong(1, _consumerId);
+            updateStmt.setLong(2, id);
+          }
+
+          int updateCount = updateStmt.executeUpdate();
+
+          if (updateCount == 1)
+            return msg;
+        }
       } finally {
-	conn.close();
+        conn.close();
       }
     } catch (IOException e) {
       throw new JmsExceptionWrapper(e);
@@ -315,7 +315,7 @@ public class JdbcQueue<E> extends PollingQueue<E> {
     
     try {
       String sql = ("SELECT id FROM " + destinationTable +
-		    " WHERE name=? AND is_topic=?");
+                    " WHERE name=? AND is_topic=?");
       
       PreparedStatement pstmt = conn.prepareStatement(sql);
       pstmt.setString(1, name);
@@ -323,64 +323,64 @@ public class JdbcQueue<E> extends PollingQueue<E> {
 
       ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
-	return rs.getInt(1);
+        return rs.getInt(1);
       }
       rs.close();
 
       if (destinationSequence != null) {
-	JdbcMetaData metaData = _jdbcManager.getMetaData();
-	sql = metaData.selectSequenceSQL(destinationSequence);
-	int id = 0;
-	
-	pstmt = conn.prepareStatement(sql);
+        JdbcMetaData metaData = _jdbcManager.getMetaData();
+        sql = metaData.selectSequenceSQL(destinationSequence);
+        int id = 0;
 
-	rs = pstmt.executeQuery();
-	if (rs.next())
-	  id = rs.getInt(1);
-	else
-	  throw new RuntimeException("can't create sequence");
+        pstmt = conn.prepareStatement(sql);
 
-	sql = "INSERT INTO " + destinationTable + " (id,name,is_topic) VALUES(?,?,?)";
+        rs = pstmt.executeQuery();
+        if (rs.next())
+          id = rs.getInt(1);
+        else
+          throw new RuntimeException("can't create sequence");
 
-	pstmt = conn.prepareStatement(sql);
+        sql = "INSERT INTO " + destinationTable + " (id,name,is_topic) VALUES(?,?,?)";
 
-	pstmt.setInt(1, id);
-	pstmt.setString(2, name);
-	pstmt.setInt(3, isTopic ? 1 : 0);
+        pstmt = conn.prepareStatement(sql);
 
-	pstmt.executeUpdate();
+        pstmt.setInt(1, id);
+        pstmt.setString(2, name);
+        pstmt.setInt(3, isTopic ? 1 : 0);
 
-	if (isTopic)
-	  log.fine("JMSTopic[" + name + "," + id + "] created");
-	else
-	  log.fine("JMSQueue[" + name + "," + id + "] created");
+        pstmt.executeUpdate();
 
-	return id;
+        if (isTopic)
+          log.fine("JMSTopic[" + name + "," + id + "] created");
+        else
+          log.fine("JMSQueue[" + name + "," + id + "] created");
+
+        return id;
       }
       else {
-	sql = "INSERT INTO " + destinationTable + " (name,is_topic) VALUES(?,?)";
-	pstmt = conn.prepareStatement(sql,
-				      PreparedStatement.RETURN_GENERATED_KEYS);
-	pstmt.setString(1, name);
-	pstmt.setInt(2, isTopic ? 1 : 0);
+        sql = "INSERT INTO " + destinationTable + " (name,is_topic) VALUES(?,?)";
+        pstmt = conn.prepareStatement(sql,
+                                      PreparedStatement.RETURN_GENERATED_KEYS);
+        pstmt.setString(1, name);
+        pstmt.setInt(2, isTopic ? 1 : 0);
 
-	pstmt.executeUpdate();
+        pstmt.executeUpdate();
 
-	rs = pstmt.getGeneratedKeys();
+        rs = pstmt.getGeneratedKeys();
 
-	if (rs.next()) {
-	  int id = rs.getInt(1);
+        if (rs.next()) {
+          int id = rs.getInt(1);
 
-	  if (isTopic)
-	    log.fine("JMSTopic[" + name + "," + id + "] created");
-	  else
-	    log.fine("JMSQueue[" + name + "," + id + "] created");
-	
-	  return id;
-	}
-	else
-	  throw new SQLException(L.l("can't generate destination for {0}",
-				     name));
+          if (isTopic)
+            log.fine("JMSTopic[" + name + "," + id + "] created");
+          else
+            log.fine("JMSQueue[" + name + "," + id + "] created");
+
+          return id;
+        }
+        else
+          throw new SQLException(L.l("can't generate destination for {0}",
+                                     name));
       }
     } finally {
       conn.close();
@@ -407,34 +407,34 @@ public class JdbcQueue<E> extends PollingQueue<E> {
     
       Connection conn = dataSource.getConnection();
       try {
-	String sql = ("SELECT m_id" +
-		      " FROM " + messageTable +
-		      " WHERE ?<m_id AND queue=?" +
-		      "   AND consumer IS NULL AND ?<=expire" +
-		      " ORDER BY m_id");
+        String sql = ("SELECT m_id" +
+                      " FROM " + messageTable +
+                      " WHERE ?<m_id AND queue=?" +
+                      "   AND consumer IS NULL AND ?<=expire" +
+                      " ORDER BY m_id");
 
-	PreparedStatement selectStmt = conn.prepareStatement(sql);
+        PreparedStatement selectStmt = conn.prepareStatement(sql);
 
-	try {
-	  selectStmt.setFetchSize(1);
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+        try {
+          selectStmt.setFetchSize(1);
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
 
-	selectStmt.setLong(1, minId);
-	selectStmt.setInt(2, getId());
-	selectStmt.setLong(3, Alarm.getCurrentTime());
+        selectStmt.setLong(1, minId);
+        selectStmt.setInt(2, getId());
+        selectStmt.setLong(3, Alarm.getCurrentTime());
 
-	MessageImpl msg = null;
+        MessageImpl msg = null;
 
-	ResultSet rs = selectStmt.executeQuery();
-	if (rs.next()) {
-	  hasValue = true;
-	}
+        ResultSet rs = selectStmt.executeQuery();
+        if (rs.next()) {
+          hasValue = true;
+        }
 
-	rs.close();
+        rs.close();
       } finally {
-	conn.close();
+        conn.close();
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);

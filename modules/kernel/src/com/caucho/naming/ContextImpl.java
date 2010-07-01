@@ -738,10 +738,10 @@ public class ContextImpl implements Context {
       value = dereference(value, null, model);
 
       if (value instanceof Context) {
-	if (rest == null)
-	  return ((Context) value).list("");
-	else
-	  return ((Context) value).list(rest);
+        if (rest == null)
+          return ((Context) value).list("");
+        else
+          return ((Context) value).list(rest);
       }
       else if (value != null)
         throw new NotContextException(L.l("{0}: expected intermediate context at `{1}'",

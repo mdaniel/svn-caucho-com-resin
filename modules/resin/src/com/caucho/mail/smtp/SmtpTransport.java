@@ -70,9 +70,9 @@ public class SmtpTransport extends Transport {
    * Connect for the protocol.
    */
   protected boolean protocolConnect(String host,
-				    int port,
-				    String user,
-				    String password)
+                                    int port,
+                                    String user,
+                                    String password)
     throws MessagingException
   {
     if (host == null)
@@ -129,7 +129,7 @@ public class SmtpTransport extends Transport {
 
     if (! (msg instanceof MimeMessage))
       throw new MessagingException("message must be a MimeMessage at '"
-				   + msg.getClass().getName() + "'");
+                                   + msg.getClass().getName() + "'");
 
     MimeMessage mimeMsg = (MimeMessage) msg;
 
@@ -141,30 +141,30 @@ public class SmtpTransport extends Transport {
       String from;
       
       if (fromList == null || fromList.length < 1) {
-	// XXX: possible should have a default
-	throw new MessagingException("message should have a sender");
+        // XXX: possible should have a default
+        throw new MessagingException("message should have a sender");
       }
       else
-	from = fromList[0];
+        from = fromList[0];
       
       _os.print("MAIL FROM:<" + from + ">\r\n");
       _os.flush();
 
       if (log.isLoggable(Level.FINER))
-	log.finer("mail from:<" + from + ">");
+        log.finer("mail from:<" + from + ">");
 
       readResponse();
 
       for (int i = 0; i < addresses.length; i++) {
-	InternetAddress addr = (InternetAddress) addresses[i];
+        InternetAddress addr = (InternetAddress) addresses[i];
 
-	if (log.isLoggable(Level.FINER))
-	  log.finer("mail to:<" + addr.getAddress() + ">");
+        if (log.isLoggable(Level.FINER))
+          log.finer("mail to:<" + addr.getAddress() + ">");
 
-	_os.print("RCPT TO:<" + addr.getAddress() + ">\r\n");
-	_os.flush();
+        _os.print("RCPT TO:<" + addr.getAddress() + ">\r\n");
+        _os.flush();
 
-	readResponse();
+        readResponse();
       }
 
       _os.print("DATA\r\n");
@@ -172,7 +172,7 @@ public class SmtpTransport extends Transport {
 
       String line = _is.readLine();
       if (! line.startsWith("354 "))
-	throw new MessagingException("Data not accepted: " + line);
+        throw new MessagingException("Data not accepted: " + line);
 
       mimeMsg.writeTo(new DataFilter(_os));
 
@@ -191,21 +191,21 @@ public class SmtpTransport extends Transport {
     while (true) {
       String line = _is.readLine();
       if (line.length() < 4)
-	throw new MessagingException(line);
+        throw new MessagingException(line);
 
       int status = 0;
       for (int i = 0; i < 3; i++) {
-	char ch;
+        char ch;
 
-	if ('0' <= (ch = line.charAt(i))  && ch <= '9')
-	  status = 10 * status + ch - '0';
+        if ('0' <= (ch = line.charAt(i))  && ch <= '9')
+          status = 10 * status + ch - '0';
       }
 
       if ((status / 100) % 10 != 2)
-	throw new MessagingException(line);
+        throw new MessagingException(line);
 
       if (line.charAt(3) != '-')
-	return status;
+        return status;
     }
   }
 
@@ -225,15 +225,15 @@ public class SmtpTransport extends Transport {
 
     try {
       if (os != null) {
-	os.print("QUIT\r\n");
-	os.flush();
+        os.print("QUIT\r\n");
+        os.flush();
       }
     } catch (IOException e) {
     }
 
     try {
       if (socket != null)
-	socket.close();
+        socket.close();
     } catch (IOException e) {
     }
   }
@@ -254,23 +254,23 @@ public class SmtpTransport extends Transport {
     {
       switch (ch) {
       case '\r':
-	_isCr = true;
-	_isLf = false;
-	break;
+        _isCr = true;
+        _isLf = false;
+        break;
       case '\n':
-	_isLf = _isCr;
-	_isCr = false;
-	break;
+        _isLf = _isCr;
+        _isCr = false;
+        break;
       case '.':
-	if (_isLf)
-	  _os.write('.');
-	_isLf = false;
-	_isCr = false;
-	break;
+        if (_isLf)
+          _os.write('.');
+        _isLf = false;
+        _isCr = false;
+        break;
       default:
-	_isLf = false;
-	_isCr = false;
-	break;
+        _isLf = false;
+        _isCr = false;
+        break;
       }
 
       _os.write(ch);

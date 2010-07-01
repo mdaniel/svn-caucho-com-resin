@@ -61,7 +61,7 @@ public class UniqueIndexColumnConstraint extends Constraint {
    */
   @Override
   public void validate(TableIterator []sourceRows,
-		       QueryContext context, Transaction xa)
+                       QueryContext context, Transaction xa)
     throws SQLException
   {
     try {
@@ -75,21 +75,21 @@ public class UniqueIndexColumnConstraint extends Constraint {
       int length = _column.getLength();
 
       if (length <= 0)
-	return;
+        return;
 
       BTree index = _column.getIndex();
 
       long value = index.lookup(buffer, 0, length);
 
       if (value != 0) {
-	Table table = sourceRow.getTable();
-	long blockId = sourceRow.getBlockId();
-	
-	throw new SQLException(L.l("`{0}' in {1}.{2} fails uniqueness constraint.",
-				   _column.getString(blockId, sourceBuffer,
-						     sourceOffset),
-				   table.getName(),
-				   _column.getName()));
+        Table table = sourceRow.getTable();
+        long blockId = sourceRow.getBlockId();
+
+        throw new SQLException(L.l("`{0}' in {1}.{2} fails uniqueness constraint.",
+                                   _column.getString(blockId, sourceBuffer,
+                                                     sourceOffset),
+                                   table.getName(),
+                                   _column.getName()));
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);

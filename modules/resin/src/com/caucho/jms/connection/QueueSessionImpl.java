@@ -43,7 +43,7 @@ public class QueueSessionImpl extends JmsSession
    * Creates the session
    */
   public QueueSessionImpl(ConnectionImpl connection,
-			  boolean isTransacted, int ackMode,
+                          boolean isTransacted, int ackMode,
                           boolean isXA)
     throws JMSException
   {
@@ -91,7 +91,7 @@ public class QueueSessionImpl extends JmsSession
     
     if (! (queue instanceof AbstractQueue))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS destination for Session.createProducer.",
-						queue));
+                                                queue));
 
     AbstractQueue dest = (AbstractQueue) queue;
 

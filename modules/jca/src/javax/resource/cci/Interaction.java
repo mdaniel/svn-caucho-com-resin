@@ -43,15 +43,15 @@ public interface Interaction {
    * Executes an interaction.
    */
   public boolean execute(InteractionSpec ispec,
-			 Record input,
-			 Record output)
+                         Record input,
+                         Record output)
     throws ResourceException;
 
   /**
    * Executes, returning a result.
    */
   public Record execute(InteractionSpec ispec,
-			Record input)
+                        Record input)
     throws ResourceException;
 
   /**

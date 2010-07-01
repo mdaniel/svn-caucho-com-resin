@@ -46,6 +46,6 @@ public abstract class XPathFun {
    * @param args The evaluated arguments
    */
   public abstract Object eval(Node node, ExprEnvironment env, 
-			      AbstractPattern pattern, ArrayList args)
+                              AbstractPattern pattern, ArrayList args)
     throws XPathException;
 }

@@ -101,7 +101,7 @@ public class ProfilerServlet
   }
 
   protected void writeHtml(HttpServletRequest request,
-			   HttpServletResponse response)
+                           HttpServletResponse response)
     throws ServletException, IOException
   {
     response.setContentType("text/html");
@@ -308,7 +308,7 @@ public class ProfilerServlet
   }
 
   protected void writeXml(HttpServletRequest request,
-			   HttpServletResponse response)
+                           HttpServletResponse response)
     throws ServletException, IOException
   {
     ProfilerNodeComparator comparator = new TimeComparator();
@@ -338,8 +338,8 @@ public class ProfilerServlet
   }
 
   private void displayXml(ProfilerPoint node,
-			  ProfilerNodeComparator comparator,
-			  XmlWriter out)
+                          ProfilerNodeComparator comparator,
+                          XmlWriter out)
   {
     List<ProfilerPoint> children = node.getChildren();
     Collections.sort(children, comparator);

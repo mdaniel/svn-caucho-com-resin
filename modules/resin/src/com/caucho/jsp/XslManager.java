@@ -144,13 +144,13 @@ class XslManager {
       DynamicClassLoader owningLoader = getStylesheetLoader(href, hrefPath);
 
       if (owningLoader != null) {
-	loader = owningLoader;
-	
-	stylePath = new MergePath();
-	stylePath.addMergePath(pwd);
-	stylePath.addMergePath(appDir);
-	resourcePath = loader.getResourcePathSpecificFirst();
-	stylePath.addClassPath(resourcePath);
+        loader = owningLoader;
+
+        stylePath = new MergePath();
+        stylePath.addMergePath(pwd);
+        stylePath.addMergePath(appDir);
+        resourcePath = loader.getResourcePathSpecificFirst();
+        stylePath.addClassPath(resourcePath);
       }
     }
 
@@ -164,9 +164,9 @@ class XslManager {
       AbstractStylesheetFactory factory;
     
       if (_strictXsl)
-	factory = new Xsl();
+        factory = new Xsl();
       else
-	factory = new StyleScript();
+        factory = new StyleScript();
 
       factory.setStylePath(stylePath);
       factory.setClassLoader(loader);
@@ -175,13 +175,13 @@ class XslManager {
       String className = "";
 
       if (pwd.lookup(href).canRead()) {
-	int p = req.getServletPath().lastIndexOf('/');
-	if (p >= 0)
-	  className += req.getServletPath().substring(0, p);
+        int p = req.getServletPath().lastIndexOf('/');
+        if (p >= 0)
+          className += req.getServletPath().substring(0, p);
       }
       /*
-	else if (href.startsWith("/"))
-	href = href.substring(1);
+        else if (href.startsWith("/"))
+        href = href.substring(1);
       */
       
       className += "/" + href;
@@ -202,7 +202,7 @@ class XslManager {
 
     for (; loader != null; loader = loader.getParent()) {
       if (! (loader instanceof DynamicClassLoader))
-	continue;
+        continue;
 
       DynamicClassLoader dynLoader = (DynamicClassLoader) loader;
       
@@ -213,7 +213,7 @@ class XslManager {
       Path loaderPath = mp.lookup(href);
 
       if (loaderPath.getNativePath().equals(sourcePath.getNativePath()))
-	owningLoader = dynLoader;
+        owningLoader = dynLoader;
     }
 
     return owningLoader;

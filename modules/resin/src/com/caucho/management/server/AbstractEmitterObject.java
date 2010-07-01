@@ -65,8 +65,8 @@ abstract public class AbstractEmitterObject
   }
 
   public void addNotificationListener(NotificationListener listener,
-				      NotificationFilter filter,
-				      Object handback)
+                                      NotificationFilter filter,
+                                      Object handback)
     throws IllegalArgumentException
   {
     if (listener == null)
@@ -86,36 +86,36 @@ abstract public class AbstractEmitterObject
   {
     if (_listeners != null) {
       synchronized (_listeners) {
-	for (int i = _listeners.size() - 1; i >= 0; i--) {
-	  Listener item = _listeners.get(i);
+        for (int i = _listeners.size() - 1; i >= 0; i--) {
+          Listener item = _listeners.get(i);
 
-	  if (item.getListener() == listener) {
-	    _listeners.remove(i);
-	  }
-	}
+          if (item.getListener() == listener) {
+            _listeners.remove(i);
+          }
+        }
 
-	_listenerArray = null;
+        _listenerArray = null;
       }
     }
   }
 
   public void removeNotificationListener(NotificationListener listener,
-					 NotificationFilter filter,
-					 Object handback)
+                                         NotificationFilter filter,
+                                         Object handback)
   {
     if (_listeners != null) {
       synchronized (_listeners) {
-	for (int i = _listeners.size() - 1; i >= 0; i--) {
-	  Listener item = _listeners.get(i);
+        for (int i = _listeners.size() - 1; i >= 0; i--) {
+          Listener item = _listeners.get(i);
 
-	  if (item.getListener() == listener
-	      && item.getFilter() == filter
-	      && item.getHandback() == handback) {
-	    _listeners.remove(i);
-	  }
-	}
+          if (item.getListener() == listener
+              && item.getFilter() == filter
+              && item.getHandback() == handback) {
+            _listeners.remove(i);
+          }
+        }
       
-	_listenerArray = null;
+        _listenerArray = null;
       }
     }
   }
@@ -126,16 +126,16 @@ abstract public class AbstractEmitterObject
     
     if (_listeners != null) {
       synchronized (_listeners) {
-	if (_listenerArray == null && _listeners.size() > 0) {
-	  _listenerArray = new Listener[_listeners.size()];
-	  _listeners.toArray(_listenerArray);
-	}
+        if (_listenerArray == null && _listeners.size() > 0) {
+          _listenerArray = new Listener[_listeners.size()];
+          _listeners.toArray(_listenerArray);
+        }
       }
     }
 
     if (listeners != null) {
       for (int i = 0; i < listeners.length; i++) {
-	listeners[i].handleNotification(notification);
+        listeners[i].handleNotification(notification);
       }
     }
   }
@@ -146,8 +146,8 @@ abstract public class AbstractEmitterObject
     private final Object _handback;
 
     Listener(NotificationListener listener,
-	     NotificationFilter filter,
-	     Object handback)
+             NotificationFilter filter,
+             Object handback)
     {
       _listener = listener;
       _filter = filter;
@@ -172,7 +172,7 @@ abstract public class AbstractEmitterObject
     void handleNotification(Notification notification)
     {
       if (_filter == null || _filter.isNotificationEnabled(notification))
-	_listener.handleNotification(notification, _handback);
+        _listener.handleNotification(notification, _handback);
     }
   }
 }

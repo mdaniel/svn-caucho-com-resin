@@ -129,19 +129,19 @@ public class TcpPool {
       Server bestServer = null;
 
       for (int i = 0; i < _servers.length; i++) {
-	int index = (startIndex + i) % _servers.length;
+        int index = (startIndex + i) % _servers.length;
 
-	Server server = _servers[index];
+        Server server = _servers[index];
 
-	if (_failRecoverTime < now - server.getLastFailTime()
-	    && server.getConnectionCount() < bestCost) {
-	  bestServer = server;
-	  bestCost = server.getConnectionCount();
-	}
+        if (_failRecoverTime < now - server.getLastFailTime()
+            && server.getConnectionCount() < bestCost) {
+          bestServer = server;
+          bestCost = server.getConnectionCount();
+        }
       }
 
       if (bestServer != null)
-	return bestServer;
+        return bestServer;
     
       int index = _roundRobin;
       _roundRobin = (_roundRobin + 1) % _servers.length;
@@ -159,9 +159,9 @@ public class TcpPool {
     Server(String host)
     {
       if (host.startsWith("http"))
-	_path = Vfs.lookup(host);
+        _path = Vfs.lookup(host);
       else
-	_path = Vfs.lookup("http://" + host);
+        _path = Vfs.lookup("http://" + host);
     }
 
     String getURL()
@@ -173,21 +173,21 @@ public class TcpPool {
       throws IOException
     {
       try {
-	Path path = _path.lookup(uri);
+        Path path = _path.lookup(uri);
 
-	ReadWritePair pair = path.openReadWrite();
+        ReadWritePair pair = path.openReadWrite();
 
-	if (pair != null) {
-	  synchronized (this) {
-	    _connectionCount++;
-	  }
-	}
+        if (pair != null) {
+          synchronized (this) {
+            _connectionCount++;
+          }
+        }
 
-	return pair;
+        return pair;
       } catch (IOException e) {
-	fail();
+        fail();
 
-	throw e;
+        throw e;
       }
     }
 
@@ -209,7 +209,7 @@ public class TcpPool {
     void close()
     {
       synchronized (this) {
-	_connectionCount--;
+        _connectionCount--;
       }
     }
   }

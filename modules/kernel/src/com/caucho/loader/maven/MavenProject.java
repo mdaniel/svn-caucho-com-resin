@@ -138,27 +138,27 @@ public class MavenProject
       ArtifactVersion parentVersion = _parent.getVersion();
       
       ArtifactVersionRange parentRange
-	= new ArtifactVersionRange(parentVersion, true,
-				   parentVersion, true);
+        = new ArtifactVersionRange(parentVersion, true,
+                                   parentVersion, true);
 
       parent = new ArtifactDependency(_parent.getGroupId(),
-				      null,
-				      _parent.getArtifactId(),
-				      parentRange);
+                                      null,
+                                      _parent.getArtifactId(),
+                                      parentRange);
     }
     
     return new Artifact(path, _groupId, null, _artifactId, _version,
-			parent, _dependencyList);
+                        parent, _dependencyList);
   }
   
   @Override
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[group=" + _groupId
-	    + ",artifact=" + _artifactId
-	    + ",version=" + _version
-	    + "]");
+            + "[group=" + _groupId
+            + ",artifact=" + _artifactId
+            + ",version=" + _version
+            + "]");
   }
 
   public static class Parent {
@@ -213,13 +213,13 @@ public class MavenProject
     public void init()
     {
       if (_groupId == null)
-	throw new ConfigException(L.l("<groupId> is a required attribute of <parent>"));
+        throw new ConfigException(L.l("<groupId> is a required attribute of <parent>"));
       
       if (_artifactId == null)
-	throw new ConfigException(L.l("<artifactId> is a required attribute of <parent>"));
+        throw new ConfigException(L.l("<artifactId> is a required attribute of <parent>"));
       
       if (_version == null)
-	throw new ConfigException(L.l("<version> is a required attribute of <parent>"));
+        throw new ConfigException(L.l("<version> is a required attribute of <parent>"));
     }
   }
 
@@ -262,13 +262,13 @@ public class MavenProject
     public void init()
     {
       if (_groupId == null)
-	throw new ConfigException(L.l("<groupId> is required in a <dependency> in a Maven pom.xml file"));
+        throw new ConfigException(L.l("<groupId> is required in a <dependency> in a Maven pom.xml file"));
       
       if (_artifactId == null)
-	throw new ConfigException(L.l("<artifactId> is required in a <dependency> in a Maven pom.xml file"));
+        throw new ConfigException(L.l("<artifactId> is required in a <dependency> in a Maven pom.xml file"));
 
       ArtifactDependency dependency
-	= new ArtifactDependency(_groupId, null, _artifactId, _version);
+        = new ArtifactDependency(_groupId, null, _artifactId, _version);
 
       addArtifactDependency(dependency);
     }

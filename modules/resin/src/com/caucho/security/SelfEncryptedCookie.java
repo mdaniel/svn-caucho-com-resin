@@ -90,7 +90,7 @@ public class SelfEncryptedCookie implements Serializable {
       Cipher cipher = initCipher(cookie, Cipher.ENCRYPT_MODE);
       
       SelfEncryptedCookie cookieObj
-	= new SelfEncryptedCookie(cookie, createTime);
+        = new SelfEncryptedCookie(cookie, createTime);
 
       TempOutputStream tos = new TempOutputStream();
       Hessian2Output hOut = new Hessian2Output(tos);
@@ -101,7 +101,7 @@ public class SelfEncryptedCookie implements Serializable {
 
       TempOutputStream cipherOut = new TempOutputStream();
       CipherOutputStream cOut
-	= new CipherOutputStream(cipherOut, cipher);
+        = new CipherOutputStream(cipherOut, cipher);
 
       tos.writeToStream(cOut);
       tos.destroy();
@@ -133,7 +133,7 @@ public class SelfEncryptedCookie implements Serializable {
       Object obj = in.readObject();
 
       if (! (obj instanceof SelfEncryptedCookie))
-	throw new SecurityException(L.l("SelfEncryptedCookie[] is invalid because it does not correctly decrypt"));
+        throw new SecurityException(L.l("SelfEncryptedCookie[] is invalid because it does not correctly decrypt"));
 
       SelfEncryptedCookie cookieObj = (SelfEncryptedCookie) obj;
 
@@ -151,8 +151,8 @@ public class SelfEncryptedCookie implements Serializable {
 
   private static Cipher initCipher(String cookie, int mode)
     throws NoSuchAlgorithmException,
-	   InvalidKeyException,
-	   NoSuchPaddingException
+           InvalidKeyException,
+           NoSuchPaddingException
   {
     Cipher cipher = Cipher.getInstance("AES");
 

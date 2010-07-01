@@ -126,55 +126,55 @@ public class HmuxDispatchRequest {
 
       case HMUX_ETAG:
         len = (is.read() << 8) + is.read();
-	_cb.clear();
-	is.readAll(_cb, len);
-	etag = _cb.toString();
+        _cb.clear();
+        is.readAll(_cb, len);
+        etag = _cb.toString();
 
-	if (isLoggable)
-	  log.fine(dbgId() + "etag: " + etag);
+        if (isLoggable)
+          log.fine(dbgId() + "etag: " + etag);
         break;
 
       case HMUX_HOST:
         len = (is.read() << 8) + is.read();
-	_cb.clear();
-	is.readAll(_cb, len);
-	host = _cb.toString();
+        _cb.clear();
+        is.readAll(_cb, len);
+        host = _cb.toString();
 
-	if (isLoggable)
-	  log.fine(dbgId() + "host: " + host);
+        if (isLoggable)
+          log.fine(dbgId() + "host: " + host);
         break;
 
       case HMUX_QUERY_ALL:
         len = (is.read() << 8) + is.read();
-	_cb.clear();
-	is.readAll(_cb, len);
+        _cb.clear();
+        is.readAll(_cb, len);
 
-	if (isLoggable)
-	  log.fine(dbgId() + "query: " + _cb);
+        if (isLoggable)
+          log.fine(dbgId() + "query: " + _cb);
 
         queryAll(os, host, _cb.toString(), etag);
         break;
 
-	/*
+        /*
       case HMUX_QUERY_SERVER:
         len = (is.read() << 8) + is.read();
-	_cb.clear();
-	is.readAll(_cb, len);
+        _cb.clear();
+        is.readAll(_cb, len);
 
-	if (isLoggable)
-	  log.fine(dbgId() + "query-server: " + _cb);
+        if (isLoggable)
+          log.fine(dbgId() + "query-server: " + _cb);
 
         queryCluster(os, host, _cb.toString());
         break;
-	*/
+        */
         
       default:
         len = (is.read() << 8) + is.read();
 
-	if (isLoggable)
-	  log.fine(dbgId() + (char) code + " " + len + " (dispatch)");
-	is.skip(len);
-	break;
+        if (isLoggable)
+          log.fine(dbgId() + (char) code + " " + len + " (dispatch)");
+        is.skip(len);
+        break;
       }
     }
 
@@ -187,7 +187,7 @@ public class HmuxDispatchRequest {
    * Returns the url.
    */
   private void queryAll(WriteStream os, String hostName,
-			String url, String etag)
+                        String url, String etag)
     throws IOException
   {
     int channel = 2;
@@ -201,17 +201,17 @@ public class HmuxDispatchRequest {
     if (host == null) {
       writeString(os, HmuxRequest.HMUX_HEADER, "check-interval");
       writeString(os, HmuxRequest.HMUX_STRING,
-		  String.valueOf(_server.getDependencyCheckInterval() / 1000));
+                  String.valueOf(_server.getDependencyCheckInterval() / 1000));
 
       if (isLoggable)
-	log.fine(dbgId() + "host '" + host + "' not configured");
+        log.fine(dbgId() + "host '" + host + "' not configured");
       return;
     }
     else if (! host.isActive()) {
       writeString(os, HMUX_UNAVAILABLE, "");
 
       if (isLoggable)
-	log.fine(dbgId() + "host '" + host + "' not active");
+        log.fine(dbgId() + "host '" + host + "' not active");
       return;
     }
 
@@ -222,15 +222,15 @@ public class HmuxDispatchRequest {
     }
     else if (etag.equals(host.getConfigETag())) {
       if (isLoggable)
-	log.fine(dbgId() + "host '" + host + "' no change");
+        log.fine(dbgId() + "host '" + host + "' no change");
       
       writeString(os, HMUX_NO_CHANGE, "");
       return;
     }
     else if (etag.equals("h-" + host.getHostName())) {
       if (isLoggable) {
-	log.fine(dbgId() + "host alias '" + hostName + " -> '"
-		 + host + "' no change");
+        log.fine(dbgId() + "host alias '" + hostName + " -> '"
+                 + host + "' no change");
       }
       
       writeString(os, HMUX_NO_CHANGE, "");
@@ -238,7 +238,7 @@ public class HmuxDispatchRequest {
     }
     else {
       if (isLoggable)
-	log.fine(dbgId() + "host '" + host + "' changed");
+        log.fine(dbgId() + "host '" + host + "' changed");
     }
     
     sendQuery(os, host, hostName, url);
@@ -248,7 +248,7 @@ public class HmuxDispatchRequest {
    * Writes the host data, returning the crc
    */
   private void sendQuery(WriteStream os, Host host,
-			 String hostName, String url)
+                         String hostName, String url)
     throws IOException
   {
     boolean isLoggable = log.isLoggable(Level.FINE);
@@ -272,69 +272,69 @@ public class HmuxDispatchRequest {
       
       WebAppController controller = host.findByURI(url);
       if (controller != null) {
-	try {
-	  controller.request();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          controller.request();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       ArrayList<WebAppController> appList = host.getWebAppList();
 
       for (int i = 0; i < appList.size(); i++) {
-	WebAppController appEntry = appList.get(i);
+        WebAppController appEntry = appList.get(i);
 
-	if (appEntry.getParent() != null &&
-	    appEntry.getParent().isDynamicDeploy()) {
-	  continue;
-	}
-	
-	writeString(os, HMUX_WEB_APP, appEntry.getContextPath());
-	if (isLoggable)
-	  log.fine(dbgId() + "web-app '" + appEntry.getContextPath() + "'");
+        if (appEntry.getParent() != null &&
+            appEntry.getParent().isDynamicDeploy()) {
+          continue;
+        }
 
-	crc64 = Crc64.generate(crc64, appEntry.getContextPath());
+        writeString(os, HMUX_WEB_APP, appEntry.getContextPath());
+        if (isLoggable)
+          log.fine(dbgId() + "web-app '" + appEntry.getContextPath() + "'");
 
-	WebApp app = appEntry.getWebApp();
+        crc64 = Crc64.generate(crc64, appEntry.getContextPath());
 
-	if (appEntry.isDynamicDeploy()) {
-	  writeString(os, HMUX_MATCH, "/*");
-	
-	  crc64 = Crc64.generate(crc64, "/*");
-	  
-	  if (isLoggable)
-	    log.fine(dbgId() + "dynamic '" + appEntry.getContextPath() + "'");
-	}
-	else if (app == null || ! app.isActive()) {
-	  if (isLoggable)
-	    log.fine(dbgId() + "not active '" + appEntry.getContextPath() + "'");
-	  
-	  writeString(os, HMUX_WEB_APP_UNAVAILABLE, "");
-	}
-	else {
-	  if (isLoggable)
-	    log.fine(dbgId() + "active '" + appEntry.getContextPath() + "'");
-	  ArrayList<String> patternList = app.getServletMappingPatterns();
+        WebApp app = appEntry.getWebApp();
 
-	  for (int j = 0; patternList != null && j < patternList.size(); j++) {
-	    String pattern = patternList.get(j);
+        if (appEntry.isDynamicDeploy()) {
+          writeString(os, HMUX_MATCH, "/*");
 
-	    writeString(os, HMUX_MATCH, pattern);
-	  
-	    crc64 = Crc64.generate(crc64, pattern);
-	  }
-	  
-	  patternList = app.getServletIgnoreMappingPatterns();
+          crc64 = Crc64.generate(crc64, "/*");
 
-	  for (int j = 0; patternList != null && j < patternList.size(); j++) {
-	    String pattern = patternList.get(j);
+          if (isLoggable)
+            log.fine(dbgId() + "dynamic '" + appEntry.getContextPath() + "'");
+        }
+        else if (app == null || ! app.isActive()) {
+          if (isLoggable)
+            log.fine(dbgId() + "not active '" + appEntry.getContextPath() + "'");
 
-	    writeString(os, HMUX_IGNORE, pattern);
-	  
-	    crc64 = Crc64.generate(crc64, "i");
-	    crc64 = Crc64.generate(crc64, pattern);
-	  }
-	}
+          writeString(os, HMUX_WEB_APP_UNAVAILABLE, "");
+        }
+        else {
+          if (isLoggable)
+            log.fine(dbgId() + "active '" + appEntry.getContextPath() + "'");
+          ArrayList<String> patternList = app.getServletMappingPatterns();
+
+          for (int j = 0; patternList != null && j < patternList.size(); j++) {
+            String pattern = patternList.get(j);
+
+            writeString(os, HMUX_MATCH, pattern);
+
+            crc64 = Crc64.generate(crc64, pattern);
+          }
+
+          patternList = app.getServletIgnoreMappingPatterns();
+
+          for (int j = 0; patternList != null && j < patternList.size(); j++) {
+            String pattern = patternList.get(j);
+
+            writeString(os, HMUX_IGNORE, pattern);
+
+            crc64 = Crc64.generate(crc64, "i");
+            crc64 = Crc64.generate(crc64, pattern);
+          }
+        }
       }
 
       CharBuffer cb = new CharBuffer();
@@ -376,8 +376,8 @@ public class HmuxDispatchRequest {
     ClusterPod []pods = cluster.getPodList();
     
     ClusterServer []servers = (pods.length > 0
-			       ? pods[0].getServerList()
-			       : null);
+                               ? pods[0].getServerList()
+                               : null);
     
     if (servers != null && servers.length > 0) {
       ClusterServer server = servers[0];
@@ -399,22 +399,22 @@ public class HmuxDispatchRequest {
       ClusterServer server = servers[i];
 
       if (server != null) {
-	String srunHost = server.getAddress() + ":" + server.getPort();
+        String srunHost = server.getAddress() + ":" + server.getPort();
 
-	/*
-	if (server.isBackup())
-	  writeString(os, HMUX_SRUN_BACKUP, srunHost);
-	else
-	*/
-	
-	boolean isSSL = false; // server.isSSL();
-	
-	if (isSSL)
-	  writeString(os, HMUX_SRUN_SSL, srunHost);
-	else
-	  writeString(os, HMUX_SRUN, srunHost);
+        /*
+        if (server.isBackup())
+          writeString(os, HMUX_SRUN_BACKUP, srunHost);
+        else
+        */
+
+        boolean isSSL = false; // server.isSSL();
+
+        if (isSSL)
+          writeString(os, HMUX_SRUN_SSL, srunHost);
+        else
+          writeString(os, HMUX_SRUN, srunHost);
       
-	crc64 = Crc64.generate(crc64, srunHost);
+        crc64 = Crc64.generate(crc64, srunHost);
       }
     }
 
@@ -429,25 +429,25 @@ public class HmuxDispatchRequest {
   {
     writeString(os, HmuxRequest.HMUX_HEADER, "check-interval");
     writeString(os, HmuxRequest.HMUX_STRING,
-		String.valueOf(_server.getDependencyCheckInterval() / 1000));
+                String.valueOf(_server.getDependencyCheckInterval() / 1000));
     
     writeString(os, HmuxRequest.HMUX_HEADER, "cookie");
     writeString(os, HmuxRequest.HMUX_STRING,
-		_server.getSessionCookie());
+                _server.getSessionCookie());
     writeString(os, HmuxRequest.HMUX_HEADER, "ssl-cookie");
     writeString(os, HmuxRequest.HMUX_STRING,
-		_server.getSSLSessionCookie());
+                _server.getSSLSessionCookie());
     writeString(os, HmuxRequest.HMUX_HEADER, "session-url-prefix");
     writeString(os, HmuxRequest.HMUX_STRING,
-		_server.getSessionURLPrefix());
+                _server.getSessionURLPrefix());
     writeString(os, HmuxRequest.HMUX_HEADER, "alt-session-url-prefix");
     writeString(os, HmuxRequest.HMUX_STRING,
-		_server.getAlternateSessionURLPrefix());
+                _server.getAlternateSessionURLPrefix());
 
     if (_server.getConnectionErrorPage() != null) {
       writeString(os, HmuxRequest.HMUX_HEADER, "connection-error-page");
       writeString(os, HmuxRequest.HMUX_STRING,
-		  _server.getConnectionErrorPage());
+                  _server.getConnectionErrorPage());
     }
   }
 

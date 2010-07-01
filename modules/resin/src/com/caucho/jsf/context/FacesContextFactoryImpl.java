@@ -41,22 +41,22 @@ public class FacesContextFactoryImpl extends FacesContextFactory
   private ApplicationFactory _applicationFactory;
   
   public FacesContext getFacesContext(Object context,
-				      Object request,
-				      Object response,
-				      Lifecycle lifecycle)
+                                      Object request,
+                                      Object response,
+                                      Lifecycle lifecycle)
     throws FacesException
   {
     if (context == null
-	|| request == null
-	|| response == null
-	|| lifecycle == null)
+        || request == null
+        || response == null
+        || lifecycle == null)
       throw new NullPointerException();
 
     FacesContext facesContext
       = new ServletFacesContextImpl(this,
-				       (ServletContext) context,
-				       (HttpServletRequest) request,
-				       (HttpServletResponse) response);
+                                       (ServletContext) context,
+                                       (HttpServletRequest) request,
+                                       (HttpServletResponse) response);
 
      return facesContext;
   }
@@ -65,8 +65,8 @@ public class FacesContextFactoryImpl extends FacesContextFactory
   {
     synchronized (this) {
       if (_applicationFactory == null) {
-	_applicationFactory = (ApplicationFactory)
-	  FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
+        _applicationFactory = (ApplicationFactory)
+          FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
       }
 
       return _applicationFactory.getApplication();

@@ -72,10 +72,10 @@ public class XmppReader
   private boolean _isFinest;
 
   XmppReader(XmppContext context,
-	     ReadStream is,
-	     XmppStreamReader in,
-	     ActorStream toReply,
-	     ActorStream handler)
+             ReadStream is,
+             XmppStreamReader in,
+             ActorStream toReply,
+             ActorStream handler)
   {
     _xmppContext = context;
     _marshalFactory = context.getMarshalFactory();
@@ -117,47 +117,47 @@ public class XmppReader
       int tag;
 
       while ((tag = _in.next()) > 0) {
-	if (_isFinest)
-	  debug(_in);
-	
-	if (tag == XMLStreamConstants.END_ELEMENT) {
-	  if ("stream".equals(_in.getLocalName())) {
-	    if (log.isLoggable(Level.FINE))
-	      log.fine(this + " end-stream");
-	  }
-	  else {
-	    log.warning(this + " " + _in.getLocalName());
-	  }
+        if (_isFinest)
+          debug(_in);
 
-	  return false;
-	}
+        if (tag == XMLStreamConstants.END_ELEMENT) {
+          if ("stream".equals(_in.getLocalName())) {
+            if (log.isLoggable(Level.FINE))
+              log.fine(this + " end-stream");
+          }
+          else {
+            log.warning(this + " " + _in.getLocalName());
+          }
 
-	if (tag == XMLStreamConstants.START_ELEMENT) {
-	  boolean valid = false;
+          return false;
+        }
 
-	  if ("iq".equals(_in.getLocalName()))
-	    valid = handleIq();
-	  else if ("presence".equals(_in.getLocalName()))
-	    valid = handlePresence();
-	  else if ("message".equals(_in.getLocalName()))
-	    valid = handleMessage();
-	  else {
-	    if (log.isLoggable(Level.FINE))
-	      log.fine(this + " " + _in.getLocalName() + " is an unknown tag");
-	    
-	    return false;
-	  }
+        if (tag == XMLStreamConstants.START_ELEMENT) {
+          boolean valid = false;
 
-	  if (! valid)
-	    return false;
+          if ("iq".equals(_in.getLocalName()))
+            valid = handleIq();
+          else if ("presence".equals(_in.getLocalName()))
+            valid = handlePresence();
+          else if ("message".equals(_in.getLocalName()))
+            valid = handleMessage();
+          else {
+            if (log.isLoggable(Level.FINE))
+              log.fine(this + " " + _in.getLocalName() + " is an unknown tag");
 
-	  if (_in.available() < 1)
-	    return true;
-	}
+            return false;
+          }
+
+          if (! valid)
+            return false;
+
+          if (_in.available() < 1)
+            return true;
+        }
       }
 
       if (_isFinest)
-	log.finest(this + " end of stream");
+        log.finest(this + " end of stream");
 
       return false;
     } catch (Exception e) {
@@ -217,71 +217,71 @@ public class XmppReader
     String thread = null;
     
     while ((tag = _in.next()) > 0
-	   && ! (tag == XMLStreamReader.END_ELEMENT
-		 && "message".equals(_in.getLocalName()))) {
+           && ! (tag == XMLStreamReader.END_ELEMENT
+                 && "message".equals(_in.getLocalName()))) {
       if (_isFinest)
-	debug(_in);
+        debug(_in);
       
       if (tag != XMLStreamReader.START_ELEMENT)
-	continue;
+        continue;
 
       if ("body".equals(_in.getLocalName())
-	  && "jabber:client".equals(_in.getNamespaceURI())) {
-	String lang = null;
+          && "jabber:client".equals(_in.getNamespaceURI())) {
+        String lang = null;
 
-	if (_in.getAttributeCount() > 0
-	    && "lang".equals(_in.getAttributeLocalName(0))) {
-	  lang = _in.getAttributeValue(0);
-	}
-	
-	tag = _in.next();
-	if (_isFinest)
-	  debug(_in);
+        if (_in.getAttributeCount() > 0
+            && "lang".equals(_in.getAttributeLocalName(0))) {
+          lang = _in.getAttributeValue(0);
+        }
 
-	String body = _in.getText();
+        tag = _in.next();
+        if (_isFinest)
+          debug(_in);
+
+        String body = _in.getText();
 
         if (bodyList == null)
           bodyList = new ArrayList<Text>();
 
-	bodyList.add(new Text(body, lang));
+        bodyList.add(new Text(body, lang));
 
-	expectEnd("body");
+        expectEnd("body");
       }
       else if ("subject".equals(_in.getLocalName())
-	       && "jabber:client".equals(_in.getNamespaceURI())) {
-	String lang = null;
-	
-	if (_in.getAttributeCount() > 0
-	    && "lang".equals(_in.getAttributeLocalName(0)))
-	  lang = _in.getAttributeValue(0);
-	
-	tag = _in.next();
-	if (_isFinest)
-	  debug(_in);
+               && "jabber:client".equals(_in.getNamespaceURI())) {
+        String lang = null;
 
-	String text = _in.getText();
+        if (_in.getAttributeCount() > 0
+            && "lang".equals(_in.getAttributeLocalName(0)))
+          lang = _in.getAttributeValue(0);
+
+        tag = _in.next();
+        if (_isFinest)
+          debug(_in);
+
+        String text = _in.getText();
 
         if (subjectList == null)
           subjectList = new ArrayList<Text>();
 
-	subjectList.add(new Text(text, lang));
+        subjectList.add(new Text(text, lang));
 
-	expectEnd("subject");
+        expectEnd("subject");
       }
       else if ("thread".equals(_in.getLocalName())
-	       && "jabber:client".equals(_in.getNamespaceURI())) {
-	tag = _in.next();
-	if (_isFinest)
-	  debug(_in);
+               && "jabber:client".equals(_in.getNamespaceURI())) {
+        tag = _in.next();
+        if (_isFinest)
+          debug(_in);
 
-	thread = _in.getText();
+        thread = _in.getText();
 
-	expectEnd("thread");
+        expectEnd("thread");
       }
       else {
-	String name = _in.getLocalName();
-	QName qName = _in.getName();
-	String uri = _in.getNamespaceURI();
+        String name = _in.getLocalName();
+        QName qName = _in.getName();
+        String uri = _in.getNamespaceURI();
 
         if (extraList == null)
           extraList = new ArrayList<Serializable>();
@@ -295,8 +295,8 @@ public class XmppReader
         else
           extra = readAsXmlString(_in);
 
-	// extraList.add(new XmlData(name, uri, data));
-	extraList.add(extra);
+        // extraList.add(new XmlData(name, uri, data));
+        extraList.add(extra);
       }
     }
 
@@ -395,11 +395,11 @@ public class XmppReader
       to = _uid;
 
       if (query instanceof ImSessionQuery && "set".equals(type)) {
-	long bamId = _xmppContext.addId(id);
-	
-	_toReply.queryResult(bamId, from, to, query);
+        long bamId = _xmppContext.addId(id);
 
-	return true;
+        _toReply.queryResult(bamId, from, to, query);
+
+        return true;
       }
     }
 
@@ -407,30 +407,30 @@ public class XmppReader
       long bamId = _xmppContext.addId(id);
 
       if (_handler != null)
-	_handler.queryGet(bamId, to, from, query);
+        _handler.queryGet(bamId, to, from, query);
     }
     else if ("set".equals(type)) {
       long bamId = _xmppContext.addId(id);
 
       if (_handler != null)
-	_handler.querySet(bamId, to, from, query);
+        _handler.querySet(bamId, to, from, query);
     }
     else if ("result".equals(type)) {
       long bamId = Long.parseLong(id);
 
       if (_handler != null)
-	_handler.queryResult(bamId, to, from, query);
+        _handler.queryResult(bamId, to, from, query);
     }
     else if ("error".equals(type)) {
       long bamId = Long.parseLong(id);
 
       if (_handler != null)
-	_handler.queryError(bamId, to, from, query, error);
+        _handler.queryError(bamId, to, from, query, error);
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " <" + _in.getLocalName() + " xmlns="
-		 + _in.getNamespaceURI() + "> unknown type");
+        log.fine(this + " <" + _in.getLocalName() + " xmlns="
+                 + _in.getNamespaceURI() + "> unknown type");
       }
     }
 
@@ -458,50 +458,50 @@ public class XmppReader
     ActorError error = null;
 
     while ((tag = _in.nextTag()) > 0
-	   && ! ("presence".equals(_in.getLocalName())
-		 && tag == XMLStreamReader.END_ELEMENT)) {
+           && ! ("presence".equals(_in.getLocalName())
+                 && tag == XMLStreamReader.END_ELEMENT)) {
       if (_isFinest)
-	debug(_in);
+        debug(_in);
       
       if (tag != XMLStreamReader.START_ELEMENT)
-	continue;
+        continue;
 
       if ("status".equals(_in.getLocalName())) {
-	tag = _in.next();
+        tag = _in.next();
     
-	if (_isFinest)
-	  debug(_in);
-	
-	status = new Text(_in.getText());
+        if (_isFinest)
+          debug(_in);
 
-	skipToEnd("status");
+        status = new Text(_in.getText());
+
+        skipToEnd("status");
       }
       else if ("show".equals(_in.getLocalName())) {
-	tag = _in.next();
+        tag = _in.next();
     
-	if (_isFinest)
-	  debug(_in);
-	
-	show = _in.getText();
+        if (_isFinest)
+          debug(_in);
 
-	skipToEnd("show");
+        show = _in.getText();
+
+        skipToEnd("show");
       }
       else if ("priority".equals(_in.getLocalName())) {
-	tag = _in.next();
+        tag = _in.next();
     
-	if (_isFinest)
-	  debug(_in);
-	
-	priority = Integer.parseInt(_in.getText());
+        if (_isFinest)
+          debug(_in);
 
-	skipToEnd("priority");
+        priority = Integer.parseInt(_in.getText());
+
+        skipToEnd("priority");
       }
       else {
-	String name = _in.getLocalName();
-	String uri = _in.getNamespaceURI();
-	String data = _in.readAsXmlString();
+        String name = _in.getLocalName();
+        String uri = _in.getNamespaceURI();
+        String data = _in.readAsXmlString();
 
-	extraList.add(new XmlData(name, uri, data));
+        extraList.add(new XmlData(name, uri, data));
       }
     }
 
@@ -518,30 +518,30 @@ public class XmppReader
 
     // XXX: need different types
     ImPresence presence = new ImPresence(to, from,
-					 show, status, priority,
-					 extraList);
+                                         show, status, priority,
+                                         extraList);
 
     if (_handler != null) {
       /*
       if ("".equals(type) || "presence".equals(type))
-	_handler.presence(target, from, presence);
+        _handler.presence(target, from, presence);
       else if ("probe".equals(type))
-	_handler.presenceProbe(target, from, presence);
+        _handler.presenceProbe(target, from, presence);
       else if ("unavailable".equals(type))
-	_handler.presenceUnavailable(target, from, presence);
+        _handler.presenceUnavailable(target, from, presence);
       else if ("subscribe".equals(type))
-	_handler.presenceSubscribe(target, from, presence);
+        _handler.presenceSubscribe(target, from, presence);
       else if ("subscribed".equals(type))
-	_handler.presenceSubscribed(target, from, presence);
+        _handler.presenceSubscribed(target, from, presence);
       else if ("unsubscribe".equals(type))
-	_handler.presenceUnsubscribe(target, from, presence);
+        _handler.presenceUnsubscribe(target, from, presence);
       else if ("unsubscribed".equals(type))
-	_handler.presenceUnsubscribed(target, from, presence);
+        _handler.presenceUnsubscribed(target, from, presence);
       else if ("error".equals(type))
-	_handler.presenceError(target, from, presence, error);
+        _handler.presenceError(target, from, presence, error);
       else
-	log.warning(this + " " + type + " is an unknown presence type");
-	*/
+        log.warning(this + " " + type + " is an unknown presence type");
+        */
     }
 
     return true;
@@ -558,13 +558,13 @@ public class XmppReader
     int tag;
     while ((tag = in.next()) > 0) {
       if (_isFinest)
-	debug(in);
-	
+        debug(in);
+
       if (tag == XMLStreamReader.START_ELEMENT) {
       }
       else if (tag == XMLStreamReader.END_ELEMENT) {
-	if (tagName.equals(in.getLocalName()))
-	  return;
+        if (tagName.equals(in.getLocalName()))
+          return;
       }
     }
   }
@@ -593,68 +593,68 @@ public class XmppReader
 
     while (true) {
       if (XMLStreamReader.START_ELEMENT == in.getEventType()) {
-	depth++;
+        depth++;
 
-	String prefix = in.getPrefix();
-	
-	sb.append("<");
+        String prefix = in.getPrefix();
 
-	if (! "".equals(prefix)) {
-	  sb.append(prefix);
-	  sb.append(":");
-	}
-	
-	sb.append(in.getLocalName());
+        sb.append("<");
 
-	if (in.getNamespaceURI() != null) {
-	  if ("".equals(prefix))
-	    sb.append(" xmlns");
-	  else
-	    sb.append(" xmlns:").append(prefix);
-	    
-	  sb.append("=\"");
-	  sb.append(in.getNamespaceURI()).append("\"");
-	}
+        if (! "".equals(prefix)) {
+          sb.append(prefix);
+          sb.append(":");
+        }
 
-	for (int i = 0; i < in.getAttributeCount(); i++) {
-	  sb.append(" ");
-	  sb.append(in.getAttributeLocalName(i));
-	  sb.append("=\"");
-	  sb.append(in.getAttributeValue(i));
-	  sb.append("\"");
-	}
-	sb.append(">");
+        sb.append(in.getLocalName());
 
-	log.finest(this + " " + sb);
+        if (in.getNamespaceURI() != null) {
+          if ("".equals(prefix))
+            sb.append(" xmlns");
+          else
+            sb.append(" xmlns:").append(prefix);
+
+          sb.append("=\"");
+          sb.append(in.getNamespaceURI()).append("\"");
+        }
+
+        for (int i = 0; i < in.getAttributeCount(); i++) {
+          sb.append(" ");
+          sb.append(in.getAttributeLocalName(i));
+          sb.append("=\"");
+          sb.append(in.getAttributeValue(i));
+          sb.append("\"");
+        }
+        sb.append(">");
+
+        log.finest(this + " " + sb);
       }
       else if (XMLStreamReader.END_ELEMENT == in.getEventType()) {
-	depth--;
+        depth--;
 
-	sb.append("</");
+        sb.append("</");
 
-	String prefix = in.getPrefix();
-	if (! "".equals(prefix))
-	  sb.append(prefix).append(":");
-	
-	sb.append(in.getLocalName());
-	sb.append(">");
+        String prefix = in.getPrefix();
+        if (! "".equals(prefix))
+          sb.append(prefix).append(":");
 
-	if (depth == 0)
-	  return sb.toString();
+        sb.append(in.getLocalName());
+        sb.append(">");
+
+        if (depth == 0)
+          return sb.toString();
       }
       else if (XMLStreamReader.CHARACTERS == in.getEventType()) {
-	sb.append(in.getText());
+        sb.append(in.getText());
       }
       else {
-	log.finer(this + " tag=" + in.getEventType());
+        log.finer(this + " tag=" + in.getEventType());
 
-	return sb.toString();
+        return sb.toString();
       }
 
       if (in.next() < 0) {
-	log.finer(this + " unexpected end of file");
-	
-	return sb.toString();
+        log.finer(this + " unexpected end of file");
+
+        return sb.toString();
       }
     }
   }
@@ -667,14 +667,14 @@ public class XmppReader
       sb.append("<").append(in.getLocalName());
 
       if (in.getNamespaceURI() != null)
-	sb.append("{").append(in.getNamespaceURI()).append("}");
+        sb.append("{").append(in.getNamespaceURI()).append("}");
 
       for (int i = 0; i < in.getAttributeCount(); i++) {
-	sb.append(" ");
-	sb.append(in.getAttributeLocalName(i));
-	sb.append("='");
-	sb.append(in.getAttributeValue(i));
-	sb.append("'");
+        sb.append(" ");
+        sb.append(in.getAttributeLocalName(i));
+        sb.append("='");
+        sb.append(in.getAttributeValue(i));
+        sb.append("'");
       }
       sb.append(">");
 
@@ -687,7 +687,7 @@ public class XmppReader
       String text = in.getText().trim();
 
       if (! "".equals(text))
-	log.finest(this + " text='" + text + "'");
+        log.finest(this + " text='" + text + "'");
     }
     else
       log.finest(this + " tag=" + in.getEventType());

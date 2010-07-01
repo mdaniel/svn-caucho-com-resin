@@ -81,9 +81,9 @@ public class YadisServlet extends GenericServlet
   }
 
   private void doGet(HttpServletRequest req,
-		     HttpServletResponse res,
-		     PrintWriter out,
-		     YadisXrd xrd)
+                     HttpServletResponse res,
+                     PrintWriter out,
+                     YadisXrd xrd)
     throws IOException, ServletException
   {
     if (xrd.getLocation() != null) {
@@ -93,7 +93,7 @@ public class YadisServlet extends GenericServlet
       out.println("<html>");
       out.println("<head>");
       out.println("<meta http-equiv='X-XRDS-Location'"
-		  + " content='" + xrd.getLocation() + "'>");
+                  + " content='" + xrd.getLocation() + "'>");
       out.println("</head>");
       out.println("<body>");
       out.println("<p>XRDS Location: " + xrd.getLocation() + "</p>");

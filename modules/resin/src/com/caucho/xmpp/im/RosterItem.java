@@ -81,7 +81,7 @@ public class RosterItem implements Serializable {
   }
 
   public RosterItem(String ask, String jid, String name, String subscription,
-		    ArrayList<String> groupList)
+                    ArrayList<String> groupList)
   {
     _ask = ask;
     _jid = jid;

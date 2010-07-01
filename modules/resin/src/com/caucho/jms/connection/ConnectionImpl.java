@@ -118,13 +118,13 @@ public class ConnectionImpl implements XAConnection
     
     if (_isClientIdSet)
       throw new IllegalStateException(L.l("Can't set client id '{0}' after the connection has been used.",
-					  clientId));
+                                          clientId));
 
     ConnectionImpl oldConn = _factory.findByClientID(clientId);
 
     if (oldConn != null)
       throw new InvalidClientIDException(L.l("'{0}' is a duplicate client id.",
-					     clientId));
+                                             clientId));
     
     _clientId = clientId;
     _isClientIdSet = true;
@@ -189,7 +189,7 @@ public class ConnectionImpl implements XAConnection
     
     synchronized (_sessions) {
       for (int i = 0; i < _sessions.size(); i++) {
-	_sessions.get(i).start();
+        _sessions.get(i).start();
       }
     }
   }
@@ -209,13 +209,13 @@ public class ConnectionImpl implements XAConnection
       assignClientID();
 
       synchronized (_sessions) {
-	for (int i = 0; i < _sessions.size(); i++) {
-	  try {
-	    _sessions.get(i).stop();
-	  } catch (Exception e) {
-	    log.log(Level.FINE, e.toString(), e);
-	  }
-	}
+        for (int i = 0; i < _sessions.size(); i++) {
+          try {
+            _sessions.get(i).stop();
+          } catch (Exception e) {
+            log.log(Level.FINE, e.toString(), e);
+          }
+        }
       }
     } finally {
       _lifecycle.toStop();
@@ -346,9 +346,9 @@ public class ConnectionImpl implements XAConnection
    */
   public ConnectionConsumer
     createConnectionConsumer(Destination destination,
-			     String messageSelector,
-			     ServerSessionPool sessionPool,
-			     int maxMessages)
+                             String messageSelector,
+                             ServerSessionPool sessionPool,
+                             int maxMessages)
     throws JMSException
   {
     throw new UnsupportedOperationException();
@@ -359,9 +359,9 @@ public class ConnectionImpl implements XAConnection
    */
   public ConnectionConsumer
     createDurableConnectionConsumer(Topic topic, String name,
-				    String messageSelector,
-				    ServerSessionPool sessionPool,
-				    int maxMessages)
+                                    String messageSelector,
+                                    ServerSessionPool sessionPool,
+                                    int maxMessages)
     throws JMSException
   {
     checkOpen();
@@ -394,9 +394,9 @@ public class ConnectionImpl implements XAConnection
     
     for (int i = 0; i < sessions.size(); i++) {
       try {
-	sessions.get(i).close();
+        sessions.get(i).close();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

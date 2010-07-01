@@ -186,13 +186,13 @@ public class ArrayResolverExpr extends Expr
 
     if (aObj == null)
       throw new PropertyNotFoundException(L.l("'{0}' is null in '{1}'",
-					      _left.toString(), toString()));
-					      
+                                              _left.toString(), toString()));
+
 
     Object fieldObj = _right.getValue(env);
     if (fieldObj == null)
       throw new PropertyNotFoundException(L.l("'{0}' is null in '{1}'",
-					      _right.toString(), toString()));
+                                              _right.toString(), toString()));
 
     env.getELResolver().setValue(env, aObj, fieldObj, value);
   }
@@ -206,8 +206,8 @@ public class ArrayResolverExpr extends Expr
    */
   @Override
   public MethodInfo getMethodInfo(ELContext env,
-				  Class<?> returnType,
-				  Class<?> []argTypes)
+                                  Class<?> returnType,
+                                  Class<?> []argTypes)
     throws ELException
   {
     Object base = _left.getValue(env);
@@ -224,8 +224,8 @@ public class ArrayResolverExpr extends Expr
       Method method = base.getClass().getMethod(name, argTypes);
       
       return new MethodInfo(_right.evalString(env),
-			    method.getReturnType(),
-			  argTypes);
+                            method.getReturnType(),
+                          argTypes);
     } catch (NoSuchMethodException e) {
       throw new javax.el.MethodNotFoundException(e);
     }

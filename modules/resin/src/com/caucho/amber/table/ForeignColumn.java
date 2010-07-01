@@ -53,8 +53,8 @@ public class ForeignColumn extends AmberColumn {
 
     if (! targetColumn.isPrimaryKey())
       throw new IllegalStateException(L.l("Foreign column '{0}' of table '{1}' must be a primary key.",
-					  targetColumn.getName(),
-					  targetColumn.getTable().getName()));
+                                          targetColumn.getName(),
+                                          targetColumn.getTable().getName()));
   }
 
   /**

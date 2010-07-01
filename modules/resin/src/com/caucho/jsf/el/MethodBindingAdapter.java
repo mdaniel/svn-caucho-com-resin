@@ -67,9 +67,9 @@ public class MethodBindingAdapter extends MethodBinding implements StateHolder
       throw new javax.faces.el.MethodNotFoundException(e);
     } catch (ELException e) {
       if (e.getCause() != null)
-	throw new EvaluationException(e.getCause());
+        throw new EvaluationException(e.getCause());
       else
-	throw new EvaluationException(e);
+        throw new EvaluationException(e);
     } catch (Exception e) {
       throw new EvaluationException(e);
     }
@@ -113,7 +113,7 @@ public class MethodBindingAdapter extends MethodBinding implements StateHolder
     Class []param = (Class []) state[1];
 
     _expr = factory.createMethodExpression(context.getELContext(),
-					   expr, Object.class, param);
+                                           expr, Object.class, param);
     _param = param;
   }
 

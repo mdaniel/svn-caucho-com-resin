@@ -91,7 +91,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
       CauchoResponse cNext = (CauchoResponse) next;
 
       if (cNext.isCauchoResponseStream())
-	_stream = cNext.getResponseStream();
+        _stream = cNext.getResponseStream();
     }
 
     _isCommitted = false;
@@ -289,16 +289,16 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     try {
       /* XXX:
       if (_response != null)
-	_response.writeHeaders(null, -1);
+        _response.writeHeaders(null, -1);
       */
 
       // startCaching(true);
       
       if (length == 0)
-	return;
+        return;
     
       if (_cacheStream != null) {
-	_cacheStream.write(buf, offset, length);
+        _cacheStream.write(buf, offset, length);
       }
 
       if (_stream != null)
@@ -308,10 +308,10 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     } catch (IOException e) {
       /*
       if (_next instanceof CauchoResponse)
-	((CauchoResponse) _next).killCache();
+        ((CauchoResponse) _next).killCache();
 
       if (_response != null)
-	_response.killCache();
+        _response.killCache();
       */
 
       throw e;

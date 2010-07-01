@@ -207,7 +207,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       TldAttribute attr = _attributes.get(i);
 
       if (name.equals(attr.getName()))
-	return attr;
+        return attr;
     }
 
     return null;
@@ -231,8 +231,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
       // jsp/1071, jsp/106g (tck)
       if (name.equals(var.getNameGiven())
-	  || name.equals(var.getAlias()))
-	return var;
+          || name.equals(var.getAlias()))
+        return var;
     }
 
     return null;
@@ -248,7 +248,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
       // jsp/106g (tck)
       if (name.equals(var.getNameFromAttribute()))
-	return var;
+        return var;
     }
 
     return null;
@@ -565,7 +565,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     // jsp/10a1
     if (_dynamicAttributes != null) {
       out.println("pageContext.setAttribute(\"" + _dynamicAttributes + "\"," +
-		  toFieldName(_dynamicAttributes) + ");");
+                  toFieldName(_dynamicAttributes) + ");");
     }
   }
 
@@ -642,32 +642,32 @@ public class JavaTagGenerator extends JavaJspGenerator {
       TldVariable var = _variables.get(i);
 
       if (var.getNameFromAttribute() != null) {
-	out.print("String _jsp_var_from_attribute_" + i + " = (String) ");
-	out.println("pageContext.getAttribute(\"" +
-		    var.getNameFromAttribute() + "\");");
+        out.print("String _jsp_var_from_attribute_" + i + " = (String) ");
+        out.println("pageContext.getAttribute(\"" +
+                    var.getNameFromAttribute() + "\");");
       }
       
       if ("AT_END".equals(var.getScope()))
-	continue;
+        continue;
 
       String srcName = var.getNameGiven();
       if (srcName == null)
-	srcName = var.getAlias();
+        srcName = var.getAlias();
       
       String dstName;
       if (var.getNameGiven() != null)
-	dstName = "\"" + var.getNameGiven() + "\"";
+        dstName = "\"" + var.getNameGiven() + "\"";
       else
-	dstName = "_jsp_var_from_attribute_" + i;
+        dstName = "_jsp_var_from_attribute_" + i;
 
       if ("NESTED".equals(var.getScope())) {
-	out.print("Object _jsp_nested_var_" + i + " = ");
-	out.println("_jsp_parentContext.getAttribute(" + dstName + ");");
+        out.print("Object _jsp_nested_var_" + i + " = ");
+        out.println("_jsp_parentContext.getAttribute(" + dstName + ");");
       }
       /*
       else {
-	out.print("pageContext.setAttribute(\"" + srcName + "\",");
-	out.println("_jsp_parentContext.getAttribute(" + dstName + "));");
+        out.print("pageContext.setAttribute(\"" + srcName + "\",");
+        out.println("_jsp_parentContext.getAttribute(" + dstName + "));");
       }
       */
     }
@@ -686,20 +686,20 @@ public class JavaTagGenerator extends JavaJspGenerator {
       
       String srcName = var.getNameGiven();
       if (srcName == null)
-	srcName = var.getAlias();
+        srcName = var.getAlias();
       
       String dstName;
       if (var.getNameGiven() != null)
-	dstName = "\"" + var.getNameGiven() + "\"";
+        dstName = "\"" + var.getNameGiven() + "\"";
       else
-	dstName = "_jsp_var_from_attribute_" + i;
+        dstName = "_jsp_var_from_attribute_" + i;
 
       if ("NESTED".equals(var.getScope())) {
-	out.println("_jsp_parentContext.setAttribute(" + dstName + ", _jsp_nested_var_" + i + ");");
+        out.println("_jsp_parentContext.setAttribute(" + dstName + ", _jsp_nested_var_" + i + ");");
       }
       else {
-	out.print("_jsp_parentContext.setAttribute(" + dstName + ",");
-	out.println("pageContext.getAttribute(\"" + srcName + "\"));");
+        out.print("_jsp_parentContext.setAttribute(" + dstName + ",");
+        out.println("pageContext.getAttribute(\"" + srcName + "\"));");
       }
     }
   }
@@ -720,9 +720,9 @@ public class JavaTagGenerator extends JavaJspGenerator {
       TldVariable var = _variables.get(i);
 
       try {
-	tag.addVariable(var);
+        tag.addVariable(var);
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
     
@@ -731,19 +731,19 @@ public class JavaTagGenerator extends JavaJspGenerator {
       bodyContent = "scriptless";
     
     return new TagInfoExt(tag.getName(),
-			  _fullClassName,
-			  bodyContent,
-			  getDescription(),
-			  taglib,
-			  null,
-			  tag.getAttributes(),
-			  getDisplayName(),
-			  getSmallIcon(),
-			  getLargeIcon(),
-			  tag.getVariables(),
-			  _dynamicAttributes != null,
-			  _dynamicAttributes,
-			  null);
+                          _fullClassName,
+                          bodyContent,
+                          getDescription(),
+                          taglib,
+                          null,
+                          tag.getAttributes(),
+                          getDisplayName(),
+                          getSmallIcon(),
+                          getLargeIcon(),
+                          tag.getVariables(),
+                          _dynamicAttributes != null,
+                          _dynamicAttributes,
+                          null);
   }
   
   /**
@@ -784,33 +784,33 @@ public class JavaTagGenerator extends JavaJspGenerator {
       Class type = attr.getType();
       if (type != null) {
         out.print("attr.setType(");
-	out.printClass(type);
-	out.println(".class);");
+        out.printClass(type);
+        out.println(".class);");
       }
       out.println("attr.setRtexprvalue(" + attr.getRtexprvalue() + ");");
       out.println("attr.setRequired(" + attr.getRequired() + ");");
 
       if (attr.getDeferredValue() != null) {
-	out.println("attr.setDeferredValue(new com.caucho.jsp.cfg.TldAttribute.DeferredValue());");
+        out.println("attr.setDeferredValue(new com.caucho.jsp.cfg.TldAttribute.DeferredValue());");
 
-	if (attr.getDeferredValue().getType() != null) {
-	  out.print("attr.getDeferredValue().setType(\"");
-	  out.printJavaString(attr.getDeferredValue().getType());
-	  out.println("\");");
-	}
+        if (attr.getDeferredValue().getType() != null) {
+          out.print("attr.getDeferredValue().setType(\"");
+          out.printJavaString(attr.getDeferredValue().getType());
+          out.println("\");");
+        }
       }
 
       if (attr.getDeferredMethod() != null) {
-	out.println("attr.setDeferredMethod(new com.caucho.jsp.cfg.TldAttribute.DeferredMethod());");
+        out.println("attr.setDeferredMethod(new com.caucho.jsp.cfg.TldAttribute.DeferredMethod());");
 
-	Signature sig = attr.getDeferredMethod().getMethodSignature();
-	
-	if (sig != null) {
-	  out.print("attr.getDeferredMethod().setMethodSignature(");
-	  out.print("new com.caucho.config.types.Signature(\"");
-	  out.printJavaString(sig.getSignature());
-	  out.println("\"));");
-	}
+        Signature sig = attr.getDeferredMethod().getMethodSignature();
+
+        if (sig != null) {
+          out.print("attr.getDeferredMethod().setMethodSignature(");
+          out.print("new com.caucho.config.types.Signature(\"");
+          out.printJavaString(sig.getSignature());
+          out.println("\"));");
+        }
       }
 
       out.println("tag.addAttribute(attr);");
@@ -823,17 +823,17 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("var = new com.caucho.jsp.cfg.TldVariable();");
 
       if (var.getNameGiven() != null)
-	out.println("var.setNameGiven(\"" + var.getNameGiven() + "\");");
+        out.println("var.setNameGiven(\"" + var.getNameGiven() + "\");");
       
       if (var.getNameFromAttribute() != null)
-	out.println("var.setNameFromAttribute(\"" + var.getNameFromAttribute() + "\");");
+        out.println("var.setNameFromAttribute(\"" + var.getNameFromAttribute() + "\");");
 
       String type = var.getVariableClass();
       if (type != null)
         out.println("var.setVariableClass(\"" + type + "\");");
       out.println("var.setDeclare(" + var.getDeclare() + ");");
       if (var.getScope() != null)
-	out.println("var.setScope(\"" + var.getScope() + "\");");
+        out.println("var.setScope(\"" + var.getScope() + "\");");
 
       out.println("tag.addVariable(var);");
     }

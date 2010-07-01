@@ -226,64 +226,64 @@ public class DeploymentService
     
     if (mxbean != null) {
       try {
-	Path deployPath = Vfs.lookup(mxbean.getArchivePath(name));
+        Path deployPath = Vfs.lookup(mxbean.getArchivePath(name));
 
-	deployPath.getParent().mkdirs();
+        deployPath.getParent().mkdirs();
 
-	if (archivePath == null) {
-	  createArchive(deployPath, plan, archiveIs);
-	  archivePath = deployPath;
-	}
-	else {
-	  WriteStream deployStream = deployPath.openWrite();
+        if (archivePath == null) {
+          createArchive(deployPath, plan, archiveIs);
+          archivePath = deployPath;
+        }
+        else {
+          WriteStream deployStream = deployPath.openWrite();
 
-	  try {
-	    deployStream.writeFile(archivePath);
-	  }
-	  finally {
-	    deployStream.close();
-	  }
-	}
+          try {
+            deployStream.writeFile(archivePath);
+          }
+          finally {
+            deployStream.close();
+          }
+        }
 
-	mxbean.update();
+        mxbean.update();
 
-	exception = mxbean.getConfigException(name);
+        exception = mxbean.getConfigException(name);
       }
       catch (Exception e) {
-	if (log.isLoggable(Level.INFO))
-	  log.log(Level.INFO, e.toString(), e);
+        if (log.isLoggable(Level.INFO))
+          log.log(Level.INFO, e.toString(), e);
 
-	exception = e;
+        exception = e;
       }
 
       if (exception != null) {
-	failed = true;
-	describe(message, childModuleID, false, getExceptionMessage(exception));
+        failed = true;
+        describe(message, childModuleID, false, getExceptionMessage(exception));
 
-	/*
-	  if (mxbean != null) {
-	  try {
-	  mxbean.undeploy(moduleID);
-	  }
-	  catch (Throwable t) {
-	  log.log(Level.FINE, t.toString(), t);
-	  }
-	  }
-	*/
+        /*
+          if (mxbean != null) {
+          try {
+          mxbean.undeploy(moduleID);
+          }
+          catch (Throwable t) {
+          log.log(Level.FINE, t.toString(), t);
+          }
+          }
+        */
       }
       else {
-	if ("ear".equals(plan.getArchiveType())) {
-	  try {
-	    EAppMXBean eApp = (EAppMXBean) Jmx.find(moduleID);
+        if ("ear".equals(plan.getArchiveType())) {
+          try {
+            EAppMXBean eApp = (EAppMXBean) Jmx.find(moduleID);
 
-	    if (eApp != null)
-	      childTarget.setClientRefs(eApp.getClientRefs());
-	  } catch (Exception e) {
-	    log.log(Level.FINEST, e.toString(), e);
-	  }
-	}
+            if (eApp != null)
+              childTarget.setClientRefs(eApp.getClientRefs());
+          } catch (Exception e) {
+            log.log(Level.FINEST, e.toString(), e);
+          }
+        }
 
-	describe(message, childModuleID, true);
+        describe(message, childModuleID, true);
       }
     }
     else {
@@ -498,12 +498,12 @@ public class DeploymentService
       try {
         ObjectName objectName = new ObjectName(targetModuleID.getModuleID());
         mxbean = (DeployControllerMXBean) Jmx.find(objectName);
-	if (mxbean != null)
-	  mxbean.start();
-	else {
-	  log.finer("Jsr88[] " + objectName + " is an unknown module");
-	  failed = true;
-	}
+        if (mxbean != null)
+          mxbean.start();
+        else {
+          log.finer("Jsr88[] " + objectName + " is an unknown module");
+          failed = true;
+        }
       }
       catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
@@ -551,12 +551,12 @@ public class DeploymentService
       try {
         ObjectName objectName = new ObjectName(targetModuleID.getModuleID());
         mxbean = (DeployControllerMXBean) Jmx.find(objectName);
-	if (mxbean != null)
-	  mxbean.stop();
-	else {
-	  log.finer("Jsr88[] " + objectName + " is an unknown module");
-	  failed = true;
-	}
+        if (mxbean != null)
+          mxbean.stop();
+        else {
+          log.finer("Jsr88[] " + objectName + " is an unknown module");
+          failed = true;
+        }
       }
       catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
@@ -606,8 +606,8 @@ public class DeploymentService
         ObjectName objectName
           = new ObjectName(targetModuleID.getModuleID());
         mxbean = getMXBean(objectName);
-	if (mxbean != null)
-	  mxbean.undeploy(objectName.getKeyProperty("name"));
+        if (mxbean != null)
+          mxbean.undeploy(objectName.getKeyProperty("name"));
       }
       catch (Throwable t) {
         log.log(Level.INFO, t.toString(), t);

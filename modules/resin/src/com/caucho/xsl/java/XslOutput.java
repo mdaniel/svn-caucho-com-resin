@@ -52,22 +52,22 @@ public class XslOutput extends XslNode implements XslTopNode {
   {
     if (name.getName().equals("indent")) {
       if (value.equals("yes"))
-	_gen.setOutputAttribute(name.getName(), value);
+        _gen.setOutputAttribute(name.getName(), value);
       else if (value.equals("no"))
-	_gen.setOutputAttribute(name.getName(), value);
+        _gen.setOutputAttribute(name.getName(), value);
       else
-	throw error(L.l("'{0}' is an illegal indent value.  <xsl:output> indent must be 'yes' or 'no'.",
-			value));
+        throw error(L.l("'{0}' is an illegal indent value.  <xsl:output> indent must be 'yes' or 'no'.",
+                        value));
     }
     else if (name.getName().equals("disable-output-escaping") ||
-	     name.getName().equals("resin:disable-output-escaping")) {
+             name.getName().equals("resin:disable-output-escaping")) {
       if (value.equals("yes") || value.equals("true"))
-	_gen.setDisableOutputEscaping(true);
+        _gen.setDisableOutputEscaping(true);
       else if (value.equals("no") || value.equals("false"))
-	_gen.setDisableOutputEscaping(false);
+        _gen.setDisableOutputEscaping(false);
       else
-	throw error(L.l("'{0}' is an illegal disable-output-escaping value.  <xsl:output> disable-output-escaping must be 'yes' or 'no'.",
-			value));
+        throw error(L.l("'{0}' is an illegal disable-output-escaping value.  <xsl:output> disable-output-escaping must be 'yes' or 'no'.",
+                        value));
     }
     else
       _gen.setOutputAttribute(name.getName(), value);

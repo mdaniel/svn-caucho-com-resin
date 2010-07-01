@@ -43,8 +43,8 @@ import java.util.ArrayList;
 public class KeyEmbeddedSubField extends EmbeddedSubField implements IdField
 {
   public KeyEmbeddedSubField(EntityEmbeddedField embeddedField,
-			     AmberField embeddableField,
-			     int index)
+                             AmberField embeddableField,
+                             int index)
     throws ConfigException
   {
     super(embeddedField, embeddableField, index);
@@ -114,8 +114,8 @@ public class KeyEmbeddedSubField extends EmbeddedSubField implements IdField
    * Generates code to copy to an object.
    */
   public void generateCopy(JavaWriter out,
-			   String dest,
-			   String source)
+                           String dest,
+                           String source)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());

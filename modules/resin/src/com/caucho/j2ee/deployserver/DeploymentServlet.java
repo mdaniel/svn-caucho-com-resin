@@ -96,38 +96,38 @@ public class DeploymentServlet
       switch (_methodMap.get(method)) {
       case GET_TARGETS:
         in.completeCall();
-	out.startReply();
-	out.writeObject(_deploymentService.getTargets());
-	out.completeReply();
-	break;
+        out.startReply();
+        out.writeObject(_deploymentService.getTargets());
+        out.completeReply();
+        break;
 
       case GET_AVAILABLE_MODULES:
-	{
-	  String type = in.readString();
-	  in.completeCall();
+        {
+          String type = in.readString();
+          in.completeCall();
 
-	  out.startReply();
-	  out.writeObject(_deploymentService.getAvailableModules(type));
-	  out.completeReply();
-	  break;
-	}
+          out.startReply();
+          out.writeObject(_deploymentService.getAvailableModules(type));
+          out.completeReply();
+          break;
+        }
 
       case DISTRIBUTE:
-	{
-	  TargetImpl []targets = (TargetImpl[]) in.readObject(TargetImpl[].class);
-	  DeploymentPlan plan = new DeploymentPlan();
+        {
+          TargetImpl []targets = (TargetImpl[]) in.readObject(TargetImpl[].class);
+          DeploymentPlan plan = new DeploymentPlan();
 
           InputStream planIs = in.readInputStream();
 
           try {
-	    new Config().configure(plan, planIs);
-	  } finally {
+            new Config().configure(plan, planIs);
+          } finally {
             planIs.close();
-	  }
+          }
 
-	  InputStream archiveIs = in.readInputStream();
+          InputStream archiveIs = in.readInputStream();
 
-	  ProgressObject po = _deploymentService.distribute(targets, archiveIs, plan);
+          ProgressObject po = _deploymentService.distribute(targets, archiveIs, plan);
 
           // use up all of the input or hessian throws
           // an execption and hides  error reported in the progress object
@@ -146,23 +146,23 @@ public class DeploymentServlet
 
           out.startReply();
           out.writeObject(po);
-	  out.completeReply();
-	  break;
-	}
+          out.completeReply();
+          break;
+        }
 
       case UNDEPLOY:
-	{
-	  TargetModuleID []targetIDs;
-	  targetIDs = (TargetModuleID []) in.readObject(TargetModuleID[].class);
+        {
+          TargetModuleID []targetIDs;
+          targetIDs = (TargetModuleID []) in.readObject(TargetModuleID[].class);
 
-	  ProgressObject po = _deploymentService.undeploy(targetIDs);
+          ProgressObject po = _deploymentService.undeploy(targetIDs);
 
-	  in.completeCall();
-	  out.startReply();
-	  out.writeObject(po);
-	  out.completeReply();
-	  break;
-	}
+          in.completeCall();
+          out.startReply();
+          out.writeObject(po);
+          out.completeReply();
+          break;
+        }
 
         case START:
         {
@@ -193,10 +193,10 @@ public class DeploymentServlet
         }
 
       default:
-	out.startReply();
-	out.writeFault("UnknownMethod", "UnknownMethod: " + method, null);
-	out.completeReply();
-	break;
+        out.startReply();
+        out.writeFault("UnknownMethod", "UnknownMethod: " + method, null);
+        out.completeReply();
+        break;
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);

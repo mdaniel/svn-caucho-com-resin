@@ -76,13 +76,13 @@ public class SqlServerMetaData extends GenericMetaData {
     case Types.DATE:
       type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.TIME:
       type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.DOUBLE:

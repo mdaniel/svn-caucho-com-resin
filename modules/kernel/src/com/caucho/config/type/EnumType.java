@@ -84,7 +84,7 @@ public final class EnumType extends ConfigType
       return value;
 
     throw new ConfigException(L.l("{0}: '{1}' is an unknown enumeration value.",
-				  _type.getName(), text));
+                                  _type.getName(), text));
   }
   
   /**

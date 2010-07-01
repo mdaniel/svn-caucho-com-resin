@@ -83,7 +83,7 @@ public abstract class StateManager
    * @Since 1.2
    */
   public void writeState(FacesContext context,
-			 Object state)
+                         Object state)
     throws IOException
   {
     if (state != null && Object[].class.isAssignableFrom(state.getClass())) {
@@ -101,21 +101,21 @@ public abstract class StateManager
    * @deprecated
    */
   public void writeState(FacesContext context,
-			 SerializedView state)
+                         SerializedView state)
     throws IOException
   {
   }
 
   public abstract UIViewRoot restoreView(FacesContext context,
-					 String viewId,
-					 String renderKitIt);
+                                         String viewId,
+                                         String renderKitIt);
 
   /**
    * @deprecated
    */
   protected UIViewRoot restoreTreeStructure(FacesContext context,
-					    String viewId,
-					    String renderKitId)
+                                            String viewId,
+                                            String renderKitId)
   {
     return null;
   }
@@ -124,8 +124,8 @@ public abstract class StateManager
    * @deprecated
    */
   protected void restoreComponentState(FacesContext context,
-				       UIViewRoot viewRoot,
-				       String renderKitId)
+                                       UIViewRoot viewRoot,
+                                       String renderKitId)
   {
   }
 

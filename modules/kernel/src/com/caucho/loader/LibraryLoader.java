@@ -140,16 +140,16 @@ public class LibraryLoader extends JarListLoader {
       if (_fileSet != null) {
       }
       else if (_path.getPath().endsWith(".jar")
-	       || _path.getPath().endsWith(".zip")) {
-	_fileSet = new FileSetType();
-	_fileSet.setDir(_path.getParent());
-	_fileSet.addInclude(new PathPatternType(_path.getTail()));
+               || _path.getPath().endsWith(".zip")) {
+        _fileSet = new FileSetType();
+        _fileSet.setDir(_path.getParent());
+        _fileSet.addInclude(new PathPatternType(_path.getTail()));
       }
       else {
-	_fileSet = new FileSetType();
-	_fileSet.setDir(_path);
-	_fileSet.addInclude(new PathPatternType("*.jar"));
-	_fileSet.addInclude(new PathPatternType("*.zip"));
+        _fileSet = new FileSetType();
+        _fileSet.setDir(_path);
+        _fileSet.addInclude(new PathPatternType("*.jar"));
+        _fileSet.addInclude(new PathPatternType("*.zip"));
       }
 
       fillJars();

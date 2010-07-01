@@ -53,8 +53,8 @@ public class MatchFilterChain
   private final FilterChain _failChain;
 
   public MatchFilterChain(RequestPredicate []predicates,
-			  FilterChain passChain,
-			  FilterChain failChain)
+                          FilterChain passChain,
+                          FilterChain failChain)
   {
     _predicates = predicates;
     _passChain = passChain;
@@ -68,7 +68,7 @@ public class MatchFilterChain
 
     if (response instanceof HttpServletResponseImpl) {
       HttpServletResponseImpl res
-	= (HttpServletResponseImpl) response;
+        = (HttpServletResponseImpl) response;
 
       // server/1k67
       res.setNoCacheUnlessVary(true);
@@ -76,11 +76,11 @@ public class MatchFilterChain
 
     for (RequestPredicate predicate : _predicates) {
       if (! predicate.isMatch(req)) {
-	if (log.isLoggable(Level.FINEST))
-	  log.finest(this + " not match");
-	
-	_failChain.doFilter(request, response);
-	return;
+        if (log.isLoggable(Level.FINEST))
+          log.finest(this + " not match");
+
+        _failChain.doFilter(request, response);
+        return;
       }
     }
     

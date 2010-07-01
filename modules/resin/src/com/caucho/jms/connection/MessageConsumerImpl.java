@@ -269,25 +269,25 @@ public class MessageConsumerImpl<E> implements MessageConsumer
         = _queue.receiveEntry(expireTime, _isAutoAcknowledge, _selector);
 
       if (entry == null)
-	return null;
+        return null;
 
       E payload = entry.getPayload();
 
       if (payload == null)
-	return null;
+        return null;
       
       MessageImpl msg = null;
 
       if (payload instanceof MessageImpl) {
-	msg = (MessageImpl) payload;
+        msg = (MessageImpl) payload;
       }
       else if (payload instanceof String) {
-	msg = new TextMessageImpl((String) payload);
-	msg.setJMSMessageID(entry.getMsgId());
+        msg = new TextMessageImpl((String) payload);
+        msg.setJMSMessageID(entry.getMsgId());
       }
       else {
-	msg = new ObjectMessageImpl((Serializable) payload);
-	msg.setJMSMessageID(entry.getMsgId());
+        msg = new ObjectMessageImpl((Serializable) payload);
+        msg.setJMSMessageID(entry.getMsgId());
       }
 
       msg.setReceive();
@@ -299,8 +299,8 @@ public class MessageConsumerImpl<E> implements MessageConsumer
 
       //else {
       if (log.isLoggable(Level.FINE))
-	log.fine(_queue + " receiving message " + msg);
-	
+        log.fine(_queue + " receiving message " + msg);
+
       if (! _isAutoAcknowledge)
         _session.addTransactedReceive(_queue, msg);
 
@@ -344,7 +344,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
 
       /*
       if (msg == null)
-	System.out.println(_queue + " NOMESSAGE:");
+        System.out.println(_queue + " NOMESSAGE:");
       */
 
       if (msg != null) {
@@ -369,10 +369,10 @@ public class MessageConsumerImpl<E> implements MessageConsumer
           }
         }
 
-	if (_session.getTransacted())
-	  _session.commit();
-	else
-	  msg.acknowledge();
+        if (_session.getTransacted())
+          _session.commit();
+        else
+          msg.acknowledge();
 
         return true;
       }
@@ -470,41 +470,41 @@ public class MessageConsumerImpl<E> implements MessageConsumer
       MessageImpl message = null;
 
       try {
-	if (payload instanceof MessageImpl)
-	  message = (MessageImpl) payload;
-	else if (payload instanceof String) {
-	  message = new TextMessageImpl((String) payload);
-	  message.setJMSMessageID(msgId);
-	}
-	else {
-	  message = new ObjectMessageImpl((Serializable) payload);
-	  message.setJMSMessageID(msgId);
-	}
+        if (payload instanceof MessageImpl)
+          message = (MessageImpl) payload;
+        else if (payload instanceof String) {
+          message = new TextMessageImpl((String) payload);
+          message.setJMSMessageID(msgId);
+        }
+        else {
+          message = new ObjectMessageImpl((Serializable) payload);
+          message.setJMSMessageID(msgId);
+        }
 
-	if (_selector == null || _selector.isMatch(message)) {
-	  // XXX: only if XA
-	  //if (! _isAutoAcknowledge) {
-	  _session.addTransactedReceive(_queue, message);
-	  //}
+        if (_selector == null || _selector.isMatch(message)) {
+          // XXX: only if XA
+          //if (! _isAutoAcknowledge) {
+          _session.addTransactedReceive(_queue, message);
+          //}
 
-	  Thread thread = Thread.currentThread();
-	  ClassLoader oldLoader = thread.getContextClassLoader();
-	  try {
-	    thread.setContextClassLoader(_classLoader);
+          Thread thread = Thread.currentThread();
+          ClassLoader oldLoader = thread.getContextClassLoader();
+          try {
+            thread.setContextClassLoader(_classLoader);
 
-	    _listener.onMessage(message);
-	  } finally {
-	    thread.setContextClassLoader(oldLoader);
+            _listener.onMessage(message);
+          } finally {
+            thread.setContextClassLoader(oldLoader);
 
-	    // XXX: commit/rollback?
-	    if (_session.getTransacted())
-	      _session.commit();
-	    else  
-	      _session.acknowledge();	    
-	  }
-	}
+            // XXX: commit/rollback?
+            if (_session.getTransacted())
+              _session.commit();
+            else
+              _session.acknowledge();
+          }
+        }
       } catch (JMSException e) {
-	throw new MessageException(e);
+        throw new MessageException(e);
       }
     }
   }

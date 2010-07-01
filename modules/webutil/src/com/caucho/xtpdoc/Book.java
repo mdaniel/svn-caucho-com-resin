@@ -52,7 +52,7 @@ public class Book {
     _type = type;
 
     if (! "book".equals(type)
-	&& ! "article".equals(type)) {
+        && ! "article".equals(type)) {
       throw new ConfigException(L.l("'{0}' is an unknown document type", type));
     }
   }

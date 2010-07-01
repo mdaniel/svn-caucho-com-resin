@@ -133,7 +133,7 @@ class HtmlOutputFormatRenderer extends Renderer
       Object value = htmlOutput.getValue();
 
       if (value == null)
-	return;
+        return;
 
       List paramList = new ArrayList();
 
@@ -164,7 +164,7 @@ class HtmlOutputFormatRenderer extends Renderer
       Object value = attrMap.get("value");
 
       if (value == null)
-	return;
+        return;
 
       out.writeText(value, "value");
     }
@@ -183,20 +183,20 @@ class HtmlOutputFormatRenderer extends Renderer
       HtmlOutputFormat htmlOutput = (HtmlOutputFormat) component;
 
       if (htmlOutput.getStyleClass() != null
-	  || htmlOutput.getStyle() != null
-	  || htmlOutput.getDir() != null
-	  || htmlOutput.getLang() != null) {
-	out.endElement("span");
+          || htmlOutput.getStyle() != null
+          || htmlOutput.getDir() != null
+          || htmlOutput.getLang() != null) {
+        out.endElement("span");
       }
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
 
       if (attrMap.get("styleClass") != null
-	  || attrMap.get("style") != null
-	  || attrMap.get("dir") != null
-	  || attrMap.get("lang") != null) {
-	out.endElement("span");
+          || attrMap.get("style") != null
+          || attrMap.get("dir") != null
+          || attrMap.get("lang") != null) {
+        out.endElement("span");
       }
     }
 

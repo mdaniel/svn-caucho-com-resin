@@ -62,7 +62,7 @@ public class MapType extends ConfigType
     _mapClass = mapClass;
 
     if (! _mapClass.isInterface()
-	&& Modifier.isAbstract(_mapClass.getModifiers())) {
+        && Modifier.isAbstract(_mapClass.getModifiers())) {
       _instanceClass = _mapClass;
     }
     else
@@ -105,6 +105,6 @@ public class MapType extends ConfigType
   public Object valueOf(String text)
   {
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
-				  _mapClass.getName(), text));
+                                  _mapClass.getName(), text));
   }
 }

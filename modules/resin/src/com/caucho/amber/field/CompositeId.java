@@ -437,7 +437,7 @@ public class CompositeId extends Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       cb.append(keys.get(i).generateGet(value));
     }
@@ -488,7 +488,7 @@ public class CompositeId extends Id {
 
         AmberColumn column = key.getColumn();
 
-	// jpa/0j55
+        // jpa/0j55
         if (true || column == null) {
           ArrayList<IdField> fields = getKeys();
           for (int j = 0; j < fields.size(); j++) {

@@ -76,7 +76,7 @@ public class HmtpLink implements Runnable {
   {
     _jid = jid;
   }
-		       
+
   public ActorStream getLinkStream()
   {
     return _toLinkStream;

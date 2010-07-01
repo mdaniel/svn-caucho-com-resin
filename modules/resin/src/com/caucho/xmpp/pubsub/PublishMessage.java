@@ -106,8 +106,8 @@ public class PublishMessage implements Serializable {
 
     if (_items != null) {
       for (PubSubItem item : _items) {
-	sb.append(",");
-	sb.append(item);
+        sb.append(",");
+        sb.append(item);
       }
     }
     sb.append("]");

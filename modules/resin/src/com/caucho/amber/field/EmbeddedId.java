@@ -101,8 +101,8 @@ public class EmbeddedId extends CompositeId {
    * Generates code to copy to an object.
    */
   public void generateCopy(JavaWriter out,
-			   String dest,
-			   String source)
+                           String dest,
+                           String source)
     throws IOException
   {
     // XXX: how to make a new instance?

@@ -85,11 +85,11 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
       char ch = ejbName.charAt(i);
 
       if (ch == '/')
-	sb.append('.');
+        sb.append('.');
       else if (Character.isJavaIdentifierPart(ch))
-	sb.append(ch);
+        sb.append(ch);
       else
-	sb.append('_');
+        sb.append('_');
     }
 
     sb.append(".");
@@ -241,8 +241,8 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     
     out.println();
     out.println("public class " + getClassName()
-		+ " extends " + getBeanType().getJavaClass().getName()
-		+ " implements MessageEndpoint, CauchoMessageEndpoint");
+                + " extends " + getBeanType().getJavaClass().getName()
+                + " implements MessageEndpoint, CauchoMessageEndpoint");
     out.println("{");
     out.pushDepth();
 
@@ -293,19 +293,19 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     /*
     for (AspectGenerator<X> bizMethod : _view.getMethods()) {
       if (REQUIRED.equals(bizMethod.getXa().getTransactionType())) {
-	Method api = bizMethod.getApiMethod().getJavaMember();
-	
-	out.print("_xaMethods.add(");
-	out.printClass(api.getDeclaringClass());
-	out.print(".class.getMethod(\"");
-	out.print(api.getName());
-	out.print("\", new Class[] { ");
+        Method api = bizMethod.getApiMethod().getJavaMember();
 
-	for (Class<?> cl : api.getParameterTypes()) {
-	  out.printClass(cl);
-	  out.print(".class, ");
-	}
-	out.println("}));");
+        out.print("_xaMethods.add(");
+        out.printClass(api.getDeclaringClass());
+        out.print(".class.getMethod(\"");
+        out.print(api.getName());
+        out.print("\", new Class[] { ");
+
+        for (Class<?> cl : api.getParameterTypes()) {
+          out.printClass(cl);
+          out.print(".class, ");
+        }
+        out.println("}));");
       }
     }
     */

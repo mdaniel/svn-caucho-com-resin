@@ -116,7 +116,7 @@ public class KeyPropertyExpr extends AbstractAmberExpr implements IdFieldExpr {
       return null;
     else {
       EntityPathExpr dst = (EntityPathExpr) getField().createExpr(parser,
-						 new KeyManyToOneExpr(this));
+                                                 new KeyManyToOneExpr(this));
       PathExpr result = field.createExpr(parser, (EntityPathExprdst);
       
       return result;

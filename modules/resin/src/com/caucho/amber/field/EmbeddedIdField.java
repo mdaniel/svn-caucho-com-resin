@@ -56,13 +56,13 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
   boolean _isKeyField;
 
   public EmbeddedIdField(EntityType ownerType,
-			 EmbeddableType embeddableType)
+                         EmbeddableType embeddableType)
   {
     super(ownerType, embeddableType);
   }
 
   public EmbeddedIdField(EntityType ownerType,
-			 EmbeddableType embeddableType,
+                         EmbeddableType embeddableType,
                          String name)
     throws ConfigException
   {

@@ -71,7 +71,7 @@ public class FromDescendants extends Axis {
     
     for (; node != null; node = node.getParentNode()) {
       if (_parent.match(node, env))
-	return true;
+        return true;
     }
 
     return false;
@@ -163,10 +163,10 @@ public class FromDescendants extends Axis {
 
     int count = 0;
     for (Node ptr = axis;
-	 ptr != null;
-	 ptr = XmlUtil.getNext(ptr)) {
+         ptr != null;
+         ptr = XmlUtil.getNext(ptr)) {
       if (pattern.match(ptr, env))
-	count++;
+        count++;
     }
 
     return count;
@@ -180,7 +180,7 @@ public class FromDescendants extends Axis {
   {
     for (; node != null; node = node.getParentNode()) {
       if (_parent.match(node, env))
-	return node;
+        return node;
     }
 
     return node;

@@ -162,27 +162,27 @@ class WatchdogChildTask implements Runnable
       long retry = Long.MAX_VALUE;
     
       while (_lifecycle.isActive() && i++ < retry) {
-	String id = String.valueOf(i);
+        String id = String.valueOf(i);
 
-	_watchdog.notifyTaskStarted();
+        _watchdog.notifyTaskStarted();
 
-	log.info(_watchdog + " starting");
-	
-	_process = new WatchdogChildProcess(id, _watchdog);
-	
-	try {
-	  _process.run();
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	} finally {
-	  WatchdogChildProcess process = _process;
-	  _process = null;
+        log.info(_watchdog + " starting");
 
-	  if (process != null)
-	    process.kill();
-	}
+        _process = new WatchdogChildProcess(id, _watchdog);
+
+        try {
+          _process.run();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          WatchdogChildProcess process = _process;
+          _process = null;
+
+          if (process != null)
+            process.kill();
+        }
       }
-	
+
       log.info(_watchdog + " stopped");
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

@@ -21,7 +21,7 @@ public class DeploySendQuery implements java.io.Serializable
   }
 
   public DeploySendQuery(String sha1,
-			 StreamSource source)
+                         StreamSource source)
   {
     _sha1 = sha1;
     _source = source;

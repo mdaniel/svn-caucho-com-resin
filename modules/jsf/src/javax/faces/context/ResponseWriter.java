@@ -53,20 +53,20 @@ public abstract class ResponseWriter extends Writer {
     throws IOException;
 
   public abstract void writeAttribute(String name,
-				      Object value,
-				      String property)
+                                      Object value,
+                                      String property)
     throws IOException;
 
   public abstract void writeURIAttribute(String name,
-					 Object value,
-					 String property)
+                                         Object value,
+                                         String property)
     throws IOException;
 
   public abstract void writeComment(Object comment)
     throws IOException;
 
   public abstract void writeText(Object text,
-				 String property)
+                                 String property)
     throws IOException;
 
   public void writeText(Object text,

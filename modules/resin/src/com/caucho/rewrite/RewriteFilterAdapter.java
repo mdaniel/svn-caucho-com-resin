@@ -76,8 +76,8 @@ public class RewriteFilterAdapter implements RewriteFilter
   }
 
   public FilterChain map(String uri,
-			 String queryString,
-			 FilterChain next)
+                         String queryString,
+                         FilterChain next)
   {
     return new FilterFilterChain(next, _filter);
   }

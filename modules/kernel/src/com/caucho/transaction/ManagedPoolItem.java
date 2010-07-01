@@ -112,8 +112,8 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
   private long _activeStartTime;
 
   public ManagedPoolItem(ConnectionPool cm,
-		  ManagedConnectionFactory mcf,
-		  ManagedConnection conn)
+                  ManagedConnectionFactory mcf,
+                  ManagedConnection conn)
   {
     _cm = cm;
 
@@ -130,15 +130,15 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
     // Gets the resource object from the driver
     try {
       if (cm.isXATransaction()) {
-	XAResource xaResource = conn.getXAResource();
+        XAResource xaResource = conn.getXAResource();
 
-	try {
-	  _defaultTransactionTimeout = xaResource.getTransactionTimeout();
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-	
-	_xaResource = xaResource;
+        try {
+          _defaultTransactionTimeout = xaResource.getTransactionTimeout();
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+
+        _xaResource = xaResource;
       }
     } catch (NotSupportedException e) {
       _cm.setXATransaction(false);
@@ -153,7 +153,7 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
     // Gets the local transaction from the driver
     try {
       if (_cm.isLocalTransaction())
-	_localTransaction = conn.getLocalTransaction();
+        _localTransaction = conn.getLocalTransaction();
     } catch (NotSupportedException e) {
       _cm.setLocalTransaction(false);
       log.log(Level.FINER, e.toString(), e);
@@ -165,8 +165,8 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
 
     if (log.isLoggable(Level.FINE))
       log.fine("create: " + this +
-	       "(active:" + _cm.getConnectionActiveCount() +
-	       ", total:" + _cm.getConnectionCount() + ")");
+               "(active:" + _cm.getConnectionActiveCount() +
+               ", total:" + _cm.getConnectionCount() + ")");
   }
 
   /**
@@ -231,8 +231,8 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
    * @return true if the pool item is valid, false if it should be removed.
    */
   synchronized UserPoolItem toActive(Subject subject,
-				     ConnectionRequestInfo info,
-				     UserPoolItem oldPoolItem)
+                                     ConnectionRequestInfo info,
+                                     UserPoolItem oldPoolItem)
     throws ResourceException
   {
     long now = Alarm.getCurrentTime();
@@ -258,7 +258,7 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
       Object uConn = oldPoolItem.getUserConnection();
 
       if (uConn != null)
-	_mConn.associateConnection(uConn);
+        _mConn.associateConnection(uConn);
 
       oldPoolItem.associatePoolItem(this);
       
@@ -301,31 +301,31 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
       boolean isDead = false;
 
       if (! isActive && _hasConnectionError) {
-	isDead = true;
-	log.fine("closing pool item from connection error:" + this);
+        isDead = true;
+        log.fine("closing pool item from connection error:" + this);
       }
       else if (! isActive &&
-	       0 < maxIdleTime && _poolEventTime + maxIdleTime < now) {
-	isDead = true;
-	log.fine("closing pool item from idle timeout:" + this);
+               0 < maxIdleTime && _poolEventTime + maxIdleTime < now) {
+        isDead = true;
+        log.fine("closing pool item from idle timeout:" + this);
       }
       else if (! isActive &&
-	       0 < maxPoolTime && _poolStartTime + maxPoolTime < now) {
-	isDead = true;
-	log.fine("closing pool item from pool timeout:" + this);
+               0 < maxPoolTime && _poolStartTime + maxPoolTime < now) {
+        isDead = true;
+        log.fine("closing pool item from pool timeout:" + this);
       }
       else if (isActive &&
-	       0 < maxActiveTime && _poolEventTime + maxActiveTime < now) {
-	isDead = true;
-	log.warning("closing pool item from active timeout:" + this);
+               0 < maxActiveTime && _poolEventTime + maxActiveTime < now) {
+        isDead = true;
+        log.warning("closing pool item from active timeout:" + this);
       }
 
       if (isDead) {
-	_hasConnectionError = true;
-	return false;
+        _hasConnectionError = true;
+        return false;
       }
       else
-	return true;
+        return true;
     }
   }
   
@@ -353,8 +353,8 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
    * @return true if the pool item has been allocated
    */
   UserPoolItem allocateXA(ManagedConnectionFactory mcf,
-			  Subject subject,
-			  ConnectionRequestInfo info)
+                          Subject subject,
+                          ConnectionRequestInfo info)
   {
     if (_mConn == null)      // already closed
       return null;
@@ -458,21 +458,21 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
    * Returns true for a valid connection.
    */
   boolean isValid(Subject subject,
-		  ConnectionRequestInfo requestInfo,
-		  UserPoolItem userPoolItem)
+                  ConnectionRequestInfo requestInfo,
+                  UserPoolItem userPoolItem)
   {
     try {
       ManagedConnection mConn = getManagedConnection();
 
       if (mConn == null)
-	return false;
+        return false;
 
       Object userConn = userPoolItem.getUserConnection();
 
       if (userConn == null) {
-	userConn = mConn.getConnection(subject, requestInfo);
+        userConn = mConn.getConnection(subject, requestInfo);
 
-	userPoolItem.setUserConnection(userConn);
+        userPoolItem.setUserConnection(userConn);
       }
 
       return userConn != null;
@@ -537,7 +537,7 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
 
     if (! _hasConnectionError && handle == null && _shareHead != null) {
       log.fine(L.l("JCA close event '{0}' for {1} did not have a connection handle.  Please notify the JCA resource provider.",
-		  event, _mConn));
+                  event, _mConn));
     }
    
     UserPoolItem ptr = _shareHead;
@@ -554,7 +554,7 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
         else
           _shareHead = next;
         
-	ptr.close();
+        ptr.close();
       }
       else
         prev = ptr;
@@ -696,27 +696,27 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
       UserTransactionImpl trans = _cm.getTransaction();
 
       if (trans != null) {
-	ManagedPoolItem xaHead = trans.findJoin(this);
+        ManagedPoolItem xaHead = trans.findJoin(this);
 
-	if (xaHead != null) {
-	  _xaNext = xaHead._xaNext;
-	  _xaHead = xaHead;
-	  xaHead._xaNext = this;
-	}
+        if (xaHead != null) {
+          _xaNext = xaHead._xaNext;
+          _xaHead = xaHead;
+          xaHead._xaNext = this;
+        }
       }
     }
 
     // local transaction optimization
     if (! _isXATransaction
-	&& flags != TMJOIN
-	&& _localTransaction != null) {
+        && flags != TMJOIN
+        && _localTransaction != null) {
       try {
-	if (log.isLoggable(Level.FINER))
-	  log.finer("begin-local-XA: " + xid + " " + _localTransaction);
+        if (log.isLoggable(Level.FINER))
+          log.finer("begin-local-XA: " + xid + " " + _localTransaction);
 
-	_localTransaction.begin();
+        _localTransaction.begin();
       } catch (ResourceException e) {
-	throw new XAExceptionWrapper(e);
+        throw new XAExceptionWrapper(e);
       }
 
       _xid = xid;
@@ -726,14 +726,14 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
 
     if (_xaResource != null) {
       if (log.isLoggable(Level.FINER))
-	log.finer("start-XA: " + xid + " " + _xaResource);
+        log.finer("start-XA: " + xid + " " + _xaResource);
 
       _xaResource.start(xid, flags);
       _isXATransaction = true;
     }
     else {
       if (log.isLoggable(Level.FINER))
-	log.finer("start-XA with non XA resource: " + xid + " " + _xaResource);
+        log.finer("start-XA with non XA resource: " + xid + " " + _xaResource);
     }
     
     _xid = xid;
@@ -777,7 +777,7 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
   {
     try {
       if (_isXATransaction)
-	_xaResource.forget(xid);
+        _xaResource.forget(xid);
     } finally {
       clearXid();
     }
@@ -794,29 +794,29 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
       _endFlags = -1;
 
       if (_isXATransaction)
-	endResource(xid, endFlags);
+        endResource(xid, endFlags);
     }
 
     if (_isXATransaction) {
       try {
-	if (log.isLoggable(Level.FINER))
-	  log.finer("prepare-XA: " + xid + " " + _xaResource);
+        if (log.isLoggable(Level.FINER))
+          log.finer("prepare-XA: " + xid + " " + _xaResource);
 
-	int result = _xaResource.prepare(xid);
+        int result = _xaResource.prepare(xid);
 
-	if (result == XA_RDONLY) {
-	  if (_xaResource != null)
-	    _isXATransaction = true;
+        if (result == XA_RDONLY) {
+          if (_xaResource != null)
+            _isXATransaction = true;
       
-	  clearXid();
-	}
+          clearXid();
+        }
 
-	return result;
+        return result;
       } catch (XAException e) {
-	if (log.isLoggable(Level.FINER))
-	  log.finer("failed prepare-XA: " + xid + " " + _xaResource + " " + e);
+        if (log.isLoggable(Level.FINER))
+          log.finer("failed prepare-XA: " + xid + " " + _xaResource + " " + e);
 
-	throw e;
+        throw e;
       }
     }
     else
@@ -866,28 +866,28 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
         try {
           endResource(xid, endFlags);
           isValid = true;
-	} finally {
+        } finally {
           if (! isValid)
-	    _xaResource.rollback(xid);
-	}
+            _xaResource.rollback(xid);
+        }
       }
     
       if (log.isLoggable(Level.FINER))
-	log.finer("connection pool rollback XA: " + this);
+        log.finer("connection pool rollback XA: " + this);
 
       if (_isXATransaction)
-	_xaResource.rollback(xid);
+        _xaResource.rollback(xid);
       else if (_localTransaction != null) {
-	try {
-	  _isLocalTransaction = false;
-	  _localTransaction.rollback();
-	} catch (ResourceException e) {
-	  throw new XAExceptionWrapper(e);
-	}
+        try {
+          _isLocalTransaction = false;
+          _localTransaction.rollback();
+        } catch (ResourceException e) {
+          throw new XAExceptionWrapper(e);
+        }
       }
     } finally {
       if (_xaResource != null)
-	_isXATransaction = true;
+        _isXATransaction = true;
       
       clearXid();
     }
@@ -908,52 +908,52 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
       if (endFlags != -1 && _isXATransaction) {
         boolean isValid = false;
         
-	try {
+        try {
           endResource(xid, endFlags);
           isValid = true;
-	} finally {
+        } finally {
           if (! isValid)
             _xaResource.rollback(xid);
         }
       }
 
       if (_isXATransaction) {
-	if (logFiner) {
-	  log.finer("commit-XA" + (onePhase ? "-1p: " : ": ")
-		    + xid + " " + _xaResource);
-	}
+        if (logFiner) {
+          log.finer("commit-XA" + (onePhase ? "-1p: " : ": ")
+                    + xid + " " + _xaResource);
+        }
 
-	try {
-	  _xaResource.commit(xid, onePhase);
-	} catch (XAException e) {
-	  if (logFiner)
-	    log.finer("commit-XA failed: " + _xaResource + " " + e);
-	  
-	  throw e;
-	}
+        try {
+          _xaResource.commit(xid, onePhase);
+        } catch (XAException e) {
+          if (logFiner)
+            log.finer("commit-XA failed: " + _xaResource + " " + e);
+
+          throw e;
+        }
       }
       else if (_localTransaction != null) {
-	if (logFiner)
-	  log.finer("commit-local: " + _localTransaction);
-	  
-	try {
-	  _localTransaction.commit();
-	} catch (ResourceException e) {
-	  if (logFiner)
-	    log.finer("commit failed: " + _localTransaction + " " + e);
-	  
-	  throw new XAExceptionWrapper(e);
-	} finally {
-	  _isLocalTransaction = false;
-	}
+        if (logFiner)
+          log.finer("commit-local: " + _localTransaction);
+
+        try {
+          _localTransaction.commit();
+        } catch (ResourceException e) {
+          if (logFiner)
+            log.finer("commit failed: " + _localTransaction + " " + e);
+
+          throw new XAExceptionWrapper(e);
+        } finally {
+          _isLocalTransaction = false;
+        }
       }
       else {
-	if (logFiner)
-	  log.finer("commit for resource with no XA support: " + this);
+        if (logFiner)
+          log.finer("commit for resource with no XA support: " + this);
       }
     } finally {
       if (_xaResource != null)
-	_isXATransaction = true;
+        _isXATransaction = true;
       
       clearXid();
     }
@@ -969,7 +969,7 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
 
     for (; xaPtr != null; xaPtr = xaPtr._xaNext) {
       if (xaPtr._xaResource != null)
-	xaPtr._xaResource.end(xid, flags);
+        xaPtr._xaResource.end(xid, flags);
     }
   }
   
@@ -1049,9 +1049,9 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
       
     if (transaction != null) {
       try {
-	transaction.delistPoolItem(this, XAResource.TMSUCCESS);
+        transaction.delistPoolItem(this, XAResource.TMSUCCESS);
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 
@@ -1095,15 +1095,15 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
 
     try {
       while (userItem != null) {
-	UserPoolItem next = userItem.getShareNext();
+        UserPoolItem next = userItem.getShareNext();
 
-	userItem.close();
+        userItem.close();
 
-	userItem = next;
+        userItem = next;
       }
-	
+
       if (transaction != null)
-	transaction.delistPoolItem(this, XAResource.TMFAIL);
+        transaction.delistPoolItem(this, XAResource.TMFAIL);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     }

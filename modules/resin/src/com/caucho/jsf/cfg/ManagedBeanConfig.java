@@ -101,11 +101,11 @@ public class ManagedBeanConfig
   {
     if (_type == null) {
       try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	_type = Class.forName(_typeName, false, loader);
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+        _type = Class.forName(_typeName, false, loader);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
     
@@ -124,7 +124,7 @@ public class ManagedBeanConfig
       _scope = Scope.NONE;
     else
       throw new ConfigException(L.l("'{0}' is an unknown managed-bean-scope.  Expected values are request, session, application, or none.",
-				    scope));
+                                    scope));
   }
 
   public String getManagedBeanScope()
@@ -160,7 +160,7 @@ public class ManagedBeanConfig
   }
   
   public Object create(FacesContext context,
-		       ManagedBeanELResolver.Scope createScope)
+                       ManagedBeanELResolver.Scope createScope)
     throws FacesException
   {
     try {
@@ -171,29 +171,29 @@ public class ManagedBeanConfig
       Object value = getType().newInstance();
 
       if (createScope.getScope() < _scope.ordinal())
-	throw new FacesException(L.l("Scope '{0}' is long for enclosing bean.",
-				     _scope));
+        throw new FacesException(L.l("Scope '{0}' is long for enclosing bean.",
+                                     _scope));
       else if (_scope.ordinal() < createScope.getScope())
-	createScope.setScope(_scope.ordinal());
+        createScope.setScope(_scope.ordinal());
 
       for (int i = 0; i < _program.size(); i++) {
-	_program.get(i).configure(context, value);
+        _program.get(i).configure(context, value);
       }
 
       ExternalContext extContext = context.getExternalContext();
 
       switch (_scope) {
       case APPLICATION:
-	extContext.getApplicationMap().put(_name, value);
-	break;
-	
+        extContext.getApplicationMap().put(_name, value);
+        break;
+
       case SESSION:
-	extContext.getSessionMap().put(_name, value);
-	break;
-	
+        extContext.getSessionMap().put(_name, value);
+        break;
+
       case REQUEST:
-	extContext.getRequestMap().put(_name, value);
-	break;
+        extContext.getRequestMap().put(_name, value);
+        break;
       }
 
       elContext.setPropertyResolved(isPropertyResolved);

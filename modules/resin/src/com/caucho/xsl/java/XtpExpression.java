@@ -72,7 +72,7 @@ public class XtpExpression extends XslNode {
     }
     else
       throw error(L.l("'{0}' is not allowed as an xtp:expression child.",
-		      node));
+                      node));
   }
 
   /**

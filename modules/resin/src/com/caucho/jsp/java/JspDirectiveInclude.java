@@ -80,23 +80,23 @@ public class JspDirectiveInclude extends JspNode {
       ParseState parseState = _gen.getParseState();
       
       if (parseState.isXml()) {
-	Xml xml = new Xml();
-	xml.setContentHandler(new JspContentHandler(parseState.getBuilder()));
-	Path path = resolvePath(_file, parseState);
-	
-	path.setUserPath(_file);
-	xml.setNamespaceAware(true);
+        Xml xml = new Xml();
+        xml.setContentHandler(new JspContentHandler(parseState.getBuilder()));
+        Path path = resolvePath(_file, parseState);
 
-	for (Namespace ns = parseState.getNamespaces();
-	     ns != null;
-	     ns = ns.getNext()) {
-	  xml.pushNamespace(ns.getPrefix(), ns.getURI());
-	}
-	
-	xml.parse(path);
+        path.setUserPath(_file);
+        xml.setNamespaceAware(true);
+
+        for (Namespace ns = parseState.getNamespaces();
+             ns != null;
+             ns = ns.getNext()) {
+          xml.pushNamespace(ns.getPrefix(), ns.getURI());
+        }
+
+        xml.parse(path);
       }
       else
-	_gen.getJspParser().pushInclude(_file);
+        _gen.getJspParser().pushInclude(_file);
     } catch (SAXException e) {
       throw error(e);
     } catch (IOException e) {

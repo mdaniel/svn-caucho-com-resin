@@ -65,8 +65,8 @@ public class EjbMessageConfigProxy extends EjbBeanConfigProxy {
     }
     else if (! (oldBean instanceof EjbMessageBean)) {
       throw new ConfigException(L.l("message bean '{0}' conflicts with prior {1} bean at {2}.",
-				    getEjbName(), oldBean.getEJBKind(),
-				    oldBean.getLocation()));
+                                    getEjbName(), oldBean.getEJBKind(),
+                                    oldBean.getLocation()));
     }
     else
       _message = (EjbMessageBean) oldBean;

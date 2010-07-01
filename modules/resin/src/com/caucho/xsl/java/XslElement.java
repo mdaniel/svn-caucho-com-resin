@@ -93,10 +93,10 @@ public class XslElement extends XslNode {
       generateString(out, _name, '+');
 
       if (getOutputNamespace() != null) {
-	out.print(", ");
-	printNamespace(out, getOutputNamespace());
+        out.print(", ");
+        printNamespace(out, getOutputNamespace());
       }
-	
+
       out.println(");");
     }
     

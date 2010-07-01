@@ -144,7 +144,7 @@ public class StringExpr extends Expr {
     case CONCAT: 
       CharBuffer cb = CharBuffer.allocate();
       for (int i = 0; i < _args.size(); i++)
-	((Expr) _args.get(i)).evalString(cb, node, env);
+        ((Expr) _args.get(i)).evalString(cb, node, env);
       return cb.close();
 
     case SUBSTRING_BEFORE:
@@ -176,27 +176,27 @@ public class StringExpr extends Expr {
       Object lobj = _left.evalObject(node, env);
       Node nodeValue = toNode(lobj);
       if (nodeValue != null)
-	return nodeValue.getLocalName();
+        return nodeValue.getLocalName();
       else
-	return "";
+        return "";
 
     case NAMESPACE:
       lobj = _left.evalObject(node, env);
       nodeValue = toNode(lobj);
       if (nodeValue != null) {
-	String uri = nodeValue.getNamespaceURI();
-	return uri != null ? uri : "";
+        String uri = nodeValue.getNamespaceURI();
+        return uri != null ? uri : "";
       }
       else
-	return "";
+        return "";
 
     case QNAME:
       lobj = _left.evalObject(node, env);
       nodeValue = toNode(lobj);
       if (nodeValue != null)
-	return nodeValue.getNodeName();
+        return nodeValue.getNodeName();
       else
-	return "";
+        return "";
 
     case GENERATE_ID:
       Iterator iter = _left.evalNodeSet(node, env);
@@ -205,21 +205,21 @@ public class StringExpr extends Expr {
     case SYSTEM_PROPERTY:
       lstr = _left.evalString(node, env);
       if (lstr == null)
-	return "";
+        return "";
       else if (lstr.equals("xsl:version"))
-	return "1.0";
+        return "1.0";
       else
-	return "";
+        return "";
 
     case SUBSTRING:
       lstr = _left.evalString(node, env);
       if (lstr == null)
-	lstr = "";
+        lstr = "";
       double start = _right.evalNumber(node, env) - 1;
       
       double end = lstr.length();
       if (_third != null)
-	end = Math.round(start) + _third.evalNumber(node, env);
+        end = Math.round(start) + _third.evalNumber(node, env);
 
       if (Double.isNaN(end) || Double.isNaN(start)) {
         start = 0;
@@ -307,15 +307,15 @@ public class StringExpr extends Expr {
     boolean lastIsWhitespace = false;
     for (; i < len; i++) {
       if (XmlChar.isWhitespace(string.charAt(i))) {
-	lastIsWhitespace = true;
+        lastIsWhitespace = true;
       }
       else if (lastIsWhitespace) {
-	result.append(' ');
-	result.append(string.charAt(i));
-	lastIsWhitespace = false;
+        result.append(' ');
+        result.append(string.charAt(i));
+        lastIsWhitespace = false;
       }
       else
-	result.append(string.charAt(i));
+        result.append(string.charAt(i));
     }
 
     return result.toString();
@@ -338,11 +338,11 @@ public class StringExpr extends Expr {
       char ch = string.charAt(i);
 
       for (int j = 0; j < from.length(); j++) {
-	if (ch == from.charAt(j)) {
-	  if (to.length() > j)
-	    result.append(to.charAt(j));
-	  continue loop;
-	}
+        if (ch == from.charAt(j)) {
+          if (to.length() > j)
+            result.append(to.charAt(j));
+          continue loop;
+        }
       }
 
       result.append(ch);
@@ -392,9 +392,9 @@ public class StringExpr extends Expr {
     case CONCAT: 
       String result = "concat(";
       for (int i = 0; i < _args.size(); i++) {
-	if (i > 0)
-	  result = result + ", ";
-	result = result + _args.get(i);
+        if (i > 0)
+          result = result + ", ";
+        result = result + _args.get(i);
       }
       return result + ")";
 
@@ -430,7 +430,7 @@ public class StringExpr extends Expr {
 
     case SUBSTRING:
       return "substring(" + _left + "," + _right + 
-	(_third == null ? "" : ("," + _third)) + ")";
+        (_third == null ? "" : ("," + _third)) + ")";
 
     case BASE_URI:
       return "fn:base-uri(" + _left + ")";

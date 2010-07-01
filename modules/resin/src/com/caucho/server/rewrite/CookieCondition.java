@@ -89,11 +89,11 @@ public class CookieCondition
 
     if (cookies != null) {
       for (int i = 0; i < cookies.length; i++) {
-	Cookie cookie = cookies[i];
-	
-	if (cookie.getName().equals(_name)) {
-	  return _regexp == null || _regexp.matcher(cookie.getValue()).find();
-	}
+        Cookie cookie = cookies[i];
+
+        if (cookie.getName().equals(_name)) {
+          return _regexp == null || _regexp.matcher(cookie.getValue()).find();
+        }
       }
     }
 

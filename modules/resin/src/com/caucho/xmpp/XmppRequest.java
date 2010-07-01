@@ -177,11 +177,11 @@ public class XmppRequest extends AbstractProtocolConnection {
       _isFinest = log.isLoggable(Level.FINEST);
       
       if (_state == null) {
-	return handleInit();
+        return handleInit();
       }
 
       SocketLinkDuplexListener handler
-	= new XmppBrokerStream(this, _broker, _is, _in, _os);
+        = new XmppBrokerStream(this, _broker, _is, _in, _os);
       
       SocketLinkDuplexController controller = _conn.startDuplex(handler);
 
@@ -234,9 +234,9 @@ public class XmppRequest extends AbstractProtocolConnection {
   {
     int tag;
     while ((tag = _in.next()) > 0
-	   && tag != XMLStreamConstants.START_ELEMENT) {
+           && tag != XMLStreamConstants.START_ELEMENT) {
       if (_isFinest)
-	debug(_in);
+        debug(_in);
     }
     
     if (_isFinest)
@@ -248,16 +248,16 @@ public class XmppRequest extends AbstractProtocolConnection {
       _os.print("<error><invalid-xml/></error>");
       
       if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: '{1}' is an unknown tag from {2}",
-		     this, name, _conn.getRemoteAddress()));
+        log.fine(L.l("{0}: '{1}' is an unknown tag from {2}",
+                     this, name, _conn.getRemoteAddress()));
       return false;
     }
     else if (! STREAMS_NS.equals(_in.getNamespaceURI())) {
       _os.print("<error><bad-namespace-prefix/></error>");
       
       if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: xmlns='{1}' is an unknown namespace from {2}",
-		     this, name, _conn.getRemoteAddress()));
+        log.fine(L.l("{0}: xmlns='{1}' is an unknown namespace from {2}",
+                     this, name, _conn.getRemoteAddress()));
       
       return false;
     }
@@ -266,8 +266,8 @@ public class XmppRequest extends AbstractProtocolConnection {
       _os.print("<error><bad-namespace-prefix/></error>");
       
       if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: xmlns='{1}' is an unknown namespace for '' from {2}",
-		     this, name, _conn.getRemoteAddress()));
+        log.fine(L.l("{0}: xmlns='{1}' is an unknown namespace for '' from {2}",
+                     this, name, _conn.getRemoteAddress()));
       
       return false;
     }
@@ -276,9 +276,9 @@ public class XmppRequest extends AbstractProtocolConnection {
       _os.print("<error><unsupported-version/></error>");
       
       if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: version='{1}' is an unknown version from {2}",
-		     this, _in.getAttributeValue(null, "version"),
-		     _conn.getRemoteAddress()));
+        log.fine(L.l("{0}: version='{1}' is an unknown version from {2}",
+                     this, _in.getAttributeValue(null, "version"),
+                     _conn.getRemoteAddress()));
       
       return false;
     }
@@ -294,8 +294,8 @@ public class XmppRequest extends AbstractProtocolConnection {
 
     if (_broker == null) {
       if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: host='{1}' is an unknown host",
-		     this, _host));
+        log.fine(L.l("{0}: host='{1}' is an unknown host",
+                     this, _host));
 
       _os.print("<error><unknown-host/></error>");
       
@@ -314,9 +314,9 @@ public class XmppRequest extends AbstractProtocolConnection {
     int tag;
     
     while ((tag = _in.next()) > 0
-	   && tag != XMLStreamConstants.START_ELEMENT) {
+           && tag != XMLStreamConstants.START_ELEMENT) {
       if (_isFinest)
-	debug(_in);
+        debug(_in);
     }
     
     if (tag >= 0 && _isFinest)
@@ -332,24 +332,24 @@ public class XmppRequest extends AbstractProtocolConnection {
       return false;
 
     if ("starttls".equals(_in.getLocalName())
-	&& STARTTLS_NS.equals(_in.getNamespaceURI())) {
+        && STARTTLS_NS.equals(_in.getNamespaceURI())) {
       if (! startTls())
-	return false;
+        return false;
     }
 
     if ("auth".equals(_in.getLocalName())
-	&& AUTH_NS.equals(_in.getNamespaceURI())) {
+        && AUTH_NS.equals(_in.getNamespaceURI())) {
       if (! handleAuth())
-	return false;
+        return false;
 
       if (! skipToStartElement())
-	return false;
+        return false;
     }
 
     if ("stream".equals(_in.getLocalName())
-	&& STREAMS_NS.equals(_in.getNamespaceURI())) {
+        && STREAMS_NS.equals(_in.getNamespaceURI())) {
       if (! handleStream())
-	return false;
+        return false;
     }
 
     return true;
@@ -407,7 +407,7 @@ public class XmppRequest extends AbstractProtocolConnection {
       String value = _in.getAttributeValue(i);
 
       if ("to".equals(localName))
-	to = value;
+        to = value;
     }
 
     String from = _host;
@@ -450,13 +450,13 @@ public class XmppRequest extends AbstractProtocolConnection {
     int tag;
     while ((tag = in.next()) > 0) {
       if (_isFinest)
-	debug(in);
-	
+        debug(in);
+
       if (tag == XMLStreamReader.START_ELEMENT) {
       }
       else if (tag == XMLStreamReader.END_ELEMENT) {
-	if (tagName.equals(in.getLocalName()))
-	  return;
+        if (tagName.equals(in.getLocalName()))
+          return;
       }
     }
   }
@@ -479,17 +479,17 @@ public class XmppRequest extends AbstractProtocolConnection {
 
     int tag;
     while ((tag = _in.next()) > 0
-	   && tag != XMLStreamConstants.START_ELEMENT
-	   && tag != XMLStreamConstants.END_ELEMENT) {
+           && tag != XMLStreamConstants.START_ELEMENT
+           && tag != XMLStreamConstants.END_ELEMENT) {
       if (_isFinest)
-	debug(_in);
+        debug(_in);
       
       if (tag == XMLStreamConstants.CHARACTERS) {
-	char []buffer = _in.getTextCharacters();
-	int start = _in.getTextStart();
-	int len = _in.getTextLength();
-	
-	value = new String(_in.getTextCharacters(), start, len);
+        char []buffer = _in.getTextCharacters();
+        int start = _in.getTextStart();
+        int len = _in.getTextLength();
+
+        value = new String(_in.getTextCharacters(), start, len);
       }
     }
 
@@ -517,7 +517,7 @@ public class XmppRequest extends AbstractProtocolConnection {
       _uid = _name + "@" + _host;
 
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " auth-plain success for " + name);
+        log.fine(this + " auth-plain success for " + name);
       
       _os.print("<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'></success>");
       _os.flush();
@@ -536,14 +536,14 @@ public class XmppRequest extends AbstractProtocolConnection {
       sb.append("<").append(in.getLocalName());
 
       if (in.getNamespaceURI() != null)
-	sb.append("{").append(in.getNamespaceURI()).append("}");
+        sb.append("{").append(in.getNamespaceURI()).append("}");
 
       for (int i = 0; i < in.getAttributeCount(); i++) {
-	sb.append(" ");
-	sb.append(in.getAttributeLocalName(i));
-	sb.append("='");
-	sb.append(in.getAttributeValue(i));
-	sb.append("'");
+        sb.append(" ");
+        sb.append(in.getAttributeLocalName(i));
+        sb.append("='");
+        sb.append(in.getAttributeValue(i));
+        sb.append("'");
       }
       sb.append(">");
 
@@ -556,7 +556,7 @@ public class XmppRequest extends AbstractProtocolConnection {
       String text = in.getText().trim();
 
       if (! "".equals(text))
-	log.finest(this + " text='" + text + "'");
+        log.finest(this + " text='" + text + "'");
     }
     else
       log.finest(this + " tag=" + in.getEventType());

@@ -92,7 +92,7 @@ public class SyslogHandler extends Handler {
       _facility = Syslog.LOG_LOCAL7;
     else
       throw new ConfigException(L.l("'{0}' is an unknown syslog facility.",
-				    facility));
+                                    facility));
   }
 
   /**
@@ -119,7 +119,7 @@ public class SyslogHandler extends Handler {
       _severity = Syslog.LOG_DEBUG;
     else
       throw new ConfigException(L.l("'{0}' is an unknown syslog severity.",
-				    severity));
+                                    severity));
   }
 
   /**

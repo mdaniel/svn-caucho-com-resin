@@ -158,17 +158,17 @@ public class Transaction extends StoreTransaction {
   {
     if (_isRollbackOnly) {
       if (_rollbackExn != null)
-	throw _rollbackExn;
+        throw _rollbackExn;
       else
-	throw new SQLException(L.l("can't get lock with rollback transaction"));
+        throw new SQLException(L.l("can't get lock with rollback transaction"));
     }
 
     try {
       if (_readLocks == null)
-	_readLocks = new ArrayList<Lock>();
+        _readLocks = new ArrayList<Lock>();
       
       if (_readLocks.contains(lock))
-	throw new SQLException(L.l("lockRead must not already have a read lock"));
+        throw new SQLException(L.l("lockRead must not already have a read lock"));
       
       lock.lockRead(_timeout);
       _readLocks.add(lock);
@@ -187,22 +187,22 @@ public class Transaction extends StoreTransaction {
   {
     if (_isRollbackOnly) {
       if (_rollbackExn != null)
-	throw _rollbackExn;
+        throw _rollbackExn;
       else
-	throw new SQLException(L.l("can't get lock with rollback transaction"));
+        throw new SQLException(L.l("can't get lock with rollback transaction"));
     }
 
     try {
       if (_readLocks == null)
-	_readLocks = new ArrayList<Lock>();
+        _readLocks = new ArrayList<Lock>();
       if (_writeLocks == null)
-	_writeLocks = new ArrayList<Lock>();
+        _writeLocks = new ArrayList<Lock>();
 
       if (_readLocks.contains(lock))
-	throw new SQLException(L.l("lockReadAndWrite cannot already have a read lock"));
+        throw new SQLException(L.l("lockReadAndWrite cannot already have a read lock"));
 
       if (_writeLocks.contains(lock))
-	throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
+        throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
       
       lock.lockReadAndWrite(_timeout);
       _readLocks.add(lock);
@@ -222,28 +222,28 @@ public class Transaction extends StoreTransaction {
   {
     if (_isRollbackOnly) {
       if (_rollbackExn != null)
-	throw _rollbackExn;
+        throw _rollbackExn;
       else
-	throw new SQLException(L.l("can't get lock with rollback transaction"));
+        throw new SQLException(L.l("can't get lock with rollback transaction"));
     }
 
     try {
       if (_readLocks == null)
-	_readLocks = new ArrayList<Lock>();
+        _readLocks = new ArrayList<Lock>();
       if (_writeLocks == null)
-	_writeLocks = new ArrayList<Lock>();
+        _writeLocks = new ArrayList<Lock>();
 
       if (_readLocks.contains(lock))
-	throw new SQLException(L.l("lockReadAndWrite cannot already have a read lock"));
+        throw new SQLException(L.l("lockReadAndWrite cannot already have a read lock"));
 
       if (_writeLocks.contains(lock))
-	throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
+        throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
       
       if (lock.lockReadAndWriteNoWait()) {
-	_readLocks.add(lock);
-	_writeLocks.add(lock);
+        _readLocks.add(lock);
+        _writeLocks.add(lock);
 
-	return true;
+        return true;
       }
     } catch (SQLException e) {
       setRollbackOnly(e);
@@ -266,7 +266,7 @@ public class Transaction extends StoreTransaction {
       _updateBlocks = new ArrayList<Block>();
 
     if (_updateBlocks.size() == 0
-	|| _updateBlocks.get(_updateBlocks.size() - 1) != block)
+        || _updateBlocks.get(_updateBlocks.size() - 1) != block)
       _updateBlocks.add(block);
   }
   
@@ -296,10 +296,10 @@ public class Transaction extends StoreTransaction {
 
     if (_writeLocks.remove(lock)) {
       try {
-	commit();
+        commit();
       } finally {
-	// lock.unlockWrite();
-	lock.unlockReadAndWrite();
+        // lock.unlockWrite();
+        lock.unlockReadAndWrite();
       }
     }
   }
@@ -364,7 +364,7 @@ public class Transaction extends StoreTransaction {
       block.getStore().freeBlock(block.getBlockId());
     else {
       if (_deallocateBlocks == null)
-	_deallocateBlocks = new ArrayList<Block>();
+        _deallocateBlocks = new ArrayList<Block>();
       
       _deallocateBlocks.add(block);
     }
@@ -400,7 +400,7 @@ public class Transaction extends StoreTransaction {
       _conn = null;
       
       if (conn != null) {
-	conn.setTransaction(null);
+        conn.setTransaction(null);
       }
     }
   }
@@ -437,10 +437,10 @@ public class Transaction extends StoreTransaction {
   {
     if (_deleteInodes != null) {
       while (_deleteInodes.size() > 0) {
-	Inode inode = _deleteInodes.remove(0);
+        Inode inode = _deleteInodes.remove(0);
 
-	// XXX: should be allocating based on auto-commit
-	inode.remove();
+        // XXX: should be allocating based on auto-commit
+        inode.remove();
       }
     }
 
@@ -449,31 +449,31 @@ public class Transaction extends StoreTransaction {
     
     if (updateBlocks != null) {
       while (updateBlocks.size() > 0) {
-	Block block = updateBlocks.remove(updateBlocks.size() - 1);
+        Block block = updateBlocks.remove(updateBlocks.size() - 1);
 
         try {
           block.getStore().saveAllocation();
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
+        } catch (IOException e) {
+          log.log(Level.WARNING, e.toString(), e);
         }
         
-	try {
-	  block.commit();
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          block.commit();
+        } catch (IOException e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
 
     if (_deallocateBlocks != null) {
       while (_deallocateBlocks.size() > 0) {
-	Block block = _deallocateBlocks.remove(0);
+        Block block = _deallocateBlocks.remove(0);
 
-	try {
-	  block.getStore().freeBlock(block.getBlockId());
-	} catch (IOException e) {
-	  throw new SQLExceptionWrapper(e);
-	}
+        try {
+          block.getStore().freeBlock(block.getBlockId());
+        } catch (IOException e) {
+          throw new SQLExceptionWrapper(e);
+        }
       }
     }
   }
@@ -491,16 +491,16 @@ public class Transaction extends StoreTransaction {
     // need to unlock write before upgrade to block other threads
     if (_writeLocks != null) {
       for (int i = 0; i < _writeLocks.size(); i++) {
-	Lock lock = _writeLocks.get(i);
+        Lock lock = _writeLocks.get(i);
 
-	if (_readLocks != null)
-	  _readLocks.remove(lock);
+        if (_readLocks != null)
+          _readLocks.remove(lock);
 
-	try {
-	  lock.unlockReadAndWrite();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          lock.unlockReadAndWrite();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       _writeLocks.clear();
@@ -508,13 +508,13 @@ public class Transaction extends StoreTransaction {
     
     if (_readLocks != null) {
       for (int i = 0; i < _readLocks.size(); i++) {
-	Lock lock = _readLocks.get(i);
+        Lock lock = _readLocks.get(i);
 
-	try {
-	  lock.unlockRead();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          lock.unlockRead();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       _readLocks.clear();

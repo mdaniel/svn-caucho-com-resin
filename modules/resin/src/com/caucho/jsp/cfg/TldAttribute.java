@@ -195,7 +195,7 @@ public class TldAttribute {
       Signature sig = _deferredMethod.getMethodSignature();
 
       if (sig != null)
-	return sig.getSignature();
+        return sig.getSignature();
     }
     
     return null;

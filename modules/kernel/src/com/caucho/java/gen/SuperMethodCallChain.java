@@ -64,7 +64,7 @@ public class SuperMethodCallChain extends MethodCallChain {
    * @param args the method arguments
    */
   public void generateCall(JavaWriter out, String retVar,
-			   String var, String []args)
+                           String var, String []args)
     throws IOException
   {
     super.generateCall(out, retVar, "super", args);

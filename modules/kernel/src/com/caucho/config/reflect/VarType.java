@@ -125,7 +125,7 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     
     for (BaseType bound : _bounds) {
       if (! bound.isAssignableFrom(type)) {
-	return false;
+        return false;
       }
     }
     

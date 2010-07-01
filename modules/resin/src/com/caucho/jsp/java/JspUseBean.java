@@ -172,11 +172,11 @@ public class JspUseBean extends JspContainerNode {
     if (_className != null) {
       String msg = canInstantiateBean(_className);
       if (msg == null) {
-	out.println(_id + " = new " + _className + "();");
-	canInstantiate = true;
+        out.println(_id + " = new " + _className + "();");
+        canInstantiate = true;
       }
       else
-	out.println("throw new java.lang.InstantiationException(\"" + msg + "\");");
+        out.println("throw new java.lang.InstantiationException(\"" + msg + "\");");
     }
     else if (_beanName == null)
       out.println("throw new java.lang.InstantiationException(\"jsp:useBean needs 'bean' or 'class'\");");
@@ -184,15 +184,15 @@ public class JspUseBean extends JspContainerNode {
     else if (hasRuntimeAttribute(_beanName)) {
       String beanName = getRuntimeAttribute(_beanName);
       out.println(_id + " = (" + _typeName +
-	      ") java.beans.Beans.instantiate(getClass().getClassLoader(), " +
-	      beanName + ");");
+              ") java.beans.Beans.instantiate(getClass().getClassLoader(), " +
+              beanName + ");");
       canInstantiate = true;
     }
     // instantiate a beans
     else {
       out.println(_id + " = (" + _typeName +
-	      ") java.beans.Beans.instantiate(getClass().getClassLoader(), \"" +
-	      _beanName + "\");");
+              ") java.beans.Beans.instantiate(getClass().getClassLoader(), \"" +
+              _beanName + "\");");
       canInstantiate = true;
     }
 
@@ -226,18 +226,18 @@ public class JspUseBean extends JspContainerNode {
       Class cl = _gen.getBeanClass(className);
       int modifiers = cl.getModifiers();
       if (Modifier.isInterface(modifiers))
-	return L.l("'{0}' is an interface", className);
+        return L.l("'{0}' is an interface", className);
       if (Modifier.isAbstract(modifiers))
-	return L.l("'{0}' is abstract", className);
+        return L.l("'{0}' is abstract", className);
       if (! Modifier.isPublic(modifiers))
-	return L.l("'{0}' must be public", className);
+        return L.l("'{0}' must be public", className);
 
       Constructor []constructors = cl.getConstructors();
       for (int i = 0; i < constructors.length; i++) {
 
-	Class []param = constructors[i].getParameterTypes();
-	if (param.length == 0)
-	  return null;
+        Class []param = constructors[i].getParameterTypes();
+        if (param.length == 0)
+          return null;
       }
     } catch (Exception e) {
       throw error(e.getMessage());

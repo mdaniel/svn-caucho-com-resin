@@ -71,7 +71,7 @@ public class SelfSignedCert {
 
       
     ks.setKeyEntry("anonymous", getPrivateKey(),
-		   "key-password".toCharArray(), getCertificateChain());
+                   "key-password".toCharArray(), getCertificateChain());
     
     kmf.init(ks, "key-password".toCharArray());
 
@@ -125,7 +125,7 @@ public class SelfSignedCert {
       X500Name x500name = new X500Name("CN=" + name);
       
       X509Certificate cert
-	= keypair.getSelfCertificate(x500name, days * 24 * 3600);
+        = keypair.getSelfCertificate(x500name, days * 24 * 3600);
 
       return new SelfSignedCert(cert, privKey);
     } catch (Exception e) {

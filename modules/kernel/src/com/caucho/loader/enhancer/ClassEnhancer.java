@@ -54,8 +54,8 @@ public interface ClassEnhancer {
    * Enhances the class by adding to the GenClass.
    */
   public void enhance(GenClass genClass,
-		      JClass baseClass,
-		      String extClassName)
+                      JClass baseClass,
+                      String extClassName)
     throws Exception;
   
   /**

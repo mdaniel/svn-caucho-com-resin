@@ -378,19 +378,19 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
       if (localHandlers != null) {
         for (int i = 0; i < localHandlers.length; i++) {
-	  int p = handlers.indexOf(localHandlers[i]);
+          int p = handlers.indexOf(localHandlers[i]);
 
-	  if (p < 0) {
-	    handlers.add(localHandlers[i]);
-	  }
-	  else {
-	    Handler oldHandler = handlers.get(p);
+          if (p < 0) {
+            handlers.add(localHandlers[i]);
+          }
+          else {
+            Handler oldHandler = handlers.get(p);
 
-	    if (localHandlers[i].getLevel().intValue()
-		< oldHandler.getLevel().intValue()) {
-	      handlers.set(p, localHandlers[i]);
-	    }
-	  }
+            if (localHandlers[i].getLevel().intValue()
+                < oldHandler.getLevel().intValue()) {
+              handlers.set(p, localHandlers[i]);
+            }
+          }
         }
       }
     }
@@ -413,21 +413,21 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
       if (localHandlers != null) {
         for (int i = 0; i < localHandlers.length; i++) {
-	  if (! localHandlers[i].equals(handler)) {
-	    int p = handlers.indexOf(localHandlers[i]);
+          if (! localHandlers[i].equals(handler)) {
+            int p = handlers.indexOf(localHandlers[i]);
 
-	    if (p < 0) {
-	      handlers.add(localHandlers[i]);
-	    }
-	    else {
-	      Handler oldHandler = handlers.get(p);
+            if (p < 0) {
+              handlers.add(localHandlers[i]);
+            }
+            else {
+              Handler oldHandler = handlers.get(p);
 
-	      if (localHandlers[i].getLevel().intValue()
-		  < oldHandler.getLevel().intValue()) {
-		handlers.set(p, localHandlers[i]);
-	      }
-	    }
-	  }
+              if (localHandlers[i].getLevel().intValue()
+                  < oldHandler.getLevel().intValue()) {
+                handlers.set(p, localHandlers[i]);
+              }
+            }
+          }
         }
       }
     }
@@ -497,7 +497,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
         _loaders.remove(i);
 
       if (refLoader == loader)
-	return;
+        return;
     }
 
     _loaders.add(new WeakReference<ClassLoader>(loader));
@@ -515,7 +515,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       Level level = log.getLevel();
 
       if (level != null)
-	return level;
+        return level;
     }
 
     return Level.INFO;
@@ -755,7 +755,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
         super.setLevel(localLevel);
       else if (localLevel.intValue() < super.getLevel().intValue())
         super.setLevel(localLevel);
-	    
+
       _hasLocalEffectiveLevel = true;
     }
   }
@@ -853,13 +853,13 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       _handlers = null;
       
       for (int i = 0; handlers != null && i < handlers.size(); i++) {
-	Handler handler = handlers.get(i);
+        Handler handler = handlers.get(i);
 
-	try {
-	  handler.close();
-	} catch (Throwable e) {
-	  e.printStackTrace();
-	}
+        try {
+          handler.close();
+        } catch (Throwable e) {
+          e.printStackTrace();
+        }
       }
     }
   }

@@ -57,41 +57,41 @@ public class LikeSelector extends Selector  {
       char ch = likeString.charAt(i);
 
       if (ch == escape && i + 1 < likeString.length()) {
-	ch = likeString.charAt(i + 1);
+        ch = likeString.charAt(i + 1);
 
-	switch (ch) {
-	case '.': case '[': case ']': case '(': case ')': case '|':
-	case '{': case '}':
-	case '+': case '*': case '?': case '\\': case '$': case '^':
-	  cb.append('\\');
-	  cb.append(ch);
-	  break;
-	  
-	default:
-	  cb.append(ch);
-	}
-	
-	i++;
-	continue;
+        switch (ch) {
+        case '.': case '[': case ']': case '(': case ')': case '|':
+        case '{': case '}':
+        case '+': case '*': case '?': case '\\': case '$': case '^':
+          cb.append('\\');
+          cb.append(ch);
+          break;
+
+        default:
+          cb.append(ch);
+        }
+
+        i++;
+        continue;
       }
 
       switch (ch) {
       case '_':
-	cb.append(".");
-	break;
+        cb.append(".");
+        break;
       case '%':
-	cb.append(".*");
-	break;
+        cb.append(".*");
+        break;
       case '.': case '[': case ']': case '(': case ')': case '|':
       case '{': case '}':
       case '+': case '*': case '?': case '\\': case '$': case '^':
-	cb.append('\\');
-	cb.append(ch);
-	break;
-	
+        cb.append('\\');
+        cb.append(ch);
+        break;
+
       default:
-	cb.append(ch);
-	break;
+        cb.append(ch);
+        break;
       }
     }
     

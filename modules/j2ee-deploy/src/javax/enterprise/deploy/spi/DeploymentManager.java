@@ -55,21 +55,21 @@ public interface DeploymentManager {
    * Returns the current running modules.
    */
   public TargetModuleID []getRunningModules(ModuleType moduleType,
-					    Target []targetList)
+                                            Target []targetList)
     throws TargetException, IllegalStateException;
   
   /**
    * Returns the current non-running modules.
    */
   public TargetModuleID []getNonRunningModules(ModuleType moduleType,
-					       Target []targetList)
+                                               Target []targetList)
     throws TargetException, IllegalStateException;
   
   /**
    * Returns all available modules.
    */
   public TargetModuleID []getAvailableModules(ModuleType moduleType,
-					      Target []targetList)
+                                              Target []targetList)
     throws TargetException, IllegalStateException, IOException;
   
   /**
@@ -82,8 +82,8 @@ public interface DeploymentManager {
    * Deploys the object.
    */
   public ProgressObject distribute(Target []targetList,
-				   File archive,
-				   File deploymentPlan)
+                                   File archive,
+                                   File deploymentPlan)
     throws IllegalStateException;
   
   /**
@@ -91,17 +91,17 @@ public interface DeploymentManager {
    * @Deprecated
    */
   public ProgressObject distribute(Target []targetList,
-				   InputStream archive,
-				   InputStream deploymentPlan)
+                                   InputStream archive,
+                                   InputStream deploymentPlan)
     throws IllegalStateException;
   
   /**
    * Deploys the object.
    */
   public ProgressObject distribute(Target []targetList,
-				   ModuleType type,
-				   InputStream archive,
-				   InputStream deploymentPlan)
+                                   ModuleType type,
+                                   InputStream archive,
+                                   InputStream deploymentPlan)
     throws IllegalStateException;
   
   /**
@@ -131,16 +131,16 @@ public interface DeploymentManager {
    * Redeploys the object.
    */
   public ProgressObject redeploy(TargetModuleID []targetList,
-				 File archive,
-				 File deploymentPlan)
+                                 File archive,
+                                 File deploymentPlan)
     throws IllegalStateException;
   
   /**
    * Redeploys the object.
    */
   public ProgressObject redeploy(TargetModuleID []targetList,
-				 InputStream archive,
-				 InputStream deploymentPlan)
+                                 InputStream archive,
+                                 InputStream deploymentPlan)
     throws IllegalStateException;
 
   /**

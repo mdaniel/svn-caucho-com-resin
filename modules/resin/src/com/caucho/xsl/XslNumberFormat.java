@@ -91,46 +91,46 @@ public class XslNumberFormat {
       // scan the separator
       cb.clear();
       for (; i < format.length(); i++) {
-	ch = format.charAt(i);
-	if (Character.isLetterOrDigit(ch))
-	  break;
-	cb.append(ch);
+        ch = format.charAt(i);
+        if (Character.isLetterOrDigit(ch))
+          break;
+        cb.append(ch);
       }
 
       // head and tail separators are just sticked on the ends
       if (head == null)
-	head = cb.toString();
+        head = cb.toString();
       else if (i >= format.length())
-	tail = cb.toString();
+        tail = cb.toString();
       else
-	separators.add(cb.toString());
+        separators.add(cb.toString());
 
       if (i >= format.length())
-	break;
+        break;
 
       // scan the format code
       int zeroSize = 1;
       int code = '0';
       for (; i < format.length(); i++) {
-	ch = format.charAt(i);
-	if (! Character.isLetterOrDigit(ch))
-	  break;
+        ch = format.charAt(i);
+        if (! Character.isLetterOrDigit(ch))
+          break;
 
-	if (! Character.isDigit(ch)) {
-	  if (code != '0' || zeroSize != 1)
-	    code = 0;
-	  else
-	    code = ch;
-	}
-	else if (Character.digit(ch, 10) == 0 && zeroSize >= 0)
-	  zeroSize++;
-	else if (Character.digit(ch, 10) == 1)
-	  code = ch - 1;
-	else
-	  code = 0;
+        if (! Character.isDigit(ch)) {
+          if (code != '0' || zeroSize != 1)
+            code = 0;
+          else
+            code = ch;
+        }
+        else if (Character.digit(ch, 10) == 0 && zeroSize >= 0)
+          zeroSize++;
+        else if (Character.digit(ch, 10) == 1)
+          code = ch - 1;
+        else
+          code = 0;
       }
       if (code == 0)
-	code = '0';
+        code = '0';
 
       zeroSizes.add(zeroSize);
       formats.add(code);
@@ -200,7 +200,7 @@ public class XslNumberFormat {
     for (i = numbers.size() - 1; i >= 0; i--) {
       int index = numbers.size() - i - 1;
       if (index >= formats.length)
-	index = formats.length - 1;
+        index = formats.length - 1;
 
       char code = (char) formats[index];
       int zeroCount = zeroSize[index];
@@ -209,28 +209,28 @@ public class XslNumberFormat {
 
       switch (code) {
       case 'i':
-	romanize(buf, "mdclxvi", count);
-	break;
+        romanize(buf, "mdclxvi", count);
+        break;
 
       case 'I':
-	romanize(buf, "MDCLXVI", count);
-	break;
+        romanize(buf, "MDCLXVI", count);
+        break;
       
       case 'a':
-	formatAlpha(buf, 'a', count);
-	break;
+        formatAlpha(buf, 'a', count);
+        break;
       
       case 'A':
-	formatAlpha(buf, 'A', count);
-	break;
+        formatAlpha(buf, 'A', count);
+        break;
       
       default:
-	formatDecimal(buf, code, zeroCount, count);
-	break;
+        formatDecimal(buf, code, zeroCount, count);
+        break;
       }
 
       if (i > 0)
-	buf.append(separators[index]);
+        buf.append(separators[index]);
     }
 
     buf.append(tail);
@@ -354,13 +354,13 @@ public class XslNumberFormat {
    * @param count number to convert
    */
   private void formatDecimal(CharBuffer cb, int code,
-			     int zeroCount, int count)
+                             int zeroCount, int count)
   {
     int digits = 0;
     int index = cb.length();
     while (count > 0) {
       if (digits > 0 && digits % groupSize == 0)
-	cb.insert(index, groupSeparator);
+        cb.insert(index, groupSeparator);
       cb.insert(index, (char) (code + count % 10));
       count /= 10;
       digits++;

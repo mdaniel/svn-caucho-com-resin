@@ -45,10 +45,10 @@ public class StaticJspFragmentSupport extends JspFragment {
   private String _value;
 
   private PageContext _pageContext;
-					 
+
   public static StaticJspFragmentSupport create(StaticJspFragmentSupport frag,
-						PageContext pageContext,
-						String value)
+                                                PageContext pageContext,
+                                                String value)
   {
     if (frag == null)
       frag = new StaticJspFragmentSupport();
@@ -86,9 +86,9 @@ public class StaticJspFragmentSupport extends JspFragment {
   {
     try {
       if (out == null)
-	_pageContext.getOut().write(_value);
+        _pageContext.getOut().write(_value);
       else
-	out.write(_value);
+        out.write(_value);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

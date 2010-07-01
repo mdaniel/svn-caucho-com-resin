@@ -77,25 +77,25 @@ public class Trace extends AbstractStringExpr {
       NodeIterator iter = (NodeIterator) value;
 
       while (iter.hasNext()) {
-	Node subnode = iter.next();
+        Node subnode = iter.next();
 
-	XmlPrinter printer = new XmlPrinter(System.out);
+        XmlPrinter printer = new XmlPrinter(System.out);
 
-	try {
-	  printer.printPrettyXml(subnode);
-	} catch (IOException e) {
-	}
+        try {
+          printer.printPrettyXml(subnode);
+        } catch (IOException e) {
+        }
       }
     }
     else if (value instanceof Node) {
-	Node subnode = (Node) value;
+        Node subnode = (Node) value;
 
-	XmlPrinter printer = new XmlPrinter(System.out);
+        XmlPrinter printer = new XmlPrinter(System.out);
 
-	try {
-	  printer.printPrettyXml(subnode);
-	} catch (IOException e) {
-	}
+        try {
+          printer.printPrettyXml(subnode);
+        } catch (IOException e) {
+        }
     }
     else
       System.out.println(value);

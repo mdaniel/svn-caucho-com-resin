@@ -145,7 +145,7 @@ public class IfNetwork implements RequestPredicate {
       Boolean cacheValue = _cache.get(remoteAddr);
 
       if (cacheValue != null)
-	return cacheValue;
+        return cacheValue;
     }
 
     InetAddress addr = null;
@@ -163,8 +163,8 @@ public class IfNetwork implements RequestPredicate {
       InetNetwork net = _networkList.get(i);
       
       if (net.isMatch(addr)) {
-	isMatch = true;
-	break;
+        isMatch = true;
+        break;
       }
     }
     

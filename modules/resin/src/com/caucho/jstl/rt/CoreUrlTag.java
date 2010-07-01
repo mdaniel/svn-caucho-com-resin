@@ -131,8 +131,8 @@ public class CoreUrlTag extends TagSupport implements NameValueTag {
     throws JspException
   {
     if (context != null
-	&& context.length() != 0
-	&& ! context.startsWith("/"))
+        && context.length() != 0
+        && ! context.startsWith("/"))
       throw new JspException(L.l("URL context '{0}' must start with '/'",
                                  context));
     
@@ -156,10 +156,10 @@ public class CoreUrlTag extends TagSupport implements NameValueTag {
       request = (HttpServletRequest) pageContext.getRequest();
 
       if (context != null) {
-	if (context.length() > 1)
-	  value.append(context);
-	
-	value.append(url);
+        if (context.length() > 1)
+          value.append(context);
+
+        value.append(url);
       }
       else {
         value.append(request.getContextPath());
@@ -169,7 +169,7 @@ public class CoreUrlTag extends TagSupport implements NameValueTag {
     else {
       if (context != null) {
         value.append(context);
-	value.append(url);
+        value.append(url);
       }
       else
         value.append(url);
@@ -179,8 +179,8 @@ public class CoreUrlTag extends TagSupport implements NameValueTag {
   }
 
   public static CharBuffer addParam(CharBuffer url,
-				    String name, String value,
-				    String encoding)
+                                    String name, String value,
+                                    String encoding)
   {
     if (url.indexOf('?') < 0)
       url.append('?');
@@ -199,19 +199,19 @@ public class CoreUrlTag extends TagSupport implements NameValueTag {
    * Adds a parameter to the string, with the given encoding.
    */
   public static CharBuffer addEncodedString(CharBuffer cb,
-					    String value,
-					    String encoding)
+                                            String value,
+                                            String encoding)
   {
     if (encoding == null || encoding.equalsIgnoreCase("iso-8859-1"))
       return addEncodedLatin1(cb, value);
     else if (encoding.equalsIgnoreCase("utf8") ||
-	     encoding.equalsIgnoreCase("utf-8"))
+             encoding.equalsIgnoreCase("utf-8"))
       return addEncodedUTF8(cb, value);
     else {
       try {
-	cb.append(URLEncoder.encode(value, encoding));
+        cb.append(URLEncoder.encode(value, encoding));
       } catch (UnsupportedEncodingException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
       
       return cb;

@@ -53,12 +53,12 @@ public class DirVar {
       String file = env.getBaseUri();
 
       if (file != null) {
-	String dir = Vfs.lookup(file).getParent().getURL();
-	
-	return Vfs.decode(dir);
+        String dir = Vfs.lookup(file).getParent().getURL();
+
+        return Vfs.decode(dir);
       }
       else
-	return null;
+        return null;
     }
     else
       throw new IllegalStateException(L.l("__DIR__ is only available during configuration"));

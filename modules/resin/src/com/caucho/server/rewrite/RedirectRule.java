@@ -63,7 +63,7 @@ public class RedirectRule
 
   @Override
   public FilterChain dispatch(String uri,
-			      String queryString,
+                              String queryString,
                               FilterChain accept,
                               FilterChainMapper next)
   {

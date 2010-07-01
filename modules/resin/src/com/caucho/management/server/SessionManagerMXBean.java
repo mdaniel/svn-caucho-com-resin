@@ -162,7 +162,7 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
    * Returns the session save-mode.
    */
   @Description("The configured session persistence mode. The session save-mode is one of: " +
-	       "before-headers, after-request, on-shutdown")
+               "before-headers, after-request, on-shutdown")
   public String getSaveMode();
     
   /**

@@ -333,87 +333,87 @@ public class JavaGenerator extends Generator {
       Class cl = _tagMap.get(elt.getQName());
 
       if (cl != null) {
-	xslNode = (XslNode) cl.newInstance();
-	xslNode.setGenerator(this);
-	xslNode.setParent(_xslNode);
-	
-	xslNode.setStartLocation(((QAbstractNode) child).getBaseURI(),
-				 ((QAbstractNode) child).getFilename(),
-				 ((QAbstractNode) child).getLine());
+        xslNode = (XslNode) cl.newInstance();
+        xslNode.setGenerator(this);
+        xslNode.setParent(_xslNode);
 
-	QAttr attr = (QAttr) elt.getFirstAttribute();
-	for (; attr != null; attr = (QAttr) attr.getNextSibling()) {
-	  xslNode.addAttribute(attr.getQName(), attr.getNodeValue());
-	}
+        xslNode.setStartLocation(((QAbstractNode) child).getBaseURI(),
+                                 ((QAbstractNode) child).getFilename(),
+                                 ((QAbstractNode) child).getLine());
 
-	xslNode.endAttributes();
+        QAttr attr = (QAttr) elt.getFirstAttribute();
+        for (; attr != null; attr = (QAttr) attr.getNextSibling()) {
+          xslNode.addAttribute(attr.getQName(), attr.getNodeValue());
+        }
 
-	XslNode oldNode = _xslNode;
-	_xslNode = xslNode;
-	
-	Node node = elt.getFirstChild();
-	for (; node != null; node = node.getNextSibling()) {
-	  XslNode xslChild = createChild(node);
+        xslNode.endAttributes();
 
-	  if (xslChild != null)
-	    xslNode.addChild(xslChild);
-	}
+        XslNode oldNode = _xslNode;
+        _xslNode = xslNode;
 
-	xslNode.endElement();
+        Node node = elt.getFirstChild();
+        for (; node != null; node = node.getNextSibling()) {
+          XslNode xslChild = createChild(node);
 
-	_xslNode = oldNode;
+          if (xslChild != null)
+            xslNode.addChild(xslChild);
+        }
+
+        xslNode.endElement();
+
+        _xslNode = oldNode;
       }
       /*
       else if (elt.getNodeName().equals("jsp:decl") ||
-	       elt.getNodeName().equals("jsp:declaration") ||
-	       elt.getNodeName().startsWith("jsp:directive")) {
+               elt.getNodeName().equals("jsp:declaration") ||
+               elt.getNodeName().startsWith("jsp:directive")) {
       }
       */
       else if (child.getNodeName().startsWith("xsl:") &&
-	       ! XSLNS.equals(child.getNamespaceURI())) {
-	throw error(child, L.l("<{0}> has an xsl: prefix, but is not in the {1} namespace.  XSL requires an xmlns:xsl=\"{1}\" namespace attribute.",
-			       child.getNodeName(),
-			       XSLNS));
+               ! XSLNS.equals(child.getNamespaceURI())) {
+        throw error(child, L.l("<{0}> has an xsl: prefix, but is not in the {1} namespace.  XSL requires an xmlns:xsl=\"{1}\" namespace attribute.",
+                               child.getNodeName(),
+                               XSLNS));
       }
       else if (! XSLNS.equals(child.getNamespaceURI()) &&
-	       ! XTPNS.equals(child.getNamespaceURI())) {
-	xslNode = new XslElementNode(elt.getQName());
-	xslNode.setGenerator(this);
-	xslNode.setParent(_xslNode);
-	
-	xslNode.setStartLocation(((QAbstractNode) child).getBaseURI(),
-				 ((QAbstractNode) child).getFilename(),
-				 ((QAbstractNode) child).getLine());
+               ! XTPNS.equals(child.getNamespaceURI())) {
+        xslNode = new XslElementNode(elt.getQName());
+        xslNode.setGenerator(this);
+        xslNode.setParent(_xslNode);
 
-	QAttr attr = (QAttr) elt.getFirstAttribute();
-	for (; attr != null; attr = (QAttr) attr.getNextSibling())
-	  xslNode.addAttribute(attr.getQName(), attr.getNodeValue());
+        xslNode.setStartLocation(((QAbstractNode) child).getBaseURI(),
+                                 ((QAbstractNode) child).getFilename(),
+                                 ((QAbstractNode) child).getLine());
 
-	xslNode.endAttributes();
+        QAttr attr = (QAttr) elt.getFirstAttribute();
+        for (; attr != null; attr = (QAttr) attr.getNextSibling())
+          xslNode.addAttribute(attr.getQName(), attr.getNodeValue());
 
-	XslNode oldNode = _xslNode;
-	_xslNode = xslNode;
-	
-	Node node = elt.getFirstChild();
-	for (; node != null; node = node.getNextSibling()) {
-	  XslNode xslChild = createChild(node);
-	  
-	  xslNode.addChild(xslChild);
-	}
+        xslNode.endAttributes();
 
-	xslNode.endElement();
+        XslNode oldNode = _xslNode;
+        _xslNode = xslNode;
 
-	_xslNode = oldNode;
+        Node node = elt.getFirstChild();
+        for (; node != null; node = node.getNextSibling()) {
+          XslNode xslChild = createChild(node);
+
+          xslNode.addChild(xslChild);
+        }
+
+        xslNode.endElement();
+
+        _xslNode = oldNode;
       }
       else {
-	throw error(child, L.l("<{0}> is an unknown XSL tag.",
-			child.getNodeName()));
-	/*
-	  XslWrapperNode wrapNode = new XslWrapperNode();
-	  wrapNode.setNode(child);
-	  xslNode = wrapNode;
-	  xslNode.setGenerator(this);
-	*/
+        throw error(child, L.l("<{0}> is an unknown XSL tag.",
+                        child.getNodeName()));
+        /*
+          XslWrapperNode wrapNode = new XslWrapperNode();
+          wrapNode.setNode(child);
+          xslNode = wrapNode;
+          xslNode.setGenerator(this);
+        */
       }
     }
     else if (child instanceof Text) {
@@ -430,8 +430,8 @@ public class JavaGenerator extends Generator {
 
     if (xslNode != null) {
       xslNode.setStartLocation(((QAbstractNode) child).getBaseURI(),
-			       ((QAbstractNode) child).getFilename(),
-			       ((QAbstractNode) child).getLine());
+                               ((QAbstractNode) child).getFilename(),
+                               ((QAbstractNode) child).getLine());
     }
 
     return xslNode;
@@ -447,7 +447,7 @@ public class JavaGenerator extends Generator {
    * @param priority the template's priority
    */
   protected void printTemplate(Element absNode, String name, 
-			       String pattern, String mode, double priority)
+                               String pattern, String mode, double priority)
     throws Exception
   {
     throw new RuntimeException();
@@ -459,7 +459,7 @@ public class JavaGenerator extends Generator {
     
     if (! pattern.equals("")) {
       String fun = createTemplatePattern(name, pattern,
-					 mode, priority);
+                                         mode, priority);
       
       print("// '" + pattern.replace('\n', ' ') + "'");
       
@@ -475,7 +475,7 @@ public class JavaGenerator extends Generator {
       println();
       
       println("private void " + fun +
-	      "(XslWriter out, Node inputNode, Env env)");
+              "(XslWriter out, Node inputNode, Env env)");
       println("  throws Exception");
       println("{");
       pushDepth();
@@ -485,9 +485,9 @@ public class JavaGenerator extends Generator {
       println("int _xsl_top = env.getTop();");
 
       if (_isRawText)
-	println("boolean oldEscaping = out.disableEscaping(true);");
+        println("boolean oldEscaping = out.disableEscaping(true);");
       else
-	println("boolean oldEscaping = out.disableEscaping(false);");
+        println("boolean oldEscaping = out.disableEscaping(false);");
 
       String filename = node.getBaseURI();
       if (filename != null) {
@@ -504,13 +504,13 @@ public class JavaGenerator extends Generator {
       _unique = 0;
       
       if (node.getLocalName().equals("template") ||
-	  node.getLocalName().equals("xsl:template"))
+          node.getLocalName().equals("xsl:template"))
         generateChildren(node);
       else
         generateChild((QAbstractNode) node);
       
       if (! _isCacheable)
-	println("out.setNotCacheable();");
+        println("out.setNotCacheable();");
 
       println("out.disableEscaping(oldEscaping);");
       println("env.popToTop(_xsl_top);");
@@ -550,7 +550,7 @@ public class JavaGenerator extends Generator {
    * @return the name of the function
    */
   public String createTemplatePattern(String name, AbstractPattern match,
-				      String mode, double priority)
+                                      String mode, double priority)
     throws Exception
   {
     String tagName;
@@ -683,12 +683,12 @@ public class JavaGenerator extends Generator {
     if (_printLocation && filename != null && ! _isSpecial) {
       print("out.setLocation(");
       if (systemId != null) {
-	print("\"");
-	printString(systemId);
-	print("\"");
+        print("\"");
+        printString(systemId);
+        print("\"");
       }
       else
-	print("null");
+        print("null");
       print(", \"");
       printString(filename);
       println("\", " + line + ");");
@@ -718,8 +718,8 @@ public class JavaGenerator extends Generator {
 
       String []postSuffix = (String []) _namespaceAliases.get(namespace);
       if (postSuffix != null) {
-	prefix = postSuffix[0];
-	namespace = postSuffix[1];
+        prefix = postSuffix[0];
+        namespace = postSuffix[1];
       }
 
       else if (value.equals(XSLNS) && prefix.equals("xmlns"))
@@ -728,7 +728,7 @@ public class JavaGenerator extends Generator {
         return;
 
       if (_excludedNamespaces.get(namespace) != null)
-	namespace = null;
+        namespace = null;
       
       if ("".equals(prefix) && ("".equals(namespace) || namespace == null)) {
         String var = generateStringVar(value, elt);
@@ -828,13 +828,13 @@ public class JavaGenerator extends Generator {
       println("{");
       pushDepth();
       println("ArrayList _xsl_list = xslSort(node, env" +
-	      ", _select_patterns[" + addSelect(select) + "]" +
-	      ", _xsl_sorts[" + _sorts.size() + "]);");
+              ", _select_patterns[" + addSelect(select) + "]" +
+              ", _xsl_sorts[" + _sorts.size() + "]);");
       println(env + ".setContextSize(_xsl_list.size());");
       println("for (int _xsl_i = 0; _xsl_i < _xsl_list.size(); _xsl_i++) {");
       println("  " + env + ".setContextPosition(_xsl_i + 1);");
       println("  " + applyName + "(out, (Node) _xsl_list.get(_xsl_i)" + 
-	      ", " + env + ", " + min + ", " + max + ");");
+              ", " + env + ", " + min + ", " + max + ");");
       println("}");
       popDepth();
       println("}");
@@ -1110,12 +1110,12 @@ public class JavaGenerator extends Generator {
     String list = "_xsl_list" + _unique++;
     
     println("ArrayList " + list +
-	    " = xslSort(node, env" +
-	    ", _select_patterns[" + addSelect(select) + "]" + 
-	    ", _xsl_sorts[" + _sorts.size() + "]);");
+            " = xslSort(node, env" +
+            ", _select_patterns[" + addSelect(select) + "]" +
+            ", _xsl_sorts[" + _sorts.size() + "]);");
     println("env.setContextSize(" + list + ".size());");
     println("for (int " + pos + " = 1; " + pos +
-	    " <= " + list + ".size(); " + pos + "++) {");
+            " <= " + list + ".size(); " + pos + "++) {");
     pushLoop();
     pushDepth();
     println("Node " + getElement() + " = node;");
@@ -1218,7 +1218,7 @@ public class JavaGenerator extends Generator {
   void printNumber(String level,
                    AbstractPattern countPattern,
                    AbstractPattern fromPattern,
-		   XslNumberFormat format)
+                   XslNumberFormat format)
     throws Exception
   {
     if (level.equals("single"))
@@ -1318,16 +1318,16 @@ public class JavaGenerator extends Generator {
     for (; attr != null; attr = (Attr) attr.getNextSibling()) {
       if (isXSL && attr.getNodeName().equals("use-attribute-sets") ||
           ! isXSL && attr.getNodeName().equals("xsl:use-attribute-sets")) {
-	HashMap set = getAttributeSet(attr.getNodeValue());
-	if (set == null)
-	  continue;
-	Iterator iter = set.keySet().iterator();
-	while (iter.hasNext()) {
-	  String key = (String) iter.next();
-	  String value = (String) set.get(key);
+        HashMap set = getAttributeSet(attr.getNodeValue());
+        if (set == null)
+          continue;
+        Iterator iter = set.keySet().iterator();
+        while (iter.hasNext()) {
+          String key = (String) iter.next();
+          String value = (String) set.get(key);
           
           printAttributeValue(key, value, element);
-	}
+        }
       }
     }
   }
@@ -1355,12 +1355,12 @@ public class JavaGenerator extends Generator {
         XslAttributeSet newSet = _attributeSets.get(cb.toString());
 
         if (newSet != null) {
-	  ArrayList<XslAttribute> attrList = newSet.getAttributes();
+          ArrayList<XslAttribute> attrList = newSet.getAttributes();
 
-	  for (int j = 0; j < attrList.size(); j++) {
-	    XslAttribute attr = attrList.get(j);
+          for (int j = 0; j < attrList.size(); j++) {
+            XslAttribute attr = attrList.get(j);
 
-	    map.put(attr.getName(), attr.getValue());
+            map.put(attr.getName(), attr.getValue());
           }
         }
       }
@@ -1392,7 +1392,7 @@ public class JavaGenerator extends Generator {
         XslAttributeSet newSet = _attributeSets.get(cb.toString());
 
         if (newSet != null) {
-	  set.addAll(newSet.getAttributes());
+          set.addAll(newSet.getAttributes());
         }
       }
     }
@@ -1466,7 +1466,7 @@ public class JavaGenerator extends Generator {
   {
     for (int i = 0; i < _namespaces.size(); i++) {
       if (_namespaces.get(i).equals(namespace)) {
-	return i;
+        return i;
       }
     }
     
@@ -1660,19 +1660,19 @@ public class JavaGenerator extends Generator {
       case '\n':
       case '(':
       case ')':
-	break;
+        break;
 
       case ':':
       case '.':
       case '|':
-	newTag.append('_');
-	break;
+        newTag.append('_');
+        break;
 
       default:
-	if (ch >= 'a' && ch <= 'z' ||
-	    ch >= 'A' && ch <= 'Z' ||
-	    ch >= '0' && ch <= '9')
-	  newTag.append((char) ch);
+        if (ch >= 'a' && ch <= 'z' ||
+            ch >= 'A' && ch <= 'Z' ||
+            ch >= '0' && ch <= '9')
+          newTag.append((char) ch);
       }
     }
     tag = newTag.toString();
@@ -1686,8 +1686,8 @@ public class JavaGenerator extends Generator {
     while (true) {
       String subname = tag + i;
       if (_names.get(subname) == null) {
-	_names.put(subname, subname);
-	return subname;
+        _names.put(subname, subname);
+        return subname;
       }
 
       i++;
@@ -1698,14 +1698,14 @@ public class JavaGenerator extends Generator {
     throws Exception
   {
     print("_exprs[" + addExpr(expr) + "].evalBoolean(" + element + 
-	  ", " + getEnv() + ")");
+          ", " + getEnv() + ")");
   }
 
   public void printExprTest(int exprId, String element)
     throws Exception
   {
     print("_exprs[" + exprId + "].evalBoolean(" + element + 
-	  ", " + getEnv() + ")");
+          ", " + getEnv() + ")");
   }
 
   private boolean attributeHasSpecial(String string)
@@ -1716,18 +1716,18 @@ public class JavaGenerator extends Generator {
       char ch = string.charAt(i);
 
       if (ch == '{' && i + 1 < length) {
-	// {{ is treated as a single {
-	if (string.charAt(i + 1) == '{') {
-	  i++;
+        // {{ is treated as a single {
+        if (string.charAt(i + 1) == '{') {
+          i++;
           continue;
-	}
+        }
 
         return true;
       }
       // <#= interpolates
       else if (i + 2 < length && ch == '<' && 
-	       string.charAt(i + 1) == '#' &&
-	       string.charAt(i + 2) == '=')
+               string.charAt(i + 1) == '#' &&
+               string.charAt(i + 2) == '=')
         return true;
     }
 
@@ -1755,112 +1755,112 @@ public class JavaGenerator extends Generator {
       char ch = string.charAt(i);
 
       if (ch == '\n') {
-	cb.append("\\n");
+        cb.append("\\n");
       }
       else if (ch == '"') {
-	cb.append("\\\"");
+        cb.append("\\\"");
       }
       else if (ch == '{' && i + 1 < length) {
-	// {{ is treated as a single {
-	if (string.charAt(i + 1) == '{') {
-	  cb.append('{');
-	  i++;
-	}
-	// the value is computed from an XPath expr
-	else {
-	  // print the gathered text if any
-	  if (mode == ',') {
-	    if (cb.length() > 0)
-	      println("out.print(\"" + cb.toString() + "\");");
-	  }
-	  else {
-	    if (! first)
-	      print((char) mode);
+        // {{ is treated as a single {
+        if (string.charAt(i + 1) == '{') {
+          cb.append('{');
+          i++;
+        }
+        // the value is computed from an XPath expr
+        else {
+          // print the gathered text if any
+          if (mode == ',') {
+            if (cb.length() > 0)
+              println("out.print(\"" + cb.toString() + "\");");
+          }
+          else {
+            if (! first)
+              print((char) mode);
 
-	    if (cb.length() > 0) {
-	      print("\"");
-	      print(cb.toString());
-	      print("\"");
-	      print((char) mode);
-	    }
-	  }
+            if (cb.length() > 0) {
+              print("\"");
+              print(cb.toString());
+              print("\"");
+              print((char) mode);
+            }
+          }
 
-	  // scan the contents of '{' ... '}'
-	  cb.clear();
-	  for (i++; i < length && string.charAt(i) != '}'; i++)
-	    cb.append(string.charAt(i));
+          // scan the contents of '{' ... '}'
+          cb.clear();
+          for (i++; i < length && string.charAt(i) != '}'; i++)
+            cb.append(string.charAt(i));
 
-	  // and add the results
-	  if (mode == ',')
-	    printStringExpr(cb.toString(), elt);
-	  else
-	    stringExpr(cb.toString(), elt);
-	  cb.clear();
-	  first = false;
-	}
+          // and add the results
+          if (mode == ',')
+            printStringExpr(cb.toString(), elt);
+          else
+            stringExpr(cb.toString(), elt);
+          cb.clear();
+          first = false;
+        }
       }
       // }} is treated as a single }
       else if (ch == '}' && i + 1 < length) {
-	if (string.charAt(i + 1) == '}') {
-	  cb.append('}');
-	  i++;
-	}
-	else
-	  cb.append('}');
+        if (string.charAt(i + 1) == '}') {
+          cb.append('}');
+          i++;
+        }
+        else
+          cb.append('}');
       }
       // <#= interpolates
       else if (i + 2 < length && ch == '<' && 
-	       string.charAt(i + 1) == '#' &&
-	       string.charAt(i + 2) == '=') {
-	// print the gathered text if any
-	if (mode == ',') {
-	  if (cb.length() > 0)
-	    println("out.print(\"" + cb.toString() + "\");");
-	}
-	else {
-	  if (! first)
-	    print((char) mode);
+               string.charAt(i + 1) == '#' &&
+               string.charAt(i + 2) == '=') {
+        // print the gathered text if any
+        if (mode == ',') {
+          if (cb.length() > 0)
+            println("out.print(\"" + cb.toString() + "\");");
+        }
+        else {
+          if (! first)
+            print((char) mode);
 
-	  if (cb.length() > 0) {
-	    print("\"");
-	    print(cb.toString());
-	    print("\"");
-	    print((char) mode);
-	  }
-	}
+          if (cb.length() > 0) {
+            print("\"");
+            print(cb.toString());
+            print("\"");
+            print((char) mode);
+          }
+        }
 
-	// scan the contents of '{' ... '}'
-	cb.clear();
-	for (i += 3;
-	     i + 1 < length && string.charAt(i) != '#' &&
-	       string.charAt(i + 1) != '>';
-	     i++)
-	  cb.append(string.charAt(i));
+        // scan the contents of '{' ... '}'
+        cb.clear();
+        for (i += 3;
+             i + 1 < length && string.charAt(i) != '#' &&
+               string.charAt(i + 1) != '>';
+             i++)
+          cb.append(string.charAt(i));
 
-	i++;
-	
-	// and add the results
-	if (mode == ',')
-	  println("out.print(" + cb + ");");
-	else {
-	  print("(" + cb + ")");
-	}
-	cb.clear();
-	first = false;
+        i++;
+
+        // and add the results
+        if (mode == ',')
+          println("out.print(" + cb + ");");
+        else {
+          print("(" + cb + ")");
+        }
+        cb.clear();
+        first = false;
       }
       else
-	cb.append((char) ch);
+        cb.append((char) ch);
     }
 
     // add any trailing text
     if (cb.length() > 0) {
       if (mode == ',') 
-	println("out.print(\"" + cb + "\");");
+        println("out.print(\"" + cb + "\");");
       else {
-	if (! first)
-	  print((char) mode);
+        if (! first)
+          print((char) mode);
 
-	print("\"" + cb + "\"");
+        print("\"" + cb + "\"");
       }
     } else if (first && mode == '+')
       print("\"\"");
@@ -1913,69 +1913,69 @@ public class JavaGenerator extends Generator {
       char ch = string.charAt(i);
 
       if (ch == '\n') {
-	cb.append("\\n");
+        cb.append("\\n");
       }
       else if (ch == '"') {
-	cb.append("\\\"");
+        cb.append("\\\"");
       }
       else if (ch == '{' && i + 1 < length) {
-	// {{ is treated as a single {
-	if (string.charAt(i + 1) == '{') {
-	  cb.append('{');
-	  i++;
-	}
-	// the value is computed from an XPath expr
-	else {
-	  // print the gathered text if any
+        // {{ is treated as a single {
+        if (string.charAt(i + 1) == '{') {
+          cb.append('{');
+          i++;
+        }
+        // the value is computed from an XPath expr
+        else {
+          // print the gathered text if any
           if (cb.length() > 0)
             println(cbVar + ".append(\"" + cb.toString() + "\");");
 
-	  // scan the contents of '{' ... '}'
-	  cb.clear();
-	  for (i++; i < length && string.charAt(i) != '}'; i++)
-	    cb.append(string.charAt(i));
+          // scan the contents of '{' ... '}'
+          cb.clear();
+          for (i++; i < length && string.charAt(i) != '}'; i++)
+            cb.append(string.charAt(i));
 
-	  // and add the results
+          // and add the results
           addStringExpr(cbVar, cb.toString(), elt, false);
           
-	  cb.clear();
-	  first = false;
-	}
+          cb.clear();
+          first = false;
+        }
       }
       // }} is treated as a single }
       else if (ch == '}' && i + 1 < length) {
-	if (string.charAt(i + 1) == '}') {
-	  cb.append('}');
-	  i++;
-	}
-	else
-	  cb.append('}');
+        if (string.charAt(i + 1) == '}') {
+          cb.append('}');
+          i++;
+        }
+        else
+          cb.append('}');
       }
       // <#= interpolates
       else if (i + 2 < length && ch == '<' && 
-	       string.charAt(i + 1) == '#' &&
-	       string.charAt(i + 2) == '=') {
-	// print the gathered text if any
+               string.charAt(i + 1) == '#' &&
+               string.charAt(i + 2) == '=') {
+        // print the gathered text if any
         if (cb.length() > 0)
           println(cbVar + ".append(\"" + cb.toString() + "\");");
 
-	// scan the contents of '<#=' ... '#>'
-	cb.clear();
-	for (i += 3;
-	     i + 1 < length && string.charAt(i) != '#' &&
-	       string.charAt(i + 1) != '>';
-	     i++)
-	  cb.append(string.charAt(i));
+        // scan the contents of '<#=' ... '#>'
+        cb.clear();
+        for (i += 3;
+             i + 1 < length && string.charAt(i) != '#' &&
+               string.charAt(i + 1) != '>';
+             i++)
+          cb.append(string.charAt(i));
 
-	i++;
-	
-	// and add the results
+        i++;
+
+        // and add the results
         println(cbVar + ".append(" + cb + ");");
-	cb.clear();
-	first = false;
+        cb.clear();
+        first = false;
       }
       else
-	cb.append((char) ch);
+        cb.append((char) ch);
     }
 
     // add any trailing text
@@ -2475,7 +2475,7 @@ public class JavaGenerator extends Generator {
     for (int i = 0; i < _depends.size(); i++) {
       Path path = _depends.get(i);
       if (path.getLastModified() > lastModified)
-	lastModified = path.getLastModified();
+        lastModified = path.getLastModified();
     }
 
     return lastModified;
@@ -2508,17 +2508,17 @@ public class JavaGenerator extends Generator {
             url.startsWith("http://www.w3.org/1999/XSL/Transform") ||
             url.startsWith("http://www.w3.org/XML/2000/xmlns") ||
             url.startsWith("http://www.w3.org/2000/xmlns") ||
-	    url.equals(XTPNS))
+            url.equals(XTPNS))
           continue;
         else if (_excludedNamespaces.get(url) != null)
           continue;
         else if (_namespaceAliases.get(url) != null)
           continue;
 
-	if (prefix == null)
-	  println("out.addNamespace(\"\", \"" + url + "\");");
-	else
-	  println("out.addNamespace(\"" + prefix + "\", \"" + url + "\");");
+        if (prefix == null)
+          println("out.addNamespace(\"\", \"" + url + "\");");
+        else
+          println("out.addNamespace(\"" + prefix + "\", \"" + url + "\");");
       }
     }
 
@@ -2533,14 +2533,14 @@ public class JavaGenerator extends Generator {
       /*
       if ("variable".equals(getXslLocal(elt)) ||
           "assign".equals(getXslLocal(elt))) {
-	String name = elt.getAttribute("name");
-	String expr = elt.getAttribute("select");
-	print("env.setGlobal(\"" + name + "\", ");
-	if (! expr.equals(""))
-	  printVariableValue(parseExpr(expr));
-	else
-	  printVariableValue(elt);
-	println(");");
+        String name = elt.getAttribute("name");
+        String expr = elt.getAttribute("select");
+        print("env.setGlobal(\"" + name + "\", ");
+        if (! expr.equals(""))
+          printVariableValue(parseExpr(expr));
+        else
+          printVariableValue(elt);
+        println(");");
       }
       else if ("param".equals(getXslLocal(elt))) {
         String name = elt.getAttribute("name");
@@ -2618,11 +2618,11 @@ public class JavaGenerator extends Generator {
       Path path = _depends.get(i);
       
       if (path.canRead() && ! path.isDirectory()) {
-	Depend depend = new Depend(path);
+        Depend depend = new Depend(path);
  
-	print("addDepend(new com.caucho.vfs.Depend(pwd.lookup(\"");
-	printString(path.getRelativePath());
-	println("\"), " + depend.getDigest() + "L));");
+        print("addDepend(new com.caucho.vfs.Depend(pwd.lookup(\"");
+        printString(path.getRelativePath());
+        println("\"), " + depend.getDigest() + "L));");
       }
     }
 
@@ -2740,9 +2740,9 @@ public class JavaGenerator extends Generator {
       for (int j = 0; j < sorts.length; j++) {
         Sort sort = sorts[j];
 
-	Expr lang = sort.getLang();
-	Expr caseOrder = sort.getCaseOrder();
-	
+        Expr lang = sort.getLang();
+        Expr caseOrder = sort.getCaseOrder();
+
         if (lang != null || caseOrder != null) {
           print("new com.caucho.xsl.Sort(\"" + sort.getExpr() + "\", " +
                 "\"" + sort.getAscending() + "\", " +
@@ -2914,7 +2914,7 @@ public class JavaGenerator extends Generator {
       Macro macro = _macros.get(i);
 
       println("void " + getMacroName(macro.getName()) +
-	      "(XslWriter out, Node inputNode, Env env)");
+              "(XslWriter out, Node inputNode, Env env)");
       println("  throws Exception");
       println("{");
       pushDepth();
@@ -3391,9 +3391,9 @@ public class JavaGenerator extends Generator {
       ch = name.charAt(i);
       
       if (Character.isJavaIdentifierPart(ch))
-	cb.append(ch);
+        cb.append(ch);
       else {
-	cb.append("_");
+        cb.append("_");
         cb.append((char) ((ch & 0xf) + 'a'));
         cb.append((char) ((ch / 16 & 0xf) + 'a'));
       }
@@ -3438,18 +3438,18 @@ public class JavaGenerator extends Generator {
     
     _tagMap.put(new QName("xsl", "attribute", XSLNS), XslAttribute.class);
     _tagMap.put(new QName("xsl", "attribute-set", XSLNS),
-		XslAttributeSet.class);
+                XslAttributeSet.class);
     _tagMap.put(new QName("xsl", "apply-imports", XSLNS),
-		XslApplyImports.class);
+                XslApplyImports.class);
     _tagMap.put(new QName("xsl", "apply-templates", XSLNS),
-		XslApplyTemplates.class);
+                XslApplyTemplates.class);
     _tagMap.put(new QName("xsl", "call-template", XSLNS), XslCallTemplate.class);
     _tagMap.put(new QName("xsl", "choose", XSLNS), XslChoose.class);
     _tagMap.put(new QName("xsl", "comment", XSLNS), XslComment.class);
     _tagMap.put(new QName("xsl", "copy", XSLNS), XslCopy.class);
     _tagMap.put(new QName("xsl", "copy-of", XSLNS), XslCopyOf.class);
     _tagMap.put(new QName("xsl", "decimal-format", XSLNS),
-		XslDecimalFormat.class);
+                XslDecimalFormat.class);
     _tagMap.put(new QName("xsl", "element", XSLNS), XslElement.class);
     _tagMap.put(new QName("xsl", "for-each", XSLNS), XslForEach.class);
     _tagMap.put(new QName("xsl", "if", XSLNS), XslIf.class);
@@ -3458,13 +3458,13 @@ public class JavaGenerator extends Generator {
     _tagMap.put(new QName("xsl", "key", XSLNS), XslKey.class);
     _tagMap.put(new QName("xsl", "message", XSLNS), XslMessage.class);
     _tagMap.put(new QName("xsl", "namespace-alias", XSLNS),
-		XslNamespaceAlias.class);
+                XslNamespaceAlias.class);
     _tagMap.put(new QName("xsl", "number", XSLNS), XslNumber.class);
     _tagMap.put(new QName("xsl", "otherwise", XSLNS), XslOtherwise.class);
     _tagMap.put(new QName("xsl", "output", XSLNS), XslOutput.class);
     _tagMap.put(new QName("xsl", "param", XSLNS), XslParam.class);
     _tagMap.put(new QName("xsl", "processing-instruction", XSLNS),
-		XslProcessingInstruction.class);
+                XslProcessingInstruction.class);
     _tagMap.put(new QName("xsl", "sort", XSLNS), XslSort.class);
     _tagMap.put(new QName("xsl", "stylesheet", XSLNS), XslStylesheet.class);
     _tagMap.put(new QName("xsl", "text", XSLNS), XslText.class);
@@ -3475,38 +3475,38 @@ public class JavaGenerator extends Generator {
     _tagMap.put(new QName("xsl", "with-param", XSLNS), XslWithParam.class);
     
     _tagMap.put(new QName("xsl", "template", XSLNS),
-		XslTemplate.class);
+                XslTemplate.class);
     _tagMap.put(new QName("xsl", "strip-space", XSLNS),
-		XslStripSpace.class);
+                XslStripSpace.class);
     _tagMap.put(new QName("xsl", "preserve-space", XSLNS),
-		XslPreserveSpace.class);
+                XslPreserveSpace.class);
     _tagMap.put(new QName("xsl", "result-document", XSLNS),
-		XslResultDocument.class);
+                XslResultDocument.class);
     
     _tagMap.put(new QName("xtp", "expression", XTPNS),
-		XtpExpression.class);
+                XtpExpression.class);
     _tagMap.put(new QName("xtp:expression", null), XtpExpression.class);
     _tagMap.put(new QName("xtp", "eval", XTPNS), XtpExpression.class);
     _tagMap.put(new QName("xtp:eval", null), XtpExpression.class);
     _tagMap.put(new QName("xtp", "expr", XTPNS), XtpExpression.class);
     _tagMap.put(new QName("xtp:expr", null), XtpExpression.class);
     _tagMap.put(new QName("xtp", "scriptlet", XTPNS),
-		XtpScriptlet.class);
+                XtpScriptlet.class);
     _tagMap.put(new QName("xtp:scriptlet", null), XtpScriptlet.class);
     _tagMap.put(new QName("xtp", "declaration", XTPNS),
-		XtpDeclaration.class);
+                XtpDeclaration.class);
     _tagMap.put(new QName("xtp", "decl", XTPNS),
-		XtpDeclaration.class);
+                XtpDeclaration.class);
     _tagMap.put(new QName("xtp:declaration", null), XtpDeclaration.class);
     _tagMap.put(new QName("xtp:decl", null), XtpDeclaration.class);
     _tagMap.put(new QName("xtp:directive.page", null), XtpDirectivePage.class);
     _tagMap.put(new QName("xtp", "directive.page", XTPNS),
-		XtpDirectivePage.class);
+                XtpDirectivePage.class);
     _tagMap.put(new QName("xtp:directive.cache", null), XtpDirectiveCache.class);
     _tagMap.put(new QName("xtp", "directive.cache", XTPNS),
-		XtpDirectiveCache.class);
+                XtpDirectiveCache.class);
     _tagMap.put(new QName("xtp:assign", null), XslVariable.class);
     _tagMap.put(new QName("xtp", "assign", XTPNS),
-		XslVariable.class);
+                XslVariable.class);
   }
 }

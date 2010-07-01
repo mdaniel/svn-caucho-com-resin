@@ -68,7 +68,7 @@ public class ValueExpr extends Expr {
       ValueExpression fieldExpr = gen.createField(field);
 
       if (fieldExpr != null)
-	return new ValueExpr(field, fieldExpr);
+        return new ValueExpr(field, fieldExpr);
     }
     
     Expr arrayExpr = createField(new StringLiteral(field));

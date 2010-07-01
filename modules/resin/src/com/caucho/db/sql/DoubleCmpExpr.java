@@ -84,39 +84,39 @@ class DoubleCmpExpr extends Expr {
     switch (_op) {
     case Parser.LT:
       if (_left.evalDouble(context) < _right.evalDouble(context))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
     
     case Parser.LE:
       if (_left.evalDouble(context) <= _right.evalDouble(context))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
     
     case Parser.GT:
       if (_left.evalDouble(context) > _right.evalDouble(context))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
     
     case Parser.GE:
       if (_left.evalDouble(context) >= _right.evalDouble(context))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
     
     case Parser.NE:
       if (_left.evalDouble(context) != _right.evalDouble(context))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
     
     case Parser.EQ:
       if (_left.evalDouble(context) == _right.evalDouble(context))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
 
     default:
       throw new SQLException("can't compare");

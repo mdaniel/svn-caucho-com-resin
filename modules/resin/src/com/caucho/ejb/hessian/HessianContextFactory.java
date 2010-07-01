@@ -68,10 +68,10 @@ public class HessianContextFactory implements InitialContextFactory {
       /* XXX: needs replacement
       HessianClientContainer client;
       try {
-	client = new HessianClientContainer(model.getURLPrefix());
-	client.setBasicAuthentication(auth);
+        client = new HessianClientContainer(model.getURLPrefix());
+        client.setBasicAuthentication(auth);
       } catch (ConfigException e) {
-	throw new NamingException(e.toString());
+        throw new NamingException(e.toString());
       }
 
       model.setClientContainer(client);

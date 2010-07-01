@@ -65,7 +65,7 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
 
     if (lockTimeoutUnit != null) {
       _lockTimeout = lockTimeout;
-      _lockTimeoutUnit = lockTimeoutUnit;    	
+      _lockTimeoutUnit = lockTimeoutUnit;
     } else {
       _lockTimeout = DEFAULT_TIMEOUT;
       _lockTimeoutUnit = TimeUnit.MILLISECONDS;
@@ -109,8 +109,8 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
                       + ");");
         } else {
             // XXX: This should probably be put behind the lock utility as well,
-        	// mostly to maintain code symmetry.
-        	out.println("_readWriteLock.readLock().lock();");
+                // mostly to maintain code symmetry.
+                out.println("_readWriteLock.readLock().lock();");
         }
         break;
 
@@ -144,14 +144,14 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
       case READ:
         out.println();
         // XXX: This should probably be put behind the lock utility as well,
-    	// mostly to maintain code symmetry.
+            // mostly to maintain code symmetry.
         out.println("_readWriteLock.readLock().unlock();");
 
         break;
       case WRITE:
         out.println();
         // XXX: This should probably be put behind the lock utility as well,
-    	// mostly to maintain code symmetry.
+            // mostly to maintain code symmetry.
         out.println("_readWriteLock.writeLock().unlock();");
         break;
       }

@@ -60,43 +60,43 @@ public interface Workspace {
    */
   public void copy(String srcAbsPath, String destAbsPath)
     throws ConstraintViolationException,
-	   VersionException,
-	   AccessDeniedException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   LockException,
-	   RepositoryException;
+           VersionException,
+           AccessDeniedException,
+           PathNotFoundException,
+           ItemExistsException,
+           LockException,
+           RepositoryException;
   
   /**
    * Copy from one node to another, starting in another workspace
    */
   public void copy(String srcWorkspace,
-		   String srcAbsPath,
-		   String destAbsPath)
+                   String srcAbsPath,
+                   String destAbsPath)
     throws NoSuchWorkspaceException,
-	   ConstraintViolationException,
-	   VersionException,
-	   AccessDeniedException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   LockException,
-	   RepositoryException;
+           ConstraintViolationException,
+           VersionException,
+           AccessDeniedException,
+           PathNotFoundException,
+           ItemExistsException,
+           LockException,
+           RepositoryException;
   
   /**
    * Clones a node from another workspace.
    */
   public void clone(String srcWorkspace,
-		    String srcAbsPath,
-		    String destAbsPath,
-		    boolean removeExisting)
+                    String srcAbsPath,
+                    String destAbsPath,
+                    boolean removeExisting)
     throws NoSuchWorkspaceException,
-	   ConstraintViolationException,
-	   VersionException,
-	   AccessDeniedException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   LockException,
-	   RepositoryException;
+           ConstraintViolationException,
+           VersionException,
+           AccessDeniedException,
+           PathNotFoundException,
+           ItemExistsException,
+           LockException,
+           RepositoryException;
   
 
   /**
@@ -104,23 +104,23 @@ public interface Workspace {
    */
   public void move(String srcAbsPath, String destAbsPath)
     throws ConstraintViolationException,
-	   VersionException,
-	   AccessDeniedException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   LockException,
-	   RepositoryException;
+           VersionException,
+           AccessDeniedException,
+           PathNotFoundException,
+           ItemExistsException,
+           LockException,
+           RepositoryException;
   
   /**
    * Restores from given versions.
    */
   public void restore(Version[] versions, boolean removeExisting)
     throws ItemExistsException,
-	   UnsupportedRepositoryOperationException,
-	   VersionException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException;
+           UnsupportedRepositoryOperationException,
+           VersionException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException;
   
   /**
    * Returns the query manager.
@@ -145,7 +145,7 @@ public interface Workspace {
    */
   public ObservationManager getObservationManager()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException;
+           RepositoryException;
   
   /**
    * Returns the workspace names.
@@ -157,26 +157,26 @@ public interface Workspace {
    * Returns a handler for importing data.
    */
   public ContentHandler getImportContentHandler(String parentAbsPath,
-						int uuidBehavior)
+                                                int uuidBehavior)
     throws PathNotFoundException,
-	   ConstraintViolationException,
-	   VersionException,
-	   LockException,
-	   AccessDeniedException,
-	   RepositoryException;
+           ConstraintViolationException,
+           VersionException,
+           LockException,
+           AccessDeniedException,
+           RepositoryException;
   
   /**
    * Import based on XML.
    */
   public void importXML(String parentAbsPath,
-			InputStream in,
-			int uuidBehavior)
+                        InputStream in,
+                        int uuidBehavior)
     throws IOException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   ConstraintViolationException,
-	   InvalidSerializedDataException,
-	   LockException,
-	   AccessDeniedException,
-	   RepositoryException;
+           PathNotFoundException,
+           ItemExistsException,
+           ConstraintViolationException,
+           InvalidSerializedDataException,
+           LockException,
+           AccessDeniedException,
+           RepositoryException;
 }

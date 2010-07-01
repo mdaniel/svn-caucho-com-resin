@@ -126,13 +126,13 @@ public class SimpleTagSupport implements SimpleTag {
       if (tag == null)
         return null;
       else if (tag instanceof TagAdapter) {
-	TagAdapter adapter = (TagAdapter) tag;
+        TagAdapter adapter = (TagAdapter) tag;
 
-	if (cl.isAssignableFrom(adapter.getAdaptee().getClass()))
-	  return adapter.getAdaptee();
+        if (cl.isAssignableFrom(adapter.getAdaptee().getClass()))
+          return adapter.getAdaptee();
       }
       else if (cl.isAssignableFrom(tag.getClass()))
-	return tag;
+        return tag;
     }
 
     return null;

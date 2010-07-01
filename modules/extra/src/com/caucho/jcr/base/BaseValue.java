@@ -46,44 +46,44 @@ abstract public class BaseValue implements Value {
   
   abstract public String getString()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException;
+           IllegalStateException,
+           RepositoryException;
   
   public InputStream getStream()
     throws IllegalStateException,
-	   RepositoryException
+           RepositoryException
   {
     throw new IllegalStateException(getClass().getName());
   }
   
   public long getLong()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException
+           IllegalStateException,
+           RepositoryException
   {
     return Long.parseLong(getString());
   }
   
   public double getDouble()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException
+           IllegalStateException,
+           RepositoryException
   {
     return Double.parseDouble(getString());
   }
   
   public Calendar getDate()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException
+           IllegalStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
   public boolean getBoolean()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException
+           IllegalStateException,
+           RepositoryException
   {
     return ! "false".equals(getString());
   }

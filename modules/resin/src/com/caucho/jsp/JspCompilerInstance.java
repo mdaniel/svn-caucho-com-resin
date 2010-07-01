@@ -253,8 +253,8 @@ public class JspCompilerInstance {
       appDir = app.getAppDir();
 
     if (app != null && app.hasPre23Config()
-	&& _parseState.getELIgnoredDefault() == null
-	&& ! _parseState.isXml()) { // jsp/100a 
+        && _parseState.getELIgnoredDefault() == null
+        && ! _parseState.isXml()) { // jsp/100a
       _parseState.setELIgnoredDefault(true);
     }
 
@@ -270,7 +270,7 @@ public class JspCompilerInstance {
       _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
 
       if (_jspPropertyGroup != null) {
-	jspList.add(_jspPropertyGroup);
+        jspList.add(_jspPropertyGroup);
       }
     }
 
@@ -278,21 +278,21 @@ public class JspCompilerInstance {
       _jspPropertyGroup = app.getJsp();
       
       if (_jspPropertyGroup != null)
-	jspList.add(_jspPropertyGroup);
+        jspList.add(_jspPropertyGroup);
     }
 
     if (_jspPropertyGroup == null) {
       _jspPropertyGroup = _jspCompiler.getJspPropertyGroup();
       
       if (_jspPropertyGroup != null)
-	jspList.add(_jspPropertyGroup);
+        jspList.add(_jspPropertyGroup);
     }
 
     if (jspConfig != null) {
       jspList.addAll(jspConfig.findJspPropertyGroupList(_uri));
 
       if (_parseState.getELIgnoredDefault() == null)
-	_parseState.setELIgnoredDefault(false);
+        _parseState.setELIgnoredDefault(false);
     }
 
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
@@ -328,25 +328,25 @@ public class JspCompilerInstance {
       _parseState.setScriptingInvalid(jspPropertyGroup.isScriptingInvalid());
 
       if (jspPropertyGroup.isELIgnored() != null) {
-	_parseState.setELIgnored(Boolean.TRUE.equals(jspPropertyGroup.isELIgnored()));
+        _parseState.setELIgnored(Boolean.TRUE.equals(jspPropertyGroup.isELIgnored()));
       }
       
       _parseState.setVelocityEnabled(jspPropertyGroup.isVelocityEnabled());
       _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
       
       if (Boolean.TRUE.equals(jspPropertyGroup.isXml()))
-	_parseState.setXml(true);
+        _parseState.setXml(true);
       
       if (Boolean.FALSE.equals(jspPropertyGroup.isXml())) {
-	_parseState.setXml(false);
-	_parseState.setForbidXml(true);
+        _parseState.setXml(false);
+        _parseState.setForbidXml(true);
       }
 
       if (jspPropertyGroup.getPageEncoding() != null) {
-	try {
-	  _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
-	} catch (JspParseException e) {
-	}
+        try {
+          _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
+        } catch (JspParseException e) {
+        }
       }
 
       pageConfig.setStaticEncoding(jspPropertyGroup.isStaticEncoding());
@@ -416,7 +416,7 @@ public class JspCompilerInstance {
 
       boolean isAutoCompile = true;
       if (_jspPropertyGroup != null)
-	isAutoCompile = _jspPropertyGroup.isAutoCompile();
+        isAutoCompile = _jspPropertyGroup.isAutoCompile();
 
       Page page;
       if (! generator.isStatic()) {
@@ -438,18 +438,18 @@ public class JspCompilerInstance {
       throw e;
     } catch (SAXException e) {
       if (e.getCause() instanceof JspParseException) {
-	JspParseException subE = (JspParseException) e.getCause();
+        JspParseException subE = (JspParseException) e.getCause();
 
-	subE.setLineMap(lineMap);
-	subE.setErrorPage(_parseState.getErrorPage());
-	throw subE;
+        subE.setLineMap(lineMap);
+        subE.setErrorPage(_parseState.getErrorPage());
+        throw subE;
       }
       else {
-	JspParseException exn = new JspParseException(e);
-	exn.setErrorPage(_parseState.getErrorPage());
-	exn.setLineMap(lineMap);
+        JspParseException exn = new JspParseException(e);
+        exn.setErrorPage(_parseState.getErrorPage());
+        exn.setLineMap(lineMap);
 
-	throw exn;
+        throw exn;
       }
     } catch (FileNotFoundException e) {
       throw e;
@@ -481,7 +481,7 @@ public class JspCompilerInstance {
       generator.setJspCompilerInstance(this);
 
       for (int i = 0; i < _dependList.size(); i++)
-	generator.addDepend(_dependList.get(i));
+        generator.addDepend(_dependList.get(i));
 
       generator.validate();
 
@@ -508,60 +508,60 @@ public class JspCompilerInstance {
       _parser.getParseState().setBuilder(_jspBuilder);
 
       for (String prelude : _preludeList) {
-	parseState.setXml(false);
-	parseState.setForbidXml(false);
-	_parser.parse(parseState.getResourceManager().resolvePath(prelude),
-		      prelude);
+        parseState.setXml(false);
+        parseState.setForbidXml(false);
+        _parser.parse(parseState.getResourceManager().resolvePath(prelude),
+                      prelude);
       }
       
       _parser.getParseState().setXml(isXml);
       _parser.getParseState().setForbidXml(isForbidXml);
 
       if (isXml) {
-	if (_parseState.getELIgnoredDefault() == null)
-	  _parseState.setELIgnoredDefault(false);
-	
-	Xml xml = new Xml();
-	_parseState.setXml(xml);
-	xml.setContentHandler(new JspContentHandler(_jspBuilder));
-	_jspPath.setUserPath(_uri);
-	xml.setNamespaceAware(true);
-	xml.setDtdValidating(true);
-	xml.parse(_jspPath);
+        if (_parseState.getELIgnoredDefault() == null)
+          _parseState.setELIgnoredDefault(false);
+
+        Xml xml = new Xml();
+        _parseState.setXml(xml);
+        xml.setContentHandler(new JspContentHandler(_jspBuilder));
+        _jspPath.setUserPath(_uri);
+        xml.setNamespaceAware(true);
+        xml.setDtdValidating(true);
+        xml.parse(_jspPath);
       }
       else {
-	WebApp app = _jspCompiler.getWebApp();
+        WebApp app = _jspCompiler.getWebApp();
 
-	// jsp/0135
-	if (app != null && app.hasPre23Config()) {
-	  if (_parseState.getELIgnoredDefault() == null)
-	    _parseState.setELIgnoredDefault(true);
-	}
-	
-	_parser.parse(_jspPath, _uri);
+        // jsp/0135
+        if (app != null && app.hasPre23Config()) {
+          if (_parseState.getELIgnoredDefault() == null)
+            _parseState.setELIgnoredDefault(true);
+        }
+
+        _parser.parse(_jspPath, _uri);
       }
 
       for (String coda : _codaList) {
-	parseState.setXml(false);
-	parseState.setForbidXml(false);
-	_parser.parse(parseState.getResourceManager().resolvePath(coda),
-		      coda);
+        parseState.setXml(false);
+        parseState.setForbidXml(false);
+        _parser.parse(parseState.getResourceManager().resolvePath(coda),
+                      coda);
       }
     } catch (JspParseException e) {
       e.setErrorPage(_parseState.getErrorPage());
       throw e;
     } catch (SAXException e) {
       if (e.getCause() instanceof JspParseException) {
-	JspParseException subE = (JspParseException) e.getCause();
+        JspParseException subE = (JspParseException) e.getCause();
 
-	subE.setErrorPage(_parseState.getErrorPage());
-	throw subE;
+        subE.setErrorPage(_parseState.getErrorPage());
+        throw subE;
       }
       else {
-	JspParseException exn = new JspParseException(e);
-	exn.setErrorPage(_parseState.getErrorPage());
+        JspParseException exn = new JspParseException(e);
+        exn.setErrorPage(_parseState.getErrorPage());
 
-	throw exn;
+        throw exn;
       }
     } catch (FileNotFoundException e) {
       throw e;
@@ -590,12 +590,12 @@ public class JspCompilerInstance {
       JspTagSupport tag = (JspTagSupport) _jspCompiler.loadClass(_className, true);
 
       if (tag == null)
-	return null;
+        return null;
 
       tag.init(_jspCompiler.getAppDir());
 
       if (tag._caucho_isModified())
-	return null;
+        return null;
 
       return tag._caucho_getTagInfo(taglib);
     } catch (Throwable e) {
@@ -614,18 +614,18 @@ public class JspCompilerInstance {
       boolean isXml = _isXml;
       
       if (_jspPropertyGroup != null && ! isXml
-	  && _jspPropertyGroup.isXml() != null)
-	isXml = Boolean.TRUE.equals(_jspPropertyGroup.isXml());
+          && _jspPropertyGroup.isXml() != null)
+        isXml = Boolean.TRUE.equals(_jspPropertyGroup.isXml());
 
       if (_jspPropertyGroup != null
-	  && Boolean.FALSE.equals(_jspPropertyGroup.isXml()))
-	_parseState.setForbidXml(true);
+          && Boolean.FALSE.equals(_jspPropertyGroup.isXml()))
+        _parseState.setForbidXml(true);
 
       _parseState.setXml(isXml);
 
       if (_jspCompiler.addTag(_className)) {
-	_isPrototype = true;
-	_jspBuilder.setPrototype(true);
+        _isPrototype = true;
+        _jspBuilder.setPrototype(true);
       }
 
       _parseState.setTag(true);
@@ -637,42 +637,42 @@ public class JspCompilerInstance {
       taglib.setJspVersion("2.0");
       
       if (implicitTld.canRead()) {
-	Config config = new Config();
-	ImplicitTld tldTaglib = new ImplicitTld();
+        Config config = new Config();
+        ImplicitTld tldTaglib = new ImplicitTld();
 
-	config.configure(tldTaglib, implicitTld);
+        config.configure(tldTaglib, implicitTld);
 
-	if (tldTaglib.getJspVersion() != null
-	    && tldTaglib.getJspVersion().compareTo("2.0") < 0)
-	  throw new ConfigException(L.l("'{0}' must have a jsp-version 2.0 or greater",
-					implicitTld));
+        if (tldTaglib.getJspVersion() != null
+            && tldTaglib.getJspVersion().compareTo("2.0") < 0)
+          throw new ConfigException(L.l("'{0}' must have a jsp-version 2.0 or greater",
+                                        implicitTld));
 
-	taglib.setJspVersion(tldTaglib.getJspVersion());
+        taglib.setJspVersion(tldTaglib.getJspVersion());
       }
 
       if (taglib.getRequiredVersion().compareTo("2.1") < 0) {
-	_parseState.setJspVersion("2.0");
-	_parseState.setDeferredSyntaxAllowedAsLiteral(true);
+        _parseState.setJspVersion("2.0");
+        _parseState.setDeferredSyntaxAllowedAsLiteral(true);
       }
       
       if (isXml) {
-	_parseState.setELIgnoredDefault(false);
+        _parseState.setELIgnoredDefault(false);
 
         Xml xml = new Xml();
-	_parseState.setXml(xml);
-	xml.setContentHandler(new JspContentHandler(_jspBuilder));
-	_jspPath.setUserPath(_uri);
-	xml.setNamespaceAware(true);
-	xml.setDtdValidating(true);
-	xml.parse(_jspPath);
+        _parseState.setXml(xml);
+        xml.setContentHandler(new JspContentHandler(_jspBuilder));
+        _jspPath.setUserPath(_uri);
+        xml.setNamespaceAware(true);
+        xml.setDtdValidating(true);
+        xml.parse(_jspPath);
       }
       else
-	_parser.parseTag(_jspPath, _uri);
+        _parser.parseTag(_jspPath, _uri);
 
       _generator = _jspBuilder.getGenerator();
 
       if (_isPrototype) {
-	return _generator.generateTagInfo(_className, taglib);
+        return _generator.generateTagInfo(_className, taglib);
       }
 
       _generator.validate();
@@ -680,9 +680,9 @@ public class JspCompilerInstance {
       _generator.generate(_jspPath, _className);
 
       if (_jspCompiler.hasRecursiveCompile()) {
-	_jspCompiler.addPending(this);
+        _jspCompiler.addPending(this);
 
-	return _generator.generateTagInfo(_className, taglib);
+        return _generator.generateTagInfo(_className, taglib);
       }
 
       return completeTag(taglib);

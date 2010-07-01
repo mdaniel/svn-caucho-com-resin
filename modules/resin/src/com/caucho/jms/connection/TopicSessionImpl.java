@@ -40,7 +40,7 @@ public class TopicSessionImpl extends JmsSession
   implements XATopicSession, TopicSession
 {
   public TopicSessionImpl(ConnectionImpl conn,
-			  boolean isTransacted, int ackMode,
+                          boolean isTransacted, int ackMode,
                           boolean isXA)
     throws JMSException
   {

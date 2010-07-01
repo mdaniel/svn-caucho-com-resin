@@ -115,14 +115,14 @@ public class BinaryExpr extends Expr {
       case DIV:
         return a.divide(b, BigDecimal.ROUND_HALF_UP);
       case MOD:
-	{
-	  double da = toDouble(aObj, env);
-	  double db = toDouble(bObj, env);
-	  
-	  return new Double(da % db);
-	}
+        {
+          double da = toDouble(aObj, env);
+          double db = toDouble(bObj, env);
+
+          return new Double(da % db);
+        }
       default:
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
     }
     else if (aObj instanceof BigInteger || bObj instanceof BigInteger) {
@@ -137,28 +137,28 @@ public class BinaryExpr extends Expr {
       case MUL:
         return a.multiply(b);
       case DIV:
-	{
-	  BigDecimal da = toBigDecimal(aObj, env);
-	  BigDecimal db = toBigDecimal(bObj, env);
-	  
-	  return da.divide(db, BigDecimal.ROUND_HALF_UP);
-	}
-      case MOD:
-	{
-	  if (aObj instanceof Float ||
-	      aObj instanceof Double ||
-	      bObj instanceof Float ||
-	      bObj instanceof Double) {
-	    double da = toDouble(aObj, env);
-	    double db = toDouble(bObj, env);
+        {
+          BigDecimal da = toBigDecimal(aObj, env);
+          BigDecimal db = toBigDecimal(bObj, env);
 
-	    return new Double(da % db);
-	  }
-	  else
-	    return a.remainder(b);
-	}
+          return da.divide(db, BigDecimal.ROUND_HALF_UP);
+        }
+      case MOD:
+        {
+          if (aObj instanceof Float ||
+              aObj instanceof Double ||
+              bObj instanceof Float ||
+              bObj instanceof Double) {
+            double da = toDouble(aObj, env);
+            double db = toDouble(bObj, env);
+
+            return new Double(da % db);
+          }
+          else
+            return a.remainder(b);
+        }
       default:
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
     }
       

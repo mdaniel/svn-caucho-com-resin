@@ -126,18 +126,18 @@ abstract class AbstractConfig implements Completion
 
     for (IdField field : fields) {
       if (field.getName().equals(name))
-	return field;
+        return field;
     }
 
     if (name == null || name.equals(""))
       throw new ConfigException(L.l("{0}: '{1}' requires a referencedColumnName value because it has multiple target keys.",
-				    getTargetClass().getSimpleName(),
-				    getName()));
+                                    getTargetClass().getSimpleName(),
+                                    getName()));
 
     throw new ConfigException(L.l("{0}: '{1}' is an unknown field for {2}",
-				  getTargetClass().getSimpleName(),
-				  name,
-				  getName()));
+                                  getTargetClass().getSimpleName(),
+                                  name,
+                                  getName()));
   }
   
 
@@ -170,7 +170,7 @@ abstract class AbstractConfig implements Completion
   }
 
   ArrayList<ForeignColumn> calculateColumns(AmberTable mapTable,
-					    EntityType type)
+                                            EntityType type)
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 

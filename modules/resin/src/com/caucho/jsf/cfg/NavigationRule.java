@@ -99,19 +99,19 @@ public class NavigationRule implements Comparable<NavigationRule>
 
       switch (ch) {
       case '*':
-	if (i < _cost)
-	  _cost = i;
-	
-	sb.append(".*");
-	break;
+        if (i < _cost)
+          _cost = i;
+
+        sb.append(".*");
+        break;
       case '.': case '?': case '+': case '|': case '[': case ']':
       case '$': case '^': case '\\': case '(': case ')':
-	sb.append("\\");
-	sb.append(ch);
-	break;
+        sb.append("\\");
+        sb.append(ch);
+        break;
       default:
-	sb.append(ch);
-	break;
+        sb.append(ch);
+        break;
       }
     }
 
@@ -130,15 +130,15 @@ public class NavigationRule implements Comparable<NavigationRule>
   }
 
   public boolean handleNavigation(FacesContext context,
-			       String action,
-			       String outcome)
+                               String action,
+                               String outcome)
   {
     NavigationCase navCase = findCase(action, outcome);
 
     if (navCase != null) {
       if (log.isLoggable(Level.FINE))
-	log.fine("Jsf[" + context.getViewRoot().getViewId() + "] navigation action:" + action + " outcome:" + outcome + " matches " + navCase);
-	
+        log.fine("Jsf[" + context.getViewRoot().getViewId() + "] navigation action:" + action + " outcome:" + outcome + " matches " + navCase);
+
       navCase.handleNavigation(context);
       return true;
     }
@@ -159,22 +159,22 @@ public class NavigationRule implements Comparable<NavigationRule>
       if (navCase.getFromAction() == null) {
       }
       else if (action != null && action.equals(navCase.getFromAction()))
-	cost |= 1;
+        cost |= 1;
       else
-	continue;
+        continue;
 
       if (navCase.getFromOutcome() == null) {
       }
       else if (outcome != null && outcome.equals(navCase.getFromOutcome()))
-	cost |= 2;
+        cost |= 2;
       else
-	continue;
+        continue;
 
       if (cost == 3)
-	return navCase;
+        return navCase;
       else if (bestCost < cost) {
-	bestCost = cost;
-	bestCase = navCase;
+        bestCost = cost;
+        bestCase = navCase;
       }
     }
 
@@ -239,40 +239,40 @@ public class NavigationRule implements Comparable<NavigationRule>
     public void handleNavigation(FacesContext context)
     {
       if (_isRedirect) {
-	try {
-	  ExternalContext extContext = context.getExternalContext();
-	  ViewHandler viewHandler = context.getApplication().getViewHandler();
+        try {
+          ExternalContext extContext = context.getExternalContext();
+          ViewHandler viewHandler = context.getApplication().getViewHandler();
 
-	  String actionUrl = viewHandler.getActionURL(context, _toViewId);
+          String actionUrl = viewHandler.getActionURL(context, _toViewId);
 
-	  extContext.redirect(extContext.encodeActionURL(actionUrl));
+          extContext.redirect(extContext.encodeActionURL(actionUrl));
 
-	  context.responseComplete();
-	} catch (IOException e) {
-	  throw new RuntimeException(e);
-	}
+          context.responseComplete();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
       else {
-	UIViewRoot oldView = context.getViewRoot();
-	
-	ViewHandler view = context.getApplication().getViewHandler();
-	
-	UIViewRoot viewRoot = view.createView(context, _toViewId);
+        UIViewRoot oldView = context.getViewRoot();
 
-	// XXX: is this in spec?
-	if (oldView != null)
-	  viewRoot.setLocale(oldView.getLocale());
+        ViewHandler view = context.getApplication().getViewHandler();
 
-	context.setViewRoot(viewRoot);
+        UIViewRoot viewRoot = view.createView(context, _toViewId);
+
+        // XXX: is this in spec?
+        if (oldView != null)
+          viewRoot.setLocale(oldView.getLocale());
+
+        context.setViewRoot(viewRoot);
       }
     }
 
     public String toString()
     {
       if (_isRedirect)
-	return "NavCase[redirect," + _toViewId + "]";
+        return "NavCase[redirect," + _toViewId + "]";
       else
-	return "NavCase[" + _toViewId + "]";
+        return "NavCase[" + _toViewId + "]";
     }
   }
 

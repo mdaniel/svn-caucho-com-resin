@@ -89,7 +89,7 @@ public class LoadBundleTag extends TagSupport
 
     if (lc == null)
       throw new JspException(L.l("'{0}' is an unknown ResourceBundle basename.",
-				 basename));
+                                 basename));
 
     ResourceBundle bundle = lc.getResourceBundle();
 
@@ -111,23 +111,23 @@ public class LoadBundleTag extends TagSupport
     public String get(Object key)
     {
       try {
-	String value = _bundle.getString(String.valueOf(key));
+        String value = _bundle.getString(String.valueOf(key));
 
-	if (value != null)
-	  return value;
-	else
-	  return "???" + key + "???";
+        if (value != null)
+          return value;
+        else
+          return "???" + key + "???";
       } catch (MissingResourceException e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
 
-	return "???" + key + "???";
+        return "???" + key + "???";
       }
     }
 
     public Set<Map.Entry<String,String>> entrySet()
     {
       if (_entrySet == null)
-	_entrySet = new BundleEntrySet(_bundle);
+        _entrySet = new BundleEntrySet(_bundle);
 
       return _entrySet;
     }
@@ -144,7 +144,7 @@ public class LoadBundleTag extends TagSupport
       Enumeration<String> e = bundle.getKeys();
       
       while (e.hasMoreElements())
-	_keys.add(e.nextElement());
+        _keys.add(e.nextElement());
     }
 
     public int size()
@@ -178,11 +178,11 @@ public class LoadBundleTag extends TagSupport
     public Map.Entry<String,String> next()
     {
       if (_index < _keys.size()) {
-	_index++;
-	return _entry;
+        _index++;
+        return _entry;
       }
       else
-	return null;
+        return null;
     }
 
     public void remove()
@@ -193,22 +193,22 @@ public class LoadBundleTag extends TagSupport
     class Entry implements Map.Entry<String,String> {
       public String getKey()
       {
-	return _keys.get(_index - 1);
+        return _keys.get(_index - 1);
       }
       
       public String setKey(String key)
       {
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
       }
 
       public String getValue()
       {
-	return _bundle.getString(getKey());
+        return _bundle.getString(getKey());
       }
       
       public String setValue(String key)
       {
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
       }
     }
   }

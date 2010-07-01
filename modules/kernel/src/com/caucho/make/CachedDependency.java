@@ -70,12 +70,12 @@ abstract public class CachedDependency implements Dependency {
     long now = Alarm.getCurrentTime();
     if (now <= _lastCheckTime + _checkInterval)
       return _isModified;
-	
+
     synchronized (this) {
       now = Alarm.getCurrentTime();
       
       if (now <= _lastCheckTime + _checkInterval)
-	return _isModified;
+        return _isModified;
 
       _lastCheckTime = now;
     }

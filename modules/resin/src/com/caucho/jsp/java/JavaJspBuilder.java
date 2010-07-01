@@ -163,7 +163,7 @@ public class JavaJspBuilder extends JspBuilder {
     try {
       // jsp/031a
       if (_rootNode != null)
-	return;
+        return;
       
       if (_parseState.isTag())
         _gen = new JavaTagGenerator(_tagManager);
@@ -196,7 +196,7 @@ public class JavaJspBuilder extends JspBuilder {
     throws JspParseException
   {
     if (_parseState.getXml() != null
-	&& _parseState.getXml().getEncoding() != null)
+        && _parseState.getXml().getEncoding() != null)
       _parseState.setXmlPageEncoding(_parseState.getXml().getEncoding());
   }
 
@@ -215,7 +215,7 @@ public class JavaJspBuilder extends JspBuilder {
     if (! _isTagDependent) {
     }
     else if (_elementDepth == 2
-	     && (JSP_ATTR_NAME.equals(qname) || JSP_BODY_NAME.equals(qname))) {
+             && (JSP_ATTR_NAME.equals(qname) || JSP_BODY_NAME.equals(qname))) {
       _isTagDependent = false;
     }
     else {
@@ -231,11 +231,11 @@ public class JavaJspBuilder extends JspBuilder {
       Class type = _jsfTagMap.get(qname);
 
       if (JsfFacetNode.class.equals(type)
-	  && _currentNode != null
-	  && ! JsfTagNode.class.isAssignableFrom(_currentNode.getClass())) {
+          && _currentNode != null
+          && ! JsfTagNode.class.isAssignableFrom(_currentNode.getClass())) {
       }
       else {
-	cl = type;
+        cl = type;
       }
     }
 
@@ -307,7 +307,7 @@ public class JavaJspBuilder extends JspBuilder {
       ArrayList<PersistentDependency> dependList = tagInfoExt.getDependList();
 
       for (int i = 0; i < dependList.size(); i++) {
-	_gen.addDepend(dependList.get(i));
+        _gen.addDepend(dependList.get(i));
       }
     }
 
@@ -356,23 +356,23 @@ public class JavaJspBuilder extends JspBuilder {
       _openNode.setStartLocation(_sourcePath, _filename, _line);
       
       if (tagInfo instanceof TagInfoImpl) {
-	TldTag tldTag = ((TagInfoImpl) tagInfo).getTldTag();
+        TldTag tldTag = ((TagInfoImpl) tagInfo).getTldTag();
 
-	if (tldTag instanceof JsfTag) {
-	  JsfTag jsfTag = (JsfTag) tldTag;
+        if (tldTag instanceof JsfTag) {
+          JsfTag jsfTag = (JsfTag) tldTag;
 
-	  JsfTagNode jsfTagNode = new JsfTagNode();
-	  jsfTagNode.setGenerator(_gen);
-	  jsfTagNode.setParseState(_parseState);
-	  jsfTagNode.setQName(qname);
-	  jsfTagNode.setParent(_currentNode);
-	  jsfTagNode.setComponentClass(jsfTag.getComponentClass());
+          JsfTagNode jsfTagNode = new JsfTagNode();
+          jsfTagNode.setGenerator(_gen);
+          jsfTagNode.setParseState(_parseState);
+          jsfTagNode.setQName(qname);
+          jsfTagNode.setParent(_currentNode);
+          jsfTagNode.setComponentClass(jsfTag.getComponentClass());
 
-	  _openNode = jsfTagNode;
-	  _openNode.setStartLocation(_sourcePath, _filename, _line);
+          _openNode = jsfTagNode;
+          _openNode.setStartLocation(_sourcePath, _filename, _line);
 
-	  return;
-	}
+          return;
+        }
       }
     }
     else if (SimpleTag.class.isAssignableFrom(tagClass)) {
@@ -505,7 +505,7 @@ public class JavaJspBuilder extends JspBuilder {
       JspNode node = _currentNode.addText(text);
 
       if (node != null) {
-	node.setStartLocation(_sourcePath, _filename, _line);
+        node.setStartLocation(_sourcePath, _filename, _line);
       }
     }
   }
@@ -522,8 +522,8 @@ public class JavaJspBuilder extends JspBuilder {
       JspNode node = _currentNode.addText(text);
 
       if (node != null) {
-	node.setStartLocation(null, srcFilename, startLine);
-	node.setEndLocation(srcFilename, endLine);
+        node.setStartLocation(null, srcFilename, startLine);
+        node.setEndLocation(srcFilename, endLine);
       }
     }
   }
@@ -539,7 +539,7 @@ public class JavaJspBuilder extends JspBuilder {
   public JspParseException error(String message)
   {
     return new JspLineParseException(_filename + ":" + _line + ": " + message
-				     + _gen.getSourceLines(_sourcePath, _line));
+                                     + _gen.getSourceLines(_sourcePath, _line));
   }
 
   public JspParseException error(Throwable e)
@@ -548,21 +548,21 @@ public class JavaJspBuilder extends JspBuilder {
       return new JspLineParseException(e);
     else if (e instanceof CompileException)
       return new JspLineParseException(_filename + ":" + _line + ": "
-				       + e.getMessage()
-				       + _gen.getSourceLines(_sourcePath, _line),
-				       e);
+                                       + e.getMessage()
+                                       + _gen.getSourceLines(_sourcePath, _line),
+                                       e);
     else
       return new JspLineParseException(_filename + ":" + _line + ": "
-				       + String.valueOf(e)
-				       + _gen.getSourceLines(_sourcePath, _line),
-				       e);
+                                       + String.valueOf(e)
+                                       + _gen.getSourceLines(_sourcePath, _line),
+                                       e);
   }
 
   private static void addMap(HashMap<QName,Class> map,
-			     String prefix,
-			     String localName,
-			     String uri,
-			     Class cl)
+                             String prefix,
+                             String localName,
+                             String uri,
+                             Class cl)
   {
     map.put(new QName(prefix, localName, uri), cl);
     map.put(new QName(prefix, localName, "urn:jsptld:" + uri), cl);
@@ -574,59 +574,59 @@ public class JavaJspBuilder extends JspBuilder {
     addMap(_tagMap, "jsp", "root", JspNode.JSP_NS, JspRoot.class);
 
     addMap(_tagMap, "jsp", "directive.page", JspNode.JSP_NS,
-	   JspDirectivePage.class);
+           JspDirectivePage.class);
     addMap(_tagMap, "jsp", "directive.include", JspNode.JSP_NS,
-	   JspDirectiveInclude.class);
+           JspDirectiveInclude.class);
     addMap(_tagMap, "jsp", "directive.cache", JspNode.JSP_NS,
-	   NullTag.class);
+           NullTag.class);
     addMap(_tagMap, "jsp", "directive.taglib", JspNode.JSP_NS,
-	   JspDirectiveTaglib.class);
+           JspDirectiveTaglib.class);
     addMap(_tagMap, "jsp", "directive.attribute", JspNode.JSP_NS,
-	   JspDirectiveAttribute.class);
+           JspDirectiveAttribute.class);
     addMap(_tagMap, "jsp", "directive.variable", JspNode.JSP_NS,
-	   JspDirectiveVariable.class);
+           JspDirectiveVariable.class);
     addMap(_tagMap, "jsp", "directive.tag", JspNode.JSP_NS,
-	   JspDirectiveTag.class);
+           JspDirectiveTag.class);
     
     addMap(_tagMap, "jsp", "expression", JspNode.JSP_NS,
-	   JspExpression.class);
+           JspExpression.class);
     addMap(_tagMap, "jsp", "scriptlet", JspNode.JSP_NS,
-	   JspScriptlet.class);
+           JspScriptlet.class);
     addMap(_tagMap, "jsp", "declaration", JspNode.JSP_NS,
-	   JspDeclaration.class);
+           JspDeclaration.class);
     addMap(_tagMap, "jsp", "useBean", JspNode.JSP_NS,
-	   JspUseBean.class);
+           JspUseBean.class);
     addMap(_tagMap, "jsp", "getProperty", JspNode.JSP_NS,
-	   JspGetProperty.class);
+           JspGetProperty.class);
     addMap(_tagMap, "jsp", "setProperty", JspNode.JSP_NS,
-	   JspSetProperty.class);
+           JspSetProperty.class);
     addMap(_tagMap, "jsp", "include", JspNode.JSP_NS,
-	   JspInclude.class);
+           JspInclude.class);
     addMap(_tagMap, "jsp", "forward", JspNode.JSP_NS,
-	   JspForward.class);
+           JspForward.class);
     addMap(_tagMap, "jsp", "param", JspNode.JSP_NS,
-	   JspParam.class);
+           JspParam.class);
     addMap(_tagMap, "jsp", "plugin", JspNode.JSP_NS,
-	   JspPlugin.class);
+           JspPlugin.class);
     addMap(_tagMap, "jsp", "params", JspNode.JSP_NS,
-	   JspParams.class);
+           JspParams.class);
     addMap(_tagMap, "jsp", "fallback", JspNode.JSP_NS,
-	   JspFallback.class);
+           JspFallback.class);
     
     addMap(_tagMap, "jsp", "attribute", JspNode.JSP_NS,
-	   JspAttribute.class);
+           JspAttribute.class);
     addMap(_tagMap, "jsp", "doBody", JspNode.JSP_NS,
-	   JspDoBody.class);
+           JspDoBody.class);
     addMap(_tagMap, "jsp", "invoke", JspNode.JSP_NS,
-	   JspInvoke.class);
+           JspInvoke.class);
     addMap(_tagMap, "jsp", "body", JspNode.JSP_NS,
-	   JspBody.class);
+           JspBody.class);
     addMap(_tagMap, "jsp", "text", JspNode.JSP_NS,
-	   JspText.class);
+           JspText.class);
     addMap(_tagMap, "jsp", "element", JspNode.JSP_NS,
-	   JspElement.class);
+           JspElement.class);
     addMap(_tagMap, "jsp", "output", JspNode.JSP_NS,
-	   JspOutput.class);
+           JspOutput.class);
 
     _fastTagMap = new HashMap<QName,Class>(_tagMap);
 
@@ -640,78 +640,78 @@ public class JavaJspBuilder extends JspBuilder {
     addMap(_fastTagMap, "resin-c", "set", JSTL_RT_CORE_URI, JstlCoreSet.class);
     
     addMap(_fastTagMap, "resin-c", "remove", JSTL_CORE_URI,
-	   JstlCoreRemove.class);
+           JstlCoreRemove.class);
     addMap(_fastTagMap, "resin-c", "remove", JSTL_EL_CORE_URI,
-	   JstlCoreRemove.class);
+           JstlCoreRemove.class);
     addMap(_fastTagMap, "resin-c", "remove", JSTL_RT_CORE_URI,
-	   JstlCoreRemove.class);
+           JstlCoreRemove.class);
     
     addMap(_fastTagMap, "resin-c", "catch", JSTL_CORE_URI,
-	   JstlCoreCatch.class);
+           JstlCoreCatch.class);
     addMap(_fastTagMap, "resin-c", "catch", JSTL_EL_CORE_URI,
-	   JstlCoreCatch.class);
+           JstlCoreCatch.class);
     addMap(_fastTagMap, "resin-c", "catch", JSTL_RT_CORE_URI,
-	   JstlCoreCatch.class);
+           JstlCoreCatch.class);
     
     addMap(_fastTagMap, "resin-c", "if", JSTL_CORE_URI, JstlCoreIf.class);
     addMap(_fastTagMap, "resin-c", "if", JSTL_EL_CORE_URI, JstlCoreIf.class);
     addMap(_fastTagMap, "resin-c", "if", JSTL_RT_CORE_URI, JstlCoreIf.class);
     
     addMap(_fastTagMap, "resin-c", "choose", JSTL_CORE_URI,
-	   JstlCoreChoose.class);
+           JstlCoreChoose.class);
     addMap(_fastTagMap, "resin-c", "choose", JSTL_EL_CORE_URI,
-	   JstlCoreChoose.class);
+           JstlCoreChoose.class);
     addMap(_fastTagMap, "resin-c", "choose", JSTL_RT_CORE_URI,
-	   JstlCoreChoose.class);
+           JstlCoreChoose.class);
     
     addMap(_fastTagMap, "resin-c", "when", JSTL_CORE_URI,
-	   JstlCoreWhen.class);
+           JstlCoreWhen.class);
     addMap(_fastTagMap, "resin-c", "when", JSTL_EL_CORE_URI,
-	   JstlCoreWhen.class);
+           JstlCoreWhen.class);
     addMap(_fastTagMap, "resin-c", "when", JSTL_RT_CORE_URI,
-	   JstlCoreWhen.class);
+           JstlCoreWhen.class);
     
     addMap(_fastTagMap, "resin-c", "otherwise", JSTL_CORE_URI,
-	   JstlCoreOtherwise.class);
+           JstlCoreOtherwise.class);
     addMap(_fastTagMap, "resin-c", "otherwise", JSTL_EL_CORE_URI,
-	   JstlCoreOtherwise.class);
+           JstlCoreOtherwise.class);
     addMap(_fastTagMap, "resin-c", "otherwise", JSTL_RT_CORE_URI,
-	   JstlCoreOtherwise.class);
+           JstlCoreOtherwise.class);
     
     addMap(_fastTagMap, "resin-c", "forEach", JSTL_CORE_URI,
-	   JstlCoreForEach.class);
+           JstlCoreForEach.class);
     addMap(_fastTagMap, "resin-c", "forEach", JSTL_EL_CORE_URI,
-	   JstlCoreForEach.class);
+           JstlCoreForEach.class);
     addMap(_fastTagMap, "resin-c", "forEach", JSTL_RT_CORE_URI,
-	   JstlCoreForEach.class);
+           JstlCoreForEach.class);
     
     addMap(_fastTagMap, "resin-fmt", "message", JSTL_FMT_URI,
-	   JstlFmtMessage.class);
+           JstlFmtMessage.class);
     addMap(_fastTagMap, "resin-fmt", "message", JSTL_EL_FMT_URI,
-	   JstlFmtMessage.class);
+           JstlFmtMessage.class);
     addMap(_fastTagMap, "resin-fmt", "message", JSTL_RT_FMT_URI,
-	   JstlFmtMessage.class);
+           JstlFmtMessage.class);
     
     addMap(_fastTagMap, "resin-fmt", "setBundle", JSTL_FMT_URI,
-	   JstlFmtSetBundle.class);
+           JstlFmtSetBundle.class);
     addMap(_fastTagMap, "resin-fmt", "setBundle", JSTL_EL_FMT_URI,
-	   JstlFmtSetBundle.class);
+           JstlFmtSetBundle.class);
     addMap(_fastTagMap, "resin-fmt", "setBundle", JSTL_RT_FMT_URI,
-	   JstlFmtSetBundle.class);
+           JstlFmtSetBundle.class);
     
     addMap(_fastTagMap, "resin-fmt", "bundle", JSTL_FMT_URI,
-	   JstlFmtBundle.class);
+           JstlFmtBundle.class);
     addMap(_fastTagMap, "resin-fmt", "bundle", JSTL_EL_FMT_URI,
-	   JstlFmtBundle.class);
+           JstlFmtBundle.class);
     addMap(_fastTagMap, "resin-fmt", "bundle", JSTL_RT_FMT_URI,
-	   JstlFmtBundle.class);
+           JstlFmtBundle.class);
     
     addMap(_fastTagMap, "resin-fmt", "param", JSTL_FMT_URI,
-	   JstlFmtParam.class);
+           JstlFmtParam.class);
     addMap(_fastTagMap, "resin-fmt", "param", JSTL_EL_FMT_URI,
-	   JstlFmtParam.class);
+           JstlFmtParam.class);
     addMap(_fastTagMap, "resin-fmt", "param", JSTL_RT_FMT_URI,
-	   JstlFmtParam.class);
+           JstlFmtParam.class);
 
     addMap(_fastTagMap, "resin-xml", "out", JSTL_XML_URI, JstlXmlOut.class);
     addMap(_fastTagMap, "resin-xml", "out", JSTL_RT_XML_URI, JstlXmlOut.class);
@@ -726,78 +726,78 @@ public class JavaJspBuilder extends JspBuilder {
     addMap(_fastTagMap, "resin-xml", "if", JSTL_EL_XML_URI, JstlXmlIf.class);
     
     addMap(_fastTagMap, "resin-xml", "choose", JSTL_XML_URI,
-	   JstlCoreChoose.class);
+           JstlCoreChoose.class);
     addMap(_fastTagMap, "resin-xml", "choose", JSTL_RT_XML_URI,
-	   JstlCoreChoose.class);
+           JstlCoreChoose.class);
     addMap(_fastTagMap, "resin-xml", "choose", JSTL_EL_XML_URI,
-	   JstlCoreChoose.class);
+           JstlCoreChoose.class);
     
     addMap(_fastTagMap, "resin-xml", "when", JSTL_XML_URI,
-	   JstlXmlWhen.class);
+           JstlXmlWhen.class);
     addMap(_fastTagMap, "resin-xml", "when", JSTL_RT_XML_URI,
-	   JstlXmlWhen.class);
+           JstlXmlWhen.class);
     addMap(_fastTagMap, "resin-xml", "when", JSTL_EL_XML_URI,
-	   JstlXmlWhen.class);
+           JstlXmlWhen.class);
     
     addMap(_fastTagMap, "resin-xml", "otherwise", JSTL_XML_URI,
-	   JstlCoreOtherwise.class);
+           JstlCoreOtherwise.class);
     addMap(_fastTagMap, "resin-xml", "otherwise", JSTL_RT_XML_URI,
-	   JstlCoreOtherwise.class);
+           JstlCoreOtherwise.class);
     addMap(_fastTagMap, "resin-xml", "otherwise", JSTL_EL_XML_URI,
-	   JstlCoreOtherwise.class);
+           JstlCoreOtherwise.class);
     
     _jsfTagMap = new HashMap<QName,Class>();
     
     addMap(_jsfTagMap, "faces", "facet", JSF_CORE_URI,
-	   JsfFacetNode.class);
+           JsfFacetNode.class);
     addMap(_jsfTagMap, "faces", "view", JSF_CORE_URI,
-	   JsfViewRoot.class);
+           JsfViewRoot.class);
     addMap(_jsfTagMap, "faces", "phaseListener", JSF_CORE_URI,
            JsfPhaseListener.class);
 
     _jstlTlvTagMap = new HashMap<QName, Class>();
 
     addMap(_jstlTlvTagMap, "resin-c", "choose", JSTL_CORE_URI,
-	   JstlTlvCoreChoose.class);
+           JstlTlvCoreChoose.class);
     addMap(_jstlTlvTagMap, "resin-c", "choose", JSTL_EL_CORE_URI,
-	   JstlTlvCoreChoose.class);
+           JstlTlvCoreChoose.class);
     addMap(_jstlTlvTagMap, "resin-c", "choose", JSTL_RT_CORE_URI,
-	   JstlTlvCoreChoose.class);
+           JstlTlvCoreChoose.class);
 
     addMap(_jstlTlvTagMap, "resin-c", "when", JSTL_CORE_URI,
-	   JstlTlvCoreWhen.class);
+           JstlTlvCoreWhen.class);
     addMap(_jstlTlvTagMap, "resin-c", "when", JSTL_EL_CORE_URI,
-	   JstlTlvCoreWhen.class);
+           JstlTlvCoreWhen.class);
     addMap(_jstlTlvTagMap, "resin-c", "when", JSTL_RT_CORE_URI,
-	   JstlTlvCoreWhen.class);
+           JstlTlvCoreWhen.class);
 
     addMap(_jstlTlvTagMap, "resin-c", "otherwise", JSTL_CORE_URI,
-	   JstlTlvCoreOtherwise.class);
+           JstlTlvCoreOtherwise.class);
     addMap(_jstlTlvTagMap, "resin-c", "otherwise", JSTL_EL_CORE_URI,
-	   JstlTlvCoreOtherwise.class);
+           JstlTlvCoreOtherwise.class);
     addMap(_jstlTlvTagMap, "resin-c", "otherwise", JSTL_RT_CORE_URI,
-	   JstlTlvCoreOtherwise.class);
+           JstlTlvCoreOtherwise.class);
 
     addMap(_jstlTlvTagMap, "resin-xml", "choose", JSTL_XML_URI,
-	   JstlTlvXmlChoose.class);
+           JstlTlvXmlChoose.class);
     addMap(_jstlTlvTagMap, "resin-xml", "choose", JSTL_RT_XML_URI,
-	   JstlTlvXmlChoose.class);
+           JstlTlvXmlChoose.class);
     addMap(_jstlTlvTagMap, "resin-xml", "choose", JSTL_EL_XML_URI,
-	   JstlTlvXmlChoose.class);
+           JstlTlvXmlChoose.class);
 
     addMap(_jstlTlvTagMap, "resin-xml", "when", JSTL_XML_URI,
-	   JstlTlvXmlWhen.class);
+           JstlTlvXmlWhen.class);
     addMap(_jstlTlvTagMap, "resin-xml", "when", JSTL_RT_XML_URI,
-	   JstlTlvXmlWhen.class);
+           JstlTlvXmlWhen.class);
     addMap(_jstlTlvTagMap, "resin-xml", "when", JSTL_EL_XML_URI,
-	   JstlTlvXmlWhen.class);
+           JstlTlvXmlWhen.class);
 
     addMap(_jstlTlvTagMap, "resin-xml", "otherwise", JSTL_XML_URI,
-	   JstlTlvXmlOtherwise.class);
+           JstlTlvXmlOtherwise.class);
     addMap(_jstlTlvTagMap, "resin-xml", "otherwise", JSTL_RT_XML_URI,
-	   JstlTlvXmlOtherwise.class);
+           JstlTlvXmlOtherwise.class);
     addMap(_jstlTlvTagMap, "resin-xml", "otherwise", JSTL_EL_XML_URI,
-	   JstlTlvXmlOtherwise.class);
+           JstlTlvXmlOtherwise.class);
 
     addMap(_jstlTlvTagMap, "resin-sql", "update", JSTL_SQL_URI,
            JstlTlvSqlUpdate.class);

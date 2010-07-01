@@ -87,7 +87,7 @@ public abstract class QAttributedNode extends QNode {
       
       if (attr.getLocalName().equals(local) &&
           (attrURI == namespaceURI ||
-	   attrURI != null && attrURI.equals(namespaceURI)))
+           attrURI != null && attrURI.equals(namespaceURI)))
         return attr.getNodeValue();
     }
 
@@ -114,7 +114,7 @@ public abstract class QAttributedNode extends QNode {
       String attrURI = attr.getNamespaceURI();
       
       if (attr.getLocalName().equals(local) &&
-	  (attrURI == uri || attrURI != null && attrURI.equals(uri)))
+          (attrURI == uri || attrURI != null && attrURI.equals(uri)))
         return true;
     }
 
@@ -145,7 +145,7 @@ public abstract class QAttributedNode extends QNode {
       
       if (attr.getLocalName().equals(local) &&
           (attrURI == uri ||
-	   attrURI != null && attrURI.equals(uri)))
+           attrURI != null && attrURI.equals(uri)))
         return (Attr) attr;
     }
 
@@ -157,7 +157,7 @@ public abstract class QAttributedNode extends QNode {
   {  
     if (! isNameValid(name))
       throw new QDOMException(DOMException.INVALID_CHARACTER_ERR, 
-			      "illegal attribute `" + name + "'");
+                              "illegal attribute `" + name + "'");
 
     setAttributeNode(_owner.createAttribute(name, value));
   }
@@ -188,7 +188,7 @@ public abstract class QAttributedNode extends QNode {
    * Sets an attribute, specified by the object.
    */
   public void setIdAttributeNS(String namespaceURI, String localName,
-			       boolean isId)
+                               boolean isId)
     throws DOMException
   {
   }
@@ -213,12 +213,12 @@ public abstract class QAttributedNode extends QNode {
       qAttr._owner = _owner;
     else if (qAttr._owner != _owner)
       throw new QDOMException(DOMException.WRONG_DOCUMENT_ERR,
-			      "attribute from wrong document");
+                              "attribute from wrong document");
 
     if (qAttr._parent != null)
       throw new QDOMException(DOMException.INUSE_ATTRIBUTE_ERR,
-			      "attribute `" + attr.getNodeName() + 
-			      "' is in use");
+                              "attribute `" + attr.getNodeName() +
+                              "' is in use");
 
     qAttr._parent = this;
 
@@ -247,12 +247,12 @@ public abstract class QAttributedNode extends QNode {
 
     if (qAttr._owner != _owner)
       throw new QDOMException(DOMException.WRONG_DOCUMENT_ERR,
-			      "attribute from wrong document");
+                              "attribute from wrong document");
 
     if (qAttr._parent != null)
       throw new QDOMException(DOMException.INUSE_ATTRIBUTE_ERR,
-			      "attribute `" + attr.getNodeName() + 
-			      "' is in use");
+                              "attribute `" + attr.getNodeName() +
+                              "' is in use");
 
     // remove any matching old attribute
     QAttr old = unlink(qAttr.getNamespaceURI(), qAttr.getLocalName());
@@ -272,7 +272,7 @@ public abstract class QAttributedNode extends QNode {
   {
     if (! isNameValid(name))
       throw new QDOMException(DOMException.INVALID_CHARACTER_ERR, 
-			      "illegal attribute `" + name + "'");
+                              "illegal attribute `" + name + "'");
     
     unlink(name);
   }

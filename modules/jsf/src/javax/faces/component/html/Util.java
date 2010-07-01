@@ -63,11 +63,11 @@ final class Util
       Object value = expr.getValue(currentELContext());
 
       if (value instanceof Number)
-	return ((Number) value).intValue();
+        return ((Number) value).intValue();
       else if (value == null)
-	return Integer.MIN_VALUE;
+        return Integer.MIN_VALUE;
       else
-	return (Integer) value;
+        return (Integer) value;
     } catch (ELException e) {
       throw new FacesException(e);
     }
@@ -79,16 +79,16 @@ final class Util
       Object value = expr.getValue(currentELContext());
 
       if (value instanceof String || value == null)
-	return (String) value;
+        return (String) value;
       else
-	return value.toString();
+        return value.toString();
     } catch (ELException e) {
       throw new FacesException(e);
     }
   }
 
   static String save(ValueExpression expr,
-		     FacesContext context)
+                     FacesContext context)
   {
     if (expr != null) {
       return expr.getExpressionString();
@@ -98,26 +98,26 @@ final class Util
   }
 
   static ValueExpression restoreBoolean(Object value,
-					FacesContext context)
+                                        FacesContext context)
   {
     return restore(value, Boolean.class, context);
   }
 
   static ValueExpression restoreString(Object value,
-					FacesContext context)
+                                        FacesContext context)
   {
     return restore(value, String.class, context);
   }
 
   static ValueExpression restoreInt(Object value,
-					FacesContext context)
+                                        FacesContext context)
   {
     return restore(value, Integer.class, context);
   }
 
   static ValueExpression restore(Object value,
-				 Class type,
-				 FacesContext context)
+                                 Class type,
+                                 FacesContext context)
   {
     if (value == null)
       return null;
@@ -128,8 +128,8 @@ final class Util
     ExpressionFactory factory = app.getExpressionFactory();
     
     return factory.createValueExpression(context.getELContext(),
-					 expr,
-					 type);
+                                         expr,
+                                         type);
   }
 
   static ELContext currentELContext()

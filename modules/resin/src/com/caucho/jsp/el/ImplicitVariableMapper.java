@@ -46,7 +46,7 @@ public class ImplicitVariableMapper extends VariableMapper
   }
   
   public ValueExpression setVariable(String variable,
-				     ValueExpression expr)
+                                     ValueExpression expr)
   {
     throw new UnsupportedOperationException();
   }

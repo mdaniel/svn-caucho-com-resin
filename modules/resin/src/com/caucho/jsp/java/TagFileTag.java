@@ -73,8 +73,8 @@ public class TagFileTag extends GenericTag {
       JspNode node = _children.get(i);
 
       if (node instanceof JspBody) {
-	if (_body != null)
-	  throw error(L.l("Only one <jsp:body> is allowed as a child of a tag."));
+        if (_body != null)
+          throw error(L.l("Only one <jsp:body> is allowed as a child of a tag."));
         _body = (JspBody) node;
         _children.remove(i);
         return;
@@ -85,13 +85,13 @@ public class TagFileTag extends GenericTag {
       JspNode node = _children.get(i);
 
       if (! (node instanceof JspAttribute)) {
-	if (_body == null) {
-	  _body = new JspBody();
-	  _body.setParent(this);
-	  _body.setGenerator(_gen);
-	  _body.endAttributes();
-	}
-	
+        if (_body == null) {
+          _body = new JspBody();
+          _body.setParent(this);
+          _body.setGenerator(_gen);
+          _body.endAttributes();
+        }
+
         _body.addChild(node);
       }
     }
@@ -308,7 +308,7 @@ public class TagFileTag extends GenericTag {
       int p = indexOf(_attributeNames, attrs[i].getName());
       
       if (p < 0 && attrs[i].isRequired()) {
-	throw error(L.l("required attribute '{0}' missing from <{1}>",
+        throw error(L.l("required attribute '{0}' missing from <{1}>",
                         attrs[i].getName(),
                         getTagName()));
       }
@@ -331,14 +331,14 @@ public class TagFileTag extends GenericTag {
       TagAttributeInfo attribute = null;
       int j = 0;
       for (j = 0; attrs != null && j < attrs.length; j++) {
-	if (attrs[j].getName().equals(attrName.getName())) {
+        if (attrs[j].getName().equals(attrName.getName())) {
           attribute = attrs[j];
-	  break;
+          break;
         }
       }
 
       if (attribute == null && ! isDynamic)
-	throw error(L.l("unexpected attribute `{0}' in <{1}>",
+        throw error(L.l("unexpected attribute `{0}' in <{1}>",
                         attrName.getName(), getTagName()));
 
       boolean rtexprvalue = true;
@@ -346,59 +346,59 @@ public class TagFileTag extends GenericTag {
       Class cl = null;
 
       if (attribute != null) {
-	cl = _gen.loadBeanClass(attribute.getTypeName());
+        cl = _gen.loadBeanClass(attribute.getTypeName());
 
-	rtexprvalue = attribute.canBeRequestTime();
+        rtexprvalue = attribute.canBeRequestTime();
       }
       
       if (cl == null)
-	cl = String.class;
+        cl = String.class;
 
       if (attribute == null) {
         /*
-	if (mapName == null) {
-	  mapName = "_jsp_map_" + _gen.uniqueId();
-	  out.println("java.util.HashMap " + mapName + " = new java.util.HashMap(8);");
-	  out.println(name + ".setAttribute(\"" + mapAttribute + "\", " + mapName + ");");
-	}
-	*/
+        if (mapName == null) {
+          mapName = "_jsp_map_" + _gen.uniqueId();
+          out.println("java.util.HashMap " + mapName + " = new java.util.HashMap(8);");
+          out.println(name + ".setAttribute(\"" + mapAttribute + "\", " + mapName + ");");
+        }
+        */
 
-	out.print(customTagName + ".setDynamicAttribute(null, \"" + attrName.getName() + "\", ");
+        out.print(customTagName + ".setDynamicAttribute(null, \"" + attrName.getName() + "\", ");
       }
       else
-	out.print(name + ".setAttribute(\"" + attrName.getName() + "\", ");
+        out.print(name + ".setAttribute(\"" + attrName.getName() + "\", ");
 
       if (value instanceof JspNode) {
-	JspFragmentNode frag = (JspFragmentNode) value;
+        JspFragmentNode frag = (JspFragmentNode) value;
 
-	if (attribute != null && 
-	    attribute.getTypeName().equals(JspFragment.class.getName())) {
-	  out.println(generateFragment(frag, "pageContext") + ");");
-	}
-	else
-	  out.println(frag.generateValue() + ");");
+        if (attribute != null &&
+            attribute.getTypeName().equals(JspFragment.class.getName())) {
+          out.println(generateFragment(frag, "pageContext") + ");");
+        }
+        else
+          out.println(frag.generateValue() + ");");
       }
       else {
-	String convValue = generateParameterValue(cl,
-						  (String) value,
-						  rtexprvalue,
-						  attribute,
-						  _parseState.isELIgnored());
+        String convValue = generateParameterValue(cl,
+                                                  (String) value,
+                                                  rtexprvalue,
+                                                  attribute,
+                                                  _parseState.isELIgnored());
       
-	//					attribute.allowRtexpr());
+        //                                        attribute.allowRtexpr());
 
-	out.println(toObject(cl, convValue) + ");");
+        out.println(toObject(cl, convValue) + ");");
 
-	String localName = attrName.getLocalName();
-	String upperName = Character.toUpperCase(localName.charAt(0)) + localName.substring(1);
+        String localName = attrName.getLocalName();
+        String upperName = Character.toUpperCase(localName.charAt(0)) + localName.substring(1);
 
-	if (attribute != null) {
-	  // needed by TeamCity
+        if (attribute != null) {
+          // needed by TeamCity
           out.println(customTagName + ".set" + upperName + "(" + convValue + ");");
-	}
-	else {
-	 // out.println(customTagName + ".set" + upperName + "(" + convValue + ");");
-	}
+        }
+        else {
+         // out.println(customTagName + ".set" + upperName + "(" + convValue + ");");
+        }
       }
       
       /*
@@ -420,7 +420,7 @@ public class TagFileTag extends GenericTag {
   {
     for (int i = 0; i < names.size(); i++) {
       if (names.get(i).getName().equals(name))
-	return i;
+        return i;
     }
 
     return -1;

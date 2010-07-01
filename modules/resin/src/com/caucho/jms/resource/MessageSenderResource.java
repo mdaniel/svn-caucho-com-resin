@@ -119,19 +119,19 @@ public class MessageSenderResource implements MessageSender {
         Message message;
 
         if (value == null) {
-  	  message = session.createMessage();
+            message = session.createMessage();
         }
         else if (value instanceof String) {
-	  message = session.createTextMessage((String) value);
+          message = session.createTextMessage((String) value);
         }
         else if (value instanceof java.io.Serializable) {
-	  ObjectMessage objMessage = session.createObjectMessage();
-	  objMessage.setObject((java.io.Serializable) value);
-	  message = objMessage;
+          ObjectMessage objMessage = session.createObjectMessage();
+          objMessage.setObject((java.io.Serializable) value);
+          message = objMessage;
         }
         else {
- 	  throw new MessageServiceException(L.l("value '{0}' must be serializable",
-					      value));
+           throw new MessageServiceException(L.l("value '{0}' must be serializable",
+                                              value));
         }
 
         MessageProducer producer = session.createProducer(_destination);

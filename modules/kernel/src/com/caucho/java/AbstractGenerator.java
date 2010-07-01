@@ -98,11 +98,11 @@ public abstract class AbstractGenerator {
       char ch = fullClassName.charAt(i);
 
       if (ch == '.' || ch == '/')
-	cb.append('.');
+        cb.append('.');
       else if (Character.isJavaIdentifierPart(ch))
-	cb.append(ch);
+        cb.append(ch);
       else
-	cb.append('_');
+        cb.append('_');
     }
     
     _fullClassName = cb.close();
@@ -332,7 +332,7 @@ public abstract class AbstractGenerator {
    * @param exn array of exceptions thrown by the method
    */
   public void printMethodHeader(String methodName, Class []parameters,
-				Class returnType, Class []exn)
+                                Class returnType, Class []exn)
     throws IOException
   {
     println();

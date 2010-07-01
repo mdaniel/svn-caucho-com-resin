@@ -117,7 +117,7 @@ public class AddAttribute extends Attribute {
       XmlBeanConfig config = (XmlBeanConfig) objValue;
 
       if (! value.trim().equals("")) {
-	config.addArg(new TextArgProgram(value));
+        config.addArg(new TextArgProgram(value));
       }
 
       config.init();

@@ -57,22 +57,22 @@ public final class OnParentVersionAction {
     switch (action) {
     case COPY:
       return ACTIONNAME_COPY;
-		
+
     case VERSION:
       return ACTIONNAME_VERSION;
-		
+
     case INITIALIZE:
       return ACTIONNAME_INITIALIZE;
-		
+
     case COMPUTE:
       return ACTIONNAME_COMPUTE;
-		
+
     case IGNORE:
       return ACTIONNAME_IGNORE;
-		
+
     case ABORT:
       return ACTIONNAME_ABORT;
-		
+
     default:
       throw new IllegalArgumentException(action + " is an unknown OnParentVersionAction");
     }

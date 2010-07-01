@@ -231,9 +231,9 @@ public class BamPhpActor extends SimpleActor {
             (ArrayList) returnValue.toJavaList(env, ArrayList.class);
         }
 
-	/*
+        /*
         understood = handleDiscoInfoQuery(id, to, from, (DiscoInfoQuery) value);
-	*/
+        */
       }
       else {
         understood = 
@@ -339,7 +339,7 @@ public class BamPhpActor extends SimpleActor {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[jid=" + getJid()
-	    + ",script=" + _script + "]");
+            + "[jid=" + getJid()
+            + ",script=" + _script + "]");
   }
 }

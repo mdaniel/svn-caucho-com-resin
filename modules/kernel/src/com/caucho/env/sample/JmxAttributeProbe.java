@@ -39,7 +39,7 @@ import com.caucho.jmx.Jmx;
 
 public final class JmxAttributeProbe extends Probe {
     private static final Logger log
-	= Logger.getLogger(JmxAttributeProbe.class.getName());
+        = Logger.getLogger(JmxAttributeProbe.class.getName());
 
   private MBeanServer _server;
   private ObjectName _objectName;
@@ -50,9 +50,9 @@ public final class JmxAttributeProbe extends Probe {
     super(name);
 
     try {
-	_objectName = new ObjectName(objectName);
+        _objectName = new ObjectName(objectName);
     } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
     }
 
     _attribute = attribute;
@@ -68,7 +68,7 @@ public final class JmxAttributeProbe extends Probe {
       Object value = _server.getAttribute(_objectName, _attribute);
 
       if (value == null)
-	return 0;
+        return 0;
       
       return ((Number) value).doubleValue();
     } catch (Exception e) {

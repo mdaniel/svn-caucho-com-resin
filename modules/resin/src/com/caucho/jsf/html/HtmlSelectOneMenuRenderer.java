@@ -119,7 +119,7 @@ class HtmlSelectOneMenuRenderer extends SelectRenderer
 
     if (component instanceof HtmlSelectOneMenu) {
       HtmlSelectOneMenu htmlComponent
-	= (HtmlSelectOneMenu) component;
+        = (HtmlSelectOneMenu) component;
 
       accesskey = htmlComponent.getAccesskey();
       dir = htmlComponent.getDir();

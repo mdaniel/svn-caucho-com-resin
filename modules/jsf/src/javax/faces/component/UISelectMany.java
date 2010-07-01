@@ -131,14 +131,14 @@ public class UISelectMany extends UIInput
       setValid(false);
       
       String summary = Util.l10n(context, INVALID_MESSAGE_ID,
-				 "{0}: Validation Error: UISelectMany value {1} is not valid.",
-				 Util.getLabel(context, this),
-				 value == null? null: Arrays.asList((Object[])value));
+                                 "{0}: Validation Error: UISelectMany value {1} is not valid.",
+                                 Util.getLabel(context, this),
+                                 value == null? null: Arrays.asList((Object[])value));
 
       String detail = summary;
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
-	
+
       context.addMessage(getClientId(context), msg);
     }
   }
@@ -159,7 +159,7 @@ public class UISelectMany extends UIInput
 
     for (int i = 0; i < oldValues.length; i++) {
       if (! oldValues[i].equals(newValues[i]))
-	return true;
+        return true;
     }
 
     return false;

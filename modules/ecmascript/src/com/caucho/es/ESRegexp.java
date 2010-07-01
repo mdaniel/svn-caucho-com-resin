@@ -167,10 +167,10 @@ public class ESRegexp extends ESObject {
       this.flags = flags;
 
       try {
-	// XXX: java.util.regex
-	// _regexp = Pattern.parse(pattern.toString(), flags.toString());
+        // XXX: java.util.regex
+        // _regexp = Pattern.parse(pattern.toString(), flags.toString());
       } catch (Exception e) {
-	throw new ESException("regexp: " + e);
+        throw new ESException("regexp: " + e);
       }
     }
 
@@ -200,7 +200,7 @@ public class ESRegexp extends ESObject {
       lastIndex = regexp.getEnd(0);
 
       if (regexp.getBegin(0) == lastIndex) 
-	lastIndex++;
+        lastIndex++;
 
       return true;
     }

@@ -105,7 +105,7 @@ public class EnhancingClassLoader extends EnvironmentClassLoader {
     super.init();
 
     if (getTransformerList() == null
-	&& EnhancerManager.getLocalEnhancer(this) != null) {
+        && EnhancerManager.getLocalEnhancer(this) != null) {
       EnhancerManager.create(this);
     }
   }

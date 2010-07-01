@@ -95,15 +95,15 @@ public class CoreSetTag extends BodyTagSupport {
   {
     try {
       if (valueExpr == null)
-	return EVAL_BODY_BUFFERED;
+        return EVAL_BODY_BUFFERED;
 
       ELContext env = pageContext.getELContext();
 
       Object value = valueExpr.evalObject(env);
       if (var != null)
-	setValue(value);
+        setValue(value);
       else
-	setProperty(value);
+        setProperty(value);
 
       return SKIP_BODY;
     } catch (Exception e) {
@@ -130,33 +130,33 @@ public class CoreSetTag extends BodyTagSupport {
   {
     if (scope == null) {
       if (value != null)
-	pageContext.setAttribute(var, value);
+        pageContext.setAttribute(var, value);
       else
-	pageContext.removeAttribute(var);
+        pageContext.removeAttribute(var);
     }
     else if (scope.equals("page")) {
       if (value != null)
-	pageContext.setAttribute(var, value);
+        pageContext.setAttribute(var, value);
       else
-	pageContext.removeAttribute(var);
+        pageContext.removeAttribute(var);
     }
     else if (scope.equals("request")) {
       if (value != null)
-	pageContext.getRequest().setAttribute(var, value);
+        pageContext.getRequest().setAttribute(var, value);
       else
-	pageContext.getRequest().removeAttribute(var);
+        pageContext.getRequest().removeAttribute(var);
     }
     else if (scope.equals("session")) {
       if (value != null)
-	pageContext.getSession().setAttribute(var, value);
+        pageContext.getSession().setAttribute(var, value);
       else
-	pageContext.getSession().removeAttribute(var);
+        pageContext.getSession().removeAttribute(var);
     }
     else if (scope.equals("application")) {
       if (value != null)
-	pageContext.getServletContext().setAttribute(var, value);
+        pageContext.getServletContext().setAttribute(var, value);
       else
-	pageContext.getServletContext().removeAttribute(var);
+        pageContext.getServletContext().removeAttribute(var);
     }
     else
       throw new JspException(L.l("illegal scope value {0}", scope));

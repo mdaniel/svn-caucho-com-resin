@@ -74,12 +74,12 @@ abstract public class AbstractActorStream implements ActorStream
    */
   @Override
   public void message(String to,
-		      String from,
-		      Serializable payload)
+                      String from,
+                      Serializable payload)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " message ignored " + payload
-		+ " {from:" + from + ", to:" + to + "}");
+                + " {from:" + from + ", to:" + to + "}");
     }
 
     String msg;
@@ -108,13 +108,13 @@ abstract public class AbstractActorStream implements ActorStream
    */
   @Override
   public void messageError(String to,
-			   String from,
-			   Serializable payload,
-			   ActorError error)
+                           String from,
+                           Serializable payload,
+                           ActorError error)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " messageError ignored " + error + " " + payload
-		+ " {from:" + from + ", to:" + to + "}");
+                + " {from:" + from + ", to:" + to + "}");
     }
   }
 
@@ -138,22 +138,22 @@ abstract public class AbstractActorStream implements ActorStream
    */
   @Override
   public void queryGet(long id,
-		       String to,
-		       String from,
-		       Serializable payload)
+                       String to,
+                       String from,
+                       Serializable payload)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " queryGet not implemented " + payload
-		+ " {id:" + id + ", from:" + from + ", to:" + to + "}");
+                + " {id:" + id + ", from:" + from + ", to:" + to + "}");
     }
 
     String msg;
     msg = (this + ": queryGet is not implemented by this actor.\n"
-	   + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
+           + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
 
     ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-				      ActorError.FEATURE_NOT_IMPLEMENTED,
-				      msg);
+                                      ActorError.FEATURE_NOT_IMPLEMENTED,
+                                      msg);
 
     ActorStream linkStream = getLinkStream();
 
@@ -179,23 +179,23 @@ abstract public class AbstractActorStream implements ActorStream
    */
   @Override
   public void querySet(long id,
-		       String to,
-		       String from,
-		       Serializable payload)
+                       String to,
+                       String from,
+                       Serializable payload)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " querySet not implemented " + payload
-		+ " {id:" + id + ", from:" + from + ", to:" + to + "}");
+                + " {id:" + id + ", from:" + from + ", to:" + to + "}");
     }
 
     String msg;
     msg = (this + ": querySet is not implemented for this payload:\n"
-	   + "  " + payload
-	   + " {id:" + id + ", from:" + from + ", to:" + to + "}");
+           + "  " + payload
+           + " {id:" + id + ", from:" + from + ", to:" + to + "}");
 
     ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-				      ActorError.FEATURE_NOT_IMPLEMENTED,
-				      msg);
+                                      ActorError.FEATURE_NOT_IMPLEMENTED,
+                                      msg);
 
 
     ActorStream linkStream = getLinkStream();
@@ -217,13 +217,13 @@ abstract public class AbstractActorStream implements ActorStream
    */
   @Override
   public void queryResult(long id,
-			  String to,
-			  String from,
-			  Serializable payload)
+                          String to,
+                          String from,
+                          Serializable payload)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " queryResult ignored " + payload
-		+ " {id:" + id + ", from:" + from + ", to:" + to + "}");
+                + " {id:" + id + ", from:" + from + ", to:" + to + "}");
     }
   }
   
@@ -239,14 +239,14 @@ abstract public class AbstractActorStream implements ActorStream
    */
   @Override
   public void queryError(long id,
-			 String to,
-			 String from,
-			 Serializable payload,
-			 ActorError error)
+                         String to,
+                         String from,
+                         Serializable payload,
+                         ActorError error)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " queryError ignored " + error + " " + payload
-		+ " {id:" + id + ", from:" + from + ", to:" + to + "}");
+                + " {id:" + id + ", from:" + from + ", to:" + to + "}");
     }
   }
   

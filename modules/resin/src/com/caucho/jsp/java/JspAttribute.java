@@ -53,7 +53,7 @@ public class JspAttribute extends JspFragmentNode {
   public JspAttribute()
   {
   }
-		      
+
   /**
    * Returns the attribute name.
    */
@@ -234,7 +234,7 @@ public class JspAttribute extends JspFragmentNode {
       String text = getStaticText();
 
       if (_trim)
-	text = text.trim();
+        text = text.trim();
 
       return stringToValue(type, '"' + escapeJavaString(text) + '"');
     }

@@ -71,9 +71,9 @@ class QNotation extends QNode implements Notation {
       os.print(_publicId);
       os.print("\"");
       if (_systemId != null) {
-	os.print(" \"");
-	os.print(_systemId);
-	os.print("\"");
+        os.print(" \"");
+        os.print(_systemId);
+        os.print("\"");
       }
     } else if (_systemId != null) {
       os.print(" SYSTEM \"");

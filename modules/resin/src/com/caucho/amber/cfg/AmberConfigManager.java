@@ -80,7 +80,7 @@ public class AmberConfigManager {
 
     try {
       EntityIntrospector introspector
-	= new EntityIntrospector(this);
+        = new EntityIntrospector(this);
 
       return introspector.introspect(type);
     } catch (SQLException e) {

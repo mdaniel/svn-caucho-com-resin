@@ -60,10 +60,10 @@ public class ArtifactRepository
 
     if (loader != null) {
       EnvironmentClassLoader parentLoader
-	= Environment.getEnvironmentClassLoader(loader.getParent());
+        = Environment.getEnvironmentClassLoader(loader.getParent());
 
       if (parentLoader != null && parentLoader != loader)
-	_parent = create(parentLoader);
+        _parent = create(parentLoader);
     }
   }
 
@@ -113,7 +113,7 @@ public class ArtifactRepository
   }
 
   public ArrayList<Artifact> resolve(ArtifactDependency dependency,
-				     ArtifactDependency []peerDependencyList)
+                                     ArtifactDependency []peerDependencyList)
   {
     ArrayList<ArtifactDependency> peers = new ArrayList<ArtifactDependency>();
 
@@ -124,7 +124,7 @@ public class ArtifactRepository
   }
 
   public ArrayList<Artifact> resolve(ArtifactDependency dependency,
-				     ArrayList<ArtifactDependency> peerDependencyList)
+                                     ArrayList<ArtifactDependency> peerDependencyList)
   {
     ArrayList<Artifact> artifactList = new ArrayList<Artifact>();
     resolve(artifactList, dependency);
@@ -136,7 +136,7 @@ public class ArtifactRepository
 
     for (Artifact artifact : artifactList) {
       if (isValid(artifact, peerDeps)) {
-	filteredArtifactList.add(artifact);
+        filteredArtifactList.add(artifact);
       }
     }
 
@@ -150,18 +150,18 @@ public class ArtifactRepository
   }
 
   private boolean isValid(Artifact artifact,
-			  ArrayList<ArtifactDependency> dependencyList)
+                          ArrayList<ArtifactDependency> dependencyList)
   {
     for (ArtifactDependency dep : dependencyList) {
       if (! artifact.isMatch(dep))
-	return false;
+        return false;
     }
 
     return true;
   }
 
   protected void resolve(ArrayList<Artifact> artifactList,
-			 ArtifactDependency dependency)
+                         ArtifactDependency dependency)
   {
     if (_parent != null)
       _parent.resolve(artifactList, dependency);
@@ -172,24 +172,24 @@ public class ArtifactRepository
 
   protected ArrayList<ArtifactDependency>
     resolvePeer(ArtifactDependency dependency,
-		ArrayList<ArtifactDependency> peerList)
+                ArrayList<ArtifactDependency> peerList)
   {
     ArrayList<ArtifactDependency> commonDeps
       = new ArrayList<ArtifactDependency>();
     
     for (ArtifactDependency peer : peerList) {
       if (peer == dependency)
-	continue;
+        continue;
 
       ArrayList<Artifact> peerArtifacts = resolve(peer);
 
       for (Artifact peerArtifact : peerArtifacts) {
-	for (ArtifactDependency peerDependency
-	       : peerArtifact.getDependencies()) {
-	  if (peerDependency.isSameArtifact(dependency)) {
-	    commonDeps.add(peerDependency);
-	  }
-	}
+        for (ArtifactDependency peerDependency
+               : peerArtifact.getDependencies()) {
+          if (peerDependency.isSameArtifact(dependency)) {
+            commonDeps.add(peerDependency);
+          }
+        }
       }
     }
 

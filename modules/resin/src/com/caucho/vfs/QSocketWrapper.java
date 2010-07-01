@@ -228,7 +228,7 @@ public class QSocketWrapper extends QSocket {
       return (X509Certificate []) sslSession.getPeerCertificates();
     } catch (SSLPeerUnverifiedException e) {
       if (log.isLoggable(Level.FINEST))
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       
       return null;
     } catch (Throwable e) {

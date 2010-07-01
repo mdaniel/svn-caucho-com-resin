@@ -37,10 +37,10 @@ import com.caucho.jms.queue.QueueEntry;
 public class MemoryQueueEntry<E> extends QueueEntry<E>
 {  
   public MemoryQueueEntry(String msgId,
-			  long leaseTimeout,
-			  int priority,
-			  long expiresTime,
-			  E payload)
+                          long leaseTimeout,
+                          int priority,
+                          long expiresTime,
+                          E payload)
   {
     super(msgId, leaseTimeout, priority, expiresTime);
 

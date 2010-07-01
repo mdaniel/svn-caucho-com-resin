@@ -90,7 +90,7 @@ public class ResinImport extends ResinControl implements FlowBean
   {
     if (_path == null) {
       if (_fileSet == null)
-	throw new ConfigException(L.l("'path' attribute missing from resin:import."));
+        throw new ConfigException(L.l("'path' attribute missing from resin:import."));
     }
     else if (_path.canRead() && ! _path.isDirectory()) {
     }
@@ -102,7 +102,7 @@ public class ResinImport extends ResinControl implements FlowBean
     }
     else {
       throw new ConfigException(L.l("Required file '{0}' can not be read for resin:import.",
-				    _path.getNativePath()));
+                                    _path.getNativePath()));
     }
     
     Object object = getObject();

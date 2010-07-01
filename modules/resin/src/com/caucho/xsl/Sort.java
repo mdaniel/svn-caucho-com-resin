@@ -160,15 +160,15 @@ public class Sort {
   }
 
   int cmp(Object a, Object b, Comparator comparator,
-	  boolean isAscending, int caseOrder)
+          boolean isAscending, int caseOrder)
   {
     if (comparator != null) {
       if (a == b)
-	return 0; 
+        return 0;
       else if (a == null)
-	return isAscending ? -1 : 1;
+        return isAscending ? -1 : 1;
       else if (b == null)
-	return isAscending ? 1 : -1;
+        return isAscending ? 1 : -1;
       
       int cmp = comparator.compare(a, b);
       
@@ -179,106 +179,106 @@ public class Sort {
       double db = ((Double) b).doubleValue();
 
       if (da == db)
-	return 0;
+        return 0;
       else if (da < db)
-	return isAscending ? -1 : 1;
+        return isAscending ? -1 : 1;
       else if (db < da)
-	return isAscending ? 1 : -1;
+        return isAscending ? 1 : -1;
       else if (! Double.isNaN(da))
-	return isAscending ? -1 : 1;
+        return isAscending ? -1 : 1;
       else if (! Double.isNaN(db))
-	return isAscending ? 1 : -1;
+        return isAscending ? 1 : -1;
       else
-	return 0;
+        return 0;
     }
     else {
       String va = (String) a;
       String vb = (String) b;
 
       if (va == vb)
-	return 0; 
+        return 0;
       else if (va == null)
-	return isAscending ? -1 : 1;
+        return isAscending ? -1 : 1;
       else if (vb == null)
-	return isAscending ? 1 : -1;
+        return isAscending ? 1 : -1;
 
       int cmp = 0;
 
       if (caseOrder == NO_CASE_ORDER)
-	cmp = va.compareTo(vb);
+        cmp = va.compareTo(vb);
       else if (caseOrder == UPPER_FIRST) {
-	int len = va.length();
-	if (vb.length() < len)
-	  len = vb.length();
+        int len = va.length();
+        if (vb.length() < len)
+          len = vb.length();
 
-	int i = 0;
-	for (; i < len; i++) {
-	  char chA = va.charAt(i);
-	  char chB = vb.charAt(i);
+        int i = 0;
+        for (; i < len; i++) {
+          char chA = va.charAt(i);
+          char chB = vb.charAt(i);
 
-	  if (chA == chB)
-	    continue;
-	  else if (Character.isUpperCase(chA) &&
-		   Character.isLowerCase(chB)) {
-	    cmp = -1;
-	    break;
-	  }
-	  else if (Character.isLowerCase(chA) &&
-		   Character.isUpperCase(chB)) {
-	    cmp = 1;
-	    break;
-	  }
-	  else {
-	    cmp = chA - chB;
-	    break;
-	  }
-	}
+          if (chA == chB)
+            continue;
+          else if (Character.isUpperCase(chA) &&
+                   Character.isLowerCase(chB)) {
+            cmp = -1;
+            break;
+          }
+          else if (Character.isLowerCase(chA) &&
+                   Character.isUpperCase(chB)) {
+            cmp = 1;
+            break;
+          }
+          else {
+            cmp = chA - chB;
+            break;
+          }
+        }
 
-	if (i < len) {
-	}
-	else if (va.length() == vb.length())
-	  cmp = 0;
-	else if (va.length() < vb.length())
-	  cmp = -1;
-	else
-	  cmp = 1;
+        if (i < len) {
+        }
+        else if (va.length() == vb.length())
+          cmp = 0;
+        else if (va.length() < vb.length())
+          cmp = -1;
+        else
+          cmp = 1;
       }
       else if (caseOrder == LOWER_FIRST) {
-	int len = va.length();
-	if (vb.length() < len)
-	  len = vb.length();
+        int len = va.length();
+        if (vb.length() < len)
+          len = vb.length();
 
-	int i = 0;
-	for (; i < len; i++) {
-	  char chA = va.charAt(i);
-	  char chB = vb.charAt(i);
+        int i = 0;
+        for (; i < len; i++) {
+          char chA = va.charAt(i);
+          char chB = vb.charAt(i);
 
-	  if (chA == chB)
-	    continue;
-	  else if (Character.isUpperCase(chA) &&
-		   Character.isLowerCase(chB)) {
-	    cmp = 1;
-	    break;
-	  }
-	  else if (Character.isLowerCase(chA) &&
-		   Character.isUpperCase(chB)) {
-	    cmp = -1;
-	    break;
-	  }
-	  else {
-	    cmp = chA - chB;
-	    break;
-	  }
-	}
+          if (chA == chB)
+            continue;
+          else if (Character.isUpperCase(chA) &&
+                   Character.isLowerCase(chB)) {
+            cmp = 1;
+            break;
+          }
+          else if (Character.isLowerCase(chA) &&
+                   Character.isUpperCase(chB)) {
+            cmp = -1;
+            break;
+          }
+          else {
+            cmp = chA - chB;
+            break;
+          }
+        }
 
-	if (i < len) {
-	}
-	else if (va.length() == vb.length())
-	  cmp = 0;
-	else if (va.length() < vb.length())
-	  cmp = -1;
-	else
-	  cmp = 1;
+        if (i < len) {
+        }
+        else if (va.length() == vb.length())
+          cmp = 0;
+        else if (va.length() < vb.length())
+          cmp = -1;
+        else
+          cmp = 1;
       }
 
       return isAscending ? cmp : -cmp;

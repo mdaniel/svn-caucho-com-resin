@@ -155,15 +155,15 @@ public class JspPrecompileResource {
     long expire = Alarm.getCurrentTime() + 60000;
     synchronized (this) {
       while (_completeCount < _threadCount) {
-	try {
-	  long timeout = expire - Alarm.getCurrentTime();
+        try {
+          long timeout = expire - Alarm.getCurrentTime();
 
-	  if (timeout < 0)
-	    return;
-	  
-	  wait(timeout);
-	} catch (Exception e) {
-	}
+          if (timeout < 0)
+            return;
+
+          wait(timeout);
+        } catch (Exception e) {
+        }
       }
     }
   }
@@ -175,13 +175,13 @@ public class JspPrecompileResource {
     private JspCompiler _compiler;
 
     CompileTask(ArrayList<Path> paths,
-		ArrayList<String> classes)
+                ArrayList<String> classes)
     {
       _paths = paths;
       _classes = classes;
 
       synchronized (_paths) {
-	_chunkCount = (_paths.size() + _threadCount) / _threadCount;
+        _chunkCount = (_paths.size() + _threadCount) / _threadCount;
       }
       
       _compiler = new JspCompiler();
@@ -191,17 +191,17 @@ public class JspPrecompileResource {
     public void run()
     {
       try {
-	while (compilePath()) {
-	}
+        while (compilePath()) {
+        }
       
-	while (compileClasses()) {
-	}
+        while (compileClasses()) {
+        }
       } finally {
-	synchronized (JspPrecompileResource.this) {
-	  _completeCount++;
+        synchronized (JspPrecompileResource.this) {
+          _completeCount++;
 
-	  JspPrecompileResource.this.notifyAll();
-	}
+          JspPrecompileResource.this.notifyAll();
+        }
       }
     }
 
@@ -209,60 +209,60 @@ public class JspPrecompileResource {
     {
       String contextPath = _webApp.getContextPath();
       if (! contextPath.endsWith("/"))
-	contextPath = contextPath + "/";
+        contextPath = contextPath + "/";
     
       Path pwd = Vfs.lookup();
       Path path = null;
 
       synchronized (_paths) {
-	if (_paths.size() == 0)
-	  return false;
+        if (_paths.size() == 0)
+          return false;
 
-	path = _paths.remove(0);
+        path = _paths.remove(0);
       }
 
       String uri = path.getPath().substring(pwd.getPath().length());
 
       if (_webApp.getContext(contextPath + uri) != _webApp)
-	return true;
+        return true;
 
       String className = JspCompiler.urlToClassName(uri);
 
       try {
-	CauchoPage page = (CauchoPage) _compiler.loadClass(className, true);
+        CauchoPage page = (CauchoPage) _compiler.loadClass(className, true);
 
-	page.init(pwd);
+        page.init(pwd);
 
-	if (! page._caucho_isModified()) {
-	  log.fine("pre-loaded " + uri);
-	  return true;
-	}
+        if (! page._caucho_isModified()) {
+          log.fine("pre-loaded " + uri);
+          return true;
+        }
       } catch (ClassNotFoundException e) {
       } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
 
       log.fine("compiling " + uri);
       
       try {
-	JspCompilerInstance compilerInst;
-	compilerInst = _compiler.getCompilerInstance(path, uri, className);
+        JspCompilerInstance compilerInst;
+        compilerInst = _compiler.getCompilerInstance(path, uri, className);
 
-	JspGenerator generator = compilerInst.generate();
-	
-	if (generator.isStatic())
-	  return true;
-	
-	LineMap lineMap = generator.getLineMap();
+        JspGenerator generator = compilerInst.generate();
 
-	synchronized (_classes) {
-	  _classes.add(className.replace('.', '/') + ".java");
-	}
+        if (generator.isStatic())
+          return true;
+
+        LineMap lineMap = generator.getLineMap();
+
+        synchronized (_classes) {
+          _classes.add(className.replace('.', '/') + ".java");
+        }
       } catch (Exception e) {
-	if (e instanceof CompileException)
-	  log.warning(e.getMessage());
-	else
-	  log.log(Level.WARNING, e.toString(), e);
+        if (e instanceof CompileException)
+          log.warning(e.getMessage());
+        else
+          log.log(Level.WARNING, e.toString(), e);
       }
 
       return true;
@@ -273,24 +273,24 @@ public class JspPrecompileResource {
       String []files;
       
       synchronized (_classes) {
-	if (_classes.size() == 0)
-	  return false;
-	
-	files = new String[_classes.size()];
-	_classes.toArray(files);
-	_classes.clear();
+        if (_classes.size() == 0)
+          return false;
+
+        files = new String[_classes.size()];
+        _classes.toArray(files);
+        _classes.clear();
       }
 
       try {
-	JavaCompiler javaCompiler = JavaCompiler.create(null);
-	javaCompiler.setClassDir(_compiler.getClassDir());
+        JavaCompiler javaCompiler = JavaCompiler.create(null);
+        javaCompiler.setClassDir(_compiler.getClassDir());
 
-	javaCompiler.compileBatch(files);
+        javaCompiler.compileBatch(files);
       } catch (Exception e) {
-	if (e instanceof CompileException)
-	  log.warning(e.getMessage());
-	else
-	  log.log(Level.WARNING, e.toString(), e);
+        if (e instanceof CompileException)
+          log.warning(e.getMessage());
+        else
+          log.log(Level.WARNING, e.toString(), e);
       }
 
       return true;

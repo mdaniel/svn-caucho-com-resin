@@ -44,7 +44,7 @@ abstract public class AbstractScriptEngine implements ScriptEngine {
   {
     this.context = new SimpleScriptContext();
     this.context.setBindings(createBindings(),
-			      SimpleScriptContext.ENGINE_SCOPE);
+                              SimpleScriptContext.ENGINE_SCOPE);
   }
 
   /**
@@ -90,7 +90,7 @@ abstract public class AbstractScriptEngine implements ScriptEngine {
     cxt.setWriter(engineCxt.getWriter());
     cxt.setErrorWriter(engineCxt.getErrorWriter());
     cxt.setBindings(engineCxt.getBindings(ScriptContext.GLOBAL_SCOPE),
-		     ScriptContext.GLOBAL_SCOPE);
+                     ScriptContext.GLOBAL_SCOPE);
     cxt.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
 
     return eval(reader, cxt);
@@ -112,7 +112,7 @@ abstract public class AbstractScriptEngine implements ScriptEngine {
     cxt.setWriter(engineCxt.getWriter());
     cxt.setErrorWriter(engineCxt.getErrorWriter());
     cxt.setBindings(engineCxt.getBindings(ScriptContext.GLOBAL_SCOPE),
-		     ScriptContext.GLOBAL_SCOPE);
+                     ScriptContext.GLOBAL_SCOPE);
     cxt.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
 
     return eval(script, cxt);

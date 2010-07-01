@@ -142,14 +142,14 @@ class QEntity extends QNode implements Entity {
       out.printDecl(_publicId);
       out.print("\"");
       if (_systemId != null) {
-	out.print(" \"");
-	out.printDecl(_systemId);
-	out.print("\"");
+        out.print(" \"");
+        out.printDecl(_systemId);
+        out.print("\"");
       }
 
       if (_ndata != null) {
-	out.print(" NDATA ");
-	out.printDecl(_ndata);
+        out.print(" NDATA ");
+        out.printDecl(_ndata);
       }
     } else if (_systemId != null) {
       out.print(" SYSTEM \"");
@@ -157,8 +157,8 @@ class QEntity extends QNode implements Entity {
       out.print("\"");
 
       if (_ndata != null) {
-	out.print(" NDATA ");
-	out.printDecl(_ndata);
+        out.print(" NDATA ");
+        out.printDecl(_ndata);
       }
     }
     else if (_value != null) {

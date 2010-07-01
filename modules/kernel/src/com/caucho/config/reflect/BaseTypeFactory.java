@@ -61,7 +61,7 @@ public class BaseTypeFactory
       baseType = BaseType.createForSource(type, new HashMap<String,BaseType>());
 
       if (baseType == null)
-	throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
+        throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
 
       _sourceCache.put(type, baseType);
     }

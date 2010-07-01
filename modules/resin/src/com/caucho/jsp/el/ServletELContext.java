@@ -59,7 +59,7 @@ abstract public class ServletELContext extends ELContext
 
     for (int i = 0; cookies != null && i < cookies.length; i++) {
       if (map.get(cookies[i].getName()) == null)
-	map.put(cookies[i].getName(), cookies[i]);
+        map.put(cookies[i].getName(), cookies[i]);
     }
       
     return map;
@@ -114,7 +114,7 @@ abstract public class ServletELContext extends ELContext
       ArrayList<String> list = new ArrayList<String>();
 
       while (values.hasMoreElements())
-	list.add((String) values.nextElement());
+        list.add((String) values.nextElement());
 
       map.put(name, list.toArray(new String[list.size()]));
     }
@@ -132,7 +132,7 @@ abstract public class ServletELContext extends ELContext
       ArrayList<String> list = new ArrayList<String>();
 
       while (values != null && values.hasMoreElements())
-	list.add((String) values.nextElement());
+        list.add((String) values.nextElement());
 
       return list.toArray(new String[list.size()]);
     }

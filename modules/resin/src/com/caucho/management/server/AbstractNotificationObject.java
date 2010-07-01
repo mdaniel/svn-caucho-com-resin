@@ -62,8 +62,8 @@ abstract public class AbstractNotificationObject extends AbstractManagedObject
    * Adds a new listener
    */
   public void addNotificationListener(NotificationListener listener,
-				      NotificationFilter filter,
-				      Object handback)
+                                      NotificationFilter filter,
+                                      Object handback)
   {
     _notifList.add(new Notif(listener, filter, handback));
   }
@@ -77,8 +77,8 @@ abstract public class AbstractNotificationObject extends AbstractManagedObject
       Notif notif = _notifList.get(i);
 
       if (listener == notif.getListener()) {
-	isMatch = true;
-	_notifList.remove(i);
+        isMatch = true;
+        _notifList.remove(i);
       }
     }
 
@@ -87,8 +87,8 @@ abstract public class AbstractNotificationObject extends AbstractManagedObject
   }
 
   public void removeNotificationListener(NotificationListener listener,
-					 NotificationFilter filter,
-					 Object handback)
+                                         NotificationFilter filter,
+                                         Object handback)
     throws ListenerNotFoundException
   {
     boolean isMatch = false;
@@ -97,10 +97,10 @@ abstract public class AbstractNotificationObject extends AbstractManagedObject
       Notif notif = _notifList.get(i);
 
       if (listener == notif.getListener()
-	  && filter == notif.getFilter()
-	  && handback == notif.getHandback()) {
-	isMatch = true;
-	_notifList.remove(i);
+          && filter == notif.getFilter()
+          && handback == notif.getHandback()) {
+        isMatch = true;
+        _notifList.remove(i);
       }
     }
 
@@ -109,8 +109,8 @@ abstract public class AbstractNotificationObject extends AbstractManagedObject
   }
 
   protected void handleNotification(NotificationListener listener,
-				    Notification notif,
-				    Object handback)
+                                    Notification notif,
+                                    Object handback)
   {
     listener.handleNotification(notif, handback);
   }
@@ -121,10 +121,10 @@ abstract public class AbstractNotificationObject extends AbstractManagedObject
       Notif notif = _notifList.get(i);
 
       if (notif.getFilter() == null
-	  || notif.getFilter().isNotificationEnabled(notification)) {
-	handleNotification(notif.getListener(),
-			   notification,
-			   notif.getHandback());
+          || notif.getFilter().isNotificationEnabled(notification)) {
+        handleNotification(notif.getListener(),
+                           notification,
+                           notif.getHandback());
       }
     }
   }
@@ -135,8 +135,8 @@ abstract public class AbstractNotificationObject extends AbstractManagedObject
     private final Object _handback;
 
     Notif(NotificationListener listener,
-	  NotificationFilter filter,
-	  Object handback)
+          NotificationFilter filter,
+          Object handback)
     {
       _listener = listener;
       _filter = filter;

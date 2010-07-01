@@ -249,7 +249,7 @@ public class JavaWriter extends Writer {
       int ch = s.charAt(i);
 
       if (ch == '\n' && ! _lastCr)
-	_destLine++;
+        _destLine++;
       else if (ch == '\r')
         _destLine++;
 
@@ -510,16 +510,16 @@ public class JavaWriter extends Writer {
 
       WriteStream out = smap.openWrite();
       try {
-	String srcName = _lineMap.getLastSourceFilename();
+        String srcName = _lineMap.getLastSourceFilename();
 
-	LineMapWriter writer = new LineMapWriter(out);
-	
-	if (_lineMap.getSourceType() != null)
-	  writer.setSourceType(_lineMap.getSourceType());
-	
-	writer.write(_lineMap);
+        LineMapWriter writer = new LineMapWriter(out);
+
+        if (_lineMap.getSourceType() != null)
+          writer.setSourceType(_lineMap.getSourceType());
+
+        writer.write(_lineMap);
       } finally {
-	out.close();
+        out.close();
       }
     }
   }

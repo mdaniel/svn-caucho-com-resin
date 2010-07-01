@@ -65,14 +65,14 @@ class JobThread implements Runnable {
       ArrayList<Job> jobs = _job._jobs;
 
       for (int i = jobs.size() - 1; i >= 0; i--) {
-	Job oldJob = jobs.get(i);
+        Job oldJob = jobs.get(i);
 
-	if (oldJob.getTask() == task) {
-	  if (time < oldJob.getTime())
-	    oldJob.setTime(time);
+        if (oldJob.getTask() == task) {
+          if (time < oldJob.getTime())
+            oldJob.setTime(time);
 
-	  return;
-	}
+          return;
+        }
       }
       
       Job job = new Job(task);
@@ -94,10 +94,10 @@ class JobThread implements Runnable {
   {
     synchronized (_jobs) {
       for (int i = _jobs.size() - 1; i >= 0; i--) {
-	Job job = _jobs.get(i);
+        Job job = _jobs.get(i);
 
-	if (job.getTask() == task)
-	  _jobs.remove(i);
+        if (job.getTask() == task)
+          _jobs.remove(i);
       }
     }
   }
@@ -112,28 +112,28 @@ class JobThread implements Runnable {
       _runJobs.clear();
 
       synchronized (_jobs) {
-	for (int i = _jobs.size() - 1; i >= 0; i--) {
-	  Job job = _jobs.get(i);
+        for (int i = _jobs.size() - 1; i >= 0; i--) {
+          Job job = _jobs.get(i);
 
-	  if (job.getTime() <= now) {
-	    _runJobs.add(job);
-	    _jobs.remove(i);
-	  }
-	}
+          if (job.getTime() <= now) {
+            _runJobs.add(job);
+            _jobs.remove(i);
+          }
+        }
       }
 
       for (int i = _runJobs.size() - 1; i >= 0; i--) {
-	Job job = _runJobs.get(i);
+        Job job = _runJobs.get(i);
 
-	try {
-	  job.run();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          job.run();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       try {
-	thread.sleep(500);
+        thread.sleep(500);
       } catch (Throwable e) {
       }
     }
@@ -195,15 +195,15 @@ class JobThread implements Runnable {
     public void run()
     {
       if (! _isDead) {
-	Thread thread = Thread.currentThread();
-	ClassLoader oldLoader = thread.getContextClassLoader();
+        Thread thread = Thread.currentThread();
+        ClassLoader oldLoader = thread.getContextClassLoader();
 
-	try {
-	  thread.setContextClassLoader(_loader);
-	  _task.run();
-	} finally {
-	  thread.setContextClassLoader(oldLoader);
-	}
+        try {
+          thread.setContextClassLoader(_loader);
+          _task.run();
+        } finally {
+          thread.setContextClassLoader(oldLoader);
+        }
       }
     }
   }

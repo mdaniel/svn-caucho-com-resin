@@ -37,8 +37,8 @@ public class SpyScheme extends FilesystemPath {
   }
 
   public Path fsWalk(String userPath,
-		     Map<String,Object> attributes,
-		     String path)
+                     Map<String,Object> attributes,
+                     String path)
   {
     if (path.startsWith("/file:"))
       return new SpyPath(Vfs.lookup().lookup(path.substring(1)));

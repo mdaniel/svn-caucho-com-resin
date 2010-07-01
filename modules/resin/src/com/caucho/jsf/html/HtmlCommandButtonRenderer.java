@@ -76,21 +76,21 @@ class HtmlCommandButtonRenderer extends Renderer
       String type;
 
       if (component instanceof HtmlCommandButton) {
-	HtmlCommandButton htmlComp = (HtmlCommandButton) component;
+        HtmlCommandButton htmlComp = (HtmlCommandButton) component;
 
-	type = htmlComp.getType();
+        type = htmlComp.getType();
       }
       else {
-	Map<String,Object> attrMap = component.getAttributes();
+        Map<String,Object> attrMap = component.getAttributes();
     
-	type = (String) attrMap.get("type");
+        type = (String) attrMap.get("type");
       }
 
       if ("reset".equals(type))
-	return;
+        return;
 
       if (log.isLoggable(Level.FINE))
-	log.fine(component + " action " + type);
+        log.fine(component + " action " + type);
 
       ActionEvent event = new ActionEvent(component);
 
@@ -101,12 +101,12 @@ class HtmlCommandButtonRenderer extends Renderer
       String valueY = paramMap.get(clientId + ".y");
       
       if (valueX != null || valueY != null) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(component + " action [" + valueX + "," + valueY + "]");
-	
-	ActionEvent event = new ActionEvent(component);
+        if (log.isLoggable(Level.FINE))
+          log.fine(component + " action [" + valueX + "," + valueY + "]");
 
-	component.queueEvent(event);
+        ActionEvent event = new ActionEvent(component);
+
+        component.queueEvent(event);
       }
     }
   }
@@ -245,12 +245,12 @@ class HtmlCommandButtonRenderer extends Renderer
     }
     else {
       if ("reset".equals(type))
-	out.writeAttribute("type", "reset", "type");
+        out.writeAttribute("type", "reset", "type");
       else
-	out.writeAttribute("type", "submit", "type");
+        out.writeAttribute("type", "submit", "type");
 
       if (value != null)
-	out.writeAttribute("value", String.valueOf(value), "value");
+        out.writeAttribute("value", String.valueOf(value), "value");
     }
       
     out.writeAttribute("name", component.getClientId(context), "name");

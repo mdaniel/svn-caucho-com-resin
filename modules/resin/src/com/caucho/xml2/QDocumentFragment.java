@@ -74,8 +74,8 @@ public class QDocumentFragment extends QNode implements DocumentFragment {
       return frag;
 
     for (Node node = getFirstChild();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       frag.appendChild(node.cloneNode(true));
     }
 

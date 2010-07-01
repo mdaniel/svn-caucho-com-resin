@@ -128,119 +128,119 @@ class NativeMath extends Native {
     switch (n) {
     case ABS:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       arg = eval.getArg(0).toNum();
       return ESNumber.create(arg == 0 ? 0 : (arg < 0 ? -arg : arg));
 
     case ACOS:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.acos(eval.getArg(0).toNum()));
 
     case ASIN:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.asin(eval.getArg(0).toNum()));
 
     case ATAN:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.atan(eval.getArg(0).toNum()));
 
     case ATAN2:
       if (length < 2)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.atan2(eval.getArg(0).toNum(),
-					eval.getArg(1).toNum()));
+                                        eval.getArg(1).toNum()));
 
     case CEIL:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.ceil(eval.getArg(0).toNum()));
 
     case COS:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.cos(eval.getArg(0).toNum()));
 
     case EXP:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.exp(eval.getArg(0).toNum()));
 
     case FLOOR:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.floor(eval.getArg(0).toNum()));
 
     case LOG:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.log(eval.getArg(0).toNum()));
 
     case MAX:
       arg = -1.0/0.0;
       for (int i = 0; i < length; i++) {
-	double v = eval.getArg(i).toNum();
+        double v = eval.getArg(i).toNum();
 
-	arg = Math.max(v, arg);
+        arg = Math.max(v, arg);
       }
       return ESNumber.create(arg);
 
     case MIN:
       arg = 1.0/0.0;
       for (int i = 0; i < length; i++) {
-	double v = eval.getArg(i).toNum();
+        double v = eval.getArg(i).toNum();
 
-	arg = Math.min(v, arg);
+        arg = Math.min(v, arg);
       }
       return ESNumber.create(arg);
 
     case POW:
       if (length < 2)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.pow(eval.getArg(0).toNum(),
-				      eval.getArg(1).toNum()));
+                                      eval.getArg(1).toNum()));
 
     case RANDOM:
       {
-	if (length > 1) {
-	  int n = eval.getArg(0).toInt32();
-	  if (n > 0)
-	    return ESNumber.create((int) (random.nextDouble() * n));
-	} else {
-	  return ESNumber.create(random.nextDouble());
-	}
+        if (length > 1) {
+          int n = eval.getArg(0).toInt32();
+          if (n > 0)
+            return ESNumber.create((int) (random.nextDouble() * n));
+        } else {
+          return ESNumber.create(random.nextDouble());
+        }
       }
 
     case ROUND:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
 
       arg = eval.getArg(0).toNum();
       if (arg >= -0.5 && arg < 0.5)
-	return ESNumber.create(Math.rint(arg));
+        return ESNumber.create(Math.rint(arg));
       else
-	return ESNumber.create(Math.floor(arg + 0.5));
+        return ESNumber.create(Math.floor(arg + 0.5));
 
     case SET_SEED:
       if (length != 0)
-	random.setSeed((long) eval.getArg(0).toNum());
+        random.setSeed((long) eval.getArg(0).toNum());
       return esUndefined;
 
     case SIN:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.sin(eval.getArg(0).toNum()));
 
     case SQRT:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.sqrt(eval.getArg(0).toNum()));
 
     case TAN:
       if (length == 0)
-	return esUndefined;
+        return esUndefined;
       return ESNumber.create(Math.tan(eval.getArg(0).toNum()));
 
     default:

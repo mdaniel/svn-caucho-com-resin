@@ -57,7 +57,7 @@ public class ObjectConverter  {
       return Boolean.valueOf((String) obj).booleanValue();
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to boolean",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 
   /**
@@ -73,7 +73,7 @@ public class ObjectConverter  {
       return (byte) Long.parseLong((String) obj);
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to byte",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 
   /**
@@ -89,7 +89,7 @@ public class ObjectConverter  {
       return (short) Long.parseLong((String) obj);
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to short",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 
   /**
@@ -99,14 +99,14 @@ public class ObjectConverter  {
     throws JMSException
   {
     if (obj instanceof Integer
-	|| obj instanceof Short
-	|| obj instanceof Byte)
+        || obj instanceof Short
+        || obj instanceof Byte)
       return ((Number) obj).intValue();
     else if (obj == null || obj instanceof String)
       return (int) Long.parseLong((String) obj);
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to int",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 
   /**
@@ -116,15 +116,15 @@ public class ObjectConverter  {
     throws JMSException
   {
     if (obj instanceof Long
-	|| obj instanceof Integer
-	|| obj instanceof Short
-	|| obj instanceof Byte)
+        || obj instanceof Integer
+        || obj instanceof Short
+        || obj instanceof Byte)
       return ((Number) obj).longValue();
     else if (obj == null || obj instanceof String)
       return Long.parseLong((String) obj);
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to long",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 
   /**
@@ -139,7 +139,7 @@ public class ObjectConverter  {
       return (float) Double.parseDouble((String) obj);
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to float",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 
   /**
@@ -154,7 +154,7 @@ public class ObjectConverter  {
       return Double.parseDouble((String) obj);
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to double",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 
   /**
@@ -169,7 +169,7 @@ public class ObjectConverter  {
       return obj.toString();
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to String",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 
   /**
@@ -214,14 +214,14 @@ public class ObjectConverter  {
     else if (obj instanceof String) {
       String string = toString(obj);
       try {
-	return string.getBytes("UTF-8");
+        return string.getBytes("UTF-8");
       } catch (Exception e) {
-	throw new MessageFormatException(e.toString());
+        throw new MessageFormatException(e.toString());
       }
     }
     */
     else
       throw new MessageFormatException(L.l("can't convert {0} to byte[]",
-					   obj.getClass().getName()));
+                                           obj.getClass().getName()));
   }
 }

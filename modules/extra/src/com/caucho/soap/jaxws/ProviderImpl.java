@@ -49,20 +49,20 @@ public class ProviderImpl extends Provider {
   private ClassLoader _loader = Thread.currentThread().getContextClassLoader();
 
   public Endpoint createAndPublishEndpoint(String address,
-					   Object implementor)
+                                           Object implementor)
   {
     throw new UnsupportedOperationException();
   }
 
   public Endpoint createEndpoint(String bindingId,
-				 Object implementor)
+                                 Object implementor)
   {
     throw new UnsupportedOperationException();
   }
 
   public ServiceDelegate createServiceDelegate(URL wsdl,
-					       QName serviceName,
-					       Class serviceClass)
+                                               QName serviceName,
+                                               Class serviceClass)
   {
     return new ServiceDelegateImpl(wsdl, serviceName, serviceClass);
   }

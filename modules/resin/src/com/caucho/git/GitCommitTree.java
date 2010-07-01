@@ -141,7 +141,7 @@ public class GitCommitTree {
 
       String lenString = String.valueOf(length);
       for (int i = 0; i < lenString.length(); i++) {
-	md.update((byte) lenString.charAt(i));
+        md.update((byte) lenString.charAt(i));
       }
       md.update((byte) 0);
 
@@ -149,7 +149,7 @@ public class GitCommitTree {
 
       byte []buffer = tBuf.getBuffer();
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	md.update(buffer, 0, len);
+        md.update(buffer, 0, len);
       }
 
       return Hex.toHex(md.digest());
@@ -176,7 +176,7 @@ public class GitCommitTree {
 
       String lenString = String.valueOf(length);
       for (int i = 0; i < lenString.length(); i++) {
-	out.write(lenString.charAt(i));
+        out.write(lenString.charAt(i));
       }
       out.write(0);
 
@@ -184,7 +184,7 @@ public class GitCommitTree {
 
       byte []buffer = tBuf.getBuffer();
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	out.write(buffer, 0, len);
+        out.write(buffer, 0, len);
       }
 
       out.close();

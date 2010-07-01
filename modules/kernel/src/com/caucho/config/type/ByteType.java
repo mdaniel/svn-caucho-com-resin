@@ -84,6 +84,6 @@ public final class ByteType extends ConfigType
       return new Byte(((Number) value).byteValue());
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to a Byte",
-				    value));
+                                    value));
   }
 }

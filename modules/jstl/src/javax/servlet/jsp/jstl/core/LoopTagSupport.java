@@ -238,10 +238,10 @@ abstract public class LoopTagSupport extends TagSupport
 
     for (; stepCount > 0; stepCount--) {
       if (! hasNext()) {
-	if (this.itemId != null)
-	  pageContext.setAttribute(itemId, _initialVar);
+        if (this.itemId != null)
+          pageContext.setAttribute(itemId, _initialVar);
 
-	return SKIP_BODY;
+        return SKIP_BODY;
       }
         
       _index++;

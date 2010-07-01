@@ -202,7 +202,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     while (length > 0) {
       int sublen = length;
       if (SIZE - charLength < sublen)
-	sublen = SIZE - charLength;
+        sublen = SIZE - charLength;
 
       System.arraycopy(buffer, offset, _charBuffer, charLength, sublen);
 
@@ -211,9 +211,9 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
       charLength += sublen;
 
       if (SIZE <= charLength) {
-	_charLength = charLength;
-	expandCharBuffer();
-	charLength = _charLength;
+        _charLength = charLength;
+        expandCharBuffer();
+        charLength = _charLength;
       }
     }
 
@@ -235,9 +235,9 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   {
     if (offset > 0) {
       try {
-	write(_byteBuffer, 0, offset);
+        write(_byteBuffer, 0, offset);
       } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -278,14 +278,14 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     if (_encodingReader == null) {
       // server/1b13
       if (_in == null)
-	_in = new BufferInputStream();
+        _in = new BufferInputStream();
       _encodingReader = Encoding.getReadEncoding(_in, getEncoding());
     }
 
     // XXX: performance issues
     if (_encodingReader == null) {
       for (; length > 0; length--) {
-	print((char) buf[offset++]);
+        print((char) buf[offset++]);
       }
       return;
     }
@@ -311,13 +311,13 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   {
     if (_encodingReader == null) {
       if (_in == null)
-	_in = new BufferInputStream();
+        _in = new BufferInputStream();
       _byteBuffer[0] = (byte) ch;
       _encodingReader = Encoding.getReadEncoding(_in, getEncoding());
 
       if (_encodingReader == null) {
-	print((char) ch);
-	return;
+        print((char) ch);
+        return;
       }
     }
     
@@ -359,7 +359,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     else if (_charLength == SIZE) {
       _tail.setLength(_charLength);
       _bufferSize += _charLength;
-	
+
       TempCharBuffer tempBuf = TempCharBuffer.allocate();
       _tail.setNext(tempBuf);
       _tail = tempBuf;
@@ -389,7 +389,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
       writeNext(ptr.getBuffer(), 0, ptr.getLength());
 
       if (next != null)
-	TempCharBuffer.free(ptr);
+        TempCharBuffer.free(ptr);
 
       ptr = next;
     } while (ptr != null);
@@ -415,7 +415,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
       ptr.setNext(null);
 
       if (next != null)
-	TempCharBuffer.free(ptr);
+        TempCharBuffer.free(ptr);
 
       ptr = next;
     } while (ptr != null);
@@ -452,9 +452,9 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     public int read()
     {
       if (_offset < _length)
-	return _buffer[_offset++] & 0xff;
+        return _buffer[_offset++] & 0xff;
       else
-	return -1;
+        return -1;
     }
   }
 }

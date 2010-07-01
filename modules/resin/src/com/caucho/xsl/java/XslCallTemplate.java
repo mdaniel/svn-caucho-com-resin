@@ -70,12 +70,12 @@ public class XslCallTemplate extends XslNode {
   {
     if (! _gen.hasMacro(_name))
       throw error(L.l("'{0}' is an unknown template name.  xsl:call-template name must match a defined xsl:template name.",
-		      _name));
+                      _name));
     
     pushCall(out);
     generateChildren(out);
     out.println(_gen.getMacroName(_name) + "(out, node, _xsl_arg" +
-		_gen.getCallDepth() + ");");
+                _gen.getCallDepth() + ");");
     
     popCall(out);
   }

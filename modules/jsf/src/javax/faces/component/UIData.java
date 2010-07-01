@@ -251,10 +251,10 @@ public class UIData extends UIComponentBase
   }
 
   private int setRowIndexState(UIComponent comp,
-			       int oldRow,
-			       int newRow,
-			       boolean isTransient,
-			       int valueIndex)
+                               int oldRow,
+                               int newRow,
+                               boolean isTransient,
+                               int valueIndex)
   {
     //skip self
     if (comp != this)
@@ -266,51 +266,51 @@ public class UIData extends UIComponentBase
       EditableValueHolder holder = (EditableValueHolder) comp;
       
       if (oldRow >= 0) {
-	ArrayList<State> oldList;
+        ArrayList<State> oldList;
 
-	while (_state.size() <= oldRow)
-	  _state.add(null);
-	
-	oldList = _state.get(oldRow);
+        while (_state.size() <= oldRow)
+          _state.add(null);
 
-	if (oldList == null) {
-	  oldList = new ArrayList<State>();
-	  
-	  _state.set(oldRow, oldList);
-	}
+        oldList = _state.get(oldRow);
 
-	while (oldList.size() < (valueIndex + 1))
-	  oldList.add(null);
+        if (oldList == null) {
+          oldList = new ArrayList<State>();
 
-	State state = oldList.get(valueIndex);
+          _state.set(oldRow, oldList);
+        }
 
-	if (state != null)
-	  state = state.update(holder);
-	else
-	  state = new State(holder);
-	
-	oldList.set(valueIndex, state);
+        while (oldList.size() < (valueIndex + 1))
+          oldList.add(null);
+
+        State state = oldList.get(valueIndex);
+
+        if (state != null)
+          state = state.update(holder);
+        else
+          state = new State(holder);
+
+        oldList.set(valueIndex, state);
       }
 
       ArrayList<State> newList = null;
 
       if (newRow >= 0 && newRow < _state.size())
-	newList = _state.get(newRow);
+        newList = _state.get(newRow);
 
       State state;
       
       if (newList != null && valueIndex < newList.size())
-	state = newList.get(valueIndex);
+        state = newList.get(valueIndex);
       else
-	state = null;
+        state = null;
 
       if (state != null)
-	state.restore(holder);
+        state.restore(holder);
       else {
-	holder.setSubmittedValue(null);
-	holder.setValue(null);
-	holder.setLocalValueSet(false);
-	holder.setValid(true);
+        holder.setSubmittedValue(null);
+        holder.setValue(null);
+        holder.setLocalValueSet(false);
+        holder.setValid(true);
       }
 
       valueIndex += 1;
@@ -320,18 +320,18 @@ public class UIData extends UIComponentBase
       UIComponentBase base = (UIComponentBase) comp;
       
       for (UIComponent child : base.getFacetsAndChildrenArray()) {
-	valueIndex = setRowIndexState(child, oldRow, newRow,
-				      isTransient, valueIndex);
+        valueIndex = setRowIndexState(child, oldRow, newRow,
+                                      isTransient, valueIndex);
       }
     }
     else {
       Iterator<UIComponent> iter = comp.getFacetsAndChildren();
 
       while (iter.hasNext()) {
-	UIComponent child = iter.next();
-	
-	valueIndex = setRowIndexState(child, oldRow, newRow,
-				      isTransient, valueIndex);
+        UIComponent child = iter.next();
+
+        valueIndex = setRowIndexState(child, oldRow, newRow,
+                                      isTransient, valueIndex);
       }
     }
 
@@ -369,13 +369,13 @@ public class UIData extends UIComponentBase
     if (prop != null) {
       switch (_propMap.get(name)) {
       case VALUE:
-	return _valueExpr;
+        return _valueExpr;
       
       case FIRST:
-	return _firstExpr;
+        return _firstExpr;
       
       case ROWS:
-	return _rowsExpr;
+        return _rowsExpr;
       }
     }
 
@@ -393,32 +393,32 @@ public class UIData extends UIComponentBase
     if (prop != null) {
       switch (_propMap.get(name)) {
       case VALUE:
-	_dataModel = null;
-	if (expr != null && expr.isLiteralText()) {
-	  _value = expr.getValue(null);
-	  return;
-	}
-	else
-	  _valueExpr = expr;
-	break;
+        _dataModel = null;
+        if (expr != null && expr.isLiteralText()) {
+          _value = expr.getValue(null);
+          return;
+        }
+        else
+          _valueExpr = expr;
+        break;
       
       case FIRST:
-	if (expr != null && expr.isLiteralText()) {
-	  _first = (Integer) expr.getValue(null);
-	  return;
-	}
-	else
-	  _firstExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _first = (Integer) expr.getValue(null);
+          return;
+        }
+        else
+          _firstExpr = expr;
+        break;
       
       case ROWS:
-	if (expr != null && expr.isLiteralText()) {
-	  _rows = (Integer) expr.getValue(null);
-	  return;
-	}
-	else
-	  _rowsExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _rows = (Integer) expr.getValue(null);
+          return;
+        }
+        else
+          _rowsExpr = expr;
+        break;
       }
     }
 
@@ -586,7 +586,7 @@ public class UIData extends UIComponentBase
 
     if (getFacetCount() > 0) {
       for (UIComponent facet : getFacets().values()) {
-	facet.processDecodes(context);
+        facet.processDecodes(context);
       }
     }
 
@@ -596,46 +596,46 @@ public class UIData extends UIComponentBase
       List<UIComponent> children = getChildren();
 
       for (int i = 0; i < children.size(); i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (! child.isRendered() && child.getFacetCount() == 0)
-	  continue;
-	
-	for (UIComponent facet : child.getFacets().values()) {
-	  facet.processDecodes(context);
-	}
+        if (! child.isRendered() && child.getFacetCount() == 0)
+          continue;
+
+        for (UIComponent facet : child.getFacets().values()) {
+          facet.processDecodes(context);
+        }
       }
       
       int first = getFirst();
       int rows = getRows();
 
       if (rows <= 0)
-	rows = Integer.MAX_VALUE;
+        rows = Integer.MAX_VALUE;
       
       for (int i = 0; i < rows; i++) {
-	setRowIndex(first + i);
+        setRowIndex(first + i);
 
-	if (! isRowAvailable())
-	  break;
+        if (! isRowAvailable())
+          break;
 
-	for (int j = 0; j < childCount; j++) {
-	  UIComponent child = children.get(j);
+        for (int j = 0; j < childCount; j++) {
+          UIComponent child = children.get(j);
 
-	  if (! child.isRendered())
-	    continue;
-	    
-	  int grandchildCount = child.getChildCount();
+          if (! child.isRendered())
+            continue;
 
-	  if (grandchildCount > 0) {
-	    List<UIComponent> grandchildren = child.getChildren();
+          int grandchildCount = child.getChildCount();
 
-	    for (int k = 0; k < grandchildCount; k++) {
-	      grandchildren.get(k).processDecodes(context);
-	    }
-	  }
+          if (grandchildCount > 0) {
+            List<UIComponent> grandchildren = child.getChildren();
 
-	  child.decode(context);
-	}
+            for (int k = 0; k < grandchildCount; k++) {
+              grandchildren.get(k).processDecodes(context);
+            }
+          }
+
+          child.decode(context);
+        }
       }
     }
 
@@ -661,7 +661,7 @@ public class UIData extends UIComponentBase
 
     if (getFacetCount() > 0) {
       for (UIComponent facet : getFacets().values()) {
-	facet.processValidators(context);
+        facet.processValidators(context);
       }
     }
 
@@ -671,41 +671,41 @@ public class UIData extends UIComponentBase
       List<UIComponent> children = getChildren();
 
       for (int i = 0; i < children.size(); i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (! child.isRendered() && child.getFacetCount() == 0)
-	  continue;
-	
-	for (UIComponent facet : child.getFacets().values()) {
-	  facet.processValidators(context);
-	}
+        if (! child.isRendered() && child.getFacetCount() == 0)
+          continue;
+
+        for (UIComponent facet : child.getFacets().values()) {
+          facet.processValidators(context);
+        }
       }
       
       int first = getFirst();
       int rows = getRows();
 
       if (rows <= 0)
-	rows = Integer.MAX_VALUE;
+        rows = Integer.MAX_VALUE;
 
       for (int i = 0; i < rows; i++) {
-	setRowIndex(first + i);
+        setRowIndex(first + i);
 
-	if (! isRowAvailable())
-	  break;
-	
-	for (int j = 0; j < childCount; j++) {
-	  UIComponent child = children.get(j);
+        if (! isRowAvailable())
+          break;
 
-	  if (! child.isRendered())
-	    continue;
-	    
-	  int grandchildCount = child.getChildCount();
-	  List<UIComponent> grandchildren = child.getChildren();
+        for (int j = 0; j < childCount; j++) {
+          UIComponent child = children.get(j);
 
-	  for (int k = 0; k < grandchildCount; k++) {
-	    grandchildren.get(k).processValidators(context);
-	  }
-	}
+          if (! child.isRendered())
+            continue;
+
+          int grandchildCount = child.getChildCount();
+          List<UIComponent> grandchildren = child.getChildren();
+
+          for (int k = 0; k < grandchildCount; k++) {
+            grandchildren.get(k).processValidators(context);
+          }
+        }
       }
     }
 
@@ -729,7 +729,7 @@ public class UIData extends UIComponentBase
 
     if (getFacetCount() > 0) {
       for (UIComponent facet : getFacets().values()) {
-	facet.processUpdates(context);
+        facet.processUpdates(context);
       }
     }
 
@@ -739,41 +739,41 @@ public class UIData extends UIComponentBase
       List<UIComponent> children = getChildren();
 
       for (int i = 0; i < children.size(); i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (! child.isRendered() && child.getFacetCount() == 0)
-	  continue;
-	
-	for (UIComponent facet : child.getFacets().values()) {
-	  facet.processUpdates(context);
-	}
+        if (! child.isRendered() && child.getFacetCount() == 0)
+          continue;
+
+        for (UIComponent facet : child.getFacets().values()) {
+          facet.processUpdates(context);
+        }
       }
       
       int first = getFirst();
       int rows = getRows();
 
       if (rows <= 0)
-	rows = Integer.MAX_VALUE;
+        rows = Integer.MAX_VALUE;
 
       for (int i = 0; i < rows; i++) {
-	setRowIndex(first + i);
+        setRowIndex(first + i);
 
-	if (! isRowAvailable())
-	  break;
-	    
-	for (int j = 0; j < childCount; j++) {
-	  UIComponent child = children.get(j);
+        if (! isRowAvailable())
+          break;
 
-	  if (! child.isRendered())
-	    continue;
-	    
-	  int grandchildCount = child.getChildCount();
-	  List<UIComponent> grandchildren = child.getChildren();
+        for (int j = 0; j < childCount; j++) {
+          UIComponent child = children.get(j);
 
-	  for (int k = 0; k < grandchildCount; k++) {
-	    grandchildren.get(k).processUpdates(context);
-	  }
-	}
+          if (! child.isRendered())
+            continue;
+
+          int grandchildCount = child.getChildCount();
+          List<UIComponent> grandchildren = child.getChildren();
+
+          for (int k = 0; k < grandchildCount; k++) {
+            grandchildren.get(k).processUpdates(context);
+          }
+        }
       }
     }
 
@@ -907,12 +907,12 @@ public class UIData extends UIComponentBase
     State update(EditableValueHolder holder)
     {
       if (_submittedValue == holder.getSubmittedValue()
-	  && _value == holder.getValue()
-	  && _isLocal == holder.isLocalValueSet()
-	  && _isValid == holder.isValid())
-	return this;
+          && _value == holder.getValue()
+          && _isLocal == holder.isLocalValueSet()
+          && _isValid == holder.isValid())
+        return this;
       else
-	return new State(holder);
+        return new State(holder);
     }
 
     void restore(EditableValueHolder holder)

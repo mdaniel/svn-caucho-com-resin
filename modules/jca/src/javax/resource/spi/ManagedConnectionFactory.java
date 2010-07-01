@@ -57,7 +57,7 @@ public interface ManagedConnectionFactory extends java.io.Serializable {
    * Creates physical connection to the EIS resource manager.
    */
   public ManagedConnection createManagedConnection(Subject subject,
-						   ConnectionRequestInfo info)
+                                                   ConnectionRequestInfo info)
     throws ResourceException;
 
   /**
@@ -65,8 +65,8 @@ public interface ManagedConnectionFactory extends java.io.Serializable {
    */
   public ManagedConnection
     matchManagedConnections(Set connectionSet,
-			    Subject subject,
-			    ConnectionRequestInfo info)
+                            Subject subject,
+                            ConnectionRequestInfo info)
     throws ResourceException;
 
   /**

@@ -84,6 +84,6 @@ public final class DoublePrimitiveType extends ConfigType
       return new Double(((Number) value).doubleValue());
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to a double",
-				    value));
+                                    value));
   }
 }

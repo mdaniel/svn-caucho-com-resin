@@ -69,7 +69,7 @@ public class JspXmlElement extends JspContainerNode {
       return;
     
     throw error(L.l("jsp:attribute '{0}' is not allowed as a child of XML element <{1}>.",
-		    name.getName(), getTagName()));
+                    name.getName(), getTagName()));
   }
 
   /**
@@ -82,7 +82,7 @@ public class JspXmlElement extends JspContainerNode {
     if (prefix == null || uri == null)
       return true;
     else if (prefix.equals(name.getPrefix()) &&
-	     uri.equals(name.getNamespaceURI()))
+             uri.equals(name.getNamespaceURI()))
       return true;
     else
       return _parent.hasNamespace(prefix, uri);
@@ -132,14 +132,14 @@ public class JspXmlElement extends JspContainerNode {
     HashSet<String> prefixes = new HashSet<String>();
     
     if (qName.getNamespaceURI() != null &&
-	! _parent.hasNamespace(qName)) {
+        ! _parent.hasNamespace(qName)) {
       prefixes.add(qName.getPrefix());
       
       out.addText(" ");
       if (qName.getPrefix() == null || qName.getPrefix().equals(""))
-	out.addText("xmlns=\"");
+        out.addText("xmlns=\"");
       else
-	out.addText("xmlns:" + qName.getPrefix() + "=\"");
+        out.addText("xmlns:" + qName.getPrefix() + "=\"");
       out.addText(qName.getNamespaceURI());
       out.addText("\"");
     }
@@ -149,40 +149,40 @@ public class JspXmlElement extends JspContainerNode {
       String value = _attrValues.get(i);
 
       if (name.getNamespaceURI() != null &&
-	  ! prefixes.contains(name.getPrefix()) &&
-	  ! _parent.hasNamespace(name)) {
-	prefixes.add(name.getPrefix());
-	out.addText(" ");
-	if (name.getPrefix() == null || name.getPrefix().equals(""))
-	  out.addText("xmlns=\"");
-	else
-	  out.addText("xmlns:" + name.getPrefix() + "=\"");
-	out.addText(name.getNamespaceURI());
-	out.addText("\"");
+          ! prefixes.contains(name.getPrefix()) &&
+          ! _parent.hasNamespace(name)) {
+        prefixes.add(name.getPrefix());
+        out.addText(" ");
+        if (name.getPrefix() == null || name.getPrefix().equals(""))
+          out.addText("xmlns=\"");
+        else
+          out.addText("xmlns:" + name.getPrefix() + "=\"");
+        out.addText(name.getNamespaceURI());
+        out.addText("\"");
       }
       
       out.addText(" ");
       out.addText(name.getName());
 
       if (value == null || value.equals("")) {
-	// XXX: possibly differ for html/text
-	
-	out.addText("=\"\"");
+        // XXX: possibly differ for html/text
+
+        out.addText("=\"\"");
       }
       else {
-	out.addText("=\"");
-	
-	if (value.indexOf("${") < 0 &&
-	    ! value.startsWith("<%") &&
-	    ! value.startsWith("%")) {
-	  out.addText(value);
-	}
-	else {
-	  String javaValue = generateParameterValue(String.class, value,
-						    true, null,
-						    _parseState.isELIgnored());
-	  out.println("out.print(" + javaValue + ");");
-	}
+        out.addText("=\"");
+
+        if (value.indexOf("${") < 0 &&
+            ! value.startsWith("<%") &&
+            ! value.startsWith("%")) {
+          out.addText(value);
+        }
+        else {
+          String javaValue = generateParameterValue(String.class, value,
+                                                    true, null,
+                                                    _parseState.isELIgnored());
+          out.println("out.print(" + javaValue + ");");
+        }
         out.addText("\"");
       }
     }

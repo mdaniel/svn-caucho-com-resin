@@ -58,8 +58,8 @@ public final class IndexKey implements LruListener {
   }
 
   public static IndexKey create(BTree btree,
-				byte []data, int offset, int length,
-				long value)
+                                byte []data, int offset, int length,
+                                long value)
   {
     byte []dataCopy = new byte[length];
     System.arraycopy(data, offset, dataCopy, 0, length);
@@ -173,7 +173,7 @@ public final class IndexKey implements LruListener {
     int offsetB = key._offset;
     for (int i = 0; i < length; i++) {
       if (dataA[offsetA + i] != dataB[offsetB + i])
-	return false;
+        return false;
     }
 
     return true;
@@ -182,6 +182,6 @@ public final class IndexKey implements LruListener {
   public String toString()
   {
     return (getClass().getSimpleName() + "[" + _btree
-	    + "," + Hex.toHex(_data, 0, _length) + "]");
+            + "," + Hex.toHex(_data, 0, _length) + "]");
   }
 }

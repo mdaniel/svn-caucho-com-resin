@@ -48,5 +48,5 @@ public interface Lock {
   
   public void refresh()
     throws LockException,
-	   RepositoryException;
+           RepositoryException;
 }

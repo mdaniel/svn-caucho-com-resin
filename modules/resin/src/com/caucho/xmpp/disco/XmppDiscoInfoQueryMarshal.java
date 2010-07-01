@@ -108,15 +108,15 @@ public class XmppDiscoInfoQueryMarshal extends AbstractXmppMarshal {
 
     if (identityList != null) {
       for (DiscoIdentity identity : identityList) {
-	out.writeStartElement("identity");
+        out.writeStartElement("identity");
 
-	out.writeAttribute("category", identity.getCategory());
-	out.writeAttribute("type", identity.getType());
+        out.writeAttribute("category", identity.getCategory());
+        out.writeAttribute("type", identity.getType());
 
-	if (identity.getName() != null)
-	  out.writeAttribute("name", identity.getName());
-	
-	out.writeEndElement(); // </identity>
+        if (identity.getName() != null)
+          out.writeAttribute("name", identity.getName());
+
+        out.writeEndElement(); // </identity>
       }
     }
     
@@ -124,11 +124,11 @@ public class XmppDiscoInfoQueryMarshal extends AbstractXmppMarshal {
 
     if (featureList != null) {
       for (DiscoFeature feature : featureList) {
-	out.writeStartElement("feature");
+        out.writeStartElement("feature");
 
-	out.writeAttribute("var", feature.getVar());
-	
-	out.writeEndElement(); // </feature>
+        out.writeAttribute("var", feature.getVar());
+
+        out.writeEndElement(); // </feature>
       }
     }
     
@@ -153,27 +153,27 @@ public class XmppDiscoInfoQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	discoInfo.setIdentityList(identityList);
-	discoInfo.setFeatureList(featureList);
-	
-	return discoInfo;
+        discoInfo.setIdentityList(identityList);
+        discoInfo.setFeatureList(featureList);
+
+        return discoInfo;
       }
 
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "feature".equals(in.getLocalName())) {
-	featureList.add(parseFeature(in));
+          && "feature".equals(in.getLocalName())) {
+        featureList.add(parseFeature(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "identity".equals(in.getLocalName())) {
-	identityList.add(parseIdentity(in));
+               && "identity".equals(in.getLocalName())) {
+        identityList.add(parseIdentity(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();

@@ -129,22 +129,22 @@ public class MBean {
       Object []args = new Object[values.getSize()];
 
       for (int i = 0; i < size; i++) {
-	args[i] = values.get(LongValue.create(i)).toJavaObject();
+        args[i] = values.get(LongValue.create(i)).toJavaObject();
       }
 
       MBeanOperationInfo opInfo = findClosestOperation(name, args);
       
       if (opInfo != null) {
-	String []mbeanSig = createMBeanSig(opInfo);
-	
-	marshall(args, mbeanSig);
+        String []mbeanSig = createMBeanSig(opInfo);
 
-	Object value = _server.invoke(_name, name, args, mbeanSig);
-	
-	return unmarshall(value);
+        marshall(args, mbeanSig);
+
+        Object value = _server.invoke(_name, name, args, mbeanSig);
+
+        return unmarshall(value);
       }
       else {
-	return _server.invoke(_name, name, args, null);
+        return _server.invoke(_name, name, args, null);
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -182,15 +182,15 @@ public class MBean {
       MBeanOperationInfo op = ops[i];
       
       if (! name.equals(op.getName()))
-	continue;
+        continue;
 
       if (op.getSignature().length == args.length) {
-	long cost = calculateCost(op.getSignature(), args);
+        long cost = calculateCost(op.getSignature(), args);
 
-	if (cost < bestCost) {
-	  bestCost = cost;
-	  bestOp = op;
-	}
+        if (cost < bestCost) {
+          bestCost = cost;
+          bestOp = op;
+        }
       }
     }
 
@@ -198,7 +198,7 @@ public class MBean {
   }
 
   private static long calculateCost(MBeanParameterInfo []paramInfo,
-				    Object []args)
+                                    Object []args)
   {
     long cost = 0;
     
@@ -207,17 +207,17 @@ public class MBean {
       String arg;
 
       if (args[i] != null)
-	arg = args[i].getClass().getName();
+        arg = args[i].getClass().getName();
       else
-	arg = "java.lang.Object";
+        arg = "java.lang.Object";
       
       if (param.equals(arg)) {
       }
       else if ((param.indexOf('[') >= 0) != (arg.indexOf('[') >= 0)) {
-	cost += 100;
+        cost += 100;
       }
       else
-	cost += 1;
+        cost += 1;
     }
 
     return cost;
@@ -243,7 +243,7 @@ public class MBean {
       MBean []mbeans = new MBean[names.length];
 
       for (int i = 0; i < names.length; i++)
-	mbeans[i] = new MBean(_server, names[i]);
+        mbeans[i] = new MBean(_server, names[i]);
 
       return mbeans;
     }
@@ -253,20 +253,20 @@ public class MBean {
       CompositeType type = compositeValue.getCompositeType();
 
       if (type != null) {
-	String typeName = type.getTypeName();
+        String typeName = type.getTypeName();
 
-	try {
-	  ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	  
-	  Class typeClass = Class.forName(typeName, false, loader);
+        try {
+          ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-	  Method from = typeClass.getMethod("from", new Class[] { CompositeData.class });
+          Class typeClass = Class.forName(typeName, false, loader);
 
-	  if (from != null)
-	    return from.invoke(null, compositeValue);
-	} catch (Exception e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+          Method from = typeClass.getMethod("from", new Class[] { CompositeData.class });
+
+          if (from != null)
+            return from.invoke(null, compositeValue);
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
 
       return new CompositeDataBean(compositeValue);
@@ -308,17 +308,17 @@ public class MBean {
     public Object marshall(Object value)
     {
       if (value instanceof Integer)
-	return value;
+        return value;
       else if (value instanceof Number)
-	return new Integer(((Number) value).intValue());
+        return new Integer(((Number) value).intValue());
       else if (value == null)
-	return new Integer(0);
+        return new Integer(0);
       else {
-	try {
-	  return new Integer(Integer.parseInt(String.valueOf(value)));
-	} catch (Exception e) {
-	  return new Integer(0);
-	}
+        try {
+          return new Integer(Integer.parseInt(String.valueOf(value)));
+        } catch (Exception e) {
+          return new Integer(0);
+        }
       }
     }
   }
@@ -329,17 +329,17 @@ public class MBean {
     public Object marshall(Object value)
     {
       if (value instanceof Long)
-	return value;
+        return value;
       else if (value instanceof Number)
-	return new Long(((Number) value).longValue());
+        return new Long(((Number) value).longValue());
       else if (value == null)
-	return new Long(0);
+        return new Long(0);
       else {
-	try {
-	  return new Long(Long.parseLong(String.valueOf(value)));
-	} catch (Exception e) {
-	  return new Long(0);
-	}
+        try {
+          return new Long(Long.parseLong(String.valueOf(value)));
+        } catch (Exception e) {
+          return new Long(0);
+        }
       }
     }
   }
@@ -350,9 +350,9 @@ public class MBean {
     public Object marshall(Object value)
     {
       if (value == null)
-	return null;
+        return null;
       else
-	return value.toString();
+        return value.toString();
     }
   }
 

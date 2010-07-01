@@ -69,7 +69,7 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
   }
 
   public void setLocation(String systemId, String filename,
-			  int line, int column)
+                          int line, int column)
   {
     _systemId = systemId;
     _filename = filename; 
@@ -305,7 +305,7 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
 
     for (QNode ptr = _parent; ptr != null; ptr = ptr._parent) {
       if (ptr._next != null)
-	return ptr._next;
+        return ptr._next;
     }
 
     return null;
@@ -317,7 +317,7 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
   {
     for (QAbstractNode node = _next; node != null; node = node._next) {
       if (node.hasContent())
-	return node;
+        return node;
     }
 
     return null;
@@ -327,7 +327,7 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
   {
     for (QAbstractNode node = _previous; node != null; node = node._previous) {
       if (node.hasContent())
-	return node;
+        return node;
     }
 
     return null;
@@ -441,7 +441,7 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
     for (int i = 1; i < name.length(); i++) {
       char ch = name.charAt(i);
       if (! XmlChar.isNameChar(ch))
-	return false;
+        return false;
     }
 
     return true;
@@ -452,9 +452,9 @@ public abstract class QAbstractNode implements CauchoNode, java.io.Serializable 
   {
     if (_parent == null) {
       if (_next != null || _previous != null)
-	throw new Exception("null bad: " + this);
+        throw new Exception("null bad: " + this);
       else
-	return true;
+        return true;
     }
 
     if (_parent._owner != _owner && _owner != _parent)

@@ -100,17 +100,17 @@ public class SqlDateParamTag extends TagSupport {
       String type = _typeExpr.evalString(env);
 
       if (type.equals("time"))
-	result = new java.sql.Time(time);
+        result = new java.sql.Time(time);
       else if (type.equals("date"))
-	result = new java.sql.Date(time);
+        result = new java.sql.Date(time);
       else
-	result = new java.sql.Timestamp(time);
+        result = new java.sql.Timestamp(time);
     }
 
     Tag parent = getParent();
     for (;
-	 parent != null && ! (parent instanceof SQLExecutionTag);
-	 parent = parent.getParent()) {
+         parent != null && ! (parent instanceof SQLExecutionTag);
+         parent = parent.getParent()) {
     }
 
     if (parent == null)

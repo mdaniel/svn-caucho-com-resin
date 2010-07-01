@@ -111,7 +111,7 @@ public class Env implements ExprEnvironment {
   {
     for (Env env = this; env != null; env = env._parent)
       if (env._stylesheetEnv != null)
-	return env._stylesheetEnv;
+        return env._stylesheetEnv;
 
     return null;
   }
@@ -249,7 +249,7 @@ public class Env implements ExprEnvironment {
   {
     for (int i = _varSize - 1; i >= 0; i--) {
       if (_varKeys[i] == name)
-	return _varValues[i];
+        return _varValues[i];
     }
 
     if (_root._globals != null) {

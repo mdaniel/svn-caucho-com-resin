@@ -243,9 +243,9 @@ public class StreamMessageImpl extends MessageImpl implements StreamMessage
     
     if (_bytes != null) {
       if (_bytesOffset == _bytes.length) {
-	_bytes = null;
-	_bytesOffset = 0;
-	return -1;
+        _bytes = null;
+        _bytesOffset = 0;
+        return -1;
       }
     }
     else {

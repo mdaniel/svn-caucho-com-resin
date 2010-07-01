@@ -45,7 +45,7 @@ public class ContinueMapFilterChain
   private final FilterChainMapper _nextFilterChainMapper;
 
   public ContinueMapFilterChain(String uri,
-				String queryString,
+                                String queryString,
                                 FilterChain accept,
                                 FilterChainMapper nextFilterChainMapper)
   {
@@ -59,8 +59,8 @@ public class ContinueMapFilterChain
     throws ServletException, IOException
   {
     FilterChain next = _nextFilterChainMapper.map(_uri,
-						  _queryString,
-						  _accept);
+                                                  _queryString,
+                                                  _accept);
 
     next.doFilter(request, response);
   }

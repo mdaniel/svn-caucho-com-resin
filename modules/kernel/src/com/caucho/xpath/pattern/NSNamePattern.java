@@ -133,10 +133,10 @@ public class NSNamePattern extends AbstractPattern {
     NSNamePattern bPattern = (NSNamePattern) b;
     
     return (_nodeType == bPattern._nodeType
-	    && _local.equals(bPattern._local)
-	    && _namespace.equals(bPattern._namespace)
-	    && (_parent == bPattern._parent
-		|| (_parent != null && _parent.equals(bPattern._parent))));
+            && _local.equals(bPattern._local)
+            && _namespace.equals(bPattern._namespace)
+            && (_parent == bPattern._parent
+                || (_parent != null && _parent.equals(bPattern._parent))));
   }
 
   public String toString()

@@ -60,8 +60,8 @@ public class AsyncRequest extends CauchoRequestWrapper {
   private HashMapImpl<String,String[]> _filledForm;
   
   public AsyncRequest(HttpServletRequestImpl request,
-		      HttpServletResponseImpl response,
-		      Invocation invocation)
+                      HttpServletResponseImpl response,
+                      Invocation invocation)
   {
     super(request);
     
@@ -323,14 +323,14 @@ public class AsyncRequest extends CauchoRequestWrapper {
 
   static {
     _asyncAttributeMap.put(AsyncContext.ASYNC_REQUEST_URI,
-			   REQUEST_URI_CODE);
+                           REQUEST_URI_CODE);
     _asyncAttributeMap.put(AsyncContext.ASYNC_CONTEXT_PATH,
-			   CONTEXT_PATH_CODE);
+                           CONTEXT_PATH_CODE);
     _asyncAttributeMap.put(AsyncContext.ASYNC_SERVLET_PATH,
-			   SERVLET_PATH_CODE);
+                           SERVLET_PATH_CODE);
     _asyncAttributeMap.put(AsyncContext.ASYNC_PATH_INFO,
-			   PATH_INFO_CODE);
+                           PATH_INFO_CODE);
     _asyncAttributeMap.put(AsyncContext.ASYNC_QUERY_STRING,
-			   QUERY_STRING_CODE);
+                           QUERY_STRING_CODE);
   }
 }

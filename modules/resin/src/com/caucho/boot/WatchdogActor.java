@@ -51,9 +51,9 @@ public class WatchdogActor extends SimpleActor
   public void sendShutdown()
   {
     getLinkStream().querySet(1,
-			     "resin@admin.resin.caucho",
-			     "watchdog@admin.resin.caucho",
-			     new WatchdogStopQuery(""));
+                             "resin@admin.resin.caucho",
+                             "watchdog@admin.resin.caucho",
+                             new WatchdogStopQuery(""));
   }
   
   /*

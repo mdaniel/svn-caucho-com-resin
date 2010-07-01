@@ -110,11 +110,11 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   {
     if ("value".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_value = expr.getValue(null);
-	return;
+        _value = expr.getValue(null);
+        return;
       }
       else
-	_valueExpr = expr;
+        _valueExpr = expr;
     }
     else if ("converter".equals(name)) {
       _converterExpr = expr;
@@ -135,16 +135,16 @@ public class UIOutput extends UIComponentBase implements ValueHolder
       Object object = Util.eval(_converterExpr, getFacesContext());
 
       if (object == null)
-	return null;
+        return null;
       else if (object instanceof Converter)
-	return (Converter) object;
+        return (Converter) object;
       else if (object instanceof String) {
-	String name = (String) object;
-	
-	return getFacesContext().getApplication().createConverter(name);
+        String name = (String) object;
+
+        return getFacesContext().getApplication().createConverter(name);
       }
       else
-	return (Converter) object;
+        return (Converter) object;
     }
     else
       return null;

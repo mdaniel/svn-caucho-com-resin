@@ -406,9 +406,9 @@ public class JspPrintWriter extends PrintWriter implements FlushBuffer {
   {
     try {
       if (_jspWriter instanceof FlushBuffer)
-	((FlushBuffer) _jspWriter).flushBuffer();
+        ((FlushBuffer) _jspWriter).flushBuffer();
       else
-	_jspWriter.flush();
+        _jspWriter.flush();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }

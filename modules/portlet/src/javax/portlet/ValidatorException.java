@@ -51,8 +51,8 @@ public class ValidatorException extends PortletException
   }
 
   public ValidatorException(String msg,
-			    Throwable cause,
-			    Collection failedKeys)
+                            Throwable cause,
+                            Collection failedKeys)
   {
     super(msg, cause);
 
@@ -61,7 +61,7 @@ public class ValidatorException extends PortletException
   }
 
   public ValidatorException(Throwable cause,
-			    Collection failedKeys)
+                            Collection failedKeys)
   {
     super(cause);
 

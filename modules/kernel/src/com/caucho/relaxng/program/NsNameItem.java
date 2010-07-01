@@ -78,9 +78,9 @@ public class NsNameItem extends NameClassItem {
   {
     if (_except != null) {
       if (prefix.equals(""))
-	return "<{" + _ns + "}:* -" + _except.toSyntaxDescription(" ") + ">";
+        return "<{" + _ns + "}:* -" + _except.toSyntaxDescription(" ") + ">";
       else
-	return prefix + "(" + "{" + _ns + "}:* -" + _except.toSyntaxDescription(" ") + ")";
+        return prefix + "(" + "{" + _ns + "}:* -" + _except.toSyntaxDescription(" ") + ")";
     }
     else if (prefix.equals(""))
       return "<{" + _ns + "}:*>";

@@ -48,7 +48,7 @@ public interface RewriteFilter
    * @param next the next rewrite FilterChain dispatch
    */
   public FilterChain map(String uri,
-			 String queryString,
-			 FilterChain next)
+                         String queryString,
+                         FilterChain next)
     throws ServletException;
 }

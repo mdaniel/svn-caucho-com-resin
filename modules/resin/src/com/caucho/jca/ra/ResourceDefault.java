@@ -89,16 +89,16 @@ public class ResourceDefault {
   }
 
   private static void getDefaultList(ArrayList<ResourceConfig> list,
-				     ClassLoader loader)
+                                     ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	getDefaultList(list, loader.getParent());
+        getDefaultList(list, loader.getParent());
 
-	ArrayList<ResourceConfig> defaultList = _localConfig.getLevel(loader);
+        ArrayList<ResourceConfig> defaultList = _localConfig.getLevel(loader);
 
-	if (defaultList != null)
-	  list.addAll(defaultList);
+        if (defaultList != null)
+          list.addAll(defaultList);
       }
     }
   }

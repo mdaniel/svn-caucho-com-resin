@@ -133,12 +133,12 @@ public class JspSetProperty extends JspContainerNode {
                       _name, _property));
     
     generateSetParameter(out, _name, value, setMethod, true,
-			 "pageContext", false, false, null);
+                         "pageContext", false, false, null);
   }
 
   private void generateSetParamProperty(JspJavaWriter out,
                                         String name, String property,
-					String param)
+                                        String param)
     throws Exception
   {
     boolean foundProp = property.equals("*");
@@ -168,19 +168,19 @@ public class JspSetProperty extends JspContainerNode {
         if (propName == null)
           continue;
 
-	if (! property.equals("*") && ! propName.equals(property))
-	  continue;
+        if (! property.equals("*") && ! propName.equals(property))
+          continue;
 
-	Class []params = setMethod.getParameterTypes();
-	if (params.length != 1)
-	  continue;
-	
-	if (hasBetterMethod(methods, setMethod))
-	  continue;
+        Class []params = setMethod.getParameterTypes();
+        if (params.length != 1)
+          continue;
+
+        if (hasBetterMethod(methods, setMethod))
+          continue;
 
         Class paramType = params[0];
-	String type = paramType.getName();
-	String tail = null;
+        String type = paramType.getName();
+        String tail = null;
         boolean isArray = false;
 
         String p = param;
@@ -199,7 +199,7 @@ public class JspSetProperty extends JspContainerNode {
           if (! hasParams)
             out.println("java.lang.String []_jspParams;");
           hasParams = true;
-	  out.println("_jspParams = request.getParameterValues(\"" + p + "\");");
+          out.println("_jspParams = request.getParameterValues(\"" + p + "\");");
           isArray = true;
           
           if (String.class.equals(compType) || Object.class.equals(compType)) {
@@ -237,20 +237,20 @@ public class JspSetProperty extends JspContainerNode {
 
         if (isArray) {
         }
-	else if (tail != null) {
-	  out.println("_jspParam = request.getParameter(\"" + p + "\");");
-	  out.println("if (_jspParam != null && ! _jspParam.equals(\"\"))");
-	  out.println("  " + name + "." + methodName + "(" + tail + ");");
-	  foundProp = true;
-	}
+        else if (tail != null) {
+          out.println("_jspParam = request.getParameter(\"" + p + "\");");
+          out.println("if (_jspParam != null && ! _jspParam.equals(\"\"))");
+          out.println("  " + name + "." + methodName + "(" + tail + ");");
+          foundProp = true;
+        }
         else if ((editor = PropertyEditorManager.findEditor(paramType)) != null) {
-	  out.println("_jspParam = request.getParameter(\"" + p + "\");");
-	  out.println("if (_jspParam != null && ! _jspParam.equals(\"\")) {");
+          out.println("_jspParam = request.getParameter(\"" + p + "\");");
+          out.println("if (_jspParam != null && ! _jspParam.equals(\"\")) {");
           out.println("   java.beans.PropertyEditor _editor = "+
                   "  java.beans.PropertyEditorManager.findEditor(" +
                   paramType.getName() + ".class);");
           out.println("  _editor.setAsText(_jspParam);");
-	  out.println("  " + name + "." + methodName + "((" + paramType.getName() + ") _editor.getValue());");
+          out.println("  " + name + "." + methodName + "((" + paramType.getName() + ") _editor.getValue());");
           out.println("}");
           foundProp = true;
         }
@@ -284,18 +284,18 @@ public class JspSetProperty extends JspContainerNode {
       Method method = methods[i];
 
       if (method == setMethod)
-	continue;
+        continue;
 
       if (! method.getName().equals(setMethod.getName()))
-	continue;
+        continue;
 
       Class []param = method.getParameterTypes();
       
       if (param.length != 1)
-	continue;
+        continue;
 
       if (param[0].equals(String.class))
-	return true;
+        return true;
     }
 
     return false;

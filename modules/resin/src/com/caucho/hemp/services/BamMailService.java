@@ -148,8 +148,8 @@ public class BamMailService
     boolean isStartAlarm = false;
     synchronized (this) {
       if (_text == null) {
-	isStartAlarm = true;
-	_text = new StringBuilder();
+        isStartAlarm = true;
+        _text = new StringBuilder();
       }
     
       _text.append(text).append("\n");
@@ -168,16 +168,16 @@ public class BamMailService
     }
     else if (value instanceof TextMessage) {
       try {
-	text = ((TextMessage) value).getText();
+        text = ((TextMessage) value).getText();
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
     else if (value instanceof ObjectMessage) {
       try {
-	text = String.valueOf(((ObjectMessage) value).getObject());
+        text = String.valueOf(((ObjectMessage) value).getObject());
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
     
@@ -193,7 +193,7 @@ public class BamMailService
     
     synchronized (this) {
       if (_text != null)
-	text = _text.toString();
+        text = _text.toString();
       _text = null;
     }
 
@@ -208,7 +208,7 @@ public class BamMailService
     
     synchronized (this) {
       if (_text != null)
-	text = _text.toString();
+        text = _text.toString();
       _text = null;
     }
 

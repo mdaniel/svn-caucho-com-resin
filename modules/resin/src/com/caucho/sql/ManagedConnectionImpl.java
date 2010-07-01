@@ -122,9 +122,9 @@ public class ManagedConnectionImpl
   private Map _typeMap;
 
   ManagedConnectionImpl(ManagedFactoryImpl factory,
-			DriverConfig driver,
-			ConnectionConfig connConfig,
-			Credential credentials)
+                        DriverConfig driver,
+                        ConnectionConfig connConfig,
+                        Credential credentials)
     throws SQLException
   {
     _factory = factory;
@@ -136,7 +136,7 @@ public class ManagedConnectionImpl
     _credentials = credentials;
 
     _connClosedEvent = new ConnectionEvent(this,
-					   ConnectionEvent.CONNECTION_CLOSED);
+                                           ConnectionEvent.CONNECTION_CLOSED);
 
     initDriverConnection();
 
@@ -178,7 +178,7 @@ public class ManagedConnectionImpl
    * Returns the underlying connection.
    */
   public Object getConnection(Subject subject,
-			      ConnectionRequestInfo info)
+                              ConnectionRequestInfo info)
     throws ResourceException
   {
     if (_connException != null)
@@ -261,51 +261,51 @@ public class ManagedConnectionImpl
     long transactionTimeout = dbPool.getTransactionTimeout();
     if (dbPool.isXA() && ! _connConfig.isReadOnly()) {
       if (_pooledConnection instanceof XAConnection) {
-	try {
-	  _xaResource = ((XAConnection) _pooledConnection).getXAResource();
-	} catch (SQLException e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+        try {
+          _xaResource = ((XAConnection) _pooledConnection).getXAResource();
+        } catch (SQLException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
 
       if (_xaResource != null && dbPool.isXAForbidSameRM())
-	_xaResource = new DisjointXAResource(_xaResource);
+        _xaResource = new DisjointXAResource(_xaResource);
       
       if (transactionTimeout > 0 && _xaResource != null) {
-	try {
-	  _xaResource.setTransactionTimeout((int) (transactionTimeout / 1000));
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+        try {
+          _xaResource.setTransactionTimeout((int) (transactionTimeout / 1000));
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
 
       boolean allowLocalTransaction = true;
       String className = "";
 
       if (_pooledConnection != null)
-	className = _pooledConnection.getClass().getName();
+        className = _pooledConnection.getClass().getName();
       
       if (! (_pooledConnection instanceof XAConnection)) {
       }
       else if (className.startsWith("oracle")) {
-	// Oracle does not allow local transactions
-	allowLocalTransaction = false;
+        // Oracle does not allow local transactions
+        allowLocalTransaction = false;
       }
       else if (className.equals("com.mysql.jdbc.jdbc2.optional.MysqlXAConnection")) {
-	allowLocalTransaction = false;
+        allowLocalTransaction = false;
       }
 
       if (allowLocalTransaction)
-	_localTransaction = new LocalTransactionImpl();
+        _localTransaction = new LocalTransactionImpl();
     }
 
     if (dbPool.isSpy()) {
       _driverConnection = new SpyConnection(_driverConnection,
-					    _dbPool.getSpyDataSource(),
-					    _id);
+                                            _dbPool.getSpyDataSource(),
+                                            _id);
 
       if (_xaResource != null)
-	_xaResource = new SpyXAResource(_id, _xaResource);
+        _xaResource = new SpyXAResource(_id, _xaResource);
     }
 
     int isolation = _connConfig.getTransactionIsolation();
@@ -406,8 +406,8 @@ public class ManagedConnectionImpl
    * Returns a new or cached prepared statement.
    */
   PreparedStatement prepareStatement(UserConnection uConn,
-				     String sql,
-				     int resultType)
+                                     String sql,
+                                     int resultType)
     throws SQLException
   {
     Connection conn = getDriverConnection();
@@ -446,12 +446,12 @@ public class ManagedConnectionImpl
       PreparedStatementCacheItem item = _preparedStatementCache.get(key);
 
       if (item != null) {
-	UserPreparedStatement upStmt = item.toActive(uConn);
+        UserPreparedStatement upStmt = item.toActive(uConn);
 
-	if (upStmt != null)
-	  return upStmt;
+        if (upStmt != null)
+          return upStmt;
 
-	hasItem = ! item.isRemoved();
+        hasItem = ! item.isRemoved();
       }
     }
 
@@ -502,17 +502,17 @@ public class ManagedConnectionImpl
   {
     if (_listener != null) {
       if (_connException != null) {
-	sendFatalEvent(_connException);
+        sendFatalEvent(_connException);
       }
 
       ConnectionEvent evt;
       synchronized (this) {
-	evt = _connClosedEvent;
-	_connClosedEvent = null;
+        evt = _connClosedEvent;
+        _connClosedEvent = null;
       }
 
       if (evt == null)
-	evt = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
+        evt = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
 
       evt.setConnectionHandle(userConn);
 
@@ -556,8 +556,8 @@ public class ManagedConnectionImpl
       ConnectionEvent event;
 
       event = new ConnectionEvent(this,
-				  ConnectionEvent.CONNECTION_ERROR_OCCURRED,
-				  e);
+                                  ConnectionEvent.CONNECTION_ERROR_OCCURRED,
+                                  e);
 
       _listener.connectionErrorOccurred(event);
     }
@@ -572,7 +572,7 @@ public class ManagedConnectionImpl
       ConnectionEvent event;
 
       event = new ConnectionEvent(this,
-				  ConnectionEvent.CONNECTION_ERROR_OCCURRED);
+                                  ConnectionEvent.CONNECTION_ERROR_OCCURRED);
 
       _listener.connectionErrorOccurred(event);
     }
@@ -616,21 +616,21 @@ public class ManagedConnectionImpl
   {
     try {
       if (! _hasCatalog) {
-	_hasCatalog = true;
-	_catalogOrig = _driverConnection.getCatalog();
-	_catalog = _catalogOrig;
+        _hasCatalog = true;
+        _catalogOrig = _driverConnection.getCatalog();
+        _catalog = _catalogOrig;
       }
 
       if (catalog == null || catalog.length() == 0) {
         // Clear the current catalog name but don't invoke setCatalog()
         // on the driver.
 
-	_catalog = null;
+        _catalog = null;
       } else if (_catalog != null && _catalog.equals(catalog)) {
         // No-op when setting to the currently selected catalog name
       } else {
-	_driverConnection.setCatalog(catalog);
-	_catalog = catalog;
+        _driverConnection.setCatalog(catalog);
+        _catalog = catalog;
       }
     } catch (SQLException e) {
       fatalEvent();
@@ -686,27 +686,27 @@ public class ManagedConnectionImpl
       /*
       // If there's a pooled connection, it can cleanup itself
       if (_pooledConnection != null) {
-	_autoCommit = true;
-	_driverConnection = _pooledConnection.getConnection();
-	_isolation = _oldIsolation = -1;
-	return;
+        _autoCommit = true;
+        _driverConnection = _pooledConnection.getConnection();
+        _isolation = _oldIsolation = -1;
+        return;
       }
       */
 
       if (_readOnly)
-	conn.setReadOnly(false);
+        conn.setReadOnly(false);
       _readOnly = false;
 
       if (_catalog != null
-	  && ! _catalog.equals(_catalogOrig)
-	  && _catalogOrig != null
-	  && ! "".equals(_catalogOrig)) {
-	conn.setCatalog(_catalogOrig);
+          && ! _catalog.equals(_catalogOrig)
+          && _catalogOrig != null
+          && ! "".equals(_catalogOrig)) {
+        conn.setCatalog(_catalogOrig);
       }
       _catalog = null;
 
       if (_typeMap != null)
-	conn.setTypeMap(_typeMap);
+        conn.setTypeMap(_typeMap);
       _typeMap = null;
 
       // Oracle requires a rollback after a reset of
@@ -714,16 +714,16 @@ public class ManagedConnectionImpl
       // starts a new transaction
       boolean needsRollback = ! _autoCommit;
       if (_isolation != _oldIsolation) {
-	needsRollback = true;
-	conn.setTransactionIsolation(_oldIsolation);
+        needsRollback = true;
+        conn.setTransactionIsolation(_oldIsolation);
       }
       _isolation = _oldIsolation;
 
       if (needsRollback)
-	conn.rollback();
+        conn.rollback();
       
       if (! _autoCommit) {
-	conn.setAutoCommit(true);
+        conn.setAutoCommit(true);
       }
       _autoCommit = true;
 
@@ -771,23 +771,23 @@ public class ManagedConnectionImpl
 
     try {
       if (conn == null || conn.isClosed()) {
-	return false;
+        return false;
       }
 
       String pingQuery = dbPool.getPingQuery();
 
       if (pingQuery == null)
-	return true;
+        return true;
       
       Statement stmt = conn.createStatement();
 
       try {
-	ResultSet rs = stmt.executeQuery(pingQuery);
-	rs.close();
+        ResultSet rs = stmt.executeQuery(pingQuery);
+        rs.close();
 
-	return true;
+        return true;
       } finally {
-	stmt.close();
+        stmt.close();
       }
     } catch (SQLException e) {
       throw new ResourceException(e);
@@ -814,16 +814,16 @@ public class ManagedConnectionImpl
       iter = _preparedStatementCache.values();
 
       while (iter.hasNext()) {
-	PreparedStatementCacheItem item = iter.next();
+        PreparedStatementCacheItem item = iter.next();
 
-	item.destroy();
+        item.destroy();
       }
     }
 
     try {
       if (poolConn != null) {
-	poolConn.close();
-	driverConn = null;
+        poolConn.close();
+        driverConn = null;
       }
     } catch (SQLException e) {
       throw new ResourceException(e);
@@ -831,7 +831,7 @@ public class ManagedConnectionImpl
 
     try {
       if (driverConn != null)
-	driverConn.close();
+        driverConn.close();
     } catch (SQLException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -849,11 +849,11 @@ public class ManagedConnectionImpl
       throws ResourceException
     {
       try {
-	_oldAutoCommit = _autoCommit;
+        _oldAutoCommit = _autoCommit;
 
-	setAutoCommit(false);
+        setAutoCommit(false);
       } catch (SQLException e) {
-	throw new ResourceException(e) ;
+        throw new ResourceException(e) ;
       }
     }
 
@@ -863,18 +863,18 @@ public class ManagedConnectionImpl
       Connection conn = _driverConnection;
 
       if (conn == null)
-	throw new ResourceException(L.l("connection is closed"));
+        throw new ResourceException(L.l("connection is closed"));
 
       try {
-	conn.commit();
+        conn.commit();
       } catch (SQLException e) {
-	throw new ResourceException(e) ;
+        throw new ResourceException(e) ;
       }
 
       try {
-	setAutoCommit(_oldAutoCommit);
+        setAutoCommit(_oldAutoCommit);
       } catch (SQLException e) {
-	throw new ResourceException(e) ;
+        throw new ResourceException(e) ;
       }
     }
 
@@ -884,18 +884,18 @@ public class ManagedConnectionImpl
       Connection conn = _driverConnection;
 
       if (conn == null)
-	throw new ResourceException(L.l("connection is closed"));
+        throw new ResourceException(L.l("connection is closed"));
 
       try {
-	conn.rollback();
+        conn.rollback();
       } catch (SQLException e) {
-	throw new ResourceException(e) ;
+        throw new ResourceException(e) ;
       }
 
       try {
-	setAutoCommit(_oldAutoCommit);
+        setAutoCommit(_oldAutoCommit);
       } catch (SQLException e) {
-	throw new ResourceException(e) ;
+        throw new ResourceException(e) ;
       }
     }
   }

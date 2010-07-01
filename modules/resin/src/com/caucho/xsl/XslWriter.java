@@ -383,9 +383,9 @@ public class XslWriter extends Writer implements ExtendedLocator {
         String topUrl = _namespaces.get(topPrefix);
 
         if (topPrefix.equals(""))
-	  _xmlWriter.endPrefixMapping(null);
+          _xmlWriter.endPrefixMapping(null);
         else
-	  _xmlWriter.endPrefixMapping(topPrefix);
+          _xmlWriter.endPrefixMapping(topPrefix);
       }
 
       popText();
@@ -669,7 +669,7 @@ public class XslWriter extends Writer implements ExtendedLocator {
    * @param url the namespace url, e.g. http://www.xml.org/...
    */
   public void setAttribute(String prefix, String local, String url,
-			   String value)
+                           String value)
     throws IOException, SAXException
   {
     popText();
@@ -915,18 +915,18 @@ public class XslWriter extends Writer implements ExtendedLocator {
     else if (node instanceof Element || node instanceof DocumentFragment) {
       Node elt = (Node) node;
       for (Node child = elt.getFirstChild();
-	   child != null;
-	   child = child.getNextSibling()) {
-	elementValueOf(child);
+           child != null;
+           child = child.getNextSibling()) {
+        elementValueOf(child);
       }
     }
     else if (node instanceof Text) {
       String data = ((Text) node).getNodeValue();
       for (int i = 0; i < data.length(); i++) {
-	if (! XmlChar.isWhitespace(data.charAt(i))) {
-	  print(data);
-	  return;
-	}
+        if (! XmlChar.isWhitespace(data.charAt(i))) {
+          print(data);
+          return;
+        }
       }
       /*
       if (! _stylesheet.stripSpaces(((Node) node).getParentNode()))
@@ -957,9 +957,9 @@ public class XslWriter extends Writer implements ExtendedLocator {
       double dValue = d.doubleValue();
 
       if ((int) dValue == dValue)
-	print((int) dValue);
+        print((int) dValue);
       else
-	print(dValue);
+        print(dValue);
     }
     else
       print(node);
@@ -978,18 +978,18 @@ public class XslWriter extends Writer implements ExtendedLocator {
     else if (node instanceof Element) {
       Element elt = (Element) node;
       for (Node child = elt.getFirstChild();
-	   child != null;
-	   child = child.getNextSibling()) {
-	elementValueOf(child);
+           child != null;
+           child = child.getNextSibling()) {
+        elementValueOf(child);
       }
     }
     else if (node instanceof Text) {
       String data = ((Text) node).getNodeValue();
       for (int i = 0; i < data.length(); i++) {
-	if (! XmlChar.isWhitespace(data.charAt(i))) {
-	  print(data);
-	  return;
-	}
+        if (! XmlChar.isWhitespace(data.charAt(i))) {
+          print(data);
+          return;
+        }
       }
       /*
       if (! _stylesheet.stripSpaces(node.getParentNode()))
@@ -1013,27 +1013,27 @@ public class XslWriter extends Writer implements ExtendedLocator {
 
       int length = list.getLength();
       for (int i = 0; i < length; i++) {
-	Node child = list.item(i);
+        Node child = list.item(i);
 
-	copyOf(child);
+        copyOf(child);
       }
     }
     else if (value instanceof ArrayList) {
       ArrayList list = (ArrayList) value;
 
       for (int i = 0; i < list.size(); i++) {
-	Node child = (Node) list.get(i);
+        Node child = (Node) list.get(i);
 
-	copyOf(child);
+        copyOf(child);
       }
     }
     else if (value instanceof Iterator) {
       Iterator iter = (Iterator) value;
 
       while (iter.hasNext()) {
-	Node child = (Node) iter.next();
+        Node child = (Node) iter.next();
 
-	copyOf(child);
+        copyOf(child);
       }
     }
     else if (value instanceof Attr) {
@@ -1104,7 +1104,7 @@ public class XslWriter extends Writer implements ExtendedLocator {
       ProcessingInstruction pi = (ProcessingInstruction) value;
       
       _xmlWriter.processingInstruction(pi.getNodeName(),
-				       pi.getNodeValue());
+                                       pi.getNodeValue());
     }
     else if (value instanceof EntityReference) {
       EntityReference child = (EntityReference) value;
@@ -1165,13 +1165,13 @@ public class XslWriter extends Writer implements ExtendedLocator {
         String topUrl = _namespaces.get(topPrefix);
 
         if (topPrefix.equals("")) {
-	  _xmlWriter.startPrefixMapping(null, topUrl);
+          _xmlWriter.startPrefixMapping(null, topUrl);
           _xmlWriter.attribute(XMLNS, null, "xmlns", topUrl);
-	}
+        }
         else {
-	  _xmlWriter.startPrefixMapping(topPrefix, topUrl);
+          _xmlWriter.startPrefixMapping(topPrefix, topUrl);
           _xmlWriter.attribute(XMLNS, topPrefix, "xmlns:" + topPrefix, topUrl);
-	}
+        }
       }
     }
 
@@ -1204,7 +1204,7 @@ public class XslWriter extends Writer implements ExtendedLocator {
         else
           _namespaces.put(oldPrefix, oldUrl);
 
-	_xmlWriter.endPrefixMapping(oldPrefix);
+        _xmlWriter.endPrefixMapping(oldPrefix);
       }
 
       isCdata = item.getCdata();
@@ -1223,7 +1223,7 @@ public class XslWriter extends Writer implements ExtendedLocator {
    * @param value the attribute's value
    */
   public void attribute(String url, String prefix, String local,
-			String qName, String value)
+                        String qName, String value)
     throws IOException, SAXException
   {
     if (qName.startsWith("xmlns:"))
@@ -1355,9 +1355,9 @@ public class XslWriter extends Writer implements ExtendedLocator {
       Path path = printer.getPath();
 
       if (path != null) {
-	Path dst = path.getParent().lookup(href);
-	dst.getParent().mkdirs();
-	
+        Path dst = path.getParent().lookup(href);
+        dst.getParent().mkdirs();
+
         return dst.openWrite();
       }
     }

@@ -81,12 +81,12 @@ public class RemoveMethod {
       
       /*
       for (BusinessMethodGenerator<X,?> bizMethod : view.getMethods()) {
-	AnnotatedMethod<?> apiMethod = bizMethod.getApiMethod();
-	
-	if (_beanMethod.isMatch(apiMethod)) {
-	  bizMethod.setRemove(true);
-	  bizMethod.setRemoveRetainIfException(_retainIfException);
-	}
+        AnnotatedMethod<?> apiMethod = bizMethod.getApiMethod();
+
+        if (_beanMethod.isMatch(apiMethod)) {
+          bizMethod.setRemove(true);
+          bizMethod.setRemoveRetainIfException(_retainIfException);
+        }
       }
       */
   }

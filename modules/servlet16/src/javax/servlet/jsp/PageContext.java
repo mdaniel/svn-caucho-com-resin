@@ -126,12 +126,12 @@ public abstract class PageContext extends JspContext {
    * Internal routine to initialize the PageContext for a page.
    */
   public abstract void initialize(Servlet servlet,
-				  ServletRequest request,
-				  ServletResponse response,
-				  String errorPageURL,
-				  boolean needsSession,
-				  int bufferSize,
-				  boolean autoFlush)
+                                  ServletRequest request,
+                                  ServletResponse response,
+                                  String errorPageURL,
+                                  boolean needsSession,
+                                  int bufferSize,
+                                  boolean autoFlush)
     throws IOException, IllegalStateException, IllegalArgumentException;
 
   /**

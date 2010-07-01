@@ -134,15 +134,15 @@ class VarBinaryColumn extends Column {
       int ch = str.charAt(i);
 
       if (ch < 0x80)
-	block[offset++] = (byte) ch;
+        block[offset++] = (byte) ch;
       else if (ch < 0x800) {
-	block[offset++] = (byte) (0xc0 + ((ch >> 6) & 0x1f));
-	block[offset++] = (byte) (0x80 + (ch & 0x3f));
+        block[offset++] = (byte) (0xc0 + ((ch >> 6) & 0x1f));
+        block[offset++] = (byte) (0x80 + (ch & 0x3f));
       }
       else {
-	block[offset++] = (byte) (0xe0 + ((ch >> 12) & 0x0f));
-	block[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
-	block[offset++] = (byte) (0x80 + (ch & 0x3f));
+        block[offset++] = (byte) (0xe0 + ((ch >> 12) & 0x0f));
+        block[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+        block[offset++] = (byte) (0x80 + (ch & 0x3f));
       }
     }
     block[lenOffset] = (byte) (offset - lenOffset - 1);
@@ -168,19 +168,19 @@ class VarBinaryColumn extends Column {
       int ch1 = block[offset++] & 0xff;
 
       if (ch1 < 0x80)
-	sb.append((char) ch1);
+        sb.append((char) ch1);
       else if ((ch1 & 0xe0) == 0xc0) {
-	int ch2 = block[offset++] & 0xff;
-	
-	sb.append((char) ((ch1 & 0x1f) << 6) + (ch2 & 0x3f));
+        int ch2 = block[offset++] & 0xff;
+
+        sb.append((char) ((ch1 & 0x1f) << 6) + (ch2 & 0x3f));
       }
       else {
-	int ch2 = block[offset++] & 0xff;
-	int ch3 = block[offset++] & 0xff;
-	
-	sb.append((char) ((ch1 & 0x0f) << 12)
-		  + ((ch2 & 0x3f) << 6)
-		  + ((ch3 & 0x3f)));
+        int ch2 = block[offset++] & 0xff;
+        int ch3 = block[offset++] & 0xff;
+
+        sb.append((char) ((ch1 & 0x0f) << 12)
+                  + ((ch2 & 0x3f) << 6)
+                  + ((ch3 & 0x3f)));
       }
     }
 
@@ -196,8 +196,8 @@ class VarBinaryColumn extends Column {
    */
   @Override
   void setExpr(Transaction xa,
-	       byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
     throws SQLException
   {
     if (expr.isNull(null))
@@ -211,7 +211,7 @@ class VarBinaryColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block1, int rowOffset1,
-			 byte []block2, int rowOffset2)
+                         byte []block2, int rowOffset2)
   {
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
@@ -227,7 +227,7 @@ class VarBinaryColumn extends Column {
 
     for (int i = len1; i > 0; i--) {
       if (block1[startOffset1 + i] != block2[startOffset2 + i])
-	return false;
+        return false;
     }
 
     return true;
@@ -238,7 +238,7 @@ class VarBinaryColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block, int rowOffset,
-			 byte []buffer, int offset, int length)
+                         byte []buffer, int offset, int length)
   {
     if (isNull(block, rowOffset))
       return false;
@@ -253,7 +253,7 @@ class VarBinaryColumn extends Column {
     int endOffset = blockOffset + len;
     while (blockOffset < endOffset) {
       if (block[blockOffset++] != buffer[offset++])
-	return false;
+        return false;
     }
 
     return true;
@@ -282,7 +282,7 @@ class VarBinaryColumn extends Column {
 
       // XXX: missing utf-8
       if (ch1 != ch)
-	return false;
+        return false;
     }
 
     return offset == endOffset && strOffset == strLength;
@@ -315,7 +315,7 @@ class VarBinaryColumn extends Column {
    */
   @Override
   int evalToBuffer(byte []block, int rowOffset,
-		   byte []buffer, int bufferOffset)
+                   byte []buffer, int bufferOffset)
     throws SQLException
   {
     if (isNull(block, rowOffset))
@@ -339,27 +339,27 @@ class VarBinaryColumn extends Column {
    */
   @Override
   void setIndex(Transaction xa,
-		byte []block, int rowOffset,
-		long rowAddr, QueryContext context)
+                byte []block, int rowOffset,
+                long rowAddr, QueryContext context)
     throws SQLException
   {
     BTree index = getIndex();
 
     if (index != null) {
       try {
-	index.insert(block,
-		     rowOffset + _columnOffset, getLength(),
-		     rowAddr,
-		     false);
+        index.insert(block,
+                     rowOffset + _columnOffset, getLength(),
+                     rowAddr,
+                     false);
       } catch (SqlIndexAlreadyExistsException e) {
         long blockId = 0;
         
-	throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
-					  getTable().getName(),
-					  getName(),
-					  getString(blockId, block, rowOffset),
-					  e.toString()),
-				      e);
+        throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
+                                          getTable().getName(),
+                                          getName(),
+                                          getString(blockId, block, rowOffset),
+                                          e.toString()),
+                                      e);
       }
     }
   }

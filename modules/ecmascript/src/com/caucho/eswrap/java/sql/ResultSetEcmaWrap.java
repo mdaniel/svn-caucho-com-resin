@@ -358,9 +358,9 @@ public class ResultSetEcmaWrap {
     public Object next()
     {
       try {
-	return md.getColumnName(++i);
+        return md.getColumnName(++i);
       } catch (SQLException e) {
-	return null;
+        return null;
       }
     }
 

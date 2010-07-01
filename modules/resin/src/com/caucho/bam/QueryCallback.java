@@ -39,7 +39,7 @@ public interface QueryCallback {
   public void onQueryResult(String to, String from, Serializable payload);
   
   public void onQueryError(String to,
-			   String from,
-			   Serializable payload,
-			   ActorError error);
+                           String from,
+                           Serializable payload,
+                           ActorError error);
 }

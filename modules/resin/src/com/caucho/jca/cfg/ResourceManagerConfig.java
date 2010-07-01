@@ -74,8 +74,8 @@ public class ResourceManagerConfig {
       com.caucho.jca.cfg.ResourceAdapterConfig ra = conn.getResourceAdapter();
 
       if (ra.getResourceadapterClass() != null &&
-	  adapterClass.equals(ra.getResourceadapterClass().getName()))
-	return conn;
+          adapterClass.equals(ra.getResourceadapterClass().getName()))
+        return conn;
     }
 
     return null;
@@ -93,21 +93,21 @@ public class ResourceManagerConfig {
       String []list = path.list();
 
       for (int i = 0; i < list.length; i++) {
-	String name = list[i];
+        String name = list[i];
 
-	if (! name.endsWith(".ra"))
-	  continue;
+        if (! name.endsWith(".ra"))
+          continue;
 
-	InputStream is = path.lookup(name).openRead();
-	try {
-	  ConnectorConfig conn = new ConnectorConfig();
+        InputStream is = path.lookup(name).openRead();
+        try {
+          ConnectorConfig conn = new ConnectorConfig();
 
-	  new Config().configure(conn, is, "com/caucho/jca/jca.rnc");
+          new Config().configure(conn, is, "com/caucho/jca/jca.rnc");
 
-	  _connList.add(conn);
-	} finally {
-	  is.close();
-	}
+          _connList.add(conn);
+        } finally {
+          is.close();
+        }
       }
     } catch (ConfigException e) {
       throw e;
@@ -135,7 +135,7 @@ public class ResourceManagerConfig {
       java.lang.reflect.Method init = raClass.getMethod("init", new Class[0]);
 
       if (init != null)
-	init.invoke(ra, (Object []) null);
+        init.invoke(ra, (Object []) null);
 
       ResourceManagerImpl.addResource(ra);
     } catch (Exception e) {

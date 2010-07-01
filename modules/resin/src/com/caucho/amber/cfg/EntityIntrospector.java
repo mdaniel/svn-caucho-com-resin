@@ -105,10 +105,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       entityType = introspectEntityType(type, parentType);
 
       if (entityType == null)
-	entityType = introspectMappedType(type, parentType);
+        entityType = introspectMappedType(type, parentType);
 
       if (entityType == null)
-	return introspectEmbeddableType(type);
+        return introspectEmbeddableType(type);
       
       beanType = entityType;
       
@@ -117,8 +117,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       entityType.setEnhanced(true);
 
       MappedSuperclassConfig mappedSuperOrEntityConfig
-	= introspectEntityConfig(type);
-				 
+        = introspectEntityConfig(type);
+
       entityType.setParentType(parentType);
 
       introspectTable(type, entityType, parentType);
@@ -142,7 +142,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         }
 
         // XXX: temp. introspects idClass as an embeddable type.
-	_persistenceUnit.addEntityClass(idClass.getName(), idClass);
+        _persistenceUnit.addEntityClass(idClass.getName(), idClass);
 
         // jpa/0i49 vs jpa/0i40
         // embeddable.setFieldAccess(isField);
@@ -222,7 +222,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   }
 
   private EntityType introspectEntityType(Class type,
-					  EntityType parentType)
+                                          EntityType parentType)
     throws SQLException
   {
     getInternalEntityConfig(type, _annotationCfg);
@@ -264,7 +264,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       int p = entityName.lastIndexOf('.');
 
       if (p > 0)
-	entityName = entityName.substring(p + 1);
+        entityName = entityName.substring(p + 1);
     }
 
     if ((entityName == null) || "".equals(entityName)) {
@@ -385,8 +385,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         isField = true;
         embeddableType.setIdClass(true);
       
-	_persistenceUnit.getAmberContainer().addEmbeddable(typeName,
-							   embeddableType);
+        _persistenceUnit.getAmberContainer().addEmbeddable(typeName,
+                                                           embeddableType);
       }
 
       embeddableType.setInstanceClassName(type.getName() +
@@ -402,12 +402,12 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     } catch (ConfigException e) {
       if (embeddableType != null)
-	embeddableType.setConfigException(e);
+        embeddableType.setConfigException(e);
 
       throw e;
     } catch (RuntimeException e) {
       if (embeddableType != null)
-	embeddableType.setConfigException(e);
+        embeddableType.setConfigException(e);
 
       throw e;
     }
@@ -449,8 +449,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
 
   private void introspectInheritance(Class type,
-				     EntityType entityType,
-				     EntityType parentType)
+                                     EntityType entityType,
+                                     EntityType parentType)
     throws SQLException
   {
     // Inheritance annotation/configuration is specified
@@ -466,24 +466,24 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     boolean hasInheritance = ! _annotationCfg.isNull();
 
     if (! hasInheritance &&
-	(parentType == null || ! parentType.isEntity()))
+        (parentType == null || ! parentType.isEntity()))
       return;
 
     introspectDiscriminatorValue(type, entityType);
     
     if (parentType != null) {
       if (hasInheritance)
-	throw new ConfigException(L.l("'{0}' cannot have @Inheritance. It must be specified on the entity class that is the root of the entity class hierarchy.",
-				      type));
+        throw new ConfigException(L.l("'{0}' cannot have @Inheritance. It must be specified on the entity class that is the root of the entity class hierarchy.",
+                                      type));
       
       EntityType rootType = entityType.getRootType();
       rootType.addSubClass(entityType);
 
       getInternalPrimaryKeyJoinColumnConfig(type, _annotationCfg);
       PrimaryKeyJoinColumn joinAnn
-	= (PrimaryKeyJoinColumn) _annotationCfg.getAnnotation();
+        = (PrimaryKeyJoinColumn) _annotationCfg.getAnnotation();
       PrimaryKeyJoinColumnConfig primaryKeyJoinColumnConfig
-	= _annotationCfg.getPrimaryKeyJoinColumnConfig();
+        = _annotationCfg.getPrimaryKeyJoinColumnConfig();
 
       if (rootType.isJoinedSubClass()) {
         linkInheritanceTable(rootType.getTable(),
@@ -502,7 +502,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     if ((inheritanceAnn != null) || (inheritanceConfig != null))
       introspectInheritance(_persistenceUnit, entityType, type,
-			    inheritanceAnn, inheritanceConfig);
+                            inheritanceAnn, inheritanceConfig);
   }
 
   private void introspectDiscriminatorValue(Class type, EntityType entityType)
@@ -605,7 +605,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
   private void introspectTable(Class type,
                                EntityType entityType,
-			       EntityType parentType)
+                               EntityType parentType)
   {
     // XXX: need better test
     boolean isEntity = ! (entityType instanceof MappedSuperclassType);
@@ -629,8 +629,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       boolean hasTableConfig = true;
 
       if (tableName == null || tableName.equals("")) {
-	hasTableConfig = false;
-	tableName = toSqlName(entityType.getName());
+        hasTableConfig = false;
+        tableName = toSqlName(entityType.getName());
       }
 
       /*
@@ -640,9 +640,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         strategy = parentType.getInheritanceStrategy();
 
       if (inheritanceAnn != null)
-	strategy = (InheritanceType) inheritanceAnn.get("strategy");
+        strategy = (InheritanceType) inheritanceAnn.get("strategy");
       else if (inheritanceConfig != null)
-	strategy = inheritanceConfig.getStrategy();
+        strategy = inheritanceConfig.getStrategy();
        */
 
       // jpa/0gg2
@@ -650,41 +650,41 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         return;
       /*
       if (type.isAbstract()
-	  && strategy != InheritanceType.JOINED
-	  && ! hasTableConfig) {
-	// jpa/0gg0
+          && strategy != InheritanceType.JOINED
+          && ! hasTableConfig) {
+        // jpa/0gg0
       }
        */
       else if (parentType == null || parentType.getTable() == null) {
-	entityType.setTable(_persistenceUnit.createTable(tableName));
+        entityType.setTable(_persistenceUnit.createTable(tableName));
       }
       else if (parentType.isJoinedSubClass()) {
-	entityType.setTable(_persistenceUnit.createTable(tableName));
+        entityType.setTable(_persistenceUnit.createTable(tableName));
 
-	EntityType rootType = parentType.getRootType();
+        EntityType rootType = parentType.getRootType();
 
-	Class rootClass = rootType.getBeanClass();
-	getInternalTableConfig(rootClass, _annotationCfg);
-	Table rootTableAnn = (Table) _annotationCfg.getAnnotation();
-	TableConfig rootTableConfig = _annotationCfg.getTableConfig();
+        Class rootClass = rootType.getBeanClass();
+        getInternalTableConfig(rootClass, _annotationCfg);
+        Table rootTableAnn = (Table) _annotationCfg.getAnnotation();
+        TableConfig rootTableConfig = _annotationCfg.getTableConfig();
 
-	String rootTableName = null;
+        String rootTableName = null;
 
-	if (rootTableAnn != null)
-	  rootTableName = rootTableAnn.name();
-	else if (rootTableConfig != null)
-	  rootTableName = rootTableConfig.getName();
+        if (rootTableAnn != null)
+          rootTableName = rootTableAnn.name();
+        else if (rootTableConfig != null)
+          rootTableName = rootTableConfig.getName();
 
-	if (rootTableName == null || rootTableName.equals("")) {
-	  String rootEntityName = rootType.getName();
+        if (rootTableName == null || rootTableName.equals("")) {
+          String rootEntityName = rootType.getName();
 
-	  rootTableName = toSqlName(rootEntityName);
-	}
+          rootTableName = toSqlName(rootEntityName);
+        }
 
-	entityType.setRootTableName(rootTableName);
+        entityType.setRootTableName(rootTableName);
       }
       else
-	entityType.setTable(parentType.getTable());
+        entityType.setTable(parentType.getTable());
     }
   }
 
@@ -700,9 +700,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       String secondaryName;
 
       if (secondaryTableAnn != null)
-	secondaryName = secondaryTableAnn.name();
+        secondaryName = secondaryTableAnn.name();
       else
-	secondaryName = secondaryTableConfig.getName();
+        secondaryName = secondaryTableConfig.getName();
 
       secondaryTable = _persistenceUnit.createTable(secondaryName);
 
@@ -715,8 +715,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       PrimaryKeyJoinColumn[] joinAnn = secondaryTableAnn.pkJoinColumns();
 
       linkSecondaryTable(entityType.getTable(),
-			 secondaryTable,
-			 joinAnn);
+                         secondaryTable,
+                         joinAnn);
     }
   }
 
@@ -766,7 +766,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     boolean hasAttributeOverrides = false;
 
     if ((attributeOverrideList != null) &&
-	(attributeOverrideList.size() > 0)) {
+        (attributeOverrideList.size() > 0)) {
       hasAttributeOverrides = true;
     }
     else if (attributeOverridesAnn != null)
@@ -774,7 +774,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     if (hasAttributeOverride && hasAttributeOverrides)
       throw new ConfigException(L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
-				    type));
+                                    type));
 
     if (attributeOverrideList == null)
       attributeOverrideList = new ArrayList<AttributeOverrideConfig>();
@@ -783,29 +783,29 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       // Convert annotation to configuration.
 
       AttributeOverrideConfig attOverrideConfig
-	= convertAttributeOverrideAnnotationToConfig(attributeOverrideAnn);
+        = convertAttributeOverrideAnnotationToConfig(attributeOverrideAnn);
 
       attributeOverrideList.add(attOverrideConfig);
     }
     else if (hasAttributeOverrides) {
       if (attributeOverrideList.size() > 0) {
-	// OK: attributeOverrideList came from orm.xml
+        // OK: attributeOverrideList came from orm.xml
       }
       else {
-	// Convert annotations to configurations.
+        // Convert annotations to configurations.
 
-	AttributeOverride attOverridesAnn[]
-	  = attributeOverridesAnn.value();
+        AttributeOverride attOverridesAnn[]
+          = attributeOverridesAnn.value();
 
-	AttributeOverrideConfig attOverrideConfig;
+        AttributeOverrideConfig attOverrideConfig;
 
         /* XXX:
-	for (int i = 0; i < attOverridesAnn.length; i++) {
-	  attOverrideConfig
-	    = convertAttributeOverrideAnnotationToConfig((JAnnotation) attOverridesAnn[i]);
+        for (int i = 0; i < attOverridesAnn.length; i++) {
+          attOverrideConfig
+            = convertAttributeOverrideAnnotationToConfig((JAnnotation) attOverridesAnn[i]);
 
-	  attributeOverrideList.add(attOverrideConfig);
-	}
+          attributeOverrideList.add(attOverrideConfig);
+        }
          * */
       }
     }
@@ -815,7 +815,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     }
 
     _depCompletions.add(new AttributeOverrideCompletion(this, entityType, type,
-							overrideMap));
+                                                        overrideMap));
   }
 
   boolean isField(Class type,
@@ -826,8 +826,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       Annotation ann[] = method.getDeclaredAnnotations();
 
       for (int i = 0; ann != null && i < ann.length; i++) {
-	if (ann[i] instanceof Basic || ann[i] instanceof Column)
-	  return false;
+        if (ann[i] instanceof Basic || ann[i] instanceof Column)
+          return false;
       }
     }
 
@@ -837,6 +837,6 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   private boolean isPropertyAnnotation(Class cl)
   {
     return (Basic.class.equals(cl)
-	    || Column.class.equals(cl));
+            || Column.class.equals(cl));
   }
 }

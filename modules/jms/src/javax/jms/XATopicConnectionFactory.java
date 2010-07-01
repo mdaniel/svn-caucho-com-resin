@@ -37,6 +37,6 @@ public interface XATopicConnectionFactory
     throws JMSException;
   
   public XATopicConnection createXATopicConnection(String userName,
-						   String password)
+                                                   String password)
     throws JMSException;
 }

@@ -143,7 +143,7 @@ public class PubSubItemsQuery extends PubSubQuery {
 
     if (_items != null) {
       for (PubSubItem item : _items) {
-	sb.append(",item=").append(item);
+        sb.append(",item=").append(item);
       }
     }
 

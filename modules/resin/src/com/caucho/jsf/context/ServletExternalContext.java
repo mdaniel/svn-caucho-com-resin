@@ -75,8 +75,8 @@ public class ServletExternalContext extends ExternalContext {
   private Map<String,Object> _sessionMap;
 
   ServletExternalContext(ServletContext webApp,
-			 HttpServletRequest request,
-			 HttpServletResponse response)
+                         HttpServletRequest request,
+                         HttpServletResponse response)
   {
     _webApp = webApp;
     _request = request;
@@ -91,8 +91,8 @@ public class ServletExternalContext extends ExternalContext {
       RequestDispatcher rd = _request.getRequestDispatcher(path);
 
       if (rd == null)
-	throw new FacesException(L.l("'{0}' is an unknown dispatcher.",
-				     path));
+        throw new FacesException(L.l("'{0}' is an unknown dispatcher.",
+                                     path));
 
       
       rd.forward(_request, _response);
@@ -244,7 +244,7 @@ public class ServletExternalContext extends ExternalContext {
       Enumeration e1 = _request.getHeaders(name);
       ArrayList<String> values = new ArrayList<String>();
       while (e1.hasMoreElements()) {
-	values.add((String) e1.nextElement());
+        values.add((String) e1.nextElement());
       }
       
       map.put(name, values.toArray(new String[values.size()]));
@@ -284,9 +284,9 @@ public class ServletExternalContext extends ExternalContext {
 
       Enumeration e = _request.getParameterNames();
       while (e.hasMoreElements()) {
-	String name = (String) e.nextElement();
+        String name = (String) e.nextElement();
       
-	map.put(name, _request.getParameter(name));
+        map.put(name, _request.getParameter(name));
       }
 
       _requestParameterMap = Collections.unmodifiableMap(map);

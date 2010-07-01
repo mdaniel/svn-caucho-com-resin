@@ -367,59 +367,59 @@ public class InvocationDecoder {
 
       if (ch == '/' || ch == '\\') {
       dots:
-	while (i + 1 < len) {
-	  ch = uri.charAt(i + 1);
+        while (i + 1 < len) {
+          ch = uri.charAt(i + 1);
 
-	  if (ch == '/' || ch == '\\')
-	    i++;
-	  else if (ch != '.')
-	    break dots;
-	  else if (len <= i + 2
-		   || (ch = uri.charAt(i + 2)) == '/' || ch == '\\') {
-	    i += 2;
-	  }
-	  else if (ch != '.')
-	    break dots;
-	  else if (len <= i + 3
-		   || (ch = uri.charAt(i + 3)) == '/' || ch == '\\') {
-	    int j;
-	    
-	    for (j = cb.length() - 1; j >= 0; j--) {
-	      if ((ch = cb.charAt(j)) == '/' || ch == '\\')
-		break;
-	    }
-	    if (j > 0)
-	      cb.setLength(j);
-	    else
-	      cb.setLength(0);
-	    i += 3;
-	  } else {
+          if (ch == '/' || ch == '\\')
+            i++;
+          else if (ch != '.')
+            break dots;
+          else if (len <= i + 2
+                   || (ch = uri.charAt(i + 2)) == '/' || ch == '\\') {
+            i += 2;
+          }
+          else if (ch != '.')
+            break dots;
+          else if (len <= i + 3
+                   || (ch = uri.charAt(i + 3)) == '/' || ch == '\\') {
+            int j;
+
+            for (j = cb.length() - 1; j >= 0; j--) {
+              if ((ch = cb.charAt(j)) == '/' || ch == '\\')
+                break;
+            }
+            if (j > 0)
+              cb.setLength(j);
+            else
+              cb.setLength(0);
+            i += 3;
+          } else {
             throw new BadRequestException(L.l("The request contains an illegal URL."));
           }
-	}
+        }
 
-	while (isWindows && cb.getLength() > 0
-	       && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
-	  cb.setLength(cb.getLength() - 1);
+        while (isWindows && cb.getLength() > 0
+               && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
+          cb.setLength(cb.getLength() - 1);
 
-	  if (cb.getLength() > 0
-	      && (ch = cb.getLastChar()) == '/' || ch == '\\') {
-	    cb.setLength(cb.getLength() - 1);
-	    // server/003n
-	    continue;
-	  }
-	}
+          if (cb.getLength() > 0
+              && (ch = cb.getLastChar()) == '/' || ch == '\\') {
+            cb.setLength(cb.getLength() - 1);
+            // server/003n
+            continue;
+          }
+        }
 
-	cb.append('/');
+        cb.append('/');
       }
       else if (ch == 0)
         throw new BadRequestException(L.l("The request contains an illegal URL."));
       else
-	cb.append(ch);
+        cb.append(ch);
     }
 
     while (isWindows && cb.getLength() > 0
-	   && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
+           && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
       cb.setLength(cb.getLength() - 1);
     }
 

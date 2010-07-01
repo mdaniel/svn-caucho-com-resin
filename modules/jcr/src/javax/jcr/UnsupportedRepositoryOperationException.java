@@ -41,7 +41,7 @@ public class UnsupportedRepositoryOperationException
   }
   
   public UnsupportedRepositoryOperationException(String message,
-						 Throwable rootCause)
+                                                 Throwable rootCause)
   {
     super(message, rootCause);
   }

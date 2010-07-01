@@ -616,7 +616,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     try {
       if (_pendingTagName == null)
-	return;
+        return;
 
       _out.print("<");
       _out.print(printQName(_pendingTagName));

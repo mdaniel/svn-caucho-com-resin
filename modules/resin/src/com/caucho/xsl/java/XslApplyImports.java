@@ -61,7 +61,7 @@ public class XslApplyImports extends XslNode {
     String arg = "_xsl_arg" + _gen.getCallDepth();
 
     out.println(applyName + "(out, node, " + arg + ", " +
-		min + ", " + (max - 1) + ");");
+                min + ", " + (max - 1) + ");");
     popCall(out);
   }
 }

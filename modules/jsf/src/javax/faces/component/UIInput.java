@@ -163,17 +163,17 @@ public class UIInput extends UIOutput
     if (prop != null) {
       switch (_propMap.get(name)) {
       case VALUE:
-	return _valueExpr;
+        return _valueExpr;
       case IMMEDIATE:
-	return _immediateExpr;
+        return _immediateExpr;
       case REQUIRED:
-	return _requiredExpr;
+        return _requiredExpr;
       case REQUIRED_MESSAGE:
-	return _requiredMessageExpr;
+        return _requiredMessageExpr;
       case CONVERTER_MESSAGE:
-	return _converterMessageExpr;
+        return _converterMessageExpr;
       case VALIDATOR_MESSAGE:
-	return _validatorMessageExpr;
+        return _validatorMessageExpr;
       }
     }
 
@@ -191,54 +191,54 @@ public class UIInput extends UIOutput
     if (prop != null) {
       switch (_propMap.get(name)) {
       case VALUE:
-	if (expr != null && ! expr.isLiteralText())
-	  _valueExpr = expr;
-	break;
-	
+        if (expr != null && ! expr.isLiteralText())
+          _valueExpr = expr;
+        break;
+
       case IMMEDIATE:
-	if (expr != null && expr.isLiteralText()) {
-	  _immediate = (Boolean) expr.getValue(null);
-	  return;
-	}
-	else
-	  _immediateExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _immediate = (Boolean) expr.getValue(null);
+          return;
+        }
+        else
+          _immediateExpr = expr;
+        break;
+
       case REQUIRED:
-	if (expr != null && expr.isLiteralText()) {
-	  _required = (Boolean) expr.getValue(null);
-	  return;
-	}
-	else
-	  _requiredExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _required = (Boolean) expr.getValue(null);
+          return;
+        }
+        else
+          _requiredExpr = expr;
+        break;
+
       case REQUIRED_MESSAGE:
-	if (expr != null && expr.isLiteralText()) {
-	  _requiredMessage = (String) expr.getValue(null);
-	  return;
-	}
-	else
-	  _requiredMessageExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _requiredMessage = (String) expr.getValue(null);
+          return;
+        }
+        else
+          _requiredMessageExpr = expr;
+        break;
+
       case CONVERTER_MESSAGE:
-	if (expr != null && expr.isLiteralText()) {
-	  _converterMessage = (String) expr.getValue(null);
-	  return;
-	}
-	else
-	  _converterMessageExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _converterMessage = (String) expr.getValue(null);
+          return;
+        }
+        else
+          _converterMessageExpr = expr;
+        break;
+
       case VALIDATOR_MESSAGE:
-	if (expr != null && expr.isLiteralText()) {
-	  _validatorMessage = (String) expr.getValue(null);
-	  return;
-	}
-	else
-	  _validatorMessageExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _validatorMessage = (String) expr.getValue(null);
+          return;
+        }
+        else
+          _validatorMessageExpr = expr;
+        break;
       }
     }
 
@@ -332,10 +332,10 @@ public class UIInput extends UIOutput
     FacesListener []listeners = getFacesListeners(FacesListener.class);
     for (int i = 0; i < listeners.length; i++) {
       if (listeners[i] instanceof ValueChangeListenerAdapter) {
-	ValueChangeListenerAdapter adapter
-	  = (ValueChangeListenerAdapter) listeners[i];
+        ValueChangeListenerAdapter adapter
+          = (ValueChangeListenerAdapter) listeners[i];
 
-	return adapter.getBinding();
+        return adapter.getBinding();
       }
     }
 
@@ -353,7 +353,7 @@ public class UIInput extends UIOutput
     FacesListener []listeners = getFacesListeners(FacesListener.class);
     for (int i = 0; i < listeners.length; i++) {
       if (listeners[i] instanceof ValueChangeListenerAdapter) {
-	removeFacesListener(listeners[i]);
+        removeFacesListener(listeners[i]);
       }
     }
     
@@ -374,11 +374,11 @@ public class UIInput extends UIOutput
     int length = _validators.length;
     for (int i = 0; i < length; i++) {
       if (_validators[i] == validator) {
-	Validator []newValidators = new Validator[length - 1];
-	System.arraycopy(_validators, 0, newValidators, 0, i);
-	System.arraycopy(_validators, i + 1, newValidators, i, length - i - 1);
-	_validators = newValidators;
-	return;
+        Validator []newValidators = new Validator[length - 1];
+        System.arraycopy(_validators, 0, newValidators, 0, i);
+        System.arraycopy(_validators, i + 1, newValidators, i, length - i - 1);
+        _validators = newValidators;
+        return;
       }
     }
   }
@@ -398,9 +398,9 @@ public class UIInput extends UIOutput
       Validator validator = _validators[i];
 
       if (validator instanceof ValidatorAdapter) {
-	ValidatorAdapter adapter = (ValidatorAdapter) validator;
+        ValidatorAdapter adapter = (ValidatorAdapter) validator;
 
-	return adapter.getBinding();
+        return adapter.getBinding();
       }
     }
 
@@ -419,8 +419,8 @@ public class UIInput extends UIOutput
       Validator validator = _validators[i];
 
       if (validator instanceof ValidatorAdapter) {
-	_validators[i] = adapter;
-	return;
+        _validators[i] = adapter;
+        return;
       }
     }
 
@@ -460,16 +460,16 @@ public class UIInput extends UIOutput
       super.processDecodes(context);
 
       if (isImmediate()) {
-	try {
-	  validate(context);
-	} catch (RuntimeException e) {
-	  context.renderResponse();
+        try {
+          validate(context);
+        } catch (RuntimeException e) {
+          context.renderResponse();
 
-	  throw e;
-	}
+          throw e;
+        }
 
-	if (! isValid())
-	  context.renderResponse();
+        if (! isValid())
+          context.renderResponse();
       }
     }
   }
@@ -480,15 +480,15 @@ public class UIInput extends UIOutput
       super.processUpdates(context);
 
       try {
-	updateModel(context);
+        updateModel(context);
       } catch (RuntimeException e) {
-	context.renderResponse();
+        context.renderResponse();
       
-	throw e;
+        throw e;
       }
 
       if (! isValid())
-	context.renderResponse();
+        context.renderResponse();
     }
   }
 
@@ -514,8 +514,8 @@ public class UIInput extends UIOutput
       setValid(false);
       
       String summary = Util.l10n(context, UPDATE_MESSAGE_ID,
-				 "{0}: An error occurred while processing your submitted information.",
-				 Util.getLabel(context, this));
+                                 "{0}: An error occurred while processing your submitted information.",
+                                 Util.getLabel(context, this));
 
       String detail = summary;
 
@@ -532,15 +532,15 @@ public class UIInput extends UIOutput
       super.processValidators(context);
 
       try {
-	if (! isImmediate())
-	  validate(context);
+        if (! isImmediate())
+          validate(context);
 
-	if (! isValid())
-	  context.renderResponse();
+        if (! isValid())
+          context.renderResponse();
       } catch (RuntimeException e) {
-	context.renderResponse();
+        context.renderResponse();
       
-	throw e;
+        throw e;
       }
     }
   }
@@ -559,8 +559,8 @@ public class UIInput extends UIOutput
       validateValue(context, value);
 
       if (! isValid()) {
-	context.renderResponse();
-	return;
+        context.renderResponse();
+        return;
       }
     } catch (ConverterException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -572,22 +572,22 @@ public class UIInput extends UIOutput
       FacesMessage msg = e.getFacesMessage();
 
       if (msg == null) {
-	String summary = null;
+        String summary = null;
 
-	if (converterMessage != null)
-	  summary = converterMessage;
-	else
-	  summary = Util.l10n(context, CONVERSION_MESSAGE_ID,
-			      "{0}: Conversion error occurred.",
-			      Util.getLabel(context, this));
+        if (converterMessage != null)
+          summary = converterMessage;
+        else
+          summary = Util.l10n(context, CONVERSION_MESSAGE_ID,
+                              "{0}: Conversion error occurred.",
+                              Util.getLabel(context, this));
 
-	String detail = summary;
+        String detail = summary;
 
         msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
       }
       else if (converterMessage != null) {
-	msg.setSummary(converterMessage);
-	msg.setDetail(converterMessage);
+        msg.setSummary(converterMessage);
+        msg.setDetail(converterMessage);
       }
 
       context.addMessage(getClientId(context), msg);
@@ -600,7 +600,7 @@ public class UIInput extends UIOutput
     setSubmittedValue(null);
 
     if (compareValues(oldValue, value)
-	&& getFacesListeners(FacesListener.class).length > 0) {
+        && getFacesListeners(FacesListener.class).length > 0) {
       ValueChangeEvent event = new ValueChangeEvent(this, oldValue, value);
 
       broadcast(event);
@@ -608,7 +608,7 @@ public class UIInput extends UIOutput
   }
 
   protected Object getConvertedValue(FacesContext context,
-				     Object submittedValue)
+                                     Object submittedValue)
     throws ConverterException
   {
     Renderer renderer = getRenderer(context);
@@ -619,20 +619,20 @@ public class UIInput extends UIOutput
       Converter converter = getConverter();
 
       if (converter != null)
-	return converter.getAsObject(context, this, (String) submittedValue);
+        return converter.getAsObject(context, this, (String) submittedValue);
 
       if (_valueExpr != null) {
-	Class type = _valueExpr.getType(context.getELContext());
+        Class type = _valueExpr.getType(context.getELContext());
 
-	if (type != null) {
-	  converter = context.getApplication().createConverter(type);
+        if (type != null) {
+          converter = context.getApplication().createConverter(type);
 
-	  if (converter != null) {
-	    return converter.getAsObject(context,
-					 this,
-					 (String) submittedValue);
-	  }
-	}
+          if (converter != null) {
+            return converter.getAsObject(context,
+                                         this,
+                                         (String) submittedValue);
+          }
+        }
       }
     }
 
@@ -658,42 +658,42 @@ public class UIInput extends UIOutput
              ! (value.getClass().isArray() &&
                java.lang.reflect.Array.getLength(value) == 0)) {
       for (Validator validator : getValidators()) {
-	try {
-	  validator.validate(context, this, value);
-	} catch (ValidatorException e) {
-	  log.log(Level.FINER, e.toString(), e);
+        try {
+          validator.validate(context, this, value);
+        } catch (ValidatorException e) {
+          log.log(Level.FINER, e.toString(), e);
 
-	  FacesMessage msg = e.getFacesMessage();
+          FacesMessage msg = e.getFacesMessage();
 
-	  String validatorMessage = getValidatorMessage();
+          String validatorMessage = getValidatorMessage();
 
-	  if (msg == null) {
-	    final String summary;
-	    final String detail;
+          if (msg == null) {
+            final String summary;
+            final String detail;
 
-	    if (validatorMessage != null) {
-	      summary = validatorMessage;
-	      detail = validatorMessage;
-	    }
-	    else {
-	      summary = e.getMessage();
-	      detail = e.toString();
-	    }
+            if (validatorMessage != null) {
+              summary = validatorMessage;
+              detail = validatorMessage;
+            }
+            else {
+              summary = e.getMessage();
+              detail = e.toString();
+            }
 
             msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                    summary,
                                    detail);
-	  }
-	  else {
-	    if (validatorMessage != null) {
-	      msg.setSummary(validatorMessage);
-	      msg.setDetail(validatorMessage);
-	    }
-	  }
-	  
-	  context.addMessage(getClientId(context), msg);
-	  setValid(false);
-	}
+          }
+          else {
+            if (validatorMessage != null) {
+              msg.setSummary(validatorMessage);
+              msg.setDetail(validatorMessage);
+            }
+          }
+
+          context.addMessage(getClientId(context), msg);
+          setValid(false);
+        }
       }
     }
     else if (isRequired()) {
@@ -706,13 +706,13 @@ public class UIInput extends UIOutput
                                requiredMessage,
                                requiredMessage);
       else {
-	String summary = Util.l10n(context,
-				   REQUIRED_MESSAGE_ID,
-				   "{0}: UIInput validation Error: Value is required.",
-				   Util.getLabel(context, this));
+        String summary = Util.l10n(context,
+                                   REQUIRED_MESSAGE_ID,
+                                   "{0}: UIInput validation Error: Value is required.",
+                                   Util.getLabel(context, this));
 
-	String detail = summary;
-	msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
+        String detail = summary;
+        msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
       }
 
       context.addMessage(getClientId(context), msg);
@@ -742,17 +742,17 @@ public class UIInput extends UIOutput
 
     if (_validators.length > 0) {
       for (int i = 0; i < _validators.length; i++) {
-	Validator validator = _validators[i];
+        Validator validator = _validators[i];
 
-	int index = offset + 2 * i;
-	
-	state[index] = validator.getClass();
+        int index = offset + 2 * i;
 
-	if (validator instanceof StateHolder) {
-	  StateHolder holder = (StateHolder) validator;
-	  
-	  state[index + 1] = holder.saveState(context);
-	}
+        state[index] = validator.getClass();
+
+        if (validator instanceof StateHolder) {
+          StateHolder holder = (StateHolder) validator;
+
+          state[index + 1] = holder.saveState(context);
+        }
       }
     }
 
@@ -779,23 +779,23 @@ public class UIInput extends UIOutput
       _validators = new Validator[(state.length - offset) / 2];
 
       for (int i = 0; i < _validators.length; i++) {
-	int index = offset + 2 * i;
-	
-	Class cl = (Class) state[index];
+        int index = offset + 2 * i;
 
-	try {
-	  Validator validator = (Validator) cl.newInstance();
+        Class cl = (Class) state[index];
 
-	  if (validator instanceof StateHolder) {
-	    StateHolder holder = (StateHolder) validator;
+        try {
+          Validator validator = (Validator) cl.newInstance();
 
-	    holder.restoreState(context, state[index + 1]);
-	  }
+          if (validator instanceof StateHolder) {
+            StateHolder holder = (StateHolder) validator;
 
-	  _validators[i] = validator;
-	} catch (Exception e) {
-	  throw new FacesException(e);
-	}
+            holder.restoreState(context, state[index + 1]);
+          }
+
+          _validators[i] = validator;
+        } catch (Exception e) {
+          throw new FacesException(e);
+        }
       }
     }
   }
@@ -890,21 +890,21 @@ public class UIInput extends UIOutput
     }
 
     public void validate(FacesContext context,
-			 UIComponent component,
-			 Object value)
+                         UIComponent component,
+                         Object value)
       throws ValidatorException
     {
       try {
-	FacesContext facesContext = FacesContext.getCurrentInstance();
+        FacesContext facesContext = FacesContext.getCurrentInstance();
 
-	_binding.invoke(facesContext, new Object[] { context, component, value });
+        _binding.invoke(facesContext, new Object[] { context, component, value });
       } catch (EvaluationException e) {
-	if (e.getCause() instanceof ValidatorException)
-	  throw (ValidatorException) e.getCause();
-	else if (e.getCause() instanceof RuntimeException)
-	  throw (RuntimeException) e.getCause();
-	else
-	  throw e;
+        if (e.getCause() instanceof ValidatorException)
+          throw (ValidatorException) e.getCause();
+        else if (e.getCause() instanceof RuntimeException)
+          throw (RuntimeException) e.getCause();
+        else
+          throw e;
       }
     }
 

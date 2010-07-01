@@ -73,7 +73,7 @@ public class FacesContextELResolver extends CompositeELResolver {
     = new ManagedBeanELResolver();
 
   public FacesContextELResolver(ELResolver []customResolvers,
-				JsfResourceBundleELResolver jsfBundleResolver)
+                                JsfResourceBundleELResolver jsfBundleResolver)
   {
     _customResolvers = customResolvers;
     _jsfBundleResolver = jsfBundleResolver;
@@ -99,8 +99,8 @@ public class FacesContextELResolver extends CompositeELResolver {
     ELResolver []elResolvers = new ELResolver[_customResolvers.length + 1];
 
     System.arraycopy(_customResolvers, 0,
-		     elResolvers, 0,
-		     _customResolvers.length);
+                     elResolvers, 0,
+                     _customResolvers.length);
 
     elResolvers[elResolvers.length - 1] = elResolver;
 
@@ -114,7 +114,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 
   @Override
   public Class<?> getCommonPropertyType(ELContext env,
-					Object base)
+                                        Object base)
   {
     Class common = null;
 
@@ -123,7 +123,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 
     for (int i = 0; i < _customResolvers.length; i++) {
       common = common(common,
-		      _customResolvers[i].getCommonPropertyType(env, base));
+                      _customResolvers[i].getCommonPropertyType(env, base));
     }
 
     common = common(common, _mapResolver.getCommonPropertyType(env, base));
@@ -152,7 +152,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
-							   Object base)
+                                                           Object base)
   {
     ArrayList<FeatureDescriptor> descriptors
       = new ArrayList<FeatureDescriptor>();
@@ -162,37 +162,37 @@ public class FacesContextELResolver extends CompositeELResolver {
 
     for (int i = 0; i < _customResolvers.length; i++) {
       addDescriptors(descriptors,
-		     _customResolvers[i].getFeatureDescriptors(env, base));
+                     _customResolvers[i].getFeatureDescriptors(env, base));
     }
 
     if (base == null) {
       addDescriptors(descriptors,
-		     _cdiResolver.getFeatureDescriptors(env, base));
+                     _cdiResolver.getFeatureDescriptors(env, base));
       
       addDescriptors(descriptors,
-		     _managedBeanResolver.getFeatureDescriptors(env, base));
+                     _managedBeanResolver.getFeatureDescriptors(env, base));
 
       addDescriptors(descriptors,
-		     _jsfBundleResolver.getFeatureDescriptors(env, base));
+                     _jsfBundleResolver.getFeatureDescriptors(env, base));
     }
     
     addDescriptors(descriptors, _mapResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
-		   _beanResolver.getFeatureDescriptors(env, base));
+                   _beanResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
-		   _jsfBundleResolver.getFeatureDescriptors(env, base));
+                   _jsfBundleResolver.getFeatureDescriptors(env, base));
     /*
     addDescriptors(descriptors,
-		   _implicitResolver.getFeatureDescriptors(env, base));
+                   _implicitResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
-		   _attrResolver.getFeatureDescriptors(env, base));
+                   _attrResolver.getFeatureDescriptors(env, base));
     */
 
     return descriptors.iterator();
   }
 
   private void addDescriptors(ArrayList<FeatureDescriptor> descriptors,
-			      Iterator<FeatureDescriptor> iter)
+                              Iterator<FeatureDescriptor> iter)
   {
     if (iter == null)
       return;
@@ -213,7 +213,7 @@ public class FacesContextELResolver extends CompositeELResolver {
       Class type = _customResolvers[i].getType(env, base, property);
 
       if (env.isPropertyResolved())
-	return type;
+        return type;
     }
     
     if (base != null) {
@@ -232,15 +232,15 @@ public class FacesContextELResolver extends CompositeELResolver {
       ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
 
       if (expr != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return Object.class;
+        return Object.class;
       }
 
       Class type = _jsfBundleResolver.getType(env, base, property);
 
       if (env.isPropertyResolved())
-	return type;
+        return type;
     }
 
     Object value = getValue(env, base, property);
@@ -257,75 +257,75 @@ public class FacesContextELResolver extends CompositeELResolver {
     env.setPropertyResolved(false);
 
     if (base == null
-	&& property instanceof String) {
+        && property instanceof String) {
       ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
 
       if (expr != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return expr.getValue(env);
+        return expr.getValue(env);
       }
 
       Object value = _jsfBundleResolver.getValue(env, base, property);
       if (env.isPropertyResolved())
-	return value;
+        return value;
     }
 
     for (int i = 0; i < _customResolvers.length; i++) {
       Object value = _customResolvers[i].getValue(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
     }
     
     if (base != null) {
       if (base instanceof Map)
-	return _mapResolver.getValue(env, base, property);
+        return _mapResolver.getValue(env, base, property);
       else if (base instanceof List)
-	return _listResolver.getValue(env, base, property);
+        return _listResolver.getValue(env, base, property);
       else if (base.getClass().isArray())
-	return _arrayResolver.getValue(env, base, property);
+        return _arrayResolver.getValue(env, base, property);
       else if (base instanceof ResourceBundle)
-	return _bundleResolver.getValue(env, base, property);
+        return _bundleResolver.getValue(env, base, property);
       else
-	return _beanResolver.getValue(env, base, property);
+        return _beanResolver.getValue(env, base, property);
     }
     else if (property instanceof String) {
       
       FacesContext facesContext
-	= (FacesContext) env.getContext(FacesContext.class);
+        = (FacesContext) env.getContext(FacesContext.class);
       ExternalContext ec = facesContext.getExternalContext();
       
       Object value = ec.getRequestMap().get(property);
 
       if (value != null) {
-	env.setPropertyResolved(true);
-	return value;
+        env.setPropertyResolved(true);
+        return value;
       }
       
       value = ec.getSessionMap().get(property);
 
       if (value != null) {
-	env.setPropertyResolved(true);
-	return value;
+        env.setPropertyResolved(true);
+        return value;
       }
       
       value = ec.getApplicationMap().get(property);
 
       if (value != null) {
-	env.setPropertyResolved(true);
-	return value;
+        env.setPropertyResolved(true);
+        return value;
       }
 
       value = _cdiResolver.getValue(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
 
       value = _managedBeanResolver.getValue(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
 
       return null;
     }
@@ -342,55 +342,55 @@ public class FacesContextELResolver extends CompositeELResolver {
       boolean readOnly = _customResolvers[i].isReadOnly(env, base, property);
 
       if (env.isPropertyResolved())
-	return readOnly;
+        return readOnly;
     }
 
     if (base != null) {
       if (base instanceof Map) {
-	env.setPropertyResolved(true);
-	
-	return _mapResolver.isReadOnly(env, base, property);
+        env.setPropertyResolved(true);
+
+        return _mapResolver.isReadOnly(env, base, property);
       }
       else if (base instanceof List) {
-	env.setPropertyResolved(true);
-	
-	return _listResolver.isReadOnly(env, base, property);
+        env.setPropertyResolved(true);
+
+        return _listResolver.isReadOnly(env, base, property);
       }
       else if (base.getClass().isArray()) {
-	env.setPropertyResolved(true);
-	
-	return _arrayResolver.isReadOnly(env, base, property);
+        env.setPropertyResolved(true);
+
+        return _arrayResolver.isReadOnly(env, base, property);
       }
       else if (base instanceof ResourceBundle) {
-	env.setPropertyResolved(true);
-	
-	return _jsfBundleResolver.isReadOnly(env, base, property);
+        env.setPropertyResolved(true);
+
+        return _jsfBundleResolver.isReadOnly(env, base, property);
       }
       else {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return _beanResolver.isReadOnly(env, base, property);
+        return _beanResolver.isReadOnly(env, base, property);
       }
     }
     else if (base == null && property instanceof String) {
       ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
 
       if (expr != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return true;
+        return true;
       }
 
       boolean value = _jsfBundleResolver.isReadOnly(env, base, property);
       if (env.isPropertyResolved())
-	return value;
+        return value;
     }
 
     for (int i = 0; i < _customResolvers.length; i++) {
       boolean value = _customResolvers[i].isReadOnly(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
     }
 
     env.setPropertyResolved(true);
@@ -399,9 +399,9 @@ public class FacesContextELResolver extends CompositeELResolver {
   }
     
   public void setValue(ELContext env,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     env.setPropertyResolved(false);
 
@@ -409,59 +409,59 @@ public class FacesContextELResolver extends CompositeELResolver {
       _customResolvers[i].setValue(env, base, property, value);
 
       if (env.isPropertyResolved())
-	return;
+        return;
     }
 
     if (base != null) {
       if (base instanceof Map)
-	_mapResolver.setValue(env, base, property, value);
+        _mapResolver.setValue(env, base, property, value);
       else if (base instanceof List)
-	_listResolver.setValue(env, base, property, value);
+        _listResolver.setValue(env, base, property, value);
       else if (base.getClass().isArray())
-	_arrayResolver.setValue(env, base, property, value);
+        _arrayResolver.setValue(env, base, property, value);
       else if (base instanceof ResourceBundle)
-	_jsfBundleResolver.setValue(env, base, property, value);
+        _jsfBundleResolver.setValue(env, base, property, value);
       else
-	_beanResolver.setValue(env, base, property, value);
+        _beanResolver.setValue(env, base, property, value);
     }
     else if (property instanceof String) {
       String key = (String) property;
       ImplicitObjectExpr expr = ImplicitObjectExpr.create(key);
 
       if (expr != null)
-	throw new PropertyNotWritableException(key);
+        throw new PropertyNotWritableException(key);
       
       _jsfBundleResolver.setValue(env, base, property, value);
       if (env.isPropertyResolved())
-	return;
+        return;
       
       FacesContext facesContext
-	= (FacesContext) env.getContext(FacesContext.class);
+        = (FacesContext) env.getContext(FacesContext.class);
       ExternalContext ec = facesContext.getExternalContext();
 
       
       Object oldValue = ec.getRequestMap().get(key);
 
       if (oldValue != null) {
-	ec.getRequestMap().put(key, value);
-	env.setPropertyResolved(true);
-	return;
+        ec.getRequestMap().put(key, value);
+        env.setPropertyResolved(true);
+        return;
       }
       
       oldValue = ec.getSessionMap().get(key);
 
       if (oldValue != null) {
-	ec.getSessionMap().put(key, value);
-	env.setPropertyResolved(true);
-	return;
+        ec.getSessionMap().put(key, value);
+        env.setPropertyResolved(true);
+        return;
       }
       
       oldValue = ec.getApplicationMap().get(key);
 
       if (oldValue != null) {
-	ec.getApplicationMap().put(key, value);
-	env.setPropertyResolved(true);
-	return;
+        ec.getApplicationMap().put(key, value);
+        env.setPropertyResolved(true);
+        return;
       }
 
       ec.getRequestMap().put(key, value);

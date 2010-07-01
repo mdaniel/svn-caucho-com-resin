@@ -151,9 +151,9 @@ public class QueryArgs {
       Object v = _argValues[i];
 
       if (v != null)
-	hash = 31 * hash + v.hashCode();
+        hash = 31 * hash + v.hashCode();
       else
-	hash = 31 * hash + 17;
+        hash = 31 * hash + 17;
     }
 
     return hash;
@@ -177,7 +177,7 @@ public class QueryArgs {
       Object b = _argValues[i];
       
       if (a != b && (a == null || ! a.equals(b)))
-	return false;
+        return false;
     }
 
     return true;

@@ -296,14 +296,14 @@ public class JdbcManager {
       String sql = "SELECT 1 FROM " + _destinationTable + " WHERE 1=0";
 
       try {
-	ResultSet rs = stmt.executeQuery(sql);
-	rs.next();
-	rs.close();
-	stmt.close();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        rs.close();
+        stmt.close();
 
-	return;
+        return;
       } catch (SQLException e) {
-	log.finest(e.toString());
+        log.finest(e.toString());
       }
 
       log.info(L.l("creating JMS destination table {0}", _destinationTable));
@@ -312,20 +312,20 @@ public class JdbcManager {
       String identity = longType + " PRIMARY KEY";
 
       if (getMetaData().supportsIdentity())
-	identity = getMetaData().createIdentitySQL(identity);
+        identity = getMetaData().createIdentitySQL(identity);
 
       sql = ("CREATE TABLE " + _destinationTable + " (" +
-	     "  id " + identity + "," +
-	     "  name VARCHAR(255)," +
-	     "  is_topic INTEGER" +
-	     ")");
+             "  id " + identity + "," +
+             "  name VARCHAR(255)," +
+             "  is_topic INTEGER" +
+             ")");
 
       stmt.executeUpdate(sql);
 
       if (! getMetaData().supportsIdentity()) {
-	_destinationSequence = _destinationTable + "_cseq";
-	
-	stmt.executeUpdate(getMetaData().createSequenceSQL(_destinationSequence, 1));
+        _destinationSequence = _destinationTable + "_cseq";
+
+        stmt.executeUpdate(getMetaData().createSequenceSQL(_destinationSequence, 1));
       }
     } finally {
       conn.close();
@@ -347,14 +347,14 @@ public class JdbcManager {
       String sql = "SELECT 1 FROM " + _consumerTable + " WHERE 1=0";
 
       try {
-	ResultSet rs = stmt.executeQuery(sql);
-	rs.next();
-	rs.close();
-	stmt.close();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        rs.close();
+        stmt.close();
 
-	return;
+        return;
       } catch (SQLException e) {
-	log.finest(e.toString());
+        log.finest(e.toString());
       }
 
       log.info(L.l("creating JMS consumer table {0}", _consumerTable));
@@ -366,19 +366,19 @@ public class JdbcManager {
         identity = getMetaData().createIdentitySQL(identity);
 
       sql = ("CREATE TABLE " + _consumerTable + " (" +
-	     "  s_id " + identity + "," +
-	     "  queue " + longType + "," +
-	     "  client VARCHAR(255)," +
-	     "  name VARCHAR(255)," +
-	     "  expire " + longType + "," +
-	     "  read_id " + longType + "," +
-	     "  ack_id " + longType +
-	     ")");
+             "  s_id " + identity + "," +
+             "  queue " + longType + "," +
+             "  client VARCHAR(255)," +
+             "  name VARCHAR(255)," +
+             "  expire " + longType + "," +
+             "  read_id " + longType + "," +
+             "  ack_id " + longType +
+             ")");
 
       stmt.executeUpdate(sql);
 
       if (_consumerSequence != null)
-	stmt.executeUpdate(getMetaData().createSequenceSQL(_consumerSequence, 1));
+        stmt.executeUpdate(getMetaData().createSequenceSQL(_consumerSequence, 1));
     } finally {
       conn.close();
     }

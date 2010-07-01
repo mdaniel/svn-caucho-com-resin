@@ -149,7 +149,7 @@ public class CGIServlet extends GenericServlet {
       pathInfo = fullPath.substring(i);
 
       if ("".equals(pathInfo))
-	pathInfo = null;
+        pathInfo = null;
     }
 
     String realPath = getServletContext().getRealPath(scriptPath);
@@ -172,9 +172,9 @@ public class CGIServlet extends GenericServlet {
 
     if (log.isLoggable(Level.FINER)) {
       if (args.length > 1)
-	log.finer("[cgi] exec " + args[0] + " " + args[1]);
+        log.finer("[cgi] exec " + args[0] + " " + args[1]);
       else if (args.length > 0)
-	log.finer("[cgi] exec " + args[0]);
+        log.finer("[cgi] exec " + args[0]);
     }
 
     Runtime runtime = Runtime.getRuntime();
@@ -223,18 +223,18 @@ public class CGIServlet extends GenericServlet {
       byte []buf = tempBuf.getBuffer();
       
       try {
-	ServletInputStream sis = req.getInputStream();
-	int len;
+        ServletInputStream sis = req.getInputStream();
+        int len;
 
-	while ((len = sis.read(buf, 0, buf.length)) > 0) {
-	  outputStream.write(buf, 0, len);
-	}
+        while ((len = sis.read(buf, 0, buf.length)) > 0) {
+          outputStream.write(buf, 0, len);
+        }
 
-	outputStream.flush();
+        outputStream.flush();
       } catch (IOException e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       } finally {
-	outputStream.close();
+        outputStream.close();
       }
       
       TempBuffer.free(tempBuf);
@@ -244,20 +244,20 @@ public class CGIServlet extends GenericServlet {
       boolean hasStatus = false;
 
       try {
-	hasStatus = parseHeaders(req, res, rs);
+        hasStatus = parseHeaders(req, res, rs);
 
-	OutputStream out = res.getOutputStream();
+        OutputStream out = res.getOutputStream();
 
-	rs.writeToStream(out);
+        rs.writeToStream(out);
       } finally {
-	try {
-	  rs.close();
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
+        try {
+          rs.close();
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
 
-	}
+        }
 
-	inputStream.close();
+        inputStream.close();
       }
 
       StringBuilder error = new StringBuilder();
@@ -265,20 +265,20 @@ public class CGIServlet extends GenericServlet {
       int ch;
 
       while (errorStream.available() > 0 && (ch = errorStream.read()) > 0) {
-	error.append((char) ch);
+        error.append((char) ch);
 
-	if (! Character.isWhitespace((char) ch))
-	  hasContent = true;
+        if (! Character.isWhitespace((char) ch))
+          hasContent = true;
       }
       errorStream.close();
 
       if (hasContent) {
-	String errorString = error.toString();
+        String errorString = error.toString();
 
-	log.warning(errorString);
+        log.warning(errorString);
 
-	if (! hasStatus && _stderrIsException)
-	  throw new ServletException(errorString);
+        if (! hasStatus && _stderrIsException)
+          throw new ServletException(errorString);
       }
 
       int exitCode = process.waitFor();
@@ -293,8 +293,8 @@ public class CGIServlet extends GenericServlet {
             log.finer(L.l("exit code {0} (ignored)", exitCode));
         }
         else
-	  throw new ServletException(L.l("CGI execution failed.  Exit code {0}",
-				         exitCode));
+          throw new ServletException(L.l("CGI execution failed.  Exit code {0}",
+                                         exitCode));
       }
     } catch (IOException e) {
       throw e;
@@ -304,10 +304,10 @@ public class CGIServlet extends GenericServlet {
       throw new ServletException(e);
     } finally {
       if (alarm != null)
-	alarm.dequeue();
+        alarm.dequeue();
 
       try {
-	process.destroy();
+        process.destroy();
       } catch (Throwable e) {
       }
     }
@@ -340,7 +340,7 @@ public class CGIServlet extends GenericServlet {
         log.finest(L.l("trying script path {0}", path));
 
       if (path.canRead() && ! path.isDirectory())
-	return head;
+        return head;
 
       tail = head - 1;
     }
@@ -403,7 +403,7 @@ public class CGIServlet extends GenericServlet {
       return new String[] { path };
     } finally {
       if (is != null) {
-	is.close();
+        is.close();
       }
     }
   }
@@ -470,7 +470,7 @@ public class CGIServlet extends GenericServlet {
       String value = req.getHeader(key);
 
       if (isFine)
-	log.fine("[cgi] " + key + "=" + value);
+        log.fine("[cgi] " + key + "=" + value);
 
       if (key.equalsIgnoreCase("content-length"))
         env.add("CONTENT_LENGTH=" + value);
@@ -510,8 +510,8 @@ public class CGIServlet extends GenericServlet {
   }
 
   private boolean parseHeaders(HttpServletRequest req,
-			       HttpServletResponse res,
-			       ReadStream rs)
+                               HttpServletResponse res,
+                               ReadStream rs)
     throws IOException
   {
     boolean hasStatus = false;
@@ -555,35 +555,35 @@ public class CGIServlet extends GenericServlet {
       String valueStr = value.toString();
 
       if (log.isLoggable(Level.FINER))
-	log.finer(keyStr + ": " + valueStr);
+        log.finer(keyStr + ": " + valueStr);
 
       if (keyStr.equalsIgnoreCase("Status")) {
         int status = 0;
         int len = valueStr.length();
         int i = 0;
 
-	hasStatus = true;
-	
+        hasStatus = true;
+
         for (; i < len && (ch = valueStr.charAt(i)) >= '0' && ch <= '9'; i++)
           status = 10 * status + ch - '0';
         
         for (; i < len && (ch = valueStr.charAt(i)) == ' '; i++) {
         }
 
-	if (status < 304)
-	  res.setStatus(status);
-	else
-	  res.sendError(status, valueStr.substring(i));
+        if (status < 304)
+          res.setStatus(status);
+        else
+          res.sendError(status, valueStr.substring(i));
       }
       else if (keyStr.equalsIgnoreCase("Location")) {
-	String uri;
-	
-	if (valueStr.startsWith("/"))
-	  uri = req.getContextPath() + valueStr;
-	else
-	  uri = valueStr;
+        String uri;
 
-	res.setHeader("Location", res.encodeRedirectURL(uri));
+        if (valueStr.startsWith("/"))
+          uri = req.getContextPath() + valueStr;
+        else
+          uri = valueStr;
+
+        res.setHeader("Location", res.encodeRedirectURL(uri));
       }
       else
         res.addHeader(keyStr, valueStr);
@@ -607,15 +607,15 @@ public class CGIServlet extends GenericServlet {
       log.warning("timing out CGI process for '" + _uri + "'");
       
       try {
-	_is.close();
+        _is.close();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
       
       try {
-	_process.destroy();
+        _process.destroy();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

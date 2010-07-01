@@ -163,11 +163,11 @@ public class LongKeyLruCache<V> {
       Object lock = getLock(i);
       
       synchronized (lock) {
-	for (CacheItem<V> item = _entries[i];
-	     item != null;
-	     item = item._nextHash) {
-	  newCache.put(item._key, (V) item._value);
-	}
+        for (CacheItem<V> item = _entries[i];
+             item != null;
+             item = item._nextHash) {
+          newCache.put(item._key, (V) item._value);
+        }
 
         _entries[i] = null;
       }
@@ -207,7 +207,7 @@ public class LongKeyLruCache<V> {
               listeners = new ArrayList<CacheListener>();
             listeners.add((CacheListener) item._value);
           }
-	  
+
           if (item._value instanceof SyncCacheListener) {
             if (syncListeners == null)
               syncListeners = new ArrayList<SyncCacheListener>();
@@ -335,38 +335,38 @@ public class LongKeyLruCache<V> {
     synchronized (lock) {
       CacheItem<V> item = _entries[hash];
       for (;
-	   item != null;
-	   item = item._nextHash) {
-	// matching item gets replaced
-	if (item._key == key) {
-	  updateLru(item);
+           item != null;
+           item = item._nextHash) {
+        // matching item gets replaced
+        if (item._key == key) {
+          updateLru(item);
 
-	  oldValue = item._value;
+          oldValue = item._value;
 
           if (replace) {
             if (oldValue instanceof SyncCacheListener) {
               ((SyncCacheListener) oldValue).syncRemoveEvent();
             }
 
-	    item._value = value;
+            item._value = value;
           }
 
-	  break;
-	}
+          break;
+        }
       }
 
       // No matching item, so create one
       if (item == null) {
-	CacheItem<V> next = _entries[hash];
+        CacheItem<V> next = _entries[hash];
         
-	item = new CacheItem<V>(key, value);
+        item = new CacheItem<V>(key, value);
 
         addNewLruItem(item);
         
-	item._nextHash = next;
+        item._nextHash = next;
         _entries[hash] = item;
 
-	return null;
+        return null;
       }
     }
 
@@ -435,52 +435,52 @@ public class LongKeyLruCache<V> {
         item._prevLru = null;
         item._nextLru = _head2;
         
-	if (prevLru != null)
-	  prevLru._nextLru = nextLru;
-	else {
+        if (prevLru != null)
+          prevLru._nextLru = nextLru;
+        else {
           assert(_head1 == item);
           
-	  _head1 = nextLru;
+          _head1 = nextLru;
         }
 
-	if (nextLru != null)
-	  nextLru._prevLru = prevLru;
-	else {
+        if (nextLru != null)
+          nextLru._prevLru = prevLru;
+        else {
           assert(_tail1 == item);
-	  _tail1 = prevLru;
+          _tail1 = prevLru;
         }
 
-	if (_head2 != null)
-	  _head2._prevLru = item;
+        if (_head2 != null)
+          _head2._prevLru = item;
         else {
           assert(_tail2 == null);
           
-	  _tail2 = item;
+          _tail2 = item;
         }
       
-	_head2 = item;
+        _head2 = item;
 
-	_size1--;
-	_size2++;
+        _size1--;
+        _size2++;
       }
       else {
-	if (item == _head2)
-	  return;
+        if (item == _head2)
+          return;
 
-	item._prevLru = null;
-	item._nextLru = _head2;
+        item._prevLru = null;
+        item._nextLru = _head2;
       
-	prevLru._nextLru = nextLru;
+        prevLru._nextLru = nextLru;
       
-	_head2._prevLru = item;
-	_head2 = item;
+        _head2._prevLru = item;
+        _head2 = item;
       
-	if (nextLru != null)
-	  nextLru._prevLru = prevLru;
+        if (nextLru != null)
+          nextLru._prevLru = prevLru;
         else {
           assert(_tail2 == item);
           
-	  _tail2 = prevLru;
+          _tail2 = prevLru;
         }
       }
     }
@@ -490,13 +490,13 @@ public class LongKeyLruCache<V> {
   {
     if (_capacity <= _size1 + _size2) {
       if (_isLruTailRemove.compareAndSet(false, true)) {
-	try {
-	  // remove LRU items until we're below capacity
+        try {
+          // remove LRU items until we're below capacity
           while (_capacity <= _size1 + _size2 && removeTail()) {
           }
-	} finally {
-	  _isLruTailRemove.set(false);
-	}
+        } finally {
+          _isLruTailRemove.set(false);
+        }
       }
     }
   }
@@ -561,9 +561,9 @@ public class LongKeyLruCache<V> {
       CacheItem<V> prevItem = null;
       
       for (CacheItem<V> item = _entries[hash];
-	   item != null;
-	   item = item._nextHash) {
-	if (item._key == key) {
+           item != null;
+           item = item._nextHash) {
+        if (item._key == key) {
           value = item._value;
           
           SyncCacheListener syncListener = null;
@@ -589,20 +589,20 @@ public class LongKeyLruCache<V> {
               syncListener.syncRemoveEvent();
           }
           
-	  CacheItem<V> nextHash = item._nextHash;
+          CacheItem<V> nextHash = item._nextHash;
 
-	  if (prevItem != null)
-	    prevItem._nextHash = nextHash;
-	  else {
+          if (prevItem != null)
+            prevItem._nextHash = nextHash;
+          else {
             assert(_entries[hash] == item);
                    
-	    _entries[hash] = nextHash;
+            _entries[hash] = nextHash;
           }
 
-	  break;
-	}
+          break;
+        }
 
-	prevItem = item;
+        prevItem = item;
       }
     }
 
@@ -775,11 +775,11 @@ public class LongKeyLruCache<V> {
 
       int i = _i + 1;
       for (; i < length; i++) {
-	if (entries[i] != null) {
-	  _i = i - 1;
-	  
-	  return true;
-	}
+        if (entries[i] != null) {
+          _i = i - 1;
+
+          return true;
+        }
       }
       _i = i;
       
@@ -803,14 +803,14 @@ public class LongKeyLruCache<V> {
 
       int i = _i + 1;
       for (; i < length; i++) {
-	entry = entries[i];
-	
-	if (entry != null) {
+        entry = entries[i];
+
+        if (entry != null) {
           _entry = entry._nextHash;
-	  _i = i;
+          _i = i;
           
-	  return entry._value;
-	}
+          return entry._value;
+        }
       }
       _i = i;
 

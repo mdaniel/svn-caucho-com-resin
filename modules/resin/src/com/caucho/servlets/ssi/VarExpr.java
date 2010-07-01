@@ -103,7 +103,7 @@ public class VarExpr extends SSIExpr {
    * Evaluate as a string.
    */
   public String evalString(HttpServletRequest request,
-			   HttpServletResponse response)
+                           HttpServletResponse response)
   {
     String fmt;
     String value = null;
@@ -191,14 +191,14 @@ public class VarExpr extends SSIExpr {
     case DATE_GMT:
       fmt = (String) request.getAttribute("caucho.ssi.timefmt");
       if (fmt == null)
-	fmt = "%Y-%m-%d %H:%M:%S";
+        fmt = "%Y-%m-%d %H:%M:%S";
       value = QDate.formatGMT(Alarm.getCurrentTime(), fmt);
       break;
 
     case DATE_LOCAL:
       fmt = (String) request.getAttribute("caucho.ssi.timefmt");
       if (fmt == null)
-	fmt = "%Y-%m-%d %H:%M:%S";
+        fmt = "%Y-%m-%d %H:%M:%S";
       
       value = QDate.formatLocal(Alarm.getCurrentTime(), fmt);
       break;
@@ -214,7 +214,7 @@ public class VarExpr extends SSIExpr {
     case LAST_MODIFIED:
       fmt = (String) request.getAttribute("caucho.ssi.timefmt");
       if (fmt == null)
-	fmt = "%Y-%m-%d %H:%M:%S";
+        fmt = "%Y-%m-%d %H:%M:%S";
       
       value = QDate.formatLocal(_path.getLastModified(), fmt);
       break;

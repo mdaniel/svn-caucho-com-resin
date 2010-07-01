@@ -84,15 +84,15 @@ public class BlobImpl implements java.sql.Blob {
       InputStream is = getBinaryStream();
 
       if (pos > 1)
-	is.skip(pos - 1);
+        is.skip(pos - 1);
 
       for (int i = 0; i < length; i++) {
-	int ch = is.read();
+        int ch = is.read();
 
-	if (ch < 0)
-	  break;
-	
-	bos.write(ch);
+        if (ch < 0)
+          break;
+
+        bos.write(ch);
       }
 
       is.close();

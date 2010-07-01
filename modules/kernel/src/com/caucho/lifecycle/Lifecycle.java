@@ -296,17 +296,17 @@ public final class Lifecycle implements LifecycleState {
     synchronized (this) {
       while ((state = _state.get()) < IS_ACTIVE
              && Alarm.getCurrentTime() < waitEnd) {
-	if (state == IS_ACTIVE)
-	  return true;
-	else if (IS_ACTIVE < state)
-	  return false;
-	else if (Alarm.isTest())
-	  return false;
+        if (state == IS_ACTIVE)
+          return true;
+        else if (IS_ACTIVE < state)
+          return false;
+        else if (Alarm.isTest())
+          return false;
 
-	try {
-	  this.wait(waitEnd - Alarm.getCurrentTime());
-	} catch (InterruptedException e) {
-	}
+        try {
+          this.wait(waitEnd - Alarm.getCurrentTime());
+        } catch (InterruptedException e) {
+        }
       }
     }
     

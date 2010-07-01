@@ -123,7 +123,7 @@ abstract public class ManagementService
 
   // first stage security - security constraint authorization
   public boolean isAuthorized(HttpServletRequest request,
-			      HttpServletResponse response,
+                              HttpServletResponse response,
                               ServletContext application)
     throws ServletException, IOException
   {
@@ -231,8 +231,8 @@ abstract public class ManagementService
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _serviceName
-	    + "," + _management.getServerId() + "]");
+            + "[" + _serviceName
+            + "," + _management.getServerId() + "]");
   }
 
   private static class HmuxConstraint
@@ -246,14 +246,14 @@ abstract public class ManagementService
     }
 
     public AuthorizationResult isAuthorized(HttpServletRequest request,
-					    HttpServletResponse response,
-					    ServletContext application)
+                                            HttpServletResponse response,
+                                            ServletContext application)
       throws ServletException, IOException
     {
       if (_service.isAuthorized(request, response, application))
-	return AuthorizationResult.ALLOW;
+        return AuthorizationResult.ALLOW;
       else
-	return AuthorizationResult.DENY_SENT_RESPONSE;
+        return AuthorizationResult.DENY_SENT_RESPONSE;
     }
   }
 }

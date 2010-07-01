@@ -91,7 +91,7 @@ public class PostConstructProgram extends ConfigProgram
       Annotation []bindings = createBindings(paramAnns[i]);
       
       _program[i] = new ParamProgram(webBeans, paramTypes[i],
-				     bindings, paramAnns[i]);
+                                     bindings, paramAnns[i]);
     }
   }
 
@@ -101,7 +101,7 @@ public class PostConstructProgram extends ConfigProgram
 
     for (Annotation ann : annotations) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class))
-	bindingList.add(ann);
+        bindingList.add(ann);
     }
 
     if (bindingList.size() == 0)
@@ -119,16 +119,16 @@ public class PostConstructProgram extends ConfigProgram
   {
     try {
       if (_program != null) {
-	Object []args = new Object[_program.length];
+        Object []args = new Object[_program.length];
 
-	for (int i = 0; i < args.length; i++) {
-	  args[i] = _program[i].eval(env);
-	}
-	
-	_init.invoke(bean, args);
+        for (int i = 0; i < args.length; i++) {
+          args[i] = _program[i].eval(env);
+        }
+
+        _init.invoke(bean, args);
       }
       else
-	_init.invoke(bean);
+        _init.invoke(bean);
     } catch (Exception e) {
       throw ConfigException.create(_init, e);
     }
@@ -179,9 +179,9 @@ public class PostConstructProgram extends ConfigProgram
     private final AbstractInjectionPoint _injectionPoint;
 
     ParamProgram(InjectManager inject,
-		 Type type,
-		 Annotation []bindings,
-		 Annotation []annList)
+                 Type type,
+                 Annotation []bindings,
+                 Annotation []annList)
     {
       _inject = inject;
       _type = type;
@@ -192,15 +192,15 @@ public class PostConstructProgram extends ConfigProgram
       HashSet<Annotation> bindingSet = new HashSet<Annotation>();
 
       if (bindings != null) {
-	for (Annotation ann :  bindings)
-	  bindingSet.add(ann);
+        for (Annotation ann :  bindings)
+          bindingSet.add(ann);
       }
       else
-	bindingSet.add(CurrentLiteral.CURRENT);
+        bindingSet.add(CurrentLiteral.CURRENT);
 
       _injectionPoint = new AbstractInjectionPoint(inject,
-						   bean, member, type,
-						   bindingSet, annList);
+                                                   bean, member, type,
+                                                   bindingSet, annList);
     }
 
     public Object eval(CreationalContext<?> env)

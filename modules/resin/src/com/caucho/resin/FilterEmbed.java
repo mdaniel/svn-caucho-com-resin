@@ -143,7 +143,7 @@ public class FilterEmbed
       filterConfig.setFilterClass(_filterClass);
 
       for (Map.Entry<String,String> entry : _initParamMap.entrySet()) {
-	filterConfig.setInitParam(entry.getKey(), entry.getValue());
+        filterConfig.setInitParam(entry.getKey(), entry.getValue());
       }
 
       filterConfig.setInit(_init);

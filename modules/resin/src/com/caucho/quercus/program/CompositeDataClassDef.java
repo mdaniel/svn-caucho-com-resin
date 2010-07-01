@@ -39,8 +39,8 @@ import javax.management.openmbean.*;
  */
 public class CompositeDataClassDef extends JavaClassDef {
   public CompositeDataClassDef(ModuleContext moduleContext,
-			       String name,
-			       Class type)
+                               String name,
+                               Class type)
   {
     super(moduleContext, name, type);
   }

@@ -110,7 +110,7 @@ abstract public class BaseSession implements Session {
    */
   public Node getNodeByUUID(String uuid)
     throws ItemNotFoundException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -124,7 +124,7 @@ abstract public class BaseSession implements Session {
    */
   public Item getItem(String absPath)
     throws PathNotFoundException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -152,11 +152,11 @@ abstract public class BaseSession implements Session {
    */
   public void move(String srcAbsPath, String destAbsPath)
     throws ItemExistsException,
-	   PathNotFoundException,
-	   VersionException,
-	   ConstraintViolationException,
-	   LockException,
-	   RepositoryException
+           PathNotFoundException,
+           VersionException,
+           ConstraintViolationException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -166,12 +166,12 @@ abstract public class BaseSession implements Session {
    */
   public void save()
     throws AccessDeniedException,
-	   ItemExistsException,
-	   ConstraintViolationException,
-	   InvalidItemStateException,
-	   VersionException, LockException,
-	   NoSuchNodeTypeException,
-	   RepositoryException
+           ItemExistsException,
+           ConstraintViolationException,
+           InvalidItemStateException,
+           VersionException, LockException,
+           NoSuchNodeTypeException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -199,7 +199,7 @@ abstract public class BaseSession implements Session {
    */
   public ValueFactory getValueFactory()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -212,7 +212,7 @@ abstract public class BaseSession implements Session {
    */
   public void checkPermission(String absPath, String actions)
     throws java.security.AccessControlException,
-	   RepositoryException
+           RepositoryException
   {
   }
 
@@ -222,12 +222,12 @@ abstract public class BaseSession implements Session {
    * @param parentAbsPath the absolute path of the parent node
    */
   public ContentHandler getImportContentHandler(String parentAbsPath,
-						int uuidBehavior)
+                                                int uuidBehavior)
     throws PathNotFoundException,
-	   ConstraintViolationException,
-	   VersionException,
-	   LockException,
-	   RepositoryException
+           ConstraintViolationException,
+           VersionException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -239,16 +239,16 @@ abstract public class BaseSession implements Session {
    * @param in InputStream to the XML data
    */
   public void importXML(String parentAbsPath,
-			InputStream in,
-			int uuidBehavior)
+                        InputStream in,
+                        int uuidBehavior)
     throws IOException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   ConstraintViolationException,
-	   VersionException,
-	   InvalidSerializedDataException,
-	   LockException,
-	   RepositoryException
+           PathNotFoundException,
+           ItemExistsException,
+           ConstraintViolationException,
+           VersionException,
+           InvalidSerializedDataException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -260,12 +260,12 @@ abstract public class BaseSession implements Session {
    * @param contentHandler SAX ContentHandler to receive the XML
    */
   public void exportSystemView(String absPath,
-			       ContentHandler contentHandler,
-			       boolean skipBinary,
-			       boolean noRecurse)
+                               ContentHandler contentHandler,
+                               boolean skipBinary,
+                               boolean noRecurse)
     throws PathNotFoundException,
-	   SAXException,
-	   RepositoryException
+           SAXException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -277,12 +277,12 @@ abstract public class BaseSession implements Session {
    * @param out OutputStream to receive the XML
    */
   public void exportSystemView(String absPath,
-			       OutputStream out,
-			       boolean skipBinary,
-			       boolean noRecurse)
+                               OutputStream out,
+                               boolean skipBinary,
+                               boolean noRecurse)
     throws IOException,
-	   PathNotFoundException,
-	   RepositoryException
+           PathNotFoundException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -294,12 +294,12 @@ abstract public class BaseSession implements Session {
    * @param out OutputStream to receive the XML
    */
   public void exportDocumentView(String absPath,
-				 ContentHandler contentHandler,
-				 boolean skipBinary,
-				 boolean noRecurse)
+                                 ContentHandler contentHandler,
+                                 boolean skipBinary,
+                                 boolean noRecurse)
     throws PathNotFoundException,
-	   SAXException,
-	   RepositoryException
+           SAXException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -311,12 +311,12 @@ abstract public class BaseSession implements Session {
    * @param out OutputStream to receive the XML
    */
   public void exportDocumentView(String absPath,
-				 OutputStream out,
-				 boolean skipBinary,
-				 boolean noRecurse)
+                                 OutputStream out,
+                                 boolean skipBinary,
+                                 boolean noRecurse)
     throws IOException,
-	   PathNotFoundException,
-	   RepositoryException
+           PathNotFoundException,
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -328,9 +328,9 @@ abstract public class BaseSession implements Session {
    * @param out OutputStream to receive the XML
    */
   public void setNamespacePrefix(String newPrefix,
-				 String existingUri)
+                                 String existingUri)
     throws NamespaceException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }
@@ -349,7 +349,7 @@ abstract public class BaseSession implements Session {
    */
   public String getNamespaceURI(String prefix)
     throws NamespaceException,
-	   RepositoryException
+           RepositoryException
   {
     return null;
   }
@@ -359,7 +359,7 @@ abstract public class BaseSession implements Session {
    */
   public String getNamespacePrefix(String uri)
     throws NamespaceException,
-	   RepositoryException
+           RepositoryException
   {
     return null;
   }
@@ -385,7 +385,7 @@ abstract public class BaseSession implements Session {
    */
   public void addLockToken(String lt)
     throws LockException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedRepositoryOperationException(getClass().getName());
   }

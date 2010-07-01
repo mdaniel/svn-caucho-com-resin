@@ -80,7 +80,7 @@ public class JspDirectiveTag extends JspNode {
 
       if (_parseState.isELIgnoredPageSpecified() &&
           isIgnored != _parseState.isELIgnored())
-	throw error(L.l("isELIgnored values conflict"));
+        throw error(L.l("isELIgnored values conflict"));
 
       _parseState.setELIgnored(isIgnored);
       _parseState.setELIgnoredPageSpecified(true);
@@ -115,7 +115,7 @@ public class JspDirectiveTag extends JspNode {
       
       if (oldValue != null && ! oldValue.equals(value))
         throw error(L.l("@tag display-name '{0}' conflicts with previous value '{1}'.  The display-name attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
 
       
       gen.setDisplayName(value);
@@ -125,7 +125,7 @@ public class JspDirectiveTag extends JspNode {
       
       if (oldValue != null && ! oldValue.equals(value))
         throw error(L.l("@tag small-icon '{0}' conflicts with previous value '{1}'.  The small-icon attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
 
       
       gen.setSmallIcon(value);
@@ -135,7 +135,7 @@ public class JspDirectiveTag extends JspNode {
       
       if (oldValue != null && ! oldValue.equals(value))
         throw error(L.l("@tag large-icon '{0}' conflicts with previous value '{1}'.  The large-icon attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
 
       
       gen.setLargeIcon(value);
@@ -145,7 +145,7 @@ public class JspDirectiveTag extends JspNode {
       
       if (oldValue != null && ! oldValue.equals(value))
         throw error(L.l("@tag description '{0}' conflicts with previous value '{1}'.  The description attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
 
       
       gen.setDescription(value);
@@ -155,7 +155,7 @@ public class JspDirectiveTag extends JspNode {
       
       if (oldValue != null && ! oldValue.equals(value))
         throw error(L.l("@tag example '{0}' conflicts with previous value '{1}'.  The example attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
 
       
       gen.setExample(value);
@@ -165,14 +165,14 @@ public class JspDirectiveTag extends JspNode {
       
       if (oldValue != null && ! oldValue.equals(value))
         throw error(L.l("@tag dynamic-attributes '{0}' conflicts with previous value '{1}'.  The dynamic-attributes attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
       else if (gen.findAttribute(value) != null) {
-	throw error(L.l("@tag dynamic-attributes '{0}' conflicts with an attribute.",
-			value));
+        throw error(L.l("@tag dynamic-attributes '{0}' conflicts with an attribute.",
+                        value));
       }
       else if (gen.findVariable(value) != null) {
-	throw error(L.l("@tag dynamic-attributes '{0}' conflicts with a variable.",
-			value));
+        throw error(L.l("@tag dynamic-attributes '{0}' conflicts with a variable.",
+                        value));
       }
       
       gen.setDynamicAttributes(value);
@@ -182,15 +182,15 @@ public class JspDirectiveTag extends JspNode {
       
       if (oldValue != null && ! oldValue.equals(value)) {
         throw error(L.l("@tag body-content '{0}' conflicts with previous value '{1}'.  The body-content attribute may only be specified once.",
-			value, oldValue));
+                        value, oldValue));
       }
-	
+
       if (value.equals("scriptless")
-	  || value.equals("tagdependent")
-	  || value.equals("empty")) {
+          || value.equals("tagdependent")
+          || value.equals("empty")) {
       }
       else
-	throw error(L.l("'{0}' is an unknown body-content value for the JSP tag directive attribute.  'scriptless', 'tagdependent', and 'empty' are the allowed values.",
+        throw error(L.l("'{0}' is an unknown body-content value for the JSP tag directive attribute.  'scriptless', 'tagdependent', and 'empty' are the allowed values.",
                       value));
 
       gen.setBodyContent(value);
@@ -234,28 +234,28 @@ public class JspDirectiveTag extends JspNode {
     while ((i = type.indexOf(';')) >= 0 && i < type.length()) {
       i++;
       while (i < type.length() && ((ch = type.charAt(i)) == ' ' || ch == '\t'))
-	i++;
+        i++;
 
       if (i >= type.length())
-	return null;
+        return null;
 
       type = type.substring(i);
       i = type.indexOf('=');
       if (i >= 0) {
-	if (! type.startsWith("charset"))
-	  continue;
+        if (! type.startsWith("charset"))
+          continue;
 
-	for (i++;
-	     i < type.length() && ((ch = type.charAt(i)) == ' ' || ch == '\t');
-	     i++) {
-	}
+        for (i++;
+             i < type.length() && ((ch = type.charAt(i)) == ' ' || ch == '\t');
+             i++) {
+        }
 
-	type = type.substring(i);
+        type = type.substring(i);
       }
       
       for (i = 0;
-	   i < type.length() && (ch = type.charAt(i)) != ';' && ch != ' ';
-	   i++) {
+           i < type.length() && (ch = type.charAt(i)) != ';' && ch != ' ';
+           i++) {
       }
 
       return type.substring(0, i);

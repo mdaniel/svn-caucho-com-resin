@@ -485,9 +485,9 @@ abstract public class Expr {
       String string = XmlUtil.textValue((Node) value);
 
       if (string == null)
-	return 0;
+        return 0;
       else
-	return stringToNumber(string);
+        return stringToNumber(string);
     }
     else if (value instanceof NodeList) {
       NodeList list = (NodeList) value;
@@ -497,9 +497,9 @@ abstract public class Expr {
     else if (value instanceof ArrayList) {
       ArrayList list = (ArrayList) value;
       if (list.size() > 0)
-	value = list.get(0);
+        value = list.get(0);
       else
-	value = null;
+        value = null;
     }
     else if (value instanceof NodeIterator) {
       value = ((NodeIterator) value).nextNode();
@@ -537,9 +537,9 @@ abstract public class Expr {
       String s = XmlUtil.textValue((Node) value);
 
       if (s == null)
-	return "";
+        return "";
       else
-	return s;
+        return s;
     }
     else if (value instanceof NodeList) {
       NodeList list = (NodeList) value;
@@ -549,9 +549,9 @@ abstract public class Expr {
     else if (value instanceof ArrayList) {
       ArrayList list = (ArrayList) value;
       if (list.size() > 0)
-	value = list.get(0);
+        value = list.get(0);
       else
-	value = null;
+        value = null;
     }
     else if (value instanceof Iterator) {
       value = ((Iterator) value).next();
@@ -563,9 +563,9 @@ abstract public class Expr {
       double d = ((Double) value).doubleValue();
 
       if ((int) d == d)
-	return String.valueOf((int) d);
+        return String.valueOf((int) d);
       else
-	return String.valueOf(d);
+        return String.valueOf(d);
     }
 
     if (value == null)
@@ -589,9 +589,9 @@ abstract public class Expr {
     else if (value instanceof ArrayList) {
       ArrayList list = (ArrayList) value;
       if (list.size() > 0)
-	value = list.get(0);
+        value = list.get(0);
       else
-	value = null;
+        value = null;
     }
     else if (value instanceof NodeIterator) {
       value = ((NodeIterator) value).nextNode();
@@ -638,11 +638,11 @@ abstract public class Expr {
 
     if (ch == '.') {
       for (i++;
-	   i < length && (ch = string.charAt(i)) >= '0' && ch <= '9';
-	   i++) {
-	value = 10 * value + ch - '0';
-	isNumber = true;
-	exp = 10 * exp;
+           i < length && (ch = string.charAt(i)) >= '0' && ch <= '9';
+           i++) {
+        value = 10 * value + ch - '0';
+        isNumber = true;
+        exp = 10 * exp;
       }
     }
 

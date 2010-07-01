@@ -44,8 +44,8 @@ public interface DeploymentFactory {
    * Returns a deployment manager for the URI.
    */
   public DeploymentManager getDeploymentManager(String uri,
-						String username,
-						String password)
+                                                String username,
+                                                String password)
     throws DeploymentManagerCreationException;
 
   /**

@@ -99,7 +99,7 @@ public class JspConfig {
       JspPropertyGroup group = _propertyGroupList.get(i);
 
       if (group.match(url)) {
-	return group;
+        return group;
       }
     }
 
@@ -117,7 +117,7 @@ public class JspConfig {
       JspPropertyGroup group = _propertyGroupList.get(i);
 
       if (group.match(url)) {
-	list.add(group);
+        list.add(group);
       }
     }
 

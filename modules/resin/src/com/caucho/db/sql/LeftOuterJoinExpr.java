@@ -90,7 +90,7 @@ class LeftOuterJoinExpr extends RowIterateExpr {
 
     for (int i = 0; i < fromItems.length; i++) {
       if (_table == fromItems[i])
-	_tableIndex = i;
+        _tableIndex = i;
     }
     
     return this;
@@ -129,11 +129,11 @@ class LeftOuterJoinExpr extends RowIterateExpr {
       if (rowIter.nextRow()) {
       }
       else if (rowIter.next()) {
-	rowIter.initRow();
+        rowIter.initRow();
       }
       else {
-	rowIter.initNullRow();
-	return true;
+        rowIter.initNullRow();
+        return true;
       }
     } while (expr.evalBoolean(context) != TRUE);
     TableIterator parentIter = context.getTableIterators()[1];
@@ -161,9 +161,9 @@ class LeftOuterJoinExpr extends RowIterateExpr {
       Expr expr = _expr;
 
       while (rowIter.nextRow() || rowIter.next()) {
-	if (expr.evalBoolean(context) == TRUE) {
-	  return true;
-	}
+        if (expr.evalBoolean(context) == TRUE) {
+          return true;
+        }
       }
       
       return false;

@@ -69,7 +69,7 @@ public class BaseNodeType implements NodeType {
     = new ArrayList<NodeDefinition>();
 
   public BaseNodeType(String name,
-		      NodeType []declaredSuperTypes)
+                      NodeType []declaredSuperTypes)
   {
     _name = name;
     _declaredSuperTypes = declaredSuperTypes;
@@ -78,11 +78,11 @@ public class BaseNodeType implements NodeType {
 
     for (NodeType type : declaredSuperTypes) {
       if (! superTypes.contains(type))
-	superTypes.add(type);
+        superTypes.add(type);
 
       for (NodeType parentType : type.getSupertypes()) {
-	if (! superTypes.contains(parentType))
-	  superTypes.add(parentType);
+        if (! superTypes.contains(parentType))
+          superTypes.add(parentType);
       }
     }
 
@@ -308,7 +308,7 @@ public class BaseNodeType implements NodeType {
     NT_BASE = new BaseNodeType("nt:base", new NodeType[0]);
 
     prop = new BasePropertyDefinition("jcr:primaryType", NT_BASE,
-				      PropertyType.NAME);
+                                      PropertyType.NAME);
     prop.setAutoCreated(true);
     prop.setMandatory(true);
     prop.setOnParentVersion(OnParentVersionAction.COMPUTE);
@@ -316,7 +316,7 @@ public class BaseNodeType implements NodeType {
     NT_BASE.addProperty(prop);
 
     prop = new BasePropertyDefinition("jcr:mixinTypes", NT_BASE,
-				      PropertyType.NAME);
+                                      PropertyType.NAME);
     prop.setOnParentVersion(OnParentVersionAction.COMPUTE);
     prop.setProtected(true);
     prop.setMultiple(true);
@@ -329,7 +329,7 @@ public class BaseNodeType implements NodeType {
     NT_HIERARCHY_NODE = new BaseNodeType("nt:hierarchyNode", NT_BASE);
 
     prop = new BasePropertyDefinition("jcr:created", NT_HIERARCHY_NODE,
-				      PropertyType.DATE);
+                                      PropertyType.DATE);
     prop.setAutoCreated(true);
     prop.setOnParentVersion(OnParentVersionAction.INITIALIZE);
     prop.setProtected(true);
@@ -358,26 +358,26 @@ public class BaseNodeType implements NodeType {
     // nt:resource
     
     NT_RESOURCE = new BaseNodeType("nt:resource",
-				 new NodeType[] { NT_HIERARCHY_NODE,
-						  MIX_REFERENCEABLE });
+                                 new NodeType[] { NT_HIERARCHY_NODE,
+                                                  MIX_REFERENCEABLE });
     NT_RESOURCE.setPrimaryItemName("jcr:data");
 
     prop = new BasePropertyDefinition("jcr:encoding", NT_RESOURCE,
-				      PropertyType.STRING);
+                                      PropertyType.STRING);
     NT_FOLDER.addProperty(prop);
 
     prop = new BasePropertyDefinition("jcr:mimeType", NT_RESOURCE,
-				      PropertyType.STRING);
+                                      PropertyType.STRING);
     prop.setMandatory(true);
     NT_FOLDER.addProperty(prop);
 
     prop = new BasePropertyDefinition("jcr:data", NT_RESOURCE,
-				      PropertyType.BINARY);
+                                      PropertyType.BINARY);
     prop.setMandatory(true);
     NT_FOLDER.addProperty(prop);
 
     prop = new BasePropertyDefinition("jcr:lastModified", NT_RESOURCE,
-				      PropertyType.DATE);
+                                      PropertyType.DATE);
     prop.setMandatory(true);
     prop.setOnParentVersion(OnParentVersionAction.IGNORE);
     NT_FOLDER.addProperty(prop);

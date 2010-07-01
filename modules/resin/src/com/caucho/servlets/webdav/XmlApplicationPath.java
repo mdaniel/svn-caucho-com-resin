@@ -324,7 +324,7 @@ public class XmlApplicationPath extends ApplicationPath {
     }
 
     public void endElement (String uri, String localName, String qName)
-	throws SAXException
+        throws SAXException
     {
       if (localName.equals("file")) {
         if (fileName != null)

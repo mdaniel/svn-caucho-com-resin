@@ -77,7 +77,7 @@ public class ValidateLongRangeTag extends ValidatorELTag
       validator = (LongRangeValidator) app.createValidator(id);
 
       if (_bindingExpr != null)
-	_bindingExpr.setValue(elContext, validator);
+        _bindingExpr.setValue(elContext, validator);
     }
 
     if (_minimumExpr != null)

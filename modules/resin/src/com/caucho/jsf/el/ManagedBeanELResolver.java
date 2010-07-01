@@ -61,7 +61,7 @@ public class ManagedBeanELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
-							   Object base)
+                                                           Object base)
   {
     ArrayList<FeatureDescriptor> descriptors
       = new ArrayList<FeatureDescriptor>();
@@ -76,9 +76,9 @@ public class ManagedBeanELResolver extends ELResolver {
       String key = property.toString();
       
       if (_managedBeanMap.get(key) != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return Object.class;
+        return Object.class;
       }
     }
 
@@ -94,51 +94,51 @@ public class ManagedBeanELResolver extends ELResolver {
       ManagedBeanConfig managedBean = _managedBeanMap.get(key);
 
       if (managedBean != null) {
-	env.setPropertyResolved(true);
-	
-	FacesContext facesContext = FacesContext.getCurrentInstance();
+        env.setPropertyResolved(true);
 
-	ExternalContext extContext = facesContext.getExternalContext();
+        FacesContext facesContext = FacesContext.getCurrentInstance();
 
-	Map requestMap = extContext.getRequestMap();
-	Object value = requestMap.get(key);
+        ExternalContext extContext = facesContext.getExternalContext();
 
-	if (value != null)
-	  return value;
+        Map requestMap = extContext.getRequestMap();
+        Object value = requestMap.get(key);
 
-	value = extContext.getSessionMap().get(key);
+        if (value != null)
+          return value;
 
-	if (value != null)
-	  return value;
+        value = extContext.getSessionMap().get(key);
 
-	value = extContext.getApplicationMap().get(key);
+        if (value != null)
+          return value;
 
-	if (value != null)
-	  return value;
+        value = extContext.getApplicationMap().get(key);
 
-	Scope oldScope = (Scope) env.getContext(Scope.class);
-	Scope scope = oldScope;
-	
-	if (scope == null) {
-	  scope = new Scope();
-	  env.putContext(Scope.class, scope);
-	}
+        if (value != null)
+          return value;
 
-	int oldScopeValue = scope.getScope();
+        Scope oldScope = (Scope) env.getContext(Scope.class);
+        Scope scope = oldScope;
 
-	try {
-	  if (scope.containsBean(key))
-	    throw new FacesException(L.l("'{0}' is a circular managed bean reference.",
-				      key));
+        if (scope == null) {
+          scope = new Scope();
+          env.putContext(Scope.class, scope);
+        }
 
-	  scope.addBean(key);
+        int oldScopeValue = scope.getScope();
 
-	  return managedBean.create(facesContext, scope);
-	} finally {
-	  scope.removeBean(key);
-	  scope.setScope(oldScopeValue);
-	  env.putContext(Scope.class, oldScope);
-	}
+        try {
+          if (scope.containsBean(key))
+            throw new FacesException(L.l("'{0}' is a circular managed bean reference.",
+                                      key));
+
+          scope.addBean(key);
+
+          return managedBean.create(facesContext, scope);
+        } finally {
+          scope.removeBean(key);
+          scope.setScope(oldScopeValue);
+          env.putContext(Scope.class, oldScope);
+        }
       }
     }
 
@@ -147,8 +147,8 @@ public class ManagedBeanELResolver extends ELResolver {
   
   @Override
   public boolean isReadOnly(ELContext env,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     if (base == null && property instanceof String) {
       String key = property.toString();
@@ -156,9 +156,9 @@ public class ManagedBeanELResolver extends ELResolver {
       ManagedBeanConfig managedBean = _managedBeanMap.get(key);
 
       if (managedBean != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return true;
+        return true;
       }
     }
 
@@ -167,7 +167,7 @@ public class ManagedBeanELResolver extends ELResolver {
   
   @Override
   public Class getCommonPropertyType(ELContext env,
-				     Object base)
+                                     Object base)
   {
     if (base == null)
       return Object.class;
@@ -177,9 +177,9 @@ public class ManagedBeanELResolver extends ELResolver {
   
   @Override
   public void setValue(ELContext env,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base == null && property instanceof String) {
       String key = property.toString();
@@ -187,8 +187,8 @@ public class ManagedBeanELResolver extends ELResolver {
       ManagedBeanConfig managedBean = _managedBeanMap.get(key);
 
       if (managedBean != null) {
-	throw new PropertyNotWritableException(L.l("Managed bean ${{0}} is not writable",
-				      key));
+        throw new PropertyNotWritableException(L.l("Managed bean ${{0}} is not writable",
+                                      key));
       }
     }
   }

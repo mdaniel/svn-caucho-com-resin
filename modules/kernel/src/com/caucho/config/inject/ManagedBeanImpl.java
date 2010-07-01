@@ -425,7 +425,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     throws InvocationTargetException,
            IllegalAccessException
     {
-    	method.invoke(_bean);
+            method.invoke(_bean);
     }
 
     @Override

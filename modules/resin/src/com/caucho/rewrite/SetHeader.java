@@ -75,19 +75,19 @@ public class SetHeader extends AbstractRewriteFilter
   {
     if (_name == null) {
       throw new ConfigException(L.l("'name' is a required attribute of '{0}'.",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
     }
     
     if (_value == null) {
       throw new ConfigException(L.l("'value' is a required attribute of '{0}'.",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
     }
   }
 
   @Override
   protected FilterChain createFilterChain(String uri,
-					  String queryString,
-					  FilterChain next)
+                                          String queryString,
+                                          FilterChain next)
   {
     return new SetHeaderFilterChain(next, _name, _value);
   }

@@ -58,8 +58,8 @@ public class AmberPersistenceProvider implements PersistenceProvider {
       String providerClass = (String) map.get("javax.persistence.provider");
 
       if (providerClass != null
-	  && ! getClass().getName().equals(providerClass))
-	return null;
+          && ! getClass().getName().equals(providerClass))
+        return null;
     }
     
     AmberContainer container = AmberContainer.getCurrent();

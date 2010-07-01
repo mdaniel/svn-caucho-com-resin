@@ -202,9 +202,9 @@ class NativeRegexp extends Native {
       int begin = regexp.regexp.getBegin(i);
       int end = regexp.regexp.getEnd(i);
       if (begin < end && begin >= 0)
-	array.setProperty(i, string.substring(begin, end));
+        array.setProperty(i, string.substring(begin, end));
       else
-	array.setProperty(i, ESString.create("")); // XXX: possible?
+        array.setProperty(i, ESString.create("")); // XXX: possible?
     }
 
     // java.util.regex

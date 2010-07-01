@@ -107,9 +107,9 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * is made to connect to the target server
    */
   @Description("The configured timeout for assuming a target server remains" +
-	      " unavailable once a connection attempt fails." +
-	      " When the timeout period elapses another" +
-	      " attempt is made to connect to the target server")
+              " unavailable once a connection attempt fails." +
+              " When the timeout period elapses another" +
+              " attempt is made to connect to the target server")
   @Units("milliseconds")
   public long getRecoverTime();
 
@@ -120,8 +120,8 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    */
   @Description("The configured timeout for an idle socket that is connected" +
                " to the target server. If the socket is not" +
-	       " used within the timeout period the idle" +
-	       " connection is closed")
+               " used within the timeout period the idle" +
+               " connection is closed")
   @Units("milliseconds")
   public long getIdleTime();
 
@@ -180,14 +180,14 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * Returns the number of connections that have been made to the target server.
    */
   @Description("The total number of new connections that have been made" +
-	       " to the target server")
+               " to the target server")
   public long getConnectionNewCountTotal();
 
   /**
    * Returns the number of connections that have been made to the target server.
    */
   @Description("The total number of keepalive connections that have been made" +
-	       " to the target server")
+               " to the target server")
   public long getConnectionKeepaliveCountTotal();
 
   /**
@@ -195,7 +195,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * to the target server.
    */
   @Description("The total number of failed connections attempts" +
-	       " to the target server")
+               " to the target server")
   public long getConnectionFailCountTotal();
 
   /**
@@ -209,7 +209,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    * response.
    */
   @Description("The total number of busy responses" +
-	       " from the target server")
+               " from the target server")
   public long getConnectionBusyCountTotal();
 
   /**

@@ -68,13 +68,13 @@ public class SkeletonInvocationException extends ActorException {
       return ((ActorException) cause).createActorError();
     else if (cause != null) {
       return new ActorError(ActorError.TYPE_CANCEL,
-			    ActorError.INTERNAL_SERVER_ERROR,
-			    cause.toString());
+                            ActorError.INTERNAL_SERVER_ERROR,
+                            cause.toString());
     }
     else {
       return new ActorError(ActorError.TYPE_CANCEL,
-			    ActorError.INTERNAL_SERVER_ERROR,
-			    toString());
+                            ActorError.INTERNAL_SERVER_ERROR,
+                            toString());
     }
   }
 }

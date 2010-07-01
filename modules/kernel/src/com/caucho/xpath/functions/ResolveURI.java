@@ -71,7 +71,7 @@ public class ResolveURI extends AbstractStringExpr {
     String rel = _relExpr.evalString(node, env);
 
     if (rel.startsWith("/") ||
-	rel.indexOf(':') > 0 && rel.indexOf(':') < '/')
+        rel.indexOf(':') > 0 && rel.indexOf(':') < '/')
       return rel;
 
     String base;

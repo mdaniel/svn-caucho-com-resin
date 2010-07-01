@@ -58,7 +58,7 @@ public class UniqueConstraint extends Constraint {
    */
   @Override
   public void validate(TableIterator []sourceRows,
-		       QueryContext queryContext, Transaction xa)
+                       QueryContext queryContext, Transaction xa)
     throws SQLException
   {
     TableIterator sourceRow = sourceRows[0];
@@ -73,37 +73,37 @@ public class UniqueConstraint extends Constraint {
 
     try {
       while (iter.next()) {
-	byte []iterBuffer = iter.getBuffer();
+        byte []iterBuffer = iter.getBuffer();
 
-	iter.prevRow();
-	
-	while (iter.nextRow()) {
-	  int iterOffset = iter.getRowOffset();
+        iter.prevRow();
 
-	  if (iterBuffer == sourceBuffer && iterOffset == sourceOffset)
-	    continue;
-	      
-	  boolean isMatch = true;
+        while (iter.nextRow()) {
+          int iterOffset = iter.getRowOffset();
 
-	  for (int i = 0; i < _uniqueSet.length; i++) {
-	    Column column = _uniqueSet[i];
+          if (iterBuffer == sourceBuffer && iterOffset == sourceOffset)
+            continue;
 
-	    if (! column.isEqual(iterBuffer, iterOffset,
-				 sourceBuffer, sourceOffset)) {
-	      isMatch = false;
-	      break;
-	    }
-	  }
+          boolean isMatch = true;
 
-	  if (isMatch) {
-	    long blockId = iter.getBlockId();
-	    
-	    throw new SQLException(L.l("'{0}' in {1}.{2} fails uniqueness constraint.",
-				       _uniqueSet[0].getString(blockId, iterBuffer, iterOffset),
-				       table.getName(),
-				       _uniqueSet[0].getName()));
-	  }
-	}
+          for (int i = 0; i < _uniqueSet.length; i++) {
+            Column column = _uniqueSet[i];
+
+            if (! column.isEqual(iterBuffer, iterOffset,
+                                 sourceBuffer, sourceOffset)) {
+              isMatch = false;
+              break;
+            }
+          }
+
+          if (isMatch) {
+            long blockId = iter.getBlockId();
+
+            throw new SQLException(L.l("'{0}' in {1}.{2} fails uniqueness constraint.",
+                                       _uniqueSet[0].getString(blockId, iterBuffer, iterOffset),
+                                       table.getName(),
+                                       _uniqueSet[0].getName()));
+          }
+        }
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);

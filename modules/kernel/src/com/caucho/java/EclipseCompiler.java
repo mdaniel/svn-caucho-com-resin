@@ -72,7 +72,7 @@ public class EclipseCompiler extends AbstractJavaCompiler {
     if (! _hasCompiler) {
       try {
         Class.forName(COMPILER, false,
-		      Thread.currentThread().getContextClassLoader());
+                      Thread.currentThread().getContextClassLoader());
 
         _hasCompiler = true;
       } catch (Exception e) {
@@ -116,20 +116,20 @@ public class EclipseCompiler extends AbstractJavaCompiler {
       argList.add(_compiler.getClassPath());
       ArrayList<String> args = _compiler.getArgs();
       if (args != null)
-	argList.addAll(args);
+        argList.addAll(args);
 
       for (int i = 0; i < path.length; i++) {
-	Path javaPath = _compiler.getSourceDir().lookup(path[i]);
-	argList.add(javaPath.getNativePath());
+        Path javaPath = _compiler.getSourceDir().lookup(path[i]);
+        argList.add(javaPath.getNativePath());
       }
 
       if (log.isLoggable(Level.FINE)) {
         CharBuffer msg = CharBuffer.allocate();
-	msg.append("javac(int)");
-	for (int i = 0; i < argList.size(); i++) {
-	  msg.append(" ");
-	  msg.append(argList.get(i));
-	}
+        msg.append("javac(int)");
+        for (int i = 0; i < argList.size(); i++) {
+          msg.append(" ");
+          msg.append(argList.get(i));
+        }
         log.fine(msg.close());
       }
 
@@ -140,21 +140,21 @@ public class EclipseCompiler extends AbstractJavaCompiler {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
       try {
-	EnvironmentClassLoader env;
-	env = EnvironmentClassLoader.create(ClassLoader.getSystemClassLoader());
+        EnvironmentClassLoader env;
+        env = EnvironmentClassLoader.create(ClassLoader.getSystemClassLoader());
         thread.setContextClassLoader(env);
 
         try {
           Class cl = Class.forName(COMPILER, false, env);
-	  Constructor xtor = cl.getConstructor(new Class[] { PrintWriter.class, PrintWriter.class, boolean.class });
-	  
-	  Object value = xtor.newInstance(error.getPrintWriter(), error.getPrintWriter(), Boolean.FALSE);
+          Constructor xtor = cl.getConstructor(new Class[] { PrintWriter.class, PrintWriter.class, boolean.class });
 
-	  Method compile = cl.getMethod("compile", new Class[] { String[].class });
+          Object value = xtor.newInstance(error.getPrintWriter(), error.getPrintWriter(), Boolean.FALSE);
 
-	  Object result = compile.invoke(value, new Object[] { argArray });
+          Method compile = cl.getMethod("compile", new Class[] { String[].class });
 
-	  status = Boolean.TRUE.equals(result) ? 0 : -1;
+          Object result = compile.invoke(value, new Object[] { argArray });
+
+          status = Boolean.TRUE.equals(result) ? 0 : -1;
         } catch (ClassNotFoundException e) {
           throw new JavaCompileException(L.l("Can't find internal Java compiler.  Either configure an external compiler with <javac> or use a JDK which contains a Java compiler."));
         } catch (NoSuchMethodException e) {
@@ -167,8 +167,8 @@ public class EclipseCompiler extends AbstractJavaCompiler {
           throw new IOExceptionWrapper(e);
         }
       
-	error.close();
-	tempStream.close();
+        error.close();
+        tempStream.close();
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -180,34 +180,34 @@ public class EclipseCompiler extends AbstractJavaCompiler {
       read.close();
 
       if (errors != null)
-	errors = errors.trim();
+        errors = errors.trim();
 
       if (log.isLoggable(Level.FINE)) {
-	read = tempStream.openReadAndSaveBuffer();
-	CharBuffer cb = new CharBuffer();
-	int ch;
-	while ((ch = read.read()) >= 0) {
-	  cb.append((char) ch);
-	}
-	read.close();
+        read = tempStream.openReadAndSaveBuffer();
+        CharBuffer cb = new CharBuffer();
+        int ch;
+        while ((ch = read.read()) >= 0) {
+          cb.append((char) ch);
+        }
+        read.close();
 
-	log.fine(cb.toString());
+        log.fine(cb.toString());
       }
       /* XXX: why should warnings be sent as warning?
       else if (status == 0 && errors != null && ! errors.equals("")) {
-	final String msg = errors;
-	
-	new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
-	  public void run()
-	  {
-	    log.warning(msg);
-	  }
-	};
+        final String msg = errors;
+
+        new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
+          public void run()
+          {
+            log.warning(msg);
+          }
+        };
       }
       */
 
       if (status != 0)
-	throw new JavaCompileException(errors);
+        throw new JavaCompileException(errors);
     } finally {
       tempStream.destroy();
     }

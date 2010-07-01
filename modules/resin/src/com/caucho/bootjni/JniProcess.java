@@ -97,7 +97,7 @@ public class JniProcess extends Process
       StreamImpl stream;
 
       Class<?> cl = Class.forName("com.caucho.vfs.JniFileStream",
-			       false, getClass().getClassLoader());
+                               false, getClass().getClassLoader());
 
       Constructor<?> ctor = cl.getConstructor(new Class[] { int.class, boolean.class, boolean.class });
       

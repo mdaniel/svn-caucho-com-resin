@@ -44,10 +44,10 @@ public class LogNotification extends Notification
   private String _level;
 
   public LogNotification(String type,
-			 ObjectName source,
-			 long sequenceNumber,
-			 long timestamp,
-			 String message)
+                         ObjectName source,
+                         long sequenceNumber,
+                         long timestamp,
+                         String message)
   {
     super(type, source, sequenceNumber, timestamp, message);
   }
@@ -119,7 +119,7 @@ public class LogNotification extends Notification
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _name + ", " + _level
-	    + ", " + _thread + ", " + getMessage() + "]");
+            + "[" + _name + ", " + _level
+            + ", " + _thread + ", " + getMessage() + "]");
   }
 }

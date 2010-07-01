@@ -146,7 +146,7 @@ public class IvyCache {
    * Finds a dependency in the cache
    */
   public void resolveVersions(ArrayList<String> versions,
-			       IvyDependency dependency)
+                               IvyDependency dependency)
   {
     String org = dependency.getOrg();
     String name = dependency.getName();
@@ -198,14 +198,14 @@ public class IvyCache {
     
     try {
       for (String item : path.list()) {
-	if (item.startsWith(prefix) && item.endsWith(suffix)) {
-	  int len = item.length() - suffix.length();
-	
-	  String revName = item.substring(prefix.length(), len);
+        if (item.startsWith(prefix) && item.endsWith(suffix)) {
+          int len = item.length() - suffix.length();
 
-	  if (! versions.contains(revName))
-	    versions.add(revName);
-	}
+          String revName = item.substring(prefix.length(), len);
+
+          if (! versions.contains(revName))
+            versions.add(revName);
+        }
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

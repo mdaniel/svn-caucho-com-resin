@@ -74,7 +74,7 @@ public class BundleManager {
       _bundleSetParentMethod
         = ResourceBundle.class.getDeclaredMethod("setParent",
                                          new Class[]{
-						   ResourceBundle.class});
+                                                   ResourceBundle.class});
       
       _bundleSetParentMethod.setAccessible(true);
     }
@@ -94,7 +94,7 @@ public class BundleManager {
       manager = _envBundle.get();
       if (manager == null) {
         manager = new BundleManager();
-	_envBundle.set(manager);
+        _envBundle.set(manager);
       }
     }
 
@@ -133,9 +133,9 @@ public class BundleManager {
   public LocalizationContext getBundle(String name, Locale locale)
   {
     String cacheName = (name
-			+ '_' + locale.getLanguage()
-			+ '_' + locale.getCountry()
-			+ '_' + locale.getVariant());
+                        + '_' + locale.getLanguage()
+                        + '_' + locale.getCountry()
+                        + '_' + locale.getVariant());
 
     LocalizationContext context;
 
@@ -147,7 +147,7 @@ public class BundleManager {
     ResourceBundle parent = getBaseBundle(name);
 
     ResourceBundle bundle = getBaseBundle(name
-					  + '_' + locale.getLanguage());
+                                          + '_' + locale.getLanguage());
 
     ResourceBundle matchBundle = null;
 
@@ -167,8 +167,8 @@ public class BundleManager {
     }
 
     bundle = getBaseBundle(name
-			   + '_' + locale.getLanguage()
-			   + '_' + locale.getCountry());
+                           + '_' + locale.getLanguage()
+                           + '_' + locale.getCountry());
     
     if (bundle != null) {
       if (parent != null) {
@@ -185,9 +185,9 @@ public class BundleManager {
     }
 
     bundle = getBaseBundle(name
-			   + '_' + locale.getLanguage()
-			   + '_' + locale.getCountry()
-			   + '_' + locale.getVariant());
+                           + '_' + locale.getLanguage()
+                           + '_' + locale.getCountry()
+                           + '_' + locale.getVariant());
     
     if (bundle != null) {
       if (parent != null) {

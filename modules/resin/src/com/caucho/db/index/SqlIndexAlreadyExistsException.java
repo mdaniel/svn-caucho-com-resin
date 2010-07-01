@@ -36,7 +36,7 @@ import java.sql.SQLException;
  * Wraps an exception in a SQLException wrapper.
  */
 public class SqlIndexAlreadyExistsException extends java.sql.SQLException
-{						    
+{
   /**
    * Creates the wrapper with a message.
    */

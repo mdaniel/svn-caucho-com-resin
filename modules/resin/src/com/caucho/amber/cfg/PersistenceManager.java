@@ -74,7 +74,7 @@ public class PersistenceManager
   public void addPersistenceUnit(PersistenceUnitProxy proxy)
   {
     _amberManager.addPersistenceUnitProxy(proxy.getName(),
-					  proxy.getProgramList());
+                                          proxy.getProgramList());
   }
 
   @PostConstruct

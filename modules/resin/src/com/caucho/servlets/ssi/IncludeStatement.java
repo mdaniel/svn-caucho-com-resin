@@ -68,8 +68,8 @@ public class IncludeStatement extends Statement{
    * @param response the servlet response
    */
   public void apply(WriteStream out,
-		    HttpServletRequest request,
-		    HttpServletResponse response)
+                    HttpServletRequest request,
+                    HttpServletResponse response)
     throws IOException, ServletException
   {
     out.flushBuffer();

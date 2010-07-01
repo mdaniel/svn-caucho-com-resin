@@ -69,7 +69,7 @@ class UnboundIdentifierExpr extends Expr {
       return Integer.MAX_VALUE;
     
     FromItem fromItem = fromList.get(fromList.size() - 1);
-	
+
     Table table = fromItem.getTable();
 
     column = table.getColumn(_column);
@@ -104,33 +104,33 @@ class UnboundIdentifierExpr extends Expr {
   {
     if (_table == null) {
       for (int i = 0; i < fromItems.size(); i++) {
-	FromItem fromItem = fromItems.get(i);
-	
-	Table table = fromItem.getTable();
+        FromItem fromItem = fromItems.get(i);
 
-	Column column = table.getColumn(_column);
+        Table table = fromItem.getTable();
 
-	if (column != null)
-	  return column;
+        Column column = table.getColumn(_column);
+
+        if (column != null)
+          return column;
       }
 
       return null;
     }
     else {
       for (int i = 0; i < fromItems.size(); i++) {
-	FromItem fromItem = fromItems.get(i);
-	
-	if (_table.equals(fromItem.getName())) {
-	  Table table = fromItem.getTable();
+        FromItem fromItem = fromItems.get(i);
 
-	  return table.getColumn(_column);
-	}
+        if (_table.equals(fromItem.getName())) {
+          Table table = fromItem.getTable();
+
+          return table.getColumn(_column);
+        }
       }
       
       return null;
     }
   }
-			    
+
   public Expr bind(Query query)
     throws SQLException
   {

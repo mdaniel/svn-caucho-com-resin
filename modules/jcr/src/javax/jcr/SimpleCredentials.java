@@ -59,9 +59,9 @@ public final class SimpleCredentials implements Credentials {
 
     synchronized (this.attributes) {
       if (value != null)
-	this.attributes.put(name, value);
+        this.attributes.put(name, value);
       else
-	this.attributes.remove(name);
+        this.attributes.remove(name);
     }
   }
 
@@ -85,7 +85,7 @@ public final class SimpleCredentials implements Credentials {
       String []names = new String[this.attributes.size()];
 
       this.attributes.keySet().toArray(names);
-	  
+
       return names;
     }
   }

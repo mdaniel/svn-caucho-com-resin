@@ -118,7 +118,7 @@ public class JspDeclaration extends JspNode {
         ch = '\n';
       
       if (ch == '\n')
-	out.println();
+        out.println();
       else
         out.print(ch);
     }

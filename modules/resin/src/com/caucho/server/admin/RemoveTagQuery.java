@@ -42,8 +42,8 @@ public class RemoveTagQuery implements java.io.Serializable
   }
 
   public RemoveTagQuery(String tag,
-			String user,
-			String message)
+                        String user,
+                        String message)
   {
     _tag = tag;
     _user = user;

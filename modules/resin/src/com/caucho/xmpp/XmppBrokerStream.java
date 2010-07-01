@@ -86,7 +86,7 @@ public class XmppBrokerStream
   private HashMap<Long,String> _idMap = new HashMap<Long,String>();
 
   XmppBrokerStream(XmppRequest request, Broker broker,
-		   ReadStream is, XmppStreamReader in, WriteStream os)
+                   ReadStream is, XmppStreamReader in, WriteStream os)
   {
     _request = request;
     _protocol = request.getProtocol();
@@ -107,8 +107,8 @@ public class XmppBrokerStream
     _authHandler = null;//new AuthBrokerStream(this, _callbackHandler);
 
     _reader = new XmppReader(_xmppContext,
-			     is, _in, _toClient,
-			     new XmppBindCallback(this));
+                             is, _in, _toClient,
+                             new XmppBindCallback(this));
 
     _reader.setUid(_uid);
 
@@ -152,7 +152,7 @@ public class XmppBrokerStream
   }
   
   public boolean serviceWrite(WriteStream os,
-			      SocketLinkDuplexController controller)
+                              SocketLinkDuplexController controller)
     throws IOException
   {
     return false;
@@ -205,8 +205,8 @@ public class XmppBrokerStream
    * Handles a message
    */
   public void message(String to,
-		      String from,
-		      Serializable value)
+                      String from,
+                      Serializable value)
   {
     _toBroker.message(to, _jid, value);
   }
@@ -215,9 +215,9 @@ public class XmppBrokerStream
    * Handles a message
    */
   public void messageError(String to,
-			   String from,
-			   Serializable value,
-			   ActorError error)
+                           String from,
+                           Serializable value,
+                           ActorError error)
   {
     _toBroker.messageError(to, _jid, value, error);
   }
@@ -229,9 +229,9 @@ public class XmppBrokerStream
    * a QueryResult or a QueryError 
    */
   public void queryGet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     _toBroker.queryGet(id, to, _jid, value);
   }
@@ -243,9 +243,9 @@ public class XmppBrokerStream
    * a QueryResult or a QueryError 
    */
   public void querySet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     _toBroker.querySet(id, to, _jid, value);
   }
@@ -256,9 +256,9 @@ public class XmppBrokerStream
    * The result id will match a pending get or set.
    */
   public void queryResult(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     _toBroker.queryResult(id, to, _jid, value);
   }
@@ -269,10 +269,10 @@ public class XmppBrokerStream
    * The result id will match a pending get or set.
    */
   public void queryError(long id,
-			     String to,
-			     String from,
-			     Serializable value,
-			     ActorError error)
+                             String to,
+                             String from,
+                             Serializable value,
+                             ActorError error)
   {
     _toBroker.queryError(id, to, _jid, value, error);
   }

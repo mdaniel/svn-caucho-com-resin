@@ -93,7 +93,7 @@ public class EqExpr extends AbstractBooleanExpr {
 
       return a.equals(b);
     }
-	
+
     if (aType == Double.class || aType == Float.class ||
         bType == Double.class || bType == Float.class) {
       double a = toDouble(aObj, env);

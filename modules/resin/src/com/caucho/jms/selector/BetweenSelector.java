@@ -49,13 +49,13 @@ public class BetweenSelector extends Selector  {
 
     if (! _left.isUnknown() && ! _left.isNumber())
       throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					     this));
+                                             this));
     if (! _low.isUnknown() && ! _low.isNumber())
       throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					     this));
+                                             this));
     if (! _high.isUnknown() && ! _high.isNumber())
       throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					     this));
+                                             this));
   }
 
   /**

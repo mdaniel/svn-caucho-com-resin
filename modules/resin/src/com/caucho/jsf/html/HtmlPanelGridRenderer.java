@@ -144,7 +144,7 @@ class HtmlPanelGridRenderer extends Renderer
       columnClassArray = columnClasses.split("[ \t,]+");
       
       if (columnClassArray.length == 0)
-	columnClassArray = null;
+        columnClassArray = null;
     }
 
     out.startElement("table", component);
@@ -228,10 +228,10 @@ class HtmlPanelGridRenderer extends Renderer
       out.startElement("caption", caption);
 
       if (captionClass != null)
-	out.writeAttribute("class", captionClass, "captionClass");
+        out.writeAttribute("class", captionClass, "captionClass");
 
       if (captionStyle != null)
-	out.writeAttribute("style", captionStyle, "captionStyle");
+        out.writeAttribute("style", captionStyle, "captionStyle");
 
       caption.encodeAll(context);
       
@@ -246,10 +246,10 @@ class HtmlPanelGridRenderer extends Renderer
       out.startElement("th", header);
 
       if (headerClass != null)
-	out.writeAttribute("class", headerClass, "headerClass");
+        out.writeAttribute("class", headerClass, "headerClass");
 
       if (columns > 0)
-	out.writeAttribute("colspan", columns, "columns");
+        out.writeAttribute("colspan", columns, "columns");
 
       out.writeAttribute("scope", "colgroup", "scope");
 
@@ -299,7 +299,7 @@ class HtmlPanelGridRenderer extends Renderer
       columnClassArray = columnClasses.split("[ \t,]+");
       
       if (columnClassArray.length == 0)
-	columnClassArray = null;
+        columnClassArray = null;
     }
 
     String []rowClassArray = null;
@@ -308,7 +308,7 @@ class HtmlPanelGridRenderer extends Renderer
       rowClassArray = rowClasses.split("[ \t,]+");
       
       if (rowClassArray.length == 0)
-	rowClassArray = null;
+        rowClassArray = null;
     }
 
     int size = component.getChildCount();
@@ -328,46 +328,46 @@ class HtmlPanelGridRenderer extends Renderer
       UIComponent child = children.get(i);
 
       if (! child.isRendered())
-	continue;
+        continue;
 
       int column = count % columns;
       int row = count / columns;
 
       if (column == 0) {
-	if (count > 0) {
-	  out.endElement("tr");
-	  out.write("\n");
-	}
+        if (count > 0) {
+          out.endElement("tr");
+          out.write("\n");
+        }
 
-	out.startElement("tr", child);
+        out.startElement("tr", child);
 
-	if (rowClassArray != null) {
-	  String v = rowClassArray[row % rowClassArray.length];
-	  
-	  out.writeAttribute("class", v, "rowClasses");
-	}
+        if (rowClassArray != null) {
+          String v = rowClassArray[row % rowClassArray.length];
+
+          out.writeAttribute("class", v, "rowClasses");
+        }
       }
 
       count++;
 
       out.startElement("td", child);
       if (columnClassArray != null) {
-	String v = columnClassArray[column % columnClassArray.length];
-	  
-	out.writeAttribute("class", v, "columnClasses");
+        String v = columnClassArray[column % columnClassArray.length];
+
+        out.writeAttribute("class", v, "columnClasses");
       }
       
       if (child instanceof UIColumn) {
-	int subCount = child.getChildCount();
-	
-	for (int j = 0; j < subCount; j++) {
-	  UIComponent subChild = child.getChildren().get(j);
-	  
-	  subChild.encodeAll(context);
-	}
+        int subCount = child.getChildCount();
+
+        for (int j = 0; j < subCount; j++) {
+          UIComponent subChild = child.getChildren().get(j);
+
+          subChild.encodeAll(context);
+        }
       }
       else {
-	child.encodeAll(context);
+        child.encodeAll(context);
       }
       out.endElement("td");
     }
@@ -414,10 +414,10 @@ class HtmlPanelGridRenderer extends Renderer
       out.startElement("td", footer);
 
       if (columns > 0)
-	out.writeAttribute("colspan", columns, "columns");
+        out.writeAttribute("colspan", columns, "columns");
 
       if (footerClass != null)
-	out.writeAttribute("class", footerClass, "footerClass");
+        out.writeAttribute("class", footerClass, "footerClass");
 
       //out.writeAttribute("scope", "colgroup", "scope");
 

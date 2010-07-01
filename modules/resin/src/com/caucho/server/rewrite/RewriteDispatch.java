@@ -105,13 +105,13 @@ public class RewriteDispatch
   public void addDispatcherType(String type)
   {
     if ("REQUEST".equals(type)
-	|| "FORWARD".equals(type)
-	|| "INCLUDE".equals(type)) {
+        || "FORWARD".equals(type)
+        || "INCLUDE".equals(type)) {
       _dispatcherTypes.add(type);
     }
     else
       throw new ConfigException(L.l("'{0} is an unknown dispatcher-type.  Valid types are 'REQUEST', 'FORWARD', and 'INCLUDE'",
-				    type));
+                                    type));
   }
 
   /**
@@ -120,7 +120,7 @@ public class RewriteDispatch
   public boolean isRequest()
   {
     return (_dispatcherTypes.contains("REQUEST")
-	    || _dispatcherTypes.size() == 0);
+            || _dispatcherTypes.size() == 0);
   }
 
   /**
@@ -177,8 +177,8 @@ public class RewriteDispatch
   }
 
   public FilterChain map(String uri,
-			 String queryString,
-			 FilterChain chain)
+                         String queryString,
+                         FilterChain chain)
   {
     try {
       if (_isFinest)
@@ -187,7 +187,7 @@ public class RewriteDispatch
       /*
         if (_matchRule == null || _matchRule.isModified()) {
         if (_matchRule != null)
-	_matchRule.destroy();
+        _matchRule.destroy();
       
         _matchRule = new MatchRule(this);
         _matchRule.setRegexp(Pattern.compile(".*"));
@@ -219,8 +219,8 @@ public class RewriteDispatch
   }
 
   private FilterChain mapChain(int index,
-			       String uri, String queryString,
-			       FilterChain chain)
+                               String uri, String queryString,
+                               FilterChain chain)
     throws ServletException
   {
     if (_ruleList.size() <= index)

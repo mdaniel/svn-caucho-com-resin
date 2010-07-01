@@ -96,7 +96,7 @@ public class MessageDestination extends DescriptionGroupConfig {
 
     if (destination == null) {
       throw new ConfigException(L.l("<message-destination> '{0}' could not be resolved",
-				    name));
+                                    name));
     }
 
     _destination = destination;

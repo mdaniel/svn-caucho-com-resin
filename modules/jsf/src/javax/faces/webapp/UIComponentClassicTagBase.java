@@ -125,7 +125,7 @@ public abstract class UIComponentClassicTagBase
   {
     if (id.startsWith(UNIQUE_ID_PREFIX))
       throw new IllegalArgumentException("id may not begin with " +
-					 UNIQUE_ID_PREFIX);
+                                         UNIQUE_ID_PREFIX);
 
     _id = id;
   }
@@ -177,8 +177,8 @@ public abstract class UIComponentClassicTagBase
     Integer iterCounter = (Integer) tagMap.get(_jspId);
 
     iterCounter = (iterCounter == null
-		   ? new Integer(0)
-		   : new Integer(iterCounter.intValue() + 1));
+                   ? new Integer(0)
+                   : new Integer(iterCounter.intValue() + 1));
 
     tagMap.put(_jspId, iterCounter);
 
@@ -212,7 +212,7 @@ public abstract class UIComponentClassicTagBase
       UIComponent component = getComponentInstance();
 
       if (component != null)
-	component.getChildren().add(verbatim);
+        component.getChildren().add(verbatim);
     }
 
     return getDoAfterBodyValue();
@@ -228,7 +228,7 @@ public abstract class UIComponentClassicTagBase
     throws JspException
   {
     pageContext.getRequest().setAttribute("caucho.jsf.parent",
-					  _parentUIComponentTag);
+                                          _parentUIComponentTag);
 
     return getDoEndValue();
   }
@@ -240,7 +240,7 @@ public abstract class UIComponentClassicTagBase
   }
 
   protected abstract UIComponent createComponent(FacesContext context,
-						 String newId)
+                                                 String newId)
     throws JspException;
 
   protected abstract void setProperties(UIComponent component);
@@ -260,7 +260,7 @@ public abstract class UIComponentClassicTagBase
 
       // XXX:
       if (_component.getChildCount() == 0){
-	_created = true;
+        _created = true;
 
         setProperties(_component);
       }
@@ -292,21 +292,21 @@ public abstract class UIComponentClassicTagBase
       _component = parent.getFacet(facetName);
 
       if (_component != null)
-	return _component;
+        return _component;
     }
     else {
       _component = parent.findComponent(id);
 
       if (_component != null) {
-	if (verbatim != null) {
-	  addVerbatimBeforeComponent(parentTag, verbatim, _component);
-	}
+        if (verbatim != null) {
+          addVerbatimBeforeComponent(parentTag, verbatim, _component);
+        }
 
-	return _component;
+        return _component;
       }
 
       if (verbatim != null) {
-	parent.getChildren().add(verbatim);
+        parent.getChildren().add(verbatim);
       }
     }
 
@@ -362,25 +362,25 @@ public abstract class UIComponentClassicTagBase
       char ch = text.charAt(i);
 
       if (!Character.isWhitespace(ch)) {
-	// check for comment
-	if (ch == '>' && text.indexOf("-->") + 2 == i) {
-	  int head = text.indexOf("<!--");
+        // check for comment
+        if (ch == '>' && text.indexOf("-->") + 2 == i) {
+          int head = text.indexOf("<!--");
 
-	  if (head >= 0) {
-	    for (int j = 0; j < head; j++) {
-	      if (!Character.isWhitespace(text.charAt(j))) {
-		isWhitespace = false;
-		break;
-	      }
-	    }
+          if (head >= 0) {
+            for (int j = 0; j < head; j++) {
+              if (!Character.isWhitespace(text.charAt(j))) {
+                isWhitespace = false;
+                break;
+              }
+            }
 
-	    if (isWhitespace)
-	      return null;
-	  }
-	}
+            if (isWhitespace)
+              return null;
+          }
+        }
 
-	isWhitespace = false;
-	break;
+        isWhitespace = false;
+        break;
       }
     }
 
@@ -409,8 +409,8 @@ public abstract class UIComponentClassicTagBase
   }
 
   protected void addVerbatimBeforeComponent(UIComponentClassicTagBase parentTag,
-					    UIComponent verbatim,
-					    UIComponent component)
+                                            UIComponent verbatim,
+                                            UIComponent component)
   {
     UIComponent parent = parentTag.getComponentInstance();
 
@@ -420,15 +420,15 @@ public abstract class UIComponentClassicTagBase
       List<UIComponent> children = parent.getChildren();
 
       for (int i = 0; i < size; i++) {
-	if (children.get(i) == component)
-	  children.add(i, verbatim);
+        if (children.get(i) == component)
+          children.add(i, verbatim);
       }
     }
   }
 
   protected void addVerbatimAfterComponent(UIComponentClassicTagBase parentTag,
-					   UIComponent verbatim,
-					   UIComponent component)
+                                           UIComponent verbatim,
+                                           UIComponent component)
   {
     UIComponent parent = parentTag.getComponentInstance();
 
@@ -438,8 +438,8 @@ public abstract class UIComponentClassicTagBase
       List<UIComponent> children = parent.getChildren();
 
       for (int i = 0; i < size; i++) {
-	if (children.get(i) == component)
-	  children.add(i + 1, verbatim);
+        if (children.get(i) == component)
+          children.add(i + 1, verbatim);
       }
     }
   }

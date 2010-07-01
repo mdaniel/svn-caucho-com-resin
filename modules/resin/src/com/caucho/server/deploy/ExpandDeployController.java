@@ -195,8 +195,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     if (attr != null) {
       for (Map.Entry<Object,Object> entry : attr.entrySet()) {
-	map.put(String.valueOf(entry.getKey()),
-		String.valueOf(entry.getValue()));
+        map.put(String.valueOf(entry.getKey()),
+                String.valueOf(entry.getValue()));
       }
     }
 
@@ -274,10 +274,10 @@ abstract public class ExpandDeployController<I extends DeployInstance>
         } catch (InterruptedException e) {
         }
 
-	if (expandRepositoryImpl()) {
-	}
-	else
-	  expandArchiveImpl();
+        if (expandRepositoryImpl()) {
+        }
+        else
+          expandArchiveImpl();
       }
 
       Path path = getRootDirectory().lookup("META-INF/MANIFEST.MF");
@@ -355,11 +355,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       pwd.mkdirs();
 
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " expanding .git repository tag=" + getRepositoryTag()
-		 + " tree=" + tree + " -> root=" + getRootDirectory());
+        log.fine(this + " expanding .git repository tag=" + getRepositoryTag()
+                 + " tree=" + tree + " -> root=" + getRootDirectory());
 
       _repository.expandToPath(pwd, tree);
-	
+
       return true;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -610,7 +610,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     throws IOException
   {
     if (_expandCleanupFileSet == null
-	|| _expandCleanupFileSet.isMatch(path, prefix)) {
+        || _expandCleanupFileSet.isMatch(path, prefix)) {
       path.remove();
     }
   }

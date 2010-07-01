@@ -183,7 +183,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
       _depend = new Depend(_path);
 
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " loading users from " + _path);
+        log.fine(this + " loading users from " + _path);
       
       _userMap = new Hashtable<String,PasswordUser>();
       
@@ -232,7 +232,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
       _name = name;
 
       if (_principal == null)
-	_principal = new BasicPrincipal(name);
+        _principal = new BasicPrincipal(name);
     }
 
     public String getName()
@@ -280,7 +280,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
     public void addRole(String role)
     {
       if ("disabled".equals(role))
-	_isDisabled = true;
+        _isDisabled = true;
       
       String []newRoles = new String[_roles.length + 1];
       System.arraycopy(_roles, 0, newRoles, 0, _roles.length);
@@ -299,7 +299,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
       int p1 = userParam.indexOf(':');
 
       if (p1 < 0)
-	return;
+        return;
 
       String name = userParam.substring(0, p1);
       int p2 = userParam.indexOf(':', p1 + 1);
@@ -307,12 +307,12 @@ public class XmlAuthenticator extends AbstractAuthenticator
       String roles;
 
       if (p2 < 0) {
-	password = userParam.substring(p1 + 1);
-	roles = getDefaultGroup();
+        password = userParam.substring(p1 + 1);
+        roles = getDefaultGroup();
       }
       else {
-	password = userParam.substring(p1 + 1, p2);
-	roles = userParam.substring(p2 + 1);
+        password = userParam.substring(p1 + 1, p2);
+        roles = userParam.substring(p2 + 1);
       }
 
       setName(name);
@@ -324,7 +324,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
     public void init()
     {
       if ((_roles == null || _roles.length == 0) && getDefaultGroup() != null)
-	_roles = new String[] { getDefaultGroup() };
+        _roles = new String[] { getDefaultGroup() };
     }
 
     public PasswordUser getPasswordUser()
@@ -332,8 +332,8 @@ public class XmlAuthenticator extends AbstractAuthenticator
       boolean isAnonymous = false;
 
       return new PasswordUser(_principal, _password.toCharArray(),
-			      _isDisabled, isAnonymous,
-			      _roles);
+                              _isDisabled, isAnonymous,
+                              _roles);
     }
   }
 }

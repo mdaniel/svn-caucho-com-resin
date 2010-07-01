@@ -58,7 +58,7 @@ public class AndConditions
 
     for (int i = 0; i < len; i++) {
       if (! conditions[i].isMatch(request, response))
-	return false;
+        return false;
     }
 
     return true;

@@ -63,9 +63,9 @@ public class QDeepNodeList implements NodeList {
       next = _first;
 
       if (_predicate != null && next != null && _predicate.isMatch(next))
-	i = 0;
+        i = 0;
       else
-	i = -1;
+        i = -1;
     }
 
     QAbstractNode end = getEnd();

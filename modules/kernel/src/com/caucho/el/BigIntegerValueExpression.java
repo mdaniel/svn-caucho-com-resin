@@ -49,8 +49,8 @@ public class BigIntegerValueExpression extends AbstractValueExpression
   private Class _expectedType;
 
   public BigIntegerValueExpression(Expr expr,
-				   String expressionString,
-				   Class expectedType)
+                                   String expressionString,
+                                   Class expectedType)
   {
     super(expr, expressionString);
 
@@ -58,7 +58,7 @@ public class BigIntegerValueExpression extends AbstractValueExpression
   }
 
   public BigIntegerValueExpression(Expr expr,
-				String expressionString)
+                                String expressionString)
   {
     super(expr, expressionString);
   }
@@ -83,7 +83,7 @@ public class BigIntegerValueExpression extends AbstractValueExpression
   @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return _expr.evalBigInteger(context);
   }

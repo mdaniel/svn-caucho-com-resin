@@ -82,7 +82,7 @@ abstract public class AbstractProtocolServletFactory
 
     for (Class ifc : serviceClass.getInterfaces()) {
       if (ifc.isAnnotationPresent(Remote.class))
-	return ifc;
+        return ifc;
     }
     
     WebService webService
@@ -92,12 +92,12 @@ abstract public class AbstractProtocolServletFactory
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
       try {
-	Class api = Class.forName(webService.endpointInterface(),
-				  false, loader);
+        Class api = Class.forName(webService.endpointInterface(),
+                                  false, loader);
 
-	return api;
+        return api;
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
 
@@ -105,16 +105,16 @@ abstract public class AbstractProtocolServletFactory
     
     for (Class ifc : serviceClass.getInterfaces()) {
       if (ifc.getName().startsWith("java.io"))
-	continue;
+        continue;
       else if (ifc.getName().startsWith("javax.ejb"))
-	continue;
+        continue;
 
       if (remoteAPI != null) {
-	// XXX: possible warning
-	return serviceClass;
+        // XXX: possible warning
+        return serviceClass;
       }
       else
-	remoteAPI = ifc;
+        remoteAPI = ifc;
     }
 
     if (remoteAPI != null)

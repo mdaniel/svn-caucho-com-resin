@@ -61,19 +61,19 @@ public class ResourceAdapterAssociationProgram extends ConfigProgram {
 
     if (ra == null) {
       throw new ConfigException(L.l("'{0}' does not have a defined resource-adapter.  Check the rar or META-INF/resin-ra.xml files",
-				    cl.getName()));
+                                    cl.getName()));
     }
 
     InjectManager webBeans = InjectManager.create();
     
     _raController
       = webBeans.getReference(ResourceAdapterController.class,
-			      Names.create(ra.getResourceAdapterClass().getName()));
+                              Names.create(ra.getResourceAdapterClass().getName()));
     
     if (_raController == null) {
       throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
-				    ra.getResourceAdapterClass().getName(),
-				    cl.getName()));
+                                    ra.getResourceAdapterClass().getName(),
+                                    cl.getName()));
     }
 
   }
@@ -89,7 +89,7 @@ public class ResourceAdapterAssociationProgram extends ConfigProgram {
   {
     try {
       ResourceAdapterAssociation association
-	= (ResourceAdapterAssociation) bean;
+        = (ResourceAdapterAssociation) bean;
 
       association.setResourceAdapter(_raController.getResourceAdapter());
     } catch (Exception e) {

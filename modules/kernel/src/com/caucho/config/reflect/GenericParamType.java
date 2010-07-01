@@ -40,8 +40,8 @@ import com.caucho.inject.Module;
 public class GenericParamType extends ParamType
 {
   public GenericParamType(Class<?> type,
-		   BaseType []param,
-		   HashMap<String,BaseType> paramMap)
+                   BaseType []param,
+                   HashMap<String,BaseType> paramMap)
   {
     super(type, param, paramMap);
   }

@@ -110,7 +110,7 @@ public class XslApplyTemplates extends XslNode {
       sort = new Sort[_sorts.size()];
 
       for (int i = 0; i < _sorts.size(); i++)
-	sort[i] = _sorts.get(i).generateSort();
+        sort[i] = _sorts.get(i).generateSort();
     }
     
 
@@ -136,9 +136,9 @@ public class XslApplyTemplates extends XslNode {
    * @param sort the sort expressions
    */
   private void printApplyTemplates(JavaWriter out,
-				   AbstractPattern select,
-				   String mode,
-				   Sort []sort)
+                                   AbstractPattern select,
+                                   String mode,
+                                   Sort []sort)
     throws Exception
   {
     int min = 0;
@@ -154,7 +154,7 @@ public class XslApplyTemplates extends XslNode {
       out.println("  " + env + ".setSelect(node, null);");
       out.println("  " + env + ".setCurrentNode(_xsl_node);");
       out.println("  " + applyName + "(out, _xsl_node, " + env + ", " +
-		  min + ", " + max + ");");
+                  min + ", " + max + ");");
       out.println("}");
     }
     else if (sort == null) {
@@ -163,11 +163,11 @@ public class XslApplyTemplates extends XslNode {
       String name = printSelectBegin(out, select, false, null);
 
       out.println(env + ".setSelect(node, _select_patterns[" +
-		  _gen.addSelect(select) + "]);");
+                  _gen.addSelect(select) + "]);");
       out.println(env + ".setCurrentNode(" + name + ");");
 
       out.println(applyName + "(out, " + name + ", " + env + ", " + 
-		  min + ", " + max + ");");
+                  min + ", " + max + ");");
 
       for (; _gen.getSelectDepth() > oldSelectDepth; _gen.popSelectDepth()) {
         out.popDepth();
@@ -180,13 +180,13 @@ public class XslApplyTemplates extends XslNode {
       out.println("{");
       out.pushDepth();
       out.println("ArrayList _xsl_list = xslSort(node, env" +
-		  ", _select_patterns[" + _gen.addSelect(select) + "]" +
-		  ", _xsl_sorts[" + sortIndex + "]);");
+                  ", _select_patterns[" + _gen.addSelect(select) + "]" +
+                  ", _xsl_sorts[" + sortIndex + "]);");
       out.println(env + ".setContextSize(_xsl_list.size());");
       out.println("for (int _xsl_i = 0; _xsl_i < _xsl_list.size(); _xsl_i++) {");
       out.println("  " + env + ".setContextPosition(_xsl_i + 1);");
       out.println("  " + applyName + "(out, (Node) _xsl_list.get(_xsl_i)" + 
-	      ", " + env + ", " + min + ", " + max + ");");
+              ", " + env + ", " + min + ", " + max + ");");
       out.println("}");
       out.popDepth();
       out.println("}");

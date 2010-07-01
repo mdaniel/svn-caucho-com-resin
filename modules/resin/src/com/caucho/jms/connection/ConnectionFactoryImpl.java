@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  */
 public class ConnectionFactoryImpl
   implements XAQueueConnectionFactory, XATopicConnectionFactory,
-	     java.io.Serializable, HandleAware
+             java.io.Serializable, HandleAware
 {
   private static final Logger log
     = Logger.getLogger(ConnectionFactoryImpl.class.getName());
@@ -189,8 +189,8 @@ public class ConnectionFactoryImpl
 
     if (_clientID != null) {
       if (findByClientID(_clientID) != null)
-	throw new JMSException(L.l("ClientID[{0}] is only allowed for a single connection.",
-				   _clientID));
+        throw new JMSException(L.l("ClientID[{0}] is only allowed for a single connection.",
+                                   _clientID));
       conn.setClientID(_clientID);
     }
 
@@ -213,8 +213,8 @@ public class ConnectionFactoryImpl
       ConnectionImpl conn = _connections.get(i);
 
       try {
-	if (id.equals(conn.getClientID()))
-	  return conn;
+        if (id.equals(conn.getClientID()))
+          return conn;
       } catch (Throwable e) {
       }
     }
@@ -239,29 +239,29 @@ public class ConnectionFactoryImpl
     /*
     try {
       synchronized (_queues) {
-	Queue queue = _queues.get(name);
+        Queue queue = _queues.get(name);
 
-	if (queue != null)
-	  return queue;
+        if (queue != null)
+          return queue;
 
-	if (_jdbcManager != null) {
-	  JdbcQueue jdbcQueue = new JdbcQueue();
-	  jdbcQueue.setJdbcManager(_jdbcManager);
-	  jdbcQueue.setQueueName(name);
-	  jdbcQueue.init();
+        if (_jdbcManager != null) {
+          JdbcQueue jdbcQueue = new JdbcQueue();
+          jdbcQueue.setJdbcManager(_jdbcManager);
+          jdbcQueue.setQueueName(name);
+          jdbcQueue.init();
 
-	  _queues.put(name, jdbcQueue);
+          _queues.put(name, jdbcQueue);
 
-	  return jdbcQueue;
-	}
-	else {
-	  MemoryQueue memoryQueue = new MemoryQueue();
-	  memoryQueue.setQueueName(name);
+          return jdbcQueue;
+        }
+        else {
+          MemoryQueue memoryQueue = new MemoryQueue();
+          memoryQueue.setQueueName(name);
 
-	  _queues.put(name, memoryQueue);
+          _queues.put(name, memoryQueue);
 
-	  return memoryQueue;
-	}
+          return memoryQueue;
+        }
       }
     } catch (RuntimeException e) {
       throw e;
@@ -282,29 +282,29 @@ public class ConnectionFactoryImpl
     /*
     try {
       synchronized (_topics) {
-	Topic topic = _topics.get(name);
+        Topic topic = _topics.get(name);
 
-	if (topic != null)
-	  return topic;
+        if (topic != null)
+          return topic;
 
-	if (_jdbcManager != null) {
-	  JdbcTopic jdbcTopic = new JdbcTopic();
-	  jdbcTopic.setJdbcManager(_jdbcManager);
-	  jdbcTopic.setTopicName(name);
-	  jdbcTopic.init();
+        if (_jdbcManager != null) {
+          JdbcTopic jdbcTopic = new JdbcTopic();
+          jdbcTopic.setJdbcManager(_jdbcManager);
+          jdbcTopic.setTopicName(name);
+          jdbcTopic.init();
 
-	  _topics.put(name, jdbcTopic);
+          _topics.put(name, jdbcTopic);
 
-	  return jdbcTopic;
-	}
-	else {
-	  MemoryTopic memoryTopic = new MemoryTopic();
-	  memoryTopic.setTopicName(name);
+          return jdbcTopic;
+        }
+        else {
+          MemoryTopic memoryTopic = new MemoryTopic();
+          memoryTopic.setTopicName(name);
 
-	  _topics.put(name, memoryTopic);
+          _topics.put(name, memoryTopic);
 
-	  return memoryTopic;
-	}
+          return memoryTopic;
+        }
       }
     } catch (RuntimeException e) {
       throw e;
@@ -320,9 +320,9 @@ public class ConnectionFactoryImpl
     throws JMSException
   {
     if (_user != null && ! _user.equals(username) ||
-	_password != null && ! _password.equals(password)) {
+        _password != null && ! _password.equals(password)) {
       throw new JMSSecurityException(L.l("'{0}' is an unknown user",
-					 username));
+                                         username));
     }
   }
 
@@ -401,8 +401,8 @@ public class ConnectionFactoryImpl
 
     if (_clientID != null) {
       if (findByClientID(_clientID) != null)
-	throw new JMSException(L.l("ClientID[{0}] is only allowed for a single connection.",
-				   _clientID));
+        throw new JMSException(L.l("ClientID[{0}] is only allowed for a single connection.",
+                                   _clientID));
       conn.setClientID(_clientID);
     }
 

@@ -125,7 +125,7 @@ public class VerifierFilter extends DefaultHandler {
   }
 
   public void startElement(String uri, String localName, String qName,
-			   Attributes atts)
+                           Attributes atts)
     throws SAXException
   {
     _verifierHandler.startElement(uri, localName, qName, atts);

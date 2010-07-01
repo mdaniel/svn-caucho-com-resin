@@ -75,7 +75,7 @@ public class WebServiceIntrospector {
     // matches RI stub for the WSDL location
     return introspect(type, "REPLACE_WITH_ACTUAL_URL", null);
   }
-	   
+
   /**
    * Introspects the class
    */
@@ -135,10 +135,10 @@ public class WebServiceIntrospector {
       WebMethod webMethod = methods[i].getAnnotation(WebMethod.class);
 
       if (api != type) {
-	/* XXX: needed for demo
+        /* XXX: needed for demo
         if (webMethod != null)
           throw new WebServiceException(L.l("Cannot use WebMethod with WebService.endpointInterface: {0}", type));
-	*/
+        */
 
         try {
           api.getDeclaredMethod(methods[i].getName(), 

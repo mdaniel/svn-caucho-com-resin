@@ -77,7 +77,7 @@ public class CacheableDocument {
 
       long time = path.getLastModified();
       if (time > lastModified)
-	lastModified = time;
+        lastModified = time;
     }
 
     return lastModified;

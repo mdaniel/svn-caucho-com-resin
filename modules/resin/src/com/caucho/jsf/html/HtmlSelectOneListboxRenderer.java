@@ -119,7 +119,7 @@ class HtmlSelectOneListboxRenderer extends SelectRenderer
 
     if (component instanceof HtmlSelectOneListbox) {
       HtmlSelectOneListbox htmlComponent
-	= (HtmlSelectOneListbox) component;
+        = (HtmlSelectOneListbox) component;
 
       accesskey = htmlComponent.getAccesskey();
       dir = htmlComponent.getDir();
@@ -186,7 +186,7 @@ class HtmlSelectOneListboxRenderer extends SelectRenderer
       readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
       Integer iValue = (Integer) attrMap.get("size");
       if (iValue != null)
-	size = iValue;
+        size = iValue;
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");

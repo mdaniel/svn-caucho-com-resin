@@ -101,8 +101,8 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
       Document tdoc = (Document) _top;
       DocumentType dtd = tdoc.getDoctype();
       if (tdoc instanceof QDocument && dtd == null) {
-	dtd = new QDocumentType(null);
-	((QDocument) tdoc).setDoctype(dtd);
+        dtd = new QDocumentType(null);
+        ((QDocument) tdoc).setDoctype(dtd);
       }
       
       if (dtd instanceof QDocumentType && dtd.getSystemId() == null)
@@ -164,9 +164,9 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
 
     if (_extLocator != null && _doc.getSystemId() == null)
       _doc.setLocation(_extLocator.getSystemId(),
-		       _extLocator.getFilename(),
-		       _extLocator.getLineNumber(),
-		       _extLocator.getColumnNumber());
+                       _extLocator.getFilename(),
+                       _extLocator.getLineNumber(),
+                       _extLocator.getColumnNumber());
   }
   
   public void startPrefixMapping(String prefix, String url)
@@ -236,9 +236,9 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
 
     if (_extLocator != null && elt instanceof QElement) {
       ((QElement) elt).setLocation(_extLocator.getSystemId(),
-				   _extLocator.getFilename(),
-				   _extLocator.getLineNumber(),
-				   _extLocator.getColumnNumber());
+                                   _extLocator.getFilename(),
+                                   _extLocator.getLineNumber(),
+                                   _extLocator.getColumnNumber());
     }
   }
 
@@ -276,7 +276,7 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
 
     if (_extLocator != null) {
       elt.setLocation(_extLocator.getSystemId(),
-		      _extLocator.getFilename(),
+                      _extLocator.getFilename(),
                       _extLocator.getLineNumber(),
                       _extLocator.getColumnNumber());
     }
@@ -333,9 +333,9 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
 
     if (_extLocator != null)
       ((QElement) elt).setLocation(_extLocator.getSystemId(),
-				   _extLocator.getFilename(),
-				   _extLocator.getLineNumber(),
-				   _extLocator.getColumnNumber());
+                                   _extLocator.getFilename(),
+                                   _extLocator.getLineNumber(),
+                                   _extLocator.getColumnNumber());
 
     QDocumentType dtd = (QDocumentType) _doc.getDoctype();
     if (dtd != null) {
@@ -601,13 +601,13 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
     
     if (_extLocator != null) {
       return new XmlParseException(_extLocator.getFilename(),
-				   _extLocator.getLineNumber(),
-				   text);
+                                   _extLocator.getLineNumber(),
+                                   text);
     }
     else if (_locator != null) {
       return new XmlParseException(_locator.getSystemId(),
-				   _locator.getLineNumber(),
-				   text);
+                                   _locator.getLineNumber(),
+                                   text);
     }
 
     return new XmlParseException(text);

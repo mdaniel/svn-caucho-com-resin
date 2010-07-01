@@ -96,21 +96,21 @@ class UpdateQuery extends Query {
     
     try {
       if (! start(rows, rows.length, context, xa)) {
-	return;
+        return;
       }
 
       do {
-	TableIterator iter = rows[0];
-	// iter.setDirty();
+        TableIterator iter = rows[0];
+        // iter.setDirty();
 
-	for (int i = 0; i < setItems.length; i++) {
-	  Column column = setItems[i].getColumn();
-	  Expr expr = setItems[i].getExpr();
+        for (int i = 0; i < setItems.length; i++) {
+          Column column = setItems[i].getColumn();
+          Expr expr = setItems[i].getExpr();
 
-	  column.set(xa, iter, expr, context);
-	}
+          column.set(xa, iter, expr, context);
+        }
 
-	context.setRowUpdateCount(++count);
+        context.setRowUpdateCount(++count);
       } while (nextTuple(rows, rows.length, context, xa));
     } finally {
       // autoCommitWrite must be before freeRows in case freeRows

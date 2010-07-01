@@ -118,12 +118,12 @@ public class JdbcTopic {
    */
     /*
   public MessageConsumerImpl createConsumer(SessionImpl session,
-					    String selector,
-					    boolean noLocal)
+                                            String selector,
+                                            boolean noLocal)
     throws JMSException
   {
     return new JdbcTopicConsumer(session, selector,
-				 _jdbcManager, this, noLocal);
+                                 _jdbcManager, this, noLocal);
   }
     */
 
@@ -132,13 +132,13 @@ public class JdbcTopic {
    */
     /*
   public TopicSubscriber createDurableSubscriber(SessionImpl session,
-						 String selector,
-						 boolean noLocal,
-						 String name)
+                                                 String selector,
+                                                 boolean noLocal,
+                                                 String name)
     throws JMSException
   {
     return new JdbcTopicConsumer(session, selector,
-				 _jdbcManager, this, noLocal, name);
+                                 _jdbcManager, this, noLocal, name);
   }
     */
 

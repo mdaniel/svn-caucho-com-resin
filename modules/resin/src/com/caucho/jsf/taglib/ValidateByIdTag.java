@@ -80,7 +80,7 @@ public class ValidateByIdTag extends ValidatorELTag
       validator = app.createValidator(id);
 
       if (_bindingExpr != null)
-	_bindingExpr.setValue(elContext, validator);
+        _bindingExpr.setValue(elContext, validator);
     }
 
     return validator;

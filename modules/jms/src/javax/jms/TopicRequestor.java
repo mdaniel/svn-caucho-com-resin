@@ -57,9 +57,9 @@ public class TopicRequestor {
       TopicSubscriber receiver = _session.createSubscriber(tempTopic);
 
       try {
-	return receiver.receive();
+        return receiver.receive();
       } finally {
-	receiver.close();
+        receiver.close();
       }
     } finally {
       tempTopic.delete();

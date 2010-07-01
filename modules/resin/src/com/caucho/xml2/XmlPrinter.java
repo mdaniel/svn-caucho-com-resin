@@ -213,7 +213,7 @@ public class XmlPrinter implements XMLWriter {
     _length = 0;
 
     if (encoding == null ||
-	encoding.equals("US-ASCII") || encoding.equals("ISO-8859-1"))
+        encoding.equals("US-ASCII") || encoding.equals("ISO-8859-1"))
       _entities = XmlLatin1Entities.create();
     else
       _entities = XmlEntities.create();
@@ -385,10 +385,10 @@ public class XmlPrinter implements XMLWriter {
       if (encoding != null) {
         _os.setEncoding(encoding);
 
-	if (encoding.equals("US-ASCII") || encoding.equals("ISO-8859-1"))
-	  _entities = XmlLatin1Entities.create();
-	else
-	  _entities = XmlEntities.create();
+        if (encoding.equals("US-ASCII") || encoding.equals("ISO-8859-1"))
+          _entities = XmlLatin1Entities.create();
+        else
+          _entities = XmlEntities.create();
       }
     } catch (Exception e) {
     }
@@ -749,7 +749,7 @@ public class XmlPrinter implements XMLWriter {
         printDoctype("html");
 
       if (encoding == null || encoding.equalsIgnoreCase("ISO-8859-1"))
- 	// _entities = Latin1Entities.create(dVersion);
+         // _entities = Latin1Entities.create(dVersion);
         _entities = HtmlEntities.create(dVersion);
       else if (encoding.equalsIgnoreCase("US-ASCII"))
         _entities = HtmlEntities.create(dVersion);
@@ -767,12 +767,12 @@ public class XmlPrinter implements XMLWriter {
         print(version);
         print("\"");
 
-	if (encoding == null ||
-	    encoding.equals("") ||
-	    encoding.equalsIgnoreCase("UTF-16") ||
-	    encoding.equalsIgnoreCase("US-ASCII")) {
-	}
-	else
+        if (encoding == null ||
+            encoding.equals("") ||
+            encoding.equalsIgnoreCase("UTF-16") ||
+            encoding.equalsIgnoreCase("US-ASCII")) {
+        }
+        else
           print(" encoding=\"" + encoding + "\"");
           
         if (_standalone != null &&
@@ -786,7 +786,7 @@ public class XmlPrinter implements XMLWriter {
 
       if (encoding == null ||
           encoding.equalsIgnoreCase("US-ASCII") ||
-	  encoding.equalsIgnoreCase("ISO-8859-1"))
+          encoding.equalsIgnoreCase("ISO-8859-1"))
         _entities = XmlLatin1Entities.create();
       else
         _entities = XmlEntities.create();
@@ -1484,26 +1484,26 @@ public class XmlPrinter implements XMLWriter {
 
       switch (ch) {
       case '&': 
-	if (i + 1 < text.length() && text.charAt(i + 1) == '#')
-	  print("&#38;"); 
-	else
-	  print(ch);
-	break;
+        if (i + 1 < text.length() && text.charAt(i + 1) == '#')
+          print("&#38;");
+        else
+          print(ch);
+        break;
 
       case '"': 
-	print("&#34;"); 
-	break;
+        print("&#34;");
+        break;
 
       case '\'': 
-	print("&#39;"); 
-	break;
+        print("&#39;");
+        break;
 
       case '\n':
         print("\n");
         break;
 
       default:
-	print(ch);
+        print(ch);
       }
     }
   }

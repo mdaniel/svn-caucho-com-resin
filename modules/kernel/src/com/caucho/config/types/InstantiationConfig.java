@@ -102,16 +102,16 @@ public class InstantiationConfig {
 
       args[i] = arg;
       if (arg == null)
-	paramTypes[i] = Object.class;
+        paramTypes[i] = Object.class;
       else
-	paramTypes[i] = arg.getClass();
+        paramTypes[i] = arg.getClass();
     }
     
     Constructor constructor = getConstructor(_type, paramTypes);
 
     if (constructor == null)
       throw new ConfigException(L.l("Can't find public constructor for `{0}'.",
-				    _type.getName()));
+                                    _type.getName()));
 
     return constructor.newInstance(args);
   }
@@ -124,7 +124,7 @@ public class InstantiationConfig {
       Class []args = constructors[i].getParameterTypes();
 
       if (args.length == types.length)
-	return constructors[i];
+        return constructors[i];
     }
 
     return null;
@@ -162,33 +162,33 @@ public class InstantiationConfig {
       cb.clear();
       
       if (ch == '\'' || ch == '"') {
-	int end = ch;
+        int end = ch;
 
-	for (ch = read(); ch > 0 && ch != end; ch = read()) {
-	  if (ch == '\\')
-	    cb.append(read());
-	  else
-	    cb.append((char) ch);
-	}
+        for (ch = read(); ch > 0 && ch != end; ch = read()) {
+          if (ch == '\\')
+            cb.append(read());
+          else
+            cb.append((char) ch);
+        }
 
-	_args.add(cb.toString());
+        _args.add(cb.toString());
       }
       else if (ch == '$') {
-	ch = read();
+        ch = read();
 
-	if (ch != '{')
-	  throw new ConfigException(L.l("expected EL-expression at $ in `{0}'",
-					_value));
+        if (ch != '{')
+          throw new ConfigException(L.l("expected EL-expression at $ in `{0}'",
+                                        _value));
 
-	for (ch = read(); ch > 0 && ch != '}'; ch = read()) {
-	  cb.append((char) ch);
-	}
+        for (ch = read(); ch > 0 && ch != '}'; ch = read()) {
+          cb.append((char) ch);
+        }
 
-	_args.add(EL.evalObject(cb.toString()));
+        _args.add(EL.evalObject(cb.toString()));
       }
       else
-	throw new ConfigException(L.l("expected string or EL-expression in `{0}'",
-				      _value));
+        throw new ConfigException(L.l("expected string or EL-expression in `{0}'",
+                                      _value));
     }
   }
 
@@ -205,7 +205,7 @@ public class InstantiationConfig {
 
     if (cb.length() == 0)
       throw new ConfigException(L.l("unexpected empty type in `{0}'",
-				    _value));
+                                    _value));
 
     String className = cb.toString();
 

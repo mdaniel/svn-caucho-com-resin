@@ -87,7 +87,7 @@ public class XslNamespaceAlias extends XslNode implements XslTopNode {
       stylesheetNs = "";
     else if (stylesheetNs.equals(""))
       throw error(L.l("'{0}' is not a valid namespace prefix",
-		      _stylesheetPrefix));
+                      _stylesheetPrefix));
     
     String resultNs = getNamespace(_resultPrefix);
     if (_resultPrefix.equals("#default")) {
@@ -96,7 +96,7 @@ public class XslNamespaceAlias extends XslNode implements XslTopNode {
     }
     else if (resultNs == null)
       throw error(L.l("'{0}' is not a valid namespace prefix",
-		      _resultPrefix));
+                      _resultPrefix));
     
     String result[] = new String[] { _resultPrefix, resultNs };
 

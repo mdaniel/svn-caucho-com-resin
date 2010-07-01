@@ -198,7 +198,7 @@ public class Parser {
 
     default:
       throw new SQLParseException(L.l("unknown query at {0}",
-				      tokenName(token)));
+                                      tokenName(token)));
     }
   }
 
@@ -288,11 +288,11 @@ public class Parser {
       Expr subExpr = resultItems.get(i);
 
       if (subExpr instanceof UnboundStarExpr) {
-	UnboundStarExpr unboundExpr = (UnboundStarExpr) subExpr;
-	ArrayList<Expr> exprList = unboundExpr.expand(query.getFromItems());
+        UnboundStarExpr unboundExpr = (UnboundStarExpr) subExpr;
+        ArrayList<Expr> exprList = unboundExpr.expand(query.getFromItems());
 
-	resultItems.remove(i);
-	resultItems.addAll(i, exprList);
+        resultItems.remove(i);
+        resultItems.addAll(i, exprList);
       }
     }
 
@@ -302,7 +302,7 @@ public class Parser {
       token = scanToken();
 
       if (token != BY)
-	throw error(L.l("expected BY at `{0}'", tokenName(token)));
+        throw error(L.l("expected BY at `{0}'", tokenName(token)));
 
       groupItems = parseGroup(query);
     }
@@ -314,7 +314,7 @@ public class Parser {
       token = scanToken();
 
       if (token != BY)
-	throw error(L.l("expected BY at `{0}'", tokenName(token)));
+        throw error(L.l("expected BY at `{0}'", tokenName(token)));
 
       Order order = parseOrder(query, resultItems);
     }
@@ -331,11 +331,11 @@ public class Parser {
       bindGroup(query, groupItems);
 
       for (int i = 0; i < resultList.length; i++) {
-	Expr subExpr = resultList[i];
+        Expr subExpr = resultList[i];
 
-	if (! (subExpr instanceof GroupExpr)) {
-	  resultList[i] = new GroupResultExpr(i, subExpr);
-	}
+        if (! (subExpr instanceof GroupExpr)) {
+          resultList[i] = new GroupResultExpr(i, subExpr);
+        }
       }
     }
     
@@ -347,7 +347,7 @@ public class Parser {
       _token = token;
     
     if (query.getParent() == null
-	&& token >= 0 && token != LIMIT && token != OFFSET)
+        && token >= 0 && token != LIMIT && token != OFFSET)
       throw error(L.l("unexpected token at end '{0}'", tokenName(token)));
 
     _query = query.getParent();
@@ -384,9 +384,9 @@ public class Parser {
       boolean isRight = true;
 
       if (token == ',') {
-	fromItem = parseFromItem();
-	fromItems.add(fromItem);
-	continue;
+        fromItem = parseFromItem();
+        fromItems.add(fromItem);
+        continue;
       }
       else if (token == '(') {
         parenCount++;
@@ -401,73 +401,73 @@ public class Parser {
           continue;
       }
       else if (token != IDENTIFIER) {
-	_token = token;
-	break;
+        _token = token;
+        break;
       }
       else if ("join".equalsIgnoreCase(_lexeme)) {
       }
       else if ("inner".equalsIgnoreCase(_lexeme)) {
-	String join = parseIdentifier();
+        String join = parseIdentifier();
 
-	if (! "join".equalsIgnoreCase(join))
-	  throw error(L.l("expected JOIN at '{0}'", join));
+        if (! "join".equalsIgnoreCase(join))
+          throw error(L.l("expected JOIN at '{0}'", join));
       }
       else if ("left".equalsIgnoreCase(_lexeme)) {
-	String name = parseIdentifier();
+        String name = parseIdentifier();
 
-	if ("outer".equalsIgnoreCase(name))
-	  name = parseIdentifier();
+        if ("outer".equalsIgnoreCase(name))
+          name = parseIdentifier();
 
-	if (! "join".equalsIgnoreCase(name))
-	  throw error(L.l("expected JOIN at '{0}'", name));
+        if (! "join".equalsIgnoreCase(name))
+          throw error(L.l("expected JOIN at '{0}'", name));
 
-	isOuter = true;
+        isOuter = true;
       }
       else if ("right".equalsIgnoreCase(_lexeme)) {
-	String name = parseIdentifier();
+        String name = parseIdentifier();
 
-	if ("outer".equalsIgnoreCase(name))
-	  name = parseIdentifier();
+        if ("outer".equalsIgnoreCase(name))
+          name = parseIdentifier();
 
-	if (! "join".equalsIgnoreCase(name))
-	  throw error(L.l("expected JOIN at '{0}'", name));
+        if (! "join".equalsIgnoreCase(name))
+          throw error(L.l("expected JOIN at '{0}'", name));
 
-	isRight = true;
-	isOuter = true;
+        isRight = true;
+        isOuter = true;
 
-	throw error(L.l("right outer joins are not supported"));
+        throw error(L.l("right outer joins are not supported"));
       }
       else if ("natural".equalsIgnoreCase(_lexeme)) {
-	String name = parseIdentifier();
+        String name = parseIdentifier();
 
-	isNatural = true;
+        isNatural = true;
 
-	if ("left".equalsIgnoreCase(name)) {
-	  name = parseIdentifier();
+        if ("left".equalsIgnoreCase(name)) {
+          name = parseIdentifier();
 
-	  if ("outer".equalsIgnoreCase(name))
-	    name = parseIdentifier();
+          if ("outer".equalsIgnoreCase(name))
+            name = parseIdentifier();
 
-	  isOuter = true;
-	}
-	else if ("right".equalsIgnoreCase(name)) {
-	  name = parseIdentifier();
+          isOuter = true;
+        }
+        else if ("right".equalsIgnoreCase(name)) {
+          name = parseIdentifier();
 
-	  if ("outer".equalsIgnoreCase(name))
-	    name = parseIdentifier();
+          if ("outer".equalsIgnoreCase(name))
+            name = parseIdentifier();
 
-	  isRight = true;
-	  isOuter = true;
+          isRight = true;
+          isOuter = true;
 
-	  throw error(L.l("right outer joins are not supported"));
-	}
+          throw error(L.l("right outer joins are not supported"));
+        }
 
-	if (! "join".equalsIgnoreCase(name))
-	  throw error(L.l("expected JOIN at '{0}'", name));
+        if (! "join".equalsIgnoreCase(name))
+          throw error(L.l("expected JOIN at '{0}'", name));
       }
       else {
-	_token = token;
-	break;
+        _token = token;
+        break;
       }
 
       fromItem = parseFromItem();
@@ -477,21 +477,21 @@ public class Parser {
 
       token = scanToken();
       if (token == IDENTIFIER && "on".equalsIgnoreCase(_lexeme)) {
-	Expr onExpr = parseExpr();
+        Expr onExpr = parseExpr();
 
-	if (isOuter) {
-	  FromItem leftItem = fromItems.get(fromItems.size() - 2);
-	  FromItem rightItem = fromItems.get(fromItems.size() - 1);
+        if (isOuter) {
+          FromItem leftItem = fromItems.get(fromItems.size() - 2);
+          FromItem rightItem = fromItems.get(fromItems.size() - 1);
 
-	  onExpr = new LeftOuterJoinExpr(rightItem, onExpr);
+          onExpr = new LeftOuterJoinExpr(rightItem, onExpr);
 
-	  rightItem.setDependTable(leftItem);
-	}
+          rightItem.setDependTable(leftItem);
+        }
 
-	_andExpr.add(onExpr);
+        _andExpr.add(onExpr);
       }
       else
-	_token = token;
+        _token = token;
     }
 
     return fromItems;
@@ -547,7 +547,7 @@ public class Parser {
    * Parses the ORDER BY
    */
   private Order parseOrder(SelectQuery query,
-			   ArrayList<Expr> resultList)
+                           ArrayList<Expr> resultList)
     throws SQLException
   {
     int token;
@@ -562,22 +562,22 @@ public class Parser {
       token = scanToken();
       boolean isAsc = true;
       if (token == ASC)
-	isAsc = true;
+        isAsc = true;
       else if (token == DESC)
-	isAsc = false;
+        isAsc = false;
       else
-	_token = token;
+        _token = token;
 
       int index;
       for (index = 0; index < resultList.size(); index++) {
-	Expr resultExpr = resultList.get(index);
+        Expr resultExpr = resultList.get(index);
 
-	if (expr.equals(resultExpr))
-	  break;
+        if (expr.equals(resultExpr))
+          break;
       }
 
       if (resultList.size() <= index) {
-	resultList.add(expr);
+        resultList.add(expr);
       }
 
       Order tailOrder = expr.createOrder(index);
@@ -632,18 +632,18 @@ public class Parser {
 
       int index;
       for (index = 0; index < resultList.length; index++) {
-	Expr resultExpr = resultList[index];
+        Expr resultExpr = resultList[index];
 
-	if (expr.equals(resultExpr)) {
-	  resultList[index] = new GroupResultExpr(index, resultExpr);
+        if (expr.equals(resultExpr)) {
+          resultList[index] = new GroupResultExpr(index, resultExpr);
 
-	  break;
-	}
+          break;
+        }
       }
 
       if (resultList.length <= index) {
-	throw error(L.l("GROUP BY field '{0}' must refer to a result field.",
-			expr));
+        throw error(L.l("GROUP BY field '{0}' must refer to a result field.",
+                        expr));
       }
 
       query.setGroupResult(index);
@@ -692,8 +692,8 @@ public class Parser {
 
       switch (token) {
       case IDENTIFIER:
-	parseCreateColumn(factory, _lexeme);
-	break;
+        parseCreateColumn(factory, _lexeme);
+        break;
 
       case UNIQUE:
         token = scanToken();
@@ -706,31 +706,31 @@ public class Parser {
         break;
 
       case PRIMARY:
-	token = scanToken();
-	if (token != KEY)
-	  throw error(L.l("expected 'key' at {0}", tokenName(token)));
+        token = scanToken();
+        if (token != KEY)
+          throw error(L.l("expected 'key' at {0}", tokenName(token)));
 
-	factory.addPrimaryKey(parseColumnNames());
-	break;
+        factory.addPrimaryKey(parseColumnNames());
+        break;
 
       case KEY:
-	String key = parseIdentifier();
+        String key = parseIdentifier();
 
-	parseColumnNames(); // factory.addPrimaryKey(parseColumnNames());
-	break;
+        parseColumnNames(); // factory.addPrimaryKey(parseColumnNames());
+        break;
 
       case CHECK:
-	if ((token = scanToken()) != '(')
-	  throw error(L.l("Expected '(' at '{0}'", tokenName(token)));
+        if ((token = scanToken()) != '(')
+          throw error(L.l("Expected '(' at '{0}'", tokenName(token)));
 
-	parseExpr();
+        parseExpr();
 
-	if ((token = scanToken()) != ')')
-	  throw error(L.l("Expected ')' at '{0}'", tokenName(token)));
-	break;
+        if ((token = scanToken()) != ')')
+          throw error(L.l("Expected ')' at '{0}'", tokenName(token)));
+        break;
 
       default:
-	throw error(L.l("unexpected token `{0}'", tokenName(token)));
+        throw error(L.l("unexpected token `{0}'", tokenName(token)));
       }
 
       token = scanToken();
@@ -759,57 +759,57 @@ public class Parser {
 
     if (type.equalsIgnoreCase("double")) {
       if ((token = scanToken()) == IDENTIFIER) {
-	if (_lexeme.equalsIgnoreCase("precision")) {
-	}
-	else
-	  throw error(L.l("unexpected double type at {0}", _lexeme));
+        if (_lexeme.equalsIgnoreCase("precision")) {
+        }
+        else
+          throw error(L.l("unexpected double type at {0}", _lexeme));
       }
       else
-	_token = token;
+        _token = token;
     }
 
     if ((token = scanToken()) == '(') {
       if ((token = scanToken()) != INTEGER)
-	throw error(L.l("expected column width at `{0}'", tokenName(token)));
+        throw error(L.l("expected column width at `{0}'", tokenName(token)));
 
       length = Integer.parseInt(_lexeme);
 
       if ((token = scanToken()) == ',') {
-	if ((token = scanToken()) != INTEGER)
-	  throw error(L.l("expected column scale at `{0}'", tokenName(token)));
+        if ((token = scanToken()) != INTEGER)
+          throw error(L.l("expected column scale at `{0}'", tokenName(token)));
 
-	scale = Integer.parseInt(_lexeme);
+        scale = Integer.parseInt(_lexeme);
 
-	token = scanToken();
+        token = scanToken();
       }
 
       if (token != ')')
-	throw error(L.l("expected ')' at '{0}'", tokenName(token)));
+        throw error(L.l("expected ')' at '{0}'", tokenName(token)));
     }
     else
       _token = token;
 
     if (type.equalsIgnoreCase("varchar")) {
       if (length < 0)
-	throw error(L.l("VARCHAR needs a defined length"));
+        throw error(L.l("VARCHAR needs a defined length"));
 
       factory.addVarchar(name, length);
     }
     else if (type.equalsIgnoreCase("char")) {
       if (length < 0)
-	length = 1;
+        length = 1;
 
       factory.addVarchar(name, length);
     }
     else if (type.equalsIgnoreCase("varbinary")) {
       if (length < 0)
-	throw error(L.l("VARBINARY needs a defined length"));
+        throw error(L.l("VARBINARY needs a defined length"));
 
       factory.addVarbinary(name, length);
     }
     else if (type.equalsIgnoreCase("binary")) {
       if (length < 0)
-	throw error(L.l("BINARY needs a defined length"));
+        throw error(L.l("BINARY needs a defined length"));
 
       factory.addBinary(name, length);
     }
@@ -826,29 +826,29 @@ public class Parser {
       factory.addVarchar(name, 512);
     }
     else if (type.equalsIgnoreCase("smallint")
-	     || type.equalsIgnoreCase("tinyint")
-	     || type.equalsIgnoreCase("bit")) {
+             || type.equalsIgnoreCase("tinyint")
+             || type.equalsIgnoreCase("bit")) {
       factory.addShort(name);
     }
     else if (type.equalsIgnoreCase("integer")
-	     || type.equalsIgnoreCase("int")
-	     || type.equalsIgnoreCase("mediumint")) {
+             || type.equalsIgnoreCase("int")
+             || type.equalsIgnoreCase("mediumint")) {
       factory.addInteger(name);
     }
     else if (type.equalsIgnoreCase("bigint")) {
       factory.addLong(name);
     }
     else if (type.equalsIgnoreCase("double")
-	     || type.equalsIgnoreCase("float")
-	     || type.equalsIgnoreCase("real")) {
+             || type.equalsIgnoreCase("float")
+             || type.equalsIgnoreCase("real")) {
       factory.addDouble(name);
     }
     else if (type.equalsIgnoreCase("datetime")
-	     || type.equalsIgnoreCase("timestamp")) {
+             || type.equalsIgnoreCase("timestamp")) {
       factory.addDateTime(name);
     }
     else if (type.equalsIgnoreCase("text")
-	     || type.equalsIgnoreCase("clob")) {
+             || type.equalsIgnoreCase("clob")) {
       factory.addVarchar(name, 255);
     }
     else if (type.equalsIgnoreCase("decimal")
@@ -878,64 +878,64 @@ public class Parser {
       switch (token) {
       case ')':
       case ',':
-	_token = token;
-	return;
+        _token = token;
+        return;
 
       case UNIQUE:
-	factory.setUnique(name);
-	break;
+        factory.setUnique(name);
+        break;
 
       case PRIMARY:
-	token = scanToken();
-	if (token != KEY)
-	  throw error(L.l("expected key at {0}", tokenName(token)));
+        token = scanToken();
+        if (token != KEY)
+          throw error(L.l("expected key at {0}", tokenName(token)));
 
-	factory.setPrimaryKey(name);
-	break;
+        factory.setPrimaryKey(name);
+        break;
 
       case CHECK:
-	if ((token = scanToken()) != '(')
-	  throw error(L.l("Expected '(' at '{0}'", tokenName(token)));
+        if ((token = scanToken()) != '(')
+          throw error(L.l("Expected '(' at '{0}'", tokenName(token)));
 
-	parseExpr();
+        parseExpr();
 
-	if ((token = scanToken()) != ')')
-	  throw error(L.l("Expected ')' at '{0}'", tokenName(token)));
-	break;
+        if ((token = scanToken()) != ')')
+          throw error(L.l("Expected ')' at '{0}'", tokenName(token)));
+        break;
 
       case IDENTIFIER:
-	String id = _lexeme;
-	if (id.equalsIgnoreCase("references")) {
-	  ArrayList<String> foreignKey = new ArrayList<String>();
-	  foreignKey.add(name);
-	  parseReferences(foreignKey);
-	}
-	else if (id.equalsIgnoreCase("default")) {
-	  Expr expr = parseExpr();
-	}
-	else if (id.equalsIgnoreCase("auto_increment")) {
-	  factory.setAutoIncrement(name, 1);
-	}
-	else if (id.equalsIgnoreCase("unsigned")) {
-	}
-	else if (id.equalsIgnoreCase("binary")) {
-	}
-	else
-	  throw error(L.l("unexpected token '{0}'", tokenName(token)));
-	break;
+        String id = _lexeme;
+        if (id.equalsIgnoreCase("references")) {
+          ArrayList<String> foreignKey = new ArrayList<String>();
+          foreignKey.add(name);
+          parseReferences(foreignKey);
+        }
+        else if (id.equalsIgnoreCase("default")) {
+          Expr expr = parseExpr();
+        }
+        else if (id.equalsIgnoreCase("auto_increment")) {
+          factory.setAutoIncrement(name, 1);
+        }
+        else if (id.equalsIgnoreCase("unsigned")) {
+        }
+        else if (id.equalsIgnoreCase("binary")) {
+        }
+        else
+          throw error(L.l("unexpected token '{0}'", tokenName(token)));
+        break;
 
       case NULL:
-	break;
+        break;
 
       case NOT:
-	if ((token = scanToken()) == NULL)
-	  factory.setNotNull(name);
-	else
-	  throw error(L.l("unexpected token '{0}'", tokenName(token)));
-	break;
+        if ((token = scanToken()) == NULL)
+          factory.setNotNull(name);
+        else
+          throw error(L.l("unexpected token '{0}'", tokenName(token)));
+        break;
 
       default:
-	throw error(L.l("unexpected token '{0}'", tokenName(token)));
+        throw error(L.l("unexpected token '{0}'", tokenName(token)));
       }
     }
   }
@@ -955,7 +955,7 @@ public class Parser {
 
       token = scanToken();
       if (token != ')')
-	throw error("expected ')'");
+        throw error("expected ')'");
     }
     else
       _token = token;
@@ -993,13 +993,13 @@ public class Parser {
     int token = scanToken();
     if (token == '(') {
       do {
-	columns.add(parseIdentifier());
+        columns.add(parseIdentifier());
 
-	token = scanToken();
+        token = scanToken();
       } while (token == ',');
 
       if (token != ')') {
-	throw error(L.l("expected ')' at '{0}'", tokenName(token)));
+        throw error(L.l("expected ')' at '{0}'", tokenName(token)));
       }
     }
     else if (token == IDENTIFIER) {
@@ -1039,18 +1039,18 @@ public class Parser {
 
     if ((token = scanToken()) == '(') {
       do {
-	String columnName = parseIdentifier();
+        String columnName = parseIdentifier();
 
-	Column column = table.getColumn(columnName);
+        Column column = table.getColumn(columnName);
 
-	if (column == null)
-	  throw new SQLException(L.l("`{0}' is not a valid column in {1}",
-				     columnName, table.getName()));
-	columns.add(column);
+        if (column == null)
+          throw new SQLException(L.l("`{0}' is not a valid column in {1}",
+                                     columnName, table.getName()));
+        columns.add(column);
       } while ((token = scanToken()) == ',');
 
       if (token != ')')
-	throw error(L.l("expected ')' at `{0}'", tokenName(token)));
+        throw error(L.l("expected ')' at `{0}'", tokenName(token)));
 
       token = scanToken();
     }
@@ -1058,7 +1058,7 @@ public class Parser {
       Column []columnArray = table.getColumns();
 
       for (int i = 0; i < columnArray.length; i++)
-	columns.add(columnArray[i]);
+        columns.add(columnArray[i]);
     }
 
     if (token != VALUES)
@@ -1263,7 +1263,7 @@ public class Parser {
 
     if (column == null)
       throw error(L.l("`{0}' is an unknown column in table {1}.",
-		      _lexeme, table.getName()));
+                      _lexeme, table.getName()));
 
     if ((token = scanToken()) != EQ)
       throw error(L.l("expected `=' at {0}", tokenName(token)));
@@ -1328,12 +1328,12 @@ public class Parser {
 
       switch (token) {
       case OR:
-	left = new OrExpr(left, parseAndExpr());
-	break;
+        left = new OrExpr(left, parseAndExpr());
+        break;
 
       default:
-	_token = token;
-	return left;
+        _token = token;
+        return left;
       }
     }
   }
@@ -1355,15 +1355,15 @@ public class Parser {
 
       switch (token) {
       case AND:
-	andExpr.add(parseNotExpr());
-	break;
+        andExpr.add(parseNotExpr());
+        break;
 
       default:
-	_token = token;
+        _token = token;
 
-	_andExpr = oldAndExpr;
+        _andExpr = oldAndExpr;
 
-	return andExpr.getSingleExpr();
+        return andExpr.getSingleExpr();
       }
     }
   }
@@ -1403,9 +1403,9 @@ public class Parser {
       token = scanToken();
 
       if (token != BETWEEN && token != LIKE && token != IN) {
-	_token = token;
-	
-	return left;
+        _token = token;
+
+        return left;
       }
     }
 
@@ -1422,47 +1422,47 @@ public class Parser {
 
     case BETWEEN:
       {
-	Expr min = parseConcatExpr();
+        Expr min = parseConcatExpr();
 
-	token = scanToken();
-	if (token != AND)
-	  throw error(L.l("expected AND at '{0}'", tokenName(token)));
+        token = scanToken();
+        if (token != AND)
+          throw error(L.l("expected AND at '{0}'", tokenName(token)));
 
-	Expr max = parseConcatExpr();
+        Expr max = parseConcatExpr();
 
-	return new BetweenExpr(left, min, max, isNot);
+        return new BetweenExpr(left, min, max, isNot);
       }
 
     case IS:
       {
-	token = scanToken();
-	isNot = false;
-	if (token == NOT) {
-	  token = scanToken();
-	  isNot = true;
-	}
+        token = scanToken();
+        isNot = false;
+        if (token == NOT) {
+          token = scanToken();
+          isNot = true;
+        }
 
-	if (token == NULL)
-	  return new IsNullExpr(left, isNot);
-	else
-	  throw error(L.l("expected NULL at '{0}'", tokenName(token)));
+        if (token == NULL)
+          return new IsNullExpr(left, isNot);
+        else
+          throw error(L.l("expected NULL at '{0}'", tokenName(token)));
       }
 
     case LIKE:
       {
-	token = scanToken();
+        token = scanToken();
 
-	if (token == STRING)
-	  return new LikeExpr(left, _lexeme, isNot);
-	else
-	  throw error(L.l("expected string at '{0}'", tokenName(token)));
+        if (token == STRING)
+          return new LikeExpr(left, _lexeme, isNot);
+        else
+          throw error(L.l("expected string at '{0}'", tokenName(token)));
       }
 
     case IN:
       {
-	HashSet<String> values = parseInValues();
+        HashSet<String> values = parseInValues();
 
-	return new InExpr(left, values, isNot);
+        return new InExpr(left, values, isNot);
       }
 
     default:
@@ -1486,17 +1486,17 @@ public class Parser {
 
     while ((token = scanToken()) != ')') {
       if (token == STRING) {
-	values.add(_lexeme);
+        values.add(_lexeme);
       }
       else
-	throw error(L.l("expected STRING at {0}", tokenName(token)));
-	
+        throw error(L.l("expected STRING at {0}", tokenName(token)));
+
       if ((token = scanToken()) != ',')
-	break;
+        break;
     }
 
     if (token != ')')
-	throw error(L.l("expected ')' at {0}", tokenName(token)));
+        throw error(L.l("expected ')' at {0}", tokenName(token)));
 
     return values;
   }
@@ -1514,12 +1514,12 @@ public class Parser {
 
       switch (token) {
       case CONCAT:
-	left = new ConcatExpr(left, parseAddExpr());
-	break;
+        left = new ConcatExpr(left, parseAddExpr());
+        break;
 
       default:
-	_token = token;
-	return left;
+        _token = token;
+        return left;
       }
     }
   }
@@ -1538,12 +1538,12 @@ public class Parser {
       switch (token) {
       case '+':
       case '-':
-	left = new BinaryExpr(left, parseMulExpr(), token);
-	break;
+        left = new BinaryExpr(left, parseMulExpr(), token);
+        break;
 
       default:
-	_token = token;
-	return left;
+        _token = token;
+        return left;
       }
     }
   }
@@ -1563,12 +1563,12 @@ public class Parser {
       case '*':
       case '/':
       case '%':
-	left = new BinaryExpr(left, parseTerm(), token);
-	break;
+        left = new BinaryExpr(left, parseTerm(), token);
+        break;
 
       default:
-	_token = token;
-	return left;
+        _token = token;
+        return left;
       }
     }
   }
@@ -1592,7 +1592,7 @@ public class Parser {
       Expr expr = parseExpr();
       int peekToken;
       if ((peekToken = scanToken()) != ')')
-	throw error(L.l("expected ')' at {0}", tokenName(peekToken)));
+        throw error(L.l("expected ')' at {0}", tokenName(peekToken)));
       return expr;
 
     default:
@@ -1612,107 +1612,107 @@ public class Parser {
     switch (token) {
     case IDENTIFIER:
       {
-	String name = _lexeme;
+        String name = _lexeme;
 
-	token = scanToken();
-	if (token == '.') {
-	  token = scanToken();
+        token = scanToken();
+        if (token == '.') {
+          token = scanToken();
 
-	  if (token == IDENTIFIER) {
-	    String column = _lexeme;
-	    return _query.bind(name, column);
-	  }
-	  else if (token == '*') {
-	    return new UnboundStarExpr(name);
-	  }
-	  else
-	    throw error("expected IDENTIFIER");
-	}
-	else if (token == '(') {
-	  FunExpr fun = null;
-	  if (name.equalsIgnoreCase("max"))
-	    fun = new MaxExpr();
-	  else if (name.equalsIgnoreCase("min"))
-	    fun = new MinExpr();
-	  else if (name.equalsIgnoreCase("sum"))
-	    fun = new SumExpr();
-	  else if (name.equalsIgnoreCase("avg"))
-	    fun = new AvgExpr();
-	  else if (name.equalsIgnoreCase("count")) {
-	    fun = new CountExpr();
+          if (token == IDENTIFIER) {
+            String column = _lexeme;
+            return _query.bind(name, column);
+          }
+          else if (token == '*') {
+            return new UnboundStarExpr(name);
+          }
+          else
+            throw error("expected IDENTIFIER");
+        }
+        else if (token == '(') {
+          FunExpr fun = null;
+          if (name.equalsIgnoreCase("max"))
+            fun = new MaxExpr();
+          else if (name.equalsIgnoreCase("min"))
+            fun = new MinExpr();
+          else if (name.equalsIgnoreCase("sum"))
+            fun = new SumExpr();
+          else if (name.equalsIgnoreCase("avg"))
+            fun = new AvgExpr();
+          else if (name.equalsIgnoreCase("count")) {
+            fun = new CountExpr();
 
-	    token = scanToken();
-	    if (token == '*') {
-	      fun.addArg(new UnboundStarExpr());
-	    }
-	    else
-	      _token = token;
-	  }
-	  else if (name.equalsIgnoreCase("exists")) {
-	    token = scanToken();
+            token = scanToken();
+            if (token == '*') {
+              fun.addArg(new UnboundStarExpr());
+            }
+            else
+              _token = token;
+          }
+          else if (name.equalsIgnoreCase("exists")) {
+            token = scanToken();
 
-	    if (token != SELECT)
-	      throw error(L.l("exists requires SELECT at '{0}'",
-			      tokenName(token)));
+            if (token != SELECT)
+              throw error(L.l("exists requires SELECT at '{0}'",
+                              tokenName(token)));
 
-	    ExistsQuery query = new ExistsQuery(_database, _sql);
+            ExistsQuery query = new ExistsQuery(_database, _sql);
 
-	    parseSelect(query);
+            parseSelect(query);
 
-	    ExistsExpr expr = new ExistsExpr(query);
+            ExistsExpr expr = new ExistsExpr(query);
 
-	    query.setSubSelect(expr);
+            query.setSubSelect(expr);
 
-	    _andExpr.add(new ExistsEvalExpr(expr));
+            _andExpr.add(new ExistsEvalExpr(expr));
 
-	    token = scanToken();
+            token = scanToken();
 
-	    if (token != ')')
-	      throw error(L.l("exists requires ')' at '{0}'",
-			      tokenName(token)));
+            if (token != ')')
+              throw error(L.l("exists requires ')' at '{0}'",
+                              tokenName(token)));
 
-	    return expr;
-	  }
-	  else {
-	    String funName = (Character.toUpperCase(name.charAt(0)) +
-			      name.substring(1).toLowerCase());
+            return expr;
+          }
+          else {
+            String funName = (Character.toUpperCase(name.charAt(0)) +
+                              name.substring(1).toLowerCase());
 
-	    funName = "com.caucho.db.fun." + funName + "Expr";
+            funName = "com.caucho.db.fun." + funName + "Expr";
 
-	    try {
-	      Class cl = Class.forName(funName);
+            try {
+              Class cl = Class.forName(funName);
 
-	      fun = (FunExpr) cl.newInstance();
-	    } catch (ClassNotFoundException e) {
-	      log.finer(e.toString());
-	    } catch (Throwable e) {
-	      log.log(Level.FINER, e.toString(), e);
-	    }
+              fun = (FunExpr) cl.newInstance();
+            } catch (ClassNotFoundException e) {
+              log.finer(e.toString());
+            } catch (Throwable e) {
+              log.log(Level.FINER, e.toString(), e);
+            }
 
-	    if (fun == null)
-	      throw error(L.l("`{0}' is an unknown function.", name));
-	  }
+            if (fun == null)
+              throw error(L.l("`{0}' is an unknown function.", name));
+          }
 
-	  token = scanToken();
-	  while (token > 0 && token != ')') {
-	    _token = token;
+          token = scanToken();
+          while (token > 0 && token != ')') {
+            _token = token;
 
-	    Expr arg = parseExpr();
+            Expr arg = parseExpr();
 
-	    fun.addArg(arg);
+            fun.addArg(arg);
 
-	    token = scanToken();
+            token = scanToken();
 
-	    if (token == ',')
-	      token = scanToken();
-	  }
+            if (token == ',')
+              token = scanToken();
+          }
 
-	  return fun;
-	}
-	else {
-	  _token = token;
-	  return _query.bind(null, name);
-	}
+          return fun;
+        }
+        else {
+          _token = token;
+          return _query.bind(null, name);
+        }
       }
 
     case STRING:
@@ -1915,22 +1915,22 @@ public class Parser {
       cb.clear();
 
       for (ch = read(); ch >= 0; ch = read()) {
-	if (ch == '\'') {
-	  if ((ch = read()) == '\'')
-	    cb.append('\'');
-	  else {
-	    unread(ch);
-	    break;
-	  }
-	}
-	else if (ch == '\\') {
-	  ch = read();
+        if (ch == '\'') {
+          if ((ch = read()) == '\'')
+            cb.append('\'');
+          else {
+            unread(ch);
+            break;
+          }
+        }
+        else if (ch == '\\') {
+          ch = read();
 
-	  if (ch >= 0)
-	    cb.append(ch);
-	}
-	else
-	  cb.append((char) ch);
+          if (ch >= 0)
+            cb.append(ch);
+        }
+        else
+          cb.append((char) ch);
       }
 
       _lexeme = cb.toString();
@@ -1947,7 +1947,7 @@ public class Parser {
     }
 
     throw error(L.l("unexpected char at {0} ({1})", "" + (char) ch,
-		    String.valueOf(ch)));
+                    String.valueOf(ch)));
   }
 
   /**

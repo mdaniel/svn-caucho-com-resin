@@ -184,44 +184,44 @@ public class XmppPubSubQueryMarshal extends AbstractXmppMarshal {
     int tag = in.nextTag();
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return query;
+        return query;
       }
 
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "options".equals(in.getLocalName())) {
-	PubSubOptions options = parseOptions(in);
+          && "options".equals(in.getLocalName())) {
+        PubSubOptions options = parseOptions(in);
 
-	if (query instanceof PubSubSubscribeQuery) {
-	  PubSubSubscribeQuery subscribe = (PubSubSubscribeQuery) query;
+        if (query instanceof PubSubSubscribeQuery) {
+          PubSubSubscribeQuery subscribe = (PubSubSubscribeQuery) query;
 
-	  subscribe.setOptions(options);
-	}
-	else
-	  log.fine(this + " options with no subscribe: " + query);
+          subscribe.setOptions(options);
+        }
+        else
+          log.fine(this + " options with no subscribe: " + query);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "items".equals(in.getLocalName())) {
-	query = parseItems(in);
+               && "items".equals(in.getLocalName())) {
+        query = parseItems(in);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "publish".equals(in.getLocalName())) {
-	query = parsePublish(in);
+               && "publish".equals(in.getLocalName())) {
+        query = parsePublish(in);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	  && "subscribe".equals(in.getLocalName())) {
-	query = parseSubscribe(in);
+          && "subscribe".equals(in.getLocalName())) {
+        query = parseSubscribe(in);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	  && "unsubscribe".equals(in.getLocalName())) {
-	query = parseUnsubscribe(in);
+          && "unsubscribe".equals(in.getLocalName())) {
+        query = parseUnsubscribe(in);
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();
@@ -252,22 +252,22 @@ public class XmppPubSubQueryMarshal extends AbstractXmppMarshal {
     int tag = in.nextTag();
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	items.setItemList(itemList);
-	
-	return items;
+        items.setItemList(itemList);
+
+        return items;
       }
     
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "item".equals(in.getLocalName())) {
-	itemList.add(parseItem(in));
+          && "item".equals(in.getLocalName())) {
+        itemList.add(parseItem(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();
@@ -296,20 +296,20 @@ public class XmppPubSubQueryMarshal extends AbstractXmppMarshal {
     int tag = in.nextTag();
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return pubsub;
+        return pubsub;
       }
     
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "item".equals(in.getLocalName())) {
-	pubsub.setItem(parseItem(in));
+          && "item".equals(in.getLocalName())) {
+        pubsub.setItem(parseItem(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();

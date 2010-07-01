@@ -54,7 +54,7 @@ public class XmppAgentStream implements ActorStream
   private XmppWriterImpl _writer;
 
   XmppAgentStream(XmppBrokerStream packetHandler,
-		  WriteStream os)
+                  WriteStream os)
   {
     _packetHandler = packetHandler;
     _os = os;
@@ -80,8 +80,8 @@ public class XmppAgentStream implements ActorStream
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send message to=" + to
-		  + " from=" + from);
+        log.finer(_packetHandler + " send message to=" + to
+                  + " from=" + from);
       }
 
       _writer.message(to, from, value);
@@ -95,14 +95,14 @@ public class XmppAgentStream implements ActorStream
   }
   
   public void messageError(String to,
-			       String from,
-			       Serializable value,
-			       ActorError error)
+                               String from,
+                               Serializable value,
+                               ActorError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send error message to=" + to
-		  + " from=" + from + " error=" + error);
+        log.finer(_packetHandler + " send error message to=" + to
+                  + " from=" + from + " error=" + error);
       }
 
       _os.flush();
@@ -114,14 +114,14 @@ public class XmppAgentStream implements ActorStream
   }
   
   public void queryGet(long id,
-		              String to,
-		              String from,
-		              Serializable query)
+                              String to,
+                              String from,
+                              Serializable query)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " queryGet to=" + to
-		  + " from=" + from);
+        log.finer(_packetHandler + " queryGet to=" + to
+                  + " from=" + from);
       }
       
       _os.flush();
@@ -133,14 +133,14 @@ public class XmppAgentStream implements ActorStream
   }
   
   public void querySet(long id,
-		              String to,
-		              String from,
-		              Serializable query)
+                              String to,
+                              String from,
+                              Serializable query)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " querySet to=" + to
-		  + " from=" + from);
+        log.finer(_packetHandler + " querySet to=" + to
+                  + " from=" + from);
       }
 
       String xmppId = _packetHandler.findId(id);
@@ -166,9 +166,9 @@ public class XmppAgentStream implements ActorStream
   }
   
   public void queryResult(long bamId,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     String id = _xmppContext.findId(bamId);
 
@@ -176,16 +176,16 @@ public class XmppAgentStream implements ActorStream
   }
   
   public void queryError(long id,
-			     String to,
-			     String from,
-			     Serializable query,
-			     ActorError error)
+                             String to,
+                             String from,
+                             Serializable query,
+                             ActorError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " queryError id=" + id
-		  + " to=" + to + " from=" + from
-		  + " error=" + error);
+        log.finer(_packetHandler + " queryError id=" + id
+                  + " to=" + to + " from=" + from
+                  + " error=" + error);
       }
 
       String xmppId = _packetHandler.findId(id);
@@ -213,13 +213,13 @@ public class XmppAgentStream implements ActorStream
    * General presence, for clients announcing availability
    */
   public void presence(String to,
-		       String from,
-		       Serializable data)
+                       String from,
+                       Serializable data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send presence to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(_packetHandler + " send presence to=" + to
+                  + " from=" + from + " value=" + data);
       }
       
       _writer.sendPresence(to, from, data, null, null);
@@ -236,13 +236,13 @@ public class XmppAgentStream implements ActorStream
    * General presence, for clients announcing unavailability
    */
   public void presenceUnavailable(String to,
-			  	      String from,
-				      Serializable data)
+                                        String from,
+                                      Serializable data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send presenceUnavailable to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(_packetHandler + " send presenceUnavailable to=" + to
+                  + " from=" + from + " value=" + data);
       }
       
       _writer.sendPresence(to, from, data, "unavailable", null);
@@ -259,13 +259,13 @@ public class XmppAgentStream implements ActorStream
    * Presence probe from the server to a client
    */
   public void presenceProbe(String to,
-			        String from,
-			        Serializable data)
+                                String from,
+                                Serializable data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send presenceProbe to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(_packetHandler + " send presenceProbe to=" + to
+                  + " from=" + from + " value=" + data);
       }
       
       _writer.sendPresence(to, from, data, "probe", null);
@@ -282,13 +282,13 @@ public class XmppAgentStream implements ActorStream
    * A subscription request from a client
    */
   public void presenceSubscribe(String to,
-				    String from,
-				    Serializable data)
+                                    String from,
+                                    Serializable data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send presenceSubscribe to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(_packetHandler + " send presenceSubscribe to=" + to
+                  + " from=" + from + " value=" + data);
       }
       
       _writer.sendPresence(to, from, data, "subscribe", null);
@@ -305,13 +305,13 @@ public class XmppAgentStream implements ActorStream
    * A subscription response to a client
    */
   public void presenceSubscribed(String to,
-				     String from,
-				     Serializable data)
+                                     String from,
+                                     Serializable data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send presenceSubscribed to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(_packetHandler + " send presenceSubscribed to=" + to
+                  + " from=" + from + " value=" + data);
       }
       
       _writer.sendPresence(to, from, data, "subscribed", null);
@@ -328,13 +328,13 @@ public class XmppAgentStream implements ActorStream
    * An unsubscription request from a client
    */
   public void presenceUnsubscribe(String to,
-				      String from,
-				      Serializable data)
+                                      String from,
+                                      Serializable data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send presenceUnsubscribe to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(_packetHandler + " send presenceUnsubscribe to=" + to
+                  + " from=" + from + " value=" + data);
       }
       
       _writer.sendPresence(to, from, data, "unsubscribe", null);
@@ -351,13 +351,13 @@ public class XmppAgentStream implements ActorStream
    * A unsubscription response to a client
    */
   public void presenceUnsubscribed(String to,
-				       String from,
-				       Serializable data)
+                                       String from,
+                                       Serializable data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send presenceUnsubscribed to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(_packetHandler + " send presenceUnsubscribed to=" + to
+                  + " from=" + from + " value=" + data);
       }
       
       _writer.sendPresence(to, from, data, "unsubscribed", null);
@@ -374,14 +374,14 @@ public class XmppAgentStream implements ActorStream
    * An error response to a client
    */
   public void presenceError(String to,
-			        String from,
-			        Serializable data,
-			        ActorError error)
+                                String from,
+                                Serializable data,
+                                ActorError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send presenceError to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(_packetHandler + " send presenceError to=" + to
+                  + " from=" + from + " value=" + data);
       }
       
       _os.flush();

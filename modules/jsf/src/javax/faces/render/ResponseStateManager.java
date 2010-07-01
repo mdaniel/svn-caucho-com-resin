@@ -43,7 +43,7 @@ public abstract class ResponseStateManager
   public static final String VIEW_STATE_PARAM = "javax.faces.ViewState";
 
   public void writeState(FacesContext context,
-			 Object state)
+                         Object state)
     throws IOException
   {
     StateManager.SerializedView view;
@@ -69,7 +69,7 @@ public abstract class ResponseStateManager
    * @deprecated
    */
   public void writeState(FacesContext context,
-			 StateManager.SerializedView state)
+                         StateManager.SerializedView state)
     throws IOException
   {
   }
@@ -78,7 +78,7 @@ public abstract class ResponseStateManager
    * @Since 1.2
    */
   public Object getState(FacesContext context,
-			 String viewId)
+                         String viewId)
   {
     return new Object[] {
       getTreeStructureToRestore(context, viewId),
@@ -90,7 +90,7 @@ public abstract class ResponseStateManager
    * @deprecated
    */
   public Object getTreeStructureToRestore(FacesContext context,
-					  String viewId)
+                                          String viewId)
   {
     return null;
   }

@@ -446,11 +446,11 @@ public class TagAnalyzer
 
       switch (visitor.getOpcode()) {
       case CodeVisitor.IRETURN:
-	if (count != 1)
-	  _hasCode = true;
+        if (count != 1)
+          _hasCode = true;
 
-	addReturnValue(_value);
-	break;
+        addReturnValue(_value);
+        break;
 
       case CodeVisitor.ICONST_M1:
       case CodeVisitor.ICONST_0:
@@ -605,7 +605,7 @@ public class TagAnalyzer
     public String toString()
     {
       return (getClass().getSimpleName() + "[end:" + hasCode()
-	      + ",skip:" + _hasSkip + ",eval:" + _hasEval + "]");
+              + ",skip:" + _hasSkip + ",eval:" + _hasEval + "]");
     }
   }
 
@@ -764,16 +764,16 @@ public class TagAnalyzer
       
       switch (visitor.getOpcode()) {
       case CodeVisitor.IRETURN:
-	if (count > 1)
-	  _hasCode = true;
-	
-	if (_resultValueCount == 0) {
-	  _resultValue = _value;
-	  _resultValueCount = 1;
-	}
-	else if (_value != _resultValue)
-	  _resultValueCount++;
-	break;
+        if (count > 1)
+          _hasCode = true;
+
+        if (_resultValueCount == 0) {
+          _resultValue = _value;
+          _resultValueCount = 1;
+        }
+        else if (_value != _resultValue)
+          _resultValueCount++;
+        break;
 
       case CodeVisitor.ICONST_M1:
       case CodeVisitor.ICONST_0:
@@ -782,31 +782,31 @@ public class TagAnalyzer
       case CodeVisitor.ICONST_3:
       case CodeVisitor.ICONST_4:
       case CodeVisitor.ICONST_5:
-	if (count > 0)
-	  _hasCode = true;
-	
-	_value = visitor.getOpcode() - CodeVisitor.ICONST_0;
-	break;
+        if (count > 0)
+          _hasCode = true;
+
+        _value = visitor.getOpcode() - CodeVisitor.ICONST_0;
+        break;
 
       case CodeVisitor.BIPUSH:
-	if (count > 0)
-	  _hasCode = true;
-	
-	_value = visitor.getByteArg();
-	break;
+        if (count > 0)
+          _hasCode = true;
+
+        _value = visitor.getByteArg();
+        break;
 
       case CodeVisitor.SIPUSH:
-	if (count > 0)
-	  _hasCode = true;
-	
-	_value = visitor.getShortArg();
-	break;
-	  
+        if (count > 0)
+          _hasCode = true;
+
+        _value = visitor.getShortArg();
+        break;
+
       default:
-	_hasCode = true;
-	
-	_value = -1;
-	break;
+        _hasCode = true;
+
+        _value = -1;
+        break;
       }
     }
   }

@@ -174,17 +174,17 @@ public class HtmlOutputText extends UIOutput
     if (prop != null) {
       switch (prop) {
       case DIR:
-	return _dirExpr;
+        return _dirExpr;
       case ESCAPE:
-	return _escapeExpr;
+        return _escapeExpr;
       case LANG:
-	return _langExpr;
+        return _langExpr;
       case STYLE:
-	return _styleExpr;
+        return _styleExpr;
       case STYLE_CLASS:
-	return _styleClassExpr;
+        return _styleClassExpr;
       case TITLE:
-	return _titleExpr;
+        return _titleExpr;
       }
     }
 
@@ -202,58 +202,58 @@ public class HtmlOutputText extends UIOutput
     if (prop != null) {
       switch (prop) {
       case DIR:
-	if (expr != null && expr.isLiteralText()) {
-	  _dir = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _dirExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _dir = Util.evalString(expr);
+          return;
+        }
+        else
+          _dirExpr = expr;
+        break;
+
       case ESCAPE:
-	if (expr != null && expr.isLiteralText()) {
-	  _escape = Util.evalBoolean(expr);
-	  return;
-	}
-	else
-	  _escapeExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _escape = Util.evalBoolean(expr);
+          return;
+        }
+        else
+          _escapeExpr = expr;
+        break;
+
       case LANG:
-	if (expr != null && expr.isLiteralText()) {
-	  _lang = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _langExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _lang = Util.evalString(expr);
+          return;
+        }
+        else
+          _langExpr = expr;
+        break;
+
       case STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _style = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _style = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleExpr = expr;
+        break;
+
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _styleClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _styleClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleClassExpr = expr;
+        break;
+
       case TITLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _title = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _titleExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _title = Util.evalString(expr);
+          return;
+        }
+        else
+          _titleExpr = expr;
+        break;
       }
     }
 

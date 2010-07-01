@@ -102,7 +102,7 @@ public class GeneratedKeysResultSet extends AbstractResultSet {
       Column column = _keys.get(i).getColumn();
 
       if (column.getName().equals(columnName))
-	return i + 1;
+        return i + 1;
     }
 
     throw new SQLException(L.l("`{0}' is an unknown column.", columnName));

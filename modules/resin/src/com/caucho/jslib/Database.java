@@ -251,7 +251,7 @@ public class Database {
       Database db = (Database) o;
 
       try {
-	db.close();
+        db.close();
       } catch (SQLException e) {
       }
     }

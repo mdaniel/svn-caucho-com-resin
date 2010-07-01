@@ -89,7 +89,7 @@ public class L10N {
           i += 2;
         }
         else {
-	  i = parseString(msg, i + 1, cb);
+          i = parseString(msg, i + 1, cb);
         }
       }
     }
@@ -134,7 +134,7 @@ public class L10N {
           i += 2;
         }
         else {
-	  i = parseString(msg, i + 1, cb);
+          i = parseString(msg, i + 1, cb);
         }
       }
     }
@@ -178,7 +178,7 @@ public class L10N {
           i += 2;
         }
         else {
-	  i = parseString(msg, i + 1, cb);
+          i = parseString(msg, i + 1, cb);
         }
       }
     }
@@ -236,7 +236,7 @@ public class L10N {
           i += 2;
         }
         else {
-	  i = parseString(msg, i + 1, cb);
+          i = parseString(msg, i + 1, cb);
         }
       }
     }
@@ -288,7 +288,7 @@ public class L10N {
           i += 2;
         }
         else {
-	  i = parseString(msg, i + 1, cb);
+          i = parseString(msg, i + 1, cb);
         }
       }
     }
@@ -345,7 +345,7 @@ public class L10N {
           i += 2;
         }
         else {
-	  i = parseString(msg, i + 1, cb);
+          i = parseString(msg, i + 1, cb);
         }
       }
     }
@@ -406,7 +406,7 @@ public class L10N {
           i += 2;
         }
         else {
-	  i = parseString(msg, i + 1, cb);
+          i = parseString(msg, i + 1, cb);
         }
       }
     }
@@ -430,8 +430,8 @@ public class L10N {
       String string = (String) stringMap.get(arg.toString());
 
       if (string != null) {
-	sb.append(string);
-	return i + 1;
+        sb.append(string);
+        return i + 1;
       }
     }
 
@@ -541,10 +541,10 @@ public class L10N {
       is = _cl.getClassLoader().getResourceAsStream(name);
 
       if (is != null) {
-	Properties messages = new Properties();
-	messages.load(is);
+        Properties messages = new Properties();
+        messages.load(is);
 
-	return messages;
+        return messages;
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -575,18 +575,18 @@ public class L10N {
       is = getClass().getResourceAsStream(xmlName);
       
       if (is != null) {
-	RegistryNode registry = null;
+        RegistryNode registry = null;
 
-	try {
-	  ReadStream rs = Vfs.openRead(is);
+        try {
+          ReadStream rs = Vfs.openRead(is);
         
-	  Registry root = Registry.parse(rs);
-	  registry = root.getTop();
+          Registry root = Registry.parse(rs);
+          registry = root.getTop();
 
-	  rs.close();
-	} finally {
-	  is.close();
-	}
+          rs.close();
+        } finally {
+          is.close();
+        }
 
         messages = new HashMap<String,String>();
         

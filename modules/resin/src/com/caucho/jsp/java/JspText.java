@@ -97,7 +97,7 @@ public class JspText extends JspNode {
   {
     for (int i = 0; i < _children.size(); i++)
       if (! _children.get(i).isStatic())
-	return false;
+        return false;
 
     
     return true;
@@ -121,10 +121,10 @@ public class JspText extends JspNode {
       JspNode child = _children.get(i);
       
       if (! (child instanceof StaticText))
-	return false;
+        return false;
 
       if (! ((StaticText) child).isWhitespace())
-	return false;
+        return false;
     }
 
     return true;
@@ -190,9 +190,9 @@ public class JspText extends JspNode {
   {
     if (_children != null) {
       for (int i = 0; i < _children.size(); i++) {
-	JspNode child = _children.get(i);
+        JspNode child = _children.get(i);
 
-	child.generateTagState(out);
+        child.generateTagState(out);
       }
     }
   }

@@ -200,16 +200,16 @@ public class VerifierHandlerImpl extends DefaultHandler
       Item newItem = getStartElement(_item, name);
 
       if (newItem == null) {
-	Item parentItem = _itemStack.get(_itemStack.size() - 1);
-	
+        Item parentItem = _itemStack.get(_itemStack.size() - 1);
+
         if (parent.getName().equals("#top"))
           throw new RelaxException(L.l("<{0}> is an unexpected top-level tag.{1}",
                                        errorNodeName(name, _item, parentItem),
-				       errorMessageDetail(_item, parentItem, null, name)));
+                                       errorMessageDetail(_item, parentItem, null, name)));
         else
           throw new RelaxException(L.l("<{0}> is an unexpected tag (parent <{1}> starts at {2}).{3}",
                                        errorNodeName(name, _item, parentItem),
-				       parent.getName(), parentLocation,
+                                       parent.getName(), parentLocation,
                                        errorMessageDetail(_item, parentItem, parent.getName(), name)));
       }
 
@@ -234,10 +234,10 @@ public class VerifierHandlerImpl extends DefaultHandler
         else if (! _item.allowAttribute(name, value)) {
           throw new RelaxException(L.l("{0}=\"{1}\" is an unexpected attribute in <{2}>.{3}",
                                        attrQName, value, qName,
-				       attributeMessageDetail(_item,
-							      parentItem,
-							      qName, null)));
-	}
+                                       attributeMessageDetail(_item,
+                                                              parentItem,
+                                                              qName, null)));
+        }
         else
           _item = _item.setAttribute(name, value);
 
@@ -249,9 +249,9 @@ public class VerifierHandlerImpl extends DefaultHandler
       if (newItem == null) {
         throw new RelaxException(L.l("<{0}> expects more attributes.{1}",
                                      qName, 
-				     attributeMessageDetail(_item,
-							    parentItem,
-							    qName, null)));
+                                     attributeMessageDetail(_item,
+                                                            parentItem,
+                                                            qName, null)));
       }
       
       _item = newItem;
@@ -302,11 +302,11 @@ public class VerifierHandlerImpl extends DefaultHandler
       if (newItem == null) {
         String string = _text.toString();
 
-	Item parentItem = _itemStack.get(_itemStack.size() - 1);
-	
+        Item parentItem = _itemStack.get(_itemStack.size() - 1);
+
         throw new RelaxException(L.l("The following text is not allowed in this context.\n{0}\n{1}", string,
-				     errorMessageDetail(_item, parentItem,
-							_name.getName(), null)));
+                                     errorMessageDetail(_item, parentItem,
+                                                        _name.getName(), null)));
       }
 
       _text.clear();
@@ -347,8 +347,8 @@ public class VerifierHandlerImpl extends DefaultHandler
       if (nextItem == null)
         throw new RelaxException(L.l("<{0}> closed while expecting more elements (open at {1}).{2}",
                                      qName, eltOpen,
-				     requiredMessageDetail(_item, parentItem,
-							qName, null)));
+                                     requiredMessageDetail(_item, parentItem,
+                                                        qName, null)));
       
       _item = nextItem;
     } catch (Exception e) {
@@ -422,10 +422,10 @@ public class VerifierHandlerImpl extends DefaultHandler
       if (! name.getLocalName().equals(value.getLocalName())) {
       }
       else if (name.getPrefix() == null || name.getPrefix().equals("")) {
-	return name.getName() + " xmlns=\"" + name.getNamespaceURI() + "\"";
+        return name.getName() + " xmlns=\"" + name.getNamespaceURI() + "\"";
       }
       else {
-	return name.getName() + " xmlns:" + name.getPrefix() + "=\"" + name.getNamespaceURI() + "\"";
+        return name.getName() + " xmlns:" + name.getPrefix() + "=\"" + name.getNamespaceURI() + "\"";
       }
     }
 
@@ -436,7 +436,7 @@ public class VerifierHandlerImpl extends DefaultHandler
    * Returns a string containing the allowed values.
    */
   private String errorMessageDetail(Item item, Item parentItem,
-				    String parentName, QName qName)
+                                    String parentName, QName qName)
   {
     Item currentItem = item;
     
@@ -449,17 +449,17 @@ public class VerifierHandlerImpl extends DefaultHandler
     String expected = null;
     if (values.size() <= 5)
       expected = namesToString(values, parentName, qName,
-			       currentItem.allowEmpty());
+                               currentItem.allowEmpty());
     
     return (getLineContext(getFileName(), getLine())
-	    + syntaxMessage(item, parentItem, parentName, qName, expected));
+            + syntaxMessage(item, parentItem, parentName, qName, expected));
   }
 
   /**
    * Returns a string containing the allowed values.
    */
   private String requiredMessageDetail(Item item, Item parentItem,
-				       String parentName, QName qName)
+                                       String parentName, QName qName)
   {
     Item currentItem = item;
 
@@ -473,18 +473,18 @@ public class VerifierHandlerImpl extends DefaultHandler
     
     if (values.size() <= 5) {
       expected = namesToString(values, parentName, qName,
-			       currentItem.allowEmpty());
+                               currentItem.allowEmpty());
     }
     
     return (getLineContext(getFileName(), getLine())
-	    + syntaxMessage(item, parentItem, parentName, qName, expected));
+            + syntaxMessage(item, parentItem, parentName, qName, expected));
   }
 
   /**
    * Returns a string containing the allowed values.
    */
   private String attributeMessageDetail(Item item, Item parentItem,
-					String parentName, QName qName)
+                                        String parentName, QName qName)
   {
     Item currentItem = item;
 
@@ -494,15 +494,15 @@ public class VerifierHandlerImpl extends DefaultHandler
     String allowed = allowedAttributes(currentItem, qName);
     
     return (getLineContext(getFileName(), getLine())
-	    + syntaxMessage(item, parentItem, parentName, qName, allowed));
+            + syntaxMessage(item, parentItem, parentName, qName, allowed));
   }
 
   /**
    * Returns a string containing the allowed values.
    */
   private String syntaxMessage(Item item, Item parentItem,
-			       String parentName, QName qName,
-			       String expected)
+                               String parentName, QName qName,
+                               String expected)
   {
     String syntaxPrefix;
 
@@ -515,22 +515,22 @@ public class VerifierHandlerImpl extends DefaultHandler
 
     Item topParent = null;
     for (Item parent = item;
-	 parent != null;
-	 parent = null) { // parent.getParent()) {
+         parent != null;
+         parent = null) { // parent.getParent()) {
       if (qName != null && parent.allowsElement(qName)) {
-	msg = "\n Check for duplicate and out-of-order tags.";
+        msg = "\n Check for duplicate and out-of-order tags.";
 
-	if (expected != null)
-	  msg += expected + "\n";
-	
-	msg += "\n";
+        if (expected != null)
+          msg += expected + "\n";
 
-	String prefix = "Syntax: ";
-	if (parent == parentItem)
-	  prefix = syntaxPrefix;
-	
-	msg += prefix + parent.toSyntaxDescription(prefix.length());
-	break;
+        msg += "\n";
+
+        String prefix = "Syntax: ";
+        if (parent == parentItem)
+          prefix = syntaxPrefix;
+
+        msg += prefix + parent.toSyntaxDescription(prefix.length());
+        break;
       }
       
       // topParent = parent;
@@ -540,15 +540,15 @@ public class VerifierHandlerImpl extends DefaultHandler
       topParent = parentItem;
 
       if (qName != null && topParent.allowsElement(qName)) {
-	msg = "\n Check for duplicate and out-of-order tags.";
+        msg = "\n Check for duplicate and out-of-order tags.";
 
-	if (expected != null)
-	  msg += expected + "\n";
-	
-	msg += "\n";
+        if (expected != null)
+          msg += expected + "\n";
 
-	String prefix = syntaxPrefix;
-	msg += prefix + topParent.toSyntaxDescription(prefix.length());
+        msg += "\n";
+
+        String prefix = syntaxPrefix;
+        msg += prefix + topParent.toSyntaxDescription(prefix.length());
       }
     }
 
@@ -556,7 +556,7 @@ public class VerifierHandlerImpl extends DefaultHandler
       msg = "";
 
       if (expected != null)
-	msg += expected + "\n";
+        msg += expected + "\n";
       
       msg += "\n";
 
@@ -582,9 +582,9 @@ public class VerifierHandlerImpl extends DefaultHandler
   }
 
   private String namesToString(HashSet<QName> values,
-			       String parentName,
-			       QName qName,
-			       boolean allowEmpty)
+                               String parentName,
+                               QName qName,
+                               boolean allowEmpty)
   {
     CharBuffer cb = new CharBuffer();
     if (values.size() > 0) {
@@ -601,9 +601,9 @@ public class VerifierHandlerImpl extends DefaultHandler
         else
           cb.append(",\n");
 
-	if (name.getName().equals("#text")) {
-	  cb.append("text");
-	}
+        if (name.getName().equals("#text")) {
+          cb.append("text");
+        }
         else if (name.getNamespaceURI() == null || qName == null)
           cb.append("<" + name.getName() + ">");
         else if (qName.getNamespaceURI() != name.getNamespaceURI()) {
@@ -666,7 +666,7 @@ public class VerifierHandlerImpl extends DefaultHandler
         else
           cb.append(", ");
 
-	String uri = name.getNamespaceURI();
+        String uri = name.getNamespaceURI();
         if (uri == null || uri.equals(""))
           cb.append("'" + name.getName() + "'");
         else if (qName == null || qName.getName().equals(name.getName()))
@@ -703,11 +703,11 @@ public class VerifierHandlerImpl extends DefaultHandler
    * the <code>endDocument</code> event.
    * 
    * @return
-   *		<b>true</b> if the document was valid,
-   *		<b>false</b> if not.
+   *                <b>true</b> if the document was valid,
+   *                <b>false</b> if not.
    * 
    * @exception IllegalStateException
-   *		If this method is called before the endDocument event is dispatched.
+   *                If this method is called before the endDocument event is dispatched.
    */
   public boolean isValid() throws IllegalStateException
   {
@@ -729,14 +729,14 @@ public class VerifierHandlerImpl extends DefaultHandler
       int line = 0;
       String text;
       while ((text = is.readLine()) != null) {
-	line++;
+        line++;
 
-	if (errorLine - 2 <= line && line <= errorLine + 2) {
-	  sb.append(line);
-	  sb.append(": ");
-	  sb.append(text);
-	  sb.append("\n");
-	}
+        if (errorLine - 2 <= line && line <= errorLine + 2) {
+          sb.append(line);
+          sb.append(": ");
+          sb.append(text);
+          sb.append("\n");
+        }
       }
 
       return sb.toString();
@@ -746,7 +746,7 @@ public class VerifierHandlerImpl extends DefaultHandler
       return "";
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
   }
 

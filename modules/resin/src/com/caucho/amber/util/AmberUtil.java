@@ -39,8 +39,8 @@ public class AmberUtil {
   }
 
   public static void setString(PreparedStatement pstmt,
-			       int index,
-			       String value)
+                               int index,
+                               String value)
     throws SQLException
   {
     if (value != null)

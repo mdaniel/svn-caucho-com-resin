@@ -99,7 +99,7 @@ public class AmberContext {
       
       AmberConnection conn = context._aConn;
       if (conn != null)
-	conn.close();
+        conn.close();
     }
     else
       context._depth--;

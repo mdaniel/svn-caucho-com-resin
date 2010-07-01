@@ -189,7 +189,7 @@ public class Functions {
 
     for (int i = 0; i < array.length; i++) {
       if (i != 0)
-	result.append(sep);
+        result.append(sep);
 
       result.append(array[i]);
     }

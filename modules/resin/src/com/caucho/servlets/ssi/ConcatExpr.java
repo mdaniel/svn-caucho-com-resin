@@ -59,9 +59,9 @@ public class ConcatExpr extends SSIExpr {
    * Evaluate as a string.
    */
   public String evalString(HttpServletRequest request,
-			   HttpServletResponse response)
+                           HttpServletResponse response)
   {
     return (_left.evalString(request, response) +
-	    _right.evalString(request, response));
+            _right.evalString(request, response));
   }
 }

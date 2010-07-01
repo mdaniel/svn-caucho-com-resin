@@ -87,15 +87,15 @@ public class DiscoInfoQuery implements java.io.Serializable {
   }
   
   public DiscoInfoQuery(DiscoIdentity []identity,
-			DiscoFeature []features)
+                        DiscoFeature []features)
   {
     _identity = identity;
     _features = features;
   }
   
   public DiscoInfoQuery(String node,
-			DiscoIdentity []identity,
-			DiscoFeature []features)
+                        DiscoIdentity []identity,
+                        DiscoFeature []features)
   {
     _node = node;
     
@@ -165,18 +165,18 @@ public class DiscoInfoQuery implements java.io.Serializable {
     
     if (_identity != null) {
       for (int i = 0; i < _identity.length; i++) {
-	if (i != 0)
-	  sb.append(",");
-	sb.append(_identity[i]);
+        if (i != 0)
+          sb.append(",");
+        sb.append(_identity[i]);
       }
     }
     sb.append("],features=[");
     
     if (_features != null) {
       for (int i = 0; i < _features.length; i++) {
-	if (i != 0)
-	  sb.append(",");
-	sb.append(_features[i].getVar());
+        if (i != 0)
+          sb.append(",");
+        sb.append(_features[i].getVar());
       }
     }
     sb.append("]]");

@@ -120,10 +120,10 @@ public class ImMessage implements Serializable {
   }
 
   public ImMessage(String to, String from, String type,
-		   Text []subject,
-		   Text []body,
-		   String thread,
-		   Serializable []extra)
+                   Text []subject,
+                   Text []body,
+                   String thread,
+                   Serializable []extra)
   {
     _to = to;
     _from = from;
@@ -223,27 +223,27 @@ public class ImMessage implements Serializable {
       
     if (_subject != null) {
       for (Text text : _subject) {
-	if (text.getLang() != null) {
-	  sb.append(",subject(").append(text.getLang()).append(")='");
-	}
-	else
-	  sb.append(",subject='");
-	
-	sb.append(text.getValue());
-	sb.append("'");
+        if (text.getLang() != null) {
+          sb.append(",subject(").append(text.getLang()).append(")='");
+        }
+        else
+          sb.append(",subject='");
+
+        sb.append(text.getValue());
+        sb.append("'");
       }
     }
 
     if (_body != null && _body.length != 0) {
       for (Text text : _body) {
-	if (text.getLang() != null) {
-	  sb.append(",body(").append(text.getLang()).append(")='");
-	}
-	else
-	  sb.append(",body='");
-	
-	sb.append(text.getValue());
-	sb.append("'");
+        if (text.getLang() != null) {
+          sb.append(",body(").append(text.getLang()).append(")='");
+        }
+        else
+          sb.append(",body='");
+
+        sb.append(text.getValue());
+        sb.append("'");
       }
     }
 
@@ -254,7 +254,7 @@ public class ImMessage implements Serializable {
 
     if (_extra != null) {
       for (Serializable extra : _extra)
-	sb.append(",extra=").append(extra);
+        sb.append(",extra=").append(extra);
     }
     
     sb.append("]");

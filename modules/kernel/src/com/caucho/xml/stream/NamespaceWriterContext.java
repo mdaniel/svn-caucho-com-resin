@@ -106,8 +106,8 @@ public class NamespaceWriterContext extends NamespaceContextImpl
       binding = _bindings.get(uri);
 
       if (binding != null
-	  && binding.getPrefix() != null
-	  && binding.getPrefix().equals(prefix)) {
+          && binding.getPrefix() != null
+          && binding.getPrefix().equals(prefix)) {
         // for writing, ignore matching prefixes
         if (forceEmit)
           binding.setEmit(true);

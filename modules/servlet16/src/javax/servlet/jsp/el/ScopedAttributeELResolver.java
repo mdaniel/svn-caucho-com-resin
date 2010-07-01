@@ -44,7 +44,7 @@ import java.util.Iterator;
 public class ScopedAttributeELResolver extends ELResolver {
   @Override
   public Class<String> getCommonPropertyType(ELContext context,
-					     Object base)
+                                             Object base)
   {
     if (base == null)
       return String.class;
@@ -80,12 +80,12 @@ public class ScopedAttributeELResolver extends ELResolver {
       desc.setPreferred(true);
 
       if (key == null)
-	desc.setValue(ELResolver.TYPE, null);
+        desc.setValue(ELResolver.TYPE, null);
       else
-	desc.setValue(ELResolver.TYPE, key.getClass());
-	
+        desc.setValue(ELResolver.TYPE, key.getClass());
+
       desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
-	
+
       keys.add(desc);
     }
 
@@ -106,8 +106,8 @@ public class ScopedAttributeELResolver extends ELResolver {
 
   @Override
     public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base != null)
       return null;
@@ -121,8 +121,8 @@ public class ScopedAttributeELResolver extends ELResolver {
 
   @Override
     public boolean isReadOnly(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base != null)
       return true;
@@ -134,9 +134,9 @@ public class ScopedAttributeELResolver extends ELResolver {
 
   @Override
     public void setValue(ELContext context,
-			 Object base,
-			 Object property,
-			 Object value)
+                         Object base,
+                         Object property,
+                         Object value)
   {
     if (base != null)
       return;

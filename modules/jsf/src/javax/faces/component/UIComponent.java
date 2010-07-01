@@ -117,8 +117,8 @@ public abstract class UIComponent
    * @Since 1.2
    */
   public boolean invokeOnComponent(FacesContext context,
-				   String clientId,
-				   ContextCallback callback)
+                                   String clientId,
+                                   ContextCallback callback)
     throws FacesException
   {
     if (context == null || clientId == null || callback == null)
@@ -138,11 +138,11 @@ public abstract class UIComponent
       Iterator<UIComponent> iter = getFacetsAndChildren();
 
       while (iter.hasNext()) {
-	UIComponent comp = iter.next();
+        UIComponent comp = iter.next();
 
-	boolean result = comp.invokeOnComponent(context, clientId, callback);
-	if (result)
-	  return true;
+        boolean result = comp.invokeOnComponent(context, clientId, callback);
+        if (result)
+          return true;
       }
 
       return false;
@@ -208,13 +208,13 @@ public abstract class UIComponent
       int childCount = getChildCount();
 
       if (childCount > 0) {
-	List<UIComponent> children = getChildren();
+        List<UIComponent> children = getChildren();
 
-	for (int i = 0; i < childCount; i++) {
-	  UIComponent child = children.get(i);
+        for (int i = 0; i < childCount; i++) {
+          UIComponent child = children.get(i);
 
-	  child.encodeAll(context);
-	}
+          child.encodeAll(context);
+        }
       }
     }
     
@@ -230,7 +230,7 @@ public abstract class UIComponent
   public abstract void queueEvent(FacesEvent event);
 
   public abstract void processRestoreState(FacesContext context,
-					   Object state);
+                                           Object state);
 
   public abstract void processDecodes(FacesContext context);
 

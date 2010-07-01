@@ -146,36 +146,36 @@ class HtmlMessageRenderer extends Renderer
       iter = context.getMessages(forComponent.getClientId(context));
 
       if (iter.hasNext()) {
-	FacesMessage msg = iter.next();
+        FacesMessage msg = iter.next();
 
-	if (FacesMessage.SEVERITY_ERROR.equals(msg.getSeverity())) {
-	  if (errorClass != null)
-	    styleClass = errorClass;
+        if (FacesMessage.SEVERITY_ERROR.equals(msg.getSeverity())) {
+          if (errorClass != null)
+            styleClass = errorClass;
 
-	  if (errorStyle != null)
-	    style = errorStyle;
-	}
-	else if (FacesMessage.SEVERITY_FATAL.equals(msg.getSeverity())) {
-	  if (fatalClass != null)
-	    styleClass = fatalClass;
+          if (errorStyle != null)
+            style = errorStyle;
+        }
+        else if (FacesMessage.SEVERITY_FATAL.equals(msg.getSeverity())) {
+          if (fatalClass != null)
+            styleClass = fatalClass;
 
-	  if (fatalStyle != null)
-	    style = fatalStyle;
-	}
-	else if (FacesMessage.SEVERITY_INFO.equals(msg.getSeverity())) {
-	  if (infoClass != null)
-	    styleClass = infoClass;
+          if (fatalStyle != null)
+            style = fatalStyle;
+        }
+        else if (FacesMessage.SEVERITY_INFO.equals(msg.getSeverity())) {
+          if (infoClass != null)
+            styleClass = infoClass;
 
-	  if (infoStyle != null)
-	    style = infoStyle;
-	}
-	else if (FacesMessage.SEVERITY_WARN.equals(msg.getSeverity())) {
-	  if (warnClass != null)
-	    styleClass = warnClass;
+          if (infoStyle != null)
+            style = infoStyle;
+        }
+        else if (FacesMessage.SEVERITY_WARN.equals(msg.getSeverity())) {
+          if (warnClass != null)
+            styleClass = warnClass;
 
-	  if (warnStyle != null)
-	    style = warnStyle;
-	}
+          if (warnStyle != null)
+            style = warnStyle;
+        }
 
         boolean hasSpan = (dir != null
                            || lang != null
@@ -194,42 +194,42 @@ class HtmlMessageRenderer extends Renderer
         }
 
         if (dir != null)
-	  out.writeAttribute("dir", dir, "dir");
+          out.writeAttribute("dir", dir, "dir");
 
-	if (lang != null)
-	  out.writeAttribute("lang", lang, "lang");
+        if (lang != null)
+          out.writeAttribute("lang", lang, "lang");
 
-	if (style != null)
-	  out.writeAttribute("style", style, "style");
+        if (style != null)
+          out.writeAttribute("style", style, "style");
 
-	if (styleClass != null)
-	  out.writeAttribute("class", styleClass, "styleClass");
+        if (styleClass != null)
+          out.writeAttribute("class", styleClass, "styleClass");
 
         boolean summaryDone = false;
-	if (isShowSummary) {
-	  if (tooltip && isShowDetail) {
-	    out.writeAttribute("title", msg.getSummary(), "title");
-	  }
-	  else if (title != null) {
-	    out.writeAttribute("title", title, "title");
-	    out.writeText(msg.getSummary(), "summary");
+        if (isShowSummary) {
+          if (tooltip && isShowDetail) {
+            out.writeAttribute("title", msg.getSummary(), "title");
+          }
+          else if (title != null) {
+            out.writeAttribute("title", title, "title");
+            out.writeText(msg.getSummary(), "summary");
             summaryDone = true;
-	  }
-	  else {
-	    out.writeText(msg.getSummary(), "summary");
+          }
+          else {
+            out.writeText(msg.getSummary(), "summary");
             summaryDone = true;
-	  }
-	}
+          }
+        }
 
-	if (isShowDetail) {
+        if (isShowDetail) {
           if (summaryDone)
             out.writeText(" ", null);
           
-	  out.writeText(msg.getDetail(), "detail");
+          out.writeText(msg.getDetail(), "detail");
         }
 
-	if (hasSpan)
-	  out.endElement("span");
+        if (hasSpan)
+          out.endElement("span");
       }
     }
   }

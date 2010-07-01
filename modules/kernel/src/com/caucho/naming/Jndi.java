@@ -74,8 +74,8 @@ public class Jndi {
       Context context = (Context) _javaCompEnvMap.getLevel();
 
       if (context == null) {
-	context = (Context) new InitialContext().lookup("java:comp/env");
-	_javaCompEnvMap.set(context);
+        context = (Context) new InitialContext().lookup("java:comp/env");
+        _javaCompEnvMap.set(context);
       }
 
       return context;
@@ -120,10 +120,10 @@ public class Jndi {
       Object value = null;
 
       try {
-	if (context instanceof ContextImpl)
-	  value = ((ContextImpl) context).lookupImpl(name);
-	else
-	  value = context.lookup(name);
+        if (context instanceof ContextImpl)
+          value = ((ContextImpl) context).lookupImpl(name);
+        else
+          value = context.lookup(name);
       } catch (NameNotFoundException e) {
       }
       
@@ -141,9 +141,9 @@ public class Jndi {
 
     try {
       if (context instanceof ContextImpl)
-	sub = ((ContextImpl) context).lookupImpl(parsedName.get(0));
+        sub = ((ContextImpl) context).lookupImpl(parsedName.get(0));
       else
-	sub = context.lookup(parsedName.get(0));
+        sub = context.lookup(parsedName.get(0));
     } catch (NameNotFoundException e) {
     }
 

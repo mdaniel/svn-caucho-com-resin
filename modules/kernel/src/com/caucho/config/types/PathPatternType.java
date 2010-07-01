@@ -76,24 +76,24 @@ public class PathPatternType {
       char ch = pattern.charAt(i);
 
       if (ch == '/')
-	cb.append('/');
+        cb.append('/');
       else if (ch != '*')
-	cb.append(ch);
+        cb.append(ch);
       else if (length <= i + 1 || pattern.charAt(i + 1) != '*')
-	cb.append("[^/]*");
+        cb.append("[^/]*");
       else if (i > 0 && pattern.charAt(i - 1) != '/')
-	throw new ConfigException(L.l("'{0}' is an invalid pattern at '**'",
-				      pattern));
+        throw new ConfigException(L.l("'{0}' is an invalid pattern at '**'",
+                                      pattern));
       else if (i + 2 < length && pattern.charAt(i + 2) == '/') {
-	cb.append("([^/]*/)*");
-	i += 2;
+        cb.append("([^/]*/)*");
+        i += 2;
       }
       else if (i + 2 < length)
-	throw new ConfigException(L.l("'{0}' is an invalid pattern at '**'",
-				      pattern));
+        throw new ConfigException(L.l("'{0}' is an invalid pattern at '**'",
+                                      pattern));
       else {
-	cb.append(".*");
-	i++;
+        cb.append(".*");
+        i++;
       }
     }
 

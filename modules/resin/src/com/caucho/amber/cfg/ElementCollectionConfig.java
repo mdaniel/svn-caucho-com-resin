@@ -68,9 +68,9 @@ class ElementCollectionConfig extends AbstractConfig
   private CollectionTableConfig _collectionTable;
 
   ElementCollectionConfig(EntityType sourceType,
-			  AccessibleObject field,
-			  String fieldName,
-			  Class fieldType)
+                          AccessibleObject field,
+                          String fieldName,
+                          Class fieldType)
   {
     _sourceType = sourceType;
     
@@ -125,7 +125,7 @@ class ElementCollectionConfig extends AbstractConfig
       _collectionTable = new CollectionTableConfig(collectionTableAnn);
     else {
       _collectionTable
-	= new CollectionTableConfig(getRelatedType().getName(), _fieldName);
+        = new CollectionTableConfig(getRelatedType().getName(), _fieldName);
     }
     
     /*
@@ -180,15 +180,15 @@ class ElementCollectionConfig extends AbstractConfig
 
     if (targetClass == null || void.class.equals(targetClass))
       throw error(_field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
-			      _fieldName));
+                              _fieldName));
 
     AmberType targetType = persistenceUnit.createType(targetClass);
       
     if (targetType == null) {
       throw error(_field,
-		  L.l("targetClass '{0}' is not a known element collection class for {1}.  The targetClass of a @ElementCollection must be a basic class.",
-		      targetClass.getName(),
-		      _fieldName));
+                  L.l("targetClass '{0}' is not a known element collection class for {1}.  The targetClass of a @ElementCollection must be a basic class.",
+                      targetClass.getName(),
+                      _fieldName));
     }
 
     /*
@@ -222,16 +222,16 @@ class ElementCollectionConfig extends AbstractConfig
     
     sourceColumns
       = calculateColumns(_field, _fieldName, mapTable,
-			 _sourceType.getTable().getName() + "_",
-			 _sourceType,
-			 joinColumnsConfig);
+                         _sourceType.getTable().getName() + "_",
+                         _sourceType,
+                         joinColumnsConfig);
 
     eltCollectionField.setAssociationTable(mapTable);
     eltCollectionField.setTable(sqlTable);
 
     eltCollectionField.setSourceLink(new LinkColumns(mapTable,
-						     _sourceType.getTable(),
-						     sourceColumns));
+                                                     _sourceType.getTable(),
+                                                     sourceColumns));
     
     _sourceType.addField(eltCollectionField);
   }

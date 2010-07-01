@@ -68,8 +68,8 @@ public abstract class AbstractLogin extends com.caucho.security.AbstractLogin {
   }
 
   protected Principal getUserPrincipal(HttpServletRequest request,
-				       HttpServletResponse response,
-				       ServletContext app)
+                                       HttpServletResponse response,
+                                       ServletContext app)
   {
     return null;
   }
@@ -79,8 +79,8 @@ public abstract class AbstractLogin extends com.caucho.security.AbstractLogin {
    */
   @Override
   public Principal login(HttpServletRequest request,
-			 HttpServletResponse response,
-			 boolean isFail)
+                         HttpServletResponse response,
+                         boolean isFail)
   {
     try {
       ServletContext app = request.getServletContext();
@@ -92,8 +92,8 @@ public abstract class AbstractLogin extends com.caucho.security.AbstractLogin {
   }
 
   protected Principal authenticate(HttpServletRequest request,
-				   HttpServletResponse response,
-				   ServletContext app)
+                                   HttpServletResponse response,
+                                   ServletContext app)
     throws ServletException, IOException
   {
     return null;
@@ -116,16 +116,16 @@ public abstract class AbstractLogin extends com.caucho.security.AbstractLogin {
       = (CauchoRequest) TcpSocketLink.getCurrentRequest();
 
     return isUserInRole(request,
-			null, // request.getResponse(),
-			request.getServletContext(),
-			user,
-			role);
+                        null, // request.getResponse(),
+                        request.getServletContext(),
+                        user,
+                        role);
   }
 
   protected boolean isUserInRole(HttpServletRequest request,
-				 HttpServletResponse response,
-				 ServletContext app,
-				 Principal user, String role)
+                                 HttpServletResponse response,
+                                 ServletContext app,
+                                 Principal user, String role)
   {
     return false;
   }

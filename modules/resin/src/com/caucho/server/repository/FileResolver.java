@@ -101,10 +101,10 @@ public class FileResolver extends Resolver
   }
   
   public DataSource resolveArtifact(String org,
-				    String module,
-				    String artifact,
-				    String rev,
-				    String ext)
+                                    String module,
+                                    String artifact,
+                                    String rev,
+                                    String ext)
   {
     String urlString = resolveArtifactString(org, module, artifact, rev, ext);
 
@@ -122,65 +122,65 @@ public class FileResolver extends Resolver
       String md5 = null;
 
       if (sha1 == null)
-	md5 = loadChecksum(urlString, "md5");
+        md5 = loadChecksum(urlString, "md5");
 
       InputStream is = null;
       try {
-	long length = path.getLength();
-	
-	is = path.openRead();
+        long length = path.getLength();
 
-	OutputStream out = inode.openOutputStream();
+        is = path.openRead();
 
-	TempBuffer tempBuffer = TempBuffer.allocate();
-	byte []buffer = tempBuffer.getBuffer();
-	
-	int readLength = 0;
-	int len;
+        OutputStream out = inode.openOutputStream();
 
-	log.info("ModuleRepository[] loading " + urlString);
+        TempBuffer tempBuffer = TempBuffer.allocate();
+        byte []buffer = tempBuffer.getBuffer();
 
-	while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	  out.write(buffer, 0, len);
-	  readLength += len;
-	}
+        int readLength = 0;
+        int len;
 
-	out.close();
+        log.info("ModuleRepository[] loading " + urlString);
 
-	TempBuffer.free(tempBuffer);
+        while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+          out.write(buffer, 0, len);
+          readLength += len;
+        }
 
-	InodeDataSource dataSource
-	  = new InodeDataSource(path.getURL(), inode);
-	
-	if (md5 != null)
-	  validateSignature(dataSource, md5, "MD5");
+        out.close();
 
-	if (sha1 != null)
-	  validateSignature(dataSource, sha1, "SHA1");
-	
-	inode = null;
+        TempBuffer.free(tempBuffer);
 
-	return dataSource;
+        InodeDataSource dataSource
+          = new InodeDataSource(path.getURL(), inode);
+
+        if (md5 != null)
+          validateSignature(dataSource, md5, "MD5");
+
+        if (sha1 != null)
+          validateSignature(dataSource, sha1, "SHA1");
+
+        inode = null;
+
+        return dataSource;
       } finally {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       }
     } catch (SecurityException e) {
       throw new ModuleNotFoundException(L.l("{0} failed signature validation",
-					    path.getURL(), e));
+                                            path.getURL(), e));
     } catch (MalformedURLException e) {
       throw new ModuleNotFoundException(e);
     } catch (IOException e) {
       throw new ModuleNotFoundException(L.l("{0} is an unknown module",
-					    path.getURL()),
-					e);
+                                            path.getURL()),
+                                        e);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
       if (inode != null)
-	inode.free();
+        inode.free();
     }
   }
 
@@ -194,9 +194,9 @@ public class FileResolver extends Resolver
       Path path;
 
       if (_path != null)
-	path = _path.lookup(urlString + "." + ext);
+        path = _path.lookup(urlString + "." + ext);
       else
-	path = Vfs.lookup(urlString + "." + ext);
+        path = Vfs.lookup(urlString + "." + ext);
 
       is = path.openRead();
       StringBuilder sb = new StringBuilder();
@@ -206,7 +206,7 @@ public class FileResolver extends Resolver
       }
 
       for (; ch >= 0 && ! Character.isWhitespace(ch); ch = is.read()) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
       
       log.fine(urlString + "." + ext + " loaded " + sb);
@@ -218,8 +218,8 @@ public class FileResolver extends Resolver
       log.log(Level.FINER, e.toString(), e);
     } finally {
       try {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       } catch (IOException e) {
       }
     }

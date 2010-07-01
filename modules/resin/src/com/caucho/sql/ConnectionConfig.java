@@ -62,7 +62,7 @@ public class ConnectionConfig {
       _isolation = Connection.TRANSACTION_SERIALIZABLE;
     else
       throw new ConfigException(L.l("'{0}' is an unknown transaction isolation.",
-				    name));
+                                    name));
   }
 
   /**

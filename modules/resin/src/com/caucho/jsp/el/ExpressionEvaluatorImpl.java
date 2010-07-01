@@ -56,8 +56,8 @@ public class ExpressionEvaluatorImpl extends ExpressionEvaluator {
    * Evaluates an expression.
    */
   public Object evaluate(String expression, Class expectedType,
-			 javax.servlet.jsp.el.VariableResolver resolver,
-			 FunctionMapper funMapper)
+                         javax.servlet.jsp.el.VariableResolver resolver,
+                         FunctionMapper funMapper)
     throws javax.servlet.jsp.el.ELException
   {
     Expression expr = parseExpression(expression, expectedType, funMapper);
@@ -69,8 +69,8 @@ public class ExpressionEvaluatorImpl extends ExpressionEvaluator {
    * Parses an expression.
    */
   public Expression parseExpression(String expression,
-				    Class expectedType,
-				    FunctionMapper funMapper)
+                                    Class expectedType,
+                                    FunctionMapper funMapper)
     throws javax.servlet.jsp.el.ELException
   {
     ELContext elContext;

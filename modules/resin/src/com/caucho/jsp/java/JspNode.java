@@ -845,7 +845,7 @@ public abstract class JspNode {
       return false;
     else
       throw error(L.l("'{0}' is an unknown value for {1}.  'true' or 'false' are the expected values.",
-		      value, attr));
+                      value, attr));
   }
 
   /**
@@ -865,15 +865,15 @@ public abstract class JspNode {
                             String obj, Object objValue, Method method,
                             boolean allowRtexpr, 
                             String contextVar, boolean isParentSimpleTag,
-			    boolean isFragment, TagAttributeInfo attrInfo)
+                            boolean isFragment, TagAttributeInfo attrInfo)
     throws Exception
   {
     Class<?> type = method.getParameterTypes()[0];
 
     if (isFragment || JspFragment.class.equals(type)) {
       generateFragmentParameter(out, obj, objValue, method,
-				allowRtexpr, contextVar,
-				isParentSimpleTag);
+                                allowRtexpr, contextVar,
+                                isParentSimpleTag);
       return;
     }
 
@@ -881,12 +881,12 @@ public abstract class JspNode {
       JspAttribute attr = (JspAttribute) objValue;
 
       if (attr.isStatic())
-	objValue = attr.getStaticText();
+        objValue = attr.getStaticText();
       else {
-	String str = "_jsp_str_" + _gen.uniqueId();
-	out.println("String " + str + " = " + attr.generateValue() + ";");
-	out.println(obj + "." + method.getName() + "(" + stringToValue(type, str) + ");");
-	return;
+        String str = "_jsp_str_" + _gen.uniqueId();
+        out.println("String " + str + " = " + attr.generateValue() + ";");
+        out.println(obj + "." + method.getName() + "(" + stringToValue(type, str) + ");");
+        return;
       }
     }
     else if (objValue instanceof JspNode)
@@ -895,9 +895,9 @@ public abstract class JspNode {
     String strValue = (String) objValue;
     
     String convValue = generateParameterValue(type,
-					      strValue,
-					      allowRtexpr,
-					      attrInfo,
+                                              strValue,
+                                              allowRtexpr,
+                                              attrInfo,
                                               _parseState.isELIgnored());
 
     PropertyEditor editor;
@@ -973,8 +973,8 @@ public abstract class JspNode {
 
   void generateFragment(JspJavaWriter out,
                         JspFragmentNode frag,
-			String contextVar,
-			boolean isParentSimpleTag)
+                        String contextVar,
+                        boolean isParentSimpleTag)
     throws Exception
   {
     out.print(generateFragment(frag, contextVar));
@@ -1073,9 +1073,9 @@ public abstract class JspNode {
       JavaTagGenerator tagGen = (JavaTagGenerator) _gen;
       
       if (tagGen.isStaticDoTag()) // jsp/1025
-	cb.append(", _jspBody");
+        cb.append(", _jspBody");
       else
-	cb.append(", getJspBody()");
+        cb.append(", getJspBody()");
     }
     else
       cb.append(", null");
@@ -1173,9 +1173,9 @@ public abstract class JspNode {
       if (outValue.equals("null")) {
       }
       else if (outValue.startsWith("\""))
-	out.print(" + (" + outValue + ")");
+        out.print(" + (" + outValue + ")");
       else
-	out.print(" + com.caucho.el.Expr.toString(" + outValue + ", null)");
+        out.print(" + com.caucho.el.Expr.toString(" + outValue + ", null)");
     }
   }
   
@@ -1258,9 +1258,9 @@ public abstract class JspNode {
   }
 
   String generateParameterValue(Class<?> type,
-				String value,
-				boolean rtexpr,
-				TagAttributeInfo attrInfo,
+                                String value,
+                                boolean rtexpr,
+                                TagAttributeInfo attrInfo,
                                 boolean isELIgnored)
     throws Exception
   {
@@ -1276,39 +1276,39 @@ public abstract class JspNode {
       String typeName = attrInfo != null ? attrInfo.getExpectedTypeName() : "";
 
       boolean isValueDeferred
-	= (attrInfo != null && attrInfo.isDeferredValue()
-	   || typeName != null && ! "".equals(typeName));
+        = (attrInfo != null && attrInfo.isDeferredValue()
+           || typeName != null && ! "".equals(typeName));
 
       boolean isMethodDeferred
-	= (attrInfo != null && attrInfo.isDeferredMethod());
+        = (attrInfo != null && attrInfo.isDeferredMethod());
 
       if (JspFragment.class.equals(type))
-	return generateFragmentParameter(value, rtexpr);
+        return generateFragmentParameter(value, rtexpr);
       else if (type.equals(ValueExpression.class)) {
         int exprIndex;
-	
+
         if (isEmpty)
           exprIndex = _gen.addValueExpr("", typeName);
         else
           exprIndex = _gen.addValueExpr(value, typeName);
 
-	if (isValueDeferred
-	    && value.indexOf("#{") < 0
-	    && value.indexOf("${") >= 0) {
-	  throw error(L.l("ValueExpression '{0}' must use deferred syntax '#{...}'",
-			  value));
-	}
-	else if (! isValueDeferred
-		 && value.indexOf("#{") >= 0
-		 && value.indexOf("${") < 0) {
-	  throw error(L.l("Deferred syntax '#{...}' is not allowed for '{0}'",
-			  value));
-	}
+        if (isValueDeferred
+            && value.indexOf("#{") < 0
+            && value.indexOf("${") >= 0) {
+          throw error(L.l("ValueExpression '{0}' must use deferred syntax '#{...}'",
+                          value));
+        }
+        else if (! isValueDeferred
+                 && value.indexOf("#{") >= 0
+                 && value.indexOf("${") < 0) {
+          throw error(L.l("Deferred syntax '#{...}' is not allowed for '{0}'",
+                          value));
+        }
 
 
         if (value.indexOf("#{") < 0 && value.indexOf("${") < 0) {
           return ("_caucho_value_expr_" + exprIndex);
-	}
+        }
         else {
           StringBuilder sb = new StringBuilder();
 
@@ -1330,28 +1330,28 @@ public abstract class JspNode {
       else if (type.equals(MethodExpression.class)) {
         int exprIndex;
 
-	String sig = attrInfo != null ? attrInfo.getMethodSignature() : "java.lang.String misc()";
+        String sig = attrInfo != null ? attrInfo.getMethodSignature() : "java.lang.String misc()";
 
         if (isEmpty)
           exprIndex = _gen.addMethodExpr("", sig);
         else
           exprIndex = _gen.addMethodExpr(value, sig);
-	
-	if (value.indexOf("${") >= 0)
-	  throw error(L.l("MethodExpression '{0}' must use deferred syntax '$#{...}'",
-			  value));
+
+        if (value.indexOf("${") >= 0)
+          throw error(L.l("MethodExpression '{0}' must use deferred syntax '$#{...}'",
+                          value));
       
         return ("_caucho_method_expr_" + exprIndex);
       }
       else if (! isValueDeferred
-	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()
+               && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()
                && value.indexOf("#{") >= 0
-	       && value.indexOf("${") < 0
-	       && rtexpr
-	       && isJsp21()) {
-	// jsp/10h2, jsp/1cn0, jsp/10h3
-	throw error(L.l("deferred expression '{0}' is not allowed here",
-			value));
+               && value.indexOf("${") < 0
+               && rtexpr
+               && isJsp21()) {
+        // jsp/10h2, jsp/1cn0, jsp/10h3
+        throw error(L.l("deferred expression '{0}' is not allowed here",
+                        value));
       }
       else if (com.caucho.el.Expr.class.equals(type)) {
         int exprIndex;
@@ -1365,32 +1365,32 @@ public abstract class JspNode {
       }
       else if (com.caucho.xpath.Expr.class.equals(type)) {
         int exprIndex;
-	
-	com.caucho.xpath.Expr expr;
+
+        com.caucho.xpath.Expr expr;
         if (isEmpty)
-	  expr = XPath.parseExpr("");
+          expr = XPath.parseExpr("");
         else
-	  expr = XPath.parseExpr(value, getNamespaceContext());
-	
-	return _gen.addXPathExpr(expr);
+          expr = XPath.parseExpr(value, getNamespaceContext());
+
+        return _gen.addXPathExpr(expr);
       }
       else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
       }
       else if (rtexpr && hasELAttribute(value, isELIgnored)) {
         // jsp/0138, jsp/18s0, jsp/1ce5, jsp/1e0a
-	return generateELValue(type, value);
+        return generateELValue(type, value);
       }
       else if (! rtexpr && hasELAttribute(value, isELIgnored)) {
-	// JSP.2.3.6 says this is an error
-	// jsp/184v vs jsp/18cr vs jsp/18f5 vs jsp/18f7 (tck)
-	// #2112
+        // JSP.2.3.6 says this is an error
+        // jsp/184v vs jsp/18cr vs jsp/18f5 vs jsp/18f7 (tck)
+        // #2112
 
-	if (String.class.equals(type) && _gen.isELIgnore())
-	  return '"' + escapeJavaString(value) + '"';
-	else
-	  throw error(L.l("EL expression '{0}' is only allowed for attributes with rtexprvalue='true'.",
-			  value));
+        if (String.class.equals(type) && _gen.isELIgnore())
+          return '"' + escapeJavaString(value) + '"';
+        else
+          throw error(L.l("EL expression '{0}' is only allowed for attributes with rtexprvalue='true'.",
+                          value));
       }
       else if (rtexpr && hasDeferredAttribute(value, false)) {
         // jsp/1c2m, jsp/1ce8
@@ -1400,10 +1400,10 @@ public abstract class JspNode {
           return generateELValue(type, value);
       }
       else if (! rtexpr
-	       && hasDeferredAttribute(value, isELIgnored)
-	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()) {
-	throw error(L.l("Deferred syntax '{0}' is not allowed as a literal.",
-			value));
+               && hasDeferredAttribute(value, isELIgnored)
+               && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()) {
+        throw error(L.l("Deferred syntax '{0}' is not allowed as a literal.",
+                        value));
       }
       else if (type.equals(boolean.class))
         return String.valueOf(Boolean.valueOf(isEmpty ? "false" : value));
@@ -1448,15 +1448,15 @@ public abstract class JspNode {
       else if (type.equals(double.class))
         return String.valueOf(Double.valueOf(value));
       else if (type.equals(Double.class)) {
-	double v = Double.valueOf(value);
+        double v = Double.valueOf(value);
 
-	if (Double.isNaN(v))
-	  return ("new java.lang.Double(Double.NaN)");
-	else
-	  return ("new java.lang.Double(" + v + ")");
+        if (Double.isNaN(v))
+          return ("new java.lang.Double(Double.NaN)");
+        else
+          return ("new java.lang.Double(" + v + ")");
       }
       else if (! type.equals(String.class)
-	       && ! type.equals(Object.class)) {
+               && ! type.equals(Object.class)) {
         return null;
       }
       else if (! isEmpty) {
@@ -1487,8 +1487,8 @@ public abstract class JspNode {
       return ("_caucho_value_expr_" + exprIndex);
     }
     else if (type.equals(Object.class)
-	     && value.contains("#{")
-	     && CustomTag.class.equals(getClass())) {
+             && value.contains("#{")
+             && CustomTag.class.equals(getClass())) {
       int exprIndex;
 
       exprIndex = _gen.addValueExpr(value, "");
@@ -1507,120 +1507,120 @@ public abstract class JspNode {
 
     if (expr.isConstant()) {
       try {
-	if (expr.evalObject(null) != null) {
-	}
-	else if (Character.class.isAssignableFrom(type)) {
-	  // jsp/18s0
-	  return "new Character((char) 0)";
-	}
-	else if (Boolean.class.isAssignableFrom(type)) {
-	  // jsp/18s1
-	  return "Boolean.FALSE";
-	}
-	else if (String.class.isAssignableFrom(type)) {
-	  // jsp/18s2
-	  return "\"\"";
-	}
-	else if (BigInteger.class.isAssignableFrom(type)) {
-	  return "java.math.BigInteger.ZERO";
-	}
-	else if (BigDecimal.class.isAssignableFrom(type)) {
-	  return "java.math.BigDecimal.ZERO";
-	}
-	else if (Number.class.isAssignableFrom(type)) {
-	  // jsp/18s6
-	  return "new " + type.getName() + "((byte) 0)";
-	}
-	else if (Object.class.isAssignableFrom(type))
-	  return "null";
+        if (expr.evalObject(null) != null) {
+        }
+        else if (Character.class.isAssignableFrom(type)) {
+          // jsp/18s0
+          return "new Character((char) 0)";
+        }
+        else if (Boolean.class.isAssignableFrom(type)) {
+          // jsp/18s1
+          return "Boolean.FALSE";
+        }
+        else if (String.class.isAssignableFrom(type)) {
+          // jsp/18s2
+          return "\"\"";
+        }
+        else if (BigInteger.class.isAssignableFrom(type)) {
+          return "java.math.BigInteger.ZERO";
+        }
+        else if (BigDecimal.class.isAssignableFrom(type)) {
+          return "java.math.BigDecimal.ZERO";
+        }
+        else if (Number.class.isAssignableFrom(type)) {
+          // jsp/18s6
+          return "new " + type.getName() + "((byte) 0)";
+        }
+        else if (Object.class.isAssignableFrom(type))
+          return "null";
 
-	if (boolean.class.equals(type))
-	  return expr.evalBoolean(null) ? "true" : "false";
-	else if (Boolean.class.equals(type))
-	  return expr.evalBoolean(null) ? "java.lang.Boolean.TRUE" : "java.lang.Boolean.FALSE";
-	else if (byte.class.equals(type))
-	  return "(byte) " + expr.evalLong(null);
-	else if (Byte.class.equals(type))
-	  return "new java.lang.Byte((byte) " + expr.evalLong(null) + "L)";
-	else if (short.class.equals(type))
-	  return "(short) " + expr.evalLong(null);
-	else if (Short.class.equals(type))
-	  return "new java.lang.Short((short) " + expr.evalLong(null) + "L)";
-	else if (int.class.equals(type))
-	  return "(int) " + expr.evalLong(null);
-	else if (Integer.class.equals(type))
-	  return "new java.lang.Integer((int) " + expr.evalLong(null) + "L)";
-	else if (long.class.equals(type))
-	  return "" + expr.evalLong(null) + "L";
-	else if (Long.class.equals(type))
-	  return "new java.lang.Long(" + expr.evalLong(null) + "L)";
-	else if (float.class.equals(type))
-	  return "(float) " + expr.evalDouble(null);
-	else if (Float.class.equals(type))
-	  return "new java.lang.Float((float) " + expr.evalDouble(null) + ")";
-	else if (double.class.equals(type)) {
-	  double v = expr.evalDouble(null);
+        if (boolean.class.equals(type))
+          return expr.evalBoolean(null) ? "true" : "false";
+        else if (Boolean.class.equals(type))
+          return expr.evalBoolean(null) ? "java.lang.Boolean.TRUE" : "java.lang.Boolean.FALSE";
+        else if (byte.class.equals(type))
+          return "(byte) " + expr.evalLong(null);
+        else if (Byte.class.equals(type))
+          return "new java.lang.Byte((byte) " + expr.evalLong(null) + "L)";
+        else if (short.class.equals(type))
+          return "(short) " + expr.evalLong(null);
+        else if (Short.class.equals(type))
+          return "new java.lang.Short((short) " + expr.evalLong(null) + "L)";
+        else if (int.class.equals(type))
+          return "(int) " + expr.evalLong(null);
+        else if (Integer.class.equals(type))
+          return "new java.lang.Integer((int) " + expr.evalLong(null) + "L)";
+        else if (long.class.equals(type))
+          return "" + expr.evalLong(null) + "L";
+        else if (Long.class.equals(type))
+          return "new java.lang.Long(" + expr.evalLong(null) + "L)";
+        else if (float.class.equals(type))
+          return "(float) " + expr.evalDouble(null);
+        else if (Float.class.equals(type))
+          return "new java.lang.Float((float) " + expr.evalDouble(null) + ")";
+        else if (double.class.equals(type)) {
+          double v = expr.evalDouble(null);
 
-	  if (Double.isNaN(v))
-	    return "Double.NaN";
-	  else
-	    return "" + v;
-	}
-	else if (Double.class.equals(type)) {
-	  double v = expr.evalDouble(null);
+          if (Double.isNaN(v))
+            return "Double.NaN";
+          else
+            return "" + v;
+        }
+        else if (Double.class.equals(type)) {
+          double v = expr.evalDouble(null);
 
-	  if (Double.isNaN(v))
-	    return "new Double(Double.NaN)";
-	  else
-	    return "new java.lang.Double(" + v + ")";
-	}
-	else if (char.class.equals(type))
-	  return "((char) " + (int) expr.evalCharacter(null) + ")";
-	else if (Character.class.equals(type)) {
-	  // jsp/18s0
-	  return "new Character((char) " + (int) expr.evalCharacter(null) + ")";
-	}
-	else if (String.class.equals(type))
-	  return "\"" + escapeJavaString(expr.evalString(null)) + "\"";
-	else if (BigInteger.class.equals(type)) {
-	  String v = expr.evalBigInteger(null).toString();
+          if (Double.isNaN(v))
+            return "new Double(Double.NaN)";
+          else
+            return "new java.lang.Double(" + v + ")";
+        }
+        else if (char.class.equals(type))
+          return "((char) " + (int) expr.evalCharacter(null) + ")";
+        else if (Character.class.equals(type)) {
+          // jsp/18s0
+          return "new Character((char) " + (int) expr.evalCharacter(null) + ")";
+        }
+        else if (String.class.equals(type))
+          return "\"" + escapeJavaString(expr.evalString(null)) + "\"";
+        else if (BigInteger.class.equals(type)) {
+          String v = expr.evalBigInteger(null).toString();
 
-	  // 18s3
-	  if (v.equals("") || v.equals("0"))
-	    return "java.math.BigInteger.ZERO";
-	  else
-	    return "new java.math.BigInteger(\"" + v + "\")";
-	}
-	else if (BigDecimal.class.equals(type)) {
-	  String v = expr.evalBigDecimal(null).toString();
+          // 18s3
+          if (v.equals("") || v.equals("0"))
+            return "java.math.BigInteger.ZERO";
+          else
+            return "new java.math.BigInteger(\"" + v + "\")";
+        }
+        else if (BigDecimal.class.equals(type)) {
+          String v = expr.evalBigDecimal(null).toString();
 
-	  // 18s4
-	  if (v.equals("") || v.equals("0.0"))
-	    return "java.math.BigDecimal.ZERO";
-	  else
-	    return "new java.math.BigDecimal(\"" + v + "\")";
-	}
-	else if (Object.class.equals(type)) {
-	  Object cValue = expr.evalObject(null);
+          // 18s4
+          if (v.equals("") || v.equals("0.0"))
+            return "java.math.BigDecimal.ZERO";
+          else
+            return "new java.math.BigDecimal(\"" + v + "\")";
+        }
+        else if (Object.class.equals(type)) {
+          Object cValue = expr.evalObject(null);
 
-	  String result = generateObject(cValue);
+          String result = generateObject(cValue);
 
-	  if (result != null)
-	    return result;
-	}
-	else {
-	  Object cValue = expr.evalObject(null);
+          if (result != null)
+            return result;
+        }
+        else {
+          Object cValue = expr.evalObject(null);
 
-	  // jsp/184t
-	  if ("".equals(cValue))
-	    return "null";
-	}
+          // jsp/184t
+          if ("".equals(cValue))
+            return "null";
+        }
       } catch (Throwable e) {
-	// jsp/18co
-	// exceptions are caught at runtime
-	log.log(Level.FINER, e.toString(), e);
-	
-	log.fine(e.getMessage());
+        // jsp/18co
+        // exceptions are caught at runtime
+        log.log(Level.FINER, e.toString(), e);
+
+        log.fine(e.getMessage());
       }
     }
     
@@ -1893,9 +1893,9 @@ public abstract class JspNode {
       double v = (Double) obj;
 
       if (Double.isNaN(v))
-	return "new java.lang.Double(Double.NaN)";
+        return "new java.lang.Double(Double.NaN)";
       else
-	return "new java.lang.Double(" + v + ")";
+        return "new java.lang.Double(" + v + ")";
     }
     else if (obj instanceof Boolean)
       return ((Boolean) obj).booleanValue() ? "java.lang.Boolean.TRUE" : "java.lang.Boolean.FALSE";

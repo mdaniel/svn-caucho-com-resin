@@ -74,7 +74,7 @@ class HtmlFormRenderer extends BaseRenderer
 
     if (log.isLoggable(Level.FINE) && value != null) {
       log.fine("JSF[" + context.getViewRoot().getViewId()
-	       + "] decoding form data for '" + clientId + "'");
+               + "] decoding form data for '" + clientId + "'");
     }
   }
   
@@ -298,17 +298,17 @@ class HtmlFormRenderer extends BaseRenderer
     }
 
     Set<String> params = findCommandLinkParamSet(context,
-						 component.getClientId(context),
-						 false);
+                                                 component.getClientId(context),
+                                                 false);
     if (params != null) {
       for (String param : params) {
-	out.startElement("input", component);
+        out.startElement("input", component);
 
-	out.writeAttribute("name", param, "name");
-	out.writeAttribute("id", param, "id");
-	out.writeAttribute("type", "hidden", "type");
-	
-	out.endElement("input");
+        out.writeAttribute("name", param, "name");
+        out.writeAttribute("id", param, "id");
+        out.writeAttribute("type", "hidden", "type");
+
+        out.endElement("input");
       }
     }
 
@@ -320,8 +320,8 @@ class HtmlFormRenderer extends BaseRenderer
   }
 
   static void addCommandLinkParam(FacesContext context,
-				  String formClientId,
-				  String name)
+                                  String formClientId,
+                                  String name)
   {
     findCommandLinkParamSet(context, formClientId, true).add(name);
   }
@@ -333,12 +333,12 @@ class HtmlFormRenderer extends BaseRenderer
   }
 
   private static Set<String> findCommandLinkParamSet(FacesContext context,
-						     String formClientId,
-						     boolean create)
+                                                     String formClientId,
+                                                     boolean create)
   {
     final String setKey = "com.caucho.jsf.html.form." +
-			  formClientId +
-			  ".commandLinkParams";
+                          formClientId +
+                          ".commandLinkParams";
     Map requestMap = context.getExternalContext().getRequestMap();
     Set<String> params = (Set<String>) requestMap.get(setKey);
     if (params == null && create) {
@@ -349,12 +349,12 @@ class HtmlFormRenderer extends BaseRenderer
   }
 
   private static Set<String> findCommandLinkHiddenFieldSet(FacesContext context,
-						     String formClientId,
-						     boolean create)
+                                                     String formClientId,
+                                                     boolean create)
   {
     final String setKey = "com.caucho.jsf.html.form." +
-			  formClientId +
-			  ".commandLinks";
+                          formClientId +
+                          ".commandLinks";
     Map requestMap = context.getExternalContext().getRequestMap();
     Set<String> links = (Set<String>) requestMap.get(setKey);
     if (links == null && create) {

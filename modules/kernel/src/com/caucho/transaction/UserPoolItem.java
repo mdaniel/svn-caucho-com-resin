@@ -297,9 +297,9 @@ class UserPoolItem {
    * Associates the UserPoolItem with a pool item
    */
   void associate(ManagedPoolItem poolItem,
-		 ManagedConnectionFactory mcf,
-		 Subject subject,
-		 ConnectionRequestInfo info)
+                 ManagedConnectionFactory mcf,
+                 Subject subject,
+                 ConnectionRequestInfo info)
   {
     if (_sharePoolItem != null)
       removeFromShareList();
@@ -312,20 +312,20 @@ class UserPoolItem {
 
     if (_transaction != null) {
       try {
-	_transaction.enlistResource(this);
+        _transaction.enlistResource(this);
       } catch (RollbackException e) {
-	removeFromShareList();
-	
-	poolItem.toIdle();
-	
-	throw new RuntimeException(e);
-      } catch (Throwable e) {
-	removeFromShareList();
+        removeFromShareList();
 
-	poolItem.setConnectionError();
-	poolItem.toIdle();
-	
-	throw new RuntimeException(e);
+        poolItem.toIdle();
+
+        throw new RuntimeException(e);
+      } catch (Throwable e) {
+        removeFromShareList();
+
+        poolItem.setConnectionError();
+        poolItem.toIdle();
+
+        throw new RuntimeException(e);
       }
     }
   }
@@ -338,7 +338,7 @@ class UserPoolItem {
   {
     if (_ownPoolItem == null) {
       UserPoolItem item
-	= _cm.allocatePoolConnection(_mcf, _subject, _info, this);
+        = _cm.allocatePoolConnection(_mcf, _subject, _info, this);
 
       assert(item == this);
       
@@ -401,12 +401,12 @@ class UserPoolItem {
       _shareNext = null;
 
       if (prev != null)
-	prev._shareNext = next;
+        prev._shareNext = next;
       else
-	poolItem._shareHead = next;
+        poolItem._shareHead = next;
 
       if (next != null)
-	next._sharePrev = prev;
+        next._sharePrev = prev;
     }
   }
 
@@ -425,7 +425,7 @@ class UserPoolItem {
       _shareNext = poolItem._shareHead;
 
       if (poolItem._shareHead != null)
-	poolItem._shareHead._sharePrev = this;
+        poolItem._shareHead._sharePrev = this;
 
       poolItem._shareHead = this;
     }

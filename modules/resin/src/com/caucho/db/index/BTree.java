@@ -106,9 +106,9 @@ public final class BTree {
    * @param store the underlying store containing the btree.
    */
   public BTree(BlockStore store,
-	       long rootBlockId,
-	       int keySize,
-	       KeyCompare keyCompare)
+               long rootBlockId,
+               int keySize,
+               KeyCompare keyCompare)
     throws IOException
   {
     if (keyCompare == null)
@@ -159,17 +159,17 @@ public final class BTree {
   }
   
   public long lookup(byte []keyBuffer,
-		     int keyOffset,
-		     int keyLength)
+                     int keyOffset,
+                     int keyLength)
     throws IOException, SQLException
   {
     return lookup(keyBuffer, keyOffset, keyLength, _rootBlockId);
   }
   
   private long lookup(byte []keyBuffer,
-		     int keyOffset,
-		     int keyLength,
-		     long blockId)
+                     int keyOffset,
+                     int keyLength,
+                     long blockId)
     throws IOException, SQLException
   {
     Block block;
@@ -191,18 +191,18 @@ public final class BTree {
         
         block.read();
         
-	byte []buffer = block.getBuffer();
+        byte []buffer = block.getBuffer();
 
-	boolean isLeaf = isLeaf(buffer, block);
+        boolean isLeaf = isLeaf(buffer, block);
       
-	long value = lookupTuple(blockId, buffer,
-				 keyBuffer, keyOffset, keyLength,
-				 isLeaf);
+        long value = lookupTuple(blockId, buffer,
+                                 keyBuffer, keyOffset, keyLength,
+                                 isLeaf);
 
-	if (isLeaf || value == FAIL)
-	  return value;
-	else
-	  return lookup(keyBuffer, keyOffset, keyLength, value);
+        if (isLeaf || value == FAIL)
+          return value;
+        else
+          return lookup(keyBuffer, keyOffset, keyLength, value);
       } finally {
         blockLock.unlockRead();
       }
@@ -217,17 +217,17 @@ public final class BTree {
    * @return false if the block needs to be split
    */
   public void insert(byte []keyBuffer,
-		     int keyOffset,
-		     int keyLength,
-		     long value,
-		     boolean isOverride)
+                     int keyOffset,
+                     int keyLength,
+                     long value,
+                     boolean isOverride)
     throws SQLException
   {
     try {
       while (! insert(keyBuffer, keyOffset, keyLength,
-		      value, isOverride, true,
-		      _rootBlockId)) {
-	splitRoot(_rootBlockId);
+                      value, isOverride, true,
+                      _rootBlockId)) {
+        splitRoot(_rootBlockId);
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -242,12 +242,12 @@ public final class BTree {
    * @return false if the block needs to be split
    */
   private boolean insert(byte []keyBuffer,
-			 int keyOffset,
-			 int keyLength,
-			 long value,
-			 boolean isOverride,
+                         int keyOffset,
+                         int keyLength,
+                         long value,
+                         boolean isOverride,
                          boolean isRead,
-			 long blockId)
+                         long blockId)
     throws IOException, SQLException
   {
     Block block;
@@ -298,7 +298,7 @@ public final class BTree {
         // return false if the block needs to be split
         return false;
       }
-	
+
       if (isLeaf(buffer, block)) {
         return false;
       }
@@ -340,7 +340,7 @@ public final class BTree {
         // return false if the block needs to be split
         return false;
       }
-	
+
       if (isLeaf(buffer, block)) {
         insertValue(keyBuffer, keyOffset, keyLength,
                     value, isOverride, block);
@@ -376,11 +376,11 @@ public final class BTree {
    * Inserts into the next block given the current block and the given key.
    */
   private void insertValue(byte []keyBuffer,
-			   int keyOffset,
-			   int keyLength,
-			   long value,
-			   boolean isOverride,
-			   Block block)
+                           int keyOffset,
+                           int keyLength,
+                           long value,
+                           boolean isOverride,
+                           Block block)
     throws IOException, SQLException
   {
     byte []buffer = block.getBuffer();
@@ -402,7 +402,7 @@ public final class BTree {
                                int keyOffset,
                                int keyLength,
                                long value,
-			       boolean isOverride)
+                               boolean isOverride)
     throws IOException, SQLException
   {
     int tupleSize = _tupleSize;
@@ -419,18 +419,18 @@ public final class BTree {
       offset = HEADER_SIZE + i * tupleSize;
     
       int cmp = _keyCompare.compare(keyBuffer, keyOffset,
-				    buffer, offset + PTR_SIZE,
-				    keyLength);
+                                    buffer, offset + PTR_SIZE,
+                                    keyLength);
 
       if (cmp == 0) {
-	if (! isOverride) {
-	  long oldValue = getPointer(buffer, offset);
+        if (! isOverride) {
+          long oldValue = getPointer(buffer, offset);
 
-	  if (value != oldValue)
-	    throw new SqlIndexAlreadyExistsException(L.l("'{0}' insert of key '{1}' fails index uniqueness.",
-				       _store,
-				       _keyCompare.toString(keyBuffer, keyOffset, keyLength)));
-	}
+          if (value != oldValue)
+            throw new SqlIndexAlreadyExistsException(L.l("'{0}' insert of key '{1}' fails index uniqueness.",
+                                       _store,
+                                       _keyCompare.toString(keyBuffer, keyOffset, keyLength)));
+        }
 
         setPointer(buffer, offset, value);
         //writeBlock(blockIndex, block);
@@ -438,10 +438,10 @@ public final class BTree {
         return 0;
       }
       else if (0 < cmp) {
-	min = i + 1;
+        min = i + 1;
       }
       else if (cmp < 0) {
-	max = i;
+        max = i;
       }
     }
 
@@ -449,7 +449,7 @@ public final class BTree {
       offset = HEADER_SIZE + min * tupleSize;
       
       return addKey(blockId, buffer, offset, min, length,
-		    keyBuffer, keyOffset, keyLength, value);
+                    keyBuffer, keyOffset, keyLength, value);
     }
     else {
       throw new IllegalStateException("ran out of key space");
@@ -459,7 +459,7 @@ public final class BTree {
   }
 
   private long addKey(long blockId, byte []buffer, int offset,
-		      int index, int length,
+                      int index, int length,
                       byte []keyBuffer, int keyOffset, int keyLength,
                       long value)
     throws IOException
@@ -468,7 +468,7 @@ public final class BTree {
 
     if (index < length) {
       if (offset + tupleSize < HEADER_SIZE)
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       
       System.arraycopy(buffer, offset,
                        buffer, offset + tupleSize,
@@ -485,8 +485,8 @@ public final class BTree {
       throw new IllegalStateException();
       
     System.arraycopy(keyBuffer, keyOffset,
-		     buffer, offset + PTR_SIZE,
-		     keyLength);
+                     buffer, offset + PTR_SIZE,
+                     keyLength);
           
     for (int j = PTR_SIZE + keyLength; j < tupleSize; j++)
       buffer[offset + j] = 0;
@@ -500,7 +500,7 @@ public final class BTree {
    * parent must already be locked
    */
   private void split(Block parent,
-		     long blockId)
+                     long blockId)
     throws IOException, SQLException
   {
     Block block = _store.readBlock(blockId);
@@ -510,7 +510,7 @@ public final class BTree {
         
       Lock blockLock = block.getLock();
       blockLock.lockReadAndWrite(_timeout);
-	
+
       try {
         split(parent, block);
 
@@ -527,7 +527,7 @@ public final class BTree {
    * The length in lBuf is assumed to be the length of the buffer.
    */
   private void split(Block parentBlock,
-		     Block block)
+                     Block block)
     throws IOException, SQLException
   {
     long parentId = parentBlock.getBlockId();
@@ -548,7 +548,7 @@ public final class BTree {
 
     if (length < 2)
       throw new IllegalStateException(L.l("illegal length '{0}' for block {1}",
-					  length, debugId(blockId)));
+                                          length, debugId(blockId)));
       
     Block leftBlock = null;
 
@@ -576,8 +576,8 @@ public final class BTree {
       int blockEnd = HEADER_SIZE + length * _tupleSize;
       
       System.arraycopy(buffer, HEADER_SIZE,
-		       leftBuffer, HEADER_SIZE,
-		       pivotSize);
+                       leftBuffer, HEADER_SIZE,
+                       pivotSize);
 
       setInt(leftBuffer, FLAGS_OFFSET, getInt(buffer, FLAGS_OFFSET));
       setLength(leftBuffer, pivot);
@@ -587,15 +587,15 @@ public final class BTree {
       setPointer(leftBuffer, PARENT_OFFSET, parentId);
 
       System.arraycopy(buffer, pivotEnd,
-		       buffer, HEADER_SIZE,
-		       blockEnd - pivotEnd);
+                       buffer, HEADER_SIZE,
+                       blockEnd - pivotEnd);
 
       setLength(buffer, length - pivot);
 
       insertLeafBlock(parentId, parentBuffer,
-		      leftBuffer, pivotEnd - _tupleSize + PTR_SIZE, _keySize,
-		      leftBlockId,
-		      true);
+                      leftBuffer, pivotEnd - _tupleSize + PTR_SIZE, _keySize,
+                      leftBlockId,
+                      true);
       
       validate(parentId, parentBuffer);
       validate(leftBlockId, leftBuffer);
@@ -609,7 +609,7 @@ public final class BTree {
       parentBlock.setDirty(0, BlockStore.BLOCK_SIZE);
     } finally {
       if (leftBlock != null)
-	leftBlock.free();
+        leftBlock.free();
       
       block.setDirty(0, BlockStore.BLOCK_SIZE);
     }
@@ -629,11 +629,11 @@ public final class BTree {
       rootLock.lockReadAndWrite(_timeout);
       
       try {
-	splitRoot(rootBlock);
+        splitRoot(rootBlock);
 
         validate(rootBlock);
       } finally {
-	rootLock.unlockReadAndWrite();
+        rootLock.unlockReadAndWrite();
       }
     } finally {
       rootBlock.free();
@@ -683,7 +683,7 @@ public final class BTree {
       //                    + " PIVOT=" + pivot);
 
       if (length <= 2 || _n < length || pivot < 1 || length <= pivot)
-	throw new IllegalStateException(Long.toHexString(parentBlock.getBlockId()) + ": " + length + " is an illegal length, or pivot " + pivot + " is bad, with n=" + _n);
+        throw new IllegalStateException(Long.toHexString(parentBlock.getBlockId()) + ": " + length + " is an illegal length, or pivot " + pivot + " is bad, with n=" + _n);
 
       int pivotOffset = HEADER_SIZE + pivot * _tupleSize;
       long pivotValue = getPointer(parentBuffer, pivotOffset);
@@ -691,8 +691,8 @@ public final class BTree {
       byte []leftBuffer = leftBlock.getBuffer();
 
       System.arraycopy(parentBuffer, HEADER_SIZE,
-		       leftBuffer, HEADER_SIZE,
-		       pivotOffset + _tupleSize - HEADER_SIZE);
+                       leftBuffer, HEADER_SIZE,
+                       pivotOffset + _tupleSize - HEADER_SIZE);
       setInt(leftBuffer, FLAGS_OFFSET, parentFlags);
       setLength(leftBuffer, pivot + 1);
       setPointer(leftBuffer, PARENT_OFFSET, parentId);
@@ -701,21 +701,21 @@ public final class BTree {
       byte []rightBuffer = rightBlock.getBuffer();
 
       if (length - pivot - 1 < 0)
-	throw new IllegalStateException("illegal length " + pivot + " " + length);
+        throw new IllegalStateException("illegal length " + pivot + " " + length);
 
       System.arraycopy(parentBuffer, pivotOffset + _tupleSize,
-		       rightBuffer, HEADER_SIZE,
-		       (length - pivot - 1) * _tupleSize);
+                       rightBuffer, HEADER_SIZE,
+                       (length - pivot - 1) * _tupleSize);
 
       setInt(rightBuffer, FLAGS_OFFSET, parentFlags);
       setLength(rightBuffer, length - pivot - 1);
       setPointer(rightBuffer, PARENT_OFFSET, parentId);
       setPointer(rightBuffer, NEXT_OFFSET,
-		 getPointer(parentBuffer, NEXT_OFFSET));
+                 getPointer(parentBuffer, NEXT_OFFSET));
 
       System.arraycopy(parentBuffer, pivotOffset,
-		       parentBuffer, HEADER_SIZE,
-		       _tupleSize);
+                       parentBuffer, HEADER_SIZE,
+                       _tupleSize);
       setPointer(parentBuffer, HEADER_SIZE, leftBlockId);
 
       setLeaf(parentBuffer, false);
@@ -731,16 +731,16 @@ public final class BTree {
       validate(rightBlock);
     } finally {
       if (leftBlock != null)
-	leftBlock.free();
+        leftBlock.free();
       
       if (rightBlock != null)
-	rightBlock.free();
+        rightBlock.free();
     }
   }
   
   public void remove(byte []keyBuffer,
-		      int keyOffset,
-		      int keyLength)
+                      int keyOffset,
+                      int keyLength)
     throws SQLException
   {
     try {
@@ -752,7 +752,7 @@ public final class BTree {
           removeWrite(rootBlock, keyBuffer, keyOffset, keyLength);
         }
       } finally {
-	rootBlock.free();
+        rootBlock.free();
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e.toString(), e);
@@ -783,7 +783,7 @@ public final class BTree {
         return false;
       
       long childId;
-	
+
       childId = lookupTuple(blockId, buffer,
                             keyBuffer, keyOffset, keyLength,
                             false);
@@ -838,7 +838,7 @@ public final class BTree {
       }
       else {
         long childId;
-	
+
         childId = lookupTuple(blockId, buffer,
                               keyBuffer, keyOffset, keyLength,
                               isLeaf);
@@ -892,7 +892,7 @@ public final class BTree {
    * @return true if the block should be deleted/freed
    */
   private boolean joinBlocks(Block parent,
-			     Block block)
+                             Block block)
     throws IOException, SQLException
   {
     long parentBlockId = parent.getBlockId();
@@ -912,24 +912,24 @@ public final class BTree {
 
       try {
         byte []leftBuffer = leftBlock.getBuffer();
-	
+
         Lock leftLock = leftBlock.getLock();
         leftLock.lockReadAndWrite(_timeout);
-	  
+
         try {
           int leftLength = getLength(leftBuffer);
 
           Lock blockLock = block.getLock();
           blockLock.lockReadAndWrite(_timeout);
-	    
+
           try {
             if (_minN < leftLength) {
               validateEqualLeaf(buffer, leftBuffer, block, leftBlock);
               
               parent.setFlushDirtyOnCommit(false);
-	    
+
               leftBlock.setFlushDirtyOnCommit(false);
-	  
+
               validate(parentBlockId, parentBuffer);
               validate(leftBlockId, leftBuffer);
               validate(blockId, buffer);
@@ -963,14 +963,14 @@ public final class BTree {
 
       try {
         byte []rightBuffer = rightBlock.getBuffer();
-	
+
         Lock blockLock = block.getLock();
         blockLock.lockReadAndWrite(_timeout);
 
         try {
           Lock rightLock = rightBlock.getLock();
           rightLock.lockReadAndWrite(_timeout);
-	      
+
           try {
             int rightLength = getLength(rightBuffer);
 
@@ -978,11 +978,11 @@ public final class BTree {
               validateEqualLeaf(buffer, rightBuffer, block, rightBlock);
               
               parent.setFlushDirtyOnCommit(false);
-	    
+
               rightBlock.setFlushDirtyOnCommit(false);
 
               // System.out.println("MOVE_FROM_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
-	    
+
               moveFromRight(parentBuffer, buffer, rightBuffer, blockId);
               validate(parentBlockId, parentBuffer);
               validate(blockId, buffer);
@@ -1013,28 +1013,28 @@ public final class BTree {
       
       try {
         byte []leftBuffer = leftBlock.getBuffer();
-	  
+
         Lock leftLock = leftBlock.getLock();
         leftLock.lockReadAndWrite(_timeout);
 
         try {
           int leftLength = getLength(leftBuffer);
-	    
+
           Lock blockLock = block.getLock();
           blockLock.lockReadAndWrite(_timeout);
 
           try {
             int length = getLength(buffer);
-	      
+
             if (length + leftLength <= _n) {
               validateEqualLeaf(leftBuffer, buffer, leftBlock, block);
               
               parent.setFlushDirtyOnCommit(false);
-	  
+
               leftBlock.setFlushDirtyOnCommit(false);
       
               // System.out.println("MERGE_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
-	    
+
               mergeLeft(parentBuffer,
                         leftBuffer, leftBlockId,
                         buffer, blockId);
@@ -1077,16 +1077,16 @@ public final class BTree {
           try {
             int length = getLength(buffer);
             int rightLength = getLength(rightBuffer);
-	      
+
             if (length + rightLength <= _n) {
               validateEqualLeaf(rightBuffer, buffer, rightBlock, block);
 
               rightBlock.setFlushDirtyOnCommit(false);
-	  
+
               parent.setFlushDirtyOnCommit(false);
-	  
+
               // System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
-	    
+
               validate(blockId, buffer);
               validate(parentBlockId, parentBuffer);
               validate(rightBlockId, rightBuffer);
@@ -1154,11 +1154,11 @@ public final class BTree {
       long pointer = getPointer(buffer, offset);
 
       if (pointer == blockId) {
-	if (HEADER_SIZE < offset) {
-	  return getPointer(buffer, offset - tupleSize);
-	}
-	else
-	  return -1;
+        if (HEADER_SIZE < offset) {
+          return getPointer(buffer, offset - tupleSize);
+        }
+        else
+          return -1;
       }
     }
     
@@ -1180,9 +1180,9 @@ public final class BTree {
    * @param index the index of the block
    */
   private void moveFromLeft(byte []parentBuffer,
-			    byte []leftBuffer,
-			    byte []buffer,
-			    long blockId)
+                            byte []leftBuffer,
+                            byte []buffer,
+                            long blockId)
   {
     int parentLength = getLength(parentBuffer);
 
@@ -1204,14 +1204,14 @@ public final class BTree {
     }
     else {
       for (parentOffset = HEADER_SIZE + tupleSize;
-	   parentOffset < parentEnd;
-	   parentOffset += tupleSize) {
-	long pointer = getPointer(parentBuffer, parentOffset);
+           parentOffset < parentEnd;
+           parentOffset += tupleSize) {
+        long pointer = getPointer(parentBuffer, parentOffset);
 
-	if (pointer == blockId) {
-	  parentLeftOffset = parentOffset - tupleSize;
-	  break;
-	}
+        if (pointer == blockId) {
+          parentLeftOffset = parentOffset - tupleSize;
+          break;
+        }
       }
     }
 
@@ -1222,15 +1222,15 @@ public final class BTree {
 
     // shift the data in the buffer
     System.arraycopy(buffer, HEADER_SIZE,
-		     buffer, HEADER_SIZE + tupleSize,
-		     length * tupleSize);
+                     buffer, HEADER_SIZE + tupleSize,
+                     length * tupleSize);
 
     int leftEnd = HEADER_SIZE + leftLength * tupleSize;
     
     // copy the last item in the left to the buffer
     System.arraycopy(leftBuffer, leftEnd - tupleSize,
-		     buffer, HEADER_SIZE,
-		     tupleSize);
+                     buffer, HEADER_SIZE,
+                     tupleSize);
 
     // add the buffer length
     setLength(buffer, length + 1);
@@ -1243,8 +1243,8 @@ public final class BTree {
 
     // copy the key from the new left tail to the left item
     System.arraycopy(leftBuffer, leftEnd - tupleSize + PTR_SIZE,
-		     parentBuffer, parentLeftOffset + PTR_SIZE,
-		     tupleSize - PTR_SIZE);
+                     parentBuffer, parentLeftOffset + PTR_SIZE,
+                     tupleSize - PTR_SIZE);
   }
 
   /**
@@ -1259,10 +1259,10 @@ public final class BTree {
    * </pre>
    */
   private void mergeLeft(byte []parentBuffer,
-			 byte []leftBuffer,
+                         byte []leftBuffer,
                          long leftBlockId,
-			 byte []buffer,
-			 long blockId)
+                         byte []buffer,
+                         long blockId)
   {
     if (isLeaf(leftBuffer) != isLeaf(buffer)) {
       throw new IllegalStateException("leaf does not match "
@@ -1284,33 +1284,33 @@ public final class BTree {
     int blockSize = blockLength * tupleSize;
 
     for (parentOffset += tupleSize;
-	 parentOffset < parentEnd;
-	 parentOffset += tupleSize) {
+         parentOffset < parentEnd;
+         parentOffset += tupleSize) {
       long pointer = getPointer(parentBuffer, parentOffset);
 
       if (pointer == blockId) {
-	// shift the parent buffer to replace the left item with the
+        // shift the parent buffer to replace the left item with the
         // current item (replacing the key)
-	System.arraycopy(parentBuffer, parentOffset,
-			 parentBuffer, parentOffset - tupleSize,
-			 parentEnd - parentOffset);
+        System.arraycopy(parentBuffer, parentOffset,
+                         parentBuffer, parentOffset - tupleSize,
+                         parentEnd - parentOffset);
         
         // set the parent's pointer to the left block id
         setPointer(parentBuffer, parentOffset - tupleSize, leftBlockId);
-	setLength(parentBuffer, parentLength - 1);
+        setLength(parentBuffer, parentLength - 1);
 
-	// the new left.next value is the buffer's next value
-	setPointer(leftBuffer, NEXT_OFFSET,
-		   getPointer(buffer, NEXT_OFFSET));
+        // the new left.next value is the buffer's next value
+        setPointer(leftBuffer, NEXT_OFFSET,
+                   getPointer(buffer, NEXT_OFFSET));
 
-	// append the buffer to the left buffer
-	System.arraycopy(buffer, HEADER_SIZE,
-			 leftBuffer, leftEnd,
-			 blockSize);
+        // append the buffer to the left buffer
+        System.arraycopy(buffer, HEADER_SIZE,
+                         leftBuffer, leftEnd,
+                         blockSize);
 
-	setLength(leftBuffer, leftLength + blockLength);
+        setLength(leftBuffer, leftLength + blockLength);
 
-	return;
+        return;
       }
     }
 
@@ -1327,12 +1327,12 @@ public final class BTree {
 
     // the new left.next value is the buffer's next value
     setPointer(leftBuffer, NEXT_OFFSET,
-	       getPointer(buffer, NEXT_OFFSET));
+               getPointer(buffer, NEXT_OFFSET));
 
     // append the buffer to the left buffer
     System.arraycopy(buffer, HEADER_SIZE,
-		     leftBuffer, leftEnd,
-		     blockSize);
+                     leftBuffer, leftEnd,
+                     blockSize);
 
     setLength(leftBuffer, leftLength + blockLength);
   }
@@ -1354,11 +1354,11 @@ public final class BTree {
       long pointer = getPointer(buffer, offset);
 
       if (pointer == blockId) {
-	if (offset + tupleSize < end) {
-	  return getPointer(buffer, offset + tupleSize);
-	}
-	else
-	  return getPointer(buffer, NEXT_OFFSET);
+        if (offset + tupleSize < end) {
+          return getPointer(buffer, offset + tupleSize);
+        }
+        else
+          return getPointer(buffer, NEXT_OFFSET);
       }
     }
 
@@ -1375,9 +1375,9 @@ public final class BTree {
    * @param index the index of the block
    */
   private void moveFromRight(byte []parentBuffer,
-			     byte []buffer,
-			     byte []rightBuffer,
-			     long blockId)
+                             byte []buffer,
+                             byte []rightBuffer,
+                             long blockId)
   {
     int parentLength = getLength(parentBuffer);
 
@@ -1392,12 +1392,12 @@ public final class BTree {
     int blockEnd = HEADER_SIZE + blockLength * tupleSize;
 
     for (parentOffset = HEADER_SIZE;
-	 parentOffset < parentEnd;
-	 parentOffset += tupleSize) {
+         parentOffset < parentEnd;
+         parentOffset += tupleSize) {
       long pointer = getPointer(parentBuffer, parentOffset);
 
       if (pointer == blockId)
-	break;
+        break;
     }
 
     if (parentEnd <= parentOffset) {
@@ -1407,24 +1407,24 @@ public final class BTree {
 
     // copy the first item in the right to the buffer
     System.arraycopy(rightBuffer, HEADER_SIZE,
-		     buffer, blockEnd,
-		     tupleSize);
+                     buffer, blockEnd,
+                     tupleSize);
 
     // add the buffer length
     setLength(buffer, blockLength + 1);
 
     // shift the data in the right buffer
     System.arraycopy(rightBuffer, HEADER_SIZE + tupleSize,
-		     rightBuffer, HEADER_SIZE,
-		     rightSize - tupleSize);
+                     rightBuffer, HEADER_SIZE,
+                     rightSize - tupleSize);
 
     // subtract from the right length
     setLength(rightBuffer, rightLength - 1);
 
     // copy the entry from the new buffer tail to the buffer's parent entry
     System.arraycopy(buffer, blockEnd + PTR_SIZE,
-		     parentBuffer, parentOffset + PTR_SIZE,
-		     tupleSize - PTR_SIZE);
+                     parentBuffer, parentOffset + PTR_SIZE,
+                     tupleSize - PTR_SIZE);
   }
 
   /**
@@ -1439,9 +1439,9 @@ public final class BTree {
    * </pre>
    */
   private void mergeRight(byte []parentBuffer,
-			  byte []buffer,
-			  byte []rightBuffer,
-			  long blockId)
+                          byte []buffer,
+                          byte []rightBuffer,
+                          long blockId)
   {
     if (isLeaf(buffer) != isLeaf(rightBuffer)) {
       throw new IllegalStateException("leaf does not match "
@@ -1463,31 +1463,31 @@ public final class BTree {
     int blockSize = blockLength * tupleSize;
 
     for (parentOffset = HEADER_SIZE;
-	 parentOffset < parentEnd;
-	 parentOffset += tupleSize) {
+         parentOffset < parentEnd;
+         parentOffset += tupleSize) {
       long pointer = getPointer(parentBuffer, parentOffset);
 
       if (pointer == blockId) {
-	// remove the buffer's pointer from the parent
-	System.arraycopy(parentBuffer, parentOffset + tupleSize,
-			 parentBuffer, parentOffset,
-			 parentEnd - parentOffset - tupleSize);
+        // remove the buffer's pointer from the parent
+        System.arraycopy(parentBuffer, parentOffset + tupleSize,
+                         parentBuffer, parentOffset,
+                         parentEnd - parentOffset - tupleSize);
 
-	setLength(parentBuffer, parentLength - 1);
+        setLength(parentBuffer, parentLength - 1);
         
-	// add space in the right buffer
-	System.arraycopy(rightBuffer, HEADER_SIZE,
-			 rightBuffer, HEADER_SIZE + blockSize,
-			 rightSize);
-	
-	// add the buffer to the right buffer
-	System.arraycopy(buffer, HEADER_SIZE,
-			 rightBuffer, HEADER_SIZE,
-			 blockSize);
+        // add space in the right buffer
+        System.arraycopy(rightBuffer, HEADER_SIZE,
+                         rightBuffer, HEADER_SIZE + blockSize,
+                         rightSize);
 
-	setLength(rightBuffer, blockLength + rightLength);
+        // add the buffer to the right buffer
+        System.arraycopy(buffer, HEADER_SIZE,
+                         rightBuffer, HEADER_SIZE,
+                         blockSize);
 
-	return;
+        setLength(rightBuffer, blockLength + rightLength);
+
+        return;
       }
     }
 
@@ -1498,11 +1498,11 @@ public final class BTree {
    * Looks up the next block given the current block and the given key.
    */
   private long lookupTuple(long blockId,
-			   byte []buffer,
+                           byte []buffer,
                            byte []keyBuffer,
                            int keyOffset,
                            int keyLength,
-			   boolean isLeaf)
+                           boolean isLeaf)
     throws IOException
   {
     int length = getLength(buffer);
@@ -1519,49 +1519,49 @@ public final class BTree {
       int newOffset = offset + delta;
 
       if (newOffset < 0) {
-	System.out.println("UNDERFLOW: " + debugId(blockId)  + " LENGTH:" + length + " STU:" + getLength(buffer) + " DELTA:" + delta);
-	throw new IllegalStateException("lookupTuple underflow newOffset:" + newOffset);
-			   
+        System.out.println("UNDERFLOW: " + debugId(blockId)  + " LENGTH:" + length + " STU:" + getLength(buffer) + " DELTA:" + delta);
+        throw new IllegalStateException("lookupTuple underflow newOffset:" + newOffset);
+
       }
       else if (newOffset > 65536) {
-	System.out.println("OVERFLOW: " + debugId(blockId)  + " LENGTH:" + length + " STU:" + getLength(buffer) + " DELTA:" + delta);
-	throw new IllegalStateException("lookupTuple overflow newOffset:" + newOffset);
-			   
+        System.out.println("OVERFLOW: " + debugId(blockId)  + " LENGTH:" + length + " STU:" + getLength(buffer) + " DELTA:" + delta);
+        throw new IllegalStateException("lookupTuple overflow newOffset:" + newOffset);
+
       }
 
       int cmp = _keyCompare.compare(keyBuffer, keyOffset,
-				    buffer, PTR_SIZE + newOffset, keyLength);
+                                    buffer, PTR_SIZE + newOffset, keyLength);
       
       if (cmp == 0) {
         value = getPointer(buffer, newOffset);
 
-	if (value == 0 && ! isLeaf)
-	  throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
+        if (value == 0 && ! isLeaf)
+          throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
 
-	return value;
+        return value;
       }
       else if (cmp > 0) {
         offset = newOffset + tupleSize;
-	length = (tail - offset) / tupleSize;
+        length = (tail - offset) / tupleSize;
       }
       else if (cmp < 0) {
-	length = length / 2;
+        length = length / 2;
       }
 
       if (length > 0) {
       }
       else if (isLeaf)
-	return 0;
+        return 0;
       else if (cmp < 0) {
-	value = getPointer(buffer, newOffset);
+        value = getPointer(buffer, newOffset);
 
-	if (value == 0 && ! isLeaf)
-	  throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
+        if (value == 0 && ! isLeaf)
+          throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
 
-	return value;
+        return value;
       }
       else if (offset == end) {
-	value = getPointer(buffer, NEXT_OFFSET);
+        value = getPointer(buffer, NEXT_OFFSET);
 
         if (value != 0 || isLeaf)
           return value;
@@ -1569,19 +1569,19 @@ public final class BTree {
           return getPointer(buffer, end - tupleSize);
         
         /*
-	if (value == 0 && ! isLeaf)
-	  throw new IllegalStateException("illegal 0 value at end=" + newOffset + " for block " + debugId(blockId) + " tuple=" + _tupleSize);
+        if (value == 0 && ! isLeaf)
+          throw new IllegalStateException("illegal 0 value at end=" + newOffset + " for block " + debugId(blockId) + " tuple=" + _tupleSize);
 
-	return value;
+        return value;
         */
       }
       else {
-	value = getPointer(buffer, offset);
+        value = getPointer(buffer, offset);
 
-	if (value == 0 && ! isLeaf)
-	  throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
+        if (value == 0 && ! isLeaf)
+          throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
 
-	return value;
+        return value;
       }
     }
 
@@ -1591,7 +1591,7 @@ public final class BTree {
       value = getPointer(buffer, NEXT_OFFSET);
 
       if (value == 0 && ! isLeaf)
-	throw new IllegalStateException("illegal 0 value at NEXT_OFFSET for block " + debugId(blockId));
+        throw new IllegalStateException("illegal 0 value at NEXT_OFFSET for block " + debugId(blockId));
 
       return value;
     }
@@ -1613,26 +1613,26 @@ public final class BTree {
 
     for (int i = 0; i < length; i++) {
       int cmp = _keyCompare.compare(keyBuffer, keyOffset,
-				    buffer, offset + PTR_SIZE,
-				    keyLength);
+                                    buffer, offset + PTR_SIZE,
+                                    keyLength);
       
       if (0 < cmp) {
         offset += tupleSize;
         continue;
       }
       else if (cmp == 0) {
-	int blockEnd = HEADER_SIZE + length * tupleSize;
+        int blockEnd = HEADER_SIZE + length * tupleSize;
 
-	if (offset + tupleSize < blockEnd) {
-	  if (offset < HEADER_SIZE)
-	    throw new IllegalStateException();
-	  
-	  System.arraycopy(buffer, offset + tupleSize,
-			   buffer, offset,
-			   blockEnd - offset - tupleSize);
-	}
+        if (offset + tupleSize < blockEnd) {
+          if (offset < HEADER_SIZE)
+            throw new IllegalStateException();
 
-	setLength(buffer, length - 1);
+          System.arraycopy(buffer, offset + tupleSize,
+                           buffer, offset,
+                           blockEnd - offset - tupleSize);
+        }
+
+        setLength(buffer, length - 1);
         
         return i;
       }
@@ -1822,7 +1822,7 @@ public final class BTree {
   {
     synchronized (this) {
       if (_isStarted)
-	return;
+        return;
 
       _isStarted = true;
     }
@@ -1852,8 +1852,8 @@ public final class BTree {
     ArrayList<String> keys = new ArrayList<String>();
     for (int i = 0; i < length; i++) {
       keys.add(_keyCompare.toString(buffer,
-				    offset + i * tupleSize + PTR_SIZE,
-				    tupleSize - PTR_SIZE));
+                                    offset + i * tupleSize + PTR_SIZE,
+                                    tupleSize - PTR_SIZE));
     }
 
     block.free();
@@ -1931,6 +1931,6 @@ public final class BTree {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _store + "," + (_rootBlockId / BLOCK_SIZE) + "]");
+            + "[" + _store + "," + (_rootBlockId / BLOCK_SIZE) + "]");
   }
 }

@@ -104,7 +104,7 @@ public class XslValueOf extends XslNode {
     }
     else if (_disableOutputEscaping != null)
       throw error(L.l("'{0}' is an unknown value for disable-output-escaping.  'yes' and 'no' are the valid values.",
-		      _disableOutputEscaping));
+                      _disableOutputEscaping));
       
     printStringExpr(out, _select);
 

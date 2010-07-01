@@ -61,8 +61,8 @@ public class ConfigPropertiesResolver extends AbstractVariableResolver {
    */
   @Override
   public Object getValue(ELContext env,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     String var;
     

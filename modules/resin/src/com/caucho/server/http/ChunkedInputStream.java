@@ -65,7 +65,7 @@ class ChunkedInputStream extends StreamImpl {
     // The chunk still has more data left
     if (_available > 0) {
       if (_available < len)
-	len = _available;
+        len = _available;
 
       len = _next.read(buf, offset, len);
 
@@ -78,18 +78,18 @@ class ChunkedInputStream extends StreamImpl {
 
       // the new chunk has data
       if (_available > 0) {
-	if (_available < len)
-	  len = _available;
+        if (_available < len)
+          len = _available;
 
-	len = _next.read(buf, offset, len);
+        len = _next.read(buf, offset, len);
 
-	if (len > 0)
-	  _available -= len;
+        if (len > 0)
+          _available -= len;
       }
       // the new chunk is the last
       else {
-	_available = -1;
-	len = -1;
+        _available = -1;
+        len = -1;
       }
     }
     else
@@ -111,37 +111,37 @@ class ChunkedInputStream extends StreamImpl {
 
     // skip whitespace
     for (ch = is.read();
-	 ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
-	 ch = is.read()) {
+         ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
+         ch = is.read()) {
     }
 
     // XXX: This doesn't properly handle the case when when the browser
     // sends headers at the end of the data.  See the HTTP/1.1 spec.
     for (; ch > 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
       if ('0' <= ch && ch <= '9')
-	length = 16 * length + ch - '0';
+        length = 16 * length + ch - '0';
       else if ('a' <= ch && ch <= 'f')
-	length = 16 * length + ch - 'a' + 10;
+        length = 16 * length + ch - 'a' + 10;
       else if ('A' <= ch && ch <= 'F')
-	length = 16 * length + ch - 'A' + 10;
+        length = 16 * length + ch - 'A' + 10;
       else if (ch == ' ' || ch == '\t') {
-	//if (dbg.canWrite())
-	//  dbg.println("unexpected chunk whitespace.");
+        //if (dbg.canWrite())
+        //  dbg.println("unexpected chunk whitespace.");
       }
       else {
-	StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-	sb.append((char) ch);
-	for (int ch1 = is.read();
-	     ch1 >= 0 && ch1 != '\r' && ch1 != '\n';
-	     ch1 = is.read()) {
-	  sb.append((char) ch1);
-	}
-	
-	throw new IOException("HTTP/1.1 protocol error: bad chunk at"
-			      + " '" + sb + "'"
-			      + " 0x" + Integer.toHexString(ch)
-			      + " length=" + length);
+        sb.append((char) ch);
+        for (int ch1 = is.read();
+             ch1 >= 0 && ch1 != '\r' && ch1 != '\n';
+             ch1 = is.read()) {
+          sb.append((char) ch1);
+        }
+
+        throw new IOException("HTTP/1.1 protocol error: bad chunk at"
+                              + " '" + sb + "'"
+                              + " 0x" + Integer.toHexString(ch)
+                              + " length=" + length);
       }
     }
 

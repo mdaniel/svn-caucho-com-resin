@@ -179,8 +179,8 @@ public class CustomTag extends GenericTag
     printVarAssign(out, VariableInfo.AT_BEGIN);
 
     if (analyzedTag.getStartReturnsSkip()
-	&& ! analyzedTag.getStartReturnsInclude()
-	&& ! analyzedTag.getStartReturnsBuffered()) {
+        && ! analyzedTag.getStartReturnsInclude()
+        && ! analyzedTag.getStartReturnsBuffered()) {
       // jsp/18cp
       generateChildrenEmpty();
     }
@@ -188,7 +188,7 @@ public class CustomTag extends GenericTag
       // jsp/18kc
       /*
       if (isBodyTag)
-	out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
+        out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
       */
     }
     else {
@@ -232,11 +232,11 @@ public class CustomTag extends GenericTag
 
           // jsp/18kf - req by JSP TCK
           /*
-	  if (_tag.getBodyContent()) {
-	    out.println("else");
-	    out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
-	  }
-	  */
+          if (_tag.getBodyContent()) {
+            out.println("else");
+            out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
+          }
+          */
         }
       }
       else if (isBodyTag && _tag.getBodyContent())

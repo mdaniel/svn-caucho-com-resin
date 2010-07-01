@@ -131,16 +131,16 @@ public class FacesMessage implements java.io.Serializable
     public int compareTo(Object other)
     {
       if (! (other instanceof Severity))
-	return -1;
+        return -1;
 
       Severity severity = (Severity) other;
 
       if (_value < severity._value)
-	return -1;
+        return -1;
       else if (severity._value < _value)
-	return 1;
+        return 1;
       else
-	return 0;
+        return 0;
     }
 
     public String toString()

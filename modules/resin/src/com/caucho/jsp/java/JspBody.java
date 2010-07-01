@@ -75,7 +75,7 @@ public class JspBody extends JspFragmentNode {
     
     for (int i = 0; i < _children.size(); i++) {
       if (! _children.get(i).isStatic())
-	return false;
+        return false;
     }
 
     return true;
@@ -91,9 +91,9 @@ public class JspBody extends JspFragmentNode {
     if (parent == null)
       return _gen.getRootTag();
     else if (parent instanceof CustomSimpleTag ||
-	     parent instanceof TagFileTag) {
+             parent instanceof TagFileTag) {
       if (_tag == null)
-	_tag = new TagInstance(_gen.getTagManager());
+        _tag = new TagInstance(_gen.getTagManager());
 
       return _tag;
     }
@@ -112,22 +112,22 @@ public class JspBody extends JspFragmentNode {
     JspNode parent = getParent();
 
     if (parent == null
-	//	parent instanceof JspRoot ||
-	|| parent instanceof JspTop) {
+        //        parent instanceof JspRoot ||
+        || parent instanceof JspTop) {
       throw error(L.l("jsp:body must be contained in a valid tag."));
     }
     else if (parent instanceof JspBody
-	     || parent instanceof JspAttribute) {
+             || parent instanceof JspAttribute) {
       throw error(L.l("jsp:body is not allowed in <{0}>",
-		      parent.getTagName()));
+                      parent.getTagName()));
     }
 
     if (parent instanceof GenericTag) {
       GenericTag tag = (GenericTag) parent;
 
       if ("tagdependent".equals(tag.getBodyContent())
-	  && _gen.getJspBuilder() != null) {
-	_gen.getJspBuilder().startTagDependent();
+          && _gen.getJspBuilder() != null) {
+        _gen.getJspBuilder().startTagDependent();
       }
     }
   }

@@ -67,7 +67,7 @@ public class ClobType extends AmberType {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print("" + rs + ".getClob(" + indexVar + " + " + index + ")");
@@ -79,7 +79,7 @@ public class ClobType extends AmberType {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println(pstmt + ".setClob(" + index + "++, " + value + ");");

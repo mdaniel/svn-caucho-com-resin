@@ -74,9 +74,9 @@ public class HessianSessionSerializer extends SessionSerializer {
 
     if (out != null) {
       try {
-	out.close();
+        out.close();
       } catch (IOException e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
     }
   }

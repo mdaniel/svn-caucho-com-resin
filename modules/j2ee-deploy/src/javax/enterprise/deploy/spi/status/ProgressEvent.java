@@ -42,8 +42,8 @@ public class ProgressEvent extends EventObject {
    * Creates the event.
    */
   public ProgressEvent(Object source,
-		       TargetModuleID targetModuleID,
-		       DeploymentStatus sCode)
+                       TargetModuleID targetModuleID,
+                       DeploymentStatus sCode)
   {
     super(source);
 

@@ -52,6 +52,6 @@ public interface MethodEnhancer {
    * @param jAnn the annotation to be enhanced
    */
   public void enhance(GenClass genClass,
-		      JMethod jMethod,
-		      JAnnotation jAnn);
+                      JMethod jMethod,
+                      JAnnotation jAnn);
 }

@@ -140,7 +140,7 @@ abstract public class JdbcDestination extends AbstractDestination {
     
     try {
       String sql = ("SELECT id FROM " + destinationTable +
-		    " WHERE name=? AND is_topic=?");
+                    " WHERE name=? AND is_topic=?");
       
       PreparedStatement pstmt = conn.prepareStatement(sql);
       pstmt.setString(1, name);
@@ -148,64 +148,64 @@ abstract public class JdbcDestination extends AbstractDestination {
 
       ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
-	return rs.getInt(1);
+        return rs.getInt(1);
       }
       rs.close();
 
       if (destinationSequence != null) {
-	JdbcMetaData metaData = _jdbcManager.getMetaData();
-	sql = metaData.selectSequenceSQL(destinationSequence);
-	int id = 0;
-	
-	pstmt = conn.prepareStatement(sql);
+        JdbcMetaData metaData = _jdbcManager.getMetaData();
+        sql = metaData.selectSequenceSQL(destinationSequence);
+        int id = 0;
 
-	rs = pstmt.executeQuery();
-	if (rs.next())
-	  id = rs.getInt(1);
-	else
-	  throw new RuntimeException("can't create sequence");
+        pstmt = conn.prepareStatement(sql);
 
-	sql = "INSERT INTO " + destinationTable + " (id,name,is_topic) VALUES(?,?,?)";
+        rs = pstmt.executeQuery();
+        if (rs.next())
+          id = rs.getInt(1);
+        else
+          throw new RuntimeException("can't create sequence");
 
-	pstmt = conn.prepareStatement(sql);
+        sql = "INSERT INTO " + destinationTable + " (id,name,is_topic) VALUES(?,?,?)";
 
-	pstmt.setInt(1, id);
-	pstmt.setString(2, name);
-	pstmt.setInt(3, isTopic ? 1 : 0);
+        pstmt = conn.prepareStatement(sql);
 
-	pstmt.executeUpdate();
+        pstmt.setInt(1, id);
+        pstmt.setString(2, name);
+        pstmt.setInt(3, isTopic ? 1 : 0);
 
-	if (isTopic)
-	  log.fine("JMSTopic[" + name + "," + id + "] created");
-	else
-	  log.fine("JMSQueue[" + name + "," + id + "] created");
+        pstmt.executeUpdate();
 
-	return id;
+        if (isTopic)
+          log.fine("JMSTopic[" + name + "," + id + "] created");
+        else
+          log.fine("JMSQueue[" + name + "," + id + "] created");
+
+        return id;
       }
       else {
-	sql = "INSERT INTO " + destinationTable + " (name,is_topic) VALUES(?,?)";
-	pstmt = conn.prepareStatement(sql,
-				      PreparedStatement.RETURN_GENERATED_KEYS);
-	pstmt.setString(1, name);
-	pstmt.setInt(2, isTopic ? 1 : 0);
+        sql = "INSERT INTO " + destinationTable + " (name,is_topic) VALUES(?,?)";
+        pstmt = conn.prepareStatement(sql,
+                                      PreparedStatement.RETURN_GENERATED_KEYS);
+        pstmt.setString(1, name);
+        pstmt.setInt(2, isTopic ? 1 : 0);
 
-	pstmt.executeUpdate();
+        pstmt.executeUpdate();
 
-	rs = pstmt.getGeneratedKeys();
+        rs = pstmt.getGeneratedKeys();
 
-	if (rs.next()) {
-	  int id = rs.getInt(1);
+        if (rs.next()) {
+          int id = rs.getInt(1);
 
-	  if (isTopic)
-	    log.fine("JMSTopic[" + name + "," + id + "] created");
-	  else
-	    log.fine("JMSQueue[" + name + "," + id + "] created");
-	
-	  return id;
-	}
-	else
-	  throw new SQLException(L.l("can't generate destination for {0}",
-				     name));
+          if (isTopic)
+            log.fine("JMSTopic[" + name + "," + id + "] created");
+          else
+            log.fine("JMSQueue[" + name + "," + id + "] created");
+
+          return id;
+        }
+        else
+          throw new SQLException(L.l("can't generate destination for {0}",
+                                     name));
       }
     } finally {
       conn.close();
@@ -232,20 +232,20 @@ abstract public class JdbcDestination extends AbstractDestination {
     
       Connection conn = dataSource.getConnection();
       try {
-	String sql = ("DELETE FROM " + messageTable +
-		      " WHERE expire < ? AND consumer IS NULL");
+        String sql = ("DELETE FROM " + messageTable +
+                      " WHERE expire < ? AND consumer IS NULL");
 
-	PreparedStatement pstmt = conn.prepareStatement(sql);
-	pstmt.setLong(1, Alarm.getCurrentTime());
-	
-	int count = pstmt.executeUpdate();
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setLong(1, Alarm.getCurrentTime());
 
-	if (count > 0)
-	  log.fine("JMSQueue[" + getName() + "] purged " + count + " expired mesages");
+        int count = pstmt.executeUpdate();
 
-	pstmt.close();
+        if (count > 0)
+          log.fine("JMSQueue[" + getName() + "] purged " + count + " expired mesages");
+
+        pstmt.close();
       } finally {
-	conn.close();
+        conn.close();
       }
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);

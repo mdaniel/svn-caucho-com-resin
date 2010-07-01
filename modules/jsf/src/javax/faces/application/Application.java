@@ -115,7 +115,7 @@ public abstract class Application
   public abstract void setStateManager(StateManager manager);
 
   public abstract void addComponent(String componentType,
-				    String componentClass);
+                                    String componentClass);
 
   public abstract UIComponent createComponent(String componentType)
     throws FacesException;
@@ -132,8 +132,8 @@ public abstract class Application
    * @since 1.2
    */
   public UIComponent createComponent(ValueExpression componentExpr,
-				     FacesContext context,
-				     String componentType)
+                                     FacesContext context,
+                                     String componentType)
     throws FacesException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -142,10 +142,10 @@ public abstract class Application
   public abstract Iterator<String> getComponentTypes();
 
   public abstract void addConverter(String converterId,
-				    String converterClass);
+                                    String converterClass);
 
   public abstract void addConverter(Class targetClass,
-				    String converterClass);
+                                    String converterClass);
 
   public abstract Converter createConverter(String converterId)
     throws FacesException;
@@ -166,8 +166,8 @@ public abstract class Application
   }
 
   public Object evaluateExpressionGet(FacesContext context,
-				      String expression,
-				      Class expectedType)
+                                      String expression,
+                                      Class expectedType)
     throws ELException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -177,7 +177,7 @@ public abstract class Application
    * @deprecated
    */
   public abstract MethodBinding createMethodBinding(String ref,
-						    Class []param)
+                                                    Class []param)
     throws ReferenceSyntaxException;
 
   public abstract Iterator<Locale> getSupportedLocales();

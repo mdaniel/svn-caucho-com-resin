@@ -73,8 +73,8 @@ abstract public class AbstractTargetDispatchRule extends AbstractDispatchRule
 
   @Override
   protected String rewriteTarget(Matcher matcher,
-				 String uri,
-				 String queryString)
+                                 String uri,
+                                 String queryString)
   {
     if (_target != null)
       return matcher.replaceFirst(_target);
@@ -90,7 +90,7 @@ abstract public class AbstractTargetDispatchRule extends AbstractDispatchRule
 
     if (_target == null) {
       throw new ConfigException(L.l("'target' is a required attribute of '{0}' because Resin needs to know the destination URL.",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
     }
 
     /*

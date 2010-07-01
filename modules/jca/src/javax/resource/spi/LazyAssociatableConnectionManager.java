@@ -40,7 +40,7 @@ public interface LazyAssociatableConnectionManager {
    * Lazily associate a connection object with a managed connection.
    */
   public void associateConnection(Object connection,
-				  ManagedConnectionFactory mcf,
-				  ConnectionRequestInfo reqInfo)
+                                  ManagedConnectionFactory mcf,
+                                  ConnectionRequestInfo reqInfo)
     throws ResourceException;
 }

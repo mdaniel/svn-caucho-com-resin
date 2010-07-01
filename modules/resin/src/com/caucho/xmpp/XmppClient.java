@@ -112,7 +112,7 @@ public class XmppClient {
 
     _isFinest = log.isLoggable(Level.FINEST);
   }
-					   
+
   public XmppClient(String address, int port)
   {
     this(getByName(address), port);
@@ -142,7 +142,7 @@ public class XmppClient {
   {
     try {
       if (_s != null)
-	throw new IllegalStateException(L.l("{0} is already connected", this));
+        throw new IllegalStateException(L.l("{0} is already connected", this));
 
       _s = new Socket(_address, _port);
 
@@ -173,14 +173,14 @@ public class XmppClient {
 
       _bindCallback = new BindCallback();
       _reader = new XmppReader(_xmppContext, _is, _in, _toBroker,
-			       _bindCallback);
+                               _bindCallback);
 
       String tag = readStartTag();
 
       if (! tag.equals("stream")
-	  || ! STREAMS_NS.equals(_in.getNamespaceURI())) {
-	throw new IOExceptionWrapper(L.l("<{0}> with ns={1} is an unexpected server response",
-				  tag, _in.getNamespaceURI()));
+          || ! STREAMS_NS.equals(_in.getNamespaceURI())) {
+        throw new IOExceptionWrapper(L.l("<{0}> with ns={1} is an unexpected server response",
+                                  tag, _in.getNamespaceURI()));
       }
 
       readStreamFeatures();
@@ -206,10 +206,10 @@ public class XmppClient {
 
     try {
       if (! readSuccess())
-	throw new RuntimeException("expected success");
+        throw new RuntimeException("expected success");
       
       if (! readStream())
-	throw new RuntimeException("expected stream");
+        throw new RuntimeException("expected stream");
 
       StringBuilder sb = new StringBuilder();
       Base64.encode(sb, RandomUtil.getRandomLong());
@@ -224,7 +224,7 @@ public class XmppClient {
       _reader.readNext();
 
       if (_jid == null)
-	throw new RuntimeException("expected bind");
+        throw new RuntimeException("expected bind");
       
       _os.print("<iq type='set' id='" + _mId++ + "'>");
       _os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
@@ -237,12 +237,12 @@ public class XmppClient {
       Stanza stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
 
       if (! (stanza instanceof SessionStanza)
-	  && ! (stanza instanceof EmptyStanza))
-	throw new RuntimeException("expected session");
+          && ! (stanza instanceof EmptyStanza))
+        throw new RuntimeException("expected session");
       */
 
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " authentication successful for " + name);
+        log.finer(this + " authentication successful for " + name);
 
       _reader.setHandler(_callback);
 
@@ -279,15 +279,15 @@ public class XmppClient {
       _os.print(" type='" + type + "'");
       
       if (to != null)
-	_os.print(" to='" + to + "'");
+        _os.print(" to='" + to + "'");
       if (_from != null)
-	_os.print(" from='" + _from + "'");
+        _os.print(" from='" + _from + "'");
       _os.print(">");
       
       if (subject != null)
-	_os.print("<subject>" + subject + "</subject>");
+        _os.print("<subject>" + subject + "</subject>");
       if (body != null)
-	_os.print("<body>" + body + "</body>");
+        _os.print("<body>" + body + "</body>");
       _os.print("</message>");
       _os.flush();
     } catch (RuntimeException e) {
@@ -323,34 +323,34 @@ public class XmppClient {
     int tag = 0;
     
     while ((tag = _in.next()) > 0
-	   && ! (tag == XMLStreamReader.END_ELEMENT
-		 && "features".equals(_in.getLocalName()))) {
+           && ! (tag == XMLStreamReader.END_ELEMENT
+                 && "features".equals(_in.getLocalName()))) {
       if (_isFinest)
-	debug(_in);
+        debug(_in);
       
       if (tag == XMLStreamReader.START_ELEMENT) {
-	String localName = _in.getLocalName();
+        String localName = _in.getLocalName();
 
-	if ("mechanisms".equals(localName)) {
-	}
-	else if ("mechanism".equals(localName)) {
-	  tag = _in.next();
-	  
-	  String mechanism = _in.getText();
+        if ("mechanisms".equals(localName)) {
+        }
+        else if ("mechanism".equals(localName)) {
+          tag = _in.next();
 
-	  _authMechanisms.add(mechanism);
-	}
-	else {
-	  String feature = localName + "{" + _in.getNamespaceURI() + "}";
+          String mechanism = _in.getText();
 
-	  if (log.isLoggable(Level.FINER))
-	    log.finer(this + " feature " + feature);
+          _authMechanisms.add(mechanism);
+        }
+        else {
+          String feature = localName + "{" + _in.getNamespaceURI() + "}";
 
-	  _features.add(feature);
-	}
+          if (log.isLoggable(Level.FINER))
+            log.finer(this + " feature " + feature);
+
+          _features.add(feature);
+        }
       }
       else if (tag == XMLStreamReader.END_ELEMENT) {
-	String localName = _in.getLocalName();
+        String localName = _in.getLocalName();
       }
     }
   }
@@ -362,7 +362,7 @@ public class XmppClient {
     
     while ((tag = _in.next()) > 0 && tag != XMLStreamReader.START_ELEMENT) {
       if (_isFinest)
-	debug(_in);
+        debug(_in);
     }
     
     if (_isFinest)
@@ -378,14 +378,14 @@ public class XmppClient {
       int tag;
       
       while ((tag = _in.next()) > 0
-	     && ! (tag == XMLStreamReader.END_ELEMENT
-		   && "error".equals(_in.getLocalName()))) {
-	if (tag == XMLStreamReader.START_ELEMENT) {
-	  System.out.println("<" + _in.getLocalName() + ">");
-	}
-	else if (tag == XMLStreamReader.END_ELEMENT) {
-	  System.out.println("</" + _in.getLocalName() + ">");
-	}
+             && ! (tag == XMLStreamReader.END_ELEMENT
+                   && "error".equals(_in.getLocalName()))) {
+        if (tag == XMLStreamReader.START_ELEMENT) {
+          System.out.println("<" + _in.getLocalName() + ">");
+        }
+        else if (tag == XMLStreamReader.END_ELEMENT) {
+          System.out.println("</" + _in.getLocalName() + ">");
+        }
       }
       
       return new IOException(L.l("<error> is unexpected", _in.getLocalName()));
@@ -410,26 +410,26 @@ public class XmppClient {
       WriteStream os;
       
       synchronized (this) {
-	s = _s;
-	_s = null;
-	
-	is = _is;
-	_is = null;
-	
-	os = _os;
-	_os = null;
+        s = _s;
+        _s = null;
+
+        is = _is;
+        _is = null;
+
+        os = _os;
+        _os = null;
       }
 
       if (os != null) {
-	try { os.close(); } catch (IOException e) {}
+        try { os.close(); } catch (IOException e) {}
       }
 
       if (is != null) {
-	is.close();
+        is.close();
       }
 
       if (s != null) {
-	s.close();
+        s.close();
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -443,18 +443,18 @@ public class XmppClient {
       StringBuilder sb = new StringBuilder();
       sb.append("<");
       if (in.getPrefix() != null && ! "".equals(in.getPrefix()))
-	sb.append(in.getPrefix()).append(":");
+        sb.append(in.getPrefix()).append(":");
       sb.append(in.getLocalName());
 
       if (in.getNamespaceURI() != null)
-	sb.append("{").append(in.getNamespaceURI()).append("}");
+        sb.append("{").append(in.getNamespaceURI()).append("}");
 
       for (int i = 0; i < in.getAttributeCount(); i++) {
-	sb.append(" ");
-	sb.append(in.getAttributeLocalName(i));
-	sb.append("='");
-	sb.append(in.getAttributeValue(i));
-	sb.append("'");
+        sb.append(" ");
+        sb.append(in.getAttributeLocalName(i));
+        sb.append("='");
+        sb.append(in.getAttributeValue(i));
+        sb.append("'");
       }
       sb.append(">");
 
@@ -481,26 +481,26 @@ public class XmppClient {
 
     while ((tag = in.next()) > 0) {
       if (_isFinest)
-	debug(in);
-	
-      if (tag == XMLStreamReader.START_ELEMENT) {
-	String localName = in.getLocalName();
+        debug(in);
 
-	if ("stream".equals(localName)) {
-	  readStreamFeatures();
-	    
-	  return true;
-	}
-	else {
-	  log.fine(XmppClient.this + " expected stream at tag <" + _in.getLocalName() + ">");
-	  close();
-	  return false;
-	}
+      if (tag == XMLStreamReader.START_ELEMENT) {
+        String localName = in.getLocalName();
+
+        if ("stream".equals(localName)) {
+          readStreamFeatures();
+
+          return true;
+        }
+        else {
+          log.fine(XmppClient.this + " expected stream at tag <" + _in.getLocalName() + ">");
+          close();
+          return false;
+        }
       }
       else if (tag == XMLStreamReader.END_ELEMENT) {
-	log.fine(XmppClient.this + " unexpected end </" + _in.getLocalName() + ">");
-	close();
-	return false;
+        log.fine(XmppClient.this + " unexpected end </" + _in.getLocalName() + ">");
+        close();
+        return false;
       }
     }
 
@@ -523,26 +523,26 @@ public class XmppClient {
 
     while ((tag = in.next()) > 0) {
       if (_isFinest)
-	debug(in);
-	
-      if (tag == XMLStreamReader.START_ELEMENT) {
-	String localName = in.getLocalName();
+        debug(in);
 
-	if ("success".equals(localName)) {
-	  _reader.skipToEnd("success");
-	    
-	  return true;
-	}
-	else {
-	  log.fine(XmppClient.this + " expected success at tag <" + _in.getLocalName() + ">");
-	  close();
-	  return false;
-	}
+      if (tag == XMLStreamReader.START_ELEMENT) {
+        String localName = in.getLocalName();
+
+        if ("success".equals(localName)) {
+          _reader.skipToEnd("success");
+
+          return true;
+        }
+        else {
+          log.fine(XmppClient.this + " expected success at tag <" + _in.getLocalName() + ">");
+          close();
+          return false;
+        }
       }
       else if (tag == XMLStreamReader.END_ELEMENT) {
-	log.fine(XmppClient.this + " unexpected end </" + _in.getLocalName() + ">");
-	close();
-	return false;
+        log.fine(XmppClient.this + " unexpected end </" + _in.getLocalName() + ">");
+        close();
+        return false;
       }
     }
 
@@ -586,12 +586,12 @@ public class XmppClient {
     
     @Override
     public void queryResult(long id, String to, String from,
-			    Serializable value)
+                            Serializable value)
     {
       if (value instanceof ImBindQuery) {
-	ImBindQuery bind = (ImBindQuery) value;
+        ImBindQuery bind = (ImBindQuery) value;
 
-	_jid = bind.getJid();
+        _jid = bind.getJid();
       }
     }
   }
@@ -604,13 +604,13 @@ public class XmppClient {
       _isFinest = log.isLoggable(Level.FINEST);
 
       try {
-	while (! isClosed()) {
-	  readPacket();
-	}
+        while (! isClosed()) {
+          readPacket();
+        }
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
-	close();
+        close();
       }
     }
 
@@ -622,49 +622,49 @@ public class XmppClient {
       XMLStreamReader in = _in;
 
       if (in == null)
-	return;
+        return;
 
       while ((tag = in.next()) > 0) {
-	if (_isFinest)
-	  debug(in);
-	
-	if (tag == XMLStreamReader.START_ELEMENT) {
-	  String localName = in.getLocalName();
+        if (_isFinest)
+          debug(in);
 
-	  if ("success".equals(localName)) {
-	    skipToEnd("success");
-	    
-	    _stanzaQueue.add(new SuccessStanza(in));
-	  }
-	  else if ("stream".equals(localName)) {
-	    readStreamFeatures();
-	    
-	    _stanzaQueue.add(new StreamStanza(in));
-	  }
-	  else if ("iq".equals(localName)) {
-	    _reader.handleIq();
-	  }
-	  else if ("message".equals(localName)) {
-	    _reader.handleMessage();
-	  }
-	  else if ("presence".equals(localName)) {
-	    _reader.handlePresence();
-	  }
-	  else {
-	    log.fine(XmppClient.this + " unknown tag <" + _in.getLocalName() + ">");
-	    close();
-	    return;
-	  }
-	}
-	else if (tag == XMLStreamReader.END_ELEMENT) {
-	  log.fine(XmppClient.this + " unexpected end </" + _in.getLocalName() + ">");
-	  close();
-	  return;
-	}
+        if (tag == XMLStreamReader.START_ELEMENT) {
+          String localName = in.getLocalName();
+
+          if ("success".equals(localName)) {
+            skipToEnd("success");
+
+            _stanzaQueue.add(new SuccessStanza(in));
+          }
+          else if ("stream".equals(localName)) {
+            readStreamFeatures();
+
+            _stanzaQueue.add(new StreamStanza(in));
+          }
+          else if ("iq".equals(localName)) {
+            _reader.handleIq();
+          }
+          else if ("message".equals(localName)) {
+            _reader.handleMessage();
+          }
+          else if ("presence".equals(localName)) {
+            _reader.handlePresence();
+          }
+          else {
+            log.fine(XmppClient.this + " unknown tag <" + _in.getLocalName() + ">");
+            close();
+            return;
+          }
+        }
+        else if (tag == XMLStreamReader.END_ELEMENT) {
+          log.fine(XmppClient.this + " unexpected end </" + _in.getLocalName() + ">");
+          close();
+          return;
+        }
       }
 
       if (tag < 0) {
-	close();
+        close();
       }
     }
 
@@ -674,44 +674,44 @@ public class XmppClient {
       String type = in.getAttributeValue(null, "type");
 
       if ("error".equals(type)) {
-	skipToEnd("iq");
-	
-	return new IqErrorStanza(in);
+        skipToEnd("iq");
+
+        return new IqErrorStanza(in);
       }
       else if ("result".equals(type)) {
-	String id = in.getAttributeValue(null, "id");
-	
-	int tag = in.nextTag();
+        String id = in.getAttributeValue(null, "id");
 
-	if (_isFinest)
-	  debug(in);
+        int tag = in.nextTag();
 
-	if (tag == XMLStreamReader.END_ELEMENT
-	    && "iq".equals(in.getLocalName())) {
-	  return new EmptyStanza();
-	}
-	
-	if (tag != XMLStreamReader.START_ELEMENT)
-	  throw new IllegalStateException("expected start");
+        if (_isFinest)
+          debug(in);
 
-	String name = in.getLocalName();
+        if (tag == XMLStreamReader.END_ELEMENT
+            && "iq".equals(in.getLocalName())) {
+          return new EmptyStanza();
+        }
 
-	if ("bind".equals(name)) {
-	  return readBind(in, id);
-	}
-	else if ("session".equals(name)) {
-	  skipToEnd("iq");
+        if (tag != XMLStreamReader.START_ELEMENT)
+          throw new IllegalStateException("expected start");
 
-	  return new SessionStanza();
-	}
-	else {
-	  skipToEnd("iq");
-	  
-	  return new IqErrorStanza();
-	}
+        String name = in.getLocalName();
+
+        if ("bind".equals(name)) {
+          return readBind(in, id);
+        }
+        else if ("session".equals(name)) {
+          skipToEnd("iq");
+
+          return new SessionStanza();
+        }
+        else {
+          skipToEnd("iq");
+
+          return new IqErrorStanza();
+        }
       }
       else {
-	throw new UnsupportedOperationException(type);
+        throw new UnsupportedOperationException(type);
       }
     }
 
@@ -733,19 +733,19 @@ public class XmppClient {
       XMLStreamReader in = _in;
       
       if (in == null)
-	return;
+        return;
 
       int tag;
       while ((tag = in.next()) > 0) {
-	if (_isFinest)
-	  debug(in);
-	
-	if (tag == XMLStreamReader.START_ELEMENT) {
-	}
-	else if (tag == XMLStreamReader.END_ELEMENT) {
-	  if (tagName.equals(in.getLocalName()))
-	    return;
-	}
+        if (_isFinest)
+          debug(in);
+
+        if (tag == XMLStreamReader.START_ELEMENT) {
+        }
+        else if (tag == XMLStreamReader.END_ELEMENT) {
+          if (tagName.equals(in.getLocalName()))
+            return;
+        }
       }
     }
   }

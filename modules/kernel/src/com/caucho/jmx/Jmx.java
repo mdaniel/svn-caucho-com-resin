@@ -140,7 +140,7 @@ public class Jmx {
    * Sets the context properties.
    */
   public static void setContextProperties(Map<String,String> properties,
-					  ClassLoader loader)
+                                          ClassLoader loader)
   {
     AbstractMBeanServer mbeanServer = getMBeanServer();
 
@@ -158,19 +158,19 @@ public class Jmx {
    */
   public static ObjectInstance register(Object object, String name)
     throws InstanceAlreadyExistsException,
-	   MBeanRegistrationException, MalformedObjectNameException,
-	   NotCompliantMBeanException
+           MBeanRegistrationException, MalformedObjectNameException,
+           NotCompliantMBeanException
   {
     if (name.indexOf(':') < 0) {
       Map<String,String> props = parseProperties(name);
 
       if (props.get("type") == null) {
-	String type = object.getClass().getName();
-	int p = type.lastIndexOf('.');
-	if (p > 0)
-	  type = type.substring(p + 1);
+        String type = object.getClass().getName();
+        int p = type.lastIndexOf('.');
+        if (p > 0)
+          type = type.substring(p + 1);
 
-	props.put("type", type);
+        props.put("type", type);
       }
 
       ObjectName objectName = getObjectName("resin", props);
@@ -191,10 +191,10 @@ public class Jmx {
    * @return the instantiated object.
    */
   public static ObjectInstance register(Object object,
-					Map<String,String> properties)
+                                        Map<String,String> properties)
     throws InstanceAlreadyExistsException,
-	   MBeanRegistrationException, MalformedObjectNameException,
-	   NotCompliantMBeanException
+           MBeanRegistrationException, MalformedObjectNameException,
+           NotCompliantMBeanException
   {
     Map<String,String> props = copyContextProperties();
     props.putAll(properties);
@@ -213,8 +213,8 @@ public class Jmx {
    */
   public static ObjectInstance register(Object object, ObjectName name)
     throws InstanceAlreadyExistsException,
-	   MBeanRegistrationException,
-	   NotCompliantMBeanException
+           MBeanRegistrationException,
+           NotCompliantMBeanException
   {
     DynamicMBean dynMBean = createMBean(object, name);
 
@@ -233,10 +233,10 @@ public class Jmx {
    * @return the instantiated object.
    */
   public static ObjectInstance register(Object object, ObjectName name,
-					ClassLoader loader)
+                                        ClassLoader loader)
     throws InstanceAlreadyExistsException,
-	   MBeanRegistrationException,
-	   NotCompliantMBeanException
+           MBeanRegistrationException,
+           NotCompliantMBeanException
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -247,10 +247,10 @@ public class Jmx {
       AbstractMBeanServer mbeanServer = getMBeanServer();
 
       if (mbeanServer != null) {
-	DynamicMBean dynMBean = createMBean(object, name);
+        DynamicMBean dynMBean = createMBean(object, name);
 
-	if (dynMBean != null)
-	  return mbeanServer.registerMBean(dynMBean, name);
+        if (dynMBean != null)
+          return mbeanServer.registerMBean(dynMBean, name);
       }
 
       return null;
@@ -287,11 +287,11 @@ public class Jmx {
       Class []interfaces = cl.getInterfaces();
 
       for (int i = 0; i < interfaces.length; i++) {
-	Class ifc = interfaces[i];
-	
-	if (ifc.getName().endsWith("MBean") ||
-	    ifc.getName().endsWith("MXBean"))
-	  return ifc;
+        Class ifc = interfaces[i];
+
+        if (ifc.getName().endsWith("MBean") ||
+            ifc.getName().endsWith("MXBean"))
+          return ifc;
       }
     }
 
@@ -305,7 +305,7 @@ public class Jmx {
    */
   public static void unregister(ObjectName name)
     throws MBeanRegistrationException,
-	   InstanceNotFoundException
+           InstanceNotFoundException
   {
     getMBeanServer().unregisterMBean(name);
   }
@@ -317,7 +317,7 @@ public class Jmx {
    */
   public static void unregister(ObjectName name, ClassLoader loader)
     throws MBeanRegistrationException,
-	   InstanceNotFoundException
+           InstanceNotFoundException
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -341,12 +341,12 @@ public class Jmx {
    * @return the instantiated object.
    */
   public static ObjectInstance register(Object object,
-					String name,
-					Class api)
+                                        String name,
+                                        Class api)
     throws InstanceAlreadyExistsException,
-	   MBeanRegistrationException,
-	   MalformedObjectNameException,
-	   NotCompliantMBeanException
+           MBeanRegistrationException,
+           MalformedObjectNameException,
+           NotCompliantMBeanException
   {
     return register(object, new ObjectName(name), api);
   }
@@ -361,11 +361,11 @@ public class Jmx {
    * @return the instantiated object.
    */
   public static ObjectInstance register(Object object,
-					ObjectName name,
-					Class api)
+                                        ObjectName name,
+                                        Class api)
     throws InstanceAlreadyExistsException,
-	   MBeanRegistrationException, MalformedObjectNameException,
-	   NotCompliantMBeanException
+           MBeanRegistrationException, MalformedObjectNameException,
+           NotCompliantMBeanException
   {
     IntrospectionMBean mbean = new IntrospectionMBean(object, api);
     
@@ -382,9 +382,9 @@ public class Jmx {
    */
   public static void unregister(String name)
     throws InstanceNotFoundException,
-	   MalformedObjectNameException,
-	   MBeanRegistrationException
-	   
+           MalformedObjectNameException,
+           MBeanRegistrationException
+
   {
     ObjectName objectName = getObjectName(name);
 
@@ -417,7 +417,7 @@ public class Jmx {
    * Parses a name.
    */
   public static void parseProperties(Map<String,String> properties,
-				     String name)
+                                     String name)
   {
     parseProperties(properties, name, 0);
   }
@@ -440,73 +440,73 @@ public class Jmx {
 
       int ch;
       for (; i < len && (ch = name.charAt(i)) != '=' && ch != ',' &&
-	     ! Character.isWhitespace((char) ch); i++) {
-	cb.append((char) ch);
+             ! Character.isWhitespace((char) ch); i++) {
+        cb.append((char) ch);
       }
 
       String key = cb.toString();
 
       if (key.length() == 0) {
-	throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
-					       name));
+        throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
+                                               name));
       }
 
       for (; i < len && Character.isWhitespace(name.charAt(i)); i++) {
       }
 
       if (len <= i || (ch = name.charAt(i)) == ',') {
-	properties.put(key, "");
+        properties.put(key, "");
       }
       else if (ch == '=') {
-	for (i++; i < len && Character.isWhitespace(name.charAt(i)); i++) {
-	}
+        for (i++; i < len && Character.isWhitespace(name.charAt(i)); i++) {
+        }
 
-	if (len <= i || (ch = name.charAt(i)) == ',') {
-	  properties.put(key, "");
-	}
-	else if (ch == '"' || ch == '\'') {
-	  int end = ch;
-	  cb.clear();
+        if (len <= i || (ch = name.charAt(i)) == ',') {
+          properties.put(key, "");
+        }
+        else if (ch == '"' || ch == '\'') {
+          int end = ch;
+          cb.clear();
 
-	  for (i++; i < len && (ch = name.charAt(i)) != end; i++) {
-	    if (ch == '\\') {
-	      ch = name.charAt(++i);
-	      cb.append((char) ch);
-	    }
-	    else
-	      cb.append((char) ch);
-	  }
+          for (i++; i < len && (ch = name.charAt(i)) != end; i++) {
+            if (ch == '\\') {
+              ch = name.charAt(++i);
+              cb.append((char) ch);
+            }
+            else
+              cb.append((char) ch);
+          }
 
-	  if (ch != end)
-	    throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
-						   name));
+          if (ch != end)
+            throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
+                                                   name));
 
-	  i++;
+          i++;
 
-	  String value = cb.toString();
+          String value = cb.toString();
 
-	  properties.put(key, value);
-	}
-	else {
-	  cb.clear();
-	  
-	  for (; i < len && (ch = name.charAt(i)) != ','; i++)
-	    cb.append((char) ch);
+          properties.put(key, value);
+        }
+        else {
+          cb.clear();
 
-	  properties.put(key, cb.toString());
-	}
+          for (; i < len && (ch = name.charAt(i)) != ','; i++)
+            cb.append((char) ch);
+
+          properties.put(key, cb.toString());
+        }
       }
       else {
-	throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
-					       name));
+        throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
+                                               name));
       }
 
       for (; i < len && Character.isWhitespace(name.charAt(i)); i++) {
       }
       
       if (i < len && name.charAt(i) != ',')
-	throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
-					       name));
+        throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
+                                               name));
 
       i++;
     }
@@ -516,7 +516,7 @@ public class Jmx {
    * Creates the clean name
    */
   public static ObjectName getObjectName(String domain,
-					 Map<String,String> properties)
+                                         Map<String,String> properties)
     throws MalformedObjectNameException
   {
     StringBuilder cb = new StringBuilder();
@@ -533,7 +533,7 @@ public class Jmx {
     if (type != null) {
       cb.append("type=");
       if (escapePattern.matcher(type).find())
-	type = ObjectName.quote(type);
+        type = ObjectName.quote(type);
       cb.append(type);
 
       isFirst = false;
@@ -541,10 +541,10 @@ public class Jmx {
 
     for (String key : properties.keySet()) {
       if (key.equals("type"))
-	continue;
+        continue;
       
       if (! isFirst)
-	cb.append(',');
+        cb.append(',');
       isFirst = false;
 
       cb.append(key);
@@ -553,9 +553,9 @@ public class Jmx {
       String value = properties.get(key);
 
       if (value.length() == 0
-	  || (escapePattern.matcher(value).find()
-	      && ! (value.startsWith("\"") && value.endsWith("\"")))) {
-	value = ObjectName.quote(value);
+          || (escapePattern.matcher(value).find()
+              && ! (value.startsWith("\"") && value.endsWith("\"")))) {
+        value = ObjectName.quote(value);
       }
       
       cb.append(value);
@@ -634,14 +634,14 @@ public class Jmx {
    * Returns the local manged object.
    */
   public static Object find(ObjectName name,
-			    ClassLoader loader,
-			    MBeanServer mbeanServer)
+                            ClassLoader loader,
+                            MBeanServer mbeanServer)
   {
     try {
       ObjectInstance obj = mbeanServer.getObjectInstance(name);
 
       if (obj == null)
-	return null;
+        return null;
 
       String className = obj.getClassName();
 
@@ -650,22 +650,22 @@ public class Jmx {
       Class ifc;
       
       if (cl.isInterface())
-	ifc = cl;
+        ifc = cl;
       else
-	ifc = getMBeanInterface(cl);
+        ifc = getMBeanInterface(cl);
 
       if (ifc == null)
-	return null;
+        return null;
 
       boolean isBroadcast = true;
 
       Object proxy;
 
       proxy = JmxInvocationHandler.newProxyInstance(mbeanServer,
-						    loader,
-						    name,
-						    ifc,
-						    true);
+                                                    loader,
+                                                    name,
+                                                    ifc,
+                                                    true);
 
       return proxy;
     } catch (InstanceNotFoundException e) {

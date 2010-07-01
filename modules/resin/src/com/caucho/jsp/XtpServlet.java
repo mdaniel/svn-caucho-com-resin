@@ -69,25 +69,25 @@ public class XtpServlet extends QServlet {
 
     String strictXslValue = conf.getInitParameter("strict-xsl");
     if (strictXslValue != null &&
-	! strictXslValue.equals("false") &&
-	! strictXslValue.equals("no"))
+        ! strictXslValue.equals("false") &&
+        ! strictXslValue.equals("no"))
       manager.setStrictXsl(true);
   
     String strictXmlValue = conf.getInitParameter("strict-xml");
     if (strictXmlValue != null &&
-	! strictXmlValue.equals("false") &&
-	! strictXmlValue.equals("no"))
+        ! strictXmlValue.equals("false") &&
+        ! strictXmlValue.equals("no"))
       manager.setStrictXml(true);
       
     String entitiesAsText = conf.getInitParameter("entities-as-text");
     if (entitiesAsText != null &&
-	! entitiesAsText.equals("false") &&
-	! entitiesAsText.equals("no"))
+        ! entitiesAsText.equals("false") &&
+        ! entitiesAsText.equals("no"))
       manager.setEntitiesAsText(true);
       
     String toLower = conf.getInitParameter("html-to-lower");
     if (toLower != null &&
-	(toLower.equals("no") || toLower.equals("false")))
+        (toLower.equals("no") || toLower.equals("false")))
       manager.setToLower(false);
 
     String defaultStylesheet = getInitParameter("default-stylesheet");

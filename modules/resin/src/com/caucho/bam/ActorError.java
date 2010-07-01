@@ -265,7 +265,7 @@ public class ActorError implements Serializable {
    * @param group the error group
    */
   public ActorError(String type,
-		    String group)
+                    String group)
   {
     this.type = type;
     this.group = group;
@@ -280,8 +280,8 @@ public class ActorError implements Serializable {
    * @param text the error text
    */
   public ActorError(String type,
-		    String group,
-		    String text)
+                    String group,
+                    String text)
   {
     this.type = type;
     this.group = group;
@@ -297,8 +297,8 @@ public class ActorError implements Serializable {
       return ((ActorException) e).createActorError();
     else {
       return new ActorError(ActorError.TYPE_CANCEL,
-			    ActorError.INTERNAL_SERVER_ERROR,
-			    e.toString());
+                            ActorError.INTERNAL_SERVER_ERROR,
+                            e.toString());
     }
   }
 
@@ -445,14 +445,14 @@ public class ActorError implements Serializable {
 
   static {
     _errorMap.put(FEATURE_NOT_IMPLEMENTED,
-		  ErrorGroup.FEATURE_NOT_IMPLEMENTED);
+                  ErrorGroup.FEATURE_NOT_IMPLEMENTED);
     _errorMap.put(NOT_AUTHORIZED,
-		  ErrorGroup.NOT_AUTHORIZED);
+                  ErrorGroup.NOT_AUTHORIZED);
     _errorMap.put(FORBIDDEN,
-		  ErrorGroup.FORBIDDEN);
+                  ErrorGroup.FORBIDDEN);
     _errorMap.put(REMOTE_CONNECTION_FAILED,
-		  ErrorGroup.REMOTE_CONNECTION_FAILED);
+                  ErrorGroup.REMOTE_CONNECTION_FAILED);
     _errorMap.put(SERVICE_UNAVAILABLE,
-		  ErrorGroup.SERVICE_UNAVAILABLE);
+                  ErrorGroup.SERVICE_UNAVAILABLE);
   }
 }

@@ -413,8 +413,8 @@ public class ResultSetImpl implements ResultSet {
     else {
       ResultSetCacheChunk next = cacheChunk.getNext();
       if (next != null) {
-	_cacheChunk = next;
-	return true;
+        _cacheChunk = next;
+        return true;
       }
 
       _isCache = false;
@@ -423,27 +423,27 @@ public class ResultSetImpl implements ResultSet {
       // jpa/1433
       /*
       if (cacheChunk.isLast()) {
-	_maxResults = 0;
-	return false;
+        _maxResults = 0;
+        return false;
       }
       else
       */
       if (_rs != null) {
-	boolean result = _rs.next();
+        boolean result = _rs.next();
 
         return result;
       }
       /*
       else if (_userQuery != null) {
-	_rs = _userQuery.executeQuery(row, -1);
+        _rs = _userQuery.executeQuery(row, -1);
 
-	_cacheMetaData = _rs.getMetaData();
+        _cacheMetaData = _rs.getMetaData();
 
-	return _rs.next();
+        return _rs.next();
       }
       */
       else {
-	return false;
+        return false;
       }
     }
   }
@@ -1094,10 +1094,10 @@ public class ResultSetImpl implements ResultSet {
       if (obj instanceof EntityItem) {
         EntityItem entityItem = (EntityItem) obj;
 
-	if (_session.isJPA())
-	  return _session.getEntity(entityItem);
-	else
-	  return _session.loadProxy(entityItem);
+        if (_session.isJPA())
+          return _session.getEntity(entityItem);
+        else
+          return _session.loadProxy(entityItem);
         
         /*
         Entity entity = entityItem.getEntity();
@@ -1144,7 +1144,7 @@ public class ResultSetImpl implements ResultSet {
       AmberExpr expr = _resultList.get(column - 1);
 
       if (_session == null)
-	throw new NullPointerException();
+        throw new NullPointerException();
 
       value = expr.getObject(_session, _rs, index);
 
@@ -1175,7 +1175,7 @@ public class ResultSetImpl implements ResultSet {
       // _session.addEntity(entity);
 
       if (! _session.isJPA())
-	return _session.loadProxy(entity.__caucho_getCacheItem());
+        return _session.loadProxy(entity.__caucho_getCacheItem());
     }
 
     return value;

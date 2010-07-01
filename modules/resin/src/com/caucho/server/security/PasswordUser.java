@@ -60,10 +60,10 @@ public class PasswordUser
   private final String []_roles;
 
   public PasswordUser(Principal principal,
-		      char []password,
-		      boolean isDisabled,
-		      boolean isAnonymous,
-		      String []roles)
+                      char []password,
+                      boolean isDisabled,
+                      boolean isAnonymous,
+                      String []roles)
   {
     _principal = principal;
     _password = password;
@@ -75,24 +75,24 @@ public class PasswordUser
   }
 
   public PasswordUser(Principal principal,
-		      char []password,
-		      String []roles)
+                      char []password,
+                      String []roles)
   {
     this(principal, password, false, false, roles);
   }
 
   public PasswordUser(String user,
-		      char []password,
-		      String []roles)
+                      char []password,
+                      String []roles)
   {
     this(new BasicPrincipal(user), password, false, false, roles);
   }
 
   public PasswordUser(String user,
-		      char []password)
+                      char []password)
   {
     this(new BasicPrincipal(user), password,
-	 false, false, new String[] { "user" });
+         false, false, new String[] { "user" });
   }
 
   /**
@@ -150,8 +150,8 @@ public class PasswordUser
   public PasswordUser copy()
   {
     return new PasswordUser(_principal, _password,
-			    _isDisabled, _isAnonymous,
-			    _roles);
+                            _isDisabled, _isAnonymous,
+                            _roles);
   }
 
   public String toString()

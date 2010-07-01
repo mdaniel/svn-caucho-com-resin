@@ -94,9 +94,9 @@ class HtmlOutputTextRenderer extends HtmlRenderer
       Boolean escapeValue = (Boolean) attrMap.get("escape");
 
       if (escapeValue != null)
-	escape = escapeValue;
+        escape = escapeValue;
       else
-	escape = true;
+        escape = true;
 
       if (component instanceof UIOutput)
         value = ((UIOutput) component).getValue();
@@ -107,31 +107,31 @@ class HtmlOutputTextRenderer extends HtmlRenderer
     boolean hasSpan = false;
 
     if (dir != null
-	|| lang != null
-	|| style != null
-	|| styleClass != null
-	|| (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))) {
+        || lang != null
+        || style != null
+        || styleClass != null
+        || (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))) {
       hasSpan = true;
       
       out.startElement("span", component);
 
       if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
-	out.writeAttribute("id", component.getClientId(context), "id");
+        out.writeAttribute("id", component.getClientId(context), "id");
 
       if (dir != null)
-	out.writeAttribute("dir", dir, "dir");
+        out.writeAttribute("dir", dir, "dir");
 
       if (lang != null)
-	out.writeAttribute("lang", lang, "dir");
+        out.writeAttribute("lang", lang, "dir");
 
       if (style != null)
-	out.writeAttribute("style", style, "style");
+        out.writeAttribute("style", style, "style");
 
       if (styleClass != null)
-	out.writeAttribute("class", styleClass, "class");
+        out.writeAttribute("class", styleClass, "class");
 
       if (title != null)
-	out.writeAttribute("title", title, "title");
+        out.writeAttribute("title", title, "title");
     }
     
     String string = toString(context, component, value);

@@ -65,7 +65,7 @@ public class GenClass extends BaseClass {
     }
     else {
       log.warning(L.l("Class '{0}' must belong to a package.",
-		      fullClassName));
+                      fullClassName));
 
       _packageName = "_dummy";
       setClassName(fullClassName);
@@ -115,7 +115,7 @@ public class GenClass extends BaseClass {
       out.println();
 
       for (int i = 0; i < _importList.size(); i++) {
-	out.println("import " + _importList.get(i) + ";");
+        out.println("import " + _importList.get(i) + ";");
       }
     }
 

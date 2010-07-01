@@ -67,8 +67,8 @@ abstract public class AbstractConstraint {
    */
   abstract public AuthorizationResult
     isAuthorized(HttpServletRequest request,
-		 HttpServletResponse response,
-		 ServletContext application)
+                 HttpServletResponse response,
+                 ServletContext application)
     throws ServletException, IOException;
 
   /**

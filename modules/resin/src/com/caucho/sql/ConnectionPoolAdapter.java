@@ -102,9 +102,9 @@ public class ConnectionPoolAdapter implements ConnectionPoolDataSource {
       throws SQLException
     {
       if (_conn != null)
-	return _conn;
+        return _conn;
       else
-	throw new SQLException(L.l("connection is not available because it has been closed."));
+        throw new SQLException(L.l("connection is not available because it has been closed."));
     }
 
     public void addConnectionEventListener(ConnectionEventListener listener)
@@ -130,7 +130,7 @@ public class ConnectionPoolAdapter implements ConnectionPoolDataSource {
       _conn = null;
 
       if (conn != null)
-	conn.close();
+        conn.close();
     }
   }
 }

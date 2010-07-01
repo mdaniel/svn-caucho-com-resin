@@ -74,7 +74,7 @@ public class MessageListenerSpec implements ActivationSpec {
   {
     if (! (ra instanceof ResourceAdapterImpl))
       throw new ResourceException(L.l("'{0}' is not a valid resource adapter for the JMS MessageListenerSpec",
-				      ra.getClass().getName()));
+                                      ra.getClass().getName()));
 
     _ra = (ResourceAdapterImpl) ra;
   }
@@ -125,9 +125,9 @@ public class MessageListenerSpec implements ActivationSpec {
       MessageListenerTask task = _endpoints.get(i);
 
       try {
-	task.release();
+        task.release();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 

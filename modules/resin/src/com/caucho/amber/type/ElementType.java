@@ -55,7 +55,7 @@ public class ElementType extends BeanType {
   private AmberField _valueField;
 
   public ElementType(AmberPersistenceUnit amberPersistenceUnit,
-		     AmberField valueField)
+                     AmberField valueField)
   {
     super(amberPersistenceUnit);
 

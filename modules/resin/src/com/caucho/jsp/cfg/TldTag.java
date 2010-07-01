@@ -165,15 +165,15 @@ public class TldTag implements DependencyBean {
       log.warning(_configLocation +  e);
 
       if (_configException == null)
-	_configException = new JspLineParseException(_configLocation + e);
+        _configException = new JspLineParseException(_configLocation + e);
 
       return;
     }
 
     if (! Tag.class.isAssignableFrom(tagClass)
-	&& ! SimpleTag.class.isAssignableFrom(tagClass))
+        && ! SimpleTag.class.isAssignableFrom(tagClass))
       throw new ConfigException(L.l("{0} must either implement Tag or SimpleTag.",
-				    tagClass.getName()));
+                                    tagClass.getName()));
   }
 
   /**
@@ -227,7 +227,7 @@ public class TldTag implements DependencyBean {
       log.warning(_configLocation +  e);
 
       if (_configException == null)
-	_configException = new JspParseException(_configLocation + e);
+        _configException = new JspParseException(_configLocation + e);
 
       return;
     }
@@ -257,13 +257,13 @@ public class TldTag implements DependencyBean {
   {
     try {
       if (_teiClassName == null)
-	return null;
+        return null;
       else {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
-	Class teiClass = Class.forName(_teiClassName, false, loader);
+        Class teiClass = Class.forName(_teiClassName, false, loader);
 
-	return (TagExtraInfo) teiClass.newInstance();
+        return (TagExtraInfo) teiClass.newInstance();
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -395,7 +395,7 @@ public class TldTag implements DependencyBean {
       scope = VariableInfo.AT_END;
     else
       throw new ConfigException(L.l("{0} expects a valid scope at `{1}'",
-				    variable.getNameGiven(), scopeName));
+                                    variable.getNameGiven(), scopeName));
 
     varInfo = new TagVariableInfo(variable.getNameGiven(),
                                   variable.getNameFromAttribute(),
@@ -434,12 +434,12 @@ public class TldTag implements DependencyBean {
     TagAttributeInfo attrInfo;
 
     if (attribute.getDeferredValue() != null
-	&& _taglib != null
-	&& _taglib.getJspVersion() != null
-	&& _taglib.getJspVersion().compareTo("2.1") < 0) {
+        && _taglib != null
+        && _taglib.getJspVersion() != null
+        && _taglib.getJspVersion().compareTo("2.1") < 0) {
       // jsp/18u9
       throw new ConfigException(L.l("<deferred-value> for tag '{0}' requires a taglib with jsp-version 2.1 or later",
-				    getName()));
+                                    getName()));
     }
 
     Class type = attribute.getType();
@@ -447,12 +447,12 @@ public class TldTag implements DependencyBean {
                                     attribute.getRequired(),
                                     type == null ? null : type.getName(),
                                     attribute.getRtexprvalue(),
-				    attribute.isFragment(),
-				    attribute.getDescription(),
-				    attribute.getDeferredValue() != null,
-				    attribute.getDeferredMethod() != null,
-				    attribute.getExpectedType(),
-				    attribute.getDeferredMethodSignature());
+                                    attribute.isFragment(),
+                                    attribute.getDescription(),
+                                    attribute.getDeferredValue() != null,
+                                    attribute.getDeferredMethod() != null,
+                                    attribute.getExpectedType(),
+                                    attribute.getDeferredMethodSignature());
     
     _attributeList.add(attrInfo);
   }

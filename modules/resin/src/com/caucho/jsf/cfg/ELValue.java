@@ -77,7 +77,7 @@ public class ELValue implements AbstractValue
       ExpressionFactory factory = app.getExpressionFactory();
 
       factory.createValueExpression(new ScopeELContext(elContext),
-				    _exprString, _type);
+                                    _exprString, _type);
 
       _expr = factory.createValueExpression(elContext, _exprString, _type);
     }
@@ -87,7 +87,7 @@ public class ELValue implements AbstractValue
       scope = (ManagedBeanELResolver.Scope) elContext.getContext(ManagedBeanELResolver.Scope.class);
 
       if (scope != null && scope.getScope() < _scope)
-	throw new ELException(L.l("implicit scope is too short."));
+        throw new ELException(L.l("implicit scope is too short."));
     }
 
     Object value = _expr.getValue(elContext);
@@ -129,17 +129,17 @@ public class ELValue implements AbstractValue
       Integer objValue = _implicitMap.get(variable);
 
       if (objValue != null) {
-	int value = objValue;
+        int value = objValue;
 
-	if (value < _scope)
-	  _scope = value;
+        if (value < _scope)
+          _scope = value;
       }
       
       return null;
     }
   
     public ValueExpression setVariable(String variable,
-				       ValueExpression expr)
+                                       ValueExpression expr)
     {
       return expr;
     }

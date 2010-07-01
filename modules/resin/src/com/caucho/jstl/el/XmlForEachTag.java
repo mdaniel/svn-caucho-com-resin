@@ -137,11 +137,11 @@ public class XmlForEachTag extends TagSupport implements IterationTag {
       else if (obj instanceof Collection)
         _iterator = ((Collection) obj).iterator();
       else if (obj instanceof NodeList) {
-	NodeList nodeList = (NodeList) obj;
+        NodeList nodeList = (NodeList) obj;
         ArrayList<Object> list = new ArrayList<Object>();
 
-	for (int i = 0;  i < nodeList.getLength(); i++)
-	  list.add(nodeList.item(i));
+        for (int i = 0;  i < nodeList.getLength(); i++)
+          list.add(nodeList.item(i));
 
         _iterator = list.iterator();
       }
@@ -173,7 +173,7 @@ public class XmlForEachTag extends TagSupport implements IterationTag {
         pageContext.setAttribute(_varStatus, new Status());
 
       if (value instanceof Node)
-	pageContext.setNodeEnv((Node) value);
+        pageContext.setNodeEnv((Node) value);
 
       return EVAL_BODY_INCLUDE;
     } catch (Exception e) {

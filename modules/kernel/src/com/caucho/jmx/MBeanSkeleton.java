@@ -90,11 +90,11 @@ public class MBeanSkeleton {
 
     if (method != null) {
       try {
-	return method.invoke(object, (Object []) null);
+        return method.invoke(object, (Object []) null);
       } catch (IllegalAccessException e) {
-	throw new ReflectionException(e);
+        throw new ReflectionException(e);
       } catch (InvocationTargetException e) {
-	throw new ReflectionException(e);
+        throw new ReflectionException(e);
       }
     }
     else if (name.equals("resin-api"))

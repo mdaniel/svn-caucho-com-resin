@@ -69,19 +69,19 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
       try {
         Map<String,String> props = Jmx.copyContextProperties(_classLoader);
 
-	props.put("type", getType());
+        props.put("type", getType());
 
-	String name = getName();
-	if (name != null) {
-	  if (name.indexOf(':') >= 0)
-	    name = ObjectName.quote(name);
-	  
-	  props.put("name", name);
-	}
+        String name = getName();
+        if (name != null) {
+          if (name.indexOf(':') >= 0)
+            name = ObjectName.quote(name);
 
-	addObjectNameProperties(props);
+          props.put("name", name);
+        }
 
-	_objectName = Jmx.getObjectName("resin", props);
+        addObjectNameProperties(props);
+
+        _objectName = Jmx.getObjectName("resin", props);
       } catch (MalformedObjectNameException e) {
         throw new RuntimeException(e);
       }
@@ -111,10 +111,10 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
       String className = interfaces[i].getName();
       
       if (className.endsWith("MXBean")) {
-	int p = className.lastIndexOf('.');
-	int q = className.indexOf("MXBean");
+        int p = className.lastIndexOf('.');
+        int q = className.indexOf("MXBean");
 
-	return className.substring(p + 1, q);
+        return className.substring(p + 1, q);
       }
     }
 

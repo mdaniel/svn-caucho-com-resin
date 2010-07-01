@@ -101,16 +101,16 @@ public class ResourceArchiveManager {
 
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
+        EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
 
-	ResourceArchiveManager manager = _localManager.getLevel(envLoader);
+        ResourceArchiveManager manager = _localManager.getLevel(envLoader);
 
-	if (manager != null) {
-	  ResourceArchive ra = manager.getResourceArchive(name);
+        if (manager != null) {
+          ResourceArchive ra = manager.getResourceArchive(name);
 
-	  if (ra != null)
-	    return ra;
-	}
+          if (ra != null)
+            return ra;
+        }
       }
     }
 
@@ -126,7 +126,7 @@ public class ResourceArchiveManager {
       ResourceArchive ra = _resources.get(i);
 
       if (type.equals(ra.getDisplayName()))
-	return ra;
+        return ra;
     }
     
     for (int i = 0; i < _resources.size(); i++) {
@@ -134,25 +134,25 @@ public class ResourceArchiveManager {
 
       ResourceAdapterConfig raConfig =  ra.getResourceAdapter();
       if (raConfig == null)
-	continue;
+        continue;
 
       Class resourceAdapterClass = raConfig.getResourceadapterClass();
       if (resourceAdapterClass != null
-	  && type.equals(resourceAdapterClass.getName()))
-	return ra;
+          && type.equals(resourceAdapterClass.getName()))
+        return ra;
     }
     
     for (int i = 0; i < _resources.size(); i++) {
       ResourceArchive ra = _resources.get(i);
       if (ra.getConnectionDefinition(type) != null)
-	return ra;
+        return ra;
     }
     
     for (int i = 0; i < _resources.size(); i++) {
       ResourceArchive ra = _resources.get(i);
       
       if (ra.getMessageListener(type) != null)
-	return ra;
+        return ra;
     }
 
     return null;
@@ -168,25 +168,25 @@ public class ResourceArchiveManager {
 
       ResourceAdapterConfig raConfig =  ra.getResourceAdapter();
       if (raConfig == null)
-	continue;
+        continue;
 
       Class resourceAdapterClass = raConfig.getResourceadapterClass();
 
       if (type.equals(resourceAdapterClass))
-	return ra;
+        return ra;
     }
     
     for (int i = 0; i < _resources.size(); i++) {
       ResourceArchive ra = _resources.get(i);
       if (ra.getConnectionDefinition(type.getName()) != null)
-	return ra;
+        return ra;
     }
     
     for (int i = 0; i < _resources.size(); i++) {
       ResourceArchive ra = _resources.get(i);
       
       if (ra.getMessageListener(type.getName()) != null)
-	return ra;
+        return ra;
     }
 
     return null;

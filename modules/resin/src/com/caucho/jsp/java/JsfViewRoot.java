@@ -66,7 +66,7 @@ public class JsfViewRoot extends JsfNode
       name = "beforePhaseListener";
 
     String setterName = ("set" + Character.toUpperCase(name.charAt(0))
-			 + name.substring(1));
+                         + name.substring(1));
 
     Method method = findSetter(UIViewRoot.class, setterName);
 
@@ -99,15 +99,15 @@ public class JsfViewRoot extends JsfNode
     }
     else {
       String setterName = ("set" + Character.toUpperCase(name.charAt(0))
-			   + name.substring(1));
+                           + name.substring(1));
 
       Method method = findSetter(UIViewRoot.class, setterName);
 
       if (method != null) {
-	_attrList.add(new Attr(name, method, value));
+        _attrList.add(new Attr(name, method, value));
       }
       else {
-	super.addAttribute(qName, value);
+        super.addAttribute(qName, value);
       }
     }
   }
@@ -156,7 +156,7 @@ public class JsfViewRoot extends JsfNode
     _bodyVar = "_jsp_body" + _gen.uniqueId();
 
     out.println("com.caucho.jsp.BodyContentImpl " + _bodyVar
-		+ " = (com.caucho.jsp.BodyContentImpl) pageContext.pushBody();");
+                + " = (com.caucho.jsp.BodyContentImpl) pageContext.pushBody();");
     out.println("out = " + _bodyVar + ";");
 
 
@@ -181,8 +181,8 @@ public class JsfViewRoot extends JsfNode
 
     if (isJsfParentRequired()) {
       out.println("request.setAttribute(\"caucho.jsf.parent\""
-		  + ", new com.caucho.jsp.jsf.JsfComponentTag("
-		  + _var + ", true, " + _bodyVar + "));");
+                  + ", new com.caucho.jsp.jsf.JsfComponentTag("
+                  + _var + ", true, " + _bodyVar + "));");
     }
 
     for (int i = 0; i < _attrList.size(); i++) {
@@ -192,29 +192,29 @@ public class JsfViewRoot extends JsfNode
       Class type = null;
 
       if (method != null)
-	type = method.getParameterTypes()[0];
+        type = method.getParameterTypes()[0];
       
       JspAttribute jspAttr = attr.getAttr();
       String value = attr.getValue();
 
       if (jspAttr != null) {
-	generateSetParameter(out, _var, jspAttr, method,
-			     true, null, false, false, null);
+        generateSetParameter(out, _var, jspAttr, method,
+                             true, null, false, false, null);
       }
       else if ((value.indexOf("#{") >= 0
-		&& ! ValueExpression.class.isAssignableFrom(type)
-		&& ! MethodExpression.class.isAssignableFrom(type))) {
-	out.print(_var + ".setValueExpression(\"" + attr.getName() + "\", ");
+                && ! ValueExpression.class.isAssignableFrom(type)
+                && ! MethodExpression.class.isAssignableFrom(type))) {
+        out.print(_var + ".setValueExpression(\"" + attr.getName() + "\", ");
 
-	String exprVar = "_caucho_value_expr_" + _gen.addValueExpr(value, type.getName());
-	
-	out.println(exprVar + ");");
+        String exprVar = "_caucho_value_expr_" + _gen.addValueExpr(value, type.getName());
+
+        out.println(exprVar + ");");
       }
       else if (attr.getName().equals("beforePhaseListener")
-	       || attr.getName().equals("afterPhaseListener")) {
-	String exprVar = "_caucho_method_expr_" + _gen.addMethodExpr(value, "void foo(javax.faces.event.PhaseEvent)");
+               || attr.getName().equals("afterPhaseListener")) {
+        String exprVar = "_caucho_method_expr_" + _gen.addMethodExpr(value, "void foo(javax.faces.event.PhaseEvent)");
 
-	out.println(_var + "." + method.getName() + "(" + exprVar + ");");
+        out.println(_var + "." + method.getName() + "(" + exprVar + ");");
       } else if (attr.getName().equals("locale")){
         out.print(_var + "." + method.getName() + "(");
 
@@ -222,13 +222,13 @@ public class JsfViewRoot extends JsfNode
 
         if (values.length > 2)
           out.print("new java.util.Locale(\"" +values[0]
-		    + "\",\"" + values[1]
-		    + "\",\"" + values[2]
-		    + "\")");
+                    + "\",\"" + values[1]
+                    + "\",\"" + values[2]
+                    + "\")");
         else if (values.length > 1)
           out.print("new java.util.Locale(\"" + values[0]
-		    + "\",\"" + values[1]
-		    + "\")");
+                    + "\",\"" + values[1]
+                    + "\")");
 
         else
           out.print("new java.util.Locale(\"" + value + "\")");
@@ -236,11 +236,11 @@ public class JsfViewRoot extends JsfNode
         out.println(");");
       }
       else {
-	out.print(_var + "." + method.getName() + "(");
+        out.print(_var + "." + method.getName() + "(");
 
-	out.print(generateParameterValue(type, value, true, null, false));
-	
-	out.println(");");
+        out.print(generateParameterValue(type, value, true, null, false));
+
+        out.println(");");
       }
     }
       
@@ -262,9 +262,9 @@ public class JsfViewRoot extends JsfNode
 
     for (PersistentDependency pDepend : _gen.getDependList()) {
       if (pDepend instanceof Depend) {
-	Depend depend = (Depend) pDepend;
+        Depend depend = (Depend) pDepend;
 
-	digest = 65521 * digest + depend.getDigest();
+        digest = 65521 * digest + depend.getDigest();
       }
     }
 

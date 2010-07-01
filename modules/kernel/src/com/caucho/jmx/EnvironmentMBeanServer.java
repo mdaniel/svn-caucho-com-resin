@@ -67,19 +67,19 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
     
     MBeanContext context = new MBeanContext(this, systemLoader, delegate,
-					    null);
+                                            null);
 
     _globalContext = context;
 
     _localContext.setGlobal(context);
-	
+
     try {
       IntrospectionMBean mbean;
       mbean = new IntrospectionMBean(delegate, MBeanServerDelegateMBean.class);
 
       MBeanWrapper mbeanWrapper;
       mbeanWrapper = new MBeanWrapper(context, SERVER_DELEGATE_NAME,
-				      delegate, mbean);
+                                      delegate, mbean);
 
       context.registerMBean(mbeanWrapper, SERVER_DELEGATE_NAME);
     } catch (Exception e) {
@@ -96,38 +96,38 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
       MBeanContext context = _localContext.getLevel(loader);
 
       if (context == null) {
-	if (loader instanceof DynamicClassLoader
-	    && ((DynamicClassLoader) loader).isDestroyed())
-	  throw new IllegalStateException(L.l("JMX context {0} has been closed.",
-					      loader));
-	
-	MBeanServerDelegate delegate;
-	delegate = new MBeanServerDelegateImpl("Resin-JMX");
+        if (loader instanceof DynamicClassLoader
+            && ((DynamicClassLoader) loader).isDestroyed())
+          throw new IllegalStateException(L.l("JMX context {0} has been closed.",
+                                              loader));
 
-	context = new MBeanContext(this, loader, delegate, _globalContext);
+        MBeanServerDelegate delegate;
+        delegate = new MBeanServerDelegateImpl("Resin-JMX");
 
-	MBeanContext parent = null;
+        context = new MBeanContext(this, loader, delegate, _globalContext);
 
-	if (loader != null)
-	  parent = createContext(loader.getParent());
+        MBeanContext parent = null;
 
-	if (parent != null)
-	  context.setProperties(parent.copyProperties());
+        if (loader != null)
+          parent = createContext(loader.getParent());
 
-	_localContext.set(context, loader);
-	
-	try {
-	  IntrospectionMBean mbean;
-	  mbean = new IntrospectionMBean(delegate, MBeanServerDelegateMBean.class);
+        if (parent != null)
+          context.setProperties(parent.copyProperties());
 
-	  MBeanWrapper mbeanWrapper;
-	  mbeanWrapper = new MBeanWrapper(context, SERVER_DELEGATE_NAME,
-					  delegate, mbean);
+        _localContext.set(context, loader);
 
-	  context.registerMBean(mbeanWrapper, SERVER_DELEGATE_NAME);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          IntrospectionMBean mbean;
+          mbean = new IntrospectionMBean(delegate, MBeanServerDelegateMBean.class);
+
+          MBeanWrapper mbeanWrapper;
+          mbeanWrapper = new MBeanWrapper(context, SERVER_DELEGATE_NAME,
+                                          delegate, mbean);
+
+          context.registerMBean(mbeanWrapper, SERVER_DELEGATE_NAME);
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       return context;
@@ -159,8 +159,8 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
     
     synchronized (_localContext) {
       if (_localContext.getLevel(loader) != null
-	  && _localContext.getLevel(loader) != context)
-	throw new IllegalStateException(L.l("replacing context is forbidden"));
+          && _localContext.getLevel(loader) != context)
+        throw new IllegalStateException(L.l("replacing context is forbidden"));
       
       _localContext.set(context, loader);
     }

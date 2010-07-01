@@ -43,13 +43,13 @@ class OtherEntities extends HtmlEntities {
   {
     if (version == 0 || version >= 4.0) {
       if (_html40 == null)
-	_html40 = new OtherEntities(4.0);
+        _html40 = new OtherEntities(4.0);
       
       return _html40;
     }
     else {
       if (_html32 == null)
-	_html32 = new OtherEntities(3.2);
+        _html32 = new OtherEntities(3.2);
       
       return _html32;
     }
@@ -70,46 +70,46 @@ class OtherEntities extends HtmlEntities {
 
       // ASCII codes use the standard escapes
       if (ch == '&') {
-	if (i + 1 < length && text[i + 1] == '{')
-	  os.print('&');
-	else if (attr)
-	  os.print(_attrLatin1[ch]);
+        if (i + 1 < length && text[i + 1] == '{')
+          os.print('&');
+        else if (attr)
+          os.print(_attrLatin1[ch]);
         else
-	  os.print(_latin1[ch]);
+          os.print(_latin1[ch]);
       }
       else if (ch == '"') {
-	if (attr)
-	  os.print("&quot;");
-	else
-	  os.print('"');
+        if (attr)
+          os.print("&quot;");
+        else
+          os.print('"');
       }
       else if (ch == '<') {
-	if (attr)
-	  os.print('<');
-	else
-	  os.print("&lt;");
+        if (attr)
+          os.print('<');
+        else
+          os.print("&lt;");
       }
       else if (ch == '>') {
-	if (attr)
-	  os.print('>');
-	else
-	  os.print("&gt;");
+        if (attr)
+          os.print('>');
+        else
+          os.print("&gt;");
       }
       else if (ch < 161)
-	os.print(_latin1[ch]);
+        os.print(_latin1[ch]);
       else {
-	try {
-	  os.print(ch);
-	} catch (IOException e) {
-	  char []value = getSparseEntity(ch);
-	  if (value != null) {
-	    os.print(value);
-	  } else {
-	    os.print("&#");
-	    os.print((int) ch);
-	    os.print(";");
-	  }
-	}
+        try {
+          os.print(ch);
+        } catch (IOException e) {
+          char []value = getSparseEntity(ch);
+          if (value != null) {
+            os.print(value);
+          } else {
+            os.print("&#");
+            os.print((int) ch);
+            os.print(";");
+          }
+        }
       }
     }
   }

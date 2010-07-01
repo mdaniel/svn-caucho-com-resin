@@ -55,7 +55,7 @@ class ESArrayWrap extends ESJavaWrapper {
       int iValue = (int) value;
 
       if (iValue == value)
-	return getProperty(iValue);
+        return getProperty(iValue);
 
       return super.getProperty(name);
     } catch (Exception e) {
@@ -73,9 +73,9 @@ class ESArrayWrap extends ESJavaWrapper {
       int index = (int) dIndex;
 
       if (index == dIndex)
-	setProperty(index, value);
+        setProperty(index, value);
       else
-	super.setProperty(name, value);
+        super.setProperty(name, value);
     } catch (Exception e) {
       super.setProperty(name, value);
     }
@@ -91,9 +91,9 @@ class ESArrayWrap extends ESJavaWrapper {
       int index = (int) dIndex;
 
       if (index == dIndex)
-	return delete(index);
+        return delete(index);
       else
-	return super.delete(name);
+        return super.delete(name);
     } catch (Exception e) {
       return super.delete(name);
     }
@@ -107,9 +107,9 @@ class ESArrayWrap extends ESJavaWrapper {
     public Object next()
     {
       try {
-	return i < length ? getProperty(i++) : ESBase.esNull;
+        return i < length ? getProperty(i++) : ESBase.esNull;
       } catch (Throwable e) {
-	return ESBase.esNull;
+        return ESBase.esNull;
       }
     }
 

@@ -45,8 +45,8 @@ abstract public class BinaryValue extends BaseValue {
   
   public String getString()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException
+           IllegalStateException,
+           RepositoryException
   {
     StringBuilder sb = new StringBuilder();
 
@@ -57,7 +57,7 @@ abstract public class BinaryValue extends BaseValue {
       int ch;
 
       while ((ch = is.read()) >= 0) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
 
       return sb.toString();
@@ -68,7 +68,7 @@ abstract public class BinaryValue extends BaseValue {
   
   abstract public InputStream getStream()
     throws IllegalStateException,
-	   RepositoryException;
+           RepositoryException;
   
   public int getType()
   {

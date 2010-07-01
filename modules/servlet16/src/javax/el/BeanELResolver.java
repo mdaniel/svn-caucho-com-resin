@@ -79,7 +79,7 @@ public class BeanELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
-							   Object base)
+                                                           Object base)
   {
     if (base == null)
       return null;
@@ -89,11 +89,11 @@ public class BeanELResolver extends ELResolver {
 
     if (props == null) {
       if (cl.isArray()
-	  || Collection.class.isAssignableFrom(cl)
-	  || Map.class.isAssignableFrom(cl)) {
-	return null;
+          || Collection.class.isAssignableFrom(cl)
+          || Map.class.isAssignableFrom(cl)) {
+        return null;
       }
-	  
+
       props = new BeanProperties(cl);
       setProps(cl, props);
     }
@@ -163,8 +163,8 @@ public class BeanELResolver extends ELResolver {
 
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base == null || property == null)
       return null;
@@ -179,11 +179,11 @@ public class BeanELResolver extends ELResolver {
 
     if (props == null) {
       if (cl.isArray()
-	  || Collection.class.isAssignableFrom(cl)
-	  || Map.class.isAssignableFrom(cl)) {
-	return null;
+          || Collection.class.isAssignableFrom(cl)
+          || Map.class.isAssignableFrom(cl)) {
+        return null;
       }
-	  
+
       props = new BeanProperties(cl);
       setProps(cl, props);
     }
@@ -206,8 +206,8 @@ public class BeanELResolver extends ELResolver {
 
   @Override
   public boolean isReadOnly(ELContext env,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     if (base == null)
       return false;
@@ -218,7 +218,7 @@ public class BeanELResolver extends ELResolver {
       env.setPropertyResolved(true);
 
       if (_isReadOnly)
-	return true;
+        return true;
 
       BeanProperty prop = props.getBeanProperty((String) property);
 
@@ -231,9 +231,9 @@ public class BeanELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base == null)
       return;
@@ -248,11 +248,11 @@ public class BeanELResolver extends ELResolver {
 
     if (props == null) {
       if (cl.isArray()
-	  || Collection.class.isAssignableFrom(cl)
-	  || Map.class.isAssignableFrom(cl)) {
-	return;
+          || Collection.class.isAssignableFrom(cl)
+          || Map.class.isAssignableFrom(cl)) {
+        return;
       }
-	  
+
       props = new BeanProperties(cl);
       setProps(cl, props);
     }
@@ -317,8 +317,8 @@ public class BeanELResolver extends ELResolver {
   }
 
   private BeanProperties getProp(ELContext context,
-				 Object base,
-				 Object property)
+                                 Object base,
+                                 Object property)
   {
     if (base == null || ! (property instanceof String))
       return null;
@@ -333,11 +333,11 @@ public class BeanELResolver extends ELResolver {
 
     if (props == null) {
       if (cl.isArray()
-	  || Collection.class.isAssignableFrom(cl)
-	  || Map.class.isAssignableFrom(cl)) {
-	return null;
+          || Collection.class.isAssignableFrom(cl)
+          || Map.class.isAssignableFrom(cl)) {
+        return null;
       }
-	  
+
       props = new BeanProperties(cl);
       setProps(cl, props);
     }
@@ -351,9 +351,9 @@ public class BeanELResolver extends ELResolver {
       SoftReference<BeanProperties> ref = _classMap.get(cl);
 
       if (ref != null)
-	return ref.get();
+        return ref.get();
       else
-	return null;
+        return null;
     }
   }
 
@@ -376,46 +376,46 @@ public class BeanELResolver extends ELResolver {
       _base = baseClass;
 
       try {
-	BeanInfo info = Introspector.getBeanInfo(baseClass);
+        BeanInfo info = Introspector.getBeanInfo(baseClass);
 
-	for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
-	  _propMap.put(descriptor.getName(),
-		       new BeanProperty(baseClass, descriptor));
-	}
+        for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
+          _propMap.put(descriptor.getName(),
+                       new BeanProperty(baseClass, descriptor));
+        }
 
-	Method []methods = baseClass.getMethods();
+        Method []methods = baseClass.getMethods();
 
-	for (int i = 0; i < methods.length; i++) {
-	  Method method = methods[i];
+        for (int i = 0; i < methods.length; i++) {
+          Method method = methods[i];
 
-	  String name = method.getName();
+          String name = method.getName();
 
-	  if (method.getParameterTypes().length != 0)
-	    continue;
+          if (method.getParameterTypes().length != 0)
+            continue;
 
-	  if (! Modifier.isPublic(method.getModifiers()))
-	    continue;
+          if (! Modifier.isPublic(method.getModifiers()))
+            continue;
 
-	  if (Modifier.isStatic(method.getModifiers()))
-	    continue;
+          if (Modifier.isStatic(method.getModifiers()))
+            continue;
 
-	  String propName;
-	  if (name.startsWith("get"))
-	    propName = Introspector.decapitalize(name.substring(3));
-	  else if (name.startsWith("is"))
-	    propName = Introspector.decapitalize(name.substring(2));
-	  else
-	    continue;
+          String propName;
+          if (name.startsWith("get"))
+            propName = Introspector.decapitalize(name.substring(3));
+          else if (name.startsWith("is"))
+            propName = Introspector.decapitalize(name.substring(2));
+          else
+            continue;
 
-	  if (_propMap.get(propName) != null)
-	    continue;
+          if (_propMap.get(propName) != null)
+            continue;
 
-	  _propMap.put(propName, new BeanProperty(baseClass,
-						  propName,
-						  method));
-	}
+          _propMap.put(propName, new BeanProperty(baseClass,
+                                                  propName,
+                                                  method));
+        }
       } catch (IntrospectionException e) {
-	throw new ELException(e);
+        throw new ELException(e);
       }
     }
 
@@ -436,7 +436,7 @@ public class BeanELResolver extends ELResolver {
     private Method _readMethod;
     
     public BeanProperty(Class<?> baseClass,
-			PropertyDescriptor descriptor)
+                        PropertyDescriptor descriptor)
     {
       _base = baseClass;
       _descriptor = descriptor;
@@ -452,7 +452,7 @@ public class BeanELResolver extends ELResolver {
       }
 
       if (_readMethod != null)
-	_readMethod.setAccessible(true);
+        _readMethod.setAccessible(true);
 
       initDescriptor();
     }
@@ -462,8 +462,8 @@ public class BeanELResolver extends ELResolver {
                          Method getter)
     {
       try {
-	_base = baseClass;
-	_descriptor = new PropertyDescriptor(name, getter, null);
+        _base = baseClass;
+        _descriptor = new PropertyDescriptor(name, getter, null);
 
         //create a copy of the method
         if (getter != null)
@@ -473,7 +473,7 @@ public class BeanELResolver extends ELResolver {
         if (_readMethod != null)
           getter.setAccessible(true);
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
 
       initDescriptor();
@@ -484,10 +484,10 @@ public class BeanELResolver extends ELResolver {
       Method readMethod = _readMethod;
 
       if (readMethod != null)
-	_descriptor.setValue(ELResolver.TYPE, readMethod.getReturnType());
-	
+        _descriptor.setValue(ELResolver.TYPE, readMethod.getReturnType());
+
       _descriptor.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME,
-			   Boolean.TRUE);
+                           Boolean.TRUE);
     }
 
     private PropertyDescriptor getDescriptor()

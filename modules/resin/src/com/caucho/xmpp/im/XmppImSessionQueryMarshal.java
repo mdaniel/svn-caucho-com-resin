@@ -97,17 +97,17 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
 
     while ((tag = in.nextTag()) > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return new ImSessionQuery();
+        return new ImSessionQuery();
       }
       else {
-	log.warning(this + " unexpected tag " + in.getLocalName());
+        log.warning(this + " unexpected tag " + in.getLocalName());
 
-	skipToEnd(in, "session");
-	
-	return null;
+        skipToEnd(in, "session");
+
+        return null;
       }
     }
 

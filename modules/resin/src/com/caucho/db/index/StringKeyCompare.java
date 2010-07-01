@@ -37,7 +37,7 @@ public class StringKeyCompare extends KeyCompare {
    * Compares the key to the block data.
    */
   public int compare(byte []keyBuffer, int keyOffset,
-		     byte []block, int offset, int length)
+                     byte []block, int offset, int length)
   {
     int keyLen = keyBuffer[keyOffset] & 0xff;
     int blockLen = block[offset] & 0xff;
@@ -54,9 +54,9 @@ public class StringKeyCompare extends KeyCompare {
       int ch2 = block[offset + i] & 0xff;
 
       if (ch1 < ch2)
-	return -1;
+        return -1;
       else if (ch2 < ch1)
-	return 1;
+        return 1;
     }
 
     if (keyLen == blockLen)
@@ -83,7 +83,7 @@ public class StringKeyCompare extends KeyCompare {
       int ch = (ch1 << 8) + ch2;
 
       if (ch == 0)
-	break;
+        break;
       
       sb.append((char) ch);
     }

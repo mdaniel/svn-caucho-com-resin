@@ -191,7 +191,7 @@ public class WebDavServlet extends GenericServlet {
     if (secure == null) {
     }
     else if ("false".equalsIgnoreCase(secure) ||
-	     "no".equalsIgnoreCase(secure))
+             "no".equalsIgnoreCase(secure))
       _needsSecure = false;
     else
       _needsSecure = true;
@@ -284,55 +284,55 @@ public class WebDavServlet extends GenericServlet {
 
     try {
       if ("0".equals(depthString))
-	depth = 0;
+        depth = 0;
       else if ("1".equals(depthString))
-	depth = 1;
+        depth = 1;
 
       if (req.getMethod().equals("OPTIONS")) {
-	res.setHeader("DAV", "1");
+        res.setHeader("DAV", "1");
 
-	res.setHeader("MS-Author-Via", "DAV");
-	if (_enableWrite)
-	  res.setHeader("Allow", "OPTIONS, PROPFIND, GET, HEAD, PUT, MKCOL, DELETE, COPY, MOVE, PROPPATCH");
-	else if (_enable)
-	  res.setHeader("Allow", "OPTIONS, PROPFIND, GET, HEAD");
+        res.setHeader("MS-Author-Via", "DAV");
+        if (_enableWrite)
+          res.setHeader("Allow", "OPTIONS, PROPFIND, GET, HEAD, PUT, MKCOL, DELETE, COPY, MOVE, PROPPATCH");
+        else if (_enable)
+          res.setHeader("Allow", "OPTIONS, PROPFIND, GET, HEAD");
       }
       else if (req.getMethod().equals("PROPFIND")) {
-	handlePropfind(req, res, out, depth);
+        handlePropfind(req, res, out, depth);
       }
       else if (req.getMethod().equals("GET") ||
-	       req.getMethod().equals("HEAD")) {
-	handleGet(req, res, out);
+               req.getMethod().equals("HEAD")) {
+        handleGet(req, res, out);
       }
       else if (req.getMethod().equals("PUT") && _enableWrite) {
-	handlePut(req, res, out);
+        handlePut(req, res, out);
       }
       else if (req.getMethod().equals("MKCOL") && _enableWrite) {
-	handleMkcol(req, res, out);
+        handleMkcol(req, res, out);
       }
       else if (req.getMethod().equals("DELETE") && _enableWrite) {
-	handleDelete(req, res, out);
+        handleDelete(req, res, out);
       }
       else if (req.getMethod().equals("COPY") && _enableWrite) {
-	handleCopy(req, res, out, depth);
+        handleCopy(req, res, out, depth);
       }
       else if (req.getMethod().equals("MOVE") && _enableWrite) {
-	handleMove(req, res, out);
+        handleMove(req, res, out);
       }
       else if (req.getMethod().equals("PROPPATCH") && _enableWrite) {
-	handleProppatch(req, res, out, depth);
+        handleProppatch(req, res, out, depth);
       }
       else if (! _enableWrite &&
-	       "PUT".equals(req.getMethod()) ||
-	       "MKCOL".equals(req.getMethod()) ||
-	       "DELETE".equals(req.getMethod()) ||
-	       "COPY".equals(req.getMethod()) ||
-	       "MOVE".equals(req.getMethod()) ||
-	       "PROPPATCH".equals(req.getMethod())) {
-	res.sendError(res.SC_FORBIDDEN);
+               "PUT".equals(req.getMethod()) ||
+               "MKCOL".equals(req.getMethod()) ||
+               "DELETE".equals(req.getMethod()) ||
+               "COPY".equals(req.getMethod()) ||
+               "MOVE".equals(req.getMethod()) ||
+               "PROPPATCH".equals(req.getMethod())) {
+        res.sendError(res.SC_FORBIDDEN);
       }
       else {
-	res.sendError(res.SC_NOT_IMPLEMENTED, "Method not implemented");
+        res.sendError(res.SC_NOT_IMPLEMENTED, "Method not implemented");
       }
     } finally {
       out.close();
@@ -341,7 +341,7 @@ public class WebDavServlet extends GenericServlet {
 
   private void handlePropfind(HttpServletRequest req,
                               HttpServletResponse res,
-			      WriteStream out,
+                              WriteStream out,
                               int depth)
     throws ServletException, IOException
   {
@@ -394,7 +394,7 @@ public class WebDavServlet extends GenericServlet {
    */
   private void handleProppatch(HttpServletRequest req,
                                HttpServletResponse res,
-			       WriteStream out,
+                               WriteStream out,
                                int depth)
     throws ServletException, IOException
   {
@@ -468,7 +468,7 @@ public class WebDavServlet extends GenericServlet {
   
   private void handlePut(HttpServletRequest req,
                          HttpServletResponse res,
-			 WriteStream out)
+                         WriteStream out)
     throws ServletException, IOException
   {
     ServletContext app = getServletContext();
@@ -512,7 +512,7 @@ public class WebDavServlet extends GenericServlet {
    */
   private void handleMkcol(HttpServletRequest req,
                            HttpServletResponse res,
-			   WriteStream out)
+                           WriteStream out)
     throws ServletException, IOException
   {
     res.setContentType("text/xml; charset=\"utf-8\"");
@@ -553,9 +553,9 @@ public class WebDavServlet extends GenericServlet {
   }
 
   private void addAllProperties(ArrayList<AttributeName> properties,
-				String pathInfo,
+                                String pathInfo,
                                 HttpServletRequest req,
-				WebApp app)
+                                WebApp app)
     throws IOException, ServletException
   {
     properties.add(new AttributeName("DAV:", "resourcetype", "D:resourcetype"));
@@ -791,7 +791,7 @@ public class WebDavServlet extends GenericServlet {
   
   private void handleDelete(HttpServletRequest req,
                             HttpServletResponse res,
-			    WriteStream out)
+                            WriteStream out)
     throws ServletException, IOException
   {
     ServletContext app = getServletContext();
@@ -867,7 +867,7 @@ public class WebDavServlet extends GenericServlet {
   
   private void handleCopy(HttpServletRequest req,
                           HttpServletResponse res,
-			  WriteStream out,
+                          WriteStream out,
                           int depth)
     throws ServletException, IOException
   {
@@ -1018,7 +1018,7 @@ public class WebDavServlet extends GenericServlet {
   
   private void handleMove(HttpServletRequest req,
                           HttpServletResponse res,
-			  WriteStream out)
+                          WriteStream out)
     throws ServletException, IOException
   {
     ServletContext app = getServletContext();
@@ -1183,8 +1183,8 @@ public class WebDavServlet extends GenericServlet {
    * Grabs all the properties from a path.
    */
   private HashMap<AttributeName,String> getProperties(String pathInfo,
-						      HttpServletRequest req,
-						      ServletContext app)
+                                                      HttpServletRequest req,
+                                                      ServletContext app)
     throws IOException
   {
     HashMap<AttributeName,String> properties = null;
@@ -1227,7 +1227,7 @@ public class WebDavServlet extends GenericServlet {
   
   private void handleGet(HttpServletRequest req,
                          HttpServletResponse res,
-			 WriteStream out)
+                         WriteStream out)
     throws ServletException, IOException
   {
     ServletContext app = getServletContext();
@@ -1267,7 +1267,7 @@ public class WebDavServlet extends GenericServlet {
   }
 
   protected void startMultistatus(HttpServletResponse res,
-				  WriteStream out)
+                                  WriteStream out)
     throws IOException
   {
     res.setStatus(207, "Multistatus");
@@ -1278,7 +1278,7 @@ public class WebDavServlet extends GenericServlet {
   }
   
   protected void sendError(HttpServletResponse res,
-			   WriteStream out,
+                           WriteStream out,
                            int status, String statusText, String message)
     throws IOException
   {
@@ -1310,7 +1310,7 @@ public class WebDavServlet extends GenericServlet {
 
   private void handleDirectory(HttpServletRequest req,
                                HttpServletResponse res,
-			       WriteStream out,
+                               WriteStream out,
                                String pathInfo)
     throws IOException, ServletException
   {
@@ -1391,7 +1391,7 @@ public class WebDavServlet extends GenericServlet {
     }
 
     public void startElement (String uri, String localName,
-			      String qName, Attributes attributes)
+                              String qName, Attributes attributes)
       throws SAXException
     {
       if (localName.equals("prop"))
@@ -1407,7 +1407,7 @@ public class WebDavServlet extends GenericServlet {
     }
 
     public void endElement (String uri, String localName, String qName)
-	throws SAXException
+        throws SAXException
     {
       if (localName.equals("prop"))
         inProp = false;
@@ -1469,7 +1469,7 @@ public class WebDavServlet extends GenericServlet {
     }
 
     public void endElement (String uri, String localName, String qName)
-	throws SAXException
+        throws SAXException
     {
       if (localName.equals("prop"))
         _inProp = false;
@@ -1483,15 +1483,15 @@ public class WebDavServlet extends GenericServlet {
                uri.equals(_attributeName.getNamespace())) {
         if (_inSet) {
           _commands.add(new ProppatchCommand(ProppatchCommand.SET,
-					     _attributeName,
-					     _value.close()));
+                                             _attributeName,
+                                             _value.close()));
         }
         else if (_inRemove) {
           _commands.add(new ProppatchCommand(ProppatchCommand.REMOVE,
-					     _attributeName,
-					     _value.close()));
+                                             _attributeName,
+                                             _value.close()));
         }
-	
+
         _value = null;
         _attributeName = null;
       }

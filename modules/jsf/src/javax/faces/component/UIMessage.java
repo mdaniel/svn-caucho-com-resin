@@ -133,27 +133,27 @@ public class UIMessage extends UIComponentBase
   {
     if ("for".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_for = String.valueOf(expr.getValue(null));
-	return;
+        _for = String.valueOf(expr.getValue(null));
+        return;
       }
       else
-	_forExpr = expr;
+        _forExpr = expr;
     }
     else if ("showDetail".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_showDetail = Util.booleanValueOf(expr.getValue(null));
-	return;
+        _showDetail = Util.booleanValueOf(expr.getValue(null));
+        return;
       }
       else
-	_showDetailExpr = expr;
+        _showDetailExpr = expr;
     }
     else if ("showSummary".equals(name)) {
       if (expr != null && expr.isLiteralText()) {
-	_showSummary = Util.booleanValueOf(expr.getValue(null));
-	return;
+        _showSummary = Util.booleanValueOf(expr.getValue(null));
+        return;
       }
       else
-	_showSummaryExpr = expr;
+        _showSummaryExpr = expr;
     }
 
     super.setValueExpression(name, expr);

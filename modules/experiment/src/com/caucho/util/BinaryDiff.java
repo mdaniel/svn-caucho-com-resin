@@ -81,15 +81,15 @@ public class BinaryDiff {
       int sublen = readAll(oldFile, buffer);
 
       if (sublen < 0) {
-	TempBuffer.free(buf);
-	break;
+        TempBuffer.free(buf);
+        break;
       }
 
       _oldLength += sublen;
       _oldBuffers.add(buf);
 
       if (sublen < buffer.length)
-	break;
+        break;
     }
 
     _oldBytes = new byte[_oldBuffers.size()][];
@@ -125,34 +125,34 @@ public class BinaryDiff {
       int ch = data[offset / TempBuffer.SIZE][offset % TempBuffer.SIZE] & 0xff;
 
       if (charMin[ch] == 0)
-	charMin[ch] = i;
+        charMin[ch] = i;
 
       charMax[ch] = i + 1;
     }
   }
 
   private static void sort(int []suffixArray, byte [][]data,
-			   int bufLength, int chunkSize)
+                           int bufLength, int chunkSize)
   {
     int length = suffixArray.length;
     int dataLength = length * chunkSize;
 
     for (int i = 0; i < suffixArray.length - 1; i++) {
       for (int j = suffixArray.length - 2; i <= j; j--) {
-	int a = suffixArray[j];
-	int b = suffixArray[j + 1];
-	
-	if (suffixCompareTo(a, b, data, dataLength, bufLength) > 0) {
-	  int temp = suffixArray[j];
-	  suffixArray[j] = suffixArray[j + 1];
-	  suffixArray[j + 1] = temp;
-	}
+        int a = suffixArray[j];
+        int b = suffixArray[j + 1];
+
+        if (suffixCompareTo(a, b, data, dataLength, bufLength) > 0) {
+          int temp = suffixArray[j];
+          suffixArray[j] = suffixArray[j + 1];
+          suffixArray[j + 1] = temp;
+        }
       }
     }
   }
 
   private static int suffixCompareTo(int a, int b, byte [][]data,
-				     int length, int bufLength)
+                                     int length, int bufLength)
   {
     int sublen = length - a;
 
@@ -164,9 +164,9 @@ public class BinaryDiff {
       int b1 = data[b / bufLength][b % bufLength];
 
       if (a1 < b1)
-	return -1;
+        return -1;
       else if (b1 < a1)
-	return 1;
+        return 1;
 
       a++;
       b++;
@@ -203,87 +203,87 @@ public class BinaryDiff {
       byte ch2 = buffer[offset + 1];
 
       for (int i = min; i < max; i++) {
-	int suffixOffset = suffixArray[i];
-	int dataOffset = suffixOffset + 1;
+        int suffixOffset = suffixArray[i];
+        int dataOffset = suffixOffset + 1;
 
-	byte d1 = data[suffixOffset / TempBuffer.SIZE][suffixOffset % TempBuffer.SIZE];
-	byte d2 = data[dataOffset / TempBuffer.SIZE][dataOffset % TempBuffer.SIZE];
-	if (d2 == ch2) {
-	  dataOffset++;
-	  int bufOffset = offset + 2;
+        byte d1 = data[suffixOffset / TempBuffer.SIZE][suffixOffset % TempBuffer.SIZE];
+        byte d2 = data[dataOffset / TempBuffer.SIZE][dataOffset % TempBuffer.SIZE];
+        if (d2 == ch2) {
+          dataOffset++;
+          int bufOffset = offset + 2;
 
-	  match_loop:
-	  while (bufOffset < length && dataOffset < _oldLength) {
-	    byte bufCh = buffer[bufOffset];
-	    byte dataCh = data[dataOffset / TempBuffer.SIZE][dataOffset % TempBuffer.SIZE];
+          match_loop:
+          while (bufOffset < length && dataOffset < _oldLength) {
+            byte bufCh = buffer[bufOffset];
+            byte dataCh = data[dataOffset / TempBuffer.SIZE][dataOffset % TempBuffer.SIZE];
 
-	    if (bufCh == dataCh) {
-	      bufOffset += 1;
-	      dataOffset += 1;
-	    }
-	    else if (bufCh < dataCh) {
-	      if (dataOffset - suffixOffset >= minLength) {
-		if (prevOffset < offset)
-		  add(out, buffer, prevOffset, offset - prevOffset);
-		      
-		offset = bufOffset;
-		copy(out, suffixOffset, dataOffset - suffixOffset);
-		prevOffset = offset;
-		continue loop;
-	      }
-	      else
-		break;
-	    }
-	    else {
-	      for (i++; i < max; i++) {
-		int newSuffix = suffixArray[i];
-		int newOffset = newSuffix + (dataOffset - suffixOffset);
+            if (bufCh == dataCh) {
+              bufOffset += 1;
+              dataOffset += 1;
+            }
+            else if (bufCh < dataCh) {
+              if (dataOffset - suffixOffset >= minLength) {
+                if (prevOffset < offset)
+                  add(out, buffer, prevOffset, offset - prevOffset);
 
-		boolean isMatch = true;
-		for (int j = newOffset; newSuffix <= j; j--) {
-		  dataCh = data[j / TempBuffer.SIZE][j % TempBuffer.SIZE];
-		  bufCh = buffer[offset + (j - newSuffix)];
-		  
-		  if (bufCh != dataCh) {
-		    isMatch = false;
-		    break;
-		  }
-		}
+                offset = bufOffset;
+                copy(out, suffixOffset, dataOffset - suffixOffset);
+                prevOffset = offset;
+                continue loop;
+              }
+              else
+                break;
+            }
+            else {
+              for (i++; i < max; i++) {
+                int newSuffix = suffixArray[i];
+                int newOffset = newSuffix + (dataOffset - suffixOffset);
 
-		if (isMatch) {
-		  dataOffset = newOffset;
-		  suffixOffset = newSuffix;
-		  continue match_loop;
-		}
-	      }
+                boolean isMatch = true;
+                for (int j = newOffset; newSuffix <= j; j--) {
+                  dataCh = data[j / TempBuffer.SIZE][j % TempBuffer.SIZE];
+                  bufCh = buffer[offset + (j - newSuffix)];
 
-	      if (dataOffset - suffixOffset >= minLength) {
-		if (prevOffset < offset)
-		  add(out, buffer, prevOffset, offset - prevOffset);
-		      
-		offset = bufOffset;
-		prevOffset = offset;
-		copy(out, suffixOffset, dataOffset - suffixOffset);
-		continue loop;
-	      }
-	      else
-		break;
-	    }
-	  }
+                  if (bufCh != dataCh) {
+                    isMatch = false;
+                    break;
+                  }
+                }
 
-	  if (dataOffset - suffixOffset >= minLength) {
-	    if (prevOffset < offset)
-	      add(out, buffer, prevOffset, offset - prevOffset);
-		      
-	    offset = bufOffset;
-	    prevOffset = offset;
-	    copy(out, suffixOffset, dataOffset - suffixOffset);
-	  }
-	  
-	  break;
-	}
-	else if (ch2 < d2)
-	  break;
+                if (isMatch) {
+                  dataOffset = newOffset;
+                  suffixOffset = newSuffix;
+                  continue match_loop;
+                }
+              }
+
+              if (dataOffset - suffixOffset >= minLength) {
+                if (prevOffset < offset)
+                  add(out, buffer, prevOffset, offset - prevOffset);
+
+                offset = bufOffset;
+                prevOffset = offset;
+                copy(out, suffixOffset, dataOffset - suffixOffset);
+                continue loop;
+              }
+              else
+                break;
+            }
+          }
+
+          if (dataOffset - suffixOffset >= minLength) {
+            if (prevOffset < offset)
+              add(out, buffer, prevOffset, offset - prevOffset);
+
+            offset = bufOffset;
+            prevOffset = offset;
+            copy(out, suffixOffset, dataOffset - suffixOffset);
+          }
+
+          break;
+        }
+        else if (ch2 < d2)
+          break;
       }
     }
 
@@ -304,7 +304,7 @@ public class BinaryDiff {
       sublen = is.read(buffer, offset, sublen);
 
       if (sublen < 0)
-	return offset > 0 ? offset : -1;
+        return offset > 0 ? offset : -1;
 
       offset += sublen;
     }

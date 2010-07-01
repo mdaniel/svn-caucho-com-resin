@@ -125,7 +125,7 @@ class DummyResultSet extends AbstractResultSet {
       DummyColumn column = _dummyColumns.get(i);
 
       if (column.getColumnName().equals(name))
-	return i;
+        return i;
     }
 
     return -1;

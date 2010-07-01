@@ -127,7 +127,7 @@ public class LogConfig extends RotateLog {
 
     if (_isInit && _handlers != null) {
       for (Handler handler : _handlers) {
-	handler.setLevel(getSubLogger().getLevel());
+        handler.setLevel(getSubLogger().getLevel());
       }
     }
   }
@@ -257,17 +257,17 @@ public class LogConfig extends RotateLog {
       os = getRotateStream().getStream();
 
       if (_timestamp != null) {
-	TimestampFilter filter = new TimestampFilter();
-	filter.setTimestamp(_timestamp);
-	filter.setStream(os);
-	filter.setNullDelimited(true);
-	os = new WriteStream(filter);
+        TimestampFilter filter = new TimestampFilter();
+        filter.setTimestamp(_timestamp);
+        filter.setStream(os);
+        filter.setNullDelimited(true);
+        os = new WriteStream(filter);
       }
 
       String encoding = System.getProperty("file.encoding");
       
       if (encoding != null)
-	os.setEncoding(encoding);
+        os.setEncoding(encoding);
       
       os.setDisableClose(true);
     }
@@ -281,33 +281,33 @@ public class LogConfig extends RotateLog {
       Level level = logger.getLevel();
 
       if (subLevel != null
-	  && (level == null && subLevel.intValue() < Level.INFO.intValue()
-	      || level != null && subLevel.intValue() < level.intValue())) {
-	logger.setLevel(subLogger.getLevel());
+          && (level == null && subLevel.intValue() < Level.INFO.intValue()
+              || level != null && subLevel.intValue() < level.intValue())) {
+        logger.setLevel(subLogger.getLevel());
       }
 
       if (_handlers == null) {
-	StreamHandler handler = new StreamHandler(os);
-	handler.setFormatter(_formatter);
-	handler.setNullDelimited(true);
+        StreamHandler handler = new StreamHandler(os);
+        handler.setFormatter(_formatter);
+        handler.setNullDelimited(true);
 
-	_handlers = new ArrayList<Handler>();
-	_handlers.add(handler);
+        _handlers = new ArrayList<Handler>();
+        _handlers.add(handler);
       }
 
       for (int j = 0; j < _handlers.size(); j++) {
-	SubHandler subHandler = new SubHandler(_handlers.get(j));
+        SubHandler subHandler = new SubHandler(_handlers.get(j));
 
-	if (subLogger.getLevel() != null)
-	  subHandler.setLevel(subLogger.getLevel());
+        if (subLogger.getLevel() != null)
+          subHandler.setLevel(subLogger.getLevel());
 
-	if (! (logger instanceof EnvironmentLogger)) {
-	  CloseListener listener = new CloseListener(subHandler);
-	  
-	  Environment.addClassLoaderListener(listener);
-	}
-	
-	logger.addHandler(subHandler);
+        if (! (logger instanceof EnvironmentLogger)) {
+          CloseListener listener = new CloseListener(subHandler);
+
+          Environment.addClassLoaderListener(listener);
+        }
+
+        logger.addHandler(subHandler);
       }
     }
 
@@ -315,7 +315,7 @@ public class LogConfig extends RotateLog {
       try {
         ObjectName objectName = Jmx.getObjectName(_mbeanName);
         
-	Jmx.register(new LogAdmin(), objectName, LoggerMXBean.class);
+        Jmx.register(new LogAdmin(), objectName, LoggerMXBean.class);
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -363,7 +363,7 @@ public class LogConfig extends RotateLog {
     {
       // backward compat
       if (name.equals("/"))
-	name = "";
+        name = "";
     
       setName(name);
     }
@@ -420,25 +420,25 @@ public class LogConfig extends RotateLog {
       throws ConfigException
     {
       if (level.equals("off"))
-	_level = Level.OFF;
+        _level = Level.OFF;
       else if (level.equals("severe"))
-	_level = Level.SEVERE;
+        _level = Level.SEVERE;
       else if (level.equals("warning"))
-	_level = Level.WARNING;
+        _level = Level.WARNING;
       else if (level.equals("info"))
-	_level = Level.INFO;
+        _level = Level.INFO;
       else if (level.equals("config"))
-	_level = Level.CONFIG;
+        _level = Level.CONFIG;
       else if (level.equals("fine"))
-	_level = Level.FINE;
+        _level = Level.FINE;
       else if (level.equals("finer"))
-	_level = Level.FINER;
+        _level = Level.FINER;
       else if (level.equals("finest"))
-	_level = Level.FINEST;
+        _level = Level.FINEST;
       else if (level.equals("all"))
-	_level = Level.ALL;
+        _level = Level.ALL;
       else
-	throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging", level));
+        throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging", level));
     }
 
     /**
@@ -462,7 +462,7 @@ public class LogConfig extends RotateLog {
       throws ConfigException
     {
       if (_name == null)
-	throw new ConfigException(L.l("`name' is a required attribute..  Each logger must configure the log name, e.g. com.caucho.server.webapp."));
+        throw new ConfigException(L.l("`name' is a required attribute..  Each logger must configure the log name, e.g. com.caucho.server.webapp."));
     }
   }
 

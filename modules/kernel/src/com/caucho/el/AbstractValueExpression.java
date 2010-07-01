@@ -57,7 +57,7 @@ abstract public class AbstractValueExpression extends ValueExpression
   }
 
   protected AbstractValueExpression(Expr expr,
-				    String expressionString)
+                                    String expressionString)
   {
     _expr = expr;
     _expressionString = expressionString;
@@ -87,7 +87,7 @@ abstract public class AbstractValueExpression extends ValueExpression
 
   public Class<?> getType(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     Object value = getValue(context);
 
@@ -100,7 +100,7 @@ abstract public class AbstractValueExpression extends ValueExpression
   @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return _expr.getValue(context);
   }
@@ -108,15 +108,15 @@ abstract public class AbstractValueExpression extends ValueExpression
   @Override
   public boolean isReadOnly(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return _expr.isReadOnly(context);
   }
 
   public void setValue(ELContext context, Object value)
     throws PropertyNotFoundException,
-	   PropertyNotWritableException,
-	   ELException
+           PropertyNotWritableException,
+           ELException
   {
     _expr.setValue(context, value);
   }

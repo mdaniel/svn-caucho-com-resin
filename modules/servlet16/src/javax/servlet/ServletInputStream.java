@@ -59,12 +59,12 @@ public abstract class ServletInputStream extends InputStream {
     for (i = 0; i < length; i++) {
       int ch = read();
       if (ch < 0)
-	return i == 0 ? -1 : i;
+        return i == 0 ? -1 : i;
 
       buffer[offset + i] = (byte) ch;
 
       if (ch == '\n')
-	return i + 1;
+        return i + 1;
     }
 
     return i;

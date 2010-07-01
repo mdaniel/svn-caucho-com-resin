@@ -64,9 +64,9 @@ public class MucHistory implements java.io.Serializable {
   }
 
   public MucHistory(int maxChars,
-		    int maxStanzas,
-		    int seconds,
-		    Date since)
+                    int maxStanzas,
+                    int seconds,
+                    Date since)
   {
     _maxChars = maxChars;
     _maxStanzas = maxStanzas;

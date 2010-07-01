@@ -65,10 +65,10 @@ public class HashManager {
 
       int len = key.length();
       for (int i = 0; i < len; i++) {
-	char ch = key.charAt(i);
+        char ch = key.charAt(i);
 
-	_digest.update((byte) ch);
-	_digest.update((byte) (ch >> 8));
+        _digest.update((byte) ch);
+        _digest.update((byte) (ch >> 8));
       }
 
       return new HashKey(_digest.digest());
@@ -87,10 +87,10 @@ public class HashManager {
 
       int len = key.length();
       for (int i = 0; i < len; i++) {
-	char ch = key.charAt(i);
+        char ch = key.charAt(i);
 
-	_digest.update((byte) ch);
-	_digest.update((byte) (ch >> 8));
+        _digest.update((byte) ch);
+        _digest.update((byte) (ch >> 8));
       }
 
       return new HashKey(_digest.digest());

@@ -366,14 +366,14 @@ public class ResponseAdapter extends ResponseWrapper
     /*
     else {
       try {
-	PrintWriter writer = response.getWriter();
-	writer.close();
+        PrintWriter writer = response.getWriter();
+        writer.close();
       } catch (Throwable e) {
       }
 
       try {
-	OutputStream os = response.getOutputStream();
-	os.close();
+        OutputStream os = response.getOutputStream();
+        os.close();
       } catch (Throwable e) {
       }
     }

@@ -342,7 +342,7 @@ public class MapMessageImpl extends MessageImpl implements MapMessage  {
     }
     else if (! obj.getClass().getName().startsWith("java.lang."))
       throw new MessageFormatException(L.l("'{0}' is an invalid value for a map message.",
-				 obj.getClass().getName()));
+                                 obj.getClass().getName()));
 
     if (name == null || "".equals(name))
       throw new IllegalArgumentException(L.l("MapMessage.setXXX name may not be empty."));

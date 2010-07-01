@@ -269,7 +269,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
    */
   @Override
   public void generateMergeFrom(JavaWriter out,
-				String dst, String src)
+                                String dst, String src)
     throws IOException
   {
   }
@@ -278,8 +278,8 @@ public class KeyPropertyField extends PropertyField implements IdField {
    * Generates code to copy to an object.
    */
   public void generateCopy(JavaWriter out,
-			   String dest,
-			   String source)
+                           String dest,
+                           String source)
     throws IOException
   {
     throw new UnsupportedOperationException();

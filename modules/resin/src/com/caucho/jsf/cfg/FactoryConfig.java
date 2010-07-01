@@ -74,11 +74,11 @@ public class FactoryConfig
   {
     if (! ApplicationFactory.class.isAssignableFrom(factory))
       throw new ConfigException(L.l("application-factory '{0}' class must extend ApplicationFactory.",
-				    factory.getName()));
+                                    factory.getName()));
 
     if (! hasConstructor(factory, ApplicationFactory.class))
       throw new ConfigException(L.l("application-factory class '{0}' must either have an (ApplicationFactory) constructor or a null-arg constructor.",
-				    factory.getName()));
+                                    factory.getName()));
 
     _applicationFactory = factory;
   }
@@ -94,11 +94,11 @@ public class FactoryConfig
   {
     if (! FacesContextFactory.class.isAssignableFrom(factory))
       throw new ConfigException(L.l("faces-context-factory '{0}' class must extend FacesContextFactory.",
-				    factory.getName()));
+                                    factory.getName()));
 
     if (! hasConstructor(factory, FacesContextFactory.class))
       throw new ConfigException(L.l("faces-context-factory class '{0}' must either have an (FacesContextFactory) constructor or a null-arg constructor.",
-				    factory.getName()));
+                                    factory.getName()));
 
     _facesContextFactory = factory;
   }
@@ -114,11 +114,11 @@ public class FactoryConfig
   {
     if (! LifecycleFactory.class.isAssignableFrom(factory))
       throw new ConfigException(L.l("lifecycle-factory '{0}' class must extend LifecycleFactory.",
-				    factory.getName()));
+                                    factory.getName()));
 
     if (! hasConstructor(factory, LifecycleFactory.class))
       throw new ConfigException(L.l("lifecycle-factory class '{0}' must either have an (LifecycleFactory) constructor or a null-arg constructor.",
-				    factory.getName()));
+                                    factory.getName()));
 
     _lifecycleFactory = factory;
   }
@@ -134,11 +134,11 @@ public class FactoryConfig
   {
     if (! RenderKitFactory.class.isAssignableFrom(factory))
       throw new ConfigException(L.l("render-kit-factory '{0}' class must extend RenderKitFactory.",
-				    factory.getName()));
+                                    factory.getName()));
 
     if (! hasConstructor(factory, RenderKitFactory.class))
       throw new ConfigException(L.l("render-kit-factory class '{0}' must either have an (RenderKitFactory) constructor or a null-arg constructor.",
-				    factory.getName()));
+                                    factory.getName()));
 
     _renderKitFactory = factory;
   }
@@ -158,26 +158,26 @@ public class FactoryConfig
   {
     try {
       if (_applicationFactory != null) {
-	FactoryFinder.setFactory(FactoryFinder.APPLICATION_FACTORY,
-				 _applicationFactory.getName());
+        FactoryFinder.setFactory(FactoryFinder.APPLICATION_FACTORY,
+                                 _applicationFactory.getName());
 
       }
       
       if (_facesContextFactory != null) {
-	FactoryFinder.setFactory(FactoryFinder.FACES_CONTEXT_FACTORY,
-				 _facesContextFactory.getName());
+        FactoryFinder.setFactory(FactoryFinder.FACES_CONTEXT_FACTORY,
+                                 _facesContextFactory.getName());
 
       }
       
       if (_lifecycleFactory != null) {
-	FactoryFinder.setFactory(FactoryFinder.LIFECYCLE_FACTORY,
-				 _lifecycleFactory.getName());
+        FactoryFinder.setFactory(FactoryFinder.LIFECYCLE_FACTORY,
+                                 _lifecycleFactory.getName());
 
       }
       
       if (_renderKitFactory != null) {
-	FactoryFinder.setFactory(FactoryFinder.RENDER_KIT_FACTORY,
-				 _renderKitFactory.getName());
+        FactoryFinder.setFactory(FactoryFinder.RENDER_KIT_FACTORY,
+                                 _renderKitFactory.getName());
 
       }
     } catch (RuntimeException e) {
@@ -193,7 +193,7 @@ public class FactoryConfig
       Constructor ctor = factoryClass.getConstructor(api);
 
       if (ctor != null)
-	return true;
+        return true;
     } catch (NoSuchMethodException e) {
     }
     
@@ -201,7 +201,7 @@ public class FactoryConfig
       Constructor ctor = factoryClass.getConstructor();
 
       if (ctor != null)
-	return true;
+        return true;
     } catch (NoSuchMethodException e) {
     }
 

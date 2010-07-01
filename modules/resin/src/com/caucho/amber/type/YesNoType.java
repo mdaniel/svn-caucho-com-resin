@@ -67,12 +67,12 @@ public class YesNoType extends AmberType {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.YesNoType.toBoolean(" +
-	      rs + ".getString(" + indexVar + " + " + index + "), " +
-	      rs + ".wasNull())");
+              rs + ".getString(" + indexVar + " + " + index + "), " +
+              rs + ".wasNull())");
 
     return index + 1;
   }
@@ -81,14 +81,14 @@ public class YesNoType extends AmberType {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, 0);");
     out.println("else");
     out.println("  " + pstmt + ".setString(" + index + "++, " +
-		value + ".booleanValue() ? \"y\" : \"n\");");
+                value + ".booleanValue() ? \"y\" : \"n\");");
   }
 
   /**

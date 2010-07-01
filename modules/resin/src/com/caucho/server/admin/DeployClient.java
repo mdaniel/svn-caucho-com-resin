@@ -100,8 +100,8 @@ public class DeployClient
       _deployJid = "deploy@resin.caucho";
     } catch (RemoteConnectionFailedException e) {
       throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-						    url, e.getMessage()),
-						e);
+                                                    url, e.getMessage()),
+                                                e);
     }
   }
 
@@ -441,7 +441,7 @@ public class DeployClient
       return (Serializable) _bamClient.queryGet(_deployJid, query);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:DeployService> tag\n  " + e.getMessage(),
-					    e);
+                                            e);
     }
   }
   

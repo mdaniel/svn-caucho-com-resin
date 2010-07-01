@@ -77,9 +77,9 @@ public class DatabaseManager {
       DatabaseManager manager = _localManager.getLevel();
 
       if (manager == null) {
-	manager = new DatabaseManager();
+        manager = new DatabaseManager();
 
-	_localManager.set(manager);
+        _localManager.set(manager);
       }
 
       return manager;
@@ -110,7 +110,7 @@ public class DatabaseManager {
    * Looks up the local database, creating if necessary.
    */
   private DataSource findDatabaseImpl(String url,
-				      String driverName)
+                                      String driverName)
     throws SQLException
   {
     try {
@@ -156,12 +156,12 @@ public class DatabaseManager {
   {
     for (int i = 0; i < _driverList.size(); i++) {
       try {
-	Driver driver = (Driver) _driverList.get(i);
-	
-	if (driver.acceptsURL(url))
-	  return driver.getClass().getName();
+        Driver driver = (Driver) _driverList.get(i);
+
+        if (driver.acceptsURL(url))
+          return driver.getClass().getName();
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 
@@ -175,49 +175,49 @@ public class DatabaseManager {
       ClassLoader loader = thread.getContextClassLoader();
       
       Enumeration iter
-	= loader.getResources("META-INF/services/java.sql.Driver");
+        = loader.getResources("META-INF/services/java.sql.Driver");
       while (iter.hasMoreElements()) {
-	URL url = (URL) iter.nextElement();
+        URL url = (URL) iter.nextElement();
 
-	ReadStream is = null;
-	try {
-	  is = Vfs.lookup(url.toString()).openRead();
+        ReadStream is = null;
+        try {
+          is = Vfs.lookup(url.toString()).openRead();
 
-	  String filename;
+          String filename;
 
-	  while ((filename = is.readLine()) != null) {
-	    int p = filename.indexOf('#');
-	    
-	    if (p >= 0)
-	      filename = filename.substring(0, p);
+          while ((filename = is.readLine()) != null) {
+            int p = filename.indexOf('#');
 
-	    filename = filename.trim();
-	    if (filename.length() == 0)
-	      continue;
+            if (p >= 0)
+              filename = filename.substring(0, p);
 
-	    try {
-	      Class cl = Class.forName(filename, false, loader);
-	      Driver driver = null;
-	      
-	      if (Driver.class.isAssignableFrom(cl))
-		driver = (Driver) cl.newInstance();
+            filename = filename.trim();
+            if (filename.length() == 0)
+              continue;
 
-	      if (driver != null) {
-		log.fine(L.l("DatabaseManager adding driver '{0}'",
-			     driver.getClass().getName()));
+            try {
+              Class cl = Class.forName(filename, false, loader);
+              Driver driver = null;
 
-		_driverList.add(driver);
-	      }
-	    } catch (Exception e) {
-	      log.log(Level.FINE, e.toString(), e);
-	    }
-	  }
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	} finally {
-	  if (is != null)
-	    is.close();
-	}
+              if (Driver.class.isAssignableFrom(cl))
+                driver = (Driver) cl.newInstance();
+
+              if (driver != null) {
+                log.fine(L.l("DatabaseManager adding driver '{0}'",
+                             driver.getClass().getName()));
+
+                _driverList.add(driver);
+              }
+            } catch (Exception e) {
+              log.log(Level.FINE, e.toString(), e);
+            }
+          }
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        } finally {
+          if (is != null)
+            is.close();
+        }
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -241,7 +241,7 @@ public class DatabaseManager {
       hash = 65521 * hash + _url.hashCode();
 
       if (_catalog != null)
-	hash = 65521 * hash + _catalog.hashCode();
+        hash = 65521 * hash + _catalog.hashCode();
 
       return hash;
     }
@@ -249,15 +249,15 @@ public class DatabaseManager {
     public boolean equals(Object o)
     {
       if (! (o instanceof DatabaseKey))
-	return false;
+        return false;
 
       DatabaseKey key = (DatabaseKey) o;
 
       if (! _url.equals(key._url))
-	return false;
+        return false;
 
       return (_catalog == key._catalog
-	      || _catalog != null && _catalog.equals(key._catalog));
+              || _catalog != null && _catalog.equals(key._catalog));
     }
   }
 }

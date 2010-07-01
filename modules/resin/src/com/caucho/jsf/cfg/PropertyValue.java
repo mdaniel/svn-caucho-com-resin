@@ -81,16 +81,16 @@ public class PropertyValue implements AbstractValue
       Converter converter = app.createConverter(_type);
 
       if (converter != null) {
-	_value = converter.getAsObject(context,
-				       context.getViewRoot(),
-				       _valueString);
+        _value = converter.getAsObject(context,
+                                       context.getViewRoot(),
+                                       _valueString);
       }
       else {
-	if (! _type.isAssignableFrom(String.class))
-	  throw new ConfigException(L.l("'{0}' cannot have a string value.",
-					_type.getName()));
-	
-	_value = _valueString;
+        if (! _type.isAssignableFrom(String.class))
+          throw new ConfigException(L.l("'{0}' cannot have a string value.",
+                                        _type.getName()));
+
+        _value = _valueString;
       }
 
       return _value;

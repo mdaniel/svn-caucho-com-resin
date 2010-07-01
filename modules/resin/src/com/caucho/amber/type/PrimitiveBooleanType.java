@@ -93,7 +93,7 @@ public class PrimitiveBooleanType extends PrimitiveType {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getBoolean(" + indexVar + " + " + index + ")");
@@ -116,7 +116,7 @@ public class PrimitiveBooleanType extends PrimitiveType {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println(pstmt + ".setBoolean(" + index + "++, " + value + ");");
@@ -126,7 +126,7 @@ public class PrimitiveBooleanType extends PrimitiveType {
    * Generates a string to set the property.
    */
   public void generateSetNull(JavaWriter out, String pstmt,
-			      String index)
+                              String index)
     throws IOException
   {
     out.println(pstmt + ".setNull(" + index + "++, java.sql.Types.BIT);");

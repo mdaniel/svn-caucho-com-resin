@@ -77,7 +77,7 @@ public class JspInclude extends JspNode {
     
     for (int i = 0; i < _params.size(); i++) {
       if (_params.get(i).hasScripting())
-	return true;
+        return true;
     }
 
     return false;

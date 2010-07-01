@@ -127,13 +127,13 @@ public class XmppPubSubSubscribeQueryMarshal extends AbstractXmppMarshal {
       out.writeStartElement("options");
 
       if (options.getJid() != null)
-	out.writeAttribute("jid", options.getJid());
+        out.writeAttribute("jid", options.getJid());
 
       if (options.getNode() != null)
-	out.writeAttribute("node", options.getNode());
+        out.writeAttribute("node", options.getNode());
 
       if (options.getSubid() != null)
-	out.writeAttribute("subid", options.getSubid());
+        out.writeAttribute("subid", options.getSubid());
 
       out.writeEndElement(); // </options>
     }

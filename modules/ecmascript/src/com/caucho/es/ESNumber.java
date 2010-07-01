@@ -75,13 +75,13 @@ public class ESNumber extends ESBase implements VfsWriteObject, Externalizable {
     try {
       // Can't use 0 because of -0
       if (value >= 128 || value <= 0)
-	return new ESNumber(value);
+        return new ESNumber(value);
     
       int intValue = (int) value;
       if (intValue == value)
-	return ints[intValue];
+        return ints[intValue];
       else
-	return new ESNumber(value);
+        return new ESNumber(value);
     } catch (Exception e) {
       return new ESNumber(value);
     }
@@ -221,9 +221,9 @@ public class ESNumber extends ESBase implements VfsWriteObject, Externalizable {
       ESBase primB = b.toPrimitive(NONE);
 
       if (primB instanceof ESString)
-	return ESString.create(toString() + primB.toString());
+        return ESString.create(toString() + primB.toString());
       else
-	return create(value + primB.toNum());
+        return create(value + primB.toNum());
     }
   }
 

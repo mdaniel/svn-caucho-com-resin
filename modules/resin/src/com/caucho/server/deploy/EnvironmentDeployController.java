@@ -309,7 +309,7 @@ abstract public class
 
     for (C config : _configDefaults) {
       if (! configDefaults.contains(config))
-	configDefaults.add(config);
+        configDefaults.add(config);
     }
     
     _configDefaults = configDefaults;
@@ -339,7 +339,7 @@ abstract public class
       thread.setContextClassLoader(getParentClassLoader());
       
       if (getDeployAdmin() != null)
-	getDeployAdmin().unregister();
+        getDeployAdmin().unregister();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -413,10 +413,10 @@ abstract public class
     }
     else {
       for (DeployConfig config : _configDefaults) {
-	DeployConfig prologue = config.getPrologue();
+        DeployConfig prologue = config.getPrologue();
 
-	if (prologue != null)
-	  initList.add(prologue);
+        if (prologue != null)
+          initList.add(prologue);
       }
     
       initList.addAll(_configDefaults);

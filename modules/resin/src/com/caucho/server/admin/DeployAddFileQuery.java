@@ -42,8 +42,8 @@ public class DeployAddFileQuery implements java.io.Serializable
   }
 
   public DeployAddFileQuery(String tag,
-			    String name,
-			    String hex)
+                            String name,
+                            String hex)
   {
     _tag = tag;
     _name = name;

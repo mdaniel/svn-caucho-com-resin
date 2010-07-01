@@ -197,7 +197,7 @@ public class ResourceDeploy {
   {
     synchronized (this) {
       if (_isInit)
-	return;
+        return;
       _isInit = true;
     }
     
@@ -224,27 +224,27 @@ public class ResourceDeploy {
         if (oldNames.contains(name))
           continue;
 
-	ResourceArchive rar;
+        ResourceArchive rar;
 
-	rar = new ResourceArchive();
-	rar.setRarPath(getPath().lookup(name + ".rar"));
-	rar.setRootDirectory(getExpandPath().lookup(getExpandPrefix() + name));
+        rar = new ResourceArchive();
+        rar.setRarPath(getPath().lookup(name + ".rar"));
+        rar.setRootDirectory(getExpandPath().lookup(getExpandPrefix() + name));
 
-	Path oldPwd = Vfs.getPwd();
+        Path oldPwd = Vfs.getPwd();
 
-	try {
-	  Vfs.setPwd(rar.getRootDirectory());
+        try {
+          Vfs.setPwd(rar.getRootDirectory());
 
-	  for (ResourceConfig config : ResourceDefault.getDefaultList()) {
-	    config.getBuilderProgram().configure(rar);
-	  }
-	} finally {
-	  Vfs.setPwd(oldPwd);
-	}
+          for (ResourceConfig config : ResourceDefault.getDefaultList()) {
+            config.getBuilderProgram().configure(rar);
+          }
+        } finally {
+          Vfs.setPwd(oldPwd);
+        }
 
-	rar.init();
+        rar.init();
 
-	ResourceArchiveManager.addResourceArchive(rar);
+        ResourceArchiveManager.addResourceArchive(rar);
       }
     } catch (ConfigException e) {
       throw e;
@@ -305,7 +305,7 @@ public class ResourceDeploy {
       String rarDirName = rarExpandList[i];
 
       if (! rarDirName.startsWith(getExpandPrefix()))
-	continue;
+        continue;
 
       if (CauchoSystem.isCaseInsensitive())
         rarDirName = rarDirName.toLowerCase();

@@ -49,7 +49,7 @@ public class WorkEvent extends EventObject {
    * Called with a Work instance has been accepted.
    */
   public WorkEvent(Object source, int type,
-		   Work work, WorkException exn)
+                   Work work, WorkException exn)
   {
     super(source);
 
@@ -62,8 +62,8 @@ public class WorkEvent extends EventObject {
    * Called with a Work instance has been accepted.
    */
   public WorkEvent(Object source, int type,
-		   Work work, WorkException exn,
-		   long startDuration)
+                   Work work, WorkException exn,
+                   long startDuration)
   {
     super(source);
 

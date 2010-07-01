@@ -105,7 +105,7 @@ public class ChoiceNamePattern extends NameClassPattern {
       ChoiceNameItem item = new ChoiceNameItem();
 
       for (int i = 0; i < _patterns.size(); i++) {
-	item.addItem(_patterns.get(i).createNameItem());
+        item.addItem(_patterns.get(i).createNameItem());
       }
 
       _item = item.getMin();

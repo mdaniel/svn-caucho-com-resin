@@ -71,7 +71,7 @@ public class IvyMergeDependency extends IvyDependency {
       int cmp = rev1.compareTo(rev2);
       
       if (cmp < 0)
-	min = dep;
+        min = dep;
     }
     
     return cache.resolve(min);
@@ -99,6 +99,6 @@ public class IvyMergeDependency extends IvyDependency {
     IvyMergeDependency dep = (IvyMergeDependency) o;
 
     return (getOrg().equals(dep.getOrg())
-	    && getName().equals(dep.getName()));
+            && getName().equals(dep.getName()));
   }
 }

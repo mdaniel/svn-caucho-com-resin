@@ -704,9 +704,9 @@ public class ConnectionPool extends AbstractManagedObject
    * @param info the user's extra connection information
    */
   UserPoolItem allocatePoolConnection(ManagedConnectionFactory mcf,
-				      Subject subject,
-				      ConnectionRequestInfo info,
-				      UserPoolItem oldPoolItem)
+                                      Subject subject,
+                                      ConnectionRequestInfo info,
+                                      UserPoolItem oldPoolItem)
     throws ResourceException
   {
     long expireTime = Alarm.getCurrentTimeActual() + _connectionWaitTimeout;
@@ -764,7 +764,7 @@ public class ConnectionPool extends AbstractManagedObject
   private UserPoolItem allocateIdleConnection(ManagedConnectionFactory mcf,
                                               Subject subject,
                                               ConnectionRequestInfo info,
-					      UserPoolItem oldPoolItem)
+                                              UserPoolItem oldPoolItem)
     throws ResourceException
   {
     while (_lifecycle.isActive()) {

@@ -65,7 +65,7 @@ public class XslText extends XslNode {
     }
     else
       throw error(L.l("'{0}' is not allowed as an xsl:text child.",
-		      node));
+                      node));
   }
 
   /**
@@ -88,7 +88,7 @@ public class XslText extends XslNode {
     }
     else if (_disableOutputEscaping != null)
       throw error(L.l("'{0}' is an unknown value for disable-output-escaping.  'yes' and 'no' are the valid values.",
-		      _disableOutputEscaping));
+                      _disableOutputEscaping));
       
     
     out.print("out.print(\"");

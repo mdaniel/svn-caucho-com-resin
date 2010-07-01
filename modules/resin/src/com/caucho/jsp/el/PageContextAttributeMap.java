@@ -79,8 +79,8 @@ public class PageContextAttributeMap extends AbstractMap {
       Enumeration e = _pageContext.getAttributeNamesInScope(_scope);
       int i = 0;
       while (e.hasMoreElements()) {
-	e.nextElement();
-	i++;
+        e.nextElement();
+        i++;
       }
 
       return i;
@@ -148,13 +148,13 @@ public class PageContextAttributeMap extends AbstractMap {
     public boolean equals(Object obj)
     {
       if (! (obj instanceof EntryIterator))
-	return false;
+        return false;
         
       EntryIterator entry = (EntryIterator) obj;
 
       return (_name.equals(entry._name) &&
-	      (_value == null && entry._value == null ||
-	       _value != null && _value.equals(entry._value)));
+              (_value == null && entry._value == null ||
+               _value != null && _value.equals(entry._value)));
     }
   }
 
@@ -170,7 +170,7 @@ public class PageContextAttributeMap extends AbstractMap {
       Map.Entry entry = (Map.Entry) iter.next();
       
       if (! isFirst)
-	sb.append(", ");
+        sb.append(", ");
       isFirst = false;
 
       sb.append("{");

@@ -120,7 +120,7 @@ class QAttributes implements Attributes {
       String testURI = names[i].getNamespaceURI();
 
       if (testURI == null)
-	testURI = "";
+        testURI = "";
       
       if (uri.equals(testURI) && localName.equals(names[i].getLocalPart()))
         return values[i];

@@ -68,21 +68,21 @@ public class IvyRevision {
     int i = 0;
     for (; i < _minSegments.length; i++) {
       if (rev._minSegments.length <= i)
-	return 1;
+        return 1;
       
       String a = _minSegments[i];
       String b = rev._minSegments[i];
       
       if (a.equals(b))
-	continue;
+        continue;
 
       try {
-	int intA = Integer.parseInt(a);
-	int intB = Integer.parseInt(b);
+        int intA = Integer.parseInt(a);
+        int intB = Integer.parseInt(b);
 
-	return intA - intB;
+        return intA - intB;
       } catch (Exception e) {
-	return a.compareTo(b);
+        return a.compareTo(b);
       }
     }
 

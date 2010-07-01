@@ -140,26 +140,26 @@ public class XmppMucQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return muc;
+        return muc;
       }
 
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "password".equals(in.getLocalName())) {
-	muc.setPassword(in.getElementText());
+          && "password".equals(in.getLocalName())) {
+        muc.setPassword(in.getElementText());
 
-	skipToEnd(in, "password");
+        skipToEnd(in, "password");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "history".equals(in.getLocalName())) {
-	muc.setHistory(parseHistory(in));
+               && "history".equals(in.getLocalName())) {
+        muc.setHistory(parseHistory(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();
@@ -192,9 +192,9 @@ public class XmppMucQueryMarshal extends AbstractXmppMarshal {
 
     if (since != null) {
       try {
-	history.setSince(new Date(new QDate().parseDate(since)));
+        history.setSince(new Date(new QDate().parseDate(since)));
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 

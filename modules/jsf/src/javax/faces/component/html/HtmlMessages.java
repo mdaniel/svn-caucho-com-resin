@@ -336,35 +336,35 @@ public class HtmlMessages extends UIMessages
     if (prop != null) {
       switch (prop) {
       case DIR:
-	return _dirExpr;
+        return _dirExpr;
       case ERROR_CLASS:
-	return _errorClassExpr;
+        return _errorClassExpr;
       case ERROR_STYLE:
-	return _errorStyleExpr;
+        return _errorStyleExpr;
       case FATAL_CLASS:
-	return _fatalClassExpr;
+        return _fatalClassExpr;
       case FATAL_STYLE:
-	return _fatalStyleExpr;
+        return _fatalStyleExpr;
       case INFO_CLASS:
-	return _infoClassExpr;
+        return _infoClassExpr;
       case INFO_STYLE:
-	return _infoStyleExpr;
+        return _infoStyleExpr;
       case LANG:
-	return _langExpr;
+        return _langExpr;
       case LAYOUT:
-	return _layoutExpr;
+        return _layoutExpr;
       case STYLE:
-	return _styleExpr;
+        return _styleExpr;
       case STYLE_CLASS:
-	return _styleClassExpr;
+        return _styleClassExpr;
       case TITLE:
-	return _titleExpr;
+        return _titleExpr;
       case WARN_CLASS:
-	return _warnClassExpr;
+        return _warnClassExpr;
       case WARN_STYLE:
-	return _warnStyleExpr;
+        return _warnStyleExpr;
       case TOOLTIP:
-	return _tooltipExpr;
+        return _tooltipExpr;
       }
     }
 
@@ -382,139 +382,139 @@ public class HtmlMessages extends UIMessages
     if (prop != null) {
       switch (prop) {
       case DIR:
-	if (expr != null && expr.isLiteralText()) {
-	  _dir = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _dirExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _dir = Util.evalString(expr);
+          return;
+        }
+        else
+          _dirExpr = expr;
+        break;
+
       case ERROR_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _errorClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _errorClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _errorClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _errorClassExpr = expr;
+        break;
+
       case ERROR_STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _errorStyle = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _errorStyleExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _errorStyle = Util.evalString(expr);
+          return;
+        }
+        else
+          _errorStyleExpr = expr;
+        break;
+
       case FATAL_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _fatalClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _fatalClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _fatalClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _fatalClassExpr = expr;
+        break;
+
       case FATAL_STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _fatalStyle = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _fatalStyleExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _fatalStyle = Util.evalString(expr);
+          return;
+        }
+        else
+          _fatalStyleExpr = expr;
+        break;
+
       case INFO_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _infoClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _infoClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _infoClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _infoClassExpr = expr;
+        break;
+
       case INFO_STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _infoStyle = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _infoStyleExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _infoStyle = Util.evalString(expr);
+          return;
+        }
+        else
+          _infoStyleExpr = expr;
+        break;
+
       case LANG:
-	if (expr != null && expr.isLiteralText()) {
-	  _lang = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _langExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _lang = Util.evalString(expr);
+          return;
+        }
+        else
+          _langExpr = expr;
+        break;
+
       case LAYOUT:
-	if (expr != null && expr.isLiteralText()) {
-	  _layout = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _layoutExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _layout = Util.evalString(expr);
+          return;
+        }
+        else
+          _layoutExpr = expr;
+        break;
+
       case STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _style = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _style = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleExpr = expr;
+        break;
+
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _styleClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _styleClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _styleClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _styleClassExpr = expr;
+        break;
+
       case TITLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _title = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _titleExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _title = Util.evalString(expr);
+          return;
+        }
+        else
+          _titleExpr = expr;
+        break;
+
       case TOOLTIP:
-	if (expr != null && expr.isLiteralText()) {
-	  _tooltip = Util.evalBoolean(expr);
-	  return;
-	}
-	else
-	  _tooltipExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _tooltip = Util.evalBoolean(expr);
+          return;
+        }
+        else
+          _tooltipExpr = expr;
+        break;
+
       case WARN_CLASS:
-	if (expr != null && expr.isLiteralText()) {
-	  _warnClass = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _warnClassExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _warnClass = Util.evalString(expr);
+          return;
+        }
+        else
+          _warnClassExpr = expr;
+        break;
+
       case WARN_STYLE:
-	if (expr != null && expr.isLiteralText()) {
-	  _warnStyle = Util.evalString(expr);
-	  return;
-	}
-	else
-	  _warnStyleExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _warnStyle = Util.evalString(expr);
+          return;
+        }
+        else
+          _warnStyleExpr = expr;
+        break;
       }
     }
 

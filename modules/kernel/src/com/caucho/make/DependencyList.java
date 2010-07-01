@@ -87,9 +87,9 @@ public class DependencyList implements PersistentDependency
   {
     for (int i = _dependencyList.size() - 1; i >= 0; i--) {
       Dependency dependency = _dependencyList.get(i);
-	
+
       if (dependency.isModified()) {
-	return true;
+        return true;
       }
     }
 
@@ -105,7 +105,7 @@ public class DependencyList implements PersistentDependency
       Dependency dependency = _dependencyList.get(i);
 
       if (dependency.logModified(log))
-	return true;
+        return true;
     }
       
     return false;

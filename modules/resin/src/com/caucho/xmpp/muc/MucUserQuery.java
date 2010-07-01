@@ -194,10 +194,10 @@ public class MucUserQuery implements java.io.Serializable {
       sb.append("invite=[");
       
       for (int i = 0; i < _invite.length; i++) {
-	if (i > 0)
-	  sb.append(",");
-	
-	sb.append(_invite[i]);
+        if (i > 0)
+          sb.append(",");
+
+        sb.append(_invite[i]);
       }
 
       sb.append("]");
@@ -213,10 +213,10 @@ public class MucUserQuery implements java.io.Serializable {
       sb.append("status=[");
       
       for (int i = 0; i < _status.length; i++) {
-	if (i > 0)
-	  sb.append(",");
-	
-	sb.append(_status[i]);
+        if (i > 0)
+          sb.append(",");
+
+        sb.append(_status[i]);
       }
 
       sb.append("]");

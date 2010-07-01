@@ -121,7 +121,7 @@ class HtmlSelectManyMenuRenderer extends SelectRenderer
 
     if (component instanceof HtmlSelectManyMenu) {
       HtmlSelectManyMenu htmlComponent
-	= (HtmlSelectManyMenu) component;
+        = (HtmlSelectManyMenu) component;
 
       accesskey = htmlComponent.getAccesskey();
       dir = htmlComponent.getDir();
@@ -274,10 +274,10 @@ class HtmlSelectManyMenuRenderer extends SelectRenderer
       UIComponent child = component.getChildren().get(i);
 
       if (child instanceof UISelectItem) {
-	UISelectItem item = (UISelectItem) child;
+        UISelectItem item = (UISelectItem) child;
 
-	if (! item.isItemDisabled())
-	  size++;
+        if (! item.isItemDisabled())
+          size++;
       }
     }
 

@@ -116,14 +116,14 @@ public class JdbcMessage
       String sql = "SELECT 1 FROM " + _messageTable + " WHERE 1=0";
 
       try {
-	ResultSet rs = stmt.executeQuery(sql);
-	rs.next();
-	rs.close();
-	stmt.close();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        rs.close();
+        stmt.close();
 
-	return;
+        return;
       } catch (SQLException e) {
-	log.finest(e.toString());
+        log.finest(e.toString());
       }
 
       String blob = _jdbcManager.getBlob();
@@ -131,37 +131,37 @@ public class JdbcMessage
       log.info(L.l("creating JMS message table {0}", _messageTable));
       
       sql = ("CREATE TABLE " + _messageTable + " (" +
-	     "  m_id " + identity + "," +
-	     "  queue INTEGER NOT NULL," +
-	     "  conn VARCHAR(255)," +
-	     "  consumer " + longType + "," +
-	     "  delivered INTEGER NOT NULL," +
-	     "  msg_type INTEGER NOT NULL," +
-	     "  msg_id VARCHAR(64) NOT NULL," +
-	     "  priority INTEGER NOT NULL," +
-	     "  expire " + longType + " NOT NULL," +
-	     "  header " + blob + "," +
-	     "  body " + blob +
-	     ")");
+             "  m_id " + identity + "," +
+             "  queue INTEGER NOT NULL," +
+             "  conn VARCHAR(255)," +
+             "  consumer " + longType + "," +
+             "  delivered INTEGER NOT NULL," +
+             "  msg_type INTEGER NOT NULL," +
+             "  msg_id VARCHAR(64) NOT NULL," +
+             "  priority INTEGER NOT NULL," +
+             "  expire " + longType + " NOT NULL," +
+             "  header " + blob + "," +
+             "  body " + blob +
+             ")");
 
       if (_isOracle) {
-	String extent = "";
-	
-	if (_jdbcManager.getTablespace() != null) {
-	  extent = " tablespace " + _jdbcManager.getTablespace();
-	}
+        String extent = "";
 
-	// oracle recommends using retention (over pctversion) for performance
-	// Oracle will keep deleted lobs for the retention time before
-	// releasing them (e.g. 900 seconds)
-	sql += (" LOB(header) STORE AS (cache retention" + extent + ")");
-	sql += (" LOB(body) STORE AS (cache retention" + extent + ")");
+        if (_jdbcManager.getTablespace() != null) {
+          extent = " tablespace " + _jdbcManager.getTablespace();
+        }
+
+        // oracle recommends using retention (over pctversion) for performance
+        // Oracle will keep deleted lobs for the retention time before
+        // releasing them (e.g. 900 seconds)
+        sql += (" LOB(header) STORE AS (cache retention" + extent + ")");
+        sql += (" LOB(body) STORE AS (cache retention" + extent + ")");
       }
 
       stmt.executeUpdate(sql);
 
       if (_messageSequence != null) {
-	stmt.executeUpdate(metaData.createSequenceSQL(_messageSequence, 1));
+        stmt.executeUpdate(metaData.createSequenceSQL(_messageSequence, 1));
       }
     } finally {
       conn.close();
@@ -192,17 +192,17 @@ public class JdbcMessage
 
     if (message instanceof TextMessage) {
       TextMessage text = (TextMessage) message;
-	
+
       type = TEXT;
-	
+
       if (text.getText() != null) {
-	body = new TempStream();
-	body.openWrite();
-	
-	ws = new WriteStream(body);
-	ws.setEncoding("UTF-8");
-	ws.print(text.getText());
-	ws.close();
+        body = new TempStream();
+        body.openWrite();
+
+        ws = new WriteStream(body);
+        ws.setEncoding("UTF-8");
+        ws.print(text.getText());
+        ws.close();
       }
     }
     else if (message instanceof BytesMessage) {
@@ -239,75 +239,75 @@ public class JdbcMessage
       String sql;
 
       if (_messageSequence != null) {
-	sql = _jdbcManager.getMetaData().selectSequenceSQL(_messageSequence);
+        sql = _jdbcManager.getMetaData().selectSequenceSQL(_messageSequence);
 
-	PreparedStatement pstmt = conn.prepareStatement(sql);;
+        PreparedStatement pstmt = conn.prepareStatement(sql);;
 
-	long mId = -1;
-	
-	ResultSet rs = pstmt.executeQuery();
-	if (rs.next())
-	  mId = rs.getLong(1);
-	else
-	  throw new RuntimeException("can't create message");
-	
-	sql = ("INSERT INTO " + _messageTable +
-	       "(m_id, queue, msg_type, msg_id, priority, expire, delivered, header, body) " +
-	       "VALUES (?,?,?,?,?,?,0,?,?)");
+        long mId = -1;
 
-	pstmt = conn.prepareStatement(sql);
+        ResultSet rs = pstmt.executeQuery();
+        if (rs.next())
+          mId = rs.getLong(1);
+        else
+          throw new RuntimeException("can't create message");
 
-	int i = 1;
-	pstmt.setLong(i++, mId);
-	pstmt.setInt(i++, queue);
-	pstmt.setInt(i++, type);
-	pstmt.setString(i++, msgId);
-	pstmt.setInt(i++, priority);
-	pstmt.setLong(i++, expireTime);
+        sql = ("INSERT INTO " + _messageTable +
+               "(m_id, queue, msg_type, msg_id, priority, expire, delivered, header, body) " +
+               "VALUES (?,?,?,?,?,?,0,?,?)");
 
-	int headerLength = header.getLength();
-	
-	if (headerLength > 0)
-	  pstmt.setBinaryStream(i++, header.openRead(), headerLength);
-	else
-	  pstmt.setNull(i++, Types.BINARY);
-	
-	if (body != null)  {
-	  int bodyLength = body.getLength();
-	  
-	  pstmt.setBinaryStream(i++, body.openRead(), bodyLength);
-	}
-	else
-	  pstmt.setString(i++, "");
+        pstmt = conn.prepareStatement(sql);
 
-	pstmt.executeUpdate();
+        int i = 1;
+        pstmt.setLong(i++, mId);
+        pstmt.setInt(i++, queue);
+        pstmt.setInt(i++, type);
+        pstmt.setString(i++, msgId);
+        pstmt.setInt(i++, priority);
+        pstmt.setLong(i++, expireTime);
+
+        int headerLength = header.getLength();
+
+        if (headerLength > 0)
+          pstmt.setBinaryStream(i++, header.openRead(), headerLength);
+        else
+          pstmt.setNull(i++, Types.BINARY);
+
+        if (body != null)  {
+          int bodyLength = body.getLength();
+
+          pstmt.setBinaryStream(i++, body.openRead(), bodyLength);
+        }
+        else
+          pstmt.setString(i++, "");
+
+        pstmt.executeUpdate();
       }
       else {
-	sql = ("INSERT INTO " + _messageTable +
-	       "(queue, msg_type, msg_id, priority, expire, delivered, header, body) " +
-	       "VALUES (?,?,?,?,?,0,?,?)");
-	PreparedStatement pstmt;
+        sql = ("INSERT INTO " + _messageTable +
+               "(queue, msg_type, msg_id, priority, expire, delivered, header, body) " +
+               "VALUES (?,?,?,?,?,0,?,?)");
+        PreparedStatement pstmt;
 
-	pstmt = conn.prepareStatement(sql);
+        pstmt = conn.prepareStatement(sql);
 
-	int i = 1;
-	pstmt.setInt(i++, queue);
-	pstmt.setInt(i++, type);
-	pstmt.setString(i++, msgId);
-	pstmt.setInt(i++, priority);
-	pstmt.setLong(i++, expireTime);
+        int i = 1;
+        pstmt.setInt(i++, queue);
+        pstmt.setInt(i++, type);
+        pstmt.setString(i++, msgId);
+        pstmt.setInt(i++, priority);
+        pstmt.setLong(i++, expireTime);
 
-	int headerLength = header.getLength();
-	pstmt.setBinaryStream(i++, header.openRead(), headerLength);
-	
-	if (body != null)  {
-	  int bodyLength = body.getLength();
-	  pstmt.setBinaryStream(i++, body.openRead(), bodyLength);
-	}
-	else
-	  pstmt.setString(i++, "");
+        int headerLength = header.getLength();
+        pstmt.setBinaryStream(i++, header.openRead(), headerLength);
 
-	pstmt.executeUpdate();
+        if (body != null)  {
+          int bodyLength = body.getLength();
+          pstmt.setBinaryStream(i++, body.openRead(), bodyLength);
+        }
+        else
+          pstmt.setString(i++, "");
+
+        pstmt.executeUpdate();
       }
 
       return 0;
@@ -327,51 +327,51 @@ public class JdbcMessage
     Connection conn = _dataSource.getConnection();
     try {
       String sql = ("SELECT m_id, msg_type, msg_id, delivered, body, header" +
-		    " FROM " + _messageTable +
-		    " WHERE ?<id AND queue=? AND consumer IS NULL" +
-		    " ORDER BY priority DESC, id");
+                    " FROM " + _messageTable +
+                    " WHERE ?<id AND queue=? AND consumer IS NULL" +
+                    " ORDER BY priority DESC, id");
 
       PreparedStatement selectStmt = conn.prepareStatement(sql);
 
       
       sql = ("UPDATE " + _messageTable + " SET consumer=?, delivered=1 " +
-	     "WHERE m_id=? AND consumer IS NULL");
+             "WHERE m_id=? AND consumer IS NULL");
       
       PreparedStatement updateStmt = conn.prepareStatement(sql);
 
       long id = -1;
       while (true) {
-	id = -1;
-	
-	selectStmt.setLong(1, minId);
-	selectStmt.setInt(2, queue);
+        id = -1;
 
-	MessageImpl msg = null;
+        selectStmt.setLong(1, minId);
+        selectStmt.setInt(2, queue);
 
-	ResultSet rs = selectStmt.executeQuery();
-	while (rs.next()) {
-	  id = rs.getLong(1);
+        MessageImpl msg = null;
 
-	  minId = id;
+        ResultSet rs = selectStmt.executeQuery();
+        while (rs.next()) {
+          id = rs.getLong(1);
 
-	  msg = readMessage(rs);
-	}
+          minId = id;
 
-	rs.close();
+          msg = readMessage(rs);
+        }
 
-	if (msg == null)
-	  return null;
+        rs.close();
 
-	updateStmt.setInt(1, session);
-	updateStmt.setLong(2, id);
-	  
-	int updateCount = updateStmt.executeUpdate();
-	
-	if (updateCount == 1)
-	  return msg;
-	else if (log.isLoggable(Level.FINE)) {
-	  log.fine("JdbcMessageQueue[" + queue + "] can't update received message " + id + " for session " + session +".");
-	}
+        if (msg == null)
+          return null;
+
+        updateStmt.setInt(1, session);
+        updateStmt.setLong(2, id);
+
+        int updateCount = updateStmt.executeUpdate();
+
+        if (updateCount == 1)
+          return msg;
+        else if (log.isLoggable(Level.FINE)) {
+          log.fine("JdbcMessageQueue[" + queue + "] can't update received message " + id + " for session " + session +".");
+        }
       }
     } finally {
       conn.close();
@@ -388,7 +388,7 @@ public class JdbcMessage
 
     try {
       String sql = ("DELETE FROM " +  _messageTable + " " +
-		    "WHERE consumer=?");
+                    "WHERE consumer=?");
 
       PreparedStatement pstmt;
       pstmt = conn.prepareStatement(sql);
@@ -418,84 +418,84 @@ public class JdbcMessage
     switch (msgType) {
     case TEXT:
       {
-	InputStream is = rs.getBinaryStream(5);
+        InputStream is = rs.getBinaryStream(5);
 
-	try {
-	  msg = readTextMessage(is);
-	} finally {
-	  if (is != null)
-	    is.close();
-	}
-	break;
+        try {
+          msg = readTextMessage(is);
+        } finally {
+          if (is != null)
+            is.close();
+        }
+        break;
       }
-	    
+
     case BYTES:
       {
-	InputStream is = rs.getBinaryStream(5);
+        InputStream is = rs.getBinaryStream(5);
 
-	try {
-	  msg = readBytesMessage(is);
-	} finally {
-	  if (is != null)
-	    is.close();
-	}
-	break;
+        try {
+          msg = readBytesMessage(is);
+        } finally {
+          if (is != null)
+            is.close();
+        }
+        break;
       }
-	    
+
     case STREAM:
       {
-	InputStream is = rs.getBinaryStream(5);
+        InputStream is = rs.getBinaryStream(5);
 
-	try {
-	  msg = readStreamMessage(is);
-	} finally {
-	  if (is != null)
-	    is.close();
-	}
-	break;
+        try {
+          msg = readStreamMessage(is);
+        } finally {
+          if (is != null)
+            is.close();
+        }
+        break;
       }
-	    
+
     case OBJECT:
       {
-	InputStream is = rs.getBinaryStream(5);
+        InputStream is = rs.getBinaryStream(5);
 
-	try {
-	  msg = readObjectMessage(is);
-	} finally {
-	  if (is != null)
-	    is.close();
-	}
-	break;
+        try {
+          msg = readObjectMessage(is);
+        } finally {
+          if (is != null)
+            is.close();
+        }
+        break;
       }
-	    
+
     case MAP:
       {
-	InputStream is = rs.getBinaryStream(5);
+        InputStream is = rs.getBinaryStream(5);
 
-	try {
-	  msg = readMapMessage(is);
-	} finally {
-	  if (is != null)
-	    is.close();
-	}
-	break;
+        try {
+          msg = readMapMessage(is);
+        } finally {
+          if (is != null)
+            is.close();
+        }
+        break;
       }
-	    
+
     case MESSAGE:
     default:
       {
-	msg = new MessageImpl();
-	break;
+        msg = new MessageImpl();
+        break;
       }
     }
-	  
+
     InputStream is = rs.getBinaryStream(6);
     
     if (is != null) {
       try {
-	readMessageHeader(is, msg);
+        readMessageHeader(is, msg);
       } finally {
-	is.close();
+        is.close();
       }
     }
 
@@ -544,10 +544,10 @@ public class JdbcMessage
       ws.write(length);
 
       for (int i = 0; i < length; i++) {
-	int ch = buf[i];
+        int ch = buf[i];
 
-	ws.write(ch >> 8);
-	ws.write(ch);
+        ws.write(ch >> 8);
+        ws.write(ch);
       }
     }
   }
@@ -560,9 +560,9 @@ public class JdbcMessage
   {
     TempStream body = new TempStream();
     body.openWrite();
-	
+
     WriteStream ws = new WriteStream(body);
-	
+
     int data;
     //bytes.reset();
 
@@ -590,15 +590,15 @@ public class JdbcMessage
   {
     TempStream body = new TempStream();
     body.openWrite();
-	
+
     WriteStream ws = new WriteStream(body);
     ObjectOutputStream out = new ObjectOutputStream(ws);
 
     try {
       while (true) {
-	Object data = stream.readObject();
+        Object data = stream.readObject();
 
-	out.writeObject(data);
+        out.writeObject(data);
       }
     } catch (MessageEOFException e) {
     }
@@ -617,7 +617,7 @@ public class JdbcMessage
   {
     TempStream body = new TempStream();
     body.openWrite();
-	
+
     WriteStream ws = new WriteStream(body);
     ObjectOutputStream out = new ObjectOutputStream(ws);
 
@@ -637,18 +637,18 @@ public class JdbcMessage
   {
     TempStream body = new TempStream();
     body.openWrite();
-	
+
     WriteStream ws = new WriteStream(body);
     ObjectOutputStream out = new ObjectOutputStream(ws);
 
     try {
       Enumeration e = map.getMapNames();
       while (e.hasMoreElements()) {
-	String name = (String) e.nextElement();
-	out.writeUTF(name);
-	
-	Object data = map.getObject(name);
-	out.writeObject(data);
+        String name = (String) e.nextElement();
+        out.writeUTF(name);
+
+        Object data = map.getObject(name);
+        out.writeObject(data);
       }
     } catch (MessageEOFException e) {
     }
@@ -742,9 +742,9 @@ public class JdbcMessage
 
     try {
       while (true) {
-	Object obj = in.readObject();
+        Object obj = in.readObject();
 
-	stream.writeObject(obj);
+        stream.writeObject(obj);
       }
     } catch (EOFException e) {
     } catch (Exception e) {
@@ -773,10 +773,10 @@ public class JdbcMessage
 
     try {
       while (true) {
-	String name = in.readUTF();
-	Object obj = in.readObject();
+        String name = in.readUTF();
+        Object obj = in.readObject();
 
-	map.setObject(name, obj);
+        map.setObject(name, obj);
       }
     } catch (EOFException e) {
     } catch (Exception e) {
@@ -826,16 +826,16 @@ public class JdbcMessage
       return null;
     case 'S':
       {
-	cb.clear();
-	int length = readInt(is);
+        cb.clear();
+        int length = readInt(is);
 
-	for (int i = 0; i < length; i++) {
-	  char ch = (char) ((is.read() << 8) + is.read());
+        for (int i = 0; i < length; i++) {
+          char ch = (char) ((is.read() << 8) + is.read());
 
-	  cb.append(ch);
-	}
+          cb.append(ch);
+        }
 
-	return cb.toString();
+        return cb.toString();
       }
     default:
       throw new IOException(L.l("unknown header type"));
@@ -849,9 +849,9 @@ public class JdbcMessage
     throws IOException
   {
     return ((is.read() << 24) +
-	    (is.read() << 16) +
-	    (is.read() << 8) +
-	    (is.read()));
+            (is.read() << 16) +
+            (is.read() << 8) +
+            (is.read()));
   }
 
   /**

@@ -98,18 +98,18 @@ public class MinExpr extends FunExpr implements GroupExpr {
       long oldValue = context.getGroupLong(_groupField);
     
       if (context.isGroupNull(_groupField))
-	context.setGroupLong(_groupField, value);
+        context.setGroupLong(_groupField, value);
       else if (value < oldValue)
-	context.setGroupLong(_groupField, value);
+        context.setGroupLong(_groupField, value);
     }
     else {
       double value = _expr.evalDouble(context);
       double oldValue = context.getGroupDouble(_groupField);
     
       if (context.isGroupNull(_groupField))
-	context.setGroupDouble(_groupField, value);
+        context.setGroupDouble(_groupField, value);
       else if (value < oldValue)
-	context.setGroupDouble(_groupField, value);
+        context.setGroupDouble(_groupField, value);
     }
   }
 

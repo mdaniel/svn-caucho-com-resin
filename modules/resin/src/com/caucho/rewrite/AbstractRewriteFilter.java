@@ -94,19 +94,19 @@ abstract public class AbstractRewriteFilter implements RewriteFilter
   
   @Override
   public FilterChain map(String uri,
-			 String queryString,
-			 FilterChain next)
+                         String queryString,
+                         FilterChain next)
     throws ServletException
   {
     if (_regexp == null || (_regexp.matcher(uri)).find()) {
       FilterChain chain = createFilterChain(uri, queryString, next);
 
       for (int i = _filters.length - 1; i >= 0; i--) {
-	chain = _filters[i].map(uri, queryString, chain);
+        chain = _filters[i].map(uri, queryString, chain);
       }
 
       if (_predicates.length > 0)
-	chain = new MatchFilterChain(_predicates, chain, next);
+        chain = new MatchFilterChain(_predicates, chain, next);
 
       return chain;
     }
@@ -115,8 +115,8 @@ abstract public class AbstractRewriteFilter implements RewriteFilter
   }
 
   protected FilterChain createFilterChain(String uri,
-					  String queryString,
-					  FilterChain next)
+                                          String queryString,
+                                          FilterChain next)
   {
     return next;
   }

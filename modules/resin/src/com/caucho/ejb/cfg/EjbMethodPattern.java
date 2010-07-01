@@ -312,10 +312,10 @@ public class EjbMethodPattern<X> {
   {
     if (roles != null) {
       if (_roles == null)
-	_roles = new ArrayList();
+        _roles = new ArrayList();
       
       for (String role : roles) {
-	_roles.add(role);
+        _roles.add(role);
       }
     }
   }
@@ -326,7 +326,7 @@ public class EjbMethodPattern<X> {
   public void configure(AnnotatedMethod<?> apiMethod)
   {
     if (_signature.isMatch(apiMethod.getJavaMember().getName(),
-			   apiMethod.getJavaMember().getParameterTypes())) {
+                           apiMethod.getJavaMember().getParameterTypes())) {
       // configureSecurity(apiMethod);
       configureXA(apiMethod);
     }
@@ -338,8 +338,8 @@ public class EjbMethodPattern<X> {
       return;
 
     Annotation ann = new TransactionAttribute() {
-	public Class annotationType() { return TransactionAttribute.class; }
-	public TransactionAttributeType value() { return _transactionType; }
+        public Class annotationType() { return TransactionAttribute.class; }
+        public TransactionAttributeType value() { return _transactionType; }
       };
 
     ((AnnotatedMethodImpl<?>) apiMethod).addAnnotation(ann);

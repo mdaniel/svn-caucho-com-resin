@@ -44,7 +44,7 @@ public interface ManagedConnection {
    * Creates a new connection handle for the underlying physical connection.
    */
   public Object getConnection(Subject subject,
-			      ConnectionRequestInfo requestInfo)
+                              ConnectionRequestInfo requestInfo)
     throws ResourceException;
 
   /**

@@ -162,26 +162,26 @@ public class ServletEmbed
   {
     try {
       if (_servletClass == null)
-	throw new ConfigException(L.l("servlet-class is required for ServletEmbed."));
+        throw new ConfigException(L.l("servlet-class is required for ServletEmbed."));
       
       servletConfig.setServletClass(_servletClass);
 
       if (_servletName != null)
-	servletConfig.setServletName(_servletName);
+        servletConfig.setServletName(_servletName);
       else
-	servletConfig.setServletName(_servletClass);
+        servletConfig.setServletName(_servletClass);
 
       for (Map.Entry<String,String> entry : _initParamMap.entrySet()) {
-	servletConfig.setInitParam(entry.getKey(), entry.getValue());
+        servletConfig.setInitParam(entry.getKey(), entry.getValue());
       }
 
       servletConfig.setInit(_init);
 
       if (_loadOnStartup >= 0)
-	servletConfig.setLoadOnStartup(_loadOnStartup);
+        servletConfig.setLoadOnStartup(_loadOnStartup);
 
       if (_protocol != null) {
-	servletConfig.setProtocol(_protocol.createProtocol());
+        servletConfig.setProtocol(_protocol.createProtocol());
       }
 
       servletConfig.init();

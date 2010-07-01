@@ -73,10 +73,10 @@ class ManyToManyConfig extends AbstractRelationConfig
   private String _orderBy;
 
   ManyToManyConfig(BaseConfigIntrospector introspector,
-		   EntityType sourceType,
-		   AccessibleObject field,
-		   String fieldName,
-		   Class fieldType)
+                   EntityType sourceType,
+                   AccessibleObject field,
+                   String fieldName,
+                   Class fieldType)
   {
     _introspector = introspector;
     
@@ -212,9 +212,9 @@ class ManyToManyConfig extends AbstractRelationConfig
 
     if (targetType == null)
       throw error(field,
-	          L.l("targetEntity '{0}' is not an @Entity bean for {1}.  The targetEntity of a @ManyToMany collection must be an @Entity bean.",
-		      targetClass.getName(),
-		      _fieldName));
+                  L.l("targetEntity '{0}' is not an @Entity bean for {1}.  The targetEntity of a @ManyToMany collection must be an @Entity bean.",
+                      targetClass.getName(),
+                      _fieldName));
 
 
     if (! isOwningSide())
@@ -253,29 +253,29 @@ class ManyToManyConfig extends AbstractRelationConfig
       inverseJoinColumnsConfig = joinTableConfig.getInverseJoinColumnMap();
 
       if (joinColumnsConfig != null 
-	  && joinColumnsConfig.size() > 0)
-	manyToManyField.setJoinColumns(true);
+          && joinColumnsConfig.size() > 0)
+        manyToManyField.setJoinColumns(true);
 
       if (inverseJoinColumnsConfig != null
-	  && inverseJoinColumnsConfig.size() > 0)
-	manyToManyField.setInverseJoinColumns(true);
+          && inverseJoinColumnsConfig.size() > 0)
+        manyToManyField.setInverseJoinColumns(true);
  
       if (! joinTableName.equals(""))
-	sqlTable = joinTableName;
+        sqlTable = joinTableName;
     }
 
     mapTable = persistenceUnit.createTable(sqlTable);
 
     sourceColumns
       = calculateColumns(_field, _fieldName, mapTable,
-			 _sourceType.getTable().getName() + "_",
-			 _sourceType, joinColumnsConfig);
+                         _sourceType.getTable().getName() + "_",
+                         _sourceType, joinColumnsConfig);
 
     targetColumns
       = calculateColumns(_field, _fieldName, mapTable,
-			 targetType.getTable().getName() + "_",
-			 targetType,
-			 inverseJoinColumnsConfig);
+                         targetType.getTable().getName() + "_",
+                         targetType,
+                         inverseJoinColumnsConfig);
     
 
     manyToManyField.setAssociationTable(mapTable);
@@ -322,15 +322,15 @@ class ManyToManyConfig extends AbstractRelationConfig
 
     if (sourceField == null)
       throw error(_field, L.l("Unable to find the associated field in '{0}' for a @ManyToMany relationship from '{1}'",
-			      targetType.getName(), _fieldName));
+                              targetType.getName(), _fieldName));
 
     ManyToManyField manyToManyField;
 
  
     manyToManyField = new ManyToManyField(_sourceType,
-					  _fieldName,
-					  sourceField,
-					  getCascade());
+                                          _fieldName,
+                                          sourceField,
+                                          getCascade());
     manyToManyField.setType(targetType);
     _sourceType.addField(manyToManyField);
 
@@ -341,10 +341,10 @@ class ManyToManyConfig extends AbstractRelationConfig
       LinkColumns sourceLink = sourceField.getSourceLink();
       ArrayList<ForeignColumn> columns = sourceLink.getColumns();
       for (ForeignColumn column : columns) {
-	String columnName = column.getName();
-	columnName = columnName.substring(columnName.indexOf('_'));
-	columnName = toSqlName(manyToManyField.getName()) + columnName;
-	column.setName(columnName);
+        String columnName = column.getName();
+        columnName = columnName.substring(columnName.indexOf('_'));
+        columnName = toSqlName(manyToManyField.getName()) + columnName;
+        column.setName(columnName);
       }
     }
 
@@ -352,10 +352,10 @@ class ManyToManyConfig extends AbstractRelationConfig
       LinkColumns targetLink = sourceField.getTargetLink();
       ArrayList<ForeignColumn> columns = targetLink.getColumns();
       for (ForeignColumn column : columns) {
-	String columnName = column.getName();
-	columnName = columnName.substring(columnName.indexOf('_'));
-	columnName = toSqlName(sourceField.getName()) + columnName;
-	column.setName(columnName);
+        String columnName = column.getName();
+        columnName = columnName.substring(columnName.indexOf('_'));
+        columnName = toSqlName(sourceField.getName()) + columnName;
+        column.setName(columnName);
       }
     }
 

@@ -40,9 +40,9 @@ class Printf {
   private final static int NO_TRAIL_ZERO = 0x40;
 
   private static char []digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-			  'a', 'b', 'c', 'd', 'e', 'f'};
+                          'a', 'b', 'c', 'd', 'e', 'f'};
   private static char []bigDigits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-			     'A', 'B', 'C', 'D', 'E', 'F'};
+                             'A', 'B', 'C', 'D', 'E', 'F'};
 
   private Printf()
   {
@@ -62,8 +62,8 @@ class Printf {
   }
 
   public static CharBuffer printf(CharBuffer result, ESString format, 
-				  Call eval, int length)
-				  throws Throwable
+                                  Call eval, int length)
+                                  throws Throwable
   {
     int arg = 1;
     int len = format.length();
@@ -73,103 +73,103 @@ class Printf {
       int start = i;
 
       if ((ch = format.charAt(i)) != '%') {
-	result.append((char) ch);
-	continue;
+        result.append((char) ch);
+        continue;
       }
 
       int flags = 0;
     loop:
       while (++i < len) {
-	switch ((ch = format.charAt(i))) {
-	case '0': flags |= ZERO_FILL; break;
-	case '+': flags |= POS_PLUS; break;
-	case ' ': flags |= POS_SPACE; break;
-	case '#': flags |= ALT; break;
-	case '-': flags |= LALIGN; break;
+        switch ((ch = format.charAt(i))) {
+        case '0': flags |= ZERO_FILL; break;
+        case '+': flags |= POS_PLUS; break;
+        case ' ': flags |= POS_SPACE; break;
+        case '#': flags |= ALT; break;
+        case '-': flags |= LALIGN; break;
 
-	default: break loop;
-	}
+        default: break loop;
+        }
       }
 
       int width = 0;
       for (; i < len && (ch = format.charAt(i)) >= '0' && ch <= '9'; i++) {
-	width = 10 * width + ch - '0';
+        width = 10 * width + ch - '0';
       }
 
       if (i >= len) {
-	fixBits(result, format, start, i);
-	break;
+        fixBits(result, format, start, i);
+        break;
       }
 
       int prec = 0;
       if (ch == '.') {
-	while (++i < len && (ch = format.charAt(i)) >= '0' && ch <= '9') {
-	  prec = 10 * prec + ch - '0';
-	}
+        while (++i < len && (ch = format.charAt(i)) >= '0' && ch <= '9') {
+          prec = 10 * prec + ch - '0';
+        }
       } else
-	prec = -1;
+        prec = -1;
 
       if (i >= len) {
-	fixBits(result, format, start, i);
-	break;
+        fixBits(result, format, start, i);
+        break;
       }
 
       switch (ch) {
       case '%':
-	result.append((char) '%');
-	break;
+        result.append((char) '%');
+        break;
 
       case 'd':
-	if (arg >= length)
-	  throw new ESException("missing printf argument");
-	formatInteger(result, eval.getArg(arg++).toNum(),
-		      width, prec, flags, 10);
-	break;
+        if (arg >= length)
+          throw new ESException("missing printf argument");
+        formatInteger(result, eval.getArg(arg++).toNum(),
+                      width, prec, flags, 10);
+        break;
 
       case 'o':
-	if (arg >= length)
-	  throw new ESException("missing printf argument");
-	formatInteger(result, eval.getArg(arg++).toNum(),
-		      width, prec, flags, 8);
-	break;
+        if (arg >= length)
+          throw new ESException("missing printf argument");
+        formatInteger(result, eval.getArg(arg++).toNum(),
+                      width, prec, flags, 8);
+        break;
 
       case 'X':
-	flags |= BIG;
+        flags |= BIG;
       case 'x':
-	if (arg >= length)
-	  throw new ESException("missing printf argument");
-	formatInteger(result, eval.getArg(arg++).toNum(), 
-		      width, prec, flags, 16);
-	break;
+        if (arg >= length)
+          throw new ESException("missing printf argument");
+        formatInteger(result, eval.getArg(arg++).toNum(),
+                      width, prec, flags, 16);
+        break;
 
       case 'E':
       case 'G':
-	flags |= BIG;
+        flags |= BIG;
       case 'f':
       case 'e':
       case 'g':
-	if (arg >= length)
-	  throw new ESException("missing printf argument");
-	formatDouble(result, eval.getArg(arg++).toNum(), 
-		      width, prec, flags, ch);
-	break;
+        if (arg >= length)
+          throw new ESException("missing printf argument");
+        formatDouble(result, eval.getArg(arg++).toNum(),
+                      width, prec, flags, ch);
+        break;
 
       case 'c':
-	if (arg >= length)
-	  throw new ESException("missing printf argument");
-	formatChar(result, (int) eval.getArg(arg++).toNum(), width, flags);
-	break;
+        if (arg >= length)
+          throw new ESException("missing printf argument");
+        formatChar(result, (int) eval.getArg(arg++).toNum(), width, flags);
+        break;
 
       case 's':
-	if (arg >= length)
-	  throw new ESException("missing printf argument");
-	formatString(result, eval.getArg(arg++).toStr(), 
-		     prec, width, flags);
-	break;
+        if (arg >= length)
+          throw new ESException("missing printf argument");
+        formatString(result, eval.getArg(arg++).toStr(),
+                     prec, width, flags);
+        break;
 
       default:
-	fixBits(result, format, start, i + 1);
-	break;
+        fixBits(result, format, start, i + 1);
+        break;
       }
     }
 
@@ -177,7 +177,7 @@ class Printf {
   }
 
   private static void formatDouble(CharBuffer cb, double value,
-				  int prec, int flags, int type)
+                                  int prec, int flags, int type)
   {
     String raw = Double.toString(value);
     int expt = 0;
@@ -189,13 +189,13 @@ class Printf {
     // XXX: locale screws us?
     for (; i < raw.length(); i++) {
       if ((ch = raw.charAt(i)) == '.' || ch == 'e' || ch == 'E')
-	break;
+        break;
       else if (! seenDigit && ch == '0') {
       }
       else {
-	seenDigit = true;
-	digits.append((char) ch);
-	expt++;
+        seenDigit = true;
+        digits.append((char) ch);
+        expt++;
       }
     }
 
@@ -206,30 +206,30 @@ class Printf {
       ch = raw.charAt(i);
 
       if (! seenDigit && ch == '0') {
-	expt--;
+        expt--;
       } else if (ch >= '0' && ch <= '9') {
-	digits.append((char) ch);
-	seenDigit = true;
+        digits.append((char) ch);
+        seenDigit = true;
       }
       else {
-	int sign = 1;
-	i++;
-	if ((ch = raw.charAt(i)) == '+') {
-	  i++;
-	}
-	else if (ch == '-') {
-	  i++;
-	  sign = -1;
-	}
-	  
-	int e = 0;
-	for (; i < raw.length() && (ch = raw.charAt(i)) >= '0' && ch <= '9';
-	     i++) {
-	  e = 10 * e + ch - '0';
-	}
-	
-	expt += sign * e;
-	break;
+        int sign = 1;
+        i++;
+        if ((ch = raw.charAt(i)) == '+') {
+          i++;
+        }
+        else if (ch == '-') {
+          i++;
+          sign = -1;
+        }
+
+        int e = 0;
+        for (; i < raw.length() && (ch = raw.charAt(i)) >= '0' && ch <= '9';
+             i++) {
+          e = 10 * e + ch - '0';
+        }
+
+        expt += sign * e;
+        break;
       }
     }
 
@@ -241,31 +241,31 @@ class Printf {
 
     if (type == 'f') {
       if (roundDigits(digits, expt + prec)) {
-	expt++;
+        expt++;
       }
 
       formatFixed(cb, digits, expt, prec, flags);
     }
     else if (type == 'e' || type == 'E') {
       if (roundDigits(digits, prec + 1))
-	expt++;
+        expt++;
 
       formatExpt(cb, digits, expt, prec, flags);
     }
     else {
       if (roundDigits(digits, prec))
-	expt++;
+        expt++;
 
       if (expt < -3 || expt > prec)
-	formatExpt(cb, digits, expt, prec - 1, flags|NO_TRAIL_ZERO);
+        formatExpt(cb, digits, expt, prec - 1, flags|NO_TRAIL_ZERO);
       else
-	formatFixed(cb, digits, expt, prec - expt, flags|NO_TRAIL_ZERO);
+        formatFixed(cb, digits, expt, prec - expt, flags|NO_TRAIL_ZERO);
     }
   }
 
   private static void formatDouble(CharBuffer cb, double value,
-				  int width, int prec, int flags, 
-				  int type)
+                                  int width, int prec, int flags,
+                                  int type)
   {
     if (prec < 0)
       prec = 6;
@@ -273,9 +273,9 @@ class Printf {
     int offset = cb.length();
 
     if ((flags & ZERO_FILL) != 0 &&
-	(value < 0 || (flags & (POS_PLUS|POS_SPACE)) != 0)) {
-	offset++;
-	width--;
+        (value < 0 || (flags & (POS_PLUS|POS_SPACE)) != 0)) {
+        offset++;
+        width--;
     }
 
     if (value < 0) {
@@ -293,9 +293,9 @@ class Printf {
 
     for (int i = 0; i < width; i++) {
       if ((flags & LALIGN) != 0)
-	cb.append(' ');
+        cb.append(' ');
       else
-	cb.insert(offset, (flags & ZERO_FILL) == 0 ? ' ' : '0');
+        cb.insert(offset, (flags & ZERO_FILL) == 0 ? ' ' : '0');
     }
   }
 
@@ -312,8 +312,8 @@ class Printf {
       int ch = digits.charAt(i);
 
       if (ch != '9') {
-	digits.setCharAt(i, (char) (ch + 1));
-	return false;
+        digits.setCharAt(i, (char) (ch + 1));
+        return false;
       }
       digits.setCharAt(i, '0');
     }
@@ -324,16 +324,16 @@ class Printf {
   }
 
   private static void formatFixed(CharBuffer cb, CharBuffer digits,
-				 int expt, int prec, int flags)
+                                 int expt, int prec, int flags)
   {
     int i = 0;
     int origExpt = expt;
 
     for (; expt > 0; expt--) {
       if (i < digits.length())
-	cb.append((char) digits.charAt(i++));
+        cb.append((char) digits.charAt(i++));
       else
-	cb.append('0');
+        cb.append('0');
     }
     
     if (origExpt <= 0) // || digits.length() == 0)
@@ -357,7 +357,7 @@ class Printf {
   }
 
   private static void formatExpt(CharBuffer cb, CharBuffer digits,
-				 int expt, int prec, int flags)
+                                 int expt, int prec, int flags)
   {
     if (digits.length() == 0)
       cb.append('0');
@@ -369,7 +369,7 @@ class Printf {
 
     for (int i = 1; i < digits.length(); i++) {
       if (prec > 0)
-	cb.append((char) digits.charAt(i));
+        cb.append((char) digits.charAt(i));
       prec--;
     }
 
@@ -385,7 +385,7 @@ class Printf {
   }
 
   private static void formatInteger(CharBuffer cb, double dvalue,
-				   int width, int prec, int flags, int radix)
+                                   int width, int prec, int flags, int radix)
   {
     boolean isBig = (flags & BIG) != 0;
     int begin = cb.length();
@@ -431,11 +431,11 @@ class Printf {
     width -= cb.length() - begin;
     for (; width > 0; width--) {
       if ((flags & LALIGN) != 0)
-	cb.append(' ');
+        cb.append(' ');
       else if ((flags & ZERO_FILL) != 0 && prec < 0)
-	cb.insert(begin, '0');
+        cb.insert(begin, '0');
       else
-	cb.insert(begin, ' ');
+        cb.insert(begin, ' ');
     }
 
     if (cb.length() == begin)
@@ -450,15 +450,15 @@ class Printf {
 
     if ((flags & LALIGN) == 0) {
       for (int i = 0; i < width - 1; i++)
-	cb.insert(offset, (char) ' ');
+        cb.insert(offset, (char) ' ');
     } else {
       for (int i = 0; i < width - 1; i++)
-	cb.append((char) ' ');
+        cb.append((char) ' ');
     }
   }
 
   private static void formatString(CharBuffer cb, ESString string,
-				  int prec, int width, int flags)
+                                  int prec, int width, int flags)
   {
     int offset = cb.length();
 
@@ -472,10 +472,10 @@ class Printf {
 
     if ((flags & LALIGN) == 0) {
       for (int i = 0; i < width; i++)
-	cb.insert(offset, (char) ' ');
+        cb.insert(offset, (char) ' ');
     } else {
       for (int i = 0; i < width; i++)
-	cb.append((char) ' ');
+        cb.append((char) ' ');
     }
   }
 

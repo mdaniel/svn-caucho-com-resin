@@ -155,12 +155,12 @@ public abstract class AbstractEnhancedType extends AmberType {
   {
     if (_javaBeanClass == null) {
       try {
-	Thread thread = Thread.currentThread();
-	ClassLoader loader = thread.getContextClassLoader();
-	
-	_javaBeanClass = Class.forName(getClassName(), false, loader);
+        Thread thread = Thread.currentThread();
+        ClassLoader loader = thread.getContextClassLoader();
+
+        _javaBeanClass = Class.forName(getClassName(), false, loader);
       } catch (ClassNotFoundException e) {
-	throw new AmberRuntimeException(e);
+        throw new AmberRuntimeException(e);
       }
     }
     

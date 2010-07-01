@@ -83,16 +83,16 @@ public class SerializationAdapter<X> {
     }
     else {
       try {
-	Class cl = obj.getClass();
+        Class cl = obj.getClass();
 
-	for (Field field : cl.getDeclaredFields()) {
-	  if (field.getName().equals("__caucho_handle")) {
-	    field.setAccessible(true);
-	    field.set(obj, handle);
-	  }
-	}
+        for (Field field : cl.getDeclaredFields()) {
+          if (field.getName().equals("__caucho_handle")) {
+            field.setAccessible(true);
+            field.set(obj, handle);
+          }
+        }
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
   }
@@ -137,9 +137,9 @@ public class SerializationAdapter<X> {
       if (false) {
         String userName = System.getProperty("user.name");
         
-	out = Vfs.lookup("file:/tmp/" + userName + "/qa/temp.class").openWrite();
-	out.write(buffer, 0, buffer.length);
-	out.close();
+        out = Vfs.lookup("file:/tmp/" + userName + "/qa/temp.class").openWrite();
+        out.write(buffer, 0, buffer.length);
+        out.close();
       }
       
       String cleanName = thisClassName.replace('/', '.');
@@ -157,15 +157,15 @@ public class SerializationAdapter<X> {
   {
     for (Constructor baseCtor : _cl.getDeclaredConstructors()) {
       if (Modifier.isPrivate(baseCtor.getModifiers()))
-	continue;
+        continue;
 
       generateConstructor(jClass, superClassName, baseCtor);
     }
   }
 
   public static void generateConstructor(JavaClass jClass,
-					 String superClassName,
-					 Constructor baseCtor)
+                                         String superClassName,
+                                         Constructor baseCtor)
   {
     Class []types = baseCtor.getParameterTypes();
 
@@ -209,7 +209,7 @@ public class SerializationAdapter<X> {
 
     code.pushObjectVar(0);
     code.getField(jClass.getThisClass(), "__caucho_handle",
-		   "Ljava/lang/Object;");
+                   "Ljava/lang/Object;");
 
     code.addObjectReturn();
     
@@ -236,7 +236,7 @@ public class SerializationAdapter<X> {
     code.pushObjectVar(0);
     code.pushObjectVar(1);
     code.putField(jClass.getThisClass(), "__caucho_handle",
-		  "Ljava/lang/Object;");
+                  "Ljava/lang/Object;");
 
     code.addReturn();
     
@@ -252,32 +252,32 @@ public class SerializationAdapter<X> {
       Class type = param[i];
       
       if (boolean.class.equals(type)
-	  || byte.class.equals(type)
-	  || short.class.equals(type)
-	  || int.class.equals(type)) {
-	code.pushIntVar(index);
-	index += 1;
-	stack += 1;
+          || byte.class.equals(type)
+          || short.class.equals(type)
+          || int.class.equals(type)) {
+        code.pushIntVar(index);
+        index += 1;
+        stack += 1;
       }
       else if (long.class.equals(type)) {
-	code.pushLongVar(index);
-	index += 2;
-	stack += 2;
+        code.pushLongVar(index);
+        index += 2;
+        stack += 2;
       }
       else if (float.class.equals(type)) {
-	code.pushFloatVar(index);
-	index += 1;
-	stack += 1;
+        code.pushFloatVar(index);
+        index += 1;
+        stack += 1;
       }
       else if (double.class.equals(type)) {
-	code.pushDoubleVar(index);
-	index += 2;
-	stack += 2;
+        code.pushDoubleVar(index);
+        index += 2;
+        stack += 2;
       }
       else {
-	code.pushObjectVar(index);
-	index += 1;
-	stack += 1;
+        code.pushObjectVar(index);
+        index += 1;
+        stack += 1;
       }
     }
   }
@@ -288,9 +288,9 @@ public class SerializationAdapter<X> {
 
     for (Class param : parameters) {
       if (long.class.equals(param) || double.class.equals(param))
-	count += 2;
+        count += 2;
       else
-	count += 1;
+        count += 1;
     }
 
     return count;

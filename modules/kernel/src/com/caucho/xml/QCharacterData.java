@@ -147,7 +147,7 @@ abstract class QCharacterData extends QAbstractNode implements CharacterData {
   {
     for (int i = 0; i < _data.length(); i++)
       if (! Character.isWhitespace(_data.charAt(i)))
-	return true;
+        return true;
 
     return false;
   }
@@ -156,7 +156,7 @@ abstract class QCharacterData extends QAbstractNode implements CharacterData {
   {
     for (int i = 0; i < _data.length(); i++)
       if (! Character.isWhitespace(_data.charAt(i)))
-	return false;
+        return false;
 
     return true;
   }

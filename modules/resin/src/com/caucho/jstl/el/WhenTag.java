@@ -66,23 +66,23 @@ public class WhenTag extends TagSupport {
       Tag parent = getParent();
 
       if (! (parent instanceof ChooseTag))
-	throw new JspException(L.l("c:when tag must be contained in a c:choose tag."));
+        throw new JspException(L.l("c:when tag must be contained in a c:choose tag."));
 
       ChooseTag chooseTag = (ChooseTag) parent;
 
       if (chooseTag.isMatch())
-	return SKIP_BODY;
+        return SKIP_BODY;
 
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
       boolean test = _testExpr.evalBoolean(pageContext.getELContext());
 
       if (test) {
-	chooseTag.setMatch();
+        chooseTag.setMatch();
       
-	return EVAL_BODY_INCLUDE;
+        return EVAL_BODY_INCLUDE;
       }
       else
-	return SKIP_BODY;
+        return SKIP_BODY;
     } catch (ELException e) {
       throw new JspException(e);
     }

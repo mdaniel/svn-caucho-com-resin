@@ -39,12 +39,12 @@ public class EnhancedLiteral {
     {
       public Class annotationType()
       {
-	return Enhanced.class;
+        return Enhanced.class;
       }
 
       public String toString()
       {
-	return "@" + annotationType().getName() + "()";
+        return "@" + annotationType().getName() + "()";
       }
     };
 }

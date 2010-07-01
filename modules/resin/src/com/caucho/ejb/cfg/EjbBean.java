@@ -975,7 +975,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
         if (method == null)
           throw error(L.l("'{0}' is an unknown around-invoke method",
                           _aroundInvokeMethodName));
-	
+
         // XXX: _bean.setAroundInvokeMethod(method.getMethod());
       }
 
@@ -1450,7 +1450,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     for (int i = 0; i < exn.length; i++) {
       if (! AnnotatedTypeUtil.hasException(method, exn[i])
-	  && ! RuntimeException.class.isAssignableFrom(exn[i]))
+          && ! RuntimeException.class.isAssignableFrom(exn[i]))
         return exn[i];
     }
 
@@ -1462,7 +1462,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     for (AnnotatedMethod<? super T> method : cl.getMethods()) {
       if (method.getJavaMember().getName().startsWith("create"))
-	return method;
+        return method;
     }
 
     return null;
@@ -1515,7 +1515,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
         /*
         // ejb/0f08: single interface
         if (values.length == 0) {
-	  // XXX: getGenericInterfaces
+          // XXX: getGenericInterfaces
           Class []ifs = type.getJavaClass().getInterfaces();
 
           if (ifs.length == 1)
@@ -1554,7 +1554,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     for (AnnotatedMethod<? super Y> method : type.getMethods()) {
       TransactionAttribute xa
-	= (TransactionAttribute) method.getAnnotation(TransactionAttribute.class);
+        = (TransactionAttribute) method.getAnnotation(TransactionAttribute.class);
 
       if (xa != null) {
         EjbMethodPattern<X> pattern = createMethod(getSignature(method));

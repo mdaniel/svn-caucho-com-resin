@@ -72,7 +72,7 @@ public class PubSubSubscribe extends PubSubQuery {
   {
     if (this.node != null)
       return (getClass().getSimpleName() + "[" + this.jid
-	      + ",node=" + this.node + "]");
+              + ",node=" + this.node + "]");
     else
       return getClass().getSimpleName() + "[" + this.jid + "]";
   }

@@ -101,13 +101,13 @@ public class XslVariable extends XslNode implements XslTopNode {
       int index = addExpr(_select);
 
       if (_isGlobal) {
-	out.print("env.setGlobal(\"" + _name + "\", ");
-	out.print("_exprs[" + index + "].evalObject(node, env));");
+        out.print("env.setGlobal(\"" + _name + "\", ");
+        out.print("_exprs[" + index + "].evalObject(node, env));");
       }
       else {
-	out.print("_exprs[" + index + "]");
+        out.print("_exprs[" + index + "]");
       
-	out.println(".addVar(env, \"" + _name + "\", node, env);");
+        out.println(".addVar(env, \"" + _name + "\", node, env);");
       }
     }
     else {
@@ -118,9 +118,9 @@ public class XslVariable extends XslNode implements XslTopNode {
       generateChildren(out);
       
       if (_isGlobal)
-	out.print("env.setGlobal(\"");
+        out.print("env.setGlobal(\"");
       else
-	out.print("env.addVar(\"");
+        out.print("env.addVar(\"");
       
       out.printJavaString(_name);
       out.println("\", out.popFragment(" + id + "));");

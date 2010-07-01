@@ -173,7 +173,7 @@ final public class ScriptClosure {
    * @return The Java object returned by the JavaScript function.
    */
   public synchronized Object call(String name, Object a, Object b,
-				  Object c, Object d)
+                                  Object c, Object d)
     throws Throwable
   {
     Call call = resin.getCall();
@@ -254,7 +254,7 @@ final public class ScriptClosure {
     } finally {
       resin.end(old);
       if (doExit)
-	Exit.exit();
+        Exit.exit();
     }
   }
 

@@ -51,8 +51,8 @@ public class ParamType extends BaseType implements ParameterizedType
   private HashMap<String,BaseType> _paramMap;
 
   public ParamType(Class<?> type,
-		   BaseType []param,
-		   HashMap<String,BaseType> paramMap)
+                   BaseType []param,
+                   HashMap<String,BaseType> paramMap)
   {
     _type = type;
     _param = param;
@@ -242,7 +242,7 @@ public class ParamType extends BaseType implements ParameterizedType
 
     for (int i = 0; i < _param.length; i++) {
       if (! _param[i].equals(type._param[i]))
-	return false;
+        return false;
     }
 
     return true;
@@ -258,7 +258,7 @@ public class ParamType extends BaseType implements ParameterizedType
 
     for (int i = 0; i < _param.length; i++) {
       if (i != 0)
-	sb.append(",");
+        sb.append(",");
       
       sb.append(_param[i].getSimpleName());
     }
@@ -276,7 +276,7 @@ public class ParamType extends BaseType implements ParameterizedType
 
     for (int i = 0; i < _param.length; i++) {
       if (i != 0)
-	sb.append(",");
+        sb.append(",");
       
       sb.append(_param[i]);
     }

@@ -56,8 +56,8 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
    * Creates the new host deploy.
    */
   public WebAppEarDeployGenerator(DeployContainer<WebAppController> deployContainer,
-				  WebAppContainer container,
-				  EarDeployGenerator earDeploy)
+                                  WebAppContainer container,
+                                  EarDeployGenerator earDeploy)
     throws Exception
   {
     super(deployContainer);

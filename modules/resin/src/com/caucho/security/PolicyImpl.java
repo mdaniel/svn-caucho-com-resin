@@ -101,22 +101,22 @@ public class PolicyImpl extends Policy {
 
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	EnvironmentClassLoader envLoader;
-	envLoader = (EnvironmentClassLoader) loader;
+        EnvironmentClassLoader envLoader;
+        envLoader = (EnvironmentClassLoader) loader;
 
-	ArrayList<Permission> perms = envLoader.getPermissions();
+        ArrayList<Permission> perms = envLoader.getPermissions();
 
-	if (perms == null)
-	  return _parent.implies(domain, permission);
-	
-	for (int i = perms.size() - 1; i >= 0; i--) {
-	  Permission perm = perms.get(i);
+        if (perms == null)
+          return _parent.implies(domain, permission);
 
-	  if (permission.implies(perm))
-	    return true;
-	}
-	
-	return _parent.implies(domain, permission);
+        for (int i = perms.size() - 1; i >= 0; i--) {
+          Permission perm = perms.get(i);
+
+          if (permission.implies(perm))
+            return true;
+        }
+
+        return _parent.implies(domain, permission);
       }
     }
 

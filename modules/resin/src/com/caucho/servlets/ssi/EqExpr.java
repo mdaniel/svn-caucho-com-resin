@@ -50,7 +50,7 @@ public class EqExpr extends SSIExpr {
    */
   @Override
   public String evalString(HttpServletRequest request,
-			   HttpServletResponse response)
+                           HttpServletResponse response)
   {
     return String.valueOf(evalBoolean(request, response));
   }
@@ -60,7 +60,7 @@ public class EqExpr extends SSIExpr {
    */
   @Override
   public boolean evalBoolean(HttpServletRequest request,
-			   HttpServletResponse response)
+                           HttpServletResponse response)
   {
     String leftValue = _left.evalString(request, response);
     String rightValue = _right.evalString(request, response);

@@ -78,10 +78,10 @@ public class FromChildren extends Axis {
     int count = 1;
     
     for (node = node.getPreviousSibling();
-	 node != null;
-	 node = node.getPreviousSibling()) {
+         node != null;
+         node = node.getPreviousSibling()) {
       if (pattern == null || pattern.match(node, env))
-	count++;
+        count++;
     }
 
     return count;
@@ -102,10 +102,10 @@ public class FromChildren extends Axis {
     int count = 0;
 
     for (node = node.getParentNode().getFirstChild();
-	 node != null;
-	 node = node.getNextSibling()) {
+         node != null;
+         node = node.getNextSibling()) {
       if (pattern.match(node, env))
-	count++;
+        count++;
     }
 
     return count;
@@ -167,7 +167,7 @@ public class FromChildren extends Axis {
     FromChildren bPattern = (FromChildren) b;
     
     return (_parent == bPattern._parent
-	    || (_parent != null && _parent.equals(bPattern._parent)));
+            || (_parent != null && _parent.equals(bPattern._parent)));
   }
 
   public String toString()

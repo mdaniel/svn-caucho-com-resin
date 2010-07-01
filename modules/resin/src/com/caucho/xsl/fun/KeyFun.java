@@ -76,7 +76,7 @@ public class KeyFun extends XPathFun {
    * @param args The evaluated arguments
    */
   public Object eval(Node node, ExprEnvironment env, 
-		     AbstractPattern pattern, ArrayList args)
+                     AbstractPattern pattern, ArrayList args)
     throws XPathException
   {
     if (args.size() < 2)
@@ -96,17 +96,17 @@ public class KeyFun extends XPathFun {
     if (value instanceof NodeList) {
       NodeList list = (NodeList) value;
       for (int i = 0; i < list.getLength(); i++)
-	key(node, env, key._match, key._use, Expr.toString(list.item(i)), nodes);
+        key(node, env, key._match, key._use, Expr.toString(list.item(i)), nodes);
     }
     else if (value instanceof ArrayList) {
       ArrayList list = (ArrayList) value;
       for (int i = 0; i < list.size(); i++)
-	key(node, env, key._match, key._use, Expr.toString(list.get(i)), nodes);
+        key(node, env, key._match, key._use, Expr.toString(list.get(i)), nodes);
     }
     else if (value instanceof Iterator) {
       Iterator iter = (Iterator) value;
       while (iter.hasNext())
-	key(node, env, key._match, key._use, Expr.toString(iter.next()), nodes);
+        key(node, env, key._match, key._use, Expr.toString(iter.next()), nodes);
     }
     else
       key(node, env, key._match, key._use, Expr.toString(value), nodes);
@@ -115,7 +115,7 @@ public class KeyFun extends XPathFun {
   }
 
   private void key(Node node, ExprEnvironment env, 
-		   AbstractPattern match, Expr use, String value,
+                   AbstractPattern match, Expr use, String value,
                    ArrayList nodes)
     throws XPathException
   {
@@ -125,7 +125,7 @@ public class KeyFun extends XPathFun {
       String nodeValue = use.evalString(subnode, env);
 
       if (value.equals(nodeValue))
-	nodes.add(subnode);
+        nodes.add(subnode);
     }
   }
 

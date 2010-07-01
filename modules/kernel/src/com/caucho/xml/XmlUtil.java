@@ -66,13 +66,13 @@ public class XmlUtil {
       }
 
       if (i < length && ! XmlChar.isNameStart(ch))
-	throw new IOException("expected name at " + (char) ch);
+        throw new IOException("expected name at " + (char) ch);
       
       cb.clear();
       while (i < length && XmlChar.isNameChar(ch)) {
-	cb.append((char) ch);
+        cb.append((char) ch);
 
-	ch = name.charAt(++i);
+        ch = name.charAt(++i);
       }
       String key = cb.toString();
       cb.clear();
@@ -81,31 +81,31 @@ public class XmlUtil {
       }
 
       if (ch != '=') {
-	attrs.put(key, "");
-	continue;
+        attrs.put(key, "");
+        continue;
       }
 
       while (++i < length && XmlChar.isWhitespace(ch = name.charAt(i))) {
       }
 
       if (i >= length)
-	break;
+        break;
 
       cb.clear();
       if (ch == '\'') {
-	while (++i < length && (ch = name.charAt(i)) != '\'')
-	  cb.append((char) ch);
-	i++;
+        while (++i < length && (ch = name.charAt(i)) != '\'')
+          cb.append((char) ch);
+        i++;
       } else if (ch == '"') {
-	while (++i < length && (ch = name.charAt(i)) != '\"')
-	  cb.append((char) ch);
-	i++;
+        while (++i < length && (ch = name.charAt(i)) != '\"')
+          cb.append((char) ch);
+        i++;
       } else if (XmlChar.isNameChar(ch)) {
-	cb.append((char) ch);
-	while (++i < length && XmlChar.isNameChar(ch = name.charAt(i)))
-	  cb.append((char) ch);
+        cb.append((char) ch);
+        while (++i < length && XmlChar.isNameChar(ch = name.charAt(i)))
+          cb.append((char) ch);
       } else
-	throw new IOException("unexpected");
+        throw new IOException("unexpected");
 
       attrs.put(key, cb.toString());
     }
@@ -144,18 +144,18 @@ public class XmlUtil {
 
       nameBuf.clear();
       for (; i < length && XmlChar.isNameChar(ch = pi.charAt(i)); i++)
-	nameBuf.append((char) ch);
+        nameBuf.append((char) ch);
 
       for (; i < length && XmlChar.isWhitespace(ch = pi.charAt(i)); i++) {
       }
       
       if (i < length && ch != '=') {
-	if (nameBuf.length() == 0)
-	  return null;
-	else if (nameBuf.toString().equals(key))
-	  return nameBuf.toString();
-	else
-	  continue;
+        if (nameBuf.length() == 0)
+          return null;
+        else if (nameBuf.toString().equals(key))
+          return nameBuf.toString();
+        else
+          continue;
       }
 
       i++;
@@ -165,27 +165,27 @@ public class XmlUtil {
       // Parse the attribute value: '.*' or ".*" or \w+
       valueBuf.clear();
       if (ch == '\'') {
-	i++;
-	for (; i < length && (ch = pi.charAt(i)) != '\''; i++)
-	  valueBuf.append((char) ch);
-	i++;
+        i++;
+        for (; i < length && (ch = pi.charAt(i)) != '\''; i++)
+          valueBuf.append((char) ch);
+        i++;
       }
       else if (ch == '\"') {
-	i++;
-	for (; i < length && (ch = pi.charAt(i)) != '\"'; i++)
-	  valueBuf.append((char) ch);
-	i++;
+        i++;
+        for (; i < length && (ch = pi.charAt(i)) != '\"'; i++)
+          valueBuf.append((char) ch);
+        i++;
       }
       else if (XmlChar.isNameChar(ch)) {
-	for (; i < length && XmlChar.isNameChar(ch = pi.charAt(i)); i++)
-	  valueBuf.append((char) ch);
+        for (; i < length && XmlChar.isNameChar(ch = pi.charAt(i)); i++)
+          valueBuf.append((char) ch);
       }
       else
-	return null; // XXX: should throw an exception?
+        return null; // XXX: should throw an exception?
 
       String name = nameBuf.toString();
       if (name.equals(key))
-	return valueBuf.toString();
+        return valueBuf.toString();
     }
 
     return null;
@@ -213,7 +213,7 @@ public class XmlUtil {
 
     for (; node != null; node = node.getParentNode()) {
       if (node.getNextSibling() != null)
-	return node.getNextSibling();
+        return node.getNextSibling();
     }
 
     return null;
@@ -234,8 +234,8 @@ public class XmlUtil {
 
     if ((previous = node.getPreviousSibling()) != null) {
       for (;
-	   previous.getLastChild() != null; 
-	   previous = previous.getLastChild()) {
+           previous.getLastChild() != null;
+           previous = previous.getLastChild()) {
       }
 
       return previous;
@@ -295,9 +295,9 @@ public class XmlUtil {
       String value = node.getNodeValue();
 
       if (value != null)
-	return value;
+        return value;
       else
-	return "";
+        return "";
     }
   }
 
@@ -328,7 +328,7 @@ public class XmlUtil {
   {
     for (int i = text.length() - 1; i >= 0; i--) {
       if (! XmlChar.isWhitespace(text.charAt(i)))
-	return false;
+        return false;
     }
 
     return true;
@@ -359,7 +359,7 @@ public class XmlUtil {
   {
     for (; node != null; node = node.getParentNode()) {
       if (node instanceof CauchoElement)
-	return ((CauchoElement) node).getNamespace(prefix);
+        return ((CauchoElement) node).getNamespace(prefix);
     }
 
     return null;

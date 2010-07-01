@@ -112,24 +112,24 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
 
       switch (ch) {
       case '&':
-	_query.append("%26");
-	break;
-	
+        _query.append("%26");
+        break;
+
       case '%':
-	_query.append("%25");
-	break;
-	
+        _query.append("%25");
+        break;
+
       case '+':
-	_query.append("%2b");
-	break;
-	
+        _query.append("%2b");
+        break;
+
       case '=':
-	_query.append("%3d");
-	break;
-	
+        _query.append("%3d");
+        break;
+
       default:
-	_query.append(ch);
-	break;
+        _query.append(ch);
+        break;
       }
     }
   }
@@ -212,24 +212,24 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
   {
     if (_varReader == null) {
       try {
-	JspWriter jspWriter = pageContext.pushBody();
+        JspWriter jspWriter = pageContext.pushBody();
           
-	handleBody();
+        handleBody();
 
-	BodyContentImpl body = (BodyContentImpl) pageContext.getOut();
+        BodyContentImpl body = (BodyContentImpl) pageContext.getOut();
 
-	if (_var != null) {
-	  String value = body.getString();
+        if (_var != null) {
+          String value = body.getString();
 
-	  pageContext.popBody();
+          pageContext.popBody();
 
-	  CoreSetTag.setValue(pageContext, _var, _scope, value);
+          CoreSetTag.setValue(pageContext, _var, _scope, value);
         }
-	else {
-	  body.writeOut(body.getEnclosingWriter());
-	  
-	  pageContext.popBody();
-	}
+        else {
+          body.writeOut(body.getEnclosingWriter());
+
+          pageContext.popBody();
+        }
       } catch (JspException e) {
         throw e;
       } catch (Exception e) {
@@ -250,7 +250,7 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
 
     if (url == null || url.equals(""))
       throw new JspTagException(L.l("URL may not be null for `{0}'",
-				    _urlExpr));
+                                    _urlExpr));
 
     if (_query == null || _query.getLength() == 0) {
     }
@@ -269,29 +269,29 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
       String context = _contextExpr.evalString(env);
 
       if (! url.startsWith("/"))
-	throw new JspException(L.l("URL `{0}' must start with `/' with context `{0}'", url, context));
+        throw new JspException(L.l("URL `{0}' must start with `/' with context `{0}'", url, context));
         
       if (context != null && context.startsWith("/")) {
-	ServletContext app = pageContext.getServletContext().getContext(context);
+        ServletContext app = pageContext.getServletContext().getContext(context);
 
-	try {
-	  RequestDispatcher disp = app.getRequestDispatcher(url);
+        try {
+          RequestDispatcher disp = app.getRequestDispatcher(url);
 
-	  if (disp == null)
-	    throw new JspException(L.l("URL `{0}' does not map to any servlet",
-				       url));
-	  
-	  CauchoResponse response = (CauchoResponse) pageContext.getResponse();
-	  response.getResponseStream().setEncoding(null);
+          if (disp == null)
+            throw new JspException(L.l("URL `{0}' does not map to any servlet",
+                                       url));
 
-	  disp.include(pageContext.getRequest(), response);
-	} catch (FileNotFoundException e) {
-	  throw new JspException(L.l("`{0}' is an unknown file or servlet.",
-				     url));
-	}
+          CauchoResponse response = (CauchoResponse) pageContext.getResponse();
+          response.getResponseStream().setEncoding(null);
+
+          disp.include(pageContext.getRequest(), response);
+        } catch (FileNotFoundException e) {
+          throw new JspException(L.l("`{0}' is an unknown file or servlet.",
+                                     url));
+        }
       }
       else
-	handleExternalBody(context + url);
+        handleExternalBody(context + url);
       
       return;
     }
@@ -302,19 +302,19 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
       ServletRequest request = pageContext.getRequest();
 
       try {
-	RequestDispatcher disp = request.getRequestDispatcher(url);
+        RequestDispatcher disp = request.getRequestDispatcher(url);
 
-	if (disp == null)
-	  throw new JspException(L.l("URL `{0}' does not map to any servlet",
-				     url));
-	  
-	CauchoResponse response = (CauchoResponse) pageContext.getResponse();
-	response.getResponseStream().setEncoding(null);
+        if (disp == null)
+          throw new JspException(L.l("URL `{0}' does not map to any servlet",
+                                     url));
 
-	disp.include(pageContext.getRequest(), response);
+        CauchoResponse response = (CauchoResponse) pageContext.getResponse();
+        response.getResponseStream().setEncoding(null);
+
+        disp.include(pageContext.getRequest(), response);
       } catch (FileNotFoundException e) {
-	throw new JspException(L.l("URL `{0}' is an unknown file or servlet.",
-				   url));
+        throw new JspException(L.l("URL `{0}' is an unknown file or servlet.",
+                                   url));
       }
     }
     else

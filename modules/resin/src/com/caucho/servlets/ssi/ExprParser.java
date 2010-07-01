@@ -78,68 +78,68 @@ public class ExprParser {
 
     while ((ch = read()) >= 0) {
       if (ch == '$') {
-	if (_sb.length() > 0)
-	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
-	_sb.setLength(0);
+        if (_sb.length() > 0)
+          expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+        _sb.setLength(0);
 
         SSIExpr var = parseVar();
-	expr = ConcatExpr.create(expr, var);
+        expr = ConcatExpr.create(expr, var);
       }
       else if (ch == '\\') {
-	ch = read();
+        ch = read();
 
-	if (ch == '$')
-	  _sb.append((char) ch);
-	else if (ch == '\\')
-	  _sb.append((char) ch);
-	else {
-	  _sb.append('\\');
-	  unread();
-	}
+        if (ch == '$')
+          _sb.append((char) ch);
+        else if (ch == '\\')
+          _sb.append((char) ch);
+        else {
+          _sb.append('\\');
+          unread();
+        }
       }
       else if (ch == '=') {
-	if (_sb.length() > 0)
-	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
-	_sb.setLength(0);
+        if (_sb.length() > 0)
+          expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+        _sb.setLength(0);
 
         SSIExpr right = parseTerm();
 
         return new EqExpr(expr, parseTerm());
       }
       else if (ch == '<') {
-	if (_sb.length() > 0)
-	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
-	_sb.setLength(0);
+        if (_sb.length() > 0)
+          expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+        _sb.setLength(0);
         
-	ch = read();
+        ch = read();
 
-	if (ch == '=') {
+        if (ch == '=') {
           return new LeExpr(expr, parseTerm());
         }
-	else {
-	  unread();
+        else {
+          unread();
           
           return new LtExpr(expr, parseTerm());
-	}
+        }
       }
       else if (ch == '>') {
-	if (_sb.length() > 0)
-	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
-	_sb.setLength(0);
+        if (_sb.length() > 0)
+          expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+        _sb.setLength(0);
         
-	ch = read();
+        ch = read();
 
-	if (ch == '=') {
+        if (ch == '=') {
           return new GeExpr(expr, parseTerm());
         }
-	else {
-	  unread();
+        else {
+          unread();
           
           return new GtExpr(expr, parseTerm());
-	}
+        }
       }
       else
-	_sb.append((char) ch);
+        _sb.append((char) ch);
     }
 
     if (_sb.length() > 0)
@@ -156,27 +156,27 @@ public class ExprParser {
 
     while ((ch = read()) >= 0) {
       if (ch == '$') {
-	if (_sb.length() > 0)
-	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
-	_sb.setLength(0);
+        if (_sb.length() > 0)
+          expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+        _sb.setLength(0);
 
         SSIExpr var = parseVar();
-	expr = ConcatExpr.create(expr, var);
+        expr = ConcatExpr.create(expr, var);
       }
       else if (ch == '\\') {
-	ch = read();
+        ch = read();
 
-	if (ch == '$')
-	  _sb.append((char) ch);
-	else if (ch == '\\')
-	  _sb.append((char) ch);
-	else {
-	  _sb.append('\\');
-	  unread();
-	}
+        if (ch == '$')
+          _sb.append((char) ch);
+        else if (ch == '\\')
+          _sb.append((char) ch);
+        else {
+          _sb.append('\\');
+          unread();
+        }
       }
       else
-	_sb.append((char) ch);
+        _sb.append((char) ch);
     }
 
     if (_sb.length() > 0)

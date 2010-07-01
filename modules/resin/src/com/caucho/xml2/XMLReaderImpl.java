@@ -224,12 +224,12 @@ public class XMLReaderImpl implements XMLReader {
       _systemId = source.getSystemId();
       
       if (is instanceof ReadStream) {
-	_filename = ((ReadStream) is).getPath().getUserPath();
-	if (_systemId == null)
-	  _systemId = ((ReadStream) is).getPath().getURL();
+        _filename = ((ReadStream) is).getPath().getUserPath();
+        if (_systemId == null)
+          _systemId = ((ReadStream) is).getPath().getURL();
       }
       else {
-	_filename = _systemId;
+        _filename = _systemId;
       }
 
       _reader = new java.io.InputStreamReader(is);
@@ -308,86 +308,86 @@ public class XMLReaderImpl implements XMLReader {
 
     while (true) {
       if (_inputLength == _inputOffset && ! fillBuffer()) {
-	writeText(valueBuffer, valueOffset, isWhitespace);
-	return;
+        writeText(valueBuffer, valueOffset, isWhitespace);
+        return;
       }
 
       char ch = inputBuf[_inputOffset++];
 
       switch (ch) {
       case ' ': case '\t':
-	if (valueOffset < valueLength)
-	  valueBuffer[valueOffset++] = ch;
-	else {
-	  writeText(valueBuffer, valueOffset, isWhitespace);
-	  valueOffset = 0;
-	}
-	break;
+        if (valueOffset < valueLength)
+          valueBuffer[valueOffset++] = ch;
+        else {
+          writeText(valueBuffer, valueOffset, isWhitespace);
+          valueOffset = 0;
+        }
+        break;
 
       case '\n':
-	if (valueOffset < valueLength)
-	  valueBuffer[valueOffset++] = ch;
-	else {
-	  writeText(valueBuffer, valueOffset, isWhitespace);
-	  valueOffset = 0;
-	}
-	_line++;
-	break;
+        if (valueOffset < valueLength)
+          valueBuffer[valueOffset++] = ch;
+        else {
+          writeText(valueBuffer, valueOffset, isWhitespace);
+          valueOffset = 0;
+        }
+        _line++;
+        break;
 
       case '\r':
-	if (valueOffset < valueLength)
-	  valueBuffer[valueOffset++] = ch;
-	else {
-	  writeText(valueBuffer, valueOffset, isWhitespace);
-	  valueOffset = 0;
-	}
+        if (valueOffset < valueLength)
+          valueBuffer[valueOffset++] = ch;
+        else {
+          writeText(valueBuffer, valueOffset, isWhitespace);
+          valueOffset = 0;
+        }
 
-	addCarriageReturnLine();
-	break;
+        addCarriageReturnLine();
+        break;
 
       case '<':
-	if (valueOffset > 0) {
-	  writeText(valueBuffer, valueOffset, isWhitespace);
-	  valueOffset = 0;
-	}
-	
-	if (_inputLength == _inputOffset && ! fillBuffer())
-	  error("XXX: unexpected eof");
+        if (valueOffset > 0) {
+          writeText(valueBuffer, valueOffset, isWhitespace);
+          valueOffset = 0;
+        }
 
-	ch = inputBuf[_inputOffset];
-	switch (ch) {
-	case '!':
-	  break;
-	case '?':
-	  break;
-	case '/':
-	  _inputOffset++;
-	  return;
-	default:
-	  parseElement();
-	  break;
-	}
+        if (_inputLength == _inputOffset && ! fillBuffer())
+          error("XXX: unexpected eof");
 
-	isWhitespace = true;
-	break;
+        ch = inputBuf[_inputOffset];
+        switch (ch) {
+        case '!':
+          break;
+        case '?':
+          break;
+        case '/':
+          _inputOffset++;
+          return;
+        default:
+          parseElement();
+          break;
+        }
+
+        isWhitespace = true;
+        break;
 
       case '&':
-	if (valueOffset > 0) {
-	  writeText(valueBuffer, valueOffset, isWhitespace);
-	  valueOffset = 0;
-	}
-	isWhitespace = true;
-	break;
+        if (valueOffset > 0) {
+          writeText(valueBuffer, valueOffset, isWhitespace);
+          valueOffset = 0;
+        }
+        isWhitespace = true;
+        break;
 
       default:
-	isWhitespace = false;
-	if (valueOffset < valueLength)
-	  valueBuffer[valueOffset++] = ch;
-	else {
-	  writeText(valueBuffer, valueOffset, false);
-	  valueOffset = 0;
-	}
-	break;
+        isWhitespace = false;
+        if (valueOffset < valueLength)
+          valueBuffer[valueOffset++] = ch;
+        else {
+          writeText(valueBuffer, valueOffset, false);
+          valueOffset = 0;
+        }
+        break;
       }
     }
   }
@@ -408,64 +408,64 @@ public class XMLReaderImpl implements XMLReader {
 
       switch (ch) {
       case -1:
-	throw error("XXX: unexpected eof");
+        throw error("XXX: unexpected eof");
 
       case ' ': case '\t':
-	break;
+        break;
 
       case '\r':
-	addCarriageReturnLine();
-	break;
+        addCarriageReturnLine();
+        break;
 
       case '\n':
-	_line++;
-	break;
+        _line++;
+        break;
 
       case '/':
-	if ((ch = read()) != '>')
-	  throw error("XXX: expected '>'");
+        if ((ch = read()) != '>')
+          throw error("XXX: expected '>'");
 
-	_contentHandler.startElement("", "", name, _attributes);
-	_contentHandler.endElement("", "", name);
+        _contentHandler.startElement("", "", name, _attributes);
+        _contentHandler.endElement("", "", name);
 
-	return;
-	
+        return;
+
       case '>':
-	_contentHandler.startElement("", "", name, _attributes);
+        _contentHandler.startElement("", "", name, _attributes);
 
-	parseContent();
+        parseContent();
 
-	InternQName tailQName = parseName();
-	String tailName = tailQName.getName();
+        InternQName tailQName = parseName();
+        String tailName = tailQName.getName();
 
-	if ((ch = read()) != '>')
-	  throw error("XXX: expected '>'");
+        if ((ch = read()) != '>')
+          throw error("XXX: expected '>'");
 
-	if (! name.equals(tailName))
-	  throw error("XXX: mismatch name");
+        if (! name.equals(tailName))
+          throw error("XXX: mismatch name");
 
-	_contentHandler.endElement("", "", name);
-	
-	return;
+        _contentHandler.endElement("", "", name);
+
+        return;
 
       default:
-	if (XmlChar.isNameStart(ch)) {
-	  unread();
-	  
-	  InternQName attrName = parseName();
-	  ch = skipWhitespace(read());
+        if (XmlChar.isNameStart(ch)) {
+          unread();
 
-	  if (ch != '=')
-	    throw error(L.l("Expected '=' for attribute value at {0}.",
-			  badChar(ch)));
+          InternQName attrName = parseName();
+          ch = skipWhitespace(read());
 
-	  String attrValue = parseValue();
+          if (ch != '=')
+            throw error(L.l("Expected '=' for attribute value at {0}.",
+                          badChar(ch)));
 
-	  _attributes.add(attrName, attrValue);
-	}
-	else
-	  throw error(L.l("{0} is an unexpected character in element.",
-			  badChar(ch)));
+          String attrValue = parseValue();
+
+          _attributes.add(attrName, attrValue);
+        }
+        else
+          throw error(L.l("{0} is an unexpected character in element.",
+                          badChar(ch)));
       }
     }
   }
@@ -488,40 +488,40 @@ public class XMLReaderImpl implements XMLReader {
       if (inputOffset < inputLength) {
       }
       else if (fillBuffer()) {
-	inputLength = _inputLength;
-	inputOffset = 0;
+        inputLength = _inputLength;
+        inputOffset = 0;
       }
       else {
-	_nameKey.init(valueBuf, 0, valueOffset);
+        _nameKey.init(valueBuf, 0, valueOffset);
 
-	QName name = _nameMap.get(_nameKey);
+        QName name = _nameMap.get(_nameKey);
 
-	if (name == null) {
-	  name = new QName(new String(valueBuf, 0, valueOffset), null);
-	  _nameMap.put(new NameKey(valueBuf, 0, valueOffset), name);
-	}
+        if (name == null) {
+          name = new QName(new String(valueBuf, 0, valueOffset), null);
+          _nameMap.put(new NameKey(valueBuf, 0, valueOffset), name);
+        }
 
-	return name;
+        return name;
       }
 
       char ch = inputBuf[inputOffset++];
 
       if (XML_NAME_CHAR[ch])
-	valueBuf[valueOffset++] = ch;
+        valueBuf[valueOffset++] = ch;
       else if (ch == ':') {
-	valueBuf[valueOffset++] = ch;
+        valueBuf[valueOffset++] = ch;
       }
       else {
-	_inputOffset = inputOffset - 1;
+        _inputOffset = inputOffset - 1;
 
-	QName name = _nameMap.get(_nameKey);
+        QName name = _nameMap.get(_nameKey);
 
-	if (name == null) {
-	  name = new QName(new String(valueBuf, 0, valueOffset), null);
-	  _nameMap.put(new NameKey(valueBuf, 0, valueOffset), name);
-	}
+        if (name == null) {
+          name = new QName(new String(valueBuf, 0, valueOffset), null);
+          _nameMap.put(new NameKey(valueBuf, 0, valueOffset), name);
+        }
 
-	return name;
+        return name;
       }
     }
   }
@@ -543,29 +543,29 @@ public class XMLReaderImpl implements XMLReader {
 
     while (true) {
       if (inputOffset < inputLength) {
-	char ch = inputBuf[inputOffset++];
+        char ch = inputBuf[inputOffset++];
 
-	if (XML_NAME_CHAR[ch]) {
-	  valueBuf[valueOffset++] = ch;
-	}
-	else if (ch == ':') {
-	  if (colon <= 0)
-	    colon = valueOffset;
-	  
-	  valueBuf[valueOffset++] = ch;
-	}
-	else {
-	  _inputOffset = inputOffset - 1;
+        if (XML_NAME_CHAR[ch]) {
+          valueBuf[valueOffset++] = ch;
+        }
+        else if (ch == ':') {
+          if (colon <= 0)
+            colon = valueOffset;
 
-	  return _intern.add(valueBuf, 0, valueOffset, colon);
-	}
+          valueBuf[valueOffset++] = ch;
+        }
+        else {
+          _inputOffset = inputOffset - 1;
+
+          return _intern.add(valueBuf, 0, valueOffset, colon);
+        }
       }
       else if (fillBuffer()) {
-	inputLength = _inputLength;
-	inputOffset = 0;
+        inputLength = _inputLength;
+        inputOffset = 0;
       }
       else {
-	return _intern.add(valueBuf, 0, valueOffset, colon);
+        return _intern.add(valueBuf, 0, valueOffset, colon);
       }
     }
   }
@@ -607,28 +607,28 @@ public class XMLReaderImpl implements XMLReader {
     
     while (true) {
       if (_inputLength == _inputOffset && ! fillBuffer())
-	throw error(L.l("Unexpected end of file in attribute value."));
+        throw error(L.l("Unexpected end of file in attribute value."));
 
       char ch = inputBuf[_inputOffset++];
       
       switch (ch) {
       case '&':
-	throw error(L.l("Can't handle entities yet."));
+        throw error(L.l("Can't handle entities yet."));
 
       case '\r':
-	addCarriageReturnLine();
-	ch = ' ';
-	break;
+        addCarriageReturnLine();
+        ch = ' ';
+        break;
 
       case '\n':
-	_line++;
-	ch = ' ';
-	break;
+        _line++;
+        ch = ' ';
+        break;
 
       case '\'': case '"':
-	if (ch == end)
-	  return new String(valueBuf, 0, index);
-	break;
+        if (ch == end)
+          return new String(valueBuf, 0, index);
+        break;
       }
 
       valueBuf[index++] = ch;
@@ -644,25 +644,25 @@ public class XMLReaderImpl implements XMLReader {
     while (true) {
       switch (ch) {
       case -1:
-	return -1;
-	
+        return -1;
+
       case ' ': case '\t':
-	break;
+        break;
 
       case '\r':
-	addCarriageReturnLine();
-	break;
+        addCarriageReturnLine();
+        break;
 
       case '\n':
-	_line++;
-	break;
-	
+        _line++;
+        break;
+
       default:
-	return ch;
+        return ch;
       }
       
       if (_inputLength == _inputOffset && ! fillBuffer())
-	return -1;
+        return -1;
 
       ch = _inputBuf[_inputOffset++];
     }
@@ -826,7 +826,7 @@ public class XMLReaderImpl implements XMLReader {
 
       char buf[] = _buf;
       for (int i = _length - 1; i >= 0; i--)
-	hash = 65537 * hash + buf[i];
+        hash = 65537 * hash + buf[i];
 
       return hash;
     }
@@ -838,7 +838,7 @@ public class XMLReaderImpl implements XMLReader {
 
       int length = _length;
       if (length != key._length)
-	return false;
+        return false;
 
       char []aBuf = _buf;
       char []bBuf = key._buf;
@@ -847,8 +847,8 @@ public class XMLReaderImpl implements XMLReader {
       int bOffset = key._offset;
 
       for (int i = 0; i < length; i++) {
-	if (aBuf[aOffset + i] != bBuf[bOffset + i])
-	  return false;
+        if (aBuf[aOffset + i] != bBuf[bOffset + i])
+          return false;
       }
 
       return true;

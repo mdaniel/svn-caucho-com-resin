@@ -48,8 +48,8 @@ public class BooleanValueExpression extends AbstractValueExpression
   private Class _expectedType;
 
   public BooleanValueExpression(Expr expr,
-				String expressionString,
-				Class expectedType)
+                                String expressionString,
+                                Class expectedType)
   {
     super(expr, expressionString);
 
@@ -57,7 +57,7 @@ public class BooleanValueExpression extends AbstractValueExpression
   }
 
   public BooleanValueExpression(Expr expr,
-				String expressionString)
+                                String expressionString)
   {
     super(expr, expressionString);
   }
@@ -83,7 +83,7 @@ public class BooleanValueExpression extends AbstractValueExpression
   @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return new Boolean(_expr.evalBoolean(context));
   }

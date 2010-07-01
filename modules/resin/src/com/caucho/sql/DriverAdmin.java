@@ -129,8 +129,8 @@ public class DriverAdmin extends AbstractManagedObject
     
     if (url != null) {
       if (url.indexOf(':') >= 0)
-	url = ObjectName.quote(url);
-	  
+        url = ObjectName.quote(url);
+
       props.put("url", url);
     }
   }

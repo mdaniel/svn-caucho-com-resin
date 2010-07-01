@@ -106,12 +106,12 @@ public class WorkDir {
   {
     try {
       if (path instanceof MergePath)
-	path = ((MergePath) path).getWritePath();
+        path = ((MergePath) path).getWritePath();
 
       if (path instanceof MemoryPath) {
-	String pathName = path.getPath();
+        String pathName = path.getPath();
 
-	path = WorkDir.getTmpWorkDir().lookup("qa/" + pathName);
+        path = WorkDir.getTmpWorkDir().lookup("qa/" + pathName);
       }
     
       // path.mkdirs();

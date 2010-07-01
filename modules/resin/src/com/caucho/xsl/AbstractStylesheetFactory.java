@@ -94,7 +94,7 @@ abstract public class AbstractStylesheetFactory
   private static
     EnvironmentLocal<LruCache<String,SoftReference<StylesheetImpl>>> _stylesheetCache =
     new EnvironmentLocal<LruCache<String,SoftReference<StylesheetImpl>>>();
-			  
+
   private URIResolver _uriResolver;
   private ErrorListener _errorListener;
 
@@ -514,20 +514,20 @@ abstract public class AbstractStylesheetFactory
       stylesheet = loadPrecompiledStylesheet(systemId, systemId);
 
       if (stylesheet != null)
-	return stylesheet;
+        return stylesheet;
       
       ReadStream is;
 
       if (_stylePath != null)
-	is = _stylePath.lookup(systemId).openRead();
+        is = _stylePath.lookup(systemId).openRead();
       else
-	is = Vfs.lookup(systemId).openRead();
+        is = Vfs.lookup(systemId).openRead();
     
       try {
-	return newStylesheet(is);
+        return newStylesheet(is);
       } finally {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       }
     }
   }
@@ -543,25 +543,25 @@ abstract public class AbstractStylesheetFactory
 
     synchronized (AbstractStylesheetFactory.class) {
       stylesheet = loadPrecompiledStylesheet(path.getFullPath(),
-					     path.getUserPath());
+                                             path.getUserPath());
 
       if (stylesheet != null)
-	return stylesheet;
+        return stylesheet;
     
       Path oldStylePath = _stylePath;
     
       if (_stylePath == null)
-	_stylePath = path.getParent();
+        _stylePath = path.getParent();
     
       InputStream is = null;
     
       try {
-	is = path.openRead();
-	return newStylesheet(is);
+        is = path.openRead();
+        return newStylesheet(is);
       } finally {
-	_stylePath = oldStylePath;
-	if (is != null)
-	  is.close();      
+        _stylePath = oldStylePath;
+        if (is != null)
+          is.close();
       }
     }
   }
@@ -590,7 +590,7 @@ abstract public class AbstractStylesheetFactory
       if (source instanceof DOMSource) {
         Node node = ((DOMSource) source).getNode();
 
-	return generateFromNode(node, systemId);
+        return generateFromNode(node, systemId);
       }
       else if (source instanceof SAXSource) {
         SAXSource saxSource = (SAXSource) source;
@@ -604,25 +604,25 @@ abstract public class AbstractStylesheetFactory
 
         reader.parse(inputSource);
       
-	return generateFromNode(doc, systemId);
+        return generateFromNode(doc, systemId);
       }
 
       ReadStream rs = openPath(source);
       try {
         Path path = rs.getPath();
 
-	Document doc = parseXSL(rs);
+        Document doc = parseXSL(rs);
 
-	if (systemId != null) {
-	  String mangledName = getMangledName(systemId);
-	  Path genPath = getWorkPath().lookup(mangledName);
+        if (systemId != null) {
+          String mangledName = getMangledName(systemId);
+          Path genPath = getWorkPath().lookup(mangledName);
 
-	  genPath.setUserPath(systemId);
-	  
-	  return generate(doc, genPath);
-	}
-	else
-	  return generateFromNode(doc, null);
+          genPath.setUserPath(systemId);
+
+          return generate(doc, genPath);
+        }
+        else
+          return generateFromNode(doc, null);
       } finally {
         if (rs != null)
           rs.close();
@@ -642,15 +642,15 @@ abstract public class AbstractStylesheetFactory
     String tempId = tempPath.getTail();
     
     StylesheetImpl stylesheet = loadPrecompiledStylesheet(tempId,
-							  tempId,
-							  false);
+                                                          tempId,
+                                                          false);
 
     if (systemId != null)
       tempPath.setUserPath(systemId);
 
     if (stylesheet != null)
       return stylesheet;
-	
+
     return generate(node, tempPath);
   }
 
@@ -825,9 +825,9 @@ abstract public class AbstractStylesheetFactory
       ReadStream is = path.openRead();
       Document doc;
       try {
-	doc = parseXSL(is);
+        doc = parseXSL(is);
       } finally {
-	is.close();
+        is.close();
       }
 
       return generate(doc, path);
@@ -888,10 +888,10 @@ abstract public class AbstractStylesheetFactory
       InputStream is = stream.getInputStream();
 
       if (is instanceof ReadStream) {
-	ReadStream rs = (ReadStream) is;
-	
-	rs.setPath(path);
-	
+        ReadStream rs = (ReadStream) is;
+
+        rs.setPath(path);
+
         return rs;
       }
       else if (is != null) {
@@ -1056,7 +1056,7 @@ abstract public class AbstractStylesheetFactory
           Attr attr = (Attr) iter.next();
           String name = attr.getNodeName();
           String value = attr.getNodeValue();
-	
+
           if (name.equals("errorPage"))
             gen.setErrorPage(value);
           else if (name.equals("import"))
@@ -1134,7 +1134,7 @@ abstract public class AbstractStylesheetFactory
    * @return a compiled stylesheet
    */
   StylesheetImpl loadPrecompiledStylesheet(String systemId,
-					   String userId)
+                                           String userId)
   {
     return loadPrecompiledStylesheet(systemId, userId, _isAutoCompile);
   }
@@ -1147,8 +1147,8 @@ abstract public class AbstractStylesheetFactory
    * @return a compiled stylesheet
    */
   StylesheetImpl loadPrecompiledStylesheet(String systemId,
-					   String userId,
-					   boolean checkModified)
+                                           String userId,
+                                           boolean checkModified)
   {
     if (! _loadPrecompiledStylesheet)
       return null;
@@ -1156,16 +1156,16 @@ abstract public class AbstractStylesheetFactory
     try {
       // look for compiled template base on SystemID
       StylesheetImpl stylesheet = loadStylesheet(systemId,
-						 getMangledName(userId));
+                                                 getMangledName(userId));
 
       if (stylesheet == null)
-	return null;
+        return null;
       
       stylesheet.setURIResolver(_uriResolver);
       // and check if it's modified or not
       if (! checkModified || ! stylesheet.isModified()) {
-	stylesheet.setURIResolver(_uriResolver);
-	return stylesheet;
+        stylesheet.setURIResolver(_uriResolver);
+        return stylesheet;
       }
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
@@ -1204,7 +1204,7 @@ abstract public class AbstractStylesheetFactory
 
     try {
       if (stylesheet != null && ! stylesheet.isModified())
-	return stylesheet;
+        return stylesheet;
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -1223,7 +1223,7 @@ abstract public class AbstractStylesheetFactory
       cl = CauchoSystem.loadClass(className, false, loader);
     } catch (Error e) {
       try {
-	classPath.remove();
+        classPath.remove();
       } catch (IOException e1) {
         log.log(Level.FINE, e1.toString(), e1);
       }

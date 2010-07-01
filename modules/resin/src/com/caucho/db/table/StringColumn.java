@@ -173,8 +173,8 @@ class StringColumn extends Column {
    */
   @Override
   void setExpr(Transaction xa,
-	       byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
     throws SQLException
   {
     if (expr.isNull(context))
@@ -188,7 +188,7 @@ class StringColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block1, int rowOffset1,
-			 byte []block2, int rowOffset2)
+                         byte []block2, int rowOffset2)
   {
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
@@ -204,7 +204,7 @@ class StringColumn extends Column {
 
     for (int i = 2 * len1; i > 0; i--) {
       if (block1[startOffset1 + i] != block2[startOffset2 + i])
-	return false;
+        return false;
     }
 
     return true;
@@ -215,7 +215,7 @@ class StringColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block, int rowOffset,
-			 byte []buffer, int offset, int length)
+                         byte []buffer, int offset, int length)
   {
     if (isNull(block, rowOffset))
       return false;
@@ -230,7 +230,7 @@ class StringColumn extends Column {
     int endOffset = blockOffset + 2 * len;
     while (blockOffset < endOffset) {
       if (block[blockOffset++] != buffer[offset++])
-	return false;
+        return false;
     }
 
     return true;
@@ -257,7 +257,7 @@ class StringColumn extends Column {
       char ch = value.charAt(strOffset++);
 
       if (ch1 != ch)
-	return false;
+        return false;
     }
 
     return offset == endOffset && strOffset == strLength;
@@ -301,7 +301,7 @@ class StringColumn extends Column {
    */
   @Override
   int evalToBuffer(byte []block, int rowOffset,
-		   byte []buffer, int bufferOffset)
+                   byte []buffer, int bufferOffset)
     throws SQLException
   {
     if (isNull(block, rowOffset))
@@ -325,27 +325,27 @@ class StringColumn extends Column {
    */
   @Override
   void setIndex(Transaction xa,
-		byte []block, int rowOffset,
-		long rowAddr, QueryContext context)
+                byte []block, int rowOffset,
+                long rowAddr, QueryContext context)
     throws SQLException
   {
     BTree index = getIndex();
 
     if (index != null) {
       try {
-	index.insert(block,
-		     rowOffset + _columnOffset, getLength(),
-		     rowAddr,
-		     false);
+        index.insert(block,
+                     rowOffset + _columnOffset, getLength(),
+                     rowAddr,
+                     false);
       } catch (SqlIndexAlreadyExistsException e) {
         long blockId = 0;
         
-	throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}.\n{3}",
-					  getTable().getName(),
-					  getName(),
-					  getString(blockId, block, rowOffset),
-					  e.toString()),
-				      e);
+        throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}.\n{3}",
+                                          getTable().getName(),
+                                          getName(),
+                                          getString(blockId, block, rowOffset),
+                                          e.toString()),
+                                      e);
       }
     }
   }

@@ -66,8 +66,8 @@ public class ManagedFactoryImpl
   private long _roundRobin;
 
   ManagedFactoryImpl(DBPoolImpl dbPool,
-		     DriverConfig []drivers,
-		     DriverConfig []backupDrivers)
+                     DriverConfig []drivers,
+                     DriverConfig []backupDrivers)
   {
     _dbPool = dbPool;
     _drivers = drivers;
@@ -78,7 +78,7 @@ public class ManagedFactoryImpl
       ClusterServer selfServer = server.getSelfServer();
 
       if (selfServer != null && _drivers.length > 1)
-	_roundRobin = selfServer.getIndex() % _drivers.length;
+        _roundRobin = selfServer.getIndex() % _drivers.length;
     }
   }
 
@@ -135,7 +135,7 @@ public class ManagedFactoryImpl
    */
   public ManagedConnection
     createManagedConnection(Subject subject,
-			    ConnectionRequestInfo requestInfo)
+                            ConnectionRequestInfo requestInfo)
     throws ResourceException
   {
     Credential credential = (Credential) requestInfo;
@@ -148,12 +148,12 @@ public class ManagedFactoryImpl
       DriverConfig driver = _drivers[index];
 
       try {
-	return new ManagedConnectionImpl(this,
-					 driver,
-					 _dbPool.getConnectionConfig(),
-					 credential);
+        return new ManagedConnectionImpl(this,
+                                         driver,
+                                         _dbPool.getConnectionConfig(),
+                                         credential);
       } catch (SQLException e) {
-	exn = e;
+        exn = e;
       }
     }
 
@@ -163,12 +163,12 @@ public class ManagedFactoryImpl
       DriverConfig driver = _backupDrivers[index];
 
       try {
-	return new ManagedConnectionImpl(this,
-					 driver,
-					 _dbPool.getConnectionConfig(),
-					 credential);
+        return new ManagedConnectionImpl(this,
+                                         driver,
+                                         _dbPool.getConnectionConfig(),
+                                         credential);
       } catch (SQLException e) {
-	exn = e;
+        exn = e;
       }
     }
 
@@ -183,8 +183,8 @@ public class ManagedFactoryImpl
    */
   public ManagedConnection
     matchManagedConnections(Set connSet,
-			    Subject subject,
-			    ConnectionRequestInfo requestInfo)
+                            Subject subject,
+                            ConnectionRequestInfo requestInfo)
     throws ResourceException
   {
     if (connSet instanceof IdlePoolSet) {
@@ -193,13 +193,13 @@ public class ManagedFactoryImpl
       ManagedConnectionImpl mConn = (ManagedConnectionImpl) idle.first();
 
       if (mConn == null)
-	return null;
+        return null;
       
       Credential mCredentials = mConn.getCredentials();
 
       if (requestInfo == mCredentials
-	  || requestInfo != null && requestInfo.equals(mCredentials)) {
-	return mConn;
+          || requestInfo != null && requestInfo.equals(mCredentials)) {
+        return mConn;
       }
     }
     
@@ -210,8 +210,8 @@ public class ManagedFactoryImpl
       Credential mCredentials = mConn.getCredentials();
 
       if (requestInfo == mCredentials
-	  || requestInfo != null && requestInfo.equals(mCredentials)) {
-	return mConn;
+          || requestInfo != null && requestInfo.equals(mCredentials)) {
+        return mConn;
       }
     }
 
@@ -231,10 +231,10 @@ public class ManagedFactoryImpl
       ManagedConnectionImpl mConn = (ManagedConnectionImpl) iter.next();
 
       if (! mConn.isValid()) {
-	if (invalidSet == null)
-	  invalidSet = new HashSet();
+        if (invalidSet == null)
+          invalidSet = new HashSet();
 
-	invalidSet.add(mConn);
+        invalidSet.add(mConn);
       }
     }
 

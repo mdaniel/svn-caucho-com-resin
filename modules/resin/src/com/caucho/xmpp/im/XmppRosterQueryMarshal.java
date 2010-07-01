@@ -101,31 +101,31 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
 
     if (items != null) {
       for (RosterItem item : items) {
-	out.writeStartElement("item");
+        out.writeStartElement("item");
 
-	if (item.getAsk() != null)
-	  out.writeAttribute("ask", item.getAsk());
+        if (item.getAsk() != null)
+          out.writeAttribute("ask", item.getAsk());
 
-	if (item.getJid() != null)
-	  out.writeAttribute("jid", item.getJid());
+        if (item.getJid() != null)
+          out.writeAttribute("jid", item.getJid());
 
-	if (item.getName() != null)
-	  out.writeAttribute("name", item.getName());
+        if (item.getName() != null)
+          out.writeAttribute("name", item.getName());
 
-	if (item.getSubscription() != null)
-	  out.writeAttribute("subscription", item.getSubscription());
+        if (item.getSubscription() != null)
+          out.writeAttribute("subscription", item.getSubscription());
 
-	String []groups = item.getGroup();
+        String []groups = item.getGroup();
 
-	if (groups != null) {
-	  for (String group : groups) {
-	    out.writeStartElement("group");
-	    out.writeCharacters(group);
-	    out.writeEndElement(); // </group>
-	  }
-	}
-	
-	out.writeEndElement(); // </item>
+        if (groups != null) {
+          for (String group : groups) {
+            out.writeStartElement("group");
+            out.writeCharacters(group);
+            out.writeEndElement(); // </group>
+          }
+        }
+
+        out.writeEndElement(); // </item>
       }
     }
     
@@ -145,18 +145,18 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
     
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return new RosterQuery(itemList);
+        return new RosterQuery(itemList);
       }
       else if (XMLStreamReader.START_ELEMENT != tag
-	       || ! "item".equals(in.getLocalName())) {
-	log.warning("expected start");
+               || ! "item".equals(in.getLocalName())) {
+        log.warning("expected start");
 
-	skipToEnd(in, "query");
-	
-	return null;
+        skipToEnd(in, "query");
+
+        return null;
       }
 
       String ask = null;
@@ -165,26 +165,26 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
       String subscription = null;
     
       for (int i = 0; i < in.getAttributeCount(); i++) {
-	String attr = in.getAttributeLocalName(i);
+        String attr = in.getAttributeLocalName(i);
 
-	if ("ask".equals(attr))
-	  ask = in.getAttributeValue(i);
-	else if ("jid".equals(attr))
-	  jid = in.getAttributeValue(i);
-	else if ("name".equals(attr))
-	  name = in.getAttributeValue(i);
-	else if ("subscription".equals(attr))
-	  subscription = in.getAttributeValue(i);
+        if ("ask".equals(attr))
+          ask = in.getAttributeValue(i);
+        else if ("jid".equals(attr))
+          jid = in.getAttributeValue(i);
+        else if ("name".equals(attr))
+          name = in.getAttributeValue(i);
+        else if ("subscription".equals(attr))
+          subscription = in.getAttributeValue(i);
       }
 
       ArrayList<String> groups = new ArrayList<String>();
       
       tag = in.nextTag();
       while (XMLStreamReader.START_ELEMENT == in.getEventType()
-	     && "group".equals(in.getLocalName())) {
-	groups.add(in.getElementText());
+             && "group".equals(in.getLocalName())) {
+        groups.add(in.getElementText());
 
-	skipToEnd(in, "group");
+        skipToEnd(in, "group");
       }
       
       skipToEnd(in, "item");

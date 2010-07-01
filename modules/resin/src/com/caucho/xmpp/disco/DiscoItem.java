@@ -66,8 +66,8 @@ public class DiscoItem implements java.io.Serializable {
   }
   
   public DiscoItem(String jid,
-		   String name,
-		   String node)
+                   String name,
+                   String node)
   {
     _jid = jid;
     _name = name;

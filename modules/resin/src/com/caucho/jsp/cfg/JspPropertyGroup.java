@@ -526,7 +526,7 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
   {
     if (max <= 0)
       throw new ConfigException(L.l("`{0}' is too small a value for jsp-max",
-				    max));
+                                    max));
 
     _jspMax = max;
   }
@@ -717,12 +717,12 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
       mapping.setServletName("jsp-property-group-" + _gId++);
       
       if (Boolean.TRUE.equals(_isXml))
-	mapping.setServletClass(JspXmlServlet.class.getName());
+        mapping.setServletClass(JspXmlServlet.class.getName());
       else
-	mapping.setServletClass(JspServlet.class.getName());
+        mapping.setServletClass(JspServlet.class.getName());
 
       for (int i = 0; i < _urlPatterns.size(); i++) {
-	mapping.addURLPattern(_urlPatterns.get(i));
+        mapping.addURLPattern(_urlPatterns.get(i));
       }
 
       _webApp.addServletMapping(mapping);
@@ -742,7 +742,7 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
       String regexpPattern = UrlMap.urlPatternToRegexpPattern(urlPattern);
 
       if (Pattern.compile(regexpPattern).matcher(url).find()) {
-	return true;
+        return true;
       }
     }
 

@@ -66,8 +66,8 @@ public class BaseItem implements Item {
    */
   public Item getAncestor(int depth)
     throws ItemNotFoundException,
-	   AccessDeniedException,
-	   RepositoryException
+           AccessDeniedException,
+           RepositoryException
   {
     Item item = this;
     
@@ -83,8 +83,8 @@ public class BaseItem implements Item {
    */
   public Node getParent()
     throws ItemNotFoundException,
-	   AccessDeniedException,
-	   RepositoryException
+           AccessDeniedException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -154,14 +154,14 @@ public class BaseItem implements Item {
    */
   public void save()
     throws AccessDeniedException,
-	   ItemExistsException,
-	   ConstraintViolationException,
-	   InvalidItemStateException,
-	   ReferentialIntegrityException,
-	   VersionException,
-	   LockException,
-	   NoSuchNodeTypeException,
-	   RepositoryException
+           ItemExistsException,
+           ConstraintViolationException,
+           InvalidItemStateException,
+           ReferentialIntegrityException,
+           VersionException,
+           LockException,
+           NoSuchNodeTypeException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -173,7 +173,7 @@ public class BaseItem implements Item {
    */
   public void refresh(boolean keepChanges)
     throws InvalidItemStateException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -183,9 +183,9 @@ public class BaseItem implements Item {
    */
   public void remove()
     throws VersionException,
-	   LockException,
-	   ConstraintViolationException,
-	   RepositoryException
+           LockException,
+           ConstraintViolationException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

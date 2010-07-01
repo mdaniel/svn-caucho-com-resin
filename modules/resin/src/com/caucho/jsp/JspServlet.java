@@ -87,7 +87,7 @@ public class JspServlet extends QServlet {
 
     manager.setXml(_isXml);
     manager.setLoadTldOnInit(_loadTldOnInit
-			     || webApp.createJsp().isLoadTldOnInit());
+                             || webApp.createJsp().isLoadTldOnInit());
     manager.setPageCacheMax(_pageCacheMax);
 
     manager.initWebApp(webApp);

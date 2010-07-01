@@ -142,7 +142,7 @@ public class UserStatement implements Statement {
       Statement stmt = _stmt;
       
       if (stmt != null)
-	stmt.clearWarnings();
+        stmt.clearWarnings();
     } catch (RuntimeException e) {
       killPool();
       throw e;
@@ -163,9 +163,9 @@ public class UserStatement implements Statement {
       _stmt = null;
 
       if (stmt != null) {
-	_conn.closeStatement(stmt);
+        _conn.closeStatement(stmt);
 
-	stmt.close();
+        stmt.close();
       }
     } catch (RuntimeException e) {
       killPool();

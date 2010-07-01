@@ -89,7 +89,7 @@ public class FilterMappingEmbed
    * @param urlPattern the url-pattern
    */
   public FilterMappingEmbed(String filterName,
-			    String urlPattern)
+                            String urlPattern)
   {
     setFilterName(filterName);
     setUrlPattern(urlPattern);
@@ -103,8 +103,8 @@ public class FilterMappingEmbed
    * @param filterClass the filter-class
    */
   public FilterMappingEmbed(String filterName,
-			    String urlPattern,
-			    String filterClass)
+                            String urlPattern,
+                            String filterClass)
   {
     setFilterName(filterName);
     setUrlPattern(urlPattern);
@@ -187,18 +187,18 @@ public class FilterMappingEmbed
   {
     try {
       if (_urlPattern != null)
-	filterMapping.createUrlPattern().addText(_urlPattern).init();
+        filterMapping.createUrlPattern().addText(_urlPattern).init();
 
       if (_servletName != null)
-	filterMapping.addServletName(_servletName);
+        filterMapping.addServletName(_servletName);
     
       filterMapping.setFilterName(_filterName);
 
       if (_filterClass != null)
-	filterMapping.setFilterClass(_filterClass);
+        filterMapping.setFilterClass(_filterClass);
 
       for (Map.Entry<String,String> entry : _initParamMap.entrySet()) {
-	filterMapping.setInitParam(entry.getKey(), entry.getValue());
+        filterMapping.setInitParam(entry.getKey(), entry.getValue());
       }
 
       filterMapping.setInit(_init);

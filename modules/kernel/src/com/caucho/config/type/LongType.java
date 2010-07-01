@@ -84,6 +84,6 @@ public final class LongType extends ConfigType
       return new Long(((Number) value).longValue());
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to an Long",
-				    value));
+                                    value));
   }
 }

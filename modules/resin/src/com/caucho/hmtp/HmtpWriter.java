@@ -125,7 +125,7 @@ public class HmtpWriter implements ActorStream
           out.writeString(from);
           out.writeObject(value);
           out.endPacket();
-	
+
           if (_isAutoFlush)
             out.flush();
         }
@@ -141,31 +141,31 @@ public class HmtpWriter implements ActorStream
    * Sends a message error to a given jid
    */
   public void messageError(String to,
-			   String from,
-			   Serializable value,
-			   ActorError error)
+                           String from,
+                           Serializable value,
+                           ActorError error)
   {
     try {
       Hessian2Output out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " messageError " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " messageError " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	synchronized (out) {
-	  out.startPacket();
-	  out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
-	  out.writeString(to);
-	  out.writeString(from);
-	  out.writeObject(value);
-	  out.writeObject(error);
-	  out.endPacket();
-	
-	  if (_isAutoFlush)
-	    out.flush();
-	}
+        synchronized (out) {
+          out.startPacket();
+          out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
+          out.writeString(to);
+          out.writeString(from);
+          out.writeObject(value);
+          out.writeObject(error);
+          out.endPacket();
+
+          if (_isAutoFlush)
+            out.flush();
+        }
       }
     } catch (IOException e) {
       close();
@@ -203,7 +203,7 @@ public class HmtpWriter implements ActorStream
           out.writeLong(id);
           out.writeObject(value);
           out.endPacket();
-	
+
           if (_isAutoFlush)
             out.flush();
         }
@@ -219,31 +219,31 @@ public class HmtpWriter implements ActorStream
    * Low-level query set
    */
   public void querySet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     try {
       Hessian2Output out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " querySet " + value
-		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " querySet " + value
+                    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
+        }
 
-	synchronized (out) {
-	  out.startPacket();
-	  out.writeInt(HmtpPacketType.QUERY_SET.ordinal());
-	  out.writeString(to);
-	  out.writeString(from);
-	  out.writeLong(id);
-	  out.writeObject(value);
-	  out.endPacket();
-	
-	  if (_isAutoFlush)
-	    out.flush();
-	}
+        synchronized (out) {
+          out.startPacket();
+          out.writeInt(HmtpPacketType.QUERY_SET.ordinal());
+          out.writeString(to);
+          out.writeString(from);
+          out.writeLong(id);
+          out.writeObject(value);
+          out.endPacket();
+
+          if (_isAutoFlush)
+            out.flush();
+        }
       }
     } catch (IOException e) {
       close();
@@ -256,31 +256,31 @@ public class HmtpWriter implements ActorStream
    * Low-level query response
    */
   public void queryResult(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     try {
       Hessian2Output out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryResult " + value
-		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " queryResult " + value
+                    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
+        }
 
-	synchronized (out) {
-	  out.startPacket();
-	  out.writeInt(HmtpPacketType.QUERY_RESULT.ordinal());
-	  out.writeString(to);
-	  out.writeString(from);
-	  out.writeLong(id);
-	  out.writeObject(value);
-	  out.endPacket();
-	
-	  if (_isAutoFlush)
-	    out.flush();
-	}
+        synchronized (out) {
+          out.startPacket();
+          out.writeInt(HmtpPacketType.QUERY_RESULT.ordinal());
+          out.writeString(to);
+          out.writeString(from);
+          out.writeLong(id);
+          out.writeObject(value);
+          out.endPacket();
+
+          if (_isAutoFlush)
+            out.flush();
+        }
       }
     } catch (IOException e) {
       close();
@@ -293,33 +293,33 @@ public class HmtpWriter implements ActorStream
    * Low-level query error
    */
   public void queryError(long id,
-			 String to,
-			 String from, 
-			 Serializable value,
-			 ActorError error)
+                         String to,
+                         String from,
+                         Serializable value,
+                         ActorError error)
   {
     try {
       Hessian2Output out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryError " + error + " " + value
-		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " queryError " + error + " " + value
+                    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
+        }
 
-	synchronized (out) {
-	  out.startPacket();
-	  out.writeInt(HmtpPacketType.QUERY_ERROR.ordinal());
-	  out.writeString(to);
-	  out.writeString(from);
-	  out.writeLong(id);
-	  out.writeObject(value);
-	  out.writeObject(error);
-	  out.endPacket();
-	
-	  if (_isAutoFlush)
-	    out.flush();
-	}
+        synchronized (out) {
+          out.startPacket();
+          out.writeInt(HmtpPacketType.QUERY_ERROR.ordinal());
+          out.writeString(to);
+          out.writeString(from);
+          out.writeLong(id);
+          out.writeObject(value);
+          out.writeObject(error);
+          out.endPacket();
+
+          if (_isAutoFlush)
+            out.flush();
+        }
       }
     } catch (IOException e) {
       close();

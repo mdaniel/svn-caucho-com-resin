@@ -97,7 +97,7 @@ public class XmlSetTag extends TagSupport {
    * Returns the value as an object.
    */
   public static Object evalObject(PageContextImpl pageContext,
-				  com.caucho.xpath.Expr select)
+                                  com.caucho.xpath.Expr select)
     throws XPathException, JspException
   {
     try {

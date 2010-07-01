@@ -84,7 +84,7 @@ public class QueryImpl implements Query {
       ResultSet rs = executeQuery();
 
       while (rs.next())
-	results.add(rs.getObject(1));
+        results.add(rs.getObject(1));
 
       rs.close();
 
@@ -105,7 +105,7 @@ public class QueryImpl implements Query {
       Object value = null;
 
       if (rs.next())
-	value = rs.getObject(1);
+        value = rs.getObject(1);
 
       rs.close();
 

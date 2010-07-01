@@ -72,13 +72,13 @@ public class XslElementNode extends XslNode {
       super.addAttribute(name, value);
       
       if (! JavaGenerator.XSLNS.equals(value) &&
-	  ! JavaGenerator.XTPNS.equals(value)) {
-	XslNamespaceNode attr = new XslNamespaceNode(name, value);
+          ! JavaGenerator.XTPNS.equals(value)) {
+        XslNamespaceNode attr = new XslNamespaceNode(name, value);
 
-	attr.setParent(this);
-	attr.setGenerator(_gen);
-	
-	addChild(attr);
+        attr.setParent(this);
+        attr.setGenerator(_gen);
+
+        addChild(attr);
       }
     }
     else if (JavaGenerator.XSLNS.equals(name.getNamespaceURI())) {

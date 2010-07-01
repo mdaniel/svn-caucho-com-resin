@@ -219,44 +219,44 @@ public class WebAppEmbed
   {
     try {
       for (Map.Entry<String,String> entry : _contextParamMap.entrySet()) {
-	InitParam initParam = new InitParam(entry.getKey(), entry.getValue());
-	webApp.addContextParam(initParam);
+        InitParam initParam = new InitParam(entry.getKey(), entry.getValue());
+        webApp.addContextParam(initParam);
       }
 
       for (BeanEmbed beanEmbed : _beanList) {
-	beanEmbed.configure();
+        beanEmbed.configure();
       }
-	
+
       for (ServletEmbed servletEmbed : _servletList) {
-	ServletConfigImpl servlet = webApp.createServlet();
+        ServletConfigImpl servlet = webApp.createServlet();
 
-	servletEmbed.configure(servlet);
+        servletEmbed.configure(servlet);
 
-	webApp.addServlet(servlet);
+        webApp.addServlet(servlet);
       }
     
       for (ServletMappingEmbed servletMappingEmbed : _servletMappingList) {
-	ServletMapping servletMapping = webApp.createServletMapping();
+        ServletMapping servletMapping = webApp.createServletMapping();
 
-	servletMappingEmbed.configure(servletMapping);
+        servletMappingEmbed.configure(servletMapping);
 
-	webApp.addServletMapping(servletMapping);
+        webApp.addServletMapping(servletMapping);
       }
-	
+
       for (FilterEmbed filterEmbed : _filterList) {
-	FilterConfigImpl filter = new FilterConfigImpl();
+        FilterConfigImpl filter = new FilterConfigImpl();
 
-	filterEmbed.configure(filter);
+        filterEmbed.configure(filter);
 
-	webApp.addFilter(filter);
+        webApp.addFilter(filter);
       }
     
       for (FilterMappingEmbed filterMappingEmbed : _filterMappingList) {
-	FilterMapping filterMapping = new FilterMapping();
+        FilterMapping filterMapping = new FilterMapping();
 
-	filterMappingEmbed.configure(filterMapping);
+        filterMappingEmbed.configure(filterMapping);
 
-	webApp.addFilterMapping(filterMapping);
+        webApp.addFilterMapping(filterMapping);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

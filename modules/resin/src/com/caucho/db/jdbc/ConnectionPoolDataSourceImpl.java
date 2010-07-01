@@ -112,12 +112,12 @@ public class ConnectionPoolDataSourceImpl implements ConnectionPoolDataSource {
   {
     synchronized (this) {
       if (_isInit)
-	return;
+        return;
 
       try {
-	_database.init();
+        _database.init();
       } finally {
-	_isInit = true;
+        _isInit = true;
       }
     }
   }

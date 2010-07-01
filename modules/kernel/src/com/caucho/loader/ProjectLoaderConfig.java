@@ -60,7 +60,7 @@ public class ProjectLoaderConfig
   {
     if (! path.getTail().equals("pom.xml"))
       throw new ConfigException(L.l("project-loader path='{0}' must be a pom.xml file.",
-				    path));
+                                    path));
 
     _path = path;
   }
@@ -77,17 +77,17 @@ public class ProjectLoaderConfig
 
     if (_path.canRead()) {
       try {
-	MavenProject project = new MavenProject();
+        MavenProject project = new MavenProject();
 
-	new Config().configure(project, _path);
+        new Config().configure(project, _path);
 
-	Artifact artifact = project.toArtifact(_path);
+        Artifact artifact = project.toArtifact(_path);
 
-	for (ArtifactDependency dependency : artifact.getDependencies())  {
-	  loader.createArtifactManager().addDependency(dependency);
-	}
+        for (ArtifactDependency dependency : artifact.getDependencies())  {
+          loader.createArtifactManager().addDependency(dependency);
+        }
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
 

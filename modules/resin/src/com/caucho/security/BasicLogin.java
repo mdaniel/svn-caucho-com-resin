@@ -163,7 +163,7 @@ public class BasicLogin extends AbstractLogin {
    */
   @Override
   protected void loginChallenge(HttpServletRequest request,
-				HttpServletResponse response)
+                                HttpServletResponse response)
     throws IOException
   {
     String realm = getRealmName();

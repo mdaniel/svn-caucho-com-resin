@@ -112,7 +112,7 @@ public class XslStylesheet extends XslNode {
       throw error(L.l("xsl:stylesheet needs a 'version' attribute."));
     else if (! _version.equals("1.0"))
       throw error(L.l("'{0}' is an unknown xsl:stylesheet version.",
-		      _version));
+                      _version));
     */
   }
   
@@ -134,13 +134,13 @@ public class XslStylesheet extends XslNode {
       TextNode text = (TextNode) node;
 
       if (! text.isWhitespace())
-	throw error(L.l("text not allowed in the top level."));
+        throw error(L.l("text not allowed in the top level."));
     }
     else if (node instanceof XslElementNode) {
     }
     else if (! (node instanceof XslTopNode)) {
       throw error(L.l("<{0}> is not allowed in the top level.",
-		      node.getTagName()));
+                      node.getTagName()));
     }
     else
       super.addChild(node);
@@ -191,7 +191,7 @@ public class XslStylesheet extends XslNode {
       String prefix = strings[i];
       String ns = getNamespace(prefix);
       if (ns == null)
-	throw error(L.l("`{0}' must be a namespace prefix", prefix));
+        throw error(L.l("`{0}' must be a namespace prefix", prefix));
       _gen.addExcludedNamespace(ns);
     }
   }

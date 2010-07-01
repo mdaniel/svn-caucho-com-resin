@@ -93,15 +93,15 @@ public class BinaryHashDiff {
       int sublen = readAll(oldFile, buffer);
 
       if (sublen < 0) {
-	TempBuffer.free(buf);
-	break;
+        TempBuffer.free(buf);
+        break;
       }
 
       _oldLength += sublen;
       _oldBuffers.add(buf);
 
       if (sublen < buffer.length)
-	break;
+        break;
     }
 
     _oldBytes = new byte[_oldBuffers.size()][];
@@ -144,7 +144,7 @@ public class BinaryHashDiff {
 
       long hash = 0;
       for (int k = 0; k < chunkSize; k++) {
-	hash = hash(hash, buffer[offset + k], 0, factor);
+        hash = hash(hash, buffer[offset + k], 0, factor);
       }
 
       hashArray[i] = hash;
@@ -162,7 +162,7 @@ public class BinaryHashDiff {
   }
 
   private static void sort(int []suffixArray, long []hashArray,
-			   int dataLength, int min, int max)
+                           int dataLength, int min, int max)
   {
     int delta = max - min;
     
@@ -176,8 +176,8 @@ public class BinaryHashDiff {
       long bValue = hashArray[bIndex];
 
       if (bValue < aValue) {
-	suffixArray[min] = bIndex;
-	suffixArray[min + 1] = aIndex;
+        suffixArray[min] = bIndex;
+        suffixArray[min + 1] = aIndex;
       }
     }
     else {
@@ -188,35 +188,35 @@ public class BinaryHashDiff {
       int pivot = min;
 
       while (pivot + 1 < pivotMax) {
-	long value = hashArray[suffixArray[pivot + 1]];
+        long value = hashArray[suffixArray[pivot + 1]];
 
-	if (value < pivotValue) {
-	  suffixArray[pivot] = suffixArray[pivot + 1];
-	  suffixArray[pivot + 1] = pivotIndex;
+        if (value < pivotValue) {
+          suffixArray[pivot] = suffixArray[pivot + 1];
+          suffixArray[pivot + 1] = pivotIndex;
 
-	  pivot += 1;
-	}
-	else {
-	  int temp = suffixArray[pivotMax - 1];
-	  suffixArray[pivotMax - 1] = suffixArray[pivot + 1];
-	  suffixArray[pivot + 1] = temp;
+          pivot += 1;
+        }
+        else {
+          int temp = suffixArray[pivotMax - 1];
+          suffixArray[pivotMax - 1] = suffixArray[pivot + 1];
+          suffixArray[pivot + 1] = temp;
 
-	  pivotMax -= 1;
-	}
+          pivotMax -= 1;
+        }
       }
 
       if (min < pivot) {
-	sort(suffixArray, hashArray, dataLength, min, pivot);
-	sort(suffixArray, hashArray, dataLength, pivot, max);
+        sort(suffixArray, hashArray, dataLength, min, pivot);
+        sort(suffixArray, hashArray, dataLength, pivot, max);
       }
       else {
-	sort(suffixArray, hashArray, dataLength, pivot + 1, max);
+        sort(suffixArray, hashArray, dataLength, pivot + 1, max);
       }
     }
   }
 
   private static int suffixCompareTo(int a, int b, long []hashArray,
-				     int length)
+                                     int length)
   {
     int sublen = length - a;
 
@@ -228,9 +228,9 @@ public class BinaryHashDiff {
       long b1 = hashArray[b + i];
 
       if (a1 < b1)
-	return -1;
+        return -1;
       else if (b1 < a1)
-	return 1;
+        return 1;
     }
 
     return 0;
@@ -269,14 +269,14 @@ public class BinaryHashDiff {
       byte oldValue = 0;
 
       if (offset > 0)
-	oldValue = buffer[offset - 1];
+        oldValue = buffer[offset - 1];
       
       hash = hash(hash, buffer[offset + chunkSize - 1], oldValue, hashFactor);
 
       int suffixIndex = findBlock(hash, suffixArray, hashArray);
 
       if (suffixIndex < 0)
-	continue;
+        continue;
 
       int suffixOffset = suffixArray[suffixIndex] + 1;
       int dataOffset = offset + chunkSize;
@@ -284,77 +284,77 @@ public class BinaryHashDiff {
 
       loop_match:
       for (;
-	   dataOffset + chunkSize < length
-	     && suffixOffset < hashArray.length;
-	   dataOffset += chunkSize, suffixOffset += 1) {
-	long hash2 = 0;
+           dataOffset + chunkSize < length
+             && suffixOffset < hashArray.length;
+           dataOffset += chunkSize, suffixOffset += 1) {
+        long hash2 = 0;
 
-	for (int i = 0; i < chunkSize; i++) {
-	  hash2 = hash(hash2, buffer[dataOffset + i], 0, hashFactor);
-	}
+        for (int i = 0; i < chunkSize; i++) {
+          hash2 = hash(hash2, buffer[dataOffset + i], 0, hashFactor);
+        }
 
-	if (hash2 == hashArray[suffixOffset]) {
-	}
-	else if (hash2 < hashArray[suffixOffset]) {
-	  int delta = suffixOffset - suffixArray[suffixIndex];
+        if (hash2 == hashArray[suffixOffset]) {
+        }
+        else if (hash2 < hashArray[suffixOffset]) {
+          int delta = suffixOffset - suffixArray[suffixIndex];
 
-	  for (int i = suffixIndex - 1;
-	       i >= 0
-		 && hashArray[suffixArray[i]] == hash
-		 && suffixArray[i] + delta < hashArray.length
-		 && hashArray[suffixArray[i] + delta - 1] == prevHash;
-	       i--) {
-	    if (hashArray[suffixArray[i] + delta] == hash2) {
-	      suffixIndex = i;
-	      suffixOffset = suffixArray[i] + delta;
-	      prevHash = hash2;
+          for (int i = suffixIndex - 1;
+               i >= 0
+                 && hashArray[suffixArray[i]] == hash
+                 && suffixArray[i] + delta < hashArray.length
+                 && hashArray[suffixArray[i] + delta - 1] == prevHash;
+               i--) {
+            if (hashArray[suffixArray[i] + delta] == hash2) {
+              suffixIndex = i;
+              suffixOffset = suffixArray[i] + delta;
+              prevHash = hash2;
 
-	      // XXX: also need to revalidate in between
-	      continue loop_match;
-	    }
-	  }
+              // XXX: also need to revalidate in between
+              continue loop_match;
+            }
+          }
 
-	  break;
-	}
-	else {
-	  int delta = suffixOffset - suffixArray[suffixIndex];
-	  
-	  for (int i = suffixIndex + 1;
-	       i < suffixArray.length
-		 && hashArray[suffixArray[i]] == hash
-		 && suffixArray[i] + delta < hashArray.length
-		 && hashArray[suffixArray[i] + delta - 1] == prevHash;
-	       i++) {
-	    if (hashArray[suffixArray[i] + delta] == hash2) {
-	      suffixIndex = i;
-	      suffixOffset = suffixArray[i] + delta;
-	      prevHash = hash2;
-	      // XXX: also need to revalidate in between
+          break;
+        }
+        else {
+          int delta = suffixOffset - suffixArray[suffixIndex];
 
-	      continue loop_match;
-	    }
-	  }
+          for (int i = suffixIndex + 1;
+               i < suffixArray.length
+                 && hashArray[suffixArray[i]] == hash
+                 && suffixArray[i] + delta < hashArray.length
+                 && hashArray[suffixArray[i] + delta - 1] == prevHash;
+               i++) {
+            if (hashArray[suffixArray[i] + delta] == hash2) {
+              suffixIndex = i;
+              suffixOffset = suffixArray[i] + delta;
+              prevHash = hash2;
+              // XXX: also need to revalidate in between
 
-	  break;
-	}
-	
-	prevHash = hash2;
+              continue loop_match;
+            }
+          }
+
+          break;
+        }
+
+        prevHash = hash2;
       }
 
       if (dataOffset - offset >= _copyMin) {
-	if (prevOffset < offset)
-	  add(out, buffer, prevOffset, offset - prevOffset);
+        if (prevOffset < offset)
+          add(out, buffer, prevOffset, offset - prevOffset);
 
-	copy(out,
-	     suffixArray[suffixIndex] * _chunkSize,
-	     dataOffset - offset);
+        copy(out,
+             suffixArray[suffixIndex] * _chunkSize,
+             dataOffset - offset);
 
-	hash = 0;
-	offset = dataOffset - 1;
-	for (int i = 0; i < _chunkSize; i++)
-	  hash = hash(hash, buffer[offset + i], 0, hashFactor);
-	  
-	prevOffset = offset + 1;
+        hash = 0;
+        offset = dataOffset - 1;
+        for (int i = 0; i < _chunkSize; i++)
+          hash = hash(hash, buffer[offset + i], 0, hashFactor);
+
+        prevOffset = offset + 1;
       }
     }
 
@@ -375,11 +375,11 @@ public class BinaryHashDiff {
       long hashValue = hashArray[suffixArray[pivot]];
 
       if (hash == hashValue)
-	return pivot;
+        return pivot;
       else if (hash < hashValue)
-	max = pivot;
+        max = pivot;
       else
-	min = pivot + 1;
+        min = pivot + 1;
     }
 
     return -1;
@@ -396,7 +396,7 @@ public class BinaryHashDiff {
       sublen = is.read(buffer, offset, sublen);
 
       if (sublen < 0)
-	return offset > 0 ? offset : -1;
+        return offset > 0 ? offset : -1;
 
       offset += sublen;
     }
@@ -414,24 +414,24 @@ public class BinaryHashDiff {
       int size = random.nextInt(256);
 
       if (size < 1)
-	size = 1;
+        size = 1;
     
       long factor = 1;
 
       for (int i = 1; i < size; i++) {
-	factor = (MUL * factor) % PRIME;
+        factor = (MUL * factor) % PRIME;
       }
 
       byte d0 = (byte) random.nextInt();
 
       for (int i = 0; i < size; i++) {
-	data[i] = (byte) random.nextInt();
+        data[i] = (byte) random.nextInt();
       }
 
       long hash = 0;
       hash = hash(hash, d0, 0, factor);
       for (int i = 0; i < size - 1; i++) {
-	hash = hash(hash, data[i], 0, factor);
+        hash = hash(hash, data[i], 0, factor);
       }
       hash = hash(hash, data[size - 1], d0, factor);
 
@@ -439,13 +439,13 @@ public class BinaryHashDiff {
 
       hash = 0;
       for (int i = 0; i < size; i++) {
-	hash = hash(hash, data[i], 0, factor);
+        hash = hash(hash, data[i], 0, factor);
       }
       
       long newHash = hash;
 
       if (oldHash != newHash)
-	System.out.println("OLD: " + oldHash + " " + newHash);
+        System.out.println("OLD: " + oldHash + " " + newHash);
     }
   }
   
@@ -456,7 +456,7 @@ public class BinaryHashDiff {
     newData = newData & 0xff;
     
     long old = ((PRIME << 8) + hash - factor * oldData) % PRIME;
-	
+
     return (MUL * old + newData) % PRIME;
   }
     

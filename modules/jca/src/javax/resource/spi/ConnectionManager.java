@@ -41,6 +41,6 @@ public interface ConnectionManager extends java.io.Serializable {
    * @return connection handle for EIS specific connection.
    */
   public Object allocateConnection(ManagedConnectionFactory mcf,
-				   ConnectionRequestInfo requestInfo)
+                                   ConnectionRequestInfo requestInfo)
     throws ResourceException;
 }

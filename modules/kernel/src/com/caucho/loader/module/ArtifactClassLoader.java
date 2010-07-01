@@ -52,8 +52,8 @@ public class ArtifactClassLoader extends EnvironmentClassLoader
    * Creates a new ArtifactClassLoader
    */
   ArtifactClassLoader(ClassLoader parent,
-		      Artifact artifact,
-		      ArrayList<ArtifactClassLoader> importList)
+                      Artifact artifact,
+                      ArrayList<ArtifactClassLoader> importList)
   {
     super(parent, createId(artifact));
 
@@ -92,10 +92,10 @@ public class ArtifactClassLoader extends EnvironmentClassLoader
   {
     for (ArtifactClassLoader loader : _imports) {
       try {
-	Class cl = loader.findClassImpl(name);
+        Class cl = loader.findClassImpl(name);
 
-	if (cl != null)
-	  return cl;
+        if (cl != null)
+          return cl;
       } catch (ClassNotFoundException e) {
       }
     }

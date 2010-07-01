@@ -76,7 +76,7 @@ public class RefPattern extends Pattern {
     if (pattern == null) {
       // XXX: line #
       throw error(L.l("<ref name=\"{0}\"/> is an unknown reference.",
-		      _refName));
+                      _refName));
     }
 
     for (Pattern ptr = this;
@@ -84,7 +84,7 @@ public class RefPattern extends Pattern {
          ptr = ptr.getParent()) {
       if (ptr == pattern) {
         throw error(L.l("<define name=\"{0}\"/> calls itself recursively in a <ref/>.",
-			_refName));
+                        _refName));
       }
     }
 

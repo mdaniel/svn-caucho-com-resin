@@ -69,7 +69,7 @@ public class IfLocalPort implements RequestPredicate
   {
     if (_localPort == 0)
       throw new ConfigException(L.l("'localPort' is a required attribute for {0}",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
   }
 
   /**

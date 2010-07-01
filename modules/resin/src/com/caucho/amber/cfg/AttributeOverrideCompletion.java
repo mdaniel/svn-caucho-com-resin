@@ -52,8 +52,8 @@ class AttributeOverrideCompletion extends CompletionImpl
 
   AttributeOverrideCompletion(BaseConfigIntrospector base,
                               EntityType entityType,
-			      Class type,
-			      HashMap<String,ColumnConfig> overrideMap)
+                              Class type,
+                              HashMap<String,ColumnConfig> overrideMap)
   {
     super(base, entityType);
 
@@ -89,7 +89,7 @@ class AttributeOverrideCompletion extends CompletionImpl
       ArrayList<IdField> mappedKeys = new ArrayList<IdField>();
 
       for (IdField key : keys) {
-	mappedKeys.add((IdField) overrideField(key));
+        mappedKeys.add((IdField) overrideField(key));
       }
 
       id = new com.caucho.amber.field.Id(_entityType, mappedKeys);
@@ -111,23 +111,23 @@ class AttributeOverrideCompletion extends CompletionImpl
     if (column != null) {
       AmberTable table = _entityType.getTable();
       AmberColumn newColumn = table.createColumn(column.getName(),
-					    oldColumn.getType());
+                                            oldColumn.getType());
 
       newField.setColumn(newColumn);
 
       newField.init();
-	
+
       return newField;
     }
     else {
       AmberTable table = _entityType.getTable();
       AmberColumn newColumn = table.createColumn(oldColumn.getName(),
-					    oldColumn.getType());
+                                            oldColumn.getType());
 
       newField.setColumn(newColumn);
 
       newField.init();
-	
+
       return newField;
     }
   }

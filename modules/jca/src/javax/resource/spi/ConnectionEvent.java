@@ -60,7 +60,7 @@ public class ConnectionEvent extends EventObject {
    * Creates an event.
    */
   public ConnectionEvent(ManagedConnection source, int eid,
-			 Exception exception)
+                         Exception exception)
   {
     super(source);
 

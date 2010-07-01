@@ -73,8 +73,8 @@ class BetweenExpr extends Expr {
   public long subCost(ArrayList<FromItem> fromList)
   {
     return (_expr.subCost(fromList) +
-	    _min.subCost(fromList) + 
-	    _max.subCost(fromList));
+            _min.subCost(fromList) +
+            _max.subCost(fromList));
   }
 
   /**
@@ -93,9 +93,9 @@ class BetweenExpr extends Expr {
       long value = _expr.evalLong(context);
 
       if (_isNot)
-	return ! (min <= value && value <= max) ? TRUE : FALSE;
+        return ! (min <= value && value <= max) ? TRUE : FALSE;
       else
-	return min <= value && value <= max ? TRUE : FALSE;
+        return min <= value && value <= max ? TRUE : FALSE;
     }
     else {
       double min = _min.evalDouble(context);
@@ -104,9 +104,9 @@ class BetweenExpr extends Expr {
       double value = _expr.evalDouble(context);
 
       if (_isNot)
-	return ! (min <= value && value <= max) ? TRUE : FALSE;
+        return ! (min <= value && value <= max) ? TRUE : FALSE;
       else
-	return min <= value && value <= max ? TRUE : FALSE;
+        return min <= value && value <= max ? TRUE : FALSE;
     }
   }
 

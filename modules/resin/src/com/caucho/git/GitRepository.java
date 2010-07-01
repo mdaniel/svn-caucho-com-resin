@@ -93,9 +93,9 @@ public class GitRepository {
       ReadStream is = path.openRead();
 
       try {
-	return is.readLine();
+        return is.readLine();
       } finally {
-	is.close();
+        is.close();
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -141,7 +141,7 @@ public class GitRepository {
       return null;
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
   }
 
@@ -164,10 +164,10 @@ public class GitRepository {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       try {
-	if (out != null)
-	  out.close();
+        if (out != null)
+          out.close();
       } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
     }
   }
@@ -178,9 +178,9 @@ public class GitRepository {
       Path path = _root.lookup("refs").lookup(dir);
 
       if (path.isDirectory())
-	return path.list();
+        return path.list();
       else
-	return new String[0];
+        return new String[0];
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -206,8 +206,8 @@ public class GitRepository {
     GitObjectStream is = open(sha1);
     try {
       if (is.getType() != GitType.COMMIT)
-	throw new IOException(L.l("'{0}' is an unexpected type, expected 'commit'",
-				  is.getType()));
+        throw new IOException(L.l("'{0}' is an unexpected type, expected 'commit'",
+                                  is.getType()));
       
       return is.parseCommit();
     } finally {
@@ -229,8 +229,8 @@ public class GitRepository {
     
     try {
       if (GitType.TREE != is.getType())
-	throw new IOException(L.l("'{0}' is an unexpected type, expected 'tree'",
-				  is.getType()));
+        throw new IOException(L.l("'{0}' is an unexpected type, expected 'tree'",
+                                  is.getType()));
       
       return is.parseTree();
     } finally {
@@ -249,7 +249,7 @@ public class GitRepository {
     if (is.getType() != GitType.BLOB) {
       is.close();
       throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob'",
-				is.getType()));
+                                is.getType()));
     }
       
     return is;
@@ -270,26 +270,26 @@ public class GitRepository {
     
     try {
       if (GitType.TREE == is.getType()) {
-	GitTree tree = is.parseTree();
-	is.close();
+        GitTree tree = is.parseTree();
+        is.close();
 
-	expandTreeToPath(path, tree, now);
+        expandTreeToPath(path, tree, now);
       }
       else if (GitType.BLOB == is.getType()) {
-	WriteStream os = path.openWrite();
+        WriteStream os = path.openWrite();
 
-	try {
-	  os.writeStream(is.getInputStream());
-	} finally {
-	  os.close();
-	}
-	
-	// #3839
-	path.setLastModified(now);
+        try {
+          os.writeStream(is.getInputStream());
+        } finally {
+          os.close();
+        }
+
+        // #3839
+        path.setLastModified(now);
       }
       else
-	throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob' or 'tree'",
-				  is.getType()));
+        throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob' or 'tree'",
+                                  is.getType()));
     } finally {
       is.close();
     }
@@ -314,15 +314,15 @@ public class GitRepository {
     
     try {
       if (GitType.BLOB != is.getType())
-	throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob'",
-				  is.getType()));
+        throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob'",
+                                  is.getType()));
 
       WriteStream os = path.openWrite();
 
       try {
-	os.writeStream(is.getInputStream());
+        os.writeStream(is.getInputStream());
       } finally {
-	os.close();
+        os.close();
       }
     } finally {
       is.close();
@@ -484,10 +484,10 @@ public class GitRepository {
       Collections.sort(keys);
 
       for (String key : keys) {
-	out.print(key);
-	out.print(' ');
-	out.print(attr.get(key));
-	out.println();
+        out.print(key);
+        out.print(' ');
+        out.print(attr.get(key));
+        out.println();
       }
     }
 
@@ -576,21 +576,21 @@ public class GitRepository {
       WriteStream tmpOut = tmp.openWrite();
       
       try {
-	tmpOut.writeStream(is);
+        tmpOut.writeStream(is);
       } finally {
-	tmpOut.close();
+        tmpOut.close();
       }
 
       String newHex = validate(tmp);
 
       if (! sha1.equals(newHex))
-	throw new RuntimeException(L.l("{0}: file validation failed because sha-1 hash '{0}' does not match expected '{1}'",
-				       newHex, sha1));
+        throw new RuntimeException(L.l("{0}: file validation failed because sha-1 hash '{0}' does not match expected '{1}'",
+                                       newHex, sha1));
 
       tmp.renameTo(objectPath);
       
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " addRawGitFile " + sha1 + " " + objectPath);
+        log.finer(this + " addRawGitFile " + sha1 + " " + objectPath);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -636,7 +636,7 @@ public class GitRepository {
   }
 
   private String writeData(OutputStream os, String type,
-			   InputStream is, long length)
+                           InputStream is, long length)
     throws IOException
   {
     TempBuffer buf = TempBuffer.allocate();
@@ -647,9 +647,9 @@ public class GitRepository {
       MessageDigest md = MessageDigest.getInstance("SHA-1");
 
       for (int i = 0; i < type.length(); i++) {
-	int ch = type.charAt(i);
-	out.write(ch);
-	md.update((byte) ch);
+        int ch = type.charAt(i);
+        out.write(ch);
+        md.update((byte) ch);
       }
 
       out.write(' ');
@@ -658,9 +658,9 @@ public class GitRepository {
       String lengthString = String.valueOf(length);
 
       for (int i = 0; i < lengthString.length(); i++) {
-	int ch = lengthString.charAt(i);
-	out.write(ch);
-	md.update((byte) ch);
+        int ch = lengthString.charAt(i);
+        out.write(ch);
+        md.update((byte) ch);
       }
       
       out.write(0);
@@ -672,16 +672,16 @@ public class GitRepository {
 
       byte []buffer = buf.getBuffer();
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	out.write(buffer, 0, len);
-	md.update(buffer, 0, len);
+        out.write(buffer, 0, len);
+        md.update(buffer, 0, len);
 
-	readLength += len;
+        readLength += len;
       }
 
       out.close();
 
       if (readLength != length)
-	throw new IOException(L.l("written length does not match data"));
+        throw new IOException(L.l("written length does not match data"));
 
       return Hex.toHex(md.digest());
     } catch (NoSuchAlgorithmException e) {

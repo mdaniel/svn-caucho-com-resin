@@ -249,8 +249,8 @@ public class NumberConverter
   }
   
   public Object getAsObject(FacesContext context,
-			    UIComponent component,
-			    String value)
+                            UIComponent component,
+                            String value)
     throws ConverterException
   {
     if (context == null || component == null)
@@ -275,50 +275,50 @@ public class NumberConverter
 
     try {
       synchronized (format) {
-	return format.parse(value);
+        return format.parse(value);
       }
     } catch (ParseException e) {
       String summary;
       String detail;
       
       if ("percent".equals(_type)) {
-	summary = Util.l10n(context, PERCENT_ID,
-			    "{2}: \"{0}\" could not be understood as a percentage.",
-			    value,
-			    getExample(context),
-			    Util.getLabel(context, component));
+        summary = Util.l10n(context, PERCENT_ID,
+                            "{2}: \"{0}\" could not be understood as a percentage.",
+                            value,
+                            getExample(context),
+                            Util.getLabel(context, component));
       
-	detail = Util.l10n(context, PERCENT_ID + "_detail",
-			   "{2}: \"{0}\" could not be understood as a percentage. Example: {1}.",
-			   value,
-			   getExample(context),
-			   Util.getLabel(context, component));
+        detail = Util.l10n(context, PERCENT_ID + "_detail",
+                           "{2}: \"{0}\" could not be understood as a percentage. Example: {1}.",
+                           value,
+                           getExample(context),
+                           Util.getLabel(context, component));
       }
       else if ("currency".equals(_type)) {
-	summary = Util.l10n(context, CURRENCY_ID,
-			    "{2}: \"{0}\" could not be understood as a currency value.",
-			    value,
-			    getExample(context),
-			    Util.getLabel(context, component));
+        summary = Util.l10n(context, CURRENCY_ID,
+                            "{2}: \"{0}\" could not be understood as a currency value.",
+                            value,
+                            getExample(context),
+                            Util.getLabel(context, component));
       
-	detail = Util.l10n(context, CURRENCY_ID + "_detail",
-			   "{2}: \"{0}\" could not be understood as a currency value. Example: {1}.",
-			   value,
-			   getExample(context),
-			   Util.getLabel(context, component));
+        detail = Util.l10n(context, CURRENCY_ID + "_detail",
+                           "{2}: \"{0}\" could not be understood as a currency value. Example: {1}.",
+                           value,
+                           getExample(context),
+                           Util.getLabel(context, component));
       }
       else {
-	summary = Util.l10n(context, NUMBER_ID,
-			    "{2}: \"{0}\" could not be understood as a number.",
-			    value,
-			    getExample(context),
-			    Util.getLabel(context, component));
+        summary = Util.l10n(context, NUMBER_ID,
+                            "{2}: \"{0}\" could not be understood as a number.",
+                            value,
+                            getExample(context),
+                            Util.getLabel(context, component));
       
-	detail = Util.l10n(context, NUMBER_ID + "_detail",
-			   "{2}: \"{0}\" could not be understood as a number. Example: {1}.",
-			   value,
-			   getExample(context),
-			   Util.getLabel(context, component));
+        detail = Util.l10n(context, NUMBER_ID + "_detail",
+                           "{2}: \"{0}\" could not be understood as a number. Example: {1}.",
+                           value,
+                           getExample(context),
+                           Util.getLabel(context, component));
       }
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -330,8 +330,8 @@ public class NumberConverter
   }
   
   public String getAsString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
     throws ConverterException
   {
     if (context == null || component == null)
@@ -343,7 +343,7 @@ public class NumberConverter
       NumberFormat format = getFormat(context.getViewRoot().getLocale());
 
       synchronized (format) {
-	return format.format((Number) value);
+        return format.format((Number) value);
       }
     }
     else
@@ -354,9 +354,9 @@ public class NumberConverter
   {
     synchronized (this) {
       if (_locale == null)
-	return createFormat(locale);
+        return createFormat(locale);
       else if (_format == null) {
-	_format = createFormat(_locale);
+        _format = createFormat(_locale);
       }
 
       return _format;
@@ -369,34 +369,34 @@ public class NumberConverter
     
     if (_type == null || "number".equals(_type)) {
       if (locale != null)
-	format = NumberFormat.getNumberInstance(locale);
+        format = NumberFormat.getNumberInstance(locale);
       else
-	format = NumberFormat.getNumberInstance();
+        format = NumberFormat.getNumberInstance();
     }
     else if ("currency".equals(_type)) {
       if (locale != null)
-	format = NumberFormat.getCurrencyInstance(locale);
+        format = NumberFormat.getCurrencyInstance(locale);
       else
-	format = NumberFormat.getCurrencyInstance();
+        format = NumberFormat.getCurrencyInstance();
 
       if (_currencyCode != null)
-	format.setCurrency(Currency.getInstance(_currencyCode));
+        format.setCurrency(Currency.getInstance(_currencyCode));
       else if (_currencySymbol != null) {
-	if (format instanceof DecimalFormat) {
-	  DecimalFormat decimalFormat = (DecimalFormat) format;
-	  DecimalFormatSymbols symbols
-	    = decimalFormat.getDecimalFormatSymbols();
+        if (format instanceof DecimalFormat) {
+          DecimalFormat decimalFormat = (DecimalFormat) format;
+          DecimalFormatSymbols symbols
+            = decimalFormat.getDecimalFormatSymbols();
 
-	  symbols.setCurrencySymbol(_currencySymbol);
-	  decimalFormat.setDecimalFormatSymbols(symbols);
-	}
+          symbols.setCurrencySymbol(_currencySymbol);
+          decimalFormat.setDecimalFormatSymbols(symbols);
+        }
       }
     }
     else if ("percent".equals(_type)) {
       if (locale != null)
-	format = NumberFormat.getPercentInstance(locale);
+        format = NumberFormat.getPercentInstance(locale);
       else
-	format = NumberFormat.getPercentInstance();
+        format = NumberFormat.getPercentInstance();
     }
     else {
       throw new ConverterException("'" + _type + "' is an illegal converter type.");
@@ -432,9 +432,9 @@ public class NumberConverter
 
     synchronized (format) {
       if ("percentage".equals(_type))
-	return format.format(new Double(0.75));
+        return format.format(new Double(0.75));
       else
-	return format.format(new Double(10125.25));
+        return format.format(new Double(10125.25));
     }
   }
 

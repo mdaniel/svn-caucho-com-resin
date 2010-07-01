@@ -114,29 +114,29 @@ public class XmppImBindQueryMarshal extends AbstractXmppMarshal {
     
     while ((tag = in.nextTag()) > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return new ImBindQuery(resource, jid);
+        return new ImBindQuery(resource, jid);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "resource".equals(in.getLocalName())) {
-	resource = in.getElementText();
+               && "resource".equals(in.getLocalName())) {
+        resource = in.getElementText();
 
-	skipToEnd(in, "resource");
+        skipToEnd(in, "resource");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "jid".equals(in.getLocalName())) {
-	jid = in.getElementText();
+               && "jid".equals(in.getLocalName())) {
+        jid = in.getElementText();
 
-	skipToEnd(in, "jid");
+        skipToEnd(in, "jid");
       }
       else {
-	log.warning(this + " unexpected tag " + in.getLocalName());
+        log.warning(this + " unexpected tag " + in.getLocalName());
 
-	skipToEnd(in, "bind");
-	
-	return null;
+        skipToEnd(in, "bind");
+
+        return null;
       }
     }
 

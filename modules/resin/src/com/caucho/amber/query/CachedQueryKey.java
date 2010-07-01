@@ -49,7 +49,7 @@ public class CachedQueryKey {
       _parameters = new Object[count];
       
       for (int i = 0; i < count; i++) {
-	_parameters[i] = parameters[i];
+        _parameters[i] = parameters[i];
       }
     }
   }
@@ -80,9 +80,9 @@ public class CachedQueryKey {
       Object o = _parameters[i];
 
       if (o != null)
-	hash = 65521 * hash + o.hashCode();
+        hash = 65521 * hash + o.hashCode();
       else
-	hash = 65521 * hash;
+        hash = 65521 * hash;
     }
 
     return hash;
@@ -108,7 +108,7 @@ public class CachedQueryKey {
       Object paramB = key._parameters[i];
       
       if (paramA != paramB && (paramA == null || ! paramA.equals(paramB)))
-	return false;
+        return false;
     }
 
     return true;

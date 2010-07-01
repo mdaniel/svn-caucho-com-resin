@@ -75,9 +75,9 @@ public class AnyNameItem extends NameClassItem {
   {
     if (_except != null) {
       if (prefix.equals(""))
-	return "<* -" + _except.toSyntaxDescription(" ") + ">";
+        return "<* -" + _except.toSyntaxDescription(" ") + ">";
       else
-	return prefix + "(* -" + _except.toSyntaxDescription(" ") + ")";
+        return prefix + "(* -" + _except.toSyntaxDescription(" ") + ")";
     }
     else if (prefix.equals(""))
       return "<*>";

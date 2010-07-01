@@ -64,7 +64,7 @@ public class MucQuery implements java.io.Serializable {
   }
 
   public MucQuery(String password,
-		  MucHistory history)
+                  MucHistory history)
   {
     _password = password;
     

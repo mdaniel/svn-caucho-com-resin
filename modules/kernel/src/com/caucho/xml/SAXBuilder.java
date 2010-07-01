@@ -308,10 +308,10 @@ public class SAXBuilder implements XMLWriter, Locator {
   {
     if (_hasElement) {
       if (_elementUri == null)
-	_contentHandler.startElement("", null, _elementQName, _attributes);
+        _contentHandler.startElement("", null, _elementQName, _attributes);
       else
-	_contentHandler.startElement(_elementUri, _elementLocalName,
-				     _elementQName, _attributes);
+        _contentHandler.startElement(_elementUri, _elementLocalName,
+                                     _elementQName, _attributes);
 
       _hasElement = false;
       _elementSystemId = null;

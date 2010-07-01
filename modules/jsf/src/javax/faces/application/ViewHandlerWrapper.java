@@ -55,7 +55,7 @@ public abstract class ViewHandlerWrapper extends ViewHandler
   }
 
   public UIViewRoot createView(FacesContext context,
-			       String viewId)
+                               String viewId)
   {
     return getWrapped().createView(context, viewId);
   }
@@ -77,14 +77,14 @@ public abstract class ViewHandlerWrapper extends ViewHandler
   }
 
   public void renderView(FacesContext context,
-			 UIViewRoot viewToRender)
+                         UIViewRoot viewToRender)
     throws IOException, FacesException
   {
     getWrapped().renderView(context, viewToRender);
   }
 
   public UIViewRoot restoreView(FacesContext context,
-				String viewId)
+                                String viewId)
     throws FacesException
   {
     return getWrapped().restoreView(context, viewId);

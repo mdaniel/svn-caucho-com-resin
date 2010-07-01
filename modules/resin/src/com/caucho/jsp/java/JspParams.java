@@ -72,10 +72,10 @@ public class JspParams extends JspNode {
       JspBody body = (JspBody) node;
 
       for (JspNode child : body.getChildren()) {
-	if (child instanceof JspParam)
-	  _params.add((JspParam) child);
-	else
-	  super.addChild(child);
+        if (child instanceof JspParam)
+          _params.add((JspParam) child);
+        else
+          super.addChild(child);
       }
     }
   }

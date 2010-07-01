@@ -168,7 +168,7 @@ public class Id {
       String generator = _keys.get(0).getGenerator();
 
       if (generator == null)
-	continue;
+        continue;
       
       return "auto".equals(generator) || "identity".equals(generator);
     }
@@ -180,7 +180,7 @@ public class Id {
   {
     for (IdField key : _keys) {
       if (key.getGenerator() != null)
-	return key;
+        return key;
     }
     
     return null;
@@ -243,8 +243,8 @@ public class Id {
    * Generates code to copy to an object.
    */
   public void generateCopy(JavaWriter out,
-			   String dest,
-			   String source)
+                           String dest,
+                           String source)
     throws IOException
   {
     ArrayList<IdField> keys = getKeys();
@@ -349,11 +349,11 @@ public class Id {
 
     for (IdField field : getKeys()) {
       for (AmberColumn column : field.getColumns()) {
-	if (! isFirst)
-	  cb.append(" and ");
-	isFirst = false;
+        if (! isFirst)
+          cb.append(" and ");
+        isFirst = false;
 
-	cb.append(column.generateMatchArgWhere(id));
+        cb.append(column.generateMatchArgWhere(id));
       }
     }
 

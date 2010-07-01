@@ -162,8 +162,8 @@ public class ManyToOneExpr extends AbstractPathExpr {
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
     return (_childFromItem == from && type == IS_INNER_JOIN
-	    || _fromItem == from
-	    || _parent.usesFrom(from, type));
+            || _fromItem == from
+            || _parent.usesFrom(from, type));
   }
 
   /**
@@ -173,7 +173,7 @@ public class ManyToOneExpr extends AbstractPathExpr {
   public boolean exists(FromItem from)
   {
     return (_fromItem == from
-	    && _parent.exists());
+            && _parent.exists());
   }
 
   /**

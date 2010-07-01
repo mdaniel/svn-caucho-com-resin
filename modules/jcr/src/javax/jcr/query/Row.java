@@ -39,5 +39,5 @@ public interface Row {
   
   public Value getValue(String propertyName)
     throws ItemNotFoundException,
-	   RepositoryException;
+           RepositoryException;
 }

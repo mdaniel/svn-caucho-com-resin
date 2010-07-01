@@ -327,12 +327,12 @@ class WatchdogChild
       WatchdogChildTask oldTask = _taskRef.get();
       
       if (oldTask != null && ! oldTask.isActive()) {
-	_taskRef.set(task);
+        _taskRef.set(task);
       }
       else if (_taskRef.compareAndSet(null, task)) {
       }
       else {
-	throw new IllegalStateException(L.l("Can't start new Resin server '{0}' because one is already running '{1}'", _id, task));
+        throw new IllegalStateException(L.l("Can't start new Resin server '{0}' because one is already running '{1}'", _id, task));
       }
     }
 
@@ -441,9 +441,9 @@ class WatchdogChild
       String userName = WatchdogChild.this.getUserName();
 
       if (userName != null)
-	return userName;
+        return userName;
       else
-	return System.getProperty("user.name");
+        return System.getProperty("user.name");
     }
 
     public String getState()
@@ -451,9 +451,9 @@ class WatchdogChild
       WatchdogChildTask task = _taskRef.get();
     
       if (task == null)
-	return "inactive";
+        return "inactive";
       else
-	return task.getState();
+        return task.getState();
     }
 
     //

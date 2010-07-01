@@ -240,7 +240,7 @@ abstract public class AbstractConfigIntrospector {
 
   static void validateAnnotations(AccessibleObject field,
                                   String fieldName,
-				  String fieldType,
+                                  String fieldType,
                                   HashSet<String> validAnnotations)
     throws ConfigException
   {
@@ -254,8 +254,8 @@ abstract public class AbstractConfigIntrospector {
         throw error(field, L.l("{0} may not have a @{1} annotation.  {2} does not allow @{3}.",
                                fieldName,
                                name,
-			       fieldType,
-			       name));
+                               fieldType,
+                               name));
       }
     }
   }
@@ -274,7 +274,7 @@ abstract public class AbstractConfigIntrospector {
     if (Character.isLowerCase(name.charAt(0)))
       return name;
     else if (name.length() == 1
-	     || ! Character.isUpperCase(name.charAt(1)))
+             || ! Character.isUpperCase(name.charAt(1)))
       return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     else
       return name;

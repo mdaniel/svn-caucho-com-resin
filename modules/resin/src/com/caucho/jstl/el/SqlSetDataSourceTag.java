@@ -120,22 +120,22 @@ public class SqlSetDataSourceTag extends TagSupport {
       String var = _var;
 
       if (var == null)
-	var = Config.SQL_DATA_SOURCE;
+        var = Config.SQL_DATA_SOURCE;
 
       ELContext env = pageContext.getELContext();
 
       DataSource dataSource = null;
 
       if (_dataSource != null) {
-	Object ds = _dataSource.evalObject(env);
+        Object ds = _dataSource.evalObject(env);
       
-	dataSource = SqlQueryTag.getDataSource(pageContext, ds);
+        dataSource = SqlQueryTag.getDataSource(pageContext, ds);
       }
       else {
-	dataSource = openDataSource(_driver.evalString(env),
-				    _url.evalString(env),
-				    _user != null ? _user.evalString(env) : null,
-				    _password != null ? _password.evalString(env) : null);
+        dataSource = openDataSource(_driver.evalString(env),
+                                    _url.evalString(env),
+                                    _user != null ? _user.evalString(env) : null,
+                                    _password != null ? _password.evalString(env) : null);
       }
 
       CoreSetTag.setValue(pageContext, var, _scope, dataSource);
@@ -147,7 +147,7 @@ public class SqlSetDataSourceTag extends TagSupport {
   }
 
   public static DataSource openDataSource(String driverClass, String url,
-					  String user, String password)
+                                          String user, String password)
     throws Exception
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -165,7 +165,7 @@ public class SqlSetDataSourceTag extends TagSupport {
     private String _password;
 
     public DataSourceAdapter(Driver driver, String url,
-			     String user, String password)
+                             String user, String password)
     {
       _driver = driver;
       _url = url;
@@ -188,9 +188,9 @@ public class SqlSetDataSourceTag extends TagSupport {
     {
       Properties props = new Properties();
       if (_user != null)
-	props.put("user", _user);
+        props.put("user", _user);
       if (_password != null)
-	props.put("password", _password);
+        props.put("password", _password);
       
       return _driver.connect(_url, props);
     }

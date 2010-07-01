@@ -121,7 +121,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   {
     for (int i = _tail; i != _head; i = (i + 1) % _entriesLength) {
       if (_entries[i] == o)
-	return true;
+        return true;
     }
 
     return false;
@@ -136,7 +136,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
 
     while (iter.hasNext()) {
       if (! contains(iter.next()))
-	return false;
+        return false;
     }
 
     return true;
@@ -157,7 +157,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   {
     for (int i = _tail; i != _head; i = (i + 1) % _entriesLength) {
       if (_entries[i] == o) {
-	return removeEntry(i);
+        return removeEntry(i);
       }
     }
     
@@ -174,7 +174,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
 
     while (iter.hasNext()) {
       if (! remove(iter.next()))
-	result = false;
+        result = false;
     }
 
     return result;
@@ -234,12 +234,12 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
       // xxx i xxx _head ... _tail xxx
       
       if (i > 0)
-	System.arraycopy(_entries, 0, _entries, 1, i);
+        System.arraycopy(_entries, 0, _entries, 1, i);
 
       _entries[0] = _entries[_entriesLength - 1];
       
       System.arraycopy(_entries, _tail, _entries, _tail + 1,
-		       _entriesLength - _tail - 1);
+                       _entriesLength - _tail - 1);
     }
     
     _entries[_tail] = null;
@@ -284,7 +284,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
     public ManagedConnection next()
     {
       if (_i == _head)
-	return null;
+        return null;
 
       ManagedConnection value = _entries[_i];
 

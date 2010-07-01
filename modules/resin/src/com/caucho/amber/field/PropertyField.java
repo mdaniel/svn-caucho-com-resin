@@ -242,8 +242,8 @@ public class PropertyField extends AbstractField {
     throws IOException
   {
     if (! isFieldAccess()
-	&& (getGetterMethod() == null
-	    || getSetterMethod() == null && ! isAbstract()))
+        && (getGetterMethod() == null
+            || getSetterMethod() == null && ! isAbstract()))
       return;
 
     out.println();

@@ -116,7 +116,7 @@ class NativeDate extends Native {
     NativeDate nativeDate = new NativeDate("Date", NEW, 7);
     ESObject dateProto = new ESDate(Long.MAX_VALUE, resin.objProto);
     NativeWrapper date = new NativeWrapper(resin, nativeDate,
-					   dateProto, ESThunk.DATE_THUNK);
+                                           dateProto, ESThunk.DATE_THUNK);
     nativeDate.newN = nativeDate.n;
     resin.dateProto = dateProto;
 
@@ -204,129 +204,129 @@ class NativeDate extends Native {
     case TO_STRING:
     case TO_UTC_STRING:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESString.create(cal.printDate());
 
     case TO_ISO_STRING:
     case TO_UTC_ISO_STRING:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESString.create(cal.printISO8601());
 
     case TO_ISO_DATE:
     case TO_UTC_ISO_DATE:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESString.create(cal.printISO8601Date());
 
     case FORMAT:
     case UTC_FORMAT:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESString.create(cal.format(eval.getArgString(0, length)));
 
     case TO_LOCALE_STRING:
       if ((error = calculate(eval.getArg(-1), 1, TO_STRING)) != null)
-	return error;
+        return error;
 
       return ESString.create(cal.printLocaleDate());
 
     case VALUE_OF:
       if (! (eval.getArg(-1) instanceof ESDate))
-	throw new ESException("valueOf must be bound to date");
+        throw new ESException("valueOf must be bound to date");
       
       value = (double) ((ESDate) eval.getArg(-1)).time;
       if (value > 8.64e15 || value < -8.64e15 || Double.isNaN(value))
-	value = 0.0/0.0;
+        value = 0.0/0.0;
 
       return ESNumber.create(value);
 
     case PARSE_DATE:
       if (length < 0)
-	return ESNumber.NaN;
+        return ESNumber.NaN;
 
       try {
-	long lvalue = cal.parseDate(eval.getArg(0).toStr().toString());
-	return ESNumber.create(millisToDouble(lvalue));
+        long lvalue = cal.parseDate(eval.getArg(0).toStr().toString());
+        return ESNumber.create(millisToDouble(lvalue));
       } catch (Exception e) {
-	throw new ESException(e.toString());
+        throw new ESException(e.toString());
       }
 
 
     case GET_FULL_YEAR:
     case GET_UTC_FULL_YEAR:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) cal.get(cal.YEAR));
 
     case GET_MONTH:
     case GET_UTC_MONTH:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) cal.get(cal.MONTH));
 
     case GET_MONTH_NAME:
     case GET_UTC_MONTH_NAME:
     {
-	if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	  return error;
+        if ((error = calculate(eval.getArg(-1), 1, n)) != null)
+          return error;
 
-	int month = (int) cal.get(cal.MONTH);
+        int month = (int) cal.get(cal.MONTH);
 
-	return ESString.create(monthNames[month]);
+        return ESString.create(monthNames[month]);
     }
 
     case GET_DATE:
     case GET_UTC_DATE:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) cal.get(cal.DAY_OF_MONTH) + 1);
 
     case GET_DAY:
     case GET_UTC_DAY:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) cal.get(cal.DAY));
 
     case GET_HOURS:
     case GET_UTC_HOURS:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) (cal.get(cal.HOUR)));
 
     case GET_MINUTES:
     case GET_UTC_MINUTES:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) (cal.get(cal.MINUTE)));
 
     case GET_SECONDS:
     case GET_UTC_SECONDS:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) (cal.get(cal.SECOND)));
 
     case GET_MILLISECONDS:
     case GET_UTC_MILLISECONDS:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) cal.get(cal.MILLISECOND));
 
     case GET_TIMEZONE_OFFSET:
       if ((error = calculate(eval.getArg(-1), 1, n)) != null)
-	return error;
+        return error;
 
       return ESNumber.create((double) (cal.getZoneOffset() / 60000));
 
@@ -341,20 +341,20 @@ class NativeDate extends Native {
     case SET_FULL_YEAR:
     case SET_UTC_FULL_YEAR:
       if ((error = calculate(eval.getArg(-1), length, n)) != null)
-	return error;
+        return error;
 
       if (0 <= off)
-	cal.set(cal.YEAR, (long) eval.getArg(off).toNum());
+        cal.set(cal.YEAR, (long) eval.getArg(off).toNum());
 
       if (0 <= off + 1 && off + 1 < length) {
-	value = eval.getArg(off + 1).toNum();
-	cal.set(cal.MONTH, 
-		(long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
+        value = eval.getArg(off + 1).toNum();
+        cal.set(cal.MONTH,
+                (long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
       }
       if (0 <= off + 2 && off + 2 < length) {
-	value = eval.getArg(off + 2).toNum();
-	cal.set(cal.DAY_OF_MONTH,
-		(long) (Double.isNaN(value) ? Long.MAX_VALUE : value - 1));
+        value = eval.getArg(off + 2).toNum();
+        cal.set(cal.DAY_OF_MONTH,
+                (long) (Double.isNaN(value) ? Long.MAX_VALUE : value - 1));
       }
 
       return create(eval.getArg(-1), n);
@@ -374,28 +374,28 @@ class NativeDate extends Native {
     case SET_HOURS:
     case SET_UTC_HOURS:
       if ((error = calculate(eval.getArg(-1), length, n)) != null)
-	return error;
+        return error;
 
       if (0 <= off) {
-	value = eval.getArg(off).toNum();
-	cal.set(cal.HOUR,
-		(long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
+        value = eval.getArg(off).toNum();
+        cal.set(cal.HOUR,
+                (long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
       }
 
       if (0 <= off + 1 && off + 1 < length) {
-	value = eval.getArg(off + 1).toNum();
-	cal.set(cal.MINUTE,
-		(long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
+        value = eval.getArg(off + 1).toNum();
+        cal.set(cal.MINUTE,
+                (long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
       }
       if (0 <= off + 2 && off + 2 < length) {
-	value = eval.getArg(off + 2).toNum();
-	cal.set(cal.SECOND,
-		(long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
+        value = eval.getArg(off + 2).toNum();
+        cal.set(cal.SECOND,
+                (long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
       }
       if (0 <= off + 3 && off + 3 < length) {
-	value = eval.getArg(off + 3).toNum();
-	cal.set(cal.MILLISECOND, 
-		(long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
+        value = eval.getArg(off + 3).toNum();
+        cal.set(cal.MILLISECOND,
+                (long) (Double.isNaN(value) ? Long.MAX_VALUE : value));
       }
 
       return create(eval.getArg(-1), n);
@@ -437,19 +437,19 @@ class NativeDate extends Native {
       
       long hour = 0;
       if (length >= 4)
-	hour = (long) eval.getArg(3).toNum();
+        hour = (long) eval.getArg(3).toNum();
 
       long minute = 0;
       if (length >= 5)
-	minute = (long) eval.getArg(4).toNum();
+        minute = (long) eval.getArg(4).toNum();
 
       long second = 0;
       if (length >= 6)
-	second = (long) eval.getArg(5).toNum();
+        second = (long) eval.getArg(5).toNum();
 
       long ms = 0;
       if (length >= 7)
-	ms = (long) eval.getArg(6).toNum();
+        ms = (long) eval.getArg(6).toNum();
 
       cal.setDate(year, month, day);
       cal.setTime(hour, minute, second, ms);
@@ -457,7 +457,7 @@ class NativeDate extends Native {
       value = cal.get(cal.TIME);
 
       if (isLocal)
-	value -= cal.getZoneOffset();
+        value -= cal.getZoneOffset();
     }
     else
       value = Long.MIN_VALUE;
@@ -503,7 +503,7 @@ class NativeDate extends Native {
 
     double value = arg.toNum();
     if (Double.isNaN(value) || value > 8.64e15 || value < -8.64e15 || 
-	length < 1)
+        length < 1)
       return ESNumber.NaN;
 
     long time = (long) value;

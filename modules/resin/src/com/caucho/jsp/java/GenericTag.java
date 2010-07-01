@@ -210,13 +210,13 @@ abstract public class GenericTag extends JspContainerNode
         if (attr.isStatic()) {
           String textValue = attr.getStaticText();
 
-	  /*
-	  if (type != null)
-	    tags.put(name, staticStringToValue(type, textValue));
-	  else
-	    tags.put(name, textValue);
-	  */
-	  tags.put(name, textValue);
+          /*
+          if (type != null)
+            tags.put(name, staticStringToValue(type, textValue));
+          else
+            tags.put(name, textValue);
+          */
+          tags.put(name, textValue);
         }
         else
           tags.put(name, TagData.REQUEST_TIME_VALUE);
@@ -716,7 +716,7 @@ abstract public class GenericTag extends JspContainerNode
       method = BeanUtil.getSetMethod(_tagClass, attrName.getLocalName());
 
       if (method != null)
-	return method;
+        return method;
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }

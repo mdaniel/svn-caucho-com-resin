@@ -174,9 +174,9 @@ public class JspElement extends JspContainerNode {
       out.addText(" " + name.getName() + "=\"");
 
       if (value.isStatic())
-	out.addText(value.getStaticText());
+        out.addText(value.getStaticText());
       else
-	out.print("out.print(" + value.generateValue() + ");");
+        out.print("out.print(" + value.generateValue() + ");");
 
       out.addText("\"");
     }

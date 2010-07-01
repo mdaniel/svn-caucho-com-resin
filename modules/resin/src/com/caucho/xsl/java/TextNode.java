@@ -71,7 +71,7 @@ public class TextNode extends XslNode {
       char ch = _text.charAt(i);
 
       if (! XmlChar.isWhitespace(ch))
-	return false;
+        return false;
     }
 
     return true;

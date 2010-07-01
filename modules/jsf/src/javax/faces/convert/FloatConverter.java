@@ -42,8 +42,8 @@ public class FloatConverter implements Converter
     = "javax.faces.converter.STRING";
   
   public Object getAsObject(FacesContext context,
-			    UIComponent component,
-			    String value)
+                            UIComponent component,
+                            String value)
     throws ConverterException
   {
     // XXX: incorrect
@@ -59,16 +59,16 @@ public class FloatConverter implements Converter
       return Float.parseFloat(value);
     } catch (NumberFormatException e) {
       String summary = Util.l10n(context, FLOAT_ID,
-				"{2}: \"{0}\" must be a floating-point number.",
-				 value,
-				 getExample(),
-				 Util.getLabel(context, component));
+                                "{2}: \"{0}\" must be a floating-point number.",
+                                 value,
+                                 getExample(),
+                                 Util.getLabel(context, component));
       
       String detail = Util.l10n(context, FLOAT_ID + "_detail",
-				"{2}: \"{0}\" must be a number between 1.4E-45 and 3.4E38.  Example: {1}.",
-				value,
-				getExample(),
-				Util.getLabel(context, component));
+                                "{2}: \"{0}\" must be a number between 1.4E-45 and 3.4E38.  Example: {1}.",
+                                value,
+                                getExample(),
+                                Util.getLabel(context, component));
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
@@ -79,8 +79,8 @@ public class FloatConverter implements Converter
   }
   
   public String getAsString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
     throws ConverterException
   {
     // XXX: incorrect

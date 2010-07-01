@@ -82,29 +82,29 @@ public final class FactoryFinder
       HashMap<String,Object> objMap = _factoryMap.get(loader);
 
       if (objMap != null) {
-	Object factory = objMap.get(factoryName);
+        Object factory = objMap.get(factoryName);
 
-	if (factory != null)
-	  return factory;
+        if (factory != null)
+          return factory;
       }
 
       String className = null;
 
       HashMap<String,String> nameMap = _factoryNameMap.get(loader);
       if (nameMap != null) {
-	className = nameMap.get(factoryName);
+        className = nameMap.get(factoryName);
       }
 
       Object factory = null;
       if (className != null)
-	factory = createFactory(className, factoryClass, factory, loader);
+        factory = createFactory(className, factoryClass, factory, loader);
 
       if (factory == null)
-	throw new FacesException("No factory found for " + factoryName);
+        throw new FacesException("No factory found for " + factoryName);
 
       if (objMap == null) {
-	objMap = new HashMap<String,Object>();
-	_factoryMap.put(loader, objMap);
+        objMap = new HashMap<String,Object>();
+        _factoryMap.put(loader, objMap);
       }
 
       objMap.put(factoryName, factory);
@@ -130,29 +130,29 @@ public final class FactoryFinder
       HashMap<String,Object> objectMap = _factoryMap.get(loader);
 
       if (objectMap == null) {
-	objectMap = new HashMap<String,Object>();
-	_factoryMap.put(loader, objectMap);
+        objectMap = new HashMap<String,Object>();
+        _factoryMap.put(loader, objectMap);
       }
 
       Object oldFactory = objectMap.get(factoryName);
 
       if (oldFactory == null)
-	oldFactory = _factoryMap.get(factoryName);
+        oldFactory = _factoryMap.get(factoryName);
 
       HashMap<String,String> map = _factoryNameMap.get(loader);
 
       if (map == null) {
-	map = new HashMap<String,String>();
-	_factoryNameMap.put(loader, map);
+        map = new HashMap<String,String>();
+        _factoryNameMap.put(loader, map);
       }
 
       map.put(factoryName, implName);
 
       Object factory = createFactory(implName, factoryClass, oldFactory,
-				     loader);
+                                     loader);
 
       if (factory == null)
-	throw new FacesException("No factory found for " + factoryName);
+        throw new FacesException("No factory found for " + factoryName);
 
       objectMap.put(factoryName, factory);
     }
@@ -170,9 +170,9 @@ public final class FactoryFinder
   }
 
   private static Object createFactory(String className,
-				      Class factoryClass,
-				      Object previous,
-				      ClassLoader loader)
+                                      Class factoryClass,
+                                      Object previous,
+                                      ClassLoader loader)
     throws FacesException
   {
     if (className == null)
@@ -182,33 +182,33 @@ public final class FactoryFinder
       Class cl = Class.forName(className, false, loader);
 
       if (! factoryClass.isAssignableFrom(cl))
-	throw new FacesException(className + " is not assignable to " + factoryClass.getName());
+        throw new FacesException(className + " is not assignable to " + factoryClass.getName());
 
       Constructor ctor0 = null;
       Constructor ctor1 = null;
 
       try {
-	ctor0 = cl.getConstructor(new Class[] { });
+        ctor0 = cl.getConstructor(new Class[] { });
       } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
 
       try {
-	ctor1 = cl.getConstructor(new Class[] { factoryClass });
+        ctor1 = cl.getConstructor(new Class[] { factoryClass });
       } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
 
       Object obj;
 
       if (ctor1 == null)
-	obj = cl.newInstance();
+        obj = cl.newInstance();
       else if (previous != null)
-	obj = ctor1.newInstance(previous);
+        obj = ctor1.newInstance(previous);
       else if (ctor0 != null)
-	obj = cl.newInstance();
+        obj = cl.newInstance();
       else
-	obj = ctor1.newInstance(new Object[1]);
+        obj = ctor1.newInstance(new Object[1]);
 
       return obj;
     } catch (ClassNotFoundException e) {

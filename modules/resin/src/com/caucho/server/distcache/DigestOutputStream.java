@@ -56,7 +56,7 @@ public class DigestOutputStream extends OutputStream {
       _digest = _freeDigestList.allocate();
 
       if (_digest == null)
-	_digest = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
+        _digest = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

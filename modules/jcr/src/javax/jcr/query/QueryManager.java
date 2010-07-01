@@ -35,11 +35,11 @@ import javax.jcr.RepositoryException;
 public interface QueryManager {
   public Query createQuery(String statement, String language)
     throws InvalidQueryException,
-	   RepositoryException;
+           RepositoryException;
   
   public Query getQuery(Node node)
     throws InvalidQueryException,
-	   RepositoryException;
+           RepositoryException;
   
   public String[] getSupportedQueryLanguages()
     throws RepositoryException;

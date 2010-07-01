@@ -99,7 +99,7 @@ public class NsNamePattern extends NameClassPattern {
       NsNameItem item = new NsNameItem(_ns);
 
       if (_except != null)
-	item.setExcept(_except.createNameItem());
+        item.setExcept(_except.createNameItem());
 
       _item = item;
     }

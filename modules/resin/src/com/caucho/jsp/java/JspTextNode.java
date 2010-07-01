@@ -85,7 +85,7 @@ public class JspTextNode extends JspNode {
       
     for (int i = text.length() - 1; i >= 0; i--) {
       if (! XmlChar.isWhitespace(text.charAt(i)))
-	return false ;
+        return false ;
     }
 
     return true;

@@ -85,21 +85,21 @@ public class ConnectionContext {
 
     if (map == null)
       throw new IllegalStateException(L.l("'{0}' is not an available connection.",
-					  jndiName));
+                                          jndiName));
 
     ConnectionContext cxt = map.get(jndiName);
 
     if (cxt == null || cxt._depth == 0)
       throw new IllegalStateException(L.l("'{0}' is not an available connection.",
-					  jndiName));
+                                          jndiName));
 
     if (cxt._conn == null) {
       try {
-	DataSource ds = (DataSource) _initialContext.lookup(jndiName);
+        DataSource ds = (DataSource) _initialContext.lookup(jndiName);
 
-	cxt._conn = ds.getConnection();
+        cxt._conn = ds.getConnection();
       } catch (NamingException e) {
-	throw new IllegalStateException(e);
+        throw new IllegalStateException(e);
       }
     }
 
@@ -122,10 +122,10 @@ public class ConnectionContext {
       Connection conn = cxt._conn;
 
       try {
-	cxt._conn = null;
-	conn.close();
+        cxt._conn = null;
+        conn.close();
       } catch (SQLException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -134,7 +134,7 @@ public class ConnectionContext {
   {
     if (_initialContext == null) {
       try {
-	_initialContext = new InitialContext();
+        _initialContext = new InitialContext();
       } catch (NamingException e) {
       }
     }

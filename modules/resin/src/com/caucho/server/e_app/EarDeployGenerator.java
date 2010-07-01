@@ -57,7 +57,7 @@ public class EarDeployGenerator
     = new ArrayList<EarConfig>();
 
   public EarDeployGenerator(DeployContainer<EarDeployController> deployContainer,
-			    WebAppContainer parentContainer)
+                            WebAppContainer parentContainer)
   {
     super(deployContainer, parentContainer.getRootDirectory());
 
@@ -166,7 +166,7 @@ public class EarDeployGenerator
       rootDirectory = getExpandDirectory().lookup(getExpandName(name));
 
       if (! archivePath.canRead() && ! rootDirectory.canRead())
-	return null;
+        return null;
     }
 
     EarDeployController controller

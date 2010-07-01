@@ -71,8 +71,8 @@ abstract public class IdGenerator {
   {
     synchronized (this) {
       if (_remaining <= 0) {
-	_next = allocateGroup(aConn);
-	_remaining += getGroupSize();
+        _next = allocateGroup(aConn);
+        _remaining += getGroupSize();
       }
       
       long value = _next;

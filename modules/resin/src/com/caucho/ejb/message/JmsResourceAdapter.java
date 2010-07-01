@@ -213,14 +213,14 @@ public class JmsResourceAdapter implements ResourceAdapter {
    * Called during activation of a message endpoint.
    */
   public void endpointActivation(MessageEndpointFactory endpointFactory,
-				 ActivationSpec spec)
+                                 ActivationSpec spec)
     throws NotSupportedException, ResourceException
   {
     init();
     
     synchronized (this) {
       if (_consumers != null)
-	throw new java.lang.IllegalStateException();
+        throw new java.lang.IllegalStateException();
       _consumers = new ArrayList<Consumer>();
     }
 
@@ -235,14 +235,14 @@ public class JmsResourceAdapter implements ResourceAdapter {
       _connection = connection;
 
       if (_destination instanceof Topic)
-	_consumerMax = 1;
+        _consumerMax = 1;
 
       for (int i = 0; i < _consumerMax; i++) {
-	Consumer consumer = new Consumer(_connection, _destination);
+        Consumer consumer = new Consumer(_connection, _destination);
 
-	_consumers.add(consumer);
+        _consumers.add(consumer);
 
-	consumer.start();
+        consumer.start();
       }
 
       _connection.start();
@@ -257,18 +257,18 @@ public class JmsResourceAdapter implements ResourceAdapter {
    * Called during deactivation of a message endpoint.
    */
   public void endpointDeactivation(MessageEndpointFactory endpointFactory,
-				   ActivationSpec spec)
+                                   ActivationSpec spec)
   {
     try {
       ArrayList<Consumer> consumers = _consumers;
       _consumers = null;
 
       if (consumers != null) {
-	consumers = new ArrayList<Consumer>(consumers);
-	
-	for (Consumer consumer : consumers) {
-	  consumer.destroy();
-	}
+        consumers = new ArrayList<Consumer>(consumers);
+
+        for (Consumer consumer : consumers) {
+          consumer.destroy();
+        }
       }
 
       if (_connection != null)
@@ -305,19 +305,19 @@ public class JmsResourceAdapter implements ResourceAdapter {
       throws Exception
     {
       if (conn instanceof XAConnection) {
-	/*
-	XASession xaSession = ((XAConnection) conn).createXASession();
-	_session = xaSession;
-	_xaResource = xaSession.getXAResource();
-	*/
-	// ejb/09a0 - needs to be auto-ack because if processing throws
-	// an exception because of a bug, can't just replay
-	boolean transacted = false;
-	_session = conn.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
+        /*
+        XASession xaSession = ((XAConnection) conn).createXASession();
+        _session = xaSession;
+        _xaResource = xaSession.getXAResource();
+        */
+        // ejb/09a0 - needs to be auto-ack because if processing throws
+        // an exception because of a bug, can't just replay
+        boolean transacted = false;
+        _session = conn.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
       }
       else {
-	boolean transacted = false;
-	_session = conn.createSession(transacted, _acknowledgeMode);
+        boolean transacted = false;
+        _session = conn.createSession(transacted, _acknowledgeMode);
       }
 
       _endpoint = _endpointFactory.createEndpoint(_xaResource);
@@ -368,7 +368,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
   static {
     try {
       _onMessage = MessageListener.class.getMethod("onMessage",
-						   new Class[] { Message.class });
+                                                   new Class[] { Message.class });
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

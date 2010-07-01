@@ -61,7 +61,7 @@ abstract public class Constraint {
    * Tries to validate the constraint.
    */
   public void validate(TableIterator []rows,
-		       QueryContext contstraint, Transaction xa)
+                       QueryContext contstraint, Transaction xa)
     throws SQLException
   {
     throw new UnsupportedOperationException(getClass().getName());

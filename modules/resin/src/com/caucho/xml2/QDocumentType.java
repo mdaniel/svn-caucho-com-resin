@@ -253,7 +253,7 @@ public class QDocumentType extends QNode implements DocumentType {
       os.println(" [");
 
       for (QAbstractNode node = _firstChild; node != null; node = node._next) {
-	node.print(os);
+        node.print(os);
       }
 
       os.println("]>");

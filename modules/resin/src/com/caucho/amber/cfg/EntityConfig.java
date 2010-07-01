@@ -70,8 +70,8 @@ public class EntityConfig extends MappedSuperclassConfig {
   }
 
   EntityConfig(String name,
-	       EntityIntrospector introspector,
-	       EntityType entityType)
+               EntityIntrospector introspector,
+               EntityType entityType)
   {
     super(name);
     

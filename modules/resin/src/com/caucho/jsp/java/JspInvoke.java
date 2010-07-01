@@ -140,18 +140,18 @@ public class JspInvoke extends JspNode {
       TldVariable var = vars.get(i);
 
       if (var.getScope().equals("AT_END"))
-	continue;
+        continue;
 
       String srcName = var.getNameGiven();
       String dstName = srcName;
       
       if (srcName == null) {
-	srcName = var.getAlias();
-	dstName = var.getNameFromAttribute();
-	dstName = "_jsp_var_from_attribute_" + i;
+        srcName = var.getAlias();
+        dstName = var.getNameFromAttribute();
+        dstName = "_jsp_var_from_attribute_" + i;
       }
       else
-	dstName = "\"" + dstName + "\"";
+        dstName = "\"" + dstName + "\"";
 
       out.print("_jsp_parentContext.setAttribute(" + dstName + ", ");
       out.println("pageContext.getAttribute(\"" + srcName + "\"));");

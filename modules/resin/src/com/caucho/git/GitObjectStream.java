@@ -92,20 +92,20 @@ public class GitObjectStream extends InputStream {
       StringBuilder keyBuilder = new StringBuilder();
 
       for (; ch >= 0 && ch != ' ' && ch != '\n'; ch = _is.read()) {
-	keyBuilder.append((char) ch);
+        keyBuilder.append((char) ch);
       }
       String key = keyBuilder.toString();
 
       if (key.length() == 0) {
-	StringBuilder msg = new StringBuilder();
+        StringBuilder msg = new StringBuilder();
 
-	for (ch = _is.read(); ch >= 0; ch = _is.read()) {
-	  msg.append((char) ch);
+        for (ch = _is.read(); ch >= 0; ch = _is.read()) {
+          msg.append((char) ch);
 
-	  commit.setMessage(msg.toString());
-	}
+          commit.setMessage(msg.toString());
+        }
 
-	break;
+        break;
       }
 
       for (; ch == ' '; ch = _is.read()) {
@@ -113,15 +113,15 @@ public class GitObjectStream extends InputStream {
 
       StringBuilder value = new StringBuilder();
       for (; ch >= 0 && ch != '\n'; ch = _is.read()) {
-	value.append((char) ch);
+        value.append((char) ch);
       }
 
       if ("tree".equals(key))
-	commit.setTree(value.toString());
+        commit.setTree(value.toString());
       if ("parent".equals(key))
-	commit.setParent(value.toString());
+        commit.setParent(value.toString());
       else
-	commit.put(key, value.toString());
+        commit.put(key, value.toString());
     }
 
     return commit;
@@ -137,7 +137,7 @@ public class GitObjectStream extends InputStream {
       int mode = 0;
 
       for (; '0' <= ch && ch <= '7'; ch = _is.read()) {
-	mode = mode * 8 + ch - '0';
+        mode = mode * 8 + ch - '0';
       }
 
       for (; ch == ' '; ch = _is.read()) {
@@ -145,13 +145,13 @@ public class GitObjectStream extends InputStream {
 
       StringBuilder nameBuffer = new StringBuilder();
       for (; ch > 0; ch = _is.read()) {
-	nameBuffer.append((char) ch);
+        nameBuffer.append((char) ch);
       }
       String name = nameBuffer.toString();
 
       byte []sha1 = new byte[20];
       for (int i = 0; i < sha1.length; i++) {
-	sha1[i] = (byte) _is.read();
+        sha1[i] = (byte) _is.read();
       }
 
       tree.addEntry(name, mode, Hex.toHex(sha1));
@@ -190,7 +190,7 @@ public class GitObjectStream extends InputStream {
 
     try {
       if (is != null)
-	is.close();
+        is.close();
     } catch (IOException e) {
     }
   }
@@ -199,8 +199,8 @@ public class GitObjectStream extends InputStream {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[type=" + _type
-	    + ",length=" + _length + "]");
+            + "[type=" + _type
+            + ",length=" + _length + "]");
   }
 
   static {

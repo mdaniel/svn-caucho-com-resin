@@ -127,7 +127,7 @@ public final class FacesServlet implements Servlet
   }
 
   public void service(ServletRequest request,
-		      ServletResponse response)
+                      ServletResponse response)
     throws IOException, ServletException
   {
     HttpServletRequest req = (HttpServletRequest) request;
@@ -147,9 +147,9 @@ public final class FacesServlet implements Servlet
     
     try {
       context = _facesContextFactory.getFacesContext(_webApp,
-						     req,
-						     res,
-						     _lifecycle);
+                                                     req,
+                                                     res,
+                                                     _lifecycle);
       _lifecycle.execute(context);
       _lifecycle.render(context);
     } catch (FacesException e) {
@@ -163,7 +163,7 @@ public final class FacesServlet implements Servlet
       throw new ServletException(e);
     } finally {
       if (context != null)
-	context.release();
+        context.release();
     }
   }
 

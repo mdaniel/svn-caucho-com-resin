@@ -66,13 +66,13 @@ public class FmtParamTag extends BodyTagSupport {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
     
       if (_valueExpr != null)
-	value = _valueExpr.evalObject(pageContext.getELContext());
+        value = _valueExpr.evalObject(pageContext.getELContext());
       else
-	value = bodyContent.getString().trim();
+        value = bodyContent.getString().trim();
 
       Object parent = getParent();
       if (! (parent instanceof ParamContainerTag))
-	throw new JspException(L.l("fmt:param requires fmt:message parent.")); 
+        throw new JspException(L.l("fmt:param requires fmt:message parent."));
 
       ParamContainerTag message = (ParamContainerTag) parent;
 

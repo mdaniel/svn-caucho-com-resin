@@ -64,7 +64,7 @@ abstract public class ClusterPod
    * @param index the triad index
    */
   protected ClusterPod(Cluster cluster,
-		       int index)
+                       int index)
   {
     _cluster = cluster;
     _index = index;
@@ -136,8 +136,8 @@ abstract public class ClusterPod
   public boolean isTriad(ClusterServer server)
   {
     return (getServerA() == server
-	    || getServerB() == server
-	    || getServerC() == server);
+            || getServerB() == server
+            || getServerC() == server);
   }
 
   /**
@@ -147,7 +147,7 @@ abstract public class ClusterPod
   {
     for (ClusterServer server : getServerList()) {
       if (server != null && server.getIndex() == index)
-	return server;
+        return server;
     }
 
     return null;
@@ -199,9 +199,9 @@ abstract public class ClusterPod
    * Sets the active dynamic server
    */
   public ClusterServer setActiveDynamicServer(String serverId,
-					      String address,
-					      int port,
-					      int index)
+                                              String address,
+                                              int port,
+                                              int index)
     throws ConfigException
   {
     throw new ConfigException(L.l("setDynamicServer requires Resin Professional"));
@@ -218,9 +218,9 @@ abstract public class ClusterPod
   {
     for (ClusterServer server : getServerList()) {
       try {
-	server.init();
+        server.init();
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
   }
@@ -243,9 +243,9 @@ abstract public class ClusterPod
   {
     for (ClusterServer server : getServerList()) {
       try {
-	server.close();
+        server.close();
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -261,10 +261,10 @@ abstract public class ClusterPod
   {
     for (ClusterServer server : getServerList()) {
       if (server == null)
-	continue;
+        continue;
 
       if (id.equals(server.getId()))
-	return server;
+        return server;
     }
 
     return null;
@@ -277,10 +277,10 @@ abstract public class ClusterPod
   {
     for (ClusterServer server : getServerList()) {
       if (server == null)
-	continue;
+        continue;
 
       if (id.equals(server.getServerClusterId()))
-	return server;
+        return server;
     }
 
     return null;
@@ -293,10 +293,10 @@ abstract public class ClusterPod
   {
     for (ClusterServer server : getServerList()) {
       if (server == null)
-	continue;
+        continue;
 
       if (address.equals(server.getAddress())
-	  && port == server.getPort()) {
+          && port == server.getPort()) {
         return server;
       }
     }
@@ -326,24 +326,24 @@ abstract public class ClusterPod
     case B_C:
     case B_A:
       if (getServerB() != null)
-	return getServerB();
+        return getServerB();
       else
-	return getServerA();
+        return getServerA();
       
     case C_A:
       if (getServerC() != null)
-	return getServerC();
+        return getServerC();
       else
-	return getServerB();
+        return getServerB();
       
     case C_B:
       if (getServerC() != null)
-	return getServerC();
+        return getServerC();
       else
-	return getServerA();
+        return getServerA();
       
     default:
-	throw new IllegalStateException(L.l("'{0}' is an unknown owner", owner));
+        throw new IllegalStateException(L.l("'{0}' is an unknown owner", owner));
     }
   }
   
@@ -363,30 +363,30 @@ abstract public class ClusterPod
       
     case A_B:
       if (getServerB() != null)
-	return getServerB();
+        return getServerB();
       else
-	return getServerC();
+        return getServerC();
       
     case A_C:
       if (getServerC() != null)
-	return getServerC();
+        return getServerC();
       else
-	return getServerB();
+        return getServerB();
       
     case B_C:
       if (getServerC() != null)
-	return getServerC();
+        return getServerC();
       else
-	return getServerA();
+        return getServerA();
       
     case C_B:
       if (getServerB() != null)
-	return getServerB();
+        return getServerB();
       else
-	return getServerA();
+        return getServerA();
       
     default:
-	throw new IllegalStateException(L.l("'{0}' is an unknown owner", owner));
+        throw new IllegalStateException(L.l("'{0}' is an unknown owner", owner));
      }
   }
   
@@ -413,7 +413,7 @@ abstract public class ClusterPod
       return getServerC();
       
     default:
-	throw new IllegalStateException(L.l("'{0}' is an unknown owner", owner));
+        throw new IllegalStateException(L.l("'{0}' is an unknown owner", owner));
     }
   }
 
@@ -421,7 +421,7 @@ abstract public class ClusterPod
    * Returns the best primary or secondary triad server.
    */
   public ClusterServer getActiveServer(Owner owner,
-				       ClusterServer oldServer)
+                                       ClusterServer oldServer)
   {
     ClusterServer server;
     ClientSocketFactory pool;
@@ -556,9 +556,9 @@ abstract public class ClusterPod
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + getIndex()
-	    + "," + getId()
-	    + ",cluster=" + _cluster.getId() + "]");
+            + "[" + getIndex()
+            + "," + getId()
+            + ",cluster=" + _cluster.getId() + "]");
   }
   
   /**

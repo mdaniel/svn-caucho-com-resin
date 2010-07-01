@@ -120,7 +120,7 @@ public class CreateAttribute extends Attribute {
   {
     try {
       if (_setter != null)
-	_setter.invoke(bean, value);
+        _setter.invoke(bean, value);
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }

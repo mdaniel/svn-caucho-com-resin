@@ -36,6 +36,6 @@ public interface XAQueueConnection extends XAConnection, QueueConnection {
     throws JMSException;
   
   public QueueSession createQueueSession(boolean transacted,
-					 int acknowledgeMode)
+                                         int acknowledgeMode)
     throws JMSException;
 }

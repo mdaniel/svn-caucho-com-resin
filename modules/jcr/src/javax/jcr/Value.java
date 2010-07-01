@@ -34,32 +34,32 @@ import java.util.Calendar;
 public interface Value {
   public String getString()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException;
+           IllegalStateException,
+           RepositoryException;
   
   public InputStream getStream()
     throws IllegalStateException,
-	   RepositoryException;
+           RepositoryException;
   
   public long getLong()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException;
+           IllegalStateException,
+           RepositoryException;
   
   public double getDouble()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException;
+           IllegalStateException,
+           RepositoryException;
   
   public Calendar getDate()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException;
+           IllegalStateException,
+           RepositoryException;
   
   public boolean getBoolean()
     throws ValueFormatException,
-	   IllegalStateException,
-	   RepositoryException;
+           IllegalStateException,
+           RepositoryException;
   
   public int getType();
 }

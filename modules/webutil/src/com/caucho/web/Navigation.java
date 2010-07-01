@@ -274,7 +274,7 @@ public class Navigation {
       NavItem item = (NavItem) tree.getData();
 
       if (item.getLink().equals(url)) {
-	return item;
+        return item;
       }
     }
 
@@ -290,7 +290,7 @@ public class Navigation {
 
     for (; childNode != null; childNode = childNode.getNextSibling()) {
       if (! childNode.getNodeName().equals("item"))
-	continue;
+        continue;
 
       if (docShouldDisplay != null && !Expr.toBoolean(docShouldDisplay.eval(childNode,env,null,null)))
         continue;

@@ -49,7 +49,7 @@ public class ResponseStateManagerImpl extends ResponseStateManager
 
 
   public void writeState(FacesContext context,
-			 Object state)
+                         Object state)
     throws IOException
   {
     if (! Object [].class.isAssignableFrom(state.getClass()))
@@ -92,7 +92,7 @@ public class ResponseStateManagerImpl extends ResponseStateManager
 
   @Deprecated
   public void writeState(FacesContext context,
-			 StateManager.SerializedView state)
+                         StateManager.SerializedView state)
     throws IOException
   {
   }
@@ -101,7 +101,7 @@ public class ResponseStateManagerImpl extends ResponseStateManager
    * @Since 1.2
    */
   public Object getState(FacesContext context,
-			 String viewId)
+                         String viewId)
   {
     ExternalContext extContext = context.getExternalContext();
     
@@ -113,7 +113,7 @@ public class ResponseStateManagerImpl extends ResponseStateManager
 
   @Deprecated
   public Object getTreeStructureToRestore(FacesContext context,
-					  String viewId)
+                                          String viewId)
   {
     ExternalContext extContext = context.getExternalContext();
 

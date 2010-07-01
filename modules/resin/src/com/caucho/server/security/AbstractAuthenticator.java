@@ -73,8 +73,8 @@ public class AbstractAuthenticator
    */
   @Override
   public Principal authenticate(Principal principal,
-				PasswordCredentials cred,
-				Object details)
+                                PasswordCredentials cred,
+                                Object details)
   {
     HttpServletRequest request = (HttpServletRequest) details;
 
@@ -89,7 +89,7 @@ public class AbstractAuthenticator
       Principal user = getUserPrincipal(request, response, webApp);
 
       if (user != null)
-	return user;
+        return user;
       
       return login(request, response, webApp, userName, password);
     } catch (Exception e) {
@@ -101,9 +101,9 @@ public class AbstractAuthenticator
    * Backward compatiblity call
    */
   protected Principal login(HttpServletRequest request,
-				HttpServletResponse response,
-				ServletContext app,
-				String userName, String password)
+                                HttpServletResponse response,
+                                ServletContext app,
+                                String userName, String password)
     throws ServletException
   {
     return loginImpl(request, response, app, userName, password);
@@ -113,9 +113,9 @@ public class AbstractAuthenticator
    * Backward compatiblity call
    */
   protected Principal loginImpl(HttpServletRequest request,
-				HttpServletResponse response,
-				ServletContext app,
-				String userName, String password)
+                                HttpServletResponse response,
+                                ServletContext app,
+                                String userName, String password)
     throws ServletException
   {
     Principal user = getUserPrincipal(request, response, app);
@@ -130,8 +130,8 @@ public class AbstractAuthenticator
    * Backward compatiblity call
    */
   protected Principal getUserPrincipal(HttpServletRequest request,
-				       HttpServletResponse response,
-				       ServletContext app)
+                                       HttpServletResponse response,
+                                       ServletContext app)
     throws ServletException
   {
     return null;
@@ -141,8 +141,8 @@ public class AbstractAuthenticator
    * Backward compatiblity call
    */
   protected Principal login(HttpServletRequest request,
-			    HttpServletResponse response,
-			    ServletContext app)
+                            HttpServletResponse response,
+                            ServletContext app)
     throws ServletException
   {
     return null;

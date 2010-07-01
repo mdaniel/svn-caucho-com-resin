@@ -18,8 +18,8 @@ public class SocketPolicyRequest extends HttpRequest
   private final SocketLink _connection;
 
   public SocketPolicyRequest(Server server,
-			     SocketLink connection,
-			     Path policy)
+                             SocketLink connection,
+                             Path policy)
   {
     super(server, connection);
     

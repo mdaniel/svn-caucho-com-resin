@@ -42,8 +42,8 @@ public class LongConverter implements Converter
     = "javax.faces.converter.STRING";
   
   public Object getAsObject(FacesContext context,
-			    UIComponent component,
-			    String value)
+                            UIComponent component,
+                            String value)
     throws ConverterException
   {
     // XXX: incorrect
@@ -59,16 +59,16 @@ public class LongConverter implements Converter
       return Long.decode(value);
     } catch (NumberFormatException e) {
       String summary = Util.l10n(context, LONG_ID,
-				 "{2}: \"{0}\" must be an integer number.",
-				 value,
-				 getExample(),
-				 Util.getLabel(context, component));
+                                 "{2}: \"{0}\" must be an integer number.",
+                                 value,
+                                 getExample(),
+                                 Util.getLabel(context, component));
       
       String detail = Util.l10n(context, LONG_ID + "_detail",
-				"{2}: \"{0}\" must be an integer -9223372036854775808 and 9223372036854775807. Example: {1}.",
-				value,
-				getExample(),
-				Util.getLabel(context, component));
+                                "{2}: \"{0}\" must be an integer -9223372036854775808 and 9223372036854775807. Example: {1}.",
+                                value,
+                                getExample(),
+                                Util.getLabel(context, component));
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
@@ -79,8 +79,8 @@ public class LongConverter implements Converter
   }
   
   public String getAsString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
     throws ConverterException
   {
     // XXX: incorrect

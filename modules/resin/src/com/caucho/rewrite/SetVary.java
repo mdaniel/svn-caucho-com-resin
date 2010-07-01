@@ -75,13 +75,13 @@ public class SetVary extends AbstractRewriteFilter
   {
     if (_value == null) {
       throw new ConfigException(L.l("'value' is a required attribute of '{0}'.",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
     }
   }
 
   protected FilterChain createFilterChain(String uri,
-					  String queryString,
-					  FilterChain next)
+                                          String queryString,
+                                          FilterChain next)
   {
     return new AddHeaderFilterChain(next, "Vary", _value);
   }

@@ -104,13 +104,13 @@ public final class Vfs {
     
     if (pwd == null) {
       if (PWD == null) {
-	/* JNI set later
-	PWD = JniFilePath.create();
+        /* JNI set later
+        PWD = JniFilePath.create();
 
-	if (PWD == null)
-	  PWD = new FilePath(null);
-	*/
-	PWD = new FilePath(null);
+        if (PWD == null)
+          PWD = new FilePath(null);
+        */
+        PWD = new FilePath(null);
       }
       pwd = PWD;
       ENV_PWD.setGlobal(pwd);
@@ -125,12 +125,12 @@ public final class Vfs {
       SchemeMap map = _localSchemeMap.getLevel();
 
       if (map == null) {
-	map = _localSchemeMap.get().copy();
-	
-	if (map == null)
-	  map = DEFAULT_SCHEME_MAP.copy();
+        map = _localSchemeMap.get().copy();
 
-	_localSchemeMap.set(map);
+        if (map == null)
+          map = DEFAULT_SCHEME_MAP.copy();
+
+        _localSchemeMap.set(map);
       }
 
       return map;
@@ -342,8 +342,8 @@ public final class Vfs {
       char ch = uri.charAt(i);
 
       if (ch != '%' || len <= i + 2) {
-	sb.append(ch);
-	continue;
+        sb.append(ch);
+        continue;
       }
 
       int d1 = uri.charAt(i + 1);
@@ -351,25 +351,25 @@ public final class Vfs {
       int v = 0;
 
       if ('0' <= d1 && d1 <= '9')
-	v = 16 * v + d1 - '0';
+        v = 16 * v + d1 - '0';
       else if ('a' <= d1 && d1 <= 'f')
-	v = 16 * v + d1 - 'a' + 10;
+        v = 16 * v + d1 - 'a' + 10;
       else if ('A' <= d1 && d1 <= 'F')
-	v = 16 * v + d1 - 'A' + 10;
+        v = 16 * v + d1 - 'A' + 10;
       else {
-	sb.append('%');
-	continue;
+        sb.append('%');
+        continue;
       }
 
       if ('0' <= d2 && d2 <= '9')
-	v = 16 * v + d2 - '0';
+        v = 16 * v + d2 - '0';
       else if ('a' <= d2 && d2 <= 'f')
-	v = 16 * v + d2 - 'a' + 10;
+        v = 16 * v + d2 - 'a' + 10;
       else if ('A' <= d2 && d2 <= 'F')
-	v = 16 * v + d2 - 'A' + 10;
+        v = 16 * v + d2 - 'A' + 10;
       else {
-	sb.append('%');
-	continue;
+        sb.append('%');
+        continue;
       }
 
       sb.append((char) v);
@@ -426,7 +426,7 @@ public final class Vfs {
     DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null)); 
     /* XXX:
     DEFAULT_SCHEME_MAP.put("mailto",
-				 new MailtoPath(null, null, null, null));
+                                 new MailtoPath(null, null, null, null));
     */
     DEFAULT_SCHEME_MAP.put("classpath", new ClasspathPath(null, "", ""));
     DEFAULT_SCHEME_MAP.put("http", new HttpPath("127.0.0.1", 0));

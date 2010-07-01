@@ -38,8 +38,8 @@ public class ValueChangeEvent extends FacesEvent
   private Object newValue;
 
   public ValueChangeEvent(UIComponent component,
-			  Object oldValue,
-			  Object newValue)
+                          Object oldValue,
+                          Object newValue)
   {
     super(component);
 

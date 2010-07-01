@@ -68,7 +68,7 @@ public class XtpDeclaration extends XslNode implements XslTopNode {
     }
     else
       throw error(L.l("'{0}' is not allowed as an xtp:declaration child.",
-		      node));
+                      node));
   }
 
   /**

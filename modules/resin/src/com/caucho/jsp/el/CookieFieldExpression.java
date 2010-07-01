@@ -78,7 +78,7 @@ public class CookieFieldExpression extends AbstractValueExpression
 
     for (int i = 0; i < cookies.length; i++) {
       if (cookies[i].getName().equals(_field)) {
-	return cookies[i];
+        return cookies[i];
       }
     }
 

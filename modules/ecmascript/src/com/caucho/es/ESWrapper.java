@@ -46,13 +46,13 @@ class ESWrapper extends ESObject {
 
     if (prototype == resin.boolProto)
       return ESString.create("new Boolean(" + 
-			     value.toSource(map, isLoopPass) + ")");
+                             value.toSource(map, isLoopPass) + ")");
     else if (prototype == resin.numProto)
       return ESString.create("new Number(" + 
-			     value.toSource(map, isLoopPass) + ")");
+                             value.toSource(map, isLoopPass) + ")");
     else if (prototype == resin.stringProto)
       return ESString.create("new String(" + 
-			     value.toSource(map, isLoopPass) + ")");
+                             value.toSource(map, isLoopPass) + ")");
     else
       return ESString.create("#unknown#");
   }

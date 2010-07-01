@@ -86,8 +86,8 @@ public interface DispatchRule
    * @param tail the plain servlet/filter chain for a match
    */
   public FilterChain map(String uri,
-			 String queryString,
-			 FilterChain next,
-			 FilterChain tail)
+                         String queryString,
+                         FilterChain next,
+                         FilterChain tail)
     throws ServletException;
 }

@@ -73,17 +73,17 @@ public class ResinConfigLibrary {
   {
     try {
       for (Method m : ResinConfigLibrary.class.getMethods()) {
-	if (! Modifier.isStatic(m.getModifiers()))
-	  continue;
-	if (! Modifier.isPublic(m.getModifiers()))
-	  continue;
-	if (m.getName().equals("configure"))
-	  continue;
+        if (! Modifier.isStatic(m.getModifiers()))
+          continue;
+        if (! Modifier.isPublic(m.getModifiers()))
+          continue;
+        if (m.getName().equals("configure"))
+          continue;
 
-	//BeanFactory factory = webBeans.createBeanFactory(m.getClass());
-	
-	// webBeans.addBean(factory.name(m.getName()).singleton(m));
-	Config.setProperty(m.getName(), m);
+        //BeanFactory factory = webBeans.createBeanFactory(m.getClass());
+
+        // webBeans.addBean(factory.name(m.getName()).singleton(m));
+        Config.setProperty(m.getName(), m);
       }
     } catch (Exception e) {
       log().log(Level.FINE, e.toString(), e);

@@ -161,31 +161,31 @@ public class BeanEmbed
       InjectManager webBeans = InjectManager.create();
       
       if (_value != null) {
-	BeanBuilder factory = webBeans.createBeanFactory(_value.getClass());
-	
-	if (_name != null)
-	  factory.name(_name);
+        BeanBuilder factory = webBeans.createBeanFactory(_value.getClass());
 
-	webBeans.addBean(factory.singleton(_value));
+        if (_name != null)
+          factory.name(_name);
+
+        webBeans.addBean(factory.singleton(_value));
       }
       else if (_className == null)
-	throw new ConfigException(L.l("BeanEmbed must either have a value or a class"));
+        throw new ConfigException(L.l("BeanEmbed must either have a value or a class"));
       else {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	Class cl = Class.forName(_className, false, loader);
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-	BeanBuilder factory = webBeans.createBeanFactory(cl);
+        Class cl = Class.forName(_className, false, loader);
 
-	factory.scope(ApplicationScoped.class);
+        BeanBuilder factory = webBeans.createBeanFactory(cl);
 
-	if (_name != null)
-	  factory.name(_name);
+        factory.scope(ApplicationScoped.class);
 
-	if (_init != null)
-	  factory.init(_init);
+        if (_name != null)
+          factory.name(_name);
 
-	webBeans.addBean(factory.bean());
+        if (_init != null)
+          factory.init(_init);
+
+        webBeans.addBean(factory.bean());
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

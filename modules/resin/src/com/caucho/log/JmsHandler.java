@@ -98,11 +98,11 @@ public class JmsHandler extends Handler {
   {
     try {
       if (_destinationList.size() > 0 && _factory == null)
-	throw new ConfigException(L.l("jms: log handler requires a connection-factory"));
+        throw new ConfigException(L.l("jms: log handler requires a connection-factory"));
 
       if (_destinationList.size() > 0) {
-	_conn = _factory.createConnection();
-	_session = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        _conn = _factory.createConnection();
+        _session = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
       }
     } catch (JMSException e) {
       throw ConfigException.create(e);
@@ -126,18 +126,18 @@ public class JmsHandler extends Handler {
 
       Formatter formatter = getFormatter();
       if (formatter != null)
-	value = formatter.format(record);
+        value = formatter.format(record);
       else
-	value = record.getMessage();
+        value = record.getMessage();
 
       for (BlockingQueue queue : _queueList) {
-	queue.offer(value);
+        queue.offer(value);
       }
       
       if (_session != null) {
-	synchronized (_session) {
-	  //
-	}
+        synchronized (_session) {
+          //
+        }
       }
     } catch (RuntimeException e) {
       throw e;

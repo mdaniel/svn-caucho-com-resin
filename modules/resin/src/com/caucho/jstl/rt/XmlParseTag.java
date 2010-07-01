@@ -179,7 +179,7 @@ public class XmlParseTag extends BodyTagSupport {
       }
       */
       else {
-	throw new JspException(L.l("No XML document supplied via a doc attribute or inside the body of <x:parse> tag."));
+        throw new JspException(L.l("No XML document supplied via a doc attribute or inside the body of <x:parse> tag."));
       }
 
       if (_systemId != null && is != null)

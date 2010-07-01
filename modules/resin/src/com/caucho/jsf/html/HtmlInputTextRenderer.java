@@ -74,8 +74,8 @@ class HtmlInputTextRenderer extends BaseRenderer
       ((EditableValueHolder) component).setSubmittedValue(value);
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer("JSF[" + context.getViewRoot().getViewId() + "] h:inputText["
-		  + clientId + "] =" + value);
+        log.finer("JSF[" + context.getViewRoot().getViewId() + "] h:inputText["
+                  + clientId + "] =" + value);
       }
     }
   }

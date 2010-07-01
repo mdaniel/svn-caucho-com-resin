@@ -47,8 +47,8 @@ class CompletionImpl implements Completion {
   protected EntityType _entityType;
 
   protected CompletionImpl(BaseConfigIntrospector base,
-		       EntityType entityType,
-		       String fieldName)
+                       EntityType entityType,
+                       String fieldName)
   {
     _base = base;
     _entityType = entityType;
@@ -56,7 +56,7 @@ class CompletionImpl implements Completion {
   }
 
   protected CompletionImpl(BaseConfigIntrospector base,
-		       EntityType entityType)
+                       EntityType entityType)
   {
     _base = base;
     _entityType = entityType;

@@ -70,7 +70,7 @@ public class SSIServlet extends HttpServlet
   }
 
   public void doGet(HttpServletRequest request,
-		    HttpServletResponse response)
+                    HttpServletResponse response)
     throws ServletException, IOException
   {
     String servletPath;
@@ -115,28 +115,28 @@ public class SSIServlet extends HttpServlet
       String errmsg = (String) request.getAttribute("caucho.ssi.errmsg");
 
       if (errmsg != null && ! response.isCommitted()) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	response.setStatus(500, errmsg);
-	response.setContentType("text/html");
+        log.log(Level.FINE, e.toString(), e);
 
-	out.clearWrite();
-	out.println("<html><head>");
-	out.println("<title>" + errmsg + "</title>");
-	out.println("</head>");
-	
-	out.println("<h1>" + errmsg + "</h1>");
-	out.println("</html>");
-	out.close();
+        response.setStatus(500, errmsg);
+        response.setContentType("text/html");
+
+        out.clearWrite();
+        out.println("<html><head>");
+        out.println("<title>" + errmsg + "</title>");
+        out.println("</head>");
+
+        out.println("<h1>" + errmsg + "</h1>");
+        out.println("</html>");
+        out.close();
       }
       else if (e instanceof RuntimeException)
-	throw (RuntimeException) e;
+        throw (RuntimeException) e;
       else if (e instanceof IOException)
-	throw (IOException) e;
+        throw (IOException) e;
       else if (e instanceof ServletException)
-	throw (ServletException) e;
+        throw (ServletException) e;
       else
-	throw new ServletException(e);
+        throw new ServletException(e);
     }
   }
 }

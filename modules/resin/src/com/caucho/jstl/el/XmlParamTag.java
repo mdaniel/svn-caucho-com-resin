@@ -75,7 +75,7 @@ public class XmlParamTag extends BodyTagSupport {
   {
     try {
       if (_valueExpr == null)
-	return EVAL_BODY_BUFFERED;
+        return EVAL_BODY_BUFFERED;
 
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
       ELContext env = pageContext.getELContext();
@@ -85,7 +85,7 @@ public class XmlParamTag extends BodyTagSupport {
 
       Object parent = getParent();
       if (! (parent instanceof NameValueTag))
-	throw new JspException(L.l("x:param requires x:transform.")); 
+        throw new JspException(L.l("x:param requires x:transform."));
 
       NameValueTag tag = (NameValueTag) parent;
 
@@ -105,14 +105,14 @@ public class XmlParamTag extends BodyTagSupport {
   {
     try {
       if (_valueExpr != null)
-	return EVAL_PAGE;
+        return EVAL_PAGE;
       
       String value;
 
       if (this.bodyContent != null)
-	value = this.bodyContent.getString().trim();
+        value = this.bodyContent.getString().trim();
       else
-	value = "";
+        value = "";
     
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
     
@@ -120,7 +120,7 @@ public class XmlParamTag extends BodyTagSupport {
 
       Object parent = getParent();
       if (! (parent instanceof NameValueTag))
-	throw new JspException(L.l("c:param requires c:url or c:import parent.")); 
+        throw new JspException(L.l("c:param requires c:url or c:import parent."));
 
       NameValueTag tag = (NameValueTag) parent;
 

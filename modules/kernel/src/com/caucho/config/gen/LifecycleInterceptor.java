@@ -163,20 +163,20 @@ public class LifecycleInterceptor {
     for (Class iClass : _interceptors) {
       String var = (String) map.get("interceptor-" + iClass.getName());
       if (var == null) {
-	var = "__caucho_i" + out.generateId();
+        var = "__caucho_i" + out.generateId();
 
-	out.println();
-	out.print("private static ");
-	out.printClass(Bean.class);
-	out.println(" " + var + "_f;");
-	
-	out.print("private transient ");
-	out.printClass(iClass);
-	out.println(" " + var + ";");
+        out.println();
+        out.print("private static ");
+        out.printClass(Bean.class);
+        out.println(" " + var + "_f;");
 
-	map.put("interceptor-" + iClass.getName(), var);
+        out.print("private transient ");
+        out.printClass(iClass);
+        out.println(" " + var + ";");
 
-	_ownInterceptors.add(iClass);
+        map.put("interceptor-" + iClass.getName(), var);
+
+        _ownInterceptors.add(iClass);
       }
 
       _interceptorVarMap.put(iClass, var);
@@ -223,13 +223,13 @@ public class LifecycleInterceptor {
     Class []exnList = new Class[0];//
     for (Class cl : exnList) {
       if (RuntimeException.class.isAssignableFrom(cl))
-	continue;
+        continue;
 
       if (! isMostGeneralException(exnList, cl))
-	continue;
+        continue;
       
       if (cl.isAssignableFrom(Exception.class))
-	isException = true;
+        isException = true;
       
       out.println("} catch (" + cl.getName() + " e) {");
       out.println("  throw e;");
@@ -247,7 +247,7 @@ public class LifecycleInterceptor {
   {
     for (Class exn : exnList) {
       if (exn != cl && exn.isAssignableFrom(cl))
-	return false;
+        return false;
     }
 
     return true;
@@ -291,15 +291,15 @@ public class LifecycleInterceptor {
     throws IOException
   {
     generateGetMethod(out,
-		      method.getDeclaringClass().getName(),
-		      method.getName(),
-		      method.getParameterTypes());
+                      method.getDeclaringClass().getName(),
+                      method.getName(),
+                      method.getParameterTypes());
   }
   
   protected void generateGetMethod(JavaWriter out,
-				   String className,
-				   String methodName,
-				   Class []paramTypes)
+                                   String className,
+                                   String methodName,
+                                   Class []paramTypes)
     throws IOException
   {
     out.print("com.caucho.ejb.util.EjbUtil.getMethod(");

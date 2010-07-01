@@ -52,8 +52,8 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
     ExpressionFactory factory = app.getExpressionFactory();
 
     _binding = factory.createValueExpression(context.getELContext(),
-					     binding,
-					     UIComponent.class);
+                                             binding,
+                                             UIComponent.class);
   }
 
   protected boolean hasBinding()
@@ -68,8 +68,8 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
     ExpressionFactory factory = app.getExpressionFactory();
 
     _rendered = factory.createValueExpression(context.getELContext(),
-					     rendered,
-					     boolean.class);
+                                             rendered,
+                                             boolean.class);
   }
 
   protected boolean isSuppressed()
@@ -88,7 +88,7 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
   }
 
   protected UIComponent createComponent(FacesContext context,
-					String newId)
+                                        String newId)
   {
     Application app = context.getApplication();
 

@@ -1093,7 +1093,7 @@ public class AmberConnection
 
     if (entityHome == null)
       throw new AmberException(L.l("{0}: entity has no matching home",
-				   entity.getClass().getName()));
+                                   entity.getClass().getName()));
 
     entityHome.makePersistent(entity, this, false);
 
@@ -1734,9 +1734,9 @@ public class AmberConnection
   {
     if (log.isLoggable(Level.FINER)) {
       if (status == Status.STATUS_COMMITTED)
-	log.finer(this + " afterCompletion(commit)");
+        log.finer(this + " afterCompletion(commit)");
       else
-	log.finer(this + " afterCompletion(rollback)");
+        log.finer(this + " afterCompletion(rollback)");
     }
 
     afterCommit(status == Status.STATUS_COMMITTED);
@@ -2071,7 +2071,7 @@ public class AmberConnection
    * Prepares an insert statement.
    */
   public PreparedStatement prepareInsertStatement(String sql,
-						  boolean isGeneratedId)
+                                                  boolean isGeneratedId)
     throws SQLException
   {
     PreparedStatement pstmt = null;
@@ -2080,21 +2080,21 @@ public class AmberConnection
       pstmt = _preparedStatementMap.get(sql);
 
       if (pstmt != null)
-	return pstmt;
+        return pstmt;
       
       Connection conn = getConnection();
 
       // XXX: avoids locking issues.
       if (_statements.size() > 0) {
-	conn = _statements.get(0).getConnection();
+        conn = _statements.get(0).getConnection();
       }
 
       if (isGeneratedId && _persistenceUnit.hasReturnGeneratedKeys())
-	pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       else {
-	// XXX: avoids locking issues.
-	// See com.caucho.sql.UserConnection
-	pstmt = conn.prepareStatement(sql);
+        // XXX: avoids locking issues.
+        // See com.caucho.sql.UserConnection
+        pstmt = conn.prepareStatement(sql);
       }
 
       _statements.add(pstmt);
@@ -2873,7 +2873,7 @@ public class AmberConnection
         try {
           entity.__caucho_flush();
         } catch (SQLException e) {
-	  throwPersistException(e, entity);
+          throwPersistException(e, entity);
         }
       }
     }
@@ -2944,18 +2944,18 @@ public class AmberConnection
 
         // jpa/0ga3
         if (contextEntity == null) {
-	}
-	else if (contextEntity.__caucho_getEntityState().isDeleting()) {
-	  // jpa/0ga3
-	  contextEntity.__caucho_flush();
-	}
-	else if (entity != contextEntity) {
-	  return contextEntity;
-	  /*
-	  // jpa/0ga1: trying to persist a detached entity that already exists.
-	  throw new EntityExistsException(L.l("Trying to persist a detached entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), state));
-	  */
-	}
+        }
+        else if (contextEntity.__caucho_getEntityState().isDeleting()) {
+          // jpa/0ga3
+          contextEntity.__caucho_flush();
+        }
+        else if (entity != contextEntity) {
+          return contextEntity;
+          /*
+          // jpa/0ga1: trying to persist a detached entity that already exists.
+          throw new EntityExistsException(L.l("Trying to persist a detached entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), state));
+          */
+        }
 
         // jpa/0h24
         // Pre-persist child entities.
@@ -3054,7 +3054,7 @@ public class AmberConnection
         EntityState state = entity.__caucho_getEntityState();
 
         log.finer(L.l("recursiveMerge({0}[{1}] state: '{2}'",
-		      className, pk, state));
+                      className, pk, state));
       }
 
       if (containsMergingEntity(entity))
@@ -3082,12 +3082,12 @@ public class AmberConnection
 
       if (log.isLoggable(Level.FINER))
         log.finer(L.l("{0}[{1}] amber merge state='{2}'",
-		      entityClass.getSimpleName(), pk, state));
+                      entityClass.getSimpleName(), pk, state));
 
       if (state.isDeleting()) {
         // removed entity instance
         throw new IllegalArgumentException(L.l("{0}: merge operation cannot be applied to a removed entity instance",
-					       entityClass));
+                                               entityClass));
       }
 
       // XXX: jpa/0o42 try {
@@ -3103,9 +3103,9 @@ public class AmberConnection
       }
       
       if (existingEntity != null) {
-	if (containsMergingEntity(existingEntity))
-	    return existingEntity;
-	    
+        if (containsMergingEntity(existingEntity))
+            return existingEntity;
+
         _mergingEntities.add(existingEntity);
         
         existingEntity.__caucho_mergeFrom(this, newEntity);

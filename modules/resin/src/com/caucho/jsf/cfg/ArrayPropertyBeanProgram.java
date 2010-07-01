@@ -52,7 +52,7 @@ public class ArrayPropertyBeanProgram extends BeanProgram
   private String _propertyName;
 
   public ArrayPropertyBeanProgram(Method getter, Method setter,
-				List<AbstractValue> values, String propertyName)
+                                List<AbstractValue> values, String propertyName)
   {
     _getter = getter;
     _setter = setter;
@@ -75,38 +75,38 @@ public class ArrayPropertyBeanProgram extends BeanProgram
       Object list = null;
 
       if (_setter == null) {
-	if (log.isLoggable(Level.CONFIG)) {
-	  log.log(Level.CONFIG,
-		  L.l("Setter for {0} not found in type {1}",
-		      _propertyName,
-		      bean.getClass().getName()));
-	}
+        if (log.isLoggable(Level.CONFIG)) {
+          log.log(Level.CONFIG,
+                  L.l("Setter for {0} not found in type {1}",
+                      _propertyName,
+                      bean.getClass().getName()));
+        }
 
-	return;
+        return;
       }
 
       if (_getter != null)
-	list = _getter.invoke(bean);
+        list = _getter.invoke(bean);
 
       final int length;
 
       if (list != null) {
-	length = Array.getLength(list);
+        length = Array.getLength(list);
 
-	Object newList = Array.newInstance(_baseType, length + _values.size());
+        Object newList = Array.newInstance(_baseType, length + _values.size());
 
-	System.arraycopy(list, 0, newList, 0, length);
+        System.arraycopy(list, 0, newList, 0, length);
 
-	list = newList;
+        list = newList;
       }
       else {
-	length = 0;
-	list = Array.newInstance(_baseType, _values.size());
+        length = 0;
+        list = Array.newInstance(_baseType, _values.size());
       }
 
       for (int i = 0; i < _values.size(); i++) {
-	AbstractValue value = _values.get(i);
-	Array.set(list, length + i, value.getValue(context));
+        AbstractValue value = _values.get(i);
+        Array.set(list, length + i, value.getValue(context));
       }
 
       _setter.invoke(bean, new Object[]{list});

@@ -100,12 +100,12 @@ public class UnaryExpr extends Expr {
       else if (obj instanceof Number)
         return new Long(- ((Number) obj).longValue());
       else if (obj instanceof String) {
-	String s = (String) obj;
+        String s = (String) obj;
 
-	if (s.indexOf('.') < 0)
-	  return new Long(- toLong(obj, env));
-	else
-	  return new Double(- toDouble(obj, env));
+        if (s.indexOf('.') < 0)
+          return new Long(- toLong(obj, env));
+        else
+          return new Double(- toDouble(obj, env));
       }
       else
         return new Double(- toDouble(obj, env));

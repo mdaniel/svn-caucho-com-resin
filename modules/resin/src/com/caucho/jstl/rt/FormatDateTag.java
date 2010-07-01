@@ -158,10 +158,10 @@ public class FormatDateTag extends BodyTagSupport {
       JspWriter out = pc.getOut();
 
       if (_value == null) {
-	if (_var != null)
-	  CoreSetTag.setValue(pageContext, _var, _scope, null);
+        if (_var != null)
+          CoreSetTag.setValue(pageContext, _var, _scope, null);
       
-	return EVAL_PAGE;
+        return EVAL_PAGE;
       }
 
       long time = _value.getTime();

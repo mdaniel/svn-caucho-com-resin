@@ -63,7 +63,7 @@ public abstract class JavaPage extends Page implements HttpJspPage
   }
 
   abstract public void _jspService(HttpServletRequest request,
-				   HttpServletResponse response)
+                                   HttpServletResponse response)
     throws ServletException, IOException;
 
   public String getServletInfo()

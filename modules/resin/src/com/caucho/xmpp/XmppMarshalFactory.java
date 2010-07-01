@@ -79,18 +79,18 @@ public class XmppMarshalFactory
       Enumeration<URL> iter = _loader.getResources(resource);
     
       while (iter.hasMoreElements()) {
-	URL url = iter.nextElement();
+        URL url = iter.nextElement();
 
-	ReadStream is = null;
-	try {
-	  is = Vfs.lookup(url.toString()).openRead();
-	  
-	  loadMarshal(is);
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	} finally {
-	  is.close();
-	}
+        ReadStream is = null;
+        try {
+          is = Vfs.lookup(url.toString()).openRead();
+
+          loadMarshal(is);
+        } catch (IOException e) {
+          log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          is.close();
+        }
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -106,36 +106,36 @@ public class XmppMarshalFactory
       int p = line.indexOf('#');
 
       if (p > 0)
-	line = line.substring(0, p);
+        line = line.substring(0, p);
       
       line = line.trim();
 
       if (line.length() == 0)
-	continue;
+        continue;
 
       try {
-	String marshalClassName = line;
-	
-	Class cl = Class.forName(marshalClassName, false, _loader);
-	XmppMarshal marshal = (XmppMarshal) cl.newInstance();
+        String marshalClassName = line;
 
-	QName qName = null;
+        Class cl = Class.forName(marshalClassName, false, _loader);
+        XmppMarshal marshal = (XmppMarshal) cl.newInstance();
 
-	if (marshal.getNamespaceURI() != null
-	    && marshal.getLocalName() != null) {
-	  qName = new QName(marshal.getNamespaceURI(),
-			    marshal.getLocalName(), "");
-	  _unserializeMap.put(qName, marshal);
-	}
+        QName qName = null;
 
-	String className = marshal.getClassName();
-	if (className != null)
-	  _serializeMap.put(className, marshal);
+        if (marshal.getNamespaceURI() != null
+            && marshal.getLocalName() != null) {
+          qName = new QName(marshal.getNamespaceURI(),
+                            marshal.getLocalName(), "");
+          _unserializeMap.put(qName, marshal);
+        }
 
-	if (log.isLoggable(Level.FINEST))
-	  log.finest(this + " marshal: " + marshal + " " + qName + " " + className);
+        String className = marshal.getClassName();
+        if (className != null)
+          _serializeMap.put(className, marshal);
+
+        if (log.isLoggable(Level.FINEST))
+          log.finest(this + " marshal: " + marshal + " " + qName + " " + className);
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

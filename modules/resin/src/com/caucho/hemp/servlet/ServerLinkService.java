@@ -64,9 +64,9 @@ public class ServerLinkService extends SimpleActor {
    */
   public ServerLinkService(ActorStream linkStream,
                            Broker broker,
-			   ServerAuthManager authManager,
-			   String ipAddress,
-			   boolean isUnidir)
+                           ServerAuthManager authManager,
+                           String ipAddress,
+                           boolean isUnidir)
   {
     if (linkStream == null)
       throw new NullPointerException();
@@ -103,7 +103,7 @@ public class ServerLinkService extends SimpleActor {
 
   @QueryGet
   public void getPublicKey(long id, String to, String from,
-			   GetPublicKeyQuery query)
+                           GetPublicKeyQuery query)
   {
     GetPublicKeyQuery result = _authManager.getPublicKey();
 

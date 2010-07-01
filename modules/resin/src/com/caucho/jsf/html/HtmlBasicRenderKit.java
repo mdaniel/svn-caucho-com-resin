@@ -52,84 +52,84 @@ public class HtmlBasicRenderKit extends RenderKit
   public HtmlBasicRenderKit()
   {
     addRenderer("javax.faces.Command", "javax.faces.Button",
-		HtmlCommandButtonRenderer.RENDERER);
+                HtmlCommandButtonRenderer.RENDERER);
     
     addRenderer("javax.faces.Command", "javax.faces.Link",
-		HtmlCommandLinkRenderer.RENDERER);
+                HtmlCommandLinkRenderer.RENDERER);
     
     addRenderer("javax.faces.Data", "javax.faces.Table",
-		HtmlDataTableRenderer.RENDERER);
+                HtmlDataTableRenderer.RENDERER);
     
     addRenderer("javax.faces.Form", "javax.faces.Form",
-		HtmlFormRenderer.RENDERER);
+                HtmlFormRenderer.RENDERER);
     
     addRenderer("javax.faces.Graphic", "javax.faces.Image",
-		HtmlGraphicImageRenderer.RENDERER);
+                HtmlGraphicImageRenderer.RENDERER);
     
     addRenderer("javax.faces.Input", "javax.faces.Secret",
-		HtmlInputSecretRenderer.RENDERER);
+                HtmlInputSecretRenderer.RENDERER);
     
     addRenderer("javax.faces.Input", "javax.faces.Hidden",
-		HtmlInputHiddenRenderer.RENDERER);
+                HtmlInputHiddenRenderer.RENDERER);
     
     addRenderer("javax.faces.Input", "javax.faces.Text",
-		HtmlInputTextRenderer.RENDERER);
+                HtmlInputTextRenderer.RENDERER);
     
     addRenderer("javax.faces.Input", "javax.faces.Textarea",
-		HtmlInputTextareaRenderer.RENDERER);
+                HtmlInputTextareaRenderer.RENDERER);
     
     addRenderer("javax.faces.Message", "javax.faces.Message",
-		HtmlMessageRenderer.RENDERER);
+                HtmlMessageRenderer.RENDERER);
     
     addRenderer("javax.faces.Messages", "javax.faces.Messages",
-		HtmlMessagesRenderer.RENDERER);
+                HtmlMessagesRenderer.RENDERER);
     
     addRenderer("javax.faces.Output", "javax.faces.Format",
-		HtmlOutputFormatRenderer.RENDERER);
+                HtmlOutputFormatRenderer.RENDERER);
     
     addRenderer("javax.faces.Output", "javax.faces.Label",
-		HtmlOutputLabelRenderer.RENDERER);
+                HtmlOutputLabelRenderer.RENDERER);
     
     addRenderer("javax.faces.Output", "javax.faces.Link",
-		HtmlOutputLinkRenderer.RENDERER);
+                HtmlOutputLinkRenderer.RENDERER);
     
     addRenderer("javax.faces.Output", "javax.faces.Text",
-		HtmlOutputTextRenderer.RENDERER);
+                HtmlOutputTextRenderer.RENDERER);
 
     addRenderer("javax.faces.Output", "javax.faces.Format",
-		HtmlOutputFormatRenderer.RENDERER);
+                HtmlOutputFormatRenderer.RENDERER);
 
     addRenderer("javax.faces.Panel", "javax.faces.Grid",
-		HtmlPanelGridRenderer.RENDERER);
+                HtmlPanelGridRenderer.RENDERER);
     
     addRenderer("javax.faces.Panel", "javax.faces.Group",
-		HtmlPanelGroupRenderer.RENDERER);
+                HtmlPanelGroupRenderer.RENDERER);
     
     addRenderer("javax.faces.SelectBoolean", "javax.faces.Checkbox",
-		HtmlBooleanCheckboxRenderer.RENDERER);
+                HtmlBooleanCheckboxRenderer.RENDERER);
     
     addRenderer("javax.faces.SelectMany", "javax.faces.Checkbox",
-		HtmlSelectManyCheckboxRenderer.RENDERER);
+                HtmlSelectManyCheckboxRenderer.RENDERER);
     
     addRenderer("javax.faces.SelectMany", "javax.faces.Listbox",
-		HtmlSelectManyListboxRenderer.RENDERER);
+                HtmlSelectManyListboxRenderer.RENDERER);
     
     addRenderer("javax.faces.SelectMany", "javax.faces.Menu",
-		HtmlSelectManyMenuRenderer.RENDERER);
+                HtmlSelectManyMenuRenderer.RENDERER);
     
     addRenderer("javax.faces.SelectOne", "javax.faces.Listbox",
-		HtmlSelectOneListboxRenderer.RENDERER);
+                HtmlSelectOneListboxRenderer.RENDERER);
     
     addRenderer("javax.faces.SelectOne", "javax.faces.Menu",
-		HtmlSelectOneMenuRenderer.RENDERER);
+                HtmlSelectOneMenuRenderer.RENDERER);
     
     addRenderer("javax.faces.SelectOne", "javax.faces.Radio",
-		HtmlSelectOneRadioRenderer.RENDERER);
+                HtmlSelectOneRadioRenderer.RENDERER);
   }
   
   public void addRenderer(String family,
-			  String rendererType,
-			  Renderer renderer)
+                          String rendererType,
+                          Renderer renderer)
   {
     if (family == null)
       throw new NullPointerException("family argument is null");
@@ -144,7 +144,7 @@ public class HtmlBasicRenderKit extends RenderKit
   }
   
   public Renderer getRenderer(String family,
-			      String rendererType)
+                              String rendererType)
   {
     if (family == null)
       throw new NullPointerException("family argument is null");
@@ -165,8 +165,8 @@ public class HtmlBasicRenderKit extends RenderKit
   }
 
   public ResponseWriter createResponseWriter(Writer writer,
-					     String contentTypeList,
-					     String characterEncoding)
+                                             String contentTypeList,
+                                             String characterEncoding)
   {
     String contentType = null;
 
@@ -191,9 +191,9 @@ public class HtmlBasicRenderKit extends RenderKit
 
     if (characterEncoding != null) {
 
-	if (Encoding.getWriteEncoding(characterEncoding) == null)
-	  throw new IllegalArgumentException(L.l("'{0}' is an unknown character encoding for ResponseWriter.",
-						 characterEncoding));
+        if (Encoding.getWriteEncoding(characterEncoding) == null)
+          throw new IllegalArgumentException(L.l("'{0}' is an unknown character encoding for ResponseWriter.",
+                                                 characterEncoding));
     }
     
     return new HtmlResponseWriter(writer, contentType, characterEncoding);
@@ -233,9 +233,9 @@ public class HtmlBasicRenderKit extends RenderKit
     public int hashCode()
     {
       if (_type != null)
-	return _family.hashCode() * 65521 + _type.hashCode();
+        return _family.hashCode() * 65521 + _type.hashCode();
       else
-	return _family.hashCode();
+        return _family.hashCode();
     }
 
     public boolean equals(Object o)
@@ -243,9 +243,9 @@ public class HtmlBasicRenderKit extends RenderKit
       Key key = (Key) o;
 
       if (_type != null)
-	return _family.equals(key._family) && _type.equals(key._type);
+        return _family.equals(key._family) && _type.equals(key._type);
       else
-	return _family.equals(key._family) && key._type != null;
+        return _family.equals(key._family) && key._type != null;
     }
 
     public String toString()

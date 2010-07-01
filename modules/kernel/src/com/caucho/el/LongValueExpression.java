@@ -48,8 +48,8 @@ public class LongValueExpression extends AbstractValueExpression
   private Class _expectedType;
 
   public LongValueExpression(Expr expr,
-			     String expressionString,
-			     Class expectedType)
+                             String expressionString,
+                             Class expectedType)
   {
     super(expr, expressionString);
 
@@ -57,7 +57,7 @@ public class LongValueExpression extends AbstractValueExpression
   }
 
   public LongValueExpression(Expr expr,
-				String expressionString)
+                                String expressionString)
   {
     super(expr, expressionString);
   }
@@ -82,7 +82,7 @@ public class LongValueExpression extends AbstractValueExpression
   @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return new Long(_expr.evalLong(context));
   }
@@ -90,7 +90,7 @@ public class LongValueExpression extends AbstractValueExpression
   @Override
   public Class getType(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return getExpectedType();
   }

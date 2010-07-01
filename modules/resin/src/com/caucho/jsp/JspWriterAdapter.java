@@ -88,10 +88,10 @@ public class JspWriterAdapter extends AbstractBodyContent {
   {
     if (_isClosed) {
       for (int i = 0; i < length; i++) {
-	if (! Character.isWhitespace(buf[offset + i])) {
-	  // jsp/0504
-	  closeError("write()");
-	}
+        if (! Character.isWhitespace(buf[offset + i])) {
+          // jsp/0504
+          closeError("write()");
+        }
       }
     }
 
@@ -107,7 +107,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
   {
     if (_isClosed) {
       if (Character.isWhitespace(ch))
-	return;
+        return;
       
       // jsp/0504
       closeError("write()");
@@ -137,10 +137,10 @@ public class JspWriterAdapter extends AbstractBodyContent {
   {
     if (_isClosed) {
       for (int i = 0; i < len; len++) {
-	if (! Character.isWhitespace(s.charAt(off + i))) {
-	  // jsp/0504
-	  closeError("write()");
-	}
+        if (! Character.isWhitespace(s.charAt(off + i))) {
+          // jsp/0504
+          closeError("write()");
+        }
       }
     }
 
@@ -153,15 +153,15 @@ public class JspWriterAdapter extends AbstractBodyContent {
       int sublen = end - off;
 
       if (size - writeLength < sublen) {
-	if (size == writeLength) {
-	  writeBuffer = _out.nextCharBuffer(writeLength);
-	  writeLength = 0;
-	  
-	  if (size < sublen)
-	    sublen = size;
-	}
-	else
-	  sublen = size - writeLength;
+        if (size == writeLength) {
+          writeBuffer = _out.nextCharBuffer(writeLength);
+          writeLength = 0;
+
+          if (size < sublen)
+            sublen = size;
+        }
+        else
+          sublen = size - writeLength;
       }
 
       int tail = off + sublen;

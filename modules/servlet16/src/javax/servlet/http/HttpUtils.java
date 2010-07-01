@@ -51,42 +51,42 @@ public class HttpUtils {
 
     while (i < length) {
       for (ch = query.charAt(i);
-	   i < length && (Character.isWhitespace((ch = query.charAt(i))) || ch == '&');
-	   i++) {
+           i < length && (Character.isWhitespace((ch = query.charAt(i))) || ch == '&');
+           i++) {
       }
 
       offset = 0;
       for (; i < length && (ch = query.charAt(i)) != '='; i++) {
-	if (ch == '+')
-	  buf[offset++] = ' ';
-	else if (ch == '%' && i + 2 < length) {
-	  int ch1 = query.charAt(++i);
-	  int ch2 = query.charAt(++i);
+        if (ch == '+')
+          buf[offset++] = ' ';
+        else if (ch == '%' && i + 2 < length) {
+          int ch1 = query.charAt(++i);
+          int ch2 = query.charAt(++i);
 
-	  buf[offset++] = (char) ((toHex(ch1) << 4) + toHex(ch2));
-	}
-	else
-	  buf[offset++] = (char) ch;
+          buf[offset++] = (char) ((toHex(ch1) << 4) + toHex(ch2));
+        }
+        else
+          buf[offset++] = (char) ch;
       }
 
       if (offset == 0)
-	break;
+        break;
 
       String key = new String(buf, 0, offset);
       offset = 0;
       for (i++; i < length && (ch = query.charAt(i)) != '&'; i++) {
-	if (ch == '+')
-	  buf[offset++] = (char) ' ';
-	else if (ch == ' ') { // XXX:
-	}
-	else if (ch == '%' && i + 2 < length) {
-	  int ch1 = query.charAt(++i);
-	  int ch2 = query.charAt(++i);
+        if (ch == '+')
+          buf[offset++] = (char) ' ';
+        else if (ch == ' ') { // XXX:
+        }
+        else if (ch == '%' && i + 2 < length) {
+          int ch1 = query.charAt(++i);
+          int ch2 = query.charAt(++i);
 
-	  buf[offset++] = (char) ((toHex(ch1) << 4) + toHex(ch2));
-	}
-	else
-	  buf[offset++] = (char) ch;
+          buf[offset++] = (char) ((toHex(ch1) << 4) + toHex(ch2));
+        }
+        else
+          buf[offset++] = (char) ch;
       }
       
       i++;
@@ -94,12 +94,12 @@ public class HttpUtils {
       String value = new String(buf, 0, offset);
       String []oldValue = (String []) table.get(key);
       if (oldValue == null)
-	table.put(key, new String[] { value });
+        table.put(key, new String[] { value });
       else {
-	String []newValue = new String[oldValue.length + 1];
-	System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
-	newValue[oldValue.length] = value;
-	table.put(key, newValue);
+        String []newValue = new String[oldValue.length + 1];
+        System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
+        newValue[oldValue.length] = value;
+        table.put(key, newValue);
       }
     }
 

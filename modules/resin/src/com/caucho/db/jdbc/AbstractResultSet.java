@@ -54,7 +54,7 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
 
     while (getRow() < row) {
       if (! next())
-	return false;
+        return false;
     }
 
     return true;
@@ -220,7 +220,7 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
       Blob blob = getBlob(columnIndex);
 
       if (blob == null)
-	return null;
+        return null;
 
       int length = (int) blob.length();
 
@@ -229,15 +229,15 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
       InputStream is = blob.getBinaryStream();
 
       try {
-	int offset = 0;
-	int sublen;
+        int offset = 0;
+        int sublen;
 
-	while (length > 0 && (sublen = is.read(bytes, offset, length)) > 0) {
-	  offset += sublen;
-	  length -= sublen;
-	}
+        while (length > 0 && (sublen = is.read(bytes, offset, length)) > 0) {
+          offset += sublen;
+          length -= sublen;
+        }
       } finally {
-	is.close();
+        is.close();
       }
 
       return bytes;

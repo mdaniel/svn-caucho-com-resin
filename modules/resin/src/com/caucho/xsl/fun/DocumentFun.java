@@ -79,7 +79,7 @@ public class DocumentFun extends XPathFun {
    * @param args The evaluated arguments
    */
   public Object eval(Node node, ExprEnvironment env, 
-		     AbstractPattern pattern, ArrayList args)
+                     AbstractPattern pattern, ArrayList args)
     throws XPathException
   {
     if (args.size() < 1)
@@ -135,9 +135,9 @@ public class DocumentFun extends XPathFun {
     Source source = null;
     if (resolver != null) {
       try {
-	source = resolver.resolve(name, systemId);
+        source = resolver.resolve(name, systemId);
       } catch (TransformerException e) {
-	throw new XPathException(e);
+        throw new XPathException(e);
       }
     }
 

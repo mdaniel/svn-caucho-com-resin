@@ -171,7 +171,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   {
     if (_attrCount <= index)
       throw new IllegalArgumentException(L.l("element only has {0} attributes, given index {1}",
-               															 _attrCount, index));
+                                                                                                                                        _attrCount, index));
 
     return _attrNames[index].getLocalPart();
   }
@@ -241,7 +241,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
           return _attrValues[i];
       }
       else if (name.getLocalPart().equals(localName)
-	       && name.getNamespaceURI().equals(namespaceURI))
+               && name.getNamespaceURI().equals(namespaceURI))
         return _attrValues[i];
     }
 
@@ -512,7 +512,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   public boolean isWhiteSpace()
   {
     return (_isWhitespace
-	    && (_current == CHARACTERS || _current == SPACE));
+            && (_current == CHARACTERS || _current == SPACE));
   }
 
   /**
@@ -604,12 +604,12 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
       return _current;
     else {
       if (_eofEncountered) {
-	_current = -1;
+        _current = -1;
       }
       else {
-	_eofEncountered = true;
+        _eofEncountered = true;
       
-	_current = END_DOCUMENT;
+        _current = END_DOCUMENT;
       }
 
       return _current;
@@ -819,7 +819,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
       case '<':
         unread();
         break loop;
-	
+
       case '&':
         if (cBuf.length <= index + 256) {
           unread();
@@ -828,15 +828,15 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
         cBuf[index] = (char) ch;
         entity = index;
         break;
-	
+
       case '\r':
         ch = read();
         if (ch != '\n') { ch = '\r'; unread(); }
-	
+
       case ' ': case '\t': case '\n':
         cBuf[index] = (char) ch;
         break;
-	
+
       case ';':
         if (entity >= 0) {
           String unresolved = new String(cBuf, entity + 1, index - entity - 1);

@@ -306,15 +306,15 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
    * Main authenticator API.
    */
   protected Principal authenticate(Principal principal,
-				   PasswordCredentials cred,
-				   Object details)
+                                   PasswordCredentials cred,
+                                   Object details)
   {
     char []password = cred.getPassword();
     char []digest = getPasswordDigest(principal.getName(), password);
 
     return authenticate(principal.getName(),
-			new String(digest),
-			(HttpServletRequest) details);
+                        new String(digest),
+                        (HttpServletRequest) details);
   }
 
   /**
@@ -326,8 +326,8 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
    * @return the authenticated user or null for a failure
    */
   public Principal authenticate(String username,
-				String password,
-				HttpServletRequest request)
+                                String password,
+                                HttpServletRequest request)
   {
     Principal user = loginImpl(username, password);
 
@@ -339,7 +339,7 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
       cookieAuth = (String) request.getParameter("j_use_cookie_auth");
 
     if ("true".equals(cookieAuth) || "on".equals(cookieAuth)
-	|| _useCookie && cookieAuth == null) {
+        || _useCookie && cookieAuth == null) {
       addAuthCookie(user, request);
     }
 
@@ -366,7 +366,7 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
     * Adds a cookie to store authentication.
     */
   protected void addAuthCookie(Principal user,
-			       HttpServletRequest request)
+                               HttpServletRequest request)
   {
     /*
     Application app = (Application) application;
@@ -380,19 +380,19 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
       cookie.setPath("/");
 
       if (getCookieVersion() >= 0)
-	cookie.setVersion(getCookieVersion());
+        cookie.setVersion(getCookieVersion());
       else
-	cookie.setVersion(sm.getCookieVersion());
+        cookie.setVersion(sm.getCookieVersion());
 
       if (_cookieDomain != null)
-	cookie.setDomain(_cookieDomain);
+        cookie.setDomain(_cookieDomain);
       else if (getCookieDomain() != null)
-	cookie.setDomain(getCookieDomain());
+        cookie.setDomain(getCookieDomain());
       else
-	cookie.setDomain(sm.getCookieDomain());
+        cookie.setDomain(sm.getCookieDomain());
  
       if (_cookieMaxAge > 0)
-	cookie.setMaxAge((int) (_cookieMaxAge / 1000L));
+        cookie.setMaxAge((int) (_cookieMaxAge / 1000L));
 
       response.addCookie(cookie);
     }
@@ -488,10 +488,10 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
       String dbPassword = rs.getString(1);
 
       return new PasswordUser(new BasicPrincipal(username),
-			      dbPassword.toCharArray(),
-			      false,
-			      false,
-			      new String[0]);
+                              dbPassword.toCharArray(),
+                              false,
+                              false,
+                              new String[0]);
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
@@ -621,7 +621,7 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
       Boolean isInRole = cachingPrincipal.isInRole(role);
 
       if (isInRole != null)
-	return isInRole.equals(Boolean.TRUE);
+        return isInRole.equals(Boolean.TRUE);
     }
 
     Connection conn = null;
@@ -639,11 +639,11 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
       while (rs.next()) {
         String dbRole = rs.getString(1);
 
-	if (cachingPrincipal != null)
-	  cachingPrincipal.addRole(dbRole);
-	
+        if (cachingPrincipal != null)
+          cachingPrincipal.addRole(dbRole);
+
         if (role.equals(dbRole))
-	  inRole = true;
+          inRole = true;
       }
       
       return inRole;

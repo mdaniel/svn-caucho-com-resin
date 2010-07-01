@@ -38,5 +38,5 @@ import java.util.ArrayList;
 public interface ArtifactResolver
 {
   public void resolve(ArrayList<Artifact> artifactList,
-		      ArtifactDependency dependency);
+                      ArtifactDependency dependency);
 }

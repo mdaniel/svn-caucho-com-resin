@@ -112,24 +112,24 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
 
       switch (ch) {
       case '&':
-	_query.append("%26");
-	break;
-	
+        _query.append("%26");
+        break;
+
       case '%':
-	_query.append("%25");
-	break;
-	
+        _query.append("%25");
+        break;
+
       case '+':
-	_query.append("%2b");
-	break;
-	
+        _query.append("%2b");
+        break;
+
       case '=':
-	_query.append("%3d");
-	break;
-	
+        _query.append("%3d");
+        break;
+
       default:
-	_query.append(ch);
-	break;
+        _query.append(ch);
+        break;
       }
     }
   }
@@ -215,24 +215,24 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     }
     else {
       try {
-	JspWriter jspWriter = pageContext.pushBody();
+        JspWriter jspWriter = pageContext.pushBody();
           
-	BodyContentImpl body = (BodyContentImpl) pageContext.getOut();
+        BodyContentImpl body = (BodyContentImpl) pageContext.getOut();
 
-	handleBody(body);
+        handleBody(body);
 
-	if (_var != null) {
-	  String value = body.getString();
+        if (_var != null) {
+          String value = body.getString();
 
-	  pageContext.popBody();
+          pageContext.popBody();
 
-	  CoreSetTag.setValue(pageContext, _var, _scope, value);
+          CoreSetTag.setValue(pageContext, _var, _scope, value);
         }
-	else {
-	  body.writeOut(body.getEnclosingWriter());
-	  
-	  pageContext.popBody();
-	}
+        else {
+          body.writeOut(body.getEnclosingWriter());
+
+          pageContext.popBody();
+        }
       } catch (JspException e) {
         throw e;
       } catch (ServletException e) {
@@ -316,8 +316,8 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
         if (disp == null)
           throw new JspException(L.l("URL `{0}' does not map to any servlet",
                                      url));
-	
-	CauchoResponse response = (CauchoResponse) pageContext.getResponse();
+
+        CauchoResponse response = (CauchoResponse) pageContext.getResponse();
 
         String charEncoding = getCharEncoding();
 

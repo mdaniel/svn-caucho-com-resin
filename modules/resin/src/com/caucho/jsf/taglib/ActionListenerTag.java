@@ -92,30 +92,30 @@ public class ActionListenerTag extends TagSupport
       }
 
       if (listener == null && _type != null) {
-	String className = (String) _type.getValue(context.getELContext());
+        String className = (String) _type.getValue(context.getELContext());
 
-	if (className != null) {
-	  try {
-	    Thread thread = Thread.currentThread();
-	    ClassLoader loader = thread.getContextClassLoader();
-	    Class cl = Class.forName(className, false, loader);
+        if (className != null) {
+          try {
+            Thread thread = Thread.currentThread();
+            ClassLoader loader = thread.getContextClassLoader();
+            Class cl = Class.forName(className, false, loader);
 
-	    listener = (ActionListener) cl.newInstance();
-	  } catch (RuntimeException e) {
-	    throw e;
-	  } catch (Exception e) {
-	    throw new JspException(e);
-	  }
-	}
+            listener = (ActionListener) cl.newInstance();
+          } catch (RuntimeException e) {
+            throw e;
+          } catch (Exception e) {
+            throw new JspException(e);
+          }
+        }
       }
 
       if (listener == null)
-	throw new JspException(L.l("f:actionListener cannot create an actionListener"));
+        throw new JspException(L.l("f:actionListener cannot create an actionListener"));
 
       actionComp.addActionListener(listener);
       
       if (bindingExpr != null)
-	bindingExpr.setValue(context.getELContext(), listener);
+        bindingExpr.setValue(context.getELContext(), listener);
     }
     
     return SKIP_BODY;

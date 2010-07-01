@@ -64,10 +64,10 @@ public class Intern {
     InternQName qName;
     
     for (qName = _entries[bucket];
-	 qName != null;
-	 qName = qName._next) {
+         qName != null;
+         qName = qName._next) {
       if (qName.match(buffer, offset, length))
-	return qName;
+        return qName;
     }
 
     qName = new InternQName(_entries[bucket], buffer, offset, length, colon);

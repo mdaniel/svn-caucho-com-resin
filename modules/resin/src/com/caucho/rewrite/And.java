@@ -84,7 +84,7 @@ public class And implements RequestPredicate {
   {
     for (RequestPredicate predicate : _predicates) {
       if (! predicate.isMatch(request))
-	return false;
+        return false;
     }
 
     return true;

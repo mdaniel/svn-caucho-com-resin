@@ -79,14 +79,14 @@ public class CoreParamTag extends BodyTagSupport {
     Tag parent = getParent();
     for (; parent != null; parent = parent.getParent()) {
       if (parent instanceof NameValueTag) {
-	NameValueTag tag = (NameValueTag) parent;
+        NameValueTag tag = (NameValueTag) parent;
 
-	if (_value == null)
-	  tag.addParam(_name, "");
-	else
-	  tag.addParam(_name, _value);
-	
-	return SKIP_BODY;
+        if (_value == null)
+          tag.addParam(_name, "");
+        else
+          tag.addParam(_name, _value);
+
+        return SKIP_BODY;
       }
     }
       

@@ -82,8 +82,8 @@ public class ListenerEndpointFactory implements MessageEndpointFactory {
       _initialEndpoint = null;
 
       if (listener == null) {
-	listener = new ListenerEndpoint();
-	_program.configure(listener);
+        listener = new ListenerEndpoint();
+        _program.configure(listener);
       }
 
       return listener;

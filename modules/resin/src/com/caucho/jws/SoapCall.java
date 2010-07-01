@@ -71,7 +71,7 @@ public class SoapCall {
     public Body createBody()
     {
       if (_body == null)
-	_body = new Body();
+        _body = new Body();
 
       return _body;
     }
@@ -86,23 +86,23 @@ public class SoapCall {
       public CallResponse _callResponse;
 
       public CallResponse createNullCallResponse() {
-	if (_callResponse == null)
-	  _callResponse = new CallResponse();
+        if (_callResponse == null)
+          _callResponse = new CallResponse();
 
-	return _callResponse;
+        return _callResponse;
       }
 
       public String toString()
       {
-	return "<body>"+_callResponse+"</body>";
+        return "<body>"+_callResponse+"</body>";
       }
       
       public class CallResponse
       {
-	public String toString()
-	{
-	  return "<nullCallResponse/>";
-	}
+        public String toString()
+        {
+          return "<nullCallResponse/>";
+        }
       }
     }
   }

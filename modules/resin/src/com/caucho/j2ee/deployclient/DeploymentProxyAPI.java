@@ -52,8 +52,8 @@ public interface DeploymentProxyAPI {
    * Distributes the archive.
    */
   public ProgressObject distribute(Target []targets,
-				   InputStream deploymentPlan,
-				   InputStream archiveIs);
+                                   InputStream deploymentPlan,
+                                   InputStream archiveIs);
   /**
    * Starts the archive.
    */

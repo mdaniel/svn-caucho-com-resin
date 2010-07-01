@@ -227,8 +227,8 @@ public class ApplicationConfig
     throws ConfigException
   {
     Config.validate(propertyResolver,
-		    PropertyResolver.class,
-		    PropertyResolver.class);
+                    PropertyResolver.class,
+                    PropertyResolver.class);
     
     _propertyResolver = propertyResolver;
   }
@@ -294,36 +294,36 @@ public class ApplicationConfig
       ActionListener listener = null;
       
       try {
-	Constructor ctor
-	  = _actionListener.getConstructor(new Class [] { ActionListener.class });
+        Constructor ctor
+          = _actionListener.getConstructor(new Class [] { ActionListener.class });
 
-	ActionListener oldListener = app.getActionListener();
+        ActionListener oldListener = app.getActionListener();
 
-	listener = (ActionListener) ctor.newInstance(oldListener);
+        listener = (ActionListener) ctor.newInstance(oldListener);
       }
       catch (NoSuchMethodException e) {
       }
       catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
 
       if (listener == null) {
-	try {
-	  listener = (ActionListener) _actionListener.newInstance();
-	}
-	catch (RuntimeException e) {
-	  throw e;
-	}
-	catch (Exception e) {
-	  throw ConfigException.create(e);
-	}
+        try {
+          listener = (ActionListener) _actionListener.newInstance();
+        }
+        catch (RuntimeException e) {
+          throw e;
+        }
+        catch (Exception e) {
+          throw ConfigException.create(e);
+        }
       }
 
       if (listener != null) {
-	app.setActionListener(listener);
-	log.fine(L.l("JSF[] using '{0}' as action-listener", listener));
+        app.setActionListener(listener);
+        log.fine(L.l("JSF[] using '{0}' as action-listener", listener));
       }
     }
 
@@ -356,7 +356,7 @@ public class ApplicationConfig
 
       if (handler != null) {
         app.setViewHandler(handler);
-	log.fine(L.l("JSF[] using '{0}' as view-handler", handler));
+        log.fine(L.l("JSF[] using '{0}' as view-handler", handler));
       }
     }
 
@@ -390,7 +390,7 @@ public class ApplicationConfig
 
       if (handler != null) {
         app.setNavigationHandler(handler);
-	log.fine(L.l("JSF[] using '{0}' as navigation-handler", handler));
+        log.fine(L.l("JSF[] using '{0}' as navigation-handler", handler));
       }
     }
 
@@ -423,50 +423,50 @@ public class ApplicationConfig
 
       if (manager != null) {
         app.setStateManager(manager);
-	log.fine(L.l("JSF[] using '{0}' as state-manager", manager));
+        log.fine(L.l("JSF[] using '{0}' as state-manager", manager));
       }
     }
 
     for (int i = 0; i < _elResolverList.size(); i++)
-	   app.addELResolver(_elResolverList.get(i));
+           app.addELResolver(_elResolverList.get(i));
 
     if (_propertyResolver != null) {
       PropertyResolver propertyResolver = null;
 
       try {
-	Constructor ctor =
-	  _propertyResolver.getConstructor(PropertyResolver.class);
+        Constructor ctor =
+          _propertyResolver.getConstructor(PropertyResolver.class);
 
-	PropertyResolver oldPropertyResolver = app.getLegacyPropertyResolver();
+        PropertyResolver oldPropertyResolver = app.getLegacyPropertyResolver();
 
-	propertyResolver =
-	  (PropertyResolver) ctor.newInstance(oldPropertyResolver);
+        propertyResolver =
+          (PropertyResolver) ctor.newInstance(oldPropertyResolver);
       }
       catch (NoSuchMethodException e) {
       }
       catch (RuntimeException e) {
-	throw e;
+        throw e;
       }
       catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
 
       if (propertyResolver == null) {
-	try {
-	  propertyResolver = (PropertyResolver) _propertyResolver.newInstance();
-	}
-	catch (RuntimeException e) {
-	  throw e;
-	}
-	catch (Exception e) {
-	  throw ConfigException.create(e);
-	}
+        try {
+          propertyResolver = (PropertyResolver) _propertyResolver.newInstance();
+        }
+        catch (RuntimeException e) {
+          throw e;
+        }
+        catch (Exception e) {
+          throw ConfigException.create(e);
+        }
       }
 
       if (propertyResolver != null) {
-	app.setPropertyResolver(propertyResolver);
-	log.fine(L.l("JSF[] using '{0}' as property-resolver",
-		     propertyResolver));
+        app.setPropertyResolver(propertyResolver);
+        log.fine(L.l("JSF[] using '{0}' as property-resolver",
+                     propertyResolver));
       }
     }
 
@@ -474,39 +474,39 @@ public class ApplicationConfig
       VariableResolver variableResolver = null;
 
       try {
-	Constructor ctor =
-	  _variableResolver.getConstructor(VariableResolver.class);
+        Constructor ctor =
+          _variableResolver.getConstructor(VariableResolver.class);
 
-	VariableResolver oldVariableResolver = app.getLegacyVariableResolver();
+        VariableResolver oldVariableResolver = app.getLegacyVariableResolver();
 
         variableResolver =
-	  (VariableResolver) ctor.newInstance(oldVariableResolver);
+          (VariableResolver) ctor.newInstance(oldVariableResolver);
       }
       catch (NoSuchMethodException e) {
       }
       catch (RuntimeException e) {
-	throw e;
+        throw e;
       }
       catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
 
       if (variableResolver == null) {
-	try {
-	  variableResolver = (VariableResolver) _variableResolver.newInstance();
-	}
-	catch (RuntimeException e) {
-	  throw e;
-	}
-	catch (Exception e) {
-	  throw ConfigException.create(e);
-	}
+        try {
+          variableResolver = (VariableResolver) _variableResolver.newInstance();
+        }
+        catch (RuntimeException e) {
+          throw e;
+        }
+        catch (Exception e) {
+          throw ConfigException.create(e);
+        }
       }
 
       if (variableResolver != null) {
-	app.setVariableResolver(variableResolver);
-	log.fine(L.l("JSF[] using '{0}' as variable-resolver",
-		     variableResolver));
+        app.setVariableResolver(variableResolver);
+        log.fine(L.l("JSF[] using '{0}' as variable-resolver",
+                     variableResolver));
       }
     }
   }
@@ -533,7 +533,7 @@ public class ApplicationConfig
     public void configure(Application app)
     {
       if (_defaultLocale != null) {
-	app.setDefaultLocale(_defaultLocale);
+        app.setDefaultLocale(_defaultLocale);
       }
 
       app.setSupportedLocales(_supportedLocales);

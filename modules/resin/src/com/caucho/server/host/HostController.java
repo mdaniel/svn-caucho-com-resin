@@ -91,9 +91,9 @@ public class HostController
   private ArrayList<Dependency> _dependList = new ArrayList<Dependency>();
 
   HostController(String id,
-		 HostConfig config,
-		 HostContainer container,
-		 Map<String,Object> varMap)
+                 HostConfig config,
+                 HostContainer container,
+                 Map<String,Object> varMap)
   {
     super(id, config);
 
@@ -110,8 +110,8 @@ public class HostController
   }
 
   public HostController(String id,
-			Path rootDirectory,
-			HostContainer container)
+                        Path rootDirectory,
+                        HostContainer container)
   {
     super(id, rootDirectory);
 
@@ -131,7 +131,7 @@ public class HostController
     
     if (_container != null) {
       for (HostConfig defaultConfig : _container.getHostDefaultList())
-	addConfigDefault(defaultConfig);
+        addConfigDefault(defaultConfig);
     }
   }
 
@@ -276,36 +276,36 @@ public class HostController
   {
     try {
       try {
-	if (getConfig() == null || getHostName() != null) {
-	}
-	else if (getConfig().getHostName() != null)
-	  setHostName(EL.evalString(getConfig().getHostName(),
-				    EL.getEnvironment()));
+        if (getConfig() == null || getHostName() != null) {
+        }
+        else if (getConfig().getHostName() != null)
+          setHostName(EL.evalString(getConfig().getHostName(),
+                                    EL.getEnvironment()));
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
 
       if (_regexpName != null && _hostName == null)
-	_hostName = _regexpName;
+        _hostName = _regexpName;
 
       if (_hostName == null)
-	_hostName = "";
+        _hostName = "";
 
       ArrayList<String> aliases = null;
 
       if (getConfig() != null) {
-	aliases = getConfig().getHostAliases();
+        aliases = getConfig().getHostAliases();
 
-	_entryHostAliasRegexps.addAll(getConfig().getHostAliasRegexps());
-	_hostAliasRegexps.addAll(getConfig().getHostAliasRegexps());
+        _entryHostAliasRegexps.addAll(getConfig().getHostAliasRegexps());
+        _hostAliasRegexps.addAll(getConfig().getHostAliasRegexps());
       }
       
       for (int i = 0; aliases != null && i < aliases.size(); i++) {
-	String alias = aliases.get(i);
+        String alias = aliases.get(i);
 
-	alias = EL.evalString(alias, EL.getEnvironment());
-	
-	addHostAlias(alias);
+        alias = EL.evalString(alias, EL.getEnvironment());
+
+        addHostAlias(alias);
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -345,14 +345,14 @@ public class HostController
 
     for (int i = _hostAliases.size() - 1; i >= 0; i--) {
       if (name.equalsIgnoreCase(_hostAliases.get(i)))
-	return true;
+        return true;
     }
 
     for (int i = _hostAliasRegexps.size() - 1; i >= 0; i--) {
       Pattern alias = _hostAliasRegexps.get(i);
 
       if (alias.matcher(name).find())
-	return true;
+        return true;
     }
 
     if (_regexp != null) {
@@ -361,10 +361,10 @@ public class HostController
       Matcher matcher = _regexp.matcher(name);
 
       if (matcher.matches()) {
-	Path rootDirectory = calculateRoot(matcher);
+        Path rootDirectory = calculateRoot(matcher);
 
-	if (getRootDirectory().equals(rootDirectory))
-	  return true;
+        if (getRootDirectory().equals(rootDirectory))
+          return true;
       }
     }
     
@@ -382,8 +382,8 @@ public class HostController
       thread.setContextClassLoader(getParentClassLoader());
 
       if (_rootDirectoryPattern == null) {
-	// server/129p
-	return Vfs.lookup();
+        // server/129p
+        return Vfs.lookup();
       }
       
       int length = matcher.end() - matcher.start();
@@ -393,8 +393,8 @@ public class HostController
       HashMap<String,Object> varMap = new HashMap<String,Object>();
         
       for (int j = 0; j <= matcher.groupCount(); j++) {
-	vars.add(matcher.group(j));
-	varMap.put("host" + j, matcher.group(j));
+        vars.add(matcher.group(j));
+        varMap.put("host" + j, matcher.group(j));
       }
 
       varMap.put("regexp", vars);
@@ -421,45 +421,45 @@ public class HostController
     if (getConfig() != null && getConfig().getRegexp() != null)
       return newController;
     else if (newController.getConfig() != null
-	     && newController.getConfig().getRegexp() != null)
+             && newController.getConfig().getRegexp() != null)
       return this;
     else {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-	thread.setContextClassLoader(getParentClassLoader());
+        thread.setContextClassLoader(getParentClassLoader());
 
-	HostController mergedController
-	  = new HostController(newController.getHostName(),
-			       getRootDirectory(),
-			       _container);
+        HostController mergedController
+          = new HostController(newController.getHostName(),
+                               getRootDirectory(),
+                               _container);
 
-	mergedController.mergeController(this);
-	mergedController.mergeController(newController);
+        mergedController.mergeController(this);
+        mergedController.mergeController(newController);
 
-	if (! isNameMatch(newController.getHostName())
-	    && ! newController.isNameMatch(getHostName())) {
-	  ConfigException e;
+        if (! isNameMatch(newController.getHostName())
+            && ! newController.isNameMatch(getHostName())) {
+          ConfigException e;
 
-	  e = new ConfigException(L.l("Illegal merge of {0} and {1}.  Both hosts have the same root-directory '{2}'.",
-					getHostName(),
-					newController.getHostName(),
-					getRootDirectory()));
+          e = new ConfigException(L.l("Illegal merge of {0} and {1}.  Both hosts have the same root-directory '{2}'.",
+                                        getHostName(),
+                                        newController.getHostName(),
+                                        getRootDirectory()));
 
-	  log.warning(e.getMessage());
-	  log.log(Level.FINEST, e.toString(), e);
+          log.warning(e.getMessage());
+          log.log(Level.FINEST, e.toString(), e);
 
-	  mergedController.setConfigException(e);
-	}
+          mergedController.setConfigException(e);
+        }
 
-	return mergedController;
+        return mergedController;
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	return null;
+        log.log(Level.FINE, e.toString(), e);
+
+        return null;
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     }
   }
@@ -511,15 +511,15 @@ public class HostController
       Object value = entry.getValue();
       
       if (value != null)
-	Config.setProperty(entry.getKey(), value);
+        Config.setProperty(entry.getKey(), value);
     }
 
     if (_container != null) {
       for (EarConfig config : _container.getEarDefaultList())
-	host.addEarDefault(config);
+        host.addEarDefault(config);
 
       for (WebAppConfig config : _container.getWebAppDefaultList())
-	host.addWebAppDefault(config);
+        host.addWebAppDefault(config);
     }
 
     super.configureInstance(host);
@@ -578,14 +578,14 @@ public class HostController
       Host host = getDeployInstance();
       
       if (host != null)
-	return host.getURL();
+        return host.getURL();
       else if (_hostName.equals(""))
-	return "";
+        return "";
       else if (_hostName.startsWith("http:")
-	       || _hostName.startsWith("https:"))
-	return _hostName;
+               || _hostName.startsWith("https:"))
+        return _hostName;
       else
-	return "http://" + _hostName;
+        return "http://" + _hostName;
     }
 
     public ArrayList getRegexp()
@@ -598,9 +598,9 @@ public class HostController
       Host host = getDeployInstance();
       
       if (host != null)
-	return host.getRootDirectory();
+        return host.getRootDirectory();
       else
-	return HostController.this.getRootDirectory();
+        return HostController.this.getRootDirectory();
     }
     
     /**
@@ -624,9 +624,9 @@ public class HostController
       Host host = getDeployInstance();
       
       if (host != null)
-	return host.getDocumentDirectory();
+        return host.getDocumentDirectory();
       else
-	return null;
+        return null;
     }
     
     public Path getDocDir()
@@ -639,9 +639,9 @@ public class HostController
       Host host = getDeployInstance();
       
       if (host != null)
-	return host.getWarDir();
+        return host.getWarDir();
       else
-	return null;
+        return null;
     }
     
     public Path getWarDir()
@@ -654,9 +654,9 @@ public class HostController
       Host host = getDeployInstance();
       
       if (host != null)
-	return host.getWarExpandDir();
+        return host.getWarExpandDir();
       else
-	return null;
+        return null;
     }
     
     public Path getWarExpandDir()

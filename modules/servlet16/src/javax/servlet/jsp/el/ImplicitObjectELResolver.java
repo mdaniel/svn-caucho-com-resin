@@ -58,7 +58,7 @@ public class ImplicitObjectELResolver extends ELResolver {
   
   @Override
   public Class<String> getCommonPropertyType(ELContext context,
-					     Object base)
+                                             Object base)
   {
     if (base == null)
       return String.class;
@@ -78,8 +78,8 @@ public class ImplicitObjectELResolver extends ELResolver {
 
   @Override
     public Class getType(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base != null)
       return null;
@@ -95,8 +95,8 @@ public class ImplicitObjectELResolver extends ELResolver {
 
   @Override
     public Object getValue(ELContext context,
-			   Object base,
-			   Object property)
+                           Object base,
+                           Object property)
   {
     if (base != null)
       return null;
@@ -115,166 +115,166 @@ public class ImplicitObjectELResolver extends ELResolver {
       
     case PAGE_SCOPE:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	Enumeration e = jspContext.getAttributeNamesInScope(PageContext.PAGE_SCOPE);
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, jspContext.getAttribute(name));
-	}
+        Enumeration e = jspContext.getAttributeNamesInScope(PageContext.PAGE_SCOPE);
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, jspContext.getAttribute(name));
+        }
+
+        return map;
       }
       
     case REQUEST_SCOPE:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	ServletRequest request = jspContext.getRequest();
+        ServletRequest request = jspContext.getRequest();
 
-	Enumeration e = request.getAttributeNames();
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, request.getAttribute(name));
-	}
+        Enumeration e = request.getAttributeNames();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, request.getAttribute(name));
+        }
+
+        return map;
       }
       
     case SESSION_SCOPE:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	HttpSession session = jspContext.getSession();
+        HttpSession session = jspContext.getSession();
 
-	if (session == null)
-	  return null;
+        if (session == null)
+          return null;
 
-	Enumeration e = session.getAttributeNames();
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, session.getAttribute(name));
-	}
+        Enumeration e = session.getAttributeNames();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, session.getAttribute(name));
+        }
+
+        return map;
       }
       
     case APPLICATION_SCOPE:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	ServletContext app = jspContext.getServletContext();
+        ServletContext app = jspContext.getServletContext();
 
-	Enumeration e = app.getAttributeNames();
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, app.getAttribute(name));
-	}
+        Enumeration e = app.getAttributeNames();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, app.getAttribute(name));
+        }
+
+        return map;
       }
       
     case PARAM:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	ServletRequest request = jspContext.getRequest();
+        ServletRequest request = jspContext.getRequest();
 
-	Enumeration e = request.getParameterNames();
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, request.getParameter(name));
-	}
+        Enumeration e = request.getParameterNames();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, request.getParameter(name));
+        }
+
+        return map;
       }
       
     case PARAM_VALUES:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	ServletRequest request = jspContext.getRequest();
+        ServletRequest request = jspContext.getRequest();
 
-	Enumeration e = request.getParameterNames();
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, request.getParameterValues(name));
-	}
+        Enumeration e = request.getParameterNames();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, request.getParameterValues(name));
+        }
+
+        return map;
       }
       
     case HEADER:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	HttpServletRequest request = (HttpServletRequest) jspContext.getRequest();
+        HttpServletRequest request = (HttpServletRequest) jspContext.getRequest();
 
-	Enumeration e = request.getHeaderNames();
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, request.getHeader(name));
-	}
+        Enumeration e = request.getHeaderNames();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, request.getHeader(name));
+        }
+
+        return map;
       }
       
     case HEADER_VALUES:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	HttpServletRequest request = (HttpServletRequest) jspContext.getRequest();
+        HttpServletRequest request = (HttpServletRequest) jspContext.getRequest();
 
-	Enumeration e = request.getHeaderNames();
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, request.getHeaders(name));
-	}
+        Enumeration e = request.getHeaderNames();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, request.getHeaders(name));
+        }
+
+        return map;
       }
       
     case COOKIE:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	HttpServletRequest request
-	  = (HttpServletRequest) jspContext.getRequest();
+        HttpServletRequest request
+          = (HttpServletRequest) jspContext.getRequest();
 
-	Cookie []cookies = request.getCookies();
+        Cookie []cookies = request.getCookies();
 
-	if (cookies == null)
-	  return map;
-	
-	for (int i = cookies.length - 1; i >= 0; i--) {
-	  map.put(cookies[i].getName(), cookies[i].getValue());
-	}
+        if (cookies == null)
+          return map;
 
-	return map;
+        for (int i = cookies.length - 1; i >= 0; i--) {
+          map.put(cookies[i].getName(), cookies[i].getValue());
+        }
+
+        return map;
       }
     
     case INIT_PARAM:
       {
-	HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
 
-	ServletContext app = jspContext.getServletContext();
+        ServletContext app = jspContext.getServletContext();
 
-	Enumeration e = app.getInitParameterNames();
-	while (e.hasMoreElements()) {
-	  String name = (String) e.nextElement();
-	  
-	  map.put(name, app.getInitParameter(name));
-	}
+        Enumeration e = app.getInitParameterNames();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
 
-	return map;
+          map.put(name, app.getInitParameter(name));
+        }
+
+        return map;
       }
     }
 
@@ -283,8 +283,8 @@ public class ImplicitObjectELResolver extends ELResolver {
 
   @Override
     public boolean isReadOnly(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base != null)
       return true;
@@ -299,9 +299,9 @@ public class ImplicitObjectELResolver extends ELResolver {
 
   @Override
     public void setValue(ELContext context,
-			 Object base,
-			 Object property,
-			 Object value)
+                         Object base,
+                         Object property,
+                         Object value)
   {
     if (base != null)
       return;
@@ -354,9 +354,9 @@ public class ImplicitObjectELResolver extends ELResolver {
       desc.setPreferred(true);
 
       desc.setValue(ELResolver.TYPE, Map.class);
-	
+
       desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
-	
+
       _featureDescriptors.add(desc);
     }
   }

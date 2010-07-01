@@ -39,8 +39,8 @@ public interface TopicSession extends Session {
     throws JMSException;
   
   public TopicSubscriber createDurableSubscriber(Topic topic, String name,
-						 String messageSelector,
-						 boolean noLocal)
+                                                 String messageSelector,
+                                                 boolean noLocal)
     throws JMSException;
   
   public TopicPublisher createPublisher(Topic topic)
@@ -50,8 +50,8 @@ public interface TopicSession extends Session {
     throws JMSException;
   
   public TopicSubscriber createSubscriber(Topic topic,
-					  String messageSelector,
-					  boolean noLocal)
+                                          String messageSelector,
+                                          boolean noLocal)
     throws JMSException;
 
   public TemporaryTopic createTemporaryTopic()

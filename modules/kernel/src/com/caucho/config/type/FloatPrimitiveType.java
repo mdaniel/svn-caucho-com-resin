@@ -84,6 +84,6 @@ public final class FloatPrimitiveType extends ConfigType
       return new Float(((Number) value).floatValue());
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to an float",
-				    value));
+                                    value));
   }
 }

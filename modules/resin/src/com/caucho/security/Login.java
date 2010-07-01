@@ -98,8 +98,8 @@ public interface Login {
    * @return the logged in principal on success, null on failure.
    */
   public Principal login(HttpServletRequest request,
-			 HttpServletResponse response,
-			 boolean isFail);
+                         HttpServletResponse response,
+                         boolean isFail);
 
   /**
    * Returns true if username and password based authentication is supported.
@@ -128,12 +128,12 @@ public interface Login {
    * in the ServletContext attribute "caucho.login".
    */
   public void logout(Principal user,
-		     HttpServletRequest request,
+                     HttpServletRequest request,
                      HttpServletResponse response);
   
   /**
    * Called when the session invalidates.
    */
   public void sessionInvalidate(HttpSession session,
-				boolean isTimeout);
+                                boolean isTimeout);
 }

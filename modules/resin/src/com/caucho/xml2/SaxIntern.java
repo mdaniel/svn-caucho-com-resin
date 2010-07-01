@@ -47,7 +47,7 @@ public class SaxIntern {
   }
 
   Entry add(char []buffer, int offset, int length, int colon,
-	    boolean isAttribute)
+            boolean isAttribute)
   {
     int hash = 0;
 
@@ -60,16 +60,16 @@ public class SaxIntern {
     Entry entry;
     
     for (entry = _entries[bucket];
-	 entry != null;
-	 entry = entry._next) {
+         entry != null;
+         entry = entry._next) {
       if (entry.match(buffer, offset, length, isAttribute))
-	return entry;
+        return entry;
     }
 
     entry = new Entry(_entries[bucket],
-		      buffer, offset, length,
-		      colon,
-		      isAttribute);
+                      buffer, offset, length,
+                      colon,
+                      isAttribute);
     _entries[bucket] = entry;
 
     return entry;
@@ -93,9 +93,9 @@ public class SaxIntern {
     QName _qName;
 
     Entry(Entry next,
-	  char []buf, int offset, int length,
-	  int colon,
-	  boolean isAttribute)
+          char []buf, int offset, int length,
+          int colon,
+          boolean isAttribute)
     {
       _next = next;
       
@@ -105,37 +105,37 @@ public class SaxIntern {
       _isAttribute = isAttribute;
 
       if (colon > offset) {
-	_prefix = new String(buf, offset, colon - offset);
-	_localName = new String(buf, colon + 1, length - colon - 1);
+        _prefix = new String(buf, offset, colon - offset);
+        _localName = new String(buf, colon + 1, length - colon - 1);
 
-	_isXmlns = isAttribute && colon == 5 && "xmlns".equals(_prefix);
+        _isXmlns = isAttribute && colon == 5 && "xmlns".equals(_prefix);
       }
       else {
-	_prefix = null;
-	_localName = new String(buf, 0, length);
-	
-	_isXmlns = isAttribute && length == 5 && "xmlns".equals(_localName);
+        _prefix = null;
+        _localName = new String(buf, 0, length);
+
+        _isXmlns = isAttribute && length == 5 && "xmlns".equals(_localName);
       }
 
       if (_isAttribute)
-	_namespace = _namespaceContext.getAttributeNamespace(_prefix);
+        _namespace = _namespaceContext.getAttributeNamespace(_prefix);
       else
-	_namespace = _namespaceContext.getElementNamespace(_prefix);
+        _namespace = _namespaceContext.getElementNamespace(_prefix);
 
       fillQName();
     }
 
     public final boolean match(char []buf, int offset, int length,
-			       boolean isAttribute)
+                               boolean isAttribute)
     {
       if (length != _buf.length || _isAttribute != isAttribute)
-	return false;
+        return false;
 
       char []entryBuf = _buf;
       
       for (length--; length >= 0; length--) {
-	if (entryBuf[length] != buf[offset + length])
-	  return false;
+        if (entryBuf[length] != buf[offset + length])
+          return false;
       }
 
       return true;
@@ -144,7 +144,7 @@ public class SaxIntern {
     String getName()
     {
       if (_name == null)
-	_name = new String(_buf, 0, _buf.length);
+        _name = new String(_buf, 0, _buf.length);
 
       return _name;
     }
@@ -167,7 +167,7 @@ public class SaxIntern {
     QName getQName()
     {
       if (_version != _namespace.getVersion())
-	fillQName();
+        fillQName();
       
       return _qName;
     }
@@ -184,7 +184,7 @@ public class SaxIntern {
       String prefix = _prefix;
 
       if (prefix == null)
-	prefix = "";
+        prefix = "";
 
       _qName = new QName(_namespace.getUri(), _localName, prefix);
     }

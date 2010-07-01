@@ -60,7 +60,7 @@ public class ResultSetDataModel extends DataModel
       return null;
     else if (isRowAvailable()) {
       if (_map == null)
-	_map = new DataMap(_rs, getMetaData());
+        _map = new DataMap(_rs, getMetaData());
 
       return _map;
     }
@@ -106,7 +106,7 @@ public class ResultSetDataModel extends DataModel
       DataModelEvent event = new DataModelEvent(this, index, _rs);
 
       for (int i = 0; i < listeners.length; i++) {
-	listeners[i].rowSelected(event);
+        listeners[i].rowSelected(event);
       }
     }
     
@@ -117,7 +117,7 @@ public class ResultSetDataModel extends DataModel
   {
     try {
       if (_metaData == null) {
-	_metaData = _rs.getMetaData();
+        _metaData = _rs.getMetaData();
       }
 
       return _metaData;
@@ -139,9 +139,9 @@ public class ResultSetDataModel extends DataModel
       _metaData = metaData;
 
       try {
-	_columnCount = _metaData.getColumnCount();
+        _columnCount = _metaData.getColumnCount();
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 
@@ -151,12 +151,12 @@ public class ResultSetDataModel extends DataModel
       int column = getColumn(String.valueOf(key));
       
       if (column < 0)
-	throw new IllegalArgumentException("'" + key + "' is an unknown column");
+        throw new IllegalArgumentException("'" + key + "' is an unknown column");
 
       try {
-	return _rs.getObject(column + 1);
+        return _rs.getObject(column + 1);
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 
@@ -175,7 +175,7 @@ public class ResultSetDataModel extends DataModel
     public Set<String> keySet()
     {
       if (_keySet == null)
-	_keySet = new DataMapKeySet(_metaData);
+        _keySet = new DataMapKeySet(_metaData);
       
       return _keySet;
     }
@@ -197,27 +197,27 @@ public class ResultSetDataModel extends DataModel
     public Object put(String k, Object value)
     {
       try {
-	String key = String.valueOf(k);
+        String key = String.valueOf(k);
 
-	int column = getColumn(key) + 1;
+        int column = getColumn(key) + 1;
 
-	if (column <= 0)
-	  throw new IllegalArgumentException();
-	
-	_rs.updateObject(column, value);
+        if (column <= 0)
+          throw new IllegalArgumentException();
 
-	return null;
+        _rs.updateObject(column, value);
+
+        return null;
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       }
     }
     
     public Set<Entry<String,Object>> entrySet()
     {
       if (_entrySet == null)
-	_entrySet = new DataMapEntrySet(_rs, _metaData);
+        _entrySet = new DataMapEntrySet(_rs, _metaData);
       
       return _entrySet;
     }
@@ -225,14 +225,14 @@ public class ResultSetDataModel extends DataModel
     private int getColumn(String key)
     {
       try {
-	for (int i = 0; i < _columnCount; i++) {
-	  if (_metaData.getColumnName(i + 1).equalsIgnoreCase(key))
-	    return i;
-	}
+        for (int i = 0; i < _columnCount; i++) {
+          if (_metaData.getColumnName(i + 1).equalsIgnoreCase(key))
+            return i;
+        }
 
-	return -1;
+        return -1;
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
   }
@@ -248,9 +248,9 @@ public class ResultSetDataModel extends DataModel
       _metaData = metaData;
 
       try {
-	_columnCount = _metaData.getColumnCount();
+        _columnCount = _metaData.getColumnCount();
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
     
@@ -263,16 +263,16 @@ public class ResultSetDataModel extends DataModel
     public boolean contains(Object v)
     {
       try {
-	String key = String.valueOf(v);
-	
-	for (int i = 0; i < _columnCount; i++) {
-	  if (_metaData.getColumnName(i + 1).equalsIgnoreCase(key))
-	    return true;
-	}
+        String key = String.valueOf(v);
 
-	return false;
+        for (int i = 0; i < _columnCount; i++) {
+          if (_metaData.getColumnName(i + 1).equalsIgnoreCase(key))
+            return true;
+        }
+
+        return false;
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 
@@ -287,13 +287,13 @@ public class ResultSetDataModel extends DataModel
       ArrayList<String> keys = new ArrayList<String>();
 
       try {
-	for (int i = 0; i < _columnCount; i++) {
-	  keys.add(_metaData.getColumnName(i + 1));
-	}
+        for (int i = 0; i < _columnCount; i++) {
+          keys.add(_metaData.getColumnName(i + 1));
+        }
 
-	return Collections.unmodifiableList(keys).iterator();
+        return Collections.unmodifiableList(keys).iterator();
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
   }
@@ -319,17 +319,17 @@ public class ResultSetDataModel extends DataModel
     public boolean contains(Object v)
     {
       try {
-	if (v == null)
-	  return false;
-	
-	for (int i = 0; i < _columnCount; i++) {
-	  if (v.equals(_rs.getObject(i + 1)))
-	    return true;
-	}
+        if (v == null)
+          return false;
 
-	return false;
+        for (int i = 0; i < _columnCount; i++) {
+          if (v.equals(_rs.getObject(i + 1)))
+            return true;
+        }
+
+        return false;
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 
@@ -344,13 +344,13 @@ public class ResultSetDataModel extends DataModel
       ArrayList values = new ArrayList();
 
       try {
-	for (int i = 0; i < _columnCount; i++) {
-	  values.add(_rs.getObject(i + 1));
-	}
+        for (int i = 0; i < _columnCount; i++) {
+          values.add(_rs.getObject(i + 1));
+        }
 
-	return Collections.unmodifiableList(values).iterator();
+        return Collections.unmodifiableList(values).iterator();
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
   }
@@ -369,9 +369,9 @@ public class ResultSetDataModel extends DataModel
       _metaData = metaData;
 
       try {
-	_columnCount = _metaData.getColumnCount();
+        _columnCount = _metaData.getColumnCount();
       } catch (SQLException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
     
@@ -415,9 +415,9 @@ public class ResultSetDataModel extends DataModel
     public Map.Entry<String,Object> next()
     {
       if (_index++ < _count)
-	return _entry;
+        return _entry;
       else
-	return null;
+        return null;
     }
 
     public void remove()
@@ -428,31 +428,31 @@ public class ResultSetDataModel extends DataModel
     class Entry implements Map.Entry<String,Object> {
       public String getKey()
       {
-	try {
-	  return _metaData.getColumnName(_index);
-	} catch (SQLException e) {
-	  throw new RuntimeException(e);
-	}
+        try {
+          return _metaData.getColumnName(_index);
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
       }
       
       public Object getValue()
       {
-	try {
-	  return _rs.getObject(_index);
-	} catch (SQLException e) {
-	  throw new RuntimeException(e);
-	}
+        try {
+          return _rs.getObject(_index);
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
       }
 
       public Object setValue(Object value)
       {
-	try {
-	  _rs.updateObject(_index, value);
-	} catch (SQLException e) {
-	  throw new RuntimeException(e);
-	}
+        try {
+          _rs.updateObject(_index, value);
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
 
-	return null;
+        return null;
       }
     }
   }

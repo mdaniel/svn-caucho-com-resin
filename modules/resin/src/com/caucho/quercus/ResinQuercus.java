@@ -125,19 +125,19 @@ public class ResinQuercus extends QuercusContext
       ModuleContext context = _localModuleContext.getLevel(loader);
 
       if (context == null) {
-	ClassLoader envLoader = Environment.getEnvironmentClassLoader(loader);
+        ClassLoader envLoader = Environment.getEnvironmentClassLoader(loader);
 
-	ModuleContext parent = null;
+        ModuleContext parent = null;
     
-	if (envLoader != null) {
-	  parent = getLocalContext(envLoader.getParent());
-	}
+        if (envLoader != null) {
+          parent = getLocalContext(envLoader.getParent());
+        }
 
-	context = createModuleContext(parent, loader);
-	
-	_localModuleContext.set(context, loader);
+        context = createModuleContext(parent, loader);
 
-	context.init();
+        _localModuleContext.set(context, loader);
+
+        context.init();
       }
 
       return context;
@@ -146,7 +146,7 @@ public class ResinQuercus extends QuercusContext
 
   @Override
   protected ModuleContext createModuleContext(ModuleContext parent,
-					      ClassLoader loader)
+                                              ClassLoader loader)
   {
     return new ResinModuleContext(parent, loader);
   }
@@ -216,11 +216,11 @@ public class ResinQuercus extends QuercusContext
   {
     try {
       if (getDatabase() != null)
-	return getDatabase();
+        return getDatabase();
       else if (isConnectionPool())
-	return DatabaseManager.findDatabase(url, driver);
+        return DatabaseManager.findDatabase(url, driver);
       else
-	return super.findDatabase(driver, url);
+        return super.findDatabase(driver, url);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

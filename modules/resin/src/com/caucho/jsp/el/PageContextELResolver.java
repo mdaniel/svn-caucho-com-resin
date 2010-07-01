@@ -68,7 +68,7 @@ public class PageContextELResolver extends AbstractVariableResolver {
   private final BeanELResolver _beanResolver = new BeanELResolver();
 
   public PageContextELResolver(PageContextImpl pageContext,
-			       ELResolver []customResolvers)
+                               ELResolver []customResolvers)
   {
     _pageContext = pageContext;
     _customResolvers = customResolvers;
@@ -81,7 +81,7 @@ public class PageContextELResolver extends AbstractVariableResolver {
 
   @Override
   public Class<?> getCommonPropertyType(ELContext env,
-					Object base)
+                                        Object base)
   {
     Class common = null;
 
@@ -90,7 +90,7 @@ public class PageContextELResolver extends AbstractVariableResolver {
 
     for (int i = 0; i < _customResolvers.length; i++) {
       common = common(common,
-		      _customResolvers[i].getCommonPropertyType(env, base));
+                      _customResolvers[i].getCommonPropertyType(env, base));
     }
 
     common = common(common, _mapResolver.getCommonPropertyType(env, base));
@@ -118,31 +118,31 @@ public class PageContextELResolver extends AbstractVariableResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
-							   Object base)
+                                                           Object base)
   {
     ArrayList<FeatureDescriptor> descriptors
       = new ArrayList<FeatureDescriptor>();
 
     for (int i = 0; i < _customResolvers.length; i++) {
       addDescriptors(descriptors,
-		     _customResolvers[i].getFeatureDescriptors(env, base));
+                     _customResolvers[i].getFeatureDescriptors(env, base));
     }
 
     addDescriptors(descriptors, _mapResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
-		   _beanResolver.getFeatureDescriptors(env, base));
+                   _beanResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
-		   _bundleResolver.getFeatureDescriptors(env, base));
+                   _bundleResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
-		   _implicitResolver.getFeatureDescriptors(env, base));
+                   _implicitResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
-		   _attrResolver.getFeatureDescriptors(env, base));
+                   _attrResolver.getFeatureDescriptors(env, base));
 
     return descriptors.iterator();
   }
 
   private void addDescriptors(ArrayList<FeatureDescriptor> descriptors,
-			      Iterator<FeatureDescriptor> iter)
+                              Iterator<FeatureDescriptor> iter)
   {
     if (iter == null)
       return;
@@ -161,32 +161,32 @@ public class PageContextELResolver extends AbstractVariableResolver {
       env.setPropertyResolved(false);
 
       for (int i = 0; i < _customResolvers.length; i++) {
-	Object value = _customResolvers[i].getValue(env, base, property);
+        Object value = _customResolvers[i].getValue(env, base, property);
 
-	if (env.isPropertyResolved()) {
-	  return value;
-	}
+        if (env.isPropertyResolved()) {
+          return value;
+        }
       }
     
       if (base != null) {
-	if (base instanceof Map)
-	  return _mapResolver.getValue(env, base, property);
-	else if (base instanceof List)
-	  return _listResolver.getValue(env, base, property);
-	else if (base.getClass().isArray())
-	  return _arrayResolver.getValue(env, base, property);
-	else if (base instanceof PropertyResourceBundle)
-	  return _bundleResolver.getValue(env, base, property);
-	else
-	  return _beanResolver.getValue(env, base, property);
+        if (base instanceof Map)
+          return _mapResolver.getValue(env, base, property);
+        else if (base instanceof List)
+          return _listResolver.getValue(env, base, property);
+        else if (base.getClass().isArray())
+          return _arrayResolver.getValue(env, base, property);
+        else if (base instanceof PropertyResourceBundle)
+          return _bundleResolver.getValue(env, base, property);
+        else
+          return _beanResolver.getValue(env, base, property);
       }
       else if (property instanceof String) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return _pageContext.findAttribute(property.toString());
+        return _pageContext.findAttribute(property.toString());
       }
       else
-	return null;
+        return null;
     }
     catch (PropertyNotFoundException e) {
       // jsp/3253
@@ -196,7 +196,7 @@ public class PageContextELResolver extends AbstractVariableResolver {
       // jsp/3094 vs jsp/30cc
 
       if (e.getCause() != null)
-	throw e;
+        throw e;
       
       log.log(Level.FINER, e.toString(), e);
 
@@ -213,20 +213,20 @@ public class PageContextELResolver extends AbstractVariableResolver {
       Class value = _customResolvers[i].getType(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
     }
     
     if (base != null) {
       if (base instanceof Map)
-	return _mapResolver.getType(env, base, property);
+        return _mapResolver.getType(env, base, property);
       else if (base instanceof List)
-	return _listResolver.getType(env, base, property);
+        return _listResolver.getType(env, base, property);
       else if (base.getClass().isArray())
-	return _arrayResolver.getType(env, base, property);
+        return _arrayResolver.getType(env, base, property);
       else if (base instanceof PropertyResourceBundle)
-      	return _bundleResolver.getType(env, base, property);
+              return _bundleResolver.getType(env, base, property);
       else
-	return _beanResolver.getType(env, base, property);
+        return _beanResolver.getType(env, base, property);
     }
     else if (base == null && property instanceof String) {
       env.setPropertyResolved(true);
@@ -234,9 +234,9 @@ public class PageContextELResolver extends AbstractVariableResolver {
       Object value = _pageContext.findAttribute(property.toString());
 
       if (value != null)
-	return value.getClass();
+        return value.getClass();
       else
-	return null;
+        return null;
     }
     else
       return null;
@@ -251,7 +251,7 @@ public class PageContextELResolver extends AbstractVariableResolver {
       boolean value = _customResolvers[i].isReadOnly(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
     }
 
     env.setPropertyResolved(true);
@@ -260,32 +260,32 @@ public class PageContextELResolver extends AbstractVariableResolver {
   }
     
   public void setValue(ELContext env,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     env.setPropertyResolved(false);
     
     if (base != null) {
       if (base instanceof Map)
-	_mapResolver.setValue(env, base, property, value);
+        _mapResolver.setValue(env, base, property, value);
       else if (base instanceof List)
-	_listResolver.setValue(env, base, property, value);
+        _listResolver.setValue(env, base, property, value);
       else if (base.getClass().isArray())
-	_arrayResolver.setValue(env, base, property, value);
+        _arrayResolver.setValue(env, base, property, value);
       else
-	_beanResolver.setValue(env, base, property, value);
+        _beanResolver.setValue(env, base, property, value);
     }
     else if (property instanceof String) {
       for (int i = 0; i < _customResolvers.length; i++) {
-	_customResolvers[i].setValue(env, base, property, value);
+        _customResolvers[i].setValue(env, base, property, value);
 
-	if (env.isPropertyResolved())
-	  return;
+        if (env.isPropertyResolved())
+          return;
       }
       
       env.setPropertyResolved(true);
-	
+
       _pageContext.setAttribute(property.toString(), value);
     }
   }

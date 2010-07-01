@@ -36,10 +36,10 @@ public abstract class RenderKitFactory {
   public static final String HTML_BASIC_RENDER_KIT = "HTML_BASIC";
 
   public abstract void addRenderKit(String renderKitId,
-				    RenderKit renderKit);
+                                    RenderKit renderKit);
 
   public abstract RenderKit getRenderKit(FacesContext context,
-					 String renderKitId);
+                                         String renderKitId);
 
   public abstract Iterator<String> getRenderKitIds();
 }

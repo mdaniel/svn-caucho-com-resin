@@ -128,7 +128,7 @@ class HtmlDataTableRenderer extends BaseRenderer
       columnClassArray = columnClasses.split("[ \t,]+");
       
       if (columnClassArray.length == 0)
-	columnClassArray = null;
+        columnClassArray = null;
     }
 
     out.startElement("table", component);
@@ -210,10 +210,10 @@ class HtmlDataTableRenderer extends BaseRenderer
       out.startElement("caption", caption);
 
       if (captionClass != null)
-	out.writeAttribute("class", captionClass, "captionClass");
+        out.writeAttribute("class", captionClass, "captionClass");
 
       if (captionStyle != null)
-	out.writeAttribute("style", captionStyle, "captionStyle");
+        out.writeAttribute("style", captionStyle, "captionStyle");
 
       caption.encodeBegin(context);
       caption.encodeChildren(context);
@@ -267,7 +267,7 @@ class HtmlDataTableRenderer extends BaseRenderer
       columnClassArray = columnClasses.split("[ \t,]+");
       
       if (columnClassArray.length == 0)
-	columnClassArray = null;
+        columnClassArray = null;
     }
 
     String []rowClassArray = null;
@@ -276,7 +276,7 @@ class HtmlDataTableRenderer extends BaseRenderer
       rowClassArray = rowClasses.split("[ \t,]+");
       
       if (rowClassArray.length == 0)
-	rowClassArray = null;
+        rowClassArray = null;
     }
 
     int size = component.getChildCount();
@@ -293,13 +293,13 @@ class HtmlDataTableRenderer extends BaseRenderer
       UIComponent child = children.get(i);
 
       if (! (child instanceof UIComponent))
-	continue;
+        continue;
 
       if (child.getFacet("header") != null)
-	hasColumnHeader = true;
+        hasColumnHeader = true;
 
       if (child.getFacet("footer") != null)
-	hasColumnFooter = true;
+        hasColumnFooter = true;
     }
     
     UIComponent header = component.getFacet("header");
@@ -312,10 +312,10 @@ class HtmlDataTableRenderer extends BaseRenderer
       out.startElement("th", header);
 
       if (headerClass != null)
-	out.writeAttribute("class", headerClass, "headerClass");
+        out.writeAttribute("class", headerClass, "headerClass");
 
       if (columns > 0)
-	out.writeAttribute("colspan", columns, "columns");
+        out.writeAttribute("colspan", columns, "columns");
 
       out.writeAttribute("scope", "colgroup", "scope");
 
@@ -329,44 +329,44 @@ class HtmlDataTableRenderer extends BaseRenderer
 
     if (hasColumnHeader) {
       out.startElement("tr", component);
-	
+
       for (int i = 0; i < size; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (! (child instanceof UIColumn))
-	  continue;
+        if (! (child instanceof UIColumn))
+          continue;
 
-	out.startElement("th", child);
+        out.startElement("th", child);
 
-	String columnHeaderClass;
+        String columnHeaderClass;
 
-	if (child instanceof HtmlColumn) {
-	  HtmlColumn htmlColumn = (HtmlColumn) child;
-	  
-	  columnHeaderClass = htmlColumn.getHeaderClass();
-	}
-	else {
-	  Map attributes = child.getAttributes();
-	  
-	  columnHeaderClass = (String) attributes.get("headerClass");
-	}
+        if (child instanceof HtmlColumn) {
+          HtmlColumn htmlColumn = (HtmlColumn) child;
 
-	if (columnHeaderClass != null)
-	  out.writeAttribute("class", columnHeaderClass, "headerClass");
-	else if (headerClass != null)
-	  out.writeAttribute("class", headerClass, "headerClass");
-	
-	out.writeAttribute("scope", "col", "scope");
+          columnHeaderClass = htmlColumn.getHeaderClass();
+        }
+        else {
+          Map attributes = child.getAttributes();
 
-	UIComponent childHeader = child.getFacet("header");
+          columnHeaderClass = (String) attributes.get("headerClass");
+        }
 
-	if (childHeader != null) {
-	  childHeader.encodeBegin(context);
-	  childHeader.encodeChildren(context);
-	  childHeader.encodeEnd(context);
-	}
-	  
-	out.endElement("th");
+        if (columnHeaderClass != null)
+          out.writeAttribute("class", columnHeaderClass, "headerClass");
+        else if (headerClass != null)
+          out.writeAttribute("class", headerClass, "headerClass");
+
+        out.writeAttribute("scope", "col", "scope");
+
+        UIComponent childHeader = child.getFacet("header");
+
+        if (childHeader != null) {
+          childHeader.encodeBegin(context);
+          childHeader.encodeChildren(context);
+          childHeader.encodeEnd(context);
+        }
+
+        out.endElement("th");
       }
       
       out.endElement("tr");
@@ -385,10 +385,10 @@ class HtmlDataTableRenderer extends BaseRenderer
       out.startElement("td", footer);
 
       if (columns > 1)
-	out.writeAttribute("colspan", columns, "columns");
+        out.writeAttribute("colspan", columns, "columns");
 
       if (footerClass != null)
-	out.writeAttribute("class", footerClass, "footerClass");
+        out.writeAttribute("class", footerClass, "footerClass");
 
       //out.writeAttribute("scope", "colgroup", "scope");
 
@@ -402,44 +402,44 @@ class HtmlDataTableRenderer extends BaseRenderer
 
     if (hasColumnFooter) {
       out.startElement("tr", component);
-	
+
       for (int i = 0; i < size; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (! (child instanceof UIComponent))
-	  continue;
+        if (! (child instanceof UIComponent))
+          continue;
 
-	String columnFooterClass;
+        String columnFooterClass;
 
-	if (child instanceof HtmlColumn) {
-	  HtmlColumn htmlColumn = (HtmlColumn) child;
-	  
-	  columnFooterClass = htmlColumn.getFooterClass();
-	}
-	else {
-	  Map attributes = child.getAttributes();
-	  
-	  columnFooterClass = (String) attributes.get("footerClass");
-	}
+        if (child instanceof HtmlColumn) {
+          HtmlColumn htmlColumn = (HtmlColumn) child;
 
-	out.startElement("td", child);
+          columnFooterClass = htmlColumn.getFooterClass();
+        }
+        else {
+          Map attributes = child.getAttributes();
 
-	if (columnFooterClass != null)
-	  out.writeAttribute("class", columnFooterClass, "footerClass");
-	else if (footerClass != null)
-	  out.writeAttribute("class", footerClass, "headerClass");
+          columnFooterClass = (String) attributes.get("footerClass");
+        }
 
-	// out.writeAttribute("scope", "col", "scope");
-	
-	UIComponent childFooter = child.getFacet("footer");
+        out.startElement("td", child);
 
-	if (childFooter != null) {
-	  childFooter.encodeBegin(context);
-	  childFooter.encodeChildren(context);
-	  childFooter.encodeEnd(context);
-	}
-	  
-	out.endElement("td");
+        if (columnFooterClass != null)
+          out.writeAttribute("class", columnFooterClass, "footerClass");
+        else if (footerClass != null)
+          out.writeAttribute("class", footerClass, "headerClass");
+
+        // out.writeAttribute("scope", "col", "scope");
+
+        UIComponent childFooter = child.getFacet("footer");
+
+        if (childFooter != null) {
+          childFooter.encodeBegin(context);
+          childFooter.encodeChildren(context);
+          childFooter.encodeEnd(context);
+        }
+
+        out.endElement("td");
       }
       
       out.endElement("tr");

@@ -122,8 +122,8 @@ public class HessianProtocol extends ProtocolContainer {
       if (children != null && children.size() > 0)
         return new NameContextSkeleton(this, serverId);
       else {
-	log.fine(this + " can't find server for " + serverId);
-	
+        log.fine(this + " can't find server for " + serverId);
+
         return null; // XXX: should return error skeleton
       }
       /*
@@ -146,8 +146,8 @@ public class HessianProtocol extends ProtocolContainer {
       Class homeApi = server.getRemoteHomeClass();
       
       com.caucho.hessian.server.HessianSkeleton skel = getSkeleton(remoteApi,
-								 homeApi,
-								 remoteApi);
+                                                                 homeApi,
+                                                                 remoteApi);
 
       return new HessianEjbSkeleton(obj, skel, _resolver);
     }
@@ -162,23 +162,23 @@ public class HessianProtocol extends ProtocolContainer {
       remoteApi = server.getRemoteObjectClass();
 
       if (homeApi != null) {
-	Object remote = server.getRemoteObject(homeApi, "hessian");
-	
-        com.caucho.hessian.server.HessianSkeleton skel = getSkeleton(homeApi,
-								   homeApi,
-								   remoteApi);
+        Object remote = server.getRemoteObject(homeApi, "hessian");
 
-	return new HessianEjbSkeleton(remote, skel, _resolver);
+        com.caucho.hessian.server.HessianSkeleton skel = getSkeleton(homeApi,
+                                                                   homeApi,
+                                                                   remoteApi);
+
+        return new HessianEjbSkeleton(remote, skel, _resolver);
       }
       
       if (remoteApi != null) {
-	Object remote = server.getRemoteObject(remoteApi, "hessian");
-	
-        com.caucho.hessian.server.HessianSkeleton skel = getSkeleton(remoteApi,
-								   remoteApi,
-								   remoteApi);
+        Object remote = server.getRemoteObject(remoteApi, "hessian");
 
-	return new HessianEjbSkeleton(remote, skel, _resolver);
+        com.caucho.hessian.server.HessianSkeleton skel = getSkeleton(remoteApi,
+                                                                   remoteApi,
+                                                                   remoteApi);
+
+        return new HessianEjbSkeleton(remote, skel, _resolver);
       }
     }
     */
@@ -210,12 +210,12 @@ public class HessianProtocol extends ProtocolContainer {
       skel = _skeletonMap.get(api);
 
       if (skel == null) {
-	skel = new HessianSkeleton(api);
+        skel = new HessianSkeleton(api);
 
-	skel.setHomeClass(homeApi);
-	skel.setObjectClass(remoteApi);
+        skel.setHomeClass(homeApi);
+        skel.setObjectClass(remoteApi);
 
-	_skeletonMap.put(api, skel);
+        _skeletonMap.put(api, skel);
       }
 
       return skel;

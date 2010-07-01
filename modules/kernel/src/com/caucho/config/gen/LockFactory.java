@@ -57,7 +57,7 @@ public class LockFactory<X>
       _classLockType = lock.value();
     
     _classAccessTimeout = beanFactory.getBeanType().getAnnotation(
-    		AccessTimeout.class);    
+                    AccessTimeout.class);
   }
   
   /**
@@ -78,7 +78,7 @@ public class LockFactory<X>
     AccessTimeout accessTimeout = method.getAnnotation(AccessTimeout.class);
     
     if (accessTimeout == null) {
-    	accessTimeout = _classAccessTimeout;
+            accessTimeout = _classAccessTimeout;
     }
     
     if (lockType == null)
@@ -89,7 +89,7 @@ public class LockFactory<X>
       if (accessTimeout != null) {
         return new LockGenerator(this, method, next, lockType, accessTimeout.value(), accessTimeout.unit());
       } else {
-    	  return new LockGenerator(this, method, next, lockType, -1, null);
+              return new LockGenerator(this, method, next, lockType, -1, null);
       }
     }
   }

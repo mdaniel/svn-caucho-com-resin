@@ -59,7 +59,7 @@ public class KeyCompare {
       int ch = buffer[offset + j];
 
       if (ch == 0)
-	break;
+        break;
       
       sb.append((char) ch);
     }

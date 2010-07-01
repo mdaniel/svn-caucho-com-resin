@@ -70,9 +70,9 @@ public class JavaSessionDeserializer extends SessionDeserializer {
 
     if (in != null) {
       try {
-	in.close();
+        in.close();
       } catch (IOException e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
     }
   }

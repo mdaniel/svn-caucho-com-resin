@@ -79,26 +79,26 @@ public interface MessageProducer {
    * @since 1.1
    */
   public void send(Message message,
-		   int deliveryMode,
-		   int priority,
-		   long timeToLive)
+                   int deliveryMode,
+                   int priority,
+                   long timeToLive)
     throws JMSException;
 
   /**
    * @since 1.1
    */
   public void send(Destination destination,
-		   Message message)
+                   Message message)
     throws JMSException;
 
   /**
    * @since 1.1
    */
   public void send(Destination destination,
-		   Message message,
-		   int deliveryMode,
-		   int priority,
-		   long timeToLive)
+                   Message message,
+                   int deliveryMode,
+                   int priority,
+                   long timeToLive)
     throws JMSException;
   
   public void close()

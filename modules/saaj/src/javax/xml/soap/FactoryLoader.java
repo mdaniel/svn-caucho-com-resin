@@ -103,10 +103,10 @@ class FactoryLoader {
     if (className == null) {
       
       String fileName = (System.getProperty("java.home")
-			 + File.separatorChar
-			 + "lib"
-			 + File.separatorChar
-			 + "jaxm.properties");
+                         + File.separatorChar
+                         + "lib"
+                         + File.separatorChar
+                         + "jaxm.properties");
 
       FileInputStream is = null;
       try {

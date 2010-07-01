@@ -64,7 +64,7 @@ public interface ServiceReference extends Comparable
    * Checks if the bundled which registered the service uses this class name
    */
   public boolean isAssignableTo(Bundle bundle,
-				String className);
+                                String className);
 
   /**
    * Compares to another reference for ordering

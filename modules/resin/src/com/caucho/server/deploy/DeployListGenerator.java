@@ -81,7 +81,7 @@ public class DeployListGenerator<E extends DeployController>
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
       if (_generatorList.get(i).isModified())
-	return true;
+        return true;
     }
 
     return false;
@@ -94,7 +94,7 @@ public class DeployListGenerator<E extends DeployController>
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
       if (_generatorList.get(i).logModified(log))
-	return true;
+        return true;
     }
 
     return false;
@@ -140,7 +140,7 @@ public class DeployListGenerator<E extends DeployController>
       E controller = _generatorList.get(i).generateController(key);
 
       if (controller == null)
-	continue;
+        continue;
       
       // merge with the rest of the entries
       for (int j = 0; j < _generatorList.size(); j++) {
@@ -207,9 +207,9 @@ public class DeployListGenerator<E extends DeployController>
 
     for (int i = 0; i < generatorList.size(); i++) {
       try {
-	generatorList.get(i).destroy();
+        generatorList.get(i).destroy();
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 

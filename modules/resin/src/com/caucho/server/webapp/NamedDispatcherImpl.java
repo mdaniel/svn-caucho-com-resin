@@ -57,8 +57,8 @@ class NamedDispatcherImpl implements RequestDispatcher {
   private String _queryString;
 
   NamedDispatcherImpl(FilterChain includeFilterChain,
-		      FilterChain forwardFilterChain,
-		      String queryString, WebApp webApp)
+                      FilterChain forwardFilterChain,
+                      String queryString, WebApp webApp)
   {
     _includeFilterChain = includeFilterChain;
     _forwardFilterChain = forwardFilterChain;
@@ -189,17 +189,17 @@ class NamedDispatcherImpl implements RequestDispatcher {
     else {
         try {
           OutputStream os = res.getOutputStream();
-	  if (os != null)
-	    os.close();
+          if (os != null)
+            os.close();
         } catch (IllegalStateException e) {
         }
-	
-	try {
-	  PrintWriter out = res.getWriter();
-	  if (out != null)
-	    out.close();
-	} catch (IllegalStateException e1) {
-	}
+
+        try {
+          PrintWriter out = res.getWriter();
+          if (out != null)
+            out.close();
+        } catch (IllegalStateException e1) {
+        }
 
     }
 
@@ -209,7 +209,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
       ptr = ((HttpServletResponseWrapper) ptr).getResponse();
 
       if (ptr instanceof AbstractHttpResponse)
-	((AbstractHttpResponse) ptr).finish();
+        ((AbstractHttpResponse) ptr).finish();
     }
     */
 

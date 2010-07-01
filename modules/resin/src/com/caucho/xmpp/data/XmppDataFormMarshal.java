@@ -136,14 +136,14 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     DataInstructions []instructions = form.getInstructions();
     if (instructions != null) {
       for (DataInstructions instruction : instructions) {
-	toXml(out, instruction);
+        toXml(out, instruction);
       }
     }
 
     DataField []fields = form.getField();
     if (fields != null) {
       for (DataField field : fields) {
-	toXml(out, field);
+        toXml(out, field);
       }
     }
 
@@ -153,7 +153,7 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     DataItem []items = form.getItem();
     if (items != null) {
       for (DataItem item : items) {
-	toXml(out, item);
+        toXml(out, item);
       }
     }
     
@@ -188,21 +188,21 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     DataValue []values = field.getValue();
     if (values != null) {
       for (int i = 0; i < values.length; i++) {
-	DataValue value = values[i];
+        DataValue value = values[i];
 
-	out.writeStartElement("value");
-	out.writeCharacters(value.getValue());
-	out.writeEndElement(); // </value>
+        out.writeStartElement("value");
+        out.writeCharacters(value.getValue());
+        out.writeEndElement(); // </value>
       }
     }
 
     DataOption []options = field.getOption();
     if (options != null) {
       for (int i = 0; i < options.length; i++) {
-	toXml(out, options[i]);
+        toXml(out, options[i]);
       }
     }
-	
+
     out.writeEndElement(); // </field>
   }
 
@@ -217,14 +217,14 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     DataValue []values = option.getValue();
     if (values != null) {
       for (int i = 0; i < values.length; i++) {
-	DataValue value = values[i];
+        DataValue value = values[i];
 
-	out.writeStartElement("value");
-	out.writeCharacters(value.getValue());
-	out.writeEndElement(); // </value>
+        out.writeStartElement("value");
+        out.writeCharacters(value.getValue());
+        out.writeEndElement(); // </value>
       }
     }
-	
+
     out.writeEndElement(); // </option>
   }
 
@@ -236,10 +236,10 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     DataField []fields = item.getField();
     if (fields != null) {
       for (int i = 0; i < fields.length; i++) {
-	toXml(out, fields[i]);
+        toXml(out, fields[i]);
       }
     }
-	
+
     out.writeEndElement(); // </item>
   }
 
@@ -251,10 +251,10 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     DataField []fields = reported.getField();
     if (fields != null) {
       for (int i = 0; i < fields.length; i++) {
-	toXml(out, fields[i]);
+        toXml(out, fields[i]);
       }
     }
-	
+
     out.writeEndElement(); // </reported>
   }
 
@@ -289,48 +289,48 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     int tag = in.nextTag();
     while (tag > 0) {
       if (isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	form.setFieldList(fieldList);
-	form.setItemList(itemList);
-	form.setInstructionsList(instructionsList);
-	
-	return form;
+        form.setFieldList(fieldList);
+        form.setItemList(itemList);
+        form.setInstructionsList(instructionsList);
+
+        return form;
       }
 
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "field".equals(in.getLocalName())) {
-	fieldList.add(parseField(in));
+          && "field".equals(in.getLocalName())) {
+        fieldList.add(parseField(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "item".equals(in.getLocalName())) {
-	itemList.add(parseItem(in));
+               && "item".equals(in.getLocalName())) {
+        itemList.add(parseItem(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "reported".equals(in.getLocalName())) {
-	form.setReported(parseReported(in));
+               && "reported".equals(in.getLocalName())) {
+        form.setReported(parseReported(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "title".equals(in.getLocalName())) {
-	String title = in.getElementText();
+               && "title".equals(in.getLocalName())) {
+        String title = in.getElementText();
 
-	form.setTitle(title);
+        form.setTitle(title);
 
-	skipToEnd(in, "title");
+        skipToEnd(in, "title");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "instructions".equals(in.getLocalName())) {
-	String value = in.getElementText();
+               && "instructions".equals(in.getLocalName())) {
+        String value = in.getElementText();
 
-	instructionsList.add(new DataInstructions(value));
+        instructionsList.add(new DataInstructions(value));
 
-	skipToEnd(in, "instructions");
+        skipToEnd(in, "instructions");
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();
@@ -357,45 +357,45 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     int tag = in.nextTag();
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	field.setValueList(valueList);
-	field.setOptionList(optionList);
-	
-	return field;
+        field.setValueList(valueList);
+        field.setOptionList(optionList);
+
+        return field;
       }
     
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "desc".equals(in.getLocalName())) {
-	String desc = in.getElementText();
+          && "desc".equals(in.getLocalName())) {
+        String desc = in.getElementText();
 
-	field.setDesc(desc);
+        field.setDesc(desc);
 
-	skipToEnd(in, "desc");
+        skipToEnd(in, "desc");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "option".equals(in.getLocalName())) {
-	optionList.add(parseOption(in));
+               && "option".equals(in.getLocalName())) {
+        optionList.add(parseOption(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "required".equals(in.getLocalName())) {
-	field.setRequired(true);
+               && "required".equals(in.getLocalName())) {
+        field.setRequired(true);
 
-	skipToEnd(in, "required");
+        skipToEnd(in, "required");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-	       && "value".equals(in.getLocalName())) {
-	String value = in.getElementText();
+               && "value".equals(in.getLocalName())) {
+        String value = in.getElementText();
 
-	valueList.add(new DataValue(value));
+        valueList.add(new DataValue(value));
 
-	skipToEnd(in, "value");
+        skipToEnd(in, "value");
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();
@@ -419,22 +419,22 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     int tag = in.nextTag();
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	item.setFieldList(fieldList);
-	
-	return item;
+        item.setFieldList(fieldList);
+
+        return item;
       }
     
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "field".equals(in.getLocalName())) {
-	fieldList.add(parseField(in));
+          && "field".equals(in.getLocalName())) {
+        fieldList.add(parseField(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();
@@ -458,22 +458,22 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     int tag = in.nextTag();
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	reported.setFieldList(fieldList);
-	
-	return reported;
+        reported.setFieldList(fieldList);
+
+        return reported;
       }
     
       if (XMLStreamReader.START_ELEMENT == tag
-	  && "field".equals(in.getLocalName())) {
-	fieldList.add(parseField(in));
+          && "field".equals(in.getLocalName())) {
+        fieldList.add(parseField(in));
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();
@@ -499,26 +499,26 @@ public class XmppDataFormMarshal extends AbstractXmppMarshal {
     int tag = in.nextTag();
     while (tag > 0) {
       if (_isFinest)
-	debug(in);
+        debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	option.setValueList(valueList);
-	
-	return option;
+        option.setValueList(valueList);
+
+        return option;
       }
     
       if (XMLStreamReader.START_ELEMENT == tag
-	       && "value".equals(in.getLocalName())) {
-	String value = in.getElementText();
+               && "value".equals(in.getLocalName())) {
+        String value = in.getElementText();
 
-	valueList.add(new DataValue(value));
+        valueList.add(new DataValue(value));
 
-	skipToEnd(in, "value");
+        skipToEnd(in, "value");
       }
       else if (XMLStreamReader.START_ELEMENT == tag) {
-	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
-	
-	skipToEnd(in, in.getLocalName());
+        log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+
+        skipToEnd(in, in.getLocalName());
       }
 
       tag = in.nextTag();

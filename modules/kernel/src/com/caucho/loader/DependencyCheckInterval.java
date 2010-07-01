@@ -56,11 +56,11 @@ public class DependencyCheckInterval {
 
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof DynamicClassLoader) {
-	DynamicClassLoader dynLoader;
-	dynLoader = (DynamicClassLoader) loader;
+        DynamicClassLoader dynLoader;
+        dynLoader = (DynamicClassLoader) loader;
 
-	dynLoader.setDependencyCheckInterval(_interval);
-	return;
+        dynLoader.setDependencyCheckInterval(_interval);
+        return;
       }
     }
 

@@ -164,11 +164,11 @@ public class AbstractAuthenticator
   {
     if (_passwordDigest != null) {
       if (_passwordDigest.getAlgorithm() == null
-	  || _passwordDigest.getAlgorithm().equals("none"))
-	_passwordDigest = null;
+          || _passwordDigest.getAlgorithm().equals("none"))
+        _passwordDigest = null;
     }
     else if (_passwordDigestAlgorithm == null
-	     || _passwordDigestAlgorithm.equals("none")) {
+             || _passwordDigestAlgorithm.equals("none")) {
     }
     else {
       int p = _passwordDigestAlgorithm.indexOf('-');
@@ -194,8 +194,8 @@ public class AbstractAuthenticator
       if (_singleSignon == null) {
         MemorySingleSignon memorySignon = new MemorySingleSignon();
         memorySignon.init();
-	_singleSignon = memorySignon;
-	_localSingleSignon.set(_singleSignon);
+        _singleSignon = memorySignon;
+        _localSingleSignon.set(_singleSignon);
       }
     }
     */
@@ -214,8 +214,8 @@ public class AbstractAuthenticator
    * @param details extra information, e.g. HttpServletRequest
    */
   public Principal authenticate(Principal user,
-				Credentials credentials,
-				Object details)
+                                Credentials credentials,
+                                Object details)
   {
     if (credentials instanceof PasswordCredentials) {
       return authenticate(user, (PasswordCredentials) credentials, details);
@@ -262,8 +262,8 @@ public class AbstractAuthenticator
    * Main authenticator API.
    */
   protected Principal authenticate(Principal principal,
-				   PasswordCredentials cred,
-				   Object details)
+                                   PasswordCredentials cred,
+                                   Object details)
   {
     PasswordUser user = getPasswordUser(principal);
 
@@ -299,7 +299,7 @@ public class AbstractAuthenticator
       char []digest = _passwordDigest.getPasswordDigest(user, password);
 
       if (digest != null)
-	return digest;
+        return digest;
     }
 
     char []digest = new char[password.length];
@@ -330,8 +330,8 @@ public class AbstractAuthenticator
    * @return the logged in principal if successful
    */
   protected Principal authenticate(Principal principal,
-				   DigestCredentials cred,
-				   Object details)
+                                   DigestCredentials cred,
+                                   Object details)
   {
     String cnonce = cred.getCnonce();
     String method = cred.getMethod();
@@ -344,7 +344,7 @@ public class AbstractAuthenticator
 
     try {
       if (clientDigest == null)
-	return null;
+        return null;
       
       MessageDigest digest = MessageDigest.getInstance("MD5");
       
@@ -382,9 +382,9 @@ public class AbstractAuthenticator
       byte []serverDigest = digest.digest();
 
       if (isMatch(clientDigest, serverDigest))
-	return principal;
+        return principal;
       else
-	return null;
+        return null;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -414,7 +414,7 @@ public class AbstractAuthenticator
       char []password = user.getPassword();
 
       for (int i = 0; i < password.length; i++)
-	digest.update((byte) password[i]);
+        digest.update((byte) password[i]);
       
       return digest.digest();
     } catch (Exception e) {
@@ -437,7 +437,7 @@ public class AbstractAuthenticator
   {
     if (log.isLoggable(Level.FINE)) {
       log.fine(this + " getPasswordUser() is not implemented for "
-	       + userName);
+               + userName);
     }
     
     return null;
@@ -549,7 +549,7 @@ public class AbstractAuthenticator
 
     for (int i = 0; i < len; i++) {
       if (password[i] != userPassword[i])
-	return false;
+        return false;
     }
 
     return true;
@@ -567,7 +567,7 @@ public class AbstractAuthenticator
 
     for (int i = 0; i < len; i++) {
       if (password[i] != userPassword[i])
-	return false;
+        return false;
     }
 
     return true;
@@ -592,7 +592,7 @@ public class AbstractAuthenticator
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _passwordDigestAlgorithm
-	    + "," + _passwordDigestRealm + "]");
+            + "[" + _passwordDigestAlgorithm
+            + "," + _passwordDigestRealm + "]");
   }
 }

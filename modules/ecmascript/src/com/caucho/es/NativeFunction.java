@@ -69,7 +69,7 @@ class NativeFunction extends Native {
 
     Native natFunction = new NativeFunction("Function", NEW, 1);
     NativeWrapper function = new NativeWrapper(resin, natFunction,
-					       funProto, ESThunk.FUN_THUNK);
+                                               funProto, ESThunk.FUN_THUNK);
     resin.funProto = funProto;
     
     put(funProto, "toString", TO_STRING, 0);
@@ -100,16 +100,16 @@ class NativeFunction extends Native {
     case TO_STRING:
       // XXX: Is this correct?  Test.
       if (eval.getThis() instanceof ESClosure) {
-	ESClosure closure = (ESClosure) eval.getThis();
+        ESClosure closure = (ESClosure) eval.getThis();
 
-	return ESString.create(closure.decompile());
+        return ESString.create(closure.decompile());
       } else if (eval.getThis() instanceof NativeWrapper) {
-	NativeWrapper wrapper = (NativeWrapper) eval.getThis();
+        NativeWrapper wrapper = (NativeWrapper) eval.getThis();
 
-	return wrapper.fun.toStr();
+        return wrapper.fun.toStr();
       } else
       throw new ESException("to string bound to function: " +
-			  eval.getThis().getClass());
+                          eval.getThis().getClass());
 
     case CALL:
       int oldTop = eval.top;
@@ -117,21 +117,21 @@ class NativeFunction extends Native {
       ESBase callThis = null;
 
       try {
-	if (length > 0) {
-	  callThis = eval.getArg(0);
-	} else
-	  callThis = esNull;
+        if (length > 0) {
+          callThis = eval.getArg(0);
+        } else
+          callThis = esNull;
 
-	if (callThis == esNull || callThis == esUndefined ||
-	    callThis == esEmpty)
-	  eval.setArg(0, eval.getGlobal());
-	else
-	  eval.setArg(0, callThis.toObject());
-	eval.top++;
+        if (callThis == esNull || callThis == esUndefined ||
+            callThis == esEmpty)
+          eval.setArg(0, eval.getGlobal());
+        else
+          eval.setArg(0, callThis.toObject());
+        eval.top++;
 
-	return fun.call(eval, length > 0 ? length - 1 : 0);
+        return fun.call(eval, length > 0 ? length - 1 : 0);
       } finally {
-	eval.top = oldTop;
+        eval.top = oldTop;
       }
 
     case APPLY:
@@ -153,7 +153,7 @@ class NativeFunction extends Native {
     ArrayList argList = new ArrayList();
     for (int i = 0; i < length - 1; i++) {
       if (i != 0)
-	sbuf.append(",");
+        sbuf.append(",");
       String str = eval.getArg(i).toString();
       int j = 0;
       int p = 0;
@@ -220,7 +220,7 @@ class NativeFunction extends Native {
       callThis = esNull;
 
     if (callThis == esNull || callThis == esUndefined ||
-	callThis == esEmpty)
+        callThis == esEmpty)
       call.setArg(-1, eval.getGlobal());
     else
       call.setArg(-1, callThis.toObject());
@@ -230,23 +230,23 @@ class NativeFunction extends Native {
       ESBase arg = eval.getArg(i);
 
       if (arg == esNull || arg == esUndefined || arg == esEmpty)
-	continue;
+        continue;
 
       ESBase arglen = arg.hasProperty(LENGTH);
 
       if (arglen == null)
-	call.setArg(j++, arg);
+        call.setArg(j++, arg);
       else {
-	int len = arglen.toInt32();
+        int len = arglen.toInt32();
 
-	if (j + len > call.stack.length - 2)
-	  throw new ESException("stack overflow");
+        if (j + len > call.stack.length - 2)
+          throw new ESException("stack overflow");
 
-	for (int k = 0; k < len; k++)
-	  call.setArg(j++, arg.getProperty(ESString.create(k)));
+        for (int k = 0; k < len; k++)
+          call.setArg(j++, arg.getProperty(ESString.create(k)));
 
-	if (len < 0)
-	  call.setArg(j++, arg);
+        if (len < 0)
+          call.setArg(j++, arg);
       }
     }
 

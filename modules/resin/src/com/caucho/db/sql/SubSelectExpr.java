@@ -126,9 +126,9 @@ public class SubSelectExpr extends Expr {
       Class type = _subselect.getType();
 
       if (long.class.equals(type))
-	data.setLong(result.getLong(0));
+        data.setLong(result.getLong(0));
       else
-	data.setString(result.getString(0));
+        data.setString(result.getString(0));
     }
     else {
       data.clear();

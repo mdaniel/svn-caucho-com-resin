@@ -153,7 +153,7 @@ public class XmlParseTag extends BodyTagSupport {
         reader = tempReader;
       }
       else
-	throw new JspException(L.l("x:parse requires a body"));
+        throw new JspException(L.l("x:parse requires a body"));
 
       InputSource is = new InputSource(reader);
 

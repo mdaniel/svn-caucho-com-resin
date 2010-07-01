@@ -187,7 +187,7 @@ public class TableIterator {
   {
     _rowOffset = -_rowLength;
   }
-	   
+
   public void prevRow()
   {
     _rowOffset -= _rowLength;
@@ -226,8 +226,8 @@ public class TableIterator {
     rowOffset += rowLength;
     for (; rowOffset < rowEnd; rowOffset += rowLength) {
       if ((buffer[rowOffset] & Table.ROW_VALID) != 0) {
-	_rowOffset = rowOffset;
-	return true;
+        _rowOffset = rowOffset;
+        return true;
       }
     }
 
@@ -244,7 +244,7 @@ public class TableIterator {
   {
     do {
       if (nextRow())
-	return true;
+        return true;
     } while (nextBlock());
 
     return false;
@@ -314,7 +314,7 @@ public class TableIterator {
       _buffer = null;
 
       if (block != null) {
-	block.free();
+        block.free();
       }
 
       _block = _xa.readBlock(_table, _blockId);
@@ -410,14 +410,14 @@ public class TableIterator {
     throws SQLException
   {
     return column.isEqual(_buffer, _rowOffset,
-			  matchBuffer, 0, matchBuffer.length);
+                          matchBuffer, 0, matchBuffer.length);
   }
 
   public boolean isEqual(Column column, byte []matchBuffer, int matchLength)
     throws SQLException
   {
     return column.isEqual(_buffer, _rowOffset,
-			  matchBuffer, 0, matchLength);
+                          matchBuffer, 0, matchLength);
   }
 
   public boolean isEqual(Column column, String string)

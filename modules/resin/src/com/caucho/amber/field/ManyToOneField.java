@@ -263,7 +263,7 @@ public class ManyToOneField extends CascadableField {
   {
     ManyToOneField field
       = new ManyToOneField((EntityType) getSourceType(), getName(),
-				 getCascadeType(), _isManyToOne);
+                                 getCascadeType(), _isManyToOne);
 
     field.setOverride(true);
     field.setLazy(isLazy());
@@ -350,9 +350,9 @@ public class ManyToOneField extends CascadableField {
           joinColumn = _joinColumnMap.get(keyColumn.getName());
 
         if (joinColumn != null) {
-	  // jpa/0h0d
-	  if (! "".equals(joinColumn.getName()))
-	    columnName = joinColumn.getName();
+          // jpa/0h0d
+          if (! "".equals(joinColumn.getName()))
+            columnName = joinColumn.getName();
 
           nullable = joinColumn.isNullable();
           unique = joinColumn.isUnique();
@@ -416,11 +416,11 @@ public class ManyToOneField extends CascadableField {
     if (relatedType.getId() != null) {
       // resolve any alias
       for (AmberField field : relatedType.getId().getKeys()) {
-	for (ForeignColumn column : _linkColumns.getColumns()) {
-	  if (field.getColumn() != null
-	      && field.getColumn().getName().equals(column.getName())) {
-	    _aliasField = field;
-	  }
+        for (ForeignColumn column : _linkColumns.getColumns()) {
+          if (field.getColumn() != null
+              && field.getColumn().getName().equals(column.getName())) {
+            _aliasField = field;
+          }
         }
       }
     }
@@ -1102,7 +1102,7 @@ public class ManyToOneField extends CascadableField {
         else
           targetObject = generateSuperGetter("this");
 
-	String objThis = "((" + getRelatedType().getInstanceClassName() + ") " + dst + ")";
+        String objThis = "((" + getRelatedType().getInstanceClassName() + ") " + dst + ")";
 
         out.println(generateSuperSetter(objThis, targetObject) + ";");
       }
@@ -1142,7 +1142,7 @@ public class ManyToOneField extends CascadableField {
 
     if (isCascade(CascadeType.MERGE)) {
       value = ("(" + getJavaTypeName() + ") aConn.recursiveMerge("
-	       + value + ")");
+               + value + ")");
     }
     else {
       // jpa/0h08
@@ -1316,8 +1316,8 @@ public class ManyToOneField extends CascadableField {
 
     out.println();
     out.println(className + " " + var
-		+ " = (" + className + ") "
-		+ generateSuperGetter("this") + ";");
+                + " = (" + className + ") "
+                + generateSuperGetter("this") + ";");
 
     Id id = targetType.getId();
     

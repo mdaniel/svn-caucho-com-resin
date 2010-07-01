@@ -123,7 +123,7 @@ abstract public class Loader {
 
     if (path != null && path.getLength() > 0) {
       return new ClassEntry(_loader, name, path, path,
-			    getCodeSource(path));
+                            getCodeSource(path));
     }
     else
       return null;
@@ -144,7 +144,7 @@ abstract public class Loader {
       try {
         return new URL(path.getURL());
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
 
@@ -206,7 +206,7 @@ abstract public class Loader {
   {
     try {
       return new CodeSource(new URL(path.getURL()),
-			    (Certificate []) path.getCertificates());
+                            (Certificate []) path.getCertificates());
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 

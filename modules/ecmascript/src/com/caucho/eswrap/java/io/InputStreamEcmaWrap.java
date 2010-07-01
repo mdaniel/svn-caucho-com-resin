@@ -40,7 +40,7 @@ public class InputStreamEcmaWrap {
       int ch = is.read();
 
       if (ch == -1)
-	break;
+        break;
 
       bb.append((char) ch);
     }
@@ -62,10 +62,10 @@ public class InputStreamEcmaWrap {
       int ch = is.read();
 
       if (ch == -1)
-	break;
+        break;
       else if (ch == '\n') {
         hasData = true;
-	break;
+        break;
       }
       else if (hasCr) {
         hasData = true;
@@ -73,9 +73,9 @@ public class InputStreamEcmaWrap {
       }
 
       if (ch == '\r')
-	hasCr = true;
+        hasCr = true;
       else
-	bb.append((char) ch);
+        bb.append((char) ch);
     }
 
     if (bb.length() == 0 && ! hasData)

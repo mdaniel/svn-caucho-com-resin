@@ -47,7 +47,7 @@ public class StringExpr extends SSIExpr {
    * Evaluate as a string.
    */
   public String evalString(HttpServletRequest request,
-			   HttpServletResponse response)
+                           HttpServletResponse response)
   {
     return _value;
   }

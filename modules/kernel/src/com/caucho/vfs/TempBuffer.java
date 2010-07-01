@@ -267,10 +267,10 @@ public class TempBuffer implements java.io.Serializable {
 
     if (buf._buf.length == SMALL_SIZE) {
       if (buf._isFree) {
-	RuntimeException e
-	  = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
-	log().log(Level.SEVERE, e.toString(), e);
-	throw e;
+        RuntimeException e
+          = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
+        log().log(Level.SEVERE, e.toString(), e);
+        throw e;
       }
 
       buf._isFree = true;
@@ -286,17 +286,17 @@ public class TempBuffer implements java.io.Serializable {
       buf._next = null;
       
       if (buf._buf.length == SMALL_SIZE) {
-	if (buf._isFree) {
-	  RuntimeException e
-	    = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
-	  
-	  log().log(Level.SEVERE, e.toString(), e);
-	  throw e;
-	}
+        if (buf._isFree) {
+          RuntimeException e
+            = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
 
-	buf._isFree = true;
+          log().log(Level.SEVERE, e.toString(), e);
+          throw e;
+        }
+
+        buf._isFree = true;
       
-	_smallFreeList.free(buf);
+        _smallFreeList.free(buf);
       }
       
       buf = next;
@@ -312,10 +312,10 @@ public class TempBuffer implements java.io.Serializable {
 
     if (buf._buf.length == LARGE_SIZE) {
       if (buf._isFree) {
-	RuntimeException e
-	  = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
-	log().log(Level.SEVERE, e.toString(), e);
-	throw e;
+        RuntimeException e
+          = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
+        log().log(Level.SEVERE, e.toString(), e);
+        throw e;
       }
 
       buf._isFree = true;
@@ -331,17 +331,17 @@ public class TempBuffer implements java.io.Serializable {
       buf._next = null;
       
       if (buf._buf.length == LARGE_SIZE) {
-	if (buf._isFree) {
-	  RuntimeException e
-	    = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
-	  
-	  log().log(Level.SEVERE, e.toString(), e);
-	  throw e;
-	}
+        if (buf._isFree) {
+          RuntimeException e
+            = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
 
-	buf._isFree = true;
+          log().log(Level.SEVERE, e.toString(), e);
+          throw e;
+        }
+
+        buf._isFree = true;
       
-	_largeFreeList.free(buf);
+        _largeFreeList.free(buf);
       }
       
       buf = next;

@@ -85,7 +85,7 @@ abstract public class JsfNode extends JspContainerNode {
     throws JspParseException
   {
     throw error(L.l("attribute '{0}' is not allowed in <{1}>.",
-		    name.getName(), getTagName()));
+                    name.getName(), getTagName()));
   }
 
   
@@ -124,30 +124,30 @@ abstract public class JsfNode extends JspContainerNode {
       JspNode child = _children.get(i);
 
       if (isFirst
-	  && child instanceof StaticText
-	  && (i + 1 == _children.size()
-	      || _children.get(i + 1) instanceof JsfNode)) {
-	StaticText text = (StaticText) child;
+          && child instanceof StaticText
+          && (i + 1 == _children.size()
+              || _children.get(i + 1) instanceof JsfNode)) {
+        StaticText text = (StaticText) child;
 
-	if (isWhitespaceOrComment(text.getText())) {
-	}
-	else if (i + 1 == _children.size()) {
-	  out.print("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		    + _var
-		    + ", \"");
-	  out.printJavaString(text.getText());
-	  out.println("\");");
-	}
-	else {
-	  out.print("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		    + _var
-		    + ", " + prevId
-		    + ", \"");
-	  out.printJavaString(text.getText());
-	  out.println("\");");
-	}
+        if (isWhitespaceOrComment(text.getText())) {
+        }
+        else if (i + 1 == _children.size()) {
+          out.print("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
+                    + _var
+                    + ", \"");
+          out.printJavaString(text.getText());
+          out.println("\");");
+        }
+        else {
+          out.print("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
+                    + _var
+                    + ", " + prevId
+                    + ", \"");
+          out.printJavaString(text.getText());
+          out.println("\");");
+        }
 
-	continue;
+        continue;
       }
 
       isFirst = false;
@@ -164,18 +164,18 @@ abstract public class JsfNode extends JspContainerNode {
       child.generateEndLocation(out);
       
       if (child instanceof JsfTagNode) {
-	JsfTagNode jsfNode = (JsfTagNode) child;
+        JsfTagNode jsfNode = (JsfTagNode) child;
 
-	if (jsfNode.getJsfId() != null)
-	  prevId = "\"" + jsfNode.getJsfId() + "\"";
+        if (jsfNode.getJsfId() != null)
+          prevId = "\"" + jsfNode.getJsfId() + "\"";
 
-	isFirst = true;
+        isFirst = true;
       }
     }
 
     if (_bodyVar != null && ! isFirst)
       out.println("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		  + _var + ", " + _bodyVar + ");");
+                  + _var + ", " + _bodyVar + ");");
   }
 
   private boolean isWhitespaceOrComment(String text)
@@ -183,7 +183,7 @@ abstract public class JsfNode extends JspContainerNode {
     text = text.trim();
 
     return (text.equals("")
-	    || text.startsWith("<!--") && text.endsWith("-->"));
+            || text.startsWith("<!--") && text.endsWith("-->"));
   }
 
   /**
@@ -204,18 +204,18 @@ abstract public class JsfNode extends JspContainerNode {
       JspNode child = _children.get(i);
 
       if (isFirst
-	  && child instanceof StaticText
-	  && (i + 1 == _children.size()
-	      || _children.get(i + 1) instanceof JsfTagNode)) {
-	continue;
+          && child instanceof StaticText
+          && (i + 1 == _children.size()
+              || _children.get(i + 1) instanceof JsfTagNode)) {
+        continue;
       }
 
       if (! (child instanceof JsfTagNode)) {
-	if (isFirst) {
-	  return true;
-	}
+        if (isFirst) {
+          return true;
+        }
 
-	// push body
+        // push body
       }
     }
 
@@ -230,14 +230,14 @@ abstract public class JsfNode extends JspContainerNode {
       Method method = methods[i];
 
       if (! method.getName().equals(name))
-	continue;
+        continue;
       
       if (! Modifier.isPublic(method.getModifiers())
-	  || Modifier.isStatic(method.getModifiers()))
-	continue;
+          || Modifier.isStatic(method.getModifiers()))
+        continue;
 
       if (method.getParameterTypes().length != 1)
-	continue;
+        continue;
 
       return method;
     }

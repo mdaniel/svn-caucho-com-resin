@@ -150,57 +150,57 @@ public class DtdParser
     int ch = 0;
 
     for (ch = _xmlParser.skipWhitespace(read()); 
-	 ch >= 0 && ch != ']'; 
-	 ch = _xmlParser.skipWhitespace(read())) {
+         ch >= 0 && ch != ']';
+         ch = _xmlParser.skipWhitespace(read())) {
       if (ch == '<') {
-	if ((ch = read()) == '!') {
-	  if (XmlChar.isNameStart(ch = read())) {
-	    ch = _xmlParser.parseName(_text, ch);
-	    String name = _text.toString();
+        if ((ch = read()) == '!') {
+          if (XmlChar.isNameStart(ch = read())) {
+            ch = _xmlParser.parseName(_text, ch);
+            String name = _text.toString();
 
-	    if (name.equals("ELEMENT"))
-	      parseElementDecl(doctype);
-	    else if (name.equals("ATTLIST"))
-	      parseAttlistDecl(doctype);
-	    else if (name.equals("NOTATION"))
-	      parseNotationDecl(doctype);
-	    else if (name.equals("ENTITY"))
-	      parseEntityDecl(doctype);
-	    else
-	      throw error("unknown declaration '" + name + "'");
-	  }
-	  else if (ch == '-')
-	    parseComment();
-	  else if (ch == '[') {
-	    ch = _xmlParser.parseName(_text, read());
-	    String name = _text.toString();
+            if (name.equals("ELEMENT"))
+              parseElementDecl(doctype);
+            else if (name.equals("ATTLIST"))
+              parseAttlistDecl(doctype);
+            else if (name.equals("NOTATION"))
+              parseNotationDecl(doctype);
+            else if (name.equals("ENTITY"))
+              parseEntityDecl(doctype);
+            else
+              throw error("unknown declaration '" + name + "'");
+          }
+          else if (ch == '-')
+            parseComment();
+          else if (ch == '[') {
+            ch = _xmlParser.parseName(_text, read());
+            String name = _text.toString();
 
-	    if (name.equals("IGNORE")) {
-	      parseIgnore();
-	    }
-	    else if (name.equals("INCLUDE")) {
-	      parseIgnore();
-	    }
-	    else
-	      throw error(L.l("unknown declaration '{0}'", name));
-	  }
-	}
-	else if (ch == '?') {
-	  parsePI();
-	}
-	else 
-	  throw error(L.l("expected markup at {0}", badChar(ch)));
+            if (name.equals("IGNORE")) {
+              parseIgnore();
+            }
+            else if (name.equals("INCLUDE")) {
+              parseIgnore();
+            }
+            else
+              throw error(L.l("unknown declaration '{0}'", name));
+          }
+        }
+        else if (ch == '?') {
+          parsePI();
+        }
+        else
+          throw error(L.l("expected markup at {0}", badChar(ch)));
       }
       else if (ch == '%') {
-	ch = _xmlParser.parseName(_buf, read());
+        ch = _xmlParser.parseName(_buf, read());
 
-	if (ch != ';')
-	  throw error(L.l("'%{0};' expects ';' at {1}.  Parameter entities have a '%name;' syntax.", _buf, badChar(ch)));
+        if (ch != ';')
+          throw error(L.l("'%{0};' expects ';' at {1}.  Parameter entities have a '%name;' syntax.", _buf, badChar(ch)));
 
-	addPEReference(_text, _buf.toString());
+        addPEReference(_text, _buf.toString());
       }
       else {
-	throw error(L.l("expected '<' at {0}", badChar(ch)));
+        throw error(L.l("expected '<' at {0}", badChar(ch)));
       }
 
       _text.clear();
@@ -248,13 +248,13 @@ public class DtdParser
     int value = 0;
     for (; ch != ';'; ch = read()) {
       if (ch >= '0' && ch <= '9')
-	value = radix * value + ch - '0';
+        value = radix * value + ch - '0';
       else if (radix == 16 && ch >= 'a' && ch <= 'f')
-	value = radix * value + ch - 'a' + 10;
+        value = radix * value + ch - 'a' + 10;
       else if (radix == 16 && ch >= 'A' && ch <= 'F')
-	value = radix * value + ch - 'A' + 10;
+        value = radix * value + ch - 'A' + 10;
       else
-	throw error(L.l("malformed entity ref at {0}", badChar(ch)));
+        throw error(L.l("malformed entity ref at {0}", badChar(ch)));
     }
 
     if (value > 0xffff)
@@ -303,47 +303,47 @@ public class DtdParser
     }
 
     while (ch != -1 && (end != 0 && ch != end
-			|| end == 0 && isAttributeChar(ch))) {
+                        || end == 0 && isAttributeChar(ch))) {
       if (end == 0 && ch == '/') {
-	ch = read();
-	if (! isWhitespace(ch) && ch != '>') {
-	  value.append('/');
-	  value.append((char) ch);
-	}
-	else {
+        ch = read();
+        if (! isWhitespace(ch) && ch != '>') {
+          value.append('/');
+          value.append((char) ch);
+        }
+        else {
           unread(ch);
-	  return '/';
-	}
+          return '/';
+        }
       }
       else if (ch == '&') {
-	if ((ch = read()) == '#')
-	  value.append((char) parseCharacterReference());
-	else if (! isGeneral) {
-	  value.append('&');
-	  value.append((char) ch);
-	}
+        if ((ch = read()) == '#')
+          value.append((char) parseCharacterReference());
+        else if (! isGeneral) {
+          value.append('&');
+          value.append((char) ch);
+        }
         else if (XmlChar.isNameStart(ch)) {
-	  ch = _xmlParser.parseName(_buf, ch);
-	  String name = _buf.toString();
+          ch = _xmlParser.parseName(_buf, ch);
+          String name = _buf.toString();
 
-	  if (ch != ';')
-	    throw error(L.l("expected '{0}' at {1}", ";", badChar(ch)));
-	  else {
-	    int lookup = _entities.getEntity(name);
+          if (ch != ';')
+            throw error(L.l("expected '{0}' at {1}", ";", badChar(ch)));
+          else {
+            int lookup = _entities.getEntity(name);
 
-	    if (lookup >= 0 && lookup <= 0xffff) {
-	      ch = read();
-	      value.append((char) lookup);
-	      continue;
-	    }
+            if (lookup >= 0 && lookup <= 0xffff) {
+              ch = read();
+              value.append((char) lookup);
+              continue;
+            }
             
-	    QEntity entity = _dtd == null ? null : _dtd.getEntity(name);
-	    if (entity != null && entity._value != null)
-	      _xmlParser.setMacroAttr(entity._value);
-	    else
-	      throw error(L.l("expected local reference at '&{0};'", name));
-	  }
-	}
+            QEntity entity = _dtd == null ? null : _dtd.getEntity(name);
+            if (entity != null && entity._value != null)
+              _xmlParser.setMacroAttr(entity._value);
+            else
+              throw error(L.l("expected local reference at '&{0};'", name));
+          }
+        }
       }
       else if (ch == '%' && ! isGeneral) {
         ch = read();
@@ -372,15 +372,15 @@ public class DtdParser
         value.append((char) ch);
       }
       else if (ch == '\r') {
-	value.append(' ');
+        value.append(' ');
         
         if ((ch = read()) != '\n')
           continue;
       }
       else if (ch == '\n')
-	value.append(' ');
+        value.append(' ');
       else
-	value.append((char) ch);
+        value.append((char) ch);
 
       ch = read();
     }
@@ -464,23 +464,23 @@ public class DtdParser
   comment:
     while (ch != -1) {
       if (ch == '-') {
-	ch = read();
+        ch = read();
 
-	while (ch == '-') {
-	  if ((ch = read()) == '>')
-	    break comment;
-	  else if (_strictComments)
-	    throw error(L.l("XML forbids '--' in comments"));
-	  else if (ch == '-') {
+        while (ch == '-') {
+          if ((ch = read()) == '>')
+            break comment;
+          else if (_strictComments)
+            throw error(L.l("XML forbids '--' in comments"));
+          else if (ch == '-') {
           }
-	  else {
-	    break;
+          else {
+            break;
           }
-	}
+        }
       } else if (! XmlChar.isChar(ch)) {
         throw error(L.l("bad character {0}", hex(ch)));
       } else {
-	ch = read();
+        ch = read();
       }
     }
 
@@ -499,12 +499,12 @@ public class DtdParser
 
     while (ch >= 0) {
       if (ch != ']') {
-	ch = read();
+        ch = read();
       }
       else if ((ch = read()) != ']') {
       }
       else if ((ch = read()) == '>')
-	return;
+        return;
     }
   }
 
@@ -518,15 +518,15 @@ public class DtdParser
       String name = _text.toString();
 
       if (name.equals("EMPTY")) {
-	def._content = "EMPTY";
-	return ch;
+        def._content = "EMPTY";
+        return ch;
       }
       else if (name.equals("ANY")) {
-	def._content = "ANY";
-	return ch;
+        def._content = "ANY";
+        return ch;
       }
       else
-	throw error(L.l("expected EMPTY or ANY at '{0}'", name));
+        throw error(L.l("expected EMPTY or ANY at '{0}'", name));
     }
     else if (ch != '(') {
       throw error(L.l("expected grammar definition starting with '(' at {0}.  <!ELEMENT> definitions have the syntax <!ELEMENT name - - (grammar)>", badChar(ch)));
@@ -555,33 +555,33 @@ public class DtdParser
     
     for (; ch != -1; ch = expandPE(ch)) {
       if (ch == '(') {
-	QContentParticle child = new QContentParticle();
-	cp.addChild(child);
-	
-	ch = parseContentParticle(child, false);
+        QContentParticle child = new QContentParticle();
+        cp.addChild(child);
+
+        ch = parseContentParticle(child, false);
       }
       else if (XmlChar.isNameStart(ch)) {
-	ch = _xmlParser.parseName(_text, ch);
-	cp.addChild(_text.toString());
+        ch = _xmlParser.parseName(_text, ch);
+        cp.addChild(_text.toString());
       }
       else if (ch == '#') {
-	ch = _xmlParser.parseName(_text, read());
-	String name = _text.toString();
+        ch = _xmlParser.parseName(_text, read());
+        String name = _text.toString();
 
-	if (cp._children.size() != 0)
-	  throw error(L.l("'#{0}' must occur first", name));
-	if (! isTop)
-	  throw error(L.l("'#{0}' may only occur at top level", name));
+        if (cp._children.size() != 0)
+          throw error(L.l("'#{0}' must occur first", name));
+        if (! isTop)
+          throw error(L.l("'#{0}' may only occur at top level", name));
 
-	if (name.equals("PCDATA"))
-	  cp.addChild("#PCDATA");
-	else
-	  throw error(L.l("illegal content particle at '#{0}'", name));
+        if (name.equals("PCDATA"))
+          cp.addChild("#PCDATA");
+        else
+          throw error(L.l("illegal content particle at '#{0}'", name));
 
-	hasCdata = true;
+        hasCdata = true;
       }
       else
-	throw error(L.l("expected content particle at {0}", badChar(ch)));
+        throw error(L.l("expected content particle at {0}", badChar(ch)));
 
       ch = expandPE(ch);
 
@@ -602,24 +602,24 @@ public class DtdParser
       }
 
       if (ch == ')')
-	break;
+        break;
       else if (cp._separator == 0) {
-	if (ch == '|') 
-	  cp._separator = ch;
-	else if (hasCdata)
-	  throw error(L.l("#PCDATA must be separated by '|' at {0}",
+        if (ch == '|')
+          cp._separator = ch;
+        else if (hasCdata)
+          throw error(L.l("#PCDATA must be separated by '|' at {0}",
                           badChar(ch)));
-	else if (ch == ',')
-	  cp._separator = ch;
-	else
-	  throw error(L.l("expected separator at {0}", badChar(ch)));
+        else if (ch == ',')
+          cp._separator = ch;
+        else
+          throw error(L.l("expected separator at {0}", badChar(ch)));
 
-	ch = read();
+        ch = read();
       } else if (ch != cp._separator)
-	throw error(L.l("expected '{0}' at {1}",
+        throw error(L.l("expected '{0}' at {1}",
                         "" + (char) cp._separator, badChar(ch)));
       else
-	ch = read();
+        ch = read();
     }
 
     ch = expandPE(read());
@@ -718,13 +718,13 @@ public class DtdParser
       int ch = text.charAt(i);
 
       if (ch == '"') {
-	text.delete(i, i + 1);
-	text.insert(i, "&#34;");
-	i--;
+        text.delete(i, i + 1);
+        text.insert(i, "&#34;");
+        i--;
       } else if (ch == '\'') {
-	text.delete(i, i + 1);
-	text.insert(i, "&#39;");
-	i--;
+        text.delete(i, i + 1);
+        text.insert(i, "&#39;");
+        i--;
       }
     }
 
@@ -754,78 +754,78 @@ public class DtdParser
       ArrayList<String> enumeration = null;
       ch = expandPE(ch);
       if (ch == '(') {
-	attrType = "#ENUM";
-	enumeration = new ArrayList<String>();
-	do {
-	  ch = expandPE(read());
+        attrType = "#ENUM";
+        enumeration = new ArrayList<String>();
+        do {
+          ch = expandPE(read());
 
-	  ch = parseNameToken(_text, ch);
-	  enumeration.add(_text.toString());
+          ch = parseNameToken(_text, ch);
+          enumeration.add(_text.toString());
 
-	  ch = expandPE(ch);
-	} while (ch == '|');
+          ch = expandPE(ch);
+        } while (ch == '|');
 
-	if (ch != ')')
-	  throw error(L.l("expected '{0}' at {1}.  <!ATTRLIST> enumerations definitions are enclosed in '(' ... ')'.", ")", badChar(ch)));
-	ch = read();
+        if (ch != ')')
+          throw error(L.l("expected '{0}' at {1}.  <!ATTRLIST> enumerations definitions are enclosed in '(' ... ')'.", ")", badChar(ch)));
+        ch = read();
       }
       else {
-	ch = _xmlParser.parseName(_text, ch);
-	attrType = _text.toString();
+        ch = _xmlParser.parseName(_text, ch);
+        attrType = _text.toString();
 
-	if (attrType.equals("NOTATION")) {
-	  enumeration = new ArrayList<String>();
-	  ch = expandPE(ch);
-	  if (ch != '(')
+        if (attrType.equals("NOTATION")) {
+          enumeration = new ArrayList<String>();
+          ch = expandPE(ch);
+          if (ch != '(')
             throw error(L.l("expected '{0}' at {1}", "(", badChar(ch)));
 
-	  do {
-	    ch = expandPE(read());
+          do {
+            ch = expandPE(read());
 
-	    ch = _xmlParser.parseName(_text, ch);
-	    enumeration.add(_text.toString());
+            ch = _xmlParser.parseName(_text, ch);
+            enumeration.add(_text.toString());
 
-	    ch = expandPE(ch);
-	  } while (ch == '|');
+            ch = expandPE(ch);
+          } while (ch == '|');
 
-	  if (ch != ')')
-	    throw error(L.l("expected '{0}' at {1}", ")", badChar(ch)));
-	  ch = read();
-	}
-	else if (_attrTypes.get(attrType) != null) {
-	}
+          if (ch != ')')
+            throw error(L.l("expected '{0}' at {1}", ")", badChar(ch)));
+          ch = read();
+        }
+        else if (_attrTypes.get(attrType) != null) {
+        }
         else
-	  throw error(L.l("expected attribute type at '{0}'", attrType));
+          throw error(L.l("expected attribute type at '{0}'", attrType));
       }
 
       ch = _xmlParser.skipWhitespace(ch);
       String qualifier = null;
       String attrDefault = null;
       if (ch == '#') {
-	ch = _xmlParser.parseName(_text, read());
-	qualifier = "#" + _text.toString();
+        ch = _xmlParser.parseName(_text, read());
+        qualifier = "#" + _text.toString();
 
-	if (qualifier.equals("#IMPLIED")) {
-	}
-	else if (qualifier.equals("#REQUIRED")) {
-	}
-	else if (qualifier.equals("#FIXED")) {
-	  ch = _xmlParser.skipWhitespace(ch);
-	  ch = parseValue(_text, ch, false);
-	  attrDefault = _text.toString();
-	} else
-	  throw error(L.l("expected attribute default at '{0}'",
+        if (qualifier.equals("#IMPLIED")) {
+        }
+        else if (qualifier.equals("#REQUIRED")) {
+        }
+        else if (qualifier.equals("#FIXED")) {
+          ch = _xmlParser.skipWhitespace(ch);
+          ch = parseValue(_text, ch, false);
+          attrDefault = _text.toString();
+        } else
+          throw error(L.l("expected attribute default at '{0}'",
                       qualifier));
       }
       else if (ch != '>') {
-	ch = parseValue(_text, ch, false);
-	attrDefault = _text.toString();
+        ch = parseValue(_text, ch, false);
+        attrDefault = _text.toString();
       }
 
       def.addAttribute(attrName, attrType, enumeration, 
                        qualifier, attrDefault);
       if (attrType != null && attrType.equals("ID"))
-	doctype.setElementId(name, attrName);
+        doctype.setElementId(name, attrName);
 
       ch = _xmlParser.skipWhitespace(ch);
     }
@@ -861,9 +861,9 @@ public class DtdParser
       String systemId = null;
 
       if (ch == '"' || ch == '\'') {
-	ch = parseValue(_text, ch, false);
-	ch = _xmlParser.skipWhitespace(ch);
-	systemId = _text.toString();
+        ch = parseValue(_text, ch, false);
+        ch = _xmlParser.skipWhitespace(ch);
+        systemId = _text.toString();
       }
 
       notation = new QNotation(name, id, systemId);
@@ -904,8 +904,8 @@ public class DtdParser
       ch = _xmlParser.skipWhitespace(ch);
 
       if (_extPublicId.indexOf('&') > 0)
-	throw error(L.l("Illegal character '&' in PUBLIC identifier '{0}'",
-			_extPublicId));
+        throw error(L.l("Illegal character '&' in PUBLIC identifier '{0}'",
+                        _extPublicId));
 
       ch = parseValue(_text, ch, false);
       ch = _xmlParser.skipWhitespace(ch);
@@ -956,17 +956,17 @@ public class DtdParser
 
       ch = _xmlParser.skipWhitespace(ch);
       if (! isPe && XmlChar.isNameStart(ch)) {
-	ch = _xmlParser.parseName(_text, ch);
-	String key = _text.toString();
-	if (key.equals("NDATA")) {
-	  ch = _xmlParser.skipWhitespace(ch);
-	  ch = _xmlParser.parseName(_text, ch);
+        ch = _xmlParser.parseName(_text, ch);
+        String key = _text.toString();
+        if (key.equals("NDATA")) {
+          ch = _xmlParser.skipWhitespace(ch);
+          ch = _xmlParser.parseName(_text, ch);
 
-	  String ndata = _text.toString();
+          String ndata = _text.toString();
 
-	  entity._ndata = ndata;
-	} else
-	  throw error(L.l("expected 'NDATA' at '{0}'", key));
+          entity._ndata = ndata;
+        } else
+          throw error(L.l("expected 'NDATA' at '{0}'", key));
       }
     }
       
@@ -993,10 +993,10 @@ public class DtdParser
   private boolean isChar(int ch)
   {
     return (ch >= 0x20 && ch <= 0xd7ff ||
-	    ch == 0x9 ||
-	    ch == 0xa ||
-	    ch == 0xd ||
-	    ch >= 0xe000 && ch <= 0xfffd);
+            ch == 0x9 ||
+            ch == 0xa ||
+            ch == 0xd ||
+            ch >= 0xe000 && ch <= 0xfffd);
   }
 
   /**
@@ -1009,9 +1009,9 @@ public class DtdParser
     for (int b = 3; b >= 0; b--) {
       int v = (value >> (4 * b)) & 0xf;
       if (v < 10)
-	cb.append((char) (v + '0'));
+        cb.append((char) (v + '0'));
       else
-	cb.append((char) (v - 10 + 'a'));
+        cb.append((char) (v - 10 + 'a'));
     }
 
     return cb.close();

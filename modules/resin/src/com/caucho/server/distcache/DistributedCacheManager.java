@@ -94,8 +94,8 @@ abstract public class DistributedCacheManager
    * Sets a cache entry
    */
   public void put(HashKey hashKey,
-		  Object value,
-		  CacheConfig config)
+                  Object value,
+                  CacheConfig config)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -104,9 +104,9 @@ abstract public class DistributedCacheManager
    * Sets a cache entry
    */
   public ExtCacheEntry put(HashKey hashKey,
-			   InputStream is,
-			   CacheConfig config,
-			   long idleTimeout)
+                           InputStream is,
+                           CacheConfig config,
+                           long idleTimeout)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -154,7 +154,7 @@ abstract public class DistributedCacheManager
   {
     try {
       MessageDigest digest
-	= MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
+        = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
 
       NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
 

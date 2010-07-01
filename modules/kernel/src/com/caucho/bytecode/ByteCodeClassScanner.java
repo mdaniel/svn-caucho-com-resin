@@ -89,7 +89,7 @@ public class ByteCodeClassScanner {
       int magic = readInt(is);
 
       if (magic != JavaClass.MAGIC)
-	throw error(L.l("bad magic number in class file"));
+        throw error(L.l("bad magic number in class file"));
 
       is.skip(2); // major
       is.skip(2); // minor
@@ -173,8 +173,8 @@ public class ByteCodeClassScanner {
       return true;
     } catch (Exception e) {
       log.log(Level.WARNING,
-	      "failed scanning class " + _className + "\n" + e.toString(),
-	      e);
+              "failed scanning class " + _className + "\n" + e.toString(),
+              e);
 
       return false;
     }
@@ -206,80 +206,80 @@ public class ByteCodeClassScanner {
       int code = is.read();
 
       if (code == ByteCodeParser.CP_LONG || code == ByteCodeParser.CP_DOUBLE)
-	i += 2;
+        i += 2;
       else
-	i += 1;
+        i += 1;
       
       switch (code) {
       case ByteCodeParser.CP_CLASS:
         int utf8Index = readShort(is);
         
         // index of the UTF-8 string
-	_classData[index] = utf8Index;
-	break;
+        _classData[index] = utf8Index;
+        break;
       
       case ByteCodeParser.CP_FIELD_REF:
-	// int classIndex = readShort();
-	// int nameAndTypeIndex = readShort();
-	
-	is.skip(4);
-	break;
+        // int classIndex = readShort();
+        // int nameAndTypeIndex = readShort();
+
+        is.skip(4);
+        break;
       
       case ByteCodeParser.CP_METHOD_REF:
-	// int classIndex = readShort();
-	// int nameAndTypeIndex = readShort();
+        // int classIndex = readShort();
+        // int nameAndTypeIndex = readShort();
 
-	is.skip(4);
-	break;
+        is.skip(4);
+        break;
       
       case ByteCodeParser.CP_INTERFACE_METHOD_REF:
-	// int classIndex = readShort();
-	// int nameAndTypeIndex = readShort();
+        // int classIndex = readShort();
+        // int nameAndTypeIndex = readShort();
 
-	is.skip(4);
-	break;
-	
+        is.skip(4);
+        break;
+
       case ByteCodeParser.CP_STRING:
-	// int stringIndex = readShort();
+        // int stringIndex = readShort();
 
-	is.skip(2);
-	break;
+        is.skip(2);
+        break;
       
       case ByteCodeParser.CP_INTEGER:
-	is.skip(4);
-	break;
+        is.skip(4);
+        break;
       
       case ByteCodeParser.CP_FLOAT:
-	is.skip(4);
-	break;
+        is.skip(4);
+        break;
       
       case ByteCodeParser.CP_LONG:
-	is.skip(8);
-	break;
+        is.skip(8);
+        break;
       
       case ByteCodeParser.CP_DOUBLE:
-	is.skip(8);
-	break;
+        is.skip(8);
+        break;
       
       case ByteCodeParser.CP_NAME_AND_TYPE:
-	// int nameIndex = readShort();
-	// int descriptorIndex = readShort();
-	
-	is.skip(4);
-	break;
+        // int nameIndex = readShort();
+        // int descriptorIndex = readShort();
+
+        is.skip(4);
+        break;
       
       case ByteCodeParser.CP_UTF8:
-	{
-	  int length = readShort(is);
+        {
+          int length = readShort(is);
 
           _cpData[index] = _charBufferOffset;
           _cpLengths[index] = parseUtf8(is, length);
 
-	  break;
-	}
+          break;
+        }
 
       default:
-	throw error(L.l("'{0}' is an unknown constant pool type.", code));
+        throw error(L.l("'{0}' is an unknown constant pool type.", code));
       }
     }
 
@@ -577,9 +577,9 @@ public class ByteCodeClassScanner {
     throws IOException
   {
     return ((is.read() << 24)
-	    | (is.read() << 16)
-	    | (is.read() << 8)
-	    | (is.read()));
+            | (is.read() << 16)
+            | (is.read() << 8)
+            | (is.read()));
   }
 
   /**

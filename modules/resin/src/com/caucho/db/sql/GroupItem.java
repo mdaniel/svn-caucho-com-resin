@@ -83,7 +83,7 @@ class GroupItem {
 
     for (int i = 0; i < _isGroupByFields.length; i++) {
       if (_isGroupByFields[i]) {
-	getData(i).copyTo(item.getData(i));
+        getData(i).copyTo(item.getData(i));
       }
     }
 
@@ -109,7 +109,7 @@ class GroupItem {
       _data = new Data[size];
 
       for (int i = 0; i < size; i++)
-	_data[i] = new Data();
+        _data[i] = new Data();
     }
   }
 
@@ -212,7 +212,7 @@ class GroupItem {
     
     for (int i = 0; i < length; i++) {
       if (isGroupByFields[i]) {
-	hash = hash * 65521 + data[i].hashCode();
+        hash = hash * 65521 + data[i].hashCode();
       }
     }
 
@@ -238,7 +238,7 @@ class GroupItem {
 
     for (int i = 0; i < isGroupByFields.length; i++) {
       if (isGroupByFields[i] && ! _data[i].equals(item._data[i]))
-	return false;
+        return false;
     }
 
     return true;

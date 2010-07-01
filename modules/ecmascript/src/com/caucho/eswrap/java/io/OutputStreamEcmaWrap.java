@@ -52,7 +52,7 @@ public class OutputStreamEcmaWrap {
       String string = call.getArgString(i, length);
 
       if (string == null)
-	string = "null";
+        string = "null";
 
       byte []bytes = string.getBytes();
 
@@ -73,7 +73,7 @@ public class OutputStreamEcmaWrap {
       String string = call.getArgString(i, length);
 
       if (string == null)
-	string = "null";
+        string = "null";
 
       byte []bytes = string.getBytes();
 
@@ -126,18 +126,18 @@ public class OutputStreamEcmaWrap {
     }
     else if (obj instanceof InputStream) {
       if (os instanceof WriteStream) {
-	((WriteStream) os).writeStream((InputStream) obj);
+        ((WriteStream) os).writeStream((InputStream) obj);
       }
       else {
-	int ch;
-	InputStream is = (InputStream) obj;
-	while ((ch = is.read()) >= 0)
-	  os.write(ch);
+        int ch;
+        InputStream is = (InputStream) obj;
+        while ((ch = is.read()) >= 0)
+          os.write(ch);
       }
     }
     else
       throw new IllegalArgumentException("expected stream at " +
-					 obj.getClass().getName());
+                                         obj.getClass().getName());
   }
 }
 

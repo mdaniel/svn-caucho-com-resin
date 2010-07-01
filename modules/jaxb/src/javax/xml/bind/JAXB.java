@@ -62,11 +62,11 @@ public final class JAXB {
 
       OutputStream os = conn.getOutputStream();
       try {
-	StreamResult result = new StreamResult(os);
+        StreamResult result = new StreamResult(os);
 
-	marshal(obj, result);
+        marshal(obj, result);
       } finally {
-	os.close();
+        os.close();
       }
     } catch (RuntimeException e) {
       throw e;

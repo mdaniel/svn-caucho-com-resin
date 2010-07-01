@@ -306,29 +306,29 @@ public class GroupItem extends Item {
       item = items.get(i);
 
       if (i == 0) {
-	cb.append(item.toSyntaxDescription(depth + 1));
-	isSimple = item.isSimpleSyntax();
+        cb.append(item.toSyntaxDescription(depth + 1));
+        isSimple = item.isSimpleSyntax();
       }
       else
-	isSimple = addSyntaxItem(cb, item, depth, isSimple);
+        isSimple = addSyntaxItem(cb, item, depth, isSimple);
 
       if (i + 1 < items.size()) {
-	Item next = items.get(i + 1);
+        Item next = items.get(i + 1);
 
-	if (next instanceof ZeroOrMoreItem) {
-	  ZeroOrMoreItem starItem = (ZeroOrMoreItem) next;
+        if (next instanceof ZeroOrMoreItem) {
+          ZeroOrMoreItem starItem = (ZeroOrMoreItem) next;
 
-	  if (starItem.getItem().equals(item)) {
-	    cb.append("+");
-	    i++;
+          if (starItem.getItem().equals(item)) {
+            cb.append("+");
+            i++;
 
-	    if (i == 1 && i == items.size() - 1) {
-	      cb.delete(0, 1);
+            if (i == 1 && i == items.size() - 1) {
+              cb.delete(0, 1);
 
-	      return cb.close();
-	    }
-	  }
-	}
+              return cb.close();
+            }
+          }
+        }
       }
     }
 
@@ -341,7 +341,7 @@ public class GroupItem extends Item {
    * Adds an item to the description.
    */
   private boolean addSyntaxItem(CharBuffer cb, Item item,
-				int depth, boolean isSimple)
+                                int depth, boolean isSimple)
   {
     if (! item.isSimpleSyntax())
       isSimple = false;

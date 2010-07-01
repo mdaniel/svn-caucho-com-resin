@@ -37,7 +37,7 @@ import java.security.*;
 public interface Authenticator
 {
   public AuthenticatedUser authenticate(Principal user,
-					Object credentials,
-					Object details);
+                                        Object credentials,
+                                        Object details);
 }
 

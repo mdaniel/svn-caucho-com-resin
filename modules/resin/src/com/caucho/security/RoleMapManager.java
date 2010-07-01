@@ -75,10 +75,10 @@ public class RoleMapManager
       RoleMapManager manager = _localManager.getLevel();
 
       if (manager == null) {
-	RoleMapManager parent = _localManager.get();
+        RoleMapManager parent = _localManager.get();
 
-	manager = new RoleMapManager(parent);
-	_localManager.set(manager);
+        manager = new RoleMapManager(parent);
+        _localManager.set(manager);
       }
 
       return manager;
@@ -106,7 +106,7 @@ public class RoleMapManager
       Boolean result = roleMap.isUserInRole(role, user);
 
       if (result != null)
-	return result;
+        return result;
     }
 
     if (_parent != null)

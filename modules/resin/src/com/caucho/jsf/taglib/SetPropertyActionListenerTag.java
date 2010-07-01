@@ -65,14 +65,14 @@ public class SetPropertyActionListenerTag
 
     if (parent == null)
       throw new JspException(
-	"f:setPropertyActionListener must be nested iside a UIComponent tag.");
+        "f:setPropertyActionListener must be nested iside a UIComponent tag.");
 
     UIComponent comp = parent.getComponentInstance();
 
     if (parent.getCreated()) {
       if (!(comp instanceof ActionSource))
-	throw new JspException(
-	  "f:valueChangeListener parent must be an ActionSource.");
+        throw new JspException(
+          "f:valueChangeListener parent must be an ActionSource.");
 
       ActionSource actionSource = (ActionSource) comp;
 

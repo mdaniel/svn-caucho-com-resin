@@ -532,7 +532,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     boolean isAbstractParent
       = (_entityType.getParentType() == null
-	 || ! _entityType.getParentType().isEntity());
+         || ! _entityType.getParentType().isEntity());
 
     // jpa/0m02
     if (id != null) // && isAbstractParent)
@@ -639,22 +639,22 @@ abstract public class AmberMappedComponent extends ClassComponent {
   {
     if (_entityType.getId() != null) {
       for (AmberField key : _entityType.getId().getKeys()) {
-	if (_entityType == key.getSourceType()) {
-	  key.generateSuperGetterMethod(out);
-	  key.generateSuperSetterMethod(out);
-	}
+        if (_entityType == key.getSourceType()) {
+          key.generateSuperGetterMethod(out);
+          key.generateSuperSetterMethod(out);
+        }
       }
     }
 
     for (AmberField prop : _entityType.getFields()) {
       if (_entityType == prop.getSourceType()) {
-	prop.generateSuperGetterMethod(out);
-	prop.generateSuperSetterMethod(out);
+        prop.generateSuperGetterMethod(out);
+        prop.generateSuperSetterMethod(out);
 
-	if (! (prop instanceof IdField)) {
-	  prop.generateGetterMethod(out);
-	  prop.generateSetterMethod(out);
-	}
+        if (! (prop instanceof IdField)) {
+          prop.generateGetterMethod(out);
+          prop.generateSetterMethod(out);
+        }
       }
     }
   }
@@ -1278,8 +1278,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     boolean isAutoInsert = false;
     
     if (_entityType.getId() != null
-	&& ! isAbstract
-	&& _entityType.getId().isIdentityGenerator()) {
+        && ! isAbstract
+        && _entityType.getId().isIdentityGenerator()) {
       isAutoInsert = true;
     }
     

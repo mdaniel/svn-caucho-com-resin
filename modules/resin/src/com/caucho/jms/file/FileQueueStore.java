@@ -113,12 +113,12 @@ public class FileQueueStore
       FileQueueStore store = _localStore.getLevel(loader);
 
       if (store == null) {
-	Path path = server.getResinDataDirectory();
-	String serverId = server.getServerId();
+        Path path = server.getResinDataDirectory();
+        String serverId = server.getServerId();
 
-	store = new FileQueueStore(path, serverId, loader, true);
+        store = new FileQueueStore(path, serverId, loader, true);
 
-	_localStore.set(store, loader);
+        _localStore.set(store, loader);
       }
 
       return store;
@@ -142,7 +142,7 @@ public class FileQueueStore
 
     if (! path.isDirectory())
       throw new ConfigException(L.l("FileQueue requires a valid persistent directory {0}.",
-				    path.getURL()));
+                                    path.getURL()));
     
     if ("".equals(serverId))
       serverId = "default";
@@ -176,10 +176,10 @@ public class FileQueueStore
    * Adds a new message to the persistent store.
    */
   public long send(byte []queueHash,
-		   String msgId,
-		   Serializable payload,
-		   int priority,
-		   long expireTime)
+                   String msgId,
+                   Serializable payload,
+                   int priority,
+                   long expireTime)
   {
     StoreConnection conn = null;
     
@@ -203,12 +203,12 @@ public class FileQueueStore
       sendStmt.executeUpdate();
 
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " send " + payload);
+        log.fine(this + " send " + payload);
 
       ResultSet rs = sendStmt.getGeneratedKeys();
 
       if (! rs.next())
-	throw new java.lang.IllegalStateException();
+        throw new java.lang.IllegalStateException();
 
       long id = rs.getLong(1);
 
@@ -243,13 +243,13 @@ public class FileQueueStore
       int count = 0;
 
       while (rs.next()) {
-	count++;
-	long id = rs.getLong(1);
-	String msgId = rs.getString(2);
-	int priority = rs.getInt(3);
-	long expire = rs.getLong(4);
+        count++;
+        long id = rs.getLong(1);
+        String msgId = rs.getString(2);
+        int priority = rs.getInt(3);
+        long expire = rs.getLong(4);
 
-	fileQueue.addEntry(id, msgId, -1, priority, expire, null);
+        fileQueue.addEntry(id, msgId, -1, priority, expire, null);
       }
 
       rs.close();
@@ -284,19 +284,19 @@ public class FileQueueStore
       ResultSet rs = readStmt.executeQuery();
 
       if (rs.next()) {
-	Serializable payload = null;
-	  
-	InputStream is = rs.getBinaryStream(1);
-	if (is != null) {
-	  Hessian2Input in = new Hessian2Input(is);
+        Serializable payload = null;
 
-	  payload = (Serializable) in.readObject();
+        InputStream is = rs.getBinaryStream(1);
+        if (is != null) {
+          Hessian2Input in = new Hessian2Input(is);
 
-	  in.close();
-	  is.close();
-	}
+          payload = (Serializable) in.readObject();
 
-	return payload;
+          in.close();
+          is.close();
+        }
+
+        return payload;
       }
 
       rs.close();
@@ -329,17 +329,17 @@ public class FileQueueStore
       ResultSet rs = receiveStmt.executeQuery();
 
       if (rs.next()) {
-	long id = rs.getLong(1);
-	
-	rs.close();
+        long id = rs.getLong(1);
 
-	PreparedStatement deleteStmt = conn.prepareDelete();
+        rs.close();
 
-	deleteStmt.setLong(1, id);
+        PreparedStatement deleteStmt = conn.prepareDelete();
 
-	deleteStmt.executeUpdate();
+        deleteStmt.setLong(1, id);
 
-	return null;
+        deleteStmt.executeUpdate();
+
+        return null;
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -381,7 +381,7 @@ public class FileQueueStore
     throws SQLException
   {
     String sql = ("select id, priority, payload, is_valid"
-		  + " from " + _messageTable + " where 1=0");
+                  + " from " + _messageTable + " where 1=0");
     
     Statement stmt = conn.createStatement();
 
@@ -408,21 +408,21 @@ public class FileQueueStore
     }
 
     sql = ("create table " + _queueTable + " ("
-	   + "  id bigint primary key auto_increment,"
-	   + "  name varchar(128)"
-	   + ")");
+           + "  id bigint primary key auto_increment,"
+           + "  name varchar(128)"
+           + ")");
 
     stmt.executeUpdate(sql);
 
     sql = ("create table " + _messageTable + " ("
-	   + "  id identity primary key,"
-	   + "  queue_id binary(32),"
-	   + "  priority integer,"
-	   + "  expire datetime,"
-	   + "  msg_id varchar(64),"
-	   + "  payload blob,"
-	   + "  is_valid bit"
-	   + ")");
+           + "  id identity primary key,"
+           + "  queue_id binary(32),"
+           + "  priority integer,"
+           + "  expire datetime,"
+           + "  msg_id varchar(64),"
+           + "  payload blob,"
+           + "  is_valid bit"
+           + ")");
 
     stmt.executeUpdate(sql);
   }
@@ -491,13 +491,13 @@ public class FileQueueStore
       char ch = name.charAt(i);
 
       if ('a' <= ch && ch <= 'z'
-	  || 'A' <= ch && ch <= 'Z'
-	  || '0' <= ch && ch <= '0'
-	  || ch == '_') {
-	sb.append(ch);
+          || 'A' <= ch && ch <= 'Z'
+          || '0' <= ch && ch <= '0'
+          || ch == '_') {
+        sb.append(ch);
       }
       else
-	sb.append('_');
+        sb.append('_');
     }
 
     return sb.toString();
@@ -527,11 +527,11 @@ public class FileQueueStore
       throws SQLException
     {
       if (_sendStmt == null) {
-	String sql = ("insert into " + _messageTable
-		      + " (queue_id,msg_id,payload,priority,expire,is_valid)"
-		      + " VALUES(?,?,?,?,?,1)");
+        String sql = ("insert into " + _messageTable
+                      + " (queue_id,msg_id,payload,priority,expire,is_valid)"
+                      + " VALUES(?,?,?,?,?,1)");
     
-	_sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        _sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       }
 
       return _sendStmt;
@@ -541,10 +541,10 @@ public class FileQueueStore
       throws SQLException
     {
       if (_receiveStmt == null) {
-	String sql = ("select id,msg_id,payload from " + _messageTable
-		      + " WHERE queue_id=? LIMIT 1");
+        String sql = ("select id,msg_id,payload from " + _messageTable
+                      + " WHERE queue_id=? LIMIT 1");
     
-	_receiveStmt = _conn.prepareStatement(sql);
+        _receiveStmt = _conn.prepareStatement(sql);
       }
 
       return _receiveStmt;
@@ -554,10 +554,10 @@ public class FileQueueStore
       throws SQLException
     {
       if (_readStmt == null) {
-	String sql = ("select payload from " + _messageTable
-		      + " WHERE id=?");
+        String sql = ("select payload from " + _messageTable
+                      + " WHERE id=?");
     
-	_readStmt = _conn.prepareStatement(sql);
+        _readStmt = _conn.prepareStatement(sql);
       }
 
       return _readStmt;
@@ -567,12 +567,12 @@ public class FileQueueStore
       throws SQLException
     {
       if (_receiveStartStmt == null) {
-	String sql = ("select id,msg_id,priority,expire"
-		      + " from " + _messageTable
-		      + " WHERE queue_id=? AND is_valid=1" // ORDER BY id"
-		      + " LIMIT " + START_LIMIT);
+        String sql = ("select id,msg_id,priority,expire"
+                      + " from " + _messageTable
+                      + " WHERE queue_id=? AND is_valid=1" // ORDER BY id"
+                      + " LIMIT " + START_LIMIT);
     
-	_receiveStartStmt = _conn.prepareStatement(sql);
+        _receiveStartStmt = _conn.prepareStatement(sql);
       }
 
       return _receiveStartStmt;
@@ -582,11 +582,11 @@ public class FileQueueStore
       throws SQLException
     {
       if (_removeStmt == null) {
-	String sql = ("update " + _messageTable
-		      + " set payload=null, is_valid=0, expire=now() + 120000"
-		      + " WHERE id=?");
+        String sql = ("update " + _messageTable
+                      + " set payload=null, is_valid=0, expire=now() + 120000"
+                      + " WHERE id=?");
     
-	_removeStmt = _conn.prepareStatement(sql);
+        _removeStmt = _conn.prepareStatement(sql);
       }
 
       return _removeStmt;
@@ -596,10 +596,10 @@ public class FileQueueStore
       throws SQLException
     {
       if (_deleteStmt == null) {
-	String sql = ("delete from " + _messageTable
-		      + " WHERE id=?");
+        String sql = ("delete from " + _messageTable
+                      + " WHERE id=?");
     
-	_deleteStmt = _conn.prepareStatement(sql);
+        _deleteStmt = _conn.prepareStatement(sql);
       }
 
       return _deleteStmt;

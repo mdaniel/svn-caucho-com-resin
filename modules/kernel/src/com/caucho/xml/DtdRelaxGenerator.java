@@ -60,26 +60,26 @@ class DtdRelaxGenerator {
       HashMap<String,QElementDef> elementMap = _dtd.getElementMap();
 
       for (QElementDef elt : elementMap.values()) {
-	String name = elt.getName();
+        String name = elt.getName();
 
-	Pattern pattern = null;
+        Pattern pattern = null;
 
-	pattern = parseContentParticle(elt.getContent());
+        pattern = parseContentParticle(elt.getContent());
 
-	if (pattern != null) {
-	  ElementPattern eltPattern = new ElementPattern(name);
-	  eltPattern.addNameChild(new NamePattern(new QName(name)));
-	  eltPattern.addChild(pattern);
-	  eltPattern.endElement();
-	  
-	  _grammar.setDefinition(name, eltPattern);
-	}
+        if (pattern != null) {
+          ElementPattern eltPattern = new ElementPattern(name);
+          eltPattern.addNameChild(new NamePattern(new QName(name)));
+          eltPattern.addChild(pattern);
+          eltPattern.endElement();
+
+          _grammar.setDefinition(name, eltPattern);
+        }
       }
 
       Pattern start = _grammar.getDefinition(_dtd.getName());
 
       if (start == null)
-	return null;
+        return null;
 
       _grammar.setStart(start);
 
@@ -107,61 +107,61 @@ class DtdRelaxGenerator {
       boolean isText = false;
 
       if (cp.getSeparator() == ',') {
-	pattern = new GroupPattern();
+        pattern = new GroupPattern();
       }
       else if (cp.getSeparator() == '|') {
-	pattern = new ChoicePattern();
+        pattern = new ChoicePattern();
       }
       else if (cp.getSeparator() == '&') {
-	pattern = new InterleavePattern();
+        pattern = new InterleavePattern();
       }
       else
-	pattern = new GroupPattern();
+        pattern = new GroupPattern();
 
       for (int i = 0; i < cp.getChildSize(); i++) {
-	Pattern child = parseContentParticle(cp.getChild(i));
+        Pattern child = parseContentParticle(cp.getChild(i));
 
-	if (child instanceof TextPattern) {
-	  isText = true;
-	  continue;
-	}
+        if (child instanceof TextPattern) {
+          isText = true;
+          continue;
+        }
 
-	if (child == null) {
-	  log.finer(this + " " + cp.getChild(i) + " is an unknown CP");
-	  
-	  return null;
-	}
-	
-	pattern.addChild(child);
+        if (child == null) {
+          log.finer(this + " " + cp.getChild(i) + " is an unknown CP");
+
+          return null;
+        }
+
+        pattern.addChild(child);
       }
 
       pattern.endElement();
 
       if (cp.getRepeat() == '*')
-	pattern = new ZeroOrMorePattern(pattern);
+        pattern = new ZeroOrMorePattern(pattern);
       else if (cp.getRepeat() == '?') {
-	Pattern group = new ChoicePattern();
-	group.addChild(new EmptyPattern());
-	group.addChild(pattern);
-	group.endElement();
-	
-	pattern = group;
+        Pattern group = new ChoicePattern();
+        group.addChild(new EmptyPattern());
+        group.addChild(pattern);
+        group.endElement();
+
+        pattern = group;
       }
       else if (cp.getRepeat() == '+') {
-	Pattern group = new GroupPattern();
-	group.addChild(pattern);
-	group.addChild(new ZeroOrMorePattern(pattern));
-	group.endElement();
-	
-	pattern = group;
+        Pattern group = new GroupPattern();
+        group.addChild(pattern);
+        group.addChild(new ZeroOrMorePattern(pattern));
+        group.endElement();
+
+        pattern = group;
       }
 
       if (isText) {
-	Pattern group = new InterleavePattern();
-	group.addChild(pattern);
-	group.addChild(new TextPattern());
-	group.endElement();
-	pattern = group;
+        Pattern group = new InterleavePattern();
+        group.addChild(pattern);
+        group.addChild(new TextPattern());
+        group.endElement();
+        pattern = group;
       }
 
       return pattern;
@@ -170,11 +170,11 @@ class DtdRelaxGenerator {
       String s = (String) obj;
 
       if ("EMPTY".equals(s))
-	return new EmptyPattern();
+        return new EmptyPattern();
       else if (s.startsWith("#"))
-	return new TextPattern();
+        return new TextPattern();
       else
-	return new RefPattern(_grammar, s);
+        return new RefPattern(_grammar, s);
     }
     else
       return null;

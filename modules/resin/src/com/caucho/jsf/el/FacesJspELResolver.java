@@ -70,7 +70,7 @@ public class FacesJspELResolver extends ELResolver {
 
   @Override
   public Class<?> getCommonPropertyType(ELContext env,
-					Object base)
+                                        Object base)
   {
     return null;
   }
@@ -91,7 +91,7 @@ public class FacesJspELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
-							   Object base)
+                                                           Object base)
   {
     ArrayList<FeatureDescriptor> descriptors
       = new ArrayList<FeatureDescriptor>();
@@ -99,19 +99,19 @@ public class FacesJspELResolver extends ELResolver {
     descriptors.addAll(_implicitFeatureDescriptors);
 
     addDescriptors(descriptors,
-		   _managedBeanResolver.getFeatureDescriptors(env, base));
+                   _managedBeanResolver.getFeatureDescriptors(env, base));
 
     addDescriptors(descriptors,
-		   _cdiResolver.getFeatureDescriptors(env, base));
+                   _cdiResolver.getFeatureDescriptors(env, base));
 
     addDescriptors(descriptors,
-		   _resourceBundleResolver.getFeatureDescriptors(env, base));
+                   _resourceBundleResolver.getFeatureDescriptors(env, base));
 
     return descriptors.iterator();
   }
 
   private void addDescriptors(ArrayList<FeatureDescriptor> descriptors,
-			      Iterator<FeatureDescriptor> iter)
+                              Iterator<FeatureDescriptor> iter)
   {
     if (iter == null)
       return;
@@ -130,9 +130,9 @@ public class FacesJspELResolver extends ELResolver {
       Type type = _typeMap.get((String) property);
 
       if (type != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return null;
+        return null;
       }
     }
 
@@ -148,34 +148,34 @@ public class FacesJspELResolver extends ELResolver {
       Type type = _typeMap.get((String) property);
 
       if (type != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	FacesContext facesContext = FacesContext.getCurrentInstance();
+        FacesContext facesContext = FacesContext.getCurrentInstance();
 
-	if (facesContext != null) {
-	  switch (type) {
-	  case FACES_CONTEXT:
-	    return facesContext;
-	  case VIEW:
-	    return facesContext.getViewRoot();
-	  }
-	}
+        if (facesContext != null) {
+          switch (type) {
+          case FACES_CONTEXT:
+            return facesContext;
+          case VIEW:
+            return facesContext.getViewRoot();
+          }
+        }
       }
 
       Object value = _cdiResolver.getValue(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
 
       value = _managedBeanResolver.getValue(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
 
       value = _resourceBundleResolver.getValue(env, base, property);
 
       if (env.isPropertyResolved())
-	return value;
+        return value;
     }
     
     return null;
@@ -190,9 +190,9 @@ public class FacesJspELResolver extends ELResolver {
       Type type = _typeMap.get((String) property);
 
       if (type != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return true;
+        return true;
       }
     }
 
@@ -201,9 +201,9 @@ public class FacesJspELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext env,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base == null && property instanceof String) {
       String key = (String) property;
@@ -211,7 +211,7 @@ public class FacesJspELResolver extends ELResolver {
       Type type = _typeMap.get(key);
 
       if (type != null) {
-	throw new PropertyNotWritableException(key);
+        throw new PropertyNotWritableException(key);
       }
     }
   }

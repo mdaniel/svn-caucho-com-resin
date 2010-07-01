@@ -135,9 +135,9 @@ public class PathEcmaWrap {
 
     try {
       for (int i = 0; i < length; i++) {
-	String string = call.getArgString(i, length);
+        String string = call.getArgString(i, length);
 
-	s.print(string);
+        s.print(string);
       }
     } finally {
       s.close();
@@ -151,9 +151,9 @@ public class PathEcmaWrap {
 
     try {
       for (int i = 0; i < length; i++) {
-	String string = call.getArgString(i, length);
+        String string = call.getArgString(i, length);
 
-	s.print(string);
+        s.print(string);
       }
 
       s.print('\n');
@@ -193,9 +193,9 @@ public class PathEcmaWrap {
 
     try {
       for (int i = 0; i < length; i++) {
-	String string = call.getArgString(i, length);
+        String string = call.getArgString(i, length);
 
-	s.print(string);
+        s.print(string);
       }
     } finally {
       s.close();
@@ -209,9 +209,9 @@ public class PathEcmaWrap {
 
     try {
       for (int i = 0; i < length; i++) {
-	String string = call.getArgString(i, length);
+        String string = call.getArgString(i, length);
 
-	s.print(string);
+        s.print(string);
       }
 
       s.print('\n');
@@ -252,7 +252,7 @@ public class PathEcmaWrap {
       pair.getReadStream().close();
 
       try {
-	pair.getWriteStream().close();
+        pair.getWriteStream().close();
       } catch (IOException e) {
       }
     }
@@ -264,7 +264,7 @@ public class PathEcmaWrap {
       InputStream stream = (InputStream) o;
 
       try {
-	stream.close();
+        stream.close();
       } catch (IOException e) {
       }
     }
@@ -276,7 +276,7 @@ public class PathEcmaWrap {
       OutputStream stream = (OutputStream) o;
 
       try {
-	stream.close();
+        stream.close();
       } catch (IOException e) {
       }
     }

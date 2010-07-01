@@ -59,7 +59,7 @@ public class UniqueSingleColumnConstraint extends Constraint {
    */
   @Override
   public void validate(TableIterator []sourceRows,
-		       QueryContext queryContext, Transaction xa)
+                       QueryContext queryContext, Transaction xa)
     throws SQLException
   {
     Column column = _uniqueColumn;
@@ -82,26 +82,26 @@ public class UniqueSingleColumnConstraint extends Constraint {
       iter.init(queryContext);
 
       while (iter.next()) {
-	byte []iterBuffer = iter.getBuffer();
+        byte []iterBuffer = iter.getBuffer();
 
-	iter.prevRow();
-	
-	while (iter.nextRow()) {
-	  int iterOffset = iter.getRowOffset();
+        iter.prevRow();
 
-	  if (iterBuffer == sourceBuffer && iterOffset == sourceOffset)
-	    continue;
+        while (iter.nextRow()) {
+          int iterOffset = iter.getRowOffset();
 
-	  if (column.isEqual(iterBuffer, iterOffset,
-			     sourceBuffer, sourceOffset)) {
-	    long blockId = iter.getBlockId();
-	    
-	    throw new SQLException(L.l("`{0}' in {1}.{2} fails uniqueness constraint.",
-				       column.getString(blockId, iterBuffer, iterOffset),
-				       table.getName(),
-				       column.getName()));
-	  }
-	}
+          if (iterBuffer == sourceBuffer && iterOffset == sourceOffset)
+            continue;
+
+          if (column.isEqual(iterBuffer, iterOffset,
+                             sourceBuffer, sourceOffset)) {
+            long blockId = iter.getBlockId();
+
+            throw new SQLException(L.l("`{0}' in {1}.{2} fails uniqueness constraint.",
+                                       column.getString(blockId, iterBuffer, iterOffset),
+                                       table.getName(),
+                                       column.getName()));
+          }
+        }
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
@@ -114,7 +114,7 @@ public class UniqueSingleColumnConstraint extends Constraint {
    * validate the constraint.
    */
   private void validateIndex(TableIterator []sourceRows,
-			     QueryContext context, Transaction xa)
+                             QueryContext context, Transaction xa)
     throws SQLException
   {
     try {
@@ -128,14 +128,14 @@ public class UniqueSingleColumnConstraint extends Constraint {
 
       /*
       int length = column.evalToBuffer(sourceBuffer, sourceOffset,
-				       buffer, 0);
+                                       buffer, 0);
 
       if (length <= 0)
-	return;
+        return;
 
       long value = index.lookup(buffer, 0, length,
-				context.getTransaction());
-				
+                                context.getTransaction());
+
       */
 
       // currently this is a static length.  See StringColumn.
@@ -144,17 +144,17 @@ public class UniqueSingleColumnConstraint extends Constraint {
       long value = index.lookup(sourceBuffer, offset, length);
 
       if (value != 0) {
-	Table table = sourceRow.getTable();
-	long blockId = sourceRow.getBlockId();
+        Table table = sourceRow.getTable();
+        long blockId = sourceRow.getBlockId();
 
-	throw new SQLException(L.l("'{0}' in {1}.{2} fails uniqueness constraint with block address {3}.",
-				   column.getString(blockId,
-				                    sourceBuffer,
-						    sourceOffset),
-				   table.getName(),
-				   column.getName(),
-				   ("" + (value / BlockStore.BLOCK_SIZE)
-				    + "." + (value % BlockStore.BLOCK_SIZE))));
+        throw new SQLException(L.l("'{0}' in {1}.{2} fails uniqueness constraint with block address {3}.",
+                                   column.getString(blockId,
+                                                    sourceBuffer,
+                                                    sourceOffset),
+                                   table.getName(),
+                                   column.getName(),
+                                   ("" + (value / BlockStore.BLOCK_SIZE)
+                                    + "." + (value % BlockStore.BLOCK_SIZE))));
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);

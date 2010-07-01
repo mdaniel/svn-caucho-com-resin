@@ -419,22 +419,22 @@ class HmuxStream extends StreamImpl {
       int len = length;
 
       if (_chunkLength == 0) {
-	if (! readData())
-	  _chunkLength = -1;
+        if (! readData())
+          _chunkLength = -1;
       }
       
       if (_chunkLength < 0)
-	return -1;
+        return -1;
       
       if (_chunkLength < len)
-	len = _chunkLength;
+        len = _chunkLength;
 
       len = _rs.read(buf, offset, len);
 
       if (len < 0) {
       }
       else
-	_chunkLength -= len;
+        _chunkLength -= len;
     
       return len;
     } catch (IOException e) {
@@ -497,8 +497,8 @@ class HmuxStream extends StreamImpl {
       writeString(HmuxRequest.HMUX_SERVER_NAME, _path.getHost());
       _ws.print(_path.getHost());
       if (_path.getPort() != 80) {
-	writeString(HmuxRequest.CSE_SERVER_PORT,
-		    String.valueOf(_path.getPort()));
+        writeString(HmuxRequest.CSE_SERVER_PORT,
+                    String.valueOf(_path.getPort()));
       }
     }
 
@@ -512,8 +512,8 @@ class HmuxStream extends StreamImpl {
     while (iter.hasNext()) {
       String name = (String) iter.next();
       if (_reserved.get(name.toLowerCase()) == null) {
-	writeString(HmuxRequest.HMUX_HEADER, name);
-	writeString(HmuxRequest.HMUX_STRING, getAttribute(name));
+        writeString(HmuxRequest.HMUX_HEADER, name);
+        writeString(HmuxRequest.HMUX_STRING, getAttribute(name));
       }
     }
 
@@ -521,22 +521,22 @@ class HmuxStream extends StreamImpl {
       MemoryStream tempStream = _tempStream;
       _tempStream = null;
       if (tempStream != null) {
-	TempBuffer tb = TempBuffer.allocate();
-	byte []buffer = tb.getBuffer();
-	int sublen;
+        TempBuffer tb = TempBuffer.allocate();
+        byte []buffer = tb.getBuffer();
+        int sublen;
 
-	ReadStream postIn = tempStream.openReadAndSaveBuffer();
+        ReadStream postIn = tempStream.openReadAndSaveBuffer();
 
-	while ((sublen = postIn.read(buffer, 0, buffer.length)) > 0) {
-	  _ws.write('D');
-	  _ws.write(sublen >> 8);
-	  _ws.write(sublen);
-	  _ws.write(buffer, 0, sublen);
-	}
+        while ((sublen = postIn.read(buffer, 0, buffer.length)) > 0) {
+          _ws.write('D');
+          _ws.write(sublen >> 8);
+          _ws.write(sublen);
+          _ws.write(buffer, 0, sublen);
+        }
 
-	tempStream.destroy();
+        tempStream.destroy();
 
-	TempBuffer.free(tb);
+        TempBuffer.free(tb);
         tb = null;
       }
     }
@@ -592,45 +592,45 @@ class HmuxStream extends StreamImpl {
     while ((code = is.read()) > 0) {
       switch (code) {
       case HmuxRequest.HMUX_CHANNEL:
-	is.read();
-	is.read();
-	break;
+        is.read();
+        is.read();
+        break;
       case HmuxRequest.HMUX_QUIT:
       case HmuxRequest.HMUX_EXIT:
-	is.close();
+        is.close();
 
-	if (isDebug)
-	  log.fine("HMUX: " + (char) code);
-	
-	return false;
-	
+        if (isDebug)
+          log.fine("HMUX: " + (char) code);
+
+        return false;
+
       case HmuxRequest.HMUX_YIELD:
-	break;
-	
+        break;
+
       case HmuxRequest.HMUX_STATUS:
-	String value = readString(is);
-	_attributes.put("status", value.substring(0, 3));
-	
-	if (isDebug)
-	  log.fine("HMUX: " + (char) code + " " + value);
-	break;
-	
+        String value = readString(is);
+        _attributes.put("status", value.substring(0, 3));
+
+        if (isDebug)
+          log.fine("HMUX: " + (char) code + " " + value);
+        break;
+
       case HmuxRequest.HMUX_DATA:
-	_chunkLength = 256 * (is.read() & 0xff) + (is.read() & 0xff);
-	
-	if (isDebug)
-	  log.fine("HMUX: " + (char) code + " " + _chunkLength);
-	
-	return true;
-	
+        _chunkLength = 256 * (is.read() & 0xff) + (is.read() & 0xff);
+
+        if (isDebug)
+          log.fine("HMUX: " + (char) code + " " + _chunkLength);
+
+        return true;
+
       default:
-	int len = 256 * (is.read() & 0xff) + (is.read() & 0xff);
-	
-	if (isDebug)
-	  log.fine("HMUX: " + (char) code + " " + len);
-	
-	is.skip(len);
-	break;
+        int len = 256 * (is.read() & 0xff) + (is.read() & 0xff);
+
+        if (isDebug)
+          log.fine("HMUX: " + (char) code + " " + len);
+
+        is.skip(len);
+        break;
       }
     }
 
@@ -733,7 +733,7 @@ class HmuxStream extends StreamImpl {
       _is = null;
     } finally {
       if (_s != null)
-	_s.close();
+        _s.close();
       _s = null;
     }
   }

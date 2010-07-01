@@ -62,7 +62,7 @@ public class ImplicitTld
 
     if (version.compareTo("2.0") < 0)
       throw new ConfigException(L.l("implicit.tld must have a 2.0 version or greater at '{0}'",
-				    version));
+                                    version));
   }
 
   /**

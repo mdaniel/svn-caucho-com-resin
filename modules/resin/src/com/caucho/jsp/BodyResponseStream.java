@@ -134,9 +134,9 @@ public class BodyResponseStream extends AbstractResponseStream {
   {
     if (offset > 0) {
       try {
-	_out.write(_charBuffer, 0, offset);
+        _out.write(_charBuffer, 0, offset);
       } catch (IOException e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
   }
@@ -200,9 +200,9 @@ public class BodyResponseStream extends AbstractResponseStream {
   {
     if (offset > 0) {
       try {
-	write(_byteBuffer, 0, offset);
+        write(_byteBuffer, 0, offset);
       } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -245,13 +245,13 @@ public class BodyResponseStream extends AbstractResponseStream {
 
     if (_encodingReader == null) {
       if (_in == null)
-	_in = new BufferInputStream();
+        _in = new BufferInputStream();
       _encodingReader = Encoding.getReadEncoding(_in, _encoding);
     }
 
     if (_encodingReader == null) {
       for (; length > 0; length--) {
-	print((char) (buf[offset++] & 0xff));
+        print((char) (buf[offset++] & 0xff));
       }
       return;
     }
@@ -275,7 +275,7 @@ public class BodyResponseStream extends AbstractResponseStream {
   {
     if (_encodingReader == null) {
       if (_in == null)
-	_in = new BufferInputStream();
+        _in = new BufferInputStream();
       _byteBuffer[0] = (byte) ch;
       _encodingReader = Encoding.getReadEncoding(_in, _encoding);
     }
@@ -323,9 +323,9 @@ public class BodyResponseStream extends AbstractResponseStream {
     public int read()
     {
       if (_offset < _length)
-	return _buffer[_offset++] & 0xff;
+        return _buffer[_offset++] & 0xff;
       else
-	return -1;
+        return -1;
     }
   }
 }

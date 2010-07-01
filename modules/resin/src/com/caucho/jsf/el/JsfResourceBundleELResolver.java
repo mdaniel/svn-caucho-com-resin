@@ -60,7 +60,7 @@ public class JsfResourceBundleELResolver extends ELResolver {
 
   @Override
   public Class<?> getCommonPropertyType(ELContext env,
-					Object base)
+                                        Object base)
   {
     if (base != null)
       return null;
@@ -70,7 +70,7 @@ public class JsfResourceBundleELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext env,
-							   Object base)
+                                                           Object base)
   {
     if (base != null)
       return null;
@@ -83,9 +83,9 @@ public class JsfResourceBundleELResolver extends ELResolver {
       desc.setName(bundle.getVar());
       
       if (bundle.getDisplayName() != null)
-	desc.setDisplayName(bundle.getDisplayName());
+        desc.setDisplayName(bundle.getDisplayName());
       else
-	desc.setDisplayName(bundle.getVar());
+        desc.setDisplayName(bundle.getVar());
       
       desc.setExpert(false);
       desc.setHidden(false);
@@ -108,9 +108,9 @@ public class JsfResourceBundleELResolver extends ELResolver {
       ResourceBundleConfig bundle = _bundleMap.get(var);
 
       if (bundle != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	return ResourceBundle.class;
+        return ResourceBundle.class;
       }
     }
 
@@ -126,25 +126,25 @@ public class JsfResourceBundleELResolver extends ELResolver {
       ResourceBundleConfig bundle = _bundleMap.get(var);
 
       if (bundle != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	FacesContext facesContext = FacesContext.getCurrentInstance();
-	Locale locale = null;
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        Locale locale = null;
 
-	if (facesContext != null)
-	  locale = facesContext.getViewRoot().getLocale();
+        if (facesContext != null)
+          locale = facesContext.getViewRoot().getLocale();
 
-	LocalizationContext lc;
-	
-	lc = _bundleManager.getBundle(bundle.getBaseName(), locale);
+        LocalizationContext lc;
 
-	if (lc == null)
-	  lc = _bundleManager.getBundle(bundle.getBaseName());
+        lc = _bundleManager.getBundle(bundle.getBaseName(), locale);
 
-	if (lc != null)
-	  return lc.getResourceBundle();
-	else
-	  return null;
+        if (lc == null)
+          lc = _bundleManager.getBundle(bundle.getBaseName());
+
+        if (lc != null)
+          return lc.getResourceBundle();
+        else
+          return null;
       }
     }
 
@@ -160,9 +160,9 @@ public class JsfResourceBundleELResolver extends ELResolver {
       ResourceBundleConfig bundle = _bundleMap.get(var);
 
       if (bundle != null) {
-	env.setPropertyResolved(true);
-	
-	return true;
+        env.setPropertyResolved(true);
+
+        return true;
       }
     }
 
@@ -170,9 +170,9 @@ public class JsfResourceBundleELResolver extends ELResolver {
   }
     
   public void setValue(ELContext env,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base == null && property instanceof String) {
       String var = (String) property;
@@ -180,9 +180,9 @@ public class JsfResourceBundleELResolver extends ELResolver {
       ResourceBundleConfig bundle = _bundleMap.get(var);
 
       if (bundle != null) {
-	env.setPropertyResolved(true);
+        env.setPropertyResolved(true);
 
-	throw new PropertyNotWritableException();
+        throw new PropertyNotWritableException();
       }
     }
   }

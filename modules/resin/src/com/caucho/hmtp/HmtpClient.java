@@ -128,17 +128,17 @@ public class HmtpClient extends SimpleActorClient {
       if (credentials instanceof SelfEncryptedCredentials) {
       }
       else if (_isEncryptPassword) {
-	GetPublicKeyQuery pkValue
-	  = (GetPublicKeyQuery) queryGet(null, new GetPublicKeyQuery());
+        GetPublicKeyQuery pkValue
+          = (GetPublicKeyQuery) queryGet(null, new GetPublicKeyQuery());
 
-	PublicKey publicKey = _authManager.getPublicKey(pkValue);
+        PublicKey publicKey = _authManager.getPublicKey(pkValue);
 
-	ClientAuthManager.Secret secret = _authManager.generateSecret();
+        ClientAuthManager.Secret secret = _authManager.generateSecret();
 
-	EncryptedObject encPassword
-	  = _authManager.encrypt(secret, publicKey, credentials);
+        EncryptedObject encPassword
+          = _authManager.encrypt(secret, publicKey, credentials);
 
-	credentials = encPassword;
+        credentials = encPassword;
       }
 
       AuthResult result;
@@ -147,7 +147,7 @@ public class HmtpClient extends SimpleActorClient {
       _jid = result.getJid();
 
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " login");
+        log.fine(this + " login");
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

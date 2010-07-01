@@ -215,7 +215,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       out.startElement("span", component);
 
       if (target != null)
-	out.writeAttribute("target", target, "target");
+        out.writeAttribute("target", target, "target");
     }
     else {
       out.startElement("a", component);
@@ -267,26 +267,26 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       final int childCount = component.getChildCount();
 
       if (childCount > 0 && !disabled) {
-	List<UIComponent> children = component.getChildren();
+        List<UIComponent> children = component.getChildren();
 
-	for (int i = 0; i < childCount; i++) {
-	  UIComponent child = children.get(i);
+        for (int i = 0; i < childCount; i++) {
+          UIComponent child = children.get(i);
 
-	  if (child instanceof UIParameter) {
-	    UIParameter param = (UIParameter) child;
+          if (child instanceof UIParameter) {
+            UIParameter param = (UIParameter) child;
 
-	    clickJs.append("document.forms['");
-	    clickJs.append(formClientId);
-	    clickJs.append("']['");
+            clickJs.append("document.forms['");
+            clickJs.append(formClientId);
+            clickJs.append("']['");
 
-	    String name = param.getName();
+            String name = param.getName();
 
-	    HtmlFormRenderer.addCommandLinkParam(context, formClientId, name);
+            HtmlFormRenderer.addCommandLinkParam(context, formClientId, name);
 
-	    clickJs.append(name);
-	    clickJs.append("'].value='");
+            clickJs.append(name);
+            clickJs.append("'].value='");
 
-	    String val = toString(context, param, param.getValue());
+            String val = toString(context, param, param.getValue());
 
             char []paramValue = val.toCharArray();
 
@@ -305,16 +305,16 @@ class HtmlCommandLinkRenderer extends BaseRenderer
             }
 
             clickJs.append("';");
-	  }
-	}
+          }
+        }
       }
 
       if (target != null) {
-	clickJs.append("document.forms['");
-	clickJs.append(formClientId);
-	clickJs.append("'].target='");
-	clickJs.append(target);
-	clickJs.append("';");
+        clickJs.append("document.forms['");
+        clickJs.append(formClientId);
+        clickJs.append("'].target='");
+        clickJs.append(target);
+        clickJs.append("';");
       }
 
       clickJs.append("document.forms['");
@@ -324,14 +324,14 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       clickJs.append("return false;");
 
       if (onclick != null) {
-	String code = ("var a = function(){" + onclick + "};"
-		       + "var b = function() {" + clickJs + "};"
-		       + "return a() && b();");
+        String code = ("var a = function(){" + onclick + "};"
+                       + "var b = function() {" + clickJs + "};"
+                       + "return a() && b();");
 
-	out.writeAttribute("onclick", code, "onclick");
+        out.writeAttribute("onclick", code, "onclick");
       }
       else
-	out.writeAttribute("onclick", clickJs.toString(), "onclick");
+        out.writeAttribute("onclick", clickJs.toString(), "onclick");
     }
 
     if (ondblclick != null)
@@ -397,15 +397,15 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       List<UIComponent> children = component.getChildren();
 
       for (int i = 0; i < childCount; i++) {
-	UIComponent child = children.get(i);
+        UIComponent child = children.get(i);
 
-	if (child instanceof UIParameter) {
-	}
-	else if (child.isRendered()) {
-	  child.encodeBegin(context);
-	  child.encodeChildren(context);
-	  child.encodeEnd(context);
-	}
+        if (child instanceof UIParameter) {
+        }
+        else if (child.isRendered()) {
+          child.encodeBegin(context);
+          child.encodeChildren(context);
+          child.encodeEnd(context);
+        }
       }
     }
 
@@ -418,10 +418,10 @@ class HtmlCommandLinkRenderer extends BaseRenderer
   private String getFormId(FacesContext context, UIComponent component)
   {
     for (UIComponent ptr = component.getParent();
-	 ptr != null;
-	 ptr = ptr.getParent()) {
+         ptr != null;
+         ptr = ptr.getParent()) {
       if (ptr instanceof UIForm) {
-	return ptr.getClientId(context);
+        return ptr.getClientId(context);
       }
     }
 

@@ -47,10 +47,10 @@ public class OrSelector extends Selector  {
 
     if (! _left.isUnknown() && ! _left.isBoolean())
       throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					     this));
+                                             this));
     if (! _right.isUnknown() && ! _right.isBoolean())
       throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
-					     this));
+                                             this));
   }
 
   /**

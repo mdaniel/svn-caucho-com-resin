@@ -60,8 +60,8 @@ public class HmuxManager
       HmuxManager manager = _localManager.get();
 
       if (manager == null) {
-	manager = new HmuxManager();
-	_localManager.set(manager);
+        manager = new HmuxManager();
+        _localManager.set(manager);
       }
 
       return manager;

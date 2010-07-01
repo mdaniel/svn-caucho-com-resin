@@ -68,7 +68,7 @@ public class MapELResolver extends ELResolver {
 
   @Override
   public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
-							   Object base)
+                                                           Object base)
   {
     if (base instanceof Map) {
       context.setPropertyResolved(true);
@@ -76,24 +76,24 @@ public class MapELResolver extends ELResolver {
       ArrayList<FeatureDescriptor> keys = new ArrayList<FeatureDescriptor>();
 
       for (Object key : ((Map) base).keySet()) {
-	String name = String.valueOf(key);
+        String name = String.valueOf(key);
 
-	FeatureDescriptor desc = new FeatureDescriptor();
-	desc.setName(name);
-	desc.setDisplayName(name);
-	desc.setShortDescription("");
-	desc.setExpert(false);
-	desc.setHidden(false);
-	desc.setPreferred(true);
+        FeatureDescriptor desc = new FeatureDescriptor();
+        desc.setName(name);
+        desc.setDisplayName(name);
+        desc.setShortDescription("");
+        desc.setExpert(false);
+        desc.setHidden(false);
+        desc.setPreferred(true);
 
-	if (key == null)
-	  desc.setValue(ELResolver.TYPE, null);
-	else
-	  desc.setValue(ELResolver.TYPE, key.getClass());
-	
-	desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
-	
-	keys.add(desc);
+        if (key == null)
+          desc.setValue(ELResolver.TYPE, null);
+        else
+          desc.setValue(ELResolver.TYPE, key.getClass());
+
+        desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
+
+        keys.add(desc);
       }
 
       return keys.iterator();
@@ -105,8 +105,8 @@ public class MapELResolver extends ELResolver {
 
   @Override
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     if (context == null)
       throw new NullPointerException();
@@ -122,8 +122,8 @@ public class MapELResolver extends ELResolver {
 
   @Override
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
   {
     if (base instanceof Map && property != null) {
       Map map = (Map) base;
@@ -139,8 +139,8 @@ public class MapELResolver extends ELResolver {
 
   @Override
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
   {
     if (base instanceof Map) {
       context.setPropertyResolved(true);
@@ -153,9 +153,9 @@ public class MapELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (_isReadOnly)
       throw new PropertyNotWritableException("resolver is readonly");

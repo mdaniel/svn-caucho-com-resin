@@ -80,9 +80,9 @@ public class DivExpr extends Expr {
     Object bObj = _right.getValue(env);
 
     if (aObj instanceof BigDecimal
-	|| bObj instanceof BigDecimal
-	|| aObj instanceof BigInteger
-	|| bObj instanceof BigInteger) {
+        || bObj instanceof BigDecimal
+        || aObj instanceof BigInteger
+        || bObj instanceof BigInteger) {
       BigDecimal a = toBigDecimal(aObj, env);
       BigDecimal b = toBigDecimal(bObj, env);
       

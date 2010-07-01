@@ -40,7 +40,7 @@ import com.caucho.util.Alarm;
  * Public API to control a comet connection.
  */
 public class HttpConnectionController extends AsyncController
-					      /*  implements CometController */
+                                              /*  implements CometController */
 {
   private HttpServletRequestImpl _request;
   private HashMap<String,Object> _map
@@ -90,7 +90,7 @@ public class HttpConnectionController extends AsyncController
   {
     if (_map != null) {
       synchronized (_map) {
-	return _map.get(name);
+        return _map.get(name);
       }
     }
     else
@@ -104,7 +104,7 @@ public class HttpConnectionController extends AsyncController
   {
     if (_map != null) {
       synchronized (_map) {
-	_map.put(name, value);
+        _map.put(name, value);
       }
     }
   }
@@ -116,7 +116,7 @@ public class HttpConnectionController extends AsyncController
   {
     if (_map != null) {
       synchronized (_map) {
-	_map.remove(name);
+        _map.remove(name);
       }
     }
   }

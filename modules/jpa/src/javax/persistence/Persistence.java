@@ -104,7 +104,7 @@ public class Persistence {
       factory = provider.createEntityManagerFactory(name, props);
 
       if (factory != null)
-	return factory;
+        return factory;
     }
 
     return null;

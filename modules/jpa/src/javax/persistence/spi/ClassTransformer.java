@@ -40,9 +40,9 @@ public interface ClassTransformer {
    * Create an return an EntityManagerFactory for the named unit.
    */
   public byte []transform(ClassLoader loader,
-			  String className,
-			  Class<?> oldClass,
-			  ProtectionDomain protectionDomain,
-			  byte []classFile)
+                          String className,
+                          Class<?> oldClass,
+                          ProtectionDomain protectionDomain,
+                          byte []classFile)
     throws IllegalClassFormatException;
 }

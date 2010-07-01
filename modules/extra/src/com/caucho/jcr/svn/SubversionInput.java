@@ -118,8 +118,8 @@ public class SubversionInput {
 
     if (! ('0' <= ch && ch <= '9'))
       throw error(L.l("expected digit (0-9) at '{0}' (0x{1})",
-		      String.valueOf((char) ch),
-		      Integer.toHexString(ch)));
+                      String.valueOf((char) ch),
+                      Integer.toHexString(ch)));
 
     for (; '0' <= ch && ch <= '9'; ch = read()) {
       value = 10 * value + ch - '0';
@@ -141,63 +141,63 @@ public class SubversionInput {
     while ((ch = read()) >= 0) {
       switch (ch) {
       case ' ': case '\t': case '\r': case '\n':
-	break;
-	
+        break;
+
       case '(':
-	{
-	  ArrayList array = new ArrayList();
+        {
+          ArrayList array = new ArrayList();
 
-	  Object value;
+          Object value;
 
-	  while ((value = readSexp()) != null) {
-	    array.add(value);
-	  }
+          while ((value = readSexp()) != null) {
+            array.add(value);
+          }
 
-	  expect(')');
+          expect(')');
 
-	  return array;
-	}
+          return array;
+        }
       case ')':
-	_peek = ch;
-	return null;
+        _peek = ch;
+        return null;
 
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
-	{
-	  _peek = ch;
-	  
-	  long value = readLong();
+        {
+          _peek = ch;
 
-	  ch = read();
+          long value = readLong();
 
-	  if (ch == ':') {
-	    StringBuilder sb = new StringBuilder();
-	    for (int i = 0; i < value; i++)
-	      sb.append((char) read());
-	    return sb.toString();
-	  }
-	  else {
-	    _peek = ch;
+          ch = read();
 
-	    return new Long(value);
-	  }
-	}
+          if (ch == ':') {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < value; i++)
+              sb.append((char) read());
+            return sb.toString();
+          }
+          else {
+            _peek = ch;
+
+            return new Long(value);
+          }
+        }
 
       default:
-	if (isStringChar((char) ch)) {
-	  StringBuilder sb = new StringBuilder();
+        if (isStringChar((char) ch)) {
+          StringBuilder sb = new StringBuilder();
 
-	  sb.append((char) ch);
-	  while (isStringChar(ch = read())) {
-	    sb.append((char) ch);
-	  }
+          sb.append((char) ch);
+          while (isStringChar(ch = read())) {
+            sb.append((char) ch);
+          }
 
-	  _peek = ch;
+          _peek = ch;
 
-	  return sb.toString();
-	}
-	else
-	  throw error(L.l("Unexpected character"));
+          return sb.toString();
+        }
+        else
+          throw error(L.l("Unexpected character"));
       }
     }
 
@@ -231,18 +231,18 @@ public class SubversionInput {
     
     while ((ch = read()) >= 0) {
       if (ch == expect)
-	return;
+        return;
       else if (Character.isWhitespace(ch)) {
       }
       else
-	throw error(L.l("Expected '{0}' at '{1}' (0x{2})",
-			String.valueOf((char) expect),
-			String.valueOf((char) ch),
-			Integer.toHexString(ch)));
+        throw error(L.l("Expected '{0}' at '{1}' (0x{2})",
+                        String.valueOf((char) expect),
+                        String.valueOf((char) ch),
+                        Integer.toHexString(ch)));
     }
     
     throw error(L.l("Expected '{0}' at end of file",
-		    String.valueOf((char) expect)));
+                    String.valueOf((char) expect)));
   }
 
   private boolean isStringChar(int ch)

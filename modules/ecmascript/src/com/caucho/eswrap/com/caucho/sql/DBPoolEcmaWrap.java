@@ -85,9 +85,9 @@ public class DBPoolEcmaWrap {
       Statement stmt = conn.createStatement();
 
       try {
-	return stmt.executeUpdate(msg);
+        return stmt.executeUpdate(msg);
       } finally {
-	stmt.close();
+        stmt.close();
       }
     } finally {
       conn.close();
@@ -104,19 +104,19 @@ public class DBPoolEcmaWrap {
       ArrayList array = new ArrayList();
 
       try {
-	ResultSet rs = stmt.executeQuery(msg);
+        ResultSet rs = stmt.executeQuery(msg);
 
-	try {
-	  int i = 0;
-	  while (rs.next()) {
-	    // array.add(ResultSetEcmaWrap.toObject(rs, null));
-	  }
-	  return array.toArray(new Object[array.size()]);
-	} finally {
-	  rs.close();
-	}
+        try {
+          int i = 0;
+          while (rs.next()) {
+            // array.add(ResultSetEcmaWrap.toObject(rs, null));
+          }
+          return array.toArray(new Object[array.size()]);
+        } finally {
+          rs.close();
+        }
       } finally {
-	stmt.close();
+        stmt.close();
       }
     } finally {
       conn.close();
@@ -129,7 +129,7 @@ public class DBPoolEcmaWrap {
       Connection conn = (Connection) o;
 
       try {
-	conn.close();
+        conn.close();
       } catch (SQLException e) {
       }
     }
@@ -141,7 +141,7 @@ public class DBPoolEcmaWrap {
       Statement stmt = (Statement) o;
 
       try {
-	stmt.close();
+        stmt.close();
       } catch (SQLException e) {
       }
     }

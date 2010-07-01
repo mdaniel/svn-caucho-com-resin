@@ -94,11 +94,11 @@ class ConditionFilterChain
 
     for (int i = 0; i < _conditions.length; i++) {
       if (! _conditions[i].isMatch(req, res)) {
-	if (_isFiner)
-	  log.finer(_logPrefix + " '" + _uri + "' --> '" + _targetUri + "'");
-	
-	_failChain.doFilter(request, response);
-	return;
+        if (_isFiner)
+          log.finer(_logPrefix + " '" + _uri + "' --> '" + _targetUri + "'");
+
+        _failChain.doFilter(request, response);
+        return;
       }
     }
 

@@ -53,7 +53,7 @@ public class PermissionConfig {
   {
     if (! Permission.class.isAssignableFrom(type.getType()))
       throw new ConfigException(L.l("`{0}' must extend java.security.Permission",
-				    type));
+                                    type));
 
     _type = type;
   }

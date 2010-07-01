@@ -56,8 +56,8 @@ public class hessianURLContextFactory implements ObjectFactory {
       HessianModel model = _model;
 
       if (model == null) {
-	model = new HessianModel();
-	_model = model;
+        model = new HessianModel();
+        _model = model;
       }
 
       return new HessianContextImpl(model, env);

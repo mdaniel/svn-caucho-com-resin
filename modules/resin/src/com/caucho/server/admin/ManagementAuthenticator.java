@@ -87,20 +87,20 @@ public class ManagementAuthenticator extends AbstractAuthenticator {
       long crc64 = 0;
 
       for (PasswordUser user : _userMap.values()) {
-	if (user.isDisabled())
-	  continue;
+        if (user.isDisabled())
+          continue;
 
-	String item = (user.getPrincipal().getName()
-		       + ":" + new String(user.getPassword()));
+        String item = (user.getPrincipal().getName()
+                       + ":" + new String(user.getPassword()));
 
-	crc64 = Crc64.generate(crc64, item); 
+        crc64 = Crc64.generate(crc64, item);
       }
 
       if (crc64 != 0) {
-	CharBuffer cb = new CharBuffer();
-	Base64.encode(cb, crc64);
+        CharBuffer cb = new CharBuffer();
+        Base64.encode(cb, crc64);
 
-	_remoteCookie = cb.toString();
+        _remoteCookie = cb.toString();
       }
     }
 

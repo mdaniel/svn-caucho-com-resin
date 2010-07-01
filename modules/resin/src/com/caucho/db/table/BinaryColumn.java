@@ -133,15 +133,15 @@ class BinaryColumn extends Column {
       int ch = str.charAt(i);
 
       if (ch < 0x80)
-	block[offset++] = (byte) ch;
+        block[offset++] = (byte) ch;
       else if (ch < 0x800) {
-	block[offset++] = (byte) (0xc0 + ((ch >> 6) & 0x1f));
-	block[offset++] = (byte) (0x80 + (ch & 0x3f));
+        block[offset++] = (byte) (0xc0 + ((ch >> 6) & 0x1f));
+        block[offset++] = (byte) (0x80 + (ch & 0x3f));
       }
       else {
-	block[offset++] = (byte) (0xe0 + ((ch >> 12) & 0x0f));
-	block[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
-	block[offset++] = (byte) (0x80 + (ch & 0x3f));
+        block[offset++] = (byte) (0xe0 + ((ch >> 12) & 0x0f));
+        block[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+        block[offset++] = (byte) (0x80 + (ch & 0x3f));
       }
     }
 
@@ -178,8 +178,8 @@ class BinaryColumn extends Column {
    */
   @Override
   void setExpr(Transaction xa,
-	       byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
     throws SQLException
   {
     if (expr.isNull(context)) {
@@ -203,7 +203,7 @@ class BinaryColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block1, int rowOffset1,
-			 byte []block2, int rowOffset2)
+                         byte []block2, int rowOffset2)
   {
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
@@ -213,7 +213,7 @@ class BinaryColumn extends Column {
 
     for (int i = _length - 1; i >= 0; i--) {
       if (block1[startOffset1 + i] != block2[startOffset2 + i])
-	return false;
+        return false;
     }
 
     return true;
@@ -224,7 +224,7 @@ class BinaryColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block, int rowOffset,
-			 byte []buffer, int offset, int length)
+                         byte []buffer, int offset, int length)
   {
     if (isNull(block, rowOffset))
       return false;
@@ -238,7 +238,7 @@ class BinaryColumn extends Column {
     int endOffset = blockOffset + _length;
     while (blockOffset < endOffset) {
       if (block[blockOffset++] != buffer[offset++])
-	return false;
+        return false;
     }
 
     return true;
@@ -266,7 +266,7 @@ class BinaryColumn extends Column {
 
       // XXX: missing utf-8
       if (ch1 != ch)
-	return false;
+        return false;
     }
 
     return offset == endOffset && strOffset == strLength;
@@ -300,7 +300,7 @@ class BinaryColumn extends Column {
    */
   @Override
   int evalToBuffer(byte []block, int rowOffset,
-		   byte []buffer, int bufferOffset)
+                   byte []buffer, int bufferOffset)
     throws SQLException
   {
     if (isNull(block, rowOffset))
@@ -318,7 +318,7 @@ class BinaryColumn extends Column {
    */
   @Override
   public void set(Transaction xa,
-		  TableIterator iter, Expr expr, QueryContext context)
+                  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
     byte []buffer = iter.getBuffer();
@@ -360,8 +360,8 @@ class BinaryColumn extends Column {
    */
   @Override
   void setIndex(Transaction xa,
-		byte []block, int rowOffset,
-		long rowAddr, QueryContext context)
+                byte []block, int rowOffset,
+                long rowAddr, QueryContext context)
     throws SQLException
   {
     BTree index = getIndex();
@@ -369,16 +369,16 @@ class BinaryColumn extends Column {
     if (index != null) {
       try {
         index.insert(block,
-		     rowOffset + _columnOffset, getLength(),
-		     rowAddr,
-		     false);
+                     rowOffset + _columnOffset, getLength(),
+                     rowAddr,
+                     false);
       } catch (SqlIndexAlreadyExistsException e) {
-	throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
-					  getTable().getName(),
-					  getName(),
-					  getDebugString(block, rowOffset),
-					  e.toString()),
-				      e);
+        throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
+                                          getTable().getName(),
+                                          getName(),
+                                          getDebugString(block, rowOffset),
+                                          e.toString()),
+                                      e);
       }
     }
   }
@@ -403,8 +403,8 @@ class BinaryColumn extends Column {
   private String getDebugString(byte []block, int rowOffset)
   {
     return getIndexKeyCompare().toString(block,
-					 rowOffset + _columnOffset,
-					 _length);
+                                         rowOffset + _columnOffset,
+                                         _length);
   }
 
   public String toString()

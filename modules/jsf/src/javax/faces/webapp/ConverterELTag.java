@@ -49,15 +49,15 @@ public abstract class ConverterELTag
 
     if (parent == null)
       throw new JspException(
-	"ConverterELTag must be nested inside a UIComponent tag.");
+        "ConverterELTag must be nested inside a UIComponent tag.");
 
     if (parent.getCreated()) {
 
       UIComponent component = parent.getComponentInstance();
 
       if (!(component instanceof ValueHolder))
-	throw new JspException(
-	  "UIComponent parent of converter must be a ValueHolder.");
+        throw new JspException(
+          "UIComponent parent of converter must be a ValueHolder.");
 
       Converter converter = createConverter();
 
@@ -67,11 +67,11 @@ public abstract class ConverterELTag
       Object obj = valueHolder.getLocalValue();
 
       if (obj instanceof String) {
-	FacesContext context = FacesContext.getCurrentInstance();
-	Object value = converter.getAsObject(context,
-					     component,
-					     (String) obj);
-	valueHolder.setValue(value);
+        FacesContext context = FacesContext.getCurrentInstance();
+        Object value = converter.getAsObject(context,
+                                             component,
+                                             (String) obj);
+        valueHolder.setValue(value);
       }
     }
 

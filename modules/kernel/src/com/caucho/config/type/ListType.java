@@ -60,7 +60,7 @@ public class ListType extends ConfigType
     _listClass = listClass;
 
     if (! _listClass.isInterface()
-	&& Modifier.isAbstract(_listClass.getModifiers())) {
+        && Modifier.isAbstract(_listClass.getModifiers())) {
       _instanceClass = _listClass;
     }
     else
@@ -110,7 +110,7 @@ public class ListType extends ConfigType
       return null;
     
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
-				  _listClass.getName(), text));
+                                  _listClass.getName(), text));
   }
 
   public String toString()

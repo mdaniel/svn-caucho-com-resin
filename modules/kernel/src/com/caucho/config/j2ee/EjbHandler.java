@@ -137,7 +137,7 @@ public class EjbHandler extends JavaeeInjectionHandler {
     }
     else {
       throw new ConfigException(location + L.l("@EJB cannot find any defined EJBs.  No @EJB with type='{0}'",
-					       bindType));
+                                               bindType));
     }
 
     // return new ComponentValueGenerator(location, (AbstractBean) bean);

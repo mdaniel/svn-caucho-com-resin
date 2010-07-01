@@ -56,18 +56,18 @@ class LikeExpr extends Expr {
 
       switch (ch) {
       case '%':
-	sb.append(".*");
-	break;
+        sb.append(".*");
+        break;
       case '_':
-	sb.append(".");
-	break;
+        sb.append(".");
+        break;
       case '.': case '\\': case '*': case '+': case '(': case ')':
       case '[': case ']': case '?': case '^': case '$': case '|':
-	sb.append("\\");
-	sb.append(ch);
-	break;
+        sb.append("\\");
+        sb.append(ch);
+        break;
       default:
-	sb.append(ch);
+        sb.append(ch);
       }
     }
 

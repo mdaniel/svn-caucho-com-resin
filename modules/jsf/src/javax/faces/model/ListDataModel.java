@@ -95,7 +95,7 @@ public class ListDataModel extends DataModel
       DataModelEvent event = new DataModelEvent(this, index, _value);
 
       for (int i = 0; i < listeners.length; i++) {
-	listeners[i].rowSelected(event);
+        listeners[i].rowSelected(event);
       }
     }
     

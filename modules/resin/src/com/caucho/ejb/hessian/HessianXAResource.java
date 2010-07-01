@@ -134,10 +134,10 @@ public class HessianXAResource implements XAResource {
     try {
       /*
       if (onephase)
-	MetaStub.call(_path, "commitOnePhase", xidToString(xid));
+        MetaStub.call(_path, "commitOnePhase", xidToString(xid));
       else
-	MetaStub.call(_path, "commit", xidToString(xid));
-	*/
+        MetaStub.call(_path, "commit", xidToString(xid));
+        */
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
 

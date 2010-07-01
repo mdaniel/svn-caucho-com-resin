@@ -260,7 +260,7 @@ public class DeployContainer<C extends DeployController>
       oldController = findDeployedController(name);
 
       if (oldController != null)
-	_controllerList.remove(oldController);
+        _controllerList.remove(oldController);
     }
     
     if (oldController != null)
@@ -304,7 +304,7 @@ public class DeployContainer<C extends DeployController>
       oldController = findDeployedController(name);
 
       if (oldController != null)
-	_controllerList.remove(oldController);
+        _controllerList.remove(oldController);
     }
 
     if (oldController != null)
@@ -335,10 +335,10 @@ public class DeployContainer<C extends DeployController>
       C controller = findDeployedController(newController.getId());
       
       if (controller != null) {
-	if (controller.isVersioning())
-	  controller.updateVersion();
+        if (controller.isVersioning())
+          controller.updateVersion();
 
-	return controller;
+        return controller;
       }
 
       _controllerList.add(newController);
@@ -371,11 +371,11 @@ public class DeployContainer<C extends DeployController>
   {
     synchronized (_controllerList) {
       for (int i = 0; i < _controllerList.size(); i++) {
-	C controller = _controllerList.get(i);
+        C controller = _controllerList.get(i);
 
-	if (controller.isNameMatch(name)) {
-	  return controller;
-	}
+        if (controller.isNameMatch(name)) {
+          return controller;
+        }
       }
     }
 
@@ -441,11 +441,11 @@ public class DeployContainer<C extends DeployController>
     public int compare(C a, C b)
     {
       if (a.getStartupPriority() == b.getStartupPriority())
-	return 0;
+        return 0;
       else if (a.getStartupPriority() < b.getStartupPriority())
-	return -1;
+        return -1;
       else
-	return 1;
+        return 1;
     }
   }
 }

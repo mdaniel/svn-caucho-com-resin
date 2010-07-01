@@ -84,10 +84,10 @@ public class UserQuery implements AmberQuery {
       SelectQuery select = (SelectQuery) query;
 
       if (select.getOffset() >= 0)
-	_firstResult = select.getOffset();
+        _firstResult = select.getOffset();
       
       if (select.getLimit() >= 0)
-	_maxResults = select.getLimit();
+        _maxResults = select.getLimit();
     }
   }
 
@@ -347,17 +347,17 @@ public class UserQuery implements AmberQuery {
       metaData = _aConn.getQueryMetaData();
 
       if (cacheChunk == null) {
-	cacheChunk = fillCache(query);
+        cacheChunk = fillCache(query);
       }
 
       // all data returned in chunk
       firstResult = cacheChunk.getRowCount();
       if (cacheChunk.getRowCount() < chunkSize)
-	maxResults = 0;
+        maxResults = 0;
       else if (maxResults < 0)
         maxResults = LIMIT_INF;
       else
-	maxResults -= firstResult - _firstResult;
+        maxResults -= firstResult - _firstResult;
 
       _rs.setCacheChunk(cacheChunk, metaData);
       _rs.setUserQuery(this);
@@ -398,7 +398,7 @@ public class UserQuery implements AmberQuery {
     _rs.fillCacheChunk(cacheChunk);
 
     _aConn.putQueryCacheChunk(query.getSQL(), _argValues, 0,
-			      cacheChunk, metaData);
+                              cacheChunk, metaData);
 
     return cacheChunk;
   }
@@ -419,11 +419,11 @@ public class UserQuery implements AmberQuery {
       // XXX: should limit meta-data as well?
       // jps/1431
       if (metaData.isLimitOffset()) {
-	sql = metaData.limit(sql, firstResults, maxResults);
-	row = firstResults;
+        sql = metaData.limit(sql, firstResults, maxResults);
+        row = firstResults;
       }
       else
-	sql = metaData.limit(sql, 0, firstResults + maxResults);
+        sql = metaData.limit(sql, 0, firstResults + maxResults);
     }
 
     PreparedStatement pstmt = _aConn.prepareStatement(sql);

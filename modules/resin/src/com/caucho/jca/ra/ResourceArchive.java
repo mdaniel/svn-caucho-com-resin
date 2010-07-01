@@ -194,12 +194,12 @@ public class ResourceArchive implements EnvironmentBean
       
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       for (; loader != null; loader = loader.getParent()) {
-	if (loader instanceof DynamicClassLoader)
-	  break;
+        if (loader instanceof DynamicClassLoader)
+          break;
       }
 
       if (loader == null)
-	throw new ConfigException(L.l("loader issues with resource adapter"));
+        throw new ConfigException(L.l("loader issues with resource adapter"));
 
       addJars((DynamicClassLoader) loader, _rootDir);
       addNative((DynamicClassLoader) loader, _rootDir);
@@ -207,8 +207,8 @@ public class ResourceArchive implements EnvironmentBean
       Path raXml = _rootDir.lookup("META-INF/ra.xml");
 
       if (! raXml.canRead())
-	throw new ConfigException(L.l("missing ra.xml for rar {0}.  .rar files require a META-INF/ra.xml file.",
-				      _rarPath));
+        throw new ConfigException(L.l("missing ra.xml for rar {0}.  .rar files require a META-INF/ra.xml file.",
+                                      _rarPath));
 
       _config = new ConnectorConfig();
 
@@ -239,7 +239,7 @@ public class ResourceArchive implements EnvironmentBean
       String []list = path.list();
 
       for (int i = 0; i < list.length; i++)
-	addJars(loader, path.lookup(list[i]));
+        addJars(loader, path.lookup(list[i]));
     }
   }
 
@@ -252,8 +252,8 @@ public class ResourceArchive implements EnvironmentBean
     String fileName = path.getPath();
 
     if (fileName.endsWith(".so")
-	|| fileName.endsWith(".dll")
-	|| fileName.endsWith(".jnilib")) {
+        || fileName.endsWith(".dll")
+        || fileName.endsWith(".jnilib")) {
       loader.addNative(path);
     }
     
@@ -261,7 +261,7 @@ public class ResourceArchive implements EnvironmentBean
       String []list = path.list();
 
       for (int i = 0; i < list.length; i++)
-	addNative(loader, path.lookup(list[i]));
+        addNative(loader, path.lookup(list[i]));
     }
   }
 
@@ -311,8 +311,8 @@ public class ResourceArchive implements EnvironmentBean
         } catch (IOException e) {
         }
 
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       }
     }
 
@@ -366,7 +366,7 @@ public class ResourceArchive implements EnvironmentBean
         } catch (IOException e) {
         }
 
-	rs.close();
+        rs.close();
       }
 
       if (! tempDir.equals(expandDir)) {

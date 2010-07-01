@@ -48,8 +48,8 @@ public class ByteValueExpression extends AbstractValueExpression
   private Class _expectedType;
 
   public ByteValueExpression(Expr expr,
-			     String expressionString,
-			     Class expectedType)
+                             String expressionString,
+                             Class expectedType)
   {
     super(expr, expressionString);
 
@@ -57,7 +57,7 @@ public class ByteValueExpression extends AbstractValueExpression
   }
 
   public ByteValueExpression(Expr expr,
-				String expressionString)
+                                String expressionString)
   {
     super(expr, expressionString);
   }
@@ -82,7 +82,7 @@ public class ByteValueExpression extends AbstractValueExpression
   @Override
   public Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return new Byte((byte) _expr.evalLong(context));
   }

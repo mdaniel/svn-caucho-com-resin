@@ -76,12 +76,12 @@ public class BaseWorkspace implements Workspace {
    */
   public void copy(String srcAbsPath, String destAbsPath)
     throws ConstraintViolationException,
-	   VersionException,
-	   AccessDeniedException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   LockException,
-	   RepositoryException
+           VersionException,
+           AccessDeniedException,
+           PathNotFoundException,
+           ItemExistsException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -90,16 +90,16 @@ public class BaseWorkspace implements Workspace {
    * Copy from one node to another, starting in another workspace
    */
   public void copy(String srcWorkspace,
-		   String srcAbsPath,
-		   String destAbsPath)
+                   String srcAbsPath,
+                   String destAbsPath)
     throws NoSuchWorkspaceException,
-	   ConstraintViolationException,
-	   VersionException,
-	   AccessDeniedException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   LockException,
-	   RepositoryException
+           ConstraintViolationException,
+           VersionException,
+           AccessDeniedException,
+           PathNotFoundException,
+           ItemExistsException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -108,17 +108,17 @@ public class BaseWorkspace implements Workspace {
    * Clones a node from another workspace.
    */
   public void clone(String srcWorkspace,
-		    String srcAbsPath,
-		    String destAbsPath,
-		    boolean removeExisting)
+                    String srcAbsPath,
+                    String destAbsPath,
+                    boolean removeExisting)
     throws NoSuchWorkspaceException,
-	   ConstraintViolationException,
-	   VersionException,
-	   AccessDeniedException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   LockException,
-	   RepositoryException
+           ConstraintViolationException,
+           VersionException,
+           AccessDeniedException,
+           PathNotFoundException,
+           ItemExistsException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -128,12 +128,12 @@ public class BaseWorkspace implements Workspace {
    */
   public void move(String srcAbsPath, String destAbsPath)
     throws ConstraintViolationException,
-	   VersionException,
-	   AccessDeniedException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   LockException,
-	   RepositoryException
+           VersionException,
+           AccessDeniedException,
+           PathNotFoundException,
+           ItemExistsException,
+           LockException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -143,11 +143,11 @@ public class BaseWorkspace implements Workspace {
    */
   public void restore(Version[] versions, boolean removeExisting)
     throws ItemExistsException,
-	   UnsupportedRepositoryOperationException,
-	   VersionException,
-	   LockException,
-	   InvalidItemStateException,
-	   RepositoryException
+           UnsupportedRepositoryOperationException,
+           VersionException,
+           LockException,
+           InvalidItemStateException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -184,7 +184,7 @@ public class BaseWorkspace implements Workspace {
    */
   public ObservationManager getObservationManager()
     throws UnsupportedRepositoryOperationException,
-	   RepositoryException
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -202,13 +202,13 @@ public class BaseWorkspace implements Workspace {
    * Returns a handler for importing data.
    */
   public ContentHandler getImportContentHandler(String parentAbsPath,
-						int uuidBehavior)
+                                                int uuidBehavior)
     throws PathNotFoundException,
-	   ConstraintViolationException,
-	   VersionException,
-	   LockException,
-	   AccessDeniedException,
-	   RepositoryException
+           ConstraintViolationException,
+           VersionException,
+           LockException,
+           AccessDeniedException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -217,16 +217,16 @@ public class BaseWorkspace implements Workspace {
    * Import based on XML.
    */
   public void importXML(String parentAbsPath,
-			InputStream in,
-			int uuidBehavior)
+                        InputStream in,
+                        int uuidBehavior)
     throws IOException,
-	   PathNotFoundException,
-	   ItemExistsException,
-	   ConstraintViolationException,
-	   InvalidSerializedDataException,
-	   LockException,
-	   AccessDeniedException,
-	   RepositoryException
+           PathNotFoundException,
+           ItemExistsException,
+           ConstraintViolationException,
+           InvalidSerializedDataException,
+           LockException,
+           AccessDeniedException,
+           RepositoryException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

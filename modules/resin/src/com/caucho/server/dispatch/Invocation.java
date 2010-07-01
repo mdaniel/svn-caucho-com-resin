@@ -244,7 +244,7 @@ public class Invocation extends ServletInvocation implements Dependency
       depend = app.getInvocationDependency();
 
       if (depend != null)
-	return depend.isModified();
+        return depend.isModified();
     }
 
     return true;
@@ -266,7 +266,7 @@ public class Invocation extends ServletInvocation implements Dependency
       depend = app.getInvocationDependency();
 
       if (depend != null)
-	return depend.logModified(log);
+        return depend.logModified(log);
     }
 
     return true;
@@ -337,11 +337,11 @@ public class Invocation extends ServletInvocation implements Dependency
       return false;
 
     if (_rawURI != inv._rawURI &&
-	(_rawURI == null || ! _rawURI.equals(inv._rawURI)))
+        (_rawURI == null || ! _rawURI.equals(inv._rawURI)))
       return false;
 
     if (_rawHost != inv._rawHost &&
-	(_rawHost == null || ! _rawHost.equals(inv._rawHost)))
+        (_rawHost == null || ! _rawHost.equals(inv._rawHost)))
       return false;
 
     if (_port != inv._port)
@@ -351,7 +351,7 @@ public class Invocation extends ServletInvocation implements Dependency
     String bQuery = inv.getQueryString();
 
     if (aQuery != bQuery &&
-	(aQuery == null || ! aQuery.equals(bQuery)))
+        (aQuery == null || ! aQuery.equals(bQuery)))
       return false;
 
     return true;

@@ -129,7 +129,7 @@ public class IvyDependency {
   public boolean isMatch(IvyDependency dep)
   {
     return (_org.equals(dep._org)
-	    && _name.equals(dep._name));
+            && _name.equals(dep._name));
   }
 
   public Path resolve(IvyCache cache)
@@ -149,14 +149,14 @@ public class IvyDependency {
       path = cache.resolve(this, version);
 
       if (path == null)
-	continue;
+        continue;
       else if (bestPath == null) {
-	bestPath = path;
-	bestVersion = version;
+        bestPath = path;
+        bestVersion = version;
       }
       else if (new IvyRevision(bestVersion).compareTo(new IvyRevision(version)) < 0) {
-	bestPath = path;
-	bestVersion = version;
+        bestPath = path;
+        bestVersion = version;
       }
       
     }
@@ -197,16 +197,16 @@ public class IvyDependency {
     IvyDependency dep = (IvyDependency) o;
 
     return (_org.equals(dep._org)
-	    && _name.equals(dep._name)
-	    && _rev.equals(dep._rev));
+            && _name.equals(dep._name)
+            && _rev.equals(dep._rev));
   }
 
   @Override
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _org
-	    + "," + _name
-	    + "," + _rev + "]");
+            + "[" + _org
+            + "," + _name
+            + "," + _rev + "]");
   }
 }

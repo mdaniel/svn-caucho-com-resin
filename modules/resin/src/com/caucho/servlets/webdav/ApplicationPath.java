@@ -130,8 +130,8 @@ public class ApplicationPath extends AbstractPath {
    * @param app the servlet context
    */
   public Iterator getAttributeNames(String path,
-				    HttpServletRequest request,
-				    ServletContext app)
+                                    HttpServletRequest request,
+                                    ServletContext app)
     throws IOException
   {
     return NullIterator.create();

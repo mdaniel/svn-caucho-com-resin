@@ -42,8 +42,8 @@ public class IntegerConverter implements Converter
     = "javax.faces.converter.STRING";
   
   public Object getAsObject(FacesContext context,
-			    UIComponent component,
-			    String value)
+                            UIComponent component,
+                            String value)
     throws ConverterException
   {
     // XXX: incorrect
@@ -59,16 +59,16 @@ public class IntegerConverter implements Converter
       return Integer.decode(value);
     } catch (NumberFormatException e) {
       String summary = Util.l10n(context, INTEGER_ID,
-				 "{2}: \"{0}\" must be an integer number.",
-				 value,
-				 getExample(),
-				 Util.getLabel(context, component));
+                                 "{2}: \"{0}\" must be an integer number.",
+                                 value,
+                                 getExample(),
+                                 Util.getLabel(context, component));
       
       String detail = Util.l10n(context, INTEGER_ID + "_detail",
-				 "{2}: \"{0}\" must be a number between -2147483648 and 2147483647. Example: {1}.",
-				value,
-				getExample(),
-				Util.getLabel(context, component));
+                                 "{2}: \"{0}\" must be a number between -2147483648 and 2147483647. Example: {1}.",
+                                value,
+                                getExample(),
+                                Util.getLabel(context, component));
 
       FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                           summary,
@@ -79,8 +79,8 @@ public class IntegerConverter implements Converter
   }
   
   public String getAsString(FacesContext context,
-			    UIComponent component,
-			    Object value)
+                            UIComponent component,
+                            Object value)
     throws ConverterException
   {
     // XXX: incorrect

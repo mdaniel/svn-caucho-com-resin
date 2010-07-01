@@ -79,11 +79,11 @@ class UnboundStarExpr extends Expr {
       Column []columns = table.getColumns();
 
       if (_table != null && ! fromItems[i].getName().equals(_table))
-	continue;
+        continue;
 
       for (int j = 0; j < columns.length; j++) {
-	exprs.add(new UnboundIdentifierExpr(fromItems[i].getName(),
-					    columns[j].getName()));
+        exprs.add(new UnboundIdentifierExpr(fromItems[i].getName(),
+                                            columns[j].getName()));
       }
     }
 

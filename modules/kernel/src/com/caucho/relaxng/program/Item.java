@@ -268,20 +268,20 @@ abstract public class Item {
   static {
     EMPTY_ITEM_ITERATOR = 
       new Iterator<Item>() {
-	public boolean hasNext()
-	{
-	  return false;
-	}
+        public boolean hasNext()
+        {
+          return false;
+        }
 
-	public Item next()
-	{
-	  throw new NoSuchElementException();
-	}
+        public Item next()
+        {
+          throw new NoSuchElementException();
+        }
 
-	public void remove()
-	{
-	  throw new UnsupportedOperationException();
-	}
+        public void remove()
+        {
+          throw new UnsupportedOperationException();
+        }
       };
   }
 }

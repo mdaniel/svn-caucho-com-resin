@@ -177,17 +177,17 @@ public class UISelectItem extends UIComponentBase
     if (prop != null) {
       switch (prop) {
       case ITEM_DESCRIPTION:
-	return _itemDescriptionExpr;
+        return _itemDescriptionExpr;
       case ITEM_DISABLED:
-	return _itemDisabledExpr;
+        return _itemDisabledExpr;
       case ITEM_ESCAPED:
-	return _itemEscapedExpr;
+        return _itemEscapedExpr;
       case ITEM_LABEL:
-	return _itemLabelExpr;
+        return _itemLabelExpr;
       case ITEM_VALUE:
-	return _itemValueExpr;
+        return _itemValueExpr;
       case VALUE:
-	return _valueExpr;
+        return _valueExpr;
       }
     }
     
@@ -205,58 +205,58 @@ public class UISelectItem extends UIComponentBase
     if (prop != null) {
       switch (prop) {
       case ITEM_DESCRIPTION:
-	if (expr != null && expr.isLiteralText()) {
-	  _itemDescription = String.valueOf(expr.getValue(null));
-	  return;
-	}
-	else
-	  _itemDescriptionExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _itemDescription = String.valueOf(expr.getValue(null));
+          return;
+        }
+        else
+          _itemDescriptionExpr = expr;
+        break;
+
       case ITEM_DISABLED:
-	if (expr != null && expr.isLiteralText()) {
-	  _itemDisabled = Util.booleanValueOf(expr.getValue(null));
-	  return;
-	}
-	else
-	  _itemDisabledExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _itemDisabled = Util.booleanValueOf(expr.getValue(null));
+          return;
+        }
+        else
+          _itemDisabledExpr = expr;
+        break;
+
       case ITEM_ESCAPED:
-	if (expr != null && expr.isLiteralText()) {
-	  _itemEscaped = Util.booleanValueOf(expr.getValue(null));
-	  return;
-	}
-	else
-	  _itemEscapedExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _itemEscaped = Util.booleanValueOf(expr.getValue(null));
+          return;
+        }
+        else
+          _itemEscapedExpr = expr;
+        break;
+
       case ITEM_LABEL:
-	if (expr != null && expr.isLiteralText()) {
-	  _itemLabel = String.valueOf(expr.getValue(null));
-	  return;
-	}
-	else
-	  _itemLabelExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _itemLabel = String.valueOf(expr.getValue(null));
+          return;
+        }
+        else
+          _itemLabelExpr = expr;
+        break;
+
       case ITEM_VALUE:
-	if (expr != null && expr.isLiteralText()) {
-	  _itemValue = expr.getValue(null);
-	  return;
-	}
-	else
-	  _itemValueExpr = expr;
-	break;
-	
+        if (expr != null && expr.isLiteralText()) {
+          _itemValue = expr.getValue(null);
+          return;
+        }
+        else
+          _itemValueExpr = expr;
+        break;
+
       case VALUE:
-	if (expr != null && expr.isLiteralText()) {
-	  _value = expr.getValue(null);
-	  return;
-	}
-	else
-	  _valueExpr = expr;
-	break;
+        if (expr != null && expr.isLiteralText()) {
+          _value = expr.getValue(null);
+          return;
+        }
+        else
+          _valueExpr = expr;
+        break;
       }
     }
     

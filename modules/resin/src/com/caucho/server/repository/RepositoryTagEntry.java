@@ -50,9 +50,9 @@ public class RepositoryTagEntry
    * Create an entry from an existing repository item.
    */
   public RepositoryTagEntry(String sha1,
-			String tag,
-			String root,
-			String parent)
+                        String tag,
+                        String root,
+                        String parent)
   {
     _tag = tag;
     _root = root;
@@ -65,9 +65,9 @@ public class RepositoryTagEntry
    * Create a new entry, storing the serialized form in the repository.
    */
   public RepositoryTagEntry(Repository repository,
-			String tag,
-			String root,
-			String parent)
+                        String tag,
+                        String root,
+                        String parent)
     throws IOException
   {
     _tag = tag;
@@ -93,7 +93,7 @@ public class RepositoryTagEntry
    * Create a new entry, storing the serialized form in the repository.
    */
   public RepositoryTagEntry(Repository repository,
-			String sha1)
+                        String sha1)
     throws IOException
   {
     _sha1 = sha1;
@@ -145,11 +145,11 @@ public class RepositoryTagEntry
       String value = line.substring(p + 2);
 
       while (value.endsWith("\\")) {
-	value = value.substring(0, value.length() - 1);
-	line = is.readLine();
+        value = value.substring(0, value.length() - 1);
+        line = is.readLine();
 
-	if (line != null)
-	  value += line;
+        if (line != null)
+          value += line;
       }
 
       map.put(key, value);
@@ -180,9 +180,9 @@ public class RepositoryTagEntry
       char ch = value.charAt(i);
 
       if (ch != '\n')
-	sb.append(ch);
+        sb.append(ch);
       else
-	sb.append("\\\n");
+        sb.append("\\\n");
     }
     
     value = sb.toString();

@@ -122,55 +122,55 @@ abstract class SelectRenderer extends BaseRenderer
       UIComponent child = children.get(i);
 
       if (child instanceof UISelectItem) {
-	UISelectItem uiSelectItem = (UISelectItem) child;
+        UISelectItem uiSelectItem = (UISelectItem) child;
 
-	SelectItem item = (SelectItem) uiSelectItem.getValue();
+        SelectItem item = (SelectItem) uiSelectItem.getValue();
 
-	if (item == null) {
-	  item = new SelectItem(uiSelectItem.getItemValue(),
-				uiSelectItem.getItemLabel(),
-				uiSelectItem.getItemDescription(),
-				uiSelectItem.isItemDisabled(),
-				uiSelectItem.isItemEscaped());
-	}
+        if (item == null) {
+          item = new SelectItem(uiSelectItem.getItemValue(),
+                                uiSelectItem.getItemLabel(),
+                                uiSelectItem.getItemDescription(),
+                                uiSelectItem.isItemDisabled(),
+                                uiSelectItem.isItemEscaped());
+        }
 
-	itemList.add(item);
+        itemList.add(item);
       }
       else if (child instanceof UISelectItems) {
-	UISelectItems selectedItems = (UISelectItems) child;
+        UISelectItems selectedItems = (UISelectItems) child;
 
-	Object value = selectedItems.getValue();
+        Object value = selectedItems.getValue();
 
-	if (value instanceof SelectItem) {
-	  itemList.add((SelectItem) value);
-	}
-	else if (value instanceof SelectItem []) {
-	  SelectItem []items = (SelectItem []) value;
+        if (value instanceof SelectItem) {
+          itemList.add((SelectItem) value);
+        }
+        else if (value instanceof SelectItem []) {
+          SelectItem []items = (SelectItem []) value;
 
-	  itemList.ensureCapacity(itemList.size() + items.length);
+          itemList.ensureCapacity(itemList.size() + items.length);
 
-	  for (SelectItem item : items) {
-	    itemList.add(item);
-	  }
-	}
-	else if (value instanceof Collection) {
-	  Collection items = (Collection) value;
+          for (SelectItem item : items) {
+            itemList.add(item);
+          }
+        }
+        else if (value instanceof Collection) {
+          Collection items = (Collection) value;
 
-	  itemList.ensureCapacity(itemList.size() + items.size());
+          itemList.ensureCapacity(itemList.size() + items.size());
 
-	  itemList.addAll(items);
-	}
-	else if (value instanceof Map) {
-	  Map map = (Map) value;
+          itemList.addAll(items);
+        }
+        else if (value instanceof Map) {
+          Map map = (Map) value;
 
-	  itemList.ensureCapacity(itemList.size() + map.size());
+          itemList.ensureCapacity(itemList.size() + map.size());
 
-	  Set<Map.Entry> entries = map.entrySet();
-	  for (Map.Entry entry : entries) {
-	    itemList.add(new SelectItem(entry.getValue(),
-					String.valueOf(entry.getKey())));
-	  }
-	}
+          Set<Map.Entry> entries = map.entrySet();
+          for (Map.Entry entry : entries) {
+            itemList.add(new SelectItem(entry.getValue(),
+                                        String.valueOf(entry.getKey())));
+          }
+        }
       }
     }
     return itemList;
@@ -199,28 +199,28 @@ abstract class SelectRenderer extends BaseRenderer
       */
 
       if (selectItem.isDisabled()) {
-	out.writeAttribute("disabled", "disabled", "disabled");
+        out.writeAttribute("disabled", "disabled", "disabled");
 
-	if (disabledClass != null)
-	  out.writeAttribute("class", disabledClass, "disabledClass");
+        if (disabledClass != null)
+          out.writeAttribute("class", disabledClass, "disabledClass");
       }
       else {
-	if (enabledClass != null)
-	  out.writeAttribute("class", enabledClass, "enabledClass");
+        if (enabledClass != null)
+          out.writeAttribute("class", enabledClass, "enabledClass");
       }
 
       if (values != null) {
-	for (int j = 0; j < values.length; j++) {
-	  if (values[j].equals(selectItem.getValue())) {
-	    out.writeAttribute("selected", "selected", "selected");
-	    break;
-	  }
-	}
+        for (int j = 0; j < values.length; j++) {
+          if (values[j].equals(selectItem.getValue())) {
+            out.writeAttribute("selected", "selected", "selected");
+            break;
+          }
+        }
       }
 
       out.writeAttribute("value",
-			 String.valueOf(selectItem.getValue()),
-			 "value");
+                         String.valueOf(selectItem.getValue()),
+                         "value");
 
       String label = selectItem.getLabel();
 
@@ -283,17 +283,17 @@ abstract class SelectRenderer extends BaseRenderer
         }
 
       if (value != null && value.equals(optionValue))
-	out.writeAttribute("selected", "selected", "selected");
+        out.writeAttribute("selected", "selected", "selected");
 
       if (selectItem.isDisabled()) {
-	out.writeAttribute("disabled", "disabled", "disabled");
+        out.writeAttribute("disabled", "disabled", "disabled");
 
-	if (disabledClass != null)
-	  out.writeAttribute("class", disabledClass, "disabledClass");
+        if (disabledClass != null)
+          out.writeAttribute("class", disabledClass, "disabledClass");
       }
       else {
-	if (enabledClass != null)
-	  out.writeAttribute("class", enabledClass, "enabledClass");
+        if (enabledClass != null)
+          out.writeAttribute("class", enabledClass, "enabledClass");
       }
 
       String itemValueString = toString(context, component, itemValue);

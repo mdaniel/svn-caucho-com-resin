@@ -55,59 +55,59 @@ public class BooleanExpr extends Expr {
 
     if (code == Expr.EQ) {
       if (_left.isNodeSet() || _right.isNodeSet())
-	_code = Expr.EQ;
+        _code = Expr.EQ;
       else if (_left.isBoolean() || _right.isBoolean())
-	_code = Expr.BOOLEAN_EQ;
+        _code = Expr.BOOLEAN_EQ;
       else if (left.isNumber() || right.isNumber())
-	_code = Expr.NUMBER_EQ;
+        _code = Expr.NUMBER_EQ;
       else if (left.isString() && right.isString())
-	_code = Expr.STRING_EQ;
+        _code = Expr.STRING_EQ;
       else
-	_code = Expr.EQ;
+        _code = Expr.EQ;
     }
     else if (code == Expr.NEQ) {
       if (left.isNodeSet() || right.isNodeSet())
-	_code = Expr.NEQ;
+        _code = Expr.NEQ;
       else if (left.isBoolean() || right.isBoolean())
-	_code = Expr.BOOLEAN_NEQ;
+        _code = Expr.BOOLEAN_NEQ;
       else if (left.isNumber() || right.isNumber())
-	_code = Expr.NUMBER_NEQ;
+        _code = Expr.NUMBER_NEQ;
       else if (left.isString() && right.isString())
-	_code = Expr.STRING_NEQ;
+        _code = Expr.STRING_NEQ;
       else
-	_code = Expr.NEQ;
+        _code = Expr.NEQ;
     }
     else if (code == Expr.LT) {
       if (left.isNodeSet() || right.isNodeSet())
-	_code = Expr.LT;
+        _code = Expr.LT;
       else if (left.isNumber() || right.isNumber())
-	_code = Expr.NUMBER_LT;
+        _code = Expr.NUMBER_LT;
       else
-	_code = Expr.LT;
+        _code = Expr.LT;
     }
     else if (code == Expr.LE) {
       if (left.isNodeSet() || right.isNodeSet())
-	_code = Expr.LE;
+        _code = Expr.LE;
       else if (left.isNumber() || right.isNumber())
-	_code = Expr.NUMBER_LE;
+        _code = Expr.NUMBER_LE;
       else
-	_code = Expr.LE;
+        _code = Expr.LE;
     }
     else if (code == Expr.GT) {
       if (left.isNodeSet() || right.isNodeSet())
-	_code = Expr.GT;
+        _code = Expr.GT;
       else if (left.isNumber() || right.isNumber())
-	_code = Expr.NUMBER_GT;
+        _code = Expr.NUMBER_GT;
       else
-	_code = Expr.GT;
+        _code = Expr.GT;
     }
     else if (code == Expr.GE) {
       if (left.isNodeSet() || right.isNodeSet())
-	_code = Expr.GE;
+        _code = Expr.GE;
       else if (left.isNumber() || right.isNumber())
-	_code = Expr.NUMBER_GE;
+        _code = Expr.NUMBER_GE;
       else
-	_code = Expr.GE;
+        _code = Expr.GE;
     }
   }
 
@@ -168,7 +168,7 @@ public class BooleanExpr extends Expr {
       Object robj = _right.evalObject(node, env);
 
       if (lobj == robj)
-	return true;
+        return true;
 
       return cmp(P_EQ, lobj, robj);
 
@@ -188,29 +188,29 @@ public class BooleanExpr extends Expr {
       robj = _right.evalObject(node, env);
 
       if (lobj == robj)
-	return false;
+        return false;
 
       return cmp(P_NEQ, lobj, robj);
 
     case LT: 
       return cmp(P_LT,
-		 _left.evalObject(node, env),
-		 _right.evalObject(node, env));
+                 _left.evalObject(node, env),
+                 _right.evalObject(node, env));
 
     case LE: 
       return cmp(P_LE,
-		 _left.evalObject(node, env),
-		 _right.evalObject(node, env));
+                 _left.evalObject(node, env),
+                 _right.evalObject(node, env));
 
     case GT:
       return cmp(P_GT,
-		 _left.evalObject(node, env),
-		 _right.evalObject(node, env));
+                 _left.evalObject(node, env),
+                 _right.evalObject(node, env));
 
     case GE:
       return cmp(P_GE,
-		 _left.evalObject(node, env),
-		 _right.evalObject(node, env));
+                 _left.evalObject(node, env),
+                 _right.evalObject(node, env));
       
     case NUMBER_LT: 
       return (_left.evalNumber(node, env) < _right.evalNumber(node, env));
@@ -255,11 +255,11 @@ public class BooleanExpr extends Expr {
     case LANG:
       lstr = _left.evalString(node, env);
       for (; node != null; node = node.getParentNode()) {
-	if (! (node instanceof Element))
-	  continue;
-	String lang = ((Element) node).getAttribute("xml:lang");
-	if (lang != null && lang.equals(lstr))
-	  return true;
+        if (! (node instanceof Element))
+          continue;
+        String lang = ((Element) node).getAttribute("xml:lang");
+        if (lang != null && lang.equals(lstr))
+          return true;
       }
       return false;
 
@@ -282,8 +282,8 @@ public class BooleanExpr extends Expr {
       int length = list.getLength();
 
       for (int i = 0; i < length; i++) {
-	if (cmp(test, list.item(i), robj))
-	  return true;
+        if (cmp(test, list.item(i), robj))
+          return true;
       }
       
       return false;
@@ -292,8 +292,8 @@ public class BooleanExpr extends Expr {
       ArrayList list = (ArrayList) lobj;
 
       for (int i = 0; i < list.size(); i++) {
-	if (cmp(test, list.get(i), robj))
-	  return true;
+        if (cmp(test, list.get(i), robj))
+          return true;
       }
       
       return false;
@@ -302,8 +302,8 @@ public class BooleanExpr extends Expr {
       Iterator iter = (Iterator) lobj;
       
       while (iter.hasNext()) {
-	if (cmp(test, iter.next(), robj))
-	  return true;
+        if (cmp(test, iter.next(), robj))
+          return true;
       }
       
       return false;
@@ -316,8 +316,8 @@ public class BooleanExpr extends Expr {
 
       int length = list.getLength();
       for (int i = 0; i < length; i++) {
-	if (cmp(test, lobj, list.item(i)))
-	  return true;
+        if (cmp(test, lobj, list.item(i)))
+          return true;
       }
       
       return false;
@@ -326,8 +326,8 @@ public class BooleanExpr extends Expr {
       ArrayList list = (ArrayList) robj;
 
       for (int i = 0; i < list.size(); i++) {
-	if (cmp(test, lobj, list.get(i)))
-	  return true;
+        if (cmp(test, lobj, list.get(i)))
+          return true;
       }
       
       return false;
@@ -338,8 +338,8 @@ public class BooleanExpr extends Expr {
       iter = (Iterator) ((NodeIterator) robj).clone();
 
       while (iter.hasNext()) {
-	if (cmp(test, lobj, iter.next()))
-	  return true;
+        if (cmp(test, lobj, iter.next()))
+          return true;
       }
       return false;
     }
@@ -470,59 +470,59 @@ public class BooleanExpr extends Expr {
 
   final static Predicate P_EQ = new Predicate() {
       public boolean test(Object lobj, Object robj)
-	throws XPathException
+        throws XPathException
       {
-	if (lobj instanceof Boolean || robj instanceof Boolean)
-	  return toBoolean(lobj) == toBoolean(robj);
-	else if (lobj instanceof Double || robj instanceof Double)
-	  return toDouble(lobj) == toDouble(robj);
-	else
-	  return BooleanExpr.toString(lobj).equals(BooleanExpr.toString(robj));
+        if (lobj instanceof Boolean || robj instanceof Boolean)
+          return toBoolean(lobj) == toBoolean(robj);
+        else if (lobj instanceof Double || robj instanceof Double)
+          return toDouble(lobj) == toDouble(robj);
+        else
+          return BooleanExpr.toString(lobj).equals(BooleanExpr.toString(robj));
       }
     };
 
   final static Predicate P_NEQ = new Predicate() {
       public boolean test(Object lobj, Object robj)
-	throws XPathException
+        throws XPathException
       {
-	if (lobj instanceof Boolean || robj instanceof Boolean)
-	  return toBoolean(lobj) != toBoolean(robj);
-	else if (lobj instanceof Double || robj instanceof Double)
-	  return toDouble(lobj) != toDouble(robj);
-	else
-	  return ! BooleanExpr.toString(lobj).equals(BooleanExpr.toString(robj));
+        if (lobj instanceof Boolean || robj instanceof Boolean)
+          return toBoolean(lobj) != toBoolean(robj);
+        else if (lobj instanceof Double || robj instanceof Double)
+          return toDouble(lobj) != toDouble(robj);
+        else
+          return ! BooleanExpr.toString(lobj).equals(BooleanExpr.toString(robj));
       }
     };
 
   final static Predicate P_LT = new Predicate() {
       public boolean test(Object lobj, Object robj)
-	throws XPathException
+        throws XPathException
       {
-	return toDouble(lobj) < toDouble(robj);
+        return toDouble(lobj) < toDouble(robj);
       }
     };
 
   final static Predicate P_LE = new Predicate() {
       public boolean test(Object lobj, Object robj)
-	throws XPathException
+        throws XPathException
       {
-	return toDouble(lobj) <= toDouble(robj);
+        return toDouble(lobj) <= toDouble(robj);
       }
     };
 
   final static Predicate P_GT = new Predicate() {
       public boolean test(Object lobj, Object robj)
-	throws XPathException
+        throws XPathException
       {
-	return toDouble(lobj) > toDouble(robj);
+        return toDouble(lobj) > toDouble(robj);
       }
     };
 
   final static Predicate P_GE = new Predicate() {
       public boolean test(Object lobj, Object robj)
-	throws XPathException
+        throws XPathException
       {
-	return toDouble(lobj) >= toDouble(robj);
+        return toDouble(lobj) >= toDouble(robj);
       }
     };
 }

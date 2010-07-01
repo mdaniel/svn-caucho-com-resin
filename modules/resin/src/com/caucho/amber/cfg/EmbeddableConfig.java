@@ -54,8 +54,8 @@ public class EmbeddableConfig extends AbstractEnhancedConfig {
   }
 
   EmbeddableConfig(String name,
-		   EntityIntrospector introspector,
-		   EmbeddableType embeddableType)
+                   EntityIntrospector introspector,
+                   EmbeddableType embeddableType)
   {
     super(name);
     

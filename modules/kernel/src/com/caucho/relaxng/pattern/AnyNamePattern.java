@@ -74,7 +74,7 @@ public class AnyNamePattern extends NameClassPattern {
       AnyNameItem item = new AnyNameItem();
 
       if (_except != null)
-	item.setExcept(_except.createNameItem());
+        item.setExcept(_except.createNameItem());
 
       _item = item;
     }

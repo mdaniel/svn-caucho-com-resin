@@ -104,6 +104,6 @@ public final class PropertiesType extends ConfigType
       return valueOf((String) value);
     else
       throw new ConfigException(L.l("'{0}' is not a valid Properties value.",
-				    value));
+                                    value));
   }
 }

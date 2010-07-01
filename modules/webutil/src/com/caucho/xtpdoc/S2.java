@@ -90,9 +90,9 @@ public class S2 extends Section {
 
     if (_title != null) {
       if (isArticle())
-	out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+        out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
       else
-	out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+        out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
     }
 
     super.writeLaTeX(out);

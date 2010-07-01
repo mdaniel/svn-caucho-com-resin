@@ -68,7 +68,7 @@ class WatchdogService extends SimpleActor
    */
   @QuerySet
   public boolean watchdogStart(long id, String to, String from,
-			       WatchdogStartQuery start)
+                               WatchdogStartQuery start)
   {
     String []argv = start.getArgv();
 
@@ -78,20 +78,20 @@ class WatchdogService extends SimpleActor
       String msg = L.l("{0}: started server", this);
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(true, msg));
+                                    new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
       String msg;
 
       if (e instanceof ConfigException)
-	msg = e.getMessage();
+        msg = e.getMessage();
       else
-	msg = L.l("{0}: start server failed because of exception\n  {1}'",
-		  this, e.toString());
+        msg = L.l("{0}: start server failed because of exception\n  {1}'",
+                  this, e.toString());
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(false, msg));
+                                    new ResultStatus(false, msg));
     }
     
     return true;
@@ -102,21 +102,21 @@ class WatchdogService extends SimpleActor
    */
   @QueryGet
   public boolean watchdogStatus(long id, String to, String from,
-				WatchdogStatusQuery status)
+                                WatchdogStatusQuery status)
   {
     try {
       String result = _manager.status();
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(true, result));
+                                    new ResultStatus(true, result));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: status failed because of exception\n{1}'",
-		       this, e.toString());
+                       this, e.toString());
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(false, msg));
+                                    new ResultStatus(false, msg));
     }
     
     return true;
@@ -127,7 +127,7 @@ class WatchdogService extends SimpleActor
    */
   @QuerySet
   public boolean watchdogStop(long id, String to, String from,
-			      WatchdogStopQuery stop)
+                              WatchdogStopQuery stop)
   {
     String serverId = stop.getServerId();
 
@@ -137,15 +137,15 @@ class WatchdogService extends SimpleActor
       String msg = L.l("{0}: stopped server='{1}'", this, serverId);
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(true, msg));
+                                    new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: stop server='{1}' failed because of exception\n{2}'",
-		       this, serverId, e.toString());
+                       this, serverId, e.toString());
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(false, msg));
+                                    new ResultStatus(false, msg));
     }
     
     return true;
@@ -156,7 +156,7 @@ class WatchdogService extends SimpleActor
    */
   @QuerySet
   public boolean watchdogKill(long id, String to, String from,
-			      WatchdogKillQuery kill)
+                              WatchdogKillQuery kill)
   {
     String serverId = kill.getServerId();
 
@@ -166,15 +166,15 @@ class WatchdogService extends SimpleActor
       String msg = L.l("{0}: killed server='{1}'", this, serverId);
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(true, msg));
+                                    new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: kill server='{1}' failed because of exception\n{2}'",
-		       this, serverId, e.toString());
+                       this, serverId, e.toString());
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(false, msg));
+                                    new ResultStatus(false, msg));
     }
     
     return true;
@@ -185,7 +185,7 @@ class WatchdogService extends SimpleActor
    */
   @QuerySet
   public boolean watchdogShutdown(long id, String to, String from,
-				  WatchdogShutdownQuery shutdown)
+                                  WatchdogShutdownQuery shutdown)
   {
     try {
       log.info(this + " shutdown from " + from);
@@ -195,15 +195,15 @@ class WatchdogService extends SimpleActor
       new Thread(new Shutdown()).start();
       
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(true, msg));
+                                    new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: shutdown failed because of exception\n{2}'",
-		       this, e.toString());
+                       this, e.toString());
     
       getLinkStream().queryResult(id, from, to,
-				    new ResultStatus(false, msg));
+                                    new ResultStatus(false, msg));
     }
     
     return true;
@@ -213,7 +213,7 @@ class WatchdogService extends SimpleActor
     public void run()
     {
       try {
-	Thread.sleep(1000);
+        Thread.sleep(1000);
       } catch (Exception e) {
       }
 

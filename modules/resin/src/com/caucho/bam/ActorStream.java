@@ -80,9 +80,9 @@ public interface ActorStream
    * @param error the message error
    */
   public void messageError(String to,
-			   String from,
-			   Serializable value,
-			   ActorError error);
+                           String from,
+                           Serializable value,
+                           ActorError error);
 
   //
   // queries (iq)
@@ -105,9 +105,9 @@ public interface ActorStream
    * @param payload the query payload
    */
   public void queryGet(long id,
-			  String to,
-			  String from,
-			  Serializable payload);
+                          String to,
+                          String from,
+                          Serializable payload);
   
   /**
    * Sends a query update request (set).
@@ -126,9 +126,9 @@ public interface ActorStream
    * @param payload the query payload
    */
   public void querySet(long id,
-		       String to,
-		       String from,
-		       Serializable payload);
+                       String to,
+                       String from,
+                       Serializable payload);
 
   /**
    * Sends a query response for a queryGet or querySet.
@@ -139,9 +139,9 @@ public interface ActorStream
    * @param payload the result payload
    */
   public void queryResult(long id,
-			  String to,
-			  String from,
-			  Serializable payload);
+                          String to,
+                          String from,
+                          Serializable payload);
   
   /**
    * Sends a query error from a failed queryGet or querySet.
@@ -153,10 +153,10 @@ public interface ActorStream
    * @param error additional error information
    */
   public void queryError(long id,
-			 String to,
-			 String from,
-			 Serializable payload,
-			 ActorError error);
+                         String to,
+                         String from,
+                         Serializable payload,
+                         ActorError error);
 
   //
   // presence

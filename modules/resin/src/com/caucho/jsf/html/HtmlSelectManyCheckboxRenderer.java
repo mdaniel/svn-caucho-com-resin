@@ -95,7 +95,7 @@ class HtmlSelectManyCheckboxRenderer
 
     if (component instanceof HtmlSelectManyCheckbox) {
       HtmlSelectManyCheckbox htmlComponent
-	= (HtmlSelectManyCheckbox) component;
+        = (HtmlSelectManyCheckbox) component;
 
       border = htmlComponent.getBorder();
       disabled = htmlComponent.isDisabled();
@@ -189,7 +189,7 @@ class HtmlSelectManyCheckboxRenderer
 
     if (component instanceof HtmlSelectManyCheckbox) {
       HtmlSelectManyCheckbox htmlComponent
-	= (HtmlSelectManyCheckbox) component;
+        = (HtmlSelectManyCheckbox) component;
 
       accesskey = htmlComponent.getAccesskey();
       border = htmlComponent.getBorder();
@@ -278,123 +278,123 @@ class HtmlSelectManyCheckboxRenderer
       SelectItem selectItem = list.get(i);
       if (selectItem instanceof SelectItemGroup) {
 
-	if ("pageDirection".equals(layout)) {
-	  out.startElement("tr", component);
-	  out.write("\n");
-	}
+        if ("pageDirection".equals(layout)) {
+          out.startElement("tr", component);
+          out.write("\n");
+        }
 
-	out.startElement("td", component);
+        out.startElement("td", component);
 
-	out.write("\n");
+        out.write("\n");
 
-	out.startElement("table", component);
+        out.startElement("table", component);
 
-	if (border > 0)
-	  out.writeAttribute("border", border, "border");
+        if (border > 0)
+          out.writeAttribute("border", border, "border");
 
-	if (style != null)
-	  out.writeAttribute("style", style, "style");
+        if (style != null)
+          out.writeAttribute("style", style, "style");
 
-	if (styleClass != null)
-	  out.writeAttribute("class", styleClass, "class");
+        if (styleClass != null)
+          out.writeAttribute("class", styleClass, "class");
 
-	if (disabled)
-	  out.writeAttribute("disabled", "disabled", "disabled");
+        if (disabled)
+          out.writeAttribute("disabled", "disabled", "disabled");
 
-	out.write("\n");
+        out.write("\n");
 
-	if (!"pageDirection".equals(layout)) {
-	  out.startElement("tr", component);
-	  out.write("\n");
-	}
+        if (!"pageDirection".equals(layout)) {
+          out.startElement("tr", component);
+          out.write("\n");
+        }
 
-	SelectItem []items = ((SelectItemGroup) selectItem).getSelectItems();
+        SelectItem []items = ((SelectItemGroup) selectItem).getSelectItems();
 
-	for (int j = 0; j < items.length; j++) {
+        for (int j = 0; j < items.length; j++) {
 
-	  SelectItem item = items[j];
+          SelectItem item = items[j];
 
-	  encodeChild(out,
-		      component,
-		      value,
-		      item,
-		      clientId,
-		      layout,
-		      accesskey,
-		      disabled,
-		      dir,
-		      lang,
-		      onblur,
-		      onchange,
-		      onclick,
-		      ondblclick,
-		      onfocus,
-		      onkeydown,
-		      onkeypress,
-		      onkeyup,
-		      onmousedown,
-		      onmousemove,
-		      onmouseout,
-		      onmouseover,
-		      onmouseup,
-		      onselect,
-		      readonly,
-		      tabindex,
-		      title,
-		      disabledClass,
-		      enabledClass,
-		      counter++);
+          encodeChild(out,
+                      component,
+                      value,
+                      item,
+                      clientId,
+                      layout,
+                      accesskey,
+                      disabled,
+                      dir,
+                      lang,
+                      onblur,
+                      onchange,
+                      onclick,
+                      ondblclick,
+                      onfocus,
+                      onkeydown,
+                      onkeypress,
+                      onkeyup,
+                      onmousedown,
+                      onmousemove,
+                      onmouseout,
+                      onmouseover,
+                      onmouseup,
+                      onselect,
+                      readonly,
+                      tabindex,
+                      title,
+                      disabledClass,
+                      enabledClass,
+                      counter++);
 
-	}
+        }
 
-	if (!"pageDirection".equals(layout)) {
-	  out.endElement("tr");
-	  out.write("\n");
-	}
+        if (!"pageDirection".equals(layout)) {
+          out.endElement("tr");
+          out.write("\n");
+        }
 
-	out.endElement("table");
-	out.write("\n");
+        out.endElement("table");
+        out.write("\n");
 
-	out.endElement("td");
-	out.write("\n");
+        out.endElement("td");
+        out.write("\n");
 
-	if ("pageDirection".equals(layout)) {
-	  out.endElement("tr");
-	  out.write("\n");
-	}
+        if ("pageDirection".equals(layout)) {
+          out.endElement("tr");
+          out.write("\n");
+        }
 
       }
       else {
-	encodeChild(out,
-		    component,
-		    value,
-		    selectItem,
-		    clientId,
-		    layout,
-		    accesskey,
-		    disabled,
-		    dir,
-		    lang,
-		    onblur,
-		    onchange,
-		    onclick,
-		    ondblclick,
-		    onfocus,
-		    onkeydown,
-		    onkeypress,
-		    onkeyup,
-		    onmousedown,
-		    onmousemove,
-		    onmouseout,
-		    onmouseover,
-		    onmouseup,
-		    onselect,
-		    readonly,
-		    tabindex,
-		    title,
-		    disabledClass,
-		    enabledClass,
-		    counter++);
+        encodeChild(out,
+                    component,
+                    value,
+                    selectItem,
+                    clientId,
+                    layout,
+                    accesskey,
+                    disabled,
+                    dir,
+                    lang,
+                    onblur,
+                    onchange,
+                    onclick,
+                    ondblclick,
+                    onfocus,
+                    onkeydown,
+                    onkeypress,
+                    onkeyup,
+                    onmousedown,
+                    onmousemove,
+                    onmouseout,
+                    onmouseover,
+                    onmouseup,
+                    onselect,
+                    readonly,
+                    tabindex,
+                    title,
+                    disabledClass,
+                    enabledClass,
+                    counter++);
       }
     }
   }
@@ -431,35 +431,35 @@ class HtmlSelectManyCheckboxRenderer
   }
 
   private void encodeChild(ResponseWriter out,
-			   UIComponent component,
-			   Object value,
-			   SelectItem selectItem,
-			   String clientId,
-			   String layout,
-			   String accesskey,
-			   boolean disabled,
-			   String dir,
-			   String lang,
-			   String onblur,
-			   String onchange,
-			   String onclick,
-			   String ondblclick,
-			   String onfocus,
-			   String onkeydown,
-			   String onkeypress,
-			   String onkeyup,
-			   String onmousedown,
-			   String onmousemove,
-			   String onmouseout,
-			   String onmouseover,
-			   String onmouseup,
-			   String onselect,
-			   boolean readonly,
-			   String tabindex,
-			   String title,
-			   String disabledClass,
-			   String enabledClass,
-			   int counter)
+                           UIComponent component,
+                           Object value,
+                           SelectItem selectItem,
+                           String clientId,
+                           String layout,
+                           String accesskey,
+                           boolean disabled,
+                           String dir,
+                           String lang,
+                           String onblur,
+                           String onchange,
+                           String onclick,
+                           String ondblclick,
+                           String onfocus,
+                           String onkeydown,
+                           String onkeypress,
+                           String onkeyup,
+                           String onmousedown,
+                           String onmousemove,
+                           String onmouseout,
+                           String onmouseover,
+                           String onmouseup,
+                           String onselect,
+                           boolean readonly,
+                           String tabindex,
+                           String title,
+                           String disabledClass,
+                           String enabledClass,
+                           int counter)
     throws IOException
   {
     String childId = clientId + ":" + counter;
@@ -484,10 +484,10 @@ class HtmlSelectManyCheckboxRenderer
       Object []values = (Object []) value;
 
       for (int j = 0; j < values.length; j++) {
-	if (values[j].equals(selectItem.getValue())) {
-	  out.writeAttribute("checked", "checked", "value");
-	  break;
-	}
+        if (values[j].equals(selectItem.getValue())) {
+          out.writeAttribute("checked", "checked", "value");
+          break;
+        }
       }
       
     }
@@ -565,12 +565,12 @@ class HtmlSelectManyCheckboxRenderer
       out.writeAttribute("for", childId, "for");
 
       if (selectItem.isDisabled() || disabled) {
-	if (disabledClass != null)
-	  out.writeAttribute("class", disabledClass, "disabledClass");
+        if (disabledClass != null)
+          out.writeAttribute("class", disabledClass, "disabledClass");
       }
       else {
-	if (enabledClass != null)
-	  out.writeAttribute("class", enabledClass, "enabledClass");
+        if (enabledClass != null)
+          out.writeAttribute("class", enabledClass, "enabledClass");
       }
 
       if (selectItem.isEscape())

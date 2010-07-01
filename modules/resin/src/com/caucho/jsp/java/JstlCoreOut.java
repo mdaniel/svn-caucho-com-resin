@@ -174,7 +174,7 @@ public class JstlCoreOut extends JstlNode {
       int index = _gen.addExpr(_value);
     
       out.print("_caucho_expr_" + index +
-		".print(out, _jsp_env, " + escapeXml + ")");
+                ".print(out, _jsp_env, " + escapeXml + ")");
     }
     
     if (_default != null || _defaultAttr != null) {
@@ -182,40 +182,40 @@ public class JstlCoreOut extends JstlNode {
       out.pushDepth();
 
       if (_defaultAttr != null) {
-	out.print("com.caucho.el.Expr.toStream(out, ");
-	out.print(_defaultAttr.generateValue(String.class));
-	out.println(", " + escapeXml + ");");
+        out.print("com.caucho.el.Expr.toStream(out, ");
+        out.print(_defaultAttr.generateValue(String.class));
+        out.println(", " + escapeXml + ");");
       }
       else if (hasRuntimeAttribute(_default)) {
-	out.print("com.caucho.el.Expr.toStream(out, ");
-	out.print(generateRTValue(String.class, _default));
-	out.println(", " + escapeXml + ");");
+        out.print("com.caucho.el.Expr.toStream(out, ");
+        out.print(generateRTValue(String.class, _default));
+        out.println(", " + escapeXml + ");");
       }
       else {
-	Expr defaultExpr = new JspELParser(_gen.getELContext(),
-					   _default).parse();
+        Expr defaultExpr = new JspELParser(_gen.getELContext(),
+                                           _default).parse();
 
-	if (defaultExpr.isConstant() && escapeXml.equals("true")) {
-	  String string = defaultExpr.evalString(null);
+        if (defaultExpr.isConstant() && escapeXml.equals("true")) {
+          String string = defaultExpr.evalString(null);
 
-	  if (string != null && ! string.equals("")) {
-	    out.print("com.caucho.el.Expr.toStreamEscaped(out, \"");
-	    out.printJavaString(string);
-	    out.println("\");");
-	  }
-	}
-	else if (defaultExpr.isConstant() && escapeXml.equals("false")) {
-	  String string = defaultExpr.evalString(null);
+          if (string != null && ! string.equals("")) {
+            out.print("com.caucho.el.Expr.toStreamEscaped(out, \"");
+            out.printJavaString(string);
+            out.println("\");");
+          }
+        }
+        else if (defaultExpr.isConstant() && escapeXml.equals("false")) {
+          String string = defaultExpr.evalString(null);
 
-	  if (string != null && ! string.equals("")) {
-	    out.addText(string);
-	  }
-	}
-	else {
-	  int defaultIndex = _gen.addExpr(_default);
-	  out.println("_caucho_expr_" + defaultIndex +
-		      ".print(out, _jsp_env, " + escapeXml + ");");
-	}
+          if (string != null && ! string.equals("")) {
+            out.addText(string);
+          }
+        }
+        else {
+          int defaultIndex = _gen.addExpr(_default);
+          out.println("_caucho_expr_" + defaultIndex +
+                      ".print(out, _jsp_env, " + escapeXml + ");");
+        }
       }
       
       out.popDepth();

@@ -135,7 +135,7 @@ public class ResourceAdapterImpl implements ResourceAdapter {
    * Called during activation of a message endpoint.
    */
   public void endpointActivation(MessageEndpointFactory endpointFactory,
-				 ActivationSpec spec)
+                                 ActivationSpec spec)
     throws NotSupportedException, ResourceException
   {
     MessageListenerSpec listener = (MessageListenerSpec) spec;
@@ -152,7 +152,7 @@ public class ResourceAdapterImpl implements ResourceAdapter {
    * Called during deactivation of a message endpoint.
    */
   public void endpointDeactivation(MessageEndpointFactory endpointFactory,
-				   ActivationSpec spec)
+                                   ActivationSpec spec)
   {
   }
   

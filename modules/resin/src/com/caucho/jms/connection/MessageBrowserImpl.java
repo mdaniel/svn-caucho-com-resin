@@ -66,8 +66,8 @@ public class MessageBrowserImpl
   private Selector _selector;
 
   public MessageBrowserImpl(JmsSession session,
-			    AbstractQueue queue,
-			    String messageSelector)
+                            AbstractQueue queue,
+                            String messageSelector)
     throws JMSException
   {
     _session = session;
@@ -132,7 +132,7 @@ public class MessageBrowserImpl
     private int _index;
     
     BrowserEnumeration(ArrayList<MessageImpl> messages,
-		       Selector selector)
+                       Selector selector)
     {
       _messages = messages;
       _selector = selector;
@@ -148,30 +148,30 @@ public class MessageBrowserImpl
     public Object nextElement()
     {
       if (_index < _messages.size()) {
-	MessageImpl msg = _messages.get(_index);
+        MessageImpl msg = _messages.get(_index);
 
-	_index++;
-	nextValidMessage();
+        _index++;
+        nextValidMessage();
 
-	return msg;
+        return msg;
       }
       else
-	return null;
+        return null;
     }
 
     private void nextValidMessage()
     {
       try {
-	for (; _index < _messages.size(); _index++) {
-	  MessageImpl msg = _messages.get(_index);
+        for (; _index < _messages.size(); _index++) {
+          MessageImpl msg = _messages.get(_index);
 
-	  if (_selector == null || _selector.isMatch(msg))
-	    return;
-	}
+          if (_selector == null || _selector.isMatch(msg))
+            return;
+        }
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new JmsRuntimeException(e);
+        throw new JmsRuntimeException(e);
       }
     }
   }
