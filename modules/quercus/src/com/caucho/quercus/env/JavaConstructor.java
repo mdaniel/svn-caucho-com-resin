@@ -54,11 +54,11 @@ public class JavaConstructor extends JavaInvoker {
                          Constructor cons)
   {    
     super(moduleContext,
-	  getName(cons),
-	  cons.getParameterTypes(),
-	  cons.getParameterAnnotations(),
-	  cons.getAnnotations(),
-	  cons.getDeclaringClass());
+          getName(cons),
+          cons.getParameterTypes(),
+          cons.getParameterAnnotations(),
+          cons.getAnnotations(),
+          cons.getDeclaringClass());
 
     _constructor = cons;
     _argLength = cons.getParameterTypes().length;

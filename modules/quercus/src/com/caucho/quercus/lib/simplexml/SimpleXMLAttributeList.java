@@ -113,7 +113,7 @@ public class SimpleXMLAttributeList extends SimpleXMLElement
    */
   @Override
   protected void addNamespaceAttribute(Env env, String name,
-				       String namespace)
+                                       String namespace)
   {
     if (_parent != null)
       _parent.addNamespaceAttribute(env, name, namespace);

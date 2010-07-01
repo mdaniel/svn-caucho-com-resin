@@ -1318,7 +1318,7 @@ public class JavaAdapterVar extends Value
    */
   @Override
   public Value callMethod(Env env, StringValue methodName, int hash,
-			  Value a0, Value a1, Value a2)
+                          Value a0, Value a1, Value a2)
   {
     return getValue().callMethod(env, methodName, hash, a0, a1, a2);
   }
@@ -1328,7 +1328,7 @@ public class JavaAdapterVar extends Value
    */
   @Override
   public Value callMethod(Env env, StringValue methodName, int hash,
-			  Value a0, Value a1, Value a2, Value a3)
+                          Value a0, Value a1, Value a2, Value a3)
   {
     return getValue().callMethod(env, methodName, hash,
                                  a0, a1, a2, a3);
@@ -1339,7 +1339,7 @@ public class JavaAdapterVar extends Value
    */
   @Override
   public Value callMethod(Env env, StringValue methodName, int hash,
-			  Value a0, Value a1, Value a2, Value a3, Value a4)
+                          Value a0, Value a1, Value a2, Value a3, Value a4)
   {
     return getValue().callMethod(env, methodName, hash,
                                  a0, a1, a2, a3, a4);

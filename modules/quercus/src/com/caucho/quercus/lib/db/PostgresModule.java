@@ -135,7 +135,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return -1;
+        return -1;
 
       return result.getAffectedRows();
     } catch (Exception ex) {
@@ -164,7 +164,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return false;
+        return false;
       
       conn.setAsynchronousStatement(null);
       conn.setAsynchronousResult(null);
@@ -203,10 +203,10 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return false;
+        return false;
 
       if (conn == env.getSpecialValue("caucho.postgres"))
-	env.removeSpecialValue("caucho.postgres");
+        env.removeSpecialValue("caucho.postgres");
 
       conn.close(env);
 
@@ -416,7 +416,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return false;
+        return false;
 
       // Query database name before closing connection
 
@@ -451,7 +451,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return PGSQL_CONNECTION_BAD;
+        return PGSQL_CONNECTION_BAD;
       
       boolean ping = pg_ping(env, conn);
 
@@ -475,7 +475,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
 
       // XXX: options has not been implemented yet.
 
@@ -600,7 +600,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
     try {
       if (conn == null)
-	return false;
+        return false;
 
       // XXX: At the time this was implemented, the JDBC driver
       // did not support SQL COPY operations that could simplify
@@ -693,7 +693,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
 
       // XXX: At the time this was implemented, the JDBC driver
       // did not support SQL COPY operations that could simplify
@@ -796,7 +796,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
     try {
       if (conn == null)
-	return false;
+        return false;
 
       if (options > 0) {
         throw new UnimplementedException("pg_delete with options");
@@ -916,7 +916,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
 
       PostgresStatement pstmt = conn.getStatement(stmtName);
 
@@ -939,7 +939,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
@@ -974,7 +974,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
@@ -1010,7 +1010,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       // NOTE: pg_fetch_array has an interesting memory feature.
       // Calls to pg_fetch_array usually return the next row for
@@ -1070,7 +1070,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
       
       if (! row.isNull() && row.toInt() >= 0) {
         result.seek(env, row.toInt());
@@ -1094,7 +1094,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       //@todo use optional resultType
       if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
@@ -1125,7 +1125,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       // NOTE: row is of type Value because there is a case where
       // row is optional. In such a case, the row value passed in
@@ -1179,7 +1179,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       if (row != null && ! row.equals(NullValue.NULL) && row.toInt() >= 0) {
         result.seek(env, row.toInt());
@@ -1204,7 +1204,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       // NOTE: row is of type Value because there is a case where
       // row is optional. In such a case, the row value passed in
@@ -1299,7 +1299,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return -1;
+        return -1;
 
       return result.getColumnNumber(fieldName);
     } catch (Exception ex) {
@@ -1328,7 +1328,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return -1;
+        return -1;
       
       int row = rowNumber.toInt();
 
@@ -1390,7 +1390,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return LongValue.create(-1);
+        return LongValue.create(-1);
 
       ResultSetMetaData metaData = result.getMetaData();
 
@@ -1512,7 +1512,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       ResultSetMetaData metaData = result.getMetaData();
 
@@ -1548,7 +1548,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return null;
+        return null;
 
       ResultSetMetaData metaData = result.getMetaData();
 
@@ -1583,7 +1583,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return true;
+        return true;
       
       result.close();
       
@@ -1617,7 +1617,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
       
       if (resultType > 0) {
         throw new UnimplementedException("pg_get_notify with result type");
@@ -1677,7 +1677,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return -1;
+        return -1;
       
       // @todo create a random string
       String randomLabel = "caucho_pg_get_pid_random_label";
@@ -1766,7 +1766,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
         if (stmt.getMoreResults()) {
           result = (PostgresResult) conn.createResult(env, stmt,
-						      stmt.getResultSet());
+                                                      stmt.getResultSet());
         } else {
           // 3. Individual pg_send_query (clean up; no futher results)
           conn.setResultResource(null);
@@ -1813,7 +1813,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return false;
+        return false;
 
       if (options > 0) {
         throw new UnimplementedException("pg_insert with options");
@@ -1861,7 +1861,7 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static StringValue pg_last_error(Env env,
-					  @Optional Postgres conn)
+                                          @Optional Postgres conn)
   {
     try {
 
@@ -1895,7 +1895,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
       
       SQLWarning warning = conn.getWarnings();
       
@@ -2050,7 +2050,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return false;
+        return false;
       
       //@todo conn should be optional
 
@@ -2125,7 +2125,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
 
       //@todo conn should be optional
 
@@ -2179,7 +2179,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
 
       Object largeObject = null;
 
@@ -2276,8 +2276,8 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static StringValue pg_lo_read(Env env,
-				       Object largeObject,
-				       @Optional("-1") int len)
+                                       Object largeObject,
+                                       @Optional("-1") int len)
   {
     try {
 
@@ -2292,13 +2292,13 @@ public class PostgresModule extends AbstractQuercusModule {
       InputStream is = (InputStream) method.invoke(largeObject, new Object[] {});
 
       try {
-	StringValue bb = env.createBinaryBuilder();
+        StringValue bb = env.createBinaryBuilder();
 
-	bb.appendReadAll(is, len);
+        bb.appendReadAll(is, len);
 
-	return bb;
+        return bb;
       } finally {
-	is.close();
+        is.close();
       }
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2311,8 +2311,8 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static StringValue pg_loread(Env env,
-				      Object largeObject,
-				      @Optional("-1") int len)
+                                      Object largeObject,
+                                      @Optional("-1") int len)
   {
     return pg_lo_read(env, largeObject, len);
   }
@@ -2387,7 +2387,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return false;
+        return false;
 
       // LargeObjectManager lobManager;
       Object lobManager;
@@ -2437,7 +2437,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (largeObject == null)
-	return null;
+        return null;
 
       if (len <= 0) {
         len = data.length();
@@ -2521,7 +2521,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
     try {
       if (result == null)
-	return LongValue.create(-1);
+        return LongValue.create(-1);
 
       if ((result != null) && (result.getResultSet() != null)) {
         numRows = result.getNumRows();
@@ -2565,7 +2565,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null || paramName == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       PostgresResult result = pg_query(env, conn, "SHOW "+paramName);
 
@@ -2662,7 +2662,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
 
       PostgresStatement pstmt = conn.prepare(env, env.createString(query));
       conn.putStatement(stmtName, pstmt);
@@ -2683,7 +2683,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return false;
+        return false;
 
       Class cl = Class.forName("org.postgresql.core.PGStream");
 
@@ -2719,7 +2719,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-	return null;
+        return null;
       
       if (pg_send_query_params(env, conn, query, params)) {
         return (PostgresResult) conn.getResultResource();
@@ -2818,7 +2818,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       Object errorField = null;
 
@@ -2919,9 +2919,9 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result != null)
-	return result.getConnection().getErrorMessage();
+        return result.getConnection().getErrorMessage();
       else
-	return null;
+        return null;
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return null;
@@ -2956,7 +2956,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (result == null)
-	return -1;
+        return -1;
 
       if (type == PGSQL_STATUS_STRING) {
         throw new UnimplementedException("pg_result_status with PGSQL_STATUS_STRING");
@@ -3363,7 +3363,7 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static ArrayValue pg_version(Env env,
-				      @Optional Postgres conn)
+                                      @Optional Postgres conn)
   {
     try {
 
@@ -3375,9 +3375,9 @@ public class PostgresModule extends AbstractQuercusModule {
       ArrayValue result = new ArrayValueImpl();
 
       result.append(env.createString("client"),
-		    env.createString(conn.getClientInfo()));
+                    env.createString(conn.getClientInfo()));
       result.append(env.createString("server_version"),
-		    env.createString(conn.getServerInfo()));
+                    env.createString(conn.getServerInfo()));
       
       return result;
     } catch (Exception ex) {

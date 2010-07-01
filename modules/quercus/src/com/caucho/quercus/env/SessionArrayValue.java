@@ -210,9 +210,9 @@ public class SessionArrayValue extends ArrayValueWrapper
     throws IOException
   {
     int len = (((in.read() & 0xff) << 24)
-	       + ((in.read() & 0xff) << 16)
-	       + ((in.read() & 0xff) << 8)
-	       + ((in.read() & 0xff)));
+               + ((in.read() & 0xff) << 16)
+               + ((in.read() & 0xff) << 8)
+               + ((in.read() & 0xff)));
 
     StringValue sb = env.createUnicodeBuilder();
 

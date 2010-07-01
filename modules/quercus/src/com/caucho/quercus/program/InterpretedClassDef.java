@@ -376,8 +376,8 @@ public class InterpretedClassDef extends ClassDef
       FieldEntry fieldEntry = entry.getValue();
 
       object.initField(entry.getKey(),
-		       fieldEntry.getValue().eval(env).copy(),
-		       fieldEntry.getVisibility());
+                       fieldEntry.getValue().eval(env).copy(),
+                       fieldEntry.getVisibility());
     }
 
     if (_destructor != null && value instanceof ObjectExtValue)

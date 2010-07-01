@@ -52,9 +52,9 @@ public class ClassConstructorExpr extends Expr {
   protected final Expr []_args;
 
   public ClassConstructorExpr(Location location, 
-			      String className, 
-			      String name, 
-			      ArrayList<Expr> args)
+                              String className,
+                              String name,
+                              ArrayList<Expr> args)
   {
     super(location);
 
@@ -67,9 +67,9 @@ public class ClassConstructorExpr extends Expr {
   }
 
   public ClassConstructorExpr(Location location, 
-			      String className, 
-			      String name, 
-			      Expr []args)
+                              String className,
+                              String name,
+                              Expr []args)
   {
     super(location);
 

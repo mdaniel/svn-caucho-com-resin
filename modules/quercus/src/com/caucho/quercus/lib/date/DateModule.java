@@ -153,16 +153,16 @@ public class DateModule extends AbstractQuercusModule {
       int length = dateString.length();
         
       for (int i = 0; i < length; i++) {
-	char ch = dateString.charAt(i);
+        char ch = dateString.charAt(i);
           
-	if ('0' <= ch && ch <= '9')
-	  result = result * 10 + ch - '0';
-	else if (ch == '-' && i == 0)
-	  sign = -1;
-	else {
-	  log.log(Level.FINEST, L.l("error parsing idate string '{0}'", dateString));
-	  break;
-	}
+        if ('0' <= ch && ch <= '9')
+          result = result * 10 + ch - '0';
+        else if (ch == '-' && i == 0)
+          sign = -1;
+        else {
+          log.log(Level.FINEST, L.l("error parsing idate string '{0}'", dateString));
+          break;
+        }
       }
 
       return LongValue.create(result * sign);
@@ -200,8 +200,8 @@ public class DateModule extends AbstractQuercusModule {
     int i = c - c /4 - (c - k) / 3 + 19 * n + 15;
     i = i - 30 * (i / 30);
     i = i - (i / 28) * (1 - ((i / 28) *
-			     (29 / (i + 1)) *
-			     ((21 - n) / 11)));
+                             (29 / (i + 1)) *
+                             ((21 - n) / 11)));
 
     int j = y + y / 4 + i + 2 - c + c / 4;
     j = j - 7 * (j / 7);
@@ -289,8 +289,8 @@ public class DateModule extends AbstractQuercusModule {
    * Returns the formatted date.
    */
   public String gmdate(Env env,
-		       String format,
-		       @Optional("time()") long time)
+                       String format,
+                       @Optional("time()") long time)
   {
     return date(env, format, time, true);
   }
@@ -851,9 +851,9 @@ public class DateModule extends AbstractQuercusModule {
     }
     else {
       return (env.createUnicodeBuilder()
-	      .append(String.format("%.6f", now - Math.floor(now)))
-	      .append(' ')
-	      .append((int) Math.floor(now)));
+              .append(String.format("%.6f", now - Math.floor(now)))
+              .append(' ')
+              .append((int) Math.floor(now)));
     }
   }
 

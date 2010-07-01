@@ -113,7 +113,7 @@ public class CallbackObjectMethod extends Callback {
    */
   @Override
   public Value call(Env env, Value a1, Value a2, Value a3,
-			     Value a4)
+                             Value a4)
   {
     return _obj.callMethod(env, _methodName, _hash,
                            a1, a2, a3, a4);
@@ -126,7 +126,7 @@ public class CallbackObjectMethod extends Callback {
    */
   @Override
   public Value call(Env env, Value a1, Value a2, Value a3,
-		    Value a4, Value a5)
+                    Value a4, Value a5)
   {
     return _obj.callMethod(env, _methodName, _hash,
                            a1, a2, a3, a4, a5);

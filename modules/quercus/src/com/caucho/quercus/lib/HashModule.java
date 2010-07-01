@@ -192,10 +192,10 @@ public class HashModule extends AbstractQuercusModule {
    * Hashes a string with the algorithm.
    */
   public Value hash_hmac(Env env,
-			 String algorithm,
-			 StringValue data,
-			 StringValue key,
-			 @Optional boolean isBinary)
+                         String algorithm,
+                         StringValue data,
+                         StringValue key,
+                         @Optional boolean isBinary)
   {
     algorithm = getAlgorithm(algorithm);
     
@@ -210,10 +210,10 @@ public class HashModule extends AbstractQuercusModule {
    * Hashes a file with the algorithm.
    */
   public Value hash_hmac_file(Env env,
-			      String algorithm,
-			      Path path,
-			      StringValue key,
-			      @Optional boolean isBinary)
+                              String algorithm,
+                              Path path,
+                              StringValue key,
+                              @Optional boolean isBinary)
   {
     algorithm = getAlgorithm(algorithm);
     
@@ -264,7 +264,7 @@ public class HashModule extends AbstractQuercusModule {
       }
     } catch (Exception e) {
       env.error(L.l("hash_init: '{0}' is an unknown algorithm",
-		    algorithm));
+                    algorithm));
 
       return null;
     }
@@ -305,7 +305,7 @@ public class HashModule extends AbstractQuercusModule {
       int len;
 
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	context.update(buffer, 0, len);
+        context.update(buffer, 0, len);
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -313,7 +313,7 @@ public class HashModule extends AbstractQuercusModule {
       TempBuffer.free(tempBuffer);
 
       if (is != null)
-	is.close();
+        is.close();
     }
 
     return BooleanValue.TRUE;
@@ -340,20 +340,20 @@ public class HashModule extends AbstractQuercusModule {
 
     try {
       while (length > 0) {
-	int sublen = buffer.length;
+        int sublen = buffer.length;
 
-	if (length < sublen)
-	  sublen = length;
+        if (length < sublen)
+          sublen = length;
 
-	int len = is.read(buffer, 0, sublen);
+        int len = is.read(buffer, 0, sublen);
 
-	if (len < 0)
-	  return readLength;
+        if (len < 0)
+          return readLength;
 
-	context.update(buffer, 0, len);
+        context.update(buffer, 0, len);
 
-	readLength += len;
-	length -= len;
+        readLength += len;
+        length -= len;
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -380,19 +380,19 @@ public class HashModule extends AbstractQuercusModule {
       StringValue v = env.createUnicodeBuilder();
 
       for (int i = 0; i < bytes.length; i++) {
-	int ch = bytes[i];
-	int d1 = (ch >> 4) & 0xf;
-	int d2 = (ch) & 0xf;
+        int ch = bytes[i];
+        int d1 = (ch >> 4) & 0xf;
+        int d2 = (ch) & 0xf;
 
-	if (d1 < 10)
-	  v.append((char) ('0' + d1));
-	else
-	  v.append((char) ('a' + d1 - 10));
+        if (d1 < 10)
+          v.append((char) ('0' + d1));
+        else
+          v.append((char) ('a' + d1 - 10));
 
-	if (d2 < 10)
-	  v.append((char) ('0' + d2));
-	else
-	  v.append((char) ('a' + d2 - 10));
+        if (d2 < 10)
+          v.append((char) ('0' + d2));
+        else
+          v.append((char) ('a' + d2 - 10));
       }
 
       return v;
@@ -446,7 +446,7 @@ public class HashModule extends AbstractQuercusModule {
       MessageDigest digest = _digest;
     
       for (int i = 0; i < len; i++) {
-	digest.update((byte) value.charAt(i));
+        digest.update((byte) value.charAt(i));
       }
     }
     
@@ -463,11 +463,11 @@ public class HashModule extends AbstractQuercusModule {
     HashContext copy()
     {
       try {
-	return new HashDigestContext((MessageDigest) _digest.clone());
+        return new HashDigestContext((MessageDigest) _digest.clone());
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
 
-	return null;
+        return null;
       }
     }
 
@@ -503,17 +503,17 @@ public class HashModule extends AbstractQuercusModule {
       int offset = 0;
       
       while (offset < len) {
-	int sublen = len - offset;
-	if (buffer.length < sublen)
-	  sublen = buffer.length;
-	
-	for (int i = 0; i < sublen; i++) {
-	  buffer[i] = (byte) value.charAt(offset + i);
-	}
+        int sublen = len - offset;
+        if (buffer.length < sublen)
+          sublen = buffer.length;
+        
+        for (int i = 0; i < sublen; i++) {
+          buffer[i] = (byte) value.charAt(offset + i);
+        }
 
-	digest.update(buffer, 0, sublen);
+        digest.update(buffer, 0, sublen);
 
-	offset += sublen;
+        offset += sublen;
       }
 
       TempBuffer.free(tBuf);
@@ -532,11 +532,11 @@ public class HashModule extends AbstractQuercusModule {
     HashContext copy()
     {
       try {
-	return new HashDigestContext((MessageDigest) _digest.clone());
+        return new HashDigestContext((MessageDigest) _digest.clone());
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
 
-	return null;
+        return null;
       }
     }
 

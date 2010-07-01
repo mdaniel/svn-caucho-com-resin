@@ -305,7 +305,7 @@ public class SessionModule extends AbstractQuercusModule
       Value value = session.get(nameV);
 
       if (value.isset())
-	var.set(value);
+        var.set(value);
 
       session.put(nameV, var);
     } else if (nameV.isArray()) {
@@ -526,8 +526,8 @@ public class SessionModule extends AbstractQuercusModule
       = env.createString(cookieName + '=' + sessionId);
     
     env.addConstant("SID", 
-		            cookieValue,
-		            false);
+                            cookieValue,
+                            false);
 
     Cookie cookie = new Cookie(cookieName, sessionId);
     // #2649

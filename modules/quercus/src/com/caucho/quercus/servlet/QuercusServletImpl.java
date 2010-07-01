@@ -214,7 +214,7 @@ public class QuercusServletImpl extends HttpServlet
       }
       catch (QuercusValueException e) {
         log.log(Level.FINE, e.toString(), e);
-	
+        
         ws.println(e.toString());
 
         //  return;

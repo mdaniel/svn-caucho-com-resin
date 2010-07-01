@@ -330,16 +330,16 @@ public class MailModule extends AbstractQuercusModule {
 
       for (;
            i < len && (! Character.isWhitespace(ch = headers.charAt(i))
-		       && ch != ':');
+                       && ch != ':');
            i++) {
         buffer.append((char) ch);
       }
 
       for (;
            i < len && ((ch = headers.charAt(i)) == ' '
-		       || ch == '\t'
-		       || ch == '\f'
-		       || ch == ':');
+                       || ch == '\t'
+                       || ch == '\f'
+                       || ch == ':');
            i++) {
       }
 

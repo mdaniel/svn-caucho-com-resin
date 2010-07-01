@@ -161,7 +161,7 @@ public class QuercusClass extends NullValue {
     else {
       classDefList = new ClassDef[] { classDef };
     }
-	  
+
     _classDefList = classDefList;
 
     for (int i = 0; i < classDefList.length; i++) {

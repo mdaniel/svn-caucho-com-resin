@@ -167,16 +167,16 @@ public abstract class JdbcConnectionResource
    * @param dbname database name
    */
   final protected boolean connectInternal(Env env,
-					  String host,
-					  String userName,
-					  String password,
-					  String dbname,
-					  int port,
-					  String socket,
-					  int flags,
-					  String driver,
-					  String url,
-					  boolean isNewLink)
+                                          String host,
+                                          String userName,
+                                          String password,
+                                          String dbname,
+                                          int port,
+                                          String socket,
+                                          int flags,
+                                          String driver,
+                                          String url,
+                                          boolean isNewLink)
   {
     if (_conn != null)
       throw new IllegalStateException(getClass().getSimpleName() + " attempt to open multiple connections");
@@ -196,8 +196,8 @@ public abstract class JdbcConnectionResource
     _catalog = dbname;
 
     _conn = connectImpl(env, host, userName, password,
-			dbname, port, socket, flags, driver, url,
-			isNewLink);
+                        dbname, port, socket, flags, driver, url,
+                        isNewLink);
 
     if (_conn != null) {
       try {
@@ -523,8 +523,8 @@ public abstract class JdbcConnectionResource
       return 0;
 
     return (Integer.parseInt(result[0]) * 10000
-	    + Integer.parseInt(result[1]) * 100
-	    + Integer.parseInt(result[2]));
+            + Integer.parseInt(result[1]) * 100
+            + Integer.parseInt(result[2]));
   }
 
   public void closeStatement(Statement stmt)
@@ -679,7 +679,7 @@ public abstract class JdbcConnectionResource
         }
         else {
           // _warnings = stmt.getWarnings();
-	      _freeStmt = stmt;
+              _freeStmt = stmt;
         }
       }
     } catch (DataTruncation truncationError) {
@@ -760,26 +760,26 @@ public abstract class JdbcConnectionResource
       case 'c': case 'C': {
         if (tok.matchesToken("CREATE")) {
           // don't pool connections that create tables, because of mysql
-	  // temporary tables
+          // temporary tables
           connEntry.markForPoolRemoval();
         }
-	/*
+        /*
         else if (tok.matchesToken("COMMIT")) {
           commit();
           setAutoCommit(true);
-	  return true;
+          return true;
         }
-	*/
+        */
         break;
       }
 
-	// reason for comment out?  no real perf gain?
-	/*
+        // reason for comment out?  no real perf gain?
+        /*
       case 'b': case 'B': {
         if (tok.matchesToken("BEGIN")) {
           // Test for mediawiki performance
           setAutoCommit(false);
-	  return true;
+          return true;
         }
         break;
       }
@@ -788,11 +788,11 @@ public abstract class JdbcConnectionResource
         if (tok.matchesToken("ROLLBACK")) {
           rollback();
           setAutoCommit(true);
-	  return true;
+          return true;
         }
         break;
       }
-	*/
+        */
     }
 
     return false;
@@ -939,7 +939,7 @@ public abstract class JdbcConnectionResource
         conn.phpClose();
 
       connectInternal(_env, _host, _userName, _password, name,
-		      _port, _socket, _flags, _driver, _url, false);
+                      _port, _socket, _flags, _driver, _url, false);
     }
     else {
       _conn.setCatalog(name);
@@ -1203,8 +1203,8 @@ public abstract class JdbcConnectionResource
       // Extract database name if back quoted : "DROP DATABASE `DBNAME`"
 
       if (tok.length() >= 2
-	  && tok.charAt(0) == '`'
-	  && tok.charAt(tok.length() - 1) == '`') {
+          && tok.charAt(0) == '`'
+          && tok.charAt(tok.length() - 1) == '`') {
         tok = tok.substring(1, tok.length() - 1);
       }
 

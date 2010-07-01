@@ -53,9 +53,9 @@ public class QuercusRequestAdapter
       uri = (String) request.getAttribute(FWD_REQUEST_URI);
 
       if (uri != null)
-	return uri;
+        return uri;
       else
-	return request.getRequestURI();
+        return request.getRequestURI();
     }
   }
   
@@ -113,9 +113,9 @@ public class QuercusRequestAdapter
       uri = (String) request.getAttribute(FWD_REQUEST_URI);
 
       if (uri != null)
-	return (String) request.getAttribute(FWD_QUERY_STRING);
+        return (String) request.getAttribute(FWD_QUERY_STRING);
       else
-	return request.getQueryString();
+        return request.getQueryString();
       */
       return request.getQueryString();
     }

@@ -82,8 +82,8 @@ public class ApcModule extends AbstractQuercusModule
    * Returns cache information.
    */
   public Value apc_cache_info(Env env,
-			      @Optional String type,
-			      @Optional boolean limited)
+                              @Optional String type,
+                              @Optional boolean limited)
   {
     ArrayValue value = new ArrayValueImpl();
 
@@ -110,31 +110,31 @@ public class ApcModule extends AbstractQuercusModule
       ArrayList<Entry> values = new ArrayList<Entry>();
 
       synchronized (_cache) {
-	Iterator<LruCache.Entry<String,Entry>> iter = _cache.iterator();
+        Iterator<LruCache.Entry<String,Entry>> iter = _cache.iterator();
 
-	while (iter.hasNext()) {
-	  LruCache.Entry<String,Entry> lruEntry = iter.next();
-	  
-	  keys.add(lruEntry.getKey());
-	  values.add(lruEntry.getValue());
-	}
+        while (iter.hasNext()) {
+          LruCache.Entry<String,Entry> lruEntry = iter.next();
+          
+          keys.add(lruEntry.getKey());
+          values.add(lruEntry.getValue());
+        }
       }
 
       for (int i = 0; i < keys.size(); i++) {
-	String key = keys.get(i);
-	Entry entryValue = values.get(i);
+        String key = keys.get(i);
+        Entry entryValue = values.get(i);
 
-	if (entryValue.isValid(env)) {
-	  ArrayValueImpl array = new ArrayValueImpl();
-	  cacheList.put(array);
+        if (entryValue.isValid(env)) {
+          ArrayValueImpl array = new ArrayValueImpl();
+          cacheList.put(array);
 
-	  array.put(env.createString("info"), env.createString(key));
-	  array.put(env.createString("ttl"),
-		    LongValue.create(entryValue.getTTL(env)));
-	  array.put(env.createString("type"), env.createString("user"));
-	  array.put(env.createString("num_hits"),
-		    LongValue.create(entryValue.getHitCount()));
-	}
+          array.put(env.createString("info"), env.createString(key));
+          array.put(env.createString("ttl"),
+                    LongValue.create(entryValue.getTTL(env)));
+          array.put(env.createString("type"), env.createString("user"));
+          array.put(env.createString("num_hits"),
+                    LongValue.create(entryValue.getHitCount()));
+        }
       }
     }
 
@@ -372,7 +372,7 @@ public class ApcModule extends AbstractQuercusModule
       if (env.getCurrentTime() <= _expire) {
         _accessTime = env.getCurrentTime();
         _hitCount++;
-	
+        
         return super.getValue(env);
       }
       else {

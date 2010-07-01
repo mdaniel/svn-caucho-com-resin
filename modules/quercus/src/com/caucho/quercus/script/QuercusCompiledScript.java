@@ -69,20 +69,20 @@ public class QuercusCompiledScript extends CompiledScript {
       WriteStream out;
 
       if (writer != null) {
-	ReaderWriterStream s = new ReaderWriterStream(null, writer);
-	WriteStream os = new WriteStream(s);
-	
-	os.setNewlineString("\n");
-    
-	try {
-	  os.setEncoding("utf-8");
-	} catch (Exception e) {
-	}
+        ReaderWriterStream s = new ReaderWriterStream(null, writer);
+        WriteStream os = new WriteStream(s);
 
-	out = os;
+        os.setNewlineString("\n");
+    
+        try {
+          os.setEncoding("utf-8");
+        } catch (Exception e) {
+        }
+
+        out = os;
       }
       else
-	out = new NullWriteStream();
+        out = new NullWriteStream();
 
       QuercusPage page = new InterpretedPage(_program);
 

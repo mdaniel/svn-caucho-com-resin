@@ -73,9 +73,9 @@ public class GoogleQuercus extends QuercusContext
     
     synchronized (this) {
       if (_localModuleContext == null) {
-	_localModuleContext = createModuleContext(null, currentLoader);
+        _localModuleContext = createModuleContext(null, currentLoader);
 
-	_localModuleContext.init();
+        _localModuleContext.init();
       }
     }
 
@@ -85,7 +85,7 @@ public class GoogleQuercus extends QuercusContext
 
   @Override
   protected ModuleContext createModuleContext(ModuleContext parent,
-					      ClassLoader loader)
+                                              ClassLoader loader)
   {
     return new ModuleContext(parent, loader);
   }

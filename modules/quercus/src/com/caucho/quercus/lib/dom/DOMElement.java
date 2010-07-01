@@ -37,9 +37,9 @@ import org.w3c.dom.Element;
 public class DOMElement extends DOMNode<Element>
 {
   public static DOMElement __construct(Env env,
-				       String name,
-				       @Optional String textContent,
-				       @Optional String namespace)
+                                       String name,
+                                       @Optional String textContent,
+                                       @Optional String namespace)
   {
     DOMElement element;
 

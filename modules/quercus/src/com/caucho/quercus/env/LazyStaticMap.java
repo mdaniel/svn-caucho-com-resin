@@ -69,11 +69,11 @@ public class LazyStaticMap extends AbstractMap<StringValue,Var> {
       if (id >= 0 && _values[id] != null) {
         var = new Var();
         // var.setGlobal();
-	
+
         _extMap.put(key, var);
       
         Env env = Env.getCurrent();
-	
+
         Value value = _values[id].copy(env);
 
         var.set(value);

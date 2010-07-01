@@ -528,7 +528,7 @@ abstract public class AbstractFunction extends Callback {
    */
   @Override
   public Value callRef(Env env,
-		       Value a1, Value a2, Value a3, Value a4, Value a5)
+                       Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     return callRef(env, new Value[] { a1, a2, a3, a4, a5 });
   }
@@ -657,7 +657,7 @@ abstract public class AbstractFunction extends Callback {
   public Value callMethod(Env env,
                           QuercusClass qClass,
                           Value qThis,
-			  Value a1, Value a2, Value a3)
+                          Value a1, Value a2, Value a3)
   {
     return callMethod(env, qClass, qThis, 
                       new Value[] { a1, a2, a3 });
@@ -681,7 +681,7 @@ abstract public class AbstractFunction extends Callback {
   public Value callMethod(Env env,
                           QuercusClass qClass,
                           Value qThis,
-			  Value a1, Value a2, Value a3, Value a4)
+                          Value a1, Value a2, Value a3, Value a4)
   {
     return callMethod(env, qClass, qThis, 
                       new Value[] { a1, a2, a3, a4 });
@@ -758,9 +758,9 @@ abstract public class AbstractFunction extends Callback {
 
     for (int i = 0; i < exprs.length; i++) {
       if (i < args.length && args[i].isReference())
-	argValues[i] = exprs[i].evalArg(env, true);
+        argValues[i] = exprs[i].evalArg(env, true);
       else
-	argValues[i] = exprs[i].eval(env);
+        argValues[i] = exprs[i].eval(env);
     }
 
     return callMethodRef(env, qClass, qThis, argValues);

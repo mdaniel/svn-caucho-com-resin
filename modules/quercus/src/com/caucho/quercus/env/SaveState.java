@@ -197,7 +197,7 @@ public class SaveState {
 
     for (Map.Entry<StringValue,EnvVar> entry : globalMap.entrySet()) {
       if (env.isSpecialVar(entry.getKey()))
-	continue;
+        continue;
 
       EnvVar envVar = entry.getValue();
 

@@ -357,18 +357,18 @@ public class LargeStringBuilderValue
       int startOffset = start % SIZE;
 
       if (startChunk == endChunk) {
-	stringValue.append(_bufferList[startChunk],
-			   startOffset,
-			   (end - start));
-	  
-	return stringValue;
+        stringValue.append(_bufferList[startChunk],
+                           startOffset,
+                           (end - start));
+
+        return stringValue;
       }
       else {
-	int len = SIZE - startOffset;
+        int len = SIZE - startOffset;
 
-	stringValue.append(_bufferList[startChunk], startOffset, len);
+        stringValue.append(_bufferList[startChunk], startOffset, len);
 
-	start += len;
+        start += len;
       }
     }
 
@@ -391,7 +391,7 @@ public class LargeStringBuilderValue
       int ch = bufferList[i / SIZE][i % SIZE] & 0xff;
 
       if ('A' <= ch && ch <= 'Z')
-	ch = (ch + 'a' - 'A');
+        ch = (ch + 'a' - 'A');
 
       string.append((char) ch);
     }
@@ -415,7 +415,7 @@ public class LargeStringBuilderValue
       int ch = bufferList[i / SIZE][i % SIZE] & 0xff;
 
       if ('a' <= ch && ch <= 'z')
-	ch = (ch + 'A' - 'a');
+        ch = (ch + 'A' - 'a');
 
       string.append((char) ch);
     }
@@ -530,7 +530,7 @@ public class LargeStringBuilderValue
 
       int sublen = SIZE - chunkOffset;
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       System.arraycopy(buf, offset, _bufferList[chunk], chunkOffset, sublen);
 
@@ -631,24 +631,24 @@ public class LargeStringBuilderValue
       int offset = _length % SIZE;
 
       if (offset == 0) {
-	ensureCapacity(_length + SIZE);
+        ensureCapacity(_length + SIZE);
       }
       
       byte []buffer = _bufferList[_length / SIZE];
       int sublen = SIZE - offset;
 
       if (length < sublen)
-	sublen = (int) length;
+        sublen = (int) length;
 
       sublen = is.read(buffer, 0, sublen);
 
       if (sublen > 0) {
-	_length += sublen;
+        _length += sublen;
 
-	return sublen;
+        return sublen;
       }
       else
-	return -1;
+        return -1;
     } catch (IOException e) {
       throw new QuercusRuntimeException(e);
     }
@@ -666,7 +666,7 @@ public class LargeStringBuilderValue
       int sublen = appendRead(is, length);
 
       if (sublen < 0)
-	return readLength <= 0 ? -1 : readLength;
+        return readLength <= 0 ? -1 : readLength;
 
       length -= sublen;
       readLength += sublen;
@@ -715,8 +715,8 @@ public class LargeStringBuilderValue
       int sublen = _length - i;
 
       if (SIZE < sublen)
-	sublen = SIZE;
-	
+        sublen = SIZE;
+
       env.write(_bufferList[chunk], 0, sublen);
     }
   }
@@ -729,13 +729,13 @@ public class LargeStringBuilderValue
   {
     try {
       for (int i = 0; i < _length; i += SIZE) {
-	int chunk = i / SIZE;
-	int sublen = _length - i;
+        int chunk = i / SIZE;
+        int sublen = _length - i;
 
-	if (SIZE < sublen)
-	  sublen = SIZE;
-	
-	out.write(_bufferList[chunk], 0, sublen);
+        if (SIZE < sublen)
+          sublen = SIZE;
+
+        out.write(_bufferList[chunk], 0, sublen);
       }
     } catch (IOException e) {
       throw new QuercusRuntimeException(e);
@@ -780,7 +780,7 @@ public class LargeStringBuilderValue
 
     for (; chunk <= endChunk; chunk++) {
       if (_bufferList[chunk] == null)
-	_bufferList[chunk] = new byte[SIZE];
+        _bufferList[chunk] = new byte[SIZE];
     }
   }
 
@@ -876,10 +876,10 @@ public class LargeStringBuilderValue
         out.print("\\x" + Integer.toHexString(ch / 16) + Integer.toHexString(ch % 16));
       else {
         out.print("\\u"
-		  + Integer.toHexString((ch >> 12) & 0xf)
-		  + Integer.toHexString((ch >> 8) & 0xf)
-		  + Integer.toHexString((ch >> 4) & 0xf)
-		  + Integer.toHexString((ch) & 0xf));
+                  + Integer.toHexString((ch >> 12) & 0xf)
+                  + Integer.toHexString((ch >> 8) & 0xf)
+                  + Integer.toHexString((ch >> 4) & 0xf)
+                  + Integer.toHexString((ch) & 0xf));
       }
     }
 
@@ -897,9 +897,9 @@ public class LargeStringBuilderValue
     public int read()
     {
       if (_index < _length)
-	return charAt(_index++);
+        return charAt(_index++);
       else
-	return -1;
+        return -1;
     }
 
     /**
@@ -911,13 +911,13 @@ public class LargeStringBuilderValue
       int sublen = _length - _index;
 
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       if (sublen <= 0)
-	return -1;
+        return -1;
 
       for (int i = 0; i < sublen; i++)
-	buffer[offset + i] = (byte) charAt(_index + i);
+        buffer[offset + i] = (byte) charAt(_index + i);
 
       _index += sublen;
 

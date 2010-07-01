@@ -146,7 +146,7 @@ public class FunctionModule extends AbstractQuercusModule {
     ArrayValue result = new ArrayValueImpl();
     if (args != null) {
       for (int i = 0; i < args.length; i++)
-	result.put(args[i]);
+        result.put(args[i]);
     }
 
     return result;

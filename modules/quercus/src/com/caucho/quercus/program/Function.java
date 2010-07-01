@@ -395,7 +395,7 @@ public class Function extends AbstractFunction {
                             arg.getName().toString(),
                             getName());
         }
-	  
+
         // quercus/0d04
         map.put(arg.getName(), new EnvVarImpl(var));
       }

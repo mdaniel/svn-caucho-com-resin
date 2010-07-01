@@ -69,7 +69,7 @@ public class Mcrypt {
 
     if (transformation == null)
       throw new QuercusRuntimeException(L.l("'{0}' is an unknown algorithm",
-					    algorithm));
+                                            algorithm));
 
     _cipher = Cipher.getInstance(transformation);
   }
@@ -366,7 +366,7 @@ public class Mcrypt {
       return "Blowfish/" + mode + "/NoPadding";
     }
     else if (McryptModule.MCRYPT_ARCFOUR.equals(algorithm)
-	     || McryptModule.MCRYPT_RC4.equals(algorithm))
+             || McryptModule.MCRYPT_RC4.equals(algorithm))
       return "ARCFOUR/" + mode + "/NoPadding";
     else
       return algorithm + '/' + mode + "/NoPadding";

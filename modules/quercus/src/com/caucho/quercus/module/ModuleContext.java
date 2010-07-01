@@ -354,7 +354,7 @@ public class ModuleContext
       ClassDef def = _javaClassWrappers.get(name);
 
       if (def != null)
-	return def;
+        return def;
 
       return _lowerJavaClassWrappers.get(name.toLowerCase());
     }
@@ -372,8 +372,8 @@ public class ModuleContext
   }
   
   public Marshal createMarshal(Class type,
-			       boolean isNotNull,
-			       boolean isNullAsFalse)
+                               boolean isNotNull,
+                               boolean isNullAsFalse)
   {
     return getMarshalFactory().create(type, isNotNull, isNullAsFalse);
   }
@@ -388,7 +388,7 @@ public class ModuleContext
 
     synchronized (_staticFunctions) {
       for (String name : _staticFunctions.keySet()) {
-	internal.put(name);
+        internal.put(name);
       }
     }
 
@@ -414,7 +414,7 @@ public class ModuleContext
       ClassDef def = _staticClasses.get(name);
 
       if (def == null)
-	def = _lowerStaticClasses.get(name.toLowerCase());
+        def = _lowerStaticClasses.get(name.toLowerCase());
 
       return def;
     }
@@ -497,7 +497,7 @@ public class ModuleContext
    * Creates a static function.
    */
   public StaticFunction createStaticFunction(QuercusModule module,
-					     Method method)
+                                             Method method)
   {
     return new StaticFunction(this, module, method);
   }
@@ -531,11 +531,11 @@ public class ModuleContext
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
 
-	if (! hasServiceModule(url)) {
-	  addServiceModule(url);
+        if (! hasServiceModule(url)) {
+          addServiceModule(url);
 
-	  urlSet.add(url);
-	}
+          urlSet.add(url);
+        }
       }
 
       for (URL url : urlSet) {
@@ -543,7 +543,7 @@ public class ModuleContext
         ReadStream rs = null;
         try {
           is = url.openStream();
-	  
+
           rs = new ReadStream(new VfsStream(is, null));
 
           parseServicesModule(rs);
@@ -652,31 +652,31 @@ public class ModuleContext
       _modules.put(cl.getName(), info);
 
       if (info.getModule() instanceof ModuleStartupListener)
-	_moduleStartupListeners.add((ModuleStartupListener)info.getModule());
+        _moduleStartupListeners.add((ModuleStartupListener)info.getModule());
 
       for (String ext : info.getLoadedExtensions())
-	_extensionSet.add(ext);
+        _extensionSet.add(ext);
 
       Map<String, Value> map = info.getConstMap();
 
       if (map != null)
-	_constMap.putAll(map);
+        _constMap.putAll(map);
 
       _iniDefinitions.addAll(info.getIniDefinitions());
 
       synchronized (_staticFunctionMap) {
-	for (Map.Entry<String, AbstractFunction> entry
-	       : info.getFunctions().entrySet()) {
-	  String funName = entry.getKey();
-	  AbstractFunction fun = entry.getValue();
+        for (Map.Entry<String, AbstractFunction> entry
+               : info.getFunctions().entrySet()) {
+          String funName = entry.getKey();
+          AbstractFunction fun = entry.getValue();
       
-	  _staticFunctionMap.put(funName, fun);
-	  
-	  // _lowerFunMap.put(funName.toLowerCase(), fun);
+          _staticFunctionMap.put(funName, fun);
 
-	  int id = getFunctionId(funName);
-	  _functionMap[id] = fun;
-	}
+          // _lowerFunMap.put(funName.toLowerCase(), fun);
+
+          int id = getFunctionId(funName);
+          _functionMap[id] = fun;
+        }
       }
       */
     }
@@ -713,9 +713,9 @@ public class ModuleContext
         ReadStream rs = null;
         try {
           is = url.openStream();
-	  
+
           rs = new ReadStream(new VfsStream(is, null));
-	  
+
           parseClassServicesModule(rs);
         } catch (Throwable e) {
           log.log(Level.FINE, e.toString(), e);
@@ -846,8 +846,8 @@ public class ModuleContext
    * @param extension the extension provided by the class, or null
    */
   public void introspectJavaImplClass(String name,
-				      Class type,
-				      String extension)
+                                      Class type,
+                                      String extension)
     throws IllegalAccessException, InstantiationException, ConfigException
   {
     if (log.isLoggable(Level.FINEST)) {
@@ -879,13 +879,13 @@ public class ModuleContext
     _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
 
     InterpretedClassDef exn = new InterpretedClassDef("Exception",
-						      null,
-						      new String[0]);
+                                                      null,
+                                                      new String[0]);
 
     try {
       exn.setConstructor(new StaticFunction(_moduleContext,
-					    null,
-					    Quercus.class.getMethod("exnConstructor", new Class[] { Env.class, Value.class, String.class })));
+                                            null,
+                                            Quercus.class.getMethod("exnConstructor", new Class[] { Env.class, Value.class, String.class })));
     } catch (Exception e) {
       throw new QuercusException(e);
     }
@@ -902,12 +902,12 @@ public class ModuleContext
     if (obj == null)
       return NullValue.NULL;
     else if (Byte.class.equals(obj.getClass())
-	     || Short.class.equals(obj.getClass())
-	     || Integer.class.equals(obj.getClass())
-	     || Long.class.equals(obj.getClass())) {
+             || Short.class.equals(obj.getClass())
+             || Integer.class.equals(obj.getClass())
+             || Long.class.equals(obj.getClass())) {
       return LongValue.create(((Number) obj).longValue());
     } else if (Float.class.equals(obj.getClass())
-	       || Double.class.equals(obj.getClass())) {
+               || Double.class.equals(obj.getClass())) {
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
       // XXX: i18n

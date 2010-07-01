@@ -282,7 +282,7 @@ public class ErrorModule extends AbstractQuercusModule {
       String functionName = callExpr.getName();
       if ("debug_backtrace".equals(functionName))
         return;
-	
+        
       ArrayValue call = new ArrayValueImpl();
       result.put(call);
       
@@ -396,18 +396,18 @@ public class ErrorModule extends AbstractQuercusModule {
       char ch = className.charAt(i);
 
       if (ch == '.' && className.charAt(i + 1) == '_') {
-	sb.append('/');
-	i++;
+        sb.append('/');
+        i++;
       }
       else if (ch != '_') {
-	sb.append(ch);
+        sb.append(ch);
       }
       else if (className.charAt(i + 1) == '_') {
-	sb.append('.');
-	i++;
+        sb.append('.');
+        i++;
       }
       else {
-	//System.out.println("UNKNOWN:" + className.charAt(i + 1) + " " + className);
+        //System.out.println("UNKNOWN:" + className.charAt(i + 1) + " " + className);
       }
     }
 
@@ -423,9 +423,9 @@ public class ErrorModule extends AbstractQuercusModule {
 
       p = className.lastIndexOf('_');
       if (p > 0)
-	return className.substring(0, p);
+        return className.substring(0, p);
       else
-	return className;
+        return className;
     }
     else
       return className;
@@ -541,8 +541,8 @@ public class ErrorModule extends AbstractQuercusModule {
    * @param code errorMask error level
    */
   public static boolean set_error_handler(Env env,
-					  Callable fun,
-					  @Optional("E_ALL") int errorMask)
+                                          Callable fun,
+                                          @Optional("E_ALL") int errorMask)
   {
     env.setErrorHandler(errorMask, fun);
 

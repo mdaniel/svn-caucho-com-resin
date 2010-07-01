@@ -108,48 +108,48 @@ public class DOMXPath
       throw new QuercusModuleException(e);
     }
   }
-	
+
   /*
   private NodeList query(Env env, String pattern, Node node)
   {
     try {
       if (_context == null) {
-	Quercus quercus = env.getQuercus();
-	
-	ExpressionCache cache
-	  = (ExpressionCache) quercus.getSpecial("caucho.domxpath.cache");
+        Quercus quercus = env.getQuercus();
 
-	if (cache == null) {
-	  cache = new ExpressionCache();
-	  quercus.setSpecial("caucho.domxpath.cache", cache);
-	}
+        ExpressionCache cache
+          = (ExpressionCache) quercus.getSpecial("caucho.domxpath.cache");
 
-	XPathExpression expr = cache.compile(pattern);
-	
-	NodeList nodeList
-	  = (NodeList) expr.evaluate(node, XPathConstants.NODESET);
+        if (cache == null) {
+          cache = new ExpressionCache();
+          quercus.setSpecial("caucho.domxpath.cache", cache);
+        }
 
-	cache.free(pattern, expr);
+        XPathExpression expr = cache.compile(pattern);
 
-	return nodeList;
+        NodeList nodeList
+          = (NodeList) expr.evaluate(node, XPathConstants.NODESET);
+
+        cache.free(pattern, expr);
+
+        return nodeList;
       }
       else {
-	XPath xpath = (XPath) env.getSpecialValue("caucho.domxpath.xpath");
-	
-	if (xpath == null) {
-	  XPathFactory factory = XPathFactory.newInstance();
-	  xpath = factory.newXPath();
-	  env.setSpecialValue("caucho.domxpath.xpath", xpath);
-	}
+        XPath xpath = (XPath) env.getSpecialValue("caucho.domxpath.xpath");
 
-	xpath.setNamespaceContext(_context);
+        if (xpath == null) {
+          XPathFactory factory = XPathFactory.newInstance();
+          xpath = factory.newXPath();
+          env.setSpecialValue("caucho.domxpath.xpath", xpath);
+        }
 
-	XPathExpression expr = xpath.compile(pattern);
-	  
-	NodeList nodeList
-	  = (NodeList) expr.evaluate(node, XPathConstants.NODESET);
+        xpath.setNamespaceContext(_context);
 
-	return nodeList;
+        XPathExpression expr = xpath.compile(pattern);
+
+        NodeList nodeList
+          = (NodeList) expr.evaluate(node, XPathConstants.NODESET);
+
+        return nodeList;
       }
     }
     catch (XPathExpressionException e) {
@@ -232,10 +232,10 @@ public class DOMXPath
       XPathExpression expr = null;
 
       if (entry != null)
-	expr = entry.allocate();
+        expr = entry.allocate();
 
       if (expr == null) {
-	XPath xpath = _factory.newXPath();
+        XPath xpath = _factory.newXPath();
         expr = xpath.compile(pattern);
       }
 
@@ -247,8 +247,8 @@ public class DOMXPath
       ExpressionEntry entry = _xpathCache.get(pattern);
 
       if (entry == null) {
-	entry = new ExpressionEntry();
-	_xpathCache.put(pattern, entry);
+        entry = new ExpressionEntry();
+        _xpathCache.put(pattern, entry);
       }
 
       entry.free(expr);
@@ -261,17 +261,17 @@ public class DOMXPath
     XPathExpression allocate()
     {
       synchronized (this) {
-	XPathExpression expr = _expr;
-	_expr = null;
+        XPathExpression expr = _expr;
+        _expr = null;
 
-	return expr;
+        return expr;
       }
     }
 
     void free(XPathExpression expr)
     {
       synchronized (this) {
-	_expr = expr;
+        _expr = expr;
       }
     }
   }

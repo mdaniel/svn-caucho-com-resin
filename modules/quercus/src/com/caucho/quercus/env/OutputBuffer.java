@@ -130,9 +130,9 @@ public class OutputBuffer {
       StringValue bb = _env.createBinaryBuilder(_tempStream.getLength());
 
       for (TempBuffer ptr = _tempStream.getHead();
-	   ptr != null;
-	   ptr = ptr.getNext()) {
-	bb.append(ptr.getBuffer(), 0, ptr.getLength());
+           ptr != null;
+           ptr = ptr.getNext()) {
+        bb.append(ptr.getBuffer(), 0, ptr.getLength());
       }
 
       return bb;
@@ -257,7 +257,7 @@ public class OutputBuffer {
 
     try {
       if (out != null)
-	out.close();
+        out.close();
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     }
