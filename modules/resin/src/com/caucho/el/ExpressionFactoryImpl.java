@@ -30,6 +30,7 @@
 package com.caucho.el;
 
 import com.caucho.jsp.el.JspELParser;
+import com.caucho.util.L10N;
 
 import javax.el.ExpressionFactory;
 import javax.el.ELException;
@@ -45,6 +46,8 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
   private static final HashMap<Class<?>, CoerceType> _coerceMap
     = new HashMap<Class<?>, CoerceType>();
 
+  protected static final L10N L = new L10N(ExpressionFactoryImpl.class);
+
   public ExpressionFactoryImpl() {
   }
 
@@ -56,40 +59,7 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
   public Object coerceToType(Object obj, Class<?> targetType)
     throws ELException
   {
-    CoerceType type = _coerceMap.get(targetType);
-
-    if (type == null)
-      return obj;
-
-    switch (type) {
-    case BOOLEAN:
-      return Expr.toBoolean(obj, null) ? Boolean.TRUE : Boolean.FALSE;
-    case CHARACTER:
-      return Expr.toCharacter(obj, null);
-    case BYTE:
-      return new Byte((byte) Expr.toLong(obj, null));
-    case SHORT:
-      return new Short((short) Expr.toLong(obj, null));
-    case INTEGER:
-      return new Integer((int) Expr.toLong(obj, null));
-    case LONG:
-      return new Long(Expr.toLong(obj, null));
-    case FLOAT:
-      return new Float((float) Expr.toDouble(obj, null));
-    case DOUBLE:
-      return new Double(Expr.toDouble(obj, null));
-    case STRING:
-      if (obj == null)
-	return "";
-      else
-	return obj.toString();
-    case BIG_DECIMAL:
-      return Expr.toBigDecimal(obj, null);
-    case BIG_INTEGER:
-      return Expr.toBigInteger(obj, null);
-    }
-
-    return null;
+    return Expr.coerceToType(obj, targetType);
   }
 
   @Override
@@ -116,6 +86,9 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
                           Class<?> expectedType)
   throws ELException
   {
+    if (expectedType == null)
+      throw new NullPointerException(L.l("expectedType can't be null"));
+    
     JspELParser parser = new JspELParser(context, expression);
 
     Expr expr = parser.parse();
@@ -129,10 +102,13 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
                           Class<?> expectedType)
   throws ELException
   {
-    throw new UnsupportedOperationException();
+    if (expectedType == null)
+      throw new NullPointerException(L.l("expectedType can't be null"));
+
+    return new ObjectLiteralValueExpression(instance, expectedType);
   }
 
-   public ValueExpression createValueExpression(Expr expr,
+  public ValueExpression createValueExpression(Expr expr,
                                                String expression,
                                                Class<?> expectedType)
   {
