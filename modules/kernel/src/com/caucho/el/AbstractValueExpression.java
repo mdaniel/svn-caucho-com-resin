@@ -89,6 +89,9 @@ abstract public class AbstractValueExpression extends ValueExpression
     throws PropertyNotFoundException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+    
     Object value = getValue(context);
 
     if (value == null)
@@ -102,6 +105,9 @@ abstract public class AbstractValueExpression extends ValueExpression
     throws PropertyNotFoundException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     return _expr.getValue(context);
   }
 
@@ -110,6 +116,9 @@ abstract public class AbstractValueExpression extends ValueExpression
     throws PropertyNotFoundException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     return _expr.isReadOnly(context);
   }
 
@@ -118,6 +127,9 @@ abstract public class AbstractValueExpression extends ValueExpression
            PropertyNotWritableException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     _expr.setValue(context, value);
   }
 

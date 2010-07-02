@@ -83,6 +83,9 @@ public class StringValueExpression extends AbstractValueExpression
     throws PropertyNotFoundException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     return String.class;
   }
 
@@ -91,6 +94,9 @@ public class StringValueExpression extends AbstractValueExpression
     throws PropertyNotFoundException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     return _expr.evalString(context);
   }
 }

@@ -103,6 +103,9 @@ public class ObjectValueExpression extends ValueExpression
     throws PropertyNotFoundException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     return _expr.getType(context);
   }
 
@@ -111,6 +114,9 @@ public class ObjectValueExpression extends ValueExpression
     throws PropertyNotFoundException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     Object rawValue = _expr.getValue(context);
 
     Object value = Expr.coerceToType(rawValue, _expectedType);
@@ -123,6 +129,9 @@ public class ObjectValueExpression extends ValueExpression
     throws PropertyNotFoundException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     return _expr.isReadOnly(context);
   }
 
@@ -131,6 +140,9 @@ public class ObjectValueExpression extends ValueExpression
            PropertyNotWritableException,
            ELException
   {
+    if (context == null)
+      throw new NullPointerException("context can't be null");
+
     _expr.setValue(context, value);
   }
 
