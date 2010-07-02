@@ -207,9 +207,15 @@ public class ModuleContext
       if (def == null) {
         if (log.isLoggable(Level.FINEST)) {
           if (extension == null)
-            log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
+            log.finest(L.l("PHP loading class {0} with type {1}",
+                           name,
+                           type.getName()));
           else
-            log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+            log.finest(L.l(
+              "PHP loading class {0} with type {1} providing extension {2}",
+              name,
+              type.getName(),
+              extension));
       }
 
       if (javaClassDefClass != null) {
@@ -292,7 +298,10 @@ public class ModuleContext
             type = Class.forName(className, false, _loader);
         }
         catch (ClassNotFoundException e) {
-          throw new ClassNotFoundException(L.l("'{0}' is not a known Java class: {1}", className, e.toString()), e);
+          throw new ClassNotFoundException(
+            L.l("'{0}' is not a known Java class: {1}",
+                className,
+                e.toString()), e);
         }
 
         def = JavaClassDef.create(this, className, type);
@@ -591,7 +600,8 @@ public class ModuleContext
             cl = Class.forName(className, false, loader);
           }
           catch (ClassNotFoundException e) {
-            throw new ClassNotFoundException(L.l("'{0}' not valid {1}", className, e.toString()));
+            throw new ClassNotFoundException(L.l(
+              "'{0}' not valid {1}", className, e.toString()));
           }
 
           introspectPhpModuleClass(cl);
@@ -771,26 +781,43 @@ public class ModuleContext
           if ("as".equals(args[i])) {
             i++;
             if (i >= args.length)
-              throw new IOException(L.l("expecting Quercus class name after '{0}' in definition for class {1}", "as", className));
+              throw new IOException(
+                L.l(
+                  "expecting Quercus class name after '{0}' "
+                  + "in definition for class {1}",
+                  "as",
+                  className));
 
             phpClassName = args[i];
           }
           else if ("provides".equals(args[i])) {
             i++;
             if (i >= args.length)
-              throw new IOException(L.l("expecting name of extension after '{0}' in definition for class {1}", "extension", className));
+              throw new IOException(
+                L.l(
+                  "expecting name of extension after '{0}' "
+                  + "in definition for class {1}",
+                  "extension",
+                  className));
 
             extension = args[i];
           }
           else if ("definedBy".equals(args[i])) {
             i++;
             if (i >= args.length)
-              throw new IOException(L.l("expecting name of class implementing JavaClassDef after '{0}' in definition for class {1}", "definedBy", className));
+              throw new IOException(L.l(
+                "expecting name of class implementing JavaClassDef after '{0}' "
+                + "in definition for class {1}",
+                "definedBy",
+                className));
 
             definedBy = args[i];
           }
           else {
-            throw new IOException(L.l("unknown token '{0}' in definition for class {1} ", args[i], className));
+            throw new IOException(L.l(
+              "unknown token '{0}' in definition for class {1} ",
+              args[i],
+              className));
           }
         }
 
@@ -852,9 +879,15 @@ public class ModuleContext
   {
     if (log.isLoggable(Level.FINEST)) {
       if (extension == null)
-        log.finest(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
+        log.finest(L.l("Quercus loading class {0} with type {1}",
+                       name,
+                       type.getName()));
       else
-        log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+        log.finest(
+          L.l("Quercus loading class {0} with type {1} providing extension {2}",
+              name,
+              type.getName(),
+              extension));
     }
 
     try {
@@ -885,11 +918,16 @@ public class ModuleContext
     try {
       exn.setConstructor(new StaticFunction(_moduleContext,
                                             null,
-                                            Quercus.class.getMethod("exnConstructor", new Class[] { Env.class, Value.class, String.class })));
-    } catch (Exception e) {
+                                            Quercus.class.getMethod(
+                                              "exnConstructor",
+                                              new Class[]{ Env.class,
+                                                           Value.class,
+                                                           String.class })));
+    }
+    catch (Exception e) {
       throw new QuercusException(e);
     }
-    
+
     // QuercusClass exnCl = new QuercusClass(exn, null);
 
     _staticClasses.put(exn.getName(), exn);

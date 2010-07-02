@@ -50,8 +50,9 @@ import java.util.logging.Logger;
 public class LazySymbolMap extends AbstractMap<StringValue,EnvVar> {
   private final IntMap _intMap;
   private final Value []_values;
-  
-  private HashMap<StringValue,EnvVar> _extMap = new HashMap<StringValue,EnvVar>();
+
+  private HashMap<StringValue, EnvVar> _extMap
+    = new HashMap<StringValue, EnvVar>();
 
   public LazySymbolMap(IntMap intMap, Value []values)
   {

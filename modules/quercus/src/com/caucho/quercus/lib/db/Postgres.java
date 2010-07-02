@@ -122,16 +122,21 @@ public class Postgres extends JdbcConnectionResource {
 
       return jConn;
     } catch (SQLException e) {
-      env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("postgres.connectErrno", LongValue.create(e.getErrorCode()));
-      env.setSpecialValue("postgres.connectError", env.createString(e.getMessage()));
+      env.warning(
+        "A link to the server could not be established. " + e.toString());
+      env.setSpecialValue(
+        "postgres.connectErrno", LongValue.create(e.getErrorCode()));
+      env.setSpecialValue(
+        "postgres.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return null;
     } catch (Exception e) {
-      env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("postgres.connectError", env.createString(e.getMessage()));
+      env.warning(
+        "A link to the server could not be established. " + e.toString());
+      env.setSpecialValue(
+        "postgres.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return null;
@@ -143,7 +148,8 @@ public class Postgres extends JdbcConnectionResource {
    */
   public PostgresStatement prepare(Env env, StringValue query)
   {
-    PostgresStatement stmt = new PostgresStatement((Postgres)validateConnection());
+    PostgresStatement stmt = new PostgresStatement(
+      (Postgres)validateConnection());
 
     stmt.prepare(env, query);
 
@@ -153,7 +159,8 @@ public class Postgres extends JdbcConnectionResource {
   /**
    * Executes a query.
    *
-   * @param sql the escaped query string (can contain escape sequences like `\n' and `\Z')
+   * @param sql the escaped query string
+   * (can contain escape sequences like `\n' and `\Z')
    *
    * @return a {@link JdbcResultResource}, or null for failure
    */
@@ -161,9 +168,9 @@ public class Postgres extends JdbcConnectionResource {
   {
     SqlParseToken tok = parseSqlToken(sql, null);
 
-    if (tok != null &&
-        tok.matchesFirstChar('S', 's') &&
-        tok.matchesToken("SET")) {
+    if (tok != null
+        && tok.matchesFirstChar('S', 's') 
+        && tok.matchesToken("SET")) {
       // Check for "SET CLIENT_ENCODING TO ..."
 
       tok = parseSqlToken(sql, tok);

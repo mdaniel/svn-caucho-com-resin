@@ -409,9 +409,11 @@ public class Function extends AbstractFunction {
       if (defaultExpr == null)
         return env.error("expected default expression");
       else if (arg.isReference())
-        map.put(arg.getName(), new EnvVarImpl(defaultExpr.evalVar(env).toVar()));
+        map.put(
+          arg.getName(), new EnvVarImpl(defaultExpr.evalVar(env).toVar()));
       else {
-        map.put(arg.getName(), new EnvVarImpl(defaultExpr.eval(env).toLocalVar()));
+        map.put(
+          arg.getName(), new EnvVarImpl(defaultExpr.eval(env).toLocalVar()));
       }
     }
 
@@ -452,7 +454,10 @@ public class Function extends AbstractFunction {
   //
 
   @Override
-  public Value callMethod(Env env, QuercusClass qClass, Value qThis, Value []args)
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis,
+                          Value[] args)
   {
     if (isStatic())
       qThis = qClass;
@@ -469,7 +474,10 @@ public class Function extends AbstractFunction {
   }
 
   @Override
-  public Value callMethodRef(Env env, QuercusClass qClass, Value qThis, Value []args)
+  public Value callMethodRef(Env env,
+                             QuercusClass qClass,
+                             Value qThis,
+                             Value[] args)
   {
     Value oldThis = env.setThis(qThis);
     QuercusClass oldClass = env.setCallingClass(qClass);

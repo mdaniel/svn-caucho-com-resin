@@ -35,7 +35,8 @@ import com.caucho.quercus.function.AbstractFunction;
  * Represents a call to a function.
  */
 public class CallbackFunction extends Callback {
- // public static final CallbackFunction INVALID_CALLBACK = new CallbackFunction(null, "Invalid Callback");
+  // public static final CallbackFunction INVALID_CALLBACK
+  // = new CallbackFunction(null, "Invalid Callback");
 
   private String _funName;
 

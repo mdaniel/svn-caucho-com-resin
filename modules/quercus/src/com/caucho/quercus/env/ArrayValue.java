@@ -419,8 +419,9 @@ abstract public class ArrayValue extends Value {
         QuercusClass cls = env.findClass(clsName);
 
         if (cls == null) {
-          env.warning(L.l("Callback: '{0}' is not a valid callback class for {1}",
-                          clsName, name));
+          env.warning(L.l(
+            "Callback: '{0}' is not a valid callback class for {1}",
+            clsName, name));
 
           return super.toCallable(env);
         }
@@ -434,8 +435,9 @@ abstract public class ArrayValue extends Value {
       QuercusClass cl = env.findClass(obj.toString());
 
       if (cl == null) {
-        env.warning(L.l("Callback: '{0}' is not a valid callback string for {1}",
-                        obj.toString(), obj));
+        env.warning(
+          L.l("Callback: '{0}' is not a valid callback string for {1}",
+              obj.toString(), obj));
 
         return super.toCallable(env);
       }
@@ -988,7 +990,8 @@ abstract public class ArrayValue extends Value {
   public void put(String key, boolean value)
   {
     // XXX: this needs an Env arg because of i18n
-    put(StringValue.create(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
+    put(StringValue.create(key),
+        value ? BooleanValue.TRUE : BooleanValue.FALSE);
   }
 
   /**
@@ -1418,15 +1421,15 @@ abstract public class ArrayValue extends Value {
     if (rValue == null)
       return false;
 
-    for (Map.Entry<Value, Value> entry: entrySet()) {
+    for (Map.Entry<Value, Value> entry : entrySet()) {
       Value entryValue = entry.getValue();
 
       Value entryKey = entry.getKey();
 
       Value rEntryValue = rValue.get(entryKey);
 
-      if ((rEntryValue instanceof ArrayValue) &&
-          ! entryValue.eq((ArrayValue) rEntryValue))
+      if ((rEntryValue instanceof ArrayValue)
+          && ! entryValue.eq((ArrayValue) rEntryValue))
         return false;
 
       if (! entryValue.eq(rEntryValue))

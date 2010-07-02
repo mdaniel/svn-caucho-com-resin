@@ -285,7 +285,8 @@ public class IniDefinition {
 
   public BooleanValue getAsBooleanValue(Env env)
   {
-    return getAsBooleanValue(env.getIniMap(false), env.getQuercus().getIniMap(false));
+    return getAsBooleanValue(env.getIniMap(false),
+                             env.getQuercus().getIniMap(false));
   }
 
   private BooleanValue getAsBooleanValue(HashMap<String, Value> overrideMap,
@@ -303,7 +304,8 @@ public class IniDefinition {
 
   public LongValue getAsLongValue(Env env)
   {
-    return getAsLongValue(env.getIniMap(false), env.getQuercus().getIniMap(false));
+    return getAsLongValue(env.getIniMap(false),
+                          env.getQuercus().getIniMap(false));
   }
 
   private LongValue getAsLongValue(HashMap<String, Value> overrideMap,
@@ -359,10 +361,14 @@ public class IniDefinition {
     if (bytes.endsWith("gb") || bytes.endsWith("g") || bytes.endsWith("G")) {
       return value * 1024L * 1024L * 1024L;
     }
-    else if (bytes.endsWith("mb") || bytes.endsWith("m") || bytes.endsWith("M")) {
+    else if (bytes.endsWith("mb")
+             || bytes.endsWith("m")
+             || bytes.endsWith("M")) {
       return value * 1024L * 1024L;
     }
-    else if (bytes.endsWith("kb") || bytes.endsWith("k") || bytes.endsWith("K")) {
+    else if (bytes.endsWith("kb")
+             || bytes.endsWith("k")
+             || bytes.endsWith("K")) {
       return value * 1024L;
     }
     else if (bytes.endsWith("b") || bytes.endsWith("B")) {
@@ -372,8 +378,12 @@ public class IniDefinition {
       return value;
     else {
       return value;
-      
-      //env.warning(L.l("byte-valued expression '{0}' for ini value '{1}' must have units.  '16B' for bytes, '16K' for kilobytes, '16M' for megabytes, '16G' for gigabytes", _name));
+
+//      env.warning(L.l(
+//        "byte-valued expression '{0}' for ini value '{1}' must have units.  "
+//        + "'16B' for bytes, '16K' for kilobytes, '16M' for megabytes, "
+//        + "'16G' for gigabytes",
+//        _name));
       //return deflt;
     }
   }
@@ -406,7 +416,8 @@ public class IniDefinition {
       // XXX: send notice instead?
       if (toBooleanValue(value).equals(toBooleanValue(getDefault())))
         return;
-        //Env.getInstance().notice(L.l("ini value `{0}' is not supported", getName()));
+//      Env.getInstance()
+//        .notice(L.l("ini value `{0}' is not supported", getName()));
       else
         env.warning(L.l("ini value `{0}' is not supported", getName()));
     }
@@ -430,7 +441,8 @@ public class IniDefinition {
       if (true)
         throw new UnsupportedOperationException();
 
-      Env.getInstance().warning(L.l("ini value `{0}' is not supported", getName()));
+      Env.getInstance()
+        .warning(L.l("ini value `{0}' is not supported", getName()));
     }
   }
 

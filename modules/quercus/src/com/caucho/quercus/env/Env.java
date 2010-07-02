@@ -717,7 +717,8 @@ public class Env
     if (! _isUnicodeSemantics)
       return null;
 
-    String encoding = QuercusContext.INI_UNICODE_OUTPUT_ENCODING.getAsString(this);
+    String encoding = QuercusContext.INI_UNICODE_OUTPUT_ENCODING
+      .getAsString(this);
 
     if (encoding == null)
       encoding = QuercusContext.INI_UNICODE_FALLBACK_ENCODING.getAsString(this);
@@ -2499,7 +2500,8 @@ public class Env
       }
 
       case HTTP_RAW_POST_DATA: {
-        if (! QuercusContext.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this)) {
+        if (!QuercusContext.INI_ALWAYS_POPULATE_RAW_POST_DATA
+          .getAsBoolean(this)) {
           String contentType = getContentType();
 
           if (contentType == null || ! contentType.equals("unknown/type"))
@@ -2878,7 +2880,8 @@ public class Env
     else if (value instanceof NullValue)
       return NullValue.NULL;
     else {
-      warning(L.l("'{0}' is an invalid reference, because only variables may be passed by reference.",
+      warning(L.l("'{0}' is an invalid reference, "
+      + "because only variables may be passed by reference.",
                   value));
 
       return NullValue.NULL;
@@ -3874,7 +3877,9 @@ public class Env
     String message = e.getMessage(this);
 
     error(location,
-          L.l("Uncaught exception of type '{0}' with message '{1}'", type, message));
+          L.l("Uncaught exception of type '{0}' with message '{1}'",
+              type,
+              message));
   }
 
   /**
@@ -4172,7 +4177,8 @@ public class Env
   public SaveState saveState()
   {
     if (_globalMap != _map)
-      throw new QuercusException(L.l("Env.saveState() only allowed at top level"));
+      throw new QuercusException(
+        L.l("Env.saveState() only allowed at top level"));
 
     return new SaveState(this,
                          _fun,
@@ -4480,7 +4486,8 @@ public class Env
     if (def != null)
       return def;
     else
-      throw createErrorException(L.l("'{0}' class definition not found", className));
+      throw createErrorException(L.l("'{0}' class definition not found",
+                                     className));
   }
 
   /**
@@ -4567,7 +4574,8 @@ public class Env
   /**
    * Adds a Quercus class import.
    *
-   * @param name wildcard class import string minus '*' at the end (i.e. java.util.)
+   * @param name wildcard class import string
+   * minus '*' at the end (i.e. java.util.)
    */
   public void addWildcardImport(String name)
   {
@@ -5214,8 +5222,9 @@ public class Env
       Value nameV = value.get(LongValue.ONE);
 
       if (! nameV.isString())
-        throw new IllegalStateException(L.l("'{0}' ({1}) is an unknown callback name",
-                                            nameV, nameV.getClass().getSimpleName()));
+        throw new IllegalStateException(
+          L.l("'{0}' ({1}) is an unknown callback name",
+          nameV, nameV.getClass().getSimpleName()));
 
       String name = nameV.toString();
 
@@ -5961,8 +5970,13 @@ public class Env
                             String functionName)
   {
     if (value.isNull()) {
-      error(L.l("'{0}' is an unexpected value for arg '{1}' in function '{2}', expected '{3}'",
-                value, argName, functionName, type));
+      error(L.l(
+        "'{0}' is an unexpected value for "
+        + "arg '{1}' in function '{2}', expected '{3}'",
+        value,
+        argName,
+        functionName,
+        type));
     }
   }
 
@@ -6022,7 +6036,8 @@ public class Env
   /**
    * A fatal runtime error.
    */
-  public QuercusRuntimeException createErrorException(Location location, String msg)
+  public QuercusRuntimeException createErrorException(Location location,
+                                                      String msg)
     throws QuercusRuntimeException
   {
     if (location == null || location.isUnknown())
@@ -7172,7 +7187,8 @@ public class Env
     SPECIAL_VARS.put(MethodIntern.intern("HTTP_COOKIE_VARS"), HTTP_COOKIE_VARS);
     SPECIAL_VARS.put(MethodIntern.intern("HTTP_SERVER_VARS"), HTTP_SERVER_VARS);
     SPECIAL_VARS.put(MethodIntern.intern("PHP_SELF"), PHP_SELF);
-    SPECIAL_VARS.put(MethodIntern.intern("HTTP_RAW_POST_DATA"), HTTP_RAW_POST_DATA);
+    SPECIAL_VARS.put(MethodIntern.intern("HTTP_RAW_POST_DATA"),
+                     HTTP_RAW_POST_DATA);
     
     DEFAULT_QUERY_SEPARATOR_MAP = new int[128];
     DEFAULT_QUERY_SEPARATOR_MAP['&'] = 1;

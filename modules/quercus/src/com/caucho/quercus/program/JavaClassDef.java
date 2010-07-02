@@ -147,8 +147,8 @@ public class JavaClassDef extends ClassDef {
     _isDelegate = type.isAnnotationPresent(ClassImplementation.class);
 
     if (type.isArray() && ! isArray())
-      throw new IllegalStateException(L.l("'{0}' needs to be called with JavaArrayClassDef",
-                                          type));
+      throw new IllegalStateException(
+        L.l("'{0}' needs to be called with JavaArrayClassDef", type));
   }
   
   public JavaClassDef(ModuleContext moduleContext,
@@ -423,7 +423,9 @@ public class JavaClassDef extends ClassDef {
     // XX: not sure how to do this, to imitate PHP objects,
     // should getters be involved as well?
 
-    for (Map.Entry<StringValue, FieldMarshalPair> lEntry : _fieldMap.entrySet()) {
+    for (
+      Map.Entry<StringValue, FieldMarshalPair> lEntry : _fieldMap.entrySet()
+      ) {
       StringValue lFieldName = lEntry.getKey();
       FieldMarshalPair rFieldPair = rClassDef._fieldMap.get(lFieldName);
 
@@ -541,7 +543,7 @@ public class JavaClassDef extends ClassDef {
         qThis.setFieldInit(true);
         
         try {
-          return phpSet.callMethod(env, getQuercusClass(), qThis, name, value);          
+          return phpSet.callMethod(env, getQuercusClass(), qThis, name, value);
           
         } finally {
           qThis.setFieldInit(false);
@@ -552,7 +554,11 @@ public class JavaClassDef extends ClassDef {
 
     if (__fieldSet != null) {
       try {
-        return __fieldSet.callMethod(env, getQuercusClass(), qThis, name, value);
+        return __fieldSet.callMethod(env,
+                                     getQuercusClass(),
+                                     qThis,
+                                     name,
+                                     value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 
@@ -778,8 +784,8 @@ public class JavaClassDef extends ClassDef {
 
     if (_traversableDelegate != null)
       cl.setTraversableDelegate(_traversableDelegate);
-    else if (cl.getTraversableDelegate() == null &&
-             _iteratorMethod != null) {
+    else if (cl.getTraversableDelegate() == null
+             && _iteratorMethod != null) {
       // adds support for Java classes implementing iterator()
       // php/
       cl.setTraversableDelegate(new JavaTraversableDelegate(_iteratorMethod));
@@ -923,7 +929,8 @@ public class JavaClassDef extends ClassDef {
         else {
           _cons = new JavaConstructor(_moduleContext, cons[0]);
           for (i = 1; i < cons.length; i++) {
-            _cons = _cons.overload(new JavaConstructor(_moduleContext, cons[i]));
+            _cons = _cons.overload(new JavaConstructor(_moduleContext,
+                                                       cons[i]));
           }
         }
 
@@ -962,8 +969,8 @@ public class JavaClassDef extends ClassDef {
             boolean isDelegate = addDelegate(cl);
 
             if (! isDelegate)
-              throw new IllegalArgumentException(L.l("unknown @Delegate class '{0}'",
-                                                     cl));
+              throw new IllegalArgumentException(
+                L.l("unknown @Delegate class '{0}'", cl));
           }
         }
         else if (annotation.annotationType() == ResourceType.class) {
@@ -1181,7 +1188,8 @@ public class JavaClassDef extends ClassDef {
   private StringValue javaToQuercusConvert(String s)
   {
     if (s.length() == 1) {
-      return new ConstStringValue(new char[] {Character.toLowerCase(s.charAt(0))});
+      return new ConstStringValue(
+        new char[]{ Character.toLowerCase(s.charAt(0)) });
     }
 
     if (Character.isUpperCase(s.charAt(1)))
@@ -1292,7 +1300,8 @@ public class JavaClassDef extends ClassDef {
         __toString = new JavaMethod(moduleContext, method);
       } else {
         if (method.getName().startsWith("quercus_"))
-          throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method.getName()));
+          throw new UnsupportedOperationException(
+            L.l("{0}: use @Name instead", method.getName()));
         
         JavaMethod newFun = new JavaMethod(moduleContext, method);
         StringValue funName = new StringBuilderValue(newFun.getName());
@@ -1329,7 +1338,8 @@ public class JavaClassDef extends ClassDef {
     if (__toString == null)
       return null;
 
-    return __toString.callMethod(env, getQuercusClass(), value, new Expr[0]).toStringValue();
+    return __toString.callMethod(
+      env, getQuercusClass(), value, new Expr[0]).toStringValue();
   }
   
   public boolean jsonEncode(Env env, Object obj, StringValue sb)
@@ -1533,8 +1543,8 @@ public class JavaClassDef extends ClassDef {
       if (next instanceof Map.Entry) {
         Map.Entry entry = (Map.Entry) next;
         
-        if (entry.getKey() instanceof Value &&
-            entry.getValue() instanceof Value)
+        if (entry.getKey() instanceof Value
+            && entry.getValue() instanceof Value)
         {
           return (Map.Entry<Value, Value>) entry;
         }

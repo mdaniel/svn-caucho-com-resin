@@ -545,7 +545,10 @@ public class Post
           array.put(formValue);
       }
       else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
-        put(array, LongValue.create(StringValue.toLong(index)), formValue, addSlashesToValues);
+        put(array,
+            LongValue.create(StringValue.toLong(index)),
+            formValue,
+            addSlashesToValues);
       else
         put(array, env.createString(index), formValue, addSlashesToValues);
     }
@@ -592,9 +595,11 @@ public class Post
     else if ((ch = contentType.charAt(i)) == '\'') {
       StringBuilder sb = new StringBuilder();
 
-      for (i++
-           ; i < length && (ch = contentType.charAt(i)) != '\''
-           ; i++) {
+      for (
+        i++;
+        i < length && (ch = contentType.charAt(i)) != '\'';
+        i++
+        ) {
         sb.append(ch);
       }
 
@@ -612,9 +617,12 @@ public class Post
     else {
       StringBuilder sb = new StringBuilder();
 
-      for (; i < length
-             && (ch = contentType.charAt(i)) != ' ' && ch != ';' && ch != ','
-           ; i++) {
+      for (/* intentionally left empty */;
+                                         i < length
+                                         && (ch = contentType.charAt(i)) != ' '
+                                         && ch != ';'
+                                         && ch != ',';
+                                         i++) {
         sb.append(ch);
       }
 
@@ -724,7 +732,10 @@ public class Post
           long fileLength = new FilePath(tmpNames[i]).getLength();
 
           addFormFile(env, files, name, fileNames[i], tmpNames[i],
-                      mimeTypes[i], fileLength, addSlashesToValues, maxFileSize);
+                      mimeTypes[i],
+                      fileLength,
+                      addSlashesToValues,
+                      maxFileSize);
         }
       }
     }

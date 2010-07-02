@@ -186,7 +186,11 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
       }
       else {
         if (_restMethodTable.length == 0) {
-          env.warning(L.l("'{0}' overloaded method call with {1} arguments does not match any overloaded method", getName(), args.length));
+          env.warning(L.l(
+            "'{0}' overloaded method call with {1} arguments "
+            + "does not match any overloaded method",
+            getName(),
+            args.length));
 
           return NullValue.NULL;
         }
@@ -199,7 +203,9 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
     }
     else {
       if (_restMethodTable.length == 0) {
-        env.warning(L.l("'{0}' overloaded method call with {1} arguments has too many arguments", getName(), args.length));
+        env.warning(L.l(
+          "'{0}' overloaded method call with {1} "
+          + "arguments has too many arguments", getName(), args.length));
 
         return NullValue.NULL;
       }

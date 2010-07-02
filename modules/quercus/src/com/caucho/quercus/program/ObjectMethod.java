@@ -41,7 +41,8 @@ import java.util.logging.Logger;
  * Represents sequence of statements.
  */
 public class ObjectMethod extends Function {
-  private static final Logger log = Logger.getLogger(ObjectMethod.class.getName());
+  private static final Logger log = Logger.getLogger(
+    ObjectMethod.class.getName());
   private static final L10N L = new L10N(ObjectMethod.class);
 
   private ClassDef _quercusClass;

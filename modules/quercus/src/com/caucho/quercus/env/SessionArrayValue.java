@@ -304,7 +304,8 @@ public class SessionArrayValue extends ArrayValueWrapper
   public void invalidate()
   {
     if (! _isValid)
-      throw new IllegalStateException(L.l("Can't call invalidate() when session is no longer valid."));
+      throw new IllegalStateException(L.l(
+        "Can't call invalidate() when session is no longer valid."));
 
     try {
       remove();

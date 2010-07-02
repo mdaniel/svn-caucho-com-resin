@@ -49,7 +49,8 @@ import java.util.logging.Logger;
  * mysqli object oriented API facade
  */
 public class MysqliStatement extends JdbcStatementResource {
-  private static final Logger log = Logger.getLogger(MysqliStatement.class.getName());
+  private static final Logger log = Logger
+    .getLogger(MysqliStatement.class.getName());
   private static final L10N L = new L10N(MysqliStatement.class);
 
   /**
@@ -198,7 +199,8 @@ public class MysqliStatement extends JdbcStatementResource {
    * Returns a string description for last statement error
    *
    * @param env the PHP executing environment
-   * @return a string that describes the error or an empty string if no error occurred.
+   * @return a string that describes the error or
+   * an empty string if no error occurred.
    */
   public StringValue error(Env env)
   {
@@ -221,7 +223,8 @@ public class MysqliStatement extends JdbcStatementResource {
   }
 
   /**
-   * Executes a prepared Query. The statement has been prepared using mysqli_prepare.
+   * Executes a prepared Query. The statement has
+   * been prepared using mysqli_prepare.
    *
    * @param env the PHP executing environment
    * @return true on success or false on failure
@@ -240,7 +243,8 @@ public class MysqliStatement extends JdbcStatementResource {
    * Fetch results from a prepared statement into the bound variables.
    *
    * @param env the PHP executing environment
-   * @return true on success, false on failure or null if no more rows/data exists
+   * @return true on success, false on failure or
+   * null if no more rows/data exists
    */
   public Value fetch(Env env)
   {
@@ -434,7 +438,8 @@ public class MysqliStatement extends JdbcStatementResource {
    * Returns SQLSTATE error from previous statement operation.
    *
    * @param env the PHP executing environment
-   * @return the SQLSTATE (5-characters string) for the last error. '00000' means no error
+   * @return the SQLSTATE (5-characters string) for
+   * the last error. '00000' means no error
    */
 
   public StringValue sqlstate(Env env)

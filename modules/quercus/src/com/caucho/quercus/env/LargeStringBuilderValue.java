@@ -873,7 +873,8 @@ public class LargeStringBuilderValue
       if (0x20 <= ch && ch <= 0x7f || ch == '\t' || ch == '\r' || ch == '\n')
         out.print(ch);
       else if (ch <= 0xff)
-        out.print("\\x" + Integer.toHexString(ch / 16) + Integer.toHexString(ch % 16));
+        out.print("\\x"
+        + Integer.toHexString(ch / 16) + Integer.toHexString(ch % 16));
       else {
         out.print("\\u"
                   + Integer.toHexString((ch >> 12) & 0xf)

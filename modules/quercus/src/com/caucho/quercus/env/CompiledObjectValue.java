@@ -47,7 +47,8 @@ import java.util.Set;
 public class CompiledObjectValue extends ObjectValue
   implements Serializable
 {
-  private static final StringValue TO_STRING = new UnicodeValueImpl("__toString");
+  private static final StringValue TO_STRING
+    = new UnicodeValueImpl("__toString");
   private static final Value []NULL_FIELDS = new Value[0];
 
   public Value []_fields;
@@ -401,7 +402,8 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1)
   {
-    return _quercusClass.getFunction(methodName).callMethodRef(env, this, a0, a1);
+    return _quercusClass.getFunction(methodName).callMethodRef(
+      env, this, a0, a1);
   }
   */
 
@@ -576,7 +578,8 @@ public class CompiledObjectValue extends ObjectValue
     if (fun != null)
       return fun.callMethod(env, this, new Expr[0]).toString(env);
     else
-      return env.createUnicodeBuilder().append(_quercusClass.getName()).append("[]");
+      return env
+      .createUnicodeBuilder().append(_quercusClass.getName()).append("[]");
   }
   */
 
@@ -642,7 +645,8 @@ public class CompiledObjectValue extends ObjectValue
   @Override
   public String toString()
   {
-    return "CompiledObjectValue@" + System.identityHashCode(this) +  "[" + _quercusClass.getName() + "]";
+    return "CompiledObjectValue@" + System.identityHashCode(this)
+           + "[" + _quercusClass.getName() + "]";
   }
 
   //

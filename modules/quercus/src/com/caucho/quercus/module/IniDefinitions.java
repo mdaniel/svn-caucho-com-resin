@@ -50,7 +50,10 @@ public class IniDefinitions {
    */
   public IniDefinition add(String name, boolean deflt, int scope)
   {
-    return add(name, IniDefinition.Type.BOOLEAN, BooleanValue.create(deflt), scope);
+    return add(name,
+               IniDefinition.Type.BOOLEAN,
+               BooleanValue.create(deflt),
+               scope);
   }
 
   /**
@@ -66,7 +69,10 @@ public class IniDefinitions {
    */
   public IniDefinition add(String name, String deflt, int scope)
   {
-    return add(name, IniDefinition.Type.STRING, StringValue.create(deflt), scope);
+    return add(name,
+               IniDefinition.Type.STRING,
+               StringValue.create(deflt),
+               scope);
   }
 
   private IniDefinition add(String name,
@@ -120,7 +126,10 @@ public class IniDefinitions {
                           scope);
   }
 
-  private IniDefinition addUnsupported(String name, IniDefinition.Type type, Value deflt, int scope)
+  private IniDefinition addUnsupported(String name,
+                                       IniDefinition.Type type,
+                                       Value deflt,
+                                       int scope)
   {
     return add(new IniDefinition.Unsupported(name, type, deflt, scope));
   }
@@ -160,7 +169,9 @@ public class IniDefinitions {
 
   public IniDefinition get(String name)
   {
-    IniDefinition iniDefinition = _defaultMap == null ? null : _defaultMap.get(name);
+    IniDefinition iniDefinition = _defaultMap == null
+                                  ? null
+                                  : _defaultMap.get(name);
 
     if (iniDefinition == null) {
       iniDefinition = new IniDefinition.Runtime(name);

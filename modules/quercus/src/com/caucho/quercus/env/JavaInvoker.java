@@ -191,20 +191,21 @@ abstract public class JavaInvoker
                 _defaultExprs[i] = exprFactory.createLiteral(StringValue.EMPTY);
               }
               else {
-                _defaultExprs[i] = QuercusParser.parseDefault(exprFactory, opt.value());
+                _defaultExprs[i] = QuercusParser.parseDefault(exprFactory,
+                                                              opt.value());
               }
             } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
               if (! Value.class.equals(argType)
                   && ! Var.class.equals(argType)) {
-                throw new QuercusException(L.l("reference must be Value or Var for {0}",
-                                               _name));
+                throw new QuercusException(
+                  L.l("reference must be Value or Var for {0}", _name));
               }
               
               isReference = true;
             } else if (PassThru.class.isAssignableFrom(ann.annotationType())) {
               if (! Value.class.equals(argType)) {
-                throw new QuercusException(L.l("pass thru must be Value for {0}",
-                                               _name));
+                throw new QuercusException(
+                  L.l("pass thru must be Value for {0}", _name));
               }
               
               isPassThru = true;
@@ -212,8 +213,9 @@ abstract public class JavaInvoker
               isNotNull = true;
             } else if (Expect.class.isAssignableFrom(ann.annotationType())) {
               if (! Value.class.equals(argType)) {
-                throw new QuercusException(L.l("Expect type must be Value for {0}",
-                                               _name));
+                throw new QuercusException(L.l(
+                  "Expect type must be Value for {0}",
+                  _name));
               }
               
               Expect.Type type = ((Expect) ann).type();
@@ -678,8 +680,12 @@ abstract public class JavaInvoker
                                               _defaultExprs[i],
                                               _param[k]);
       } else {
-        warnMessage = L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-                           _name, _minArgumentLength, args.length);
+        warnMessage = L.l(
+          "function '{0}' has {1} required arguments, "
+          + "but only {2} were provided",
+          _name,
+          _minArgumentLength,
+          args.length);
 
         //return NullValue.NULL;
 
@@ -720,8 +726,12 @@ abstract public class JavaInvoker
     }
     else if (_marshalArgs.length < args.length) {
       // php/153o
-      env.warning(L.l("function '{0}' called with {1} arguments, but only expects {2} arguments",
-                      _name, args.length, _marshalArgs.length));
+      env.warning(L.l(
+        "function '{0}' called with {1} arguments, "
+        + "but only expects {2} arguments",
+        _name,
+        args.length,
+        _marshalArgs.length));
     }
 
     Object result = invoke(obj, javaArgs);

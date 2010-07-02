@@ -179,7 +179,8 @@ public abstract class JdbcConnectionResource
                                           boolean isNewLink)
   {
     if (_conn != null)
-      throw new IllegalStateException(getClass().getSimpleName() + " attempt to open multiple connections");
+      throw new IllegalStateException(
+        getClass().getSimpleName() + " attempt to open multiple connections");
     
     _host = host;
     _userName = userName;
@@ -598,8 +599,9 @@ public abstract class JdbcConnectionResource
   public JdbcConnectionResource validateConnection()
   {
     if (_conn == null) {
-      throw _env.createErrorException(L.l("Connection is not properly initialized {0}\nDriver {1}",
-                                    _url, _driver));
+      throw _env.createErrorException(
+        L.l("Connection is not properly initialized {0}\nDriver {1}",
+            _url, _driver));
     }
 
     return this;
@@ -822,8 +824,7 @@ public abstract class JdbcConnectionResource
     else
       i = prevToken._end;
 
-    while (i < len &&
-        Character.isWhitespace(sql.charAt(i))) {
+    while (i < len && Character.isWhitespace(sql.charAt(i))) {
       i++;
     }
 

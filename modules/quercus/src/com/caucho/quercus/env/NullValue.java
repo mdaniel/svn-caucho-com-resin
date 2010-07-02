@@ -532,7 +532,7 @@ public class NullValue extends Value
   @Override
   public Value sub(long rLong)
   {
-    return LongValue.create( - rLong);
+    return LongValue.create(-rLong);
   }
 
   /**

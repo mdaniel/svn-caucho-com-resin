@@ -389,10 +389,9 @@ public class QuercusProgram {
 
       Statement []statements = blockStmt.getStatements();
 
-      if (statements.length > 0 &&
-          statements[0] instanceof ExprStatement) {
-        ExprStatement exprStmt
-          = (ExprStatement) statements[0];
+      if (statements.length > 0
+          && statements[0] instanceof ExprStatement) {
+        ExprStatement exprStmt = (ExprStatement) statements[0];
 
         _statement = new ReturnStatement(exprStmt.getExpr());
       }

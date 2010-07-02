@@ -123,7 +123,7 @@ public class ObjectExtValue extends ObjectValue
     Entry []copyEntries = copy._entries;
 
     _entries = new Entry[copyEntries.length];
-    _prime= copy._prime;
+    _prime = copy._prime;
 
     int len = copyEntries.length;
     for (int i = 0; i < len; i++) {
@@ -430,7 +430,11 @@ public class ObjectExtValue extends ObjectValue
 
         if (fieldSet != null) {
           _isFieldInit = true;
-          Value retVal = fieldSet.callMethod(env, _quercusClass, this, name, value);
+          Value retVal = fieldSet.callMethod(env,
+                                             _quercusClass,
+                                             this,
+                                             name,
+                                             value);
           _isFieldInit = false;
 
           return retVal;
@@ -483,7 +487,11 @@ public class ObjectExtValue extends ObjectValue
           Value retValue = NullValue.NULL;
 
           try {
-            retValue = fieldSet.callMethod(env, _quercusClass, this, name, value);
+            retValue = fieldSet.callMethod(env,
+                                           _quercusClass,
+                                           this,
+                                           name,
+                                           value);
           } finally {
             _isFieldInit = false;
           }
@@ -1392,7 +1400,9 @@ public class ObjectExtValue extends ObjectValue
     if (Alarm.isTest())
       return getClass().getSimpleName() +  "[" + _className + "]";
     else
-      return getClass().getSimpleName() + "@" + System.identityHashCode(this) +  "[" + _className + "]";
+      return getClass().getSimpleName()
+             + "@" + System.identityHashCode(this)
+             + "[" + _className + "]";
   }
 
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {

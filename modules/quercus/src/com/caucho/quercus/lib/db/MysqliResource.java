@@ -43,7 +43,8 @@ import java.util.logging.Logger;
  */
 @ResourceType("mysql link")
 public class MysqliResource extends Mysqli {
-  private static final Logger log = Logger.getLogger(MysqliResource.class.getName());
+  private static final Logger log = Logger
+    .getLogger(MysqliResource.class.getName());
   private static final L10N L = new L10N(MysqliResource.class);
 
   /**
@@ -80,7 +81,10 @@ public class MysqliResource extends Mysqli {
                  String url,
                  boolean isNewLink)
   {
-    super(env, host, user, password, db, port, socket, flags, driver, url, isNewLink);
+    super(
+      env, 
+      host, user, password,
+      db, port, socket, flags, driver, url, isNewLink);
   }
 
   protected MysqliResource(Env env)

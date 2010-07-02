@@ -45,7 +45,8 @@ import java.util.logging.Logger;
  */
 public class MethodDeclaration extends Function
 {
-  private static final Logger log = Logger.getLogger(MethodDeclaration.class.getName());
+  private static final Logger log = Logger.getLogger(
+    MethodDeclaration.class.getName());
   private static final L10N L = new L10N(MethodDeclaration.class);
 
   private final ClassDef _qClass;

@@ -151,7 +151,7 @@ public class FunctionInfo
    */
   public void setClosure(boolean isClosure)
   {
-    _isClosure= isClosure;
+    _isClosure = isClosure;
   }
 
   /**

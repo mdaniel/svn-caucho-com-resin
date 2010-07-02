@@ -203,8 +203,8 @@ public class DoubleValue extends NumberValue
    */
   public long toLong()
   {
-    if ((_value > (double) Long.MAX_VALUE) ||
-        (_value < (double) Long.MIN_VALUE)) {
+    if ((_value > (double) Long.MAX_VALUE)
+        || (_value < (double) Long.MIN_VALUE)) {
       return 0;
     } else {
       return (long) _value;

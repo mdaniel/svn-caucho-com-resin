@@ -160,8 +160,8 @@ public class HttpModule extends AbstractQuercusModule {
       // Check for special headers that are not
       // colon separated "key: value" pairs.
 
-      if (header.equals("Not Modified") ||
-        header.equals("No Content")) {
+      if (header.equals("Not Modified")
+          || header.equals("No Content")) {
         // php/1b0(j|k|l|m)
 
         if (httpResponseCode != 0)
@@ -224,12 +224,12 @@ public class HttpModule extends AbstractQuercusModule {
     for (int i = 0; i < len; i++) {
       char ch = value.charAt(i);
 
-      if ('0' <= ch && ch <= '9' ||
-          'a' <= ch && ch <= 'z' ||
-          'A' <= ch && ch <= 'Z' ||
-          ch == '-' ||
-          ch == '.' ||
-          ch == '_') {
+      if ('0' <= ch && ch <= '9'
+          || 'a' <= ch && ch <= 'z'
+          || 'A' <= ch && ch <= 'Z'
+          || ch == '-'
+          || ch == '.'
+          || ch == '_') {
         sb.append(ch);
       }
       else if (ch == ' ') {

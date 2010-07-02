@@ -102,7 +102,8 @@ public class QuercusClass extends NullValue {
 
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
-    this(ModuleContext.getLocalContext(Thread.currentThread().getContextClassLoader()),
+    this(ModuleContext
+      .getLocalContext(Thread.currentThread().getContextClassLoader()),
          classDef,
          parent);
   }
@@ -633,8 +634,9 @@ public class QuercusClass extends NullValue {
     if (existingFun == null || ! fun.isAbstract())
       _methodMap.put(name.toString(), fun);
     else if (! existingFun.isAbstract() && fun.isAbstract())
-      Env.getInstance().error(L.l("cannot make non-abstract function {0}:{1}() abstract",
-                                  getName(), name));
+      Env.getInstance()
+        .error(L.l("cannot make non-abstract function {0}:{1}() abstract",
+                   getName(), name));
   }
   
   /*
@@ -727,7 +729,8 @@ public class QuercusClass extends NullValue {
         boolean isAbstract;
 
         // php/093g constructor
-        if (_constructor != null && fun.getName().equals(_constructor.getName()))
+        if (_constructor != null
+            && fun.getName().equals(_constructor.getName()))
           isAbstract = _constructor.isAbstract();
         else
           isAbstract = fun.isAbstract();
@@ -735,8 +738,11 @@ public class QuercusClass extends NullValue {
         if (isAbstract) {
           throw env.createErrorException(
             _classDef.getLocation(),
-            L.l("Abstract function '{0}' must be implemented in concrete class {1}.",
-                fun.getName(), getName()));
+            L.l(
+              "Abstract function '{0}' must be "
+              + "implemented in concrete class {1}.",
+              fun.getName(),
+              getName()));
         }
       }
     }
@@ -863,12 +869,14 @@ public class QuercusClass extends NullValue {
   public Value createObject(Env env)
   {
     if (_isAbstract) {
-      throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
-                                     _className));
+      throw env.createErrorException(L.l(
+        "abstract class '{0}' cannot be instantiated.",
+        _className));
     }
     else if (_isInterface) {
-      throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
-                                     _className));
+      throw env.createErrorException(L.l(
+        "interface '{0}' cannot be instantiated.",
+        _className));
     }
 
     ObjectValue objectValue = null;
@@ -918,12 +926,14 @@ public class QuercusClass extends NullValue {
     
     try {
       if (_classDef.isAbstract()) {
-        throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
-                                       _className));
+        throw env.createErrorException(L.l(
+          "abstract class '{0}' cannot be instantiated.",
+          _className));
       }
       else if (_classDef.isInterface()) {
-        throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
-                                       _className));
+        throw env.createErrorException(L.l(
+          "interface '{0}' cannot be instantiated.",
+          _className));
       }
 
       ObjectValue objectValue = null;
@@ -1149,7 +1159,7 @@ public class QuercusClass extends NullValue {
     }
     else {
       throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
-                                            getName(), toMethod(name, nameLen)));
+                                       getName(), toMethod(name, nameLen)));
     }
     */
   }

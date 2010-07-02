@@ -203,13 +203,22 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   }
 
   @Override
-  public Value callMethod(Env env, QuercusClass qClass, Value qThis, Value a1, Value a2)
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis,
+                          Value a1,
+                          Value a2)
   {
     return callMethod(env, qClass, qThis, new Value[] {a1, a2});
   }
 
   @Override
-  public Value callMethod(Env env, QuercusClass qClass, Value qThis, Value a1, Value a2, Value a3)
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis,
+                          Value a1,
+                          Value a2,
+                          Value a3)
   {
     return callMethod(env, qClass, qThis, new Value[] {a1, a2, a3});
   }

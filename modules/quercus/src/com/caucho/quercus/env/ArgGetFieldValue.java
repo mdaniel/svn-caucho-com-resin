@@ -71,7 +71,9 @@ public class ArgGetFieldValue extends ArgValue {
   public Var toLocalVarDeclAsRef()
   {
     // php/3d2t
-    return _obj.toAutoObject(_env).getFieldVar(_env, _name).toLocalVarDeclAsRef();
+    return _obj.toAutoObject(_env)
+      .getFieldVar(_env, _name)
+      .toLocalVarDeclAsRef();
   }
 
   /**

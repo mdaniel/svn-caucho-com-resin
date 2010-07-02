@@ -861,7 +861,7 @@ abstract public class StringValue
 
       Character[] charObjects = new Character[length];
 
-      for (int i = 0; i <length; i++) {
+      for (int i = 0; i < length; i++) {
         charObjects[i] = Character.valueOf(chars[i]);
       }
 
@@ -877,14 +877,17 @@ abstract public class StringValue
 
       Byte[] byteObjects = new Byte[length];
 
-      for (int i = 0; i <length; i++) {
+      for (int i = 0; i < length; i++) {
         byteObjects[i] = Byte.valueOf(bytes[i]);
       }
 
       return byteObjects;
     }
     else {
-      env.error(L.l("Can't assign {0} with type {1} to {2}", this, this.getClass(), elementType));
+      env.error(L.l("Can't assign {0} with type {1} to {2}",
+                    this,
+                    this.getClass(),
+                    elementType));
       return null;
     }
   }

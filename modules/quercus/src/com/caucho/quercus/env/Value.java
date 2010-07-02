@@ -498,8 +498,8 @@ abstract public class Value implements java.io.Serializable
     if (rVal instanceof ObjectValue) return -1;
 
     // XXX: proper default case?
-    throw new RuntimeException("values are incomparable: " +
-                               lVal + " <=> " + rVal);
+    throw new RuntimeException(
+      "values are incomparable: " + lVal + " <=> " + rVal);
   }
 
   /**
@@ -960,8 +960,11 @@ abstract public class Value implements java.io.Serializable
    */
   public Value toArgRef()
   {
-    Env.getCurrent().warning(L.l("'{0}' is an invalid reference, because only variables may be passed by reference.",
-                                 this));
+    Env.getCurrent()
+      .warning(L.l(
+        "'{0}' is an invalid reference, because only "
+        + "variables may be passed by reference.",
+        this));
 
     return NullValue.NULL;
   }
@@ -1501,11 +1504,15 @@ abstract public class Value implements java.io.Serializable
                           StringValue methodName, int hash,
                           Value []args)
   {
-    if (isNull())
+    if (isNull()) {
       return env.error(L.l("Method call '{0}' is not allowed for a null value.",
                            methodName));
-    else
-      return env.error(L.l("'{0}' is an unknown method of {1}.", methodName, toDebugString()));
+    }
+    else {
+      return env.error(L.l("'{0}' is an unknown method of {1}.",
+                           methodName,
+                           toDebugString()));
+    }
   }
 
   /**
@@ -1827,11 +1834,15 @@ abstract public class Value implements java.io.Serializable
   {
     String methodName =  new String(name, 0, nameLen);
 
-    if (isNull())
+    if (isNull()) {
       return env.error(L.l("Method call '{0}' is not allowed for a null value.",
                            methodName));
-    else
-      return env.error(L.l("'{0}' is an unknown method of {1}.", methodName, toDebugString()));
+    }
+    else {
+      return env.error(L.l("'{0}' is an unknown method of {1}.",
+                           methodName,
+                           toDebugString()));
+    }
   }
 
   //
@@ -2683,7 +2694,10 @@ abstract public class Value implements java.io.Serializable
    */
   public Object valuesToArray(Env env, Class elementType)
   {
-    env.error(L.l("Can't assign {0} with type {1} to {2}[]", this, this.getClass(), elementType));
+    env.error(L.l("Can't assign {0} with type {1} to {2}[]",
+                  this,
+                  this.getClass(),
+                  elementType));
     return null;
   }
 

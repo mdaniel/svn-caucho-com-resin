@@ -974,7 +974,8 @@ public class JdbcResultResource {
    * Get a StringValue with the column type.
    *
    * @param env the PHP executing environment
-   * @param fieldOffset need to add 1 because java is 1 based index and quercus is 0 based
+   * @param fieldOffset need to add 1 because java
+   * is 1 based index and quercus is 0 based
    *
    * @return a StringValue containing the column type
    */
@@ -1356,7 +1357,8 @@ public class JdbcResultResource {
   public Value toKey()
   {
     // XXX: phpbb seems to want this?
-    return _env.createString("JdbcResultResource$" + System.identityHashCode(this));
+    return _env
+      .createString("JdbcResultResource$" + System.identityHashCode(this));
   }
 
   /**
@@ -1367,7 +1369,8 @@ public class JdbcResultResource {
   public String toString()
   {
     if (_rs != null)
-      return getClass().getSimpleName() +  "[" + _rs.getClass().getSimpleName() + "]";
+      return getClass()
+        .getSimpleName() +  "[" + _rs.getClass().getSimpleName() + "]";
     else
       return getClass().getSimpleName() +  "[]";
   }

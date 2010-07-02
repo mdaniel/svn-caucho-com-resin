@@ -131,7 +131,7 @@ public class HttpRequest
 
     HashMap<String,String> _properties = _curl.getRequestPropertiesMap();
 
-    for (Map.Entry<String, String> entry: _properties.entrySet()) {
+    for (Map.Entry<String, String> entry : _properties.entrySet()) {
       _conn.setRequestProperty(entry.getKey(), entry.getValue());
     }
 
@@ -225,7 +225,8 @@ public class HttpRequest
       return false;
     }
     catch (SocketTimeoutException e) {
-      error(env, CurlModule.CURLE_OPERATION_TIMEOUTED, "connection timed out", e);
+      error(
+        env, CurlModule.CURLE_OPERATION_TIMEOUTED, "connection timed out", e);
       
       return false;
     }
@@ -239,7 +240,8 @@ public class HttpRequest
       //error(0, e.getMessage(), e);
     }
     catch (UnknownHostException e) {
-      error(env, CurlModule.CURLE_COULDNT_RESOLVE_HOST, "unknown host: " + e.getMessage(), e);
+      error(env, CurlModule.CURLE_COULDNT_RESOLVE_HOST,
+            "unknown host: " + e.getMessage(), e);
       
       return false;
     }

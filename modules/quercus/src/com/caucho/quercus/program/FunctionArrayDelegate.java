@@ -64,7 +64,6 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   /**
    * Returns the value for the specified key.
    */
-  @Override
   public Value get(ObjectValue qThis, Value key)
   {
     if (_arrayGet != null) {

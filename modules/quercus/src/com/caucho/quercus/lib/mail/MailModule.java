@@ -157,7 +157,8 @@ public class MailModule extends AbstractQuercusModule {
 
       Address []from = msg.getFrom();
       if (from == null || from.length == 0) {
-        log.fine(L.l("mail 'From' not set, setting to Java System property 'user.name'"));
+        log.fine(L.l(
+          "mail 'From' not set, setting to Java System property 'user.name'"));
         msg.setFrom();
       }
 
@@ -186,9 +187,11 @@ public class MailModule extends AbstractQuercusModule {
 
       throw e;
     } catch (AuthenticationFailedException e) {
-      log.warning(L.l("Quercus[] mail could not send mail to '{0}' because authentication failed\n{1}",
-                      to,
-                      e.getMessage()));
+      log.warning(L.l(
+        "Quercus[] mail could not send mail to '{0}' "
+        + "because authentication failed\n{1}",
+        to,
+        e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
