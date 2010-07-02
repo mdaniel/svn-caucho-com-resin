@@ -1090,12 +1090,12 @@ public final class InjectManager
   {
     AnnotatedType<T> type = createAnnotatedType(cl);
     
-    type = getExtensionManager().processAnnotatedType(type);
+    AnnotatedType<T> extType = getExtensionManager().processAnnotatedType(type);
     
-    if (type != null)
-      return createManagedBean(type);
+    if (extType != null)
+      return createManagedBean(extType);
     else
-      return null; 
+      return createManagedBean(type);
   }
 
   /**

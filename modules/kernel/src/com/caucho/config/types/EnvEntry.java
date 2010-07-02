@@ -162,13 +162,16 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
     _objValue = value;
 
-    InjectManager webBeans = InjectManager.create();
-    BeanBuilder factory = webBeans.createBeanFactory(value.getClass());
-    factory.name(_name);
+    if (value == null)
+      return;
+    
+    InjectManager cdiManager = InjectManager.create();
+    BeanBuilder<?> builder = cdiManager.createBeanFactory(value.getClass());
+    builder.name(_name);
     // server/1516
-    factory.binding(Names.create(_name));
+    builder.binding(Names.create(_name));
 
-    webBeans.addBean(factory.singleton(value));
+    cdiManager.addBean(builder.singleton(value));
 
     Jndi.bindDeepShort(_name, value);
   }

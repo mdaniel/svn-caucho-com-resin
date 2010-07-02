@@ -73,6 +73,7 @@ public class UserTransactionImpl
   /**
    * Sets the transaction's timeout.
    */
+  @Override
   public void setTransactionTimeout(int seconds)
     throws SystemException
   {
@@ -82,6 +83,7 @@ public class UserTransactionImpl
   /**
    * Gets the transaction's status
    */
+  @Override
   public int getStatus()
     throws SystemException
   {
@@ -408,6 +410,7 @@ public class UserTransactionImpl
   /**
    * Marks the transaction as rollback only.
    */
+  @Override
   public void setRollbackOnly()
     throws IllegalStateException, SystemException
   {
@@ -426,6 +429,7 @@ public class UserTransactionImpl
   /**
    * Commits the transaction
    */
+  @Override
   public void commit()
     throws IllegalStateException, RollbackException, HeuristicMixedException,
     HeuristicRollbackException, SecurityException, SystemException
@@ -446,6 +450,7 @@ public class UserTransactionImpl
   /**
    * Rolls the transaction back
    */
+  @Override
   public void rollback()
     throws IllegalStateException, SecurityException, SystemException
   {
@@ -480,8 +485,6 @@ public class UserTransactionImpl
 
     if (isTransactionActive) {
       try {
-        TransactionImpl xa = (TransactionImpl) _transactionManager.getTransaction();
-
         exn = new IllegalStateException(L.l("Transactions must have a commit() or rollback() in a finally block."));
 
         log.warning("Rolling back dangling transaction.  All transactions must have a commit() or rollback() in a finally block.");

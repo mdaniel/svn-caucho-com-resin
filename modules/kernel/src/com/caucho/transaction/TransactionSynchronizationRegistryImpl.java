@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.transaction.RollbackException;
+import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionSynchronizationRegistry;
@@ -104,8 +105,11 @@ public class TransactionSynchronizationRegistryImpl
     if (transaction != null) {
       return transaction.getStatus();
     } else {
+      return Status.STATUS_NO_TRANSACTION;
+      /*
       throw new IllegalStateException(L.l("Thread {0} does not have an active transaction.",
                                           Thread.currentThread()));
+                                          */
     }
   }
 

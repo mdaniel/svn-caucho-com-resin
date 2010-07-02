@@ -42,7 +42,6 @@ import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
-import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
@@ -283,6 +282,7 @@ public class TransactionManagerImpl
   /**
    * Commit the transaction.
    */
+  @Override
   public void commit() throws RollbackException, HeuristicMixedException,
       HeuristicRollbackException, SystemException
   {

@@ -593,16 +593,20 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Start a transaction.
    */
-  void begin() throws SystemException, NotSupportedException
+  void begin() 
+    throws SystemException, NotSupportedException
   {
     if (_status != Status.STATUS_NO_TRANSACTION) {
       int status = _status;
 
+      // env/0691
+      /*
       try {
         rollback();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
+      */
 
       throw new NotSupportedException(
           L.l("Nested transactions are not supported. "
@@ -777,8 +781,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
           log.fine(this + " commit (no transaction)");
 
         throw new IllegalStateException(
-            L
-                .l("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
+            L.l("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
 
       default:
         if (log.isLoggable(Level.FINE))
@@ -852,8 +855,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
             } catch (XAException e) {
               heuristicExn = heuristicException(heuristicExn, e);
               rollbackInt();
-              throw new RollbackExceptionWrapper(
-                  L.l("all commits rolled back"), heuristicExn);
+              throw new RollbackExceptionWrapper(L.l("all commits rolled back"), 
+                                                 heuristicExn);
             }
           }
         }
@@ -945,6 +948,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Rollback the transaction.
    */
+  @Override
   public void rollback()
   {
     _alarm.dequeue();
@@ -964,8 +968,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
       case Status.STATUS_NO_TRANSACTION:
         throw new IllegalStateException(
-            L
-                .l("Can't rollback outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
+            L.l("Can't rollback outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
 
       default:
         rollbackInt();
