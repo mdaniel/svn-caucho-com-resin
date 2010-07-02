@@ -27,6 +27,7 @@
       no longer be used:
     </p>
     <ul>
+      <li>&lt;accept-buffer-size> (see <a config-tag="accept-listen-backlog"/>)</li>
       <li>&lt;authenticator> (see <a config-tag="resin:PropertiesAuthenticator"/>, <a config-tag="resin:JaasAuthenticator"/>, <a config-tag="resin:DatabaseAuthenticator"/>, <a config-tag="resin:XmlAuthenticator"/>)</li>
       <li>&lt;ejb-stateful-bean> (Stateful EJBs are configured via <a href="config-candi.xtp">CDI</a>)</li>
       <li>&lt;ejb-stateless-bean> (Stateless EJBs are configured via <a href="config-candi.xtp">CDI</a>)</li>
@@ -37,9 +38,11 @@
       <li>&lt;min-free-memory> (see <a config-tag="memory-free-min"/>)</li>
       <li>&lt;management> (see <a config-tag="resin:JmxService"/>, <a config-tag="resin:LogService"/>, <a config-tag="resin:XaLogService"/>, <a config-tag="resin:AdminAuthenticator"/>)</li>
       <li>&lt;persistent-store> (No longer necessary. See <a href="clustering.xtp">clustering</a>.)</li>
+      <li>&lt;request-timeout> (see <a config-tag="socket-timeout"/>)</li>
       <li>&lt;resin:IfRemoteAddr> (see <a config-tag="resin:IfNetwork"/>)</li>
       <li>&lt;scheduled-task> (see <a config-tag="resin:ScheduledTask"/>)</li>
       <li>&lt;stat-service> (see <a config-tag="resin:StatService"/>)</li>
+      <li>&lt;thread-keepalive> (removed)</li>
       <li>&lt;xa-log-service> (see <a config-tag="resin:XaLogService"/>)</li>
       <li>resin:type attribute (see <a href="config-candi.xtp">CanDI documentation</a>)</li>
       <li>uri: convention (see <a href="config-candi.xtp">CanDI documentation</a>)</li>
