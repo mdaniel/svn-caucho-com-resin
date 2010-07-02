@@ -58,7 +58,8 @@ import java.util.logging.Logger;
 public class PDOStatement
   implements Iterable<Value>, EnvCleanup
 {
-  private static final Logger log = Logger.getLogger(PDOStatement.class.getName());
+  private static final Logger log = Logger.getLogger(
+      PDOStatement.class.getName());
   private static final L10N L = new L10N(PDOStatement.class);
 
   private static final Value[] NULL_VALUES = new Value[0];
@@ -190,7 +191,8 @@ public class PDOStatement
         continue;
       }
       // XXX: check what characters are allowed
-      else if (name != null && (ch == -1 || !Character.isJavaIdentifierPart(ch))) {
+      else if (name != null
+          && (ch == -1 || !Character.isJavaIdentifierPart(ch))) {
         if (_parameterNameMap == null)
           _parameterNameMap = new IntMap();
 
@@ -240,7 +242,8 @@ public class PDOStatement
     }
   }
 
-  public boolean bindColumn(Value column, @Reference Value var, @Optional("-1") int type)
+  public boolean bindColumn(
+      Value column, @Reference Value var, @Optional("-1") int type)
   {
     if (_bindColumns == null)
       _bindColumns = new ArrayList<BindColumn>();
@@ -295,7 +298,8 @@ public class PDOStatement
     if (_bindParams == null)
       _bindParams = new ArrayList<BindParam>();
 
-    BindParam bindParam = new BindParam(parameter, variable, dataType, length, driverOptions);
+    BindParam bindParam = new BindParam(
+        parameter, variable, dataType, length, driverOptions);
 
     _bindParams.add(bindParam);
 
@@ -354,7 +358,12 @@ public class PDOStatement
     }
   }
 
-  public BindParam createBindParam(Value parameter, Value value, int dataType, int length, Value driverOptions)
+  public BindParam createBindParam(
+      Value parameter,
+      Value value,
+      int dataType,
+      int length,
+      Value driverOptions)
   {
     return new BindParam(parameter, value, dataType, length, driverOptions);
   }
@@ -437,7 +446,9 @@ public class PDOStatement
     else if (inputParameters instanceof DefaultValue)
       parameters = null;
     else {
-      _env.warning(L.l("'{0}' is an unexpected argument, expected ArrayValue", inputParameters));
+      _env.warning(L.l(
+          "'{0}' is an unexpected argument, expected ArrayValue",
+          inputParameters));
       return false;
     }
 
@@ -491,8 +502,10 @@ public class PDOStatement
   /**
    * Fetch the next row.
    *
-   * @param fetchMode the mode, 0 to use the value set by {@link #setFetchMode}.
-   * @return a value, BooleanValue.FALSE if there are no more rows or an error occurs.
+   * @param fetchMode the mode, 0 to use the value
+   * set by {@link #setFetchMode}.
+   * @return a value, BooleanValue.FALSE if there
+   * are no more rows or an error occurs.
    */
   public Value fetch(@Optional int fetchMode,
                      @Optional("-1") int cursorOrientation,
@@ -512,7 +525,8 @@ public class PDOStatement
    * @param fetchMode
    * @param columnIndex 0-based column index when fetchMode is FETCH_BOTH
    */
-  public Value fetchAll(@Optional("0") int fetchMode, @Optional("-1") int columnIndex)
+  public Value fetchAll(
+      @Optional("0") int fetchMode, @Optional("-1") int columnIndex)
   {
     int effectiveFetchMode;
 
@@ -532,14 +546,16 @@ public class PDOStatement
     if (isUnique)
       throw new UnimplementedException("PDO.FETCH_UNIQUE");
 
-    effectiveFetchMode = effectiveFetchMode & (~(PDO.FETCH_GROUP | PDO.FETCH_UNIQUE));
+    effectiveFetchMode = effectiveFetchMode
+        & (~(PDO.FETCH_GROUP | PDO.FETCH_UNIQUE));
 
     switch (effectiveFetchMode) {
       case PDO.FETCH_COLUMN:
         break;
 
       case PDO.FETCH_LAZY:
-        _error.warning(L.l("PDO::FETCH_LAZY can't be used with PDOStatement::fetchAll()"));
+        _error.warning(L.l(
+            "PDO::FETCH_LAZY can't be used with PDOStatement::fetchAll()"));
         return BooleanValue.FALSE;
 
       default:
@@ -675,7 +691,8 @@ public class PDOStatement
 
     if (_fetchModeArgs.length == 2) {
       if (_fetchModeArgs[1].isArray()) {
-        // XXX: inefiicient, but args[1].getValueArray(_env) doesn't handle references
+        // XXX: inefiicient, but args[1].getValueArray(_env)
+        // doesn't handle references
         ArrayValue argsArray = (ArrayValue) _fetchModeArgs[1];
 
         ctorArgs = new Value[argsArray.getSize()];
@@ -735,7 +752,8 @@ public class PDOStatement
    * Fetch the next row.
    *
    * @param fetchMode the mode, 0 to use the value set by {@link #setFetchMode}.
-   * @return a value, BooleanValue.FALSE if there are no more rows or an error occurs.
+   * @return a value, BooleanValue.FALSE if there are no more
+   *  rows or an error occurs.
    */
   private Value fetchImpl(int fetchMode, int columnIndex)
   {
@@ -1192,7 +1210,8 @@ public class PDOStatement
     return setAttribute(attribute, value, false);
   }
 
-  public boolean setAttribute(int attribute, Value value, boolean isFromConstructor)
+  public boolean setAttribute(
+      int attribute, Value value, boolean isFromConstructor)
   {
     if (isFromConstructor) {
       switch (attribute) {
@@ -1280,7 +1299,8 @@ public class PDOStatement
         break;
 
      case PDO.FETCH_FUNC:
-       _error.warning(L.l("PDO::FETCH_FUNC can only be used with PDOStatement::fetchAll()"));
+       _error.warning(L.l(
+           "PDO::FETCH_FUNC can only be used with PDOStatement::fetchAll()"));
        return false;
 
       case PDO.FETCH_INTO:
@@ -1314,16 +1334,20 @@ public class PDOStatement
       }
       else if (value instanceof StringValue) {
         if (length < 0) {
-          _preparedStatement.setBinaryStream(index, value.toInputStream(), value.toString().length());
+          _preparedStatement.setBinaryStream(
+              index, value.toInputStream(), value.toString().length());
         }
         else
-          _preparedStatement.setBinaryStream(index, value.toInputStream(), (int) length);
+          _preparedStatement.setBinaryStream(
+              index, value.toInputStream(), (int) length);
       }
       else {
         InputStream inputStream = value.toInputStream();
 
         if (inputStream == null) {
-          _error.warning(L.l("type {0} ({1}) for parameter index {2} cannot be used for lob", value.getType(), value.getClass(), index));
+          _error.warning(L.l(
+              "type {0} ({1}) for parameter index {2} cannot be used for lob",
+              value.getType(), value.getClass(), index));
           return false;
         }
 
@@ -1353,7 +1377,8 @@ public class PDOStatement
           TempReadStream tempReadStream = new TempReadStream(tempBuffer);
           tempReadStream.setFreeWhenDone(true);
 
-          _preparedStatement.setBinaryStream(index, new ReadStream(tempReadStream), tempBuffer.getLength());
+          _preparedStatement.setBinaryStream(
+              index, new ReadStream(tempReadStream), tempBuffer.getLength());
         }
         else
           _preparedStatement.setBinaryStream(index, inputStream, (int) length);
@@ -1396,7 +1421,9 @@ public class PDOStatement
         _preparedStatement.setObject(index, null);
       }
       else {
-        _error.warning(L.l("unknown type {0} ({1}) for parameter index {2}", value.getType(), value.getClass(), index));
+        _error.warning(L.l(
+            "unknown type {0} ({1}) for parameter index {2}",
+            value.getType(), value.getClass(), index));
         return false;
       }
     }
@@ -1515,7 +1542,12 @@ public class PDOStatement
     private final int _length;
     private final Value _driverOptions;
 
-    public BindParam(Value parameter, Value value, int dataType, int length, Value driverOptions)
+    public BindParam(
+        Value parameter,
+        Value value,
+        int dataType,
+        int length,
+        Value driverOptions)
     {
       int index = resolveParameter(parameter);
 

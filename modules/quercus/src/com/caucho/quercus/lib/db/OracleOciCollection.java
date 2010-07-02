@@ -49,7 +49,8 @@ import java.util.logging.Logger;
  * Quercus Oracle OCI-Collection object oriented API.
  */
 public class OracleOciCollection {
-  private static final Logger log = Logger.getLogger(OracleOciCollection.class.getName());
+  private static final Logger log = Logger.getLogger(
+      OracleOciCollection.class.getName());
   private static final L10N L = new L10N(OracleOciCollection.class);
 
   // The Oracle array descriptor
@@ -144,7 +145,7 @@ public class OracleOciCollection {
         return false;
       }
 
-      _javaCollection.set(index-1, value.toJavaObject());
+      _javaCollection.set(index - 1, value.toJavaObject());
 
       return true;
 
@@ -180,14 +181,16 @@ public class OracleOciCollection {
   {
     try {
 
-      // oracle.sql.ARRAY array = new oracle.sql.ARRAY(arrayDesc, jdbcConn, arrayValues);
+      // oracle.sql.ARRAY array = new oracle.sql.ARRAY(
+      // arrayDesc, jdbcConn, arrayValues);
 
       Class clArrayDescriptor = Class.forName("oracle.sql.ArrayDescriptor");
 
-      Constructor constructor = classOracleARRAY.getDeclaredConstructor(new Class[]
+      Constructor constructor = classOracleARRAY.getDeclaredConstructor(
+          new Class[]
         {clArrayDescriptor, Connection.class, Object.class});
 
-      Object elements[] = _javaCollection.toArray();
+      Object []elements = _javaCollection.toArray();
 
       _collection = (Array) constructor.newInstance(new Object[]
         {_arrayDescriptor, _jdbcConn, elements});
@@ -220,7 +223,7 @@ public class OracleOciCollection {
         return BooleanValue.FALSE;
       }
 
-      return env.wrapJava(_javaCollection.get(index-1));
+      return env.wrapJava(_javaCollection.get(index - 1));
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);

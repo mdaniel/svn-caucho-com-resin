@@ -42,7 +42,8 @@ import java.util.logging.Logger;
  * this is essentially a JdbcStatementResource.
  */
 public class OracleStatement extends JdbcStatementResource {
-  private static final Logger log = Logger.getLogger(OracleStatement.class.getName());
+  private static final Logger log = Logger.getLogger(
+      OracleStatement.class.getName());
   private static final L10N L = new L10N(OracleStatement.class);
 
   // Oracle statement has a notion of number of fetched rows
@@ -50,13 +51,15 @@ public class OracleStatement extends JdbcStatementResource {
   private int _fetchedRows;
 
   // Binding variables for Oracle statements
-  private HashMap<String,Integer> _bindingVariables = new HashMap<String,Integer>();
+  private HashMap<String,Integer> _bindingVariables =
+      new HashMap<String,Integer>();
   private OracleOciLob _outParameter;
 
   // Oracle internal result buffer
   private Value _resultBuffer;
 
-  // Binding variables for Oracle statements with define_by_name (TOTALLY DIFFERENT FROM ?)
+  // Binding variables for Oracle statements with define_by_name
+  // (TOTALLY DIFFERENT FROM ?)
   //
   // Example:
   //

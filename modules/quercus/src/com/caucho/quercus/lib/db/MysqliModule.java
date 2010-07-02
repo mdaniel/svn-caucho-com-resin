@@ -302,7 +302,8 @@ public class MysqliModule extends AbstractQuercusModule {
     if (result.seek(env, rowNumber)) {
       return BooleanValue.TRUE;
     } else {
-      env.warning(L.l("Offset {0} is invalid for MySQL (or the query data is unbuffered)",
+      env.warning(L.l(
+          "Offset {0} is invalid for MySQL (or the query data is unbuffered)",
                       rowNumber));
       return BooleanValue.FALSE;
     }
@@ -916,11 +917,11 @@ public class MysqliModule extends AbstractQuercusModule {
    * Executes a query and returns the result.
    *
    */
-  public static Value mysqli_query(Env env,
-                                   @NotNull Mysqli conn,
-                                   StringValue sql,
-                                   @Optional("MYSQLI_STORE_RESULT") int resultMode)
-  {
+  public static Value mysqli_query(
+      Env env,
+      @NotNull Mysqli conn,
+      StringValue sql,
+      @Optional("MYSQLI_STORE_RESULT") int resultMode) {
     // ERRATUM: <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
     //  an unbuffered query, but that is not supported.
 
@@ -955,16 +956,16 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Connects to the database.
    */
-  public static boolean mysqli_real_connect(Env env,
-                                            @NotNull Mysqli mysqli,
-                                            @Optional("localhost") StringValue host,
-                                            @Optional StringValue userName,
-                                            @Optional StringValue password,
-                                            @Optional StringValue dbname,
-                                            @Optional("3306") int port,
-                                            @Optional StringValue socket,
-                                            @Optional int flags)
-  {
+  public static boolean mysqli_real_connect(
+      Env env,
+      @NotNull Mysqli mysqli,
+      @Optional("localhost") StringValue host,
+      @Optional StringValue userName,
+      @Optional StringValue password,
+      @Optional StringValue dbname,
+      @Optional("3306") int port,
+      @Optional StringValue socket,
+      @Optional int flags) {
     if (mysqli == null)
       return false;
 
@@ -1039,8 +1040,10 @@ public class MysqliModule extends AbstractQuercusModule {
   }
 
   /**
-   * Execute an single query against the database whose result can then be retrieved
-   * or stored using the mysqli_store_result() or mysqli_use_result() functions.
+   * Execute an single query against the database
+   * whose result can then be retrieved
+   * or stored using the mysqli_store_result()
+   * or mysqli_use_result() functions.
    */
   public static boolean mysqli_real_query(Env env,
                                           @NotNull Mysqli conn,
@@ -1073,7 +1076,8 @@ public class MysqliModule extends AbstractQuercusModule {
         Object arg = args[argIndex++];
 
         if (arg == null)
-          throw new IllegalArgumentException(L.l("argument `{0}' cannot be null", arg));
+          throw new IllegalArgumentException(
+              L.l("argument `{0}' cannot be null", arg));
 
         buf.append('\'');
         escapeString(buf, String.valueOf(arg));
@@ -1138,7 +1142,8 @@ public class MysqliModule extends AbstractQuercusModule {
    * <dt>i<dd>corresponding variable has type integer;
    * <dt>d<dd>corresponding variable has type double;
    * <dt>b<dd>corresponding variable is a blob and will be sent in packages
-   * <dt>s<dd>corresponding variable has type string (which really means all other types);
+   * <dt>s<dd>corresponding variable has type string
+   * (which really means all other types);
    * </dl>
    */
   public static boolean mysqli_stmt_bind_param(Env env,
@@ -1296,9 +1301,9 @@ public class MysqliModule extends AbstractQuercusModule {
    * Deprecated alias for {@link #mysqli_stmt_result_metadata}.
    */
   @ReturnNullAsFalse
-  public static JdbcResultResource mysqli_get_metadata(Env env,
-                                                       @NotNull MysqliStatement stmt)
-  {
+  public static JdbcResultResource mysqli_get_metadata(
+      Env env,
+      @NotNull MysqliStatement stmt) {
     return mysqli_stmt_result_metadata(env, stmt);
   }
 

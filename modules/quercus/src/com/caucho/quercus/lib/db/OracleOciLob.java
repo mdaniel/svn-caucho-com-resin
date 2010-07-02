@@ -57,7 +57,8 @@ import java.util.logging.Logger;
  * Quercus Oracle OCI-Lob object oriented API.
  */
 public class OracleOciLob {
-  private static final Logger log = Logger.getLogger(OracleOciLob.class.getName());
+  private static final Logger log = Logger.getLogger(
+      OracleOciLob.class.getName());
   private static final L10N L = new L10N(OracleOciLob.class);
 
   // The large object
@@ -90,20 +91,28 @@ public class OracleOciLob {
     try {
       classOracleBLOB = Class.forName("oracle.sql.BLOB");
       classOracleCLOB = Class.forName("oracle.sql.CLOB");
-      createTemporaryBLOB = classOracleBLOB.getDeclaredMethod("createTemporary",
-                                                              new Class[] {Connection.class,
-                                                                           Boolean.TYPE,
-                                                                           Integer.TYPE});
-      createTemporaryCLOB = classOracleCLOB.getDeclaredMethod("createTemporary",
-                                                              new Class[] {Connection.class,
-                                                                           Boolean.TYPE,
-                                                                           Integer.TYPE});
-      BLOB_DURATION_CALL = classOracleBLOB.getDeclaredField("DURATION_CALL").getInt(null);
-      BLOB_DURATION_SESSION = classOracleBLOB.getDeclaredField("DURATION_SESSION").getInt(null);
-      CLOB_DURATION_CALL = classOracleCLOB.getDeclaredField("DURATION_CALL").getInt(null);
-      CLOB_DURATION_SESSION = classOracleCLOB.getDeclaredField("DURATION_SESSION").getInt(null);
+      createTemporaryBLOB = classOracleBLOB.getDeclaredMethod(
+          "createTemporary",
+          new Class[]{Connection.class,
+              Boolean.TYPE,
+              Integer.TYPE});
+      createTemporaryCLOB = classOracleCLOB.getDeclaredMethod(
+          "createTemporary",
+          new Class[]{Connection.class,
+              Boolean.TYPE,
+              Integer.TYPE});
+      BLOB_DURATION_CALL = classOracleBLOB.getDeclaredField(
+          "DURATION_CALL").getInt(null);
+      BLOB_DURATION_SESSION = classOracleBLOB.getDeclaredField(
+          "DURATION_SESSION").getInt(null);
+      CLOB_DURATION_CALL = classOracleCLOB.getDeclaredField(
+          "DURATION_CALL").getInt(null);
+      CLOB_DURATION_SESSION = classOracleCLOB.getDeclaredField(
+          "DURATION_SESSION").getInt(null);
     } catch (Exception e) {
-      log.log(Level.FINER, L.l("Unable to load LOB classes or methods for oracle.sql.BLOB and oracle.sql.CLOB."));
+      log.log(Level.FINER, L.l(
+          "Unable to load LOB classes or methods for "
+              + "oracle.sql.BLOB and oracle.sql.CLOB."));
     }
   }
 
@@ -257,7 +266,7 @@ public class OracleOciLob {
             length = blobLength - offset;
           }
           long remaining = length;
-          byte zeroBuffer[] = new byte[128];
+          byte []zeroBuffer = new byte[128];
           while (remaining >= 128) {
             _outputStream.write(zeroBuffer, 0, 128);
             remaining -= 128;
@@ -282,7 +291,7 @@ public class OracleOciLob {
             length = clobLength - offset;
           }
           long remaining = length;
-          char spaceBuffer[] = new char[128];
+          char []spaceBuffer = new char[128];
           while (remaining >= 128) {
             _writer.write(spaceBuffer, 0, 128);
             remaining -= 128;
@@ -423,7 +432,7 @@ public class OracleOciLob {
 
         _outputStream = blob.setBinaryStream(0);
         long nbytes;
-        byte buffer[] = new byte[128];
+        byte []buffer = new byte[128];
         while ((nbytes = readStream.read(buffer, 0, 128)) > 0) {
           _outputStream.write(buffer, 0, (int) nbytes);
           _currentPointer += nbytes;
@@ -440,7 +449,7 @@ public class OracleOciLob {
 
         _writer = clob.setCharacterStream(0);
         long nchars;
-        char buffer[] = new char[128];
+        char []buffer = new char[128];
         while ((nchars = readStream.read(buffer, 0, 128)) > 0) {
           _writer.write(buffer, 0, (int) nchars);
           _currentPointer += nchars;
@@ -605,7 +614,8 @@ public class OracleOciLob {
         } else if (_lob instanceof Clob) {
           length = ((Clob) _lob).length();
         } else {
-          L.l("Unable to determine large object's length trying to seek with OCI_SEEK_END");
+          L.l("Unable to determine large object's "
+              + "length trying to seek with OCI_SEEK_END");
           return false;
         }
         _currentPointer = length + offset;
@@ -703,7 +713,7 @@ public class OracleOciLob {
       break;
     }
 
-    return "OracleOciLob("+typeName+")";
+    return "OracleOciLob(" + typeName + ")";
   }
 
   /**
@@ -851,7 +861,7 @@ public class OracleOciLob {
       InputStream is = blobFrom.getBinaryStream();
 
       long nbytes;
-      byte buffer[] = new byte[128];
+      byte []buffer = new byte[128];
       while ((nbytes = is.read(buffer)) > 0) {
         _outputStream.write(buffer, 0, (int) nbytes);
         _currentPointer += nbytes;
@@ -887,7 +897,7 @@ public class OracleOciLob {
       Reader reader = clobFrom.getCharacterStream();
 
       long nchars;
-      char buffer[] = new char[128];
+      char []buffer = new char[128];
       while ((nchars = reader.read(buffer)) > 0) {
         _writer.write(buffer, 0, (int) nchars);
         _currentPointer += nchars;

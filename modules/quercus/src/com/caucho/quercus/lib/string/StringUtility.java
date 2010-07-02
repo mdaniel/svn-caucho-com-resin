@@ -106,7 +106,8 @@ public class StringUtility
           Post.addFormValue(env, result, key,
                             new String[] { value }, isMagicQuotes);
         } else {
-          // If key is an exsiting array, then append this value to existing array
+          // If key is an exsiting array, then append
+          // this value to existing array
           // Only use extract(EXTR_OVERWRITE) on non-array variables or
           // non-existing arrays
           int openBracketIndex = key.indexOf('[');
@@ -124,7 +125,8 @@ public class StringUtility
               }
 
               if (closeBracketIndex > openBracketIndex + 1) {
-                String index = key.substring(key.indexOf('[') + 1, key.indexOf(']'));
+                String index = key
+                    .substring(key.indexOf('[') + 1, key.indexOf(']'));
                 v.put(env.createString(index), env.createString(value));
               } else {
                 v.put(env.createString(value));

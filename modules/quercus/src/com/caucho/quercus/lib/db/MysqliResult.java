@@ -294,7 +294,8 @@ public class MysqliResult extends JdbcResultResource {
         return fetchFieldImproved(env, md, offset);
       }
 
-      String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
+      String sql = "SHOW FULL COLUMNS FROM "
+          + fieldTable + " LIKE \'" + fieldName + "\'";
 
       MysqliResult metaResult;
 
@@ -667,7 +668,8 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns the following field flags: not_null, primary_key, multiple_key, blob,
+   * Returns the following field flags: not_null,
+   * primary_key, multiple_key, blob,
    * unsigned zerofill, binary, enum, auto_increment and timestamp
    * <p/>
    * it does not return the MySQL / PHP flag unique_key
@@ -701,8 +703,8 @@ public class MysqliResult extends JdbcResultResource {
         }
       }
 
-      final boolean isTimestamp = (jdbcType == Types.TIMESTAMP) &&
-        mysqlType.equals("TIMESTAMP");
+      final boolean isTimestamp = (jdbcType == Types.TIMESTAMP)
+          && mysqlType.equals("TIMESTAMP");
 
       if (isInResultString(2, "blob")
           || (jdbcType == Types.LONGVARCHAR)) {
@@ -719,20 +721,20 @@ public class MysqliResult extends JdbcResultResource {
         flags.append("unsigned");
       }
 
-      if (isInResultString(2, "zerofill") ||
-          isTimestamp) {
+      if (isInResultString(2, "zerofill")
+          || isTimestamp) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("zerofill");
       }
 
-      if (isInResultString(3, "bin") ||
-          (jdbcType == Types.BINARY) ||
-          (jdbcType == Types.LONGVARBINARY) ||
-          (jdbcType == Types.VARBINARY) ||
-          (jdbcType == Types.TIME) ||
-          isTimestamp ||
-          isInResultString(2, "date")) {
+      if (isInResultString(3, "bin")
+          || (jdbcType == Types.BINARY)
+          || (jdbcType == Types.LONGVARBINARY)
+          || (jdbcType == Types.VARBINARY)
+          || (jdbcType == Types.TIME)
+          || isTimestamp
+          || isInResultString(2, "date")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("binary");

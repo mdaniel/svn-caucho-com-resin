@@ -532,7 +532,8 @@ public class PDO implements EnvCleanup {
     try {
       closeStatements();
 
-      PDOStatement pdoStatement = new PDOStatement(_env, _conn, query, false, null);
+      PDOStatement pdoStatement = new PDOStatement(
+          _env, _conn, query, false, null);
       _lastPDOStatement = pdoStatement;
       return _env.wrapJava(pdoStatement);
     } catch (SQLException e) {
@@ -835,7 +836,8 @@ public class PDO implements EnvCleanup {
       dbname = "test";
 
     // PHP doc does not sure user and password as attributes for mysql,
-    // but in the pgsql doc  the dsn specified user and password override arguments
+    // but in the pgsql doc  the dsn specified user and
+    // password override arguments
     // passed to constructor
     String user = attr.get("user");
     if (user != null)

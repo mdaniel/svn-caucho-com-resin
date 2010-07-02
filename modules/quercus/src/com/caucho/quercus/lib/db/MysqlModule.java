@@ -139,7 +139,8 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns the client encoding
    */
-  public static StringValue mysql_client_encoding(Env env, @Optional Mysqli conn)
+  public static StringValue mysql_client_encoding(
+      Env env, @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
@@ -176,7 +177,8 @@ public class MysqlModule extends AbstractQuercusModule {
       return true;
     }
     else {
-      env.warning(L.l("connection is either not connected or is already closed"));
+      env.warning(
+          L.l("connection is either not connected or is already closed"));
 
       return false;
     }
@@ -234,7 +236,9 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result.seek(env, rowNumber)) {
       return true;
     } else {
-      env.warning(L.l("Offset {0} is invalid for MySQL (or the query data is unbuffered)",
+      env.warning(
+          L.l("Offset {0} is invalid for MySQL "
+              + "(or the query data is unbuffered)",
                       rowNumber));
       return false;
     }
@@ -396,7 +400,8 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Escapes special characters.
    *
-   * @see StringValue MysqliModule.mysqli_real_escape_string(JdbcConnectionResource, String)
+   * @see StringValue MysqliModule.mysqli_real_escape_string(
+   * JdbcConnectionResource, String)
    *
    * @return the escaped string
    */
@@ -527,7 +532,8 @@ public class MysqlModule extends AbstractQuercusModule {
       // NOT the maximum length of data that column is designed to hold.
 
       int maxLength = 0;
-      int notNull = md.isNullable(jdbcField) == ResultSetMetaData.columnNullable ? 0 : 1;
+      int notNull = md
+          .isNullable(jdbcField) == ResultSetMetaData.columnNullable ? 0 : 1;
       int numeric = JdbcColumnMetaData.isNumeric(jdbcColumnType) ? 1 : 0;
       int blob = JdbcColumnMetaData.isBlob(jdbcColumnType) ? 1 : 0;
       String type = result.getFieldType(fieldOffset, jdbcColumnType);
@@ -642,7 +648,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns a numerical row from the result, FALSE if no more rows.
    */
   @ReturnNullAsFalse
-  public static ArrayValue mysql_fetch_row(Env env, @NotNull MysqliResult result)
+  public static ArrayValue mysql_fetch_row(
+      Env env, @NotNull MysqliResult result)
   {
     if (result == null)
       return null;
@@ -651,10 +658,12 @@ public class MysqlModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the field flags of the specified field.  The flags are reported as
-   * a space separated list of words, the returned value can be split using explode().
+   * Returns the field flags of the specified field.  The flags
+   * are reported as a space separated list of words, the returned
+   * value can be split using explode().
    *
-   * The following flages are reported, older version of MySQL may not report all flags:
+   * The following flages are reported, older version of MySQL
+   * may not report all flags:
    * <ul>
    * <li> not_null
    * <li> primary_key
@@ -684,12 +693,13 @@ public class MysqlModule extends AbstractQuercusModule {
     Value fieldJdbcType = result.getJdbcType(fieldOffset);
     String fieldMysqlType = result.getMysqlType(fieldOffset);
 
-    if ((fieldTable == BooleanValue.FALSE) ||
-        (fieldJdbcType == BooleanValue.FALSE) ||
-        (fieldMysqlType == null))
+    if ((fieldTable == BooleanValue.FALSE)
+        || (fieldJdbcType == BooleanValue.FALSE)
+        || (fieldMysqlType == null))
       return BooleanValue.FALSE;
 
-    String sql = "SHOW FULL COLUMNS FROM " + fieldTable.toString() + " LIKE \'" + fieldName.toString() + "\'";
+    String sql = "SHOW FULL COLUMNS FROM "
+        + fieldTable.toString() + " LIKE \'" + fieldName.toString() + "\'";
 
     Mysqli conn = getConnection(env);
 
@@ -902,7 +912,8 @@ public class MysqlModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns a result pointer containing the databases available from the current mysql daemon.
+   * Returns a result pointer containing the
+   * databases available from the current mysql daemon.
    */
   public static Value mysql_list_dbs(Env env,
                                      @Optional Mysqli conn)
@@ -916,7 +927,9 @@ public class MysqlModule extends AbstractQuercusModule {
     // MySQL Connector/J 5.x returns 'SCHEME_NAME' as the column name
     // for "SHOW DATABASES", while 3.x returns 'Database'
     return mysql_query(env,
-                       env.createString("SELECT SCHEMA_NAME AS 'Database' FROM information_schema.SCHEMATA"),
+                       env.createString(
+                           "SELECT SCHEMA_NAME AS 'Database' "
+                               + "FROM information_schema.SCHEMATA"),
                        conn);
   }
 
@@ -949,7 +962,8 @@ public class MysqlModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     Value result = conn.query(env,
-                              env.createString("SELECT * FROM " + tableName + " WHERE NULL"),
+                              env.createString(
+                                  "SELECT * FROM " + tableName + " WHERE NULL"),
                               1);
 
     if (result == BooleanValue.FALSE)
@@ -1078,13 +1092,13 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns a new mysql connection.
    */
-  public static Value mysql_connect(Env env,
-                                    @Optional StringValue host,
-                                                    @Optional StringValue userName,
-                                                    @Optional StringValue password,
-                                                    @Optional boolean isNewLink,
-                                                    @Optional int flags)
-  {
+  public static Value mysql_connect(
+      Env env,
+      @Optional StringValue host,
+      @Optional StringValue userName,
+      @Optional StringValue password,
+      @Optional boolean isNewLink,
+      @Optional int flags) {
     int port = 3306;
     String socketStr = "";
     String hostStr = host.toString();

@@ -67,7 +67,8 @@ public class ClassesModule extends AbstractQuercusModule {
     else {
       QuercusClass cls = env.findClass(obj.toString());
       
-      return cls.callMethod(env, env.getThis(), name, name.hashCode(), args).copyReturn();
+      return cls.callMethod(
+          env, env.getThis(), name, name.hashCode(), args).copyReturn();
     }
   }
 

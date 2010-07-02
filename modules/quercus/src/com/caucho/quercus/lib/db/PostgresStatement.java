@@ -48,7 +48,8 @@ import java.util.regex.Pattern;
  * this is essentially a JdbcStatementResource.
  */
 public class PostgresStatement extends JdbcStatementResource {
-  private static final Logger log = Logger.getLogger(PostgresStatement.class.getName());
+  private static final Logger log = Logger.getLogger(
+      PostgresStatement.class.getName());
   private static final L10N L = new L10N(PostgresStatement.class);
 
   // Map JDBC ?,?,? to any unsorted or duplicated params.
@@ -83,7 +84,7 @@ public class PostgresStatement extends JdbcStatementResource {
       for (int i = 0; i < size; i++) {
         LongValue param = _preparedMapping.get(i);
 
-        Value paramV = getParam(param.toInt()-1);
+        Value paramV = getParam(param.toInt() - 1);
 
         if (paramV.equals(UnsetValue.UNSET)) {
           env.warning(L.l("Not all parameters are bound"));
@@ -92,7 +93,7 @@ public class PostgresStatement extends JdbcStatementResource {
 
         Object object = paramV.toJavaObject();
 
-        setObject(i+1, object);
+        setObject(i + 1, object);
       }
 
       return executeStatement();
@@ -126,7 +127,7 @@ public class PostgresStatement extends JdbcStatementResource {
         int phpParam;
         try {
           phpParam = Integer.parseInt(matcher.group(1));
-        } catch(Exception ex) {
+        } catch (Exception ex) {
           _preparedMapping.clear();
           return false;
         }

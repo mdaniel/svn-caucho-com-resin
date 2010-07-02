@@ -231,15 +231,23 @@ public class Mysqli extends JdbcConnectionResource {
 
       return jConn;
     } catch (SQLException e) {
-      env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
+      env.warning(
+          L.l("A link to the server could not be established.\n  "
+              + "url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
 
-      env.setSpecialValue("mysqli.connectErrno", LongValue.create(e.getErrorCode()));
-      env.setSpecialValue("mysqli.connectError", env.createString(e.getMessage()));
+      env.setSpecialValue(
+          "mysqli.connectErrno", LongValue.create(e.getErrorCode()));
+      env.setSpecialValue(
+          "mysqli.connectError", env.createString(e.getMessage()));
 
       return null;
     } catch (Exception e) {
-      env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
-      env.setSpecialValue("mysqli.connectError", env.createString(e.toString()));
+      env.warning(
+          L.l(
+              "A link to the server could not be established.\n  url={0}\n  "
+                  + "driver={1}\n  {2}", url, driver, e.toString()), e);
+      env.setSpecialValue(
+          "mysqli.connectError", env.createString(e.toString()));
 
       return null;
     }
@@ -374,7 +382,8 @@ public class Mysqli extends JdbcConnectionResource {
       return false;
     }
 
-    // XXX: Docs for mysqli_change_user indicate that if new user authorization fails,
+    // XXX: Docs for mysqli_change_user indicate that
+    // if new user authorization fails,
     // then the existing user perms are retained.
 
     close(getEnv());
@@ -476,8 +485,8 @@ public class Mysqli extends JdbcConnectionResource {
         try {
           Driver driver = DriverManager.getDriver("jdbc:mysql://localhost/");
 
-          version = driver.getMajorVersion() + "." +
-                    driver.getMinorVersion() + ".00";
+          version = driver.getMajorVersion() + "."
+              + driver.getMinorVersion() + ".00";
         }
         catch (SQLException e) {
           version = "0.00.00";
@@ -773,7 +782,8 @@ public class Mysqli extends JdbcConnectionResource {
    * Executes a query.
    *
    * @param env the PHP executing environment
-   * @param sql the escaped query string (can contain escape sequences like `\n' and `\Z')
+   * @param sql the escaped query string (can contain
+   * escape sequences like `\n' and `\Z')
    * @param resultMode ignored
    *
    * @return a {@link JdbcResultResource}, or null for failure
@@ -886,11 +896,13 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
-   * Execute an single query against the database whose result can then be retrieved
-   * or stored using the mysqli_store_result() or mysqli_use_result() functions.
+   * Execute an single query against the database whose result
+   * can then be retrieved or stored using the mysqli_store_result()
+   * or mysqli_use_result() functions.
    *
    * @param env the PHP executing environment
-   * @param query the escaped query string (can contain escape sequences like `\n' and `\Z')
+   * @param query the escaped query string (can contain
+   * escape sequences like `\n' and `\Z')
    */
   public boolean real_query(Env env,
                             StringValue query)
@@ -1447,7 +1459,7 @@ public class Mysqli extends JdbcConnectionResource {
       if (c == '\\') {
         queryBuffer.append(c);
         if (i < length - 1) {
-          queryBuffer.append(sql.charAt(i+1));
+          queryBuffer.append(sql.charAt(i + 1));
           i++;
         }
         continue;
@@ -1579,8 +1591,8 @@ public class Mysqli extends JdbcConnectionResource {
         end = version.lastIndexOf('.');
 
         major = Integer.valueOf(version.substring(0, start));
-        minor = Integer.valueOf(version.substring(start+1, end));
-        release = Integer.valueOf(version.substring(end+1));
+        minor = Integer.valueOf(version.substring(start + 1, end));
+        release = Integer.valueOf(version.substring(end + 1));
 
         checkedDriverVersion = major + "." + minor + "." + release;
 
@@ -1588,9 +1600,10 @@ public class Mysqli extends JdbcConnectionResource {
             || major == 3 && (minor > 1 || minor == 1 && release >= 14)) {
         }
         else {
-          String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
-                               "have issues with character encoding.  The " +
-                               "recommended JDBC version is 3.1.14/5+.", version);
+          String message = L.l(
+              "Your MySQL Connector/J JDBC {0} driver may "
+                  + "have issues with character encoding.  The "
+                  + "recommended JDBC version is 3.1.14/5+.", version);
 
           log.log(Level.WARNING, message);
           env.warning(message);

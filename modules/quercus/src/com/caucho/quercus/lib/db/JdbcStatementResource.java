@@ -74,7 +74,8 @@ public class JdbcStatementResource {
   private int _errorCode;
 
   // Statement type
-  // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
+  // (SELECT, UPDATE, DELETE, INSERT, CREATE,
+  // DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
   private String _stmtType;
 
   /**
@@ -171,7 +172,8 @@ public class JdbcStatementResource {
     }
 
     if ((size == 0) || (size != numColumns)) {
-      env.warning(L.l("number of bound variables does not equal number of columns"));
+      env.warning(
+          L.l("number of bound variables does not equal number of columns"));
       return false;
     }
 
@@ -321,7 +323,8 @@ public class JdbcStatementResource {
         int size = _results.length;
 
         for (int i = 0; i < size; i++) {
-          _results[i].set(_resultResource.getColumnValue(env, _rs, _metaData, i + 1));
+          _results[i].set(_resultResource.getColumnValue(
+              env, _rs, _metaData, i + 1));
         }
         return BooleanValue.TRUE;
       } else {
@@ -442,13 +445,15 @@ public class JdbcStatementResource {
    * Returns this statement type.
    *
    * @return this statement type:
-   * SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, or UNKNOWN.
+   * SELECT, UPDATE, DELETE, INSERT, CREATE, DROP,
+   * ALTER, BEGIN, DECLARE, or UNKNOWN.
    */
   public String getStatementType()
   {
     // Oracle Statement type
     // Also used internally in Postgres (see PostgresModule)
-    // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
+    // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP,
+    // ALTER, BEGIN, DECLARE, UNKNOWN)
 
     _stmtType = _query;
     _stmtType = _stmtType.replaceAll("\\s+.*", "");
@@ -457,7 +462,8 @@ public class JdbcStatementResource {
       _stmtType = "UNKNOWN";
     else {
       _stmtType = _stmtType.toUpperCase();
-      String s = _stmtType.replaceAll("(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
+      String s = _stmtType.replaceAll(
+          "(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
       if (! s.equals(""))
         _stmtType = "UNKNOWN";
     }
@@ -667,10 +673,12 @@ public class JdbcStatementResource {
             Constructor constructor = cl.getDeclaredConstructor(null);
             Object object = constructor.newInstance();
 
-            Method method = cl.getDeclaredMethod("setType", new Class[] {String.class});
+            Method method = cl.getDeclaredMethod(
+                "setType", new Class[] {String.class});
             method.invoke(object, new Object[] {typeName});
 
-            method = cl.getDeclaredMethod("setValue", new Class[] {String.class});
+            method = cl.getDeclaredMethod(
+                "setValue", new Class[] {String.class});
             method.invoke(object, new Object[] {param});
 
             _stmt.setObject(i, object, type);
@@ -686,7 +694,8 @@ public class JdbcStatementResource {
             String s = param.toString();
 
             if (s.length() == 0) {
-              throw new IllegalArgumentException(L.l("argument `{0}' cannot be empty", param));
+              throw new IllegalArgumentException(
+                  L.l("argument `{0}' cannot be empty", param));
             } else {
 
               String money = s;
@@ -702,11 +711,13 @@ public class JdbcStatementResource {
                 // come late, otherwise. See php/43p8.
                 Double.parseDouble(s);
               } catch (Exception ex) {
-                throw new IllegalArgumentException(L.l("cannot convert argument `{0}' to money", param));
+                throw new IllegalArgumentException(L.l(
+                    "cannot convert argument `{0}' to money", param));
               }
 
               Class cl = Class.forName("org.postgresql.util.PGmoney");
-              Constructor constructor = cl.getDeclaredConstructor(new Class[] {String.class});
+              Constructor constructor = cl.getDeclaredConstructor(
+                  new Class[] {String.class});
               Object object = constructor.newInstance(new Object[] {money});
 
               _stmt.setObject(i, object, Types.OTHER);

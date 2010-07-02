@@ -286,9 +286,9 @@ public class NetworkModule extends AbstractQuercusModule {
   {
     // php/1m02
 
-    InetAddress ip[] = null;
+    InetAddress []ip = null;
 
-    try{
+    try {
       ip = InetAddress.getAllByName(hostname);
     }
     catch (Exception e) {
@@ -328,10 +328,10 @@ public class NetworkModule extends AbstractQuercusModule {
       return null;
     }
 
-    String formIPv4 = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+    String formIPv4 = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
+        + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
+        + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
+        + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
 
     CharSequence ipToCS = ip.subSequence(0, ip.length());
 
@@ -341,7 +341,7 @@ public class NetworkModule extends AbstractQuercusModule {
       return null;
     }
 
-    String splitIP[] = null;
+    String []splitIP = null;
 
     try {
       splitIP = ip.split("\\.");
@@ -354,7 +354,7 @@ public class NetworkModule extends AbstractQuercusModule {
       return ip;
     }
 
-    byte addr[] = new byte[splitIP.length];
+    byte []addr = new byte[splitIP.length];
 
     for (int k = 0; k < splitIP.length; k++) {
       Integer intForm = new Integer(splitIP[k]);
@@ -364,7 +364,7 @@ public class NetworkModule extends AbstractQuercusModule {
 
     InetAddress host = null;
 
-    try{
+    try {
       host = InetAddress.getByAddress(addr);
     }
     catch (Exception e) {
@@ -401,7 +401,7 @@ public class NetworkModule extends AbstractQuercusModule {
   {
     // php/1m05
 
-    for (Map.Entry<String, LongValue> entry: _protoToNum.entrySet())
+    for (Map.Entry<String, LongValue> entry : _protoToNum.entrySet())
       if (entry.getValue().toLong() == protoNumber)
         return entry.getKey();
 
@@ -446,11 +446,11 @@ public class NetworkModule extends AbstractQuercusModule {
   {
     // php/1m07
 
-    for (Map.Entry<String, ServiceNode> entry: _servToNum.entrySet()) {
+    for (Map.Entry<String, ServiceNode> entry : _servToNum.entrySet()) {
       ServiceNode node = entry.getValue();
 
-      if (node.getPort().toLong() == port &&
-          node.protocolCheck(protocol))
+      if (node.getPort().toLong() == port
+          && node.protocolCheck(protocol))
               return entry.getKey();
     }
 
@@ -483,7 +483,8 @@ public class NetworkModule extends AbstractQuercusModule {
       if (type.equals("ANY") || type.equals("ALL"))
         attributes = ictx.getAttributes("dns:/" + hostname);
       else
-        attributes = ictx.getAttributes("dns:/" + hostname, new String[] { type });
+        attributes = ictx.getAttributes(
+            "dns:/" + hostname, new String[] { type });
 
 
       ArrayValue hosts =  new ArrayValueImpl();
@@ -506,7 +507,7 @@ public class NetworkModule extends AbstractQuercusModule {
           String target = String.valueOf(attrList.next());
 
           if (target.endsWith("."))
-            target = target.substring(0, target.length() -1);
+            target = target.substring(0, target.length() - 1);
 
           int weight = 0;
 
@@ -647,7 +648,8 @@ public class NetworkModule extends AbstractQuercusModule {
       if (typeName == null)
         attributes = ictx.getAttributes("dns:/" + hostname);
       else
-        attributes = ictx.getAttributes("dns:/" + hostname, new String[] { typeName });
+        attributes = ictx.getAttributes(
+            "dns:/" + hostname, new String[] { typeName });
 
       NamingEnumeration list = attributes.getAll();
 
@@ -664,7 +666,7 @@ public class NetworkModule extends AbstractQuercusModule {
           String target = attr;
 
           if (target.endsWith("."))
-            target = target.substring(0, target.length() -1);
+            target = target.substring(0, target.length() - 1);
 
           ArrayValueImpl recordValue = new ArrayValueImpl();
           recordValue.put("host", hostname);
