@@ -889,9 +889,9 @@ public abstract class Expr extends ValueExpression {
   /**
    * Write to the *.java stream escaping Java reserved characters.
    *
-   * @param out the output stream to the *.java code.
+   * @param os the output stream to the *.java code.
    *
-   * @param value the value to be converted.
+   * @param string the value to be converted.
    */
   public static void printEscapedString(WriteStream os, String string)
     throws IOException
@@ -1008,7 +1008,7 @@ public abstract class Expr extends ValueExpression {
    * Write to the stream escaping XML reserved characters.
    *
    * @param out the output stream.
-   * @param value the value to be converted.
+   * @param in the value to be converted.
    */
   public static void toStreamEscaped(Writer out, Reader in)
     throws IOException
@@ -1231,43 +1231,52 @@ public abstract class Expr extends ValueExpression {
   public static Object coerceToType(Object obj, Class<?> targetType)
     throws ELException
   {
-    CoerceType type = _coerceMap.get(targetType);
-
-    if (targetType.isEnum())
-      return Expr.toEnum(obj, (Class<? extends Enum>) targetType);
-
-    if (type == null)
+    if (targetType == null)
       return obj;
 
-    switch (type) {
-    case BOOLEAN:
-      return Expr.toBoolean(obj, null) ? Boolean.TRUE : Boolean.FALSE;
-    case CHARACTER:
-      return Expr.toCharacter(obj, null);
-    case BYTE:
-      return new Byte((byte) Expr.toLong(obj, null));
-    case SHORT:
-      return new Short((short) Expr.toLong(obj, null));
-    case INTEGER:
-      return new Integer((int) Expr.toLong(obj, null));
-    case LONG:
-      return new Long(Expr.toLong(obj, null));
-    case FLOAT:
-      return new Float((float) Expr.toDouble(obj, null));
-    case DOUBLE:
-      return new Double(Expr.toDouble(obj, null));
-    case STRING:
-      if (obj == null)
-        return "";
-      else
-        return obj.toString();
-    case BIG_DECIMAL:
-      return Expr.toBigDecimal(obj, null);
-    case BIG_INTEGER:
-      return Expr.toBigInteger(obj, null);
+    CoerceType type = _coerceMap.get(targetType);
+
+    if (type != null) {
+      switch (type) {
+      case BOOLEAN:
+        return Expr.toBoolean(obj, null) ? Boolean.TRUE : Boolean.FALSE;
+      case CHARACTER:
+        return Expr.toCharacter(obj, null);
+      case BYTE:
+        return new Byte((byte) Expr.toLong(obj, null));
+      case SHORT:
+        return new Short((short) Expr.toLong(obj, null));
+      case INTEGER:
+        return new Integer((int) Expr.toLong(obj, null));
+      case LONG:
+        return new Long(Expr.toLong(obj, null));
+      case FLOAT:
+        return new Float((float) Expr.toDouble(obj, null));
+      case DOUBLE:
+        return new Double(Expr.toDouble(obj, null));
+      case STRING:
+        if (obj == null)
+          return "";
+        else
+          return obj.toString();
+      case BIG_DECIMAL:
+        return Expr.toBigDecimal(obj, null);
+      case BIG_INTEGER:
+        return Expr.toBigInteger(obj, null);
+      case OBJECT:
+        return obj;
+      }
+    } else if (targetType.isEnum()) {
+      return Expr.toEnum(obj, (Class<? extends Enum>) targetType);
+    } else if (obj == null) {
+      return null;
+    } else if (targetType.isAssignableFrom(obj.getClass())) {
+      return obj;
     }
 
-    return null;
+    throw new ELException(L.l("unable to convert {0} to type {1}",
+                              obj,
+                              targetType));
   }
 
   /**
@@ -1337,7 +1346,8 @@ public abstract class Expr extends ValueExpression {
     BYTE,
     BIG_INTEGER,
     BIG_DECIMAL,
-    VOID
+    VOID,
+    OBJECT
   };
 
   static {
@@ -1371,6 +1381,7 @@ public abstract class Expr extends ValueExpression {
     _coerceMap.put(BigInteger.class, CoerceType.BIG_INTEGER);
     
     _coerceMap.put(void.class, CoerceType.VOID);
+    _coerceMap.put(Object.class, CoerceType.OBJECT);
   }
 
   static {
