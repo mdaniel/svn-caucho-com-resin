@@ -116,7 +116,7 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
    */
   public String getLanguageVersion()
   {
-    return "5.0.4";
+    return "5.3.2";
   }
 
   /**
