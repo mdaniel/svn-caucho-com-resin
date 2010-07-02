@@ -60,14 +60,16 @@ public class PathMarshal extends Marshal
   public Value unmarshal(Env env, Object value)
   {
     // XXX: need test
-    return env.getQuercus().getJavaClassDefinition(value.getClass().getName()).wrap(env, value);
+    return env.getQuercus()
+      .getJavaClassDefinition(value.getClass().getName())
+      .wrap(env, value);
   }
   
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue instanceof JavaValue &&
-        Path.class.isAssignableFrom(argValue.toJavaObject().getClass()))
+    if (argValue instanceof JavaValue
+        && Path.class.isAssignableFrom(argValue.toJavaObject().getClass()))
       return Marshal.ZERO;
     else if (argValue.isString())
       return Marshal.THREE;

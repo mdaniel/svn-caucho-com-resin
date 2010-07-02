@@ -49,7 +49,10 @@ public class ObjectMethodVarExpr extends Expr {
 
   protected Expr []_fullArgs;
 
-  public ObjectMethodVarExpr(Location location, Expr objExpr, Expr name, ArrayList<Expr> args)
+  public ObjectMethodVarExpr(Location location,
+                             Expr objExpr,
+                             Expr name,
+                             ArrayList<Expr> args)
   {
     super(location);
     _objExpr = objExpr;
@@ -60,7 +63,10 @@ public class ObjectMethodVarExpr extends Expr {
     args.toArray(_args);
   }
 
-  public ObjectMethodVarExpr(Location location, Expr objExpr, Expr name, Expr []args)
+  public ObjectMethodVarExpr(Location location,
+                             Expr objExpr,
+                             Expr name,
+                             Expr []args)
   {
     super(location);
     _objExpr = objExpr;

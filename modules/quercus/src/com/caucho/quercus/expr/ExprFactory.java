@@ -688,8 +688,10 @@ public class ExprFactory {
 
     if (left.getValue() instanceof LiteralBinaryStringExpr
         && tail.getValue() instanceof LiteralBinaryStringExpr) {
-      LiteralBinaryStringExpr leftString = (LiteralBinaryStringExpr) left.getValue();
-      LiteralBinaryStringExpr rightString = (LiteralBinaryStringExpr) tail.getValue();
+      LiteralBinaryStringExpr leftString
+        = (LiteralBinaryStringExpr) left.getValue();
+      LiteralBinaryStringExpr rightString
+        = (LiteralBinaryStringExpr) tail.getValue();
 
       try {
         byte []bytes = (leftString.evalConstant().toString()
@@ -1270,7 +1272,8 @@ public class ExprFactory {
    * Creates an expr statement
    */
   public final BlockStatement createBlockImpl(Location loc,
-                                              ArrayList<Statement> statementList)
+                                              ArrayList<Statement> statementList
+  )
   {
     Statement []statements = new Statement[statementList.size()];
 

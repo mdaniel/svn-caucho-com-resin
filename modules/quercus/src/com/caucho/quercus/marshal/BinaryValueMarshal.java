@@ -63,7 +63,10 @@ public class BinaryValueMarshal extends Marshal
   {
     Value arg = value.toBinaryValue(env);
 
-    assert arg instanceof BinaryValue : "" + value.getClass() + ".toBinaryValue() returned a " + arg.getClass();
+    assert arg instanceof BinaryValue : ""
+                                        + value.getClass()
+                                        + ".toBinaryValue() returned a " 
+                                        + arg.getClass();
 
     return arg;
   }

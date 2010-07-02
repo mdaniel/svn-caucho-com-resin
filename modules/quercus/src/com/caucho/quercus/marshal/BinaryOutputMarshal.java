@@ -100,7 +100,8 @@ public class BinaryOutputMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof JavaValue
-        && OutputStream.class.isAssignableFrom(argValue.toJavaObject().getClass()))
+        && OutputStream.class.isAssignableFrom(
+      argValue.toJavaObject().getClass()))
       return Marshal.ZERO;
     else
       return Marshal.FOUR;

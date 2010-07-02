@@ -83,7 +83,8 @@ public class Quercus
 
   public static void printUsage()
   {
-    System.out.println("usage: com.caucho.quercus.Quercus [flags] <file> [php-args]");
+    System.out
+      .println("usage: com.caucho.quercus.Quercus [flags] <file> [php-args]");
     System.out.println(" -f            : Explicitly set the script filename.");
     System.out.println(" -d name=value : Sets a php ini value.");
   }

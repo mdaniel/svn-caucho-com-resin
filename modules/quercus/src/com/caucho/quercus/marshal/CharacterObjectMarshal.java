@@ -66,7 +66,9 @@ public class CharacterObjectMarshal extends Marshal
   {
     if (argValue.isUnicode() && argValue.length() == 1)
       return Marshal.ONE;
-    else if (argValue.isString() && !argValue.isBinary() && argValue.length() == 1)
+    else if (argValue.isString()
+             && !argValue.isBinary()
+             && argValue.length() == 1)
       return Marshal.ONE; // php/0ch1
     else if (argValue.isLongConvertible())
       return Marshal.THREE;

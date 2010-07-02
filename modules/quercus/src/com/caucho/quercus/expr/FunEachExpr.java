@@ -86,7 +86,8 @@ public class FunEachExpr extends AbstractUnaryExpr {
       return array.each();
     }
     else {
-      env.warning(L.l("each() argument must be an array at '{0}'", value.getClass().getSimpleName()));
+      env.warning(L.l("each() argument must be an array at '{0}'",
+                      value.getClass().getSimpleName()));
     
       return BooleanValue.FALSE;
     }

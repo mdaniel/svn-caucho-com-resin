@@ -92,7 +92,8 @@ public class ClassConstructorExpr extends Expr {
     QuercusClass cl = env.findClass(_className);
 
     if (cl == null)
-      throw env.createErrorException(L.l("{0} is an unknown class", _className));
+      throw env.createErrorException(L.l("{0} is an unknown class",
+                                         _className));
 
     AbstractFunction fun = cl.getFunction(_name);
     

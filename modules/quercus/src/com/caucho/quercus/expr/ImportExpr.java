@@ -72,7 +72,7 @@ public class ImportExpr extends Expr
     if (_isWildcard)
       return "import " + _name + ".*;";
     else
-      return "import " + _name +";";
+      return "import " + _name + ";";
   }
 }
 

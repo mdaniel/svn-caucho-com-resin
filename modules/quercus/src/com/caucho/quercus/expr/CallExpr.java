@@ -195,7 +195,8 @@ public class CallExpr extends Expr {
           _funId = env.findFunctionId(_nsName);
       
         if (_funId <= 0) {
-          env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
+          env.error(getLocationLine(),
+                    L.l("'{0}' is an unknown function.", _name));
 
           return NullValue.NULL;
         }

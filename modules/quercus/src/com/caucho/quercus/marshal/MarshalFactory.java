@@ -188,7 +188,7 @@ public class MarshalFactory {
     else if (void.class.equals(argType)) {
       marshal = VoidMarshal.MARSHAL;
     }
-    else if (Calendar.class.equals(argType)){
+    else if (Calendar.class.equals(argType)) {
       marshal = CalendarMarshal.MARSHAL;
     }
     else if (Date.class.equals(argType)) {
@@ -259,18 +259,20 @@ public class MarshalFactory {
     if (!isNullAsFalse)
       return marshal;
     else {
-      if (Value.class.equals(argType) ||
-          Boolean.class.equals(argType) ||
-          Byte.class.equals(argType) ||
-          Short.class.equals(argType) ||
-          Integer.class.equals(argType) ||
-          Long.class.equals(argType) ||
-          Float.class.equals(argType) ||
-          Double.class.equals(argType) ||
-          Character.class.equals(argType)) {
+      if (Value.class.equals(argType)
+          || Boolean.class.equals(argType)
+          || Byte.class.equals(argType)
+          || Short.class.equals(argType)
+          || Integer.class.equals(argType)
+          || Long.class.equals(argType)
+          || Float.class.equals(argType)
+          || Double.class.equals(argType)
+          || Character.class.equals(argType)) {
 
         String shortName = argType.getSimpleName();
-        throw new UnsupportedOperationException("@ReturnNullAsFalse cannot be used with return type `"+shortName+"'");
+        throw new UnsupportedOperationException(
+          "@ReturnNullAsFalse cannot be used with return type `"
+          + shortName + "'");
       }
 
       return new NullAsFalseMarshal(marshal);

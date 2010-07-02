@@ -205,7 +205,7 @@ abstract public class AbstractFunction extends Callback {
    */
   public void setClosure(boolean isClosure)
   {
-    _isClosure= isClosure;
+    _isClosure = isClosure;
   }
   
   /**
@@ -768,18 +768,20 @@ abstract public class AbstractFunction extends Callback {
   
   protected Value errorProtectedAccess(Env env, Value oldThis)
   {
-    return env.error(L.l("Cannot call protected method {0}::{1}() from '{2}' context",
-                         getDeclaringClassName(),
-                         getName(),
-                         oldThis != null ? oldThis.getClassName() : null));
+    return env.error(L.l(
+      "Cannot call protected method {0}::{1}() from '{2}' context",
+      getDeclaringClassName(),
+      getName(),
+      oldThis != null ? oldThis.getClassName() : null));
   }
   
   protected Value errorPrivateAccess(Env env, Value oldThis)
   {
-    return env.error(L.l("Cannot call private method {0}::{1}() from '{2}' context",
-                         getDeclaringClassName(),
-                         getName(),
-                         oldThis != null ? oldThis.getClassName() : null));
+    return env.error(L.l(
+      "Cannot call private method {0}::{1}() from '{2}' context",
+      getDeclaringClassName(),
+      getName(),
+      oldThis != null ? oldThis.getClassName() : null));
   }
   
   @Override

@@ -49,8 +49,11 @@ public class FunIncludeExpr extends AbstractUnaryExpr {
 
     _dir = sourceFile.getParent();
   }
-  
-  public FunIncludeExpr(Location location, Path sourceFile, Expr expr, boolean isRequire)
+
+  public FunIncludeExpr(Location location,
+                        Path sourceFile,
+                        Expr expr,
+                        boolean isRequire)
   {
     this(location, sourceFile, expr);
 

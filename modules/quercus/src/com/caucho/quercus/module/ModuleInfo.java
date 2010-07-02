@@ -196,7 +196,8 @@ public class ModuleInfo {
       if (method.getDeclaringClass().equals(Object.class))
         continue;
 
-      if (method.getDeclaringClass().isAssignableFrom(AbstractQuercusModule.class))
+      if (method.getDeclaringClass()
+        .isAssignableFrom(AbstractQuercusModule.class))
         continue;
 
       if (! Modifier.isPublic(method.getModifiers()))
@@ -220,15 +221,17 @@ public class ModuleInfo {
         continue;
 
       if (hasCheckedException(method)) {
-        log.warning(L.l("Module method '{0}.{1}' may not throw checked exceptions",
-                        method.getDeclaringClass().getName(),
-                        method.getName()));
+        log.warning(L.l(
+          "Module method '{0}.{1}' may not throw checked exceptions",
+          method.getDeclaringClass().getName(),
+          method.getName()));
         continue;
       }
 
       try {
         if (method.getName().startsWith("quercus_"))
-          throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method));
+          throw new UnsupportedOperationException(L.l("{0}: use @Name instead",
+                                                      method));
 
         StaticFunction function
           = _context.createStaticFunction(_module, method);
@@ -262,13 +265,13 @@ public class ModuleInfo {
   {
     if (obj == null)
       return NullValue.NULL;
-    else if (Byte.class.equals(obj.getClass()) ||
-             Short.class.equals(obj.getClass()) ||
-             Integer.class.equals(obj.getClass()) ||
-             Long.class.equals(obj.getClass())) {
+    else if (Byte.class.equals(obj.getClass())
+             || Short.class.equals(obj.getClass())
+             || Integer.class.equals(obj.getClass())
+             || Long.class.equals(obj.getClass())) {
       return LongValue.create(((Number) obj).longValue());
-    } else if (Float.class.equals(obj.getClass()) ||
-               Double.class.equals(obj.getClass())) {
+    } else if (Float.class.equals(obj.getClass())
+               || Double.class.equals(obj.getClass())) {
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
       // XXX: need unicode semantics check

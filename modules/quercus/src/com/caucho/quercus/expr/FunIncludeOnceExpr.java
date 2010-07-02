@@ -51,8 +51,11 @@ public class FunIncludeOnceExpr extends AbstractUnaryExpr {
     if (! sourceFile.getScheme().equals("string"))
       _dir = sourceFile.getParent();
   }
-  
-  public FunIncludeOnceExpr(Location location, Path sourceFile, Expr expr, boolean isRequire)
+
+  public FunIncludeOnceExpr(Location location,
+                            Path sourceFile,
+                            Expr expr,
+                            boolean isRequire)
   {
     this(location, sourceFile, expr);
 

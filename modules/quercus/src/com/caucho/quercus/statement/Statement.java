@@ -124,7 +124,8 @@ abstract public class Statement {
     Throwable rootCause = t;
 
     // guard against circular cause
-    IdentityHashMap<Throwable, Boolean> causes = new IdentityHashMap<Throwable, Boolean>();
+    IdentityHashMap<Throwable, Boolean> causes
+      = new IdentityHashMap<Throwable, Boolean>();
 
     causes.put(rootCause, Boolean.TRUE);
 
@@ -162,8 +163,12 @@ abstract public class Statement {
       int rootCauseIndex = rootCauseStackTrace.length - 1;
 
       while (rootCauseIndex >= 0 &&  quercusExIndex >= 0) {
-        StackTraceElement rootCauseElement = rootCauseStackTrace[rootCauseIndex];
-        StackTraceElement quercusExElement = quercusExStackTrace[quercusExIndex];
+        StackTraceElement
+          rootCauseElement
+          = rootCauseStackTrace[rootCauseIndex];
+        StackTraceElement
+          quercusExElement
+          = quercusExStackTrace[quercusExIndex];
 
         if (! quercusExElement.equals(rootCauseElement))
           break;

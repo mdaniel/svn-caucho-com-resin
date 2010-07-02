@@ -41,7 +41,10 @@ public class ConditionalExpr extends Expr {
   protected final Expr _trueExpr;
   protected final Expr _falseExpr;
 
-  public ConditionalExpr(Location location, Expr test, Expr trueExpr, Expr falseExpr)
+  public ConditionalExpr(Location location,
+                         Expr test,
+                         Expr trueExpr,
+                         Expr falseExpr)
   {
     super(location);
     _test = test;

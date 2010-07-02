@@ -770,7 +770,9 @@ public class QuercusContext
       type = Class.forName(className, false, _loader);
     }
     catch (ClassNotFoundException e) {
-      throw new QuercusRuntimeException(L.l("`{0}' not valid: {1}", className, e.toString()), e);
+      throw new QuercusRuntimeException(L.l("`{0}' not valid: {1}",
+                                            className,
+                                            e.toString()), e);
     }
 
     addJavaClass(phpName, type);
@@ -782,7 +784,8 @@ public class QuercusContext
   public void addImplClass(String name, Class type)
     throws ConfigException
   {
-    throw new UnsupportedOperationException("XXX: need to merge with ModuleContext: " + name);
+    throw new UnsupportedOperationException(
+      "XXX: need to merge with ModuleContext: " + name);
     /*
     try {
       introspectJavaImplClass(name, type, null);
@@ -1965,8 +1968,8 @@ public class QuercusContext
              || Integer.class.equals(obj.getClass())
              || Long.class.equals(obj.getClass())) {
       return LongValue.create(((Number) obj).longValue());
-    } else if (Float.class.equals(obj.getClass()) ||
-               Double.class.equals(obj.getClass())) {
+    } else if (Float.class.equals(obj.getClass())
+               || Double.class.equals(obj.getClass())) {
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
       // XXX: i18n
@@ -2125,7 +2128,8 @@ public class QuercusContext
           _quantumCount = 0;
           
           try {
-            ArrayList<Env> activeEnv = new ArrayList<Env>(_activeEnvSet.keySet());
+            ArrayList<Env> activeEnv
+              = new ArrayList<Env>(_activeEnvSet.keySet());
             
             for (Env env : activeEnv) {
               env.updateTimeout();
@@ -2168,7 +2172,8 @@ public class QuercusContext
                     + FileModule.PATH_SEPARATOR
                     + "/usr/share/pear";
 
-    INI_INCLUDE_PATH = _ini.add("include_path", includePath, IniDefinition.PHP_INI_ALL);
+    INI_INCLUDE_PATH = _ini.add(
+      "include_path", includePath, IniDefinition.PHP_INI_ALL);
     */
   }
 
@@ -2177,7 +2182,8 @@ public class QuercusContext
   public static final IniDefinition INI_REGISTER_LONG_ARRAYS
     = _ini.add("register_long_arrays", true, IniDefinition.PHP_INI_PERDIR);
   public static final IniDefinition INI_ALWAYS_POPULATE_RAW_POST_DATA
-    = _ini.add("always_populate_raw_post_data", false, IniDefinition.PHP_INI_PERDIR);
+    = _ini.add(
+    "always_populate_raw_post_data", false, IniDefinition.PHP_INI_PERDIR);
 
   // unicode ini
   public static final IniDefinition INI_UNICODE_SEMANTICS
@@ -2187,7 +2193,8 @@ public class QuercusContext
   public static final IniDefinition INI_UNICODE_FROM_ERROR_MODE
     = _ini.add("unicode.from_error_mode", "2", IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_FROM_ERROR_SUBST_CHAR
-    = _ini.add("unicode.from_error_subst_char", "3f", IniDefinition.PHP_INI_ALL);
+    = _ini.add(
+    "unicode.from_error_subst_char", "3f", IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_HTTP_INPUT_ENCODING
     = _ini.add("unicode.http_input_encoding", null, IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_OUTPUT_ENCODING

@@ -102,7 +102,8 @@ public class JavaCollectionAdapter extends JavaAdapter
   public Value putImpl(Value key, Value value)
   {
     if (key.toInt() != getSize())
-      throw new UnsupportedOperationException("random assignment into Collection");
+      throw new UnsupportedOperationException(
+        "random assignment into Collection");
 
     _collection.add(value.toJavaObject());
     

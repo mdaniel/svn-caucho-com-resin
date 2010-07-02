@@ -91,7 +91,11 @@ public class JavaMarshal extends Marshal {
     }
     else if (! argClass.isAssignableFrom(obj.getClass())) {
       //env.error(L.l("Can't assign {0} to {1}", obj, argClass));
-      env.warning(L.l("'{0}' of type '{1}' is an unexpected argument, expected {2}", value, shortName(obj.getClass()), shortName(argClass)));
+      env.warning(L.l(
+        "'{0}' of type '{1}' is an unexpected argument, expected {2}",
+        value,
+        shortName(obj.getClass()),
+        shortName(argClass)));
       return null;
     }
 
@@ -120,8 +124,8 @@ public class JavaMarshal extends Marshal {
   {
     Class type = _def.getType();
     
-    if (argValue instanceof JavaValue &&
-        type.isAssignableFrom(argValue.toJavaObject().getClass()))
+    if (argValue instanceof JavaValue
+        && type.isAssignableFrom(argValue.toJavaObject().getClass()))
       return Marshal.ZERO;
     else
       return Marshal.FOUR;

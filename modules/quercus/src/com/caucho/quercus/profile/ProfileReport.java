@@ -283,8 +283,9 @@ public class ProfileReport
                                 100.0 * item.getMicros() / ownTotalMicros));
         out.println();
       }
-      
-      out.print(String.format(" %6.2f%%", 100.0 * ownTotalMicros / totalMicros));
+
+      out.print(String.format(" %6.2f%%",
+                              100.0 * ownTotalMicros / totalMicros));
       out.print(String.format(" %7dus", method.getTotalMicros()));
       out.print(String.format(" %6d", method.getCount()));
       out.print(String.format("  %-22s", name));

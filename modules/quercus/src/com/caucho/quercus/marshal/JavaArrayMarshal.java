@@ -57,7 +57,9 @@ public class JavaArrayMarshal extends Marshal
     /*
     if (! value.isset()) {
       if (_isNotNull) {
-        env.warning(L.l("null is an unexpected argument, expected {0}", shortName(expectedClass)));
+        env.warning(L.l(
+          "null is an unexpected argument, expected {0}",
+          shortName(expectedClass)));
       }
 
       return null;
@@ -68,7 +70,9 @@ public class JavaArrayMarshal extends Marshal
     Object array = value.valuesToArray(env, componentType);
     /*
     if (array == null && _isNotNull) {
-      env.warning(L.l("null is an unexpected argument, expected {0}", shortName(expectedClass)));
+      env.warning(L.l(
+        "null is an unexpected argument, expected {0}",
+        shortName(expectedClass)));
     }
     */
     
@@ -84,8 +88,8 @@ public class JavaArrayMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue.isArray()) {
-      if (Value[].class.equals(_expectedClass) ||
-          Object[].class.equals(_expectedClass))
+      if (Value[].class.equals(_expectedClass)
+          || Object[].class.equals(_expectedClass))
         return Marshal.ONE;
       else
         return Marshal.THREE;

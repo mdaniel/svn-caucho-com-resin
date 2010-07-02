@@ -974,8 +974,8 @@ public class UnicodeBuilderValue
       return IS_LONG;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
-           i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
-                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i < len && ('0' <= (ch = buffer[i]) && ch <= '9'
+                       || ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
            i++) {
       }
 

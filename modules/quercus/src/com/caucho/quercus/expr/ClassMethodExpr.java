@@ -91,7 +91,8 @@ public class ClassMethodExpr extends AbstractMethodExpr {
     QuercusClass cl = env.findClass(_className);
 
     if (cl == null)
-      throw env.createErrorException(L.l("{0} is an unknown class", _className));
+      throw env.createErrorException(L.l("{0} is an unknown class",
+                                         _className));
 
     Value []values = evalArgs(env, _args);
 

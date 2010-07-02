@@ -77,7 +77,11 @@ public class JavaMapMarshal extends JavaMarshal {
       return null;
     }
     else if (! argClass.isAssignableFrom(obj.getClass())) {
-      env.warning(L.l("'{0}' of type '{1}' is an unexpected argument, expected {2}", value, shortName(value.getClass()), shortName(argClass)));
+      env.warning(L.l(
+        "'{0}' of type '{1}' is an unexpected argument, expected {2}",
+        value,
+        shortName(value.getClass()),
+        shortName(argClass)));
       return null;
     }
 
@@ -86,8 +90,9 @@ public class JavaMapMarshal extends JavaMarshal {
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue instanceof JavaMapAdapter &&
-        getExpectedClass().isAssignableFrom(argValue.toJavaObject().getClass()))
+    if (argValue instanceof JavaMapAdapter
+        && getExpectedClass()
+      .isAssignableFrom(argValue.toJavaObject().getClass()))
       return Marshal.ZERO;
     else if (argValue.isArray())
       return Marshal.THREE;

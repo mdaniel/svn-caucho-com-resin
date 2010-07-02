@@ -64,8 +64,9 @@ public class InputStreamMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue instanceof JavaValue &&
-        InputStream.class.isAssignableFrom(argValue.toJavaObject().getClass()))
+    if (argValue instanceof JavaValue
+        && InputStream.class.isAssignableFrom(
+            argValue.toJavaObject().getClass()))
       return Marshal.ZERO;
     else
       return Marshal.FOUR;

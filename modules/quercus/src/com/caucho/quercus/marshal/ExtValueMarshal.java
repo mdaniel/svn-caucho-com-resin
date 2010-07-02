@@ -84,8 +84,11 @@ public class ExtValueMarshal extends Marshal
       p = valueClassName.lastIndexOf('.');
       valueClassName = valueClassName.substring(p + 1);
 
-      env.warning(L.l("'{0}' of type `{1}' is an unexpected argument, expected {2}",
-                      value, valueClassName, className));
+      env.warning(L.l(
+        "'{0}' of type `{1}' is an unexpected argument, expected {2}",
+        value,
+        valueClassName,
+        className));
 
       return null;
     }

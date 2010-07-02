@@ -37,7 +37,10 @@ import com.caucho.quercus.expr.Expr;
 
 public class ExpectMarshal extends Marshal
 {
-  protected enum Type {STRING, NUMERIC, BOOLEAN};
+  protected enum Type {
+    STRING, NUMERIC, BOOLEAN
+  }
+
   private Type _type;
   
   public static final Marshal MARSHAL_EXPECT_STRING

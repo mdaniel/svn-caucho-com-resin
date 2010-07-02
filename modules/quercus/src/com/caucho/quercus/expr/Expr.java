@@ -565,8 +565,9 @@ abstract public class Expr {
    */
   public Value evalAssignValue(Env env, Value value)
   {
-    throw new RuntimeException(L.l("{0} is an invalid left-hand side of an assignment.",
-                                   this));
+    throw new RuntimeException(L.l(
+      "{0} is an invalid left-hand side of an assignment.",
+      this));
   }
 
   /**
@@ -575,8 +576,9 @@ abstract public class Expr {
    */
   public Value evalAssignRef(Env env, Value value)
   {
-    throw new RuntimeException(L.l("{0} is an invalid left-hand side of an assignment.",
-                                   this));
+    throw new RuntimeException(L.l(
+      "{0} is an invalid left-hand side of an assignment.",
+      this));
   }
 
   /**

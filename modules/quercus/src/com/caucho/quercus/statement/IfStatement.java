@@ -42,7 +42,10 @@ public class IfStatement extends Statement {
   private final Statement _trueBlock;
   private final Statement _falseBlock;
 
-  public IfStatement(Location location, Expr test, Statement trueBlock, Statement falseBlock)
+  public IfStatement(Location location,
+                     Expr test,
+                     Statement trueBlock,
+                     Statement falseBlock)
   {
     super(location);
 
