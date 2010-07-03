@@ -58,6 +58,7 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.git.GitRepository;
 import com.caucho.hemp.broker.DomainManager;
 import com.caucho.hemp.broker.HempBroker;
@@ -115,7 +116,6 @@ import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QServerSocket;
@@ -353,6 +353,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the classLoader
    */
+  @Override
   public ClassLoader getClassLoader()
   {
     return _classLoader;
@@ -1062,6 +1063,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the relax schema.
    */
+  @Override
   public String getSchema()
   {
     return "com/caucho/server/resin/cluster.rnc";
@@ -1070,6 +1072,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the id.
    */
+  @Override
   public String getServerId()
   {
     return _selfServer.getId();
@@ -1771,11 +1774,13 @@ public class Server extends ProtocolDispatchServer
     if (_threadMax > 0)
       threadPool.setThreadMax(_threadMax);
 
+    /*
     if (_threadIdleMax > 0)
       threadPool.setThreadIdleMax(_threadIdleMax);
+      */
 
     if (_threadIdleMin > 0)
-      threadPool.setThreadIdleMin(_threadIdleMin);
+      threadPool.setIdleMin(_threadIdleMin);
 
     threadPool.setExecutorTaskMax(_threadExecutorTaskMax);
 

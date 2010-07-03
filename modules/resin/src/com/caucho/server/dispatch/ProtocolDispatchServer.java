@@ -46,6 +46,7 @@ public class ProtocolDispatchServer extends DispatchServer {
   /**
    * Gets the ignore-client-disconnect
    */
+  @Override
   public boolean isIgnoreClientDisconnect()
   {
     return _isIgnoreClientDisconnect;

@@ -46,6 +46,7 @@ import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.types.Period;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
@@ -66,7 +67,6 @@ import com.caucho.server.util.JniCauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -127,8 +127,8 @@ class WatchdogManager implements AlarmListener {
     else
       Logger.getLogger("").setLevel(Level.INFO);
 
-    ThreadPool.getThreadPool().setThreadIdleMin(1);
-    ThreadPool.getThreadPool().setThreadIdleMax(5);
+    ThreadPool.getThreadPool().setIdleMin(1);
+    ThreadPool.getThreadPool().setPriorityIdleMin(1);
 
     ResinELContext elContext = _args.getELContext();
 

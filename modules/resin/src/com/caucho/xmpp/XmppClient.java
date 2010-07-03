@@ -45,10 +45,10 @@ import javax.xml.stream.XMLStreamReader;
 
 import com.caucho.bam.AbstractActorStream;
 import com.caucho.bam.ActorStream;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
-import com.caucho.util.ThreadPool;
 import com.caucho.vfs.IOExceptionWrapper;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SocketStream;

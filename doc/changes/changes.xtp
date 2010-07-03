@@ -11,7 +11,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.8 - snapshot">
+<s2 title="4.0.9 - snapshot">
+<ul>
+</ul>
+</s2>
+
+<s2 title="4.0.8 - June 28, 2010">
 <ul>
 <li>servlet: added support for MockHttpServletRequest and MockHttpServletResponse: (#4073)</li>
 <li>configure: fix for bad libtool message: (#4048)</li>

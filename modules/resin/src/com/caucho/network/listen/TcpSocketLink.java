@@ -799,29 +799,6 @@ public class TcpSocketLink extends AbstractSocketLink
 
   //
   // async/comet state transitions
-
-  /**
-   * Starts a comet request
-   */
-  /*
-  @Override
-  public ConnectionCometController toComet(boolean isTop,
-                                           ServletRequest request,
-                                           ServletResponse response)
-  {
-    _state = _state.toComet();
-
-    ConnectionCometController controller
-      = super.toComet(isTop, request, response);
-
-    _controller = controller;
-
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " starting comet");
-
-    return controller;
-  }
-  */
   
   @Override
   public AsyncController toComet(CometHandler cometHandler)

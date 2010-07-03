@@ -29,8 +29,8 @@
 
 package com.caucho.server.thread;
 
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;

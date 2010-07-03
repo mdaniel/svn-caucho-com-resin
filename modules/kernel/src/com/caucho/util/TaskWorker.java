@@ -30,6 +30,7 @@
 package com.caucho.util;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.thread.ThreadPool;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;

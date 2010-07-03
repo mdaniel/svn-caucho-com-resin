@@ -40,12 +40,12 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.network.listen.AsyncController;
 import com.caucho.network.listen.CometHandler;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.servlet.comet.CometController;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 
 /**
  * Public API to control a comet connection.

@@ -35,9 +35,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.ejb.Timer;
 
 import com.caucho.config.types.Trigger;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
-import com.caucho.util.ThreadPool;
 
 /**
  * Scheduled task.

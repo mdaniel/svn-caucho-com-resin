@@ -47,6 +47,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.inject.SingletonBindingHandle;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
@@ -54,7 +55,6 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 
 /**
  * Scheduler for custom services.

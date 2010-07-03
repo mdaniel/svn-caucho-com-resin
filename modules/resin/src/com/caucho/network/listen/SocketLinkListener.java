@@ -49,19 +49,20 @@ import javax.annotation.PostConstruct;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
+import com.caucho.network.server.NetworkServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.TaskWorker;
-import com.caucho.util.ThreadPool;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
@@ -130,6 +131,7 @@ public class SocketLinkListener extends TaskWorker
 
   private long _keepaliveTimeMax = 10 * 60 * 1000L;
   private long _keepaliveTimeout = 120 * 1000L;
+  
   private boolean _isKeepaliveSelectEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
   
@@ -520,16 +522,6 @@ public class SocketLinkListener extends TaskWorker
   }
 
   /**
-   * Returns true for ignore-client-disconnect.
-   */
-  /*
-  public boolean isIgnoreClientDisconnect()
-  {
-    return _server.isIgnoreClientDisconnect();
-  }
-  */
-
-  /**
    * Sets the read/write timeout for the accepted sockets.
    */
   @Configurable
@@ -545,18 +537,6 @@ public class SocketLinkListener extends TaskWorker
   {
     _socketTimeout = timeout;
   }
-
-  /**
-   * Sets the read timeout for the accepted sockets.
-   *
-   * @deprecated
-   */
-  /*
-  public void setReadTimeout(Period period)
-  {
-    setSocketTimeout(period);
-  }
-  */
 
   /**
    * Gets the read timeout for the accepted sockets.
@@ -610,17 +590,6 @@ public class SocketLinkListener extends TaskWorker
   {
     _isEnableJni = isEnableJni;
   }
-
-  /**
-   * Sets the write timeout for the accepted sockets.
-   *
-   * @deprecated
-   */
-  /*
-  public void setWriteTimeout(Period period)
-  {
-  }
-  */
 
   private Throttle createThrottle()
   {
@@ -722,7 +691,12 @@ public class SocketLinkListener extends TaskWorker
 
   public void setKeepaliveSelectThreadTimeout(Period period)
   {
-    _keepaliveSelectThreadTimeout = period.getPeriod();
+    setKeepaliveSelectThreadTimeoutMillis(period.getPeriod());
+  }
+
+  public void setKeepaliveSelectThreadTimeoutMillis(long timeout)
+  {
+    _keepaliveSelectThreadTimeout = timeout;
   }
 
   public long getBlockingTimeoutForSelect()
@@ -1006,10 +980,17 @@ public class SocketLinkListener extends TaskWorker
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 
     if (_serverSocket.isJni()) {
-      Server server = Server.getCurrent();
+      NetworkServer server = NetworkServer.getCurrent();
 
-      if (server != null)
-        _selectManager = server.getSelectManager();
+      if (server != null) {
+        SocketPollService pollService 
+          = server.getService(SocketPollService.class);
+        
+        if (pollService != null) {
+          _selectManager = pollService.getSelectManager();
+          
+        }
+      }
 
       /*
       if (_selectManager == null) {
@@ -1340,7 +1321,7 @@ public class SocketLinkListener extends TaskWorker
 
     if (timeout < 0)
       timeout = 0;
-
+    
     // server/2l02
 
     _keepaliveThreadCount.incrementAndGet();

@@ -37,8 +37,8 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.Alarm;
-import com.caucho.util.ThreadPool;
 
 /**
  * Provides abstract implementation for a memory queue.

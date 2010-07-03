@@ -30,11 +30,11 @@
 package com.caucho.server.resin;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.MemoryMXBean;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 
 import java.util.logging.Logger;
 import java.lang.management.MemoryUsage;

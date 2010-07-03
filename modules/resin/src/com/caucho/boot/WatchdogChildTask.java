@@ -33,8 +33,8 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.util.ThreadPool;
 
 /**
  * Thread responsible for the Resin restart capability, managing and

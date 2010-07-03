@@ -33,6 +33,7 @@ import com.caucho.bytecode.ByteCodeParser;
 import com.caucho.bytecode.JavaClass;
 import com.caucho.bytecode.SourceDebugExtensionAttribute;
 import com.caucho.config.*;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Loader;
@@ -40,7 +41,6 @@ import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 import com.caucho.vfs.*;
 
 import java.io.IOException;

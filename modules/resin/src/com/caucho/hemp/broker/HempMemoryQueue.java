@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.hemp.packet.Message;
 import com.caucho.hemp.packet.MessageError;
 import com.caucho.hemp.packet.Packet;
@@ -47,7 +48,6 @@ import com.caucho.hemp.packet.QueryResult;
 import com.caucho.hemp.packet.QuerySet;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
-import com.caucho.util.ThreadPool;
 import com.caucho.util.WaitQueue;
 
 /**

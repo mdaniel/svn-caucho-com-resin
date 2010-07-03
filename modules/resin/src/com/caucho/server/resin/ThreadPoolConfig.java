@@ -28,8 +28,8 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 
 import javax.annotation.PostConstruct;
 
@@ -60,7 +60,7 @@ public class ThreadPoolConfig {
     ThreadPool threadPool = ThreadPool.getThreadPool();
     
     threadPool.setThreadMax(_threadMax);
-    threadPool.setThreadIdleMax(_threadSpareMin + THREAD_GAP);
-    threadPool.setThreadIdleMin(_threadSpareMin);
+    // threadPool.setThreadIdleMax(_threadSpareMin + THREAD_GAP);
+    threadPool.setIdleMin(_threadSpareMin);
   }
 }

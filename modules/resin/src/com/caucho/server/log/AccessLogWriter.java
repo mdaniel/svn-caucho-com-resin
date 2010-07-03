@@ -31,12 +31,12 @@ package com.caucho.server.log;
 
 import com.caucho.env.sample.ProbeManager;
 import com.caucho.env.sample.SemaphoreProbe;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.util.Alarm;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.TaskWorker;
-import com.caucho.util.ThreadPool;
 
 import java.io.IOException;
 import java.util.ArrayList;

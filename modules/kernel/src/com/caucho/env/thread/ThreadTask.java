@@ -27,57 +27,71 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.env.thread;
 
-import java.util.concurrent.Executor;
-import java.util.logging.Logger;
+import java.util.concurrent.locks.LockSupport;
 
-import com.caucho.env.thread.ThreadPool;
+import com.caucho.util.Alarm;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-public class ResinThreadPoolExecutor implements Executor {
-  private static final L10N L = new L10N(ResinThreadPoolExecutor.class);
-  private static final Logger log
-    = Logger.getLogger(ResinThreadPoolExecutor.class.getName());
+final class ThreadTask {
+  private final Runnable _runnable;
+  private final ClassLoader _loader;
+  private volatile Thread _thread;
 
-  private static ResinThreadPoolExecutor _service
-    = new ResinThreadPoolExecutor();
-    
-  private ThreadPool _threadPool = ThreadPool.getThreadPool();
-
-  private ResinThreadPoolExecutor()
+  ThreadTask(Runnable runnable, ClassLoader loader, Thread thread)
   {
+    _runnable = runnable;
+    _loader = loader;
+    _thread = thread;
   }
 
-  public static ResinThreadPoolExecutor getThreadPool()
+  final Runnable getRunnable()
   {
-    return _service;
+    return _runnable;
   }
 
-  //
-  // java.util.concurrent
-  //
-
-  public void execute(Runnable task)
+  final ClassLoader getLoader()
   {
-    if (task == null)
-      throw new NullPointerException();
-    
-    _threadPool.schedule(task);
+    return _loader;
+  }
+  
+  void clearThread()
+  {
+    _thread = null;
   }
 
-  /**
-   * Resets the thread pool, letting old threads drain.
-   */
-  public void stopEnvironment(ClassLoader env)
+  final void wake()
   {
-    _threadPool.closeEnvironment(env);
+    Thread thread = _thread;
+    _thread = null;
+
+    if (thread != null)
+      LockSupport.unpark(thread);
   }
 
-  public String toString()
+  final void park(long expires)
   {
-    return "ResinThreadPoolExecutor[]";
+    Thread thread = _thread;
+
+    while (_thread != null
+           && Alarm.getCurrentTimeActual() < expires) {
+      try {
+        Thread.interrupted();
+        LockSupport.parkUntil(thread, expires);
+      } catch (Exception e) {
+      }
+    }
+
+    /*
+      if (_thread != null) {
+        System.out.println("TIMEOUT:" + thread);
+        Thread.dumpStack();
+      }
+     */
+
+    _thread = null;
   }
 }

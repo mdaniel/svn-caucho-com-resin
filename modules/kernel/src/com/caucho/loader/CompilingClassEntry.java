@@ -29,10 +29,10 @@
 
 package com.caucho.loader;
 
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.java.CompileClassNotFound;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;

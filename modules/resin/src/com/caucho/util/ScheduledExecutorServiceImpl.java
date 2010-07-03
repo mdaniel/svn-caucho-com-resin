@@ -32,6 +32,8 @@ package com.caucho.util;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
+import com.caucho.env.thread.ThreadPool;
+
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
