@@ -27,28 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
-
-import com.caucho.config.ConfigException;
-import com.caucho.env.thread.ThreadPool;
+package com.caucho.env.thread;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.util.Alarm;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
 abstract public class TaskWorker implements Runnable {
-  private static final Logger log
-    = Logger.getLogger(TaskWorker.class.getName());
-
-  private final AtomicBoolean _isTask = new AtomicBoolean();
+  private final int TASK_PARK = 0;
+  private final int TASK_SLEEP = 1;
+  private final int TASK_READY = 2;
+  
+  private final AtomicInteger _taskState = new AtomicInteger();
   private final AtomicBoolean _isActive = new AtomicBoolean();
   private final AtomicLong _idGen = new AtomicLong();
 
+  private final ThreadPool _threadPool;
   private final ClassLoader _classLoader;
   private long _idleTimeout = 30000L;
   private boolean _isDestroyed;
@@ -58,6 +58,7 @@ abstract public class TaskWorker implements Runnable {
   protected TaskWorker()
   {
     _classLoader = Thread.currentThread().getContextClassLoader();
+    _threadPool = ThreadPool.getCurrent();
   }
 
   abstract public void runTask();
@@ -77,13 +78,13 @@ abstract public class TaskWorker implements Runnable {
     if (_isDestroyed)
       return;
 
-    boolean isNewTask = ! _isTask.getAndSet(true);
+    int oldState = _taskState.getAndSet(TASK_READY);
 
     if (! _isActive.getAndSet(true)) {
-      ThreadPool.getCurrent().schedulePriority(this);
+      _threadPool.schedulePriority(this);
     }
 
-    if (isNewTask) {
+    if (oldState == TASK_PARK) {
       Thread thread = _thread;
 
       if (thread != null) {
@@ -97,6 +98,7 @@ abstract public class TaskWorker implements Runnable {
     return getClass().getSimpleName() + "-" + _idGen.incrementAndGet();
   }
 
+  @Override
   public final void run()
   {
     String oldName = null;
@@ -109,24 +111,27 @@ abstract public class TaskWorker implements Runnable {
       long expires = Alarm.getCurrentTimeActual() + _idleTimeout;
 
       do {
-        while (_isTask.getAndSet(false)) {
+        while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
           runTask();
           expires = Alarm.getCurrentTimeActual() + _idleTimeout;
         }
 
         if (_isDestroyed)
           return;
-
-        Thread.interrupted();
-        LockSupport.parkUntil(expires);
-      } while (_isTask.get() || Alarm.getCurrentTimeActual() < expires);
+        
+        if (_taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
+          Thread.interrupted();
+          LockSupport.parkUntil(expires);
+        }
+      } while (_taskState.get() == TASK_READY
+               || Alarm.getCurrentTimeActual() < expires);
     } finally {
       Thread thread = _thread;
       _thread = null;
 
       _isActive.set(false);
 
-      if (_isTask.get())
+      if (_taskState.get() == TASK_READY)
         wake();
 
       if (thread != null && oldName != null)

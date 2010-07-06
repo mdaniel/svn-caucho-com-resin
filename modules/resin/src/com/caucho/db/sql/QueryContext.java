@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -569,14 +570,19 @@ public class QueryContext {
         bestBlock = block;
       }
 
-      if (bestBlock == null) {
+      try {
+        if (bestBlock == null) {
+        }
+        else if (_isWrite) {
+          bestBlock.getWriteLock().tryLock(_xa.getTimeout(), TimeUnit.MILLISECONDS);
+        }
+        else {
+          bestBlock.getReadLock().tryLock(_xa.getTimeout(), TimeUnit.MILLISECONDS);
+        }
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
       }
-      else if (_isWrite) {
-        bestBlock.getLock().lockReadAndWrite(_xa.getTimeout());
-      }
-      else {
-        bestBlock.getLock().lockRead(_xa.getTimeout());
-      }
+      
       // assignment must be after obtaining lock because the unlock
       // requires a lock
       _blockLocks[i] = bestBlock;
@@ -610,10 +616,10 @@ public class QueryContext {
       if (block == null) {
       }
       else if (_isWrite) {
-        block.getLock().unlockReadAndWrite();
+        block.getWriteLock().unlock();
       }
       else {
-        block.getLock().unlockRead();
+        block.getReadLock().unlock();
       }
     }
 

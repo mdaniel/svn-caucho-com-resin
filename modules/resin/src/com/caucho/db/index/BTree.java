@@ -33,7 +33,7 @@ import com.caucho.db.Database;
 import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockManager;
 import com.caucho.db.block.BlockStore;
-import com.caucho.db.lock.Lock;
+// import com.caucho.db.lock.Lock;
 import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
@@ -42,6 +42,8 @@ import com.caucho.vfs.Path;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -163,14 +165,18 @@ public final class BTree {
                      int keyLength)
     throws IOException, SQLException
   {
-    return lookup(keyBuffer, keyOffset, keyLength, _rootBlockId);
+    try {
+      return lookup(keyBuffer, keyOffset, keyLength, _rootBlockId);
+    } catch (InterruptedException e) {
+      throw new IllegalStateException(e);
+    }
   }
   
   private long lookup(byte []keyBuffer,
                      int keyOffset,
                      int keyLength,
                      long blockId)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
     Block block;
 
@@ -182,9 +188,9 @@ public final class BTree {
       block = _store.loadBlock(blockId);
 
     try {
-      Lock blockLock = block.getLock();
+      Lock blockLock = block.getReadLock();
       
-      blockLock.lockRead(_timeout);
+      blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
       try {
         validateIndex(block);
@@ -204,7 +210,7 @@ public final class BTree {
         else
           return lookup(keyBuffer, keyOffset, keyLength, value);
       } finally {
-        blockLock.unlockRead();
+        blockLock.unlock();
       }
     } finally {
       block.free();
@@ -229,7 +235,11 @@ public final class BTree {
                       _rootBlockId)) {
         splitRoot(_rootBlockId);
       }
-    } catch (IOException e) {
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw e;
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       
       throw new SQLExceptionWrapper(e.toString(), e);
@@ -240,6 +250,7 @@ public final class BTree {
    * Inserts the new value for the given key.
    *
    * @return false if the block needs to be split
+   * @throws InterruptedException 
    */
   private boolean insert(byte []keyBuffer,
                          int keyOffset,
@@ -248,7 +259,7 @@ public final class BTree {
                          boolean isOverride,
                          boolean isRead,
                          long blockId)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
     Block block;
 
@@ -279,10 +290,10 @@ public final class BTree {
                                   long value,
                                   boolean isOverride,
                                   Block block)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
-    Lock blockLock = block.getLock();
-    blockLock.lockRead(_timeout);
+    Lock blockLock = block.getReadLock();
+    blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
       
     try {
       validateIndex(block);
@@ -311,7 +322,7 @@ public final class BTree {
                     value, isOverride, true,
                     childBlockId);
     } finally {
-      blockLock.unlockRead();
+      blockLock.unlock();
     }
   }
 
@@ -321,10 +332,10 @@ public final class BTree {
                                    long value,
                                    boolean isOverride,
                                    Block block)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
-    Lock blockLock = block.getLock();
-    blockLock.lockReadAndWrite(_timeout);
+    Lock blockLock = block.getWriteLock();
+    blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
       
     try {
       block.read();
@@ -368,7 +379,7 @@ public final class BTree {
 
       return true;
     } finally {
-      blockLock.unlockReadAndWrite();
+      blockLock.unlock();
     }
   }
     
@@ -498,25 +509,26 @@ public final class BTree {
    * The length in lBuf is assumed to be the length of the buffer.
    *
    * parent must already be locked
+   * @throws InterruptedException 
    */
   private void split(Block parent,
                      long blockId)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
     Block block = _store.readBlock(blockId);
 
     try {
       validate(block);
         
-      Lock blockLock = block.getLock();
-      blockLock.lockReadAndWrite(_timeout);
+      Lock blockLock = block.getWriteLock();
+      blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
       try {
         split(parent, block);
 
         validate(block);
       } finally {
-        blockLock.unlockReadAndWrite();
+        blockLock.unlock();
       }
     } finally {
       block.free();
@@ -617,23 +629,24 @@ public final class BTree {
 
   /**
    * The length in lBuf is assumed to be the length of the buffer.
+   * @throws InterruptedException 
    */
   private void splitRoot(long rootBlockId)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
     Block rootBlock = _rootBlock; // store.readBlock(rootBlockId);
     rootBlock.allocate();
 
     try {
-      Lock rootLock = rootBlock.getLock();
-      rootLock.lockReadAndWrite(_timeout);
+      Lock rootLock = rootBlock.getWriteLock();
+      rootLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
       
       try {
         splitRoot(rootBlock);
 
         validate(rootBlock);
       } finally {
-        rootLock.unlockReadAndWrite();
+        rootLock.unlock();
       }
     } finally {
       rootBlock.free();
@@ -754,7 +767,11 @@ public final class BTree {
       } finally {
         rootBlock.free();
       }
-    } catch (IOException e) {
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw e;
+    } catch (Exception e) {
       throw new SQLExceptionWrapper(e.toString(), e);
     }
   }
@@ -763,15 +780,16 @@ public final class BTree {
    * Recursively remove a key from the index.
    *
    * block is read-locked by the parent.
+   * @throws InterruptedException 
    */
   private boolean removeRead(Block block,
                              byte []keyBuffer,
                              int keyOffset,
                              int keyLength)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
-    Lock blockLock = block.getLock();
-    blockLock.lockRead(_timeout);
+    Lock blockLock = block.getReadLock();
+    blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
     try {
       validateIndex(block);
@@ -804,7 +822,7 @@ public final class BTree {
         childBlock.free();
       }
     } finally {
-      blockLock.unlockRead();
+      blockLock.unlock();
     }
   }
 
@@ -812,18 +830,19 @@ public final class BTree {
    * Recursively remove a key from the index.
    *
    * block is read-locked by the parent.
+   * @throws InterruptedException 
    */
   private boolean removeWrite(Block block,
                               byte []keyBuffer,
                               int keyOffset,
                               int keyLength)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
     byte []buffer = block.getBuffer();
     long blockId = block.getBlockId();
     
-    Lock blockLock = block.getLock();
-    blockLock.lockReadAndWrite(_timeout);
+    Lock blockLock = block.getWriteLock();
+    blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
     try {
       boolean isLeaf = isLeaf(buffer, block);
@@ -856,7 +875,7 @@ public final class BTree {
 
           if (isJoin && joinBlocks(block, childBlock)) {
             if (childBlock.getUseCount() > 2) {
-              System.out.println("USE: " + childBlock.getUseCount() + " " + block + " " + block.getLock());
+              System.out.println("USE: " + childBlock.getUseCount() + " " + block);
             }
             childBlock.deallocate();
           }
@@ -869,7 +888,7 @@ public final class BTree {
       
       return _minN <= getLength(buffer);
     } finally {
-      blockLock.unlockReadAndWrite();
+      blockLock.unlock();
     }
   }
 
@@ -890,10 +909,11 @@ public final class BTree {
    * </pre>
    *
    * @return true if the block should be deleted/freed
+   * @throws InterruptedException 
    */
   private boolean joinBlocks(Block parent,
                              Block block)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
     long parentBlockId = parent.getBlockId();
     byte []parentBuffer = parent.getBuffer();
@@ -913,14 +933,14 @@ public final class BTree {
       try {
         byte []leftBuffer = leftBlock.getBuffer();
 
-        Lock leftLock = leftBlock.getLock();
-        leftLock.lockReadAndWrite(_timeout);
+        Lock leftLock = leftBlock.getWriteLock();
+        leftLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
         try {
           int leftLength = getLength(leftBuffer);
 
-          Lock blockLock = block.getLock();
-          blockLock.lockReadAndWrite(_timeout);
+          Lock blockLock = block.getWriteLock();
+          blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
           try {
             if (_minN < leftLength) {
@@ -946,10 +966,10 @@ public final class BTree {
               return false;
             }
           } finally {
-            blockLock.unlockReadAndWrite();
+            blockLock.unlock();
           }
         } finally {
-          leftLock.unlockReadAndWrite();
+          leftLock.unlock();
         }
       } finally {
         leftBlock.free();
@@ -964,12 +984,12 @@ public final class BTree {
       try {
         byte []rightBuffer = rightBlock.getBuffer();
 
-        Lock blockLock = block.getLock();
-        blockLock.lockReadAndWrite(_timeout);
+        Lock blockLock = block.getWriteLock();
+        blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
         try {
-          Lock rightLock = rightBlock.getLock();
-          rightLock.lockReadAndWrite(_timeout);
+          Lock rightLock = rightBlock.getWriteLock();
+          rightLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
           try {
             int rightLength = getLength(rightBuffer);
@@ -994,10 +1014,10 @@ public final class BTree {
               return false;
             }
           } finally {
-            rightLock.unlockReadAndWrite();
+            rightLock.unlock();
           }
         } finally {
-          blockLock.unlockReadAndWrite();
+          blockLock.unlock();
         }
       } finally {
         rightBlock.free();
@@ -1014,14 +1034,14 @@ public final class BTree {
       try {
         byte []leftBuffer = leftBlock.getBuffer();
 
-        Lock leftLock = leftBlock.getLock();
-        leftLock.lockReadAndWrite(_timeout);
+        Lock leftLock = leftBlock.getWriteLock();
+        leftLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
         try {
           int leftLength = getLength(leftBuffer);
 
-          Lock blockLock = block.getLock();
-          blockLock.lockReadAndWrite(_timeout);
+          Lock blockLock = block.getWriteLock();
+          blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
           try {
             int length = getLength(buffer);
@@ -1050,10 +1070,10 @@ public final class BTree {
               return true;
             }
           } finally {
-            blockLock.unlockReadAndWrite();
+            blockLock.unlock();
           }
         } finally {
-          leftLock.unlockReadAndWrite();
+          leftLock.unlock();
         }
       } finally {
         leftBlock.free();
@@ -1067,12 +1087,12 @@ public final class BTree {
       try {
         byte []rightBuffer = rightBlock.getBuffer();
 
-        Lock blockLock = block.getLock();
-        blockLock.lockReadAndWrite(_timeout);
+        Lock blockLock = block.getWriteLock();
+        blockLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
         try {
-          Lock rightLock = rightBlock.getLock();
-          rightLock.lockReadAndWrite(_timeout);
+          Lock rightLock = rightBlock.getWriteLock();
+          rightLock.tryLock(_timeout, TimeUnit.MILLISECONDS);
 
           try {
             int length = getLength(buffer);
@@ -1104,10 +1124,10 @@ public final class BTree {
               return true;
             }
           } finally {
-            rightLock.unlockReadAndWrite();
+            rightLock.unlock();
           }
         } finally {
-          blockLock.unlockReadAndWrite();
+          blockLock.unlock();
         }
       } finally {
         rightBlock.free();

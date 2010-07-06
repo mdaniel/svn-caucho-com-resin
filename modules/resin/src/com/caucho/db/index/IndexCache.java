@@ -31,6 +31,7 @@ package com.caucho.db.index;
 
 import com.caucho.util.*;
 import com.caucho.db.xa.Transaction;
+import com.caucho.env.thread.TaskWorker;
 
 import java.io.IOException;
 import java.util.*;

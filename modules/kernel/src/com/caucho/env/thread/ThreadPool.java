@@ -317,6 +317,14 @@ public final class ThreadPool {
   }
 
   /**
+   * Returns the priority idle thread count.
+   */
+  public int getPriorityIdleCount()
+  {
+    return _priorityIdleCount.get();
+  }
+
+  /**
    * Returns the waiting thread count.
    */
   public int getThreadWaitCount()
@@ -681,6 +689,9 @@ public final class ThreadPool {
   ThreadTask nextTask(ResinThread thread)
   {
     ThreadTask item = _priorityQueue.poll();
+    
+    if (item != null)
+      return item;
 
     int idleCount = _idleCount.get();
 
@@ -750,6 +761,17 @@ public final class ThreadPool {
     } while (! idleHeadRef.compareAndSet(next, head));
   }
   
+  private ResinThread popPriorityThread()
+  {
+    ResinThread thread = popIdleThread(_priorityIdleHead);
+    
+    if (thread != null) {
+      _priorityIdleCount.decrementAndGet();
+    }
+    
+    return thread;
+  }
+  
   private ResinThread popIdleThread()
   {
     ResinThread thread = popIdleThread(_idleHead);
@@ -765,17 +787,6 @@ public final class ThreadPool {
     _threadIdleExpireTime.set(now + _idleTimeout);
 
     _launcher.wake();
-    
-    return thread;
-  }
-  
-  private ResinThread popPriorityThread()
-  {
-    ResinThread thread = popIdleThread(_priorityIdleHead);
-    
-    if (thread != null) {
-      _priorityIdleCount.decrementAndGet();
-    }
     
     return thread;
   }

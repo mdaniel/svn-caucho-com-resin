@@ -115,50 +115,37 @@ public class UTF8Writer extends EncodingWriter {
     byte []buffer = os.getBuffer();
     int length = os.getBufferOffset();
     int capacity = buffer.length;
+    int tail = off + len;
 
-    while (len > 0) {
-      int sublen = capacity - length - 2;
-      
-      if (sublen < 1) {
+    while (off < tail) {
+      if (capacity - length < 3) {
         buffer = os.nextBuffer(length);
         length = os.getBufferOffset();
-        
-        sublen = capacity - length;
       }
       
-      if (len < sublen)
-        sublen = len;
-      
-      for (int i = 0; i < sublen; i++) {
-        char ch = cbuf[off + i];
+      char ch = cbuf[off++];
 
-        if (ch < 0x80)
-          buffer[length++] = (byte) ch;
-        else if (ch < 0x800) {
-          buffer[length++] = (byte) (0xc0 + (ch >> 6));
-          buffer[length++] = (byte) (0x80 + (ch & 0x3f));
-        }
-        else if (ch < 0xd800 || 0xdfff < ch || i + 1 == len) {
-          // server/0815
-          buffer[length++] = (byte) (0xe0 + (ch >> 12));
-          buffer[length++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
-          buffer[length++] = (byte) (0x80 + (ch & 0x3f));
-        }
-        else {
-          char ch2 = cbuf[off + i + 1];
-          int v = 0x10000 + (ch & 0x3ff) * 0x400 + (ch2 & 0x3ff);
-          
-          i += 1;
-        
-          buffer[length++] = (byte) (0xf0 + (v >> 18));
-          buffer[length++] = (byte) (0x80 + ((v >> 12) & 0x3f));
-          buffer[length++] = (byte) (0x80 + ((v >> 6) & 0x3f));
-          buffer[length++] = (byte) (0x80 + (v & 0x3f));
-        }
+      if (ch < 0x80)
+        buffer[length++] = (byte) ch;
+      else if (ch < 0x800) {
+        buffer[length++] = (byte) (0xc0 + (ch >> 6));
+        buffer[length++] = (byte) (0x80 + (ch & 0x3f));
       }
-      
-      len -= sublen;
-      off += sublen;
+      else if (ch < 0xd800 || 0xdfff < ch || off == tail) {
+        // server/0815
+        buffer[length++] = (byte) (0xe0 + (ch >> 12));
+        buffer[length++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+        buffer[length++] = (byte) (0x80 + (ch & 0x3f));
+      }
+      else {
+        char ch2 = cbuf[off++];
+        int v = 0x10000 + (ch & 0x3ff) * 0x400 + (ch2 & 0x3ff);
+          
+        buffer[length++] = (byte) (0xf0 + (v >> 18));
+        buffer[length++] = (byte) (0x80 + ((v >> 12) & 0x3f));
+        buffer[length++] = (byte) (0x80 + ((v >> 6) & 0x3f));
+        buffer[length++] = (byte) (0x80 + (v & 0x3f));
+      }
     }
 
     os.setBufferOffset(length);

@@ -34,17 +34,17 @@ import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
-import com.caucho.db.lock.Lock;
+// import com.caucho.db.lock.Lock;
 import com.caucho.db.sql.CreateQuery;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.Transaction;
+import com.caucho.env.thread.TaskWorker;
 import com.caucho.inject.Module;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.util.TaskWorker;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
@@ -54,9 +54,11 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
+import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -153,8 +155,8 @@ public class Table extends BlockStore {
     }
     _autoIncrementColumn = autoIncrementColumn;
 
-    new Lock("table-insert:" + name);
-    new Lock("table-alloc:" + name);
+    //new Lock("table-insert:" + name);
+    //new Lock("table-alloc:" + name);
   }
 
   Row getRow()
@@ -747,6 +749,8 @@ public class Table extends BlockStore {
         block = null;
         freeBlock.free();
       }
+    } catch (InterruptedException e) {
+      throw new IllegalStateException(e);
     } finally {
       if (block != null)
         block.free();
@@ -754,11 +758,11 @@ public class Table extends BlockStore {
   }
 
   private int allocateRow(Block block, Transaction xa)
-    throws IOException, SQLException
+    throws IOException, SQLException, InterruptedException
   {
-    Lock blockLock = block.getLock();
+    Lock blockLock = block.getWriteLock();
 
-    blockLock.lockReadAndWrite(xa.getTimeout());
+    blockLock.tryLock(xa.getTimeout(), TimeUnit.MILLISECONDS);
     try {
       block.read();
 
@@ -776,7 +780,7 @@ public class Table extends BlockStore {
         }
       }
     } finally {
-      blockLock.unlockReadAndWrite();
+      blockLock.unlock();
     }
 
     return -1;

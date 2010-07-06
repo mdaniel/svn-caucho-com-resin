@@ -30,7 +30,6 @@
 package com.caucho.db.block;
 
 import java.io.IOException;
-import java.lang.ref.SoftReference;
 import java.sql.SQLException;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;

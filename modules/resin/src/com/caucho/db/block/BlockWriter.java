@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.util.TaskWorker;
+import com.caucho.env.thread.TaskWorker;
 
 /**
  * Writer thread serializing dirty blocks.
@@ -61,6 +61,8 @@ public class BlockWriter extends TaskWorker {
   {
     synchronized (_writeQueue) {
       if (_writeQueueMax < _writeQueue.size()) {
+        wake();
+        
         try {
           _writeQueue.wait(100);
         } catch (InterruptedException e) {
@@ -75,24 +77,26 @@ public class BlockWriter extends TaskWorker {
 
   boolean copyDirtyBlock(long blockId, Block block)
   {
+    Block writeBlock = null;
+    
     synchronized (_writeQueue) {
       int size = _writeQueue.size();
 
       // search from newest to oldest in case multiple writes
       for (int i = size - 1; i >= 0; i--) {
-        Block writeBlock = _writeQueue.get(i);
+        Block testBlock = _writeQueue.get(i);
 
-        if (writeBlock.getBlockId() == blockId) {
-          // System.out.println("FOUND-DIRTY: " + block + " " + _writeQueue.size());
-          
-          writeBlock.copyToBlock(block);
-          
-          return true;
+        if (testBlock.getBlockId() == blockId) {
+          writeBlock = testBlock;
+          break;
         }
       }
     }
-
-    return false;
+    
+    if (writeBlock != null)
+      return writeBlock.copyToBlock(block);
+    else
+      return false;
   }
   
   void waitForComplete()
@@ -122,11 +126,9 @@ public class BlockWriter extends TaskWorker {
           retry = retryMax;
 
           try {
-            block.writeImpl();
+            block.writeFromBlockWriter();
           } finally {
             removeFirstBlock();
-          
-            block.freeFromWriter();
           }
         }
         else if (retry-- <= 0) {
