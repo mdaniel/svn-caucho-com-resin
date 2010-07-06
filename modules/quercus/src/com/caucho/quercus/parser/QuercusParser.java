@@ -4667,6 +4667,7 @@ public class QuercusParser {
         if ((ch = read()) == 's' || ch == 'S') {
           _peek = ch;
           if (parseScriptBegin(sb)) {
+            _lexeme = sb.toString();
             return TEXT;
           }
           ch = read();
@@ -4728,13 +4729,24 @@ public class QuercusParser {
 
     parseWhitespace(sb);
 
-    if (! parseTextMatch(sb, "language"))
+    if (! parseTextMatch(sb, "language="))
       return false;
 
-    parseWhitespace(sb);
+    int openingParentheses = read();
 
-    if (! parseTextMatch(sb, "=\"php\""))
-      return false;
+    if(openingParentheses == '\'' || openingParentheses == '"'){
+      if (! parseTextMatch(sb, "php")){
+        sb.append((char) openingParentheses);
+        return false;
+      }
+
+      int closingParentheses = read();
+      if(openingParentheses != closingParentheses){
+        sb.append((char) closingParentheses);
+        return false;
+      }
+    }
+
 
     parseWhitespace(sb);
 
