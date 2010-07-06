@@ -62,7 +62,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       .getName());
   private static final L10N L = new L10N(TransactionImpl.class);
 
-  private final static long EXTRA_TIMEOUT = 60000;
+  // private final static long EXTRA_TIMEOUT = 60000;
+  private final static long EXTRA_TIMEOUT = 0;
   private final static long MAX_TIMEOUT = 24 * 3600 * 1000L;
 
   // flag when the resource is active (between getConnection() and close())
@@ -629,6 +630,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " begin");
 
+    System.out.println("TIMEOUT: " + _timeout);
     if (_timeout > 0) {
       _alarm.queue(_timeout + EXTRA_TIMEOUT);
     }

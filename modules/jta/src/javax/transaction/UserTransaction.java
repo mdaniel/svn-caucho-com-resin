@@ -47,17 +47,17 @@ public interface UserTransaction {
     throws SystemException;
 
   /**
-   * Start the transaction.
-   */
-  public void begin()
-    throws NotSupportedException, SystemException;
-
-  /**
    * Marks the transaction as rollback only.
    */
   public void setRollbackOnly()
     throws IllegalStateException, SystemException;
 
+  /**
+   * Start the transaction.
+   */
+  public void begin()
+    throws NotSupportedException, SystemException;
+  
   /**
    * Commits the transaction
    */
