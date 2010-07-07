@@ -45,6 +45,7 @@ import com.caucho.config.program.BeanValueGenerator;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldGeneratorProgram;
 import com.caucho.config.program.MethodGeneratorProgram;
+import com.caucho.config.program.ValueGenerator;
 import com.caucho.util.L10N;
 
 /**
@@ -93,8 +94,6 @@ public class EjbHandler extends JavaeeInjectionHandler {
     throws ConfigException
   {
     String name = ejb.name();
-    String mappedName = ejb.mappedName();
-    String beanName = ejb.beanName();
 
     Field javaField = field.getJavaMember();
     
@@ -102,48 +101,7 @@ public class EjbHandler extends JavaeeInjectionHandler {
 
     Class<?> bindType = javaField.getType();
     
-    // ejb/2004
-    if (! Object.class.equals(ejb.beanInterface())) {
-      bindType = ejb.beanInterface();
-    }
-    
-    /*
-    if (! "".equals(pContext.name()))
-      jndiName = pContext.name();
-      */
-
-    Bean<?> bean = null;
-
-    if (! "".equals(beanName))
-      bean = bind(location, bindType, new BeanNameLiteral(beanName));
-    
-    if (bean == null)
-      bean = bind(location, bindType, name);
-    
-    if (bean == null)
-      bean = bind(location, bindType, mappedName);
-
-    if (bean != null) {
-      // valid bean
-    }
-    else if (! "".equals(name)) {
-      throw new ConfigException(location + L.l("name='{0}' is an unknown @EJB.",
-                                               name));
-    }
-    else if (! "".equals(mappedName)) {
-      throw new ConfigException(location + L.l("mappedName='{0}' is an unknown @EJB.",
-                                               mappedName));
-
-    }
-    else {
-      throw new ConfigException(location + L.l("@EJB cannot find any defined EJBs.  No @EJB with type='{0}'",
-                                               bindType));
-    }
-
-    // return new ComponentValueGenerator(location, (AbstractBean) bean);
-    
-    BeanValueGenerator gen
-      = new BeanValueGenerator(location, bean);
+    ValueGenerator gen = bindGenerator(location, ejb, bindType);
 
     if (name != null && ! "".equals(name))
       bindJndi(name, gen, name);
@@ -157,8 +115,6 @@ public class EjbHandler extends JavaeeInjectionHandler {
     throws ConfigException
   {
     String name = ejb.name();
-    String mappedName = ejb.mappedName();
-    String beanName = ejb.beanName();
 
     Method javaMethod = method.getJavaMember();
     
@@ -169,6 +125,32 @@ public class EjbHandler extends JavaeeInjectionHandler {
     // ejb/2005
     if (! Object.class.equals(ejb.beanInterface())) {
       bindType = ejb.beanInterface();
+    }
+    
+    ValueGenerator gen = bindGenerator(location, ejb, bindType);
+
+    if (name != null && ! "".equals(name))
+      bindJndi(name, gen, name);
+    
+    return new MethodGeneratorProgram(javaMethod, gen);
+  }
+  
+  protected ValueGenerator bindGenerator(String location,
+                                         EJB ejb,
+                                         Class<?> bindType)
+  {
+    String name = ejb.name();
+    String mappedName = ejb.mappedName();
+    String beanName = ejb.beanName();
+    String lookupName = ejb.lookup();
+
+    // ejb/2005
+    if (! Object.class.equals(ejb.beanInterface())) {
+      bindType = ejb.beanInterface();
+    }
+    
+    if (lookupName != null && ! "".equals(lookupName)) {
+      return new JndiValueGenerator(location, bindType, lookupName);
     }
     
     /*
@@ -204,14 +186,6 @@ public class EjbHandler extends JavaeeInjectionHandler {
                                                bindType));
     }
 
-    // bindJndi(location, jndiName, bean);
-
-    // return new ComponentValueGenerator(location, (AbstractBean) bean);
-    
-    BeanValueGenerator gen
-      = new BeanValueGenerator(location, bean);
-    
-    return new MethodGeneratorProgram(javaMethod, gen);
+    return new BeanValueGenerator(location, bean);
   }
-
 }

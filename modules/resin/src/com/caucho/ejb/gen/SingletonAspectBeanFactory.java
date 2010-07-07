@@ -73,6 +73,15 @@ public class SingletonAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   }
   
   /**
+   * Returns true for proxy-style generation
+   */
+  @Override
+  public boolean isProxy()
+  {
+    return true;
+  }
+  
+  /**
    * Generates the underlying bean object
    */
   @Override

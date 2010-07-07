@@ -387,7 +387,15 @@ public class InterceptorGenerator<X>
     out.print("objects[i] = ");
     out.println("__caucho_manager.getReference(bean, bean.getBeanClass(), env);");
 
-    out.println("if (objects[i] == null)");
+    // ejb/6032
+    out.print("if (objects[i] == null && (bean instanceof ");
+    out.printClass(InterceptorSelfBean.class);
+    out.println("))");
+    out.print("  objects[i] = ");
+    out.print(getBeanFactory().getBeanInstance());
+    out.println(";");
+
+    out.println("else if (objects[i] == null)");
     out.println("  throw new NullPointerException(String.valueOf(bean));");
     out.popDepth();
     out.println("}");
@@ -596,6 +604,7 @@ public class InterceptorGenerator<X>
                       javaMethod.getDeclaringClass().getName(),
                       javaMethod.getName(),
                       javaMethod.getParameterTypes());
+    
     out.println(";");
     out.println(getUniqueName(out) + "_method.setAccessible(true);");
 
@@ -612,7 +621,9 @@ public class InterceptorGenerator<X>
     else {
       className = getBeanFactory().getInstanceClassName();
       // ejb/6030 vs ioc/0c00
-      // superMethodName = javaMethod.getName();
+      
+      if (getBeanFactory().isProxy())
+        superMethodName = javaMethod.getName();
     }
       
     
@@ -1798,12 +1809,14 @@ public class InterceptorGenerator<X>
     throws IOException
   {
     if (_interceptionType == InterceptionType.POST_CONSTRUCT) {
-      out.print("com.caucho.config.gen.CandiUtil.getMethod(");
+      out.printClass(CandiUtil.class);
+      out.print(".getMethod(");
       out.print(_factory.getGeneratedClassName());
       out.print(".class, \"__caucho_postConstructImpl\");");
     }
     else {
-      out.print("com.caucho.config.gen.CandiUtil.getMethod(");
+      out.printClass(CandiUtil.class);
+      out.print(".getMethod(");
       out.print(className);
       out.print(".class, \"" + methodName + "\"");
 

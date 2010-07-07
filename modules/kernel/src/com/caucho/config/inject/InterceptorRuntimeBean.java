@@ -183,7 +183,7 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
     X value = CreationalContextImpl.findAny(env, getBean());
     
     if (value == null)
-      throw new NullPointerException(toString());
+      throw new NullPointerException(getBean() + " " + toString());
     
     return value;
   }

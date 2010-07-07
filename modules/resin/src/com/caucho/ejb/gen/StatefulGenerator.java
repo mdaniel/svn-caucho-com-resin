@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.ejb.Stateful;
+import javax.ejb.SessionBean;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectBeanFactory;
@@ -213,6 +214,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     
     generateEpilogue(out, map);
     generateInject(out, map);
+    generateDelegate(out, map);
     generatePostConstruct(out, map);
     generateDestroy(out, map);
   }
@@ -249,6 +251,11 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println("_context = context;");
 
     out.println("_bean = (" + getBeanClassName() + ") _manager.newInstance(env);");
+    
+    // ejb/5011
+    if (SessionBean.class.isAssignableFrom(getBeanType().getJavaClass())) {
+      out.println("_bean.setSessionContext(context);");
+    }
     
     generateContextObjectConstructor(out);
 

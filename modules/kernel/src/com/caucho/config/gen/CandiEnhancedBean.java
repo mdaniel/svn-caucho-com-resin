@@ -37,7 +37,10 @@ import com.caucho.config.inject.CreationalContextImpl;
 public interface CandiEnhancedBean {
   public void __caucho_inject(Object []delegates, CreationalContextImpl<?> parentEnv);
   
+  public Object __caucho_getDelegate();
+  
   public void __caucho_postConstruct();
   
   public void __caucho_destroy(CreationalContextImpl<?> env);
+
 }

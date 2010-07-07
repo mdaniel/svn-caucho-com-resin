@@ -360,6 +360,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     
     generateEpilogue(out, map);
     generateInject(out, map);
+    generateDelegate(out, map);
     generatePostConstruct(out, map);
     generateDestroy(out, map);
   }

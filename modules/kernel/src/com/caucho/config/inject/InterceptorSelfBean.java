@@ -32,6 +32,8 @@ package com.caucho.config.inject;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
+import com.caucho.config.gen.CandiEnhancedBean;
+
 /**
  * InterceptorBean represents a Java interceptor
  */
@@ -58,7 +60,16 @@ public class InterceptorSelfBean<X> extends InterceptorRuntimeBean<X>
   {
     CreationalContextImpl<X> env = (CreationalContextImpl<X>) cxt;
     
-    return (X) env.getParentValue();
+    Object parentValue = env.getParentValue();
+    
+    if (parentValue instanceof CandiEnhancedBean) {
+      CandiEnhancedBean candiProxy = (CandiEnhancedBean) parentValue;
+      
+      if (candiProxy.__caucho_getDelegate() != null)
+        return (X) candiProxy.__caucho_getDelegate();
+    }
+    
+    return (X) parentValue;
   }
 
   /**

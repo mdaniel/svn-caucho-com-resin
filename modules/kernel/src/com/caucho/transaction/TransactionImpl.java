@@ -630,7 +630,6 @@ public class TransactionImpl implements Transaction, AlarmListener {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " begin");
 
-    System.out.println("TIMEOUT: " + _timeout);
     if (_timeout > 0) {
       _alarm.queue(_timeout + EXTRA_TIMEOUT);
     }

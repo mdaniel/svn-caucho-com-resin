@@ -166,7 +166,6 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   
   public <T> T initProxy(T proxy, CreationalContextImpl<T> env)
   {
-    System.out.println("PROXY: " + proxy);
     if (proxy instanceof CandiEnhancedBean) {
       try {
         CandiEnhancedBean bean = (CandiEnhancedBean) proxy;
@@ -174,10 +173,8 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
         Object []delegates = createDelegates((CreationalContextImpl) env);
       
         bean.__caucho_inject(delegates, env);
-        System.out.println("INJECT: " + delegates);
       } catch (Exception e) {
-        System.out.println("INJECT: " + e);
-
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
     

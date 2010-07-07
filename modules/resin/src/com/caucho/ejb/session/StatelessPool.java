@@ -32,7 +32,10 @@ package com.caucho.ejb.session;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.ejb.SessionBean;
 import javax.enterprise.inject.spi.Interceptor;
 
 import com.caucho.config.inject.CreationalContextImpl;
@@ -46,6 +49,8 @@ import com.caucho.util.L10N;
  */
 @Module
 public class StatelessPool<X,T> {
+  private static final Logger log
+    = Logger.getLogger(StatelessPool.class.getName());
   private static final L10N L = new L10N(StatelessPool.class);
 
   private final StatelessManager<X> _manager;
@@ -114,7 +119,17 @@ public class StatelessPool<X,T> {
       if (beanItem == null) {
         CreationalContextImpl<X> env = new OwnerCreationalContext<X>(_manager.getBean());
         
-        beanItem = new Item<X>(_context.newInstance(env), 
+        X instance = _context.newInstance(env);
+        
+        if (instance instanceof SessionBean) {
+          try {
+            ((SessionBean) instance).setSessionContext(_context);
+          } catch (Exception e) {
+            log.log(Level.WARNING, e.toString(), e);
+          }
+        }
+        
+        beanItem = new Item<X>(instance,
                                _manager.getInterceptorBindings(_interceptorBeans, env));
         // _ejbProducer.newInstance();
       }

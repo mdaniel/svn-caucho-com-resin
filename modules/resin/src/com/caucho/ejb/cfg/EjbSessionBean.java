@@ -344,7 +344,8 @@ public class EjbSessionBean<X> extends EjbBean<X> {
         addInterface(interfaceList, localApi);
     }
     
-    addInterfaces(interfaceList, ejbClass.getSuperclass(), false);
+    // ejb/6040
+    // addInterfaces(interfaceList, ejbClass.getSuperclass(), false);
   }
   
   private void addInterface(ArrayList<Class<?>> interfaceList, Class<?> cl)

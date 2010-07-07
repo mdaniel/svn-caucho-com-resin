@@ -28,6 +28,10 @@
 
 package com.caucho.ejb.session;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import javax.ejb.EJBException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
@@ -48,6 +52,9 @@ import com.caucho.util.L10N;
 abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   implements SessionContext
 {
+  private static final Logger log
+    = Logger.getLogger(AbstractSessionContext.class.getName());
+  
   private static final L10N L = new L10N(AbstractSessionContext.class);
 
   private transient AbstractSessionManager<X> _manager;
@@ -55,6 +62,8 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   private transient ClassLoader _classLoader;
   private Class<T> _api;
   private SessionProxyFactory<T> _proxyFactory;
+  
+  private HashMap<String,Object> _contextData = new HashMap<String,Object>();
 
   protected AbstractSessionContext(AbstractSessionManager<X> manager,
                                    Class<T> api)
@@ -94,6 +103,12 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   }
   
   @Override
+  public Map<String,Object> getContextData()
+  {
+    return _contextData;
+  }
+  
+  @Override
   public Class<?> getInvokedBusinessInterface()
   {
     return getApi();
@@ -130,7 +145,9 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     try {
       thread.setContextClassLoader(_classLoader);
       
-      return _manager.newInstance(env);
+      X instance = _manager.newInstance(env);
+      
+      return instance;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

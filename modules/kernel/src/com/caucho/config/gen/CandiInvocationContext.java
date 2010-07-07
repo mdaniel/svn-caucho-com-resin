@@ -37,7 +37,10 @@ import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.interceptor.InvocationContext;
 
+import com.caucho.util.L10N;
+
 public class CandiInvocationContext implements InvocationContext {
+  private static final L10N L = new L10N(CandiInvocationContext.class);
   private static final Logger log
     = Logger.getLogger(CandiInvocationContext.class.getName());
   
@@ -105,6 +108,17 @@ public class CandiInvocationContext implements InvocationContext {
   public void setParameters(Object[] parameters)
     throws IllegalStateException
   {
+    Class<?> []paramType = _apiMethod.getParameterTypes();
+    
+    if (parameters != null
+        && paramType.length != parameters.length) {
+      throw new IllegalArgumentException(L.l("{0}.{1}: interception parameters '{2}' do not match the expected '{3}'",
+                                          _apiMethod.getDeclaringClass().getName(),
+                                          _apiMethod.getName(),
+                                          parameters.length,
+                                          paramType.length));
+    }
+    
     _param = parameters;
   }
 
@@ -122,6 +136,8 @@ public class CandiInvocationContext implements InvocationContext {
     throws Exception
   {
     try {
+      log.info("PROCEED: " + _chainObjects + " " + _implMethod + " " + _index);
+      
       // ioc/0c57
       if (_chainObjects != null && _index < _chainIndex.length) {
         int i = _index++;

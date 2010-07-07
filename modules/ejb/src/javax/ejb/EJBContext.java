@@ -31,6 +31,7 @@ package javax.ejb;
 import javax.transaction.UserTransaction;
 import java.security.Identity;
 import java.security.Principal;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -41,10 +42,12 @@ public interface EJBContext {
 
   public Principal getCallerPrincipal();
   
+  public Map<String,Object> getContextData();
+
   public EJBHome getEJBHome();
 
   public EJBLocalHome getEJBLocalHome();
-
+  
   public Properties getEnvironment();
 
   public boolean getRollbackOnly()

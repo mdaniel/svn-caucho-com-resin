@@ -316,6 +316,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     
     generateInject(out, map);
     
+    generateDelegate(out, map);
+    
     generatePostConstruct(out, map);
     
     generateWriteReplace(out);
