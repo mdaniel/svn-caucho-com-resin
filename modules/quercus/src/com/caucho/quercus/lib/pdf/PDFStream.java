@@ -31,7 +31,6 @@ package com.caucho.quercus.lib.pdf;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.util.L10N;
-import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
