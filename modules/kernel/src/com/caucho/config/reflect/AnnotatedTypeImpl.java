@@ -92,7 +92,13 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   
     _constructorSet.addAll(annType.getConstructors());
     _fieldSet.addAll(annType.getFields());
-    _methodSet.addAll(annType.getMethods());
+    
+    for (AnnotatedMethod<? super X> annMethod : annType.getMethods()) {
+      if (annMethod.getDeclaringType() == annType)
+        _methodSet.add(new AnnotatedMethodImpl(this, annMethod, annMethod.getJavaMember()));
+      else
+        _methodSet.add(annMethod);
+    }
   }
   
   public static <X> AnnotatedTypeImpl<X> create(AnnotatedType<X> annType)
