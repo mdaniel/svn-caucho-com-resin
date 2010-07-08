@@ -276,14 +276,21 @@ abstract public class BeanGenerator<X> extends GenClass
     out.println("{");
     out.pushDepth();
 
+    generateInjectContent(out, map);
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  protected void generateInjectContent(JavaWriter out,
+                                       HashMap<String,Object> map)
+    throws IOException
+  {
     for (AspectGenerator<X> method : getMethods()) {
       method.generateInject(out, map);
     }
 
     getAspectBeanFactory().generateInject(out, map);
-
-    out.popDepth();
-    out.println("}");
   }
 
   protected void generateDelegate(JavaWriter out,

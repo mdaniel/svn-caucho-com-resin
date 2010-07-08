@@ -67,6 +67,8 @@ abstract public class TaskWorker implements Runnable {
   {
     _isDestroyed = true;
 
+    wake();
+    
     Thread thread = _thread;
 
     if (thread != null)
@@ -75,9 +77,6 @@ abstract public class TaskWorker implements Runnable {
 
   public final void wake()
   {
-    if (_isDestroyed)
-      return;
-
     int oldState = _taskState.getAndSet(TASK_READY);
 
     if (! _isActive.getAndSet(true)) {

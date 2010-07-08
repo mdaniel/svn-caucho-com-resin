@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.TaskWorker;
+import com.caucho.util.Alarm;
 
 /**
  * Writer thread serializing dirty blocks.
@@ -99,12 +100,21 @@ public class BlockWriter extends TaskWorker {
       return false;
   }
   
-  void waitForComplete()
+  void waitForComplete(long timeout)
   {
+    long expires = Alarm.getCurrentTimeActual() + timeout;
+    
     synchronized (_writeQueue) {
+      wake();
+      
       while (_writeQueue.size() > 0) {
+        long now = Alarm.getCurrentTimeActual();
+        
+        if (expires < now)
+          return;
+        
         try {
-          _writeQueue.wait(2000);
+          _writeQueue.wait(expires - now);
         } catch (Exception e) {
           
         }

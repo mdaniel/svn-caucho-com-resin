@@ -102,9 +102,6 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
   // active sessions
   private LruCache<String,SessionImpl> _sessions;
-  // total sessions
-  private int _totalSessions;
-
   // iterator to purge sessions (to reduce gc)
   private Iterator<SessionImpl> _sessionIter;
   // array list for session timeout
@@ -112,9 +109,8 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   // generate cookies
   private boolean _enableSessionCookies = true;
   // allow session rewriting
-  private boolean _enableSessionUrls = true;
+  private boolean _enableSessionUrls = false;
 
-  private boolean _isModuloSessionId = false;
   private boolean _isAppendServerIndex = false;
   private boolean _isTwoDigitSessionIndex = false;
 
@@ -1041,7 +1037,6 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
    */
   public void setCookieModuloCluster(boolean isModulo)
   {
-    _isModuloSessionId = isModulo;
   }
 
   /**

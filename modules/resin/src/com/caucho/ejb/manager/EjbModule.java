@@ -30,14 +30,20 @@
 
 package com.caucho.ejb.manager;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.inject.Module;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.naming.Jndi;
 
 /**
  * Environment-based container.
  */
 @Module
 public class EjbModule {
+  private static final Logger log = Logger.getLogger(EjbModule.class.getName());
+  
   private static final EnvironmentLocal<EjbModule> _localModule
     = new EnvironmentLocal<EjbModule>();
   
@@ -76,6 +82,19 @@ public class EjbModule {
   {
     EjbModule module = new EjbModule(name);
     _localModule.set(module, loader);
+    
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(loader);
+      
+      Jndi.bindDeep("java:module/ModuleName", name);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
     
     return module;
   }

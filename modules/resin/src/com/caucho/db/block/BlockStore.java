@@ -1632,7 +1632,7 @@ public class BlockStore {
       _blockManager.freeStore(this);
     }
     
-    _writer.waitForComplete();
+    _writer.waitForComplete(60000);
 
     int id = _id;
     _id = 0;

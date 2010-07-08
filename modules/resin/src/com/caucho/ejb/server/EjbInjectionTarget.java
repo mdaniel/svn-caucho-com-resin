@@ -223,6 +223,11 @@ public class EjbInjectionTarget<T> {
       bindInjection();
     
     InjectManager inject = InjectManager.create();
+    
+    T instance = CreationalContextImpl.find(parentEnv, _bean);
+    
+    if (instance != null)
+      return instance;
    
     if (parentEnv == null)
       parentEnv = new OwnerCreationalContext<T>(_bean);
@@ -231,7 +236,7 @@ public class EjbInjectionTarget<T> {
     CreationalContextImpl<T> env 
       = new DependentCreationalContext<T>(_bean, parentEnv, null);
     
-    T instance = _bean.create(env);
+    instance = _bean.create(env);
     
     return instance;
   }

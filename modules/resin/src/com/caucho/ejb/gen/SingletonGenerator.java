@@ -191,8 +191,21 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     generateContentImpl(out, map);
     
     // generateSerialization(out);
+
   }
-  
+
+  @Override
+  protected void generateInjectContent(JavaWriter out,
+                                       HashMap<String,Object> map)
+    throws IOException
+  {
+    String beanClassName = getBeanType().getJavaClass().getName();
+    
+    out.println("_bean = (" + beanClassName + ") _manager.newInstance(parentEnv);");
+    
+    super.generateInjectContent(out, map);
+  }
+
   private void generateConstructor(JavaWriter out)
     throws IOException
   {
@@ -219,9 +232,7 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
 
     out.println("_manager = manager;");
     out.println("_isValid = true;");
-
-    out.println("_bean = (" + beanClassName + ") manager.newInstance(env);");
-    
+  
     generateContextObjectConstructor(out);
 
     out.popDepth();
@@ -231,17 +242,17 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
   private void generateProxyFactory(JavaWriter out)
     throws IOException
   {
-      out.println();
-      out.println("@Override");
-      out.println("public T __caucho_createProxy(com.caucho.config.inject.CreationalContextImpl<T> env)");
-      out.println("{");
-      out.println("  return (T) new " + getClassName() + "(_manager, env);");
-      out.println("}");
-      out.println();
-      
-      out.println("@Override");
-      out.println("public void __caucho_destroy()");
-      out.println("{");
-      out.println("}");
+    out.println();
+    out.println("@Override");
+    out.println("public T __caucho_createProxy(com.caucho.config.inject.CreationalContextImpl<T> env)");
+    out.println("{");
+    out.println("  return (T) new " + getClassName() + "(_manager, env);");
+    out.println("}");
+    out.println();
+
+    out.println("@Override");
+    out.println("public void __caucho_destroy()");
+    out.println("{");
+    out.println("}");
   }
 }
