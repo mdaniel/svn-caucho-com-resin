@@ -44,11 +44,13 @@ import javax.jms.ConnectionFactory;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.ApplicationExceptionConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.cfg.EjbConfigManager;
 import com.caucho.ejb.cfg.EjbRootConfig;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
+import com.caucho.ejb.util.AppExceptionItem;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -75,6 +77,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   private static final EnvironmentLocal<Boolean> _localScanAll
     = new EnvironmentLocal<Boolean>();
 
+  private ClassLoader _globalClassLoader;
   private final EnvironmentClassLoader _classLoader;
   private final ClassLoader _tempClassLoader;
 
@@ -97,7 +100,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
 
   private ConnectionFactory _jmsConnectionFactory;
   private int _messageConsumerMax = 5;
-
+  
   //
   // active servers
   //
@@ -181,6 +184,11 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   {
     _localScanAll.set(true);
   }
+  
+  public void setGlobalClassLoader(ClassLoader globalClassLoader)
+  {
+    _globalClassLoader = globalClassLoader;
+  }
 
   /**
    * Returns the parent loader
@@ -190,6 +198,14 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     return _classLoader;
   }
 
+  public ClassLoader getGlobalClassLoader()
+  {
+    if (_globalClassLoader != null)
+      return _globalClassLoader;
+    else
+      return _classLoader;
+  }
+  
   /**
    * Returns the introspection class loader
    */
@@ -454,6 +470,27 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   {
     EjbRootConfig config = _configManager.createRootConfig(root);
     config.addClassName(className);
+  }
+  
+  //
+  // app exception
+
+  /**
+   * Returns the configuration for a system exception.
+   */
+  public AppExceptionItem
+  getSystemException(Class<?> exceptionClass)
+  {
+    return _configManager.getApplicationException(exceptionClass, true);
+  }
+
+  /**
+   * Returns the configuration for an application exception.
+   */
+  public AppExceptionItem
+  getApplicationException(Class<?> exceptionClass)
+  {
+    return _configManager.getApplicationException(exceptionClass, false);
   }
 
   //

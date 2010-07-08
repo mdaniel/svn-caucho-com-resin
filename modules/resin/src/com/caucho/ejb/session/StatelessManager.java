@@ -76,11 +76,12 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
    *          the session configuration from the ejb.xml
    */
   public StatelessManager(EjbManager ejbContainer, 
+                          String moduleName,
                           AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annotatedType,
                           EjbLazyGenerator<X> ejbGenerator)
   {
-    super(ejbContainer, rawAnnType, annotatedType, ejbGenerator);
+    super(ejbContainer, moduleName, rawAnnType, annotatedType, ejbGenerator);
     
     introspect();
   }

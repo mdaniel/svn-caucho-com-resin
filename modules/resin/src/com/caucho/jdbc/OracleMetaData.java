@@ -29,17 +29,17 @@
 
 package com.caucho.jdbc;
 
-import com.caucho.util.Log;
-
-import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.logging.Logger;
+
+import javax.sql.DataSource;
 
 /**
  * Abstract way of grabbing data from the JDBC connection.
  */
 public class OracleMetaData extends GenericMetaData {
-  private static final Logger log = Log.open(OracleMetaData.class);
+  private static final Logger log
+    = Logger.getLogger(OracleMetaData.class.getName());
 
   protected OracleMetaData(DataSource ds)
   {

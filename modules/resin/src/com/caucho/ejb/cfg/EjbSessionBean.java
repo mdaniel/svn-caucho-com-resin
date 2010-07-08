@@ -378,18 +378,21 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
     if (Stateless.class.equals(getSessionType())) {
       manager = new StatelessManager<X>(ejbContainer, 
+                                        getModuleName(),
                                         getRawAnnotatedType(),
                                         getAnnotatedType(),
                                         lazyGenerator);
     }
     else if (Stateful.class.equals(getSessionType())) {
       manager = new StatefulManager<X>(ejbContainer,
+                                       getModuleName(),
                                        getRawAnnotatedType(),
                                        getAnnotatedType(),
                                        lazyGenerator);
     }
     else if (Singleton.class.equals(getSessionType())) {
-      manager = new SingletonManager<X>(ejbContainer, 
+      manager = new SingletonManager<X>(ejbContainer,
+                                        getModuleName(),
                                         getRawAnnotatedType(),
                                         getAnnotatedType(),
                                         lazyGenerator);

@@ -157,6 +157,9 @@ public class EjbInjectionTarget<T> {
 
   public void bindInjection()
   {
+    if (_bean != null)
+      return;
+    
     InjectManager beanManager = InjectManager.create();
     ManagedBeanImpl<T> managedBean
       = beanManager.createManagedBean(_annotatedType);
@@ -216,6 +219,9 @@ public class EjbInjectionTarget<T> {
   
   public T newInstance(CreationalContextImpl<?> parentEnv)
   {
+    if (_bean == null)
+      bindInjection();
+    
     InjectManager inject = InjectManager.create();
    
     if (parentEnv == null)

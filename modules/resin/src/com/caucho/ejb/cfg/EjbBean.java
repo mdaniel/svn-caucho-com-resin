@@ -158,6 +158,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     _ejbConfig = ejbConfig;
     _ejbModuleName = ejbModuleName;
 
+    System.out.println("BEANZ: " + ejbModuleName);
     _loader = ejbConfig.getEjbContainer().getClassLoader();
   }
 
@@ -190,6 +191,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
     return _ejbConfig.getEjbContainer();
   }
 
+  public String getModuleName()
+  {
+    return _ejbModuleName;
+  }
+  
   public String getAroundInvokeMethodName()
   {
     return _aroundInvokeMethodName;

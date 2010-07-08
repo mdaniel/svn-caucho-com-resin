@@ -46,6 +46,10 @@ public class EjbRootConfig  {
   EjbRootConfig(Path root)
   {
     _root = root;
+    
+    String tail = root.getTail();
+    if (tail.endsWith(".jar"))
+      _moduleName = tail.substring(0, tail.length() - 4);
   }
 
   public Path getRoot()

@@ -28,6 +28,7 @@
  */
 package com.caucho.ejb.util;
 
+import javax.ejb.ApplicationException;
 import javax.ejb.EJBException;
 import javax.ejb.EJBTransactionRequiredException;
 import javax.ejb.EJBTransactionRolledbackException;
@@ -42,6 +43,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.xa.XAResource;
 
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.transaction.UserTransactionProxy;
@@ -54,10 +56,12 @@ public class XAManager {
   private static L10N L = new L10N(XAManager.class);
 
   private UserTransactionProxy _ut;
+  private EjbManager _ejbManager;
 
   public XAManager()
   {
     _ut = UserTransactionProxy.getInstance();
+    _ejbManager = EjbManager.getCurrent();
   }
 
   /**
@@ -257,6 +261,42 @@ public class XAManager {
     }
   }
 
+  public boolean systemException(RuntimeException e)
+  {
+    TransactionImpl xa = getTransaction();
+    
+    AppExceptionItem appExn = null;
+    
+    if (_ejbManager != null)
+      appExn = _ejbManager.getSystemException(e.getClass());
+    
+    if (appExn == null || appExn.isRollback()) {
+      if (xa != null)
+        xa.setRollbackOnly(e);
+      
+      return true;
+    }
+    else
+      return false;
+  }
+
+  public void applicationException(Exception e)
+  {
+    TransactionImpl xa = getTransaction();
+    
+    if (xa == null)
+      return;
+    
+    AppExceptionItem appExn = null;
+    
+    if (_ejbManager != null)
+      appExn = _ejbManager.getApplicationException(e.getClass());
+    
+    if (appExn != null && appExn.isRollback()) {
+      xa.setRollbackOnly(e);
+    }
+  }
+  
   /**
    * Mark the transaction for rollback
    */

@@ -67,6 +67,8 @@ public class ReflectionAnnotatedType<T>
     = Logger.getLogger(ReflectionAnnotatedType.class.getName());
 
   private Class<T> _javaClass;
+  
+  private ReflectionAnnotatedType<?> _parentType;
 
   private Set<AnnotatedConstructor<T>> _constructorSet
     = new LinkedHashSet<AnnotatedConstructor<T>>();
@@ -77,13 +79,19 @@ public class ReflectionAnnotatedType<T>
   private Set<AnnotatedMethod<? super T>> _methodSet
     = new LinkedHashSet<AnnotatedMethod<? super T>>();
 
-  ReflectionAnnotatedType(InjectManager manager, BaseType type)
+  ReflectionAnnotatedType(InjectManager manager, 
+                          BaseType type)
   {
     super(type.getRawClass(),
           type.getTypeClosure(manager),
           type.getRawClass().getDeclaredAnnotations());
 
     _javaClass = (Class<T>) type.getRawClass();
+    
+    Class<?> parentClass = _javaClass.getSuperclass();
+    
+    if (parentClass != null && ! parentClass.equals(Object.class))
+      _parentType = ReflectionAnnotatedFactory.introspectType(parentClass);
 
     introspect(_javaClass);
   }
@@ -196,11 +204,6 @@ public class ReflectionAnnotatedType<T>
 
   private void introspectMethods(Class<?> cl)
   {
-    introspectMethods(cl, true);
-  }
-
-  private void introspectMethods(Class<?> cl, boolean isParent)
-  {
     if (cl == null)
       return;
     
@@ -210,31 +213,84 @@ public class ReflectionAnnotatedType<T>
       
       if (hasBeanAnnotation(method)
           || ! Modifier.isPrivate(method.getModifiers())) {
-        AnnotatedMethod<?> oldMethod
+        AnnotatedMethod<?> childMethod
           = AnnotatedTypeUtil.findMethod(_methodSet, method);
             
-        if (oldMethod == null) {
+        if (childMethod == null) {
           _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
         }
         /*
         else if (! isParent)
           continue;
           */
-        else if (oldMethod instanceof AnnotatedMethodImpl<?>){
+        else if (childMethod instanceof AnnotatedMethodImpl<?>){
           AnnotatedMethodImpl<?> oldMethodImpl
-            = (AnnotatedMethodImpl<?>) oldMethod;
+            = (AnnotatedMethodImpl<?>) childMethod;
           
-          oldMethodImpl.addAnnotations(method.getAnnotations());
+          // ejb/1290
+          for (Annotation ann : method.getAnnotations()) {
+            Class<?> annType = ann.annotationType();
+            
+            if (oldMethodImpl.isAnnotationPresent(ann.annotationType()))
+              continue;
+            
+            if (! annType.isAnnotationPresent(Inherited.class))
+              continue;
+            
+            oldMethodImpl.addAnnotation(ann);
+          }
         }
       }
     }
     
+    // ejb/4050
     if (cl.isInterface()) {
       for (Class<?> superInterface : cl.getInterfaces()) 
-        introspectMethods(superInterface, false);
+        introspectMethods(superInterface);
     }
     else
-      introspectMethods(cl.getSuperclass(), false);
+      introspectParentMethods(_parentType);
+  }
+
+  private void introspectParentMethods(AnnotatedType<?> parentType)
+  {
+    if (parentType == null)
+      return;
+    
+    for (AnnotatedMethod<?> annMethod : parentType.getMethods()) {
+      Method javaMethod = annMethod.getJavaMember();
+      
+      if (hasBeanAnnotation(javaMethod)
+          || ! Modifier.isPrivate(javaMethod.getModifiers())) {
+        AnnotatedMethod<?> childMethod
+          = AnnotatedTypeUtil.findMethod(_methodSet, javaMethod);
+            
+        if (childMethod == null) {
+          _methodSet.add((AnnotatedMethod<? super T>) annMethod);
+        }
+        /*
+        else if (! isParent)
+          continue;
+          */
+        else if (childMethod instanceof AnnotatedMethodImpl<?>){
+          AnnotatedMethodImpl<?> oldMethodImpl
+            = (AnnotatedMethodImpl<?>) childMethod;
+          
+          // ejb/1290
+          for (Annotation ann : annMethod.getAnnotations()) {
+            Class<?> annType = ann.annotationType();
+            
+            if (oldMethodImpl.isAnnotationPresent(ann.annotationType()))
+              continue;
+            
+            if (! annType.isAnnotationPresent(Inherited.class))
+              continue;
+            
+            oldMethodImpl.addAnnotation(ann);
+          }
+        }
+      }
+    }
   }
   
   private void introspectInheritedAnnotations(Class<?> cl)

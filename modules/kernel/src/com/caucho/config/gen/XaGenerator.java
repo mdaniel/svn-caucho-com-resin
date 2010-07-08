@@ -241,32 +241,25 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   {
     super.generateApplicationException(out, exception);
 
-    ApplicationException applicationException = exception
-        .getAnnotation(ApplicationException.class);
-
     out.println("isXAValid = true;");
-    
-    if ((applicationException != null) && (applicationException.rollback())) {
-      if (_isContainerManaged && (_transactionType != NOT_SUPPORTED)) {
-        out.println("if (_xa.getTransaction() != null)");
-        out.println("  _xa.markRollback(e);");
-      }
-    }/* else if (_isContainerManaged
-        && (_transactionType == REQUIRED || _transactionType == REQUIRES_NEW)) {
-      out.println("isXAValid = true;");
-    }*/
+    out.println("_xa.applicationException(e);");
   }
 
   @Override
   public void generateSystemException(JavaWriter out, Class<?> exn)
       throws IOException
   {
+    out.println("isXAValid = true;");
+    out.println("if (_xa.systemException(e)) {");
+    out.pushDepth();
+    
     if (_isContainerManaged) {
+      /*
       out.println("if (_xa.getTransaction() != null) {");
       out.println("  _xa.markRollback(e);");
       //out.println("  isXAValid = true;");
       out.println("}");
-      
+      */
       
       if (isEjb()) {
         switch (_transactionType) {
@@ -296,14 +289,19 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
     }
     else {
       if (isEjb()) {
+        /*
         out.println("if (_xa.getTransaction() != null) {");
         out.println("  _xa.markRollback(e);");
         //out.println("  isXAValid = true;");
         out.println("}");
+        */
         
         out.println("_xa.rethrowEjbException(e, false);");
       }
     }
+    
+    out.popDepth();
+    out.println("}");
   }
 
   /**

@@ -605,7 +605,11 @@ public class EjbMessageBean<X> extends EjbBean<X> {
     else
       ra.setConsumerMax(getEjbContainer().getMessageConsumerMax());
 
-    return deployMessageServer(ejbManager, lazyGenerator, ra, spec);
+    return deployMessageServer(ejbManager,
+                               getModuleName(),
+                               lazyGenerator, 
+                               ra, 
+                               spec);
   }
 
   /**
@@ -643,7 +647,11 @@ public class EjbMessageBean<X> extends EjbBean<X> {
                       raClass.getName()));
     }
 
-    return deployMessageServer(ejbManager, lazyGenerator, ra, _activationSpec);
+    return deployMessageServer(ejbManager,
+                               getModuleName(),
+                               lazyGenerator,
+                               ra,
+                               _activationSpec);
   }
 
   private AnnotatedType<X> fillClassDefaults(AnnotatedType<X> ejbClass)
@@ -670,6 +678,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
    */
   public AbstractEjbBeanManager<X> 
   deployMessageServer(EjbManager ejbManager,
+                      String moduleName,
                       EjbLazyGenerator<X> lazyGenerator,
                       ResourceAdapter ra,
                       ActivationSpec spec)
@@ -685,7 +694,8 @@ public class EjbMessageBean<X> extends EjbBean<X> {
         throw new ConfigException(L.l("ResourceAdapter is required for ActivationSpecServer"));
 
 
-      manager = new MessageManager<X>(ejbManager, 
+      manager = new MessageManager<X>(ejbManager,
+                                      moduleName,
                                       getRawAnnotatedType(), 
                                       getAnnotatedType(),
                                       lazyGenerator);

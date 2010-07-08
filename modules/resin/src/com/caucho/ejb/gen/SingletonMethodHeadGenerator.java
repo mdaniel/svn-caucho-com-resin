@@ -93,12 +93,15 @@ public class SingletonMethodHeadGenerator<X> extends MethodHeadGenerator<X>
   /**
    * Generates the underlying bean instance
    */
+  // ejb/6021
+  /*
   @Override
   public void generateApplicationException(JavaWriter out,
                                            Class<?> exn)
     throws IOException
   {
   }
+  */
 
   @Override
   public void generateFinally(JavaWriter out)

@@ -69,7 +69,7 @@ public class Jndi {
     throws NamingException
   {
     if (shortName.startsWith("java:"))
-      return new InitialContext();
+      return getInitialContext();
     else {
       Context context = (Context) _javaCompEnvMap.getLevel();
 
@@ -100,13 +100,20 @@ public class Jndi {
   public static void bindDeep(String name, Object obj)
     throws NamingException
   {
-    bindImpl(new InitialContext(), name, obj, name);
+    bindImpl(getInitialContext(), name, obj, name);
   }
 
   public static void bindDeep(Context context, String name, Object obj)
     throws NamingException
   {
     bindImpl(context, name, obj, name);
+  }
+  
+  private static Context getInitialContext()
+    throws NamingException
+  {
+    // return new InitialContext();
+    return InitialContextFactoryImpl.createInitialContext();
   }
 
   private static void bindImpl(Context context, String name,

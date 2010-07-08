@@ -131,7 +131,7 @@ public class ReflectionAnnotatedFactory
     if (type == null) {
       InjectManager inject = InjectManager.create();
       
-      type = new ReflectionAnnotatedType(inject, inject.createSourceBaseType(cl));
+      type = new ReflectionAnnotatedType<X>(inject, inject.createSourceBaseType(cl));
 
       typeRef = new SoftReference<ReflectionAnnotatedType>(type);
 

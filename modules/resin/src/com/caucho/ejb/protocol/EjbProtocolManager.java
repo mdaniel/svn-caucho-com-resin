@@ -320,9 +320,14 @@ public class EjbProtocolManager {
         else
           jndiName = "java:global/" + moduleName + '/' + suffix;
 
+        // XXX: for embed client must be true global  
+        thread.setContextClassLoader(_ejbContainer.getGlobalClassLoader());
+
         Jndi.bindDeep(jndiName, proxy);
         log.finer(proxy + " global binding to '" + jndiName + "' "
                   + _loader);
+        
+        thread.setContextClassLoader(_loader);
         
         // application means across modules within an application
         jndiName = "java:app/" + moduleName + '/' + suffix;

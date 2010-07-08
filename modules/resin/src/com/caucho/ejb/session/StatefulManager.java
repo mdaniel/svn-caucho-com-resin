@@ -81,11 +81,12 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   private List<Decorator<?>> _decoratorBeans;
 
   public StatefulManager(EjbManager ejbContainer,
+                         String moduleName,
                          AnnotatedType<X> rawAnnType,
                          AnnotatedType<X> annotatedType,
                          EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, rawAnnType, annotatedType, lazyGenerator);
+    super(ejbContainer, moduleName, rawAnnType, annotatedType, lazyGenerator);
   }
 
   @Override

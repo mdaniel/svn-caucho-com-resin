@@ -260,6 +260,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
    * 
    * @return true if successful
    */
+  @Override
   public boolean enlistResource(XAResource resource) throws RollbackException,
       SystemException
   {
@@ -283,10 +284,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
         throw RollbackExceptionWrapper.create(_rollbackException);
       } else
         throw new RollbackException(
-            L
-                .l(
-                    "Can't enlist resource {0} because the transaction is marked rollback-only.",
-                    resource));
+            L.l("Can't enlist resource {0} because the transaction is marked rollback-only.",
+                resource));
 
       if (_status == Status.STATUS_NO_TRANSACTION)
         throw new IllegalStateException(L.l(
@@ -294,10 +293,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
             resource));
 
       throw new IllegalStateException(
-          L
-              .l(
-                  "Can't enlist resource {0} because the transaction is not in an active state.  state='{1}'",
-                  resource, xaState(_status)));
+          L.l("Can't enlist resource {0} because the transaction is not in an active state.  state='{1}'",
+              resource, xaState(_status)));
     }
 
     // creates enough space in the arrays for the resource
@@ -337,11 +334,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
       } else if ((_resourceStates[i] & RES_ACTIVE) != 0) {
         IllegalStateException exn;
         exn = new IllegalStateException(
-            L
-                .l(
-                    "Can't enlist same resource {0} twice. "
-                        + "Delist is required before calling enlist with an old resource.",
-                    resource));
+            L.l("Can't enlist same resource {0} twice. "
+                + "Delist is required before calling enlist with an old resource.",
+                resource));
 
         setRollbackOnly(exn);
         throw exn;
@@ -383,9 +378,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     } catch (XAException e) {
       setRollbackOnly(e);
 
-      String message = L
-          .l(
-              "Failed to enlist resource {0} in transaction because of exception:\n{1}",
+      String message = L.l("Failed to enlist resource {0} in transaction because of exception:\n{1}",
               resource, e);
 
       log.log(Level.SEVERE, message, e);
@@ -641,8 +634,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   void suspend() throws SystemException
   {
     if (_isSuspended)
-      throw new IllegalStateException(L
-          .l("can't suspend already-suspended transaction"));
+      throw new IllegalStateException(L.l("can't suspend already-suspended transaction"));
 
     // _alarm.dequeue();
 

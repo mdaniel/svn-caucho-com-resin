@@ -88,11 +88,12 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
   private Method _ejbCreate;
 
   public MessageManager(EjbManager ejbContainer,
+                        String moduleName,
                         AnnotatedType<X> rawAnnType,
                         AnnotatedType<X> annotatedType,
                         EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, rawAnnType, annotatedType);
+    super(ejbContainer, moduleName, rawAnnType, annotatedType);
 
     InjectManager webBeans = InjectManager.create();
     

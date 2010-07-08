@@ -158,7 +158,6 @@ public class BlockStore {
   // number of minifragments currently used
   private long _miniFragmentUseCount;
 
-  private Lock _rowReadLock;
   private Lock _rowWriteLock;
   
   private long _blockLockTimeout = 120000;
@@ -202,7 +201,7 @@ public class BlockStore {
     if (rowLock == null)
       rowLock = new ReentrantReadWriteLock();
 
-    _rowReadLock = rowLock.readLock();
+    rowLock.readLock();
     _rowWriteLock = rowLock.writeLock();
   }
 

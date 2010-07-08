@@ -29,12 +29,31 @@
 
 package com.caucho.sql;
 
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.XADataSource;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.PropertyStringProgram;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.TypeFactory;
 import com.caucho.config.types.InitParam;
@@ -52,26 +71,6 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.xml.QName;
-
-import java.io.InputStream;
-import java.lang.reflect.*;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.PostConstruct;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.PooledConnection;
-import javax.sql.XADataSource;
-import javax.sql.DataSource;
 
 /**
  * Configures the database driver.
@@ -112,7 +111,7 @@ public class DriverConfig
 
   private DBPoolImpl _dbPool;
 
-  private Class _driverClass;
+  private Class<?> _driverClass;
 
   private String _driverURL;
   private String _user;

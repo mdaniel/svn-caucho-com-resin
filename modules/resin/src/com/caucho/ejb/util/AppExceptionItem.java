@@ -19,62 +19,45 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Rodrigo Westrupp
+ * @author Scott Ferguson
  */
+package com.caucho.ejb.util;
 
-package com.caucho.ejb.cfg;
 
-public class ApplicationException {
-  private String _id;
-  private String _exceptionClass;
-  private String _rollback;
-
-  public ApplicationException()
+/**
+ * Manages XA exceptions.
+ */
+public class AppExceptionItem {
+  private boolean _isApplicationException;
+  private boolean _isRollback;
+  private boolean _isInherited;
+  
+  public AppExceptionItem(boolean isApplicationException,
+                          boolean isRollback,
+                          boolean isInherited)
   {
+    _isApplicationException = isApplicationException;
+    _isRollback = isRollback;
+    _isInherited = isInherited;
   }
-
-  public String getExceptionClass()
+  
+  public boolean isApplicationException()
   {
-    return _exceptionClass;
+    return _isApplicationException;
   }
-
-  public String getId()
-  {
-    return _id;
-  }
-
-  public String getRollback()
-  {
-    return _rollback;
-  }
-
+  
   public boolean isRollback()
   {
-    if (_rollback == null)
-      return false;
-
-    if (_rollback.equals("true"))
-      return true;
-
-    return false;
+    return _isRollback;
   }
-
-  public void setExceptionClass(String exceptionClass)
+  
+  public boolean isInherited()
   {
-    _exceptionClass = exceptionClass;
-  }
-
-  public void setId(String id)
-  {
-    _id = id;
-  }
-
-  public void setRollback(String rollback)
-  {
-    _rollback = rollback;
+    return _isInherited;
   }
 }

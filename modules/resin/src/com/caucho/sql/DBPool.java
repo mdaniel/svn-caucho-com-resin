@@ -114,6 +114,7 @@ import javax.sql.XADataSource;
  * and also protects against the database dropping old connections.
  */
 
+@SuppressWarnings("serial")
 public class DBPool
   implements DataSource, java.io.Serializable, HandleAware
 {
@@ -121,16 +122,12 @@ public class DBPool
     = Logger.getLogger(DBPool.class.getName());
   private static final L10N L = new L10N(DBPool.class);
 
-  private static int _g_id;
-  
   private EnvironmentLocal<DBPoolImpl> _localPoolImpl;
   private EnvironmentLocal<DataSource> _localDataSourceImpl;
 
   private String _var;
   private String _name;
   private String _jndiName;
-  private String _tmpName;
-
   private ArrayList<Annotation> _bindingList
     = new ArrayList<Annotation>();
 

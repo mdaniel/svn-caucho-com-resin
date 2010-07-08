@@ -93,12 +93,13 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   
   private String[] _declaredRoles;
 
-  public AbstractSessionManager(EjbManager manager, 
+  public AbstractSessionManager(EjbManager manager,
+                                String moduleName,
                                 AnnotatedType<X> rawAnnType,
                                 AnnotatedType<X> annotatedType,
                                 EjbLazyGenerator<X> lazyGenerator)
   {
-    super(manager, rawAnnType, annotatedType);
+    super(manager, moduleName, rawAnnType, annotatedType);
     
     _lazyGenerator = lazyGenerator;
     

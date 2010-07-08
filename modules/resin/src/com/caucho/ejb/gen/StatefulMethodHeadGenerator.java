@@ -121,6 +121,9 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X>
                                            Class<?> exn)
     throws IOException
   {
+    // ejb/5070
+    super.generateApplicationException(out, exn);
+    
     out.println("isValid = true;");
   }
 

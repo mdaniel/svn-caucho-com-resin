@@ -41,7 +41,7 @@ import com.caucho.util.L10N;
 @Module
 public class StatefulContext<X,T> extends AbstractSessionContext<X,T> {
   private static final L10N L = new L10N(StatefulContext.class);
-    
+  
   public StatefulContext(StatefulManager<X> manager, Class<T> api)
   {
     super(manager, api);

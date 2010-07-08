@@ -57,6 +57,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.ejb.EJBs;
 import javax.ejb.Stateful;
 import javax.el.ELContext;
 import javax.el.ELResolver;
@@ -391,6 +392,8 @@ public final class InjectManager
       _injectionMap.put(Resource.class,
                         new ResourceHandler(this));
       _injectionMap.put(EJB.class,
+                        new EjbHandler(this));
+      _injectionMap.put(EJBs.class,
                         new EjbHandler(this));
 
       _deploymentMap.put(CauchoDeployment.class, 0);

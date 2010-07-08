@@ -76,11 +76,12 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
 
 
   public SingletonManager(EjbManager ejbContainer,
+                          String moduleName,
                           AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annotatedType,
                           EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, rawAnnType, annotatedType, lazyGenerator);
+    super(ejbContainer, moduleName, rawAnnType, annotatedType, lazyGenerator);
   }
 
   @Override
@@ -153,6 +154,9 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   @Override
   public X newInstance(CreationalContextImpl<X> env)
   {
+    if (_instance == null)
+      _instance = super.newInstance(env);
+    
     return _instance;
   }
 
@@ -161,7 +165,7 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   {
     CreationalContextImpl<X> env = new OwnerCreationalContext<X>(getBean());
     
-    _instance = super.newInstance(env);
+    newInstance(env);
   }
   
   public <T> T initProxy(T proxy, CreationalContextImpl<T> env)

@@ -34,6 +34,8 @@ import com.caucho.config.gen.ApplicationExceptionConfig;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
+import com.caucho.ejb.util.AppExceptionItem;
+import com.caucho.ejb.util.XAManager;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jms.JmsMessageListener;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -43,7 +45,9 @@ import com.caucho.vfs.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.ejb.ApplicationException;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
@@ -83,8 +87,11 @@ public class EjbConfig {
   private ArrayList<InterceptorBinding> _cfgInterceptorBindings
     = new ArrayList<InterceptorBinding>();
 
-  private ArrayList<ApplicationExceptionConfig> _cfgApplicationExceptions
-    = new ArrayList<ApplicationExceptionConfig>();
+  private HashMap<Class<?>,ApplicationExceptionConfig> _appExceptionConfig
+    = new HashMap<Class<?>,ApplicationExceptionConfig>(); 
+
+  private ConcurrentHashMap<Class<?>,AppExceptionItem> _appExceptionMap
+    = new ConcurrentHashMap<Class<?>,AppExceptionItem>(); 
 
   public EjbConfig(EjbManager ejbContainer)
   {
@@ -215,17 +222,60 @@ public class EjbConfig {
    */
   public void addApplicationException(ApplicationExceptionConfig applicationException)
   {
-    _cfgApplicationExceptions.add(applicationException);
+    Class<?> appExnClass = applicationException.getExceptionClass();
+
+    _appExceptionConfig.put(appExnClass, applicationException);
   }
 
   /**
    * Returns the application exceptions.
    */
-  public ArrayList<ApplicationExceptionConfig> getApplicationExceptions()
+  public AppExceptionItem getApplicationException(Class<?> exn,
+                                                  boolean isSystem)
   {
-    return _cfgApplicationExceptions;
+    AppExceptionItem appExn = _appExceptionMap.get(exn);
+    
+    if (appExn == null) {
+      appExn = createApplicationException(exn, isSystem);
+      
+      _appExceptionMap.put(exn, appExn);
+    }
+    
+    return appExn;
   }
-
+  
+  private AppExceptionItem createApplicationException(Class<?> exn, 
+                                                      boolean isSystem)
+  {
+    if (exn == Error.class || exn == RuntimeException.class)
+      return new AppExceptionItem(true, true, true);
+    else if (exn == Exception.class)
+      return new AppExceptionItem(false, false, true);
+    
+    ApplicationExceptionConfig cfg = _appExceptionConfig.get(exn);
+    
+    if (cfg != null) {
+      return new AppExceptionItem(true, cfg.isRollback(), cfg.isInherited());
+    }
+    
+    ApplicationException appExn = exn.getAnnotation(ApplicationException.class);
+    
+    if (appExn != null) {
+      return new AppExceptionItem(true, appExn.rollback(), true);
+    }
+    
+    AppExceptionItem parentItem = getApplicationException(exn.getSuperclass(),
+                                                          isSystem);
+    
+    if (parentItem.isInherited())
+      return parentItem;
+    else if (isSystem)
+      return new AppExceptionItem(true, true, true);
+    else
+      return new AppExceptionItem(false, false, true);
+    
+  }
+  
   /**
    * Binds an interceptor to an ejb.
    */

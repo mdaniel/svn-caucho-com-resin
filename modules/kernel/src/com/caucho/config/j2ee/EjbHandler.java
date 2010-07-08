@@ -34,6 +34,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 import javax.ejb.EJB;
+import javax.ejb.EJBs;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -45,6 +46,7 @@ import com.caucho.config.program.BeanValueGenerator;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldGeneratorProgram;
 import com.caucho.config.program.MethodGeneratorProgram;
+import com.caucho.config.program.NullProgram;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.util.L10N;
 
@@ -81,12 +83,53 @@ public class EjbHandler extends JavaeeInjectionHandler {
   @Override
   public ConfigProgram introspectType(AnnotatedType<?> type)
   {
+    // ejb/123j
+    for (Class<?> parentClass = type.getJavaClass().getSuperclass();
+         parentClass != null;
+         parentClass = parentClass.getSuperclass()) {
+      EJBs ejbs = parentClass.getAnnotation(EJBs.class);
+
+      if (ejbs != null) {
+        for (EJB ejb : ejbs.value()) {
+          introspectClass(getClass().getName(), ejb);
+        }
+      }
+
+      EJB ejb = parentClass.getAnnotation(EJB.class);
+
+      if (ejb != null)
+        introspectClass(getClass().getName(), ejb);
+    }
+    
+    EJBs ejbs = type.getAnnotation(EJBs.class);
+
+    if (ejbs != null) {
+      for (EJB ejb : ejbs.value()) {
+        introspectClass(getClass().getName(), ejb);
+      }
+    }
+
     EJB ejb = type.getAnnotation(EJB.class);
+
+    if (ejb != null)
+      introspectClass(getClass().getName(), ejb);
     
-    // return generateContext(type, ejb);
+
+    return new NullProgram();
+  }
+
+  private void introspectClass(String location, EJB ejb)
+  {
+    String name = ejb.name();
+
+    Class<?> bindType = Object.class;
     
-    // return null;
-    throw new UnsupportedOperationException(getClass().getName() + ":" + ejb);
+    ValueGenerator gen = bindGenerator(location, ejb, bindType);
+
+    if (name != null && ! "".equals(name)) {
+      bindJndi(name, gen, name);
+    }
+    
   }
 
   private ConfigProgram generateContext(AnnotatedField<?> field,

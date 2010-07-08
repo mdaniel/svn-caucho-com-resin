@@ -41,6 +41,8 @@ public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
   private static final Logger log
     = Logger.getLogger(SingletonContext.class.getName());
   
+  private T _proxy;
+  
   public SingletonContext(SingletonManager<X> manager,
                           Class<T> api)
   {
@@ -59,14 +61,18 @@ public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
   @Override
   public T createProxy(CreationalContextImpl<T> env)
   {
-    T proxy = super.createProxy(env);
+    synchronized (this) {
+      if (_proxy == null) {
+        _proxy = super.createProxy(env);
 
-    if (env != null)
-      env.push(proxy);
+        if (env != null)
+          env.push(_proxy);
 
-    getServer().initProxy(proxy, env);
-    
-    return proxy;
+        getServer().initProxy(_proxy, env);
+      }
+      
+      return _proxy;
+    }
   }
 
   /**

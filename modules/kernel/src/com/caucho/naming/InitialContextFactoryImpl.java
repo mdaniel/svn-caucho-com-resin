@@ -115,4 +115,9 @@ public class InitialContextFactoryImpl implements InitialContextFactory
 
     return new ContextImpl(model, env);
   }
+  
+  public static Context createInitialContext()
+  {
+    return new ContextImpl(createRoot(), null);
+  }
 }

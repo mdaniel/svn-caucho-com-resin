@@ -26,19 +26,18 @@
  * @author Rodrigo Westrupp
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.cfg;
 
 public class ApplicationExceptionConfig {
   private String _id;
-  private Class<?> _exceptionClass;
+  private String _exceptionClass;
   private String _rollback;
-  private boolean _inherited;
 
   public ApplicationExceptionConfig()
   {
   }
 
-  public Class<?> getExceptionClass()
+  public String getExceptionClass()
   {
     return _exceptionClass;
   }
@@ -64,7 +63,7 @@ public class ApplicationExceptionConfig {
     return false;
   }
 
-  public void setExceptionClass(Class<?> exceptionClass)
+  public void setExceptionClass(String exceptionClass)
   {
     _exceptionClass = exceptionClass;
   }
@@ -77,15 +76,5 @@ public class ApplicationExceptionConfig {
   public void setRollback(String rollback)
   {
     _rollback = rollback;
-  }
-
-  public void setInherited(boolean inherited)
-  {
-    _inherited = inherited;
-  }
-
-  public boolean isInherited()
-  {
-    return _inherited;
   }
 }

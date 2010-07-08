@@ -78,6 +78,8 @@ public class XaFactory<X>
     if (method.isAnnotationPresent(Remove.class))
       return super.create(method, isEnhanced);
     
+    AnnotatedType<?> declType = method.getDeclaringType();
+    
     TransactionManagement xaManagement
       = method.getAnnotation(TransactionManagement.class);
     
@@ -88,11 +90,16 @@ public class XaFactory<X>
     
 
     TransactionAttribute xa = method.getAnnotation(TransactionAttribute.class);
-    TransactionAttributeType xaType = _classXa;
+    TransactionAttributeType xaType = null;
     
-
     if (xa != null) {
       xaType = xa.value();
+    }
+    else {
+      xa = declType.getAnnotation(TransactionAttribute.class);
+      
+      if (xa != null)
+        xaType = xa.value();
     }
     
     boolean isBeanManaged = xaManagementType == TransactionManagementType.BEAN;

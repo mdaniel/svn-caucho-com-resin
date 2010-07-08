@@ -623,7 +623,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     if (rawType == null || Object.class.equals(rawType))
       return;
     
-    Class<?> parentClass = rawType.getSuperclass();
+    // Class<?> parentClass = rawType.getSuperclass();
     
     // configureClassResources(injectList, type);
 
@@ -645,6 +645,22 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       
       if (handler != null) {
         injectProgramList.add(new ClassHandlerProgram(ann, handler));
+      }
+    }
+    
+    // ioc/123i
+    for (Class<?> parentClass = type.getJavaClass().getSuperclass();
+         parentClass != null;
+         parentClass = parentClass.getSuperclass()) {
+      for (Annotation ann : parentClass.getAnnotations()) {
+        Class<? extends Annotation> annType = ann.annotationType();
+      
+        InjectionPointHandler handler 
+          = cdiManager.getInjectionPointHandler(annType);
+      
+        if (handler != null) {
+          injectProgramList.add(new ClassHandlerProgram(ann, handler));
+        }
       }
     }
   }
