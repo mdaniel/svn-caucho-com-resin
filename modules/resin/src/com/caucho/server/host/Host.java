@@ -523,9 +523,9 @@ public class Host extends WebAppContainer
       }
     }
 
-    _bamBroker = new HempBroker(hostName);
-
     HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
+
+    _bamBroker = new HempBroker(brokerManager, hostName);
 
     if (brokerManager != null)
       brokerManager.addBroker(hostName, _bamBroker);

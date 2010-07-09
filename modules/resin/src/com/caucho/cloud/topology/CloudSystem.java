@@ -36,9 +36,9 @@ import com.caucho.util.L10N;
 /**
  * CloudDomain represents all the clusters in a Resin configuration.
  */
-public class CloudDomain
+public class CloudSystem
 {
-  private static final L10N L = new L10N(CloudDomain.class);
+  private static final L10N L = new L10N(CloudSystem.class);
   
   private CloudCluster []_clusterArray = new CloudCluster[0];
 
@@ -50,7 +50,7 @@ public class CloudDomain
   /**
    * Creates a CloudDomain with an identifying id.
    */
-  public CloudDomain(String id)
+  public CloudSystem(String id)
   {
     _id = id;
   }

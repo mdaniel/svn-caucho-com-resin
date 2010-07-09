@@ -84,6 +84,9 @@ public class SecurityService extends AbstractNetworkService
   public String sign(String uid, String nonce)
   {
     try {
+      if (uid != null && ! uid.equals(""))
+        return "fail";
+      
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
       
       digest.update(uid.getBytes("UTF-8"));
@@ -91,6 +94,21 @@ public class SecurityService extends AbstractNetworkService
 
       if (_signatureSecret != null)
         digest.update(_signatureSecret);
+      
+      return Base64.encode(digest.digest());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public String sign(String uid, String nonce, String password)
+  {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      
+      digest.update(uid.getBytes("UTF-8"));
+      digest.update(nonce.getBytes("UTF-8"));
+      digest.update(password.getBytes("UTF-8"));
       
       return Base64.encode(digest.digest());
     } catch (Exception e) {

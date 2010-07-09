@@ -30,11 +30,6 @@
 package com.caucho.bam;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
-
-import com.caucho.util.Alarm;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,

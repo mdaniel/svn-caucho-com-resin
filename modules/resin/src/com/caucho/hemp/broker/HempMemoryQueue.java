@@ -46,8 +46,10 @@ import com.caucho.hemp.packet.QueryError;
 import com.caucho.hemp.packet.QueryGet;
 import com.caucho.hemp.packet.QueryResult;
 import com.caucho.hemp.packet.QuerySet;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 import com.caucho.util.WaitQueue;
 
 /**
@@ -55,8 +57,10 @@ import com.caucho.util.WaitQueue;
  */
 public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 {
+  private static final L10N L = new L10N(HempMemoryQueue.class);
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
+
   private static long _gid;
 
   // how long the thread should wait for a new request before exiting
@@ -74,10 +78,10 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   private final AtomicInteger _threadCount = new AtomicInteger();
   private final WaitQueue _wait = new WaitQueue();
   private final PacketQueue _queue;
+  
+  private final Lifecycle _lifecycle = new Lifecycle();
 
   private long _lastExitTime;
-
-  private volatile boolean _isClosed;
 
   public HempMemoryQueue(ActorStream actorStream,
                          ActorStream linkStream,
@@ -105,6 +109,8 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
     long expireTimeout = -1;
 
     _queue = new PacketQueue(_name, maxDiscardSize, maxBlockSize, expireTimeout);
+    
+    _lifecycle.toActive();
 
     Environment.addCloseListener(this);
   }
@@ -112,6 +118,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   /**
    * Returns the actor's jid
    */
+  @Override
   public String getJid()
   {
     return _actorStream.getJid();
@@ -136,6 +143,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   /**
    * Sends a message
    */
+  @Override
   public void message(String to, String from, Serializable value)
   {
     enqueue(new Message(to, from, value));
@@ -144,6 +152,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   /**
    * Sends a message
    */
+  @Override
   public void messageError(String to,
                                String from,
                                Serializable value,
@@ -155,6 +164,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   /**
    * Query an entity
    */
+  @Override
   public void queryGet(long id,
                        String to,
                        String from,
@@ -177,6 +187,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   /**
    * Query an entity
    */
+  @Override
   public void queryResult(long id,
                               String to,
                               String from,
@@ -188,6 +199,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   /**
    * Query an entity
    */
+  @Override
   public void queryError(long id,
                              String to,
                              String from,
@@ -204,6 +216,10 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
   protected final void enqueue(Packet packet)
   {
+    if (! _lifecycle.isActive())
+      throw new IllegalStateException(L.l("{0} cannot accept packets because it's no longer active",
+                                          this));
+    
     if (log.isLoggable(Level.FINEST)) {
       int size = _queue.getSize();
       log.finest(this + " enqueue(" + size + ") " + packet);
@@ -236,7 +252,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
       return;
     }
 
-    while (! isClosed()) {
+    while (! _lifecycle.isDestroying()) {
       if (_queue.isEmpty()) {
         // empty queue
         return;
@@ -365,6 +381,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
     return true;
   }
 
+  @Override
   public void run()
   {
     Thread thread = Thread.currentThread();
@@ -379,7 +396,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
     WaitQueue.Item item = _wait.create();
 
     try {
-      while (! isClosed()) {
+      while (! _lifecycle.isDestroying()) {
         try {
           if (log.isLoggable(Level.FINEST)) {
             log.finest(this + " spawn {threadCount:" + _threadCount.get()
@@ -406,16 +423,31 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
     }
   }
 
+  @Override
   public void close()
   {
-    _isClosed = true;
+    _lifecycle.toStop();
 
     _wait.wakeAll();
+    
+    long expires = Alarm.getCurrentTimeActual() + 2000;
+    
+    while (! _queue.isEmpty()
+           && Alarm.getCurrentTimeActual() < expires) {
+      try {
+        Thread.sleep(100);
+      } catch (Exception e) {
+        
+      }
+    }
+    
+    _lifecycle.toDestroy();
   }
 
+  @Override
   public boolean isClosed()
   {
-    return _isClosed || _linkStream.isClosed();
+    return _lifecycle.isDestroying() || _linkStream.isClosed();
   }
 
   @Override

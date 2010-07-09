@@ -45,7 +45,7 @@ public class CloudCluster
   
   private static final int POD_INDEX_MAX = 64 * 64;
 
-  private final CloudDomain _domain;
+  private final CloudSystem _domain;
   private final String _id;
 
   private CloudPod []_podList = new CloudPod[0];
@@ -53,7 +53,7 @@ public class CloudCluster
   private final CopyOnWriteArrayList<CloudPodListener> _listeners
     = new CopyOnWriteArrayList<CloudPodListener>();
 
-  CloudCluster(CloudDomain domain, String id)
+  CloudCluster(CloudSystem domain, String id)
   {
     _domain = domain;
     _id = id;
@@ -70,7 +70,7 @@ public class CloudCluster
   /**
    * Returns the owning domain.
    */
-  public CloudDomain getDomain()
+  public CloudSystem getDomain()
   {
     return _domain;
   }

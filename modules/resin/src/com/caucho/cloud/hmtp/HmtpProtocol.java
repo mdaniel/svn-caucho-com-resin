@@ -27,65 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.topology;
+package com.caucho.cloud.hmtp;
 
-import com.caucho.network.server.NetworkService;
+import com.caucho.cloud.bam.BamService;
+import com.caucho.network.listen.AbstractProtocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 
 /**
- * Interface for a service registered with the Resin Server.
+ * Dispatches the HMUX protocol.
+ *
+ * @see com.caucho.network.listen.AbstractProtocol
  */
-public class TopologyService implements NetworkService
-{
-  public static final int START_PRIORITY_CLASSLOADER = 999;
-  public static final int START_PRIORITY_DEFAULT = 1000;
+public class HmtpProtocol extends AbstractProtocol {
+  private BamService _bamService;
   
-  public static final int STOP_PRIORITY_DEFAULT = 1000;
-  public static final int STOP_PRIORITY_CLASSLOADER = 1001;
-  
-  private final CloudSystem _domain;
-  
-  public TopologyService(String domainId)
+  public HmtpProtocol()
   {
-    _domain = new CloudSystem(domainId);
-  }
-  
-  public CloudSystem getDomain()
-  {
-    return _domain;
+    setProtocolName("hmtp");
+    
+    _bamService = BamService.create(null);
   }
 
+  /**
+   * Create a HmuxRequest object for the new thread.
+   */
   @Override
-  public int getStartPriority()
+  public ProtocolConnection createConnection(SocketLink conn)
   {
-    return START_PRIORITY_DEFAULT;
-  }
-
-  @Override
-  public void start()
-    throws Exception
-  {
-  }
-
-  @Override
-  public int getStopPriority()
-  {
-    return STOP_PRIORITY_DEFAULT;
-  }
-
-  @Override
-  public void stop() 
-    throws Exception
-  {
-  }
-
-  @Override
-  public void destroy()
-  {
-  }
-  
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _domain + "]";
+    return new HmtpRequest(conn, _bamService);
   }
 }

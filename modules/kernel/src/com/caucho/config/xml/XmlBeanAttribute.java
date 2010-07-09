@@ -49,7 +49,7 @@ public class XmlBeanAttribute extends Attribute {
   public static final XmlBeanAttribute ATTRIBUTE
     = new XmlBeanAttribute();
 
-  private final ConfigType _configType;
+  private final ConfigType<?> _configType;
   private final Method _setMethod;
 
   private XmlBeanAttribute()
@@ -63,7 +63,7 @@ public class XmlBeanAttribute extends Attribute {
     _setMethod = setMethod;
   }
 
-  public ConfigType getConfigType()
+  public ConfigType<?> getConfigType()
   {
     return _configType;
   }
@@ -81,7 +81,7 @@ public class XmlBeanAttribute extends Attribute {
     if (uri.equals("urn:java:com.caucho.config.driver")) {
       TypeFactory factory = TypeFactory.getFactory();
 
-      Class api;
+      Class<?> api;
 
       if (parent instanceof BeanConfig) {
         api = ((BeanConfig) parent).getBeanConfigClass();
@@ -91,7 +91,7 @@ public class XmlBeanAttribute extends Attribute {
       else
         api = _configType.getType();
 
-      Class cl = factory.getDriverClassByScheme(api, localName);
+      Class<?> cl = factory.getDriverClassByScheme(api, localName);
 
       return new XmlBeanConfig(qName, cl);
     }
@@ -101,10 +101,10 @@ public class XmlBeanAttribute extends Attribute {
 
     String pkg = uri.substring("uri:java:".length());
 
-    Class cl = TypeFactory.loadClass(pkg, localName);
+    Class<?> cl = TypeFactory.loadClass(pkg, localName);
 
     if (cl == null) {
-      ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+      ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(qName);
 
       if (type != null)
         return type.create(parent, qName);

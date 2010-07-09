@@ -31,7 +31,6 @@ package com.caucho.network.listen;
 
 import java.io.IOException;
 
-
 /**
  * Protocol specific information for each request.  ServerRequest
  * is reused to reduce memory allocations.
@@ -43,6 +42,7 @@ public abstract  class AbstractProtocolConnection implements ProtocolConnection 
    * Initialize the connection.  At this point, the current thread is the
    * connection thread.
    */
+  @Override
   public void init()
   {
   }
@@ -70,7 +70,18 @@ public abstract  class AbstractProtocolConnection implements ProtocolConnection 
    * @param conn Information about the connection, including buffered
    * read and write streams.
    */
+  @Override
   public abstract boolean handleRequest() throws IOException;
+
+  /**
+   * Handles a resumption of the connection for an async/comet request.
+   */
+  @Override
+  public boolean handleResume()
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Handles a close event when the connection is closed.

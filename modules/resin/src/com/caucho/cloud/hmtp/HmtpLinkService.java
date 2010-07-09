@@ -27,44 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.hmux;
+package com.caucho.cloud.hmtp;
 
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.hemp.servlet.ServerLinkService;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.ClusterServer;
-import com.caucho.server.cluster.Server;
-import com.caucho.util.Alarm;
-import com.caucho.vfs.*;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ConnectException;
-import java.net.Socket;
-import java.net.SocketException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Underlying stream handling HTTP requests.
  */
-class HmuxLinkService extends ServerLinkService {
-  private Server _server;
-  
-  public HmuxLinkService(ActorStream linkStream, Broker broker,
-                         ServerAuthManager authManager, String ipAddress,
-                         boolean isUnidir,
-                         Server server)
+class HmtpLinkService extends ServerLinkService {
+  public HmtpLinkService(ActorStream linkStream,
+                         Broker broker,
+                         ServerAuthManager authManager,
+                         String ipAddress,
+                         boolean isUnidir)
   {
     super(linkStream, broker, authManager, ipAddress, isUnidir);
-    
-    _server = server;
   }
   
   /**
@@ -89,6 +70,7 @@ class HmuxLinkService extends ServerLinkService {
 
   private ClusterServer findServerByJid(String jid)
   {
+    /*
     for (Cluster cluster : _server.getClusterList()) {
       for (ClusterPod pod : cluster.getPodList()) {
         for (ClusterServer clusterServer : pod.getServerList()) {
@@ -97,6 +79,7 @@ class HmuxLinkService extends ServerLinkService {
         }
       }
     }
+    */
     
     return null;
   }

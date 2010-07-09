@@ -80,6 +80,7 @@ public class ServerLinkStream extends AbstractActorStream {
   /**
    * Sends a message to the link service if 'to' is null, else send it to the broker.
    */
+  @Override
   public void message(String to,
                       String from,
                       Serializable payload)
@@ -95,6 +96,7 @@ public class ServerLinkStream extends AbstractActorStream {
   /**
    * Handles a message
    */
+  @Override
   public void messageError(String to,
                            String from,
                            Serializable payload,
@@ -114,6 +116,7 @@ public class ServerLinkStream extends AbstractActorStream {
    * The get handler must respond with either
    * a QueryResult or a QueryError
    */
+  @Override
   public void queryGet(long id,
                        String to,
                        String from,
@@ -133,6 +136,7 @@ public class ServerLinkStream extends AbstractActorStream {
    * The set handler must respond with either
    * a QueryResult or a QueryError
    */
+  @Override
   public void querySet(long id,
                        String to,
                        String from,
@@ -151,6 +155,7 @@ public class ServerLinkStream extends AbstractActorStream {
    *
    * The result id will match a pending get or set.
    */
+  @Override
   public void queryResult(long id,
                           String to,
                           String from,
@@ -169,6 +174,7 @@ public class ServerLinkStream extends AbstractActorStream {
    *
    * The result id will match a pending get or set.
    */
+  @Override
   public void queryError(long id,
                          String to, 
                          String from,
@@ -183,11 +189,13 @@ public class ServerLinkStream extends AbstractActorStream {
       super.queryError(id, to, from, payload, error);
   }
 
+  @Override
   public boolean isClosed()
   {
     return _brokerStream == null;
   }
 
+  @Override
   public void close()
   {
     _brokerStream = null;

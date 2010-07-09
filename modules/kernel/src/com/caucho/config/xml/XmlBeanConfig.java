@@ -460,7 +460,7 @@ public class XmlBeanConfig<T> {
     _bean = new XmlBean(managedBean, injectionTarget);
     
     _cdiManager.addXmlInjectionTarget(xmlCookie.value(), injectionTarget);
-
+    
     if (! _isInlineBean)
       _cdiManager.discoverBean(_annotatedType);
     

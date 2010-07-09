@@ -707,7 +707,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   public void setResinSystemKey(String key)
   {
     SecurityService security = SecurityService.create();
-    System.out.println("KEY: " + key);
     security.setSignatureSecret(key);
   }
 

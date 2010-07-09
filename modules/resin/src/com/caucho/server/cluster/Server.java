@@ -47,6 +47,7 @@ import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
+import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.deploy.DeployNetworkService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -61,7 +62,6 @@ import com.caucho.distcache.GlobalCache;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.git.GitRepository;
 import com.caucho.hemp.broker.DomainManager;
-import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.lifecycle.Lifecycle;
@@ -149,9 +149,7 @@ public class Server extends ProtocolDispatchServer
 
   private InjectManager _cdiManager;
 
-  private HempBrokerManager _brokerManager;
-  private DomainManager _domainManager;
-  private HempBroker _broker;
+  private BamService _bamService;
   private ServerAuthManager _serverLinkManager;
   
   private GitRepository _git;
@@ -254,6 +252,7 @@ public class Server extends ProtocolDispatchServer
     //  = (cluster.getId() + ":" + _selfServer.getClusterPod().getId());
 
     _classLoader = _networkServer.getClassLoader();
+    _classLoader.setId("server:" + clusterServer.getId());
 
     _serverLocal.set(this, _classLoader);
 
@@ -302,16 +301,11 @@ public class Server extends ProtocolDispatchServer
     _hostContainer.setDispatchServer(this);
 
     _alarm = new Alarm(this);
+    
+    _bamService = BamService.create(getBamAdminName());
+    _bamService.setDomainManager(createDomainManager());
 
-    _brokerManager = createBrokerManager();
-    _domainManager = createDomainManager();
-
-    _broker = new HempBroker(getBamAdminName());
-
-    _brokerManager.addBroker(getBamAdminName(), _broker);
-    _brokerManager.addBroker("resin.caucho", _broker);
-
-    _serverLinkManager = new ServerAuthManager(this);
+    _bamService.setLinkManager(new ServerAuthManager(this));
     
     Config.setProperty("server", new ServerVar(_selfServer), _classLoader);
     Config.setProperty("cluster", new ClusterVar(), _classLoader);
@@ -413,14 +407,6 @@ public class Server extends ProtocolDispatchServer
   public Path getResinDataDirectory()
   {
     return _resin.getResinDataDirectory();
-  }
-
-  /**
-   * Returns the HMTP link manager
-   */
-  public ServerAuthManager getServerLinkManager()
-  {
-    return _serverLinkManager;
   }
 
   /**
@@ -608,7 +594,7 @@ public class Server extends ProtocolDispatchServer
    */
   public Broker getBamBroker()
   {
-    return _broker;
+    return _bamService.getBroker();
   }
 
   /**
@@ -656,7 +642,7 @@ public class Server extends ProtocolDispatchServer
    */
   public Broker getBroker()
   {
-    return _broker;
+    return _bamService.getBroker();
   }
 
   public AdminAuthenticator getAdminAuthenticator()
@@ -2422,12 +2408,14 @@ public class Server extends ProtocolDispatchServer
         log.log(Level.WARNING, e.toString(), e);
       }
       
+      /*
       try {
         if (_domainManager != null)
           _domainManager.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
+      */
 
       try {
         ThreadPool.getThreadPool().interrupt();

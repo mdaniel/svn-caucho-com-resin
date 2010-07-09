@@ -35,18 +35,12 @@ import java.io.InputStream;
 import com.caucho.db.block.BlockStore;
 
 public class BlobInputStream extends InputStream {
-  private static final int INODE_DIRECT_BLOCKS = 14;
-    
   private BlockStore _store;
 
-  private long _length;
   private long _offset;
 
   private byte []_inode;
   private int _inodeOffset;
-
-  private long _lastOffset;
-  private long _fragmentId;
 
   private byte []_buffer;
 
@@ -83,11 +77,8 @@ public class BlobInputStream extends InputStream {
     _inode = inode;
     _inodeOffset = inodeOffset;
 
-    _length = readLong(inode, inodeOffset);
+    readLong(inode, inodeOffset);
     _offset = 0;
-
-    _fragmentId = 0;
-    _lastOffset = 0;
   }
 
   /**
@@ -143,14 +134,5 @@ public class BlobInputStream extends InputStream {
             ((buffer[offset + 5] & 0xffL) << 16) +
             ((buffer[offset + 6] & 0xffL) << 8) +
             ((buffer[offset + 7] & 0xffL)));
-  }
-
-  /**
-   * Writes the short.
-   */
-  private static int readShort(byte []buffer, int offset)
-  {
-    return (((buffer[offset + 0] & 0xff) << 8) +
-            ((buffer[offset + 1] & 0xff)));
   }
 }

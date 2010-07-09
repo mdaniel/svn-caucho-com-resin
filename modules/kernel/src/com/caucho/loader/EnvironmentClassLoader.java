@@ -819,8 +819,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public void start()
   {
-    if (! _lifecycle.toStarting())
+    if (! _lifecycle.toStarting()) {
+      startListeners();
       return;
+    }
 
     sendAddLoaderEvent();
 
@@ -829,6 +831,16 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     if (_artifactManager != null)
       _artifactManager.start();
 
+    startListeners();
+
+    _admin = new EnvironmentAdmin(this);
+    _admin.register();
+
+    _lifecycle.toActive();
+  }
+  
+  private void startListeners()
+  {
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
     int size = listeners.size();
     for (int i = 0; listeners != null && i < size; i++) {
@@ -836,11 +848,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       listener.environmentStart(this);
     }
-
-    _admin = new EnvironmentAdmin(this);
-    _admin.register();
-
-    _lifecycle.toActive();
   }
 
   /**

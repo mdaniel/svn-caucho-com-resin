@@ -29,11 +29,10 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.util.CharBuffer;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+
+import com.caucho.util.CharBuffer;
 
 final class AndExpr extends Expr {
   private ArrayList<Expr> _exprList = new ArrayList<Expr>();
@@ -88,7 +87,8 @@ final class AndExpr extends Expr {
   /**
    * Returns the type of the expression.
    */
-  public Class getType()
+  @Override
+  public Class<?> getType()
   {
     return boolean.class;
   }

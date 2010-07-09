@@ -66,6 +66,7 @@ public class HmuxProtocol extends AbstractHttpProtocol {
   /**
    * Create a HmuxRequest object for the new thread.
    */
+  @Override
   public ProtocolConnection createConnection(SocketLink conn)
   {
     return new HmuxRequest(getServer(), conn, this);

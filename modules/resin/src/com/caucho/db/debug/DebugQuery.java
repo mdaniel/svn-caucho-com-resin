@@ -30,21 +30,14 @@
 package com.caucho.db.debug;
 
 import com.caucho.db.Database;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-
-import java.util.logging.Logger;
 
 /**
  * Manager for a basic Java-based database.
  */
 public class DebugQuery {
-  private static final Logger log = Log.open(DebugStore.class);
-  private static final L10N L = new L10N(DebugStore.class);
-
   Database _db;
   
   public DebugQuery(Path path)
@@ -63,11 +56,7 @@ public class DebugQuery {
       return;
     }
 
-    Path path = Vfs.lookup(args[0]);
-
     WriteStream out = Vfs.openWrite(System.out);
-
-    DebugQuery query = new DebugQuery(path);
 
     out.close();
   }

@@ -174,13 +174,14 @@ public class ServerAuthManager {
     }
   }
   
-  void authenticate(String uid, Object credentials, String ipAddress)
+  void authenticate(String to, Object credentials, String ipAddress)
   {
     Authenticator auth = getAuth();
     
     if (credentials instanceof SignedCredentials) {
       SignedCredentials signedCred = (SignedCredentials) credentials;
 
+      String uid= signedCred.getUid();
       String nonce = signedCred.getNonce();
       String signature = signedCred.getSignature();
       
@@ -208,12 +209,12 @@ public class ServerAuthManager {
     else if (credentials instanceof String) {
       String password = (String) credentials;
     
-      Principal user = new BasicPrincipal(uid);
+      Principal user = new BasicPrincipal(to);
       PasswordCredentials pwdCred = new PasswordCredentials(password);
     
       if (auth.authenticate(user, pwdCred, null) == null) {
         throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
-                                             uid));
+                                             to));
       }
     }
     /*
@@ -236,11 +237,8 @@ public class ServerAuthManager {
     String clientNonce = query.getNonce();
 
     String clientSignature = _security.sign(uid, clientNonce);
-    System.out.println("GENNONCE: " + query + " " + clientSignature);
     
     String nonce = String.valueOf(Alarm.getCurrentTime());
-    
-    System.out.println("GENNONCE->: " + nonce);
     
     return new NonceQuery(uid, nonce, clientSignature);
   }

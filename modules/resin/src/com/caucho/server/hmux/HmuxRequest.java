@@ -32,7 +32,6 @@ package com.caucho.server.hmux;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -43,19 +42,8 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorClient;
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorException;
-import com.caucho.bam.ActorStream;
-import com.caucho.bam.Broker;
-import com.caucho.hemp.broker.HempMemoryQueue;
-import com.caucho.hemp.servlet.ServerLinkService;
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.Hessian2StreamingInput;
-import com.caucho.hessian.io.HessianDebugInputStream;
-import com.caucho.hmtp.HmtpReader;
-import com.caucho.hmtp.HmtpWriter;
+import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.hmtp.HmtpRequest;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.server.cluster.Server;
@@ -66,11 +54,9 @@ import com.caucho.server.http.HttpBufferStore;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.server.webapp.ErrorPageManager;
-import com.caucho.util.Alarm;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
-import com.caucho.util.RandomUtil;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StreamImpl;
@@ -263,10 +249,8 @@ public class HmuxRequest extends AbstractHttpRequest
   private AbstractClusterRequest _clusterRequest;
   private HmuxDispatchRequest _dispatchRequest;
 
-  private HmtpReader _hmtpReader;
-  private HmtpWriter _hmtpWriter;
-  private ActorStream _linkStream;
-  private ActorStream _brokerStream;
+  private HmtpRequest _hmtpRequest;
+  private boolean _isHmtpRequest;
 
   private HmuxProtocol _hmuxProtocol;
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
@@ -317,6 +301,10 @@ public class HmuxRequest extends AbstractHttpRequest
     _cb2 = new CharBuffer();
 
     _filter = new ServletFilter();
+    
+    BamService bamService = BamService.getCurrent();
+    
+    _hmtpRequest = new HmtpRequest(conn, bamService);
   }
 
   @Override
@@ -332,13 +320,6 @@ public class HmuxRequest extends AbstractHttpRequest
   }
 
   /**
-   * Called when the connection starts.
-   */
-  public void startConnection()
-  {
-  }
-
-  /**
    * Returns true if a valid HTTP request has started.
    */
   @Override
@@ -350,7 +331,7 @@ public class HmuxRequest extends AbstractHttpRequest
   @Override
   public boolean isSuspend()
   {
-    return super.isSuspend() || _brokerStream != null;
+    return super.isSuspend() || _isHmtpRequest;
   }
 
 
@@ -358,8 +339,8 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     try {
-      if (_brokerStream != null) {
-        return dispatchHmtp();
+      if (_isHmtpRequest) {
+        return _hmtpRequest.handleRequest();
       }
       else {
         return handleRequestImpl();
@@ -401,7 +382,7 @@ public class HmuxRequest extends AbstractHttpRequest
       if (! _hasRequest)
         getResponse().setHeaderWritten(true);
 
-      if (_brokerStream == null) {
+      if (! _isHmtpRequest) {
         finishInvocation();
       }
 
@@ -416,7 +397,7 @@ public class HmuxRequest extends AbstractHttpRequest
       }
 
       // cluster/6610 - hmtp mode doesn't close the stream.
-      if (_brokerStream == null) {
+      if (! _isHmtpRequest) {
         try {
           ReadStream is = getReadStream();
 
@@ -513,6 +494,7 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Initialize the read stream from the raw stream.
    */
+  @Override
   public boolean initStream(ReadStream readStream,
                             ReadStream rawStream)
     throws IOException
@@ -561,6 +543,15 @@ public class HmuxRequest extends AbstractHttpRequest
     return true;
   }
 
+  @Override
+  public void onStartConnection()
+  {
+    super.onStartConnection();
+    
+    _hmtpRequest.onStartConnection();
+    _isHmtpRequest = false;
+  }
+  
   /**
    * Clears variables at the start of a new request.
    */
@@ -891,55 +882,12 @@ public class HmuxRequest extends AbstractHttpRequest
         if (_hasRequest)
           throw new IllegalStateException();
 
-        len = (is.read() << 8) + is.read();
-        boolean isAdmin = is.read() != 0;
-
-        InputStream rawIs = is;
-
-        if (log.isLoggable(Level.FINEST)) {
-          HessianDebugInputStream dIs
-            = new HessianDebugInputStream(is, log, Level.FINEST);
-          dIs.startStreaming();
-          rawIs = dIs;
-        }
-
-        if (_hmtpReader != null)
-          _hmtpReader.init(rawIs);
-        else {
-          _hmtpReader = new HmtpReader(rawIs);
-          _hmtpReader.setId(getRequestId());
-        }
-
-        if (_hmtpWriter != null)
-          _hmtpWriter.init(_rawWrite);
-        else {
-          _hmtpWriter = new HmtpWriter(_rawWrite);
-          // _hmtpWriter.setId(getRequestId());
-          _hmtpWriter.setAutoFlush(true);
-        }
-
-        Broker broker = _server.getAdminBroker();
-        ActorStream brokerStream = broker.getBrokerStream();
-
-        _hmtpWriter.setJid("server-" + getConnectionId() + "-hmtp");
-
-        _linkStream = new HempMemoryQueue(_hmtpWriter, brokerStream, 1);
-        boolean isUnidir = code == HMUX_TO_UNIDIR_HMTP;
-
-        ServerLinkService linkService
-          = new HmuxLinkService(_linkStream,
-                                _server.getAdminBroker(),
-                                _server.getServerLinkManager(),
-                                getRemoteAddr(),
-                                isUnidir,
-                                _server);
-
-        _brokerStream = linkService.getBrokerStream();
+        is.unread();
 
         if (isLoggable)
           log.fine(dbgId() + (char) code + "-r switch-to-hmtp");
-
-        return dispatchHmtp();
+        
+        return _hmtpRequest.handleRequest();
       }
 
       case ' ': case '\n':
@@ -1060,23 +1008,6 @@ public class HmuxRequest extends AbstractHttpRequest
     return ((is.read() << 8) + is.read());
   }
 
-  //
-  // HMTP
-  //
-
-  private boolean dispatchHmtp()
-    throws IOException
-  {
-    HmtpReader in = _hmtpReader;
-
-    do {
-      if (! in.readPacket(_brokerStream))
-        return false;
-    } while (in.isDataAvailable());
-
-    return true;
-  }
-
   void writeFlush()
     throws IOException
   {
@@ -1090,6 +1021,7 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Returns the header.
    */
+  @Override
   public String getMethod()
   {
     if (_methodString == null) {
@@ -1628,24 +1560,11 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Close when the socket closes.
    */
+  @Override
   public void onCloseConnection()
   {
-    ActorStream brokerStream = _brokerStream;
-    _brokerStream = null;
-
-    ActorStream linkStream = _linkStream;
-    _linkStream = null;
-
-    if (brokerStream != null)
-      brokerStream.close();
-
-    if (linkStream != null)
-      linkStream.close();
-
-    HmtpWriter writer = _hmtpWriter;
-
-    if (writer != null)
-      writer.close();
+    _isHmtpRequest = false;
+    _hmtpRequest.onCloseConnection();
   }
 
   protected String getRequestId()

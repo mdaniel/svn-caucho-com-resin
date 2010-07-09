@@ -2816,6 +2816,9 @@ public final class InjectManager
       */
 
       processPendingAnnotatedTypes();
+
+      // cloud/0300
+      getExtensionManager().fireAfterDeploymentValidation();
     } catch (ConfigException e) {
       if (_configException == null)
         _configException = e;
@@ -2925,7 +2928,6 @@ public final class InjectManager
     }
     
     AnnotatedType<X> type = getExtensionManager().processAnnotatedType(beanType);
-
     if (type == null)
       return;
 
@@ -3713,7 +3715,10 @@ public final class InjectManager
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _id + "]";
+    if (_classLoader != null)
+      return getClass().getSimpleName() + "[" + _classLoader.getId() + "]";
+    else
+      return getClass().getSimpleName() + "[" + _id + "]";
   }
 
   static String getSimpleName(Type type)

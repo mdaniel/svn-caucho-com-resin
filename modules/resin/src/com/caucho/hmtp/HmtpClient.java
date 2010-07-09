@@ -143,7 +143,7 @@ public class HmtpClient extends SimpleActorClient {
         String serverSignature = nonceResult.getSignature();
         
         String testSignature = _authManager.sign(uid, clientNonce, password);
-
+        
         if (! testSignature.equals(serverSignature))
           throw new ActorException(L.l("{0} server signature does not match",
                                       this));

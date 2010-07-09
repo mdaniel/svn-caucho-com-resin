@@ -38,12 +38,8 @@ import com.caucho.vfs.TempBuffer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
-import java.util.logging.Logger;
 
 public class BlobOutputStream extends OutputStream {
-  private static final Logger log
-    = Logger.getLogger(BlobOutputStream.class.getName());
-
   private StoreTransaction _xa;
   private BlockStore _store;
   

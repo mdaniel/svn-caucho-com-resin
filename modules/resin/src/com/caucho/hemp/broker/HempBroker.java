@@ -41,13 +41,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessBean;
 
 import com.caucho.bam.Actor;
-import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
@@ -57,9 +54,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.remote.BamService;
 import com.caucho.server.admin.AdminService;
-import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
@@ -73,8 +68,8 @@ public class HempBroker
   private static final Logger log
     = Logger.getLogger(HempBroker.class.getName());
   private static final L10N L = new L10N(HempBroker.class);
-
-  private static final EnvironmentLocal<HempBroker> _localBroker
+  
+  private final static EnvironmentLocal<HempBroker> _localBroker
     = new EnvironmentLocal<HempBroker>();
 
   private final AtomicLong _jidGenerator
@@ -105,40 +100,18 @@ public class HempBroker
 
   private volatile boolean _isClosed;
 
-  public HempBroker()
+  public HempBroker(HempBrokerManager manager)
   {
-    Server server = Server.getCurrent();
+    _manager = manager;
 
-    if (server == null) {
-      throw new IllegalStateException(L.l("{0} must be created from an active server context",
-                                          this));
-    }
-
-    server.getServerId();
-
-    _manager = HempBrokerManager.getCurrent();
-    _domainManager = DomainManager.getCurrent();
+    Environment.addCloseListener(this);
 
     if (_localBroker.getLevel() == null)
       _localBroker.set(this);
-
-    Environment.addCloseListener(this);
   }
 
-  public HempBroker(String domain)
+  public HempBroker(HempBrokerManager manager, String domain)
   {
-    Server server = Server.getCurrent();
-
-    if (server == null) {
-      throw new IllegalStateException(L.l("{0} must be created from an active server context",
-                                          this));
-    }
-
-    server.getServerId();
-
-    _manager = HempBrokerManager.getCurrent();
-    _domainManager = DomainManager.getCurrent();
-
     _domain = domain;
     _managerJid = domain;
 
@@ -150,10 +123,16 @@ public class HempBroker
   {
     return _localBroker.get();
   }
+  
+  public void setDomainManager(DomainManager domainManager)
+  {
+    _domainManager = domainManager;
+  }
 
   /**
    * Returns true if the broker is closed
    */
+  @Override
   public boolean isClosed()
   {
     return _isClosed;
@@ -170,6 +149,7 @@ public class HempBroker
   /**
    * Returns the stream to the broker
    */
+  @Override
   public ActorStream getBrokerStream()
   {
     return this;
@@ -239,6 +219,7 @@ public class HempBroker
   /**
    * Registers a actor
    */
+  @Override
   public void addActor(ActorStream actor)
   {
     String jid = actor.getJid();

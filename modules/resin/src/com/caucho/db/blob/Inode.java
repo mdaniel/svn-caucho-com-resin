@@ -122,13 +122,9 @@ public class Inode {
     = (SINGLE_INDIRECT_MAX
        + DOUBLE_INDIRECT_BLOCKS * (BLOCK_SIZE / 8L) * BLOCK_SIZE);
 
-  private static final byte []NULL_BYTES = new byte[INODE_SIZE];
-  
   private static final FreeList<byte[]> _freeBytes = new FreeList<byte[]>(16);
 
   private BlockStore _store;
-  private StoreTransaction _xa;
-
   private final byte []_bytes = new byte[INODE_SIZE];
 
   public Inode()
@@ -138,7 +134,6 @@ public class Inode {
   public Inode(BlockStore store, StoreTransaction xa)
   {
     _store = store;
-    _xa = xa;
   }
 
   public Inode(BlockStore store)
@@ -174,8 +169,6 @@ public class Inode {
                    byte []buffer, int offset)
   {
     _store = store;
-    _xa = xa;
-
     System.arraycopy(buffer, offset, _bytes, 0, _bytes.length);
   }
 
@@ -734,7 +727,6 @@ public class Inode {
         }
       }
       else {
-        long initLength = length;
         long indAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
 
         for (; length > 0; length -= BLOCK_SIZE) {
@@ -1015,24 +1007,6 @@ public class Inode {
     buffer[offset + 5] = (byte) (v >> 16);
     buffer[offset + 6] = (byte) (v >> 8);
     buffer[offset + 7] = (byte) (v);
-  }
-
-  /**
-   * Reads the short.
-   */
-  private static int readShort(byte []buffer, int offset)
-  {
-    return (((buffer[offset + 0] & 0xff) << 8)
-            + ((buffer[offset + 1] & 0xff)));
-  }
-
-  /**
-   * Writes the short.
-   */
-  private static void writeShort(byte []buffer, int offset, int v)
-  {
-    buffer[offset + 0] = (byte) (v >> 8);
-    buffer[offset + 1] = (byte) v;
   }
 
   private static IllegalStateException stateError(String msg)
