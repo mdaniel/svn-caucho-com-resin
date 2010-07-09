@@ -232,7 +232,7 @@ public final class IndexCache
   }
 
   class IndexCacheWriter extends TaskWorker {
-    public void runTask()
+    public long runTask()
     {
       Transaction xa = Transaction.create();
       
@@ -243,7 +243,7 @@ public final class IndexCache
 
         synchronized (_writeQueue) {
           if (_writeQueue.size() == 0)
-            return;
+            return -1;
 
           key = _writeQueue.get(0);
         }
@@ -272,6 +272,8 @@ public final class IndexCache
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
+      
+      return -1;
     }
   }
 }

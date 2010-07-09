@@ -895,9 +895,11 @@ public class AbstractRolloverLog {
   }
 
   class RolloverWorker extends TaskWorker {
-    public void runTask()
+    public long runTask()
     {
       rolloverLogImpl();
+      
+      return -1;
     }
   }
 }

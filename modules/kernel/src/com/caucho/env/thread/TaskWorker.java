@@ -62,7 +62,7 @@ abstract public class TaskWorker implements Runnable {
     _threadPool = ThreadPool.getCurrent();
   }
 
-  abstract public void runTask();
+  abstract public long runTask();
 
   public void destroy()
   {
@@ -113,8 +113,12 @@ abstract public class TaskWorker implements Runnable {
 
       do {
         while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
-          runTask();
-          expires = Alarm.getCurrentTimeActual() + _idleTimeout;
+          long delta = runTask();
+          
+          if (delta < 0)
+            expires = Alarm.getCurrentTimeActual() + _idleTimeout;
+          else
+            expires = Alarm.getCurrentTimeActual() + delta;
         }
 
         if (_isDestroyed && _taskState.get() != TASK_READY)

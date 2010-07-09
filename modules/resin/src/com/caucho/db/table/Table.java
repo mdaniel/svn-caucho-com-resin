@@ -1148,9 +1148,11 @@ public class Table extends BlockStore {
 
   class RowAllocator extends TaskWorker {
     @Override
-    public void runTask()
+    public long runTask()
     {
       fillFreeRows();
+      
+      return -1;
     }
   }
 }

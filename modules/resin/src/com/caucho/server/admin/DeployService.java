@@ -104,7 +104,8 @@ public class DeployService extends SimpleActor
     _server = Server.getCurrent();
 
     if (_server == null)
-      throw new ConfigException(L.l("resin:DeployService requires an active Server."));
+      throw new ConfigException(L.l("resin:DeployService requires an active Server.\n  {0}",
+                                    Thread.currentThread().getContextClassLoader()));
 
     _repository = new RepositoryManager();
 

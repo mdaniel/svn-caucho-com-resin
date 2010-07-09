@@ -123,7 +123,7 @@ public class BlockWriter extends TaskWorker {
   }
   
   @Override
-  public void runTask()
+  public long runTask()
   {
     try {
       int retryMax = 10;
@@ -142,12 +142,14 @@ public class BlockWriter extends TaskWorker {
           }
         }
         else if (retry-- <= 0) {
-          return;
+          return -1;
         }
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+    
+    return -1;
   }
 
   private Block peekFirstBlock()

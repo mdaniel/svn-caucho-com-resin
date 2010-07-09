@@ -34,6 +34,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -50,18 +51,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
   private static final ClassLoader _systemLoader;
 
-  private static final Object _queueLock = new Object();
-
   private static final AlarmThread _alarmThread;
   private static final CoordinatorThread _coordinatorThread;
 
   private static volatile long _currentTime;
   private static volatile boolean _isCurrentTimeUsed;
-  private static volatile boolean _isFastTimeRequested;
   private static volatile boolean _isSlowTime;
 
-  private static Alarm []_heap = new Alarm[256];
-  private static int _heapTop;
+  private static final AlarmHeap _heap = new AlarmHeap();
 
   private static final AtomicInteger _runningAlarmCount
     = new AtomicInteger();
@@ -207,8 +204,6 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       if (_alarmThread == null)
         return System.currentTimeMillis();
       
-      _isFastTimeRequested = true;
-      
       if (_isSlowTime) {
         return System.currentTimeMillis();
       }
@@ -283,6 +278,21 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   public long getWakeTime()
   {
     return _wakeTime;
+  }
+  
+  void setWakeTime(long wakeTime)
+  {
+    _wakeTime = wakeTime;
+  }
+  
+  int getHeapIndex()
+  {
+    return _heapIndex;
+  }
+  
+  void setHeapIndex(int index)
+  {
+    _heapIndex = index;
   }
 
   /**
@@ -364,19 +374,9 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   public void queue(long delta)
   {
-    boolean isNotify = false;
-
-    synchronized (_queueLock) {
-      if (_heapIndex > 0)
-        dequeueImpl(this);
-
-      // #3548 - getCurrentTime for consistency
-      long wakeTime = delta + getCurrentTime();
-
-      _wakeTime = wakeTime;
-
-      isNotify = insertImpl(this);
-    }
+    long now = getCurrentTime();
+    
+    boolean isNotify = _heap.queueAt(this, now + delta);
 
     if (isNotify) {
       _coordinatorThread.wake();
@@ -390,16 +390,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   public void queueAt(long wakeTime)
   {
-    boolean isNotify = false;
-
-    synchronized (_queueLock) {
-      if (_heapIndex > 0)
-        dequeueImpl(this);
-
-      _wakeTime = wakeTime;
-
-      isNotify = insertImpl(this);
-    }
+    boolean isNotify = _heap.queueAt(this, wakeTime);
 
     if (isNotify) {
       _coordinatorThread.wake();
@@ -411,10 +402,8 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   public void dequeue()
   {
-    synchronized (_queueLock) {
-      if (_heapIndex > 0)
-        dequeueImpl(this);
-    }
+    if (_heapIndex > 0)
+      _heap.dequeue(this);
   }
 
   /**
@@ -486,165 +475,11 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     */
   }
 
-  /**
-   * Returns the next alarm ready to run
-   */
-  static Alarm extractAlarm()
-  {
-    synchronized (_queueLock) {
-      // #3548 - getCurrentTime for consistency
-      long now = getCurrentTime();
-
-      Alarm []heap = _heap;
-
-      Alarm alarm = heap[1];
-
-      if (alarm == null)
-        return null;
-      else if (now < alarm._wakeTime)
-        return null;
-
-      dequeueImpl(alarm);
-
-      return alarm;
-    }
-  }
-
-  /**
-   * Returns the next alarm ready to run
-   */
-  static long nextAlarmTime()
-  {
-    Alarm []heap = _heap;
-
-    Alarm alarm = heap[1];
-
-    if (alarm != null)
-      return alarm._wakeTime;
-    else
-      return getCurrentTime() + 120000;
-  }
-
-  /**
-   * Removes the alarm item.  Must be called from within the heap lock.
-   */
-  private static boolean insertImpl(Alarm item)
-  {
-    if (item._heapIndex != 0)
-      throw new IllegalStateException();
-
-    // resize if necessary
-    if (_heap.length <= _heapTop + 2) {
-      Alarm []newHeap = new Alarm[2 * _heap.length];
-      System.arraycopy(_heap, 0, newHeap, 0, _heap.length);
-      _heap = newHeap;
-    }
-
-    Alarm []heap = _heap;
-
-    int i = ++_heapTop;
-    int parent = 0;
-    Alarm alarm = null;
-    long wakeTime = item._wakeTime;
-
-    while (i > 1 && wakeTime < (alarm = heap[parent = (i >> 1)])._wakeTime) {
-      heap[i] = alarm;
-      alarm._heapIndex = i;
-      i = parent;
-    }
-
-    heap[i] = item;
-    item._heapIndex = i;
-
-    if (_heapTop < i)
-      throw new IllegalStateException();
-    
-    return (i == 1 && _coordinatorThread != null);
-  }
-
-  /**
-   * Removes the alarm item.  Must be called from within the heap lock.
-   */
-  private static void dequeueImpl(Alarm item)
-  {
-    int i = item._heapIndex;
-
-    if (i < 1)
-      return;
-
-    if (_heapTop < i)
-      throw new IllegalStateException("bad heap: " + _heapTop + " index:" + i);
-
-    Alarm []heap = _heap;
-
-    if (_heapTop < 1)
-      throw new IllegalStateException();
-
-    int size = _heapTop--;
-
-    heap[i] = heap[size];
-    heap[i]._heapIndex = i;
-    heap[size] = null;
-
-    item._heapIndex = 0;
-
-    if (size == i)
-      return;
-
-    if (item._wakeTime < heap[i]._wakeTime) {
-      while (i < size) {
-        item = heap[i];
-
-        int minIndex = i;
-        long minWakeTime = item._wakeTime;
-
-        int left = i << 1;
-        if (left < size && heap[left]._wakeTime < minWakeTime) {
-          minIndex = left;
-          minWakeTime = heap[left]._wakeTime;
-        }
-
-        int right = left + 1;
-        if (right < size && heap[right]._wakeTime < minWakeTime)
-          minIndex = right;
-
-        if (i == minIndex)
-          return;
-
-        heap[i] = heap[minIndex];
-        heap[i]._heapIndex = i;
-        heap[minIndex] = item;
-        item._heapIndex = minIndex;
-
-        i = minIndex;
-      }
-    }
-    else {
-      int parent;
-      Alarm alarm;
-      item = heap[i];
-      long wakeTime = item._wakeTime;
-
-      while (i > 1 && wakeTime < (alarm = heap[parent = (i >> 1)])._wakeTime) {
-        heap[i] = alarm;
-        alarm._heapIndex = i;
-        i = parent;
-      }
-
-      heap[i] = item;
-      item._heapIndex = i;
-    }
-  }
-
   // test
 
   static void testClear()
   {
-    for (; _heapTop > 0; _heapTop--) {
-      Alarm alarm = _heap[_heapTop];
-      alarm._heapIndex = 0;
-      _heap[_heapTop] = null;
-    }
+    _heap.testClear();
   }
   
   static void setTestTime(long time)
@@ -668,7 +503,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      while ((alarm = Alarm.extractAlarm()) != null) {
+      while ((alarm = _heap.extractAlarm(getCurrentTime())) != null) {
         alarm.run();
       }
     } finally {
@@ -687,9 +522,6 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   }
 
   static class AlarmThread extends Thread {
-    private static final long MIN = 10L;
-    private static final long MAX = 250L;
-
     AlarmThread()
     {
       super("resin-timer");
@@ -739,77 +571,63 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     }
   }
 
-  static class CoordinatorThread extends Thread {
-    CoordinatorThread()
-    {
-      super("alarm-coordinator");
-      setDaemon(true);
-      setPriority(Thread.MAX_PRIORITY);
-      setName("alarm-coordinator");
-    }
-
-    void wake()
-    {
-      LockSupport.unpark(this);
-    }
-
+  static class CoordinatorThread extends TaskWorker {
     /**
      * Runs the coordinator task.
      */
     @Override
-    public void run()
+    public long runTask()
     {
-      while (true) {
-        try {
-          Alarm alarm;
+      try {
+        Alarm alarm;
 
-          if ((alarm = Alarm.extractAlarm()) != null) {
-            // throttle alarm invocations by 5ms so quick alarms don't need
-            // extra threads
-            /*
+        if ((alarm = _heap.extractAlarm(getCurrentTime())) != null) {
+          // throttle alarm invocations by 5ms so quick alarms don't need
+          // extra threads
+          /*
             if (_concurrentAlarmThrottle < _runningAlarmCount.get()) {
               try {
                 Thread.sleep(5);
               } catch (Throwable e) {
               }
             }
-            */
+           */
 
-            _runningAlarmCount.incrementAndGet();
+          _runningAlarmCount.incrementAndGet();
 
-            long now;
+          long now;
 
-            if (_isStressTest)
-              now = Alarm.getExactTime();
-            else
-              now = Alarm.getCurrentTime();
+          if (_isStressTest)
+            now = Alarm.getExactTime();
+          else
+            now = Alarm.getCurrentTime();
 
-            long delta = now - alarm._wakeTime;
+          long delta = now - alarm._wakeTime;
 
-            if (delta > 10000) {
-              log.warning(this + " slow alarm " + alarm + " " + delta + "ms");
-            }
-            else if (_isStressTest && delta > 100) {
-              System.out.println(this + " slow alarm " + alarm + " " + delta);
-            }
-
-            if (alarm.isPriority())
-              ThreadPool.getThreadPool().schedulePriority(alarm);
-            else
-              ThreadPool.getThreadPool().schedule(alarm);
+          if (delta > 10000) {
+            log.warning(this + " slow alarm " + alarm + " " + delta + "ms");
+          }
+          else if (_isStressTest && delta > 100) {
+            System.out.println(this + " slow alarm " + alarm + " " + delta);
           }
 
-          long next = nextAlarmTime();
-          // #3548 - getCurrentTime for consistency
-          long now = getCurrentTime();
-
-          if (now < next) {
-            LockSupport.parkUntil(next);
-          }
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
+          if (alarm.isPriority())
+            ThreadPool.getThreadPool().schedulePriority(alarm);
+          else
+            ThreadPool.getThreadPool().schedule(alarm);
         }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
+
+      long next = _heap.nextAlarmTime();
+      // #3548 - getCurrentTime for consistency
+      long now = getCurrentTime();
+
+      if (next < 0)
+        next = now + 120000L;
+
+      return next;
     }
   }
 
@@ -818,7 +636,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     ClassLoader systemLoader = null;
     AlarmThread alarmThread = null;
-    CoordinatorThread coordinatorThread = null;
+    CoordinatorThread coordinator = null;
 
     try {
       systemLoader = ClassLoader.getSystemClassLoader();
@@ -834,7 +652,11 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
         alarmThread = new AlarmThread();
         alarmThread.start();
 
-        coordinatorThread = new CoordinatorThread();
+        coordinator = new CoordinatorThread();
+        Thread coordinatorThread = new Thread(coordinator);
+        coordinatorThread.setDaemon(true);
+        coordinatorThread.setPriority(Thread.MAX_PRIORITY);
+        coordinatorThread.setName("alarm-coordinator");
         coordinatorThread.start();
       }
     } catch (Throwable e) {
@@ -844,7 +666,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     _systemLoader = systemLoader;
     _alarmThread = alarmThread;
-    _coordinatorThread = coordinatorThread;
+    _coordinatorThread = coordinator;
 
     _isStressTest = System.getProperty("caucho.stress.test") != null;
   }

@@ -2816,9 +2816,6 @@ public final class InjectManager
       */
 
       processPendingAnnotatedTypes();
-
-      // cloud/0300
-      getExtensionManager().fireAfterDeploymentValidation();
     } catch (ConfigException e) {
       if (_configException == null)
         _configException = e;
@@ -3568,6 +3565,30 @@ public final class InjectManager
     if (_configException != null) {
       // ioc/0p91
       throw _configException;
+    }
+    
+    notifyStart();
+  }
+
+  public void notifyStart()
+  {
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      update();
+      // cloud/0300
+      getExtensionManager().fireAfterDeploymentValidation();
+    } catch (ConfigException e) {
+      if (_configException == null)
+        _configException = e;
+
+      throw e;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 

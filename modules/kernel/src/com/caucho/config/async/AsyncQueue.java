@@ -53,7 +53,7 @@ public class AsyncQueue extends TaskWorker {
     wake();
   }
   
-  public final void runTask()
+  public final long runTask()
   {
     try {
       Runnable task;
@@ -64,5 +64,7 @@ public class AsyncQueue extends TaskWorker {
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+    
+    return -1;
   }
 }

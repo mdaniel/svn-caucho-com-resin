@@ -1509,10 +1509,10 @@ public class SocketLinkListener extends TaskWorker
   /**
    * The port thread is responsible for creating new connections.
    */
-  public void runTask()
+  public long runTask()
   {
     if (_lifecycle.isDestroyed())
-      return;
+      return -1;
 
     try {
       TcpSocketLink startConn = null;
@@ -1542,11 +1542,14 @@ public class SocketLinkListener extends TaskWorker
     } catch (Throwable e) {
       log.log(Level.SEVERE, e.toString(), e);
     }
+    
+    return -1;
   }
 
   /**
    * Handles the environment config phase
    */
+  @Override
   public void environmentConfigure(EnvironmentClassLoader loader)
   {
   }
@@ -1554,6 +1557,7 @@ public class SocketLinkListener extends TaskWorker
   /**
    * Handles the environment bind phase
    */
+  @Override
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }
@@ -1561,6 +1565,7 @@ public class SocketLinkListener extends TaskWorker
   /**
    * Handles the case where the environment is starting (after init).
    */
+  @Override
   public void environmentStart(EnvironmentClassLoader loader)
   {
   }
@@ -1569,6 +1574,7 @@ public class SocketLinkListener extends TaskWorker
   /**
    * Handles the case where the environment is stopping
    */
+  @Override
   public void environmentStop(EnvironmentClassLoader loader)
   {
     close();

@@ -275,9 +275,11 @@ public class AccessLogWriter extends AbstractRolloverLog
   }
 
   class LogWriterTask extends TaskWorker {
-    public void runTask()
+    public long runTask()
     {
       flushBuffer();
+      
+      return -1;
     }
   }
 }
