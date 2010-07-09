@@ -6989,7 +6989,13 @@ public class Env
     if (fun != null) {
       boolean isUsed = false;
 
-      if (_page.setRuntimeFunction(fun)) {
+      /**
+       * Fix for Bug #4077
+       * Page may be null when if the Env was created throught
+       * the (QuercusContext)-Constructor and therefor every
+       * parameter except the context is null.
+       */
+      if (_page != null && _page.setRuntimeFunction(fun)) {
         isUsed = true;
       }
 
