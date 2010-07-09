@@ -29,6 +29,10 @@
 
 package com.caucho.boot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.caucho.cloud.security.SecurityService;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
@@ -37,10 +41,6 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class BootResinConfig implements EnvironmentBean
 {
@@ -69,8 +69,8 @@ public class BootResinConfig implements EnvironmentBean
   private Path _resinDataDirectory;
   
   private BootManagementConfig _management;
-  private String _password;
-
+  private String _resinSystemKey;
+  
   BootResinConfig(WatchdogArgs args)
   {
     _args = args;
@@ -126,7 +126,19 @@ public class BootResinConfig implements EnvironmentBean
     else
       return getRootDirectory().lookup("resin-data");
   }
+  
+  public void setResinSystemKey(String digest)
+  {
+    SecurityService.create().setSignatureSecret(digest);
+    _resinSystemKey = digest;
+  }
+  
+  public String getResinSystemKey()
+  {
+    return _resinSystemKey;
+  }
 
+  @Override
   public ClassLoader getClassLoader()
   {
     return _classLoader;
@@ -159,17 +171,6 @@ public class BootResinConfig implements EnvironmentBean
   public BootManagementConfig getManagement()
   {
     return _management;
-  }
-  
-  /**
-   * Returns the management password.
-   */
-  public String getAdminCookie()
-  {
-    if (_management != null)
-      return _management.getAdminCookie();
-    else
-      return _password;
   }
   
   /**

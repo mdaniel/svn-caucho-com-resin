@@ -38,6 +38,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.loader.Environment;
+import com.caucho.network.server.NetworkServer;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -109,6 +110,12 @@ public class ResinBoot {
                                       VersionFactory.getVersion(),
                                       _args.getResinConf().getNativePath()));
     }
+    
+    NetworkServer networkServer
+      = new NetworkServer("watchdog", _args.getRootDirectory());
+    
+    Thread thread = Thread.currentThread();
+    thread.setContextClassLoader(networkServer.getClassLoader());
 
     Config config = new Config();
     BootResinConfig bootManager = new BootResinConfig(_args);
@@ -144,30 +151,6 @@ public class ResinBoot {
       throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
                                       VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
     }
-
-    // XXX: needs to be changed for setuid issues
-    /*
-    JniBoot boot = new JniBoot();
-
-    Path logDirectory = _client.getLogDirectory();
-    if (boot.isValid()) {
-      if (! logDirectory.exists()) {
-        logDirectory.mkdirs();
-
-        boot.chown(logDirectory, _client.getUserName(), _client.getGroupName());
-      }
-    }
-
-    Path resinDataDirectory = _client.getResinDataDirectory();
-    if (! resinDataDirectory.exists()) {
-      resinDataDirectory.mkdirs();
-
-      if (boot.isValid()) {
-        boot.chown(resinDataDirectory,
-                   _client.getUserName(), _client.getGroupName());
-      }
-    }
-    */
   }
 
   boolean start()

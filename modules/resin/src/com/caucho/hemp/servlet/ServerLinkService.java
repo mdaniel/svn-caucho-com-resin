@@ -42,7 +42,7 @@ import com.caucho.bam.SimpleActor;
 import com.caucho.hmtp.AuthQuery;
 import com.caucho.hmtp.AuthResult;
 import com.caucho.hmtp.GetPublicKeyQuery;
-import com.caucho.security.SecurityException;
+import com.caucho.hmtp.NonceQuery;
 
 /**
  * The LinkService is low-level link
@@ -106,6 +106,15 @@ public class ServerLinkService extends SimpleActor {
                            GetPublicKeyQuery query)
   {
     GetPublicKeyQuery result = _authManager.getPublicKey();
+
+    getLinkStream().queryResult(id, from, to, result);
+  }
+
+  @QueryGet
+  public void getNonce(long id, String to, String from,
+                       NonceQuery query)
+  {
+    NonceQuery result = _authManager.generateNonce(query);
 
     getLinkStream().queryResult(id, from, to, result);
   }

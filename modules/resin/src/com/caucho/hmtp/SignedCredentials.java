@@ -29,45 +29,52 @@
 
 package com.caucho.hmtp;
 
-import java.io.Serializable;
-
 /**
- * An object encrypted by its own key.
+ * Query to generate a server nonce.
  */
-public class SelfEncryptedCredentials implements Serializable {
-  private final byte []_encData;
-
+@SuppressWarnings("serial")
+public class SignedCredentials implements java.io.Serializable {
+  private String _uid;
+  private String _nonce;
+  private String _signature;
+  
   /**
-   * null constructor for Hessian.
+   * Null constructor
    */
-  @SuppressWarnings("unused")
-  private SelfEncryptedCredentials()
+  public SignedCredentials()
   {
-    _encData = null;
+  }
+  
+  /**
+   * Constructor for the result
+   */
+  public SignedCredentials(String uid,
+                           String nonce,
+                           String signature)
+  {
+    _uid = uid;
+    _nonce = nonce;
+    _signature = signature;
   }
 
-  /**
-   * An encrypted object
-   */
-  public SelfEncryptedCredentials(byte []encData)
+  public String getUid()
   {
-    _encData = encData;
+    return _uid;
   }
 
-  public byte []getEncData()
+  public String getNonce()
   {
-    return _encData;
+    return _nonce;
+  }
+
+  public String getSignature()
+  {
+    return _signature;
   }
 
   @Override
   public String toString()
   {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-    sb.append("]");
-
-    return sb.toString();
+    return (getClass().getSimpleName() + "[" + _uid + "," + _nonce + "]");
   }
 }

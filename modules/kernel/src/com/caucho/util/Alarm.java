@@ -804,7 +804,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           long now = getCurrentTime();
 
           if (now < next) {
-            LockSupport.parkNanos((next - now) * 1000000L);
+            LockSupport.parkUntil(next);
           }
         } catch (Throwable e) {
           log.log(Level.WARNING, e.toString(), e);

@@ -56,6 +56,7 @@ import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.server.NetworkServer;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Cluster;
@@ -131,6 +132,22 @@ class WatchdogManager implements AlarmListener {
     ThreadPool.getThreadPool().setPriorityIdleMin(1);
 
     ResinELContext elContext = _args.getELContext();
+    
+    Path rootDirectory = _args.getRootDirectory();
+    Path dataDirectory = rootDirectory.lookup("watchdog-data");
+    
+    Resin resin = Resin.createWatchdog();
+    
+    resin.preConfigureInit();
+    /*
+    NetworkServer network = new NetworkServer("watchdog",
+                                              rootDirectory,
+                                              dataDirectory,
+                                              null);
+    
+    */
+    Thread thread = Thread.currentThread();
+    thread.setContextClassLoader(resin.getClassLoader());
 
     // XXX: needs to be config
 
@@ -177,12 +194,10 @@ class WatchdogManager implements AlarmListener {
 
     server.getConfig().logInit(logStream);
 
-    Resin resin = Resin.createWatchdog();
-
     resin.preConfigureInit();
     resin.setConfigFile(_args.getResinConf().getNativePath());
 
-    Thread thread = Thread.currentThread();
+    thread = Thread.currentThread();
     thread.setContextClassLoader(resin.getClassLoader());
 
     Cluster cluster = resin.createCluster();

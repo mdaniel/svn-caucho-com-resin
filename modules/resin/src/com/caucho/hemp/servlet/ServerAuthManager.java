@@ -39,17 +39,18 @@ import java.security.PublicKey;
 import javax.crypto.Cipher;
 
 import com.caucho.bam.NotAuthorizedException;
+import com.caucho.cloud.security.SecurityService;
 import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hmtp.EncryptedObject;
 import com.caucho.hmtp.GetPublicKeyQuery;
-import com.caucho.hmtp.SelfEncryptedCredentials;
+import com.caucho.hmtp.NonceQuery;
+import com.caucho.hmtp.SignedCredentials;
 import com.caucho.security.Authenticator;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.security.PasswordCredentials;
-import com.caucho.security.SecurityException;
-import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.server.cluster.Server;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
 /**
  * Manages links on the server
@@ -59,24 +60,31 @@ public class ServerAuthManager {
   private static final L10N L = new L10N(ServerAuthManager.class);
   
   private Server _server;
+  private SecurityService _security;
   private Authenticator _auth;
   private KeyPair _authKeyPair; // authentication key pair
   private boolean _isAuthenticationRequired = true;
   private boolean _isRequireEncryptedPassword = true;
   
+  private LruCache<String,String> _nonceMap
+    = new LruCache<String,String>(4096);
+  
   public ServerAuthManager()
   {
     _server = Server.getCurrent();
+    _security = SecurityService.create();
   }
   
   public ServerAuthManager(Authenticator auth)
   {
     _auth = auth;
+    _security = SecurityService.create();
   }
   
   public ServerAuthManager(Server server)
   {
     _server = server;
+    _security = SecurityService.create();
   }
   
   private Authenticator getAuth()
@@ -168,19 +176,25 @@ public class ServerAuthManager {
   
   void authenticate(String uid, Object credentials, String ipAddress)
   {
-    credentials = decryptCredentials(credentials);
-    Server server = Server.getCurrent();
     Authenticator auth = getAuth();
+    
+    if (credentials instanceof SignedCredentials) {
+      SignedCredentials signedCred = (SignedCredentials) credentials;
 
-    if (credentials instanceof SelfEncryptedCookie) {
-      SelfEncryptedCookie cookie = (SelfEncryptedCookie) credentials;
-
-      // XXX: cred timeout
-      String adminCookie = server.getAdminCookie();
-      if (adminCookie == null)
-        adminCookie = "";
+      String nonce = signedCred.getNonce();
+      String signature = signedCred.getSignature();
       
-      if (! cookie.getCookie().equals(adminCookie)) {
+      /*
+      String savedNonce = _nonceMap.get(uid);
+      
+      if (savedNonce == null)
+        throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+                                             uid));
+                                             */
+      
+      String serverSignature = _security.sign(uid, nonce);
+      
+      if (! serverSignature.equals(signature)) {
         throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
                                              uid));
       }
@@ -202,50 +216,36 @@ public class ServerAuthManager {
                                              uid));
       }
     }
+    /*
     else if (server.getAdminCookie() == null && credentials == null) {
       if (! "127.0.0.1".equals(ipAddress)) {
         throw new NotAuthorizedException(L.l("'{0}' is an invalid local address for '{1}', because no password credentials are available",
                                              ipAddress, uid));
       }
     }
+    */
     else {
       throw new NotAuthorizedException(L.l("'{0}' is an unknown credential",
                                            credentials));
     }
   }
   
-  private Object decryptCredentials(Object credentials)
+  NonceQuery generateNonce(NonceQuery query)
   {
-    if (credentials instanceof EncryptedObject) {
-      EncryptedObject encPassword = (EncryptedObject) credentials;
+    String uid = query.getUid();
+    String clientNonce = query.getNonce();
 
-      Key key = decryptKey(encPassword.getKeyAlgorithm(),
-                           encPassword.getEncKey());
-
-      return decrypt(key, encPassword.getEncData());
-    }
-    else if (credentials instanceof SelfEncryptedCredentials) {
-      SelfEncryptedCredentials encCred
-      = (SelfEncryptedCredentials) credentials;
-
-      byte []encData = encCred.getEncData();
-
-      Server server = Server.getCurrent();
-
-      String adminCookie = server.getAdminCookie();
-      
-      if (adminCookie == null)
-        adminCookie = "";
-
-      return SelfEncryptedCookie.decrypt(adminCookie, encData);
-    }
-    else if (_isRequireEncryptedPassword) {
-      throw new SecurityException("passwords must be encrypted");
-    }
-    else
-      return credentials;
+    String clientSignature = _security.sign(uid, clientNonce);
+    System.out.println("GENNONCE: " + query + " " + clientSignature);
+    
+    String nonce = String.valueOf(Alarm.getCurrentTime());
+    
+    System.out.println("GENNONCE->: " + nonce);
+    
+    return new NonceQuery(uid, nonce, clientSignature);
   }
   
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _auth + "]";

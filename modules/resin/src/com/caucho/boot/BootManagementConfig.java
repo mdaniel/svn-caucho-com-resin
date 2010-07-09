@@ -29,21 +29,18 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.*;
-import com.caucho.config.program.*;
-import com.caucho.lifecycle.*;
-import com.caucho.server.admin.*;
-import com.caucho.server.resin.*;
-import com.caucho.security.*;
-import com.caucho.security.PasswordDigest;
-import com.caucho.security.PasswordUser;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import java.util.logging.Logger;
 
-import javax.annotation.*;
-import java.util.*;
-import java.util.logging.*;
+import javax.annotation.PostConstruct;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.BeanBuilder;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.security.AdminAuthenticator;
+import com.caucho.security.Authenticator;
+import com.caucho.security.XmlAuthenticator;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for management.

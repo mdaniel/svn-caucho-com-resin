@@ -571,6 +571,8 @@ r_resin-Content =
   & r_module-repository?
 
   & r_resin-data-directory?
+  
+  & r_resin-system-key?
 
   & r_root-directory?
 
@@ -597,6 +599,10 @@ r_resin-Content =
 r_resin-data-directory =
   attribute resin-data-directory { r_path-Type }
   | element resin-data-directory { r_path-Type }
+
+r_resin-system-key =
+  attribute resin-system-key { string }
+  | element resin-system-key { string }
   
 r_security-manager = 
   attribute security-manager { string }

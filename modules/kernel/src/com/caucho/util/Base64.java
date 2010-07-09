@@ -104,9 +104,18 @@ public class Base64 {
     cb.append(Base64.encode(data));
   }
 
+  public static String encode(byte []buffer)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    encode(sb, buffer, 0, buffer.length);
+    
+    return sb.toString();
+  }
+
   public static void encode(CharBuffer cb, byte []buffer,
                             int offset, int length)
-  {
+    {
     while (length >= 3) {
       int data = (buffer[offset] & 0xff) << 16;
       data += (buffer[offset + 1] & 0xff) << 8;

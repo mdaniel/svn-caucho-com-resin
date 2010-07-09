@@ -29,18 +29,9 @@
 
 package com.caucho.cloud.topology;
 
-import com.caucho.config.ConfigException;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterServer;
-import com.caucho.server.cluster.Machine;
-import com.caucho.server.cluster.OwnerServerTriad;
-import com.caucho.util.L10N;
-
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.util.L10N;
 
 /**
  * CloudDomain represents all the clusters in a Resin configuration.
@@ -48,11 +39,6 @@ import java.util.logging.Logger;
 public class CloudDomain
 {
   private static final L10N L = new L10N(CloudDomain.class);
-  private static final Logger log
-    = Logger.getLogger(CloudDomain.class.getName());
-  
-  private final CopyOnWriteArrayList<CloudCluster> _clusterList
-    = new CopyOnWriteArrayList<CloudCluster>();
   
   private CloudCluster []_clusterArray = new CloudCluster[0];
 

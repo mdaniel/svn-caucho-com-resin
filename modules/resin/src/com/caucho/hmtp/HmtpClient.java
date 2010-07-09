@@ -32,7 +32,6 @@ package com.caucho.hmtp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.security.PublicKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,11 +43,15 @@ import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.remote.websocket.WebSocketClient;
 import com.caucho.servlet.WebSocketContext;
 import com.caucho.servlet.WebSocketListener;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 /**
  * HMTP client protocol
  */
 public class HmtpClient extends SimpleActorClient {
+  private static final L10N L = new L10N(HmtpClient.class);
+  
   private static final Logger log
     = Logger.getLogger(HmtpClient.class.getName());
 
@@ -125,20 +128,29 @@ public class HmtpClient extends SimpleActorClient {
   protected void loginImpl(String uid, Serializable credentials)
   {
     try {
-      if (credentials instanceof SelfEncryptedCredentials) {
+      if (credentials instanceof SignedCredentials) {
       }
-      else if (_isEncryptPassword) {
-        GetPublicKeyQuery pkValue
-          = (GetPublicKeyQuery) queryGet(null, new GetPublicKeyQuery());
+      else if (_isEncryptPassword && (credentials instanceof String)) {
+        String password = (String) credentials;
+        
+        String clientNonce = String.valueOf(Alarm.getCurrentTime());
+        
+        NonceQuery nonceQuery = new NonceQuery(uid, clientNonce);
+        NonceQuery nonceResult
+          = (NonceQuery) queryGet(null, nonceQuery);
+        
+        String serverNonce = nonceResult.getNonce();
+        String serverSignature = nonceResult.getSignature();
+        
+        String testSignature = _authManager.sign(uid, clientNonce, password);
 
-        PublicKey publicKey = _authManager.getPublicKey(pkValue);
+        if (! testSignature.equals(serverSignature))
+          throw new ActorException(L.l("{0} server signature does not match",
+                                      this));
 
-        ClientAuthManager.Secret secret = _authManager.generateSecret();
+        String signature = _authManager.sign(uid, serverNonce, password);
 
-        EncryptedObject encPassword
-          = _authManager.encrypt(secret, publicKey, credentials);
-
-        credentials = encPassword;
+        credentials = new SignedCredentials(uid, serverNonce, signature);
       }
 
       AuthResult result;

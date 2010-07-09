@@ -29,30 +29,7 @@
 
 package com.caucho.cloud.topology;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.bam.ActorStream;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.Period;
-import com.caucho.lifecycle.StartLifecycleException;
-import com.caucho.management.server.ClusterServerMXBean;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.network.server.NetworkServer;
-import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPod;
-import com.caucho.server.cluster.ClusterServerAdmin;
-import com.caucho.server.cluster.Machine;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.cluster.ClusterPod.Owner;
-import com.caucho.server.resin.Resin;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 /**
@@ -73,9 +50,6 @@ import com.caucho.util.L10N;
  */
 public class CloudServer {
   private static final L10N L = new L10N(CloudServer.class);
-  private static final Logger log
-    = Logger.getLogger(CloudServer.class.getName());
-
   private static final int DECODE[];
 
   private final String _id;
@@ -83,8 +57,6 @@ public class CloudServer {
   private final CloudPod _pod;
   private final int _index;
   
-  private final boolean _isStatic;
-
   // unique identifier for the server within the cluster
   private String _uniqueClusterId;
   // unique identifier for the server within all Resin clusters
@@ -103,8 +75,6 @@ public class CloudServer {
     
     _pod = pod;
     _index = index;
-    
-    _isStatic = isStatic;
     
     if (index < 0 || index >= 64)
       throw new IllegalArgumentException(L.l("'{0}' is an invalid server index because it must be between 0 and 64",

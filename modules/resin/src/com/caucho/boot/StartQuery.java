@@ -30,9 +30,11 @@ package com.caucho.boot;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class StartQuery implements Serializable {
   private final String []_argv;
 
+  @SuppressWarnings("unused")
   private StartQuery()
   {
     _argv = null;

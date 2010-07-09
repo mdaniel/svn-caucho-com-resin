@@ -89,7 +89,6 @@ class IndexExpr extends RowIterateExpr {
     // the Query will call initRow immediately after, so the following
     // call isn't necessary
     //return initRow(context, rowIter);
-    context.lock();
 
     return true;
   }
@@ -106,11 +105,7 @@ class IndexExpr extends RowIterateExpr {
     if (rowAddr == 0)
       return false;
 
-    context.unlock();
-
     tableIter.setRow(rowAddr);
-
-    context.lock();
 
     return true;
   }
@@ -131,8 +126,6 @@ class IndexExpr extends RowIterateExpr {
   boolean nextBlock(QueryContext context, TableIterator rowIter)
     throws IOException, SQLException
   {
-    context.unlock();
-
     return false;
   }
 

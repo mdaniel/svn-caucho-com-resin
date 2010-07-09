@@ -40,13 +40,14 @@ import com.caucho.util.Alarm;
  * A generic pool of threads available for Alarms and Work tasks.
  */
 abstract public class TaskWorker implements Runnable {
-  private final int TASK_PARK = 0;
-  private final int TASK_SLEEP = 1;
-  private final int TASK_READY = 2;
+  private static final int TASK_PARK = 0;
+  private static final int TASK_SLEEP = 1;
+  private static final int TASK_READY = 2;
+  
+  private static final AtomicLong _idGen = new AtomicLong();
   
   private final AtomicInteger _taskState = new AtomicInteger();
   private final AtomicBoolean _isActive = new AtomicBoolean();
-  private final AtomicLong _idGen = new AtomicLong();
 
   private final ThreadPool _threadPool;
   private final ClassLoader _classLoader;
@@ -94,7 +95,8 @@ abstract public class TaskWorker implements Runnable {
 
   protected String getThreadName()
   {
-    return getClass().getSimpleName() + "-" + _idGen.incrementAndGet();
+    // return getClass().getSimpleName() + "-" + _idGen.incrementAndGet();
+    return toString() + "-" + _idGen.incrementAndGet();
   }
 
   @Override
@@ -115,7 +117,7 @@ abstract public class TaskWorker implements Runnable {
           expires = Alarm.getCurrentTimeActual() + _idleTimeout;
         }
 
-        if (_isDestroyed)
+        if (_isDestroyed && _taskState.get() != TASK_READY)
           return;
         
         if (_taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {

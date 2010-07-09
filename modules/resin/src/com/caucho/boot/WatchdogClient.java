@@ -41,10 +41,10 @@ import java.util.logging.Logger;
 import com.caucho.VersionFactory;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.cloud.security.SecurityService;
 import com.caucho.config.ConfigException;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.hmtp.SelfEncryptedCredentials;
-import com.caucho.security.SelfEncryptedCookie;
+import com.caucho.hmtp.SignedCredentials;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -89,11 +89,6 @@ class WatchdogClient
   public String getId()
   {
     return _id;
-  }
-
-  public String getAdminCookie()
-  {
-    return _bootManager.getAdminCookie();
   }
 
   public String getWatchdogAddress()
@@ -164,6 +159,11 @@ class WatchdogClient
   public Path getResinDataDirectory()
   {
     return _bootManager.getResinDataDirectory();
+  }
+
+  public String getResinSystemKey()
+  {
+    return _bootManager.getResinSystemKey();
   }
 
   public long getShutdownWaitTime()
@@ -340,19 +340,11 @@ class WatchdogClient
                                          + "/hmtp");
 
       client.setVirtualHost("admin.resin");
-
-      String cookie = getAdminCookie();
-
-      if (cookie == null)
-        cookie = "";
-
-      long now = Alarm.getCurrentTime();
-
-      byte []encData = SelfEncryptedCookie.encrypt(cookie, now);
-
-      SelfEncryptedCredentials cred = new SelfEncryptedCredentials(encData);
-
-      client.connect("admin.resin", cred);
+      
+      String uid = "";
+      
+      client.setEncryptPassword(true);
+      client.connect(uid, getResinSystemKey());
 
       _conn = client;
     }

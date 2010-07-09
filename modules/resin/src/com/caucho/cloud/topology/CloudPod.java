@@ -30,7 +30,6 @@
 package com.caucho.cloud.topology;
 
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 
@@ -42,9 +41,6 @@ import com.caucho.util.L10N;
 public class CloudPod
 {
   private static final L10N L = new L10N(CloudPod.class);
-  private static final Logger log
-    = Logger.getLogger(CloudPod.class.getName());
-
   private final String _id;
   
   private final CloudCluster _cluster;

@@ -55,6 +55,7 @@ import javax.management.ObjectName;
 
 import com.caucho.VersionFactory;
 import com.caucho.bam.Broker;
+import com.caucho.cloud.security.SecurityService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -183,6 +184,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     = new ArrayList<BoundPort>();
 
   protected Management _management;
+  private String _systemKey;
 
   private ModuleRepositoryImpl _repository = new ModuleRepositoryImpl();
   private TempFileManager _tempFileManager;
@@ -230,7 +232,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;
     else
-      _classLoader = EnvironmentClassLoader.create();
+      _classLoader = EnvironmentClassLoader.create("Resin");
   }
 
   /**
@@ -421,7 +423,8 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       
       _networkServer = new NetworkServer(serverName,
                                          getRootDirectory(),
-                                         resinData.lookup(serverName));
+                                         resinData.lookup(serverName),
+                                         _classLoader);
 
       // watchdog/0212
       // else
@@ -478,6 +481,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   /**
    * Returns the classLoader
    */
+  @Override
   public ClassLoader getClassLoader()
   {
     return _classLoader;
@@ -527,6 +531,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   /**
    * Returns the relax schema.
    */
+  @Override
   public String getSchema()
   {
     return "com/caucho/server/resin/resin.rnc";
@@ -694,6 +699,16 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     }
 
     _resinDataDirectory = path;
+  }
+  
+  /**
+   * Sets the resin system key
+   */
+  public void setResinSystemKey(String key)
+  {
+    SecurityService security = SecurityService.create();
+    System.out.println("KEY: " + key);
+    security.setSignatureSecret(key);
   }
 
   /**

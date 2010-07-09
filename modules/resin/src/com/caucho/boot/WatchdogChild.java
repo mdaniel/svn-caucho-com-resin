@@ -29,20 +29,17 @@
 
 package com.caucho.boot;
 
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.WatchdogMXBean;
-import com.caucho.network.listen.SocketLinkListener;
-import com.caucho.util.*;
-import com.caucho.vfs.Path;
-
 import java.io.Serializable;
-import java.lang.reflect.*;
-import java.net.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.WatchdogMXBean;
+import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * Thread responsible for watching a backend server.
@@ -50,9 +47,6 @@ import java.util.logging.Logger;
 class WatchdogChild
 {
   private static final L10N L = new L10N(WatchdogChild.class);
-  private static final Logger log
-    = Logger.getLogger(WatchdogChild.class.getName());
-  
   private final String _id;
 
   private final WatchdogConfig _config;

@@ -147,7 +147,7 @@ public class Server extends ProtocolDispatchServer
 
   private AdminAuthenticator _adminAuth;
 
-  private InjectManager _webBeans;
+  private InjectManager _cdiManager;
 
   private HempBrokerManager _brokerManager;
   private DomainManager _domainManager;
@@ -293,7 +293,7 @@ public class Server extends ProtocolDispatchServer
   
   protected void preInit()
   {
-    _webBeans = InjectManager.create();
+    _cdiManager = InjectManager.create();
     
     _networkServer.addService(new DeployNetworkService());
     
@@ -659,16 +659,6 @@ public class Server extends ProtocolDispatchServer
     return _broker;
   }
 
-  public String getAdminCookie()
-  {
-    AdminAuthenticator auth = getAdminAuthenticator();
-
-    if (auth != null)
-      return auth.getHash();
-    else
-      return null;
-  }
-
   public AdminAuthenticator getAdminAuthenticator()
   {
     if (_adminAuth == null) {
@@ -678,7 +668,7 @@ public class Server extends ProtocolDispatchServer
       try {
         thread.setContextClassLoader(getClassLoader());
 
-        _adminAuth = _webBeans.getReference(AdminAuthenticator.class);
+        _adminAuth = _cdiManager.getReference(AdminAuthenticator.class);
       } catch (Exception e) {
         if (log.isLoggable(Level.FINEST))
           log.log(Level.FINEST, e.toString(), e);

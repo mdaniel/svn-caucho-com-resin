@@ -29,63 +29,59 @@
 
 package com.caucho.hmtp;
 
-import java.io.Serializable;
-
 /**
- * An object with a shared key
+ * Query to generate a server nonce.
  */
-public class EncryptedObject implements Serializable {
-  private final String _keyAlgorithm;
-  private final byte []_encKey;
+@SuppressWarnings("serial")
+public class NonceQuery implements java.io.Serializable {
+  private String _uid;
+  private String _nonce;
+  private String _signature;
   
-  private final byte []_encData;
-
   /**
-   * null constructor for Hessian.
+   * Null constructor
    */
-  @SuppressWarnings("unused")
-  private EncryptedObject()
+  public NonceQuery()
   {
-    _keyAlgorithm = null;
-    _encKey = null;
-    _encData = null;
   }
-
+  
   /**
-   * An encrypted object with its key
+   * Constructor for the result
    */
-  public EncryptedObject(String keyAlgorithm, byte []encKey, byte []encData)
+  public NonceQuery(String uid, String nonce)
   {
-    _keyAlgorithm = keyAlgorithm;
-    _encKey = encKey;
-    _encData = encData;
+    _uid = uid;
+    _nonce = nonce;
   }
-
-  public String getKeyAlgorithm()
+  
+  /**
+   * Constructor for the result
+   */
+  public NonceQuery(String uid, String nonce, String signature)
   {
-    return _keyAlgorithm;
+    _uid = uid;
+    _nonce = nonce;
+    _signature = signature;
   }
-
-  public byte []getEncKey()
+  
+  public String getUid()
   {
-    return _encKey;
+    return _uid;
   }
-
-  public byte []getEncData()
+  
+  public String getNonce()
   {
-    return _encData;
+    return _nonce;
+  }
+  
+  public String getSignature()
+  {
+    return _signature;
   }
 
   @Override
   public String toString()
   {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-    sb.append(getKeyAlgorithm());
-    sb.append("]");
-
-    return sb.toString();
+    return (getClass().getSimpleName() + "[" + _nonce + "]");
   }
 }

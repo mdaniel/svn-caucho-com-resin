@@ -747,6 +747,8 @@ abstract public class Query {
       if (rowLength == 0) {
         return true;
       }
+      
+      queryContext.lock();
 
       for (int i = rowLength - 1; i >= 0; i--) {
         TableIterator row = rows[i];

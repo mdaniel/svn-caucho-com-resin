@@ -84,14 +84,29 @@ public class NetworkServer
    * Creates a new servlet server.
    */
   public NetworkServer(String id,
-                       Path rootDirectory,
-                       Path dataDirectory)
+                       Path rootDirectory)
     throws IOException
+  {
+    this(id, rootDirectory, rootDirectory.lookup("resin-data"), null);
+  }
+  
+    /**
+     * Creates a new servlet server.
+     */
+  public NetworkServer(String id,
+                       Path rootDirectory,
+                       Path dataDirectory,
+                       ClassLoader loader)
+  throws IOException
   {
     _id = id;
     _rootDirectory = rootDirectory;
     _dataDirectory = dataDirectory;
-    _classLoader = EnvironmentClassLoader.create("server:" + id);
+    
+    if (loader instanceof EnvironmentClassLoader)
+      _classLoader = (EnvironmentClassLoader) loader;
+    else
+      _classLoader = EnvironmentClassLoader.create(loader, "server:" + id);
     
     rootDirectory.mkdirs();
     dataDirectory.mkdirs();
