@@ -127,13 +127,13 @@ public class BootResinConfig implements EnvironmentBean
       return getRootDirectory().lookup("resin-data");
   }
   
-  public void setResinSystemKey(String digest)
+  public void setResinSystemAuthKey(String digest)
   {
     SecurityService.create().setSignatureSecret(digest);
     _resinSystemKey = digest;
   }
   
-  public String getResinSystemKey()
+  public String getResinSystemAuthKey()
   {
     return _resinSystemKey;
   }

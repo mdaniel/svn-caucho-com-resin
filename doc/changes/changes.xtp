@@ -13,6 +13,9 @@
 
 <s2 title="4.0.9 - snapshot">
 <ul>
+<li>thread: Thread/ThreadWorker sync issues (#3960, rep by rmann)</li>
+<li>LogService: add pooled connection (#4096, rep by Brian Deng)</li>
+<li>watchdog: added &lt;resin-system-auth-key> for watchdog authentication (#4113)</li>
 <li>dist-session: performance/locking work for DB stability and perf (#4089, #4093, rep by Skippopotamus)</li>
 <li>database: createSQLXML filter implemented (#4092, rep by alex)</li>
 <li>server: utf-8 encoding issues in ServletResponse (#4101, #4106, rep by jkriesten, Kaj Hejer)</li>

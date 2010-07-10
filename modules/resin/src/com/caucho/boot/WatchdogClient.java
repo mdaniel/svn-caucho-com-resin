@@ -161,9 +161,9 @@ class WatchdogClient
     return _bootManager.getResinDataDirectory();
   }
 
-  public String getResinSystemKey()
+  public String getResinSystemAuthKey()
   {
-    return _bootManager.getResinSystemKey();
+    return _bootManager.getResinSystemAuthKey();
   }
 
   public long getShutdownWaitTime()
@@ -344,7 +344,7 @@ class WatchdogClient
       String uid = "";
       
       client.setEncryptPassword(true);
-      client.connect(uid, getResinSystemKey());
+      client.connect(uid, getResinSystemAuthKey());
 
       _conn = client;
     }
