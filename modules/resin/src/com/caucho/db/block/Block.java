@@ -349,6 +349,16 @@ public final class Block implements SyncCacheListener {
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " free (" + useCount + ")");
     
+    if (useCount < 2 && _isDeallocate) {
+      _isDeallocate = false;
+      
+      try {
+        getStore().freeBlock(getBlockId());
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+    
     if (useCount < 1) {
       freeImpl();
     }
@@ -420,9 +430,9 @@ public final class Block implements SyncCacheListener {
   void writeFromBlockWriter()
     throws IOException
   {
+    int use;
+    
     do {
-      int use;
-      
       do {
         use = _useCount.get();
       } while (use >= 0 && ! _useCount.compareAndSet(use, use + 1));
@@ -446,7 +456,7 @@ public final class Block implements SyncCacheListener {
       }
 
       _isWriteQueued.set(false);
-    } while (_dirty.get() != INIT_DIRTY);
+    } while (use >= 0 && _dirty.get() != INIT_DIRTY);
 
     if (_useCount.get() == 0) {
       freeImpl();

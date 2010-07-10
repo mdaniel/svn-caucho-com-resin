@@ -1632,6 +1632,8 @@ public class BlockStore {
       _blockManager.freeStore(this);
     }
     
+    _writer.destroy();
+    
     _writer.waitForComplete(60000);
 
     int id = _id;

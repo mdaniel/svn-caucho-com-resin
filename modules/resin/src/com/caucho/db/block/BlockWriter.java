@@ -100,14 +100,20 @@ public class BlockWriter extends TaskWorker {
       return false;
   }
   
+  @Override
+  protected boolean isClosed()
+  {
+    return super.isClosed() && _writeQueue.size() == 0;
+  }
+  
   void waitForComplete(long timeout)
   {
     long expires = Alarm.getCurrentTimeActual() + timeout;
     
     synchronized (_writeQueue) {
-      wake();
-      
       while (_writeQueue.size() > 0) {
+        wake();
+        
         long now = Alarm.getCurrentTimeActual();
         
         if (expires < now)
@@ -150,6 +156,16 @@ public class BlockWriter extends TaskWorker {
     }
     
     return -1;
+  }
+  
+  @Override
+  protected void onThreadStart()
+  {
+  }
+  
+  @Override
+  protected void onThreadComplete()
+  {
   }
 
   private Block peekFirstBlock()

@@ -572,6 +572,12 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   }
 
   static class CoordinatorThread extends TaskWorker {
+    @Override
+    protected boolean isPermanent()
+    {
+      return true;
+    }
+    
     /**
      * Runs the coordinator task.
      */

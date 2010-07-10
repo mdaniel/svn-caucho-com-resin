@@ -52,7 +52,7 @@ abstract public class TaskWorker implements Runnable {
   private final ThreadPool _threadPool;
   private final ClassLoader _classLoader;
   private long _idleTimeout = 30000L;
-  private boolean _isDestroyed;
+  private boolean _isClosed;
 
   private volatile Thread _thread;
 
@@ -62,11 +62,21 @@ abstract public class TaskWorker implements Runnable {
     _threadPool = ThreadPool.getCurrent();
   }
 
+  protected boolean isPermanent()
+  {
+    return false;
+  }
+  
+  protected boolean isClosed()
+  {
+    return _isClosed;
+  }
+  
   abstract public long runTask();
 
   public void destroy()
   {
-    _isDestroyed = true;
+    _isClosed = true;
 
     wake();
     
@@ -98,6 +108,14 @@ abstract public class TaskWorker implements Runnable {
     // return getClass().getSimpleName() + "-" + _idGen.incrementAndGet();
     return toString() + "-" + _idGen.incrementAndGet();
   }
+  
+  protected void onThreadStart()
+  {
+  }
+  
+  protected void onThreadComplete()
+  {
+  }
 
   @Override
   public final void run()
@@ -108,6 +126,8 @@ abstract public class TaskWorker implements Runnable {
       _thread.setContextClassLoader(_classLoader);
       oldName = _thread.getName();
       _thread.setName(getThreadName());
+      
+      onThreadStart();
 
       long expires = Alarm.getCurrentTimeActual() + _idleTimeout;
 
@@ -121,7 +141,7 @@ abstract public class TaskWorker implements Runnable {
             expires = Alarm.getCurrentTimeActual() + delta;
         }
 
-        if (_isDestroyed && _taskState.get() != TASK_READY)
+        if (isClosed())
           return;
         
         if (_taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
@@ -129,7 +149,8 @@ abstract public class TaskWorker implements Runnable {
           LockSupport.parkUntil(expires);
         }
       } while (_taskState.get() == TASK_READY
-               || Alarm.getCurrentTimeActual() < expires);
+               || Alarm.getCurrentTimeActual() < expires
+               || isPermanent());
     } finally {
       Thread thread = _thread;
       _thread = null;
@@ -139,6 +160,8 @@ abstract public class TaskWorker implements Runnable {
       if (_taskState.get() == TASK_READY)
         wake();
 
+      onThreadComplete();
+      
       if (thread != null && oldName != null)
         thread.setName(oldName);
     }

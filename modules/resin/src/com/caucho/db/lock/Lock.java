@@ -101,6 +101,7 @@ public final class Lock {
       }
       else {
         addReadLock(timeout);
+        return;
       }
     }
   }
@@ -153,7 +154,7 @@ public final class Lock {
       lock = _lockCount;
     } while (! _lockCountUpdater.compareAndSet(this, lock, lock - READ));
 
-    if ((lock & NODE_LOCK_MASK) != 0) {
+    if ((lock & READ_MASK) == 1 && (lock & NODE_LOCK_MASK) != 0) {
       LockNode node = popNextNode();
       
       if (node != null)
@@ -165,7 +166,7 @@ public final class Lock {
   {
     long expires = Alarm.getCurrentTimeActual() + timeout;
 
-    LockNode node = new LockNode(true);
+    LockNode node = new LockNode(false);
     LockNode head;
     
     do {
@@ -179,6 +180,13 @@ public final class Lock {
     do {
       lock = _lockCount;
     } while (! _lockCountUpdater.compareAndSet(this, lock, lock + NODE_LOCK));
+    
+    if (lock == 0) {
+      LockNode popNode = popNextNode();
+      
+      assert(node == popNode);
+      return;
+    }
 
     boolean isValid = false;
     
@@ -210,7 +218,7 @@ public final class Lock {
     } while (! _lockCountUpdater.compareAndSet(this, lock, lock - NODE_LOCK));
     
     LockNode node = popNextNode();
-      
+
     if (node != null)
       node.unpark();
   }
@@ -259,6 +267,7 @@ public final class Lock {
       
       LockNode ptr = head;
       for (; ptr != null; ptr = ptr.getNext()) {
+
         if (first == null || ! ptr.isRead() || ! first.isRead()) {
           first = ptr;
           firstPrev = ptrPrev;
