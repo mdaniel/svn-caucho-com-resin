@@ -887,6 +887,8 @@ public class HmuxRequest extends AbstractHttpRequest
         if (isLoggable)
           log.fine(dbgId() + (char) code + "-r switch-to-hmtp");
         
+        _isHmtpRequest = true;
+        
         return _hmtpRequest.handleRequest();
       }
 

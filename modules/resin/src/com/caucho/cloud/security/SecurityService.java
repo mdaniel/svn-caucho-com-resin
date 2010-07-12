@@ -88,8 +88,9 @@ public class SecurityService extends AbstractNetworkService
         return "fail";
       
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      
-      digest.update(uid.getBytes("UTF-8"));
+
+      if (uid != null)
+        digest.update(uid.getBytes("UTF-8"));
       digest.update(nonce.getBytes("UTF-8"));
 
       if (_signatureSecret != null)
@@ -106,9 +107,11 @@ public class SecurityService extends AbstractNetworkService
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
       
-      digest.update(uid.getBytes("UTF-8"));
+      if (uid != null)
+        digest.update(uid.getBytes("UTF-8"));
       digest.update(nonce.getBytes("UTF-8"));
-      digest.update(password.getBytes("UTF-8"));
+      if (password != null)
+        digest.update(password.getBytes("UTF-8"));
       
       return Base64.encode(digest.digest());
     } catch (Exception e) {

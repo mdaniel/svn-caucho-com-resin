@@ -47,7 +47,7 @@ public class AuthenticatorConfig extends BeanConfig {
   }
 
   @Override
-  public Class getBeanConfigClass()
+  public Class<?> getBeanConfigClass()
   {
     return Authenticator.class;
   }
@@ -56,7 +56,7 @@ public class AuthenticatorConfig extends BeanConfig {
    * Override the old meaning of type for backward compat.
    */
   @Override
-  public void setType(Class cl)
+  public void setType(Class<?> cl)
   {
     setClass(cl);
   }
@@ -65,10 +65,10 @@ public class AuthenticatorConfig extends BeanConfig {
    * Check for correct type.
    */
   @Override
-  public void setClass(Class cl)
+  public void setClass(Class<?> cl)
   {
     super.setClass(cl);
-
+    
     if (! Authenticator.class.isAssignableFrom(cl))
       throw new ConfigException(L.l("<authenticator> class '{0}' must implement com.caucho.security.Authenticator"));
   }

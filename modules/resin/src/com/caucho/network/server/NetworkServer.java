@@ -87,7 +87,18 @@ public class NetworkServer
                        Path rootDirectory)
     throws IOException
   {
-    this(id, rootDirectory, rootDirectory.lookup("resin-data"), null);
+    this(id, rootDirectory, rootDirectory.lookup("resin-data"));
+  }
+
+  /**
+   * Creates a new servlet server.
+   */
+  public NetworkServer(String id,
+                       Path rootDirectory,
+                       Path dataDirectory)
+    throws IOException
+  {
+    this(id, rootDirectory, dataDirectory, null);
   }
   
     /**

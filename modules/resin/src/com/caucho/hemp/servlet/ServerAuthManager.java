@@ -59,7 +59,6 @@ import com.caucho.util.LruCache;
 public class ServerAuthManager {
   private static final L10N L = new L10N(ServerAuthManager.class);
   
-  private Server _server;
   private SecurityService _security;
   private Authenticator _auth;
   private KeyPair _authKeyPair; // authentication key pair
@@ -71,7 +70,6 @@ public class ServerAuthManager {
   
   public ServerAuthManager()
   {
-    _server = Server.getCurrent();
     _security = SecurityService.create();
   }
   
@@ -81,20 +79,17 @@ public class ServerAuthManager {
     _security = SecurityService.create();
   }
   
-  public ServerAuthManager(Server server)
-  {
-    _server = server;
-    _security = SecurityService.create();
-  }
-  
-  private Authenticator getAuth()
+  public Authenticator getAuth()
   {
     if (_auth != null)
       return _auth;
-    else if (_server != null)
-      return _server.getAdminAuthenticator();
     else
       return null;
+  }
+  
+  public void setAuthenticator(Authenticator auth)
+  {
+    _auth = auth;
   }
 
   //

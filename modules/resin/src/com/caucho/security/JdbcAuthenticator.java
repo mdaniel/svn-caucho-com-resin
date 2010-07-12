@@ -29,33 +29,7 @@
 
 package com.caucho.security;
 
-import com.caucho.config.*;
-import com.caucho.config.types.Period;
-import com.caucho.server.dispatch.ServletConfigException;
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.server.security.CachingPrincipal;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-import java.security.Principal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An authenticator using JDBC.

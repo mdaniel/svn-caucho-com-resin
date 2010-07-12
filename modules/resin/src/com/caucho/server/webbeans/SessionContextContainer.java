@@ -41,8 +41,8 @@ import com.caucho.inject.Module;
 @Module
 @SuppressWarnings("serial")
 public class SessionContextContainer extends ContextContainer
-  implements HttpSessionBindingListener
 {
+  /*
   @Override
   public void valueBound(HttpSessionBindingEvent event)
   {
@@ -53,4 +53,5 @@ public class SessionContextContainer extends ContextContainer
   {
     close();
   }
+  */
 }

@@ -67,8 +67,10 @@ import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import com.caucho.amber.manager.AmberContainer;
@@ -164,6 +166,7 @@ import com.caucho.server.security.TransportConstraint;
 import com.caucho.server.security.WebResourceCollection;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webbeans.SessionContextContainer;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -518,6 +521,13 @@ public class WebApp extends ServletContextImpl
         _invocationDependency.add(new RepositoryDependency(baseTag, baseValue));
       }
 
+      _cdiManager = InjectManager.create(_classLoader);
+      _cdiManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
+      _cdiManager.addExtension(new WebAppInjectExtension(_cdiManager, this));
+
+      _jspApplicationContext = new JspApplicationContextImpl(this);
+      _jspApplicationContext.addELResolver(_cdiManager.getELResolver());
+
       // validation
       if (CauchoSystem.isTesting()) {
       }
@@ -528,13 +538,6 @@ public class WebApp extends ServletContextImpl
                && _appDir.equals(_parent.getRootDirectory())) {
         throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as the host root-directory\n", _appDir.getURL()));
       }
-
-      _cdiManager = InjectManager.create(_classLoader);
-      _cdiManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
-      _cdiManager.addExtension(new WebAppInjectExtension(_cdiManager, this));
-
-      _jspApplicationContext = new JspApplicationContextImpl(this);
-      _jspApplicationContext.addELResolver(_cdiManager.getELResolver());
     } catch (Throwable e) {
       setConfigException(e);
     }
@@ -2707,6 +2710,8 @@ public class WebApp extends ServletContextImpl
             _cookieDomainPattern
               = Pattern.compile(_sessionManager.getCookieDomainRegexp());
           }
+          
+          addListenerObject(new WebAppSessionListener(), true);
         }
       }
 
@@ -3032,6 +3037,7 @@ public class WebApp extends ServletContextImpl
     return _controller.getAdmin();
   }
 
+  @Override
   public void start()
   {
     if (! _lifecycle.isAfterInit())
@@ -4255,6 +4261,26 @@ public class WebApp extends ServletContextImpl
     return "WebApp[" + getId() + "]";
   }
 
+  static class WebAppSessionListener implements HttpSessionListener {
+    @Override
+    public void sessionCreated(HttpSessionEvent se)
+    {
+
+    }
+
+    @Override
+    public void sessionDestroyed(HttpSessionEvent se)
+    {
+      HttpSession session = se.getSession();
+      
+      SessionContextContainer candiContainer
+        = (SessionContextContainer) session.getAttribute("resin.candi.scope");
+      
+      if (candiContainer != null)
+        candiContainer.close();
+    }
+  }
+  
   static class FilterChainEntry {
     FilterChain _filterChain;
     String _pathInfo;

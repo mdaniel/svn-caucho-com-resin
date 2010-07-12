@@ -29,18 +29,15 @@
 
 package com.caucho.config.attribute;
 
-import java.lang.reflect.*;
-
-import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
-import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.types.InterfaceConfig;
 import com.caucho.xml.QName;
 
-public class EnvironmentAttribute extends Attribute {
-  private final ConfigType _type;
+public class EnvironmentAttribute<T> extends Attribute {
+  private final ConfigType<T> _type;
 
-  public EnvironmentAttribute(ConfigType type)
+  public EnvironmentAttribute(ConfigType<T> type)
   {
     _type = type;
   }
@@ -48,7 +45,8 @@ public class EnvironmentAttribute extends Attribute {
   /**
    * Returns the config type of the attribute value.
    */
-  public ConfigType getConfigType()
+  @Override
+  public ConfigType<T> getConfigType()
   {
     return _type;
   }
@@ -91,7 +89,7 @@ public class EnvironmentAttribute extends Attribute {
       ((InterfaceConfig) value).setDeploy(true);
       ((InterfaceConfig) value).setFactory(false);
     }
-
+    
     return value;
   }
 }

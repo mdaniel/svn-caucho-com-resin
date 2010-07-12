@@ -112,11 +112,10 @@ public class HempBroker
 
   public HempBroker(HempBrokerManager manager, String domain)
   {
+    this(manager);
+    
     _domain = domain;
     _managerJid = domain;
-
-    if (_localBroker.getLevel() == null)
-      _localBroker.set(this);
   }
 
   public static HempBroker getCurrent()
@@ -545,7 +544,10 @@ public class HempBroker
     if ("local".equals(domain))
       return getBrokerStream();
 
-    Broker broker = _manager.findBroker(domain);
+    Broker broker = null;
+    
+    if (_manager != null)
+      broker = _manager.findBroker(domain);
 
     if (broker == this)
       return null;

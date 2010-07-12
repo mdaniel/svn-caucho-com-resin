@@ -128,9 +128,12 @@ public class HmtpClient extends SimpleActorClient {
   protected void loginImpl(String uid, Serializable credentials)
   {
     try {
+      if (credentials == null)
+        credentials = "";
+      
       if (credentials instanceof SignedCredentials) {
       }
-      else if (_isEncryptPassword && (credentials instanceof String)) {
+      else if (credentials instanceof String) {
         String password = (String) credentials;
         
         String clientNonce = String.valueOf(Alarm.getCurrentTime());

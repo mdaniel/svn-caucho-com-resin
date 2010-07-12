@@ -13,6 +13,7 @@
 
 <s2 title="4.0.9 - snapshot">
 <ul>
+<li>candi: CDI session destroy must be after other session listeners (#4901, rep by sweigersf)</li>
 <li>thread: Thread/ThreadWorker sync issues (#3960, rep by rmann)</li>
 <li>LogService: add pooled connection (#4096, rep by Brian Deng)</li>
 <li>watchdog: added &lt;resin-system-auth-key> for watchdog authentication (#4113)</li>

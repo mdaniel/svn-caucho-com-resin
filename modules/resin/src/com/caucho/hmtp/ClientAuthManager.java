@@ -43,9 +43,13 @@ public class ClientAuthManager {
     try {
       MessageDigest md = MessageDigest.getInstance("SHA-256");
     
-      md.update(uid.getBytes("UTF-8"));
+      if (uid != null)
+        md.update(uid.getBytes("UTF-8"));
+      
       md.update(nonce.getBytes("UTF-8"));
-      md.update(password.getBytes("UTF-8"));
+      
+      if (password != null)
+        md.update(password.getBytes("UTF-8"));
       
       byte []digest = md.digest();
       

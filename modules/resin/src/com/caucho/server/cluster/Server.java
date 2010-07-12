@@ -145,6 +145,7 @@ public class Server extends ProtocolDispatchServer
 
   private Throwable _configException;
 
+  private ServerAuthManager _authManager;
   private AdminAuthenticator _adminAuth;
 
   private InjectManager _cdiManager;
@@ -252,7 +253,13 @@ public class Server extends ProtocolDispatchServer
     //  = (cluster.getId() + ":" + _selfServer.getClusterPod().getId());
 
     _classLoader = _networkServer.getClassLoader();
-    _classLoader.setId("server:" + clusterServer.getId());
+    
+    String id = clusterServer.getId();
+    
+    if ("".equals(id))
+      id = "default";
+    
+    _classLoader.setId("server:" + id);
 
     _serverLocal.set(this, _classLoader);
 
@@ -305,7 +312,8 @@ public class Server extends ProtocolDispatchServer
     _bamService = BamService.create(getBamAdminName());
     _bamService.setDomainManager(createDomainManager());
 
-    _bamService.setLinkManager(new ServerAuthManager(this));
+    _authManager = new ServerAuthManager();
+    _bamService.setLinkManager(_authManager);
     
     Config.setProperty("server", new ServerVar(_selfServer), _classLoader);
     Config.setProperty("cluster", new ClusterVar(), _classLoader);
@@ -1946,7 +1954,7 @@ public class Server extends ProtocolDispatchServer
     throws Exception
   {
     // server/2l32
-    // getAdminAuthenticator();
+    _authManager.setAuthenticator(getAdminAuthenticator());
 
     /*
     AbstractSelectManager selectManager = getSelectManager();

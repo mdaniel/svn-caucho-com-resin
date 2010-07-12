@@ -95,7 +95,7 @@ public class XaFactory<X>
     if (xa != null) {
       xaType = xa.value();
     }
-    else {
+    else if (declType != null) {
       xa = declType.getAnnotation(TransactionAttribute.class);
       
       if (xa != null)

@@ -109,7 +109,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   // generate cookies
   private boolean _enableSessionCookies = true;
   // allow session rewriting
-  private boolean _enableSessionUrls = false;
+  private boolean _enableSessionUrls = true;
 
   private boolean _isAppendServerIndex = false;
   private boolean _isTwoDigitSessionIndex = false;

@@ -277,6 +277,7 @@ public final class InjectManager
   private HashSet<Bean<?>> _beanSet = new HashSet<Bean<?>>();
 
   private boolean _isUpdateNeeded = true;
+  private boolean _isAfterValidationNeeded = true;
 
   private ArrayList<Path> _pendingPathList
     = new ArrayList<Path>();
@@ -1162,6 +1163,8 @@ public final class InjectManager
 
     if (log.isLoggable(Level.FINER))
       log.finer(this + " add bean " + bean);
+    
+    _isAfterValidationNeeded = true;
 
     _version.incrementAndGet();
     
@@ -3349,9 +3352,11 @@ public final class InjectManager
 
       validate();
       
+      /*
       if (isBind) {
         getExtensionManager().fireAfterDeploymentValidation();
       }
+      */
     } catch (RuntimeException e) {
       if (_configException == null)
         _configException = e;
@@ -3581,7 +3586,10 @@ public final class InjectManager
 
       update();
       // cloud/0300
-      getExtensionManager().fireAfterDeploymentValidation();
+      if (_isAfterValidationNeeded) {
+        _isAfterValidationNeeded = false;
+        getExtensionManager().fireAfterDeploymentValidation();
+      }
     } catch (ConfigException e) {
       if (_configException == null)
         _configException = e;

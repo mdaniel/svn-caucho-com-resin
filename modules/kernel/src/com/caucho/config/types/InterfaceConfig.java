@@ -29,27 +29,21 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.*;
-import com.caucho.naming.*;
-import com.caucho.config.cfg.*;
-import com.caucho.util.L10N;
-
-import java.util.logging.*;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.Bean;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.cfg.BeanConfig;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.naming.Jndi;
+import com.caucho.util.L10N;
+
 /**
  * Configures an interface type.  Allows class and uri syntax
  */
 public class InterfaceConfig extends BeanConfig {
-  private static final Logger log
-    = Logger.getLogger(InterfaceConfig.class.getName());
-  
   private static final L10N L = new L10N(InterfaceConfig.class);
 
   private boolean _isDeploy;
@@ -75,6 +69,7 @@ public class InterfaceConfig extends BeanConfig {
     setTagName(tagName);
   }
 
+  @Override
   protected String getDefaultScope()
   {
     return null;
@@ -84,7 +79,7 @@ public class InterfaceConfig extends BeanConfig {
    * Override the old meaning of type for backward compat.
    */
   @Override
-  public void setType(Class cl)
+  public void setType(Class<?> cl)
   {
     setClass(cl);
   }
@@ -93,7 +88,7 @@ public class InterfaceConfig extends BeanConfig {
    * Check for correct type.
    */
   @Override
-  public void setClass(Class cl)
+  public void setClass(Class<?> cl)
   {
     super.setClass(cl);
 
@@ -174,6 +169,7 @@ public class InterfaceConfig extends BeanConfig {
    * Override init to handle value
    */
   @Override
+  @PostConstruct
   public void init()
   {
     if (_valueName != null) {

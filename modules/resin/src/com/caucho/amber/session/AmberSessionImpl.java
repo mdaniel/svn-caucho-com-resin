@@ -31,7 +31,7 @@ package com.caucho.amber.session;
 /**
  * Implements the session.
  */
-public class SessionImpl {
+public class AmberSessionImpl {
   public String toString()
   {
     return "SessionImpl[]";
