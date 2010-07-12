@@ -115,7 +115,7 @@ public class CloudPod
    */
   public CloudServer findServer(String id)
   {
-    for (int i = 0; i < _maxIndex; i++) {
+    for (int i = 0; i <= _maxIndex; i++) {
       CloudServer server = _servers[i];
       
       if (server != null && server.getId().equals(id))
@@ -138,7 +138,7 @@ public class CloudPod
    */
   public CloudServer findServer(String address, int port)
   {
-    for (int i = 0; i < _maxIndex; i++) {
+    for (int i = 0; i <= _maxIndex; i++) {
       CloudServer server = _servers[i];
       
       if (server != null 
@@ -158,7 +158,7 @@ public class CloudPod
   /**
    * Adds a listener to detect server add and removed.
    */
-  public void addListener(CloudServerListener listener)
+  public void addServerListener(CloudServerListener listener)
   {
     if (! _listeners.contains(listener))
       _listeners.add(listener);
@@ -167,7 +167,7 @@ public class CloudPod
   /**
    * Removes a listener to detect server add and removed.
    */
-  public void removeListener(CloudServerListener listener)
+  public void removeServerListener(CloudServerListener listener)
   {
     _listeners.remove(listener);
   }
@@ -209,19 +209,38 @@ public class CloudPod
   {
     int index;
     CloudServer server;
+    boolean isSSL = false;
     
     synchronized (this) {
+      if (findServer(id) != null)
+        throw new IllegalArgumentException(L.l("'{0}' is an invalid server name because that name already exists as\n  {1}.",
+                                               id, 
+                                               findServer(id)));
+      
+      if (findServer(address, port) != null)
+        throw new IllegalArgumentException(L.l("'{0}:{1}' is an invalid server address because that name already exists as\n  {2}.",
+                                               address, port,
+                                               findServer(address, port)));
+      
       index = findFirstFreeIndex();
       
-      if (index < 2)
-        server = new TriadServer(id, this, index, isStatic);
+      if (index <= 2)
+        server = new TriadServer(id, this, index, address, port, isSSL, isStatic);
       else
-        server = new CloudServer(id, this, index, isStatic);
+        server = new CloudServer(id, this, index, address, port, isSSL, isStatic);
       
       _servers[index] = server;
       
       if (_maxIndex < index)
         _maxIndex = index;
+    }
+    
+    for (CloudServerListener listener : _listeners) {
+      listener.onServerAdd(server);
+      
+      if (server instanceof TriadServer)
+        listener.onTriadAdd((TriadServer) server);
+      
     }
     
     return server;
@@ -234,7 +253,7 @@ public class CloudPod
         return i;
     }
     
-    return _maxIndex;
+    return _maxIndex + 1;
   }
 
   @Override

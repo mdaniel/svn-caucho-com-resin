@@ -62,13 +62,16 @@ public class CloudServer {
   // unique identifier for the server within all Resin clusters
   private String _uniqueDomainId;
   
-  private String _address = "127.0.0.1";
-  private int _port = -1;
+  private String _address;
+  private int _port;
   private boolean _isSSL;
 
   public CloudServer(String id,
                      CloudPod pod, 
                      int index,
+                     String address,
+                     int port,
+                     boolean isSSL,
                      boolean isStatic)
   {
     _id = id;
@@ -87,6 +90,10 @@ public class CloudServer {
       throw new NullPointerException();
     if (pod == null)
       throw new NullPointerException();
+    
+    _address = address;
+    _port = port;
+    _isSSL = isSSL;
 
     // _clusterPort = new ClusterPort(this);
     // _ports.add(_clusterPort);
@@ -213,6 +220,15 @@ public class CloudServer {
   public boolean isSSL()
   {
     return _isSSL;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName() 
+            + "[" + _id + "," + _index
+            + "," + _address + ":" + _port
+            + "]");
   }
 
   private static char convert(long code)

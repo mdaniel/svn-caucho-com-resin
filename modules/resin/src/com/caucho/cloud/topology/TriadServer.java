@@ -40,9 +40,12 @@ public class TriadServer extends CloudServer {
   public TriadServer(String id,
                      CloudPod pod, 
                      int index,
+                     String address,
+                     int port,
+                     boolean isSSL,
                      boolean isStatic)
   {
-    super(id, pod, index, isStatic);
+    super(id, pod, index, address, port, isSSL, isStatic);
     
     if (index < 0 || index > 2)
       throw new IllegalArgumentException(L.l("'{0}' is an invalid triad server index because it must be between 0 and 3",
