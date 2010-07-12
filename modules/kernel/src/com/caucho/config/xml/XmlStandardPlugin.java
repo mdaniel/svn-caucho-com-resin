@@ -235,7 +235,7 @@ public class XmlStandardPlugin implements Extension
   {
     ArrayList<Bean<?>> startupBeans = new ArrayList<Bean<?>>(_pendingService);
     _pendingService.clear();
-
+    
     for (Bean<?> bean : startupBeans) {
       CreationalContext<?> env = _cdiManager.createCreationalContext(bean);
 

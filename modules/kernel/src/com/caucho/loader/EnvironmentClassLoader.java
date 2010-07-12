@@ -842,6 +842,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private void startListeners()
   {
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
+
     int size = listeners.size();
     for (int i = 0; listeners != null && i < size; i++) {
       EnvironmentListener listener = listeners.get(i);

@@ -193,6 +193,8 @@ public final class InjectManager
 
   private static final Class<? extends Annotation> []_forbiddenAnnotations;
   private static final Class<?> []_forbiddenClasses;
+  
+  private static final ClassLoader _systemClassLoader;
 
   private String _id;
 
@@ -330,7 +332,7 @@ public final class InjectManager
                         boolean isSetLocal)
   {
     _id = id;
-
+    
     _classLoader = loader;
     
     _parent = parent;
@@ -499,6 +501,9 @@ public final class InjectManager
    */
   public static InjectManager create(ClassLoader loader)
   {
+    if (loader == null)
+      loader = _systemClassLoader;
+    
     InjectManager manager = null;
 
     manager = _localContainer.getLevel(loader);
@@ -532,7 +537,7 @@ public final class InjectManager
 
     InjectManager parent = null;
 
-    if (envLoader != null)
+    if (envLoader != null && envLoader != _systemClassLoader)
       parent = create(envLoader.getParent());
 
     synchronized (_localContainer) {
@@ -3585,6 +3590,7 @@ public final class InjectManager
       thread.setContextClassLoader(_classLoader);
 
       update();
+      
       // cloud/0300
       if (_isAfterValidationNeeded) {
         _isAfterValidationNeeded = false;
@@ -4445,7 +4451,6 @@ public final class InjectManager
     _forbiddenClasses = new Class[forbiddenClasses.size()];
     forbiddenClasses.toArray(_forbiddenClasses);
 
-    /*
     ClassLoader systemClassLoader = null;
 
     try {
@@ -4455,6 +4460,7 @@ public final class InjectManager
 
       log.log(Level.FINEST, e.toString(), e);
     }
-    */
+
+    _systemClassLoader = systemClassLoader;
   }
 }
