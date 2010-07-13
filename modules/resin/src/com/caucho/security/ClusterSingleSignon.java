@@ -29,16 +29,12 @@
 
 package com.caucho.security;
 
-import com.caucho.distcache.ObjectCache;
-import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.ClusterCache;
-import com.caucho.util.LruCache;
-
-import java.util.logging.Logger;
-
 import java.security.Principal;
 
 import javax.annotation.PostConstruct;
+
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.ClusterCache;
 
 /**
  * Cluster-based cache for single-signon.
@@ -47,8 +43,6 @@ import javax.annotation.PostConstruct;
  */
 @com.caucho.config.Service
 public class ClusterSingleSignon implements SingleSignon {
-  private final static Logger log
-    = Logger.getLogger(ClusterSingleSignon.class.getName());
   private AbstractCache _cache;
 
   public ClusterSingleSignon()

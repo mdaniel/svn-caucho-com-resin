@@ -29,7 +29,6 @@
 
 package com.caucho.security;
 
-import java.security.Principal;
 import javax.annotation.PostConstruct;
 
 /**

@@ -29,21 +29,6 @@
 
 package com.caucho.server.security;
 
-import com.caucho.config.*;
-import com.caucho.security.BasicPrincipal;
-import com.caucho.util.Alarm;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.security.Principal;
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
 
 /**
  * The Property authenticator reads a properties file for authentication.

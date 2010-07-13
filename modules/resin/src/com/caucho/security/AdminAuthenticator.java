@@ -29,22 +29,10 @@
 
 package com.caucho.security;
 
-import com.caucho.config.*;
-import com.caucho.security.BasicPrincipal;
-import com.caucho.util.Alarm;
+import com.caucho.config.CauchoDeployment;
+import com.caucho.config.Service;
 import com.caucho.util.Base64;
 import com.caucho.util.Crc64;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.security.Principal;
-import java.util.Hashtable;
-import java.util.logging.*;
 
 /**
  * The admin authenticator provides authentication for Resin admin/management
@@ -65,11 +53,9 @@ import java.util.logging.*;
  */
 @Service
 @CauchoDeployment  
+@SuppressWarnings("serial")
 public class AdminAuthenticator extends XmlAuthenticator
 {
-  private static final Logger log
-    = Logger.getLogger(AdminAuthenticator.class.getName());
-  
   private String _remoteCookie;
   
 

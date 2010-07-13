@@ -29,21 +29,18 @@
 
 package com.caucho.security;
 
+import java.security.Principal;
+
+import javax.ejb.EJBAccessException;
+
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.util.L10N;
-
-import java.security.*;
-import java.util.logging.Logger;
-
-import javax.ejb.EJBAccessException;
 
 /**
  * Defines a proxy for the current security context.
  */
 public class SecurityContext {
-  private static final Logger log
-    = Logger.getLogger(SecurityContext.class.getName());
   private static final L10N L = new L10N(SecurityContext.class);
 
   /**

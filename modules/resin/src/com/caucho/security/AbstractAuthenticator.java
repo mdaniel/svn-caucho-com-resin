@@ -29,33 +29,18 @@
 
 package com.caucho.security;
 
-import com.caucho.config.inject.HandleAware;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.security.BasicPrincipal;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.security.PasswordDigest;
-import com.caucho.server.session.SessionImpl;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.Hex;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Cookie;
-import java.lang.ref.SoftReference;
 import java.security.MessageDigest;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletException;
+
+import com.caucho.config.inject.HandleAware;
+import com.caucho.server.security.PasswordDigest;
+import com.caucho.util.L10N;
 
 /**
  * All applications should extend AbstractAuthenticator to implement
@@ -65,6 +50,7 @@ import java.util.logging.Logger;
  * <p>The AbstractAuthenticator provides a single-signon cache.  Users
  * logged into one web-app will share the same principal.
  */
+@SuppressWarnings("serial")
 public class AbstractAuthenticator
   implements Authenticator, HandleAware, java.io.Serializable
 {
@@ -213,12 +199,16 @@ public class AbstractAuthenticator
    * @param credentials the login credentials
    * @param details extra information, e.g. HttpServletRequest
    */
+  @Override
   public Principal authenticate(Principal user,
                                 Credentials credentials,
                                 Object details)
   {
     if (credentials instanceof PasswordCredentials) {
       return authenticate(user, (PasswordCredentials) credentials, details);
+    }
+    else if (credentials instanceof HttpDigestCredentials) {
+      return authenticate(user, (HttpDigestCredentials) credentials, details);
     }
     else if (credentials instanceof DigestCredentials) {
       return authenticate(user, (DigestCredentials) credentials, details);
@@ -233,6 +223,7 @@ public class AbstractAuthenticator
    * @param user the user to test
    * @param role the role to test
    */
+  @Override
   public boolean isUserInRole(Principal user, String role)
   {
     PasswordUser passwordUser = getPasswordUser(user);
@@ -248,6 +239,7 @@ public class AbstractAuthenticator
    *
    * @param user the logged in user
    */
+  @Override
   public void logout(Principal user)
   {
     if (log.isLoggable(Level.FINE))
@@ -309,7 +301,7 @@ public class AbstractAuthenticator
   }
 
   //
-  // digest authentication
+  // http digest authentication
   //
   
   /**
@@ -330,7 +322,7 @@ public class AbstractAuthenticator
    * @return the logged in principal if successful
    */
   protected Principal authenticate(Principal principal,
-                                   DigestCredentials cred,
+                                   HttpDigestCredentials cred,
                                    Object details)
   {
     String cnonce = cred.getCnonce();
@@ -380,6 +372,63 @@ public class AbstractAuthenticator
       digestUpdateHex(digest, a2);
 
       byte []serverDigest = digest.digest();
+
+      if (isMatch(clientDigest, serverDigest))
+        return principal;
+      else
+        return null;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  //
+  // http digest authentication
+  //
+  
+  /**
+   * Validates the user when Resin's Digest authentication.
+   * The igest authentication uses the following algorithm
+   * to calculate the digest.  The digest is then compared to
+   * the client digest.
+   *
+   * <code><pre>
+   * A1 = MD5(username + ':' + realm + ':' + password)
+   * digest = MD5(A1 + ':' + nonce)
+   * </pre></code>
+   *
+   * @param principal the user trying to authenticate.
+   * @param cred the digest credentials
+   *
+   * @return the logged in principal if successful
+   */
+  protected Principal authenticate(Principal principal,
+                                   DigestCredentials cred,
+                                   Object details)
+  {
+    String nonce = cred.getNonce();
+    String realm = cred.getRealm();
+    byte []clientDigest = cred.getDigest();
+
+    try {
+      if (clientDigest == null)
+        return null;
+      
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      
+      byte []a1 = getDigestSecret(principal, realm);
+
+      if (a1 == null)
+        return null;
+
+      digestUpdateHex(md, a1);
+      
+      md.update((byte) ':');
+      for (int i = 0; i < nonce.length(); i++) {
+        md.update((byte) nonce.charAt(i));
+      }
+
+      byte []serverDigest = md.digest();
 
       if (isMatch(clientDigest, serverDigest))
         return principal;

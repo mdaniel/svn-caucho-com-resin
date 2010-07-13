@@ -29,17 +29,15 @@
 
 package com.caucho.security;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.Base64;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
+import java.security.MessageDigest;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.security.MessageDigest;
+
+import com.caucho.config.ConfigException;
+import com.caucho.util.Base64;
+import com.caucho.util.L10N;
 
 /**
  * Calculates a digest for the user and password.

@@ -29,11 +29,11 @@
 
 package com.caucho.security;
 
-import com.caucho.util.LruCache;
-
-import java.util.logging.Logger;
 import java.security.Principal;
+
 import javax.annotation.PostConstruct;
+
+import com.caucho.util.LruCache;
 
 /**
  * Memory-based cache for single-signon.
@@ -42,9 +42,6 @@ import javax.annotation.PostConstruct;
  */
 @com.caucho.config.Service
 public class MemorySingleSignon implements SingleSignon {
-  private final static Logger log
-    = Logger.getLogger(MemorySingleSignon.class.getName());
-  
   private int _cacheSize = 4096;
   private LruCache<String,Principal> _cache;
 

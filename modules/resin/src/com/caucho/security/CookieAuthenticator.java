@@ -29,8 +29,7 @@
 
 package com.caucho.security;
 
-import java.security.*;
-import javax.servlet.http.Cookie;
+import java.security.Principal;
 
 /**
  * Base implementation to log in a user.

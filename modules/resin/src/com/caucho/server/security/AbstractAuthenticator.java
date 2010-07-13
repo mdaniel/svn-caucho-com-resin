@@ -29,28 +29,15 @@
 
 package com.caucho.server.security;
 
-import com.caucho.security.BasicPrincipal;
-import com.caucho.security.PasswordCredentials;
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.server.session.SessionImpl;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
+import java.security.Principal;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.lang.ref.SoftReference;
-import java.security.MessageDigest;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.security.PasswordCredentials;
+import com.caucho.server.http.CauchoRequest;
 
 /**
  * All applications should extend AbstractAuthenticator to implement
@@ -60,6 +47,7 @@ import java.util.logging.Logger;
  * <p>The AbstractAuthenticator provides a single-signon cache.  Users
  * logged into one web-app will share the same principal.
  */
+@SuppressWarnings("serial")
 public class AbstractAuthenticator
   extends com.caucho.security.AbstractAuthenticator
 {
@@ -158,6 +146,7 @@ public class AbstractAuthenticator
    * @param user the user to test
    * @param role the role to test
    */
+  @Override
   public boolean isUserInRole(Principal user, String role)
   {
     try {

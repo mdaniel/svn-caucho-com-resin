@@ -66,6 +66,7 @@ import com.caucho.util.L10N;
  * </pre></code>
  */
 
+@SuppressWarnings("serial")
 public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
   private static final Logger log
     = Logger.getLogger(DatabaseAuthenticator.class.getName());

@@ -30,6 +30,7 @@ package com.caucho.security;
 
 import java.security.Principal;
 
+@SuppressWarnings("serial")
 public class BasicPrincipal implements Principal, java.io.Serializable {
   String _name;
 

@@ -29,23 +29,23 @@
 
 package com.caucho.security;
 
-import com.caucho.config.Unbound;
-import com.caucho.config.Service;
-import com.caucho.util.Base64;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CharCursor;
-import com.caucho.util.RandomUtil;
-import com.caucho.util.StringCharCursor;
-import com.caucho.xml.XmlChar;
+import java.io.IOException;
+import java.security.Principal;
+import java.text.CharacterIterator;
+import java.util.logging.Level;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.security.Principal;
-import java.util.logging.Level;
+
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharCursor;
+import com.caucho.util.RandomUtil;
+import com.caucho.util.StringCharCursor;
+import com.caucho.xml.XmlChar;
 
 /**
  * Implements the "digest" auth-method.  Basic uses the
@@ -153,7 +153,7 @@ public class DigestLogin extends AbstractLogin {
     Authenticator auth = getAuthenticator();
     Principal principal = new BasicPrincipal(username);
 
-    DigestCredentials cred = new DigestCredentials();
+    HttpDigestCredentials cred = new HttpDigestCredentials();
 
     cred.setCnonce(cnonce);
     cred.setMethod(request.getMethod());
@@ -199,7 +199,7 @@ public class DigestLogin extends AbstractLogin {
 
     res.setHeader("WWW-Authenticate", cb.toString());
     
-    res.sendError(res.SC_UNAUTHORIZED);
+    res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   protected long getRandomLong(ServletContext application)
@@ -246,7 +246,7 @@ public class DigestLogin extends AbstractLogin {
     }
 
     ch = cursor.current();
-    if (ch == cursor.DONE)
+    if (ch == CharacterIterator.DONE)
       return null;
     
     if (! XmlChar.isNameStart(ch))
@@ -256,7 +256,7 @@ public class DigestLogin extends AbstractLogin {
     while (XmlChar.isNameChar(ch = cursor.read())) {
       cb.append((char) ch);
     }
-    if (ch != cursor.DONE)
+    if (ch != CharacterIterator.DONE)
       cursor.previous();
 
     return cb.close();
@@ -277,15 +277,16 @@ public class DigestLogin extends AbstractLogin {
     
     ch = cursor.read();
     if (ch == '"')
-      while ((ch = cursor.read()) != cursor.DONE && ch != '"')
+      while ((ch = cursor.read()) != CharacterIterator.DONE && ch != '"')
         cb.append((char) ch);
     else {
       for (;
-           ch != cursor.DONE && ch != ',' && ! XmlChar.isWhitespace(ch);
+           ch != CharacterIterator.DONE && ch != ','
+             && ! XmlChar.isWhitespace(ch);
            ch = cursor.read())
         cb.append((char) ch);
 
-      if (ch != cursor.DONE)
+      if (ch != CharacterIterator.DONE)
         cursor.previous();
     }
 

@@ -50,5 +50,6 @@ import javax.enterprise.context.ApplicationScoped;
  */
 
 @ApplicationScoped
+@SuppressWarnings("serial")
 public class JdbcAuthenticator extends DatabaseAuthenticator {
 }

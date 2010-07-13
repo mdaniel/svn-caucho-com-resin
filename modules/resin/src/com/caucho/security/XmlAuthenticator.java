@@ -29,21 +29,20 @@
 
 package com.caucho.security;
 
-import com.caucho.config.*;
-import com.caucho.security.BasicPrincipal;
-import com.caucho.util.Alarm;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
+import java.security.Principal;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.security.Principal;
-import java.util.Hashtable;
-import java.util.logging.*;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.util.Alarm;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
 
 /**
  * The XML authenticator reads a static file for authentication.
@@ -70,6 +69,7 @@ import java.util.logging.*;
  * </pre></code>
  */
 @ApplicationScoped
+@SuppressWarnings("serial")
 public class XmlAuthenticator extends AbstractAuthenticator
 {
   private static final Logger log =

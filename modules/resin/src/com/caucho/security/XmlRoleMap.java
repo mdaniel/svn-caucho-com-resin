@@ -28,18 +28,19 @@
 
 package com.caucho.security;
 
-import com.caucho.config.*;
-import com.caucho.security.BasicPrincipal;
+import java.security.Principal;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
-
-import java.security.Principal;
-import java.util.Hashtable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.logging.*;
-import javax.annotation.PostConstruct;
 
 /**
  * The XML role-map reads a static file for authentication.
@@ -67,9 +68,6 @@ public class XmlRoleMap extends AbstractRoleMap
   
   private Hashtable<String,Role> _roleMap
     = new Hashtable<String,Role>();
-
-  private Depend _depend;
-  private long _lastCheck;
 
   /**
    * Sets the path to the XML file.
@@ -137,8 +135,8 @@ public class XmlRoleMap extends AbstractRoleMap
       return;
     
     try {
-      _lastCheck = Alarm.getCurrentTime();
-      _depend = new Depend(_path);
+      Alarm.getCurrentTime();
+      new Depend(_path);
 
       if (log.isLoggable(Level.FINE))
         log.fine(this + " loading users from " + _path);
@@ -148,20 +146,6 @@ public class XmlRoleMap extends AbstractRoleMap
       new Config().configureBean(this, _path);
     } catch (Exception e) {
       throw ConfigException.create(e);
-    }
-  }
-
-  private boolean isModified()
-  {
-    if (_path == null)
-      return false;
-    else if (_depend == null)
-      return true;
-    else if (Alarm.getCurrentTime() < _lastCheck + 5000)
-      return false;
-    else {
-      _lastCheck = Alarm.getCurrentTime();
-      return _depend.isModified();
     }
   }
 

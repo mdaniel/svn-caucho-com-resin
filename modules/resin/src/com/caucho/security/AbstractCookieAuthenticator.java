@@ -29,29 +29,7 @@
 
 package com.caucho.security;
 
-import com.caucho.security.BasicPrincipal;
-import com.caucho.server.security.PasswordDigest;
-import com.caucho.server.session.SessionImpl;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Cookie;
-import java.lang.ref.SoftReference;
-import java.security.MessageDigest;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * All applications should extend AbstractAuthenticator to implement
@@ -61,6 +39,7 @@ import java.util.logging.Logger;
  * <p>The AbstractAuthenticator provides a single-signon cache.  Users
  * logged into one web-app will share the same principal.
  */
+@SuppressWarnings("serial")
 public class AbstractCookieAuthenticator extends AbstractAuthenticator
   implements CookieAuthenticator
 {
@@ -71,6 +50,7 @@ public class AbstractCookieAuthenticator extends AbstractAuthenticator
   /**
    * Test if cookie-based authentication is supported.
    */
+  @Override
   public boolean isCookieSupported(String jUseCookieAuth)
   {
     return false;
@@ -79,6 +59,7 @@ public class AbstractCookieAuthenticator extends AbstractAuthenticator
   /**
    * Associate the user with a cookie
    */
+  @Override
   public boolean associateCookie(Principal user, String cookieValue)
   {
     return false;
@@ -87,6 +68,7 @@ public class AbstractCookieAuthenticator extends AbstractAuthenticator
   /**
    * Authenticates the user based on the cookie
    */
+  @Override
   public Principal authenticateByCookie(String cookieValue)
   {
     return null;

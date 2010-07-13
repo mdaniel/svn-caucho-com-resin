@@ -30,61 +30,46 @@
 package com.caucho.security;
 
 /**
- * HTTP Digest-based credentials
+ * Digest-based credentials
  *
- * The HTTP Digest authentication uses the following algorithm
+ * The Digest authentication uses the following algorithm
  * to calculate the digest.  The digest is then compared to
  * the client digest.
  *
  * <code><pre>
  * A1 = MD5(username + ':' + realm + ':' + password)
- * A2 = MD5(method + ':' + uri)
- * digest = MD5(A1 + ':' + nonce + ':' + A2)
+ * digest = MD5(A1 + ':' + nonce)
  * </pre></code>
  */
 public class DigestCredentials implements Credentials
 {
-  private String _cnonce;
-  private String _method;
-  private String _nc;
+  private String _userName;
   private String _nonce;
-  private String _qop;
   private String _realm;
-  private byte []_response;
-  private String _uri;
+  
+  private byte []_digest;
   
   public DigestCredentials()
   {
   }
-
-  public String getCnonce()
+  
+  public DigestCredentials(String userName,
+                           String nonce,
+                           byte []digest)
   {
-    return _cnonce;
+    _userName = userName;
+    _nonce = nonce;
+    _digest = digest;
   }
 
-  public void setCnonce(String cnonce)
+  public String getUserName()
   {
-    _cnonce = cnonce;
+    return _userName;
   }
 
-  public String getMethod()
+  public void setUserName(String userName)
   {
-    return _method;
-  }
-
-  public void setMethod(String method)
-  {
-    _method = method;
-  }
-
-  public String getNc()
-  {
-    return _nc;
-  }
-
-  public void setNc(String nc)
-  {
-    _nc = nc;
+    _userName = userName;
   }
 
   public String getNonce()
@@ -97,16 +82,6 @@ public class DigestCredentials implements Credentials
     _nonce = nonce;
   }
 
-  public String getQop()
-  {
-    return _qop;
-  }
-
-  public void setQop(String qop)
-  {
-    _qop = qop;
-  }
-
   public String getRealm()
   {
     return _realm;
@@ -117,30 +92,20 @@ public class DigestCredentials implements Credentials
     _realm = realm;
   }
 
-  public byte []getResponse()
+  public byte []getDigest()
   {
-    return _response;
+    return _digest;
   }
 
-  public void setResponse(byte []response)
+  public void setDigest(byte []digest)
   {
-    _response = response;
-  }
-
-  public String getUri()
-  {
-    return _uri;
-  }
-
-  public void setUri(String uri)
-  {
-    _uri = uri;
+    _digest = digest;
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _userName + "]";
   }
 }
 

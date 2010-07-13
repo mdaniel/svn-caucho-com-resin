@@ -29,11 +29,11 @@
 
 package com.caucho.cloud.security;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 import com.caucho.network.server.AbstractNetworkService;
 import com.caucho.network.server.NetworkServer;
+import com.caucho.security.Authenticator;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 
@@ -44,7 +44,8 @@ public class SecurityService extends AbstractNetworkService
 {
   private static final L10N L = new L10N(SecurityService.class);
   
-  private byte []_signatureSecret;
+  private String _signatureSecret;
+  private Authenticator _authenticator;
   
   public static SecurityService create()
   {
@@ -67,25 +68,30 @@ public class SecurityService extends AbstractNetworkService
     }
   }
   
-  public void setSignatureSecret(String text)
-  {
-    try {
-      setSignatureSecret(text.getBytes("UTF-8"));
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalArgumentException(e);
-    }
-  }
-  
-  public void setSignatureSecret(byte []secret)
+  public void setSignatureSecret(String secret)
   {
     _signatureSecret = secret;
+  }
+  
+  public void setAuthenticator(Authenticator auth)
+  {
+    _authenticator = auth;
+  }
+  
+  public Authenticator getAuthenticator()
+  {
+    return _authenticator;
   }
   
   public String sign(String uid, String nonce)
   {
     try {
-      if (uid != null && ! uid.equals(""))
-        return "fail";
+      String password = null;
+      
+      if (uid == null || uid.equals(""))
+        password = _signatureSecret;
+      else
+        password = "fail";
       
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
@@ -93,8 +99,8 @@ public class SecurityService extends AbstractNetworkService
         digest.update(uid.getBytes("UTF-8"));
       digest.update(nonce.getBytes("UTF-8"));
 
-      if (_signatureSecret != null)
-        digest.update(_signatureSecret);
+      if (password != null)
+        digest.update(password.getBytes("UTF-8"));
       
       return Base64.encode(digest.digest());
     } catch (Exception e) {
@@ -127,11 +133,58 @@ public class SecurityService extends AbstractNetworkService
       digest.update(data);
 
       if (_signatureSecret != null)
-        digest.update(_signatureSecret);
+        digest.update(_signatureSecret.getBytes("UTF-8"));
       
       return digest.digest();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  public byte []createDigest(String user, 
+                             String password, 
+                             String nonce)
+  {
+    try {
+      String realm = "resin";
+      
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      
+      md.update(user.getBytes("UTF-8"));
+      md.update((byte) ':');
+      md.update(realm.getBytes("UTF-8"));
+      md.update((byte) ':');
+      md.update(password.getBytes("UTF-8"));
+      
+      byte []digest = md.digest();
+      
+      md.reset();
+      
+      updateHex(md, digest);
+      md.update((byte) ':');
+      md.update(nonce.getBytes("UTF-8"));
+      
+      return md.digest();
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+  }
+  
+  private void updateHex(MessageDigest md, byte []digest)
+  {
+    for (int i = 0; i < digest.length; i++) {
+      updateHex(md, digest[i] >> 4);
+      updateHex(md, digest[i]);
+    }
+  }
+  
+  private void updateHex(MessageDigest md, int digit)
+  {
+    digit = digit & 0xf;
+    
+    if (digit < 10)
+      md.update((byte) (digit + '0'));
+    else
+      md.update((byte) (digit - 10 + 'a'));
   }
 }

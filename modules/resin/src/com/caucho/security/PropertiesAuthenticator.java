@@ -29,21 +29,23 @@
 
 package com.caucho.security;
 
-import com.caucho.config.*;
-import com.caucho.security.BasicPrincipal;
+import java.io.InputStream;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletException;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Service;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.security.Principal;
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
 
 /**
  * The Property authenticator reads a properties file for authentication.
@@ -68,6 +70,7 @@ import java.io.*;
  */
 
 @Service
+@SuppressWarnings("serial")
 public class PropertiesAuthenticator extends AbstractAuthenticator {
   private static final Logger log =
     Logger.getLogger(PropertiesAuthenticator.class.getName());
@@ -110,6 +113,11 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
 
       _userMap.put(name, createUser(name, userValue));
     }
+  }
+  
+  public void addUser(String name, String password)
+  {
+    _userMap.put(name, createUser(name, password));
   }
 
   /**

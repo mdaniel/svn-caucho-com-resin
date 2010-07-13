@@ -31,8 +31,6 @@ package com.caucho.security;
 
 import java.security.Principal;
 
-import com.caucho.loader.EnvironmentLocal;
-
 /**
  * Abstract single-signon
  *

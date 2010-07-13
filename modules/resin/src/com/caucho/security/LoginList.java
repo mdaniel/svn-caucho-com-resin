@@ -29,23 +29,14 @@
 
 package com.caucho.security;
 
-import com.caucho.server.session.SessionImpl;
-import com.caucho.server.security.*;
-import com.caucho.util.LruCache;
-
-import javax.annotation.PostConstruct;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.ejb.Startup;
-import javax.inject.Singleton;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import javax.ejb.Startup;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Used to allow multiple login types in a priority list.
@@ -159,8 +150,8 @@ public class LoginList implements Login {
 
     // if none match, use first
 
-    for (int i = 0; i < _loginList.size(); i++) {
-      Login login = _loginList.get(i);
+    if (_loginList.size() > 0) {
+      Login login = _loginList.get(0);
 
       Principal user = login.login(request, response, isFail);
 

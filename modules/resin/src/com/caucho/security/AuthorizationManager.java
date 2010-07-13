@@ -37,7 +37,7 @@ import java.security.Permission;
  * Manages the authorization for a context.
  */
 public class AuthorizationManager {
-  private static EnvironmentLocal _localAuthorizationManager
+  private static final EnvironmentLocal _localAuthorizationManager
     = new EnvironmentLocal("caucho.security.manager");
 
   /**

@@ -28,11 +28,13 @@
 
 package com.caucho.security;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitParam;
-import com.caucho.server.security.RolePrincipal;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.security.auth.Subject;
@@ -43,17 +45,13 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.logging.*;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.InitParam;
+import com.caucho.server.security.RolePrincipal;
+import com.caucho.util.L10N;
 
 /**
  * The JAAS authenticator uses an existing JAAS LoginModule.  Applications
@@ -65,13 +63,14 @@ import java.util.logging.*;
  *   &lt;init login-module="example.MyLogin"/>
  * &lt;/authenticator>
  */
+@SuppressWarnings("serial")
 public class JaasAuthenticator extends AbstractAuthenticator {
   private static final L10N L = new L10N(JaasAuthenticator.class);
   
   private static final Logger log
     = Logger.getLogger(JaasAuthenticator.class.getName());
   
-  private Class _loginModuleClass;
+  private Class<?> _loginModuleClass;
 
   private HashMap<String,String> _options
     = new HashMap<String,String>();
@@ -84,7 +83,7 @@ public class JaasAuthenticator extends AbstractAuthenticator {
   /**
    * Sets the JAAS spi login module class.
    */
-  public void setLoginModule(Class loginModuleClass)
+  public void setLoginModule(Class<?> loginModuleClass)
     throws ConfigException
   {
     _loginModuleClass = loginModuleClass;

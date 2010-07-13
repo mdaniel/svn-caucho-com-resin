@@ -30,6 +30,7 @@
 
 package com.caucho.security;
 
+@SuppressWarnings("serial")
 public class SecurityException extends RuntimeException
 {
   public SecurityException()

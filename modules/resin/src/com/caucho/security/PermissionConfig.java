@@ -28,12 +28,11 @@
 
 package com.caucho.security;
 
+import java.security.Permission;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InstantiationConfig;
 import com.caucho.util.L10N;
-
-import java.security.Permission;
-import java.util.logging.Logger;
 
 /**
  * Permission configuration.

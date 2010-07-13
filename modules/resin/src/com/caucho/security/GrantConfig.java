@@ -28,13 +28,12 @@
 
 package com.caucho.security;
 
-import com.caucho.loader.Environment;
-import com.caucho.util.L10N;
-
 import java.security.Permission;
 import java.security.Policy;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+
+import com.caucho.loader.Environment;
+import com.caucho.util.L10N;
 
 /**
  * Grants permissions.

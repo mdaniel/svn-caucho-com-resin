@@ -40,6 +40,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
@@ -283,7 +285,10 @@ public class ReflectionAnnotatedType<T>
             if (oldMethodImpl.isAnnotationPresent(ann.annotationType()))
               continue;
             
-            if (! annType.isAnnotationPresent(Inherited.class))
+            // ioc/0a02
+            if (! annType.isAnnotationPresent(Inherited.class)
+                && ! annType.equals(PostConstruct.class)
+                && ! annType.equals(PreDestroy.class))
               continue;
             
             oldMethodImpl.addAnnotation(ann);

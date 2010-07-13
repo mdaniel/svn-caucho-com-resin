@@ -29,24 +29,20 @@
 
 package com.caucho.security;
 
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.config.ConfigException;
-import com.caucho.config.Service;
-import com.caucho.config.Unbound;
 import com.caucho.rewrite.RequestPredicate;
 import com.caucho.server.dispatch.UrlMap;
 import com.caucho.server.security.AbstractConstraint;
 import com.caucho.server.security.AuthorizationResult;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.L10N;
-
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.*;
-import javax.annotation.PostConstruct;
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 /**
  * The &lt;sec:Allow> tag authorizes requests for a set of url-patterns.
@@ -78,9 +74,6 @@ import javax.servlet.http.*;
  */
 public class Allow extends com.caucho.server.security.SecurityConstraint
 {
-  private static final L10N L = new L10N(Allow.class);
-  private static final Logger log = Logger.getLogger(Allow.class.getName());
-
   private ArrayList<Pattern> _patternList
     = new ArrayList<Pattern>();
 

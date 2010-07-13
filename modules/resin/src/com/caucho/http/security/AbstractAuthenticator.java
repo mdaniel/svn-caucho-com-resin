@@ -31,6 +31,7 @@ package com.caucho.http.security;
 /**
  * Deprecated abstract authenticator for backward compatibilty
  */
+@SuppressWarnings("serial")
 abstract public class AbstractAuthenticator
   extends com.caucho.server.security.AbstractAuthenticator {
   public AbstractAuthenticator()

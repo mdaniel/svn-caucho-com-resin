@@ -29,30 +29,13 @@
 
 package com.caucho.security;
 
-import com.caucho.config.Config;
-import com.caucho.security.BasicPrincipal;
-import com.caucho.util.Alarm;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
 
 /**
  * PasswordUser is used by PasswordAuthenticator implementations.
  */
 public class PasswordUser
 {
-  private static final Logger log =
-    Logger.getLogger(PasswordUser.class.getName());
-
   private final Principal _principal;
   private final char []_password;
   

@@ -28,11 +28,7 @@
 
 package com.caucho.security;
 
-import java.security.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.security.*;
+import java.security.Principal;
 
 /**
  * The anonymous authenticator always succeeds
@@ -41,6 +37,7 @@ import com.caucho.security.*;
  * &lt;authenticator url="anonymous:"/>
  * </pre></code>
  */
+@SuppressWarnings("serial")
 public class AnonymousAuthenticator extends AbstractAuthenticator
 {
   private Principal _user = new BasicPrincipal("anonymous");

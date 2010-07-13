@@ -29,21 +29,12 @@
 
 package com.caucho.security;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.security.BasicPrincipal;
+import java.security.Principal;
 
 /**
  * The null authenticator creates a dummy user.
  */
+@SuppressWarnings("serial")
 public class NullAuthenticator extends AbstractAuthenticator {
   @Override
   protected Principal authenticate(Principal user,

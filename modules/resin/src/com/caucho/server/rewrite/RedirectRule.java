@@ -32,6 +32,7 @@ package com.caucho.server.rewrite;
 import com.caucho.server.dispatch.RedirectFilterChain;
 import com.caucho.config.ConfigException;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import java.util.regex.Matcher;
 
@@ -71,6 +72,7 @@ public class RedirectRule
   }
 
   @Override
+  @PostConstruct
   public void init()
     throws ConfigException
   {

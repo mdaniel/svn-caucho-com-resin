@@ -30,21 +30,14 @@
 package com.caucho.security;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.ConfigException;
 import com.caucho.rewrite.RequestPredicate;
-import com.caucho.server.dispatch.UrlMap;
 import com.caucho.server.security.AbstractConstraint;
 import com.caucho.server.security.AuthorizationResult;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.L10N;
 
 /**
  * The &lt;sec:Require> tag authorizes requests for a set of url-patterns.
@@ -68,9 +61,6 @@ import com.caucho.util.L10N;
  */
 public class Require extends Allow
 {
-  private static final L10N L = new L10N(Require.class);
-  private static final Logger log = Logger.getLogger(Require.class.getName());
-
   /**
    * return the constraint
    */

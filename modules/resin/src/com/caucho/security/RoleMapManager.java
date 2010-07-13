@@ -29,12 +29,11 @@
 
 package com.caucho.security;
 
+import java.security.Principal;
+import java.util.ArrayList;
+
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
-
-import java.util.ArrayList;
-import java.security.Principal;
-import javax.annotation.PostConstruct;
 
 /**
  * Manages role mapping
