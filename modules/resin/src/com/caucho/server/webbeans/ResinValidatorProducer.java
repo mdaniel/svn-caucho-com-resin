@@ -24,48 +24,51 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Alex Rojkov
+ * @author Scott Ferguson
  */
 
-package com.caucho.server.webapp;
+package com.caucho.server.webbeans;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
-import com.caucho.server.http.ResponseAdapter;
+import com.caucho.config.CauchoDeployment;
 
-public class DispatchResponse extends ResponseAdapter {
+/**
+ * Resin CDI producer for the main singletons.
+ */
 
-  public DispatchResponse(HttpServletResponse response) {
-    super(response);
-  }
-
-  @Override
-  public void setDateHeader(String name, long date) {
-  }
-
-  @Override
-  public void setHeader(String name, String value) {
-  }
-
-  @Override
-  public void addHeader(String name, String value) {
-  }
-
-  @Override
-  public void addDateHeader(String name, long date) {
-  }
-
-  @Override
-  public void addIntHeader(String name, int value) {
-  }
-
-  @Override
-  public void setIntHeader(String name, int value) {
-  }
-
-  @Override
-  public String toString()
+@CauchoDeployment
+@Singleton
+public class ResinValidatorProducer
+{
+  private Validator _validator;
+  
+  public ResinValidatorProducer()
   {
-    return getClass().getSimpleName() + '[' + getResponse() + ']';
+  }
+  
+  /**
+   * Returns the validator factory.
+   */
+  @Produces
+  public ValidatorFactory createValidatorFactory()
+  {
+    return Validation.buildDefaultValidatorFactory();
+  }
+  
+  /**
+   * Returns the validator factory.
+   */
+  @Produces
+  public Validator createValidator()
+  {
+    if (_validator == null)
+      _validator = Validation.buildDefaultValidatorFactory().getValidator();
+    
+    return _validator;
   }
 }

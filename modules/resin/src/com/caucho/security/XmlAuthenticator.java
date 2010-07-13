@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 import javax.servlet.ServletException;
 
 import com.caucho.config.Config;
@@ -68,7 +68,7 @@ import com.caucho.vfs.Path;
  * &lt;/security:XmlAuthenticator>
  * </pre></code>
  */
-@ApplicationScoped
+@Singleton
 @SuppressWarnings("serial")
 public class XmlAuthenticator extends AbstractAuthenticator
 {

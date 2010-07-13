@@ -29,29 +29,18 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.servlet.comet.CometFilterChain;
-import com.caucho.server.http.AbstractHttpRequest;
-import com.caucho.server.http.AbstractHttpResponse;
-import com.caucho.server.http.CauchoResponse;
-import com.caucho.server.http.HttpServletRequestImpl;
-import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.server.log.AbstractAccessLog;
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.UserTransactionImpl;
-import com.caucho.transaction.UserTransactionProxy;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.server.log.AbstractAccessLog;
 
 /**
  * Logs the request.

@@ -113,7 +113,6 @@
       <!-- enable persistent sessions -->
       <session-config>
         <use-persistent-store/>
-        <enable-session-urls>false</enable-session-urls>
       </session-config>
      
       <!--

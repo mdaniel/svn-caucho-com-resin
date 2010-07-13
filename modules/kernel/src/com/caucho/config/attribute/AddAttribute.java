@@ -30,40 +30,41 @@
 package com.caucho.config.attribute;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.type.*;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class AddAttribute extends Attribute {
+public class AddAttribute<T> extends Attribute {
   private static final L10N L = new L10N(AddAttribute.class);
 
-  public static final AddAttribute ATTR = new AddAttribute();
+  public static final AddAttribute<XmlBeanConfig> ATTR
+    = new AddAttribute<XmlBeanConfig>(XmlBeanConfig.class);
   
-  private final ConfigType _configType;
+  private final ConfigType<T> _configType;
   private final Method _setMethod;
 
-  private AddAttribute()
+  private AddAttribute(Class<T> cl)
   {
-    this(null, TypeFactory.getType(XmlBeanConfig.class));
+    this(null, (ConfigType<T>) TypeFactory.getType(cl));
   }
   
-  public AddAttribute(Method setMethod, ConfigType configType)
+  public AddAttribute(Method setMethod, ConfigType<T> configType)
   {
     _configType = configType;
     _setMethod = setMethod;
   }
 
-  public ConfigType getConfigType()
+  @Override
+  public ConfigType<T> getConfigType()
   {
     return _configType;
   }
@@ -96,7 +97,7 @@ public class AddAttribute extends Attribute {
       return new AnnotationConfig(cl);
     }
     else {
-      XmlBeanConfig config = new XmlBeanConfig(qName, cl);
+      XmlBeanConfig<?> config = new XmlBeanConfig(qName, cl);
       config.setInlineBean(true);
 
       // config.setScope("singleton");
@@ -108,13 +109,14 @@ public class AddAttribute extends Attribute {
   /**
    * Sets the value of the attribute as text
    */
+  @Override
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
     Object objValue = create(bean, name);
 
-    if (objValue instanceof XmlBeanConfig) {
-      XmlBeanConfig config = (XmlBeanConfig) objValue;
+    if (objValue instanceof XmlBeanConfig<?>) {
+      XmlBeanConfig<?> config = (XmlBeanConfig<?>) objValue;
 
       if (! value.trim().equals("")) {
         config.addArg(new TextArgProgram(value));
@@ -134,8 +136,8 @@ public class AddAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      if (value instanceof XmlBeanConfig) {
-        XmlBeanConfig config = (XmlBeanConfig) value;
+      if (value instanceof XmlBeanConfig<?>) {
+        XmlBeanConfig<?> config = (XmlBeanConfig<?>) value;
 
         value = config.toObject();
       }
@@ -173,7 +175,7 @@ public class AddAttribute extends Attribute {
       throw new UnsupportedOperationException(getClass().getName());
     }
 
-    public Object configure(ConfigType type, CreationalContext<?> env)
+    public Object configure(ConfigType<?> type, CreationalContext<?> env)
       throws ConfigException
     {
       return type.valueOf(_arg);

@@ -40,7 +40,7 @@ public abstract class Attribute {
   /**
    * Returns the config type of the attribute value.
    */
-  abstract public ConfigType getConfigType();
+  abstract public ConfigType<?> getConfigType();
 
   /**
    * Returns true for a bean-style attribute.
@@ -85,7 +85,7 @@ public abstract class Attribute {
   /**
    * True if the inline type matches
    */
-  public boolean isInlineType(ConfigType type)
+  public boolean isInlineType(ConfigType<?> type)
   {
     return false;
   }
@@ -121,7 +121,7 @@ public abstract class Attribute {
       Object childBean = create(bean, name);
 
       if (childBean != null) {
-        ConfigType type = TypeFactory.getType(childBean.getClass());
+        ConfigType<?> type = TypeFactory.getType(childBean.getClass());
 
         type.init(childBean);
 
@@ -157,7 +157,7 @@ public abstract class Attribute {
   /**
    * Creates the child bean.
    */
-  public Object create(Object parent, QName name, ConfigType type)
+  public Object create(Object parent, QName name, ConfigType<?> type)
     throws ConfigException
   {
     return create(parent, name);

@@ -325,11 +325,11 @@ public class IncludeRequest extends CauchoRequestWrapper {
   }
 
   @Override
-  public Enumeration getAttributeNames()
+  public Enumeration<String> getAttributeNames()
   {
-    ArrayList list = new ArrayList();
+    ArrayList<String> list = new ArrayList<String>();
 
-    Enumeration e = super.getAttributeNames();
+    Enumeration<String> e = super.getAttributeNames();
     
     while (e.hasMoreElements()) {
       list.add(e.nextElement());
@@ -374,12 +374,12 @@ public class IncludeRequest extends CauchoRequestWrapper {
     _includeAttributeMap.put(PATH_INFO, PATH_INFO_CODE);
     _includeAttributeMap.put(QUERY_STRING, QUERY_STRING_CODE);
 
-    _emptyEnum = new Enumeration() {
+    _emptyEnum = new Enumeration<String>() {
       public boolean hasMoreElements() {
         return false;
       }
 
-      public Object nextElement() {
+      public String nextElement() {
         throw new NoSuchElementException();
       }
     };

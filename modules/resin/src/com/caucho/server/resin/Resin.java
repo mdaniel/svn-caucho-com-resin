@@ -423,8 +423,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       
       _networkServer = new NetworkServer(serverName,
                                          getRootDirectory(),
-                                         resinData.lookup(serverName),
-                                         _classLoader);
+                                         resinData.lookup(serverName));
 
       // watchdog/0212
       // else
@@ -433,7 +432,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
-      InjectManager webBeans = InjectManager.create();
+      InjectManager cdiManager = InjectManager.create();
 
       Config.setProperty("resinHome", getResinHome());
       Config.setProperty("resin", new Var());
@@ -446,10 +445,10 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       _management = createResinManagement();
 
-      if (webBeans.getBeans(ResinCdiProducer.class).size() == 0) {
+      if (cdiManager.getBeans(ResinCdiProducer.class).size() == 0) {
         Config.setProperty("fmt", new FmtFunctions());
 
-        ResinConfigLibrary.configure(webBeans);
+        ResinConfigLibrary.configure(cdiManager);
 
         try {
           Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
@@ -459,8 +458,9 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
           throw ConfigException.create(e);
         }
 
-        webBeans.addManagedBean(webBeans.createManagedBean(ResinCdiProducer.class));
-        webBeans.update();
+        cdiManager.addManagedBean(cdiManager.createManagedBean(ResinCdiProducer.class));
+        addResinValidatorProducer(cdiManager);
+        cdiManager.update();
       }
 
       _threadPoolAdmin = ThreadPoolAdmin.create();
@@ -475,6 +475,23 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       throw ConfigException.create(e);
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
+   * Adds the bean validation producer to CDI. This uses reflection in case
+   * the validation jars don't exist.
+   */
+  private void addResinValidatorProducer(InjectManager cdiManager)
+  {
+    try {
+      Class<?> cl = Class.forName("com.caucho.server.webbeans.ResinValidatorProducer");
+      
+      cdiManager.addManagedBean(cdiManager.createManagedBean(cl));
+    } catch (Exception e) {
+      log().log(Level.FINE, e.toString(), e);
+    } catch (NoClassDefFoundError e) {
+      log().log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -1060,7 +1077,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(getClassLoader());
+      thread.setContextClassLoader(_networkServer.getClassLoader());
 
       // force a GC on start
       System.gc();
@@ -1099,8 +1116,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       }
       */
 
-      Environment.start(getClassLoader());
-
       _server = createServer();
 
       for (int i = 0; i < _boundPortList.size(); i++) {
@@ -1111,7 +1126,11 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
                      port.getServerSocket());
       }
 
-      _server.start();
+//      Environment.start(getClassLoader());
+
+      // _server.start();
+      
+      _networkServer.start();
 
       /*
         if (! hasListeningPort()) {

@@ -29,6 +29,11 @@
 
 package com.caucho.server.webapp;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,15 +43,7 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoRequestWrapper;
-import com.caucho.server.http.HttpServletRequestImpl;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will
@@ -89,14 +86,14 @@ public class DispatchFilterChain implements FilterChain {
    * @param response the servlet response
    * @since Servlet 2.3
    */
+  @Override
   public void doFilter(ServletRequest request,
                        ServletResponse response)
     throws ServletException, IOException
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    HttpServletRequestImpl cauchoReq = null;
-
+    
     // server/10gf, server/10gv - listeners on web-app change
     ServletContext webApp;
     if (request instanceof CauchoRequestWrapper) {

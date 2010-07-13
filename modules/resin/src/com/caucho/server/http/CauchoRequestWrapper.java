@@ -162,49 +162,58 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return _request.getParameterMap();
   }
   
+  @Override
   public String []getParameterValues(String name)
   {
     return _request.getParameterValues(name);
   }
   
-  public Enumeration getParameterNames()
+  @Override
+  public Enumeration<String> getParameterNames()
   {
     return _request.getParameterNames();
   }
   
+  @Override
   public ServletInputStream getInputStream()
     throws IOException
   {
     return _request.getInputStream();
   }
   
+  @Override
   public BufferedReader getReader()
     throws IOException, IllegalStateException
   {
     return _request.getReader();
   }
   
+  @Override
   public String getCharacterEncoding()
   {
     return _request.getCharacterEncoding();
   }
   
+  @Override
   public void setCharacterEncoding(String encoding)
     throws UnsupportedEncodingException
   {
     _request.setCharacterEncoding(encoding);
   }
   
+  @Override
   public int getContentLength()
   {
     return _request.getContentLength();
   }
   
+  @Override
   public String getContentType()
   {
     return _request.getContentType();
   }
   
+  @Override
   public Locale getLocale()
   {
     return _request.getLocale();
@@ -415,13 +424,13 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   
   @Override
-  public Enumeration getHeaders(String name)
+  public Enumeration<String> getHeaders(String name)
   {
     return _request.getHeaders(name);
   }
   
   @Override
-  public Enumeration getHeaderNames()
+  public Enumeration<String> getHeaderNames()
   {
     return _request.getHeaderNames();
   }
@@ -510,6 +519,7 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   */
   
+  @Override
   public boolean isRequestedSessionIdFromUrl()
   {
     return _request.isRequestedSessionIdFromUrl();

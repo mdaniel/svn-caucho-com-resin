@@ -315,13 +315,14 @@ public class FilePath extends FilesystemPath {
 
     for (; offset < length; offset++) {
       ch = path.charAt(offset);
+      
       if (ch == '/')
         cb.append(_separatorChar);
       else
         cb.append(ch);
     }
-
-    return cb.close();
+    
+    return cb.toString();
   }
 
   public boolean exists()

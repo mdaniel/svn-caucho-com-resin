@@ -29,9 +29,6 @@
 
 package com.caucho.server.webbeans;
 
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
-
 import com.caucho.config.scope.ContextContainer;
 import com.caucho.inject.Module;
 

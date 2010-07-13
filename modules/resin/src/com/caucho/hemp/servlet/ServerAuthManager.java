@@ -46,6 +46,7 @@ import com.caucho.hmtp.NonceQuery;
 import com.caucho.hmtp.SignedCredentials;
 import com.caucho.security.Authenticator;
 import com.caucho.security.BasicPrincipal;
+import com.caucho.security.DigestCredentials;
 import com.caucho.security.PasswordCredentials;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
@@ -200,6 +201,18 @@ public class ServerAuthManager {
     else if (auth == null) {
       throw new NotAuthorizedException(L.l("{0} does not have a configured authenticator",
                                              this));
+    }
+    else if (credentials instanceof DigestCredentials) {
+      DigestCredentials digestCred = (DigestCredentials) credentials;
+
+      Principal user = new BasicPrincipal(digestCred.getUserName());
+      
+      user = auth.authenticate(user, digestCred, null);
+
+      if (user == null) {
+        throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+                                             digestCred.getUserName()));
+      }
     }
     else if (credentials instanceof String) {
       String password = (String) credentials;

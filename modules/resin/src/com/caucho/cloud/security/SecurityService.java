@@ -34,6 +34,7 @@ import java.security.MessageDigest;
 import com.caucho.network.server.AbstractNetworkService;
 import com.caucho.network.server.NetworkServer;
 import com.caucho.security.Authenticator;
+import com.caucho.security.DigestCredentials;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 
@@ -139,6 +140,18 @@ public class SecurityService extends AbstractNetworkService
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  public DigestCredentials createCredentials(String user,
+                                             String password,
+                                             String nonce)
+  {
+    byte []digest = createDigest(user, password, nonce);
+    
+    DigestCredentials cred = new DigestCredentials(user, nonce, digest);
+    cred.setRealm("resin");
+    
+    return cred;
   }
   
   public byte []createDigest(String user, 

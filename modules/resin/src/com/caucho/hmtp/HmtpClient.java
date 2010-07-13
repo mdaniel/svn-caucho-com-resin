@@ -39,6 +39,7 @@ import com.caucho.bam.ActorException;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.SimpleActorClient;
+import com.caucho.cloud.security.SecurityService;
 import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.remote.websocket.WebSocketClient;
 import com.caucho.servlet.WebSocketContext;
@@ -147,13 +148,18 @@ public class HmtpClient extends SimpleActorClient {
         
         String testSignature = _authManager.sign(uid, clientNonce, password);
         
-        if (! testSignature.equals(serverSignature))
+        if (! testSignature.equals(serverSignature) && "".equals(uid))
           throw new ActorException(L.l("{0} server signature does not match",
                                       this));
 
         String signature = _authManager.sign(uid, serverNonce, password);
 
-        credentials = new SignedCredentials(uid, serverNonce, signature);
+        SecurityService security = new SecurityService();
+        
+        if ("".equals(uid))
+          credentials = new SignedCredentials(uid, serverNonce, signature);
+        else
+          credentials = security.createCredentials(uid, password, serverNonce);
       }
 
       AuthResult result;

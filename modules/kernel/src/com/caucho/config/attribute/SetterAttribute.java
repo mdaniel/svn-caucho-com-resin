@@ -36,14 +36,14 @@ import com.caucho.config.type.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class SetterAttribute extends Attribute {
+public class SetterAttribute<T> extends Attribute {
   private static final L10N L = new L10N(SetterAttribute.class);
   
   private final Method _setter;
-  private final Class<?> _type;
-  private ConfigType<?> _configType;
+  private final Class<T> _type;
+  private ConfigType<T> _configType;
 
-  public SetterAttribute(Method setter, Class<?> type)
+  public SetterAttribute(Method setter, Class<T> type)
   {
     _setter = setter;
     _setter.setAccessible(true);
@@ -53,7 +53,8 @@ public class SetterAttribute extends Attribute {
   /**
    * Returns the config type of the attribute value.
    */
-  public ConfigType getConfigType()
+  @Override
+  public ConfigType<T> getConfigType()
   {
     if (_configType == null)
       _configType = TypeFactory.getType(_type);
@@ -80,7 +81,7 @@ public class SetterAttribute extends Attribute {
    * True if it allows inline beans
    */
   @Override
-  public boolean isInlineType(ConfigType type)
+  public boolean isInlineType(ConfigType<?> type)
   {
     if (type == null)
       return false;
@@ -102,10 +103,10 @@ public class SetterAttribute extends Attribute {
   @Override
   public boolean isAssignableFrom(Attribute attr)
   {
-    if (! (attr instanceof SetterAttribute))
+    if (! (attr instanceof SetterAttribute<?>))
       return false;
     
-    SetterAttribute setterAttr = (SetterAttribute) attr;
+    SetterAttribute<?> setterAttr = (SetterAttribute<?>) attr;
     Method setter = setterAttr._setter;
     
     if (! _setter.getName().equals(setter.getName()))
@@ -153,7 +154,7 @@ public class SetterAttribute extends Attribute {
    * Creates the child bean.
    */
   @Override
-  public Object create(Object parent, QName name, ConfigType configType)
+  public Object create(Object parent, QName name, ConfigType<?> configType)
     throws ConfigException
   {
     try {
@@ -193,7 +194,7 @@ public class SetterAttribute extends Attribute {
     else if (getClass() != o.getClass())
       return false;
     
-    SetterAttribute attr = (SetterAttribute) o;
+    SetterAttribute<?> attr = (SetterAttribute<?>) o;
     
     return _type.equals(attr._type) && _setter.equals(attr._setter);
   }

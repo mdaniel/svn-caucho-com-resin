@@ -612,7 +612,7 @@ abstract public class Cluster
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(getResin().getClassLoader());
+      thread.setContextClassLoader(networkServer.getClassLoader());
 
       Server server = createResinServer(networkServer, clusterServer);
       

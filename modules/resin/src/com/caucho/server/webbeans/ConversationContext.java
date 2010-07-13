@@ -30,34 +30,26 @@
 package com.caucho.server.webbeans;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
-import javax.faces.component.UIViewRoot;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
-import com.caucho.config.inject.InjectManager;
 import com.caucho.config.scope.AbstractScopeContext;
 import com.caucho.config.scope.ContextContainer;
-import com.caucho.config.scope.ScopeRemoveListener;
-import com.caucho.inject.Module;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
 /**
  * The conversation scope value
  */
+@SuppressWarnings("serial")
 public class ConversationContext extends AbstractScopeContext
   implements Conversation, java.io.Serializable
 {

@@ -29,19 +29,19 @@
 
 package com.caucho.config.attribute;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 
-import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.xml.QName;
 
-public class TextAttribute extends Attribute {
+public class TextAttribute<T> extends Attribute {
   private final Method _setter;
-  private final Class _type;
-  private ConfigType _configType;
+  private final Class<T> _type;
+  private ConfigType<T> _configType;
 
-  public TextAttribute(Method setter, Class type)
+  public TextAttribute(Method setter, Class<T> type)
   {
     _setter = setter;
     _type = type;
@@ -50,13 +50,29 @@ public class TextAttribute extends Attribute {
   /**
    * Returns the config type of the attribute value.
    */
-  public ConfigType getConfigType()
+  public ConfigType<T> getConfigType()
   {
     if (_configType == null)
       _configType = TypeFactory.getType(_type);
     
     return _configType;
   }
+  
+  @Override
+  public boolean isAssignableFrom(Attribute attr)
+  {
+    if (! (attr instanceof TextAttribute<?>))
+      return false;
+    
+    TextAttribute<?> textAttr = (TextAttribute<?>) attr;
+    Method setter = textAttr._setter;
+    
+    if (! _setter.getName().equals(setter.getName()))
+      return false;
+    
+    return _setter.getDeclaringClass().isAssignableFrom(setter.getDeclaringClass());
+  }
+  
   
   /**
    * Sets the value of the attribute

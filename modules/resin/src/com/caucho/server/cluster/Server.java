@@ -151,8 +151,6 @@ public class Server extends ProtocolDispatchServer
   private InjectManager _cdiManager;
 
   private BamService _bamService;
-  private ServerAuthManager _serverLinkManager;
-  
   private GitRepository _git;
   private Repository _repository;
   private FileRepository _localRepository;
@@ -234,13 +232,15 @@ public class Server extends ProtocolDispatchServer
   public Server(NetworkServer networkServer,
                 ClusterServer clusterServer)
   {
-    _networkServer = networkServer;
-    
     if (networkServer == null)
       throw new NullPointerException();
     
     if (clusterServer == null)
       throw new NullPointerException();
+    
+    _networkServer = networkServer;
+    
+    ServletService.create(this);
 
     _selfServer = clusterServer;
     Cluster cluster = clusterServer.getCluster();
@@ -1890,12 +1890,13 @@ public class Server extends ProtocolDispatchServer
 
       getCluster().start();
 
-      _classLoader.start();
+      // handled by the network server itself
+      // _classLoader.start();
 
       _hostContainer.start();
 
       // initialize the environment admin
-      _classLoader.getAdmin();
+      // _classLoader.getAdmin();
 
       startPersistentStore();
 

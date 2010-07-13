@@ -482,7 +482,7 @@ public class HostContainer implements DispatchBuilder {
     if (! _lifecycle.toStarting())
       return;
 
-    _classLoader.start();
+    // _classLoader.start();
 
     _lifecycle.toActive();
 
@@ -499,7 +499,7 @@ public class HostContainer implements DispatchBuilder {
 
     _hostDeploy.stop();
     
-    _classLoader.stop();
+    // _classLoader.stop();
   }
 
   /**

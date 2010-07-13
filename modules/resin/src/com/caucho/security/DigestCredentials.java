@@ -29,6 +29,8 @@
 
 package com.caucho.security;
 
+import java.io.Serializable;
+
 /**
  * Digest-based credentials
  *
@@ -41,7 +43,7 @@ package com.caucho.security;
  * digest = MD5(A1 + ':' + nonce)
  * </pre></code>
  */
-public class DigestCredentials implements Credentials
+public class DigestCredentials implements Credentials, Serializable
 {
   private String _userName;
   private String _nonce;

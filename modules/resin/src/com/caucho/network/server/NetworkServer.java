@@ -124,7 +124,7 @@ public class NetworkServer
 
     _serverLocal.set(this, _classLoader);
 
-    _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+    _lifecycle = new Lifecycle(log, toString(), Level.FINE);
     
     // lifecycle for the classloader itself
     addService(new ClassLoaderService());

@@ -31,7 +31,6 @@ package com.caucho.server.webbeans;
 
 import java.io.IOException;
 
-import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
 import javax.faces.FacesException;
 import javax.faces.application.ViewHandler;

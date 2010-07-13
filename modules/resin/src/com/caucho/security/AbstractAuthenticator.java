@@ -40,6 +40,7 @@ import javax.servlet.ServletException;
 
 import com.caucho.config.inject.HandleAware;
 import com.caucho.server.security.PasswordDigest;
+import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 
 /**
@@ -150,8 +151,10 @@ public class AbstractAuthenticator
   {
     if (_passwordDigest != null) {
       if (_passwordDigest.getAlgorithm() == null
-          || _passwordDigest.getAlgorithm().equals("none"))
+          || _passwordDigest.getAlgorithm().equals("none")) {
         _passwordDigest = null;
+        _passwordDigestAlgorithm = "none";
+      }
     }
     else if (_passwordDigestAlgorithm == null
              || _passwordDigestAlgorithm.equals("none")) {
@@ -280,26 +283,6 @@ public class AbstractAuthenticator
       return null;
   }
 
-  /**
-   * Returns the digest view of the password.  The default
-   * uses the PasswordDigest class if available, and returns the
-   * plaintext password if not.
-   */
-  protected char []getPasswordDigest(String user, char []password)
-  {
-    if (_passwordDigest != null) {
-      char []digest = _passwordDigest.getPasswordDigest(user, password);
-
-      if (digest != null)
-        return digest;
-    }
-
-    char []digest = new char[password.length];
-    System.arraycopy(password, 0, digest, 0, password.length);
-      
-    return digest;
-  }
-
   //
   // http digest authentication
   //
@@ -414,13 +397,13 @@ public class AbstractAuthenticator
       if (clientDigest == null)
         return null;
       
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      
       byte []a1 = getDigestSecret(principal, realm);
 
       if (a1 == null)
         return null;
 
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      
       digestUpdateHex(md, a1);
       
       md.update((byte) ':');
@@ -437,6 +420,26 @@ public class AbstractAuthenticator
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Returns the digest view of the password.  The default
+   * uses the PasswordDigest class if available, and returns the
+   * plaintext password if not.
+   */
+  protected char []getPasswordDigest(String user, char []password)
+  {
+    if (_passwordDigest != null) {
+      char []digest = _passwordDigest.getPasswordDigest(user, password);
+
+      if (digest != null)
+        return digest;
+    }
+
+    char []digest = new char[password.length];
+    System.arraycopy(password, 0, digest, 0, password.length);
+      
+    return digest;
   }
 
   /**
@@ -638,10 +641,18 @@ public class AbstractAuthenticator
     return _serializationHandle;
   }
 
+  @Override
   public String toString()
   {
-    return (getClass().getSimpleName()
-            + "[" + _passwordDigestAlgorithm
-            + "," + _passwordDigestRealm + "]");
+    if (_passwordDigest != null) {
+      return (getClass().getSimpleName()
+              + "[" + _passwordDigest.getAlgorithm()
+              + "," + _passwordDigest.getRealm() + "]");
+    }
+    else {
+      return (getClass().getSimpleName()
+              + "[" + _passwordDigestAlgorithm
+              + "," + _passwordDigestRealm + "]");
+    }
   }
 }

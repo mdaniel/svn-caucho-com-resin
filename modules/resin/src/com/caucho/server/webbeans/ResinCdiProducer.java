@@ -34,7 +34,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.Conversation;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
@@ -44,13 +43,9 @@ import javax.management.MBeanServer;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.jmx.Jmx;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
@@ -68,8 +63,6 @@ public class ResinCdiProducer
 {
   private static final Logger log
     = Logger.getLogger(ResinCdiProducer.class.getName());
-  
-  private Validator _validator;
   
   public ResinCdiProducer()
   {
@@ -158,26 +151,5 @@ public class ResinCdiProducer
 
       return null;
     }
-  }
-  
-  /**
-   * Returns the validator factory.
-   */
-  @Produces
-  public ValidatorFactory createValidatorFactory()
-  {
-    return Validation.buildDefaultValidatorFactory();
-  }
-  
-  /**
-   * Returns the validator factory.
-   */
-  @Produces
-  public Validator createValidator()
-  {
-    if (_validator == null)
-      _validator = Validation.buildDefaultValidatorFactory().getValidator();
-    
-    return _validator;
   }
 }

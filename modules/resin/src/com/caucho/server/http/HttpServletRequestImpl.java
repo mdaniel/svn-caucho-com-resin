@@ -2117,6 +2117,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       }
     }
 
+    @Override
     public void write(String fileName)
       throws IOException
     {
@@ -2130,7 +2131,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
       Object value = getValue();
 
-      if (!(value instanceof FilePath))
+      if (! (value instanceof FilePath))
         throw new IOException(L.l(
           "Part.write() is not applicable to part '{0}':'{1}'",
           _name,

@@ -74,6 +74,8 @@ public class SystemClassLoader
 
     String preScan = System.getProperty("caucho.jar.prescan");
     
+    preScan = "false";
+    
     if (preScan == null || ! "false".equals(preScan))
       DynamicClassLoader.setJarCacheEnabled(true);
 
@@ -89,11 +91,13 @@ public class SystemClassLoader
     return DynamicClassLoader.isJarCacheEnabledDefault();
   }
 
+  @Override
   public ClassLoader getClassLoader()
   {
     return this;
   }
 
+  @Override
   public void init()
   {
     if (_isInit.getAndSet(true))
@@ -210,7 +214,7 @@ public class SystemClassLoader
     throws ClassNotFoundException
   {
     // The JVM has already cached the classes, so we don't need to
-    Class cl = findLoadedClass(name);
+    Class<?> cl = findLoadedClass(name);
 
     if (cl != null) {
       if (resolve)
@@ -218,6 +222,7 @@ public class SystemClassLoader
       return cl;
     }
 
+    /*
     // This causes problems with JCE
     if (_hasBootClassPath) {
       String className = name.replace('.', '/') + ".class";
@@ -225,6 +230,7 @@ public class SystemClassLoader
       if (findPath(className) == null)
         return null;
     }
+    */
 
     return super.loadClassImpl(name, resolve);
   }

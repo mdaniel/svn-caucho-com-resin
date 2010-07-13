@@ -43,7 +43,6 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
@@ -59,7 +58,6 @@ import com.caucho.inject.Jndi;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.MBean;
 import com.caucho.inject.Module;
-import com.caucho.inject.ThreadContext;
 import com.caucho.jms.JmsMessageListener;
 import com.caucho.jmx.Jmx;
 import com.caucho.remote.BamService;
@@ -137,20 +135,6 @@ public class ResinStandardPlugin implements Extension {
     */
   }
   
-  private boolean isEjbParent(Class<?> cl)
-  {
-    if (cl == null || cl == Object.class)
-      return false;
-    
-    for (Annotation ann : cl.getAnnotations()) {
-      if (_ejbAnnotations.contains(ann.annotationType()))
-        return true;
-    }
-    
-    return isEjbParent(cl.getSuperclass());
-  }
-  
-
   @LazyExtension
   public void processBean(@Observes ProcessBean<?> event) 
   {
