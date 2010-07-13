@@ -388,7 +388,7 @@ public class AbstractAuthenticator
   
   /**
    * Validates the user when Resin's Digest authentication.
-   * The igest authentication uses the following algorithm
+   * The digest authentication uses the following algorithm
    * to calculate the digest.  The digest is then compared to
    * the client digest.
    *
