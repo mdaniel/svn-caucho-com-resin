@@ -2877,7 +2877,7 @@ abstract public class Value implements java.io.Serializable
     throws IOException
   {
     if (valueSet.get(this) != null) {
-      out.print("#recursion#");
+      out.print("*recursion*");
       return;
     }
 
@@ -2907,7 +2907,7 @@ abstract public class Value implements java.io.Serializable
     throws IOException
   {
     if (valueSet.get(this) != null) {
-      out.print("#recursion#");
+      out.print("*recursion*");
       return;
     }
 
