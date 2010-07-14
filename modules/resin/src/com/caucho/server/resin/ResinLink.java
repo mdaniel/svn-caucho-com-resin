@@ -56,6 +56,7 @@ public class ResinLink extends HmtpLink implements Runnable {
   /**
    * Receive messages from the client
    */
+  @Override
   public void run()
   {
     try {
@@ -64,6 +65,8 @@ public class ResinLink extends HmtpLink implements Runnable {
       Thread.currentThread().setContextClassLoader(loader);
       
       super.run();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
     } finally {
       if (log.isLoggable(Level.FINE))
         log.fine(this + " finishing main thread");

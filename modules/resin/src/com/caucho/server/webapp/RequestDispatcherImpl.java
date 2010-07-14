@@ -115,6 +115,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     return _dispatchInvocation;
   }
 
+  @Override
   public void forward(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -182,10 +183,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       // server/10yg
       
       // } else if ("error".equals(method) || (method == null && ! allowForward)) {
+      
       topResponse.resetBuffer();
 
       if (cauchoRes != null) {
-        ServletResponse resp = cauchoRes.getResponse();
+        // server/10yh
+        // ServletResponse resp = cauchoRes.getResponse();
+        ServletResponse resp = cauchoRes;
 
         while (resp != null) {
           if (allowForward && resp instanceof IncludeResponse) {

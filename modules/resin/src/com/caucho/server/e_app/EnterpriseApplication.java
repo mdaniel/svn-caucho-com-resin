@@ -556,7 +556,9 @@ public class EnterpriseApplication
 
       if (_webAppContainer != null) {
         for (WebAppController webApp : _webApps) {
-          _webAppContainer.getWebAppGenerator().updateNoStart(webApp.getContextPath());
+          // server/13bb
+          //_webAppContainer.getWebAppGenerator().updateNoStart(webApp.getContextPath());
+          _webAppContainer.getWebAppGenerator().update(webApp.getContextPath());
         }
       }
       

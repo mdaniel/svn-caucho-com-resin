@@ -325,6 +325,7 @@ public class FilePath extends FilesystemPath {
     return cb.toString();
   }
 
+  @Override
   public boolean exists()
   {
     try {
@@ -339,6 +340,7 @@ public class FilePath extends FilesystemPath {
     }
   }
 
+  @Override
   public int getMode()
   {
     int perms = 0;

@@ -45,8 +45,6 @@ final class ResinThread extends Thread {
   private final int _id;
   private final String _name;
   
-  private long _threadResetCount;
-  
   private volatile ResinThread _next;
   private boolean _isClose;
   
@@ -123,9 +121,11 @@ final class ResinThread extends Thread {
   public void run()
   {
     try {
-      _threadResetCount = _pool.onThreadStart();
+      _pool.onThreadStart();
       
       runTasks();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
     } finally {
       _pool.onThreadEnd();
     }
