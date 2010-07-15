@@ -29,8 +29,8 @@
 package com.caucho.server.admin;
 
 import java.io.Serializable;
-import java.net.URL;
 
+@SuppressWarnings("serial")
 public class TagResult implements Serializable {
   private String _tag;
   private String _root;

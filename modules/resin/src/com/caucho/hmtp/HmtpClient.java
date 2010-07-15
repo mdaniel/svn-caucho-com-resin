@@ -129,6 +129,9 @@ public class HmtpClient extends SimpleActorClient {
   protected void loginImpl(String uid, Serializable credentials)
   {
     try {
+      if (uid == null)
+        uid = "";
+      
       if (credentials == null)
         credentials = "";
       

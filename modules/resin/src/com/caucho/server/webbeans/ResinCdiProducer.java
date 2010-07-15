@@ -46,6 +46,7 @@ import javax.transaction.UserTransaction;
 
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.jmx.Jmx;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
@@ -151,5 +152,26 @@ public class ResinCdiProducer
 
       return null;
     }
+  }
+
+  /**
+   * Adds the bean validation producer to CDI. This uses reflection in case
+   * the validation jars don't exist.
+   */
+  public static Class<?> createResinValidatorProducer()
+  {
+    try {
+      Class<?> cl = Class.forName("com.caucho.server.webbeans.ResinValidatorProducer");
+      
+      cl.getMethods();
+      
+      return cl;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    } catch (NoClassDefFoundError e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+    
+    return null;
   }
 }

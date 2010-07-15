@@ -53,6 +53,9 @@ public class ListenService extends AbstractNetworkService
   private static final Logger log
     = Logger.getLogger(ListenService.class.getName());
   
+  public static final int START_PRIORITY_LISTEN = 2000;
+  public static final int START_PRIORITY_CLUSTER = 2100;
+  
   private final NetworkServer _server;
   
   private final ArrayList<SocketLinkListener> _listeners
@@ -121,6 +124,12 @@ public class ListenService extends AbstractNetworkService
   //
   // lifecycle
   //
+
+  @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY_LISTEN;
+  }
   
   @Override
   public void start()

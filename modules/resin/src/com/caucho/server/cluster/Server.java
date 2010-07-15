@@ -1723,17 +1723,20 @@ public class Server extends ProtocolDispatchServer
   @PostConstruct
   public void init()
   {
+    if (! _lifecycle.toInit())
+      return;
+    
     _classLoader.init();
 
     super.init();
+
+    _admin = new ServerAdmin(this);
 
     if (_resin != null) {
       createManagement().setCluster(getCluster());
       createManagement().setServer(this);
       createManagement().init();
     }
-
-    _admin = new ServerAdmin(this);
 
     if (_threadIdleMax > 0
         && _threadMax > 0
@@ -1789,6 +1792,11 @@ public class Server extends ProtocolDispatchServer
       }
     }
     */
+    
+    ClusterNetworkService clusterService
+      = new ClusterNetworkService(_clusterPort);
+    
+    _networkServer.addService(clusterService);
   }
 
   /**
@@ -1796,8 +1804,6 @@ public class Server extends ProtocolDispatchServer
    */
   public void start()
   {
-    init();
-
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
@@ -1861,7 +1867,7 @@ public class Server extends ProtocolDispatchServer
 
       _lifecycle.toStarting();
 
-      startClusterNetwork();
+      // startClusterNetwork();
       
       startImpl();
 
@@ -1951,38 +1957,6 @@ public class Server extends ProtocolDispatchServer
   {
   }
 
-  private void startClusterNetwork()
-    throws Exception
-  {
-    // server/2l32
-    _authManager.setAuthenticator(getAdminAuthenticator());
-
-    /*
-    AbstractSelectManager selectManager = getSelectManager();
-
-    if (! _keepaliveSelectEnable
-        || selectManager == null
-        || ! selectManager.start()) {
-      initSelectManager(null);
-    }
-    */
-
-    startClusterPort();
-
-    for (Cluster cluster : getResin().getClusterList()) {
-      for (ClusterPod pod : cluster.getPodList()) {
-        for (ClusterServer server : pod.getStaticServerList()) {
-          ClientSocketFactory pool = server.getServerPool();
-
-          if (pool != null)
-            pool.start();
-        }
-      }
-    }
-
-    notifyClusterStart();
-  }
-
   public void startClusterUpdate()
   {
     /*
@@ -1995,30 +1969,6 @@ public class Server extends ProtocolDispatchServer
     */
   }
 
-  /**
-   * Start the cluster port
-   */
-  private void startClusterPort()
-    throws Exception
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    try {
-      thread.setContextClassLoader(_classLoader);
-
-      SocketLinkListener port = _clusterPort;
-
-      if (port != null && port.getPort() != 0) {
-        log.info("");
-        port.bind();
-        port.start();
-        log.info("");
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-  
   public void bind(String address, int port, QServerSocket ss)
     throws Exception
   {

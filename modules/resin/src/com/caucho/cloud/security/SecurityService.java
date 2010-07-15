@@ -56,15 +56,15 @@ public class SecurityService extends AbstractNetworkService
       throw new IllegalStateException(L.l("NetworkServer is not active in {0}",
                                           Thread.currentThread().getContextClassLoader()));
     }
-    
+
     synchronized (server) {
       SecurityService service = server.getService(SecurityService.class);
-      
+
       if (service == null) {
         service = new SecurityService();
         server.addService(service);
       }
-      
+  
       return service;
     }
   }
@@ -163,11 +163,15 @@ public class SecurityService extends AbstractNetworkService
       
       MessageDigest md = MessageDigest.getInstance("MD5");
       
-      md.update(user.getBytes("UTF-8"));
+      if (user != null)
+        md.update(user.getBytes("UTF-8"));
+      
       md.update((byte) ':');
       md.update(realm.getBytes("UTF-8"));
       md.update((byte) ':');
-      md.update(password.getBytes("UTF-8"));
+      
+      if (password != null)
+        md.update(password.getBytes("UTF-8"));
       
       byte []digest = md.digest();
       

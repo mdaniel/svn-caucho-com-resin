@@ -459,7 +459,11 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
         }
 
         cdiManager.addManagedBean(cdiManager.createManagedBean(ResinCdiProducer.class));
-        addResinValidatorProducer(cdiManager);
+        Class<?> resinValidatorClass = ResinCdiProducer.createResinValidatorProducer();
+        
+        if (resinValidatorClass != null)
+          cdiManager.addManagedBean(cdiManager.createManagedBean(resinValidatorClass));
+
         cdiManager.update();
       }
 
@@ -475,23 +479,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       throw ConfigException.create(e);
     } finally {
       thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  /**
-   * Adds the bean validation producer to CDI. This uses reflection in case
-   * the validation jars don't exist.
-   */
-  private void addResinValidatorProducer(InjectManager cdiManager)
-  {
-    try {
-      Class<?> cl = Class.forName("com.caucho.server.webbeans.ResinValidatorProducer");
-      
-      cdiManager.addManagedBean(cdiManager.createManagedBean(cl));
-    } catch (Exception e) {
-      log().log(Level.FINE, e.toString(), e);
-    } catch (NoClassDefFoundError e) {
-      log().log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -723,8 +710,17 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
    */
   public void setResinSystemAuthKey(String key)
   {
-    SecurityService security = SecurityService.create();
-    security.setSignatureSecret(key);
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(_networkServer.getClassLoader());
+      
+      SecurityService security = SecurityService.create();
+      security.setSignatureSecret(key);
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
   }
 
   /**

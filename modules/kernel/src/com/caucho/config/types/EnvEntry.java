@@ -29,20 +29,23 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.LineConfigException;
-import com.caucho.config.Names;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.el.Expr;
-import com.caucho.naming.Jndi;
-import com.caucho.util.L10N;
+import java.lang.reflect.Type;
+import java.util.LinkedHashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
+import com.caucho.config.inject.BeanBuilder;
+import com.caucho.config.inject.DefaultLiteral;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.el.Expr;
+import com.caucho.naming.Jndi;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for the env-entry pattern.
@@ -52,15 +55,14 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   private static final Logger log = Logger.getLogger(EnvEntry.class.getName());
 
   private String _name;
-  private Class _type;
+  private Class<?> _type;
   private String _value;
-
-  private Object _objValue;
 
   public EnvEntry()
   {
   }
 
+  @Override
   public void setId(String id)
   {
   }
@@ -84,7 +86,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   /**
    * Sets the env-entry-type
    */
-  public void setEnvEntryType(Class type)
+  public void setEnvEntryType(Class<?> type)
   {
     _type = type;
   }
@@ -92,7 +94,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   /**
    * Gets the env-entry-type
    */
-  public Class getEnvEntryType()
+  public Class<?> getEnvEntryType()
   {
     return _type;
   }
@@ -132,25 +134,50 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     // actually, should register for validation
     if (_value == null)
       return;
+    
+    LinkedHashSet<Type> types = new LinkedHashSet<Type>();
+    
+    types.add(_type);
 
     Object value = _value;
 
     if (_type.equals(String.class)) {
     }
-    else if (_type.equals(Boolean.class))
+    else if (_type.equals(Boolean.class)) {
       value = new Boolean(Expr.toBoolean(_value, null));
-    else if (_type.equals(Byte.class))
+      
+      types.add(boolean.class);
+    }
+    else if (_type.equals(Byte.class)) {
       value = new Byte((byte) Expr.toLong(_value, null));
-    else if (_type.equals(Short.class))
+      
+      types.add(byte.class);
+    }
+    else if (_type.equals(Short.class)) {
       value = new Short((short) Expr.toLong(_value, null));
-    else if (_type.equals(Integer.class))
+      
+      types.add(short.class);
+    }
+    else if (_type.equals(Integer.class)) {
       value = new Integer((int) Expr.toLong(_value, null));
-    else if (_type.equals(Long.class))
+      
+      types.add(int.class);
+    }
+    else if (_type.equals(Long.class)) {
       value = new Long(Expr.toLong(_value, null));
-    else if (_type.equals(Float.class))
+      
+      types.add(long.class);
+    }
+    else if (_type.equals(Float.class)) {
       value = new Float((float) Expr.toDouble(_value, null));
-    else if (_type.equals(Double.class))
+      
+      types.add(float.class);
+    }
+    else if (_type.equals(Double.class)) {
       value = new Double(Expr.toDouble(_value, null));
+      
+      types.add(double.class);
+    }
     else if (_type.equals(Character.class)) {
       String v = Expr.toString(_value, null);
 
@@ -158,9 +185,9 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
         value = null;
       else
         value = new Character(v.charAt(0));
+      
+      types.add(char.class);
     }
-
-    _objValue = value;
 
     if (value == null)
       return;
@@ -170,6 +197,9 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     builder.name(_name);
     // server/1516
     builder.binding(Names.create(_name));
+    builder.binding(DefaultLiteral.DEFAULT);
+    
+    builder.type(types);
 
     cdiManager.addBean(builder.singleton(value));
 

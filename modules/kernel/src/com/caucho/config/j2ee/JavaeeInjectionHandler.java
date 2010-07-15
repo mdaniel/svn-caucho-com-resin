@@ -33,7 +33,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.enterprise.inject.AmbiguousResolutionException;
 import javax.enterprise.inject.Any;
@@ -45,11 +44,9 @@ import javax.naming.NamingException;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
-import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionPointHandler;
-import com.caucho.config.program.BeanValueGenerator;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.naming.Jndi;
 
@@ -57,9 +54,6 @@ import com.caucho.naming.Jndi;
  * Common JavaEE injection handler
  */
 abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
-  private static final Logger log
-    = Logger.getLogger(JavaeeInjectionHandler.class.getName());
-  
   private InjectManager _manager;
   
   protected JavaeeInjectionHandler(InjectManager manager)
@@ -146,6 +140,19 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       name = "java:comp/env/" + name;
     }
     
+    try {
+      Jndi.bindDeep(name, gen);
+    } catch (NamingException e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
+  protected void bindJndi(Field field, ValueGenerator gen)
+  {
+    String name = ("java:comp/env/"
+                   + field.getDeclaringClass().getName()
+                   + "/" + field.getName());
+
     try {
       Jndi.bindDeep(name, gen);
     } catch (NamingException e) {

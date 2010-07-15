@@ -315,13 +315,13 @@ public class XmlBeanConfig<T> {
 
   public void addField(XmlBeanFieldConfig fieldConfig)
   {
-    Field field = fieldConfig.getField();
-    Annotation []annList = fieldConfig.getAnnotations();
+    // Field field = fieldConfig.getField();
+    // Annotation []annList = fieldConfig.getAnnotations();
 
     //_component.addField(new SimpleBeanField(field, annList));
   }
 
-  private void clearBindings(AnnotatedTypeImpl beanType)
+  private void clearBindings(AnnotatedTypeImpl<?> beanType)
   {
     HashSet<Annotation> annSet
       = new HashSet<Annotation>(beanType.getAnnotations());
@@ -332,7 +332,7 @@ public class XmlBeanConfig<T> {
     }
   }
 
-  private void clearAnnotations(AnnotatedTypeImpl beanType,
+  private void clearAnnotations(AnnotatedTypeImpl<?> beanType,
                                 Class<? extends Annotation> annType)
   {
     HashSet<Annotation> annSet
@@ -363,8 +363,6 @@ public class XmlBeanConfig<T> {
 
   private Class<?> createResinClass(String name)
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
     Class<?> cl = TypeFactory.loadClass("ee", name);
 
     if (cl != null)
@@ -423,7 +421,7 @@ public class XmlBeanConfig<T> {
 
       for (int i = 0; i < _args.size(); i++) {
         ConfigProgram argProgram = _args.get(i);
-        ConfigType type = TypeFactory.getType(genericParam[i]);
+        ConfigType<?> type = TypeFactory.getType(genericParam[i]);
 
         if (argProgram != null)
           newProgram[i] = new ProgramArg(type, argProgram);

@@ -198,6 +198,9 @@ public class CloudSystem
    */
   public void addClusterListener(CloudClusterListener listener)
   {
+    if (listener == null)
+      throw new NullPointerException();
+    
     if (! _listeners.contains(listener))
       _listeners.add(listener);
   }

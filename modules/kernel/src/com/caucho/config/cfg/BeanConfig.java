@@ -55,7 +55,6 @@ import javax.inject.Singleton;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
-import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;

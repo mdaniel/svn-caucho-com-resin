@@ -69,16 +69,19 @@ public class ServerAdmin extends AbstractEmitterObject
     registerSelf();
   }
 
+  @Override
   public String getName()
   {
     return null;
   }
 
+  @Override
   public String getType()
   {
     return "Server";
   }
 
+  @Override
   public String getId()
   {
     return _server.getServerId();
@@ -96,6 +99,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the cluster server owning this server
    */
+  @Override
   public ClusterServerMXBean getSelfServer()
   {
     return _server.getSelfServer().getAdmin();
@@ -104,6 +108,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the cluster owning this server
    */
+  @Override
   public ClusterMXBean getCluster()
   {
     return _server.getCluster().getAdmin();

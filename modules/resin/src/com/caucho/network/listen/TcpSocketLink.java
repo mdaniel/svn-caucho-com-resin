@@ -711,29 +711,25 @@ public class TcpSocketLink extends AbstractSocketLink
 
         return RequestState.THREAD_DETACHED;
       }
-      // keepalive to select manager fails (e.g. filled select manager)
-      else {
-        log.warning(dbgId() + " failed keepalive (select)");
-
-        close();
-
-        return RequestState.EXIT;
-      }
     }
+    // keepalive to select manager fails (e.g. filled select manager)
     else {
-      if (log.isLoggable(Level.FINE))
-        log.fine(dbgId() + " keepalive (thread)");
+      log.warning(dbgId() + " failed keepalive (select)");
 
-      // if blocking read has available data
-      if (getReadStream().waitForRead()) {
-        return RequestState.REQUEST;
-      }
-      // blocking read timed out or closed
-      else {
-        close();
+    }
 
-        return RequestState.EXIT;
-      }
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + " keepalive (thread)");
+
+    // if blocking read has available data
+    if (getReadStream().waitForRead()) {
+      return RequestState.REQUEST;
+    }
+    // blocking read timed out or closed
+    else {
+      close();
+
+      return RequestState.EXIT;
     }
   }
 

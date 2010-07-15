@@ -31,7 +31,6 @@ package com.caucho.config.j2ee;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
@@ -54,9 +53,6 @@ import com.caucho.util.L10N;
  * Handles the @EJB annotation for JavaEE
  */
 public class EjbHandler extends JavaeeInjectionHandler {
-  private static final Logger log
-    = Logger.getLogger(EjbHandler.class.getName());
-  
   private static final L10N L = new L10N(EjbHandler.class);
   
   public EjbHandler(InjectManager manager)
@@ -122,7 +118,15 @@ public class EjbHandler extends JavaeeInjectionHandler {
   {
     String name = ejb.name();
 
-    Class<?> bindType = Object.class;
+    Class<?> bindType = ejb.beanInterface();
+    
+    if ("".equals(name))
+      throw new ConfigException(L.l("{0}: @EJB name() attribute is required for @EJB on a class.",
+                                    location));
+    
+    if (Object.class.equals(bindType))
+      throw new ConfigException(L.l("{0}: @EJB beanInterface() attribute is required for @EJB on a class.",
+                                    location));
     
     ValueGenerator gen = bindGenerator(location, ejb, bindType);
 
@@ -148,6 +152,8 @@ public class EjbHandler extends JavaeeInjectionHandler {
 
     if (name != null && ! "".equals(name))
       bindJndi(name, gen, name);
+    
+    bindJndi(javaField, gen);
     
     return new FieldGeneratorProgram(javaField, gen);
   }

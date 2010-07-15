@@ -409,6 +409,9 @@ public class NetworkServer
       while (_pendingStart.size() > 0) {
         NetworkService service = _pendingStart.first();
         _pendingStart.remove(service);
+        
+        if (log.isLoggable(Level.FINE))
+          log.fine(service + " starting");
 
         service.start();
       }
@@ -454,6 +457,9 @@ public class NetworkServer
       
       for (NetworkService service : services) {
         try {
+          if (log.isLoggable(Level.FINE))
+            log.fine(service + " stopping");
+          
           service.stop();
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);

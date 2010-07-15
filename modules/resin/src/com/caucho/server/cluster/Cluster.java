@@ -619,6 +619,8 @@ abstract public class Cluster
       thread.setContextClassLoader(server.getClassLoader());
 
       _serverProgram.configure(server);
+      
+      server.init();
 
       return server;
     } finally {

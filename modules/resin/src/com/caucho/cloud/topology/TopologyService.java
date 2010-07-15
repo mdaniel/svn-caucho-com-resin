@@ -42,16 +42,16 @@ public class TopologyService implements NetworkService
   public static final int STOP_PRIORITY_DEFAULT = 1000;
   public static final int STOP_PRIORITY_CLASSLOADER = 1001;
   
-  private final CloudSystem _domain;
+  private final CloudSystem _system;
   
-  public TopologyService(String domainId)
+  public TopologyService(String systemId)
   {
-    _domain = new CloudSystem(domainId);
+    _system = new CloudSystem(systemId);
   }
   
-  public CloudSystem getDomain()
+  public CloudSystem getSystem()
   {
-    return _domain;
+    return _system;
   }
 
   @Override
@@ -86,6 +86,6 @@ public class TopologyService implements NetworkService
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _domain + "]";
+    return getClass().getSimpleName() + "[" + _system + "]";
   }
 }

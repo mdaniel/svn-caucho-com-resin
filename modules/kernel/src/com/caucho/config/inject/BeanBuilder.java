@@ -173,6 +173,18 @@ public class BeanBuilder<T>
     return this;
   }
 
+  public BeanBuilder<T> type(Set<Type> types)
+  {
+    if (_types == null)
+      _types = new LinkedHashSet<Type>();
+
+    if (types != null) {
+      _types.addAll(types);
+    }
+
+    return this;
+  }
+
   public BeanBuilder<T> init(ConfigProgram init)
   {
     if (init != null) {

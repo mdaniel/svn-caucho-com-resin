@@ -29,21 +29,21 @@
 
 package com.caucho.config.attribute;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 
-import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.xml.QName;
 
-public class CreateAttribute extends Attribute {
+public class CreateAttribute<T> extends Attribute {
   private final Method _create;
   private final Method _setter;
-  private Class _type;
+  private Class<T> _type;
   
-  private ConfigType _configType;
+  private ConfigType<T> _configType;
 
-  public CreateAttribute(Method create, Class type)
+  public CreateAttribute(Method create, Class<T> type)
   {
     _create = create;
     if (_create != null)
@@ -53,7 +53,7 @@ public class CreateAttribute extends Attribute {
     _setter = null;
   }
 
-  public CreateAttribute(Method create, Class type, Method setter)
+  public CreateAttribute(Method create, Class<T> type, Method setter)
   {
     _create = create;
     if (_create != null)
@@ -69,7 +69,7 @@ public class CreateAttribute extends Attribute {
   /**
    * Returns the config type of the attribute value.
    */
-  public ConfigType getConfigType()
+  public ConfigType<?> getConfigType()
   {
     if (_configType == null)
       _configType = TypeFactory.getType(_type);
@@ -99,7 +99,7 @@ public class CreateAttribute extends Attribute {
    * True if it allows inline beans
    */
   @Override
-  public boolean isInlineType(ConfigType type)
+  public boolean isInlineType(ConfigType<?> type)
   {
     // server/0219
     
@@ -150,6 +150,41 @@ public class CreateAttribute extends Attribute {
   
   
   @Override
+  public boolean isAssignableFrom(Attribute attr)
+  {
+    if (! (attr instanceof CreateAttribute<?>))
+      return false;
+    
+    CreateAttribute<?> createAttr = (CreateAttribute<?>) attr;
+    Method create = createAttr._create;
+
+    if (create == null || _create == null)
+      return false;
+    
+    if (! _create.getName().equals(create.getName()))
+      return false;
+    
+    if (! _create.getDeclaringClass().isAssignableFrom(create.getDeclaringClass()))
+      return false;
+    
+    Method setter = createAttr._setter;
+
+    if ((setter == null) != (_setter == null))
+      return false;
+    
+    if (setter == null)
+      return true;
+    
+    if (! _setter.getName().equals(setter.getName()))
+      return false;
+    
+    if (! _setter.getDeclaringClass().isAssignableFrom(setter.getDeclaringClass()))
+      return false;
+    
+    return true;
+  }
+  
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)
@@ -159,7 +194,7 @@ public class CreateAttribute extends Attribute {
     else if (getClass() != o.getClass())
       return false;
     
-    CreateAttribute attr = (CreateAttribute) o;
+    CreateAttribute<?> attr = (CreateAttribute<?>) o;
     
     return (_type.equals(attr._type)
             && _setter == attr._setter

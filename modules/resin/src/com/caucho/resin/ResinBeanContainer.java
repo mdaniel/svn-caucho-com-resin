@@ -156,6 +156,11 @@ public class ResinBeanContainer
 
       _injectManager.addManagedBean(_injectManager.createManagedBean(ResinCdiProducer.class));
 
+      Class<?> resinValidatorClass = ResinCdiProducer.createResinValidatorProducer();
+      
+      if (_injectManager != null)
+        _injectManager.addManagedBean(_injectManager.createManagedBean(resinValidatorClass));
+
       _classLoader.scanRoot();
     } finally {
       thread.setContextClassLoader(oldLoader);
