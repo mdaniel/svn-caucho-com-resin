@@ -5821,8 +5821,50 @@ element resin-data-directory {
 <javadoc class="com.caucho.security.AdminAuthenticator"/>
 
 <description>
-<p>Resin administration authentication (same syntax as XmlAuthenticator).</p>
+  <p>
+    Authenticator used by Resin for administration purposes such as
+    the /resin-admin application.  Also used by the watchdog and clustering
+    code to authenticate servers, so changing principals or passwords 
+    in this authenticator requires a shutdown and restart of the watchdog
+    and Resin instances.
+  </p>
+
+  <p>
+    Uses the same syntax as XmlAuthenticator.
+  </p>
 </description>
+
+<deftable>
+<tr>
+  <th>Attribute</th>
+  <th>Meaning</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>user</td>
+  <td>Specifies a user authentication record. There maybe zero, one or more records.</td>
+  <td>None</td>
+</tr>
+<tr>
+  <td>password-digest</td>
+  <td>
+    Specifies the digest algorithm and format used to secure the password (see following 
+    section in this document for details).
+  </td>
+  <td>md5-base64</td>
+</tr>
+<tr>
+  <td>path</td>
+  <td>Specifies the path to an XML file containing users and passwords.</td>
+  <td>None</td>
+</tr>
+<tr>
+  <td>logout-on-session-timeout</td>
+  <td>If true, the user will be logged out when the session times out.</td>
+  <td>true</td>
+</tr>
+</deftable>
+
 </defun>
 
 <defun title="&lt;resin:Allow>" name="resin:Allow">

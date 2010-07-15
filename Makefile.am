@@ -43,7 +43,7 @@ install	:
 	fi; \
 	(cd modules/c/src; $(MAKE) install)
 	if test -r $(resin_pro)/modules/c/src/Makefile; then \
-	  pushd $(resin_pro)/modules/c/src; $(MAKE) install; popd; \
+		_pwd=`pwd`; cd $(resin_pro)/modules/c/src; $(MAKE) install; cd $(_pwd); \
 	fi; \
 	if test -n "${resin_init_d}"; then \
 		cd $(abs_builddir); \

@@ -46,7 +46,7 @@ import javax.servlet.http.HttpServletRequest;
  * <pre>
  * &lt;resin:Allow url-pattern="/admin/*"&gt;
  *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
- *   &lt;resin:IfMBean name="admin"/>
+ *   &lt;resin:IfMBeanEnabled name="admin"/>
  * &lt;/resin:Allow>
  * </pre>
  *

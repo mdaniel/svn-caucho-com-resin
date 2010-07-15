@@ -75,12 +75,11 @@ A login configuration file has been written under the name
 resin.xml file. Simply rename this file to <code>admin-users.xml</code>
 to install your login.
 </li>
+<li>Or cut and paste the following into the <code>admin-users.xml</code>
 <?php } else {
 ?>
-<li>Unable to create file `<?php echo($password_file)?>`, please correct permissions and repeat the steps</li>
+<li>Cut and paste the following into the <code>admin-users.xml</code>
 <?php}?>
-
-<li>Or cut and paste the following into the <code>admin-users.xml</code>
 
 <pre>
   &lt;resin:AdminAuthenticator xmlns="http://caucho.com/ns/resin"
