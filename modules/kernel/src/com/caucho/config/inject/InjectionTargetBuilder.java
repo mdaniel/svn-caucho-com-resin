@@ -34,7 +34,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +45,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.decorator.Decorator;
 import javax.decorator.Delegate;
 import javax.ejb.Stateful;
 import javax.enterprise.context.spi.CreationalContext;
@@ -100,7 +98,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   
   private Bean<X> _bean;
 
-  private AnnotatedType<X> _annotatedType;
+  private final AnnotatedType<X> _annotatedType;
 
   private AnnotatedConstructor<X> _beanCtor;
   
@@ -170,20 +168,6 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   {
     _isGenerateInterception = isEnable;
   }
-
-  private static boolean isAnnotationPresent(Annotation []annotations, Class<?> type)
-  {
-    for (Annotation ann : annotations) {
-      if (ann.annotationType().equals(type))
-        return true;
-    }
-
-    return false;
-  }
-  
-  //
-  // Producer/InjectionTarget methods
-  //
 
   @Override
   public X produce(CreationalContext<X> env)
@@ -256,11 +240,11 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
       introspect();
       
-      Class<?> cl = (Class<?>) _annotatedType.getBaseType();
+      Class<X> cl = (Class<X>) _annotatedType.getBaseType();
 
       if (_beanCtor == null) {
         // XXX:
-        AnnotatedType beanType = _annotatedType;
+        AnnotatedType<X> beanType = _annotatedType;
           
         if (beanType == null)
           beanType = ReflectionAnnotatedFactory.introspectType(cl);

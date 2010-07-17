@@ -46,6 +46,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
@@ -373,9 +374,8 @@ public class EjbSessionBean<X> extends EjbBean<X> {
                                                 EjbLazyGenerator<X> lazyGenerator)
       throws ClassNotFoundException, ConfigException
   {
-
     AbstractSessionManager<X> manager;
-
+    
     if (Stateless.class.equals(getSessionType())) {
       manager = new StatelessManager<X>(ejbContainer, 
                                         getModuleName(),
@@ -405,59 +405,6 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     manager.setId(getEJBModuleName() + "#" + getEJBName());
     manager.setContainerTransaction(_isContainerTransaction);
 
-    /*
-    ArrayList<AnnotatedType<? super X>> remoteList = _sessionBean.getRemoteApi();
-    if (remoteList.size() > 0) {
-      ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
-      for (AnnotatedType<?> apiClass : remoteList) {
-        classList.add(loadClass(apiClass.getJavaClass().getName()));
-      }
-
-      manager.setRemoteApiList(classList);
-    }
-    */
-
-    /*
-     * if (getRemote21() != null)
-     * server.setRemote21(loadClass(getRemote21().getName()));
-     */
-    
-    // manager.setIsNoInterfaceView(_sessionBean.hasNoInterfaceView());
-
-    /*
-    ArrayList<AnnotatedType<? super X>> localList = _sessionBean.getLocalApi();
-    if (localList.size() > 0) {
-      ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
-      for (AnnotatedType<?> apiClass : localList) {
-        classList.add(loadClass(apiClass.getJavaClass().getName()));
-      }
-
-      manager.setLocalApiList(classList);
-    }
-    
-    if (_sessionBean.hasNoInterfaceView())
-      manager.setLocalBean(getEJBClass());
-      */
-
-    /*
-     * if (getLocal21() != null)
-     * server.setLocal21(loadClass(getLocal21().getName()));
-     */
-
-    // Class<?> contextImplClass = javaGen.loadClassParentLoader(getSkeletonName());
-
-    /*
-    Class<?>[] classes = contextImplClass.getDeclaredClasses();
-
-    for (Class<?> aClass : classes) {
-      if (getEJBClass().isAssignableFrom(aClass)) {
-        manager.setBeanImplClass((Class<X>) aClass);
-
-        break;
-      }
-    }
-    */
-
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -482,23 +429,6 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
 
     return manager;
-  }
-
-  private Class<?> generateProxyClass(JavaClassGenerator javaGen)
-    throws ClassNotFoundException
-  {
-    Class<?> proxyImplClass;
-  
-    if (Modifier.isPublic(getEJBClass().getModifiers())) {
-      proxyImplClass = javaGen.loadClass(getSkeletonName());
-    }
-    else {
-      // ejb/1103
-      proxyImplClass = javaGen.loadClassParentLoader(getSkeletonName(), getEJBClass());
-    }
-    // contextImplClass.getDeclaredConstructors();
-    
-    return proxyImplClass;
   }
 
   /**

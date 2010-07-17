@@ -29,12 +29,10 @@
 
 package com.caucho.server.cluster;
 
+import java.util.ArrayList;
+
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.logging.Logger;
 
 /**
  * The ClusterPod is a reliable triplicate for clustered data.
@@ -45,9 +43,6 @@ import java.util.logging.Logger;
 public class SingleClusterPod extends ClusterPod
 {
   private static final L10N L = new L10N(SingleClusterPod.class);
-  private static final Logger log
-    = Logger.getLogger(SingleClusterPod.class.getName());
-
   private ClusterServer _serverA;
 
   private ArrayList<ClusterServer> _staticServerList
@@ -134,7 +129,7 @@ public class SingleClusterPod extends ClusterPod
     if (_serverA != null)
       throw new ConfigException(L.l("Multiple servers requires Resin Professional"));
     
-    _serverA = new ClusterServer(this, 0);
+    _serverA = null;//new ClusterServer(this, 0);
     _serverList = new ClusterServer[] { _serverA };
 
     getCluster().configureServerDefault(_serverA);

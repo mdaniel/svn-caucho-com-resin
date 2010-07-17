@@ -29,13 +29,17 @@
 
 package com.caucho.cloud.topology;
 
-import com.caucho.network.server.NetworkService;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.util.L10N;
 
 /**
  * Interface for a service registered with the Resin Server.
  */
-public class TopologyService implements NetworkService
+public class TopologyService extends AbstractResinService
 {
+  private static final L10N L = new L10N(TopologyService.class);
+  
   public static final int START_PRIORITY_CLASSLOADER = 999;
   public static final int START_PRIORITY_DEFAULT = 1000;
   
@@ -49,38 +53,39 @@ public class TopologyService implements NetworkService
     _system = new CloudSystem(systemId);
   }
   
+  public static TopologyService getCurrent()
+  {
+    return ResinSystem.getCurrentService(TopologyService.class);
+  }
+  
+  public static CloudCluster findCluster(String id)
+  {
+    TopologyService topology = getCurrent();
+    
+    if (topology == null)
+      throw new IllegalStateException(L.l("TopologyService must be active in the ResinSystem"));
+    
+    return topology.getSystem().findCluster(id);
+  }
+  
+  /**
+   * Returns the server with the given id in the active cloud system.
+   * 
+   * @param id the server id within the system.
+   */
+  public static CloudServer findServer(String id)
+  {
+    TopologyService topology = getCurrent();
+    
+    if (topology == null)
+      throw new IllegalStateException(L.l("TopologyService must be active in the ResinSystem"));
+    
+    return topology.getSystem().findServer(id);
+  }
+
   public CloudSystem getSystem()
   {
     return _system;
-  }
-
-  @Override
-  public int getStartPriority()
-  {
-    return START_PRIORITY_DEFAULT;
-  }
-
-  @Override
-  public void start()
-    throws Exception
-  {
-  }
-
-  @Override
-  public int getStopPriority()
-  {
-    return STOP_PRIORITY_DEFAULT;
-  }
-
-  @Override
-  public void stop() 
-    throws Exception
-  {
-  }
-
-  @Override
-  public void destroy()
-  {
   }
   
   @Override

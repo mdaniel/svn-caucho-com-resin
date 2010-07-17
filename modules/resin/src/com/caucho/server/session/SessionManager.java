@@ -29,6 +29,7 @@
 
 package com.caucho.server.session;
 
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ByteStreamCache;
@@ -1186,30 +1187,32 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     // the most random bit is the high bit
     int index = _selfIndex;
 
-    ClusterServer server = _selfServer;
+    CloudServer server = _selfServer.getCloudServer();
 
     if (owner == null) {
     }
     else if (owner instanceof Number) {
       index = ((Number) owner).intValue();
 
-      int podIndex = _selfServer.getClusterPod().getIndex();
+      int podIndex = _selfServer.getCloudPod().getIndex();
 
       server = _selfServer.getCluster().findServer(podIndex, index);
 
       if (server == null)
-        server = _selfServer;
+        server = _selfServer.getCloudServer();
     }
     else if (owner instanceof String) {
       server = _selfServer.getCluster().findServer((String) owner);
 
       if (server == null)
-        server = _selfServer;
+        server = _selfServer.getCloudServer();
     }
 
     index = server.getIndex();
+    
+    ClusterServer clusterServer = server.getData(ClusterServer.class);
 
-    server.generateIdPrefix(sb);
+    clusterServer.generateIdPrefix(sb);
     // XXX: _cluster.generateBackup(sb, index);
 
     int length = _cookieLength;

@@ -29,18 +29,17 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.distcache.CacheSerializer;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterPod;
-import com.caucho.server.cluster.Server;
-import com.caucho.util.HashKey;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
-import javax.cache.CacheLoader;
+
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudPod;
+import com.caucho.distcache.CacheSerializer;
+import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.server.cluster.Server;
+import com.caucho.util.HashKey;
 
 /**
  * Manages the distributed cache
@@ -65,7 +64,7 @@ abstract public class DistributedCacheManager
   /**
    * Returns the owning cluster.
    */
-  protected Cluster getCluster()
+  protected CloudCluster getCluster()
   {
     return _server.getCluster();
   }
@@ -73,7 +72,7 @@ abstract public class DistributedCacheManager
   /**
    * Returns the owning pod.
    */
-  protected ClusterPod getPod()
+  protected CloudPod getPod()
   {
     return _server.getPod();
   }

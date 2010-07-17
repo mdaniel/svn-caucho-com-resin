@@ -29,23 +29,14 @@
 
 package com.caucho.server.cache;
 
+import java.util.logging.Logger;
+
 import com.caucho.config.ConfigException;
 import com.caucho.db.Database;
 import com.caucho.db.block.BlockStore;
-import com.caucho.db.xa.RawTransaction;
-import com.caucho.db.xa.StoreTransaction;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
-import com.caucho.vfs.OutputStreamWithBuffer;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.TempCharBuffer;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents an inode to a temporary file.

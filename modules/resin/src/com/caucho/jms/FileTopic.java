@@ -32,7 +32,6 @@ package com.caucho.jms;
 import com.caucho.config.Configurable;
 import com.caucho.config.Service;
 import com.caucho.jms.file.FileTopicImpl;
-import com.caucho.vfs.Path;
 
 /**
  * A JMS topic backed by a file-based database.
@@ -54,7 +53,8 @@ import com.caucho.vfs.Path;
 
 @Service
 @Configurable  
-public class FileTopic extends FileTopicImpl
+@SuppressWarnings("serial")
+public class FileTopic<E> extends FileTopicImpl<E>
 {
   public FileTopic()
   {

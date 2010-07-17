@@ -29,7 +29,9 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.env.sample.Probe;
+import java.util.Collection;
+import java.util.Date;
+
 import com.caucho.env.sample.ProbeManager;
 import com.caucho.env.sample.TotalProbe;
 import com.caucho.management.server.AbstractEmitterObject;
@@ -44,9 +46,6 @@ import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
-
-import java.util.Collection;
-import java.util.Date;
 
 public class ServerAdmin extends AbstractEmitterObject
   implements ServerMXBean
@@ -111,7 +110,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public ClusterMXBean getCluster()
   {
-    return _server.getCluster().getAdmin();
+    return _server.getCluster().getData(ClusterMXBean.class);
   }
 
   public EnvironmentMXBean getEnvironment()
@@ -142,7 +141,7 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public ThreadPoolMXBean getThreadPool()
   {
-    return _server.getCluster().getResin().getThreadPoolAdmin();
+    return _server.getResin().getThreadPoolAdmin();
   }
 
   /**

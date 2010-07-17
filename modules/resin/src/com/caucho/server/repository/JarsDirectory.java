@@ -29,32 +29,17 @@
 
 package com.caucho.server.repository;
 
-import com.caucho.config.ConfigException;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.repository.ModuleRepository;
-import com.caucho.server.resin.Resin;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The directory holding jars
  */
 public class JarsDirectory
 {
-  private ModuleRepositoryImpl _repository;
-  
   private Path _path;
 
   JarsDirectory(ModuleRepositoryImpl repository)
   {
-    _repository = repository;
   }
 
   public void setPath(Path path)

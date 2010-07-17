@@ -33,12 +33,14 @@ package com.caucho.server.cluster;
 /**
  * Dynamic clustered representation of a server
  */
+@SuppressWarnings("serial")
 public class DynamicServerResult implements java.io.Serializable {
   private String _id;
   private String _address;
   private int _port;
   private int _index;
 
+  @SuppressWarnings("unused")
   private DynamicServerResult()
   {
   }

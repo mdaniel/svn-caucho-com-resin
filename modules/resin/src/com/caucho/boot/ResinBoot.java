@@ -37,8 +37,8 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.Environment;
-import com.caucho.network.server.NetworkServer;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -111,8 +111,8 @@ public class ResinBoot {
                                       _args.getResinConf().getNativePath()));
     }
     
-    NetworkServer networkServer
-      = new NetworkServer("watchdog", _args.getRootDirectory());
+    ResinSystem networkServer
+      = new ResinSystem("watchdog", _args.getRootDirectory());
     
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(networkServer.getClassLoader());

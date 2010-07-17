@@ -28,18 +28,13 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.env.thread.ThreadPool;
-import com.caucho.util.L10N;
-
 import javax.annotation.PostConstruct;
 
+import com.caucho.env.thread.ThreadPool;
+
 public class ThreadPoolConfig {
-  private static final L10N L = new L10N(ThreadPoolConfig.class);
-
-  private static final int THREAD_GAP = 5;
-
-  private int _threadMax = 256;
-  private int _threadSpareMin = 5;
+  private int _threadMax = -1;
+  private int _threadSpareMin = -1;
 
   public void setThreadMax(int threadMax)
   {
@@ -58,9 +53,12 @@ public class ThreadPoolConfig {
   public void init()
   {
     ThreadPool threadPool = ThreadPool.getThreadPool();
-    
-    threadPool.setThreadMax(_threadMax);
+
+    if (_threadMax > 0)
+      threadPool.setThreadMax(_threadMax);
     // threadPool.setThreadIdleMax(_threadSpareMin + THREAD_GAP);
-    threadPool.setIdleMin(_threadSpareMin);
+    
+    if (_threadSpareMin > 0)
+      threadPool.setIdleMin(_threadSpareMin);
   }
 }

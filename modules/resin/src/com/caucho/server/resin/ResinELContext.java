@@ -29,17 +29,14 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.VersionFactory;
-import com.caucho.config.ConfigELContext;
-import com.caucho.config.ConfigException;
-import com.caucho.naming.Jndi;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.Alarm;
-import com.caucho.vfs.Path;
-
 import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.VersionFactory;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.vfs.Path;
 
 abstract public class ResinELContext
 {

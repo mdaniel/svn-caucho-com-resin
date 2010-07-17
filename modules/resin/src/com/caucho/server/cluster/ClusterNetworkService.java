@@ -32,12 +32,15 @@ package com.caucho.server.cluster;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
+import com.caucho.cloud.topology.TopologyService;
+import com.caucho.env.service.AbstractResinService;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.network.listen.SocketLinkListener;
-import com.caucho.network.server.AbstractNetworkService;
-import com.caucho.server.resin.Resin;
 
-public class ClusterNetworkService extends AbstractNetworkService
+public class ClusterNetworkService extends AbstractResinService
 {
   private static final Logger log
     = Logger.getLogger(ClusterNetworkService.class.getName());
@@ -73,16 +76,20 @@ public class ClusterNetworkService extends AbstractNetworkService
 
     startClusterPort();
 
-    Resin resin = Resin.getCurrent();
+    TopologyService topology = TopologyService.getCurrent();
     
-    if (resin != null) {
-      for (Cluster cluster : resin.getClusterList()) {
-        for (ClusterPod pod : cluster.getPodList()) {
-          for (ClusterServer server : pod.getStaticServerList()) {
-            ClientSocketFactory pool = server.getServerPool();
+    if (topology != null) {
+      for (CloudCluster cluster : topology.getSystem().getClusterList()) {
+        for (CloudPod pod : cluster.getPodList()) {
+          for (CloudServer cloudServer : pod.getServerList()) {
+            ClusterServer server = cloudServer.getData(ClusterServer.class);
+            
+            if (server != null) {
+              ClientSocketFactory pool = server.getServerPool();
 
-            if (pool != null)
-              pool.start();
+              if (pool != null)
+                pool.start();
+            }
           }
         }
       }

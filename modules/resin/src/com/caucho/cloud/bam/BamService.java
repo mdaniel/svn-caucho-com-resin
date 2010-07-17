@@ -30,18 +30,18 @@
 package com.caucho.cloud.bam;
 
 import com.caucho.bam.Broker;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.hemp.broker.DomainManager;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
-import com.caucho.network.server.AbstractNetworkService;
-import com.caucho.network.server.NetworkServer;
 import com.caucho.util.L10N;
 
 /**
  * The BAM service registered in the Resin network.
  */
-public class BamService extends AbstractNetworkService
+public class BamService extends AbstractResinService
 {
   private static final L10N L = new L10N(BamService.class);
   
@@ -73,7 +73,7 @@ public class BamService extends AbstractNetworkService
   
   public static BamService create(String jid)
   {
-    NetworkServer server = NetworkServer.getCurrent();
+    ResinSystem server = ResinSystem.getCurrent();
 
     if (server == null) {
       throw new IllegalStateException(L.l("NetworkServer is not active in {0}",
@@ -94,7 +94,7 @@ public class BamService extends AbstractNetworkService
   
   public static BamService getCurrent()
   {
-    NetworkServer server = NetworkServer.getCurrent();
+    ResinSystem server = ResinSystem.getCurrent();
 
     if (server != null)
       return server.getService(BamService.class);

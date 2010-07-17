@@ -29,15 +29,9 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.ConfigException;
-import com.caucho.network.server.NetworkServer;
-import com.caucho.server.resin.*;
-import com.caucho.util.Alarm;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
-
-import java.io.IOException;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * Defines a cluster with a single server
@@ -45,9 +39,6 @@ import java.util.logging.Level;
 public class SingleCluster extends Cluster
 {
   private static final L10N L = new L10N(SingleCluster.class);
-  private static final Logger log
-    = Logger.getLogger(SingleCluster.class.getName());
-
   private SingleClusterPod _pod;
   private ClusterPod [] _podList;
 
@@ -89,7 +80,7 @@ public class SingleCluster extends Cluster
   }
 
   @Override
-  protected Server createResinServer(NetworkServer networkServer,
+  protected Server createResinServer(ResinSystem networkServer,
                                      ClusterServer clusterServer)
   {
     return new Server(networkServer, clusterServer);

@@ -29,23 +29,13 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.ConfigException;
 import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.util.L10N;
-
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The primary,secondary,tertiary for a ClusterTriad.Owner
  */
 public final class OwnerServerTriad
 {
-  private static final L10N L = new L10N(OwnerServerTriad.class);
-  private static final Logger log
-    = Logger.getLogger(OwnerServerTriad.class.getName());
-
   private final ClusterServer _primary;
   private final ClusterServer _secondary;
   private final ClusterServer _tertiary;

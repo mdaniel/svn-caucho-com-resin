@@ -29,6 +29,7 @@
 
 package com.caucho.cloud.topology;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,6 +53,9 @@ public class CloudCluster
   
   private final CopyOnWriteArrayList<CloudPodListener> _listeners
     = new CopyOnWriteArrayList<CloudPodListener>();
+  
+  private final ConcurrentHashMap<Class<?>,Object> _dataMap
+    = new ConcurrentHashMap<Class<?>,Object>();
 
   CloudCluster(CloudSystem domain, String id)
   {
@@ -70,7 +74,7 @@ public class CloudCluster
   /**
    * Returns the owning domain.
    */
-  public CloudSystem getDomain()
+  public CloudSystem getSystem()
   {
     return _domain;
   }
@@ -90,6 +94,21 @@ public class CloudCluster
   {
     for (CloudPod pod : _podList) {
       CloudServer server = pod.findServer(id);
+
+      if (server != null)
+        return server;
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds the first server with the given server-id.
+   */
+  public CloudServer findServerByUniqueClusterId(String id)
+  {
+    for (CloudPod pod : _podList) {
+      CloudServer server = pod.findServerByUniqueClusterId(id);
 
       if (server != null)
         return server;
@@ -241,6 +260,27 @@ public class CloudCluster
     }
 
     return null;
+  }
+  
+  //
+  // data
+  //
+  
+  public void putData(Object value)
+  {
+    _dataMap.put(value.getClass(), value);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> T putDataIfAbsent(T value)
+  {
+    return (T) _dataMap.putIfAbsent(value.getClass(), value);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> T getData(Class<T> cl)
+  {
+    return (T) _dataMap.get(cl);
   }
 
   //

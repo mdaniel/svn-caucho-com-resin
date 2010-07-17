@@ -100,7 +100,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
       validateType((Class) beanType.getType());
     */
     
-    InjectionTargetBuilder target;
+    InjectionTargetBuilder<X> target;
     target = new InjectionTargetBuilder<X>(injectManager, beanType, this);
     
     if (isSessionBean)

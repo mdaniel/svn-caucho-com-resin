@@ -41,6 +41,9 @@ import java.util.logging.LogManager;
 
 import javax.enterprise.context.spi.CreationalContext;
 
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudServer;
+import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
@@ -92,7 +95,7 @@ public class ResinEmbed
   private Resin _resin = Resin.create();
   private String _configFile = EMBED_CONF;
 
-  private Cluster _cluster;
+  private CloudCluster _cluster;
   private ClusterServer _clusterServer;
   private String _serverId;
 
@@ -440,7 +443,7 @@ public class ResinEmbed
 
     String clusterId = _resin.getClusters()[0].getName();
 
-    _cluster = _resin.findCluster(clusterId);
+    _cluster = TopologyService.findCluster(clusterId);
 
     if (_cluster.getPodList().length == 0)
       throw new ConfigException(L.l("Resin needs at least one defined <server> or <cluster-pod>"));
@@ -448,7 +451,9 @@ public class ResinEmbed
     if (_cluster.getPodList()[0].getServerList().length == 0)
       throw new ConfigException(L.l("Resin needs at least one defined <server>"));
 
-    _clusterServer = _cluster.getPodList()[0].getServerList()[0];
+    CloudServer cloudServer = _cluster.getPodList()[0].getServerList()[0]; 
+    _clusterServer = cloudServer.getData(ClusterServer.class);
+    
     _resin.setServerId(_clusterServer.getId());
   }
 

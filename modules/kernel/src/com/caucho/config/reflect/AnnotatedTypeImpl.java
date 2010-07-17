@@ -95,7 +95,8 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     
     for (AnnotatedMethod<? super X> annMethod : annType.getMethods()) {
       if (annMethod.getDeclaringType() == annType)
-        _methodSet.add(new AnnotatedMethodImpl(this, annMethod, annMethod.getJavaMember()));
+        _methodSet.add(new AnnotatedMethodImpl(this, annMethod, 
+                                               annMethod.getJavaMember()));
       else
         _methodSet.add(annMethod);
     }

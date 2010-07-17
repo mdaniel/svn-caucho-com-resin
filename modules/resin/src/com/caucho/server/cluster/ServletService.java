@@ -29,45 +29,27 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.network.server.AbstractNetworkService;
-import com.caucho.network.server.NetworkServer;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.util.L10N;
 
 /**
  * The main servlet service in a Resin server. 
  */
-public class ServletService extends AbstractNetworkService
+public class ServletService extends AbstractResinService
 {
   private static final L10N L = new L10N(ServletService.class);
   
   private Server _server;
   
-  private ServletService(Server server)
+  public ServletService(Server server)
   {
     _server = server;
   }
   
-  public static ServletService create(Server servletServer)
+  public static ServletService getCurrent()
   {
-    NetworkServer server = NetworkServer.getCurrent();
-
-    if (server == null) {
-      throw new IllegalStateException(L.l("NetworkServer is not active in {0}",
-                                          Thread.currentThread().getContextClassLoader()));
-    }
-    
-    synchronized (server) {
-      ServletService service = server.getService(ServletService.class);
-      
-      if (service != null)
-        throw new IllegalStateException(L.l("Server is already active in {0}",
-                                            Thread.currentThread().getContextClassLoader()));
-        
-      service = new ServletService(servletServer);
-      server.addService(service);
-      
-      return service;
-    }
+    return ResinSystem.getCurrentService(ServletService.class);
   }
   
   public Server getServer()

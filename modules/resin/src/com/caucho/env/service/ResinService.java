@@ -27,51 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.network.server;
+package com.caucho.env.service;
 
 /**
  * Interface for a service registered with the Resin Server.
  */
-public class AbstractNetworkService implements NetworkService
+public interface ResinService
 {
   public static final int START_PRIORITY_CLASSLOADER = 999;
   public static final int START_PRIORITY_DEFAULT = 1000;
   
+
   public static final int STOP_PRIORITY_DEFAULT = 1000;
   public static final int STOP_PRIORITY_CLASSLOADER = 1001;
 
-  @Override
-  public int getStartPriority()
-  {
-    return START_PRIORITY_DEFAULT;
-  }
-
-  @Override
-  public void start()
-    throws Exception
-  {
-  }
-
-  @Override
-  public int getStopPriority()
-  {
-    return STOP_PRIORITY_DEFAULT;
-  }
-
-  @Override
-  public void stop() 
-    throws Exception
-  {
-  }
-
-  @Override
-  public void destroy()
-  {
-  }
+  /**
+   * Returns the start priority of the service, used to determine which
+   * services to start first.
+   */
+  public int getStartPriority();
   
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
-  }
+  /**
+   * Starts the service.
+   * @throws Exception 
+   */
+  public void start()
+    throws Exception;
+  
+  /**
+   * Returns the stop priority of the service, used to determine which
+   * services to stop first.
+   */
+  public int getStopPriority();
+
+  /**
+   * Stops the service.
+   * @throws Exception 
+   */
+  public void stop() throws Exception;
+  
+  /**
+   * Destroys the service.
+   */
+  public void destroy();
 }

@@ -513,7 +513,13 @@ public class BeanConfig {
       builder.name(getCdiNamed());
     }
 
-
+    if (_annotatedType.isAnnotationPresent(javax.ejb.Singleton.class)
+        || _annotatedType.isAnnotationPresent(Stateful.class) 
+        || _annotatedType.isAnnotationPresent(Stateless.class) 
+        || _annotatedType.isAnnotationPresent(MessageDriven.class)) {
+      throw new ConfigException(L.l("{0} cannot be configured by <bean> because it has an EJB annotation.  Use CDI syntax instead.",
+                                    _annotatedType));
+    }
     /*
     if (getMBeanName() != null)
       comp.setMBeanName(getMBeanName());

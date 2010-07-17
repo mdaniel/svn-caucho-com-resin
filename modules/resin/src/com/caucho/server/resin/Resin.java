@@ -41,9 +41,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.security.Provider;
-import java.security.Security;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.locks.LockSupport;
@@ -55,51 +52,41 @@ import javax.management.ObjectName;
 
 import com.caucho.VersionFactory;
 import com.caucho.bam.Broker;
-import com.caucho.cloud.security.SecurityService;
+import com.caucho.cloud.topology.CloudSystem;
+import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.SchemaBean;
 import com.caucho.config.functions.FmtFunctions;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.WebBeansAddLoaderListener;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.Bytes;
-import com.caucho.config.types.Period;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.RootDirectoryService;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.java.WorkDir;
-import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentProperties;
 import com.caucho.log.EnvironmentStream;
-import com.caucho.log.RotateStream;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.naming.Jndi;
-import com.caucho.network.server.NetworkServer;
-import com.caucho.repository.ModuleRepository;
 import com.caucho.server.admin.Management;
-import com.caucho.server.admin.TransactionManager;
-import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.cluster.SingleCluster;
-import com.caucho.server.repository.ModuleRepositoryImpl;
-import com.caucho.server.util.JniCauchoSystem;
+import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
@@ -108,17 +95,14 @@ import com.caucho.util.QDate;
 import com.caucho.util.Shutdown;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.QJniServerSocket;
-import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
 /**
  * The Resin class represents the top-level container for Resin.
  * It exactly matches the &lt;resin> tag in the resin.xml
  */
-public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
+public class Resin extends Shutdown
 {
   private static Logger _log;
   private static L10N _L;
@@ -137,33 +121,22 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
   private String _serverId = "";
   private final boolean _isWatchdog;
-  private DynamicServer _dynamicServer;
-
-  private ClusterPod _dynPod;
-  private String _dynCluster;
-  private String _dynAddress;
-  private int _dynPort;
+  
+  private ResinArgs _args;
 
   private Path _resinHome;
   private Path _rootDirectory;
 
   private Path _resinDataDirectory;
   
-  private NetworkServer _networkServer;
+  private ResinSystem _resinSystem;
+  private CloudSystem _cloudSystem;
 
-  private long _minFreeMemory = 2 * 1024L * 1024L;
   private long _shutdownWaitMax = 60000L;
-
-  private SecurityManager _securityManager;
-
-  private ArrayList<ConfigProgram> _clusterDefaults
-    = new ArrayList<ConfigProgram>();
-
-  private ArrayList<Cluster> _clusters
-    = new ArrayList<Cluster>();
 
   private Lifecycle _lifecycle;
 
+  private BootResinConfig _bootResinConfig;
   private Server _server;
 
   private long _initialStartTime;
@@ -171,7 +144,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
   private String _licenseErrorMessage;
 
-  private String _configFile;
   private Path _resinConf;
 
   private ClassLoader _systemClassLoader;
@@ -180,14 +152,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   private FailSafeHaltThread _failSafeHaltThread;
   private ShutdownThread _shutdownThread;
 
-  private ArrayList<BoundPort> _boundPortList
-    = new ArrayList<BoundPort>();
-
   protected Management _management;
-  private String _systemKey;
-
-  private ModuleRepositoryImpl _repository = new ModuleRepositoryImpl();
-  private TempFileManager _tempFileManager;
 
   private ThreadPoolAdmin _threadPoolAdmin;
   private ObjectName _objectName;
@@ -233,6 +198,8 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       _classLoader = (EnvironmentClassLoader) loader;
     else
       _classLoader = EnvironmentClassLoader.create("Resin");
+    
+    initEnvironment();
   }
 
   /**
@@ -282,11 +249,11 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
         licenseErrorMessage = cause.getMessage();
       }
       else {
-        String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n"
-                           + "\n"
-                           + "  See http://www.caucho.com for information on Resin Professional,\n"
-                           + "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n"
-                           + "\n  Exception=" + cause + "\n");
+        licenseErrorMessage= L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n"
+                                   + "\n"
+                                   + "  See http://www.caucho.com for information on Resin Professional,\n"
+                                   + "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n"
+                                   + "\n  Exception=" + cause + "\n");
       }
     } catch (Throwable e) {
       log().log(Level.FINER, e.toString(), e);
@@ -362,6 +329,50 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     return getLocal();
   }
 
+  public ResinSystem getResinSystem()
+  {
+    return _resinSystem;
+  }
+  
+  public CloudSystem getCloudSystem()
+  {
+    return _resinSystem.getService(TopologyService.class).getSystem();
+  }
+  
+  public void setRootDirectory(Path path)
+  {
+    _rootDirectory = path;
+  }
+  
+  public void setPingSocket(Socket socket)
+  {
+    _pingSocket = socket;
+  }
+  
+  private void initEnvironment()
+  {
+    String resinHome = System.getProperty("resin.home");
+
+    if (resinHome != null)
+      _resinHome = Vfs.lookup(resinHome);
+    else
+      _resinHome = Vfs.getPwd();
+
+    _rootDirectory = _resinHome;
+
+    // server.root backwards compat
+    String resinRoot = System.getProperty("server.root");
+
+    if (resinRoot != null)
+      _rootDirectory = Vfs.lookup(resinRoot);
+
+    // resin.root backwards compat
+    resinRoot = System.getProperty("resin.root");
+
+    if (resinRoot != null)
+      _rootDirectory = Vfs.lookup(resinRoot);
+  }
+  
   /**
    * Must be called after the Resin.create()
    */
@@ -380,50 +391,28 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       _lifecycle = new Lifecycle(log(), "Resin[]");
 
-      String resinHome = System.getProperty("resin.home");
+      // default server id
+      if (_args != null) {
+        setServerId(_args.getServerId());
 
-      if (resinHome != null)
-        setResinHome(Vfs.lookup(resinHome));
-      else
-        setResinHome(Vfs.getPwd());
-
-      if (getRootDirectory() == null) {
-        setRootDirectory(getResinHome());
-
-        // server.root backwards compat
-        String serverRoot = System.getProperty("server.root");
-
-        if (serverRoot != null)
-          setRootDirectory(Vfs.lookup(serverRoot));
-
-        // resin.root backwards compat
-        serverRoot = System.getProperty("resin.root");
-
-        if (serverRoot != null)
-          setRootDirectory(Vfs.lookup(serverRoot));
+        if (_rootDirectory == null)
+          setRootDirectory(_args.getRootDirectory());
       }
-
+      
       if (getRootDirectory() == null)
         throw new NullPointerException();
-
-      // default server id
-      if (getServerId() == null)
-        setServerId("");
       
       String serverName = getServerId();
       if (serverName == null || "".equals(serverName))
         serverName = "default";
       
-      Path resinData;
+      _resinSystem = new ResinSystem(serverName);
       
-      if (isWatchdog())
-        resinData = getRootDirectory().lookup("watchdog-data");
-      else
-        resinData = getRootDirectory().lookup("resin-data");
+      TopologyService topology = new TopologyService(serverName);
+      _resinSystem.addService(topology);
+      _cloudSystem = topology.getSystem();
       
-      _networkServer = new NetworkServer(serverName,
-                                         getRootDirectory(),
-                                         resinData.lookup(serverName));
+      _bootResinConfig = new BootResinConfig(this);
 
       // watchdog/0212
       // else
@@ -443,7 +432,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       new HempBrokerManager();
 
-      _management = createResinManagement();
+      // _management = createResinManagement();
 
       if (cdiManager.getBeans(ResinCdiProducer.class).size() == 0) {
         Config.setProperty("fmt", new FmtFunctions());
@@ -481,14 +470,18 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       thread.setContextClassLoader(oldLoader);
     }
   }
+  
+  private void setArgs(ResinArgs args)
+  {
+    _args = args;
+  }
 
   /**
    * Returns the classLoader
    */
-  @Override
   public ClassLoader getClassLoader()
   {
-    return _classLoader;
+    return _resinSystem.getClassLoader();
   }
 
   public ObjectName getObjectName()
@@ -530,15 +523,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   public void setEnvironmentClassLoader(EnvironmentClassLoader loader)
   {
     _classLoader = loader;
-  }
-
-  /**
-   * Returns the relax schema.
-   */
-  @Override
-  public String getSchema()
-  {
-    return "com/caucho/server/resin/resin.rnc";
   }
 
   /**
@@ -597,9 +581,9 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       return "";
   }
   
-  protected NetworkServer getNetworkServer()
+  protected ResinSystem getNetworkServer()
   {
-    return _networkServer;
+    return _resinSystem;
   }
 
   /**
@@ -609,10 +593,11 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   {
     String id = address + ":" + port;
 
+    /*
     _dynCluster = clusterId;
     _dynAddress = address;
     _dynPort = port;
-
+*/
     if (_serverId == null)
       setServerId(id);
   }
@@ -633,7 +618,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
    */
   public void setConfigFile(String configFile)
   {
-    _configFile = configFile;
   }
 
   /**
@@ -650,17 +634,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   public Path getResinHome()
   {
     return _resinHome;
-  }
-
-  /**
-   * Sets the root directory.
-   */
-  public void setRootDirectory(Path root)
-  {
-    _rootDirectory = root;
-
-    if (root == null)
-      throw new NullPointerException();
   }
 
   /**
@@ -693,37 +666,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   }
 
   /**
-   * Sets the resin-data directory
-   */
-  public void setResinDataDirectory(Path path)
-  {
-    if (path.isFile()) {
-      throw new ConfigException(L().l("resin-data-directory '{0}' must not be a file",
-                                    path));
-    }
-
-    _resinDataDirectory = path;
-  }
-  
-  /**
-   * Sets the resin system key
-   */
-  public void setResinSystemAuthKey(String key)
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-    
-    try {
-      thread.setContextClassLoader(_networkServer.getClassLoader());
-      
-      SecurityService security = SecurityService.create();
-      security.setSignatureSecret(key);
-    } finally {
-      thread.setContextClassLoader(loader);
-    }
-  }
-
-  /**
    * Sets the admin directory
    */
   public void setAdminPath(Path path)
@@ -751,206 +693,36 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   {
     return false;
   }
-
+  
+  public long getShutdownWaitMax()
+  {
+    return _shutdownWaitMax;
+  }
+  
+  public void setShutdownWaitTime(long shutdownTime)
+  {
+    _shutdownWaitMax = shutdownTime;
+  }
+  
   /**
    * Returns the cluster names.
    */
   public ClusterMXBean []getClusters()
   {
+    /*
     ClusterMXBean []clusters = new ClusterMXBean[_clusters.size()];
 
     for (int i = 0; i < _clusters.size(); i++)
       clusters[i] = _clusters.get(i).getAdmin();
 
     return clusters;
-  }
-
-  public void addClusterDefault(ContainerProgram program)
-  {
-    _clusterDefaults.add(program);
-  }
-
-  @Configurable
-  public Cluster createCluster()
-    throws ConfigException
-  {
-    Cluster cluster = instantiateCluster();
-
-    for (int i = 0; i < _clusterDefaults.size(); i++)
-      _clusterDefaults.get(i).configure(cluster);
-
-    return cluster;
+    */
+    throw new UnsupportedOperationException();
   }
 
   protected Cluster instantiateCluster()
   {
     return new SingleCluster(this);
-  }
-
-  @Configurable
-  public void addCluster(Cluster cluster)
-  {
-    _clusters.add(cluster);
-  }
-
-  public ArrayList<Cluster> getClusterList()
-  {
-    return _clusters;
-  }
-
-  /**
-   * Set true if the server should enable environment-based
-   * system properties.
-   */
-  public void setEnvironmentSystemProperties(boolean isEnable)
-  {
-    EnvironmentProperties.enableEnvironmentSystemProperties(isEnable);
-  }
-
-  /**
-   * Configures the thread pool
-   */
-  public ThreadPoolConfig createThreadPool()
-    throws Exception
-  {
-    return new ThreadPoolConfig();
-  }
-
-  /**
-   * Sets the user name for setuid.
-   */
-  public void setUserName(String userName)
-  {
-  }
-
-  /**
-   * Sets the group name for setuid.
-   */
-  public void setGroupName(String groupName)
-  {
-  }
-
-  /**
-   * Sets the minimum free memory allowed.
-   */
-  public void setMinFreeMemory(Bytes minFreeMemory)
-  {
-    _minFreeMemory = minFreeMemory.getBytes();
-  }
-
-  /**
-   * Gets the minimum free memory allowed.
-   */
-  public long getMinFreeMemory()
-  {
-    return _minFreeMemory;
-  }
-
-  /**
-   * Sets the shutdown time
-   */
-  public void setShutdownWaitMax(Period shutdownWaitMax)
-  {
-    _shutdownWaitMax = shutdownWaitMax.getPeriod();
-  }
-
-  /**
-   * Gets the minimum free memory allowed.
-   */
-  public long getShutdownWaitMax()
-  {
-    return _shutdownWaitMax;
-  }
-
-  /**
-   * Set true if system properties are global.
-   */
-  public void setGlobalSystemProperties(boolean isGlobal)
-  {
-  }
-
-  public SecurityManagerConfig createSecurityManager()
-  {
-    return new SecurityManagerConfig();
-  }
-
-  public void setWatchdogManager(ConfigProgram program)
-  {
-  }
-
-  /**
-   * Configures the TM.
-   */
-  @Deprecated
-  public TransactionManager createTransactionManager()
-    throws ConfigException
-  {
-    log().warning(L().l("<transaction-manager> tag belongs in <management>"));
-
-    return new TransactionManager(this);
-  }
-
-  @Deprecated
-  public void addManagement(ConfigProgram program)
-  {
-    _clusterDefaults.add(program);
-  }
-
-  @Deprecated
-  public Management createResinManagement()
-  {
-    if (_management == null) {
-      _management = new Management();
-
-      _management.setResin(this);
-    }
-
-    return _management;
-  }
-
-  public ModuleRepository createModuleRepository()
-  {
-    return _repository;
-  }
-
-  public TempFileManager getTempFileManager()
-  {
-    if (_tempFileManager == null) {
-      Path path = getResinDataDirectory();
-
-      _tempFileManager = new TempFileManager(path);
-    }
-
-    return _tempFileManager;
-  }
-
-  /**
-   * Adds a new security provider
-   */
-  public void addSecurityProvider(Class<?> providerClass)
-    throws Exception
-  {
-    if (! Provider.class.isAssignableFrom(providerClass))
-      throw new ConfigException(L().l("security-provider {0} must implement java.security.Provider",
-                                    providerClass.getName()));
-
-    Security.addProvider((Provider) providerClass.newInstance());
-  }
-
-  /**
-   * Configures JSP (backwards compatibility).
-   */
-  public JspPropertyGroup createJsp()
-  {
-    return new JspPropertyGroup();
-  }
-
-  /**
-   * Ignore the boot configuration
-   */
-  public void addBoot(ContainerProgram program)
-    throws Exception
-  {
   }
 
   /**
@@ -1004,13 +776,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     return _server;
   }
 
-  public void setServer(Server server)
-  {
-    assert(_server == null);
-
-    _server = server;
-  }
-
   /**
    * Returns the management api.
    */
@@ -1022,27 +787,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   public Server createServer()
   {
     if (_server == null) {
-      ClusterServer clusterServer = null;
-
-      if (_dynCluster != null) {
-        clusterServer
-          = loadDynamicServer(_dynPod, _serverId, _dynAddress, _dynPort);
-      }
-
-      if (clusterServer == null)
-        clusterServer = findClusterServer(_serverId);
-
-      if (clusterServer == null)
-        throw new ConfigException(L().l("server-id '{0}' has no matching <server> definition.",
-                                        _serverId));
-
-
-      Server server = clusterServer.startServer(_networkServer);
-
-      assert(server == _server);
-
-      if (_stage != null)
-        _server.setStage(_stage);
+      configure();
 
       // _server.start();
     }
@@ -1073,60 +818,22 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_networkServer.getClassLoader());
+      thread.setContextClassLoader(_resinSystem.getClassLoader());
 
       // force a GC on start
       System.gc();
 
-      ClusterServer clusterServer = null;
-
-      if (_dynCluster != null) {
-        clusterServer = findClusterServer(_serverId);
-
-        if (clusterServer != null)
-          throw new ConfigException(L().l("dynamic-server '{0}' must not have a static configuration configured in the resin.xml.",
-                                          _serverId));
-
-        Cluster cluster = findCluster(_dynCluster);
-
-        if (cluster == null) {
-          throw new ConfigException(L().l("dynamic-server cluster '{0}' does not exist.  Dynamic servers must be added to an existing cluster.",
-                                          _dynamicServer.getCluster()));
-        }
-
-        if (! cluster.isDynamicServerEnable()) {
-          throw new ConfigException(L().l("cluster '{0}' does not allow dynamic servers.  Add a <dynamic-server-enable/> tag to the <cluster> to enable it.",
-                                          cluster.getId()));
-        }
-
-        _dynPod = cluster.getPodList()[0];
-
-        if (_dynPod == null)
-          throw new NullPointerException();
-      }
-
-      /*
-      // XXX: get the server
-      for (Cluster cluster : _clusters) {
-        cluster.start();
-      }
-      */
-
       _server = createServer();
 
-      for (int i = 0; i < _boundPortList.size(); i++) {
-        BoundPort port = _boundPortList.get(i);
-
-        _server.bind(port.getAddress(),
-                     port.getPort(),
-                     port.getServerSocket());
+      if (_args != null) {
+        for (BoundPort port : _args.getBoundPortList()) {
+          _server.bind(port.getAddress(),
+                       port.getPort(),
+                       port.getServerSocket());
+        }
       }
 
-//      Environment.start(getClassLoader());
-
-      // _server.start();
-      
-      _networkServer.start();
+      _resinSystem.start();
 
       /*
         if (! hasListeningPort()) {
@@ -1148,44 +855,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   {
     if (! _lifecycle.toStop())
       return;
-  }
-
-  public boolean isDynamicServer()
-  {
-    for (int i = 0; i < _clusters.size(); i++) {
-      Cluster cluster = _clusters.get(i);
-
-      if (cluster.isDynamicServerEnable())
-        return true;
-    }
-
-    return false;
-  }
-
-  public Cluster findCluster(String id)
-  {
-    for (int i = 0; i < _clusters.size(); i++) {
-      Cluster cluster = _clusters.get(i);
-
-      if (cluster.getId().equals(id))
-        return cluster;
-    }
-
-    return null;
-  }
-
-  public ClusterServer findClusterServer(String id)
-  {
-    for (int i = 0; i < _clusters.size(); i++) {
-      Cluster cluster = _clusters.get(i);
-
-      ClusterServer server = cluster.findServer(id);
-
-      if (server != null)
-        return server;
-    }
-
-    return null;
   }
 
   /**
@@ -1317,240 +986,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     }
   }
 
-  public void parseCommandLine(String []argv)
-    throws Exception
-  {
-    preConfigureInit();
-
-    int len = argv.length;
-    int i = 0;
-
-    while (i < len) {
-      // RandomUtil.addRandom(argv[i]);
-
-      if (i + 1 < len
-          && (argv[i].equals("-stdout")
-              || argv[i].equals("--stdout"))) {
-        Path path = Vfs.lookup(argv[i + 1]);
-
-        RotateStream stream = RotateStream.create(path);
-        stream.init();
-        WriteStream out = stream.getStream();
-        out.setDisableClose(true);
-
-        EnvironmentStream.setStdout(out);
-
-        i += 2;
-      }
-      else if (i + 1 < len
-               && (argv[i].equals("-stderr")
-                   || argv[i].equals("--stderr"))) {
-        Path path = Vfs.lookup(argv[i + 1]);
-
-        RotateStream stream = RotateStream.create(path);
-        stream.init();
-        WriteStream out = stream.getStream();
-        out.setDisableClose(true);
-
-        EnvironmentStream.setStderr(out);
-
-        i += 2;
-      }
-      else if (i + 1 < len
-               && (argv[i].equals("-conf")
-                   || argv[i].equals("--conf"))) {
-        _configFile = argv[i + 1];
-        i += 2;
-      }
-      else if (argv[i].equals("-log-directory")
-               || argv[i].equals("--log-directory")) {
-        i += 2;
-      }
-      else if (argv[i].equals("-config-server")
-               || argv[i].equals("--config-server")) {
-        i += 2;
-      }
-      else if (argv[i].equals("--dump-heap-on-exit")) {
-        _isDumpHeapOnExit = true;
-
-        i += 1;
-      }
-      else if (i + 1 < len
-               && (argv[i].equals("-dynamic-server")
-                   || argv[i].equals("--dynamic-server"))) {
-        String []values = argv[i + 1].split(":");
-
-        if (values.length == 3) {
-          String clusterId = values[0];
-          String address = values[1];
-          int port = Integer.parseInt(values[2]);
-
-          setDynamicServer(clusterId, address, port);
-        } else {
-          System.out.println("-dynamic-server requires 'cluster:address:port' at '" + argv[i + 1] + "'");
-
-          System.exit(66);
-        }
-
-        i += 2;
-      }
-      else if (i + 1 < len
-               && (argv[i].equals("-server")
-                   || argv[i].equals("--server"))) {
-        setServerId(argv[i + 1]);
-        i += 2;
-      }
-      else if (argv[i].equals("-resin-home")
-               || argv[i].equals("--resin-home")) {
-        _resinHome = Vfs.lookup(argv[i + 1]);
-
-        i += 2;
-      }
-      else if (argv[i].equals("-root-directory")
-               || argv[i].equals("--root-directory")
-               || argv[i].equals("-resin-root")
-               || argv[i].equals("--resin-root")) {
-        _rootDirectory = _resinHome.lookup(argv[i + 1]);
-
-        i += 2;
-      }
-      else if (argv[i].equals("-server-root") // backwards compat
-               || argv[i].equals("--server-root")) {
-        _rootDirectory = _resinHome.lookup(argv[i + 1]);
-
-        i += 2;
-      }
-      else if (argv[i].equals("-service")) {
-        JniCauchoSystem.create().initJniBackground();
-        // windows service
-        i += 1;
-      }
-      else if (argv[i].equals("-version")
-               || argv[i].equals("--version")) {
-        System.out.println(VersionFactory.getFullVersion());
-        System.exit(66);
-      }
-      else if (argv[i].equals("-watchdog-port")
-               || argv[i].equals("--watchdog-port")) {
-        // watchdog
-        i += 2;
-      }
-      else if (argv[i].equals("-socketwait")
-               || argv[i].equals("--socketwait")
-               || argv[i].equals("-pingwait")
-               || argv[i].equals("--pingwait")) {
-        int socketport = Integer.parseInt(argv[i + 1]);
-
-        Socket socket = null;
-        for (int k = 0; k < 15 && socket == null; k++) {
-          try {
-            socket = new Socket("127.0.0.1", socketport);
-          } catch (Throwable e) {
-            System.out.println(new Date());
-            e.printStackTrace();
-          }
-
-          if (socket == null)
-            Thread.sleep(1000);
-        }
-
-        if (socket == null) {
-          System.err.println("Can't connect to parent process through socket " + socketport);
-          System.err.println("Resin needs to connect to its parent.");
-          System.exit(0);
-        }
-
-        /*
-        if (argv[i].equals("-socketwait") || argv[i].equals("--socketwait"))
-          _waitIn = socket.getInputStream();
-        */
-
-        _pingSocket = socket;
-
-        //socket.setSoTimeout(60000);
-
-        i += 2;
-      }
-      else if ("-port".equals(argv[i]) || "--port".equals(argv[i])) {
-        int fd = Integer.parseInt(argv[i + 1]);
-        String addr = argv[i + 2];
-        if ("null".equals(addr))
-          addr = null;
-        int port = Integer.parseInt(argv[i + 3]);
-
-        _boundPortList.add(new BoundPort(QJniServerSocket.openJNI(fd, port),
-                                         addr,
-                                         port));
-
-        i += 4;
-      }
-      else if ("start".equals(argv[i])
-               || "restart".equals(argv[i])) {
-        JniCauchoSystem.create().initJniBackground();
-        i++;
-      }
-      else if (argv[i].equals("-verbose")
-               || argv[i].equals("--verbose")) {
-        i += 1;
-      }
-      else if (argv[i].equals("console")) {
-        i += 1;
-      }
-      else if (argv[i].equals("-fine")
-               || argv[i].equals("--fine")) {
-        i += 1;
-      }
-      else if (argv[i].equals("-finer")
-               || argv[i].equals("--finer")) {
-        i += 1;
-      }
-      else if (argv[i].startsWith("-D")
-               || argv[i].startsWith("-J")
-               || argv[i].startsWith("-X")) {
-        i += 1;
-      }
-      else if ("-stage".equals(argv[i])
-               || "--stage".equals(argv[i])) {
-        _stage = argv[i + 1];
-        i += 2;
-      }
-      else if ("-preview".equals(argv[i])
-               || "--preview".equals(argv[i])) {
-        _stage = "preview";
-        i += 1;
-      }
-      else if ("-debug-port".equals(argv[i])
-               || "--debug-port".equals(argv[i])) {
-        i += 2;
-      }
-      else if ("-jmx-port".equals(argv[i])
-               || "--jmx-port".equals(argv[i])) {
-        i += 2;
-      }
-      else {
-        System.out.println(L().l("unknown argument '{0}'", argv[i]));
-        System.out.println();
-        usage();
-        System.exit(66);
-      }
-    }
-  }
-
-  private static void usage()
-  {
-    System.err.println(L().l("usage: java -jar resin.jar [-options] [start | stop | restart]"));
-    System.err.println(L().l(""));
-    System.err.println(L().l("where options include:"));
-    System.err.println(L().l("   -conf <file>          : select a configuration file"));
-    System.err.println(L().l("   -log-directory <dir>  : select a logging directory"));
-    System.err.println(L().l("   -resin-home <dir>     : select a resin home directory"));
-    System.err.println(L().l("   -root-directory <dir> : select a root directory"));
-    System.err.println(L().l("   -server <id>          : select a <server> to run"));
-    System.err.println(L().l("   -watchdog-port <port> : override the watchdog-port"));
-    System.err.println(L().l("   -verbose              : print verbose starting information"));
-    System.err.println(L().l("   -preview              : run as a preview server"));
-  }
-
   /**
    * Initialize the server, binding to TCP and starting the threads.
    */
@@ -1606,50 +1041,50 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     thread.setContextClassLoader(_systemClassLoader);
 
-    if (_classLoader != null)
-      thread.setContextClassLoader(_classLoader);
-
-    Path pwd = Vfs.getPwd();
-
     if (_rootDirectory == null)
       _rootDirectory = _resinHome;
 
-    Vfs.setPwd(_rootDirectory);
+    configure();
 
-    Path resinConf = null;
-
-    if (_configFile != null) {
-      if (log().isLoggable(Level.FINER))
-        log().finer(this + " looking for conf in " +  pwd.lookup(_configFile));
-
-      resinConf = pwd.lookup(_configFile);
-    }
-
-    if (_configFile == null) {
-      if (pwd.lookup("conf/resin.xml").canRead())
-        _configFile = "conf/resin.xml";
-      else { // backward compat
-        _configFile = "conf/resin.conf";
+    start();
+  }
+  
+  private void configure()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(_resinSystem.getClassLoader());
+      
+      if (_server == null) {
+        BootResinConfig bootResin = configureBoot();
+  
+        _rootDirectory = bootResin.getRootDirectory();
+  
+        configureRoot(bootResin);
+  
+        configureServer();
       }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
-
-    if (resinConf == null || ! resinConf.exists()) {
-      if (log().isLoggable(Level.FINER))
-        log().finer(this + " looking for conf in " +  _rootDirectory.lookup(_configFile));
-
-      resinConf = _rootDirectory.lookup(_configFile);
-    }
-
-    if (! resinConf.exists() && ! _resinHome.equals(_rootDirectory)) {
-      if (log().isLoggable(Level.FINER))
-        log().finer(this + " looking for conf in " +  _resinHome.lookup(_configFile));
-
-      resinConf = _resinHome.lookup(_configFile);
-    }
-
-    // for error messages, show path relative to rootDirectory
-    if (! resinConf.exists())
-      resinConf = _rootDirectory.lookup(_configFile);
+  }
+  
+  /**
+   * Configures the boot structure, which parses the clusters and servers
+   * for the system topology.
+   */
+  private BootResinConfig configureBoot()
+  {
+    Vfs.setPwd(_rootDirectory);
+    
+    Path resinConf = null;
+    
+    if (_args != null)
+      resinConf = _args.getResinConfPath();
 
     _resinConf = resinConf;
 
@@ -1657,47 +1092,124 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     Vfs.setPwd(getRootDirectory());
 
+    if (resinConf != null)
+      configureFile(resinConf);
+
+    return _bootResinConfig;
+  }
+  
+  public void configureFile(Path resinConf)
+  {
+    BootResinConfig bootResin = _bootResinConfig;
+    
     Config config = new Config();
     // server/10hc
     // config.setResinInclude(true);
 
-    config.configure(this, resinConf, getSchema());
+    config.configure(bootResin, resinConf, bootResin.getSchema());
+  }
+  
+  public void configureProgram(ConfigProgram program)
+  {
+    program.configure(_bootResinConfig);
+  }
+  
+  /**
+   * Configures the root directory and dataDirectory.
+   */
+  private void configureRoot(BootResinConfig bootConfig)
+    throws IOException
+  {
+    Path dataDirectory;
+  
+    if (isWatchdog())
+      dataDirectory = _rootDirectory.lookup("watchdog-data");
+    else
+      dataDirectory = _rootDirectory.lookup("resin-data");
+  
+    String serverName = _serverId;
+  
+    if ("".equals(serverName))
+      serverName = "default";
+  
+    dataDirectory = dataDirectory.lookup(serverName);
+  
+    RootDirectoryService rootService
+      = new RootDirectoryService(_rootDirectory, dataDirectory);
+    
+    _resinSystem.addService(rootService);
+  }
+  
+  /**
+   * Configures the selected server from the boot config.
+   */
+  private void configureServer()
+    throws IOException
+  {
+    if (_server != null)
+      return;
+    
+    BootResinConfig bootResin = _bootResinConfig;
+    
+    ResinConfig resinConfig = new ResinConfig(this);
+    
+    bootResin.getProgram().configure(resinConfig);
+    
+    bootResin.configureServers();
+    
+    BootServerConfig bootServer = bootResin.findServer(_serverId);
+    
+    if (bootServer == null) {
+      BootClusterConfig clusterConfig = bootResin.findCluster("");
+      
+      if (clusterConfig != null) {
+      }
+      else if (bootResin.getClusterList().size() == 0) {
+        clusterConfig = bootResin.createCluster();
+        clusterConfig.setId("");
+        clusterConfig.init();
+      }
+      else {
+          throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
+                                          _serverId));
+      }
+        
+      if (clusterConfig.getServerList().size() > 0) {
+        throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
+                                        _serverId));
+      }
+      
+      bootServer = clusterConfig.createServer();
+      bootServer.setId("");
+      bootServer.init();
+      bootServer.configureServer();
+    }
+    
+    ClusterServer clusterServer = bootServer.getClusterServer();
+    
+    _server = createServer(clusterServer);
 
-    ClusterServer clusterServer = findClusterServer(_serverId);
-
-    start();
+    if (_stage != null)
+      _server.setStage(_stage);
+    
+    ServletService servletService = new ServletService(_server);
+    _resinSystem.addService(servletService);
+    
+    bootServer.getCluster().getProgram().configure(_server);
+  }
+  
+  protected Server createServer(ClusterServer clusterServer)
+  {
+    return new Server(_resinSystem, clusterServer);
   }
 
+  public Management createResinManagement()
+  {
+    return new Management(this);
+  }
+  
   private void addRandom()
   {
-    /*
-    RandomUtil.addRandom(System.currentTimeMillis());
-    RandomUtil.addRandom(Runtime.getRuntime().freeMemory());
-
-    RandomUtil.addRandom(System.identityHashCode(_mainThread));
-    RandomUtil.addRandom(System.identityHashCode(_systemClassLoader));
-    RandomUtil.addRandom(VersionFactory.getFullVersion());
-
-    try {
-      RandomUtil.addRandom(InetAddress.getLocalHost().toString());
-    } catch (Throwable e) {
-    }
-    */
-
-    /*
-    // for systems with /dev/urandom, read more bits from it.
-    try {
-      InputStream is = new FileInputStream("/dev/urandom");
-
-      for (int i = 0; i < 16; i++)
-        RandomUtil.addRandom(is.read());
-
-      is.close();
-    } catch (Throwable e) {
-    }
-
-    RandomUtil.addRandom(System.currentTimeMillis());
-    */
   }
 
   public void dumpHeapOnExit()
@@ -1801,7 +1313,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   private boolean checkMemory(Runtime runtime)
     throws InterruptedException
   {
-    long minFreeMemory = getMinFreeMemory();
+    long minFreeMemory = 0;//_resinConfig.getMinFreeMemory();
 
     if (minFreeMemory <= 0) {
       // memory check disabled
@@ -1890,16 +1402,18 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       Environment.init();
 
       validateEnvironment();
-
+      
       final Resin resin = Resin.create();
+
+      ResinArgs args = new ResinArgs(resin, argv);
+
+      resin.setArgs(args);
 
       resin.preConfigureInit();
 
-      resin.parseCommandLine(argv);
-
       resin.initMain();
 
-      Server server = resin.getServer();
+      resin.getServer();
 
       resin.startResinActor();
 
@@ -1992,37 +1506,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       _log = Logger.getLogger(Resin.class.getName());
 
     return _log;
-  }
-
-  static class BoundPort {
-    private QServerSocket _ss;
-    private String _address;
-    private int _port;
-
-    BoundPort(QServerSocket ss, String address, int port)
-    {
-      if (ss == null)
-        throw new NullPointerException();
-
-      _ss = ss;
-      _address = address;
-      _port = port;
-    }
-
-    public QServerSocket getServerSocket()
-    {
-      return _ss;
-    }
-
-    public int getPort()
-    {
-      return _port;
-    }
-
-    public String getAddress()
-    {
-      return _address;
-    }
   }
 
   /**
@@ -2279,42 +1762,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     }
   }
 
-  class SecurityManagerConfig {
-    private boolean _isEnable = true;
-
-    SecurityManagerConfig()
-    {
-      if (_securityManager == null)
-        _securityManager = new SecurityManager();
-    }
-
-    public void setEnable(boolean enable)
-    {
-      _isEnable = enable;
-    }
-
-    public void setValue(boolean enable)
-    {
-      setEnable(enable);
-    }
-
-    public void setPolicyFile(Path path)
-      throws ConfigException
-    {
-      if (! path.canRead())
-        throw new ConfigException(L().l("policy-file '{0}' must be readable.",
-                                      path));
-
-    }
-
-    @PostConstruct
-    public void init()
-    {
-      if (_isEnable)
-        System.setSecurityManager(_securityManager);
-    }
-  }
-
   class ShutdownThread extends Thread {
     private volatile boolean _isShutdown;
 
@@ -2385,34 +1832,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       }
 
       Runtime.getRuntime().halt(Resin.EXIT_HALT);
-    }
-  }
-
-  static class DynamicServer {
-    private final String _cluster;
-    private final String _address;
-    private final int _port;
-
-    DynamicServer(String cluster, String address, int port)
-    {
-      _cluster = cluster;
-      _address = address;
-      _port = port;
-    }
-
-    String getCluster()
-    {
-      return _cluster;
-    }
-
-    String getAddress()
-    {
-      return _address;
-    }
-
-    int getPort()
-    {
-      return _port;
     }
   }
 }

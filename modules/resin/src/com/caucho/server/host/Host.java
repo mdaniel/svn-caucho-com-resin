@@ -30,6 +30,7 @@
 package com.caucho.server.host;
 
 import com.caucho.bam.*;
+import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;
@@ -430,7 +431,7 @@ public class Host extends WebAppContainer
   /**
    * Returns the current cluster.
    */
-  public Cluster getCluster()
+  public CloudCluster getCluster()
   {
     Server server = getServer();
 

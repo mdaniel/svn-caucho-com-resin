@@ -29,6 +29,8 @@
 
 package com.caucho.cloud.topology;
 
+import com.caucho.server.cluster.ClusterPod;
+
 
 /**
  * The triad owner is the triad ownership for a hashed item. Each owner has
@@ -118,4 +120,45 @@ public enum TriadOwner
   {
     return OWNER_VALUES[(int) ((index & Long.MAX_VALUE) % OWNER_VALUES.length)];
   }
+  
+  public static TriadOwner getHashOwner(byte []hash)
+  {
+    long value = 0;
+
+    int len = hash.length;
+    if (len > 4)
+      len = 4;
+
+    for (int i = 0; i < len; i++)
+      value = 256 * value + (hash[i] & 0xff);
+
+    return getOwner(value);
+  }
+  
+  public static TriadOwner getHashOwner(String value)
+  {
+    return getOwner(getIndex(value));
+  }
+
+  private static long getIndex(String value)
+  {
+    if (value == null)
+      return 0;
+
+    int len = value.length();
+
+    if (len > 16)
+      len = 16;
+
+    long hash = 0;
+
+    for (int i = 0; i < len; i++) {
+      char ch = value.charAt(i);
+      
+      hash = 65521 * hash + ch + 17;
+    }
+
+    return hash;
+  }
+
 }

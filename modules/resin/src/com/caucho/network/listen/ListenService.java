@@ -38,16 +38,16 @@ import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.network.server.AbstractNetworkService;
-import com.caucho.network.server.NetworkServer;
 import com.caucho.util.L10N;
 
 /**
  * The socket listen service, which accepts sockets and dispatches them to
  * protocols. 
  */
-public class ListenService extends AbstractNetworkService
+public class ListenService extends AbstractResinService
 {
   private static final L10N L = new L10N(ListenService.class);
   private static final Logger log
@@ -56,7 +56,7 @@ public class ListenService extends AbstractNetworkService
   public static final int START_PRIORITY_LISTEN = 2000;
   public static final int START_PRIORITY_CLUSTER = 2100;
   
-  private final NetworkServer _server;
+  private final ResinSystem _server;
   
   private final ArrayList<SocketLinkListener> _listeners
     = new ArrayList<SocketLinkListener>();
@@ -69,7 +69,7 @@ public class ListenService extends AbstractNetworkService
   private final Lifecycle _lifecycle = new Lifecycle();
   private AtomicBoolean _isStartedListeners = new AtomicBoolean();
   
-  public ListenService(NetworkServer server)
+  public ListenService(ResinSystem server)
   {
     _server = server;
   }

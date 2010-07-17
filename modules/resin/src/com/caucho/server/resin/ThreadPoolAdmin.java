@@ -32,17 +32,10 @@ package com.caucho.server.resin;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ThreadPoolMXBean;
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
 
 public class ThreadPoolAdmin extends AbstractManagedObject
   implements ThreadPoolMXBean
 {
-  private static final L10N L = new L10N(ThreadPoolAdmin.class);
-  private static final Logger log
-    = Logger.getLogger(ThreadPoolAdmin.class.getName());
-
   private final ThreadPool _threadPool;
 
   private ThreadPoolAdmin(ThreadPool threadPool)

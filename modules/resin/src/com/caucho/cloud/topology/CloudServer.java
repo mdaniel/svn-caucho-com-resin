@@ -29,7 +29,8 @@
 
 package com.caucho.cloud.topology;
 
-import com.caucho.server.cluster.ClusterPod;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.caucho.util.L10N;
 
 /**
@@ -65,6 +66,9 @@ public class CloudServer {
   private String _address;
   private int _port;
   private boolean _isSSL;
+  
+  private final ConcurrentHashMap<Class<?>,Object> _dataMap
+    = new ConcurrentHashMap<Class<?>,Object>();
 
   public CloudServer(String id,
                      CloudPod pod, 
@@ -192,9 +196,9 @@ public class CloudServer {
   /**
    * Returns the pod owner
    */
-  public ClusterPod.Owner getTriadOwner()
+  public TriadOwner getTriadOwner()
   {
-    return ClusterPod.getOwner(getIndex());
+    return TriadOwner.getOwner(getIndex());
   }
   
   //
@@ -220,6 +224,27 @@ public class CloudServer {
   public boolean isSSL()
   {
     return _isSSL;
+  }
+  
+  //
+  // data
+  //
+  
+  public void putData(Object value)
+  {
+    _dataMap.put(value.getClass(), value);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> T putDataIfAbsent(T value)
+  {
+    return (T) _dataMap.putIfAbsent(value.getClass(), value);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> T getData(Class<T> cl)
+  {
+    return (T) _dataMap.get(cl);
   }
   
   @Override

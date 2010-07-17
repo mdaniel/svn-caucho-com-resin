@@ -36,15 +36,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorStream;
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
+import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Period;
-import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.network.server.NetworkServer;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
 
@@ -61,11 +63,7 @@ public final class ClusterServer {
 
   private static final int DECODE[];
 
-  private final Cluster _cluster;
-  private final ClusterPod _pod;
-  private final int _index;
-
-  private String _id = "";
+  private final CloudServer _cloudServer;
 
   private Machine _machine;
 
@@ -82,15 +80,9 @@ public final class ClusterServer {
   private int _port = -1;
   private boolean _isSSL;
 
-  // private ClusterPort _clusterPort;
-  // private boolean _isClusterPortConfig;
-
   //
   // config parameters
   //
-
-  // private long _socketTimeout = 90000L;
-  // private long _keepaliveTimeout = 75000L;
 
   private int _loadBalanceConnectionMin = 0;
   private long _loadBalanceIdleTime = 60000L;
@@ -107,10 +99,6 @@ public final class ClusterServer {
   private ContainerProgram _serverProgram
     = new ContainerProgram();
 
-  //private ArrayList<ConfigProgram> _portDefaults
-  //  = new ArrayList<ConfigProgram>();
-  // private ArrayList<Port> _ports = new ArrayList<Port>();
-
   private ArrayList<String> _pingUrls = new ArrayList<String>();
 
   private boolean _isSelf;
@@ -126,24 +114,30 @@ public final class ClusterServer {
 
   private ClusterServerAdmin _admin = new ClusterServerAdmin(this);
 
-  public ClusterServer(ClusterPod pod, int index)
+  public ClusterServer(CloudServer cloudServer)
   {
-    _pod = pod;
-    _cluster = pod.getCluster();
-    _index = index;
+    _cloudServer = cloudServer;
+    cloudServer.getIndex();
 
+    try {
+      setAddress(cloudServer.getAddress());
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+    
+    setPort(cloudServer.getPort());
     // _clusterPort = new ClusterPort(this);
     // _ports.add(_clusterPort);
 
     StringBuilder sb = new StringBuilder();
 
     sb.append(convert(getIndex()));
-    sb.append(convert(getClusterPod().getIndex()));
-    sb.append(convert(getClusterPod().getIndex() / 64));
+    sb.append(convert(getCloudPod().getIndex()));
+    sb.append(convert(getCloudPod().getIndex() / 64));
 
     _serverClusterId = sb.toString();
 
-    String clusterId = _cluster.getId();
+    String clusterId = cloudServer.getCluster().getId();
     if (clusterId.equals(""))
       clusterId = "default";
 
@@ -157,25 +151,22 @@ public final class ClusterServer {
    */
   public String getId()
   {
-    return _id;
-  }
-
-  /**
-   * Sets the server identifier.
-   */
-  public void setId(String id)
-  {
-    _id = id;
+    return _cloudServer.getId();
   }
 
   public String getDebugId()
   {
-    if ("".equals(_id))
+    if ("".equals(getId()))
       return "default";
     else
-      return _id;
+      return getId();
   }
 
+  public CloudServer getCloudServer()
+  {
+    return _cloudServer;
+  }
+  
   /**
    * Returns the server's id within the cluster
    */
@@ -203,9 +194,9 @@ public final class ClusterServer {
   /**
    * Returns the cluster.
    */
-  public Cluster getCluster()
+  public CloudCluster getCluster()
   {
-    return _cluster;
+    return _cloudServer.getCluster();
   }
 
   /**
@@ -227,9 +218,9 @@ public final class ClusterServer {
   /**
    * Returns the owning pod
    */
-  public ClusterPod getClusterPod()
+  public CloudPod getCloudPod()
   {
-    return _pod;
+    return _cloudServer.getPod();
   }
 
   /**
@@ -237,35 +228,23 @@ public final class ClusterServer {
    */
   public boolean isTriad()
   {
-    ClusterPod pod = getClusterPod();
-
-    return pod.isTriad(this);
+    return _cloudServer.isTriad();
   }
 
   /**
    * Returns the pod owner
    */
-  public ClusterPod.Owner getTriadOwner()
+  public TriadOwner getTriadOwner()
   {
-    return ClusterPod.getOwner(getIndex());
+    return TriadOwner.getOwner(getIndex());
   }
-
-  /**
-   * Returns the server index.
-   */
-  /*
-  void setIndex(int index)
-  {
-    _index = index;
-  }
-  */
 
   /**
    * Returns the server index within the pod.
    */
   public int getIndex()
   {
-    return _index;
+    return _cloudServer.getIndex();
   }
 
   /**
@@ -637,92 +616,6 @@ public final class ClusterServer {
   }
 
   /**
-   * Adds a http.
-   */
-  /*
-  public Port createHttp()
-    throws ConfigException
-  {
-    Port port = new Port(this);
-
-    HttpProtocol protocol = new HttpProtocol();
-    port.setProtocol(protocol);
-
-    _ports.add(port);
-
-    applyPortDefaults(port);
-
-    return port;
-  }
-
-  public Port createProtocol()
-  {
-    ProtocolPortConfig port = new ProtocolPortConfig(this);
-
-    _ports.add(port);
-
-    return port;
-  }
-
-  void addProtocolPort(Port port)
-  {
-    _ports.add(port);
-  }
-
-  public void add(ProtocolPort protocolPort)
-  {
-    Port port = new Port(this);
-
-    AbstractProtocol protocol = protocolPort.getProtocol();
-    port.setProtocol(protocol);
-
-    applyPortDefaults(port);
-
-    protocolPort.getConfigProgram().configure(port);
-
-    addProtocolPort(port);
-  }
-
-  private void applyPortDefaults(Port port)
-  {
-    for (ConfigProgram program : _portDefaults) {
-      program.configure(port);
-    }
-  }
-  */
-
-  /**
-   * Pre-binding of ports.
-   */
-  
-  /*
-  public void bind(String address, int port, QServerSocket ss)
-    throws Exception
-  {
-    if ("null".equals(address))
-      address = null;
-
-    for (int i = 0; i < _ports.size(); i++) {
-      Port serverPort = _ports.get(i);
-
-      if (port != serverPort.getPort())
-        continue;
-
-      if ((address == null) != (serverPort.getAddress() == null))
-        continue;
-      else if (address == null || address.equals(serverPort.getAddress())) {
-        serverPort.bind(ss);
-
-        return;
-      }
-    }
-
-    throw new IllegalStateException(L.l("No matching port for {0}:{1}",
-                                        address, port));
-  }
-  */
-
-  /**
    * Sets the user name.
    */
   public void setUserName(String userName)
@@ -737,56 +630,12 @@ public final class ClusterServer {
   }
 
   /**
-   * Returns the ports.
-   */
-  /*
-  public ArrayList<Port> getPorts()
-  {
-    return _ports;
-  }
-  */
-
-  /**
-   * Sets the ClusterPort.
-   */
-  /*
-  public ClusterPort createClusterPort()
-  {
-    applyPortDefaults(_clusterPort);
-
-    _isClusterPortConfig = true;
-
-    return _clusterPort;
-  }
-  */
-
-  /**
-   * Sets the ClusterPort.
-   */
-  /*
-  public ClusterPort getClusterPort()
-  {
-    return _clusterPort;
-  }
-  */
-
-  /**
    * Returns true for the self server
    */
   public boolean isSelf()
   {
     return _isSelf;
   }
-
-  /**
-   * Returns true for secure.
-   */
-  /*
-  public boolean isSSL()
-  {
-    return getClusterPort().isSSL();
-  }
-  */
 
   /**
    * Returns the server connector.
@@ -972,19 +821,6 @@ public final class ClusterServer {
   /**
    * Starts the server.
    */
-  public Server startServer(NetworkServer networkServer)
-    throws StartLifecycleException
-  {
-    _isSelf = true;
-    _isActive = true;
-    _stateTimestamp = Alarm.getCurrentTime();
-
-    return _cluster.startServer(networkServer, this);
-  }
-
-  /**
-   * Starts the server.
-   */
   public void stopServer()
   {
     _isActive = false;
@@ -993,17 +829,6 @@ public final class ClusterServer {
     if (_serverPool != null)
       _serverPool.notifyStop();
   }
-
-  /**
-   * Generate the primary, secondary, tertiary, returning the value encoded
-   * in a long.
-   */
-  /*
-  public long generateBackupCode()
-  {
-    return _cluster.generateBackupCode(_index);
-  }
-  */
 
   /**
    * Adds the primary/backup/third digits to the id.

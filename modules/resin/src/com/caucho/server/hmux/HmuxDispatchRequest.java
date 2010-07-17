@@ -29,23 +29,26 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.VersionFactory;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterPort;
-import com.caucho.server.cluster.ClusterServer;
-import com.caucho.server.cluster.ClusterPod;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.host.Host;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.webapp.WebAppController;
-import com.caucho.util.*;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.VersionFactory;
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
+import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.host.Host;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppController;
+import com.caucho.util.Alarm;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Crc64;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Handles the filter mapping (config) requests from a remote dispatcher.
@@ -76,8 +79,6 @@ public class HmuxDispatchRequest {
   private HmuxRequest _request;
   private Server _server;
 
-  private int _srunIndex;
-
   public HmuxDispatchRequest(HmuxRequest request)
   {
     _request = request;
@@ -95,7 +96,6 @@ public class HmuxDispatchRequest {
   public boolean handleRequest(ReadStream is, WriteStream os)
     throws IOException
   {
-    CharBuffer cb = _cb;
     boolean isLoggable = log.isLoggable(Level.FINE);
     int code;
     int len;
@@ -364,7 +364,7 @@ public class HmuxDispatchRequest {
     os.write(channel);
     */
 
-    Cluster cluster = host.getCluster();
+    CloudCluster cluster = host.getCluster();
 
     if (cluster == null)
       return 0;
@@ -373,14 +373,16 @@ public class HmuxDispatchRequest {
 
     crc64 = Crc64.generate(crc64, cluster.getId());
 
-    ClusterPod []pods = cluster.getPodList();
+    CloudPod []pods = cluster.getPodList();
     
-    ClusterServer []servers = (pods.length > 0
-                               ? pods[0].getServerList()
-                               : null);
+    int serverLength = (pods.length > 0 ? pods[0].getServerLength() : 0);
+    CloudServer []servers = (pods.length > 0
+                             ? pods[0].getServerList()
+                             : null);
     
-    if (servers != null && servers.length > 0) {
-      ClusterServer server = servers[0];
+    if (serverLength > 0) {
+      CloudServer cloudServer = servers[0];
+      ClusterServer server = cloudServer.getData(ClusterServer.class);
 
       writeString(os, HmuxRequest.HMUX_HEADER, "live-time");
       writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceIdleTime() / 1000));
@@ -395,8 +397,13 @@ public class HmuxDispatchRequest {
       writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceConnectTimeout() / 1000));
     }
 
-    for (int i = 0; i < servers.length; i++) {
-      ClusterServer server = servers[i];
+    for (int i = 0; i < serverLength; i++) {
+      CloudServer cloudServer = servers[i];
+      
+      if (cloudServer == null)
+        continue;
+      
+      ClusterServer server = cloudServer.getData(ClusterServer.class);
 
       if (server != null) {
         String srunHost = server.getAddress() + ":" + server.getPort();

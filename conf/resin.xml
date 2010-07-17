@@ -28,13 +28,6 @@
   <class-loader>
     <tree-loader path="${resin.root}/ext-lib"/>
   </class-loader>
-
-  <!--
-     - project jars with maven dependencies can be placed
-     - in project-jars to be used by web-apps.  A WEB-INF/pom.xml will
-     - select the project's artifacts.
-    -->
-  <resin:ProjectJarRepository path="${resin.root}/project-jars"/>
   
   <!--
      - Remote management requires at least one enabled admin user.
@@ -49,9 +42,7 @@
     -->
   <dependency-check-interval>2s</dependency-check-interval>
 
-  <!--
-     - SMTP server for sending mail notifications
-    -->
+  <!-- Java system-properties -->
   <system-property mail.smtp.host="127.0.0.1"/>
   <system-property mail.smtp.port="25"/>
 
@@ -97,34 +88,33 @@
 
       <!-- creates the webapps directory for .war expansion -->
       <web-app-deploy path="webapps"/>
-    </host-default>
 
-    <!--
-       - Defaults applied to each web-app.
-      -->
-    <web-app-default>
-      <prologue>
-        <!--
-           - Enable EL expressions in Servlet and Filter init-param
-          -->
-        <allow-servlet-el/>
-      </prologue>
-
-      <!-- enable persistent sessions -->
-      <session-config>
-        <use-persistent-store/>
-      </session-config>
-     
       <!--
-         - Sets max-age for cacheable pages, e.g. static pages.
+         - Defaults applied to each web-app.
         -->
-      <cache-mapping url-pattern="/" max-age="5s"/>
-      <cache-mapping url-pattern="*.gif" max-age="60s"/>
-      <cache-mapping url-pattern="*.jpg" max-age="60s"/>
-      <cache-mapping url-pattern="*.png" max-age="60s"/>
-      <cache-mapping url-pattern="*.css" max-age="60s"/>
-      <cache-mapping url-pattern="*.js" max-age="60s"/>
-    </web-app-default>
+      <web-app-default>
+        <prologue>
+          <allow-servlet-el/>
+        </prologue>
+
+        <!-- enable persistent sessions -->
+        <session-config>
+          <use-persistent-store/>
+        </session-config>
+     
+        <!--
+           - Sets max-age for cacheable pages, e.g. static pages.
+          -->
+        <resin:if test="${resin.professional}">
+          <cache-mapping url-pattern="/" max-age="5s"/>
+          <cache-mapping url-pattern="*.gif" max-age="60s"/>
+          <cache-mapping url-pattern="*.jpg" max-age="60s"/>
+          <cache-mapping url-pattern="*.png" max-age="60s"/>
+          <cache-mapping url-pattern="*.css" max-age="60s"/>
+          <cache-mapping url-pattern="*.js" max-age="60s"/>
+         </resin:if>
+      </web-app-default>
+    </host-default>
   </cluster-default>
 
   <!--
@@ -145,8 +135,8 @@
         <jsse-ssl self-signed-certificate-name="resin@localhost"/>
       </http>
 
-      <jvm-arg>-Xmx512m</jvm-arg>
       <!--
+         - <jvm-arg>-Xmx512m</jvm-arg>
          - <jvm-arg>-agentlib:resin</jvm-arg>
         -->
 
@@ -162,7 +152,6 @@
 
     <!-- define the servers in the cluster -->
     <server id="" address="127.0.0.1" port="6800">
-      <!-- server-specific configuration, e.g. jvm-arg goes here -->
     </server>
 
     <!-- the default host, matching any host name -->

@@ -29,11 +29,8 @@
 
 package com.caucho.server.cluster;
 
-import java.util.logging.Logger;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.Config;
@@ -41,8 +38,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.network.listen.AbstractProtocol;
-import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.network.listen.Protocol;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.util.L10N;
 
 /**
@@ -52,14 +49,10 @@ public class ProtocolPortConfig extends SocketLinkListener
 {
   private static final L10N L = new L10N(ProtocolPortConfig.class);
 
-  private static final Logger log
-    = Logger.getLogger(ProtocolPortConfig.class.getName());
-
   // The protocol
   private Class<?> _protocolClass;
   private ContainerProgram _init;
-  private Protocol _protocol;
-
+  
   public ProtocolPortConfig()
   {
   }

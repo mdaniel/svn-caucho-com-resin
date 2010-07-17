@@ -29,36 +29,20 @@
 
 package com.caucho.server.repository;
 
-import com.caucho.git.GitCommit;
-import com.caucho.git.GitObjectStream;
-import com.caucho.git.GitRepository;
-import com.caucho.git.GitTree;
-import com.caucho.git.GitType;
-import com.caucho.jmx.Jmx;
-import com.caucho.management.server.DeployControllerMXBean;
-import com.caucho.management.server.EAppMXBean;
-import com.caucho.management.server.EarDeployMXBean;
-import com.caucho.management.server.WebAppMXBean;
-import com.caucho.management.server.WebAppDeployMXBean;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.resin.Resin;
-import com.caucho.server.host.HostController;
-import com.caucho.server.webapp.WebAppController;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.QDate;
-import com.caucho.vfs.*;
-
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.management.ObjectName;
+
+import com.caucho.git.GitCommit;
+import com.caucho.git.GitTree;
+import com.caucho.git.GitType;
+import com.caucho.server.cluster.Server;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 abstract public class Repository
 {
@@ -71,7 +55,6 @@ abstract public class Repository
 
   private String _repositoryTag;
 
-  private String _repositoryHash;
   private RepositoryTagMap _tagMap = new RepositoryTagMap();
 
   public Repository(Server server)
@@ -237,7 +220,6 @@ abstract public class Repository
         throw new RepositoryException(L.l("'{0}' is an invalid .git file",
                                           root));
 
-      RepositoryTagEntry oldEntry = tagMap.get(tag);
       String parent = null;
 
       RepositoryTagEntry entry

@@ -29,6 +29,15 @@
 
 package com.caucho.server.repository;
 
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.Config;
 import com.caucho.config.Service;
 import com.caucho.config.Unbound;
@@ -38,20 +47,9 @@ import com.caucho.loader.module.Artifact;
 import com.caucho.loader.module.ArtifactDependency;
 import com.caucho.loader.module.ArtifactRepository;
 import com.caucho.loader.module.ArtifactResolver;
-import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 import com.caucho.vfs.JarPath;
-import com.caucho.vfs.ReadStream;
-
-import java.io.InputStream;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
+import com.caucho.vfs.Path;
 
 /**
  * The directory holding jars
@@ -186,13 +184,12 @@ public class ProjectJarRepository implements ArtifactResolver
   static class Entry {
     private Path _path;
     private Artifact _artifact;
-    private SoftReference<JarMap> _jarMapRef;
-
+    
     Entry(Path path, Artifact artifact, JarMap jarMap)
     {
       _path = path;
       _artifact = artifact;
-      _jarMapRef = new SoftReference<JarMap>(jarMap);
+      new SoftReference<JarMap>(jarMap);
     }
 
     Artifact getArtifact()

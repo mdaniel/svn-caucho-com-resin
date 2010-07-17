@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.network.server;
+package com.caucho.env.service;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -40,31 +40,30 @@ import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
-public class NetworkServer
+public class ResinSystem
 {
-  private static final L10N L = new L10N(NetworkServer.class);
+  private static final L10N L = new L10N(ResinSystem.class);
   private static final Logger log
-    = Logger.getLogger(NetworkServer.class.getName());
+    = Logger.getLogger(ResinSystem.class.getName());
 
-  private static final EnvironmentLocal<NetworkServer> _serverLocal
-    = new EnvironmentLocal<NetworkServer>();
+  private static final EnvironmentLocal<ResinSystem> _serverLocal
+    = new EnvironmentLocal<ResinSystem>();
 
   private final String _id;
-  private final Path _rootDirectory;
-  private final Path _dataDirectory;
   private EnvironmentClassLoader _classLoader;
   
-  private final ConcurrentHashMap<Class<?>,NetworkService> _serviceMap
-    = new ConcurrentHashMap<Class<?>,NetworkService>();
+  private final ConcurrentHashMap<Class<?>,ResinService> _serviceMap
+    = new ConcurrentHashMap<Class<?>,ResinService>();
   
-  private final TreeSet<NetworkService> _pendingStart
-    = new TreeSet<NetworkService>(new StartComparator());
+  private final TreeSet<ResinService> _pendingStart
+    = new TreeSet<ResinService>(new StartComparator());
   
   private InjectManager _injectManager;
 
@@ -79,48 +78,27 @@ public class NetworkServer
   // stats
 
   private long _startTime;
-
+  
   /**
    * Creates a new servlet server.
    */
-  public NetworkServer(String id,
-                       Path rootDirectory)
-    throws IOException
+  public ResinSystem(String id)
   {
-    this(id, rootDirectory, rootDirectory.lookup("resin-data"));
-  }
-
-  /**
-   * Creates a new servlet server.
-   */
-  public NetworkServer(String id,
-                       Path rootDirectory,
-                       Path dataDirectory)
-    throws IOException
-  {
-    this(id, rootDirectory, dataDirectory, null);
+    this(id, (ClassLoader) null);
   }
   
-    /**
-     * Creates a new servlet server.
-     */
-  public NetworkServer(String id,
-                       Path rootDirectory,
-                       Path dataDirectory,
-                       ClassLoader loader)
-  throws IOException
+  /**
+   * Creates a new servlet server.
+   */
+  public ResinSystem(String id,
+                     ClassLoader loader)
   {
     _id = id;
-    _rootDirectory = rootDirectory;
-    _dataDirectory = dataDirectory;
     
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;
     else
-      _classLoader = EnvironmentClassLoader.create(loader, "server:" + id);
-    
-    rootDirectory.mkdirs();
-    dataDirectory.mkdirs();
+      _classLoader = EnvironmentClassLoader.create(loader, "system:" + id);
 
     _serverLocal.set(this, _classLoader);
 
@@ -135,24 +113,65 @@ public class NetworkServer
     try {
       thread.setContextClassLoader(_classLoader);
       
+      Environment.init();
+      
       _injectManager = InjectManager.create();
       
-      BeanBuilder<NetworkServer> beanFactory
-        = _injectManager.createBeanFactory(NetworkServer.class);
+      BeanBuilder<ResinSystem> beanFactory
+        = _injectManager.createBeanFactory(ResinSystem.class);
       // factory.deployment(Standard.class);
-      beanFactory.type(NetworkServer.class);
+      beanFactory.type(ResinSystem.class);
       _injectManager.addBean(beanFactory.singleton(this));
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
+
+  /**
+   * Creates a new servlet server.
+   */
+  public ResinSystem(String id,
+                     Path rootDirectory)
+    throws IOException
+  {
+    this(id);
+    
+    addService(new RootDirectoryService(rootDirectory));
+  }
+
+  /**
+   * Creates a new servlet server.
+   */
+  public ResinSystem(String id,
+                      Path rootDirectory,
+                      Path dataDirectory)
+    throws IOException
+  {
+    this(id);
+    
+    addService(new RootDirectoryService(rootDirectory, dataDirectory));
+  }
  
   /**
    * Returns the current server
    */
-  public static NetworkServer getCurrent()
+  public static ResinSystem getCurrent()
   {
     return _serverLocal.get();
+  }
+  
+  /**
+   * Returns the current identified service.
+   */
+  public static <T extends ResinService> T
+  getCurrentService(Class<T> serviceClass)
+  {
+    ResinSystem manager = getCurrent();
+    
+    if (manager != null)
+      return manager.getService(serviceClass);
+    else
+      return null;
   }
   
   /**
@@ -185,22 +204,6 @@ public class NetworkServer
   public void setConfigException(Throwable exn)
   {
     _configException = exn;
-  }
-
-  /**
-   * Sets the root directory.
-   */
-  public Path getRootDirectory()
-  {
-    return _rootDirectory;
-  }
-
-  /**
-   * Returns the internal data directory.
-   */
-  public Path getDataDirectory()
-  {
-    return _dataDirectory;
   }
 
   //
@@ -304,7 +307,7 @@ public class NetworkServer
   /**
    * Adds a new service.
    */
-  public void addService(NetworkService service)
+  public void addService(ResinService service)
   {
     addService(service.getClass(), service);
   }
@@ -312,9 +315,9 @@ public class NetworkServer
   /**
    * Adds a new service.
    */
-  public void addService(Class<?> serviceApi, NetworkService service)
+  public void addService(Class<?> serviceApi, ResinService service)
   {
-    NetworkService oldService
+    ResinService oldService
       = _serviceMap.putIfAbsent(serviceApi, service);
     
     if (oldService != null) {
@@ -333,7 +336,7 @@ public class NetworkServer
    * Returns the service for the given class.
    */
   @SuppressWarnings("unchecked")
-  public <T extends NetworkService> T getService(Class<T> cl)
+  public <T extends ResinService> T getService(Class<T> cl)
   {
     return (T) _serviceMap.get(cl);
   }
@@ -349,6 +352,7 @@ public class NetworkServer
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
+    
     try {
       thread.setContextClassLoader(_classLoader);
 
@@ -377,15 +381,8 @@ public class NetworkServer
 
         log.info("");
 
-        // log.info("resin.home = " + resin.getResinHome().getNativePath());
-        log.info("resin.root = " + _rootDirectory);
-
-        log.info("");
-
         log.info("user.name  = " + System.getProperty("user.name"));
       }
-
-      _lifecycle.toStarting();
 
       startServices();
 
@@ -407,8 +404,10 @@ public class NetworkServer
       thread.setContextClassLoader(_classLoader);
       
       while (_pendingStart.size() > 0) {
-        NetworkService service = _pendingStart.first();
+        ResinService service = _pendingStart.first();
         _pendingStart.remove(service);
+        
+        thread.setContextClassLoader(_classLoader);
         
         if (log.isLoggable(Level.FINE))
           log.fine(service + " starting");
@@ -448,14 +447,14 @@ public class NetworkServer
       if (! _lifecycle.toStopping())
         return;
 
-      TreeSet<NetworkService> services
-        = new TreeSet<NetworkService>(new StopComparator());
+      TreeSet<ResinService> services
+        = new TreeSet<ResinService>(new StopComparator());
       
       services.addAll(_serviceMap.values());
       
       // sort
       
-      for (NetworkService service : services) {
+      for (ResinService service : services) {
         try {
           if (log.isLoggable(Level.FINE))
             log.fine(service + " stopping");
@@ -488,14 +487,14 @@ public class NetworkServer
     try {
       thread.setContextClassLoader(_classLoader);
 
-      TreeSet<NetworkService> services
-        = new TreeSet<NetworkService>(new StopComparator());
+      TreeSet<ResinService> services
+        = new TreeSet<ResinService>(new StopComparator());
       
       services.addAll(_serviceMap.values());
       
       _serviceMap.clear();
       
-      for (NetworkService service : services) {
+      for (ResinService service : services) {
         try {
           service.destroy();
         } catch (Exception e) {
@@ -525,11 +524,11 @@ public class NetworkServer
             + "[id=" + getId() + "]");
   }
   
-  class ClassLoaderService implements NetworkService {
+  class ClassLoaderService extends AbstractResinService {
     @Override
     public int getStartPriority()
     {
-      return NetworkService.START_PRIORITY_CLASSLOADER;
+      return ResinService.START_PRIORITY_CLASSLOADER;
     }
     
     @Override
@@ -541,7 +540,7 @@ public class NetworkServer
     @Override
     public int getStopPriority()
     {
-      return NetworkService.STOP_PRIORITY_CLASSLOADER;
+      return ResinService.STOP_PRIORITY_CLASSLOADER;
     }
     
     @Override
@@ -557,19 +556,29 @@ public class NetworkServer
     }
   }
   
-  static class StartComparator implements Comparator<NetworkService> {
+  static class StartComparator implements Comparator<ResinService> {
     @Override
-    public int compare(NetworkService a, NetworkService b)
+    public int compare(ResinService a, ResinService b)
     {
-      return a.getStartPriority() - b.getStartPriority();
+      int cmp = a.getStartPriority() - b.getStartPriority();
+      
+      if (cmp != 0)
+        return cmp;
+      else
+        return a.getClass().getName().compareTo(b.getClass().getName());
     }
   }
   
-  static class StopComparator implements Comparator<NetworkService> {
+  static class StopComparator implements Comparator<ResinService> {
     @Override
-    public int compare(NetworkService a, NetworkService b)
+    public int compare(ResinService a, ResinService b)
     {
-      return a.getStopPriority() - b.getStopPriority();
+      int cmp = a.getStopPriority() - b.getStopPriority();
+      
+      if (cmp != 0)
+        return cmp;
+      else
+        return a.getClass().getName().compareTo(b.getClass().getName());
     }
   }
 }

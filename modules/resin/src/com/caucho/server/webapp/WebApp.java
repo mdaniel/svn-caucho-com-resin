@@ -74,6 +74,7 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import com.caucho.amber.manager.AmberContainer;
+import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -2466,14 +2467,6 @@ public class WebApp extends ServletContextImpl
   public Throwable getConfigException()
   {
     return _configException;
-  }
-
-  /**
-   * Returns the current cluster.
-   */
-  public Cluster getCluster()
-  {
-    return getServer().getCluster();
   }
 
   /**

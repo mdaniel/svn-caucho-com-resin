@@ -39,6 +39,11 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.admin.RemoteAdminService;
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
+import com.caucho.cloud.topology.CloudSystem;
+import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.BeanBuilder;
@@ -46,6 +51,7 @@ import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.types.Period;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.jmx.Jmx;
@@ -56,7 +62,6 @@ import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.SocketLinkListener;
-import com.caucho.network.server.NetworkServer;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Cluster;
@@ -200,18 +205,11 @@ class WatchdogManager implements AlarmListener {
     thread = Thread.currentThread();
     thread.setContextClassLoader(resin.getClassLoader());
 
-    Cluster cluster = resin.createCluster();
-    ClusterServer clusterServer = cluster.createServer();
-    // cluster.addServer(clusterServer);
-
-    clusterServer.setId("");
-    clusterServer.setPort(0);
-
-    // clusterServer.addHttp(http);
-
-    cluster.addServer(clusterServer);
-
-    resin.addCluster(cluster);
+    CloudSystem cloudSystem = TopologyService.getCurrent().getSystem();
+    
+    CloudCluster cluster = cloudSystem.createCluster("watchdog");
+    CloudPod pod = cluster.createPod();
+    pod.createStaticServer("", "localhost", -1, false);
 
     _server = resin.createServer();
     

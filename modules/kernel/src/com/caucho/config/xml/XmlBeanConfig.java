@@ -448,14 +448,14 @@ public class XmlBeanConfig<T> {
     _annotatedType.addAnnotation(xmlCookie);
     
     ManagedBeanImpl<T> managedBean
-      = new ManagedBeanImpl(_cdiManager,_annotatedType, false);
+      = new ManagedBeanImpl<T>(_cdiManager,_annotatedType, false);
     
     managedBean.introspect();
     
-    XmlInjectionTarget injectionTarget
+    XmlInjectionTarget<T> injectionTarget
       = new XmlInjectionTarget(managedBean, javaCtor, newProgram, injectProgram);
     
-    _bean = new XmlBean(managedBean, injectionTarget);
+    _bean = new XmlBean<T>(managedBean, injectionTarget);
     
     _cdiManager.addXmlInjectionTarget(xmlCookie.value(), injectionTarget);
     

@@ -29,19 +29,19 @@
 
 package com.caucho.network.listen;
 
-import com.caucho.network.server.AbstractNetworkService;
-import com.caucho.network.server.NetworkServer;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 
 /**
  * The socket poll service, provides nio-style socket listening.
  */
-public class SocketPollService extends AbstractNetworkService
+public class SocketPollService extends AbstractResinService
 {
-  private final NetworkServer _server;
+  private final ResinSystem _server;
   
   private AbstractSelectManager _selectManager;
   
-  public SocketPollService(NetworkServer server, 
+  public SocketPollService(ResinSystem server, 
                            AbstractSelectManager manager)
   {
     _server = server;

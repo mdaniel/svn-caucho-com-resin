@@ -48,6 +48,24 @@ public class TriadDispatcherDouble<X> extends TriadDispatcher<X> {
   }
   
   /**
+   * Returns the member A.
+   */
+  @Override
+  public X getA()
+  {
+    return _valueA;
+  }
+  
+  /**
+   * Returns the member B.
+   */
+  @Override
+  public X getB()
+  {
+    return _valueB;
+  }
+  
+  /**
    * Returns the primary server.
    */
   @Override

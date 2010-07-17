@@ -29,24 +29,11 @@
 
 package com.caucho.server.repository;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.PropertyValueProgram;
-import com.caucho.config.types.PathBuilder;
-import com.caucho.config.types.Period;
-import com.caucho.config.types.RawString;
-import com.caucho.config.types.FileSetType;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * General deployment exception.
  */
+@SuppressWarnings("serial")
 public class RepositoryException extends RuntimeException {
   public RepositoryException()
   {

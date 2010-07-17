@@ -34,6 +34,30 @@ package com.caucho.cloud.topology;
  */
 public class TriadDispatcher<X> {
   /**
+   * Returns member A
+   */
+  public X getA()
+  {
+    return null;
+  }
+
+  /**
+   * Returns member B
+   */
+  public X getB()
+  {
+    return null;
+  }
+
+  /**
+   * Returns member C
+   */
+  public X getC()
+  {
+    return null;
+  }
+
+  /**
    * Returns the primary server.
    */
   public X primary(TriadOwner owner)

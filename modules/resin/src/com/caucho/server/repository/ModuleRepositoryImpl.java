@@ -29,31 +29,20 @@
 
 package com.caucho.server.repository;
 
-import com.caucho.config.ConfigException;
-import com.caucho.loader.EnvironmentLocal;
+import java.util.ArrayList;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.repository.ModuleRepository;
 import com.caucho.repository.Resolver;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 
 /**
  * The module repository holds the module jars for osgi and ivy.
  */
 public class ModuleRepositoryImpl extends ModuleRepository
 {
-  private static final Logger log
-    = Logger.getLogger(ModuleRepositoryImpl.class.getName());
-  private static final L10N L = new L10N(ModuleRepositoryImpl.class);
-    
   private Path _root;
 
   private ArrayList<JarsDirectory> _jarsList

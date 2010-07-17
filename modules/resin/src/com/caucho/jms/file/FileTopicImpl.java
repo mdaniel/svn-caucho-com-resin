@@ -29,30 +29,20 @@
 
 package com.caucho.jms.file;
 
-import java.io.Serializable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.*;
 
-import javax.jms.*;
-
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
-import com.caucho.jms.memory.MemoryQueue;
-import com.caucho.jms.connection.*;
-import com.caucho.vfs.*;
+import com.caucho.jms.queue.AbstractQueue;
+import com.caucho.jms.queue.AbstractTopic;
+import com.caucho.jms.queue.MessageException;
+import com.caucho.vfs.Path;
 
 /**
  * Implements a file topic.
  */
+@SuppressWarnings("serial")
 public class FileTopicImpl<E> extends AbstractTopic<E>
 {
-  private static final Logger log
-    = Logger.getLogger(FileTopicImpl.class.getName());
-
-  private final FileQueueStore _store;
-
   private HashMap<String,AbstractQueue<E>> _durableSubscriptionMap
     = new HashMap<String,AbstractQueue<E>>();
 
@@ -63,7 +53,7 @@ public class FileTopicImpl<E> extends AbstractTopic<E>
 
   public FileTopicImpl()
   {
-    _store = FileQueueStore.create();
+    FileQueueStore.create();
   }
 
   protected FileTopicImpl(Path path, String name, String serverId)
@@ -76,7 +66,7 @@ public class FileTopicImpl<E> extends AbstractTopic<E>
     if (serverId == null)
       serverId = "anon";
 
-    _store = new FileQueueStore(path, serverId);
+    new FileQueueStore(path, serverId);
 
     setName(name);
 
@@ -111,17 +101,17 @@ public class FileTopicImpl<E> extends AbstractTopic<E>
   }
 
   @Override
-  public AbstractQueue createSubscriber(Object publisher,
+  public AbstractQueue<E> createSubscriber(Object publisher,
                                         String name,
                                         boolean noLocal)
   {
-    AbstractQueue queue;
+    AbstractQueue<E> queue;
 
     if (name != null) {
       queue = _durableSubscriptionMap.get(name);
 
       if (queue == null) {
-        queue = new FileSubscriberQueue(this, publisher, noLocal);
+        queue = new FileSubscriberQueue<E>(this, publisher, noLocal);
         queue.setName(getName() + ":sub-" + name);
 
         _subscriptionList.add(queue);
@@ -131,7 +121,7 @@ public class FileTopicImpl<E> extends AbstractTopic<E>
       return queue;
     }
     else {
-      queue = new FileSubscriberQueue(this, publisher, noLocal);
+      queue = new FileSubscriberQueue<E>(this, publisher, noLocal);
       queue.setName(getName() + ":sub-" + _id++);
 
       _subscriptionList.add(queue);

@@ -33,9 +33,11 @@ package com.caucho.server.cluster;
 /**
  * Dynamic clustered representation of a server
  */
+@SuppressWarnings("serial")
 public class DynamicServerQuery implements java.io.Serializable {
   private String _id;
 
+  @SuppressWarnings("unused")
   private DynamicServerQuery()
   {
   }

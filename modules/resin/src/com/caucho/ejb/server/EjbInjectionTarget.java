@@ -37,6 +37,7 @@ import javax.ejb.TimedObject;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerService;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
@@ -79,7 +80,7 @@ public class EjbInjectionTarget<T> {
   private TimerService _timerService;
   
   EjbInjectionTarget(AbstractEjbBeanManager<T> server,
-              AnnotatedType<T> annotatedType)
+                     AnnotatedType<T> annotatedType)
   {
     _server = server;
     _ejbClass = annotatedType.getJavaClass();
@@ -109,9 +110,10 @@ public class EjbInjectionTarget<T> {
   public void setInjectionTarget(InjectionTarget<T> injectionTarget)
   {
     _injectionTarget = injectionTarget;
-    
+
     if (injectionTarget instanceof InjectionTargetBuilder<?>) {
-      InjectionTargetBuilder<T> targetImpl = (InjectionTargetBuilder<T>) injectionTarget;
+      InjectionTargetBuilder<T> targetImpl
+        = (InjectionTargetBuilder<T>) injectionTarget;
       
       targetImpl.setGenerateInterception(false);
     }
@@ -161,6 +163,7 @@ public class EjbInjectionTarget<T> {
       return;
     
     InjectManager beanManager = InjectManager.create();
+
     ManagedBeanImpl<T> managedBean
       = beanManager.createManagedBean(_annotatedType);
     

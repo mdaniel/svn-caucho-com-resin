@@ -29,19 +29,16 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.server.cluster.ClusterPod;
-import com.caucho.server.distcache.MnodeValue;
-import com.caucho.server.distcache.CacheConfig;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
-
-import javax.cache.CacheLoader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An entry in the cache map
@@ -49,9 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 abstract public class DistCacheEntry implements ExtCacheEntry {
   private final HashKey _keyHash;
 
-  private final ClusterPod.Owner _owner;
-
-  private CacheConfig _cacheConfig;
+  private final TriadOwner _owner;
 
   private Object _key;
 
@@ -60,11 +55,9 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   private final AtomicReference<MnodeValue> _mnodeValue
     = new AtomicReference<MnodeValue>();
 
-  private int _hits;
-
   public DistCacheEntry(Object key,
                         HashKey keyHash,
-                        ClusterPod.Owner owner)
+                        TriadOwner owner)
   {
     _key = key;
     _keyHash = keyHash;
@@ -73,13 +66,12 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
 
   public DistCacheEntry(Object key,
                         HashKey keyHash,
-                        ClusterPod.Owner owner,
+                        TriadOwner owner,
                         CacheConfig config)
   {
     _key = key;
     _keyHash = keyHash;
     _owner = owner;
-    _cacheConfig = config;
   }
 
   /**
@@ -130,7 +122,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the owner
    */
-  public final ClusterPod.Owner getOwner()
+  public final TriadOwner getOwner()
   {
     return _owner;
   }

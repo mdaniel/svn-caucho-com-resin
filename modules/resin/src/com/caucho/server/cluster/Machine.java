@@ -29,18 +29,12 @@
 
 package com.caucho.server.cluster;
 
-import java.util.*;
-import java.util.logging.*;
-import com.caucho.util.*;
+import java.util.ArrayList;
 
 /**
  * Represents a machine in a cluster.  Contains multiple servers.
  */
 public class Machine {
-  private static final Logger log
-    = Logger.getLogger(Machine.class.getName());
-  private static final L10N L = new L10N(Machine.class);
-
   private ClusterPod _pod;
   private String _id = "";
 

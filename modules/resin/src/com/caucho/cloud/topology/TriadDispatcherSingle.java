@@ -32,7 +32,7 @@ package com.caucho.cloud.topology;
 /**
  * Selects one of the triad members, given the triad owner.
  */
-public class TriadDispatcherSingle<X> {
+public class TriadDispatcherSingle<X> extends TriadDispatcher<X> {
   private final X _valueA;
   
   public TriadDispatcherSingle(X valueA)
@@ -44,8 +44,18 @@ public class TriadDispatcherSingle<X> {
   }
   
   /**
+   * Returns the member A.
+   */
+  @Override
+  public X getA()
+  {
+    return _valueA;
+  }
+  
+  /**
    * Returns the primary server.
    */
+  @Override
   public X primary(TriadOwner owner)
   {
     return _valueA;
@@ -54,6 +64,7 @@ public class TriadDispatcherSingle<X> {
   /**
    * Returns the secondary server.
    */
+  @Override
   public X secondary(TriadOwner owner)
   {
     return null;
@@ -62,6 +73,7 @@ public class TriadDispatcherSingle<X> {
   /**
    * Returns the tertiary server.
    */
+  @Override
   public X tertiary(TriadOwner owner)
   {
     return null;

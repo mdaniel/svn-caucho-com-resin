@@ -67,14 +67,16 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the owning cluster's object name.
    */
+  @Override
   public ClusterMXBean getCluster()
   {
-    return _server.getCluster().getAdmin();
+    return _server.getCluster().getData(ClusterMXBean.class);
   }
 
   /**
    * Returns the cluster index.
    */
+  @Override
   public int getClusterIndex()
   {
     return _server.getIndex();
@@ -83,6 +85,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the server's IP address.
    */
+  @Override
   public String getAddress()
   {
     return _server.getAddress();
@@ -91,6 +94,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the server's port.
    */
+  @Override
   public int getPort()
   {
     return _server.getPort();
@@ -99,6 +103,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns true for a dynamic server
    */
+  @Override
   public boolean isDynamicServer()
   {
     return _server.isDynamic();
@@ -107,6 +112,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns true for a triad server
    */
+  @Override
   public boolean isTriadServer()
   {
     return _server.isTriad();
@@ -115,6 +121,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns true for the self server
    */
+  @Override
   public boolean isSelfServer()
   {
     return _server.isSelf();
@@ -128,6 +135,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
    * Returns the time the client will consider the connection dead
    * before retrying.
    */
+  @Override
   public long getRecoverTime()
   {
     return _server.getLoadBalanceRecoverTime();
@@ -136,6 +144,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the maximum time a socket can remain idle in the pool.
    */
+  @Override
   public long getIdleTime()
   {
     return _server.getLoadBalanceIdleTime();
@@ -144,6 +153,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the green load-balancing connection minimum
    */
+  @Override
   public int getConnectionMin()
   {
     return _server.getLoadBalanceConnectionMin();
@@ -152,6 +162,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the connect timeout for a client.
    */
+  @Override
   public long getConnectTimeout()
   {
     return _server.getLoadBalanceConnectTimeout();
@@ -160,6 +171,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the socket timeout for a client.
    */
+  @Override
   public long getSocketTimeout()
   {
     return _server.getLoadBalanceSocketTimeout();
@@ -168,6 +180,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the warmup time in milliseconds.
    */
+  @Override
   public long getWarmupTime()
   {
     return _server.getLoadBalanceWarmupTime();
@@ -176,6 +189,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Returns the load-balance weight.
    */
+  @Override
   public int getWeight()
   {
     return _server.getLoadBalanceWeight();
@@ -185,6 +199,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   // State
   //
 
+  @Override
   public String getState()
   {
     ClientSocketFactory pool = _server.getServerPool();
@@ -195,6 +210,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return "self";
   }
 
+  @Override
   public int getConnectionActiveCount()
   {
     ClientSocketFactory pool = _server.getServerPool();
@@ -205,6 +221,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return 0;
   }
 
+  @Override
   public int getConnectionIdleCount()
   {
     ClientSocketFactory pool = _server.getServerPool();
@@ -215,6 +232,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return 0;
   }
 
+  @Override
   public long getConnectionNewCountTotal()
   {
     ClientSocketFactory pool = _server.getServerPool();
@@ -225,6 +243,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return 0;
   }
 
+  @Override
   public long getConnectionFailCountTotal()
   {
     ClientSocketFactory pool = _server.getServerPool();
@@ -235,6 +254,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return 0;
   }
 
+  @Override
   public Date getLastFailTime()
   {
     ClientSocketFactory pool = _server.getServerPool();
@@ -355,10 +375,12 @@ public class ClusterServerAdmin extends AbstractManagedObject
   public void removeDynamicServer()
   {
     ClusterServer clusterServer = _server;
-    
+
+    /*
     clusterServer.getClusterPod().removeDynamicServer(clusterServer.getId(),
                                                       clusterServer.getAddress(),
                                                       clusterServer.getPort());
+                                                      */
   }
 
   protected void register()

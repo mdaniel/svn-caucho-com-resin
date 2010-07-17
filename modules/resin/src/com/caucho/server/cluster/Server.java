@@ -49,6 +49,9 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
@@ -59,6 +62,7 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.git.GitRepository;
 import com.caucho.hemp.broker.DomainManager;
@@ -80,7 +84,6 @@ import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.network.listen.AbstractSelectManager;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.network.listen.TcpSocketLink;
-import com.caucho.network.server.NetworkServer;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.admin.Management;
@@ -138,7 +141,7 @@ public class Server extends ProtocolDispatchServer
     = new EnvironmentLocal<Server>();
 
   private final Resin _resin;
-  private final NetworkServer _networkServer;
+  private final ResinSystem _resinSystem;
   private final ClusterServer _selfServer;
 
   private EnvironmentClassLoader _classLoader;
@@ -229,30 +232,27 @@ public class Server extends ProtocolDispatchServer
   /**
    * Creates a new servlet server.
    */
-  public Server(NetworkServer networkServer,
+  public Server(ResinSystem resinSystem,
                 ClusterServer clusterServer)
   {
-    if (networkServer == null)
+    if (resinSystem == null)
       throw new NullPointerException();
     
     if (clusterServer == null)
       throw new NullPointerException();
     
-    _networkServer = networkServer;
+    _resinSystem = resinSystem;
     
-    ServletService.create(this);
-
     _selfServer = clusterServer;
-    Cluster cluster = clusterServer.getCluster();
-    _resin = cluster.getResin();
-    _resin.setServer(this);
+
+    _resin = Resin.getCurrent();
 
     // pod id can't include the server since it's used as part of
     // cache ids
     //String podId
     //  = (cluster.getId() + ":" + _selfServer.getClusterPod().getId());
 
-    _classLoader = _networkServer.getClassLoader();
+    _classLoader = _resinSystem.getClassLoader();
     
     String id = clusterServer.getId();
     
@@ -301,8 +301,6 @@ public class Server extends ProtocolDispatchServer
   {
     _cdiManager = InjectManager.create();
     
-    _networkServer.addService(new DeployNetworkService());
-    
     _hostContainer = new HostContainer();
     _hostContainer.setClassLoader(_classLoader);
     _hostContainer.setDispatchServer(this);
@@ -323,6 +321,8 @@ public class Server extends ProtocolDispatchServer
     
     _ports.add(_clusterPort);
 
+    _resinSystem.addService(new DeployNetworkService());
+    
     _selfServer.getServerProgram().configure(this);
   }
 
@@ -334,9 +334,9 @@ public class Server extends ProtocolDispatchServer
     return _serverLocal.get();
   }
   
-  public NetworkServer getNetworkServer()
+  public ResinSystem getNetworkServer()
   {
-    return _networkServer;
+    return _resinSystem;
   }
 
   public boolean isResinServer()
@@ -396,7 +396,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the cluster
    */
-  public Cluster getCluster()
+  public CloudCluster getCluster()
   {
     return _selfServer.getCluster();
   }
@@ -404,9 +404,9 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns all the clusters
    */
-  public ArrayList<Cluster> getClusterList()
+  public CloudCluster []getClusterList()
   {
-    return getResin().getClusterList();
+    return _selfServer.getCluster().getSystem().getClusterList();
   }
 
   /**
@@ -527,9 +527,9 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the self server's pod
    */
-  public ClusterPod getPod()
+  public CloudPod getPod()
   {
-    return _selfServer.getClusterPod();
+    return _selfServer.getCloudServer().getPod();
   }
 
   /**
@@ -587,14 +587,6 @@ public class Server extends ProtocolDispatchServer
   protected AbstractVoteManager createDistributedVoteManager()
   {
     return new SingleVoteManager(this);
-  }
-
-  public TempFileManager getTempFileManager()
-  {
-    if (! isResinServer())
-      return null;
-
-    return _resin.getTempFileManager();
   }
 
   /**
@@ -867,13 +859,20 @@ public class Server extends ProtocolDispatchServer
 
   public Management createManagement()
   {
+    if (_resin != null)
+      return _resin.createResinManagement();
+    else
+      return null;
+    
+    /*
     if (_management == null && _resin != null) {
       _management = _resin.createResinManagement();
 
-      _management.setCluster(getCluster());
+      // _management.setCluster(getCluster());
     }
 
     return _management;
+    */
   }
 
   /**
@@ -1437,9 +1436,18 @@ public class Server extends ProtocolDispatchServer
       _serverListeners.add(listener);
     }
 
-    for (ClusterServer server : _selfServer.getClusterPod().getServerList()) {
-      if (server.isActive())
-        listener.serverStart(server);
+    CloudServer []serverList = _selfServer.getCloudPod().getServerList();
+    int serverLength = _selfServer.getCloudPod().getServerLength();
+    
+    for (int i = 0; i < serverLength; i++) {
+      CloudServer cloudServer = serverList[i];
+
+      if (cloudServer != null) {
+        ClusterServer server = cloudServer.getData(ClusterServer.class);
+      
+        if (server.isActive())
+          listener.serverStart(server);
+      }
     }
   }
 
@@ -1732,11 +1740,13 @@ public class Server extends ProtocolDispatchServer
 
     _admin = new ServerAdmin(this);
 
+    /*
     if (_resin != null) {
       createManagement().setCluster(getCluster());
       createManagement().setServer(this);
       createManagement().init();
     }
+    */
 
     if (_threadIdleMax > 0
         && _threadMax > 0
@@ -1796,7 +1806,7 @@ public class Server extends ProtocolDispatchServer
     ClusterNetworkService clusterService
       = new ClusterNetworkService(_clusterPort);
     
-    _networkServer.addService(clusterService);
+    _resinSystem.addService(clusterService);
   }
 
   /**
@@ -1894,7 +1904,7 @@ public class Server extends ProtocolDispatchServer
       if (repository != null)
         repository.start();
 
-      getCluster().start();
+      // getCluster().start();
 
       // handled by the network server itself
       // _classLoader.start();
@@ -1912,7 +1922,7 @@ public class Server extends ProtocolDispatchServer
         startPorts();
       }
 
-      getCluster().startRemote();
+      // getCluster().startRemote();
 
       _alarm.queue(ALARM_INTERVAL);
 
@@ -2069,7 +2079,7 @@ public class Server extends ProtocolDispatchServer
         // XXX: message slightly wrong
         String msg = L.l("Resin restarting due to configuration change");
 
-        _selfServer.getCluster().getResin().startShutdown(msg);
+        getResin().startShutdown(msg);
         return;
       }
 

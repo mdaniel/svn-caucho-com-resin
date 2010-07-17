@@ -28,14 +28,13 @@
 
 package com.caucho.server.cache;
 
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.server.http.CauchoResponse;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.FilterChain;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.ArrayList;
+
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
 
 /**
  * Represents the final servlet in a filter chain.

@@ -29,6 +29,7 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.PortMXBean;
@@ -39,7 +40,6 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostController;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
@@ -47,8 +47,6 @@ import java.util.Date;
 
 public class ServerAdmin
 {
-  private static final L10N L = new L10N(ServerAdmin.class);
-
   private final Server _server;
 
   ServerAdmin(Server server)
@@ -121,10 +119,10 @@ public class ServerAdmin
     if (_server == null)
       return null;
     else {
-      Cluster cluster = _server.getCluster();
+      CloudCluster cluster = _server.getCluster();
 
       if (cluster != null)
-        return cluster.getAdmin();
+        return cluster.getData(ClusterMXBean.class);
       else
         return null;
     }

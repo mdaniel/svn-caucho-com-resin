@@ -29,17 +29,10 @@
 
 package com.caucho.server.repository;
 
-import com.caucho.config.ConfigException;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.ivy.IvyPattern;
-import com.caucho.util.L10N;
+import java.io.InputStream;
+
 import com.caucho.repository.DataSource;
 import com.caucho.server.cache.TempFileInode;
-import com.caucho.server.resin.Resin;
-import com.caucho.vfs.Path;
-
-import java.io.InputStream;
-import java.util.ArrayList;
 
 /**
  * The module repository holds the module jars for osgi and ivy.

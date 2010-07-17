@@ -29,6 +29,7 @@
 
 package com.caucho.cloud.topology;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.caucho.util.L10N;
@@ -51,6 +52,12 @@ public class CloudPod
   
   private final CopyOnWriteArrayList<CloudServerListener> _listeners
     = new CopyOnWriteArrayList<CloudServerListener>();
+  
+  private final ConcurrentHashMap<Class<?>,Object> _dataMap
+    = new ConcurrentHashMap<Class<?>,Object>();
+  
+  private TriadDispatcher<CloudServer> _serverDispatcher
+    = new TriadDispatcher<CloudServer>();
   
   private int _maxIndex;
 
@@ -99,17 +106,31 @@ public class CloudPod
   }
 
   /**
-   * Returns the triad's cluster
+   * Returns the pod's cluster
    */
   public final CloudCluster getCluster()
   {
     return _cluster;
   }
 
+  /**
+   * Returns the pod's system
+   */
+  public final CloudSystem getSystem()
+  {
+    return getCluster().getSystem();
+  }
+
   public CloudServer []getServerList()
   {
     return _servers;
   }
+  
+  public int getServerLength()
+  {
+    return _maxIndex + 1;
+  }
+  
   /**
    * Finds the first server with the given server-id.
    */
@@ -119,6 +140,22 @@ public class CloudPod
       CloudServer server = _servers[i];
       
       if (server != null && server.getId().equals(id))
+        return server;
+    }
+
+    return null;
+  }
+  
+  /**
+   * Finds the first server with the given cluster id, the
+   * three-digit base-64 identifier.
+   */
+  public CloudServer findServerByUniqueClusterId(String id)
+  {
+    for (int i = 0; i <= _maxIndex; i++) {
+      CloudServer server = _servers[i];
+      
+      if (server != null && server.getIdWithinCluster().equals(id))
         return server;
     }
 
@@ -149,6 +186,27 @@ public class CloudPod
     }
 
     return null;
+  }
+  
+  //
+  // data
+  //
+  
+  public void putData(Object value)
+  {
+    _dataMap.put(value.getClass(), value);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> T putDataIfAbsent(T value)
+  {
+    return (T) _dataMap.putIfAbsent(value.getClass(), value);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> T getData(Class<T> cl)
+  {
+    return (T) _dataMap.get(cl);
   }
   
   //
@@ -234,6 +292,8 @@ public class CloudPod
       if (_maxIndex < index)
         _maxIndex = index;
     }
+
+    updateDispatcher();
     
     for (CloudServerListener listener : _listeners) {
       listener.onServerAdd(server);
@@ -244,6 +304,45 @@ public class CloudPod
     }
     
     return server;
+  }
+  
+  //
+  // dispatcher
+  //
+  
+  /**
+   * Returns the triad server dispatcher
+   */
+  public TriadDispatcher<CloudServer> getTriadServerDispatcher()
+  {
+    return _serverDispatcher;
+  }
+  
+  /**
+   * Updates the triad server dispatcher.
+   */
+  private void updateDispatcher()
+  {
+    
+    switch (_maxIndex) {
+    case 0:
+      _serverDispatcher
+        = new TriadDispatcherSingle<CloudServer>(_servers[0]);
+      break;
+
+    case 1:
+      _serverDispatcher 
+        = new TriadDispatcherDouble<CloudServer>(_servers[0],
+                                                 _servers[1]);
+      break;
+
+    default:
+      _serverDispatcher 
+        = new TriadDispatcherTriple<CloudServer>(_servers[0],
+                                                 _servers[1],
+                                                 _servers[2]);
+      break;
+    }
   }
   
   private int findFirstFreeIndex()

@@ -369,15 +369,15 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   {
     ArrayList<AnnotatedType<? super X>> localApiList = getLocalApi();
     ArrayList<Class<?>> remoteApiList = getRemoteApiList();
-    
+ 
     AnnotatedType<X> rawAnnType = getRawAnnotatedType();
-    AnnotatedType<X> beanType = getAnnotatedType();
+    AnnotatedType<X> annType = getAnnotatedType();
     
-    AnnotatedType<X> extAnnType = createExternalAnnotatedType(beanType, localApiList);
+    AnnotatedType<X> extAnnType = createExternalAnnotatedType(annType, localApiList);
 
     InjectManager moduleBeanManager = InjectManager.create();
 
-    Named named = (Named) beanType.getAnnotation(Named.class);
+    Named named = (Named) annType.getAnnotation(Named.class);
 
     if (named != null) {
     }
@@ -388,8 +388,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     
     InjectionTarget<X> target = mBean.getInjectionTarget();
     target = moduleBeanManager.processInjectionTarget(target, getRawAnnotatedType());
+    mBean.setInjectionTarget(target);
     
-    Class<?> baseApi = beanType.getJavaClass();
+    Class<?> baseApi = annType.getJavaClass();
       
     Set<Type> apiList = new LinkedHashSet<Type>();
 
@@ -434,7 +435,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
     moduleBeanManager.addBean(_bean, process);
     
-    if (! moduleBeanManager.isSpecialized(beanType.getJavaClass())) {
+    if (! moduleBeanManager.isSpecialized(annType.getJavaClass())) {
       moduleBeanManager.addProduces(_bean, extAnnType);
     }
 

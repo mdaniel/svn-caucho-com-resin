@@ -36,15 +36,10 @@ import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.L10N;
 
 public class ResinAdmin extends AbstractManagedObject
   implements ResinMXBean
 {
-  private static final L10N L = new L10N(ResinAdmin.class);
-
-  private static final String THREAD_POOL_OBJECT_NAME = "resin:type=ThreadPool";
-
   private final Resin _resin;
 
   /**

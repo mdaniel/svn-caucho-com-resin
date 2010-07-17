@@ -29,22 +29,15 @@
 
 package com.caucho.server.repository;
 
-import com.caucho.server.cluster.Server;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Map;
+
+import com.caucho.server.cluster.Server;
 
 /**
  * Public API for the deployment
  */
 public class LocalRepositoryManager
 {
-  private static final L10N L = new L10N(LocalRepositoryManager.class);
-  
   private Server _server;
   private Repository _repository;
 

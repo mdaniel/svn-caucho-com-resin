@@ -29,15 +29,14 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.server.cluster.ClusterPod;
-import com.caucho.util.Alarm;
-import com.caucho.util.HashKey;
-
-import javax.cache.CacheLoader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
+
+import com.caucho.cloud.topology.TriadOwner;
+import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.util.Alarm;
+import com.caucho.util.HashKey;
 
 /**
  * An entry in the cache map
@@ -47,7 +46,7 @@ public class FileCacheEntry extends DistCacheEntry {
 
   public FileCacheEntry(Object key,
                         HashKey keyHash,
-                        ClusterPod.Owner owner,
+                        TriadOwner owner,
                         FileCacheManager manager)
   {
     super(key, keyHash, owner);
@@ -57,7 +56,7 @@ public class FileCacheEntry extends DistCacheEntry {
 
   public FileCacheEntry(Object key,
                         HashKey keyHash,
-                        ClusterPod.Owner owner,
+                        TriadOwner owner,
                         FileCacheManager manager,
                         CacheConfig config)
   {

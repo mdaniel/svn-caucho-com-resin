@@ -49,6 +49,7 @@ import javax.annotation.PostConstruct;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
@@ -57,7 +58,6 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
-import com.caucho.network.server.NetworkServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -980,7 +980,7 @@ public class SocketLinkListener extends TaskWorker
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 
     if (_serverSocket.isJni()) {
-      NetworkServer server = NetworkServer.getCurrent();
+      ResinSystem server = ResinSystem.getCurrent();
 
       if (server != null) {
         SocketPollService pollService 

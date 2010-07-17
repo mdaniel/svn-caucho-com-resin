@@ -29,32 +29,28 @@
 
 package com.caucho.server.repository;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.ConfigException;
-import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.ivy.IvyPattern;
-import com.caucho.util.L10N;
 import com.caucho.repository.DataSource;
 import com.caucho.repository.ModuleNotFoundException;
 import com.caucho.repository.Resolver;
 import com.caucho.server.cache.TempFileInode;
 import com.caucho.server.cache.TempFileManager;
-import com.caucho.server.resin.Resin;
+import com.caucho.server.cache.TempFileService;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.TempBuffer;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.PostConstruct;
+import com.caucho.vfs.Vfs;
 
 /**
  * The module repository holds the module jars for osgi and ivy.
@@ -73,7 +69,7 @@ public class FileResolver extends Resolver
 
   public FileResolver()
   {
-    _tempFileManager = Resin.getCurrent().getTempFileManager();
+    _tempFileManager = TempFileService.create().getManager();
   }
 
   public void setPath(Path path)
@@ -126,8 +122,6 @@ public class FileResolver extends Resolver
 
       InputStream is = null;
       try {
-        long length = path.getLength();
-
         is = path.openRead();
 
         OutputStream out = inode.openOutputStream();

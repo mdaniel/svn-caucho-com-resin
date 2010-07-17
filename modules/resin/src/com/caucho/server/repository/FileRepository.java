@@ -29,50 +29,27 @@
 
 package com.caucho.server.repository;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import com.caucho.git.GitCommit;
 import com.caucho.git.GitObjectStream;
 import com.caucho.git.GitRepository;
 import com.caucho.git.GitTree;
 import com.caucho.git.GitType;
-import com.caucho.jmx.Jmx;
-import com.caucho.management.server.DeployControllerMXBean;
-import com.caucho.management.server.EAppMXBean;
-import com.caucho.management.server.EarDeployMXBean;
-import com.caucho.management.server.WebAppMXBean;
-import com.caucho.management.server.WebAppDeployMXBean;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.resin.Resin;
-import com.caucho.server.host.HostController;
-import com.caucho.server.webapp.WebAppController;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.QDate;
-import com.caucho.vfs.*;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.management.ObjectName;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 public class FileRepository extends Repository
 {
-  private static final Logger log
-    = Logger.getLogger(FileRepository.class.getName());
-
   private static final L10N L = new L10N(FileRepository.class);
 
   private GitRepository _git;
   
-  private String _repositoryHash;
-  
-  private RepositoryTagMap _tagMap;
-
   public FileRepository(Server server)
   {
     super(server);

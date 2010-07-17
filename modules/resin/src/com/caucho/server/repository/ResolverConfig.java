@@ -29,19 +29,13 @@
 
 package com.caucho.server.repository;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.type.TypeFactory;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.ivy.IvyPattern;
-import com.caucho.util.L10N;
-import com.caucho.repository.Resolver;
-import com.caucho.server.resin.Resin;
-import com.caucho.vfs.Path;
-
-import java.util.ArrayList;
 import javax.annotation.PostConstruct;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.cfg.BeanConfig;
+import com.caucho.loader.ivy.IvyPattern;
+import com.caucho.repository.Resolver;
+import com.caucho.util.L10N;
 
 /**
  * The configuration for a resolver

@@ -29,52 +29,18 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.distcache.CacheSerializer;
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.config.ConfigException;
-import com.caucho.server.cache.TempFileManager;
-import com.caucho.server.cluster.ClusterPod;
+import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.server.cluster.Server;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
 import com.caucho.util.HashKey;
-import com.caucho.util.Sha256OutputStream;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.TempOutputStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-
-import javax.cache.CacheLoader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.logging.Logger;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
 
 /**
  * Manages the distributed cache
  */
 public class FileCacheManager
   extends AbstractDataCacheManager<FileCacheEntry> {
-  private static final Logger log
-    = Logger.getLogger(FileCacheManager.class.getName());
-
-  private static final L10N L = new L10N(FileCacheManager.class);
-
-  private TempFileManager _tempFileManager;
-
   public FileCacheManager(Server server)
   {
     super(server);
-
-    try {
-      _tempFileManager = server.getTempFileManager();
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
   }
 
   /**
@@ -83,7 +49,7 @@ public class FileCacheManager
   @Override
   public FileCacheEntry createCacheEntry(Object key, HashKey hashKey)
   {
-    ClusterPod.Owner owner = ClusterPod.Owner.A_B;
+    TriadOwner owner = TriadOwner.A_B;
 
     return new FileCacheEntry(key, hashKey, owner, this);
   }

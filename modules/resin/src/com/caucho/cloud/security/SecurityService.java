@@ -31,8 +31,8 @@ package com.caucho.cloud.security;
 
 import java.security.MessageDigest;
 
-import com.caucho.network.server.AbstractNetworkService;
-import com.caucho.network.server.NetworkServer;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.security.Authenticator;
 import com.caucho.security.DigestCredentials;
 import com.caucho.util.Base64;
@@ -41,7 +41,7 @@ import com.caucho.util.L10N;
 /**
  * Interface for a service registered with the Resin Server.
  */
-public class SecurityService extends AbstractNetworkService
+public class SecurityService extends AbstractResinService
 {
   private static final L10N L = new L10N(SecurityService.class);
   
@@ -50,7 +50,7 @@ public class SecurityService extends AbstractNetworkService
   
   public static SecurityService create()
   {
-    NetworkServer server = NetworkServer.getCurrent();
+    ResinSystem server = ResinSystem.getCurrent();
 
     if (server == null) {
       throw new IllegalStateException(L.l("NetworkServer is not active in {0}",

@@ -78,9 +78,9 @@ public class Management
     _resin = Resin.getCurrent();
   }
 
-  public void setCluster(Cluster cluster)
+  public Management(Resin resin)
   {
-    _cluster = cluster;
+    _resin = resin;
   }
 
   public void setResin(Resin resin)
@@ -315,14 +315,6 @@ public class Management
     }
 
     return _hostConfig;
-  }
-
-  protected Cluster getCluster()
-  {
-    if (_cluster == null)
-      _cluster = Server.getCurrent().getCluster();
-
-    return _cluster;
   }
 
   public double getCpuLoad()

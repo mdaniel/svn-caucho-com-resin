@@ -29,17 +29,16 @@
 
 package com.caucho.server.resin;
 
+import java.lang.management.MemoryUsage;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
+
 import com.caucho.config.ConfigException;
-import com.caucho.env.thread.ThreadPool;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.MemoryMXBean;
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
-import java.lang.management.MemoryUsage;
-import javax.management.*;
-import javax.management.openmbean.*;
 
 /**
  * Facade for the JVM's memory statistics
@@ -47,10 +46,6 @@ import javax.management.openmbean.*;
 public class MemoryAdmin extends AbstractManagedObject
   implements MemoryMXBean
 {
-  private static final L10N L = new L10N(MemoryAdmin.class);
-  private static final Logger log
-    = Logger.getLogger(MemoryAdmin.class.getName());
-
   private final MBeanServer _mbeanServer;
 
   private final ObjectName _codeCacheName;
