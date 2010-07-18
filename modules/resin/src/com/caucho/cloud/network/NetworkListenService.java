@@ -79,6 +79,13 @@ public class NetworkListenService
     
     if (_clusterListener != null)
       _listeners.add(_clusterListener);
+    
+    NetworkServerConfig config = new NetworkServerConfig(this);
+    
+    ClusterServerProgram program = cloudServer.getData(ClusterServerProgram.class);
+    
+    if (program != null)
+      program.getProgram().configure(config);
   }
   
   /**
