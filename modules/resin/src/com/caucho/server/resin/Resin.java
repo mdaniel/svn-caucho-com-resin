@@ -857,6 +857,8 @@ public class Resin extends Shutdown
   {
     if (! _lifecycle.toStop())
       return;
+    
+    _resinSystem.stop();
   }
 
   /**
@@ -951,13 +953,14 @@ public class Resin extends Shutdown
       }
 
       try {
-        Server server = _server;
-
-        if (server != null)
-          server.destroy();
+        ResinSystem resinSystem = _resinSystem;
+        
+        if (resinSystem != null)
+          resinSystem.destroy();
       } catch (Throwable e) {
         log().log(Level.WARNING, e.toString(), e);
       } finally {
+        _resinSystem = null;
         _server = null;
       }
 

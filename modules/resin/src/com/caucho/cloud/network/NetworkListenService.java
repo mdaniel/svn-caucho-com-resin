@@ -58,6 +58,8 @@ public class NetworkListenService
   
   private static final long ALARM_TIMEOUT = 120 * 1000L;
   
+  private final CloudServer _cloudServer;
+  
   private SocketLinkListener _clusterListener;
   
   private final ArrayList<SocketLinkListener> _listeners
@@ -72,6 +74,8 @@ public class NetworkListenService
    */
   public NetworkListenService(CloudServer cloudServer)
   {
+    _cloudServer = cloudServer;
+    
     NetworkClusterService clusterService = NetworkClusterService.getCurrent();
     
     if (clusterService != null)
@@ -79,13 +83,6 @@ public class NetworkListenService
     
     if (_clusterListener != null)
       _listeners.add(_clusterListener);
-    
-    NetworkServerConfig config = new NetworkServerConfig(this);
-    
-    ClusterServerProgram program = cloudServer.getData(ClusterServerProgram.class);
-    
-    if (program != null)
-      program.getProgram().configure(config);
   }
   
   /**
@@ -197,6 +194,11 @@ public class NetworkListenService
   public void start()
     throws Exception
   {
+    
+    NetworkServerConfig config = new NetworkServerConfig(this);
+   
+    configure(_cloudServer, config);
+    
     boolean isFirst = true;
 
     for (SocketLinkListener listener : _listeners) {
@@ -218,6 +220,27 @@ public class NetworkListenService
     
     _alarm = new Alarm(this);
     _alarm.queue(ALARM_TIMEOUT);
+  }
+  
+  private void configure(CloudServer server, Object config)
+  {
+    ClusterServerProgram program;
+    
+    program = server.getCluster().getData(ClusterServerProgram.class);
+
+    if (program != null)
+      program.getProgram().configure(config);
+    
+    program = server.getPod().getData(ClusterServerProgram.class);
+
+    if (program != null)
+      program.getProgram().configure(config);
+    
+    program = server.getData(ClusterServerProgram.class);
+
+    if (program != null)
+      program.getProgram().configure(config);
+
   }
 
   /**

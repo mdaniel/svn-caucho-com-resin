@@ -94,7 +94,7 @@ public class ResinSystem
                      ClassLoader loader)
   {
     _id = id;
-    
+
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;
     else
@@ -326,7 +326,7 @@ public class ResinSystem
     }
     
     _pendingStart.add(service);
-    
+
     if (_lifecycle.isActive()) {
       startServices();
     }
@@ -456,6 +456,8 @@ public class ResinSystem
       
       for (ResinService service : services) {
         try {
+          thread.setContextClassLoader(_classLoader);
+
           if (log.isLoggable(Level.FINE))
             log.fine(service + " stopping");
           
@@ -491,7 +493,7 @@ public class ResinSystem
         = new TreeSet<ResinService>(new StopComparator());
       
       services.addAll(_serviceMap.values());
-      
+
       _serviceMap.clear();
       
       for (ResinService service : services) {
@@ -567,12 +569,12 @@ public class ResinSystem
     @Override
     public int compare(ResinService a, ResinService b)
     {
-      int cmp = a.getStopPriority() - b.getStopPriority();
+      int cmp = b.getStopPriority() - a.getStopPriority();
       
       if (cmp != 0)
         return cmp;
       else
-        return a.getClass().getName().compareTo(b.getClass().getName());
+        return b.getClass().getName().compareTo(a.getClass().getName());
     }
   }
 }
