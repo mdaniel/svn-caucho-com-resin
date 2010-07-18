@@ -31,9 +31,9 @@ package com.caucho.cloud.hmtp;
 
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.hemp.servlet.ServerLinkService;
-import com.caucho.server.cluster.ClusterServer;
 
 /**
  * Underlying stream handling HTTP requests.

@@ -220,6 +220,11 @@ public class CloudPod
   {
     if (! _listeners.contains(listener))
       _listeners.add(listener);
+    
+    for (CloudServer server : getServerList()) {
+      if (server != null)
+        listener.onServerAdd(server);
+    }
   }
   
   /**

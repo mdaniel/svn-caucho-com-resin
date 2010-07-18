@@ -29,9 +29,6 @@
 
 package com.caucho.cloud.topology;
 
-import com.caucho.server.cluster.ClusterPod;
-
-
 /**
  * The triad owner is the triad ownership for a hashed item. Each owner has
  * a primary, secondary and tertiary owner.

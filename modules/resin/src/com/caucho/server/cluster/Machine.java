@@ -31,6 +31,8 @@ package com.caucho.server.cluster;
 
 import java.util.ArrayList;
 
+import com.caucho.cloud.network.ClusterServer;
+
 /**
  * Represents a machine in a cluster.  Contains multiple servers.
  */

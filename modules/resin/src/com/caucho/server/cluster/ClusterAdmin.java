@@ -32,6 +32,7 @@ package com.caucho.server.cluster;
 
 import java.util.ArrayList;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ClusterServerMXBean;

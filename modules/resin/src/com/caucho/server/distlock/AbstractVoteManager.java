@@ -29,7 +29,7 @@
 
 package com.caucho.server.distlock;
 
-import com.caucho.server.cluster.ClusterServer;
+import com.caucho.cloud.network.ClusterServer;
 
 /**
  * Manages the distributed lock

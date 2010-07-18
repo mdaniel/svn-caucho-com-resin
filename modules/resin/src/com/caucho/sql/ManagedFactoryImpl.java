@@ -29,6 +29,7 @@
 
 package com.caucho.sql;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.server.cluster.*;
 import com.caucho.server.resin.Resin;
 import com.caucho.transaction.IdlePoolSet;

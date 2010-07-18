@@ -29,6 +29,7 @@
 
 package com.caucho.server.session;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
@@ -42,7 +43,6 @@ import com.caucho.hessian.io.*;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.distcache.PersistentStoreConfig;

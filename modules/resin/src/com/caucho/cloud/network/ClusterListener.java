@@ -27,26 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
+package com.caucho.cloud.network;
 
 import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
 import com.caucho.network.listen.SocketLinkListener;
-import com.caucho.server.hmux.HmuxProtocol;
 
 /**
  * Represents a protocol connection.
  */
-public class ClusterPort extends SocketLinkListener {
-  public ClusterPort(String address, int port)
+public class ClusterListener extends SocketLinkListener {
+  public ClusterListener(String address, int port)
   {
     try {
       setAddress(address);
       
       setPort(port);
       
-      setProtocol(new HmuxProtocol());
+      // setProtocol(new HmuxProtocol());
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

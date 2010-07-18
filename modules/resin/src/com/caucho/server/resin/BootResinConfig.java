@@ -160,10 +160,12 @@ public class BootResinConfig implements SchemaBean
   
   void configureServers()
   {
+    /*
     for (BootClusterConfig cluster : getClusterList()) {
       for (BootServerConfig server : cluster.getServerList()) {
         server.configureServer();
       }
     }
+    */
   }
 }

@@ -41,6 +41,7 @@ import java.util.logging.LogManager;
 
 import javax.enterprise.context.spi.CreationalContext;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.TopologyService;
@@ -53,7 +54,6 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.network.listen.StreamSocketLink;
 import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;

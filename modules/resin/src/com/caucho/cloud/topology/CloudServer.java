@@ -162,7 +162,7 @@ public class CloudServer {
    */
   public boolean isTriad()
   {
-    return _index < 3;
+    return false;
   }
 
   /**
@@ -191,6 +191,14 @@ public class CloudServer {
   public CloudCluster getCluster()
   {
     return getPod().getCluster();
+  }
+
+  /**
+   * Returns the system.
+   */
+  public CloudSystem getSystem()
+  {
+    return getCluster().getSystem();
   }
 
   /**

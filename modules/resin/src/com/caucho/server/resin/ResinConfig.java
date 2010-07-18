@@ -271,13 +271,7 @@ public class ResinConfig implements EnvironmentBean
   @Deprecated
   public Management createResinManagement()
   {
-    if (_management == null) {
-      _management = new Management();
-
-      _management.setResin(_resin);
-    }
-
-    return _management;
+    return new Management();
   }
 
   public String toString()

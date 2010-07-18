@@ -40,11 +40,7 @@ public class TopologyService extends AbstractResinService
 {
   private static final L10N L = new L10N(TopologyService.class);
   
-  public static final int START_PRIORITY_CLASSLOADER = 999;
-  public static final int START_PRIORITY_DEFAULT = 1000;
-  
-  public static final int STOP_PRIORITY_DEFAULT = 1000;
-  public static final int STOP_PRIORITY_CLASSLOADER = 1001;
+  public static final int START_PRIORITY = 100;
   
   private final CloudSystem _system;
   
@@ -86,6 +82,12 @@ public class TopologyService extends AbstractResinService
   public CloudSystem getSystem()
   {
     return _system;
+  }
+  
+  @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY;
   }
   
   @Override

@@ -260,7 +260,7 @@ public class StreamImpl {
    */
   public void flushToDisk() throws IOException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

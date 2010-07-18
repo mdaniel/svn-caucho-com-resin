@@ -29,11 +29,11 @@
 
 package com.caucho.cluster;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.config.Configurable;
 import com.caucho.config.ConfigException;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.distlock.AbstractVoteManager;
 import com.caucho.util.L10N;
 

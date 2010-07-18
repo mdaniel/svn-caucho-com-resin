@@ -528,19 +528,13 @@ public class ResinSystem
     @Override
     public int getStartPriority()
     {
-      return ResinService.START_PRIORITY_CLASSLOADER;
+      return START_PRIORITY_CLASSLOADER;
     }
     
     @Override
     public void start()
     {
       _classLoader.start();
-    }
-    
-    @Override
-    public int getStopPriority()
-    {
-      return ResinService.STOP_PRIORITY_CLASSLOADER;
     }
     
     @Override

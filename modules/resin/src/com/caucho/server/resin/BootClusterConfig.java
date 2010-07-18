@@ -33,6 +33,7 @@ import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.cloud.network.ClusterServerProgram;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.config.ConfigException;
@@ -60,8 +61,8 @@ public class BootClusterConfig implements SchemaBean
   private ContainerProgram _clusterProgram
     = new ContainerProgram();
 
-  private ArrayList<ConfigProgram> _serverDefaults
-    = new ArrayList<ConfigProgram>();
+  private ContainerProgram _serverDefaultProgram
+    = new ContainerProgram();
 
   private ArrayList<BootServerConfig> _servers
     = new ArrayList<BootServerConfig>();
@@ -106,7 +107,7 @@ public class BootClusterConfig implements SchemaBean
   @Configurable
   public void addServerDefault(ContainerProgram program)
   {
-    _serverDefaults.add(program);
+    _serverDefaultProgram.addProgram(program);
   }
 
   @Configurable
@@ -115,8 +116,7 @@ public class BootClusterConfig implements SchemaBean
   {
     BootServerConfig server = new BootServerConfig(this);
 
-    for (int i = 0; i < _serverDefaults.size(); i++)
-      _serverDefaults.get(i).configure(server);
+    _servers.add(server);
 
     return server;
   }
@@ -147,6 +147,10 @@ public class BootClusterConfig implements SchemaBean
   {
     if (_id == null)
       throw new ConfigException(L.l("'id' is a require attribute for <cluster>"));
+    
+    CloudCluster cluster = getCloudCluster();
+    
+    cluster.putData(new ClusterServerProgram(_serverDefaultProgram));
 
     getCloudPod();
   }

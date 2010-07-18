@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
@@ -77,12 +78,5 @@ public class SingleCluster extends Cluster
       throw new IllegalStateException(L.l("{0}: can't create static server after initialization", this));
 
     return _pod.createServer();
-  }
-
-  @Override
-  protected Server createResinServer(ResinSystem networkServer,
-                                     ClusterServer clusterServer)
-  {
-    return new Server(networkServer, clusterServer);
   }
 }

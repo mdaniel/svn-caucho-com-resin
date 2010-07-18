@@ -294,6 +294,10 @@ public class CloudCluster
   {
     if (! _listeners.contains(listener))
       _listeners.add(listener);
+    
+    for (CloudPod pod : getPodList()) {
+      listener.onPodAdd(pod);
+    }
   }
   
   /**

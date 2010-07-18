@@ -29,8 +29,8 @@
 
 package com.caucho.server.distlock;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.cluster.ClusterServer;
 
 /**
  * Manages the distributed vote

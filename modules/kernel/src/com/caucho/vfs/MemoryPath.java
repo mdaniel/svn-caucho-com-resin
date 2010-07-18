@@ -355,6 +355,7 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
+  @Override
   public StreamImpl openReadImpl() throws IOException
   {
     synchronized (_rootNode) {
@@ -369,11 +370,13 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
+  @Override
   public StreamImpl openWriteImpl() throws IOException
   {
     return openWriteImpl(false);
   }
 
+  @Override
   public StreamImpl openAppendImpl() throws IOException
   {
     return openWriteImpl(true);
@@ -402,6 +405,7 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
+  @Override
   public Object getValue() throws IOException
   {
     synchronized (_rootNode) {
@@ -414,6 +418,7 @@ public class MemoryPath extends FilesystemPath {
     }
   }
 
+  @Override
   synchronized public void setValue(Object object) throws IOException
   {
     synchronized (_rootNode) {
@@ -447,6 +452,7 @@ public class MemoryPath extends FilesystemPath {
     return path;
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == null || ! getClass().equals(o.getClass()))
@@ -567,6 +573,7 @@ public class MemoryPath extends FilesystemPath {
       return newNode;
     }
 
+    @Override
     public String toString()
     {
       return getClass().getSimpleName() + "[" + this.name + "]";
@@ -591,13 +598,16 @@ public class MemoryPath extends FilesystemPath {
       _bb = bb;
     }
 
+    @Override
     public int getAvailable()
     {
       return _bb.length() - _offset;
     }
 
+    @Override
     public boolean canRead() { return true; }
 
+    @Override
     public int read(byte []buf, int bufOffset, int length) throws IOException
     {
       synchronized (_bb) {
@@ -620,6 +630,7 @@ public class MemoryPath extends FilesystemPath {
       return _offset;
     }
 
+    @Override
     public void seekStart(long pos)
     {
       _offset = (int) pos;
@@ -629,6 +640,7 @@ public class MemoryPath extends FilesystemPath {
         _offset = _bb.length();
     }
 
+    @Override
     public boolean canWrite() { return true; }
 
     /**
@@ -639,6 +651,7 @@ public class MemoryPath extends FilesystemPath {
      * @param length the number of bytes to write.
      * @param isEnd true when the write is flushing a close.
      */
+    @Override
     public void write(byte []buf, int offset, int length, boolean isEnd)
       throws IOException
     {
@@ -649,6 +662,11 @@ public class MemoryPath extends FilesystemPath {
       _node.lastModified = Alarm.getCurrentTime();
     }
 
+    @Override
+    public void flushToDisk()
+    {
+    }
+    
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _node + "]";

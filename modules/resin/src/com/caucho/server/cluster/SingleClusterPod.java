@@ -31,6 +31,7 @@ package com.caucho.server.cluster;
 
 import java.util.ArrayList;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 

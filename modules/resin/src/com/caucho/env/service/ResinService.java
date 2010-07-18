@@ -34,12 +34,8 @@ package com.caucho.env.service;
  */
 public interface ResinService
 {
-  public static final int START_PRIORITY_CLASSLOADER = 999;
-  public static final int START_PRIORITY_DEFAULT = 1000;
-  
-
-  public static final int STOP_PRIORITY_DEFAULT = 1000;
-  public static final int STOP_PRIORITY_CLASSLOADER = 1001;
+  public static final int START_PRIORITY_CLASSLOADER = 9000;
+  public static final int START_PRIORITY_DEFAULT = 10000;
 
   /**
    * Returns the start priority of the service, used to determine which

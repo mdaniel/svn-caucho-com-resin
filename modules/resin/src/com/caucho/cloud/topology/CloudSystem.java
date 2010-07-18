@@ -203,6 +203,10 @@ public class CloudSystem
     
     if (! _listeners.contains(listener))
       _listeners.add(listener);
+    
+    for (CloudCluster cluster : getClusterList()) {
+      listener.onClusterAdd(cluster);
+    }
   }
   
   /**

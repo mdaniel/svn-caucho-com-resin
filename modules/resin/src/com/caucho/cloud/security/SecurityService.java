@@ -43,6 +43,8 @@ import com.caucho.util.L10N;
  */
 public class SecurityService extends AbstractResinService
 {
+  public static final int START_PRIORITY = 30;
+  
   private static final L10N L = new L10N(SecurityService.class);
   
   private String _signatureSecret;
@@ -53,7 +55,7 @@ public class SecurityService extends AbstractResinService
     ResinSystem server = ResinSystem.getCurrent();
 
     if (server == null) {
-      throw new IllegalStateException(L.l("NetworkServer is not active in {0}",
+      throw new IllegalStateException(L.l("ResinSystem is not active in {0}",
                                           Thread.currentThread().getContextClassLoader()));
     }
 
@@ -203,5 +205,11 @@ public class SecurityService extends AbstractResinService
       md.update((byte) (digit + '0'));
     else
       md.update((byte) (digit - 10 + 'a'));
+  }
+  
+  @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY;
   }
 }

@@ -28,7 +28,7 @@
  */
 
 
-package com.caucho.server.cluster;
+package com.caucho.cloud.network;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ClusterMXBean;
@@ -374,9 +374,9 @@ public class ClusterServerAdmin extends AbstractManagedObject
   @Override
   public void removeDynamicServer()
   {
+    /*
     ClusterServer clusterServer = _server;
 
-    /*
     clusterServer.getClusterPod().removeDynamicServer(clusterServer.getId(),
                                                       clusterServer.getAddress(),
                                                       clusterServer.getPort());

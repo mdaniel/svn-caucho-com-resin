@@ -27,37 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.network.listen;
+package com.caucho.cloud.network;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
 
-/**
- * The socket poll service, provides nio-style socket listening.
- */
-public class SocketPollService extends AbstractResinService
+public interface ClusterServerListener
 {
-  public static final int START_PRIORITY = 100;
+  public void serverStart(ClusterServer server);
   
-  private final ResinSystem _server;
-  
-  private AbstractSelectManager _selectManager;
-  
-  public SocketPollService(ResinSystem server, 
-                           AbstractSelectManager manager)
-  {
-    _server = server;
-    _selectManager = manager;
-  }
-  
-  public AbstractSelectManager getSelectManager()
-  {
-    return _selectManager;
-  }
- 
-  @Override
-  public int getStartPriority()
-  {
-    return START_PRIORITY;
-  }
+  public void serverStop(ClusterServer server);
 }

@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -49,15 +48,16 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.network.ClusterServer;
+import com.caucho.cloud.network.NetworkClusterService;
+import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
-import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
@@ -79,8 +79,6 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.CacheItem;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.management.server.ServerMXBean;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.network.listen.AbstractSelectManager;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.network.listen.TcpSocketLink;
@@ -88,7 +86,6 @@ import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.AbstractCache;
-import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
@@ -107,7 +104,6 @@ import com.caucho.server.host.HostConfig;
 import com.caucho.server.host.HostContainer;
 import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
-import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.repository.FileRepository;
 import com.caucho.server.repository.Repository;
@@ -142,6 +138,8 @@ public class Server extends ProtocolDispatchServer
 
   private final Resin _resin;
   private final ResinSystem _resinSystem;
+  private final NetworkClusterService _clusterService;
+  private final NetworkListenService _listenService;
   private final ClusterServer _selfServer;
 
   private EnvironmentClassLoader _classLoader;
@@ -176,11 +174,6 @@ public class Server extends ProtocolDispatchServer
 
   private boolean _isDevelopmentModeErrorPage;
 
-  // <server> configuration
-  
-  private ClusterPort _clusterPort;
-  private final ArrayList<SocketLinkListener> _ports = new ArrayList<SocketLinkListener>();
-  
   private Management _management;
 
   private long _memoryFreeMin = 1024 * 1024;
@@ -192,9 +185,6 @@ public class Server extends ProtocolDispatchServer
   private int _threadExecutorTaskMax = -1;
   private int _threadIdleMin = -1;
   private int _threadIdleMax = -1;
-  
-  private ContainerProgram _listenerDefaults
-    = new ContainerProgram();
 
   // <cluster> configuration
 
@@ -205,9 +195,6 @@ public class Server extends ProtocolDispatchServer
   private Alarm _alarm;
   protected AbstractCache _cache;
 
-  private boolean _isBindPortsAtEnd = true;
-  private AtomicBoolean _isStartedPorts = new AtomicBoolean();
-
   //
   // internal databases
   //
@@ -215,13 +202,6 @@ public class Server extends ProtocolDispatchServer
   // reliable system store
   private ClusterCache _systemStore;
   private GlobalCache _globalStore;
-
-  //
-  // listeners
-  //
-
-  private ArrayList<ServerListener> _serverListeners
-    = new ArrayList<ServerListener>();
 
   // stats
 
@@ -233,17 +213,23 @@ public class Server extends ProtocolDispatchServer
    * Creates a new servlet server.
    */
   public Server(ResinSystem resinSystem,
-                ClusterServer clusterServer)
+                NetworkClusterService clusterService,
+                NetworkListenService listenService)
   {
     if (resinSystem == null)
       throw new NullPointerException();
     
-    if (clusterServer == null)
+    if (clusterService == null)
+      throw new NullPointerException();
+    
+    if (listenService == null)
       throw new NullPointerException();
     
     _resinSystem = resinSystem;
+    _clusterService = clusterService;
+    _listenService = listenService;
     
-    _selfServer = clusterServer;
+    _selfServer = _clusterService.getSelfServer().getData(ClusterServer.class);
 
     _resin = Resin.getCurrent();
 
@@ -254,7 +240,7 @@ public class Server extends ProtocolDispatchServer
 
     _classLoader = _resinSystem.getClassLoader();
     
-    String id = clusterServer.getId();
+    String id = _selfServer.getId();
     
     if ("".equals(id))
       id = "default";
@@ -315,15 +301,10 @@ public class Server extends ProtocolDispatchServer
     
     Config.setProperty("server", new ServerVar(_selfServer), _classLoader);
     Config.setProperty("cluster", new ClusterVar(), _classLoader);
-    
-    _clusterPort = new ClusterPort(_selfServer.getAddress(),
-                                   _selfServer.getPort());
-    
-    _ports.add(_clusterPort);
 
     _resinSystem.addService(new DeployNetworkService());
     
-    _selfServer.getServerProgram().configure(this);
+    // _selfServer.getServerProgram().configure(this);
   }
 
   /**
@@ -334,9 +315,14 @@ public class Server extends ProtocolDispatchServer
     return _serverLocal.get();
   }
   
-  public ResinSystem getNetworkServer()
+  public ResinSystem getResinSystem()
   {
     return _resinSystem;
+  }
+  
+  public NetworkListenService getListenService()
+  {
+    return _listenService;
   }
 
   public boolean isResinServer()
@@ -933,87 +919,6 @@ public class Server extends ProtocolDispatchServer
   {
     _threadIdleMax = max;
   }
-  
-  //
-  // <server> port configuration
-  //
-  
-  public ClusterPort createClusterPort()
-  {
-   return _clusterPort;
-  }
-  
-  public SocketLinkListener createHttp()
-    throws ConfigException
-  {
-    SocketLinkListener port = new SocketLinkListener();
-    
-    applyPortDefaults(port);
-
-    HttpProtocol protocol = new HttpProtocol();
-    port.setProtocol(protocol);
-
-    _ports.add(port);
-
-    return port;
-  }
-
-  public SocketLinkListener createProtocol()
-  {
-    ProtocolPortConfig port = new ProtocolPortConfig();
-
-    _ports.add(port);
-
-    return port;
-  }
-
-  public SocketLinkListener createListen()
-  {
-    ProtocolPortConfig port = new ProtocolPortConfig();
-
-    _ports.add(port);
-
-    return port;
-  }
-
-  public void addProtocolPort(SocketLinkListener port)
-  {
-    try {
-      if (! _ports.contains(port))
-        _ports.add(port);
-    
-      if (_lifecycle.isAfterStarting()) {
-        // server/1e00
-        port.bind();
-        port.start();
-      }
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
-  public void add(ProtocolPort protocolPort)
-  {
-    SocketLinkListener port = new SocketLinkListener();
-
-    AbstractProtocol protocol = protocolPort.getProtocol();
-    port.setProtocol(protocol);
-
-    applyPortDefaults(port);
-
-    protocolPort.getConfigProgram().configure(port);
-
-    addProtocolPort(port);
-  }
-
-  private void applyPortDefaults(SocketLinkListener port)
-  {
-    ConfigProgram program = _selfServer.getPortDefaults();
-    
-    program.configure(port);
-    
-    _listenerDefaults.configure(port);
-  }
 
   //
   // Configuration from <cluster>
@@ -1117,14 +1022,6 @@ public class Server extends ProtocolDispatchServer
   public int getUrlLengthMax()
   {
     return _urlLengthMax;
-  }
-
-  /**
-   * Adds a port-default
-   */
-  public void addPortDefault(ConfigProgram program)
-  {
-    _listenerDefaults.addProgram(program);
   }
 
   /**
@@ -1306,11 +1203,13 @@ public class Server extends ProtocolDispatchServer
   /**
    * Adds the ping.
    */
+  /*
   public void addPing(Object ping)
     throws ConfigException
   {
     createManagement().addPing(ping);
   }
+  */
 
   /**
    * Sets true if the select manager should be enabled
@@ -1424,66 +1323,6 @@ public class Server extends ProtocolDispatchServer
   public double getCpuLoad()
   {
     return 0;
-  }
-
-  //
-  // listeners
-  //
-
-  public void addServerListener(ServerListener listener)
-  {
-    synchronized (_serverListeners) {
-      _serverListeners.add(listener);
-    }
-
-    CloudServer []serverList = _selfServer.getCloudPod().getServerList();
-    int serverLength = _selfServer.getCloudPod().getServerLength();
-    
-    for (int i = 0; i < serverLength; i++) {
-      CloudServer cloudServer = serverList[i];
-
-      if (cloudServer != null) {
-        ClusterServer server = cloudServer.getData(ClusterServer.class);
-      
-        if (server.isActive())
-          listener.serverStart(server);
-      }
-    }
-  }
-
-  public void removeServerListener(ServerListener listener)
-  {
-    synchronized (_serverListeners) {
-      _serverListeners.remove(listener);
-    }
-  }
-
-  protected void notifyServerStart(ClusterServer server)
-  {
-    ArrayList<ServerListener> serverListeners
-      = new ArrayList<ServerListener>();
-
-    synchronized (_serverListeners) {
-      serverListeners.addAll(_serverListeners);
-    }
-
-    for (ServerListener listener : serverListeners) {
-      listener.serverStart(server);
-    }
-  }
-
-  protected void notifyServerStop(ClusterServer server)
-  {
-    ArrayList<ServerListener> serverListeners
-      = new ArrayList<ServerListener>();
-
-    synchronized (_serverListeners) {
-      serverListeners.addAll(_serverListeners);
-    }
-
-    for (ServerListener listener : serverListeners) {
-      listener.serverStop(server);
-    }
   }
 
   //
@@ -1637,27 +1476,11 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * If true, ports are bound at end.
-   */
-  public void setBindPortsAfterStart(boolean bindAtEnd)
-  {
-    _isBindPortsAtEnd = bindAtEnd;
-  }
-
-  /**
-   * If true, ports are bound at end.
-   */
-  public boolean isBindPortsAfterStart()
-  {
-    return _isBindPortsAtEnd;
-  }
-
-  /**
    * Returns the {@link SocketLinkListener}s for this server.
    */
   public Collection<SocketLinkListener> getPorts()
   {
-    return Collections.unmodifiableList(_ports);
+    return _listenService.getListeners();
   }
 
   /**
@@ -1802,11 +1625,6 @@ public class Server extends ProtocolDispatchServer
       }
     }
     */
-    
-    ClusterNetworkService clusterService
-      = new ClusterNetworkService(_clusterPort);
-    
-    _resinSystem.addService(clusterService);
   }
 
   /**
@@ -1877,17 +1695,10 @@ public class Server extends ProtocolDispatchServer
 
       _lifecycle.toStarting();
 
-      // startClusterNetwork();
-      
       startImpl();
 
       if (_resin != null && _resin.getManagement() != null)
         _resin.getManagement().start(this);
-
-      if (! _isBindPortsAtEnd) {
-        bindPorts();
-        startPorts();
-      }
 
       if (_distributedCacheManager == null)
         _distributedCacheManager = createDistributedCacheManager();
@@ -1915,12 +1726,6 @@ public class Server extends ProtocolDispatchServer
       // _classLoader.getAdmin();
 
       startPersistentStore();
-
-      // will only occur if bind-ports-at-end is true
-      if (_isBindPortsAtEnd) {
-        bindPorts();
-        startPorts();
-      }
 
       // getCluster().startRemote();
 
@@ -1982,26 +1787,7 @@ public class Server extends ProtocolDispatchServer
   public void bind(String address, int port, QServerSocket ss)
     throws Exception
   {
-    if ("null".equals(address))
-      address = null;
-
-    for (int i = 0; i < _ports.size(); i++) {
-      SocketLinkListener serverPort = _ports.get(i);
-
-      if (port != serverPort.getPort())
-        continue;
-
-      if ((address == null) != (serverPort.getAddress() == null))
-        continue;
-      else if (address == null || address.equals(serverPort.getAddress())) {
-        serverPort.bind(ss);
-
-        return;
-      }
-    }
-
-    throw new IllegalStateException(L.l("No matching port for {0}:{1}",
-                                        address, port));
+    _listenService.bind(address, port, ss);
   }
 
   /**   
@@ -2009,61 +1795,6 @@ public class Server extends ProtocolDispatchServer
    */
   protected void notifyClusterStart()
   {
-  }
-
-  /**
-   * Bind the ports.
-   */
-  public void bindPorts()
-    throws Exception
-  {
-    if (_isStartedPorts.getAndSet(true))
-      return;
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    try {
-      thread.setContextClassLoader(_classLoader);
-
-      ArrayList<SocketLinkListener> ports = _ports;
-      if (ports.size() > 0
-          && (ports.get(0) != _clusterPort
-              || ports.size() > 1)) {
-        log.info("");
-
-        for (int i = 0; i < ports.size(); i++) {
-          SocketLinkListener port = ports.get(i);
-
-          port.bind();
-        }
-
-        log.info("");
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  /**
-   * Start the ports.
-   */
-  public void startPorts()
-    throws Exception
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    try {
-      thread.setContextClassLoader(_classLoader);
-
-      ArrayList<SocketLinkListener> ports = _ports;
-      for (int i = 0; i < ports.size(); i++) {
-        SocketLinkListener port = ports.get(i);
-
-        port.start();
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
   }
 
   /**
@@ -2080,25 +1811,6 @@ public class Server extends ProtocolDispatchServer
         String msg = L.l("Resin restarting due to configuration change");
 
         getResin().startShutdown(msg);
-        return;
-      }
-
-      try {
-        ArrayList<SocketLinkListener> ports = _ports;
-
-        for (int i = 0; i < ports.size(); i++) {
-          SocketLinkListener port = ports.get(i);
-
-          if (port.isClosed()) {
-            log.severe("Resin restarting due to closed port: " + port);
-            // destroy();
-            //_controller.restart();
-          }
-        }
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-        // destroy();
-        //_controller.restart();
         return;
       }
     } finally {
@@ -2344,18 +2056,6 @@ public class Server extends ProtocolDispatchServer
       if (getSelectManager() != null)
         getSelectManager().stop();
 
-      ArrayList<SocketLinkListener> ports = _ports;
-      for (int i = 0; i < ports.size(); i++) {
-        SocketLinkListener port = ports.get(i);
-
-        try {
-          if (port != _clusterPort)
-            port.close();
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
-
       try {
         if (_systemStore != null)
           _systemStore.close();
@@ -2366,13 +2066,6 @@ public class Server extends ProtocolDispatchServer
       try {
         if (_globalStore != null)
           _globalStore.close();
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-
-      try {
-        if (_clusterPort != null)
-          _clusterPort.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -2564,10 +2257,7 @@ public class Server extends ProtocolDispatchServer
 
     private SocketLinkListener getFirstPort(String protocol, boolean isSSL)
     {
-      if (_ports == null)
-        return null;
-
-      for (SocketLinkListener port : _ports) {
+      for (SocketLinkListener port : _listenService.getListeners()) {
         if (protocol.equals(port.getProtocolName()) && (port.isSSL() == isSSL))
           return port;
       }

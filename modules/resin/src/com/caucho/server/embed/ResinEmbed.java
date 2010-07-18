@@ -37,6 +37,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.resin.HttpEmbed;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -111,8 +112,10 @@ public class ResinEmbed
       _resin.start();
       _server = _resin.getServer();
       
-      if (_httpPort >= 0)
-        _server.createHttp().setPort(_httpPort);
+      if (_httpPort >= 0) {
+        HttpEmbed httpEmbed = new HttpEmbed(_httpPort);
+        httpEmbed.bindTo(_server);
+      }
       
       HostConfig hostConfig = new HostConfig();
       _server.addHost(hostConfig);

@@ -29,10 +29,11 @@
 
 package com.caucho.resin;
 
+import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.config.ConfigException;
 import com.caucho.network.listen.SocketLinkListener;
-import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.http.HttpProtocol;
 
 /**
  * Embeddable version of a HTTP port
@@ -87,14 +88,18 @@ public class HttpEmbed extends PortEmbed
   public void bindTo(Server server)
   {
     try {
-      _port = server.createHttp();
+      _port = new SocketLinkListener();
+      
+      _port.setProtocol(new HttpProtocol());
 
       _port.setPort(getPort());
       _port.setAddress(getAddress());
       
       _port.init();
       
-      server.addProtocolPort(_port);
+      NetworkListenService listenService = server.getListenService();
+      
+      listenService.addListener(_port);
       
       // server.addPort(_port);
     } catch (Exception e) {

@@ -39,6 +39,8 @@ import com.caucho.vfs.Path;
  */
 public class RootDirectoryService extends AbstractResinService 
 {
+  public static final int START_PRIORITY_ROOT_DIRECTORY = 20;
+  
   private final Path _rootDirectory;
   private final Path _dataDirectory;
 
@@ -93,5 +95,11 @@ public class RootDirectoryService extends AbstractResinService
   public Path getDataDirectory()
   {
     return _dataDirectory;
+  }
+  
+  @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY_ROOT_DIRECTORY;
   }
 }

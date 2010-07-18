@@ -52,6 +52,11 @@ import javax.management.ObjectName;
 
 import com.caucho.VersionFactory;
 import com.caucho.bam.Broker;
+import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.network.NetworkClusterService;
+import com.caucho.cloud.network.ClusterServer;
+import com.caucho.cloud.network.NetworkListenService;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.Config;
@@ -82,7 +87,6 @@ import com.caucho.naming.Jndi;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPod;
-import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.server.cluster.SingleCluster;
@@ -429,8 +433,6 @@ public class Resin extends Shutdown
       Config.setProperty("java", new JavaVar());
       Config.setProperty("system", System.getProperties());
       Config.setProperty("getenv", System.getenv());
-
-      new HempBrokerManager();
 
       // _management = createResinManagement();
 
@@ -1151,10 +1153,6 @@ public class Resin extends Shutdown
     
     BootResinConfig bootResin = _bootResinConfig;
     
-    ResinConfig resinConfig = new ResinConfig(this);
-    
-    bootResin.getProgram().configure(resinConfig);
-    
     bootResin.configureServers();
     
     BootServerConfig bootServer = bootResin.findServer(_serverId);
@@ -1182,12 +1180,23 @@ public class Resin extends Shutdown
       bootServer = clusterConfig.createServer();
       bootServer.setId("");
       bootServer.init();
-      bootServer.configureServer();
+      // bootServer.configureServer();
     }
     
-    ClusterServer clusterServer = bootServer.getClusterServer();
+    CloudServer cloudServer = bootServer.getCloudServer();
     
-    _server = createServer(clusterServer);
+    NetworkClusterService networkService = new NetworkClusterService(cloudServer);
+    _resinSystem.addService(networkService);
+    
+    ClusterServer server = cloudServer.getData(ClusterServer.class);
+    
+    BamService bamService = new BamService(server.getBamAdminName());
+    _resinSystem.addService(bamService);
+    
+    NetworkListenService listenService = new NetworkListenService(cloudServer);
+    _resinSystem.addService(listenService);
+    
+    _server = createServer(networkService, listenService);
 
     if (_stage != null)
       _server.setStage(_stage);
@@ -1195,12 +1204,17 @@ public class Resin extends Shutdown
     ServletService servletService = new ServletService(_server);
     _resinSystem.addService(servletService);
     
+    ResinConfig resinConfig = new ResinConfig(this);
+    
+    bootResin.getProgram().configure(resinConfig);
+    
     bootServer.getCluster().getProgram().configure(_server);
   }
   
-  protected Server createServer(ClusterServer clusterServer)
+  protected Server createServer(NetworkClusterService clusterService,
+                                NetworkListenService listenService)
   {
-    return new Server(_resinSystem, clusterServer);
+    return new Server(_resinSystem, clusterService, listenService);
   }
 
   public Management createResinManagement()

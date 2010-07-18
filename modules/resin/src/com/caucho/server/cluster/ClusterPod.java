@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.config.ConfigException;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.util.L10N;

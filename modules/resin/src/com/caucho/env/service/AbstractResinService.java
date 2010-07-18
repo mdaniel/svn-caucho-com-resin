@@ -35,12 +35,6 @@ package com.caucho.env.service;
  */
 public class AbstractResinService implements ResinService
 {
-  public static final int START_PRIORITY_CLASSLOADER = 999;
-  public static final int START_PRIORITY_DEFAULT = 1000;
-  
-  public static final int STOP_PRIORITY_DEFAULT = 1000;
-  public static final int STOP_PRIORITY_CLASSLOADER = 1001;
-
   @Override
   public int getStartPriority()
   {
@@ -56,7 +50,7 @@ public class AbstractResinService implements ResinService
   @Override
   public int getStopPriority()
   {
-    return STOP_PRIORITY_DEFAULT;
+    return getStartPriority();
   }
 
   @Override

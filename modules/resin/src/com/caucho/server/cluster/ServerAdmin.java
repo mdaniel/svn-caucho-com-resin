@@ -156,9 +156,10 @@ public class ServerAdmin extends AbstractEmitterObject
   // Configuration attributes
   //
 
+  @Override
   public boolean isBindPortsAfterStart()
   {
-    return _server.isBindPortsAfterStart();
+    return _server.getListenService().isBindPortsAfterStart();
   }
 
   /**

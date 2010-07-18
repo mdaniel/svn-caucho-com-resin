@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinService;
 import com.caucho.env.service.ResinSystem;
@@ -46,9 +47,7 @@ import com.caucho.inject.Module;
 public class DeployNetworkService extends AbstractResinService
 {
   public static final int START_PRIORITY
-    = ResinService.START_PRIORITY_DEFAULT;
-  public static final int STOP_PRIORITY
-    = ResinService.STOP_PRIORITY_DEFAULT;
+    = NetworkClusterService.START_PRIORITY_CLUSTER_SERVICE;
   
   private final ConcurrentHashMap<String,DeployTagItem> _deployMap
     = new ConcurrentHashMap<String,DeployTagItem>();
@@ -187,14 +186,5 @@ public class DeployNetworkService extends AbstractResinService
   public int getStartPriority()
   {
     return START_PRIORITY;
-  }
-
-  /**
-   * Returns the stop priority order for the deploy service.
-   */
-  @Override
-  public int getStopPriority()
-  {
-    return STOP_PRIORITY;
   }
 }

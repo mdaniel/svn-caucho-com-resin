@@ -78,8 +78,8 @@ abstract public class AbstractCache extends AbstractMap
 
   private String _guid;
 
-  private Collection<CacheListener> _listeners
-    = new ConcurrentLinkedQueue<CacheListener>();
+  private Collection<CacheListener<?>> _listeners
+    = new ConcurrentLinkedQueue<CacheListener<?>>();
 
   private CacheConfig _config = new CacheConfig();
 
@@ -141,7 +141,7 @@ abstract public class AbstractCache extends AbstractMap
    * a cache is created.
    */
   @Configurable
-  public void setSerializer(CacheSerializer serializer)
+  public void setSerializer(CacheSerializer<?> serializer)
   {
     _config.setValueSerializer(serializer);
   }

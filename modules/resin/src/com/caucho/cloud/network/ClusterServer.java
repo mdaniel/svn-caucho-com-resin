@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
+package com.caucho.cloud.network;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -47,7 +47,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Period;
 import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.server.resin.Resin;
+import com.caucho.server.cluster.Machine;
 import com.caucho.util.Alarm;
 
 /**
@@ -63,6 +63,7 @@ public final class ClusterServer {
 
   private static final int DECODE[];
 
+  private final NetworkClusterService _clusterService;
   private final CloudServer _cloudServer;
 
   private Machine _machine;
@@ -114,10 +115,20 @@ public final class ClusterServer {
 
   private ClusterServerAdmin _admin = new ClusterServerAdmin(this);
 
-  public ClusterServer(CloudServer cloudServer)
+  ClusterServer(NetworkClusterService networkService,
+                CloudServer cloudServer)
   {
+    _clusterService = networkService;
+    
+    if (networkService == null)
+      throw new NullPointerException();
+    
     _cloudServer = cloudServer;
     cloudServer.getIndex();
+
+    
+    if (_clusterService == null)
+      throw new NullPointerException();
 
     try {
       setAddress(cloudServer.getAddress());
@@ -210,7 +221,7 @@ public final class ClusterServer {
   /**
    * Returns the machine.
    */
-  protected void setMachine(Machine machine)
+  public void setMachine(Machine machine)
   {
     _machine = machine;
   }
@@ -704,8 +715,8 @@ public final class ClusterServer {
     _clusterPort.init();
     */
 
-    if (! getId().equals(Resin.getCurrent().getServerId())) {
-      _serverPool = createServerPool(Resin.getCurrent().getServerId());
+    if (getCloudServer() != _clusterService.getSelfServer()) {
+      _serverPool = createServerPool(_clusterService.getServerId());
       _serverPool.init();
     }
 
@@ -783,10 +794,7 @@ public final class ClusterServer {
     if (_serverPool != null)
       _serverPool.notifyStart();
 
-    Server server = Server.getCurrent();
-
-    if (server != null)
-      server.notifyServerStart(this);
+    _clusterService.notifyServerStart(this);
 
     return true;
   }
@@ -810,10 +818,7 @@ public final class ClusterServer {
     if (_serverPool != null)
       _serverPool.notifyStop();
 
-    Server server = Server.getCurrent();
-
-    if (server != null)
-      server.notifyServerStop(this);
+    _clusterService.notifyServerStop(this);
 
     return true;
   }

@@ -43,6 +43,8 @@ import com.caucho.util.L10N;
  */
 public class BamService extends AbstractResinService
 {
+  public static final int START_PRIORITY = 50;
+  
   private static final L10N L = new L10N(BamService.class);
   
   private String _jid;
@@ -128,8 +130,14 @@ public class BamService extends AbstractResinService
   }
   
   @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY;
+  }
+  
+  @Override
   public String toString()
   {
-    return getClass().getName() + "[" + _jid + "]";
+    return getClass().getSimpleName() + "[" + _jid + "]";
   }
 }

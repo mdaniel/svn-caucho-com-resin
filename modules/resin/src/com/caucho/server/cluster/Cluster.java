@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
@@ -382,39 +383,6 @@ abstract public class Cluster
     for (ClusterPod pod : getPodList()) {
       pod.start();
     }
-  }
-
-  /**
-   * Starts the server.
-   */
-  Server startServer(ResinSystem networkServer,
-                     ClusterServer clusterServer)
-    throws StartLifecycleException
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(networkServer.getClassLoader());
-
-      Server server = createResinServer(networkServer, clusterServer);
-      
-      thread.setContextClassLoader(server.getClassLoader());
-
-      _serverProgram.configure(server);
-      
-      server.init();
-
-      return server;
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  protected Server createResinServer(ResinSystem networkServer,
-                                     ClusterServer clusterServer)
-  {
-    return new Server(networkServer, clusterServer);
   }
 
   //

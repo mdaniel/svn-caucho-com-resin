@@ -31,13 +31,14 @@ package com.caucho.server.resin;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.cloud.network.ClusterServer;
+import com.caucho.cloud.network.ClusterServerProgram;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.server.cluster.ClusterServer;
 
 /**
  * The BootServerConfig is the first-pass configuration of the server.
@@ -50,8 +51,8 @@ public class BootServerConfig implements SchemaBean
   
   private String _id;
   
-  private String _address;
-  private int _port;
+  private String _address = "127.0.0.1";
+  private int _port = -1;
   private boolean _isSecure;
 
   private ContainerProgram _serverProgram
@@ -129,6 +130,11 @@ public class BootServerConfig implements SchemaBean
   {
     _serverProgram.addProgram(program);
   }
+  
+  public CloudServer getCloudServer()
+  {
+    return _cloudServer;
+  }
 
   @PostConstruct
   public void init()
@@ -139,15 +145,8 @@ public class BootServerConfig implements SchemaBean
                                           getAddress(),
                                           getPort(),
                                           isSecure());
-  }
-  
-  void configureServer()
-  {
-    ClusterServer server = new ClusterServer(_cloudServer);
     
-    _cloudServer.putData(server);
-    
-    _serverProgram.configure(server);
+    _cloudServer.putData(new ClusterServerProgram(_serverProgram));
   }
   
   ClusterServer getClusterServer()

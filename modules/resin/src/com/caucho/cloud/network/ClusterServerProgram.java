@@ -27,11 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
+package com.caucho.cloud.network;
 
-public interface ServerListener
+import com.caucho.config.program.ConfigProgram;
+
+/**
+ * The configuration program for a NetworkServer. 
+ *
+ */
+public class ClusterServerProgram
 {
-  public void serverStart(ClusterServer server);
+  private final ConfigProgram _program;
   
-  public void serverStop(ClusterServer server);
+  public ClusterServerProgram(ConfigProgram program)
+  {
+    _program = program;
+  }
+  
+  public ConfigProgram getProgram()
+  {
+    return _program;
+  }
 }

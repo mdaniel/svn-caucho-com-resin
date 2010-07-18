@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.network.balance.ClientSocketFactory;
 
 /**
