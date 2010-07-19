@@ -29,6 +29,7 @@
 
 package com.caucho.security;
 
+import com.caucho.config.Admin;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.Service;
 import com.caucho.util.Base64;
@@ -52,6 +53,7 @@ import com.caucho.util.Crc64;
  * </pre></code>
  */
 @Service
+@Admin
 @CauchoDeployment  
 @SuppressWarnings("serial")
 public class AdminAuthenticator extends XmlAuthenticator

@@ -103,11 +103,13 @@ abstract public class AbstractDispatchRule implements DispatchRule
     add(new RewriteFilterAdapter(filter));
   }
 
+  @Override
   public String rewriteUri(String uri, String queryString)
   {
     return uri;
   }
   
+  @Override
   public FilterChain map(String uri,
                          String queryString,
                          FilterChain next,

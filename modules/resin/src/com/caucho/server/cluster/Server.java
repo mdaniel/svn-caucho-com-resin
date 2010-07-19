@@ -65,7 +65,6 @@ import com.caucho.distcache.GlobalCache;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.git.GitRepository;
-import com.caucho.hemp.broker.DomainManager;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.lifecycle.Lifecycle;
@@ -193,7 +192,7 @@ public class Server extends ProtocolDispatchServer
   private ServerAdmin _admin;
 
   private Alarm _alarm;
-  protected AbstractCache _cache;
+  private AbstractCache _cache;
 
   //
   // internal databases
@@ -245,7 +244,8 @@ public class Server extends ProtocolDispatchServer
     if ("".equals(id))
       id = "default";
     
-    _classLoader.setId("server:" + id);
+    // cannot set the based on server-id because of distributed cache
+    // _classLoader.setId("server:" + id);
 
     _serverLocal.set(this, _classLoader);
 
@@ -1070,6 +1070,10 @@ public class Server extends ProtocolDispatchServer
     return _hostContainer.createRewriteDispatch();
   }
 
+  public AbstractCache getProxyCache()
+  {
+    return _cache;
+  }
 
   /**
    * Creates the proxy cache.
@@ -1079,7 +1083,10 @@ public class Server extends ProtocolDispatchServer
   {
     log.warning(L.l("<proxy-cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
 
-    return new AbstractCache();
+    if (_cache == null)
+      _cache = instantiateProxyCache();
+
+    return _cache;
   }
 
   /**
@@ -1089,6 +1096,11 @@ public class Server extends ProtocolDispatchServer
     throws ConfigException
   {
     return createProxyCache();
+  }
+  
+  protected AbstractCache instantiateProxyCache()
+  {
+    return new AbstractCache();
   }
 
   /**
@@ -1633,6 +1645,7 @@ public class Server extends ProtocolDispatchServer
       _startTime = Alarm.getCurrentTime();
 
       if (! Alarm.isTest()) {
+        /*
         log.info("");
 
         log.info(System.getProperty("os.name")
@@ -1649,6 +1662,7 @@ public class Server extends ProtocolDispatchServer
                  + ", " + System.getProperty("sun.arch.data.model")
                  + ", " + System.getProperty("java.vm.info")
                  + ", " + System.getProperty("java.vm.vendor"));
+                 */
 
         log.info("");
 
@@ -1669,7 +1683,7 @@ public class Server extends ProtocolDispatchServer
           else
             serverType = "server";
 
-          log.info(serverType + "     = "
+          log.info(serverType + "    = "
                    + _selfServer.getAddress()
                    + ":" + _selfServer.getPort()
                    + " (" + getCluster().getId()
@@ -1679,7 +1693,7 @@ public class Server extends ProtocolDispatchServer
           log.info("resin.home = " + System.getProperty("resin.home"));
         }
 
-        log.info("user.name  = " + System.getProperty("user.name"));
+        // log.info("user.name  = " + System.getProperty("user.name"));
         log.info("stage      = " + _stage);
       }
 

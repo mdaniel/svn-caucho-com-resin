@@ -29,27 +29,8 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.config.ConfigException;
-import com.caucho.db.jdbc.DataSourceImpl;
-import com.caucho.db.index.SqlIndexAlreadyExistsException;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.FreeList;
-import com.caucho.util.IoUtil;
-import com.caucho.util.Hex;
-import com.caucho.util.HashKey;
-import com.caucho.util.JdbcUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.WriteStream;
-import com.caucho.server.admin.Management;
-
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,12 +39,24 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sql.DataSource;
+
+import com.caucho.db.index.SqlIndexAlreadyExistsException;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.FreeList;
+import com.caucho.util.HashKey;
+import com.caucho.util.Hex;
+import com.caucho.util.IoUtil;
+import com.caucho.util.JdbcUtil;
+import com.caucho.vfs.StreamSource;
+import com.caucho.vfs.WriteStream;
+
 
 /**
  * Manages the backing for the file database objects
  */
 public class DataStore implements AlarmListener {
-  private static final L10N L = new L10N(DataStore.class);
   private static final Logger log
     = Logger.getLogger(DataStore.class.getName());
 
@@ -359,6 +352,9 @@ public class DataStore implements AlarmListener {
       stmt.setLong(2, _expireTimeout + Alarm.getCurrentTime());
       stmt.setBinaryStream(3, is, length);
 
+      if (is == null)
+        Thread.dumpStack();
+      
       int count = stmt.executeUpdate();
 
       if (log.isLoggable(Level.FINER))
@@ -475,8 +471,6 @@ public class DataStore implements AlarmListener {
       conn = getConnection();
 
       long resinOid = 0;
-      boolean isData = false;
-
       PreparedStatement pstmt = conn.prepareSelectAllLimitExpires();
       PreparedStatement pstmtUpdate = conn.prepareUpdateExpires();
 
@@ -487,8 +481,6 @@ public class DataStore implements AlarmListener {
 
       // System.out.println("UPDATE_EXPIRE:" + _expireTimeout);
       do {
-        isData = false;
-
         pstmt.setLong(1, resinOid);
         pstmt.setFetchSize(fetchSize);
 

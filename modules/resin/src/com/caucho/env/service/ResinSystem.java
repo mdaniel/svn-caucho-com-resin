@@ -97,8 +97,11 @@ public class ResinSystem
 
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;
-    else
-      _classLoader = EnvironmentClassLoader.create(loader, "system:" + id);
+    else {
+      // the environment id must be independent of the server because
+      // of cluster cache requirements. 
+      _classLoader = EnvironmentClassLoader.create(loader, "system:");
+    }
 
     _serverLocal.set(this, _classLoader);
 

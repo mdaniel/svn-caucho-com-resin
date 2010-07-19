@@ -778,21 +778,25 @@ public final class ClusterServer {
   public boolean notifyStart(long timestamp)
   {
     synchronized (this) {
+      boolean isActive = _isActive;
+      _isActive = true;
+
+      if (_serverPool != null)
+        _serverPool.notifyStart();
+
       if (timestamp <= _stateTimestamp)
         return false;
 
-      if (log.isLoggable(Level.FINER) && ! _isActive)
+      if (log.isLoggable(Level.FINER) && ! isActive)
         log.finer(this + " notify-start");
       
-      _isActive = true;
       _stateTimestamp = timestamp;
     }
 
+    /*
     // notify after timestamp check to avoid closing sockets already opened
     // to the target server
-    
-    if (_serverPool != null)
-      _serverPool.notifyStart();
+     */
 
     _clusterService.notifyServerStart(this);
 

@@ -43,7 +43,7 @@ import java.util.logging.Level;
 /**
  * Custom serialization for the cache
  */
-public class HessianSerializer<V> implements CacheSerializer<V>
+public class HessianSerializer implements CacheSerializer
 {
   private static final Logger log
     = Logger.getLogger(HessianSerializer.class.getName());
@@ -51,7 +51,8 @@ public class HessianSerializer<V> implements CacheSerializer<V>
   /**
    * Serialize the data
    */
-  public void serialize(V value, OutputStream os)
+  @Override
+  public void serialize(Object value, OutputStream os)
     throws IOException
   {
     if (log.isLoggable(Level.FINEST))
@@ -67,7 +68,8 @@ public class HessianSerializer<V> implements CacheSerializer<V>
   /**
    * Deserialize the data
    */
-  public V deserialize(InputStream is)
+  @Override
+  public Object deserialize(InputStream is)
     throws IOException
   {
     if (log.isLoggable(Level.FINEST))
@@ -79,6 +81,6 @@ public class HessianSerializer<V> implements CacheSerializer<V>
 
     hIn.close();
     
-    return (V) value;
+    return value;
   }
 }

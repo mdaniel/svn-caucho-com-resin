@@ -135,7 +135,7 @@ abstract public class DistributedCacheManager
       NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
 
       Object []fullKey = new Object[] { config.getGuid(), key };
-
+      
       config.getKeySerializer().serialize(fullKey, dOut);
 
       HashKey hashKey = new HashKey(dOut.digest());

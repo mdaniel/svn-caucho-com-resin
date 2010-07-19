@@ -41,6 +41,7 @@ public class TempOutputStream extends OutputStream
     return _tail.getBuffer();
   }
 
+  @Override
   public void write(int ch)
   {
     if (_tail == null)

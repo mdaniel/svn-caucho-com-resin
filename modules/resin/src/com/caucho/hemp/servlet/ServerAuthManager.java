@@ -85,7 +85,7 @@ public class ServerAuthManager {
     if (_auth != null)
       return _auth;
     else
-      return null;
+      return _security.getAuthenticator();
   }
   
   public void setAuthenticator(Authenticator auth)

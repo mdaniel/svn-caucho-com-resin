@@ -218,6 +218,9 @@ public class CloudPod
    */
   public void addServerListener(CloudServerListener listener)
   {
+    if (listener == null)
+      throw new NullPointerException();
+    
     if (! _listeners.contains(listener))
       _listeners.add(listener);
     

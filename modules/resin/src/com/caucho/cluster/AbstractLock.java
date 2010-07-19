@@ -175,9 +175,12 @@ abstract public class AbstractLock implements Lock
   {
     Server server = Server.getCurrent();
 
-    if (server == null)
-      throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment",
-                                    getClass().getSimpleName()));
+    if (server == null) {
+      Thread.dumpStack();
+      throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment\n  {1}",
+                                    getClass().getSimpleName(),
+                                    Thread.currentThread().getContextClassLoader()));
+    }
 
     _manager = server.getDistributedLockManager();
 

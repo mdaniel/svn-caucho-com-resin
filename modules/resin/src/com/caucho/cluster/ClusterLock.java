@@ -29,8 +29,9 @@
 
 package com.caucho.cluster;
 
+import javax.inject.Singleton;
+
 import com.caucho.config.Configurable;
-import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Distributed lock.
@@ -38,7 +39,7 @@ import javax.enterprise.context.ApplicationScoped;
  * Using the cache is like using java.util.concurrent.locks.Lock.
  */
 
-@ApplicationScoped
+@Singleton
 @Configurable  
 public class ClusterLock extends AbstractLock
 {

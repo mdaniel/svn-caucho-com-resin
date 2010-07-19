@@ -112,4 +112,10 @@ public class StreamSource
     if (ss != null)
       ss.close();
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _out + "," + _indirectSource + "]";
+  }
 }

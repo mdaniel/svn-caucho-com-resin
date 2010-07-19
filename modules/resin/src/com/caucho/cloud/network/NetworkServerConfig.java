@@ -39,7 +39,7 @@ import com.caucho.server.cluster.ProtocolPort;
 import com.caucho.server.cluster.ProtocolPortConfig;
 import com.caucho.server.http.HttpProtocol;
 
-class NetworkServerConfig {
+public class NetworkServerConfig {
   private NetworkListenService _listenService;
   
   private ContainerProgram _listenerDefaults = new ContainerProgram();

@@ -27,26 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache;
+package com.caucho.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * Custom serialization for the cache
+ * Utility class for creating @Admin annotations, used for generic
+ * resources like DataSources.
  */
-public interface CacheSerializer
+public final class AdminLiteral 
+  extends AnnotationLiteral<Admin> 
+  implements Admin
 {
-  /**
-   * Serialize the data
-   */
-  public void serialize(Object value, OutputStream os)
-    throws IOException;
-  
-  /**
-   * Deserialize the data
-   */
-  public Object deserialize(InputStream is)
-    throws IOException;
 }

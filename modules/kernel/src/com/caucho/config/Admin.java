@@ -27,26 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache;
+package com.caucho.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import javax.inject.Qualifier;
 
 /**
- * Custom serialization for the cache
+ * @Admin is a qualifier for administration resources.
  */
-public interface CacheSerializer
-{
-  /**
-   * Serialize the data
-   */
-  public void serialize(Object value, OutputStream os)
-    throws IOException;
-  
-  /**
-   * Deserialize the data
-   */
-  public Object deserialize(InputStream is)
-    throws IOException;
+
+@Documented
+@Retention(RUNTIME)
+@Target({FIELD, METHOD, TYPE})
+@Qualifier
+public @interface Admin {
 }

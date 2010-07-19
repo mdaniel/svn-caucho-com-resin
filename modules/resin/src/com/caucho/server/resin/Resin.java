@@ -340,7 +340,12 @@ public class Resin extends Shutdown
   
   public CloudSystem getCloudSystem()
   {
-    return _resinSystem.getService(TopologyService.class).getSystem();
+    ResinSystem resinSystem = _resinSystem;
+    
+    if (resinSystem != null)
+      return resinSystem.getService(TopologyService.class).getSystem();
+    else
+      return null;
   }
   
   public void setRootDirectory(Path path)
@@ -785,6 +790,11 @@ public class Resin extends Shutdown
   {
     return _management;
   }
+  
+  public double getCpuLoad()
+  {
+    return 0;
+  }
 
   public Server createServer()
   {
@@ -1210,8 +1220,10 @@ public class Resin extends Shutdown
     ResinConfig resinConfig = new ResinConfig(this);
     
     bootResin.getProgram().configure(resinConfig);
-    
+
     bootServer.getCluster().getProgram().configure(_server);
+    
+    _server.init();
   }
   
   protected Server createServer(NetworkClusterService clusterService,

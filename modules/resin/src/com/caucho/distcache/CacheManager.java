@@ -54,12 +54,11 @@ public class CacheManager
   private static final EnvironmentLocal<CacheManager> _localCacheManager
     = new EnvironmentLocal<CacheManager>();
 
-  private String _envName;
   private ConcurrentHashMap<String,AbstractCache> _cacheMap;
 
   public CacheManager()
   {
-    _envName = Environment.getEnvironmentName();
+    Environment.getEnvironmentName();
 
     synchronized (_localCacheManager) {
       CacheManager manager = _localCacheManager.getLevel();

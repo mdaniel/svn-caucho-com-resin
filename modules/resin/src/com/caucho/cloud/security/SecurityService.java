@@ -30,7 +30,13 @@
 package com.caucho.cloud.security;
 
 import java.security.MessageDigest;
+import java.util.Set;
 
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+
+import com.caucho.config.AdminLiteral;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.security.Authenticator;
@@ -211,5 +217,36 @@ public class SecurityService extends AbstractResinService
   public int getStartPriority()
   {
     return START_PRIORITY;
+  }
+  
+  @Override
+  public void start()
+  {
+    InjectManager cdiManager = InjectManager.getCurrent();
+    
+    if (_authenticator == null) {
+      Bean<Authenticator> bean = findAuthenticator(cdiManager);
+     
+      if (bean != null) {
+        CreationalContext<Authenticator> env 
+          = cdiManager.createCreationalContext(bean);
+        
+        _authenticator = (Authenticator)
+           cdiManager.getReference(bean, Authenticator.class, env);
+      }
+    }
+  }
+  
+  @SuppressWarnings("unchecked")
+  private Bean<Authenticator> findAuthenticator(InjectManager cdiManager)
+  {
+    Set<Bean<?>> beans = cdiManager.getBeans(Authenticator.class,
+                                             new AdminLiteral());
+   
+    if (beans.size() > 0) {
+      return (Bean<Authenticator>) cdiManager.resolve(beans);
+    }
+    
+    return null;
   }
 }

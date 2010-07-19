@@ -141,7 +141,7 @@ abstract public class AbstractCache extends AbstractMap
    * a cache is created.
    */
   @Configurable
-  public void setSerializer(CacheSerializer<?> serializer)
+  public void setSerializer(CacheSerializer serializer)
   {
     _config.setValueSerializer(serializer);
   }
