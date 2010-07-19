@@ -301,6 +301,8 @@ public class Server extends ProtocolDispatchServer
     Config.setProperty("server", new ServerVar(_selfServer), _classLoader);
     Config.setProperty("cluster", new ClusterVar(), _classLoader);
 
+    _distributedCacheManager = createDistributedCacheManager();
+    
     _resinSystem.addService(new DeployNetworkService());
     
     // _selfServer.getServerProgram().configure(this);
@@ -514,9 +516,6 @@ public class Server extends ProtocolDispatchServer
    */
   public DistributedCacheManager getDistributedCacheManager()
   {
-    if (_distributedCacheManager == null)
-      _distributedCacheManager = createDistributedCacheManager();
-
     return _distributedCacheManager;
   }
 
@@ -1548,7 +1547,7 @@ public class Server extends ProtocolDispatchServer
     if (! _lifecycle.toInit())
       return;
     
-    _classLoader.init();
+    // _classLoader.init();
 
     super.init();
 
@@ -1690,12 +1689,6 @@ public class Server extends ProtocolDispatchServer
 
       if (_resin != null && _resin.getManagement() != null)
         _resin.getManagement().start(this);
-
-      if (_distributedCacheManager == null)
-        _distributedCacheManager = createDistributedCacheManager();
-
-      if (_distributedCacheManager != null)
-        _distributedCacheManager.start();
 
       // initialize the system distributed store
       if (isResinServer())

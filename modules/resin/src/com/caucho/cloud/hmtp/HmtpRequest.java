@@ -108,9 +108,6 @@ public class HmtpRequest extends AbstractProtocolConnection
     throws IOException
   {
     try {
-      Thread thread = Thread.currentThread();
-      thread.setName(_id);
-      
       if (_isFirst) {
         return handleInitialRequest();
       }

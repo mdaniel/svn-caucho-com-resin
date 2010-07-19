@@ -218,7 +218,7 @@ public class SocketLinkListener extends TaskWorker
 
   public String getDebugId()
   {
-    return _debugId;
+    return getUrl();
   }
 
   public ClassLoader getClassLoader()
@@ -846,31 +846,36 @@ public class SocketLinkListener extends TaskWorker
   {
     if (! _lifecycle.toInit())
       return;
-    
-    StringBuilder url = new StringBuilder();
+  }
+  
+  public String getUrl()
+  {
+    if (_url == null) {
+      StringBuilder url = new StringBuilder();
 
-    if (_protocol != null)
-      url.append(_protocol.getProtocolName());
-    else
-      url.append("unknown");
-    url.append("://");
+      if (_protocol != null)
+        url.append(_protocol.getProtocolName());
+      else
+        url.append("unknown");
+      url.append("://");
 
-    if (getAddress() != null)
-      url.append(getAddress());
-    else
-      url.append("*");
-    url.append(":");
-    url.append(getPort());
+      if (getAddress() != null)
+        url.append(getAddress());
+      else
+        url.append("*");
+      url.append(":");
+      url.append(getPort());
 
-    if (_serverId != null && ! "".equals(_serverId)) {
-      url.append("(");
-      url.append(_serverId);
-      url.append(")");
+      if (_serverId != null && ! "".equals(_serverId)) {
+        url.append("(");
+        url.append(_serverId);
+        url.append(")");
+      }
+
+      _url = url.toString();
     }
-
-    _url = url.toString();
-
-    _debugId = _url;
+    
+    return _url;
   }
 
   /**
@@ -1748,7 +1753,7 @@ public class SocketLinkListener extends TaskWorker
 
   public String toURL()
   {
-    return _url;
+    return getUrl();
   }
 
   @Override
