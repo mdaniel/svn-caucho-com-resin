@@ -731,9 +731,14 @@ public class ClientSocketFactory
    */
   public void start()
   {
+    // State state = _state;
+    
     _state = _state.toStart();
 
-    _startSequenceId.incrementAndGet();
+    /*
+    if (state != State.ACTIVE)
+      _startSequenceId.incrementAndGet();
+      */
   }
 
   /**
@@ -1107,7 +1112,7 @@ public class ClientSocketFactory
    */
   public void notifyStart()
   {
-    _startSequenceId.incrementAndGet();
+    // _startSequenceId.incrementAndGet();
 
     clearRecycle();
     wake();

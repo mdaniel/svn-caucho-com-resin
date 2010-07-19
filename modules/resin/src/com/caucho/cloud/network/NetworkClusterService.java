@@ -109,21 +109,6 @@ public class NetworkClusterService extends AbstractResinService
   }
   
   /**
-   * Creates a new network server for the cloud node.
-   */
-  private ClusterServer createServer(CloudServer cloudServer)
-  {
-    ClusterServer server = new ClusterServer(this, cloudServer);
-    
-    if (cloudServer.putDataIfAbsent(server) != null) {
-      throw new IllegalStateException(L.l("{0} already has a NetworkServer.",
-                                          cloudServer));
-    }
-    
-    return cloudServer.getData(ClusterServer.class);
-  }
-
-  /**
    * Returns the cluster port.
    */
   public SocketLinkListener getClusterListener()

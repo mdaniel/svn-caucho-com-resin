@@ -67,6 +67,8 @@ public class HmtpRequest extends AbstractProtocolConnection
   private SocketLink _conn;
   private BamService _bamService;
   
+  private String _id;
+  
   private ReadStream _rawRead;
   private WriteStream _rawWrite;
   
@@ -85,6 +87,8 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     _rawRead = conn.getReadStream();
     _rawWrite = conn.getWriteStream();
+    
+    _id = _bamService.getJid() + "-" + _conn.getId();
   }
 
   @Override
@@ -104,6 +108,9 @@ public class HmtpRequest extends AbstractProtocolConnection
     throws IOException
   {
     try {
+      Thread thread = Thread.currentThread();
+      thread.setName(_id);
+      
       if (_isFirst) {
         return handleInitialRequest();
       }

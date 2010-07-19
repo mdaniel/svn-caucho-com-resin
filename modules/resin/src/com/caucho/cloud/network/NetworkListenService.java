@@ -283,7 +283,7 @@ public class NetworkListenService
 
     for (SocketLinkListener listener : _listeners) {
       try {
-        if (listener!= _clusterListener)
+        if (listener != _clusterListener)
           listener.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);

@@ -1760,7 +1760,10 @@ public class SocketLinkListener extends TaskWorker
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _url + "]";
+    if (_url != null)
+      return getClass().getSimpleName() + "[" + _url + "]";
+    else
+      return getClass().getSimpleName() + "[" + getAddress() + ":" + getPort() + "]";
   }
 
   public class SuspendReaper implements AlarmListener {

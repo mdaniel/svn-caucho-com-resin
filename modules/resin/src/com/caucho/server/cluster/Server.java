@@ -294,7 +294,6 @@ public class Server extends ProtocolDispatchServer
     _alarm = new Alarm(this);
     
     _bamService = BamService.create(getBamAdminName());
-    _bamService.setDomainManager(createDomainManager());
 
     _authManager = new ServerAuthManager();
     _bamService.setLinkManager(_authManager);
@@ -476,14 +475,6 @@ public class Server extends ProtocolDispatchServer
   protected Repository createRepository()
   {
     return getLocalRepository();
-  }
-
-  /**
-   * Creates the bam domain manager
-   */
-  protected DomainManager createDomainManager()
-  {
-    return null;
   }
 
   /**
