@@ -1265,6 +1265,8 @@ public abstract class Expr extends ValueExpression {
         return Expr.toBigInteger(obj, null);
       case OBJECT:
         return obj;
+      case VOID:
+        return null;
       }
     } else if (targetType.isEnum()) {
       return Expr.toEnum(obj, (Class<? extends Enum>) targetType);

@@ -1233,7 +1233,7 @@ public class PageContextImpl extends PageContext
                             getCauchoRequest().getRequestURI());
       
       // jsp/01ck
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      // response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
       try {
         RequestDispatcher rd = getCauchoRequest().getRequestDispatcher(_errorPage);
@@ -1255,7 +1255,9 @@ public class PageContextImpl extends PageContext
                                            _errorPage));
           }
         }
-
+        
+        // jsp/01ck
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       } catch (FileNotFoundException e2) {
         log.log(Level.WARNING, e.toString(), e2);
         throw new ServletException(L.l("`{0}' is an unknown error page.  The JSP errorPage directive must refer to a valid URL relative to the current web-app.",

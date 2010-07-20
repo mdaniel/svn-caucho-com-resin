@@ -1134,6 +1134,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   /**
    * Closes the manager.
    */
+  @Override
   public void close()
   {
     _mnodeStore.close();
