@@ -10,7 +10,13 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1 snapshot">
+<s2 title="3.1.10 snapshot">
+<ul>
+<li>build: httpd.exe and setup.exe location (#3915)</li>
+</ul>
+</s2>
+
+<s2 title="3.1.10">
 <ul>
 <li>session: check reuse-session-id with always-save-session="true" (#3715, rep by Nobuaki Shinomiya)</li>
 <li>mod_caucho: allow socket-timeout for non-windows (#3749, rep by Nobuaki Shinomiya)</li>

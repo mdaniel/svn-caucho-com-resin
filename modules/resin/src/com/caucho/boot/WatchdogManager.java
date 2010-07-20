@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.RawString;
+import com.caucho.config.types.Bytes;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
 import com.caucho.log.EnvironmentStream;
@@ -84,7 +85,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
   private Server _dispatchServer;
 
   private boolean _isWatchdogManagerConfig;
-  
+
   private HashMap<String,Watchdog> _watchdogMap
     = new HashMap<String,Watchdog>();
 
@@ -100,6 +101,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     Path logPath = getLogDirectory().lookup("watchdog-manager.log");
 
     RotateStream stream = RotateStream.create(logPath);
+    stream.getRolloverLog().setRolloverSize(new Bytes(64L * 1024 * 1024));
     stream.init();
     WriteStream out = stream.getStream();
     out.setDisableClose(true);
@@ -116,7 +118,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     ThreadPool.getThreadPool().setThreadIdleMax(5);
 
     ResinELContext elContext = _args.getELContext();
-    
+
     WebBeansContainer webBeans = WebBeansContainer.create();
     webBeans.addSingletonByName(elContext.getResinHome(), "resinHome");
     webBeans.addSingletonByName(elContext.getJavaVar(), "java");
@@ -130,7 +132,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
-					    _args.getServerId()));
+                                            _args.getServerId()));
 
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);
@@ -144,14 +146,14 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     clusterServer.getClusterPort().setMinSpareListen(1);
     clusterServer.getClusterPort().setMaxSpareListen(2);
-      
+
     _dispatchServer = new Server(clusterServer);
 
     HostConfig hostConfig = new HostConfig();
     hostConfig.setId("resin-admin");
 
     hostConfig.init();
-    
+
     _dispatchServer.addHost(hostConfig);
     _dispatchServer.init();
     _dispatchServer.start();
@@ -201,14 +203,14 @@ public class WatchdogManager extends ProtocolDispatchServer {
     else if (_management != null)
       return _management.getAdminCookie();
     else
-      return null;    
+      return null;
   }
 
   Path getRootDirectory()
   {
     return _args.getRootDirectory();
   }
-  
+
   Path getLogDirectory()
   {
     Path logDirectory = _args.getLogDirectory();
@@ -222,7 +224,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
   boolean authenticate(String password)
   {
     String cookie = getAdminCookie();
-    
+
     if (password == null && cookie == null)
       return true;
     else if  (password != null && password.equals(getAdminCookie()))
@@ -230,12 +232,12 @@ public class WatchdogManager extends ProtocolDispatchServer {
     else
       return false;
   }
-  
+
   Watchdog findServer(String id)
   {
     return _watchdogMap.get(id);
   }
-  
+
   String status()
   {
     StringBuilder sb = new StringBuilder();
@@ -243,30 +245,30 @@ public class WatchdogManager extends ProtocolDispatchServer {
     synchronized (_watchdogMap) {
       ArrayList<String> keys = new ArrayList<String>(_watchdogMap.keySet());
       Collections.sort(keys);
-    
+
       for (String key : keys) {
-	Watchdog watchdog = _watchdogMap.get(key);
+        Watchdog watchdog = _watchdogMap.get(key);
 
-	sb.append("\n");
-	sb.append("server '" + key + "' : " + watchdog.getState() + "\n");
+        sb.append("\n");
+        sb.append("server '" + key + "' : " + watchdog.getState() + "\n");
 
-	if (getAdminCookie() == null)
-	  sb.append("  password: missing\n");
-	else
-	  sb.append("  password: ok\n");
-      
-	sb.append("  user: " + System.getProperty("user.name"));
-        
-	if (watchdog.getGroupName() != null)
-	  sb.append("(" + watchdog.getGroupName() + ")");
-        
-	sb.append("\n");
-      
-	sb.append("  root: " + watchdog.getResinRoot() + "\n");
-	sb.append("  conf: " + watchdog.getResinConf() + "\n");
+        if (getAdminCookie() == null)
+          sb.append("  password: missing\n");
+        else
+          sb.append("  password: ok\n");
+
+        sb.append("  user: " + System.getProperty("user.name"));
+
+        if (watchdog.getGroupName() != null)
+          sb.append("(" + watchdog.getGroupName() + ")");
+
+        sb.append("\n");
+
+        sb.append("  root: " + watchdog.getResinRoot() + "\n");
+        sb.append("  conf: " + watchdog.getResinConf() + "\n");
       }
     }
-    
+
     return sb.toString();
   }
 
@@ -281,16 +283,16 @@ public class WatchdogManager extends ProtocolDispatchServer {
       Vfs.setPwd(_args.getRootDirectory());
 
       try {
-	readConfig(args);
+        readConfig(args);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
-    
+
       Watchdog watchdog = _watchdogMap.get(serverId);
 
       if (watchdog == null)
-	throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
-					serverId, _args.getResinConf()));
+        throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
+                                        serverId, _args.getResinConf()));
 
       watchdog.start();
     }
@@ -300,11 +302,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
   {
     synchronized (_watchdogMap) {
       Watchdog watchdog = _watchdogMap.get(serverId);
-    
+
       if (watchdog == null)
-	throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
-					serverId, _args.getResinConf()));
-    
+        throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
+                                        serverId, _args.getResinConf()));
+
       watchdog.stop();
     }
   }
@@ -313,11 +315,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
   {
     // no synchronization because kill shouldn't block
     Watchdog watchdog = _watchdogMap.get(serverId);
-    
+
     if (watchdog == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
-				      serverId, _args.getResinConf()));
-    
+                                      serverId, _args.getResinConf()));
+
     watchdog.kill();
   }
 
@@ -325,10 +327,10 @@ public class WatchdogManager extends ProtocolDispatchServer {
   {
     synchronized (_watchdogMap) {
       Watchdog server = _watchdogMap.get(serverId);
-    
+
       if (server != null)
-	server.stop();
-    
+        server.stop();
+
       startServer(argv);
     }
   }
@@ -344,8 +346,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
     ResinConfig resin = new ResinConfig(args);
 
     config.configure(resin,
-		     args.getResinConf(),
-		     "com/caucho/server/resin/resin.rnc");
+                     args.getResinConf(),
+                     "com/caucho/server/resin/resin.rnc");
   }
 
   public static void main(String []argv)
@@ -374,13 +376,13 @@ public class WatchdogManager extends ProtocolDispatchServer {
   //
   // configuration classes
   //
-  
+
   /**
-   * Class for the initial WatchdogManager configuration. 
+   * Class for the initial WatchdogManager configuration.
    */
   class ResinConfig {
     private WatchdogArgs _args;
-    
+
     private ArrayList<ContainerProgram> _clusterDefaultList
       = new ArrayList<ContainerProgram>();
 
@@ -388,7 +390,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     {
       _args = WatchdogManager.this._args;
     }
-    
+
     ResinConfig(WatchdogArgs args)
     {
       _args = args;
@@ -402,17 +404,17 @@ public class WatchdogManager extends ProtocolDispatchServer {
     public String getId()
     {
       if (_args == null)
-	return "default";
+        return "default";
       else
-	return _args.getServerId();
+        return _args.getServerId();
     }
-    
+
     public void setManagement(ManagementConfig management)
     {
       if (_management == null)
-	_management = management;
+        _management = management;
     }
-  
+
     public void addClusterDefault(ContainerProgram program)
     {
       _clusterDefaultList.add(program);
@@ -421,7 +423,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     public WatchdogManagerConfig createWatchdogManager()
     {
       _isWatchdogManagerConfig = true;
-      
+
       return new WatchdogManagerConfig(this);
     }
 
@@ -430,8 +432,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
       ClusterConfig cluster = new ClusterConfig(this);
 
       for (int i = 0; i < _clusterDefaultList.size(); i++)
-	_clusterDefaultList.get(i).configure(cluster);
-    
+        _clusterDefaultList.get(i).configure(cluster);
+
       return cluster;
     }
 
@@ -439,7 +441,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     {
       return new ServerCompatConfig();
     }
-  
+
     /**
      * Ignore items we can't understand.
      */
@@ -450,7 +452,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   public class WatchdogManagerConfig {
     private ResinConfig _resin;
-    
+
     private ArrayList<ContainerProgram> _watchdogDefaultList
       = new ArrayList<ContainerProgram>();
 
@@ -462,7 +464,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     public void setWatchdogPort(int port)
     {
       if (_args.getWatchdogPort() == 0)
-	_args.setWatchdogPort(port);
+        _args.setWatchdogPort(port);
     }
 
     public void addWatchdogDefault(ContainerProgram program)
@@ -475,7 +477,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
       WatchdogConfig config = new WatchdogConfig(_resin.getArgs());
 
       for (int i = 0; i < _watchdogDefaultList.size(); i++)
-	_watchdogDefaultList.get(i).configure(config);
+        _watchdogDefaultList.get(i).configure(config);
 
       return config;
     }
@@ -484,22 +486,22 @@ public class WatchdogManager extends ProtocolDispatchServer {
       throws ConfigException
     {
       Watchdog watchdog = _watchdogMap.get(config.getId());
-      
+
       if (watchdog == null)
         _watchdogMap.put(config.getId(), new Watchdog(config));
       else if (_resin.getId().equals(watchdog.getId()))
         watchdog.setConfig(config);
 
       /*
-	throw new ConfigException(L().l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
-				      config.getId()));
+        throw new ConfigException(L().l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
+                                      config.getId()));
       */
     }
   }
 
   public class ClusterConfig {
     private ResinConfig _resin;
-    
+
     private ArrayList<ContainerProgram> _serverDefaultList
       = new ArrayList<ContainerProgram>();
 
@@ -527,7 +529,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
       WatchdogConfig config = new WatchdogConfig(_resin.getArgs());
 
       for (int i = 0; i < _serverDefaultList.size(); i++)
-	_serverDefaultList.get(i).configure(config);
+        _serverDefaultList.get(i).configure(config);
 
       return config;
     }
@@ -536,18 +538,18 @@ public class WatchdogManager extends ProtocolDispatchServer {
       throws ConfigException
     {
       if (_isWatchdogManagerConfig)
-	return;
-      
+        return;
+
       Watchdog watchdog = _watchdogMap.get(config.getId());
-      
+
       if (watchdog == null)
         _watchdogMap.put(config.getId(), new Watchdog(config));
       else {
-	if (_resin.getId().equals(config.getId()))
-	  watchdog.setConfig(config);
+        if (_resin.getId().equals(config.getId()))
+          watchdog.setConfig(config);
       }
     }
-  
+
     /**
      * Ignore items we can't understand.
      */
@@ -561,12 +563,12 @@ public class WatchdogManager extends ProtocolDispatchServer {
     {
       return new ClusterCompatConfig();
     }
-    
+
     public SrunCompatConfig createHttp()
     {
       return new SrunCompatConfig();
     }
-    
+
     /**
      * Ignore items we can't understand.
      */
@@ -580,7 +582,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     {
       return new SrunCompatConfig();
     }
-    
+
     /**
      * Ignore items we can't understand.
      */
@@ -601,7 +603,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     {
       _id = id;
     }
-    
+
     /**
      * Ignore items we can't understand.
      */
@@ -613,15 +615,15 @@ public class WatchdogManager extends ProtocolDispatchServer {
     public void init()
     {
       if (_isWatchdogManagerConfig)
-	return;
-      
+        return;
+
       Watchdog server = findServer(_id);
 
       if (server != null)
-	return;
-      
+        return;
+
       server = new Watchdog(_id, _args);
-      
+
       _watchdogMap.put(_id, server);
     }
   }
