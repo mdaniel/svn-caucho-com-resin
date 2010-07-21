@@ -174,6 +174,23 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
    * Receives a message, blocking until expireTime if no message is
    * available.
    */
+  public E receive()
+    throws MessageException
+  {
+    long expireTime;
+    
+    if (Alarm.isTest())
+      expireTime = Alarm.getCurrentTimeActual() + 120000L;
+    else
+      expireTime = Long.MAX_VALUE / 2;
+    
+    return receive(expireTime, true);
+  }
+
+  /**
+   * Receives a message, blocking until expireTime if no message is
+   * available.
+   */
   public E receive(long expireTime)
     throws MessageException
   {

@@ -211,8 +211,8 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     ReadStream is = getReadStream();
 
     try {
-      int d1 = is.read();    
-      int d2 = is.read();    
+      int d1 = is.read();
+      int d2 = is.read();
 
       if (d2 >= 0)
         return (short) ((d1 << 8) + d2);

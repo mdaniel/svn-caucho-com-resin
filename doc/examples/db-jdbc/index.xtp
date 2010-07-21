@@ -143,10 +143,11 @@ The <code>DataSource</code> is thread-safe, so it
 can be used simultaneously by any of the requesting threads.</p>
 
 <example>
-import com.caucho.config.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 public class BasicServlet extends HttpServlet {
-  @Name("jdbc/basic")
+  @Inject @Named("jdbc/basic")
   private DataSource _ds;
 
   ...

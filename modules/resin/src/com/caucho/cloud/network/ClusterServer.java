@@ -139,6 +139,10 @@ public final class ClusterServer {
     setPort(cloudServer.getPort());
     // _clusterPort = new ClusterPort(this);
     // _ports.add(_clusterPort);
+    
+    // XXX: active isn't quite right here
+    if (cloudServer.getPod() != networkService.getSelfServer().getPod())
+      _isActive = true;
 
     StringBuilder sb = new StringBuilder();
 

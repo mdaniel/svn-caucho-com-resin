@@ -26,7 +26,7 @@ to execute the SQL.</li>
 <p>JDBC database access is based around the Factory pattern.
 With JDBC, <code>javax.sql.DataSource</code> is the Factory object.
 The &lt;database&gt; configures the <code>DataSource</code> and stores it
-in the WebBeans directory.  The servlet will retrieve the
+in the CDI registry.  The servlet will retrieve the
 <code>DataSource</code> and use it as a factory to obtain
 <code>Connection</code> objects, the main workhorse for using databases.</p>
 </s1>
@@ -123,15 +123,15 @@ intended for examples and testing.</p>
 
 <p>The servlet is configured with a <code>DataSource</code> to
 access JDBC.  Resin allows two styles of configuration: Dependency Injection
-using WebBeans injection and standard servlet &lt;init-param&gt;
+using CDI injection and standard servlet &lt;init-param&gt;
 configuration with JNDI lookups.  The Dependency Injection style is
 simpler, cleaner and makes the application more testable and robust.</p>
 
 <example>
-import javax.webbeans.In;
+import javax.inject.Inject;
 
 public class BasicServlet extends HttpServlet {
-  @In private DataSource _ds;
+  @Inject private DataSource _ds;
 
   ...
 }
@@ -155,7 +155,7 @@ remain the primary registry.
 </li></ol>
 
 <p>Enabling the Dependency Injection pattern is trivial: just
-add the <code>@javax.webbeans.In</code> annotation to your
+add the <code>@javax.inject.Inject</code> annotation to your
 <code>DataSource</code> field.</p>
 
 <example title="resin-web.xml">
