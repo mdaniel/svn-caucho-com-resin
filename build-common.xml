@@ -635,6 +635,8 @@
 	
         <include name="lib/activation.jar"/>
         <include name="lib/activation.LICENSE"/>
+        <include name="lib/eclipselink.jar"/>
+        <include name="lib/hibernate-validation-api-4.0.2.GA.jar"/>
         <include name="lib/javamail-141.jar"/>
         <include name="lib/javamail-14.LICENSE"/>
         <!--
@@ -644,8 +646,6 @@
         <include name="lib/jsf-api.jar"/>
         <include name="lib/jsf-impl.jar"/>
         <include name="lib/jsf.LICENSE"/>
-        <include name="lib/hibernate-validation-api-4.0.2.GA.jar"/>
-        <include name="lib/validation-api-1.0.0.GA.jar"/>
         <include name="lib/webutil.jar"/>
         <include name="lib/webservices-api.jar"/>
         <include name="lib/webservices-extra-api.jar"/>
