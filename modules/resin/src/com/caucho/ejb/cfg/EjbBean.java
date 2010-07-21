@@ -32,9 +32,7 @@ package com.caucho.ejb.cfg;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Local;
@@ -47,18 +45,15 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
-import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.MessageDestinationRef;
@@ -83,8 +78,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
   implements EnvironmentBean, DependencyBean
 {
   private static final L10N L = new L10N(EjbBean.class);
-  private static final Logger log = Logger.getLogger(EjbBean.class.getName());
-
   private final EjbConfig _ejbConfig;
   private final String _ejbModuleName;
 
@@ -158,7 +151,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
     _ejbConfig = ejbConfig;
     _ejbModuleName = ejbModuleName;
 
-    System.out.println("BEANZ: " + ejbModuleName);
     _loader = ejbConfig.getEjbContainer().getClassLoader();
   }
 
@@ -176,7 +168,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     _ejbClass = AnnotatedTypeImpl.create(annType);
     _ejbModuleName = ejbModuleName;
     
-    setEJBClass(annType.getJavaClass());
+    setEJBClass(_ejbClass.getJavaClass());
 
     _loader = ejbConfig.getEjbContainer().getClassLoader();
   }
@@ -451,11 +443,14 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public void setEJBClass(Class<X> ejbClass)
     throws ConfigException
   {
+    if (_ejbClass != null)
+      return;
+    
     AnnotatedTypeImpl<X> annType;
     
-    AnnotatedType<?> refType = ReflectionAnnotatedFactory.introspectType(ejbClass);
+    AnnotatedType<X> refType = ReflectionAnnotatedFactory.introspectType(ejbClass);
     
-    annType = new AnnotatedTypeImpl(refType);
+    annType = new AnnotatedTypeImpl<X>(refType);
     
     setEJBClassWrapper(annType);
   }

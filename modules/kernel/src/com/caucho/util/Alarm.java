@@ -586,7 +586,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     {
       try {
         Alarm alarm;
-
+        
         if ((alarm = _heap.extractAlarm(getCurrentTime())) != null) {
           // throttle alarm invocations by 5ms so quick alarms don't need
           // extra threads

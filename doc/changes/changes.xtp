@@ -13,7 +13,19 @@
 
 <s2 title="4.0.9 - snapshot">
 <ul>
+<li>alarm: updates for atomic refactor causing cpu-spin (rep by Jeff Schnitzer)</li>
+<li>watchdog: set log rollover size to 64m (rep by Scott Croco)</li>
+<li>candi: ioc/timing issue with EL configuration and custom beans (#4131, rep by Jeff Schnitzer)</li>
+<li>(2010-07-20) cloud: refactor triad messaging into BamTriadServer in cloud.bam for consistency across cloud services</li>
+<li>cloud: refactor heartbeat into cloud.heartbeat and increase service priority</li>
+<li>network: refactor hmtp/cloud client pool from cluster into cloud.bam</li>
+<li>network: refactor network listener from Server into cloud.network</li>
+<li>network: refactor cluster listener from Server into cloud.network</li>
+<li>resin: refactor Resin/Server main to use ResinSystem</li>
+<li>database: locking/sync rework to use atomic references when possible</li>
+<li>database: locking/sync rework to use JDK's locking</li>
 <li>candi: CDI session destroy must be after other session listeners (#4901, rep by sweigersf)</li>
+<li>thread: Thread/ThreadWorker rework to use atomic references where possible</li>
 <li>thread: Thread/ThreadWorker sync issues (#3960, rep by rmann)</li>
 <li>LogService: add pooled connection (#4096, rep by Brian Deng)</li>
 <li>watchdog: added &lt;resin-system-auth-key> for watchdog authentication (#4113)</li>

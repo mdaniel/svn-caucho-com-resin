@@ -44,24 +44,24 @@ public class AnnotationConfig implements InvocationHandler {
   private static final Method ANNOTATION_TYPE;
 
   private AnnotationInterfaceType _configType;
-  private Class _annotationType;
+  private Class<?> _annotationType;
 
   private HashMap<String,Object> _valueMap = new HashMap<String,Object>(8);
 
-  public AnnotationConfig(Class annotationType)
+  public AnnotationConfig(Class<?> annotationType)
   {
     this((AnnotationInterfaceType) TypeFactory.getType(annotationType),
          annotationType);
   }
 
   public AnnotationConfig(AnnotationInterfaceType configType,
-                          Class annotationType)
+                          Class<?> annotationType)
   {
     _configType = configType;
     _annotationType = annotationType;
   }
 
-  public ConfigType getConfigType()
+  public ConfigType<?> getConfigType()
   {
     return _configType;
   }
@@ -79,7 +79,7 @@ public class AnnotationConfig implements InvocationHandler {
         && oldValue.getClass() == value.getClass()) {
       Object []oldArray = (Object []) oldValue;
       Object []valueArray = (Object []) value;
-      Class componentType = oldValue.getClass().getComponentType();
+      Class<?> componentType = oldValue.getClass().getComponentType();
       value = Array.newInstance(componentType,
                                 oldArray.length + valueArray.length);
 

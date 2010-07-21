@@ -41,19 +41,16 @@ import java.util.logging.LogManager;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudServer;
+import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.cloud.topology.TopologyService;
-import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.RawString;
-import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.network.listen.StreamSocketLink;
-import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -62,7 +59,6 @@ import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.VfsStream;
 import com.caucho.vfs.WriteStream;
@@ -96,9 +92,8 @@ public class ResinEmbed
   private String _configFile = EMBED_CONF;
 
   private CloudCluster _cluster;
-  private ClusterServer _clusterServer;
-  private String _serverId;
-
+  // private ClusterServer _clusterServer;
+  
   private Host _host;
   private Server _server;
 
@@ -121,6 +116,8 @@ public class ResinEmbed
    */
   public ResinEmbed()
   {
+    _resin = Resin.create();
+    _resin.setRootDirectory(Vfs.lookup());
   }
 
   /**
@@ -128,6 +125,8 @@ public class ResinEmbed
    */
   public ResinEmbed(String configFile)
   {
+    this();
+    
     setConfig(configFile);
   }
 
@@ -265,6 +264,10 @@ public class ResinEmbed
     try {
       Environment.initializeEnvironment();
 
+      _resin.preConfigureInit();
+      
+      thread.setContextClassLoader(_resin.getClassLoader());
+
       initConfig(_configFile);
 
       _server = _resin.createServer();
@@ -302,7 +305,7 @@ public class ResinEmbed
         _host.addWebApp(config);
       }
       
-      _server.start();
+      _resin.start();
     } catch (Exception e) {
       throw ConfigException.create(e);
     } finally {
@@ -430,20 +433,20 @@ public class ResinEmbed
       if (_isConfig)
         return;
       _isConfig = true;
-      
-      Config config = new Config();
 
-      config.configure(_resin, Vfs.lookup(configFile));
+      _resin.configureFile(Vfs.lookup(configFile));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+    
+    CloudSystem cloudSystem = TopologyService.getCurrent().getSystem();
 
-    if (_resin.getClusters().length == 0)
+    if (cloudSystem.getClusterList().length == 0)
       throw new ConfigException(L.l("Resin needs at least one defined <cluster>"));
 
-    String clusterId = _resin.getClusters()[0].getName();
+    String clusterId = cloudSystem.getClusterList()[0].getId();
 
-    _cluster = TopologyService.findCluster(clusterId);
+    _cluster = cloudSystem.findCluster(clusterId);
 
     if (_cluster.getPodList().length == 0)
       throw new ConfigException(L.l("Resin needs at least one defined <server> or <cluster-pod>"));
@@ -452,9 +455,9 @@ public class ResinEmbed
       throw new ConfigException(L.l("Resin needs at least one defined <server>"));
 
     CloudServer cloudServer = _cluster.getPodList()[0].getServerList()[0]; 
-    _clusterServer = cloudServer.getData(ClusterServer.class);
+    // _clusterServer = cloudServer.getData(ClusterServer.class);
     
-    _resin.setServerId(_clusterServer.getId());
+    _resin.setServerId(cloudServer.getId());
   }
 
   protected void finalize()
@@ -519,8 +522,6 @@ public class ResinEmbed
     StreamSocketLink _conn;
     HttpRequest _request;
     VfsStream _vfsStream;
-    ReadStream _readStream;
-    WriteStream _writeStream;
     InetAddress _localAddress;
     InetAddress _remoteAddress;
     int _port = 6666;
@@ -536,8 +537,6 @@ public class ResinEmbed
       _request.init();
 
       _vfsStream = new VfsStream(null, null);
-      _readStream = new ReadStream();
-      _writeStream = new WriteStream();
 
       // _conn.setSecure(_isSecure);
 
@@ -548,39 +547,6 @@ public class ResinEmbed
       }
     }
 
-    public HttpRequest getRequest()
-    {
-      return _request;
-    }
-
-    public void setVirtualHost(String virtualHost)
-    {
-      _conn.setVirtualHost(virtualHost);
-    }
-
-    public void setPort(int port)
-    {
-      if (port > 0)
-        _port = port;
-    }
-
-    public void setLocalIP(String ip)
-      throws IOException
-    {
-      _localAddress = InetAddress.getByName(ip);
-    }
-
-    public void setRemoteIP(String ip)
-      throws IOException
-    {
-      _remoteAddress = InetAddress.getByName(ip);
-    }
-
-    public void setSecure(boolean isSecure)
-    {
-      _conn.setSecure(isSecure);
-    }
-
     public String request(String input) throws IOException
     {
       OutputStream os = new ByteArrayOutputStream();
@@ -588,11 +554,6 @@ public class ResinEmbed
       request(input, os);
 
       return os.toString();
-    }
-
-    public boolean allocateKeepalive()
-    {
-      return true;
     }
 
     public void request(String input, OutputStream os)
@@ -647,10 +608,6 @@ public class ResinEmbed
 
         Thread.currentThread().setContextClassLoader(oldLoader);
       }
-    }
-
-    public void close()
-    {
     }
   }
 

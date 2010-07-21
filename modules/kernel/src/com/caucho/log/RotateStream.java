@@ -29,21 +29,21 @@
 
 package com.caucho.log;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.QDate;
-import com.caucho.util.WeakAlarm;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamImpl;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Bytes;
+import com.caucho.config.types.Period;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.WeakAlarm;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Automatically-rotating streams.  Normally, clients will call
@@ -62,9 +62,6 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   private final AbstractRolloverLog _rolloverLog = new AbstractRolloverLog();
 
   private final Alarm _alarm = new WeakAlarm(this);
-
-  // calendar using the local timezone
-  private QDate _calendar = new QDate(true);
 
   private volatile boolean _isInit;
   private volatile boolean _isClosed;
@@ -187,6 +184,14 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   public void setRolloverPeriod(long period)
   {
     _rolloverLog.setRolloverPeriod(new Period(period));
+  }
+
+  /**
+   * Sets the log rollover size in bytes.
+   */
+  public void setRolloverSize(long size)
+  {
+    _rolloverLog.setRolloverSize(new Bytes(size));
   }
 
   /**

@@ -41,12 +41,9 @@ import java.util.logging.Logger;
 import com.caucho.VersionFactory;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.cloud.security.SecurityService;
 import com.caucho.config.ConfigException;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.hmtp.SignedCredentials;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 

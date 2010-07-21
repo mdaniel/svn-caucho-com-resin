@@ -53,8 +53,8 @@ import javax.management.ObjectName;
 import com.caucho.VersionFactory;
 import com.caucho.bam.Broker;
 import com.caucho.cloud.bam.BamService;
-import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.cloud.network.ClusterServer;
+import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.CloudSystem;
@@ -71,7 +71,6 @@ import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectoryService;
 import com.caucho.env.thread.ThreadPool;
-import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.java.WorkDir;
 import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
@@ -134,8 +133,7 @@ public class Resin extends Shutdown
   private Path _resinDataDirectory;
   
   private ResinSystem _resinSystem;
-  private CloudSystem _cloudSystem;
-
+  
   private long _shutdownWaitMax = 60000L;
 
   private Lifecycle _lifecycle;
@@ -419,7 +417,7 @@ public class Resin extends Shutdown
       
       TopologyService topology = new TopologyService(serverName);
       _resinSystem.addService(topology);
-      _cloudSystem = topology.getSystem();
+      topology.getSystem();
       
       _bootResinConfig = new BootResinConfig(this);
 

@@ -457,8 +457,6 @@ public class MessageConsumerImpl<E> implements MessageConsumer
     private final MessageListener _listener;
     private final ClassLoader _classLoader;
     
-    private MessageImpl _message;
-
     MessageConsumerCallback(MessageListener listener)
     {
       _listener = listener;

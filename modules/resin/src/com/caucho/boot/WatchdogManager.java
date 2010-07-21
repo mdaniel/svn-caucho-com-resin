@@ -117,6 +117,7 @@ class WatchdogManager implements AlarmListener {
     Path logPath = getLogDirectory().lookup("watchdog-manager.log");
 
     RotateStream logStream = RotateStream.create(logPath);
+    logStream.setRolloverSize(64L * 1024 * 1024);
     logStream.init();
     WriteStream out = logStream.getStream();
     out.setDisableClose(true);

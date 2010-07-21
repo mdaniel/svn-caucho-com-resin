@@ -29,49 +29,34 @@
 
 package com.caucho.config.type;
 
-import java.beans.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.PropertyStringProgram;
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
 import com.caucho.config.annotation.NonEL;
-import com.caucho.config.attribute.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.*;
+import com.caucho.config.attribute.AnnotationAttribute;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.types.AnnotationConfig;
+import com.caucho.util.L10N;
 import com.caucho.xml.QName;
-
-import org.w3c.dom.*;
 
 /**
  * Represents an introspected bean type for configuration.
  */
-public class AnnotationInterfaceType extends ConfigType
+public class AnnotationInterfaceType<T> extends ConfigType<T>
 {
   private static final L10N L = new L10N(AnnotationInterfaceType.class);
-  private static final Logger log
-    = Logger.getLogger(AnnotationInterfaceType.class.getName());
 
   private static final QName TEXT = new QName("#text");
 
-  private static final Object _introspectLock = new Object();
-
-  private final Class _annClass;
-
-  private HashMap<QName,Attribute> _nsAttributeMap
-    = new HashMap<QName,Attribute>();
+  private final Class<T> _annClass;
 
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
 
-  public AnnotationInterfaceType(Class annClass)
+  public AnnotationInterfaceType(Class<T> annClass)
   {
     _annClass = annClass;
 
@@ -94,7 +79,7 @@ public class AnnotationInterfaceType extends ConfigType
     // createProxy(annClass);
   }
 
-  private boolean isAnnotationPresent(Annotation []annList, Class annType)
+  private boolean isAnnotationPresent(Annotation []annList, Class<?> annType)
   {
     for (int i = 0; i < annList.length; i++) {
       if (annList[i].annotationType().equals(annType))
@@ -107,7 +92,8 @@ public class AnnotationInterfaceType extends ConfigType
   /**
    * Returns the given type.
    */
-  public Class getType()
+  @Override
+  public Class<T> getType()
   {
     return _annClass;
   }
@@ -183,7 +169,25 @@ public class AnnotationInterfaceType extends ConfigType
 
       sb.append(entry.getKey());
       sb.append('=');
-      sb.append(entry.getValue());
+      
+      Object value = entry.getValue();
+      
+      if (value == null)
+        sb.append(value);
+      else if (value.getClass().isArray()) {
+        Object []values = (Object []) value;
+        
+        sb.append("[");
+        for (int i = 0; i < values.length; i++) {
+          if (i != 0)
+            sb.append(", ");
+          
+          sb.append(values[i]);
+        }
+        sb.append("]");
+      }
+      else
+        sb.append(value);
     }
 
     sb.append(")");

@@ -359,7 +359,8 @@ public class EjbConfig {
       }      
       else if (annType.isAnnotationPresent(MessageDriven.class)) {
         MessageDriven message = annType.getAnnotation(MessageDriven.class);
-        EjbMessageBean<X> bean = new EjbMessageBean<X>(this, rawAnnType, annType, message);
+        EjbMessageBean<X> bean
+          = new EjbMessageBean<X>(this, rawAnnType, annType, moduleName);
         bean.setInjectionTarget(injectTarget);
 
         setBeanConfig(bean.getEJBName(), bean);

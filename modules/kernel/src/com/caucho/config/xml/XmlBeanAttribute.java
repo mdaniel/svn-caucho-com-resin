@@ -57,7 +57,7 @@ public class XmlBeanAttribute extends Attribute {
     this(null, TypeFactory.getType(XmlBeanConfig.class));
   }
 
-  public XmlBeanAttribute(Method setMethod, ConfigType configType)
+  public XmlBeanAttribute(Method setMethod, ConfigType<?> configType)
   {
     _configType = configType;
     _setMethod = setMethod;
@@ -128,6 +128,7 @@ public class XmlBeanAttribute extends Attribute {
   /**
    * Sets the value of the attribute as text
    */
+  @Override
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
@@ -150,6 +151,7 @@ public class XmlBeanAttribute extends Attribute {
   /**
    * Sets the value of the attribute
    */
+  @Override
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {

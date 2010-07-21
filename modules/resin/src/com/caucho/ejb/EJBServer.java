@@ -100,6 +100,8 @@ public class EJBServer
   private String _jdbcIsolation;
 
   private ConnectionFactory _jmsConnectionFactory;
+  
+  private Path _configDirectory;
 
   private boolean _forbidJVMCall;
   private boolean _autoCompile = true;
@@ -244,6 +246,11 @@ public class EJBServer
     return _urlPrefix;
   }
 
+  public void setConfigDirectory(Path path)
+  {
+    
+  }
+  
   /**
    * Adds an ejb jar.
    */

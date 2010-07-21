@@ -160,7 +160,7 @@ more information.</p>
   <li>Configuring the MessageListener</li>
 </ul>
 
-<p>The <code>Queue</code> is configured directly in a &lt;jms-queue&gt;
+<p>The <code>Queue</code> is configured directly in a &lt;resin:FileQueue&gt;
 tag, together with any configuration setters.  This example uses a
 local file store.</p>
 
@@ -168,10 +168,13 @@ local file store.</p>
 the jms-queue stores it in the "my_queue" variable.</p>
 
 <example title="Example: Queue configuration in WEB-INF/resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+   xmlns:ee="urn:java:ee"
+   xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;jms-queue name="my_queue"
-             uri="file:path=WEB-INF/db"/&gt;
+  &lt;resin:FileQueue ee:Named="my_queue">
+    &lt;path>WEB-INF/db&lt;/path>
+  &lt;/resin:FileQueue>
 
 &lt;/web-app&gt;
 </example>
@@ -180,9 +183,10 @@ the jms-queue stores it in the "my_queue" variable.</p>
 and listener can create JMS connections.</p>
 
 <example title="Example: ConnectionFactory in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+   xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;jms-connection-factory uri="resin:"/>
+  &lt;resin:JmsConnectionFactory/>
 
 &lt;/web-app&gt;
 </example>
@@ -193,6 +197,10 @@ and receives messages from the queue.</p>
 
 <example title="Example: message bean configuration resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;resin:FileQueue ee:Named="my_queue">
+    &lt;path>WEB-INF/db&lt;/path>
+  &lt;/resin:FileQueue>
 
   &lt;ejb-message-bean class="example.MyListener">
     &lt;destination>${my_queue}&lt;/destination>

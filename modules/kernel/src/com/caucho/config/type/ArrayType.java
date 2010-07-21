@@ -41,28 +41,28 @@ import com.caucho.xml.QName;
 /**
  * Represents an array of values for configuration.
  */
-public class ArrayType extends ConfigType
+public class ArrayType<T,X> extends ConfigType<T>
 {
   private static final L10N L = new L10N(ArrayType.class);
   private static final Logger log
     = Logger.getLogger(ListType.class.getName());
 
-  private final ConfigType _componentType;
-  private final Class _componentClass;
-  private final Class _type;
+  private final ConfigType<X> _componentType;
+  private final Class<X> _componentClass;
+  private final Class<T> _type;
 
-  public ArrayType(ConfigType componentType, Class componentClass)
+  public ArrayType(ConfigType<X> componentType, Class<X> componentClass)
   {
     _componentType = componentType;
     _componentClass = componentClass;
 
-    Class type = null;
+    Class<?> type = null;
     try {
       type = Array.newInstance(componentClass, 0).getClass();
     } catch (Exception e) {
     }
 
-    _type = type;
+    _type = (Class<T>) type;
   }
 
   @Override
@@ -72,7 +72,7 @@ public class ArrayType extends ConfigType
   }
 
   @Override
-  public ConfigType getComponentType()
+  public ConfigType<X> getComponentType()
   {
     return _componentType;
   }
@@ -80,7 +80,8 @@ public class ArrayType extends ConfigType
   /**
    * Returns the given type.
    */
-  public Class getType()
+  @Override
+  public Class<T> getType()
   {
     return _type;
   }
@@ -91,7 +92,7 @@ public class ArrayType extends ConfigType
   @Override
   public Object create(Object parent, QName name)
   {
-    return new ArrayList();
+    return new ArrayList<X>();
   }
 
   /**
@@ -114,8 +115,8 @@ public class ArrayType extends ConfigType
     if (value == null)
       return null;
 
-    if (value instanceof List) {
-      List list = (List) value;
+    if (value instanceof List<?>) {
+      List<X> list = (List<X>) value;
 
       Object []array
         = (Object []) Array.newInstance(_componentClass, list.size());

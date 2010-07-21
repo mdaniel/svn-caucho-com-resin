@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Produces;
@@ -99,7 +100,6 @@ public class XmlBeanConfig<T> {
   private ContainerProgram _init;
   private boolean _hasBindings;
   private boolean _hasInterceptorBindings;
-  private boolean _hasDeployment;
   private boolean _isInlineBean;
 
   public XmlBeanConfig(QName name, Class<T> cl)
@@ -376,7 +376,7 @@ public class XmlBeanConfig<T> {
     return null;
   }
 
-  //  @PostConstruct
+  @PostConstruct
   public void init()
   {
     if (_annotatedType != null) {
@@ -459,8 +459,11 @@ public class XmlBeanConfig<T> {
     
     _cdiManager.addXmlInjectionTarget(xmlCookie.value(), injectionTarget);
     
-    if (! _isInlineBean)
+    if (! _isInlineBean) {
       _cdiManager.discoverBean(_annotatedType);
+      // ioc/23n3
+      _cdiManager.processPendingAnnotatedTypes();
+    }
     
     //beanManager.addBean(_bean);
 
@@ -495,7 +498,7 @@ public class XmlBeanConfig<T> {
     InjectManager beanManager = InjectManager.create();
 
     CreationalContext<?> env = beanManager.createCreationalContext(_bean);
-    Class type = _bean.getBeanClass();
+    Class<?> type = _bean.getBeanClass();
 
     return InjectManager.create().getReference(_bean, type, env);
   }
@@ -505,7 +508,7 @@ public class XmlBeanConfig<T> {
     return getClass().getSimpleName() + "[" + _class.getSimpleName() + "]";
   }
 
-  class BeanArg<T> extends Arg<T> {
+  class BeanArg extends Arg<T> {
     private String _loc;
     private Constructor<T> _ctor;
     private Type _type;

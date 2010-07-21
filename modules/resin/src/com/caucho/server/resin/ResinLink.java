@@ -49,7 +49,7 @@ public class ResinLink extends HmtpLink implements Runnable {
   public ResinLink(ResinActor resinActor, InputStream is, OutputStream os)
   {
     super(resinActor, is, os);
-
+    
     _resinActor = resinActor;
   }
 

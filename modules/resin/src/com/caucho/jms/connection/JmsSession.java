@@ -99,8 +99,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   
   private ConnectionImpl _connection;
   
-  private final ArrayList<MessageConsumerImpl> _consumers
-    = new ArrayList<MessageConsumerImpl>();
+  private final ArrayList<MessageConsumerImpl<Message>> _consumers
+    = new ArrayList<MessageConsumerImpl<Message>>();
 
   private MessageFactory _messageFactory = new MessageFactory();
   private MessageListener _messageListener;
@@ -474,11 +474,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       return new MessageProducerImpl(this, null);
     }
     
-    if (! (destination instanceof AbstractDestination))
+    if (! (destination instanceof AbstractDestination<?>))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS destination for Session.createProducer.",
                                                 destination));
 
-    AbstractDestination dest = (AbstractDestination) destination;
+    AbstractDestination<Message> dest
+      = (AbstractDestination<Message>) destination;
 
     return new MessageProducerImpl(this, dest);
   }
@@ -509,11 +510,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (queue == null)
       throw new InvalidDestinationException(L.l("queue is null.  Queue may not be null for Session.createBrowser"));
     
-    if (! (queue instanceof AbstractQueue))
+    if (! (queue instanceof AbstractQueue<?>))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown queue.  The queue must be a Resin JMS Queue for Session.createBrowser.",
                                                 queue));
     
-    return new MessageBrowserImpl(this, (AbstractQueue) queue,
+    return new MessageBrowserImpl(this, (AbstractQueue<?>) queue,
                                   messageSelector);
   }
 
@@ -595,11 +596,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (topic == null)
       throw new InvalidDestinationException(L.l("destination is null.  Destination may not be null for Session.createDurableSubscriber"));
     
-    if (! (topic instanceof AbstractTopic))
+    if (! (topic instanceof AbstractTopic<?>))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
                                                 topic));
     
-    AbstractTopic topicImpl = (AbstractTopic) topic;
+    AbstractTopic<?> topicImpl = (AbstractTopic<?>) topic;
 
     if (_connection.getDurableSubscriber(name) != null) {
       // jms/2130
@@ -610,7 +611,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       */
     }
 
-    AbstractQueue queue = topicImpl.createSubscriber(this, name, noLocal);
+    AbstractQueue<?> queue = topicImpl.createSubscriber(this, name, noLocal);
 
     TopicSubscriberImpl consumer;
     consumer = new TopicSubscriberImpl(this, topicImpl, queue,
@@ -652,7 +653,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       log.fine(toString() + " active");
 
     synchronized (_consumers) {
-      for (MessageConsumerImpl consumer : _consumers) {
+      for (MessageConsumerImpl<Message> consumer : _consumers) {
         consumer.start();
       }
     }
@@ -682,10 +683,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
         }
       }
 
-      ArrayList<MessageConsumerImpl> consumers
-        = new ArrayList<MessageConsumerImpl>(_consumers);
+      ArrayList<MessageConsumerImpl<Message>> consumers
+        = new ArrayList<MessageConsumerImpl<Message>>(_consumers);
       
-      for (MessageConsumerImpl consumer : consumers) {
+      for (MessageConsumerImpl<Message> consumer : consumers) {
         try {
           // XXX: should be stop()?
 
@@ -766,6 +767,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   /**
    * Recovers the messages.
    */
+  @Override
   public void recover()
     throws JMSException
   {
@@ -790,6 +792,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   /**
    * Rollsback the messages.
    */
+  @Override
   public void rollback()
     throws JMSException
   {
@@ -808,8 +811,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       throw new IllegalStateException(L.l("rollback() can only be called on a transacted session."));
 
     if (_transactedMessages != null) {
-      for (int i = 0; i < _transactedMessages.size(); i++)
+      for (int i = 0; i < _transactedMessages.size(); i++) {
         _transactedMessages.get(i).rollback();
+      }
 
       _transactedMessages.clear();
     }
@@ -818,6 +822,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   /**
    * Closes the session
    */
+  @Override
   public void close()
     throws JMSException
   {
@@ -1118,6 +1123,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   /**
    * Called to roll back.
    */
+  @Override
   public void rollback(Xid xid)
     throws XAException
   {
@@ -1236,11 +1242,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   }
 
   class SendMessage extends TransactedMessage {
-    private final AbstractDestination _queue;
+    private final AbstractDestination<Message> _queue;
     private final MessageImpl _message;
     private final long _expires;
     
-    SendMessage(AbstractDestination queue,
+    SendMessage(AbstractDestination<Message> queue,
                 MessageImpl message,
                 long expires)
     {
@@ -1271,10 +1277,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   }
 
   class ReceiveMessage extends TransactedMessage {
-    private final AbstractDestination _queue;
+    private final AbstractDestination<Message> _queue;
     private final MessageImpl _message;
     
-    ReceiveMessage(AbstractDestination queue, MessageImpl message)
+    ReceiveMessage(AbstractDestination<Message> queue, MessageImpl message)
     {
       _queue = queue;
       _message = message;

@@ -86,6 +86,7 @@ public class ServerAdmin extends AbstractEmitterObject
     return _server.getServerId();
   }
 
+  @Override
   public int getServerIndex()
   {
     return _server.getServerIndex();
@@ -113,6 +114,7 @@ public class ServerAdmin extends AbstractEmitterObject
     return _server.getCluster().getData(ClusterMXBean.class);
   }
 
+  @Override
   public EnvironmentMXBean getEnvironment()
   {
     // XXX: possible GC/classloader issues
@@ -122,6 +124,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the array of ports.
    */
+  @Override
   public PortMXBean []getPorts()
   {
     Collection<SocketLinkListener> portList = _server.getPorts();
@@ -139,6 +142,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the server's thread pool administration
    */
+  @Override
   public ThreadPoolMXBean getThreadPool()
   {
     return _server.getResin().getThreadPoolAdmin();
@@ -147,6 +151,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the cluster port
    */
+  @Override
   public PortMXBean getClusterPort()
   {
     return null;
@@ -165,46 +170,55 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns true if detailed statistics are being kept.
    */
+  @Override
   public boolean isDetailedStatistics()
   {
     return false;
   }
 
+  @Override
   public boolean isDevelopmentModeErrorPage()
   {
     return _server.isDevelopmentModeErrorPage();
   }
 
+  @Override
   public long getMemoryFreeMin()
   {
     return _server.getMemoryFreeMin();
   }
 
+  @Override
   public long getPermGenFreeMin()
   {
     return _server.getPermGenFreeMin();
   }
 
+  @Override
   public String getServerHeader()
   {
     return _server.getServerHeader();
   }
 
+  @Override
   public boolean isSelectManagerEnabled()
   {
     return _server.isSelectManagerEnabled();
   }
 
+  @Override
   public long getShutdownWaitMax()
   {
     return _server.getShutdownWaitMax();
   }
 
+  @Override
   public String getStage()
   {
     return _server.getStage();
   }
 
+  @Override
   public int getUrlLengthMax()
   {
     return _server.getUrlLengthMax();
@@ -217,6 +231,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * The current lifecycle state.
    */
+  @Override
   public String getState()
   {
     return _server.getState();
@@ -225,6 +240,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the current time according to the server.
    */
+  @Override
   public Date getCurrentTime()
   {
     return new Date(Alarm.getExactTime());
@@ -233,6 +249,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the last start time.
    */
+  @Override
   public Date getStartTime()
   {
     return new Date(_server.getStartTime());
@@ -241,6 +258,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the time since the last start time.
    */
+  @Override
   public long getUptime()
   {
     return Alarm.getExactTime() - _server.getStartTime();
@@ -253,6 +271,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the current number of threads that are servicing requests.
    */
+  @Override
   public int getThreadActiveCount()
   {
     int activeThreadCount = -1;
@@ -273,6 +292,7 @@ public class ServerAdmin extends AbstractEmitterObject
    * Returns the current number of connections that are in the keepalive
    * state and are using a thread to maintain the connection.
    */
+  @Override
   public int getThreadKeepaliveCount()
   {
     int keepaliveThreadCount = -1;
@@ -293,6 +313,7 @@ public class ServerAdmin extends AbstractEmitterObject
    * Returns the current number of connections that are in the keepalive
    * state and are using select to maintain the connection.
    */
+  @Override
   public int getSelectKeepaliveCount()
   {
     return _server.getKeepaliveSelectCount();
@@ -302,6 +323,7 @@ public class ServerAdmin extends AbstractEmitterObject
    * Returns the total number of requests serviced by the server
    * since it started.
    */
+  @Override
   public long getRequestCountTotal()
   {
     long lifetimeRequestCount = 0;
@@ -316,6 +338,7 @@ public class ServerAdmin extends AbstractEmitterObject
    * Returns the number of requests that have ended up in the keepalive state
    * for this server in its lifetime.
    */
+  @Override
   public long getKeepaliveCountTotal()
   {
     return -1;
@@ -325,6 +348,7 @@ public class ServerAdmin extends AbstractEmitterObject
    * The total number of connections that have terminated with
    * {@link com.caucho.vfs.ClientDisconnectException}.
    */
+  @Override
   public long getClientDisconnectCountTotal()
   {
     long lifetimeClientDisconnectCount = 0;
@@ -339,6 +363,7 @@ public class ServerAdmin extends AbstractEmitterObject
    * Returns the total duration in milliseconds that requests serviced by
    * this server have taken.
    */
+  @Override
   public long getRequestTimeTotal()
   {
     return -1;
@@ -348,6 +373,7 @@ public class ServerAdmin extends AbstractEmitterObject
    * Returns the total number of bytes that requests serviced by this
    * server have read.
    */
+  @Override
   public long getRequestReadBytesTotal()
   {
     return -1;
@@ -357,6 +383,7 @@ public class ServerAdmin extends AbstractEmitterObject
    * Returns the total number of bytes that requests serviced by this
    * server have written.
    */
+  @Override
   public long getRequestWriteBytesTotal()
   {
     if (_httpBytesProbe != null)
@@ -368,6 +395,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the invocation cache hit count.
    */
+  @Override
   public long getInvocationCacheHitCountTotal()
   {
     return _server.getInvocationCacheHitCount();
@@ -376,6 +404,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the invocation cache miss count.
    */
+  @Override
   public long getInvocationCacheMissCountTotal()
   {
     return _server.getInvocationCacheMissCount();
@@ -384,6 +413,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the current total amount of memory available for the JVM, in bytes.
    */
+  @Override
   public long getRuntimeMemory()
   {
     if (Alarm.isTest())
@@ -395,6 +425,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the current free amount of memory available for the JVM, in bytes.
    */
+  @Override
   public long getRuntimeMemoryFree()
   {
     if (Alarm.isTest())
@@ -406,6 +437,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Returns the CPU load average.
    */
+  @Override
   public double getCpuLoadAvg()
   {
     try {
@@ -425,6 +457,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Restart this Resin server.
    */
+  @Override
   public void restart()
   {
     _server.destroy();
@@ -433,6 +466,7 @@ public class ServerAdmin extends AbstractEmitterObject
   /**
    * Finds the ConnectionMXBean for a given thread id
    */
+  @Override
   public TcpConnectionMXBean findConnectionByThreadId(long threadId)
   {
     TcpSocketLink conn = _server.findConnectionByThreadId(threadId);

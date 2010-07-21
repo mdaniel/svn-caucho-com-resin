@@ -320,6 +320,8 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
 
       if (_ejbCreate != null)
         _ejbCreate.invoke(listener);
+      
+      _builder.postConstruct(listener);
 
       return listener;
     } finally {

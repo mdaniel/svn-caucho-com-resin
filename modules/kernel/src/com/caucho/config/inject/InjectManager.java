@@ -2834,7 +2834,7 @@ public final class InjectManager
     }
   }
 
-  private void processPendingAnnotatedTypes()
+  public void processPendingAnnotatedTypes()
   {
     _scanManager.discover();
     

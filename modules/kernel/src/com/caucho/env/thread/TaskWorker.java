@@ -129,9 +129,10 @@ abstract public class TaskWorker implements Runnable {
       
       onThreadStart();
 
-      long expires = Alarm.getCurrentTimeActual() + _idleTimeout;
+      long expires;
 
       do {
+        expires = Alarm.getCurrentTimeActual() + _idleTimeout;
         while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
           long delta = runTask();
           
