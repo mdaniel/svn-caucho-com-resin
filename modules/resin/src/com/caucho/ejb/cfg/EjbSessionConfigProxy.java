@@ -116,6 +116,7 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
       return new EjbSingletonBean<T>(getConfig(), rawAnnType, annType, singleton.name());
     }
     
-    throw new UnsupportedOperationException(_sessionType);
+    throw new ConfigException(L.l("'{0}' is an unknown <session-type>",
+                                  _sessionType));
   }
 }

@@ -90,7 +90,7 @@ public class BeanBuilder<T>
     return this;
   }
 
-  public BeanBuilder<T> binding(Annotation ann)
+  public BeanBuilder<T> qualifier(Annotation ann)
   {
     if (_bindings == null)
       _bindings = new LinkedHashSet<Annotation>();

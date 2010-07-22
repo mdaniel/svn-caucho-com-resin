@@ -108,7 +108,8 @@ public final class ClusterServer {
 
   private ClientSocketFactory _serverPool;
 
-  private boolean _isActive;
+  // XXX: needs to start as active until proven otherwise
+  private boolean _isActive = true;
   private long _stateTimestamp;
 
   // admin

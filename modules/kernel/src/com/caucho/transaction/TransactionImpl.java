@@ -668,7 +668,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       throw new IllegalStateException(L
           .l("can't resume non-suspended transaction"));
 
-    _alarm.queue(_timeout + EXTRA_TIMEOUT);
+    if (_timeout > 0)
+      _alarm.queue(_timeout + EXTRA_TIMEOUT);
 
     for (int i = _resourceCount - 1; i >= 0; i--) {
       if ((_resourceStates[i] & (RES_ACTIVE | RES_SUSPENDED)) == RES_ACTIVE) {
@@ -706,6 +707,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     _status = Status.STATUS_MARKED_ROLLBACK;
 
+    _alarm.dequeue();
     _timeout = 0;
 
     if (log.isLoggable(Level.FINE))
@@ -1043,6 +1045,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
    */
   private void callBeforeCompletion() throws RollbackException
   {
+    _alarm.dequeue();
+    
     // server/16h2
     for (int i = 0; _synchronizations != null && i < _synchronizations.size(); i++) {
       Synchronization synchronization = _synchronizations.get(i);
@@ -1171,11 +1175,16 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
   public void handleAlarm(Alarm alarm)
   {
+    System.out.println("ALARM: " + alarm);
     try {
-      log.warning(L.l("{0}: timed out after {1} seconds.", this, String
-          .valueOf(getTransactionTimeout())));
+      String msg = L.l("{0}: timed out after {1} seconds.", this, 
+                       String.valueOf(getTransactionTimeout()));
+                       
+      log.warning(msg);
+      
+      RuntimeException exn = new RuntimeException(msg);
 
-      setRollbackOnly();
+      setRollbackOnly(exn);
 
       // should not close at this point because there could be following
       // statements that also need to be rolled back

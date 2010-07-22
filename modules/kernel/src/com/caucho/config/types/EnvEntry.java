@@ -196,8 +196,8 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     BeanBuilder<?> builder = cdiManager.createBeanFactory(value.getClass());
     builder.name(_name);
     // server/1516
-    builder.binding(Names.create(_name));
-    builder.binding(DefaultLiteral.DEFAULT);
+    builder.qualifier(Names.create(_name));
+    builder.qualifier(DefaultLiteral.DEFAULT);
     
     builder.type(types);
 

@@ -120,7 +120,7 @@ public class WebAppInjectExtension implements Extension
             Class<?> bindingType = binding.annotationType();
 
             if (bindingType.isAnnotationPresent(Qualifier.class))
-              builder.binding(binding);
+              builder.qualifier(binding);
           }
 
           _beanManager.addBean(builder.singleton(proxy));

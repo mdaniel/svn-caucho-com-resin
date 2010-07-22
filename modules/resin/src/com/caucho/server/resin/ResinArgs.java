@@ -393,12 +393,12 @@ class ResinArgs
       }
       else if ("-stage".equals(argv[i])
                || "--stage".equals(argv[i])) {
-        _stage = argv[i + 1];
+        _resin.setStage(argv[i + 1]);
         i += 2;
       }
       else if ("-preview".equals(argv[i])
                || "--preview".equals(argv[i])) {
-        _stage = "preview";
+        _resin.setStage("preview");
         i += 1;
       }
       else if ("-debug-port".equals(argv[i])

@@ -112,8 +112,8 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
 
     factory.name(name);
-    factory.binding(Names.create(name));
-    factory.binding(DefaultLiteral.DEFAULT);
+    factory.qualifier(Names.create(name));
+    factory.qualifier(DefaultLiteral.DEFAULT);
     
     ResourceAdapterProducer<T> producer = new ResourceAdapterProducer(controller);
 

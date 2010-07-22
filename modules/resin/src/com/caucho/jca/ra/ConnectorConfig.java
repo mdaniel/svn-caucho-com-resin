@@ -702,8 +702,8 @@ public class ConnectorConfig implements EnvironmentListener {
 
         factory.name(getName());
         // server/30b4
-        factory.binding(Names.create(getName()));
-        factory.binding(CurrentLiteral.CURRENT);
+        factory.qualifier(Names.create(getName()));
+        factory.qualifier(CurrentLiteral.CURRENT);
       }
       
       manager.addBean(factory.singleton(connectionFactory));

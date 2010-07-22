@@ -82,6 +82,11 @@ public class SecurityService extends AbstractResinService
     _signatureSecret = secret;
   }
   
+  public boolean isSystemAuthKey()
+  {
+    return _signatureSecret != null;
+  }
+  
   public void setAuthenticator(Authenticator auth)
   {
     _authenticator = auth;
@@ -92,20 +97,15 @@ public class SecurityService extends AbstractResinService
     return _authenticator;
   }
   
-  public String sign(String uid, String nonce)
+  public String signSystem(String nonce)
   {
     try {
       String password = null;
       
-      if (uid == null || uid.equals(""))
-        password = _signatureSecret;
-      else
-        password = "fail";
+      password = _signatureSecret;
       
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-      if (uid != null)
-        digest.update(uid.getBytes("UTF-8"));
+      
       digest.update(nonce.getBytes("UTF-8"));
 
       if (password != null)
@@ -124,7 +124,9 @@ public class SecurityService extends AbstractResinService
       
       if (uid != null)
         digest.update(uid.getBytes("UTF-8"));
+      
       digest.update(nonce.getBytes("UTF-8"));
+      
       if (password != null)
         digest.update(password.getBytes("UTF-8"));
       
@@ -226,7 +228,7 @@ public class SecurityService extends AbstractResinService
     
     if (_authenticator == null) {
       Bean<Authenticator> bean = findAuthenticator(cdiManager);
-     
+      
       if (bean != null) {
         CreationalContext<Authenticator> env 
           = cdiManager.createCreationalContext(bean);

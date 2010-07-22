@@ -296,6 +296,8 @@ public class Server extends ProtocolDispatchServer
     _bamService = BamService.create(getBamAdminName());
 
     _authManager = new ServerAuthManager();
+    // XXX:
+    _authManager.setAuthenticationRequired(false);
     _bamService.setLinkManager(_authManager);
     
     Config.setProperty("server", new ServerVar(_selfServer), _classLoader);

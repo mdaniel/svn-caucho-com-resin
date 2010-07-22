@@ -246,7 +246,7 @@ abstract public class AbstractBeanConfig {
       builder.init(_init);
     
     for (Annotation qualifier : _qualifiers)
-      builder.binding(qualifier);
+      builder.qualifier(qualifier);
 
     Object value = replaceObject();
     Bean<X> bean = null;

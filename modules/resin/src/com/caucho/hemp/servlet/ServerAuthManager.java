@@ -35,6 +35,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Principal;
 import java.security.PublicKey;
+import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 
@@ -58,13 +59,14 @@ import com.caucho.util.LruCache;
  */
 
 public class ServerAuthManager {
+  private static final Logger log
+    = Logger.getLogger(ServerAuthManager.class.getName());
   private static final L10N L = new L10N(ServerAuthManager.class);
   
   private SecurityService _security;
-  private Authenticator _auth;
+
   private KeyPair _authKeyPair; // authentication key pair
   private boolean _isAuthenticationRequired = true;
-  private boolean _isRequireEncryptedPassword = true;
   
   private LruCache<String,String> _nonceMap
     = new LruCache<String,String>(4096);
@@ -74,23 +76,14 @@ public class ServerAuthManager {
     _security = SecurityService.create();
   }
   
-  public ServerAuthManager(Authenticator auth)
+  public void setAuthenticationRequired(boolean isAuthenticationRequired)
   {
-    _auth = auth;
-    _security = SecurityService.create();
+    _isAuthenticationRequired = isAuthenticationRequired;
   }
   
   public Authenticator getAuth()
   {
-    if (_auth != null)
-      return _auth;
-    else
-      return _security.getAuthenticator();
-  }
-  
-  public void setAuthenticator(Authenticator auth)
-  {
-    _auth = auth;
+    return _security.getAuthenticator();
   }
 
   //
@@ -189,7 +182,20 @@ public class ServerAuthManager {
                                              uid));
                                              */
       
-      String serverSignature = _security.sign(uid, nonce);
+      String serverSignature;
+      
+      if (uid != null && ! uid.equals("")) {
+        // XXXX:
+        serverSignature = _security.signSystem(nonce);
+      }
+      else if (_security.isSystemAuthKey() || ! _isAuthenticationRequired)
+        serverSignature = _security.signSystem(nonce);
+      else {
+        log.info("Authentication failed because no resin-system-auth-key");
+        
+        throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+                                             uid));
+      }
       
       if (! serverSignature.equals(signature)) {
         throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
@@ -199,8 +205,10 @@ public class ServerAuthManager {
     else if (auth == null && ! _isAuthenticationRequired) {
     }
     else if (auth == null) {
-      throw new NotAuthorizedException(L.l("{0} does not have a configured authenticator",
-                                             this));
+      log.finer("Authentication failed because no authenticator configured");
+      
+      throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+                                           credentials));
     }
     else if (credentials instanceof DigestCredentials) {
       DigestCredentials digestCred = (DigestCredentials) credentials;
@@ -244,7 +252,7 @@ public class ServerAuthManager {
     String uid = query.getUid();
     String clientNonce = query.getNonce();
 
-    String clientSignature = _security.sign(uid, clientNonce);
+    String clientSignature = _security.signSystem(clientNonce);
     
     String nonce = String.valueOf(Alarm.getCurrentTime());
     
@@ -254,6 +262,6 @@ public class ServerAuthManager {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _auth + "]";
+    return getClass().getSimpleName() + "[" + getAuth() + "]";
   }  
 }

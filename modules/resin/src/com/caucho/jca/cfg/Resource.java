@@ -451,8 +451,8 @@ public class Resource {
 
     if (name != null) {
       factory.name(name);
-      factory.binding(CurrentLiteral.CURRENT);
-      factory.binding(Names.create(name));
+      factory.qualifier(CurrentLiteral.CURRENT);
+      factory.qualifier(Names.create(name));
     }
 
     // server/12dt

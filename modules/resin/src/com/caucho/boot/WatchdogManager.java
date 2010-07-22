@@ -39,11 +39,9 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.admin.RemoteAdminService;
-import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
-import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.Config;
@@ -66,7 +64,6 @@ import com.caucho.log.RotateStream;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.Authenticator;
-import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.resin.Resin;
@@ -253,7 +250,7 @@ class WatchdogManager implements AlarmListener {
 
         factory.type(Authenticator.class);
         factory.type(AdminAuthenticator.class);
-        factory.binding(DefaultLiteral.DEFAULT);
+        factory.qualifier(DefaultLiteral.DEFAULT);
 
         cdiManager.addBean(factory.singleton(auth));
       }

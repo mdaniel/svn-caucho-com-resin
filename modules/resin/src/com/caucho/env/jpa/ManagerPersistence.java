@@ -366,15 +366,15 @@ public class ManagerPersistence
       BeanBuilder<EntityManagerFactory> emfFactory;
       emfFactory = beanManager.createBeanFactory(EntityManagerFactory.class);
 
-      emfFactory.binding(CurrentLiteral.CURRENT);
-      emfFactory.binding(Names.create(pUnit.getName()));
+      emfFactory.qualifier(CurrentLiteral.CURRENT);
+      emfFactory.qualifier(Names.create(pUnit.getName()));
       beanManager.addBean(emfFactory.singleton(pUnit.getEntityManagerFactoryProxy()));
 
       BeanBuilder<EntityManager> emFactory;
       emFactory = beanManager.createBeanFactory(EntityManager.class);
 
-      emFactory.binding(CurrentLiteral.CURRENT);
-      emFactory.binding(Names.create(pUnit.getName()));
+      emFactory.qualifier(CurrentLiteral.CURRENT);
+      emFactory.qualifier(Names.create(pUnit.getName()));
       beanManager.addBean(emFactory.singleton(pUnit.getEntityManagerJtaProxy()));
 
       /*

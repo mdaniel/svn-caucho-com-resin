@@ -534,14 +534,14 @@ public class BeanConfig {
     }
 
     for (Annotation qualifier : _qualifierList) {
-      builder.binding(qualifier);
+      builder.qualifier(qualifier);
     }
     
     if (_name != null)
-      builder.binding(Names.create(_name));
+      builder.qualifier(Names.create(_name));
     
     if (_qualifierList.size() == 0)
-      builder.binding(DefaultLiteral.DEFAULT);
+      builder.qualifier(DefaultLiteral.DEFAULT);
 
     for (Annotation stereotype : _stereotypeList) {
       builder.stereotype(stereotype.annotationType());

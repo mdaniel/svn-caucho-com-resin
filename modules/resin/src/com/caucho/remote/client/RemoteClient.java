@@ -90,7 +90,7 @@ public class RemoteClient extends BeanConfig
     }
 
     for (Annotation binding : getBindingList()) {
-      builder = builder.binding(binding);
+      builder = builder.qualifier(binding);
     }
 
     for (Annotation stereotype : getStereotypeList()) {

@@ -155,7 +155,7 @@ public class ServerLinkService extends SimpleActor {
                                                 e.getMessage()));
       return;
     } catch (Throwable e) {
-      e.printStackTrace();
+      log.log(Level.FINER, e.toString(), e);
     }
 
     if (_serverLinkStream != null)

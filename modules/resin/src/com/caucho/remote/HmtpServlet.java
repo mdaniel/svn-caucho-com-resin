@@ -120,7 +120,9 @@ public class HmtpServlet extends GenericServlet {
       }
     }
 
-    _authManager = new ServerAuthManager(_auth);
+    // _authManager = new ServerAuthManager(_auth);
+    _authManager = new ServerAuthManager();
+    _authManager.setAuthenticationRequired(_isAuthenticationRequired);
 
     if (_isAdmin)
       _broker = Server.getCurrent().getAdminBroker();

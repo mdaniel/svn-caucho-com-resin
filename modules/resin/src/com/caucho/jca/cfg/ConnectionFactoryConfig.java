@@ -194,9 +194,9 @@ public class ConnectionFactoryConfig extends BeanConfig {
         Jndi.bindDeepShort(getName(), connectionFactory);
 
         factory.name(getName());
-        factory.binding(Names.create(getName()));
+        factory.qualifier(Names.create(getName()));
         // server/30i0
-        factory.binding(CurrentLiteral.CURRENT);
+        factory.qualifier(CurrentLiteral.CURRENT);
       }
 
       Bean bean = factory.singleton(connectionFactory);

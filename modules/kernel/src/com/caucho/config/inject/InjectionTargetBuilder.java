@@ -78,6 +78,7 @@ import com.caucho.config.j2ee.PreDestroyInject;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.reflect.AnnotatedConstructorImpl;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -488,10 +489,10 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
         }
       }
 
-      /*
-      if (best == null)
-        best = cl.getConstructor(new Class[0]);
-      */
+      if (best == null) {
+        // ioc/0q00
+        best = new AnnotatedConstructorImpl(beanType, beanType.getJavaClass().getConstructor(new Class[0]));
+      }
 
       if (best == null) {
         throw new ConfigException(L.l("{0}: no constructor found while introspecting bean for Java Injection",

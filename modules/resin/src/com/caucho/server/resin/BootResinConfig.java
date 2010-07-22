@@ -148,7 +148,7 @@ public class BootResinConfig implements SchemaBean
     return null;
   }
   
-  public void addBuilderProgram(ConfigProgram program)
+  public void addContentProgram(ConfigProgram program)
   {
     _resinProgram.addProgram(program);
   }

@@ -764,9 +764,9 @@ public class DBPool
     }
     else {
       if (name != null)
-        factory.binding(Names.create(name));
+        factory.qualifier(Names.create(name));
       
-      factory.binding(CurrentLiteral.CURRENT);
+      factory.qualifier(CurrentLiteral.CURRENT);
     }
 
     if (name != null)

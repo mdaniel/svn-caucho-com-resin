@@ -32,9 +32,11 @@ package com.caucho.server.admin;
 import javax.annotation.PostConstruct;
 
 import com.caucho.bam.Broker;
+import com.caucho.config.AdminLiteral;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.inject.BeanBuilder;
+import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;
@@ -226,12 +228,15 @@ public class Management
       if (_auth != null) {
         _auth.init();
 
-        InjectManager webBeans = InjectManager.create();
-        BeanBuilder<?> factory = webBeans.createBeanFactory(Authenticator.class);
+        InjectManager cdiManager = InjectManager.create();
+        BeanBuilder<?> factory = cdiManager.createBeanFactory(Authenticator.class);
         factory.type(Authenticator.class);
         factory.type(AdminAuthenticator.class);
+        
+        factory.qualifier(DefaultLiteral.DEFAULT);
+        factory.qualifier(new AdminLiteral());
 
-        webBeans.addBean(factory.singleton(_auth));
+        cdiManager.addBean(factory.singleton(_auth));
       }
 
       if (_transactionManager != null)

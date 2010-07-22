@@ -132,7 +132,7 @@ public class BootClusterConfig implements SchemaBean
     return _servers;
   }
   
-  public void addBuilderProgram(ConfigProgram program)
+  public void addContentProgram(ConfigProgram program)
   {
     _clusterProgram.addProgram(program);
   }

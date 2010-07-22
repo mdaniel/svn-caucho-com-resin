@@ -356,6 +356,11 @@ public class Resin extends Shutdown
     _pingSocket = socket;
   }
   
+  public void setStage(String stage)
+  {
+    _stage = stage; 
+  }
+  
   private void initEnvironment()
   {
     String resinHome = System.getProperty("resin.home");
