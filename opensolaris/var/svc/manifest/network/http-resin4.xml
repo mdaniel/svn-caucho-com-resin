@@ -1,0 +1,87 @@
+<?xml version='1.0'?>
+<!DOCTYPE service_bundle SYSTEM '/usr/share/lib/xml/dtd/service_bundle.dtd.1'>
+<service_bundle type='manifest' name='CAUCHOResin:resin'>
+  <service name='network/http'
+    type='service'
+    version='1'>
+<!--    <create_default_instance enabled='false'/>
+    <single_instance/> -->
+    
+
+<instance name='resin' enabled='false'>
+<dependency
+      name='network'
+      grouping='require_all'
+      restart_on='error'
+      type='service'>
+        <service_fmri value='svc:/milestone/network:default'/>
+    </dependency>
+
+               <!--
+                  Wait for all local filesystems to be mounted.
+                -->
+                <dependency name='filesystem-local'
+                    grouping='require_all'
+                    restart_on='none'
+                    type='service'>
+                    <service_fmri
+                        value='svc:/system/filesystem/local:default'/>
+                </dependency>
+
+                <!--
+                  Wait for automounting to be available, as we may be
+                  serving data from home directories or other remote
+                  filesystems.
+                -->
+                <dependency name='autofs'
+                    grouping='optional_all'
+                    restart_on='error'
+                    type='service'>
+                    <service_fmri
+                        value='svc:/system/filesystem/autofs:default'/>
+                </dependency>
+
+
+
+
+
+
+    <exec_method
+      type='method'
+      name='start'
+      exec='/lib/svc/method/http-resin4 start'
+      timeout_seconds='60'/>
+
+    <exec_method
+      type='method'
+      name='stop'
+      exec='/lib/svc/method/http-resin4 stop'
+      timeout_seconds='60'/>
+<!--    <exec_method
+      type='method'
+      name='refresh'
+      exec='/lib/svc/method/REPLACE_ME refresh'
+      timeout_seconds='REPLACE_ME'/>
+-->
+    <method_context>
+      <method_credential user='webservd' group='webservd' privileges='basic,net_privaddr'/>
+    </method_context>
+<!--    <property_group name='REPLACE_ME' type='application'>
+      <propval name='REPLACE_ME' type='astring' value='REPLACE_ME'/>
+      <propval name='REPLACE_ME' type='astring' value='REPLACE_ME'/>
+    </property_group>
+-->
+    <stability value='Evolving'/>
+    <template>
+      <common_name>
+        <loctext xml:lang='C'>Caucho Resin4 JavaEE Application Server </loctext>
+      </common_name>
+      <documentation>
+<!--        <manpage title='REPLACE_ME' section='REPLACE_ME'/> -->
+        <doc_link name='caucho.org' uri='http://caucho.com/resin-4.0/'/>
+
+      </documentation>
+    </template>
+  </service>
+</service_bundle>
+
