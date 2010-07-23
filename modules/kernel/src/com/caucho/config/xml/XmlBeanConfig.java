@@ -31,15 +31,12 @@ package com.caucho.config.xml;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.NormalScope;
@@ -70,7 +67,6 @@ import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.TypeFactory;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 

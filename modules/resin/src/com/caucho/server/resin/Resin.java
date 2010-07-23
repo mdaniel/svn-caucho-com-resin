@@ -76,7 +76,6 @@ import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.management.server.ClusterMXBean;
@@ -119,7 +118,7 @@ public class Resin extends Shutdown
   private final EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
 
-  private EnvironmentClassLoader _classLoader;
+  // private EnvironmentClassLoader _classLoader;
   private boolean _isGlobal;
 
   private String _serverId = "";
@@ -196,10 +195,12 @@ public class Resin extends Shutdown
 
     _isGlobal = (loader == ClassLoader.getSystemClassLoader());
 
+    /*
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;
     else
       _classLoader = EnvironmentClassLoader.create("Resin");
+      */
     
     initEnvironment();
   }
@@ -232,6 +233,9 @@ public class Resin extends Shutdown
     String licenseErrorMessage = null;
 
     Resin resin = null;
+    
+    if (loader == null)
+      loader = Thread.currentThread().getContextClassLoader();
 
     try {
       Class<?> cl = Class.forName("com.caucho.server.resin.ProResin");
@@ -397,9 +401,15 @@ public class Resin extends Shutdown
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_classLoader);
+      String serverName = getServerId();
+      if (serverName == null || "".equals(serverName))
+        serverName = "default";
+      
+      _resinSystem = new ResinSystem(serverName);
+      
+      thread.setContextClassLoader(getClassLoader());
 
-      _resinLocal.set(this, _classLoader);
+      _resinLocal.set(this, getClassLoader());
 
       _lifecycle = new Lifecycle(log(), "Resin[]");
 
@@ -413,12 +423,6 @@ public class Resin extends Shutdown
       
       if (getRootDirectory() == null)
         throw new NullPointerException();
-      
-      String serverName = getServerId();
-      if (serverName == null || "".equals(serverName))
-        serverName = "default";
-      
-      _resinSystem = new ResinSystem(serverName);
       
       TopologyService topology = new TopologyService(serverName);
       _resinSystem.addService(topology);
@@ -525,14 +529,6 @@ public class Resin extends Shutdown
   protected String getLicenseErrorMessage()
   {
     return _licenseErrorMessage;
-  }
-
-  /**
-   * Sets the classLoader
-   */
-  public void setEnvironmentClassLoader(EnvironmentClassLoader loader)
-  {
-    _classLoader = loader;
   }
 
   /**
@@ -991,8 +987,9 @@ public class Resin extends Shutdown
 
       if (_isGlobal)
         Environment.closeGlobal();
-      else
-        _classLoader.destroy();
+      else {
+        // _classLoader.destroy();
+      }
     } finally {
       _lifecycle.toDestroy();
 

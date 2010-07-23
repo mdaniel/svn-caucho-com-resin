@@ -2618,7 +2618,8 @@ public class WebApp extends ServletContextImpl
       if (securityBuilder != null)
         _filterMapper.addTopFilter(securityBuilder);
 
-      _cache = _server.getProxyCache();
+      if (_server != null)
+        _cache = _server.getProxyCache();
 
       for (int i = 0; i < _appGenerators.size(); i++)
         _parent.addDeploy(_appGenerators.get(i));

@@ -720,7 +720,8 @@ public final class ClusterServer {
     _clusterPort.init();
     */
 
-    if (getCloudServer() != _clusterService.getSelfServer()) {
+    if (getCloudServer() != _clusterService.getSelfServer()
+        && getCloudServer().getPort() >= 0) {
       _serverPool = createServerPool(_clusterService.getServerId());
       _serverPool.init();
     }

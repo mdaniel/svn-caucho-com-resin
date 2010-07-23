@@ -107,8 +107,6 @@ public class SocketLinkListener extends TaskWorker
   // URL for debugging
   private String _url;
 
-  private String _debugId;
-
   // The protocol
   private Protocol _protocol;
 

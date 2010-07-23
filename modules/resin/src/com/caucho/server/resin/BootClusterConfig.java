@@ -109,13 +109,18 @@ public class BootClusterConfig implements SchemaBean
   {
     _serverDefaultProgram.addProgram(program);
   }
+  
+  public ContainerProgram getServerDefault()
+  {
+    return _serverDefaultProgram;
+  }
 
   @Configurable
   public BootServerConfig createServer()
     throws ConfigException
   {
     BootServerConfig server = new BootServerConfig(this);
-
+    
     _servers.add(server);
 
     return server;
@@ -160,8 +165,12 @@ public class BootClusterConfig implements SchemaBean
     if (_id == null)
       throw new ConfigException(L.l("'id' is a require attribute for <cluster>"));
     
-    if (_cloudCluster == null)
-      _cloudCluster = _resinConfig.getCloudSystem().createCluster(_id);
+    if (_cloudCluster == null) {
+      _cloudCluster = _resinConfig.getCloudSystem().findCluster(_id);
+      
+      if (_cloudCluster == null)
+        _cloudCluster = _resinConfig.getCloudSystem().createCluster(_id);
+    }
     
     return _cloudCluster;
   }

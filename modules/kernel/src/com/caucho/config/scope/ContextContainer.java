@@ -102,7 +102,7 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
     }
   }
   
-  static class ContextItem<T> {
+  static class ContextItem<T> implements Serializable {
     private final ContextItem<?> _next;
     
     private final transient Contextual<T> _bean;

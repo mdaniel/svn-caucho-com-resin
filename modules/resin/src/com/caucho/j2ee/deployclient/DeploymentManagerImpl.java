@@ -448,9 +448,7 @@ public class DeploymentManagerImpl
         String host = targetModuleID.getTarget().getName();
         String tag = targetModuleID.getModuleID();
 
-        System.out.println("STOP2:" + tag);
         _deployClient.stop(tag);
-        System.out.println("STOP2a:" + tag);
 
         sb.append(tag).append(' ');
       }
@@ -482,8 +480,6 @@ public class DeploymentManagerImpl
 
         String host = targetModuleID.getTarget().getName();
         String tag = targetModuleID.getModuleID();
-
-        System.out.println("UNDEPLOY: " + tag);
 
         _deployClient.undeploy(tag, _user, "", null);
 

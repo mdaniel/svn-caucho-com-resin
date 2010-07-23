@@ -28,7 +28,6 @@
  */
 package com.caucho.ejb.util;
 
-import javax.ejb.ApplicationException;
 import javax.ejb.EJBException;
 import javax.ejb.EJBTransactionRequiredException;
 import javax.ejb.EJBTransactionRolledbackException;

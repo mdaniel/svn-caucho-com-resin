@@ -254,7 +254,7 @@ public class MBeanContext
     }
 
     if (log.isLoggable(Level.FINEST)
-        && ! name.equals(_mbeanServer.SERVER_DELEGATE_NAME)) {
+        && ! name.equals(AbstractMBeanServer.SERVER_DELEGATE_NAME)) {
       log.finest(getDebugName(name, mbean) + " registered in " + this);
     }
 
@@ -384,6 +384,7 @@ public class MBeanContext
   {
     if (_mbeans == null)
       throw new IllegalStateException(L.l("Adding MBean when context is closed"));
+    
     if (mbean == null) {
       log.warning(L.l("'{0}' is an empty mbean", name));
       return;
@@ -423,7 +424,7 @@ public class MBeanContext
     if (_mbeans != null)
       mbean = _mbeans.remove(name);
 
-    if (_globalContext != null)
+    if (_globalContext != null && _globalContext._mbeans != null)
       _globalContext._mbeans.remove(name);
 
     if (_view != null)
@@ -528,7 +529,7 @@ public class MBeanContext
   {
     MBeanServerNotification notif;
 
-    ObjectName delegateName = _mbeanServer.SERVER_DELEGATE_NAME;
+    ObjectName delegateName = AbstractMBeanServer.SERVER_DELEGATE_NAME;
     
     notif = new MBeanServerNotification(type, delegateName, _seq++, name);
 
@@ -613,7 +614,7 @@ public class MBeanContext
    */
   public String toString()
   {
-    return "MBeanContext[" + _loader + "]";
+    return getClass().getSimpleName() + "[" + _loader + "]";
   }
 
   /**

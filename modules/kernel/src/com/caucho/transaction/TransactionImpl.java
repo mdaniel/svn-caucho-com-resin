@@ -106,8 +106,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
   private int [] _resourceStates;
 
   /**
-   * Transaction resources that a client API such as JPA may store and retrieve
-   * by key.
+   * Transaction resources that a client API such 
+   * as JPA may store and retrieve by key.
    */
   private Map<Object, Object> _mappedResources;
 

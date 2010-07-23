@@ -59,7 +59,7 @@ public class CloudPod
   private TriadDispatcher<CloudServer> _serverDispatcher
     = new TriadDispatcher<CloudServer>();
   
-  private int _maxIndex;
+  private int _maxIndex = -1;
 
   /**
    * Creates a new triad for the cluster.

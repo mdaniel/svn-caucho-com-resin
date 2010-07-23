@@ -431,9 +431,9 @@ public class XmlConfigContext {
 
     Attribute attrStrategy;
 
-    try {
+   try {
       attrStrategy = getAttribute(type, qName, childNode);
-
+      
       if (attrStrategy == null) {
       }
       else if (attrStrategy.isProgram()) {
@@ -508,8 +508,6 @@ public class XmlConfigContext {
       text = text.trim();
 
     if (isEL() && attrType.isEL() && text.indexOf("${") >= 0) {
-      System.out.println("ATTRXX: "+ attrType);
-      
       Object value = attrType.valueOf(evalObject(text));
 
       attrStrategy.setValue(bean, qName, value);

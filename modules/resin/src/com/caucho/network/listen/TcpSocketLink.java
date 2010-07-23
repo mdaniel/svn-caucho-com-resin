@@ -711,11 +711,9 @@ public class TcpSocketLink extends AbstractSocketLink
 
         return RequestState.THREAD_DETACHED;
       }
-    }
-    // keepalive to select manager fails (e.g. filled select manager)
-    else {
-      log.warning(dbgId() + " failed keepalive (select)");
-
+      else {
+        log.warning(dbgId() + " failed keepalive (select)");
+      }
     }
 
     if (log.isLoggable(Level.FINE))

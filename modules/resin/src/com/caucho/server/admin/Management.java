@@ -146,7 +146,7 @@ public class Management
    */
   public Object createDeployService()
   {
-    return createService("com.caucho.admin.DeployService");
+    return createService("com.caucho.server.admin.DeployService");
   }
   /**
    * Create and configure the jmx service.
