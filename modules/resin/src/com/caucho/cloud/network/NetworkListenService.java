@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.util.Alarm;
@@ -83,6 +84,15 @@ public class NetworkListenService
     
     if (_clusterListener != null)
       _listeners.add(_clusterListener);
+
+    NetworkServerConfig config = new NetworkServerConfig(this);
+   
+    configure(_cloudServer, config);
+  }
+  
+  public static NetworkListenService getCurrent()
+  {
+    return ResinSystem.getCurrentService(NetworkListenService.class);
   }
   
   /**
@@ -194,11 +204,6 @@ public class NetworkListenService
   public void start()
     throws Exception
   {
-    
-    NetworkServerConfig config = new NetworkServerConfig(this);
-   
-    configure(_cloudServer, config);
-    
     boolean isFirst = true;
 
     for (SocketLinkListener listener : _listeners) {

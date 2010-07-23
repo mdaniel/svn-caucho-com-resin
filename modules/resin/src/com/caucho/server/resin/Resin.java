@@ -1206,13 +1206,14 @@ public class Resin extends Shutdown
     BamService bamService = new BamService(server.getBamAdminName());
     _resinSystem.addService(bamService);
     
-    NetworkListenService listenService = new NetworkListenService(cloudServer);
-    _resinSystem.addService(listenService);
-    
-    _server = createServer(networkService, listenService);
+    _server = createServer(networkService);
 
     if (_stage != null)
       _server.setStage(_stage);
+    
+    NetworkListenService listenService = new NetworkListenService(cloudServer);
+    
+    _resinSystem.addService(listenService);
     
     ServletService servletService = new ServletService(_server);
     _resinSystem.addService(servletService);
@@ -1226,10 +1227,9 @@ public class Resin extends Shutdown
     _server.init();
   }
   
-  protected Server createServer(NetworkClusterService clusterService,
-                                NetworkListenService listenService)
+  protected Server createServer(NetworkClusterService clusterService)
   {
-    return new Server(_resinSystem, clusterService, listenService);
+    return new Server(_resinSystem, clusterService);
   }
 
   public Management createResinManagement()

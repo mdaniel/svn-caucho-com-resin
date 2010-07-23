@@ -90,31 +90,6 @@ public class ServerAuthManager {
   // authentication
   //
 
-  /**
-   * Asks for the server's public key
-   */
-  public GetPublicKeyQuery getPublicKey()
-  {
-    try {
-      if (_authKeyPair == null) {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-
-        _authKeyPair = gen.generateKeyPair();
-      }
-
-      PublicKey publicKey = _authKeyPair.getPublic();
-
-      GetPublicKeyQuery result
-        = new GetPublicKeyQuery(publicKey.getAlgorithm(),
-                                publicKey.getFormat(),
-                                publicKey.getEncoded());
-      
-      return result;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   public Key decryptKey(String keyAlgorithm, byte []encKey)
   {
     try {
@@ -125,39 +100,6 @@ public class ServerAuthManager {
       Key key = cipher.unwrap(encKey, keyAlgorithm, Cipher.SECRET_KEY);
 
       return key;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-  
-  public Object decrypt(String msgAlgorithm,
-                        byte []msgKey,
-                        byte []data)
-  {
-    try {
-      Key key = decryptKey(msgAlgorithm, msgKey);
-
-      return decrypt(key, data);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-  
-  public Object decrypt(Key key, byte []data)
-  {
-    try {
-      Cipher aes = Cipher.getInstance("AES");
-
-      aes.init(Cipher.DECRYPT_MODE, key);
-
-      byte []plainData = aes.doFinal(data);
-
-      ByteArrayInputStream bis = new ByteArrayInputStream(plainData);
-      Hessian2Input in = new Hessian2Input(bis);
-      Object value = in.readObject();
-      in.close();
-
-      return value;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -186,10 +128,10 @@ public class ServerAuthManager {
       
       if (uid != null && ! uid.equals("")) {
         // XXXX:
-        serverSignature = _security.signSystem(nonce);
+        serverSignature = _security.signSystem(uid, nonce);
       }
       else if (_security.isSystemAuthKey() || ! _isAuthenticationRequired)
-        serverSignature = _security.signSystem(nonce);
+        serverSignature = _security.signSystem(uid, nonce);
       else {
         log.info("Authentication failed because no resin-system-auth-key");
         
@@ -252,7 +194,7 @@ public class ServerAuthManager {
     String uid = query.getUid();
     String clientNonce = query.getNonce();
 
-    String clientSignature = _security.signSystem(clientNonce);
+    String clientSignature = _security.signSystem(uid, clientNonce);
     
     String nonce = String.valueOf(Alarm.getCurrentTime());
     

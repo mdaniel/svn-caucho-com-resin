@@ -102,15 +102,6 @@ public class ServerLinkService extends SimpleActor {
   //
 
   @QueryGet
-  public void getPublicKey(long id, String to, String from,
-                           GetPublicKeyQuery query)
-  {
-    GetPublicKeyQuery result = _authManager.getPublicKey();
-
-    getLinkStream().queryResult(id, from, to, result);
-  }
-
-  @QueryGet
   public void getNonce(long id, String to, String from,
                        NonceQuery query)
   {

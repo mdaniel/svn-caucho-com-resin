@@ -97,7 +97,7 @@ public class SecurityService extends AbstractResinService
     return _authenticator;
   }
   
-  public String signSystem(String nonce)
+  public String signSystem(String uid, String nonce)
   {
     try {
       String password = null;
@@ -105,6 +105,9 @@ public class SecurityService extends AbstractResinService
       password = _signatureSecret;
       
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      
+      if (uid != null)
+        digest.update(uid.getBytes("UTF-8"));
       
       digest.update(nonce.getBytes("UTF-8"));
 

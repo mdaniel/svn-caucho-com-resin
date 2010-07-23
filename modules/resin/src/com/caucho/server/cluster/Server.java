@@ -138,10 +138,9 @@ public class Server extends ProtocolDispatchServer
   private final Resin _resin;
   private final ResinSystem _resinSystem;
   private final NetworkClusterService _clusterService;
-  private final NetworkListenService _listenService;
   private final ClusterServer _selfServer;
 
-  private EnvironmentClassLoader _classLoader;
+  private NetworkListenService _listenService;
 
   private Throwable _configException;
 
@@ -212,8 +211,7 @@ public class Server extends ProtocolDispatchServer
    * Creates a new servlet server.
    */
   public Server(ResinSystem resinSystem,
-                NetworkClusterService clusterService,
-                NetworkListenService listenService)
+                NetworkClusterService clusterService)
   {
     if (resinSystem == null)
       throw new NullPointerException();
@@ -221,12 +219,8 @@ public class Server extends ProtocolDispatchServer
     if (clusterService == null)
       throw new NullPointerException();
     
-    if (listenService == null)
-      throw new NullPointerException();
-    
     _resinSystem = resinSystem;
     _clusterService = clusterService;
-    _listenService = listenService;
     
     _selfServer = _clusterService.getSelfServer().getData(ClusterServer.class);
 
@@ -237,8 +231,6 @@ public class Server extends ProtocolDispatchServer
     //String podId
     //  = (cluster.getId() + ":" + _selfServer.getClusterPod().getId());
 
-    _classLoader = _resinSystem.getClassLoader();
-    
     String id = _selfServer.getId();
     
     if ("".equals(id))
@@ -247,7 +239,7 @@ public class Server extends ProtocolDispatchServer
     // cannot set the based on server-id because of distributed cache
     // _classLoader.setId("server:" + id);
 
-    _serverLocal.set(this, _classLoader);
+    _serverLocal.set(this, getClassLoader());
 
     if (! Alarm.isTest())
       _serverHeader = "Resin/" + VersionFactory.getVersion();
@@ -257,7 +249,7 @@ public class Server extends ProtocolDispatchServer
     try {
       Thread thread = Thread.currentThread();
 
-      Environment.addClassLoaderListener(this, _classLoader);
+      Environment.addClassLoaderListener(this, getClassLoader());
 
       PermissionManager permissionManager = new PermissionManager();
       PermissionManager.setPermissionManager(permissionManager);
@@ -265,7 +257,7 @@ public class Server extends ProtocolDispatchServer
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-        thread.setContextClassLoader(_classLoader);
+        thread.setContextClassLoader(getClassLoader());
 
         _serverIdLocal.set(_selfServer.getId());
         
@@ -288,7 +280,7 @@ public class Server extends ProtocolDispatchServer
     _cdiManager = InjectManager.create();
     
     _hostContainer = new HostContainer();
-    _hostContainer.setClassLoader(_classLoader);
+    _hostContainer.setClassLoader(getClassLoader());
     _hostContainer.setDispatchServer(this);
 
     _alarm = new Alarm(this);
@@ -300,8 +292,8 @@ public class Server extends ProtocolDispatchServer
     _authManager.setAuthenticationRequired(false);
     _bamService.setLinkManager(_authManager);
     
-    Config.setProperty("server", new ServerVar(_selfServer), _classLoader);
-    Config.setProperty("cluster", new ClusterVar(), _classLoader);
+    Config.setProperty("server", new ServerVar(_selfServer), getClassLoader());
+    Config.setProperty("cluster", new ClusterVar(), getClassLoader());
 
     _distributedCacheManager = createDistributedCacheManager();
     
@@ -325,9 +317,12 @@ public class Server extends ProtocolDispatchServer
   
   public NetworkListenService getListenService()
   {
+    if (_listenService == null)
+      _listenService = NetworkListenService.getCurrent();
+    
     return _listenService;
   }
-
+  
   public boolean isResinServer()
   {
     if (_resin != null)
@@ -345,9 +340,9 @@ public class Server extends ProtocolDispatchServer
    * Returns the classLoader
    */
   @Override
-  public ClassLoader getClassLoader()
+  public EnvironmentClassLoader getClassLoader()
   {
-    return _classLoader;
+    return _resinSystem.getClassLoader();
   }
 
   /**
@@ -965,7 +960,7 @@ public class Server extends ProtocolDispatchServer
   {
     _hostContainer.setRootDirectory(path);
 
-    Vfs.setPwd(path, _classLoader);
+    Vfs.setPwd(path, getClassLoader());
   }
 
   /**
@@ -1399,7 +1394,7 @@ public class Server extends ProtocolDispatchServer
    */
   public EnvironmentMXBean getEnvironmentAdmin()
   {
-    return _classLoader.getAdmin();
+    return getClassLoader().getAdmin();
   }
 
   /**
@@ -1484,7 +1479,7 @@ public class Server extends ProtocolDispatchServer
    */
   public Collection<SocketLinkListener> getPorts()
   {
-    return _listenService.getListeners();
+    return getListenService().getListeners();
   }
 
   /**
@@ -1639,7 +1634,7 @@ public class Server extends ProtocolDispatchServer
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
-      thread.setContextClassLoader(_classLoader);
+      thread.setContextClassLoader(getClassLoader());
 
       if (! _lifecycle.toStarting())
         return;
@@ -1787,7 +1782,7 @@ public class Server extends ProtocolDispatchServer
   public void bind(String address, int port, QServerSocket ss)
     throws Exception
   {
-    _listenService.bind(address, port, ss);
+    getListenService().bind(address, port, ss);
   }
 
   /**   
@@ -1821,12 +1816,13 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns true if the server has been modified and needs restarting.
    */
+  @Override
   public boolean isModified()
   {
-    boolean isModified = _classLoader.isModified();
+    boolean isModified = getClassLoader().isModified();
 
     if (isModified)
-      _classLoader.logModified(log);
+      getClassLoader().logModified(log);
 
     return isModified;
   }
@@ -1836,7 +1832,7 @@ public class Server extends ProtocolDispatchServer
    */
   public boolean isModifiedNow()
   {
-    boolean isModified = _classLoader.isModifiedNow();
+    boolean isModified = getClassLoader().isModifiedNow();
 
     if (isModified)
       log.fine("server is modified");
@@ -2039,7 +2035,7 @@ public class Server extends ProtocolDispatchServer
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_classLoader);
+      thread.setContextClassLoader(getClassLoader());
 
       if (! _lifecycle.toStopping())
         return;
@@ -2098,7 +2094,7 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-        _classLoader.stop();
+        getClassLoader().stop();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -2132,7 +2128,7 @@ public class Server extends ProtocolDispatchServer
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_classLoader);
+      thread.setContextClassLoader(getClassLoader());
 
       try {
         Management management = _management;
@@ -2154,7 +2150,7 @@ public class Server extends ProtocolDispatchServer
 
       log.fine(this + " destroyed");
 
-      _classLoader.destroy();
+      // getClassLoader().destroy();
 
       if (_distributedCacheManager != null)
         _distributedCacheManager.close();
@@ -2257,7 +2253,7 @@ public class Server extends ProtocolDispatchServer
 
     private SocketLinkListener getFirstPort(String protocol, boolean isSSL)
     {
-      for (SocketLinkListener port : _listenService.getListeners()) {
+      for (SocketLinkListener port : getListenService().getListeners()) {
         if (protocol.equals(port.getProtocolName()) && (port.isSSL() == isSSL))
           return port;
       }

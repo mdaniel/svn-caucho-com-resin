@@ -141,8 +141,9 @@ public class NetworkServerConfig {
     getListenService().setBindPortsAfterStart(bindAtEnd);
   }
   
-  public void addBuilderProgram(ConfigProgram builder)
+  public void addContentProgram(ConfigProgram builder)
   {
+    _listenerDefaults.addProgram(builder);
   }
 
   private void applyPortDefaults(SocketLinkListener port)
