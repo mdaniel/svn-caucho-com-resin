@@ -29,8 +29,6 @@
 
 package com.caucho.remote.client;
 
-import com.caucho.remote.*;
-
 import java.lang.annotation.Annotation;
 
 import javax.enterprise.inject.spi.Annotated;
@@ -60,5 +58,5 @@ abstract public class AbstractProtocolProxyFactory
    *
    * @param api the remote api for the proxy
    */
-  abstract public Object createProxy(Class api);
+  abstract public <T> T createProxy(Class<T> api);
 }

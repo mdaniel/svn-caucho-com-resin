@@ -34,16 +34,11 @@ import com.caucho.util.IntArray;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
-import java.util.logging.Logger;
-
 /**
  * Configuration for a run-at
  */
 public class RunAt {
   static L10N L = new L10N(RunAt.class);
-  private static final Logger log
-    = Logger.getLogger(RunAt.class.getName());
-
   private QDate _cal = QDate.createLocal();
 
   private long _period = -1;

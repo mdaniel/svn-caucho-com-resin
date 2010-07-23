@@ -57,4 +57,7 @@ import com.caucho.remote.hessian.HessianProtocolProxyFactory;
 @ProxyType(defaultFactory=HessianProtocolProxyFactory.class)
 public @interface HessianClient {
   public String url();
+  
+  public String userName() default "";
+  public String password() default "";
 }

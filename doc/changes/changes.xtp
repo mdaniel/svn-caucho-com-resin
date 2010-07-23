@@ -13,6 +13,7 @@
 
 <s2 title="4.0.9 - snapshot">
 <ul>
+<li>remoting: add userName and password to HessianClient (#4130, rep by Jeff Schnitzer)</li>
 <li>build: missing eclipselink in build (rep by Bill Au)</li>
 <li>alarm: updates for atomic refactor causing cpu-spin (rep by Jeff Schnitzer)</li>
 <li>watchdog: set log rollover size to 64m (rep by Scott Croco)</li>

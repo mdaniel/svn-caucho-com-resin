@@ -44,9 +44,6 @@ import java.util.logging.Logger;
  * be the servlet itself.
  */
 public class SecurityRoleMapFilterChain implements FilterChain {
-  private static final Logger log
-    = Logger.getLogger(SecurityRoleMapFilterChain.class.getName());
-  
   // Next filter chain
   private FilterChain _next;
 

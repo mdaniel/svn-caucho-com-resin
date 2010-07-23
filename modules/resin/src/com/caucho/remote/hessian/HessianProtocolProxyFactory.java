@@ -45,6 +45,9 @@ public class HessianProtocolProxyFactory
   private HessianProxyFactory _factory = new HessianProxyFactory();
 
   private String _url;
+  
+  private String _userName = "";
+  private String _password = "";
 
   /**
    * Sets the proxy URL.
@@ -53,6 +56,16 @@ public class HessianProtocolProxyFactory
   {
     _url = url;
   }
+  
+  public void setUserName(String userName)
+  {
+    _factory.setUser(userName);
+  }
+  
+  public void setPassword(String password)
+  {
+    _factory.setPassword(password);
+  }
 
   @Override
   public void setProxyType(Annotation ann)
@@ -60,6 +73,8 @@ public class HessianProtocolProxyFactory
     HessianClient client = (HessianClient) ann;
 
     setURL(client.url());
+    setUserName(client.userName());
+    setPassword(client.password());
   }
   
   /**
