@@ -326,6 +326,8 @@ public class ResinBoot {
         } catch (Exception e) {
         }
       }
+      
+      System.exit(0);
     } catch (Exception e) {
       e.printStackTrace();
 
