@@ -29,27 +29,30 @@
 
 package com.caucho.server.deploy;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.make.CachedDependency;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
-
-import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * A container of deploy objects.
  */
-public class DeployContainer<C extends DeployController>
+public class DeployContainer<C extends DeployController<?>>
   extends CachedDependency
   implements Dependency
 {
-  private static final L10N L = new L10N(DeployContainer.class);
-  private static final Logger log
-    = Logger.getLogger(DeployContainer.class.getName());
-
   private final DeployListGenerator<C> _deployListGenerator
     = new DeployListGenerator<C>(this);
 

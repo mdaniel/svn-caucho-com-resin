@@ -556,7 +556,7 @@ public class HostController
    */
   public String toString()
   {
-    return "HostController[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 
   /**
