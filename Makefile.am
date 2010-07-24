@@ -26,14 +26,16 @@ install	:
 	  mkdir -p $(resin_home)/licenses; \
 	  mkdir -p $(resin_home)/lib; \
 	  mkdir -p $(resin_home)/$(LIBEXEC); \
-	  cp lib/*.jar $(resin_home)/lib; \
 	  cp bin/* $(resin_home)/bin; \
+	  cp lib/*.jar $(resin_home)/lib; \
 	fi; \
 	if test $(resin_root) != `pwd`; then \
 	  mkdir -p $(resin_root)/webapps; \
 	  cp -r $(CP_U_FLAG) webapps/* $(resin_root)/webapps; \
 	  mkdir -p $(resin_root)/doc; \
 	  cp -r $(CP_U_FLAG) doc/* $(resin_root)/doc; \
+	  mkdir -p $(resin_root)/project-jars; \
+	  cp -r $(CP_U_FLAG) project-jars/* $(resin_root)/project-jars; \
 	  mkdir -p $(resin_log); \
 	fi; \
 	if test $(resin_conf) != `pwd`/conf; then \
