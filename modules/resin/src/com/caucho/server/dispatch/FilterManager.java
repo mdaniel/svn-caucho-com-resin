@@ -28,19 +28,25 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.Config;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.InjectionTarget;
+import javax.servlet.Filter;
+import javax.servlet.ServletException;
+
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.Filter;
-import javax.servlet.ServletException;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.InjectionTarget;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manages the servlets.

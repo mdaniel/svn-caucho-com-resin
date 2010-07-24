@@ -51,13 +51,9 @@ import java.util.*;
 public class FilterConfigImpl
   implements FilterConfig, FilterRegistration.Dynamic
 {
-  private static final L10N L = new L10N(FilterConfigImpl.class);
-  private static final Iterable<String> EMPTY
-    = new ArrayList<String>(0);
-
   private String _filterName;
   private String _filterClassName;
-  private Class _filterClass;
+  private Class<?> _filterClass;
   private String _displayName;
   private HashMap<String,String> _initParams = new HashMap<String,String>();
 
@@ -110,7 +106,7 @@ public class FilterConfigImpl
   }
 
   @DisableConfig
-  public void setFilterClass(Class filterClass)
+  public void setFilterClass(Class<?> filterClass)
   {
     _filterClass = filterClass;
 
@@ -120,7 +116,7 @@ public class FilterConfigImpl
   /**
    * Gets the filter name.
    */
-  public Class getFilterClass()
+  public Class<?> getFilterClass()
   {
     return _filterClass;
   }
@@ -162,7 +158,7 @@ public class FilterConfigImpl
   /**
    * Gets the init params
    */
-  public Map getInitParamMap()
+  public Map<String,String> getInitParamMap()
   {
     return _initParams;
   }
@@ -178,7 +174,7 @@ public class FilterConfigImpl
   /**
    * Gets the init params
    */
-  public Enumeration getInitParameterNames()
+  public Enumeration<String> getInitParameterNames()
   {
     return Collections.enumeration(_initParams.keySet());
   }

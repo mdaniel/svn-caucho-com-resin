@@ -29,22 +29,17 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.http.HttpServletRequestImpl;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Dependency;
-
 import java.util.logging.Logger;
+
+import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.vfs.Dependency;
 
 /**
  * A repository for request information gleaned from the uri.
  */
 public class Invocation extends ServletInvocation implements Dependency
 {
-  private static final L10N L = new L10N(Invocation.class);
-  private static final Logger log
-    = Logger.getLogger(Invocation.class.getName());
-
   private String _rawHost;
 
   // canonical host and port

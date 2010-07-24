@@ -30,7 +30,6 @@
 package com.caucho.server.cluster;
 
 import com.caucho.cloud.network.ClusterServer;
-import com.caucho.env.service.ResinSystem;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 

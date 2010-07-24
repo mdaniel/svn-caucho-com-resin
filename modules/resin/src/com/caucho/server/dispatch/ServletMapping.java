@@ -29,6 +29,14 @@
 
 package com.caucho.server.dispatch;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+
+import javax.el.ELContext;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
@@ -36,14 +44,6 @@ import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
-
-import javax.el.ELContext;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.regex.*;
 
 /**
  * Configuration for a servlet.
@@ -164,7 +164,6 @@ public class ServletMapping extends ServletConfigImpl {
                     ArrayList<String> vars)
     throws ServletException
   {
-    ELContext env = EL.getEnvironment();
     HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("regexp", vars);
 
@@ -190,7 +189,7 @@ public class ServletMapping extends ServletConfigImpl {
       try {
         WebApp app = (WebApp) getServletContext();
 
-        Class cl = Class.forName(className, false, app.getClassLoader());
+        Class.forName(className, false, app.getClassLoader());
       } catch (ClassNotFoundException e) {
         log.log(Level.WARNING, e.toString(), e);
 

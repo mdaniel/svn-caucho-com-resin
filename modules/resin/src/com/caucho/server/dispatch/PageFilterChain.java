@@ -29,9 +29,11 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.jsp.Page;
-import com.caucho.jsp.QServlet;
-import com.caucho.util.L10N;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -41,11 +43,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+
+import com.caucho.jsp.Page;
+import com.caucho.jsp.QServlet;
 
 /**
  * Represents the final servlet in a filter chain.
@@ -54,7 +54,6 @@ public class PageFilterChain implements FilterChain
 {
   private static final Logger log
     = Logger.getLogger(PageFilterChain.class.getName());
-  private static final L10N L = new L10N(PageFilterChain.class);
   
   public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
   public static String SERVLET_EXN = "javax.servlet.error.exception";

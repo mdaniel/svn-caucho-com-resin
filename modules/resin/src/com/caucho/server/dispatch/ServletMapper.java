@@ -29,21 +29,24 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.*;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+
+import com.caucho.config.ConfigException;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.net.URL;
 
 /**
  * Manages dispatching: servlets and filters.
@@ -482,49 +485,6 @@ public class ServletMapper {
   private boolean isWelcomeFileResource(String servletName)
   {
     return _welcomeFileResourceMap.contains(servletName);
-  }
-
-  private MatchResult matchWelcomeServlet(ServletInvocation invocation,
-                                     ArrayList<String> vars)
-  {
-    String contextURI = invocation.getContextURI();
-
-    String servletName = null;
-
-    ArrayList<String> welcomeFileList = _welcomeFileList;
-    int size = welcomeFileList.size();
-
-    for (int i = 0; i < size; i++) {
-      String file = welcomeFileList.get(i);
-
-      String welcomeURI;
-
-      if (contextURI.endsWith("/"))
-        welcomeURI = contextURI + file;
-      else
-        welcomeURI = contextURI + '/' + file;
-
-      ServletMapping servletMap = _servletMap.map(welcomeURI, vars, true);
-
-      if (servletMap != null)
-        servletName = servletMap.getServletName();
-
-      if (servletName != null) {
-        contextURI = welcomeURI;
-
-        if (invocation instanceof Invocation) {
-          Invocation inv = (Invocation) invocation;
-
-          inv.setContextURI(contextURI);
-          // server/10r9
-          // inv.setRawURI(inv.getRawURI() + file);
-        }
-
-        return new MatchResult(servletName, contextURI);
-      }
-    }
-
-    return null;
   }
 
   private void addWelcomeFileDependency(ServletInvocation servletInvocation)

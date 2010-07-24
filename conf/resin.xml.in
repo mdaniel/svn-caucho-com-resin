@@ -155,7 +155,7 @@
     </server>
 
     <!-- the default host, matching any host name -->
-    <host id="" root-directory=".">
+    <host host-name="" root-directory=".">
       <!--
          - configures an explicit root web-app matching the
          - webapp's ROOT

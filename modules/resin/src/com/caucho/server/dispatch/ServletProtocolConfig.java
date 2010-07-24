@@ -29,23 +29,13 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.remote.server.ProtocolServletFactory;
-import com.caucho.util.*;
-
-import java.util.*;
-import javax.annotation.PostConstruct;
 
 /**
  * Configuration for a servlet web-service protocol.
  */
 public class ServletProtocolConfig extends BeanConfig {
-  private static L10N L = new L10N(ServletProtocolConfig.class);
-
   /**
    * Creates a new protocol configuration object.
    */

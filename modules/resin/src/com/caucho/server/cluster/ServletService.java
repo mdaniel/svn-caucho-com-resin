@@ -31,15 +31,12 @@ package com.caucho.server.cluster;
 
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.util.L10N;
 
 /**
  * The main servlet service in a Resin server. 
  */
 public class ServletService extends AbstractResinService
 {
-  private static final L10N L = new L10N(ServletService.class);
-  
   private Server _server;
   
   public ServletService(Server server)

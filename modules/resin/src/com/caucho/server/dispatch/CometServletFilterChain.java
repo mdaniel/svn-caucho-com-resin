@@ -29,18 +29,22 @@
 
 package com.caucho.server.dispatch;
 
-import javax.servlet.*;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.caucho.servlet.comet.CometServlet;
-import com.caucho.servlet.comet.CometController;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.UnavailableException;
 
-import com.caucho.server.http.ConnectionCometController;
-import com.caucho.server.http.HttpConnectionController;
 import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.servlet.comet.CometController;
+import com.caucho.servlet.comet.CometServlet;
 
 /**
  * Represents the final servlet in a filter chain.
