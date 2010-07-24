@@ -29,30 +29,28 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.util.L10N;
-import com.caucho.vfs.Dependency;
-
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.vfs.Dependency;
+
 /**
  * A list of deploy objects.
  */
-public class DeployListGenerator<E extends DeployController>
+public class DeployListGenerator<E extends DeployController<?>>
   extends DeployGenerator<E> implements Dependency {
   private static final Logger log
     = Logger.getLogger(DeployListGenerator.class.getName());
-  private static final L10N L = new L10N(DeployListGenerator.class);
-
+  
   private ArrayList<DeployGenerator<E>> _generatorList
     = new ArrayList<DeployGenerator<E>>();
 
   /**
    * Creates the deploy.
    */
-  public DeployListGenerator(DeployContainer container)
+  public DeployListGenerator(DeployContainer<E> container)
   {
     super(container);
   }
@@ -147,7 +145,7 @@ public class DeployListGenerator<E extends DeployController>
         DeployGenerator<E> generator = _generatorList.get(j);
 
         // XXX: issue with server/10tl
-        controller = _generatorList.get(j).mergeController(controller, key);
+        controller = generator.mergeController(controller, key);
       }
 
       return controller;

@@ -35,11 +35,7 @@
 	<classpathentry kind="lib" path="modules/ext/webservices-api.jar"/>
 	<classpathentry kind="lib" path="modules/ext/webservices-extra-api.jar"/>
 	<classpathentry kind="lib" path="modules/ext/junit-4.7.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
-		<accessrules>
-			<accessrule kind="discouraged" pattern="**/Unsafe*"/>
-		</accessrules>
-	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="modules/ext/eclipselink.jar"/>
 	<classpathentry kind="lib" path="modules/ext/validation-api-1.0.0.GA.jar"/>
 	<classpathentry kind="output" path="classes"/>

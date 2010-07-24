@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 /**
  * The generator for the deploy
  */
-abstract public class DeployGenerator<E extends DeployController>
+abstract public class DeployGenerator<E extends DeployController<?>>
   implements Dependency, EnvironmentListener
 {
   private static final Logger log
