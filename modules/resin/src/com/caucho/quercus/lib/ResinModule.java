@@ -126,7 +126,7 @@ public class ResinModule
   }
 
   /**
-   * Returns the matchding webbeans.
+   * Returns the matching webbeans.
    */
   public Object java_bean(String name)
   {
