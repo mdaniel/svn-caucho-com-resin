@@ -33,8 +33,10 @@ import java.lang.annotation.Annotation;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configured;
+import com.caucho.config.Names;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.inject.BeanBuilder;
+import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 
@@ -87,6 +89,11 @@ public class RemoteClient extends BeanConfig
       builder = builder.name(getName());
 
       addOptionalStringProperty("name", getName());
+      
+      builder.qualifier(Names.create(getName()));
+      
+      if (getBindingList().size() == 0)
+        builder.qualifier(DefaultLiteral.DEFAULT);
     }
 
     for (Annotation binding : getBindingList()) {

@@ -111,9 +111,13 @@ public class ResinBoot {
                                       _args.getResinConf().getNativePath()));
     }
     
-    ResinSystem networkServer
-      = new ResinSystem("watchdog", _args.getRootDirectory());
+    Path rootDirectory = _args.getRootDirectory();
+    Path dataDirectory = rootDirectory.lookup("watchdog-data");
     
+    ResinSystem networkServer = new ResinSystem("watchdog",
+                                                rootDirectory,
+                                                dataDirectory);
+
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(networkServer.getClassLoader());
 
