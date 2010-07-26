@@ -112,8 +112,8 @@ namespace Caucho
       _resinCmbBox.EndUpdate();
 
       UpdateServices(null);
-
     }
+
     private void ResinSelectectionCommitted(object sender, EventArgs e)
     {
       UpdateServices(null);
@@ -215,8 +215,10 @@ namespace Caucho
       if (_resinService != null)
         _resinRoot = _resinService.Root;
 
-      if (_resinRoot == null || "".Equals(_resinRoot))
+      if ((_resinRoot == null || "".Equals(_resinRoot)) && _resinConf != null)
         _resinRoot = _resinConf.getRootDirectory();
+      else
+        _resinRootTxtBox.Text = "Please specify resin root";
 
       if (_resinRoot != null && !"".Equals(_resinRoot) && !Util.IsAbsolutePath(_resinRoot))
         _resinRoot = Util.GetCanonicalPath(_resin.Home + @"\" + _resinRoot);
@@ -256,7 +258,11 @@ namespace Caucho
     private void UpdateServers()
     {
       if (_resinService == null) {
-        ArrayList servers = new ArrayList(_resinConf.getServers());
+        ArrayList servers = new ArrayList();
+
+        if (_resinConf != null)
+          servers.AddRange(_resinConf.getServers());
+
         ArrayList dynamicServers = new ArrayList();
         foreach (Object o in servers) {
           ResinConfServer server = (ResinConfServer)o;
@@ -347,10 +353,11 @@ namespace Caucho
 
     private void SelectJavaHome(object sender, EventArgs e)
     {
+      _folderDlg.Description = "Please locate your java installation";
       bool select = true;
       String javaHome;
       while (select) {
-        _folderDlg.RootFolder = Environment.SpecialFolder.ProgramFiles;
+        _folderDlg.RootFolder = Environment.SpecialFolder.MyComputer;
 
         if (_folderDlg.ShowDialog() == DialogResult.OK) {
           javaHome = _folderDlg.SelectedPath;
@@ -650,10 +657,25 @@ namespace Caucho
       }
     }
 
+    private bool CheckConf()
+    {
+      if (_resinConfFile == null) {
+        String message = "Please specify configuration file";
+        _errorProvider.SetError(_resinConfTxtBox, message);
+        _resinConfTxtBox.Focus();
+        return false;
+      } else {
+        return true;
+      }
+    }
+
     private void ServiceInstallBtnClick(object sender, EventArgs eventArgs)
     {
       bool isNew = MODE.NEW.Equals(_mode);
       if (isNew && !CheckServiceName())
+        return;
+
+      if (isNew && !CheckConf())
         return;
 
       ResinService resinService = new ResinService();
@@ -1236,6 +1258,9 @@ namespace Caucho
 
     private void ServerCmbBoxLeave(object sender, EventArgs eventArgs)
     {
+      if (_resinConfFile == null)
+        return;
+
       String server = null;
       if (_serverCmbBox.SelectedItem is String)
         server = (String)_serverCmbBox.SelectedItem;
@@ -1253,11 +1278,10 @@ namespace Caucho
         try {
           ResinConfServer r = ResinConf.ParseDynamic(_serverCmbBox.Text);
         }
-        catch (Exception e) {
+        catch (Exception) {
           _errorProvider.SetError(_serverCmbBox, "Invalid dynamic server format");
           _serverCmbBox.SelectedIndex = ((ArrayList)_serverCmbBox.DataSource).Count - 1;
           _serverCmbBox.Focus();
-
         }
       }
     }

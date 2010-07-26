@@ -229,6 +229,7 @@ namespace Caucho
           resin.Server = resinArgs.Server;
           resin.DynamicServer = resinArgs.DynamicServer;
           resin.Root = resinArgs.Root;
+          resin.Conf = resinArgs.Conf;
           resin.Log = resinArgs.Log;
           resin.User = resinArgs.User;
           resin.JavaHome = resinArgs.JavaHome;

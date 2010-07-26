@@ -93,6 +93,7 @@ namespace Caucho
     public String Exe { get; private set; }
     public String Server { get; private set; }
     public String DynamicServer { get; private set; }
+    public String Conf { get; private set; }
     public String Log { get; private set; }
     public String JmxPort { get; private set; }
     public String DebugPort { get; private set; }
@@ -323,6 +324,13 @@ namespace Caucho
           DynamicServer = arguments[argsIdx + 1];
 
           argsIdx += 2;
+        } else if ("-conf".Equals(arguments[argsIdx]) ||
+                   "--conf".Equals(arguments[argsIdx])) {
+          Conf = arguments[argsIdx + 1];
+
+          resinArgs.Append("-conf \"").Append(Conf).Append("\" ");
+
+          argsIdx += 2;
         } else if ("-log-directory".Equals(arguments[argsIdx]) ||
                    "--log-directory".Equals(arguments[argsIdx])) {
           Log = arguments[argsIdx + 1];
@@ -375,7 +383,7 @@ namespace Caucho
 
           argsIdx++;
         } else {
-          resinArgs.Append(' ').Append(arguments[argsIdx++]);
+          resinArgs.Append(' ').Append(arguments[argsIdx++]).Append(' ');
         }
       }
 

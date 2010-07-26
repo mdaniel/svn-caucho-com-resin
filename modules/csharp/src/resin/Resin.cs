@@ -54,8 +54,6 @@ namespace Caucho
     private String _displayName;
     private String _resinDataDir;
 
-    private StringBuilder _args;
-
     private Process _process;
     private ResinArgs ResinArgs;
 
@@ -84,8 +82,9 @@ namespace Caucho
           ExecuteJava(ResinArgs.Command);
 
         return true;
-      }
-      catch (Exception e) {
+      } catch (ResinServiceException e) {
+        throw e;
+      } catch (Exception e) {
         StringBuilder message = new StringBuilder("Unable to start application. Make sure java is in your path. Use option -verbose for more detail.\n");
         message.Append(e.ToString());
 
@@ -296,7 +295,7 @@ namespace Caucho
 
           Info(message, true);
 
-          throw new ApplicationException(message);
+          throw new ResinServiceException(message);
         }
       } else {
         _process = Process.Start(startInfo);
@@ -514,5 +513,13 @@ namespace Caucho
     {
       Info(String.Format(ResinArgs.USAGE, name));
     }
+  }
+}
+
+class ResinServiceException : Exception
+{
+  public ResinServiceException(String message)
+    : base(message)
+  {
   }
 }
