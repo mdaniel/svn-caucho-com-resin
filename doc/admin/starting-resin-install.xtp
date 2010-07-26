@@ -296,24 +296,10 @@ on startup.
 </s2>
 <s2 title="Installing Resin as a Windows Service">
 <p>
-Resin can install itself as a Windows Service by executing the
-<var>resin.exe</var> with the <var>-install</var> command line
-option.  If you pass other options to <var>resin.exe</var> along
-with the <var>-install</var> option, such as specifying a server or
-content directory, these will be used when the service is started.
-To install Resin as a Windows Service using the default options,
-simply run:
+Resin can be instaled as a Windows Service by executing the
+<var>Setup.exe</var>. <var>Setup.exe</var> is a GUI utiltity that allows
+to install and un-install Resin windows service.  
 </p>
-<example>
-C:\Resin\resin.exe -install
-</example>
-<p>
-You can also install Resin using a specific service name or install
-multiple Resin services using the <var>-install-as</var> option:
-</p>
-<example>
-C:\Resin\resin.exe -install-as ResinA
-</example>
 </s2>
 </s1>
 
