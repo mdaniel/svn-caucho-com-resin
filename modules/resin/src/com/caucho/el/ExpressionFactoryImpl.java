@@ -70,7 +70,7 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
                            Class<?> []expectedParamTypes)
   throws ELException
   {
-    JspELParser parser = new JspELParser(context, expression);
+    JspELParser parser = new JspELParser(context, expression, true);
 
     Expr expr = parser.parse();
 

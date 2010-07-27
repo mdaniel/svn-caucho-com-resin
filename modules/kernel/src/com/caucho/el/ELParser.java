@@ -61,21 +61,28 @@ public class ELParser
   private CharBuffer _cb = new CharBuffer();
 
   protected final ELContext _elContext;
+  protected final boolean _isMethodExpr;
 
   private boolean _checkEscape = true;
 
   public ELParser(ELContext elContext, String string)
+  {
+    this(elContext, string, false);
+  }
+
+  public ELParser(ELContext elContext, String string, boolean isMethodExpr)
   {
     if (elContext == null)
       throw new NullPointerException();
     
     _elContext = elContext;
     _string = string;
+    _isMethodExpr = isMethodExpr;
   }
 
   protected ELParser create(String string)
   {
-    ELParser parser = new ELParser(_elContext, string);
+    ELParser parser = new ELParser(_elContext, string, _isMethodExpr);
 
     copyTo(parser);
 
@@ -129,6 +136,10 @@ public class ELParser
         }
       }
       else if (ch == '$' || ch == '#') {
+        if (expr != null && _isMethodExpr)
+          throw new ELParseException(L.l("Invalid method expression `{0}'",
+                                         _string));
+
         int origChar = ch;
 
         ch = read();
@@ -213,7 +224,20 @@ public class ELParser
 
     while (true) {
       int token = scanToken();
-      
+
+      if (_isMethodExpr) {
+        switch (token) {
+        case '?':
+        case Expr.OR: case Expr.AND:
+        case Expr.EQ: case Expr.NE: case Expr.LT:
+        case Expr.LE: case Expr.GT: case Expr.GE:
+        case Expr.ADD: case Expr.SUB:
+        case Expr.MUL: case Expr.DIV: case Expr.MOD:
+          throw new ELParseException(L.l("Invalid method expression `{0}'",
+                                         _string));
+        }
+      }
+
       switch (token) {
       case '?':
       {
@@ -516,6 +540,10 @@ public class ELParser
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
       {
+        if (_isMethodExpr)
+          throw new ELParseException(L.l("Invalid method expression `{0}'",
+                                         _string));
+
         long value = 0;
         double exp = 1;
         int digits = 0;
@@ -562,14 +590,29 @@ public class ELParser
         return new DoubleLiteral((double) value / (double) exp);
       }
 
-    case '-':
+    case '-': {
+      if (_isMethodExpr)
+        throw new ELParseException(L.l("Invalid method expression `{0}'",
+                                       _string));
+      
       return new MinusExpr(parseTerm());
+    }
 
-    case '!':
+    case '!': {
+      if (_isMethodExpr)
+        throw new ELParseException(L.l("Invalid method expression `{0}'",
+                                       _string));
+
       return UnaryExpr.create(Expr.NOT, parseTerm());
+    }
 
-    case '+':
+    case '+': {
+      if (_isMethodExpr)
+        throw new ELParseException(L.l("Invalid method expression `{0}'",
+                                       _string));
+
       return parseTerm();
+    }
 
     case '(':
       {

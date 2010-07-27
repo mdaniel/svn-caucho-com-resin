@@ -37,17 +37,28 @@ import javax.el.ELContext;
  * Parses the expression.
  */
 public class JspELParser extends ELParser {
+
   /**
    * Creates a new JspELParser
+   * @param env
+   * @param string
    */
   public JspELParser(ELContext env, String string)
   {
-    super(env, string);
+    super(env, string, false);
+  }
+
+  /**
+   * Creates a new JspELParser in method parsing mode (more restrictive)
+   */
+  public JspELParser(ELContext env, String string, boolean isMethodExpr)
+  {
+    super(env, string, isMethodExpr);
   }
 
   protected ELParser create(String string)
   {
-    ELParser parser = new JspELParser(_elContext, string);
+    ELParser parser = new JspELParser(_elContext, string, _isMethodExpr);
 
     copyTo(parser);
 
