@@ -48,9 +48,9 @@ import com.caucho.hmtp.NonceQuery;
  * The LinkService is low-level link
  */
 
-public class ServerLinkService extends SimpleActor {
+public class ServerLinkActor extends SimpleActor {
   private static final Logger log
-    = Logger.getLogger(ServerLinkService.class.getName());
+    = Logger.getLogger(ServerLinkActor.class.getName());
   
   private final Broker _broker;
   private final ServerLinkStream _serverLinkStream;
@@ -62,11 +62,11 @@ public class ServerLinkService extends SimpleActor {
   /**
    * Creates the LinkService for low-level link messages
    */
-  public ServerLinkService(ActorStream linkStream,
-                           Broker broker,
-                           ServerAuthManager authManager,
-                           String ipAddress,
-                           boolean isUnidir)
+  public ServerLinkActor(ActorStream linkStream,
+                         Broker broker,
+                         ServerAuthManager authManager,
+                         String ipAddress,
+                         boolean isUnidir)
   {
     if (linkStream == null)
       throw new NullPointerException();

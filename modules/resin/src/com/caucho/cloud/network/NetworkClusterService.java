@@ -29,6 +29,7 @@
 
 package com.caucho.cloud.network;
 
+import java.io.Serializable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,7 +68,10 @@ public class NetworkClusterService extends AbstractResinService
   private SocketLinkListener _clusterListener;
   
   private CopyOnWriteArrayList<ClusterServerListener> _serverListeners
-    = new CopyOnWriteArrayList<ClusterServerListener>();
+  = new CopyOnWriteArrayList<ClusterServerListener>();
+
+  private CopyOnWriteArrayList<ClusterLinkListener> _linkListeners
+  = new CopyOnWriteArrayList<ClusterLinkListener>();
 
   /**
    * Creates a new network cluster service.
@@ -157,6 +161,18 @@ public class NetworkClusterService extends AbstractResinService
       listener.serverStop(server);
     }
   }
+
+  public void addLinkListener(ClusterLinkListener listener)
+  {
+    _linkListeners.add(listener);
+  }
+  
+  public void notifyLinkClose(Object payload)
+  {
+    for (ClusterLinkListener listener : _linkListeners) {
+      listener.onLinkClose(payload);
+    }
+  }
   
   //
   // lifecycle
@@ -178,7 +194,7 @@ public class NetworkClusterService extends AbstractResinService
     
     ClusterServer selfServer = _selfServer.getData(ClusterServer.class);
     
-    selfServer.notifyStart(Alarm.getCurrentTime());
+    selfServer.notifyStart();
 
     CloudSystem cloudSystem = TopologyService.getCurrent().getSystem();
     

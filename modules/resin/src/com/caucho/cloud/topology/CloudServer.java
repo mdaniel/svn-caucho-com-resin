@@ -255,6 +255,12 @@ public class CloudServer {
     return (T) _dataMap.get(cl);
   }
   
+  @SuppressWarnings("unchecked")
+  public <T> T removeData(Class<T> cl)
+  {
+    return (T) _dataMap.remove(cl);
+  }
+  
   @Override
   public String toString()
   {

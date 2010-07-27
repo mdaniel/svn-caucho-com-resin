@@ -38,7 +38,7 @@ import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.hemp.broker.HempMemoryQueue;
-import com.caucho.hemp.servlet.ServerLinkService;
+import com.caucho.hemp.servlet.ServerLinkActor;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWriter;
@@ -67,8 +67,6 @@ public class HmtpRequest extends AbstractProtocolConnection
   private SocketLink _conn;
   private BamService _bamService;
   
-  private String _id;
-  
   private ReadStream _rawRead;
   private WriteStream _rawWrite;
   
@@ -77,7 +75,8 @@ public class HmtpRequest extends AbstractProtocolConnection
   private HmtpReader _hmtpReader;
   private HmtpWriter _hmtpWriter;
   private ActorStream _linkStream;
-  private ActorStream _brokerStream;
+  
+  private HmtpLinkActor _linkActor;
 
   public HmtpRequest(SocketLink conn,
                      BamService bamService)
@@ -87,8 +86,6 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     _rawRead = conn.getReadStream();
     _rawWrite = conn.getWriteStream();
-    
-    _id = _bamService.getJid() + "-" + _conn.getId();
   }
 
   @Override
@@ -177,15 +174,12 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     _linkStream = new HempMemoryQueue(_hmtpWriter, brokerStream, 1);
 
-    ServerLinkService linkService
-      = new HmtpLinkService(_linkStream,
-                            broker,
-                            _bamService.getLinkManager(),
-                            _conn.getRemoteHost(),
-                            isUnidir);
+    _linkActor = new HmtpLinkActor(_linkStream,
+                                   broker,
+                                   _bamService.getLinkManager(),
+                                   _conn.getRemoteHost(),
+                                   isUnidir);
 
-    _brokerStream = linkService.getBrokerStream();
-    
     return dispatchHmtp();
   }
 
@@ -195,7 +189,9 @@ public class HmtpRequest extends AbstractProtocolConnection
     HmtpReader in = _hmtpReader;
 
     do {
-      if (! in.readPacket(_brokerStream)) {
+      ActorStream brokerStream = _linkActor.getBrokerStream();
+      
+      if (! in.readPacket(brokerStream)) {
         return false;
       }
     } while (in.isDataAvailable());
@@ -209,14 +205,14 @@ public class HmtpRequest extends AbstractProtocolConnection
   @Override
   public void onCloseConnection()
   {
-    ActorStream brokerStream = _brokerStream;
-    _brokerStream = null;
+    HmtpLinkActor linkActor = _linkActor;
+    _linkActor = null;
 
     ActorStream linkStream = _linkStream;
     _linkStream = null;
 
-    if (brokerStream != null)
-      brokerStream.close();
+    if (linkActor!= null)
+      linkActor.onCloseConnection();
 
     if (linkStream != null)
       linkStream.close();

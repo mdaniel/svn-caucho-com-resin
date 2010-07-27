@@ -74,7 +74,7 @@ import com.caucho.vfs.SSLFactory;
  * Represents a protocol connection.
  */
 public class SocketLinkListener extends TaskWorker
-  implements EnvironmentListener, Runnable
+  implements Runnable
 {
   private static final L10N L = new L10N(SocketLinkListener.class);
 
@@ -1084,8 +1084,6 @@ public class SocketLinkListener extends TaskWorker
 
     boolean isValid = false;
     try {
-      Environment.addEnvironmentListener(this);
-
       bind();
       postBind();
 
@@ -1550,40 +1548,6 @@ public class SocketLinkListener extends TaskWorker
   }
 
   /**
-   * Handles the environment config phase
-   */
-  @Override
-  public void environmentConfigure(EnvironmentClassLoader loader)
-  {
-  }
-
-  /**
-   * Handles the environment bind phase
-   */
-  @Override
-  public void environmentBind(EnvironmentClassLoader loader)
-  {
-  }
-
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  @Override
-  public void environmentStart(EnvironmentClassLoader loader)
-  {
-  }
-
-
-  /**
-   * Handles the case where the environment is stopping
-   */
-  @Override
-  public void environmentStop(EnvironmentClassLoader loader)
-  {
-    close();
-  }
-
-  /**
    * Frees the connection to the idle pool.
    *
    * only called from ConnectionState
@@ -1623,8 +1587,6 @@ public class SocketLinkListener extends TaskWorker
    */
   public void close()
   {
-    Environment.removeEnvironmentListener(this);
-
     if (! _lifecycle.toDestroy())
       return;
 

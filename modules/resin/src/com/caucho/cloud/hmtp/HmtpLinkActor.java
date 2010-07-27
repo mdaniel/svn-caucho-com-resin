@@ -31,21 +31,34 @@ package com.caucho.cloud.hmtp;
 
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
+import com.caucho.bam.Message;
 import com.caucho.cloud.network.ClusterServer;
+import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.hemp.servlet.ServerAuthManager;
-import com.caucho.hemp.servlet.ServerLinkService;
+import com.caucho.hemp.servlet.ServerLinkActor;
 
 /**
  * Underlying stream handling HTTP requests.
  */
-class HmtpLinkService extends ServerLinkService {
-  public HmtpLinkService(ActorStream linkStream,
-                         Broker broker,
-                         ServerAuthManager authManager,
-                         String ipAddress,
-                         boolean isUnidir)
+class HmtpLinkActor extends ServerLinkActor {
+  private Object _linkClosePayload;
+  
+  public HmtpLinkActor(ActorStream linkStream,
+                       Broker broker,
+                       ServerAuthManager authManager,
+                       String ipAddress,
+                       boolean isUnidir)
   {
     super(linkStream, broker, authManager, ipAddress, isUnidir);
+  }
+  
+  void onCloseConnection()
+  {
+    if (_linkClosePayload != null) {
+      NetworkClusterService clusterService = NetworkClusterService.getCurrent();
+      
+      clusterService.notifyLinkClose(_linkClosePayload);
+    }  
   }
   
   /**
@@ -82,5 +95,18 @@ class HmtpLinkService extends ServerLinkService {
     */
     
     return null;
+  }
+  
+  //
+  // message handling
+  //
+  
+  @Message
+  @SuppressWarnings("unused")
+  private void onLinkRegister(String to, 
+                              String from,
+                              HmtpLinkRegisterMessage registerMessage)
+  {
+    _linkClosePayload = registerMessage.getPayload();
   }
 }

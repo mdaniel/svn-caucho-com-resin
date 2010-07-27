@@ -32,6 +32,8 @@ package com.caucho.cloud.network;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,9 +110,8 @@ public final class ClusterServer {
 
   private ClientSocketFactory _serverPool;
 
-  // XXX: needs to start as active until proven otherwise
-  private boolean _isActive = true;
-  private long _stateTimestamp;
+  private AtomicBoolean _isActive = new AtomicBoolean();
+  private AtomicLong _stateTimestamp = new AtomicLong();
 
   // admin
 
@@ -143,7 +144,7 @@ public final class ClusterServer {
     
     // XXX: active isn't quite right here
     if (cloudServer.getPod() != networkService.getSelfServer().getPod())
-      _isActive = true;
+      _isActive.set(true);
 
     StringBuilder sb = new StringBuilder();
 
@@ -767,7 +768,7 @@ public final class ClusterServer {
    */
   public boolean isActive()
   {
-    return _isActive;
+    return _isActive.get();
   }
 
   /**
@@ -775,34 +776,26 @@ public final class ClusterServer {
    */
   public long getStateTimestamp()
   {
-    return _stateTimestamp;
+    return _stateTimestamp.get();
   }
 
   /**
    * Notify that a start event has been received.
    */
-  public boolean notifyStart(long timestamp)
+  public boolean notifyStart()
   {
-    synchronized (this) {
-      boolean isActive = _isActive;
-      _isActive = true;
+    boolean isActive = _isActive.getAndSet(true);
+    
+    if (isActive)
+      return false;
+    
+    _stateTimestamp.set(Alarm.getCurrentTime());
 
-      if (_serverPool != null)
-        _serverPool.notifyStart();
+    if (_serverPool != null)
+      _serverPool.notifyStart();
 
-      if (timestamp <= _stateTimestamp)
-        return false;
-
-      if (log.isLoggable(Level.FINER) && ! isActive)
-        log.finer(this + " notify-start");
-      
-      _stateTimestamp = timestamp;
-    }
-
-    /*
-    // notify after timestamp check to avoid closing sockets already opened
-    // to the target server
-     */
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " notify-start");
 
     _clusterService.notifyServerStart(this);
 
@@ -810,23 +803,22 @@ public final class ClusterServer {
   }
 
   /**
-   * Notify that a start event has been received.
+   * Notify that a stop event has been received.
    */
-  public boolean notifyStop(long timestamp)
+  public boolean notifyStop()
   {
-    synchronized (this) {
-      if (timestamp <= _stateTimestamp)
-        return false;
-
-      if (log.isLoggable(Level.FINER) && _isActive)
-        log.finer(this + " notify-stop");
-
-      _isActive = false;
-      _stateTimestamp = timestamp;
-    }
+    boolean isActive = _isActive.getAndSet(false);
     
+    if (! isActive)
+      return false;
+    
+    _stateTimestamp.set(Alarm.getCurrentTime());
+
     if (_serverPool != null)
       _serverPool.notifyStop();
+
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " notify-stop");
 
     _clusterService.notifyServerStop(this);
 
@@ -838,8 +830,8 @@ public final class ClusterServer {
    */
   public void stopServer()
   {
-    _isActive = false;
-    _stateTimestamp = Alarm.getCurrentTime();
+    _isActive.set(false);
+    _stateTimestamp.set(Alarm.getCurrentTime());
 
     if (_serverPool != null)
       _serverPool.notifyStop();

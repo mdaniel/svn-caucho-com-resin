@@ -77,6 +77,11 @@ public class SecurityService extends AbstractResinService
     }
   }
   
+  public static SecurityService getCurrent()
+  {
+    return ResinSystem.getCurrentService(SecurityService.class);
+  }
+  
   public void setSignatureSecret(String secret)
   {
     _signatureSecret = secret;

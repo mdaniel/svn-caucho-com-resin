@@ -46,14 +46,14 @@ import com.caucho.util.L10N;
  * {@link com.caucho.bam.SimpleActor}
  * or {@link com.caucho.bam.SimpleActorStream}.
  */
-class Skeleton<S>
+class Skeleton<S extends SimpleActorStream>
 {
   private static final L10N L = new L10N(Skeleton.class);
   private static final Logger log
     = Logger.getLogger(Skeleton.class.getName());
 
-  private final static WeakHashMap<Class, SoftReference<Skeleton>> _skeletonRefMap
-    = new WeakHashMap<Class, SoftReference<Skeleton>>();
+  private final static WeakHashMap<Class<?>, SoftReference<Skeleton>> _skeletonRefMap
+    = new WeakHashMap<Class<?>, SoftReference<Skeleton>>();
 
   private Class<?> _cl;
 
@@ -69,6 +69,7 @@ class Skeleton<S>
     = new HashMap<Class<?>, Method>();
   private final HashMap<Class<?>, Method> _queryErrorHandlers
     = new HashMap<Class<?>, Method>();
+  
   private Skeleton(Class<S> cl)
   {
     _cl = cl;
@@ -115,10 +116,7 @@ class Skeleton<S>
       }
     }
     else {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(actor + " message ignored " + payload
-                 + " {from: " + from + " to: " + to + "}");
-      }
+      actor.messageFallback(to, from, payload);
     }
   }
 
@@ -157,10 +155,7 @@ class Skeleton<S>
       }
     }
     else {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(actor + " messageError ignored " + error + " " + payload
-                 + " {from: " + from + " to: " + to + "}");
-      }
+      actor.messageErrorFallback(to, from, payload, error);
     }
   }
 
@@ -201,20 +196,7 @@ class Skeleton<S>
       }
     }
     else {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(actor + " queryGet not implemented for " + payload
-                 + " {id: " + id + ", from: " + from + " to: " + to + "}");
-      }
-
-      String msg;
-      msg = (actor + ": queryGet is not implemented for this payload:\n"
-             + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
-
-      ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                        ActorError.FEATURE_NOT_IMPLEMENTED,
-                                        msg);
-
-      linkStream.queryError(id, from, to, payload, error);
+      actor.queryGetFallback(id, to, from, payload);
     }
   }
 
@@ -254,20 +236,7 @@ class Skeleton<S>
       }
     }
     else {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(actor + " querySet not implemented for " + payload
-                 + " {id: " + id + ", from: " + from + " to: " + to + "}");
-      }
-
-      String msg;
-      msg = (actor + ": querySet is not implemented for this payload:\n"
-             + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
-
-      ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                        ActorError.FEATURE_NOT_IMPLEMENTED,
-                                        msg);
-
-      linkStream.queryError(id, from, to, payload, error);
+      actor.querySetFallback(id, to, from, payload);
     }
   }
 
@@ -306,10 +275,7 @@ class Skeleton<S>
       }
     }
     else {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(actor + " queryResult ignored " + payload
-                 + " {id: " + id + ", from: " + from + " to: " + to + "}");
-      }
+      actor.queryResultFallback(id, to, from, payload);
     }
   }
 
@@ -349,10 +315,7 @@ class Skeleton<S>
       }
     }
     else {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(actor + " queryError ignored " + error + " " + payload
-                 + " {id: " + id + ", from: " + from + " to: " + to + "}");
-      }
+      actor.queryErrorFallback(id, to, from, payload, error);
     }
   }
 

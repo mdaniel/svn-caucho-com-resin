@@ -47,7 +47,7 @@ import com.caucho.config.Admin;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.hemp.servlet.ServerAuthManager;
-import com.caucho.hemp.servlet.ServerLinkService;
+import com.caucho.hemp.servlet.ServerLinkActor;
 import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWriter;
 import com.caucho.security.Authenticator;
@@ -168,7 +168,7 @@ public class HmtpServlet extends GenericServlet {
     private ActorStream _linkStream;
     private ActorStream _brokerStream;
     
-    private ServerLinkService _linkService;
+    private ServerLinkActor _linkService;
 
     WebSocketHandler(String ipAddress)
     {
@@ -182,7 +182,7 @@ public class HmtpServlet extends GenericServlet {
       _out = new HmtpWriter(context.getOutputStream());
       _linkStream = new HempMemoryQueue(_out, _broker.getBrokerStream(), 1);
       
-      _linkService = new ServerLinkService(_linkStream, _broker, _authManager,
+      _linkService = new ServerLinkActor(_linkStream, _broker, _authManager,
                                            _ipAddress, false);
       _brokerStream = _linkService.getBrokerStream();
     }
