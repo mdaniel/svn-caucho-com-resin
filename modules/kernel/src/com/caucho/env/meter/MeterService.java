@@ -31,12 +31,8 @@ package com.caucho.env.meter;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.util.L10N;
 
 public class MeterService extends AbstractResinService {
-  private static final L10N L = new L10N(MeterService.class);
-  
   private static MeterService _manager = new MeterService();
 
   private final ConcurrentHashMap<String,AbstractMeter> _meterMap

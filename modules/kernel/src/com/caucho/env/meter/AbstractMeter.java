@@ -37,21 +37,25 @@ abstract public class AbstractMeter implements Meter {
   }
 
   /**
-   * Returns the probe's name.
+   * Returns the meter's name.
    */
+  @Override
   public final String getName()
   {
     return _name;
   }
   
   /**
-   * Return the probe's next sample.
+   * Return the meter's next sample, resetting any counters for the next
+   * sample.
    */
+  @Override
   abstract public double sample();
 
   /**
    * Returns the current value.
    */
+  @Override
   public double peek()
   {
     return 0;

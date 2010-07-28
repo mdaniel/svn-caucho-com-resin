@@ -245,7 +245,6 @@ public class NetworkListenService
 
     if (program != null)
       program.getProgram().configure(config);
-
   }
 
   /**

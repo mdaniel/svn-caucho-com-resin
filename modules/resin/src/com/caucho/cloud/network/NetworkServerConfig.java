@@ -141,6 +141,7 @@ public class NetworkServerConfig {
     getListenService().setBindPortsAfterStart(bindAtEnd);
   }
   
+  @Configurable
   public void addContentProgram(ConfigProgram builder)
   {
     _listenerDefaults.addProgram(builder);

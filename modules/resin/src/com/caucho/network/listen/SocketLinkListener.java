@@ -48,14 +48,12 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Period;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
 import com.caucho.server.cluster.Server;
@@ -73,6 +71,7 @@ import com.caucho.vfs.SSLFactory;
 /**
  * Represents a protocol connection.
  */
+@Configurable
 public class SocketLinkListener extends TaskWorker
   implements Runnable
 {
@@ -715,6 +714,17 @@ public class SocketLinkListener extends TaskWorker
       return getSelectManager().getSelectMax();
     else
       return -1;
+  }
+  
+  /**
+   * Ignore unknown tags.
+   * 
+   * server/0940
+   */
+  @Configurable
+  public void addContentProgram(ConfigProgram program)
+  {
+    
   }
 
   //
