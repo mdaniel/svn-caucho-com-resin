@@ -26,33 +26,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-import java.util.concurrent.atomic.AtomicLong;
-
-
-public final class SampleCountProbe extends Probe {
-  private final AtomicLong _count = new AtomicLong();
-  private final AtomicLong _lastCount = new AtomicLong();
-
-  public SampleCountProbe(String name)
-  {
-    super(name);
-  }
-
-  public final void addData()
-  {
-    _count.incrementAndGet();
-  }
-  
-  /**
-   * Return the probe's next sample.
-   */
-  public final double sample()
-  {
-    long count = _count.get();
-    long lastCount = _lastCount.getAndSet(count);
-    
-    return count - lastCount;
-  }
+/**
+ * A Sensor is an event-based measurement interface inserted into the
+ * running program to gather information as events occur.  For example, a
+ * request counter sensor will be called every time a request completes.
+ * 
+ * Sensors are typically implemented by Meters as their interface to the
+ * running program.
+ */
+public interface Sensor {
 }

@@ -29,7 +29,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.env.sample.ActiveTimeSample;
+import com.caucho.env.meter.ActiveTimeSensor;
 import com.caucho.util.L10N;
 
 import java.sql.*;
@@ -88,7 +88,7 @@ public class UserConnection implements java.sql.Connection {
     return conn;
   }
 
-  ActiveTimeSample getTimeProbe()
+  ActiveTimeSensor getTimeProbe()
   {
     return _mConn.getDBPool().getTimeProbe();
   }

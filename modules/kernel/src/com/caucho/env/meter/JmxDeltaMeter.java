@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,9 +37,9 @@ import javax.management.ObjectName;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 
-public final class JmxDeltaProbe extends Probe {
+public final class JmxDeltaMeter extends AbstractMeter {
   private static final Logger log
-  = Logger.getLogger(JmxDeltaProbe.class.getName());
+  = Logger.getLogger(JmxDeltaMeter.class.getName());
 
   private MBeanServer _server;
   private ObjectName _objectName;
@@ -47,7 +47,7 @@ public final class JmxDeltaProbe extends Probe {
 
   private double _lastValue;
 
-  public JmxDeltaProbe(String name, String objectName, String attribute)
+  public JmxDeltaMeter(String name, String objectName, String attribute)
   {
     super(name);
 

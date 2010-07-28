@@ -26,43 +26,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicInteger;
-
-
-public final class AverageTimeProbe extends Probe {
-  private final AtomicLong _sum = new AtomicLong();
-  private final AtomicInteger _count = new AtomicInteger();
-
-  public AverageTimeProbe(String name)
-  {
-    super(name);
-  }
-
-  public final void addData(long time)
-  {
-    long oldValue;
-
-    do {
-      oldValue = _sum.get();
-    } while (! _sum.compareAndSet(oldValue, oldValue + time));
-
-    _count.incrementAndGet();
-  }
+/**
+ * Meters gather information from Sensors in a ResinSystem. Some sampled
+ * meters like the CPU and JMX don't have an associated Sensor, but gather
+ * the data as they are polled.
+ * 
+ * Meters typically gather information when polled and then reset any internal
+ * accumulated counters. For example, a request counter meter will clear the
+ * request count after being sampled.
+ * 
+ * Meter values can typically be peeked which will return the current value
+ * without resetting internal counters.
+ */
+public interface Meter {
+  /**
+   * Returns the meter's name.
+   */
+  public String getName();
   
   /**
-   * Return the probe's next sample.
+   * Gather the meter's next sample.
    */
-  public final double sample()
-  {
-    long sum = _sum.getAndSet(0);
-    int count = _count.getAndSet(0);
+  public double sample();
 
-    if (count != 0)
-      return sum / (double) count;
-    else
-      return 0;
-  }
+  /**
+   * Returns the current meter value without updating the sample.
+   */
+  public double peek();
 }

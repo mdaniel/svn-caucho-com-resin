@@ -26,19 +26,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-/**
- * SemaphoreSample tracks resource allocations from a pool.
- */
-public interface SemaphoreSample {
+public interface ActiveTimeSensor {
   /**
-   * Acquire a resource from the semaphore.
+   * Start the active time.
    */
-  public void acquire();
+  public long start();
   
   /**
-   * Free a resource
+   * End the active time.
    */
-  public void release();
+  public void end(long startTime);
 }

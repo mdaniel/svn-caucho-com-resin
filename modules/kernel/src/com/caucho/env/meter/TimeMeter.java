@@ -26,16 +26,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-public interface ActiveTimeSample {
-  /**
-   * Start the active time.
-   */
-  public long start();
+import java.util.concurrent.atomic.AtomicLong;
+
+
+public final class TimeMeter extends AbstractMeter implements TimeSensor {
+  private final AtomicLong _count = new AtomicLong();
+  private final AtomicLong _time = new AtomicLong();
+
+  public TimeMeter(String name)
+  {
+    super(name);
+  }
+
+  public final void add(long time)
+  {
+    _count.incrementAndGet();
+    _time.addAndGet(time);
+  }
   
   /**
-   * End the active time.
+   * Return the probe's next sample.
    */
-  public void end(long startTime);
+  public final double sample()
+  {
+    long count = _count.getAndSet(0);
+    long time = _time.getAndSet(0);
+
+    if (count == 0)
+      return 0;
+    else
+      return time / (double) count;
+  }
 }

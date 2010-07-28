@@ -26,12 +26,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public final class SemaphoreProbe extends Probe implements SemaphoreSample {
+public final class SemaphoreMeter extends AbstractMeter implements SemaphoreSensor {
   // sample data
   private final AtomicLong _acquireCount = new AtomicLong();
   private final AtomicLong _releaseCount = new AtomicLong();
@@ -43,22 +43,22 @@ public final class SemaphoreProbe extends Probe implements SemaphoreSample {
   // for sample
   private long _lastAcquireCount;
   
-  public SemaphoreProbe(String name)
+  public SemaphoreMeter(String name)
   {
     super(name);
   }
 
-  public Probe createCount(String name)
+  public AbstractMeter createCount(String name)
   {
     return new CountProbe(name);
   }
 
-  public Probe createMin(String name)
+  public AbstractMeter createMin(String name)
   {
     return new MinProbe(name);
   }
 
-  public Probe createMax(String name)
+  public AbstractMeter createMax(String name)
   {
     return new MaxProbe(name);
   }
@@ -131,7 +131,7 @@ public final class SemaphoreProbe extends Probe implements SemaphoreSample {
     return min;
   }
 
-  class CountProbe extends Probe {
+  class CountProbe extends AbstractMeter {
     CountProbe(String name)
     {
       super(name);
@@ -143,7 +143,7 @@ public final class SemaphoreProbe extends Probe implements SemaphoreSample {
     }
   }
 
-  class MaxProbe extends Probe {
+  class MaxProbe extends AbstractMeter {
     MaxProbe(String name)
     {
       super(name);
@@ -155,7 +155,7 @@ public final class SemaphoreProbe extends Probe implements SemaphoreSample {
     }
   }
 
-  class MinProbe extends Probe {
+  class MinProbe extends AbstractMeter {
     MinProbe(String name)
     {
       super(name);

@@ -37,8 +37,8 @@ import com.caucho.distcache.ByteStreamCache;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ClusterByteStreamCache;
 import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.env.sample.AverageSample;
-import com.caucho.env.sample.ProbeManager;
+import com.caucho.env.meter.AverageSensor;
+import com.caucho.env.meter.MeterService;
 import com.caucho.hessian.io.*;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
@@ -186,7 +186,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private volatile long _sessionTimeoutCount;
   private volatile long _sessionInvalidateCount;
 
-  private final AverageSample _sessionSaveSample;
+  private final AverageSensor _sessionSaveSample;
 
   /**
    * Creates and initializes a new session manager
@@ -243,7 +243,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
     _alarm = new WeakAlarm(this);
     _sessionSaveSample
-      = ProbeManager.createAverageProbe("Resin|WebApp|Session Save", "Size");
+      = MeterService.createAverageMeter("Resin|WebApp|Session Save", "Size");
 
     _admin = new SessionManagerAdmin(this);
   }

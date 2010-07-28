@@ -37,10 +37,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.sample.ActiveProbe;
-import com.caucho.env.sample.ActiveTimeProbe;
-import com.caucho.env.sample.CountProbe;
-import com.caucho.env.sample.ProbeManager;
+import com.caucho.env.meter.ActiveMeter;
+import com.caucho.env.meter.ActiveTimeMeter;
+import com.caucho.env.meter.CountMeter;
+import com.caucho.env.meter.MeterService;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -128,12 +128,12 @@ public class ClientSocketFactory
   private volatile double _latencyFactor;
 
   // statistics
-  private ActiveTimeProbe _requestTimeProbe;
-  private ActiveProbe _connProbe;
-  private ActiveProbe _idleProbe;
-  private CountProbe _connFailProbe;
-  private CountProbe _requestFailProbe;
-  private CountProbe _requestBusyProbe;
+  private ActiveTimeMeter _requestTimeProbe;
+  private ActiveMeter _connProbe;
+  private ActiveMeter _idleProbe;
+  private CountMeter _connFailProbe;
+  private CountMeter _requestFailProbe;
+  private CountMeter _requestBusyProbe;
 
   private volatile long _keepaliveCountTotal;
   private volatile long _connectCountTotal;
@@ -1234,63 +1234,63 @@ public class ClientSocketFactory
   // statistics
   //
 
-  public ActiveProbe getConnectionProbe()
+  public ActiveMeter getConnectionProbe()
   {
     if (_connProbe == null) {
       _connProbe
-        = ProbeManager.createActiveProbe(_statCategory + "|Connection",
+        = MeterService.createActiveMeter(_statCategory + "|Connection",
                                          _statId);
     }
 
     return _connProbe;
   }
 
-  public CountProbe getConnectionFailProbe()
+  public CountMeter getConnectionFailProbe()
   {
     if (_connFailProbe == null) {
       String name = _statCategory + "|Connection Fail|" + _statId;
-      _connFailProbe = ProbeManager.createCountProbe(name);
+      _connFailProbe = MeterService.createCountMeter(name);
     }
 
     return _connFailProbe;
   }
 
-  public ActiveTimeProbe getRequestTimeProbe()
+  public ActiveTimeMeter getRequestTimeProbe()
   {
     if (_requestTimeProbe == null) {
       _requestTimeProbe
-        = ProbeManager.createActiveTimeProbe(_statCategory + "|Request",
+        = MeterService.createActiveTimeMeter(_statCategory + "|Request",
                                              "Time", _statId);
     }
 
     return _requestTimeProbe;
   }
 
-  public CountProbe getRequestFailProbe()
+  public CountMeter getRequestFailProbe()
   {
     if (_requestFailProbe == null) {
       String name = _statCategory + "|Request Fail" + _statId;
-      _requestFailProbe = ProbeManager.createCountProbe(name);
+      _requestFailProbe = MeterService.createCountMeter(name);
     }
 
     return _requestFailProbe;
   }
 
-  public CountProbe getRequestBusyProbe()
+  public CountMeter getRequestBusyProbe()
   {
     if (_requestBusyProbe == null) {
       String name = _statCategory + "|Request Busy" + _statId;
-      _requestBusyProbe = ProbeManager.createCountProbe(name);
+      _requestBusyProbe = MeterService.createCountMeter(name);
     }
 
     return _requestBusyProbe;
   }
 
-  public ActiveProbe getIdleProbe()
+  public ActiveMeter getIdleProbe()
   {
     if (_idleProbe == null) {
       _idleProbe
-        = ProbeManager.createActiveProbe(_statCategory + "|Idle",
+        = MeterService.createActiveMeter(_statCategory + "|Idle",
                                          _statId);
     }
 

@@ -34,8 +34,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorException;
-import com.caucho.env.sample.ActiveProbe;
-import com.caucho.env.sample.ActiveTimeProbe;
+import com.caucho.env.meter.ActiveMeter;
+import com.caucho.env.meter.ActiveTimeMeter;
 import com.caucho.server.hmux.HmuxRequest;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -61,9 +61,9 @@ public class ClientSocket {
 
   private boolean _isAuthenticated;
 
-  private ActiveProbe _connProbe;
-  private ActiveTimeProbe _requestTimeProbe;
-  private ActiveProbe _idleProbe;
+  private ActiveMeter _connProbe;
+  private ActiveTimeMeter _requestTimeProbe;
+  private ActiveMeter _idleProbe;
 
   private long _requestStartTime;
   private boolean _isIdle;

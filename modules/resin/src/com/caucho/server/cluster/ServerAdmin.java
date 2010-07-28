@@ -32,8 +32,8 @@ package com.caucho.server.cluster;
 import java.util.Collection;
 import java.util.Date;
 
-import com.caucho.env.sample.ProbeManager;
-import com.caucho.env.sample.TotalProbe;
+import com.caucho.env.meter.MeterService;
+import com.caucho.env.meter.TotalMeter;
 import com.caucho.management.server.AbstractEmitterObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ClusterServerMXBean;
@@ -51,7 +51,7 @@ public class ServerAdmin extends AbstractEmitterObject
   implements ServerMXBean
 {
   private static final String BYTES_PROBE = "Resin|Request|Http Request Bytes";
-  private TotalProbe _httpBytesProbe;
+  private TotalMeter _httpBytesProbe;
 
   private Server _server;
 
@@ -59,11 +59,11 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     _server = server;
 
-    ProbeManager.createAverageProbe(BYTES_PROBE, "");
+    MeterService.createAverageMeter(BYTES_PROBE, "");
 
     String name = BYTES_PROBE;
 
-    _httpBytesProbe = (TotalProbe) ProbeManager.getProbe(name);
+    _httpBytesProbe = (TotalMeter) MeterService.getMeter(name);
 
     registerSelf();
   }

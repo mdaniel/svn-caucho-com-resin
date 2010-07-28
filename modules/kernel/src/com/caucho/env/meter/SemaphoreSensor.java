@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,46 +26,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.service;
-
+package com.caucho.env.meter;
 
 /**
- * Interface for a service registered with the Resin Server.
+ * SemaphoreSample tracks resource allocations from a pool.
  */
-public class AbstractResinService implements ResinService
-{
-  @Override
-  public int getStartPriority()
-  {
-    return START_PRIORITY_DEFAULT;
-  }
-
-  @Override
-  public void start()
-    throws Exception
-  {
-  }
-
-  @Override
-  public int getStopPriority()
-  {
-    return getStartPriority();
-  }
-
-  @Override
-  public void stop() 
-    throws Exception
-  {
-  }
-
-  @Override
-  public void destroy()
-  {
-  }
+public interface SemaphoreSensor {
+  /**
+   * Acquire a resource from the semaphore.
+   */
+  public void acquire();
   
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
-  }
+  /**
+   * Free a resource
+   */
+  public void release();
 }

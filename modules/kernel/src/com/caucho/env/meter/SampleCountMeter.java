@@ -26,11 +26,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-public interface TimeSample {
+import java.util.concurrent.atomic.AtomicLong;
+
+
+public final class SampleCountMeter extends AbstractMeter {
+  private final AtomicLong _count = new AtomicLong();
+  private final AtomicLong _lastCount = new AtomicLong();
+
+  public SampleCountMeter(String name)
+  {
+    super(name);
+  }
+
+  public final void addData()
+  {
+    _count.incrementAndGet();
+  }
+  
   /**
-   * Adds a time sample to the probe
+   * Return the probe's next sample.
    */
-  public void add(long time);
+  public final double sample()
+  {
+    long count = _count.get();
+    long lastCount = _lastCount.getAndSet(count);
+    
+    return count - lastCount;
+  }
 }

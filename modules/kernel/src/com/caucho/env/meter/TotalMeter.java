@@ -26,40 +26,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-abstract public class Probe {
-  private final String _name;
 
-  protected Probe(String name)
+abstract public class TotalMeter extends AbstractMeter {
+  protected TotalMeter(String name)
   {
-    _name = name;
+    super(name);
   }
 
   /**
-   * Returns the probe's name.
+   * Return the total count
    */
-  public final String getName()
-  {
-    return _name;
-  }
-  
-  /**
-   * Return the probe's next sample.
-   */
-  abstract public double sample();
-
-  /**
-   * Returns the current value.
-   */
-  public double peek()
-  {
-    return 0;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _name + "]";
-  }
+  abstract public double getTotal();
 }

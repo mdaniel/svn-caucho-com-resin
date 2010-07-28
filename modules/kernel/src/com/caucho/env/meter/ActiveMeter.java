@@ -26,25 +26,65 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public final class CountProbe extends Probe {
+public final class ActiveMeter extends AbstractMeter implements ActiveSensor {
   // sample data
+  private final AtomicLong _activeCount = new AtomicLong();
+  private final AtomicLong _activeCountMax = new AtomicLong();
   private final AtomicLong _totalCount = new AtomicLong();
 
   private long _lastTotal;
 
-  public CountProbe(String name)
+  public ActiveMeter(String name)
   {
     super(name);
   }
 
   public final void start()
   {
+    long activeCount = _activeCount.incrementAndGet();
     _totalCount.incrementAndGet();
+
+    long max;
+
+    while ((max = _activeCountMax.get()) < activeCount
+           && ! _activeCountMax.compareAndSet(max, activeCount)) {
+    }
+  }
+
+  public final void end()
+  {
+    _activeCount.decrementAndGet();
+  }
+
+  public AbstractMeter createMax(String name)
+  {
+    return new MaxProbe(name);
+  }
+
+  public AbstractMeter createTotal(String name)
+  {
+    return new TotalProbe(name);
+  }
+
+  /**
+   * Sample the active count
+   */
+  public final double sampleActive()
+  {
+    return _activeCount.get();
+  }
+
+  /**
+   * Sample the active count
+   */
+  public final double sampleMax()
+  {
+    return _activeCountMax.getAndSet(_activeCount.get());
   }
 
   /**
@@ -57,5 +97,29 @@ public final class CountProbe extends Probe {
     _lastTotal = totalCount;
 
     return totalCount - lastTotal;
+  }
+
+  class MaxProbe extends AbstractMeter {
+    MaxProbe(String name)
+    {
+      super(name);
+    }
+
+    public double sample()
+    {
+      return sampleMax();
+    }
+  }
+
+  class TotalProbe extends AbstractMeter {
+    TotalProbe(String name)
+    {
+      super(name);
+    }
+
+    public double sample()
+    {
+      return sample();
+    }
   }
 }

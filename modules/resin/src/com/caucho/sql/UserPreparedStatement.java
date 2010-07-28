@@ -29,7 +29,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.env.sample.ActiveTimeSample;
+import com.caucho.env.meter.ActiveTimeSensor;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -55,7 +55,7 @@ public class UserPreparedStatement extends UserStatement
 
   private boolean _isClosed;
 
-  private ActiveTimeSample _timeProbe;
+  private ActiveTimeSensor _timeProbe;
   
   UserPreparedStatement(UserConnection conn,
                         PreparedStatement pStmt,

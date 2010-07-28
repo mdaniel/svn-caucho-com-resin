@@ -26,37 +26,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-import java.util.concurrent.atomic.AtomicLong;
+abstract public class AbstractMeter implements Meter {
+  private final String _name;
 
-
-public final class TimeProbe extends Probe implements TimeSample {
-  private final AtomicLong _count = new AtomicLong();
-  private final AtomicLong _time = new AtomicLong();
-
-  public TimeProbe(String name)
+  protected AbstractMeter(String name)
   {
-    super(name);
+    _name = name;
   }
 
-  public final void add(long time)
+  /**
+   * Returns the probe's name.
+   */
+  public final String getName()
   {
-    _count.incrementAndGet();
-    _time.addAndGet(time);
+    return _name;
   }
   
   /**
    * Return the probe's next sample.
    */
-  public final double sample()
-  {
-    long count = _count.getAndSet(0);
-    long time = _time.getAndSet(0);
+  abstract public double sample();
 
-    if (count == 0)
-      return 0;
-    else
-      return time / (double) count;
+  /**
+   * Returns the current value.
+   */
+  public double peek()
+  {
+    return 0;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

@@ -26,15 +26,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.caucho.env.sample.ActiveTimeSample;
-import com.caucho.env.sample.Probe;
+import com.caucho.env.meter.ActiveTimeSensor;
+import com.caucho.env.meter.AbstractMeter;
 import com.caucho.util.Alarm;
 
-public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
+public final class ActiveTimeMeter extends AbstractMeter implements ActiveTimeSensor {
   private final double _scale;
 
   private final Object _lock = new Object();
@@ -56,7 +56,7 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
   private long _lastStdTotalCount;
   private double _lastStdSum;
 
-  public ActiveTimeProbe(String name)
+  public ActiveTimeMeter(String name)
   {
     super(name);
 
@@ -97,27 +97,27 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
     }
   }
 
-  public Probe createActiveCount(String name)
+  public AbstractMeter createActiveCount(String name)
   {
     return new ActiveCountProbe(name);
   }
 
-  public Probe createActiveCountMax(String name)
+  public AbstractMeter createActiveCountMax(String name)
   {
     return new ActiveCountMaxProbe(name);
   }
 
-  public Probe createTotalCount(String name)
+  public AbstractMeter createTotalCount(String name)
   {
     return new TotalCountProbe(name);
   }
 
-  public Probe createMax(String name)
+  public AbstractMeter createMax(String name)
   {
     return new MaxProbe(name);
   }
 
-  public Probe createSigma(String name, int n)
+  public AbstractMeter createSigma(String name, int n)
   {
     return new SigmaProbe(name, n);
   }
@@ -213,7 +213,7 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
     return _scale * max;
   }
 
-  class ActiveCountProbe extends Probe {
+  class ActiveCountProbe extends AbstractMeter {
     ActiveCountProbe(String name)
     {
       super(name);
@@ -225,7 +225,7 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
     }
   }
 
-  class ActiveCountMaxProbe extends Probe {
+  class ActiveCountMaxProbe extends AbstractMeter {
     ActiveCountMaxProbe(String name)
     {
       super(name);
@@ -237,7 +237,7 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
     }
   }
 
-  class TotalCountProbe extends Probe {
+  class TotalCountProbe extends AbstractMeter {
     TotalCountProbe(String name)
     {
       super(name);
@@ -249,7 +249,7 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
     }
   }
 
-  class MaxProbe extends Probe {
+  class MaxProbe extends AbstractMeter {
     MaxProbe(String name)
     {
       super(name);
@@ -261,7 +261,7 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
     }
   }
 
-  class SigmaProbe extends Probe {
+  class SigmaProbe extends AbstractMeter {
     private final int _n;
 
     SigmaProbe(String name, int n)

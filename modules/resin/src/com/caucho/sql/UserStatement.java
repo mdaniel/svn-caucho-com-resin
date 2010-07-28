@@ -28,7 +28,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.env.sample.ActiveTimeSample;
+import com.caucho.env.meter.ActiveTimeSensor;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 
@@ -57,7 +57,7 @@ public class UserStatement implements Statement {
   // True if the statement is changed in a way that forbids its caching.
   protected boolean _isPoolable = true;
 
-  private final ActiveTimeSample _timeProbe;
+  private final ActiveTimeSensor _timeProbe;
 
   UserStatement(UserConnection conn, Statement stmt)
   {

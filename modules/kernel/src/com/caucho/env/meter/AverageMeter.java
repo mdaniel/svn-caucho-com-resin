@@ -26,12 +26,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public final class AverageProbe extends TotalProbe implements AverageSample {
+public final class AverageMeter extends TotalMeter implements AverageSensor {
   private final double _scale;
 
   private final Object _lock = new Object();
@@ -51,24 +51,24 @@ public final class AverageProbe extends TotalProbe implements AverageSample {
   private long _lastStdCount;
   private double _lastStdSum;
 
-  public AverageProbe(String name)
+  public AverageMeter(String name)
   {
     super(name);
 
     _scale = 1.0;
   }
 
-  public TotalProbe createCount(String name)
+  public TotalMeter createCount(String name)
   {
     return new AverageCountProbe(name);
   }
 
-  public Probe createMax(String name)
+  public AbstractMeter createMax(String name)
   {
     return new MaxProbe(name);
   }
 
-  public Probe createSigma(String name, int n)
+  public AbstractMeter createSigma(String name, int n)
   {
     return new SigmaProbe(name, n);
   }
@@ -172,7 +172,7 @@ public final class AverageProbe extends TotalProbe implements AverageSample {
     }
   }
 
-  class AverageCountProbe extends TotalProbe {
+  class AverageCountProbe extends TotalMeter {
     AverageCountProbe(String name)
     {
       super(name);
@@ -190,7 +190,7 @@ public final class AverageProbe extends TotalProbe implements AverageSample {
     }
   }
 
-  class MaxProbe extends Probe {
+  class MaxProbe extends AbstractMeter {
     MaxProbe(String name)
     {
       super(name);
@@ -202,7 +202,7 @@ public final class AverageProbe extends TotalProbe implements AverageSample {
     }
   }
 
-  class SigmaProbe extends Probe {
+  class SigmaProbe extends AbstractMeter {
     private final int _n;
 
     SigmaProbe(String name, int n)

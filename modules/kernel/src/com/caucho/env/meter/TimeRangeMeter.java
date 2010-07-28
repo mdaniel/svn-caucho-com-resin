@@ -26,13 +26,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.caucho.util.Alarm;
 
-public final class TimeRangeProbe extends Probe implements TimeSample {
+public final class TimeRangeMeter extends AbstractMeter implements TimeSensor {
   private final double _scale;
 
   private final AtomicLong _activeCount = new AtomicLong();
@@ -44,24 +44,24 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
   private final AtomicLong _lastAvgTime = new AtomicLong();
   private final AtomicLong _lastCount = new AtomicLong();
 
-  public TimeRangeProbe(String name)
+  public TimeRangeMeter(String name)
   {
     super(name);
 
     _scale = 1.0;
   }
 
-  public Probe createCount(String name)
+  public AbstractMeter createCount(String name)
   {
     return new TimeRangeCountProbe(name);
   }
 
-  public Probe createActiveCount(String name)
+  public AbstractMeter createActiveCount(String name)
   {
     return new TimeRangeActiveCountProbe(name);
   }
 
-  public Probe createMax(String name)
+  public AbstractMeter createMax(String name)
   {
     return new TimeRangeMaxProbe(name);
   }
@@ -128,7 +128,7 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
     return _scale * max;
   }
 
-  class TimeRangeCountProbe extends Probe {
+  class TimeRangeCountProbe extends AbstractMeter {
     TimeRangeCountProbe(String name)
     {
       super(name);
@@ -140,7 +140,7 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
     }
   }
 
-  class TimeRangeActiveCountProbe extends Probe {
+  class TimeRangeActiveCountProbe extends AbstractMeter {
     TimeRangeActiveCountProbe(String name)
     {
       super(name);
@@ -152,7 +152,7 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
     }
   }
 
-  class TimeRangeMaxProbe extends Probe {
+  class TimeRangeMaxProbe extends AbstractMeter {
     TimeRangeMaxProbe(String name)
     {
       super(name);

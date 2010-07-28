@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,15 +37,15 @@ import javax.management.ObjectName;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 
-public final class JmxAttributeProbe extends Probe {
+public final class JmxAttributeMeter extends AbstractMeter {
     private static final Logger log
-        = Logger.getLogger(JmxAttributeProbe.class.getName());
+        = Logger.getLogger(JmxAttributeMeter.class.getName());
 
   private MBeanServer _server;
   private ObjectName _objectName;
   private String _attribute;
 
-  public JmxAttributeProbe(String name, String objectName, String attribute)
+  public JmxAttributeMeter(String name, String objectName, String attribute)
   {
     super(name);
 

@@ -37,10 +37,10 @@ import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.sample.ActiveTimeProbe;
-import com.caucho.env.sample.AverageProbe;
-import com.caucho.env.sample.ProbeManager;
-import com.caucho.env.sample.SampleCountProbe;
+import com.caucho.env.meter.ActiveTimeMeter;
+import com.caucho.env.meter.AverageMeter;
+import com.caucho.env.meter.MeterService;
+import com.caucho.env.meter.SampleCountMeter;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
@@ -114,9 +114,9 @@ public class HttpRequest extends AbstractHttpRequest
   private ContentLengthStream _contentLengthStream = new ContentLengthStream();
   private RawInputStream _rawInputStream = new RawInputStream();
 
-  private ActiveTimeProbe _requestTimeProbe;
-  private SampleCountProbe _requestCountProbe;
-  private AverageProbe _requestBytesProbe;
+  private ActiveTimeMeter _requestTimeProbe;
+  private SampleCountMeter _requestCountProbe;
+  private AverageMeter _requestBytesProbe;
 
   /**
    * Creates a new HttpRequest.  New connections reuse the request.
@@ -128,10 +128,10 @@ public class HttpRequest extends AbstractHttpRequest
     super(server, conn);
 
     _requestTimeProbe
-      = ProbeManager.createActiveTimeProbe(REQUEST_TIME_PROBE);
+      = MeterService.createActiveTimeMeter(REQUEST_TIME_PROBE);
 
     _requestBytesProbe
-      = ProbeManager.createAverageProbe(REQUEST_BYTES_PROBE, "");
+      = MeterService.createAverageMeter(REQUEST_BYTES_PROBE, "");
   }
 
   @Override

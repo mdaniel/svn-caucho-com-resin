@@ -32,8 +32,8 @@ package com.caucho.sql;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.Period;
-import com.caucho.env.sample.ActiveTimeSample;
-import com.caucho.env.sample.ProbeManager;
+import com.caucho.env.meter.ActiveTimeSensor;
+import com.caucho.env.meter.MeterService;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
@@ -204,7 +204,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   // Count for debugging ids.
   private int _idCount;
 
-  private ActiveTimeSample _timeProbe;
+  private ActiveTimeSensor _timeProbe;
 
   // The alarm
   private Alarm _alarm;
@@ -327,12 +327,12 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     return _connectionConfig;
   }
 
-  ActiveTimeSample getTimeProbe()
+  ActiveTimeSensor getTimeProbe()
   {
     if (_timeProbe == null) {
-      ProbeManager manager = ProbeManager.getCurrent();
+      MeterService manager = MeterService.getCurrent();
 
-      _timeProbe = manager.createActiveTimeProbe("Resin|Database|Query");
+      _timeProbe = manager.createActiveTimeMeter("Resin|Database|Query");
     }
 
     return _timeProbe;

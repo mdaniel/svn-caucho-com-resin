@@ -26,11 +26,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-public interface AverageSample {
+/**
+ * The ActiveSensor measures the number of threads currently using a resource.
+ */
+public interface ActiveSensor {
   /**
-   * Adds a data sample to the probe
+   * Start the active
    */
-  public void add(long value);
+  public void start();
+
+  /**
+   * End the active
+   */
+  public void end();
 }

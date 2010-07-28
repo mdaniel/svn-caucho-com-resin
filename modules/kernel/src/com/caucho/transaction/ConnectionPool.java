@@ -49,8 +49,8 @@ import javax.transaction.xa.XAResource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
-import com.caucho.env.sample.ActiveTimeProbe;
-import com.caucho.env.sample.ProbeManager;
+import com.caucho.env.meter.ActiveTimeMeter;
+import com.caucho.env.meter.MeterService;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
@@ -149,9 +149,9 @@ public class ConnectionPool extends AbstractManagedObject
   // statistics
   //
 
-  private ActiveTimeProbe _connectionTime;
-  private ActiveTimeProbe _idleTime;
-  private ActiveTimeProbe _activeTime;
+  private ActiveTimeMeter _connectionTime;
+  private ActiveTimeMeter _idleTime;
+  private ActiveTimeMeter _activeTime;
 
   private final AtomicLong _connectionCountTotal = new AtomicLong();
   private final AtomicLong _connectionCreateCountTotal = new AtomicLong();
@@ -483,7 +483,7 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Returns the connection time probe
    */
-  public ActiveTimeProbe getConnectionTimeProbe()
+  public ActiveTimeMeter getConnectionTimeProbe()
   {
     return _connectionTime;
   }
@@ -491,7 +491,7 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Returns the idle time probe
    */
-  public ActiveTimeProbe getIdleTimeProbe()
+  public ActiveTimeMeter getIdleTimeProbe()
   {
     return _idleTime;
   }
@@ -499,7 +499,7 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Returns the active time probe
    */
-  public ActiveTimeProbe getActiveTimeProbe()
+  public ActiveTimeMeter getActiveTimeProbe()
   {
     return _activeTime;
   }
@@ -580,9 +580,9 @@ public class ConnectionPool extends AbstractManagedObject
 
     _idlePool = new IdlePoolSet(_maxIdleCount);
 
-    _connectionTime = ProbeManager.createActiveTimeProbe("Resin|Database|Connection");
-    _idleTime = ProbeManager.createActiveTimeProbe("Resin|Database|Idle");
-    _activeTime = ProbeManager.createActiveTimeProbe("Resin|Database|Active");
+    _connectionTime = MeterService.createActiveTimeMeter("Resin|Database|Connection");
+    _idleTime = MeterService.createActiveTimeMeter("Resin|Database|Idle");
+    _activeTime = MeterService.createActiveTimeMeter("Resin|Database|Active");
 
     registerSelf();
 

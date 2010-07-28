@@ -26,16 +26,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-public interface ActiveSample {
-  /**
-   * Start the active
-   */
-  public void start();
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
+
+public final class AverageTimeMeter extends AbstractMeter {
+  private final AtomicLong _sum = new AtomicLong();
+  private final AtomicInteger _count = new AtomicInteger();
+
+  public AverageTimeMeter(String name)
+  {
+    super(name);
+  }
+
+  public final void addData(long time)
+  {
+    long oldValue;
+
+    do {
+      oldValue = _sum.get();
+    } while (! _sum.compareAndSet(oldValue, oldValue + time));
+
+    _count.incrementAndGet();
+  }
+  
   /**
-   * End the active
+   * Return the probe's next sample.
    */
-  public void end();
+  public final double sample()
+  {
+    long sum = _sum.getAndSet(0);
+    int count = _count.getAndSet(0);
+
+    if (count != 0)
+      return sum / (double) count;
+    else
+      return 0;
+  }
 }

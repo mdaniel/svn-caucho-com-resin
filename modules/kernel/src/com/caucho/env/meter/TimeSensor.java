@@ -26,17 +26,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.sample;
+package com.caucho.env.meter;
 
-
-abstract public class TotalProbe extends Probe {
-  protected TotalProbe(String name)
-  {
-    super(name);
-  }
-
+public interface TimeSensor {
   /**
-   * Return the total count
+   * Adds a time sample to the probe
    */
-  abstract public double getTotal();
+  public void add(long time);
 }
