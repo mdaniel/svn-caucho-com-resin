@@ -59,31 +59,12 @@ public class MeterService extends AbstractResinService {
 
   public static MeterService getCurrent()
   {
-    return ResinSystem.getCurrentService(MeterService.class);
+    return _manager;
   }
 
   public static MeterService create()
   {
-    ResinSystem system = ResinSystem.getCurrent();
-    
-    if (system == null) {
-      throw new IllegalStateException(L.l("{0} requires an active {1}",
-                                          MeterService.class.getSimpleName(),
-                                          ResinSystem.class.getSimpleName()));
-    }
-    
-    MeterService meterService = system.getService(MeterService.class);
-    
-    if (meterService == null) {
-      meterService = new MeterService();
-      
-      MeterService oldService = system.addServiceIfAbsent(meterService);
-      
-      if (oldService != null)
-        meterService = oldService;
-    }
-    
-    return meterService;
+    return _manager;
   }
 
   public static AbstractMeter getMeter(String name)
