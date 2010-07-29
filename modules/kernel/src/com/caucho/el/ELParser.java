@@ -123,6 +123,7 @@ public class ELParser
     CharBuffer exprString = new CharBuffer();
     Expr expr = null;
     int ch;
+    int exprToken = -1;
 
     while ((ch = read()) >= 0) {
       if (_checkEscape && ch == '\\') {
@@ -139,6 +140,13 @@ public class ELParser
         if (expr != null && _isMethodExpr)
           throw new ELParseException(L.l("Invalid method expression `{0}'",
                                          _string));
+
+        if (exprToken != -1 && exprToken != ch)
+          throw error(L.l("Mixed '#' and '$'. Expected `{0}' at `{1}'",
+                          Character.toString((char)exprToken),
+                          Character.toString((char)ch)));
+
+        exprToken = ch;
 
         int origChar = ch;
 
@@ -513,6 +521,14 @@ public class ELParser
         term = term.createField(field);
         break;
       }
+
+      case Expr.NOT: {
+        if (Expr.NOT == token && term != null && term.isConstant())
+          throw new ELParseException(L.l("invalid expression `{0}'", _string));
+
+        _peek = token;
+        return term;
+      }
         
       default:
         _peek = token;
@@ -658,6 +674,12 @@ public class ELParser
         cb.append((char) ch);
 
       unread();
+
+      if (cb.charAt(cb.length() - 1) == ':') {
+        unread();
+        
+        cb.deleteCharAt(cb.length() - 1);
+      }
 
       String name = cb.toString();
 

@@ -32,6 +32,7 @@ package com.caucho.el;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -52,8 +53,7 @@ public class StaticMethodExpr extends Expr {
   /**
    * Creates a new method expression.
    *
-   * @param expr the expression generating the method to be called
-   * @param args the arguments for the method
+   * @param method - the target method
    */
   public StaticMethodExpr(Method method)
   {
@@ -152,6 +152,8 @@ public class StaticMethodExpr extends Expr {
       }
     } catch (ELException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      throw new ELException(e.getCause());
     } catch (Exception e) {
       throw new ELException(e);
     }

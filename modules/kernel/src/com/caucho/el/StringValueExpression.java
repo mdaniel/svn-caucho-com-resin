@@ -86,7 +86,10 @@ public class StringValueExpression extends AbstractValueExpression
     if (context == null)
       throw new NullPointerException("context can't be null");
 
-    return String.class;
+    if (_expr.isConstant())
+      return String.class;
+    else
+      return _expr.getType(context);
   }
 
   @Override

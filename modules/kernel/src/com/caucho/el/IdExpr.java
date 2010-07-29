@@ -33,6 +33,8 @@ import com.caucho.vfs.WriteStream;
 
 import javax.el.ELContext;
 import javax.el.ELException;
+import javax.el.ELResolver;
+import javax.el.PropertyNotFoundException;
 import java.io.IOException;
 
 /**
@@ -56,6 +58,13 @@ public class IdExpr extends Expr {
   @Override
   public boolean isReadOnly(ELContext env)
   {
+    env.getELResolver().getValue(env, null, _id);
+
+    if (! env.isPropertyResolved())
+      throw new PropertyNotFoundException(L.l(
+        "Object with id `{0}' is not found",
+        _id));
+        
     return false;
   }
 
@@ -83,7 +92,14 @@ public class IdExpr extends Expr {
   public Class getType(ELContext env)
     throws ELException
   {
-    return env.getELResolver().getType(env, null, _id);
+    Class type = env.getELResolver().getType(env, null, _id);
+
+    if (! env.isPropertyResolved())
+      throw new PropertyNotFoundException(L.l(
+        "Object with id `{0}' is not found",
+        _id));
+
+    return type;
   }
 
   /**
@@ -97,7 +113,14 @@ public class IdExpr extends Expr {
   public Object getValue(ELContext env)
     throws ELException
   {
-    return env.getELResolver().getValue(env, null, _id);
+    Object result = env.getELResolver().getValue(env, null, _id);
+
+    if (! env.isPropertyResolved())
+      throw new PropertyNotFoundException(L.l(
+        "Object with id `{0}' is not found",
+        _id));
+
+    return result;
   }
 
   /**
@@ -111,7 +134,16 @@ public class IdExpr extends Expr {
   public void setValue(ELContext env, Object value)
     throws ELException
   {
-    env.getELResolver().setValue(env, null, _id, value);
+    ELResolver resolver = env.getELResolver();
+
+    resolver.getValue(env, null, _id);
+
+    if (env.isPropertyResolved())
+      resolver.setValue(env, null, _id, value);
+    else
+      throw new PropertyNotFoundException(L.l(
+        "Object with id `{0}' is not found",
+        _id));
   }
 
   /**
