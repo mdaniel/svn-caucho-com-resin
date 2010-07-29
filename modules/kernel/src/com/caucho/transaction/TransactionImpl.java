@@ -1175,7 +1175,6 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
   public void handleAlarm(Alarm alarm)
   {
-    System.out.println("ALARM: " + alarm);
     try {
       String msg = L.l("{0}: timed out after {1} seconds.", this, 
                        String.valueOf(getTransactionTimeout()));
