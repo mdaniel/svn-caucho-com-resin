@@ -34,6 +34,7 @@ import com.caucho.util.L10N;
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.PropertyNotFoundException;
+import javax.el.ValueReference;
 import java.util.logging.Logger;
 
 /**
@@ -115,5 +116,11 @@ public class StringValueExpression extends AbstractValueExpression
         _expr.getExpressionString(), context));
 
     return result;
+  }
+
+  @Override
+  public ValueReference getValueReference(ELContext context)
+  {
+    return _expr.getValueReference(context);
   }
 }

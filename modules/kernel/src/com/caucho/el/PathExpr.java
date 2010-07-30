@@ -176,6 +176,12 @@ public class PathExpr extends Expr {
     _expr.setValue(env, value);
   }
 
+  @Override
+  public ValueReference getValueReference(ELContext context)
+  {
+    return _expr.getValueReference(context);
+  }
+
   /**
    * Returns the method info.
    *

@@ -35,6 +35,7 @@ import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.MethodInfo;
 import javax.el.PropertyNotFoundException;
+import javax.el.ValueReference;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -195,6 +196,15 @@ public class ArrayResolverExpr extends Expr
                                               _right.toString(), toString()));
 
     env.getELResolver().setValue(env, aObj, fieldObj, value);
+  }
+
+  @Override
+  public ValueReference getValueReference(ELContext context)
+  {
+    Object base = _left.getValue(context);
+    Object property = _right.getValue(context);
+
+    return new ValueReference(base, property);
   }
 
   /**
