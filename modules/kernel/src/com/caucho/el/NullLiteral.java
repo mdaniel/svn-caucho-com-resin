@@ -66,6 +66,8 @@ public class NullLiteral extends Expr {
   public Object getValue(ELContext env)
     throws ELException
   {
+    env.setPropertyResolved(true);
+    
     return null;
   }
 

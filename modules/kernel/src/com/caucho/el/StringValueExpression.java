@@ -88,8 +88,15 @@ public class StringValueExpression extends AbstractValueExpression
 
     if (_expr.isConstant())
       return String.class;
-    else
-      return _expr.getType(context);
+
+    Class type = _expr.getType(context);
+
+    if (! context.isPropertyResolved())
+      throw new PropertyNotFoundException(L.l(
+        "'{0}' not found in context '{1}'.",
+        _expr.getExpressionString(), context));
+
+    return String.class;
   }
 
   @Override
@@ -100,6 +107,13 @@ public class StringValueExpression extends AbstractValueExpression
     if (context == null)
       throw new NullPointerException("context can't be null");
 
-    return _expr.evalString(context);
+    Object result = _expr.evalString(context);
+
+    if (! context.isPropertyResolved() && (result == null || "".equals(result)))
+      throw new PropertyNotFoundException(L.l(
+        "'{0}' not found in context '{1}'.",
+        _expr.getExpressionString(), context));
+
+    return result;
   }
 }

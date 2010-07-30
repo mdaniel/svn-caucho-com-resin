@@ -62,8 +62,8 @@ public class IdExpr extends Expr {
 
     if (! env.isPropertyResolved())
       throw new PropertyNotFoundException(L.l(
-        "Object with id `{0}' is not found",
-        _id));
+        "'{0}' not found in context '{1}'.",
+        _id, env));
         
     return false;
   }
@@ -92,14 +92,7 @@ public class IdExpr extends Expr {
   public Class getType(ELContext env)
     throws ELException
   {
-    Class type = env.getELResolver().getType(env, null, _id);
-
-    if (! env.isPropertyResolved())
-      throw new PropertyNotFoundException(L.l(
-        "Object with id `{0}' is not found",
-        _id));
-
-    return type;
+    return env.getELResolver().getType(env, null, _id);
   }
 
   /**
@@ -113,14 +106,7 @@ public class IdExpr extends Expr {
   public Object getValue(ELContext env)
     throws ELException
   {
-    Object result = env.getELResolver().getValue(env, null, _id);
-
-    if (! env.isPropertyResolved())
-      throw new PropertyNotFoundException(L.l(
-        "Object with id `{0}' is not found",
-        _id));
-
-    return result;
+    return env.getELResolver().getValue(env, null, _id);
   }
 
   /**
@@ -142,8 +128,8 @@ public class IdExpr extends Expr {
       resolver.setValue(env, null, _id, value);
     else
       throw new PropertyNotFoundException(L.l(
-        "Object with id `{0}' is not found",
-        _id));
+        "'{0}' not found in context '{1}'.",
+        _id, env));
   }
 
   /**
