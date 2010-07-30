@@ -446,6 +446,9 @@ public class ResinSystem
           log.fine(service + " starting");
 
         service.start();
+        
+        if (log.isLoggable(Level.FINER))
+          log.finer(service + " active");
       }
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);

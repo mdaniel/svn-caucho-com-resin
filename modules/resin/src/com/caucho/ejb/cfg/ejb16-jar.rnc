@@ -508,6 +508,14 @@ ejb16_inherited = element inherited {
   string
 }
 
+ejb16_init-on-startup = element init-on-startup {
+  string
+}
+
+ejb16_local-bean = element local-bean {
+  string
+}
+
 ejb16_security-identity = element security-identity {
   ejb16_description*,
 
@@ -537,6 +545,8 @@ ejb16_session = element session {
 
   ejb16_local?,
 
+  ejb16_local-bean?,
+
   ejb16_business-local*,
 
   ejb16_business-remote*,
@@ -565,7 +575,9 @@ ejb16_session = element session {
 
   javaee_security-role-ref*,
 
-  ejb16_security-identity?
+  ejb16_security-identity?,
+
+  ejb16_init-on-startup?
 }
 
 ejb16_timeout-method = element timeout-method {

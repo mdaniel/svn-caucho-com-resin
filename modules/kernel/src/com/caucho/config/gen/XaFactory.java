@@ -87,10 +87,9 @@ public class XaFactory<X>
     
     if (xaManagement != null)
       xaManagementType = xaManagement.value();
-    
 
     TransactionAttribute xa = method.getAnnotation(TransactionAttribute.class);
-    TransactionAttributeType xaType = null;
+    TransactionAttributeType xaType = _classXa;
     
     if (xa != null) {
       xaType = xa.value();

@@ -29,6 +29,10 @@
 
 package com.caucho.config.gen;
 
+import static javax.enterprise.inject.spi.InterceptionType.AROUND_INVOKE;
+import static javax.enterprise.inject.spi.InterceptionType.POST_CONSTRUCT;
+import static javax.enterprise.inject.spi.InterceptionType.PRE_DESTROY;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -40,7 +44,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -52,7 +55,6 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InterceptionType;
-import static javax.enterprise.inject.spi.InterceptionType.*;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;

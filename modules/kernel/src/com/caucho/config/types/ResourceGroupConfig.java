@@ -62,6 +62,8 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
 
   private ArrayList<InjectionTarget> _injectionTargets
     = new ArrayList<InjectionTarget>();
+  
+  private String _lookupName;
 
   public ResourceGroupConfig()
   {
@@ -91,13 +93,26 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
   {
     _description = description;
   }
-
+  
   /**
    * Adds an injection-target
    */
   public void addInjectionTarget(InjectionTarget injectionTarget)
   {
     _injectionTargets.add(injectionTarget);
+  }
+  
+  /**
+   * Sets the lookup-name 
+   */
+  public void setLookupName(String lookupName)
+  {
+    _lookupName = lookupName;
+  }
+  
+  public String getLookupName()
+  {
+    return _lookupName;
   }
 
   /**

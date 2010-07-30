@@ -591,7 +591,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     AnnotatedTypeImpl<X> annType;
     
-    AnnotatedType<?> refType = ReflectionAnnotatedFactory.introspectType(remote);
+    AnnotatedType<T> refType = ReflectionAnnotatedFactory.introspectType(remote);
     
     annType = new AnnotatedTypeImpl(refType);
     
@@ -1100,13 +1100,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
     String objectName = objectClass.getName();
 
-    int modifiers = objectClass.getModifiers();
-
-    /*
-    if (! Modifier.isPublic(modifiers))
-      throw error(L.l("'{0}' must be public", objectName));
-      */
-
     if (! objectClass.isInterface())
       throw error(L.l("'{0}' must be an interface", objectName));
 
@@ -1168,7 +1161,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     method = AnnotatedTypeUtil.findMethod(beanClass, methodName, param);
 
     if (method == null && sourceMethod != null) {
-      throw error(L.l("{0}: '{1}' expected to match {2}.{3}",
+      throw error(L.l("{0}: '{1}' needed on the implementation class to match {2}.{3}",
                       beanClass.getJavaClass().getName(),
                       getFullMethodName(methodName, param),
                       sourceMethod.getJavaMember().getDeclaringClass().getSimpleName(),

@@ -89,7 +89,7 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   private <T> EjbBean<T> createEjbBean(Class<T> ejbClass)
   {
     AnnotatedType<T> rawAnnType
-      = ReflectionAnnotatedFactory.introspectSimpleType(ejbClass);
+      = ReflectionAnnotatedFactory.introspectType(ejbClass);
     
     AnnotatedTypeImpl<T> annType = AnnotatedTypeImpl.create(rawAnnType);
     

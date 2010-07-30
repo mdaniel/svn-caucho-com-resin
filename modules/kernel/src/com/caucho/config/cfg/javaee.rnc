@@ -180,6 +180,10 @@ javaee_local-home = element local-home {
   javaee_fully-qualified-class
 }
 
+javaee_lookup-name = element lookup-name {
+  string
+}
+
 javaee_mapped-name = element mapped-name {
   string
 }
@@ -315,7 +319,9 @@ javaee_res-type = element res-type {
 javaee_resource-Group =
   javaee_mapped-name?,
 
-  javaee_injection-target*
+  javaee_injection-target*,
+  
+  javaee_lookup-name*
 
 javaee_resource-env-ref = element resource-env-ref {
   attribute id { string }?,

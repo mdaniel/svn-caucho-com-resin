@@ -57,7 +57,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   private String _name;
   private Class<?> _type;
   private String _value;
-
+  
   public EnvEntry()
   {
   }
@@ -126,22 +126,31 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   {
     if (_name == null)
       throw new ConfigException(L.l("env-entry needs 'env-entry-name' attribute"));
+    
+    /*
     if (_type == null)
       throw new ConfigException(L.l("env-entry needs 'env-entry-type' attribute"));
+      */
 
     super.init();
 
     // actually, should register for validation
     if (_value == null)
       return;
+
+    Object value = _value;
     
     LinkedHashSet<Type> types = new LinkedHashSet<Type>();
     
-    types.add(_type);
+    if (_type != null)
+      types.add(_type);
+    else
+      types.add(value.getClass());
 
-    Object value = _value;
-
-    if (_type.equals(String.class)) {
+    if (_type == null) {
+      
+    }
+    else if (_type.equals(String.class)) {
     }
     else if (_type.equals(Boolean.class)) {
       value = new Boolean(Expr.toBoolean(_value, null));
@@ -194,7 +203,11 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     
     InjectManager cdiManager = InjectManager.create();
     BeanBuilder<?> builder = cdiManager.createBeanFactory(value.getClass());
-    builder.name(_name);
+    
+    // CDI names can't have '.'
+    if (_name.indexOf('.') < 0)
+      builder.name(_name);
+    
     // server/1516
     builder.qualifier(Names.create(_name));
     builder.qualifier(DefaultLiteral.DEFAULT);

@@ -28,25 +28,14 @@
  */
 package com.caucho.config.gen;
 
-import static javax.ejb.TransactionAttributeType.NOT_SUPPORTED;
-import static javax.ejb.TransactionAttributeType.REQUIRED;
-import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
-import static javax.ejb.TransactionAttributeType.SUPPORTS;
-
 import java.io.IOException;
 import java.util.HashMap;
 
-import javax.ejb.ApplicationException;
-import javax.ejb.SessionSynchronization;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
