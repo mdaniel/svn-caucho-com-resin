@@ -27,18 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.git;
+package com.caucho.env.git;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.WorkDir;
-
-import java.io.*;
-import java.security.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+
+import com.caucho.java.WorkDir;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Tree structure from a jar
@@ -155,9 +158,8 @@ public class GitCommitJar {
 
         if (length < 0) {
           length = 0;
-          int ch;
 
-          while ((ch = zin.read()) >= 0) {
+          while (zin.read() >= 0) {
             length++;
           }
         }
@@ -175,8 +177,7 @@ public class GitCommitJar {
     InputStream is = openFile(sha1);
     long length = 0;
 
-    int ch;
-    while ((ch = is.read()) >= 0) {
+    while (is.read() >= 0) {
       length++;
     }
 
@@ -201,7 +202,7 @@ public class GitCommitJar {
         InputStream is = file.getInputStream(entry);
 
         try {
-          return _commit.writeBlob(is, entry.getSize());
+          return GitCommitTree.writeBlob(is, entry.getSize());
         } finally {
           is.close();
         }

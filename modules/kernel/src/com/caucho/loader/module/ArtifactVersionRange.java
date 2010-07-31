@@ -29,21 +29,11 @@
 
 package com.caucho.loader.module;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-import com.caucho.repository.ModuleRepository;
-import com.caucho.vfs.Path;
-
-import java.util.logging.*;
-import javax.annotation.PostConstruct;
-
 /**
  * Artifact version major.minor.micro-qualifier
  */
 public class ArtifactVersionRange
 {
-  private static final L10N L = new L10N(ArtifactVersionRange.class);
-
   private final ArtifactVersion _min;
   private final boolean _isMinInclusive;
   

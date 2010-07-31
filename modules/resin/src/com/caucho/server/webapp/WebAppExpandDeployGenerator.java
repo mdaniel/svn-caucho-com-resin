@@ -30,12 +30,13 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.repository.AbstractRepository;
+import com.caucho.env.repository.RepositoryService;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.ExpandDeployGenerator;
 import com.caucho.server.deploy.VersionEntry;
-import com.caucho.server.repository.Repository;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.CaseInsensitive;
@@ -97,24 +98,22 @@ public class WebAppExpandDeployGenerator
       log.log(Level.WARNING, e.toString(), e);
     }
 
+    setRepository(RepositoryService.getCurrentRepository());
+
+    String hostName = webAppContainer.getHostName();
+    if ("".equals(hostName))
+      hostName = "default";
+
+    String stage = "default";
+
     Server server = Server.getCurrent();
 
-    if (server != null) {
-      setRepository(server.getRepository());
+    if (server != null)
+      stage = server.getStage();
 
-      String hostName = webAppContainer.getHostName();
-      if ("".equals(hostName))
-        hostName = "default";
+    setRepositoryTag("wars/" + stage + "/" + hostName);
 
-      String stage = "default";
-
-      if (server != null)
-        stage = server.getStage();
-
-      setRepositoryTag("wars/" + stage + "/" + hostName);
-
-      setEntryNamePrefix("/");
-    }
+    setEntryNamePrefix("/");
 
     _admin = new WebAppExpandDeployGeneratorAdmin(this);
   }

@@ -34,7 +34,6 @@ import com.caucho.util.L10N;
 import com.caucho.loader.module.ArtifactDependency;
 import com.caucho.loader.module.ArtifactRepository;
 import com.caucho.loader.module.ArtifactVersionRange;
-import com.caucho.repository.ModuleRepository;
 import com.caucho.vfs.Path;
 
 import java.util.logging.*;

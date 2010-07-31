@@ -80,6 +80,14 @@ public class RootDirectoryService extends AbstractResinService
   {
     return ResinSystem.getCurrentService(RootDirectoryService.class);
   }
+
+  /**
+   * Returns the data directory for current active directory service.
+   */
+  public static Path getCurrentDataDirectory()
+  {
+    return getCurrent().getDataDirectory();
+  }
   
   /**
    * Returns the root directory.

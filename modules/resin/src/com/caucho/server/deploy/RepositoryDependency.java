@@ -29,20 +29,16 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.server.cluster.Server;
-import com.caucho.server.repository.Repository;
-import com.caucho.vfs.PersistentDependency;
-
-import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.env.repository.Repository;
+import com.caucho.env.repository.RepositoryService;
+import com.caucho.vfs.PersistentDependency;
 
 /**
  * Class for keeping track of modifications.
  */
 public class RepositoryDependency implements PersistentDependency {
-  private static final Logger log
-    = Logger.getLogger(RepositoryDependency.class.getName());
-  
   private String _tag;
   private String _sha1;
 
@@ -58,8 +54,7 @@ public class RepositoryDependency implements PersistentDependency {
     _tag = tag;
     _sha1 = sha1;
 
-    if (Server.getCurrent() != null)
-      _repository = Server.getCurrent().getRepository();
+    _repository = RepositoryService.getCurrentRepository();
   }
 
   /**
@@ -67,6 +62,7 @@ public class RepositoryDependency implements PersistentDependency {
    * This protects against the case where multiple computers have
    * misaligned dates and a '<' comparison may fail.
    */
+  @Override
   public boolean isModified()
   {
     String value = getRepository().getTagRoot(_tag);
@@ -81,19 +77,13 @@ public class RepositoryDependency implements PersistentDependency {
 
   private Repository getRepository()
   {
-    if (_repository == null) {
-      if (Server.getCurrent() == null)
-        return null;
-      
-      _repository = Server.getCurrent().getRepository();
-    }
-
     return _repository;
   }
 
   /**
    * Log the reason for modification
    */
+  @Override
   public boolean logModified(Logger log)
   {
     if (! isModified())
@@ -108,6 +98,7 @@ public class RepositoryDependency implements PersistentDependency {
    * Returns true if the test Dependency has the same tag as
    * this dependency.
    */
+  @Override
   public boolean equals(Object obj)
   {
     if (! (obj instanceof RepositoryDependency))
@@ -118,6 +109,7 @@ public class RepositoryDependency implements PersistentDependency {
     return _tag.equals(depend._tag);
   }
 
+  @Override
   public String getJavaCreateString()
   {
     return ("new " + getClass().getName()

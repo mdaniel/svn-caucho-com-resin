@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.repository;
+package com.caucho.env.repository;
 
 import com.caucho.vfs.*;
 
@@ -64,7 +64,7 @@ public class RepositoryTagEntry
   /**
    * Create a new entry, storing the serialized form in the repository.
    */
-  public RepositoryTagEntry(Repository repository,
+  public RepositoryTagEntry(AbstractRepository repository,
                         String tag,
                         String root,
                         String parent)
@@ -92,7 +92,7 @@ public class RepositoryTagEntry
   /**
    * Create a new entry, storing the serialized form in the repository.
    */
-  public RepositoryTagEntry(Repository repository,
+  public RepositoryTagEntry(AbstractRepository repository,
                         String sha1)
     throws IOException
   {

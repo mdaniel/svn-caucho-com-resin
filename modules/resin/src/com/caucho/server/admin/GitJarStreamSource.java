@@ -30,7 +30,8 @@
 package com.caucho.server.admin;
 
 import java.io.*;
-import com.caucho.git.GitCommitJar;
+
+import com.caucho.env.git.GitCommitJar;
 import com.caucho.vfs.StreamSource;
 import com.caucho.util.L10N;
 

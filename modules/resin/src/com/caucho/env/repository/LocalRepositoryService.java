@@ -27,58 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.repository;
+package com.caucho.env.repository;
 
-import java.util.Map;
+import com.caucho.env.git.GitService;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.util.L10N;
 
-import com.caucho.server.cluster.Server;
-
-/**
- * Public API for the deployment
- */
-public class LocalRepositoryManager
+public class LocalRepositoryService
+  extends AbstractResinService
 {
-  private Server _server;
-  private Repository _repository;
+  private static final L10N L = new L10N(LocalRepositoryService.class);
 
-  public LocalRepositoryManager()
+  private FileRepository _fileRepository;
+  
+  public LocalRepositoryService()
   {
-    _server = Server.getCurrent();
-
-    _repository = _server.getLocalRepository();
+    GitService git = GitService.create();
+    
+    if (git == null) {
+      throw new IllegalStateException(L.l("{0} is required for {1}",
+                                          GitService.class.getSimpleName(),
+                                          getClass().getSimpleName()));
+    }
+    
+    _fileRepository = new FileRepository(git);
   }
 
-  /**
-   * Returns the current tag map.
-   */
-  public Map<String,RepositoryTagEntry> getTagMap()
+  public static LocalRepositoryService getCurrent()
   {
-    return _repository.getTagMap();
+    return ResinSystem.getCurrentService(LocalRepositoryService.class);
   }
-
-  //
-  // git management
-  //
-
-  /**
-   * Returns true if the file exists.
-   */
-  public boolean exists(String sha1)
+  
+  public Repository getRepository()
   {
-    return _repository.exists(sha1);
-  }
-
-  /**
-   * Returns true if the file is a blob.
-   */
-  public boolean isBlob(String sha1)
-  {
-    return _repository.isBlob(sha1);
+    return _fileRepository;
   }
   
   @Override
-  public String toString()
+  public void start()
   {
-    return getClass().getSimpleName() + "[" + _repository + "]";
+    _fileRepository.start();
   }
 }

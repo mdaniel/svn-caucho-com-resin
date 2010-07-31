@@ -31,7 +31,6 @@ package com.caucho.server.log;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.AccessLogMXBean;
-import com.caucho.util.L10N;
 
 /**
  * The admin implementation for the access log
@@ -39,8 +38,6 @@ import com.caucho.util.L10N;
 public class AccessLogAdmin extends AbstractManagedObject
   implements AccessLogMXBean
 {
-  private static final L10N L = new L10N(AccessLogAdmin.class);
-
   private final AbstractAccessLog _accessLog;
 
   public AccessLogAdmin(AbstractAccessLog accessLog)

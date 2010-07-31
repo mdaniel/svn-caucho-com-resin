@@ -450,7 +450,7 @@ public class FileServlet extends GenericServlet {
         last = cacheLength - 1;
       }
 
-      if (last <= first)
+      if (last < first)
         break;
 
       if (cacheLength <= last) {
@@ -524,6 +524,8 @@ public class FileServlet extends GenericServlet {
     }
 
     if (hasMore) {
+      os = res.getOutputStream();
+      
       os.write('\r');
       os.write('\n');
       os.write('-');

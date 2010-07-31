@@ -29,10 +29,7 @@
 
 package com.caucho.server.http;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.AsyncListener;
 import javax.servlet.ServletContext;
@@ -54,9 +51,6 @@ import com.caucho.util.L10N;
 public class ConnectionCometController
   implements CometController, CometHandler {
   private static final L10N L = new L10N(ConnectionCometController.class);
-  private static final Logger log = Logger
-      .getLogger(ConnectionCometController.class.getName());
-
   private final AsyncController _cometController;
   
   private HashMap<String, Object> _map;

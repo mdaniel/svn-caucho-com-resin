@@ -47,11 +47,9 @@ import com.caucho.env.service.RootDirectoryService;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentProperties;
-import com.caucho.repository.ModuleRepository;
 import com.caucho.server.admin.Management;
 import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.cache.TempFileManager;
-import com.caucho.server.repository.ModuleRepositoryImpl;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -73,7 +71,6 @@ public class ResinConfig implements EnvironmentBean
 
   protected Management _management;
   
-  private ModuleRepositoryImpl _repository = new ModuleRepositoryImpl();
   private TempFileManager _tempFileManager;
 
   /**
@@ -197,9 +194,9 @@ public class ResinConfig implements EnvironmentBean
     return new TransactionManager(_resin);
   }
 
-  public ModuleRepository createModuleRepository()
+  public Object createModuleRepository()
   {
-    return _repository;
+    return new Object();
   }
 
   public TempFileManager getTempFileManager()

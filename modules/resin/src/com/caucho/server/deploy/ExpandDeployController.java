@@ -39,12 +39,11 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import com.caucho.cloud.deploy.DeployNetworkService;
-import com.caucho.cloud.deploy.DeployTagItem;
 import com.caucho.config.types.FileSetType;
+import com.caucho.env.repository.AbstractRepository;
+import com.caucho.env.repository.Repository;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
-import com.caucho.server.repository.Repository;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
@@ -223,7 +222,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    * Merges with the old controller.
    */
   @Override
-  protected void mergeController(DeployController oldControllerV)
+  protected void mergeController(DeployController<I> oldControllerV)
   {
     super.mergeController(oldControllerV);
 
@@ -632,7 +631,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (o == null || ! getClass().equals(o.getClass()))
       return false;
 
-    DeployController controller = (DeployController) o;
+    DeployController<?> controller = (DeployController<?>) o;
 
     // XXX: s/b getRootDirectory?
     return getId().equals(controller.getId());

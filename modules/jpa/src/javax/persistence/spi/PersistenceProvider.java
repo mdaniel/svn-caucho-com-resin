@@ -39,11 +39,13 @@ public interface PersistenceProvider {
   /**
    * Create an return an EntityManagerFactory for the named unit.
    */
+  @SuppressWarnings("unchecked")
   public EntityManagerFactory createEntityManagerFactory(String name, Map map);
 
   /**
    * Create and return an EntityManagerFactory for the named unit.
    */
+  @SuppressWarnings("unchecked")
   public EntityManagerFactory
     createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map);
   

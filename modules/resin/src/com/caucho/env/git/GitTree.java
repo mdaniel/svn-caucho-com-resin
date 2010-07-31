@@ -27,14 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.git;
+package com.caucho.env.git;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
+import com.caucho.util.Hex;
 
 /**
  * Tree structure

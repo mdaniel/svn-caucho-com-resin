@@ -29,13 +29,7 @@
 
 package com.caucho.loader.module;
 
-import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
-import com.caucho.repository.ModuleRepository;
-import com.caucho.vfs.Path;
-
-import java.util.logging.*;
-import javax.annotation.PostConstruct;
 
 /**
  * Artifact version major.minor.micro-qualifier

@@ -29,13 +29,15 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.webapp.WebApp;
-import com.caucho.vfs.ReadStream;
+import java.io.IOException;
 
 import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
-import java.io.IOException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import com.caucho.server.webapp.WebApp;
+import com.caucho.vfs.ReadStream;
 
 public interface CauchoRequest extends HttpServletRequest {
   public String getPageURI();

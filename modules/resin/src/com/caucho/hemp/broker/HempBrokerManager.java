@@ -29,17 +29,15 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.*;
-import com.caucho.hemp.*;
-import com.caucho.loader.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.host.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
-import java.util.*;
-import java.util.logging.*;
-import java.lang.ref.*;
-import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.bam.Broker;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.host.Host;
 
 
 /**
@@ -49,8 +47,7 @@ public class HempBrokerManager
 {
   private static final Logger log
     = Logger.getLogger(HempBrokerManager.class.getName());
-  private static final L10N L = new L10N(HempBrokerManager.class);
-
+  
   private static EnvironmentLocal<HempBrokerManager> _localBroker
     = new EnvironmentLocal<HempBrokerManager>();
   

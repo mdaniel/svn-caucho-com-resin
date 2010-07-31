@@ -232,7 +232,26 @@ public class Persistence {
         }
       }
       
-      return false;
+      for (PersistenceProvider provider : _providerList) {
+        try {
+          ProviderUtil util = provider.getProviderUtil();
+      
+          if (util != null) {
+            LoadState state = util.isLoadedWithReference(entity, attributeName);
+          
+            if (state == LoadState.LOADED)
+              return true;
+            else if (state == LoadState.NOT_LOADED)
+              return false;
+          }
+        } catch (Exception e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        } catch (AbstractMethodError e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        }
+      }
+      
+      return true;
     }
 
     @Override

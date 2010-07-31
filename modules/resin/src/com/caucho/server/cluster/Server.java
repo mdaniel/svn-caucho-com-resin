@@ -62,9 +62,11 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
+import com.caucho.env.git.GitService;
+import com.caucho.env.repository.AbstractRepository;
+import com.caucho.env.repository.FileRepository;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.ThreadPool;
-import com.caucho.git.GitRepository;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.lifecycle.Lifecycle;
@@ -104,8 +106,6 @@ import com.caucho.server.host.HostContainer;
 import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.log.AccessLog;
-import com.caucho.server.repository.FileRepository;
-import com.caucho.server.repository.Repository;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.ErrorPage;
@@ -114,7 +114,6 @@ import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
-import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
@@ -150,9 +149,6 @@ public class Server extends ProtocolDispatchServer
   private InjectManager _cdiManager;
 
   private BamService _bamService;
-  private GitRepository _git;
-  private Repository _repository;
-  private FileRepository _localRepository;
   private PersistentStoreConfig _persistentStoreConfig;
 
   private DistributedCacheManager _distributedCacheManager;
@@ -399,81 +395,6 @@ public class Server extends ProtocolDispatchServer
   public Path getResinDataDirectory()
   {
     return _resin.getResinDataDirectory();
-  }
-
-  /**
-   * Returns the repository
-   */
-  public GitRepository getGit()
-  {
-    if (! isResinServer())
-      return null;
-
-    synchronized (this) {
-      if (_git == null && _resin != null) {
-        // initialize git repository
-        Path root = _resin.getResinDataDirectory();
-
-        // QA
-        if (root instanceof MemoryPath) {
-          String userName = System.getProperty("user.name");
-
-          root = Vfs.lookup("file:/tmp/" + userName + "/qa");
-        }
-
-        _git = new GitRepository(root.lookup(".git"));
-
-        try {
-          _git.initDb();
-        } catch (Exception e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
-
-      return _git;
-    }
-  }
-
-  /**
-   * Returns the deployment repository
-   */
-  public Repository getRepository()
-  {
-    if (! isResinServer())
-      return null;
-
-    synchronized (this) {
-      if (_repository == null)
-        _repository = createRepository();
-    }
-
-    _repository.init();
-
-    return _repository;
-  }
-
-  /**
-   * Returns the local repository
-   */
-  public FileRepository getLocalRepository()
-  {
-    if (! isResinServer())
-      return null;
-
-    synchronized (this) {
-      if (_localRepository == null)
-        _localRepository = new FileRepository(this);
-    }
-
-    return _localRepository;
-  }
-
-  /**
-   * Creates a new deployment repository
-   */
-  protected Repository createRepository()
-  {
-    return getLocalRepository();
   }
 
   /**
@@ -1706,9 +1627,9 @@ public class Server extends ProtocolDispatchServer
         getSystemStore();
 
       // start the repository
-      Repository repository = getRepository();
-      if (repository != null)
-        repository.start();
+      // AbstractRepository repository = getRepository();
+      // if (repository != null)
+      //   repository.start();
 
       // getCluster().start();
 

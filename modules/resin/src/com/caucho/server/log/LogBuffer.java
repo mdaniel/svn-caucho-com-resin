@@ -29,8 +29,6 @@
 
 package com.caucho.server.log;
 
-import com.caucho.util.FreeList;
-
 /**
  * Holds the HTTP buffers for keepalive reuse.  Because a request needs a
  * large number of buffers, but a keepalive doesn't need those buffers,

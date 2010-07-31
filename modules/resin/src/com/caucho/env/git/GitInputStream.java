@@ -27,20 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.git;
+package com.caucho.env.git;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.util.zip.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Stream with type/length combined with a data stream
  */
 public class GitInputStream extends InputStream {
-  private String _type;
-  private long _length;
   private InputStream _is;
 
   private byte []_buffer;
@@ -50,8 +45,6 @@ public class GitInputStream extends InputStream {
   public GitInputStream(String type, long length, InputStream is)
     throws IOException
   {
-    _type = type;
-    _length = length;
     _is = is;
 
     _buffer = new byte[64];

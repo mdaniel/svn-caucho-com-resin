@@ -29,40 +29,24 @@
 
 package com.caucho.env.jpa;
 
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.net.URL;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.SharedCacheMode;
-import javax.persistence.ValidationMode;
-import javax.persistence.spi.ClassTransformer;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.naming.Jndi;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
 
 /**
  * <persistence-unit> tag in the persistence.xml
  */
 public class ConfigPersistenceUnit {
-  private static final L10N L = new L10N(ConfigPersistenceUnit.class);
-  
   private String _name;
   private String _version;
   private String _description;

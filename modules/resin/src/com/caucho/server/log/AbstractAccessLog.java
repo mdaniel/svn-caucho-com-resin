@@ -29,19 +29,19 @@
 
 package com.caucho.server.log;
 
+import java.io.IOException;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.Environment;
 import com.caucho.vfs.Path;
-
-import javax.annotation.*;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Represents an log of every top-level request to the server.

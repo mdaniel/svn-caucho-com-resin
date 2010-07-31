@@ -31,6 +31,7 @@ package com.caucho.http.security;
 /**
  * Deprecated inteface for the password digest.
  */
+@SuppressWarnings("serial")
 public class XmlAuthenticator
   extends com.caucho.server.security.XmlAuthenticator {
   public XmlAuthenticator()

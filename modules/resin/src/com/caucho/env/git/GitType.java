@@ -27,18 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.repository;
-
-import java.io.InputStream;
+package com.caucho.env.git;
 
 /**
- * The module repository holds the module jars for osgi and ivy.
+ * The possible types for a Git file
  */
-public interface DataSource
-{
-  public String getName();
-  
-  public InputStream openInputStream();
-  
-  public void close();
+public enum GitType {
+  BLOB,
+  TREE,
+  COMMIT,
 }

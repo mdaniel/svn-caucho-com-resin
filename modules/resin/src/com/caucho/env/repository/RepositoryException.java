@@ -27,72 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.git;
+package com.caucho.env.repository;
 
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
 
 /**
- * Commit structure
+ * General deployment exception.
  */
-public class GitCommit {
-  private String _parent;
-  private String _tree;
-  private String _message;
-  
-  private HashMap<String,String> _attributes = new HashMap<String,String>();
-
-  public String getMessage()
+@SuppressWarnings("serial")
+public class RepositoryException extends RuntimeException
+{
+  public RepositoryException()
   {
-    return _message;
-  }
-
-  public void setMessage(String message)
-  {
-    _message = message;
-  }
-
-  public String getParent()
-  {
-    return _parent;
-  }
-
-  public void setParent(String parent)
-  {
-    _parent = parent;
-  }
-
-  public String getTree()
-  {
-    return _tree;
-  }
-
-  public void setTree(String tree)
-  {
-    _tree = tree;
-  }
-
-  public void put(String key, String value)
-  {
-    _attributes.put(key, value);
-  }
-
-  public String get(String key)
-  {
-    return _attributes.get(key);
-  }
-
-  public HashMap<String,String> getAttributeMap()
-  {
-    return _attributes;
   }
   
-  @Override
-  public String toString()
+  public RepositoryException(String msg)
   {
-    return (getClass().getSimpleName() + "[tree=" + _tree + "]");
+    super(msg);
+  }
+  
+  public RepositoryException(String msg, Throwable cause)
+  {
+    super(msg, cause);
+  }
+  
+  public RepositoryException(Throwable cause)
+  {
+    super(cause);
   }
 }

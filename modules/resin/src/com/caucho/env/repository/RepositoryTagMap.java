@@ -27,9 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.repository;
+package com.caucho.env.repository;
 
-import com.caucho.git.*;
+import com.caucho.env.git.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
@@ -63,7 +63,7 @@ public class RepositoryTagMap
     _tree = null;
   }
 
-  public RepositoryTagMap(Repository repository,
+  public RepositoryTagMap(AbstractRepository repository,
                           String commitHash)
     throws IOException
   {
@@ -81,7 +81,7 @@ public class RepositoryTagMap
     _tagMap = readTagMap(repository, _tree.getHash("tags"));
   }
 
-  public RepositoryTagMap(Repository repository,
+  public RepositoryTagMap(AbstractRepository repository,
                       RepositoryTagMap parent,
                       Map<String,RepositoryTagEntry> tagMap)
     throws IOException
@@ -162,7 +162,7 @@ public class RepositoryTagMap
     return _tagMap;
   }
 
-  private Map<String,RepositoryTagEntry> readTagMap(Repository repository,
+  private Map<String,RepositoryTagEntry> readTagMap(AbstractRepository repository,
                                                 String sha1)
     throws IOException
   {

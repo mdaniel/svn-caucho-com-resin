@@ -32,14 +32,14 @@ package com.caucho.server.deploy;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
+import com.caucho.env.repository.AbstractRepository;
+import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
-import com.caucho.server.repository.Repository;
-import com.caucho.server.repository.RepositoryTagEntry;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;
 

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.git;
+package com.caucho.env.git;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;

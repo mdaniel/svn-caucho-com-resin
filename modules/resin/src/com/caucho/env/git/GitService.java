@@ -27,8 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.git;
+package com.caucho.env.git;
 
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.RootDirectoryService;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -41,27 +44,50 @@ import java.util.zip.*;
 /**
  * Top-level class for a repository
  */
-public class GitRepository {
-  private static final L10N L = new L10N(GitRepository.class);
+public class GitService extends AbstractResinService {
+  private static final L10N L = new L10N(GitService.class);
   private static final Logger log
-    = Logger.getLogger(GitRepository.class.getName());
-  
-  private static final int OBJ_NONE = 0;
-  private static final int OBJ_COMMIT = 1;
-  private static final int OBJ_TREE = 2;
-  private static final int OBJ_BLOB = 3;
-  private static final int OBJ_TAG = 4;
+    = Logger.getLogger(GitService.class.getName());
   
   private Path _root;
 
-  public GitRepository(Path root)
+  public GitService()
+  {
+  }
+  public GitService(Path root)
   {
     _root = root;
   }
+  
+  public static GitService getCurrent()
+  {
+    return ResinSystem.getCurrentService(GitService.class);
+  }
+  
+  public static GitService create()
+  {
+    ResinSystem resinSystem = ResinSystem.getCurrent();
+    
+    GitService git = resinSystem.getService(GitService.class);
+    
+    if (git == null) {
+      git = new GitService();
+      
+      resinSystem.addServiceIfAbsent(git);
+      
+      git = resinSystem.getService(GitService.class);
+    }
+    
+    return git;
+  }
 
-  public void initDb()
+  @Override
+  public void start()
     throws IOException
   {
+    if (_root == null)
+    _root = RootDirectoryService.getCurrentDataDirectory();
+    
     if (_root.lookup("HEAD").canRead())
       return;
 
@@ -621,8 +647,7 @@ public class GitRepository {
       InflaterInputStream zin = new InflaterInputStream(is);
       DigestInputStream din = new DigestInputStream(zin, md);
 
-      int ch;
-      while ((ch = din.read()) >= 0) {
+      while (din.read() >= 0) {
       }
 
       din.close();

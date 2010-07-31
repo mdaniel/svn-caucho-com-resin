@@ -57,8 +57,6 @@ public class HmtpClient extends SimpleActorClient {
     = Logger.getLogger(HmtpClient.class.getName());
 
   private String _url;
-  private boolean _isEncryptPassword = true;
-  
   private String _jid;
 
   private WebSocketClient _webSocketClient;
@@ -91,7 +89,6 @@ public class HmtpClient extends SimpleActorClient {
 
   public void setEncryptPassword(boolean isEncrypt)
   {
-    _isEncryptPassword = isEncrypt;
   }
 
   public void connect(String user, String password)

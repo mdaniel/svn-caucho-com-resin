@@ -29,31 +29,31 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.cloud.deploy.DeployNetworkService;
-import com.caucho.cloud.deploy.DeployUpdateListener;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.Period;
-import com.caucho.loader.Environment;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.Crc64;
-import com.caucho.util.L10N;
-import com.caucho.util.WeakAlarm;
-import com.caucho.server.repository.Repository;
-import com.caucho.server.repository.RepositoryTagEntry;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.Path;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.deploy.DeployUpdateListener;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.Period;
+import com.caucho.env.repository.Repository;
+import com.caucho.env.repository.RepositoryTagEntry;
+import com.caucho.loader.Environment;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
+import com.caucho.util.WeakAlarm;
+import com.caucho.vfs.Path;
 
 /**
  * The generator for the deploy
@@ -93,9 +93,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
   private TreeSet<String> _controllerNames = new TreeSet<String>();
   
-  private TreeMap<String,ArrayList<String>> _versionMap
-    = new TreeMap<String,ArrayList<String>>();
-
   private FileSetType _expandCleanupFileSet;
 
   private Alarm _alarm;
@@ -768,8 +765,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
     String []entryList = archiveDirectory.list();
 
-    // collect all the new entrys
-    loop:
+    // collect all the new entries
+    // loop:
     for (int i = 0; i < entryList.length; i++) {
       String archiveName = entryList[i];
 
@@ -813,7 +810,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     String []entryExpandList = expandDirectory.list();
 
     // collect all the new war expand directories
-    loop:
+    //loop:
     for (int i = 0; i < entryExpandList.length; i++) {
       String pathName = entryExpandList[i];
 
@@ -911,7 +908,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
         String baseName = name;
 
         int p = baseName.lastIndexOf('-');
-        int ch;
         if (p > 0 && p + 1 < baseName.length()
             && '0' <= baseName.charAt(p + 1)
             && baseName.charAt(p + 1) <= '9') {
@@ -1034,21 +1030,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       return archiveName.substring(0, archiveName.length() - getExtension().length());
   }
 
-  /**
-   * returns a version's base name.
-   */
-  private String versionedNameToBaseName(String name)
-  {
-    int p = name.lastIndexOf('-');
-    int ch;
-    
-    if (p > 0 && p + 1 < name.length()
-        && '0' <= (ch = name.charAt(p + 1)) && ch <= '9')
-      return name.substring(0, p);
-    else
-      return name;
-  }
-
   public String[] getNames()
   {
     String[] names = new String[_controllerNames.size()];
@@ -1086,7 +1067,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   {
     update();
     
-    DeployController controller
+    DeployController<?> controller
       = getDeployContainer().findController(nameToEntryName(name));
 
     if (controller == null) {
@@ -1105,7 +1086,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   public boolean start(String name)
   {
-    DeployController controller
+    DeployController<?> controller
       = getDeployContainer().findController(nameToEntryName(name));
 
     if (controller == null) {
@@ -1128,7 +1109,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   public Throwable getConfigException(String name)
   {
-    DeployController controller = getDeployContainer().findController(nameToEntryName(name));
+    DeployController<?> controller
+      = getDeployContainer().findController(nameToEntryName(name));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
@@ -1147,7 +1129,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   public boolean stop(String name)
   {
-    DeployController controller = getDeployContainer().findController(nameToEntryName(name));
+    DeployController<?> controller
+      = getDeployContainer().findController(nameToEntryName(name));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
@@ -1168,7 +1151,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   public boolean undeploy(String name)
   {
-    DeployController controller
+    DeployController<?> controller
       = getDeployContainer().findController(nameToEntryName(name));
 
     if (controller == null) {
@@ -1260,7 +1243,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     if (o == null || ! getClass().equals(o.getClass()))
       return false;
 
-    ExpandDeployGenerator deploy = (ExpandDeployGenerator) o;
+    ExpandDeployGenerator<?> deploy = (ExpandDeployGenerator<?>) o;
 
     Path expandDirectory = getExpandDirectory();
     Path deployExpandDirectory = deploy.getExpandDirectory();

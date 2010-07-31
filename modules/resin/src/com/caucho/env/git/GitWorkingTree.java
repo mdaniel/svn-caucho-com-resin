@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.git;
+package com.caucho.env.git;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -243,13 +243,6 @@ public class GitWorkingTree {
     _treeMap.put(name, entry);
 
     return subTree;
-  }
-
-  private void addDir(String name, GitWorkingTree tree)
-  {
-    Entry entry = new Entry(name, tree);
-
-    _treeMap.put(name, entry);
   }
 
   public void toData(OutputStream out)

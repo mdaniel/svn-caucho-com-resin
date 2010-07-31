@@ -29,18 +29,13 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.*;
-import com.caucho.hemp.*;
-import com.caucho.loader.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.host.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
-import java.util.*;
-import java.util.logging.*;
-import java.lang.ref.*;
-import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.caucho.bam.ActorStream;
+import com.caucho.server.cluster.Server;
 
 /**
  * Domain manager for foreign domains
@@ -49,8 +44,6 @@ public class HempDomainManager extends DomainManager
 {
   private static final Logger log
     = Logger.getLogger(HempDomainManager.class.getName());
-  private static final L10N L = new L10N(HempDomainManager.class);
-  
   // domains
   private final HashMap<String,WeakReference<ActorStream>> _domainMap
     = new HashMap<String,WeakReference<ActorStream>>();
@@ -103,19 +96,6 @@ public class HempDomainManager extends DomainManager
     if (server == null)
       return null;
     
-    Host host = server.getHost(name, 5222);
-
-    /*
-    if (host == null)
-      return null;
-
-    ActorStream domain = host.getBamDomain();
-
-    synchronized (_domainMap) {
-      _domainMap.put(name, new WeakReference<ActorStream>(domain));
-    }
-    */
-
     return null;
   }
   

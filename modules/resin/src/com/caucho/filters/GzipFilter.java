@@ -51,7 +51,6 @@ public class GzipFilter implements Filter {
   private boolean _noCache = false;
 
   private HashMap<String,AllowEntry> _contentTypeMap;
-  private boolean _hasAllow;
   private boolean _hasDeny;
 
   /**
@@ -86,7 +85,6 @@ public class GzipFilter implements Filter {
     if (_contentTypeMap == null)
       _contentTypeMap = new HashMap<String,AllowEntry>();
 
-    _hasAllow = true;
     _contentTypeMap.put(type, ALLOW);
   }
 

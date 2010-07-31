@@ -45,7 +45,6 @@ import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.network.listen.ProtocolConnection;
@@ -1508,11 +1507,6 @@ public abstract class AbstractHttpRequest
 
       ServletContext webApp = asyncContext.getDispatchContext();
       String url = asyncContext.getDispatchPath();
-
-      HttpServletRequest asyncRequest = getRequestFacade();
-      HttpServletResponse asyncResponse = getResponseFacade();
-
-      // asyncContext.onStart(webApp, asyncRequest, asyncResponse);
 
       if (url != null) {
         if (webApp == null)

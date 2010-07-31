@@ -28,19 +28,12 @@
 
 package com.caucho.filters;
 
-import com.caucho.server.http.ToByteResponseStream;
-import com.caucho.util.L10N;
-
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Logger;
+
+import com.caucho.server.http.ToByteResponseStream;
 
 public class FilterWrapperResponseStream extends ToByteResponseStream {
-  private static final Logger log
-    = Logger.getLogger(FilterWrapperResponseStream.class.getName());
-  
-  static final L10N L = new L10N(FilterWrapperResponseStream.class);
-
   private CauchoResponseWrapper _response;
   
   private OutputStream _os;

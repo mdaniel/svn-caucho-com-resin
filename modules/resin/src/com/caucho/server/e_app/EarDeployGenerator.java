@@ -30,6 +30,7 @@
 package com.caucho.server.e_app;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.repository.RepositoryService;
 import com.caucho.inject.Module;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
@@ -68,15 +69,13 @@ public class EarDeployGenerator
       throw new RuntimeException(e);
     }
 
-    if (Server.getCurrent() != null) {
-      setRepository(Server.getCurrent().getRepository());
+    setRepository(RepositoryService.getCurrentRepository());
       
-      String hostName = parentContainer.getHostName();
-      if ("".equals(hostName))
-        hostName = "default";
+    String hostName = parentContainer.getHostName();
+    if ("".equals(hostName))
+      hostName = "default";
     
-      setRepositoryTag("ears/default/" + hostName);
-    }
+    setRepositoryTag("ears/default/" + hostName);
 
     _parentContainer = parentContainer;
 

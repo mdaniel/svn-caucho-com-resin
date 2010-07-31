@@ -29,7 +29,7 @@
 package com.caucho.server.admin;
 
 import com.caucho.bam.*;
-import com.caucho.git.*;
+import com.caucho.env.git.*;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.resin.*;
 import com.caucho.util.L10N;

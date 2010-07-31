@@ -29,6 +29,17 @@
 
 package com.caucho.filters;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.Locale;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.ResponseWrapper;
@@ -36,26 +47,11 @@ import com.caucho.server.http.ResponseWriter;
 import com.caucho.server.http.ServletOutputStreamImpl;
 import com.caucho.vfs.FlushBuffer;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Collection;
-import java.util.logging.Logger;
-
 /**
  * Response wrapper that can take advantage of Resin's streams.
  */
 public class CauchoResponseWrapper extends ResponseWrapper
   implements CauchoResponse {
-  private static final Logger log
-    = Logger.getLogger(CauchoResponseWrapper.class.getName());
-
   private FlushBuffer _flushBuffer;
   
   private final FilterWrapperResponseStream _originalStream;
@@ -63,8 +59,6 @@ public class CauchoResponseWrapper extends ResponseWrapper
 
   private ResponseWriter _writer;
   private ServletOutputStreamImpl _os;
-  
-  private boolean _hasStream;
   
   private boolean _hasError;
 
@@ -94,7 +88,6 @@ public class CauchoResponseWrapper extends ResponseWrapper
     _os.init(_originalStream);
     _writer.init(_originalStream);
 
-    _hasStream = false;
     _hasError = false;
 
     _originalStream.init(this);

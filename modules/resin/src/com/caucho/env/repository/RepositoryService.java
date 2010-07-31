@@ -27,48 +27,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.repository;
+package com.caucho.env.repository;
 
-import java.io.InputStream;
-
-import com.caucho.repository.DataSource;
-import com.caucho.server.cache.TempFileInode;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.util.L10N;
 
 /**
- * The module repository holds the module jars for osgi and ivy.
+ * Public API for the persistent .git repository
  */
-public class InodeDataSource implements DataSource
+public class RepositoryService extends AbstractResinService
 {
-  private String _name;
-  private TempFileInode _inode;
+  private static final L10N L = new L10N(RepositoryService.class);
+  
+  private Repository _repository;
 
-  InodeDataSource(String name, TempFileInode inode)
+  public RepositoryService(Repository repository)
   {
-    _name = name;
-    _inode = inode;
+    _repository = repository;
+  }
+  
+  public static RepositoryService getCurrent()
+  {
+    return ResinSystem.getCurrentService(RepositoryService.class);
+  }
+  
+  public static Repository getCurrentRepository()
+  {
+    RepositoryService service = getCurrent();
+    
+    if (service == null)
+      throw new IllegalStateException(L.l("RepositoryService is not available in this context"));
+    
+    return service.getRepository();
+  }
+  
+  public Repository getRepository()
+  {
+    return _repository;
   }
 
-  public String getName()
+  @Override
+  public String toString()
   {
-    return _name;
-  }
-
-  public InputStream openInputStream()
-  {
-    return _inode.openInputStream();
-  }
-
-  public void close()
-  {
-    TempFileInode inode = _inode;
-    _inode = null;
-
-    if (inode != null)
-      inode.free();
-  }
-
-  protected void finalize()
-  {
-    close();
+    return getClass().getSimpleName() + "[" + _repository + "]";
   }
 }

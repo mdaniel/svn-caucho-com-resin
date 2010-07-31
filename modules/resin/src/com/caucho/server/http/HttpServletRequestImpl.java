@@ -71,9 +71,6 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.JanusContext;
-import com.caucho.servlet.JanusListener;
-import com.caucho.servlet.JanusServletRequest;
 import com.caucho.servlet.WebSocketContext;
 import com.caucho.servlet.WebSocketListener;
 import com.caucho.servlet.WebSocketServletRequest;
@@ -2203,109 +2200,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     }
   }
 
-  /*
-  static class DuplexContextImpl implements SocketLinkDuplexListener {
-    private final HttpServletRequestImpl _request;
-    private final HttpServletResponseImpl _response;
-
-    private final SocketLinkDuplexListener _listener;
-
-    private SocketLinkDuplexController _controller;
-
-    DuplexContextImpl(HttpServletRequestImpl request,
-                      HttpServletResponseImpl response,
-                      SocketLinkDuplexListener listener)
-    {
-      _request = request;
-      _response = response;
-      _listener = listener;
-    }
-
-    public void setController(SocketLinkDuplexController controller)
-    {
-      _controller = controller;
-    }
-
-    public void setTimeout(long timeout)
-    {
-      _controller.setIdleTimeMax(timeout);
-    }
-
-    public long getTimeout()
-    {
-      return _controller.getIdleTimeMax();
-    }
-
-    public ServletRequest getRequest()
-    {
-      return _request;
-    }
-
-    public ServletResponse getResponse()
-    {
-      return _response;
-    }
-
-    public void complete()
-    {
-      _controller.complete();
-    }
-
-    public void onRead(SocketLinkDuplexController duplex)
-      throws IOException
-    {
-      do {
-        _listener.onMessage(this);
-      } while (_request.getAvailable() > 0);
-    }
-
-    public void onComplete(SocketLinkDuplexController duplex)
-      throws IOException
-    {
-      _listener.onComplete(this);
-    }
-
-    public void onTimeout(SocketLinkDuplexController duplex)
-      throws IOException
-    {
-      _listener.onTimeout(this);
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _listener + "]";
-    }
-
-    @Override
-    public InputStream getInputStream() throws IOException
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override
-    public OutputStream getOutputStream() throws IOException
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override
-    public void onStart(SocketLinkDuplexController context) throws IOException
-    {
-      // TODO Auto-generated method stub
-      
-    }
-  }
-  */
-
   static class WebSocketContextImpl
     implements WebSocketContext, SocketLinkDuplexListener
   {
     private final HttpServletRequestImpl _request;
-    private final HttpServletResponseImpl _response;
-
     private final WebSocketListener _listener;
 
     private SocketLinkDuplexController _controller;
@@ -2315,7 +2213,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
                          WebSocketListener listener)
     {
       _request = request;
-      _response = response;
       _listener = listener;
     }
 

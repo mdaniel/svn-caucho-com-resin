@@ -27,39 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.repository;
+package com.caucho.env.repository;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.caucho.git.GitCommit;
-import com.caucho.git.GitObjectStream;
-import com.caucho.git.GitRepository;
-import com.caucho.git.GitTree;
-import com.caucho.git.GitType;
-import com.caucho.server.cluster.Server;
+import com.caucho.env.git.GitCommit;
+import com.caucho.env.git.GitObjectStream;
+import com.caucho.env.git.GitService;
+import com.caucho.env.git.GitTree;
+import com.caucho.env.git.GitType;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
-public class FileRepository extends Repository
+public class FileRepository extends AbstractRepository
 {
   private static final L10N L = new L10N(FileRepository.class);
 
-  private GitRepository _git;
+  private GitService _git;
   
-  public FileRepository(Server server)
+  public FileRepository(GitService git)
   {
-    super(server);
+    _git = git;
     
-    _git = server.getGit();
+    if (_git == null)
+      throw new IllegalStateException(L.l("GitService is required for FileRepository"));
   }
 
   /**
    * Updates the repository
    */
+  @Override
   public void update()
   {
     update(getTag(getRepositoryTag()));
@@ -79,6 +80,7 @@ public class FileRepository extends Repository
    * @param message user's message for the commit
    * @param version symbolic version name for the commit
    */
+  @Override
   public boolean setTag(String tag,
                         String root,
                         String user,
@@ -107,6 +109,7 @@ public class FileRepository extends Repository
    * @param message user's message for the commit
    * @param version symbolic version name for the commit
    */
+  @Override
   public boolean removeTag(String tag,
                            String user,
                            String server,
@@ -146,7 +149,8 @@ public class FileRepository extends Repository
   /**
    * Returns the hash stored in the git tag
    */
-  protected String getTag(String tag)
+  @Override
+  public String getTag(String tag)
   {
     return _git.getTag(tag);
   }
@@ -154,7 +158,8 @@ public class FileRepository extends Repository
   /**
    * Sets the hash stored in the git tag
    */
-  protected void setTag(String tag, String sha1)
+  @Override
+  public void setTag(String tag, String sha1)
   {
     _git.writeTag(tag, sha1);
   }
@@ -162,6 +167,7 @@ public class FileRepository extends Repository
   /**
    * Returns true if the file exists.
    */
+  @Override
   public boolean exists(String sha1)
   {
     return _git.contains(sha1);
@@ -170,6 +176,7 @@ public class FileRepository extends Repository
   /**
    * Returns true if the file is a blob.
    */
+  @Override
   public GitType getType(String sha1)
   {
     try {
@@ -183,6 +190,7 @@ public class FileRepository extends Repository
    * Adds a path to the repository.  If the path is a directory or a
    * jar scheme, adds the contents recursively.
    */
+  @Override
   public String addPath(Path path)
   {
     try {
@@ -196,6 +204,7 @@ public class FileRepository extends Repository
    * Adds a path to the repository.  If the path is a directory or a
    * jar scheme, adds the contents recursively.
    */
+  @Override
   public String addInputStream(InputStream is)
   {
     try {
@@ -221,6 +230,7 @@ public class FileRepository extends Repository
   /**
    * Opens a stream to a blob
    */
+  @Override
   public InputStream openBlob(String sha1)
     throws IOException
   {
@@ -230,6 +240,7 @@ public class FileRepository extends Repository
   /**
    * Opens a stream to the raw git file.
    */
+  @Override
   public InputStream openRawGitFile(String sha1)
     throws IOException
   {
@@ -239,6 +250,7 @@ public class FileRepository extends Repository
   /**
    * Reads a git tree from the repository
    */
+  @Override
   public GitTree readTree(String sha1)
     throws IOException
   {
@@ -248,6 +260,7 @@ public class FileRepository extends Repository
   /**
    * Adds a git tree to the repository
    */
+  @Override
   public String addTree(GitTree tree)
     throws IOException
   {
@@ -257,6 +270,7 @@ public class FileRepository extends Repository
   /**
    * Reads a git commit from the repository
    */
+  @Override
   public GitCommit readCommit(String sha1)
     throws IOException
   {
@@ -266,6 +280,7 @@ public class FileRepository extends Repository
   /**
    * Adds a git commit to the repository
    */
+  @Override
   public String addCommit(GitCommit commit)
     throws IOException
   {
@@ -278,6 +293,7 @@ public class FileRepository extends Repository
    * @param sha1 the file hash
    * @param is the raw contents for the new file
    */
+  @Override
   public void writeRawGitFile(String sha1, InputStream is)
     throws IOException
   {
@@ -287,6 +303,7 @@ public class FileRepository extends Repository
   /**
    * Writes the contents to a stream.
    */
+  @Override
   public void writeToStream(OutputStream os, String sha1)
   {
     GitObjectStream is = null;
@@ -321,6 +338,7 @@ public class FileRepository extends Repository
   /**
    * Expands the repository to the filesystem.
    */
+  @Override
   public void expandToPath(Path path, String rootSha1)
   {
     try {

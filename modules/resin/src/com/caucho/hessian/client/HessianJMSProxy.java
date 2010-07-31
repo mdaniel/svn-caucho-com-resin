@@ -114,7 +114,7 @@ public class HessianJMSProxy implements InvocationHandler {
     throws Throwable
   {
     String methodName = method.getName();
-    Class []params = method.getParameterTypes();
+    Class<?> []params = method.getParameterTypes();
 
     // equals and hashCode are special cased
     if (methodName.equals("equals") &&

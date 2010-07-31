@@ -11,6 +11,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.10 - snapshot">
+<ul>
+<li>file: range parsing issue with firefox and FileServlet (#4149, rep by Fred Howell)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.9 - 2010-07-26">
 <ul>
 <li>remoting: add userName and password to HessianClient (#4130, rep by Jeff Schnitzer)</li>

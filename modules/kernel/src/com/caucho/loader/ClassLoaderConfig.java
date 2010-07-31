@@ -172,23 +172,6 @@ public class ClassLoaderConfig {
   */
 
   /**
-   * Adds an osig class loader.
-   */
-  /*
-  public void addOsgiLoader(OsgiLoader loader)
-  {
-    _classLoader.addLoader(loader, _index++);
-  }
-  */
-
-  /**
-   * Adds a project-loader, to be loaded from the repository
-   */
-  public void addProjectLoader(ProjectLoaderConfig config)
-  {
-  }
-
-  /**
    * Adds a tree loader.
    */
   public TreeLoader createTreeLoader()

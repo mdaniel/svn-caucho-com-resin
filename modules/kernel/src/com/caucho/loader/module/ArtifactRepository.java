@@ -29,22 +29,18 @@
 
 package com.caucho.loader.module;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * A jar artifact in the repository
  */
 public class ArtifactRepository
 {
-  private static final L10N L = new L10N(ArtifactRepository.class);
-
   private static final EnvironmentLocal<ArtifactRepository> _local
     = new EnvironmentLocal<ArtifactRepository>();
 

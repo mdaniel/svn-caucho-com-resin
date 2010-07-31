@@ -27,22 +27,68 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.git;
+package com.caucho.env.git;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.security.*;
-import java.util.*;
-import java.util.logging.*;
-import java.util.zip.*;
+import java.util.HashMap;
 
 /**
- * The possible types for a Git file
+ * Commit structure
  */
-public enum GitType {
-  BLOB,
-  TREE,
-  COMMIT,
+public class GitCommit {
+  private String _parent;
+  private String _tree;
+  private String _message;
+  
+  private HashMap<String,String> _attributes = new HashMap<String,String>();
+
+  public String getMessage()
+  {
+    return _message;
+  }
+
+  public void setMessage(String message)
+  {
+    _message = message;
+  }
+
+  public String getParent()
+  {
+    return _parent;
+  }
+
+  public void setParent(String parent)
+  {
+    _parent = parent;
+  }
+
+  public String getTree()
+  {
+    return _tree;
+  }
+
+  public void setTree(String tree)
+  {
+    _tree = tree;
+  }
+
+  public void put(String key, String value)
+  {
+    _attributes.put(key, value);
+  }
+
+  public String get(String key)
+  {
+    return _attributes.get(key);
+  }
+
+  public HashMap<String,String> getAttributeMap()
+  {
+    return _attributes;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName() + "[tree=" + _tree + "]");
+  }
 }

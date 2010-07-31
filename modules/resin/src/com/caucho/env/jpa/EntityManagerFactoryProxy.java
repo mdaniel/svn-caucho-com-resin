@@ -29,22 +29,18 @@
 
 package com.caucho.env.jpa;
 
-import com.caucho.amber.*;
-import com.caucho.amber.manager.AmberContainer;
-import com.caucho.config.Names;
-import com.caucho.config.inject.HandleAware;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.jca.*;
-import com.caucho.util.L10N;
+import java.io.Serializable;
+import java.util.Map;
 
-import javax.persistence.*;
+import javax.persistence.Cache;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
-import javax.transaction.*;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.logging.Logger;
+import com.caucho.config.Names;
+import com.caucho.config.inject.InjectManager;
 
 /**
  * The @PersistenceUnit, container managed entity manager proxy, used

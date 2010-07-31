@@ -80,14 +80,12 @@ public class XsltFilter implements Filter {
   private static final Logger log
     = Logger.getLogger(XsltFilter.class.getName());
   
-  private String _mimeType = "x-application/xslt";
   private MergePath _stylePath;
   private ServletContext _application;
   private boolean _isConditional = true;
 
   public void setMimeType(String mimeType)
   {
-    _mimeType = mimeType;
   }
 
   public void setUnconditional(boolean isUnconditional)
@@ -335,9 +333,9 @@ public class XsltFilter implements Filter {
           encoding = "ISO-8859-1";
         transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 
-        ArrayList params = null;;
+        ArrayList<?> params = null;;
         if (cauchoTransformer != null) {
-          params = (ArrayList) cauchoTransformer.getProperty(CauchoStylesheet.GLOBAL_PARAM);
+          params = (ArrayList<?>) cauchoTransformer.getProperty(CauchoStylesheet.GLOBAL_PARAM);
         }
 
         for (int i = 0; params != null && i < params.size(); i++) {
