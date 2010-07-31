@@ -235,7 +235,7 @@ public class BeanELResolver extends ELResolver {
                        Object property,
                        Object value)
   {
-    if (base == null)
+    if (base == null || property == null)
       return;
 
     String fieldName = String.valueOf(property);
