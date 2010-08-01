@@ -37,6 +37,8 @@ import com.caucho.util.L10N;
 public class LocalRepositoryService
   extends AbstractResinService
 {
+  public static final int START_PRIORITY = GitService.START_PRIORITY + 1;
+  
   private static final L10N L = new L10N(LocalRepositoryService.class);
 
   private FileRepository _fileRepository;

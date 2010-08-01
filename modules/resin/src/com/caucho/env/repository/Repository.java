@@ -39,126 +39,99 @@ import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
 import com.caucho.vfs.Path;
 
+/**
+ * The Repository is a collection of archives organized by a tag map. Each
+ * archive is equivalent to a .jar file or a directory, consisting of
+ * the binary data Blobs, the directory name Tree, and a .git Commit item
+ * to track versions.
+ * 
+ * The tag map is a map of strings to tag entries, where the entry is
+ * the sha1 of the .git Commit root of the archive, and metadata.
+ */
 public interface Repository
 {
-  /**
-   * Updates the repository
-   */
-  public void update();
-  /**
-   * Returns the tag map.
-   */
-  public Map<String,RepositoryTagEntry> getTagMap();
-
-  /**
-   * Returns the tag root.
-   */
-  public String getTagRoot(String tag);
-
-  /**
-   * Adds a tag
-   *
-   * @param tag the symbolic tag for the repository
-   * @param sha1 the root for the tag's content
-   * @param user the user adding a tag.
-   * @param server the server adding a tag.
-   * @param message user's message for the commit
-   * @param version symbolic version name for the commit
-   */
-  public boolean setTag(String tag,
-                        String sha1,
-                        String user,
-                        String server,
-                        String message,
-                        String version);
-  
-  /**
-   * Returns the hash stored in the git tag
-   */
-  public String getTag(String tag);
-  
-  /**
-   * Sets the hash stored in the git tag
-   */
-  public void setTag(String tag, String sha1);
-
-  /**
-   * Removes a tag
-   *
-   * @param tag the symbolic tag for the repository
-   * @param user the user adding a tag.
-   * @param server the server adding a tag.
-   * @param message user's message for the commit
-   */
-  public boolean removeTag(String tag,
-                           String user,
-                           String server,
-                           String message);
-
   //
-  // git file management
+  // The repository root hash
+  //
+  
+  /**
+   * The Commit .git hash for the repository itself. The hash points
+   * to a .git Commit entry for the current repository version.
+   * 
+   * @return the hash of the .git Commit for the current repository root.
+   */
+  public String getRepositoryCommitHash();
+  
+  /**
+   * The root .git hash for the repository itself. The hash points
+   * to a .git Commit entry for the current repository version.
+   * 
+   * @param rootCommitHash the hash of the new .git Commit for the 
+   * repository.
+   */
+  public void setRepositoryCommitHash(String rootCommitHash);
+  
+  //
+  // .git file management
   //
 
   /**
    * Returns true if the file exists.
    */
-  public boolean exists(String sha1);
+  public boolean exists(String contentHash);
+
+  /**
+   * Returns the GitType of the file.
+   */
+  public GitType getType(String contentHash);
 
   /**
    * Returns true if the file is a blob.
    */
-  public GitType getType(String sha1);
-
-  /**
-   * Returns true if the file is a blob.
-   */
-  public boolean isBlob(String sha1);
+  public boolean isBlob(String contentHash);
 
   /**
    * Returns true if the file is a tree
    */
-  public boolean isTree(String sha1);
+  public boolean isTree(String contentHash);
 
   /**
    * Returns true if the file is a commit
    */
-  public boolean isCommit(String sha1);
+  public boolean isCommit(String contentHash);
 
   /**
-   * Validates a file, checking that it and its dependencies exist.
+   * Adds a stream to the repository where the length is not known.
+   * When possible the alternate method with a length should be used because
+   * this method requires a copy of the entire stream to calculate the length.
+   * 
+   * @param is the blob's input stream
    */
-  public boolean validateFile(String sha1)
+  public String addBlob(InputStream is)
     throws IOException;
 
   /**
-   * Adds a path to the repository.  If the path is a directory or a
-   * jar scheme, adds the contents recursively.
+   * Adds a stream to the repository where the length is known.
+   * 
+   * @param is the blob's input stream
+   * @param length the blob's length
    */
-  public String addPath(Path path);
-
-  /**
-   * Adds a stream to the repository.
-   */
-  public String addInputStream(InputStream is)
+  public String addBlob(InputStream is, long length)
     throws IOException;
 
   /**
-   * Adds a stream to the repository.
+   * Opens an InputStream to a git blob
    */
-  public String addInputStream(InputStream is, long length)
+  public InputStream openBlob(String blobHash)
     throws IOException;
 
   /**
-   * Opens a stream to a git blob
+   * Writes the contents of a blob to an OutputStream.
+   * 
+   * @param blobHash the hash of the source blob
+   * @param os the OutputStream to write to
    */
-  public InputStream openBlob(String sha1)
-    throws IOException;
-
-  /**
-   * Reads a git tree from the repository
-   */
-  public GitTree readTree(String sha1)
-    throws IOException;
+  public void writeBlobToStream(String blobHash, OutputStream os);
 
   /**
    * Adds a git tree to the repository
@@ -167,36 +140,101 @@ public interface Repository
     throws IOException;
 
   /**
-   * Reads a git commit from the repository
+   * Reads a git tree from the repository
    */
-  public GitCommit readCommit(String sha1)
+  public GitTree readTree(String treeHash)
     throws IOException;
 
   /**
-   * Adds a git commit to the repository
+   * Adds a git commit entry to the repository
    */
   public String addCommit(GitCommit commit)
     throws IOException;
 
   /**
+   * Reads a git commit entry from the repository
+   */
+  public GitCommit readCommit(String commitHash)
+    throws IOException;
+
+  /**
+   * Validates a hash, checking that it and its dependencies exist.
+   */
+  public boolean validateHash(String contentHash)
+    throws IOException;
+  
+  //
+  // Convenience methods
+  //
+
+  /**
+   * Adds a path to the repository.  If the path is a directory or a
+   * jar scheme, adds the contents recursively.
+   */
+  public String addPath(Path path);
+
+  /**
+   * Expands the repository to the filesystem.
+   */
+  public void expandToPath(String contentHash, Path path);
+
+  //
+  // low-level raw .git access
+  //
+  
+  /**
    * Opens a stream to the raw git file.
    */
-  public InputStream openRawGitFile(String sha1)
+  public InputStream openRawGitFile(String contentHash)
     throws IOException;
 
   /**
    * Writes a raw git file
    */
-  public void writeRawGitFile(String sha1, InputStream is)
+  public void writeRawGitFile(String contentHash, InputStream is)
     throws IOException;
+  
+  //
+  // tag management
+  //
+  
+  /**
+   * Returns the current read-only tag map.
+   */
+  public Map<String,RepositoryTagEntry> getTagMap();
 
   /**
-   * Writes the contents to a stream.
+   * Convenience method returning the tag's contentHash.
    */
-  public void writeToStream(OutputStream os, String sha1);
+  public String getTagContentHash(String tag);
 
   /**
-   * Expands the repository to the filesystem.
+   * Adds a tag
+   *
+   * @param tagName the symbolic tag for the repository
+   * @param contentHash the hash for the tag's content, typically a .git tree
+   * @param commitMessage user's message for the commit
+   * @param commitMetaData additional commit meta-data
    */
-  public void expandToPath(Path path, String root);
+  public boolean putTag(String tagName,
+                        String contentHash,
+                        String commitMessage,
+                        Map<String,String> commitMetaData);
+
+  /**
+   * Removes a tag
+   *
+   * @param tagName the symbolic tag for the repository
+   * @param user the user adding a tag.
+   * @param server the server adding a tag.
+   * @param message user's message for the commit
+   */
+  public boolean removeTag(String tagName,
+                           String commitMessage,
+                           Map<String,String> commitMetaData);
+  
+  /**
+   * Updates the repository, checking for any changes across the cluster.
+   */
+  public void checkForUpdate();
 }

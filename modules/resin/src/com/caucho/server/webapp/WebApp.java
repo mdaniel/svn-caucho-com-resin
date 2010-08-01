@@ -517,7 +517,7 @@ public class WebApp extends ServletContextImpl
       if (_controller.getRepository() != null
           && _controller.getBaseRepositoryTag() != null) {
         String baseTag = _controller.getBaseRepositoryTag();
-        String baseValue = _controller.getRepository().getTagRoot(baseTag);
+        String baseValue = _controller.getRepository().getTagContentHash(baseTag);
 
         _invocationDependency.add(new RepositoryDependency(baseTag, baseValue));
       }

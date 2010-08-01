@@ -85,9 +85,9 @@ abstract public class AbstractRepository implements Repository
    * Updates the repository
    */
   @Override
-  public void update()
+  public void checkForUpdate()
   {
-    update(getTag(getRepositoryTag()));
+    update(getRepositoryCommitHash());
   }
 
   /**
@@ -147,7 +147,7 @@ abstract public class AbstractRepository implements Repository
    * Returns the tag root.
    */
   @Override
-  public String getTagRoot(String tag)
+  public String getTagContentHash(String tag)
   {
     RepositoryTagEntry entry = getTagMap().get(tag);
 
@@ -160,71 +160,62 @@ abstract public class AbstractRepository implements Repository
   /**
    * Adds a tag
    *
-   * @param tag the symbolic tag for the repository
-   * @param sha1 the root for the tag's content
-   * @param user the user adding a tag.
-   * @param server the server adding a tag.
-   * @param message user's message for the commit
-   * @param version symbolic version name for the commit
+   * @param tagName the symbolic tag for the repository
+   * @param contentHash the hash of the tag's content
+   * @param commitMessage the commit message for the tag update
+   * @param commitMetaData additional commit attributes
    */
   @Override
-  abstract public boolean setTag(String tag,
-                                 String sha1,
-                                 String user,
-                                 String server,
-                                 String message,
-                                 String version);
+  abstract public boolean putTag(String tagName,
+                                 String contentHash,
+                                 String commitMessage,
+                                 Map<String,String> commitMetaData);
 
   /**
    * Removes a tag
    *
-   * @param tag the symbolic tag for the repository
-   * @param user the user adding a tag.
-   * @param server the server adding a tag.
-   * @param message user's message for the commit
+   * @param tagName the symbolic tag for the repository
+   * @param commitMessage user's message for the commit
+   * @param commitMetaData additional commit meta-data
    */
   @Override
-  abstract public boolean removeTag(String tag,
-                                    String user,
-                                    String server,
-                                    String message);
+  abstract public boolean removeTag(String tagName,
+                                    String commitMessage,
+                                    Map<String,String> commitMetaData);
 
   /**
    * Creates a tag entry
    *
-   * @param tag the symbolic tag for the repository
-   * @param user the user adding a tag.
-   * @param server the server adding a tag.
-   * @param message user's message for the commit
-   * @param version symbolic version name for the commit
+   * @param tagName the symbolic tag for the repository
+   * @param contentHash the hash of the tag's content
+   * @param commitMessage user's message for the commit
+   * @param commitMetaData additional attributes for the commit
    */
-  protected RepositoryTagMap addTagData(String tag,
-                                        String root,
-                                        String user,
-                                        String server,
+  protected RepositoryTagMap addTagData(String tagName,
+                                        String contentHash,
                                         String message,
-                                        String version)
+                                        Map<String,String> commitMetaData)
   {
     try {
-      update();
+      checkForUpdate();
 
       RepositoryTagMap repositoryTagMap = _tagMap;
 
       Map<String,RepositoryTagEntry> tagMap = repositoryTagMap.getTagMap();
 
-      if (! validateFile(root))
-        throw new RepositoryException(L.l("'{0}' is an invalid .git file",
-                                          root));
+      if (! validateHash(contentHash))
+        throw new RepositoryException(L.l("'{0}' is an invalid .git content",
+                                          contentHash));
 
       String parent = null;
 
       RepositoryTagEntry entry
-        = new RepositoryTagEntry(this, tag, root, parent);
+        = new RepositoryTagEntry(this, tagName, contentHash, parent);
 
       Map<String,RepositoryTagEntry> newTagMap
         = new TreeMap<String,RepositoryTagEntry>(tagMap);
 
-      newTagMap.put(tag, entry);
+      newTagMap.put(tagName, entry);
 
       RepositoryTagMap newDeployTagMap = new RepositoryTagMap(this,
                                                       repositoryTagMap,
@@ -251,19 +242,18 @@ abstract public class AbstractRepository implements Repository
    * @param message user's message for the commit
    * @param version symbolic version name for the commit
    */
-  protected RepositoryTagMap removeTagData(String tag,
-                                       String user,
-                                       String server,
-                                       String message)
+  protected RepositoryTagMap removeTagData(String tagName,
+                                           String commitMessage,
+                                           Map<String,String> commitMetaData)
   {
     try {
-      update();
+      checkForUpdate();
 
       RepositoryTagMap repositoryTagMap = _tagMap;
 
       Map<String,RepositoryTagEntry> tagMap = repositoryTagMap.getTagMap();
 
-      RepositoryTagEntry oldEntry = tagMap.get(tag);
+      RepositoryTagEntry oldEntry = tagMap.get(tagName);
 
       if (oldEntry == null)
         return repositoryTagMap;
@@ -271,7 +261,7 @@ abstract public class AbstractRepository implements Repository
       Map<String,RepositoryTagEntry> newTagMap
         = new TreeMap<String,RepositoryTagEntry>(tagMap);
 
-      newTagMap.remove(tag);
+      newTagMap.remove(tagName);
 
       RepositoryTagMap newDeployTagMap = new RepositoryTagMap(this,
                                                       repositoryTagMap,
@@ -295,7 +285,7 @@ abstract public class AbstractRepository implements Repository
       if (_tagMap.getSequence() < tagMap.getSequence()) {
         _tagMap = tagMap;
 
-        setTag(getRepositoryTag(), tagMap.getCommitHash());
+        setRepositoryCommitHash(tagMap.getCommitHash());
 
         if (log.isLoggable(Level.FINER))
           log.finer(this + " updating deployment " + tagMap);
@@ -314,12 +304,14 @@ abstract public class AbstractRepository implements Repository
   /**
    * Returns the sha1 stored at the gitTag
    */
-  abstract public String getTag(String gitTag);
+  @Override
+  abstract public String getRepositoryCommitHash();
 
   /**
    * Writes the sha1 stored at the gitTag
    */
-  abstract public void setTag(String gitTag, String sha1);
+  @Override
+  abstract public void setRepositoryCommitHash(String repositoryCommitHash);
 
   //
   // git file management
@@ -368,7 +360,7 @@ abstract public class AbstractRepository implements Repository
    * Validates a file, checking that it and its dependencies exist.
    */
   @Override
-  public boolean validateFile(String sha1)
+  public boolean validateHash(String sha1)
     throws IOException
   {
     GitType type = getType(sha1);
@@ -385,13 +377,13 @@ abstract public class AbstractRepository implements Repository
       if (commit == null)
         return false;
 
-      return validateFile(commit.getTree());
+      return validateHash(commit.getTree());
     }
     else if (type == GitType.TREE) {
       GitTree tree = readTree(sha1);
 
       for (GitTree.Entry entry : tree.entries()) {
-        if (! validateFile(entry.getSha1())) {
+        if (! validateHash(entry.getSha1())) {
           if (log.isLoggable(Level.FINE))
             log.fine(this + " invalid " + entry);
 
@@ -423,7 +415,7 @@ abstract public class AbstractRepository implements Repository
    * Adds a stream to the repository.
    */
   @Override
-  abstract public String addInputStream(InputStream is)
+  abstract public String addBlob(InputStream is)
     throws IOException;
 
   /**
@@ -437,7 +429,7 @@ abstract public class AbstractRepository implements Repository
    * Reads a git tree from the repository
    */
   @Override
-  abstract public GitTree readTree(String sha1)
+  abstract public GitTree readTree(String treeHash)
     throws IOException;
 
   /**
@@ -451,7 +443,7 @@ abstract public class AbstractRepository implements Repository
    * Reads a git commit from the repository
    */
   @Override
-  abstract public GitCommit readCommit(String sha1)
+  abstract public GitCommit readCommit(String commitHash)
     throws IOException;
 
   /**
@@ -465,27 +457,27 @@ abstract public class AbstractRepository implements Repository
    * Opens a stream to the raw git file.
    */
   @Override
-  abstract public InputStream openRawGitFile(String sha1)
+  abstract public InputStream openRawGitFile(String contentHash)
     throws IOException;
 
   /**
    * Writes a raw git file
    */
   @Override
-  abstract public void writeRawGitFile(String sha1, InputStream is)
+  abstract public void writeRawGitFile(String contentHash, InputStream is)
     throws IOException;
 
   /**
    * Writes the contents to a stream.
    */
   @Override
-  abstract public void writeToStream(OutputStream os, String sha1);
+  abstract public void writeBlobToStream(String blobHash, OutputStream os);
 
   /**
    * Expands the repository to the filesystem.
    */
   @Override
-  abstract public void expandToPath(Path path, String root);
+  abstract public void expandToPath(String contentHash, Path path);
 
   @Override
   public String toString()

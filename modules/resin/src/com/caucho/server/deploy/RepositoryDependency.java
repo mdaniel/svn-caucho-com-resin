@@ -65,7 +65,7 @@ public class RepositoryDependency implements PersistentDependency {
   @Override
   public boolean isModified()
   {
-    String value = getRepository().getTagRoot(_tag);
+    String value = getRepository().getTagContentHash(_tag);
 
     if (_sha1 != null && ! _sha1.equals(value))
       return true;

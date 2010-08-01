@@ -32,6 +32,7 @@ package com.caucho.env.repository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 import com.caucho.env.git.GitCommit;
 import com.caucho.env.git.GitObjectStream;
@@ -54,16 +55,18 @@ public class FileRepository extends AbstractRepository
     _git = git;
     
     if (_git == null)
-      throw new IllegalStateException(L.l("GitService is required for FileRepository"));
+      throw new IllegalStateException(L.l("{0} is required for {1}",
+                                          GitService.class.getSimpleName(),
+                                          getClass().getSimpleName()));
   }
 
   /**
    * Updates the repository
    */
   @Override
-  public void update()
+  public void checkForUpdate()
   {
-    update(getTag(getRepositoryTag()));
+    update(getRepositoryCommitHash());
   }
 
   //
@@ -73,52 +76,22 @@ public class FileRepository extends AbstractRepository
   /**
    * Adds a tag
    *
-   * @param tag the symbolic tag for the repository
-   * @param sha1 the root for the tag's content
-   * @param user the user adding a tag.
-   * @param server the server adding a tag.
-   * @param message user's message for the commit
-   * @param version symbolic version name for the commit
+   * @param tagName the symbolic tag for the repository
+   * @param contentHash the sha1 hash of the tag's content
+   * @param commitMessage user's message for the commit
+   * @param commitMetaData additional commit metadata
    */
   @Override
-  public boolean setTag(String tag,
-                        String root,
-                        String user,
-                        String server,
-                        String message,
-                        String version)
+  public boolean putTag(String tagName,
+                        String contentHash,
+                        String commitMessage,
+                        Map<String,String> commitMetaData)
   {
     RepositoryTagMap tagMap;
 
     do {
-      tagMap = addTagData(tag, root, user,
-                          server, message, version);
+      tagMap = addTagData(tagName, contentHash, commitMessage, commitMetaData);
 
-    } while (! setTagMap(tagMap));
-
-    return true;
-  }
-
-  /**
-   * Adds a tag
-   *
-   * @param tag the symbolic tag for the repository
-   * @param sha1 the root for the tag's content
-   * @param user the user adding a tag.
-   * @param server the server adding a tag.
-   * @param message user's message for the commit
-   * @param version symbolic version name for the commit
-   */
-  @Override
-  public boolean removeTag(String tag,
-                           String user,
-                           String server,
-                           String message)
-  {
-    RepositoryTagMap tagMap;
-
-    do {
-      tagMap = removeTagData(tag, user, server, message);
     } while (! setTagMap(tagMap));
 
     return true;
@@ -127,41 +100,40 @@ public class FileRepository extends AbstractRepository
   /**
    * Removes a tag
    *
-   * @param tag the symbolic tag for the repository
-   * @param sha1 the root for the tag's content
-   * @param user the user adding a tag.
-   * @param server the server adding a tag.
-   * @param message user's message for the commit
+   * @param tagName the symbolic tag for the repository
+   * @param commitMessage user's message for the commit
+   * @param commitMetaData additional metadata
    */
-  public boolean removeTag(String tag,
-                           String sha1,
-                           String user,
-                           String server,
-                           String message)
+  @Override
+  public boolean removeTag(String tagName,
+                           String commitMessage,
+                           Map<String,String> commitMetaData)
   {
-    return false;
+    RepositoryTagMap tagMap;
+
+    do {
+      tagMap = removeTagData(tagName, commitMessage, commitMetaData);
+    } while (! setTagMap(tagMap));
+
+    return true;
   }
 
-  //
-  // git management
-  //
-  
   /**
    * Returns the hash stored in the git tag
    */
   @Override
-  public String getTag(String tag)
+  public String getRepositoryCommitHash()
   {
-    return _git.getTag(tag);
+    return _git.getTag(getRepositoryTag());
   }
   
   /**
    * Sets the hash stored in the git tag
    */
   @Override
-  public void setTag(String tag, String sha1)
+  public void setRepositoryCommitHash(String sha1)
   {
-    _git.writeTag(tag, sha1);
+    _git.writeTag(getRepositoryTag(), sha1);
   }
 
   /**
@@ -205,7 +177,7 @@ public class FileRepository extends AbstractRepository
    * jar scheme, adds the contents recursively.
    */
   @Override
-  public String addInputStream(InputStream is)
+  public String addBlob(InputStream is)
   {
     try {
       return _git.writeInputStream(is);
@@ -218,7 +190,8 @@ public class FileRepository extends AbstractRepository
    * Adds a path to the repository.  If the path is a directory or a
    * jar scheme, adds the contents recursively.
    */
-  public String addInputStream(InputStream is, long length)
+  @Override
+  public String addBlob(InputStream is, long length)
   {
     try {
       return _git.writeInputStream(is, length);
@@ -304,12 +277,12 @@ public class FileRepository extends AbstractRepository
    * Writes the contents to a stream.
    */
   @Override
-  public void writeToStream(OutputStream os, String sha1)
+  public void writeBlobToStream(String blobHash, OutputStream os)
   {
     GitObjectStream is = null;
     
     try {
-      is = _git.open(sha1);
+      is = _git.open(blobHash);
     
       if (is.getType() != GitType.BLOB)
         throw new RepositoryException(L.l("'{0}' is an unexpected type, expected 'blob'",
@@ -339,10 +312,10 @@ public class FileRepository extends AbstractRepository
    * Expands the repository to the filesystem.
    */
   @Override
-  public void expandToPath(Path path, String rootSha1)
+  public void expandToPath(String contentHash, Path path)
   {
     try {
-      _git.expandToPath(path, rootSha1);
+      _git.expandToPath(path, contentHash);
     } catch (IOException e) {
       throw new RepositoryException(e);
     }

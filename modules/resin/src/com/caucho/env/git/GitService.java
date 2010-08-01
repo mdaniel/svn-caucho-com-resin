@@ -49,6 +49,9 @@ public class GitService extends AbstractResinService {
   private static final Logger log
     = Logger.getLogger(GitService.class.getName());
   
+  public static final int START_PRIORITY
+    = RootDirectoryService.START_PRIORITY_ROOT_DIRECTORY + 1; 
+  
   private Path _root;
 
   public GitService()
@@ -68,6 +71,12 @@ public class GitService extends AbstractResinService {
   {
     ResinSystem resinSystem = ResinSystem.getCurrent();
     
+    if (resinSystem == null) {
+      throw new IllegalStateException(L.l("{0} requires an active {1} environment.",
+                                          GitService.class.getSimpleName(),
+                                          ResinSystem.class.getSimpleName()));
+    }
+    
     GitService git = resinSystem.getService(GitService.class);
     
     if (git == null) {
@@ -79,6 +88,12 @@ public class GitService extends AbstractResinService {
     }
     
     return git;
+  }
+
+  @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY;
   }
 
   @Override
@@ -481,22 +496,6 @@ public class GitService extends AbstractResinService {
     out.print("tree ");
     out.println(commit.getTree());
 
-    /*
-    if (user != null) {
-      out.print("author ");
-      out.print(user);
-      out.print(" ");
-      out.print(timestamp / 1000);
-      out.println(" +0000");
-      
-      out.print("committer ");
-      out.print(user);
-      out.print(" ");
-      out.print(timestamp / 1000);
-      out.println(" +0000");
-    }
-    */
-
     String parent = commit.getParent();
 
     if (parent != null) {
@@ -504,7 +503,7 @@ public class GitService extends AbstractResinService {
       out.println(parent);
     }
 
-    HashMap<String,String> attr = commit.getAttributeMap();
+    Map<String,String> attr = commit.getMetaData();
     if (attr != null) {
       ArrayList<String> keys = new ArrayList<String>(attr.keySet());
       Collections.sort(keys);

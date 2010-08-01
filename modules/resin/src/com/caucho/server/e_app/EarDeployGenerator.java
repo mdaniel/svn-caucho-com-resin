@@ -158,7 +158,7 @@ public class EarDeployGenerator
       rootDirectory = getExpandDirectory().lookup(archiveName);
       archivePath = null;
     }
-    else if (getRepository().getTagRoot(tag) != null) {
+    else if (getRepository().getTagContentHash(tag) != null) {
       rootDirectory = getExpandDirectory().lookup(getExpandName(name));
     }
     else {

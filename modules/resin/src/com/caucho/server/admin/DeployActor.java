@@ -31,8 +31,10 @@ package com.caucho.server.admin;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -159,13 +161,22 @@ public class DeployActor extends SimpleActor
     log.fine(this + " copy dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
     
     String server = "default";
+    
+    TreeMap<String,String> metaDataMap = new TreeMap<String,String>();
+    
+    if (query.getUser() != null)
+      metaDataMap.put("user", query.getUser());
+    
+    if (server != null)
+      metaDataMap.put("server", server);
+    
+    if (query.getVersion() != null)
+      metaDataMap.put("version", query.getVersion());
 
-    boolean result = _repository.setTag(tag,
+    boolean result = _repository.putTag(tag,
                                         entry.getRoot(),  
-                                        query.getUser(),
-                                        server,
-                                        query.getMessage(), 
-                                        query.getVersion());
+                                        query.getMessage(),
+                                        metaDataMap);
 
     getLinkStream().queryResult(id, from, to, result);
   }
@@ -207,10 +218,16 @@ public class DeployActor extends SimpleActor
   {
     String server = "default";
     
+    HashMap<String,String> commitMetaData = new HashMap<String,String>();
+    
+    commitMetaData.put("server", server);
+    
+    if (query.getUser() != null)
+      commitMetaData.put("user", query.getUser());
+    
     boolean result = _repository.removeTag(query.getTag(),
-                                           query.getUser(),
-                                           server,
-                                           query.getMessage());
+                                           query.getMessage(),
+                                           commitMetaData);
 
     getLinkStream().queryResult(id, from, to, result);
   }
@@ -245,17 +262,25 @@ public class DeployActor extends SimpleActor
   @QuerySet
   public boolean setTagQuery(long id, String to, String from, SetTagQuery query)
   {
-    String tag = query.getTag();
-    String hex = query.getHex();
+    String tagName = query.getTag();
+    String contentHash = query.getHex();
 
     String server = "default";
     
-    boolean result = _repository.setTag(tag, 
-                                        hex,
-                                        query.getUser(),
-                                        server,
-                                        query.getMessage(), 
-                                        query.getVersion());
+    TreeMap<String,String> commitMetaData = new TreeMap<String,String>();
+    
+    commitMetaData.put("server", server);
+    
+    if (query.getUser() != null)
+      commitMetaData.put("user", query.getUser());
+    
+    if (query.getVersion() != null)
+      commitMetaData.put("user", query.getVersion());
+    
+    boolean result = _repository.putTag(tagName, 
+                                        contentHash,
+                                        query.getMessage(),
+                                        commitMetaData);
 
     getLinkStream().queryResult(id, from, to, String.valueOf(result));
 
@@ -348,28 +373,6 @@ public class DeployActor extends SimpleActor
       log.log(Level.FINE, e.toString(), e);
 
       return L.l("deploy '{0}' failed\n{1}", gitPath, e.toString());
-    }
-  }
-
-  private void updateDeploy()
-  {
-    try {
-      ObjectName pattern = new ObjectName("resin:type=EarDeploy,*");
-
-      for (Object proxy : Jmx.query(pattern)) {
-        EarDeployMXBean earDeploy = (EarDeployMXBean) proxy;
-        earDeploy.update();
-      }
-
-      pattern = new ObjectName("resin:type=WebAppDeploy,*");
-
-      for (Object proxy : Jmx.query(pattern)) {
-        WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
-
-        warDeploy.update();
-      }
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -511,7 +514,7 @@ public class DeployActor extends SimpleActor
     return true;
   }
 
-  private String undeploy(String tag, String user, String message)
+  private String undeploy(String tag, String user, String commitMessage)
   {
     DeployControllerMXBean controller = findController(tag);
 
@@ -528,7 +531,14 @@ public class DeployActor extends SimpleActor
       if (controller.destroy()) {
         String server = "default";
         
-        _repository.removeTag(tag, user, server, message);
+        HashMap<String,String> commitMetaData = new HashMap<String,String>();
+        
+        commitMetaData.put("server", server);
+        
+        if (user != null)
+          commitMetaData.put("user", user);
+        
+        _repository.removeTag(tag, commitMessage, commitMetaData);
 
         return "undeployed";
       }
@@ -552,7 +562,7 @@ public class DeployActor extends SimpleActor
   {
     String tag = query.getTag();
     String name = query.getName();
-    String hex = query.getHex();
+    String contentHash = query.getHex();
 
     try {
       DeployControllerMXBean deploy = findController(tag);
@@ -574,7 +584,7 @@ public class DeployActor extends SimpleActor
       if (! path.getParent().exists())
         path.getParent().mkdirs();
 
-      _repository.expandToPath(path, hex);
+      _repository.expandToPath(contentHash, path);
 
       getLinkStream().queryResult(id, from, to, "ok");
 

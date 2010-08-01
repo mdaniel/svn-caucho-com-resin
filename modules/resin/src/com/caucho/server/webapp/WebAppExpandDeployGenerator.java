@@ -272,7 +272,7 @@ public class WebAppExpandDeployGenerator
 
     if (contextPath.equals(baseContextPath)
         && (getRepository() != null
-            && getRepository().getTagRoot(baseRepositoryTag) != null)) {
+            && getRepository().getTagContentHash(baseRepositoryTag) != null)) {
       baseController
         = new WebAppVersioningController(contextPath,
                                          baseContextPath,
@@ -284,7 +284,7 @@ public class WebAppExpandDeployGenerator
     if (! isValidDirectory(rootDirectory, segmentName)
         && ! jarPath.canRead()
         && (getRepository() != null
-            && getRepository().getTagRoot(repositoryTag) == null)) {
+            && getRepository().getTagContentHash(repositoryTag) == null)) {
       return baseController;
     }
 
@@ -315,7 +315,7 @@ public class WebAppExpandDeployGenerator
       return baseController;
     }
     else if ((getRepository() != null
-              && getRepository().getTagRoot(baseRepositoryTag) != null)) {
+              && getRepository().getTagContentHash(baseRepositoryTag) != null)) {
       WebAppController versionController
         = _container.getWebAppGenerator().findController(baseSegmentName);
 
@@ -530,7 +530,7 @@ public class WebAppExpandDeployGenerator
 
     if (! rootDirectory.isDirectory()
         && (jarPath == null || ! jarPath.isFile())
-        && getRepository().getTagRoot(versionTag) == null)
+        && getRepository().getTagContentHash(versionTag) == null)
       return null;
     else if (rootDirectory.isDirectory()
              && ! isValidDirectory(rootDirectory, versionName.substring(1)))

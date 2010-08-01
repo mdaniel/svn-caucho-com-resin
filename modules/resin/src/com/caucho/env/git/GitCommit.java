@@ -30,9 +30,16 @@
 package com.caucho.env.git;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Commit structure
+ * The Commit structure has four main data items:
+ * <ul>
+ * <li>The Tree which is the hash of the content root</li>
+ * <li>The parent, which is the hash of the previous version's Commit</li>
+ * <li>meta-data &lt;key, value> pairs</li>
+ * <li>A text message describing the commit</li>
+ * </ul>
  */
 public class GitCommit {
   private String _parent;
@@ -51,37 +58,61 @@ public class GitCommit {
     _message = message;
   }
 
+  /**
+   * The hash of the previous version's Commit entry or null if
+   * this Commit has no previous version.
+   */
   public String getParent()
   {
     return _parent;
   }
 
+
+  /**
+   * The hash of the previous version's Commit entry or null if
+   * this Commit has no previous version.
+   */
   public void setParent(String parent)
   {
     _parent = parent;
   }
 
+  /**
+   * The hash of the directory Tree containing the committed content.
+   */
   public String getTree()
   {
     return _tree;
   }
 
+  /**
+   * The hash of the directory Tree containing the committed content.
+   */
   public void setTree(String tree)
   {
     _tree = tree;
   }
 
+  /**
+   * Adds a metadata value.
+   */
   public void put(String key, String value)
   {
     _attributes.put(key, value);
   }
-
+  
+  /**
+   * Returns the given metadata value.
+   */
   public String get(String key)
   {
     return _attributes.get(key);
   }
 
-  public HashMap<String,String> getAttributeMap()
+  /**
+   * Returns the meta-data map for the commit. 
+   */
+  public Map<String,String> getMetaData()
   {
     return _attributes;
   }

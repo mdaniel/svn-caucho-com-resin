@@ -39,39 +39,25 @@ import java.io.*;
  */
 public class RepositoryTagEntry
 {
-  private final String _sha1; // sha1 of the entry itself
+  private final String _tagName;  // the tag name "webapps/foo/bar"
+  private final String _treeHash; // sha1 hash of the content tree
   
-  private final String _tag;
+  private final String _tagEntryHash; // sha1 of the entry itself
   
-  private final String _root; // sha1 of the target root
+  
   private final String _parent; // sha1 of the parent tag entry
-
-  /**
-   * Create an entry from an existing repository item.
-   */
-  public RepositoryTagEntry(String sha1,
-                        String tag,
-                        String root,
-                        String parent)
-  {
-    _tag = tag;
-    _root = root;
-    _parent = parent;
-    
-    _sha1 = sha1;
-  }
 
   /**
    * Create a new entry, storing the serialized form in the repository.
    */
   public RepositoryTagEntry(AbstractRepository repository,
-                        String tag,
-                        String root,
-                        String parent)
+                            String tagName,
+                            String treeHash,
+                            String parent)
     throws IOException
   {
-    _tag = tag;
-    _root = root;
+    _tagName = tagName;
+    _treeHash = treeHash;
     _parent = parent;
     
     TempStream os = new TempStream();
@@ -83,7 +69,7 @@ public class RepositoryTagEntry
     InputStream is = os.getInputStream();
 
     try {
-      _sha1 = repository.addInputStream(is);
+      _tagEntryHash = repository.addBlob(is);
     } finally {
       is.close();
     }
@@ -93,10 +79,10 @@ public class RepositoryTagEntry
    * Create a new entry, storing the serialized form in the repository.
    */
   public RepositoryTagEntry(AbstractRepository repository,
-                        String sha1)
+                            String sha1)
     throws IOException
   {
-    _sha1 = sha1;
+    _tagEntryHash = sha1;
 
     InputStream is = repository.openBlob(sha1);
 
@@ -107,8 +93,8 @@ public class RepositoryTagEntry
 
       in.close();
 
-      _tag = map.get("tag");
-      _root = map.get("root");
+      _tagName = map.get("tag");
+      _treeHash = map.get("root");
       _parent = map.get("parent");
     } finally {
       is.close();
@@ -120,7 +106,7 @@ public class RepositoryTagEntry
    */
   public String getSha1()
   {
-    return _sha1;
+    return _tagEntryHash;
   }
 
   /**
@@ -128,7 +114,7 @@ public class RepositoryTagEntry
    */
   public String getRoot()
   {
-    return _root;
+    return _treeHash;
   }
 
   private Map<String,String> readMap(ReadStream is)
@@ -161,8 +147,8 @@ public class RepositoryTagEntry
   private void writeEntry(WriteStream out)
     throws IOException
   {
-    writePair(out, "tag", _tag);
-    writePair(out, "root", _root);
+    writePair(out, "tag", _tagName);
+    writePair(out, "root", _treeHash);
     writePair(out, "parent", _parent);
   }
 
@@ -195,6 +181,6 @@ public class RepositoryTagEntry
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _tag + ",root=" + _root + "]";
+    return getClass().getSimpleName() + "[" + _tagName + ",root=" + _treeHash + "]";
   }
 }

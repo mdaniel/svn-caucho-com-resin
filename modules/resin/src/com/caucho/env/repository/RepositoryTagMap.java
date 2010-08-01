@@ -30,6 +30,7 @@
 package com.caucho.env.repository;
 
 import com.caucho.env.git.*;
+import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
@@ -39,6 +40,7 @@ import java.util.*;
 /**
  * Map of the current tags.
  */
+@Module
 public class RepositoryTagMap
 {
   private static final L10N L = new L10N(RepositoryTagMap.class);
@@ -70,7 +72,7 @@ public class RepositoryTagMap
     _commitHash = commitHash;
 
     // force loading and validation from backend
-    repository.validateFile(commitHash);
+    repository.validateHash(commitHash);
 
     _commit = repository.readCommit(commitHash);
 
@@ -82,8 +84,8 @@ public class RepositoryTagMap
   }
 
   public RepositoryTagMap(AbstractRepository repository,
-                      RepositoryTagMap parent,
-                      Map<String,RepositoryTagEntry> tagMap)
+                          RepositoryTagMap parent,
+                          Map<String,RepositoryTagEntry> tagMap)
     throws IOException
   {
     _tagMap = Collections.unmodifiableMap(tagMap);
@@ -101,7 +103,7 @@ public class RepositoryTagMap
     InputStream is = os.getInputStream();
 
     try {
-      tagHash = repository.addInputStream(is);
+      tagHash = repository.addBlob(is);
     } finally {
       is.close();
     }

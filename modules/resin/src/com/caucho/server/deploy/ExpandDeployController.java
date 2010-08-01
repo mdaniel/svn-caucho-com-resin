@@ -344,9 +344,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       if (_repository == null)
         return false;
       
-      String tree = _repository.getTagRoot(getRepositoryTag());
+      String treeHash = _repository.getTagContentHash(getRepositoryTag());
 
-      if (tree == null)
+      if (treeHash == null)
         return false;
       
       Path pwd = getRootDirectory();
@@ -355,9 +355,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
       if (log.isLoggable(Level.FINE))
         log.fine(this + " expanding .git repository tag=" + getRepositoryTag()
-                 + " tree=" + tree + " -> root=" + getRootDirectory());
+                 + " tree=" + treeHash + " -> root=" + getRootDirectory());
 
-      _repository.expandToPath(pwd, tree);
+      _repository.expandToPath(treeHash, pwd);
 
       return true;
     } catch (IOException e) {
@@ -558,7 +558,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     if (getRepository() != null && getRepositoryTag() != null) {
       String tag = getRepositoryTag();
-      String value = getRepository().getTagRoot(tag);
+      String value = getRepository().getTagContentHash(tag);
 
       Environment.addDependency(new RepositoryDependency(tag, value));
     }

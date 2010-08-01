@@ -346,6 +346,7 @@ public class ResinSystem
   /**
    * Adds a new service.
    */
+  @SuppressWarnings("unchecked")
   public <T extends ResinService> T 
   addServiceIfAbsent(Class<?> serviceApi, T service)
   {
