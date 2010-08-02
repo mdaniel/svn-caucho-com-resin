@@ -54,7 +54,9 @@
   <servlet servlet-name="j_security_check"
            servlet-class="com.caucho.server.security.FormLoginServlet"/>
 
-  <multipart-form enable="true"/>
+  <!--
+     - <multipart-form enable="true"/>
+    -->
 
   <!-- Configures the special index files to check for directory URLs -->
   <welcome-file-list>

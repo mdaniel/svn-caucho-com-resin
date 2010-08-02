@@ -56,7 +56,27 @@ import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Bean;
 import javax.management.ObjectName;
 import javax.naming.NamingException;
-import javax.servlet.*;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterRegistration;
+import javax.servlet.HttpMethodConstraintElement;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestListener;
+import javax.servlet.ServletSecurityElement;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.UnavailableException;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
@@ -74,12 +94,10 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import com.caucho.amber.manager.AmberContainer;
-import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
-import com.caucho.config.el.CandiConfigResolver;
 import com.caucho.config.el.CandiElResolver;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBindingHandle;
@@ -129,7 +147,6 @@ import com.caucho.security.MemorySingleSignon;
 import com.caucho.security.RoleMapManager;
 import com.caucho.security.SingleSignon;
 import com.caucho.server.cache.AbstractCache;
-import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
@@ -187,16 +204,11 @@ public class WebApp extends ServletContextImpl
              EnvironmentDeployInstance, ScanListener, JspConfigDescriptor,
              java.io.Serializable
 {
-  private static final String DEFAULT_VERSION = "2.5";
-
   private static final L10N L = new L10N(WebApp.class);
   private static final Logger log
     = Logger.getLogger(WebApp.class.getName());
 
-  private static final int JSP_NONE = 0;
   private static final int JSP_1 = 1;
-  private static final int JSP_2 = 2;
-  
   private static final char []SERVLET_ANNOTATION
     = "javax.servlet.annotation.".toCharArray();
 
@@ -208,8 +220,6 @@ public class WebApp extends ServletContextImpl
 
   static String []_classLoaderHackPackages;
 
-  private ClassLoader _parentClassLoader;
-
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
 
@@ -217,8 +227,6 @@ public class WebApp extends ServletContextImpl
   // The parent
   private WebAppContainer _parent;
 
-  // web-app versioning
-  private String _version;
   private WebApp _oldWebApp;
   private long _oldWebAppExpireTime;
 
@@ -284,9 +292,6 @@ public class WebApp extends ServletContextImpl
   // True if includes are allowed to wrap a filter (forbidden by servlet spec)
   private boolean _dispatchWrapsFilters;
 
-  // Transaction manager
-  private TransactionManagerImpl _tm;
-
   // The session manager
   private SessionManager _sessionManager;
   // True if the session manager is inherited
@@ -302,7 +307,6 @@ public class WebApp extends ServletContextImpl
 
   private UrlMap<CacheMapping> _cacheMappingMap = new UrlMap<CacheMapping>();
 
-  private final Object _dispatcherCacheLock = new Object();
   private LruCache<String,RequestDispatcherImpl> _dispatcherCache;
 
   private Login _defaultLogin;
@@ -396,7 +400,6 @@ public class WebApp extends ServletContextImpl
 
   private long _idleTime = 2 * 3600 * 1000L;
 
-  private final Object _countLock = new Object();
   private final Lifecycle _lifecycle;
 
   private final AtomicInteger _requestCount = new AtomicInteger();

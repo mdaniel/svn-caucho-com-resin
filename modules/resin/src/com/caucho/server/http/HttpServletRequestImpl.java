@@ -951,8 +951,16 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public Collection<Part> getParts()
     throws IOException, ServletException
   {
-    if ( ! getWebApp().doMultipartForm())
+    MultipartConfigElement multipartConfig
+      = _invocation.getMultipartConfig();
+    
+    if (multipartConfig == null)
+      throw new ServletException("multipart-form is disabled; check @MultipartConfig configuration tag.");
+    
+    /*
+    if (! getWebApp().doMultipartForm())
       throw new ServletException("multipart-form is disabled; check <multipart-form> configuration tag.");
+      */
 
     if (! getContentType().startsWith("multipart/form-data"))
       throw new ServletException("Content-Type must be of 'multipart/form-data'.");
@@ -1040,6 +1048,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
       String javaEncoding = Encoding.getJavaName(charEncoding);
 
+      MultipartConfigElement multipartConfig
+        = _invocation.getMultipartConfig();
+
       if (contentType == null || ! "POST".equalsIgnoreCase(getMethod())) {
       }
 
@@ -1047,7 +1058,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
         formParser.parsePostData(form, getInputStream(), javaEncoding);
       }
 
-      else if (getWebApp().doMultipartForm()
+      else if ((getWebApp().doMultipartForm() || multipartConfig != null)
                && contentType.startsWith("multipart/form-data")) {
         int length = contentType.length();
         int i = contentType.indexOf("boundary=");
@@ -1071,9 +1082,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
           return form;
         }
-
-        MultipartConfigElement multipartConfig
-          = _invocation.getMultipartConfig();
 
         long fileUploadMax = -1;
 
