@@ -955,7 +955,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       = _invocation.getMultipartConfig();
     
     if (multipartConfig == null)
-      throw new ServletException("multipart-form is disabled; check @MultipartConfig configuration tag.");
+      throw new ServletException(L.l("multipart-form is disabled; check @MultipartConfig annotation on `{0}'.", _invocation.getServletName()));
     
     /*
     if (! getWebApp().doMultipartForm())
