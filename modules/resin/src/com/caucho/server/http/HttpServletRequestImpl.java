@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayInputStream;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.nio.charset.Charset;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -100,6 +102,8 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   private static final String CHAR_ENCODING = "resin.form.character.encoding";
   private static final String FORM_LOCALE = "resin.form.local";
   private static final String CAUCHO_CHAR_ENCODING = "caucho.form.character.encoding";
+
+  private static final Charset UTF8 = Charset.forName("UTF-8");
 
   private AbstractHttpRequest _request;
 
@@ -2029,7 +2033,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     return getClass().getSimpleName() + "[" + _request + "]";
   }
 
-  private class PartImpl implements Part {
+  public class PartImpl implements Part {
     private String _name;
     private Map<String, List<String>> _headers;
     private Object _value;
@@ -2091,10 +2095,14 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       Object value = getValue();
 
       if (value instanceof FilePath)
-        return ((FilePath)value).openRead();
+        return ((FilePath) value).openRead();
 
-      throw new IOException(L.l("Part.getInputStream() is not applicable to part '{0}':'{1}'", _name, value));
+      ByteArrayInputStream is
+        = new ByteArrayInputStream(value.toString().getBytes(UTF8));
+
+      return is;
     }
+
 
     public String getName()
     {
@@ -2188,7 +2196,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       }
     }
 
-    private Object getValue()
+    public Object getValue()
     {
       if (_value != null)
         return _value;

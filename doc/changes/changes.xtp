@@ -13,6 +13,7 @@
 
 <s2 title="4.0.10 - snapshot">
 <ul>
+<li>servlet: fixed getInputStream issue for String params with Servlet3.0 Part (#4153), rep by Wesley Wu</li>
 <li>servlet: remove &lt;multipart-form> from app-default.xml (#4102, rep by Brian Eng)</li>
 <li>file: range parsing issue with firefox and FileServlet (#4149, rep by Fred Howell)</li>
 </ul>
