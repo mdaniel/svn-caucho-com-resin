@@ -99,6 +99,22 @@ public class EjbModule {
     return module;
   }
   
+  public static void setAppName(String name, ClassLoader loader)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(loader);
+      
+      Jndi.bindDeep("java:app/AppName", name);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
   public String getModuleName()
   {
     return _moduleName;

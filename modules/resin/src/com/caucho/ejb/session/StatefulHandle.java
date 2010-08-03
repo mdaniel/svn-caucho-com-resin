@@ -31,7 +31,6 @@ package com.caucho.ejb.session;
 import java.io.Serializable;
 
 import com.caucho.ejb.manager.EjbManager;
-import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.util.L10N;
 
 /**

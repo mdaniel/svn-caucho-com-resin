@@ -480,6 +480,7 @@ public class WebApp extends ServletContextImpl
       EjbManager.setScanAll();
       
       EjbModule.replace(getModuleName(), _classLoader);
+      EjbModule.setAppName(getModuleName(), _classLoader);
 
       // map.put("app", _appVar);
 

@@ -100,6 +100,10 @@ public class CandiProducer<X> implements InjectionTarget<X>
     _destroyProgram = destroyProgram;
     _injectionPointSet = injectionPointSet;
     
+    for (ConfigProgram program : _injectProgram) {
+      program.bind();
+    }
+    
     if (injectionPointSet == null)
       throw new NullPointerException();
     

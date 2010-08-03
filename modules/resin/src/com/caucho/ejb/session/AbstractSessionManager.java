@@ -214,7 +214,12 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   @Override
   public void bind()
   {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
     try {
+      thread.setContextClassLoader(getClassLoader());
+      
       boolean isAutoCompile = true;
 
       if (_proxyImplClass == null) {
@@ -242,6 +247,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(loader);
     }
   }
 

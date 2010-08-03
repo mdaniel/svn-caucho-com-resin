@@ -402,6 +402,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     manager.setMappedName(getMappedName());
     manager.setId(getEJBModuleName() + "#" + getEJBName());
     manager.setContainerTransaction(_isContainerTransaction);
+    manager.setResourceList(getResourceList());
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

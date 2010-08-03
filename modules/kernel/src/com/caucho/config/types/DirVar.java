@@ -28,10 +28,9 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.*;
 import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
 
 /**
  * Variable for __DIR__

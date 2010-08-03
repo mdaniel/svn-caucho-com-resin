@@ -83,13 +83,17 @@ r_ejb-ref-type = element ejb-ref-type {
 }
 
 r_env-entry = element env-entry {
+  attribute id { string }?,
+
   r_description*,
 
   r_env-entry-name,
 
-  r_env-entry-type,
+  r_env-entry-type?,
 
-  r_env-entry-value?
+  r_env-entry-value?,
+
+  r_resource-Group-Value
 }
 
 r_env-entry-name =
@@ -137,6 +141,12 @@ r_icon = element icon {
   element large-icon { r_path-Type }?
 }
 
+r_injection-target = element injection-target {
+  element injection-target-class { string },
+
+  element injection-target-name { string }
+}
+
 r_java-identifier = string
 
 r_jndi-name-Type = string
@@ -147,6 +157,10 @@ r_local = element local {
 
 r_local-home = element local-home {
   r_fully-qualified-class
+}
+
+r_lookup-name = element lookup-name {
+  string
 }
 
 r_mapped-name = element mapped-name {
@@ -270,6 +284,13 @@ r_resource-Group =
   & r_message-destination-ref*
 
   & r_persistence-unit-ref*
+
+r_resource-Group-Value =
+  r_mapped-name?,
+
+  r_injection-target*,
+  
+  r_lookup-name*
 
 r_resource-env-ref = element resource-env-ref {
   r_description*,

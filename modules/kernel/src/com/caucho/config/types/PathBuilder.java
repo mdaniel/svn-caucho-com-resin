@@ -29,26 +29,26 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigELContext;
-import com.caucho.el.*;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigELContext;
+import com.caucho.el.ELParser;
+import com.caucho.el.Expr;
+import com.caucho.el.MapVariableResolver;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * Special builder for path variables.
  */
 public class PathBuilder {
-  private static final L10N L = new L10N(PathBuilder.class);
-
   private String _userPath;
 
   /**
@@ -74,7 +74,7 @@ public class PathBuilder {
     return lookupPath(string, Config.getEnvironment());
   }
 
-  public static Path lookupPath(String string, ArrayList vars)
+  public static Path lookupPath(String string, ArrayList<?> vars)
     throws ELException
   {
     HashMap<String,Object> map = new HashMap<String,Object>();

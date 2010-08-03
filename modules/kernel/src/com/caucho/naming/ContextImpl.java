@@ -216,6 +216,7 @@ public class ContextImpl implements Context {
   /**
    * Looks up an object with the given parsed JNDI name.
    */
+  @Override
   public Object lookup(Name name)
     throws NamingException
   {
@@ -274,6 +275,7 @@ public class ContextImpl implements Context {
   /**
    * Looks up an object given the name, but doesn't dereference links.
    */
+  @Override
   public Object lookupLink(String name)
     throws NamingException
   {

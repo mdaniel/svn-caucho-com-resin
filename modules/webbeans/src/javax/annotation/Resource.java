@@ -58,12 +58,14 @@ public @interface Resource {
    */
   String name() default "";
   
+  String lookup() default "";
+  
   boolean shareable() default true;
 
   /**
    * Java type of the resource.
    */
-  Class type() default Object.class;
+  Class<?> type() default Object.class;
 
   /**
    * Product-specific name.

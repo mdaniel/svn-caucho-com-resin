@@ -273,7 +273,7 @@ public class XAManager {
       if (xa != null)
         xa.setRollbackOnly(e);
       
-      return true;
+      return appExn == null;
     }
     else
       return false;

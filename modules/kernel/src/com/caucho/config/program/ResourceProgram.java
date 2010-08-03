@@ -19,57 +19,34 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package com.caucho.config.types;
+package com.caucho.config.program;
+
+import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.types.ResourceGroupConfig;
 
 /**
- * Configuration for the init-param pattern.
+ * JavaEE resource program
  */
-public class Icon {
-  private String _smallIcon;
-  private String _largeIcon;
-
-  /**
-   * Sets the value
-   */
-  public void setValue(String value)
+public class ResourceProgram extends ConfigProgram {
+  private ResourceGroupConfig _resourceConfig;
+  
+  public ResourceProgram(ResourceGroupConfig resourceConfig)
   {
+    _resourceConfig = resourceConfig;
   }
-
-  /**
-   * Sets the small icon
-   */
-  public void setSmallIcon(String value)
+  
+  @Override
+  public <T> void inject(T bean, CreationalContext<T> env)
   {
-    _smallIcon = value;
-  }
-
-  public String getSmallIcon()
-  {
-    return _smallIcon;
-  }
-
-  /**
-   * Sets the large icon
-   */
-  public void setLargeIcon(String value)
-  {
-    _largeIcon = value;
-  }
-
-  public String getLargeIcon()
-  {
-    return _largeIcon;
-  }
-
-  public String toString()
-  {
-    return "Icon[]";
+    _resourceConfig.deploy();
   }
 }

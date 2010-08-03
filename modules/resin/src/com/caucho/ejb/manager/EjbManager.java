@@ -597,6 +597,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   /**
    * Handles the case where the environment is configuring
    */
+  @Override
   public void environmentBind(EnvironmentClassLoader loader)
   {
     bind();

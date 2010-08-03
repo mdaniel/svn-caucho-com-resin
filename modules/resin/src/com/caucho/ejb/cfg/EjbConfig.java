@@ -358,7 +358,6 @@ public class EjbConfig {
         setBeanConfig(bean.getEJBName(), bean);
       }      
       else if (annType.isAnnotationPresent(MessageDriven.class)) {
-        MessageDriven message = annType.getAnnotation(MessageDriven.class);
         EjbMessageBean<X> bean
           = new EjbMessageBean<X>(this, rawAnnType, annType, moduleName);
         bean.setInjectionTarget(injectTarget);
@@ -386,6 +385,7 @@ public class EjbConfig {
   /**
    * Finds an entity bean by its abstract schema.
    */
+  @SuppressWarnings("unchecked")
   public <X> EjbBean<X> findBeanByType(Class<X> type)
   {
     for (EjbBean<?> bean : _cfgBeans.values()) {
@@ -427,6 +427,8 @@ public class EjbConfig {
       for (EjbBeanConfigProxy configProxy : _proxyList) {
         configProxy.configure();
       }
+      
+      _proxyList.clear();
       
       ArrayList<EjbBean<?>> beanConfig = new ArrayList<EjbBean<?>>(_pendingBeans);
       _pendingBeans.clear();

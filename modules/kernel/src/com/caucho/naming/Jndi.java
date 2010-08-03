@@ -128,9 +128,9 @@ public class Jndi {
 
       try {
         if (context instanceof ContextImpl)
-          value = ((ContextImpl) context).lookupImpl(name);
+          value = ((ContextImpl) context).lookupLink(name);
         else
-          value = context.lookup(name);
+          value = context.lookupLink(name);
       } catch (NameNotFoundException e) {
       }
       

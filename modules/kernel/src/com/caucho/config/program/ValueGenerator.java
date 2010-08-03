@@ -36,7 +36,7 @@ import java.util.*;
  * Creates a new value.
  */
 abstract public class ValueGenerator implements ObjectProxy {
-  public Class getType()
+  public Class<?> getType()
   {
     return null;
   }

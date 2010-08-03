@@ -80,6 +80,13 @@ public abstract class ConfigProgram implements Comparable<ConfigProgram> {
   abstract public <T> void inject(T bean, 
                                   CreationalContext<T> createContext);
 
+  /**
+   * Binds the injection point
+   */
+  public void bind()
+  {
+  }
+
   public void addProgram(ConfigProgram program)
   {
     throw new UnsupportedOperationException("Cannot add a program to a BuilderProgram. You probably need a BuilderProgramContainer.");

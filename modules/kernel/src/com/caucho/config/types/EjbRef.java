@@ -253,11 +253,29 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   public void init()
     throws Exception
   {
-    Object value = Jndi.lookup(_ejbRefName);
+    super.init();
     
+    if (! isProgram())
+      deploy();
+  }
+
+  @Override
+  public Object getValue()
+  {
+    return Jndi.lookup(_ejbRefName);
+  }
+  
+  @Override
+  public void deploy()
+  {
+    Object value = Jndi.lookup(_ejbRefName);
+
     if (value != null)
       return;
     
+    if (_ejbRefType == null)
+      throw new ConfigException(L.l("<ejb-ref-type> is missing for <ejb-ref> {0}",
+                                    _ejbRefName));
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
@@ -267,7 +285,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       return;
     }
    
-    Jndi.bindDeepShort(_ejbRefName, this);
+    try {
+      Jndi.bindDeepShort(_ejbRefName, this);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
     
     // new BeanJndiProxy(injectManager, bean));
   }

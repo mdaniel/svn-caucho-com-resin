@@ -48,7 +48,7 @@ public class JndiLink {
   private static L10N L = new L10N(JndiLink.class);
 
   private String _name;
-  private Class _factoryClass;
+  private Class<?> _factoryClass;
   private String _description;
 
   private Hashtable _properties = new Hashtable();

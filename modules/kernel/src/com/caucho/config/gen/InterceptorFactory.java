@@ -469,10 +469,11 @@ public class InterceptorFactory<X>
   private void validatePassivating()
   {
     for (Class<?> cl : _classInterceptors) {
-      if (! Serializable.class.isAssignableFrom(cl))
+      if (! Serializable.class.isAssignableFrom(cl) && false) {
         throw new ConfigException(L.l("{0} has an invalid interceptor {1} because it's not serializable.",
                                       getBeanType().getJavaClass().getName(),
-                                      cl.getName()));        
+                                      cl.getName()));
+      }
     }
   }
   

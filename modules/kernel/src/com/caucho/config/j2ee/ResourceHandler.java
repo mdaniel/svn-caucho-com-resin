@@ -32,6 +32,8 @@ package com.caucho.config.j2ee;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.Resource;
 import javax.annotation.Resources;
@@ -56,8 +58,12 @@ import com.caucho.util.L10N;
  */
 public class ResourceHandler extends JavaeeInjectionHandler {
   private static final L10N L = new L10N(ResourceHandler.class);
-  private static HashMap<Class<?>,Class<?>> _boxingMap
+  private static final Logger log 
+    = Logger.getLogger(ResourceHandler.class.getName());
+  private static final HashMap<Class<?>,Class<?>> _boxingMap
     = new HashMap<Class<?>,Class<?>>();
+  
+  private static final Method _lookupMethod;
   
   public ResourceHandler(InjectManager manager)
   {
@@ -158,7 +164,6 @@ public class ResourceHandler extends JavaeeInjectionHandler {
     if (name != null && ! "".equals(name)) {
       bindJndi(name, gen, name);
     }
-    
   }
 
   private ValueGenerator generateContext(String loc,
@@ -169,15 +174,27 @@ public class ResourceHandler extends JavaeeInjectionHandler {
   {
     String name = resource.name();
     String mappedName = resource.mappedName();
-    String lookupName; // = resource.lookup();
+    String lookupName = null;
+    
+    if (_lookupMethod != null) {
+      try {
+        lookupName = (String) _lookupMethod.invoke(resource);
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
     
     if (! resource.type().equals(Object.class)
         && ! resource.type().equals(void.class)) {
       bindType = resource.type();
     }
 
-    lookupName = name;
-    ValueGenerator gen = lookupJndi(loc, bindType, lookupName);
+    ValueGenerator gen = null;
+
+    if (lookupName != null && ! "".equals(lookupName))
+      gen = new JndiValueGenerator(loc, bindType, lookupName);
+    else
+      gen = lookupJndi(loc, bindType, name);
     
     if (gen != null) {
       if (fullJndiName != null)
@@ -264,5 +281,15 @@ public class ResourceHandler extends JavaeeInjectionHandler {
     _boxingMap.put(long.class, Long.class);
     _boxingMap.put(float.class, Float.class);
     _boxingMap.put(double.class, Double.class);
+    
+    Method lookupMethod = null;
+    
+    try {
+      lookupMethod = Resource.class.getMethod("lookup");
+    } catch (Exception e) {
+      log.log(Level.ALL, e.toString(), e);
+    }
+    
+    _lookupMethod = lookupMethod;
   }
 }

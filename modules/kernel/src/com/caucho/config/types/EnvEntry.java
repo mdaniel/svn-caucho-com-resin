@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -137,8 +138,37 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     // actually, should register for validation
     if (_value == null)
       return;
+    
+    
+    if (! isProgram())
+      deploy();
+  }
+  
+  /**
+   * Configures the bean using the current program.
+   * 
+   * @param bean the bean to configure
+   * @param env the Config environment
+   */
+  @Override
+  public <T> void inject(T bean, CreationalContext<T> env)
+  {
+    
+  }
+  
+  @Override
+  public String getValue()
+  {
+    return _value;
+  }
 
-    Object value = _value;
+  @Override
+  public void deploy()
+  {
+    Object value = getValue();
+    
+    if (value == null)
+      return;
     
     LinkedHashSet<Type> types = new LinkedHashSet<Type>();
     
@@ -216,13 +246,18 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
     cdiManager.addBean(builder.singleton(value));
 
-    Jndi.bindDeepShort(_name, value);
+    try {
+      Jndi.bindDeepShort(_name, value);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
   /**
-   * Validates the resource-ref, i.e. checking that it exists in
+   * Validates the env-entry, i.e. checking that it exists in
    * JNDI.
    */
+  @Override
   public void validate()
     throws ConfigException
   {

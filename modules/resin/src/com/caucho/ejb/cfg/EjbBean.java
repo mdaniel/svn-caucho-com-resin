@@ -56,12 +56,15 @@ import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.config.types.EjbLocalRef;
+import com.caucho.config.types.EjbRef;
+import com.caucho.config.types.EnvEntry;
 import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.PostConstructType;
+import com.caucho.config.types.ResourceGroupConfig;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.make.ClassDependency;
@@ -131,6 +134,9 @@ public class EjbBean<X> extends DescriptionGroupConfig
   private ArrayList<ConfigProgram> _postConstructList
     = new ArrayList<ConfigProgram>();
   private ContainerProgram _serverProgram;
+  private ArrayList<ResourceGroupConfig> _resourceList
+    = new ArrayList<ResourceGroupConfig>();
+
 
   private ArrayList<Interceptor> _interceptors
     = new ArrayList<Interceptor>();
@@ -139,7 +145,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   private String _timeoutMethodName;
 
   private long _transactionTimeout;
-
+  
   private ArrayList<RemoveMethod> _removeMethods
     = new ArrayList<RemoveMethod>();
 
@@ -591,7 +597,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     AnnotatedTypeImpl<X> annType;
     
-    AnnotatedType<T> refType = ReflectionAnnotatedFactory.introspectType(remote);
+    AnnotatedType<?> refType = ReflectionAnnotatedFactory.introspectType(remote);
     
     annType = new AnnotatedTypeImpl(refType);
     
@@ -876,6 +882,48 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
     _serverProgram.addProgram(init);
   }
+  
+  //
+  // references and resources
+  //
+  
+  public EnvEntry createEnvEntry()
+  {
+    EnvEntry env = new EnvEntry();
+    
+    env.setProgram(true);
+    
+    _resourceList.add(env);
+    
+    return env;
+  }
+  
+  public EjbRef createEjbRef()
+  {
+    EjbRef ref = new EjbRef();
+    
+    ref.setProgram(true);
+    
+    _resourceList.add(ref);
+    
+    return ref;
+  }
+  
+  public EjbLocalRef createEjbLocalRef()
+  {
+    EjbLocalRef ref = new EjbLocalRef();
+    
+    ref.setProgram(true);
+    
+    _resourceList.add(ref);
+    
+    return ref;
+  }
+  
+  public ArrayList<ResourceGroupConfig> getResourceList()
+  {
+    return _resourceList;
+  }
 
   public void setInit(ContainerProgram init)
   {
@@ -951,39 +999,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
       introspect();
 
       initIntrospect();
-      
-      /*
-      _bean = createBeanGenerator();
-      
-      if (_bean == null)
-        throw new NullPointerException(getClass().getName() + ": createBeanGenerator returns null");
-
-      _bean.introspect();
-      */
-
-      // _bean.createViews();
-
-      // XXX: lifecycle refactor
-      /*
-      InterceptorBinding interceptor
-        = getConfig().getInterceptorBinding(getEJBName(), false);
-
-      if (_aroundInvokeMethodName != null) {
-        AnnotatedMethod<? super X> method
-          = getMethod(_aroundInvokeMethodName,
-                      new Class[] { InvocationContext.class });
-
-        if (method == null)
-          throw error(L.l("'{0}' is an unknown around-invoke method",
-                          _aroundInvokeMethodName));
-
-        // XXX: _bean.setAroundInvokeMethod(method.getMethod());
-      }
-
-      for (RemoveMethod method : _removeMethods) {
-        method.configure(_bean);
-      }
-      */
     } catch (ConfigException e) {
       throw ConfigException.createLine(_location, e);
     }
@@ -1053,23 +1068,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
     }
 
   }
-
-  /**
-   * Generates the class.
-   */
-  /*
-  public void generate(JavaClassGenerator javaGen, boolean isAutoCompile)
-    throws Exception
-  {
-    String fullClassName = _bean.getFullClassName();
-
-    if (javaGen.preload(fullClassName) != null) {
-    }
-    else if (isAutoCompile) {
-      javaGen.generate(_bean);
-    }
-  }
-  */
 
   /**
    * Deploys the bean.
@@ -1231,25 +1229,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
   }
 
   /**
-   * Assembles the generator.
-   */
-  public GenClass assembleGenerator(String fullClassName)
-    throws NoSuchMethodException, ConfigException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Introspects the bean's methods.
-   */
-  public void assembleBeanMethods()
-    throws ConfigException
-  {
-    if (getAnnotatedType() == null)
-      return;
-  }
-
-  /**
    * Finds the method in the class.
    *
    * @param cl owning class
@@ -1304,11 +1283,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public boolean isCMP1()
   {
     return false;
-  }
-
-  public boolean isEJB3()
-  {
-    return ! (isCMP() || isCMP1());
   }
 
   /**

@@ -38,7 +38,7 @@ import java.lang.reflect.*;
 /**
  * Base configuration for ejb-ref and resource-env-ref.
  */
-abstract public class BaseRef {
+abstract public class BaseRef extends ResourceGroupConfig {
   protected final Path _modulePath;
 
   protected String _sourceEjbName;

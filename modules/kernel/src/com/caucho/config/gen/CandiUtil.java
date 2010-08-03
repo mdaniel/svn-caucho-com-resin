@@ -202,7 +202,8 @@ public class CandiUtil {
   {
     Class<?> beanClass = bean.getBeanClass();
 
-    if (! Serializable.class.isAssignableFrom(beanClass)) {
+    if (! Serializable.class.isAssignableFrom(beanClass)
+        && false) {
       ConfigException exn
       = new ConfigException(L.l("{0}: {1} is an invalid {2} because it is not serializable.",
                                 cl.getName(),

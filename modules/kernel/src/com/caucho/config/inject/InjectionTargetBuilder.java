@@ -1016,7 +1016,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       _boundProgram.inject(instance, env);
     }
     
-    private void bind()
+    @Override
+    public void bind()
     {
       _boundProgram = _handler.introspectField(_field);
     }
@@ -1048,7 +1049,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       _boundProgram.inject(instance, env);
     }
     
-    private void bind()
+    @Override
+    public void bind()
     {
       _boundProgram = _handler.introspectType(_annotatedType);
     }
@@ -1087,7 +1089,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       _boundProgram.inject(instance, env);
     }
     
-    private void bind()
+    @Override
+    public void bind()
     {
       _boundProgram = _handler.introspectMethod(_method);
     }

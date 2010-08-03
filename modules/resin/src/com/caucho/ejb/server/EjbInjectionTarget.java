@@ -30,14 +30,12 @@
 package com.caucho.ejb.server;
 
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
 import javax.ejb.TimedObject;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerService;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
@@ -49,19 +47,16 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.PostConstructConfig;
 import com.caucho.ejb.cfg.PreDestroyConfig;
 import com.caucho.ejb.timer.EjbTimerService;
-import com.caucho.naming.Jndi;
 
 /**
  * Creates an configures an ejb instance
  */
 public class EjbInjectionTarget<T> {
-  private static final Logger log 
-    = Logger.getLogger(EjbInjectionTarget.class.getName());
-  
-  private AbstractEjbBeanManager<T> _server;
+  private AbstractEjbBeanManager<T> _manager;
   
   private Class<T> _ejbClass;
   private AnnotatedType<T> _annotatedType;
@@ -71,6 +66,7 @@ public class EjbInjectionTarget<T> {
   private ClassLoader _envLoader;
   
   private InjectionTarget<T> _injectionTarget;
+  private ArrayList<ConfigProgram> _resourceProgram;
 
   private PreDestroyConfig _preDestroyConfig;
   private PostConstructConfig _postConstructConfig;
@@ -79,10 +75,10 @@ public class EjbInjectionTarget<T> {
   private Method _timeoutMethod;
   private TimerService _timerService;
   
-  EjbInjectionTarget(AbstractEjbBeanManager<T> server,
+  EjbInjectionTarget(AbstractEjbBeanManager<T> manager,
                      AnnotatedType<T> annotatedType)
   {
-    _server = server;
+    _manager = manager;
     _ejbClass = annotatedType.getJavaClass();
     _annotatedType = annotatedType;
     
@@ -173,7 +169,7 @@ public class EjbInjectionTarget<T> {
     _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
     
     if (_timeoutMethod != null)
-      _timerService = new EjbTimerService(_server);
+      _timerService = new EjbTimerService(_manager);
 
     // Injection binding occurs in the start phase
 
@@ -184,6 +180,8 @@ public class EjbInjectionTarget<T> {
       _injectionTarget = inject.createInjectionTarget(_ejbClass);
       _injectionTarget.getInjectionPoints();
     }
+    
+    _resourceProgram = _manager.getResourceProgram(_ejbClass);
 
     if (_timerService != null) {
       BeanBuilder<TimerService> factory = inject.createBeanFactory(TimerService.class);
@@ -225,8 +223,6 @@ public class EjbInjectionTarget<T> {
     if (_bean == null)
       bindInjection();
     
-    InjectManager inject = InjectManager.create();
-    
     T instance = CreationalContextImpl.find(parentEnv, _bean);
     
     if (instance != null)
@@ -239,7 +235,16 @@ public class EjbInjectionTarget<T> {
     CreationalContextImpl<T> env 
       = new DependentCreationalContext<T>(_bean, parentEnv, null);
     
-    instance = _bean.create(env);
+    // instance = _bean.create(env);
+    instance = _injectionTarget.produce(env);
+    
+    _injectionTarget.inject(instance, env);
+    
+    for (ConfigProgram program : _resourceProgram) {
+      program.inject(instance, env);
+    }
+    
+    _injectionTarget.postConstruct(instance);
     
     return instance;
   }
@@ -279,7 +284,13 @@ public class EjbInjectionTarget<T> {
         if (target != selfInjectionTarget) {
           selfInjectionTarget.inject(instance, cxt);
         }
+      }
+      
+      for (ConfigProgram program : _resourceProgram) {
+        program.inject(instance, cxt);
+      }
 
+      if (selfInjectionTarget != null) {
         selfInjectionTarget.postConstruct(instance);
       }
     } finally {
@@ -302,17 +313,6 @@ public class EjbInjectionTarget<T> {
 
     try {
       thread.setContextClassLoader(_envLoader);
-
-      /*
-      if (_destroyInject != null) {
-        ConfigContext env = null;
-        if (env == null)
-          env = new ConfigContext();
-  
-        for (ConfigProgram inject : _destroyInject)
-          inject.inject(instance, env);
-      }
-      */
 
       if (getInjectionTarget() != null) {
         getInjectionTarget().preDestroy(instance);

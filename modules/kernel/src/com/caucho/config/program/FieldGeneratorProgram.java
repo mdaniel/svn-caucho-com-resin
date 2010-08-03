@@ -86,6 +86,7 @@ public class FieldGeneratorProgram extends ConfigProgram
         value = PortableRemoteObject.narrow(value, _field.getType());
       }
       */
+      
 
       _field.set(bean, value);
     } catch (ConfigException e) {
