@@ -457,6 +457,12 @@ namespace Caucho
     [STAThread]
     public static void Main(String[] args)
     {
+      try {
+        Util.TestDotNetCapability();
+      } catch (Exception) {
+        MessageBox.Show(".NET Version 3.5 is required.");
+        Environment.Exit(1);
+      }
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
       SetupForm setupForm = new SetupForm(new Setup());
@@ -603,8 +609,8 @@ namespace Caucho
     public String GetServiceArgs()
     {
       StringBuilder sb = new StringBuilder();
-      sb.Append("-service -name ");
-      sb.Append(Name);
+      sb.Append("-service -name ").Append("\"");
+      sb.Append(Name).Append("\"");
       if (Conf != null)
         sb.Append(" -conf ").Append('"').Append(Conf).Append('"');
 

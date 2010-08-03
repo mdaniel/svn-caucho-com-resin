@@ -16,7 +16,7 @@
  * of NON-INFRINGEMENT.  See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU General Public License 
  * along with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
@@ -192,6 +192,11 @@ namespace Caucho
         return new String(buf, 0, cursor - 1);
       else
         return new String(buf, 0, cursor);
+    }
+
+    public static void TestDotNetCapability()
+    {
+      HashSet<String> foundVersions = new HashSet<String>();
     }
 
     public static IList FindJava()
