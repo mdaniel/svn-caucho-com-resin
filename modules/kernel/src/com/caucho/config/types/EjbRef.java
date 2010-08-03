@@ -295,7 +295,6 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   }
 
   public void bind()
-    throws Exception
   {
     // initBinding(null);
   }
