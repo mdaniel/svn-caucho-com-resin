@@ -445,26 +445,29 @@ class WatchdogChildProcess
     env.put("CLASSPATH", classPath);
 
     if (_watchdog.is64bit()) {
-      appendEnvPath(env,
+      WatchdogClient.appendEnvPath(env,
                     "LD_LIBRARY_PATH",
                     resinHome.lookup("libexec64").getNativePath());
-      appendEnvPath(env,
+      WatchdogClient.appendEnvPath(env,
                     "DYLD_LIBRARY_PATH",
                     resinHome.lookup("libexec64").getNativePath());
-      appendEnvPath(env,
-                    "PATH",
-                    resinHome.lookup("win64").getNativePath());
+      if (CauchoSystem.isWindows())
+        WatchdogClient.appendEnvPath(env,
+                      "Path",
+                      resinHome.lookup("win64").getNativePath());
     }
     else {
-      appendEnvPath(env,
+      WatchdogClient.appendEnvPath(env,
                     "LD_LIBRARY_PATH",
                     resinHome.lookup("libexec").getNativePath());
-      appendEnvPath(env,
+      WatchdogClient.appendEnvPath(env,
                     "DYLD_LIBRARY_PATH",
                     resinHome.lookup("libexec").getNativePath());
-      appendEnvPath(env,
-                    "PATH",
-                    resinHome.lookup("win32").getNativePath());
+
+      if (CauchoSystem.isWindows())
+        WatchdogClient.appendEnvPath(env,
+                      "Path",
+                      resinHome.lookup("win32").getNativePath());
     }
 
     return env;
@@ -628,18 +631,6 @@ class WatchdogChildProcess
       else
         out.println("" + key + ": " + value);
     }
-  }
-
-  private void appendEnvPath(Map<String,String> env,
-                             String prop,
-                             String value)
-  {
-    String oldValue = env.get(prop);
-
-    if (oldValue != null && ! "".equals(oldValue))
-      value = value + File.pathSeparator + oldValue;
-
-    env.put(prop, value);
   }
 
   Boot getJniBoot()

@@ -151,8 +151,7 @@ namespace Caucho
 
       try {
         Directory.SetCurrentDirectory(_rootDirectory);
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         Error(String.Format("Can't change dir to {0} due to: {1}", _rootDirectory, e), e);
 
         return 1;
@@ -160,10 +159,9 @@ namespace Caucho
 
       Environment.SetEnvironmentVariable("CLASSPATH", _cp);
       Environment.SetEnvironmentVariable("PATH",
-                                         String.Format("{0};{1};{2}\\win32;{2}\\win64;\\openssl\\bin",
+                                         String.Format("{0};{1};\\openssl\\bin;.",
                                                        _javaHome + "\\bin",
-                                                       Environment.GetEnvironmentVariable("PATH"),
-                                                       _resinHome));
+                                                       Environment.GetEnvironmentVariable("PATH")));
 
       _resinDataDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
       _resinDataDir = _resinDataDir.Substring(0, _resinDataDir.LastIndexOf('\\')) + "\\resin-data";
@@ -255,8 +253,7 @@ namespace Caucho
         Process process = null;
         try {
           process = Process.Start(startInfo);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
           Error(e.Message, e);
 
           return;
@@ -277,7 +274,7 @@ namespace Caucho
 
         while (!process.HasExited)
           process.WaitForExit(500);
-        
+
         process.CancelErrorRead();
         process.CancelOutputRead();
 
