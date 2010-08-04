@@ -120,7 +120,13 @@ public class IncludeRequest extends CauchoRequestWrapper {
   {
     return _invocation.getURI();
   }
-  
+
+  @Override
+  public String getContextPath()
+  {
+    return _invocation.getContextPath();
+  }
+
   public String getPageContextPath()
   {
     return _invocation.getContextPath();
