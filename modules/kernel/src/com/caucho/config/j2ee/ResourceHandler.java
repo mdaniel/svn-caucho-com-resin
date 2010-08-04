@@ -105,6 +105,8 @@ public class ResourceHandler extends JavaeeInjectionHandler {
     
     ValueGenerator gen = generateContext(loc, bindType, jndiName, resource);
     
+    bindJndi(javaMethod, gen);
+    
     return new MethodGeneratorProgram(method.getJavaMember(), gen);
   }
 

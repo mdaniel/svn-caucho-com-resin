@@ -36,7 +36,7 @@ import com.caucho.vfs.*;
 public class EjbLocalRef
   extends EjbRef
 {
-  private Class _local;
+  private Class<?> _local;
 
   public EjbLocalRef()
   {
@@ -62,18 +62,19 @@ public class EjbLocalRef
     return "<ejb-local-ref>";
   }
 
-  public void setLocalHome(Class home)
+  public void setLocalHome(Class<?> home)
   {
     // XXX: should distinguish
     setHome(home);
   }
 
-  public Class getLocal()
+  @Override
+  public Class<?> getLocal()
   {
     return _local;
   }
 
-  public void setLocal(Class local)
+  public void setLocal(Class<?> local)
   {
     //setRemote(local);
 

@@ -159,6 +159,25 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       throw ConfigException.create(e);
     }
   }
+  
+  protected void bindJndi(Method method, ValueGenerator gen)
+  {
+    String methodName = method.getName();
+    
+    if (methodName.startsWith("set"))
+      methodName = (Character.toLowerCase(methodName.charAt(3))
+                    + methodName.substring(4));
+    
+    String name = ("java:comp/env/"
+                   + method.getDeclaringClass().getName()
+                   + "/" + methodName);
+
+    try {
+      Jndi.bindDeep(name, gen);
+    } catch (NamingException e) {
+      throw ConfigException.create(e);
+    }
+  }
 
   protected String getLocation(Field javaField)
   {

@@ -29,9 +29,6 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.type.*;
-
 /**
  * A saved program that avoids interpreting flow operations
  */

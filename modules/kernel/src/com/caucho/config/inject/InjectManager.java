@@ -123,6 +123,7 @@ import com.caucho.config.j2ee.EjbHandler;
 import com.caucho.config.j2ee.PersistenceContextHandler;
 import com.caucho.config.j2ee.PersistenceUnitHandler;
 import com.caucho.config.j2ee.ResourceHandler;
+import com.caucho.config.program.ResourceProgramManager;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.BaseTypeFactory;
@@ -219,6 +220,9 @@ public final class InjectManager
 
   private HashMap<Class<?>,InjectionPointHandler> _injectionMap
     = new HashMap<Class<?>,InjectionPointHandler>();
+  
+  private ResourceProgramManager _resourceManager
+    = new ResourceProgramManager();
 
   //
   // self configuration
@@ -827,7 +831,7 @@ public final class InjectManager
 
   /**
    * Returns a new instance for a class, but does not register the
-   * component with webbeans.
+   * component with CDI.
    */
   public <T> BeanBuilder<T> createBeanFactory(AnnotatedType<T> type)
   {
@@ -1206,6 +1210,11 @@ public final class InjectManager
 
     registerJmx(bean);
   }
+  
+  public ResourceProgramManager getResourceManager()
+  {
+    return _resourceManager;
+  }
 
   private void registerJmx(Bean<?> bean)
   {
@@ -1313,6 +1322,9 @@ public final class InjectManager
    */
   private Set<Bean<?>> resolve(Type type, Annotation []bindings)
   {
+    if (type == null)
+      throw new NullPointerException();
+    
     if (bindings == null || bindings.length == 0) {
       if (Object.class.equals(type))
         return resolveAllBeans();

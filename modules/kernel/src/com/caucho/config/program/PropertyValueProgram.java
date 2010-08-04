@@ -31,12 +31,12 @@ package com.caucho.config.program;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.config.attribute.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
 
 /**
  * A saved program for configuring an object.

@@ -151,6 +151,9 @@ public class PostConstructProgram extends ConfigProgram
 
     if (! _init.getName().equals(init.getName()))
       return false;
+    
+    if (! init.getDeclaringClass().equals(_init.getDeclaringClass()))
+      return false;
 
     Class<?> []aParam = _init.getParameterTypes();
     Class<?> []bParam = init.getParameterTypes();
@@ -174,8 +177,6 @@ public class PostConstructProgram extends ConfigProgram
 
   private static class ParamProgram {
     private final InjectManager _inject;
-    private final Type _type;
-    private final Annotation []_bindings;
     private final AbstractInjectionPoint _injectionPoint;
 
     ParamProgram(InjectManager inject,
@@ -184,9 +185,6 @@ public class PostConstructProgram extends ConfigProgram
                  Annotation []annList)
     {
       _inject = inject;
-      _type = type;
-      _bindings = bindings;
-
       Bean<?> bean = null;
       Member member = null;
       HashSet<Annotation> bindingSet = new HashSet<Annotation>();

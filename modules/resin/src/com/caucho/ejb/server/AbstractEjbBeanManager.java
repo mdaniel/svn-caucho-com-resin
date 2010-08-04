@@ -562,8 +562,6 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
 
       _loader.start();
 
-      bindContext();
-
       if (_serverProgram != null)
         _serverProgram.configure(this);
 

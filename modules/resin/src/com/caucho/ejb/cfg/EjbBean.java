@@ -62,7 +62,9 @@ import com.caucho.config.types.EnvEntry;
 import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.PostConstructType;
+import com.caucho.config.types.ResourceEnvRef;
 import com.caucho.config.types.ResourceGroupConfig;
+import com.caucho.config.types.ResourceRef;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -892,6 +894,8 @@ public class EjbBean<X> extends DescriptionGroupConfig
     EnvEntry env = new EnvEntry();
     
     env.setProgram(true);
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    env.setJndiClassLoader(loader);
     
     _resourceList.add(env);
     
@@ -903,6 +907,8 @@ public class EjbBean<X> extends DescriptionGroupConfig
     EjbRef ref = new EjbRef();
     
     ref.setProgram(true);
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    ref.setJndiClassLoader(loader);
     
     _resourceList.add(ref);
     
@@ -912,6 +918,32 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public EjbLocalRef createEjbLocalRef()
   {
     EjbLocalRef ref = new EjbLocalRef();
+    
+    ref.setProgram(true);
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    ref.setJndiClassLoader(loader);
+    
+    _resourceList.add(ref);
+    
+    return ref;
+  }
+  
+  public ResourceRef createResourceRef()
+  {
+    ResourceRef ref= new ResourceRef();
+    
+    ref.setProgram(true);
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    ref.setJndiClassLoader(loader);
+    
+    _resourceList.add(ref);
+    
+    return ref;
+  }
+  
+  public ResourceEnvRef createResourceEnvRef()
+  {
+    ResourceEnvRef ref = new ResourceEnvRef();
     
     ref.setProgram(true);
     

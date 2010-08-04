@@ -29,13 +29,17 @@
 
 package com.caucho.config.types;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ResourceInjectionTargetProgram;
 import com.caucho.config.program.ResourceProgram;
@@ -45,11 +49,11 @@ import com.caucho.util.L10N;
  * Configuration for the resource group
  */
 abstract public class ResourceGroupConfig extends ConfigProgram {
+  private static final Logger log 
+    = Logger.getLogger(ResourceGroupConfig.class.getName());
   private static final L10N L = new L10N(ResourceGroupConfig.class);
   
   private String _location = "";
-
-  private String _description;
 
   private String _defaultInjectionClass;
 
@@ -59,6 +63,8 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
   private String _lookupName;
   
   private boolean _isProgram;
+  
+  private ClassLoader _jndiClassLoader;
 
   public ResourceGroupConfig()
   {
@@ -86,7 +92,6 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
    */
   public void setDescription(String description)
   {
-    _description = description;
   }
   
   /**
@@ -119,6 +124,17 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
   {
     return _isProgram;
   }
+  
+  public void setJndiClassLoader(ClassLoader loader)
+  {
+    _jndiClassLoader = loader;
+  }
+  
+  public ClassLoader getJndiClassLoader()
+  {
+    return _jndiClassLoader;
+  }
+
 
   /**
    * Registers any injection targets
@@ -127,6 +143,34 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
   public void init()
     throws Exception
   {
+    if (! isProgram())
+      deploy();
+  }
+  
+  public void deploy()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    InjectManager cdiManager = InjectManager.getCurrent();
+    
+    for (InjectionTarget target : _injectionTargets) {
+      String targetClassName = target.getInjectionTargetClass();
+      String targetMethod = target.getInjectionTargetName();
+      
+      try {
+        Class<?> targetClass = Class.forName(targetClassName, false, loader);
+        
+        ResourceInjectionTargetProgram resourceProgram
+            = new ResourceInjectionTargetProgram(this, 
+                                                 targetClass,
+                                                 targetMethod);
+        
+        cdiManager.getResourceManager().addResource(resourceProgram);
+      } catch (Exception e) {
+        throw new ConfigException(L.l("'{0}' is an unknown class in {1}",
+                                      targetClassName, this));
+      }
+    }
   }
   
   public ConfigProgram getProgram()
@@ -136,24 +180,40 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
   
   public ConfigProgram getProgram(Class<?> cl)
   {
+    throw new IllegalStateException();
+  }
+  
+  protected Class<?> inferTypeFromInjection()
+  {
     for (InjectionTarget target : _injectionTargets) {
-      String targetClassName = target.getInjectionTargetClass();
-      String targetMethod = target.getInjectionTargetName();
-      
       try {
+        String className = target.getInjectionTargetClass();
+        String name = target.getInjectionTargetName();
+        
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         
-        Class<?> targetClass = Class.forName(targetClassName, false, loader);
+        Class<?> cl = Class.forName(className, false, loader);
         
-        if (targetClass.isAssignableFrom(cl)) {
-          return new ResourceInjectionTargetProgram(this, 
-                                                    targetClass,
-                                                    targetMethod);
-        }
-      } catch (ClassNotFoundException e) {
-        throw new ConfigException(L.l("'{0}' is an unknown class in injection-target",
-                                      targetClassName));
+        Class<?> type = findProperty(cl, name);
+        
+        if (type != null)
+          return type;
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
       }
+    }
+    
+    return null;
+  }
+  
+  private Class<?> findProperty(Class<?> cl, String name)
+  {
+    if (cl == null)
+      return null;
+    
+    for (Field field : cl.getDeclaredFields()) {
+      if (name.equals(field.getName()))
+        return field.getType();
     }
     
     return null;
@@ -172,10 +232,6 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
   public Object getValue()
   {
     return null;
-  }
-  
-  public void deploy()
-  {
   }
 
   protected ConfigException error(String msg)

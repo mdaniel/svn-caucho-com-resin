@@ -48,6 +48,7 @@ public class ExprProgram extends ConfigProgram {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T> T create(ConfigType<T> type, CreationalContext<T> env)
     throws ConfigException
   {

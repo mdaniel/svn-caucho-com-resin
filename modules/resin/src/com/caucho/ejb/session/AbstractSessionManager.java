@@ -202,10 +202,12 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       for (AnnotatedType<? super X> remoteApi : _lazyGenerator.getRemoteApi()) {
         createContext(remoteApi.getJavaClass());
       }
+
+      bindContext();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
-
+    
     registerCdiBeans();
 
     log.fine(this + " initialized");

@@ -28,33 +28,26 @@
 
 package com.caucho.config.types;
 
-import com.caucho.util.L10N;
+import javax.ejb.EJBContext;
+
 import com.caucho.vfs.Path;
 
 /**
  * Configuration for the init-param pattern.
  */
-public class ResourceEnvRef extends BaseRef {
-  private static L10N L = new L10N(ResourceEnvRef.class);
+//public class ResourceEnvRef extends BaseRef {
 
-  private String _name;
-  private Class _type;
-
-
+public class ResourceEnvRef extends ResourceRef {
   public ResourceEnvRef()
   {
+    setResType(EJBContext.class);
   }
 
   public ResourceEnvRef(Path modulePath, String sourceEjbName)
   {
-    super(modulePath, sourceEjbName);
-  }
-
-  /**
-   * Sets the description.
-   */
-  public void setDescription(String description)
-  {
+    // super(modulePath, sourceEjbName);
+    
+    setResType(EJBContext.class);
   }
 
   /**
@@ -62,65 +55,16 @@ public class ResourceEnvRef extends BaseRef {
    */
   public void setResourceEnvRefName(String name)
   {
-    _name = name;
+    setResRefName(name);
   }
 
   /**
    * Sets the type
    */
-  public void setResourceEnvRefType(Class type)
+  public void setResourceEnvRefType(Class<?> type)
   {
-    _type = type;
-  }
-
-  /**
-   * Initialize the resource.
-   */
-  // XXX TCK: @PostConstruct, needs QA, called from EjbConfig.
-  /*
-  public void initBinding(AbstractServer ejbServer)
-    throws Exception
-  {
-    String jndiName = null;
-
-    // XXX TCK: merge this code with the one in InjectIntrospector.
-    if (javax.ejb.SessionContext.class.equals(_type)) {
-      jndiName = "java:comp/env/sessionContext";
-    }
-
-    Object targetValue = null;
-
-    if (jndiName != null) {
-      targetValue = Jndi.lookup(jndiName);
-    }
-
-    // XXX TCK, needs QA
-    if (_injectionTarget != null && targetValue != null) {
-      String className = _injectionTarget.getInjectionTargetClass();
-      String fieldName = _injectionTarget.getInjectionTargetName();
-
-      if (ejbServer != null) {
-        Class cl = getJavaClass(className);
-
-        AccessibleObject field = getFieldOrMethod(cl, fieldName);
-
-        if (field != null) {
-          ConfigProgram program;
-
-          if (field instanceof Method)
-            program = new MethodValueProgram((Method) field, targetValue);
-          else
-            program = new FieldValueProgram((Field) field, targetValue);
-
-          ejbServer.getInitProgram().addProgram(program);
-        }
-      }
-    }
-  }
-  */
-
-  public String toString()
-  {
-    return "ResourceEnvRef[" + _name + "]";
+    // _type = type;
+    
+    setResType(type);
   }
 }

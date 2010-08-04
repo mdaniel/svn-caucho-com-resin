@@ -29,40 +29,56 @@
 
 package com.caucho.config.types;
 
+import com.caucho.config.inject.BeanBuilder;
+import com.caucho.config.inject.DefaultLiteral;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.Names;
+import com.caucho.el.Expr;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.naming.Jndi;
+import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.inject.spi.Bean;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Configuration for the init-param pattern.
  */
-public class ResourceRef implements Validator {
+public class ResourceRef extends ResourceGroupConfig
+  implements Validator, ObjectProxy {
   private static Logger log = Logger.getLogger(ResourceRef.class.getName());
   private static L10N L = new L10N(ResourceRef.class);
 
   private String _location = "";
 
   private String _name;
-  private Class _type;
+  private Class<?> _type;
   private String _description;
   private boolean _sharing;
 
   private ConfigProgram _init;
   private HashMap<String,String> _params = new HashMap<String,String>();
+  
+  private Bean<?> _bean;
+  private Object _value;
 
   private InjectionTarget _injectionTarget;
 
@@ -116,7 +132,7 @@ public class ResourceRef implements Validator {
   /**
    * Sets the type
    */
-  public void setResType(Class type)
+  public void setResType(Class<?> type)
   {
     _type = type;
   }
@@ -138,7 +154,7 @@ public class ResourceRef implements Validator {
   /**
    * Sets the type
    */
-  public void setClassName(Class type)
+  public void setClassName(Class<?> type)
   {
     _type = type;
   }
@@ -154,7 +170,7 @@ public class ResourceRef implements Validator {
   /**
    * Gets the type;
    */
-  public Class getResType()
+  public Class<?> getResType()
   {
     return _type;
   }
@@ -188,47 +204,90 @@ public class ResourceRef implements Validator {
    */
   @PostConstruct
   public void init()
-    throws Throwable
   {
     if (_init == null && _params.size() == 0) {
       return;
     }
 
-    Class cl = _type;
+    try {
+      Class<?> cl = _type;
 
-    if (javax.sql.DataSource.class.equals(_type))
-      cl = Class.forName("com.caucho.sql.DBPool");
-    /*
-    else if (javax.sql.XADataSource.class.equals(_type))
-      cl = com.caucho.sql.XAPool.class;
-    */
+      if (javax.sql.DataSource.class.equals(_type))
+        cl = Class.forName("com.caucho.sql.DBPool");
 
-    Object obj = cl.newInstance();
+      Object obj = cl.newInstance();
 
-    if (_init != null)
-      _init.configure(obj);
+      if (_init != null)
+        _init.configure(obj);
 
-    Iterator iter = _params.keySet().iterator();
-    while (iter.hasNext()) {
-      String key = (String) iter.next();
-      String value = (String) _params.get(key);
+      Iterator iter = _params.keySet().iterator();
+      while (iter.hasNext()) {
+        String key = (String) iter.next();
+        String value = (String) _params.get(key);
 
-      Config.setAttribute(obj, key, value);
-    }
+        Config.setAttribute(obj, key, value);
+      }
 
-    if (obj instanceof ClassLoaderListener) {
-      ClassLoaderListener listener = (ClassLoaderListener) obj;
+      if (obj instanceof ClassLoaderListener) {
+        ClassLoaderListener listener = (ClassLoaderListener) obj;
 
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      for (; loader != null; loader = loader.getParent()) {
-        if (loader instanceof EnvironmentClassLoader) {
-          ((DynamicClassLoader) loader).addListener(listener);
-          break;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        for (; loader != null; loader = loader.getParent()) {
+          if (loader instanceof EnvironmentClassLoader) {
+            ((DynamicClassLoader) loader).addListener(listener);
+            break;
+          }
         }
       }
+      
+      _value = obj;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
+  }
 
-    Jndi.bindDeep(_name, obj);
+  @Override
+  public void deploy()
+  {
+    Object value = getValue();
+    
+    if (_value == null) {
+      InjectManager manager = InjectManager.getCurrent();
+      Set<Bean<?>> beans = manager.getBeans(_type);
+      
+      _bean = manager.resolve(beans);
+
+      value = this;
+    }
+System.out.println("DEPLOY:" + value + " " + _bean + " " + this);
+    try {
+      Jndi.bindDeepShort(_name, value);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+ 
+  @Override
+  public Object getValue()
+  {
+    Object value;
+    
+    if (_value != null)
+      value = _value;
+    else {
+      InjectManager cdiManager = InjectManager.getCurrent();
+      
+      value = cdiManager.getReference(_bean);
+    }
+    System.out.println("VALUE: " + value + " " + _bean + " " + this);
+    
+    return value;
+  }
+  
+  @Override
+  public Object createObject(Hashtable<?,?> env)
+  {
+    return getValue();
   }
 
   /**

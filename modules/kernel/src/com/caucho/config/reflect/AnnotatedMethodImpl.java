@@ -125,8 +125,14 @@ public class AnnotatedMethodImpl<T>
 
   public static boolean isMatch(Method methodA, Method methodB)
   {
-    if (! methodA.getName().equals(methodB.getName()))
+    if (! methodA.getName().equals(methodB.getName())) {
       return false;
+    }
+    
+    // ejb/4018 
+    if (! methodA.getDeclaringClass().equals(methodB.getDeclaringClass())) {
+      return false;
+    }
 
     Class<?> []paramA = methodA.getParameterTypes();
     Class<?> []paramB = methodB.getParameterTypes();

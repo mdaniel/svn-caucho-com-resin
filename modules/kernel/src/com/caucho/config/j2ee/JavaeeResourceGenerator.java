@@ -60,22 +60,22 @@ public class JavaeeResourceGenerator extends ValueGenerator {
     = Logger.getLogger(JavaeeResourceGenerator.class.getName());
   private static final L10N L = new L10N(JavaeeResourceGenerator.class);
   
-  private static HashMap<Class,Class> _primitiveTypeMap
-    = new HashMap<Class,Class>();
+  private static HashMap<Class<?>,Class<?>> _primitiveTypeMap
+    = new HashMap<Class<?>,Class<?>>();
 
   private final String _location;
-  private final Class _fieldType;
-  private final Class _type;
+  private final Class<?> _fieldType;
+  private final Class<?> _type;
   private final String _jndiName;
   private final String _mappedName;
   private final String _beanName;
 
   private InjectManager _beanManager;
-  private Bean _bean;
+  private Bean<?> _bean;
 
   JavaeeResourceGenerator(String location,
-                          Class fieldType,
-                          Class type,
+                          Class<?> fieldType,
+                          Class<?> type,
                           String jndiName,
                           String mappedName,
                           String beanName)

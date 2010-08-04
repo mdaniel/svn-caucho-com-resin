@@ -31,6 +31,8 @@ package com.caucho.config.program;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.rmi.PortableRemoteObject;
@@ -41,6 +43,8 @@ import com.caucho.util.L10N;
 
 public class MethodGeneratorProgram extends ConfigProgram
 {
+  private static final Logger log
+    = Logger.getLogger(MethodGeneratorProgram.class.getName());
   private static final L10N L = new L10N(MethodGeneratorProgram.class);
 
   private Method _method;
@@ -75,29 +79,35 @@ public class MethodGeneratorProgram extends ConfigProgram
   public <T> void inject(T bean, CreationalContext<T> env)
     throws ConfigException
   {
+    Class<?> type = getType();
+    
+    Object value = _gen.create();
+    
     try {
-      Class<?> type = getType();
-      
-      Object value = _gen.create();
-      
       // XXX TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1, needs QA
       if (! type.isAssignableFrom(value.getClass())) {
-        value = PortableRemoteObject.narrow(value, getType());
+        try {
+          value = PortableRemoteObject.narrow(value, getType());
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
 
       if (! type.isAssignableFrom(value.getClass())) {
-
-        throw new ConfigException(location()
-                                  + L.l("Resource type {0} is not assignable to method '{1}' of type {2}.",
-                                        value.getClass().getName(),
-                                        _method.getName(),
-                                        type.getName()));
       }
 
       _method.invoke(bean, value);
     } catch (InvocationTargetException e) {
       throw new ConfigException(location() + e.getCause().getMessage(),
                                 e.getCause());
+    } catch (IllegalArgumentException e) {
+
+      throw new ConfigException(location()
+                                + L.l("Resource type {0} is not assignable to method '{1}' of type {2}.",
+                                      value.getClass().getName(),
+                                      _method.getName(),
+                                      type.getName()),
+                                e);
     } catch (Exception e) {
       throw new ConfigException(location() + e.getMessage(), e);
     }

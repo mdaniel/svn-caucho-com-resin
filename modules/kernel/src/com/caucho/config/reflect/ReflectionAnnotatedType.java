@@ -94,7 +94,7 @@ public class ReflectionAnnotatedType<T>
     
     if (parentClass != null && ! parentClass.equals(Object.class))
       _parentType = ReflectionAnnotatedFactory.introspectType(parentClass);
-
+    
     introspect(_javaClass);
   }
 
@@ -213,10 +213,15 @@ public class ReflectionAnnotatedType<T>
       if (method.getDeclaringClass().equals(Object.class))
         continue;
       
+      // ejb/4018
+      // hasBeanAnnotation(method)
       if (hasBeanAnnotation(method)
           || ! Modifier.isPrivate(method.getModifiers())) {
-        AnnotatedMethod<?> childMethod
-          = AnnotatedTypeUtil.findMethod(_methodSet, method);
+        AnnotatedMethod<?> childMethod = null;
+        
+        if (! Modifier.isPrivate(method.getModifiers())) {
+          childMethod = AnnotatedTypeUtil.findMethod(_methodSet, method);
+        }
             
         if (childMethod == null) {
           _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
@@ -250,8 +255,9 @@ public class ReflectionAnnotatedType<T>
       for (Class<?> superInterface : cl.getInterfaces()) 
         introspectMethods(superInterface);
     }
-    else
+    else {
       introspectParentMethods(_parentType);
+    }
   }
 
   private void introspectParentMethods(AnnotatedType<?> parentType)
@@ -264,8 +270,10 @@ public class ReflectionAnnotatedType<T>
       
       if (hasBeanAnnotation(javaMethod)
           || ! Modifier.isPrivate(javaMethod.getModifiers())) {
-        AnnotatedMethod<?> childMethod
-          = AnnotatedTypeUtil.findMethod(_methodSet, javaMethod);
+        AnnotatedMethod<?> childMethod = null;
+        
+        if (! Modifier.isPrivate(javaMethod.getModifiers()))
+          childMethod = AnnotatedTypeUtil.findMethod(_methodSet, javaMethod);
             
         if (childMethod == null) {
           _methodSet.add((AnnotatedMethod<? super T>) annMethod);

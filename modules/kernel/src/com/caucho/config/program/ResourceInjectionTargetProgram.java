@@ -31,20 +31,28 @@ package com.caucho.config.program;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Hashtable;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.naming.NamingException;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.ResourceGroupConfig;
+import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
 
 /**
  * JavaEE resource program
  */
-public class ResourceInjectionTargetProgram extends ConfigProgram {
+public class ResourceInjectionTargetProgram extends ConfigProgram
+  implements ObjectProxy
+{
   private static final L10N L = new L10N(ResourceInjectionTargetProgram.class);
   
   private ResourceGroupConfig _resourceConfig;
+  
+  private Class<?> _targetClass;
+  private String _targetName;
   
   private Field _field;
   private Method _method;
@@ -55,15 +63,28 @@ public class ResourceInjectionTargetProgram extends ConfigProgram {
   {
     _resourceConfig = resourceConfig;
     
+    _targetClass = targetClass;
+    _targetName = targetName;
+    
     _field = findField(targetClass, targetName);
     _method = findMethod(targetClass, targetName);
     
     if (_method == null && _field == null) {
-      throw new ConfigException(L.l("{0}.{1} is an unknown targetfor {2}",
+      throw new ConfigException(L.l("{0}.{1} is an unknown target for {2}",
                                     targetClass.getName(),
                                     targetName,
                                     resourceConfig));
     }
+  }
+  
+  public Class<?> getTargetClass()
+  {
+    return _targetClass;
+  }
+  
+  public String getTargetName()
+  {
+    return _targetName;
   }
   
   private Method findMethod(Class<?> targetClass, String targetMethod)
@@ -97,7 +118,10 @@ public class ResourceInjectionTargetProgram extends ConfigProgram {
   public <T> void inject(T bean, CreationalContext<T> env)
   {
     Object value = _resourceConfig.getValue();
-
+    
+    if (value == null)
+      return;
+    
     if (_field != null) {
       try {
         _field.set(bean, value);
@@ -110,7 +134,7 @@ public class ResourceInjectionTargetProgram extends ConfigProgram {
       }
     } else {
       try {
-        _method.invoke(bean, _resourceConfig.getValue());
+        _method.invoke(bean, value);
       } catch (Exception e) {
         throw new ConfigException(L.l("{0}.{1} cannot be assigned the value {2}",
                                       _method.getDeclaringClass(),
@@ -119,5 +143,17 @@ public class ResourceInjectionTargetProgram extends ConfigProgram {
                                   e);
       }
     }
+  }
+
+  @Override
+  public Object createObject(Hashtable<?, ?> env) throws NamingException
+  {
+    Object value = _resourceConfig.getValue();
+    
+    if (value == null)
+      throw new ConfigException(L.l("Null value returned from {0}",
+                                    _resourceConfig));
+    
+    return value;
   }
 }

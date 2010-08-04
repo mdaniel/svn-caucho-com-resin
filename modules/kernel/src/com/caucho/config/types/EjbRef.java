@@ -30,7 +30,9 @@
 package com.caucho.config.types;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.j2ee.BeanNameLiteral;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
@@ -67,9 +69,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   
   private Class<?> _home;
   private Class<?> _remote;
+
   private String _foreignName;
   private String _ejbLink;
 
+  private Object _linkValue;
 
   private Object _target;
 
@@ -113,11 +117,6 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   public InjectionTarget getInjectionTarget()
   {
     return _injectionTarget;
-  }
-
-  public Class<?> getLocal()
-  {
-    return null;
   }
 
   protected String getTagName()
@@ -201,6 +200,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     // XXX: should distinguish
     return _remote;
   }
+  
+  public Class<?> getLocal()
+  {
+    return null;
+  }
 
   /**
    * Sets the canonical jndi name to use to find the bean that
@@ -224,6 +228,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   {
     _ejbLink = ejbLink;
   }
+  
+  public String getEjbLink()
+  {
+    return _ejbLink;
+  }
 
   /**
    * Merges duplicated information in application-client.xml / resin-application-client.xml
@@ -238,6 +247,9 @@ public class EjbRef extends BaseRef implements ObjectProxy {
 
     if (_type == null)
       _type = other._type;
+
+    if (_ejbRefType == null)
+      _ejbRefType = other._ejbRefType;
 
     if (_home == null)
       _home = other._home;
@@ -262,28 +274,17 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   @Override
   public Object getValue()
   {
-    return Jndi.lookup(_ejbRefName);
+    return createObject(null);
   }
   
   @Override
   public void deploy()
   {
-    Object value = Jndi.lookup(_ejbRefName);
-
-    if (value != null)
-      return;
-    
     if (_ejbRefType == null)
       throw new ConfigException(L.l("<ejb-ref-type> is missing for <ejb-ref> {0}",
                                     _ejbRefName));
-    try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
-      _type = Class.forName(_ejbRefType, false, loader);
-    } catch (ClassNotFoundException e) {
-      log.log(Level.FINER, e.toString(), e);
-      return;
-    }
+    
+    _type = getLocal();
    
     try {
       Jndi.bindDeepShort(_ejbRefName, this);
@@ -294,9 +295,10 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     // new BeanJndiProxy(injectManager, bean));
   }
 
+  @Override
   public void bind()
   {
-    // initBinding(null);
+    deploy();
   }
 
   /**
@@ -305,14 +307,38 @@ public class EjbRef extends BaseRef implements ObjectProxy {
    * @return the object named by the proxy.
    */
   public Object createObject(Hashtable env)
-    throws NamingException
   {
+    String lookup = getLookupName();
+    
+    if (lookup != null) {
+      return Jndi.lookup(lookup);
+    }
+    
+    if (_type == null)
+      deploy();
+    
+    if (_type == null)
+      throw new IllegalStateException(String.valueOf(this));
     
     InjectManager injectManager = InjectManager.getCurrent();
     
-    Set<Bean<?>> beans = injectManager.getBeans(_type);
+    Set<Bean<?>> beans = null;
     
-    Bean<?> bean = injectManager.resolve(beans);
+    if (getEjbLink() != null)
+      beans = injectManager.getBeans(_type, new BeanNameLiteral(getEjbLink()));
+    
+    if (beans == null || beans.size() == 0)
+      beans = injectManager.getBeans(_type);
+    
+    Bean<?> bean;
+    
+    try {
+      bean = injectManager.resolve(beans);
+    } catch (Exception e) {
+      throw new ConfigException(L.l("{0} can't resolve a unique bean.\n  {1}",
+                                    this, e.toString(),
+                                    e));
+    }
     
     if (bean == null)
       throw new ConfigException(L.l("ejb-ref '{0}' is an unknown bean", 

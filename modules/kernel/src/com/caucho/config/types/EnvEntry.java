@@ -58,6 +58,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   private String _name;
   private Class<?> _type;
   private String _value;
+  private Object _objectValue;
   
   public EnvEntry()
   {
@@ -120,7 +121,6 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
    * Gets the env-entry-value
    */
   // XXX: ejb/0fd0 vs ejb/0g03
-  // PostConstruct called from com.caucho.ejb.cfg.EjbSessionBean.
   @PostConstruct
   public void init()
     throws Exception
@@ -157,67 +157,90 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   }
   
   @Override
-  public String getValue()
+  public Object getValue()
   {
-    return _value;
+    if (_objectValue == null)
+      deploy();
+    
+    if (_objectValue == null)
+      throw new NullPointerException(toString());
+    
+    return _objectValue;
   }
 
   @Override
   public void deploy()
   {
-    Object value = getValue();
-    
-    if (value == null)
+    if (_objectValue != null)
       return;
     
     LinkedHashSet<Type> types = new LinkedHashSet<Type>();
     
-    if (_type != null)
-      types.add(_type);
+    Class<?> type = _type;
+    Object value = _value;
+    
+    if (getLookupName() != null) {
+      value = Jndi.lookup(getLookupName());
+      
+      if (value == null) {
+        throw new ConfigException(L.l("No value returned from '{0}' in {1}",
+                                      getLookupName(), this));
+      }
+    }
+    
+    if (value == null)
+      return;
+    
+    if (type == null)
+      type = inferTypeFromInjection();
+    
+    if (type != null)
+      types.add(type);
     else
       types.add(value.getClass());
 
-    if (_type == null) {
-      
+    if (getLookupName() != null) {
     }
-    else if (_type.equals(String.class)) {
+    else if (type == null) {
     }
-    else if (_type.equals(Boolean.class)) {
+    else if (type.equals(String.class)) {
+    }
+    else if (Boolean.class.equals(type) || boolean.class.equals(type)) {
       value = new Boolean(Expr.toBoolean(_value, null));
       
       types.add(boolean.class);
     }
-    else if (_type.equals(Byte.class)) {
+    else if (Byte.class.equals(type) || byte.class.equals(type)) {
       value = new Byte((byte) Expr.toLong(_value, null));
       
       types.add(byte.class);
     }
-    else if (_type.equals(Short.class)) {
+    else if (Short.class.equals(type) || short.class.equals(type)) {
       value = new Short((short) Expr.toLong(_value, null));
       
       types.add(short.class);
     }
-    else if (_type.equals(Integer.class)) {
+    else if (Integer.class.equals(type) || int.class.equals(type)) {
       value = new Integer((int) Expr.toLong(_value, null));
       
       types.add(int.class);
     }
-    else if (_type.equals(Long.class)) {
+    else if (Long.class.equals(type) || long.class.equals(type)) {
       value = new Long(Expr.toLong(_value, null));
       
       types.add(long.class);
     }
-    else if (_type.equals(Float.class)) {
+    else if (Float.class.equals(type) || float.class.equals(type)) {
       value = new Float((float) Expr.toDouble(_value, null));
       
       types.add(float.class);
     }
-    else if (_type.equals(Double.class)) {
+    else if (Double.class.equals(type) || double.class.equals(type)) {
       value = new Double(Expr.toDouble(_value, null));
       
       types.add(double.class);
     }
-    else if (_type.equals(Character.class)) {
+    else if (Character.class.equals(type) || char.class.equals(type)) {
       String v = Expr.toString(_value, null);
 
       if (v == null || v.length() == 0)
@@ -227,7 +250,21 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
       
       types.add(char.class);
     }
+    else if (Enum.class.isAssignableFrom(type)) {
+      value = Enum.valueOf((Class) type, _value);
+    }
+    else if (Class.class.isAssignableFrom(type)) {
+      try {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
+        value = Class.forName(_value, false, loader);
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+    }
+    
+    _objectValue = value;
+    
     if (value == null)
       return;
     
@@ -246,10 +283,18 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
     cdiManager.addBean(builder.singleton(value));
 
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
     try {
+      if (getJndiClassLoader() != null)
+        thread.setContextClassLoader(getJndiClassLoader());
+      
+      log.info("BINDSELFX: " + _name + " " + value + " " + thread.getContextClassLoader());
       Jndi.bindDeepShort(_name, value);
     } catch (Exception e) {
       throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(loader);
     }
   }
 

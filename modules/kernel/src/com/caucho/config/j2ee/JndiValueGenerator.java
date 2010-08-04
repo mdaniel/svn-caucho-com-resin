@@ -28,6 +28,8 @@
 
 package com.caucho.config.j2ee;
 
+import java.util.logging.Logger;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -36,6 +38,7 @@ import com.caucho.config.program.ValueGenerator;
 import com.caucho.util.L10N;
 
 public class JndiValueGenerator extends ValueGenerator {
+  private static final Logger log = Logger.getLogger(JndiValueGenerator.class.getName());
   private static final L10N L = new L10N(JndiValueGenerator.class);
   
   private final String _location;
@@ -59,6 +62,7 @@ public class JndiValueGenerator extends ValueGenerator {
     try {
       return new InitialContext().lookup(_jndiName);
     } catch (NamingException e) {
+      log.info("FINDX: " + _jndiName + " " + Thread.currentThread().getContextClassLoader());
       throw ConfigException.create(_location, e);
     }
   }

@@ -64,11 +64,19 @@ abstract public class BaseType
 //  return create(type, paramMap, false);
     return create(type, paramMap, false);
   }
-    
+  
   public static BaseType create(Type type, 
                                 HashMap<String,BaseType> paramMap,
                                 boolean isClassFillParamObject)
   {
+    return create(type, paramMap, null, isClassFillParamObject);
+  }
+    
+  public static BaseType create(Type type, 
+                                HashMap<String,BaseType> paramMap,
+                                Type parentType,
+                                boolean isClassFillParamObject)
+    {
     if (type instanceof Class<?>) {
       Class<?> cl = (Class<?>) type;
       
@@ -107,7 +115,7 @@ abstract public class BaseType
       BaseType []args = new BaseType[typeArgs.length];
 
       for (int i = 0; i < args.length; i++) {
-        args[i] = create(typeArgs[i], paramMap, true);
+        args[i] = create(typeArgs[i], paramMap, type, true);
 
         if (args[i] == null) {
           throw new NullPointerException("unsupported BaseType: " + type);
@@ -150,8 +158,13 @@ abstract public class BaseType
 
         baseBounds = new BaseType[bounds.length];
 
-        for (int i = 0; i < bounds.length; i++)
-          baseBounds[i] = create(bounds[i], paramMap, true);
+        for (int i = 0; i < bounds.length; i++) {
+          // ejb/1243 - Enum
+          if (bounds[i] != parentType)
+            baseBounds[i] = create(bounds[i], paramMap, type, true);
+          else
+            baseBounds[i] = ObjectType.OBJECT_TYPE;
+        }
       }
       else
         baseBounds = new BaseType[0];
@@ -168,7 +181,8 @@ abstract public class BaseType
     }
     
     else {
-      throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
+      throw new IllegalStateException("unsupported BaseType: " + type
+                                      + " " + (type != null ? type.getClass() : null));
     }
   }
 
