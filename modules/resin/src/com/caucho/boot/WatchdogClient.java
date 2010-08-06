@@ -177,6 +177,11 @@ class WatchdogClient
     return _watchdog.startConsole();
   }
 
+  public void stopConsole()
+  {
+    _watchdog.stop();
+  }
+
   //
   // watchdog commands
   //

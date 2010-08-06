@@ -174,6 +174,11 @@ class WatchdogArgs
     return _startMode == StartMode.START;
   }
 
+  boolean isGui()
+  {
+    return _startMode == StartMode.GUI;
+  }
+
   boolean isStop()
   {
     return _startMode == StartMode.STOP;
@@ -321,6 +326,9 @@ class WatchdogArgs
       else if ("start".equals(arg)) {
         _startMode = StartMode.START;
       }
+      else if ("gui".equals(arg)) {
+        _startMode = StartMode.GUI;
+      }
       else if ("stop".equals(arg)) {
         _startMode = StartMode.STOP;
       }
@@ -350,6 +358,7 @@ class WatchdogArgs
                                + "\n  console - start Resin in console mode"
                                + "\n  status - watchdog status"
                                + "\n  start - start a Resin server"
+                               + "\n  gui - start a Resin server with a GUI"
                                + "\n  stop - stop a Resin server"
                                + "\n  restart - restart a Resin server"
                                + "\n  kill - force a kill of a Resin server"
@@ -373,7 +382,7 @@ class WatchdogArgs
 
   private static void usage()
   {
-    System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | stop | restart | kill | shutdown]"));
+    System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | gui | stop | restart | kill | shutdown]"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
     System.err.println(L().l("   -conf <file>          : select a configuration file"));
@@ -668,6 +677,7 @@ class WatchdogArgs
     CONSOLE,
     STATUS,
     START,
+    GUI,
     STOP,
     KILL,
     RESTART,

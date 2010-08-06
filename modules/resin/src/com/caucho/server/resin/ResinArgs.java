@@ -375,6 +375,9 @@ class ResinArgs
                || argv[i].equals("--verbose")) {
         i += 1;
       }
+      else if (argv[i].equals("gui")) {
+        i += 1;
+      }
       else if (argv[i].equals("console")) {
         i += 1;
       }

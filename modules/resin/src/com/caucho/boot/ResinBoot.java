@@ -66,6 +66,7 @@ public class ResinBoot {
   private WatchdogArgs _args;
 
   private WatchdogClient _client;
+  private ResinGUI _ui;
 
   ResinBoot(String []argv)
     throws Exception
@@ -300,6 +301,17 @@ public class ResinBoot {
     }
     else if (_args.isConsole()) {
       return _client.startConsole() != 0;
+    }
+    else if (_args.isGui()) {
+      if (_ui != null && _ui.isVisible())
+        return true;
+      else if (_ui != null)
+        return false;
+
+      _ui = new ResinGUI(this, _client);
+      _ui.setVisible(true);
+
+      return true;
     }
     else {
       throw new IllegalStateException(L().l("Unknown start mode"));
