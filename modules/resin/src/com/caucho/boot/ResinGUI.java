@@ -41,6 +41,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -53,12 +55,17 @@ public class ResinGUI extends JFrame implements WindowListener, ActionListener {
 
   private final WatchdogClient _client;
   private final ResinBoot _boot;
+  private final ExecutorService _exec = Executors.newSingleThreadExecutor();
+
+  private JRadioButton _start;
+  private JRadioButton _stop;
+  private JButton _quit;
 
   public ResinGUI(ResinBoot boot, WatchdogClient client)
     throws HeadlessException, IOException
   {
     super(Version.FULL_VERSION);
-   
+
     _boot = boot;
     _client = client;
 
@@ -105,28 +112,28 @@ public class ResinGUI extends JFrame implements WindowListener, ActionListener {
     box.setBorder(border);
 
     ButtonGroup group = new ButtonGroup();
-    JRadioButton start = new JRadioButton("Start");
-    start.setActionCommand("start");
-    start.addActionListener(this);
-    start.setSelected(true);
+    _start = new JRadioButton("Start");
+    _start.setActionCommand("start");
+    _start.addActionListener(this);
+    _start.setSelected(true);
 
-    JRadioButton stop = new JRadioButton("Stop");
-    stop.setActionCommand("stop");
-    stop.addActionListener(this);
+    _stop = new JRadioButton("Stop");
+    _stop.setActionCommand("stop");
+    _stop.addActionListener(this);
 
-    group.add(start);
-    group.add(stop);
+    group.add(_start);
+    group.add(_stop);
 
-    box.add(start);
-    box.add(stop);
+    box.add(_start);
+    box.add(_stop);
 
     this.add(box, BorderLayout.CENTER);
 
-    JButton button = new JButton("Quit");
-    button.setActionCommand("quit");
-    button.addActionListener(this);
+    _quit = new JButton("Quit");
+    _quit.setActionCommand("quit");
+    _quit.addActionListener(this);
     JPanel panel = new JPanel();
-    panel.add(button);
+    panel.add(_quit);
 
     this.add(panel, BorderLayout.SOUTH);
 
@@ -136,36 +143,15 @@ public class ResinGUI extends JFrame implements WindowListener, ActionListener {
   @Override
   public void actionPerformed(ActionEvent e)
   {
-    if ("start".equals(e.getActionCommand())) {
-      start();
-    }
-    else if ("stop".equals(e.getActionCommand())) {
-      stop();
-    }
-    else {
-      quit();
-    }
+    setUiEnabled(false);
+    _exec.execute(new ActionRunnable(e.getActionCommand()));
   }
 
-  private void stop()
+  private void setUiEnabled(boolean enabled)
   {
-    _client.stopConsole();
-  }
-
-  private void start()
-  {
-    try {
-      _client.startConsole();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void quit()
-  {
-    _client.stopConsole();
-    setVisible(false);
-    dispose();
+    _start.setEnabled(enabled);
+    _stop.setEnabled(enabled);
+    _quit.setEnabled(enabled);
   }
 
   @Override
@@ -195,6 +181,9 @@ public class ResinGUI extends JFrame implements WindowListener, ActionListener {
   @Override
   public void windowClosed(WindowEvent e)
   {
+    synchronized (_boot) {
+      _boot.notifyAll();
+    }
   }
 
   @Override
@@ -209,5 +198,41 @@ public class ResinGUI extends JFrame implements WindowListener, ActionListener {
   public void windowOpened(WindowEvent e)
   {
 
+  }
+
+  public class ActionRunnable implements Runnable {
+    private String _action;
+
+    public ActionRunnable(String action)
+    {
+      _action = action;
+    }
+
+    @Override
+    public void run()
+    {
+      if ("start".equals(_action)) {
+        try {
+          _client.startConsole();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      else
+        _client.stopConsole();
+
+      SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run()
+        {
+          if ("quit".equals(_action)) {
+            setVisible(false);
+            dispose();
+          }
+          else
+            setUiEnabled(true);
+        }
+      });
+    }
   }
 }
