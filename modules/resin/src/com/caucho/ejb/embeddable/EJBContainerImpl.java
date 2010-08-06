@@ -28,15 +28,15 @@
 
 package com.caucho.ejb.embeddable;
 
-import java.net.URL;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.ejb.EJBException;
 import javax.ejb.embeddable.EJBContainer;
 import javax.naming.Context;
-import javax.naming.InitialContext;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
@@ -48,11 +48,9 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
 import com.caucho.naming.InitialContextFactoryImpl;
-import com.caucho.resin.ResinBeanContainer;
 import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 /**
  * Interface for the EJBClient.
@@ -63,7 +61,7 @@ public class EJBContainerImpl extends EJBContainer {
     = Logger.getLogger(EJBContainerImpl.class.getName());
 
   private Context _context;
-  private ClassLoader _globalClassLoader;
+  private ClassLoader _parentClassLoader;
   private EnvironmentClassLoader _classLoader;
   private InjectManager _injectManager;
   private EnterpriseApplication _application;
@@ -96,12 +94,12 @@ public class EJBContainerImpl extends EJBContainer {
     
     Thread thread = Thread.currentThread();
     
-    _globalClassLoader = thread.getContextClassLoader(); 
+    _parentClassLoader = thread.getContextClassLoader(); 
     _application = EnterpriseApplication.create(name);
     
     _classLoader = _application.getClassLoader();
     _injectManager = InjectManager.create(_classLoader);
-
+    
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
@@ -141,7 +139,7 @@ public class EJBContainerImpl extends EJBContainer {
 
         EjbManager manager = EjbManager.getCurrent();
 
-        manager.setGlobalClassLoader(_globalClassLoader);
+        manager.setGlobalClassLoader(_parentClassLoader);
         manager.setScannableRoots(_moduleRoots);
       }
       

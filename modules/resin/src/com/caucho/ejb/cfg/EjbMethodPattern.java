@@ -36,7 +36,6 @@ import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.gen.SecurityGenerator;
 import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.util.L10N;
 

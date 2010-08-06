@@ -151,6 +151,7 @@ public class ContextImpl implements Context {
    *
    * @return the retrieved object
    */
+  @Override
   public Object lookup(String name)
     throws NamingException
   {

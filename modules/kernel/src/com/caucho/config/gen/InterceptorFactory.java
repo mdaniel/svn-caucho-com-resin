@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +61,7 @@ import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.ExcludeClassInterceptors;
+import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.interceptor.InterceptorBinding;
 import javax.interceptor.Interceptors;
 import javax.interceptor.InvocationContext;
@@ -88,6 +90,9 @@ public class InterceptorFactory<X>
   private boolean _isInterceptorOrDecorator;
   
   private ArrayList<Class<?>> _classInterceptors
+    = new ArrayList<Class<?>>();
+  
+  private ArrayList<Class<?>> _defaultInterceptors
     = new ArrayList<Class<?>>();
   
   private ArrayList<Class<?>> _selfInterceptors
@@ -139,6 +144,9 @@ public class InterceptorFactory<X>
     boolean isExcludeClassInterceptors
       = method.isAnnotationPresent(ExcludeClassInterceptors.class);
     
+    boolean isExcludeDefaultInterceptors
+      = method.isAnnotationPresent(ExcludeDefaultInterceptors.class);
+    
     HashSet<Class<?>> methodInterceptors = null;
     
     InterceptionType type = InterceptionType.AROUND_INVOKE;
@@ -151,6 +159,13 @@ public class InterceptorFactory<X>
     else if (method.isAnnotationPresent(PreDestroy.class)){
       type = InterceptionType.PRE_DESTROY;
       annType = PreDestroy.class;
+    }
+    
+    if (! isExcludeDefaultInterceptors 
+        && _defaultInterceptors.size() > 0) {
+      methodInterceptors = addInterceptors(methodInterceptors,
+                                           _defaultInterceptors,
+                                           annType);
     }
     
     if (! isExcludeClassInterceptors 
@@ -407,6 +422,9 @@ public class InterceptorFactory<X>
       if (! m.isAnnotationPresent(annType))
         continue;
       
+      if (Modifier.isAbstract(cl.getModifiers()))
+        continue;
+      
       Class<?> []param = m.getParameterTypes();
       
       if (param.length == 1 && param[0].equals(InvocationContext.class)) {
@@ -458,6 +476,7 @@ public class InterceptorFactory<X>
       }
     }
     
+    introspectDefaultInterceptors();
     introspectClassInterceptors();
     introspectClassInterceptorBindings();
     introspectClassDecorators();
@@ -491,6 +510,24 @@ public class InterceptorFactory<X>
     }
     
     introspectClassInterceptors(_selfInterceptors, getBeanType().getJavaClass());
+  }
+  
+  /**
+   * Introspects the @Interceptors annotation on the class
+   */
+  private void introspectDefaultInterceptors()
+  {
+    if (getBeanType().isAnnotationPresent(ExcludeDefaultInterceptors.class))
+      return;
+    
+    DefaultInterceptors interceptors 
+      = getBeanType().getAnnotation(DefaultInterceptors.class);
+
+    if (interceptors != null) {
+      for (Class<?> iClass : interceptors.value()) {
+        introspectClassInterceptors(_defaultInterceptors, iClass);
+      }
+    }
   }
   
   private void introspectClassInterceptors(ArrayList<Class<?>> list,

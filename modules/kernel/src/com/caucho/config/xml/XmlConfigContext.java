@@ -525,12 +525,13 @@ public class XmlConfigContext {
     if (! attrStrategy.isSetter())
       return false;
 
-    String text = getTextValue(childNode);
+    boolean isTrim = ! attrStrategy.getConfigType().isNoTrim();
+    String text = getTextValue(childNode, isTrim);
 
     if (text == null)
       return false;
 
-    boolean isTrim = isTrim(childNode);
+    isTrim = isTrim(childNode);
 
     if (isEL() && attrStrategy.isEL()
         && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
@@ -741,7 +742,9 @@ public class XmlConfigContext {
                            Object parent,
                            Element newNode)
   {
-    String text = getTextValue(newNode);
+    boolean isTrim = true;
+    
+    String text = getTextValue(newNode, isTrim);
 
     if (text != null) {
       text = text.trim();
@@ -968,7 +971,7 @@ public class XmlConfigContext {
   /**
    * Returns the text value of the node.
    */
-  private String getTextValue(Node node)
+  private String getTextValue(Node node, boolean isTrim)
   {
     if (node instanceof Attr) {
       Attr attrNode = (Attr) node;
@@ -978,7 +981,7 @@ public class XmlConfigContext {
     }
     else if (node instanceof CharacterData) {
       CharacterData cData = (CharacterData) node;
-
+      System.out.println("CD: '" + cData.getData() + "'");
       return cData.getData();
     }
 
@@ -1005,11 +1008,15 @@ public class XmlConfigContext {
       else if (child instanceof CharacterData) {
         String data = ((CharacterData) child).getData();
 
-        if (child.getNextSibling() == null && ! XmlUtil.isWhitespace(data)) {
+        if (child.getNextSibling() != null) {
+          return null;
+        }
+        else if (! isTrim || ! XmlUtil.isWhitespace(data)) {
           return data;
         }
-        else
+        else {
           return null;
+        }
       }
     }
 
@@ -1024,7 +1031,8 @@ public class XmlConfigContext {
     if (node instanceof Element && ! node.getLocalName().equals("value"))
       return null;
 
-    return getTextValue(node);
+    boolean isTrim = true;
+    return getTextValue(node, isTrim);
   }
 
   private Object eval(ConfigType<?> type, String data)

@@ -156,4 +156,14 @@ public class ResourceInjectionTargetProgram extends ConfigProgram
     
     return value;
   }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+            + "[" + _targetClass.getSimpleName()
+            + ", " + _targetName
+            + ", " + _resourceConfig
+            + "]");
+  }
 }

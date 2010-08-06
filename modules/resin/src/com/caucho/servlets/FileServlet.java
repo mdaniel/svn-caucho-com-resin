@@ -216,19 +216,19 @@ public class FileServlet extends GenericServlet {
       else if (relPath.regionMatches(true, 0, "/web-inf", 0, 8)
                && (relPath.length() == 8
                    || ! Character.isLetterOrDigit(relPath.charAt(8)))) {
-        res.sendError(res.SC_NOT_FOUND);
+        res.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
       else if (relPath.regionMatches(true, 0, "/meta-inf", 0, 9)
                && (relPath.length() == 9
                    || ! Character.isLetterOrDigit(relPath.charAt(9)))) {
-        res.sendError(res.SC_NOT_FOUND);
+        res.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
 
       if (relPath.endsWith(".DS_store")) {
         // MacOS-X security hole with trailing '.'
-        res.sendError(res.SC_NOT_FOUND);
+        res.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
       else if (! CauchoSystem.isWindows() || relPath.length() == 0) {
@@ -237,7 +237,7 @@ public class FileServlet extends GenericServlet {
       }
       else if (path.isWindowsInsecure()) {
         // Windows security issues with trailing '.'
-        res.sendError(res.SC_NOT_FOUND);
+        res.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
 
@@ -356,11 +356,12 @@ public class FileServlet extends GenericServlet {
       }
     }
 
-    res.setContentLength((int) cache.getLength());
+    // res.setContentLength((int) cache.getLength());
 
     if (res instanceof CauchoResponse) {
       CauchoResponse cRes = (CauchoResponse) res;
 
+      res.getOutputStream().flush();
       cRes.getResponseStream().sendFile(cache.getPath(), cache.getLength());
     }
     else {

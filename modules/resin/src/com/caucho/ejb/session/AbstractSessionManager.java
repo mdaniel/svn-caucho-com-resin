@@ -85,6 +85,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   private EjbLazyGenerator<X> _lazyGenerator;
   
   private Class<?> _proxyImplClass;
+  
   private HashMap<Class<?>, AbstractSessionContext<X,?>> _contextMap
     = new HashMap<Class<?>, AbstractSessionContext<X,?>>();
 

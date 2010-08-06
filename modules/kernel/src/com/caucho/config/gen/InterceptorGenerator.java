@@ -80,8 +80,8 @@ public class InterceptorGenerator<X>
   private String _chainName;
   private boolean _isChainNew;
 
-  private boolean _isExcludeDefaultInterceptors;
-  private boolean _isExcludeClassInterceptors;
+  // private boolean _isExcludeDefaultInterceptors;
+  // private boolean _isExcludeClassInterceptors;
 
   private InterceptionType _interceptionType = InterceptionType.AROUND_INVOKE;
 

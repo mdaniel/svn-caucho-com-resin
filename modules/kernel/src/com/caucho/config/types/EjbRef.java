@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  * An ejb-ref is used to make an ejb available within the environment
  * in which the ejb-ref is declared.
  */
-public class EjbRef extends BaseRef implements ObjectProxy {
+public class EjbRef extends BaseRef {
   private static final L10N L = new L10N(EjbRef.class);
   private static final Logger log
     = Logger.getLogger(EjbRef.class.getName());
@@ -261,25 +261,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       _injectionTarget = other._injectionTarget;
   }
 
-  @PostConstruct
-  public void init()
-    throws Exception
-  {
-    super.init();
-    
-    if (! isProgram())
-      deploy();
-  }
-
-  @Override
-  public Object getValue()
-  {
-    return createObject(null);
-  }
-  
   @Override
   public void deploy()
   {
+    super.deploy();
+    
     if (_ejbRefType == null)
       throw new ConfigException(L.l("<ejb-ref-type> is missing for <ejb-ref> {0}",
                                     _ejbRefName));
@@ -306,16 +292,14 @@ public class EjbRef extends BaseRef implements ObjectProxy {
    *
    * @return the object named by the proxy.
    */
-  public Object createObject(Hashtable env)
+  @Override
+  public Object getValue()
   {
     String lookup = getLookupName();
     
     if (lookup != null) {
       return Jndi.lookup(lookup);
     }
-    
-    if (_type == null)
-      deploy();
     
     if (_type == null)
       throw new IllegalStateException(String.valueOf(this));

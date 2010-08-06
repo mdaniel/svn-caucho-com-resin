@@ -70,7 +70,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
   {
     try {
       InjectManager injectManager = getManager();
-
+      
       Set<Bean<?>> beans = null;
 
       if ("".equals(name))
@@ -140,10 +140,18 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       name = "java:comp/env/" + name;
     }
     
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
     try {
+      if (_manager.getJndiClassLoader() != null)
+        thread.setContextClassLoader(_manager.getJndiClassLoader());
+
       Jndi.bindDeep(name, gen);
     } catch (NamingException e) {
       throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(loader);
     }
   }
   
@@ -152,11 +160,19 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     String name = ("java:comp/env/"
                    + field.getDeclaringClass().getName()
                    + "/" + field.getName());
+    
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
 
     try {
+      if (_manager.getJndiClassLoader() != null)
+        thread.setContextClassLoader(_manager.getJndiClassLoader());
+
       Jndi.bindDeep(name, gen);
     } catch (NamingException e) {
       throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(loader);
     }
   }
   

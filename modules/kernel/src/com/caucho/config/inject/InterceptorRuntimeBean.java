@@ -310,8 +310,14 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
       return true;
     else if (a == null || b == null)
       return false;
+    else if (! AnnotatedTypeUtil.isMatch(a, b))
+      return false;
+    else if (Modifier.isPrivate(a.getModifiers())
+        || Modifier.isPrivate(b.getModifiers())) {
+      return false;
+    }
     else
-      return AnnotatedTypeUtil.isMatch(a, b);
+      return true;
   }
 
   private Class<?> findParentInterceptor(Class<?> cl)

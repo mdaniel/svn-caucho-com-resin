@@ -78,6 +78,7 @@ import com.caucho.config.j2ee.PreDestroyInject;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ResourceProgramManager;
 import com.caucho.config.reflect.AnnotatedConstructorImpl;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.inject.Module;
@@ -93,7 +94,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   private static final Logger log
     = Logger.getLogger(InjectionTargetBuilder.class.getName());
 
-  private InjectManager _beanManager;
+  private InjectManager _cdiManager;
 
   private Class<X> _instanceClass;
   
@@ -113,25 +114,25 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
   private Set<InjectionPoint> _injectionPointSet;
   
-  public InjectionTargetBuilder(InjectManager beanManager,
+  public InjectionTargetBuilder(InjectManager cdiManager,
                                 AnnotatedType<X> beanType,
                                 Bean<X> bean)
   {
-    _beanManager = beanManager;
+    _cdiManager = cdiManager;
 
     _annotatedType = beanType;
     _bean = bean;
   }
   
-  public InjectionTargetBuilder(InjectManager beanManager,
+  public InjectionTargetBuilder(InjectManager cdiManager,
                                 AnnotatedType<X> beanType)
   {
-    this(beanManager, beanType, null);
+    this(cdiManager, beanType, null);
   }
 
   protected InjectManager getBeanManager()
   {
-    return _beanManager;
+    return _cdiManager;
   }
   
   public AnnotatedType<X> getAnnotatedType()
@@ -615,6 +616,10 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     introspectInjectClass(type, injectProgramList);
     introspectInjectField(type, injectProgramList);
     introspectInjectMethod(type, injectProgramList);
+    
+    ResourceProgramManager resourceManager = _cdiManager.getResourceManager();
+    
+    resourceManager.buildInject(rawType, injectProgramList);
   }
   
   private void introspectInjectClass(AnnotatedType<X> type,

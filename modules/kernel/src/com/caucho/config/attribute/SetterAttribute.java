@@ -76,6 +76,7 @@ public class SetterAttribute<T> extends Attribute {
   {
     return true;
   }
+  
 
   /**
    * True if it allows inline beans

@@ -119,8 +119,12 @@ public class StatelessPool<X,T> {
       if (beanItem == null) {
         CreationalContextImpl<X> env = new OwnerCreationalContext<X>(_manager.getBean());
         
-        X instance = _context.newInstance(env);
+        Object []bindings;
         
+        bindings = _manager.getInterceptorBindings(_interceptorBeans, env);
+        
+        X instance = _context.newInstance(env);
+               
         if (instance instanceof SessionBean) {
           try {
             ((SessionBean) instance).setSessionContext(_context);
@@ -129,8 +133,7 @@ public class StatelessPool<X,T> {
           }
         }
         
-        beanItem = new Item<X>(instance,
-                               _manager.getInterceptorBindings(_interceptorBeans, env));
+        beanItem = new Item<X>(instance, bindings);
         // _ejbProducer.newInstance();
       }
       

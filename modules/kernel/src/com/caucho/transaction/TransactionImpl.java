@@ -1173,6 +1173,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       _properties.clear();
   }
 
+  @Override
   public void handleAlarm(Alarm alarm)
   {
     try {

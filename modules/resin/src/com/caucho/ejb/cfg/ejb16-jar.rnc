@@ -282,7 +282,7 @@ ejb16_interceptor-binding = element interceptor-binding {
 
   element exclude-class-interceptors { javaee_boolean }?,
 
-  element method { string }?
+  ejb16_method?
 }
 
 ejb16_interceptor-order = element interceptor-order {
@@ -405,7 +405,7 @@ ejb16_method = element method {
 
   ejb16_description*,
 
-  ejb16_ejb-name,
+  ejb16_ejb-name?,
 
   ejb16_method-intf?,
 

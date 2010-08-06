@@ -45,6 +45,7 @@ import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
@@ -141,11 +142,14 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     _loader = EnvironmentClassLoader.create(ejbManager.getClassLoader());
     // XXX: 4.0.7 this is complicated by decorator vs context injection
     _loader.setAttribute("caucho.inject", false);
+    _loader.setAttribute("ejb.manager", false);
     
     _producer = new EjbInjectionTarget<X>(this, annotatedType);
     
     _moduleInjectManager = InjectManager.create();
     _ejbInjectManager = InjectManager.create(_loader);
+    
+    _ejbInjectManager.setJndiClassLoader(_moduleInjectManager.getClassLoader());
   }
 
   /**
@@ -361,6 +365,9 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     try {
       if (_jndiEnv == null)
         _jndiEnv = (Context) new InitialContext();//.lookup("java:comp/env");
+      
+      if (jndiName == null)
+        throw new IllegalArgumentException();
 
       if (jndiName.indexOf(':') < 0)
         jndiName = "java:comp/env/" + jndiName;
@@ -415,6 +422,12 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   public long getTransactionTimeout()
   {
     return _transactionTimeout;
+  }
+  
+  @Configurable
+  public void setBusinessLocal(Class<?> local)
+  {
+    
   }
 
   /**
@@ -613,20 +626,6 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   public void setResourceList(ArrayList<ResourceGroupConfig> resourceList)
   {
     _resourceList = resourceList;
-  }
-  
-  public ArrayList<ConfigProgram> getResourceProgram(Class<?> beanClass)
-  {
-    ArrayList<ConfigProgram> resourceProgram = new ArrayList<ConfigProgram>();
-    
-    for (ResourceGroupConfig resource : _resourceList) {
-      ConfigProgram program = resource.getProgram(beanClass);
-      
-      if (program != null)
-        resourceProgram.add(program);
-    }
-    
-    return resourceProgram;
   }
 
   /**

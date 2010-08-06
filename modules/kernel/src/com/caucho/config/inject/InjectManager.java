@@ -202,6 +202,7 @@ public final class InjectManager
   private InjectManager _parent;
 
   private EnvironmentClassLoader _classLoader;
+  private ClassLoader _jndiClassLoader;
   
   private final InjectScanManager _scanManager;
   private final ExtensionManager _extensionManager
@@ -575,6 +576,16 @@ public final class InjectManager
   public ClassLoader getClassLoader()
   {
     return _classLoader;
+  }
+  
+  public ClassLoader getJndiClassLoader()
+  {
+    return _jndiClassLoader;
+  }
+  
+  public void setJndiClassLoader(ClassLoader loader)
+  {
+    _jndiClassLoader = loader;
   }
 
   public InjectManager getParent()

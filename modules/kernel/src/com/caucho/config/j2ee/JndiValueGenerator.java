@@ -62,7 +62,6 @@ public class JndiValueGenerator extends ValueGenerator {
     try {
       return new InitialContext().lookup(_jndiName);
     } catch (NamingException e) {
-      log.info("FINDX: " + _jndiName + " " + Thread.currentThread().getContextClassLoader());
       throw ConfigException.create(_location, e);
     }
   }

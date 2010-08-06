@@ -11,7 +11,9 @@
   <class-loader>
     <compiling-loader path="WEB-INF/classes"/>
     <library-loader path="WEB-INF/lib"/>
+    <!--
     <project-loader path="WEB-INF/pom.xml"/>
+    -->
   </class-loader>
 
   <servlet servlet-name="resin-file"

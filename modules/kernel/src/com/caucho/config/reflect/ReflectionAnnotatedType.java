@@ -222,7 +222,7 @@ public class ReflectionAnnotatedType<T>
         if (! Modifier.isPrivate(method.getModifiers())) {
           childMethod = AnnotatedTypeUtil.findMethod(_methodSet, method);
         }
-            
+        
         if (childMethod == null) {
           _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
         }

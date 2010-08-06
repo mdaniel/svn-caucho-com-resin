@@ -31,11 +31,13 @@ package com.caucho.config.types;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.naming.NamingException;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
@@ -43,12 +45,16 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ResourceInjectionTargetProgram;
 import com.caucho.config.program.ResourceProgram;
+import com.caucho.naming.Jndi;
+import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
 
 /**
  * Configuration for the resource group
  */
-abstract public class ResourceGroupConfig extends ConfigProgram {
+abstract public class ResourceGroupConfig extends ConfigProgram
+  implements ObjectProxy
+{
   private static final Logger log 
     = Logger.getLogger(ResourceGroupConfig.class.getName());
   private static final L10N L = new L10N(ResourceGroupConfig.class);
@@ -166,9 +172,21 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
                                                  targetMethod);
         
         cdiManager.getResourceManager().addResource(resourceProgram);
+        
+        if (getJndiClassLoader() != null)
+          thread.setContextClassLoader(getJndiClassLoader());
+        
+        String jndiName = "java:comp/env/" + targetClassName + "/" + targetMethod;
+
+        Jndi.bindDeep(jndiName, this);
+      } catch (ConfigException e) {
+        throw e;
       } catch (Exception e) {
         throw new ConfigException(L.l("'{0}' is an unknown class in {1}",
-                                      targetClassName, this));
+                                      targetClassName, this),
+                                  e);
+      } finally {
+        thread.setContextClassLoader(loader);
       }
     }
   }
@@ -228,12 +246,21 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
   public <T> void inject(T bean, CreationalContext<T> env)
   {
   }
+
+  @Override
+  public Object createObject(Hashtable<?,?> env)
+    throws NamingException
+  {
+    Object value = getValue();
+    
+    return value;
+  }
   
   public Object getValue()
   {
     return null;
   }
-
+  
   protected ConfigException error(String msg)
   {
     if (_location != null)

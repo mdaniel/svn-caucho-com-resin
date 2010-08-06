@@ -45,6 +45,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.interceptor.AroundInvoke;
+import javax.interceptor.Interceptors;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
@@ -492,31 +493,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
     if (_ejbClass.getJavaClass().isInterface())
       throw error(L.l("'{0}' must not be an interface.  Bean implementations must be classes.", ejbClass.getJavaClass().getName()));
 
-    /*
-    // ejb/02e5
-    Constructor<?> constructor = null;
-    try {
-      for (Constructor<?> ctor : ejbClass.getDeclaredConstructors()) {
-        if (ctor.getParameterTypes().length == 0)
-          constructor = ctor;
-      }
-      
-      if (constructor == null)
-        constructor = ejbClass.getConstructor(new Class[0]);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    if (constructor == null && ejbClass.getDeclaredConstructors().length > 0)
-      throw error(L.l("'{0}' needs a zero-arg constructor.  Bean implementations need a zero-argument constructor.", ejbClass.getName()));
-
-    for (Class<?> exn : constructor.getExceptionTypes()) {
-      if (! RuntimeException.class.isAssignableFrom(exn)) {
-        throw error(L.l("{0}: constructor must not throw '{1}'.  Bean constructors must not throw checked exceptions.", ejbClass.getName(), exn.getName()));
-      }
-    }
-      */
-
     AnnotatedMethod<? super X> method = getMethod("finalize", new Class[0]);
 
     if (method != null
@@ -524,14 +500,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
       throw error(L.l("'{0}' may not implement finalize().  Bean implementations may not implement finalize().", 
                       method.getJavaMember().getDeclaringClass().getName()));
     }
-
-    /*
-    if (_ejbClass == null) {
-      InjectManager manager = InjectManager.create();
-
-      _ejbClass = manager.createAnnotatedType(_ejbClass.getJavaClass());
-    }
-    */
   }
 
   /**
@@ -1007,7 +975,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
       if (_isInit)
         return;
       _isInit = true;
-
+      
       if (getAnnotatedType() == null)
         throw error(L.l("ejb-class is not defined for '{0}'",
                         getEJBName()));
@@ -1029,8 +997,10 @@ public class EjbBean<X> extends DescriptionGroupConfig
       // XXX: add local api
 
       introspect();
-
+      
       initIntrospect();
+      
+      addInterceptors();
     } catch (ConfigException e) {
       throw ConfigException.createLine(_location, e);
     }
@@ -1060,7 +1030,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
     // ejb/0fb5
     InterceptorBinding binding =
       _ejbConfig.getInterceptorBinding(getEJBName(), isExcludeDefault);
-
 
     if (binding != null) {
       ArrayList<String> interceptorClasses = new ArrayList<String>();
@@ -1098,7 +1067,33 @@ public class EjbBean<X> extends DescriptionGroupConfig
         }
       }
     }
+  }
 
+  private void addInterceptors()
+  {
+    Class<?> []interceptors = new Class<?>[_interceptors.size()];
+    
+    for (int i = 0; i < _interceptors.size(); i++) {
+      String className = _interceptors.get(i).getInterceptorClass();
+      Class<?> cl = null;
+    
+      try {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+        cl = Class.forName(className, false, loader);
+        
+        interceptors[i] = cl;
+      } catch (ClassNotFoundException e) {
+        throw ConfigException.create(e);
+      }
+    }
+    
+    addClassInterceptors(interceptors);
+  }
+  
+  private void addClassInterceptors(Class<?> []cl)
+  {
+    _ejbClass.addAnnotation(new InterceptorsDefaultLiteral(cl));
   }
 
   /**

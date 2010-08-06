@@ -149,7 +149,17 @@ public class EjbManager implements ScanListener, EnvironmentListener {
       EjbManager container = _localContainer.getLevel(loader);
 
       if (container == null) {
-        container = new EjbManager(loader);
+        EnvironmentClassLoader envLoader
+          = Environment.getEnvironmentClassLoader(loader);
+        
+        Boolean ejbManager = null;
+        
+        ejbManager = (Boolean) Environment.getAttribute("ejb.manager", loader);
+        
+        if (ejbManager == null || Boolean.TRUE.equals(ejbManager))
+          container = new EjbManager(loader);
+        else
+          container = _localContainer.get(loader);
 
         _localContainer.set(container, loader);
       }

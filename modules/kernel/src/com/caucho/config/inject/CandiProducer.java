@@ -51,6 +51,7 @@ import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
@@ -58,6 +59,7 @@ import com.caucho.inject.Module;
 @Module
 public class CandiProducer<X> implements InjectionTarget<X>
 {
+  private static final L10N L = new L10N(CandiProducer.class);
   private static final Logger log 
     = Logger.getLogger(CandiProducer.class.getName());
   private static final Object []NULL_ARGS = new Object[0];
@@ -210,6 +212,10 @@ public class CandiProducer<X> implements InjectionTarget<X>
         throw (RuntimeException) e.getCause();
       else
         throw new CreationException(e.getCause());
+    } catch (InstantiationException e) {
+      throw new CreationException(L.l("Exception while creating {0}",
+                                      _javaCtor != null ? _javaCtor : _instanceClass),
+                                  e);
     } catch (Exception e) {
       throw new CreationException(e);
     } catch (ExceptionInInitializerError e) {

@@ -75,6 +75,9 @@ public class InterceptorBean<X> extends InterceptorRuntimeBean<X>
     super(null, type);
     
     _type = type;
+    
+    if (Modifier.isAbstract(type.getModifiers()))
+      throw new IllegalStateException(type + " is an unexpected abstract type");
 
     AnnotatedType<X> annType = beanManager.createAnnotatedType(_type);
     AnnotatedTypeImpl<X> enhAnnType = AnnotatedTypeImpl.create(annType);

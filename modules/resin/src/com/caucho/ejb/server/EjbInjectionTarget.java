@@ -158,34 +158,43 @@ public class EjbInjectionTarget<T> {
     if (_bean != null)
       return;
     
-    InjectManager beanManager = InjectManager.create();
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(_manager.getClassLoader());
+      
+      InjectManager beanManager = InjectManager.create();
 
-    ManagedBeanImpl<T> managedBean
+      ManagedBeanImpl<T> managedBean
       = beanManager.createManagedBean(_annotatedType);
-    
-    _bean = managedBean;
-    setInjectionTarget(managedBean.getInjectionTarget());
 
-    _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
-    
-    if (_timeoutMethod != null)
-      _timerService = new EjbTimerService(_manager);
+      _bean = managedBean;
+      setInjectionTarget(managedBean.getInjectionTarget());
 
-    // Injection binding occurs in the start phase
+      _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
 
-    InjectManager inject = InjectManager.create();
+      if (_timeoutMethod != null)
+        _timerService = new EjbTimerService(_manager);
 
-    // server/4751
-    if (_injectionTarget == null) {
-      _injectionTarget = inject.createInjectionTarget(_ejbClass);
-      _injectionTarget.getInjectionPoints();
-    }
-    
-    _resourceProgram = _manager.getResourceProgram(_ejbClass);
+      // Injection binding occurs in the start phase
 
-    if (_timerService != null) {
-      BeanBuilder<TimerService> factory = inject.createBeanFactory(TimerService.class);
-      inject.addBean(factory.singleton(_timerService));
+      InjectManager inject = InjectManager.create();
+
+      // server/4751
+      if (_injectionTarget == null) {
+        _injectionTarget = inject.createInjectionTarget(_ejbClass);
+        _injectionTarget.getInjectionPoints();
+      }
+
+      // _resourceProgram = _manager.getResourceProgram(_ejbClass);
+
+      if (_timerService != null) {
+        BeanBuilder<TimerService> factory = inject.createBeanFactory(TimerService.class);
+        inject.addBean(factory.singleton(_timerService));
+      }
+    } finally {
+      thread.setContextClassLoader(loader);
     }
   }
 
@@ -239,10 +248,12 @@ public class EjbInjectionTarget<T> {
     instance = _injectionTarget.produce(env);
     
     _injectionTarget.inject(instance, env);
-    
+
+    /*
     for (ConfigProgram program : _resourceProgram) {
       program.inject(instance, env);
     }
+    */
     
     _injectionTarget.postConstruct(instance);
     

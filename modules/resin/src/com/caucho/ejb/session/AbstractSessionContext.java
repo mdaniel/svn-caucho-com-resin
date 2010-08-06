@@ -184,7 +184,7 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   @Override
   public MessageContext getMessageContext()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new IllegalStateException(getClass().getName());
   }
 
   @Override
@@ -197,13 +197,19 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   public <Z> Z getBusinessObject(Class<Z> businessInterface)
     throws IllegalStateException
   {
+    if (businessInterface== null) {
+      throw new IllegalStateException(L.l("null is not a valid local interface or no-interface view for {0}",
+                                          getServer().getEjbClass().getName()));
+    }
+    
     AbstractSessionContext<?,Z> context = 
       getServer().getSessionContext(businessInterface);
     
-    if (context == null)
+    if (context == null) {
       throw new IllegalStateException(L.l("{0} is not a valid local interface or no-interface view for {1}",
                                           businessInterface.getName(),
                                           getServer().getEjbClass().getName()));
+    }
     
     return context.createProxy(null);
   }

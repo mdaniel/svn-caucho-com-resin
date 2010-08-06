@@ -87,10 +87,10 @@ public class EjbJar extends DescriptionGroupConfig {
     return new EjbEnterpriseBeans(_config, _ejbModuleName);
   }
 
-  public Interceptors createInterceptors()
+  public InterceptorsConfig createInterceptors()
     throws ConfigException
   {
-    return new Interceptors(_config);
+    return new InterceptorsConfig(_config);
   }
 
   public Relationships createRelationships()

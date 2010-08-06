@@ -431,7 +431,7 @@ public class BeanELResolver extends ELResolver {
   }
 
   protected static final class BeanProperty {
-    private Class _base;
+    private Class<?> _base;
     private PropertyDescriptor _descriptor;
     private Method _readMethod;
     
@@ -457,21 +457,28 @@ public class BeanELResolver extends ELResolver {
       initDescriptor();
     }
     
-    private BeanProperty(Class baseClass,
+    private BeanProperty(Class<?> baseClass,
                          String name,
                          Method getter)
     {
       try {
         _base = baseClass;
-        _descriptor = new PropertyDescriptor(name, getter, null);
+        
+        if (getter != null && ! void.class.equals(getter.getReturnType()))
+          _descriptor = new PropertyDescriptor(name, getter, null);
+        else
+          _descriptor = new PropertyDescriptor(name, null, null);
 
         //create a copy of the method
-        if (getter != null)
+        if (getter != null) {
           _readMethod = _base.getMethod(getter.getName(),
                                         getter.getParameterTypes());
+        }
 
         if (_readMethod != null)
           getter.setAccessible(true);
+      } catch (RuntimeException e) {
+        throw e;
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -495,7 +502,7 @@ public class BeanELResolver extends ELResolver {
       return _descriptor;
     }
 
-    public Class getPropertyType()
+    public Class<?> getPropertyType()
     {
       return _descriptor.getPropertyType();
     }

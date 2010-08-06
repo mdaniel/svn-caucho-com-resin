@@ -204,7 +204,10 @@ public class ResourceRef extends ResourceGroupConfig
    */
   @PostConstruct
   public void init()
+    throws Exception
   {
+    super.init();
+    
     if (_init == null && _params.size() == 0) {
       return;
     }
@@ -249,19 +252,19 @@ public class ResourceRef extends ResourceGroupConfig
   @Override
   public void deploy()
   {
-    Object value = getValue();
+    super.deploy();
     
-    if (_value == null) {
-      InjectManager manager = InjectManager.getCurrent();
-      Set<Bean<?>> beans = manager.getBeans(_type);
+    if (_value == null && getLookupName() == null) {
+      InjectManager cdiManager = InjectManager.getCurrent();
       
-      _bean = manager.resolve(beans);
-
-      value = this;
+      Set<Bean<?>> beans = cdiManager.getBeans(_type);
+      
+      _bean = cdiManager.resolve(beans);
     }
-System.out.println("DEPLOY:" + value + " " + _bean + " " + this);
+
+    
     try {
-      Jndi.bindDeepShort(_name, value);
+      Jndi.bindDeepShort(_name, this);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -271,33 +274,30 @@ System.out.println("DEPLOY:" + value + " " + _bean + " " + this);
   public Object getValue()
   {
     Object value;
-    
+   
+    System.out.println("GETV: " + _value + " " + getLookupName() + " " + _bean);
     if (_value != null)
       value = _value;
+    else if (getLookupName() != null)
+      return Jndi.lookup(getLookupName());
     else {
       InjectManager cdiManager = InjectManager.getCurrent();
       
       value = cdiManager.getReference(_bean);
     }
-    System.out.println("VALUE: " + value + " " + _bean + " " + this);
     
     return value;
-  }
-  
-  @Override
-  public Object createObject(Hashtable<?,?> env)
-  {
-    return getValue();
   }
 
   /**
    * Validates the resource-ref, i.e. checking that it exists in
    * JNDI.
    */
+  @Override
   public void validate()
     throws ConfigException
   {
-    Object obj = null;
+    Object obj = getValue();
 
     try {
       obj = new InitialContext().lookup("java:comp/env/" + _name);

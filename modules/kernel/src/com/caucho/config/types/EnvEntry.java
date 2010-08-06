@@ -104,9 +104,9 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   /**
    * Sets the env-entry-value
    */
-  public void setEnvEntryValue(String value)
+  public void setEnvEntryValue(RawString value)
   {
-    _value = value;
+    _value = value.getValue();
   }
 
   /**
@@ -136,8 +136,10 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     super.init();
 
     // actually, should register for validation
+    /*
     if (_value == null)
       return;
+      */
     
     
     if (! isProgram())
@@ -159,12 +161,20 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   @Override
   public Object getValue()
   {
+    if (getLookupName() != null) {
+      try {
+        return Jndi.lookup(getLookupName());
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+    }
+    
     if (_objectValue == null)
       deploy();
-    
+    /*
     if (_objectValue == null)
       throw new NullPointerException(toString());
-    
+    */
     return _objectValue;
   }
 
@@ -174,22 +184,28 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     if (_objectValue != null)
       return;
     
+    super.deploy();
+
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    try {
+      if (getJndiClassLoader() != null)
+        thread.setContextClassLoader(getJndiClassLoader());
+      
+      Jndi.bindDeepShort(_name, this);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
+    
+    if (_value == null)
+      return;
+    
     LinkedHashSet<Type> types = new LinkedHashSet<Type>();
     
     Class<?> type = _type;
     Object value = _value;
-    
-    if (getLookupName() != null) {
-      value = Jndi.lookup(getLookupName());
-      
-      if (value == null) {
-        throw new ConfigException(L.l("No value returned from '{0}' in {1}",
-                                      getLookupName(), this));
-      }
-    }
-    
-    if (value == null)
-      return;
     
     if (type == null)
       type = inferTypeFromInjection();
@@ -198,7 +214,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
       types.add(type);
     else
       types.add(value.getClass());
-
+    
     if (getLookupName() != null) {
     }
     else if (type == null) {
@@ -206,7 +222,10 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     else if (type.equals(String.class)) {
     }
     else if (Boolean.class.equals(type) || boolean.class.equals(type)) {
-      value = new Boolean(Expr.toBoolean(_value, null));
+      if (_value != null)
+        value = new Boolean("true".equals(_value.toLowerCase()));
+      else
+        value = Boolean.FALSE;
       
       types.add(boolean.class);
     }
@@ -244,7 +263,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
       String v = Expr.toString(_value, null);
 
       if (v == null || v.length() == 0)
-        value = null;
+        value = new Character(' ');
       else
         value = new Character(v.charAt(0));
       
@@ -255,7 +274,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     }
     else if (Class.class.isAssignableFrom(type)) {
       try {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        loader = Thread.currentThread().getContextClassLoader();
 
         value = Class.forName(_value, false, loader);
       } catch (Exception e) {
@@ -282,20 +301,6 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     builder.type(types);
 
     cdiManager.addBean(builder.singleton(value));
-
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-    try {
-      if (getJndiClassLoader() != null)
-        thread.setContextClassLoader(getJndiClassLoader());
-      
-      log.info("BINDSELFX: " + _name + " " + value + " " + thread.getContextClassLoader());
-      Jndi.bindDeepShort(_name, value);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    } finally {
-      thread.setContextClassLoader(loader);
-    }
   }
 
   /**

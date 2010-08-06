@@ -29,31 +29,29 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.gen.ApplicationExceptionConfig;
-import com.caucho.config.types.FileSetType;
-import com.caucho.ejb.manager.EjbManager;
-import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.ejb.util.AppExceptionItem;
-import com.caucho.ejb.util.XAManager;
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.jms.JmsMessageListener;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ejb.ApplicationException;
+import javax.ejb.MessageDriven;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
-import javax.ejb.MessageDriven;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionTarget;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.gen.ApplicationExceptionConfig;
+import com.caucho.config.types.FileSetType;
+import com.caucho.ejb.manager.EjbManager;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
+import com.caucho.ejb.util.AppExceptionItem;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.jms.JmsMessageListener;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * Manages the EJB configuration files.
@@ -435,9 +433,11 @@ public class EjbConfig {
 
       _deployingBeans.addAll(beanConfig);
 
+      /*
       for (EjbBean<?> bean : beanConfig) {
         bean.init();
       }
+      */
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -506,6 +506,8 @@ public class EjbConfig {
         if (beanList.contains(bean))
           continue;
         
+        bean.init();
+        
         deployBean(beanConfig, javaGen, beanList, bean);
       }
     } finally {
@@ -566,28 +568,6 @@ public class EjbConfig {
     server.init();
 
     return server;
-  }
-
-  private <X> void initResources(EjbBean<?> bean, AbstractEjbBeanManager<?> server)
-    throws Exception
-  {
-    /*
-    for (ResourceEnvRef ref : bean.getResourceEnvRefs())
-      ref.initBinding(server);
-
-    // XXX TCK, needs QA probably ejb/0gc4 ejb/0gc5
-    for (EjbLocalRef ref : bean.getEjbLocalRefs())
-      ref.initBinding(server);
-      */
-    _ejbContainer.addServer(server);
-  }
-
-  /**
-   * Match up the relations.
-   */
-  protected void configureRelations()
-    throws ConfigException
-  {
   }
 
   public String toString()

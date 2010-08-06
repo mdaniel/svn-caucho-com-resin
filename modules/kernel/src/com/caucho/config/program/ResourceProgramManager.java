@@ -29,7 +29,10 @@
 
 package com.caucho.config.program;
 
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.util.FreeList;
 
@@ -37,38 +40,45 @@ import com.caucho.util.FreeList;
  * JavaEE resource program
  */
 public class ResourceProgramManager {
-  private final ConcurrentHashMap<TargetKey,ResourceInjectionTargetProgram> _programMap
-    = new ConcurrentHashMap<TargetKey,ResourceInjectionTargetProgram>();
+  private final ConcurrentHashMap<Class<?>,ArrayList<ResourceInjectionTargetProgram>> _programMap
+    = new ConcurrentHashMap<Class<?>,ArrayList<ResourceInjectionTargetProgram>>();
   
   private final FreeList<TargetKey> _freeList = new FreeList<TargetKey>(16); 
   
   public void addResource(ResourceInjectionTargetProgram resource)
   {
-    TargetKey key = new TargetKey(resource.getTargetClass(),
-                                  resource.getTargetName());
-
-    _programMap.put(key, resource);
+    ArrayList<ResourceInjectionTargetProgram> programList;
+    
+    programList = _programMap.get(resource.getTargetClass());
+    
+    if (programList == null) {
+      programList = new ArrayList<ResourceInjectionTargetProgram>();
+      
+      _programMap.put(resource.getTargetClass(), programList);
+    }
+    
+    programList.add(resource);
   }
   
-  public ResourceInjectionTargetProgram 
-  findResource(Class<?> targetClass, String targetName)
+  public void buildInject(Class<?> type,
+                          ArrayList<ConfigProgram> injectProgramList)
   {
-    TargetKey key = _freeList.allocate();
+    if (type == null || type.equals(Object.class))
+      return;
     
-    if (key == null)
-      key = new TargetKey();
+    buildInject(type.getSuperclass(), injectProgramList);
     
-    key.init(targetClass, targetName);
+    ArrayList<ResourceInjectionTargetProgram> programList;
+    programList = _programMap.get(type);
     
-    ResourceInjectionTargetProgram program;
+    if (programList == null)
+      return;
     
-    program = _programMap.get(key);
-    
-    _freeList.free(key);
-    
-    return program;
+    for (ResourceInjectionTargetProgram program : programList) {
+      injectProgramList.add(program);
+    }
   }
-  
+ 
   static class TargetKey {
     private Class<?> _targetClass;
     private String _targetName;

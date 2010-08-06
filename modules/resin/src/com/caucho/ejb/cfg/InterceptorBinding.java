@@ -29,23 +29,20 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.L10N;
-
 import java.util.ArrayList;
 
 /**
  * Configuration for interceptor-binding.
  */
 public class InterceptorBinding {
-  private static final L10N L = new L10N(InterceptorBinding.class);
-
   private String _ejbName;
 
   private boolean _isExcludeDefaultInterceptors;
+  private boolean _isExcludeClassInterceptors;
 
   private InterceptorOrder _interceptorOrder;
 
-  private ArrayList<Class> _interceptors = new ArrayList<Class>();
+  private ArrayList<Class<?>> _interceptors = new ArrayList<Class<?>>();
 
   public InterceptorBinding()
   {
@@ -61,7 +58,7 @@ public class InterceptorBinding {
     return _interceptorOrder;
   }
 
-  public ArrayList<Class> getInterceptors()
+  public ArrayList<Class<?>> getInterceptors()
   {
     return _interceptors;
   }
@@ -80,14 +77,24 @@ public class InterceptorBinding {
   {
     _isExcludeDefaultInterceptors = b;
   }
+  
+  public void setExcludeClassInterceptors(boolean value)
+  {
+    _isExcludeClassInterceptors = value;
+  }
 
   public void setInterceptorOrder(InterceptorOrder interceptorOrder)
   {
     _interceptorOrder = interceptorOrder;
   }
 
-  public void addInterceptorClass(Class interceptorClass)
+  public void addInterceptorClass(Class<?> interceptorClass)
   {
     _interceptors.add(interceptorClass);
+  }
+  
+  public void addMethod(EjbMethod method)
+  {
+    
   }
 }

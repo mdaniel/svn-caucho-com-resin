@@ -223,7 +223,8 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
     }
     else {
       Path tmpDir = Vfs.lookup(System.getProperty("java.io.tmpdir"));
-      Path workDir = tmpDir.lookup("caucho-ejb");
+      String userName = System.getProperty("user.name");
+      Path workDir = tmpDir.lookup(userName).lookup("caucho-ejb");
 
       WorkDir.setLocalWorkDir(workDir);
     }

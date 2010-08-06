@@ -47,6 +47,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 import com.caucho.make.ClassDependency;
+import com.caucho.make.VersionDependency;
 import com.caucho.vfs.PersistentDependency;
 
 /**
@@ -66,6 +67,7 @@ abstract public class BeanGenerator<X> extends GenClass
     
     _beanType = beanType;
 
+    addDependency(new VersionDependency());
     addDependency(beanType.getJavaClass());
   }
 

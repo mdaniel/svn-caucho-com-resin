@@ -430,7 +430,6 @@ public class JavaClassGenerator {
         preloadLoader = SimpleLoader.create(getPreloadLoader(),
                                             getWorkDir(),
                                             fullClassName);
-
         // needed for cases like Amber enhancing
         preloadLoader.setServletHack(true);
         loader = preloadLoader;
