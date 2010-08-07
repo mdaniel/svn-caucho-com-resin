@@ -31,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Identity;
 import java.security.Principal;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,20 +44,21 @@ import javax.ejb.TimerService;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
 
+import com.caucho.config.gen.CandiInvocationContext;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.util.L10N;
 
 /**
  * Base class for an abstract context
  */
+@SuppressWarnings("deprecation")
 abstract public class AbstractContext<X> implements EJBContext {
   private static final L10N L = new L10N(AbstractContext.class);
-  private static final Logger log = Logger.getLogger(AbstractContext.class
-      .getName());
+  private static final Logger log
+    = Logger.getLogger(AbstractContext.class.getName());
 
   private boolean _isDead;
   private String []_declaredRoles;
@@ -123,12 +125,17 @@ abstract public class AbstractContext<X> implements EJBContext {
   {
     return new Properties();
   }
+  
+  @Override
+  public final Map<String,Object> getContextData()
+  {
+    return CandiInvocationContext.getCurrentContextData();
+  }
 
   /**
    * Obsolete method returns null.
    */
   @Override
-  @SuppressWarnings("deprecation")
   public Identity getCallerIdentity()
   {
     throw new UnsupportedOperationException();
@@ -153,7 +160,6 @@ abstract public class AbstractContext<X> implements EJBContext {
    * Obsolete method returns false.
    */
   @Override
-  @SuppressWarnings("deprecation")
   public boolean isCallerInRole(Identity role)
   {
     throw new UnsupportedOperationException();
@@ -250,7 +256,7 @@ abstract public class AbstractContext<X> implements EJBContext {
     _isDead = true;
   }
 
-  public Class getInvokedBusinessInterface() 
+  public Class<?> getInvokedBusinessInterface() 
     throws IllegalStateException
   {
     if (_invokedBusinessInterface == null)

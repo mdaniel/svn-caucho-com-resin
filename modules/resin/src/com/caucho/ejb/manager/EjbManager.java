@@ -149,9 +149,6 @@ public class EjbManager implements ScanListener, EnvironmentListener {
       EjbManager container = _localContainer.getLevel(loader);
 
       if (container == null) {
-        EnvironmentClassLoader envLoader
-          = Environment.getEnvironmentClassLoader(loader);
-        
         Boolean ejbManager = null;
         
         ejbManager = (Boolean) Environment.getAttribute("ejb.manager", loader);
@@ -461,6 +458,9 @@ public class EjbManager implements ScanListener, EnvironmentListener {
       return true;
     }
     else if (annotationName.matches("javax.ejb.MessageDriven")) {
+      return true;
+    }
+    else if (annotationName.matches("javax.annotation.ManagedBean")) {
       return true;
     }
     else

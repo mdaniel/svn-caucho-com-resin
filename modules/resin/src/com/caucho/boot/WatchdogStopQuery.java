@@ -30,9 +30,11 @@ package com.caucho.boot;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class WatchdogStopQuery implements Serializable {
   private final String _serverId;
 
+  @SuppressWarnings("unused")
   private WatchdogStopQuery()
   {
     _serverId = null;

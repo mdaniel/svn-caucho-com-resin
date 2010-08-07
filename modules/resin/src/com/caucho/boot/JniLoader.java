@@ -29,35 +29,13 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.ConfigException;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.enhancer.ByteCodeEnhancer;
-import com.caucho.loader.enhancer.EnhancerRuntimeException;
-import com.caucho.make.AlwaysModified;
-import com.caucho.make.DependencyContainer;
-import com.caucho.make.Make;
-import com.caucho.make.MakeContainer;
-import com.caucho.management.server.*;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.ByteBuffer;
-import com.caucho.util.L10N;
-import com.caucho.util.TimedCache;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.security.CodeSource;
+import java.security.SecureClassLoader;
 
-import javax.annotation.PostConstruct;
-import java.io.*;
-import java.net.URL;
-import java.security.*;
-import java.lang.instrument.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -71,8 +49,6 @@ public class JniLoader extends SecureClassLoader
 {
   private Path _resinHome;
   private JarPath _proJar;
-  private boolean _is64bit;
-  
   /**
    * Create a new class loader.
    *
@@ -96,7 +72,7 @@ public class JniLoader extends SecureClassLoader
    * @return the loaded classes
    */
   // XXX: added synchronized for RSN-373
-  protected synchronized Class loadClass(String name, boolean resolve)
+  protected synchronized Class<?> loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
     String className = name.replace('.', '/') + ".class";
@@ -115,8 +91,8 @@ public class JniLoader extends SecureClassLoader
 
           is.readAll(buffer, 0, buffer.length);
 
-          Class cl = defineClass(name, buffer, 0, buffer.length,
-                                 (CodeSource) null);
+          Class<?> cl = defineClass(name, buffer, 0, buffer.length,
+                                    (CodeSource) null);
 
           return cl;
         } finally {
@@ -137,7 +113,7 @@ public class JniLoader extends SecureClassLoader
    *
    * @return the loaded class
    */
-  protected Class findClass(String name)
+  protected Class<?> findClass(String name)
     throws ClassNotFoundException
   {
     return super.findClass(name);

@@ -29,8 +29,6 @@
 
 package com.caucho.boot;
 
-import java.util.logging.Logger;
-
 import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
@@ -40,17 +38,12 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.Authenticator;
 import com.caucho.security.XmlAuthenticator;
-import com.caucho.util.L10N;
 
 /**
  * Configuration for management.
  */
 public class BootManagementConfig
 {
-  private static L10N L = new L10N(BootManagementConfig.class);
-  private static Logger log
-    = Logger.getLogger(BootManagementConfig.class.getName());
-
   private AdminAuthenticator _auth;
   
   /**
@@ -122,7 +115,7 @@ public class BootManagementConfig
         _auth.init();
       
         InjectManager manager = InjectManager.create();
-        BeanBuilder factory = manager.createBeanFactory(Authenticator.class);
+        BeanBuilder<?> factory = manager.createBeanFactory(Authenticator.class);
         factory.type(Authenticator.class);
         factory.type(AdminAuthenticator.class);
 

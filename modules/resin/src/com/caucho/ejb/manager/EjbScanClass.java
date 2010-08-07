@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.manager;
 
+import javax.annotation.ManagedBean;
 import javax.ejb.MessageDriven;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
@@ -49,6 +50,8 @@ class EjbScanClass extends AbstractScanClass {
     = Singleton.class.getName().toCharArray();
   private static final char []MESSAGE_DRIVEN
     = MessageDriven.class.getName().toCharArray();
+  private static final char []MANAGED_BEAN
+    = ManagedBean.class.getName().toCharArray();
   
   private Path _root;
   private String _className;
@@ -77,6 +80,9 @@ class EjbScanClass extends AbstractScanClass {
     else if (isMatch(buffer, offset, length, MESSAGE_DRIVEN)) {
       _isEjb = true;
     }
+    else if (isMatch(buffer, offset, length, MANAGED_BEAN)) {
+      _isEjb = true;
+    }
   }
 
   @Override
@@ -100,5 +106,11 @@ class EjbScanClass extends AbstractScanClass {
     if (_isEjb) {
       _ejbContainer.addScanClass(_root, _className);
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _className + "]";
   }
 }

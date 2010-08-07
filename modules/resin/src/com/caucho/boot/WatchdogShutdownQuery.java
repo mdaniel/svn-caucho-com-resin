@@ -30,6 +30,7 @@ package com.caucho.boot;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class WatchdogShutdownQuery implements Serializable {
   public WatchdogShutdownQuery()
   {

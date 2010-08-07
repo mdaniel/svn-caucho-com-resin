@@ -138,9 +138,6 @@ class WatchdogManager implements AlarmListener {
 
     ResinELContext elContext = _args.getELContext();
     
-    Path rootDirectory = _args.getRootDirectory();
-    Path dataDirectory = rootDirectory.lookup("watchdog-data");
-    
     Resin resin = Resin.createWatchdog();
     
     resin.preConfigureInit();

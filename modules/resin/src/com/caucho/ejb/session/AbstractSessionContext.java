@@ -103,12 +103,6 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   }
   
   @Override
-  public Map<String,Object> getContextData()
-  {
-    return _contextData;
-  }
-  
-  @Override
   public Class<?> getInvokedBusinessInterface()
   {
     return getApi();

@@ -29,31 +29,28 @@
 
 package com.caucho.ejb.interceptor;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.ejb.cfg.Interceptor;
-import com.caucho.util.L10N;
-
-import javax.interceptor.InvocationContext;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.interceptor.InvocationContext;
+
+import com.caucho.config.gen.CandiInvocationContext;
+import com.caucho.ejb.cfg.Interceptor;
+import com.caucho.loader.EnvironmentLocal;
+
 /**
  * InvocationContext implementation.
  */
 public class InvocationContextImpl implements InvocationContext {
-  private static final L10N L = new L10N(InvocationContextImpl.class);
-
   private Object _target;
   private Object _home;
   private Object _parameters[];
 
   private Method _method;
   private String _methodName;
-  private Class _parameterTypes[];
-
-  private HashMap<String, Object> _contextData;
+  private Class<?> _parameterTypes[];
 
   private Object _context[];
 
@@ -63,12 +60,10 @@ public class InvocationContextImpl implements InvocationContext {
   private Object _interceptors[];
   private Method _methods[];
 
-  private boolean _hasCalledTargetMethod;
-
   public InvocationContextImpl(Object target,
                                Object home,
                                String methodName,
-                               Class parameterTypes[],
+                               Class<?> parameterTypes[],
                                Object interceptors[],
                                Method methods[])
   {
@@ -82,29 +77,32 @@ public class InvocationContextImpl implements InvocationContext {
 
     _context = new Object[] { this };
   }
-
+ 
   public Object getHome()
   {
     return _home;
   }
 
+  @Override
   public Object getTarget()
   {
     return _target;
   }
 
+  @Override
   public Object getTimer()
   {
     return null;
   }
 
+  @Override
   public Method getMethod()
   {
     if (_method == null) {
       if (_methodName == null)
         return null;
 
-      Class cl = _target.getClass();
+      Class<?> cl = _target.getClass();
 
       try {
         _method = cl.getMethod(_methodName, _parameterTypes);
@@ -116,27 +114,27 @@ public class InvocationContextImpl implements InvocationContext {
     return _method;
   }
 
+  @Override
   public Object[] getParameters()
     throws IllegalStateException
   {
     return _parameters;
   }
 
+  @Override
   public void setParameters(Object[] parameters)
     throws IllegalStateException
   {
     _parameters = parameters;
   }
 
+  @Override
   public Map<String, Object> getContextData()
   {
-    if (_contextData == null) {
-      _contextData = new HashMap<String, Object>();
-    }
-
-    return _contextData;
+    return CandiInvocationContext.getCurrentContextData();
   }
 
+  @Override
   public Object proceed()
     throws Exception
   {
@@ -146,7 +144,7 @@ public class InvocationContextImpl implements InvocationContext {
 
         return invokeMethod(getCurrentMethod(), interceptor, _context);
       }
-      else if (! hasCalledTargetMethod()) {
+      else {
         return invokeMethod(getMethod(), getTarget(), getParameters());
       }
     } catch (InvocationTargetException e) {
@@ -154,8 +152,6 @@ public class InvocationContextImpl implements InvocationContext {
     } catch (Exception e) {
       throw e;
     }
-
-    return null;
   }
 
   public static Object invokeMethod(Method method, Object obj, Object params[])
@@ -167,16 +163,6 @@ public class InvocationContextImpl implements InvocationContext {
     Interceptor.makeAccessible(method);
 
     return method.invoke(obj, params);
-  }
-
-  private boolean hasCalledTargetMethod()
-  {
-    return _hasCalledTargetMethod;
-  }
-
-  private void setHasCalledTargetMethod(boolean b)
-  {
-    _hasCalledTargetMethod = b;
   }
 
   private boolean hasNextInterceptor()

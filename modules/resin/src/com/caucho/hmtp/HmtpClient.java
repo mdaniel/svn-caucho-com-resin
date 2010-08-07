@@ -114,7 +114,8 @@ public class HmtpClient extends SimpleActorClient {
 
       throw _connException;
     } catch (IOException e) {
-      _connException = new RemoteConnectionFailedException("Failed to connect to server at " + _url);
+      _connException = new RemoteConnectionFailedException("Failed to connect to server at " + _url + "\n  " + e, 
+                                                           e);
 
       throw _connException;
     }

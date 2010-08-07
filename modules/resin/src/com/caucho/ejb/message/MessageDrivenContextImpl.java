@@ -56,8 +56,6 @@ public class MessageDrivenContextImpl extends AbstractContext
   private UserTransaction _ut;
   private boolean _isRollbackOnly;
   
-  private HashMap<String,Object> _contextMap = new HashMap<String,Object>();
-
   MessageDrivenContextImpl(MessageManager server, UserTransaction ut)
   {
     _server = server;
@@ -72,12 +70,6 @@ public class MessageDrivenContextImpl extends AbstractContext
   public boolean isCMT()
   {
     return getServer().isContainerTransaction();
-  }
-  
-  @Override
-  public Map<String,Object> getContextData()
-  {
-    return _contextMap;
   }
 
   /**

@@ -738,11 +738,12 @@ public class InterceptorGenerator<X>
 
           interceptors.add(iClass);
           
-          if (iClass == getJavaClass()) {
+          if (iClass.isAssignableFrom(getJavaClass())) {
             out.print("__caucho_interceptor_static_beans.add(new ");
             out.printClass(InterceptorSelfBean.class);
             out.print("(");
-            out.printClass(iClass);
+            //out.printClass(iClass);
+            out.printClass(getJavaClass());
             out.println(".class));");
           }
           else {
@@ -1618,6 +1619,7 @@ public class InterceptorGenerator<X>
     return (_interceptors != null && _interceptors.size() > 0
             || _interceptorBinding != null && _interceptorBinding.size() > 0
             || getAroundInvokeMethod() != null
+            || _factory.isSelfInterceptor()
             || _isEpilogue);
   }
 

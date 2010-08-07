@@ -38,6 +38,7 @@ import java.util.Hashtable;
 /**
  * An object proxy for a foreign JNDI factory.
  */
+@SuppressWarnings("serial")
 public class NamingProxy implements ObjectProxy, java.io.Serializable {
   // The server
   protected AbstractModel _namingModel;
@@ -60,7 +61,8 @@ public class NamingProxy implements ObjectProxy, java.io.Serializable {
    *
    * @return the object named by the proxy.
    */
-  public Object createObject(Hashtable env)
+  @Override
+  public Object createObject(Hashtable<?,?> env)
     throws NamingException
   {
     return new ContextImpl(_namingModel, env);

@@ -105,6 +105,8 @@ public class RemoteAdminService
       webAppConfig.addPropertyProgram("servlet-mapping", mapping);
       
       _server.addHost(hostConfig);
+      
+      System.out.println("SERVLET: " + mapping);
 
       if (log.isLoggable(Level.FINER))
         log.finer(this + " enabled at http://" + _hostName + "/hmtp");

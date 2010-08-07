@@ -29,33 +29,25 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.program.ConfigProgram;
+import java.io.File;
+import java.util.ArrayList;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.SocketLinkListener;
-import com.caucho.server.cluster.ProtocolPort;
-import com.caucho.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Thread responsible for watching a backend server.
  */
 class WatchdogConfig
 {
-  private static final L10N L
-    = new L10N(WatchdogConfig.class);
-  private static final Logger log
-    = Logger.getLogger(WatchdogConfig.class.getName());
-
   private static final int WATCHDOG_PORT_DEFAULT = 6600;
   
   private String _id = "";
@@ -81,10 +73,6 @@ class WatchdogConfig
   private Path _chroot;
   private Path _pwd;
 
-  private boolean _isDynamic;
-  private String _address;
-  private int _port;
-
   private String _watchdogAddress = "127.0.0.1";
   private int _watchdogPort;
 
@@ -99,7 +87,6 @@ class WatchdogConfig
   private long _shutdownWaitTime = 60000L;
 
   private boolean _isVerbose;
-  private boolean _isWatchdog64bit;
   private boolean _hasWatchdogXss;
   private boolean _hasWatchdogXmx;
 
@@ -130,7 +117,6 @@ class WatchdogConfig
 
   public void setDynamic(boolean isDynamic)
   {
-    _isDynamic = isDynamic;
   }
 
   public void setVerbose(boolean isVerbose)
@@ -335,9 +321,8 @@ class WatchdogConfig
   {
     _watchdogJvmArgs.add(arg);
 
-    if (arg.equals("-d64"))
-      _isWatchdog64bit = true;
-    else if (arg.startsWith("-Xss"))
+    if (arg.equals("-d64")) {
+    } else if (arg.startsWith("-Xss"))
       _hasWatchdogXss = true;
     else if (arg.startsWith("-Xmx"))
       _hasWatchdogXmx = true;
@@ -358,12 +343,10 @@ class WatchdogConfig
 
   public void setAddress(String address)
   {
-    _address = address;
   }
 
   public void setPort(int port)
   {
-    _port = port;
   }
   
   /**

@@ -107,6 +107,23 @@ public class AnnotatedTypeUtil {
   /**
    * Finds any method matching the method name and parameter types.
    */
+  public static Method findDeclaredMethod(Class<?> cl, Method testMethod)
+  {
+    if (cl == null)
+      return null;
+    
+    for (Method method : cl.getDeclaredMethods()) {
+      if (isMatch(method, testMethod))
+        return method;
+    }
+    
+    return null;
+  }
+  
+  
+  /**
+   * Finds any method matching the method name and parameter types.
+   */
   public static Method findMethod(Method []methods, Method testMethod)
   {
     for (Method method : methods) {

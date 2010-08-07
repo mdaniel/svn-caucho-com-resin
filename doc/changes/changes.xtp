@@ -13,6 +13,7 @@
 
 <s2 title="4.0.10 - snapshot">
 <ul>
+<li>thread: alarm locking issue (rep by Wesley Wu, Jan Kriesten)</li>
 <li>win: fixed dll loading issue (#4159), rep hans</li>
 <li>servlet: fixed cross context include issue (#4117), rep Brian Deng</li>
 <li>servlet: fixed getInputStream issue for String params with Servlet3.0 Part (#4153), rep by Wesley Wu</li>

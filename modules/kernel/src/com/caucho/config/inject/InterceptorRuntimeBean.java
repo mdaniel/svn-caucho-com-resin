@@ -85,6 +85,8 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
     if (parentClass != null) {
       _parent = new InterceptorRuntimeBean(this, parentClass);
     }
+    
+    // introspectOverrideMethods(type);
   }
   
   //
@@ -94,6 +96,11 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
   public Bean<X> getBean()
   {
     return _child;
+  }
+  
+  public Class<?> getType()
+  {
+    return _type;
   }
   
   public InterceptorRuntimeBean<?> getParent()
@@ -263,43 +270,94 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
     if (cl == null)
       return;
     
+    Class<?> childClass = null;
+    
+    if (_child != null)
+      childClass = _child.getType();
+      
     for (Method method : cl.getDeclaredMethods()) {
       if (Modifier.isStatic(method.getModifiers()))
         continue;
 
-      if (method.isAnnotationPresent(AroundInvoke.class)
-          && (_child == null
-              || ! isMethodMatch(_child._aroundInvoke, method))) {
-        _aroundInvoke = method;
-        method.setAccessible(true);
+      if (method.isAnnotationPresent(AroundInvoke.class)) {
+        Method childMethod 
+          = AnnotatedTypeUtil.findDeclaredMethod(childClass, method);
+
+        if (childMethod == null) {
+          // ioc/0cb1
+          _aroundInvoke = method;
+          method.setAccessible(true);
+        }
       }
 
       if (method.isAnnotationPresent(PostConstruct.class)
           && (_child == null
-              || ! isMethodMatch(_child._aroundInvoke, method))) {
+              || ! isMethodMatch(_child._postConstruct, method))) {
         _postConstruct = method;
         method.setAccessible(true);
       }
 
       if (method.isAnnotationPresent(PreDestroy.class)
           && (_child == null
-              || ! isMethodMatch(_child._aroundInvoke, method))) {
+              || ! isMethodMatch(_child._preDestroy, method))) {
         _preDestroy = method;
         method.setAccessible(true);
       }
 
       if (method.isAnnotationPresent(PrePassivate.class)
           && (_child == null
-              || ! isMethodMatch(_child._aroundInvoke, method))) {
+              || ! isMethodMatch(_child._prePassivate, method))) {
         _prePassivate = method;
         method.setAccessible(true);
       }
 
       if (method.isAnnotationPresent(PostActivate.class)
           && (_child == null
-              || ! isMethodMatch(_child._aroundInvoke, method))) {
+              || ! isMethodMatch(_child._postActivate, method))) {
         _postActivate = method;
         method.setAccessible(true);
+      }
+    }
+  }
+
+  private void introspectOverrideMethods(Class<?> cl)
+  {
+    if (cl == null)
+      return;
+    
+    for (Method method : cl.getDeclaredMethods()) {
+      if (Modifier.isStatic(method.getModifiers()))
+        continue;
+
+      if (_aroundInvoke != null
+          && cl != _aroundInvoke.getDeclaringClass()
+          && isMethodMatch(method, _aroundInvoke)) {
+        // ioc/0cb1
+        _aroundInvoke = null;
+      }
+
+      if (_postConstruct != null
+          && cl != _postConstruct.getDeclaringClass()
+          && isMethodMatch(method, _postConstruct)) {
+        _postConstruct = null;
+      }
+
+      if (_preDestroy != null
+          && cl != _preDestroy.getDeclaringClass()
+          && isMethodMatch(method, _preDestroy)) {
+        _preDestroy= null;
+      }
+
+      if (_prePassivate != null
+          && cl != _prePassivate.getDeclaringClass()
+          && isMethodMatch(method, _prePassivate)) {
+        _prePassivate= null;
+      }
+
+      if (_postActivate != null
+          && cl != _postActivate.getDeclaringClass()
+          && isMethodMatch(method, _postActivate)) {
+        _postActivate = null;
       }
     }
   }

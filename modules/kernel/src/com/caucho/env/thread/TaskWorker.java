@@ -67,7 +67,12 @@ abstract public class TaskWorker implements Runnable {
     return false;
   }
   
-  protected boolean isClosed()
+  public boolean isTaskActive()
+  {
+    return _isActive.get();
+  }
+  
+  public boolean isClosed()
   {
     return _isClosed;
   }
@@ -136,10 +141,12 @@ abstract public class TaskWorker implements Runnable {
         while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
           long delta = runTask();
           
-          if (delta < 0)
+          if (delta < 0) {
             expires = Alarm.getCurrentTimeActual() + _idleTimeout;
-          else
+          }
+          else {
             expires = Alarm.getCurrentTimeActual() + delta;
+          }
         }
 
         if (isClosed())
@@ -148,6 +155,9 @@ abstract public class TaskWorker implements Runnable {
         if (_taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
           Thread.interrupted();
           LockSupport.parkUntil(expires);
+          
+          if (isPermanent())
+            _taskState.set(TASK_READY);
         }
       } while (_taskState.get() == TASK_READY
                || Alarm.getCurrentTimeActual() < expires

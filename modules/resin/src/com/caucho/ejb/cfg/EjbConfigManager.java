@@ -32,6 +32,7 @@ package com.caucho.ejb.cfg;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.ManagedBean;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.*;
@@ -164,6 +165,12 @@ public class EjbConfigManager extends EjbConfig {
       InjectManager manager = InjectManager.create(loader);
       
       AnnotatedType<X> annType = manager.createAnnotatedType(type);
+      
+      if (annType.isAnnotationPresent(ManagedBean.class)) {
+        // ioc/00b0
+        manager.discoverBean(annType);
+        return;
+      }
       
       addAnnotatedType(annType, annType, null, moduleName);
     }

@@ -60,8 +60,8 @@ public class EjbProtocolManager {
 
   private static ThreadLocal<String> _protocolLocal = new ThreadLocal<String>();
 
-  private static Hashtable<String, WeakReference<AbstractEjbBeanManager>> _staticServerMap
-    = new Hashtable<String, WeakReference<AbstractEjbBeanManager>>();
+  private static Hashtable<String, WeakReference<AbstractEjbBeanManager<?>>> _staticServerMap
+    = new Hashtable<String, WeakReference<AbstractEjbBeanManager<?>>>();
 
   private final EjbManager _ejbContainer;
   private final ClassLoader _loader;
@@ -71,8 +71,8 @@ public class EjbProtocolManager {
 
   private String _jndiPrefix; // java:comp/env/ejb/FooBean/local
 
-  private HashMap<String, AbstractEjbBeanManager> _serverMap 
-    = new HashMap<String, AbstractEjbBeanManager>();
+  private HashMap<String, AbstractEjbBeanManager<?>> _serverMap 
+    = new HashMap<String, AbstractEjbBeanManager<?>>();
 
   // handles remote stuff
   protected ProtocolContainer _protocolContainer;
@@ -207,7 +207,7 @@ public class EjbProtocolManager {
 
   private void addProtocolServers(ProtocolContainer protocol)
   {
-    for (AbstractEjbBeanManager server : _serverMap.values()) {
+    for (AbstractEjbBeanManager<?> server : _serverMap.values()) {
       protocol.addServer(server);
     }
   }
@@ -217,7 +217,8 @@ public class EjbProtocolManager {
    */
   public static AbstractEjbBeanManager<?> getJVMServer(String serverId)
   {
-    WeakReference<AbstractEjbBeanManager> serverRef = _staticServerMap.get(serverId);
+    WeakReference<AbstractEjbBeanManager<?>> serverRef
+      = _staticServerMap.get(serverId);
 
     return serverRef != null ? serverRef.get() : null;
   }
@@ -408,45 +409,11 @@ public class EjbProtocolManager {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private void bindServer(String jndiName, AbstractEjbBeanManager server, Class api)
-      throws NamingException
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-
-    try {
-      Thread.currentThread().setContextClassLoader(_loader);
-
-      if (log.isLoggable(Level.FINER))
-        log.finest(server + " binding to " + jndiName);
-
-      Jndi.bindDeep(jndiName, server.getLocalProxy(api));
-    } finally {
-      Thread.currentThread().setContextClassLoader(loader);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void bindRemoteServer(String jndiName, AbstractEjbBeanManager server,
-      Class api) throws NamingException
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-
-    try {
-      Thread.currentThread().setContextClassLoader(_loader);
-
-      Jndi.bindDeep(jndiName, new ServerRemoteProxy(server, api));
-    } finally {
-      Thread.currentThread().setContextClassLoader(loader);
-    }
-  }
-
   /**
    * Adds a server.
    */
-  public void removeServer(AbstractEjbBeanManager server) throws NamingException
+  public void removeServer(AbstractEjbBeanManager<?> server)
+    throws NamingException
   {
     for (ProtocolContainer protocol : _protocolMap.values()) {
       protocol.removeServer(server);
@@ -456,7 +423,7 @@ public class EjbProtocolManager {
   /**
    * Returns the server specified by the serverId.
    */
-  public AbstractEjbBeanManager getServerByEJBName(String ejbName)
+  public AbstractEjbBeanManager<?> getServerByEJBName(String ejbName)
   {
     if (!ejbName.startsWith("/"))
       ejbName = "/" + ejbName;
@@ -467,9 +434,9 @@ public class EjbProtocolManager {
   /**
    * Returns the server specified by the serverId.
    */
-  public AbstractEjbBeanManager getServerByServerId(String protocolId)
+  public AbstractEjbBeanManager<?> getServerByServerId(String protocolId)
   {
-    for (AbstractEjbBeanManager server : _serverMap.values()) {
+    for (AbstractEjbBeanManager<?> server : _serverMap.values()) {
       if (protocolId.equals(server.getProtocolId()))
         return server;
     }
@@ -503,7 +470,7 @@ public class EjbProtocolManager {
     while (iter.hasNext()) {
       String name = iter.next();
 
-      AbstractEjbBeanManager server = _serverMap.get(name);
+      AbstractEjbBeanManager<?> server = _serverMap.get(name);
 
       if (server.getLocalProxy(null) == null)
         continue;
@@ -542,7 +509,7 @@ public class EjbProtocolManager {
     while (iter.hasNext()) {
       String name = iter.next();
 
-      AbstractEjbBeanManager server = _serverMap.get(name);
+      AbstractEjbBeanManager<?> server = _serverMap.get(name);
     }
 
     if (children.size() == 0)

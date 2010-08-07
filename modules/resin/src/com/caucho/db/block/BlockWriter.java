@@ -101,7 +101,7 @@ public class BlockWriter extends TaskWorker {
   }
   
   @Override
-  protected boolean isClosed()
+  public boolean isClosed()
   {
     return super.isClosed() && _writeQueue.size() == 0;
   }

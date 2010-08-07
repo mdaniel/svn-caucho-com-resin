@@ -35,6 +35,7 @@ import java.io.Serializable;
 /**
  * Special class for dealing with serialization.
  */
+@SuppressWarnings("serial")
 public class ObjectSkeletonWrapper implements Serializable {
   protected Handle handle;
 

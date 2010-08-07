@@ -38,7 +38,6 @@ import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.hemp.broker.HempMemoryQueue;
-import com.caucho.hemp.servlet.ServerLinkActor;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWriter;

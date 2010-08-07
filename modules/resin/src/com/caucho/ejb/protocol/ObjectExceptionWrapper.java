@@ -33,6 +33,7 @@ import java.io.ObjectStreamException;
 /**
  * Wraps the actual exception with an EJB exception
  */
+@SuppressWarnings("serial")
 public class ObjectExceptionWrapper extends ObjectStreamException {
   /**
    * Create a basic ObjectExceptionWrapper with a message.

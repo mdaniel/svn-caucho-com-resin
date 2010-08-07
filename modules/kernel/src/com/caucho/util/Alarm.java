@@ -630,10 +630,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       // #3548 - getCurrentTime for consistency
       long now = getCurrentTime();
 
+      long delta;
+      
       if (next < 0)
-        next = now + 120000L;
-
-      return next;
+        delta = 120000L;
+      else
+        delta = next - now;
+      
+      return delta;
     }
   }
 

@@ -131,6 +131,11 @@ public class InterceptorFactory<X>
     return _isPassivating;
   }
   
+  public boolean isSelfInterceptor()
+  {
+    return _selfInterceptors.size() > 0;
+  }
+  
   /**
    * Creates an aspect for interception if the method should be intercepted.
    */
@@ -227,6 +232,7 @@ public class InterceptorFactory<X>
     
     if (methodInterceptors != null
         || interceptorMap != null
+        || _selfInterceptors.size() > 0
         || decoratorSet != null) {
       AspectGenerator<X> next = super.create(method, true);
       
@@ -383,7 +389,17 @@ public class InterceptorFactory<X>
     else
       return super.isEnhanced();
   }
-   
+  
+  private boolean isInterceptorPresentRec(Class<?> cl)
+  {
+    if (cl == null)
+      return false;
+    else if (isInterceptorPresent(cl))
+      return true;
+    else
+      return isInterceptorPresentRec(cl.getSuperclass());
+  }
+  
   private boolean isInterceptorPresent(Class<?> cl)
   {
     for (Method m : cl.getDeclaredMethods()) {
@@ -509,7 +525,9 @@ public class InterceptorFactory<X>
       }
     }
     
-    introspectClassInterceptors(_selfInterceptors, getBeanType().getJavaClass());
+    if (isInterceptorPresentRec(getBeanType().getJavaClass())) {
+      _selfInterceptors.add(getBeanType().getJavaClass());
+    }
   }
   
   /**

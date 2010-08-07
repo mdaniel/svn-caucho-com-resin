@@ -37,12 +37,16 @@ import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.interceptor.InvocationContext;
 
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 
 public class CandiInvocationContext implements InvocationContext {
   private static final L10N L = new L10N(CandiInvocationContext.class);
   private static final Logger log
     = Logger.getLogger(CandiInvocationContext.class.getName());
+  
+  private static final EnvironmentLocal<Map<String,Object>> _contextDataLocal
+  = new EnvironmentLocal<Map<String,Object>>();
   
   private final Object _target;
   private final Method _apiMethod;
@@ -121,14 +125,24 @@ public class CandiInvocationContext implements InvocationContext {
     
     _param = parameters;
   }
+  
+  public static Map<String,Object> getCurrentContextData()
+  {
+    Map<String,Object> contextData = _contextDataLocal.get();
+    
+    if (contextData == null) {
+      contextData = new HashMap<String, Object>();
+      
+      _contextDataLocal.set(contextData);
+    }
+
+    return contextData;
+  }
 
   @Override
   public Map<String, Object> getContextData()
   {
-    if (_map == null)
-      _map = new HashMap<String,Object>();
-
-    return _map;
+    return getCurrentContextData();
   }
 
   @Override
@@ -136,8 +150,6 @@ public class CandiInvocationContext implements InvocationContext {
     throws Exception
   {
     try {
-      log.info("PROCEED: " + _chainObjects + " " + _implMethod + " " + _index);
-      
       // ioc/0c57
       if (_chainObjects != null && _index < _chainIndex.length) {
         int i = _index++;
