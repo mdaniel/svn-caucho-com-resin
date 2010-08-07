@@ -44,13 +44,6 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Created by IntelliJ IDEA.
- * User: alex
- * Date: Aug 6, 2010
- * Time: 1:22:40 PM
- * To change this template use File | Settings | File Templates.
- */
 public class ResinGUI extends JFrame implements WindowListener, ActionListener {
 
   private final WatchdogClient _client;
