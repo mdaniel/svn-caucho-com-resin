@@ -66,7 +66,7 @@ public class FileRepository extends AbstractRepository
   @Override
   public void checkForUpdate()
   {
-    update(getRepositoryCommitHash());
+    update(getRepositoryRootHash());
   }
 
   //
@@ -122,7 +122,7 @@ public class FileRepository extends AbstractRepository
    * Returns the hash stored in the git tag
    */
   @Override
-  public String getRepositoryCommitHash()
+  public String getRepositoryRootHash()
   {
     return _git.getTag(getRepositoryTag());
   }
@@ -131,7 +131,7 @@ public class FileRepository extends AbstractRepository
    * Sets the hash stored in the git tag
    */
   @Override
-  public void setRepositoryCommitHash(String sha1)
+  public void setRepositoryRootHash(String sha1)
   {
     _git.writeTag(getRepositoryTag(), sha1);
   }

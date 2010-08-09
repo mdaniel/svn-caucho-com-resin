@@ -60,7 +60,7 @@ public interface Repository
    * 
    * @return the hash of the .git Commit for the current repository root.
    */
-  public String getRepositoryCommitHash();
+  public String getRepositoryRootHash();
   
   /**
    * The root .git hash for the repository itself. The hash points
@@ -69,7 +69,7 @@ public interface Repository
    * @param rootCommitHash the hash of the new .git Commit for the 
    * repository.
    */
-  public void setRepositoryCommitHash(String rootCommitHash);
+  public void setRepositoryRootHash(String rootCommitHash);
   
   //
   // .git file management

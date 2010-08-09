@@ -87,7 +87,7 @@ abstract public class AbstractRepository implements Repository
   @Override
   public void checkForUpdate()
   {
-    update(getRepositoryCommitHash());
+    update(getRepositoryRootHash());
   }
 
   /**
@@ -285,7 +285,7 @@ abstract public class AbstractRepository implements Repository
       if (_tagMap.getSequence() < tagMap.getSequence()) {
         _tagMap = tagMap;
 
-        setRepositoryCommitHash(tagMap.getCommitHash());
+        setRepositoryRootHash(tagMap.getCommitHash());
 
         if (log.isLoggable(Level.FINER))
           log.finer(this + " updating deployment " + tagMap);
@@ -305,13 +305,13 @@ abstract public class AbstractRepository implements Repository
    * Returns the sha1 stored at the gitTag
    */
   @Override
-  abstract public String getRepositoryCommitHash();
+  abstract public String getRepositoryRootHash();
 
   /**
    * Writes the sha1 stored at the gitTag
    */
   @Override
-  abstract public void setRepositoryCommitHash(String repositoryCommitHash);
+  abstract public void setRepositoryRootHash(String repositoryCommitHash);
 
   //
   // git file management

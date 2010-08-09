@@ -981,7 +981,7 @@ public class XmlConfigContext {
     }
     else if (node instanceof CharacterData) {
       CharacterData cData = (CharacterData) node;
-      System.out.println("CD: '" + cData.getData() + "'");
+
       return cData.getData();
     }
 
