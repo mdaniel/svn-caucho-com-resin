@@ -361,7 +361,6 @@ public class FileServlet extends GenericServlet {
     if (res instanceof CauchoResponse) {
       CauchoResponse cRes = (CauchoResponse) res;
 
-      res.getOutputStream().flush();
       cRes.getResponseStream().sendFile(cache.getPath(), cache.getLength());
     }
     else {
