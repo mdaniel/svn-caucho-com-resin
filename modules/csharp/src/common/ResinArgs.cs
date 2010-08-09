@@ -70,7 +70,6 @@ namespace Caucho
     public bool IsService { get; private set; }
     public bool IsInstall { get; private set; }
     public bool IsUnInstall { get; private set; }
-    public bool IsStandalone { get; private set; }
     public bool IsHelp { get; private set; }
 
     //used with -install / -remove.
@@ -311,8 +310,6 @@ namespace Caucho
 
           argsIdx++;
         } else if ("-standalone".Equals(arguments[argsIdx])) {
-          IsStandalone = true;
-
           argsIdx++;
         } else if ("-server".Equals(arguments[argsIdx]) ||
                    "--server".Equals(arguments[argsIdx])) {
@@ -373,13 +370,12 @@ namespace Caucho
         } else if ("console".Equals(arguments[argsIdx]) ||
                    "status".Equals(arguments[argsIdx]) ||
                    "start".Equals(arguments[argsIdx]) ||
+                   "gui".Equals(arguments[argsIdx]) ||
                    "stop".Equals(arguments[argsIdx]) ||
                    "restart".Equals(arguments[argsIdx]) ||
                    "kill".Equals(arguments[argsIdx]) ||
                    "shutdown".Equals(arguments[argsIdx])) {
           Command = arguments[argsIdx];
-
-          IsStandalone = true;
 
           argsIdx++;
         } else {

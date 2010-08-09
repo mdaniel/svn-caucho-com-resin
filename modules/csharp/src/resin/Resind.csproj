@@ -99,14 +99,6 @@
     <Compile Include="Resin.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ResinWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ResinWindow.resx">
-      <DependentUpon>ResinWindow.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

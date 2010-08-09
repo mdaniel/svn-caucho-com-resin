@@ -70,14 +70,9 @@ namespace Caucho
 
     public bool StartResin()
     {
-      if (!ResinArgs.IsService && _process != null)
-        return false;
-
       try {
         if (ResinArgs.IsService)
           ExecuteJava("start");
-        else if ("gui".Equals(ResinArgs.Command))
-          ExecuteJava("console");
         else
           ExecuteJava(ResinArgs.Command);
 
@@ -99,22 +94,6 @@ namespace Caucho
       if (ResinArgs.IsService) {
         Info("Stopping Resin");
         ExecuteJava("stop");
-      } else {
-        if (_process != null && !_process.HasExited) {
-          Info("Stopping Resin ", false);
-
-          _process.Kill();
-
-          //give server time to close
-          for (int i = 0; i < 14; i++) {
-            Info(".", false);
-            Thread.CurrentThread.Join(1000);
-          }
-
-          Info(". done.");
-        }
-
-        _process = null;
       }
     }
 
@@ -173,23 +152,14 @@ namespace Caucho
         ServiceBase.Run(new ServiceBase[] { this });
 
         return 0;
-      } else if (ResinArgs.IsStandalone) {
+      } else {
         if (StartResin()) {
           Join();
-
           if (_process != null) {
             int exitCode = _process.ExitCode;
             _process.Dispose();
             return exitCode;
           }
-        }
-
-        return 0;
-      } else {
-        if (StartResin()) {
-          ResinWindow window = new ResinWindow(this, _displayName);
-          window.Show();
-          Application.Run();
         }
 
         return 0;
