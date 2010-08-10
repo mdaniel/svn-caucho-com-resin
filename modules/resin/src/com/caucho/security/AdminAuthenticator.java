@@ -29,6 +29,7 @@
 
 package com.caucho.security;
 
+import javax.inject.Named;
 import javax.enterprise.inject.Default;
 
 import com.caucho.config.Admin;
@@ -56,6 +57,7 @@ import com.caucho.util.Crc64;
  */
 @Service
 @Admin
+@Named("resinAdmin")
 @Default
 @CauchoDeployment  
 @SuppressWarnings("serial")

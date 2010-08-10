@@ -15,8 +15,9 @@
     -->
   <resin:LoginList>
     <resin:FormLogin login-page="/login.php"
-                     error-page="/error.php"/>
-    <resin:BasicLogin/>
+                     error-page="/error.php"
+                     authenticator="#{resinAdmin}"/>
+    <resin:BasicLogin authenticator="#{resinAdmin}"/>
   </resin:LoginList>
 
   <resin:Require>

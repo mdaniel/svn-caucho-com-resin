@@ -175,10 +175,10 @@
   <!-- doc -->
 
   <resin:Redirect regexp="^/doc/amber-table.xtp"
-                  target="${app.contextPath}/admin/config-el-ref.xtp#jpa-persistence"/>
+                  target="${app.contextPath}/admin/config-el-ref.xtp\#jpa-persistence"/>
 
   <resin:Redirect regexp="^/doc/amber.xtp"
-                  target="${app.contextPath}/admin/config-el-ref.xtp#jpa-persistence"/>
+                  target="${app.contextPath}/admin/config-el-ref.xtp\#jpa-persistence"/>
 
   <resin:Redirect regexp="^/doc/authentication.xtp"
                   target="${app.contextPath}/admin/security-overview.xtp"/>
@@ -719,7 +719,7 @@
   <!-- XXX -->
 
   <resin:Redirect regexp="^/admin/amber.xtp" 
-                  target="${app.contextPath}/admin/config-el-ref.xtp#jpa-persistence"/>
+                  target="${app.contextPath}/admin/config-el-ref.xtp\#jpa-persistence"/>
 
   <resin:Redirect regexp="^/admin/file-system-deploy.xtp"
                   target="${app.contextPath}/admin/deploy.xtp"/>
