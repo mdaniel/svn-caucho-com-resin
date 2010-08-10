@@ -13,6 +13,7 @@
 
 <s2 title="4.0.10 - snapshot">
 <ul>
+<li>resin-admin: jmx hide &amp; show acted on wrong detail boxes. (#4145, Rep by Jamison Novak)</li>
 <li>jpa: eclipselink properties for Resin JTA not set when eclipselink found by scanning (#4167, rep by Roccardo Cohen)</li>
 <li>thread: alarm locking issue (rep by Wesley Wu, Jan Kriesten)</li>
 <li>win: fixed dll loading issue (#4159), rep hans</li>

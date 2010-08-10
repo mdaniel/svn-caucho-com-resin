@@ -359,7 +359,7 @@ function display_jmx($mbean_server, $group_mbeans)
 {
   $type_partition = jmx_partition($group_mbeans, array("type"));
   ksort($type_partition);
-
+  static $data_id = 0;
   echo "<table class='data'>";
   
   foreach ($type_partition as $type_name => $type_mbeans) {
