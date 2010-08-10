@@ -27,34 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.jpa;
-
-import javax.annotation.PostConstruct;
-
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
+package com.caucho.cloud.loadbalance;
 
 /**
- * <jpa-persistence-unit> tag in the resin-web.xml
+ * LoadBalanceService distributes requests across a group of clients.
  */
-public class ConfigJpaPersistenceUnitDefault {
-  private ContainerProgram _program = new ContainerProgram();
-  
-  public void addBuilderProgram(ConfigProgram program)
+public class LoadBalanceFactory
+{
+  public LoadBalanceBuilder createBuilder()
   {
-    _program.addProgram(program);
-  }
-  
-  public ContainerProgram getProgram()
-  {
-    return _program;
-  }
-  
-  @PostConstruct
-  public void init()
-  {
-    PersistenceManager manager = PersistenceManager.create();
-    
-    manager.addPersistenceUnitDefault(_program);
+    return new LoadBalanceBuilder();
   }
 }

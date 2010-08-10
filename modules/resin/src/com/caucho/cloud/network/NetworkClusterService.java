@@ -29,7 +29,6 @@
 
 package com.caucho.cloud.network;
 
-import java.io.Serializable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +46,6 @@ import com.caucho.env.service.ResinSystem;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.server.hmux.HmuxProtocol;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 /**

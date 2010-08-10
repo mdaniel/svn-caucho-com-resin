@@ -50,11 +50,11 @@ import com.caucho.config.inject.InjectManager;
 public class EntityManagerFactoryProxy
   implements EntityManagerFactory, Serializable
 {
-  private transient final ManagerPersistenceUnit _persistenceUnit;
+  private transient final PersistenceUnitManager _persistenceUnit;
   
   private transient EntityManagerFactory _emfDelegate;
 
-  public EntityManagerFactoryProxy(ManagerPersistenceUnit persistenceUnit)
+  public EntityManagerFactoryProxy(PersistenceUnitManager persistenceUnit)
   {
     _persistenceUnit = persistenceUnit;
   }

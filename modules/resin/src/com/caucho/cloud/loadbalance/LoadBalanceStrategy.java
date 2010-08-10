@@ -27,55 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
-
-import com.caucho.cloud.network.ClusterServer;
-import com.caucho.server.resin.Resin;
-import com.caucho.util.L10N;
+package com.caucho.cloud.loadbalance;
 
 /**
- * Defines a cluster with a single server
+ * Manages a load balancer.
  */
-public class SingleCluster extends Cluster
-{
-  private static final L10N L = new L10N(SingleCluster.class);
-  private SingleClusterPod _pod;
-  private ClusterPod [] _podList;
-
-  public SingleCluster(Resin resin)
-  {
-    super(resin);
-
-    _pod = new SingleClusterPod(this);
-    _podList = new ClusterPod[] { _pod };
-  }
-
-  public SingleCluster()
-  {
-    this(null);
-  }
-
-  /**
-   * Returns the pod as a list
-   */
-  @Override
-  public ClusterPod []getPodList()
-  {
-    return _podList;
-  }
-
-  //
-  // configuration
-  //
-
-  /**
-   * Adds a new server to the cluster during configuration.
-   */
-  public ClusterServer createServer()
-  {
-    if (isActive())
-      throw new IllegalStateException(L.l("{0}: can't create static server after initialization", this));
-
-    return _pod.createServer();
-  }
+public enum LoadBalanceStrategy {
+  ADAPTIVE,
+  ROUND_ROBIN;
 }

@@ -63,7 +63,7 @@ public class EntityManagerJtaProxy
 {
   private static final L10N L = new L10N(EntityManagerJtaProxy.class);
   
-  private final ManagerPersistenceUnit _persistenceUnit;
+  private final PersistenceUnitManager _persistenceUnit;
   
   private EntityManagerFactory _emf;
 
@@ -77,7 +77,7 @@ public class EntityManagerJtaProxy
 
   private Object _serializationHandle;
   
-  public EntityManagerJtaProxy(ManagerPersistenceUnit pUnit)
+  public EntityManagerJtaProxy(PersistenceUnitManager pUnit)
   {
     _persistenceUnit = pUnit;
     _ut = UserTransactionProxy.getCurrent();

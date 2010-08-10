@@ -568,17 +568,22 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Register a synchronization callback
    */
+  @Override
   public void registerSynchronization(Synchronization synchronization)
   {
     if (_synchronizations == null)
       _synchronizations = new ArrayList<Synchronization>();
 
     _synchronizations.add(synchronization);
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " registerSync " + synchronization);
   }
 
   /**
    * Returns the status of this transaction
    */
+  @Override
   public int getStatus()
   {
     return _status;
@@ -1050,6 +1055,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
     // server/16h2
     for (int i = 0; _synchronizations != null && i < _synchronizations.size(); i++) {
       Synchronization synchronization = _synchronizations.get(i);
+      
+      if (log.isLoggable(Level.FINEST))
+        log.finest(this + " beforeCompletion " + synchronization);
 
       try {
         synchronization.beforeCompletion();
@@ -1148,11 +1156,14 @@ public class TransactionImpl implements Transaction, AlarmListener {
                   ? 0
                   : interposedSynchronizations.size());
     for (int i = 0; i < length; i++) {
-      Synchronization synchronization 
+      Synchronization sync
         = (Synchronization) interposedSynchronizations.get(i);
 
       try {
-        synchronization.afterCompletion(status);
+        if (log.isLoggable(Level.FINEST))
+          log.finest(this + " afterCompletion " + sync);
+
+        sync.afterCompletion(status);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
@@ -1163,6 +1174,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
       Synchronization sync = (Synchronization) synchronizations.get(i);
 
       try {
+        if (log.isLoggable(Level.FINEST))
+          log.finest(this + " afterCompletion " + sync);
+
         sync.afterCompletion(status);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);

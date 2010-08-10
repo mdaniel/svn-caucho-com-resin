@@ -178,6 +178,23 @@ public class ResinSystem
   }
   
   /**
+   * Returns the current system id.
+   */
+  public static String getCurrentId()
+  {
+    ResinSystem system = getCurrent();
+    
+    if (system == null) {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      throw new IllegalStateException(L.l("ResinSystem is not available in this context.\n  {0}",
+                                          loader));
+    }
+    
+    return system.getId();
+  }
+  
+  /**
    * Returns the server id
    */
   public String getId()

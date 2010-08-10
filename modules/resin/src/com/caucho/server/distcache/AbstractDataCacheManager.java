@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.env.service.RootDirectoryService;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
@@ -81,7 +82,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     super(server);
 
     try {
-      Path dataDirectory = server.getResinDataDirectory();
+      Path dataDirectory = RootDirectoryService.getCurrentDataDirectory();
+      
       String serverId = server.getUniqueServerName();
 
       _mnodeStore = new MnodeStore(dataDirectory, serverId);

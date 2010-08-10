@@ -40,7 +40,7 @@ import com.caucho.config.types.Period;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
-import com.caucho.env.jpa.ManagerPersistence;
+import com.caucho.env.jpa.PersistenceManager;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -494,7 +494,7 @@ public class EJBServer
     
       // _ejbContainer.start();
       
-      ManagerPersistence persistenceManager = ManagerPersistence.create();
+      PersistenceManager persistenceManager = PersistenceManager.create();
       
       if (persistenceManager != null)
         persistenceManager.addPersistenceUnitDefault(_jpaProgram);

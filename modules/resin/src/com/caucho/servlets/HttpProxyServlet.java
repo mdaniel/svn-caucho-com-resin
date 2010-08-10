@@ -29,15 +29,12 @@
 
 package com.caucho.servlets;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-import com.caucho.config.types.*;
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.servlets.HttpProxyServlet;
-import com.caucho.server.cluster.CustomLoadBalanceManager;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.http.CauchoRequest;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
@@ -45,15 +42,18 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
+import com.caucho.cloud.loadbalance.LoadBalanceManager;
+import com.caucho.cloud.loadbalance.LoadBalanceService;
+import com.caucho.config.types.Period;
+import com.caucho.network.balance.ClientSocket;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.WriteStream;
 
 /**
  * HTTP proxy
@@ -66,18 +66,26 @@ import java.util.logging.Logger;
  * &lt;/servlet>
  * </pre>
  */
+@SuppressWarnings("serial")
 public class HttpProxyServlet extends GenericServlet {
-  static protected final Logger log =
+  private static final Logger log =
     Logger.getLogger(HttpProxyServlet.class.getName());
-  static final L10N L = new L10N(HttpProxyServlet.class);
+  private static final L10N L = new L10N(HttpProxyServlet.class);
 
-  private CustomLoadBalanceManager _loadBalancer;
+  private LoadBalanceBuilder _loadBalanceBuilder;
+  private LoadBalanceManager _loadBalancer;
 
   public HttpProxyServlet()
   {
-    Server server = Server.getCurrent();
-
-    _loadBalancer = server.createProxyLoadBalancer("Resin|Http Proxy");
+    LoadBalanceService loadBalanceService = LoadBalanceService.getCurrent();
+    
+    if (loadBalanceService == null) {
+      throw new IllegalStateException(L.l("'{0}' requires an active {1}",
+                                          this,
+                                          LoadBalanceService.class.getSimpleName()));
+    }
+    
+    _loadBalanceBuilder = loadBalanceService.createBuilder();
   }
 
   /**
@@ -85,7 +93,7 @@ public class HttpProxyServlet extends GenericServlet {
    */
   public void addAddress(String address)
   {
-    _loadBalancer.addAddress(address);
+    _loadBalanceBuilder.addAddress(address);
   }
 
   /**
@@ -107,15 +115,17 @@ public class HttpProxyServlet extends GenericServlet {
   /**
    * Initialize the servlet with the server's sruns.
    */
+  @Override
   public void init()
     throws ServletException
   {
-    _loadBalancer.init();
+    _loadBalancer = _loadBalanceBuilder.create();
   }
 
   /**
    * Handle the request.
    */
+  @Override
   public void service(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -129,7 +139,7 @@ public class HttpProxyServlet extends GenericServlet {
     String sessionId = req.getRequestedSessionId();
 
     String uri;
-    if (req.isRequestedSessionIdFromUrl()) {
+    if (req.isRequestedSessionIdFromURL()) {
       uri =  (req.getRequestURI() + ";jsessionid=" +
               req.getRequestedSessionId());
     }
@@ -150,7 +160,7 @@ public class HttpProxyServlet extends GenericServlet {
     if (queryString != null)
       uri += '?' + queryString;
 
-    ClientSocket stream = _loadBalancer.openServer(sessionId, null);
+    ClientSocket stream = _loadBalancer.openSticky(sessionId, null);
 
     try {
       long startRequestTime = Alarm.getCurrentTime();
@@ -197,14 +207,14 @@ public class HttpProxyServlet extends GenericServlet {
       out.print("X-Forwarded-For: ");
       out.println(req.getRemoteAddr());
 
-      Enumeration e = req.getHeaderNames();
+      Enumeration<String> e = req.getHeaderNames();
       while (e.hasMoreElements()) {
-        String name = (String) e.nextElement();
+        String name = e.nextElement();
 
         if (name.equalsIgnoreCase("Connection"))
           continue;
 
-        Enumeration e1 = req.getHeaders(name);
+        Enumeration<String> e1 = req.getHeaders(name);
         while (e1.hasMoreElements()) {
           String value = (String) e1.nextElement();
 
@@ -280,7 +290,6 @@ public class HttpProxyServlet extends GenericServlet {
 
     String location = null;
 
-    String hostURL = "";
     boolean isChunked = false;
     int contentLength = -1;
 

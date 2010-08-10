@@ -820,7 +820,7 @@ public class ClientSocketFactory
    *
    * @return the socket's read/write pair.
    */
-  public ClientSocket openForSession()
+  public ClientSocket openSticky()
   {
     State state = _state;
     if (! state.isSessionEnabled()) {

@@ -27,10 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
+package com.caucho.cloud.loadbalance;
 
 import com.caucho.config.ConfigException;
 import com.caucho.network.balance.ClientSocketFactory;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 
 
@@ -40,18 +41,18 @@ import com.caucho.util.L10N;
 abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
   private static final L10N L = new L10N(CustomLoadBalanceManager.class);
 
-  private String _probeCategory;
+  private String _meterCategory;
 
-  protected CustomLoadBalanceManager(String probeCategory)
+  protected CustomLoadBalanceManager(String meterCategory)
   {
-    _probeCategory = probeCategory;
+    _meterCategory = meterCategory;
   }
 
   abstract public void addAddress(String address);
 
   protected String getProbeCategory()
   {
-    return _probeCategory;
+    return _meterCategory;
   }
 
   protected ClientSocketFactory createServerPool(String address)

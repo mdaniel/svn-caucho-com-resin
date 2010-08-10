@@ -30,12 +30,15 @@
 package com.caucho.servlets;
 
 import com.caucho.VersionFactory;
+import com.caucho.cloud.loadbalance.CustomLoadBalanceManager;
+import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
+import com.caucho.cloud.loadbalance.LoadBalanceManager;
+import com.caucho.cloud.loadbalance.LoadBalanceService;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.network.balance.ClientSocket;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.cluster.CustomLoadBalanceManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -108,7 +111,9 @@ public class FastCGIServlet extends GenericServlet {
 
   private int _servletId;
 
-  private CustomLoadBalanceManager _loadBalancer;
+  private LoadBalanceBuilder _loadBalanceBuilder;
+
+  private LoadBalanceManager _loadBalancer;
 
   private Path _pwd;
   private String _hostAddress;
@@ -121,12 +126,20 @@ public class FastCGIServlet extends GenericServlet {
   private long _keepaliveTimeout = 15000;
 
   private int _idCount = 0;
-
+  
   public FastCGIServlet()
   {
-    Server server = Server.getCurrent();
+    LoadBalanceService loadBalanceService = LoadBalanceService.getCurrent();
+    
+    if (loadBalanceService == null) {
+      throw new IllegalStateException(L.l("'{0}' requires an active {1}",
+                                          this,
+                                          LoadBalanceService.class.getSimpleName()));
+    }
 
-    _loadBalancer = server.createProxyLoadBalancer("Resin|FastCGI");
+    _loadBalanceBuilder = loadBalanceService.createBuilder();
+    
+    _loadBalanceBuilder.setMeterCategory("Resin|FastCGI");
   }
 
   /**
@@ -134,7 +147,7 @@ public class FastCGIServlet extends GenericServlet {
    */
   public void addAddress(String address)
   {
-    _loadBalancer.addAddress(address);
+    _loadBalanceBuilder.addAddress(address);
   }
 
   public void setServerAddress(String address)
@@ -191,22 +204,17 @@ public class FastCGIServlet extends GenericServlet {
   {
     _pwd = Vfs.lookup();
 
-    Server server = Server.getCurrent();
-
-    if (server == null)
-      throw new ConfigException(L.l("Server context is required for '{0}'",
-                                    this));
-
     String serverAddress = getInitParameter("server-address");
     if (serverAddress != null)
       addAddress(serverAddress);
 
-    _loadBalancer.init();
+    _loadBalancer = _loadBalanceBuilder.create();
   }
 
   /**
    * Handle the request.
    */
+  @Override
   public void service(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -217,7 +225,7 @@ public class FastCGIServlet extends GenericServlet {
 
     String sessionId = null;
 
-    ClientSocket stream = _loadBalancer.openServer(sessionId, null);
+    ClientSocket stream = _loadBalancer.openSticky(sessionId, null);
     boolean isValid = false;
 
     if (stream == null) {
@@ -613,7 +621,7 @@ public class FastCGIServlet extends GenericServlet {
 
   public void destroy()
   {
-    _loadBalancer.destroy();
+    _loadBalancer.close();
   }
 
   static class FastCGIInputStream extends InputStream {

@@ -48,6 +48,9 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.loadbalance.CustomLoadBalanceManager;
+import com.caucho.cloud.loadbalance.LoadBalanceManager;
+import com.caucho.cloud.loadbalance.SingleLoadBalanceManager;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.cloud.network.NetworkListenService;
@@ -1924,24 +1927,6 @@ public class Server extends ProtocolDispatchServer
                                   String address,
                                   int port)
   {
-  }
-
-  /**
-   * Creates an returns a load balancer based on the cluster name.
-   *
-   * @param clusterName the name of the cluster
-   */
-  public LoadBalanceManager createClusterLoadBalancer(String clusterName)
-  {
-    throw new ConfigException(L.l("Cluster LoadBalancer requires Resin Professional."));
-  }
-
-  /**
-   * Creates and returns a load balancer configured explicitly
-   */
-  public CustomLoadBalanceManager createProxyLoadBalancer(String probeCategory)
-  {
-    return new SingleLoadBalanceManager(probeCategory);
   }
 
   /**

@@ -31,7 +31,9 @@ package com.caucho.env.service;
 
 import java.io.IOException;
 
+import com.caucho.java.WorkDir;
 import com.caucho.util.L10N;
+import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 
 /**
@@ -67,6 +69,10 @@ public class RootDirectoryService extends AbstractResinService
     
     if (dataDirectory == null)
       throw new NullPointerException();
+    
+    if (dataDirectory instanceof MemoryPath) { // QA
+      dataDirectory = WorkDir.getTmpWorkDir().lookup("qa/resin-data");
+    }
     
     _rootDirectory = rootDirectory;
     _dataDirectory = dataDirectory;

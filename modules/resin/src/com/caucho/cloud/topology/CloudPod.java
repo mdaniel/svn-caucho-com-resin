@@ -180,6 +180,7 @@ public class CloudPod
       
       if (server != null 
           && server.getAddress().equals(address)
+          && server.getPort() > 0
           && server.getPort() == port) {
         return server;
       }

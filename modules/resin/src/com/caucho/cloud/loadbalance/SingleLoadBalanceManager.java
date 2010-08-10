@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
+package com.caucho.cloud.loadbalance;
 
 import com.caucho.config.ConfigException;
 import com.caucho.network.balance.ClientSocket;
@@ -64,7 +64,7 @@ public class SingleLoadBalanceManager extends CustomLoadBalanceManager {
   /**
    * Opens the next available server.
    */
-  public ClientSocket openServer(String sessionId, ClientSocketFactory oldSrun)
+  public ClientSocket openSticky(String sessionId, ClientSocketFactory oldSrun)
   {
     if (_serverPool == oldSrun)
       return null;

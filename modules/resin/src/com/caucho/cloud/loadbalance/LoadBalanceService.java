@@ -27,48 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
+package com.caucho.cloud.loadbalance;
 
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.network.balance.ClientSocketFactory;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 
 /**
- * Manages a load balancer.
+ * LoadBalanceService distributes requests across a group of clients.
  */
-abstract public class LoadBalanceManager {
-  private Strategy _strategyType = Strategy.ADAPTIVE;
-  
-  public void setStrategy(Strategy strategy)
+public class LoadBalanceService extends AbstractResinService
+{
+  private final LoadBalanceFactory _factory;
+
+  /**
+   * Creates a new load balance service.
+   */
+  public LoadBalanceService(LoadBalanceFactory factory)
   {
-    _strategyType = strategy;
-  }
-  
-  public Strategy getStrategy()
-  {
-    return _strategyType;
-  }
-  
-  public void init()
-  {
+    _factory = factory;
   }
   
   /**
-   * Opens the next available server.
+   * Returns the current network service.
    */
-  abstract public ClientSocket
-    openServer(String sessionId, ClientSocketFactory oldSrun);
-
-  public void destroy()
+  public static LoadBalanceService getCurrent()
   {
+    return ResinSystem.getCurrentService(LoadBalanceService.class);
   }
   
+  public LoadBalanceBuilder createBuilder()
+  {
+    return _factory.createBuilder();
+  }
+  
+  //
+  // lifecycle
+  //
+
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
-  }
-
-  public enum Strategy {
-    ADAPTIVE,
-    ROUND_ROBIN;
+    return (getClass().getSimpleName()
+            + "[" + "]");
   }
 }

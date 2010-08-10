@@ -27,60 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.jpa;
+package com.caucho.cloud.loadbalance;
 
-import com.caucho.loader.AddLoaderListener;
-import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.network.balance.ClientSocket;
+import com.caucho.network.balance.ClientSocketFactory;
 
 /**
- * Listener for environment start to detect and load persistence.xml
+ * Manages a load balancer.
  */
-public class ListenerPersistenceEnvironment implements AddLoaderListener
-{
-  public ListenerPersistenceEnvironment()
+abstract public class LoadBalanceManager {
+  /**
+   * Opens the next available server.
+   */
+  public ClientSocket open()
   {
-  }
-
-  @Override
-  public boolean isEnhancer()
-  {
-    return true;
+    return openSticky(null, null);
   }
   
   /**
-   * Handles the case where the environment is starting (after init).
+   * Opens the next available server, using a sticky session if available.
    */
-  @Override
-  public void addLoader(EnvironmentClassLoader loader)
-  {
-    PersistenceManager manager = PersistenceManager.create(loader);
+  abstract public ClientSocket openSticky(String sessionId, 
+                                          ClientSocketFactory oldClient);
 
-    // called to configure the enhancer when the classloader updates before
-    // any loading of the class
-    manager.configurePersistenceRoots();
-  }
-
-  /**
-   * Handles the case where the environment is stopping
-   */
-  public void environmentStop(EnvironmentClassLoader loader)
+  public void close()
   {
   }
-
+  
   @Override
-  public int hashCode()
+  public String toString()
   {
-    return getClass().hashCode();
-  }
-
-  @Override
-  public boolean equals(Object o)
-  {
-    if (o == null)
-      return false;
-
-    return getClass().equals(o.getClass());
+    return getClass().getSimpleName() + "[]";
   }
 }
-
-

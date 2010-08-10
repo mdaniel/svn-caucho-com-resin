@@ -69,20 +69,20 @@ import com.caucho.vfs.Vfs;
  * Manages the JPA persistence contexts.
  */
 @Module
-public class ManagerPersistence 
+public class PersistenceManager 
   implements ScanListener, EnvironmentEnhancerListener
 {
   private static final Logger log
-    = Logger.getLogger(ManagerPersistence.class.getName());
+    = Logger.getLogger(PersistenceManager.class.getName());
 
-  private static final EnvironmentLocal<ManagerPersistence> _localManager
-    = new EnvironmentLocal<ManagerPersistence>();
+  private static final EnvironmentLocal<PersistenceManager> _localManager
+    = new EnvironmentLocal<PersistenceManager>();
 
   private EnvironmentClassLoader _classLoader;
   private ClassLoader _tempLoader;
   
-  private HashMap<String, ManagerPersistenceUnit> _persistenceUnitMap
-    = new HashMap<String, ManagerPersistenceUnit>();
+  private HashMap<String, PersistenceUnitManager> _persistenceUnitMap
+    = new HashMap<String, PersistenceUnitManager>();
   
   private ArrayList<ConfigProgram> _unitDefaultList
     = new ArrayList<ConfigProgram>();
@@ -98,7 +98,7 @@ public class ManagerPersistence
   private ArrayList<LazyEntityManagerFactory> _pendingFactoryList
     = new ArrayList<LazyEntityManagerFactory>();
 
-  private ManagerPersistence(ClassLoader loader)
+  private PersistenceManager(ClassLoader loader)
   {
     _classLoader = Environment.getEnvironmentClassLoader(loader);
     _localManager.set(this, _classLoader);
@@ -122,7 +122,7 @@ public class ManagerPersistence
   /**
    * Returns the local container.
    */
-  public static ManagerPersistence create()
+  public static PersistenceManager create()
   {
     return create(Thread.currentThread().getContextClassLoader());
   }
@@ -130,13 +130,13 @@ public class ManagerPersistence
   /**
    * Returns the local container.
    */
-  public static ManagerPersistence create(ClassLoader loader)
+  public static PersistenceManager create(ClassLoader loader)
   {
     synchronized (_localManager) {
-      ManagerPersistence container = _localManager.getLevel(loader);
+      PersistenceManager container = _localManager.getLevel(loader);
 
       if (container == null) {
-        container = new ManagerPersistence(loader);
+        container = new PersistenceManager(loader);
 
         _localManager.set(container, loader);
       }
@@ -148,7 +148,7 @@ public class ManagerPersistence
   /**
    * Returns the local container.
    */
-  public static ManagerPersistence getCurrent()
+  public static PersistenceManager getCurrent()
   {
     return getCurrent(Thread.currentThread().getContextClassLoader());
   }
@@ -156,7 +156,7 @@ public class ManagerPersistence
   /**
    * Returns the current environment container.
    */
-  public static ManagerPersistence getCurrent(ClassLoader loader)
+  public static PersistenceManager getCurrent(ClassLoader loader)
   {
     synchronized (_localManager) {
       return _localManager.get(loader);
@@ -198,7 +198,7 @@ public class ManagerPersistence
   void addPersistenceUnit(String name,
                           ConfigJpaPersistenceUnit configJpaPersistenceUnit)
   {
-    ManagerPersistenceUnit pUnit = createPersistenceUnit(name);
+    PersistenceUnitManager pUnit = createPersistenceUnit(name);
     
     if (pUnit.getRoot() == null)
       pUnit.setRoot(configJpaPersistenceUnit.getPath());
@@ -288,7 +288,7 @@ public class ManagerPersistence
           "com/caucho/amber/cfg/persistence-31.rnc");
 
       for (ConfigPersistenceUnit unitConfig : persistence.getUnitList()) {
-        ManagerPersistenceUnit pUnit
+        PersistenceUnitManager pUnit
           = createPersistenceUnit(unitConfig.getName());
         
         if (pUnit.getRoot() == null)
@@ -312,9 +312,9 @@ public class ManagerPersistence
     }
   }
   
-  private ManagerPersistenceUnit createPersistenceUnit(String name)
+  private PersistenceUnitManager createPersistenceUnit(String name)
   {
-    ManagerPersistenceUnit unit;
+    PersistenceUnitManager unit;
     
     synchronized (_persistenceUnitMap) {
       unit = _persistenceUnitMap.get(name);
@@ -322,7 +322,7 @@ public class ManagerPersistence
       if (unit != null)
         return unit;
       
-      unit = new ManagerPersistenceUnit(this, name);
+      unit = new PersistenceUnitManager(this, name);
       _persistenceUnitMap.put(name, unit);
     }
     
@@ -343,14 +343,14 @@ public class ManagerPersistence
       // jpa/1630
       thread.setContextClassLoader(_classLoader);
 
-      ArrayList<ManagerPersistenceUnit> pUnitList
-        = new ArrayList<ManagerPersistenceUnit>();
+      ArrayList<PersistenceUnitManager> pUnitList
+        = new ArrayList<PersistenceUnitManager>();
       
       synchronized (_persistenceUnitMap) {
         pUnitList.addAll(_persistenceUnitMap.values());
       }
       
-      for (ManagerPersistenceUnit pUnit : pUnitList) {
+      for (PersistenceUnitManager pUnit : pUnitList) {
         pUnit.start();
       }
     } finally {
@@ -358,7 +358,7 @@ public class ManagerPersistence
     }
   }
 
-  private void registerPersistenceUnit(ManagerPersistenceUnit pUnit)
+  private void registerPersistenceUnit(PersistenceUnitManager pUnit)
   {
     try {
       InjectManager beanManager = InjectManager.create(_classLoader);

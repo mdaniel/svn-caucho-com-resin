@@ -53,6 +53,8 @@ import javax.management.ObjectName;
 import com.caucho.VersionFactory;
 import com.caucho.bam.Broker;
 import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.loadbalance.LoadBalanceFactory;
+import com.caucho.cloud.loadbalance.LoadBalanceService;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.cloud.network.NetworkListenService;
@@ -90,7 +92,6 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ServletService;
-import com.caucho.server.cluster.SingleCluster;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.Alarm;
@@ -589,11 +590,6 @@ public class Resin extends Shutdown
     else
       return "";
   }
-  
-  protected ResinSystem getNetworkServer()
-  {
-    return _resinSystem;
-  }
 
   /**
    * Sets the server id.
@@ -727,11 +723,6 @@ public class Resin extends Shutdown
     return clusters;
     */
     throw new UnsupportedOperationException();
-  }
-
-  protected Cluster instantiateCluster()
-  {
-    return new SingleCluster(this);
   }
 
   /**
@@ -937,6 +928,7 @@ public class Resin extends Shutdown
   /**
    * Start the server shutdown
    */
+  @Override
   public void startShutdown(String msg)
   {
     startFailSafeShutdown(msg);
@@ -1227,6 +1219,11 @@ public class Resin extends Shutdown
     
     ClusterServer server = cloudServer.getData(ClusterServer.class);
     
+    LoadBalanceService loadBalanceService;
+    loadBalanceService = new LoadBalanceService(createLoadBalanceFactory());
+    
+    _resinSystem.addService(loadBalanceService);
+    
     BamService bamService = new BamService(server.getBamAdminName());
     _resinSystem.addService(bamService);
     
@@ -1249,6 +1246,11 @@ public class Resin extends Shutdown
     bootServer.getCluster().getProgram().configure(_server);
     
     _server.init();
+  }
+  
+  protected LoadBalanceFactory createLoadBalanceFactory()
+  {
+    return new LoadBalanceFactory();
   }
   
   protected Server createServer(NetworkClusterService clusterService)

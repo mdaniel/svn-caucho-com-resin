@@ -71,12 +71,12 @@ import com.caucho.vfs.Vfs;
 /**
  * Manages a single persistence unit
  */
-public class ManagerPersistenceUnit implements PersistenceUnitInfo {
-  private static final L10N L = new L10N(ManagerPersistenceUnit.class);
+public class PersistenceUnitManager implements PersistenceUnitInfo {
+  private static final L10N L = new L10N(PersistenceUnitManager.class);
   private static final Logger log 
-    = Logger.getLogger(ManagerPersistenceUnit.class.getName());
+    = Logger.getLogger(PersistenceUnitManager.class.getName());
   
-  private final ManagerPersistence _persistenceManager;
+  private final PersistenceManager _persistenceManager;
   
   private final String _name;
   private URL _root;
@@ -118,7 +118,7 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   
   private EntityManagerFactory _emfDelegate;
   
-  ManagerPersistenceUnit(ManagerPersistence manager, String name)
+  PersistenceUnitManager(PersistenceManager manager, String name)
   {
     _persistenceManager = manager;
     
@@ -360,31 +360,7 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
       program.configure(this);
     }
     
-    addProviderProperties();
-    
     createDelegate();
-  }
-  
-  /**
-   * Adds default properties for known providers
-   */
-  private void addProviderProperties()
-  {
-    Class<?> cl = getProvider();
-    
-    if (cl == null)
-      return;
-    
-    String className = cl.getName();
-
-    if ("org.eclipse.persistence.jpa.PersistenceProvider".equals(className)) {
-      addDefaultProperty("eclipselink.target-server",
-                         "org.eclipse.persistence.platform.server.resin.ResinPlatform");
-    }
-    else if ("org.hibernate.ejb.HibernatePersistence".equals(className)) {
-      addDefaultProperty("hibernate.transaction.manager_lookup_class",
-                         "org.hibernate.transaction.ResinTransactionManagerLookup");
-    }
   }
   
   private void addDefaultProperty(String name, String value)
@@ -402,6 +378,8 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
 
     if (cl == null)
       cl = AmberPersistenceProvider.class;
+    
+    addProviderDefaultProperties(cl);
 
     if (log.isLoggable(Level.CONFIG)) {
       log.config("JPA PersistenceUnit[" + getName() + "] handled by "
@@ -414,12 +392,37 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
       HashMap<String,Object> map = null;
       
       _emfDelegate = provider.createContainerEntityManagerFactory(this, map);
+
+      if (log.isLoggable(Level.FINE)) {
+        log.fine("JPA PersistenceUnit[" + getName() + "] EMF delegate is "
+                   + _emfDelegate);
+      }
       
       if (_emfDelegate == null)
         throw new IllegalStateException(L.l("{0} did not return an EntityManagerFactory",
                                             provider));
     } catch (Exception e) {
       throw ConfigException.create(e);
+    }
+  }
+  
+  /**
+   * Adds default properties for known providers
+   */
+  private void addProviderDefaultProperties(Class<?> cl)
+  {
+    if (cl == null)
+      return;
+    
+    String className = cl.getName();
+
+    if ("org.eclipse.persistence.jpa.PersistenceProvider".equals(className)) {
+      addDefaultProperty("eclipselink.target-server",
+                         "org.eclipse.persistence.platform.server.resin.ResinPlatform");
+    }
+    else if ("org.hibernate.ejb.HibernatePersistence".equals(className)) {
+      addDefaultProperty("hibernate.transaction.manager_lookup_class",
+                         "org.hibernate.transaction.ResinTransactionManagerLookup");
     }
   }
   
