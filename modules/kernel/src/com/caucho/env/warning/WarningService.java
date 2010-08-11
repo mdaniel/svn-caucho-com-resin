@@ -102,8 +102,8 @@ public class WarningService extends AbstractResinService
    */
   public void warning(String msg)
   {
-    log.warning(msg);
-    System.err.println(msg);
+    log.warning("WarningService: " + msg);
+    System.err.println("WarningService: " + msg);
     
     for (WarningHandler handler : _handlerList) {
       handler.warning(msg);
