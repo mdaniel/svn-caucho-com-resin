@@ -27,40 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.server.resin;
 
-import com.caucho.config.ConfigException;
-
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.Serializable;
 
 /**
- * A generic pool of threads available for Alarms and Work tasks.
+ * System warning handler which sends messages to the watchdog.
  */
-abstract public class Shutdown {
-  private static Shutdown _shutdown;
-
-  protected void setShutdown(Shutdown shutdown)
+@SuppressWarnings("serial")
+public class WarningMessage implements Serializable
+{
+ private String _message;
+  
+  public WarningMessage(String message)
   {
-    _shutdown = _shutdown;
+    _message = message;
   }
-
-  abstract protected void startShutdown(String msg);
-
-  public static void shutdown(String msg)
+  
+  public String getMessage()
   {
-    Shutdown shutdown = _shutdown;
-
-    if (shutdown != null)
-      shutdown.startShutdown(msg);
-    else {
-      System.err.println(msg);
-      System.exit(1);
-    }
+    return _message;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getMessage() + "]";
   }
 }

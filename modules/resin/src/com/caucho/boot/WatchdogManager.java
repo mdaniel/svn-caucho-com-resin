@@ -141,13 +141,7 @@ class WatchdogManager implements AlarmListener {
     Resin resin = Resin.createWatchdog();
     
     resin.preConfigureInit();
-    /*
-    NetworkServer network = new NetworkServer("watchdog",
-                                              rootDirectory,
-                                              dataDirectory,
-                                              null);
     
-    */
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(resin.getClassLoader());
 

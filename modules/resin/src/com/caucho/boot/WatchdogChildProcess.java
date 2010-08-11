@@ -46,6 +46,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bootjni.JniProcess;
 import com.caucho.config.ConfigException;
+import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.hmtp.HmtpLink;
 import com.caucho.lifecycle.Lifecycle;
@@ -122,12 +123,12 @@ class WatchdogChildProcess
 
       int port = ss.getLocalPort();
 
-      log.config(this + " starting Resin");
+      log.warning("Watchdog starting Resin[" + _watchdog.getId() + "]");
 
       jvmOut = createJvmOut();
 
       _process = createProcess(port, jvmOut);
-
+      
       if (_process != null) {
         if (_process instanceof JniProcess)
           _pid = ((JniProcess) _process).getPid();
@@ -145,6 +146,8 @@ class WatchdogChildProcess
         s = connectToChild(ss);
 
         _status = _process.waitFor();
+        
+        logStatus(_status);
       }
     } catch (Exception e) {
       log.log(Level.INFO, e.toString(), e);
@@ -186,6 +189,51 @@ class WatchdogChildProcess
         notifyAll();
       }
     }
+  }
+  
+  private void logStatus(int status)
+  {
+    String type = "unknown status=" + status;
+    
+    if (status == 0)
+      type = "normal exit";
+    else if (status > 0 && status < ExitCode.values().length) {
+      type = ExitCode.values()[status].toString();
+    }
+    else if (status > 128 && status < 128 + 31) {
+      switch (status - 128) {
+      case 1:
+        type = "SIGHUP";
+        break;
+      case 2:
+        type = "SIGINT";
+        break;
+      case 3:
+        type = "SIGQUIT";
+        break;
+      case 7:
+        type = "SIGBUS";
+        break;
+      case 9:
+        type = "SIGKILL";
+        break;
+      case 11:
+        type = "SIGSEGV";
+        break;
+      case 14:
+        type = "SIGALRM";
+        break;
+      case 19:
+        type = "SIGSTOP";
+        break;
+      default:
+        type = "signal=" + (status - 128) + " status=" + status;
+        break;
+      }
+    }
+    
+    log.warning("Watchdog detected Resin[" + _watchdog.getId() + ",pid=" + _pid + "] close"
+                + " " + type + " (status=" + status + ")");
   }
 
   /**

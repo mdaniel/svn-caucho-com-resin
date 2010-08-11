@@ -114,7 +114,7 @@ public class HmtpReader {
     int type = hIn.readInt();
     String to = hIn.readString();
     String from = hIn.readString();
-
+    
     switch (HmtpPacketType.TYPES[type]) {
     case MESSAGE:
       {

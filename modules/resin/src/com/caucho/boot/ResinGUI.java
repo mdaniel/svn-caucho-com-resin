@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@SuppressWarnings("serial")
 public class ResinGUI extends JFrame implements WindowListener, ActionListener {
 
   private final WatchdogClient _client;
@@ -91,7 +92,8 @@ public class ResinGUI extends JFrame implements WindowListener, ActionListener {
   private void init()
   {
     String id = _client.getId();
-    if (id != null || id.isEmpty())
+    
+    if (id == null || id.isEmpty())
       id = "default";
 
     this.setLayout(new BorderLayout());

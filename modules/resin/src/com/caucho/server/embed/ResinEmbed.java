@@ -147,7 +147,7 @@ public class ResinEmbed
       return;
       
     try {
-      _resin.startShutdown("Shutdown from ResinEmbed destroy()");
+      _resin.destroy();
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {
@@ -160,6 +160,6 @@ public class ResinEmbed
   {
     super.finalize();
     
-    _resin.startShutdown("Shutdown from ResinEmbed finalize()");
+    _resin.destroy();
   }
 }

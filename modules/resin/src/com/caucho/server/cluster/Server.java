@@ -66,6 +66,8 @@ import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.env.shutdown.ExitCode;
+import com.caucho.env.shutdown.ShutdownService;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
@@ -1726,7 +1728,7 @@ public class Server extends ProtocolDispatchServer
         // XXX: message slightly wrong
         String msg = L.l("Resin restarting due to configuration change");
 
-        getResin().startShutdown(msg);
+        ShutdownService.getCurrent().shutdown(ExitCode.MODIFIED, msg);
         return;
       }
     } finally {
@@ -2066,7 +2068,7 @@ public class Server extends ProtocolDispatchServer
       Resin resin = _resin;
 
       if (resin != null)
-        resin.startShutdown(L.l("Resin shutdown from Server.destroy()"));
+        resin.destroy();
     }
   }
 

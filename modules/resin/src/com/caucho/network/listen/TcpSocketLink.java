@@ -38,6 +38,8 @@ import java.util.logging.Logger;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import com.caucho.env.shutdown.ExitCode;
+import com.caucho.env.shutdown.ShutdownService;
 import com.caucho.inject.Module;
 import com.caucho.inject.RequestContext;
 import com.caucho.loader.Environment;
@@ -1091,7 +1093,9 @@ public class TcpSocketLink extends AbstractSocketLink
       try {
         result = doTask();
       } catch (OutOfMemoryError e) {
-        CauchoSystem.exitOom(getClass(), e);
+        String msg = "TcpSocketLink OutOfMemory";
+        
+        ShutdownService.shutdownActive(ExitCode.MEMORY, msg); 
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {
@@ -1292,7 +1296,9 @@ public class TcpSocketLink extends AbstractSocketLink
      } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       } catch (OutOfMemoryError e) {
-        CauchoSystem.exitOom(getClass(), e);
+        String msg = "TcpSocketLink OutOfMemory";
+        
+        ShutdownService.shutdownActive(ExitCode.MEMORY, msg);
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {

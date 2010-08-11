@@ -39,6 +39,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.shutdown.ExitCode;
+import com.caucho.env.shutdown.ShutdownService;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -969,9 +971,10 @@ public final class ThreadPool {
           return true;
         } catch (Throwable e) {
           e.printStackTrace();
-          System.err.println("Resin exiting because of failed thread");
+          
+          String msg = "Resin exiting because of failed thread";
 
-          System.exit(1);
+          ShutdownService.shutdownActive(ExitCode.THREAD, msg);
         }
       }
       else {
@@ -1003,7 +1006,10 @@ public final class ThreadPool {
           startConnection(true);
         } catch (Throwable e) {
           e.printStackTrace();
-          System.exit(10);
+          
+          String msg = "ThreadPool start connection failed";
+          
+          ShutdownService.shutdownActive(ExitCode.THREAD, msg);
         }
       }
     }

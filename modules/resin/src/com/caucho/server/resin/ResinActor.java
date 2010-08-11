@@ -41,11 +41,13 @@ import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
 import com.caucho.boot.PidQuery;
 import com.caucho.boot.WatchdogStopQuery;
+import com.caucho.env.shutdown.ExitCode;
+import com.caucho.env.shutdown.ShutdownService;
 import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;
 
 /**
- * Service for handling the distributed cache
+ * Actor communicating with the watchdog.
  */
 public class ResinActor extends SimpleActor
 {
@@ -56,12 +58,33 @@ public class ResinActor extends SimpleActor
 
   private Resin _resin;
   
+  private ShutdownService _shutdown;
+  
   ResinActor(Resin resin)
   {
     _resin = resin;
     
     setJid("resin");
+    
+    _shutdown = ShutdownService.getCurrent();
+    
+    if (_shutdown == null)
+      throw new IllegalStateException(L.l("'{0}' requires an active {1}.",
+                                          this,
+                                          ShutdownService.class.getSimpleName()));
   }
+  
+  /**
+   * Sends a warning message to the watchdog
+   */
+  public void sendWarning(String msg)
+  {
+    getLinkStream().message("watchdog", getJid(), new WarningMessage(msg));
+  }
+  
+  //
+  // bam callbacks
+  //
   
   /**
    * Query for the process pid.
@@ -112,15 +135,18 @@ public class ResinActor extends SimpleActor
                    WatchdogStopQuery query)
   {
     log.info(_resin + " stop request from watchdog '" + from + "'");
-
-    _resin.startShutdown(L.l("Resin shutdown from watchdog stop '"
-                             + from + "'"));
+    
+    String msg = L.l("Resin shutdown from watchdog stop '" + from + "'");
 
     getLinkStream().queryResult(id, from, to, query);
+    
+    ShutdownService.shutdownActive(ExitCode.OK, msg);
   }
 
   public void destroy()
   {
-    _resin.startShutdown(L.l("Resin shutdown from ResinActor"));
+    String msg = L.l("Resin shutdown from unexpected watchdog exit.");
+    
+    ShutdownService.shutdownActive(ExitCode.WATCHDOG_EXIT, msg);
   }
 }
