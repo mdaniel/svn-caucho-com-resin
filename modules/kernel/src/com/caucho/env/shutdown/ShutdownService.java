@@ -75,7 +75,7 @@ public class ShutdownService extends AbstractResinService
   {
     _resinSystemRef = new WeakReference<ResinSystem>(resinSystem);
     
-    _warningService = WarningService.create();
+    _warningService = WarningService.create(resinSystem);
   }
   
   /**
@@ -120,9 +120,11 @@ public class ShutdownService extends AbstractResinService
     
     if (shutdown != null) {
       shutdown.shutdown(exitCode, msg);
+      return;
     }
     
     log.warning("ShutdownService is not active");
+    System.out.println("ShutdownService is not active");
   }
 
   /**
@@ -136,10 +138,20 @@ public class ShutdownService extends AbstractResinService
     startFailSafeShutdown(msg);
 
     ShutdownThread shutdownThread = _shutdownThread;
-    if (shutdownThread != null)
+    if (shutdownThread != null) {
       shutdownThread.startShutdown(exitCode);
-    else
+      
+      try {
+        Thread.sleep(15 * 60000);
+      } catch (Exception e) {
+      }
+      
+      System.out.println("Shutdown timeout");
+      System.exit(exitCode.ordinal());
+    }
+    else {
       shutdownImpl(exitCode);
+    }
   }
 
   public void startFailSafeShutdown(String msg)
@@ -157,6 +169,8 @@ public class ShutdownService extends AbstractResinService
    */
   private void shutdownImpl(ExitCode exitCode)
   {
+    System.out.println("SHUTDOWN: " + exitCode);
+    log.warning("SHUTDOWN: " + exitCode);
     // start the fail-safe thread in case the shutdown fails
     FailSafeHaltThread haltThread = _failSafeHaltThread;
     if (haltThread != null)
@@ -177,6 +191,8 @@ public class ShutdownService extends AbstractResinService
       } finally {
         _resinSystemRef = null;
       }
+      System.out.println("DONE1: " + exitCode);
+      log.warning("DONE1: " + exitCode);
     } finally {
       _lifecycle.toDestroy();
 
@@ -184,6 +200,12 @@ public class ShutdownService extends AbstractResinService
         log.finer("test simulating exit");
       }
       else {
+        if (exitCode == null)
+          exitCode = ExitCode.FAIL_SAFE_HALT;
+        
+        System.out.println("EXIT: " + exitCode);
+        log.warning("EXIT: " + exitCode);
+        
         System.exit(exitCode.ordinal());
       }
     }

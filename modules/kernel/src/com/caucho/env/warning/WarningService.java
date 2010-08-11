@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.util.L10N;
 
 /**
  * The WarningService is a general way to send warning and critical
@@ -41,6 +42,8 @@ import com.caucho.env.service.ResinSystem;
  */
 public class WarningService extends AbstractResinService
 {
+  private static final L10N L = new L10N(WarningService.class);
+  
   private static final Logger log
     = Logger.getLogger(WarningService.class.getName());
   
@@ -67,10 +70,22 @@ public class WarningService extends AbstractResinService
    */
   public static WarningService create()
   {
-    ResinSystem resinSystem = ResinSystem.getCurrent();
-    
+    return create(ResinSystem.getCurrent());
+  }
+
+  /**
+   * Returns the warning service.
+   */
+  public static WarningService create(ResinSystem resinSystem)
+  {
+    if (resinSystem == null) {
+      throw new IllegalStateException(L.l("{0} requires an active {1}",
+                                          WarningService.class.getSimpleName(),
+                                          ResinSystem.class.getSimpleName()));
+    }
+
     WarningService service = resinSystem.getService(WarningService.class);
-    
+
     if (service == null) {
       service = new WarningService();
       

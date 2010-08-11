@@ -44,9 +44,13 @@ public class WatchdogActor extends SimpleActor
   private static final Logger log
     = Logger.getLogger(WatchdogActor.class.getName());
   
+  private WatchdogChildProcess _child;
+  
   WatchdogActor(WatchdogChildProcess watchdog)
   {
     setJid("watchdog");
+    
+    _child = watchdog;
   }
   
   public Serializable queryGet(Serializable payload)
@@ -65,8 +69,9 @@ public class WatchdogActor extends SimpleActor
   @Message
   public void onWarning(String to, String from, WarningMessage warning)
   {
-    System.out.println("WARNING: " + warning);
-    log.warning(warning.getMessage());
+    log.warning("Watchdog received warning "
+                + "from Resin[" + _child.getId() + ",pid=" + _child.getPid() + "]:"
+                + "\n  " + warning.getMessage());
   }
   
   /*

@@ -98,6 +98,11 @@ class WatchdogChildProcess
     return _pid;
   }
   
+  public String getId()
+  {
+    return _id;
+  }
+  
   /**
    * General queries of the Resin instance.
    */
@@ -193,11 +198,11 @@ class WatchdogChildProcess
   
   private void logStatus(int status)
   {
-    String type = "unknown status=" + status;
+    String type = "unknown";
     
     if (status == 0)
       type = "normal exit";
-    else if (status > 0 && status < ExitCode.values().length) {
+    else if (status >= 0 && status < ExitCode.values().length) {
       type = ExitCode.values()[status].toString();
     }
     else if (status > 128 && status < 128 + 31) {
@@ -227,13 +232,14 @@ class WatchdogChildProcess
         type = "SIGSTOP";
         break;
       default:
-        type = "signal=" + (status - 128) + " status=" + status;
+        type = "signal=" + (status - 128);
         break;
       }
     }
     
-    log.warning("Watchdog detected Resin[" + _watchdog.getId() + ",pid=" + _pid + "] close"
-                + " " + type + " (status=" + status + ")");
+    log.warning("Watchdog detected close of "
+                + "Resin[" + _watchdog.getId() + ",pid=" + _pid + "]"
+                + "\n  exit reason: " + type + " (exit code=" + status + ")");
   }
 
   /**

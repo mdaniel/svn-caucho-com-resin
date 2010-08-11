@@ -692,6 +692,9 @@ public class MiscModule extends AbstractQuercusModule {
         is.close();
 
         int status = process.waitFor();
+        
+        if (result != null)
+          result.set(LongValue.create(status));
       }
       finally {
         process.destroy();
