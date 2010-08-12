@@ -29,14 +29,9 @@
 
 package com.caucho.resin;
 
-import com.caucho.config.*;
-import com.caucho.config.program.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.util.*;
-
-import java.util.*;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.PropertyValueProgram;
+import com.caucho.server.dispatch.ServletProtocolConfig;
 
 /**
  * Embeddable version of a servlet remoting protocol like hessian or burlap.
@@ -58,8 +53,6 @@ import java.util.*;
  */
 public class ServletProtocolEmbed
 {
-  private static final L10N L = new L10N(ServletProtocolEmbed.class);
-  
   private String _uri;
   private ContainerProgram _init = new ContainerProgram();
 

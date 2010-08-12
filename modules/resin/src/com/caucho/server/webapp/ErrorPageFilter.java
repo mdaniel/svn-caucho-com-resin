@@ -28,22 +28,19 @@
 
 package com.caucho.server.webapp;
 
+import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Represents the final servlet in a filter chain.
  */
 public class ErrorPageFilter implements Filter {
-  private static final Logger log
-    = Logger.getLogger(ErrorPageFilter.class.getName());
-  
   public static String REQUEST_URI = "javax.servlet.include.request_uri";
   public static String CONTEXT_PATH = "javax.servlet.include.context_path";
   public static String SERVLET_PATH = "javax.servlet.include.servlet_path";
@@ -61,8 +58,6 @@ public class ErrorPageFilter implements Filter {
   
   public static String SHUTDOWN = "com.caucho.shutdown";
   
-  private FilterConfig _config;
-  private WebApp _app;
   private ErrorPageManager _errorPageManager;
 
   /**
@@ -83,10 +78,9 @@ public class ErrorPageFilter implements Filter {
   /**
    * Dummy init.
    */
+  @Override
   public void init(FilterConfig config)
   {
-    _config = config;
-    _app = (WebApp) config.getServletContext();
   }
   
   /**
@@ -95,6 +89,7 @@ public class ErrorPageFilter implements Filter {
    * @param request the servlet request
    * @param response the servlet response
    */
+  @Override
   public void doFilter(ServletRequest request,
                        ServletResponse response,
                        FilterChain next)
@@ -110,6 +105,7 @@ public class ErrorPageFilter implements Filter {
   /**
    * Dummy destroy
    */
+  @Override
   public void destroy()
   {
   }

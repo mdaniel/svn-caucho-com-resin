@@ -38,13 +38,13 @@ import java.util.logging.Logger;
 
 public class CXFProtocolServletFactory extends AbstractProtocolServletFactory
 {
-  private static final Logger log = 
+  private static final Logger log =
     Logger.getLogger(CXFProtocolServletFactory.class.getName());
   /**
    * Creates a new servlet skeleton based on an API and an object
    *
    * @param serviceClass the remoteApi exposed to the server
-   * @param service the managed service object
+   * @param instance the managed service object
    */
   public Servlet createServlet(Class serviceClass, Object instance)
     throws ServiceException

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,8 +106,8 @@ public class ClientSocketFactory
     = new AtomicInteger();
 
   // current connection count
-  private volatile int _activeCount;
-  private volatile int _startingCount;
+  private final AtomicInteger _activeCount = new AtomicInteger();
+  private final AtomicInteger _startingCount = new AtomicInteger();
 
   private final AtomicInteger _loadBalanceAllocateCount = new AtomicInteger();
 
@@ -137,7 +138,7 @@ public class ClientSocketFactory
 
   private volatile long _keepaliveCountTotal;
   private volatile long _connectCountTotal;
-  private volatile long _failCountTotal;
+  private final AtomicLong _failCountTotal = new AtomicLong();
   private volatile long _busyCountTotal;
 
   private volatile double _cpuLoadAvg;
@@ -357,7 +358,7 @@ public class ClientSocketFactory
    */
   public int getActiveCount()
   {
-    return _activeCount;
+    return _activeCount.get();
   }
 
   /**
@@ -413,7 +414,7 @@ public class ClientSocketFactory
    */
   public long getFailCountTotal()
   {
-    return _failCountTotal;
+    return _failCountTotal.get();
   }
 
   /**
@@ -452,7 +453,7 @@ public class ClientSocketFactory
     long delta = decayPeriod - (now - _lastSuccessTime);
 
     // decay the latency factor over 60s
-
+    
     if (delta <= 0)
       return 0;
     else
@@ -545,15 +546,39 @@ public class ClientSocketFactory
   /**
    * Returns true if the server can open a connection.
    */
-  public boolean canOpenSoftOrRecycle()
+  public boolean canOpen()
   {
-    return getIdleCount() > 0 || canOpenSoft();
+    if (getIdleCount() > 0)
+      return true;
+    State state = _state;
+
+    if (state == State.ACTIVE)
+      return true;
+    else if (! state.isEnabled())
+      return false;
+    else {
+      long now = Alarm.getCurrentTime();
+
+      if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
+        return false;
+      }
+
+      return true;
+    }
   }
 
   /**
    * Returns true if the server can open a connection.
    */
-  public boolean canOpenSoft()
+  public boolean canOpenWarmOrRecycle()
+  {
+    return getIdleCount() > 0 || canOpenWarm();
+  }
+
+  /**
+   * Returns true if the server can open a connection.
+   */
+  public boolean canOpenWarm()
   {
     State state = _state;
 
@@ -583,9 +608,9 @@ public class ClientSocketFactory
       int connectionMax = WARMUP_CONNECTION_MAX[warmupState];
 
       int idleCount = getIdleCount();
-      int activeCount = _activeCount + _startingCount;
+      int activeCount = _activeCount.get() + _startingCount.get();
       int totalCount = activeCount + idleCount;
-
+      
       return totalCount < connectionMax;
     }
     else {
@@ -623,9 +648,7 @@ public class ClientSocketFactory
 
     getRequestFailProbe().start();
 
-    synchronized (this) {
-      _failCountTotal++;
-    }
+    _failCountTotal.incrementAndGet();
 
     _state = _state.toFail();
 
@@ -639,9 +662,9 @@ public class ClientSocketFactory
   {
     getRequestFailProbe().start();
 
+    _failCountTotal.incrementAndGet();
+    
     synchronized (this) {
-      _failCountTotal++;
-
       long now = Alarm.getCurrentTime();
       _firstSuccessTime = 0;
 
@@ -667,9 +690,9 @@ public class ClientSocketFactory
   {
     getConnectionFailProbe().start();
 
-    synchronized (this) {
-      _failCountTotal++;
+    _failCountTotal.incrementAndGet();
 
+    synchronized (this) {
       _firstSuccessTime = 0;
 
       // only degrade one per 100ms
@@ -719,8 +742,9 @@ public class ClientSocketFactory
   {
     _currentFailCount = 0;
 
-    if (_firstSuccessTime <= 0)
+    if (_firstSuccessTime <= 0) {
       _firstSuccessTime = Alarm.getCurrentTime();
+    }
 
     // reset the connection fail recover time
     _dynamicFailRecoverTime = 1000L;
@@ -762,11 +786,11 @@ public class ClientSocketFactory
   }
 
   /**
-   * Open a stream to the target server.
+   * Open a stream to the target server, restricted by warmup.
    *
    * @return the socket's read/write pair.
    */
-  public ClientSocket openSoft()
+  public ClientSocket openWarm()
   {
     State state = _state;
 
@@ -779,7 +803,7 @@ public class ClientSocketFactory
     if (stream != null)
       return stream;
 
-    if (canOpenSoft()) {
+    if (canOpenWarm()) {
       return connect();
     }
     else {
@@ -807,7 +831,7 @@ public class ClientSocketFactory
 
     if (now <= _failTime + _loadBalanceRecoverTime)
       return null;
-    else if (_state == State.FAIL && _startingCount > 0) {
+    else if (_state == State.FAIL && _startingCount.get() > 0) {
       // if in fail state, only one thread should try to connect
       return null;
     }
@@ -886,7 +910,7 @@ public class ClientSocketFactory
         _idleHead = (_idleHead + _idle.length - 1) % _idle.length;
 
         if (now < freeTime + _loadBalanceIdleTime) {
-          _activeCount++;
+          _activeCount.incrementAndGet();
           _keepaliveCountTotal++;
 
           stream.clearIdleStartTime();
@@ -915,15 +939,15 @@ public class ClientSocketFactory
    */
   private ClientSocket connect()
   {
-    synchronized (this) {
-      if (_maxConnections <= _activeCount + _startingCount)
-        return null;
+    if (_maxConnections <= _activeCount.get() + _startingCount.get())
+      return null;
 
-      _startingCount++;
-    }
+    _startingCount.incrementAndGet();
 
     State state = _state;
     if (! state.isInit()) {
+      _startingCount.decrementAndGet();
+      
       IllegalStateException e = new IllegalStateException(L.l("'{0}' connection cannot be opened because the server pool has not been started.", this));
 
       log.log(Level.WARNING, e.toString(), e);
@@ -938,8 +962,9 @@ public class ClientSocketFactory
       
       rs.setAttribute("timeout", new Integer((int) _loadBalanceSocketTimeout));
 
+      _activeCount.incrementAndGet();
+      
       synchronized (this) {
-        _activeCount++;
         _connectCountTotal++;
       }
 
@@ -974,9 +999,7 @@ public class ClientSocketFactory
 
       return null;
     } finally {
-      synchronized (this) {
-        _startingCount--;
-      }
+      _startingCount.decrementAndGet();
     }
   }
 
@@ -1005,9 +1028,9 @@ public class ClientSocketFactory
   {
     success();
 
-    synchronized (this) {
-      _activeCount--;
+    _activeCount.decrementAndGet();
 
+    synchronized (this) {
       int size = (_idleHead - _idleTail + _idle.length) % _idle.length;
 
       if (_state != State.CLOSED && size < _idleSize) {
@@ -1026,7 +1049,7 @@ public class ClientSocketFactory
                           + 0.05 * (now - prevSuccessTime));
       }
 
-      if (_activeCount > 0)
+      if (_activeCount.get() > 0)
         _prevSuccessTime = now;
       else
         _prevSuccessTime = 0;
@@ -1102,9 +1125,7 @@ public class ClientSocketFactory
     if (log.isLoggable(Level.FINER))
       log.finer("close " + stream);
 
-    synchronized (this) {
-      _activeCount--;
-    }
+    _activeCount.decrementAndGet();
   }
 
   /**

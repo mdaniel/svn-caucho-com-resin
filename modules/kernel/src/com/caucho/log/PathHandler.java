@@ -42,6 +42,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -73,6 +74,14 @@ public class PathHandler extends Handler {
     setPath(path);
 
     init();
+  }
+
+  /**
+   * Convenience method to create a path.  Calls init() automatically.
+   */
+  public PathHandler(String path)
+  {
+    this(Vfs.lookup(path));
   }
 
   /**

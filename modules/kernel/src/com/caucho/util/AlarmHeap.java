@@ -137,8 +137,10 @@ public class AlarmHeap {
     alarm.setHeapIndex(i);
 
     if (_heapTop < i)
-      throw new IllegalStateException();
-
+      throw new IllegalStateException("i=" + i + " top=" + _heapTop);
+    if (i < 1)
+      throw new IllegalStateException("i=" + i);
+    
     return (i == 1);
   }
 

@@ -2629,8 +2629,13 @@ public class FileModule extends AbstractQuercusModule {
       }
 
       args[2] = command;
+      
+      ProcessBuilder builder = new ProcessBuilder();
+      
+      builder.command(args);
+      builder.redirectErrorStream(true);
 
-      Process process = Runtime.getRuntime().exec(args);
+      Process process = builder.start();
 
       if (doRead)
         return new PopenInput(env, process);

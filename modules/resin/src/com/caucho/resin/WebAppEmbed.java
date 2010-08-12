@@ -29,14 +29,17 @@
 
 package com.caucho.resin;
 
-import com.caucho.config.*;
-import com.caucho.config.program.*;
-import com.caucho.config.types.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.InitParam;
+import com.caucho.server.dispatch.FilterConfigImpl;
+import com.caucho.server.dispatch.FilterMapping;
+import com.caucho.server.dispatch.ServletConfigImpl;
+import com.caucho.server.dispatch.ServletMapping;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Embeddable version of a Resin web-app.
@@ -58,8 +61,6 @@ public class WebAppEmbed
   private HashMap<String,String> _contextParamMap
     = new HashMap<String,String>();
   
-  private ContainerProgram _init = new ContainerProgram();
-
   private final ArrayList<BeanEmbed> _beanList
     = new ArrayList<BeanEmbed>();
 

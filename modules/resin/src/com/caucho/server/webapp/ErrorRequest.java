@@ -36,17 +36,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
 
 public class ErrorRequest extends ForwardRequest {
   private static final IntMap _errorAttributeMap = new IntMap();
-  private static final L10N L = new L10N(ErrorRequest.class);
 
   private static final int REQUEST_URI_CODE = 1;
-  private static final int CONTEXT_PATH_CODE = 2;
-  private static final int SERVLET_PATH_CODE = 3;
-  private static final int PATH_INFO_CODE = 4;
-  private static final int QUERY_STRING_CODE = 5;
   
   public ErrorRequest()
   {

@@ -13,6 +13,12 @@
 
 <s2 title="4.0.10 - snapshot">
 <ul>
+<li>load-balance: fixes to weight and warmup</li>
+<li>load-balance: created LoadBalanceService for testability</li>
+<li>watchdog: added logging of Resin exit codes on detected shutdown</li>
+<li>system: added ShutdownService to centralize Resin shutdown</li>
+<li>system: added WarningService to send Resin messages to the watchdog</li>
+<li>embed: add ResinEmbed.setRootDirectory and WebAppEmbed.setArchivePath (rep by Danny Yates)</li>
 <li>resin-admin: jmx hide &amp; show acted on wrong detail boxes. (#4145, Rep by Jamison Novak)</li>
 <li>jpa: eclipselink properties for Resin JTA not set when eclipselink found by scanning (#4167, rep by Roccardo Cohen)</li>
 <li>thread: alarm locking issue (rep by Wesley Wu, Jan Kriesten)</li>
