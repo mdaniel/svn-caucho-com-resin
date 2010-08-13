@@ -38,9 +38,11 @@ import java.io.Serializable;
  * component is the deployment type, the second is the virtual host and
  * the third is the specific name.
  */
+@SuppressWarnings("serial")
 public class ControllerStartQuery implements Serializable {
   private String _tag;
 
+  @SuppressWarnings("unused")
   private ControllerStartQuery()
   {
   }

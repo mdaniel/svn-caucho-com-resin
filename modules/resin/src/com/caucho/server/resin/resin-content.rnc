@@ -83,8 +83,6 @@ r_cluster-Content =
   & (attribute max-uri-length { r_int-Type }
      | element max-uri-length { r_int-Type })?
 
-  & r_machine*
-
   & r_persistent-store?
 
   & r_ping*
@@ -325,12 +323,6 @@ r_log-service = element log-service {
      | element level { string })?
      
   & r_path?
-}
-
-r_machine = element machine {
-  attribute id { string }?
-
-  & r_server+
 }
 
 r_management = element management {

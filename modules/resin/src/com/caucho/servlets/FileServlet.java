@@ -356,7 +356,7 @@ public class FileServlet extends GenericServlet {
       }
     }
 
-    // res.setContentLength((int) cache.getLength());
+    res.setContentLength((int) cache.getLength());
 
     if (res instanceof CauchoResponse) {
       CauchoResponse cRes = (CauchoResponse) res;

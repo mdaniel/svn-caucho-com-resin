@@ -550,8 +550,13 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       synchronized (this) {
         while (!_isDone && !_isCancelled && Alarm.getCurrentTime() < expire
                && !Thread.currentThread().isInterrupted()) {
-          if (! Alarm.isTest())
-            wait(expire - Alarm.getCurrentTime());
+          if (! Alarm.isTest()) {
+            long delta = expire - Alarm.getCurrentTime();
+            
+            if (delta > 0) {
+              wait(expire - Alarm.getCurrentTime());
+            }
+          }
           else {
             wait(1000);
             break;
@@ -751,14 +756,17 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     public T get(long timeout, TimeUnit unit) throws InterruptedException,
         ExecutionException, TimeoutException
     {
-      long expire = Alarm.getCurrentTime() + unit.toMillis(timeout);
+      long expire = Alarm.getCurrentTimeActual() + unit.toMillis(timeout);
       int count = _alarmCount;
 
       while (!_isDone && !_isCancelled && count == _alarmCount
-          && Alarm.getCurrentTime() < expire
+          && Alarm.getCurrentTimeActual() < expire
           && !Thread.currentThread().isInterrupted()) {
         synchronized (this) {
-          wait(expire - Alarm.getCurrentTime());
+          long delta = expire - Alarm.getCurrentTimeActual();
+          
+          if (delta > 0)
+            wait(delta);
         }
       }
 

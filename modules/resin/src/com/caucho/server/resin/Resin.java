@@ -113,8 +113,7 @@ public class Resin
   private final EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
 
-  // private EnvironmentClassLoader _classLoader;
-  private boolean _isGlobal;
+  private boolean _isEmbedded;
 
   private String _serverId = "";
   private final boolean _isWatchdog;
@@ -186,8 +185,6 @@ public class Resin
     if (loader == null)
       loader = ClassLoader.getSystemClassLoader();
 
-    _isGlobal = (loader == ClassLoader.getSystemClassLoader());
-    
     initEnvironment();
   }
 
@@ -351,6 +348,11 @@ public class Resin
     _stage = stage; 
   }
   
+  public void setEmbedded(boolean isEmbedded)
+  {
+    _isEmbedded = isEmbedded;
+  }
+  
   private void initEnvironment()
   {
     String resinHome = System.getProperty("resin.home");
@@ -410,14 +412,7 @@ public class Resin
       if (getRootDirectory() == null)
         throw new NullPointerException();
       
-      if (_mainThread != null) {
-        ShutdownService shutdown = new ShutdownService(_resinSystem);
-        _resinSystem.addService(shutdown);
-      }
-      
-      TopologyService topology = new TopologyService(serverName);
-      _resinSystem.addService(topology);
-      topology.getSystem();
+      addServices();
       
       _bootResinConfig = new BootResinConfig(this);
 
@@ -474,6 +469,16 @@ public class Resin
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  protected void addServices()
+  {
+    ShutdownService shutdown = new ShutdownService(_resinSystem, _isEmbedded);
+    _resinSystem.addService(shutdown);
+  
+    TopologyService topology = new TopologyService(_resinSystem.getId());
+    _resinSystem.addService(topology);
+    topology.getSystem();
   }
   
   private void setArgs(ResinArgs args)

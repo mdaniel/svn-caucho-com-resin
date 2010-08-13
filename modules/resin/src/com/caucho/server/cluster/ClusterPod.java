@@ -164,14 +164,6 @@ abstract public class ClusterPod
   abstract public ClusterServer createServer();
 
   /**
-   * Creates a cluster machine
-   */
-  public Machine createMachine()
-  {
-    throw new UnsupportedOperationException(L.l("<machine> requires Resin Professional"));
-  }
-
-  /**
    * Adds cluster server
    */
   public void addServer(ClusterServer server)

@@ -116,11 +116,13 @@ public class BlockWriter extends TaskWorker {
         
         long now = Alarm.getCurrentTimeActual();
         
-        if (expires < now)
+        long delta = now - expires;
+        
+        if (delta <= 0)
           return;
         
         try {
-          _writeQueue.wait(expires - now);
+          _writeQueue.wait(delta);
         } catch (Exception e) {
           
         }

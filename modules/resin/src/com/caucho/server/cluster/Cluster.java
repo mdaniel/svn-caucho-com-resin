@@ -274,14 +274,6 @@ abstract public class Cluster
   }
 
   /**
-   * Adds a new server to the cluster.
-   */
-  public Machine createMachine()
-  {
-    throw new UnsupportedOperationException(L.l("<machine> requires Resin Professional"));
-  }
-
-  /**
    * Adds a new server to the cluster during configuration.
    */
   abstract public ClusterServer createServer();

@@ -35,10 +35,12 @@ import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.ClusterServerProgram;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudServer;
+import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.util.L10N;
 
 /**
  * The BootServerConfig is the first-pass configuration of the server.
@@ -47,6 +49,8 @@ import com.caucho.config.program.ContainerProgram;
  */
 public class BootServerConfig implements SchemaBean
 {
+  private static final L10N L = new L10N(BootServerConfig.class);
+  
   private final BootClusterConfig _cluster;
   
   private String _id;
@@ -140,6 +144,10 @@ public class BootServerConfig implements SchemaBean
   public void init()
   {
     CloudPod pod = _cluster.getCloudPod();
+    
+    if (pod.getServerLength() >= 64) {
+      throw new ConfigException(L.l("The server cannot be added to the current pod because it would be more than 64 servers to the pod."));
+    }
     
     _cloudServer = pod.createStaticServer(getId(), 
                                           getAddress(),

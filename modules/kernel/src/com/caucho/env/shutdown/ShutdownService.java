@@ -66,6 +66,8 @@ public class ShutdownService extends AbstractResinService
   private FailSafeHaltThread _failSafeHaltThread;
   private ShutdownThread _shutdownThread;
   
+  private boolean _isEmbedded;
+  
   private boolean _isDumpHeapOnExit;
 
   /**
@@ -73,9 +75,20 @@ public class ShutdownService extends AbstractResinService
    */
   public ShutdownService(ResinSystem resinSystem)
   {
+    this(resinSystem, false);
+  }
+
+  /**
+   * Creates a new resin server.
+   */
+  public ShutdownService(ResinSystem resinSystem,
+                         boolean isEmbedded)
+  {
     _resinSystemRef = new WeakReference<ResinSystem>(resinSystem);
     
     _warningService = WarningService.create(resinSystem);
+    
+    _isEmbedded = isEmbedded;
   }
   
   /**
@@ -138,16 +151,19 @@ public class ShutdownService extends AbstractResinService
     startFailSafeShutdown(msg);
 
     ShutdownThread shutdownThread = _shutdownThread;
+    
     if (shutdownThread != null) {
       shutdownThread.startShutdown(exitCode);
+
+      if (! _isEmbedded) {
+        try {
+          Thread.sleep(15 * 60000);
+        } catch (Exception e) {
+        }
       
-      try {
-        Thread.sleep(15 * 60000);
-      } catch (Exception e) {
+        System.out.println("Shutdown timeout");
+        System.exit(exitCode.ordinal());
       }
-      
-      System.out.println("Shutdown timeout");
-      System.exit(exitCode.ordinal());
     }
     else {
       shutdownImpl(exitCode);
@@ -192,17 +208,14 @@ public class ShutdownService extends AbstractResinService
     } finally {
       _lifecycle.toDestroy();
 
-      if (Alarm.isTest()) {
-        log.finer("test simulating exit");
-      }
-      else {
-        if (exitCode == null)
-          exitCode = ExitCode.FAIL_SAFE_HALT;
-        
-        System.err.println("\nShutdown Resin reason: " + exitCode + "\n");
-        
-        log.warning("Shutdown Resin reason: " + exitCode);
-        
+      if (exitCode == null)
+        exitCode = ExitCode.FAIL_SAFE_HALT;
+
+      System.err.println("\nShutdown Resin reason: " + exitCode + "\n");
+
+      log.warning("Shutdown Resin reason: " + exitCode);
+
+      if (! _isEmbedded) {
         System.exit(exitCode.ordinal());
       }
     }
@@ -248,9 +261,11 @@ public class ShutdownService extends AbstractResinService
   {
     _lifecycle.toActive();
     
-    _activeService.compareAndSet(null, this);
+    if (! _isEmbedded) {
+      _activeService.compareAndSet(null, this);
+    }
     
-    if (! Alarm.isTest()) {
+    if (! Alarm.isTest() && ! _isEmbedded) {
       _failSafeHaltThread = new FailSafeHaltThread();
       _failSafeHaltThread.start();
     }

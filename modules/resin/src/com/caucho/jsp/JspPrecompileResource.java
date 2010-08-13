@@ -158,7 +158,7 @@ public class JspPrecompileResource {
         try {
           long timeout = expire - Alarm.getCurrentTime();
 
-          if (timeout < 0)
+          if (timeout <= 0)
             return;
 
           wait(timeout);

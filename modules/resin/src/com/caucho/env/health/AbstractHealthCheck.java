@@ -28,14 +28,22 @@
 
 package com.caucho.env.health;
 
-public interface Health {
+public abstract class AbstractHealthCheck implements HealthCheck {
   /**
-   * Returns true if the health status is valid.
+   * Returns the health status for this health check.
    */
-  public boolean isValid();
+  @Override
+  public HealthStatus checkHealth()
+  {
+    return HealthStatus.OK;
+  }
 
   /**
    * Returns the current status message.
    */
-  public String getStatus();
+  @Override
+  public String getHealthStatusMessage()
+  {
+    return "";
+  }
 }

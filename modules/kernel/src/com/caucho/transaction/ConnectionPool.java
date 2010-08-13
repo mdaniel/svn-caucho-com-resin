@@ -961,12 +961,14 @@ public class ConnectionPool extends AbstractManagedObject
         while (! isIdleAvailable() && ! isCreateAvailable()) {
           try {
             long now = Alarm.getCurrentTimeActual();
+            
+            long delta = now - expireTime;
         
-            if (expireTime <= now)
+            if (delta <= 0)
               return false;
         
             Thread.interrupted();
-            _availableLock.wait(expireTime - now);
+            _availableLock.wait(delta);
           } catch (InterruptedException e) {
             log.log(Level.FINER, e.toString(), e);
           }

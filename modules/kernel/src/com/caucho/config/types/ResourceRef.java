@@ -254,6 +254,15 @@ public class ResourceRef extends ResourceGroupConfig
   {
     super.deploy();
     
+    try {
+      Object value = Jndi.lookup(_name);
+      
+      if (value != null)
+        return;
+    } catch (Exception e) {
+      log.log(Level.ALL, e.toString(), e);
+    }
+    
     if (_value == null && getLookupName() == null) {
       InjectManager cdiManager = InjectManager.getCurrent();
       
@@ -275,7 +284,6 @@ public class ResourceRef extends ResourceGroupConfig
   {
     Object value;
    
-    System.out.println("GETV: " + _value + " " + getLookupName() + " " + _bean);
     if (_value != null)
       value = _value;
     else if (getLookupName() != null)

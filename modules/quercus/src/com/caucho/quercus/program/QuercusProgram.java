@@ -452,7 +452,8 @@ public class QuercusProgram {
     synchronized (this) {
       if (_runtimeFunList == null) {
         try {
-          wait(timeout);
+          if (timeout > 0)
+            wait(timeout);
         } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);
         }

@@ -304,7 +304,11 @@ public final class Lifecycle implements LifecycleState {
           return false;
 
         try {
-          this.wait(waitEnd - Alarm.getCurrentTime());
+          long delta = waitEnd - Alarm.getCurrentTime();
+          
+          if (delta > 0) {
+            wait(delta);
+          }
         } catch (InterruptedException e) {
         }
       }

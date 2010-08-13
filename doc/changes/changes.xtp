@@ -13,6 +13,7 @@
 
 <s2 title="4.0.10 - snapshot">
 <ul>
+<li>cluster: removed &lt;machine> tag as obsolete</li>
 <li>load-balance: fixes to weight and warmup</li>
 <li>load-balance: created LoadBalanceService for testability</li>
 <li>watchdog: added logging of Resin exit codes on detected shutdown</li>
