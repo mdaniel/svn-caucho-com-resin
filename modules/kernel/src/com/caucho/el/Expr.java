@@ -796,7 +796,7 @@ public abstract class Expr extends ValueExpression {
       return 0;
     else if (value instanceof String) {
       try {
-	return (long) Double.parseDouble((String) value);
+	return Long.parseLong((String) value);
       } catch (Exception e) {
 	throw new ELException(e);
       }
