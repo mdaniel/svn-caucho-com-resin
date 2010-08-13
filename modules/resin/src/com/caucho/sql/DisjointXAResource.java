@@ -79,7 +79,7 @@ public class DisjointXAResource implements XAResource {
   public boolean isSameRM(XAResource resource)
     throws XAException
   {
-    return false;
+    return this == resource;
   }
 
   /**

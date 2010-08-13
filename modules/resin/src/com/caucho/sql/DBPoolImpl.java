@@ -183,7 +183,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   // True if the pool is transactional
   private boolean _isTransactional = true;
   // True if the pool should never allow isSameRM
-  private boolean _isXAForbidSameRM = false;
+    private boolean _isXAForbidSameRM = true;
   // The transaction manager if the pool participates in transactions.
   private TransactionManager _tm;
   // how long before the transaction times out

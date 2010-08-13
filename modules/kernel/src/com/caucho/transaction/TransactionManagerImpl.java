@@ -337,9 +337,22 @@ public class TransactionManagerImpl
    */
   public void recover(XAResource xaRes) throws XAException
   {
-    Xid [] xids;
+    Xid [] xids = null;
 
-    xids = xaRes.recover(XAResource.TMSTARTRSCAN | XAResource.TMENDRSCAN);
+    try {
+      xids = xaRes.recover(XAResource.TMSTARTRSCAN | XAResource.TMENDRSCAN);
+    } catch (XAException e) {
+      int code = e.errorCode;
+      System.out.println("E: " + e + " " + e.errorCode +  " " + e.getMessage());
+      if (e.getMessage() == null || e.getMessage().isEmpty()) {
+        XAException e1 = new XAException(L.l("Error during recovery (code=" + code + ")", e));
+	e1.errorCode = code;
+
+	throw e1;
+      }
+
+      throw e;
+    }
 
     if (xids == null)
       return;
