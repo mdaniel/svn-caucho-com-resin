@@ -29,47 +29,13 @@
 
 package com.caucho.env.repository;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.util.L10N;
-
 /**
- * Public API for the persistent .git repository
+ * Repository listener to detect when the repository changes.
+ * 
+ * For example, deploy services like web-apps listen to their tags to 
+ * handle updates.
  */
-public class RepositoryService extends AbstractResinService
+public interface RepositoryTagListener
 {
-  private static final L10N L = new L10N(RepositoryService.class);
-  
-  private Repository _repository;
-
-  public RepositoryService(Repository repository)
-  {
-    _repository = repository;
-  }
-  
-  public static RepositoryService getCurrent()
-  {
-    return ResinSystem.getCurrentService(RepositoryService.class);
-  }
-  
-  public static Repository getCurrentRepository()
-  {
-    RepositoryService service = getCurrent();
-    
-    if (service == null)
-      throw new IllegalStateException(L.l("RepositoryService is not available in this context"));
-    
-    return service.getRepository();
-  }
-  
-  public Repository getRepository()
-  {
-    return _repository;
-  }
-  
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _repository + "]";
-  }
+  public void onTagChange(String tag);
 }

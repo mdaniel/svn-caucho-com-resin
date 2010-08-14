@@ -51,27 +51,6 @@ import com.caucho.vfs.Path;
 public interface Repository
 {
   //
-  // The repository root hash
-  //
-  
-  /**
-   * The Commit .git hash for the repository itself. The hash points
-   * to a .git Commit entry for the current repository version.
-   * 
-   * @return the hash of the .git Commit for the current repository root.
-   */
-  public String getRepositoryRootHash();
-  
-  /**
-   * The root .git hash for the repository itself. The hash points
-   * to a .git Commit entry for the current repository version.
-   * 
-   * @param rootCommitHash the hash of the new .git Commit for the 
-   * repository.
-   */
-  public void setRepositoryRootHash(String rootCommitHash);
-  
-  //
   // .git file management
   //
 
@@ -199,6 +178,11 @@ public interface Repository
   //
   
   /**
+   * Updates the repository, checking for any changes across the cluster.
+   */
+  public void checkForUpdate();
+  
+  /**
    * Returns the current read-only tag map.
    */
   public Map<String,RepositoryTagEntry> getTagMap();
@@ -234,7 +218,34 @@ public interface Repository
                            Map<String,String> commitMetaData);
   
   /**
-   * Updates the repository, checking for any changes across the cluster.
+   * Adds a tag change listener
    */
-  public void checkForUpdate();
+  public void addListener(String tagName, RepositoryTagListener listener);
+  
+  /**
+   * Adds a tag change listener
+   */
+  public void removeListener(String tagName, RepositoryTagListener listener);
+  
+  
+  //
+  // The repository root hash
+  //
+  
+  /**
+   * The Commit .git hash for the repository itself. The hash points
+   * to a .git Commit entry for the current repository version.
+   * 
+   * @return the hash of the .git Commit for the current repository root.
+   */
+  public String getRepositoryRootHash();
+  
+  /**
+   * The root .git hash for the repository itself. The hash points
+   * to a .git Commit entry for the current repository version.
+   * 
+   * @param rootCommitHash the hash of the new .git Commit for the 
+   * repository.
+   */
+  public void setRepositoryRootHash(String rootCommitHash);
 }

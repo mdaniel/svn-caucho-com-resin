@@ -115,7 +115,7 @@ public class RepositoryTagMap
     for (String key : tagMap.keySet()) {
       RepositoryTagEntry entry = tagMap.get(key);
 
-      String sha1 = entry.getSha1();
+      String sha1 = entry.getTagEntryHash();
       String root = entry.getRoot();
 
       _tree.addBlob(sha1, 0644, sha1);
@@ -196,7 +196,7 @@ public class RepositoryTagMap
   {
     for (Map.Entry<String,RepositoryTagEntry> entry : _tagMap.entrySet()) {
       out.println(entry.getKey());
-      out.println(entry.getValue().getSha1());
+      out.println(entry.getValue().getTagEntryHash());
     }
   }
 

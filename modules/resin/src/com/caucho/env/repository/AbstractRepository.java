@@ -34,6 +34,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +55,9 @@ abstract public class AbstractRepository implements Repository
   private String _repositoryTag;
 
   private RepositoryTagMap _tagMap = new RepositoryTagMap();
+  
+  private ConcurrentHashMap<String,CopyOnWriteArrayList<RepositoryTagListener>>
+  _tagListenerMap = new ConcurrentHashMap<String,CopyOnWriteArrayList<RepositoryTagListener>>();
 
   protected AbstractRepository()
   {
@@ -71,6 +76,7 @@ abstract public class AbstractRepository implements Repository
    */
   public void start()
   {
+    checkForUpdate();
   }
 
   /**
@@ -204,7 +210,7 @@ abstract public class AbstractRepository implements Repository
       Map<String,RepositoryTagEntry> tagMap = repositoryTagMap.getTagMap();
 
       if (! validateHash(contentHash))
-        throw new RepositoryException(L.l("'{0}' is an invalid .git content",
+        throw new RepositoryException(L.l("'{0}' has invalid or missing repository content",
                                           contentHash));
 
       String parent = null;
@@ -217,9 +223,8 @@ abstract public class AbstractRepository implements Repository
 
       newTagMap.put(tagName, entry);
 
-      RepositoryTagMap newDeployTagMap = new RepositoryTagMap(this,
-                                                      repositoryTagMap,
-                                                      newTagMap);
+      RepositoryTagMap newDeployTagMap
+        = new RepositoryTagMap(this, repositoryTagMap, newTagMap);
 
       if (_tagMap == repositoryTagMap) {
         return newDeployTagMap;
@@ -263,9 +268,8 @@ abstract public class AbstractRepository implements Repository
 
       newTagMap.remove(tagName);
 
-      RepositoryTagMap newDeployTagMap = new RepositoryTagMap(this,
-                                                      repositoryTagMap,
-                                                      newTagMap);
+      RepositoryTagMap newDeployTagMap
+        = new RepositoryTagMap(this, repositoryTagMap, newTagMap);
 
       if (_tagMap == repositoryTagMap) {
         return newDeployTagMap;
@@ -296,6 +300,62 @@ abstract public class AbstractRepository implements Repository
         return false;
     }
   }
+  
+  /**
+   * Adds a tag listener 
+   */
+  @Override
+  public void addListener(String tag, RepositoryTagListener listener)
+  {
+    CopyOnWriteArrayList<RepositoryTagListener> listeners;
+    listeners = _tagListenerMap.get(tag);
+    
+    if (listeners == null) {
+      listeners = new CopyOnWriteArrayList<RepositoryTagListener>();
+      
+      _tagListenerMap.putIfAbsent(tag, listeners);
+      
+      listeners = _tagListenerMap.get(tag);
+    }
+    
+    listeners.add(listener);
+  }
+  
+  /**
+   * Adds a tag listener 
+   */
+  @Override
+  public void removeListener(String tag, RepositoryTagListener listener)
+  {
+    CopyOnWriteArrayList<RepositoryTagListener> listeners;
+    listeners = _tagListenerMap.get(tag);
+    
+    if (listeners == null) {
+      return;
+    }
+    
+    listeners.remove(listener);
+  }
+  
+  protected void onTagChange(String tag)
+  {
+    int p = tag.lastIndexOf('/');
+    
+    if (p >= 0)
+      onTagChange(tag.substring(0, p));
+    else if (! tag.isEmpty())
+      onTagChange("");
+    
+    CopyOnWriteArrayList<RepositoryTagListener> listeners;
+    listeners = _tagListenerMap.get(tag);
+    
+    if (listeners != null) {
+      for (RepositoryTagListener listener : listeners) {
+        listener.onTagChange(tag);
+      }
+    }
+  }
+  
 
   //
   // git tag management

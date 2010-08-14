@@ -920,7 +920,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
         VersionEntry versionEntry
           = new VersionEntry(name, versionContextPath, baseContextPath,
-                             entry.getValue().getSha1(),
+                             entry.getValue().getTagEntryHash(),
                              entry.getValue().getRoot());
         
         versionMap.put(versionContextPath, versionEntry);

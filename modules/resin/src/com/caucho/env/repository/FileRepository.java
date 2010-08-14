@@ -93,6 +93,8 @@ public class FileRepository extends AbstractRepository
       tagMap = addTagData(tagName, contentHash, commitMessage, commitMetaData);
 
     } while (! setTagMap(tagMap));
+    
+    onTagChange(tagName);
 
     return true;
   }
@@ -114,6 +116,8 @@ public class FileRepository extends AbstractRepository
     do {
       tagMap = removeTagData(tagName, commitMessage, commitMetaData);
     } while (! setTagMap(tagMap));
+
+    onTagChange(tagName);
 
     return true;
   }

@@ -58,6 +58,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Sets the transaction timeout.
    */
+  @Override
   public boolean setTransactionTimeout(int seconds)
     throws XAException
   {
@@ -67,6 +68,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Gets the transaction timeout.
    */
+  @Override
   public int getTransactionTimeout()
     throws XAException
   {
@@ -76,6 +78,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Returns true if the underlying RM is the same.
    */
+  @Override
   public boolean isSameRM(XAResource resource)
     throws XAException
   {
@@ -85,6 +88,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Starts the resource.
    */
+  @Override
   public void start(Xid xid, int flags)
     throws XAException
   {
@@ -94,6 +98,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Starts the resource.
    */
+  @Override
   public void end(Xid xid, int flags)
     throws XAException
   {
@@ -103,6 +108,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Rolls the resource back
    */
+  @Override
   public int prepare(Xid xid)
     throws XAException
   {
@@ -112,6 +118,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Commits the resource
    */
+  @Override
   public void commit(Xid xid, boolean onePhase)
     throws XAException
   {
@@ -121,6 +128,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Rolls the resource back
    */
+  @Override
   public void rollback(Xid xid)
     throws XAException
   {
@@ -130,6 +138,7 @@ public class DisjointXAResource implements XAResource {
   /**
    * Rolls the resource back
    */
+  @Override
   public Xid []recover(int flags)
     throws XAException
   {
@@ -139,12 +148,14 @@ public class DisjointXAResource implements XAResource {
   /**
    * Forgets the transaction
    */
+  @Override
   public void forget(Xid xid)
     throws XAException
   {
     _xaResource.forget(xid);
   }
 
+  @Override
   public String toString()
   {
     return "DisjointXAResource[" + _xaResource.getClass().getName() + "]";

@@ -48,7 +48,9 @@ public class XidImpl implements Xid {
    * @param id
    *          the 64 bit number for the id.
    */
-  public XidImpl(long serverId, long randomId, long sequence)
+  public XidImpl(long serverId, 
+                 long randomId, 
+                 long sequence)
   {
     _global = new byte[GLOBAL_LENGTH];
     _local = new byte[4];
@@ -121,25 +123,19 @@ public class XidImpl implements Xid {
     _local[0] = 1;
   }
 
-  XidImpl(byte [] global, int length)
-  {
-    _global = new byte[length];
-    _local = new byte[4];
-
-    System.arraycopy(global, 0, _global, 0, length);
-    _local[0] = 1;
-  }
-
+  @Override
   public int getFormatId()
   {
     return 1234;
   }
 
+  @Override
   public byte [] getBranchQualifier()
   {
     return _local;
   }
 
+  @Override
   public byte [] getGlobalTransactionId()
   {
     return _global;
@@ -148,6 +144,7 @@ public class XidImpl implements Xid {
   /**
    * Clones the xid.
    */
+  @Override
   public Object clone()
   {
     return new XidImpl(_global, _local);
@@ -156,6 +153,7 @@ public class XidImpl implements Xid {
   /**
    * Returns hashCode.
    */
+  @Override
   public int hashCode()
   {
     byte [] global = _global;
@@ -171,6 +169,7 @@ public class XidImpl implements Xid {
   /**
    * Returns equality.
    */
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof Xid))
@@ -203,9 +202,10 @@ public class XidImpl implements Xid {
   /**
    * Printable version of the transaction id.
    */
+  @Override
   public String toString()
   {
-    CharBuffer cb = CharBuffer.allocate();
+    StringBuilder cb = new StringBuilder();
 
     cb.append("Xid[");
 
@@ -221,7 +221,7 @@ public class XidImpl implements Xid {
 
     cb.append("]");
 
-    return cb.close();
+    return cb.toString();
   }
 
   /**
@@ -232,7 +232,7 @@ public class XidImpl implements Xid {
    * @param b
    *          the byte value
    */
-  static private void addByte(CharBuffer cb, int b)
+  static private void addByte(StringBuilder cb, int b)
   {
     int h = (b / 16) & 0xf;
     int l = b & 0xf;

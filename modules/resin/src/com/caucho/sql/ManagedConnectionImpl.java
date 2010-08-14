@@ -270,6 +270,8 @@ public class ManagedConnectionImpl
 
       if (_xaResource != null && dbPool.isXAForbidSameRM())
         _xaResource = new DisjointXAResource(_xaResource);
+      System.out.println("XAXX: " + _xaResource);
+      
       
       if (transactionTimeout > 0 && _xaResource != null) {
         try {

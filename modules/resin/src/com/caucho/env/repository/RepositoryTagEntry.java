@@ -100,13 +100,13 @@ public class RepositoryTagEntry
       is.close();
     }
   }
-
+  
   /**
-   * Returns the hash of the entry itself
+   * Returns the tag's name
    */
-  public String getSha1()
+  public String getName()
   {
-    return _tagEntryHash;
+    return _tagName;
   }
 
   /**
@@ -115,6 +115,14 @@ public class RepositoryTagEntry
   public String getRoot()
   {
     return _treeHash;
+  }
+
+  /**
+   * Returns the hash of the entry itself
+   */
+  public String getTagEntryHash()
+  {
+    return _tagEntryHash;
   }
 
   private Map<String,String> readMap(ReadStream is)

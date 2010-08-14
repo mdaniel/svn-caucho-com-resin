@@ -112,12 +112,6 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private static final L10N L = new L10N(DBPoolImpl.class);
 
   /**
-   * The beginning of the URL used to connect to a database with
-   * this pooled connection driver.
-   */
-  private static final String URL_PREFIX = "jdbc:caucho:" ;
-
-  /**
    * The key used to look into the properties passed to the
    * connect method to find the username.
    */
@@ -205,9 +199,6 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private int _idCount;
 
   private ActiveTimeSensor _timeProbe;
-
-  // The alarm
-  private Alarm _alarm;
 
   /**
    * Null constructor for the Driver interface; called by the JNDI
@@ -330,9 +321,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   ActiveTimeSensor getTimeProbe()
   {
     if (_timeProbe == null) {
-      MeterService manager = MeterService.getCurrent();
-
-      _timeProbe = manager.createActiveTimeMeter("Resin|Database|Query");
+      _timeProbe = MeterService.createActiveTimeMeter("Resin|Database|Query");
     }
 
     return _timeProbe;
