@@ -39,14 +39,11 @@ public class SocketPollService extends AbstractResinService
 {
   public static final int START_PRIORITY = 100;
   
-  private final ResinSystem _server;
-  
   private AbstractSelectManager _selectManager;
   
   public SocketPollService(ResinSystem server, 
                            AbstractSelectManager manager)
   {
-    _server = server;
     _selectManager = manager;
   }
   

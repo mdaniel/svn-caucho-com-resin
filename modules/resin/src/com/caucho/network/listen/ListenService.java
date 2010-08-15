@@ -64,8 +64,6 @@ public class ListenService extends AbstractResinService
   private final ContainerProgram _listenDefaults
     = new ContainerProgram();
 
-  private boolean _isBindListenersAtEnd = true;
-  
   private final Lifecycle _lifecycle = new Lifecycle();
   private AtomicBoolean _isStartedListeners = new AtomicBoolean();
   

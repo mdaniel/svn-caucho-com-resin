@@ -32,11 +32,10 @@ package com.caucho.network.listen;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownService;
@@ -45,7 +44,6 @@ import com.caucho.inject.RequestContext;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;

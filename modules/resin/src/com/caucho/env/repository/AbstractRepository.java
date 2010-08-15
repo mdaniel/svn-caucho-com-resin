@@ -252,6 +252,9 @@ abstract public class AbstractRepository implements Repository
                                            Map<String,String> commitMetaData)
   {
     try {
+      if (tagName == null)
+        throw new NullPointerException();
+      
       checkForUpdate();
 
       RepositoryTagMap repositoryTagMap = _tagMap;
@@ -285,19 +288,48 @@ abstract public class AbstractRepository implements Repository
 
   protected boolean setTagMap(RepositoryTagMap tagMap)
   {
+    RepositoryTagMap oldTagMap = null;
+
     synchronized (this) {
-      if (_tagMap.getSequence() < tagMap.getSequence()) {
-        _tagMap = tagMap;
-
-        setRepositoryRootHash(tagMap.getCommitHash());
-
-        if (log.isLoggable(Level.FINER))
-          log.finer(this + " updating deployment " + tagMap);
-
-        return true;
-      }
-      else
+      oldTagMap = _tagMap;
+      
+      if (tagMap.getSequence() <= oldTagMap.getSequence())
         return false;
+        
+      _tagMap = tagMap;
+
+      setRepositoryRootHash(tagMap.getCommitHash());
+    }
+
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " updating deployment " + tagMap);
+    
+    notifyTagListeners(oldTagMap.getTagMap(), tagMap.getTagMap());
+
+    return true;
+  }
+  
+  private void notifyTagListeners(Map<String,RepositoryTagEntry> oldTagMap,
+                                  Map<String,RepositoryTagEntry> newTagMap)
+  {
+    for (Map.Entry<String,RepositoryTagEntry> entry : newTagMap.entrySet()) {
+      String tag = entry.getKey();
+      RepositoryTagEntry newEntry = entry.getValue();
+      
+      RepositoryTagEntry oldEntry = oldTagMap.get(tag);
+
+      if (oldEntry == null) {
+        onTagChange(tag);
+      }
+      else if (! newEntry.getTagEntryHash().equals(oldEntry.getTagEntryHash())) {
+        onTagChange(tag);
+      }
+    }
+    
+    for (String tag : oldTagMap.keySet()) {
+      if (! newTagMap.containsKey(tag)) {
+        onTagChange(tag);
+      }
     }
   }
   
@@ -337,7 +369,7 @@ abstract public class AbstractRepository implements Repository
     listeners.remove(listener);
   }
   
-  protected void onTagChange(String tag)
+  private void onTagChange(String tag)
   {
     int p = tag.lastIndexOf('/');
     

@@ -65,6 +65,7 @@ import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
+import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.LocalRepositoryService;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
@@ -856,14 +857,14 @@ public class Resin
 
     _resinSystem.addService(localRepositoryService);
 
-    Repository repository = createRepository(localRepository);
+    AbstractRepository repository = createRepository(localRepository);
     
     _resinSystem.addService(new RepositoryService(repository));
   }
   
-  protected Repository createRepository(Repository localRepository)
+  protected AbstractRepository createRepository(Repository localRepository)
   {
-    return localRepository;
+    return (AbstractRepository) localRepository;
   }
 
   /**

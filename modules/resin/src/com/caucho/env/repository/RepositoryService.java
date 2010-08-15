@@ -40,9 +40,9 @@ public class RepositoryService extends AbstractResinService
 {
   private static final L10N L = new L10N(RepositoryService.class);
   
-  private Repository _repository;
+  private AbstractRepository _repository;
 
-  public RepositoryService(Repository repository)
+  public RepositoryService(AbstractRepository repository)
   {
     _repository = repository;
   }
@@ -65,6 +65,12 @@ public class RepositoryService extends AbstractResinService
   public Repository getRepository()
   {
     return _repository;
+  }
+  
+  @Override
+  public void start()
+  {
+    _repository.start();
   }
   
   @Override
