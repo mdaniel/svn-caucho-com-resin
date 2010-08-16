@@ -317,6 +317,21 @@ element resin-data-directory {
 
 </defun>
 
+<defun title="&lt;resin-system-auth-key>" version="Resin 4.0.8" name="resin-system-auth-key">
+<parents>resin</parents>
+
+<description>
+<p>&lt;resin-system-auth-key> specifies authorization token for Resin's Security service.</p>
+</description>
+
+<schema>
+element resin-system-auth-key {
+  String
+}
+</schema>
+
+</defun>
+
 <defun title="&lt;root-directory>" version="Resin 3.0">
 <parents>resin, cluster, host, web-app</parents>
 
