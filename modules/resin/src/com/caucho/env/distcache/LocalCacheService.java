@@ -27,34 +27,61 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.network.listen;
+package com.caucho.env.distcache;
 
+import com.caucho.distcache.CacheManager;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.server.distcache.AbstractCacheManager;
+import com.caucho.server.distcache.FileCacheEntry;
+import com.caucho.server.distcache.FileCacheManager;
 
 /**
- * The socket poll service, provides nio-style socket listening.
+ * The local cache repository.
  */
-public class SocketPollService extends AbstractResinService
-{
-  public static final int START_PRIORITY = START_PRIORITY_NETWORK_CLUSTER;
+public class LocalCacheService extends AbstractResinService {
+  public static final int START_PRIORITY = START_PRIORITY_ENV_SERVICE;
   
-  private AbstractSelectManager _selectManager;
+  private CacheManager _cacheManager;
+  private FileCacheManager _fileCacheManager;
   
-  public SocketPollService(ResinSystem server, 
-                           AbstractSelectManager manager)
+  public LocalCacheService(ResinSystem resinSystem)
   {
-    _selectManager = manager;
+    _fileCacheManager = new FileCacheManager(resinSystem);
   }
   
-  public AbstractSelectManager getSelectManager()
+  public static LocalCacheService getCurrent()
   {
-    return _selectManager;
+    return ResinSystem.getCurrentService(LocalCacheService.class);
   }
- 
+  
   @Override
   public int getStartPriority()
   {
     return START_PRIORITY;
+  }
+  
+  public AbstractCacheManager<FileCacheEntry> getBackingManager()
+  {
+    return _fileCacheManager;
+  }
+  
+  public CacheBuilder createBuilder(String name)
+  {
+    return new CacheBuilder(name, _cacheManager, _fileCacheManager);
+  }
+  
+  @Override
+  public void start()
+  {
+    _fileCacheManager.start();
+    
+    _cacheManager = new CacheManager();
+  }
+  
+  @Override
+  public void stop()
+  {
+    _fileCacheManager.close();
   }
 }

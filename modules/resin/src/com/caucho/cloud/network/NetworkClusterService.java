@@ -58,8 +58,7 @@ public class NetworkClusterService extends AbstractResinService
   private static final Logger log
     = Logger.getLogger(NetworkClusterService.class.getName());
   
-  public static final int START_PRIORITY = 2000;
-  public static final int START_PRIORITY_CLUSTER_SERVICE = 2100;
+  public static final int START_PRIORITY = TopologyService.START_PRIORITY + 1;
   
   private final CloudServer _selfServer;
   

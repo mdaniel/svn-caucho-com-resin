@@ -88,8 +88,9 @@ public class MnodeStore implements AlarmListener {
   public MnodeStore(Path path, String serverName)
     throws Exception
   {
-    _path = path;
-    _tableName = serverNameToTableName(serverName);
+    _path = path.lookup("distcache");
+    // _tableName = serverNameToTableName(serverName);
+    _tableName = "mnode";
 
     if (_path == null)
       throw new NullPointerException();
@@ -714,36 +715,6 @@ public class MnodeStore implements AlarmListener {
     }
 
     return cConn;
-  }
-
-  private String serverNameToTableName(String serverName)
-  {
-    if (serverName == null || "".equals(serverName))
-      return "resin_mnode_default";
-
-    StringBuilder cb = new StringBuilder();
-    cb.append("resin_mnode_");
-
-    for (int i = 0; i < serverName.length(); i++) {
-      char ch = serverName.charAt(i);
-
-      if ('a' <= ch && ch <= 'z') {
-        cb.append(ch);
-      }
-      else if ('A' <= ch && ch <= 'Z') {
-        cb.append(ch);
-      }
-      else if ('0' <= ch && ch <= '9') {
-        cb.append(ch);
-      }
-      else if (ch == '_') {
-        cb.append(ch);
-      }
-      else
-        cb.append('_');
-    }
-
-    return cb.toString();
   }
 
   @Override

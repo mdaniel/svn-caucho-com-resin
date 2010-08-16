@@ -317,14 +317,6 @@ abstract public class Cluster
   }
 
   /**
-   * Returns the distributed cache manager.
-   */
-  public DistributedCacheManager getDistributedCacheManager()
-  {
-    return getResin().getServer().getDistributedCacheManager();
-  }
-
-  /**
    * Adds a program.
    */
   public void addContentProgram(ConfigProgram program)

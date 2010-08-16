@@ -45,7 +45,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Defines a connection to the client.
  */
-public class ClientSocket {
+public class ClientSocket implements ClientSocketApi {
   private static final L10N L = new L10N(ClientSocket.class);
 
   private static final Logger log

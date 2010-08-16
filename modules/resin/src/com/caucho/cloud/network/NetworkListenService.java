@@ -54,8 +54,8 @@ public class NetworkListenService
   private static final Logger log
     = Logger.getLogger(NetworkListenService.class.getName());
 
-  public static final int START_PRIORITY_AT_BEGIN = 1000;
-  public static final int START_PRIORITY_AT_END = 100000;
+  public static final int START_PRIORITY_AT_BEGIN = 50;
+  public static final int START_PRIORITY_AT_END = 90;
   
   private static final long ALARM_TIMEOUT = 120 * 1000L;
   

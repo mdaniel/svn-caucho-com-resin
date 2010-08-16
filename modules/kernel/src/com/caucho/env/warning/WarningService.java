@@ -44,6 +44,8 @@ public class WarningService extends AbstractResinService
 {
   private static final L10N L = new L10N(WarningService.class);
   
+  public static final int START_PRIORITY = 1;
+  
   private static final Logger log
     = Logger.getLogger(WarningService.class.getName());
   
@@ -124,5 +126,11 @@ public class WarningService extends AbstractResinService
   public void addHandler(WarningHandler handler)
   {
     _handlerList.add(handler);
+  }
+  
+  @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY;
   }
 }

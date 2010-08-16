@@ -27,30 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.env.distcache;
 
-import com.caucho.cloud.topology.TriadOwner;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.util.HashKey;
+import com.caucho.distcache.CacheManager;
+import com.caucho.distcache.ObjectCache;
+import com.caucho.server.distcache.AbstractCacheManager;
 
 /**
- * Manages the distributed cache
+ * Builds a local cache.
  */
-public class FileCacheManager
-  extends AbstractDataCacheManager<FileCacheEntry> {
-  public FileCacheManager(ResinSystem resinSystem)
+public class CacheBuilder {
+  private final DistCache _cache;
+  
+  CacheBuilder(String name,
+               CacheManager cacheManager,
+               AbstractCacheManager<?> backingManager)
   {
-    super(resinSystem);
+    _cache = new DistCache(name, cacheManager, backingManager);
   }
-
-  /**
-   * Returns the key entry.
-   */
-  @Override
-  public FileCacheEntry createCacheEntry(Object key, HashKey hashKey)
+  
+  public ObjectCache createObjectCache()
   {
-    TriadOwner owner = TriadOwner.A_B;
+    _cache.init();
     
-    return new FileCacheEntry(key, hashKey, owner, this);
+    return _cache;
   }
 }

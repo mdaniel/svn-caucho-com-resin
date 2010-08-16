@@ -27,30 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.env.distcache;
 
-import com.caucho.cloud.topology.TriadOwner;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.util.HashKey;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.CacheManager;
+import com.caucho.server.distcache.AbstractCacheManager;
 
 /**
- * Manages the distributed cache
+ * Cache which stores consistent copies on all clusters.
+ *
+ * Using the cache is like using java.util.Map.  To add a new entry,
+ * call <code>cache.put(key, value)</code>.  To get the entry, call
+ * <code>cache.get(key)</code>.
+ *
+ * The cache configuration affects the lifetime, local caching timeouts
+ * and consistency.
  */
-public class FileCacheManager
-  extends AbstractDataCacheManager<FileCacheEntry> {
-  public FileCacheManager(ResinSystem resinSystem)
-  {
-    super(resinSystem);
-  }
 
-  /**
-   * Returns the key entry.
-   */
-  @Override
-  public FileCacheEntry createCacheEntry(Object key, HashKey hashKey)
+class DistCache extends AbstractCache
+{
+  DistCache(String name,
+            CacheManager cacheManager,
+            AbstractCacheManager<?> manager)
   {
-    TriadOwner owner = TriadOwner.A_B;
+    if (name == null)
+      throw new NullPointerException();
     
-    return new FileCacheEntry(key, hashKey, owner, this);
+    if (cacheManager == null)
+      throw new NullPointerException();
+    
+    if (manager == null)
+      throw new NullPointerException();
+    
+    setName(name);
+    setCacheManager(cacheManager);
+    setManager(manager);
   }
 }

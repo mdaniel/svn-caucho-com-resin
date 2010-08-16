@@ -153,7 +153,6 @@ public class Server extends ProtocolDispatchServer
   private BamService _bamService;
   private PersistentStoreConfig _persistentStoreConfig;
 
-  private DistributedCacheManager _distributedCacheManager;
   private AbstractLockManager _distributedLockManager;
   private AbstractVoteManager _distributedVoteManager;
 
@@ -293,8 +292,6 @@ public class Server extends ProtocolDispatchServer
     Config.setProperty("server", new ServerVar(_selfServer), getClassLoader());
     Config.setProperty("cluster", new ClusterVar(), getClassLoader());
 
-    _distributedCacheManager = createDistributedCacheManager();
-    
     _resinSystem.addService(new DeployNetworkService());
     
     // _selfServer.getServerProgram().configure(this);
@@ -429,22 +426,6 @@ public class Server extends ProtocolDispatchServer
   public CloudPod getPod()
   {
     return _selfServer.getCloudServer().getPod();
-  }
-
-  /**
-   * Returns the distributed cache manager
-   */
-  public DistributedCacheManager getDistributedCacheManager()
-  {
-    return _distributedCacheManager;
-  }
-
-  /**
-   * Returns the distributed cache manager
-   */
-  protected DistributedCacheManager createDistributedCacheManager()
-  {
-    return new FileCacheManager(this);
   }
 
   /**
@@ -2056,9 +2037,6 @@ public class Server extends ProtocolDispatchServer
       log.fine(this + " destroyed");
 
       // getClassLoader().destroy();
-
-      if (_distributedCacheManager != null)
-        _distributedCacheManager.close();
 
       _hostContainer = null;
       _cache = null;

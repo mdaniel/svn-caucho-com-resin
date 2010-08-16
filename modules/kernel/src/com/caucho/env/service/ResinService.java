@@ -34,8 +34,17 @@ package com.caucho.env.service;
  */
 public interface ResinService
 {
-  public static final int START_PRIORITY_CLASSLOADER = 9000;
-  public static final int START_PRIORITY_DEFAULT = 10000;
+  // the start priority of an environment service with no network dependencies
+  public static final int START_PRIORITY_ENV_SERVICE = 30;
+  
+  // the start priority of the cluster network service
+  public static final int START_PRIORITY_NETWORK_CLUSTER = 40;
+  
+  // the lowest priority of a cluster service
+  public static final int START_PRIORITY_CLUSTER_SERVICE = 50;
+  
+  public static final int START_PRIORITY_CLASSLOADER = 70;
+  public static final int START_PRIORITY_DEFAULT = 80;
 
   /**
    * Returns the start priority of the service, used to determine which

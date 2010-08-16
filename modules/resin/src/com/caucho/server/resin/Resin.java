@@ -64,6 +64,8 @@ import com.caucho.config.inject.WebBeansAddLoaderListener;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
+import com.caucho.env.distcache.DistCacheService;
+import com.caucho.env.distcache.LocalCacheService;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.LocalRepositoryService;
@@ -476,10 +478,21 @@ public class Resin
   {
     ShutdownService shutdown = new ShutdownService(_resinSystem, _isEmbedded);
     _resinSystem.addService(shutdown);
+    
+    LocalCacheService localCache = new LocalCacheService(_resinSystem);
+    _resinSystem.addService(localCache);
   
     TopologyService topology = new TopologyService(_resinSystem.getId());
     _resinSystem.addService(topology);
     topology.getSystem();
+    
+    DistCacheService distCache = createDistCacheService(localCache);
+    _resinSystem.addService(DistCacheService.class, distCache);
+  }
+  
+  protected DistCacheService createDistCacheService(LocalCacheService localCache)
+  {
+    return new DistCacheService(localCache.getBackingManager());
   }
   
   private void setArgs(ResinArgs args)

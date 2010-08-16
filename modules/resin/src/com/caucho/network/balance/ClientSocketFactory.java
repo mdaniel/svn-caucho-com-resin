@@ -53,7 +53,7 @@ import com.caucho.vfs.Vfs;
 /**
  * A pool of connections to a server.
  */
-public class ClientSocketFactory
+public class ClientSocketFactory implements ClientSocketFactoryApi
 {
   private static final Logger log
     = Logger.getLogger(ClientSocketFactory.class.getName());

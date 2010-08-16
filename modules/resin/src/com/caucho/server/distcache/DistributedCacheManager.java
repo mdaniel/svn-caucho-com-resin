@@ -34,11 +34,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 
-import com.caucho.cloud.topology.CloudCluster;
-import com.caucho.cloud.topology.CloudPod;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.server.cluster.Server;
 import com.caucho.util.HashKey;
 
 /**
@@ -46,37 +43,6 @@ import com.caucho.util.HashKey;
  */
 abstract public class DistributedCacheManager
 {
-  private final Server _server;
-
-  protected DistributedCacheManager(Server server)
-  {
-    _server = server;
-  }
-
-  /**
-   * Returns the owning server
-   */
-  protected Server getServer()
-  {
-    return _server;
-  }
-
-  /**
-   * Returns the owning cluster.
-   */
-  protected CloudCluster getCluster()
-  {
-    return _server.getCluster();
-  }
-
-  /**
-   * Returns the owning pod.
-   */
-  protected CloudPod getPod()
-  {
-    return _server.getPod();
-  }
-
   /**
    * Starts the service
    */
@@ -170,7 +136,7 @@ abstract public class DistributedCacheManager
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _server.getServerId() + "]";
+    return getClass().getSimpleName() + "[]";
   }
 
   static class NullDigestOutputStream extends OutputStream {

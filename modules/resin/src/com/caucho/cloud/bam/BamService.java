@@ -43,7 +43,7 @@ import com.caucho.util.L10N;
  */
 public class BamService extends AbstractResinService
 {
-  public static final int START_PRIORITY = 50;
+  public static final int START_PRIORITY = START_PRIORITY_NETWORK_CLUSTER;
   
   private static final L10N L = new L10N(BamService.class);
   

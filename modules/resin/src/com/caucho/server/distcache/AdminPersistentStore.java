@@ -95,7 +95,7 @@ public class AdminPersistentStore extends AbstractManagedObject
   @Override
   public long getDataCount()
   {
-    return _manager.getDataStore().getCount();
+    return _manager.getCacheBacking().getDataStore().getCount();
   }
 
   @Override

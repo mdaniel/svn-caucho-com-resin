@@ -90,7 +90,7 @@ public class DataStore implements AlarmListener {
     _dataSource = mnodeStore.getDataSource();
     _mnodeTableName = mnodeStore.getTableName();
 
-    _tableName = serverNameToTableName(serverName);
+    _tableName = "data";
 
     if (_tableName == null)
       throw new NullPointerException();
@@ -542,7 +542,7 @@ public class DataStore implements AlarmListener {
 
       PreparedStatement pstmt = conn.prepareValidate();
 
-      int count = pstmt.executeUpdate();
+      pstmt.executeUpdate();
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -619,36 +619,6 @@ public class DataStore implements AlarmListener {
     }
 
     return cConn;
-  }
-
-  private String serverNameToTableName(String serverName)
-  {
-    if (serverName == null || "".equals(serverName))
-      return "resin_data_default";
-
-    StringBuilder cb = new StringBuilder();
-    cb.append("resin_data_");
-
-    for (int i = 0; i < serverName.length(); i++) {
-      char ch = serverName.charAt(i);
-
-      if ('a' <= ch && ch <= 'z') {
-        cb.append(ch);
-      }
-      else if ('A' <= ch && ch <= 'Z') {
-        cb.append(ch);
-      }
-      else if ('0' <= ch && ch <= '9') {
-        cb.append(ch);
-      }
-      else if (ch == '_') {
-        cb.append(ch);
-      }
-      else
-        cb.append('_');
-    }
-
-    return cb.toString();
   }
 
   @Override
