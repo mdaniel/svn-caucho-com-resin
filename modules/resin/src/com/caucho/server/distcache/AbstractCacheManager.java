@@ -32,7 +32,6 @@ package com.caucho.server.distcache;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +42,7 @@ import javax.cache.CacheLoader;
 
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.env.distcache.AbstractCacheClusterBacking;
 import com.caucho.env.distcache.CacheClusterBacking;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
@@ -77,6 +77,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   {
     // new AdminPersistentStore(this);
     _dataBacking = new DataCacheBacking();
+    _clusterBacking = new AbstractCacheClusterBacking();
   }
   
   protected CacheDataBacking getDataBacking()
