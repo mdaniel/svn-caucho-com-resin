@@ -535,10 +535,12 @@
       <fileset dir="${resin.modules}/jta/classes">
         <exclude name="**/.*"/>
       </fileset>
-      
+
+      <!--
       <fileset dir="${resin.modules}/jws/classes">
         <exclude name="**/.*"/>
       </fileset>
+      -->
       
       <fileset dir="${resin.modules}/servlet16/classes">
         <exclude name="**/.*"/>
