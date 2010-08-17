@@ -118,23 +118,6 @@ public class EntityManagerJtaProxy
   }
 
   @Override
-  public Set<String> getSupportedProperties()
-  {
-    EntityManager em = getCurrent();
-    
-    if (em != null)
-      return em.getSupportedProperties();
-    
-    em = createEntityManager();
-    
-    try {
-      return em.getSupportedProperties();
-    } finally {
-      freeEntityManager(em);
-    }
-  }
-
-  @Override
   public void setProperty(String propertyName, Object value)
   {
     EntityManager em = getCurrent();
@@ -776,19 +759,19 @@ public class EntityManagerJtaProxy
   }
 
   @Override
-  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery,
+  public <T> TypedQuery<T> createQuery(String query,
                                        Class<T> resultClass)
   {
     EntityManager em = getCurrent();
-    
+
     if (em != null) {
-      return em.createQuery(criteriaQuery, resultClass);
+      return em.createQuery(query, resultClass);
     }
-    
+
     em = createEntityManager();
-    
+
     try {
-      return em.createQuery(criteriaQuery, resultClass);
+      return em.createQuery(query, resultClass);
     } finally {
       freeEntityManager(em);
     }

@@ -1185,12 +1185,6 @@ public class AmberConnection
    *
    * @param name the class name.
    * @param key the key.
-   * @param notExpiringLoadMask the load mask bit that will not be reset
-   *        when the entity is expiring and reloaded to a new transaction.
-   *        Normally, the bit is only set in bidirectional one-to-one
-   *        relationships where we already know the other side has already
-   *        been loaded in the second or new transactions.
-   * @param notExpiringGroup the corresponding load group.
    */
   public Entity loadFromHome(String name,
                              Object key)
@@ -2221,7 +2215,7 @@ public class AmberConnection
   /**
    * Deletes the object.
    *
-   * @param obj the object to delete
+   * @param entity the object to delete
    */
   public void delete(Entity entity)
     throws SQLException
@@ -2265,7 +2259,7 @@ public class AmberConnection
   /**
    * Creates a query object from a query string.
    *
-   * @param query a Hibernate query
+   * @param queryString a Hibernate query
    */
   public AmberQuery prepareQuery(String queryString)
     throws AmberException
@@ -2276,7 +2270,7 @@ public class AmberConnection
   /**
    * Creates a query object from a query string.
    *
-   * @param query a Hibernate query
+   * @param queryString a Hibernate query
    */
   public AmberQuery prepareLazyQuery(String queryString)
     throws AmberException
@@ -2287,7 +2281,7 @@ public class AmberConnection
   /**
    * Creates a query object from a query string.
    *
-   * @param query a Hibernate query
+   * @param queryString a Hibernate query
    */
   public AmberQuery prepareUpdate(String queryString)
     throws AmberException
@@ -2298,7 +2292,7 @@ public class AmberConnection
   /**
    * Creates a query object from a query string.
    *
-   * @param query a Hibernate query
+   * @param queryString a Hibernate query
    */
   private AmberQuery prepareQuery(String queryString, boolean isLazy)
     throws AmberException
@@ -2315,7 +2309,7 @@ public class AmberConnection
   /**
    * Creates a query object from a query string.
    *
-   * @param query a Hibernate query
+   * @param sql a Hibernate query
    */
   public AbstractQuery parseQuery(String sql, boolean isLazy)
     throws AmberException
@@ -2345,7 +2339,7 @@ public class AmberConnection
   /**
    * Select a list of objects with a Hibernate query.
    *
-   * @param query the hibernate query
+   * @param hsql the hibernate query
    *
    * @return the query results.
    */
@@ -2409,7 +2403,7 @@ public class AmberConnection
   /**
    * Updates the database with a query
    *
-   * @param query the hibernate query
+   * @param hsql the hibernate query
    *
    * @return the query results.
    */
@@ -2424,7 +2418,7 @@ public class AmberConnection
   /**
    * Select a list of objects with a Hibernate query.
    *
-   * @param query the hibernate query
+   * @param hsql the hibernate query
    *
    * @return the query results.
    */
@@ -3416,11 +3410,8 @@ public class AmberConnection
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see javax.persistence.EntityManager#createQuery(javax.persistence.criteria.CriteriaQuery, java.lang.Class)
-   */
   @Override
-  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery,
+  public <T> TypedQuery<T> createQuery(String qlString,
                                        Class<T> resultClass)
   {
     // TODO Auto-generated method stub
@@ -3515,16 +3506,6 @@ public class AmberConnection
    */
   @Override
   public Map<String, Object> getProperties()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.persistence.EntityManager#getSupportedProperties()
-   */
-  @Override
-  public Set<String> getSupportedProperties()
   {
     // TODO Auto-generated method stub
     return null;

@@ -321,7 +321,7 @@ public class EntityManagerProxy
    * @see javax.persistence.EntityManager#createQuery(javax.persistence.criteria.CriteriaQuery, java.lang.Class)
    */
   @Override
-  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery,
+  public <T> TypedQuery<T> createQuery(String criteriaQuery,
                                        Class<T> resultClass)
   {
     // TODO Auto-generated method stub
@@ -416,16 +416,6 @@ public class EntityManagerProxy
    */
   @Override
   public Map<String, Object> getProperties()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.persistence.EntityManager#getSupportedProperties()
-   */
-  @Override
-  public Set<String> getSupportedProperties()
   {
     // TODO Auto-generated method stub
     return null;

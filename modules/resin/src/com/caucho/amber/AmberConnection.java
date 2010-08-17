@@ -97,7 +97,7 @@ public interface AmberConnection {
    * The query will load the default group values for any selected
    * entitites.
    *
-   * @param query a query
+   * @param queryString a query
    */
   public AmberQuery prepareQuery(String queryString)
     throws AmberException;

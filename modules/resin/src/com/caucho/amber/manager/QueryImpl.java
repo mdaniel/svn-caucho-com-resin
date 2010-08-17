@@ -1365,18 +1365,14 @@ public class QueryImpl implements Query {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see javax.persistence.Query#setParameter(javax.persistence.Parameter, java.util.Date, javax.persistence.TemporalType)
-   */
   @Override
-  public Query setParameter(Parameter<Calendar> param, Date date,
-                            TemporalType type)
+  public Query setParameter(Parameter<Date> param,
+                                      Date value,
+                                      TemporalType temporalType)
   {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  /* (non-Javadoc)
+  }/* (non-Javadoc)
    * @see javax.persistence.Query#unwrap(java.lang.Class)
    */
   @Override
