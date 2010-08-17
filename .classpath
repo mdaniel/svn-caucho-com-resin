@@ -8,7 +8,6 @@
 	<classpathentry kind="src" path="modules/jaxb/src"/>
 	<classpathentry kind="src" path="modules/jaxrpc/src"/>
 	<classpathentry kind="src" path="modules/jaxstream/src"/>
-	<classpathentry kind="src" path="modules/jaxws/src"/>
 	<classpathentry kind="src" path="modules/jca/src"/>
 	<classpathentry kind="src" path="modules/jcache/src"/>
 	<classpathentry kind="src" path="modules/jcr/src"/>
