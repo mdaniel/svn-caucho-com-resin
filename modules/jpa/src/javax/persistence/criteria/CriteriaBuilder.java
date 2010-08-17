@@ -102,18 +102,18 @@ public interface CriteriaBuilder {
   
   public Predicate and(Expression<Boolean> x,
                        Expression<Boolean> y);
-  
-  public Predicate and(Expression<Boolean>... restrictions);
+
+  public Predicate and(Predicate... restrictions);
   
   public Predicate or(Expression<Boolean> x,
                       Expression<Boolean> y);
-  
-  public Predicate or(Expression<Boolean>... restrictions);
+
+  public Predicate or(Predicate... restrictions);
   
   public Predicate not(Expression<Boolean> restriction);
   
-  public Predicate conjunection();
-  
+  public Predicate conjunction();
+
   public Predicate disjunction();
   
   public Predicate isTrue(Expression<Boolean> x);
@@ -228,16 +228,15 @@ public interface CriteriaBuilder {
   
   public <N extends Number> Expression<N> diff(N x,
                                                Expression<? extends N> y);
-  
-  public <N extends Number> Expression<N> quot(Expression<? extends N> x,
-                                               Expression<? extends N> y);
-  
-  public <N extends Number> Expression<N> quot(Expression<? extends N> x,
-                                               N y);
-  
-  public <N extends Number> Expression<N> quot(N x,
-                                               Expression<? extends N> y);
-  
+
+  public Expression<Number> quot(Expression<? extends Number> x,
+                                 Expression<? extends Number> y);
+
+  public Expression<Number> quot(Expression<? extends Number> x,
+                                 Number y);
+
+  public Expression<Number> quot(Number x, Expression<? extends Number> y);
+
   public Expression<Integer> mod(Expression<Integer> x,
                                  Expression<Integer> y);
   

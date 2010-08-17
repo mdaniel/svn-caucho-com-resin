@@ -97,9 +97,12 @@ public interface ManagedType<X> extends Type<X> {
   public SetAttribute<X,?> getDeclaredSet(String name);
   
   public ListAttribute<? super X,?> getList(String name);
-  
-  public ListAttribute<X,?> getDeclaredList();
-  
+
+  public <E> ListAttribute<? super X,E> getList(java.lang.String name,
+                                                 java.lang.Class<E> elementType);
+
+  public ListAttribute<X,?> getDeclaredList(String name);
+
   public MapAttribute<? super X,?,?> getMap(String name);
   
   public MapAttribute<X,?,?> getDeclaredMap(String name);

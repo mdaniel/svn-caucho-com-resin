@@ -105,9 +105,9 @@ public interface Query {
   /**
    * Sets a date parameter.
    */
-  public Query setParameter(Parameter<Calendar> param,
-                            java.util.Date date,
-                            TemporalType type); 
+  public Query setParameter(Parameter<java.util.Date> param,
+                            java.util.Date value,
+                            TemporalType temporalType);
 
   /**
    * Binds a position parameter.

@@ -36,7 +36,7 @@ import javax.persistence.metamodel.Attribute;
  *
  * @since JPA 2.0
  */
-public interface Fetch<Z,X> {
+public interface Fetch<Z, X> extends FetchParent<Z, X> {
   public Attribute<? super Z,?> getAttribute();
   
   public FetchParent<?,Z> getParent();

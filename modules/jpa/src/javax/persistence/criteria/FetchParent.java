@@ -51,8 +51,8 @@ public interface FetchParent<Z,X> {
   
   public <Y> Fetch<X,Y> fetch(PluralAttribute<? super X,?,Y> attribute,
                               JoinType joinType);
-  
-  public <Y> Fetch<X,Y> fetch(String attributeName);
-  
-  public <Y> Fetch<X,Y> fetch(String attributeName, JoinType joinType);
+
+  public <X,Y> Fetch<X,Y> fetch(String attributeName);
+
+  public <X,Y> Fetch<X,Y> fetch(String attributeName, JoinType joinType);
 }

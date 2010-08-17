@@ -74,25 +74,27 @@ public interface From<Z,X> extends Path<X>, FetchParent<Z,X> {
   public <K,V> MapJoin<X,K,V> join(MapAttribute<? super X,K,V> map,
                                  JoinType joinType);
   
-  public <Y> Join<X,Y> join(String attributeName);
+  public <X,Y> Join<X,Y> join(String attributeName);
+
+  public <X,Y> CollectionJoin<X,Y> joinCollection(String attributeName);
   
-  public <Y> CollectionJoin<X,Y> joinCollection(String attributeName);
-  
-  public <Y> SetJoin<X,Y> joinSet(String attributeName);
-  
-  public <Y> ListJoin<X,Y> joinList(String attributeName);
-  
-  public <K,V> MapJoin<X,K,V> joinMap(String attributeName);
-  
-  public <Y> Join<X,Y> join(String attributeName, JoinType joinType);
-  
-  public <Y> CollectionJoin<X,Y> joinCollection(String attributeName,
-                                                  JoinType joinType);
-  
-  public <Y> SetJoin<X,Y> joinSet(String attributeName,
+  public <X,Y> SetJoin<X,Y> joinSet(String attributeName);
+
+  public <X,Y> SetJoin<X,Y> joinSet(String attributeName,
                                     JoinType joinType);
+
+  public <X,Y> ListJoin<X,Y> joinList(String attributeName);
+
+  public <X,Y> ListJoin<X,Y> joinList(String attributeName, JoinType joinType);
+
+  public <X,K,V> MapJoin<X,K,V> joinMap(String attributeName);
+
+  public <X,K,V> MapJoin<X,K,V> joinMap(String attributeName,
+                                      JoinType joinType);
+
+  public <X,Y> Join<X,Y> join(String attributeName, JoinType joinType);
   
-  public <Y> ListJoin<X,Y> joinList(String attributeName, JoinType joinType);
+  public <X,Y> CollectionJoin<X,Y> joinCollection(String attributeName,
+                                                JoinType joinType);
   
-  public <K,V> MapJoin<X,K,V> joinMap(String attributeName, JoinType joinType);  
 }

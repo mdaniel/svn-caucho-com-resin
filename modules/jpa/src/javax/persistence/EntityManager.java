@@ -190,13 +190,6 @@ public interface EntityManager {
   public Map<String,Object> getProperties();
 
   /**
-   * Returns the supported properties for the entity manager
-   *
-   * @since JPA 2.0
-   */
-  public Set<String> getSupportedProperties();
-
-  /**
    * Creates a new query.
    */
   public Query createQuery(String ql);
@@ -213,8 +206,8 @@ public interface EntityManager {
    * 
    * @since JPA 2.0
    */
-  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery,
-                                       Class<T> resultClass);
+  public <T> TypedQuery<T> createQuery(java.lang.String qlString,
+                                       java.lang.Class<T> resultClass);
 
   /**
    * Creates a named query.

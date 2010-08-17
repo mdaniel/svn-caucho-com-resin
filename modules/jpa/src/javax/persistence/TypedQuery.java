@@ -37,9 +37,10 @@ import java.util.List;
  * Represents a typed SQL query.
  */
 public interface TypedQuery<X> extends Query {
-  public List<X> getResultQuery();
   
   public X getSingleResult();
+
+  public java.util.List<X> getResultList();
   
   public TypedQuery<X> setMaxResults(int maxResult);
   
