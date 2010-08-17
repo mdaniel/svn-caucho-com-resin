@@ -27,35 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.remote.hessian;
+package com.caucho.env.distcache;
 
-import javax.servlet.Servlet;
-
-import com.caucho.hessian.server.HessianServlet;
-import com.caucho.remote.ServiceException;
-import com.caucho.remote.server.AbstractProtocolServletFactory;
+import com.caucho.server.distcache.CacheConfig;
+import com.caucho.server.distcache.MnodeValue;
+import com.caucho.util.HashKey;
 
 /**
- * Hessian factory for creating @HessianService servlets. 
+ * The local cache repository.
  */
-public class HessianProtocolServletFactory
-  extends AbstractProtocolServletFactory
-{
-  /**
-   * Creates a new servlet skeleton based on an API and an object
-   *
-   * @param serviceClass the remoteApi exposed to the server
-   * @param service the managed service object
-   */
+public class AbstractCacheClusterBacking implements CacheClusterBacking {
   @Override
-  public Servlet createServlet(Class<?> serviceClass, Object service)
-    throws ServiceException
+  public <E> MnodeValue loadClusterValue(E entry, CacheConfig config)
   {
-    HessianServlet servlet = new HessianServlet();
+    return null;
+  }
+  
+  @Override
+  public void putCluster(HashKey key, HashKey value, HashKey cacheKey,
+                         MnodeValue mnodeValue)
+  {
+  }
 
-    servlet.setHome(service);
-    servlet.setHomeAPI(getRemoteAPI(serviceClass));
-    
-    return servlet;
+  @Override
+  public void removeCluster(HashKey key,
+                            HashKey cacheKey,
+                            MnodeValue mnodeValue)
+  {
   }
 }

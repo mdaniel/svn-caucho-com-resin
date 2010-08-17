@@ -29,6 +29,7 @@
 
 package com.caucho.env.repository;
 
+import com.caucho.env.distcache.DistCacheService;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.util.L10N;
@@ -39,6 +40,8 @@ import com.caucho.util.L10N;
 public class RepositoryService extends AbstractResinService
 {
   private static final L10N L = new L10N(RepositoryService.class);
+  
+  public static final int START_PRIORITY = DistCacheService.START_PRIORITY + 1;
   
   private AbstractRepository _repository;
 
@@ -65,6 +68,12 @@ public class RepositoryService extends AbstractResinService
   public Repository getRepository()
   {
     return _repository;
+  }
+  
+  @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY;
   }
   
   @Override

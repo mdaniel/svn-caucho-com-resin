@@ -29,18 +29,16 @@
 
 package com.caucho.server.distcache;
 
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
-import com.caucho.naming.Jndi;
-import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 
 /**
  * Configuration distributed stores.

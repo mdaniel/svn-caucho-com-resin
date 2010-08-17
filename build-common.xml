@@ -474,12 +474,6 @@
       <fileset dir="${resin.modules}/servlet16/classes">
         <exclude name="**/.*"/>
       </fileset>
-
-      <!--
-      <fileset dir="${resin.modules}/jsf/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      -->
       
       <fileset dir="${resin.modules}/jstl/classes">
         <exclude name="**/.*"/>
@@ -488,10 +482,12 @@
       <fileset dir="${resin.modules}/jta/classes">
         <exclude name="**/.*"/>
       </fileset>
-      
+
+      <!--
       <fileset dir="${resin.modules}/jws/classes">
         <exclude name="**/.*"/>
       </fileset>
+      -->
       
       <fileset dir="${resin.modules}/webbeans/classes">
         <exclude name="**/.*"/>
@@ -535,12 +531,11 @@
   </target>
 
   <target name="resin.artifacts.dist" depends="init">
-    <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
-    -->
+
     <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="mule"/>

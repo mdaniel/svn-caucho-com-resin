@@ -38,6 +38,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.security.AdminAuthenticator;
@@ -306,6 +307,10 @@ public class Management
 
   private Object createService(String className)
   {
+    if (! _resin.isProfessional()) {
+      return new IgnoreConfig();
+    }
+    
     int p = className.lastIndexOf('.');
     String shortName = className.substring(p + 1);
     
@@ -375,6 +380,13 @@ public class Management
                               _password.toCharArray(),
                               _isDisabled, isAnonymous,
                               new String[] { "resin-admin" });
+    }
+  }
+  
+  static class IgnoreConfig {
+    public void addBuilderProgram(ConfigProgram program)
+    {
+      
     }
   }
 }

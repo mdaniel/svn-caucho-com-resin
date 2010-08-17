@@ -44,6 +44,6 @@ public interface WebServiceServletFactory
    * @param webServiceClass the remoteApi exposed to the server
    * @param service the managed service object
    */
-  public Servlet createServlet(Class webServiceClass, Object service)
+  public Servlet createServlet(Class<?> webServiceClass, Object service)
     throws ServiceException;
 }

@@ -122,12 +122,12 @@
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="ant"/>
     </antcall>
-    <!--
+
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
     </antcall>
     
-    <antcall target="artifact" inheritRefs="true">
+    <!--    <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="maven"/>
     </antcall>
     
@@ -239,13 +239,14 @@
     </antcall>
   </target>
 
+  <!--
   <target name="jws" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jws"/>
       <param name="module.jar" value="jws-15.jar"/>
-      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
+  -->
 
   <target name="jca" depends="init">
     <antcall target="module" inheritRefs="true">
@@ -496,7 +497,7 @@
     </copy>
   </target>
 
-  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, jcache, jstl, jta, jws, inject">
+  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, jcache, jstl, jta, inject">
     <!--
        - javaee-16.jar
       -->

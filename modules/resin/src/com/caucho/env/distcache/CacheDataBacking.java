@@ -32,9 +32,9 @@ package com.caucho.env.distcache;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheData;
 import com.caucho.server.distcache.DataStore;
+import com.caucho.server.distcache.MnodeStore;
 import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.StreamSource;
@@ -43,11 +43,13 @@ import com.caucho.vfs.WriteStream;
 /**
  * The local cache repository.
  */
-public interface CacheBacking {
+public interface CacheDataBacking {
   /**
    * Returns the underlying DataStore, used for serialization.
    */
   DataStore getDataStore();
+  
+  MnodeStore getMnodeStore();
   
   public MnodeValue loadLocalEntryValue(HashKey key);
   
@@ -55,8 +57,6 @@ public interface CacheBacking {
                                      MnodeValue mnodeValue,
                                      MnodeValue oldEntryValue,
                                      long timeout);
-  
-  public <E> MnodeValue loadClusterValue(E entry, CacheConfig config);
   
   public MnodeValue saveLocalUpdateTime(HashKey keyHash,
                                         MnodeValue mnodeValue,
@@ -101,12 +101,4 @@ public interface CacheBacking {
    * Returns a set of entries since an access time.
    */
   public ArrayList<CacheData> getGlobalUpdates(long accessTime, int offset);
-
-  public void putCluster(HashKey key, HashKey value, HashKey cacheKey,
-                         MnodeValue mnodeValue);
-
-  public void removeCluster(HashKey key,
-                            HashKey cacheKey,
-                            MnodeValue mnodeValue);
-
 }

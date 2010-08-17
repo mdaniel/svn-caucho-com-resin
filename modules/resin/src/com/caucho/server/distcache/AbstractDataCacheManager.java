@@ -29,34 +29,8 @@
 
 package com.caucho.server.distcache;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
-
-import javax.cache.CacheLoader;
-
-import com.caucho.config.ConfigException;
-import com.caucho.distcache.CacheSerializer;
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.env.distcache.CacheBacking;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.env.service.RootDirectoryService;
-import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.Sha256OutputStream;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.TempOutputStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
 /**
  * Manages the distributed cache
@@ -64,23 +38,9 @@ import com.caucho.vfs.WriteStream;
 abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   extends AbstractCacheManager<E>
 {
-  private MnodeStore _mnodeStore;
-  private DataStore _dataStore;
-  
-  private DataCacheBacking _dataCacheBacking;
-  
-  public AbstractDataCacheManager(ResinSystem resinSystem)
+  protected AbstractDataCacheManager(ResinSystem resinSystem)
   {
     super(resinSystem);
-    
-    _dataCacheBacking = new DataCacheBacking();
-    
-    setCacheBacking(_dataCacheBacking);
-  }
-
-  protected MnodeStore getMnodeStore()
-  {
-    return _mnodeStore;
   }
 
   abstract protected E createCacheEntry(Object key, HashKey hashKey);
@@ -94,34 +54,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   @Override
   public void start()
   {
-    try {
-      Path dataDirectory = RootDirectoryService.getCurrentDataDirectory();
-    
-      String serverId = ResinSystem.getCurrentId();
-    
-      if (serverId.isEmpty())
-        serverId = "default";
-
-      _mnodeStore = new MnodeStore(dataDirectory, serverId);
-      _dataStore = new DataStore(serverId, _mnodeStore);
-      
-      _dataCacheBacking.setDataStore(_dataStore);
-      _dataCacheBacking.setMnodeStore(_mnodeStore);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  
+    super.start();
+ 
     new AdminPersistentStore(this);
-  }
-
-  /**
-   * Closes the manager.
-   */
-  @Override
-  public void close()
-  {
-    super.close();
-    
-    _mnodeStore.close();
   }
 }

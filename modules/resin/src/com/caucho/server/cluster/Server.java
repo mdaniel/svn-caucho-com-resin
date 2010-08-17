@@ -48,9 +48,6 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.deploy.DeployNetworkService;
-import com.caucho.cloud.loadbalance.CustomLoadBalanceManager;
-import com.caucho.cloud.loadbalance.LoadBalanceManager;
-import com.caucho.cloud.loadbalance.SingleLoadBalanceManager;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.cloud.network.NetworkListenService;
@@ -94,8 +91,6 @@ import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.dispatch.ProtocolDispatchServer;
-import com.caucho.server.distcache.DistributedCacheManager;
-import com.caucho.server.distcache.FileCacheManager;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.distlock.AbstractLockManager;
 import com.caucho.server.distlock.AbstractVoteManager;
@@ -293,7 +288,7 @@ public class Server extends ProtocolDispatchServer
     Config.setProperty("cluster", new ClusterVar(), getClassLoader());
 
     _resinSystem.addService(new DeployNetworkService());
-    
+
     // _selfServer.getServerProgram().configure(this);
   }
 
@@ -982,8 +977,6 @@ public class Server extends ProtocolDispatchServer
   public AbstractCache createProxyCache()
     throws ConfigException
   {
-    log.warning(L.l("<proxy-cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
-
     if (_cache == null)
       _cache = instantiateProxyCache();
 
@@ -1001,6 +994,8 @@ public class Server extends ProtocolDispatchServer
   
   protected AbstractCache instantiateProxyCache()
   {
+    log.warning(L.l("<proxy-cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
+
     return new AbstractCache();
   }
 
@@ -1506,7 +1501,9 @@ public class Server extends ProtocolDispatchServer
       threadPool.setIdleMin(_threadIdleMin);
 
     threadPool.setExecutorTaskMax(_threadExecutorTaskMax);
-
+    
+    if (_selfServer.getStage() != null)
+      setStage(_selfServer.getStage());
     /*
     if (_keepaliveSelectEnable) {
       try {

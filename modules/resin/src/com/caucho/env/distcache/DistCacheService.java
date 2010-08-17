@@ -38,7 +38,7 @@ import com.caucho.server.distcache.AbstractCacheManager;
  * The local cache repository.
  */
 public class DistCacheService extends AbstractResinService {
-  public static final int START_PRIORITY = LocalCacheService.START_PRIORITY + 1;
+  public static final int START_PRIORITY = START_PRIORITY_CACHE_SERVICE;
   
   private CacheManager _cacheManager;
   private AbstractCacheManager<?> _distCacheManager;

@@ -1978,6 +1978,19 @@ public final class InjectManager
   /**
    * Convenience for Resin.
    */
+  public <T> T findReference(Bean<T> bean)
+  {
+    Context context = getContext(bean.getScope());
+    
+    if (context != null)
+      return context.get(bean);
+    else
+      return null;
+  }
+
+  /**
+   * Convenience for Resin.
+   */
   public <T> T getReference(Bean<T> bean, CreationalContextImpl<?> parentEnv)
   {
     ReferenceFactory<T> factory = getReferenceFactory(bean);

@@ -53,9 +53,6 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
   static ObjectName SERVER_DELEGATE_NAME;
 
-  private EnvironmentLocal<MBeanContext> _currentContext
-    = new EnvironmentLocal<MBeanContext>();
-
   // default domain
   private String _defaultDomain;
 
@@ -156,7 +153,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     throws ReflectionException, MBeanException
   {
     try {
-      Class cl = getClassLoaderRepository().loadClass(className);
+      Class<?> cl = getClassLoaderRepository().loadClass(className);
 
       return cl.newInstance();
     } catch (ClassNotFoundException e) {
@@ -196,7 +193,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     try {
       ClassLoader loader = (ClassLoader) mbean.getObject();
 
-      Class cl = loader.loadClass(className);
+      Class<?> cl = loader.loadClass(className);
 
       return cl.newInstance();
     } catch (ClassNotFoundException e) {
@@ -223,9 +220,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     throws ReflectionException, MBeanException
   {
     try {
-      Class cl = getClassLoaderRepository().loadClass(className);
+      Class<?> cl = getClassLoaderRepository().loadClass(className);
 
-      Constructor constructor = getConstructor(cl, signature);
+      Constructor<?> constructor = getConstructor(cl, signature);
 
       return constructor.newInstance(params);
     } catch (ClassNotFoundException e) {
@@ -265,9 +262,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     try {
       ClassLoader loader = (ClassLoader) mbean.getObject();
 
-      Class cl = loader.loadClass(className);
+      Class<?> cl = loader.loadClass(className);
 
-      Constructor constructor = getConstructor(cl, signature);
+      Constructor<?> constructor = getConstructor(cl, signature);
 
       return constructor.newInstance(params);
     } catch (ClassNotFoundException e) {
@@ -284,9 +281,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   /**
    * Returns the class's constructor with the matching sig.
    */
-  private Constructor getConstructor(Class cl, String []sig)
+  private Constructor<?> getConstructor(Class<?> cl, String []sig)
   {
-    Constructor []constructors = cl.getConstructors();
+    Constructor<?> []constructors = cl.getConstructors();
 
     for (int i = 0; i < constructors.length; i++) {
       if (! Modifier.isPublic(constructors[i].getModifiers()))
@@ -302,7 +299,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   /**
    * Matches the parameters the sig.
    */
-  private boolean isMatch(Class []param, String []sig)
+  private boolean isMatch(Class<?> []param, String []sig)
   {
     if (param.length != sig.length)
       return false;
@@ -436,7 +433,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     else if (obj instanceof DynamicMBean)
       return (DynamicMBean) obj;
 
-    Class ifc = getMBeanInterface(obj.getClass());
+    Class<?> ifc = getMBeanInterface(obj.getClass());
 
     if (ifc == null)
       throw new NotCompliantMBeanException(L.l("{0} mbean has no MBean interface for class {1}", name, obj.getClass().getName()));
@@ -447,10 +444,10 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   /**
    * Returns the mbean interface.
    */
-  private Class getMBeanInterface(Class cl)
+  private Class<?> getMBeanInterface(Class<?> cl)
   {
     for (; cl != null; cl = cl.getSuperclass()) {
-      Class []interfaces = cl.getInterfaces();
+      Class<?> []interfaces = cl.getInterfaces();
 
       String mbeanName = cl.getName() + "MBean";
       String mxbeanName = cl.getName() + "MXBean";
@@ -462,7 +459,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       mxbeanName = mxbeanName.substring(p);
 
       for (int i = 0; i < interfaces.length; i++) {
-        Class ifc = interfaces[i];
+        Class<?> ifc = interfaces[i];
 
         if (ifc.getName().endsWith(mbeanName)
             || ifc.getName().endsWith(mxbeanName))
@@ -877,12 +874,12 @@ abstract public class AbstractMBeanServer implements MBeanServer {
       throw new InstanceNotFoundException(String.valueOf(name));
 
     Object obj = mbean.getObject();
-    Class cl = obj.getClass();
+    Class<?> cl = obj.getClass();
 
     return isInstanceOf(cl, className);
   }
 
-  private boolean isInstanceOf(Class cl, String className)
+  private boolean isInstanceOf(Class<?> cl, String className)
   {
     if (cl == null)
       return false;
@@ -893,7 +890,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     if (isInstanceOf(cl.getSuperclass(), className))
       return true;
 
-    Class []ifs = cl.getInterfaces();
+    Class<?> []ifs = cl.getInterfaces();
     for (int i = 0; i < ifs.length; i++) {
       if (isInstanceOf(ifs[i], className))
         return true;

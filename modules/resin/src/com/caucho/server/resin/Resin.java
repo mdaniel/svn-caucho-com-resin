@@ -65,7 +65,6 @@ import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.distcache.DistCacheService;
-import com.caucho.env.distcache.LocalCacheService;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.LocalRepositoryService;
@@ -89,6 +88,7 @@ import com.caucho.server.admin.Management;
 import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ServletService;
+import com.caucho.server.distcache.FileCacheManager;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.Alarm;
@@ -479,20 +479,17 @@ public class Resin
     ShutdownService shutdown = new ShutdownService(_resinSystem, _isEmbedded);
     _resinSystem.addService(shutdown);
     
-    LocalCacheService localCache = new LocalCacheService(_resinSystem);
-    _resinSystem.addService(localCache);
-  
     TopologyService topology = new TopologyService(_resinSystem.getId());
     _resinSystem.addService(topology);
     topology.getSystem();
     
-    DistCacheService distCache = createDistCacheService(localCache);
+    DistCacheService distCache = createDistCacheService();
     _resinSystem.addService(DistCacheService.class, distCache);
   }
   
-  protected DistCacheService createDistCacheService(LocalCacheService localCache)
+  protected DistCacheService createDistCacheService()
   {
-    return new DistCacheService(localCache.getBackingManager());
+    return new DistCacheService(new FileCacheManager(getResinSystem()));
   }
   
   private void setArgs(ResinArgs args)

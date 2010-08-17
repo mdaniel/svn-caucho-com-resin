@@ -17,7 +17,6 @@
 	<classpathentry kind="src" path="modules/jsf/src"/>
 	<classpathentry kind="src" path="modules/jstl/src"/>
 	<classpathentry kind="src" path="modules/jta/src"/>
-	<classpathentry kind="src" path="modules/jws/src"/>
 	<classpathentry kind="src" path="modules/kernel/src"/>
 	<classpathentry kind="src" path="modules/quercus/src"/>
 	<classpathentry kind="src" path="modules/resin/src"/>

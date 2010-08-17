@@ -29,35 +29,8 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.distcache.CacheSerializer;
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.config.ConfigException;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.PersistentStoreMXBean;
-import com.caucho.server.cluster.ClusterPod;
-import com.caucho.server.cluster.Server;
-import com.caucho.util.Alarm;
-import com.caucho.util.HashKey;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.Sha256OutputStream;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.TempOutputStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
-
-import javax.cache.CacheLoader;
 
 /**
  * Manages the distributed cache
@@ -89,13 +62,13 @@ public class AdminPersistentStore extends AbstractManagedObject
   @Override
   public long getMnodeCount()
   {
-    return _manager.getMnodeStore().getCount();
+    return _manager.getDataBacking().getMnodeStore().getCount();
   }
 
   @Override
   public long getDataCount()
   {
-    return _manager.getCacheBacking().getDataStore().getCount();
+    return _manager.getDataBacking().getDataStore().getCount();
   }
 
   @Override

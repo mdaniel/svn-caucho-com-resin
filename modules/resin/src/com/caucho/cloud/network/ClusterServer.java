@@ -99,6 +99,7 @@ public final class ClusterServer {
   private ContainerProgram _serverProgram
     = new ContainerProgram();
 
+  private String _stage;
   private ArrayList<String> _pingUrls = new ArrayList<String>();
 
   private boolean _isSelf;
@@ -493,6 +494,16 @@ public final class ClusterServer {
     _portDefaults.addProgram(program);
   }
 
+  public void setStage(String stage)
+  {
+    _stage = stage;
+  }
+  
+  public String getStage()
+  {
+    return _stage;
+  }
+  
   /**
    * Adds a ping url for availability testing
    */

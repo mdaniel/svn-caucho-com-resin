@@ -29,17 +29,15 @@
 
 package com.caucho.remote.server;
 
-import com.caucho.config.*;
-import com.caucho.remote.*;
-
 import java.lang.annotation.Annotation;
 
-import javax.ejb.*;
-import javax.jws.*;
-import javax.servlet.*;
-
+import javax.ejb.Remote;
 import javax.enterprise.inject.spi.Annotated;
-import javax.servlet.*;
+import javax.jws.WebService;
+import javax.servlet.Servlet;
+
+import com.caucho.config.ConfigException;
+import com.caucho.remote.ServiceException;
 
 /**
  * Abstract factory for creating @WebService and @Remote servlets. 
@@ -67,20 +65,20 @@ abstract public class AbstractProtocolServletFactory
    * @param serviceApi the remoteApi exposed to the server
    * @param service the managed service object
    */
-  abstract public Servlet createServlet(Class serviceApi, Object service)
+  abstract public Servlet createServlet(Class<?> serviceApi, Object service)
     throws ServiceException;
 
   /**
    * Returns the remote interface to expose as a service.
    */
-  protected Class getRemoteAPI(Class serviceClass)
+  protected Class<?> getRemoteAPI(Class<?> serviceClass)
   {
     Remote remote = (Remote) serviceClass.getAnnotation(Remote.class);
 
     if (remote != null)
       return remote.value()[0];
 
-    for (Class ifc : serviceClass.getInterfaces()) {
+    for (Class<?> ifc : serviceClass.getInterfaces()) {
       if (ifc.isAnnotationPresent(Remote.class))
         return ifc;
     }
@@ -92,8 +90,8 @@ abstract public class AbstractProtocolServletFactory
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
       try {
-        Class api = Class.forName(webService.endpointInterface(),
-                                  false, loader);
+        Class<?> api = Class.forName(webService.endpointInterface(),
+                                     false, loader);
 
         return api;
       } catch (Exception e) {
@@ -101,9 +99,9 @@ abstract public class AbstractProtocolServletFactory
       }
     }
 
-    Class remoteAPI = null;
+    Class<?> remoteAPI = null;
     
-    for (Class ifc : serviceClass.getInterfaces()) {
+    for (Class<?> ifc : serviceClass.getInterfaces()) {
       if (ifc.getName().startsWith("java.io"))
         continue;
       else if (ifc.getName().startsWith("javax.ejb"))

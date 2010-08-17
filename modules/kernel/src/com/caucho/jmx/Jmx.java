@@ -645,9 +645,9 @@ public class Jmx {
 
       String className = obj.getClassName();
 
-      Class cl = Class.forName(className, false, loader);
+      Class<?> cl = Class.forName(className, false, loader);
 
-      Class ifc;
+      Class<?> ifc;
       
       if (cl.isInterface())
         ifc = cl;
@@ -722,17 +722,5 @@ public class Jmx {
 
   // static
   public Jmx() {}
-
-  private static void initStaticMBeans()
-  {
-    try {
-      Class cl = Class.forName("java.lang.Management.ManagementFactory");
-
-      Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
-
-      method.invoke(null, new Object[0]);
-    } catch (Throwable e) {
-    }
-  }
 }
 

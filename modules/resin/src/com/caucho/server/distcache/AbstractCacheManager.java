@@ -43,7 +43,8 @@ import javax.cache.CacheLoader;
 
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.env.distcache.CacheBacking;
+import com.caucho.env.distcache.CacheClusterBacking;
+import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
@@ -66,7 +67,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
   private static final L10N L = new L10N(AbstractCacheManager.class);
   
-  private CacheBacking _backing;
+  private DataCacheBacking _dataBacking;
+  private CacheClusterBacking _clusterBacking;
   
   private final LruCache<HashKey, E> _entryCache
     = new LruCache<HashKey, E>(64 * 1024);
@@ -74,16 +76,22 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   public AbstractCacheManager(ResinSystem resinSystem)
   {
     // new AdminPersistentStore(this);
+    _dataBacking = new DataCacheBacking();
   }
   
-  protected void setCacheBacking(CacheBacking backing)
+  protected CacheDataBacking getDataBacking()
   {
-    _backing = backing;
+    return _dataBacking;
   }
   
-  protected CacheBacking getCacheBacking()
+  protected void setClusterBacking(CacheClusterBacking clusterBacking)
   {
-    return _backing;
+    _clusterBacking = clusterBacking;
+  }
+  
+  protected CacheClusterBacking getClusterBacking()
+  {
+    return _clusterBacking;
   }
 
   /**
@@ -292,7 +300,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                 CacheConfig config,
                                 long now)
   {
-    MnodeValue mnodeValue = getCacheBacking().loadClusterValue(entry, config);
+    MnodeValue mnodeValue = getClusterBacking().loadClusterValue(entry, config);
 
     if (mnodeValue == null || mnodeValue.isEntryExpired(now)) {
       CacheLoader loader = config.getCacheLoader();
@@ -374,7 +382,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     if (mnodeValue == null)
       return oldValue;
 
-    getCacheBacking().putCluster(key, valueHash, cacheKey, mnodeValue);
+    getClusterBacking().putCluster(key, valueHash, cacheKey, mnodeValue);
 
     return oldValue;
   }
@@ -418,7 +426,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     if (mnodeValue == null)
       return null;
 
-    getCacheBacking().putCluster(key, valueHash, cacheHash, mnodeValue);
+    getClusterBacking().putCluster(key, valueHash, cacheHash, mnodeValue);
 
     return mnodeValue;
   }
@@ -488,7 +496,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     MnodeValue mnodeValue = cacheEntry.getMnodeValue();
 
     if (mnodeValue == null) {
-      MnodeValue newMnodeValue = getCacheBacking().loadLocalEntryValue(key);
+      MnodeValue newMnodeValue = getDataBacking().loadLocalEntryValue(key);
 
       cacheEntry.compareAndSet(null, newMnodeValue);
 
@@ -506,7 +514,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     HashKey key = cacheEntry.getKeyHash();
     MnodeValue mnodeValue = cacheEntry.getMnodeValue();
 
-    MnodeValue newMnodeValue = getCacheBacking().loadLocalEntryValue(key);
+    MnodeValue newMnodeValue = getDataBacking().loadLocalEntryValue(key);
 
     cacheEntry.compareAndSet(mnodeValue, newMnodeValue);
 
@@ -540,7 +548,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       return entry.getMnodeValue();
     }
 
-    return getCacheBacking().insertLocalValue(key, mnodeValue,
+    return getDataBacking().insertLocalValue(key, mnodeValue,
                                               oldEntryValue, timeout);
   }
   
@@ -613,7 +621,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       return entry.getMnodeValue();
     }
     
-    return getCacheBacking().saveLocalUpdateTime(entry.getKeyHash(),
+    return getDataBacking().saveLocalUpdateTime(entry.getKeyHash(),
                                                  mnodeValue,
                                                  oldEntryValue);
   }
@@ -654,7 +662,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     if (mnodeValue == null)
       return oldValueHash != null;
 
-    getCacheBacking().removeCluster(key, cacheKey, mnodeValue);
+    getClusterBacking().removeCluster(key, cacheKey, mnodeValue);
 
     return oldValueHash != null;
   }
@@ -688,7 +696,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     if (mnodeValue == null)
       return oldValueHash != null;
 
-    getCacheBacking().putCluster(key, null, cacheKey, mnodeValue);
+    getClusterBacking().putCluster(key, null, cacheKey, mnodeValue);
 
     return oldValueHash != null;
   }
@@ -759,7 +767,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       return null;
     }
     
-    return getCacheBacking().putLocalValue(mnodeValue, key, oldEntryValue, version,
+    return getDataBacking().putLocalValue(mnodeValue, key, oldEntryValue, version,
                                            valueHash, value, cacheHash,
                                            flags, expireTimeout, idleTimeout, 
                                            leaseTimeout,
@@ -793,7 +801,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       int length = os.getLength();
 
       StreamSource source = new StreamSource(os);
-      if (! getCacheBacking().saveData(valueHash, source, length)) {
+      if (! getDataBacking().saveData(valueHash, source, length)) {
         throw new IllegalStateException(L.l("Can't save the data '{0}'",
                                        valueHash));
       }
@@ -838,7 +846,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       int length = os.getLength();
       StreamSource source = new StreamSource(os);
 
-      if (! getCacheBacking().saveData(valueHash, source, length))
+      if (! getDataBacking().saveData(valueHash, source, length))
         throw new RuntimeException(L.l("Can't save the data '{0}'",
                                        valueHash));
 
@@ -867,10 +875,10 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
       WriteStream out = Vfs.openWrite(os);
 
-      if (! getCacheBacking().loadData(valueKey, out)) {
+      if (! getDataBacking().loadData(valueKey, out)) {
         requestClusterData(valueKey, flags);
 
-        if (! getCacheBacking().loadData(valueKey, out)) {
+        if (! getDataBacking().loadData(valueKey, out)) {
           out.close();
           System.out.println("MISSING_DATA: " + valueKey);
         
@@ -914,12 +922,12 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     WriteStream out = Vfs.openWrite(os);
 
     try {
-      if (getCacheBacking().loadData(valueKey, out))
+      if (getDataBacking().loadData(valueKey, out))
         return true;
 
       requestClusterData(valueKey, flags);
 
-      if (getCacheBacking().loadData(valueKey, out))
+      if (getDataBacking().loadData(valueKey, out))
         return true;
 
       log.warning(this + " unexpected load failure");
@@ -956,6 +964,20 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
    */
   public void clearEphemeralEntries()
   {
+  }
+  
+  @Override
+  public void start()
+  {
+    super.start();
+    
+    if (getDataBacking() == null)
+      throw new NullPointerException();
+    
+    if (getClusterBacking() == null)
+      throw new NullPointerException();
+    
+    _dataBacking.start();
   }
 
   /**

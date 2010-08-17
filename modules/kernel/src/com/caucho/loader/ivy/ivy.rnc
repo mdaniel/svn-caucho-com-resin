@@ -1,5 +1,4 @@
 start = ivy-module
-
 artifact = element artifact {
   attribute conf { string }?
   & attribute classifier { string }?
@@ -47,7 +46,8 @@ conflicts = element conflicts {
 }
 
 description = element description {
-  attribute homepage { string }?
+  attribute homepage { string }?,
+  text
 }
 
 manager = element manager {

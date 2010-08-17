@@ -29,45 +29,67 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.InjectionException;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
+import javax.naming.NamingException;
+import javax.servlet.FilterChain;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletSecurityElement;
+import javax.servlet.SingleThreadModel;
+import javax.servlet.UnavailableException;
+import javax.servlet.annotation.MultipartConfig;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.config.LineConfigException;
+import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CreationalContextImpl;
-import com.caucho.config.inject.OwnerCreationalContext;
-import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.InitParam;
 import com.caucho.config.types.CronType;
-import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.config.types.InitParam;
 import com.caucho.jmx.Jmx;
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
 import com.caucho.naming.Jndi;
-import com.caucho.remote.server.*;
+import com.caucho.remote.server.ProtocolServletFactory;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.server.http.StubServletRequest;
 import com.caucho.server.http.StubServletResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.comet.CometServlet;
-import com.caucho.util.*;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.InjectionException;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.faces.*;
-import javax.faces.application.*;
-import javax.naming.NamingException;
-import javax.servlet.*;
-import javax.servlet.annotation.MultipartConfig;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.security.Principal;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.CompileException;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for a servlet.
@@ -90,7 +112,7 @@ public class ServletConfigImpl
   private String _servletNameDefault;
 
   private String _servletClassName;
-  private Class _servletClass;
+  private Class<?> _servletClass;
   private Bean _bean;
   private String _jspFile;
   private String _displayName;
@@ -102,7 +124,7 @@ public class ServletConfigImpl
   private boolean _allowEL = true;
   private HashMap<String,String> _initParams = new HashMap<String,String>();
   // used for params defined prior to applying fragments.
-  private Set<String> _paramNames = new HashSet();
+  private Set<String> _paramNames = new HashSet<String>();
 
   private HashMap<String,String> _roleMap;
 
@@ -371,12 +393,12 @@ public class ServletConfigImpl
    * Set the bean
    */
   @Configurable
-  public void setBean(Bean bean)
+  public void setBean(Bean<?> bean)
   {
     _bean = bean;
   }
 
-  public Bean getBean()
+  public Bean<?> getBean()
   {
     return _bean;
   }
@@ -1238,7 +1260,15 @@ public class ServletConfigImpl
       // XXX: need to ask manager?
       CreationalContextImpl<?> env = new OwnerCreationalContext(_bean);
       
-      return _bean.create(env);
+      InjectManager cdiManager = InjectManager.create();
+      
+      // server/5130
+      Object value = cdiManager.findReference(_bean);
+      
+      if (value != null)
+        return value;
+      else
+        return _bean.create(env);
     }
 
     Class<?> servletClass = getServletClass();

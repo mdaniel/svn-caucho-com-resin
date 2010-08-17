@@ -50,6 +50,7 @@ public class MBeanServerBuilderImpl extends MBeanServerBuilder {
   /**
    * Creates the delegate.
    */
+  @Override
   public MBeanServerDelegate newMBeanServerDelegate()
   {
     return new MBeanServerDelegateImpl("Resin");
@@ -58,6 +59,7 @@ public class MBeanServerBuilderImpl extends MBeanServerBuilder {
   /**
    * Creates the mbean server
    */
+  @Override
   public MBeanServer newMBeanServer(String defaultDomain,
                                     MBeanServer outer,
                                     MBeanServerDelegate delegate)

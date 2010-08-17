@@ -33,15 +33,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import com.caucho.env.distcache.CacheBacking;
+import com.caucho.config.ConfigException;
+import com.caucho.env.distcache.CacheDataBacking;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.RootDirectoryService;
 import com.caucho.util.HashKey;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.WriteStream;
 
 /**
  * Manages the distributed cache
  */
-public class DataCacheBacking implements CacheBacking {
+public class DataCacheBacking implements CacheDataBacking {
   private static final Logger log
     = Logger.getLogger(DataCacheBacking.class.getName());
   
@@ -66,6 +70,12 @@ public class DataCacheBacking implements CacheBacking {
   public DataStore getDataStore()
   {
     return _dataStore;
+  }
+  
+  @Override
+  public MnodeStore getMnodeStore()
+  {
+    return _mnodeStore;
   }
 
   /**
@@ -244,24 +254,28 @@ public class DataCacheBacking implements CacheBacking {
   {
     return _mnodeStore.getGlobalUpdates(accessTime, offset);
   }
-
-  @Override
-  public <E> MnodeValue loadClusterValue(E entry, CacheConfig config)
+  
+  public void start()
   {
-    return null;
-    // return _cacheService.get(entry, config);
+    try {
+      Path dataDirectory = RootDirectoryService.getCurrentDataDirectory();
+
+      String serverId = ResinSystem.getCurrentId();
+
+
+      if (serverId.isEmpty())
+        serverId = "default";
+
+      _mnodeStore = new MnodeStore(dataDirectory, serverId);
+      _dataStore = new DataStore(serverId, _mnodeStore);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
-
-  @Override
-  public void putCluster(HashKey key, HashKey value, HashKey cacheKey,
-                         MnodeValue mnodeValue)
+  
+  public void close()
   {
-  }
-
-  @Override
-  public void removeCluster(HashKey key,
-                            HashKey cacheKey,
-                            MnodeValue mnodeValue)
-  {
+    _mnodeStore.close();
+    // _dataStore.close();
   }
 }

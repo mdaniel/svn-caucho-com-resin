@@ -57,6 +57,6 @@ public interface ProtocolServletFactory
    * @param serviceClass the remoteApi exposed to the server
    * @param service the managed service object
    */
-  public Servlet createServlet(Class serviceClass, Object service)
+  public Servlet createServlet(Class<?> serviceClass, Object service)
     throws ServiceException;
 }

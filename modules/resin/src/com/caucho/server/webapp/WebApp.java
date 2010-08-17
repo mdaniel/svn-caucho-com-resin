@@ -2679,6 +2679,9 @@ public class WebApp extends ServletContextImpl
         log.log(Level.FINEST, e.toString(), e);
       }
 
+      // server/5030
+      _cdiManager.addBean(_cdiManager.createManagedBean(WebServiceContextProxy.class));
+
       /*
       _beanManager.addObserver(new WebBeansObserver(),
                             BeanManager.class,

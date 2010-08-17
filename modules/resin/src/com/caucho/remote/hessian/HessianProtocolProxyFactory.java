@@ -29,12 +29,12 @@
 
 package com.caucho.remote.hessian;
 
-import com.caucho.config.*;
-import com.caucho.hessian.client.*;
-import com.caucho.remote.*;
-import com.caucho.remote.client.*;
-
 import java.lang.annotation.Annotation;
+
+import com.caucho.hessian.client.HessianProxyFactory;
+import com.caucho.remote.HessianClient;
+import com.caucho.remote.ServiceException;
+import com.caucho.remote.client.AbstractProtocolProxyFactory;
 
 /**
  * Hessian factory for creating remote-client proxies
@@ -82,10 +82,11 @@ public class HessianProtocolProxyFactory
    *
    * @param api the api exposed to the client
    */
-  public Object createProxy(Class api)
+  @Override
+  public <T> T createProxy(Class<T> api)
   {
     try {
-      return _factory.create(api, _url);
+      return (T) _factory.create(api, _url);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

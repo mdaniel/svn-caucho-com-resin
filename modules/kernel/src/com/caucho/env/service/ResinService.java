@@ -40,6 +40,9 @@ public interface ResinService
   // the start priority of the cluster network service
   public static final int START_PRIORITY_NETWORK_CLUSTER = 40;
   
+  // the lowest priority of a cache service
+  public static final int START_PRIORITY_CACHE_SERVICE = 45;
+  
   // the lowest priority of a cluster service
   public static final int START_PRIORITY_CLUSTER_SERVICE = 50;
   

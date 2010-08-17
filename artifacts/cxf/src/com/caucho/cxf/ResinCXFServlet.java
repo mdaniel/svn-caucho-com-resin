@@ -35,38 +35,47 @@ import java.util.ArrayList;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.Endpoint;
+import javax.xml.ws.WebServiceContext;
 
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
+import org.apache.cxf.jaxws.context.WebServiceContextImpl;
 import org.apache.cxf.service.model.EndpointInfo;
 import org.apache.cxf.transport.DestinationFactoryManager;
 import org.apache.cxf.transport.servlet.AbstractCXFServlet;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.apache.cxf.transport.servlet.ServletTransportFactory;
 
+import com.caucho.server.webapp.WebServiceContextProxy;
+
 class ResinCXFServlet extends CXFNonSpringServlet
 {
   private final Class _serviceClass;
   private final Object _instance;
+  private final WebServiceContext _context;
 
   public ResinCXFServlet(Class serviceClass, Object instance)
   {
     _serviceClass = serviceClass;
     _instance = instance;
+
+    _context = new WebServiceContextImpl();
   }
 
-  public void init(ServletConfig servletConfig) 
-    throws ServletException 
+  public void init(ServletConfig servletConfig)
+    throws ServletException
   {
     super.init(servletConfig);
 
     Bus bus = getBus();
     BusFactory.setDefaultBus(bus);
 
-    DestinationFactoryManager manager = 
+    DestinationFactoryManager manager =
       bus.getExtension(DestinationFactoryManager.class);
 
     bus.setExtension(new ReadOnlyDestinationFactoryManager(manager),
@@ -75,5 +84,17 @@ class ResinCXFServlet extends CXFNonSpringServlet
     String uri = "/";
 
     Endpoint.publish(uri, _instance);
+  }
+
+  public void service(ServletRequest req, ServletResponse res)
+    throws IOException, ServletException
+  {
+    WebServiceContext oldContext = WebServiceContextProxy.setContext(_context);
+
+    try {
+      super.service(req, res);
+    } finally {
+      WebServiceContextProxy.setContext(oldContext);
+    }
   }
 }
