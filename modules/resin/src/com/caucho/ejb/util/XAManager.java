@@ -279,7 +279,7 @@ public class XAManager {
       return false;
   }
 
-  public void applicationException(Exception e)
+  public void applicationException(Throwable e)
   {
     TransactionImpl xa = getTransaction();
     
