@@ -89,6 +89,8 @@ import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.server.distcache.FileCacheManager;
+import com.caucho.server.distlock.LockService;
+import com.caucho.server.distlock.SingleLockManager;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.Alarm;
@@ -415,7 +417,7 @@ public class Resin
       if (getRootDirectory() == null)
         throw new NullPointerException();
       
-      addServices();
+      addPreTopologyServices();
       
       _bootResinConfig = new BootResinConfig(this);
 
@@ -474,7 +476,7 @@ public class Resin
     }
   }
   
-  protected void addServices()
+  protected void addPreTopologyServices()
   {
     ShutdownService shutdown = new ShutdownService(_resinSystem, _isEmbedded);
     _resinSystem.addService(shutdown);
@@ -485,11 +487,19 @@ public class Resin
     
     DistCacheService distCache = createDistCacheService();
     _resinSystem.addService(DistCacheService.class, distCache);
+
+    LockService lockService = createLockService();
+    _resinSystem.addService(LockService.class, lockService);
   }
   
   protected DistCacheService createDistCacheService()
   {
     return new DistCacheService(new FileCacheManager(getResinSystem()));
+  }
+  
+  protected LockService createLockService()
+  {
+    return new LockService(new SingleLockManager());
   }
   
   private void setArgs(ResinArgs args)
@@ -1054,11 +1064,11 @@ public class Resin
   
     String serverName = _serverId;
   
-    if ("".equals(serverName))
+    if (serverName == null || serverName.isEmpty())
       serverName = "default";
   
     dataDirectory = dataDirectory.lookup(serverName);
-  
+    
     RootDirectoryService rootService
       = new RootDirectoryService(_rootDirectory, dataDirectory);
     

@@ -131,17 +131,6 @@ public class ClusterVoteManager
 
     if (_guid == null)
       _guid = contextId + ":" + _name;
-
-    /*
-    _config.setGuid(_guid);
-
-    if (! cacheNameSet.contains(_guid))
-      cacheNameSet.add(_guid);
-    else
-      throw new ConfigException(L.l(
-                                    "'{0}' is an invalid Cache name because it's already used by another cache.",
-                                    _name));
-    */
   }
 
   private void initServer()

@@ -987,5 +987,6 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   @Override
   public void close()
   {
+    getDataBacking().close();
   }
 }

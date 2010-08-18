@@ -101,4 +101,9 @@ public interface CacheDataBacking {
    * Returns a set of entries since an access time.
    */
   public ArrayList<CacheData> getGlobalUpdates(long accessTime, int offset);
+
+  /**
+   * Close the backing.
+   */
+  public void close();
 }

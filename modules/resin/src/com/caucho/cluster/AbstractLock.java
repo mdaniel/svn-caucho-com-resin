@@ -29,18 +29,19 @@
 
 package com.caucho.cluster;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.distlock.AbstractLockManager;
+import com.caucho.server.distlock.LockManager;
+import com.caucho.server.distlock.LockService;
 import com.caucho.util.L10N;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import javax.annotation.PostConstruct;
 
 /**
  * Implements the distributed lock
@@ -51,7 +52,7 @@ abstract public class AbstractLock implements Lock
 {
   private static final L10N L = new L10N(AbstractLock.class);
   
-  private AbstractLockManager _manager;
+  private LockManager _manager;
   private Lock _lock;
 
   private String _name;
@@ -173,16 +174,15 @@ abstract public class AbstractLock implements Lock
   private void initServer()
     throws ConfigException
   {
-    Server server = Server.getCurrent();
+    LockService lockService = LockService.getCurrent();
 
-    if (server == null) {
-      Thread.dumpStack();
+    if (lockService == null) {
       throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment\n  {1}",
                                     getClass().getSimpleName(),
                                     Thread.currentThread().getContextClassLoader()));
     }
 
-    _manager = server.getDistributedLockManager();
+    _manager = lockService.getManager();
 
     if (_manager == null)
       throw new IllegalStateException("distributed lock manager not available");

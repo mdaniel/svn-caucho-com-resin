@@ -29,11 +29,9 @@
 
 package com.caucho.server.distlock;
 
-import com.caucho.server.cluster.Server;
-
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -82,5 +80,11 @@ public class SingleLock implements Lock {
   public Condition newCondition()
   {
     return _lock.newCondition();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

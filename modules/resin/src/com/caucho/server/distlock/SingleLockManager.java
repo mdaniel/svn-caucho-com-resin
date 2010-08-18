@@ -29,8 +29,6 @@
 
 package com.caucho.server.distlock;
 
-import com.caucho.server.cluster.Server;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 
@@ -38,14 +36,11 @@ import java.util.concurrent.locks.Lock;
  * Manages the distributed lock
  */
 public class SingleLockManager extends AbstractLockManager {
-  private Server _server;
-
   private ConcurrentHashMap<String,SingleLock> _lockMap
     = new ConcurrentHashMap<String,SingleLock>();
 
-  public SingleLockManager(Server server)
+  public SingleLockManager()
   {
-    _server = server;
   }
 
   @Override

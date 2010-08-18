@@ -31,30 +31,52 @@ package com.caucho.server.distlock;
 
 import java.util.concurrent.locks.Lock;
 
-import com.caucho.inject.Module;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 
 /**
  * Manages the distributed lock
  */
-@Module
-abstract public class AbstractLockManager implements LockManager {
+public class LockService extends AbstractResinService {
+  private AbstractLockManager _lockManager;
+  
+  public LockService(AbstractLockManager lockManager)
+  {
+    _lockManager = lockManager;
+  }
+  
+  public static LockService getCurrent()
+  {
+    return ResinSystem.getCurrentService(LockService.class);
+  }
+  
+  public LockManager getManager()
+  {
+    return _lockManager;
+  }
+  
   /**
    * Creates a new lock with the given name;
    */
-  @Override
-  abstract public Lock getOrCreateLock(String name);
+  public Lock getOrCreateLock(String name)
+  {
+    return getManager().getOrCreateLock(name);
+  }
   
+  //
+  // lifecycle/
+  //
+  
+  @Override
   public void start()
   {
-  }
-  
-  public void close()
-  {
+    _lockManager.start();
   }
   
   @Override
-  public String toString()
+  public void stop()
   {
-    return getClass().getSimpleName() + "[]";
+    _lockManager.close();
   }
+  
 }

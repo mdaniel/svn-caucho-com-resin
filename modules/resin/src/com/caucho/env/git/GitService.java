@@ -101,7 +101,7 @@ public class GitService extends AbstractResinService {
     throws IOException
   {
     if (_root == null)
-    _root = RootDirectoryService.getCurrentDataDirectory();
+    _root = RootDirectoryService.getCurrentDataDirectory().lookup(".git");
     
     if (_root.lookup("HEAD").canRead())
       return;

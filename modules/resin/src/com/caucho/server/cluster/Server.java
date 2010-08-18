@@ -92,9 +92,7 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.dispatch.ProtocolDispatchServer;
 import com.caucho.server.distcache.PersistentStoreConfig;
-import com.caucho.server.distlock.AbstractLockManager;
 import com.caucho.server.distlock.AbstractVoteManager;
-import com.caucho.server.distlock.SingleLockManager;
 import com.caucho.server.distlock.SingleVoteManager;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
@@ -148,7 +146,6 @@ public class Server extends ProtocolDispatchServer
   private BamService _bamService;
   private PersistentStoreConfig _persistentStoreConfig;
 
-  private AbstractLockManager _distributedLockManager;
   private AbstractVoteManager _distributedVoteManager;
 
   private HostContainer _hostContainer;
@@ -421,25 +418,6 @@ public class Server extends ProtocolDispatchServer
   public CloudPod getPod()
   {
     return _selfServer.getCloudServer().getPod();
-  }
-
-  /**
-   * Returns the distributed lock manager
-   */
-  public AbstractLockManager getDistributedLockManager()
-  {
-    if (_distributedLockManager == null)
-      _distributedLockManager = createDistributedLockManager();
-
-    return _distributedLockManager;
-  }
-
-  /**
-   * Returns the distributed cache manager
-   */
-  protected AbstractLockManager createDistributedLockManager()
-  {
-    return new SingleLockManager(this);
   }
 
   /**

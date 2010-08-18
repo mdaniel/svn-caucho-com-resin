@@ -71,7 +71,7 @@ public class RootDirectoryService extends AbstractResinService
       throw new NullPointerException();
     
     if (dataDirectory instanceof MemoryPath) { // QA
-      dataDirectory = WorkDir.getTmpWorkDir().lookup("qa/resin-data");
+      dataDirectory = WorkDir.getTmpWorkDir().lookup("qa/" + dataDirectory.getFullPath());
     }
     
     _rootDirectory = rootDirectory;
