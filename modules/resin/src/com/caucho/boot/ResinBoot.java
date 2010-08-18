@@ -29,6 +29,7 @@
 
 package com.caucho.boot;
 
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,6 +40,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.Environment;
+import com.caucho.log.PathHandler;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -328,8 +330,9 @@ public class ResinBoot {
    */
   public static void main(String []argv)
   {
-    if (System.getProperty("log.level") != null)
+    if (System.getProperty("log.level") != null) {
       Logger.getLogger("").setLevel(Level.FINER);
+    }
 
     try {
       ResinBoot boot = new ResinBoot(argv);

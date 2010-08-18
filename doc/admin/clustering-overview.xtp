@@ -16,54 +16,64 @@ of your application evolves.
 <body>
 <localtoc/>
 <s1 title="Concepts">
-<p>The basic concepts behind clustering and load-balancing are relatively simple.</p>
-<p>
-Most web applications start their life-cycle being deployed to a single server. This 
-is a very simple deployment model and certainly the one developers are most familiar 
-with since single servers are usually used for development and testing (especially on 
-a developer's local machine). The problem is that as the usage of a web application 
-grows beyond moderate numbers, the hardware limitations of a single machine simply is 
-not enough (the problem is even more acute when you have more than one high-use 
-application deployed to a single machine). The physical hardware limits of a server 
-usually manifest themselves as chronic high CPU and memory usage despite reasonable 
-performance tuning and hardware upgrades.
+
+<p>The basic concepts behind clustering and load-balancing are
+relatively simple.</p> <p> Most web applications start their
+life-cycle being deployed to a single server. This is a very simple
+deployment model and certainly the one developers are most familiar
+with since single servers are usually used for development and testing
+(especially on a developer's local machine). The problem is that as
+the usage of a web application grows beyond moderate numbers, the
+hardware limitations of a single machine simply is not enough (the
+problem is even more acute when you have more than one high-use
+application deployed to a single machine). The physical hardware
+limits of a server usually manifest themselves as chronic high CPU and
+memory usage despite reasonable performance tuning and hardware
+upgrades.  </p>
+
+<p> Server <i>load-balancing</i> solves this problem by allowing you
+to deploy a single web application to more than one physical
+machine. These machines can then be used to share the web application
+traffic, reducing the total workload on a single machine and providing
+better performance from the perspective of the user. We'll discuss
+Resin's load-balancing capabilities in greater detail shortly, but
+load-balancing is usually achieved by transparently redirecting
+network traffic across multiple machines at the systems level via a
+hardware or software load-balancer (both of which Resin supports).
+Load-balancing also increases the reliability/up-time of a system
+because even if one or more servers go down or are brought down for
+maintenance, other servers can still continue to handle traffic. With
+a single server application, any down-time is directly visible to the
+user, drastically decreasing reliability.  </p>
+
+<p> If web applications were entirely stateless, load-balancing alone
+would be sufficient in meeting all application server scalability
+needs. In reality, most web applications are relatively heavily
+stateful. Even very simple web applications use the HTTP session to
+keep track of current login, shopping-cart-like functionality and so
+on.  Component oriented web frameworks like JSF and Wicket in
+particular tend to heavily utilize the HTTP session to achieve greater
+development abstraction. Maintaining application state is also very
+natural for the CDI (Resin CanDI) and JBoss Seam programming models
+with stateful, conversational components. When web applications are
+load-balanced, application state must somehow be shared across
+application servers.  While in most cases you will likely be using a
+<i>sticky session</i> (discussed in detail shortly) to pin a session
+to a single server, sharing state is still important for
+<i>fail-over</i>. Fail-over is the process of seamlessly transferring
+over an existing session from one server to another when a
+load-balanced server fails or is taken down (probably for
+upgrade). Without fail-over, the user would lose a session when a
+load-balanced server experiences down-time. In order for fail-over to
+work, application state must be synchronized or replicated in real
+time across a set of load-balanced servers. This state synchronization
+or replication process is generally known as <i>clustering</i>. In a
+similar vein, the set of synchronized, load-balanced servers are
+collectively called a <i>cluster</i>. Resin supports robust clustering
+including persistent sessions, distributed sessions and dynamically
+adding/removing servers from a cluster (elastic/cloud computing).
 </p>
-<p>
-Server <i>load-balancing</i> solves this problem by allowing you to deploy a single 
-web application to more than one physical machine. These machines can then be used to 
-share the web application traffic, reducing the total workload on a single machine and 
-providing better performance from the perspective of the user. We'll discuss Resin's 
-load-balancing capabilities in greater detail shortly, but load-balancing is usually 
-achieved by transparently redirecting network traffic across multiple machines at the 
-systems level via a hardware or software load-balancer (both of which Resin supports). 
-Load-balancing also increases the reliability/up-time of a system because even if one 
-or more servers go down or are brought down for maintenance, other servers can still 
-continue to handle traffic. With a single server application, any down-time is 
-directly visible to the user, drastically decreasing reliability.
-</p>
-<p>
-If web applications were entirely stateless, load-balancing alone would be sufficient 
-in meeting all application server scalability needs. In reality, most web applications 
-are relatively heavily stateful. Even very simple web applications use the HTTP 
-session to keep track of current login, shopping-cart-like functionality and so on. 
-Component oriented web frameworks like JSF and Wicket in particular tend to heavily 
-utilize the HTTP session to achieve greater development abstraction. Maintaining 
-application state is also very natural for the CDI (Resin CanDI) and JBoss Seam 
-programming models with stateful, conversational components. When web applications are 
-load-balanced, application state must somehow be shared across application servers. 
-While in most cases you will likely be using a <i>sticky session</i> (discussed in 
-detail shortly) to pin a session to a single server, sharing state is still important 
-for <i>fail-over</i>. Fail-over is the process of seamlessly transferring over an 
-existing session from one server to another when a load-balanced server fails or is 
-taken down (probably for upgrade). Without fail-over, the user would lose a session 
-when a load-balanced server experiences down-time. In order for fail-over to work, 
-application state must be synchronized or replicated in real time across a set of 
-load-balanced servers. This state synchronization or replication process is generally 
-known as <i>clustering</i>. In a similar vein, the set of synchronized, load-balanced 
-servers are collectively called a <i>cluster</i>. Resin supports robust clustering 
-including persistent sessions, distributed sessions and dynamically adding/removing 
-servers from a cluster (elastic/cloud computing).
-</p>
+
 <p>
 Based on the infrastructure required to support load-balancing, fail-over and 
 clustering, Resin also has support for an EHCache or Coherence style distributed 
@@ -437,26 +447,25 @@ The following is a simple example of how to enable clustering on Resin:
   &lt;/session-config&gt;
 &lt;/web-app&gt;
 </example>
-<p>
-The <a href="deploy-ref.xtp#session-config">&lt;use-persistent-store&gt;</a> tag under
-<a href="deploy-ref.xtp#session-config">&lt;session-config&gt;</a> is used to enable 
-clustering. Note, clustering is enabled on a per-web-application basis since not all
-web applications under a host need be clustered. If you want to cluster all web 
-applications under a host, you can place &lt;use-persistent-store&gt; under 
-<a href="deploy-ref.xtp#web-app-default">&lt;web-app-default&gt;</a>. The following
-example shows how you can do this: 
-</p>
+
+<p> The <a
+href="deploy-ref.xtp#session-config">&lt;use-persistent-store&gt;</a>
+tag under <a
+href="deploy-ref.xtp#session-config">&lt;session-config&gt;</a> is
+used to enable clustering. Note, clustering is enabled on a
+per-web-application basis since not all web applications under a host
+need be clustered. If you want to cluster all web applications under a
+host, you can place &lt;use-persistent-store&gt; under <a
+href="deploy-ref.xtp#web-app-default">&lt;web-app-default&gt;</a>. The
+following example shows how you can do this: </p>
+
 <example title="Example: Clustering for All Web Applications">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster&gt;
     &lt;server id="a" address="192.168.0.1" port="6800"/&gt;
     &lt;server id="b" address="192.168.0.2" port="6800"/&gt;
 
-    &lt;persistent-store type="cluster"&gt;
-      &lt;init&gt;
-        &lt;triplicate&gt;true&lt;/triplicate&gt;
-      &lt;/init&gt;
-    &lt;/persistent-store&gt;
+    &lt;persistent-store/>
 
     &lt;web-app-default&gt;
       &lt;session-config use-persistent-store="true"/&gt;

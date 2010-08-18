@@ -27,29 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.hemp.broker;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.env.thread.TaskWorker;
+import com.caucho.hemp.packet.Packet;
+import com.caucho.util.L10N;
 
 /**
- * HMPP wrapper
+ * Queue of hmtp packets
  */
-@SuppressWarnings("serial")
-public class TimeoutException extends ActorException {
-  public TimeoutException()
+public class QueueWorker extends TaskWorker
+{
+  private static final L10N L = new L10N(QueueWorker.class);
+  private static final Logger log
+    = Logger.getLogger(QueueWorker.class.getName());
+
+  private final HempMemoryQueue _queue;
+
+  public QueueWorker(HempMemoryQueue queue)
   {
+    _queue = queue;
   }
 
-  public TimeoutException(String msg)
+  @Override
+  public long runTask()
   {
-    super(msg);
-  }
+    // _dequeueCount.incrementAndGet();
+    Packet packet;
+    
+    while ((packet = _queue.dequeue()) != null) {
+      if (log.isLoggable(Level.FINEST))
+        log.finest(this + " dequeue " + packet);
 
-  public TimeoutException(Throwable e)
-  {
-    super(e);
-  }
+      packet.unparkDequeue();
 
-  public TimeoutException(String msg, Throwable e)
-  {
-    super(msg, e);
+      _queue.dispatch(packet);
+    }
+    
+    return -1;
   }
 }

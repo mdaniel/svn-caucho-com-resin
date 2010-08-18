@@ -410,8 +410,11 @@ abstract public class AbstractCache extends AbstractMap
       _config.setCacheKey(_manager.createSelfHashKey(_config.getGuid(),
                                                      _config.getKeySerializer()));
 
-      if (_localManager == null)
-        _localManager = CacheManager.createManager();
+      if (_localManager == null) {
+        DistCacheService cacheService = DistCacheService.getCurrent();
+        
+        _localManager = cacheService.getCacheManager();
+      }
       
       if (_localManager.putIfAbsent(_guid, this) != null) {
         throw new ConfigException(L.l("'{0}' with full name '{1}' is an invalid Cache name because it's already used by another cache.",

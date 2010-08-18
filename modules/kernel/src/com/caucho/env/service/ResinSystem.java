@@ -52,9 +52,11 @@ public class ResinSystem
   private static final L10N L = new L10N(ResinSystem.class);
   private static final Logger log
     = Logger.getLogger(ResinSystem.class.getName());
-
+  
   private static final EnvironmentLocal<ResinSystem> _serverLocal
     = new EnvironmentLocal<ResinSystem>();
+
+  private static final ClassLoader _systemClassLoader;
 
   private final String _id;
   private EnvironmentClassLoader _classLoader;
@@ -94,6 +96,9 @@ public class ResinSystem
                      ClassLoader loader)
   {
     _id = id;
+    
+    if (loader == null)
+      loader = _systemClassLoader;
 
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;
@@ -630,5 +635,16 @@ public class ResinSystem
       else
         return b.getClass().getName().compareTo(a.getClass().getName());
     }
+  }
+  
+  static {
+    ClassLoader systemClassLoader = null;
+    
+    try {
+      systemClassLoader = ClassLoader.getSystemClassLoader();
+    } catch (Exception e) {
+    }
+    
+    _systemClassLoader = systemClassLoader;
   }
 }

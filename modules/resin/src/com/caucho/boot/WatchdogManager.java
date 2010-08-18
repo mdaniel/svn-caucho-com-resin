@@ -128,8 +128,9 @@ class WatchdogManager implements AlarmListener {
     log.setLevel("all");
     log.init();
 
-    if (System.getProperty("log.level") != null)
+    if (System.getProperty("log.level") != null) {
       Logger.getLogger("").setLevel(Level.FINER);
+    }
     else
       Logger.getLogger("").setLevel(Level.INFO);
 

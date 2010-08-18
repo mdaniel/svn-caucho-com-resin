@@ -62,6 +62,11 @@ public class DistCacheService extends AbstractResinService {
     return _distCacheManager;
   }
   
+  public CacheManager getCacheManager()
+  {
+    return _cacheManager;
+  }
+  
   public CacheBuilder createBuilder(String name)
   {
     return new CacheBuilder(name, _cacheManager, _distCacheManager);

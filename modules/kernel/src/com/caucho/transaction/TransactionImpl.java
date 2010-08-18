@@ -1196,7 +1196,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
                        
       log.warning(msg);
       
-      RuntimeException exn = new RuntimeException(msg);
+      RollbackException exn = new RollbackException(msg);
 
       setRollbackOnly(exn);
 

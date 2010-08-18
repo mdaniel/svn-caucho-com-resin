@@ -29,38 +29,69 @@
 
 package com.caucho.quercus;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.LockSupport;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaCompiler;
-import com.caucho.java.WorkDir;
-import com.caucho.loader.SimpleLoader;
 import com.caucho.quercus.annotation.ClassImplementation;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ConstStringValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.MethodIntern;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.SessionArrayValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.db.JavaSqlDriverWrapper;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.lib.session.QuercusSessionManager;
-import com.caucho.quercus.module.*;
+import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.module.ModuleInfo;
+import com.caucho.quercus.module.ModuleStartupListener;
+import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.QuercusParser;
-import com.caucho.quercus.program.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.sql.Connection;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.locks.LockSupport;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.quercus.program.UndefinedFunction;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.TimedCache;
+import com.caucho.vfs.FilePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Facade for the PHP language.
@@ -1727,6 +1758,7 @@ public class QuercusContext
    */
   public void init()
   {
+    log.info("INIF: " + this);
     initModules();
     initClasses();
 
@@ -1754,6 +1786,7 @@ public class QuercusContext
    */
   private void initModules()
   {
+    log.info("MODUOES: " + _moduleContext.getModules());
     for (ModuleInfo info : _moduleContext.getModules()) {
       addModuleInfo(info);
     }

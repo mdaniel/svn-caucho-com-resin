@@ -51,39 +51,11 @@ import javax.enterprise.context.ApplicationScoped;
 @Configurable
 public class CacheManager
 {
-  private static final EnvironmentLocal<CacheManager> _localCacheManager
-    = new EnvironmentLocal<CacheManager>();
-
   private ConcurrentHashMap<String,AbstractCache> _cacheMap;
 
   public CacheManager()
   {
-    Environment.getEnvironmentName();
-
-    synchronized (_localCacheManager) {
-      CacheManager manager = _localCacheManager.getLevel();
-
-      if (manager != null) {
-        _cacheMap = manager._cacheMap;
-      }
-      else {
-        _cacheMap = new ConcurrentHashMap<String,AbstractCache>();
-        _localCacheManager.set(this);
-      }
-    }
-  }
-
-  public static CacheManager createManager()
-  {
-    synchronized (_localCacheManager) {
-      CacheManager manager = _localCacheManager.getLevel();
-
-      if (manager == null) {
-        manager = new CacheManager();
-      }
-
-      return manager;
-    }
+    _cacheMap = new ConcurrentHashMap<String,AbstractCache>();
   }
 
   public AbstractCache get(String name)

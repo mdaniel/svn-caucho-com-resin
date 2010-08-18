@@ -92,7 +92,7 @@ public class JavaModule extends AbstractQuercusModule {
         env.warning(L.l("could not find Java class {0}", className));
         return null;
       }
-      
+
       return new JavaValue(env, def.getType(), def);
     } catch (Throwable e) {
       log.log(Level.FINE, e.getMessage(), e);

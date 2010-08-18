@@ -31,13 +31,11 @@ package com.caucho.hemp.broker;
 
 import java.io.Closeable;
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
-import com.caucho.env.thread.ThreadPool;
 import com.caucho.hemp.packet.Message;
 import com.caucho.hemp.packet.MessageError;
 import com.caucho.hemp.packet.Packet;
@@ -55,33 +53,20 @@ import com.caucho.util.WaitQueue;
 /**
  * Queue of hmtp packets
  */
-public class HempMemoryQueue implements ActorStream, Runnable, Closeable
+public class HempMemoryQueue implements ActorStream, Closeable
 {
   private static final L10N L = new L10N(HempMemoryQueue.class);
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
 
-  private static long _gid;
-
-  // how long the thread should wait for a new request before exiting
-  private long _queueIdleTimeout = 2000L;
-
-  private final ThreadPool _threadPool = ThreadPool.getCurrent();
-  private final ClassLoader _loader
-    = Thread.currentThread().getContextClassLoader();
-
   private final String _name;
   private final ActorStream _linkStream;
   private final ActorStream _actorStream;
 
-  private final int _threadMax;
-  private final AtomicInteger _threadCount = new AtomicInteger();
-  private final WaitQueue _wait = new WaitQueue();
+  private final QueueWorker []_workers;
   private final PacketQueue _queue;
   
   private final Lifecycle _lifecycle = new Lifecycle();
-
-  private long _lastExitTime;
 
   public HempMemoryQueue(ActorStream actorStream,
                          ActorStream linkStream,
@@ -95,15 +80,19 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
     _linkStream = linkStream;
     _actorStream = actorStream;
-
-    _threadMax = threadMax;
-
+    
     if (_actorStream.getJid() == null) {
       _name = _actorStream.getClass().getSimpleName();
     }
     else
       _name = _actorStream.getJid();
-
+    
+    _workers = new QueueWorker[threadMax];
+    
+    for (int i = 0; i < threadMax; i++) {
+      _workers[i] = new QueueWorker(this);
+    }
+    
     int maxDiscardSize = -1;
     int maxBlockSize = 1024;
     long expireTimeout = -1;
@@ -138,6 +127,11 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   public ActorStream getLinkStream()
   {
     return _linkStream;
+  }
+
+  protected ActorStream getActorStream()
+  {
+    return _actorStream;
   }
 
   /**
@@ -209,11 +203,6 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
     enqueue(new QueryError(id, to, from, query, error));
   }
 
-  protected ActorStream getActorStream()
-  {
-    return _actorStream;
-  }
-
   protected final void enqueue(Packet packet)
   {
     if (! _lifecycle.isActive())
@@ -245,182 +234,22 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
   private void wakeConsumer(Packet packet)
   {
-    long lastExitTime = _lastExitTime;
-    _lastExitTime = Alarm.getCurrentTime();
-
-    if (_wait.wake()) {
-      return;
-    }
-
-    while (! _lifecycle.isDestroying()) {
-      if (_queue.isEmpty()) {
-        // empty queue
-        return;
-      }
-
-      int size = _queue.getSize();
-      int threadCount = _threadCount.get();
-      long now = Alarm.getCurrentTime();
-
-      if (threadCount >= _threadMax) {
-        // thread max
-        return;
-      }
-      else if (threadCount >= 2 && size / 3 < threadCount) {
-        // too little work to spawn a new thread
-        return;
-      }
-      else if (threadCount > 0 && now <= lastExitTime + 10) {
-        // last spawn too recent
-        return;
-      }
-
-      if (isClosed()) {
-        return;
-      }
-      else if (_threadCount.compareAndSet(threadCount, threadCount + 1)) {
-        // 10ms start is primarily for QA
-        if (! _threadPool.start(this, 100)) {
-          _threadPool.schedule(this);
-        }
-        return;
-      }
-      else if (_threadCount.get() > 0) {
-        // other thread already added
-        return;
-      }
+    for (QueueWorker worker : _workers) {
+      worker.wake();
     }
   }
 
   /**
    * Dispatches the packet to the stream
    */
-  protected void dispatch(Packet packet, WaitQueue.Item item)
+  protected void dispatch(Packet packet)
   {
     packet.dispatch(getActorStream(), _linkStream);
   }
-
-  protected Packet dequeue(WaitQueue.Item item, long timeout)
+  
+  protected Packet dequeue()
   {
-    item.startPark();
-
-    try {
-      Packet packet = _queue.dequeue();
-
-      if (packet == null) {
-        if (timeout <= 0)
-          return null;
-
-        item.park(timeout);
-
-        packet = _queue.dequeue();
-      }
-
-      if (packet != null)
-        packet.unparkDequeue();
-
-      return packet;
-    } finally {
-      item.endPark();
-    }
-  }
-
-  private void consumeQueue(WaitQueue.Item item)
-  {
-    while (! isClosed()) {
-      try {
-        Packet packet;
-
-        // _dequeueCount.incrementAndGet();
-        packet = _queue.dequeue();
-        // _dequeueCount.decrementAndGet();
-
-        if (packet != null) {
-          // reset last exit with a new packet
-          _lastExitTime = Alarm.getCurrentTime();
-
-          if (log.isLoggable(Level.FINEST))
-            log.finest(this + " dequeue " + packet);
-
-          packet.unparkDequeue();
-
-          dispatch(packet, item);
-        }
-        else if (! waitForQueue(item)) {
-          return;
-        }
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-  }
-
-  private boolean waitForQueue(WaitQueue.Item item)
-  {
-    long expires = Alarm.getCurrentTimeActual() + _queueIdleTimeout;
-    int spinMax = 8;
-
-    while (! isClosed()) {
-      for (int i = spinMax; i >= 0; i--) {
-        if (! _queue.isEmpty()) {
-          // check for queue values
-          return true;
-        }
-      }
-
-      long now = Alarm.getCurrentTimeActual();
-
-      if (now < expires) {
-        _wait.parkUntil(item, expires);
-      }
-      else {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  @Override
-  public void run()
-  {
-    Thread thread = Thread.currentThread();
-
-    String oldName = thread.getName();
-    String name = _name;
-
-    thread.setName(name + "-" + _gid++);
-
-    thread.setContextClassLoader(_loader);
-
-    WaitQueue.Item item = _wait.create();
-
-    try {
-      while (! _lifecycle.isDestroying()) {
-        try {
-          if (log.isLoggable(Level.FINEST)) {
-            log.finest(this + " spawn {threadCount:" + _threadCount.get()
-                       + ", queueSize:" + _queue.getSize() + "}");
-          }
-
-          consumeQueue(item);
-        } finally {
-          _threadCount.decrementAndGet();
-        }
-
-        if (_queue.isEmpty()) {
-          // queue check after the _threadCount decrement for threading
-          // timing issues
-          return;
-        }
-
-        _threadCount.incrementAndGet();
-      }
-    } finally {
-      item.remove();
-
-      thread.setName(oldName);
-    }
+    return _queue.dequeue();
   }
 
   @Override
@@ -428,7 +257,9 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   {
     _lifecycle.toStop();
 
-    _wait.wakeAll();
+    for (QueueWorker worker : _workers) {
+      worker.wake();
+    }
     
     long expires = Alarm.getCurrentTimeActual() + 2000;
     
@@ -439,6 +270,10 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
       } catch (Exception e) {
         
       }
+    }
+
+    for (QueueWorker worker : _workers) {
+      worker.destroy();
     }
     
     _lifecycle.toDestroy();

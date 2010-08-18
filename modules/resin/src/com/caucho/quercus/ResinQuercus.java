@@ -32,6 +32,7 @@ package com.caucho.quercus;
 import com.caucho.VersionFactory;
 import com.caucho.loader.*;
 import com.caucho.distcache.*;
+import com.caucho.env.distcache.DistCacheService;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ResinModuleContext;
@@ -165,7 +166,7 @@ public class ResinQuercus extends QuercusContext
   public Map getSessionCache()
   {
     if (_sessionCache == null && Server.getCurrent() != null) {
-      CacheManager cacheManager = CacheManager.createManager();
+      CacheManager cacheManager = DistCacheService.getCurrent().getCacheManager();
       AbstractCache cache = cacheManager.create("resin:quercus:session");
 
       cache.setIdleTimeoutMillis(3600 * 1000L);

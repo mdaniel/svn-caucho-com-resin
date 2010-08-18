@@ -292,7 +292,7 @@ public class QueryManager {
         } catch (Exception e) {
         }
       }
-
+      
       _thread = null;
 
       return _isResult.get();

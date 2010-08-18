@@ -346,6 +346,7 @@ class WatchdogClient
       String uid = "";
       
       client.setEncryptPassword(true);
+
       client.connect(uid, getResinSystemAuthKey());
 
       _conn = client;
