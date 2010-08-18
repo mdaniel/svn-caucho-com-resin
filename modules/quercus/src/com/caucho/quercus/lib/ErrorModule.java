@@ -507,10 +507,15 @@ public class ErrorModule extends AbstractQuercusModule {
       return false;
     } else {
       // message sent to PHP's system logger
-
-      log.warning(message.toString());
-
-      return true;
+      String dest = ErrorModule.INI_ERROR_LOG.getAsString(env);
+      if("syslog".equals(dest))
+      {
+        log.warning(message.toString());
+        return true;
+      } else {
+        return ErrorModule.error_log(env, message, 3,
+                                     env.createString(dest), extraHeaders);
+      }
     }
   }
 
