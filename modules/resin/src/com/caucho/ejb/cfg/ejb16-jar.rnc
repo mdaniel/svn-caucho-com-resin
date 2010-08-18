@@ -500,6 +500,14 @@ ejb16_remove-method = element remove-method {
   element retain-if-exception { string }?
 }
 
+ejb16_async-method = element async-method {
+  attribute id { string }?,
+
+  element method-name { string },
+
+  ejb16_method-params?
+}
+
 ejb16_rollback = element rollback {
   string
 }
@@ -562,6 +570,8 @@ ejb16_session = element session {
   ejb16_init-method*,
 
   ejb16_remove-method*,
+  
+  ejb16_async-method*,  
 
   ejb16_transaction-type?,
 
