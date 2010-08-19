@@ -558,6 +558,8 @@ ejb16_session = element session {
   ejb16_business-local*,
 
   ejb16_business-remote*,
+  
+  element local-bean { empty }?,
 
   element service-endpoint { javaee_class }?,
 
