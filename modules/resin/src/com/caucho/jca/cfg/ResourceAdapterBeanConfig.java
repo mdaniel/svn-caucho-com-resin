@@ -33,6 +33,8 @@ import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CurrentLiteral;
+import com.caucho.config.inject.InjectionBean;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -116,8 +118,12 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     factory.qualifier(DefaultLiteral.DEFAULT);
     
     ResourceAdapterProducer<T> producer = new ResourceAdapterProducer(controller);
+    
+    Bean<T> bean = factory.injection(producer);
 
-    beanManager.addBean(factory.injection(producer));
+    beanManager.addBean(bean);
+    
+    ((InjectionBean) bean).introspectProduces();
   }
 
   @Override

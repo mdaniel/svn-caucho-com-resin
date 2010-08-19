@@ -146,6 +146,13 @@ abstract public class AbstractSingletonBean<T> extends BeanWrapper<T>
     return _passivationId;
   }
 
+  public void introspectProduces()
+  {
+    ProducesBuilder builder = new ManagedProducesBuilder(getBeanManager());
+    
+    builder.introspectProduces(this, getAnnotatedType());
+  }
+
   /**
    * Returns the bean's scope type.
    */

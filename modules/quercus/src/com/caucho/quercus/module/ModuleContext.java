@@ -534,14 +534,11 @@ public class ModuleContext
         = "META-INF/services/com.caucho.quercus.QuercusModule";
       Enumeration<URL> urls = _loader.getResources(quercusModule);
       
-      log.info("LOADERX: " + urls + " " + _loader);
-
       HashSet<URL> urlSet = new HashSet<URL>();
 
       // gets rid of duplicate entries found by different classloaders
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
-        log.info("URLX: " + urls);
 
         if (! hasServiceModule(url)) {
           addServiceModule(url);

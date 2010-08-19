@@ -59,6 +59,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 {
   private static Logger _log;
 
+  private static final ClassLoader _systemClassLoader;
+  
   private static final Object _childListenerLock = new Object();
 
   // listeners invoked at the start of any child environment
@@ -138,7 +140,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   public static EnvironmentClassLoader create(ClassLoader parent)
   {
     String id = null;
-
+    
     return create(parent, id);
   }
 
@@ -147,6 +149,12 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public static EnvironmentClassLoader create(ClassLoader parent, String id)
   {
+    if (parent == null)
+      parent = Thread.currentThread().getContextClassLoader();
+    
+    if (parent == null)
+      parent = _systemClassLoader;
+    
     String className = System.getProperty("caucho.environment.class.loader");
 
     if (className != null) {
@@ -979,5 +987,16 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     {
       return getClass().getSimpleName() + "[" + _url + "," + _pkg + "]";
     }
+  }
+  
+  static {
+    ClassLoader systemClassLoader = null;
+    
+    try {
+      systemClassLoader = ClassLoader.getSystemClassLoader();
+    } catch (Exception e) {
+    }
+    
+    _systemClassLoader = systemClassLoader;
   }
 }

@@ -96,9 +96,6 @@ public class ResinSystem
                      ClassLoader loader)
   {
     _id = id;
-    
-    if (loader == null)
-      loader = _systemClassLoader;
 
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;

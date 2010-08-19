@@ -89,4 +89,11 @@ public class InjectionBean<T> extends AbstractSingletonBean<T>
 
     return value;
   }
+
+  public void introspectProduces()
+  {
+    ProducesBuilder builder = new ManagedProducesBuilder(getBeanManager());
+    
+    builder.introspectProduces(this, getAnnotatedType());
+  }
 }

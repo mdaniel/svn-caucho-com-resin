@@ -1758,7 +1758,6 @@ public class QuercusContext
    */
   public void init()
   {
-    log.info("INIF: " + this);
     initModules();
     initClasses();
 
@@ -1786,7 +1785,6 @@ public class QuercusContext
    */
   private void initModules()
   {
-    log.info("MODUOES: " + _moduleContext.getModules());
     for (ModuleInfo info : _moduleContext.getModules()) {
       addModuleInfo(info);
     }
