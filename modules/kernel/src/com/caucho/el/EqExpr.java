@@ -86,41 +86,47 @@ public class EqExpr extends AbstractBooleanExpr {
 
     Class aType = aObj.getClass();
     Class bType = bObj.getClass();
-    
-    if (aObj instanceof BigDecimal || bObj instanceof BigDecimal) {
-      BigDecimal a = toBigDecimal(aObj, env);
-      BigDecimal b = toBigDecimal(bObj, env);
 
-      return a.equals(b);
-    }
+    try {
+      if (aObj instanceof BigDecimal || bObj instanceof BigDecimal) {
+        BigDecimal a = toBigDecimal(aObj, env);
+        BigDecimal b = toBigDecimal(bObj, env);
 
-    if (aType == Double.class || aType == Float.class ||
-        bType == Double.class || bType == Float.class) {
-      double a = toDouble(aObj, env);
-      double b = toDouble(bObj, env);
+        return a.equals(b);
+      }
 
-      return a == b;
-    }
-    
-    if (aType == BigInteger.class || bType == BigInteger.class) {
-      BigInteger a = toBigInteger(aObj, env);
-      BigInteger b = toBigInteger(bObj, env);
+      if (aType == Double.class || aType == Float.class ||
+          bType == Double.class || bType == Float.class) {
+        double a = toDouble(aObj, env);
+        double b = toDouble(bObj, env);
 
-      return a.equals(b);
-    }
-    
-    if (aObj instanceof Number || bObj instanceof Number) {
-      long a = toLong(aObj, env);
-      long b = toLong(bObj, env);
+        return a == b;
+      }
 
-      return a == b;
-    }
+      if (aType == BigInteger.class || bType == BigInteger.class) {
+        BigInteger a = toBigInteger(aObj, env);
+        BigInteger b = toBigInteger(bObj, env);
 
-    if (aType == Boolean.class || bType == Boolean.class) {
-      boolean a = toBoolean(aObj, env);
-      boolean b = toBoolean(bObj, env);
+        return a.equals(b);
+      }
 
-      return a == b;
+      if (aObj instanceof Number || bObj instanceof Number) {
+        long a = toLong(aObj, env);
+        long b = toLong(bObj, env);
+
+        return a == b;
+      }
+
+      if (aType == Boolean.class || bType == Boolean.class) {
+        boolean a = toBoolean(aObj, env);
+        boolean b = toBoolean(bObj, env);
+
+        return a == b;
+      }
+    } catch (ELException e) {
+      log.finest(L.l("`{0}' in `{1}'", e.getMessage(), this.toString()));
+
+      return false;
     }
 
     // XXX: enum
