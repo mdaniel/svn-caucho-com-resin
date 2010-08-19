@@ -208,7 +208,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
   }
 
-  private void fillClassDefaults()
+  protected void fillClassDefaults()
   {
     AnnotatedTypeImpl<X> ejbClass = getAnnotatedType();
     

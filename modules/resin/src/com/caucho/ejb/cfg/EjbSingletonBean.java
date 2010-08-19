@@ -31,9 +31,15 @@ package com.caucho.ejb.cfg;
 
 import java.lang.annotation.Annotation;
 
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.gen.LockingAttributeLiteral;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.inject.Module;
 
 /**
@@ -44,11 +50,8 @@ public class EjbSingletonBean<X> extends EjbSessionBean<X> {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbSingletonBean(EjbConfig ejbConfig, 
-                          AnnotatedType<X> rawAnnType,
-                          AnnotatedType<X> annType,
-                          String moduleName)
-  {
+  public EjbSingletonBean(EjbConfig ejbConfig, AnnotatedType<X> rawAnnType,
+      AnnotatedType<X> annType, String moduleName) {
     super(ejbConfig, rawAnnType, annType, moduleName);
   }
 
@@ -62,8 +65,28 @@ public class EjbSingletonBean<X> extends EjbSessionBean<X> {
   }
 
   @Override
-  public Class<? extends Annotation> getSessionType() 
+  public Class<? extends Annotation> getSessionType()
   {
     return Singleton.class;
+  }
+
+  @Override
+  protected void fillClassDefaults()
+  {
+    AnnotatedTypeImpl<X> ejbClass = getAnnotatedType();
+
+    ConcurrencyManagement concurrencyManagementAttribute = ejbClass
+        .getAnnotation(ConcurrencyManagement.class);
+
+    if ((concurrencyManagementAttribute == null)
+        || (concurrencyManagementAttribute.value() == ConcurrencyManagementType.CONTAINER)) {
+      Lock lockingAttribute = ejbClass.getAnnotation(Lock.class);
+
+      if (lockingAttribute == null) {
+        ejbClass.addAnnotation(new LockingAttributeLiteral(LockType.WRITE));
+      }
+    }
+
+    super.fillClassDefaults();
   }
 }

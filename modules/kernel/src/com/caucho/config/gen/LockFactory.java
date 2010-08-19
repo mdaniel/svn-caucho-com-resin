@@ -30,66 +30,77 @@
 package com.caucho.config.gen;
 
 import javax.ejb.AccessTimeout;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.inject.Module;
 
 /**
- * Aspect factory for generating @Asynchronous aspects.
+ * Aspect factory for generating @Lock aspects.
  */
 @Module
-public class LockFactory<X>
-  extends AbstractAspectFactory<X>
-{
+public class LockFactory<X> extends AbstractAspectFactory<X> {
+  private ConcurrencyManagementType _concurrencyManagement = ConcurrencyManagementType.CONTAINER;
   private LockType _classLockType;
-  private AccessTimeout _classAccessTimeout; 
-  
-  public LockFactory(AspectBeanFactory<X> beanFactory,
-                     AspectFactory<X> next)
-  {
+  private AccessTimeout _classAccessTimeout;
+
+  public LockFactory(AspectBeanFactory<X> beanFactory, AspectFactory<X> next) {
     super(beanFactory, next);
-    
-    Lock lock = beanFactory.getBeanType().getAnnotation(Lock.class);
-    
-    if (lock != null)
+
+    AnnotatedType<X> beanType = beanFactory.getBeanType();
+
+    ConcurrencyManagement concurrencyManagement = beanType
+        .getAnnotation(ConcurrencyManagement.class);
+
+    if (concurrencyManagement != null) {
+      _concurrencyManagement = concurrencyManagement.value();
+    }
+
+    Lock lock = beanType.getAnnotation(Lock.class);
+
+    if (lock != null) {
       _classLockType = lock.value();
-    
-    _classAccessTimeout = beanFactory.getBeanType().getAnnotation(
-                    AccessTimeout.class);
+    }
+
+    _classAccessTimeout = beanType.getAnnotation(AccessTimeout.class);
   }
-  
+
   /**
    * Creates an aspect for interception if the method should be intercepted.
    */
   @SuppressWarnings("unchecked")
-@Override
+  @Override
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
-                                   boolean isEnhanced)
+      boolean isEnhanced)
   {
     Lock lock = method.getAnnotation(Lock.class);
-    
+
     LockType lockType = _classLockType;
-    
+
     if (lock != null)
       lockType = lock.value();
-    
+
     AccessTimeout accessTimeout = method.getAnnotation(AccessTimeout.class);
-    
+
     if (accessTimeout == null) {
-            accessTimeout = _classAccessTimeout;
+      accessTimeout = _classAccessTimeout;
     }
-    
-    if (lockType == null)
+
+    if ((lockType == null)
+        || (_concurrencyManagement == ConcurrencyManagementType.BEAN))
       return super.create(method, isEnhanced);
     else {
       AspectGenerator<X> next = super.create(method, true);
-    
+
       if (accessTimeout != null) {
-        return new LockGenerator(this, method, next, lockType, accessTimeout.value(), accessTimeout.unit());
+        return new LockGenerator(this, method, next, lockType, accessTimeout
+            .value(), accessTimeout.unit());
       } else {
-              return new LockGenerator(this, method, next, lockType, -1, null);
+        return new LockGenerator(this, method, next, lockType, -1, null);
       }
     }
   }
