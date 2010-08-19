@@ -13,6 +13,7 @@
 
 <s2 title="4.0.10 - snapshot">
 <ul>
+<li>candi: _namedBeanMap is active and needs to be a ConcurrentHashMap (rep by Wesley Wu)</li>
 <li>hessian: for HessianServlet, do not attempt to find implicit API (#4168, rep by Riccardo Cohen)</li>
 <li>remote: add cxt to artifacts (#4314, rep by Riccardo Cohen)</li>
 <li>remote: cxt needs to have WebServiceContext (#4314, rep by Riccardo Cohen)</li>

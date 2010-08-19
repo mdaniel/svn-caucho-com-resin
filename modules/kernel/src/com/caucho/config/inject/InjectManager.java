@@ -245,8 +245,8 @@ public final class InjectManager
   private HashMap<Class<?>,WebComponent> _beanMap
     = new HashMap<Class<?>,WebComponent>();
 
-  private HashMap<String,ArrayList<Bean<?>>> _namedBeanMap
-    = new HashMap<String,ArrayList<Bean<?>>>();
+  private ConcurrentHashMap<String,ArrayList<Bean<?>>> _namedBeanMap
+    = new ConcurrentHashMap<String,ArrayList<Bean<?>>>();
 
   private HashMap<Type,Bean<?>> _newBeanMap
     = new HashMap<Type,Bean<?>>();
@@ -734,7 +734,7 @@ public final class InjectManager
   protected ArrayList<Bean<?>> findByName(String name)
   {
     // #3334 - shutdown timing issues
-    HashMap<String,ArrayList<Bean<?>>> namedBeanMap = _namedBeanMap;
+    ConcurrentHashMap<String,ArrayList<Bean<?>>> namedBeanMap = _namedBeanMap;
 
     if (namedBeanMap == null)
       return null;
