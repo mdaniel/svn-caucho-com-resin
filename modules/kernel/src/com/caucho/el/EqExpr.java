@@ -87,6 +87,13 @@ public class EqExpr extends AbstractBooleanExpr {
     Class aType = aObj.getClass();
     Class bType = bObj.getClass();
 
+    if (aType == Boolean.class || bType == Boolean.class) {
+      boolean a = toBoolean(aObj, env);
+      boolean b = toBoolean(bObj, env);
+
+      return a == b;
+    }
+
     try {
       if (aObj instanceof BigDecimal || bObj instanceof BigDecimal) {
         BigDecimal a = toBigDecimal(aObj, env);
@@ -113,13 +120,6 @@ public class EqExpr extends AbstractBooleanExpr {
       if (aObj instanceof Number || bObj instanceof Number) {
         long a = toLong(aObj, env);
         long b = toLong(bObj, env);
-
-        return a == b;
-      }
-
-      if (aType == Boolean.class || bType == Boolean.class) {
-        boolean a = toBoolean(aObj, env);
-        boolean b = toBoolean(bObj, env);
 
         return a == b;
       }
