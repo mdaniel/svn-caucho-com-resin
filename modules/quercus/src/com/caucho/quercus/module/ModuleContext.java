@@ -292,16 +292,19 @@ public class ModuleContext
         return def;
 
       try {
-        Class type;
+        Class<?> type;
 
         try {
-            type = Class.forName(className, false, _loader);
+          type = Class.forName(className, false, _loader);
         }
         catch (ClassNotFoundException e) {
-          throw new ClassNotFoundException(
-            L.l("'{0}' is not a known Java class: {1}",
-                className,
-                e.toString()), e);
+          throw new ClassNotFoundException(L.l("'{0}' is not a known Java class: {1}",
+                                               className,
+                                               e.toString()), e);
+        } catch (NoClassDefFoundError e) {
+          throw new ClassNotFoundException(L.l("'{0}' cannot be as a Java class: {1}",
+                                               className,
+                                               e.toString()), e);
         }
 
         def = JavaClassDef.create(this, className, type);

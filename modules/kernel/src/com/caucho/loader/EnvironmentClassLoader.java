@@ -589,22 +589,27 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     super.scanRoot();
 
-    ClassLoader parent = getParent();
-    if (parent instanceof EnvironmentClassLoader)
+    scanRoot(getParent());
+  }
+  
+  private void scanRoot(ClassLoader loader)
+  {
+    if (loader == null)
       return;
+    
+    scanRoot(loader.getParent());
 
-    if (parent instanceof URLClassLoader) {
-      URLClassLoader urlParent = (URLClassLoader) parent;
+    if (loader instanceof URLClassLoader) {
+      URLClassLoader urlParent = (URLClassLoader) loader;
 
       for (URL url : urlParent.getURLs()) {
-        String name = url.toString();
+        // String name = url.toString();
         
-        if (name.endsWith(".jar")) {
-          _pendingScanRoots.add(new ScanRoot(url, null));
-        }
+        // ejb/0e01
+        //if (name.endsWith(".jar")) {
+        _pendingScanRoots.add(new ScanRoot(url, null));
+        //}
       }
-
-      return;
     }
   }
 

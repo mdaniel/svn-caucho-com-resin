@@ -4514,10 +4514,18 @@ public class Env
       }
     }
     catch (Throwable e) {
-      if (useImport)
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, e.toString(), e);
+      
+      if (useImport) {
         def = importJavaClass(className);
-      else
-        log.log(Level.FINER, e.toString(), e);
+        
+        if (def != null)
+          return def;
+        
+      }
+      
+      throw createErrorException(e);
     }
 
     return def;
@@ -6052,6 +6060,25 @@ public class Env
     String exMsg = prefix + fullMsg;
 
     return new QuercusRuntimeException(fullMsg);
+  }
+
+  /**
+   * A fatal runtime error.
+   */
+  public QuercusRuntimeException createErrorException(Throwable e)
+    throws QuercusRuntimeException
+  {
+    Location location = getLocation();
+
+    String prefix = location.getMessagePrefix();
+
+    String fullMsg = e.toString() + getFunctionLocation();
+
+    error(B_ERROR, location, fullMsg);
+
+    String exMsg = prefix + fullMsg;
+
+    return new QuercusRuntimeException(fullMsg, e);
   }
 
   /**

@@ -158,7 +158,7 @@ class InjectScanManager
     ScanRootContext context = _scanRootMap.get(root);
     
     Path scanRoot = root;
-    
+
     if (packageRoot != null) {
       scanRoot = scanRoot.lookup(packageRoot.replace('.', '/'));
       

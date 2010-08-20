@@ -496,6 +496,7 @@ public class ResinBeanContainer
       return _classLoader;
     }
 
+    @SuppressWarnings("unused")
     public SystemContext createSystem()
     {
       return new SystemContext();

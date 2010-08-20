@@ -29,13 +29,13 @@
 
 package com.caucho.resin;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.config.program.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.dispatch.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.PropertyValueProgram;
+import com.caucho.server.dispatch.FilterConfigImpl;
 
 /**
  * Embeddable version of a filter

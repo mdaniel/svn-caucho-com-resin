@@ -29,19 +29,14 @@
 
 package com.caucho.resin;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.util.*;
-import com.caucho.config.cfg.*;
-
 import javax.enterprise.context.ApplicationScoped;
 
-import java.util.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.BeanBuilder;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.PropertyValueProgram;
+import com.caucho.util.L10N;
 
 /**
  * Embeddable version of a singleton bean
@@ -158,24 +153,24 @@ public class BeanEmbed
   protected void configure()
   {
     try {
-      InjectManager webBeans = InjectManager.create();
+      InjectManager cdiManager = InjectManager.create();
       
       if (_value != null) {
-        BeanBuilder factory = webBeans.createBeanFactory(_value.getClass());
+        BeanBuilder<?> factory = cdiManager.createBeanFactory(_value.getClass());
 
         if (_name != null)
           factory.name(_name);
 
-        webBeans.addBean(factory.singleton(_value));
+        cdiManager.addBean(factory.singleton(_value));
       }
       else if (_className == null)
         throw new ConfigException(L.l("BeanEmbed must either have a value or a class"));
       else {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-        Class cl = Class.forName(_className, false, loader);
+        Class<?> cl = Class.forName(_className, false, loader);
 
-        BeanBuilder factory = webBeans.createBeanFactory(cl);
+        BeanBuilder<?> factory = cdiManager.createBeanFactory(cl);
 
         factory.scope(ApplicationScoped.class);
 
@@ -185,7 +180,7 @@ public class BeanEmbed
         if (_init != null)
           factory.init(_init);
 
-        webBeans.addBean(factory.bean());
+        cdiManager.addBean(factory.bean());
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
