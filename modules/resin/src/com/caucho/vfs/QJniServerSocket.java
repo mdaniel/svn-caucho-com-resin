@@ -99,7 +99,7 @@ public class QJniServerSocket {
       }
 
       try {
-        Thread.currentThread().sleep(1);
+        Thread.sleep(1);
       } catch (Throwable e) {
       }
     }
@@ -127,9 +127,9 @@ public class QJniServerSocket {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
       
-      Class cl = Class.forName("com.caucho.vfs.JniServerSocketImpl",
-                               false, loader);
-
+      Class<?> cl = Class.forName("com.caucho.vfs.JniServerSocketImpl",
+                                  false, loader);
+      
       Method method = cl.getMethod("create",
                                    new Class[] { String.class,
                                                  int.class });
@@ -152,11 +152,13 @@ public class QJniServerSocket {
     } catch (ClassNotFoundException e) {
       log.fine(e.toString());
       
-      throw new IOException(L.l("JNI Socket support requires Resin Professional."));
+      throw new IOException(L.l("JNI Socket support requires Resin Professional."),
+                            e);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
       
-      throw new IOException(L.l("JNI Socket support requires Resin Professional."));
+      throw new IOException(L.l("JNI Socket support requires Resin Professional."),
+                            e);
     }
   }
 
@@ -167,7 +169,7 @@ public class QJniServerSocket {
     throws IOException
   {
     try {
-      Class cl = Class.forName("com.caucho.vfs.JniServerSocketImpl");
+      Class<?> cl = Class.forName("com.caucho.vfs.JniServerSocketImpl");
 
       Method method = cl.getMethod("open", new Class[] { int.class,
                                                          int.class});

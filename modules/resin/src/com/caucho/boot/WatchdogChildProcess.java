@@ -128,7 +128,7 @@ class WatchdogChildProcess
 
       int port = ss.getLocalPort();
 
-      log.warning("Watchdog starting Resin[" + _watchdog.getId() + "]");
+      log.info("Watchdog starting Resin[" + _watchdog.getId() + "]");
 
       jvmOut = createJvmOut();
 
@@ -155,12 +155,14 @@ class WatchdogChildProcess
         logStatus(_status);
       }
     } catch (Exception e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.WARNING, e.toString(), e);
 
       try {
         Thread.sleep(5000);
       } catch (Exception e1) {
       }
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
     } finally {
       if (ss != null) {
         try {

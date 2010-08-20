@@ -188,7 +188,6 @@ class WatchdogManager implements AlarmListener {
       }
     }
 
-
     server.getConfig().logInit(logStream);
 
     resin.preConfigureInit();
@@ -631,6 +630,8 @@ class WatchdogManager implements AlarmListener {
       }
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
+      System.out.println(e);
+      e.printStackTrace();
     } finally {
       System.exit(1);
     }

@@ -111,8 +111,13 @@ Java_com_caucho_bootjni_JniProcess_setFdMax(JNIEnv *env, jobject obj)
   struct rlimit rlimit;
   struct rlimit set_rlimit;
 
-  set_rlimit.rlim_cur = set_rlimit.rlim_max = RLIM_INFINITY;
-  setrlimit(RLIMIT_NOFILE, &set_rlimit);
+  set_rlimit.rlim_cur = set_rlimit.rlim_max = 128 * 1024;
+
+  if (setrlimit(RLIMIT_NOFILE, &set_rlimit) != 0) {
+    set_rlimit.rlim_cur = set_rlimit.rlim_max = RLIM_INFINITY;
+    
+    setrlimit(RLIMIT_NOFILE, &set_rlimit);
+  }
 
   if (getrlimit(RLIMIT_NOFILE, &rlimit) == 0)
     return rlimit.rlim_cur;

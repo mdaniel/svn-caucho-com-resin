@@ -67,7 +67,7 @@ public final class MnodeValue implements ExtCacheEntry {
 
   private int _hits = 0;
 
-  private SoftReference _valueRef;
+  private SoftReference<Object> _valueRef;
 
   public MnodeValue(HashKey valueHash,
                     Object value,
@@ -102,7 +102,7 @@ public final class MnodeValue implements ExtCacheEntry {
     _isServerVersionValid = isServerVersionValid;
 
     if (value != null)
-      _valueRef = new SoftReference(value);
+      _valueRef = new SoftReference<Object>(value);
   }
 
   public MnodeValue(MnodeValue oldMnodeValue,
@@ -133,7 +133,7 @@ public final class MnodeValue implements ExtCacheEntry {
     Object value = oldMnodeValue.getValue();
     
     if (value != null)
-      _valueRef = new SoftReference(value);
+      _valueRef = new SoftReference<Object>(value);
   }
 
   /**
@@ -337,9 +337,10 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns the deserialized value for the entry.
    */
+  @Override
   public final Object getValue()
   {
-    SoftReference valueRef = _valueRef;
+    SoftReference<Object> valueRef = _valueRef;
 
     if (valueRef != null)
     {

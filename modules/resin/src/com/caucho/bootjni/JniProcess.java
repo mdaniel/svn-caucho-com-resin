@@ -83,6 +83,7 @@ public class JniProcess extends Process
     }
 
     int fdMax = setFdMax();
+
     if (CauchoSystem.isUnix() && fdMax <= 0) {
       System.out.println(L.l("process file descriptors: {0}", fdMax));
     }

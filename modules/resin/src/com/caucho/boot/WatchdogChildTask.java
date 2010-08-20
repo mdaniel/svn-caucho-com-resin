@@ -152,6 +152,7 @@ class WatchdogChildTask implements Runnable
   /**
    * Main thread watching over the health of the Resin instances.
    */
+  @Override
   public void run()
   {
     try {

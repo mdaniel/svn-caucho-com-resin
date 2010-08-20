@@ -101,7 +101,8 @@ class ProLoader extends SecureClassLoader
 
     if (length > 0
         && (className.startsWith("com/caucho/bootjni")
-            || className.equals("com/caucho/vfs/JniFileStream.class"))) {
+            || className.equals("com/caucho/vfs/JniFileStream.class")
+            || className.equals("com/caucho/vfs/JniServerSocketImpl.class"))) {
       byte []buffer = new byte[length];
 
       try {
