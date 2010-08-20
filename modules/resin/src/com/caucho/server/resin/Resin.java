@@ -79,6 +79,7 @@ import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
@@ -510,7 +511,7 @@ public class Resin
   /**
    * Returns the classLoader
    */
-  public ClassLoader getClassLoader()
+  public EnvironmentClassLoader getClassLoader()
   {
     return _resinSystem.getClassLoader();
   }

@@ -429,7 +429,7 @@ public class DispatchServer implements Dependency {
    */
   public void update()
   {
-    destroy();
+    restart();
   }
 
   /**

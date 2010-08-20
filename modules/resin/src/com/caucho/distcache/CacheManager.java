@@ -80,4 +80,9 @@ public class CacheManager
   {
     return _cacheMap.putIfAbsent(name, cache);
   }
+  
+  public void remove(String name)
+  {
+    _cacheMap.remove(name);
+  }
 }

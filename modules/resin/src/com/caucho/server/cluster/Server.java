@@ -1674,6 +1674,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Handles the alarm.
    */
+  @Override
   public void handleAlarm(Alarm alarm)
   {
     if (! _lifecycle.isActive())
@@ -1699,7 +1700,7 @@ public class Server extends ProtocolDispatchServer
   public boolean isModified()
   {
     boolean isModified = getClassLoader().isModified();
-
+    
     if (isModified)
       getClassLoader().logModified(log);
 
@@ -1762,6 +1763,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns true if the server is currently active and accepting requests
    */
+  @Override
   public boolean isActive()
   {
     return _lifecycle.isActive();
@@ -1887,9 +1889,17 @@ public class Server extends ProtocolDispatchServer
   {
   }
 
+  @Override
+  public void restart()
+  {
+    String msg = L.l("Server restarting due to configuration change");
+    
+    ShutdownService.shutdownActive(ExitCode.MODIFIED, msg);
+  }
   /**
    * Closes the server.
    */
+  @Override
   public void stop()
   {
     Thread thread = Thread.currentThread();

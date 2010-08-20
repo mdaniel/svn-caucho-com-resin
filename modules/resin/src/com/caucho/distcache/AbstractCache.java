@@ -29,6 +29,7 @@
 
 package com.caucho.distcache;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -66,7 +67,7 @@ import com.caucho.util.LruCache;
  */
 
 abstract public class AbstractCache extends AbstractMap
-  implements ObjectCache, ByteStreamCache, CacheStatistics
+  implements ObjectCache, ByteStreamCache, CacheStatistics, Closeable
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
@@ -422,6 +423,8 @@ abstract public class AbstractCache extends AbstractMap
       }
 
       _entryCache = new LruCache<Object,DistCacheEntry>(512);
+      
+      Environment.addCloseListener(this);
     }
   }
 
@@ -928,6 +931,8 @@ abstract public class AbstractCache extends AbstractMap
   public void close()
   {
     _isClosed = true;
+    
+    _localManager.remove(_guid);
   }
 
   @Override

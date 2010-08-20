@@ -34,17 +34,20 @@ import java.util.ArrayList;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.config.DependencyBean;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
 import com.caucho.vfs.Vfs;
 
 /**
  * The Resin class represents the top-level container for Resin.
  * It exactly matches the &lt;resin> tag in the resin.xml
  */
-public class BootResinConfig implements SchemaBean
+public class BootResinConfig implements SchemaBean, DependencyBean
 {
   private Resin _resin;
 
@@ -156,6 +159,12 @@ public class BootResinConfig implements SchemaBean
   public ConfigProgram getProgram()
   {
     return _resinProgram;
+  }
+  
+  @Override
+  public void addDependency(PersistentDependency dependency)
+  {
+    _resin.getClassLoader().addDependency(dependency);
   }
   
   void configureServers()

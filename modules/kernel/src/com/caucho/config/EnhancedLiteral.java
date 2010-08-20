@@ -29,7 +29,6 @@
 
 package com.caucho.config;
 
-import java.lang.annotation.Annotation;
 
 /**
  * Represents the @Current annotation
