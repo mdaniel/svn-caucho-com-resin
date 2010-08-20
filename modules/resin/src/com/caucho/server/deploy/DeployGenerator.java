@@ -50,8 +50,6 @@ abstract public class DeployGenerator<E extends DeployController<?>>
 {
   private static final Logger log
     = Logger.getLogger(DeployGenerator.class.getName());
-  private static final L10N L = new L10N(DeployGenerator.class);
-
   // The owning deployment container
   private DeployContainer<E> _container;
 

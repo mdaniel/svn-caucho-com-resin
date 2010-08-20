@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * DeployController controls the lifecycle of the DeployInstance.
  */
 abstract public class DeployController<I extends DeployInstance>
-  implements Dependency, AlarmListener
+  implements DeployControllerApi<I>, Dependency, AlarmListener
 {
   private static final Logger log
     = Logger.getLogger(DeployController.class.getName());
@@ -105,6 +105,11 @@ abstract public class DeployController<I extends DeployInstance>
 
     _lifecycle = new Lifecycle(getLog(), toString(), Level.FINEST);
   }
+
+  /**
+   * Creates an instance.
+   */
+  abstract protected I instantiateDeployInstance();
 
   public void addLifecycleListener(LifecycleListener listener)
   {
@@ -500,6 +505,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns true if the entry is modified.
    */
+  @Override
   public boolean isModified()
   {
     DeployInstance instance = getDeployInstance();
@@ -510,6 +516,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Log the reason for modification
    */
+  @Override
   public boolean logModified(Logger log)
   {
     DeployInstance instance = getDeployInstance();
@@ -822,11 +829,6 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Creates an instance.
-   */
-  abstract protected I instantiateDeployInstance();
-
-  /**
    * Adds any manifest Class-Path
    */
   protected void addManifestClassPath()
@@ -845,6 +847,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Handles the redeploy check alarm.
    */
+  @Override
   public void handleAlarm(Alarm alarm)
   {
     try {
@@ -895,6 +898,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the entry's debug name.
    */
+  @Override
   public String toString()
   {
     String className = getClass().getName();

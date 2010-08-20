@@ -32,6 +32,7 @@ package com.caucho.server.deploy;
 /**
  * Thrown during deployment
  */
+@SuppressWarnings("serial")
 public class DeployException extends Exception
 {
   /**

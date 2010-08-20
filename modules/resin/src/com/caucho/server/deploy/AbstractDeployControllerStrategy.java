@@ -41,7 +41,8 @@ package com.caucho.server.deploy;
  * </table>
  */
 abstract public class AbstractDeployControllerStrategy
-  implements DeployControllerStrategy {
+  implements DeployControllerStrategy
+{
 
   /**
    * Starts the instance.  Called from an admin start.
@@ -49,7 +50,7 @@ abstract public class AbstractDeployControllerStrategy
    * @param controller the owning controller
    */
   public <I extends DeployInstance>
-          void start(DeployController<I> controller)
+  void start(DeployController<I> controller)
   {
     if (controller.isStopped()) {
       // server/1d03
@@ -72,7 +73,7 @@ abstract public class AbstractDeployControllerStrategy
    * @param controller the owning controller
    */
   public<I extends DeployInstance>
-    void stop(DeployController<I> controller)
+  void stop(DeployController<I> controller)
   {
     controller.stopImpl();
   }
