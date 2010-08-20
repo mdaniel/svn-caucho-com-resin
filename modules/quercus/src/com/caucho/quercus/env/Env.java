@@ -4522,10 +4522,11 @@ public class Env
         
         if (def != null)
           return def;
-        
       }
-      
-      throw createErrorException(e);
+      /*
+      else
+        throw createErrorException(e);
+        */
     }
 
     return def;
@@ -4554,11 +4555,17 @@ public class Env
       for (String entry : wildcardList) {
         fullName = entry + '.' + className;
 
-        JavaClassDef def = getJavaClassDefinition(fullName, false);
+        JavaClassDef def;
+        
+        try {
+          def = getJavaClassDefinition(fullName, false);
 
-        if (def != null) {
-          _importMap.putQualified(className, fullName);
-          return def;
+          if (def != null) {
+            _importMap.putQualified(className, fullName);
+            return def;
+          }
+        } catch (Exception e) {
+          log.log(Level.ALL, e.toString(), e);
         }
       }
     }
