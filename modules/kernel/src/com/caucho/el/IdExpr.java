@@ -35,6 +35,7 @@ import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
 import javax.el.PropertyNotFoundException;
+import javax.el.PropertyNotWritableException;
 import java.io.IOException;
 
 /**
@@ -58,14 +59,14 @@ public class IdExpr extends Expr {
   @Override
   public boolean isReadOnly(ELContext env)
   {
-    env.getELResolver().getValue(env, null, _id);
+    boolean result = env.getELResolver().isReadOnly(env, null, _id);
 
     if (! env.isPropertyResolved())
       throw new PropertyNotFoundException(L.l(
         "'{0}' not found in context '{1}'.",
         _id, env));
-        
-    return false;
+
+    return result;
   }
 
   /**
@@ -122,11 +123,9 @@ public class IdExpr extends Expr {
   {
     ELResolver resolver = env.getELResolver();
 
-    resolver.getValue(env, null, _id);
-
-    if (env.isPropertyResolved())
       resolver.setValue(env, null, _id, value);
-    else
+
+    if (! env.isPropertyResolved())
       throw new PropertyNotFoundException(L.l(
         "'{0}' not found in context '{1}'.",
         _id, env));
