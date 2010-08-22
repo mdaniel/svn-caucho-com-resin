@@ -4493,7 +4493,7 @@ public class Env
   /**
    * Returns an introspected Java class definition.
    */
-  public JavaClassDef getJavaClassDefinition(Class type)
+  public JavaClassDef getJavaClassDefinition(Class<?> type)
   {
     JavaClassDef def = _quercus.getJavaClassDefinition(type, type.getName());
 

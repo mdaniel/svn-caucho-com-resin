@@ -829,7 +829,7 @@ public class QuercusContext
   /**
    * Adds a java class
    */
-  public JavaClassDef getJavaClassDefinition(Class type, String className)
+  public JavaClassDef getJavaClassDefinition(Class<?> type, String className)
   {
     JavaClassDef def;
 

@@ -787,7 +787,7 @@ public final class InjectManager
   }
 
   //
-  // javax.webbeans.Container
+  // javax.enterprise.context.Conversation
   //
 
   public Conversation createConversation()

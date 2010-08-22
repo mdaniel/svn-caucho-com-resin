@@ -985,7 +985,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     } catch (Exception e) {
     }
     
-    return null;
+    return EnvironmentClassLoader.class.getClassLoader();
   }
   
   static class ScanRoot {

@@ -189,7 +189,7 @@ public class JavaClassDef extends ClassDef {
   }
 
   public static JavaClassDef create(ModuleContext moduleContext,
-                                    String name, Class type)
+                                    String name, Class<?> type)
   {
     if (Double.class.isAssignableFrom(type)
         || Float.class.isAssignableFrom(type))

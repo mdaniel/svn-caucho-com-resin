@@ -95,7 +95,6 @@ public class JavaModule extends AbstractQuercusModule {
 
       return new JavaValue(env, def.getType(), def);
     } catch (Throwable e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
 
