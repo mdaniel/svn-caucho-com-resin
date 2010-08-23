@@ -83,7 +83,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   // Array of listeners
   // server/306i  - can't be weak reference, instead create WeakStopListener
   private ArrayList<EnvironmentListener> _listeners
-    = new ArrayList<EnvironmentListener>();
+  = new ArrayList<EnvironmentListener>();
 
   private WeakStopListener _stopListener;
 
@@ -443,20 +443,24 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     if (_listeners == null)
       return listeners;
+    
+    ArrayList<EnvironmentListener> envListeners = _listeners;
 
-    synchronized (_listeners) {
-      for (int i = 0; i < _listeners.size(); i++) {
-        EnvironmentListener listener = _listeners.get(i);
+    if (envListeners != null) {
+      synchronized (envListeners) {
+        for (int i = 0; i < envListeners.size(); i++) {
+          EnvironmentListener listener = envListeners.get(i);
 
-        if (listener != null)
-          listeners.add(listener);
-        else {
-          _listeners.remove(i);
-          i--;
+          if (listener != null)
+            listeners.add(listener);
+          else {
+            envListeners.remove(i);
+            i--;
+          }
         }
       }
     }
-
+    
     return listeners;
   }
 
