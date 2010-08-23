@@ -11,7 +11,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.10 - snapshot">
+<s2 title="4.0.10 - Aug 23, 2010">
 <ul>
 <li>candi: _namedBeanMap is active and needs to be a ConcurrentHashMap (rep by Wesley Wu)</li>
 <li>hessian: for HessianServlet, do not attempt to find implicit API (#4168, rep by Riccardo Cohen)</li>
