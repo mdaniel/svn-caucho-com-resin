@@ -2,14 +2,15 @@
 
 if (isset($_POST["message"])) {
   $queue = java_bean("Queue");
+  $message = htmlspecialchars($_POST["message"]);
 
   if (! $queue) {
     echo "Unable to get message queue!\n";
   } else {
-    if ($queue->offer($_POST["message"])) {
-      echo "Successfully sent message '" . $_POST["message"] . "'";
+    if ($queue->offer($message)) {
+      echo "Successfully sent message '{$message}'";
     } else {
-      echo "Unable to send message '" . $_POST["message"] . "'";
+      echo "Unable to send message '{$message}'";
     }
   }
 }
