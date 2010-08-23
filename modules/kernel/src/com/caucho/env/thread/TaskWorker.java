@@ -177,4 +177,10 @@ abstract public class TaskWorker implements Runnable {
         thread.setName(oldName);
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

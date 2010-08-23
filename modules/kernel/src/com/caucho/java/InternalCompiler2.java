@@ -253,8 +253,6 @@ public class InternalCompiler2 extends AbstractJavaCompiler {
       super(createURI(path), kind);
 
       _path = path;
-
-      System.out.println("PFO: " + toUri());
     }
 
     private static URI createURI(Path path)

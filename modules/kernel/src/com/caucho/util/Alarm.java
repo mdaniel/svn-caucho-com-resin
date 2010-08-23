@@ -657,17 +657,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       ClassLoader loader = Alarm.class.getClassLoader();
 
       if (loader == null
+          || loader instanceof DynamicClassLoader
           || loader == systemLoader
           || systemLoader != null && loader == systemLoader.getParent()) {
         alarmThread = new AlarmThread();
         alarmThread.start();
 
         coordinator = new CoordinatorThread();
-        Thread coordinatorThread = new Thread(coordinator);
-        coordinatorThread.setDaemon(true);
-        coordinatorThread.setPriority(Thread.MAX_PRIORITY);
-        coordinatorThread.setName("alarm-coordinator");
-        coordinatorThread.start();
+        coordinator.wake();
       }
     } catch (Throwable e) {
       // should display for security manager issues

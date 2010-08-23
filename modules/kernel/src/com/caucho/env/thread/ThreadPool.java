@@ -70,6 +70,8 @@ public final class ThreadPool {
 
   private static final AtomicReference<ThreadPool> _globalThreadPool
     = new AtomicReference<ThreadPool>();
+  
+  private final String _name;
 
   private final AtomicInteger _gId = new AtomicInteger();
   
@@ -149,6 +151,13 @@ public final class ThreadPool {
 
   public ThreadPool()
   {
+    this("system");
+  }
+
+  public ThreadPool(String name)
+  {
+    _name = name;
+    
     _launcher = new ThreadLauncher();
 
     // initialize default values
@@ -299,7 +308,7 @@ public final class ThreadPool {
    */
   public int getThreadActiveCount()
   {
-    return _activeCount.get() - _idleCount.get();
+    return _activeCount.get() - _idleCount.get() - _priorityIdleCount.get();
   }
 
   /**
@@ -657,8 +666,9 @@ public final class ThreadPool {
                                ClassLoader loader,
                                boolean isPriority)
   {
-    if (! _priorityQueue.isEmpty())
+    if (! _priorityQueue.isEmpty()) {
       return false;
+    }
     
     if (_taskQueue.isEmpty()) {
       ResinThread thread = popIdleThread();
@@ -695,10 +705,10 @@ public final class ThreadPool {
     if (item != null)
       return item;
 
-    int idleCount = _idleCount.get();
+    int priorityIdleCount = _priorityIdleCount.get();
 
     // if we have spare threads, process any task queue item
-    if (_priorityIdleMin <= idleCount) {
+    if (_priorityIdleMin <= priorityIdleCount) {
       item = _taskQueue.poll();
       
       if (item != null)
@@ -744,7 +754,7 @@ public final class ThreadPool {
     }
     else {
       _idleCount.incrementAndGet();
-      
+
       pushIdleThread(_idleHead, thread);
     }
   }
@@ -874,6 +884,7 @@ public final class ThreadPool {
   private boolean doStart()
   {
     int idleCount = _idleCount.get();
+    int priorityIdleCount = _priorityIdleCount.get();
     int startingCount = _startingCount.get();
 
     int threadCount = _activeCount.get() + startingCount;
@@ -881,7 +892,8 @@ public final class ThreadPool {
     if (_threadMax < threadCount) {
       return false;
     }
-    else if (idleCount + startingCount < _idleMin) {
+    else if (idleCount + priorityIdleCount + startingCount 
+             < _idleMin + _priorityIdleMin) {
       _startingCount.incrementAndGet();
 
       return true;
@@ -900,9 +912,10 @@ public final class ThreadPool {
     interrupt();
   }
 
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 
   final class OverflowThread extends Thread {
@@ -988,6 +1001,7 @@ public final class ThreadPool {
       return false;
     }
 
+    @Override
     public void run()
     {
       ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
@@ -995,7 +1009,7 @@ public final class ThreadPool {
       Thread.currentThread().setContextClassLoader(systemLoader);
 
       try {
-        for (int i = 0; i < _idleMin; i++)
+        for (int i = 0; i < _idleMin + _priorityIdleMin; i++)
           startConnection(false);
       } catch (Throwable e) {
         e.printStackTrace();

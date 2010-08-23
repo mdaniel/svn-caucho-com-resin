@@ -135,7 +135,6 @@ final class ResinThread extends Thread {
   {
     ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
     
-    
     Thread thread = this;
     setName(_name);
     
@@ -151,7 +150,7 @@ final class ResinThread extends Thread {
         
         taskItem.wake();
       }
-      else if (_pool.isIdleExpire()){
+      else if (_pool.isIdleExpire()) {
         return;
       }
       else if ((task = waitForTask()) != null) {
@@ -178,7 +177,6 @@ final class ResinThread extends Thread {
   private Runnable waitForTask()
   {
     _pool.pushIdleThread(this);
-    
     /*
     for (int i = 1000; i >= 0; i--) {
       Runnable task = _taskRef.getAndSet(null);
