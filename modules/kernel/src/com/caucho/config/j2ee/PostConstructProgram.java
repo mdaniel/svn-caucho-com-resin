@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 
@@ -50,11 +51,14 @@ import com.caucho.inject.Module;
 @Module
 public class PostConstructProgram extends ConfigProgram
 {
+  private AnnotatedMethod<?> _annMethod;
   private Method _init;
   private ParamProgram []_program;
 
-  public PostConstructProgram(Method init)
+  public PostConstructProgram(AnnotatedMethod<?> annMethod, Method init)
   {
+    _annMethod = annMethod;
+    
     _init = init;
     _init.setAccessible(true);
 
@@ -71,6 +75,11 @@ public class PostConstructProgram extends ConfigProgram
   public String getName()
   {
     return _init.getName();
+  }
+  
+  public AnnotatedMethod<?> getAnnotatedMethod()
+  {
+    return _annMethod;
   }
 
   protected void introspect()

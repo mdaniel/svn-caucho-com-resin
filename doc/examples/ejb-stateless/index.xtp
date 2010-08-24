@@ -95,11 +95,11 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.SUPPORTS;
 
-import com.caucho.config.Name;
+import javax.inject.Named;
 
 @Stateless
 public class HelloBean implements Hello {
-  @Name("greeting")
+  @Inject @Named("greeting")
   private String _greeting;
 
   @TransactionAttribute(SUPPORTS)
@@ -194,20 +194,23 @@ already exists.  It's used when updating database values.</p>
 
 <s1 title="Configuring the EJB stateless bean">
 
-<p><code>&lt;StatelessBean&gt;</code> configure the session bean
+<p><code>&lt;ee:Stateless&gt;</code> configure the session bean
 from the resin-web.xml.
-The &lt;StatelessBean&gt; entry will
+The &lt;ee:Stateless&gt; entry will
 look at the bean's annotations to enhance the class.</p>
 
 <example title="ejb-stateless-bean in web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:qa="urn:java:qa"
+          xmlns:lang="urn:java:java.lang"
+          xmlns:ee="urn:java:ee">
 
-  &lt;env-entry env-entry-name="greeting"
-             env-entry-type="java.lang.String"
-             env-entry-value="Hello, World."/&gt;
+  &lt;lang:String ee:Named="greeting">
+    Hello, World
+  &lt;/lang:String>
 
-  &lt;qa:TestBean xmlns:qa="urn:java:qa">
-    &lt;StatelessBean/>
+  &lt;qa:TestBean>
+    &lt;ee:Stateless/>
   &lt;/qa:TestBean>
   
 &lt;/web-app&gt;
@@ -222,10 +225,10 @@ dependency injection section.</p>
 <s1 title="Client">
 
 <example title="HelloServlet.java">
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 public class HelloServlet extends GenericServlet {
-  @Current private Hello _hello;
+  @Inject private Hello _hello;
 
   public void service(HttpServletRequest req, HttpServletResponse res)
     throws IOException, ServletException
@@ -239,7 +242,7 @@ public class HelloServlet extends GenericServlet {
 
 <s2 title="@EJB">
 
-<p>The <a href="http://caucho.com/resin-javadoc/com/caucho/enterprise/inject/Current.html">@Current</a> annotation tells
+<p>The <a href="http://caucho.com/resin-javadoc/javax.inject/Inject.html">@Inject</a> annotation tells
 Resin to look for a <code>Hello</code> component in the Java Injection
 repository.
 </p>

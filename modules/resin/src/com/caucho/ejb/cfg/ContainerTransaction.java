@@ -95,7 +95,7 @@ public class ContainerTransaction {
       throw new ConfigException(L.l("'{0}' is an unknown entity bean.",
                                     _method.getEJBName()));
 
-    EjbMethodPattern method = bean.createMethod(_method);
+    EjbMethodPattern<?> method = bean.createMethod(_method);
 
     method.setTransAttribute(_trans);
 
@@ -121,7 +121,7 @@ public class ContainerTransaction {
 
       signature.setMethodName(prefix + methodName);
 
-      EjbMethodPattern method = bean.createMethod(signature);
+      EjbMethodPattern<?> method = bean.createMethod(signature);
 
       method.setTransAttribute(_trans);
     }

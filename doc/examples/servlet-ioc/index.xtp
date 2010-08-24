@@ -94,10 +94,12 @@ the following calls:</p>
 </ol>
 
 <example title="WEB-INF/web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:test="urn:java:test"
+            xmlns:ee="urn:java:ee"&gt;
   
   &lt;test:HelloServlet>
-    &lt;WebServlet urlPatterns="/hello"/>
+    &lt;ee:WebServlet urlPatterns="/hello"/>
 
     &lt;test:greeting>Hello, bean-style World&lt;/test:greeting>
   &lt;/test:HelloServlet>

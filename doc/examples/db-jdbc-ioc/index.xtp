@@ -95,8 +95,12 @@ generally always available as a fallback.</li>
 </ol>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+   xmlns:example="urn:java:example">
   &lt;database jndi-name="jdbc/basic"&gt;
+
+    &lt;example:Demo/>
+    
     &lt;driver type="com.caucho.db.jca.ConnectionFactory"&gt;
       &lt;url&gt;resin:WEB-INF/db&lt;/url&gt;
     &lt;/driver&gt;
@@ -128,10 +132,12 @@ configuration with JNDI lookups.  The Dependency Injection style is
 simpler, cleaner and makes the application more testable and robust.</p>
 
 <example>
+package example;
+
 import javax.inject.Inject;
 
 public class BasicServlet extends HttpServlet {
-  @Inject private DataSource _ds;
+  @Inject @Demo private DataSource _ds;
 
   ...
 }

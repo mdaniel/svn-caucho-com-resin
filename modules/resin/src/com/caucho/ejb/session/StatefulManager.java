@@ -42,7 +42,6 @@ import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 import javax.ejb.NoSuchEJBException;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
@@ -58,7 +57,6 @@ import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
-import com.caucho.ejb.inject.SessionBeanImpl;
 import com.caucho.ejb.inject.StatefulBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;

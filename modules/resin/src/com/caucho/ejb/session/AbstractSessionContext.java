@@ -29,7 +29,6 @@
 package com.caucho.ejb.session;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.ejb.EJBException;

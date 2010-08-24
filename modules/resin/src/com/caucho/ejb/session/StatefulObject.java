@@ -28,14 +28,10 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
-import com.caucho.ejb.server.AbstractEjbBeanManager;
-
-import javax.ejb.Handle;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.rmi.RemoteException;
-import javax.ejb.*;
+
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 
 /**
  * Abstract base class for a stateful session object

@@ -45,7 +45,6 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptors;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;

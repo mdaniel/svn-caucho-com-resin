@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
 import javax.ejb.Schedules;
@@ -261,6 +262,14 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     for (AnnotatedMethod<? super X> method : getAnnotatedMethods()) {
       introspectMethodImpl(method);
     }
+    
+    /*
+    for (AnnotatedMethod<? super X> method : getBeanType().getMethods()) {
+      if (method.isAnnotationPresent(PostConstruct.class)) {
+        introspectMethodImpl(method);
+      }
+    }
+    */
   }
 
   private void introspectMethodImpl(AnnotatedMethod<? super X> apiMethod)
@@ -308,7 +317,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   {
     AspectGenerator<X> bizMethod = getAspectBeanFactory().create(method);
       
-    if (bizMethod != null)
+    if (bizMethod != null && ! _businessMethods.contains(bizMethod))
       _businessMethods.add(bizMethod);
   }
 

@@ -192,11 +192,23 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   @Override
   public void postConstruct(X instance)
   {
-
     if (_producer == null)
       getInjectionPoints();
     
     _producer.postConstruct(instance);
+  }
+  
+  public ConfigProgram []getPostConstructProgram()
+  {
+    if (_producer == null)
+      getInjectionPoints();
+    
+    return _producer.getPostConstructProgram();
+  }
+  
+  public void setPostConstructProgram(ConfigProgram []program)
+  {
+    _producer.setPostConstructProgram(program);
   }
 
   /**
@@ -375,7 +387,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       }
 
       PostConstructProgram initProgram
-        = new PostConstructProgram(method);
+        = new PostConstructProgram(annMethod, method);
 
       if (! initList.contains(initProgram))
         initList.add(initProgram);
@@ -433,8 +445,6 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
    */
   private void introspect(AnnotatedType<X> beanType)
   {
-    Class<X> cl = (Class<X>) beanType.getBaseType();
-    
     introspectConstructor(beanType);
   }
 

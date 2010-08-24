@@ -314,7 +314,7 @@ abstract public class BeanGenerator<X> extends GenClass
   {
     ArrayList<Method> postConstructMethods 
       = getLifecycleMethods(PostConstruct.class);
-    
+ 
     out.println();
     out.println("public void __caucho_postConstruct()");
     out.println("{");

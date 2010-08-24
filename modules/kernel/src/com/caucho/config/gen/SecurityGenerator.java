@@ -32,12 +32,7 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.util.HashMap;
 
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.annotation.security.RunAs;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;

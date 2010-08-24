@@ -259,6 +259,16 @@ public class CandiProducer<X> implements InjectionTarget<X>
       throw new CreationException(e);
     }
   }
+  
+  public ConfigProgram []getPostConstructProgram()
+  {
+    return _initProgram;
+  }
+  
+  public void setPostConstructProgram(ConfigProgram []initProgram)
+  {
+    _initProgram = initProgram;
+  }
 
   @Override
   public void postConstruct(X instance)

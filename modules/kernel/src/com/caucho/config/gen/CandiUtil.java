@@ -29,33 +29,34 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.CreationalContextImpl;
-import com.caucho.config.inject.DecoratorBean;
-import com.caucho.config.inject.DelegateProxyBean;
-import com.caucho.config.inject.DependentCreationalContext;
-import com.caucho.config.inject.InterceptorBean;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.InterceptorRuntimeBean;
-import com.caucho.config.inject.OwnerCreationalContext;
-import com.caucho.config.reflect.AnnotatedTypeUtil;
-import com.caucho.util.L10N;
-
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
+import javax.enterprise.inject.spi.Interceptor;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.DecoratorBean;
+import com.caucho.config.inject.DelegateProxyBean;
+import com.caucho.config.inject.DependentCreationalContext;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InterceptorRuntimeBean;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
+import com.caucho.util.L10N;
 
 /**
  * Utilities

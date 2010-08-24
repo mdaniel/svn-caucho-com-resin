@@ -29,21 +29,18 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.j2ee.PostConstructProgram;
+import java.lang.reflect.Method;
+
 import com.caucho.config.ConfigException;
+import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
-
-import java.lang.reflect.*;
-import java.util.logging.Logger;
 
 /**
  * Configuration for the init-param pattern.
  */
 public class PostConstructType
 {
-  private static Logger log
-    = Logger.getLogger(PostConstructType.class.getName());
   private static L10N L = new L10N(PostConstructType.class);
 
   private String _declaringClass;
@@ -66,7 +63,7 @@ public class PostConstructType
     _methodName = name;
   }
 
-  public ConfigProgram getProgram(Class cl)
+  public ConfigProgram getProgram(Class<?> cl)
   {
     if (cl == null) {
       throw new ConfigException(L.l("'{0}' is an unknown callback method.",
@@ -83,7 +80,7 @@ public class PostConstructType
 
       if (method.getName().equals(_methodName)
           && method.getParameterTypes().length == 0) {
-        return new PostConstructProgram(method);
+        return new PostConstructProgram(null, method);
       }
     }
 

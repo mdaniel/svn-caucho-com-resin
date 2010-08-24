@@ -29,19 +29,9 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.config.inject.DecoratorBean;
-import com.caucho.config.inject.InterceptorBean;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.util.L10N;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.ejb.SessionSynchronization;
-import javax.transaction.Synchronization;
 import javax.transaction.Status;
+import javax.transaction.Synchronization;
 
 /**
  * Utilities

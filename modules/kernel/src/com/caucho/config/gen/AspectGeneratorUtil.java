@@ -30,12 +30,6 @@ package com.caucho.config.gen;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.HashSet;
-
-import javax.ejb.ApplicationException;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;

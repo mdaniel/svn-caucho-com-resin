@@ -36,6 +36,7 @@ import javax.ejb.TimedObject;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerService;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
@@ -47,10 +48,12 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
+import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.PostConstructConfig;
 import com.caucho.ejb.cfg.PreDestroyConfig;
 import com.caucho.ejb.timer.EjbTimerService;
+import com.caucho.ejb.xa.XaInterceptor;
 
 /**
  * Creates an configures an ejb instance
@@ -112,6 +115,29 @@ public class EjbInjectionTarget<T> {
         = (InjectionTargetBuilder<T>) injectionTarget;
       
       targetImpl.setGenerateInterception(false);
+
+      // Special processing required for the @Singleton XA support
+      ConfigProgram []initProgram = targetImpl.getPostConstructProgram();
+      ConfigProgram []extInitProgram = new ConfigProgram[initProgram.length];
+      
+      for (int i = 0; i < initProgram.length; i++) {
+        ConfigProgram program = initProgram[i];
+        
+        if (program instanceof PostConstructProgram) {
+          PostConstructProgram pcProgram = (PostConstructProgram) program;
+          
+          AnnotatedMethod<?> annMethod = pcProgram.getAnnotatedMethod();
+          
+          if (annMethod != null) {
+            program = XaInterceptor.create(annMethod);
+          }
+        }
+        
+        if (program != null)
+          extInitProgram[i] = program;
+      }
+      
+      targetImpl.setPostConstructProgram(extInitProgram);
     }
   }
 
@@ -167,7 +193,7 @@ public class EjbInjectionTarget<T> {
       InjectManager beanManager = InjectManager.create();
 
       ManagedBeanImpl<T> managedBean
-      = beanManager.createManagedBean(_annotatedType);
+        = beanManager.createManagedBean(_annotatedType);
 
       _bean = managedBean;
       setInjectionTarget(managedBean.getInjectionTarget());
@@ -244,17 +270,10 @@ public class EjbInjectionTarget<T> {
     CreationalContextImpl<T> env 
       = new DependentCreationalContext<T>(_bean, parentEnv, null);
     
-    // instance = _bean.create(env);
     instance = _injectionTarget.produce(env);
     
     _injectionTarget.inject(instance, env);
 
-    /*
-    for (ConfigProgram program : _resourceProgram) {
-      program.inject(instance, env);
-    }
-    */
-    
     _injectionTarget.postConstruct(instance);
     
     return instance;

@@ -29,7 +29,6 @@
 package com.caucho.ejb.session;
 
 import javax.ejb.TimerService;
-import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.inject.Module;
