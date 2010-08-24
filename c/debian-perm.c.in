@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <pwd.h>
+#include <errno.h>
+#include <string.h>
 
 static void
 chown_rec(char *path, int uid, int gid)
@@ -13,7 +15,8 @@ chown_rec(char *path, int uid, int gid)
   char buf[2048];
   
   if (chown(path, uid, gid) < 0) {
-    fprintf(stderr, "can't chown %s\n", path);
+    fprintf(stderr, "can't chown %s to uid(%d)/gid(%d): %s\n", 
+            path, uid, gid, strerror(errno));
     return;
   }
   lchown(path, uid, gid);
