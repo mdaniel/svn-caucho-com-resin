@@ -675,60 +675,86 @@ public class SpyConnection implements java.sql.Connection {
     _conn.rollback(savepoint);
   }
 
+  public Clob createClob()
+    throws SQLException
+  {
+    return _conn.createClob();
+  }
+
+  public Blob createBlob()
+    throws SQLException
+  {
+    return _conn.createBlob();
+  }
+
+  public NClob createNClob()
+    throws SQLException
+  {
+    return _conn.createNClob();
+  }
+
+  public SQLXML createSQLXML()
+    throws SQLException
+  {
+    return _conn.createSQLXML();
+  }
+
+  public boolean isValid(int timeout)
+    throws SQLException
+  {
+    return _conn.isValid(timeout);
+  }
+
+  public void setClientInfo(String name, String value)
+    throws SQLClientInfoException
+  {
+    _conn.setClientInfo(name, value);
+  }
+
+  public void setClientInfo(Properties properties)
+    throws SQLClientInfoException
+  {
+    _conn.setClientInfo(properties);
+  }
+
+  public String getClientInfo(String name)
+    throws SQLException
+  {
+    return _conn.getClientInfo(name);
+  }
+
+  public Properties getClientInfo()
+    throws SQLException
+  {
+    return _conn.getClientInfo();
+  }
+
+  public Array createArrayOf(String typeName, Object[] elements)
+    throws SQLException
+  {
+    return _conn.createArrayOf(typeName, elements);
+  }
+
+  public Struct createStruct(String typeName, Object[] attributes)
+    throws SQLException
+  {
+    return _conn.createStruct(typeName, attributes);
+  }
+
+  public <T> T unwrap(Class<T> iface)
+    throws SQLException
+  {
+    return _conn.unwrap(iface);
+  }
+
+  public boolean isWrapperFor(Class<?> iface)
+    throws SQLException
+  {
+    return _conn.isWrapperFor(iface);
+  }
+
   public String toString()
   {
     return "SpyConnection[id=" + getId() + ",conn=" + _conn + "]";
   }
-
-    public Clob createClob() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Blob createBlob() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public NClob createNClob() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public SQLXML createSQLXML() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isValid(int timeout) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setClientInfo(String name, String value) throws SQLClientInfoException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setClientInfo(Properties properties) throws SQLClientInfoException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public String getClientInfo(String name) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Properties getClientInfo() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

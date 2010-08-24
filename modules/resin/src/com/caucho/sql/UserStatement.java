@@ -776,13 +776,19 @@ public class UserStatement implements Statement {
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    return (T) _stmt;
+    if (iface.isAssignableFrom(_stmt.getClass()))
+      return (T)_stmt;
+    else
+      return _stmt.unwrap(iface);
   }
 
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    return (iface.isAssignableFrom(_stmt.getClass()));
+    if (iface.isAssignableFrom(_stmt.getClass()))
+      return true;
+    else
+      return _stmt.isWrapperFor(iface);
   }
 
   /**

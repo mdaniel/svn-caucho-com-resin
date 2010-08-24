@@ -612,23 +612,37 @@ public class SpyStatement implements java.sql.Statement {
     return _stmt.getResultSetHoldability();
   }
 
-    public boolean isClosed() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isClosed()
+    throws SQLException
+  {
+    return _stmt.isClosed();
+  }
 
-    public void setPoolable(boolean poolable) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setPoolable(boolean poolable)
+    throws SQLException
+  {
+    _stmt.setPoolable(poolable);
+  }
 
-    public boolean isPoolable() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isPoolable()
+    throws SQLException
+  {
+    return _stmt.isPoolable();
+  }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public <T> T unwrap(Class<T> iface)
+    throws SQLException
+  {
+    return _stmt.unwrap(iface);
+  }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isWrapperFor(Class<?> iface)
+    throws SQLException
+  {
+    return _stmt.isWrapperFor(iface);
+  }
+
+  public String toString() {
+    return getClass().getSimpleName() + "[" + _id + "]";
+  }
 }
