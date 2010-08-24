@@ -694,6 +694,11 @@ public final class ThreadPool {
     }
   }
 
+  void startIdleThread()
+  {
+    _launcher.wake();
+  }
+  
   /**
    * Returns the next available task, returning null if the thread
    * should exit.
@@ -706,15 +711,16 @@ public final class ThreadPool {
       return item;
 
     int priorityIdleCount = _priorityIdleCount.get();
+    int idleCount = _idleCount.get();
 
     // if we have spare threads, process any task queue item
-    if (_priorityIdleMin <= priorityIdleCount) {
+    if (_priorityIdleMin <= priorityIdleCount + idleCount) {
       item = _taskQueue.poll();
       
       if (item != null)
         return item;
     }
-    
+
     return null;
   }
   
@@ -892,8 +898,8 @@ public final class ThreadPool {
     if (_threadMax < threadCount) {
       return false;
     }
-    else if (idleCount + priorityIdleCount + startingCount 
-             < _idleMin + _priorityIdleMin) {
+    else if (idleCount + startingCount < _idleMin
+             || priorityIdleCount + startingCount < _priorityIdleMin) {
       _startingCount.incrementAndGet();
 
       return true;
@@ -902,7 +908,7 @@ public final class ThreadPool {
       return false;
     }
   }
-  
+
   public void close()
   {
     if (this == _globalThreadPool.get())
@@ -1009,8 +1015,8 @@ public final class ThreadPool {
       Thread.currentThread().setContextClassLoader(systemLoader);
 
       try {
-        for (int i = 0; i < _idleMin + _priorityIdleMin; i++)
-          startConnection(false);
+        while (startConnection(false)) {
+        }
       } catch (Throwable e) {
         e.printStackTrace();
       }

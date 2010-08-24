@@ -145,6 +145,8 @@ final class ResinThread extends Thread {
       ThreadTask taskItem = _pool.nextTask(this);
 
       if (taskItem != null) {
+        _pool.startIdleThread();
+        
         task = taskItem.getRunnable();
         classLoader = taskItem.getLoader();
         
