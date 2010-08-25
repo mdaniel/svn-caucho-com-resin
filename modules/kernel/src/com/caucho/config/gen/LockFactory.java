@@ -77,16 +77,50 @@ public class LockFactory<X> extends AbstractAspectFactory<X> {
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
       boolean isEnhanced)
   {
-    Lock lock = method.getAnnotation(Lock.class);
+    // TODO The annotation resolution algorithm should probably be re-factored
+    // in a superclass.
 
-    LockType lockType = _classLockType;
+    AnnotatedType<?> declaringType = method.getDeclaringType();
 
-    if (lock != null)
-      lockType = lock.value();
+    LockType lockType = null;
 
-    AccessTimeout accessTimeout = method.getAnnotation(AccessTimeout.class);
+    Lock methodLevelLock = method.getAnnotation(Lock.class);
 
-    if (accessTimeout == null) {
+    Lock declaringClassLock = (declaringType != null) ? declaringType
+        .getAnnotation(Lock.class) : null;
+
+    // The method-level annotation takes precedence.
+    if (methodLevelLock != null) {
+      lockType = methodLevelLock.value();
+    }
+    // Then the class-level annotation at the declaring class takes precedence.
+    else if (declaringClassLock != null) {
+      lockType = declaringClassLock.value();
+    }
+    // Finally, the top level class annotation takes effect.
+    else {
+      lockType = _classLockType;
+    }
+
+    AccessTimeout accessTimeout = null;
+
+    AccessTimeout methodLevelAccessTimeout = method
+        .getAnnotation(AccessTimeout.class);
+
+    AccessTimeout declaringClassAccessTimeout = (declaringType != null) ? declaringType
+        .getAnnotation(AccessTimeout.class)
+        : null;
+
+    // The method-level annotation takes precedence.
+    if (methodLevelAccessTimeout != null) {
+      accessTimeout = methodLevelAccessTimeout;
+    }
+    // Then the class-level annotation at the declaring class takes precedence.
+    else if (declaringClassAccessTimeout != null) {
+      accessTimeout = declaringClassAccessTimeout;
+    }
+    // Finally, the top level class annotation takes effect.
+    else {
       accessTimeout = _classAccessTimeout;
     }
 
