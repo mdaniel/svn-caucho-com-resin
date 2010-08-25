@@ -105,7 +105,7 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
         if (_lockTimeout != -1) {
           out.println("com.caucho.config.util.LockUtil.lockRead("
                       + "_readWriteLock.readLock(),"
-                      + _lockTimeoutUnit.toMillis(_lockTimeout)
+                      + _lockTimeoutUnit.toMillis(_lockTimeout) + "L"
                       + ");");
         } else {
             // XXX: This should probably be put behind the lock utility as well,
@@ -118,7 +118,7 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
         if (_lockTimeout != -1) {
           out.println("com.caucho.config.util.LockUtil.lockWrite("
                       + "_readWriteLock,"
-                      + _lockTimeoutUnit.toMillis(_lockTimeout)
+                      + _lockTimeoutUnit.toMillis(_lockTimeout) + "L"
                       + ");");
         } else {
           out.println("com.caucho.config.util.LockUtil.lockWrite("
