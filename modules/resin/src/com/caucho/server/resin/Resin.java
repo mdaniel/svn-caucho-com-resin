@@ -768,7 +768,7 @@ public class Resin
    */
   public LifecycleState getLifecycleState()
   {
-    return _lifecycle;
+    return _lifecycle.getState();
   }
 
   /**

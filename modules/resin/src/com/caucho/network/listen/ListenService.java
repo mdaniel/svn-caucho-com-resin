@@ -96,7 +96,7 @@ public class ListenService extends AbstractResinService
       
       _listeners.add(listener);
     
-      if (_lifecycle.isAfterStarting()) {
+      if (_lifecycle.getState().isAfterStarting()) {
         // server/1e00
         listener.bind();
         listener.start();

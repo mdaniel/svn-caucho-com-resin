@@ -1725,7 +1725,7 @@ public class Server extends ProtocolDispatchServer
    */
   public boolean isAfterStarting()
   {
-    return _lifecycle.isAfterStarting();
+    return _lifecycle.getState().isAfterStarting();
   }
 
   /**

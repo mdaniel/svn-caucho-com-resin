@@ -56,8 +56,6 @@ public class ResinSystem
   private static final EnvironmentLocal<ResinSystem> _serverLocal
     = new EnvironmentLocal<ResinSystem>();
 
-  private static final ClassLoader _systemClassLoader;
-
   private final String _id;
   private EnvironmentClassLoader _classLoader;
   
@@ -279,7 +277,7 @@ public class ResinSystem
    */
   public boolean isAfterStarting()
   {
-    return _lifecycle.isAfterStarting();
+    return _lifecycle.getState().isAfterStarting();
   }
 
   /**
@@ -632,16 +630,5 @@ public class ResinSystem
       else
         return b.getClass().getName().compareTo(a.getClass().getName());
     }
-  }
-  
-  static {
-    ClassLoader systemClassLoader = null;
-    
-    try {
-      systemClassLoader = ClassLoader.getSystemClassLoader();
-    } catch (Exception e) {
-    }
-    
-    _systemClassLoader = systemClassLoader;
   }
 }

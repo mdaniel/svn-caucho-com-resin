@@ -30,5 +30,5 @@ package com.caucho.lifecycle;
 
 public interface LifecycleListener
 {
-  public void lifecycleEvent(int oldState, int newState);
+  public void lifecycleEvent(LifecycleState oldState, LifecycleState newState);
 }

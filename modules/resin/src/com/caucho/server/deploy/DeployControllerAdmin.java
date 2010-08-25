@@ -32,6 +32,7 @@ package com.caucho.server.deploy;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
 import com.caucho.lifecycle.LifecycleNotification;
+import com.caucho.lifecycle.LifecycleState;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.util.Alarm;
@@ -110,7 +111,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
 
   public String getState()
   {
-    return getController().getState();
+    return getController().getState().toString();
   }
 
   public String getErrorMessage()
@@ -195,20 +196,20 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return new MBeanNotificationInfo[] { status };
   }
 
-  public void lifecycleEvent(int oldState, int newState)
+  public void lifecycleEvent(LifecycleState oldState, LifecycleState newState)
   {
     Logger log = _controller.getLog();
 
     long timestamp = Alarm.getCurrentTime();
 
-    String oldValue = Lifecycle.getStateName(oldState);
-    String newValue = Lifecycle.getStateName(newState);
+    String oldValue = oldState.toString();
+    String newValue = newState.toString();
     String message = newValue;
 
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " lifecycleEvent " + oldValue + " -> " + newValue);
 
-    if (newState == Lifecycle.IS_ACTIVE) {
+    if (newState.isActive()) {
       LifecycleNotification notif;
       notif = new LifecycleNotification(LifecycleNotification.AFTER_START,
                                         this, _sequence++, timestamp,
@@ -217,7 +218,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
       _broadcaster.sendNotification(notif);
     }
 
-    if (oldState == Lifecycle.IS_ACTIVE) {
+    if (oldState.isActive()) {
       LifecycleNotification notif;
       notif = new LifecycleNotification(LifecycleNotification.BEFORE_STOP,
                                         this, _sequence++, timestamp,

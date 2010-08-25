@@ -59,7 +59,7 @@ public interface DeployControllerApi<I extends DeployInstance>
   /**
    * Returns the state name.
    */
-  public String getState();
+  public DeployControllerState getState();
 
   /**
    * Returns true if the instance is in the active state.

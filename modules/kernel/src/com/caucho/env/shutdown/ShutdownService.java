@@ -114,7 +114,7 @@ public class ShutdownService extends AbstractResinService
    */
   public LifecycleState getLifecycleState()
   {
-    return _lifecycle;
+    return _lifecycle.getState();
   }
   
   /**

@@ -80,6 +80,7 @@ abstract public class DeployController<I extends DeployInstance>
   private DeployControllerStrategy _strategy;
 
   protected final Lifecycle _lifecycle;
+  private DeployControllerState _state = DeployControllerState.NEW;
 
   private Alarm _alarm = new WeakAlarm(this);
   private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
@@ -304,8 +305,9 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Returns true if the entry matches.
+   * Returns true if
    */
+  @Override
   public boolean isNameMatch(String name)
   {
     return getId().equals(name);
@@ -314,6 +316,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the start time of the entry.
    */
+  @Override
   public long getStartTime()
   {
     return _startTime;
@@ -341,6 +344,8 @@ abstract public class DeployController<I extends DeployInstance>
     try {
       thread.setContextClassLoader(getParentClassLoader());
 
+      _state = _state.toInit();
+      
       initBegin();
 
       if (_startupMode == STARTUP_MANUAL) {
@@ -413,20 +418,24 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the state name.
    */
-  public String getState()
+  @Override
+  public DeployControllerState getState()
   {
+    return _state.toCurrentState(this);
+    /*
     if (isDestroyed())
-      return "destroyed";
+      return DeployControllerState.DESTROYED;
     else if (isStoppedLazy())
-      return "stopped-lazy";
+      return DeployControllerState.STOPPED_IDLE;
     else if (isStopped())
-      return "stopped";
+      return DeployControllerState.STOPPED;
     else if (isError())
-      return "error";
+      return DeployControllerState.ERROR;
     else if (isModified())
-      return "active-modified";
+      return DeployControllerState.ACTIVE_MODIFIED;
     else
-      return "active";
+      return DeployControllerState.ACTIVE;
+      */
   }
 
   /**
@@ -552,6 +561,14 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public final I getDeployInstance()
   {
+    return _deployInstance;
+  }
+
+  /**
+   * Returns the current instance.
+   */
+  protected final I createDeployInstance()
+  {
     synchronized (this) {
       if (_deployInstance == null) {
         Thread thread = Thread.currentThread();
@@ -573,6 +590,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Redeploys the entry if it's modified.
    */
+  @Override
   public void startOnInit()
   {
     if (! _lifecycle.isAfterInit())
@@ -585,6 +603,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Deploy the controller from an admin command.
    */
+  @Override
   public void deploy()
   {
   }
@@ -592,6 +611,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Force an instance start from an admin command.
    */
+  @Override
   public final void start()
   {
     _strategy.start(this);
@@ -606,6 +626,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Stops the controller from an admin command.
    */
+  @Override
   public final void stop()
   {
     _strategy.stop(this);
@@ -614,6 +635,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Force an instance restart from an admin command.
    */
+  @Override
   public final void restart()
   {
     _strategy.stop(this);
@@ -623,6 +645,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Update the controller from an admin command.
    */
+  @Override
   public final void update()
   {
     _strategy.update(this);
@@ -639,6 +662,7 @@ abstract public class DeployController<I extends DeployInstance>
    * Returns the instance for a top-level request
    * @return the request object or null for none.
    */
+  @Override
   public final I request()
   {
     if (_lifecycle.isDestroyed())
@@ -654,6 +678,7 @@ abstract public class DeployController<I extends DeployInstance>
    *
    * @return the request object or null for none.
    */
+  @Override
   public final I subrequest()
   {
     if (_lifecycle.isDestroyed())
@@ -700,7 +725,7 @@ abstract public class DeployController<I extends DeployInstance>
     try {
       thread.setContextClassLoader(_parentLoader);
       
-      deployInstance = getDeployInstance();
+      deployInstance = createDeployInstance();
       
       loader = deployInstance.getClassLoader();
       thread.setContextClassLoader(loader);
@@ -718,9 +743,13 @@ abstract public class DeployController<I extends DeployInstance>
 
       deployInstance.start();
 
+      _state = _state.toActive();
       isActive = true;
+
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
+      _state = _state.toError();
+      
       _lifecycle.toError();
       
       if (_deployItem != null)
@@ -733,6 +762,8 @@ abstract public class DeployController<I extends DeployInstance>
         log.log(Level.FINEST, e.toString(), e);
       }
     } catch (Throwable e) {
+      _state = _state.toError();
+      
       _lifecycle.toError();
       
       if (_deployItem != null)
@@ -743,7 +774,7 @@ abstract public class DeployController<I extends DeployInstance>
       else
         log.log(Level.SEVERE, e.toString(), e);
     } finally {
-      if (isActive) {
+      if (_state.isActive()) {
         _lifecycle.toActive();
         
         if (_deployItem != null && ! "error".equals(_deployItem.getState()))
@@ -873,6 +904,8 @@ abstract public class DeployController<I extends DeployInstance>
   {
     if (_lifecycle.isAfterInit())
       stop();
+    
+    _state = _state.toDestroy();
 
     if (! _lifecycle.toDestroy())
       return false;
