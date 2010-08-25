@@ -294,10 +294,12 @@ public final class Lifecycle {
   /**
    * Returns true for the closing states
    */
+  /*
   public boolean isAfterActive()
   {
     return getState().isAfterActive();
   }
+  */
 
   /**
    * Wait for a period of time until the service starts.
@@ -356,6 +358,14 @@ public final class Lifecycle {
     
     return IS_WARMUP <= state && state <= IS_ACTIVE;
     */
+  }
+
+  /**
+   * Returns true for the closing states
+   */
+  public boolean isAfterStopping()
+  {
+    return getState().isAfterStopping();
   }
 
   /**

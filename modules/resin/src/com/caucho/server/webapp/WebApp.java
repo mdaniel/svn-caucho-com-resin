@@ -3163,7 +3163,7 @@ public class WebApp extends ServletContextImpl
 
     // _configException test is needed so compilation failures will force
     // restart
-    if (_lifecycle.isAfterActive())
+    if (_lifecycle.isAfterStopping())
       return true;
     else if (_classLoader.isModified())
       return true;
@@ -3186,9 +3186,12 @@ public class WebApp extends ServletContextImpl
   /**
    * Log the reason for modification.
    */
+  @Override
   public boolean logModified(Logger log)
   {
-    if (_lifecycle.isAfterActive()) {
+    if (_lifecycle.isAfterStopping()) {
+      log.fine(this + " modified after stopping");
+      
       // closed web-apps don't modify (XXX: errors?)
       return true;
     }

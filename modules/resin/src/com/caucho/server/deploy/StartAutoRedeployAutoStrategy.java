@@ -29,6 +29,8 @@
 
 package com.caucho.server.deploy;
 
+import java.util.logging.Logger;
+
 /**
  * The start-mode="automatic", redeploy-model="automatic" controller strategy.
  *
@@ -122,6 +124,8 @@ public class StartAutoRedeployAutoStrategy
       return controller.getDeployInstance();
     }
     else if (controller.isModified()) {
+      System.out.println("ISMX: " + controller);
+      controller.logModified(Logger.getLogger(getClass().getName()));
       // server/1d1i
       I instance = controller.restartImpl();
 
