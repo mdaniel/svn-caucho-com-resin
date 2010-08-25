@@ -284,7 +284,8 @@ public class CandiProducer<X> implements InjectionTarget<X>
       else {
         for (ConfigProgram program : _initProgram) {
           // log.info("POST: " + program);
-          program.inject(instance, env);
+          if (program != null)
+            program.inject(instance, env);
         }
       }
 

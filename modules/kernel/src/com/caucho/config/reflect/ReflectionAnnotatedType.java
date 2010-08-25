@@ -231,20 +231,21 @@ public class ReflectionAnnotatedType<T>
           continue;
           */
         else if (childMethod instanceof AnnotatedMethodImpl<?>){
-          AnnotatedMethodImpl<?> oldMethodImpl
+          AnnotatedMethodImpl<?> childMethodImpl
             = (AnnotatedMethodImpl<?>) childMethod;
           
           // ejb/1290
           for (Annotation ann : method.getAnnotations()) {
             Class<?> annType = ann.annotationType();
             
-            if (oldMethodImpl.isAnnotationPresent(ann.annotationType()))
+            if (childMethodImpl.isAnnotationPresent(ann.annotationType()))
               continue;
             
             if (! annType.isAnnotationPresent(Inherited.class))
               continue;
             
-            oldMethodImpl.addAnnotation(ann);
+            childMethodImpl.addAnnotation(ann);
+            System.out.println("CHILD: " + childMethodImpl + " " + ann);
           }
         }
       }
@@ -283,23 +284,24 @@ public class ReflectionAnnotatedType<T>
           continue;
           */
         else if (childMethod instanceof AnnotatedMethodImpl<?>){
-          AnnotatedMethodImpl<?> oldMethodImpl
+          AnnotatedMethodImpl<?> childMethodImpl
             = (AnnotatedMethodImpl<?>) childMethod;
           
           // ejb/1290
           for (Annotation ann : annMethod.getAnnotations()) {
             Class<?> annType = ann.annotationType();
             
-            if (oldMethodImpl.isAnnotationPresent(ann.annotationType()))
+            if (childMethodImpl.isAnnotationPresent(ann.annotationType()))
               continue;
             
             // ioc/0a02
             if (! annType.isAnnotationPresent(Inherited.class)
-                && ! annType.equals(PostConstruct.class)
-                && ! annType.equals(PreDestroy.class))
+                || annType.equals(PostConstruct.class)
+                || annType.equals(PreDestroy.class))
               continue;
             
-            oldMethodImpl.addAnnotation(ann);
+            System.out.println("CHILD2: " + childMethodImpl + " " + ann);
+            childMethodImpl.addAnnotation(ann);
           }
         }
       }
@@ -371,8 +373,6 @@ public class ReflectionAnnotatedType<T>
       throw new ConfigException(L.l("'{0}' is an invalid @Specializes bean because it has a @Named annotation.",
                                     cl.getName()));
     
-    boolean isQualifierPresent = false;
-
     if (isMetaAnnotationPresent(cl.getAnnotations(), Qualifier.class)) {
       // isQualifierPresent = true;
       /*

@@ -121,7 +121,7 @@ public class EjbInjectionTarget<T> {
       ConfigProgram []extInitProgram = new ConfigProgram[initProgram.length];
       
       for (int i = 0; i < initProgram.length; i++) {
-        ConfigProgram program = initProgram[i];
+        ConfigProgram program = null;
         
         if (program instanceof PostConstructProgram) {
           PostConstructProgram pcProgram = (PostConstructProgram) program;
@@ -135,6 +135,8 @@ public class EjbInjectionTarget<T> {
         
         if (program != null)
           extInitProgram[i] = program;
+        else
+          extInitProgram[i] = initProgram[i];
       }
       
       targetImpl.setPostConstructProgram(extInitProgram);

@@ -52,6 +52,12 @@ import com.caucho.vfs.Vfs;
 
 /**
  * A pool of connections to a server.
+ * 
+ * <h3>Fail Recover Time</h3>
+ * 
+ * The fail recover time is dynamic. The first timeout is 1s. After the 1s,
+ * the client tries again. If that fails, the timeout is doubled until
+ * reaching the maximum _loadBalanceRecoverTime.
  */
 public class ClientSocketFactory implements ClientSocketFactoryApi
 {
@@ -137,7 +143,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   private CountMeter _requestBusyProbe;
 
   private volatile long _keepaliveCountTotal;
-  private volatile long _connectCountTotal;
+  private final AtomicLong _connectCountTotal = new AtomicLong();
   private final AtomicLong _failCountTotal = new AtomicLong();
   private volatile long _busyCountTotal;
 
@@ -398,7 +404,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   public long getConnectCountTotal()
   {
-    return _connectCountTotal;
+    return _connectCountTotal.get();
   }
 
   /**
@@ -578,6 +584,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Returns true if the server can open a connection.
    */
+  @Override
   public boolean canOpenWarm()
   {
     State state = _state;
@@ -626,6 +633,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     return _state.isEnabled();
   }
 
+  @Override
   public void toBusy()
   {
     _lastBusyTime = Alarm.getCurrentTime();
@@ -640,6 +648,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     }
   }
 
+  @Override
   public void toFail()
   {
     _failTime = Alarm.getCurrentTime();
@@ -658,6 +667,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Called when the socket read/write fails.
    */
+  @Override
   public void failSocket()
   {
     getRequestFailProbe().start();
@@ -686,8 +696,10 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Called when the socket read/write fails.
    */
+  @Override
   public void failConnect()
   {
+    System.out.println("FAIL-CONN:");
     getConnectionFailProbe().start();
 
     _failCountTotal.incrementAndGet();
@@ -964,9 +976,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
 
       _activeCount.incrementAndGet();
       
-      synchronized (this) {
-        _connectCountTotal++;
-      }
+      _connectCountTotal.incrementAndGet();
 
       ClientSocket stream = new ClientSocket(this, _streamCount++,
                                                rs, pair.getWriteStream());
