@@ -89,13 +89,6 @@ public class ErrorPageManager {
   public static String PATH_INFO = "javax.servlet.include.path_info";
   public static String QUERY_STRING = "javax.servlet.include.query_string";
 
-  public static String STATUS_CODE = "javax.servlet.error.status_code";
-  public static String EXCEPTION_TYPE = "javax.servlet.error.exception_type";
-  public static String MESSAGE = "javax.servlet.error.message";
-  public static String EXCEPTION = "javax.servlet.error.exception";
-  public static String ERROR_URI = "javax.servlet.error.request_uri";
-  public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
-
   public static String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
 
   public static String SHUTDOWN = "com.caucho.shutdown";
@@ -394,19 +387,19 @@ public class ErrorPageManager {
         errorPageExn = rootExn;
 
       request.setAttribute(JSP_EXCEPTION, errorPageExn);
-      request.setAttribute(EXCEPTION, errorPageExn);
-      request.setAttribute(EXCEPTION_TYPE, errorPageExn.getClass());
+      request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, errorPageExn);
+      request.setAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE, errorPageExn.getClass());
       if (request instanceof HttpServletRequest)
-        request.setAttribute(ERROR_URI,
+        request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI,
                              ((HttpServletRequest) request).getRequestURI());
 
       String servletName = getServletName(request);
 
       if (servletName != null)
-        request.setAttribute(AbstractHttpRequest.SERVLET_NAME, servletName);
+        request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME, servletName);
 
-      request.setAttribute(STATUS_CODE, new Integer(500));
-      request.setAttribute(MESSAGE, errorPageExn.getMessage());
+      request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, new Integer(500));
+      request.setAttribute(RequestDispatcher.ERROR_MESSAGE, errorPageExn.getMessage());
       /*
         if (_app != null && _app.getServer().isClosed())
         setAttribute(SHUTDOWN, "shutdown");
@@ -696,7 +689,7 @@ public class ErrorPageManager {
     if (request.getRequestDepth(0) > 16)
       return false;
 
-    else if (request.getAttribute(AbstractHttpRequest.ERROR_URI) != null) {
+    else if (request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI) != null) {
       return false;
     }
 
@@ -714,17 +707,17 @@ public class ErrorPageManager {
       return false;
 
     if (location != null && ! location.equals(request.getRequestURI())) {
-      request.setAttribute(AbstractHttpRequest.STATUS_CODE,
+      request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE,
                             new Integer(code));
-      request.setAttribute(AbstractHttpRequest.MESSAGE,
+      request.setAttribute(RequestDispatcher.ERROR_MESSAGE,
                            message);
-      request.setAttribute(AbstractHttpRequest.ERROR_URI,
+      request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI,
                            request.getRequestURI());
 
       String servletName = getServletName(request);
 
       if (servletName != null)
-        request.setAttribute(AbstractHttpRequest.SERVLET_NAME, servletName);
+        request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME, servletName);
 
       try {
         RequestDispatcher disp = null;

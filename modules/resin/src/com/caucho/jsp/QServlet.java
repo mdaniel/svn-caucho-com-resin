@@ -411,8 +411,8 @@ abstract public class QServlet implements Servlet {
     throws ServletException, IOException
   {
     req.setAttribute("javax.servlet.jsp.jspException", e);
-    req.setAttribute("javax.servlet.error.exception_type", e);
-    req.setAttribute("javax.servlet.error.request_uri",
+    req.setAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE, e);
+    req.setAttribute(RequestDispatcher.ERROR_REQUEST_URI,
                      req.getRequestURI());
 
     if (res instanceof CauchoResponse) {

@@ -29,28 +29,27 @@
 
 package com.caucho.server.dispatch;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.servlet.comet.CometController;
+import com.caucho.servlet.comet.CometServlet;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
-
-import com.caucho.server.http.HttpServletRequestImpl;
-import com.caucho.servlet.comet.CometController;
-import com.caucho.servlet.comet.CometServlet;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Represents the final servlet in a filter chain.
  */
 public class CometServletFilterChain implements FilterChain {
-  public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
 
   // servlet config
   private ServletConfigImpl _config;
@@ -60,7 +59,7 @@ public class CometServletFilterChain implements FilterChain {
   /**
    * Create the filter chain servlet.
    *
-   * @param servlet the underlying servlet
+   * @param config for the underlying servlet
    */
   public CometServletFilterChain(ServletConfigImpl config)
   {
@@ -133,16 +132,16 @@ public class CometServletFilterChain implements FilterChain {
       _servlet = null;
       _config.setInitException(e);
       _config.killServlet();
-      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME, _config.getServletName());
       throw e;
     } catch (ServletException e) {
-      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME, _config.getServletName());
       throw e;
     } catch (IOException e) {
-      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME, _config.getServletName());
       throw e;
     } catch (RuntimeException e) {
-      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME, _config.getServletName());
       throw e;
     } finally {
       if (controller != null)

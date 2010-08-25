@@ -29,7 +29,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.el.EL;
 import com.caucho.el.ExprEnv;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.el.*;
@@ -940,7 +939,7 @@ public class PageContextImpl extends PageContext
     Throwable exn = (Throwable) getCauchoRequest().getAttribute(EXCEPTION);
 
     if (exn == null)
-      exn = (Throwable) getCauchoRequest().getAttribute("javax.servlet.error.exception_type");
+      exn = (Throwable) getCauchoRequest().getAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE);
     if (exn == null)
       exn = (Throwable) getCauchoRequest().getAttribute("javax.servlet.jsp:jspException");
 
@@ -1226,12 +1225,16 @@ public class PageContextImpl extends PageContext
         log.log(Level.WARNING, e.toString(), e);
       }
 
-      getCauchoRequest().setAttribute(EXCEPTION, e);
-      getCauchoRequest().setAttribute("javax.servlet.error.exception", e);
-      getCauchoRequest().setAttribute("javax.servlet.error.exception_type", e);
-      getCauchoRequest().setAttribute("javax.servlet.error.request_uri",
-                            getCauchoRequest().getRequestURI());
-      
+      request.setAttribute(EXCEPTION, e);
+      request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE,
+                           response.getStatus());
+      request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, e);
+      request.setAttribute(RequestDispatcher.ERROR_MESSAGE, e.getMessage());
+      request.setAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE,
+                           e.getClass());
+      request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI,
+                           request.getRequestURI());
+
       // jsp/01ck
       // response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
@@ -1300,17 +1303,17 @@ public class PageContextImpl extends PageContext
    */
   public ErrorData getErrorData()
   {
-    String uri = (String) getCauchoRequest().getAttribute(AbstractHttpRequest.ERROR_URI);
+    String uri = (String) getCauchoRequest().getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
 
     if (uri == null)
       return null;
 
-    Integer status = (Integer) getCauchoRequest().getAttribute(AbstractHttpRequest.STATUS_CODE);
+    Integer status = (Integer) getCauchoRequest().getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 
     return new ErrorData(getThrowable(),
                          status == null ? 0 : status.intValue(),
-                         (String) getCauchoRequest().getAttribute(AbstractHttpRequest.ERROR_URI),
-                         (String) getCauchoRequest().getAttribute(AbstractHttpRequest.SERVLET_NAME));
+                         (String) getCauchoRequest().getAttribute(RequestDispatcher.ERROR_REQUEST_URI),
+                         (String) getCauchoRequest().getAttribute(RequestDispatcher.ERROR_SERVLET_NAME));
   }
 
   /**

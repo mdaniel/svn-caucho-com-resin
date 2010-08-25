@@ -42,6 +42,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
@@ -95,13 +96,6 @@ public abstract class AbstractHttpRequest
   public static final String SERVLET_PATH = "javax.servlet.include.servlet_path";
   public static final String PATH_INFO = "javax.servlet.include.path_info";
   public static final String QUERY_STRING = "javax.servlet.include.query_string";
-
-  public static final String STATUS_CODE = "javax.servlet.error.status_code";
-  public static final String EXCEPTION_TYPE = "javax.servlet.error.exception_type";
-  public static final String MESSAGE = "javax.servlet.error.message";
-  public static final String EXCEPTION = "javax.servlet.error.exception";
-  public static final String ERROR_URI = "javax.servlet.error.request_uri";
-  public static final String SERVLET_NAME = "javax.servlet.error.servlet_name";
 
   public static final String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
 

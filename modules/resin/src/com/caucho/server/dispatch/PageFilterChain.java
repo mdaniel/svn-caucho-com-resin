@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -46,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
+import com.caucho.server.http.AbstractHttpRequest;
 
 /**
  * Represents the final servlet in a filter chain.
@@ -54,9 +56,6 @@ public class PageFilterChain implements FilterChain
 {
   private static final Logger log
     = Logger.getLogger(PageFilterChain.class.getName());
-  
-  public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
-  public static String SERVLET_EXN = "javax.servlet.error.exception";
 
   private ServletContext _application;
   private QServlet _servlet;
@@ -160,7 +159,7 @@ public class PageFilterChain implements FilterChain
       if (notFound == null)
         return;
       
-      String errorUri = (String) req.getAttribute("javax.servlet.error.request_uri");
+      String errorUri = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
       String uri = (String) req.getAttribute("javax.servlet.include.request_uri");
       String forward = (String) req.getAttribute("javax.servlet.forward.request_uri");
 
@@ -193,19 +192,22 @@ public class PageFilterChain implements FilterChain
         else
           page.pageservice(req, res);
       } catch (ServletException e) {
-        request.setAttribute(SERVLET_EXN, e);
+        request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, e);
         if (_config != null)
-          request.setAttribute(SERVLET_NAME, _config.getServletName());
+          request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME,
+                               _config.getServletName());
         throw e;
       } catch (IOException e) {
-        request.setAttribute(SERVLET_EXN, e);
+        request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, e);
         if (_config != null)
-          request.setAttribute(SERVLET_NAME, _config.getServletName());
+          request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME,
+                               _config.getServletName());
         throw e;
       } catch (RuntimeException e) {
-        request.setAttribute(SERVLET_EXN, e);
+        request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, e);
         if (_config != null)
-          request.setAttribute(SERVLET_NAME, _config.getServletName());
+          request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME,
+                               _config.getServletName());
         throw e;
       }
     }
