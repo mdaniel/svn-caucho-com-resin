@@ -553,6 +553,7 @@ public class WebAppController
   /**
    * Instantiate the webApp.
    */
+  @Override
   protected WebApp instantiateDeployInstance()
   {
     return new WebApp(this);

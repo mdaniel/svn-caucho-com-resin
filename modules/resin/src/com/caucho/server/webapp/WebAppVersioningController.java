@@ -84,6 +84,7 @@ public class WebAppVersioningController extends WebAppController {
     _baseController = baseController;
   }
 
+  @Override
   public boolean isVersioning()
   {
     return true;
@@ -120,6 +121,8 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   protected WebApp startImpl()
   {
+    super.startImpl();
+    
     updateVersionImpl();
 
     WebAppController controller = _primaryController;

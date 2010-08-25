@@ -506,6 +506,7 @@ abstract public class
   /**
    * Handles the case where the environment is stopping
    */
+  @Override
   public void environmentStop(EnvironmentClassLoader loader)
   {
     stop();

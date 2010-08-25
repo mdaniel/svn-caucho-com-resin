@@ -226,6 +226,7 @@ public class Invocation extends ServletInvocation implements Dependency
    * Returns true if the invocation has been modified.  Generally only
    * true if the webApp has been modified.
    */
+  @Override
   public boolean isModified()
   {
     Dependency depend = _dependency;
@@ -233,10 +234,10 @@ public class Invocation extends ServletInvocation implements Dependency
     if (depend != null && depend.isModified())
       return true;
 
-    WebApp app = _webApp;
+    WebApp webApp = _webApp;
 
-    if (app != null) {
-      depend = app.getInvocationDependency();
+    if (webApp != null) {
+      depend = webApp.getInvocationDependency();
 
       if (depend != null)
         return depend.isModified();

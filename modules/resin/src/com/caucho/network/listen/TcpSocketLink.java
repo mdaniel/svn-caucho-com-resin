@@ -1068,6 +1068,7 @@ public class TcpSocketLink extends AbstractSocketLink
     abstract RequestState doTask()
       throws IOException;
 
+    @Override
     public void run()
     {
       runThread();
@@ -1120,7 +1121,7 @@ public class TcpSocketLink extends AbstractSocketLink
     public void run()
     {
       SocketLinkListener port = _port;
-
+      
       port.startConnection(TcpSocketLink.this);
 
       runThread();

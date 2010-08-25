@@ -56,7 +56,11 @@ public enum LifecycleState {
   },
   
   STANDBY,
-  STOPPED_IDLE,
+  
+  STOPPED_IDLE {
+    @Override
+    public boolean isStoppedIdle() { return true; }
+  },
   
   WARMUP {
     @Override
@@ -129,6 +133,11 @@ public enum LifecycleState {
   public boolean isAfterInit()
   {
     return INIT.ordinal() <= ordinal();
+  }
+
+  public boolean isStoppedIdle()
+  {
+    return false;
   }
 
   public boolean isStarting()

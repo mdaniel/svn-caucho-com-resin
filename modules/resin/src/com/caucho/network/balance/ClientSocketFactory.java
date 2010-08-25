@@ -699,7 +699,6 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   @Override
   public void failConnect()
   {
-    System.out.println("FAIL-CONN:");
     getConnectionFailProbe().start();
 
     _failCountTotal.incrementAndGet();

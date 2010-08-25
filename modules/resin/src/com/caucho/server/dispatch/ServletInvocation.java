@@ -48,7 +48,6 @@ import java.util.logging.Level;
 public class ServletInvocation {
   private static final Logger log
     = Logger.getLogger(ServletInvocation.class.getName());
-  private static final L10N L = new L10N(ServletInvocation.class);
 
   private final boolean _isFiner;
 
@@ -78,7 +77,7 @@ public class ServletInvocation {
   public ServletInvocation()
   {
     _classLoader = Thread.currentThread().getContextClassLoader();
-
+    
     _isFiner = log.isLoggable(Level.FINER);
   }
 
@@ -248,11 +247,13 @@ public class ServletInvocation {
     _isAsyncSupported = false;
   }
 
-  public MultipartConfigElement getMultipartConfig() {
+  public MultipartConfigElement getMultipartConfig() 
+  {
     return _multipartConfig;
   }
 
-  public void setMultipartConfig(MultipartConfigElement multipartConfig) {
+  public void setMultipartConfig(MultipartConfigElement multipartConfig)
+  {
     _multipartConfig = multipartConfig;
   }
 
@@ -306,6 +307,7 @@ public class ServletInvocation {
     _securityRoleMap = invocation._securityRoleMap;
   }
 
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();

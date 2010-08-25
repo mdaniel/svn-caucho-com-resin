@@ -1408,9 +1408,10 @@ public class SocketLinkListener extends TaskWorker
   /**
    * Returns true if the port is closed.
    */
+  @Override
   public boolean isClosed()
   {
-    return _lifecycle.isAfterActive();
+    return ! _lifecycle.getState().isRunnable();
   }
 
   //
@@ -1520,6 +1521,7 @@ public class SocketLinkListener extends TaskWorker
   /**
    * The port thread is responsible for creating new connections.
    */
+  @Override
   public long runTask()
   {
     if (_lifecycle.isDestroyed())
@@ -1527,7 +1529,6 @@ public class SocketLinkListener extends TaskWorker
 
     try {
       TcpSocketLink startConn = null;
-
       if (isStartThreadRequired()
           && _lifecycle.isActive()
           && _activeConnectionCount.get() < _connectionMax) {

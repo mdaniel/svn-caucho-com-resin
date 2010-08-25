@@ -1208,6 +1208,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Sets the invocation
    */
+  @Override
   public Invocation buildInvocation(Invocation invocation)
     throws ConfigException
   {

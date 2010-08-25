@@ -768,12 +768,12 @@ public class WebAppContainer
 
     FilterChain chain;
 
-    WebApp app = getWebApp(invocation, true);
+    WebApp webApp = getWebApp(invocation, true);
 
     boolean isAlwaysModified;
 
-    if (app != null) {
-      invocation = app.buildInvocation(invocation);
+    if (webApp != null) {
+      invocation = webApp.buildInvocation(invocation);
       chain = invocation.getFilterChain();
       isAlwaysModified = false;
     }
@@ -798,7 +798,7 @@ public class WebAppContainer
       if (rewriteChain != chain) {
         Server server = (Server) _dispatchServer;
         // server/13sf, server/1kq1
-        WebApp webApp = findWebAppByURI("/");
+        webApp = findWebAppByURI("/");
 
         if (webApp != null)
           invocation.setWebApp(webApp);
@@ -975,20 +975,20 @@ public class WebAppContainer
       WebAppController controller = getWebAppController(invocation);
 
       if (controller != null) {
-        WebApp app;
+        WebApp webApp;
 
         if (enableRedeploy)
-          app = controller.request();
+          webApp = controller.request();
         else
-          app = controller.subrequest();
-
-        if (app == null) {
+          webApp = controller.subrequest();
+        
+        if (webApp == null) {
           return null;
         }
 
-        invocation.setWebApp(app);
+        invocation.setWebApp(webApp);
 
-        return app;
+        return webApp;
       }
       else {
         return null;

@@ -109,6 +109,7 @@ public class StartAutoRedeployAutoStrategy
    * @param controller the owning controller
    * @return the current deploy instance
    */
+  @Override
   public <I extends DeployInstance>
           I request(DeployController<I> controller)
   {
@@ -122,7 +123,9 @@ public class StartAutoRedeployAutoStrategy
     }
     else if (controller.isModified()) {
       // server/1d1i
-      return controller.restartImpl();
+      I instance = controller.restartImpl();
+
+      return instance;
     }
     else { /* active */
       // server/1d1c

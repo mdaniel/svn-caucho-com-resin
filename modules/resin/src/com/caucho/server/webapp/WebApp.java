@@ -2564,6 +2564,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns true if the webApp is active.
    */
+  @Override
   public boolean isActive()
   {
     return _lifecycle.isActive();
@@ -4146,14 +4147,16 @@ public class WebApp extends ServletContextImpl
   /**
    * Closes the webApp.
    */
+  @Override
   public void destroy()
   {
     stop();
 
-    if (! _lifecycle.toDestroy())
-      return;
-
     clearCache();
+    
+    if (! _lifecycle.toDestroy()) {
+      return;
+    }
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -4257,9 +4260,15 @@ public class WebApp extends ServletContextImpl
     return new SingletonBindingHandle(WebApp.class);
   }
 
+  @Override
   public String toString()
   {
-    return "WebApp[" + getId() + "]";
+    if (_lifecycle == null)
+      return "WebApp[" + getId() + ", null]";
+    else if (_lifecycle.isActive())
+      return "WebApp[" + getId() + "]";
+    else
+      return "WebApp[" + getId() + "," + _lifecycle.getState() + "]";
   }
 
   static class WebAppSessionListener implements HttpSessionListener {

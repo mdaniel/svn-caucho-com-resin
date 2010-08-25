@@ -451,6 +451,7 @@ abstract public class DeployController<I extends DeployInstance>
    *
    * @return true on stopped state
    */
+  @Override
   public boolean isStopped()
   {
     return _lifecycle.isStopped() || _lifecycle.isInit();
@@ -459,9 +460,11 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns true for the stop-lazy state
    */
+  @Override
   public boolean isStoppedLazy()
   {
-    return _lifecycle.isInit();
+    return (_lifecycle.getState().isStoppedIdle()
+            || _lifecycle.getState().isInit());
   }
 
   /**
@@ -667,8 +670,11 @@ abstract public class DeployController<I extends DeployInstance>
   {
     if (_lifecycle.isDestroyed())
       return null;
-    else if (_strategy != null)
-      return _strategy.request(this);
+    else if (_strategy != null) {
+      I instance = _strategy.request(this);
+      
+      return instance;
+    }
     else
       return null;
   }
@@ -683,8 +689,11 @@ abstract public class DeployController<I extends DeployInstance>
   {
     if (_lifecycle.isDestroyed())
       return null;
-    else if (_strategy != null)
-      return _strategy.subrequest(this);
+    else if (_strategy != null) {
+      I instance = _strategy.subrequest(this);
+      
+      return instance;
+    }
     else
       return null;
   }
@@ -828,10 +837,10 @@ abstract public class DeployController<I extends DeployInstance>
     DeployInstance oldInstance = _deployInstance;
     boolean isStopping = false;
 
-    if (oldInstance != null)
-      thread.setContextClassLoader(oldInstance.getClassLoader());
-
     try {
+      if (oldInstance != null)
+        thread.setContextClassLoader(oldInstance.getClassLoader());
+      
       isStopping = _lifecycle.toStopping();
 
       if (! isStopping)
