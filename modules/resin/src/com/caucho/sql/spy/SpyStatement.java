@@ -36,6 +36,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.*;
 
 /**
@@ -561,85 +564,256 @@ public class SpyStatement implements java.sql.Statement {
   public boolean getMoreResults(int count)
     throws SQLException
   {
-    return _stmt.getMoreResults(count);
+    try {
+      boolean moreResults = _stmt.getMoreResults(count);
+
+      log.fine(getId() + ":getMoreResults(" + count + ") -> " + moreResults);
+
+      return moreResults;
+    } catch (SQLException e) {
+      log.fine(getId() + ":getMoreResults(" + e + ")");
+
+      throw e;
+    }
   }
   
   public java.sql.ResultSet getGeneratedKeys()
     throws SQLException
   {
-    return _stmt.getGeneratedKeys();
+    try {
+      ResultSet generatedKeys = _stmt.getGeneratedKeys();
+
+      log.fine(getId() + ":getGeneratedKeys() -> " + generatedKeys);
+
+      return generatedKeys;
+    } catch (SQLException e) {
+      log.fine(getId() + ":getGeneratedKeys(" + e + ")");
+
+      throw e;
+    }
   }
   
   public int executeUpdate(String query, int resultType)
     throws SQLException
   {
-    return _stmt.executeUpdate(query, resultType);
+    try {
+      int rowsUpdated = _stmt.executeUpdate(query, resultType);
+
+      log.fine(getId()
+        + ":executeUpdate("
+        + query
+        + ", resultType="
+        + resultType
+        + ") -> "
+        + rowsUpdated);
+
+      return rowsUpdated;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-executeUpdate(" + e + ")");
+
+      throw e;
+    }
   }
   
   public int executeUpdate(String query, int []columns)
     throws SQLException
   {
-    return _stmt.executeUpdate(query, columns);
+    try {
+      int rowsUpdated = _stmt.executeUpdate(query, columns);
+
+      List<Integer> list = new ArrayList<Integer>();
+      for (int column : columns)
+        list.add(column);
+
+      log.fine(getId()
+        + ":executeUpdate("
+        + query
+        + ", columns="
+        + list
+        + ") -> "
+        + rowsUpdated);
+
+      return rowsUpdated;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-executeUpdate(" + e + ")");
+
+      throw e;
+    }
   }
   
   public int executeUpdate(String query, String []columns)
     throws SQLException
   {
-    return _stmt.executeUpdate(query, columns);
+    try {
+      int rowsUpdated = _stmt.executeUpdate(query, columns);
+
+      log.fine(getId()
+        + ":executeUpdate("
+        + query
+        + ", columns="
+        + Arrays.asList(columns)
+        + ") -> "
+        + rowsUpdated);
+
+      return rowsUpdated;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-executeUpdate(" + e + ")");
+
+      throw e;
+    }
   }
   
   public boolean execute(String query, int resultType)
     throws SQLException
   {
-    return _stmt.execute(query, resultType);
+    try {
+      boolean isResultSet = _stmt.execute(query, resultType);
+
+      log.fine(getId()
+        + ":execute("
+        + query
+        + ", resultType="
+        + resultType
+        + ") -> "
+        + isResultSet);
+
+      return isResultSet;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-execute("+e+")");
+
+      throw e;
+    }
   }
   
   public boolean execute(String query, int []columns)
     throws SQLException
   {
-    return _stmt.execute(query, columns);
+    try {
+      boolean isResultSet = _stmt.execute(query, columns);
+
+      List<Integer> list = new ArrayList<Integer>();
+      for (int column : columns)
+        list.add(column);
+
+      log.fine(getId() + ":execute(" + query + ", columns=" + list + ")");
+
+      return isResultSet;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-execute(" + e + ")");
+
+      throw e;
+    }
   }
   
   public boolean execute(String query, String []columns)
     throws SQLException
   {
-    return _stmt.execute(query, columns);
+    try {
+      boolean isResultSet = _stmt.execute(query, columns);
+
+      log.fine(getId() + ":execute(" + query + ", columns=" + Arrays.asList(
+        columns) + ") -> " + isResultSet);
+
+      return isResultSet;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-execute(" + e + ")");
+
+      throw e;
+    }
   }
 
   public int getResultSetHoldability()
     throws SQLException
   {
-    return _stmt.getResultSetHoldability();
+    try {
+      int holdability =  _stmt.getResultSetHoldability();
+
+      log.fine(getId() + ":getResultSetHoldability() -> " + holdability);
+
+      return holdability;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-getResultSetHoldability(" + e + ")");
+
+      throw e;
+    }
   }
 
   public boolean isClosed()
     throws SQLException
   {
-    return _stmt.isClosed();
+    try {
+      boolean closed = _stmt.isClosed();
+
+      log.fine(getId() + ":isClosed() -> " + closed);
+
+      return closed;
+    } catch (SQLException e) {
+      log.fine(getId() + ":isClosed(" + e + ")");
+
+      throw e;
+    }
   }
 
   public void setPoolable(boolean poolable)
     throws SQLException
   {
-    _stmt.setPoolable(poolable);
+    try {
+      _stmt.setPoolable(poolable);
+
+      log.fine(getId() + ":setPoolable(" + poolable + ")");
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-setPoolable(" + e + ")");
+
+      throw e;
+    }
   }
 
   public boolean isPoolable()
     throws SQLException
   {
-    return _stmt.isPoolable();
+    try {
+      boolean isPoolable = _stmt.isPoolable();
+
+      log.fine(getId() + ":isPoolable() -> " + isPoolable);
+
+      return isPoolable;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-isPoolable(" + e + ")");
+
+      throw e;
+    }
   }
 
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    return _stmt.unwrap(iface);
+    try {
+      T t = _stmt.unwrap(iface);
+
+      log.fine(getId() + ":unwrap(" + iface + ") -> " + t);
+
+      return t;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-unwrap(" + e + ")");
+
+      throw e;
+    }
   }
 
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    return _stmt.isWrapperFor(iface);
+    try {
+      boolean isWrapper = _stmt.isWrapperFor(iface);
+
+      log.fine(getId() + ":isWrapperFor(" + iface + ") -> " + isWrapper);
+      
+      return isWrapper;
+    } catch (SQLException e) {
+      log.fine(getId() + ":exn-isWrapperFor(" + e + ")");
+
+      throw e;
+    }
   }
 
   public String toString() {
