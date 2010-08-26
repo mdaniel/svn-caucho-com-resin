@@ -122,6 +122,12 @@ public class AnnotatedElementImpl implements Annotated
     
     _annSet.replace(newAnn);
   }
+  
+  public void addAnnotationIfAbsent(Annotation newAnn)
+  {
+    if (! isAnnotationPresent(newAnn.annotationType()))
+      addAnnotation(newAnn);
+  }
 
   public void removeAnnotation(Annotation ann)
   {

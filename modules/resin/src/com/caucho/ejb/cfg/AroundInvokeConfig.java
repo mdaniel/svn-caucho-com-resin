@@ -29,6 +29,10 @@
 
 package com.caucho.ejb.cfg;
 
+import java.lang.reflect.Method;
+
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
 import com.caucho.util.L10N;
 
 /**
@@ -63,5 +67,27 @@ public class AroundInvokeConfig {
   public void setMethodName(String methodName)
   {
     _methodName = methodName;
+  }
+  
+  public boolean isMatch(AnnotatedMethod<?> method)
+  {
+    if (! method.getJavaMember().getName().equals(_methodName))
+      return false;
+    else if (method.getDeclaringType().getJavaClass().getName().equals(_className)
+             || _className == null)
+      return true;
+    else
+      return false;
+  }
+  
+  public boolean isMatch(Method method)
+  {
+    if (! method.getName().equals(_methodName))
+      return false;
+    else if (method.getDeclaringClass().getName().equals(_className)
+             || _className == null)
+      return true;
+    else
+      return false;
   }
 }

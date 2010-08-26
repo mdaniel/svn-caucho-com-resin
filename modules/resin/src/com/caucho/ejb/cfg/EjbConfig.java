@@ -192,27 +192,24 @@ public class EjbConfig {
   /**
    * Returns the interceptor bindings for a given ejb name.
    */
-  public InterceptorBinding getInterceptorBinding(String ejbName,
-                                                  boolean isExcludeDefault)
+  public ArrayList<InterceptorBinding>
+  getInterceptorBinding(String ejbName,
+                        boolean isExcludeDefault)
   {
     assert ejbName != null;
 
+    ArrayList<InterceptorBinding> bindings 
+      = new ArrayList<InterceptorBinding>();
+    
     for (InterceptorBinding binding : _cfgInterceptorBindings) {
       if (binding.getEjbName().equals(ejbName))
-        return binding;
-    }
-
-    // ejb/0fbe vs ejb/0fbf
-    for (InterceptorBinding binding : _cfgInterceptorBindings) {
-      if (binding.getEjbName().equals("*")) {
-        if (isExcludeDefault)
-          continue;
-
-        return binding;
+        bindings.add(binding);
+      else if (binding.getEjbName().equals("*") && ! isExcludeDefault) {
+        bindings.add(binding);
       }
     }
 
-    return null;
+    return bindings;
   }
 
   /**

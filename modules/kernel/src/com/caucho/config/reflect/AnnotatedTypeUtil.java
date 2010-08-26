@@ -56,6 +56,16 @@ public class AnnotatedTypeUtil {
                       javaMethod.getName(),
                       javaMethod.getParameterTypes());
   }
+  /**
+   * Finds any method matching the method name and parameter types.
+   */
+  public static <X> AnnotatedMethod<? super X>
+  findMethod(AnnotatedType<X> type, Method javaMethod)
+  {
+    return findMethod(type, 
+                      javaMethod.getName(),
+                      javaMethod.getParameterTypes());
+  }
 
   /**
    * Finds any method matching the method name and parameter types.

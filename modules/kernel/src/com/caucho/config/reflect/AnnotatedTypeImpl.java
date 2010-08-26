@@ -136,7 +136,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   {
     return _methodSet;
   }
-
+  
   /**
    * Returns the matching method, creating one if necessary.
    */

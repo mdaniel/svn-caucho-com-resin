@@ -245,7 +245,6 @@ public class ReflectionAnnotatedType<T>
               continue;
             
             childMethodImpl.addAnnotation(ann);
-            System.out.println("CHILD: " + childMethodImpl + " " + ann);
           }
         }
       }
@@ -300,7 +299,6 @@ public class ReflectionAnnotatedType<T>
                 || annType.equals(PreDestroy.class))
               continue;
             
-            System.out.println("CHILD2: " + childMethodImpl + " " + ann);
             childMethodImpl.addAnnotation(ann);
           }
         }

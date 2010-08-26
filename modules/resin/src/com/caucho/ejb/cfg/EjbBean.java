@@ -50,8 +50,10 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.inject.AnnotatedOverrideMap;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
@@ -140,10 +142,15 @@ public class EjbBean<X> extends DescriptionGroupConfig
     = new ArrayList<ResourceGroupConfig>();
 
 
-  private ArrayList<Interceptor> _interceptors
+  private ArrayList<Interceptor> _defaultInterceptors
     = new ArrayList<Interceptor>();
 
-  private String _aroundInvokeMethodName;
+  private ArrayList<Interceptor> _classInterceptors
+    = new ArrayList<Interceptor>();
+
+  private ArrayList<AroundInvokeConfig> _aroundInvoke
+    = new ArrayList<AroundInvokeConfig>();
+  
   private String _timeoutMethodName;
 
   private long _transactionTimeout;
@@ -195,21 +202,10 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     return _ejbModuleName;
   }
-  
-  public String getAroundInvokeMethodName()
-  {
-    return _aroundInvokeMethodName;
-  }
-
-  public void setAroundInvokeMethodName(String aroundInvokeMethodName)
-  {
-    _aroundInvokeMethodName = aroundInvokeMethodName;
-  }
 
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
   {
-    // ejb/0fbb
-    _aroundInvokeMethodName = aroundInvoke.getMethodName();
+    _aroundInvoke.add(aroundInvoke);
   }
 
   public void setInjectionTarget(InjectionTarget<X> injectTarget)
@@ -260,61 +256,14 @@ public class EjbBean<X> extends DescriptionGroupConfig
   }
 
   /**
-   * Returns the interceptors.
-   */
-  public ArrayList<Interceptor> getInterceptors()
-  {
-    return _interceptors;
-  }
-
-  /**
-   * Returns the interceptors.
-   */
-  public ArrayList<Interceptor> getInvokeInterceptors(String methodName)
-  {
-    ArrayList<Interceptor> matchList = null;
-
-    for (Interceptor interceptor : _interceptors) {
-      if (methodName.equals(interceptor.getAroundInvokeMethodName())) {
-        if (matchList == null)
-          matchList = new ArrayList<Interceptor>();
-
-        matchList.add(interceptor);
-      }
-    }
-
-    return matchList;
-  }
-
-  /**
    * Adds a new interceptor.
    */
-  public void addInterceptor(Interceptor interceptor)
+  public void addInterceptor(Interceptor interceptor, boolean isDefault)
   {
-    _interceptors.add(interceptor);
-  }
-
-  /**
-   * Returns true if the interceptor is already configured.
-   */
-  public boolean containsInterceptor(String interceptorClassName)
-  {
-    return getInterceptor(interceptorClassName) != null;
-  }
-
-  /**
-   * Returns the interceptor for a given class name.
-   */
-  public Interceptor getInterceptor(String interceptorClassName)
-  {
-    for (Interceptor interceptor : _interceptors) {
-      String className = interceptor.getInterceptorClass();
-
-      if (className.equals(interceptorClassName))
-        return interceptor;
-    }
-
-    return null;
+    if (isDefault)
+      _defaultInterceptors.add(interceptor);
+    else
+      _classInterceptors.add(interceptor);
   }
 
   public String getEJBModuleName()
@@ -713,6 +662,19 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     _methodList.add(method);
   }
+  
+  public boolean isMatch(AnnotatedMethod<?> method)
+  {
+    if (_methodList.size() == 0)
+      return true;
+    
+    for (EjbMethodPattern<?> ejbMethod : _methodList) {
+      if (ejbMethod.isMatch(method))
+        return true;
+    }
+    
+    return false;
+  }
 
   /**
    * Gets the best method.
@@ -1024,56 +986,97 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public void initIntrospect()
     throws ConfigException
   {
+    // configureBeanMethods(getAnnotatedType());
+    
     boolean isExcludeDefault = false;
 
-    // ejb/0fb5
-    InterceptorBinding binding =
-      _ejbConfig.getInterceptorBinding(getEJBName(), isExcludeDefault);
+    for (InterceptorBinding interceptor :
+          _ejbConfig.getInterceptorBinding(getEJBName(), isExcludeDefault)) {
+      introspectInterceptor(interceptor);
+    }
+    
+    configureAroundInvoke(getAnnotatedType());
+  }
+  
+  private void introspectInterceptor(InterceptorBinding binding)
+  {
+    ArrayList<String> interceptorClasses = new ArrayList<String>();
 
-    if (binding != null) {
-      ArrayList<String> interceptorClasses = new ArrayList<String>();
-
+    if (binding.getMethodList().isEmpty()) {
       for (Class<?> iClass : binding.getInterceptors()) {
         interceptorClasses.add(iClass.getName());
       }
 
-      // ejb/0fb7
       if (interceptorClasses.isEmpty()) {
         InterceptorOrder interceptorOrder = binding.getInterceptorOrder();
 
-        // ejb/0fbf
         if (interceptorOrder != null)
           interceptorClasses = interceptorOrder.getInterceptorClasses();
       }
+      
+      AnnotatedTypeImpl<?> typeImpl = (AnnotatedTypeImpl<?>) getAnnotatedType();
 
-      for (String className : interceptorClasses) {
-        Interceptor interceptor = getInterceptor(className);
-
-        // ejb/0fb5 vs ejb/0fb6
-        if (interceptor != null) {
-          _interceptors.remove(interceptor);
-
-          addInterceptor(interceptor);
-        }
-        else {
-          interceptor = _ejbConfig.getInterceptor(className);
-
-          if (interceptor != null) {
-            interceptor.init();
-
-            addInterceptor(interceptor);
+      if (binding.isExcludeDefaultInterceptors())
+        typeImpl.addAnnotation(new ExcludeDefaultInterceptorsLiteral());
+      
+      if (binding.isExcludeClassInterceptors())
+        typeImpl.addAnnotation(new ExcludeClassInterceptorsLiteral());
+    }
+    else {
+      for (AnnotatedMethod<?> method : getAnnotatedType().getMethods()) {
+        if (binding.isMatch(method)) {
+          if (method instanceof AnnotatedMethodImpl<?>) {
+            AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) method;
+            
+            if (binding.getAnnotation() != null)
+              methodImpl.addAnnotationIfAbsent(binding.getAnnotation());
+            
+            if (binding.isExcludeClassInterceptors())
+              methodImpl.addAnnotationIfAbsent(new ExcludeClassInterceptorsLiteral());
           }
         }
+      }
+    }
+
+    for (String className : interceptorClasses) {
+      /*
+      Interceptor interceptor = getInterceptor(className);
+
+      // ejb/0fb5 vs ejb/0fb6
+      if (interceptor != null) {
+        _interceptors.remove(interceptor);
+
+        addInterceptor(interceptor, binding.isDefault());
+      }
+      else {
+      */
+      Interceptor interceptor = _ejbConfig.getInterceptor(className);
+
+      if (interceptor != null) {
+        interceptor.init();
+
+        addInterceptor(interceptor, binding.isDefault());
       }
     }
   }
 
   private void addInterceptors()
   {
-    Class<?> []interceptors = new Class<?>[_interceptors.size()];
+    if (_defaultInterceptors.size() > 0) {
+      addDefaultInterceptors(createInterceptors(_defaultInterceptors));
+    }
     
-    for (int i = 0; i < _interceptors.size(); i++) {
-      String className = _interceptors.get(i).getInterceptorClass();
+    if (_classInterceptors.size() > 0) {
+      addClassInterceptors(createInterceptors(_classInterceptors));
+    }
+  }
+
+  private Class<?> []createInterceptors(ArrayList<Interceptor> interceptorList)
+  {
+    Class<?> []interceptors = new Class<?>[interceptorList.size()];
+    
+    for (int i = 0; i < interceptorList.size(); i++) {
+      String className = interceptorList.get(i).getInterceptorClass();
       Class<?> cl = null;
     
       try {
@@ -1086,11 +1089,16 @@ public class EjbBean<X> extends DescriptionGroupConfig
         throw ConfigException.create(e);
       }
     }
-    
-    addClassInterceptors(interceptors);
+   
+    return interceptors;
   }
   
   private void addClassInterceptors(Class<?> []cl)
+  {
+    _ejbClass.addAnnotation(new InterceptorsLiteral(cl));
+  }
+  
+  private void addDefaultInterceptors(Class<?> []cl)
   {
     _ejbClass.addAnnotation(new InterceptorsDefaultLiteral(cl));
   }
@@ -1529,7 +1537,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
       }
 
       configureMethods(type);
-
+      configureAroundInvoke(type);
       /*
         for (int i = 0; i < _initList.size(); i++)
         addInitProgram(_initList.get(i).getBuilderProgram());
@@ -1546,7 +1554,18 @@ public class EjbBean<X> extends DescriptionGroupConfig
   private <Y> void configureMethods(AnnotatedType<Y> type)
     throws ConfigException
   {
+    configureMethods(type);
+  }
+
+  private <Y> void configureBeanMethods(AnnotatedType<Y> type)
+    throws ConfigException
+  {
     for (AnnotatedMethod<? super Y> method : type.getMethods()) {
+      AnnotatedMethodImpl<?> methodImpl = null;
+      
+      if (method instanceof AnnotatedMethodImpl<?>)
+        methodImpl = (AnnotatedMethodImpl<?>) method;
+      
       TransactionAttribute xa
         = (TransactionAttribute) method.getAnnotation(TransactionAttribute.class);
 
@@ -1554,13 +1573,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
         EjbMethodPattern<X> pattern = createMethod(getSignature(method));
 
         setPatternTransaction(pattern, xa);
-      }
-
-      Annotation aroundInvoke = method.getAnnotation(AroundInvoke.class);
-
-      // ejb/0fb8
-      if (aroundInvoke != null) {
-        _aroundInvokeMethodName = method.getJavaMember().getName();
       }
 
       Annotation timeout = method.getAnnotation(Timeout.class);
@@ -1572,6 +1584,43 @@ public class EjbBean<X> extends DescriptionGroupConfig
     }
   }
 
+  private void configureAroundInvoke(AnnotatedType<X> type)
+  {
+    AnnotatedTypeImpl<X> typeImpl = (AnnotatedTypeImpl<X>) type;
+
+    for (AroundInvokeConfig aroundInvoke : _aroundInvoke) {
+      configureAroundInvoke(typeImpl, type.getJavaClass(), aroundInvoke);
+    }
+  }
+  
+  private void configureAroundInvoke(AnnotatedTypeImpl<X> type,
+                                     Class<?> cl, 
+                                     AroundInvokeConfig aroundInvoke)
+  {
+    if (cl == null)
+      return;
+
+    for (Method method : cl.getDeclaredMethods()) {
+      if (aroundInvoke.isMatch(method)) {
+        AnnotatedMethod<?> annMethod = AnnotatedTypeUtil.findMethod(type, method);
+        
+        if (annMethod == null) {
+          annMethod = type.createMethod(method);
+        }
+          
+        AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) annMethod; 
+        
+        methodImpl.addAnnotation(new AroundInvokeLiteral());
+
+        AnnotatedOverrideMap.putMethod(method, methodImpl);
+        
+        return;
+      }
+    }
+    
+    configureAroundInvoke(type, cl.getSuperclass(), aroundInvoke);
+  }
+    
   private void setPatternTransaction(EjbMethodPattern<X> pattern,
                                      TransactionAttribute xa)
     throws ConfigException

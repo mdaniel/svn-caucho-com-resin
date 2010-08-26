@@ -19,56 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.annotation;
+package com.caucho.ejb.cfg;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
+import javax.interceptor.AroundInvoke;
 
 /**
- * The resource annotation.
+ * <pre>
+ * boolean-literal ::= (true="1", false="0")
+ * </pre>            
  */
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({TYPE, FIELD, METHOD})
-public @interface Resource {
-  public enum AuthenticationType {
-    CONTAINER,
-    APPLICATION
-  }
-  
-  AuthenticationType authenticationType()
-    default AuthenticationType.CONTAINER;
-  
-  String description() default "";
-
-  /**
-   * JNDI name.
-   */
-  String name() default "";
-  
-  String lookup() default "";
-  
-  boolean shareable() default true;
-
-  /**
-   * Java type of the resource.
-   */
-  Class<?> type() default Object.class;
-
-  /**
-   * Product-specific name.
-   */
-  String mappedName() default "";
+public class AroundInvokeLiteral extends AnnotationLiteral<AroundInvoke>
+  implements AroundInvoke
+{
 }

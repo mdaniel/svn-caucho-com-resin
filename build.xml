@@ -460,6 +460,11 @@
       <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="inject-16.jar"/>
     </antcall>
+    
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="resource"/>
+      <param name="module.jar" value="resource-16.jar"/>
+    </antcall>
   </target>
 
   <target name="version">
@@ -753,6 +758,7 @@
       <packageset dir="${modules}/unix/src"/>
       -->
       <packageset dir="${modules}/kernel/src"/>
+      <packageset dir="${modules}/resource/src"/>
       <packageset dir="${modules}/webbeans/src"/>
       <!--
       <packageset dir="${modules}/webutil/src"/>

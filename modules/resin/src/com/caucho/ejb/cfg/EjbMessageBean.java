@@ -555,6 +555,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
     for (AnnotatedMethod<? super X> method : type.getMethods()) {
       AroundInvoke aroundInvoke = method.getAnnotation(AroundInvoke.class);
 
+      /*
       // ejb/0fbl
       if (aroundInvoke != null) {
         setAroundInvokeMethodName(method.getJavaMember().getName());
@@ -562,6 +563,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
         // XXX: needs to check invalid duplicated @AroundInvoke methods.
         break;
       }
+      */
     }
   }
 

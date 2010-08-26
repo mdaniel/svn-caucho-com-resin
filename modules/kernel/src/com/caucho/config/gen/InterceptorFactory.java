@@ -67,6 +67,7 @@ import javax.interceptor.Interceptors;
 import javax.interceptor.InvocationContext;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.AnnotatedOverrideMap;
 import com.caucho.config.inject.AnyLiteral;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
@@ -101,6 +102,9 @@ public class InterceptorFactory<X>
   private HashMap<Class<?>, Annotation> _classInterceptorBindings;
   
   private HashSet<Class<?>> _decoratorClasses;
+  
+  private boolean _isExcludeClassInterceptors;
+  private boolean _isExcludeDefaultInterceptors;
   
   private boolean _isPassivating;
   
@@ -146,11 +150,15 @@ public class InterceptorFactory<X>
     if (_isInterceptorOrDecorator)
       return super.create(method, isEnhanced);
     
-    boolean isExcludeClassInterceptors
-      = method.isAnnotationPresent(ExcludeClassInterceptors.class);
+    boolean isExcludeClassInterceptors = _isExcludeClassInterceptors;
     
-    boolean isExcludeDefaultInterceptors
-      = method.isAnnotationPresent(ExcludeDefaultInterceptors.class);
+    if (method.isAnnotationPresent(ExcludeClassInterceptors.class))
+      isExcludeClassInterceptors = true;
+    
+    boolean isExcludeDefaultInterceptors = _isExcludeDefaultInterceptors;
+    
+    if (method.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+      isExcludeDefaultInterceptors = true;
     
     HashSet<Class<?>> methodInterceptors = null;
     
@@ -173,13 +181,13 @@ public class InterceptorFactory<X>
                                            annType);
     }
     
-    if (! isExcludeClassInterceptors 
+    if (! isExcludeClassInterceptors
         && _classInterceptors.size() > 0) {
       methodInterceptors = addInterceptors(methodInterceptors,
                                            _classInterceptors,
                                            annType);
     }
-
+    
     Interceptors interceptorsAnn = method.getAnnotation(Interceptors.class);
 
     boolean isMethodInterceptor = false;
@@ -435,25 +443,40 @@ public class InterceptorFactory<X>
       return set;
     
     for (Method m : cl.getDeclaredMethods()) {
-      if (! m.isAnnotationPresent(annType))
-        continue;
-      
       if (Modifier.isAbstract(cl.getModifiers()))
         continue;
       
       Class<?> []param = m.getParameterTypes();
       
-      if (param.length == 1 && param[0].equals(InvocationContext.class)) {
-        if (set == null)
-          set = new LinkedHashSet<Class<?>>();
-          
-        set.add(cl);
+      if (param.length != 1 || ! param[0].equals(InvocationContext.class))
+        continue;
         
-        return set;
-      }
+      if (! isAnnotationPresent(m, annType))
+        continue;
+        
+      if (set == null)
+        set = new LinkedHashSet<Class<?>>();
+          
+      set.add(cl);
+        
+      return set;
     }
     
     return addInterceptor(set, cl.getSuperclass(), annType);
+  }
+  
+  private boolean isAnnotationPresent(Method m, 
+                                      Class<? extends Annotation> annType)
+  {
+    if (m.isAnnotationPresent(annType))
+      return true;
+    
+    AnnotatedMethod<?> annMethod = AnnotatedOverrideMap.getMethod(m);
+    
+    if (annMethod == null)
+      return false;
+    else
+      return annMethod.isAnnotationPresent(annType);
   }
   
   //
@@ -517,6 +540,11 @@ public class InterceptorFactory<X>
    */
   private void introspectClassInterceptors()
   {
+    if (getBeanType().isAnnotationPresent(ExcludeClassInterceptors.class)) {
+      _isExcludeClassInterceptors = true;
+      return;
+    }
+    
     Interceptors interceptors = getBeanType().getAnnotation(Interceptors.class);
 
     if (interceptors != null) {
@@ -535,8 +563,10 @@ public class InterceptorFactory<X>
    */
   private void introspectDefaultInterceptors()
   {
-    if (getBeanType().isAnnotationPresent(ExcludeDefaultInterceptors.class))
+    if (getBeanType().isAnnotationPresent(ExcludeDefaultInterceptors.class)) {
+      _isExcludeDefaultInterceptors = true;
       return;
+    }
     
     DefaultInterceptors interceptors 
       = getBeanType().getAnnotation(DefaultInterceptors.class);

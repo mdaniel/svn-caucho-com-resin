@@ -330,6 +330,12 @@ public class EjbMethodPattern<X> {
       configureXA(apiMethod);
     }
   }
+  
+  public boolean isMatch(AnnotatedMethod<?> method)
+  {
+    return _signature.isMatch(method.getJavaMember().getName(),
+                              method.getJavaMember().getParameterTypes());
+  }
 
   private void configureXA(AnnotatedMethod<?> apiMethod)
   {

@@ -31,6 +31,8 @@ package com.caucho.ejb.cfg;
 
 import java.util.ArrayList;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
 /**
  * Configuration for interceptor-binding.
  */
@@ -43,6 +45,7 @@ public class InterceptorBinding {
   private InterceptorOrder _interceptorOrder;
 
   private ArrayList<Class<?>> _interceptors = new ArrayList<Class<?>>();
+  private ArrayList<EjbMethod> _methodList = new ArrayList<EjbMethod>();
 
   public InterceptorBinding()
   {
@@ -68,9 +71,19 @@ public class InterceptorBinding {
     return _isExcludeDefaultInterceptors;
   }
 
+  public boolean isExcludeClassInterceptors()
+  {
+    return _isExcludeClassInterceptors;
+  }
+
   public void setEjbName(String ejbName)
   {
     _ejbName = ejbName;
+  }
+  
+  public boolean isDefault()
+  {
+    return _ejbName == null || "*".equals(_ejbName); 
   }
 
   public void setExcludeDefaultInterceptors(boolean b)
@@ -93,8 +106,32 @@ public class InterceptorBinding {
     _interceptors.add(interceptorClass);
   }
   
+  public ArrayList<EjbMethod> getMethodList()
+  {
+    return _methodList;
+  }
+  
+  public InterceptorsLiteral getAnnotation()
+  {
+    Class<?> []values = new Class<?>[_interceptors.size()];
+    
+    _interceptors.toArray(values);
+    
+    return new InterceptorsLiteral(values);
+  }
+  
+  public boolean isMatch(AnnotatedMethod<?> method)
+  {
+    for (EjbMethod ejbMethod : _methodList) {
+      if (ejbMethod.isMatch(method))
+        return true;
+    }
+    
+    return false;
+  }
+  
   public void addMethod(EjbMethod method)
   {
-    
+    _methodList.add(method);
   }
 }

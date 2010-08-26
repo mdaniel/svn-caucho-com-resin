@@ -492,6 +492,10 @@
       <fileset dir="${resin.modules}/webbeans/classes">
         <exclude name="**/.*"/>
       </fileset>
+      
+      <fileset dir="${resin.modules}/resource/classes">
+        <exclude name="**/.*"/>
+      </fileset>
     </jar>
 
 
