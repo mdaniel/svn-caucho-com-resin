@@ -646,98 +646,379 @@ public class SpyPreparedStatement extends SpyStatement
   public void setURL(int index, URL value)
     throws SQLException
   {
-    throw new UnsupportedOperationException();
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":setURL(" + index + "," + value + ")");
+
+      _pstmt.setURL(index, value);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setURL(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+
   }
 
-    public boolean isClosed() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setRowId(int parameterIndex, RowId x)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":setRowId(" + parameterIndex + "," + x + ")");
 
-    public void setPoolable(boolean poolable) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+      _pstmt.setRowId(parameterIndex, x);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setRowId(" + e + ")");
 
-    public boolean isPoolable() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+      throw SQLExceptionWrapper.create(e);
     }
+  }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setNString(int parameterIndex, String value)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":setNString(" + parameterIndex + "," + value + ")");
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+      _pstmt.setNString(parameterIndex, value);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setNString(" + e + ")");
 
-    public void setRowId(int parameterIndex, RowId x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+      throw SQLExceptionWrapper.create(e);
     }
+  }
 
-    public void setNString(int parameterIndex, String value) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setNCharacterStream(int parameterIndex, Reader value, long length)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setNCharacterStream("
+          + parameterIndex
+          + ","
+          + value
+          + ","
+          + length
+          + ")");
 
-    public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+      _pstmt.setNCharacterStream(parameterIndex, value, length);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setNCharacterStream(" + e + ")");
 
-    public void setNClob(int parameterIndex, NClob value) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+      throw SQLExceptionWrapper.create(e);
     }
+  }
 
-    public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setNClob(int parameterIndex, NClob value)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":setNClob(" + parameterIndex + "," + value + ")");
 
-    public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+      _pstmt.setNClob(parameterIndex, value);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setNClob(" + e + ")");
 
-    public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+      throw SQLExceptionWrapper.create(e);
     }
+  }
 
-    public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setClob(int parameterIndex, Reader reader, long length)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setClob("
+          + parameterIndex
+          + ","
+          + reader
+          + ","
+          + length
+          + ")");
 
-    public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+      _pstmt.setClob(parameterIndex, reader, length);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setClob(" + e + ")");
 
-    public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+      throw SQLExceptionWrapper.create(e);
     }
+  }
 
-    public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setBlob(int parameterIndex, InputStream inputStream, long length)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setBlob("
+          + parameterIndex
+          + ","
+          + inputStream
+          + ","
+          + length
+          + ")");
 
-    public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+      _pstmt.setBlob(parameterIndex, inputStream, length);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setBlob(" + e + ")");
 
-    public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+      throw SQLExceptionWrapper.create(e);
     }
+  }
 
-    public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setNClob(int parameterIndex, Reader reader, long length)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setNClob("
+          + parameterIndex
+          + ","
+          + reader
+          + ","
+          + length
+          + ")");
 
-    public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+      _pstmt.setNClob(parameterIndex, reader, length);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setNClob(" + e + ")");
 
-    public void setClob(int parameterIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+      throw SQLExceptionWrapper.create(e);
     }
+  }
 
-    public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setSQLXML(int parameterIndex, SQLXML xmlObject)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setSQLXML("
+          + parameterIndex
+          + ","
+          + xmlObject
+          + ")");
 
-    public void setNClob(int parameterIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+      _pstmt.setSQLXML(parameterIndex, xmlObject);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setSQLXML(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
     }
+  }
+
+  public void setAsciiStream(int parameterIndex, InputStream x, long length)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setAsciiStream("
+          + parameterIndex
+          + ","
+          + x
+          + ","
+          + length
+          + ")");
+
+      _pstmt.setAsciiStream(parameterIndex, x, length);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setAsciiStream(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setBinaryStream(int parameterIndex, InputStream x, long length)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setBinaryStream("
+          + parameterIndex
+          + ","
+          + x
+          + ","
+          + length
+          + ")");
+
+      _pstmt.setBinaryStream(parameterIndex, x, length);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setBinaryStream(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setCharacterStream(int parameterIndex, Reader reader, long length)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setCharacterStream("
+          + parameterIndex
+          + ","
+          + reader
+          + ","
+          + length
+          + ")");
+
+      _pstmt.setCharacterStream(parameterIndex, reader, length);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setCharacterStream(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setAsciiStream(int parameterIndex, InputStream x)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":setAsciiStream(" + parameterIndex + "," + x + ")");
+
+      _pstmt.setAsciiStream(parameterIndex, x);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setAsciiStream(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setBinaryStream(int parameterIndex, InputStream x)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setBinaryStream("
+          + parameterIndex
+          + ","
+          + x
+          + ")");
+
+      _pstmt.setBinaryStream(parameterIndex, x);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setBinaryStream(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setCharacterStream(int parameterIndex, Reader reader)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setCharacterStream("
+          + parameterIndex
+          + ","
+          + reader
+          + ")");
+
+      _pstmt.setCharacterStream(parameterIndex, reader);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setCharacterStream(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setNCharacterStream(int parameterIndex, Reader reader)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setNCharacterStream("
+          + parameterIndex
+          + ","
+          + reader
+          + ")");
+
+      _pstmt.setNCharacterStream(parameterIndex, reader);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setNCharacterStream(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setClob(int parameterIndex, Reader reader)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":setClob(" + parameterIndex + "," + reader + ")");
+
+      _pstmt.setClob(parameterIndex, reader);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setClob(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setBlob(int parameterIndex, InputStream inputStream)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId()
+          + ":setBlob("
+          + parameterIndex
+          + ","
+          + inputStream
+          + ")");
+
+      _pstmt.setBlob(parameterIndex, inputStream);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setBlob(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
+
+  public void setNClob(int parameterIndex, Reader reader)
+    throws SQLException
+  {
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":setNClob(" + parameterIndex + "," + reader + ")");
+
+      _pstmt.setNClob(parameterIndex, reader);
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-setNClob(" + e + ")");
+
+      throw SQLExceptionWrapper.create(e);
+    }
+  }
 }
