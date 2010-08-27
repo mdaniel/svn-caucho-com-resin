@@ -96,7 +96,7 @@ public abstract class EJBContainer {
       throw new EJBException(e);
     }
 
-    throw new UnsupportedOperationException("No EJBProvider Found");
+    return null;
   }
   
   private static Class loadProviderClass(URL url, ClassLoader loader)
