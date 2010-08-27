@@ -28,14 +28,13 @@
 
 package com.caucho.naming;
 
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.L10N;
+import java.util.Hashtable;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
-import java.util.Hashtable;
-import java.util.logging.Logger;
+
+import com.caucho.loader.EnvironmentLocal;
 
 /**
  * Returns the JNDI context for the current classloader.  Since each
@@ -44,10 +43,6 @@ import java.util.logging.Logger;
  */
 public class InitialContextFactoryImpl implements InitialContextFactory
 {
-  private static Logger log
-    = Logger.getLogger(InitialContextFactoryImpl.class.getName());
-  private static L10N L = new L10N(InitialContextFactoryImpl.class);
-
   private static EnvironmentLocal<AbstractModel> _rootModel
     = new EnvironmentLocal<AbstractModel>();
 
@@ -113,7 +108,7 @@ public class InitialContextFactoryImpl implements InitialContextFactory
   {
     AbstractModel model = createRoot();
 
-    return new ContextImpl(model, env);
+    return new ContextImpl(model, (Hashtable) env);
   }
   
   public static Context createInitialContext()

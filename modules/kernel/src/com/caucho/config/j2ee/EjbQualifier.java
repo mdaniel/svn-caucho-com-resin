@@ -27,33 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlets.naming;
+package com.caucho.config.j2ee;
 
-import java.util.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 
-import javax.naming.*;
-import javax.naming.spi.*;
+import javax.inject.Qualifier;
 
-import com.caucho.naming.*;
-import com.caucho.hessian.client.*;
+import com.caucho.inject.Module;
 
-public class HessianContextFactory implements InitialContextFactory {
-  /**
-   * Returns the initial context
-   */
-  public Context getInitialContext(Hashtable<?,?> env)
-  {
-    try {
-      String url = (String) env.get(Context.PROVIDER_URL);
+/**
+ * The qualifier for a registered EJB.
+ */
 
-      HessianProxyFactory factory = new HessianProxyFactory();
-      NamingProxy proxy = (NamingProxy) factory.create(NamingProxy.class, url);
-
-      HessianModel model = new HessianModel(proxy);
-    
-      return new ContextImpl(model, (Hashtable) env);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+@Module
+public @interface EjbQualifier {
 }

@@ -40,7 +40,6 @@ import javax.rmi.PortableRemoteObject;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-
 public class MethodGeneratorProgram extends ConfigProgram
 {
   private static final Logger log

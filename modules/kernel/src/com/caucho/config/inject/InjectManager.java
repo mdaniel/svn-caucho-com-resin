@@ -310,6 +310,9 @@ public final class InjectManager
   private ThreadLocal<CreationalContextImpl<?>> _proxyThreadLocal
     = new ThreadLocal<CreationalContextImpl<?>>();
   
+  private ConcurrentHashMap<Class<?>,ManagedBeanImpl<?>> _transientMap
+    = new ConcurrentHashMap<Class<?>,ManagedBeanImpl<?>>();
+  
   private ConcurrentHashMap<Long,InjectionTarget<?>> _xmlTargetMap
     = new ConcurrentHashMap<Long,InjectionTarget<?>>();
 
@@ -801,7 +804,7 @@ public final class InjectManager
    */
   public <T> T createTransientObject(Class<T> type)
   {
-    ManagedBeanImpl<T> bean = createManagedBean(type);
+    ManagedBeanImpl<T> bean = createCachedManagedBean(type);
 
     validate(bean);
     
@@ -813,8 +816,31 @@ public final class InjectManager
 
     T instance = injectionTarget.produce(env);
     injectionTarget.inject(instance, env);
+    // jsp/1o60
+    injectionTarget.postConstruct(instance);
 
     return instance;
+  }
+
+  /**
+   * Creates an object, but does not register the
+   * component with webbeans.
+   */
+  private <T> ManagedBeanImpl<T> createCachedManagedBean(Class<T> type)
+  {
+    ManagedBeanImpl<T> bean = (ManagedBeanImpl<T>) _transientMap.get(type);
+    
+    if (bean == null) {
+      bean = createManagedBean(type);
+
+      validate(bean);
+      
+      _transientMap.putIfAbsent(type, bean);
+      
+      bean = (ManagedBeanImpl<T>) _transientMap.get(type);
+    }
+    
+    return bean;
   }
 
   /**
@@ -2050,7 +2076,7 @@ public final class InjectManager
       thread.setContextClassLoader(getClassLoader());
       
       ReferenceFactory factory = getReferenceFactory(bean);
-      
+
       if (createContext instanceof CreationalContextImpl<?>)
         return factory.create((CreationalContextImpl) createContext, null, null);
       else
@@ -4151,6 +4177,12 @@ public final class InjectManager
       */
       
       return instance;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _bean + "]";
     }
   }
   

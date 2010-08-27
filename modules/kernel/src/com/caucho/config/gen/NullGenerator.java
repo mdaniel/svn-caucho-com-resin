@@ -225,6 +225,15 @@ public class NullGenerator<X> implements AspectGenerator<X> {
   }
 
   /**
+   * True if the application exceptions are thrown
+   */
+  @Override
+  public boolean isApplicationExceptionThrown()
+  {
+    return false;
+  }
+  
+  /**
    * Generates application (checked) exception code for
    * the method.
    */

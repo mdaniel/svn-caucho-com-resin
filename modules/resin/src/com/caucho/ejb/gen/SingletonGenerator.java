@@ -166,6 +166,11 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     for (AnnotatedType<? super X> apiType : getLocalApi()) {
       out.print(", " + apiType.getJavaClass().getName());
     }
+
+    for (AnnotatedType<? super X> apiType : getRemoteApi()) {
+      out.print(", " + apiType.getJavaClass().getName());
+    }
+    
     out.println();
   }
 
@@ -217,7 +222,6 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     out.pushDepth();
 
     out.println("_manager = manager;");
-
     out.popDepth();
     out.println("}");
 

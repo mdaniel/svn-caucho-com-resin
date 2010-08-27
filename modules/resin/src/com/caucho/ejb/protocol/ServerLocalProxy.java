@@ -40,7 +40,7 @@ import java.util.Hashtable;
 public class ServerLocalProxy implements ObjectProxy, java.io.Serializable {
   // The server
   private AbstractEjbBeanManager _server;
-  private Class _clientApi;
+  private Class<?> _clientApi;
 
   /**
    * Creates a new server proxy
@@ -58,10 +58,13 @@ public class ServerLocalProxy implements ObjectProxy, java.io.Serializable {
    *
    * @return the object named by the proxy.
    */
-  public Object createObject(Hashtable env)
+  @Override
+  public Object createObject(Hashtable<?,?> env)
     throws NamingException
   {
-    return _server.getLocalProxy(_clientApi);
+    Object object = _server.getLocalProxy(_clientApi);
+    
+    return object;
   }
 
   @Override

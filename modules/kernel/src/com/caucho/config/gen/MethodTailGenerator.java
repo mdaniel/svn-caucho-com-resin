@@ -89,4 +89,10 @@ public class MethodTailGenerator<X> extends NullGenerator<X> {
     */
   }
 
+  @Override
+  public boolean isApplicationExceptionThrown()
+  {
+    return true;
+  }
+
 }

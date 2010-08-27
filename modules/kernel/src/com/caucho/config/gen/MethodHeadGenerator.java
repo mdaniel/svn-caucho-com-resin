@@ -29,14 +29,12 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.HashSet;
 
-import javax.ejb.ApplicationException;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -117,6 +115,6 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
 
     MethodHeadGenerator<?> bizMethod = (MethodHeadGenerator<?>) o;
 
-    return getJavaMethod().getName().equals(bizMethod.getJavaMethod().getName());
+    return AnnotatedTypeUtil.isMatch(getJavaMethod(), bizMethod.getJavaMethod());
   }
 }

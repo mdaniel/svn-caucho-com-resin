@@ -29,25 +29,127 @@
 
 package com.caucho.config.async;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.ejb.EJBException;
+
+import com.caucho.util.Alarm;
 
 
 /**
  * Represents the @Asynchronous interception
  */
-abstract public class AsyncItem implements Runnable {
+abstract public class AsyncItem<X> implements Runnable, Future<X> {
   private static final Logger log = Logger.getLogger(AsyncItem.class.getName());
+
+  private volatile boolean _isDone;
+  private volatile Future<X> _result;
   
-  abstract public void runTask()
+  private ExecutionException _executionException;
+
+  abstract public Future<X> runTask()
     throws Exception;
   
+  @Override
   public final void run()
   {
     try {
-      runTask();
-    } catch (Exception e) {
+      _result = runTask();
+      
+      if (_result != null)
+        _result.get();
+    } catch (RuntimeException e) {
       log.log(Level.FINER, e.toString(), e);
+      
+      _executionException = new ExecutionException(new EJBException(e));
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      _executionException = new ExecutionException(e);
+    } finally {
+      _isDone = true;
+      
+      synchronized (this) {
+        notifyAll();
+      }
+    }
+  }
+
+  @Override
+  public boolean cancel(boolean mayInterruptIfRunning)
+  {
+    return mayInterruptIfRunning;
+  }
+
+  @Override
+  public X get() throws InterruptedException, ExecutionException
+  {
+    try {
+      return get(Integer.MAX_VALUE, TimeUnit.SECONDS);
+    } catch (TimeoutException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  @Override
+  public X get(long timeout, TimeUnit unit)
+    throws InterruptedException,
+           ExecutionException,
+           TimeoutException
+  {
+    long timeoutMillis = unit.toMillis(timeout);
+    
+    long expires = Alarm.getCurrentTimeActual() + timeoutMillis;
+    
+    synchronized (this) {
+      while (! _isDone) {
+        long delta = expires - Alarm.getCurrentTimeActual();
+        
+        if (delta < 0)
+          throw new TimeoutException(toString());
+
+        Thread.interrupted();
+        wait(delta);
+      }
+    }
+    
+    if (_executionException != null)
+      throw _executionException;
+    
+    if (_result != null)
+      return _result.get(0, TimeUnit.MILLISECONDS);
+    else
+      return null;
+  }
+
+  @Override
+  public boolean isCancelled()
+  {
+    if (_result != null)
+      return _result.isCancelled();
+    else
+      return false;
+  }
+
+  @Override
+  public boolean isDone()
+  {
+    return _isDone;
+  }
+  
+  @Override
+  public String toString()
+  {
+    if (getClass().getEnclosingMethod() != null) {
+      return getClass().getEnclosingClass().getSimpleName() + "[" + getClass().getEnclosingMethod().getName() + "]";
+    }
+    else {
+      return getClass().getSimpleName() + "[]";
     }
   }
 }

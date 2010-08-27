@@ -65,6 +65,6 @@ public class NamingProxy implements ObjectProxy, java.io.Serializable {
   public Object createObject(Hashtable<?,?> env)
     throws NamingException
   {
-    return new ContextImpl(_namingModel, env);
+    return new ContextImpl(_namingModel, (Hashtable) env);
   }
 }

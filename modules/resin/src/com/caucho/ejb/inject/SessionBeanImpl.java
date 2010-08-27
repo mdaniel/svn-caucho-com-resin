@@ -80,6 +80,7 @@ public class SessionBeanImpl<X,T>
     introspectObservers(bean.getAnnotatedType(), extAnnType);
   }
   
+  @Override
   public InjectManager getCdiManager()
   {
     return _context.getInjectManager();

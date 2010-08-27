@@ -62,6 +62,11 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     return false;
   }
   
+  public Contextual<T> getBean()
+  {
+    return _bean;
+  }
+  
   protected OwnerCreationalContext<?> getOwner()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -147,9 +152,9 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
       return null;
     
     for (ptr = ptr.getOwner(); ptr != null; ptr = ptr.getNext()) {
-      Contextual<?> testBean = ptr._bean;
+      Contextual<?> testBean = ptr.getBean();
       
-      if (testBean == bean) {
+      if (testBean == bean || testBean != null && testBean.equals(bean)) {
         return (X) ptr._value;
       }
     }

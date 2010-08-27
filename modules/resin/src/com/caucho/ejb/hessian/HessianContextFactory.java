@@ -76,12 +76,12 @@ public class HessianContextFactory implements InitialContextFactory {
 
       model.setClientContainer(client);
       */
-      return new ContextImpl(model, environment);
+      return new ContextImpl(model, (Hashtable) environment);
     }
 
     if (_model == null)
       _model = new HessianModel(prefix);
 
-    return new ContextImpl(_model, environment);
+    return new ContextImpl(_model, (Hashtable) environment);
   }
 }

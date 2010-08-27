@@ -42,6 +42,7 @@ import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectEnvironmentBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.BeanName;
+import com.caucho.config.j2ee.EjbQualifierLiteral;
 import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.inject.Module;
 
@@ -67,6 +68,7 @@ public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
     
     _qualifierSet = new HashSet<Annotation>();
     _qualifierSet.add(beanName);
+    _qualifierSet.add(EjbQualifierLiteral.QUALIFIER);
   }
  
   public InjectManager getCdiManager()

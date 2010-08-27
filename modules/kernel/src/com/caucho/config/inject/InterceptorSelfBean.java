@@ -29,6 +29,9 @@
 
 package com.caucho.config.inject;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
@@ -39,9 +42,16 @@ import com.caucho.config.gen.CandiEnhancedBean;
  */
 public class InterceptorSelfBean<X> extends InterceptorRuntimeBean<X>
 {
+  private static final Logger log = Logger.getLogger(InterceptorSelfBean.class.getName());
+  
   public InterceptorSelfBean(Class<X> type)
   {
     super(null, type);
+    
+    RuntimeException exn = new RuntimeException("SELFX: " + type);
+    exn.fillInStackTrace();
+    
+    log.log(Level.INFO, exn.toString(), exn);
   }
 
   @Override

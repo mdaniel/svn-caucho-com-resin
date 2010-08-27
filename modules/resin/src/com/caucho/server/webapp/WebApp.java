@@ -4267,7 +4267,7 @@ public class WebApp extends ServletContextImpl
   public String toString()
   {
     if (_lifecycle == null)
-      return "WebApp[" + getId() + ", null]";
+      return "WebApp[" + getId() + "]";
     else if (_lifecycle.isActive())
       return "WebApp[" + getId() + "]";
     else

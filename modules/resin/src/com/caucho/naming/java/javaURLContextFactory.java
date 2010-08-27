@@ -29,26 +29,21 @@
 
 package com.caucho.naming.java;
 
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.naming.*;
-import com.caucho.util.L10N;
+import java.util.Hashtable;
 
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.spi.ObjectFactory;
-import java.util.Hashtable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.naming.AbstractModel;
+import com.caucho.naming.ContextImpl;
+import com.caucho.naming.InitialContextFactoryImpl;
 
 /**
  * Create a remote object
  */
 public class javaURLContextFactory implements ObjectFactory {
-  private static final L10N L = new L10N(javaURLContextFactory.class);
-  private static final Logger log
-    = Logger.getLogger(javaURLContextFactory.class.getName());
-
   public Object getObjectInstance(Object obj,
                                   Name name,
                                   Context parentContext,
@@ -57,7 +52,7 @@ public class javaURLContextFactory implements ObjectFactory {
   {
     AbstractModel model = InitialContextFactoryImpl.createRoot();
 
-    Context context = new ContextImpl(model, env);
+    Context context = new ContextImpl(model, (Hashtable) env);
 
     if (obj != null)
       return context.lookup((String) obj);

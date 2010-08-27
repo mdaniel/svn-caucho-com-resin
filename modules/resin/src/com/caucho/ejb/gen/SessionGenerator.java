@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
 import javax.ejb.Schedules;
@@ -202,10 +201,11 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
       
       if (localDefault.getJavaClass().isInterface())
         _localApi.add(localDefault); 
-      else
+      else {
         // we still want to introspect the methods, but don't add it as
         // a local api because it will be treated as an interface later
         introspectType(localDefault);
+      }
     }
     
     for (AnnotatedType<? super X> type : _localApi)
@@ -317,8 +317,9 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   {
     AspectGenerator<X> bizMethod = getAspectBeanFactory().create(method);
       
-    if (bizMethod != null && ! _businessMethods.contains(bizMethod))
+    if (bizMethod != null && ! _businessMethods.contains(bizMethod)) {
       _businessMethods.add(bizMethod);
+    }
   }
 
   protected void addNonBusinessMethod(AnnotatedMethod<? super X> method)

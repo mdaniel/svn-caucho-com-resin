@@ -175,9 +175,11 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
         CandiEnhancedBean bean = (CandiEnhancedBean) proxy;
       
         Object []delegates = createDelegates((CreationalContextImpl) env);
-      
+        
         bean.__caucho_inject(delegates, env);
       } catch (Exception e) {
+        e.printStackTrace();
+        
         log.log(Level.WARNING, e.toString(), e);
       }
     }

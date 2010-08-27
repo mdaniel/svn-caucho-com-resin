@@ -33,6 +33,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.ApplicationException;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -46,6 +48,9 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
+  private static final Logger log 
+    = Logger.getLogger(AbstractAspectGenerator.class.getName());
+  
   private AspectFactory<X> _factory;
   private AnnotatedMethod<? super X> _method;
   private AspectGenerator<X> _next;
@@ -174,6 +179,12 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
   private void generateExceptions(JavaWriter out)
     throws IOException
   {
+    if (! isApplicationExceptionThrown())
+      return;
+    RuntimeException exn1= new RuntimeException("EXCEPTIONS:");
+    exn1.fillInStackTrace();
+    log.log(Level.INFO, exn1.toString(), exn1);
+    
     HashSet<Class<?>> exceptionSet
       = new HashSet<Class<?>>();
 
@@ -410,6 +421,15 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
     throws IOException
   {
     _next.generatePostCall(out);
+  }
+  
+  /**
+   * Returns true if the application exception can be thrown.
+   */
+  @Override
+  public boolean isApplicationExceptionThrown()
+  {
+    return _next.isApplicationExceptionThrown();
   }
   
   /**

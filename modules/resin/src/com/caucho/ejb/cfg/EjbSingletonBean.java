@@ -38,6 +38,7 @@ import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.Configurable;
 import com.caucho.config.gen.LockingAttributeLiteral;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.inject.Module;
@@ -68,6 +69,12 @@ public class EjbSingletonBean<X> extends EjbSessionBean<X> {
   public Class<? extends Annotation> getSessionType()
   {
     return Singleton.class;
+  }
+  
+  @Configurable
+  public void setInitOnStartup(boolean isInit)
+  {
+    
   }
 
   @Override

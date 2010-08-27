@@ -33,6 +33,7 @@ import com.caucho.bytecode.*;
 import com.caucho.util.L10N;
 
 import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.persistence.PersistenceContext;
@@ -285,12 +286,18 @@ public class TagAnalyzer
       return;
     
     for (Method method : cl.getDeclaredMethods()) {
+      if (method.getDeclaringClass() == Object.class)
+        continue;
+      
       if (method.getName().startsWith("set")
           && (method.isAnnotationPresent(Resource.class)
               || method.isAnnotationPresent(EJB.class)
               || method.isAnnotationPresent(Inject.class)
               || method.isAnnotationPresent(PersistenceContext.class)
               || method.isAnnotationPresent(PersistenceUnit.class))) {
+        tag.setHasInjection(true);
+      }
+      else if (method.isAnnotationPresent(PostConstruct.class)) {
         tag.setHasInjection(true);
       }
     }

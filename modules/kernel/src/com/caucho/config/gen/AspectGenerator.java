@@ -200,6 +200,11 @@ public interface AspectGenerator<X> {
    */
   public void generatePostCall(JavaWriter out)
     throws IOException;
+
+  /**
+   * Returns true if the application exception can be thrown.
+   */
+  public boolean isApplicationExceptionThrown();
   
   /**
    * Generates application (checked) exception code for

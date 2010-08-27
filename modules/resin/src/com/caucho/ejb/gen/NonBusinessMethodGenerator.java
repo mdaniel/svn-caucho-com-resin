@@ -38,7 +38,6 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.AspectGeneratorUtil;
-import com.caucho.config.gen.MethodHeadGenerator;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -282,6 +281,12 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
   public void generatePostCall(JavaWriter out)
     throws IOException
   {
+  }
+  
+  @Override
+  public boolean isApplicationExceptionThrown()
+  {
+    return true;
   }
   
   /**

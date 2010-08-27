@@ -178,6 +178,11 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     for (AnnotatedType<? super X> api : getLocalApi()) {
       out.print(", " + api.getJavaClass().getName());
     }
+
+    for (AnnotatedType<? super X> apiType : getRemoteApi()) {
+      out.print(", " + apiType.getJavaClass().getName());
+    }
+    
     out.println();
   }
 

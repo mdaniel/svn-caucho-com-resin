@@ -71,43 +71,6 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
   {
     return _isAsynchronous;
   }
-
-  /**
-   * Introspect EJB security annotations:
-   *   @RunAs
-   *   @RolesAllowed
-   *   @PermitAll
-   *   @DenyAll
-   */
-  /*
-  public void introspect(AnnotatedMethod<? super T> apiMethod, 
-                         AnnotatedMethod<? super X> implMethod)
-  {
-    AnnotatedType<T> apiClass = getApiType();
-    AnnotatedType<X> implClass = getImplType();
-    
-    if (implMethod != null && implMethod.isAnnotationPresent(Asynchronous.class))
-      _isAsynchronous = true;
-    
-    if (implClass != null && implClass.isAnnotationPresent(Asynchronous.class))
-      _isAsynchronous = true;
-    
-    if (apiMethod != null && apiMethod.isAnnotationPresent(Asynchronous.class))
-      _isAsynchronous = true;
-    
-    if (apiClass != null && apiClass.isAnnotationPresent(Asynchronous.class))
-      _isAsynchronous = true;
-    
-    if (! _isAsynchronous)
-      return;
-
-    if (! void.class.equals(apiMethod.getBaseType())) {
-      throw ConfigException.create(apiMethod.getJavaMember(),
-                                   L.l("@Asynchronous method must return void"));
-    }
-  }
-  */
-  
   //
   // business method interception
   //
@@ -149,9 +112,12 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     out.println("task = new com.caucho.config.async.AsyncItem() {");
     out.pushDepth();
     
-    out.println("public void runTask() throws Exception");
+    out.println("public java.util.concurrent.Future runTask() throws Exception");
     out.println("{");
     out.pushDepth();
+    
+    if (! void.class.equals(javaApiMethod.getReturnType()))
+      out.print("return ");
     
     out.print(javaApiMethod.getName() + "_async(");
     
@@ -164,6 +130,11 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     
     out.println(");");
     
+    if (void.class.equals(javaApiMethod.getReturnType())) {
+      out.println();
+      out.println("return null;");
+    }
+    
     out.popDepth();
     out.println("}");
     
@@ -171,8 +142,12 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     out.println("};");
     
     out.println(_varName + ".offer(task);");
+    
+    if (! void.class.equals(javaApiMethod.getReturnType())) {
+      out.println("result = task;");
+    }
   }
-
+  
   protected Method getJavaMethod()
   {
     return _method.getJavaMember();

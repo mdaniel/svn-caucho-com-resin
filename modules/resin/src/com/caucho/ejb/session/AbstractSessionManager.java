@@ -60,6 +60,7 @@ import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.j2ee.BeanName;
 import com.caucho.config.j2ee.BeanNameLiteral;
 import com.caucho.config.reflect.AnnotatedMethodImpl;
@@ -162,6 +163,12 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   public ArrayList<AnnotatedType<? super X>> getLocalApi()
   {
     return _lazyGenerator.getLocalApi();
+  }
+  
+  @Override
+  public ArrayList<AnnotatedType<? super X>> getRemoteApi()
+  {
+    return _lazyGenerator.getRemoteApi();
   }
 
   @Override
@@ -335,7 +342,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   @Override
   public <T> T getLocalProxy(Class<T> api)
   {
-    return getSessionContext(api).createProxy(null);
+    OwnerCreationalContext owner = new OwnerCreationalContext(null);
+    
+    return getSessionContext(api).createProxy(owner);
   }
   
   protected <T> AbstractSessionContext<X,T>
@@ -378,7 +387,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   private void registerCdiBeans()
   {
     ArrayList<AnnotatedType<? super X>> localApiList = getLocalApi();
-    ArrayList<Class<?>> remoteApiList = getRemoteApiList();
+    ArrayList<AnnotatedType<? super X>> remoteApiList = getRemoteApi();
  
     AnnotatedType<X> rawAnnType = getRawAnnotatedType();
     AnnotatedType<X> annType = getAnnotatedType();
@@ -386,11 +395,6 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     AnnotatedType<X> extAnnType = createExternalAnnotatedType(annType, localApiList);
 
     InjectManager moduleBeanManager = InjectManager.create();
-
-    Named named = (Named) annType.getAnnotation(Named.class);
-
-    if (named != null) {
-    }
 
     ManagedBeanImpl<X> mBean 
       = new ManagedBeanImpl<X>(getInjectManager(), getAnnotatedType(), true);
@@ -415,7 +419,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     if (localApiList != null) {
       for (AnnotatedType<? super X> api : localApiList) {
         baseApi = api.getJavaClass();
-          
+        
         BaseType sourceApi = moduleBeanManager.createSourceBaseType(api.getJavaClass());
           
         apiList.addAll(sourceApi.getTypeClosure(moduleBeanManager));
@@ -425,8 +429,13 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     apiList.add(Object.class);
     
     if (remoteApiList != null) {
-      for (Class<?> api : remoteApiList) {
-        baseApi = api;
+      for (AnnotatedType<? super X> api : remoteApiList) {
+        if (baseApi == null)
+          baseApi = api.getJavaClass();
+        
+        BaseType sourceApi = moduleBeanManager.createSourceBaseType(api.getJavaClass());
+          
+        apiList.addAll(sourceApi.getTypeClosure(moduleBeanManager));
       }
     }
     
@@ -451,6 +460,10 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
     for (AnnotatedType<?> localApi : getLocalApi()) {
       registerLocalSession(moduleBeanManager, localApi.getJavaClass());
+    }
+
+    for (AnnotatedType<?> remoteApi : getRemoteApi()) {
+      registerLocalSession(moduleBeanManager, remoteApi.getJavaClass());
     }
     
     if (getLocalBean() != null) {

@@ -36,6 +36,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -85,7 +87,6 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
     if (parentClass != null) {
       _parent = new InterceptorRuntimeBean(this, parentClass);
     }
-    
     // introspectOverrideMethods(type);
   }
   
@@ -95,7 +96,10 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
 
   public Bean<X> getBean()
   {
-    return _child;
+    if (_child != null)
+      return _child.getBean();
+    else
+      return this;
   }
   
   public Class<?> getType()
@@ -189,8 +193,9 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
     
     X value = CreationalContextImpl.findAny(env, getBean());
     
-    if (value == null)
-      throw new NullPointerException(getBean() + " " + toString());
+    if (value == null) {
+      throw new NullPointerException(getBean() + "\n  " + env + "\n  " + toString());
+    }
     
     return value;
   }
@@ -467,12 +472,25 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
   @Override
   public boolean equals(Object o)
   {
-    if (! (o instanceof InterceptorRuntimeBean<?>))
+    if (o == this)
+      return true;
+    else if (o == null)
+      return false;
+    
+    if (getClass() != o.getClass())
       return false;
 
     InterceptorRuntimeBean<?> bean = (InterceptorRuntimeBean<?>) o;
 
-    return _type.equals(bean._type);
+    if (! _type.equals(bean._type))
+      return false;
+    
+    if (_child == bean._child)
+      return true;
+    else if (_child == null || ! _child.equals(bean._child))
+      return false;
+    else
+      return true;
   }
 
   @Override

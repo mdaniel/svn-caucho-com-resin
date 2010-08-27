@@ -27,33 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlets.naming;
+package com.caucho.config.j2ee;
 
-import java.util.*;
+import javax.enterprise.util.AnnotationLiteral;
 
-import javax.naming.*;
-import javax.naming.spi.*;
+/**
+ * A @BeanName literal for EJB names
+ */
 
-import com.caucho.naming.*;
-import com.caucho.hessian.client.*;
-
-public class HessianContextFactory implements InitialContextFactory {
-  /**
-   * Returns the initial context
-   */
-  public Context getInitialContext(Hashtable<?,?> env)
-  {
-    try {
-      String url = (String) env.get(Context.PROVIDER_URL);
-
-      HessianProxyFactory factory = new HessianProxyFactory();
-      NamingProxy proxy = (NamingProxy) factory.create(NamingProxy.class, url);
-
-      HessianModel model = new HessianModel(proxy);
-    
-      return new ContextImpl(model, (Hashtable) env);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+public class EjbQualifierLiteral extends AnnotationLiteral<EjbQualifier>
+  implements EjbQualifier {
+  public static final EjbQualifier QUALIFIER = new EjbQualifierLiteral();
 }

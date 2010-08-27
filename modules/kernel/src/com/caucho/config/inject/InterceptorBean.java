@@ -248,29 +248,14 @@ public class InterceptorBean<X> extends InterceptorRuntimeBean<X>
   }
 
   @Override
-  public boolean equals(Object o)
-  {
-    if (! (o instanceof InterceptorBean))
-      return false;
-
-    InterceptorBean bean = (InterceptorBean) o;
-
-    return _type.equals(bean._type);
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return _type.hashCode();
-  }
-
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
-    sb.append(_type.getSimpleName());
+    if (_type != null)
+      sb.append(_type.getSimpleName());
 
     sb.append("]");
 

@@ -49,6 +49,7 @@ import javax.ejb.TransactionManagementType;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.gen.TransactionAttributeLiteral;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
@@ -164,6 +165,12 @@ public class EjbSessionBean<X> extends EjbBean<X> {
       throw new ConfigException(
           L.l("'{0}' is an unknown transaction-type.  transaction-type must be 'Container' or 'Bean'.",
               type));
+  }
+  
+  @Configurable
+  public void setLocalBean(boolean isLocalBean)
+  {
+    
   }
 
   /**

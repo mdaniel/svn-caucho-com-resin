@@ -164,7 +164,7 @@ public class FilterManager {
       throw new ServletException(L.l("`{0}' is not a known filter.  Filters must be defined by <filter> before being used.", filterName));
     }
 
-    Class filterClass = config.getFilterClass();
+    Class<?> filterClass = config.getFilterClass();
 
     /* XXX:
     if (! config.isAvailable(Alarm.getCurrentTime()))

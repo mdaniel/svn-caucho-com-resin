@@ -95,7 +95,7 @@ public class CandiUtil {
     ArrayList<Integer> indexList = new ArrayList<Integer>();
     
     List<Interceptor<?>> interceptors;
-
+    
     if (bindings != null && bindings.length > 0) {
       interceptors = manager.resolveInterceptors(type, bindings);
     }

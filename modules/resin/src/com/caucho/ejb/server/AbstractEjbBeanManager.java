@@ -344,6 +344,11 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  public ArrayList<AnnotatedType<? super X>> getRemoteApi()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
   public AnnotatedType<X> getLocalBean()
   {
     return null;

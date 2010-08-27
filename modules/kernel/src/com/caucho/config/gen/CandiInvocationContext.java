@@ -29,9 +29,10 @@
 
 package com.caucho.config.gen;
 
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.Logger;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
@@ -42,11 +43,12 @@ import com.caucho.util.L10N;
 
 public class CandiInvocationContext implements InvocationContext {
   private static final L10N L = new L10N(CandiInvocationContext.class);
-  private static final Logger log
-    = Logger.getLogger(CandiInvocationContext.class.getName());
   
   private static final EnvironmentLocal<Map<String,Object>> _contextDataLocal
   = new EnvironmentLocal<Map<String,Object>>();
+  
+  private static final HashMap<Class<?>,Class<?>> _boxMap
+    = new HashMap<Class<?>,Class<?>>();
   
   private final Object _target;
   private final Method _apiMethod;
@@ -61,13 +63,12 @@ public class CandiInvocationContext implements InvocationContext {
   private Object []_param;
 
   private int _index;
-  private HashMap<String,Object> _map;
-
+  
   public CandiInvocationContext(InterceptionType type,
                                 Object target,
                                 Method apiMethod,
                                 Method implMethod,
-                                Interceptor []chainMethods,
+                                Interceptor<?> []chainMethods,
                                 Object []chainObjects,
                                 int []chainIndex,
                                 Object []param)
@@ -114,13 +115,32 @@ public class CandiInvocationContext implements InvocationContext {
   {
     Class<?> []paramType = _apiMethod.getParameterTypes();
     
-    if (parameters != null
-        && paramType.length != parameters.length) {
+    if (parameters == null) {
+      throw new IllegalArgumentException(L.l("{0}.{1}: interception parameters cannot be null",
+                                             _apiMethod.getDeclaringClass().getName(),
+                                             _apiMethod.getName()));
+    }
+    
+    if (paramType.length != parameters.length) {
       throw new IllegalArgumentException(L.l("{0}.{1}: interception parameters '{2}' do not match the expected '{3}'",
-                                          _apiMethod.getDeclaringClass().getName(),
-                                          _apiMethod.getName(),
-                                          parameters.length,
-                                          paramType.length));
+                                             _apiMethod.getDeclaringClass().getName(),
+                                             _apiMethod.getName(),
+                                             parameters.length,
+                                             paramType.length));
+    }
+    
+    for (int i = paramType.length - 1; i >= 0; i--) {
+      Object value = parameters[i];
+      
+      Class<?> argType = getArgType(paramType[i]);
+      
+      if (value != null && ! argType.isAssignableFrom(value.getClass())) {
+        throw new IllegalArgumentException(L.l("{0}.{1}: interception parameters '{2}' do not match the expected '{3}'",
+                                               _apiMethod.getDeclaringClass().getName(),
+                                               _apiMethod.getName(),
+                                               value,
+                                               paramType[i].getName()));
+      }
     }
     
     _param = parameters;
@@ -150,6 +170,8 @@ public class CandiInvocationContext implements InvocationContext {
     throws Exception
   {
     try {
+      Object result;
+      
       // ioc/0c57
       if (_chainObjects != null && _index < _chainIndex.length) {
         int i = _index++;
@@ -157,13 +179,15 @@ public class CandiInvocationContext implements InvocationContext {
         if (_chainObjects[_chainIndex[i]] == null)
           throw new NullPointerException(i + " index[i]=" + _chainIndex[i] + " " + _type + " " + _chainMethods[i]);
 
-        return _chainMethods[i].intercept(_type,
-                                          _chainObjects[_chainIndex[i]], 
-                                          this);
+        result = _chainMethods[i].intercept(_type,
+                                            _chainObjects[_chainIndex[i]], 
+                                            this);
       }
       else {
-        return _implMethod.invoke(_target, _param);
+        result = _implMethod.invoke(_target, _param);
       }
+      
+      return result;
     } catch (InterceptorException e) {
       Throwable cause = e.getCause();
 
@@ -181,8 +205,29 @@ public class CandiInvocationContext implements InvocationContext {
     }
   }
   
+  private Class<?> getArgType(Class<?> type)
+  {
+    Class<?> boxType = _boxMap.get(type);
+    
+    if (boxType != null)
+      return boxType;
+    else
+      return type;
+  }
+  
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _implMethod.getName() + "]";
+  }
+  
+  static {
+    _boxMap.put(boolean.class, Boolean.class);
+    _boxMap.put(char.class, Character.class);
+    _boxMap.put(byte.class, Byte.class);
+    _boxMap.put(short.class, Short.class);
+    _boxMap.put(int.class, Integer.class);
+    _boxMap.put(long.class, Long.class);
+    _boxMap.put(float.class, Float.class);
+    _boxMap.put(double.class, Double.class);
   }
 }

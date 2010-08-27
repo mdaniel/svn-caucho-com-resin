@@ -62,7 +62,7 @@ public class ContextImpl implements Context {
     = Logger.getLogger(ContextImpl.class.getName());
   protected static final L10N L = new L10N(ContextImpl.class);
 
-  protected Hashtable _env;
+  protected Hashtable<String,Object> _env;
   protected AbstractModel _model;
   protected String _name;
 
@@ -72,7 +72,7 @@ public class ContextImpl implements Context {
    * @param model The underlying storage node.
    * @param env The client's JNDI environment.
    */
-  public ContextImpl(AbstractModel model, Hashtable env)
+  public ContextImpl(AbstractModel model, Hashtable<String,Object> env)
   {
     _model = model;
     _env = env;
@@ -89,7 +89,9 @@ public class ContextImpl implements Context {
    * @param model The underlying storage node.
    * @param env The client's JNDI environment.
    */
-  public ContextImpl(String name, AbstractModel model, Hashtable env)
+  public ContextImpl(String name, 
+                     AbstractModel model, 
+                     Hashtable<String,Object> env)
   {
     _model = model;
     _env = env;
@@ -109,7 +111,9 @@ public class ContextImpl implements Context {
    *
    * @return a new instance of the implementing class.
    */
-  protected ContextImpl create(String name, AbstractModel model, Hashtable env)
+  protected ContextImpl create(String name,
+                               AbstractModel model,
+                               Hashtable<String,Object> env)
   {
     return new ContextImpl(name, model, env);
   }
@@ -122,7 +126,8 @@ public class ContextImpl implements Context {
    *
    * @return a new instance of the implementing class.
    */
-  final protected ContextImpl create(AbstractModel model, Hashtable env)
+  final protected ContextImpl create(AbstractModel model, 
+                                     Hashtable<String,Object> env)
   {
     return create("", model, env);
   }
@@ -156,7 +161,7 @@ public class ContextImpl implements Context {
     throws NamingException
   {
     Object value = lookupImpl(name);
-
+    
     if (value == NullValue.NULL) {
       // env/0gc9
       return null;
@@ -479,6 +484,7 @@ public class ContextImpl implements Context {
    * @param name the name to bind
    * @param obj the object to bind
    */
+  @Override
   public void rebind(String name, Object obj)
     throws NamingException
   {
@@ -1226,6 +1232,7 @@ public class ContextImpl implements Context {
   /**
    * Adds a property to the context environment.
    */
+  @Override
   public Object addToEnvironment(String prop, Object value)
     throws NamingException
   {
