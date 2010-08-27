@@ -83,12 +83,6 @@ public class ErrorPageManager {
 
   public static final char []MSIE_PADDING;
 
-  public static String REQUEST_URI = "javax.servlet.include.request_uri";
-  public static String CONTEXT_PATH = "javax.servlet.include.context_path";
-  public static String SERVLET_PATH = "javax.servlet.include.servlet_path";
-  public static String PATH_INFO = "javax.servlet.include.path_info";
-  public static String QUERY_STRING = "javax.servlet.include.query_string";
-
   public static String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
 
   public static String SHUTDOWN = "com.caucho.shutdown";

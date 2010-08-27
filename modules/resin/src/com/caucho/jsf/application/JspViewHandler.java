@@ -37,6 +37,7 @@ import javax.faces.component.*;
 import javax.faces.context.*;
 import javax.faces.render.*;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.*;
 import javax.servlet.jsp.jstl.core.*;
 
@@ -220,12 +221,12 @@ public class JspViewHandler extends ViewHandler
     Map requestMap = extContext.getRequestMap();
 
     boolean isInclude
-      = requestMap.containsKey("javax.servlet.include.request_uri");
+      = requestMap.containsKey(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     String pathInfo;
 
     if (isInclude)
-      pathInfo = (String) requestMap.get("javax.servlet.include.path_info");
+      pathInfo = (String) requestMap.get(RequestDispatcher.INCLUDE_PATH_INFO);
     else
       pathInfo = extContext.getRequestPathInfo();
 
@@ -261,12 +262,12 @@ public class JspViewHandler extends ViewHandler
     Map requestMap = extContext.getRequestMap();
 
     boolean isInclude
-      = requestMap.containsKey("javax.servlet.include.request_uri");
+      = requestMap.containsKey(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     String pathInfo;
 
     if (isInclude)
-      pathInfo = (String) requestMap.get("javax.servlet.include.path_info");
+      pathInfo = (String) requestMap.get(RequestDispatcher.INCLUDE_PATH_INFO);
     else
       pathInfo = extContext.getRequestPathInfo();
 

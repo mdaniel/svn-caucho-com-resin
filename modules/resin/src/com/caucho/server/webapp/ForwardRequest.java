@@ -36,6 +36,7 @@ import java.util.Map;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,17 +52,6 @@ import com.caucho.vfs.Encoding;
 public class ForwardRequest extends CauchoRequestWrapper {
   private static final IntMap _forwardAttributeMap = new IntMap();
   private static final L10N L = new L10N(ForwardRequest.class);
-
-  private static final String REQUEST_URI
-    = "javax.servlet.forward.request_uri";
-  private static final String CONTEXT_PATH
-    = "javax.servlet.forward.context_path";
-  private static final String SERVLET_PATH
-    = "javax.servlet.forward.servlet_path";
-  private static final String PATH_INFO
-    = "javax.servlet.forward.path_info";
-  private static final String QUERY_STRING
-    = "javax.servlet.forward.query_string";
 
   private static final int REQUEST_URI_CODE = 1;
   private static final int CONTEXT_PATH_CODE = 2;
@@ -360,10 +350,15 @@ public class ForwardRequest extends CauchoRequestWrapper {
   }
 
   static {
-    _forwardAttributeMap.put(REQUEST_URI, REQUEST_URI_CODE);
-    _forwardAttributeMap.put(CONTEXT_PATH, CONTEXT_PATH_CODE);
-    _forwardAttributeMap.put(SERVLET_PATH, SERVLET_PATH_CODE);
-    _forwardAttributeMap.put(PATH_INFO, PATH_INFO_CODE);
-    _forwardAttributeMap.put(QUERY_STRING, QUERY_STRING_CODE);
+    _forwardAttributeMap.put(RequestDispatcher.FORWARD_REQUEST_URI,
+                             REQUEST_URI_CODE);
+    _forwardAttributeMap.put(RequestDispatcher.FORWARD_CONTEXT_PATH,
+                             CONTEXT_PATH_CODE);
+    _forwardAttributeMap.put(RequestDispatcher.FORWARD_SERVLET_PATH,
+                             SERVLET_PATH_CODE);
+    _forwardAttributeMap.put(RequestDispatcher.FORWARD_PATH_INFO,
+                             PATH_INFO_CODE);
+    _forwardAttributeMap.put(RequestDispatcher.FORWARD_QUERY_STRING,
+                             QUERY_STRING_CODE);
   }
 }

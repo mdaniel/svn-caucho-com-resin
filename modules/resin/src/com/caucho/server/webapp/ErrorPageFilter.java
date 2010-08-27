@@ -41,11 +41,6 @@ import javax.servlet.ServletResponse;
  * Represents the final servlet in a filter chain.
  */
 public class ErrorPageFilter implements Filter {
-  public static String REQUEST_URI = "javax.servlet.include.request_uri";
-  public static String CONTEXT_PATH = "javax.servlet.include.context_path";
-  public static String SERVLET_PATH = "javax.servlet.include.servlet_path";
-  public static String PATH_INFO = "javax.servlet.include.path_info";
-  public static String QUERY_STRING = "javax.servlet.include.query_string";
   
   public static String STATUS_CODE = "javax.servlet.error.status_code";
   public static String EXCEPTION_TYPE = "javax.servlet.error.exception_type";

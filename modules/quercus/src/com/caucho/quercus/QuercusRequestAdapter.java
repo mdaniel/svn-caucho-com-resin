@@ -29,28 +29,23 @@
 
 package com.caucho.quercus;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 
 public class QuercusRequestAdapter
 {
-  public static String REQUEST_URI = "javax.servlet.include.request_uri";
-  public static String FWD_REQUEST_URI = "javax.servlet.forward.request_uri";
-  public static String CONTEXT_PATH = "javax.servlet.include.context_path";
-  public static String SERVLET_PATH = "javax.servlet.include.servlet_path";
-  public static String PATH_INFO = "javax.servlet.include.path_info";
-  public static String QUERY_STRING = "javax.servlet.include.query_string";
-  public static String FWD_QUERY_STRING = "javax.servlet.forward.query_string";
-  
   public static String getPageURI(HttpServletRequest request)
   {
-    String uri = (String) request.getAttribute(REQUEST_URI);
+    String uri
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
 
     if (uri != null)
       return uri;
     else {
       // php/0829
 
-      uri = (String) request.getAttribute(FWD_REQUEST_URI);
+      uri
+        = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
 
       if (uri != null)
         return uri;
@@ -61,7 +56,8 @@ public class QuercusRequestAdapter
   
   public static String getPageContextPath(HttpServletRequest request)
   {
-    String contextPath = (String) request.getAttribute(CONTEXT_PATH);
+    String contextPath
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
     
     if (contextPath != null)
       return contextPath;
@@ -75,7 +71,8 @@ public class QuercusRequestAdapter
    */
   public static String getPageServletPath(HttpServletRequest request)
   {
-    String servletPath = (String) request.getAttribute(SERVLET_PATH);
+    String servletPath
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
     
     if (servletPath != null)
       return servletPath;
@@ -89,10 +86,11 @@ public class QuercusRequestAdapter
    */
   public static String getPagePathInfo(HttpServletRequest request)
   {
-    String uri = (String) request.getAttribute(REQUEST_URI);
+    String uri
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     if (uri != null)
-      return (String) request.getAttribute(PATH_INFO);
+      return (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
     else
       return request.getPathInfo();
   }
@@ -103,10 +101,11 @@ public class QuercusRequestAdapter
    */
   public static String getPageQueryString(HttpServletRequest request)
   {
-    String uri = (String) request.getAttribute(REQUEST_URI);
+    String uri
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     if (uri != null)
-      return (String) request.getAttribute(QUERY_STRING);
+      return (String) request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING);
     else {
       /*
       // php/0829

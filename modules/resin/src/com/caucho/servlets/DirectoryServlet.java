@@ -38,6 +38,7 @@ import com.caucho.util.URLUtil;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -101,7 +102,7 @@ public class DirectoryServlet extends HttpServlet {
       isInclude = ! uri.equals(cauchoReq.getRequestURI());
     }
     else {
-      uri = (String) req.getAttribute("javax.servlet.include.request_uri");
+      uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
       if (uri != null)
         isInclude = true;
       else
@@ -114,7 +115,7 @@ public class DirectoryServlet extends HttpServlet {
     if (cauchoReq != null)
       servletPath = cauchoReq.getPageServletPath();
     else if (isInclude)
-      servletPath = (String) req.getAttribute("javax.servlet.include.servlet_path");
+      servletPath = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
     else
       servletPath = req.getServletPath();
         
@@ -125,7 +126,7 @@ public class DirectoryServlet extends HttpServlet {
     if (cauchoReq != null)
       pathInfo = cauchoReq.getPagePathInfo();
     else if (isInclude)
-      pathInfo = (String) req.getAttribute("javax.servlet.include.path_info");
+      pathInfo = (String) req.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
     else
       pathInfo = req.getPathInfo();
         

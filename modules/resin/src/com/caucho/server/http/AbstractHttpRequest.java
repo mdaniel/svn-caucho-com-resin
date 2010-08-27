@@ -91,12 +91,6 @@ public abstract class AbstractHttpRequest
 
   protected static final CaseInsensitiveIntMap _headerCodes;
 
-  public static final String REQUEST_URI = "javax.servlet.include.request_uri";
-  public static final String CONTEXT_PATH = "javax.servlet.include.context_path";
-  public static final String SERVLET_PATH = "javax.servlet.include.servlet_path";
-  public static final String PATH_INFO = "javax.servlet.include.path_info";
-  public static final String QUERY_STRING = "javax.servlet.include.query_string";
-
   public static final String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
 
   public static final String SHUTDOWN = "com.caucho.shutdown";

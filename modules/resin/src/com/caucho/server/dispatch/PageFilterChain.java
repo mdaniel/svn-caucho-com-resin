@@ -160,8 +160,8 @@ public class PageFilterChain implements FilterChain
         return;
       
       String errorUri = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-      String uri = (String) req.getAttribute("javax.servlet.include.request_uri");
-      String forward = (String) req.getAttribute("javax.servlet.forward.request_uri");
+      String uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+      String forward = (String) req.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
 
       // jsp/01ch
       if (uri != null) {

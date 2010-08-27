@@ -40,6 +40,7 @@ import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Vfs;
 
 import javax.servlet.GenericServlet;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
@@ -62,12 +63,6 @@ public class CGIServlet extends GenericServlet {
   static protected final Logger log
     = Logger.getLogger(CGIServlet.class.getName());
   static final L10N L = new L10N(CGIServlet.class);
-
-  private static String REQUEST_URI = "javax.servlet.include.request_uri";
-  private static String CONTEXT_PATH = "javax.servlet.include.context_path";
-  private static String SERVLET_PATH = "javax.servlet.include.servlet_path";
-  private static String PATH_INFO = "javax.servlet.include.path_info";
-  private static String QUERY_STRING = "javax.servlet.include.query_string";
 
   private String _executable;
   private boolean _stderrIsException = true;
@@ -109,13 +104,18 @@ public class CGIServlet extends GenericServlet {
     String servletPathInfo;
     String queryString;
 
-    requestURI = (String) req.getAttribute(REQUEST_URI);
+    requestURI
+      = (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
 
     if (requestURI != null) {
-      contextPath = (String) req.getAttribute(CONTEXT_PATH);
-      servletPath = (String) req.getAttribute(SERVLET_PATH);
-      servletPathInfo = (String) req.getAttribute(PATH_INFO);
-      queryString = (String) req.getAttribute(QUERY_STRING);
+      contextPath
+        = (String) req.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+      servletPath
+        = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+      servletPathInfo
+        = (String) req.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
+      queryString
+        = (String) req.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING);
     }
     else {
       requestURI = req.getRequestURI();

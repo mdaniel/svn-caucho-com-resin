@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.GenericServlet;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -151,7 +152,8 @@ public class HttpProxyServlet extends GenericServlet {
     if (cReq != null)
       queryString = cReq.getPageQueryString();
     else {
-      queryString = (String) req.getAttribute("javax.servlet.include.query_string");
+      queryString
+        = (String) req.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING);
 
       if (queryString == null)
         queryString = req.getQueryString();

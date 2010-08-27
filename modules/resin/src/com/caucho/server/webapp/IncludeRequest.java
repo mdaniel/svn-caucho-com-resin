@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,17 +53,6 @@ import com.caucho.vfs.Encoding;
 @Module
 public class IncludeRequest extends CauchoRequestWrapper {
   private static final IntMap _includeAttributeMap = new IntMap();
-
-  private static final String REQUEST_URI
-    = "javax.servlet.include.request_uri";
-  private static final String CONTEXT_PATH
-    = "javax.servlet.include.context_path";
-  private static final String SERVLET_PATH
-    = "javax.servlet.include.servlet_path";
-  private static final String PATH_INFO
-    = "javax.servlet.include.path_info";
-  private static final String QUERY_STRING
-    = "javax.servlet.include.query_string";
 
   private static Enumeration<String> _emptyEnum;
 
@@ -341,12 +331,12 @@ public class IncludeRequest extends CauchoRequestWrapper {
       list.add(e.nextElement());
     }
 
-    if (! list.contains(REQUEST_URI)) {
-      list.add(REQUEST_URI);
-      list.add(CONTEXT_PATH);
-      list.add(SERVLET_PATH);
-      list.add(PATH_INFO);
-      list.add(QUERY_STRING);
+    if (! list.contains(RequestDispatcher.INCLUDE_REQUEST_URI)) {
+      list.add(RequestDispatcher.INCLUDE_REQUEST_URI);
+      list.add(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+      list.add(RequestDispatcher.INCLUDE_SERVLET_PATH);
+      list.add(RequestDispatcher.INCLUDE_PATH_INFO);
+      list.add(RequestDispatcher.INCLUDE_QUERY_STRING);
     }
 
     return Collections.enumeration(list);
@@ -374,11 +364,16 @@ public class IncludeRequest extends CauchoRequestWrapper {
   }
 
   static {
-    _includeAttributeMap.put(REQUEST_URI, REQUEST_URI_CODE);
-    _includeAttributeMap.put(CONTEXT_PATH, CONTEXT_PATH_CODE);
-    _includeAttributeMap.put(SERVLET_PATH, SERVLET_PATH_CODE);
-    _includeAttributeMap.put(PATH_INFO, PATH_INFO_CODE);
-    _includeAttributeMap.put(QUERY_STRING, QUERY_STRING_CODE);
+    _includeAttributeMap.put(RequestDispatcher.INCLUDE_REQUEST_URI,
+                             REQUEST_URI_CODE);
+    _includeAttributeMap.put(RequestDispatcher.INCLUDE_CONTEXT_PATH,
+                             CONTEXT_PATH_CODE);
+    _includeAttributeMap.put(RequestDispatcher.INCLUDE_SERVLET_PATH,
+                             SERVLET_PATH_CODE);
+    _includeAttributeMap.put(RequestDispatcher.INCLUDE_PATH_INFO,
+                             PATH_INFO_CODE);
+    _includeAttributeMap.put(RequestDispatcher.INCLUDE_QUERY_STRING,
+                             QUERY_STRING_CODE);
 
     _emptyEnum = new Enumeration<String>() {
       public boolean hasMoreElements() {

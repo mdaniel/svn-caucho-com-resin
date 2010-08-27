@@ -34,6 +34,7 @@ import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -55,12 +56,6 @@ public class RequestAdapter extends RequestWrapper
   private static final L10N L = new L10N(RequestAdapter.class);
 
   static final int MAX_DEPTH = 64;
-  
-  public static String REQUEST_URI = "javax.servlet.include.request_uri";
-  public static String CONTEXT_PATH = "javax.servlet.include.context_path";
-  public static String SERVLET_PATH = "javax.servlet.include.servlet_path";
-  public static String PATH_INFO = "javax.servlet.include.path_info";
-  public static String QUERY_STRING = "javax.servlet.include.query_string";
     
   public static String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
   
@@ -181,7 +176,7 @@ public class RequestAdapter extends RequestWrapper
    */
   public String getPageURI()
   {
-    String uri = (String) getAttribute(REQUEST_URI);
+    String uri = (String) getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     if (uri != null)
       return uri;
@@ -191,7 +186,7 @@ public class RequestAdapter extends RequestWrapper
 
   public static String getPageURI(HttpServletRequest request)
   {
-    String uri = (String) request.getAttribute(REQUEST_URI);
+    String uri = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     if (uri != null)
       return uri;
@@ -201,7 +196,8 @@ public class RequestAdapter extends RequestWrapper
 
   public String getPageContextPath()
   {
-    String contextPath = (String) getAttribute(CONTEXT_PATH);
+    String contextPath
+      = (String) getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
     
     if (contextPath != null)
       return contextPath;
@@ -211,7 +207,8 @@ public class RequestAdapter extends RequestWrapper
 
   public static String getPageContextPath(HttpServletRequest request)
   {
-    String contextPath = (String) request.getAttribute(CONTEXT_PATH);
+    String contextPath
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
     
     if (contextPath != null)
       return contextPath;
@@ -225,7 +222,8 @@ public class RequestAdapter extends RequestWrapper
    */
   public String getPageServletPath()
   {
-    String servletPath = (String) getAttribute(SERVLET_PATH);
+    String servletPath
+      = (String) getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
     
     if (servletPath != null)
       return servletPath;
@@ -239,7 +237,8 @@ public class RequestAdapter extends RequestWrapper
    */
   public static String getPageServletPath(HttpServletRequest request)
   {
-    String servletPath = (String) request.getAttribute(SERVLET_PATH);
+    String servletPath
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
     
     if (servletPath != null)
       return servletPath;
@@ -253,10 +252,10 @@ public class RequestAdapter extends RequestWrapper
    */
   public String getPagePathInfo()
   {
-    String uri = (String) getAttribute(REQUEST_URI);
+    String uri = (String) getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     if (uri != null)
-      return (String) getAttribute(PATH_INFO);
+      return (String) getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
     else
       return getPathInfo();
   }
@@ -267,10 +266,11 @@ public class RequestAdapter extends RequestWrapper
    */
   public static String getPagePathInfo(HttpServletRequest request)
   {
-    String uri = (String) request.getAttribute(REQUEST_URI);
+    String uri
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     if (uri != null)
-      return (String) request.getAttribute(PATH_INFO);
+      return (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
     else
       return request.getPathInfo();
   }
@@ -281,10 +281,10 @@ public class RequestAdapter extends RequestWrapper
    */
   public String getPageQueryString()
   {
-    String uri = (String) getAttribute(REQUEST_URI);
+    String uri = (String) getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     if (uri != null)
-      return (String) getAttribute(QUERY_STRING);
+      return (String) getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING);
     else
       return getQueryString();
   }
@@ -295,10 +295,11 @@ public class RequestAdapter extends RequestWrapper
    */
   public static String getPageQueryString(HttpServletRequest request)
   {
-    String uri = (String) request.getAttribute(REQUEST_URI);
+    String uri
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     
     if (uri != null)
-      return (String) request.getAttribute(QUERY_STRING);
+      return (String) request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING);
     else
       return request.getQueryString();
   }

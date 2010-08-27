@@ -33,6 +33,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -76,8 +77,9 @@ public class SSIServlet extends HttpServlet
     String servletPath;
     String pathInfo;
     
-    servletPath = (String) request.getAttribute("javax.servlet.include.servlet_path");
-    pathInfo = (String) request.getAttribute("javax.servlet.include.path_info");
+    servletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+    pathInfo
+      = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
 
     if (servletPath == null && pathInfo == null) {
       servletPath = request.getServletPath();

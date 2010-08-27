@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -93,7 +94,7 @@ public class ProfilerFilter
     String uri = request.getRequestURI();
 
     String servletPath = (String) request.getAttribute(
-      "javax.servlet.include.servlet_path");
+      RequestDispatcher.INCLUDE_SERVLET_PATH);
     String pathInfo;
     String queryString;
 
@@ -107,11 +108,12 @@ public class ProfilerFilter
         queryString = null;
     }
     else {
-      pathInfo = (String) request.getAttribute("javax.servlet.include.path_info");
+      pathInfo
+        = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
 
       if (isUseQuery())
         queryString = (String) request.getAttribute(
-          "javax.servlet.include.query_string");
+          RequestDispatcher.INCLUDE_QUERY_STRING);
       else
         queryString = null;
     }

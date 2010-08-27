@@ -167,7 +167,7 @@ public class FileServlet extends GenericServlet {
     boolean isInclude = false;
     String uri;
 
-    uri = (String) req.getAttribute("javax.servlet.include.request_uri");
+    uri = (String) req.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
     if (uri != null)
       isInclude = true;
     else
@@ -184,7 +184,7 @@ public class FileServlet extends GenericServlet {
       if (cauchoReq != null)
         servletPath = cauchoReq.getPageServletPath();
       else if (isInclude)
-        servletPath = (String) req.getAttribute("javax.servlet.include.servlet_path");
+        servletPath = (String) req.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
       else
         servletPath = req.getServletPath();
 
@@ -195,7 +195,8 @@ public class FileServlet extends GenericServlet {
       if (cauchoReq != null)
         pathInfo = cauchoReq.getPagePathInfo();
       else if (isInclude)
-        pathInfo = (String) req.getAttribute("javax.servlet.include.path_info");
+        pathInfo
+          = (String) req.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
       else
         pathInfo = req.getPathInfo();
 

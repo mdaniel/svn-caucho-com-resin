@@ -56,28 +56,6 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
   static final int MAX_DEPTH = 64;
 
-  private static final String REQUEST_URI
-    = "javax.servlet.include.request_uri";
-  private static final String CONTEXT_PATH
-    = "javax.servlet.include.context_path";
-  private static final String SERVLET_PATH
-    = "javax.servlet.include.servlet_path";
-  private static final String PATH_INFO
-    = "javax.servlet.include.path_info";
-  private static final String QUERY_STRING
-    = "javax.servlet.include.query_string";
-
-  private static final String FWD_REQUEST_URI =
-    "javax.servlet.forward.request_uri";
-  private static final String FWD_CONTEXT_PATH =
-    "javax.servlet.forward.context_path";
-  private static final String FWD_SERVLET_PATH =
-    "javax.servlet.forward.servlet_path";
-  private static final String FWD_PATH_INFO =
-    "javax.servlet.forward.path_info";
-  private static final String FWD_QUERY_STRING =
-    "javax.servlet.forward.query_string";
-
   // WebApp the request dispatcher was called from
   private WebApp _webApp;
   private Invocation _includeInvocation;

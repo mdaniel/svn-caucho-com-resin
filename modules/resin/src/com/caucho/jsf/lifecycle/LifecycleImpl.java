@@ -44,6 +44,7 @@ import javax.faces.event.*;
 import javax.faces.lifecycle.*;
 import javax.faces.render.*;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.*;
 import javax.servlet.jsp.JspException;
 import javax.servlet.ServletException;
@@ -276,13 +277,13 @@ public class LifecycleImpl extends Lifecycle
      Map map = context.getExternalContext().getRequestMap();
 
     String viewId = (String)
-      map.get("javax.servlet.include.path_info");
+      map.get(RequestDispatcher.INCLUDE_PATH_INFO);
 
     if (viewId == null)
       viewId = context.getExternalContext().getRequestPathInfo();
 
     if (viewId == null)
-      viewId = (String) map.get("javax.servlet.include.servlet_path");
+      viewId = (String) map.get(RequestDispatcher.INCLUDE_SERVLET_PATH);
 
     if (viewId == null)
       viewId = context.getExternalContext().getRequestServletPath();
