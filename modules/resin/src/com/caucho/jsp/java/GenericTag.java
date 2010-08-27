@@ -579,7 +579,7 @@ abstract public class GenericTag extends JspContainerNode
 
       if (attribute != null) {
         isFragment = (attribute.isFragment()
-                      || attribute.getTypeName().equals(JspFragment.class.getName()));
+                      || JspFragment.class.getName().equals(attribute.getTypeName()));
       }
 
       if (value instanceof JspAttribute

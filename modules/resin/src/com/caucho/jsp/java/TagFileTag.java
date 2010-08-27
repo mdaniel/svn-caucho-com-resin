@@ -346,7 +346,12 @@ public class TagFileTag extends GenericTag {
       Class cl = null;
 
       if (attribute != null) {
-        cl = _gen.loadBeanClass(attribute.getTypeName());
+        String typeName = attribute.getTypeName();
+        
+        if (typeName == null)
+          typeName = String.class.getName();
+
+        cl = _gen.loadBeanClass(typeName);
 
         rtexprvalue = attribute.canBeRequestTime();
       }
@@ -372,7 +377,7 @@ public class TagFileTag extends GenericTag {
         JspFragmentNode frag = (JspFragmentNode) value;
 
         if (attribute != null &&
-            attribute.getTypeName().equals(JspFragment.class.getName())) {
+            JspFragment.class.getName().equals(attribute.getTypeName())) {
           out.println(generateFragment(frag, "pageContext") + ");");
         }
         else

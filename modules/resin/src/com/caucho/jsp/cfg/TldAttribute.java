@@ -148,8 +148,10 @@ public class TldAttribute {
       return _type;
     else if (isFragment())
       return JspFragment.class;
+    else if (_rtexprvalue)
+      return null;
     else
-      return String.class;
+      return java.lang.String.class;
   }
 
   /**
