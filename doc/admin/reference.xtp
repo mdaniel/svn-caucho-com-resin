@@ -7926,10 +7926,6 @@ interception and @Observes.</p>
   <th>Description</th>
 </tr>
 <tr>
-  <td>class</td>
-  <td>the classname of the singleton bean to create</td>
-</tr>
-<tr>
   <td>cron</td>
   <td>a cron-style scheduling description</td>
 </tr>
@@ -7962,6 +7958,24 @@ interception and @Observes.</p>
   <td>alternate task assignment for predefined beans</td>
 </tr>
 </attributes>
+
+<examples>
+<example title="A runnable task">
+&lt;resin:ScheduledTask>
+  &lt;cron>* * * * *&lt;/cron>
+  &lt;task>
+    &lt;example:MyClass xmlns:qa="urn:java:com.example"/>
+  &lt;/task>
+&lt;/resin:ScheduledTask>
+</example>
+
+<example title="Weekly maintenance script">
+&lt;resin:ScheduledTask url="/saturday-maintenance.jsp">
+  &lt;cron>* * * * 6&lt;/cron>
+&lt;/resin:ScheduledTask>
+</example>
+
+</examples>
 
 </defun>
 
