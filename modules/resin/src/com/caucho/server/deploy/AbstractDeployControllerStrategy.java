@@ -29,6 +29,9 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.inject.Module;
+import com.caucho.lifecycle.LifecycleState;
+
 /**
  * The abstract strategy implements the start, update, and stop commands which
  * are common to all strategies.
@@ -40,27 +43,30 @@ package com.caucho.server.deploy;
  * <tr><td>stop   <td>-        <td>stopImpl<td>stopImpl   <td>stopImpl
  * </table>
  */
+@Module
 abstract public class AbstractDeployControllerStrategy
   implements DeployControllerStrategy
 {
-
   /**
    * Starts the instance.  Called from an admin start.
    *
    * @param controller the owning controller
    */
+  @Override
   public <I extends DeployInstance>
   void start(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
+    LifecycleState state = controller.getState();
+    
+    if (state.isStopped()) {
       // server/1d03
       controller.startImpl();
     }
-    else if (controller.isModifiedNow()) {
-      // server/1d0p
+    else if (state.isError()) {
       controller.restartImpl();
     }
-    else if (controller.isError()) {
+    else if (controller.isModifiedNow()) {
+      // server/1d0p
       controller.restartImpl();
     }
     else { /* active */
@@ -72,6 +78,7 @@ abstract public class AbstractDeployControllerStrategy
    *
    * @param controller the owning controller
    */
+  @Override
   public<I extends DeployInstance>
   void stop(DeployController<I> controller)
   {

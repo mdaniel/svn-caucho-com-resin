@@ -1328,14 +1328,14 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the host controllers.
    */
-  public Collection<HostController> getHostControllers()
+  public HostController []getHostControllers()
   {
     HostContainer hostContainer = _hostContainer;
 
     if (hostContainer == null)
-      return Collections.emptyList();
+      return new HostController[0];
 
-    return Collections.unmodifiableList(hostContainer.getHostList());
+    return hostContainer.getHostList();
   }
 
   /**

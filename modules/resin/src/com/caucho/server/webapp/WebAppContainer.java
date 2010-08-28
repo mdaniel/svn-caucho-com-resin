@@ -757,7 +757,6 @@ public class WebAppContainer
       invocation.setFilterChain(chain);
 
       if (_dispatchServer instanceof Server) {
-        Server server = (Server) _dispatchServer;
         invocation.setWebApp(getErrorWebApp());
       }
 
@@ -767,8 +766,10 @@ public class WebAppContainer
     }
 
     FilterChain chain;
+    
+    WebAppController controller = getWebAppController(invocation);
 
-    WebApp webApp = getWebApp(invocation, true);
+    WebApp webApp = getWebApp(invocation, controller, true);
 
     boolean isAlwaysModified;
 
@@ -776,6 +777,15 @@ public class WebAppContainer
       invocation = webApp.buildInvocation(invocation);
       chain = invocation.getFilterChain();
       isAlwaysModified = false;
+    }
+    else if (controller != null){
+      int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+      chain = new ErrorFilterChain(code);
+      ContextFilterChain contextChain = new ContextFilterChain(chain);
+      contextChain.setErrorPageManager(_errorPageManager);
+      chain = contextChain;
+      invocation.setFilterChain(contextChain);
+      isAlwaysModified = true;
     }
     else {
       int code = HttpServletResponse.SC_NOT_FOUND;
@@ -796,7 +806,6 @@ public class WebAppContainer
                                                       chain);
 
       if (rewriteChain != chain) {
-        Server server = (Server) _dispatchServer;
         // server/13sf, server/1kq1
         webApp = findWebAppByURI("/");
 
@@ -847,12 +856,15 @@ public class WebAppContainer
       buildErrorInvocation(errorInvocation);
       buildDispatchInvocation(dispatchInvocation);
 
+      WebAppController controller = getWebAppController(includeInvocation);
+      WebApp webApp = getWebApp(includeInvocation, controller, false);
+
       RequestDispatcher disp
         = new RequestDispatcherImpl(includeInvocation,
                                     forwardInvocation,
                                     errorInvocation,
                                     dispatchInvocation,
-                                    getWebApp(includeInvocation, false));
+                                    webApp);
 
       return disp;
     } catch (Exception e) {
@@ -969,15 +981,14 @@ public class WebAppContainer
    * Returns the webApp for the current request.
    */
   private WebApp getWebApp(Invocation invocation,
-                           boolean enableRedeploy)
+                           WebAppController controller,
+                           boolean isTopRequest)
   {
     try {
-      WebAppController controller = getWebAppController(invocation);
-
       if (controller != null) {
         WebApp webApp;
 
-        if (enableRedeploy)
+        if (isTopRequest)
           webApp = controller.request();
         else
           webApp = controller.subrequest();
@@ -1129,7 +1140,7 @@ public class WebAppContainer
   /**
    * Returns a list of the webApps.
    */
-  public ArrayList<WebAppController> getWebAppList()
+  public WebAppController []getWebAppList()
   {
     return _appDeploy.getControllers();
   }
@@ -1137,7 +1148,7 @@ public class WebAppContainer
   /**
    * Returns a list of the webApps.
    */
-  public ArrayList<EarDeployController> getEntAppList()
+  public EarDeployController []getEntAppList()
   {
     return _earDeploy.getControllers();
   }

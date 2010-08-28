@@ -30,68 +30,11 @@
 package com.caucho.server.deploy;
 
 /**
- * DeployController controls the lifecycle of the DeployInstance.
+ * enumeration of the Deployment start and redeploy modes.
  */
-public enum DeployControllerState
-{
-  NEW,
-  INIT,
-  
-  ACTIVE {
-    @Override
-    public DeployControllerState toCurrentState(DeployController<?> controller)
-    {
-      return controller.isModified() ? ACTIVE_MODIFIED : this;
-    }
-    
-
-    @Override
-    public boolean isActive()
-    {
-      return true;
-    }
-  },
-  
-  ACTIVE_MODIFIED {
-    @Override
-    public boolean isActive()
-    {
-      return true;
-    }
-  },
-  
-  STOPPED,
-  STOPPED_IDLE,
-  ERROR,
-  DESTROYED;
-  
-  public DeployControllerState toInit()
-  {
-    return INIT;
-  }
-  
-  public DeployControllerState toActive()
-  {
-    return ACTIVE;
-  }
-  
-  public DeployControllerState toError()
-  {
-    return ERROR;
-  }
-  
-  public DeployControllerState toDestroy()
-  {
-    return DESTROYED;
-  }
-  
-  public boolean isActive()
-  {
-    return false;
-  }
-  
-  public DeployControllerState toCurrentState(DeployController<?> controller)
-  {
-    return this;
-  }
+public enum DeployMode {
+  DEFAULT,
+  AUTOMATIC,
+  LAZY,
+  MANUAL;
 }

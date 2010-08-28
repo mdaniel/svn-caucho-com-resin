@@ -42,14 +42,14 @@ public final class EnumType extends ConfigType
 {
   private static final L10N L = new L10N(EnumType.class);
 
-  private Class _type;
+  private Class<?> _type;
 
   private HashMap<String,Object> _nameMap = new HashMap<String,Object>();
   
   /**
    * The enumeration type
    */
-  public EnumType(Class type)
+  public EnumType(Class<?> type)
   {
     _type = type;
 
@@ -59,13 +59,16 @@ public final class EnumType extends ConfigType
       String name = enumValue.name();
 
       _nameMap.put(name, enumValue);
+      
+      if (_nameMap.get(name.toLowerCase()) == null)
+        _nameMap.put(name.toLowerCase(), enumValue);
     }
   }
   
   /**
    * Returns the Java type.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return _type;
   }
@@ -73,6 +76,7 @@ public final class EnumType extends ConfigType
   /**
    * Converts the string to a value of the type.
    */
+  @Override
   public Object valueOf(String text)
   {
     if (text == null)
@@ -90,6 +94,7 @@ public final class EnumType extends ConfigType
   /**
    * Converts the value to a value of the type.
    */
+  @Override
   public Object valueOf(Object value)
   {
     if (value == null)

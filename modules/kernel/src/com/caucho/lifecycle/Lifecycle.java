@@ -37,6 +37,7 @@ import static com.caucho.lifecycle.LifecycleState.INIT;
 import static com.caucho.lifecycle.LifecycleState.INITIALIZING;
 import static com.caucho.lifecycle.LifecycleState.STARTING;
 import static com.caucho.lifecycle.LifecycleState.STOPPED;
+import static com.caucho.lifecycle.LifecycleState.STOPPED_IDLE;
 import static com.caucho.lifecycle.LifecycleState.STOPPING;
 
 import java.lang.ref.WeakReference;
@@ -250,11 +251,20 @@ public final class Lifecycle {
   }
 
   /**
-   * Returns true for the init state.
+   * True for any state after initialization.
    */
   public boolean isAfterInit()
   {
     return getState().isAfterInit();
+  }
+
+  /**
+   * True for an idle state, where any request would transition to an
+   * active state.
+   */
+  public boolean isIdle()
+  {
+    return getState().isIdle();
   }
 
   /**
@@ -575,6 +585,16 @@ public final class Lifecycle {
   }
   
   /**
+   * Changes to the idle (stopped) state.
+   *
+   * @return true if the transition is allowed
+   */
+  public boolean toIdle()
+  {
+    return toState(STOPPED_IDLE);
+  }
+  
+  /**
    * Changes to the stopped state.
    *
    * @return true if the transition is allowed
@@ -619,6 +639,25 @@ public final class Lifecycle {
       if (newState.ordinal() <= state.ordinal())
         return false;
     } while (! _state.compareAndSet(state, newState));
+
+    _lastChangeTime = Alarm.getCurrentTime();
+
+    if (_log != null && _log.isLoggable(_lowLevel))
+      _log.log(_lowLevel, _name + " " + newState);
+
+    notifyListeners(state, newState);
+
+    return true;
+  }
+  
+  /**
+   * Changes to the next state.
+   *
+   * @return true if the transition is allowed
+   */
+  private boolean toState(LifecycleState newState)
+  {
+    LifecycleState state = _state.getAndSet(newState);
 
     _lastChangeTime = Alarm.getCurrentTime();
 

@@ -279,13 +279,9 @@ public class HmuxDispatchRequest {
         }
       }
 
-      ArrayList<WebAppController> appList = host.getWebAppList();
-
-      for (int i = 0; i < appList.size(); i++) {
-        WebAppController appEntry = appList.get(i);
-
-        if (appEntry.getParent() != null &&
-            appEntry.getParent().isDynamicDeploy()) {
+      for (WebAppController appEntry : host.getWebAppList()) {
+        if (appEntry.getParent() != null
+            && appEntry.getParent().isDynamicDeploy()) {
           continue;
         }
 

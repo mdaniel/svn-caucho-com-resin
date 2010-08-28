@@ -30,6 +30,7 @@
 package com.caucho.server.deploy;
 
 import com.caucho.lifecycle.LifecycleListener;
+import com.caucho.lifecycle.LifecycleState;
 
 /**
  * DeployController controls the lifecycle of the DeployInstance.
@@ -42,7 +43,8 @@ public interface DeployControllerApi<I extends DeployInstance>
   public String getId();
 
   /**
-   * Returns true if the entry matches.
+   * Returns true if the entry matches, used for finding a matching web-app
+   * or host.
    */
   public boolean isNameMatch(String name);
 
@@ -52,50 +54,23 @@ public interface DeployControllerApi<I extends DeployInstance>
   public int getStartupPriority();
 
   /**
-   * Returns the start time of the entry.
+   * Initialization of the controller itself
    */
-  public long getStartTime();
-
+  public boolean init();
+  
   /**
    * Returns the state name.
    */
-  public DeployControllerState getState();
+  public LifecycleState getState();
 
   /**
-   * Returns true if the instance is in the active state.
+   * Returns the current instance.
    */
-  public boolean isActive();
-
-  /**
-   * Returns true if the instance is in the stopped state.
-   *
-   * @return true on stopped state
-   */
-  public boolean isStopped();
-
-  /**
-   * Returns true for the stop-lazy state
-   */
-  public boolean isStoppedLazy();
-
-  /**
-   * Returns true if the instance has been idle for longer than its timeout.
-   *
-   * @return true if idle
-   */
-  public boolean isActiveIdle();
-
-  /**
-   * Returns true if the entry is destroyed.
-   */
-  public boolean isDestroyed();
-
-  /**
-   * Return true if the instance is in the error state.
-   *
-   * @return true for the error state.
-   */
-  public boolean isError();
+  public I getDeployInstance();
+  
+  //
+  // state transition operations
+  //
 
   /**
    * Start the controller for initialization.
@@ -123,14 +98,10 @@ public interface DeployControllerApi<I extends DeployInstance>
   public void deploy();
 
   /**
-   * Update the controller from an admin command.
+   * Check for modification updates, generally from an admin command when
+   * using "manual" redeployment.
    */
   public void update();
-
-  /**
-   * Returns the current instance.
-   */
-  public I getDeployInstance();
 
   /**
    * Returns the instance for a top-level request
@@ -145,5 +116,14 @@ public interface DeployControllerApi<I extends DeployInstance>
    */
   public I subrequest();
   
+  /**
+   * Closes the controller
+   */
+  public void close();
+  
+  /**
+   * External lifecycle listeners, so applications can detect deployment
+   * and redeployment.
+   */
   public void addLifecycleListener(LifecycleListener listener);
 }

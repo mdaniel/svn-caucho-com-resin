@@ -115,12 +115,12 @@ public class ResourceDeployAdmin
 
   public String getRedeployMode()
   {
-    return getResourceDeploy().getRedeployMode();
+    return getResourceDeploy().getRedeployMode().toString();
   }
 
   public String getStartupMode()
   {
-    return getResourceDeploy().getStartupMode();
+    return getResourceDeploy().getStartupMode().toString();
   }
 
   public boolean isModified()

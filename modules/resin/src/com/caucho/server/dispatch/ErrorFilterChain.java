@@ -73,6 +73,7 @@ public class ErrorFilterChain implements FilterChain {
    *
    * @since Servlet 2.3
    */
+  @Override
   public void doFilter(ServletRequest request,
                        ServletResponse response)
     throws ServletException, IOException

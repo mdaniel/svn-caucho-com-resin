@@ -150,6 +150,7 @@ import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.server.deploy.DeployMode;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.deploy.RepositoryDependency;
 import com.caucho.server.dispatch.DispatchBuilder;
@@ -718,7 +719,7 @@ public class WebApp extends ServletContextImpl
    * Sets the redeploy-mode of the controller
    */
   @Configurable
-  public void setRedeployMode(String mode)
+  public void setRedeployMode(DeployMode mode)
   {
     if (_controller != null)
       _controller.setRedeployMode(mode);

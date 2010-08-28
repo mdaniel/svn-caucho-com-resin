@@ -32,6 +32,7 @@ package com.caucho.server.host;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.server.deploy.DeployConfig;
+import com.caucho.server.deploy.DeployMode;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -233,9 +234,9 @@ public class HostConfig extends DeployConfig {
     throws ConfigException
   {
     if (lazyInit)
-      setStartupMode("lazy");
+      setStartupMode(DeployMode.LAZY);
     else
-      setStartupMode("automatic");
+      setStartupMode(DeployMode.AUTOMATIC);
   }
 
   /**

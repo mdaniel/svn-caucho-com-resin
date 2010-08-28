@@ -29,6 +29,8 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.inject.Module;
+
 /**
  * The start-mode="auto", redeploy-model="manual" controller strategy.
  *
@@ -44,10 +46,11 @@ package com.caucho.server.deploy;
  * <tr><td>alarm  <td>-        <td>-       <td>-          <td>-
  * </table>
  */
+@Module
 public class StartAutoRedeployManualStrategy
   extends StartManualRedeployManualStrategy {
-  private final static StartAutoRedeployManualStrategy STRATEGY =
-          new StartAutoRedeployManualStrategy();
+  public final static StartAutoRedeployManualStrategy STRATEGY
+    = new StartAutoRedeployManualStrategy();
 
   private StartAutoRedeployManualStrategy()
   {
@@ -68,8 +71,9 @@ public class StartAutoRedeployManualStrategy
    *
    * @param controller the owning controller
    */
+  @Override
   public<I extends DeployInstance>
-    void startOnInit(DeployController<I> controller)
+  void startOnInit(DeployController<I> controller)
   {
     controller.startImpl();
   }

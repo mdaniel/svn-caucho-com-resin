@@ -63,14 +63,14 @@ public class DeployConfig {
   // The expansion cleanup set
   private FileSetType _expandCleanupFileset;
 
-  // startup mode
-  private String _startupMode;
-
   // startup priority
   private int _startupPriority;
 
+  // startup mode
+  private DeployMode _startupMode;
+
   // redeploy mode
-  private String _redeployMode;
+  private DeployMode _redeployMode;
   
   // redeploy period
   private Period _redeployCheckInterval;
@@ -164,16 +164,16 @@ public class DeployConfig {
   /**
    * Sets the startup-mode
    */
-  public void setStartupMode(String mode)
+  public void setStartupMode(DeployMode mode)
     throws ConfigException
   {
-    _startupMode = DeployController.toStartupCode(mode);
+    _startupMode = mode;
   }
 
   /**
    * Gets the startup mode.
    */
-  public String getStartupMode()
+  public DeployMode getStartupMode()
   {
     return _startupMode;
   }
@@ -214,16 +214,16 @@ public class DeployConfig {
   /**
    * Sets the redeploy-mode
    */
-  public void setRedeployMode(String mode)
+  public void setRedeployMode(DeployMode mode)
     throws ConfigException
   {
-    _redeployMode = DeployController.toRedeployCode(mode);
+    _redeployMode = mode;
   }
 
   /**
    * Gets the redeploy mode.
    */
-  public String getRedeployMode()
+  public DeployMode getRedeployMode()
   {
     return _redeployMode;
   }

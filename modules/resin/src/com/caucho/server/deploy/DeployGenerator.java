@@ -29,23 +29,24 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.config.ConfigException;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Dependency;
-
-import javax.annotation.PostConstruct;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.vfs.Dependency;
+
 /**
  * The generator for the deploy
  */
-abstract public class DeployGenerator<E extends DeployController<?>>
+abstract public class DeployGenerator<E extends DeployControllerApi<?>>
   implements Dependency, EnvironmentListener
 {
   private static final Logger log
@@ -55,8 +56,8 @@ abstract public class DeployGenerator<E extends DeployController<?>>
 
   private ClassLoader _parentClassLoader;
 
-  private String _startupMode = DeployController.STARTUP_AUTOMATIC;
-  private String _redeployMode = DeployController.REDEPLOY_AUTOMATIC;
+  private DeployMode _startupMode = DeployMode.AUTOMATIC;
+  private DeployMode _redeployMode = DeployMode.AUTOMATIC;
 
   private Throwable _configException;
 
@@ -93,16 +94,17 @@ abstract public class DeployGenerator<E extends DeployController<?>>
   /**
    * Sets the startup mode.
    */
-  public void setStartupMode(String mode)
+  @Configurable
+  public void setStartupMode(DeployMode mode)
     throws ConfigException
   {
-    _startupMode = DeployController.toStartupCode(mode);
+    _startupMode = mode;
   }
 
   /**
    * Gets the startup mode.
    */
-  public String getStartupMode()
+  public DeployMode getStartupMode()
     throws ConfigException
   {
     return _startupMode;
@@ -111,16 +113,16 @@ abstract public class DeployGenerator<E extends DeployController<?>>
   /**
    * Sets the redeploy mode.
    */
-  public void setRedeployMode(String mode)
+  public void setRedeployMode(DeployMode mode)
     throws ConfigException
   {
-    _redeployMode = DeployController.toRedeployCode(mode);
+    _redeployMode = mode;
   }
 
   /**
    * Gets the redeploy mode.
    */
-  public String getRedeployMode()
+  public DeployMode getRedeployMode()
     throws ConfigException
   {
     return _redeployMode;

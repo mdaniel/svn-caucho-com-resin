@@ -69,12 +69,7 @@ public class JavadocRedirectServlet extends HttpServlet {
 
     WebApp japp = null;
 
-    ArrayList appControllers = app.getParent().getWebAppList();
-
-    for (int i = 0; i < appControllers.size(); i++)
-    {
-      WebAppController appController = (WebAppController) appControllers.get(i);
-
+    for (WebAppController appController : app.getParent().getWebAppList()) {
       String contextPath = appController.getContextPath();
 
       if (contextPath.startsWith("/resin-javadoc")) {

@@ -41,6 +41,7 @@ public enum LifecycleState {
   INITIALIZING {
     @Override
     public boolean isBeforeInit() { return true; }
+    
     @Override
     public boolean isInitializing() { return true; }
   },
@@ -48,6 +49,9 @@ public enum LifecycleState {
   INIT {
     @Override
     public boolean isInit() { return true; }
+    
+    @Override
+    public boolean isIdle() { return true; }
   },
   
   STARTING {
@@ -60,11 +64,18 @@ public enum LifecycleState {
   STOPPED_IDLE {
     @Override
     public boolean isStoppedIdle() { return true; }
+    
+    @Override
+    public boolean isIdle() { return true; }
+    
+    @Override
+    public boolean isStopped() { return true; }
   },
   
   WARMUP {
     @Override
     public boolean isWarmup() { return true; }
+    
     @Override
     public boolean isRunnable() { return true; }
   },
@@ -136,6 +147,11 @@ public enum LifecycleState {
   }
 
   public boolean isStoppedIdle()
+  {
+    return false;
+  }
+
+  public boolean isIdle()
   {
     return false;
   }

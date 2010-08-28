@@ -48,6 +48,7 @@ import com.caucho.vfs.Vfs;
 import javax.servlet.FilterChain;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,8 +83,8 @@ public class HostContainer implements DispatchBuilder {
     = new DeployContainer<HostController>();
   
   // Cache of hosts
-  private HashMap<String,HostController> _hostMap
-    = new HashMap<String,HostController>();
+  private ConcurrentHashMap<String,HostController> _hostMap
+    = new ConcurrentHashMap<String,HostController>();
 
   // Regexp host
   private ArrayList<HostConfig> _hostRegexpList = new ArrayList<HostConfig>();
@@ -357,7 +358,7 @@ public class HostContainer implements DispatchBuilder {
     return invocation;
   }
 
-  public ArrayList<HostController> getHostList()
+  public HostController []getHostList()
   {
     return _hostDeploy.getControllers();
   }
@@ -402,27 +403,25 @@ public class HostContainer implements DispatchBuilder {
 
     HostController hostController = null;
     
-    synchronized (_hostMap) {
-      hostController = _hostMap.get(fullHost);
+    hostController = _hostMap.get(fullHost);
 
-      if (hostController != null && ! hostController.isDestroyed())
-        return hostController;
-    }
+    if (hostController != null && ! hostController.getState().isDestroyed())
+      return hostController;
 
-    if (hostController == null || hostController.isDestroyed())
+    if (hostController == null || hostController.getState().isDestroyed())
       hostController = _hostMap.get(shortHost);
 
-    if (hostController == null || hostController.isDestroyed())
+    if (hostController == null || hostController.getState().isDestroyed())
       hostController = findHostController(fullHost);
 
-    if (hostController == null || hostController.isDestroyed())
+    if (hostController == null || hostController.getState().isDestroyed())
       hostController = findHostController(shortHost);
 
-    if (hostController == null || hostController.isDestroyed())
+    if (hostController == null || hostController.getState().isDestroyed())
       hostController = findHostController("");
 
     synchronized (_hostMap) {
-      if (hostController != null && ! hostController.isDestroyed())
+      if (hostController != null && ! hostController.getState().isDestroyed())
         _hostMap.put(fullHost, hostController);
       else {
         hostController = null;

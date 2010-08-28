@@ -34,6 +34,7 @@ import com.caucho.jca.cfg.ResourceConfig;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.server.deploy.DeployController;
+import com.caucho.server.deploy.DeployMode;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -342,14 +343,14 @@ public class ResourceDeploy {
     return -1;
   }
 
-  public String getStartupMode()
+  public DeployMode getStartupMode()
   {
-    return DeployController.STARTUP_AUTOMATIC;
+    return DeployMode.AUTOMATIC;
   }
 
-  public String getRedeployMode()
+  public DeployMode getRedeployMode()
   {
-    return DeployController.REDEPLOY_MANUAL;
+    return DeployMode.MANUAL;
   }
 
   public String getState()

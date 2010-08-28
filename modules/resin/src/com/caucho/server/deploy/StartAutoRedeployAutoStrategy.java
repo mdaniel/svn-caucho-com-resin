@@ -31,6 +31,9 @@ package com.caucho.server.deploy;
 
 import java.util.logging.Logger;
 
+import com.caucho.inject.Module;
+import com.caucho.lifecycle.LifecycleState;
+
 /**
  * The start-mode="automatic", redeploy-model="automatic" controller strategy.
  *
@@ -44,10 +47,11 @@ import java.util.logging.Logger;
  * <tr><td>alarm  <td>-        <td>-       <td>stopImpl   <td>stopImpl
  * </table>
  */
+@Module
 public class StartAutoRedeployAutoStrategy
   extends AbstractDeployControllerStrategy {
-  private final static StartAutoRedeployAutoStrategy STRATEGY =
-          new StartAutoRedeployAutoStrategy();
+  public final static StartAutoRedeployAutoStrategy STRATEGY
+    = new StartAutoRedeployAutoStrategy();
 
   private StartAutoRedeployAutoStrategy()
   {
@@ -68,8 +72,9 @@ public class StartAutoRedeployAutoStrategy
    *
    * @param controller the owning controller
    */
+  @Override
   public<I extends DeployInstance>
-    void startOnInit(DeployController<I> controller)
+  void startOnInit(DeployController<I> controller)
   {
     controller.startImpl();
   }
@@ -80,24 +85,27 @@ public class StartAutoRedeployAutoStrategy
    *
    * @param controller the owning controller
    */
+  @Override
   public<I extends DeployInstance>
-    void update(DeployController<I> controller)
+  void update(DeployController<I> controller)
   {
-    if (controller.isStoppedLazy()) {
+    LifecycleState state = controller.getState();
+    
+    if (state.isIdle()) {
       // server/1d18
     }
-    else if (controller.isStopped()) {
+    else if (state.isStopped()) {
       // server/1d15
       controller.startImpl();
+    }
+    else if (state.isError()) {
+      controller.restartImpl();
     }
     else if (controller.isModifiedNow()) {
       // 1d1n, 1d1o
       controller.restartImpl();
     }
-    else if (controller.isError()) {
-      controller.restartImpl();
-    }
-    else if (controller.isActiveIdle()) {
+    else if (controller.isIdleTimeout()) {
       controller.restartImpl();
     }
     else { /* active */
@@ -113,13 +121,15 @@ public class StartAutoRedeployAutoStrategy
    */
   @Override
   public <I extends DeployInstance>
-          I request(DeployController<I> controller)
+  I request(DeployController<I> controller)
   {
-    if (controller.isStoppedLazy()) {
+    LifecycleState state = controller.getState();
+    
+    if (state.isIdle()) {
       // server/1d16
       return controller.startImpl();
     }
-    else if (controller.isStopped()) {
+    else if (state.isStopped()) {
       // server/1d10
       return controller.getDeployInstance();
     }
@@ -142,14 +152,17 @@ public class StartAutoRedeployAutoStrategy
    * @param controller the owning controller
    * @return the current deploy instance
    */
+  @Override
   public <I extends DeployInstance>
-          I subrequest(DeployController<I> controller)
+  I subrequest(DeployController<I> controller)
   {
-    if (controller.isStoppedLazy()) {
+    LifecycleState state = controller.getState();
+    
+    if (state.isIdle()) {
       // server/1d17
       return controller.startImpl();
     }
-    else if (controller.isStopped()) {
+    else if (state.isStopped()) {
       // server/1d11
       return controller.getDeployInstance();
     }
@@ -168,23 +181,22 @@ public class StartAutoRedeployAutoStrategy
    *
    * @param controller the owning controller
    */
+  @Override
   public <I extends DeployInstance>
-          void alarm(DeployController<I> controller)
+  void alarm(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
+    LifecycleState state = controller.getState();
+    
+    if (state.isStopped()) {
       // server/1d12
     }
-    else if (controller.isStoppedLazy()) {
+    else if (state.isIdle()) {
       // server/1d18
     }
     else if (controller.isModified()) {
       // server/1d1k
       controller.logModified(controller.getLog());
       controller.restartImpl();
-    }
-    else if (controller.isActiveIdle()) {
-    }
-    else { /* active */
     }
   }
 }

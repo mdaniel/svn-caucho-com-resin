@@ -29,6 +29,8 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.lifecycle.LifecycleState;
+
 /**
  * The start-mode="manual", redeploy-model="manual" controller strategy.
  *
@@ -46,8 +48,8 @@ package com.caucho.server.deploy;
  */
 public class StartManualRedeployManualStrategy
   extends AbstractDeployControllerStrategy {
-  private final static StartManualRedeployManualStrategy STRATEGY =
-          new StartManualRedeployManualStrategy();
+  public final static StartManualRedeployManualStrategy STRATEGY
+    = new StartManualRedeployManualStrategy();
 
   protected StartManualRedeployManualStrategy()
   {
@@ -68,8 +70,9 @@ public class StartManualRedeployManualStrategy
    *
    * @param controller the owning controller
    */
+  @Override
   public<I extends DeployInstance>
-    void startOnInit(DeployController<I> controller)
+  void startOnInit(DeployController<I> controller)
   {
     controller.stopImpl();
   }
@@ -80,16 +83,19 @@ public class StartManualRedeployManualStrategy
    *
    * @param controller the owning controller
    */
+  @Override
   public<I extends DeployInstance>
-    void update(DeployController<I> controller)
+  void update(DeployController<I> controller)
   {
-    if (controller.isStopped()) {
+    LifecycleState state = controller.getState();
+    
+    if (state.isStopped()) {
       controller.startImpl();
     }
-    else if (controller.isModifiedNow()) {
+    else if (state.isError()) {
       controller.restartImpl();
     }
-    else if (controller.isError()) {
+    else if (controller.isModifiedNow()) {
       controller.restartImpl();
     }
     else { /* active */
@@ -105,8 +111,9 @@ public class StartManualRedeployManualStrategy
    * @return the current deploy instance
    */
   /* XXX: should request always return an instance? */
+  @Override
   public <I extends DeployInstance>
-          I request(DeployController<I> controller)
+  I request(DeployController<I> controller)
   {
     return controller.getDeployInstance();
   }
@@ -119,8 +126,9 @@ public class StartManualRedeployManualStrategy
    * @return the current deploy instance
    */
   /* XXX: should request always return an instance? */
+  @Override
   public <I extends DeployInstance>
-          I subrequest(DeployController<I> controller)
+  I subrequest(DeployController<I> controller)
   {
     return controller.getDeployInstance();
   }
@@ -132,8 +140,9 @@ public class StartManualRedeployManualStrategy
    * @param controller the owning controller
    */
   /* XXX: should request always return an instance? */
+  @Override
   public <I extends DeployInstance>
-          void alarm(DeployController<I> controller)
+  void alarm(DeployController<I> controller)
   {
   }
 }

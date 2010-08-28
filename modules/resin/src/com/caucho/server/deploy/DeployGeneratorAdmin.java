@@ -52,12 +52,12 @@ abstract public class DeployGeneratorAdmin<C extends DeployGenerator>
 
   public String getRedeployMode()
   {
-    return _deployGenerator.getRedeployMode();
+    return _deployGenerator.getRedeployMode().toString();
   }
 
   public String getStartupMode()
   {
-    return _deployGenerator.getStartupMode();
+    return _deployGenerator.getStartupMode().toString();
   }
 
   public boolean isModified()

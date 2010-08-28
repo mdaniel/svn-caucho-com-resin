@@ -41,6 +41,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployMode;
 import com.caucho.server.deploy.ExpandDeployGenerator;
 import com.caucho.server.deploy.VersionEntry;
 import com.caucho.util.L10N;
@@ -171,9 +172,9 @@ public class WebAppExpandDeployGenerator
   {
     log.config("lazy-init is deprecated.  Use <startup>lazy</startup> instead.");
     if (lazyInit)
-      setStartupMode("lazy");
+      setStartupMode(DeployMode.LAZY);
     else
-      setStartupMode("automatic");
+      setStartupMode(DeployMode.AUTOMATIC);
   }
 
   /**

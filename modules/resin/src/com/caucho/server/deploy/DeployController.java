@@ -35,6 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
+import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -55,16 +56,6 @@ abstract public class DeployController<I extends DeployInstance>
   private static final Logger log
     = Logger.getLogger(DeployController.class.getName());
   private static final L10N L = new L10N(DeployController.class);
-
-  public static final String STARTUP_DEFAULT = "default";
-  public static final String STARTUP_AUTOMATIC = "automatic";
-  public static final String STARTUP_LAZY = "lazy";
-  public static final String STARTUP_MANUAL = "manual";
-
-  public static final String REDEPLOY_DEFAULT = "default";
-  public static final String REDEPLOY_AUTOMATIC = "automatic";
-  public static final String REDEPLOY_LAZY = "lazy";
-  public static final String REDEPLOY_MANUAL = "manual";
   
   public static final long REDEPLOY_CHECK_INTERVAL = 60000;
 
@@ -72,15 +63,14 @@ abstract public class DeployController<I extends DeployInstance>
   
   private String _id;
 
-  private String _startupMode = STARTUP_DEFAULT;
-  private String _redeployMode = REDEPLOY_DEFAULT;
+  private DeployMode _startupMode = DeployMode.DEFAULT;
+  private DeployMode _redeployMode = DeployMode.DEFAULT;
 
   private int _startupPriority = Integer.MAX_VALUE;
 
   private DeployControllerStrategy _strategy;
 
   protected final Lifecycle _lifecycle;
-  private DeployControllerState _state = DeployControllerState.NEW;
 
   private Alarm _alarm = new WeakAlarm(this);
   private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
@@ -152,13 +142,9 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Sets the startup mode.
    */
-  public void setStartupMode(String mode)
+  public void setStartupMode(DeployMode mode)
   {
-    try {
-      _startupMode = toStartupCode(mode);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    _startupMode = mode;
   }
 
   /**
@@ -172,6 +158,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Gets the startup priority.
    */
+  @Override
   public int getStartupPriority()
   {
     return _startupPriority;
@@ -191,9 +178,9 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Merge the startup mode.
    */
-  public void mergeStartupMode(String mode)
+  public void mergeStartupMode(DeployMode mode)
   {
-    if (mode == null || STARTUP_DEFAULT.equals(mode))
+    if (mode == null || DeployMode.DEFAULT.equals(mode))
       return;
 
     _startupMode = mode;
@@ -202,7 +189,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the startup mode.
    */
-  public String getStartupMode()
+  public DeployMode getStartupMode()
   {
     return _startupMode;
   }
@@ -210,39 +197,26 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Converts startup mode to code.
    */
-  public static String toStartupCode(String mode)
+  public static DeployMode toStartupCode(String mode)
     throws ConfigException
   {
-    if ("automatic".equals(mode))
-      return STARTUP_AUTOMATIC;
-    else if ("lazy".equals(mode))
-      return STARTUP_LAZY;
-    else if ("manual".equals(mode))
-      return STARTUP_MANUAL;
-    else {
-      throw new ConfigException(L.l("'{0}' is an unknown startup-mode.  'automatic', 'lazy', and 'manual' are the acceptable values.",
-                                    mode));
-    }
+    return DeployMode.valueOf(mode);
   }
 
   /**
    * Sets the redeploy mode.
    */
-  public void setRedeployMode(String mode)
+  public void setRedeployMode(DeployMode mode)
   {
-    try {
-      _redeployMode = toRedeployCode(mode);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    _redeployMode = mode;
   }
 
   /**
    * Merge the redeploy mode.
    */
-  public void mergeRedeployMode(String mode)
+  public void mergeRedeployMode(DeployMode mode)
   {
-    if (mode == null || REDEPLOY_DEFAULT.equals(mode))
+    if (mode == null || DeployMode.DEFAULT.equals(mode))
       return;
 
     _redeployMode = mode;
@@ -251,7 +225,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the redeploy mode.
    */
-  public String getRedeployMode()
+  public DeployMode getRedeployMode()
   {
     return _redeployMode;
   }
@@ -259,18 +233,10 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Converts redeploy mode to code.
    */
-  public static String toRedeployCode(String mode)
+  public static DeployMode toRedeployCode(String mode)
     throws ConfigException
   {
-    if ("automatic".equals(mode))
-      return REDEPLOY_AUTOMATIC;
-    else if ("lazy".equals(mode))
-      return REDEPLOY_LAZY;
-    else if ("manual".equals(mode))
-      return REDEPLOY_MANUAL;
-    else
-      throw new ConfigException(L.l("'{0}' is an unknown redeploy-mode.  'automatic', 'lazy', and 'manual' are the acceptable values.",
-                                    mode));
+    return DeployMode.valueOf(mode);
   }
 
   /**
@@ -316,10 +282,14 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the start time of the entry.
    */
-  @Override
   public long getStartTime()
   {
     return _startTime;
+  }
+  
+  public Throwable getConfigException()
+  {
+    return null;
   }
 
   /**
@@ -333,6 +303,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Initialize the entry.
    */
+  @Override
   public final boolean init()
   {
     if (! _lifecycle.toInitializing())
@@ -344,28 +315,32 @@ abstract public class DeployController<I extends DeployInstance>
     try {
       thread.setContextClassLoader(getParentClassLoader());
 
-      _state = _state.toInit();
-      
       initBegin();
 
-      if (_startupMode == STARTUP_MANUAL) {
-        if (_redeployMode == REDEPLOY_AUTOMATIC) {
+      switch (_startupMode) {
+      case MANUAL: {
+        if (_redeployMode == DeployMode.AUTOMATIC) {
           throw new IllegalStateException(L.l("startup='manual' and redeploy='automatic' is an unsupported combination."));
         }
         else
           _strategy = StartManualRedeployManualStrategy.create();
+        break;
       }
-      else if (_startupMode == STARTUP_LAZY) {
-        if (_redeployMode == REDEPLOY_MANUAL)
+
+      case LAZY: {
+        if (_redeployMode == DeployMode.MANUAL)
           _strategy = StartLazyRedeployManualStrategy.create();
         else
           _strategy = StartLazyRedeployAutomaticStrategy.create();
+        break;
       }
-      else {
-        if (_redeployMode == STARTUP_MANUAL)
+      
+      default: {
+        if (_redeployMode == DeployMode.MANUAL)
           _strategy = StartAutoRedeployManualStrategy.create();
         else
           _strategy = StartAutoRedeployAutoStrategy.create();
+      }
       }
 
       initEnd();
@@ -419,9 +394,9 @@ abstract public class DeployController<I extends DeployInstance>
    * Returns the state name.
    */
   @Override
-  public DeployControllerState getState()
+  public LifecycleState getState()
   {
-    return _state.toCurrentState(this);
+    return _lifecycle.getState();
     /*
     if (isDestroyed())
       return DeployControllerState.DESTROYED;
@@ -439,80 +414,22 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Returns true if the instance is in the active state.
-   */
-  public boolean isActive()
-  {
-    return _lifecycle.isActive();
-  }
-
-  /**
-   * Returns true if the instance is in the stopped state.
-   *
-   * @return true on stopped state
-   */
-  @Override
-  public boolean isStopped()
-  {
-    return _lifecycle.isStopped() || _lifecycle.isInit();
-  }
-
-  /**
-   * Returns true for the stop-lazy state
-   */
-  @Override
-  public boolean isStoppedLazy()
-  {
-    return (_lifecycle.getState().isStoppedIdle()
-            || _lifecycle.getState().isInit());
-  }
-
-  /**
    * Returns true if the instance has been idle for longer than its timeout.
    *
    * @return true if idle
    */
-  public boolean isActiveIdle()
+  public boolean isIdleTimeout()
   {
     DeployInstance instance = getDeployInstance();
 
-    if (! _lifecycle.isActive())
-      return false;
-    else if (instance == null)
-      return false;
-    else
+    if (instance != null)
       return instance.isDeployIdle();
+    else
+      return false;
   }
-
-  /**
-   * Return true if the instance is in the error state.
-   *
-   * @return true for the error state.
-   */
-  public boolean isError()
-  {
-    if (_lifecycle.isError())
-      return true;
-
-    DeployInstance instance = getDeployInstance();
-
-    return (instance != null
-            && instance.getConfigException() != null);
-  }
-
-  /**
-   * Returns true if there's currently an error.
-   */
-  public boolean isErrorNow()
-  {
-    if (_lifecycle.isError())
-      return true;
-    
-    DeployInstance instance = getDeployInstance();
-
-    return (instance != null
-            && instance.getConfigException() != null);
-  }
+  
+  //
+  // dependency/modified
 
   /**
    * Returns true if the entry is modified.
@@ -562,6 +479,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the current instance.
    */
+  @Override
   public final I getDeployInstance()
   {
     return _deployInstance;
@@ -618,12 +536,6 @@ abstract public class DeployController<I extends DeployInstance>
   public final void start()
   {
     _strategy.start(this);
-  }
-
-
-  public Throwable getConfigException()
-  {
-    return null;
   }
 
   /**
@@ -752,13 +664,10 @@ abstract public class DeployController<I extends DeployInstance>
 
       deployInstance.start();
 
-      _state = _state.toActive();
       isActive = true;
 
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
-      _state = _state.toError();
-      
       _lifecycle.toError();
       
       if (_deployItem != null)
@@ -771,8 +680,6 @@ abstract public class DeployController<I extends DeployInstance>
         log.log(Level.FINEST, e.toString(), e);
       }
     } catch (Throwable e) {
-      _state = _state.toError();
-      
       _lifecycle.toError();
       
       if (_deployItem != null)
@@ -783,7 +690,7 @@ abstract public class DeployController<I extends DeployInstance>
       else
         log.log(Level.SEVERE, e.toString(), e);
     } finally {
-      if (_state.isActive()) {
+      if (isActive) {
         _lifecycle.toActive();
         
         if (_deployItem != null && ! "error".equals(_deployItem.getState()))
@@ -818,12 +725,11 @@ abstract public class DeployController<I extends DeployInstance>
    */
   void stopLazyImpl()
   {
-    if (_lifecycle.isInit()) 
-      return;
+    if (! _lifecycle.isIdle()) {
+      stopImpl();
+    }
 
-    stopImpl();
-
-    _lifecycle.toPostInit();
+    _lifecycle.toIdle();
   }
 
   /**
@@ -888,7 +794,7 @@ abstract public class DeployController<I extends DeployInstance>
    * Handles the redeploy check alarm.
    */
   @Override
-  public void handleAlarm(Alarm alarm)
+  public final void handleAlarm(Alarm alarm)
   {
     try {
       _strategy.alarm(this);
@@ -897,13 +803,11 @@ abstract public class DeployController<I extends DeployInstance>
         alarm.queue(_redeployCheckInterval);
     }
   }
-
-  /**
-   * Returns true if the entry is destroyed.
-   */
-  public boolean isDestroyed()
+  
+  @Override
+  public final void close()
   {
-    return _lifecycle.isDestroyed();
+    destroy();
   }
 
   /**
@@ -914,8 +818,6 @@ abstract public class DeployController<I extends DeployInstance>
     if (_lifecycle.isAfterInit())
       stop();
     
-    _state = _state.toDestroy();
-
     if (! _lifecycle.toDestroy())
       return false;
 

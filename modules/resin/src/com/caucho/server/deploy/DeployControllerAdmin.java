@@ -96,12 +96,12 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
 
   public String getStartupMode()
   {
-    return _controller.getStartupMode();
+    return _controller.getStartupMode().toString();
   }
 
   public String getRedeployMode()
   {
-    return _controller.getRedeployMode();
+    return _controller.getRedeployMode().toString();
   }
 
   public long getRedeployCheckInterval()
@@ -111,7 +111,14 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
 
   public String getState()
   {
-    return getController().getState().toString();
+    DeployController<?> controller = getController();
+    
+    LifecycleState state = controller.getState();
+    
+    if (state.isActive() && controller.isModified())
+      return state.toString() + "_MODIFIED";
+    else
+      return state.toString();
   }
 
   public String getErrorMessage()
@@ -204,7 +211,6 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
 
     String oldValue = oldState.toString();
     String newValue = newState.toString();
-    String message = newValue;
 
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " lifecycleEvent " + oldValue + " -> " + newValue);

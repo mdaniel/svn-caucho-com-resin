@@ -39,7 +39,7 @@ import com.caucho.vfs.Dependency;
 /**
  * A list of deploy objects.
  */
-public class DeployListGenerator<E extends DeployController<?>>
+public class DeployListGenerator<E extends DeployControllerApi<?>>
   extends DeployGenerator<E> implements Dependency {
   private static final Logger log
     = Logger.getLogger(DeployListGenerator.class.getName());
