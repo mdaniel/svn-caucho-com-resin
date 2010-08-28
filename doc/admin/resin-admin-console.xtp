@@ -33,7 +33,8 @@ heap dumps.</p>
 enabling it is just adding an appropriate &lt;web-app> tag.</p>
 
 <p>For security, you will also need to add a &lt;user> to
-the &lt;management> section of the resin.xml.  The password will be
+the &lt;resin:AdminAuthenticator> section of the resin.xml.
+The password will be
 a MD5 hash.  By default, the /resin-admin web-app provides a form
 for generating the hash codes.  You will need to copy the generated
 password into the resin.xml.  This guarantees that you have access
@@ -42,11 +43,11 @@ is very cautious about security issues to enable the administration.</p>
 
 <example title="resin.xml /resin-admin configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+       xmlns:resin="urn:java:com.caucho.resin"&gt;
 
-  &lt;management>
+  &lt;resin:AdminAuthenticator>
      &lt;user name="harry" password="MD5HASH=="/>
-  &lt;/management>
+  &lt;/resin:AdminAuthenticator>
 
 &lt;cluster id="">
 &lt;host id="">
@@ -473,14 +474,14 @@ unix&gt; jconsole
 </p>
 </s1>
 
-<s1 title="stat-service">
+<s1 title="resin:StatService">
 
-<p>Resin 3.1.6 adds a new &lt;stat-service> to the &lt;management tag.
-The &lt;stat-service periodically checks the status of Resin and the JVM
+<p>Resin 3.1.6 adds a new &lt;resin:StatService> to Resin.
+The StatService periodically checks the status of Resin and the JVM
 and can act if certain thresholds are exceeded.  The default check rate
 is every 60s.</p>
 
-<p>The primary statistic that &lt;stat-service> observes is the CPU load
+<p>The primary statistic that StatService observes is the CPU load
 of the server.  You can set thresholds so Resin will log a thread dump
 if the CPU gets high, e.g. to find and debug a runaway thread.  If necessary,
 you can also have Resin restart if the CPU load gets too high.
@@ -488,17 +489,17 @@ The configuration is documented in <a
 href="security-overview.xtp#Authentication">&lt;resin:AdminAuthenticator></a>.</p>
 
 <example title="Example: CPU thresholds">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-  &lt;management>
-    &lt;stat-service>
-      &lt;unix-load-avg-exit-threshold>10.0&lt;/unix-load-avg-exit-threshold>
-      &lt;cpu-load-log-info-threshold>1.0&lt;/cpu-load-log-info-threshold>
-      &lt;cpu-load-log-warning-threshold>2.0&lt;/cpu-load-log-warning-threshold>
-      &lt;cpu-load-thread-dump-threshold>2.0&lt;/cpu-load-thread-dump-threshold>
-      &lt;sample-period>15s&lt;/sample-period>
-      &lt;thread-dump-interval>10m&lt;/thread-dump-interval>
-    &lt;/stat-service>
-  &lt;/management>
+&lt;resin xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:StatService>
+    &lt;unix-load-avg-exit-threshold>10.0&lt;/unix-load-avg-exit-threshold>
+    &lt;cpu-load-log-info-threshold>1.0&lt;/cpu-load-log-info-threshold>
+    &lt;cpu-load-log-warning-threshold>2.0&lt;/cpu-load-log-warning-threshold>
+    &lt;cpu-load-thread-dump-threshold>2.0&lt;/cpu-load-thread-dump-threshold>
+    &lt;sample-period>15s&lt;/sample-period>
+    &lt;thread-dump-interval>10m&lt;/thread-dump-interval>
+  &lt;/resin:StatService>
 
 &lt;/resin>
 </example>

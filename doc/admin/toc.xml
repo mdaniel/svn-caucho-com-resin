@@ -30,24 +30,27 @@
 
     <item link="migration.xtp" title="Migrating"
           description="Migrating to Resin 4.0"/>
+    
+    <item link="resin-admin.xtp" title="Administration"
+          description="/resin-admin monitoring and administration">
+    
+      <item link="resin-admin-console.xtp" title="console"
+            description="The web-based Resin administration console"/>
 
-    <item link="deploy.xtp" title="Deployment"
-          description="Deploying applications and .war files to a Resin server."
-          reference="deploy-ref.xtp">
       <!--
-      <item link="deploy-file-system.xtp" title="File System Deploy"
-            description="Using the webapps/ directory for deployment"/>
+      <item link="resin-admin-rest.xtp" title="rest"
       -->
+      
+    </item>
     
-      <item link="deploy-git-overview.xtp" title=".git overview"
-            description="Overview of the clustered .git deployment"/>
-    
-      <item link="deploy-tool-reference.xtp" title="deploy tools"
-            description="ant and maven deployment tool reference"/>
-    
-      <item link="deploy-pomegranate.xtp" title="pomegranate"
-            description="The Pomegranate module system"/>
-    
+    <item link="clustering.xtp" title="Clustering"
+          description="Clustering and load balancing of multiple coordinated Resin servers">  
+      <item link="clustering-overview.xtp" title="Overview"
+        description="Overview of Resin's clustering, load-balancing, elastic-computing and distributed caching features"/>
+      <item link="clustering-ref.xtp" title="Clustering Tags Reference"
+        description="Resin clustering and load-balancing tags reference"/>
+      <item link="clustering-deployment-ref.xtp" title="Clustered Deployment Reference"
+        description="ANT and Maven clustered deployment API reference"/>
     </item>
     
     <item link="config.xtp" title="Configuration"
@@ -69,16 +72,24 @@
           description="Configuration of the Resin database pool"
           reference="database-ref.xtp"/>
 
-    <item link="logging.xtp" title="Logging"
-          description="java.util logging configuration in Resin"
-          reference="logging-ref.xtp">
-      
+    <item link="deploy.xtp" title="Deployment"
+          description="Deploying applications and .war files to a Resin server."
+          reference="deploy-ref.xtp">
       <!--
-      <item link="logging-loggers.xtp" .../>
-
-      <item link="logging-rollover.xtp" .../>
+      <item link="deploy-file-system.xtp" title="File System Deploy"
+            description="Using the webapps/ directory for deployment"/>
       -->
-      
+    
+      <item link="deploy-git-overview.xtp" title=".git overview"
+            description="Overview of the clustered .git deployment"/>
+    
+      <item link="deploy-tool-reference.xtp" title="deploy tools"
+            description="ant and maven deployment tool reference"/>
+
+      <!--
+      <item link="deploy-pomegranate.xtp" title="pomegranate"
+            description="The Pomegranate module system"/>
+      -->
     </item>
 
     <item link="http.xtp" title="HTTP">
@@ -103,6 +114,18 @@
        
        -->
            
+    </item>
+
+    <item link="logging.xtp" title="Logging"
+          description="java.util logging configuration in Resin"
+          reference="logging-ref.xtp">
+      
+      <!--
+      <item link="logging-loggers.xtp" .../>
+
+      <item link="logging-rollover.xtp" .../>
+      -->
+      
     </item>
     
     <item link="security.xtp" title="Security"
@@ -133,28 +156,6 @@
 
     <item link="scheduled-tasks.xtp" title="Scheduled tasks"
           description="Scheduled tasks"/>
-    
-    <item link="clustering.xtp" title="Clustering"
-          description="Clustering and load balancing of multiple coordinated Resin servers">  
-      <item link="clustering-overview.xtp" title="Overview"
-        description="Overview of Resin's clustering, load-balancing, elastic-computing and distributed caching features"/>
-      <item link="clustering-ref.xtp" title="Clustering Tags Reference"
-        description="Resin clustering and load-balancing tags reference"/>
-      <item link="clustering-deployment-ref.xtp" title="Clustered Deployment Reference"
-        description="ANT and Maven clustered deployment API reference"/>
-    </item>
-    
-    <item link="resin-admin.xtp" title="resin-admin"
-          description="Resin monitoring and administration">
-    
-      <item link="resin-admin-console.xtp" title="console"
-            description="The web-based Resin administration console"/>
-
-      <!--
-      <item link="resin-admin-rest.xtp" title="rest"
-      -->
-      
-    </item>
     
     <item link="advanced.xtp" title="Advanced"
           description="Advanced and technical concepts">

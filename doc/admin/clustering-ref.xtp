@@ -1,6 +1,6 @@
 <document>
 <header>
-<title>Clustering Tags Reference</title>
+<title>Cluster and Network Tags Reference</title>
 <version>Resin 4.0</version>
 <description>
 <p>
@@ -13,18 +13,17 @@ load-balancing including &lt;cluster>, &lt;server>, &lt;host>, &lt;resin:LoadBal
 <body>
 <reference-legend/>
 <localtoc/>
+
+<include-defun name="address"/> 
 <include-defun name="cluster"/> 
 <include-defun name="cluster-default"/> 
+<include-defun name="cluster-port"/>
 <include-defun name="host"/> 
 <include-defun name="host-default"/> 
-<include-defun name="persistent-store"/> 
-<include-defun name="session-sticky-disable"/> 
-<include-defun name="server"/> 
-<include-defun name="server-default"/> 
-<include-defun name="address"/> 
-<include-defun name="port"/>
-<include-defun name="cluster-port"/>
-<include-defun name="port-default"/>
+<include-defun name="http"/> 
+<include-defun name="keepalive-max"/>
+<include-defun name="keepalive-select-enable"/>
+<include-defun name="keepalive-timeout"/>
 <include-defun name="resin:LoadBalance"/>
 <include-defun name="load-balance-weight"/>
 <include-defun name="load-balance-connect-timeout"/> 
@@ -32,13 +31,15 @@ load-balancing including &lt;cluster>, &lt;server>, &lt;host>, &lt;resin:LoadBal
 <include-defun name="load-balance-idle-time"/> 
 <include-defun name="load-balance-warmup-time"/> 
 <include-defun name="load-balance-recover-time"/> 
-<include-defun name="socket-timeout"/>
-<include-defun name="keepalive-max"/>
-<include-defun name="keepalive-select-enable"/>
-<include-defun name="keepalive-timeout"/>
+<include-defun name="port"/>
+<include-defun name="port-default"/>
 <include-defun name="save-mode"/>
+<include-defun name="server"/> 
+<include-defun name="server-default"/> 
 <include-defun name="session-config"/>
+<include-defun name="session-sticky-disable"/> 
 <include-defun name="session-url-prefix"/> 
+<include-defun name="socket-timeout"/>
 <include-defun name="web-app"/> 
 <include-defun name="web-app-default"/> 
 </body>

@@ -4825,7 +4825,7 @@ public class QuercusParser {
               _sb.append('u');
             }
             else
-              _sb.append(Character.toChars(value));
+              _sb.append((char) value); // Character.toChars(value));
             
             continue;
           }
@@ -4837,7 +4837,7 @@ public class QuercusParser {
               _sb.append('U');
             }
             else
-              _sb.append(Character.toChars(value));
+              _sb.append((char) value); // Character.toChars(value));
             
             continue;
           }
