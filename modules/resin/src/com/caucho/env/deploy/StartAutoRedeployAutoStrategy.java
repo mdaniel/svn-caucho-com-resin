@@ -27,31 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
+import java.util.logging.Logger;
+
+import com.caucho.inject.Module;
 import com.caucho.lifecycle.LifecycleState;
 
 /**
- * The start-mode="manual", redeploy-model="manual" controller strategy.
- *
- * initial state = stop
+ * The start-mode="automatic", redeploy-model="automatic" controller strategy.
  *
  * <table>
  * <tr><th>input  <th>stopped  <th>active  <th>modified   <th>error
+ * <tr><td>request<td>startImpl<td>-       <td>restartImpl<td>restartImpl
+ * <tr><td>include<td>startImpl<td>-       <td>-          <td>-
  * <tr><td>start  <td>startImpl<td>-       <td>restartImpl<td>restartImpl
- * <tr><td>update <td>startImpl<td>-       <td>restartImpl<td>restartImpl
+ * <tr><td>restart<td>startImpl<td>-       <td>restartImpl<td>restartImpl
  * <tr><td>stop   <td>-        <td>stopImpl<td>stopImpl   <td>stopImpl
- * <tr><td>request<td>-        <td>-       <td>-          <td>-
- * <tr><td>include<td>-        <td>-       <td>-          <td>-
- * <tr><td>alarm  <td>-        <td>-       <td>-          <td>-
+ * <tr><td>alarm  <td>-        <td>-       <td>stopImpl   <td>stopImpl
  * </table>
  */
-public class StartManualRedeployManualStrategy
+@Module
+public class StartAutoRedeployAutoStrategy
   extends AbstractDeployControllerStrategy {
-  public final static StartManualRedeployManualStrategy STRATEGY
-    = new StartManualRedeployManualStrategy();
+  public final static StartAutoRedeployAutoStrategy STRATEGY
+    = new StartAutoRedeployAutoStrategy();
 
-  protected StartManualRedeployManualStrategy()
+  private StartAutoRedeployAutoStrategy()
   {
   }
 
@@ -64,7 +66,7 @@ public class StartManualRedeployManualStrategy
   {
     return STRATEGY;
   }
-  
+
   /**
    * Called at initialization time for automatic start.
    *
@@ -74,12 +76,12 @@ public class StartManualRedeployManualStrategy
   public<I extends DeployInstance>
   void startOnInit(DeployController<I> controller)
   {
-    controller.stopImpl();
+    controller.startImpl();
   }
 
   /**
-   * Checks for updates from an admin command.  The target state will be the
-   * initial state, i.e. update will not start a lazy instance.
+   * Checks for updates from an admin command.  The target state is
+   * the started state.
    *
    * @param controller the owning controller
    */
@@ -89,13 +91,21 @@ public class StartManualRedeployManualStrategy
   {
     LifecycleState state = controller.getState();
     
-    if (state.isStopped()) {
+    if (state.isIdle()) {
+      // server/1d18
+    }
+    else if (state.isStopped()) {
+      // server/1d15
       controller.startImpl();
     }
     else if (state.isError()) {
       controller.restartImpl();
     }
     else if (controller.isModifiedNow()) {
+      // 1d1n, 1d1o
+      controller.restartImpl();
+    }
+    else if (controller.isIdleTimeout()) {
       controller.restartImpl();
     }
     else { /* active */
@@ -104,45 +114,89 @@ public class StartManualRedeployManualStrategy
 
 
   /**
-   * Returns the current instance.  This strategy does not lazily restart
-   * the instance.
+   * Returns the current instance, redeploying if necessary.
    *
    * @param controller the owning controller
    * @return the current deploy instance
    */
-  /* XXX: should request always return an instance? */
   @Override
   public <I extends DeployInstance>
   I request(DeployController<I> controller)
   {
-    return controller.getDeployInstance();
+    LifecycleState state = controller.getState();
+    
+    if (state.isIdle()) {
+      // server/1d16
+      return controller.startImpl();
+    }
+    else if (state.isStopped()) {
+      // server/1d10
+      return controller.getDeployInstance();
+    }
+    else if (controller.isModified()) {
+      controller.logModified(Logger.getLogger(getClass().getName()));
+      // server/1d1i
+      I instance = controller.restartImpl();
+
+      return instance;
+    }
+    else { /* active */
+      // server/1d1c
+      return controller.getDeployInstance();
+    }
   }
 
   /**
-   * Returns the current instance.  This strategy does not lazily restart
-   * the instance.
+   * Returns the current instance, starting if necessary.
    *
    * @param controller the owning controller
    * @return the current deploy instance
    */
-  /* XXX: should request always return an instance? */
   @Override
   public <I extends DeployInstance>
   I subrequest(DeployController<I> controller)
   {
-    return controller.getDeployInstance();
+    LifecycleState state = controller.getState();
+    
+    if (state.isIdle()) {
+      // server/1d17
+      return controller.startImpl();
+    }
+    else if (state.isStopped()) {
+      // server/1d11
+      return controller.getDeployInstance();
+    }
+    else if (controller.isModified()) {
+      // server/1d1j
+      return controller.getDeployInstance();
+    }
+    else { /* active */
+      // server/1d1d
+      return controller.getDeployInstance();
+    }
   }
 
   /**
-   * Returns the current instance.  This strategy does not lazily restart
-   * the instance.
+   * Redeployment on a timeout alarm.
    *
    * @param controller the owning controller
    */
-  /* XXX: should request always return an instance? */
   @Override
   public <I extends DeployInstance>
   void alarm(DeployController<I> controller)
   {
+    LifecycleState state = controller.getState();
+    
+    if (state.isStopped()) {
+      // server/1d12
+    }
+    else if (state.isIdle()) {
+      // server/1d18
+    }
+    else if (controller.isModified()) {
+      // server/1d1k
+      controller.logModified(controller.getLog());
+      controller.restartImpl();
+    }
   }
 }

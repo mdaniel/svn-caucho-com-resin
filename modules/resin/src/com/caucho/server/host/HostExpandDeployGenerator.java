@@ -35,9 +35,9 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
+import com.caucho.env.deploy.DeployMode;
+import com.caucho.env.deploy.ExpandDeployGenerator;
 import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployMode;
-import com.caucho.server.deploy.ExpandDeployGenerator;
 import com.caucho.vfs.Path;
 
 import javax.el.ELContext;

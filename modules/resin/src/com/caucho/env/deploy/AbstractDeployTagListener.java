@@ -27,14 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.deploy;
+package com.caucho.env.deploy;
+
 
 /**
  * Interface for NetworkDeployService tag listeners, i.e. when tags are
  * added or removed.
  */
-public interface DeployTagListener {
-  public void onTagAdd(String tag);
+public class AbstractDeployTagListener implements DeployTagListener {
+  @Override
+  public void onTagAdd(String tag)
+  {
+  }
   
-  public void onTagRemove(String tag);
+  @Override
+  public void onTagRemove(String tag)
+  {
+  }
 }

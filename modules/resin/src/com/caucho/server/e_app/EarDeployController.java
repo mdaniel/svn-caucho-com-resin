@@ -35,8 +35,8 @@ import java.util.logging.Logger;
 
 import javax.servlet.jsp.el.ELException;
 
-import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.env.deploy.DeployControllerAdmin;
+import com.caucho.env.deploy.EnvironmentDeployController;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.vfs.Path;

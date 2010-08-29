@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +46,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
+import com.caucho.server.deploy.DeployConfig;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -274,6 +275,25 @@ abstract public class
   {
     return url.equals(getId());
   }
+  
+  protected String getMBeanTypeName()
+  {
+    String className = getDeployInstance().getClass().getName();
+    int p = className.lastIndexOf('.');
+    if (p > 0)
+      className = className.substring(p + 1);
+
+    return className;
+  }
+
+  protected String getMBeanId()
+  {
+    String name = getId();
+    if (name == null || name.equals(""))
+      name = "default";
+
+    return name;
+  }
 
   /**
    * Merges with the old controller.
@@ -320,6 +340,11 @@ abstract public class
 
     mergeRedeployMode(oldController.getRedeployMode());
   }
+  
+  protected DeployControllerAdmin<?> getDeployAdmin()
+  {
+    return null;
+  }
 
   /**
    * Returns the application object.
@@ -352,7 +377,7 @@ abstract public class
    */
   @Override
   protected void configureInstance(I instance)
-    throws Throwable
+    throws Exception
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -363,6 +388,8 @@ abstract public class
       thread.setContextClassLoader(classLoader);
 
       log.fine(instance + " initializing");
+      
+      super.configureInstance(instance);
 
       // set from external error, like .ear
       instance.setConfigException(_configException);
@@ -427,7 +454,6 @@ abstract public class
   }
 
   protected void configureInstanceVariables(I instance)
-    throws Throwable
   {
     Path rootDirectory = getRootDirectory();
 
@@ -480,6 +506,7 @@ abstract public class
   /**
    * Handles config phase.
    */
+  @Override
   public void environmentConfigure(EnvironmentClassLoader loader)
   {
   }
@@ -487,6 +514,7 @@ abstract public class
   /**
    * Handles bind phase.
    */
+  @Override
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }
@@ -494,6 +522,7 @@ abstract public class
   /**
    * Handles the case where the environment is starting (after init).
    */
+  @Override
   public void environmentStart(EnvironmentClassLoader loader)
   {
     try {

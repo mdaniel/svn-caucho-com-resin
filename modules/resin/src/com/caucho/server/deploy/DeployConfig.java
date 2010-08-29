@@ -37,6 +37,7 @@ import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.RawString;
 import com.caucho.config.types.FileSetType;
+import com.caucho.env.deploy.DeployMode;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 

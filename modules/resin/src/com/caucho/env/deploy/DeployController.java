@@ -27,10 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
-import com.caucho.cloud.deploy.DeployNetworkService;
-import com.caucho.cloud.deploy.DeployTagItem;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
@@ -42,10 +43,6 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
 import com.caucho.vfs.Dependency;
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * DeployController controls the lifecycle of the DeployInstance.
@@ -75,8 +72,6 @@ abstract public class DeployController<I extends DeployInstance>
   private Alarm _alarm = new WeakAlarm(this);
   private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
   
-  private DeployTagItem _deployItem;
-
   private long _startTime;
   private I _deployInstance;
 
@@ -102,14 +97,10 @@ abstract public class DeployController<I extends DeployInstance>
    */
   abstract protected I instantiateDeployInstance();
 
-  public void addLifecycleListener(LifecycleListener listener)
-  {
-    _lifecycle.addListener(listener);
-  }
-
   /**
    * Returns the controller's id.
    */
+  @Override
   public final String getId()
   {
     return _id;
@@ -121,22 +112,6 @@ abstract public class DeployController<I extends DeployInstance>
   public ClassLoader getParentClassLoader()
   {
     return _parentLoader;
-  }
-  
-  /**
-   * Returns the deploy tag name.
-   */
-  protected String getDeployTag()
-  {
-    return null;
-  }
-
-  /**
-   * Returns true for a versioning controller
-   */
-  public boolean isVersioning()
-  {
-    return false;
   }
 
   /**
@@ -195,15 +170,6 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Converts startup mode to code.
-   */
-  public static DeployMode toStartupCode(String mode)
-    throws ConfigException
-  {
-    return DeployMode.valueOf(mode);
-  }
-
-  /**
    * Sets the redeploy mode.
    */
   public void setRedeployMode(DeployMode mode)
@@ -228,15 +194,6 @@ abstract public class DeployController<I extends DeployInstance>
   public DeployMode getRedeployMode()
   {
     return _redeployMode;
-  }
-
-  /**
-   * Converts redeploy mode to code.
-   */
-  public static DeployMode toRedeployCode(String mode)
-    throws ConfigException
-  {
-    return DeployMode.valueOf(mode);
   }
 
   /**
@@ -285,19 +242,6 @@ abstract public class DeployController<I extends DeployInstance>
   public long getStartTime()
   {
     return _startTime;
-  }
-  
-  public Throwable getConfigException()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the deploy admin.
-   */
-  protected DeployControllerAdmin<?> getDeployAdmin()
-  {
-    return null;
   }
   
   /**
@@ -361,56 +305,18 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Final calls for init.
    */
+
   protected void initEnd()
   {
-    DeployNetworkService deployService = DeployNetworkService.getCurrent();
-    if (deployService != null && getDeployTag() != null) {
-      deployService.addTag(getDeployTag());
-      
-      _deployItem = deployService.getTagItem(getDeployTag());
-    }
-  }
-
-  protected String getMBeanTypeName()
-  {
-    String className = getDeployInstance().getClass().getName();
-    int p = className.lastIndexOf('.');
-    if (p > 0)
-      className = className.substring(p + 1);
-
-    return className;
-  }
-
-  protected String getMBeanId()
-  {
-    String name = getId();
-    if (name == null || name.equals(""))
-      name = "default";
-
-    return name;
   }
 
   /**
    * Returns the state name.
    */
   @Override
-  public LifecycleState getState()
+  public final LifecycleState getState()
   {
     return _lifecycle.getState();
-    /*
-    if (isDestroyed())
-      return DeployControllerState.DESTROYED;
-    else if (isStoppedLazy())
-      return DeployControllerState.STOPPED_IDLE;
-    else if (isStopped())
-      return DeployControllerState.STOPPED;
-    else if (isError())
-      return DeployControllerState.ERROR;
-    else if (isModified())
-      return DeployControllerState.ACTIVE_MODIFIED;
-    else
-      return DeployControllerState.ACTIVE;
-      */
   }
 
   /**
@@ -418,7 +324,7 @@ abstract public class DeployController<I extends DeployInstance>
    *
    * @return true if idle
    */
-  public boolean isIdleTimeout()
+  public final boolean isIdleTimeout()
   {
     DeployInstance instance = getDeployInstance();
 
@@ -508,6 +414,12 @@ abstract public class DeployController<I extends DeployInstance>
     }
   }
 
+  @Override
+  public void addLifecycleListener(LifecycleListener listener)
+  {
+    _lifecycle.addListener(listener);
+  }
+
   /**
    * Redeploys the entry if it's modified.
    */
@@ -519,14 +431,6 @@ abstract public class DeployController<I extends DeployInstance>
                                           _lifecycle.getStateName()));
 
     _strategy.startOnInit(this);
-  }
-
-  /**
-   * Deploy the controller from an admin command.
-   */
-  @Override
-  public void deploy()
-  {
   }
 
   /**
@@ -564,13 +468,6 @@ abstract public class DeployController<I extends DeployInstance>
   public final void update()
   {
     _strategy.update(this);
-  }
-
-  /**
-   * Updates version-specific information
-   */
-  public void updateVersion()
-  {
   }
 
   /**
@@ -656,10 +553,6 @@ abstract public class DeployController<I extends DeployInstance>
       if (! isStarting)
         return deployInstance;
       
-      expandArchive();
-    
-      addManifestClassPath();
-      
       configureInstance(deployInstance);
 
       deployInstance.start();
@@ -669,9 +562,8 @@ abstract public class DeployController<I extends DeployInstance>
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
       _lifecycle.toError();
-      
-      if (_deployItem != null)
-        _deployItem.toError(e);
+
+      onError(e);
 
       if (deployInstance != null)
         deployInstance.setConfigException(e);
@@ -682,8 +574,7 @@ abstract public class DeployController<I extends DeployInstance>
     } catch (Throwable e) {
       _lifecycle.toError();
       
-      if (_deployItem != null)
-        _deployItem.toError(e);
+      onError(e);
 
       if (deployInstance != null)
         deployInstance.setConfigException(e);
@@ -693,8 +584,7 @@ abstract public class DeployController<I extends DeployInstance>
       if (isActive) {
         _lifecycle.toActive();
         
-        if (_deployItem != null && ! "error".equals(_deployItem.getState()))
-          _deployItem.toStart();
+        onActive();
       }
       else
         _lifecycle.toError();
@@ -710,14 +600,6 @@ abstract public class DeployController<I extends DeployInstance>
     }
 
     return deployInstance;
-  }
-
-  /**
-   * Deploys the entry, e.g. archive expansion.
-   */
-  protected void expandArchive()
-    throws Exception
-  {
   }
 
   /**
@@ -764,8 +646,7 @@ abstract public class DeployController<I extends DeployInstance>
       if (isStopping) {
         _lifecycle.toStop();
 
-        if (_deployItem != null)
-          _deployItem.toStop();
+        onStop();
       }
       
       thread.setContextClassLoader(oldLoader);
@@ -773,12 +654,20 @@ abstract public class DeployController<I extends DeployInstance>
 
     return;
   }
-
-  /**
-   * Adds any manifest Class-Path
-   */
-  protected void addManifestClassPath()
-    throws IOException
+  
+  //
+  // state callbacks
+  //
+  
+  protected void onActive()
+  {
+  }
+  
+  protected void onError(Throwable e)
+  {
+  }
+  
+  protected void onStop()
   {
   }
 
@@ -786,7 +675,7 @@ abstract public class DeployController<I extends DeployInstance>
    * Configuration of the instance
    */
   protected void configureInstance(I deployInstance)
-    throws Throwable
+    throws Exception
   {
   }
 

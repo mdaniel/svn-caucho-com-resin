@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.deploy;
+package com.caucho.env.deploy;
 
 import java.util.List;
 import java.util.Set;
@@ -36,15 +36,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.inject.Module;
 
 /**
- * Interface for a service registered with the Resin Server.
+ * Deployment service for detecting changes in a controller, managed
+ * by tags.
  */
 @Module
-public class DeployNetworkService extends AbstractResinService
+public class DeployUpdateService extends AbstractResinService
 {
   public static final int START_PRIORITY
     = NetworkClusterService.START_PRIORITY_CLUSTER_SERVICE;
@@ -61,12 +61,12 @@ public class DeployNetworkService extends AbstractResinService
   //
   // Returns the current service if available.
   //
-  public static DeployNetworkService getCurrent()
+  public static DeployUpdateService getCurrent()
   {
     ResinSystem server = ResinSystem.getCurrent();
     
     if (server != null)
-      return server.getService(DeployNetworkService.class);
+      return server.getService(DeployUpdateService.class);
     else
       return null;
   }

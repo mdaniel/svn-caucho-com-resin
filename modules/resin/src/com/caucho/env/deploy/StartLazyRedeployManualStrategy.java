@@ -27,12 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import com.caucho.inject.Module;
+import com.caucho.lifecycle.LifecycleState;
 
 /**
- * The start-mode="auto", redeploy-model="manual" controller strategy.
+ * The start-mode="lazy", redeploy-model="manual" controller strategy.
  *
  * initial state = stop
  *
@@ -47,12 +48,12 @@ import com.caucho.inject.Module;
  * </table>
  */
 @Module
-public class StartAutoRedeployManualStrategy
+public class StartLazyRedeployManualStrategy
   extends StartManualRedeployManualStrategy {
-  public final static StartAutoRedeployManualStrategy STRATEGY
-    = new StartAutoRedeployManualStrategy();
+  public final static StartLazyRedeployManualStrategy STRATEGY
+    = new StartLazyRedeployManualStrategy();
 
-  private StartAutoRedeployManualStrategy()
+  private StartLazyRedeployManualStrategy()
   {
   }
 
@@ -75,6 +76,47 @@ public class StartAutoRedeployManualStrategy
   public<I extends DeployInstance>
   void startOnInit(DeployController<I> controller)
   {
-    controller.startImpl();
+    controller.stopLazyImpl();
+  }
+
+  /**
+   * Returns the current instance, redeploying if necessary.
+   *
+   * @param controller the owning controller
+   * @return the current deploy instance
+   */
+  @Override
+  public <I extends DeployInstance>
+  I request(DeployController<I> controller)
+  {
+    LifecycleState state = controller.getState();
+    
+    if (state.isIdle()) {
+      return controller.startImpl();
+    }
+    else {
+      return controller.getDeployInstance();
+    }
+  }
+
+  /**
+   * Returns the current instance, starting if necessary.
+   *
+   * @param controller the owning controller
+   * @return the current deploy instance
+   */
+  @Override
+  public <I extends DeployInstance>
+  I subrequest(DeployController<I> controller)
+  {
+    LifecycleState state = controller.getState();
+    
+    if (state.isIdle()) {
+      return controller.startImpl();
+    }
+    else { /* active */
+      // server/1d0d
+      return controller.getDeployInstance();
+    }
   }
 }

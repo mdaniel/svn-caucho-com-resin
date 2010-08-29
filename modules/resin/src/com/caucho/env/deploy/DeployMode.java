@@ -27,20 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.deploy;
+package com.caucho.env.deploy;
 
 /**
- * Interface for NetworkDeployService tag listeners, i.e. when tags are
- * added or removed.
+ * enumeration of the Deployment start and redeploy modes.
  */
-public class AbstractDeployTagListener implements DeployTagListener {
-  @Override
-  public void onTagAdd(String tag)
-  {
-  }
-  
-  @Override
-  public void onTagRemove(String tag)
-  {
-  }
+public enum DeployMode {
+  DEFAULT,
+  AUTOMATIC,
+  LAZY,
+  MANUAL;
 }

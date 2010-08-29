@@ -31,8 +31,8 @@ package com.caucho.server.webapp;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
+import com.caucho.env.deploy.DeployMode;
 import com.caucho.server.deploy.DeployConfig;
-import com.caucho.server.deploy.DeployMode;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 

@@ -27,15 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
-
-import java.util.logging.Logger;
+package com.caucho.env.deploy;
 
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.LifecycleState;
 
 /**
- * The start-mode="automatic", redeploy-model="automatic" controller strategy.
+ * The start-mode="lazy", redeploy-model="automatic" controller strategy.
  *
  * <table>
  * <tr><th>input  <th>stopped  <th>active  <th>modified   <th>error
@@ -48,12 +46,13 @@ import com.caucho.lifecycle.LifecycleState;
  * </table>
  */
 @Module
-public class StartAutoRedeployAutoStrategy
+public class StartLazyRedeployAutomaticStrategy
   extends AbstractDeployControllerStrategy {
-  public final static StartAutoRedeployAutoStrategy STRATEGY
-    = new StartAutoRedeployAutoStrategy();
+  public final static StartLazyRedeployAutomaticStrategy STRATEGY
+    = new StartLazyRedeployAutomaticStrategy();
 
-  private StartAutoRedeployAutoStrategy()
+
+  private StartLazyRedeployAutomaticStrategy()
   {
   }
 
@@ -76,12 +75,13 @@ public class StartAutoRedeployAutoStrategy
   public<I extends DeployInstance>
   void startOnInit(DeployController<I> controller)
   {
-    controller.startImpl();
+    controller.stopLazyImpl();
   }
 
+
   /**
-   * Checks for updates from an admin command.  The target state is
-   * the started state.
+   * Checks for updates from an admin command.  The target state will be the
+   * initial state, i.e. update will not start a lazy instance.
    *
    * @param controller the owning controller
    */
@@ -90,31 +90,31 @@ public class StartAutoRedeployAutoStrategy
   void update(DeployController<I> controller)
   {
     LifecycleState state = controller.getState();
-    
+
     if (state.isIdle()) {
-      // server/1d18
+      // server/1d08
     }
     else if (state.isStopped()) {
-      // server/1d15
-      controller.startImpl();
+      // server/1d05
+      controller.stopLazyImpl();
     }
     else if (state.isError()) {
-      controller.restartImpl();
+      controller.stopLazyImpl();
     }
     else if (controller.isModifiedNow()) {
-      // 1d1n, 1d1o
-      controller.restartImpl();
+      // 1d0n, 1d0o
+      controller.stopLazyImpl();
     }
     else if (controller.isIdleTimeout()) {
-      controller.restartImpl();
+      controller.stopLazyImpl();
     }
     else { /* active */
+      // server/1d0h
     }
   }
 
-
   /**
-   * Returns the current instance, redeploying if necessary.
+   * Returns the current instance for a request, redeploying if necessary.
    *
    * @param controller the owning controller
    * @return the current deploy instance
@@ -126,28 +126,26 @@ public class StartAutoRedeployAutoStrategy
     LifecycleState state = controller.getState();
     
     if (state.isIdle()) {
-      // server/1d16
+      // server/1d06
       return controller.startImpl();
     }
     else if (state.isStopped()) {
-      // server/1d10
+      // server/1d00
       return controller.getDeployInstance();
     }
     else if (controller.isModified()) {
-      controller.logModified(Logger.getLogger(getClass().getName()));
-      // server/1d1i
-      I instance = controller.restartImpl();
-
-      return instance;
+      // server/1d0i
+      return controller.restartImpl();
     }
     else { /* active */
-      // server/1d1c
+      // server/1d0c
       return controller.getDeployInstance();
     }
   }
 
   /**
-   * Returns the current instance, starting if necessary.
+   * Returns the current instance for a subrequest like an include,
+   * starting if necessary.
    *
    * @param controller the owning controller
    * @return the current deploy instance
@@ -159,19 +157,23 @@ public class StartAutoRedeployAutoStrategy
     LifecycleState state = controller.getState();
     
     if (state.isIdle()) {
-      // server/1d17
+      // server/1d07
       return controller.startImpl();
     }
     else if (state.isStopped()) {
-      // server/1d11
+      // server/1d01
       return controller.getDeployInstance();
     }
+    else if (state.isError() && controller.isModified()) {
+      // server/1d0x
+      return controller.restartImpl();
+    }
     else if (controller.isModified()) {
-      // server/1d1j
+      // server/1d0j
       return controller.getDeployInstance();
     }
     else { /* active */
-      // server/1d1d
+      // server/1d0d
       return controller.getDeployInstance();
     }
   }
@@ -187,16 +189,23 @@ public class StartAutoRedeployAutoStrategy
   {
     LifecycleState state = controller.getState();
     
-    if (state.isStopped()) {
-      // server/1d12
+    if (state.isIdle()) {
+      // server/1d08
     }
-    else if (state.isIdle()) {
-      // server/1d18
+    else if (state.isStopped()) {
+      // server/1d02
+    }
+    else if (state.isError()) {
+      // server/1d0w
     }
     else if (controller.isModified()) {
-      // server/1d1k
-      controller.logModified(controller.getLog());
-      controller.restartImpl();
+      // server/1d0k
+      controller.stopLazyImpl();
+    }
+    else if (controller.isIdleTimeout()) {
+      controller.stopLazyImpl();
+    }
+    else { /* active */
     }
   }
 }

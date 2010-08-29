@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import java.io.IOException;
 import java.util.Map;
@@ -40,10 +40,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import com.caucho.config.types.FileSetType;
-import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.Repository;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
+import com.caucho.server.deploy.RepositoryDependency;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
@@ -70,6 +70,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private String _baseRepositoryTag;
 
   private FileSetType _expandCleanupFileSet;
+  
+  private DeployTagItem _deployItem;
 
   // classloader for the manifest entries
   private DynamicClassLoader _manifestLoader;
@@ -219,6 +221,27 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
+   * Final calls for init.
+   */
+  @Override
+  protected void initEnd()
+  {
+    super.initEnd();
+    
+    DeployUpdateService deployService = DeployUpdateService.getCurrent();
+    if (deployService != null && getDeployTag() != null) {
+      deployService.addTag(getDeployTag());
+      
+      _deployItem = deployService.getTagItem(getDeployTag());
+    }
+  }
+  
+  protected String getDeployTag()
+  {
+    return null;
+  }
+
+  /**
    * Merges with the old controller.
    */
   @Override
@@ -253,6 +276,17 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       // XXX: better exception
       throw new RuntimeException(e);
     }
+  }
+  
+  @Override
+  protected void configureInstance(I deployInstance)
+    throws Exception
+  {
+    expandArchive();
+    
+    addManifestClassPath();
+    
+    super.configureInstance(deployInstance);
   }
 
   /**
@@ -579,7 +613,12 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     removeExpandDirectory(path, prefix);
   }
-
+  
+  public Throwable getConfigException()
+  {
+    return null;
+  }
+ 
   /**
    * Recursively remove all files in a directory.  Used for wars when
    * they change.
@@ -613,10 +652,42 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       path.remove();
     }
   }
+  
+  //
+  // state callbacks
+  //
+  
+  @Override
+  protected void onActive()
+  {
+    super.onActive();
+    
+    if (_deployItem != null && ! "error".equals(_deployItem.getState()))
+      _deployItem.toStart();
+  }
+  
+  @Override
+  protected void onError(Throwable e)
+  {
+    super.onError(e);
+    
+    if (_deployItem != null)
+      _deployItem.toError(e);
+  }
+  
+  @Override
+  protected void onStop()
+  {
+    super.onStop();
+    
+    if (_deployItem != null)
+      _deployItem.toStop();
+  }
 
   /**
    * Returns the hash code.
    */
+  @Override
   public int hashCode()
   {
     return getId().hashCode();
@@ -625,6 +696,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   /**
    * Returns equality.
    */
+  @Override
   public boolean equals(Object o)
   {
     // server/125g

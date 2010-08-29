@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,14 +39,14 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.cloud.deploy.DeployNetworkService;
-import com.caucho.cloud.deploy.DeployUpdateListener;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.loader.Environment;
+import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -78,7 +78,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   private Repository _repository;
   private String _repositoryTag;
   
-  private DeployNetworkService _deployService;
+  private DeployUpdateService _deployService;
   
   private String _entryNamePrefix = "";
 
@@ -123,7 +123,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
     _loader = Thread.currentThread().getContextClassLoader();
     
-    _deployService = DeployNetworkService.getCurrent();
+    _deployService = DeployUpdateService.getCurrent();
     
     if (_deployService != null)
       _deployService.addUpdateListener(this);
@@ -1109,7 +1109,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   public Throwable getConfigException(String name)
   {
-    DeployController<?> controller
+    ExpandDeployController<?> controller
       = getDeployContainer().findController(nameToEntryName(name));
 
     if (controller == null) {
@@ -1202,6 +1202,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Checks for updates.
    */
+  @Override
   public void handleAlarm(Alarm alarm)
   {
     if (isDestroyed())
@@ -1211,7 +1212,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       // XXX: tck, but no QA test
 
       // server/10ka
-      if ("automatic".equals(getRedeployMode()) && isActive())
+      if (DeployMode.AUTOMATIC.equals(getRedeployMode()) && isActive())
         request();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

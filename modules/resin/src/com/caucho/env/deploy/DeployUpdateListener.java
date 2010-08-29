@@ -27,29 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
-
-import com.caucho.vfs.Path;
+package com.caucho.env.deploy;
 
 /**
- * Deployment instance handling an environment.
+ * Listener for update events, which ask the deployment listeners to check
+ * the filesystem or repository for any changes.
  */
-public interface EnvironmentDeployInstance extends DeployInstance {
+public interface DeployUpdateListener {
   /**
-   * Sets the root.
+   * Notification of an update. If the tag is null, all
+   * tags are updated.
    */
-  public void setRootDirectory(Path root);
-
-  /**
-   * Initialization before any configuration
-   */
-  public void preConfigInit()
-    throws Exception;
-  
-  /**
-   * Initialize the instance.
-   */
-  public void init()
-    throws Exception;
-}  
-
+  public void onUpdate(String tag);
+}

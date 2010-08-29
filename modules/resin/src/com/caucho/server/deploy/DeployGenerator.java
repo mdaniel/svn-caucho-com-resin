@@ -37,6 +37,8 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.env.deploy.DeployControllerApi;
+import com.caucho.env.deploy.DeployMode;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;

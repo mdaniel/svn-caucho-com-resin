@@ -34,10 +34,10 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.el.EL;
+import com.caucho.env.deploy.DeployController;
+import com.caucho.env.deploy.DeployControllerAdmin;
+import com.caucho.env.deploy.EnvironmentDeployController;
 import com.caucho.management.server.HostMXBean;
-import com.caucho.server.deploy.DeployController;
-import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
@@ -490,6 +490,7 @@ public class HostController
   /**
    * Creates a new instance of the host object.
    */
+  @Override
   protected Host instantiateDeployInstance()
   {
     return new Host(_container, this, _hostName);
@@ -498,8 +499,9 @@ public class HostController
   /**
    * Creates the host.
    */
+  @Override
   protected void configureInstance(Host host)
-    throws Throwable
+    throws Exception
   {
     _hostAliases.clear();
     _hostAliases.addAll(_entryHostAliases);
@@ -525,6 +527,7 @@ public class HostController
     super.configureInstance(host);
   }
 
+  @Override
   protected void extendJMXContext(Map<String,String> context)
   {
     context.put("Host", getMBeanId());
@@ -533,6 +536,7 @@ public class HostController
   /**
    * Returns the appropriate log for debugging.
    */
+  @Override
   protected Logger getLog()
   {
     return log;
@@ -541,6 +545,7 @@ public class HostController
   /**
    * Returns equality.
    */
+  @Override
   public boolean equals(Object o)
   {
     if (! (o instanceof HostController))
@@ -554,6 +559,7 @@ public class HostController
   /**
    * Returns a printable view.
    */
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getName() + "]";

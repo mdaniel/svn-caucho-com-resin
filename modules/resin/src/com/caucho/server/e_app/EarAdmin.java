@@ -29,8 +29,8 @@
 
 package com.caucho.server.e_app;
 
+import com.caucho.env.deploy.DeployControllerAdmin;
 import com.caucho.management.server.EAppMXBean;
-import com.caucho.server.deploy.DeployControllerAdmin;
 
 public class EarAdmin
   extends DeployControllerAdmin<EarDeployController>

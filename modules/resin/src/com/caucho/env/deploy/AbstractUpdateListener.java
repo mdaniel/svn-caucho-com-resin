@@ -27,29 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.deploy;
+package com.caucho.env.deploy;
+
 
 /**
- * Exception during deployment of a tag.
+ * Interface for NetworkDeployService update listeners, used when tags contents
+ * are updated.
  */
-@SuppressWarnings("serial")
-public class DeployException extends RuntimeException {
-  public DeployException()
+public class AbstractUpdateListener implements DeployUpdateListener {
+  @Override
+  public void onUpdate(String tag)
   {
-  }
-  
-  public DeployException(String message)
-  {
-    super(message);
-  }
-  
-  public DeployException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
-  
-  public DeployException(Throwable cause)
-  {
-    super(cause);
   }
 }

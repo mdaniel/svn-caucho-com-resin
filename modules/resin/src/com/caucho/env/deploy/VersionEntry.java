@@ -27,16 +27,59 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.deploy;
+package com.caucho.env.deploy;
 
-/**
- * Listener for update events, which ask the deployment listeners to check
- * the filesystem or repository for any changes.
- */
-public interface DeployUpdateListener {
-  /**
-   * Notification of an update. If the tag is null, all
-   * tags are updated.
-   */
-  public void onUpdate(String tag);
+public class VersionEntry {
+  private final String _name;
+  private final String _contextPath;
+  private final String _baseContextPath;
+  private final String _sha1;
+  private final String _root;
+
+  VersionEntry(String name,
+               String contextPath,
+               String baseContextPath,
+               String sha1,
+               String root)
+  {
+    _name = name;
+    _contextPath = contextPath;
+    _baseContextPath = baseContextPath;
+    _sha1 = sha1;
+    _root = root;
+  }
+
+  public String getName()
+  {
+    return _name;
+  }
+
+  public String getContextPath()
+  {
+    return _contextPath;
+  }
+
+  public String getBaseContextPath()
+  {
+    return _baseContextPath;
+  }
+
+  public String getSha1()
+  {
+    return _sha1;
+  }
+
+  public String getRoot()
+  {
+    return _root;
+  }
+
+  @Override
+    public String toString()
+  {
+    return (getClass().getSimpleName()
+            + "[" + _contextPath
+            + "," + _baseContextPath
+            + "," + _root + "]");
+  }
 }

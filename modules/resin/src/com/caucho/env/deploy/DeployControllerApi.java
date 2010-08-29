@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import com.caucho.lifecycle.LifecycleListener;
 import com.caucho.lifecycle.LifecycleState;
@@ -91,11 +91,6 @@ public interface DeployControllerApi<I extends DeployInstance>
    * Force an instance restart from an admin command.
    */
   public void restart();
-
-  /**
-   * Deploy the controller from an admin command.
-   */
-  public void deploy();
 
   /**
    * Check for modification updates, generally from an admin command when

@@ -27,9 +27,10 @@
  * @author Sam
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import com.caucho.management.server.ArchiveDeployMXBean;
+import com.caucho.server.deploy.DeployGeneratorAdmin;
 import com.caucho.vfs.Path;
 
 abstract public class ExpandDeployGeneratorAdmin<C extends ExpandDeployGenerator>

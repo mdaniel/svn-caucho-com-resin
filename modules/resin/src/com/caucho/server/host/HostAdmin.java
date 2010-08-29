@@ -29,10 +29,10 @@
 
 package com.caucho.server.host;
 
+import com.caucho.env.deploy.DeployControllerAdmin;
+import com.caucho.env.deploy.DeployException;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.WebAppMXBean;
-import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.deploy.DeployException;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;

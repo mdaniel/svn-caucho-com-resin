@@ -29,8 +29,8 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.env.deploy.ExpandDeployGeneratorAdmin;
 import com.caucho.management.server.WebAppDeployMXBean;
-import com.caucho.server.deploy.ExpandDeployGeneratorAdmin;
 
 public class WebAppExpandDeployGeneratorAdmin
   extends ExpandDeployGeneratorAdmin<WebAppExpandDeployGenerator>

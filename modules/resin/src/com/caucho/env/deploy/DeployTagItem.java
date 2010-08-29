@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.deploy;
+package com.caucho.env.deploy;
 
 import com.caucho.lifecycle.Lifecycle;
 

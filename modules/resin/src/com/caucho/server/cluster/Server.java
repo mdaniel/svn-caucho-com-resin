@@ -47,7 +47,6 @@ import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.cloud.bam.BamService;
-import com.caucho.cloud.deploy.DeployNetworkService;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.cloud.network.NetworkListenService;
@@ -62,6 +61,7 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
+import com.caucho.env.deploy.DeployUpdateService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownService;
@@ -284,7 +284,7 @@ public class Server extends ProtocolDispatchServer
     Config.setProperty("server", new ServerVar(_selfServer), getClassLoader());
     Config.setProperty("cluster", new ClusterVar(), getClassLoader());
 
-    _resinSystem.addService(new DeployNetworkService());
+    _resinSystem.addService(new DeployUpdateService());
 
     // _selfServer.getServerProgram().configure(this);
   }

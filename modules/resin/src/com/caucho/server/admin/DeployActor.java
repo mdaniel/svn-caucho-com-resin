@@ -48,10 +48,10 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
-import com.caucho.cloud.deploy.DeployNetworkService;
-import com.caucho.cloud.deploy.DeployTagItem;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
+import com.caucho.env.deploy.DeployUpdateService;
+import com.caucho.env.deploy.DeployTagItem;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositoryTagEntry;
@@ -192,7 +192,7 @@ public class DeployActor extends SimpleActor
     
     String tag = query.getTag();
     
-    DeployNetworkService deploy = DeployNetworkService.getCurrent();
+    DeployUpdateService deploy = DeployUpdateService.getCurrent();
     DeployTagItem item = null;
     
     if (deploy != null) {

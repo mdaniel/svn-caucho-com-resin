@@ -27,62 +27,124 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import java.util.logging.Logger;
-import com.caucho.vfs.Dependency;
+
 
 /**
- * Abstract deployment entry.
+ * The abstract deployment instance represents a deployed service like
+ * a WebApp or a Host. The instrance works with the controller to handle
+ * dynamic deployment.
  */
-public interface DeployInstance extends Dependency {
+abstract public class AbstractDeployInstance implements DeployInstance {
+  private ClassLoader _classLoader;
+  private Throwable _configException;
+  
+  protected AbstractDeployInstance()
+  {
+    _classLoader = Thread.currentThread().getContextClassLoader();
+  }
+  
   /**
    * Returns the deployment class loader.
    */
-  public ClassLoader getClassLoader();
+  @Override
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
+  }
+  
+  /**
+   * The deployment class loader.
+   */
+  protected void setClassLoader(ClassLoader classLoader)
+  {
+    _classLoader = classLoader;
+  }
 
   /**
    * Returns true if the deployment is modified.
    */
-  public boolean isModified();
+  @Override
+  public boolean isModified()
+  {
+    return isModifiedNow();
+  }
 
   /**
    * Returns true if the deployment is modified, forcing a check.
    */
-  public boolean isModifiedNow();
+  @Override
+  public boolean isModifiedNow()
+  {
+    return false;
+  }
 
   /**
    * Logs the reason for modification
    */
-  public boolean logModified(Logger log);
+  @Override
+  public boolean logModified(Logger log)
+  {
+    return false;
+  }
 
   /**
    * Returns true if the deployment is modified for the timer redeploy.
    */
-  public boolean isDeployError();
+  @Override
+  public boolean isDeployError()
+  {
+    return false;
+  }
 
   /**
    * Returns true if the deployment can be removed.
    */
-  public boolean isDeployIdle();
+  @Override
+  public boolean isDeployIdle()
+  {
+    return false;
+  }
 
   /**
    * Sets the configuration exception.
    */
-  public void setConfigException(Throwable e);
+  @Override
+  public void setConfigException(Throwable e)
+  {
+    _configException = e;
+  }
 
   /**
    * Gets the configuration exception.
    */
-  public Throwable getConfigException();
+  @Override
+  public Throwable getConfigException()
+  {
+    return _configException;
+  }
   
   /**
    * Starts the deployment instance
    */
-  public void start();
+  @Override
+  public void start()
+  {
+  }
 
   /**
    * Destroys the deployment instance
    */
-  public void destroy();
+  @Override
+  public void destroy()
+  {
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

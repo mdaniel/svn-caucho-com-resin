@@ -27,15 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.deploy;
+package com.caucho.env.deploy;
+
+import com.caucho.vfs.Path;
 
 /**
- * Interface for NetworkDeployService update listeners, used when tags contents
- * are updated.
+ * Deployment instance handling an environment.
  */
-public class AbstractUpdateListener implements DeployUpdateListener {
-  @Override
-  public void onUpdate(String tag)
-  {
-  }
-}
+public interface EnvironmentDeployInstance extends DeployInstance {
+  /**
+   * Sets the root.
+   */
+  public void setRootDirectory(Path root);
+
+  /**
+   * Initialization before any configuration
+   */
+  public void preConfigInit()
+    throws Exception;
+  
+  /**
+   * Initialize the instance.
+   */
+  public void init()
+    throws Exception;
+}  
+

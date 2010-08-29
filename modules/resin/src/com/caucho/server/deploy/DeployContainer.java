@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.env.deploy.DeployControllerApi;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.make.CachedDependency;

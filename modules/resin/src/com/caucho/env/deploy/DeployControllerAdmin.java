@@ -27,15 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.lifecycle.LifecycleListener;
-import com.caucho.lifecycle.LifecycleNotification;
-import com.caucho.lifecycle.LifecycleState;
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.DeployControllerMXBean;
-import com.caucho.util.Alarm;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanNotificationInfo;
@@ -43,9 +39,13 @@ import javax.management.NotificationBroadcasterSupport;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.lifecycle.LifecycleListener;
+import com.caucho.lifecycle.LifecycleNotification;
+import com.caucho.lifecycle.LifecycleState;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.DeployControllerMXBean;
+import com.caucho.util.Alarm;
 
 /**
  * A deploy controller for an environment.

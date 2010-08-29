@@ -30,9 +30,9 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.deploy.VersionEntry;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
-import com.caucho.server.deploy.VersionEntry;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -84,11 +84,12 @@ public class WebAppVersioningController extends WebAppController {
     _baseController = baseController;
   }
 
-  @Override
+  /*
   public boolean isVersioning()
   {
     return true;
   }
+  */
 
   @Override
   public String getVersion()
@@ -144,6 +145,7 @@ public class WebAppVersioningController extends WebAppController {
     */
   }
 
+  @Override
   public boolean isModified()
   {
     if (_isModified)

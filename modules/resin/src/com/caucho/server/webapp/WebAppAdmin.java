@@ -32,10 +32,10 @@ package com.caucho.server.webapp;
 import java.util.Date;
 import java.util.Map;
 
+import com.caucho.env.deploy.DeployControllerAdmin;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.management.server.WebAppMXBean;
-import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.host.Host;
 import com.caucho.util.L10N;
 

@@ -31,11 +31,11 @@ package com.caucho.server.e_app;
 
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.manager.EjbManager;
+import com.caucho.env.deploy.EnvironmentDeployInstance;
 import com.caucho.inject.Module;
 import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
-import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.server.webapp.WebAppConfig;

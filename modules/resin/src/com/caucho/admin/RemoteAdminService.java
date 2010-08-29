@@ -36,8 +36,8 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
+import com.caucho.env.deploy.DeployMode;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.deploy.DeployMode;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.webapp.WebApp;

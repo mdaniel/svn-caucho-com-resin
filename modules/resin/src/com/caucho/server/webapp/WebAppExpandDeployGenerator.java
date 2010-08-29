@@ -36,14 +36,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.deploy.DeployMode;
+import com.caucho.env.deploy.ExpandDeployGenerator;
+import com.caucho.env.deploy.VersionEntry;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployMode;
-import com.caucho.server.deploy.ExpandDeployGenerator;
-import com.caucho.server.deploy.VersionEntry;
 import com.caucho.util.L10N;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;

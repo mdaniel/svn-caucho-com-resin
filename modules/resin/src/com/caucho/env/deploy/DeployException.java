@@ -24,35 +24,32 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
-package com.caucho.server.e_app;
+package com.caucho.env.deploy;
 
-import com.caucho.env.deploy.ExpandDeployGeneratorAdmin;
-import com.caucho.management.server.EarDeployMXBean;
-
-public class EarDeployGeneratorAdmin
-  extends ExpandDeployGeneratorAdmin<EarDeployGenerator>
-  implements EarDeployMXBean
-{
-  public EarDeployGeneratorAdmin(EarDeployGenerator earDeployGenerator)
+/**
+ * Exception during deployment of a tag.
+ */
+@SuppressWarnings("serial")
+public class DeployException extends RuntimeException {
+  public DeployException()
   {
-    super(earDeployGenerator);
   }
-
-  boolean register()
+  
+  public DeployException(String message)
   {
-    return registerSelf();
+    super(message);
   }
-
-  boolean unregister()
+  
+  public DeployException(String message, Throwable cause)
   {
-    return unregisterSelf();
+    super(message, cause);
   }
-
-  public String getURLPrefix()
+  
+  public DeployException(Throwable cause)
   {
-    return getDeployGenerator().getURLPrefix();
+    super(cause);
   }
 }

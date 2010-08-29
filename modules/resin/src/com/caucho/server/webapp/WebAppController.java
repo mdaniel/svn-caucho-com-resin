@@ -43,10 +43,10 @@ import com.caucho.config.Config;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.PathBuilder;
+import com.caucho.env.deploy.DeployControllerAdmin;
+import com.caucho.env.deploy.EnvironmentDeployController;
 import com.caucho.inject.Module;
 import com.caucho.server.deploy.DeployConfig;
-import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.host.Host;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
@@ -564,7 +564,6 @@ public class WebAppController
    */
   @Override
   protected void configureInstanceVariables(WebApp webApp)
-    throws Throwable
   {
     InjectManager beanManager = InjectManager.create();
     BeanBuilder<WebApp> factory = beanManager.createBeanFactory(WebApp.class);
@@ -646,37 +645,27 @@ public class WebAppController
 
   public long getLifetimeConnectionCount()
   {
-    synchronized (_statisticsLock) {
-      return _lifetimeConnectionCount;
-    }
+    return _lifetimeConnectionCount;
   }
 
   public long getLifetimeConnectionTime()
   {
-    synchronized (_statisticsLock) {
-      return _lifetimeConnectionTime;
-    }
+    return _lifetimeConnectionTime;
   }
 
   public long getLifetimeReadBytes()
   {
-    synchronized (_statisticsLock) {
-      return _lifetimeReadBytes;
-    }
+    return _lifetimeReadBytes;
   }
 
   public long getLifetimeWriteBytes()
   {
-    synchronized (_statisticsLock) {
-      return _lifetimeWriteBytes;
-    }
+    return _lifetimeWriteBytes;
   }
 
   public long getLifetimeClientDisconnectCount()
   {
-    synchronized (_statisticsLock) {
-      return _lifetimeClientDisconnectCount;
-    }
+    return _lifetimeClientDisconnectCount;
   }
 
   /**

@@ -30,11 +30,11 @@
 package com.caucho.server.e_app;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.deploy.ExpandDeployGenerator;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.inject.Module;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.ExpandDeployGenerator;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.vfs.Path;
 
