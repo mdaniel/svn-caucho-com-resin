@@ -645,9 +645,12 @@ public class EnterpriseApplication
       contextUrl = "/" + contextUrl;
 
     controller = findWebAppEntry(contextUrl);
+    
+    String id = "production/webapp/default" + contextUrl;
 
     if (controller == null) {
-      controller = new WebAppController(contextUrl,
+      controller = new WebAppController(id, 
+                                        contextUrl,
                                         contextUrl,
                                         path,
                                         _webAppContainer);

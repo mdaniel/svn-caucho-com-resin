@@ -59,12 +59,12 @@ import java.util.logging.Logger;
 public class HostContainer implements DispatchBuilder {
   private static final Logger log
     = Logger.getLogger(HostContainer.class.getName());
-  private static final L10N L = new L10N(HostContainer.class);
-
+  
+  // the owning servlet container
+  private final Server _server;
+  
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
-
-  private DispatchServer _dispatchServer;
 
   private WebApp _errorWebApp;
 
@@ -81,7 +81,7 @@ public class HostContainer implements DispatchBuilder {
 
   // The host deploy
   private DeployContainer<HostController> _hostDeploy
-    = new DeployContainer<HostController>();
+    = new DeployContainer<HostController>(HostController.class);
   
   // Cache of hosts
   private ConcurrentHashMap<String,HostController> _hostMap
@@ -107,11 +107,17 @@ public class HostContainer implements DispatchBuilder {
   /**
    * Creates the webApp with its environment loader.
    */
-  public HostContainer()
+  public HostContainer(Server server)
   {
-    _classLoader = EnvironmentClassLoader.create();
+    _server = server;
+    _classLoader = server.getClassLoader();
 
     _rootDir = Vfs.lookup();
+  }
+  
+  public String getStageTag()
+  {
+    return "production";
   }
 
   /**
@@ -120,14 +126,6 @@ public class HostContainer implements DispatchBuilder {
   public ClassLoader getClassLoader()
   {
     return _classLoader;
-  }
-
-  /**
-   * Gets the environment class loader.
-   */
-  public void setClassLoader(EnvironmentClassLoader classLoader)
-  {
-    _classLoader = classLoader;
   }
 
   /**
@@ -147,19 +145,11 @@ public class HostContainer implements DispatchBuilder {
   }
 
   /**
-   * Sets the dispatch server.
-   */
-  public void setDispatchServer(DispatchServer server)
-  {
-    _dispatchServer = server;
-  }
-
-  /**
    * Gets the dispatch server.
    */
-  public DispatchServer getDispatchServer()
+  public Server getServer()
   {
-    return _dispatchServer;
+    return _server;
   }
 
   /**
@@ -208,7 +198,9 @@ public class HostContainer implements DispatchBuilder {
    */
   public HostExpandDeployGenerator createHostDeploy()
   {
-    return new HostExpandDeployGenerator(_hostDeploy, this);
+    String id = getStageTag() + "/host";
+    
+    return new HostExpandDeployGenerator(id, _hostDeploy, this);
   }
 
   /**
@@ -285,7 +277,8 @@ public class HostContainer implements DispatchBuilder {
   public void clearCache()
   {
     _hostMap.clear();
-    _dispatchServer.clearCache();
+    
+    getServer().clearCache();
   }
 
   /**
@@ -337,7 +330,7 @@ public class HostContainer implements DispatchBuilder {
                                                       chain);
 
       if (rewriteChain != chain) {
-        Server server = (Server) _dispatchServer;
+        Server server = getServer();
         WebApp webApp = server.getDefaultWebApp();
         invocation.setWebApp(webApp);
 

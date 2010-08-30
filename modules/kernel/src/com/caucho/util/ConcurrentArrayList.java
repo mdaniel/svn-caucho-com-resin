@@ -29,8 +29,10 @@
 
 package com.caucho.util;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.AbstractCollection;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -39,11 +41,17 @@ import java.util.Iterator;
  * saves a fixed array to avoid extra allocations.
  */
 public class ConcurrentArrayList<E> extends AbstractCollection<E> {
-  private static final Object []NULL_ARRAY = new Object[0];
-  
+  private final Class<?> _type;
   private final ArrayList<E> _list = new ArrayList<E>();
   
-  private E []_array = (E[]) NULL_ARRAY;
+  private E []_array;
+  
+  public ConcurrentArrayList(Class<E> type)
+  {
+    _type = type;
+
+    updateArray();
+  }
   
   @Override
   public int size()
@@ -89,23 +97,18 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
     return -1;
   }
   
-  @SuppressWarnings("unchecked")
   @Override
   public boolean add(E value)
   {
     synchronized (_list) {
       _list.add(value);
       
-      E []array = (E []) new Object[_list.size()];
-      _list.toArray(array);
-      
-      _array = array;
+      updateArray();
       
       return true;
     }
   }
   
-  @SuppressWarnings("unchecked")
   public E addIfAbsent(E value)
   {
     synchronized (_list) {
@@ -115,17 +118,13 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
         return _list.get(index);
       
       _list.add(value);
-      
-      E []array = (E []) new Object[_list.size()];
-      _list.toArray(array);
-      
-      _array = array;
+
+      updateArray();
       
       return null;
     }
   }
   
-  @SuppressWarnings("unchecked")
   public <K> E addIfAbsent(E value, Match<E,K> match, K key)
   {
     synchronized (_list) {
@@ -141,16 +140,12 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
   }
   
   @Override
-  @SuppressWarnings("unchecked")
   public boolean remove(Object value)
   {
     synchronized (_list) {
       boolean result  = _list.remove(value);
-      
-      E []array = (E []) new Object[_list.size()];
-      _list.toArray(array);
-      
-      _array = array;
+
+      updateArray();
       
       return result;
     }
@@ -169,25 +164,60 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
       
       _list.remove(index);
 
-      E []array = (E []) new Object[_list.size()];
-      _list.toArray(array);
-      
-      _array = array;
+      updateArray();
       
       return value;
     }
   }
   
+  @Override
   public Iterator<E> iterator()
   {
     return new ArrayIterator<E>(_array);
   }
-  
+
+  @Override
   public E []toArray()
   {
     return _array;
   }
   
+  @SuppressWarnings("unchecked")
+  private void updateArray()
+  {
+    E []array = (E []) Array.newInstance(_type, _list.size());
+    _list.toArray(array);
+  
+    _array = array;
+  }
+  
+  private Class<?> calculateType()
+  {
+    return calculateType(getClass());
+  }
+  
+  public static Class<?> calculateType(Class<?> cl)
+  {
+    return calculateType(cl, cl);
+  }
+  
+  public static Class<?> calculateType(Class<?> topClass, Class<?> cl)
+  {
+    if (cl == null)
+      throw new UnsupportedOperationException(topClass.toString());
+      
+    Type type = cl.getGenericSuperclass();
+
+    if (type instanceof ParameterizedType) {
+      ParameterizedType pType = (ParameterizedType) type;
+
+      return (Class) pType.getActualTypeArguments()[0];
+    }
+    else {
+      return calculateType(topClass, cl.getSuperclass());
+    }
+  }
+
   public interface Match<E,K> {
     public boolean isMatch(E element, K key);
   }

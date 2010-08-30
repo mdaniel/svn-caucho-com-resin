@@ -59,16 +59,17 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   private final DeployListGenerator<C> _deployListGenerator
     = new DeployListGenerator<C>(this);
 
-  private final ConcurrentArrayList<C> _controllerList
-    = new ConcurrentArrayList<C>();
+  private final ConcurrentArrayList<C> _controllerList;
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
   /**
    * Creates the deploy container.
    */
-  public DeployContainer()
+  public DeployContainer(Class<C> type)
   {
+    _controllerList = new ConcurrentArrayList<C>(type);
+    
     setCheckInterval(Environment.getDependencyCheckInterval());
   }
   

@@ -570,6 +570,9 @@ abstract public class DeployController<I extends DeployInstance>
       thread.setContextClassLoader(_parentLoader);
       
       deployInstance = createDeployInstance();
+
+      if (deployInstance == null)
+        throw new NullPointerException(getClass().getName());
       
       loader = deployInstance.getClassLoader();
       thread.setContextClassLoader(loader);

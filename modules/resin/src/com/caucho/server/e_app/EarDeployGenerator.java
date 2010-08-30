@@ -57,10 +57,11 @@ public class EarDeployGenerator
   private ArrayList<EarConfig> _earDefaultList
     = new ArrayList<EarConfig>();
 
-  public EarDeployGenerator(DeployContainer<EarDeployController> deployContainer,
+  public EarDeployGenerator(String id,
+                            DeployContainer<EarDeployController> deployContainer,
                             WebAppContainer parentContainer)
   {
-    super(deployContainer, parentContainer.getRootDirectory());
+    super(id, deployContainer, parentContainer.getRootDirectory());
 
     try {
       setExpandPrefix("_ear_");
@@ -69,13 +70,13 @@ public class EarDeployGenerator
       throw new RuntimeException(e);
     }
 
-    setRepository(RepositoryService.getCurrentRepository());
-      
+    /*
     String hostName = parentContainer.getHostName();
     if ("".equals(hostName))
       hostName = "default";
     
     setRepositoryTag("ears/default/" + hostName);
+    */
 
     _parentContainer = parentContainer;
 
@@ -152,7 +153,7 @@ public class EarDeployGenerator
 
     Path rootDirectory;
 
-    String tag = getRepositoryTag() + "/" + name;
+    String tag = getId() + "/" + name;
 
     if (archivePath.isDirectory()) {
       rootDirectory = getExpandDirectory().lookup(archiveName);

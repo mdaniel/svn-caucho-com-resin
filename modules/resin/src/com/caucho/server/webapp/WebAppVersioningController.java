@@ -64,12 +64,14 @@ public class WebAppVersioningController extends WebAppController {
   private boolean _isModified = true;
   private AtomicBoolean _isUpdating = new AtomicBoolean();
 
-  public WebAppVersioningController(String versionContextPath,
+  public WebAppVersioningController(String id,
+                                    String versionContextPath,
                                     String baseContextPath,
                                     WebAppExpandDeployGenerator generator,
                                     WebAppContainer container)
   {
-    super(versionContextPath, baseContextPath, null, container);
+    super(id + "-0.0.0.versioning",
+          versionContextPath, baseContextPath, null, container);
 
     _generator = generator;
   }
@@ -108,12 +110,14 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   public WebApp instantiateDeployInstance()
   {
+    updateVersion();
+    
     WebAppController controller = _primaryController;
 
     if (controller != null)
-      return controller.getDeployInstance();
+      return controller.request();
     else
-      return null;
+      throw new NullPointerException(getClass().getName());
   }
 
   /**

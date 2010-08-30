@@ -333,7 +333,8 @@ public class JspCompiler implements EnvironmentBean {
         rootDirectory = getAppDir();
       
       WebAppController controller
-        = new WebAppController("",  "", rootDirectory, null);
+        = new WebAppController("compiler/webapp/default/ROOT",
+                               "", "", rootDirectory, null);
 
       _app = controller.getDeployInstance();
     }

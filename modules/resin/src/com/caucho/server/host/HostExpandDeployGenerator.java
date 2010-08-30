@@ -67,10 +67,11 @@ public class HostExpandDeployGenerator
   /**
    * Creates the new host deploy.
    */
-  public HostExpandDeployGenerator(DeployContainer<HostController> container,
+  public HostExpandDeployGenerator(String id,
+                                   DeployContainer<HostController> container,
                                    HostContainer hostContainer)
   {
-    super(container, hostContainer.getRootDirectory());
+    super(id, container, hostContainer.getRootDirectory());
     
     _container = hostContainer;
   }

@@ -111,7 +111,7 @@ public class WebAppContainer
   private DeployContainer<EarDeployController> _earDeploy;
   
   private final DeployContainer<WebAppController> _appDeploySpi
-    = new DeployContainer<WebAppController>();
+    = new DeployContainer<WebAppController>(WebAppController.class);
   private final DeployContainerApi<WebAppController> _appDeploy
     = _appDeploySpi;
   
@@ -136,15 +136,6 @@ public class WebAppContainer
 
   // lifecycle
   protected final Lifecycle _lifecycle;
-
-  /**
-   * Creates the webApp with its environment loader.
-   */
-  public WebAppContainer()
-  {
-    this((EnvironmentClassLoader) Thread.currentThread().getContextClassLoader(),
-         null);
-  }
 
   /**
    * Creates the webApp with its environment loader.
@@ -177,9 +168,7 @@ public class WebAppContainer
 
       // These need to be in the proper class loader so they can
       // register themselves with the environment
-      _earDeploy = new DeployContainer<EarDeployController>();
-
-      _warGenerator = new WebAppExpandDeployGenerator(_appDeploySpi, this);
+      _earDeploy = new DeployContainer<EarDeployController>(EarDeployController.class);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -233,6 +222,25 @@ public class WebAppContainer
   public Host getHost()
   {
     return null;
+  }
+  
+  public String getHostTag()
+  {
+    Host host = getHost();
+    
+    if (host != null) {
+      String hostTag = host.getId();
+      
+      if (! hostTag.isEmpty())
+        return hostTag;
+    }
+    
+    return "default";
+  }
+  
+  public String getStageTag()
+  {
+    return "production";
   }
 
   /**
@@ -446,7 +454,9 @@ public class WebAppContainer
    */
   public WebAppExpandDeployGenerator createWarDeploy()
   {
-    return new WebAppExpandDeployGenerator(_appDeploySpi, this);
+    String id = getStageTag() + "/webapp/" + getHostTag();
+    
+    return new WebAppExpandDeployGenerator(id, _appDeploySpi, this);
   }
 
   /**
@@ -602,7 +612,9 @@ public class WebAppContainer
   public EarDeployGenerator createEarDeploy()
     throws Exception
   {
-    return new EarDeployGenerator(_earDeploy, this);
+    String id = getStageTag() + "/entapp/" + getHostTag();
+    
+    return new EarDeployGenerator(id, _earDeploy, this);
   }
 
   /**
@@ -654,11 +666,11 @@ public class WebAppContainer
   public void setWarDir(Path warDir)
     throws ConfigException
   {
-    _warGenerator.setPath(warDir);
+    getWarGenerator().setPath(warDir);
 
     if (! _hasWarGenerator) {
       _hasWarGenerator = true;
-      addWebAppDeploy(_warGenerator);
+      addWebAppDeploy(getWarGenerator());
     }
   }
 
@@ -667,7 +679,7 @@ public class WebAppContainer
    */
   public Path getWarDir()
   {
-    return _warGenerator.getPath();
+    return getWarGenerator().getPath();
   }
 
   /**
@@ -675,7 +687,7 @@ public class WebAppContainer
    */
   public void setWarExpandDir(Path warDir)
   {
-    _warGenerator.setExpandDirectory(warDir);
+    getWarGenerator().setExpandDirectory(warDir);
   }
 
   /**
@@ -683,8 +695,23 @@ public class WebAppContainer
    */
   public Path getWarExpandDir()
   {
-    return _warGenerator.getExpandDirectory();
+    return getWarGenerator().getExpandDirectory();
   }
+  
+
+  private WebAppExpandDeployGenerator getWarGenerator()
+  {
+    if (_warGenerator == null) {
+      String id = getStageTag() + "/webapp/" + getHostTag();
+
+      _warGenerator = new WebAppExpandDeployGenerator(id,
+                                                      _appDeploySpi, 
+                                                      this);
+    }
+    
+    return _warGenerator;
+  }
+
 
   /**
    * Init the container.

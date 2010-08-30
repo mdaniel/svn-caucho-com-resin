@@ -268,9 +268,7 @@ public class Server extends ProtocolDispatchServer
   {
     _cdiManager = InjectManager.create();
     
-    _hostContainer = new HostContainer();
-    _hostContainer.setClassLoader(getClassLoader());
-    _hostContainer.setDispatchServer(this);
+    _hostContainer = new HostContainer(this);
 
     _alarm = new Alarm(this);
     

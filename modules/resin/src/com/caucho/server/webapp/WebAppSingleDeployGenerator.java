@@ -216,7 +216,10 @@ public class WebAppSingleDeployGenerator
                                               _container.getDocumentDirectory());
     }
     
-    _controller = new WebAppController(_urlPrefix, _urlPrefix,
+    String id = "production/webapp/default" + _urlPrefix;
+    
+    _controller = new WebAppController(id,
+                                       _urlPrefix, _urlPrefix,
                                        _rootDirectory, _container);
 
     _controller.setArchivePath(_archivePath);
@@ -258,7 +261,9 @@ public class WebAppSingleDeployGenerator
     if (name.equals(_controller.getContextPath())) {
       WebAppController webApp;
       
-      webApp = new WebAppController(_urlPrefix, _urlPrefix,
+      String id = "production/webapp/default/" + name;
+      
+      webApp = new WebAppController(id, _urlPrefix, _urlPrefix,
                                     _rootDirectory, _container);
 
       webApp.setArchivePath(_controller.getArchivePath());

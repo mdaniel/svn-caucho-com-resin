@@ -77,8 +77,6 @@ public class WebAppController
   private final String _baseContextPath;
   private String _version = "";
   
-  private final String _deployTagName;
-
   // true if the versioned web-app is an alias for the base web-app
   private boolean _isVersionAlias;
 
@@ -110,15 +108,16 @@ public class WebAppController
 
   public WebAppController()
   {
-    this("/", "/", null, null);
+    this("production/webapp/default/ROOT", "/", "/", null, null);
   }
 
-  public WebAppController(String contextPath,
+  public WebAppController(String id,
+                          String contextPath,
                           String baseContextPath,
                           Path rootDirectory,
                           WebAppContainer container)
   {
-    super(contextPath, rootDirectory);
+    super(id, rootDirectory);
 
     _container = container;
 
@@ -126,22 +125,6 @@ public class WebAppController
     _baseContextPath = baseContextPath;
 
     _contextPath = contextPath;
-    
-    String hostName;
-    
-    if (container != null)
-      hostName = container.getHostName();
-    else
-      hostName = "default";
-    
-    String webAppName;
-    
-    if ("".equals(_versionContextPath))
-      webAppName = "/default";
-    else
-      webAppName = _versionContextPath;
-    
-    _deployTagName = "WebApp/" + hostName + webAppName;
   }
 
   /**
@@ -201,14 +184,6 @@ public class WebAppController
     }
 
     return _contextPath;
-  }
-  
-  /**
-   * Returns the deploy tag
-   */
-  public String getDeployTag()
-  {
-    return _deployTagName;
   }
 
   /**
@@ -471,7 +446,8 @@ public class WebAppController
 
         //  The contextPath comes from current web-app
         WebAppController mergedController
-          = new WebAppController(getContextPath(),
+          = new WebAppController(getId(),
+                                 getContextPath(),
                                  getBaseContextPath(),
                                  getRootDirectory(),
                                  _container);

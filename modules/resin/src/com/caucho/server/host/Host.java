@@ -29,14 +29,20 @@
 
 package com.caucho.server.host;
 
-import com.caucho.bam.*;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+import com.caucho.bam.Broker;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SingletonBean;
 import com.caucho.env.deploy.EnvironmentDeployInstance;
-import com.caucho.hemp.broker.*;
+import com.caucho.hemp.broker.HempBroker;
+import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -44,22 +50,13 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.network.listen.SocketLinkListener;
-import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.resin.*;
+import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.WebAppContainer;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
-
-import java.net.*;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.*;
 
 /**
  * Resin's virtual host implementation.
@@ -69,15 +66,14 @@ public class Host extends WebAppContainer
              EnvironmentDeployInstance
 {
   private static final Logger log = Logger.getLogger(Host.class.getName());
-  private static final L10N L = new L10N(Host.class);
-
+  
   private static EnvironmentLocal<Host> _hostLocal
     = new EnvironmentLocal<Host>("caucho.host");
 
-  private HostContainer _parent;
+  private final HostContainer _parent;
 
   // The Host entry
-  private HostController _controller;
+  private final HostController _controller;
 
   // The canonical host name.  The host name may include the port.
   private String _hostName = "";
@@ -99,7 +95,6 @@ public class Host extends WebAppContainer
 
   private Throwable _configException;
 
-  private boolean _isRootDirSet;
   private boolean _isDocDirSet;
 
   private String _configETag = null;
@@ -112,10 +107,13 @@ public class Host extends WebAppContainer
     super(EnvironmentClassLoader.create("host:" + controller.getName()),
           new Lifecycle(log, "Host[" + hostName + "]", Level.INFO));
 
+    _parent = parent;
+    _controller = controller;
+    
+    if (parent == null)
+      throw new NullPointerException();
+    
     try {
-      _controller = controller;
-
-      setParent(parent);
       setHostName(hostName);
 
       _hostLocal.set(this, getClassLoader());
@@ -201,6 +199,12 @@ public class Host extends WebAppContainer
     return this;
   }
 
+  @Override
+  public String getHostTag()
+  {
+    return _serverName;
+  }
+  
   /**
    * Returns the secure host name.  Used for redirects.
    */
@@ -346,21 +350,6 @@ public class Host extends WebAppContainer
   }
 
   /**
-   * Sets the parent container.
-   */
-  private void setParent(HostContainer parent)
-  {
-    _parent = parent;
-
-    setDispatchServer(parent.getDispatchServer());
-
-    if (! _isRootDirSet) {
-      setRootDirectory(parent.getRootDirectory());
-      _isRootDirSet = false;
-    }
-  }
-
-  /**
    * Gets the environment class loader.
    */
   public EnvironmentClassLoader getEnvironmentClassLoader()
@@ -371,10 +360,10 @@ public class Host extends WebAppContainer
   /**
    * Sets the root dir.
    */
+  @Override
   public void setRootDirectory(Path rootDir)
   {
     super.setRootDirectory(rootDir);
-    _isRootDirSet = true;
 
     if (! _isDocDirSet) {
       setDocumentDirectory(rootDir);
@@ -418,14 +407,7 @@ public class Host extends WebAppContainer
    */
   public Server getServer()
   {
-    if (_parent != null) {
-      DispatchServer server = _parent.getDispatchServer();
-
-      if (server instanceof Server)
-        return (Server) server;
-    }
-
-    return null;
+    return _parent.getServer();
   }
 
   /**

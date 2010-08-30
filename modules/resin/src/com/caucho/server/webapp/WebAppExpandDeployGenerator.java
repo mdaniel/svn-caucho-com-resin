@@ -82,10 +82,11 @@ public class WebAppExpandDeployGenerator
   /**
    * Creates the new expand deploy.
    */
-  public WebAppExpandDeployGenerator(DeployContainer<WebAppController> container,
+  public WebAppExpandDeployGenerator(String id,
+                                     DeployContainer<WebAppController> container,
                                      WebAppContainer webAppContainer)
   {
-    super(container, webAppContainer.getRootDirectory());
+    super(id, container, webAppContainer.getRootDirectory());
 
     _container = webAppContainer;
 
@@ -97,21 +98,20 @@ public class WebAppExpandDeployGenerator
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    if (RepositoryService.getCurrent() != null)
-      setRepository(RepositoryService.getCurrentRepository());
-
+    /*
     String hostName = webAppContainer.getHostName();
     if ("".equals(hostName))
       hostName = "default";
 
-    String stage = "default";
+    String stage = "production";
 
     Server server = Server.getCurrent();
 
     if (server != null)
       stage = server.getStage();
 
-    setRepositoryTag("wars/" + stage + "/" + hostName);
+    setRepositoryTag(stage + "/webapp/" + stage + "/" + hostName);
+    */
 
     setEntryNamePrefix("/");
 
@@ -269,12 +269,15 @@ public class WebAppExpandDeployGenerator
     Path jarPath = buildJarPath(segmentName);
 
     WebAppVersioningController baseController = null;
+    
+    String id = "production/webapp/default" + segmentName;
 
     if (contextPath.equals(baseContextPath)
         && (getRepository() != null
             && getRepository().getTagContentHash(baseRepositoryTag) != null)) {
       baseController
-        = new WebAppVersioningController(contextPath,
+        = new WebAppVersioningController(id,
+                                         contextPath,
                                          baseContextPath,
                                          this,
                                          _container);
@@ -289,7 +292,8 @@ public class WebAppExpandDeployGenerator
     }
 
     WebAppController controller
-      = new WebAppController(contextPath, baseContextPath,
+      = new WebAppController(id, 
+                             contextPath, baseContextPath,
                              rootDirectory, _container);
 
     controller.setArchivePath(jarPath);
@@ -399,7 +403,7 @@ public class WebAppExpandDeployGenerator
    */
   private String buildRepositoryTag(String segmentName)
   {
-    return getRepositoryTag() + segmentName;
+    return getId() + segmentName;
   }
 
   private Path buildRootDirectory(String segmentName)
@@ -478,8 +482,11 @@ public class WebAppExpandDeployGenerator
     if (versionEntry == null) {
       throw new ConfigException(L.l("Versioned web-app '{0}' is not valid because it does not have a concrete version.  Check that the web-app is properly configured.", name));
     }
+    
+    String id = "production/webapp/default/" + segmentName;
 
-    return new WebAppVersioningController(segmentName,
+    return new WebAppVersioningController(id,
+                                          segmentName,
                                           baseContextPath,
                                           this, _container);
 
@@ -522,7 +529,7 @@ public class WebAppExpandDeployGenerator
       rootDirectory = getExpandDirectory().lookup("./" + expandName);
     }
 
-    String versionTag = getRepositoryTag() + "/" + segmentName;
+    String versionTag = getId() + "/" + segmentName;
 
     if (! rootDirectory.isDirectory()
         && (jarPath == null || ! jarPath.isFile())
@@ -539,13 +546,16 @@ public class WebAppExpandDeployGenerator
     }
 
     String versionContextPath = versionName;
+    
+    String id = "production/webapp/deploy/" + segmentName;
 
     // server/019b
     if ("/ROOT".equals(versionContextPath))
       versionContextPath = "";
 
     WebAppController controller
-      = new WebAppController(versionContextPath, contextPath,
+      = new WebAppController(id,
+                             versionContextPath, contextPath,
                              rootDirectory, _container);
 
     controller.setWarName(versionName.substring(1));

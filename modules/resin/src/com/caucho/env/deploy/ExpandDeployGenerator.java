@@ -43,7 +43,9 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.Repository;
+import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositoryTagEntry;
+import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.loader.Environment;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
@@ -60,7 +62,7 @@ import com.caucho.vfs.Path;
  */
 abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   extends DeployGenerator<E>
-  implements AlarmListener, DeployUpdateListener
+  implements AlarmListener, DeployUpdateListener, RepositoryTagListener
 {
   private static final Logger log
     = Logger.getLogger(ExpandDeployGenerator.class.getName());
@@ -68,6 +70,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
   private static final long MIN_CRON_INTERVAL = 5000L;
 
+  private final String _id;
+  
   private Path _path; // default path
   private ClassLoader _loader;
 
@@ -75,10 +79,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   private Path _archiveDirectory;
   private Path _expandDirectory;
 
-  private Repository _repository;
-  private String _repositoryTag;
+  private final Repository _repository;
   
-  private DeployUpdateService _deployService;
+  private final DeployUpdateService _deployService;
   
   private String _entryNamePrefix = "";
 
@@ -108,10 +111,13 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Creates the deploy.
    */
-  public ExpandDeployGenerator(DeployContainer<E> container,
+  public ExpandDeployGenerator(String id,
+                               DeployContainer<E> container,
                                Path containerRootDirectory)
   {
     super(container);
+    
+    _id = id;
 
     _containerRootDirectory = containerRootDirectory;
 
@@ -123,10 +129,16 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
     _loader = Thread.currentThread().getContextClassLoader();
     
-    _deployService = DeployUpdateService.getCurrent();
+    _deployService = DeployUpdateService.create();
+    _deployService.addUpdateListener(this);
     
-    if (_deployService != null)
-      _deployService.addUpdateListener(this);
+    _repository = RepositoryService.getCurrentRepository();
+    _repository.addListener(id, this);
+  }
+  
+  public String getId()
+  {
+    return _id;
   }
 
   Path getContainerRootDirectory()
@@ -319,33 +331,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * The repository
    */
-  public void setRepository(Repository repository)
-  {
-    _repository = repository;
-  }
-
-  /**
-   * The repository
-   */
   public Repository getRepository()
   {
     return _repository;
-  }
-
-  /**
-   * The repository tag
-   */
-  public void setRepositoryTag(String repositoryTag)
-  {
-    _repositoryTag = repositoryTag;
-  }
-
-  /**
-   * The repository tag
-   */
-  public String getRepositoryTag()
-  {
-    return _repositoryTag;
   }
 
   public void setEntryNamePrefix(String entryNamePrefix)
@@ -397,6 +385,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Returns the log.
    */
+  @Override
   protected Logger getLog()
   {
     return log;
@@ -501,6 +490,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Returns the deployed keys.
    */
+  @Override
   protected void fillDeployedKeys(Set<String> keys)
   {
     if (isModified()) {
@@ -618,6 +608,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Finds the matching entry.
    */
+  @Override
   public E generateController(String name)
   {
     request();
@@ -675,16 +666,14 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     
     digest = Crc64.generate(digest, expandDigest);
     
-    if (_repository != null && _repositoryTag != null) {
-      digest = calculateRepositoryDigest(digest);
-    }
+    digest = calculateRepositoryDigest(digest);
 
     return digest;
   }
 
   private long calculateRepositoryDigest(long digest)
   {
-    String prefix = getRepositoryTag() + "/";
+    String prefix = getId() + "/";
     
     ArrayList<String> tags = new ArrayList<String>();
     Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
@@ -853,10 +842,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   private void addRepositoryEntryNames(TreeSet<String> entryNames)
     throws IOException
   {
-    if (_repository == null || getRepositoryTag() == null)
-      return;
-    
-    String prefix = getRepositoryTag() + "/";
+    String prefix = getId() + "/";
     
     Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
 
@@ -890,10 +876,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   private TreeMap<String,VersionEntry> buildVersionMap()
   {
-    if (_repository == null || getRepositoryTag() == null)
-      return null;
-    
-    String prefix = getRepositoryTag() + "/";
+    String prefix = getId() + "/";
     
     Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
 
@@ -1198,6 +1181,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     return true;
   }
 
+  @Override
+  public void onTagChange(String tag)
+  {
+    alarm();
+  }
+
 
   /**
    * Checks for updates.
@@ -1209,16 +1198,20 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       return;
     
     try {
-      // XXX: tck, but no QA test
-
-      // server/10ka
-      if (DeployMode.AUTOMATIC.equals(getRedeployMode()) && isActive())
-        request();
+      alarm();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       _alarm.queue(_cronInterval);
     }
+  }
+  
+  private void alarm()
+  {
+    // XXX: tck, but no QA test
+    // server/10ka
+    if (DeployMode.AUTOMATIC.equals(getRedeployMode()) && isActive())
+      request();
   }
 
   /**

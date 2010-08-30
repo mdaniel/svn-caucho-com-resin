@@ -44,12 +44,10 @@ import com.caucho.env.git.GitCommitJar;
 import com.caucho.env.git.GitService;
 import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
-import com.caucho.server.admin.DeploySendQuery;
 import com.caucho.server.admin.GitJarStreamSource;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.TempOutputStream;
 
 abstract public class AbstractRepository implements Repository
@@ -363,7 +361,7 @@ abstract public class AbstractRepository implements Repository
       RepositoryTagEntry newEntry = entry.getValue();
       
       RepositoryTagEntry oldEntry = oldTagMap.get(tag);
-
+      
       if (oldEntry == null) {
         onTagChange(tag);
       }
