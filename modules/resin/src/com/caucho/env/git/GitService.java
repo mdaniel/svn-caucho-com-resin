@@ -308,7 +308,7 @@ public class GitService extends AbstractResinService {
     throws IOException
   {
     GitObjectStream is = open(sha1);
-    
+
     try {
       if (GitType.TREE == is.getType()) {
         GitTree tree = is.parseTree();

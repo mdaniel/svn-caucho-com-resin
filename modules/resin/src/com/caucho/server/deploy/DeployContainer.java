@@ -54,7 +54,7 @@ import com.caucho.vfs.Dependency;
  */
 public class DeployContainer<C extends DeployControllerApi<?>>
   extends CachedDependency
-  implements Dependency
+  implements DeployContainerApi<C>, Dependency
 {
   private final DeployListGenerator<C> _deployListGenerator
     = new DeployListGenerator<C>(this);

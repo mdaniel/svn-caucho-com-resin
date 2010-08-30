@@ -239,7 +239,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the start time of the entry.
    */
-  public long getStartTime()
+  final public long getStartTime()
   {
     return _startTime;
   }
@@ -336,7 +336,8 @@ abstract public class DeployController<I extends DeployInstance>
   
   //
   // dependency/modified
-
+  //
+  
   /**
    * Returns true if the entry is modified.
    */
@@ -368,7 +369,7 @@ abstract public class DeployController<I extends DeployInstance>
    * Log the reason for modification
    */
   @Override
-  public boolean logModified(Logger log)
+  final public boolean logModified(Logger log)
   {
     if (controllerLogModified(log)) {
       return true;
@@ -537,7 +538,7 @@ abstract public class DeployController<I extends DeployInstance>
    *
    * @return the new instance
    */
-  I restartImpl()
+  final I restartImpl()
   {
     if (! _lifecycle.isStopped() && ! _lifecycle.isInit())
       stopImpl();
@@ -630,7 +631,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Stops the current instance, putting it in the lazy state.
    */
-  void stopLazyImpl()
+  final void stopLazyImpl()
   {
     if (! _lifecycle.isIdle()) {
       stopImpl();
@@ -642,7 +643,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Stops the current instance.
    */
-  void stopImpl()
+  final void stopImpl()
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

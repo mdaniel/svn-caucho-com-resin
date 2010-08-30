@@ -362,7 +362,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       
       props.put("archive-digest", hash);
       
-      _repository.putTagContent(_autoDeployTag, 
+      _repository.putTagArchive(_autoDeployTag, 
                                 archivePath,
                                 ".war auto-update", 
                                 props);

@@ -93,11 +93,13 @@ abstract public class AbstractDeployInstance implements DeployInstance {
   /**
    * Returns true if the deployment is modified for the timer redeploy.
    */
+  /*
   @Override
   public boolean isDeployError()
   {
     return false;
   }
+  */
 
   /**
    * Returns true if the deployment can be removed.

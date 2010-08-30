@@ -57,11 +57,6 @@ public interface DeployInstance extends Dependency {
   public boolean logModified(Logger log);
 
   /**
-   * Returns true if the deployment is modified for the timer redeploy.
-   */
-  public boolean isDeployError();
-
-  /**
    * Returns true if the deployment can be removed.
    */
   public boolean isDeployIdle();

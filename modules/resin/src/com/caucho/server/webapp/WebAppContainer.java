@@ -29,6 +29,18 @@
 
 package com.caucho.server.webapp;
 
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
@@ -37,10 +49,11 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.make.AlwaysModified;
-import com.caucho.rewrite.RewriteFilter;
 import com.caucho.rewrite.DispatchRule;
+import com.caucho.rewrite.RewriteFilter;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployContainerApi;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.dispatch.DispatchBuilder;
 import com.caucho.server.dispatch.DispatchServer;
@@ -55,24 +68,13 @@ import com.caucho.server.e_app.EarSingleDeployGenerator;
 import com.caucho.server.host.Host;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
+import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.FilterChain;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Resin's webApp implementation.
@@ -107,7 +109,12 @@ public class WebAppContainer
     = new ArrayList<EarConfig>();
 
   private DeployContainer<EarDeployController> _earDeploy;
-  private DeployContainer<WebAppController> _appDeploy;
+  
+  private final DeployContainer<WebAppController> _appDeploySpi
+    = new DeployContainer<WebAppController>();
+  private final DeployContainerApi<WebAppController> _appDeploy
+    = _appDeploySpi;
+  
   private WebAppExpandDeployGenerator _warGenerator;
 
   private boolean _hasWarGenerator;
@@ -172,9 +179,7 @@ public class WebAppContainer
       // register themselves with the environment
       _earDeploy = new DeployContainer<EarDeployController>();
 
-      _appDeploy = new DeployContainer<WebAppController>();
-
-      _warGenerator = new WebAppExpandDeployGenerator(_appDeploy, this);
+      _warGenerator = new WebAppExpandDeployGenerator(_appDeploySpi, this);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -322,7 +327,7 @@ public class WebAppContainer
    */
   public DeployContainer<WebAppController> getWebAppGenerator()
   {
-    return _appDeploy;
+    return _appDeploySpi;
   }
 
   /**
@@ -384,7 +389,7 @@ public class WebAppContainer
   {
     if (config.getURLRegexp() != null) {
       DeployGenerator<WebAppController> deploy
-        = new WebAppRegexpDeployGenerator(_appDeploy, this, config);
+        = new WebAppRegexpDeployGenerator(_appDeploySpi, this, config);
       _appDeploy.add(deploy);
       return;
     }
@@ -401,7 +406,7 @@ public class WebAppContainer
     */
 
     WebAppSingleDeployGenerator deploy
-      = new WebAppSingleDeployGenerator(_appDeploy, this, config);
+      = new WebAppSingleDeployGenerator(_appDeploySpi, this, config);
 
     deploy.deploy();
 
@@ -441,7 +446,7 @@ public class WebAppContainer
    */
   public WebAppExpandDeployGenerator createWarDeploy()
   {
-    return new WebAppExpandDeployGenerator(_appDeploy, this);
+    return new WebAppExpandDeployGenerator(_appDeploySpi, this);
   }
 
   /**
@@ -610,7 +615,7 @@ public class WebAppContainer
 
     // server/26cc - _appDeploy must be added first, because the
     // _earDeploy addition will automaticall register itself
-    _appDeploy.add(new WebAppEarDeployGenerator(_appDeploy, this, earDeploy));
+    _appDeploy.add(new WebAppEarDeployGenerator(_appDeploySpi, this, earDeploy));
 
     /*
     _earDeploy.add(earDeploy);

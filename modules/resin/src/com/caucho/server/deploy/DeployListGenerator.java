@@ -76,6 +76,7 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
   /**
    * Returns true if the deployment has modified.
    */
+  @Override
   public boolean isModified()
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
@@ -89,6 +90,7 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
   /**
    * Logs the modified location.
    */
+  @Override
   public boolean logModified(Logger log)
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
@@ -104,6 +106,7 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
    *
    * XXX:
    */
+  @Override
   public void request()
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
@@ -114,6 +117,7 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
   /**
    * Force an update
    */
+  @Override
   public void update()
   {
     for (int i = 0; i < _generatorList.size(); i++)
@@ -123,6 +127,7 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
   /**
    * Returns the deployed keys.
    */
+  @Override
   public void fillDeployedKeys(Set<String> keys)
   {
     for (int i = 0; i < _generatorList.size(); i++) {
@@ -133,6 +138,7 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
   /**
    * Generates the controller matching the key string.
    */
+  @Override
   protected E generateController(String key)
   {
     for (int i = 0; i < _generatorList.size(); i++) {
@@ -158,6 +164,7 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
   /**
    * Merges with other matching entries.
    */
+  @Override
   protected E mergeController(E controller, String key)
   {
     for (int i = 0; i < _generatorList.size(); i++) {
@@ -217,6 +224,6 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
 
   public String toString()
   {
-    return "DeployListGenerator[" + _generatorList + "]";
+    return getClass().getSimpleName() + "[" + _generatorList + "]";
   }
 }

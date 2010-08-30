@@ -34,6 +34,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.make.AlwaysModified;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
+import com.caucho.server.deploy.DeployContainerApi;
 import com.caucho.server.dispatch.DispatchBuilder;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ErrorFilterChain;
