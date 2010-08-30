@@ -167,17 +167,22 @@ public class JspDirectiveAttribute extends JspNode {
     TldAttribute attr = new TldAttribute();
     attr.setName(_name);
 
-    if (_type != null) {
+    if (_type == null) {
+      attr.setType(String.class);
+    }
+    else {
       Class type = loadClass(_type);
-      
+
       if (type == null)
         throw error(L.l("type '{0}' is an unknown class for tag attribute {1}.",
                         _type, _name));
-      
+
       if (type.isPrimitive())
-        throw error(L.l("attribute type '{0}' cannot be a Java primitive for {1}.",
-                        _type, _name));
-      
+        throw error(L.l(
+          "attribute type '{0}' cannot be a Java primitive for {1}.",
+          _type,
+          _name));
+
       attr.setType(type);
     }
 
