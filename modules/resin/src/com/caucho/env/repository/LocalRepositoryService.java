@@ -67,6 +67,12 @@ public class LocalRepositoryService
   }
   
   @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY;
+  }
+  
+  @Override
   public void start()
   {
     _fileRepository.start();

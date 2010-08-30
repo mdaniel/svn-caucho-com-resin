@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import com.caucho.env.git.GitCommit;
 import com.caucho.env.git.GitCommitJar;
+import com.caucho.env.git.GitService;
 import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
 import com.caucho.server.admin.DeploySendQuery;
@@ -49,6 +50,7 @@ import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
+import com.caucho.vfs.TempOutputStream;
 
 abstract public class AbstractRepository implements Repository
 {
@@ -565,7 +567,12 @@ abstract public class AbstractRepository implements Repository
       try {
         is = path.openRead();
         
-        return addBlob(is, length);
+        String hash = addBlob(is, length);
+        
+        if (hash == null)
+          throw new NullPointerException();
+        
+        return hash;
       } finally {
         IoUtil.close(is);
       }
@@ -581,7 +588,12 @@ abstract public class AbstractRepository implements Repository
         tree.addEntry(fileName, 775, subHash);
       }
       
-      return addTree(tree);
+      String hash = addTree(tree);
+      
+      if (hash == null)
+        throw new NullPointerException();
+      
+      return hash;
     }
   }
 
@@ -630,8 +642,19 @@ abstract public class AbstractRepository implements Repository
    * Adds a stream to the repository.
    */
   @Override
-  abstract public String addBlob(InputStream is)
-    throws IOException;
+  public String addBlob(InputStream is, long length)
+    throws IOException
+  {
+    String type = "blob";
+
+    TempOutputStream os = new TempOutputStream();
+
+    String hash = GitService.writeData(os, type, is, length);
+
+    writeRawGitFile(hash, os.openInputStream());
+    
+    return hash;
+  }
 
   /**
    * Opens a stream to a git blob
@@ -651,8 +674,30 @@ abstract public class AbstractRepository implements Repository
    * Adds a git tree to the repository
    */
   @Override
-  abstract public String addTree(GitTree tree)
-    throws IOException;
+  public String addTree(GitTree tree)
+    throws IOException
+  {
+    TempOutputStream treeOut = new TempOutputStream();
+
+    tree.toData(treeOut);
+    
+    int treeLength = treeOut.getLength();
+    
+    InputStream is = treeOut.openRead();
+    
+    try {
+      TempOutputStream os = new TempOutputStream();
+      String type = "tree";
+
+      String contentHash = GitService.writeData(os, type, is, treeLength);
+
+      writeRawGitFile(contentHash, os.openInputStream());
+      
+      return contentHash;
+    } finally {
+      is.close();
+    }
+  }
 
   /**
    * Reads a git commit from the repository

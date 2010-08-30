@@ -146,9 +146,12 @@ public class FileRepository extends AbstractRepository
    * Returns true if the file exists.
    */
   @Override
-  public boolean exists(String sha1)
+  public boolean exists(String hash)
   {
-    return _git.contains(sha1);
+    if (hash == null)
+      throw new NullPointerException();
+    
+    return _git.contains(hash);
   }
 
   /**

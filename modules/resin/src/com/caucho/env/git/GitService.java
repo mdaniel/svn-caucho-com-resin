@@ -370,10 +370,10 @@ public class GitService extends AbstractResinService {
     }
   }
 
-  public boolean contains(String sha1)
+  public boolean contains(String hash)
   {
-    String prefix = sha1.substring(0, 2);
-    String suffix = sha1.substring(2);
+    String prefix = hash.substring(0, 2);
+    String suffix = hash.substring(2);
 
     Path path = _root.lookup("objects").lookup(prefix).lookup(suffix);
 
@@ -659,8 +659,8 @@ public class GitService extends AbstractResinService {
     }
   }
 
-  private String writeData(OutputStream os, String type,
-                           InputStream is, long length)
+  public static String writeData(OutputStream os, String type,
+                                 InputStream is, long length)
     throws IOException
   {
     TempBuffer buf = TempBuffer.allocate();

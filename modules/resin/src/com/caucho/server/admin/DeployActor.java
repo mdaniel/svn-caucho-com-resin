@@ -264,6 +264,9 @@ public class DeployActor extends SimpleActor
   {
     String tagName = query.getTag();
     String contentHash = query.getHex();
+    
+    if (contentHash == null)
+      throw new NullPointerException();
 
     String server = "default";
     
