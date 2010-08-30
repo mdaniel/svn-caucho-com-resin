@@ -38,6 +38,7 @@ import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * Deployment service for detecting changes in a controller, managed
@@ -46,6 +47,8 @@ import com.caucho.inject.Module;
 @Module
 public class DeployUpdateService extends AbstractResinService
 {
+  private static final L10N L = new L10N(DeployUpdateService.class);
+  
   public static final int START_PRIORITY
     = NetworkClusterService.START_PRIORITY_CLUSTER_SERVICE;
   
@@ -70,6 +73,30 @@ public class DeployUpdateService extends AbstractResinService
     else
       return null;
   }
+  
+  public static DeployUpdateService create()
+  {
+    ResinSystem system = ResinSystem.getCurrent();
+    
+    if (system == null) {
+      throw new IllegalStateException(L.l("{0} requires an active {1}",
+                                          DeployUpdateService.class.getSimpleName(),
+                                          ResinSystem.class.getSimpleName()));
+    }
+    
+    DeployUpdateService service = system.getService(DeployUpdateService.class);
+    
+    if (service == null) {
+      service = new DeployUpdateService();
+      
+      system.addServiceIfAbsent(service);
+      
+      service = system.getService(DeployUpdateService.class);
+    }
+    
+    return service;
+  }
+  
   //
   // tag management
   //
@@ -77,17 +104,19 @@ public class DeployUpdateService extends AbstractResinService
   /**
    * Adds a tag
    */
-  public void addTag(String tagName)
+  public DeployTagItem addTag(String tagName)
   {
     DeployTagItem item = new DeployTagItem(tagName);
     
     DeployTagItem oldItem = _deployMap.putIfAbsent(tagName, item);
     if (oldItem != null)
-      return;
+      return oldItem;
     
     for (DeployTagListener listener : _tagListeners) {
       listener.onTagAdd(tagName);
     }
+    
+    return item;
   }
   
   /**

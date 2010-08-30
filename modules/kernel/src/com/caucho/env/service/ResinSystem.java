@@ -93,6 +93,9 @@ public class ResinSystem
   public ResinSystem(String id,
                      ClassLoader loader)
   {
+    if (id == null || id.isEmpty())
+      id = "default";
+    
     _id = id;
 
     if (loader instanceof EnvironmentClassLoader)

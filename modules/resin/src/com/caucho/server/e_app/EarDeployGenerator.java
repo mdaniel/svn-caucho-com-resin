@@ -169,12 +169,9 @@ public class EarDeployGenerator
     }
 
     EarDeployController controller
-      = new EarDeployController(name, rootDirectory, _parentContainer);
+      = new EarDeployController(tag, rootDirectory, _parentContainer);
 
     controller.setArchivePath(archivePath);
-
-    controller.setRepository(getRepository());
-    controller.setRepositoryTag(tag);
 
     for (EarConfig config : _earDefaultList)
       controller.addConfigDefault(config);

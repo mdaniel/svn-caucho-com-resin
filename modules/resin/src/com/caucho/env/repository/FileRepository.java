@@ -39,6 +39,7 @@ import com.caucho.env.git.GitObjectStream;
 import com.caucho.env.git.GitService;
 import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -58,6 +59,11 @@ public class FileRepository extends AbstractRepository
       throw new IllegalStateException(L.l("{0} is required for {1}",
                                           GitService.class.getSimpleName(),
                                           getClass().getSimpleName()));
+  }
+  
+  public FileRepository()
+  {
+    this(GitService.create());
   }
 
   /**
@@ -153,20 +159,6 @@ public class FileRepository extends AbstractRepository
   {
     try {
       return _git.contains(sha1) ? _git.objectType(sha1) : null;
-    } catch (IOException e) {
-      throw new RepositoryException(e);
-    }
-  }
-
-  /**
-   * Adds a path to the repository.  If the path is a directory or a
-   * jar scheme, adds the contents recursively.
-   */
-  @Override
-  public String addPath(Path path)
-  {
-    try {
-      return _git.writeFile(path);
     } catch (IOException e) {
       throw new RepositoryException(e);
     }

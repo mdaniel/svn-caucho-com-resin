@@ -29,11 +29,11 @@
 
 package com.caucho.server.admin;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 import com.caucho.env.git.GitCommitJar;
 import com.caucho.vfs.StreamSource;
-import com.caucho.util.L10N;
 
 /**
  * Stream source for Hessian serialization of large data

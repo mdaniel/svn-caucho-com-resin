@@ -302,10 +302,6 @@ public class WebAppExpandDeployGenerator
 
     controller.setVersion(version);
 
-    controller.setRepository(getRepository());
-    controller.setRepositoryTag(repositoryTag);
-    controller.setBaseRepositoryTag(baseRepositoryTag);
-
     if (baseController != null) {
       // server/1h52
       initBaseController(controller);
@@ -561,10 +557,6 @@ public class WebAppExpandDeployGenerator
 
     controller.setVersion(version);
 
-    controller.setRepository(getRepository());
-
-    controller.setRepositoryTag(versionTag);
-
     if (! baseName.equals(contextPath)) {
       WebAppController versionController
         = _container.getWebAppGenerator().findController(baseName);
@@ -602,12 +594,6 @@ public class WebAppExpandDeployGenerator
           controller.setArchivePath(jarPath);
           controller.addDepend(jarPath);
         }
-      }
-
-      if (controller.getRepositoryTag() == null) {
-        String tag = "wars/default/" + rootDirectory.getTail();
-
-        controller.setRepositoryTag(tag);
       }
 
       controller.setStartupMode(getStartupMode());

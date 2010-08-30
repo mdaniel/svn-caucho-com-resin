@@ -30,6 +30,7 @@
 package com.caucho.env.deploy;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
@@ -41,8 +42,12 @@ import java.util.zip.ZipInputStream;
 
 import com.caucho.config.types.FileSetType;
 import com.caucho.env.repository.Repository;
+import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositoryTagListener;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
+import com.caucho.make.DependencyContainer;
 import com.caucho.server.deploy.RepositoryDependency;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
@@ -55,23 +60,26 @@ import com.caucho.vfs.WriteStream;
  * A deployment entry that expands from an archive (Jar/Zip) file.
  */
 abstract public class ExpandDeployController<I extends DeployInstance>
-  extends DeployController<I> {
+  extends DeployController<I>
+  implements RepositoryTagListener {
   private static final L10N L = new L10N(ExpandDeployController.class);
   private static final Logger log
     = Logger.getLogger(ExpandDeployController.class.getName());
 
-  private Object _archiveExpandLock = new Object();
-
+  private final String _autoDeployTag;
+  
   private Path _rootDirectory;
   private Path _archivePath;
 
   private Repository _repository;
-  private String _repositoryTag;
-  private String _baseRepositoryTag;
 
   private FileSetType _expandCleanupFileSet;
   
   private DeployTagItem _deployItem;
+  
+  private DependencyContainer _depend = new DependencyContainer();
+
+  private Object _archiveExpandLock = new Object();
 
   // classloader for the manifest entries
   private DynamicClassLoader _manifestLoader;
@@ -92,6 +100,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       rootDirectory = Vfs.getPwd(getParentClassLoader());
 
     _rootDirectory = rootDirectory;
+    
+    _autoDeployTag = "server/" + ResinSystem.getCurrentId() + "/" + id; 
   }
 
   /**
@@ -135,46 +145,6 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
-   * Sets the repository
-   */
-  public void setRepository(Repository repository)
-  {
-    _repository = repository;
-  }
-
-  /**
-   * The repository tag
-   */
-  public String getRepositoryTag()
-  {
-    return _repositoryTag;
-  }
-
-  /**
-   * The repository tag
-   */
-  public void setRepositoryTag(String tag)
-  {
-    _repositoryTag = tag;
-  }
-
-  /**
-   * The base repository tag
-   */
-  public String getBaseRepositoryTag()
-  {
-    return _baseRepositoryTag;
-  }
-
-  /**
-   * The base repository tag
-   */
-  public void setBaseRepositoryTag(String tag)
-  {
-    _baseRepositoryTag = tag;
-  }
-
-  /**
    * Returns the manifest.
    */
   public Manifest getManifest()
@@ -205,14 +175,6 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
-   * Sets the manifest class loader.
-   */
-  public void setManifestClassLoader(DynamicClassLoader loader)
-  {
-    _manifestLoader = loader;
-  }
-
-  /**
    * Sets the archive auto-remove file set.
    */
   public void setExpandCleanupFileSet(FileSetType fileSet)
@@ -228,17 +190,14 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   {
     super.initEnd();
     
-    DeployUpdateService deployService = DeployUpdateService.getCurrent();
-    if (deployService != null && getDeployTag() != null) {
-      deployService.addTag(getDeployTag());
-      
-      _deployItem = deployService.getTagItem(getDeployTag());
-    }
-  }
-  
-  protected String getDeployTag()
-  {
-    return null;
+    RepositoryService repositoryService = RepositoryService.create(); 
+    _repository = repositoryService.getRepository();
+    _repository.addListener(getId(), this);
+    
+    DeployUpdateService deployService = DeployUpdateService.create();
+
+    deployService.addTag(getId());
+    _deployItem = deployService.getTagItem(getId());
   }
 
   /**
@@ -257,9 +216,6 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     if (oldController.getArchivePath() != null)
       setArchivePath(oldController.getArchivePath());
-
-    if (oldController.getRepositoryTag() != null)
-      setRepositoryTag(oldController.getRepositoryTag());
   }
 
   /**
@@ -267,6 +223,14 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    */
   public void deploy()
   {
+    deployImpl();
+  }
+  
+  /**
+   * Deploys the controller
+   */
+  protected void deployImpl()
+    {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " deploying");
     
@@ -287,31 +251,33 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     addManifestClassPath();
     
     super.configureInstance(deployInstance);
+    
+    addDependencies();
+  }
+  
+  @Override
+  public void onTagChange(String tag)
+  {
+    alarm();
   }
 
   /**
    * Expand an archive file.  The _archiveExpandLock must be obtained
    * before the expansion.
    */
-  protected void expandArchive()
+  private void expandArchive()
     throws IOException
   {
+    // save any .war file to the server-specific repository
+    for (int i = 0; ! commitArchive() && i < 3; i++) {
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+      }
+    }
+    
     synchronized (_archiveExpandLock) {
-      if (expandRepositoryImpl()) {
-      }
-      else if (expandArchiveImpl()) {
-      }
-      else {
-        try {
-          Thread.sleep(2000);
-        } catch (InterruptedException e) {
-        }
-
-        if (expandRepositoryImpl()) {
-        }
-        else
-          expandArchiveImpl();
-      }
+      expandRepository();
 
       Path path = getRootDirectory().lookup("META-INF/MANIFEST.MF");
       if (path.canRead()) {
@@ -368,18 +334,67 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
+   * Adds any updated .war file to the server-specific repository. The war
+   * will be expanded as part of the usual repository system.
+   *
+   * The commitArchive() can return false if the war update fails, for example
+   * if the war is in the process of updating.
+   */
+  private boolean commitArchive()
+    throws IOException
+  {
+    Path archivePath = getArchivePath();
+
+    if (archivePath == null)
+      return true;
+
+    if (! archivePath.canRead())
+      return true;
+    
+    String hash = Long.toHexString(archivePath.getCrc64());
+    
+    if (log.isLoggable(Level.FINE)){
+      log.fine(this + " updating .war repository for " + archivePath);
+    }
+
+    try {
+      HashMap<String,String> props = new HashMap<String,String>();
+      
+      props.put("archive-digest", hash);
+      
+      _repository.putTagContent(_autoDeployTag, 
+                                archivePath,
+                                ".war auto-update", 
+                                props);
+      
+      return true;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return false;
+    }
+  }
+
+  /**
    * Expand an archive.  The _archiveExpandLock must be obtained before the
    * expansion.
    */
-  private boolean expandRepositoryImpl()
+  private boolean expandRepository()
     throws IOException
   {
     try {
       if (_repository == null)
         return false;
       
-      String treeHash = _repository.getTagContentHash(getRepositoryTag());
+      String tag = getId();
+      String treeHash = _repository.getTagContentHash(tag);
 
+      if (treeHash == null) {
+        tag = _autoDeployTag;
+
+        treeHash = _repository.getTagContentHash(tag);
+      }
+      
       if (treeHash == null)
         return false;
       
@@ -387,9 +402,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
       pwd.mkdirs();
 
-      if (log.isLoggable(Level.FINE))
-        log.fine(this + " expanding .git repository tag=" + getRepositoryTag()
-                 + " tree=" + treeHash + " -> root=" + getRootDirectory());
+      if (log.isLoggable(Level.FINE)) {
+        log.fine(this + " expanding repository tag=" + tag
+                 + "\n  root=" + getRootDirectory()
+                 + "\n  contentHash=" + treeHash);
+      }
 
       _repository.expandToPath(treeHash, pwd);
 
@@ -403,199 +420,37 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       return false;
     }
   }
-
-  /**
-   * Expand an archive.  The _archiveExpandLock must be obtained before the
-   * expansion.
-   */
-  private boolean expandArchiveImpl()
-    throws IOException
+  
+  @Override
+  protected boolean isControllerModified()
   {
-    Path archivePath = getArchivePath();
-
-    if (archivePath == null)
-      return true;
-
-    if (! archivePath.canRead())
-      return true;
-
-    Path expandDir = getRootDirectory();
-    Path parent = expandDir.getParent();
-
-    try {
-      parent.mkdirs();
-    } catch (Throwable e) {
-    }
-
-    Path dependPath = expandDir.lookup("META-INF/resin-war.digest");
-    Depend depend = null;
-
-    // XXX: change to a hash
-    if (dependPath.canRead()) {
-      ReadStream is = null;
-      try {
-        is = dependPath.openRead();
-
-        String line = is.readLine();
-
-        long digest;
-
-        if (line != null) {
-          digest = Long.parseLong(line.trim());
-
-          depend = new Depend(archivePath, digest);
-
-          if (! depend.isModified())
-            return true;
-        }
-      } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
-      } finally {
-        if (is != null)
-          is.close();
-      }
-    }
-
-    if (depend == null)
-      depend = new Depend(archivePath);
-
-    try {
-      if (log.isLoggable(Level.INFO))
-        getLog().info("expanding " + archivePath + " to " + expandDir);
-
-      removeExpandDirectory(expandDir);
-
-      expandDir.mkdirs();
-
-      ReadStream rs = archivePath.openRead();
-      ZipInputStream zis = new ZipInputStream(rs);
-
-      try {
-        ZipEntry entry = zis.getNextEntry();
-
-        byte []buffer = new byte[1024];
-
-        while (entry != null) {
-          String name = entry.getName();
-          Path path = expandDir.lookup(name);
-
-          if (entry.isDirectory())
-            path.mkdirs();
-          else {
-            long entryLength = entry.getSize();
-            long length = entryLength;
-
-            // XXX: avoids unexpected end of ZLIB input stream.
-            // XXX: This should be a really temp. workaround.
-            int bufferLen = buffer.length;
-
-            // XXX: avoids unexpected end of ZLIB input stream.
-            if (length < 0) {
-              // bufferLen = 1;
-              length = Long.MAX_VALUE / 2;
-            }
-            else if (length < bufferLen) {
-              bufferLen = (int) length;
-            }
-
-            long lastModified = entry.getTime();
-            path.getParent().mkdirs();
-
-            WriteStream os = path.openWrite();
-            int len = 0;
-            try {
-              if (bufferLen == 1) {
-                for (int ch = zis.read(); ch != -1; ch = zis.read())
-                  os.write(ch);
-              }
-              else {
-                while ((len = zis.read(buffer, 0, bufferLen)) > 0) {
-                  os.write(buffer, 0, len);
-
-                  // XXX: avoids unexpected end of ZLIB input stream.
-                  /*
-                  if (len < bufferLen) {
-                    for (int ch = zis.read(); ch != -1; ch = zis.read())
-                      os.write(ch);
-
-                    break;
-                  }
-                  */
-
-                  length -= len;
-
-                  if (length < bufferLen) {
-                    bufferLen = (int) length;
-                  }
-                }
-              }
-            } catch (IOException e) {
-              Exception ex = new Exception("IOException when expanding entry "
-                                           + entry
-                                           +" in " + archivePath
-                                           + ", entry.length: " + entryLength
-                                           + " entry.compressed: " + entry.getCompressedSize()
-                                           + ", bufferLen: " + bufferLen
-                                           + ", read len: " + len
-                                           + ", remaining: " + length, e);
-
-              log.log(Level.FINE, ex.toString(), ex);
-            } finally {
-              os.close();
-            }
-
-            if (lastModified > 0)
-              path.setLastModified(lastModified);
-          }
-
-          try {
-            entry = zis.getNextEntry();
-          } catch (IOException e) {
-            log.log(Level.FINE, e.toString(), e);
-
-            // XXX: avoids unexpected end of ZLIB input stream.
-            break;
-          }
-        }
-      } finally {
-        try {
-          zis.close();
-        } catch (IOException e) {
-        }
-
-        rs.close();
-      }
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
-      // If the jar is incomplete, it should throw an exception here.
-      return false;
-    }
-
-    try {
-      dependPath.getParent().mkdirs();
-      WriteStream os = dependPath.openWrite();
-
-      os.println(depend.getDigest());
-
-      os.close();
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
-    return true;
+    return _depend.isModified();
+  }
+  
+  @Override
+  protected boolean isControllerModifiedNow()
+  {
+    return _depend.isModified();
+  }
+  
+  @Override
+  protected boolean controllerLogModified(Logger log)
+  {
+    return _depend.logModified(log);
   }
 
   protected void addDependencies()
   {
+    _depend = new DependencyContainer();
+    
     if (getArchivePath() != null)
-      Environment.addDependency(getArchivePath());
+      _depend.add(new Depend(getArchivePath()));
 
-    if (getRepository() != null && getRepositoryTag() != null) {
-      String tag = getRepositoryTag();
-      String value = getRepository().getTagContentHash(tag);
-
-      Environment.addDependency(new RepositoryDependency(tag, value));
-    }
+    String value = getRepository().getTagContentHash(getId());
+    _depend.add(new RepositoryDependency(getId(), value));
+    
+    value = getRepository().getTagContentHash(_autoDeployTag);
+    _depend.add(new RepositoryDependency(_autoDeployTag, value));
   }
 
   /**

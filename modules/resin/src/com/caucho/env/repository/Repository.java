@@ -148,9 +148,14 @@ public interface Repository
 
   /**
    * Adds a path to the repository.  If the path is a directory or a
-   * jar scheme, adds the contents recursively.
+   * adds the contents recursively.
    */
   public String addPath(Path path);
+
+  /**
+   * Adds a path as a jar/zip archive to the repository.
+   */
+  public String addArchive(Path path);
 
   /**
    * Expands the repository to the filesystem.
@@ -216,6 +221,26 @@ public interface Repository
   public boolean removeTag(String tagName,
                            String commitMessage,
                            Map<String,String> commitMetaData);
+  
+  /**
+   * Adds and commits a full path, recursively
+   */
+  public String putTagContent(String tagName,
+                              Path contentRoot,
+                              String commitMessage,
+                              Map<String,String> commitMetaData);
+  
+  /**
+   * Adds and commits a full path, recursively
+   */
+  public String putTagArchive(String tagName,
+                              Path contentArchive,
+                              String commitMessage,
+                              Map<String,String> commitMetaData);
+  
+  //
+  // tag listeners
+  //
   
   /**
    * Adds a tag change listener

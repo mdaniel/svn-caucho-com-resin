@@ -58,7 +58,7 @@ abstract public class DeployController<I extends DeployInstance>
 
   private ClassLoader _parentLoader;
   
-  private String _id;
+  private final String _id;
 
   private DeployMode _startupMode = DeployMode.DEFAULT;
   private DeployMode _redeployMode = DeployMode.DEFAULT;
@@ -343,17 +343,37 @@ abstract public class DeployController<I extends DeployInstance>
   @Override
   public boolean isModified()
   {
+    if (isControllerModified())
+      return true;
+    
     DeployInstance instance = getDeployInstance();
 
     return instance == null || instance.isModified();
   }
 
   /**
+   * Returns true if the entry is modified.
+   */
+  public boolean isModifiedNow()
+  {
+    if (isControllerModifiedNow())
+      return true;
+    
+    DeployInstance instance = getDeployInstance();
+
+    return instance == null || instance.isModifiedNow();
+  }
+  
+  /**
    * Log the reason for modification
    */
   @Override
   public boolean logModified(Logger log)
   {
+    if (controllerLogModified(log)) {
+      return true;
+    }
+    
     DeployInstance instance = getDeployInstance();
 
     if (instance != null) {
@@ -372,14 +392,19 @@ abstract public class DeployController<I extends DeployInstance>
       return false;
   }
 
-  /**
-   * Returns true if the entry is modified.
-   */
-  public boolean isModifiedNow()
+  protected boolean isControllerModified()
   {
-    DeployInstance instance = getDeployInstance();
-
-    return instance == null || instance.isModifiedNow();
+    return false;
+  }
+  
+  protected boolean isControllerModifiedNow()
+  {
+    return false;
+  }
+  
+  protected boolean controllerLogModified(Logger log)
+  {
+    return false;
   }
 
   /**
@@ -686,11 +711,17 @@ abstract public class DeployController<I extends DeployInstance>
   public final void handleAlarm(Alarm alarm)
   {
     try {
-      _strategy.alarm(this);
+      alarm();
     } finally {
       if (! _lifecycle.isDestroyed())
         alarm.queue(_redeployCheckInterval);
     }
+  }
+  
+  @Override
+  public final void alarm()
+  {
+    _strategy.alarm(this);
   }
   
   @Override

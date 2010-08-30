@@ -99,6 +99,13 @@ public interface DeployControllerApi<I extends DeployInstance>
   public void update();
 
   /**
+   * Internal notification for modification updates, either from a timer
+   * or a repository notification. Depending on the restart mode, the
+   * alarm may trigger a restart.
+   */
+  public void alarm();
+
+  /**
    * Returns the instance for a top-level request
    * @return the request object or null for none.
    */

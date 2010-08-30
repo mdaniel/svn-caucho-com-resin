@@ -519,9 +519,8 @@ public class WebApp extends ServletContextImpl
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
 
-      if (_controller.getRepository() != null
-          && _controller.getBaseRepositoryTag() != null) {
-        String baseTag = _controller.getBaseRepositoryTag();
+      if (_controller.getRepository() != null) {
+        String baseTag = _controller.getId();
         String baseValue = _controller.getRepository().getTagContentHash(baseTag);
 
         _invocationDependency.add(new RepositoryDependency(baseTag, baseValue));

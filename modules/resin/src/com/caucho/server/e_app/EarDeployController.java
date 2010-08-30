@@ -131,12 +131,6 @@ public class EarDeployController
   {
     return _admin;
   }
-  
-  @Override
-  protected String getDeployTag()
-  {
-    return _deployTagName;
-  }
 
   /**
    * Finds any web-app in the ear matching the contextPath.

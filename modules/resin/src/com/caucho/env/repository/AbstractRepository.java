@@ -40,10 +40,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.git.GitCommit;
+import com.caucho.env.git.GitCommitJar;
 import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
+import com.caucho.server.admin.DeploySendQuery;
+import com.caucho.server.admin.GitJarStreamSource;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamSource;
 
 abstract public class AbstractRepository implements Repository
 {
@@ -190,6 +195,40 @@ abstract public class AbstractRepository implements Repository
                                     Map<String,String> commitMetaData);
 
   /**
+   * Convenience method for adding the content of a directory.
+   */
+  @Override
+  public String putTagContent(String tagName,
+                              Path path,
+                              String commitMessage,
+                              Map<String,String> commitMetaData)
+  {
+    String contentHash = addPath(path);
+    
+    if (putTag(tagName, contentHash, commitMessage, commitMetaData))
+      return contentHash;
+    else
+      return null;
+  }
+
+  /**
+   * Convenience method for adding the content of a jar.
+   */
+  @Override
+  public String putTagArchive(String tagName,
+                              Path archivePath,
+                              String commitMessage,
+                              Map<String,String> commitMetaData)
+  {
+    String contentHash = addArchive(archivePath);
+    
+    if (putTag(tagName, contentHash, commitMessage, commitMetaData))
+      return contentHash;
+    else
+      return null;
+  }
+  
+  /**
    * Creates a tag entry
    *
    * @param tagName the symbolic tag for the repository
@@ -212,6 +251,11 @@ abstract public class AbstractRepository implements Repository
       if (! validateHash(contentHash))
         throw new RepositoryException(L.l("'{0}' has invalid or missing repository content",
                                           contentHash));
+      
+      if (log.isLoggable(Level.FINE)) {
+        log.fine(this + " committing " + tagName + "\n  '" + message
+                 + "'\n  " + contentHash);
+      }
 
       String parent = null;
 
@@ -497,11 +541,90 @@ abstract public class AbstractRepository implements Repository
   }
 
   /**
-   * Adds a path to the repository.  If the path is a directory or a
-   * jar scheme, adds the contents recursively.
+   * Adds a path to the repository.  If the path is a directory, 
+   * adds the contents recursively.
    */
   @Override
-  abstract public String addPath(Path path);
+  public String addPath(Path path)
+  {
+    try {
+      return addPathRec(path);
+    } catch (IOException e) {
+      throw new RepositoryException(e);
+    }
+  }
+  
+  private String addPathRec(Path path)
+    throws IOException
+  {
+    if (path.isFile()) {
+      long length = path.getLength();
+      
+      InputStream is = null;
+      
+      try {
+        is = path.openRead();
+        
+        return addBlob(is, length);
+      } finally {
+        IoUtil.close(is);
+      }
+    }
+    else {
+      GitTree tree = new GitTree();
+      
+      for (String fileName : path.list()) {
+        Path subPath = path.lookup(fileName);
+        
+        String subHash = addPathRec(subPath);
+        
+        tree.addEntry(fileName, 775, subHash);
+      }
+      
+      return addTree(tree);
+    }
+  }
+
+  /**
+   * Adds a path to the repository.  If the path is a directory, 
+   * adds the contents recursively.
+   */
+  @Override
+  public String addArchive(Path path)
+  {
+    GitCommitJar commit = null;
+
+    try {
+      commit = new GitCommitJar(path);
+      
+      return addArchive(commit);
+    } catch (IOException e) {
+      throw new RepositoryException(e);
+    } finally {
+      if (commit != null)
+        commit.close();
+    }
+  }
+
+  protected String addArchive(GitCommitJar commit)
+    throws IOException
+  {
+    for (String hash : commit.getCommitList()) {
+      GitJarStreamSource gitSource = new GitJarStreamSource(hash, commit);
+      
+      if (! exists(hash)) {
+        InputStream is = gitSource.openInputStream();
+        
+        try {
+          writeRawGitFile(hash, is);
+        } finally {
+          is.close();
+        }
+      }
+    }
+    
+    return commit.getDigest();
+  }
 
   /**
    * Adds a stream to the repository.
