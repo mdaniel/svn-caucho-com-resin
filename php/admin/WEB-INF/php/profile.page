@@ -234,7 +234,7 @@ if ($profile) {
       else 
         echo "<td>";
 
-      echo $entry->getDescription();
+      echo htmlspecialchars($entry->getDescription());
 
       // echo print_stack_entry($stack);
 

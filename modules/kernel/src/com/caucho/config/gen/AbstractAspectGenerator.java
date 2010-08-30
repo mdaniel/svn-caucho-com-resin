@@ -181,9 +181,6 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
   {
     if (! isApplicationExceptionThrown())
       return;
-    RuntimeException exn1= new RuntimeException("EXCEPTIONS:");
-    exn1.fillInStackTrace();
-    log.log(Level.INFO, exn1.toString(), exn1);
     
     HashSet<Class<?>> exceptionSet
       = new HashSet<Class<?>>();
