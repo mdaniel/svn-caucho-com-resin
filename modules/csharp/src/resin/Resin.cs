@@ -51,8 +51,6 @@ namespace Caucho
     private String _cp;
     private String _resinHome;
     private String _rootDirectory;
-    private String _displayName;
-    private String _resinDataDir;
 
     private Process _process;
     private ResinArgs ResinArgs;
@@ -65,7 +63,8 @@ namespace Caucho
       if (ServiceName == null)
         ServiceName = "Resin";
 
-      _displayName = "Resin Web Server";
+      _resinHome = ResinArgs.Home;
+      _rootDirectory = ResinArgs.Root;
     }
 
     public bool StartResin()
@@ -128,25 +127,11 @@ namespace Caucho
 
       System.Environment.SetEnvironmentVariable("JAVA_HOME", _javaHome);
 
-      try {
-        Directory.SetCurrentDirectory(_rootDirectory);
-      } catch (Exception e) {
-        Error(String.Format("Can't change dir to {0} due to: {1}", _rootDirectory, e), e);
-
-        return 1;
-      }
-
       Environment.SetEnvironmentVariable("CLASSPATH", _cp);
       Environment.SetEnvironmentVariable("PATH",
                                          String.Format("{0};{1};\\openssl\\bin;.",
                                                        _javaHome + "\\bin",
                                                        Environment.GetEnvironmentVariable("PATH")));
-
-      _resinDataDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
-      _resinDataDir = _resinDataDir.Substring(0, _resinDataDir.LastIndexOf('\\')) + "\\resin-data";
-
-      if (!Directory.Exists(_resinDataDir))
-        Directory.CreateDirectory(_resinDataDir);
 
       if (ResinArgs.IsService) {
         ServiceBase.Run(new ServiceBase[] { this });
@@ -214,7 +199,6 @@ namespace Caucho
         Info("Using Command Line: " + _javaExe + ' ' + startInfo.Arguments);
 
       startInfo.UseShellExecute = false;
-      startInfo.WorkingDirectory = _rootDirectory;
 
       if (ResinArgs.IsService) {
         startInfo.RedirectStandardError = true;
