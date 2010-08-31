@@ -30,7 +30,7 @@
 package com.caucho.server.rewrite;
 
 import java.util.ArrayList;
-s
+
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -291,7 +291,7 @@ public class MatchRule
 
     if (_depend.size() > 0) {
       _alarm = new Alarm(this);
-      
+
       handleAlarm(_alarm);
     }
   }
