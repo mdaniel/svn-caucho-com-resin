@@ -432,8 +432,12 @@ function display_jmx_data($v)
     echo "<pre>{\n";
     foreach ($v as $k => $v) {
       echo "  ";
+      if (is_string($k)) {
+        echo "$k => ";
+      }
+
       if (is_string($v))
-        echo "\"$v\",\n";
+        echo htmlspecialchars("\"$v\",\n");
       else
         var_dump($v);
     }

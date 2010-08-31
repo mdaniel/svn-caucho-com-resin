@@ -36,6 +36,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import java.util.logging.Level;
@@ -81,6 +82,7 @@ public class LoadBalanceRule
   }
 
   @Override
+  @PostConstruct
   public void init()
     throws ConfigException
   {

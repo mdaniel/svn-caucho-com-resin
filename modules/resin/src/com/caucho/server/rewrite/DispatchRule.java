@@ -33,6 +33,7 @@ import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.*;
 import com.caucho.config.ConfigException;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import java.util.regex.Matcher;
 
@@ -113,6 +114,7 @@ public class DispatchRule
   }
 
   @Override
+  @PostConstruct
   public void init()
     throws ConfigException
   {

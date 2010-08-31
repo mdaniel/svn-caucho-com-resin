@@ -75,6 +75,9 @@ class WatchdogConfig
 
   private String _watchdogAddress = "127.0.0.1";
   private int _watchdogPort;
+  
+  private String _serverAddress = "127.0.0.1";
+  private int _serverPort;
 
   private WatchdogLog _watchdogLog;
   private Path _logPath;
@@ -192,6 +195,8 @@ class WatchdogConfig
   public void addHttp(OpenPort port)
     throws ConfigException
   {
+    port.setProtocolName("http");
+    
     _ports.add(port);
   }
 
@@ -343,10 +348,22 @@ class WatchdogConfig
 
   public void setAddress(String address)
   {
+    _serverAddress = address;
+  }
+  
+  public String getAddress()
+  {
+    return _serverAddress;
   }
 
   public void setPort(int port)
   {
+    _serverPort = port;
+  }
+  
+  public int getPort()
+  {
+    return _serverPort;
   }
   
   /**

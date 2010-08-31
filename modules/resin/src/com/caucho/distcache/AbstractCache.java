@@ -386,6 +386,19 @@ abstract public class AbstractCache extends AbstractMap
     _localManager = cacheManager;
   }
 
+  public static AbstractCache getMatchingCache(String name)
+  {
+    DistCacheService cacheService = DistCacheService.getCurrent();
+    
+    CacheManager localManager = cacheService.getCacheManager();
+
+    String contextId = Environment.getEnvironmentName();
+
+    String guid = contextId + ":" + name;
+  
+    return localManager.get(guid);
+  }
+
   /**
    * Initialize the cache.
    */

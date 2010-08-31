@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -98,6 +99,7 @@ public class ProxyRule
   }
 
   @Override
+  @PostConstruct
   public void init()
     throws ConfigException
   {
@@ -107,7 +109,7 @@ public class ProxyRule
       _servlet = new ServletConfigImpl();
 
       _servlet.setServletName("resin-dispatch-lb");
-      Class cl = Class.forName("com.caucho.servlets.HttpProxyServlet");
+      Class.forName("com.caucho.servlets.HttpProxyServlet");
       _servlet.setServletClass("com.caucho.servlets.HttpProxyServlet");
 
       _servlet.setInit(_program);

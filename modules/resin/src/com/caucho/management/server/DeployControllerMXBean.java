@@ -33,6 +33,7 @@ import com.caucho.jmx.Description;
 import com.caucho.jmx.Units;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Management interface for the deploy controller.
@@ -62,11 +63,21 @@ public interface DeployControllerMXBean extends ManagedObjectMXBean
   public String getRedeployMode();
 
   /**
-   * Returns the interval between redploy checks.
+   * Returns the interval between redeploy checks.
    */
   @Description("The configured millisecond interval between checks for the need to redeploy")
   @Units("milliseconds")
   public long getRedeployCheckInterval();
+  
+  //
+  // Repository
+  //
+  
+  /**
+   * Returns the repository metadata for the entry.
+   */
+  @Description("The repository metadata for the entry")
+  public Map<String,String> getRepositoryMetaData();
 
   //
   // Lifecycle

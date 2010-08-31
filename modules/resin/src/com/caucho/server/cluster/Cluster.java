@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 
 import com.caucho.cloud.network.ClusterServer;
+import com.caucho.cloud.topology.CloudClusterAdmin;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
@@ -68,7 +69,7 @@ abstract public class Cluster
   //private EnvironmentClassLoader _classLoader;
   //private Path _rootDirectory;
 
-  private ClusterAdmin _admin;
+  private CloudClusterAdmin _admin;
 
   private ArrayList<ContainerProgram> _serverDefaultList
     = new ArrayList<ContainerProgram>();
@@ -345,8 +346,8 @@ abstract public class Cluster
   {
     _lifecycle.toInit();
 
-    _admin = new ClusterAdmin(this);
-    _admin.register();
+    //_admin = new ClusterAdmin(this);
+    //_admin.register();
 
     for (ClusterPod pod : getPodList()) {
       pod.init();

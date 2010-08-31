@@ -42,6 +42,7 @@ import javax.management.ObjectName;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.PathBuilder;
+import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -472,6 +473,26 @@ abstract public class
 
     instance.setRootDirectory(rootDirectory);
   }
+  
+  public Map<String,String> getRepositoryMetaData()
+  {
+    HashMap<String,String> map = new HashMap<String,String>();
+    
+    Map<String,RepositoryTagEntry> tagMap = getRepository().getTagMap();
+    
+    RepositoryTagEntry entry = tagMap.get(getId());
+    
+    if (entry == null && getAutoDeployTag() != null) {
+      entry = tagMap.get(getAutoDeployTag());
+    }
+    
+    if (entry != null) {
+      map.put("id", entry.getName());
+      map.put("content-hash", entry.getRoot());
+    }
+    
+    return map;
+  }
 
   @Override
   public Path getArchivePath()
@@ -497,7 +518,7 @@ abstract public class
 
     return path;
   }
-
+  
   /**
    * Handles config phase.
    */

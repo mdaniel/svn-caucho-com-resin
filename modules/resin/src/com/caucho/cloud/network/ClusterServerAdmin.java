@@ -70,7 +70,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   @Override
   public ClusterMXBean getCluster()
   {
-    return _server.getCluster().getData(ClusterMXBean.class);
+    return _server.getCluster().getAdmin();
   }
 
   /**

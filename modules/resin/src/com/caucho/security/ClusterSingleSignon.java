@@ -52,12 +52,15 @@ public class ClusterSingleSignon implements SingleSignon {
 
   public ClusterSingleSignon(String name)
   {
-    _cache = new ClusterCache();
-    _cache.setExpireTimeoutMillis(24 * 3600 * 1000L);
-
-    setName(name);
-
-    init();
+    _cache = AbstractCache.getMatchingCache(name);
+    
+    if (_cache == null) {
+      _cache = new ClusterCache();
+      _cache.setExpireTimeoutMillis(24 * 3600 * 1000L);
+      _cache.setName("resin:single-signon:" + name);
+    
+      _cache.init();
+    }
   }
 
   public void setName(String name)

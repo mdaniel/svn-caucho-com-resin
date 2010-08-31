@@ -24,44 +24,11 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
-package com.caucho.server.rewrite;
+package com.caucho.boot;
 
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
-import com.caucho.util.L10N;
-
-import javax.el.ELContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-/**
- * A {@link RewriteDispatch} condition that is an el expression.
- */
-public class ExprCondition
-  extends AbstractCondition
-{
-  private Expr _expr;
-
-  public ExprCondition(String expr)
-  {
-    ELContext elContext = new RewriteELContext();
-    
-    _expr = new ELParser(elContext, expr).parse();
-  }
-
-  @Override
-  public String getTagName()
-  {
-    return "expr";
-  }
-
-  @Override
-  public boolean isMatch(HttpServletRequest request,
-                         HttpServletResponse response)
-  {
-    return _expr.evalBoolean(new RewriteELContext());
-  }
+public interface BootCommand {
+  public void doCommand(WatchdogArgs args, WatchdogClient client);
 }

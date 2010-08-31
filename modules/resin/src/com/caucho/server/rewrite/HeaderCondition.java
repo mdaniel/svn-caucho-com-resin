@@ -29,12 +29,11 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.util.L10N;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.regex.Pattern;
 
 /**
 * A rewrite condition that passes if the value of a named header matches a regexp.
@@ -42,8 +41,6 @@ import java.util.regex.Pattern;
 public class HeaderCondition
   extends AbstractCondition
 {
-  private static final L10N L = new L10N(HeaderCondition.class);
-
   private final String _header;
   private Pattern _regexp;
   private boolean _caseInsensitive = false;

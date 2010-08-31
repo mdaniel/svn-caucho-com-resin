@@ -29,12 +29,12 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.dispatch.RedirectFilterChain;
-import com.caucho.config.ConfigException;
+import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
-import java.util.regex.Matcher;
+
+import com.caucho.config.ConfigException;
 
 public class RedirectRule
   extends AbstractRuleWithConditions

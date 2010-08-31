@@ -42,6 +42,8 @@ import com.caucho.vfs.SSLFactory;
  */
 public class OpenPort extends SocketLinkListener
 {
+  private String _protocol;
+  
   public OpenPort()
   {
     // super.setClass(HttpProtocol.class); // dummy
@@ -52,6 +54,17 @@ public class OpenPort extends SocketLinkListener
   {
   }
   */
+  
+  @Override
+  public String getProtocolName()
+  {
+    return _protocol;
+  }
+  
+  public void setProtocolName(String protocol)
+  {
+    _protocol = protocol;
+  }
 
   /**
    * Sets the SSL factory

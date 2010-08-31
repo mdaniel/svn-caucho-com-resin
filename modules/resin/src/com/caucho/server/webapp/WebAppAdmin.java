@@ -111,14 +111,25 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   // error statistics
   //
 
+  @Override
   public long getStatus500CountTotal()
   {
-    return getWebApp().getStatus500CountTotal();
+    WebApp webApp = getWebApp();
+    
+    if (webApp != null)
+      return webApp.getStatus500CountTotal();
+    else
+      return 0;
   }
 
   public Date getStatus500LastTime()
   {
-    long lastTime = getWebApp().getStatus500LastTime();
+    WebApp webApp = getWebApp();
+    
+    if (webApp == null)
+      return null;
+    
+    long lastTime = webApp.getStatus500LastTime();
 
     if (lastTime > 0)
       return new Date(lastTime);
@@ -130,31 +141,42 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   // statistics
   //
   
+  @Override
   public int getRequestCount()
   {
-    return getWebApp().getRequestCount();
+    WebApp webApp = getWebApp();
+    
+    if (webApp != null)
+      return webApp.getRequestCount();
+    else
+      return 0;
   }
 
+  @Override
   public long getRequestCountTotal()
   {
     return getController().getLifetimeConnectionCount();
   }
 
+  @Override
   public long getRequestTimeTotal()
   {
     return getController().getLifetimeConnectionTime();
   }
 
+  @Override
   public long getRequestReadBytesTotal()
   {
     return getController().getLifetimeReadBytes();
   }
 
+  @Override
   public long getRequestWriteBytesTotal()
   {
     return getController().getLifetimeWriteBytes();
   }
 
+  @Override
   public long getClientDisconnectCountTotal()
   {
     return getController().getLifetimeClientDisconnectCount();
@@ -167,5 +189,4 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   {
     return getController().getWebApp();
   }
-
 }

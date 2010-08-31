@@ -643,7 +643,7 @@ public final class ClusterServer {
    */
   public boolean isSelf()
   {
-    return _isSelf;
+    return _clusterService.getSelfServer() == getCloudServer();
   }
 
   /**

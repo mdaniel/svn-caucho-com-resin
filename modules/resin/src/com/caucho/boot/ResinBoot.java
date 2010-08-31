@@ -29,10 +29,12 @@
 
 package com.caucho.boot;
 
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.VersionFactory;
+import com.caucho.boot.WatchdogArgs.StartMode;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
@@ -62,6 +64,9 @@ import com.caucho.vfs.Vfs;
 public class ResinBoot {
   private static L10N _L;
   private static Logger _log;
+  
+  private static HashMap<StartMode,BootCommand> _commandMap
+    = new HashMap<StartMode,BootCommand>();
 
   private WatchdogArgs _args;
 
@@ -313,9 +318,16 @@ public class ResinBoot {
 
       return true;
     }
-    else {
-      throw new IllegalStateException(L().l("Unknown start mode"));
+    
+    BootCommand command = _commandMap.get(_args.getStartMode());
+    
+    if (command != null) {
+      command.doCommand(_args, _client);
+      
+      return false;
     }
+    
+    throw new IllegalStateException(L().l("Unknown start mode"));
   }
 
   /**
@@ -375,5 +387,9 @@ public class ResinBoot {
       _log = Logger.getLogger(ResinBoot.class.getName());
 
     return _log;
+  }
+  
+  static {
+    _commandMap.put(StartMode.DEPLOY, new DeployCommand());
   }
 }

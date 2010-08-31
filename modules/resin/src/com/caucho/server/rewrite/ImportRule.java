@@ -41,6 +41,7 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.jmx.Description;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import java.util.logging.Level;
@@ -104,6 +105,7 @@ public class ImportRule
   }
 
   @Override
+  @PostConstruct
   public void init()
   {
     if (_path == null)

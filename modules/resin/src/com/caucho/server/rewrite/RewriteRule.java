@@ -31,6 +31,7 @@ package com.caucho.server.rewrite;
 
 import com.caucho.config.ConfigException;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import java.util.regex.Matcher;
@@ -70,6 +71,7 @@ public class RewriteRule
    * Init
    */
   @Override
+  @PostConstruct
   public void init()
     throws ConfigException
   {

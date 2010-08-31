@@ -34,6 +34,7 @@ import com.caucho.server.webapp.*;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -106,6 +107,7 @@ public class ForwardRule
   }
 
   @Override
+  @PostConstruct
   public void init()
     throws ConfigException
   {

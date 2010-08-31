@@ -34,6 +34,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.management.server.ClusterMXBean;
 import com.caucho.util.L10N;
 
 /**
@@ -50,6 +51,8 @@ public class CloudCluster
   private final String _id;
 
   private CloudPod []_podList = new CloudPod[0];
+  
+  private CloudClusterAdmin _admin = new CloudClusterAdmin(this);
   
   private final CopyOnWriteArrayList<CloudPodListener> _listeners
     = new CopyOnWriteArrayList<CloudPodListener>();
@@ -85,6 +88,25 @@ public class CloudCluster
   public CloudPod []getPodList()
   {
     return _podList;
+  }
+  
+  public ClusterMXBean getAdmin()
+  {
+    return _admin;
+  }
+  
+  //
+  // lifecycle
+  //
+  
+  void init()
+  {
+    _admin.register();
+  }
+  
+  void destroy()
+  {
+    _admin.unregister();
   }
 
   /**

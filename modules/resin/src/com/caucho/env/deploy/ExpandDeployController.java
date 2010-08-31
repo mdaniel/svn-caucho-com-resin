@@ -43,6 +43,7 @@ import java.util.zip.ZipInputStream;
 import com.caucho.config.types.FileSetType;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.DynamicClassLoader;
@@ -182,6 +183,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     _expandCleanupFileSet = fileSet;
   }
 
+  public String getAutoDeployTag()
+  {
+    return _autoDeployTag;
+  }
+  
   /**
    * Final calls for init.
    */

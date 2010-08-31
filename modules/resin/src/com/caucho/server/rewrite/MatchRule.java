@@ -29,28 +29,26 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.L10N;
-import com.caucho.util.*;
-import com.caucho.make.*;
-import com.caucho.vfs.*;
+import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.make.DependencyContainer;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.vfs.PersistentDependency;
 
 public class MatchRule
   extends AbstractRuleWithConditions
   implements AlarmListener
 {
   private static final L10N L = new L10N(MatchRule.class);
-
-  private static final Logger log
-    = Logger.getLogger(MatchRule.class.getName());
 
   private DependencyContainer _depend = new DependencyContainer();
 
@@ -282,6 +280,7 @@ public class MatchRule
   }
 
   @Override
+  @PostConstruct
   public void init()
   {
     super.init();

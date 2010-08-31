@@ -139,6 +139,8 @@ public class CloudSystem
       _clusterArray = clusterArray;
     }
     
+    cluster.init();
+    
     for (CloudClusterListener listener : _listeners) {
       listener.onClusterAdd(cluster);
     }
@@ -185,6 +187,8 @@ public class CloudSystem
     for (CloudClusterListener listener : _listeners) {
       listener.onClusterRemove(cluster);
     }
+    
+    cluster.destroy();
     
     return true;
   }

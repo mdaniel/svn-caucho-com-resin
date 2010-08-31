@@ -67,6 +67,8 @@ public class DeployClient extends AbstractRepository
   private ActorClient _bamClient;
   private String _deployJid;
   
+  private String _url;
+  
   public DeployClient()
   {
     Server server = Server.getCurrent();
@@ -96,6 +98,8 @@ public class DeployClient extends AbstractRepository
   {
     String url = "http://" + host + ":" + port + "/hmtp";
     
+    _url = url;
+    
     HmtpClient client = new HmtpClient(url);
     try {
       client.setVirtualHost("admin.resin");
@@ -110,6 +114,11 @@ public class DeployClient extends AbstractRepository
                                                     url, e.getMessage()),
                                                 e);
     }
+  }
+  
+  public String getUrl()
+  {
+    return _url;
   }
 
   /**

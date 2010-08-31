@@ -30,6 +30,7 @@
 package com.caucho.env.deploy;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -89,26 +90,31 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     unregisterSelf();
   }
 
+  @Override
   public String getName()
   {
     return _controller.getMBeanId();
   }
 
+  @Override
   public String getStartupMode()
   {
     return _controller.getStartupMode().toString();
   }
 
+  @Override
   public String getRedeployMode()
   {
     return _controller.getRedeployMode().toString();
   }
 
+  @Override
   public long getRedeployCheckInterval()
   {
     return _controller.getRedeployCheckInterval();
   }
 
+  @Override
   public String getState()
   {
     DeployController<?> controller = getController();
@@ -121,31 +127,46 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
       return state.toString();
   }
 
+  @Override
   public String getErrorMessage()
   {
     return getController().getErrorMessage();
   }
 
+  @Override
   public Date getStartTime()
   {
     return new Date(getController().getStartTime());
   }
+  
+  @Override
+  public Map<String,String> getRepositoryMetaData()
+  {
+    return getController().getRepositoryMetaData();
+  }
+  
+  //
+  // Lifecycle
+  //
 
   /**
    * Starts the controller.
    */
+  @Override
   public void start()
     throws Exception
   {
     getController().start();
   }
 
+  @Override
   public void stop()
     throws Exception
   {
     getController().stop();
   }
 
+  @Override
   public void restart()
     throws Exception
   {
@@ -153,12 +174,14 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     getController().start();
   }
 
+  @Override
   public void update()
     throws Exception
   {
     getController().update();
   }
 
+  @Override
   public boolean destroy()
     throws Exception
   {
@@ -168,11 +191,13 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
   /**
    * Returns the root directory
    */
+  @Override
   public String getRootDirectory()
   {
     return _controller.getRootDirectory().getNativePath();
   }
 
+  @Override
   public void addNotificationListener(NotificationListener listener,
                                       NotificationFilter filter,
                                       Object handback)
@@ -181,12 +206,14 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     _broadcaster.addNotificationListener(listener, filter, handback);
   }
 
+  @Override
   public void removeNotificationListener(NotificationListener listener)
     throws ListenerNotFoundException
   {
     _broadcaster.removeNotificationListener(listener);
   }
 
+  @Override
   public void removeNotificationListener(NotificationListener listener,
                                          NotificationFilter filter,
                                          Object handback)
@@ -195,6 +222,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     _broadcaster.removeNotificationListener(listener, filter, handback);
   }
 
+  @Override
   public MBeanNotificationInfo[] getNotificationInfo()
   {
     // XXX: temporary hack
@@ -203,6 +231,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return new MBeanNotificationInfo[] { status };
   }
 
+  @Override
   public void lifecycleEvent(LifecycleState oldState, LifecycleState newState)
   {
     Logger log = _controller.getLog();
@@ -242,6 +271,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     */
   }
 
+  @Override
   public String toString()
   {
     String name =  getClass().getName();
