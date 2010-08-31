@@ -28,7 +28,7 @@
  */
 
 
-package com.caucho.server.cluster;
+package com.caucho.cloud.topology;
 
 import java.util.ArrayList;
 
@@ -40,22 +40,25 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ResinMXBean;
+import com.caucho.server.resin.Resin;
 
-public class ClusterAdmin extends AbstractManagedObject
+public class CloudClusterAdmin extends AbstractManagedObject
   implements ClusterMXBean
 {
-  private final Cluster _cluster;
+  private final CloudCluster _cluster;
 
-  public ClusterAdmin(Cluster cluster)
+  public CloudClusterAdmin(CloudCluster cluster)
   {
     _cluster = cluster;
   }
 
+  @Override
   public String getName()
   {
     return _cluster.getId();
   }
   
+  @Override
   public HostMXBean []getHosts()
   {
     return new HostMXBean[0];
@@ -74,25 +77,32 @@ public class ClusterAdmin extends AbstractManagedObject
     return null;
   }
 
+  @Override
   public ResinMXBean getResin()
   {
-    return _cluster.getResin().getAdmin();
+    return Resin.getCurrent().getAdmin();
   }
 
+  @Override
   public PersistentStoreMXBean getPersistentStore()
   {
     return null;
   }
 
+  @Override
   public ClusterServerMXBean []getServers()
   {
     ArrayList<ClusterServerMXBean> serverMBeansList
       = new ArrayList<ClusterServerMXBean>();
 
-    for (ClusterPod pod : _cluster.getPodList()) {
-      for (ClusterServer server : pod.getServerList()) {
-        if (server != null)
-          serverMBeansList.add(server.getAdmin());
+    for (CloudPod pod : _cluster.getPodList()) {
+      for (CloudServer server : pod.getServerList()) {
+        if (server != null) {
+          ClusterServer clusterServer = server.getData(ClusterServer.class);
+
+          if (clusterServer != null)
+            serverMBeansList.add(clusterServer.getAdmin());
+        }
       }
     }
 
@@ -108,7 +118,7 @@ public class ClusterAdmin extends AbstractManagedObject
    */
   public void addDynamicServer(String id, String address, int port)
   {
-    _cluster.addDynamicServer(id, address, port);
+    // _cluster.addDynamicServer(id, address, port);
     /*
     Server server = _cluster.getResin().getServer();
     
@@ -118,7 +128,8 @@ public class ClusterAdmin extends AbstractManagedObject
 
   public boolean isDynamicServerEnable()
   {
-    return _cluster.isDynamicServerEnable();
+    // return _cluster.isDynamicServerEnable();
+    return false;
   }
 
 
@@ -129,6 +140,11 @@ public class ClusterAdmin extends AbstractManagedObject
   void register()
   {
     registerSelf();
+  }
+  
+  void unregister()
+  {
+    unregisterSelf();
   }
 
   @Override
