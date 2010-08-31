@@ -23,20 +23,20 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Reza Rahman
+ * @author Scott Ferguson
  */
-package javax.ejb;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.caucho.ejb.cfg;
+
+import javax.ejb.Asynchronous;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * Used to mark a method as an asynchronous method or to designate all business
- * methods of a class or interface as asynchronous.
+ * <pre>
+ * @Asynchronous
+ * </pre>            
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Asynchronous {
+public class AsynchronousLiteral extends AnnotationLiteral<Asynchronous>
+  implements Asynchronous
+{
 }

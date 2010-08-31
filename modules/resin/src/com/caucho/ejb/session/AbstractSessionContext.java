@@ -39,6 +39,7 @@ import javax.ejb.EJBObject;
 import javax.ejb.SessionContext;
 import javax.xml.rpc.handler.MessageContext;
 
+import com.caucho.config.async.AsyncItem;
 import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
@@ -62,8 +63,6 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   private Class<T> _api;
   private SessionProxyFactory<T> _proxyFactory;
   
-  private HashMap<String,Object> _contextData = new HashMap<String,Object>();
-
   protected AbstractSessionContext(AbstractSessionManager<X> manager,
                                    Class<T> api)
   {
@@ -183,7 +182,7 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   @Override
   public boolean wasCancelCalled()
   {
-    return false;
+    return AsyncItem.isThreadCancelled();
   }
 
   @Override
@@ -223,5 +222,9 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _api.getName() + "]";
+  }
+  
+  static interface CancelCalled {
+    boolean wasCancelCalled();
   }
 }

@@ -47,14 +47,12 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
 
   private String _varName;
   private AspectGenerator<X> _head;
-  private AsynchronousFactory<X> _factory;
   private AnnotatedMethod<? super X> _method;
  
   public AsynchronousGenerator(AsynchronousFactory<X> factory,
                                AnnotatedMethod<? super X> method,
                                AspectGenerator<X> head)
   {
-    _factory = factory;
     _method = method;
     _head = head;
   }

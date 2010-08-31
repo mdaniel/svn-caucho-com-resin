@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import javax.ejb.EJBException;
 
+import com.caucho.config.j2ee.EJBExceptionWrapper;
 import com.caucho.util.Alarm;
 
 
@@ -46,11 +47,25 @@ import com.caucho.util.Alarm;
  */
 abstract public class AsyncItem<X> implements Runnable, Future<X> {
   private static final Logger log = Logger.getLogger(AsyncItem.class.getName());
+  
+  private static final ThreadLocal<AsyncItem<?>> _localItem
+    = new ThreadLocal<AsyncItem<?>>();
 
+  private boolean _isCancelled;
   private volatile boolean _isDone;
   private volatile Future<X> _result;
   
   private ExecutionException _executionException;
+  
+  public static boolean isThreadCancelled()
+  {
+    AsyncItem<?> item = _localItem.get();
+    
+    if (item != null)
+      return item.isCancelled();
+    else
+      return false;
+  }
 
   abstract public Future<X> runTask()
     throws Exception;
@@ -59,6 +74,8 @@ abstract public class AsyncItem<X> implements Runnable, Future<X> {
   public final void run()
   {
     try {
+      _localItem.set(this);
+      
       _result = runTask();
       
       if (_result != null)
@@ -67,12 +84,17 @@ abstract public class AsyncItem<X> implements Runnable, Future<X> {
       log.log(Level.FINER, e.toString(), e);
       
       _executionException = new ExecutionException(new EJBException(e));
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
       
       _executionException = new ExecutionException(e);
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      _executionException = new ExecutionException(new EJBExceptionWrapper(e));
     } finally {
       _isDone = true;
+      _localItem.set(null);
       
       synchronized (this) {
         notifyAll();
@@ -83,7 +105,10 @@ abstract public class AsyncItem<X> implements Runnable, Future<X> {
   @Override
   public boolean cancel(boolean mayInterruptIfRunning)
   {
-    return mayInterruptIfRunning;
+    if (mayInterruptIfRunning)
+      _isCancelled = true;
+    
+    return false;
   }
 
   @Override
@@ -130,10 +155,7 @@ abstract public class AsyncItem<X> implements Runnable, Future<X> {
   @Override
   public boolean isCancelled()
   {
-    if (_result != null)
-      return _result.isCancelled();
-    else
-      return false;
+    return _isCancelled;
   }
 
   @Override

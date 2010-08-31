@@ -53,6 +53,7 @@ public class AsyncQueue extends TaskWorker {
     wake();
   }
   
+  @Override
   public final long runTask()
   {
     try {

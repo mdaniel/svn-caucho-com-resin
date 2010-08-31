@@ -150,6 +150,9 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
   private ArrayList<AroundInvokeConfig> _aroundInvoke
     = new ArrayList<AroundInvokeConfig>();
+
+  private ArrayList<AsyncConfig> _asyncConfig
+    = new ArrayList<AsyncConfig>();
   
   private String _timeoutMethodName;
 
@@ -206,6 +209,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
   {
     _aroundInvoke.add(aroundInvoke);
+  }
+
+  public void addAsyncMethod(AsyncConfig async)
+  {
+    _asyncConfig.add(async);
   }
 
   public void setInjectionTarget(InjectionTarget<X> injectTarget)
@@ -712,6 +720,16 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     _transactionTimeout = timeout.getPeriod();
   }
+  
+  public void addBusinessLocal(Class localApi)
+  {
+    addLocal(localApi);
+  }
+  
+  public void addBusinessRemote(Class<?> remoteApi)
+  {
+    addRemote(remoteApi);
+  }
 
   /**
    * Gets the transaction timeout.
@@ -996,6 +1014,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     }
     
     configureAroundInvoke(getAnnotatedType());
+    configureAsync(getAnnotatedType());
   }
   
   private void introspectInterceptor(InterceptorBinding binding)
@@ -1538,6 +1557,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
       configureMethods(type);
       configureAroundInvoke(type);
+      configureAsync(type);
       /*
         for (int i = 0; i < _initList.size(); i++)
         addInitProgram(_initList.get(i).getBuilderProgram());
@@ -1619,6 +1639,43 @@ public class EjbBean<X> extends DescriptionGroupConfig
     }
     
     configureAroundInvoke(type, cl.getSuperclass(), aroundInvoke);
+  }
+
+  private void configureAsync(AnnotatedType<X> type)
+  {
+    AnnotatedTypeImpl<X> typeImpl = (AnnotatedTypeImpl<X>) type;
+
+    for (AsyncConfig async : _asyncConfig) {
+      configureAsync(typeImpl, type.getJavaClass(), async);
+    }
+  }
+  
+  private void configureAsync(AnnotatedTypeImpl<X> type,
+                              Class<?> cl, 
+                              AsyncConfig async)
+  {
+    if (cl == null)
+      return;
+
+    for (Method method : cl.getDeclaredMethods()) {
+      if (async.isMatch(method)) {
+        AnnotatedMethod<?> annMethod = AnnotatedTypeUtil.findMethod(type, method);
+        
+        if (annMethod == null) {
+          annMethod = type.createMethod(method);
+        }
+          
+        AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) annMethod; 
+        
+        methodImpl.addAnnotation(new AsynchronousLiteral());
+
+        AnnotatedOverrideMap.putMethod(method, methodImpl);
+        
+        return;
+      }
+    }
+    
+    configureAsync(type, cl.getSuperclass(), async);
   }
     
   private void setPatternTransaction(EjbMethodPattern<X> pattern,
