@@ -9,7 +9,7 @@ dnl Get os info
 AC_CANONICAL_SYSTEM
 
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE(resin, 4.0.2)
+AM_INIT_AUTOMAKE(resin, 4.0.11)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -37,10 +37,9 @@ AC_SUBST(resin_home)
 #
 
 AC_ARG_WITH(resin-root,
-[  --with-resin-root=DIR  resin data directory
-], [
-resin_root=${withval}
-])
+[AS_HELP_STRING([--with-resin-root=DIR],
+                [resin data directory])], 
+[resin_root=${withval}])
 
 if test -z "$resin_root"; then
   if test "$prefix" == "NONE"; then
@@ -58,10 +57,9 @@ AC_SUBST(resin_root)
 AC_SUBST(resin_conf)
 
 AC_ARG_WITH(resin-conf,
-[  --with-resin-conf=DIR  resin configuration directory
-], [
-resin_conf=${withval}
-])
+[AS_HELP_STRING([--with-resin-conf=DIR],
+                [resin configuration directory])], 
+[resin_conf=${withval}])
 
 if test -z "$resin_conf"; then
   if test "$prefix" == "NONE"; then
@@ -77,10 +75,9 @@ fi
 AC_SUBST(resin_log)
 
 AC_ARG_WITH(resin-log,
-[  --with-resin-log=DIR  resin log directory
-], [
-resin_log=${withval}
-])
+[AS_HELP_STRING([--with-resin-log=DIR], 
+                [resin log directory])], 
+[resin_log=${withval}])
 
 if test -z "$resin_log"; then
   if test "$prefix" == "NONE"; then
@@ -90,11 +87,24 @@ if test -z "$resin_log"; then
   fi
 fi
 
+#
+# --with-resin-init.d
+#
 if test -d "/etc/init.d/rc.d"; then
   resin_init_d="/etc/init.d/rc.d/resin"
 elif test -d "/etc/init.d"; then
   resin_init_d="/etc/init.d/resin"
 fi
+
+AC_ARG_WITH(resin-init.d,
+[AS_HELP_STRING([--with-resin-init.d=PATH], 
+                [resin startup (init.d) script path])], 
+[
+case "${withval}" in
+  no)  resin_init_d= ;;
+  *)   resin_init_d=${withval};;
+esac
+])
 
 AC_SUBST(resin_init_d)
 
@@ -115,10 +125,9 @@ AC_SUBST(resin_pro)
 # --with-java-home
 #
 AC_ARG_WITH(java-home,
-[  --with-java-home=DIR  java home
-], [
-JAVA_HOME=${withval}
-])
+[AS_HELP_STRING([--with-java-home=DIR],
+                [java home])], 
+[JAVA_HOME=${withval}])
 
 if test -z "$JAVA_HOME"; then
   java=`which java 2>/dev/null`
@@ -216,8 +225,9 @@ CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS"
 # --with-apache-src
 #
 AC_ARG_WITH(apache-src,
-[  --with-apache-src=DIR  Apache src static compilation
-], [
+[AS_HELP_STRING([--with-apache-src=DIR],
+                [Apache src static compilation])], 
+[
 apache_src=${withval}
 
 if test -d "${apache_src}/modules"; then
@@ -299,8 +309,9 @@ END
 # --with-apache
 #
 AC_ARG_WITH(apache,
-[  --with-apache=DIR  the Apache root directory
-], [
+[AS_HELP_STRING([--with-apache=DIR],
+                [the Apache root directory])], 
+[
 apache_dir=${withval}
 
 if test "${apache_dir}" = "yes"; then
@@ -318,8 +329,9 @@ apache=1
 # --with-apxs
 #
 AC_ARG_WITH(apxs,
-[  --with-apxs=PATH  the Apache configuration utility
-], [
+[AS_HELP_STRING([--with-apxs=PATH],
+                [the Apache configuration utility])], 
+[
 apxs=${withval}
 
 if test "${apxs}" = "yes"; then
@@ -333,17 +345,17 @@ apache=1
 # --with-apache-eapi
 #
 AC_ARG_WITH(apache-eapi,
-[  --with-apache-eapi=DIR  Apache eapi support
-], [
-apache_eapi=${withval}
-])
+[AS_HELP_STRING([--with-apache-eapi=DIR],
+                [Apache eapi support])], 
+[apache_eapi=${withval}])
 
 #
 # --with-apache-include
 #
 AC_ARG_WITH(apache-include,
-[  --with-apache-include=DIR  the Apache include directory
-], [
+[AS_HELP_STRING([--with-apache-include=DIR],
+                [the Apache include directory])], 
+[
 apache_include=${withval}
 
 if test "${apache_include}" = "yes"; then
@@ -357,8 +369,9 @@ apache=1
 # --with-apache-libexec
 #
 AC_ARG_WITH(apache-libexec,
-[  --with-apache-libexec=DIR  the Apache module directory
-], [
+[AS_HELP_STRING([--with-apache-libexec=DIR],
+                [the Apache module directory])], 
+[
 apache_libexec=${withval}
 
 if test "${apache_libexec}" = "yes"; then
@@ -372,8 +385,9 @@ apache=1
 # --with-apache-conf
 #
 AC_ARG_WITH(apache-conf,
-[  --with-apache-conf=DIR  the Apache configuration
-], [
+[AS_HELP_STRING([--with-apache-conf=DIR],
+                [the Apache configuration])], 
+[
 apache_conf=${withval}
 
 if test "${apache_conf}" = "yes"; then
@@ -389,8 +403,9 @@ apache_cflags=
 # --with-apache-cflags
 #
 AC_ARG_WITH(apache-cflags,
-[  --with-apache-cflags=flags  flags for compiling mod_caucho
-], [
+[AS_HELP_STRING([--with-apache-cflags=flags],
+                [flags for compiling mod_caucho])], 
+[
 apache_cflags=${withval}
 
 apache=1
@@ -671,7 +686,7 @@ rm -f $tmpname
 # --enable-64bit
 #
 AC_ARG_ENABLE(64bit,
-[  --enable-64bit    Enable 64 bit],
+[AS_HELP_STRING([--enable-64bit], [Enable 64 bit])],
 [case "${enableval}" in
  yes) b64=true; b64_jni=true ;;
  no)  b64=""; b64_jni="" ;;
@@ -682,7 +697,7 @@ AC_ARG_ENABLE(64bit,
 # --enable-64bit-jni
 #
 AC_ARG_ENABLE(64bit-jni,
-[  --enable-64bit-jni    Enable 64 bit JNI only (not Apache)],
+[AS_HELP_STRING([--enable-64bit-jni], [Enable 64 bit JNI only (not Apache)])],
 [case "${enableval}" in
  yes) b64_jni=true ;;
  no)  b64_jni="" ;;
@@ -693,7 +708,7 @@ AC_ARG_ENABLE(64bit-jni,
 # --enable-64bit-plugin
 #
 AC_ARG_ENABLE(64bit-plugin,
-[  --enable-64bit-plugin    Enable 64 bit plugin (Apache) (not JNI)],
+[AS_HELP_STRING([--enable-64bit-plugin], [Enable 64 bit plugin (Apache) (not JNI)])],
 [case "${enableval}" in
  yes) b64=true ;;
  no)  b64="" ;;
@@ -713,7 +728,7 @@ fi
 # --enable-lfs
 #
 AC_ARG_ENABLE(lfs,
-[  --enable-lfs            Enable large file source support],
+[AS_HELP_STRING([--enable-lfs], [Enable large file source support])],
 [case "${enableval}" in
  yes) lfs=true ;;
  no)  lfs="";;
@@ -997,8 +1012,9 @@ AC_SUBST(SSL_LIBS)
 # --with-jni-include
 #
 AC_ARG_WITH(jni-include,
-[  --with-jni-include="-Idir -Idir"  jni include string
-], [
+[AS_HELP_STRING([--with-jni-include="-Idir -Idir"], 
+                [jni include string])], 
+[
 JNI_INCLUDE=${withval}
 JNI="yes"
 ])
@@ -1007,7 +1023,7 @@ JNI="yes"
 # --enable-jni
 #
 AC_ARG_ENABLE(jni,
-[  --enable-jni    Turn on jni],
+[AS_HELP_STRING([--enable-jni], [Turn on jni])],
 [case "${enableval}" in
  yes) JNI=true ;;
  no)  JNI=false ;; 
@@ -1097,7 +1113,7 @@ AC_SUBST(JNI_INCLUDE)
 # --enable-ssl
 #
 AC_ARG_ENABLE(ssl,
-[  --enable-ssl    Turn on ssl],
+[AS_HELP_STRING([--enable-ssl], [Turn on ssl])],
 [case "${enableval}" in
  yes) ENABLE_SSL=true ;;
  no)  ENABLE_SSL="false" ;;
@@ -1108,8 +1124,9 @@ AC_ARG_ENABLE(ssl,
 # --with-openssl
 #
 AC_ARG_WITH(openssl,
-[  --with-openssl=DIR  Openssl directory
-], [
+[AS_HELP_STRING([--with-openssl=DIR],
+                [Openssl directory])], 
+[
 OPENSSL=${withval}
 OPENSSL_INCLUDE=${OPENSSL}/include	
 OPENSSL_LIB=${OPENSSL}/lib	
@@ -1119,8 +1136,9 @@ OPENSSL_LIB=${OPENSSL}/lib
 # --with-openssl-include
 #
 AC_ARG_WITH(openssl-include,
-[  --with-openssl-include=DIR  Openssl include directory
-], [
+[AS_HELP_STRING([--with-openssl-include=DIR],
+                [Openssl include directory])], 
+[
 OPENSSL_INCLUDE=${withval}
 
 if test ! -r "${OPENSSL_INCLUDE}/openssl/ssl23.h"; then
@@ -1132,8 +1150,9 @@ fi
 # --with-openssl-lib
 #
 AC_ARG_WITH(openssl-lib,
-[  --with-openssl-lib=DIR  Openssl lib directory
-], [
+[AS_HELP_STRING([--with-openssl-lib=DIR],
+                [Openssl lib directory])], 
+[
 OPENSSL_LIB=${withval}
 
 if test ! -r "${OPENSSL_LIB}/libssl.a" -a \
@@ -1334,10 +1353,9 @@ PERL="perl"
 # --with-perl
 #
 AC_ARG_WITH(perl,
-[  --with-perl=DIR  Perl binary location
-], [
-PERL=${withval}
-])
+[AS_HELP_STRING([--with-perl=DIR],
+                [Perl binary location])], 
+[PERL=${withval}])
 
 AC_SUBST(PERL)
 
@@ -1345,7 +1363,7 @@ AC_SUBST(PERL)
 # --enable-debug
 #
 AC_ARG_ENABLE(debug,
-[  --enable-debug    Turn on debugging],
+[AS_HELP_STRING([--enable-debug], [Turn on debugging])],
 [case "${enableval}" in
  yes) debug=true ;;
  no)  debug=false ;;
@@ -1392,7 +1410,7 @@ echo "      root: ${resin_root}"
 echo "      conf: ${resin_conf}"
 echo "      log : ${resin_log}"
 
-if test -n "resin_init_d"; then
+if test -n "${resin_init_d}"; then
   echo "      init: ${resin_init_d}"
 fi
 

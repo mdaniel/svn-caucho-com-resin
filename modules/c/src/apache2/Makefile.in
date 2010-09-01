@@ -14,8 +14,8 @@ LDFLAGS_SHLIB=@LDFLAGS_SHLIB@
 APACHE_INC=@APACHE_INC@
 apache_conf=@apache_conf@
 apache_dir=@apache_dir@
-apache_libexec=@apache_libexec@
-resin_home=@resin_home@
+apache_libexec=@$(DESTDIR)apache_libexec@
+resin_home=$(DESTDIR)@resin_home@
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo
