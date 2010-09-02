@@ -698,6 +698,35 @@ if (! empty($server)) {
   return true;
 }
 
+function javascript_create_tab($tab_name)
+{
+  $javascript = <<<EOF
+    $(".toggleable").each(function() {
+      var toggleable = $(this);
+      var id = toggleable.attr("id");
+      var toggleId = id + "-toggle";
+      var toggleSwitch = $("#" + toggleId);
+
+      toggleSwitch.html("[show] ");
+
+      toggleSwitch.toggle(
+        function() {
+          toggleable.show();
+          toggleSwitch.html("[hide] ");
+        },
+        function() {
+          toggleable.hide();
+          toggleSwitch.html("[show] ");
+        }
+     );
+    });
+
+    $($tab_name).tabs().find(".ui-tabs-nav").sortable({axis:'x'});
+EOF;
+
+  return $javascript;
+}  
+
 function display_pages()
 {
   global $g_pages;

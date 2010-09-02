@@ -18,44 +18,6 @@ $is_secure = $request->isSecure();
 $user = quercus_get_request()->getUserPrincipal();
 $action = $_POST['action'];
 
-if (! $action) {
-}
-else if ($is_secure) {
-  if ($action == 'deploy') {
-    $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
-    $vfs = java_class("com.caucho.vfs.Vfs");
-
-    $path = $vfs->lookup($_FILES['warfile']['tmp_name']);
-    $tag = $client->createTag("default", 
-                              $_REQUEST['host'], 
-                              $_REQUEST['url'], 
-                              NULL);
-    $user = $request->getRemoteUser();
-
-    $attributes = array($client->USER_ATTRIBUTE => $user,
-                        "client", "resin-admin");
-
-    $client->deployJarContents($tag, $path, $attributes);
-  }
-  else if ($_POST['name'] == $_GET['id']) {
-    if ($action == 'start') {
-      $webapp->start();
-
-      echo "<div class='warn'>Starting '${_GET['id']}' by $user</div>";
-    }
-    else if ($action == 'stop') {
-      $webapp->stop();
-
-      echo "<div class='warn'>Stopping '${_GET['id']}' by $user</div>";
-    }
-    else if ($action == 'restart') {
-      $webapp->restart();
-
-      echo "<div class='warn'>Restarting '${_GET['id']}' by $user</div>";
-    }
-  }
-}
-
 if ($webapp) {
   display_webapp($g_mbean_server, $webapp);
 }
@@ -172,13 +134,21 @@ function display_tab($name, $un_name, $is_selected)
  */
 function display_webapp_summary_page($g_mbean_server)
 {
-  echo "<ul class='tabs'>\n";
-  display_tab("active", "idle", true);
-  display_tab("idle", "active", false);
+  echo "<div id='webapp-tabs'>\n";
+  echo "<ul>\n";
+  echo "<li><a href='#webapp-active'>Active</a></li>\n";
+  echo "<li><a href='#webapp-idle'>Idle</a></li>\n";
   echo "</ul>\n";
-  
+
+  echo "<div id='webapp-active'>\n";
   display_webapp_summary($g_mbean_server, false);
+  echo "</div>\n";
+  
+  echo "<div id='webapp-idle'>\n";
   display_webapp_summary($g_mbean_server, true);
+  echo "</div>\n";
+  
+  echo "</div>\n";
 }  
 
 /**
@@ -187,13 +157,6 @@ function display_webapp_summary_page($g_mbean_server)
 function display_webapp_summary($g_mbean_server, $is_idle)
 {
   global $is_secure;
-
-  if ($is_idle) {
-    echo "<div id='g_idle' style='display:none'>";
-  }
-  else {
-    echo "<div id='g_active'>";
-  }
   
 ?><top>
   <test-file/>
@@ -272,7 +235,6 @@ echo "<a href='index.php?q=webapp&id=" . $object_name . "'>" . $context_path . "
 ?>
 
 </table>
-</div>
 
 <?php
 }
@@ -315,4 +277,6 @@ Online webapp deploy is only available over connections secured with SSL.
 </table>
 <?php
 } // summary
+
+display_footer($g_page, javascript_create_tab("webapp-tab"));
 ?>

@@ -10,7 +10,6 @@ if (! admin_init()) {
 }
 
 $profile = @new Java("com.caucho.profile.Profile");
-$profileQuercus = isset($_POST['profile_quercus']);
 
 if ($profile) {
   if ($_POST['action'] == 'stop') {
@@ -126,8 +125,8 @@ if ($profile) {
 
 //  echo "<table class='threads'>\n";
 
-  echo "<p>";
-  echo "<ul class='tabs'>";
+  echo "<div id='#profile-tab'>";
+  echo "<ul>";
   $count = 0;
   foreach ($groups as $name) {
     $entries = $partition[$name];
@@ -137,28 +136,14 @@ if ($profile) {
 
     $count++;
 
-    echo "<li id='tab_" . $name . "'";
-    if ($count == 1)
-      echo " class='selected'";
-    else
-      echo " class=''";
-    echo ">\n";
-
-    echo "<a href='#' onclick=\"";
     foreach ($groups as $subname) {
       if (sizeof($partition[$subname]) <= 0)
         continue;
 
-      if ($subname == $name) {
-        echo "show('g_" . $subname . "');";
-        echo "sel('tab_" . $subname . "');";
-      }
-      else {
-        echo "hide('g_" . $subname . "');";
-        echo "unsel('tab_" . $subname . "');";
-      }
+      echo "<li>\n";
+      echo "<a href='#${subname}-tab'>$subname</a>";
+      echo "</li>\n";
     }
-    echo "\">" . $name . "</a></li>";
   }
   echo "</ul>\n";
 
@@ -171,11 +156,7 @@ if ($profile) {
 
     $count++;
 
-    echo "<div"
-    echo " id='g_" . $name . "'";
-    if ($count != 1)
-     echo " style='display:none'";
-    echo ">\n";
+    echo "<div id='${name}-tab'>"
 
     echo "<table";
     echo " class='threads'>\n";
@@ -272,7 +253,7 @@ if ($profile) {
     echo "</div>\n";
   }
 
- // echo "</table>\n";
+ echo "</div>\n";
 }
 else {
   echo "<h2>Profiling is not available</h2>";
@@ -465,4 +446,6 @@ function print_stack_entry($stack)
     return "{$stack->className}.{$methodName}({$stack->getArg()})\n";
   }
 }
+
+display_footer($g_page, javascript_create_tab("profile-tab"));
 ?>
