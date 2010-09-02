@@ -574,11 +574,11 @@ table.data {
   empty-cells: hide;
 }
 
-.data tr.ra {
+tr.ra {
   background: #f4f4f4;
 }
 
-.data tr.rb {
+tr.rb {
   background: #e4e4e4;
 }
 

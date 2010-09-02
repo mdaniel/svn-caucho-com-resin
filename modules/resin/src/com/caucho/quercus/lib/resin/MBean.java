@@ -228,7 +228,6 @@ public class MBean {
   {
     for (int i = 0; i < sig.length; i++) {
       args[i] = findMarshall(sig[i]).marshall(args[i]);
-      System.out.println("MM: " + sig[i]);
     }
   }
 

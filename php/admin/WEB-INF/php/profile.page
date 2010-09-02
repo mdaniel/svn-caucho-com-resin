@@ -115,7 +115,6 @@ if ($profile) {
   $period = $profile->getPeriod();
   $sample_ticks = $profile->getTicks();
   $results = $profile->getResults();
-  
 
   echo "<h3>Run Time: " . ($sample_ticks * $period / 1000) . "s</h3>\n";
 
@@ -125,7 +124,7 @@ if ($profile) {
 
 //  echo "<table class='threads'>\n";
 
-  echo "<div id='#profile-tab'>";
+  echo "<div id='profile-tabs'>";
   echo "<ul>";
   $count = 0;
   foreach ($groups as $name) {
@@ -136,14 +135,9 @@ if ($profile) {
 
     $count++;
 
-    foreach ($groups as $subname) {
-      if (sizeof($partition[$subname]) <= 0)
-        continue;
-
-      echo "<li>\n";
-      echo "<a href='#${subname}-tab'>$subname</a>";
-      echo "</li>\n";
-    }
+    echo "<li>\n";
+    echo "<a href='#${name}-tab'>$name</a>";
+    echo "</li>\n";
   }
   echo "</ul>\n";
 
@@ -157,108 +151,105 @@ if ($profile) {
     $count++;
 
     echo "<div id='${name}-tab'>"
-
-    echo "<table";
-    echo " class='threads'>\n";
-
-    //$topTicks = $entries[0]->getCount();
-    $total_ticks = 0;
-    for ($i = sizeof($entries) - 1; $i >= 0; $i--) {
-      $total_ticks += $entries[$i]->getCount();
-    }
-
-    echo "<tr class='head'><th colspan='5' align='left'>$name (" . sizeof($entries) . ")";
-
-    $show = "hide('s_$name');show('h_$name');";
-    $hide = "show('s_$name');hide('h_$name');";
-
-    for ($i = 0; $i < sizeof($entries); $i++) {
-      $show .= "show('t_{$name}_{$i}');";
-      $hide .= "hide('t_{$name}_{$i}');";
-    }
-
-    echo " <a id='s_$name' href=\"javascript:$show\">show</a> ";
-    echo "<a id='h_$name' href=\"javascript:$hide\" style='display:none'>hide</a>";
-
-    echo "</th></tr>\n";
-
-    echo "<tr>";
-    echo "  <th>% time</th>";
-    echo "  <th>time self";
-    echo "  <th>% sum</th>";
-    echo "<th><th>trace\n";
-    echo "</tr>";
-
-    $total_percent = 0;
-    for ($i = 0; $i < sizeof($entries); $i++) {
-      $entry = $entries[$i];
-
-      $time_percent = 100 * $entry->getCount() / $sample_ticks;
-      $self_percent = 100 * $entry->getCount() / $total_ticks;
-      $total_percent += $self_percent;
-
-      echo "<tr>";
-      echo "<td align='right'>";
-      printf("%9.3f%%", $time_percent);
-      echo "</td><td align='right'>";
-      printf("%.3fs", $entry->getCount() * $period * 0.001);
-      echo "</td><td align='right'>";
-      printf("%9.3f%%", $total_percent);
-      echo "</td>";
-      echo "<td>";
-      echo "<a id='s_{$name}_{$i}' href=\"javascript:show('t_{$name}_{$i}');hide('s_{$name}_{$i}');show('h_{$name}_{$i}');\">show</a> ";
-      echo "<a id='h_{$name}_{$i}' href=\"javascript:hide('t_{$name}_{$i}');show('s_{$name}_{$i}');hide('h_{$name}_{$i}');\" style='display:none'>hide</a> ";
-      echo "</td>";
-
-      if ($profileQuercus)
-        echo "<td class='quercus'>";
-      else 
-        echo "<td>";
-
-      echo htmlspecialchars($entry->getDescription());
-
-      // echo print_stack_entry($stack);
-
-      if (contains_quercus_calls($entry))
-        echo "*";
-
-      echo "</td>";
-      echo "</tr>\n";
-
-//      echo "<tr id='t_{$name}_{$i}' style='display:none; cellpadding:0'>";
-      echo "<tr>";
-
-      echo "<td colspan='1'>";
-      echo "</td>";
-
-      echo "<td colspan='4'>";
-
-      if ($profileQuercus)
-        echo "<div class='quercus-stack-trace'";
-      else {
-        echo "<div class='stack-trace'";
-      }
-      echo " id='t_{$name}_{$i}' style='display:none'>";
-
-      foreach ($entry->getStackTrace() as $stack) {
-        echo "  at " . print_stack_entry($stack);
-      }
-      
-      echo "</div>";
-      echo "</td>";
-      echo "</tr>\n";
-    }
-
-    echo "</table>\n";
+    print_profile_tab($entries, $name, $count, $profile);
     echo "</div>\n";
   }
 
- echo "</div>\n";
+  echo "</div>\n";
 }
 else {
   echo "<h2>Profiling is not available</h2>";
 
   echo "<p>Profiling requires Resin Professional and compiled JNI</p>";
+}
+
+function print_profile_tab($entries, $name, $count, $profile)
+{
+  $period = $profile->getPeriod();
+  $sample_ticks = $profile->getTicks();
+  
+  echo "<table class='threads'>\n";
+
+  //$topTicks = $entries[0]->getCount();
+  $total_ticks = 0;
+  for ($i = sizeof($entries) - 1; $i >= 0; $i--) {
+    $total_ticks += $entries[$i]->getCount();
+  }
+
+  echo "<tr class='head'>"
+  echo "<th colspan='5' align='left'>"
+  echo "<span id='sw_$name' class='switch'></span>";
+  echo "$name (" . sizeof($entries) . ")";
+
+  /*
+  $show = "hide('s_$name');show('h_$name');";
+  $hide = "show('s_$name');hide('h_$name');";
+
+  for ($i = 0; $i < sizeof($entries); $i++) {
+    $show .= "show('t_{$name}_{$i}');";
+    $hide .= "hide('t_{$name}_{$i}');";
+  }
+
+  echo " <a id='s_$name' href=\"javascript:$show\">show</a> ";
+  echo "<a id='h_$name' href=\"javascript:$hide\" style='display:none'>hide</a>";
+  */
+
+  echo "</th></tr>\n";
+
+  echo "<tr>";
+  echo "  <th></th>";
+  echo "  <th>% time</th>";
+  echo "  <th>time self";
+  echo "  <th>% sum</th>";
+  echo "  <th>Method Call</th>";
+  echo "</tr>";
+
+  $total_percent = 0;
+  for ($i = 0; $i < sizeof($entries); $i++) {
+    $entry = $entries[$i];
+
+    $time_percent = 100 * $entry->getCount() / $sample_ticks;
+    $self_percent = 100 * $entry->getCount() / $total_ticks;
+    $total_percent += $self_percent;
+
+    echo "<tr>";
+    echo "<td>";
+    echo "<span id='sw_{$name}_{$i}' class='switch'></span>";
+    echo "</td>";
+    
+    echo "<td align='right'>";
+    printf("%9.3f%%", $time_percent);
+    echo "</td><td align='right'>";
+    printf("%.3fs", $entry->getCount() * $period * 0.001);
+    echo "</td><td align='right'>";
+    printf("%9.3f%%", $total_percent);
+    echo "</td>";
+
+    echo "<td>";
+
+    echo htmlspecialchars($entry->getDescription());
+
+    echo "</td>";
+    echo "</tr>\n";
+
+    echo "<tr class='toggle-sw_${name} toggle-sw_${name}_${i}'>";
+    echo "<td></td>";
+    
+    echo "<td colspan='4'>";
+
+    echo "<div class='stack-trace'>";
+    echo "<hr>";
+
+    foreach ($entry->getStackTrace() as $stack) {
+      echo "  at " . print_stack_entry($stack);
+    }
+    
+    echo "</div>";
+    echo "</td>";
+    echo "</tr>\n";
+  }
+
+  echo "</table>\n";
 }
 
 function do_partition_profile($entries)
@@ -447,5 +438,5 @@ function print_stack_entry($stack)
   }
 }
 
-display_footer($g_page, javascript_create_tab("#profile-tab"));
+display_footer($g_page, javascript_create_tab("profile-tabs"));
 ?>

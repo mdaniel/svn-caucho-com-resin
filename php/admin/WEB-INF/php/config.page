@@ -11,39 +11,21 @@ if (! admin_init()) {
   return;
 }
 
-echo "<p>";
-echo "<ul class='tabs'>";
+echo "<div id='config-tabs'>";
+echo "<ul>";
 $count = 0;
 $sections = array('environment', 'cluster', 'webapps', 'database');
 
 foreach ($sections as $name) {
   $count++;
 
-  echo "<li id='tab_" . $name . "'";
-  if ($count == 1)
-    echo " class='selected'";
-  else
-    echo " class=''";
-  echo ">\n";
-
-  echo "<a href='#' onclick=\"";
-  foreach ($sections as $subname) {
-    if ($subname == $name) {
-      echo "sel('tab_" . $subname . "');";
-      echo "show('s_" . $subname . "');";
-    }
-    else {
-      echo "unsel('tab_" . $subname . "');";
-      echo "hide('s_" . $subname . "');";
-    }
-  }
-  echo "\">" . $name  . "</a></li>";
+  echo "<li><a href='#$name'>$name</a></li>";
 }
 echo "</ul>\n";
 
 ?>
 
-<div id='s_environment'>
+<div id='environment'>
 <h2>Server: <?= $g_server->Id ? $g_server->Id : "default" ?></h2>
 <div class='section'>
 <table class="data">
@@ -98,7 +80,7 @@ echo "</ul>\n";
    - XML cluster configuration
   -->
   
-<div id='s_cluster' style='display:none'>
+<div id='cluster'>
 <h2>Cluster/Server</h2>
 
 <!-- XML config -->
@@ -120,7 +102,7 @@ echo "</code></pre>\n";
    - webapps configuration
   -->
 
-<div id='s_webapps' style='display:none'>
+<div id='webapps'>
 <!-- cluster ports -->
 
 <?php
@@ -228,22 +210,27 @@ foreach ($webapps as $webapp) {
    - database configuration
   -->
 
-<div id='s_database' style='display:none'>
+<div id='database'>
 
 <?php
 
 $databases = $g_mbean_server->query("resin:type=Database,*");
 
+$count = 0;
 foreach ($databases as $db) {
+  $count++;
+  
   echo "<h2>";
-  echo $db->ObjectName;
+  echo "<span id='sw_database_${count}' class='switch'></span> ";
+  echo jmx_short_name($db->mbean_name, array("type"));
   echo "</h2>\n";
 
-  echo "<pre>";
+  echo "<pre class='toggle-sw_database_${count}'>";
   print_database_config($db);
   echo "</pre>";
 }
 
+echo "</div>";
 echo "</div>";
 
 function display_config_cluster($g_server)
@@ -512,4 +499,7 @@ function print_database_config($db)
 
   echo "&lt;/database>\n";
 }
+
+display_footer($g_page, javascript_create_tab("config-tabs"));
+
 ?>
