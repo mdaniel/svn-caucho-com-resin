@@ -6,26 +6,6 @@
 require_once "WEB-INF/php/inc.php";
 
 $javascript = <<<EOF
-  $(".toggleable").each(function() {
-    var toggleable = $(this);
-    var id = toggleable.attr("id");
-    var toggleId = id + "-toggle";
-    var toggleSwitch = $("#" + toggleId);
-
-    toggleSwitch.html("[show] ");
-
-    toggleSwitch.toggle(
-      function() {
-        toggleable.show();
-        toggleSwitch.html("[hide] ");
-      },
-      function() {
-        toggleable.hide();
-        toggleSwitch.html("[show] ");
-      }
-   );
-  });
-
   $("#jmx-tabs").tabs().find(".ui-tabs-nav").sortable({axis:'x'});
 EOF;
 

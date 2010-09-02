@@ -379,12 +379,12 @@ function display_jmx($mbean_server, $group_mbeans)
       $start_id = ++$data_id;
 
       echo "<tr><td class='item' colspan='2'>";
-      echo "<span id='jmx${start_id}-toggle' class='toggle-switch'></span>";
+      echo "<span id='jmx${start_id}' class='switch'></span>";
       echo jmx_short_name($mbean->mbean_name, $group_array);
       echo "</td></tr>\n";
 
       echo "<tr><td>";
-      echo "<table id='jmx${start_id}' class='data toggleable' style='display:none'>\n";
+      echo "<table class='data toggle-jmx${start_id}' style='display:none'>\n";
       $row = 0;
 
       foreach ($attr_names as $attr_name) {
@@ -700,28 +700,6 @@ if (! empty($server)) {
 
 function javascript_create_tab($tab_name)
 {
-  $javascript = <<<EOF
-    $(".toggleable").each(function() {
-      var toggleable = $(this);
-      var id = toggleable.attr("id");
-      var toggleId = id + "-toggle";
-      var toggleSwitch = $("#" + toggleId);
-
-      toggleSwitch.html("[show] ");
-
-      toggleSwitch.toggle(
-        function() {
-          toggleable.show();
-          toggleSwitch.html("[hide] ");
-        },
-        function() {
-          toggleable.hide();
-          toggleSwitch.html("[show] ");
-        }
-     );
-    });
-EOF;
-
   $javascript .= '$("#' . $tab_name . '").tabs().find(".ui-tabs-nav").sortable({axis:\'x\'});';
 
   return $javascript;
@@ -819,6 +797,34 @@ function display_footer($script, $javascript="")
 <script type="text/javascript" src="resin-admin.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {
+
+    // right triangle -- e == east
+    var toggleShowIcon = "ui-icon-circle-triangle-e";
+    // down triangle -- s == south
+    var toggleHideIcon = "ui-icon-circle-triangle-s";
+
+    $(".switch").each(function() {
+      var toggleSwitch =  $(this);
+      var id = toggleSwitch.attr("id");
+      var toggleTargets = $(".toggle-" + id);
+
+      toggleSwitch.addClass("ui-icon");
+      toggleSwitch.css("display", "inline-block");
+
+      toggleSwitch.addClass(toggleShowIcon);
+
+      toggleSwitch.toggle(
+        function() {
+          toggleTargets.show();
+          toggleSwitch.toggleClass(toggleShowIcon + " " + toggleHideIcon);
+        },
+        function() {
+          toggleTargets.hide();
+          toggleSwitch.toggleClass(toggleShowIcon + " " + toggleHideIcon);
+        }
+      );
+    });
+
     <?= $javascript ?>
   });
 </script>
