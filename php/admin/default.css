@@ -566,6 +566,51 @@ a.hideOptional {
   font-weight: bold;
 }
  
+.jmx {
+  font-size: 100%;
+  color: black;
+  background: #f4f4f4;
+}
+
+.jmx-header {
+  margin: 2px;
+  padding: 1px;
+  width: 100%;
+  font-weight : bold;
+}
+
+.jmx-items {
+  margin-left: 0.5em;
+}
+
+.jmx-data {
+  margin-left: 0.5em;
+  width: 95%;
+}
+
+.jmx-data-table {
+  width: 95%;
+  border-collapse: collapse;
+}
+
+.jmx-data tr {
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+}
+
+.jmx-data td {
+  border: 0px;
+}
+
+.jmx-data th {
+  text-align: left;
+  background: #e0e6f8;
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+}
+
 table.data {
   font-size: 100%;
   color: black;

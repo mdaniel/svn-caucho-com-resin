@@ -359,11 +359,17 @@ function display_jmx($mbean_server, $group_mbeans)
 {
   $type_partition = jmx_partition($group_mbeans, array("type"));
   ksort($type_partition);
+  static $group_id = 0;
   static $data_id = 0;
-  echo "<table class='data'>";
+  echo "<div class='jmx'>";
   
   foreach ($type_partition as $type_name => $type_mbeans) {
-    echo "<tr><td class='group' colspan='2'>$type_name</td></tr>\n";
+    echo "<div id='jmx-${group_id}-type-${type_name}'";
+    echo " class='ui-widget-header ui-corner-all switch jmx-header'>\n";
+    echo "$type_name";
+    echo "</div>\n";
+
+    echo "<div class='jmx-items toggle-jmx-${group_id}-type-${type_name}'>\n";
 
     foreach ($type_mbeans as $mbean) {
       $attr_list = $mbean->mbean_info->attributes;
@@ -378,20 +384,20 @@ function display_jmx($mbean_server, $group_mbeans)
 
       $start_id = ++$data_id;
 
-      echo "<tr><td class='item' colspan='2'>";
-      echo "<span id='jmx${start_id}' class='switch'></span>";
+      echo "<div id='jmx-${start_id}' ";
+      echo " class='switch ui-widget-header ui-corner-all jmx-header'>";
       echo jmx_short_name($mbean->mbean_name, $group_array);
-      echo "</td></tr>\n";
+      echo "</div>\n";
 
-      echo "<tr><td>";
-      echo "<table class='data toggle-jmx${start_id}' style='display:none'>\n";
+      echo "<div class='jmx-data-table ui-widget-content toggle-jmx-${start_id}'>";
+      echo "<table class='jmx-data'>\n";
       $row = 0;
 
       foreach ($attr_names as $attr_name) {
         $id = "jmx" . $data_id++;
       
         echo "<tr>";
-        echo "<td>" . $attr_name . "</td>";
+        echo "<th>" . $attr_name . "</th>";
 
         //OS X 10.6.2 JDK 1.6 fix for #3782
         try {
@@ -405,11 +411,15 @@ function display_jmx($mbean_server, $group_mbeans)
         echo "</td>\n";
         echo "</tr>\n";
       }
-      echo "</table>";
+      echo "</table></div>";
     }
+
+    echo "</div>";
   }
   
-  echo "</table>";
+  echo "</div>";
+
+  $group_id++;
 }
 
 function is_composite_data($v)
@@ -797,37 +807,7 @@ function display_footer($script, $javascript="")
 <script type="text/javascript" src="resin-admin.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {
-
-    // right triangle -- e == east
-    var toggleShowIcon = "ui-icon-circle-triangle-e";
-    // down triangle -- s == south
-    var toggleHideIcon = "ui-icon-circle-triangle-s";
-
-    $(".switch").each(function() {
-      var toggleSwitch =  $(this);
-      var id = toggleSwitch.attr("id");
-      var toggleTargets = $(".toggle-" + id);
-
-      toggleSwitch.addClass("ui-icon");
-      toggleSwitch.css("display", "inline-block");
-
-      toggleSwitch.addClass(toggleShowIcon);
-
-      toggleTargets.hide();
-
-      toggleSwitch.toggle(
-        function() {
-          toggleTargets.show();
-          toggleSwitch.removeClass(toggleShowIcon);
-          toggleSwitch.addClass(toggleHideIcon);
-        },
-        function() {
-          toggleTargets.hide();
-          toggleSwitch.removeClass(toggleHideIcon);
-          toggleSwitch.addClass(toggleShowIcon);
-        }
-      );
-    });
+    initializeToggleSwitches();
 
     <?= $javascript ?>
   });
