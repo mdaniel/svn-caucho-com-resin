@@ -163,7 +163,7 @@ function format_ago_td_pair($value, $date, $fail=3600, $warn=14400)
 
 function format_state_class($state)
 {
-  if ($state == "error")
+  if ($state == "FAILED")
     return "fail";
   else
     return "";

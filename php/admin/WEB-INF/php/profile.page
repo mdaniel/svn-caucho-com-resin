@@ -100,12 +100,6 @@ if ($profile) {
     echo              "decode Quercus-generated Java class names and ";
     echo              "functions to their original PHP names'>";
 
-    if ($profileQuercus) 
-      echo "<input type='checkbox' name='profile_quercus' checked/>";
-    else
-      echo "<input type='checkbox' name='profile_quercus'/>";
-
-    echo "Enable Quercus profiling mode</span>";
     echo "</form>";
 
     if ($profileQuercus) 
@@ -124,6 +118,18 @@ if ($profile) {
 
 //  echo "<table class='threads'>\n";
 
+  if ($results) {
+    display_profile_results($partition, $groups, $profile);
+  }
+}
+else {
+  echo "<h2>Profiling is not available</h2>";
+
+  echo "<p>Profiling requires Resin Professional and compiled JNI</p>";
+}
+
+function display_profile_results($partition, $groups, $profile)
+{
   echo "<div id='profile-tabs'>";
   echo "<ul>";
   $count = 0;
@@ -156,12 +162,7 @@ if ($profile) {
   }
 
   echo "</div>\n";
-}
-else {
-  echo "<h2>Profiling is not available</h2>";
-
-  echo "<p>Profiling requires Resin Professional and compiled JNI</p>";
-}
+}  
 
 function print_profile_tab($entries, $name, $count, $profile)
 {

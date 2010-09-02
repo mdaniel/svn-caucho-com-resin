@@ -158,16 +158,14 @@ function display_webapp_summary($g_mbean_server, $is_idle)
 {
   global $is_secure;
   
-?><top>
-  <test-file/>
-</top>
-
+?>
 
 <!-- Applications -->
 <h2>WebApps</h2>
 
 <table class="data">
   <tr>
+    <th></th>
     <th>Web-App</th>
     <th>State</th>
     <th>Active</th>
@@ -177,47 +175,81 @@ function display_webapp_summary($g_mbean_server, $is_idle)
   </tr>
 <?php
 
-if ($g_mbean_server) {
-  $hosts = $g_mbean_server->query("resin:*,type=Host");
-}
-
-usort($hosts, "sort_host");
-
-foreach ($hosts as $host) {
-  $hostName = empty($host->HostName) ? "default" : $host->HostName;
-?>
-
-  <tr title='<?= $hostObjectName ?>'><td class='group' colspan='7'><?= $host->URL ?></td></tr>
-<?php
-
-$webapps = $host->WebApps;
-
-usort($webapps, "sort_webapp");
-$count = 0;
-foreach ($webapps as $webapp) {
-  if ($is_idle != ($webapp->State == "STOPPED_IDLE")) {
-    continue;
+  if ($g_mbean_server) {
+    $hosts = $g_mbean_server->query("resin:*,type=Host");
   }
 
-  $session = $webapp->SessionManager;
-?>
+  $webapp_id = 0;
 
-  <tr class='<?= row_style($count++) ?>'>
-    <td class='item'>
-<?php
-$context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
+  usort($hosts, "sort_host");
 
-if ($webApp->RepositoryTag) {
-  $context_path .= "<br/>&nbsp;&nbsp;(tag: {$webapp->RepositoryTag})";
+  foreach ($hosts as $host) {
+    $hostName = empty($host->HostName) ? "default" : $host->HostName;
+
+    echo "<tr title='<?= $hostObjectName ?>'><td class='group' colspan='8'>\n";
+    echo $host->URL;
+    echo "</td></tr>\n";
+
+    $webapps = $host->WebApps;
+
+    usort($webapps, "sort_webapp");
+    $count = 0;
+    foreach ($webapps as $webapp) {
+      if ($is_idle != ($webapp->State == "STOPPED_IDLE")) {
+        continue;
+      }
+
+      $webapp_name = $webapp->mbean_name;
+      $webapp_id++;
+
+      echo "<tr class='" . row_style($count++) . "'>";
+      echo "<td><span id='sw_webapp_${webapp_id}' class='switch'></td>\n";
+  
+      display_webapp($webapp);
+  
+      echo "</tr>\n";
+      
+      echo "<tr class='toggle-sw_webapp_${webapp_id}'>";
+      echo "<td></td><td colspan='6'>";
+
+      display_webapp_expanded($webapp);
+      
+      echo "<td></tr>\n";
+    }
+  }
+
+  echo "</table>\n";
 }
 
-$object_name = $webapp->mbean_name;
+function display_webapp($webapp)
+{
+  $session = $webapp->SessionManager;
+  $context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
 
-echo "<a href='index.php?q=webapp&id=" . $object_name . "'>" . $context_path . "</a>";
-?>       
-    </td>
-    <td class='<?= format_state_class($webapp->State) ?>'>
-       <?= $webapp->State ?>
+  if ($webApp->RepositoryTag) {
+    $context_path .= "<br/>&nbsp;&nbsp;(tag: {$webapp->RepositoryTag})";
+  }
+
+  $object_name = $webapp->mbean_name;
+
+  echo "<td class='item'>";
+  echo $context_path;
+  echo "</td>";
+  
+  echo "<td>";
+
+  if ($webapp->State == "ACTIVE") {
+    echo "<span style='color:#00c000'>&#x2713;</span> ACTIVE";
+  }
+  else if ($webapp->State == "FAILED") {
+    echo "<span style='color:#c00000'>&#x2717; FAILED</span>";
+  }
+  else {
+    echo "&nbsp;" . $webapp->State;
+  }
+  
+  echo "</td>\n";
+  ?>
     </td>
     <td><?= $webapp->RequestCount ?></td>
     <td><?= $session->SessionActiveCount ?></td>
@@ -228,17 +260,57 @@ echo "<a href='index.php?q=webapp&id=" . $object_name . "'>" . $context_path . "
         format_ago_td_pair($webapp->Status500CountTotal,
                            $webapp->Status500LastTime);
     ?>
-  </tr>
-<?php
-  } // webapps
-} // hosts
-?>
-
-</table>
-
 <?php
 }
 
+function display_webapp_expanded($webapp)
+{
+  global $g_mbean_server;
+  global $g_server;
+  
+  if ($is_secure) {
+    $disabled = "";
+  }
+  else {
+    $disabled = "disabled='true'";
+    echo "<div class='warn'>Actions can only be performed over a secure connection (SSL)</div>";
+  }
+
+  $name = $webapp->mbean_name;
+
+  $server_name = $g_server->SelfServer->Name;
+  if (! $server_name)
+    $server_name = "default";
+
+  echo "<div>";
+  printf("<b>%02d - %s:</b> ", $g_server->SelfServer->ClusterIndex, $server_name);
+
+  echo "<form method='POST' style='display:inline'>\n";
+  echo "<input type='hidden' name='action' value='start'>\n";
+  echo "<input type='hidden' name='name' value='$name'>\n";
+  echo "<input type='submit' name='submit' value='start' $disabled>\n";
+  echo "</form>";
+
+  echo "<form method='POST' style='display:inline'>\n";
+  echo "<input type='hidden' name='action' value='stop'>\n";
+  echo "<input type='hidden' name='name' value='$name'>\n";
+  echo "<input type='submit' name='submit' value='stop' $disabled>\n";
+  echo "</form>";
+
+  echo "<form method='POST' style='display:inline'>";
+  echo "<input type='hidden' name='action' value='restart'>";
+  echo "<input type='hidden' name='name' value='$name'>\n";
+  echo "<input type='submit' name='submit' value='restart' $disabled>";
+  echo "</form>";
+  echo "</div>";
+
+  $exp = mbean_explode($name);
+  $beans = $g_mbean_server->query("resin:*,Host=" . $exp['Host']
+                                   . ",WebApp=" . $exp['name']);
+
+  echo "<p>";
+  display_jmx($g_mbean_server, $beans);
+}
 
 function deploy()
 {
