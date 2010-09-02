@@ -40,6 +40,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.*;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,6 +61,11 @@ public class CompositeDataBean {
   public Object __getField(String attrName)
   {
     return _data.get(attrName);
+  }
+
+  public Set getKeys()
+  {
+    return _data.getCompositeType().keySet();
   }
 
   public String toString()

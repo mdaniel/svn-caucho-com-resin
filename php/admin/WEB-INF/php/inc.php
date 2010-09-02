@@ -34,7 +34,7 @@ function admin_init($query="", $is_refresh=false)
     else
       $title = "Resin: $g_page for server default";
 
-    display_header("thread.php", $title, $g_server, $query, $is_refresh);
+    display_header($g_page, $title, $g_server, $query, $is_refresh);
 
     echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
     
@@ -46,7 +46,7 @@ function admin_init($query="", $is_refresh=false)
   else
     $title = "Resin: $g_page";
 
-  return display_header("thread.php", $title, $g_server, $query,
+  return display_header($g_page, $title, $g_server, $query,
                         $is_refresh, true);
 }  
 
@@ -378,34 +378,20 @@ function display_jmx($mbean_server, $group_mbeans)
 
       $start_id = ++$data_id;
 
-      $s = "show('h$start_id');hide('s$start_id');";
-      $h = "hide('h$start_id');show('s$start_id');";
-
-/*
-      for ($i = 0; $i < count($attr_names); $i++) {
-        $s .= "show('jmx" . ($i + $start_id) . "');";
-        $h .= "hide('jmx" . ($i + $start_id) . "');";
-      }
-*/
-        $s .= "show('jmx" . ($start_id) . "');";
-        $h .= "hide('jmx" . ($start_id) . "');";
-      
       echo "<tr><td class='item' colspan='2'>";
-      echo "<a id='s$start_id' href=\"javascript:$s\">[show]</a>\n";
-      echo "<a id='h$start_id' href=\"javascript:$h\" style='display:none'>[hide]</a>\n";
+      echo "<span id='jmx${start_id}-toggle' class='toggle-switch'></span>";
       echo jmx_short_name($mbean->mbean_name, $group_array);
       echo "</td></tr>\n";
 
       echo "<tr><td>";
-      echo "<table id='jmx${start_id}' class='data' style='display:none'>\n";
+      echo "<table id='jmx${start_id}' class='data toggleable' style='display:none'>\n";
       $row = 0;
 
       foreach ($attr_names as $attr_name) {
         $id = "jmx" . $data_id++;
       
-//        echo "<tr id='$id' style='display:none'>";
         echo "<tr>";
-	echo "<td>" . $attr_name . "</td>";
+        echo "<td>" . $attr_name . "</td>";
 
         //OS X 10.6.2 JDK 1.6 fix for #3782
         try {
@@ -424,6 +410,12 @@ function display_jmx($mbean_server, $group_mbeans)
   }
   
   echo "</table>";
+}
+
+function is_composite_data($v)
+{
+  $class_name = get_java_class_name($v);
+  return $class_name == "com.caucho.quercus.lib.resin.CompositeDataBean";
 }
 
 function display_jmx_data($v)
@@ -449,6 +441,20 @@ function display_jmx_data($v)
     echo "true";
   else if ($v === null)
     echo "null";
+  elseif (is_composite_data($v)) {
+    echo "<table class='jmx-composite-data'>\n";
+    echo "<tbody>\n";
+    foreach ($v->getKeys() as $key) {
+      echo "<tr>\n";
+      echo "<th>" . $key . "</th>\n";
+      echo "<td>";
+      display_jmx_data($v->$key);
+      echo "</td>\n";
+      echo "</tr>\n";
+    }
+    echo "</tbody>\n";
+    echo "</table>\n";
+  }
   else {
     $v = (string) $v;
 
@@ -578,6 +584,7 @@ function display_header($script, $title, $server,
 <head>
   <title><?= $title ?></title>
   <link rel='stylesheet' href='<?= uri("default.css") ?>' type='text/css' />
+  <link rel='stylesheet' href='jquery-ui/jquery.ui.all.css' type='text/css' />
 <?php
 if ($is_refresh) {
   echo "<meta http-equiv=\"refresh\" content=\"60\" />\n";
@@ -641,9 +648,9 @@ if (! empty($server)) {
   </td>
 
   <td align='right'>
-   <img src='<?= uri("images/caucho-logo.png") ?>' width='300'></tr>
+   <img src='<?= uri("images/caucho-logo.png") ?>' width='300'>
   </td>
-
+</tr>
 <tr>
   <td width="150">
    <img src='<?= uri("images/pixel.gif") ?>' height="14">
@@ -757,7 +764,7 @@ function display_header_title()
 /**
  * Outputs an html footer if needed.
  */
-function display_footer($script)
+function display_footer($script, $javascript="")
 {
   global $display_header_script, $is_display_footer;
 
@@ -777,6 +784,15 @@ function display_footer($script)
 </p>
 
 </td></tr></table>
+
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="jquery-ui.js"></script>
+<script type="text/javascript" src="resin-admin.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    <?= $javascript ?>
+  });
+</script>
 
 </body>
 </html>

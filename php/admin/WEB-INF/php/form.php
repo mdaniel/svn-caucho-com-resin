@@ -234,7 +234,13 @@ class TextField extends FormField {
   private $_max_length;
   private $_initial_value;
 
+<<<<<<< .mine
+  public function __construct($name, $label, $required, $xml = NULL, 
+                              $default = 'N/A', $initial_value = null, 
+                              $max_length = 0)
+=======
   public function __construct($name, $label, $required, $default = 'N/A')
+>>>>>>> .r5820
   {
     parent::__construct($name, $label, $required, $default);
   }

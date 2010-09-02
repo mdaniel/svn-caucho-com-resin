@@ -5,120 +5,115 @@
 
 require_once "WEB-INF/php/inc.php";
 
-if (! admin_init($query)) {
+$javascript = <<<EOF
+  $(".toggleable").each(function() {
+    var toggleable = $(this);
+    var id = toggleable.attr("id");
+    var toggleId = id + "-toggle";
+    var toggleSwitch = $("#" + toggleId);
+
+    toggleSwitch.html("[show] ");
+
+    toggleSwitch.toggle(
+      function() {
+        toggleable.show();
+        toggleSwitch.html("[hide] ");
+      },
+      function() {
+        toggleable.hide();
+        toggleSwitch.html("[show] ");
+      }
+   );
+  });
+
+  $("#jmx-tabs").tabs().find(".ui-tabs-nav").sortable({axis:'x'});
+EOF;
+
+if (! admin_init($query, false)) {
   return;
 }
 
-$mbean_list = $g_mbean_server->query("*:*");
+function collect_mbean_groups()
+{
+  global $g_mbean_server;
 
-$mbean_group = jmx_partition($mbean_list, array(":domain:"));
+  $mbean_list = $g_mbean_server->query("*:*");
 
-$group_array = array(":domain:", "type");
+  $mbean_group = jmx_partition($mbean_list, array(":domain:"));
 
-$data_id = 0;
-ksort($mbean_group);
-foreach ($mbean_group as $group_name => $group_mbeans) {
-  echo "<h1>" . $group_name . "</h1>\n";
+  $application_mbeans = array();
+  $jvm_mbeans = array();
+  $resin_mbeans = array();
 
-  display_jmx($mbean_server, $group_mbeans);
-/*
-  $type_partition = jmx_partition($group_mbeans, array("type"));
-  ksort($type_partition);
-
-  echo "<table class='data'>";
-  
-  foreach ($type_partition as $type_name => $type_mbeans) {
-    echo "<tr><td class='group' colspan='2'>$type_name</td></tr>\n";
-
-    foreach ($type_mbeans as $mbean) {
-      $attr_list = $mbean->mbean_info->attributes;
-      sort($attr_list);
-      
-      $attr_names = null;
-      
-      foreach ($attr_list as $attr) {
-        $attr_names[] = $attr->name;
-      }
-      sort($attr_names);
-
-      $start_id = ++$data_id;
-
-      $s = "show('h$start_id');hide('s$start_id');";
-      $h = "hide('h$start_id');show('s$start_id');";
-
-      for ($i = 0; $i < count($attr_names); $i++) {
-        $s .= "show('jmx" . ($i + $start_id) . "');";
-        $h .= "hide('jmx" . ($i + $start_id) . "');";
-      }
-      
-      echo "<tr><td class='item' colspan='2'>";
-      echo "<a id='s$start_id' href=\"javascript:$s\">[show]</a>\n";
-      echo "<a id='h$start_id' href=\"javascript:$h\" style='display:none'>[hide]</a>\n";
-      echo jmx_short_name($mbean->mbean_name, $group_array);
-      echo "</td></tr>\n";
-
-      $row = 0;
-
-      foreach ($attr_names as $attr_name) {
-        $id = "jmx" . $data_id++;
-      
-        echo "<tr id='$id' style='display:none'>";
-	echo "<td>" . $attr_name . "</td>";
-
-	$v = $mbean->$attr_name;
-
-	echo "<td>";
-	
-	display_jmx_data($v);
-
-  	echo "</td>\n";
-        echo "</tr>";
-      }
+  foreach ($mbean_group as $group_name => $group_mbeans) {
+    if (preg_match("/^com.sun/", $group_name) 
+        || preg_match("/^java/", $group_name)) {
+      $jvm_mbeans[$group_name] = $group_mbeans;
+    }
+    elseif (preg_match("/^resin/", $group_name))  {
+      $resin_mbeans[$group_name] = $group_mbeans;
+    }
+    else {
+      $application_mbeans[$group_name] = $group_mbeans;
     }
   }
-  
-  echo "</table>";
-*/
+
+  ksort($application_mbeans);
+  ksort($jvm_mbeans);
+  ksort($resin_mbeans);
+
+  return array($application_mbeans, $jvm_mbeans, $resin_mbeans);
 }
 
-// var_dump($mbean_group);
-//usort($a, "jmx_order");
-
-//var_dump($a);
-
-function jmx_order($a, $b)
+function display_mbeans($id, $mbean_group) 
 {
-  $name_a = $a->mbean_name;
-  $name_b = $b->mbean_name;
+  echo "<div id='${id}'>\n";
 
-  $exp_a = mbean_explode($name_a);
-  $exp_b = mbean_explode($name_b);
-
-  $cmp = strcmp($exp_a['type'], $exp_b['type']);
-  
-  if ($cmp != 0) {
-    return $cmp;
+  foreach ($mbean_group as $group_name => $group_mbeans) {
+    echo "<h1>" . $group_name . "</h1>\n";
+    display_jmx($mbean_server, $group_mbeans);
   }
-  
-  return strcmp($name_a, $name_b);
+
+  echo "</div>\n";
 }
 
-function jmx_partition_type($mbean_list)
+function display_tabs()
 {
-  $env = null;
+  list($application_mbeans, $jvm_mbeans, $resin_mbeans) 
+    = collect_mbean_groups();
 
-  foreach ($mbean_list as $mbean) {
-    $exp = mbean_explode($mbean->mbean_name);
+  echo "<div id='jmx-tabs'>\n";
+  echo "<ul>\n";
 
-    $type = $exp['type'];
-      
-    $env[$type][] = $mbean;
-
+  if (count($application_mbeans) != 0) {
+    echo "<li><a href='#application-tab'>Application</a></li>\n";
   }
-  
-  ksort($env);
 
-  return $env;
+  if (count($jvm_mbeans) != 0) {
+    echo "<li><a href='#jvm-tab'>JVM</a></li>\n";
+  }
+
+  if (count($resin_mbeans) != 0) {
+    echo "<li><a href='#resin-tab'>Resin</a></li>\n";
+  }
+
+  echo "</ul>\n";
+
+  if (count($application_mbeans) != 0) {
+    display_mbeans("application-tab", $application_mbeans);
+  }
+
+  if (count($jvm_mbeans) != 0) {
+    display_mbeans("jvm-tab", $jvm_mbeans);
+  }
+
+  if (count($resin_mbeans) != 0) {
+    display_mbeans("resin-tab", $resin_mbeans);
+  }
+
+  echo "</div>\n";
 }
 
+display_tabs();
+display_footer($g_page, $javascript);
 ?>
