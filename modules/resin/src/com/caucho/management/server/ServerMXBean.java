@@ -55,7 +55,7 @@ public interface ServerMXBean extends ManagedObjectMXBean {
    * Returns the -server id.
    */
   @Description("The server id used when starting this instance"
-               + " of Resin, the value of `-server'")
+               + " of Resin, the value of '-server'")
   public String getId();
 
   /**
@@ -147,7 +147,8 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   public long getShutdownWaitMax();
 
   /**
-   * Returns true if a {@link com.caucho.network.listen.AbstractSelectManager} is enabled and active
+   * Returns true if a {@link com.caucho.network.listen.AbstractSelectManager}
+   * is enabled and active
    */
   @Description("A SelectManager handles keepalive without requiring a thread")
   public boolean isSelectManagerEnabled();

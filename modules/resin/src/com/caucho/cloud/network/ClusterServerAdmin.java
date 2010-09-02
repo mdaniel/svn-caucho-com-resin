@@ -209,6 +209,27 @@ public class ClusterServerAdmin extends AbstractManagedObject
     else
       return "self";
   }
+  
+  //
+  // Heartbeat status
+  //
+  
+  @Override
+  public boolean isHeartbeatActive()
+  {
+    return _server.isActive();
+  }
+  
+  @Override
+  public Date getLastHeartbeatTime()
+  {
+    long lastHeartbeatTime = _server.getLastHeartbeatTime();
+
+    if (lastHeartbeatTime > 0)
+      return new Date(lastHeartbeatTime);
+    else
+      return null;
+  }
 
   @Override
   public int getConnectionActiveCount()

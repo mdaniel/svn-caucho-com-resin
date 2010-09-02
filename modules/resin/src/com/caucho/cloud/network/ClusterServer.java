@@ -110,6 +110,7 @@ public final class ClusterServer {
 
   private AtomicBoolean _isActive = new AtomicBoolean();
   private AtomicLong _stateTimestamp = new AtomicLong();
+  private AtomicLong _lastHeartbeatTime = new AtomicLong();
 
   // admin
 
@@ -657,10 +658,12 @@ public final class ClusterServer {
   /**
    * Returns the bam queue to the server.
    */
+  /*
   public ActorStream getHmtpStream()
   {
     return null;
   }
+  */
 
   /**
    * Returns true if the server is remote and active.
@@ -725,12 +728,12 @@ public final class ClusterServer {
   private ClientSocketFactory createServerPool(String serverId)
   {
     ClientSocketFactory pool = new ClientSocketFactory(serverId,
-                                     getId(),
-                                     "Resin|Cluster",
-                                     getStatId(),
-                                     getAddress(),
-                                     getPort(),
-                                     isSSL());
+                                                       getId(),
+                                                       "Resin|Cluster",
+                                                       getStatId(),
+                                                       getAddress(),
+                                                       getPort(),
+                                                       isSSL());
 
     pool.setLoadBalanceConnectTimeout(getLoadBalanceConnectTimeout());
     pool.setLoadBalanceConnectionMin(getLoadBalanceConnectionMin());
@@ -770,18 +773,27 @@ public final class ClusterServer {
   {
     return _stateTimestamp.get();
   }
+  
+  public long getLastHeartbeatTime()
+  {
+    return _lastHeartbeatTime.get();
+  }
 
   /**
    * Notify that a start event has been received.
    */
   public boolean notifyStart()
   {
+    long now = Alarm.getCurrentTime();
+    
+    _lastHeartbeatTime.set(now);
+
     boolean isActive = _isActive.getAndSet(true);
     
     if (isActive)
       return false;
     
-    _stateTimestamp.set(Alarm.getCurrentTime());
+    _stateTimestamp.set(now);
 
     if (_serverPool != null)
       _serverPool.notifyStart();
@@ -799,6 +811,8 @@ public final class ClusterServer {
    */
   public boolean notifyStop()
   {
+    _lastHeartbeatTime.set(0);
+    
     boolean isActive = _isActive.getAndSet(false);
     
     if (! isActive)

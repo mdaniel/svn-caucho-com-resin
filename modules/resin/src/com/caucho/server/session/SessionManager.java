@@ -1069,12 +1069,16 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       _sessionStore.setIdleTimeoutMillis(_sessionTimeout);
 
     if (_isPersistenceEnabled) {
-      AbstractCache sessionCache = new ClusterByteStreamCache();
+      AbstractCache sessionCache = AbstractCache.getMatchingCache("resin:session"); 
+        
+      if (sessionCache == null) {
+        sessionCache = new ClusterByteStreamCache();
 
-      sessionCache.setName("resin:session");
-      sessionCache.setBackup(_isSaveBackup);
-      sessionCache.setTriplicate(_isSaveTriplicate);
-      sessionCache.init();
+        sessionCache.setName("resin:session");
+        sessionCache.setBackup(_isSaveBackup);
+        sessionCache.setTriplicate(_isSaveTriplicate);
+        sessionCache.init();
+      }
 
       _sessionStore = sessionCache;
     }

@@ -56,6 +56,18 @@ public class TopologyService extends AbstractResinService
     return ResinSystem.getCurrentService(TopologyService.class);
   }
   
+  public static CloudSystem getCurrentSystem()
+  {
+    TopologyService topology = getCurrent();
+    
+    if (topology == null)
+      throw new IllegalStateException(L.l("{0} needs an active {1}",
+                                          TopologyService.class.getSimpleName(),
+                                          ResinSystem.class.getSimpleName()));
+    
+    return topology.getSystem();
+  }
+  
   public static CloudCluster findCluster(String id)
   {
     TopologyService topology = getCurrent();

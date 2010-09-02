@@ -9,6 +9,8 @@ if (! admin_init()) {
   return;
 }
 
+echo "<h1>JVM Memory</h1>";
+
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
 $si = sprintf("%02d", $g_server->Index);
@@ -35,11 +37,13 @@ if ($stat_service) {
 
 $memory = $g_mbean_server->lookup("resin:type=Memory");
 
+echo "<h2>Memory Pools</h2>\n";
 $row = 0;
 echo "<table class='data'>\n"
 
 echo "<tr>";
 echo "<th>pool</th>\n";
+echo "<th>% free</th>\n";
 echo "<th>max</th>\n";
 echo "<th>committed</th>\n";
 echo "<th>used</th>\n";
@@ -48,6 +52,7 @@ echo "</tr>";
 
 echo "<tr class='" . row_style($row++) . "'>";
 echo "<td>CodeCache</td>";
+echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->CodeCacheFree / $memory->CodeCacheMax) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheCommitted / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheUsed / 1e6) . "</td>";
@@ -56,6 +61,7 @@ echo "</tr>\n";
 
 echo "<tr class='" . row_style($row++) . "'>";
 echo "<td>Eden</td>";
+echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->EdenFree / $memory->EdenMax) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenCommitted / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenUsed / 1e6) . "</td>";
@@ -64,6 +70,7 @@ echo "</tr>\n";
 
 echo "<tr class='" . row_style($row++) . "'>";
 echo "<td>PermGen</td>";
+echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->PermGenFree / $memory->PermGenMax) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenCommitted / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenUsed / 1e6) . "</td>";
@@ -72,6 +79,7 @@ echo "</tr>\n";
 
 echo "<tr class='" . row_style($row++) . "'>";
 echo "<td>Survivor</td>";
+echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->SurvivorFree / $memory->SurvivorMax) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorCommitted / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorUsed / 1e6) . "</td>";
@@ -80,6 +88,7 @@ echo "</tr>\n";
 
 echo "<tr class='" . row_style($row++) . "'>";
 echo "<td>Tenured</td>";
+echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->TenuredFree / $memory->TenuredMax) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredCommitted / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredUsed / 1e6) . "</td>";

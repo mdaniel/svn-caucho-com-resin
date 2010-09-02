@@ -799,6 +799,32 @@ function display_footer($script, $javascript="")
 <?php
 }
 
+function print_show_hide($message, $id, $names)
+{
+  $show = "hide('s_${id}');show('h_${id}');";
+  $hide = "hide('h_${id}');show('s_${id}');";
+  
+  foreach ($names as $name) {
+    $show .= "show('${name}');";
+    $hide .= "hide('${name}');";
+  }
+
+  echo "<ul style='list-style-type:none;padding:0;margin:0'>";
+  echo "<li id='s_${id}' onclick=\"${show}\">";
+  echo "<img src='images/close-item.png'></img> $message";
+  echo "</li>";
+
+  echo "<li id='h_${id}' style='display:none' onclick=\"${hide}\">";
+  echo "<img src='images/open-item.png'></img> $message";
+  echo "</li>";
+  echo "</ul>";
+
+/*
+  echo " <a id='s_${id}' href=\"javascript:$show\">show</a> ";
+  echo "<a id='h_${id}' href=\"javascript:$hide\" style='display:none'>hide</a>";
+*/
+}
+
 function display_left_navigation($current_server)
 {
   global $g_page;

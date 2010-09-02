@@ -52,7 +52,7 @@ public class ClusterSingleSignon implements SingleSignon {
 
   public ClusterSingleSignon(String name)
   {
-    _cache = AbstractCache.getMatchingCache(name);
+    _cache = AbstractCache.getMatchingCache("resin:single-signon:" + name);
     
     if (_cache == null) {
       _cache = new ClusterCache();

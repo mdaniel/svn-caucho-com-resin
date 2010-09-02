@@ -219,6 +219,8 @@ class MBeanWrapper implements DynamicMBean {
       thread.setContextClassLoader(_context.getClassLoader());
       
       return _mbean.invoke(operation, params, signature);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException(_mbean + "." + operation + "\n  " + e, e);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

@@ -5,6 +5,30 @@
 
 require_once "WEB-INF/php/inc.php";
 
+$javascript = <<<EOF
+  $(".toggleable").each(function() {
+    var toggleable = $(this);
+    var id = toggleable.attr("id");
+    var toggleId = id + "-toggle";
+    var toggleSwitch = $("#" + toggleId);
+
+    toggleSwitch.html("[show] ");
+
+    toggleSwitch.toggle(
+      function() {
+        toggleable.show();
+        toggleSwitch.html("[hide] ");
+      },
+      function() {
+        toggleable.hide();
+        toggleSwitch.html("[show] ");
+      }
+   );
+  });
+
+  $("#thread-tabs").tabs().find(".ui-tabs-nav").sortable({axis:'x'});
+EOF;
+
 if (! admin_init()) {
   return;
 }
@@ -13,20 +37,14 @@ $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
 $server = $g_mbean_server->lookup("resin:type=Server");
 
 ?>
-
+<!--
 <h2>Server: <?= $g_server->Id ? $g_server->Id : "default" ?></h2>
+-->
 <?php
 
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
-$si = sprintf("%02d", $server->Index);
-/*
-if ($stat_service) {
-  echo "<img src='graph.php?";
-  echo "g[0][0]=$si|Resin|Thread|Active Thread Count"
-  echo "&g[1][0]=$si|Resin|Thread|Thread Count"
-  echo "&width=600&height=300' width='600' height='300'>\n"
-}
-*/
+$si = sprintf("%02d", $server->SelfServer->ClusterIndex);
+
 $thread_pool = $g_server->ThreadPool;
 ?>
 
@@ -34,12 +52,8 @@ $thread_pool = $g_server->ThreadPool;
 "Restart" - "Exit this instance cleanly and allow the wrapper script to start a new JVM."
 -->
 
-<h2>Thread pool</h2>
 <!--
-<div class="description">
-The ThreadPool manages all threads used by Resin.
-</div>
--->
+<h2>Thread pool</h2>
 
 <table class="data">
   <tr>
@@ -72,17 +86,22 @@ The ThreadPool manages all threads used by Resin.
     <td><?= $thread_pool->ThreadIdleMin ?></td>
   </tr>
 </table>
-
+-->
 <?php
 
 $threads = array();
 $thread_ids = $jvm_thread->AllThreadIds;
+sort($thread_ids);
 
-foreach ($thread_ids as $id) {
+$info_list = $jvm_thread->getThreadInfo($thread_ids, true, true);
+
+foreach ($info_list as $info) {
   $conn = $server->findConnectionByThreadId($id);
-  
+
+  $id = $info->ThreadId;
+
   $thread = array("id" => $id,
-                  "info" => $jvm_thread->getThreadInfo($id, 50));
+                  "info" => $info);
 
   if ($conn) {
     $thread["url"] = $conn->getUrl();
@@ -91,31 +110,35 @@ foreach ($thread_ids as $id) {
   $threads[] = $thread;
 }
 
-echo "<h2>Threads</h2>\n"
+echo "<h1>Thread Dump</h1>\n"
 
 $thread_group = partition_threads($threads);
-$groups = array("active", "blocked", "jni", "misc", "wait", "idle", "all");
+$groups = array("active", "blocked", "jni", "locking",
+                "misc", "wait", "idle", "all");
 
 //  echo "<table class='threads'>\n";
 
-echo "<p>";
-echo "<ul class='tabs'>";
-$count = 0;
-foreach ($groups as $name) {
-  $entries = $thread_group[$name];
+display_tabs($thread_group, $groups);
 
-  if (sizeof($entries) <= 0)
-    continue;
+function display_tabs($thread_group, $groups)
+{
+  echo "<div id='thread-tabs'>";
+  echo "<ul>";
+  $count = 0;
+  foreach ($groups as $name) {
+    $entries = $thread_group[$name];
 
-  $count++;
+    if (sizeof($entries) <= 0)
+      continue;
 
-  echo "<li id='tab_" . $name . "'";
-  if ($count == 1)
-    echo " class='selected'";
-  else
-    echo " class=''";
-  echo ">\n";
+    $count++;
 
+    $tab_name = $name . "-tab";
+
+    echo "<li><a href='#${tab_name}'>$name"
+         . " (" . sizeof($entries) . ")</a></li>\n";
+
+/*
   echo "<a href='#' onclick=\"";
   foreach ($groups as $subname) {
     if (sizeof($thread_group[$subname]) <= 0)
@@ -131,48 +154,50 @@ foreach ($groups as $name) {
     }
   }
   echo "\">" . $name . " (" . sizeof($thread_group[$name]) . ")</a></li>";
+  */
+  }
+  echo "</ul>\n";
+
+  thread_display_content($thread_group, $groups);
+
+  echo "</div>\n";
 }
-echo "</ul>\n";
 
-// echo "<table class='threads'>\n";
-$is_first = true;
+function thread_display_content($thread_group, $groups)
+{
+  foreach ($groups as $name) {
+    $threads = $thread_group[$name];
 
-foreach ($groups as $name) {
-  $threads = $thread_group[$name];
+    if (sizeof($threads) <= 0)
+      continue;
 
-  if (sizeof($threads) <= 0)
-    continue;
+    usort($threads, "thread_name_cmp");
 
-  usort($threads, "thread_name_cmp");
+    echo "<div id='${name}-tab'>\n";
 
-  echo "<table class='threads' id='g_" . $name . "'";
-  if (! $is_first)
-    echo " style='display:none'";
-  $is_first = false;
-
-  echo ">\n";
-  echo "<tr class='head'><th colspan='5' align='left'>$name (" . sizeof($threads) . ")";
-
-  $show = "hide('s_$name');show('h_$name');";
-  foreach ($threads as $thread) {
-    $info = $thread["info"];
-
-    if ($info->threadId) {
-      $show .= "show('t_{$info->threadId}');";
-    }
-  }
-
-  $hide = "show('s_$name');hide('h_$name');";
-  foreach ($threads as $thread) {
-    $info = $thread["info"];
+    thread_display_group($name, $threads);
     
-    if ($info->threadId) {
-      $hide .= "hide('t_{$info->threadId}');";
+    echo "</div>\n";
+  }
+}
+
+function thread_display_group($group_name, $threads)
+{
+  echo "<table class='threads'>\n";
+
+  $stack_names = array();
+  foreach ($threads as $thread) {
+    $info = $thread["info"];
+
+    if ($info) {
+      $stack_names[] = "t_${group_name}_{$info->threadId}";
     }
   }
+  
+  echo "<tr class='head'><th colspan='5' align='left'>";
 
-  echo " <a id='s_$name' href=\"javascript:$show\">show</a> ";
-  echo "<a id='h_$name' href=\"javascript:$hide\" style='display:none'>hide</a>";
+  $message = "$group_name (" . sizeof($threads) . ")";
+  print_show_hide($message, $group_name, $stack_names);
 
   echo "</th></tr>\n";
 
@@ -191,67 +216,93 @@ foreach ($groups as $name) {
     if ($info == null)
       continue;
     
-    echo "<tr>";
+    thread_display_thread($info, $group_name);
+  }
+  
+  echo "</table>\n";
+}
 
-    $id = $info->threadId;
+function thread_display_thread($info, $group_name)
+{
+  echo "<tr>";
+
+  $id = $info->threadId;
 
 //    echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
-    echo "<td><a name='th" . $id . "'></a>" . $id . "</td>";
-    echo "<td>" . $info->threadName . "</td>";
+  echo "<td><a name='th_${group_name}_${id}'></a>" . $id . "</td>";
+  echo "<td>" . $info->threadName . "</td>";
 
-    $topStack = thread_get_description($info);
+  $topStack = thread_get_description($info);
 
-    if ($topStack) {
-      $name = $topStack->className;
-      $tail = strrchr($name, '.');
-      if ($tail)
-        $name = substr($tail, 1);
-      echo "<td>" . $name . "."
-	. $topStack->methodName . "()</td>";
-    }
-    else
-      echo "<td></td>";
-    
-    echo "<td>" . $info->threadState;
-    if ($info->isInNative())
-      echo " (JNI)";
-    if ($info->getBlockedTime() > 0)
-      echo sprintf(" (%dms)", $info->getBlockedTime())
-    else if ($info->getWaitedTime() > 0)
-      echo sprintf(" (%dms)", $info->getWaitedTime())
-    echo "</td>";
-
-    echo "<td>" . $thread["url"] . "</td>\n";
-
-    echo "</tr>\n";
-    
-      echo "<tr class='stack_trace'>";
-//    echo "<td style='border-width:0'>&nbsp;</td>";
-    echo "<td colspan='5'>";
-    echo "<pre id='t_$id' style='display:none' class='stack_trace'>";
-
-    if ($info->getLockName()) {
-      echo "Lock " . $info->getLockName() . " owned by ";
-      echo "<a href='#th" . $info->getLockOwnerId() . "'>"
-           . $info->getLockOwnerId() . "</a>\n\n";
-    }
-    
-    // echo $info;
-
-    // XXX: need to look at the JDK 1.6 for locks
-    // var_dump($info->getLockedMonitors());
-    // var_dump($info->getLockedSynchronizers());
-
-    foreach ($info->stackTrace as $elt) {
-      echo " at {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber})\n";
-    }
-
-    echo "</pre>\n";
-
-    echo "</td>";
-    echo "</tr>\n";
+  if ($topStack) {
+    $name = $topStack->className;
+    $tail = strrchr($name, '.');
+    if ($tail)
+      $name = substr($tail, 1);
+    echo "<td>" . $name . "."
+	 . $topStack->methodName . "()</td>";
   }
-  echo "</table>\n";
+  else
+    echo "<td></td>";
+    
+  echo "<td>" . $info->threadState;
+  if ($info->isInNative())
+    echo " (JNI)";
+  if ($info->getBlockedTime() > 0)
+    echo sprintf(" (%dms)", $info->getBlockedTime())
+  else if ($info->getWaitedTime() > 0)
+    echo sprintf(" (%dms)", $info->getWaitedTime())
+  echo "</td>";
+
+  echo "<td>" . $thread["url"] . "</td>\n";
+
+  echo "</tr>\n";
+
+  thread_display_stack($id, $group_name, $info);
+
+  echo "</tr>\n";
+}  
+
+function thread_display_stack($id, $group, $info)
+{
+   echo "<tr class='stack_trace'>";
+//    echo "<td style='border-width:0'>&nbsp;</td>";
+  echo "<td colspan='5'>";
+  echo "<pre id='t_${group}_${id}' style='display:none' class='stack_trace'>";
+
+  if ($info->getLockName()) {
+    echo " -- waiting on " . $info->getLockName() . " owned by ";
+    echo "<a href='#th_${group}_{$info->getLockOwnerId()}'>"
+         . $info->getLockOwnerId() . "</a>\n\n";
+  }
+    
+  // echo $info;
+
+  // XXX: need to look at the JDK 1.6 for locks
+  $monitors = $info->getLockedMonitors();
+  $synchronizers = $info->getLockedSynchronizers();
+
+  $i = 0;
+  foreach ($info->stackTrace as $elt) {
+    thread_print_monitor($monitors, $i);
+    echo " at {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber})\n";
+    
+    $i++;
+  }
+
+  echo "</pre>\n";
+  echo "</td>\n";
+}
+
+function thread_print_monitor($monitors, $i)
+{
+  foreach ($monitors as $monitor) {
+    if ($monitor->getLockedStackDepth() == $i) {
+      printf(" -- locked %s@0x%x\n",
+             $monitor->getClassName(),
+             $monitor->getIdentityHashCode());
+    }
+  }
 }
 
 function thread_get_description($info)
@@ -311,6 +362,7 @@ function thread_name_cmp($thread_a, $thread_b)
 function partition_threads($threads)
 {
   $partition = array();
+  $partition["locking"] = array();
 
   foreach ($threads as $thread) {
     $info = $thread["info"];
@@ -345,9 +397,32 @@ function partition_threads($threads)
     else {
       $partition["misc"][] = $thread;
     }
+
+    $p_locking =& $partition["locking"];
+    if ($info->getLockName() != null && $info->getLockOwnerId() > 0) {
+      if (! thread_find($p_locking, $thread["info"]->getLockOwnerId())) {
+        $p_locking[] = $thread;
+      }
+
+      $owner_thread = thread_find($threads, $info->getLockOwnerId());
+      if ($owner_thread
+          && ! thread_find($p_locking, $info->getLockOwnerId())) {
+        $p_locking[] = $owner_thread;
+      }
+    }
   }
 
   return $partition;
+}
+
+function thread_find($threads, $id)
+{
+  foreach ($threads as $thread) {
+    if ($thread["info"]->threadId == $id)
+      return $thread;
+  }
+
+  return null;
 }
 
 function is_accept_thread($info)
@@ -438,6 +513,6 @@ function is_idle_pool_thread($info)
   return false;
 }
 
-?>
+display_footer($g_page, $javascript);
 
-<?php display_footer("summary.php"); ?>
+?>

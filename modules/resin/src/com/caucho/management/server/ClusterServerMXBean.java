@@ -156,6 +156,16 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    */
   @Description("The current lifecycle state of the client")
   public String getState();
+  
+  //
+  // Heartbeat
+  //
+  
+  @Description("True if the heartbeat is active")
+  public boolean isHeartbeatActive();
+  
+  @Description("The time of the last received heartbeat from this server")
+  public Date getLastHeartbeatTime();
 
   //
   // Statistics attributes

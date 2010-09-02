@@ -31,6 +31,7 @@
 package com.caucho.quercus.lib.resin;
 
 import com.caucho.quercus.annotation.Name;
+import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
@@ -133,7 +134,7 @@ public class MBean {
       }
 
       MBeanOperationInfo opInfo = findClosestOperation(name, args);
-      
+
       if (opInfo != null) {
         String []mbeanSig = createMBeanSig(opInfo);
 
@@ -227,6 +228,7 @@ public class MBean {
   {
     for (int i = 0; i < sig.length; i++) {
       args[i] = findMarshall(sig[i]).marshall(args[i]);
+      System.out.println("MM: " + sig[i]);
     }
   }
 
@@ -258,7 +260,7 @@ public class MBean {
         try {
           ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-          Class typeClass = Class.forName(typeName, false, loader);
+          Class<?> typeClass = Class.forName(typeName, false, loader);
 
           Method from = typeClass.getMethod("from", new Class[] { CompositeData.class });
 
@@ -270,6 +272,17 @@ public class MBean {
       }
 
       return new CompositeDataBean(compositeValue);
+    }
+    else if (value instanceof CompositeData[]) {
+      CompositeData []compositeValue = (CompositeData[]) value;
+      
+      Object []result = new Object[compositeValue.length];
+                                   
+      for (int i = 0; i < result.length; i++) {
+        result[i] = unmarshall(compositeValue[i]); 
+      }
+      
+      return result;
     }
     else
       return value;
@@ -344,6 +357,37 @@ public class MBean {
     }
   }
 
+  static class LongArrayMarshall extends Marshall {
+    static final Marshall MARSHALL = new LongArrayMarshall();
+    
+    public Object marshall(Object value)
+    {
+      if (value instanceof Long)
+        return new long[] { ((Long) value).longValue() };
+      else if (value instanceof Number)
+        return new long[] { ((Number) value).longValue() };
+      else if (value == null)
+        return null;
+      else if (value instanceof ArrayValue) {
+        ArrayValue array = (ArrayValue) value;
+        
+        long []result = new long[array.getSize()];
+        
+        for (int i = 0; i < result.length; i++)
+          result[i] = array.get(LongValue.create(i)).toLong();
+        
+        return result;
+      }
+      else {
+        try {
+          return new long [] { Long.parseLong(String.valueOf(value)) };
+        } catch (Exception e) {
+          return new long[0];
+        }
+      }
+    }
+  }
+
   static class StringMarshall extends Marshall {
     static final Marshall MARSHALL = new StringMarshall();
     
@@ -362,6 +406,8 @@ public class MBean {
     
     _marshallMap.put("long", LongMarshall.MARSHALL);
     _marshallMap.put("java.lang.Long", LongMarshall.MARSHALL);
+    
+    _marshallMap.put("[J", LongArrayMarshall.MARSHALL);
     
     _marshallMap.put("java.lang.String", StringMarshall.MARSHALL);
   }

@@ -30,6 +30,9 @@
 package com.caucho.server.resin;
 
 import com.caucho.VersionFactory;
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudSystem;
+import com.caucho.cloud.topology.TopologyService;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
@@ -52,6 +55,7 @@ public class ResinAdmin extends AbstractManagedObject
     registerSelf();
   }
 
+  @Override
   public String getName()
   {
     return null;
@@ -64,30 +68,45 @@ public class ResinAdmin extends AbstractManagedObject
   /**
    * Returns the Clusters known to Resin.
    */
+  @Override
   public ClusterMXBean []getClusters()
   {
-    return _resin.getClusters();
+    CloudSystem system = TopologyService.getCurrentSystem();
+    
+    CloudCluster []clusters = system.getClusterList();
+    
+    ClusterMXBean []mxClusters = new ClusterMXBean[clusters.length];
+    
+    for (int i = 0; i < clusters.length; i++) {
+      mxClusters[i] = clusters[i].getAdmin();
+    }
+    
+    return mxClusters;
   }
 
   //
   // Configuration attributes
   //
 
+  @Override
   public String getConfigFile()
   {
     return _resin.getResinConf().getNativePath();
   }
 
+  @Override
   public String getResinHome()
   {
     return _resin.getResinHome().getNativePath();
   }
 
+  @Override
   public String getRootDirectory()
   {
     return _resin.getRootDirectory().getNativePath();
   }
 
+  @Override
   public ServerMXBean getServer()
   {
     Server server = _resin.getServer();
@@ -98,26 +117,31 @@ public class ResinAdmin extends AbstractManagedObject
       return null;
   }
 
+  @Override
   public String getVersion()
   {
     return VersionFactory.getFullVersion();
   }
   
+  @Override
   public boolean isProfessional()
   {
     return _resin.isProfessional();
   }
 
+  @Override
   public String getLocalHost()
   {
     return CauchoSystem.getLocalHost();
   }
 
+  @Override
   public String getUserName()
   {
     return System.getProperty("user.name");
   }
 
+  @Override
   public String toString()
   {
     return "ResinAdmin[" + getObjectName() + "]";

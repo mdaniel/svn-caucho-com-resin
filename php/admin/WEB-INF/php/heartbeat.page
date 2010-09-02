@@ -1,0 +1,176 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+echo "<h1>Cluster Heartbeat</h1>\n";
+
+$resin = $g_server->Cluster->Resin;
+$clusters = $resin->Clusters;
+
+echo "<table cellspacing='5'>";
+
+echo "<tr>";
+
+foreach ($clusters as $c) {
+  echo "<th>" . $c->Name . "</th>\n"
+}
+
+echo "</tr>";
+
+function has_server($clusters, $i)
+{
+  return true;
+}  
+
+for ($i = 0; $i < 64; $i++) {
+  if (! has_server($clusters, $i))
+    continue;
+
+  echo "<tr>";
+
+  foreach ($clusters as $c) {
+    echo "<td>";
+    
+    $triad_a = $c->Servers[0];
+    if ($triad_a) {
+      $mbean_server_a = new MBeanServer($triad_a->Name);
+    }
+    
+    $triad_b = $c->Servers[1];
+    if ($triad_b) {
+      $mbean_server_b = new MBeanServer($triad_b->Name);
+    }
+
+    $triad_c = $c->Servers[2];
+    if ($triad_c) {    
+      $mbean_server_c = new MBeanServer($triad_c->Name);
+    }
+
+    $s = $c->Servers[$i];
+
+    if ($s) {
+      $style = "border-width : 1px";
+
+      $s_mbean_server = new MBeanServer($s->Name);
+      $s_server = $s_mbean_server->lookup("resin:type=Server");
+
+      if (! $s_server) {
+        $style .= "; border-color : #cc0000";
+      }
+      else if ($s->Name === $g_server->SelfServer->Name) {
+        $style .= "; border-color : #e5a122";
+      }
+      
+      if ($s->isTriadServer()) {
+        $style .= "; border-style : solid";
+      }
+      else {
+        $style .= "; border-style : dashed";
+      }
+
+      echo "<table style='$style' width='100%'>\n";
+
+      echo "<tr>";
+      echo "<td>"
+      
+      $is_health = $s_server;
+      
+      if ($is_health) {
+        echo "<span style='color:#00c000'>&#x2713;</span>";
+      }
+      else {
+        echo "<span style='color:#c00000'>&#x2717;</span>";
+      }
+      
+      echo "</td>"
+      echo "<td width='5em'>";
+  
+      $name = $s->Name;
+      if (! $name)
+        $name = "default";
+      printf("%02d - %s", $s->ClusterIndex, $name);
+
+      echo "</td>\n";
+      echo "<td>";
+
+      do_triad($s, $triad_a, $mbean_server_a);
+
+      echo "</td></tr>\n";
+      echo "<tr><td>&nbsp;</td><td>";
+
+      printf("%s:%d", $s->Address, $s->Port);
+
+      echo "</td>\n<td>";
+
+      do_triad($s, $triad_b, $mbean_server_b);
+
+      echo "</td></tr>\n";
+      echo "<tr><td>&nbsp;</td><td>";
+
+      $s_mbean_server = new MBeanServer($s->Name);
+      $s_server = $s_mbean_server->lookup("resin:type=Server");
+      
+      $is_health = $s_server;
+      
+      echo "</td>";
+
+      echo "<td>";
+
+      do_triad($s, $triad_c, $mbean_server_c);
+      
+      echo "</td>";
+      
+      echo "</tr>\n";
+      echo "</table>\n";
+    }
+
+    echo "</td>";
+  }
+
+  echo "</tr>";
+}
+
+echo "</table>";
+
+function do_triad($s, $triad, $triad_mbean_server)
+{
+  if (! $triad) {
+    echo "&nbsp;&nbsp;\n";
+    return;
+  }
+
+  echo "<span style='font-size=1.2em'>";
+  
+  $s_mbean_server = new MBeanServer($s->Name);
+  $s_server = $s_mbean_server->lookup("resin:type=Server");
+  $s_triad_server = $s_server->SelfServer->Cluster->Servers[$triad->ClusterIndex];
+
+  $triad_server = $triad_mbean_server->lookup("resin:type=Server");
+  $triad_cluster = $triad_server->SelfServer->Cluster;
+  $triad_cluster_server = $triad_cluster->Servers[$s->ClusterIndex];
+
+  if (! $s_triad_server) {
+    echo "<span>&ndash;</span>";
+  }
+  else if ($s_triad_server->isHeartbeatActive()) {
+    echo "<span style='color:#00c000'>&larr;</span>";
+  }
+  else {
+    echo "<span style='color:#c00000'>&#x2717;</span>";
+  }
+
+  if (! $triad_cluster_server) {
+    echo "<span>&ndash;</span>";
+  }
+  else if ($triad_cluster_server->isHeartbeatActive()) {
+    echo "<span style='color:#00c000'>&rarr;</span>";
+  }
+  else {
+    echo "<span style='color:#c00000'>&#x2717;</span>";
+  }
+}
+?>

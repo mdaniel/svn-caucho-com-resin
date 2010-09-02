@@ -30,8 +30,8 @@ body {
 }
 
 a {
-  text-decoration : none;
   color : #4c2004;
+  text-decoration : underline;
 }
 
 /* color : #e5a122 */
@@ -422,6 +422,14 @@ span.example {
 
 .warn {
   color : #ff0055;
+}
+
+.ok {
+  background : #00ff00;
+}
+
+.fail {
+  background : #ff0000;
 }
 
 .todo {
