@@ -278,5 +278,5 @@ Online webapp deploy is only available over connections secured with SSL.
 <?php
 } // summary
 
-display_footer($g_page, javascript_create_tab("webapp-tab"));
+display_footer($g_page, javascript_create_tab("webapp-tabs"));
 ?>

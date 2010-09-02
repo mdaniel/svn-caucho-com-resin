@@ -720,9 +720,9 @@ function javascript_create_tab($tab_name)
         }
      );
     });
-
-    $($tab_name).tabs().find(".ui-tabs-nav").sortable({axis:'x'});
 EOF;
+
+  $javascript .= '$("#' . $tab_name . '").tabs().find(".ui-tabs-nav").sortable({axis:\'x\'});';
 
   return $javascript;
 }  

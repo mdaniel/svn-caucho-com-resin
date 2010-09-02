@@ -447,5 +447,5 @@ function print_stack_entry($stack)
   }
 }
 
-display_footer($g_page, javascript_create_tab("profile-tab"));
+display_footer($g_page, javascript_create_tab("#profile-tab"));
 ?>
