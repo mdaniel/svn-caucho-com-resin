@@ -813,14 +813,18 @@ function display_footer($script, $javascript="")
 
       toggleSwitch.addClass(toggleShowIcon);
 
+      toggleTargets.hide();
+
       toggleSwitch.toggle(
         function() {
           toggleTargets.show();
-          toggleSwitch.toggleClass(toggleShowIcon + " " + toggleHideIcon);
+          toggleSwitch.removeClass(toggleShowIcon);
+          toggleSwitch.addClass(toggleHideIcon);
         },
         function() {
           toggleTargets.hide();
-          toggleSwitch.toggleClass(toggleShowIcon + " " + toggleHideIcon);
+          toggleSwitch.removeClass(toggleHideIcon);
+          toggleSwitch.addClass(toggleShowIcon);
         }
       );
     });
