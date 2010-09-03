@@ -37,13 +37,10 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import com.caucho.config.types.FileSetType;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
-import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.DynamicClassLoader;
@@ -51,11 +48,11 @@ import com.caucho.loader.Environment;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.deploy.RepositoryDependency;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
 /**
  * A deployment entry that expands from an archive (Jar/Zip) file.
@@ -236,7 +233,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    * Deploys the controller
    */
   protected void deployImpl()
-    {
+  {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " deploying");
     
@@ -368,9 +365,16 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       
       props.put("archive-digest", hash);
       
+      long archiveDate = archivePath.getLastModified();
+      QDate qDate = QDate.allocateLocalDate();
+      qDate.setGMTTime(archiveDate);
+      props.put("date", qDate.printISO8601());
+      QDate.freeLocalDate(qDate);
+      
       _repository.putTagArchive(_autoDeployTag, 
                                 archivePath,
-                                ".war auto-update", 
+                                ".war auto-update from " 
+                                + archivePath.getNativePath(), 
                                 props);
       
       return true;

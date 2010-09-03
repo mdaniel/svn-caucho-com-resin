@@ -59,12 +59,29 @@ public class GitCommitJar {
   public GitCommitJar(Path jar)
     throws IOException
   {
-    init(jar);
+    if (jar.getScheme().equals("memory")) {
+      InputStream is = jar.openRead();
+      
+      try {
+        init(is);
+      } finally {
+        is.close();
+      }
+    }
+    else {
+      init(jar);
+    }
   }
 
   public GitCommitJar(InputStream is)
     throws IOException
   {
+    init(is);
+  }
+  
+  private void init(InputStream is)
+    throws IOException
+    {
     Path dir = WorkDir.getLocalWorkDir();
 
     Path path = dir.createTempFile("git", "tmp");

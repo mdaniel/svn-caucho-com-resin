@@ -487,8 +487,7 @@ abstract public class
     }
     
     if (entry != null) {
-      map.put("id", entry.getName());
-      map.put("content-hash", entry.getRoot());
+      map.putAll(entry.getAttributeMap());
     }
     
     return map;

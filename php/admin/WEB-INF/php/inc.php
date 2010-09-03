@@ -148,17 +148,10 @@ function format_ago_td_pair($value, $date, $fail=3600, $warn=14400)
   if ($ago_class)
     $ago_class="class='$ago_class'";
 
-  /*
-  echo "<td $ago_class style='border-right: none'>$value</td>\n";
-  echo "<td $ago_class style='border-left: none'>";
-  echo format_ago($date);
-  echo "</td>";
-  */
-
   echo "<td>$value</td>\n";
   echo "<td $ago_class>";
   echo format_ago($date);
-  echo "</td>";
+  echo "</td>\n";
 }
 
 function format_state_class($state)
@@ -963,6 +956,16 @@ function server_find_by_index($g_mbean_server, $index)
   }
   
   return null;
+}
+    
+function print_ok($message)
+{
+  echo "<span style='color:#00c000'>&#x2713;$message</span>";
+}
+    
+function print_fail($message)
+{
+  echo "<span style='color:#c00000'>&#x2717;$message</span>";
 }
 
 ?>

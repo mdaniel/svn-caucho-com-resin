@@ -1,0 +1,69 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+$webapp = $g_mbean_server->lookup($_GET['id']);
+
+$request = quercus_servlet_request();
+$is_secure = $request->isSecure();
+$user = quercus_get_request()->getUserPrincipal();
+$action = $_POST['action'];
+
+if (! $action) {
+}
+else if ($is_secure) {
+  if ($action == 'deploy') {
+    $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
+
+    $path = $_FILES['warfile']['tmp_name'];
+    $host = $_REQUEST['host'];
+    if (! $host)
+      $host = "default";
+      
+    $tag = "production/webapp/" . $host . $_REQUEST['url'];
+    
+    $client->putTagArchive($tag, $path, "commit from web form", $attributes);
+  }
+}
+
+deploy();
+
+function deploy()
+{
+?>
+
+<h2>Deploy new webapp</h2>
+<?php 
+if ($is_secure) {
+?>
+
+<table>
+<form method='POST' enctype="multipart/form-data">
+  <input type='hidden' name='action' value='deploy'/>
+  <tr>
+    <th>Virtual Host</th>
+    <th>URL</th>
+    <th>.war file</th>
+  </tr>
+  <tr>
+    <td><input type='text' name='host' value='default'/></td>
+    <td>/<input type='text' name='url' value=''/></td>
+    <td><input type='file' name='warfile'/></td>
+    <td><input type='submit' value='Deploy'/></td>
+  </tr>
+</form>
+<?php
+}
+else {
+?>
+<span class='warn' style="font-size: 110%">Insecure connection:</span>
+Online webapp deploy is only available over connections secured with SSL.
+<?php
+}
+
+} // summary
+?>

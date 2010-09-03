@@ -590,25 +590,33 @@ abstract public class DeployController<I extends DeployInstance>
 
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
       _lifecycle.toError();
 
       onError(e);
 
-      if (deployInstance != null)
+      if (deployInstance != null) {
+        log.finer(e.toString());
         deployInstance.setConfigException(e);
+      }
       else {
         log.severe(e.toString());
-        log.log(Level.FINEST, e.toString(), e);
       }
     } catch (Throwable e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
       _lifecycle.toError();
       
       onError(e);
 
-      if (deployInstance != null)
+      if (deployInstance != null) {
+        log.finer(e.toString());
         deployInstance.setConfigException(e);
-      else
+      }
+      else {
         log.log(Level.SEVERE, e.toString(), e);
+      }
     } finally {
       if (isActive) {
         _lifecycle.toActive();

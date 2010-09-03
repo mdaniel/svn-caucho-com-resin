@@ -46,6 +46,8 @@ public class RepositoryTagEntry
   
   
   private final String _parent; // sha1 of the parent tag entry
+  
+  private final Map<String,String> _attributeMap;
 
   /**
    * Create a new entry, storing the serialized form in the repository.
@@ -53,12 +55,33 @@ public class RepositoryTagEntry
   public RepositoryTagEntry(AbstractRepository repository,
                             String tagName,
                             String treeHash,
-                            String parent)
+                            String parent,
+                            Map<String,String> attributeMap)
     throws IOException
   {
+    if (tagName == null)
+      throw new NullPointerException();
+    if (treeHash == null)
+      throw new NullPointerException();
+    
     _tagName = tagName;
     _treeHash = treeHash;
     _parent = parent;
+    
+    HashMap<String,String> map;
+    
+    if (attributeMap != null)
+      map = new HashMap<String,String>(attributeMap);
+    else
+      map = new HashMap<String,String>();
+    
+    map.put("tag", tagName);
+    map.put("root", treeHash);
+    
+    if (parent != null)
+      map.put("parent", parent);
+    
+    _attributeMap = map;
     
     TempStream os = new TempStream();
     WriteStream out = new WriteStream(os);
@@ -89,13 +112,13 @@ public class RepositoryTagEntry
     try {
       ReadStream in = Vfs.openRead(is);
       
-      Map<String,String> map = readMap(in);
+      _attributeMap = readMap(in);
 
       in.close();
 
-      _tagName = map.get("tag");
-      _treeHash = map.get("root");
-      _parent = map.get("parent");
+      _tagName = _attributeMap.get("tag");
+      _treeHash = _attributeMap.get("root");
+      _parent = _attributeMap.get("parent");
     } finally {
       is.close();
     }
@@ -123,6 +146,11 @@ public class RepositoryTagEntry
   public String getTagEntryHash()
   {
     return _tagEntryHash;
+  }
+  
+  public Map<String,String> getAttributeMap()
+  {
+    return _attributeMap;
   }
 
   private Map<String,String> readMap(ReadStream is)
@@ -155,9 +183,9 @@ public class RepositoryTagEntry
   private void writeEntry(WriteStream out)
     throws IOException
   {
-    writePair(out, "tag", _tagName);
-    writePair(out, "root", _treeHash);
-    writePair(out, "parent", _parent);
+    for (Map.Entry<String,String> entry : _attributeMap.entrySet()) {
+      writePair(out, entry.getKey(), entry.getValue());
+    }
   }
 
   private void writePair(WriteStream out, String key, String value)

@@ -260,7 +260,8 @@ abstract public class AbstractRepository implements Repository
       String parent = null;
 
       RepositoryTagEntry entry
-        = new RepositoryTagEntry(this, tagName, contentHash, parent);
+        = new RepositoryTagEntry(this, tagName, contentHash, parent,
+                                 commitMetaData);
 
       Map<String,RepositoryTagEntry> newTagMap
         = new TreeMap<String,RepositoryTagEntry>(tagMap);

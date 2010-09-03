@@ -45,13 +45,13 @@ public class RemoteMBeanConnectionFactory {
   private static final Logger log
     = Logger.getLogger(RemoteMBeanConnectionFactory.class.getName());
   
-  private static Constructor _constructor;
+  private static Constructor<?> _constructor;
   
   public static MBeanServerConnection create(String serverId)
   {
     try {
       if (_constructor == null) {
-        Class cl = Class.forName("com.caucho.server.admin.RemoteMBeanServerConnection");
+        Class<?> cl = Class.forName("com.caucho.server.admin.RemoteMBeanServerConnection");
 
         _constructor = cl.getConstructor(new Class[] { String.class });
       }
