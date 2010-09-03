@@ -5,7 +5,7 @@
  * @author Sam
  */
 
-require_once "WEB-INF/php/graph.php";
+require_once "WEB-INF/php/graph_flot.php";
 
 global $g_server_id;
 global $g_mbean_server;
@@ -593,7 +593,7 @@ if ($is_refresh) {
   echo "<meta http-equiv=\"refresh\" content=\"60\" />\n";
 }
 ?>
-
+  <script type="text/javascript" src="jquery.js"></script>
   <script language='javascript' type='text/javascript'>
     function hide(id) { document.getElementById(id).style.display = 'none'; }
     function show(id) { document.getElementById(id).style.display = 'block'; }
@@ -795,9 +795,9 @@ function display_footer($script, $javascript="")
 
 </td></tr></table>
 
-<script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="jquery-ui.js"></script>
 <script type="text/javascript" src="resin-admin.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {
     initializeToggleSwitches();

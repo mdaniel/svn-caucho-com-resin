@@ -30,14 +30,9 @@
 package com.caucho.quercus.lib.date;
 
 import com.caucho.quercus.UnimplementedException;
-import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.date.DateModule.DateParser;
-import com.caucho.util.Alarm;
 import com.caucho.util.QDate;
 
 /**
