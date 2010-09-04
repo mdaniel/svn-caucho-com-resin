@@ -109,12 +109,34 @@ for ($i = 0; $i < 64; $i++) {
       do_triad($s, $triad_b, $mbean_server_b);
 
       echo "</td></tr>\n";
-      echo "<tr><td>&nbsp;</td><td>";
+
+      //
+      // third row - health and triad C
+      // 
 
       $s_mbean_server = new MBeanServer($s->Name);
       $s_server = $s_mbean_server->lookup("resin:type=Server");
+      $s_health = $s_mbean_server->lookup("resin:type=HealthCheck,name=Resin");
       
       $is_health = $s_server;
+      
+      echo "<tr><td>";
+      echo "<span id='sw_${server}' class='switch'></span>";
+      echo "</td><td>";
+
+      if (! $s_health) {
+        echo "n/a";
+      }
+      else if ($s_health->Status == "OK") {
+        print_ok("");
+        echo " health " . $s_health->Status;
+      }
+      else if ($s_health->Status == "FAIL") {
+        print_fail("health " . $s_health->Status);
+      }
+      else {
+        echo  "health " . $s_health->Status;
+      }
       
       echo "</td>";
 

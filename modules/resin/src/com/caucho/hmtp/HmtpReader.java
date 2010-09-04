@@ -39,6 +39,7 @@ import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2StreamingInput;
+import com.caucho.hessian.io.HessianDebugInputStream;
 
 /**
  * HmtpReader stream handles client packets received from the server.
@@ -69,6 +70,14 @@ public class HmtpReader {
   public void init(InputStream is)
   {
     _is = is;
+    
+    if (log.isLoggable(Level.FINEST)) {
+      HessianDebugInputStream hIs
+        = new HessianDebugInputStream(is, log, Level.FINEST);
+      
+      hIs.startStreaming();
+      is = hIs;
+    }
     _in = new Hessian2StreamingInput(is);
   }
 

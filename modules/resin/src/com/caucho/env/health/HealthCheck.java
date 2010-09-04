@@ -30,6 +30,11 @@ package com.caucho.env.health;
 
 public interface HealthCheck {
   /**
+   * Returns the health check name.
+   */
+  public String getName();
+  
+  /**
    * Returns the health status for this health check.
    */
   public HealthStatus checkHealth();

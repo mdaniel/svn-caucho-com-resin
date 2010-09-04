@@ -11,6 +11,18 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.11 snapshot">
+<ul>
+<li>resin-admin: JMX display has been reorganized and domains split into tabs</li>
+<li>resin-admin: graph generation has been updated</li>
+<li>resin-admin: thread page now includes locking tab giving blocking threads and their lockers.</li>
+<li>resin-admin: thread page includes locking information in stack trace.</li>
+<li>resin-admin: webapp page now includes deployment version validation.</li>
+<li>health: HealthCheck added to JMX</li>
+<li>health: JvmDeadlock and Memory checks were not being added to the Health check.</li>
+</ul>
+</s2>
+
 <s2 title="4.0.10 - Aug 23, 2010">
 <ul>
 <li>candi: _namedBeanMap is active and needs to be a ConcurrentHashMap (rep by Wesley Wu)</li>

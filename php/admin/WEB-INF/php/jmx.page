@@ -9,7 +9,7 @@ $javascript = <<<EOF
   $("#jmx-tabs").tabs().find(".ui-tabs-nav").sortable({axis:'x'});
 EOF;
 
-if (! admin_init($query, false)) {
+if (! admin_init($query)) {
   return;
 }
 

@@ -493,6 +493,11 @@ public class Resin
     _resinSystem.addService(LockService.class, lockService);
   }
   
+  protected void addServices()
+  {
+    
+  }
+  
   protected DistCacheService createDistCacheService()
   {
     return new DistCacheService(new FileCacheManager(getResinSystem()));
@@ -1000,8 +1005,13 @@ public class Resin
   
         configureRoot(bootResin);
   
+        if (! isWatchdog()) {
+          addServices();
+        }
+        
         configureServer();
       }
+      
     } catch (Exception e) {
       throw ConfigException.create(e);
     } finally {

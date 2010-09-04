@@ -7,8 +7,9 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,41 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.health;
+package com.caucho.management.server;
 
-public abstract class AbstractHealthCheck implements HealthCheck {
+/**
+ * Interface for a HealthCheck
+ *
+ * <pre>
+ * resin:type=HealthCheck,name="Resin|MyHealth"
+ * </pre>
+ */
+public interface HealthCheckMXBean extends ManagedObjectMXBean
+{
   /**
-   * Returns the health check name
+   * Returns the last health check status.
    */
-  @Override
-  public String getName()
-  {
-    String simpleName = getClass().getSimpleName();
-    
-    if (simpleName.endsWith("HealthCheck")) {
-      int prefixLen = simpleName.length() - "HealthCheck".length();
-      
-      return "Resin|" + simpleName.substring(0, prefixLen);
-    }
-    else
-      return "Resin|" + simpleName;
-  }
+  public String getStatus();
   
   /**
-   * Returns the health status for this health check.
+   * Returns the last health check message.
    */
-  @Override
-  public HealthStatus checkHealth()
-  {
-    return HealthStatus.OK;
-  }
-
+  public String getMessage();
+  
   /**
-   * Returns the current status message.
+   * Returns the last status value as an integer for graphing.
    */
-  @Override
-  public String getHealthStatusMessage()
-  {
-    return "";
-  }
+  public int getStatusOrdinal();
 }
