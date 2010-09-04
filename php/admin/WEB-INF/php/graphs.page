@@ -305,13 +305,13 @@ foreach ($sections as $section => $names) {
 
   echo "<li class='open' id='lc_$i'>";
   echo "<img src='images/close-item.png'";
-  echo " onclick='show_n(\"lo_$i\");hide(\"lc_$i\");'></img> ";
+  echo " onclick='show_n(\"lo_$i\");hide(\"lc_$i\");'/> ";
   echo "$section"
   echo "</li>";
 
   echo "<li class='open' id='lo_$i' style='display:none'";
   echo "<img src='images/open-item.png'";
-  echo " onclick='show_n(\"lc_$i\");hide(\"lo_$i\");'></img> ";
+  echo " onclick='show_n(\"lc_$i\");hide(\"lo_$i\");'/> ";
   echo $section;
 
   sort($names);
@@ -331,6 +331,8 @@ foreach ($sections as $section => $names) {
 echo "</ul>";
 
 echo "</form>\n";
+
+display_footer($g_page);
 
 function draw_main_graph()
 {

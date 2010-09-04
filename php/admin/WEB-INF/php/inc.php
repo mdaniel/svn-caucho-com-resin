@@ -624,30 +624,29 @@ if ($is_refresh) {
 
 <body>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr>
-  <td width="160" align="center">
-  </td>
-
-  <td width="10">
-  </td>
-
-  <td valign="top">
-   <ul class="status">
+<ul id="status-bar">
+   <li class='status-item logout'><a href="?q=index.php&logout=true">logout</a></li>
+   <li class='status-item'><a href="<?= $g_next_url ?>">refresh</a></li>
 <?
 if (! empty($server)) {
   $server_name = $server->Id ? $server->Id : "default";
 
 ?>
-   <li class="server"><?php display_servers($server) ?></li>
+   <li class="server status-item"><?php display_servers($server); ?></li>
 <? }  ?>
 <!--
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    -->
-   <li><a href="<?= $g_next_url ?>">refresh</a></li>
-   <li><a href="?q=index.php&logout=true">logout</a></li>
-   </ul>
+   <li class="status-item"><?php display_health(); ?></li>
+   <li class="status-item status-log"><?php display_status_log($server); ?></li>
+</ul>
 
+<table id="layout" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+  <td width="160" align="center">
+  </td>
+
+  <td width="10">
   </td>
 
   <td align='right'>
@@ -692,6 +691,11 @@ if (! empty($server)) {
   </td>
   <td valign='top' colspan='2'>
 
+  <div id="busyIndicator">
+    <img src="images/loading.gif"/>
+  </div>
+
+  <div id='content'> <!-- XXX not compatible with flot: style='display: none' -->
 <?php
   if (! $server && $g_server_id) {
     echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
@@ -730,12 +734,153 @@ function display_pages()
   }
 }
 
+function display_status_log($server)
+{
+  $mbean_server = new MBeanServer($server->SelfServer->Name);
+
+  if ($mbean_server) {
+    $mbean = $mbean_server->lookup("resin:type=LogService");
+  }
+
+  //
+  // recent messages
+  //
+  
+  if ($mbean) {
+    $now = time();
+
+    $messages = $mbean->findMessages(($now - 24 * 3600) * 1000, $now * 1000);
+
+    if (! empty($messages)) {
+      $messages = array_reverse($messages);
+
+      if (count($messages) > 3) {
+        $messages = array_slice($messages, 0, 3);
+      }
+
+      $first_message = $messages[0]->message;
+
+      if (strlen($first_message) > 60) {
+        $first_message 
+          = htmlspecialchars(substr($messages[0]->message, 0, 57)) . "...";
+      }
+      else {
+        $first_message = htmlspecialchars($messages[0]->message);
+      }
+
+      echo "Latest Log: \n";
+
+      echo "<span class=\"switch {$messages[0]->level}\" id=\"status-log\">";
+      echo "<span id='first-log-message'>${first_message}</span></span>";
+
+      echo "<table class='toggle-status-log data'>\n";
+
+      echo "<tbody class='scroll'>\n";
+      foreach ($messages as $message) {
+        echo "<tr class='{$message->level}'>";
+
+        echo "  <td class='date'>";
+        echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+        echo "</td>";
+        echo "  <td class='level'>{$message->level}</td>";
+        echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90));
+        echo "  </td>";
+
+        echo "</tr>";
+      }
+
+      echo "</tbody>\n";
+      echo "</table>\n";
+    }
+  }
+}
+
+function display_health()
+{
+  global $g_server;
+  $resin = $g_server->Cluster->Resin;
+  $clusters = $resin->Clusters;
+
+  $down_servers = array();
+
+  foreach ($clusters as $c) {
+    $servers = $c->Servers;
+    $triads = array();
+
+    for ($i = 0; $i < min(3, count($servers)); $i++) {
+      $triad = $c->Servers[$i];
+      if ($triad) {
+        array_push($triads, array($triad, new MBeanServer($triad->Name)));
+      }
+    }
+
+    foreach ($servers as $s) {
+      if ($s->Name == "")
+        $display_name = "{$c->Name}:default";
+      else
+        $display_name = "{$c->Name}:{$s->Name}";
+ 
+      $error = "";
+
+      foreach ($triads as $triad_pair) {
+        list($triad, $triad_mbean_server) = $triad_pair;
+
+        if ($s->SelfServer->Name == $triad->Name)
+          continue;
+
+        $s_mbean_server = new MBeanServer($s->Name);
+        $s_server = $s_mbean_server->lookup("resin:type=Server");
+        $s_triad_server 
+          = $s_server->SelfServer->Cluster->Servers[$triad->ClusterIndex];
+
+        $triad_server = $triad_mbean_server->lookup("resin:type=Server");
+        $triad_cluster = $triad_server->SelfServer->Cluster;
+        $triad_cluster_server = $triad_cluster->Servers[$s->ClusterIndex];
+
+        if (! $s_triad_server
+            || ! $s_triad_server->isHeartbeatActive()) {
+          $error .= "\"${display_name}\" cannot contact triad \"" . $triad->Name . "\"\n";
+        }
+
+        if (! $triad_cluster_server
+            || ! $triad_cluster_server->isHeartbeatActive()) {
+          $error .= "Triad server \"{$triad->Name}\" cannot contact \"${display_name}\n";
+        }
+      }
+
+      if ($error) {
+       array_push($down_servers, array($display_name, $error));
+      }
+    }
+  }
+
+  if (count($down_servers) == 0) {
+    echo "<span class='ok'>System Health</span>";
+  }
+  else {
+    echo "<span class='switch' id='down-servers'>"
+    echo "<span class='fail'>System Health</span>";
+    echo "<ul class='toggle-down-servers' style='display: none'>";
+    foreach ($down_servers as $down_server) {
+      list($display_name, $error) = $down_server;
+      $title = htmlspecialchars($error);
+
+      global $g_server_index;
+
+      $next_url = "?q=heartbeat&s=" . $g_server_index;
+      echo "<li class='fail' title='$title'><a href='$next_url'>$display_name</a></li>";
+    }
+    echo "</ul>";
+    echo "</span>";
+  }
+}
+
 function display_servers($server)
 {
   global $g_next_url;
   global $g_server_index;
 
-  echo "<form name='servers' method='POST' action='" . $g_next_url . "'>";
+  echo "<form class='status-item' name='servers' method='POST' action='" . $g_next_url . "'>";
   echo "Server: "; 
   echo "<select name='new_s' onchange='document.forms.servers.submit();'>\n";
 
@@ -788,12 +933,13 @@ function display_footer($script, $javascript="")
 
 ?>
 </td></tr></table>
+
+<div id="footer">
 <hr />
 <p>
 <em><?= resin_version() ?></em>
 </p>
-
-</td></tr></table>
+</div>
 
 <script type="text/javascript" src="jquery-ui.js"></script>
 <script type="text/javascript" src="resin-admin.js"></script>
@@ -803,6 +949,9 @@ function display_footer($script, $javascript="")
     initializeToggleSwitches();
 
     <?= $javascript ?>
+
+    $("#busyIndicator").hide();
+    $("#content").show();
   });
 </script>
 

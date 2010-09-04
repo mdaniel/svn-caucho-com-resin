@@ -38,20 +38,28 @@ ToggleSwitch.prototype.setShownState = function() {
   this.state = "shown";
 };
 
+ToggleSwitch.prototype.showTargets = function() {
+  this.toggleTargets.show();
+};
+
 ToggleSwitch.prototype.setHiddenState = function() {
   this.toggleSwitch.removeClass(this.toggleHideIcon);
   this.toggleSwitch.addClass(this.toggleShowIcon);
   this.state = "hidden";
 };
 
+ToggleSwitch.prototype.hideTargets = function() {
+  this.toggleTargets.hide();
+};
+
 ToggleSwitch.prototype.handleClickToggle = function() {
   if (this.state == "hidden") {
     this.setShownState();
-    this.toggleTargets.show();
+    this.showTargets();
   }
   else {
     this.setHiddenState();
-    this.toggleTargets.hide();
+    this.hideTargets();
   }
 
   this.toggleTargets.trigger("toggle", this);
@@ -86,4 +94,6 @@ function initializeToggleSwitches() {
   });
 }
 
-
+function init() {
+  initializeToggleSwitches();
+}

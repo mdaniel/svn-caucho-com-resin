@@ -8,10 +8,12 @@
 /* red #98012e;  */
 
 body {
-  border : solid;
-  border-width : 0px;
   font-family: Arial,Helvetica,sans-serif;
   font-size: small;
+  border: 0px;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
 .breadcrumb {
@@ -428,8 +430,6 @@ span.example {
   border-width : 1px;
 }
 
-//  background : #fe9;
-
 .ok {
   background : #00ff00;
 }
@@ -451,6 +451,10 @@ code {
   color : #003399;
 }
 
+#layout {
+  margin-top: 2em;
+}
+
 ul.leftnav {
   list-style : none;
   padding-left : 1em;
@@ -466,19 +470,17 @@ ul.none {
   list-style : none
 }
 
+/*
 ul.status {
   border-bottom: 1px solid gray;
   list-style-type:none;
   position:relative;
   padding : 0em;
   margin : 0em;
-  float:left;
   border-right: 1px solid gray;
 }
 
-
 .status li {
-  float:left;
   display : inline;
   margin : 0em;
   padding: 0.4em 0.4em 0.3em 0.4em;
@@ -488,7 +490,79 @@ ul.status {
 
 li.server {
   background : #ccddee;
+}*/
+
+#status-bar {
+  x-overflow: hidden;
+  width: 100%;
+  list-style-type:none;
+  position: fixed;
+  top: 0;
+  z-index: 500;
+  width: 100%;
+  background: #f4f4f4;
+  border-bottom:1px solid gray; 
+  margin: 0;
+  padding: 0;
 }
+
+li.status-item {
+  border-right: 1px solid gray;
+  position: relative;
+}
+
+.status-item {
+  display: inline;
+  padding-right: 0.5em;
+  padding-left: 0.5em;
+}
+
+.status-item table {
+  display: none;
+  position: absolute;
+}
+
+.status-log {
+  x-overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+select.log {
+  width: 300px;
+}
+
+select.log option {
+  width: 300px;
+  white-space: normal;
+}
+
+.status-item table td.message {
+  font-family: monospace;
+  white-space: pre;
+}
+
+#footer {
+  width: 100%;
+}
+
+.toggle-down-servers {
+  display: none;
+  position: absolute;
+  list-style-type:none;
+  padding-left: 1em;
+}
+
+.toggle-down-servers li {
+  border: 1px solid gray;
+  padding: 5px;
+}
+
+
+/*
+.logout {
+  float: right;
+}*/
 
 /*
 
@@ -677,6 +751,10 @@ th.fail {
   background : #fe9;
 }
 
+span.warning {
+  background : #fe9;
+}
+
 .stopped-lazy {
   background : #bbb;
   font-style : italic;
@@ -795,4 +873,14 @@ table.schema tr td {
 table.schema tr th {
   background: #f4f4f4;
   padding: 0.2em;
+}
+
+#busyIndicator {
+  width: 100%;
+  text-align: center;
+  padding-top: 2em;
+}
+
+.switch {
+  vertical-align: middle;
 }
