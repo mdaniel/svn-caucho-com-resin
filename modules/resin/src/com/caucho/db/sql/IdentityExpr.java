@@ -62,6 +62,7 @@ class IdentityExpr extends Expr {
    *
    * @return the long value
    */
+  @Override
   public long evalLong(QueryContext context)
     throws SQLException
   {
@@ -87,6 +88,7 @@ class IdentityExpr extends Expr {
    *
    * @return the double value
    */
+  @Override
   public double evalDouble(QueryContext context)
     throws SQLException
   {
@@ -100,12 +102,14 @@ class IdentityExpr extends Expr {
    *
    * @return the string value
    */
+  @Override
   public String evalString(QueryContext context)
     throws SQLException
   {
     return String.valueOf(evalLong(context));
   }
 
+  @Override
   public String toString()
   {
     return "identity()";

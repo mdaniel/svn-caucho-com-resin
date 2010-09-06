@@ -28,24 +28,31 @@
 
 package com.caucho.db.sql;
 
+import java.sql.SQLException;
+
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
 
-import java.sql.SQLException;
-import java.util.logging.Logger;
-
 class OidExpr extends Expr {
   private Table _table;
-
   private int _tableIndex;
+  
+  private FromItem _fromItem;
 
-  OidExpr(Table table, int tableIndex)
+  OidExpr(FromItem fromItem, Table table, int tableIndex)
   {
+    _fromItem = fromItem;
     _table = table;
     _tableIndex = tableIndex;
   }
 
-  public Class getType()
+  FromItem getFromItem()
+  {
+    return _fromItem;
+  }
+  
+  @Override
+  public Class<?> getType()
   {
     return long.class;
   }

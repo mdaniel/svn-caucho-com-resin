@@ -33,11 +33,15 @@ import java.sql.SQLException;
 
 import com.caucho.db.table.TableIterator;
 
-class IdentityIndexExpr extends RowIterateExpr {
-  private IdExpr _columnExpr;
+/**
+ * resin_oid index.
+ *
+ */
+class OidIndexExpr extends RowIterateExpr {
+  private OidExpr _columnExpr;
   private Expr _expr;
 
-  IdentityIndexExpr(IdExpr index, Expr expr)
+  OidIndexExpr(OidExpr index, Expr expr)
   {
     _expr = expr;
     _columnExpr = index;
@@ -45,7 +49,7 @@ class IdentityIndexExpr extends RowIterateExpr {
     if (expr == null || index == null)
       throw new NullPointerException();
 
-    index.getColumn();
+    // index.getColumn();
   }
 
   /**

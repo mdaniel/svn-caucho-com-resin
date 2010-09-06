@@ -28,18 +28,14 @@
 
 package com.caucho.db.sql;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.util.L10N;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 final class IdExpr extends Expr {
-  private static final L10N L = new L10N(IdExpr.class);
-
   private final FromItem _fromItem;
   private final Column _column;
 
@@ -54,7 +50,8 @@ final class IdExpr extends Expr {
     _column = column;
   }
 
-  public Class getType()
+  @Override
+  public Class<?> getType()
   {
     return _column.getJavaType();
   }
@@ -70,6 +67,7 @@ final class IdExpr extends Expr {
   /**
    * Returns any column name.
    */
+  @Override
   public String getName()
   {
     return _column.getName();
@@ -86,6 +84,7 @@ final class IdExpr extends Expr {
   /**
    * Returns the column's table.
    */
+  @Override
   public Table getTable()
   {
     return _fromItem.getTable();
@@ -122,6 +121,7 @@ final class IdExpr extends Expr {
   /**
    * The cost of a match of the expr.
    */
+  @Override
   public long subCost(ArrayList<FromItem> fromList)
   {
     if (! fromList.contains(_fromItem))
@@ -131,6 +131,7 @@ final class IdExpr extends Expr {
     return 10 * 100 * 100 * 100;
   }
 
+  @Override
   public Expr bind(Query query)
     throws SQLException
   {
@@ -147,6 +148,7 @@ final class IdExpr extends Expr {
   /**
    * Returns true if the expression is null.
    */
+  @Override
   public boolean isNull(QueryContext context)
     throws SQLException
   {
@@ -159,6 +161,7 @@ final class IdExpr extends Expr {
   /**
    * Evaluates the expression as a string.
    */
+  @Override
   public String evalString(QueryContext context)
     throws SQLException
   {
@@ -171,6 +174,7 @@ final class IdExpr extends Expr {
   /**
    * Evaluates the expression as a boolean.
    */
+  @Override
   public int evalBoolean(QueryContext context)
     throws SQLException
   {
@@ -200,6 +204,7 @@ final class IdExpr extends Expr {
     return row.getInteger(_column);
   }
 
+  @Override
   public long evalLong(QueryContext context)
     throws SQLException
   {
@@ -209,6 +214,7 @@ final class IdExpr extends Expr {
     return row.getLong(_column);
   }
 
+  @Override
   public double evalDouble(QueryContext context)
     throws SQLException
   {
@@ -224,6 +230,7 @@ final class IdExpr extends Expr {
    * @param context the query context
    * @param result the output result
    */
+  @Override
   public void evalToResult(QueryContext context, SelectResult result)
     throws SQLException
   {
@@ -270,6 +277,7 @@ final class IdExpr extends Expr {
     return row.isEqual(_column, string);
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == null || ! IdExpr.class.equals(o.getClass()))

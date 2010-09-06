@@ -106,6 +106,13 @@ final class EqExpr extends Expr {
         return new IndexExpr(expr, _right);
       }
     }
+    else if (_left instanceof OidExpr) {
+      OidExpr expr = (OidExpr) _left;
+
+      if (item == expr.getFromItem()) {
+        return new OidIndexExpr(expr, _right);
+      }
+    }
 
     if (_right instanceof IdExpr) {
       IdExpr expr = (IdExpr) _right;
@@ -117,6 +124,13 @@ final class EqExpr extends Expr {
       }
       else if (expr.getColumn().getIndex() != null) {
         return new IndexExpr(expr, _left);
+      }
+    }
+    else if (_right instanceof OidExpr) {
+      OidExpr expr = (OidExpr) _right;
+
+      if (item == expr.getFromItem()) {
+        return new OidIndexExpr(expr, _left);
       }
     }
 

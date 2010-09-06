@@ -360,8 +360,7 @@ abstract public class Query {
         costItems.add(fromItems[i]);
 
       AndExpr subWhereExpr = null;
-      boolean hasExpr = false;
-
+      
       int bestIndex = -1;
       long bestCost;
 
@@ -387,7 +386,7 @@ abstract public class Query {
 
           if (i < fromItems.length)
             indexExpr = expr.getIndexExpr(fromItems[i]);
-
+          
           if (indexExpr != null && indexExprs[i] == null) {
             indexExprs[i] = indexExpr;
           }
@@ -527,7 +526,7 @@ abstract public class Query {
 
     if (tableName == null) {
       if ("resin_oid".equals(columnName))
-        return new OidExpr(fromItems[0].getTable(), 0);
+        return new OidExpr(fromItems[0], fromItems[0].getTable(), 0);
 
       for (int i = 0; i < fromItems.length; i++) {
         Table table = fromItems[i].getTable();
@@ -554,7 +553,7 @@ abstract public class Query {
           Table table = fromItems[i].getTable();
 
           if ("resin_oid".equals(columnName))
-            return new OidExpr(table, i);
+            return new OidExpr(fromItems[i], table, i);
 
           int columnIndex = table.getColumnIndex(columnName);
 
@@ -604,122 +603,6 @@ abstract public class Query {
 
     return null;
   }
-
-  /**
-   * Clears the paramters.
-   */
-  /*
-  public void clearParameters()
-  {
-    for (int i = 0; i < _params.length; i++)
-      _params[i].clear();
-  }
-  */
-
-  /**
-   * Sets the indexed parameter as a boolean.
-   */
-  /*
-  public void setBoolean(int index, boolean value)
-  {
-    if (index < 1 || _params.length < index) {
-      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-                                             this, index, _sql));
-    }
-
-    _params[index - 1].setBoolean(value);
-  }
-  */
-
-  /**
-   * Sets the indexed parameter as a string.
-   */
-  /*
-  public void setString(int index, String value)
-  {
-    if (index < 1 || _params.length < index) {
-      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-                                             this, index, _sql));
-    }
-
-    _params[index - 1].setString(value);
-  }
-  */
-
-  /**
-   * Sets the indexed parameter as a long.
-   */
-  /*
-  public void setLong(int index, long value)
-  {
-    if (index < 1 || _params.length < index) {
-      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-                                             this, index, _sql));
-    }
-
-    _params[index - 1].setLong(value);
-  }
-  */
-
-  /**
-   * Sets the indexed parameter as a double.
-   */
-  /*
-  public void setDouble(int index, double value)
-  {
-    if (index < 1 || _params.length < index) {
-      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-                                             this, index, _sql));
-    }
-
-    _params[index - 1].setDouble(value);
-  }
-  */
-
-  /**
-   * Sets the indexed parameter as a date value.
-   */
-  /*
-  public void setDate(int index, long value)
-  {
-    if (index < 1 || _params.length < index) {
-      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-                                             this, index, _sql));
-    }
-
-    _params[index - 1].setDate(value);
-  }
-  */
-
-  /**
-   * Sets the indexed parameter as a binary stream
-   */
-  /*
-  public void setBinaryStream(int index, InputStream is, int length)
-  {
-    if (index < 1 || _params.length < index) {
-      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-                                             this, index, _sql));
-    }
-
-    _params[index - 1].setBinaryStream(is, length);
-  }
-  */
-
-  /**
-   * Sets the indexed parameter as a bytes
-   */
-  /*
-  public void setBytes(int index, byte []bytes)
-  {
-    if (index < 1 || _params.length < index) {
-      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-                                             this, index, _sql));
-    }
-
-    _params[index - 1].setBytes(bytes);
-  }
-  */
 
   /**
    * Executes the query.
