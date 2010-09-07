@@ -78,6 +78,21 @@ class OidExpr extends Expr {
   {
     return _table;
   }
+  
+  @Override
+  public Expr bind(Query query)
+  {
+    FromItem []fromItems = query.getFromItems();
+    
+    for (int i = 0; i < fromItems.length; i++) {
+      if (fromItems[i] == _fromItem) {
+        _tableIndex = i;
+        return this;
+      }
+    }
+
+    throw new IllegalStateException();
+  }
 
   /**
    * Returns true if the expression is null.
@@ -109,6 +124,7 @@ class OidExpr extends Expr {
     return (int) row.getRowAddress();
   }
 
+  @Override
   public long evalLong(QueryContext context)
     throws SQLException
   {
@@ -118,6 +134,7 @@ class OidExpr extends Expr {
     return row.getRowAddress();
   }
 
+  @Override
   public double evalDouble(QueryContext context)
     throws SQLException
   {

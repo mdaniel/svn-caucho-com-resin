@@ -103,8 +103,9 @@ class OidIndexExpr extends RowIterateExpr {
 
     context.unlock();
     
-    if (! tableIter.isValidRow(rowAddr))
+    if (! tableIter.isValidRow(rowAddr)) {
       return false;
+    }
 
     tableIter.setRow(rowAddr);
 

@@ -386,7 +386,7 @@ abstract public class Query {
 
           if (i < fromItems.length)
             indexExpr = expr.getIndexExpr(fromItems[i]);
-          
+
           if (indexExpr != null && indexExprs[i] == null) {
             indexExprs[i] = indexExpr;
           }
@@ -437,63 +437,117 @@ abstract public class Query {
     ArrayList<Expr> andProduct = new ArrayList<Expr>(topAndProduct);
 
     for (int i = fromItems.length - 1; i >= 0; i--) {
-      costItems.clear();
+      orderFromItemsTail(i, costItems, andProduct, fromItems);
+      
+      orderFromItemsUpdateAnd(andProduct, costItems);
+    }
+  }
+  
+  private void orderFromItemsTail(int i,
+                                  ArrayList<FromItem> costItems,
+                                  ArrayList<Expr> andProduct,
+                                  FromItem []fromItems)
+  {
+    costItems.clear();
 
-      for (int j = i + 1; j < fromItems.length; j++)
-        costItems.add(fromItems[j]);
+    for (int j = i + 1; j < fromItems.length; j++)
+      costItems.add(fromItems[j]);
 
-      int bestIndex = i;
-      long bestCost = Expr.COST_INVALID;
+    int bestIndex = i;
+    long bestCost = Expr.COST_INVALID;
 
-      loop:
-      for (int j = 0; j <= i; j++) {
-        FromItem item = fromItems[j];
+    for (int j = 0; j <= i; j++) {
+      FromItem item = fromItems[j];
+      
+      costItems.add(item);
+      
+      long indexCost = calculateOrderIndexCost(costItems, andProduct);
+      
+      if (indexCost < bestCost) {
+        bestCost = indexCost;
+        bestIndex = j;
+      }
 
-        costItems.add(item);
+      if (isFromOrderValid(costItems, fromItems)) {
+        long cost = calculateOrderExprCost(costItems, andProduct);
 
-        for (int k = 0; k < fromItems.length; k++) {
-          if (! fromItems[k].isValid(costItems)) {
-            costItems.remove(costItems.size() - 1);
-            continue loop;
-          }
-        }
-
-        long cost = Long.MAX_VALUE;
-        for (int k = 0; k < andProduct.size(); k++) {
-          Expr expr = andProduct.get(k);
-
-          long subCost = expr.cost(costItems);
-
-          if (Expr.COST_INVALID <= subCost) {
-            costItems.remove(costItems.size() - 1);
-            continue loop;
-          }
-
-          if (subCost < cost)
-            cost = subCost;
-        }
-
-        costItems.remove(costItems.size() - 1);
-
-        if (cost < bestCost) {
+        if (cost >= 0 && cost < bestCost) {
           bestCost = cost;
           bestIndex = j;
         }
       }
 
-      FromItem tempItem = fromItems[i];
-      fromItems[i] = fromItems[bestIndex];
-      fromItems[bestIndex] = tempItem;
+      costItems.remove(costItems.size() - 1);
+    }
 
-      costItems.add(fromItems[i]);
-      for (int k = andProduct.size() - 1; k >= 0; k--) {
-        Expr expr = andProduct.get(k);
+    FromItem tempItem = fromItems[i];
+    fromItems[i] = fromItems[bestIndex];
+    fromItems[bestIndex] = tempItem;
 
-        long subCost = expr.cost(costItems);
+    costItems.add(fromItems[i]);
+  }
+  
+  private boolean isFromOrderValid(ArrayList<FromItem> costItems,
+                                   FromItem []fromItems)
+  {
+    for (int k = 0; k < fromItems.length; k++) {
+      if (! fromItems[k].isValid(costItems)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
 
-        if (subCost < Expr.COST_NO_TABLE) {
-          andProduct.remove(k);
-        }
+  private long calculateOrderExprCost(ArrayList<FromItem> costItems,
+                                      ArrayList<Expr> andProduct)
+  {
+    long cost = Long.MAX_VALUE;
+    for (int k = 0; k < andProduct.size(); k++) {
+      Expr expr = andProduct.get(k);
+
+      long subCost = expr.cost(costItems);
+
+      if (Expr.COST_INVALID <= subCost) {
+        return -1;
+      }
+
+      if (subCost < cost)
+        cost = subCost;
+    }
+    
+    return cost;
+  }
+
+  /**
+   * Calculates index bonus costs.
+   */
+  private long calculateOrderIndexCost(ArrayList<FromItem> costItems,
+                                       ArrayList<Expr> andProduct)
+  {
+    long cost = Long.MAX_VALUE;
+    for (int k = 0; k < andProduct.size(); k++) {
+      Expr expr = andProduct.get(k);
+
+      long subCost = expr.indexCost(costItems);
+
+      if (subCost < cost)
+        cost = subCost;
+    }
+    
+    return cost;
+  }
+  
+  private void orderFromItemsUpdateAnd(ArrayList<Expr> andProduct,
+                                       ArrayList<FromItem> costItems)
+  {
+    for (int k = andProduct.size() - 1; k >= 0; k--) {
+      Expr expr = andProduct.get(k);
+
+      long subCost = expr.cost(costItems);
+
+      if (subCost < Expr.COST_NO_TABLE) {
+        andProduct.remove(k);
       }
     }
   }

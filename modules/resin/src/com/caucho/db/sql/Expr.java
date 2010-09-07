@@ -55,6 +55,8 @@ abstract public class Expr {
   final static long COST_UNIQUE   = 10000L;
   final static long COST_INDEX    = 100L;
   final static long COST_CONSTANT = 0L;
+  
+  final static long INDEX_COST_INDEX = COST_SCAN * 100;
 
   private static QDate _gmtDate = new QDate();
 
@@ -172,6 +174,22 @@ abstract public class Expr {
    * Returns the cost based on the given FromList.
    */
   public long subCost(ArrayList<FromItem> fromList)
+  {
+    return COST_INVALID;
+  }
+
+  /**
+   * Returns the cost bonus for an index.
+   */
+  public long indexCost(ArrayList<FromItem> costItems)
+  {
+    return indexSubCost(costItems);
+  }
+
+  /**
+   * Returns the cost bonus for an index.
+   */
+  public long indexSubCost(ArrayList<FromItem> costItems)
   {
     return COST_INVALID;
   }

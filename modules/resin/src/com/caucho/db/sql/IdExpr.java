@@ -124,11 +124,20 @@ final class IdExpr extends Expr {
   @Override
   public long subCost(ArrayList<FromItem> fromList)
   {
-    if (! fromList.contains(_fromItem))
+    if (! fromList.contains(_fromItem)) {
       return Integer.MAX_VALUE;
-
+    }
 
     return 10 * 100 * 100 * 100;
+  }
+  
+  @Override
+  public long indexSubCost(ArrayList<FromItem> costItems)
+  {
+    if (_column.getIndex() != null && ! costItems.contains(_fromItem))
+      return INDEX_COST_INDEX;
+    else
+      return COST_INVALID;
   }
 
   @Override

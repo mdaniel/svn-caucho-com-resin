@@ -290,12 +290,18 @@ public class TableIterator {
   {
     long blockId = _table.addressToBlockId(rowAddr);
     
-    if (! _table.isRowBlock(blockId))
+    if (! _table.isRowBlock(blockId)) {
       return false;
+    }
     
     int rowOffset = (int) (rowAddr & BlockStore.BLOCK_OFFSET_MASK);
-    
-    return (rowOffset % _table.getRowLength() == 0);
+
+    if (rowOffset % _table.getRowLength() == 0) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   /**

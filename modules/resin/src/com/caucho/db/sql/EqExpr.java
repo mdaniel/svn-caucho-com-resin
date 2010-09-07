@@ -179,6 +179,21 @@ final class EqExpr extends Expr {
   }
 
   /**
+   * Returns the cost based on the given FromList.
+   */
+  @Override
+  public long indexCost(ArrayList<FromItem> costItems)
+  {
+    long leftCost = _left.indexSubCost(costItems);
+    long rightCost = _right.indexSubCost(costItems);
+    
+    if (leftCost < rightCost)
+      return leftCost;
+    else
+      return rightCost;
+  }
+
+  /**
    * Evaluates the expression for nulls
    */
   @Override
