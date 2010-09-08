@@ -329,30 +329,28 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
 
   public void setResponseStream(AbstractResponseStream os)
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.setResponseStream(os);
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setResponseStream(os);
   }
 
   public boolean isCauchoResponseStream()
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
+    if (_response instanceof CauchoResponse)
+      return ((CauchoResponse) _response).isCauchoResponseStream();
 
-    return cResponse.isCauchoResponseStream();
+    return false;
   }
 
   public void setFooter(String key, String value)
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.setFooter(key, value);
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setFooter(key, value);
   }
 
   public void addFooter(String key, String value)
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.addFooter(key, value);
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).addFooter(key, value);
   }
 
   public void close() throws IOException
@@ -364,65 +362,62 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
 
   public boolean getForbidForward()
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).getForbidForward();
 
-    return cResponse.getForbidForward();
+    return false;
   }
 
   public void setForbidForward(boolean forbid)
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.setForbidForward(forbid);
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setForbidForward(forbid);
   }
 
   public String getStatusMessage()
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).getStatusMessage();
 
-    return cResponse.getStatusMessage();
+    return null;
   }
 
   public boolean hasError()
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).hasError();
 
-    return cResponse.hasError();
+    return false;
   }
 
   public void setHasError(boolean error)
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.setHasError(error);
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setHasError(error);
   }
 
   public void setSessionId(String id)
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.setSessionId(id);
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setSessionId(id);
   }
 
   public void killCache()
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.killCache();
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).killCache();
   }
 
   public void setNoCache(boolean killCache)
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.setNoCache(killCache);
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setNoCache(killCache);
   }
 
   public void setPrivateCache(boolean isPrivate)
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.setPrivateCache(isPrivate);
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setPrivateCache(isPrivate);
   }
 
   public boolean isNoCacheUnlessVary()
@@ -445,9 +440,10 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
 
   public AbstractHttpResponse getAbstractHttpResponse()
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
+    if (_response instanceof CauchoResponse)
+      return ((CauchoResponse) _response).getAbstractHttpResponse();
 
-    return cResponse.getAbstractHttpResponse();
+    return null;
   }
 
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)

@@ -382,7 +382,7 @@ public class ResponseAdapter extends ResponseWrapper
 
   public int getStatus()
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return _response.getStatus();
   }
 
   public Collection<String> getHeaders(String name)
@@ -395,10 +395,12 @@ public class ResponseAdapter extends ResponseWrapper
     return _response.getHeaderNames();
   }
 
-  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  public void setForwardEnclosed(boolean isForwardEnclosed)
+  {
   }
 
-  public boolean isForwardEnclosed() {
+  public boolean isForwardEnclosed()
+  {
     return false;
   }
 
