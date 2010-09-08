@@ -140,6 +140,7 @@ import com.caucho.rewrite.IfSecure;
 import com.caucho.rewrite.Not;
 import com.caucho.rewrite.RedirectSecure;
 import com.caucho.rewrite.RewriteFilter;
+import com.caucho.rewrite.WelcomeFile;
 import com.caucho.security.AbstractSingleSignon;
 import com.caucho.security.Authenticator;
 import com.caucho.security.BasicLogin;
@@ -219,7 +220,7 @@ public class WebApp extends ServletContextImpl
   private static EnvironmentLocal<WebApp> _appLocal
     = new EnvironmentLocal<WebApp>("caucho.application");
 
-  static String []_classLoaderHackPackages;
+  private static String []_classLoaderHackPackages;
 
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
@@ -368,6 +369,9 @@ public class WebApp extends ServletContextImpl
 
   private ServletRequestAttributeListener []_requestAttributeListenerArray
     = new ServletRequestAttributeListener[0];
+  
+  private ArrayList<String> _welcomeFileList
+    = new ArrayList<String>();
 
   private ArrayList<Validator> _resourceValidators
     = new ArrayList<Validator>();
@@ -512,7 +516,7 @@ public class WebApp extends ServletContextImpl
       _errorFilterMapper.setFilterManager(_filterManager);
 
       _constraintManager = new ConstraintManager();
-      _errorPageManager = new ErrorPageManager(this);
+      _errorPageManager = new ErrorPageManager(_server, this);
 
       if (getParent() != null)
         _errorPageManager.setParent(getParent().getErrorPageManager());
@@ -678,20 +682,6 @@ public class WebApp extends ServletContextImpl
   }
 
   /**
-   * The id is the context path.
-   */
-  private void setContextPathId(String id)
-  {
-    if (! id.equals("") && ! id.startsWith("/"))
-      id = "/" + id;
-
-    if (id.endsWith("/"))
-      id = id.substring(0, id.length() - 1);
-
-    setContextPath(id);
-  }
-
-  /**
    * Gets the environment class loader.
    */
   public ClassLoader getClassLoader()
@@ -837,14 +827,6 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the context path
    */
-  private void setContextPath(String contextPath)
-  {
-    _baseContextPath = contextPath;
-  }
-
-  /**
-   * Sets the context path
-   */
   private void setVersionContextPath(String contextPath)
   {
     _versionContextPath = contextPath;
@@ -974,11 +956,13 @@ public class WebApp extends ServletContextImpl
   }
 
   @Configurable
-  public boolean isAllowForwardAfterFlush() {
+  public boolean isAllowForwardAfterFlush()
+  {
     return _isAllowForwardAfterFlush;
   }
 
-  public void setAllowForwardAfterFlush(boolean allowForwardAfterFlush) {
+  public void setAllowForwardAfterFlush(boolean allowForwardAfterFlush)
+  {
     _isAllowForwardAfterFlush = allowForwardAfterFlush;
   }
 
@@ -1023,7 +1007,8 @@ public class WebApp extends ServletContextImpl
   }
 
   @Configurable
-  public Ordering createOrdering() {
+  public Ordering createOrdering() 
+  {
     log.finer(L.l("'{0}' ordering tag should not be used inside web application descriptor.", this));
 
     return new Ordering();
@@ -1640,7 +1625,9 @@ public class WebApp extends ServletContextImpl
   {
     ArrayList<String> fileList = list.getWelcomeFileList();
 
-    _servletMapper.setWelcomeFileList(fileList);
+    _welcomeFileList = new ArrayList<String>(fileList);
+    
+    //    _servletMapper.setWelcomeFileList(fileList);
   }
 
   /**
@@ -2721,6 +2708,10 @@ public class WebApp extends ServletContextImpl
       _roleMapManager = RoleMapManager.create();
 
       _characterEncoding = CharacterEncoding.getLocalEncoding();
+      
+      WelcomeFile welcomeFile = new WelcomeFile(_welcomeFileList);
+      
+      add(welcomeFile);
 
       if (! _isCompileContext) {
         for (int i = 0; i < _resourceValidators.size(); i++) {

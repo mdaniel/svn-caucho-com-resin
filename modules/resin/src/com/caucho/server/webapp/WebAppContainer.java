@@ -86,6 +86,8 @@ public class WebAppContainer
   private static final Logger log
     = Logger.getLogger(WebAppContainer.class.getName());
 
+  private Server _server;
+  
   // The owning dispatch server
   private DispatchServer _dispatchServer;
 
@@ -140,9 +142,15 @@ public class WebAppContainer
   /**
    * Creates the webApp with its environment loader.
    */
-  public WebAppContainer(EnvironmentClassLoader loader,
+  public WebAppContainer(Server server,
+                         EnvironmentClassLoader loader,
                          Lifecycle lifecycle)
   {
+    _server = server;
+    
+    if (server == null)
+      throw new IllegalStateException();
+    
     _rootDir = Vfs.lookup();
     _docDir = Vfs.lookup();
 
@@ -163,7 +171,7 @@ public class WebAppContainer
     try {
       thread.setContextClassLoader(loader);
 
-      _errorPageManager = new ErrorPageManager(getErrorWebApp());
+      _errorPageManager = new ErrorPageManager(server, getErrorWebApp());
       _errorPageManager.setWebAppContainer(this);
 
       // These need to be in the proper class loader so they can

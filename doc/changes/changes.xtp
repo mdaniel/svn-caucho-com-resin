@@ -13,6 +13,7 @@
 
 <s2 title="4.0.11 snapshot">
 <ul>
+<li>class-loader: getProtectionDomain() should return the file:... for the jar object, not the jar contents (#4194)</li>
 <li>resin-admin: JMX display has been reorganized and domains split into tabs</li>
 <li>resin-admin: graph generation has been updated</li>
 <li>resin-admin: thread page now includes locking tab giving blocking threads and their lockers.</li>

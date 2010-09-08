@@ -253,7 +253,7 @@ public class HmuxRequest extends AbstractHttpRequest
   private boolean _isHmtpRequest;
 
   private HmuxProtocol _hmuxProtocol;
-  private ErrorPageManager _errorManager = new ErrorPageManager(null);
+  private ErrorPageManager _errorManager;
 
   public HmuxRequest(Server server,
                      SocketLink conn,
@@ -265,7 +265,8 @@ public class HmuxRequest extends AbstractHttpRequest
 
     if (server == null)
       throw new NullPointerException();
-
+    
+    _errorManager = new ErrorPageManager(server);
     _hmuxProtocol = protocol;
 
     _rawWrite = conn.getWriteStream();

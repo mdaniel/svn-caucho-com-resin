@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 /**
  * sub-request for a include() page
  */
-class IncludeDispatchRequest extends DispatchRequest {
+class IncludeDispatchRequest extends AbstractDispatchRequest {
   protected static final Logger log
     = Logger.getLogger(IncludeDispatchRequest.class.getName());
 

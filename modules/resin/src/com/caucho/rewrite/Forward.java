@@ -53,7 +53,7 @@ import com.caucho.util.L10N;
  * </pre>
  */
 @Configurable
-public class Forward extends AbstractDispatchRule
+public class Forward extends AbstractRegexpDispatchRule
 {
   private static final L10N L = new L10N(Forward.class);
 

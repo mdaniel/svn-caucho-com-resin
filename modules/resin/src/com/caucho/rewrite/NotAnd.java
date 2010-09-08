@@ -29,15 +29,12 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.Configurable;
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
+import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
+
+import com.caucho.config.Configurable;
 
 
 /**

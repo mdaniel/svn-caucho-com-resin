@@ -87,6 +87,7 @@ public class ErrorPageManager {
 
   public static String SHUTDOWN = "com.caucho.shutdown";
 
+  private final Server _server;
   private final WebApp _app;
   private WebAppContainer _appContainer;
   private HashMap<Object,String> _errorPageMap = new HashMap<Object,String>();
@@ -97,9 +98,24 @@ public class ErrorPageManager {
   /**
    * Create error page manager.
    */
-  public ErrorPageManager(WebApp app)
+  public ErrorPageManager(Server server)
+  {
+    this(server, null);
+  }
+
+  /**
+   * Create error page manager.
+   */
+  public ErrorPageManager(Server server, WebApp app)
   {
     _app = app;
+
+    _server = server;
+    
+    if (_server == null)
+      throw new IllegalStateException(L.l("{0} requires an active {1}",
+                                          getClass().getSimpleName(),
+                                          Server.class.getSimpleName()));
   }
 
   /**
@@ -479,7 +495,7 @@ public class ErrorPageManager {
 
       out.println("</pre></code>");
 
-      Server server = Server.getCurrent();
+      Server server = _server;
       String version = null;
 
       if (server == null) {
@@ -491,7 +507,7 @@ public class ErrorPageManager {
       }
       else
         version = VersionFactory.getFullVersion();
-
+      
       if (version != null) {
         out.println("<p /><hr />");
         out.println("<small>");
@@ -628,12 +644,14 @@ public class ErrorPageManager {
                         escapeHtml(request.getPageURI())));
       }
 
+      Server server = _server;
+      
       String version = null;
-      if (_app == null) {
+      if (server == null) {
       }
-      else if (_app.getServer() != null
-               && _app.getServer().getServerHeader() != null) {
-        version = _app.getServer().getServerHeader();
+      else if (server != null
+               && server.getServerHeader() != null) {
+        version = server.getServerHeader();
       }
       else if (CauchoSystem.isTesting()) {
       }

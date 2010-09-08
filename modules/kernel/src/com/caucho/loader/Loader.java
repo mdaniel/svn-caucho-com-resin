@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
+import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 
 
@@ -205,6 +206,12 @@ abstract public class Loader {
   protected CodeSource getCodeSource(Path path)
   {
     try {
+      if (path instanceof JarPath) {
+        JarPath jarPath = (JarPath) path;
+        
+        path = jarPath.getContainer();
+      }
+      
       return new CodeSource(new URL(path.getURL()),
                             (Certificate []) path.getCertificates());
     } catch (Exception e) {

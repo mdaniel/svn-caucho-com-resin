@@ -29,16 +29,13 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.util.L10N;
-
 import java.security.Principal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.annotation.PostConstruct;
+
+import com.caucho.config.Configurable;
 
 /**
  * Match if the user is in any of the given roles,

@@ -29,16 +29,13 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.util.L10N;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import com.caucho.config.Configurable;
 
 /*
  * Redirect a request using a HTTP redirect.
@@ -55,8 +52,7 @@ import java.util.regex.Pattern;
 @Configurable
 public class Rewrite extends AbstractTargetDispatchRule
 {
-  private static final L10N L = new L10N(Rewrite.class);
-
+  @Override
   public String rewriteUri(String uri, String queryString)
   {
     Pattern regexp = getRegexp();

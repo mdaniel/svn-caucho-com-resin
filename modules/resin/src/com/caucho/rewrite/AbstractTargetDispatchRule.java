@@ -30,24 +30,16 @@
 package com.caucho.rewrite;
 
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
 @Configurable
-abstract public class AbstractTargetDispatchRule extends AbstractDispatchRule
+abstract public class AbstractTargetDispatchRule extends AbstractRegexpDispatchRule
 {
   private static final L10N L = new L10N(AbstractTargetDispatchRule.class);
 
-  private static final Pattern ALL_PATTERN = Pattern.compile("^.*$");
-
-  private String _absoluteTarget;
-  private String _targetHost;
   private String _target;
-
-  private boolean _isAbsolute;
 
   public void setTarget(String target)
   {
@@ -57,13 +49,10 @@ abstract public class AbstractTargetDispatchRule extends AbstractDispatchRule
   public void setAbsoluteTarget(String target)
   {
     setTarget(target);
-
-    _isAbsolute = true;
   }
 
   public void setTargetHost(String target)
   {
-    _targetHost = target;
   }
 
   public String getTarget()

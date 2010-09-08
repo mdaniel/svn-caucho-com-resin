@@ -29,6 +29,7 @@
 
 package com.caucho.env.deploy;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,12 +48,14 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.deploy.RepositoryDependency;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 /**
  * A deployment entry that expands from an archive (Jar/Zip) file.
@@ -63,11 +66,16 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private static final L10N L = new L10N(ExpandDeployController.class);
   private static final Logger log
     = Logger.getLogger(ExpandDeployController.class.getName());
+  
+  private static final String APPLICATION_HASH_PATH
+    = "META-INF/resin.application-hash";
 
   private final String _autoDeployTag;
   
   private Path _rootDirectory;
   private Path _archivePath;
+  
+  private String _rootHash;
 
   private Repository _repository;
 
@@ -77,7 +85,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   
   private DependencyContainer _depend = new DependencyContainer();
 
-  private Object _archiveExpandLock = new Object();
+  private Object _applicationExtractLock = new Object();
 
   // classloader for the manifest entries
   private DynamicClassLoader _manifestLoader;
@@ -201,6 +209,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     deployService.addTag(getId());
     _deployItem = deployService.getTagItem(getId());
+    
+    _rootHash = readRootHash();
   }
 
   /**
@@ -238,22 +248,36 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       log.finer(this + " deploying");
     
     try {
-      expandArchive();
+      extractApplication();
     } catch (Exception e) {
       // XXX: better exception
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  protected void preConfigureInstance(I deployInstance)
+    throws Exception
+  {
+    extractApplication();
+    
+    addManifestClassPath();
+    
+    super.preConfigureInstance(deployInstance);
   }
   
   @Override
   protected void configureInstance(I deployInstance)
     throws Exception
   {
-    expandArchive();
-    
-    addManifestClassPath();
-    
     super.configureInstance(deployInstance);
+  }
+
+  @Override
+  protected void postConfigureInstance(I deployInstance)
+    throws Exception
+  {
+    super.postConfigureInstance(deployInstance);
     
     addDependencies();
   }
@@ -265,13 +289,12 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
-   * Expand an archive file.  The _archiveExpandLock must be obtained
-   * before the expansion.
+   * Extract an application from the repository.
    */
-  private void expandArchive()
+  private void extractApplication()
     throws IOException
   {
-    // save any .war file to the server-specific repository
+    // adds any .war file to the server-specific repository
     for (int i = 0; ! commitArchive() && i < 3; i++) {
       try {
         Thread.sleep(2000);
@@ -279,22 +302,32 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       }
     }
     
-    synchronized (_archiveExpandLock) {
-      expandRepository();
+    synchronized (_applicationExtractLock) {
+      boolean isExtract = extractFromRepository();
 
-      Path path = getRootDirectory().lookup("META-INF/MANIFEST.MF");
-      if (path.canRead()) {
-        ReadStream is = path.openRead();
-        try {
-          _manifest = new Manifest(is);
-        } catch (IOException e) {
-          log.warning(L.l("Manifest file cannot be read for '{0}'.\n{1}",
-                          getRootDirectory(), e));
+      postExtract(isExtract);
+    }
+  }
+  
+  /**
+   * Called after the application is extracted from the repository.
+   */
+  protected void postExtract(boolean isExtract)
+    throws IOException
+  {
+    Path path = getRootDirectory().lookup("META-INF/MANIFEST.MF");
+    if (path.canRead()) {
+      ReadStream is = path.openRead();
+      
+      try {
+        _manifest = new Manifest(is);
+      } catch (IOException e) {
+        log.warning(L.l("{0} Manifest file cannot be read for '{1}'.\n  {2}",
+                        this, getRootDirectory(), e));
 
-          log.log(Level.FINE, e.toString(), e);
-        } finally {
-          is.close();
-        }
+        log.log(Level.FINE, e.toString(), e);
+      } finally {
+        is.close();
       }
     }
   }
@@ -337,8 +370,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
-   * Adds any updated .war file to the server-specific repository. The war
-   * will be expanded as part of the usual repository system.
+   * Adds any updated .war file to the server-specific repository. The 
+   * application will be extracted as part of the usual repository system.
    *
    * The commitArchive() can return false if the war update fails, for example
    * if the war is in the process of updating.
@@ -357,7 +390,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     String hash = Long.toHexString(archivePath.getCrc64());
     
     if (log.isLoggable(Level.FINE)){
-      log.fine(this + " updating .war repository for " + archivePath);
+      log.fine(this + " adding .war to repository from " + archivePath);
     }
 
     try {
@@ -373,7 +406,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       
       _repository.putTagArchive(_autoDeployTag, 
                                 archivePath,
-                                ".war auto-update from " 
+                                ".war added to repository from " 
                                 + archivePath.getNativePath(), 
                                 props);
       
@@ -386,10 +419,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
-   * Expand an archive.  The _archiveExpandLock must be obtained before the
-   * expansion.
+   * Extract the contents from the repository into the root directory.
    */
-  private boolean expandRepository()
+  private boolean extractFromRepository()
     throws IOException
   {
     try {
@@ -408,17 +440,24 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       if (treeHash == null)
         return false;
       
+      if (treeHash.equals(_rootHash))
+        return false;
+      
       Path pwd = getRootDirectory();
 
       pwd.mkdirs();
 
       if (log.isLoggable(Level.FINE)) {
-        log.fine(this + " expanding repository tag=" + tag
+        log.fine(this + " extract from repository tag=" + tag
                  + "\n  root=" + getRootDirectory()
                  + "\n  contentHash=" + treeHash);
       }
 
       _repository.expandToPath(treeHash, pwd);
+      
+      writeRootHash(treeHash);
+      
+      _rootHash = treeHash;
 
       return true;
     } catch (IOException e) {
@@ -426,8 +465,60 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
       return false;
     } catch (Exception e) {
-      e.printStackTrace();
+      log.log(Level.FINE, e.toString(), e);
+
       return false;
+    }
+  }
+
+  /**
+   * Reads the saved application root hash which is stored in META-INF, so
+   * the application is not extracted twice.
+   */
+  private String readRootHash()
+  {
+    Path path = _rootDirectory.lookup(APPLICATION_HASH_PATH);
+    
+    ReadStream is = null;
+    try {
+      is = path.openRead();
+      
+      String rootHash = is.readLine();
+      
+      return rootHash;
+    } catch (FileNotFoundException e) {
+      log.log(Level.ALL, e.toString(), e);
+      
+      return null;
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      return null;
+    } finally {
+      IoUtil.close(is);
+    }
+  }
+  
+
+  /**
+   * Saves the saved application root hash which is stored in META-INF, so
+   * the application is not extracted twice.
+   */
+  private void writeRootHash(String hash)
+    throws IOException
+  {
+    Path path = _rootDirectory.lookup(APPLICATION_HASH_PATH);
+    
+    WriteStream os = null;
+    
+    try {
+      path.getParent().mkdirs();
+      
+      os = path.openWrite();
+      
+      os.println(hash);
+    } finally {
+      IoUtil.close(os);
     }
   }
   

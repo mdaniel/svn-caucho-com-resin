@@ -29,14 +29,12 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.util.L10N;
+import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
+
+import com.caucho.config.Configurable;
 
 /**
  * Matches if any of the child predicates match.

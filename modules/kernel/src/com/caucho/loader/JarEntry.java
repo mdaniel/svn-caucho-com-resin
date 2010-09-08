@@ -233,8 +233,10 @@ class JarEntry {
       Path jarPath = _jarPath.lookup(path);
       
       Certificate []certificates = jarPath.getCertificates();
+      
+      URL url = new URL(_jarPath.getContainer().getURL());
 
-      return new CodeSource(new URL(jarPath.getURL()), certificates);
+      return new CodeSource(url, certificates);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 

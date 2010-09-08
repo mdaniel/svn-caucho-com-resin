@@ -27,59 +27,58 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.rewrite;
+package com.caucho.env.deploy;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-
-import com.caucho.server.dispatch.FilterConfigImpl;
-import com.caucho.server.dispatch.FilterFilterChain;
-import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.WeakAlarm;
 
 /**
- * Wraps a Java filter in a RewriteFilter
+ * DeployController controls the lifecycle of the DeployInstance.
  */
-public class RewriteFilterAdapter implements RewriteFilter
+class DeployControllerAlarm<C extends DeployController<?>>
+  implements AlarmListener
 {
-  private Filter _filter;
+  private C _controller;
 
-  public RewriteFilterAdapter(Filter filter)
-    throws ServletException
+  private Alarm _alarm = new WeakAlarm(this);
+  
+  private long _checkInterval;
+
+  DeployControllerAlarm(C controller, long checkInterval)
   {
-    WebApp webApp = WebApp.getCurrent();
-    FilterConfigImpl filterConfig = new FilterConfigImpl();
-    filterConfig.setServletContext(webApp);
+    _controller = controller;
+    _checkInterval = checkInterval;
+    
+    if (checkInterval > 0)
+      _alarm.queue(checkInterval);
+  }
 
-    filter.init(filterConfig);
-
-    _filter = filter;
+  /**
+   * Handles the redeploy check alarm.
+   */
+  @Override
+  public final void handleAlarm(Alarm alarm)
+  {
+    try {
+      _controller.alarm();
+    } finally {
+      if (! _controller.getState().isDestroyed())
+        alarm.queue(_checkInterval);
+    }
   }
   
-  public boolean isRequest()
+  public final void close()
   {
-    return true;
-  }
-  
-  public boolean isInclude()
-  {
-    return false;
-  }
-  
-  public boolean isForward()
-  {
-    return false;
+    _alarm.dequeue();
   }
 
-  public FilterChain map(String uri,
-                         String queryString,
-                         FilterChain next)
-  {
-    return new FilterFilterChain(next, _filter);
-  }
-
+  /**
+   * Returns the entry's debug name.
+   */
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _filter + "]";
+    return getClass().getSimpleName() + "[" + _controller + "]";
   }
 }

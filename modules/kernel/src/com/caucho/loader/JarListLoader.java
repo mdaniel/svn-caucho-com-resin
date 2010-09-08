@@ -346,27 +346,4 @@ abstract public class JarListLoader extends Loader implements Dependency {
   {
     return getClass().getSimpleName() + "[" + _jarList + "]";
   }
-
-  /*
-  static class JarList {
-    JarEntry _entry;
-    JarList _next;
-
-    JarList(JarEntry entry, JarList next)
-    {
-      _entry = entry;
-      _next = next;
-    }
-
-    JarEntry getEntry()
-    {
-      return _entry;
-    }
-
-    JarList getNext()
-    {
-      return _next;
-    }
-  }
-  */
 }

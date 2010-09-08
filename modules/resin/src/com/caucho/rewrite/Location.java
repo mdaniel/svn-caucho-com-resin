@@ -29,18 +29,13 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.server.rewrite.SetHeaderFilterChain;
-import com.caucho.util.L10N;
+import java.util.ArrayList;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 
 
 /**
@@ -60,7 +55,7 @@ import java.util.regex.Pattern;
  * </pre>
  */
 @Configurable
-public class Location extends AbstractDispatchRule
+public class Location extends AbstractRegexpDispatchRule
 {
   private ArrayList<DispatchRule> _ruleList
     = new ArrayList<DispatchRule>();

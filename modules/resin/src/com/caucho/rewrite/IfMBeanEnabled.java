@@ -97,6 +97,7 @@ public class IfMBeanEnabled implements RequestPredicate
   }
   
   @PostConstruct
+  @SuppressWarnings("unused")
   private void init()
   {
     if (_name == null)

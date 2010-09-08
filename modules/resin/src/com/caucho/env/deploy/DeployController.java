@@ -39,16 +39,14 @@ import com.caucho.lifecycle.LifecycleListener;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
-import com.caucho.util.WeakAlarm;
 import com.caucho.vfs.Dependency;
 
 /**
  * DeployController controls the lifecycle of the DeployInstance.
  */
 abstract public class DeployController<I extends DeployInstance>
-  implements DeployControllerApi<I>, Dependency, AlarmListener
+  implements DeployControllerApi<I>, Dependency
 {
   private static final Logger log
     = Logger.getLogger(DeployController.class.getName());
@@ -69,7 +67,7 @@ abstract public class DeployController<I extends DeployInstance>
 
   protected final Lifecycle _lifecycle;
 
-  private Alarm _alarm = new WeakAlarm(this);
+  private DeployControllerAlarm<DeployController<I>> _alarm;
   private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
   
   private long _startTime;
@@ -457,6 +455,8 @@ abstract public class DeployController<I extends DeployInstance>
                                           _lifecycle.getStateName()));
 
     _strategy.startOnInit(this);
+    
+    _alarm = new DeployControllerAlarm<DeployController<I>>(this, _redeployCheckInterval);
   }
 
   /**
@@ -582,7 +582,11 @@ abstract public class DeployController<I extends DeployInstance>
       if (! isStarting)
         return deployInstance;
       
+      preConfigureInstance(deployInstance);
+      
       configureInstance(deployInstance);
+      
+      postConfigureInstance(deployInstance);
 
       deployInstance.start();
 
@@ -629,9 +633,6 @@ abstract public class DeployController<I extends DeployInstance>
       // server/
       if (loader instanceof DynamicClassLoader)
         ((DynamicClassLoader) loader).clearModified();
-
-      if (_alarm != null)
-        _alarm.queue(_redeployCheckInterval); // XXX: strategy-controlled
 
       thread.setContextClassLoader(oldLoader);
     }
@@ -709,6 +710,15 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Before instance configuration
+   */
+  protected void preConfigureInstance(I deployInstance)
+    throws Exception
+  {
+    
+  }
+
+  /**
    * Configuration of the instance
    */
   protected void configureInstance(I deployInstance)
@@ -717,19 +727,14 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Handles the redeploy check alarm.
+   * After instance configuration
    */
-  @Override
-  public final void handleAlarm(Alarm alarm)
+  protected void postConfigureInstance(I deployInstance)
+    throws Exception
   {
-    try {
-      alarm();
-    } finally {
-      if (! _lifecycle.isDestroyed())
-        alarm.queue(_redeployCheckInterval);
-    }
+    
   }
-  
+
   @Override
   public final void alarm()
   {
@@ -753,11 +758,11 @@ abstract public class DeployController<I extends DeployInstance>
     if (! _lifecycle.toDestroy())
       return false;
 
-    Alarm alarm = _alarm;
+    DeployControllerAlarm<DeployController<I>> alarm = _alarm;
     _alarm = null;
 
     if (alarm != null) {
-      alarm.dequeue();
+      alarm.close();
     }
     
     return true;

@@ -83,6 +83,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
     _invocation = invocation;
   }
 
+  @Override
   protected Invocation getInvocation()
   {
     return _invocation;
@@ -105,16 +106,19 @@ public class ForwardRequest extends CauchoRequestWrapper {
       _response.finishRequest();
   }
 
+  @Override
   public ForwardResponse getResponse()
   {
     return _response;
   }
 
+  @Override
   public ServletContext getServletContext()
   {
     return _invocation.getWebApp();
   }
 
+  @Override
   public DispatcherType getDispatcherType()
   {
     return DispatcherType.FORWARD;
@@ -171,21 +175,25 @@ public class ForwardRequest extends CauchoRequestWrapper {
   // CauchoRequest
   //
   
+  @Override
   public String getPageURI()
   {
     return _invocation.getURI();
   }
   
+  @Override
   public String getPageContextPath()
   {
     return _invocation.getContextPath();
   }
   
+  @Override
   public String getPageServletPath()
   {
     return _invocation.getServletPath();
   }
   
+  @Override
   public String getPagePathInfo()
   {
     return _invocation.getPathInfo();

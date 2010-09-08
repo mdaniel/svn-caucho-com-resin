@@ -29,11 +29,27 @@
 
 package com.caucho.servlets;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.GenericServlet;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.LruCache;
@@ -43,19 +59,11 @@ import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Serves static files.  The cache headers are automatically set on these
  * files.
  */
+@SuppressWarnings("serial")
 public class FileServlet extends GenericServlet {
   private static final Logger log
     = Logger.getLogger(FileServlet.class.getName());
@@ -160,7 +168,8 @@ public class FileServlet extends GenericServlet {
     if (! method.equalsIgnoreCase("GET")
         && ! method.equalsIgnoreCase("HEAD")
         && ! method.equalsIgnoreCase("POST")) {
-      res.sendError(res.SC_NOT_IMPLEMENTED, "Method not implemented");
+      res.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, 
+                    "Method not implemented");
       return;
     }
 
@@ -267,10 +276,19 @@ public class FileServlet extends GenericServlet {
       req.getSession(true);
 
     if (cache.isDirectory()) {
-      if (_dir != null)
+      if (! uri.endsWith("/")) {
+        String queryString = req.getQueryString();
+        
+        if (queryString != null)
+          res.sendRedirect(uri + "/?" + queryString);
+        else
+          res.sendRedirect(uri + "/");
+      }
+      else if (_dir != null)
         _dir.forward(req, res);
       else
         res.sendError(HttpServletResponse.SC_NOT_FOUND);
+      
       return;
     }
 

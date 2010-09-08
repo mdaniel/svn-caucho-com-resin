@@ -307,7 +307,7 @@ public class ClassEntry implements Dependency {
         return false;
       }
 
-      if (_hasAnnotations && requireReload(cl))
+      if (cl.isAnnotationPresent(RequireReload.class))
         return true;
 
       ReadStream is = _classPath.openRead();
@@ -428,11 +428,6 @@ public class ClassEntry implements Dependency {
     return _hasJNIReload;
   }
 
-  private static boolean requireReload(Class cl)
-  {
-    return cl.isAnnotationPresent(RequireReload.class);
-  }
-
   public String toString()
   {
     if (_sourcePath == null)
@@ -443,7 +438,7 @@ public class ClassEntry implements Dependency {
 
   public static native boolean canReloadNative();
 
-  public static native int reloadNative(Class cl,
+  public static native int reloadNative(Class<?> cl,
                                         byte []bytes, int offset, int length);
 
   class ReloadThread implements Runnable {
@@ -483,14 +478,5 @@ public class ClassEntry implements Dependency {
     _jniTroubleshoot = jniTroubleshoot;
 
     _jniTroubleshoot.log();
-
-    try {
-      Class reloadClass = Class.forName("com.caucho.loader.RequireReload");
-
-      Object.class.getAnnotation(reloadClass);
-
-      _hasAnnotations = true;
-    } catch (Throwable e) {
-    }
   }
 }

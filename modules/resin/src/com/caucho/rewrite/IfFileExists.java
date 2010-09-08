@@ -62,9 +62,9 @@ public class IfFileExists implements RequestPredicate
     String realPath;
 
     if (servletPath != null)
-      realPath = request.getRealPath(servletPath);
+      realPath = request.getServletContext().getRealPath(servletPath);
     else
-      realPath = request.getRealPath(request.getPathInfo());
+      realPath = request.getServletContext().getRealPath(request.getPathInfo());
 
     Path path = Vfs.lookup(realPath);
 

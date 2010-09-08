@@ -29,17 +29,12 @@
 
 package com.caucho.rewrite;
 
+import javax.servlet.FilterChain;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
 import com.caucho.server.rewrite.AddHeaderFilterChain;
 import com.caucho.util.L10N;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Sets a response Vary header to control caching based on input headers,
