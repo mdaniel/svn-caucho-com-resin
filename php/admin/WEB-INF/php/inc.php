@@ -624,22 +624,29 @@ if ($is_refresh) {
 
 <body>
 
-<ul id="status-bar">
-   <li class='status-item logout'><a href="?q=index.php&logout=true">logout</a></li>
-   <li class='status-item'><a href="<?= $g_next_url ?>">refresh</a></li>
+<div id="status-bar">
+<div style='float: left; width: 80%; padding: 0; margin: 0;'>
 <?
 if (! empty($server)) {
   $server_name = $server->Id ? $server->Id : "default";
 
 ?>
+<ul class='status'>
    <li class="server status-item"><?php display_servers($server); ?></li>
-<? }  ?>
 <!--
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    -->
    <li class="status-item"><?php display_health(); ?></li>
    <li class="status-item status-log"><?php display_status_log($server); ?></li>
 </ul>
+<? }  ?>
+</div>
+
+<div style='float: right; width: 20%; text-align: right;'>
+ <span class='status-item'><a href="<?= $g_next_url ?>">refresh</a></span>
+ <span class='status-item logout'><a href="?q=index.php&logout=true">logout</a></span>
+</div>
+</div>
 
 <table id="layout" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
@@ -770,7 +777,7 @@ function display_status_log($server)
 
       echo "Latest Log: \n";
 
-      echo "<span class=\"switch {$messages[0]->level}\" id=\"status-log\">";
+      echo "<span class=\"menu-switch {$messages[0]->level}\" id=\"status-log\">";
       echo "<span id='first-log-message'>${first_message}</span></span>";
 
       echo "<table class='toggle-status-log data'>\n";
@@ -858,7 +865,7 @@ function display_health()
     echo "<span class='ok'>System Health</span>";
   }
   else {
-    echo "<span class='switch' id='down-servers'>"
+    echo "<span class='menu-switch' id='down-servers'>"
     echo "<span class='fail'>System Health</span>";
     echo "<ul class='toggle-down-servers' style='display: none'>";
     foreach ($down_servers as $down_server) {
@@ -943,6 +950,7 @@ function display_footer($script, $javascript="")
 
 <script type="text/javascript" src="jquery-ui.js"></script>
 <script type="text/javascript" src="resin-admin.js"></script>
+<script type="text/javascript" src="pie-chart.js"></script>
 <script type="text/javascript" src="flot/jquery.flot.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {

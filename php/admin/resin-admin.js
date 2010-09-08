@@ -92,6 +92,16 @@ function initializeToggleSwitches() {
     var toggleSwitch = new ToggleSwitch($(this));
     toggleSwitch.init();
   });
+
+  $(".menu-switch").each(function() {
+    var toggleSwitch = new ToggleSwitch($(this));
+
+    toggleSwitch.showTargets = function() { 
+      this.toggleTargets.css('left',  '0px').show();
+    };
+
+    toggleSwitch.init();
+  });
 }
 
 function init() {

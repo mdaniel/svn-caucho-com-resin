@@ -495,13 +495,18 @@ li.server {
 #status-bar {
   x-overflow: hidden;
   width: 100%;
-  list-style-type:none;
   position: fixed;
   top: 0;
   z-index: 500;
   width: 100%;
   background: #f4f4f4;
   border-bottom:1px solid gray; 
+  margin: 0;
+  padding: 0;
+}
+
+ul.status {
+  list-style-type:none;
   margin: 0;
   padding: 0;
 }
@@ -551,6 +556,9 @@ select.log option {
   position: absolute;
   list-style-type:none;
   padding-left: 1em;
+  padding-right: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .toggle-down-servers li {
@@ -883,4 +891,8 @@ table.schema tr th {
 
 .switch {
   vertical-align: middle;
+}
+
+.highlight { 
+  background-color: #aaa;
 }

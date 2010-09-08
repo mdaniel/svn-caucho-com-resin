@@ -169,7 +169,7 @@ function print_profile_tab($entries, $name, $count, $profile)
   $period = $profile->getPeriod();
   $sample_ticks = $profile->getTicks();
   
-  echo "<table class='threads'>\n";
+  echo "<table class='threads' id='${name}-table' style='display: inline-block'>\n";
 
   //$topTicks = $entries[0]->getCount();
   $total_ticks = 0;
@@ -213,20 +213,20 @@ function print_profile_tab($entries, $name, $count, $profile)
     $self_percent = 100 * $entry->getCount() / $total_ticks;
     $total_percent += $self_percent;
 
-    echo "<tr>";
+    echo "<tr class='chart-data'>";
     echo "<td>";
     echo "<span id='sw_{$name}_{$i}' class='switch'></span>";
     echo "</td>";
     
-    echo "<td align='right'>";
+    echo "<td align='right' class='time-percent'>";
     printf("%9.3f%%", $time_percent);
-    echo "</td><td align='right'>";
+    echo "</td><td align='right' class='time-self'>";
     printf("%.3fs", $entry->getCount() * $period * 0.001);
-    echo "</td><td align='right'>";
+    echo "</td><td align='right' class='sum-percent'>";
     printf("%9.3f%%", $total_percent);
     echo "</td>";
 
-    echo "<td>";
+    echo "<td class='method-call'>";
 
     echo htmlspecialchars($entry->getDescription());
 
@@ -251,6 +251,8 @@ function print_profile_tab($entries, $name, $count, $profile)
   }
 
   echo "</table>\n";
+
+  echo "<canvas id='${name}-table-chart'/ width='300' height='300' style='display:inline-block; float: right;'></canvas>\n";
 }
 
 function do_partition_profile($entries)
@@ -439,5 +441,13 @@ function print_stack_entry($stack)
   }
 }
 
-display_footer($g_page, javascript_create_tab("profile-tabs"));
+$javascript = <<<EOF
+$("table.threads").each(function() {
+  var table = $(this);
+  var chartId = table.attr("id") + "-chart";
+  pieChart(table, chartId, "method-call", "time-percent");
+});
+EOF;
+
+display_footer($g_page, $javascript . javascript_create_tab("profile-tabs"));
 ?>
