@@ -13,6 +13,7 @@
 
 <s2 title="4.0.11 snapshot">
 <ul>
+<li>servlet: CauchoResponseWrapper shouldn't assume wrapping CauchoResponse (#4206)</li>
 <li>class-loader: getProtectionDomain() should return the file:... for the jar object, not the jar contents (#4194)</li>
 <li>resin-admin: JMX display has been reorganized and domains split into tabs</li>
 <li>resin-admin: graph generation has been updated</li>
