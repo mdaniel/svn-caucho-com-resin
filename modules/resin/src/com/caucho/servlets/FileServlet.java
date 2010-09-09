@@ -347,6 +347,7 @@ public class FileServlet extends GenericServlet {
 
     res.addHeader("ETag", etag);
     res.addHeader("Last-Modified", lastModified);
+    
     if (_isEnableRange && cauchoReq != null && cauchoReq.isTop())
       res.addHeader("Accept-Ranges", "bytes");
 

@@ -78,8 +78,11 @@ public class CloudServer {
                      boolean isSSL,
                      boolean isStatic)
   {
-    _id = id;
+    if (id.equals(""))
+      throw new IllegalArgumentException();
     
+    _id = id;
+
     _pod = pod;
     _index = index;
     

@@ -66,6 +66,8 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.distcache.DistCacheService;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
+import com.caucho.env.lock.LockService;
+import com.caucho.env.lock.SingleLockManager;
 import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.LocalRepositoryService;
 import com.caucho.env.repository.Repository;
@@ -88,10 +90,10 @@ import com.caucho.naming.Jndi;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServerConfig;
+import com.caucho.server.cluster.ServletContainerConfig;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.server.distcache.FileCacheManager;
-import com.caucho.server.distlock.LockService;
-import com.caucho.server.distlock.SingleLockManager;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.Alarm;
@@ -121,7 +123,7 @@ public class Resin
 
   private boolean _isEmbedded;
 
-  private String _serverId = "";
+  private String _serverId = "default";
   private final boolean _isWatchdog;
   
   private ResinArgs _args;
@@ -138,7 +140,10 @@ public class Resin
   private Lifecycle _lifecycle;
 
   private BootResinConfig _bootResinConfig;
-  private Server _server;
+  private CloudServer _selfServer;
+  
+  private ServletContainerConfig _servletContainerConfig;
+  private Server _servletContainer;
 
   private long _initialStartTime;
   private long _startTime;
@@ -559,6 +564,9 @@ public class Resin
    */
   public void setServerId(String serverId)
   {
+    if ("".equals(serverId))
+      serverId = "default";
+    
     Config.setProperty("serverId", serverId);
 
     _serverId = serverId;
@@ -792,7 +800,7 @@ public class Resin
    */
   public Server getServer()
   {
-    return _server;
+    return _servletContainer;
   }
 
   /**
@@ -807,16 +815,21 @@ public class Resin
   {
     return 0;
   }
+  
+  public CloudServer getSelfServer()
+  {
+    return _selfServer;
+  }
 
   public Server createServer()
   {
-    if (_server == null) {
+    if (_servletContainer == null) {
       configure();
 
       // _server.start();
     }
 
-    return _server;
+    return _servletContainer;
   }
 
   protected ClusterServer loadDynamicServer(ClusterPod pod,
@@ -846,16 +859,17 @@ public class Resin
 
       // force a GC on start
       System.gc();
-      
-      initRepository();
 
-      _server = createServer();
+      _servletContainer = createServer();
+      
+      NetworkListenService listenService 
+        = _resinSystem.getService(NetworkListenService.class);
 
       if (_args != null) {
         for (BoundPort port : _args.getBoundPortList()) {
-          _server.bind(port.getAddress(),
-                       port.getPort(),
-                       port.getServerSocket());
+          listenService.bind(port.getAddress(),
+                             port.getPort(),
+                             port.getServerSocket());
         }
       }
 
@@ -998,18 +1012,18 @@ public class Resin
     try {
       thread.setContextClassLoader(_resinSystem.getClassLoader());
       
-      if (_server == null) {
+      if (_servletContainer == null) {
         BootResinConfig bootResin = configureBoot();
   
         _rootDirectory = bootResin.getRootDirectory();
   
         configureRoot(bootResin);
-  
+        
+        configureServer();
+        
         if (! isWatchdog()) {
           addServices();
         }
-        
-        configureServer();
       }
       
     } catch (Exception e) {
@@ -1092,7 +1106,7 @@ public class Resin
   private void configureServer()
     throws IOException
   {
-    if (_server != null)
+    if (_servletContainer != null)
       return;
     
     BootResinConfig bootResin = _bootResinConfig;
@@ -1112,8 +1126,8 @@ public class Resin
         clusterConfig.init();
       }
       else {
-          throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
-                                          _serverId));
+        throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
+                                        _serverId));
       }
         
       if (clusterConfig.getServerList().size() > 0) {
@@ -1127,12 +1141,13 @@ public class Resin
       // bootServer.configureServer();
     }
     
-    CloudServer cloudServer = bootServer.getCloudServer();
+    _selfServer = bootServer.getCloudServer();
     
-    NetworkClusterService networkService = new NetworkClusterService(cloudServer);
+    NetworkClusterService networkService
+      = new NetworkClusterService(_selfServer);
     _resinSystem.addService(networkService);
     
-    ClusterServer server = cloudServer.getData(ClusterServer.class);
+    ClusterServer server = _selfServer.getData(ClusterServer.class);
     
     LoadBalanceService loadBalanceService;
     loadBalanceService = new LoadBalanceService(createLoadBalanceFactory());
@@ -1142,25 +1157,40 @@ public class Resin
     BamService bamService = new BamService(server.getBamAdminName());
     _resinSystem.addService(bamService);
     
-    _server = createServer(networkService);
+    initRepository();
+    
+    _servletContainer = createServer(networkService);
 
     if (_stage != null)
-      _server.setStage(_stage);
+      _servletContainer.setStage(_stage);
     
-    NetworkListenService listenService = new NetworkListenService(cloudServer);
+    NetworkListenService listenService
+      = new NetworkListenService(_selfServer);
     
     _resinSystem.addService(listenService);
     
-    ServletService servletService = new ServletService(_server);
+    ServletService servletService = new ServletService(_servletContainer);
     _resinSystem.addService(servletService);
     
     ResinConfig resinConfig = new ResinConfig(this);
     
     bootResin.getProgram().configure(resinConfig);
-
-    bootServer.getCluster().getProgram().configure(_server);
     
-    _server.init();
+    _servletContainerConfig = new ServletContainerConfig(_servletContainer);
+
+    bootServer.getCluster().getProgram().configure(_servletContainerConfig);
+    
+    ServerConfig config = new ServerConfig(_servletContainerConfig);
+    bootServer.getServerProgram().configure(config);
+    
+    _servletContainerConfig.init();
+    
+    _servletContainer.init();
+  }
+  
+  protected ServletContainerConfig getServletContainerConfig()
+  {
+    return _servletContainerConfig;
   }
   
   protected LoadBalanceFactory createLoadBalanceFactory()
@@ -1170,7 +1200,7 @@ public class Resin
   
   protected Server createServer(NetworkClusterService clusterService)
   {
-    return new Server(_resinSystem, clusterService);
+    return new Server(this, _resinSystem, clusterService);
   }
 
   public Management createResinManagement()
@@ -1335,12 +1365,8 @@ public class Resin
     public String getAddress()
     {
       try {
-        Server server = _server;
-
-        if (server != null) {
-          ClusterServer clusterServer = server.getSelfServer();
-
-          return clusterServer.getAddress();
+        if (_selfServer != null) {
+          return _selfServer.getAddress();
         }
         else
           return InetAddress.getLocalHost().getHostAddress();
@@ -1356,12 +1382,8 @@ public class Resin
      */
     public int getPort()
     {
-      Server server = _server;
-
-      if (server != null) {
-        ClusterServer clusterServer = server.getSelfServer();
-
-        return clusterServer.getPort();
+      if (_selfServer != null) {
+        return _selfServer.getPort();
       }
       else
         return 0;

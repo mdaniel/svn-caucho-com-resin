@@ -454,9 +454,11 @@ public class HostContainer implements DispatchBuilder {
       try {
         thread.setContextClassLoader(_classLoader);
 
+        /*
         _errorWebApp = new WebApp(getRootDirectory().lookup("caucho-host-error"));
         _errorWebApp.init();
         _errorWebApp.start();
+        */
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {

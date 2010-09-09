@@ -1261,8 +1261,13 @@ public class WebAppContainer
       try {
         thread.setContextClassLoader(_classLoader);
 
-        _errorWebApp = new WebApp(getRootDirectory().lookup("caucho-web-app-error"));
-        _errorWebApp.setParent(this);
+        Path errorRoot = getRootDirectory().lookup("caucho-web-app-error");
+        
+        WebAppController webAppController
+          = new WebAppController(errorRoot, this);
+        
+        _errorWebApp = webAppController.request();
+
         //_errorWebApp.init();
         //_errorWebApp.start();
       } catch (Throwable e) {

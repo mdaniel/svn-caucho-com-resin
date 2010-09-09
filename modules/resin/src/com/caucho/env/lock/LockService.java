@@ -27,27 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distlock;
+package com.caucho.env.lock;
 
-import com.caucho.cloud.network.ClusterServer;
-import com.caucho.server.cluster.Server;
+import java.util.concurrent.locks.Lock;
+
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 
 /**
- * Manages the distributed vote
+ * Manages the distributed lock
  */
-public class SingleVoteManager extends AbstractVoteManager {
-  private Server _server;
+public class LockService extends AbstractResinService {
+  private AbstractLockManager _lockManager;
+  
+  public LockService(AbstractLockManager lockManager)
+  {
+    _lockManager = lockManager;
+  }
+  
+  public static LockService getCurrent()
+  {
+    return ResinSystem.getCurrentService(LockService.class);
+  }
+  
+  public LockManager getManager()
+  {
+    return _lockManager;
+  }
   
   /**
-   * Selects a cluster owner
+   * Creates a new lock with the given name;
    */
-  public ClusterServer electServer(String guid, String name)
+  public Lock getOrCreateLock(String name)
   {
-    return _server.getSelfServer();
+    return getManager().getOrCreateLock(name);
   }
-
-  public SingleVoteManager(Server server)
+  
+  //
+  // lifecycle/
+  //
+  
+  @Override
+  public void start()
   {
-    _server = server;
+    _lockManager.start();
   }
+  
+  @Override
+  public void stop()
+  {
+    _lockManager.close();
+  }
+  
 }

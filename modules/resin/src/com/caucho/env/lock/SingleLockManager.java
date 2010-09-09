@@ -27,56 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distlock;
+package com.caucho.env.lock;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
 
 /**
  * Manages the distributed lock
  */
-public class LockService extends AbstractResinService {
-  private AbstractLockManager _lockManager;
-  
-  public LockService(AbstractLockManager lockManager)
+public class SingleLockManager extends AbstractLockManager {
+  private ConcurrentHashMap<String,SingleLock> _lockMap
+    = new ConcurrentHashMap<String,SingleLock>();
+
+  public SingleLockManager()
   {
-    _lockManager = lockManager;
   }
-  
-  public static LockService getCurrent()
-  {
-    return ResinSystem.getCurrentService(LockService.class);
-  }
-  
-  public LockManager getManager()
-  {
-    return _lockManager;
-  }
-  
-  /**
-   * Creates a new lock with the given name;
-   */
+
+  @Override
   public Lock getOrCreateLock(String name)
   {
-    return getManager().getOrCreateLock(name);
+    SingleLock lock = _lockMap.get(name);
+
+    if (lock == null) {
+      lock = new SingleLock(name);
+
+      SingleLock oldLock = _lockMap.putIfAbsent(name, lock);
+
+      if (oldLock != null)
+        lock = oldLock;
+    }
+
+    return lock;
   }
-  
-  //
-  // lifecycle/
-  //
-  
-  @Override
-  public void start()
-  {
-    _lockManager.start();
-  }
-  
-  @Override
-  public void stop()
-  {
-    _lockManager.close();
-  }
-  
 }

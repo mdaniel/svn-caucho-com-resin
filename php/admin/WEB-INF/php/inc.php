@@ -1124,5 +1124,10 @@ function print_fail($message)
 {
   echo "<span style='color:#c00000'>&#x2717;$message</span>";
 }
+    
+function print_warn($message)
+{
+  echo "<span style='color:#c0c000'>?$message</span>";
+}
 
 ?>

@@ -37,10 +37,10 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.env.lock.LockManager;
+import com.caucho.env.lock.LockService;
 import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
-import com.caucho.server.distlock.LockManager;
-import com.caucho.server.distlock.LockService;
 import com.caucho.util.L10N;
 
 /**

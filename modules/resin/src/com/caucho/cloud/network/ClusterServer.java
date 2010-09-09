@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorStream;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudServer;
@@ -554,62 +553,6 @@ public final class ClusterServer {
   }
 
   /**
-   * Arguments on boot
-   */
-  public void addJavaExe(String args)
-  {
-  }
-
-  /**
-   * Arguments on boot
-   */
-  public void addJvmArg(String args)
-  {
-  }
-
-  /**
-   * Arguments on boot
-   */
-  public void addJvmClasspath(String args)
-  {
-  }
-
-  /**
-   * Arguments on boot
-   */
-  public void addWatchdogArg(String args)
-  {
-  }
-
-  /**
-   * Arguments on boot
-   */
-  public void addWatchdogJvmArg(String args)
-  {
-  }
-
-  /**
-   * Arguments on boot
-   */
-  public void addWatchdogPassword(String args)
-  {
-  }
-
-  /**
-   * Arguments on boot
-   */
-  public void addWatchdogPort(int port)
-  {
-  }
-
-  /**
-   * Arguments on boot
-   */
-  public void addWatchdogAddress(String addr)
-  {
-  }
-
-  /**
    * Sets a port.
    */
   public void setPort(int port)
@@ -623,20 +566,6 @@ public final class ClusterServer {
   public int getPort()
   {
     return _port;
-  }
-
-  /**
-   * Sets the user name.
-   */
-  public void setUserName(String userName)
-  {
-  }
-
-  /**
-   * Sets the group name.
-   */
-  public void setGroupName(String groupName)
-  {
   }
 
   /**
@@ -655,16 +584,6 @@ public final class ClusterServer {
     return _serverPool;
   }
   
-  /**
-   * Returns the bam queue to the server.
-   */
-  /*
-  public ActorStream getHmtpStream()
-  {
-    return null;
-  }
-  */
-
   /**
    * Returns true if the server is remote and active.
    */

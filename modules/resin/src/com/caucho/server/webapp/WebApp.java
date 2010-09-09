@@ -201,6 +201,7 @@ import com.caucho.vfs.Vfs;
  * Resin's webApp implementation.
  */
 @Configurable
+@SuppressWarnings("serial")
 public class WebApp extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
              EnvironmentDeployInstance, ScanListener, JspConfigDescriptor,
@@ -428,21 +429,17 @@ public class WebApp extends ServletContextImpl
   /**
    * Creates the webApp with its environment loader.
    */
-  public WebApp(Path rootDirectory)
-  {
-    this(new WebAppController("production/webapp/default/ROOT",
-                              "/", "/", rootDirectory, null));
-  }
-
-  /**
-   * Creates the webApp with its environment loader.
-   */
   WebApp(WebAppController controller)
   {
-    _server = Server.getCurrent();
+    _server = controller.getServletContainer();
+    
+    if (_server == null) {
+      throw new IllegalStateException(L.l("{0} requires an active {1}",
+                                          getClass().getSimpleName(),
+                                          Server.class.getSimpleName()));
+    }
 
-    if (_server != null) // JspCompiler creates no server jsp/1930)
-      _invocationDecoder = _server.getInvocationDecoder();
+    _invocationDecoder = _server.getInvocationDecoder();
 
     setVersionContextPath(controller.getContextPath());
     _baseContextPath = controller.getBaseContextPath();
@@ -638,10 +635,7 @@ public class WebApp extends ServletContextImpl
    */
   public Server getServer()
   {
-    if (_parent != null && _parent.getDispatchServer() instanceof Server)
-      return (Server) _parent.getDispatchServer();
-    else
-      return null;
+    return _server;
   }
   
   public String getModuleName()

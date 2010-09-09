@@ -121,7 +121,9 @@ for ($i = 0; $i < 64; $i++) {
       $is_health = $s_server;
       
       echo "<tr><td>";
-      echo "<span id='sw_${server}' class='switch'></span>";
+      if ($s_health) {
+        echo "<span id='sw_${server}' class='switch'></span>";
+      }
       echo "</td><td>";
 
       if (! $s_health) {
@@ -147,6 +149,36 @@ for ($i = 0; $i < 64; $i++) {
       echo "</td>";
       
       echo "</tr>\n";
+
+      echo "<tr class='toggle-sw_${server}'>";
+      echo "<td colspan='3'>";
+      if ($s_server) {
+        echo "<table border='0' style='border-width:1px'>\n";
+        $s_health_list = $s_mbean_server->query("resin:type=HealthCheck,*");
+        foreach ($s_health_list as $s_health) {
+          $name = $s_health->Name;
+          $msg = $s_health->Message;
+
+          echo "<tr><td>";
+          if ($s_health->Status == "OK") {
+            print_ok("");
+            echo $name;
+          }
+          else if ($s_health->Status == "FAIL") {
+            print_fail($name);
+          }
+          else {
+            print_warn($name);
+          }
+          echo "</td>";
+          echo "<td>";
+          echo $msg;
+          echo "</td>";
+          echo "</tr>";
+        }
+        echo "</table>";
+      }
+      echo "</td></tr>";
       echo "</table>\n";
     }
 

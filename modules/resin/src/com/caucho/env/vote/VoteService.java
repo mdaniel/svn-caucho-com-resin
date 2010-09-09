@@ -27,36 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distlock;
+package com.caucho.env.vote;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
+
+import com.caucho.env.lock.AbstractLockManager;
+import com.caucho.env.lock.LockManager;
+import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.ResinSystem;
 
 /**
  * Manages the distributed lock
  */
-public class SingleLockManager extends AbstractLockManager {
-  private ConcurrentHashMap<String,SingleLock> _lockMap
-    = new ConcurrentHashMap<String,SingleLock>();
-
-  public SingleLockManager()
+public class VoteService extends AbstractResinService {
+  private AbstractVoteManager _voteManager;
+  
+  public VoteService(AbstractVoteManager voteManager)
   {
+    _voteManager = voteManager;
   }
-
+  
+  public static VoteService getCurrent()
+  {
+    return ResinSystem.getCurrentService(VoteService.class);
+  }
+  
+  public AbstractVoteManager getManager()
+  {
+    return _voteManager;
+  }
+  
+  //
+  // lifecycle/
+  //
+  
   @Override
-  public Lock getOrCreateLock(String name)
+  public void start()
   {
-    SingleLock lock = _lockMap.get(name);
-
-    if (lock == null) {
-      lock = new SingleLock(name);
-
-      SingleLock oldLock = _lockMap.putIfAbsent(name, lock);
-
-      if (oldLock != null)
-        lock = oldLock;
-    }
-
-    return lock;
+    // _voteManager.start();
   }
+  
+  @Override
+  public void stop()
+  {
+    // _voteManager.close();
+  }
+  
 }

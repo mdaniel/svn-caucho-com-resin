@@ -83,7 +83,8 @@ public class GitCommitJar {
     throws IOException
     {
     Path dir = WorkDir.getLocalWorkDir();
-
+    dir.mkdirs();
+    
     Path path = dir.createTempFile("git", "tmp");
 
     try {

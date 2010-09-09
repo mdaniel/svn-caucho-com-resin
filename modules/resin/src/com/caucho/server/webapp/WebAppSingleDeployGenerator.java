@@ -261,7 +261,7 @@ public class WebAppSingleDeployGenerator
     if (name.equals(_controller.getContextPath())) {
       WebAppController webApp;
       
-      String id = "production/webapp/default/" + name;
+      String id = "production/webapp/default" + name;
       
       webApp = new WebAppController(id, _urlPrefix, _urlPrefix,
                                     _rootDirectory, _container);

@@ -47,6 +47,24 @@ public class SocketPollService extends AbstractResinService
     _selectManager = manager;
   }
   
+  public static SocketPollService getCurrent()
+  {
+    SocketPollService pollService 
+      = ResinSystem.getCurrentService(SocketPollService.class);
+    
+    return pollService;
+  }
+  
+  public static AbstractSelectManager getCurrentSelectManager()
+  {
+    SocketPollService pollService = getCurrent();
+
+    if (pollService != null)
+      return pollService.getSelectManager();
+    else
+      return null;
+  }
+  
   public AbstractSelectManager getSelectManager()
   {
     return _selectManager;

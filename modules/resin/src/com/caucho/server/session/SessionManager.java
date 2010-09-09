@@ -29,43 +29,46 @@
 
 package com.caucho.server.session;
 
-import com.caucho.cloud.network.ClusterServer;
-import com.caucho.cloud.topology.CloudServer;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.distcache.ByteStreamCache;
-import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.ClusterByteStreamCache;
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.env.meter.AverageSensor;
-import com.caucho.env.meter.MeterService;
-import com.caucho.hessian.io.*;
-import com.caucho.management.server.SessionManagerMXBean;
-import com.caucho.security.Authenticator;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.dispatch.InvocationDecoder;
-import com.caucho.server.distcache.PersistentStoreConfig;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
-import com.caucho.util.WeakAlarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.RandomUtil;
-import com.caucho.vfs.TempOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import javax.servlet.SessionCookieConfig;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.cloud.network.ClusterServer;
+import com.caucho.cloud.topology.CloudServer;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.ByteStreamCache;
+import com.caucho.distcache.ClusterByteStreamCache;
+import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.env.meter.AverageSensor;
+import com.caucho.env.meter.MeterService;
+import com.caucho.hessian.io.HessianDebugInputStream;
+import com.caucho.management.server.SessionManagerMXBean;
+import com.caucho.security.Authenticator;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.distcache.PersistentStoreConfig;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.RandomUtil;
+import com.caucho.util.WeakAlarm;
+import com.caucho.vfs.TempOutputStream;
 
 // import com.caucho.server.http.ServletServer;
 // import com.caucho.server.http.VirtualHost;
@@ -95,7 +98,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private final WebApp _webApp;
   private final SessionManagerAdmin _admin;
 
-  private final Server _server;
+  private final Server _servletContainer;
   private final ClusterServer _selfServer;
   private final int _selfIndex;
 
@@ -198,17 +201,17 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   {
     _webApp = webApp;
 
-    _server = Server.getCurrent();
+    _servletContainer = webApp.getServer();
 
-    if (_server == null) {
+    if (_servletContainer == null) {
       throw new IllegalStateException(L.l("Server is not active in this context {0}",
                                           Thread.currentThread().getContextClassLoader()));
     }
-    _selfServer = _server.getSelfServer();
+    _selfServer = _servletContainer.getSelfServer();
     _selfIndex = _selfServer.getIndex();
 
     // copy defaults from store for backward compat
-    PersistentStoreConfig cfg = _server.getPersistentStoreConfig();
+    PersistentStoreConfig cfg = null;//_server.getPersistentStoreConfig();
     if (cfg != null) {
       setAlwaysSaveSession(cfg.isAlwaysSave());
 
@@ -216,19 +219,14 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       _isSaveTriplicate = cfg.isSaveTriplicate();
     }
 
-    DispatchServer server = webApp.getDispatchServer();
-    if (server != null) {
-      InvocationDecoder decoder = server.getInvocationDecoder();
+    _sessionSuffix = _servletContainer.getSessionURLPrefix();
+    _sessionPrefix = _servletContainer.getAlternateSessionURLPrefix();
 
-      _sessionSuffix = decoder.getSessionURLPrefix();
-      _sessionPrefix = decoder.getAlternateSessionURLPrefix();
-
-      _cookieName = decoder.getSessionCookie();
-      _sslCookieName = decoder.getSSLSessionCookie();
+    _cookieName = _servletContainer.getSessionCookie();
+    _sslCookieName = _servletContainer.getSSLSessionCookie();
       
-      if (_sslCookieName != null && ! _sslCookieName.equals(_cookieName))
-        _isSecure = true;
-    }
+    if (_sslCookieName != null && ! _sslCookieName.equals(_cookieName))
+      _isSecure = true;
 
     String hostName = webApp.getHostName();
     String contextPath = webApp.getContextPath();

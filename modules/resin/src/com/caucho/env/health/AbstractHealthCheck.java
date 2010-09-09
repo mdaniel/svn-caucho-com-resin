@@ -63,4 +63,10 @@ public abstract class AbstractHealthCheck implements HealthCheck {
   {
     return "";
   }
+ 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

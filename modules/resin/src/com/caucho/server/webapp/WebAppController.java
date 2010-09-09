@@ -46,6 +46,7 @@ import com.caucho.config.types.PathBuilder;
 import com.caucho.env.deploy.DeployControllerAdmin;
 import com.caucho.env.deploy.EnvironmentDeployController;
 import com.caucho.inject.Module;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.util.CauchoSystem;
@@ -108,7 +109,12 @@ public class WebAppController
 
   public WebAppController()
   {
-    this("production/webapp/default/ROOT", "/", "/", null, null);
+    this(null, null);
+  }
+
+  public WebAppController(Path rootDirectory, WebAppContainer container)
+  {
+    this("production/webapp/default/ROOT", "/", "/", rootDirectory, container);
   }
 
   public WebAppController(String id,
@@ -227,6 +233,11 @@ public class WebAppController
   public WebAppContainer getContainer()
   {
     return _container;
+  }
+  
+  public Server getServletContainer()
+  {
+    return _container.getHost().getServer();
   }
 
   /**

@@ -36,11 +36,13 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.caucho.bam.Broker;
+import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.env.deploy.EnvironmentDeployInstance;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.lifecycle.Lifecycle;
@@ -272,8 +274,12 @@ public class Host extends WebAppContainer
 
       if (server == null)
         return "http://localhost";
+      
+      ResinSystem resinSystem = server.getResinSystem();
+      NetworkListenService listenService 
+        = resinSystem.getService(NetworkListenService.class);
 
-      for (SocketLinkListener port : server.getPorts()) {
+      for (SocketLinkListener port : listenService.getListeners()) {
         if ("http".equals(port.getProtocolName())) {
           String address = port.getAddress();
 
@@ -284,7 +290,7 @@ public class Host extends WebAppContainer
         }
       }
 
-      for (SocketLinkListener port : server.getPorts()) {
+      for (SocketLinkListener port : listenService.getListeners()) {
         if ("https".equals(port.getProtocolName())) {
           String address = port.getAddress();
           if (address == null || address.equals(""))

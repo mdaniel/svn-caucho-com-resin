@@ -27,64 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distlock;
+package com.caucho.env.lock;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
+import com.caucho.inject.Module;
 
 /**
  * Manages the distributed lock
  */
-public class SingleLock implements Lock {
-  private String _name;
-  private final Lock _lock = new ReentrantLock();
+@Module
+abstract public class AbstractLockManager implements LockManager {
+  /**
+   * Creates a new lock with the given name;
+   */
+  @Override
+  abstract public Lock getOrCreateLock(String name);
   
-  public SingleLock(String name)
+  public void start()
   {
-    _name = name;
   }
-
-  //
-  // Lock API
-  //
-
-  public void lock()
+  
+  public void close()
   {
-    _lock.lock();
-  }
-
-  public void lockInterruptibly()
-    throws InterruptedException
-  {
-    _lock.lockInterruptibly();
-  }
-
-  public boolean tryLock()
-  {
-    return _lock.tryLock();
-  }
-
-  public boolean tryLock(long time, TimeUnit unit)
-    throws InterruptedException
-  {
-    return _lock.tryLock(time, unit);
-  }
-
-  public void unlock()
-  {
-    _lock.unlock();
-  }
-
-  public Condition newCondition()
-  {
-    return _lock.newCondition();
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _name + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

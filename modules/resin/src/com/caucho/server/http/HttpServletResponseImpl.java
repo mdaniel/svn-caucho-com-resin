@@ -156,6 +156,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * Returns a PrintWriter with the proper character encoding for writing
    * text data to the client.
    */
+  @Override
   public PrintWriter getWriter()
     throws IOException
   {
@@ -183,6 +184,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    *
    * @param size the new output buffer size.
    */
+  @Override
   public void setBufferSize(int size)
   {
     _responseStream.setBufferSize(size);
@@ -191,6 +193,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   /**
    * Returns the size of the output buffer.
    */
+  @Override
   public int getBufferSize()
   {
     return _responseStream.getBufferSize();
@@ -270,6 +273,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    *
    * @throws IllegalStateException if <code>isCommitted()</code> is true.
    */
+  @Override
   public void resetBuffer()
   {
     _responseStream.clearBuffer();
@@ -1252,6 +1256,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * @param string the url to encode
    * @return a url with session information encoded
    */
+  @Override
   public String encodeURL(String string)
   {
     HttpServletRequestImpl request = getRequest();

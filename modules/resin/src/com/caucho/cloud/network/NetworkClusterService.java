@@ -94,6 +94,20 @@ public class NetworkClusterService extends AbstractResinService
   }
   
   /**
+   * Returns the current network service.
+   */
+  public static CloudServer getCurrentSelfServer()
+  {
+    NetworkClusterService clusterService = getCurrent();
+    
+    if (clusterService == null)
+      throw new IllegalStateException(L.l("{0} is not available in this context",
+                                          NetworkClusterService.class.getSimpleName()));
+    
+    return clusterService.getSelfServer();
+  }
+  
+  /**
    * Returns the self server for the network.
    */
   public CloudServer getSelfServer()

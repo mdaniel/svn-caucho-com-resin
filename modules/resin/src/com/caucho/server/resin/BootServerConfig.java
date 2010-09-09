@@ -53,7 +53,7 @@ public class BootServerConfig implements SchemaBean
   
   private final BootClusterConfig _cluster;
   
-  private String _id;
+  private String _id = "default";
   
   private String _address = "127.0.0.1";
   private int _port = -1;
@@ -100,6 +100,9 @@ public class BootServerConfig implements SchemaBean
   @Configurable
   public void setId(String id)
   {
+    if (id.equals(""))
+      id = "default";
+    
     _id = id;
   }
   
@@ -133,6 +136,11 @@ public class BootServerConfig implements SchemaBean
   public void addBuilderProgram(ConfigProgram program)
   {
     _serverProgram.addProgram(program);
+  }
+  
+  public ConfigProgram getServerProgram()
+  {
+    return _serverProgram;
   }
   
   public CloudServer getCloudServer()

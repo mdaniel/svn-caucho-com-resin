@@ -27,34 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distlock;
+package com.caucho.env.lock;
 
 import java.util.concurrent.locks.Lock;
-
-import com.caucho.inject.Module;
 
 /**
  * Manages the distributed lock
  */
-@Module
-abstract public class AbstractLockManager implements LockManager {
+public interface LockManager {
   /**
    * Creates a new lock with the given name;
    */
-  @Override
-  abstract public Lock getOrCreateLock(String name);
-  
-  public void start()
-  {
-  }
-  
-  public void close()
-  {
-  }
-  
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
-  }
+  public Lock getOrCreateLock(String name);
 }

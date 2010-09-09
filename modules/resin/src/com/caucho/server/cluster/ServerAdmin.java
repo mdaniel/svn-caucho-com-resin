@@ -32,8 +32,10 @@ package com.caucho.server.cluster;
 import java.util.Collection;
 import java.util.Date;
 
+import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.env.meter.MeterService;
 import com.caucho.env.meter.TotalMeter;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.management.server.AbstractEmitterObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ClusterServerMXBean;
@@ -127,7 +129,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public PortMXBean []getPorts()
   {
-    Collection<SocketLinkListener> portList = _server.getPorts();
+    Collection<SocketLinkListener> portList = getNetworkListeners();
 
     PortMXBean []ports = new PortMXBean[portList.size()];
 
@@ -164,7 +166,12 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public boolean isBindPortsAfterStart()
   {
-    return _server.getListenService().isBindPortsAfterStart();
+    
+    ResinSystem resinSystem = _server.getResinSystem();
+    NetworkListenService listenService 
+      = resinSystem.getService(NetworkListenService.class);
+    
+    return listenService.isBindPortsAfterStart();
   }
 
   /**
@@ -185,13 +192,13 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public long getMemoryFreeMin()
   {
-    return _server.getMemoryFreeMin();
+    return 0;
   }
 
   @Override
   public long getPermGenFreeMin()
   {
-    return _server.getPermGenFreeMin();
+    return 0;
   }
 
   @Override
@@ -203,7 +210,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public boolean isSelectManagerEnabled()
   {
-    return _server.isSelectManagerEnabled();
+    return false;
   }
 
   @Override
@@ -276,7 +283,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     int activeThreadCount = -1;
 
-    for (SocketLinkListener port : _server.getPorts()) {
+    for (SocketLinkListener port : getNetworkListeners()) {
       if (port.getActiveThreadCount() >= 0) {
         if (activeThreadCount == -1)
           activeThreadCount = 0;
@@ -297,7 +304,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     int keepaliveThreadCount = -1;
 
-    for (SocketLinkListener port : _server.getPorts()) {
+    for (SocketLinkListener port : getNetworkListeners()) {
       if (port.getKeepaliveConnectionCount() >= 0) {
         if (keepaliveThreadCount == -1)
           keepaliveThreadCount = 0;
@@ -316,7 +323,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public int getSelectKeepaliveCount()
   {
-    return _server.getKeepaliveSelectCount();
+    return 0;
   }
 
   /**
@@ -328,7 +335,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     long lifetimeRequestCount = 0;
 
-    for (SocketLinkListener port : _server.getPorts())
+    for (SocketLinkListener port : getNetworkListeners())
       lifetimeRequestCount += port.getLifetimeRequestCount();
 
     return lifetimeRequestCount;
@@ -353,7 +360,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     long lifetimeClientDisconnectCount = 0;
 
-    for (SocketLinkListener port : _server.getPorts())
+    for (SocketLinkListener port : getNetworkListeners())
       lifetimeClientDisconnectCount += port.getLifetimeClientDisconnectCount();
 
     return lifetimeClientDisconnectCount;
@@ -469,11 +476,24 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public TcpConnectionMXBean findConnectionByThreadId(long threadId)
   {
-    TcpSocketLink conn = _server.findConnectionByThreadId(threadId);
+    TcpSocketLink conn = getListenService().findConnectionByThreadId(threadId);
 
     if (conn != null)
       return conn.getAdmin();
     else
       return null;
+  }
+  
+  private Collection<SocketLinkListener> getNetworkListeners()
+  {
+    NetworkListenService listenService
+    = _server.getResinSystem().getService(NetworkListenService.class);
+  
+    return listenService.getListeners();
+  }
+  
+  private NetworkListenService getListenService()
+  {
+    return _server.getResinSystem().getService(NetworkListenService.class);
   }
 }

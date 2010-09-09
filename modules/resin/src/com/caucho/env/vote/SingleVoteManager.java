@@ -27,48 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.dispatch;
+package com.caucho.env.vote;
 
-public class ProtocolDispatchServer extends DispatchServer {
-  private boolean _isIgnoreClientDisconnect = true;
+import com.caucho.cloud.network.ClusterServer;
+import com.caucho.server.cluster.Server;
 
+/**
+ * Manages the distributed vote
+ */
+public class SingleVoteManager extends AbstractVoteManager {
+  private Server _server;
+  
   /**
-   * Sets the ignore-client-disconnect
+   * Selects a cluster owner
    */
-  public void setIgnoreClientDisconnect(boolean ignore)
+  public ClusterServer electServer(String guid, String name)
   {
-    _isIgnoreClientDisconnect = ignore;
+    return _server.getSelfServer();
   }
 
-  /**
-   * Gets the ignore-client-disconnect
-   */
-  @Override
-  public boolean isIgnoreClientDisconnect()
+  public SingleVoteManager(Server server)
   {
-    return _isIgnoreClientDisconnect;
-  }
-
-  /**
-   * Returns the configured keepalive max.
-   */
-  public int getKeepaliveMax()
-  {
-    return Integer.MAX_VALUE / 2;
-  }
-
-  /**
-   * Returns true if the server is active.
-   */
-  public boolean isActive()
-  {
-    return true;
-  }
-
-  /**
-   * Stops the server.
-   */
-  public void stop()
-  {
+    _server = server;
   }
 }

@@ -85,11 +85,14 @@ public class WorkDir {
   {
     String userName = System.getProperty("user.name");
     
+    Path path;
     // Windows uses /temp as a work dir
     if (com.caucho.server.util.CauchoSystem.isWindows() && ! Alarm.isTest())
-      return Vfs.lookup("file:/c:/tmp/" + userName);
+      path = Vfs.lookup("file:/c:/tmp/" + userName);
     else
-      return Vfs.lookup("file:/tmp/" + userName);
+      path = Vfs.lookup("file:/tmp/" + userName);
+    
+    return path;
   }
 
   /**

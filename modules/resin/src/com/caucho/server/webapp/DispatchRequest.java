@@ -29,10 +29,12 @@
 
 package com.caucho.server.webapp;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.CauchoRequest;
 
 public class DispatchRequest extends ForwardRequest {
   public DispatchRequest()
@@ -54,5 +56,20 @@ public class DispatchRequest extends ForwardRequest {
   public String getRequestURI()
   {
     return getRequest().getRequestURI();
+  }
+  
+  @Override
+  public boolean isTop()
+  {
+    ServletRequest req = getRequest();
+    
+    if (req instanceof CauchoRequest) {
+      CauchoRequest cReq = (CauchoRequest) req;
+      
+      return cReq.isTop();
+    }
+    else {
+      return false;
+    }
   }
 }

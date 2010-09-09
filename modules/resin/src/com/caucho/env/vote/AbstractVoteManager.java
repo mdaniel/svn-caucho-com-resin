@@ -27,16 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distlock;
+package com.caucho.env.vote;
 
-import java.util.concurrent.locks.Lock;
+import com.caucho.cloud.network.ClusterServer;
 
 /**
  * Manages the distributed lock
  */
-public interface LockManager {
+abstract public class AbstractVoteManager {
   /**
-   * Creates a new lock with the given name;
+   * Selects a cluster owner
    */
-  public Lock getOrCreateLock(String name);
+  abstract public ClusterServer electServer(String guid, String name);
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

@@ -11,6 +11,14 @@ if (! admin_init()) {
 
 echo "<h1>JVM Memory</h1>";
 
+echo "<div id='memory-tabs'>";
+echo "<ul>";
+echo "<li><a href='#graphs'>Graphs</a></li>\n";
+echo "<li><a href='#dump'>Heap Dump</a></li>\n";
+echo "</ul>";
+
+echo "<div id='graphs'>\n";
+
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
 $si = sprintf("%02d", $g_server->Index);
@@ -97,6 +105,9 @@ echo "</tr>\n";
 
 echo "</table>";
 
+echo "</div>\n";
+echo "<div id='dump'>\n";
+
 echo "<h2>Heap Dump</h2>";
 
 $heap_dump_cl = java_class("com.caucho.profile.HeapDump");
@@ -134,12 +145,17 @@ if ($heap) {
   }
 }
 
+$total_size = 0;
+foreach ($entries as $entry) {
+  $total_size += $entry->getTotalSize();
+}
+
 if (sizeof($entries) > 0) {
   $topSize = $entries[0]->getTotalSize();
 
   echo "<table class='data'>";
   echo "<tr>\n";
-  echo "  <th>rank</th>\n";
+  echo "  <th>% self</th>\n";
   echo "  <th>self+desc</th>\n";
   echo "  <th>self</th>\n";
   echo "  <th>desc</th>\n";
@@ -152,7 +168,7 @@ if (sizeof($entries) > 0) {
 
     echo "<tr class='" . row_style($i) . "'>";
     echo "<td>";
-    printf("%.4f", $entry->getTotalSize() / $topSize);
+    printf("%04.2f%%", 100 * $entry->getTotalSize() / $total_size);
     echo "</td>";
     echo "<td align='right'>";
     printf("%.3fM", $entry->getTotalSize() / (1024 * 1024));
@@ -190,5 +206,10 @@ else if (! $is_heap_available) {
   echo "&lt;/resin>\n";
   echo "</pre>\n";
 }
+
+echo "</div>\n";
+echo "</div>\n";
+
+display_footer($g_page, $javascript . javascript_create_tab("memory-tabs"));
 
 ?>

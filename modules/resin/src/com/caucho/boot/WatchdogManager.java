@@ -200,13 +200,16 @@ class WatchdogManager implements AlarmListener {
     
     CloudCluster cluster = cloudSystem.createCluster("watchdog");
     CloudPod pod = cluster.createPod();
-    pod.createStaticServer("", "localhost", -1, false);
+    pod.createStaticServer("default", "localhost", -1, false);
 
     _server = resin.createServer();
     
     thread.setContextClassLoader(_server.getClassLoader());
     
-    NetworkListenService listenService = _server.getListenService();
+    
+    ResinSystem resinSystem = resin.getResinSystem();
+    NetworkListenService listenService 
+      = resinSystem.getService(NetworkListenService.class);
     
     _httpPort = new SocketLinkListener();
     _httpPort.setProtocol(new HttpProtocol());

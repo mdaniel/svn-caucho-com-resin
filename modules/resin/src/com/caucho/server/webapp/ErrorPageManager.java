@@ -339,7 +339,7 @@ public class ErrorPageManager {
 
       response.resetBuffer();
 
-      response.setStatus(response.SC_BAD_REQUEST, title);
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST, title);
 
       if (location == null)
         log.warning(e.toString());
@@ -507,7 +507,7 @@ public class ErrorPageManager {
       }
       else
         version = VersionFactory.getFullVersion();
-      
+
       if (version != null) {
         out.println("<p /><hr />");
         out.println("<small>");
@@ -768,9 +768,9 @@ public class ErrorPageManager {
   /**
    * Returns the URL of an error page for the given exception.
    */
-  String getErrorPage(Throwable e, Class limit)
+  String getErrorPage(Throwable e, Class<?> limit)
   {
-    Class cl = e.getClass();
+    Class<?> cl = e.getClass();
     for (; cl != null; cl = cl.getSuperclass()) {
       String location = (String) _errorPageMap.get(cl.getName());
       if (location != null)

@@ -32,9 +32,10 @@ package com.caucho.cluster;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.config.Configurable;
 import com.caucho.config.ConfigException;
+import com.caucho.env.vote.AbstractVoteManager;
+import com.caucho.env.vote.VoteService;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.distlock.AbstractVoteManager;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -136,13 +137,14 @@ public class ClusterVoteManager
   private void initServer()
     throws ConfigException
   {
-    Server server = Server.getCurrent();
+    VoteService voteService = VoteService.getCurrent();
     
-    if (server == null)
-      throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment",
-                                    getClass().getSimpleName()));
+    if (voteService == null)
+      throw new ConfigException(L.l("'{0}' requires an active {1}",
+                                    getClass().getSimpleName(),
+                                    VoteService.class.getSimpleName()));
 
-    _manager = server.getDistributedVoteManager();
+    _manager = voteService.getManager();
 
     if (_manager == null)
       throw new IllegalStateException(L.l("distributed vote manager not available"));
