@@ -130,7 +130,7 @@ else {
 
 function display_profile_results($partition, $groups, $profile)
 {
-  echo "<div id='profile-tabs'>";
+  echo "<div id='profile-tabs' style='display: none'>";
   echo "<ul>";
   $count = 0;
   foreach ($groups as $name) {
@@ -142,7 +142,7 @@ function display_profile_results($partition, $groups, $profile)
     $count++;
 
     echo "<li>\n";
-    echo "<a href='#${name}-tab'>$name</a>";
+    echo "<a class='profile-tab' href='#${name}-tab'>$name</a>";
     echo "</li>\n";
   }
   echo "</ul>\n";
@@ -166,10 +166,15 @@ function display_profile_results($partition, $groups, $profile)
 
 function print_profile_tab($entries, $name, $count, $profile)
 {
+  echo "<div style='display:inline-block; float: right;' class='pie-chart'>";
+  echo "<canvas id='${name}-table-chart'/ width='300' height='300' style='display: block'></canvas>\n";
+  echo "<div id='${name}-table-label' class='chart-label'></div>\n";
+  echo "</div>\n";
+
   $period = $profile->getPeriod();
   $sample_ticks = $profile->getTicks();
   
-  echo "<table class='threads' id='${name}-table' style='display: inline-block'>\n";
+  echo "<table class='threads' id='${name}-table' style='display: inline-block; min-height: 400px;'>\n";
 
   //$topTicks = $entries[0]->getCount();
   $total_ticks = 0;
@@ -182,19 +187,6 @@ function print_profile_tab($entries, $name, $count, $profile)
   echo "<span id='sw_$name' class='switch'></span>";
   echo "$name (" . sizeof($entries) . ")";
 
-  /*
-  $show = "hide('s_$name');show('h_$name');";
-  $hide = "show('s_$name');hide('h_$name');";
-
-  for ($i = 0; $i < sizeof($entries); $i++) {
-    $show .= "show('t_{$name}_{$i}');";
-    $hide .= "hide('t_{$name}_{$i}');";
-  }
-
-  echo " <a id='s_$name' href=\"javascript:$show\">show</a> ";
-  echo "<a id='h_$name' href=\"javascript:$hide\" style='display:none'>hide</a>";
-  */
-
   echo "</th></tr>\n";
 
   echo "<tr>";
@@ -202,7 +194,7 @@ function print_profile_tab($entries, $name, $count, $profile)
   echo "  <th>% time</th>";
   echo "  <th>time self";
   echo "  <th>% sum</th>";
-  echo "  <th>Method Call</th>";
+  echo "  <th colspan='2'>Method Call</th>";
   echo "</tr>";
 
   $total_percent = 0;
@@ -228,9 +220,11 @@ function print_profile_tab($entries, $name, $count, $profile)
 
     echo "<td class='method-call'>";
 
-    echo htmlspecialchars($entry->getDescription());
+    echo htmlspecialchars(short_method_call($entry->getDescription()));
 
     echo "</td>";
+
+    echo "<td class='legend'></td>";
     echo "</tr>\n";
 
     echo "<tr class='toggle-sw_${name} toggle-sw_${name}_${i}'>";
@@ -252,7 +246,6 @@ function print_profile_tab($entries, $name, $count, $profile)
 
   echo "</table>\n";
 
-  echo "<canvas id='${name}-table-chart'/ width='300' height='300' style='display:inline-block; float: right;'></canvas>\n";
 }
 
 function do_partition_profile($entries)
@@ -441,13 +434,48 @@ function print_stack_entry($stack)
   }
 }
 
+function short_method_call($long_method)
+{
+  $parts = explode('.', $long_method);
+  $part_count = count($parts);
+  
+  if ($part_count >= 2) {
+    return $parts[$part_count - 2] . '.' . $parts[$part_count - 1];
+  }
+  else {
+    return $long_method;
+  }
+}
+
 $javascript = <<<EOF
-$("table.threads").each(function() {
-  var table = $(this);
-  var chartId = table.attr("id") + "-chart";
-  pieChart(table, chartId, "method-call", "time-percent");
+$("#profile-tabs").show();
+
+$("a.profile-tab").each(function(i) {
+  var tabContents = $($(this).attr("href"));
+  var table = tabContents.find("table.threads");
+
+  var builder = null;
+
+  var buildChart = function() { 
+    if (builder == null) { 
+      builder = new PieChartBuilder();
+      builder.setTable(table);
+      builder.setLabelId(table.attr("id") + "-label");
+      builder.setChartId(table.attr("id") + "-chart");
+      builder.setLabelClass("method-call");
+      builder.setDataClass("time-percent");
+      builder.setLegendClass("legend");
+      builder.setNumTopSlices(10);
+      builder.create();
+    }
+  };
+
+  if ($(this).parent().hasClass("ui-state-active"))
+    buildChart();
+  else 
+    $(this).click(buildChart);
 });
 EOF;
 
-display_footer($g_page, $javascript . javascript_create_tab("profile-tabs"));
+display_footer($g_page, javascript_create_tab("profile-tabs") . $javascript);
 ?>

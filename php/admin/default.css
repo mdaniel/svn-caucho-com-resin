@@ -896,3 +896,17 @@ table.schema tr th {
 .highlight { 
   background-color: #aaa;
 }
+
+.pie-chart {
+  width: 300px;
+}
+
+.chart-label {
+  padding-left: 1em;
+  padding-right: 1em;
+  text-align: center;
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid gray;
+  min-height: 1em;
+}
