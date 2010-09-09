@@ -39,12 +39,12 @@ public class Depend implements PersistentDependency {
   private static final Logger log
     = Logger.getLogger(Depend.class.getName());
   
-  Path _source;
-  long _lastModified;
-  long _length;
+  private final Path _source;
+  private final long _lastModified;
+  private long _length;
 
-  boolean _requireSource = true;
-  boolean _isDigestModified;
+  private boolean _requireSource = true;
+  private boolean _isDigestModified;
 
   /**
    * Create a new dependency with an already known modified time and length.
@@ -65,14 +65,7 @@ public class Depend implements PersistentDependency {
    */
   public Depend(Path source)
   {
-    /* XXX:
-    if (source instanceof JarPath)
-      source = ((JarPath) source).getContainer();
-    */
-
-    _source = source;
-    _lastModified = source.getLastModified();
-    _length = source.getLength();
+    this(source, source.getLastModified(), source.getLength());
   }
 
   /**
@@ -94,7 +87,7 @@ public class Depend implements PersistentDependency {
    */
   public Depend(Path source, long digest, boolean requireSource)
   {
-    _source = source;
+    this(source);
 
     long newDigest = source.getCrc64();
 
@@ -118,9 +111,6 @@ public class Depend implements PersistentDependency {
 
       _isDigestModified = true;
     }
-
-    _lastModified = _source.getLastModified();
-    _length = _source.getLength();
   }
 
   /**

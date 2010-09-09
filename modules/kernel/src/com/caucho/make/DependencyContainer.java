@@ -192,6 +192,7 @@ public class DependencyContainer implements Dependency
   /**
    * Returns true if the underlying dependencies have changed.
    */
+  @Override
   public boolean isModified()
   {
     long now = Alarm.getCurrentTime();

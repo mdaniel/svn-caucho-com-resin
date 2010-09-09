@@ -1378,6 +1378,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Clears the proxy cache.
    */
+  @Override
   public void clearCache()
   {
     // skip the clear on restart

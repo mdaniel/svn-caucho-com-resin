@@ -29,11 +29,25 @@
 
 package com.caucho.jsp;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.ToCharResponseAdapter;
-import com.caucho.server.webapp.JspResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
@@ -42,20 +56,6 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents a compiled JSP page.

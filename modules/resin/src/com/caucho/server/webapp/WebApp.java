@@ -3402,7 +3402,7 @@ public class WebApp extends ServletContextImpl
    */
   public void clearCache()
   {
-    DispatchServer server = getDispatchServer();
+    Server server = getServer();
 
     if (server != null)
       server.clearCache();

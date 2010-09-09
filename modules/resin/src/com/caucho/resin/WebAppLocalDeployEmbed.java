@@ -29,9 +29,6 @@
 
 package com.caucho.resin;
 
-import com.caucho.resin.deploy.*;
-import com.caucho.server.cluster.*;
-
 /**
  * Enables the local deployment service at /resin.deploy
  *

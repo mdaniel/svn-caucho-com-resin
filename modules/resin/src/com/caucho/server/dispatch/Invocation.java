@@ -231,6 +231,7 @@ public class Invocation extends ServletInvocation implements Dependency
   {
     Dependency depend = _dependency;
 
+    System.out.println("ISM: " + depend + " " + this);
     if (depend != null && depend.isModified())
       return true;
 
