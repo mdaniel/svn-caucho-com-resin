@@ -216,16 +216,8 @@ public class WebAppSingleDeployGenerator
                                               _container.getDocumentDirectory());
     }
 
-    String hostTail = _container.getHost().getIdTail();
-    
-    String id; 
-    
-    if ("".equals(_urlPrefix) || "/".equals(_urlPrefix))
-      id = "production/webapp/" + hostTail + "/ROOT";
-    else
-      id = "production/webapp/" + hostTail + "/" + _urlPrefix;
-    
-    _controller = new WebAppController(id, _rootDirectory, _container,
+    _controller = new WebAppController(_rootDirectory, 
+                                       _container,
                                        _urlPrefix, _urlPrefix);
 
     _controller.setArchivePath(_archivePath);

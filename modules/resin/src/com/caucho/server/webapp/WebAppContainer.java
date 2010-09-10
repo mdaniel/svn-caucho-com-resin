@@ -137,6 +137,7 @@ public class WebAppContainer
    */
   public WebAppContainer(Server server,
                          Host host,
+                         Path rootDirectory,
                          EnvironmentClassLoader loader,
                          Lifecycle lifecycle)
   {
@@ -150,8 +151,7 @@ public class WebAppContainer
     if (host == null)
       throw new NullPointerException();
     
-    _rootDir = Vfs.lookup();
-    _docDir = Vfs.lookup();
+    _rootDir = rootDirectory;
 
     _classLoader = loader;
     
@@ -240,7 +240,10 @@ public class WebAppContainer
    */
   public Path getDocumentDirectory()
   {
-    return _docDir;
+    if (_docDir != null)
+      return _docDir;
+    else
+      return _rootDir;
   }
 
   /**
@@ -739,7 +742,7 @@ public class WebAppContainer
     FilterChain chain;
     
     WebAppController controller = getWebAppController(invocation);
-
+    
     WebApp webApp = getWebApp(invocation, controller, true);
 
     boolean isAlwaysModified;

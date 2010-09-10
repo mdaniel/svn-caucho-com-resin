@@ -86,7 +86,7 @@ public class HostController
 
   // The host variables.
   private final HostVar _hostVar = new HostVar(this);
-  private final HostAdmin _admin = new HostAdmin(this);
+  private HostAdmin _admin;
 
   private ArrayList<Dependency> _dependList = new ArrayList<Dependency>();
 
@@ -124,6 +124,10 @@ public class HostController
     getVariableMap().put("host", _hostVar);
     
     setContainer(container);
+    
+    if (! getId().startsWith("/error/")) {
+      _admin = new HostAdmin(this);
+    }
   }
 
   public void setContainer(HostContainer container)
@@ -149,10 +153,7 @@ public class HostController
    */
   public String getHostName()
   {
-    if ("".equals(_hostName))
-      return "default";
-    else
-      return _hostName;
+    return _hostName;
   }
 
   /**
@@ -166,10 +167,10 @@ public class HostController
     if (name == null || name.equals("*"))
       name = "";
     
-    if (name.indexOf("/host/") >= 0)
-      Thread.dumpStack();
-    
     name = name.toLowerCase();
+    
+    if (name.equals(""))
+      name = "default";
 
     _hostName = name;
   }
@@ -335,11 +336,9 @@ public class HostController
   /**
    * Returns true for a matching name.
    */
+  @Override
   public boolean isNameMatch(String name)
   {
-    if (name.equals("default"))
-      name = "";
-    
     if (_hostName.equalsIgnoreCase(name))
       return true;
 

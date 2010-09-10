@@ -266,7 +266,7 @@ abstract public class QServlet implements Servlet {
     else
       uri = RequestAdapter.getPageURI(req);
 
-    Path appDir = _webApp.getAppDir();
+    Path appDir = _webApp.getRootDirectory();
 
     String realPath;
     Path subcontext;
@@ -348,7 +348,7 @@ abstract public class QServlet implements Servlet {
    */
   private Path getPagePath(String pathName)
   {
-    Path appDir = _webApp.getAppDir();
+    Path appDir = _webApp.getRootDirectory();
     String realPath = _webApp.getRealPath(pathName);
     Path path = appDir.lookupNative(realPath);
 

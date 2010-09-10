@@ -41,6 +41,7 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
 
 /**
  * DeployController controls the lifecycle of the DeployInstance.

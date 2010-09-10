@@ -354,7 +354,7 @@ class XtpPage extends Page {
     try {
       page = _jspManager.preload(className,
                                  _webApp.getClassLoader(),
-                                 _webApp.getAppDir(),
+                                 _webApp.getRootDirectory(),
                                  null);
 
       if (page != null) {

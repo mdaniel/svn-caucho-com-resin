@@ -250,7 +250,7 @@ public class JspCompilerInstance {
     WebApp app = _jspCompiler.getWebApp();
     Path appDir = _jspCompiler.getAppDir();
     if (appDir == null && app != null)
-      appDir = app.getAppDir();
+      appDir = app.getRootDirectory();
 
     if (app != null && app.hasPre23Config()
         && _parseState.getELIgnoredDefault() == null

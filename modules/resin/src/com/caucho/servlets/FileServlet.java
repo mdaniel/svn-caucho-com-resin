@@ -129,7 +129,7 @@ public class FileServlet extends GenericServlet {
     super.init(conf);
 
     _app = (WebApp) getServletContext();
-    _context = _app.getAppDir();
+    _context = _app.getRootDirectory();
 
     try {
       _dir = _app.getNamedDispatcher("directory");

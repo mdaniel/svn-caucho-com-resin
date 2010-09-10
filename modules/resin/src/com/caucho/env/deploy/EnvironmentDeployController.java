@@ -483,7 +483,7 @@ abstract public class
     if (log.isLoggable(Level.FINE))
       log.fine(instance + " root-directory=" + rootDirectory);
 
-    instance.setRootDirectory(rootDirectory);
+    // instance.setRootDirectory(rootDirectory);
   }
   
   public Map<String,String> getRepositoryMetaData()

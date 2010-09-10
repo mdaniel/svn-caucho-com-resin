@@ -139,7 +139,7 @@ abstract public class PageManager {
     if (_classDir != null)
       return _classDir;
     else {
-      Path appDir = _webApp.getAppDir();
+      Path appDir = _webApp.getRootDirectory();
 
       if (appDir instanceof MemoryPath) {
         String workPathName = ("./" + _webApp.getURL());
@@ -154,7 +154,7 @@ abstract public class PageManager {
 
   public Path getAppDir()
   {
-    return _webApp.getAppDir();
+    return _webApp.getRootDirectory();
   }
 
   /**
@@ -323,11 +323,11 @@ abstract public class PageManager {
       if (log.isLoggable(Level.FINE)) {
         log.fine("Jsp[] uri:" + uri +
                  "(cp:" + getWebApp().getContextPath() + 
-                 ",app:" + getWebApp().getAppDir() +
+                 ",app:" + getWebApp().getRootDirectory() +
                  ") -> " + path);
       }
      
-      Path appDir = getWebApp().getAppDir();
+      Path appDir = getWebApp().getRootDirectory();
 
       String rawClassName = pageURI;
 

@@ -29,17 +29,11 @@
 
 package com.caucho.env.deploy;
 
-import com.caucho.vfs.Path;
 
 /**
  * Deployment instance handling an environment.
  */
 public interface EnvironmentDeployInstance extends DeployInstance {
-  /**
-   * Sets the root.
-   */
-  public void setRootDirectory(Path root);
-
   /**
    * Initialization before any configuration
    */

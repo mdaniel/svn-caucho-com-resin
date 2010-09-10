@@ -86,6 +86,7 @@ public class HostSingleDeployGenerator
   /**
    * Gets the parent loader.
    */
+  @Override
   public ClassLoader getParentClassLoader()
   {
     return _container.getClassLoader();
@@ -107,7 +108,7 @@ public class HostSingleDeployGenerator
   {
     super.initImpl();
 
-    String hostName = null;
+    String hostName = "";
     String hostId = null;
     
     String rawId = _config.getId();
@@ -153,6 +154,7 @@ public class HostSingleDeployGenerator
   /**
    * Returns the deployed keys.
    */
+  @Override
   protected void fillDeployedKeys(Set<String> keys)
   {
     keys.add(_controller.getName());

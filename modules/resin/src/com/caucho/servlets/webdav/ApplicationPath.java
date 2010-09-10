@@ -286,7 +286,7 @@ public class ApplicationPath extends AbstractPath {
                          ServletContext app)
     throws IOException
   {
-    Path appDir = ((WebApp) app).getAppDir();
+    Path appDir = ((WebApp) app).getRootDirectory();
 
     return appDir.lookup("./" + path);
   }

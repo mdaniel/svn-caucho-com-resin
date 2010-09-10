@@ -233,7 +233,7 @@ public class JspManager extends PageManager {
 
     try {
       if (_precompile || _autoCompile)
-        page = preload(className, app.getClassLoader(), app.getAppDir(),
+        page = preload(className, app.getClassLoader(), app.getRootDirectory(),
                        config);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -412,7 +412,7 @@ public class JspManager extends PageManager {
                         String servletName)
     throws Exception
   {
-    page.init(_webApp.getAppDir());
+    page.init(_webApp.getRootDirectory());
 
     page._caucho_setJspManager(this);
 

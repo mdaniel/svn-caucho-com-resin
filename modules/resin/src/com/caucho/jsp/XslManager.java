@@ -85,7 +85,7 @@ class XslManager {
 
     WebApp webApp = req.getWebApp();
 
-    Path appDir = webApp.getAppDir();
+    Path appDir = webApp.getRootDirectory();
     Path pwd = appDir.lookupNative(webApp.getRealPath(servletPath));
     pwd = pwd.getParent();
     
@@ -124,7 +124,7 @@ class XslManager {
     String servletPath = req.getPageServletPath();
 
     WebApp webApp = req.getWebApp();
-    Path appDir = webApp.getAppDir();
+    Path appDir = webApp.getRootDirectory();
     Path pwd = appDir.lookupNative(webApp.getRealPath(servletPath));
     pwd = pwd.getParent();
 

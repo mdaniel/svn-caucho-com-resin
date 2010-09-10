@@ -60,9 +60,10 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.e_app.EarDeployGenerator;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.webapp.ErrorPage;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.WebAppContainer;
-import com.caucho.server.webapp.WebAppEarDeployGenerator;
 import com.caucho.server.webapp.WebAppExpandDeployGenerator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
@@ -86,7 +87,7 @@ public class Host
 
   // The Host entry
   private final HostController _controller;
-  private Path _rootDirectory;
+  private final Path _rootDirectory;
   
   private EnvironmentClassLoader _classLoader;
 
@@ -135,12 +136,16 @@ public class Host
     
     _rootDirectory = controller.getRootDirectory();
     
-    _lifecycle = new Lifecycle(log, "Host[" + controller.getId() + "]", Level.INFO);
+    if (controller.getId().startsWith("error/"))
+      _lifecycle = new Lifecycle(log, "Host[" + controller.getId() + "]", Level.FINEST);
+    else
+      _lifecycle = new Lifecycle(log, "Host[" + controller.getId() + "]", Level.INFO);
     
     InjectManager.create(_classLoader);
     
     _webAppContainer = new WebAppContainer(_servletContainer, 
                                            this, 
+                                           _rootDirectory,
                                            getClassLoader(), 
                                            _lifecycle);
     
@@ -388,12 +393,6 @@ public class Host
     return _rootDirectory;
   }
   
-  @Override
-  public void setRootDirectory(Path rootDirectory)
-  {
-    _rootDirectory = rootDirectory;
-  }
-  
   /**
    * Sets the doc dir.
    */
@@ -408,9 +407,23 @@ public class Host
   }
   
   @Configurable
+  public void addErrorPage(ErrorPage errorPage)
+  {
+    WebApp errorWebApp = getWebAppContainer().getErrorWebApp();
+    
+    errorWebApp.getErrorPageManager().addErrorPage(errorPage);
+  }
+  
+  @Configurable
   public void addWebApp(WebAppConfig config)
   {
     getWebAppContainer().addWebApp(config);
+  }
+  
+  @Configurable
+  public void addWebAppDefault(WebAppConfig config)
+  {
+    getWebAppContainer().addWebAppDefault(config);
   }
 
   /**

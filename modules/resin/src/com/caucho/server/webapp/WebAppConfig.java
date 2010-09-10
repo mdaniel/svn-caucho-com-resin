@@ -124,22 +124,6 @@ public class WebAppConfig extends DeployConfig {
   }
 
   /**
-   * Gets the app-dir.
-   */
-  public String getAppDir()
-  {
-    return getRootDirectory();
-  }
-
-  /**
-   * Sets the app-dir.
-   */
-  public String getDocumentDirectory()
-  {
-    return getAppDir();
-  }
-
-  /**
    * Sets the app-dir.
    */
   public void setDocumentDirectory(RawString dir)
@@ -172,6 +156,7 @@ public class WebAppConfig extends DeployConfig {
   /**
    * Gets the prologue.
    */
+  @Override
   public DeployConfig getPrologue()
   {
     return _prologue;

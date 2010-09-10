@@ -483,7 +483,7 @@ public class ServletMapper {
 
     WebApp app = (WebApp) _webApp;
 
-    Path contextPath = app.getAppDir().lookup(app.getRealPath(contextURI));
+    Path contextPath = app.getRootDirectory().lookup(app.getRealPath(contextURI));
 
     if (! contextPath.isDirectory())
       return;
@@ -493,7 +493,7 @@ public class ServletMapper {
 
       String realPath = app.getRealPath(contextURI + "/" + file);
 
-      Path path = app.getAppDir().lookup(realPath);
+      Path path = app.getRootDirectory().lookup(realPath);
 
       dependencyList.add(new Depend(path));
     }

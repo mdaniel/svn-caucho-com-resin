@@ -1143,24 +1143,9 @@ public class Server
 
       _lifecycle.toStarting();
 
-      startImpl();
-
-      if (_resin != null && _resin.getManagement() != null)
-        _resin.getManagement().start(this);
-
       // initialize the system distributed store
       if (isResinServer())
         getSystemStore();
-
-      // start the repository
-      // AbstractRepository repository = getRepository();
-      // if (repository != null)
-      //   repository.start();
-
-      // getCluster().start();
-
-      // handled by the network server itself
-      // _classLoader.start();
 
       _hostContainer.start();
 

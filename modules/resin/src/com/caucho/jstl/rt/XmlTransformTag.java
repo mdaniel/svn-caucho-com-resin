@@ -283,7 +283,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
   private String getCanonicalURL(PageContextImpl pageContext, String url)
   {
     WebApp app = pageContext.getApplication();
-    Path appDir = pageContext.getApplication().getAppDir();
+    Path appDir = pageContext.getApplication().getRootDirectory();
       
     if (url != null) {
       if (url.startsWith("/"))

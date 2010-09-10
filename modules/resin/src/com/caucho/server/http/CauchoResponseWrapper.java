@@ -377,9 +377,9 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
   public String getStatusMessage()
   {
     if (_response instanceof CauchoResponse)
-      ((CauchoResponse) _response).getStatusMessage();
-
-    return null;
+      return ((CauchoResponse) _response).getStatusMessage();
+    else
+      return null;
   }
 
   public boolean hasError()

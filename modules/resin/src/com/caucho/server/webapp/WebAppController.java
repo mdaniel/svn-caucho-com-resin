@@ -105,12 +105,25 @@ public class WebAppController
   private volatile long _lifetimeWriteBytes;
   private volatile long _lifetimeClientDisconnectCount;
 
-  private WebAppAdmin _admin = new WebAppAdmin(this);
+  private WebAppAdmin _admin;
 
-  public WebAppController(String id, Path rootDirectory, 
+  public WebAppController(String id, 
+                          Path rootDirectory, 
                           WebAppContainer container)
   {
     this(id, rootDirectory, container, "/", "/");
+  }
+  
+  public WebAppController(Path rootDirectory,
+                          WebAppContainer container,
+                          String contextPath,
+                          String baseContextPath)
+  {
+    this(calculateId(container, contextPath), 
+         rootDirectory,
+         container,
+         contextPath,
+         baseContextPath);
   }
 
   public WebAppController(String id,
@@ -133,6 +146,22 @@ public class WebAppController
     _baseContextPath = baseContextPath;
 
     _contextPath = contextPath;
+    
+    if (! getId().startsWith("error/")) {
+      _admin = new WebAppAdmin(this);
+    }
+  }
+  
+  private static String calculateId(WebAppContainer container,
+                                    String contextPath)
+  {
+    if (contextPath.equals("") || contextPath.equals("/"))
+      contextPath = "/ROOT";
+    
+    String stage = container.getServer().getStage();
+    String hostId = container.getHost().getIdTail();
+    
+    return stage + "/webapp/" + hostId + contextPath;
   }
   
   public String getName()
@@ -616,7 +645,7 @@ public class WebAppController
       appDir = _container.getDocumentDirectory().lookup("./" + _contextPath);
 
     if (appDir == null && getDeployInstance() != null)
-      appDir = getDeployInstance().getAppDir();
+      appDir = getDeployInstance().getRootDirectory();
 
     return appDir;
   }

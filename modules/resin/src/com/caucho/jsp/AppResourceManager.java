@@ -49,14 +49,14 @@ public class AppResourceManager extends JspResourceManager {
   public Path resolvePath(String uri)
   {
     if (uri.startsWith("file:"))
-      return _app.getAppDir().lookup(uri);
+      return _app.getRootDirectory().lookup(uri);
     else if (uri.indexOf("://") >= 0)
       return null;
       
     String realPath = _app.getRealPath(uri);
 
     if (realPath != null)
-      return _app.getAppDir().lookup(realPath);
+      return _app.getRootDirectory().lookup(realPath);
     else
       return null;
   }

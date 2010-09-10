@@ -69,7 +69,7 @@ public class DirectoryServlet extends HttpServlet {
   public void init()
   {
     _app = (WebApp) getServletContext();
-    _context = _app.getAppDir();
+    _context = _app.getRootDirectory();
   }
 
   public void doGet(HttpServletRequest req, HttpServletResponse res)

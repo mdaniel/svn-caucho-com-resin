@@ -64,9 +64,9 @@ public class ServletContextImpl extends ServletContextCompat
 
   public Path getRootDirectory()
   {
-    return Vfs.lookup();
+    throw new UnsupportedOperationException();
   }
-
+  
   /**
    * Sets the servlet context name
    */

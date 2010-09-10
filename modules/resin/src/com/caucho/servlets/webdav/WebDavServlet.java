@@ -219,12 +219,12 @@ public class WebDavServlet extends GenericServlet {
     if (_path != null) {
     }
     else if (_root != null) {
-      Path pwd = ((WebApp) getServletContext()).getAppDir();
+      Path pwd = ((WebApp) getServletContext()).getRootDirectory();
 
       _path = new FilePath(pwd.lookup(_root));
     }
     else if (root != null) {
-      Path pwd = ((WebApp) getServletContext()).getAppDir();
+      Path pwd = ((WebApp) getServletContext()).getRootDirectory();
 
       _path = new FilePath(pwd.lookup(root));
     }
@@ -359,7 +359,7 @@ public class WebDavServlet extends GenericServlet {
     }
 
     WebApp app = (WebApp) getServletContext();
-    Path appDir = app.getAppDir();
+    Path appDir = app.getRootDirectory();
 
     String pathInfo = req.getPathInfo();
     String uriPwd = app.getContextPath() + req.getServletPath();
@@ -412,7 +412,7 @@ public class WebDavServlet extends GenericServlet {
     }
     
     WebApp app = (WebApp) getServletContext();
-    Path appDir = app.getAppDir();
+    Path appDir = app.getRootDirectory();
 
     String pathInfo = req.getPathInfo();
     String uriPwd = app.getContextPath() + req.getServletPath();

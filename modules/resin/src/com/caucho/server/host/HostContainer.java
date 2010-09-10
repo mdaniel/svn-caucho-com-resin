@@ -417,13 +417,13 @@ public class HostContainer implements InvocationBuilder {
     if (hostController == null || hostController.getState().isDestroyed())
       hostController = findHostController("");
 
-    synchronized (_hostMap) {
-      if (hostController != null && ! hostController.getState().isDestroyed())
-        _hostMap.put(fullHost, hostController);
-      else {
-        hostController = null;
-        _hostMap.remove(fullHost);
-      }
+    if (hostController == null) {
+    }
+    else if (! hostController.getState().isDestroyed())
+      _hostMap.put(fullHost, hostController);
+    else {
+      hostController = null;
+      _hostMap.remove(fullHost);
     }
 
     return hostController;
@@ -461,7 +461,8 @@ public class HostContainer implements InvocationBuilder {
 
       Path rootDirectory = Vfs.lookup("error:");
       HostController controller
-        = new HostController("error/host/error", rootDirectory, "error", null, this, null);
+        = new HostController("error/host/error", rootDirectory, "error", 
+                             null, this, null);
       controller.init();
       controller.startOnInit();
 
@@ -488,10 +489,8 @@ public class HostContainer implements InvocationBuilder {
    */
   public void start()
   {
-    if (! _lifecycle.toStarting())
+    if (! _lifecycle.toActive())
       return;
-
-    // _classLoader.start();
 
     _lifecycle.toActive();
 

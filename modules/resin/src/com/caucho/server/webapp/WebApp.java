@@ -240,9 +240,6 @@ public class WebApp extends ServletContextImpl
   // The webbeans container
   private InjectManager _cdiManager;
 
-  // The webApp directory.
-  private final Path _appDir;
-
   private InvocationDecoder _invocationDecoder;
 
   private String _moduleName = "default";
@@ -466,8 +463,6 @@ public class WebApp extends ServletContextImpl
     else if (_moduleName.startsWith("/"))
       _moduleName = _moduleName.substring(1);
 
-    _appDir = controller.getRootDirectory();
-
     setParent(controller.getContainer());
     
     if (getId().startsWith("error/"))
@@ -490,9 +485,12 @@ public class WebApp extends ServletContextImpl
       // _classLoader.setId("web-app:" + getId());
 
       _appLocal.set(this, _classLoader);
+      
+      Path rootDirectory = getRootDirectory();
 
-      Vfs.setPwd(_appDir, _classLoader);
-      WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
+      Vfs.setPwd(rootDirectory, _classLoader);
+      WorkDir.setLocalWorkDir(rootDirectory.lookup("WEB-INF/work"),
+                              _classLoader);
       
       EjbManager.setScanAll();
       
@@ -540,7 +538,7 @@ public class WebApp extends ServletContextImpl
       }
 
       _cdiManager = InjectManager.create(_classLoader);
-      _cdiManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
+      _cdiManager.addPath(getRootDirectory().lookup("WEB-INF/beans.xml"));
       _cdiManager.addExtension(new WebAppInjectExtension(_cdiManager, this));
 
       _jspApplicationContext = new JspApplicationContextImpl(this);
@@ -549,12 +547,14 @@ public class WebApp extends ServletContextImpl
       // validation
       if (CauchoSystem.isTesting()) {
       }
-      else if (_appDir.equals(CauchoSystem.getResinHome())) {
-        throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as resin.home\n", _appDir.getURL()));
+      else if (rootDirectory.equals(CauchoSystem.getResinHome())) {
+        throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as resin.home\n",
+                                      rootDirectory.getURL()));
       }
       else if (_parent != null
-               && _appDir.equals(_parent.getRootDirectory())) {
-        throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as the host root-directory\n", _appDir.getURL()));
+               && rootDirectory.equals(_parent.getRootDirectory())) {
+        throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as the host root-directory\n",
+                                      rootDirectory.getURL()));
       }
     } catch (Throwable e) {
       setConfigException(e);
@@ -749,9 +749,9 @@ public class WebApp extends ServletContextImpl
   /**
    * Gets the webApp directory.
    */
-  public Path getAppDir()
+  public Path getRootDirectory()
   {
-    return _appDir;
+    return _controller.getRootDirectory();
   }
 
   /**
@@ -1896,7 +1896,7 @@ public class WebApp extends ServletContextImpl
   public RewriteRealPath createRewriteRealPath()
   {
     if (_rewriteRealPath == null)
-      _rewriteRealPath = new RewriteRealPath(getAppDir());
+      _rewriteRealPath = new RewriteRealPath(getRootDirectory());
 
     return _rewriteRealPath;
   }
@@ -2400,12 +2400,12 @@ public class WebApp extends ServletContextImpl
     for (WebAppConfig configDefault : _webAppDefaultList)
       deploy.addWebAppDefault(configDefault);
 
-    String appDir = config.getDocumentDirectory();
+    String appDir = config.getRootDirectory();
 
     if (appDir == null)
       appDir = "./" + prefix;
 
-    Path root = PathBuilder.lookupPath(appDir, null, getAppDir());
+    Path root = PathBuilder.lookupPath(appDir, null, getRootDirectory());
 
     deploy.setRootDirectory(root);
 
@@ -2595,9 +2595,9 @@ public class WebApp extends ServletContextImpl
         _tempDir = (Path) Environment.getLevelAttribute("caucho.temp-dir");
 
       if (_tempDir == null) {
-        _tempDir = getAppDir().lookup("WEB-INF/tmp");
+        _tempDir = getRootDirectory().lookup("WEB-INF/tmp");
 
-        if (getAppDir().lookup("WEB-INF").isDirectory())
+        if (getRootDirectory().lookup("WEB-INF").isDirectory())
           _tempDir.mkdirs();
       }
       else

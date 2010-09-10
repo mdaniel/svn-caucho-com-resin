@@ -168,7 +168,7 @@ public class JspCompiler implements EnvironmentBean {
     if (_appDir != null)
       return _appDir;
     else if (_app != null)
-      return _app.getAppDir();
+      return _app.getRootDirectory();
     else
       return null;
   }
@@ -238,7 +238,7 @@ public class JspCompiler implements EnvironmentBean {
 
         Path appDir = getAppDir();
         if (appDir == null && app != null)
-          appDir = app.getAppDir();
+          appDir = app.getRootDirectory();
 
         JspResourceManager resourceManager = getResourceManager();
         if (resourceManager != null) {
@@ -692,7 +692,7 @@ public class JspCompiler implements EnvironmentBean {
 
       WebApp app = getWebApp();
       if (app != null && ! hasConf) {
-        Path appDir = app.getAppDir();
+        Path appDir = app.getRootDirectory();
 
         DynamicClassLoader dynLoader = app.getEnvironmentClassLoader();
         dynLoader.addLoader(new CompilingLoader(dynLoader, appDir.lookup("WEB-INF/classes")));
@@ -723,7 +723,7 @@ public class JspCompiler implements EnvironmentBean {
         
         app.init();
 
-        appDir = getWebApp().getAppDir();
+        appDir = getWebApp().getRootDirectory();
         setClassLoader(getWebApp().getClassLoader());
       }
 

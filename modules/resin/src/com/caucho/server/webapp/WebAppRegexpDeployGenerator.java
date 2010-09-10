@@ -137,7 +137,7 @@ public class WebAppRegexpDeployGenerator
     Path appDir = null;
     
     try {
-      String appDirPath = _config.getDocumentDirectory();
+      String appDirPath = _config.getRootDirectory();
 
       if (appDirPath == null)
         appDirPath = "./" + matcher.group(0);

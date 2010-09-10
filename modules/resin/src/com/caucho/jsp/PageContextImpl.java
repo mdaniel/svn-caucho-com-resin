@@ -1194,7 +1194,7 @@ public class PageContextImpl extends PageContext
     }
     else if (e instanceof Error) {
       try {
-        Path workDir = getApplication().getAppDir().lookup("WEB-INF/work");
+        Path workDir = getApplication().getRootDirectory().lookup("WEB-INF/work");
         String className = _servlet.getClass().getName();
         Path path = workDir.lookup(className.replace('.', '/') + ".class");
 

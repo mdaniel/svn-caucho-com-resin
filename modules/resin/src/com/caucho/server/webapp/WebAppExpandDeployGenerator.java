@@ -182,7 +182,7 @@ public class WebAppExpandDeployGenerator
    */
   public void addWebApp(WebAppConfig config)
   {
-    String docDir = config.getDocumentDirectory();
+    String docDir = config.getRootDirectory();
 
     Path appDir = getExpandDirectory().lookup(docDir);
 

@@ -357,7 +357,7 @@ public class FastCGIServlet extends GenericServlet {
 
     WebApp webApp = (WebApp) req.getServletContext();
 
-    Path appDir = webApp.getAppDir();
+    Path appDir = webApp.getRootDirectory();
     String realPath = webApp.getRealPath(scriptPath);
 
     if (! appDir.lookup(realPath).isFile() && pathInfo != null)

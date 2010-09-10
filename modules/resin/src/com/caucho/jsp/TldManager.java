@@ -698,7 +698,7 @@ public class TldManager {
       TldPreload taglib = parseTldPreload(is);
 
       taglib.setPath(path);
-      String appDir = _webApp.getAppDir().getPath();
+      String appDir = _webApp.getRootDirectory().getPath();
       String tagPath = path.getPath();
 
       if (tagPath.startsWith(appDir))

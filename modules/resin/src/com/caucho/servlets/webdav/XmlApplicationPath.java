@@ -223,7 +223,7 @@ public class XmlApplicationPath extends ApplicationPath {
                          ServletContext app)
     throws IOException
   {
-    Path appDir = ((WebApp) app).getAppDir();
+    Path appDir = ((WebApp) app).getRootDirectory();
 
     if (_root != null)
       appDir = _root;
