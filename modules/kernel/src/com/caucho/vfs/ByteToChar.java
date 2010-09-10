@@ -29,8 +29,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.CharBuffer;
-
 import java.io.IOException;
 
 /**
@@ -49,14 +47,14 @@ import java.io.IOException;
  * </pre>
  */
 public class ByteToChar extends AbstractByteToChar {
-  private CharBuffer _charBuffer;
+  private StringBuilder _charBuffer;
 
   /**
    * Creates an uninitialized converter. Use <code>init</code> to initialize.
    */ 
   ByteToChar()
   {
-    _charBuffer = new CharBuffer();
+    _charBuffer = new StringBuilder();
   }
 
   public static ByteToChar create()
@@ -71,7 +69,7 @@ public class ByteToChar extends AbstractByteToChar {
   {
     super.clear();
     
-    _charBuffer.clear();
+    _charBuffer.setLength(0);
   }
 
   /**
@@ -85,6 +83,7 @@ public class ByteToChar extends AbstractByteToChar {
     return _charBuffer.toString();
   }
 
+  @Override
   protected void outputChar(int ch)
   {
     _charBuffer.append((char) ch);
@@ -93,6 +92,7 @@ public class ByteToChar extends AbstractByteToChar {
   /**
    * Prints the object.
    */
+  @Override
   public String toString()
   {
     try {

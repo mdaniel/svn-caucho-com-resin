@@ -42,11 +42,10 @@ import java.util.ArrayList;
 /**
  * The admin implementation for a host.
  */
+@SuppressWarnings("serial")
 public class HostAdmin extends DeployControllerAdmin<HostController>
   implements HostMXBean
 {
-  private static final L10N L = new L10N(HostAdmin.class);
-
   /**
    * Creates the admin.
    */
@@ -65,11 +64,13 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return name;
   }
 
+  @Override
   public String getHostName()
   {
     return getController().getHostName();
   }
 
+  @Override
   public String getURL()
   {
     Host host = getHost();
@@ -83,6 +84,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   /**
    * Returns the host's document directory.
    */
+  @Override
   public String getRootDirectory()
   {
     Path path = null;
@@ -108,7 +110,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     Host host = getHost();
 
     if (host != null)
-      path = host.getDocumentDirectory();
+      path = host.getWebAppContainer().getDocumentDirectory();
 
     if (path != null)
       return path.getNativePath();
@@ -119,6 +121,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   /**
    * Returns the host's war directory.
    */
+  @Override
   public String getWarDirectory()
   {
     Path path = null;
@@ -126,7 +129,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     Host host = getHost();
 
     if (host != null)
-      path = host.getWarDir();
+      path = host.getWebAppContainer().getWarDir();
 
     if (path != null)
       return path.getNativePath();
@@ -134,6 +137,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
       return null;
   }
 
+  @Override
   public String getWarExpandDirectory()
   {
     Path path = null;
@@ -141,7 +145,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     Host host = getHost();
 
     if (host != null)
-      path = host.getWarExpandDir();
+      path = host.getWebAppContainer().getWarExpandDir();
 
     if (path != null)
       return path.getNativePath();
@@ -159,7 +163,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     try {
       if (host != null)
-        host.updateWebAppDeploy(name);
+        host.getWebAppContainer().updateWebAppDeploy(name);
     } catch (Throwable e) {
       throw new DeployException(e);
     }
@@ -168,6 +172,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   /**
    * Updates a .ear deployment.
    */
+  @Override
   public void updateEarDeploy(String name)
     throws DeployException
   {
@@ -175,7 +180,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
 
     try {
       if (host != null)
-        host.updateEarDeploy(name);
+        host.getWebAppContainer().updateEarDeploy(name);
     } catch (Throwable e) {
       throw new DeployException(e);
     }
@@ -189,23 +194,25 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     Host host = getHost();
 
     if (host != null)
-      host.expandEarDeploy(name);
+      host.getWebAppContainer().expandEarDeploy(name);
   }
 
   /**
    * Start a .ear deployment.
    */
+  @Override
   public void startEarDeploy(String name)
   {
     Host host = getHost();
 
     if (host != null)
-      host.startEarDeploy(name);
+      host.getWebAppContainer().startEarDeploy(name);
   }
 
   /**
    * Returns the webapps.
    */
+  @Override
   public WebAppMXBean []getWebApps()
   {
     Host host = getHost();
@@ -213,7 +220,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     if (host == null)
       return new WebAppMXBean[0];
 
-    WebAppController []webappList = host.getWebAppList();
+    WebAppController []webappList = host.getWebAppContainer().getWebAppList();
 
     WebAppMXBean []webapps = new WebAppMXBean[webappList.length];
 
@@ -237,8 +244,9 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
   /**
    * Returns a string view.
    */
+  @Override
   public String toString()
   {
-    return "HostAdmin[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }

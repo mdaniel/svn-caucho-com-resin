@@ -32,5 +32,5 @@ package com.caucho.server.dispatch;
  * Callbacks for the server starting or closing.
  */
 public interface ServerListener {
-  public void closeEvent(DispatchServer server);
+  public void closeEvent(InvocationServer server);
 }

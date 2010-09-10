@@ -81,7 +81,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
   private final Repository _repository;
   
-  private final DeployUpdateService _deployService;
+  private final DeployControllerService _deployService;
   
   private String _entryNamePrefix = "";
 
@@ -129,7 +129,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
     _loader = Thread.currentThread().getContextClassLoader();
     
-    _deployService = DeployUpdateService.create();
+    _deployService = DeployControllerService.create();
     _deployService.addUpdateListener(this);
     
     _repository = RepositoryService.getCurrentRepository();

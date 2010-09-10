@@ -38,7 +38,7 @@ import javax.servlet.FilterChain;
 /**
  * Cached response.
  */
-public class AbstractCache
+public class AbstractProxyCache
 {
   /**
    * Sets the path to the cache directory.

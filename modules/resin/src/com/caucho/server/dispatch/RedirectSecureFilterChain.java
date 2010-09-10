@@ -74,7 +74,7 @@ public class RedirectSecureFilterChain implements FilterChain {
     if (queryString != null)
       path += "?" + queryString;
 
-    Host host = (Host) webApp.getParent();
+    Host host = webApp.getHost();
     String secureHostName = req.getServerName();
 
     if (host != null && host.getSecureHostName() != null)

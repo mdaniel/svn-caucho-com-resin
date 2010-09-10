@@ -149,13 +149,13 @@ import com.caucho.security.Login;
 import com.caucho.security.MemorySingleSignon;
 import com.caucho.security.RoleMapManager;
 import com.caucho.security.SingleSignon;
-import com.caucho.server.cache.AbstractCache;
+import com.caucho.server.cache.AbstractProxyCache;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.deploy.RepositoryDependency;
-import com.caucho.server.dispatch.DispatchBuilder;
-import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.dispatch.InvocationBuilder;
+import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.FilterChainBuilder;
@@ -203,7 +203,7 @@ import com.caucho.vfs.Vfs;
 @Configurable
 @SuppressWarnings("serial")
 public class WebApp extends ServletContextImpl
-  implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
+  implements Dependency, EnvironmentBean, SchemaBean, InvocationBuilder,
              EnvironmentDeployInstance, ScanListener, JspConfigDescriptor,
              java.io.Serializable
 {
@@ -227,6 +227,7 @@ public class WebApp extends ServletContextImpl
   private EnvironmentClassLoader _classLoader;
 
   private Server _server;
+  private Host _host;
   // The parent
   private WebAppContainer _parent;
 
@@ -303,7 +304,7 @@ public class WebApp extends ServletContextImpl
   private String _characterEncoding;
 
   // The cache
-  private AbstractCache _cache;
+  private AbstractProxyCache _cache;
 
   private LruCache<String,FilterChainEntry> _filterChainCache
     = new LruCache<String,FilterChainEntry>(256);
@@ -431,14 +432,28 @@ public class WebApp extends ServletContextImpl
    */
   WebApp(WebAppController controller)
   {
-    _server = controller.getServletContainer();
+    _controller = controller;
+
+    _classLoader
+      = EnvironmentClassLoader.create(controller.getParentClassLoader(),
+                                      "web-app:" + getId());
     
+    _server = controller.getWebManager();
+
     if (_server == null) {
       throw new IllegalStateException(L.l("{0} requires an active {1}",
                                           getClass().getSimpleName(),
                                           Server.class.getSimpleName()));
     }
-
+    
+    _host = controller.getHost();
+    
+    if (_host == null) {
+      throw new IllegalStateException(L.l("{0} requires an active {1}",
+                                          getClass().getSimpleName(),
+                                          Host.class.getSimpleName()));
+    }
+    
     _invocationDecoder = _server.getInvocationDecoder();
 
     setVersionContextPath(controller.getContextPath());
@@ -451,16 +466,15 @@ public class WebApp extends ServletContextImpl
     else if (_moduleName.startsWith("/"))
       _moduleName = _moduleName.substring(1);
 
-    _controller = controller;
     _appDir = controller.getRootDirectory();
 
     setParent(controller.getContainer());
-
-    _classLoader
-      = EnvironmentClassLoader.create(controller.getParentClassLoader(),
-                                      "web-app:" + getId());
-
-    _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+    
+    if (getId().startsWith("error/"))
+      _lifecycle = new Lifecycle(log, toString(), Level.FINER);
+    else
+      _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+    
 
     initConstructor();
   }
@@ -514,9 +528,6 @@ public class WebApp extends ServletContextImpl
 
       _constraintManager = new ConstraintManager();
       _errorPageManager = new ErrorPageManager(_server, this);
-
-      if (getParent() != null)
-        _errorPageManager.setParent(getParent().getErrorPageManager());
 
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
@@ -602,6 +613,14 @@ public class WebApp extends ServletContextImpl
   {
     return _parent;
   }
+  
+  /**
+   * Returns the owning host.
+   */
+  public Host getHost()
+  {
+    return _host;
+  }
 
   /**
    * Returns the local webApp.
@@ -617,17 +636,6 @@ public class WebApp extends ServletContextImpl
   public static WebApp getCurrent()
   {
     return _appLocal.get();
-  }
-
-  /**
-   * Gets the dispatch server.
-   */
-  public DispatchServer getDispatchServer()
-  {
-    if (_parent != null)
-      return _parent.getDispatchServer();
-    else
-      return null;
   }
 
   /**
@@ -887,10 +895,13 @@ public class WebApp extends ServletContextImpl
    */
   public String getId()
   {
+    return _controller.getId();
+    /*
     if (_parent != null)
       return _parent.getId() + _versionContextPath;
     else
       return _versionContextPath;
+      */
   }
 
   /**
@@ -2460,12 +2471,7 @@ public class WebApp extends ServletContextImpl
    */
   public boolean isIgnoreClientDisconnect()
   {
-    DispatchServer server = getDispatchServer();
-
-    if (server == null)
-      return true;
-    else
-      return server.isIgnoreClientDisconnect();
+    return getServer().isIgnoreClientDisconnect();
   }
 
   /**
@@ -3119,11 +3125,7 @@ public class WebApp extends ServletContextImpl
         throw e;
       }
 
-      if (_parent instanceof Host) {
-        Host host = (Host) _parent;
-
-        host.setConfigETag(null);
-      }
+      _host.setConfigETag(null);
 
       _lifecycle.toActive();
 

@@ -137,8 +137,12 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
         }
       }
 
+      String id = _container.getServer().getStage() + "/host/" + name;
+      Path rootDirectory = _config.calculateRootDirectory();
+      
       HostController controller
-        = new HostController(name, _config, _container, varMap);
+        = new HostController(id, rootDirectory, name,
+                             _config, _container, varMap);
 
       controller.setRegexpName(name);
 

@@ -76,13 +76,13 @@ public class TransportConstraint extends AbstractConstraint {
     if (request.isSecure())
       return AuthorizationResult.DEFAULT_ALLOW;
 
-    WebApp app = (WebApp) application;
-    Host host = (Host) app.getParent();
+    WebApp webApp = (WebApp) application;
+    Host host = webApp.getHost();
     String secureHost = host.getSecureHostName();
 
     if (secureHost != null) {
-      String url = ("https://" + secureHost + app.getContextPath() +
-                    request.getServletPath());
+      String url = ("https://" + secureHost + webApp.getContextPath()
+                    + request.getServletPath());
 
       if (request.getPathInfo() != null)
         url += request.getPathInfo();

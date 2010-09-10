@@ -50,7 +50,7 @@ import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
-import com.caucho.env.deploy.DeployUpdateService;
+import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.deploy.DeployTagItem;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
@@ -63,6 +63,7 @@ import com.caucho.management.server.WebAppDeployMXBean;
 import com.caucho.management.server.WebAppMXBean;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostController;
+import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
@@ -192,7 +193,7 @@ public class DeployActor extends SimpleActor
     
     String tag = query.getTag();
     
-    DeployUpdateService deploy = DeployUpdateService.getCurrent();
+    DeployControllerService deploy = DeployControllerService.getCurrent();
     DeployTagItem item = null;
     
     if (deploy != null) {
@@ -616,8 +617,10 @@ public class DeployActor extends SimpleActor
 
     for (HostController host : _server.getHostControllers()) {
       if (listQuery.getHost().equals(host.getName())) {
-        for (WebAppController webApp
-            : host.getDeployInstance().getWebAppList()) {
+        WebAppContainer webAppContainer
+          = host.getDeployInstance().getWebAppContainer();
+        
+        for (WebAppController webApp : webAppContainer.getWebAppList()) {
           WebAppQuery q = new WebAppQuery();
           String name = webApp.getId();
 

@@ -102,6 +102,7 @@ public class StartAutoRedeployAutoStrategy
       controller.restartImpl();
     }
     else if (controller.isModifiedNow()) {
+      controller.logModified(controller.getLog());
       // 1d1n, 1d1o
       controller.restartImpl();
     }
@@ -134,7 +135,7 @@ public class StartAutoRedeployAutoStrategy
       return controller.getDeployInstance();
     }
     else if (controller.isModified()) {
-      controller.logModified(Logger.getLogger(getClass().getName()));
+      controller.logModified(controller.getLog());
       // server/1d1i
       I instance = controller.restartImpl();
 
@@ -167,6 +168,7 @@ public class StartAutoRedeployAutoStrategy
       return controller.getDeployInstance();
     }
     else if (controller.isModified()) {
+      controller.logModified(controller.getLog());
       // server/1d1j
       return controller.getDeployInstance();
     }

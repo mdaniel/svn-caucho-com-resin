@@ -567,6 +567,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    *
    * @param code the HTTP status code
    */
+  @Override
   public void sendError(int code)
     throws IOException
   {
@@ -579,6 +580,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * @param code the HTTP error code
    * @param value a string message
    */
+  @Override
   public void sendError(int code, String value)
     throws IOException
   {
@@ -610,6 +612,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     ErrorPageManager errorManager = null;
     if (webApp != null)
       errorManager = webApp.getErrorPageManager();
+    else
+      errorManager = getRequest().getServer().getErrorWebApp().getErrorPageManager();
 
     setStatus(code, value);
 

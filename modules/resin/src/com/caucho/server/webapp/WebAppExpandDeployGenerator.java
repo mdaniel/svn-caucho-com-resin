@@ -292,9 +292,8 @@ public class WebAppExpandDeployGenerator
     }
 
     WebAppController controller
-      = new WebAppController(id, 
-                             contextPath, baseContextPath,
-                             rootDirectory, _container);
+      = new WebAppController(id,  rootDirectory, _container,
+                             contextPath, baseContextPath);
 
     controller.setArchivePath(jarPath);
     controller.setWarName(segmentName.substring(1));
@@ -554,9 +553,8 @@ public class WebAppExpandDeployGenerator
       versionContextPath = "";
 
     WebAppController controller
-      = new WebAppController(id,
-                             versionContextPath, contextPath,
-                             rootDirectory, _container);
+      = new WebAppController(id, rootDirectory, _container,
+                             versionContextPath, contextPath);
 
     controller.setWarName(versionName.substring(1));
 

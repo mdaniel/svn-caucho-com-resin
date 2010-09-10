@@ -29,8 +29,6 @@
 
 package com.caucho.server.cluster;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -54,7 +52,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
-import com.caucho.env.deploy.DeployUpdateService;
+import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownService;
@@ -68,17 +66,18 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
-import com.caucho.management.server.CacheItem;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PermissionManager;
-import com.caucho.server.cache.AbstractCache;
+import com.caucho.server.cache.AbstractProxyCache;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.InvocationBuilder;
+import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.InvocationMatcher;
-import com.caucho.server.dispatch.ProtocolDispatchServer;
+import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -94,11 +93,12 @@ import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-public class Server extends ProtocolDispatchServer
-  implements AlarmListener, ClassLoaderListener
+public class Server
+  implements AlarmListener, ClassLoaderListener, InvocationBuilder, Dependency
 {
   private static final L10N L = new L10N(Server.class);
   private static final Logger log
@@ -126,6 +126,7 @@ public class Server extends ProtocolDispatchServer
 
   private BamService _bamService;
 
+  private InvocationServer _invocationServer;
   private HostContainer _hostContainer;
 
   private String _stage = "production";
@@ -140,6 +141,8 @@ public class Server extends ProtocolDispatchServer
   private boolean _isDevelopmentModeErrorPage;
 
   private long _shutdownWaitMax = 60 * 1000;
+  
+  private boolean _isIgnoreClientDisconnect;
 
   // <cluster> configuration
 
@@ -148,7 +151,7 @@ public class Server extends ProtocolDispatchServer
   private ServerAdmin _admin;
 
   private Alarm _alarm;
-  private AbstractCache _cache;
+  private AbstractProxyCache _proxyCache;
 
   //
   // internal databases
@@ -184,6 +187,7 @@ public class Server extends ProtocolDispatchServer
     _resinSystem = resinSystem;
     _clusterService = clusterService;
     
+    _invocationServer = new InvocationServer(this);
     
     _selfServer = _clusterService.getSelfServer().getData(ClusterServer.class);
 
@@ -251,7 +255,7 @@ public class Server extends ProtocolDispatchServer
     _authManager.setAuthenticationRequired(false);
     _bamService.setLinkManager(_authManager);
 
-    _resinSystem.addService(new DeployUpdateService());
+    // _resinSystem.addService(new DeployUpdateService());
 
     // _selfServer.getServerProgram().configure(this);
   }
@@ -285,7 +289,6 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the classLoader
    */
-  @Override
   public EnvironmentClassLoader getClassLoader()
   {
     return _resinSystem.getClassLoader();
@@ -552,11 +555,26 @@ public class Server extends ProtocolDispatchServer
   {
     return _configException != null;
   }
+  
+  /**
+   * True if client disconnects should be invisible to servlets.
+   */
+  public boolean isIgnoreClientDisconnect()
+  {
+    return _isIgnoreClientDisconnect;
+  }
+  
+  /**
+   * True if client disconnections should be invisible to servlets.
+   */
+  public void setIgnoreClientDisconnect(boolean isIgnore)
+  {
+    _isIgnoreClientDisconnect = isIgnore;
+  }
 
   /**
    * Returns the id.
    */
-  @Override
   public String getServerId()
   {
     return _selfServer.getId();
@@ -668,28 +686,28 @@ public class Server extends ProtocolDispatchServer
     return _hostContainer.createRewriteDispatch();
   }
 
-  public AbstractCache getProxyCache()
+  public AbstractProxyCache getProxyCache()
   {
-    return _cache;
+    return _proxyCache;
   }
 
   /**
    * Creates the proxy cache.
    */
-  public AbstractCache createProxyCache()
+  public AbstractProxyCache createProxyCache()
     throws ConfigException
   {
-    if (_cache == null)
-      _cache = instantiateProxyCache();
+    if (_proxyCache == null)
+      _proxyCache = instantiateProxyCache();
 
-    return _cache;
+    return _proxyCache;
   }
   
-  protected AbstractCache instantiateProxyCache()
+  protected AbstractProxyCache instantiateProxyCache()
   {
     log.warning(L.l("<proxy-cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
 
-    return new AbstractCache();
+    return new AbstractProxyCache();
   }
 
   /**
@@ -781,6 +799,21 @@ public class Server extends ProtocolDispatchServer
   {
     getInvocationDecoder().setEncoding(encoding);
   }
+  
+  public String getURLCharacterEncoding()
+  {
+    return getInvocationDecoder().getEncoding();
+  }
+  
+  public InvocationDecoder getInvocationDecoder()
+  {
+    return getInvocationServer().getInvocationDecoder();
+  }
+  
+  public InvocationServer getInvocationServer()
+  {
+    return _invocationServer;
+  }
 
   /**
    * Adds an error page
@@ -818,39 +851,6 @@ public class Server extends ProtocolDispatchServer
     return _lifecycle.getStateName();
   }
 
-  /**
-   * Returns the cache stuff.
-   */
-  public ArrayList<CacheItem> getCacheStatistics()
-  {
-    ArrayList<Invocation> invocationList = getInvocations();
-
-    if (invocationList == null)
-      return null;
-
-    HashMap<String,CacheItem> itemMap = new HashMap<String,CacheItem>();
-
-    for (int i = 0; i < invocationList.size(); i++) {
-      Invocation inv = (Invocation) invocationList.get(i);
-
-      String uri = inv.getURI();
-      int p = uri.indexOf('?');
-      if (p >= 0)
-        uri = uri.substring(0, p);
-
-      CacheItem item = itemMap.get(uri);
-
-      if (item == null) {
-        item = new CacheItem();
-        item.setUrl(uri);
-
-        itemMap.put(uri, item);
-      }
-    }
-
-    return null;
-  }
-
   public double getCpuLoad()
   {
     return 0;
@@ -885,32 +885,6 @@ public class Server extends ProtocolDispatchServer
       invocation.setDependency(AlwaysModified.create());
 
       return invocation;
-    }
-  }
-
-  /**
-   * Returns the matching servlet pattern for a URL.
-   */
-  public String getServletPattern(String hostName, int port, String url)
-  {
-    try {
-      Host host = _hostContainer.getHost(hostName, port);
-
-      if (host == null)
-        return null;
-
-      WebApp app = host.findWebAppByURI(url);
-
-      if (app == null)
-        return null;
-
-      String pattern = app.getServletPattern(url);
-
-      return pattern;
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-
-      return null;
     }
   }
 
@@ -959,7 +933,7 @@ public class Server extends ProtocolDispatchServer
       if (host == null)
         return null;
 
-      return host.findWebAppByURI(url);
+      return host.getWebAppContainer().findWebAppByURI(url);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -972,12 +946,7 @@ public class Server extends ProtocolDispatchServer
    */
   public WebApp getErrorWebApp()
   {
-    HostContainer hostContainer = _hostContainer;
-
-    if (hostContainer != null)
-      return hostContainer.getErrorWebApp();
-    else
-      return null;
+    return _hostContainer.getErrorWebApp();
   }
 
   /**
@@ -1082,8 +1051,8 @@ public class Server extends ProtocolDispatchServer
       return;
     
     // _classLoader.init();
-
-    super.init();
+    
+    _invocationServer.init();
 
     _admin = createAdmin();
 
@@ -1264,12 +1233,13 @@ public class Server extends ProtocolDispatchServer
   @Override
   public boolean isModified()
   {
-    boolean isModified = getClassLoader().isModified();
-    
-    if (isModified)
-      getClassLoader().logModified(log);
-
-    return isModified;
+    return getClassLoader().isModified();
+  }
+  
+  @Override
+  public boolean logModified(Logger log)
+  {
+    return getClassLoader().logModified(log);
   }
 
   /**
@@ -1277,12 +1247,7 @@ public class Server extends ProtocolDispatchServer
    */
   public boolean isModifiedNow()
   {
-    boolean isModified = getClassLoader().isModifiedNow();
-
-    if (isModified)
-      log.fine("server is modified");
-
-    return isModified;
+    return getClassLoader().isModifiedNow();
   }
 
   /**
@@ -1328,7 +1293,6 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns true if the server is currently active and accepting requests
    */
-  @Override
   public boolean isActive()
   {
     return _lifecycle.isActive();
@@ -1372,13 +1336,12 @@ public class Server extends ProtocolDispatchServer
       }
     };
 
-    invalidateMatchingInvocations(matcher);
+    getInvocationServer().invalidateMatchingInvocations(matcher);
   }
 
   /**
    * Clears the proxy cache.
    */
-  @Override
   public void clearCache()
   {
     // skip the clear on restart
@@ -1391,10 +1354,10 @@ public class Server extends ProtocolDispatchServer
     // the invocation cache must be cleared first because the old
     // filter chain entries must not point to the cache's
     // soon-to-be-invalid entries
-    super.clearCache();
+    getInvocationServer().clearCache();
 
-    if (_cache != null)
-      _cache.clear();
+    if (_proxyCache != null)
+      _proxyCache.clear();
   }
 
   /**
@@ -1402,8 +1365,8 @@ public class Server extends ProtocolDispatchServer
    */
   public long getProxyCacheHitCount()
   {
-    if (_cache != null)
-      return _cache.getHitCount();
+    if (_proxyCache != null)
+      return _proxyCache.getHitCount();
     else
       return 0;
   }
@@ -1413,8 +1376,8 @@ public class Server extends ProtocolDispatchServer
    */
   public long getProxyCacheMissCount()
   {
-    if (_cache != null)
-      return _cache.getMissCount();
+    if (_proxyCache != null)
+      return _proxyCache.getMissCount();
     else
       return 0;
   }
@@ -1427,7 +1390,6 @@ public class Server extends ProtocolDispatchServer
     return null;
   }
 
-  @Override
   public void restart()
   {
     String msg = L.l("Server restarting due to configuration change");
@@ -1437,7 +1399,6 @@ public class Server extends ProtocolDispatchServer
   /**
    * Closes the server.
    */
-  @Override
   public void stop()
   {
     Thread thread = Thread.currentThread();
@@ -1449,6 +1410,7 @@ public class Server extends ProtocolDispatchServer
       if (! _lifecycle.toStopping())
         return;
 
+      // getInvocationServer().stop();
       // notify other servers that we've stopped
       notifyStop();
 
@@ -1508,8 +1470,6 @@ public class Server extends ProtocolDispatchServer
       _lifecycle.toStop();
     } finally {
       thread.setContextClassLoader(oldLoader);
-
-      super.stop();
     }
   }
 
@@ -1542,14 +1502,12 @@ public class Server extends ProtocolDispatchServer
         log.log(Level.WARNING, e.toString(), e);
       }
 
-      super.destroy();
-
       log.fine(this + " destroyed");
 
+      getInvocationServer().destroy();
       // getClassLoader().destroy();
 
-      _hostContainer = null;
-      _cache = null;
+      _proxyCache = null;
     } finally {
       DynamicClassLoader.setOldLoader(thread, oldLoader);
 

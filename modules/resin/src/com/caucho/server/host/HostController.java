@@ -85,19 +85,21 @@ public class HostController
   private ArrayList<Pattern> _hostAliasRegexps = new ArrayList<Pattern>();
 
   // The host variables.
-  private final Var _hostVar = new Var();
+  private final HostVar _hostVar = new HostVar(this);
   private final HostAdmin _admin = new HostAdmin(this);
 
   private ArrayList<Dependency> _dependList = new ArrayList<Dependency>();
 
   HostController(String id,
+                 Path rootDirectory,
+                 String hostName,
                  HostConfig config,
                  HostContainer container,
                  Map<String,Object> varMap)
   {
-    super(id, config);
+    super(id, rootDirectory, config);
 
-    setHostName(id);
+    setHostName(hostName);
 
     if (varMap != null)
       getVariableMap().putAll(varMap);
@@ -105,18 +107,17 @@ public class HostController
     getVariableMap().put("host", _hostVar);
 
     setContainer(container);
-    
-    setRootDirectory(config.calculateRootDirectory(getVariableMap()));
   }
 
   public HostController(String id,
                         Path rootDirectory,
+                        String hostName,
                         HostContainer container)
   {
     super(id, rootDirectory);
 
-    addHostAlias(id);
-    setHostName(id);
+    addHostAlias(hostName);
+    setHostName(hostName);
 
     // jsp/101r
     // getVariableMap().put("name", id);
@@ -140,12 +141,7 @@ public class HostController
    */
   public String getName()
   {
-    String name = super.getId();
-    
-    if (name != null)
-      return name;
-    else
-      return getHostName();
+    return getHostName();
   }
 
   /**
@@ -169,6 +165,9 @@ public class HostController
     
     if (name == null || name.equals("*"))
       name = "";
+    
+    if (name.indexOf("/host/") >= 0)
+      Thread.dumpStack();
     
     name = name.toLowerCase();
 
@@ -317,6 +316,7 @@ public class HostController
   /**
    * Returns the "name" property.
    */
+  @Override
   protected String getMBeanId()
   {
     String name = _hostName;
@@ -430,9 +430,12 @@ public class HostController
       try {
         thread.setContextClassLoader(getParentClassLoader());
 
+        String id = newController.getId();
+        
         HostController mergedController
-          = new HostController(newController.getHostName(),
+          = new HostController(id,
                                getRootDirectory(),
+                               newController.getHostName(),
                                _container);
 
         mergedController.mergeController(this);
@@ -443,9 +446,9 @@ public class HostController
           ConfigException e;
 
           e = new ConfigException(L.l("Illegal merge of {0} and {1}.  Both hosts have the same root-directory '{2}'.",
-                                        getHostName(),
-                                        newController.getHostName(),
-                                        getRootDirectory()));
+                                      getId(),
+                                      newController.getId(),
+                                      getRootDirectory()));
 
           log.warning(e.getMessage());
           log.log(Level.FINEST, e.toString(), e);
@@ -506,7 +509,6 @@ public class HostController
     _hostAliases.clear();
     _hostAliases.addAll(_entryHostAliases);
 
-    InjectManager webBeans = InjectManager.create();
     Config.setProperty("host", _hostVar);
 
     for (Map.Entry<String,Object> entry : getVariableMap().entrySet()) {
@@ -518,10 +520,10 @@ public class HostController
 
     if (_container != null) {
       for (EarConfig config : _container.getEarDefaultList())
-        host.addEarDefault(config);
+        host.getWebAppContainer().addEarDefault(config);
 
       for (WebAppConfig config : _container.getWebAppDefaultList())
-        host.addWebAppDefault(config);
+        host.getWebAppContainer().addWebAppDefault(config);
     }
 
     super.configureInstance(host);
@@ -562,118 +564,7 @@ public class HostController
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getName() + "]";
-  }
-
-  /**
-   * EL variables for the host.
-   */
-  public class Var {
-    public String getName()
-    {
-      return HostController.this.getName();
-    }
-    
-    public String getHostName()
-    {
-      return HostController.this.getHostName();
-    }
-    
-    public String getUrl()
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-        return host.getURL();
-      else if (_hostName.equals(""))
-        return "";
-      else if (_hostName.startsWith("http:")
-               || _hostName.startsWith("https:"))
-        return _hostName;
-      else
-        return "http://" + _hostName;
-    }
-
-    public ArrayList getRegexp()
-    {
-      return (ArrayList) getVariableMap().get("regexp");
-    }
-    
-    public Path getRoot()
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-        return host.getRootDirectory();
-      else
-        return HostController.this.getRootDirectory();
-    }
-    
-    /**
-     * @deprecated
-     */
-    public Path getRootDir()
-    {
-      return getRoot();
-    }
-
-    /**
-     * @deprecated
-     */
-    public Path getRootDirectory()
-    {
-      return getRoot();
-    }
-    
-    public Path getDocumentDirectory()
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-        return host.getDocumentDirectory();
-      else
-        return null;
-    }
-    
-    public Path getDocDir()
-    {
-      return getDocumentDirectory();
-    }
-    
-    public Path getWarDirectory()
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-        return host.getWarDir();
-      else
-        return null;
-    }
-    
-    public Path getWarDir()
-    {
-      return getWarDirectory();
-    }
-    
-    public Path getWarExpandDirectory()
-    {
-      Host host = getDeployInstance();
-      
-      if (host != null)
-        return host.getWarExpandDir();
-      else
-        return null;
-    }
-    
-    public Path getWarExpandDir()
-    {
-      return getWarExpandDirectory();
-    }
-    
-    public String toString()
-    {
-      return "Host[" + getId() + "]";
-    }
+    return getClass().getSimpleName() + "[" + getId() + "]";
   }
 
   /**

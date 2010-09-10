@@ -42,6 +42,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.HttpBufferStore;
 import com.caucho.server.http.InvocationKey;
@@ -353,7 +354,7 @@ public class FastCgiRequest extends AbstractHttpRequest
   private Invocation getInvocation(CharSequence host)
     throws Throwable
   {
-    Server server = getServer();
+    InvocationServer server = getServer().getInvocationServer();
     Invocation invocation = server.getInvocation(_invocationKey);
 
     if (invocation == null) {

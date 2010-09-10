@@ -70,8 +70,8 @@ public class WebAppVersioningController extends WebAppController {
                                     WebAppExpandDeployGenerator generator,
                                     WebAppContainer container)
   {
-    super(id + "-0.0.0.versioning",
-          versionContextPath, baseContextPath, null, container);
+    super(id + "-0.0.0.versioning", null, container,
+          versionContextPath, baseContextPath);
 
     _generator = generator;
   }

@@ -5,7 +5,7 @@ import java.io.*;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.http.HttpRequest;
 import com.caucho.vfs.*;
 import com.caucho.util.*;

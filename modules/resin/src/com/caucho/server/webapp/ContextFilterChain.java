@@ -96,6 +96,7 @@ public class ContextFilterChain implements FilterChain {
    * @param response the servlet response
    * @since Servlet 2.3
    */
+  @Override
   public void doFilter(ServletRequest request,
                        ServletResponse response)
     throws ServletException, IOException

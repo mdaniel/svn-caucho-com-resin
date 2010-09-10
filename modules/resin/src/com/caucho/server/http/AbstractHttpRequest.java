@@ -42,7 +42,6 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
@@ -55,9 +54,9 @@ import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.webapp.ErrorPageManager;
 import com.caucho.server.webapp.RequestDispatcherImpl;
 import com.caucho.server.webapp.WebApp;
@@ -173,7 +172,10 @@ public abstract class AbstractHttpRequest
   {
     _server = server;
     
-    _errorManager = new ErrorPageManager(server);
+    if (server == null)
+      throw new NullPointerException();
+    
+    _errorManager = server.getErrorWebApp().getErrorPageManager();
     
     _conn = conn;
 
@@ -230,9 +232,9 @@ public abstract class AbstractHttpRequest
   /**
    * returns the dispatch server.
    */
-  public final DispatchServer getDispatchServer()
+  public final InvocationServer getInvocationServer()
   {
-    return _server;
+    return _server.getInvocationServer();
   }
 
   protected final CharBuffer getCharBuffer()
@@ -1415,12 +1417,14 @@ public abstract class AbstractHttpRequest
                         host, getServerPort(),
                         uri, uriLength);
 
-    Invocation invocation = _server.getInvocation(_invocationKey);
+    InvocationServer server = _server.getInvocationServer();
+    
+    Invocation invocation = server.getInvocation(_invocationKey);
 
     if (invocation != null)
       return invocation.getRequestInvocation(_requestFacade);
 
-    invocation = _server.createInvocation();
+    invocation = server.createInvocation();
     invocation.setSecure(isSecure());
 
     if (host != null) {
@@ -1447,7 +1451,8 @@ public abstract class AbstractHttpRequest
                                        int uriLength)
     throws IOException
   {
-    InvocationDecoder decoder = _server.getInvocationDecoder();
+    InvocationServer server = _server.getInvocationServer();
+    InvocationDecoder decoder = server.getInvocationDecoder();
 
     decoder.splitQueryAndUnescape(invocation, uri, uriLength);
 
@@ -1455,19 +1460,17 @@ public abstract class AbstractHttpRequest
       _server.logModified(log);
 
       _requestFacade.setInvocation(invocation);
-      if (_server instanceof Server)
-        invocation.setWebApp(((Server) _server).getDefaultWebApp());
+      invocation.setWebApp(_server.getErrorWebApp());
 
       HttpServletResponse res = _responseFacade;
       res.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 
-      restartServer();
+      _server.restart();
 
       return null;
     }
 
-    invocation = _server.buildInvocation(_invocationKey.clone(),
-                                         invocation);
+    invocation = server.buildInvocation(_invocationKey.clone(), invocation);
 
     return invocation.getRequestInvocation(_requestFacade);
   }
@@ -1477,6 +1480,7 @@ public abstract class AbstractHttpRequest
    *
    * @return true if the connection should stay open (keepalive)
    */
+  @Override
   public boolean handleResume()
     throws IOException
   {
@@ -1588,27 +1592,7 @@ public abstract class AbstractHttpRequest
    */
   protected ErrorPageManager getErrorManager()
   {
-    Server server = (Server) _server;
-
-    WebApp webApp = server.getWebApp("error.resin", 80, "/");
-
-    if (webApp != null)
-      return webApp.getErrorPageManager();
-    else
-      return _errorManager;
-  }
-
-  /**
-   * Returns the depth of the request calls.
-   */
-  public int getRequestDepth(int depth)
-  {
-    return depth + 1;
-  }
-
-  public int getRequestDepth()
-  {
-    return 0;
+    return _errorManager;
   }
 
   /**
@@ -1685,7 +1669,6 @@ public abstract class AbstractHttpRequest
    */
   protected void restartServer()
   {
-    _server.update();
   }
 
   /**

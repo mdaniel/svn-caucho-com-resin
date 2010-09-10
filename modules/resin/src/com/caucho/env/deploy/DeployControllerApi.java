@@ -38,7 +38,8 @@ import com.caucho.lifecycle.LifecycleState;
 public interface DeployControllerApi<I extends DeployInstance>
 {
   /**
-   * Returns the controller's id.
+   * Returns the controller's id, typically a tag value like
+   * production/webapp/default/ROOT
    */
   public String getId();
 

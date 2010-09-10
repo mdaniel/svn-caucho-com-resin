@@ -578,7 +578,7 @@ abstract public class DeployController<I extends DeployInstance>
       thread.setContextClassLoader(loader);
 
       isStarting = _lifecycle.toStarting();
-      
+
       if (! isStarting)
         return deployInstance;
       

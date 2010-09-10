@@ -85,6 +85,7 @@ abstract public class
   // Config exception passed in from parent, e.g. .ear
   private Throwable _configException;
 
+  /*
   public EnvironmentDeployController(C config)
   {
     this(config.getId(), config.calculateRootDirectory());
@@ -98,12 +99,23 @@ abstract public class
 
     setConfig(config);
   }
+  */
 
-  public EnvironmentDeployController(String id, Path rootDirectory)
+  public EnvironmentDeployController(String id, 
+                                     Path rootDirectory)
   {
+    this(id, rootDirectory, null);
+  }
+
+    public EnvironmentDeployController(String id, 
+                                       Path rootDirectory,
+                                       C config)
+    {
     super(id, null, rootDirectory);
 
     _jmxContext = Jmx.copyContextProperties(getParentClassLoader());
+    
+    setConfig(config);
   }
 
   /**

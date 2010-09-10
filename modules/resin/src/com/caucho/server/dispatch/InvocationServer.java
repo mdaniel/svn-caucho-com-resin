@@ -29,33 +29,30 @@
 
 package com.caucho.server.dispatch;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Dependency;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.logging.Logger;
-
 /**
  * The dispatch server is responsible for building Invocations,
  * specifically for creating the FilterChain for the invocation.
  */
-public class DispatchServer implements Dependency {
+public class InvocationServer implements Dependency {
   private String _serverId = "";
 
-  private DispatchBuilder _dispatchBuilder;
+  private InvocationBuilder _invocationBuilder;
 
   // Cache of uri -> invocation maps
   private LruCache<Object,Invocation> _invocationCache;
 
   private InvocationDecoder _invocationDecoder;
-
-  private HashMap<String,Object> _attributeMap
-    = new HashMap<String,Object>();
 
   private ArrayList<ServerListener> _listeners
     = new ArrayList<ServerListener>();
@@ -66,6 +63,14 @@ public class DispatchServer implements Dependency {
   private int _maxURILength = 1024;
 
   private final Lifecycle _lifecycle = new Lifecycle();
+  
+  public InvocationServer(InvocationBuilder builder)
+  {
+    _invocationBuilder = builder;
+    
+    if (builder == null)
+      throw new NullPointerException();
+  }
 
   /**
    * Gets the server's id.
@@ -84,35 +89,21 @@ public class DispatchServer implements Dependency {
   }
 
   /**
-   * Gets the class loader.
-   */
-  public ClassLoader getClassLoader()
-  {
-    return null;
-  }
-
-  /**
    * Sets the dispatch builder.
    */
-  public void setDispatchBuilder(DispatchBuilder builder)
+  /*
+  public void setInvocationBuilder(InvocationBuilder builder)
   {
-    _dispatchBuilder = builder;
+    _invocationBuilder = builder;
   }
+  */
 
   /**
    * Gets the dispatch builder.
    */
-  public DispatchBuilder getDispatchBuilder()
+  public InvocationBuilder getInvocationBuilder()
   {
-    return _dispatchBuilder;
-  }
-
-  /**
-   * Return true for ignoring client disconnect.
-   */
-  public boolean isIgnoreClientDisconnect()
-  {
-    return true;
+    return _invocationBuilder;
   }
 
   /**
@@ -252,11 +243,11 @@ public class DispatchServer implements Dependency {
   public Invocation buildInvocation(Invocation invocation)
     throws ConfigException
   {
-    return getDispatchBuilder().buildInvocation(invocation);
+    return getInvocationBuilder().buildInvocation(invocation);
   }
 
   /**
-   * Clears the proxy cache.
+   * Clears the invocation cache.
    */
   public void clearCache()
   {
@@ -271,7 +262,7 @@ public class DispatchServer implements Dependency {
   /**
    * Clears matching entries.
    */
-  protected void invalidateMatchingInvocations(InvocationMatcher matcher)
+  public void invalidateMatchingInvocations(InvocationMatcher matcher)
   {
     // XXX: see if can remove this, and rely on the invocation cache existing
     LruCache<Object,Invocation> invocationCache = _invocationCache;
@@ -346,53 +337,6 @@ public class DispatchServer implements Dependency {
   }
 
   /**
-   * Returns the named attribute.
-   *
-   * @param key the attribute key
-   *
-   * @return the attribute value
-   */
-  public synchronized Object getAttribute(String key)
-  {
-    return _attributeMap.get(key);
-  }
-
-  /**
-   * Returns an iteration of attribute names.
-   *
-   * @return the iteration of names
-   */
-  public synchronized Iterator<String> getAttributeNames()
-  {
-    return _attributeMap.keySet().iterator();
-  }
-
-  /**
-   * Sets the named attribute.
-   *
-   * @param key the attribute key
-   * @param value the attribute value
-   *
-   * @return the old attribute value
-   */
-  public synchronized Object setAttribute(String key, Object value)
-  {
-    return _attributeMap.put(key, value);
-  }
-
-  /**
-   * Removes the named attribute.
-   *
-   * @param key the attribute key
-   *
-   * @return the old attribute value
-   */
-  public synchronized Object removeAttribute(String key)
-  {
-    return _attributeMap.remove(key);
-  }
-
-  /**
    * Returns true if the server has been modified and needs restarting.
    */
   public boolean isModified()
@@ -422,22 +366,6 @@ public class DispatchServer implements Dependency {
   public boolean isDestroyed()
   {
     return _lifecycle.isDestroyed();
-  }
-
-  /**
-   * Closes the server.
-   */
-  public void update()
-  {
-    restart();
-  }
-
-  /**
-   * Closes the server.
-   */
-  public void restart()
-  {
-    destroy();
   }
 
   /**

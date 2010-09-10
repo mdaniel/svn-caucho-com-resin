@@ -29,34 +29,35 @@
 
 package com.caucho.server.host;
 
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.FilterChain;
+
+import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.make.AlwaysModified;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployContainerApi;
-import com.caucho.server.dispatch.DispatchBuilder;
-import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.rewrite.RewriteDispatch;
-import com.caucho.server.webapp.*;
-import com.caucho.util.L10N;
+import com.caucho.server.webapp.AccessLogFilterChain;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.server.webapp.WebAppFilterChain;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-
-import javax.servlet.FilterChain;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Resin's host container implementation.
  */
-public class HostContainer implements DispatchBuilder {
+public class HostContainer implements InvocationBuilder {
   private static final Logger log
     = Logger.getLogger(HostContainer.class.getName());
   
@@ -66,7 +67,7 @@ public class HostContainer implements DispatchBuilder {
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
 
-  private WebApp _errorWebApp;
+  private Host _errorHost;
 
   private String _url = "";
   
@@ -98,9 +99,6 @@ public class HostContainer implements DispatchBuilder {
   private ArrayList<EarConfig> _earDefaultList
     = new ArrayList<EarConfig>();
 
-  // The configure exception
-  private Throwable _configException;
-
   // lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -113,6 +111,11 @@ public class HostContainer implements DispatchBuilder {
     _classLoader = server.getClassLoader();
 
     _rootDir = Vfs.lookup();
+    
+    _errorHost = createErrorHost();
+    
+    if (_errorHost == null)
+      throw new NullPointerException();
   }
   
   public String getStageTag()
@@ -446,27 +449,38 @@ public class HostContainer implements DispatchBuilder {
    */
   public WebApp getErrorWebApp()
   {
-    if (_errorWebApp == null
-        && _classLoader != null
-        && ! _classLoader.isModified()) {
-      Thread thread = Thread.currentThread();
-      ClassLoader loader = thread.getContextClassLoader();
-      try {
-        thread.setContextClassLoader(_classLoader);
+    return getErrorHost().getWebAppContainer().getErrorWebApp();
+  }
+  
+  private Host createErrorHost()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(_classLoader);
 
-        /*
-        _errorWebApp = new WebApp(getRootDirectory().lookup("caucho-host-error"));
-        _errorWebApp.init();
-        _errorWebApp.start();
-        */
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      } finally {
-        thread.setContextClassLoader(loader);
-      }
+      Path rootDirectory = Vfs.lookup("error:");
+      HostController controller
+        = new HostController("error/host/error", rootDirectory, "error", null, this, null);
+      controller.init();
+      controller.startOnInit();
+
+      Host host = controller.request();
+      
+      if (host == null)
+        throw new NullPointerException();
+      
+      return host;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(loader);
     }
-
-    return _errorWebApp;
+  }
+  
+  private Host getErrorHost()
+  {
+    return _errorHost;
   }
 
   /**

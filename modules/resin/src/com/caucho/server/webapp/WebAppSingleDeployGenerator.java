@@ -215,12 +215,18 @@ public class WebAppSingleDeployGenerator
       _rootDirectory = PathBuilder.lookupPath(rootDir, null,
                                               _container.getDocumentDirectory());
     }
+
+    String hostTail = _container.getHost().getIdTail();
     
-    String id = "production/webapp/default" + _urlPrefix;
+    String id; 
     
-    _controller = new WebAppController(id,
-                                       _urlPrefix, _urlPrefix,
-                                       _rootDirectory, _container);
+    if ("".equals(_urlPrefix) || "/".equals(_urlPrefix))
+      id = "production/webapp/" + hostTail + "/ROOT";
+    else
+      id = "production/webapp/" + hostTail + "/" + _urlPrefix;
+    
+    _controller = new WebAppController(id, _rootDirectory, _container,
+                                       _urlPrefix, _urlPrefix);
 
     _controller.setArchivePath(_archivePath);
 
@@ -256,15 +262,23 @@ public class WebAppSingleDeployGenerator
   /**
    * Creates a controller given the name
    */
+  @Override
   public WebAppController generateController(String name)
   {
     if (name.equals(_controller.getContextPath())) {
       WebAppController webApp;
       
-      String id = "production/webapp/default" + name;
+      String stage = _container.getServer().getStage();
+      String hostId = _container.getHost().getIdTail();
+      String id;
       
-      webApp = new WebAppController(id, _urlPrefix, _urlPrefix,
-                                    _rootDirectory, _container);
+      if (name.equals("") || name.equals("/"))
+        id = stage + "/webapp/" + hostId + "/ROOT";
+      else
+        id = stage + "/webapp/" + hostId + name;
+      
+      webApp = new WebAppController(id, _rootDirectory, _container,
+                                    _urlPrefix, _urlPrefix);
 
       webApp.setArchivePath(_controller.getArchivePath());
 

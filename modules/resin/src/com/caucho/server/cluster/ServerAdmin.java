@@ -29,14 +29,17 @@
 
 package com.caucho.server.cluster;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 
 import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.env.meter.MeterService;
 import com.caucho.env.meter.TotalMeter;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.management.server.AbstractEmitterObject;
+import com.caucho.management.server.CacheItem;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.management.server.EnvironmentMXBean;
@@ -46,6 +49,8 @@ import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.network.listen.TcpSocketLink;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 
@@ -405,7 +410,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public long getInvocationCacheHitCountTotal()
   {
-    return _server.getInvocationCacheHitCount();
+    return _server.getInvocationServer().getInvocationCacheHitCount();
   }
 
   /**
@@ -414,7 +419,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public long getInvocationCacheMissCountTotal()
   {
-    return _server.getInvocationCacheMissCount();
+    return _server.getInvocationServer().getInvocationCacheMissCount();
   }
 
   /**
@@ -455,6 +460,41 @@ public class ServerAdmin extends AbstractEmitterObject
     } catch (Exception e) {
       return 0;
     }
+  }
+
+  /**
+   * Returns the cache stuff.
+   */
+  public ArrayList<CacheItem> getCacheStatistics()
+  {
+    InvocationServer server = _server.getInvocationServer();
+    
+    ArrayList<Invocation> invocationList = server.getInvocations();
+
+    if (invocationList == null)
+      return null;
+
+    HashMap<String,CacheItem> itemMap = new HashMap<String,CacheItem>();
+
+    for (int i = 0; i < invocationList.size(); i++) {
+      Invocation inv = (Invocation) invocationList.get(i);
+
+      String uri = inv.getURI();
+      int p = uri.indexOf('?');
+      if (p >= 0)
+        uri = uri.substring(0, p);
+
+      CacheItem item = itemMap.get(uri);
+
+      if (item == null) {
+        item = new CacheItem();
+        item.setUrl(uri);
+
+        itemMap.put(uri, item);
+      }
+    }
+
+    return null;
   }
 
   //

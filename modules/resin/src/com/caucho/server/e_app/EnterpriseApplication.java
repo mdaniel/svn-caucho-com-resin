@@ -650,10 +650,10 @@ public class EnterpriseApplication
 
     if (controller == null) {
       controller = new WebAppController(id, 
-                                        contextUrl,
-                                        contextUrl,
                                         path,
-                                        _webAppContainer);
+                                        _webAppContainer,
+                                        contextUrl,
+                                        contextUrl);
       
       _webApps.add(controller);
     }

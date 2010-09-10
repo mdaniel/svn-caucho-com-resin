@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ByteToChar;
 
@@ -47,8 +48,11 @@ import java.util.logging.Logger;
 public class InvocationDecoder {
   private static final Logger log
     = Logger.getLogger(InvocationDecoder.class.getName());
-  static final L10N L = new L10N(InvocationDecoder.class);
+  private static final L10N L = new L10N(InvocationDecoder.class);
 
+  private static final FreeList<ByteToChar> _freeConverters
+    = new FreeList<ByteToChar>(256);
+  
   // The character encoding
   private String _encoding = "UTF-8";
 
@@ -57,7 +61,6 @@ public class InvocationDecoder {
   
   // The URL-encoded session suffix
   private String _sessionSuffix = ";jsessionid=";
-  private char _sessionSuffixChar = ';';
 
   // The URL-encoded session prefix
   private String _sessionPrefix;
@@ -130,8 +133,6 @@ public class InvocationDecoder {
   public void setSessionURLPrefix(String prefix)
   {
     _sessionSuffix = prefix;
-    if (_sessionSuffix != null)
-      _sessionSuffixChar = _sessionSuffix.charAt(0);
   }
 
   /**
@@ -290,23 +291,10 @@ public class InvocationDecoder {
     invocation.setContextURI(uri);
   }
 
-  /**
-   * Splits out the session.
-   */
-  public void splitSession(Invocation invocation)
-  {
-    if (_sessionSuffix != null) {
-      String uri = invocation.getURI();
-    }
-    else if (_sessionPrefix != null) {
-      String uri = invocation.getURI();
-    }
-  }
-
   private String byteToChar(byte []buffer, int offset, int length,
                             String encoding)
   {
-    ByteToChar converter = ByteToChar.create();
+    ByteToChar converter = allocateConverter();
     // XXX: make this configurable
 
     if (encoding == null)
@@ -318,14 +306,20 @@ public class InvocationDecoder {
       log.log(Level.FINE, e.toString(), e);
     }
 
+    String result;
+    
     try {
       for (; length > 0; length--)
         converter.addByte(buffer[offset++]);
       
-      return converter.getConvertedString();
+      result = converter.getConvertedString();
+      
+      freeConverter(converter);
     } catch (IOException e) {
-      return "unknown";
+      result = "unknown";
     }
+    
+    return result;
   }
 
   /**
@@ -356,9 +350,7 @@ public class InvocationDecoder {
     if (len > _maxURILength)
       throw new BadRequestException(L.l("The request contains an illegal URL."));
 
-    boolean isBogus;
     char ch;
-    char ch1;
     if (len == 0 || (ch = uri.charAt(0)) != '/' && ch != '\\')
       cb.append('/');
 
@@ -440,7 +432,7 @@ public class InvocationDecoder {
                                            String encoding)
     throws IOException
   {
-    ByteToChar converter = ByteToChar.create();
+    ByteToChar converter = allocateConverter();
     // XXX: make this configurable
 
     if (encoding == null)
@@ -462,7 +454,11 @@ public class InvocationDecoder {
           converter.addByte(ch);
       }
 
-      return converter.getConvertedString();
+      String result = converter.getConvertedString();
+      
+      freeConverter(converter);
+      
+      return result;
     } catch (Exception e) {
       throw new BadRequestException(L.l("The URL contains escaped bytes unsupported by the {0} encoding.", encoding));
     }
@@ -519,5 +515,22 @@ public class InvocationDecoder {
       return ch - 'A' + 10;
     else
       return -1;
+  }
+  
+  private static ByteToChar allocateConverter()
+  {
+    ByteToChar converter = _freeConverters.allocate();
+    
+    if (converter == null)
+      converter = ByteToChar.create();
+    else
+      converter.clear();
+    
+    return converter;
+  }
+  
+  private static void freeConverter(ByteToChar converter)
+  {
+    _freeConverters.free(converter);
   }
 }

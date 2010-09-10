@@ -33,6 +33,7 @@ import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
+import com.caucho.vfs.Path;
 
 /**
  * The generator for the ear-deploy
@@ -51,8 +52,12 @@ public class EarSingleDeployGenerator extends DeployGenerator<EarDeployControlle
     super(deployContainer);
     
     _parentContainer = parentContainer;
+    
+    String id = "production/entapp/default/default";
+    Path rootDirectory = config.calculateRootDirectory();
 
-    _controller = new EarDeployController("", parentContainer, config);
+    _controller = new EarDeployController(id, rootDirectory, "",
+                                          parentContainer, config);
   }
 
   /**

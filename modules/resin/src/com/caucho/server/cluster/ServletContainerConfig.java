@@ -48,7 +48,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.server.admin.Management;
-import com.caucho.server.cache.AbstractCache;
+import com.caucho.server.cache.AbstractProxyCache;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.HostConfig;
@@ -503,7 +503,7 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
    * Creates the proxy cache.
    */
   @Configurable
-  public AbstractCache createProxyCache()
+  public AbstractProxyCache createProxyCache()
     throws ConfigException
   {
     return _servletContainer.createProxyCache();
@@ -513,7 +513,7 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
    * backward compatibility for proxy cache
    */
   @Configurable
-  public AbstractCache createCache()
+  public AbstractProxyCache createCache()
     throws ConfigException
   {
     return createProxyCache();

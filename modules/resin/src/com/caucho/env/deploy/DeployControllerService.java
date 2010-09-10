@@ -45,9 +45,9 @@ import com.caucho.util.L10N;
  * by tags.
  */
 @Module
-public class DeployUpdateService extends AbstractResinService
+public class DeployControllerService extends AbstractResinService
 {
-  private static final L10N L = new L10N(DeployUpdateService.class);
+  private static final L10N L = new L10N(DeployControllerService.class);
   
   public static final int START_PRIORITY
     = NetworkClusterService.START_PRIORITY_CLUSTER_SERVICE;
@@ -64,34 +64,34 @@ public class DeployUpdateService extends AbstractResinService
   //
   // Returns the current service if available.
   //
-  public static DeployUpdateService getCurrent()
+  public static DeployControllerService getCurrent()
   {
     ResinSystem server = ResinSystem.getCurrent();
     
     if (server != null)
-      return server.getService(DeployUpdateService.class);
+      return server.getService(DeployControllerService.class);
     else
       return null;
   }
   
-  public static DeployUpdateService create()
+  public static DeployControllerService create()
   {
     ResinSystem system = ResinSystem.getCurrent();
     
     if (system == null) {
       throw new IllegalStateException(L.l("{0} requires an active {1}",
-                                          DeployUpdateService.class.getSimpleName(),
+                                          DeployControllerService.class.getSimpleName(),
                                           ResinSystem.class.getSimpleName()));
     }
     
-    DeployUpdateService service = system.getService(DeployUpdateService.class);
+    DeployControllerService service = system.getService(DeployControllerService.class);
     
     if (service == null) {
-      service = new DeployUpdateService();
+      service = new DeployControllerService();
       
       system.addServiceIfAbsent(service);
       
-      service = system.getService(DeployUpdateService.class);
+      service = system.getService(DeployControllerService.class);
     }
     
     return service;

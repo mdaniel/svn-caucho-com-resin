@@ -107,30 +107,37 @@ public class WebAppController
 
   private WebAppAdmin _admin = new WebAppAdmin(this);
 
-  public WebAppController()
+  public WebAppController(String id, Path rootDirectory, 
+                          WebAppContainer container)
   {
-    this(null, null);
-  }
-
-  public WebAppController(Path rootDirectory, WebAppContainer container)
-  {
-    this("production/webapp/default/ROOT", "/", "/", rootDirectory, container);
+    this(id, rootDirectory, container, "/", "/");
   }
 
   public WebAppController(String id,
-                          String contextPath,
-                          String baseContextPath,
                           Path rootDirectory,
-                          WebAppContainer container)
+                          WebAppContainer container,
+                          String contextPath,
+                          String baseContextPath)
   {
     super(id, rootDirectory);
 
     _container = container;
+    
+    if (container == null)
+      throw new NullPointerException();
+    
+    if (container.getHost() == null)
+      throw new NullPointerException();
 
     _versionContextPath = contextPath;
     _baseContextPath = baseContextPath;
 
     _contextPath = contextPath;
+  }
+  
+  public String getName()
+  {
+    return getContextPath();
   }
 
   /**
@@ -235,9 +242,9 @@ public class WebAppController
     return _container;
   }
   
-  public Server getServletContainer()
+  public Server getWebManager()
   {
-    return _container.getHost().getServer();
+    return _container.getServer();
   }
 
   /**
@@ -253,10 +260,7 @@ public class WebAppController
    */
   public Host getHost()
   {
-    if (_container != null)
-      return _container.getHost();
-    else
-      return null;
+    return _container.getHost();
   }
 
   /**
@@ -458,10 +462,10 @@ public class WebAppController
         //  The contextPath comes from current web-app
         WebAppController mergedController
           = new WebAppController(getId(),
-                                 getContextPath(),
-                                 getBaseContextPath(),
                                  getRootDirectory(),
-                                 _container);
+                                 _container,
+                                 getContextPath(),
+                                 getBaseContextPath());
 
         // server/1h1{2,3}
         // This controller overrides configuration from the new controller

@@ -163,11 +163,13 @@ public class HostExpandDeployGenerator
 
     String hostName = name;
 
+    String id = "production/host/" + hostName;
+    
     if ("default".equals(hostName))
       hostName = "";
 
     HostController controller
-      = new HostController(hostName, rootDirectory, _container);
+      = new HostController(id, rootDirectory, hostName, _container);
 
     Path jarPath = getArchiveDirectory().lookup("./" + name + ".jar");
     controller.setArchivePath(jarPath);

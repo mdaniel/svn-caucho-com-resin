@@ -55,7 +55,6 @@ import com.caucho.java.LineMapException;
 import com.caucho.java.ScriptStackTrace;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.BadRequestException;
-import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.HttpServletRequestImpl;

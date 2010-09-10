@@ -32,6 +32,7 @@ package com.caucho.server.host;
 import com.caucho.config.Config;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.vfs.Path;
 
 import java.util.Set;
 import java.util.logging.Logger;
@@ -107,16 +108,16 @@ public class HostSingleDeployGenerator
     super.initImpl();
 
     String hostName = null;
-    String id = null;
+    String hostId = null;
     
     String rawId = _config.getId();
     String rawHostName = _config.getHostName();
 
     if (rawId != null) {
-      id = Config.evalString(rawId);
+      hostId = Config.evalString(rawId);
 
-      if (id.equals("*"))  // server/1f20
-        id = "";
+      if (hostId.equals("*"))  // server/1f20
+        hostId = "";
     }
 
     if (rawHostName != null) {
@@ -125,17 +126,28 @@ public class HostSingleDeployGenerator
       if (rawHostName.equals("*"))  // server/1f20
         hostName = "";
     }
+    
+    String stage = _container.getServer().getStage();
+    
+    String id;
+    
+    if (hostName.equals(""))
+      id = stage + "/host/default";
+    else
+      id = stage + "/host/" + hostName;
+      
+    Path rootDirectory = _config.calculateRootDirectory();
 
     if (hostName != null) {
-      _controller = new HostController(hostName, _config, _container, null);
+      _controller = new HostController(id, rootDirectory,
+                                       hostName, _config, _container, null);
 
-      if (id != null)
-        _controller.addHostAlias(id);
+      if (hostId != null)
+        _controller.addHostAlias(hostId);
     }
-    else if (id != null)
-      _controller = new HostController(id, _config, _container, null);
     else
-      _controller = new HostController("", _config, _container, null);
+      _controller = new HostController(id, rootDirectory,
+                                       hostId, _config, _container, null);
   }
 
   /**
@@ -149,10 +161,14 @@ public class HostSingleDeployGenerator
   /**
    * Returns the current array of application entries.
    */
+  @Override
   public HostController generateController(String name)
   {
     if (_controller.isNameMatch(name)) {
-      return new HostController(_controller.getName(), _config,
+      Path rootDirectory = _config.calculateRootDirectory();
+      
+      return new HostController(_controller.getId(), rootDirectory,
+                                _controller.getName(), _config,
                                 _container, null);
     }
     else

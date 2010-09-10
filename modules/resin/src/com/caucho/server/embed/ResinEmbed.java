@@ -97,7 +97,7 @@ public class ResinEmbed
       config.setContextPath(contextPath);
       config.setRootDirectory(new RawString(rootDirectory));
 
-      _host.addWebApp(config);
+      _host.getWebAppContainer().addWebApp(config);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

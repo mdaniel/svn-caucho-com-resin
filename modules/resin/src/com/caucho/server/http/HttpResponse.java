@@ -83,7 +83,7 @@ public class HttpResponse extends AbstractHttpResponse
     _request = request;
     _rawWrite = rawWrite;
 
-    Server server = (Server) request.getDispatchServer();
+    Server server = request.getServer();
 
     _resinServerBytes = ("\r\nServer: " + server.getServerHeader()).getBytes();
   }

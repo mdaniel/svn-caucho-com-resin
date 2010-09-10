@@ -34,7 +34,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.rewrite.RewriteFilter;
-import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;

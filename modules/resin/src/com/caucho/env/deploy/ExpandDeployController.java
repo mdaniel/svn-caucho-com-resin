@@ -205,7 +205,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     _repository = repositoryService.getRepository();
     _repository.addListener(getId(), this);
     
-    DeployUpdateService deployService = DeployUpdateService.create();
+    DeployControllerService deployService = DeployControllerService.create();
 
     deployService.addTag(getId());
     _deployItem = deployService.getTagItem(getId());

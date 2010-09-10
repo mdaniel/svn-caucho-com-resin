@@ -19,8 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,46 +28,15 @@
 
 package com.caucho.server.dispatch;
 
-public class ProtocolDispatchServer extends DispatchServer {
-  private boolean _isIgnoreClientDisconnect = true;
+import com.caucho.config.ConfigException;
 
+/**
+ * Builds the dispatch for an invocation.
+ */
+public interface InvocationBuilder {
   /**
-   * Sets the ignore-client-disconnect
+   * Builds the invocation values.
    */
-  public void setIgnoreClientDisconnect(boolean ignore)
-  {
-    _isIgnoreClientDisconnect = ignore;
-  }
-
-  /**
-   * Gets the ignore-client-disconnect
-   */
-  @Override
-  public boolean isIgnoreClientDisconnect()
-  {
-    return _isIgnoreClientDisconnect;
-  }
-
-  /**
-   * Returns the configured keepalive max.
-   */
-  public int getKeepaliveMax()
-  {
-    return Integer.MAX_VALUE / 2;
-  }
-
-  /**
-   * Returns true if the server is active.
-   */
-  public boolean isActive()
-  {
-    return true;
-  }
-
-  /**
-   * Stops the server.
-   */
-  public void stop()
-  {
-  }
+  public Invocation buildInvocation(Invocation invocation)
+    throws ConfigException;
 }

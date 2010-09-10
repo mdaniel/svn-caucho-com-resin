@@ -42,6 +42,7 @@ import com.caucho.cloud.topology.CloudServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
@@ -83,7 +84,7 @@ public class HmuxDispatchRequest {
   {
     _request = request;
 
-    _server = (Server) request.getDispatchServer();
+    _server = request.getServer();
   }
 
   /**
@@ -207,7 +208,7 @@ public class HmuxDispatchRequest {
         log.fine(dbgId() + "host '" + host + "' not configured");
       return;
     }
-    else if (! host.isActive()) {
+    else if (! host.getState().isActive()) {
       writeString(os, HMUX_UNAVAILABLE, "");
 
       if (isLoggable)
@@ -269,8 +270,10 @@ public class HmuxDispatchRequest {
 
     if (hostName.equals(canonicalHostName)) {
       crc64 = queryCluster(os, host, crc64);
+
+      WebAppContainer webAppContainer = host.getWebAppContainer();
       
-      WebAppController controller = host.findByURI(url);
+      WebAppController controller = webAppContainer.findByURI(url);
       if (controller != null) {
         try {
           controller.request();
@@ -279,7 +282,7 @@ public class HmuxDispatchRequest {
         }
       }
 
-      for (WebAppController appEntry : host.getWebAppList()) {
+      for (WebAppController appEntry : webAppContainer.getWebAppList()) {
         if (appEntry.getParent() != null
             && appEntry.getParent().isDynamicDeploy()) {
           continue;

@@ -313,7 +313,7 @@ public class ResinEmbed
 
         config.addBuilderProgram(new WebAppProgram(webApp));
 
-        _host.addWebApp(config);
+        _host.getWebAppContainer().addWebApp(config);
       }
       
       _resin.start();

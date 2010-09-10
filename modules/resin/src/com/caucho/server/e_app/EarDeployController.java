@@ -59,14 +59,17 @@ public class EarDeployController
 
   private ArrayList<EarConfig> _eAppDefaults = new ArrayList<EarConfig>();
   
+  private String _name;
   private String _deployTagName;
 
   private EarAdmin _admin = new EarAdmin(this);
  
-  EarDeployController(String name,
-                      WebAppContainer container, EarConfig config)
+  EarDeployController(String id, Path rootDirectory,
+                      String name,
+                      WebAppContainer container,
+                      EarConfig config)
   {
-    super(config);
+    super(id, rootDirectory, config);
 
     _container = container;
 
@@ -74,29 +77,14 @@ public class EarDeployController
       _eAppDefaults.addAll(container.getEarDefaultList());
     }
     
-    if (container != null)
-      _deployTagName = "EntApp/" + container.getHostName() + "/" + name;
-    else
-      _deployTagName = "EntApp/default/" + name;
+    _name = name;
   }
 
-  EarDeployController(String name, Path rootDirectory,
-                      WebAppContainer container)
+  public String getName()
   {
-    super(name, rootDirectory);
-
-    _container = container;
-
-    if (container != null) {
-      _eAppDefaults.addAll(container.getEarDefaultList());
-    }
-    
-    if (container != null)
-      _deployTagName = "EntApp/" + container.getHostName() + "/" + name;
-    else
-      _deployTagName = "EntApp/default/" + name;
+    return _name;
   }
-
+  
   /**
    * Sets the Resin host name.
    */
