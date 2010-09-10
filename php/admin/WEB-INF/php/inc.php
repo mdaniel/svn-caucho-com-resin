@@ -348,12 +348,19 @@ $display_header_script = NULL;
 $display_header_title = NULL;
 $is_display_footer = false;
 
+/**
+ * Displays JMX data to the output and returns javascript to enable updating
+ * fields dynamically.
+ **/
 function display_jmx($mbean_server, $group_mbeans)
 {
   $type_partition = jmx_partition($group_mbeans, array("type"));
   ksort($type_partition);
   static $group_id = 0;
   static $data_id = 0;
+
+  $javascript = "";
+
   echo "<div class='jmx'>";
   
   foreach ($type_partition as $type_name => $type_mbeans) {
@@ -388,13 +395,34 @@ function display_jmx($mbean_server, $group_mbeans)
 
       foreach ($attr_names as $attr_name) {
         $id = "jmx" . $data_id++;
+
+        $name_hash = sprintf("%u", crc32($mbean->mbean_name));
+        $safe_mbean_name = htmlspecialchars($mbean->mbean_name);
+        $javascript .= <<<EOF
+          $('#jmx-bean-data-${name_hash}').bind('refresh', function() {
+            var success = function(jmx) {
+              for (var attr in jmx) {
+                // TODO need to wrap attr name in htmlspecialchars for id
+                $("#jmx-value-${name_hash}-" + attr).text(jmx[attr]);
+              }
+            };
+
+            $.ajax({
+              url: "json.php",
+              data: {q: "jmx", mbean: '${safe_mbean_name}'},
+              dataType: "json",
+              success: success
+            });
+          });
+EOF;
       
-        echo "<tr>";
+        echo "<tr id='jmx-bean-data-${name_hash}'>";
         echo "<th>" . $attr_name . "</th>";
 
         //OS X 10.6.2 JDK 1.6 fix for #3782
         try {
-          echo "<td>";
+          $id = "jmx-value-${name_hash}-" . htmlspecialchars($attr_name);
+          echo "<td class='jmx-value' id='${id}'>";
           $v = $mbean->$attr_name;
           display_jmx_data($v);
         } catch (Exception $e) {
@@ -413,6 +441,8 @@ function display_jmx($mbean_server, $group_mbeans)
   echo "</div>";
 
   $group_id++;
+
+  return $javascript;
 }
 
 function is_composite_data($v)

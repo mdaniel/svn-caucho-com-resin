@@ -1,0 +1,19 @@
+<?php
+
+mbean_init();
+
+$action = $_POST['action'];
+$webapp_mbean_name = htmlspecialchars_decode($_POST['webapp']);
+$mbean = $g_mbean_server->lookup($webapp_mbean_name);
+
+if ($action == "start") { 
+  $mbean->start();
+}
+elseif ($action == "stop") { 
+  $mbean->stop();
+}
+elseif ($action == "restart") { 
+  $mbean->restart();
+}
+
+?>

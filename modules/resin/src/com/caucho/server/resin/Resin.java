@@ -493,13 +493,12 @@ public class Resin
     
     DistCacheService distCache = createDistCacheService();
     _resinSystem.addService(DistCacheService.class, distCache);
-
-    LockService lockService = createLockService();
-    _resinSystem.addService(LockService.class, lockService);
   }
   
   protected void addServices()
   {
+    LockService lockService = createLockService();
+    _resinSystem.addService(LockService.class, lockService);
     
   }
   

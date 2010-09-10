@@ -1,0 +1,23 @@
+<?php
+
+mbean_init();
+
+$mbean_name = htmlspecialchars_decode($_GET['mbean']);
+$mbean = $g_mbean_server->lookup($mbean_name);
+
+$attr_list = $mbean->mbean_info->attributes;
+
+echo "{\n";
+
+for ($i = 0; $i < count($attr_list); $i++) {
+  if ($i > 0)
+    echo ",\n";
+
+  $attr_name = $attr_list[$i]->name;
+
+  echo "'{$attr_name}': '{$mbean->$attr_name}'";
+}
+
+echo "\n}";
+
+?>

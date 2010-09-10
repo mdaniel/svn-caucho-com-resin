@@ -19,16 +19,16 @@ $user = quercus_get_request()->getUserPrincipal();
 $action = $_POST['action'];
 
 if ($webapp) {
-  display_webapp($g_mbean_server, $webapp);
+  $javascript = display_webapp_page($g_mbean_server, $webapp);
 }
 else {
-  display_webapp_summary_page($g_mbean_server);
+  $javascript = display_webapp_summary_page($g_mbean_server);
 }
 
 /**
  * single-page webapp
  */
-function display_webapp($mbean_server, $webapp)
+function display_webapp_page($mbean_server, $webapp)
 {
   global $is_secure;
 
@@ -134,6 +134,8 @@ function display_tab($name, $un_name, $is_selected)
  */
 function display_webapp_summary_page($g_mbean_server)
 {
+  $javascript = "";
+
   echo "<div id='webapp-tabs'>\n";
   echo "<ul>\n";
   echo "<li><a href='#webapp-active'>Active</a></li>\n";
@@ -141,14 +143,16 @@ function display_webapp_summary_page($g_mbean_server)
   echo "</ul>\n";
 
   echo "<div id='webapp-active'>\n";
-  display_webapp_summary($g_mbean_server, false);
+  $javascript .= display_webapp_summary($g_mbean_server, false);
   echo "</div>\n";
   
   echo "<div id='webapp-idle'>\n";
-  display_webapp_summary($g_mbean_server, true);
+  $javascript .= display_webapp_summary($g_mbean_server, true);
   echo "</div>\n";
   
   echo "</div>\n";
+
+  return $javascript;
 }  
 
 /**
@@ -181,6 +185,7 @@ function display_webapp_summary($g_mbean_server, $is_idle)
   }
 
   $webapp_id = 0;
+  $javascript = "";
 
   usort($hosts, "sort_host");
 
@@ -207,20 +212,23 @@ function display_webapp_summary($g_mbean_server, $is_idle)
       echo "<td><span id='sw_webapp_${webapp_id}' class='switch'></td>\n";
 
       $is_deploy_valid = true;
-      display_webapp($webapp, $is_deploy_valid);
+      $javascript .= display_webapp($webapp, $is_deploy_valid);
   
       echo "</tr>\n";
       
       echo "<tr class='toggle-sw_webapp_${webapp_id}'>";
       echo "<td>&nbsp;</td><td colspan='8'>";
 
-      display_webapp_expanded($webapp, $webapp_id, $is_deploy_valid);
+      $javascript .= 
+        display_webapp_expanded($webapp, $webapp_id, $is_deploy_valid);
       
-      echo "<td></tr>\n";
+      echo "</tr>\n";
     }
   }
 
   echo "</table>\n";
+
+  return $javascript;
 }
 
 function display_webapp($webapp, &$is_deploy_valid)
@@ -346,13 +354,15 @@ function display_webapp_expanded($webapp, $webapp_id, $is_deploy_valid)
 
   array_push($beans, $webapp);
 
-  display_jmx($g_mbean_server, $beans);
+  $javascript = display_jmx($g_mbean_server, $beans);
 
   echo "<p>";
-  display_webapp_expanded_actions($webapp);
+  $javascript .= display_webapp_expanded_actions($webapp, $beans);
+
+  return $javascript;
 }
 
-function display_webapp_expanded_actions($webapp)
+function display_webapp_expanded_actions($webapp, $beans)
 {
   global $g_server;
   global $is_secure;
@@ -365,7 +375,8 @@ function display_webapp_expanded_actions($webapp)
     echo "<div class='warn'>Actions can only be performed over a secure connection (SSL)</div>";
   }
 
-  $name = $webapp->mbean_name;
+  $name = htmlspecialchars($webapp->mbean_name);
+  $name_hash = sprintf("%u", crc32($webapp->mbean_name));
 
   $server_name = $g_server->SelfServer->Name;
   if (! $server_name)
@@ -374,25 +385,31 @@ function display_webapp_expanded_actions($webapp)
   echo "<div>";
   printf("<b>%02d - %s:</b> ", $g_server->SelfServer->ClusterIndex, $server_name);
 
-  echo "<form method='POST' style='display:inline'>\n";
-  echo "<input type='hidden' name='action' value='start'>\n";
-  echo "<input type='hidden' name='name' value='$name'>\n";
-  echo "<input type='submit' name='submit' value='start' $disabled>\n";
-  echo "</form>";
+  $javascript = "function trigger_mbeans_${name_hash}() {\n";
+  foreach ($beans as $bean) {
+    $bean_hash = sprintf("%u", crc32($bean->mbean_name));
+    $javascript .= "  $('#jmx-bean-data-${bean_hash}').trigger(\"refresh\");";
+  }
+  $javascript .= "}\n";
 
-  echo "<form method='POST' style='display:inline'>\n";
-  echo "<input type='hidden' name='action' value='stop'>\n";
-  echo "<input type='hidden' name='name' value='$name'>\n";
-  echo "<input type='submit' name='submit' value='stop' $disabled>\n";
-  echo "</form>";
+  foreach (array("start", "stop", "restart") as $action) {
+    echo "<button class='webapp-${action}' id='webapp-${action}-${name_hash}' $disabled>${action}</button>\n";
 
-  echo "<form method='POST' style='display:inline'>";
-  echo "<input type='hidden' name='action' value='restart'>";
-  echo "<input type='hidden' name='name' value='$name'>\n";
-  echo "<input type='submit' name='submit' value='restart' $disabled>";
-  echo "</form>";
+    $javascript .= <<<EOF
+      $("#webapp-${action}-${name_hash}").click(function() {
+        $.ajax({ type: 'POST',
+                 url: "json.php?q=webapp",
+                 data: { action: "${action}", webapp: "${name}" },
+                 success: trigger_mbeans_${name_hash}
+        });
+      });
+EOF;
+  }
+
   echo "</div>";
-}  
+
+  return $javascript;
+}
 
 function display_versions($webapp, $webapp_id, $is_deploy_valid)
 {
@@ -505,5 +522,7 @@ Online webapp deploy is only available over connections secured with SSL.
   }
 } // summary
 
-display_footer($g_page, javascript_create_tab("webapp-tabs"));
+$javascript = javascript_create_tab("webapp-tabs") . "\n\n$javascript";
+
+display_footer($g_page, $javascript);
 ?>
