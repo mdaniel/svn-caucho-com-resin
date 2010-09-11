@@ -1,3 +1,48 @@
+function ToggleCookie() {
+  this.shown = {};
+  this.cookieName = "toggle";
+}
+
+ToggleCookie.prototype.init = function() {
+  var cookies = document.cookie.split(';');
+
+  for (var i = 0; i < cookies.length; i++) {
+    var cookie = $.trim(cookies[i]);
+
+    if (cookie.indexOf(this.cookieName + "=") == 0) {
+      var shown = cookie.substr((this.cookieName + "=").length).split(",");
+
+      for (var j = 0; j < shown.length; j++) {
+        this.shown[shown[j]] = true;
+      }
+
+      break;
+    }
+  }
+};
+
+ToggleCookie.prototype.isShown = function(id) {
+  return this.shown[id] == true;
+};
+
+ToggleCookie.prototype.setShown = function(id) {
+  this.shown[id] = true;
+  this.persist();
+};
+
+ToggleCookie.prototype.setHidden = function(id) {
+  delete this.shown[id];
+  this.persist();
+};
+
+ToggleCookie.prototype.persist = function() {
+  var shownArray = [];
+  for (var key in this.shown)
+    shownArray.push(key);
+
+  document.cookie = this.cookieName + "=" + shownArray.join(",");
+};
+
 function ToggleSwitch(context) {
   // right triangle -- e == east
   this.toggleShowIcon = "ui-icon-circle-triangle-e";
@@ -6,6 +51,7 @@ function ToggleSwitch(context) {
 
   this.state = "hidden";
   this.context = context;
+  this.contextId = this.context.attr("id");
   this.toggleSwitch = $("<span></span>");
 
   this.toggleSwitch.addClass("ui-icon");
@@ -13,9 +59,16 @@ function ToggleSwitch(context) {
   this.toggleSwitch.addClass(this.toggleShowIcon);
   this.context.prepend(this.toggleSwitch);
 
-  var id = this.context.attr("id");
-  this.toggleTargets = $(".toggle-" + id);
-  this.toggleTargets.hide();
+  this.toggleTargets = $(".toggle-" + this.contextId);
+
+  if (ToggleSwitch.cookie.isShown(this.contextId)) {
+    this.setShownState();
+    this.showTargets();
+  }
+  else {
+    this.setHiddenState();
+    this.hideTargets();
+  }
 }
 
 ToggleSwitch.prototype.init = function() {
@@ -36,6 +89,8 @@ ToggleSwitch.prototype.setShownState = function() {
   this.toggleSwitch.removeClass(this.toggleShowIcon);
   this.toggleSwitch.addClass(this.toggleHideIcon);
   this.state = "shown";
+
+  ToggleSwitch.cookie.setShown(this.contextId);
 };
 
 ToggleSwitch.prototype.showTargets = function() {
@@ -46,6 +101,8 @@ ToggleSwitch.prototype.setHiddenState = function() {
   this.toggleSwitch.removeClass(this.toggleHideIcon);
   this.toggleSwitch.addClass(this.toggleShowIcon);
   this.state = "hidden";
+
+  ToggleSwitch.cookie.setHidden(this.contextId);
 };
 
 ToggleSwitch.prototype.hideTargets = function() {
@@ -88,6 +145,9 @@ ToggleSwitch.prototype.handleExternalToggle = function(caller) {
 };
 
 function initializeToggleSwitches() {
+  ToggleSwitch.cookie = new ToggleCookie();
+  ToggleSwitch.cookie.init();
+
   $(".switch").each(function() {
     var toggleSwitch = new ToggleSwitch($(this));
     toggleSwitch.init();

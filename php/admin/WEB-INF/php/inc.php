@@ -349,8 +349,7 @@ $display_header_title = NULL;
 $is_display_footer = false;
 
 /**
- * Displays JMX data to the output and returns javascript to enable updating
- * fields dynamically.
+ * Displays JMX data to the output
  **/
 function display_jmx($mbean_server, $group_mbeans)
 {
@@ -394,35 +393,12 @@ function display_jmx($mbean_server, $group_mbeans)
       $row = 0;
 
       foreach ($attr_names as $attr_name) {
-        $id = "jmx" . $data_id++;
-
-        $name_hash = sprintf("%u", crc32($mbean->mbean_name));
-        $safe_mbean_name = htmlspecialchars($mbean->mbean_name);
-        $javascript .= <<<EOF
-          $('#jmx-bean-data-${name_hash}').bind('refresh', function() {
-            var success = function(jmx) {
-              for (var attr in jmx) {
-                // TODO need to wrap attr name in htmlspecialchars for id
-                $("#jmx-value-${name_hash}-" + attr).text(jmx[attr]);
-              }
-            };
-
-            $.ajax({
-              url: "json.php",
-              data: {q: "jmx", mbean: '${safe_mbean_name}'},
-              dataType: "json",
-              success: success
-            });
-          });
-EOF;
-      
-        echo "<tr id='jmx-bean-data-${name_hash}'>";
+        echo "<tr>";
         echo "<th>" . $attr_name . "</th>";
 
         //OS X 10.6.2 JDK 1.6 fix for #3782
         try {
-          $id = "jmx-value-${name_hash}-" . htmlspecialchars($attr_name);
-          echo "<td class='jmx-value' id='${id}'>";
+          echo "<td>";
           $v = $mbean->$attr_name;
           display_jmx_data($v);
         } catch (Exception $e) {
@@ -441,8 +417,6 @@ EOF;
   echo "</div>";
 
   $group_id++;
-
-  return $javascript;
 }
 
 function is_composite_data($v)
@@ -732,7 +706,7 @@ if (! empty($server)) {
     <img src="images/loading.gif"/>
   </div>
 
-  <div id='content'> <!-- XXX not compatible with flot: style='display: none' -->
+  <div>
 <?php
   if (! $server && $g_server_id) {
     echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
@@ -744,7 +718,8 @@ if (! empty($server)) {
 
 function javascript_create_tab($tab_name)
 {
-  $javascript .= '$("#' . $tab_name . '").tabs().find(".ui-tabs-nav").sortable({axis:\'x\'});';
+  $javascript .= '$("#' . $tab_name . '").tabs().find(".ui-tabs-nav").sortable({axis:\'x\'});' . "\n";
+  $javascript .= '$("#' . $tab_name . '").show();' . "\n";
 
   return $javascript;
 }  
@@ -989,7 +964,6 @@ function display_footer($script, $javascript="")
     <?= $javascript ?>
 
     $("#busyIndicator").hide();
-    $("#content").show();
   });
 </script>
 

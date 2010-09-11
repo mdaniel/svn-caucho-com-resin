@@ -910,3 +910,8 @@ table.schema tr th {
   border: 1px solid gray;
   min-height: 1em;
 }
+
+textarea {
+  width: 90%;
+  min-height: 3em;
+}

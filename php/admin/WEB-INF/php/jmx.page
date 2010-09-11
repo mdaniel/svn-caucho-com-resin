@@ -5,10 +5,6 @@
 
 require_once "WEB-INF/php/inc.php";
 
-$javascript = <<<EOF
-  $("#jmx-tabs").tabs().find(".ui-tabs-nav").sortable({axis:'x'});
-EOF;
-
 if (! admin_init($query)) {
   return;
 }
@@ -62,7 +58,7 @@ function display_tabs()
   list($application_mbeans, $jvm_mbeans, $resin_mbeans) 
     = collect_mbean_groups();
 
-  echo "<div id='jmx-tabs'>\n";
+  echo "<div id='jmx-tabs' style='display: none'>\n";
   echo "<ul>\n";
 
   if (count($application_mbeans) != 0) {
@@ -95,5 +91,5 @@ function display_tabs()
 }
 
 display_tabs();
-display_footer($g_page, $javascript);
+display_footer($g_page, javascript_create_tab("jmx-tabs"));
 ?>
