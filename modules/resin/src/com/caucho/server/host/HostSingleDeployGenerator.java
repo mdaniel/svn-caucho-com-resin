@@ -30,8 +30,8 @@
 package com.caucho.server.host;
 
 import com.caucho.config.Config;
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.vfs.Path;
 
 import java.util.Set;

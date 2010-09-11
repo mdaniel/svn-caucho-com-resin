@@ -47,7 +47,6 @@ import com.caucho.jmx.Jmx;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.server.deploy.DeployConfig;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;

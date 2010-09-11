@@ -37,11 +37,11 @@ import java.util.logging.Logger;
 import javax.servlet.FilterChain;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.deploy.DeployContainer;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.make.AlwaysModified;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.Invocation;

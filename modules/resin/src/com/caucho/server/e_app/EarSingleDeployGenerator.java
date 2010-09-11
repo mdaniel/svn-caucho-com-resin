@@ -29,8 +29,8 @@
 
 package com.caucho.server.e_app;
 
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.vfs.Path;

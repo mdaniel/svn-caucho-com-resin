@@ -35,10 +35,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.types.PathBuilder;
+import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 

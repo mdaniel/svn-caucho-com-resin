@@ -27,9 +27,8 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
-import com.caucho.env.deploy.DeployControllerApi;
 import com.caucho.vfs.Dependency;
 
 /**

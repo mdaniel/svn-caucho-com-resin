@@ -135,7 +135,7 @@ public class WebAppDeployClient extends DeployClient
     while (name.startsWith("/"))
       name = name.substring(1);
     
-    return "wars/" + stage + "/" + host + "/" + name;
+    return stage + "/webapp/" + host + "/" + name;
   }
 
   public static String createTag(String stage, 

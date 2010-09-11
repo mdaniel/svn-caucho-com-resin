@@ -29,8 +29,8 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.types.PathBuilder;
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.vfs.Path;
 
 import java.util.ArrayList;

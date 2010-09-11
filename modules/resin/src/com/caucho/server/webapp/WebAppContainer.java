@@ -42,6 +42,9 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployContainerApi;
+import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -52,9 +55,6 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.rewrite.RewriteFilter;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployContainerApi;
-import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
@@ -214,7 +214,7 @@ public class WebAppContainer
   
   public String getStageTag()
   {
-    return "production";
+    return getServer().getStage();
   }
 
   /**
@@ -431,7 +431,10 @@ public class WebAppContainer
    */
   public WebAppExpandDeployGenerator createWarDeploy()
   {
-    String id = getStageTag() + "/webapp/" + getHost().getIdTail();
+    String stage = getServer().getStage();
+    String host = getHost().getIdTail();
+    
+    String id = stage + "/webapp/" + host;
     
     return new WebAppExpandDeployGenerator(id, _appDeploySpi, this);
   }

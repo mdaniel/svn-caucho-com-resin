@@ -27,14 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.deploy.DeployControllerApi;
 import com.caucho.vfs.Dependency;
 
 /**

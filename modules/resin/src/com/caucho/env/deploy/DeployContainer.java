@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +41,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.env.deploy.DeployControllerApi;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.make.CachedDependency;
@@ -76,6 +75,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   /**
    * Adds a deploy generator.
    */
+  @Override
   public void add(DeployGenerator<C> generator)
   {
     Set<String> names = new TreeSet<String>();
@@ -90,6 +90,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   /**
    * Removes a deploy.
    */
+  @Override
   public void remove(DeployGenerator<C> generator)
   {
     Set<String> names = new TreeSet<String>();
@@ -122,6 +123,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   /**
    * Forces updates.
    */
+  @Override
   public void update()
   {
     _deployListGenerator.update();

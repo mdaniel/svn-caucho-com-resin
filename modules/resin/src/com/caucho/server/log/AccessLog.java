@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
@@ -126,6 +127,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   /**
    * Sets the formatted path.
    */
+  @Configurable
+  @Override
   public void setPathFormat(String pathFormat)
     throws ConfigException
   {
@@ -137,6 +140,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   /**
    * Sets the archive name format
    */
+  @Configurable
   public void setArchiveFormat(String format)
   {
     _logWriter.setArchiveFormat(format);
@@ -147,6 +151,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    *
    * @param count maximum count of the log file
    */
+  @Configurable
   public void setRolloverCount(int count)
   {
     _logWriter.setRolloverCount(count);
@@ -157,6 +162,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    *
    * @param cron the cron string for rollover times
    */
+  @Configurable
   public void setRolloverCron(CronType cron)
   {
     _logWriter.setRolloverCron(cron);
@@ -167,6 +173,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    *
    * @param period the new rollover period in milliseconds.
    */
+  @Configurable
   public void setRolloverPeriod(Period period)
   {
     _logWriter.setRolloverPeriod(period);
@@ -177,6 +184,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    *
    * @param size maximum size of the log file
    */
+  @Configurable
   public void setRolloverSize(Bytes bytes)
   {
     _logWriter.setRolloverSize(bytes);
@@ -187,6 +195,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    *
    * @param period how often the log rollover will be checked.
    */
+  @Configurable
   public void setRolloverCheckTime(long period)
   {
     _logWriter.setRolloverCheckPeriod(period);
@@ -195,6 +204,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   /**
    * Sets the auto-flush attribute.
    */
+  @Configurable
   public void setAutoFlush(boolean isAutoFlush)
   {
     _isAutoFlush =  isAutoFlush;
@@ -223,6 +233,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   /**
    * Adds an exclusion pattern.
    */
+  @Configurable
   public void addExclude(Pattern pattern)
   {
     _excludeList.add(pattern);
@@ -234,6 +245,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    * Initialize the log.
    */
   @PostConstruct
+  @Override
   public void init()
     throws ServletException, IOException
   {
@@ -261,6 +273,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
     if (_autoFlushTime > 0 && _alarm != null)
       _alarm.queue(_autoFlushTime);
+    
+    super.init();
   }
 
   /**

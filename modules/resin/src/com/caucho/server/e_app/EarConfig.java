@@ -28,7 +28,7 @@
 
 package com.caucho.server.e_app;
 
-import com.caucho.server.deploy.DeployConfig;
+import com.caucho.env.deploy.DeployConfig;
 
 /**
  * The configuration for an ear in the resin.conf

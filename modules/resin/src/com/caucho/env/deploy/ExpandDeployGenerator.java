@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,8 +48,6 @@ import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.loader.Environment;
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -101,8 +100,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   private Alarm _alarm;
   private long _cronInterval;
 
-  private volatile long _lastCheckTime;
-  private volatile boolean _isChecking;
+  private long _lastCheckTime;
+  private AtomicBoolean _isChecking = new AtomicBoolean();
   private long _checkInterval = 1000L;
   private long _digest;
   private volatile boolean _isModified;
@@ -397,18 +396,19 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   @Override
   public boolean isModified()
   {
-    synchronized (this) {
-      long now = Alarm.getCurrentTime();
-      
-      if (now < _lastCheckTime + _checkInterval || _isChecking) {
-        return _isModified;
-      }
-
-      _isChecking = true;
-      _lastCheckTime = Alarm.getCurrentTime();
+    if (! _isChecking.compareAndSet(false, true)) {
+      return _isModified;
     }
 
     try {
+      long now = Alarm.getCurrentTime();
+      
+      if (now < _lastCheckTime + _checkInterval) {
+        return _isModified;
+      }
+
+      _lastCheckTime = Alarm.getCurrentTime();
+
       long digest = getDigest();
 
       _isModified = _digest != digest;
@@ -419,7 +419,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       
       return false;
     } finally {
-      _isChecking = false;
+      _isChecking.set(false);
     }
   }
 
@@ -1184,6 +1184,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   @Override
   public void onTagChange(String tag)
   {
+    _lastCheckTime = 0;
+
     alarm();
   }
 
@@ -1210,8 +1212,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   {
     // XXX: tck, but no QA test
     // server/10ka
-    if (DeployMode.AUTOMATIC.equals(getRedeployMode()) && isActive())
+    if (DeployMode.AUTOMATIC.equals(getRedeployMode()) && isActive()) {
       request();
+    }
   }
 
   /**

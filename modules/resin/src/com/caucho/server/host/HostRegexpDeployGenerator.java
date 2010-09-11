@@ -30,8 +30,8 @@
 package com.caucho.server.host;
 
 import com.caucho.config.Config;
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
@@ -99,6 +99,7 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
   /**
    * Returns the current array of application entries.
    */
+  @Override
   public HostController generateController(String name)
   {
     Pattern regexp = _config.getRegexp();
@@ -138,7 +139,7 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
       }
 
       String id = _container.getServer().getStage() + "/host/" + name;
-      Path rootDirectory = _config.calculateRootDirectory();
+      Path rootDirectory = _config.calculateRootDirectory(varMap);
       
       HostController controller
         = new HostController(id, rootDirectory, name,

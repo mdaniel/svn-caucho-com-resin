@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import java.util.Set;
 import java.util.logging.Level;
@@ -37,8 +37,6 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.env.deploy.DeployControllerApi;
-import com.caucho.env.deploy.DeployMode;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;

@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.deploy.DeployContainer;
 import com.caucho.env.deploy.DeployMode;
 import com.caucho.env.deploy.ExpandDeployGenerator;
 import com.caucho.env.deploy.VersionEntry;
@@ -43,7 +44,6 @@ import com.caucho.env.repository.RepositoryService;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.deploy.DeployContainer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
@@ -270,13 +270,14 @@ public class WebAppExpandDeployGenerator
 
     WebAppVersioningController baseController = null;
     
-    String id = "production/webapp/default" + segmentName;
+    String id = getId() + segmentName;
+    String baseId = getId() + baseSegmentName;
 
     if (contextPath.equals(baseContextPath)
         && (getRepository() != null
-            && getRepository().getTagContentHash(baseRepositoryTag) != null)) {
+            && getRepository().getTagContentHash(baseId) != null)) {
       baseController
-        = new WebAppVersioningController(id,
+        = new WebAppVersioningController(baseId,
                                          contextPath,
                                          baseContextPath,
                                          this,
@@ -287,12 +288,12 @@ public class WebAppExpandDeployGenerator
     if (! isValidDirectory(rootDirectory, segmentName)
         && ! jarPath.canRead()
         && (getRepository() != null
-            && getRepository().getTagContentHash(repositoryTag) == null)) {
+            && getRepository().getTagContentHash(id) == null)) {
       return baseController;
     }
 
     WebAppController controller
-      = new WebAppController(id,  rootDirectory, _container,
+      = new WebAppController(id, rootDirectory, _container,
                              contextPath, baseContextPath);
 
     controller.setArchivePath(jarPath);
@@ -314,7 +315,7 @@ public class WebAppExpandDeployGenerator
       return baseController;
     }
     else if ((getRepository() != null
-              && getRepository().getTagContentHash(baseRepositoryTag) != null)) {
+              && getRepository().getTagContentHash(baseId) != null)) {
       WebAppController versionController
         = _container.getWebAppGenerator().findController(baseSegmentName);
 

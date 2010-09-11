@@ -27,7 +27,7 @@
  * @author Sam
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.DeployMXBean;

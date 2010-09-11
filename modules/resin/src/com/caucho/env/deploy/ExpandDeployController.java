@@ -47,7 +47,6 @@ import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.make.DependencyContainer;
-import com.caucho.server.deploy.RepositoryDependency;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -446,6 +445,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       Path pwd = getRootDirectory();
 
       pwd.mkdirs();
+      
+      removeExpandDirectory(pwd);
 
       if (log.isLoggable(Level.FINE)) {
         log.fine(this + " extract from repository tag=" + tag

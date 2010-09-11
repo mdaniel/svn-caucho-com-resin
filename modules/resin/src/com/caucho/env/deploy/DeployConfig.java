@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.env.deploy;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
@@ -37,7 +37,6 @@ import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.RawString;
 import com.caucho.config.types.FileSetType;
-import com.caucho.env.deploy.DeployMode;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 

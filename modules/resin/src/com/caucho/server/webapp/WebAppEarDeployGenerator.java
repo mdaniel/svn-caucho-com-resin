@@ -28,8 +28,8 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.deploy.DeployContainer;
-import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.server.e_app.EarDeployController;
 import com.caucho.server.e_app.EarDeployGenerator;
 

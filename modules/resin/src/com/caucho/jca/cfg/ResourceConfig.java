@@ -29,7 +29,7 @@
 
 package com.caucho.jca.cfg;
 
-import com.caucho.server.deploy.DeployConfig;
+import com.caucho.env.deploy.DeployConfig;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;

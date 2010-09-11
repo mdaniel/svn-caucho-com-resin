@@ -46,6 +46,7 @@ import com.caucho.env.deploy.EnvironmentDeployInstance;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.broker.HempBrokerManager;
+import com.caucho.http.log.AccessLog;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.EnvironmentBean;
@@ -58,6 +59,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationBuilder;
+import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.e_app.EarDeployGenerator;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.ErrorPage;
@@ -393,6 +395,12 @@ public class Host
     return _rootDirectory;
   }
   
+  @Configurable
+  public void setAccessLog(AccessLog log)
+  {
+    _webAppContainer.setAccessLog(log);
+  }
+  
   /**
    * Sets the doc dir.
    */
@@ -481,6 +489,12 @@ public class Host
     throws Exception
   {
     getWebAppContainer().addEarDeploy(earDeploy);
+  }
+  
+  @Configurable
+  public void addEarDefault(EarConfig config)
+  {
+    getWebAppContainer().addEarDefault(config);
   }
 
   /**

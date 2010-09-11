@@ -385,9 +385,9 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
   public boolean hasError()
   {
     if (_response instanceof CauchoResponse)
-      ((CauchoResponse) _response).hasError();
-
-    return false;
+      return ((CauchoResponse) _response).hasError();
+    else
+      return false;
   }
 
   public void setHasError(boolean error)
