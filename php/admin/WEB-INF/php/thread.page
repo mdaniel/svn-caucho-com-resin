@@ -90,7 +90,7 @@ foreach ($info_list as $info) {
   $threads[] = $thread;
 }
 
-echo "<h1>Thread Dump</h1>\n"
+echo "<h1>Thread Dump"; print_help("Thread Dump"); echo "</h1>\n"
 
 $thread_group = partition_threads($threads);
 $groups = array("active", "blocked", "jni", "locking",

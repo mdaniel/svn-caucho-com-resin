@@ -31,50 +31,75 @@ $g_colors = array("#ff3030", // red
 $g_label_width = 180;
 
 function stat_graph_regexp($canvas, $width, $height,
-                           $start, $end, $pattern, $expand_height = true)
+                           $start, $end, $pattern, $label = "bottom",
+                           $mbean_server = null)
 {
   global $g_mbean_server;
-  global $g_label_width;
 
-  if (! $g_mbean_server)
+  if (! $mbean_server) {
+    $mbean_server = $g_mbean_server;
+  }
+
+  if (! $mbean_server) {
     return;
+  }
 
-  $stat = $g_mbean_server->lookup("resin:type=StatService");
+  $stat = $mbean_server->lookup("resin:type=StatService");
 
-  if (! $stat)
+  if (! $stat) {
     return;
+  }
 
   $full_names = $stat->statisticsNames();
 
   $names = preg_grep($pattern, $full_names);
   sort($names);
 
-  stat_graph($canvas, $width, $height, $start, $end, $names, $expand_height);
+  stat_graph($canvas, $width, $height, $start, $end, $names,
+             $label, $mbean_server);
 }
 
 function stat_graph($canvas, $width, $height, $start, $end, $names,
-                    $expand_height = true)
+                    $legend = "bottom", $mbean_server = null)
 {
   global $g_mbean_server;
 
-  if (! $g_mbean_server) {
+  if (! $mbean_server) {
+    $mbean_server = $g_mbean_server;
+  }
+
+  if (! $mbean_server) {
     return;
   }
 
-  $stat = $g_mbean_server->lookup("resin:type=StatService");
+  $stat = $mbean_server->lookup("resin:type=StatService");
 
   if (! $stat) {
     return;
   }
-
-  echo "<div id='$canvas' style='width:${width}px;height:${height}px'></div>\n";
 
   $label_height = 20 * sizeof($names);
 
   $date = new DateTime();
   $tz_offset = $date->getOffset() * 1000;
 
-  echo "<div id='${canvas}-legend' style='width:${width}px;height:${label_height}px'></div>\n";
+  if ($legend == "none") {
+    echo "<div id='$canvas' style='width:${width}px;height:${height}px'></div>\n";
+  }
+  else if ($legend == "right") {
+    echo "<table border='0' cellspacing='0' cellpadding='0'>\n";
+    echo "<tr><td>";
+    echo "<div id='$canvas' style='width:${width}px;height:${height}px'></div>\n";
+    echo "</td><td>";
+
+    echo "<div id='${canvas}-legend' style='width:${width}px;height:${label_height}px'></div>\n";
+    echo "</td></table>\n";
+  }
+  else {
+    echo "<div id='$canvas' style='width:${width}px;height:${height}px'></div>\n";
+
+    echo "<div id='${canvas}-legend' style='width:${width}px;height:${label_height}px'></div>\n";
+  }
 
   echo "<script id='source' language='javascript' type='text/javascript'>\n";
   echo '$(function () {' . "\n";
@@ -84,7 +109,6 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
   echo 'graphs = [];';
 
   $i = 0;
-  
   foreach ($names as $name) {
     $values = $stat->statisticsData($name, $start * 1000, $end * 1000,
                                     $step * 1000);

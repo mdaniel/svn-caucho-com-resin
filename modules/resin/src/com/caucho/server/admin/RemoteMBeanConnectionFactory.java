@@ -30,10 +30,12 @@
 package com.caucho.server.admin;
 
 import java.lang.reflect.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
 import javax.management.MBeanServerConnection;
 
 import com.caucho.config.*;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.*;
 
 /**
@@ -47,24 +49,56 @@ public class RemoteMBeanConnectionFactory {
   
   private static Constructor<?> _constructor;
   
+  private static EnvironmentLocal<RemoteMBeanConnectionFactory> _localFactory
+    = new EnvironmentLocal<RemoteMBeanConnectionFactory>();
+  
+  private ConcurrentHashMap<String,MBeanServerConnection> _connMap
+    = new ConcurrentHashMap<String,MBeanServerConnection>();
+  
   public static MBeanServerConnection create(String serverId)
   {
-    try {
-      if (_constructor == null) {
-        Class<?> cl = Class.forName("com.caucho.server.admin.RemoteMBeanServerConnection");
-
-        _constructor = cl.getConstructor(new Class[] { String.class });
-      }
-
-      return (MBeanServerConnection)  _constructor.newInstance(serverId);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (InvocationTargetException e) {
-      throw ConfigException.create(e);
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
+    return createFactory().createImpl(serverId);
+  }
+  
+  private static RemoteMBeanConnectionFactory createFactory()
+  {
+    RemoteMBeanConnectionFactory factory = _localFactory.getLevel();
+    
+    if (factory == null) {
+      factory = new RemoteMBeanConnectionFactory();
       
-      throw new ConfigException(L.l("remote mbeans require Resin Professional"));
+      _localFactory.set(factory);
     }
+    
+    return factory;
+  }
+  
+  private MBeanServerConnection createImpl(String serverId)
+  {
+    MBeanServerConnection conn = _connMap.get(serverId);
+    
+    if (conn == null) {
+      try {
+        if (_constructor == null) {
+          Class<?> cl = Class.forName("com.caucho.server.admin.RemoteMBeanServerConnection");
+
+          _constructor = cl.getConstructor(new Class[] { String.class });
+        }
+
+        conn = (MBeanServerConnection)  _constructor.newInstance(serverId);
+        
+        _connMap.put(serverId, conn);
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (InvocationTargetException e) {
+        throw ConfigException.create(e);
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+
+        throw new ConfigException(L.l("remote mbeans require Resin Professional"));
+      }
+    }
+    
+    return conn;
   }
 }

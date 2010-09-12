@@ -374,7 +374,7 @@ public class MeterService extends AbstractResinService {
     return (SemaphoreMeter) meter;
   }
 
-  protected AbstractMeter createMeter(AbstractMeter newMeter)
+  public AbstractMeter createMeter(AbstractMeter newMeter)
   {
     AbstractMeter meter = _meterMap.putIfAbsent(newMeter.getName(), newMeter);
 

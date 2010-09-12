@@ -79,6 +79,12 @@ $height = 150;
 
 echo "<table>";
 
+echo "<tr><th>Health<th>";
+echo "<tr valign='top'><td colspan='2'>";
+stat_graph_regexp("health", 300, $height, $start, $end,
+                  "/^$si\|Resin\|Health/", "right");
+echo "</td></tr>";
+
 echo "<tr><th>Request Count<th>Request Time";
 echo "<tr valign='top'><td>";
 stat_graph("request", 300, $height, $start, $end,
@@ -115,10 +121,9 @@ stat_graph("cpu", 300, $height, $start, $end,
 echo "<tr><th>Memory<th>GC Time";
 echo "<tr valign='top'><td>";
 stat_graph("memory", 300, $height, $start, $end,
-           array("$si|JVM|Memory|Heap Memory Used",
-                 "$si|JVM|Memory|Heap Memory Free",
-                 "$si|JVM|Memory|Tenured Memory Used",
-                 "$si|JVM|Memory|PermGen Memory Used"));
+           array("$si|JVM|Memory|Heap Memory Free",
+                 "$si|JVM|Memory|Tenured Memory Free",
+                 "$si|JVM|Memory|PermGen Memory Free"));
 
 echo "<td>";
 stat_graph_regexp("memory_gc", 300, $height, $start, $end,

@@ -75,7 +75,7 @@ public class ShutdownService extends AbstractResinService
    */
   public ShutdownService(ResinSystem resinSystem)
   {
-    this(resinSystem, false);
+    this(resinSystem, Alarm.isTest());
   }
 
   /**
@@ -174,8 +174,10 @@ public class ShutdownService extends AbstractResinService
   {
     // start the fail-safe thread in case the shutdown fails
     FailSafeHaltThread haltThread = _failSafeHaltThread;
-    if (haltThread != null)
+    
+    if (haltThread != null) {
       haltThread.startShutdown();
+    }
 
     _warningService.warning(msg);
   }
@@ -216,6 +218,7 @@ public class ShutdownService extends AbstractResinService
       log.warning("Shutdown Resin reason: " + exitCode);
 
       if (! _isEmbedded) {
+        Thread.dumpStack();
         System.exit(exitCode.ordinal());
       }
     }

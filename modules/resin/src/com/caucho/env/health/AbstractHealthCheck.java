@@ -61,7 +61,7 @@ public abstract class AbstractHealthCheck implements HealthCheck {
   @Override
   public String getHealthStatusMessage()
   {
-    return "";
+    return "ok";
   }
  
   @Override

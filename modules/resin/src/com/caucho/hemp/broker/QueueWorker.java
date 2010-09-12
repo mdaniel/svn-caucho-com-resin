@@ -46,27 +46,46 @@ public class QueueWorker extends TaskWorker
     = Logger.getLogger(QueueWorker.class.getName());
 
   private final HempMemoryQueue _queue;
+  
+  private volatile boolean _isRunning;
 
   public QueueWorker(HempMemoryQueue queue)
   {
     _queue = queue;
   }
+  
+  boolean isRunning()
+  {
+    return _isRunning;
+  }
 
   @Override
   public long runTask()
   {
-    // _dequeueCount.incrementAndGet();
-    Packet packet;
+    _isRunning = true;
+
+    try {
+      // _dequeueCount.incrementAndGet();
+      Packet packet;
     
-    while ((packet = _queue.dequeue()) != null) {
-      if (log.isLoggable(Level.FINEST))
-        log.finest(this + " dequeue " + packet);
+      while ((packet = _queue.dequeue()) != null) {
+        if (log.isLoggable(Level.FINEST))
+          log.finest(this + " dequeue " + packet);
 
-      packet.unparkDequeue();
+        packet.unparkDequeue();
 
-      _queue.dispatch(packet);
+        _queue.dispatch(packet);
+      }
+    
+      return -1;
+    } finally {
+      _isRunning = false;
     }
-    
-    return -1;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _queue.getJid() + "]";
   }
 }

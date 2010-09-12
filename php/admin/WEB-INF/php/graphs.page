@@ -256,7 +256,7 @@ foreach ($servers as $server) {
   echo " value='$server'>$server\n";      
 }
 echo "<br>";
-echo "Data: ";
+echo "<h2>Meters</h2>";
 
 // data selection
 /*

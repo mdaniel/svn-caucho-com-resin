@@ -235,7 +235,12 @@ public class HempMemoryQueue implements ActorStream, Closeable
   private void wakeConsumer(Packet packet)
   {
     for (QueueWorker worker : _workers) {
+      boolean isRunning = worker.isRunning();
+      
       worker.wake();
+      
+      if (! isRunning)
+        return;
     }
   }
 

@@ -394,7 +394,7 @@ function display_jmx($mbean_server, $group_mbeans)
 
       foreach ($attr_names as $attr_name) {
         echo "<tr>";
-        echo "<th>" . $attr_name . "</th>";
+        echo "<th width='200px'>" . $attr_name . "</th>";
 
         //OS X 10.6.2 JDK 1.6 fix for #3782
         try {
@@ -1071,6 +1071,11 @@ function info($name,$wiki="")
     $wiki = $name;
 
   echo $name;
+  echo "<sup><small><a href='http://wiki.caucho.com/Admin: $wiki' class='info'>?</a></small></sup>";
+}
+
+function print_help($wiki)
+{
   echo "<sup><small><a href='http://wiki.caucho.com/Admin: $wiki' class='info'>?</a></small></sup>";
 }
 

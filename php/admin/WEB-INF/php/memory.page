@@ -9,7 +9,7 @@ if (! admin_init()) {
   return;
 }
 
-echo "<h1>JVM Memory</h1>";
+echo "<h1>JVM Memory"; print_help("Memory"); echo "</h1>";
 
 echo "<div id='memory-tabs'>";
 echo "<ul>";
@@ -24,23 +24,22 @@ $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 $si = sprintf("%02d", $g_server->Index);
 
 if ($stat_service) {
-  echo "<h2>Graphs</h2>\n";
-/*  
-  echo "<p>";
-  echo "<img src='graph.php?";
-  echo "g[0][0]=$si|JVM|Memory|Heap Memory Used"
-  echo "&g[1][0]=$si|JVM|Memory|Heap Memory Free"
-  echo "&g[2][0]=$si|JVM|Memory|Tenured Memory Used"
-  echo "&g[3][0]=$si|JVM|Memory|PermGen Memory Used"
-  echo "&width=600&height=300' width='600' height='300'>\n"
-  */
+  echo "<h2>Memory Free</h2>\n";
+
   $end = time();
   $start = $end - 6 * 3600;
-  stat_graph("memory", 600, 300, $start, $end,
-             array("$si|JVM|Memory|Heap Memory Used",
-                   "$si|JVM|Memory|Heap Memory Free",
-                   "$si|JVM|Memory|Tenured Memory Used",
-                   "$si|JVM|Memory|PermGen Memory Used"));
+  stat_graph("memory", 600, 200, $start, $end,
+             array("$si|JVM|Memory|Heap Memory Free",
+                   "$si|JVM|Memory|Tenured Memory Free",
+                   "$si|JVM|Memory|PermGen Memory Free"));
+
+  echo "<h2>GC Time</h2>\n";
+
+  $end = time();
+  $start = $end - 6 * 3600;
+  stat_graph("gc", 600, 200, $start, $end,
+             array("$si|JVM|Memory|GC Time|PS MarkSweep",
+                   "$si|JVM|Memory|GC Time|PS Scavenge"));
 }
 
 $memory = $g_mbean_server->lookup("resin:type=Memory");
@@ -52,55 +51,55 @@ echo "<table class='data'>\n"
 echo "<tr>";
 echo "<th>pool</th>\n";
 echo "<th>% free</th>\n";
-echo "<th>max</th>\n";
+echo "<th>free"; print_help("Memory#free"); echo "</th>\n";
+echo "<th>used"; print_help("Memory#used"); echo "</th>\n";
+echo "<th>max"; print_help("Memory#max"); echo "</th>\n";
 echo "<th>committed</th>\n";
-echo "<th>used</th>\n";
-echo "<th>free</th>\n";
 echo "</tr>";
 
 echo "<tr class='" . row_style($row++) . "'>";
-echo "<td>CodeCache</td>";
+echo "<td>CodeCache"; print_help("Memory#CodeCache"); echo "</td>";
 echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->CodeCacheFree / $memory->CodeCacheMax) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheFree / 1e6) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheUsed / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheCommitted / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheUsed / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->CodeCacheFree / 1e6) . "</td>";
 echo "</tr>\n";
 
 echo "<tr class='" . row_style($row++) . "'>";
-echo "<td>Eden</td>";
+echo "<td>Eden"; print_help("Memory#Eden"); echo "</td>\n";
 echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->EdenFree / $memory->EdenMax) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenFree / 1e6) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenUsed / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenCommitted / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenUsed / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->EdenFree / 1e6) . "</td>";
 echo "</tr>\n";
 
 echo "<tr class='" . row_style($row++) . "'>";
-echo "<td>PermGen</td>";
+echo "<td>PermGen"; print_help("Memory#PermGen"); echo "</td>";
 echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->PermGenFree / $memory->PermGenMax) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenFree / 1e6) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenUsed / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenCommitted / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenUsed / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->PermGenFree / 1e6) . "</td>";
 echo "</tr>\n";
 
 echo "<tr class='" . row_style($row++) . "'>";
-echo "<td>Survivor</td>";
+echo "<td>Survivor"; print_help("Memory#Survivor"); echo "</td>";
 echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->SurvivorFree / $memory->SurvivorMax) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorFree / 1e6) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorUsed / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorCommitted / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorUsed / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->SurvivorFree / 1e6) . "</td>";
 echo "</tr>\n";
 
 echo "<tr class='" . row_style($row++) . "'>";
-echo "<td>Tenured</td>";
+echo "<td>Tenured"; print_help("Memory#Tenured"); echo "</td>";
 echo "<td align='right'>" . sprintf("%.2f%%", 100 * $memory->TenuredFree / $memory->TenuredMax) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredFree / 1e6) . "</td>";
+echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredUsed / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredMax / 1e6) . "</td>";
 echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredCommitted / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredUsed / 1e6) . "</td>";
-echo "<td align='right'>" . sprintf("%.2fM", $memory->TenuredFree / 1e6) . "</td>";
 echo "</tr>\n";
 
 echo "</table>";

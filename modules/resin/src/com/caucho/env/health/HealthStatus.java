@@ -10,7 +10,8 @@ package com.caucho.env.health;
  */
 public enum HealthStatus
 {
-  OK,
+  UNKNOWN,
+  FAIL,
   WARNING,
-  FAIL;
+  OK;
 }

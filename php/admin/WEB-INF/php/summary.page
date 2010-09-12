@@ -168,9 +168,13 @@ if ($mbean_server) {
 <?php
 /* graphs */
 
-$si = sprintf("%02d", $server->Index);
+$si = sprintf("%02d", $server->ServerIndex);
 // $si = sprintf("%02d", $g_server_index);
 $stat_service = $mbean_server->lookup("resin:type=StatService");
+
+echo "<h2>Health</h2>";
+
+display_health_status();
 
 if ($stat_service) {
   echo "<h2>Graphs</h2>\n";
@@ -556,6 +560,91 @@ function conn_time_cmp($conn_a, $conn_b)
 
 recent_messages();
 
+function display_health_status()
+{
+  global $g_mbean_server;
+
+  $health = $g_mbean_server->lookup("resin:type=HealthCheck,name=Resin");
+      
+  $is_health = $health;
+
+  echo "<table border='0'>";
+  echo "<tr><td>";
+
+  echo "<span id='sw_health' class='switch'></span>";
+
+  echo "</td><td>";
+
+  if (! $health) {
+    echo "n/a";
+  }
+  else if ($health->Status == "OK") {
+    print_ok("");
+    echo " health " . $health->Status;
+  }
+  else if ($health->Status == "FAIL") {
+    print_fail("health " . $health->Status);
+  }
+  else {
+    echo  "health " . $health->Status;
+  }
+
+  echo "</td></tr>";
+
+  if ($g_mbean_server && $health) {
+    $health_list = $g_mbean_server->query("resin:type=HealthCheck,*");
+    foreach ($health_list as $s_health) {
+      echo "<tr class='toggle-sw_health'>";
+      echo "<td>";
+      echo "</td>";
+      echo "<td>";
+
+      if ($s_health->Status == "FAIL") {
+        print_fail(" " . $s_health->Name);
+      }
+      else if ($s_health->Status == "OK") {
+        print_ok(""); echo " " . $s_health->Name;
+      }
+      else {
+        print_warn(" " . $s_health->Name);
+      }
+
+      echo "</td>";
+      echo "<td>";
+      echo $s_health->Message;
+      echo "</td>";
+      echo "</tr>";
+    }
+  }
+
+  echo "</table>";
+
+  display_health_graph();
+}
+
+function display_health_graph()
+{
+  global $mbean_server;
+  global $si;
+
+  $stat_service = $mbean_server->lookup("resin:type=StatService");
+  if ($stat_service) {
+    $period = 24 * 60 * 60;
+    $end = time();
+    $start = $end - $period;
+
+    $height = 150;
+    $width = 400;
+
+    stat_graph_regexp("health", $width, $height, $start, $end,
+                      "/^$si\|Resin\|Health/", "right");
+  }
+}
+
 ?>
 
-<?php display_footer("summary.php"); ?>
+<?php
+
+  display_footer($g_page, $javascript);
+
+?>
