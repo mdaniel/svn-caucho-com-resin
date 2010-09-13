@@ -31,10 +31,7 @@ package com.caucho.env.deploy;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -45,13 +42,10 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
-import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.loader.Environment;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
-import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
 import com.caucho.vfs.Path;
@@ -514,7 +508,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   public void updateIfModified()
   {
     if (isModified()) {
-      deploy();
+      update();
     }
   }
 
