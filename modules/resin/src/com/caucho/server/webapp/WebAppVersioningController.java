@@ -155,12 +155,11 @@ public class WebAppVersioningController extends WebAppController {
     if (_isModified)
       return true;
 
-    VersionEntry entry = _generator.getVersionEntry(getId());
-
+    // VersionEntry entry = _generator.getVersionEntry(getId());
+/*
     if (entry == null)
       return false;
-
-
+*/
     return false;
   }
 
@@ -182,7 +181,7 @@ public class WebAppVersioningController extends WebAppController {
         
         WebAppController newPrimaryController = null;
         
-        String versionName = _generator.getPrimaryVersion(getId());
+        String versionName = null;//_generator.getPrimaryVersion(getId());
 
         if (versionName != null) {
           newPrimaryController

@@ -93,19 +93,28 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   
   private ArrayList<String> _requireFiles = new ArrayList<String>();
 
-  private TreeSet<String> _controllerNames = new TreeSet<String>();
-  
   private FileSetType _expandCleanupFileSet;
-
+  
+  private ExpandDirectoryManager _directoryManager;
+  private ExpandArchiveManager _archiveManager;
+  private ExpandRepositoryManager _repositoryManager;
+  
   private Alarm _alarm;
   private long _cronInterval;
 
+  //
+  // runtime values
+  //
+  
+  private ExpandManager _expandManager;
+  private Set<String> _deployedKeys = new TreeSet<String>();
+  
   private long _lastCheckTime;
   private AtomicBoolean _isChecking = new AtomicBoolean();
   private long _checkInterval = 1000L;
   private long _digest;
   private volatile boolean _isModified;
-  private volatile boolean _isDeploying;
+  private AtomicBoolean _isDeploying = new AtomicBoolean();
 
   /**
    * Creates the deploy.
@@ -201,43 +210,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       return _expandDirectory;
     else
       return _path;
-  }
-
-  /**
-   * Returns the location of an expanded archive, or null if no archive with
-   * the passed name is deployed.
-   *
-   * @param name a name, without an extension
-   */
-  public Path getExpandPath(String name)
-  {
-    if (!isDeployedKey(nameToEntryName(name)))
-      return null;
-
-    return getExpandDirectory().lookup(getExpandName(name));
-
-    /*
-    if (expandDir.isDirectory())
-      return expandDir;
-
-    Path extPath = getExpandDirectory().lookup(name + _extension);
-    
-    if (extPath.isDirectory())
-      return extPath;
-    else
-      return expandDir;
-    */
-  }
-
-  /**
-   * Returns the combination of prefix, name, and suffix used for expanded
-   * archives.
-   *
-   * @return
-   */
-  protected String getExpandName(String name)
-  {
-    return getExpandPrefix() + name + getExpandSuffix();
   }
 
   /**
@@ -391,6 +363,75 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   }
 
   /**
+   * Configuration checks on init.
+   */
+  @Override
+  protected void initImpl()
+    throws ConfigException
+  {
+    super.initImpl();
+
+    if (getExpandDirectory() == null)
+      throw new ConfigException(L.l("<expand-directory> must be specified for deployment of archive expansion."));
+
+    if (getArchiveDirectory() == null)
+      throw new ConfigException(L.l("<archive-directory> must be specified for deployment of archive expansion."));
+    
+    String id = getId();
+    
+    _directoryManager = new ExpandDirectoryManager(id, 
+                                                   getExpandDirectory(),
+                                                   getExpandPrefix(),
+                                                   getExpandSuffix(),
+                                                   _requireFiles);
+    
+    _archiveManager = new ExpandArchiveManager(id,
+                                               getArchiveDirectory(),
+                                               getExtension());
+    
+    _repositoryManager = new ExpandRepositoryManager(id);
+  }
+
+  /**
+   * Starts the deploy.
+   */
+  @Override
+  protected void startImpl()
+  {
+    super.startImpl();
+    
+    deploy();
+    
+    handleAlarm(_alarm);
+  }
+
+  /**
+   * Returns the location of an expanded archive, or null if no archive with
+   * the passed name is deployed.
+   *
+   * @param name a name, without an extension
+   */
+  public Path getExpandPath(String name)
+  {
+    if (! isDeployedKey(nameToKey(name)))
+      return null;
+
+    return _directoryManager.getExpandPath(nameToKey(name));
+
+    /*
+    if (expandDir.isDirectory())
+      return expandDir;
+
+    Path extPath = getExpandDirectory().lookup(name + _extension);
+    
+    if (extPath.isDirectory())
+      return extPath;
+    else
+      return expandDir;
+    */
+  }
+
+  /**
    * Returns true if the deployment has modified.
    */
   @Override
@@ -409,9 +450,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
       _lastCheckTime = Alarm.getCurrentTime();
 
-      long digest = getDigest();
-
-      _isModified = _digest != digest;
+      _isModified = _expandManager.isModified();
 
       return _isModified;
     } catch (Exception e) {
@@ -429,80 +468,19 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   @Override
   public boolean logModified(Logger log)
   {
-    long digest = getDigest();
-
-    if (_digest != digest) {
-      String reason = "";
-      
-      String name = getClass().getName();
-      int p = name.lastIndexOf('.');
-      if (p > 0)
-        name = name.substring(p + 1);
-    
-      Path archiveDirectory = getArchiveDirectory();
-      if (archiveDirectory != null)
-        reason = name + "[" + archiveDirectory.getNativePath() + "] is modified";
-    
-      Path expandDirectory = getExpandDirectory();
-      if (expandDirectory != null
-          && ! expandDirectory.equals(archiveDirectory)) {
-        if (! "".equals(reason))
-          reason = reason + " or ";
-
-        reason = name + "[" + expandDirectory.getNativePath() + "] is modified";
-      }
-
-      log.info(reason);
-
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Configuration checks on init.
-   */
-  @Override
-  protected void initImpl()
-    throws ConfigException
-  {
-    super.initImpl();
-
-    if (getExpandDirectory() == null)
-      throw new ConfigException(L.l("<expand-directory> must be specified for deployment of archive expansion."));
-
-    if (getArchiveDirectory() == null)
-      throw new ConfigException(L.l("<archive-directory> must be specified for deployment of archive expansion."));
-  }
-
-  /**
-   * Starts the deploy.
-   */
-  @Override
-  protected void startImpl()
-  {
-    super.startImpl();
-    
-    handleAlarm(_alarm);
+    return _expandManager.logModified(log);
   }
 
   /**
    * Returns the deployed keys.
    */
   @Override
-  protected void fillDeployedKeys(Set<String> keys)
+  protected void fillDeployedNames(Set<String> names)
   {
-    if (isModified()) {
-      try {
-        deployStart();
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    for (String name : _controllerNames) {
-      keys.add(name);
+    updateIfModified();
+    
+    for (String key : _deployedKeys) {
+      names.add(keyToName(key));
     }
   }
 
@@ -511,47 +489,43 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   protected boolean isDeployedKey(String key)
   {
-    return _controllerNames.contains(key);
+    return _deployedKeys.contains(key);
   }
 
   /**
-   * Forces an update.
+   * Creates a new entry.
    */
-  @Override
-  public final void update()
-  {
-    // force modify check
-    _lastCheckTime = 0;
+  abstract protected E createController(ExpandVersion version);
 
-    request();
+  protected String keyToName(String key)
+  {
+    return key;
+  }
+
+  protected String nameToKey(String name)
+  {
+    return name;
   }
   
-
   /**
    * Redeploys if modified.
    */
   @Override
-  public void request()
+  public void updateIfModified()
   {
     if (isModified()) {
-      try {
-        deployStart();
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
+      deploy();
     }
   }
 
   /**
    * Deploys the objects.
    */
-  private void deployStart()
-    throws Exception
+  @Override
+  public final void update()
   {
-    boolean isDeploying = false;
-
-    if (! _isDeploying)
-      log.finer(this + " deploy/start " + _isDeploying);
+    if (! _isDeploying.compareAndSet(false, true))
+      return;
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -559,49 +533,50 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     try {
       thread.setContextClassLoader(_loader);
       
-      ArrayList<String> updatedNames = null;
+      Set<String> oldKeys = _deployedKeys;
+      
+      deploy();
+      
+      Set<String> newKeys = _deployedKeys;
 
-      synchronized (this) {
-        if (_isDeploying)
-          return;
-        else {
-          _isDeploying = true;
-          isDeploying = true;
-        }
+      if (oldKeys.equals(newKeys))
+        return;
 
-        TreeSet<String> entryNames = findEntryNames();
+      ArrayList<String> updatedKeys = new ArrayList<String>();
 
-        _digest = getDigest();
-
-        if (! _controllerNames.equals(entryNames)) {
-          updatedNames = new ArrayList<String>();
-
-          for (String name : _controllerNames) {
-            if (! entryNames.contains(name))
-              updatedNames.add(name);
-          }
-
-          for (String name : entryNames) {
-            if (! _controllerNames.contains(name))
-              updatedNames.add(name);
-          }
-
-          _controllerNames = entryNames;
-        }
+      for (String key : oldKeys) {
+        if (! newKeys.contains(key))
+          updatedKeys.add(key);
       }
 
-      for (int i = 0; updatedNames != null && i < updatedNames.size(); i++) {
-        String name = updatedNames.get(i);
+      for (String key : newKeys) {
+        if (! oldKeys.contains(key))
+          updatedKeys.add(key);
+      }
 
-        getDeployContainer().update(name);
+      for (String key : updatedKeys) {
+        getDeployContainer().update(keyToName(key));
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
       
-      if (isDeploying) {
-        _isModified = false;
-        _isDeploying = false;
-      }
+      _isDeploying.set(false);
+    }
+  }
+  
+  private void deploy()
+  {
+    try {
+      _expandManager = new ExpandManager(getId(),
+                                         _directoryManager,
+                                         _archiveManager,
+                                         _repositoryManager);
+      
+      _deployedKeys = _expandManager.getBaseKeySet();
+      
+      _isModified = false;
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -609,23 +584,33 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    * Finds the matching entry.
    */
   @Override
-  public E generateController(String name)
+  public final E generateController(String name)
   {
-    request();
+    updateIfModified();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(getParentClassLoader());
-
-      E controller = createController(name);
+      
+      String key = nameToKey(name);
+      
+      ExpandVersion version = _expandManager.getPrimaryVersion(key);
+      
+      if (version == null)
+        version = _expandManager.getVersion(key);
+      
+      if (version == null)
+        return null;
+      
+      E controller = createController(version);
 
       if (controller == null)
         return null;
 
       controller.setExpandCleanupFileSet(_expandCleanupFileSet);
 
-      _controllerNames.add(name); // server/1d19
+      // _controllerNames.add(name); // server/1d19
       
       return controller;
     } finally {
@@ -643,384 +628,16 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     update();
   }
 
-  /**
-   * Returns the digest of the expand and archive directories.
-   */
-  private long getDigest()
-  {
-    long digest = 0;
-    
-    long archiveDigest = 0;
-    
-    Path archiveDirectory = getArchiveDirectory();
-    if (archiveDirectory != null)
-      archiveDigest = archiveDirectory.getCrc64();
-
-    digest = Crc64.generate(digest, archiveDigest);
-    
-    long expandDigest = 0;
-    
-    Path expandDirectory = getExpandDirectory();
-    if (expandDirectory != null)
-      expandDigest = expandDirectory.getCrc64();
-    
-    digest = Crc64.generate(digest, expandDigest);
-    
-    digest = calculateRepositoryDigest(digest);
-
-    return digest;
-  }
-
-  private long calculateRepositoryDigest(long digest)
-  {
-    String prefix = getId() + "/";
-    
-    ArrayList<String> tags = new ArrayList<String>();
-    Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
-
-    for (String key : tagMap.keySet()) {
-      if (key.startsWith(prefix))
-        tags.add(key);
-    }
-
-    Collections.sort(tags);
-
-    for (String tag : tags) {
-      digest = Crc64.generate(digest, tag);
-
-      RepositoryTagEntry entry = tagMap.get(tag);
-
-      if (entry.getRoot() != null)
-        digest = Crc64.generate(digest, entry.getRoot());
-    }
-
-    return digest;
-  }
-
-  public VersionEntry getVersionEntry(String name)
-  {
-    if (! isVersioning())
-      return null;
-    
-    TreeMap<String,VersionEntry> map = buildVersionMap();
-
-    return map.get(name);
-  }
-
-  public VersionEntry getVersionEntryByRoot(String root)
-  {
-    if (! isVersioning())
-      return null;
-    
-    TreeMap<String,VersionEntry> map = buildVersionMap();
-
-    for (Map.Entry<String,VersionEntry> mapEntry : map.entrySet()) {
-      VersionEntry vEntry = mapEntry.getValue();
-
-      if (vEntry.getRoot().equals(root)
-          && ! vEntry.getContextPath().equals(vEntry.getBaseContextPath())) {
-        return vEntry;
-      }
-    }
-
-    return null;
-  }
-  
-  /**
-   * Return the entry names for all deployed objects.
-   */
-  private TreeSet<String> findEntryNames()
-    throws IOException
-  {
-    TreeSet<String> entryNames = new TreeSet<String>();
-
-    addArchiveEntryNames(entryNames);
-    addExpandEntryNames(entryNames);
-    addRepositoryEntryNames(entryNames);
-
-    return entryNames;
-  }
-  
-  /**
-   * Return the entry names for all deployed objects.
-   */
-  private void addArchiveEntryNames(TreeSet<String> entryNames)
-    throws IOException
-  {
-    Path archiveDirectory = getArchiveDirectory();
-
-    if (archiveDirectory == null)
-      return;
-
-    String []entryList = archiveDirectory.list();
-
-    // collect all the new entries
-    // loop:
-    for (int i = 0; i < entryList.length; i++) {
-      String archiveName = entryList[i];
-
-      Path archivePath = archiveDirectory.lookup(archiveName);
-
-      String entryName = null;
-      
-      if (! archivePath.canRead())
-        continue;
-      else
-        entryName = archiveNameToEntryName(archiveName);
-
-      if (entryName != null) {
-        entryNames.add(entryName);
-
-        if (_isVersioning) {
-          int p = entryName.lastIndexOf('-');
-
-          if (p >= 0) {
-            entryName = entryName.substring(0, p);
-
-            if (! entryNames.contains(entryName))
-              entryNames.add(entryName);
-          }
-        }
-      }
-    }
-  }
-  
-  /**
-   * Return the entry names for all deployed objects.
-   */
-  private void addExpandEntryNames(TreeSet<String> entryNames)
-    throws IOException
-  {
-    Path expandDirectory = getExpandDirectory();
-
-    if (expandDirectory == null)
-      return;
-    
-    String []entryExpandList = expandDirectory.list();
-
-    // collect all the new war expand directories
-    //loop:
-    for (int i = 0; i < entryExpandList.length; i++) {
-      String pathName = entryExpandList[i];
-
-      /* XXX: this used to be needed to solve issues with NT
-      if (CauchoSystem.isCaseInsensitive())
-        pathName = pathName.toLowerCase();
-      */
-
-      Path rootDirectory = expandDirectory.lookup(pathName);
-      
-      String entryName = pathNameToEntryName(pathName);
-
-      if (entryName == null)
-        continue;
-      else if (entryName.endsWith(getExtension()))
-        continue;
-
-      if (! isValidDirectory(rootDirectory, pathName))
-        continue;
-
-      if (! entryNames.contains(entryName))
-        entryNames.add(entryName);
-
-      if (_isVersioning) {
-        int p = entryName.lastIndexOf('-');
-
-        if (p >= 0) {
-          entryName = entryName.substring(0, p);
-
-          if (! entryNames.contains(entryName))
-            entryNames.add(entryName);
-        }
-      }
-    }
-  }
-  
-  /**
-   * Return the entry names for all repository objects.
-   */
-  private void addRepositoryEntryNames(TreeSet<String> entryNames)
-    throws IOException
-  {
-    String prefix = getId() + "/";
-    
-    Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
-
-    for (String key : tagMap.keySet()) {
-      if (key.startsWith(prefix)) {
-        String pathName = key.substring(prefix.length());
-
-        // collect all the new repository expand directories
-        // server/12p6 make sure webapps are prefixed with a '/'
-        entryNames.add(_entryNamePrefix + pathName);
-      }
-    }
-  }
-
-  public String getPrimaryVersion(String name)
-  {
-    VersionEntry entry = getVersionEntry(name);
-
-    if (entry != null) {
-      VersionEntry versionEntry = getVersionEntryByRoot(entry.getRoot());
-
-      if (versionEntry != null)
-        return versionEntry.getContextPath();
-    }
-    
-    return null;
-  }
-  
-  /**
-   * Version map uses the repository
-   */
-  private TreeMap<String,VersionEntry> buildVersionMap()
-  {
-    String prefix = getId() + "/";
-    
-    Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
-
-    TreeMap<String,VersionEntry> versionMap;
-    versionMap = new TreeMap<String,VersionEntry>();
-
-    for (Map.Entry<String,RepositoryTagEntry> entry : tagMap.entrySet()) {
-      String tagName = entry.getKey();
-
-      if (tagName.startsWith(prefix)) {
-        String name = tagName.substring(prefix.length());
-        String baseName = name;
-
-        int p = baseName.lastIndexOf('-');
-        if (p > 0 && p + 1 < baseName.length()
-            && '0' <= baseName.charAt(p + 1)
-            && baseName.charAt(p + 1) <= '9') {
-          baseName = baseName.substring(0, p);
-        }
-
-        // XXX: url-prefix?
-        String versionContextPath = "/" + name;
-        String baseContextPath = "/" + baseName;
-
-        VersionEntry versionEntry
-          = new VersionEntry(name, versionContextPath, baseContextPath,
-                             entry.getValue().getTagEntryHash(),
-                             entry.getValue().getRoot());
-        
-        versionMap.put(versionContextPath, versionEntry);
-      }
-    }
-
-    return versionMap;
-  }
-
-  protected boolean isValidDirectory(Path rootDirectory, String pathName)
-  {
-    
-    if (! rootDirectory.isDirectory() || pathName.startsWith(".")) {
-      return false;
-    }
-
-    if (pathName.equalsIgnoreCase("web-inf")
-        || pathName.equalsIgnoreCase("meta-inf"))
-      return false;
-
-    for (int j = 0; j < _requireFiles.size(); j++) {
-      String file = _requireFiles.get(j);
-
-      if (! rootDirectory.lookup(file).canRead())
-        return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Converts the expand-path name to the entry name, returns null if
-   * the path name is not valid.
-   */
-  protected String pathNameToEntryName(String name)
-  {
-    if (_expandPrefix == null) {
-    }
-    else if (_expandPrefix.equals("")
-             && (name.startsWith("_")
-                 || name.startsWith(".")
-                 || name.endsWith(".") && CauchoSystem.isWindows()
-                 || name.equalsIgnoreCase("META-INF")
-                 || name.equalsIgnoreCase("WEB-INF"))) {
-      return null;
-    }
-    else if (name.startsWith(_expandPrefix)) {
-      name = name.substring(_expandPrefix.length());
-    }
-    else
-      return null;
-
-
-    if (_expandSuffix == null || "".equals(_expandSuffix)) {
-    }
-    else if (name.endsWith(_expandSuffix))
-      return name.substring(0, name.length() - _expandSuffix.length());
-    else
-      return null;
-
-    if (_extension != null && name.endsWith(_extension))
-      return name.substring(0, name.length() - _extension.length());
-    else
-      return name;
-  }
-
-  /**
-   * Converts the archive name to the entry name, returns null if
-   * the archive name is not valid.
-   */
-  protected String entryNameToArchiveName(String entryName)
-  {
-    return entryName + getExtension();
-  }
-
-  /**
-   * Converts the entry name to the archive name, returns null if
-   * the entry name is not valid.
-   */
-  protected String archiveNameToEntryName(String archiveName)
-  {
-    if (! archiveName.endsWith(_extension))
-      return null;
-    else {
-      int sublen = archiveName.length() - _extension.length();
-      return pathNameToEntryName(archiveName.substring(0, sublen));
-    }
-  }
-
-  /**
-   * Creates a new entry.
-   */
-  abstract protected E createController(String name);
-
-  private String nameToEntryName(String name)
-  {
-    return archiveNameToEntryName(name + getExtension());
-  }
-
-  private String entryNameToName(String name)
-  {
-    String archiveName = entryNameToArchiveName(name);
-
-    if (archiveName == null)
-      return null;
-    else
-      return archiveName.substring(0, archiveName.length() - getExtension().length());
-  }
-
   public String[] getNames()
   {
-    String[] names = new String[_controllerNames.size()];
+    Set<String> deployedKeys = _deployedKeys;
+    
+    String[] names = new String[deployedKeys.size()];
 
     int i = 0;
 
-    for (String controllerName : _controllerNames) {
-      names[i++] = entryNameToName(controllerName);
+    for (String key : deployedKeys) {
+      names[i++] = key;
     }
 
     return names;
@@ -1030,7 +647,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   {
     StringBuilder builder = new StringBuilder();
 
-    for (String name : getNames()) {
+    for (String name : _deployedKeys) {
       if (builder.length() > 0)
         builder.append(", ");
 
@@ -1046,17 +663,17 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Deploy the archive.
    */
-  public boolean deploy(String name)
+  public boolean deploy(String key)
   {
     update();
     
     DeployController<?> controller
-      = getDeployContainer().findController(nameToEntryName(name));
+      = getDeployContainer().findController(keyToName(key));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
         log.finer(L.l("{0} can't deploy '{1}' because it's not a known controller: {2}",
-                      this, name, getNamesAsString()));
+                      this, key, getNamesAsString()));
 
       return false;
     }
@@ -1070,7 +687,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   public boolean start(String name)
   {
     DeployController<?> controller
-      = getDeployContainer().findController(nameToEntryName(name));
+      = getDeployContainer().findController(keyToName(name));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
@@ -1093,7 +710,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   public Throwable getConfigException(String name)
   {
     ExpandDeployController<?> controller
-      = getDeployContainer().findController(nameToEntryName(name));
+      = getDeployContainer().findController(keyToName(name));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
@@ -1113,7 +730,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   public boolean stop(String name)
   {
     DeployController<?> controller
-      = getDeployContainer().findController(nameToEntryName(name));
+      = getDeployContainer().findController(keyToName(name));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
@@ -1135,7 +752,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   public boolean undeploy(String name)
   {
     DeployController<?> controller
-      = getDeployContainer().findController(nameToEntryName(name));
+      = getDeployContainer().findController(keyToName(name));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
@@ -1176,7 +793,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
         log.log(Level.FINE, ex.toString(), ex);
     }
 
-    getDeployContainer().update(nameToEntryName(name));
+    getDeployContainer().update(keyToName(name));
 
     return true;
   }
@@ -1213,7 +830,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     // XXX: tck, but no QA test
     // server/10ka
     if (DeployMode.AUTOMATIC.equals(getRedeployMode()) && isActive()) {
-      request();
+      updateIfModified();
     }
   }
 
@@ -1256,11 +873,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   @Override
   public String toString()
   {
-    String name = getClass().getName();
-    int p = name.lastIndexOf('.');
-    if (p > 0)
-      name = name.substring(p + 1);
-    
-    return name + "[" + getExpandDirectory() + "]";
+    return getClass().getSimpleName() + "[" + getExpandDirectory() + "]";
   }
 }

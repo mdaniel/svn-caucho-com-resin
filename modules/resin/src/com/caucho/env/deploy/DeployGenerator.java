@@ -161,6 +161,7 @@ abstract public class DeployGenerator<E extends DeployControllerApi<?>>
   /**
    * Returns true if the deployment has modified.
    */
+  @Override
   public boolean logModified(Logger log)
   {
     return false;
@@ -209,7 +210,7 @@ abstract public class DeployGenerator<E extends DeployControllerApi<?>>
   /**
    * lazy-start
    */
-  public void request()
+  public void updateIfModified()
   {
   }
 
@@ -221,16 +222,16 @@ abstract public class DeployGenerator<E extends DeployControllerApi<?>>
   }
 
   /**
-   * Returns the deployed keys.
+   * Returns the deployed names.
    */
-  protected void fillDeployedKeys(Set<String> keys)
+  protected void fillDeployedNames(Set<String> names)
   {
   }
 
   /**
    * Generates the controller.
    */
-  protected E generateController(String key)
+  protected E generateController(String name)
   {
     return null;
   }
@@ -239,7 +240,7 @@ abstract public class DeployGenerator<E extends DeployControllerApi<?>>
    * Merges the entry with other matching entries, returning the
    * new entry.
    */
-  protected E mergeController(E controller, String key)
+  protected E mergeController(E controller, String name)
   {
     return controller;
   }

@@ -39,6 +39,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.env.deploy.DeployContainer;
 import com.caucho.env.deploy.DeployMode;
 import com.caucho.env.deploy.ExpandDeployGenerator;
+import com.caucho.env.deploy.ExpandVersion;
 import com.caucho.env.deploy.VersionEntry;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.loader.Environment;
@@ -200,12 +201,6 @@ public class WebAppExpandDeployGenerator
     _webAppDefaults.add(config);
   }
 
-  @Override
-  protected void initImpl()
-  {
-    super.initImpl();
-  }
-
   /**
    * Returns the log.
    */
@@ -219,9 +214,9 @@ public class WebAppExpandDeployGenerator
    * Returns the deployed keys.
    */
   @Override
-  protected void fillDeployedKeys(Set<String> keys)
+  protected void fillDeployedNames(Set<String> keys)
   {
-    super.fillDeployedKeys(keys);
+    super.fillDeployedNames(keys);
 
     for (WebAppConfig cfg : _webAppConfigMap.values()) {
       if (cfg.getContextPath() != null)
@@ -246,36 +241,24 @@ public class WebAppExpandDeployGenerator
    * Returns the new controller.
    */
   @Override
-  protected WebAppController createController(String name)
+  protected WebAppController createController(ExpandVersion version)
   {
-    if (! name.startsWith(_urlPrefix))
-      return null;
+    String key = version.getKey();
+    String contextPath = keyToName(key);
 
-    String segmentName = buildSegmentName(name);
-
-    if (segmentName == null)
-      return null;
-
-    String baseSegmentName = buildBaseSegmentName(segmentName);
-    String version = buildVersion(segmentName);
-
-    String contextPath = buildContextPath(segmentName);
-    String baseContextPath = buildContextPath(baseSegmentName);
-
-    String repositoryTag = buildRepositoryTag(segmentName);
-    String baseRepositoryTag = buildRepositoryTag(baseSegmentName);
-
-    Path rootDirectory = buildRootDirectory(segmentName);
-    Path jarPath = buildJarPath(segmentName);
+    String baseKey = version.getBaseKey();
+    String baseContextPath = keyToName(baseKey);
+    
+    Path rootDirectory = getExpandPath(key);
+    Path archivePath = getArchivePath(key);
 
     WebAppVersioningController baseController = null;
     
-    String id = getId() + segmentName;
-    String baseId = getId() + baseSegmentName;
+    String id = getId() + "/" + key;
+    // String baseId = getId() + baseSegmentName;
 
-    if (contextPath.equals(baseContextPath)
-        && (getRepository() != null
-            && getRepository().getTagContentHash(baseId) != null)) {
+    /*
+    if (contextPath.equals(baseContextPath)) {
       baseController
         = new WebAppVersioningController(baseId,
                                          contextPath,
@@ -291,21 +274,23 @@ public class WebAppExpandDeployGenerator
             && getRepository().getTagContentHash(id) == null)) {
       return baseController;
     }
+    */
 
     WebAppController controller
       = new WebAppController(id, rootDirectory, _container,
                              contextPath, baseContextPath);
 
-    controller.setArchivePath(jarPath);
-    controller.setWarName(segmentName.substring(1));
+    controller.setArchivePath(archivePath);
+    controller.setWarName(key);
 
     controller.setParentWebApp(_parent);
 
     controller.setDynamicDeploy(true);
     controller.setSourceType("expand");
 
-    controller.setVersion(version);
+    controller.setVersion(version.getVersion());
 
+    /*
     if (baseController != null) {
       // server/1h52
       initBaseController(controller);
@@ -323,6 +308,7 @@ public class WebAppExpandDeployGenerator
         ((WebAppVersioningController) versionController).setModified(true);
       }
     }
+    */
 
     return controller;
   }
@@ -460,6 +446,7 @@ public class WebAppExpandDeployGenerator
     }
   }
 
+  /*
   private WebAppController createVersioningController(String name,
                                                       String contextPath,
                                                       String segmentName)
@@ -489,17 +476,10 @@ public class WebAppExpandDeployGenerator
                                           segmentName,
                                           baseContextPath,
                                           this, _container);
-
-    /*
-    WebAppController controller
-      = new WebAppVersioningController(_urlPrefix + contextPath,
-                                       _urlPrefix + contextPath,
-                                       baseName, this, _container);
-
-    return controller;
-    */
   }
+  */
 
+  /*
   private WebAppController makeController(String name,
                                           String contextPath,
                                           String versionName)
@@ -577,6 +557,7 @@ public class WebAppExpandDeployGenerator
 
     return controller;
   }
+  */
 
   /**
    * Returns the current array of webApp entries.
@@ -635,6 +616,7 @@ public class WebAppExpandDeployGenerator
   /**
    * Converts the name.
    */
+  /*
   @Override
   protected String pathNameToEntryName(String name)
   {
@@ -666,7 +648,35 @@ public class WebAppExpandDeployGenerator
     else
       return _urlPrefix + "/" + entryName;
   }
+  */
+  
+  @Override
+  protected String keyToName(String key)
+  {
+    if (key.equalsIgnoreCase("root"))
+      return _urlPrefix;
+    else
+      return _urlPrefix + "/" + key;
+  }
+  
+  @Override
+  protected String nameToKey(String name)
+  {
+    if (! name.startsWith(_urlPrefix))
+      return null;
+    
+    String tail = name.substring(_urlPrefix.length());
+    
+    if (tail.startsWith("/"))
+      tail = tail.substring(1);
+    
+    if (tail.equals(""))
+      return "ROOT";
+    else
+      return tail;
+  }
 
+  /*
   @Override
   protected String entryNameToArchiveName(String entryName)
   {
@@ -679,6 +689,7 @@ public class WebAppExpandDeployGenerator
     else
       return null;
   }
+  */
 
   /**
    * Destroy the deployment.

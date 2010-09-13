@@ -246,7 +246,7 @@ public class WebAppSingleDeployGenerator
   /**
    * Returns the deployed keys.
    */
-  protected void fillDeployedKeys(Set<String> keys)
+  protected void fillDeployedNames(Set<String> keys)
   {
     keys.add(_controller.getContextPath());
   }

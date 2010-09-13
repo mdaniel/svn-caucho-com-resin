@@ -32,6 +32,7 @@ package com.caucho.server.e_app;
 import com.caucho.config.ConfigException;
 import com.caucho.env.deploy.DeployContainer;
 import com.caucho.env.deploy.ExpandDeployGenerator;
+import com.caucho.env.deploy.ExpandVersion;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.inject.Module;
 import com.caucho.server.cluster.Server;
@@ -130,47 +131,22 @@ public class EarDeployGenerator
 
     _admin.register();
   }
-
-  /**
-   * Converts the archive name to the entry name, returns null if
-   * the path name is not a valid entry name.
-   */
-  protected String archiveNameToEntryName(String archiveName)
-  {
-    if (! archiveName.endsWith(".ear"))
-      return null;
-    else
-      return archiveName.substring(0, archiveName.length() - 4);
-  }
-  
+ 
   /**
    * Returns the current array of application entries.
    */
-  public EarDeployController createController(String name)
+  @Override
+  public EarDeployController createController(ExpandVersion version)
   {
-    String archiveName = name + getExtension();
-    Path archivePath = getArchiveDirectory().lookup(archiveName);
-
-    Path rootDirectory;
-
-    String tag = getId() + "/" + name;
-
-    if (archivePath.isDirectory()) {
-      rootDirectory = getExpandDirectory().lookup(archiveName);
-      archivePath = null;
-    }
-    else if (getRepository().getTagContentHash(tag) != null) {
-      rootDirectory = getExpandDirectory().lookup(getExpandName(name));
-    }
-    else {
-      rootDirectory = getExpandDirectory().lookup(getExpandName(name));
-
-      if (! archivePath.canRead() && ! rootDirectory.canRead())
-        return null;
-    }
+    String key = version.getKey();
+    
+    String tag = getId() + "/" + key;
+    
+    Path rootDirectory = getExpandPath(key);
+    Path archivePath = getArchivePath(key);
 
     EarDeployController controller
-      = new EarDeployController(tag, rootDirectory, name, 
+      = new EarDeployController(tag, rootDirectory, key, 
                                 _parentContainer, null);
 
     controller.setArchivePath(archivePath);

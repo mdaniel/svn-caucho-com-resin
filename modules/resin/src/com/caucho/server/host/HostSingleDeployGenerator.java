@@ -155,7 +155,7 @@ public class HostSingleDeployGenerator
    * Returns the deployed keys.
    */
   @Override
-  protected void fillDeployedKeys(Set<String> keys)
+  protected void fillDeployedNames(Set<String> keys)
   {
     keys.add(_controller.getName());
   }

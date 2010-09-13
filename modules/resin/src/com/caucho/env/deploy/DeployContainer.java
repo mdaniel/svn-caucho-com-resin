@@ -79,7 +79,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   public void add(DeployGenerator<C> generator)
   {
     Set<String> names = new TreeSet<String>();
-    generator.fillDeployedKeys(names);
+    generator.fillDeployedNames(names);
 
     _deployListGenerator.add(generator);
 
@@ -94,7 +94,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   public void remove(DeployGenerator<C> generator)
   {
     Set<String> names = new TreeSet<String>();
-    generator.fillDeployedKeys(names);
+    generator.fillDeployedNames(names);
 
     _deployListGenerator.remove(generator);
 
@@ -154,7 +154,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
 
     HashSet<String> keys = new LinkedHashSet<String>();
 
-    _deployListGenerator.fillDeployedKeys(keys);
+    _deployListGenerator.fillDeployedNames(keys);
 
     for (String key : keys) {
       startImpl(key);

@@ -38,6 +38,7 @@ import com.caucho.el.MapVariableResolver;
 import com.caucho.env.deploy.DeployContainer;
 import com.caucho.env.deploy.DeployMode;
 import com.caucho.env.deploy.ExpandDeployGenerator;
+import com.caucho.env.deploy.ExpandVersion;
 import com.caucho.vfs.Path;
 
 import javax.el.ELContext;
@@ -148,8 +149,11 @@ public class HostExpandDeployGenerator
   /**
    * Returns the current array of application entries.
    */
-  public HostController createController(String name)
+  @Override
+  public HostController createController(ExpandVersion version)
   {
+    String name = version.getKey();
+    
     // server/13g3
     if (name.equals(""))
       return null;
@@ -163,7 +167,8 @@ public class HostExpandDeployGenerator
 
     String hostName = name;
 
-    String id = "production/host/" + hostName;
+    String stage = _container.getServer().getStage();
+    String id = stage + "/host/" + hostName;
     
     if ("default".equals(hostName))
       hostName = "";
@@ -174,12 +179,14 @@ public class HostExpandDeployGenerator
     Path jarPath = getArchiveDirectory().lookup("./" + name + ".jar");
     controller.setArchivePath(jarPath);
     
+    /*
     if (rootDirectory.isDirectory()
         && ! isValidDirectory(rootDirectory, name))
       return null;
     else if (! rootDirectory.isDirectory()
              && ! jarPath.isFile())
       return null;
+      */
 
     try {
       String hostNamePattern = getHostName();
@@ -210,6 +217,7 @@ public class HostExpandDeployGenerator
   /**
    * Adds configuration to the current controller
    */
+  @Override
   protected HostController mergeController(HostController controller,
                                            String key)
   {

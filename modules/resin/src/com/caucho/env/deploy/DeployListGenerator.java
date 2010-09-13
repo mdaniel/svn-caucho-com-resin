@@ -106,10 +106,10 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
    * XXX:
    */
   @Override
-  public void request()
+  public void updateIfModified()
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
-      _generatorList.get(i).request();
+      _generatorList.get(i).updateIfModified();
     }
   }
 
@@ -127,10 +127,10 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
    * Returns the deployed keys.
    */
   @Override
-  public void fillDeployedKeys(Set<String> keys)
+  public void fillDeployedNames(Set<String> keys)
   {
     for (int i = 0; i < _generatorList.size(); i++) {
-      _generatorList.get(i).fillDeployedKeys(keys);
+      _generatorList.get(i).fillDeployedNames(keys);
     }
   }
 
