@@ -702,10 +702,6 @@ if (! empty($server)) {
   </td>
   <td valign='top' colspan='2'>
 
-  <div id="busyIndicator">
-    <img src="images/loading.gif"/>
-  </div>
-
   <div>
 <?php
   if (! $server && $g_server_id) {
@@ -718,8 +714,9 @@ if (! empty($server)) {
 
 function javascript_create_tab($tab_name)
 {
-  $javascript .= '$("#' . $tab_name . '").tabs().find(".ui-tabs-nav").sortable({axis:\'x\'});' . "\n";
-  $javascript .= '$("#' . $tab_name . '").show();' . "\n";
+  $javascript .= 'var tabs = $("#' . $tab_name . '").tabs();' . "\n";
+  $javascript .= 'tabs.find(".ui-tabs-nav").sortable({axis:\'x\'});' . "\n";
+  $javascript .= '$("#'. $tab_name . '").show();' . "\n";
 
   return $javascript;
 }  
@@ -944,6 +941,10 @@ function display_footer($script, $javascript="")
   $is_display_footer = true;
 
 ?>
+  <div id="busyIndicator">
+    <img src="images/loading.gif"/>
+  </div>
+
 </td></tr></table>
 
 <div id="footer">

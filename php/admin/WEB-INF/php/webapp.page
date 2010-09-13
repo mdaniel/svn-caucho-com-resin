@@ -13,6 +13,8 @@ $is_secure = $request->isSecure();
 $user = quercus_get_request()->getUserPrincipal();
 $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
 
+resin_var_dump($client);
+
 if ($is_secure) {
   $action = $_POST['action'];
 
@@ -31,26 +33,14 @@ if ($is_secure) {
   elseif ($action == 'update') {
     $path = $_FILES['application']['tmp_name'];
 
-    $stage = $_POST['stage'];
-    $host = $_POST['host'];
-    if (! $host)
-      $host = "default";
-    $name = $_POST['name'];
+    list($tag, $commit_message) = process_deploy_args();
 
-    if ($name == '/')
-      $name = "/ROOT";
+    $client->putTagArchive($tag, $path, $commit_message, $attributes);
+  }
+  elseif ($action == 'deploy') {
+    $path = $_FILES['application']['tmp_name'];
 
-    $version = $_POST['version'];
-
-    if ($version != '')
-      $version = "-" . $version;
-
-    $commit_message = $_POST['commit-message'];
-
-    if ($commit_message == "")
-      $commit_message = "updated via resin-admin web form";
-
-    $tag = $stage . "/webapp/" . $host . $name . $version;
+    list($tag, $commit_message) = process_deploy_args();
 
     $client->putTagArchive($tag, $path, $commit_message, $attributes);
   }
@@ -185,6 +175,7 @@ function display_webapp_summary_page($g_mbean_server)
   echo "<ul>\n";
   echo "<li><a href='#webapp-active'>Active</a></li>\n";
   echo "<li><a href='#webapp-idle'>Idle</a></li>\n";
+  echo "<li><a href='#webapp-deploy'>Deploy</a></li>\n";
   echo "</ul>\n";
 
   echo "<div id='webapp-active'>\n";
@@ -193,6 +184,10 @@ function display_webapp_summary_page($g_mbean_server)
   
   echo "<div id='webapp-idle'>\n";
   display_webapp_summary($g_mbean_server, true);
+  echo "</div>\n";
+
+  echo "<div id='webapp-deploy'>\n";
+  display_deploy_form($g_mbean_server);
   echo "</div>\n";
   
   echo "</div>\n";
@@ -250,15 +245,17 @@ function display_webapp_summary($g_mbean_server, $is_idle)
       $webapp_name = $webapp->mbean_name;
       $webapp_id++;
 
+      $id = "sw_webapp_" . ($is_idle ? "idle" : "") . $webapp_id;
+
       echo "<tr class='" . row_style($count++) . "'>";
-      echo "<td><span id='sw_webapp_${webapp_id}' class='switch'></td>\n";
+      echo "<td><span id='${id}' class='switch'></td>\n";
 
       $is_deploy_valid = true;
       display_webapp($webapp, $is_deploy_valid);
   
       echo "</tr>\n";
       
-      echo "<tr class='toggle-sw_webapp_${webapp_id}'>";
+      echo "<tr class='toggle-${id}'>";
       echo "<td>&nbsp;</td><td colspan='8'>";
 
       display_webapp_expanded($webapp, $webapp_id, $is_deploy_valid);
@@ -473,7 +470,6 @@ function display_webapp_expanded_actions($webapp, $beans, $refresh_id)
   echo "</div>";
   echo "</form>";
   echo "</div>";
-
 }
 
 function display_versions($webapp, $webapp_id, $is_deploy_valid)
@@ -552,28 +548,118 @@ function display_versions($webapp, $webapp_id, $is_deploy_valid)
   echo "</table>\n";
 }
 
-function javascript_stage_autocomplete()
+function display_deploy_form($mbean_server)
+{
+  global $is_secure;
+
+  if ($is_secure) {
+    $disabled = "";
+  }
+  else {
+    $disabled = "disabled='true'";
+    echo "<div class='warn'>Actions can only be performed over a secure connection (SSL)</div>";
+  }
+
+  echo "<div class='deploy-application'>";
+  echo "<h3>Deploy new application</h3>";
+  echo "<form enctype='multipart/form-data' method='POST'>";
+  echo "<input type='hidden' name='action' value='deploy'>";
+
+  echo "<h4>Stage</h4>";
+  echo "<input class='stage' type='text' name='stage' value='production'>";
+  echo "<h4>Host</h4>";
+  echo "<input class='host' type='text' name='host' value='default'>";
+  echo "<h4>Name</h4>";
+  echo "<input type='text' name='name' value=''>\n";
+
+  echo "<h4>Commit message</h4>";
+  echo "<textarea name='commit-message'></textarea>\n";
+  echo "<h4>Version</h4>";
+
+  echo "<input type='text' name='version' value=''>\n";
+  echo "<h4>Application archive file</h4>";
+  echo "<input type='file' name='application'>\n";
+  echo "<div style='text-align: right'>";
+  echo "<input type='submit' name='submit' value='deploy' $disabled>";
+  echo "</div>";
+  echo "</form>";
+  echo "</div>";
+}
+
+function process_deploy_args()
+{
+  resin_var_dump($_POST);
+  resin_var_dump($_FILES);
+  $path = $_FILES['application']['tmp_name'];
+
+  $stage = $_POST['stage'];
+
+  if (! $stage)
+    $stage = "production";
+
+  $host = $_POST['host'];
+
+  if (! $host)
+    $host = "default";
+
+  $name = $_POST['name'];
+
+  if ($name == '/')
+    $name = "/ROOT";
+
+  if ($name[0] != '/')
+    $name = '/' . $name;
+
+  $version = $_POST['version'];
+
+  if ($version != '')
+    $version = "-" . $version;
+
+  $commit_message = $_POST['commit-message'];
+
+  if ($commit_message == "")
+    $commit_message = "updated via resin-admin web form";
+
+  $tag = $stage . "/webapp/" . $host . $name . $version;
+
+  return array($tag, $commit_message);
+}
+
+function javascript_autocomplete()
 {
   global $client;
 
   $tags = $client->queryTags("[^/]*/webapp/.*");
+  resin_debug("tags");
+  resin_var_dump($tags);
 
-  $stages = array_map(function($tagResult) {
-    return explode("/", $tagResult->getTag())[0];
-  }, $tags);
+  $stages = array();
+  $hosts = array();
+  
+  foreach ($tags as $tag) {
+    $elements = explode("/", $tag->getTag());
+    array_push($stages, "'{$elements[0]}'");
+    array_push($hosts, "'{$elements[2]}'");
+  }
+
+  $stages = array_unique($stages);
+  $hosts = array_unique($hosts);
 
   $stage_array = "[" . implode(",", $stages) . "]";
+  $host_array = "[" . implode(",", $hosts) . "]";
 
   $javascript = <<<EOF
     var stages = ${stage_array};
     $("input.stage").autocomplete({ source: stages });
+    var hosts = ${host_array};
+    $("input.host").autocomplete({ source: hosts });
 EOF;
 
   return $javascript;
 }
 
 $javascript = javascript_create_tab("webapp-tabs") .
-              javascript_stage_autocomplete();
+              javascript_autocomplete();
 
 display_footer($g_page, $javascript);
 ?>

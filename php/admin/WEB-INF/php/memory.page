@@ -144,50 +144,106 @@ if ($heap) {
   }
 }
 
-$total_size = 0;
-foreach ($entries as $entry) {
-  $total_size += $entry->getTotalSize();
+function display_heap_dump_subtab($name, $entries) 
+{
+  $total_size = 0;
+  foreach ($entries as $entry) {
+    $total_size += $entry->getTotalSize();
+  }
+
+  if (sizeof($entries) > 0) {
+    echo "<div id='${name}-heap-dump-tab'>\n";
+    echo "<div style='display:inline-block; float: right;' class='pie-chart'>\n";
+    echo "<canvas id='${name}-heap-dump-chart'/ width='300' height='300' style='display: block'></canvas>\n";
+    echo "<div id='${name}-heap-dump-label' class='chart-label'></div>\n";
+    echo "</div>\n";
+
+    echo "<table id='${name}-heap-dump' class='heap-dump data'>";
+    echo "<tr>\n";
+    echo "  <th>% self</th>\n";
+    echo "  <th>self+desc</th>\n";
+    echo "  <th>self</th>\n";
+    echo "  <th>desc</th>\n";
+    echo "  <th>count</th>\n";
+    echo "  <th colspan='2'>class</th>\n";
+    echo "</tr>\n";
+
+    for ($i = 0; $i < sizeof($entries); $i++) {
+      $entry = $entries[$i];
+
+      echo "<tr class='chart-data " . row_style($i) . "'>";
+      echo "<td class='heap-percent-self'>";
+      printf("%04.2f%%", 100 * $entry->getTotalSize() / $total_size);
+      echo "</td>";
+      echo "<td class='heap-self-plus-desc' align='right'>";
+      printf("%.3fM", $entry->getTotalSize() / (1024 * 1024));
+      echo "</td>";
+      echo "<td class='heap-self' align='right'>";
+      printf("%.3fM", $entry->getSelfSize() / (1024 * 1024));
+      echo "</td>";
+      echo "<td class='heap-desc' align='right'>";
+      printf("%.3fM", $entry->getChildSize() / (1024 * 1024));
+      echo "</td>";
+      echo "<td class='heap-count' align='right'>";
+      printf("%d", $entry->getCount());
+      echo "</td>";
+      echo "<td class='heap-class'>";
+      echo "{$entry->getClassName()}";
+      echo "</td>";
+      echo "<td class='heap-legend'></td>";
+      echo "</tr>\n";
+    }
+
+    echo "</table>\n";
+    echo "</div>\n";
+  }
 }
 
 if (sizeof($entries) > 0) {
-  $topSize = $entries[0]->getTotalSize();
+  $application_entries = array();
+  $jvm_entries = array();
+  $resin_entries = array();
 
-  echo "<table class='data'>";
-  echo "<tr>\n";
-  echo "  <th>% self</th>\n";
-  echo "  <th>self+desc</th>\n";
-  echo "  <th>self</th>\n";
-  echo "  <th>desc</th>\n";
-  echo "  <th>count</th>\n";
-  echo "  <th>class</th>\n";
-  echo "</tr>\n";
-
-  for ($i = 0; $i < sizeof($entries); $i++) {
-    $entry = $entries[$i];
-
-    echo "<tr class='" . row_style($i) . "'>";
-    echo "<td>";
-    printf("%04.2f%%", 100 * $entry->getTotalSize() / $total_size);
-    echo "</td>";
-    echo "<td align='right'>";
-    printf("%.3fM", $entry->getTotalSize() / (1024 * 1024));
-    echo "</td>";
-    echo "<td align='right'>";
-    printf("%.3fM", $entry->getSelfSize() / (1024 * 1024));
-    echo "</td>";
-    echo "<td align='right'>";
-    printf("%.3fM", $entry->getChildSize() / (1024 * 1024));
-    echo "</td>";
-    echo "<td align='right'>";
-    printf("%d", $entry->getCount());
-    echo "</td>";
-    echo "<td>";
-    echo "{$entry->getClassName()}";
-    echo "</td>";
-    echo "</tr>\n";
+  foreach ($entries as $entry) {
+    if (strpos($entry->getClassName(), "java") === 0
+        || strpos($entry->getClassName(), "com.sun") === 0
+        || strpos($entry->getClassName(), "sun.") === 0
+        || ereg("^(boolean|int|byte|float|double|long|char|short)(\[\])*$", 
+                $entry->getClassName())) {
+      array_push($jvm_entries, $entry);
+    }
+    elseif (strpos($entry->getClassName(), "com.caucho") === 0) {
+      array_push($resin_entries, $entry);
+    }
+    else {
+      array_push($application_entries, $entry);
+    }
   }
 
-  echo "</table>\n";
+
+  echo "<div id='heap-tabs'>";
+  echo "<ul>";
+  if (count($application_entries) > 0)
+    echo "<li><a href='#Application-heap-dump-tab'>Application</a></li>\n";
+  if (count($jvm_entries) > 0)
+    echo "<li><a href='#JVM-heap-dump-tab'>JVM</a></li>\n";
+  if (count($resin_entries) > 0)
+    echo "<li><a href='#Resin-heap-dump-tab'>Resin</a></li>\n";
+  if (count($entries) > 0)
+    echo "<li><a href='#All-heap-dump-tab'>All</a></li>\n";
+  echo "</ul>";
+
+  if (count($application_entries) > 0)
+    display_heap_dump_subtab("Application", $application_entries);
+
+  if (count($jvm_entries) > 0)
+    display_heap_dump_subtab("JVM", $jvm_entries);
+
+  if (count($resin_entries) > 0)
+    display_heap_dump_subtab("Resin", $resin_entries);
+
+  if (count($entries) > 0)
+    display_heap_dump_subtab("All", $entries);
 }
 else if (! $is_heap_available) {
   echo "<h2>Heap dump is not available</h2>\n";
@@ -209,6 +265,53 @@ else if (! $is_heap_available) {
 echo "</div>\n";
 echo "</div>\n";
 
-display_footer($g_page, $javascript . javascript_create_tab("memory-tabs"));
+$javascript = javascript_create_tab("memory-tabs");
+
+if ($_REQUEST["action"] == "dump heap"
+    || $_REQUEST["action"] == "jvm heap dump") {
+  $javascript .= "tabs.tabs('select', 1);\n";
+}
+
+if ($is_heap_available) {
+  $javascript .= <<<EOF
+
+var heapTabLinks = $("#heap-tabs > ul > li > a");
+var heapTabs = $("#heap-tabs").tabs();
+
+heapTabLinks.each(function(i) {
+  var tabContents = $($(this).attr("href"));
+  var table = tabContents.find("table.heap-dump");
+
+  var builder = null;
+
+  var buildChart = function() { 
+    if (builder == null) { 
+      builder = new PieChartBuilder();
+      builder.setTable(table);
+      builder.setLabelId(table.attr("id") + "-label");
+      builder.setChartId(table.attr("id") + "-chart");
+      builder.setLabelClass("heap-class");
+      builder.setDataClass("heap-self-plus-desc");
+      builder.setLegendClass("heap-legend");
+      builder.setNumTopSlices(10);
+      builder.create();
+    }
+  };
+
+  if (heapTabs.tabs("option", "selected") == i) {
+    buildChart();
+  }
+  else {
+    tabs.bind('tabsselect', function(event, ui) {
+      if (ui.index == i)
+        buildChart();
+    });
+  }
+});
+
+EOF;
+}
+
+display_footer($g_page, $javascript);
 
 ?>
