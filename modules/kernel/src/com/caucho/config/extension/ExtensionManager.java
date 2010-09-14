@@ -64,6 +64,7 @@ import javax.enterprise.inject.spi.Producer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.event.AbstractObserverMethod;
 import com.caucho.config.event.EventManager;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
@@ -172,9 +173,7 @@ public class ExtensionManager
   }
 
   void loadExtension(String className)
-  {
-//    _isCustomExtension = true;
-    
+  {    
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -207,6 +206,14 @@ public class ExtensionManager
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " add extension " + ext);
+
+    // Register extension instance with CDI.
+    // TODO Is this correct or should a managed bean be created?
+    BeanBuilder<? extends Extension> beanBuilder = _cdiManager
+        .createBeanFactory(ext.getClass());
+    // TODO Is singleton equivalent to ApplicationScoped? That is what the
+    // extension is supposed to be as per CDI specification.
+    _cdiManager.addBean(beanBuilder.singleton(ext));
     
     ExtensionItem item = introspect(ext.getClass());
 
@@ -527,6 +534,7 @@ public class ExtensionManager
       return _observers;
     }
 
+    @SuppressWarnings("unchecked")
     private ExtensionMethod bindObserver(Class<?> cl, Method method)
     {
       Type []param = method.getGenericParameterTypes();
