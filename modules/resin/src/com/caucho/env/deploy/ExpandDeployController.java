@@ -213,21 +213,21 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
-   * Merges with the old controller.
+   * Merges with the new controller.
    */
   @Override
-  protected void mergeController(DeployController<I> oldControllerV)
+  public void merge(DeployControllerApi<I> newControllerV)
   {
-    super.mergeController(oldControllerV);
+    super.merge(newControllerV);
 
-    ExpandDeployController<I> oldController;
-    oldController = (ExpandDeployController<I>) oldControllerV;
+    ExpandDeployController<I> newController;
+    newController = (ExpandDeployController<I>) newControllerV;
 
-    if (oldController._expandCleanupFileSet != null)
-      _expandCleanupFileSet = oldController._expandCleanupFileSet;
+    if (newController._expandCleanupFileSet != null)
+      _expandCleanupFileSet = newController._expandCleanupFileSet;
 
-    if (oldController.getArchivePath() != null)
-      setArchivePath(oldController.getArchivePath());
+    if (newController.getArchivePath() != null)
+      setArchivePath(newController.getArchivePath());
   }
 
   /**

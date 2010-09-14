@@ -9,11 +9,16 @@ if (! admin_init()) {
 echo "<div id='health-tabs'>\n";
 echo "<ul>";
 echo "<li><a href='#health'>Health</a></li>\n";
+echo "<li><a href='#health-graph'>Graphs</a></li>\n";
 echo "<li><a href='#heartbeat'>Heartbeat</a></li>\n";
 echo "</ul>";
 
 echo "<div id='health'>\n";
 display_health_tab();
+echo "</div>\n";
+
+echo "<div id='health-graph'>\n";
+display_health_graph_tab();
 echo "</div>\n";
 
 echo "<div id='heartbeat'>\n";
@@ -33,7 +38,93 @@ function display_health_tab()
   }
 }
 
+function display_health_graph_tab()
+{
+  global $g_server;
+
+  echo "<h1>Cluster Health</h1>\n";
+
+  foreach ($g_server->SelfServer->Cluster->Servers as $s) {
+    display_health_status_graph($s);
+  }
+}
+
 function display_health_status($s)
+{
+  $si = sprintf("%02d", $s->ClusterIndex);
+  $server_id = $s->Name;
+
+  $mbean_server = new MBeanServer($server_id);
+
+  if ($mbean_server) {
+    $health = $mbean_server->lookup("resin:type=HealthCheck,name=Resin");
+  }
+      
+  $is_health = $health;
+
+  echo "<table border='0'>";
+  echo "<tr><th colspan='3'>";
+
+  echo "</th></tr>";
+
+  echo "<tr><td>";
+
+  echo "<span id='sw_health_status_${si}' class='switch'></span>";
+
+  echo "</td><td>";
+
+  $label = $si . " - " . $s->Name;
+
+  if (! $health) {
+    echo "n/a " . $label;
+  }
+  else if ($health->Status == "OK") {
+    print_ok("");
+    echo " $label";
+  }
+  else if ($health->Status == "FAIL") {
+    print_fail(" $label");
+  }
+  else {
+    echo $label;
+  }
+
+  echo "</td><td>";
+
+  echo $health->Message;
+
+  echo "</td></tr>";
+
+  if ($mbean_server && $health) {
+    $health_list = $mbean_server->query("resin:type=HealthCheck,*");
+    foreach ($health_list as $s_health) {
+      echo "<tr class='toggle-sw_health_status_${si}'>";
+      echo "<td>";
+      echo "</td>";
+      echo "<td>";
+
+      if ($s_health->Status == "FAIL") {
+        print_fail(" " . $s_health->Name);
+      }
+      else if ($s_health->Status == "OK") {
+        print_ok(""); echo " " . $s_health->Name;
+      }
+      else {
+        print_warn(" " . $s_health->Name);
+      }
+
+      echo "</td>";
+      echo "<td>";
+      echo $s_health->Message;
+      echo "</td>";
+      echo "</tr>";
+    }
+  }
+  
+  echo "</table>";
+}
+
+function display_health_status_graph($s)
 {
   $si = sprintf("%02d", $s->ClusterIndex);
   $server_id = $s->Name;
@@ -79,6 +170,7 @@ function display_health_status($s)
 
   echo "</td></tr>";
 
+  /*
   if ($mbean_server && $health) {
     $health_list = $mbean_server->query("resin:type=HealthCheck,*");
     foreach ($health_list as $s_health) {
@@ -104,6 +196,7 @@ function display_health_status($s)
       echo "</tr>";
     }
   }
+*/
 
   echo "<tr class='toggle-sw_health_${si}'>";
   echo "<td colspan='3' id='health_${si}-legend'>";

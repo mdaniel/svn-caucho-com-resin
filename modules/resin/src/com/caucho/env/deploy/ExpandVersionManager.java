@@ -40,6 +40,8 @@ class ExpandVersionManager
 {
   private final String _id;
   
+  private final boolean _isVersioning;
+  
   private final TreeMap<String,ExpandVersion> _versionMap;
   
   private final TreeMap<String,ExpandVersionGroup> _baseVersionMap;
@@ -47,9 +49,13 @@ class ExpandVersionManager
   /**
    * Creates the deploy.
    */
-  public ExpandVersionManager(String id, TreeSet<String> keySet)
+  public ExpandVersionManager(String id, 
+                              TreeSet<String> keySet,
+                              boolean isVersioning)
   {
     _id = id;
+    
+    _isVersioning = isVersioning;
     
     _versionMap = buildVersionMap(keySet);
     _baseVersionMap = buildVersionGroupMap(_versionMap);
@@ -60,7 +66,10 @@ class ExpandVersionManager
    */
   public ExpandVersion getVersion(String key)
   {
-    return _versionMap.get(key);
+    if (key != null)
+      return _versionMap.get(key);
+    else
+      return null;
   }
   
   /**
@@ -68,7 +77,10 @@ class ExpandVersionManager
    */
   public ExpandVersionGroup getBaseVersionGroup(String baseKey)
   {
-    return _baseVersionMap.get(baseKey);
+    if (baseKey != null)
+      return _baseVersionMap.get(baseKey);
+    else
+      return null;
   }
   
   /**
@@ -139,6 +151,9 @@ class ExpandVersionManager
   
   private boolean isValidVersion(String version)
   {
+    if (! _isVersioning)
+      return false;
+    
     int length = version.length();
     
     boolean isDigit = false;

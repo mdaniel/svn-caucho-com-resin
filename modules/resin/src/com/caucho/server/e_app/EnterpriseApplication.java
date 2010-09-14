@@ -648,7 +648,6 @@ public class EnterpriseApplication
       controller = new WebAppController(id, 
                                         path,
                                         _webAppContainer,
-                                        contextUrl,
                                         contextUrl);
       
       _webApps.add(controller);

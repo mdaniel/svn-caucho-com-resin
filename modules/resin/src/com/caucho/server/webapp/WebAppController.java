@@ -74,12 +74,7 @@ public class WebAppController
 
   // The context path is the URL prefix for the web-app
   private String _contextPath;
-  private final String _versionContextPath;
-  private final String _baseContextPath;
   private String _version = "";
-  
-  // true if the versioned web-app is an alias for the base web-app
-  private boolean _isVersionAlias;
 
   // Any old version web-app
   private WebAppController _oldWebAppController;
@@ -111,26 +106,23 @@ public class WebAppController
                           Path rootDirectory, 
                           WebAppContainer container)
   {
-    this(id, rootDirectory, container, "/", "/");
+    this(id, rootDirectory, container, "/");
   }
   
   public WebAppController(Path rootDirectory,
                           WebAppContainer container,
-                          String contextPath,
-                          String baseContextPath)
+                          String contextPath)
   {
     this(calculateId(container, contextPath), 
          rootDirectory,
          container,
-         contextPath,
-         baseContextPath);
+         contextPath);
   }
 
   public WebAppController(String id,
                           Path rootDirectory,
                           WebAppContainer container,
-                          String contextPath,
-                          String baseContextPath)
+                          String contextPath)
   {
     super(id, rootDirectory);
 
@@ -141,9 +133,6 @@ public class WebAppController
     
     if (container.getHost() == null)
       throw new NullPointerException();
-
-    _versionContextPath = contextPath;
-    _baseContextPath = baseContextPath;
 
     _contextPath = contextPath;
     
@@ -185,23 +174,12 @@ public class WebAppController
   }
 
   /**
-   * Returns the webApp's base context path, e.g. /foo for /foo-1.0
-   */
-  public String getBaseContextPath()
-  {
-    return _baseContextPath;
-  }
-
-  /**
    * Returns the webApp's context path
    */
   public String getContextPath(String uri)
   {
     if (getConfig() == null || getConfig().getURLRegexp() == null) {
-      if (uri.startsWith(getContextPath()))
-        return getContextPath();
-      else
-        return getBaseContextPath();
+      return getContextPath();
     }
 
     Pattern regexp = getConfig().getURLRegexp();
@@ -394,7 +372,6 @@ public class WebAppController
    */
   public void setVersionAlias(boolean isVersionAlias)
   {
-    _isVersionAlias = isVersionAlias;
   }
 
   /**
@@ -403,7 +380,7 @@ public class WebAppController
    */
   public boolean isVersionAlias()
   {
-    return _isVersionAlias;
+    return false;
   }
 
   /**
@@ -474,6 +451,7 @@ public class WebAppController
   /**
    * Merges two entries.
    */
+  /*
   protected WebAppController merge(WebAppController newController)
   {
     if (getConfig() != null && getConfig().getURLRegexp() != null)
@@ -493,8 +471,7 @@ public class WebAppController
           = new WebAppController(getId(),
                                  getRootDirectory(),
                                  _container,
-                                 getContextPath(),
-                                 getBaseContextPath());
+                                 getContextPath());
 
         // server/1h1{2,3}
         // This controller overrides configuration from the new controller
@@ -507,6 +484,7 @@ public class WebAppController
       }
     }
   }
+  */
 
   /**
    * Returns the var.

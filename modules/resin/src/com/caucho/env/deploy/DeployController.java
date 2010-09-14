@@ -29,6 +29,7 @@
 
 package com.caucho.env.deploy;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,6 +70,8 @@ abstract public class DeployController<I extends DeployInstance>
   protected final Lifecycle _lifecycle;
 
   private DeployControllerAlarm<DeployController<I>> _alarm;
+  
+  private long _waitForActiveTimeout = 10000L;
   private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
   
   private long _startTime;
@@ -112,6 +115,12 @@ abstract public class DeployController<I extends DeployInstance>
   {
     return _parentLoader;
   }
+  
+  @Override
+  public DeployControllerType getControllerType()
+  {
+    return DeployControllerType.STATIC;
+  }
 
   /**
    * Sets the startup mode.
@@ -139,25 +148,11 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Merges with the old controller.
+   * Merges with the new controller information
    */
-  protected void mergeController(DeployController<I> oldController)
+  @Override
+  public void merge(DeployControllerApi<I> newController)
   {
-    _parentLoader = oldController._parentLoader = _parentLoader;
-
-    if (oldController._startupPriority < _startupPriority)
-      _startupPriority = oldController._startupPriority;
-  }
-
-  /**
-   * Merge the startup mode.
-   */
-  public void mergeStartupMode(DeployMode mode)
-  {
-    if (mode == null || DeployMode.DEFAULT.equals(mode))
-      return;
-
-    _startupMode = mode;
   }
 
   /**
@@ -580,8 +575,11 @@ abstract public class DeployController<I extends DeployInstance>
 
       isStarting = _lifecycle.toStarting();
 
-      if (! isStarting)
+      if (! isStarting) {
+        _lifecycle.waitForActive(_waitForActiveTimeout);
+        
         return deployInstance;
+      }
       
       preConfigureInstance(deployInstance);
       

@@ -1218,13 +1218,26 @@ public class Server
   @Override
   public boolean isModified()
   {
-    return getClassLoader().isModified();
+    DynamicClassLoader classLoader = getClassLoader();
+    
+    if (classLoader != null)
+      return classLoader.isModified();
+    else
+      return true;
   }
   
   @Override
   public boolean logModified(Logger log)
   {
-    return getClassLoader().logModified(log);
+    DynamicClassLoader classLoader = getClassLoader();
+    
+    if (classLoader != null)
+      return classLoader.logModified(log);
+    else {
+      log.info(this + " is closed");
+
+      return true;
+    }
   }
 
   /**
@@ -1232,7 +1245,12 @@ public class Server
    */
   public boolean isModifiedNow()
   {
-    return getClassLoader().isModifiedNow();
+    DynamicClassLoader classLoader = getClassLoader();
+    
+    if (classLoader != null)
+      return classLoader.isModifiedNow();
+    else
+      return true;
   }
 
   /**

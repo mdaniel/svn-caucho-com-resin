@@ -55,6 +55,8 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.rewrite.DispatchRule;
+import com.caucho.rewrite.RewriteFilter;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
@@ -62,6 +64,7 @@ import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.e_app.EarDeployGenerator;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.ErrorPage;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
@@ -513,6 +516,30 @@ public class Host
   public void setWarExpandDir(Path warDir)
   {
     getWebAppContainer().setWarExpandDir(warDir);
+  }
+
+  /**
+   * Adds a rewrite dispatch rule
+   */
+  public void add(DispatchRule dispatchRule)
+  {
+    _webAppContainer.add(dispatchRule);
+  }
+
+  /**
+   * Adds a rewrite dispatch rule
+   */
+  public void add(RewriteFilter dispatchAction)
+  {
+    _webAppContainer.add(dispatchAction);
+  }
+
+  /**
+   * Adds rewrite-dispatch (backward compat).
+   */
+  public RewriteDispatch createRewriteDispatch()
+  {
+    return _webAppContainer.createRewriteDispatch();
   }
   
   /**

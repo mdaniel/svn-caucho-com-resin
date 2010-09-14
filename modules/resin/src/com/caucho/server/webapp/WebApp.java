@@ -454,7 +454,7 @@ public class WebApp extends ServletContextImpl
     _invocationDecoder = _server.getInvocationDecoder();
 
     setVersionContextPath(controller.getContextPath());
-    _baseContextPath = controller.getBaseContextPath();
+    _baseContextPath = controller.getContextPath();
     
     _moduleName = _baseContextPath;
     
@@ -3574,8 +3574,8 @@ public class WebApp extends ServletContextImpl
         _parent.getWebAppController(dispatchInvocation);
 
         if (subController != null
-            && (_controller.getBaseContextPath()
-                .equals(subController.getBaseContextPath()))) {
+            && (_controller.getContextPath()
+                .equals(subController.getContextPath()))) {
           isSameWebApp = true;
         }
       }

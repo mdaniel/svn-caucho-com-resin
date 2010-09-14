@@ -56,7 +56,7 @@ import com.caucho.vfs.Vfs;
  */
 abstract public class
   EnvironmentDeployController<I extends EnvironmentDeployInstance,
-                                        C extends DeployConfig>
+                              C extends DeployConfig>
   extends ExpandDeployController<I>
   implements EnvironmentListener
 {
@@ -83,22 +83,6 @@ abstract public class
 
   // Config exception passed in from parent, e.g. .ear
   private Throwable _configException;
-
-  /*
-  public EnvironmentDeployController(C config)
-  {
-    this(config.getId(), config.calculateRootDirectory());
-
-    setConfig(config);
-  }
-
-  public EnvironmentDeployController(String id, C config)
-  {
-    this(id, config.calculateRootDirectory());
-
-    setConfig(config);
-  }
-  */
 
   public EnvironmentDeployController(String id, 
                                      Path rootDirectory)
@@ -285,12 +269,7 @@ abstract public class
   
   protected String getMBeanTypeName()
   {
-    String className = getDeployInstance().getClass().getName();
-    int p = className.lastIndexOf('.');
-    if (p > 0)
-      className = className.substring(p + 1);
-
-    return className;
+    return getDeployInstance().getClass().getSimpleName();
   }
 
   protected String getMBeanId()
@@ -305,6 +284,7 @@ abstract public class
   /**
    * Merges with the old controller.
    */
+  /*
   @Override
   protected void mergeController(DeployController oldControllerV)
   {
@@ -346,6 +326,49 @@ abstract public class
     mergeRedeployCheckInterval(oldController.getRedeployCheckInterval());
 
     mergeRedeployMode(oldController.getRedeployMode());
+  }
+  */
+  @Override
+  public void merge(DeployControllerApi<I> oldControllerV)
+  {
+    super.merge(oldControllerV);
+
+    EnvironmentDeployController<I,C> oldController;
+    oldController = (EnvironmentDeployController<I,C>) oldControllerV;
+    // setId(oldController.getId());
+
+    ArrayList<C> configDefaults = new ArrayList<C>();
+
+    if (getPrologue() == null)
+      setPrologue(oldController.getPrologue());
+    else if (oldController.getPrologue() != null) {
+      configDefaults.add(0, (C) getPrologue()); // XXX: must be first
+
+      setPrologue(oldController.getPrologue());
+    }
+
+    configDefaults.addAll(oldController._configDefaults);
+    
+    if (getConfig() == null)
+      setConfig(oldController.getConfig());
+    else if (oldController.getConfig() != null) {
+      configDefaults.add(getConfig());
+
+      setConfig(oldController.getConfig());
+    }
+
+    for (C config : _configDefaults) {
+      if (! configDefaults.contains(config))
+        configDefaults.add(config);
+    }
+    
+    _configDefaults = configDefaults;
+
+    // mergeStartupMode(oldController.getStartupMode());
+
+    // mergeRedeployCheckInterval(oldController.getRedeployCheckInterval());
+
+    // mergeRedeployMode(oldController.getRedeployMode());
   }
   
   protected DeployControllerAdmin<?> getDeployAdmin()

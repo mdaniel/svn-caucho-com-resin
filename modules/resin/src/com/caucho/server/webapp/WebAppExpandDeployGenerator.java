@@ -244,14 +244,16 @@ public class WebAppExpandDeployGenerator
   protected WebAppController createController(ExpandVersion version)
   {
     String key = version.getKey();
-    String contextPath = keyToName(key);
 
     String baseKey = version.getBaseKey();
-    String baseContextPath = keyToName(baseKey);
+    String contextPath = keyToName(baseKey);
     
     Path rootDirectory = getExpandPath(key);
     Path archivePath = getArchivePath(key);
-
+    
+    if (rootDirectory == null)
+      throw new NullPointerException();
+    
     WebAppVersioningController baseController = null;
     
     String id = getId() + "/" + key;
@@ -278,7 +280,7 @@ public class WebAppExpandDeployGenerator
 
     WebAppController controller
       = new WebAppController(id, rootDirectory, _container,
-                             contextPath, baseContextPath);
+                             contextPath);
 
     controller.setArchivePath(archivePath);
     controller.setWarName(key);
@@ -670,10 +672,14 @@ public class WebAppExpandDeployGenerator
     if (tail.startsWith("/"))
       tail = tail.substring(1);
     
+    String key;
+    
     if (tail.equals(""))
-      return "ROOT";
+      key = "ROOT";
     else
-      return tail;
+      key = tail;
+    
+    return key;
   }
 
   /*

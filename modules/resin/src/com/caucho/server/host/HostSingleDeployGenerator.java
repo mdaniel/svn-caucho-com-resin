@@ -34,6 +34,7 @@ import com.caucho.env.deploy.DeployContainer;
 import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.vfs.Path;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -95,6 +96,7 @@ public class HostSingleDeployGenerator
   /**
    * Returns the log.
    */
+  @Override
   protected Logger getLog()
   {
     return log;
@@ -164,22 +166,27 @@ public class HostSingleDeployGenerator
    * Returns the current array of application entries.
    */
   @Override
-  public HostController generateController(String name)
+  public void generateController(String name, ArrayList<HostController> list)
   {
     if (_controller.isNameMatch(name)) {
       Path rootDirectory = _config.calculateRootDirectory();
       
-      return new HostController(_controller.getId(), rootDirectory,
+      HostController host;
+      host = new HostController(_controller.getId(), rootDirectory,
                                 _controller.getName(), _config,
                                 _container, null);
+      
+      // host = host.merge(_controller);
+      
+      list.add(host);
     }
-    else
-      return null;
   }
   
   /**
    * Merges the controllers.
    */
+  /*
+  @Override
   public HostController mergeController(HostController controller,
                                         String name)
   {
@@ -201,7 +208,9 @@ public class HostSingleDeployGenerator
       return _controller;
     }
   }
+  */
 
+  @Override
   public Throwable getConfigException()
   {
     Throwable configException =  super.getConfigException();
@@ -212,11 +221,12 @@ public class HostSingleDeployGenerator
     return configException;
   }
 
+  @Override
   public String toString()
   {
     if (_config == null)
-      return "HostSingleDeployGenerator[]";
+      return getClass().getSimpleName() + "[]";
     else
-      return "HostSingleDeployGenerator[" + _config.getHostName() + "]";
+      return getClass().getSimpleName() + "[" + _config.getHostName() + "]";
   }
 }

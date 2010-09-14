@@ -52,7 +52,8 @@ class ExpandManager
   public ExpandManager(String id,
                        ExpandDirectoryManager directoryManager,
                        ExpandArchiveManager archiveManager,
-                       ExpandRepositoryManager repositoryManager)
+                       ExpandRepositoryManager repositoryManager,
+                       boolean isVersioning)
   {
     _id = id;
     
@@ -69,7 +70,7 @@ class ExpandManager
     // XXX: needs to filter through repository manager to remove
     // undeployed items
     
-    _versionManager = new ExpandVersionManager(id, keySet);
+    _versionManager = new ExpandVersionManager(id, keySet, isVersioning);
   }
   
   boolean isModified()

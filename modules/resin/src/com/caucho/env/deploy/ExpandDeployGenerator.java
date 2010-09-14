@@ -483,7 +483,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   protected boolean isDeployedKey(String key)
   {
-    return _deployedKeys.contains(key);
+    if (_deployedKeys.contains(key))
+      return true;
+    else if (_expandManager.getKeySet().contains(key))
+      return true;
+    else
+      return false;
   }
 
   /**
@@ -507,6 +512,19 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   @Override
   public void updateIfModified()
   {
+    if (isModified()) {
+      update();
+    }
+  }
+
+  
+  /**
+   * Redeploys if modified.
+   */
+  public void updateIfModifiedNow()
+  {
+    _lastCheckTime = 0;
+    
     if (isModified()) {
       update();
     }
@@ -564,7 +582,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       _expandManager = new ExpandManager(getId(),
                                          _directoryManager,
                                          _archiveManager,
-                                         _repositoryManager);
+                                         _repositoryManager,
+                                         _isVersioning);
       
       _deployedKeys = _expandManager.getBaseKeySet();
       
@@ -578,9 +597,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    * Finds the matching entry.
    */
   @Override
-  public final E generateController(String name)
+  public final void generateController(String name, ArrayList<E> controllerList)
   {
-    updateIfModified();
+    updateIfModifiedNow();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -595,18 +614,17 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
         version = _expandManager.getVersion(key);
       
       if (version == null)
-        return null;
+        return;
       
       E controller = createController(version);
 
-      if (controller == null)
-        return null;
+      if (controller != null) {
+        controller.setExpandCleanupFileSet(_expandCleanupFileSet);
+        
+        controllerList.add(controller);
 
-      controller.setExpandCleanupFileSet(_expandCleanupFileSet);
-
-      // _controllerNames.add(name); // server/1d19
-      
-      return controller;
+        // _controllerNames.add(name); // server/1d19
+      }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -653,7 +671,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
     return builder.toString();
   }
-
+  
   /**
    * Deploy the archive.
    */

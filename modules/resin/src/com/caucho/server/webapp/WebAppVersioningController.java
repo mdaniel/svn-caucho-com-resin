@@ -54,9 +54,6 @@ public class WebAppVersioningController extends WebAppController {
     = new ArrayList<WebAppController>();
 
   private final WebAppExpandDeployGenerator _generator;
-
-  // if the versioning has a controller matching the un-versioned path
-  private WebAppController _baseController;
   
   private long _restartTime;
   
@@ -65,13 +62,11 @@ public class WebAppVersioningController extends WebAppController {
   private AtomicBoolean _isUpdating = new AtomicBoolean();
 
   public WebAppVersioningController(String id,
-                                    String versionContextPath,
-                                    String baseContextPath,
+                                    String contextPath,
                                     WebAppExpandDeployGenerator generator,
                                     WebAppContainer container)
   {
-    super(id + "-0.0.0.versioning", null, container,
-          versionContextPath, baseContextPath);
+    super(id + "-0.0.0.versioning", null, container, contextPath);
 
     _generator = generator;
   }
@@ -79,11 +74,6 @@ public class WebAppVersioningController extends WebAppController {
   void setModified(boolean isModified)
   {
     _isModified = isModified;
-  }
-
-  void setBaseController(WebAppController baseController)
-  {
-    _baseController = baseController;
   }
 
   /*
@@ -128,7 +118,7 @@ public class WebAppVersioningController extends WebAppController {
   {
     super.startImpl();
     
-    updateVersionImpl();
+    // updateVersionImpl();
 
     WebAppController controller = _primaryController;
 
@@ -167,9 +157,10 @@ public class WebAppVersioningController extends WebAppController {
   {
     _isModified = true;
 
-    updateVersionImpl();
+    // updateVersionImpl();
   }
-  
+
+  /*
   private void updateVersionImpl()
   {
     if (! _isUpdating.compareAndSet(false, true))
@@ -180,10 +171,8 @@ public class WebAppVersioningController extends WebAppController {
         WebAppController oldPrimaryController = _primaryController;
         
         WebAppController newPrimaryController = null;
-        
-        String versionName = null;//_generator.getPrimaryVersion(getId());
 
-        if (versionName != null) {
+        if (version != null) {
           newPrimaryController
             = _container.getWebAppGenerator().findController(versionName);
         } else if (_baseController != null
@@ -226,6 +215,7 @@ public class WebAppVersioningController extends WebAppController {
       _isUpdating.set(false);
     }
   }
+  */
   
   /**
    * Returns a printable view.

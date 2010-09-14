@@ -174,6 +174,7 @@ public class WebAppSingleDeployGenerator
   /**
    * Returns the log.
    */
+  @Override
   protected Logger getLog()
   {
     return log;
@@ -218,7 +219,7 @@ public class WebAppSingleDeployGenerator
 
     _controller = new WebAppController(_rootDirectory, 
                                        _container,
-                                       _urlPrefix, _urlPrefix);
+                                       _urlPrefix);
 
     _controller.setArchivePath(_archivePath);
 
@@ -246,6 +247,7 @@ public class WebAppSingleDeployGenerator
   /**
    * Returns the deployed keys.
    */
+  @Override
   protected void fillDeployedNames(Set<String> keys)
   {
     keys.add(_controller.getContextPath());
@@ -255,34 +257,29 @@ public class WebAppSingleDeployGenerator
    * Creates a controller given the name
    */
   @Override
-  public WebAppController generateController(String name)
+  public void generateController(String name, ArrayList<WebAppController> list)
   {
     if (name.equals(_controller.getContextPath())) {
       WebAppController webApp;
       
-      String stage = _container.getServer().getStage();
-      String hostId = _container.getHost().getIdTail();
-      String id;
-      
-      if (name.equals("") || name.equals("/"))
-        id = stage + "/webapp/" + hostId + "/ROOT";
-      else
-        id = stage + "/webapp/" + hostId + name;
-      
-      webApp = new WebAppController(id, _rootDirectory, _container,
-                                    _urlPrefix, _urlPrefix);
+      webApp = new WebAppController(_controller.getId(),
+                                    _rootDirectory, 
+                                    _container,
+                                    _urlPrefix);
 
       webApp.setArchivePath(_controller.getArchivePath());
+      
+      webApp.merge(_controller);
 
-      return webApp;
+      list.add(webApp);
     }
-    else
-      return null;
   }
   
   /**
    * Merges the controllers.
    */
+  /*
+  @Override
   public WebAppController mergeController(WebAppController controller,
                                           String name)
   {
@@ -303,6 +300,7 @@ public class WebAppSingleDeployGenerator
     else
       return _controller;
   }
+  */
 
   /**
    * Initialize the deployment.
@@ -316,6 +314,7 @@ public class WebAppSingleDeployGenerator
     }
   }
 
+  @Override
   public Throwable getConfigException()
   {
     Throwable configException =   super.getConfigException();
@@ -339,8 +338,9 @@ public class WebAppSingleDeployGenerator
     super.destroyImpl();
   }
   
+  @Override
   public String toString()
   {
-    return "WebAppSingleDeployGenerator[" + _urlPrefix + "]";
+    return getClass().getSimpleName() + "[" + _urlPrefix + "]";
   }
 }

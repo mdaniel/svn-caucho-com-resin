@@ -173,7 +173,7 @@ public class WebAppRegexpDeployGenerator
         
         String id = "production/webapp/" + hostId + "/" + name;
 
-        controller = new WebAppController(id, appDir, _container, name, name);
+        controller = new WebAppController(id, appDir, _container, name);
 
         // XXX: not dynamic-deploy in the sense that the mappings are known
         //controller.setDynamicDeploy(true);

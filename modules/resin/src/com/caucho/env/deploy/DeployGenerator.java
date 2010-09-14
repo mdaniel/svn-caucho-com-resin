@@ -29,6 +29,7 @@
 
 package com.caucho.env.deploy;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -231,9 +232,8 @@ abstract public class DeployGenerator<E extends DeployControllerApi<?>>
   /**
    * Generates the controller.
    */
-  protected E generateController(String name)
+  protected void generateController(String name, ArrayList<E> controllers)
   {
-    return null;
   }
 
   /**

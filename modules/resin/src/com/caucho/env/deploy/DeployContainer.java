@@ -308,12 +308,35 @@ public class DeployContainer<C extends DeployControllerApi<?>>
       return null;
     */
     
-    C newController = _deployListGenerator.generateController(name);
+    ArrayList<C> controllerList = new ArrayList<C>();
     
-    return mergeController(newController);
+    _deployListGenerator.generateController(name, controllerList);
+    
+    C bestController = null;
+    
+    for (C controller : controllerList) {
+      if (bestController == null)
+        bestController = controller;
+      else if (controller.getControllerType().ordinal()
+               < bestController.getControllerType().ordinal()) {
+        bestController = controller;
+      }
+    }
+    
+    if (bestController == null)
+      return null;
+    
+    for (C controller : controllerList) {
+      if (controller != bestController) {
+        bestController.merge((DeployControllerApi) controller);
+        System.out.println("MERGE: " + bestController + " " + controller);
+      }
+    }
+    
+    return addController(bestController);
   }
 
-  private C mergeController(C newController)
+  private C addController(C newController)
   {
     // server/1h00,13g4
     // generated controller might match the name, e.g.

@@ -36,6 +36,7 @@ import com.caucho.config.types.PathBuilder;
 import com.caucho.el.EL;
 import com.caucho.env.deploy.DeployController;
 import com.caucho.env.deploy.DeployControllerAdmin;
+import com.caucho.env.deploy.DeployControllerApi;
 import com.caucho.env.deploy.EnvironmentDeployController;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.server.e_app.EarConfig;
@@ -169,8 +170,8 @@ public class HostController
     
     name = name.toLowerCase();
     
-    if (name.equals(""))
-      name = "default";
+    if (name.equals("default"))
+      name = "";
 
     _hostName = name;
   }
@@ -415,6 +416,7 @@ public class HostController
   /**
    * Merges two entries.
    */
+  /*
   protected HostController merge(HostController newController)
   {
     if (getConfig() != null && getConfig().getRegexp() != null)
@@ -465,27 +467,29 @@ public class HostController
       }
     }
   }
+  */
 
   /**
    * Merges with the old controller.
    */
-  protected void mergeController(DeployController oldControllerV)
+  @Override
+  public void merge(DeployControllerApi<Host> newControllerV)
   {
-    super.mergeController(oldControllerV);
+    super.merge(newControllerV);
 
-    HostController oldController = (HostController) oldControllerV;
+    HostController newController = (HostController) newControllerV;
     
-    _entryHostAliases.addAll(oldController._entryHostAliases);
-    if (! oldController.getHostName().equals(""))
-      _entryHostAliases.add(oldController.getHostName());
-    _entryHostAliasRegexps.addAll(oldController._entryHostAliasRegexps);
+    _entryHostAliases.addAll(newController._entryHostAliases);
+    if (! newController.getHostName().equals(""))
+      _entryHostAliases.add(newController.getHostName());
+    _entryHostAliasRegexps.addAll(newController._entryHostAliasRegexps);
     
-    _hostAliases.addAll(oldController._hostAliases);
-    _hostAliasRegexps.addAll(oldController._hostAliasRegexps);
+    _hostAliases.addAll(newController._hostAliases);
+    _hostAliasRegexps.addAll(newController._hostAliasRegexps);
 
     if (_regexp == null) {
-      _regexp = oldController._regexp;
-      _rootDirectoryPattern = oldController._rootDirectoryPattern;
+      _regexp = newController._regexp;
+      _rootDirectoryPattern = newController._rootDirectoryPattern;
     }
   }
 

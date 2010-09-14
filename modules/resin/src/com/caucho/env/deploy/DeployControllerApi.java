@@ -53,6 +53,16 @@ public interface DeployControllerApi<I extends DeployInstance>
    * Gets the startup priority.
    */
   public int getStartupPriority();
+  
+  /**
+   * Returns the controller type
+   */
+  public DeployControllerType getControllerType();
+  
+  /**
+   * Merging the controller
+   */
+  public void merge(DeployControllerApi<I> newController);
 
   /**
    * Initialization of the controller itself

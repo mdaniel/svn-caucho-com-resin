@@ -138,12 +138,14 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
    * Generates the controller matching the key string.
    */
   @Override
-  protected E generateController(String key)
+  protected void generateController(String key, ArrayList<E> controllers)
   {
     for (int i = 0; i < _generatorList.size(); i++) {
-      E controller = _generatorList.get(i).generateController(key);
-
-      if (controller == null)
+      _generatorList.get(i).generateController(key, controllers);
+    }
+    
+    /*
+      if (controller != null)
         continue;
       
       // merge with the rest of the entries
@@ -158,6 +160,7 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
     }
 
     return null;
+    */
   }
 
   /**

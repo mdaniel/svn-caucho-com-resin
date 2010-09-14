@@ -33,6 +33,7 @@ import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.server.e_app.EarDeployController;
 import com.caucho.server.e_app.EarDeployGenerator;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -154,18 +155,19 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
    * Returns the current array of webApp entries.
    */
   @Override
-  public WebAppController generateController(String name)
+  public void generateController(String name,
+                                 ArrayList<WebAppController> list)
   {
     for (EarDeployController earController : _earContainer.getControllers()) {
       WebAppController webAppController;
 
       webAppController = earController.findWebAppController(name);
 
-      if (webAppController != null)
-        return webAppController;
+      if (webAppController != null) {
+        list.add(webAppController);
+        return;
+      }
     }
-
-    return null;
   }
   
   /**
