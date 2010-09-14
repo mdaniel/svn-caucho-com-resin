@@ -29,7 +29,12 @@
 
 package com.caucho.env.deploy;
 
+import java.util.Comparator;
+
 public class ExpandVersion {
+  private static final VersionNameComparator _comparator
+    = new VersionNameComparator();
+  
   private final String _key;
   private final String _baseKey;
   private final String _version;
@@ -60,24 +65,102 @@ public class ExpandVersion {
   
   int compareTo(ExpandVersion version)
   {
-    if (getKey().equals(version.getKey()))
-      return 0;
+    return _comparator.compare(version.getVersion(), getVersion());
+  }
+  
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof ExpandVersion))
+      return false;
     
-    String versionA = getVersion();
-    String versionB = version.getVersion();
-
-    // versioned are always preferred
-    if (versionB.isEmpty())
-      return 1;
-    else if (versionA.isEmpty())
-      return -1;
+    ExpandVersion version = (ExpandVersion) o;
     
-    return versionA.compareTo(versionB);
+    return getKey().equals(version.getKey());
   }
 
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getKey() + "]";
+  }
+
+  static class VersionNameComparator implements Comparator<String>
+  {
+    public int compare(String versionA, String versionB)
+    {
+      /*
+      String versionA = a.getVersion();
+      String versionB = b.getVersion();
+      */
+      
+      if (versionA.equals(versionB))
+        return 0;
+      
+      if (versionA.isEmpty())
+        return 1;
+      else if (versionB.isEmpty())
+        return -1;
+
+      int lengthA = versionA.length();
+      int lengthB = versionB.length();
+
+      int indexA = 0;
+      int indexB = 0;
+
+      while (indexA < lengthA && indexB < lengthB) {
+        int valueA = 0;
+        int valueB = 0;
+        char chA;
+        char chB;
+
+        for (;
+             indexA < lengthA
+               && '0' <= (chA = versionA.charAt(indexA)) && chA <= '9';
+             indexA++) {
+          valueA = 10 * valueA + chA - '0';
+        }
+
+        for (;
+             indexB < lengthB
+               && '0' <= (chB = versionB.charAt(indexB)) && chB <= '9';
+             indexB++) {
+          valueB = 10 * valueB + chB - '0';
+        }
+
+        if (valueA < valueB)
+          return 1;
+        else if (valueB < valueA)
+          return -1;
+
+        while (indexA < lengthA && indexB < lengthB
+               && ! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9')
+               && ! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9')) {
+
+          if (chA < chB)
+            return 1;
+          else if (chB < chA)
+            return -1;
+
+          indexA++;
+          indexB++;
+        }
+
+        if (indexA < lengthA
+            && ! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9'))
+          return 1;
+        else if (indexB < lengthB
+                 && ! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9'))
+          return -1;
+      }
+
+      if (indexA != lengthA)
+        return 1;
+      else if (indexB != lengthB)
+        return -1;
+      else
+        return 0;
+    }
   }
 }

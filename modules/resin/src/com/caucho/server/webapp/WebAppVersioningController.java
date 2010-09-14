@@ -30,6 +30,7 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.deploy.ExpandVersion;
 import com.caucho.env.deploy.VersionEntry;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
@@ -48,6 +49,8 @@ public class WebAppVersioningController extends WebAppController {
 
   private static final long EXPIRE_PERIOD = 3600 * 1000L;
 
+  private final String _baseKey;
+  
   private long _versionRolloverTime = EXPIRE_PERIOD;
 
   private ArrayList<WebAppController> _controllerList
@@ -57,17 +60,21 @@ public class WebAppVersioningController extends WebAppController {
   
   private long _restartTime;
   
+  private ExpandVersion _primaryVersion;
   private WebAppController _primaryController;
+  
   private boolean _isModified = true;
   private AtomicBoolean _isUpdating = new AtomicBoolean();
 
   public WebAppVersioningController(String id,
+                                    String baseKey,
                                     String contextPath,
                                     WebAppExpandDeployGenerator generator,
                                     WebAppContainer container)
   {
     super(id + "-0.0.0.versioning", null, container, contextPath);
 
+    _baseKey = baseKey;
     _generator = generator;
   }
 
@@ -104,8 +111,11 @@ public class WebAppVersioningController extends WebAppController {
     
     WebAppController controller = _primaryController;
 
-    if (controller != null)
-      return controller.request();
+    if (controller != null) {
+      WebApp webApp = controller.request();
+      
+      return webApp;
+    }
     else
       throw new NullPointerException(getClass().getName());
   }
@@ -118,7 +128,7 @@ public class WebAppVersioningController extends WebAppController {
   {
     super.startImpl();
     
-    // updateVersionImpl();
+    updateVersion();
 
     WebAppController controller = _primaryController;
 
@@ -157,10 +167,9 @@ public class WebAppVersioningController extends WebAppController {
   {
     _isModified = true;
 
-    // updateVersionImpl();
+    updateVersionImpl();
   }
 
-  /*
   private void updateVersionImpl()
   {
     if (! _isUpdating.compareAndSet(false, true))
@@ -168,17 +177,19 @@ public class WebAppVersioningController extends WebAppController {
 
     try {
       synchronized (this) {
+        ExpandVersion oldPrimaryVersion = _primaryVersion;
         WebAppController oldPrimaryController = _primaryController;
         
         WebAppController newPrimaryController = null;
 
+        ExpandVersion version = _generator.getPrimaryVersion(_baseKey);
+        
+        if (oldPrimaryVersion != null && oldPrimaryVersion.equals(version))
+          return;
+
         if (version != null) {
-          newPrimaryController
-            = _container.getWebAppGenerator().findController(versionName);
-        } else if (_baseController != null
-                   && _controllerList.size() == 0) {
-          // server/1h52
-          newPrimaryController = _baseController;
+          newPrimaryController = _generator.createVersionController(version);
+          newPrimaryController.merge(newPrimaryController);
         }
 
         if (newPrimaryController == null) {
@@ -197,6 +208,7 @@ public class WebAppVersioningController extends WebAppController {
 
         newPrimaryController.setVersionAlias(true);
         _primaryController = newPrimaryController;
+        _primaryVersion = version;
 
         _controllerList.remove(newPrimaryController);
 
@@ -215,7 +227,6 @@ public class WebAppVersioningController extends WebAppController {
       _isUpdating.set(false);
     }
   }
-  */
   
   /**
    * Returns a printable view.

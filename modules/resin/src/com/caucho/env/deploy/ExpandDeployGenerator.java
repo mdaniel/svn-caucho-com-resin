@@ -592,6 +592,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       log.log(Level.WARNING, e.toString(), e);
     }
   }
+  
+  public ExpandVersion getPrimaryVersion(String key)
+  {
+    return _expandManager.getPrimaryVersion(key);
+  }
 
   /**
    * Finds the matching entry.

@@ -254,21 +254,37 @@ public class WebAppExpandDeployGenerator
     if (rootDirectory == null)
       throw new NullPointerException();
     
-    WebAppVersioningController baseController = null;
-    
     String id = getId() + "/" + key;
-    // String baseId = getId() + baseSegmentName;
-
-    /*
-    if (contextPath.equals(baseContextPath)) {
-      baseController
-        = new WebAppVersioningController(baseId,
+    
+    if (isVersioning()) {
+      WebAppVersioningController controller
+        = new WebAppVersioningController(id,
+                                         baseKey,
                                          contextPath,
-                                         baseContextPath,
                                          this,
                                          _container);
+    
+      return controller;
     }
+    else
+      return createVersionController(version);
+  }
+  
+  
+  /**
+   * Returns the new controller.
+   */
+  public WebAppController createVersionController(ExpandVersion version)
+  {
+    String key = version.getKey();
 
+    String baseKey = version.getBaseKey();
+    String contextPath = keyToName(baseKey);
+    
+    Path rootDirectory = getExpandPath(key);
+    Path archivePath = getArchivePath(key);
+    
+    /*
     // server/10tk
     if (! isValidDirectory(rootDirectory, segmentName)
         && ! jarPath.canRead()
@@ -278,6 +294,8 @@ public class WebAppExpandDeployGenerator
     }
     */
 
+    String id = getId() + "/" + key;
+    
     WebAppController controller
       = new WebAppController(id, rootDirectory, _container,
                              contextPath);
@@ -291,6 +309,8 @@ public class WebAppExpandDeployGenerator
     controller.setSourceType("expand");
 
     controller.setVersion(version.getVersion());
+    
+    controller.init();
 
     /*
     if (baseController != null) {

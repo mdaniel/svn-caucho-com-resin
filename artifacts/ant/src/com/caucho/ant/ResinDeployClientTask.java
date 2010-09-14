@@ -52,7 +52,7 @@ public abstract class ResinDeployClientTask extends Task {
   private String _message;
   private String _password;
 
-  private String _stage = "default";
+  private String _stage = "production";
   private String _virtualHost = "default";
   private String _contextRoot;
   private String _version;
@@ -149,16 +149,16 @@ public abstract class ResinDeployClientTask extends Task {
 
   protected String buildWarTag()
   {
-    return WebAppDeployClient.createTag(_stage, 
-                                        _virtualHost, 
+    return WebAppDeployClient.createTag(_stage,
+                                        _virtualHost,
                                         _contextRoot);
   }
 
   protected String buildVersionedWarTag()
   {
-    return WebAppDeployClient.createTag(_stage, 
-                                        _virtualHost, 
-                                        _contextRoot, 
+    return WebAppDeployClient.createTag(_stage,
+                                        _virtualHost,
+                                        _contextRoot,
                                         _version);
   }
 
@@ -186,7 +186,7 @@ public abstract class ResinDeployClientTask extends Task {
     attributes.put(DeployClient.MESSAGE_ATTRIBUTE, _message);
     attributes.put(DeployClient.VERSION_ATTRIBUTE, _version);
 
-    attributes.put("user.name", 
+    attributes.put("user.name",
                    System.getProperties().getProperty("user.name"));
     attributes.put("client", "ant (" + getClass().getSimpleName() + ")");
 
@@ -245,7 +245,7 @@ public abstract class ResinDeployClientTask extends Task {
     }
 
     @Override
-    public void publish(LogRecord record) 
+    public void publish(LogRecord record)
     {
       if (Level.ALL.equals(record.getLevel())
           || Level.INFO.equals(record.getLevel())
