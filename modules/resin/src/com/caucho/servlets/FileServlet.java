@@ -32,6 +32,7 @@ package com.caucho.servlets;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +59,7 @@ import com.caucho.util.RandomUtil;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
 /**
  * Serves static files.  The cache headers are automatically set on these
@@ -265,7 +267,18 @@ public class FileServlet extends GenericServlet {
 
       String mimeType = webApp.getMimeType(relPath);
 
-      cache = new Cache(_calendar, path, relPath, mimeType);
+      boolean isPathRedable = path.canRead();
+      Path jarPath = null;
+
+      if (! isPathRedable) {
+        String resource = "META-INF/resources" + relPath;
+        URL url = webApp.getClassLoader().getResource(resource);
+
+        if (url != null)
+          jarPath = Vfs.lookup(url);
+      }
+
+      cache = new Cache(_calendar, path, jarPath, relPath, mimeType);
 
       _pathCache.put(uri, cache);
     }
@@ -563,6 +576,8 @@ public class FileServlet extends GenericServlet {
   static class Cache {
     QDate _calendar;
     Path _path;
+    Path _jarPath;
+    Path _pathResolved;
     boolean _isDirectory;
     boolean _canRead;
     long _length;
@@ -573,19 +588,20 @@ public class FileServlet extends GenericServlet {
     String _lastModifiedString;
     String _mimeType;
 
-    Cache(QDate calendar, Path path, String relPath, String mimeType)
+    Cache(QDate calendar, Path path, Path jarPath, String relPath, String mimeType)
     {
       _calendar = calendar;
       _path = path;
+      _jarPath = jarPath;
       _relPath = relPath;
       _mimeType = mimeType;
 
-      update();
+      //update();
     }
 
     Path getPath()
     {
-      return _path;
+      return _pathResolved;
     }
 
     boolean canRead()
@@ -637,18 +653,23 @@ public class FileServlet extends GenericServlet {
 
     private void updateData()
     {
-      long lastModified = _path.getLastModified();
-      long length = _path.getLength();
+      _pathResolved = _path;
+
+      if (_jarPath != null && ! _path.canRead())
+        _pathResolved = _jarPath;
+
+      long lastModified = _pathResolved.getLastModified();
+      long length = _pathResolved.getLength();
 
       if (lastModified != _lastModified || length != _length) {
         _lastModified = lastModified;
         _length = length;
-        _canRead = _path.canRead();
-        _isDirectory = _path.isDirectory();
+        _canRead = _pathResolved.canRead();
+        _isDirectory = _pathResolved.isDirectory();
 
         StringBuilder sb = new StringBuilder();
         sb.append('"');
-        Base64.encode(sb, _path.getCrc64());
+        Base64.encode(sb, _pathResolved.getCrc64());
         sb.append('"');
         _etag = sb.toString();
 

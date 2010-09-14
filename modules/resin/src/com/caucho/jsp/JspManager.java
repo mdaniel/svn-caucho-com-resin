@@ -30,25 +30,23 @@
 package com.caucho.jsp;
 
 import com.caucho.java.LineMap;
-import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.SimpleLoader;
-import com.caucho.make.DependencyContainer;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.Vfs;
 
 import javax.servlet.*;
-import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.jsp.HttpJspPage;
 import javax.servlet.jsp.JspFactory;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -246,10 +244,28 @@ public class JspManager extends PageManager {
       return page;
     }
 
-    if (path == null || ! path.canRead() || path.isDirectory()
-        || ! _autoCompile) {
+    if (path == null || path.isDirectory() || ! _autoCompile)
+      return null;
+
+    Path jspJarPath = null;
+    boolean isPathReadable = path.canRead();
+
+    if (! isPathReadable) {
+      String resource = "META-INF/resources" + uri;
+      _webApp.getClassLoader().getResource(resource);
+
+      URL url = _webApp.getClassLoader().getResource(resource);
+
+      if (url != null)
+        jspJarPath = Vfs.lookup(url);
+    }
+
+    if (! isPathReadable && jspJarPath == null) {
       return null;
     }
+
+    if (jspJarPath != null)
+      path = jspJarPath;
 
     JspCompilerInstance compilerInst =
       compiler.getCompilerInstance(path, uri, className);

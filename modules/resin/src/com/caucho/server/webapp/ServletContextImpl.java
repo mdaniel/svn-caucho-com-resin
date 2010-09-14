@@ -33,7 +33,6 @@ import com.caucho.VersionFactory;
 import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 import javax.servlet.*;
 import javax.servlet.descriptor.JspConfigDescriptor;
@@ -330,8 +329,11 @@ public class ServletContextImpl extends ServletContextCompat
     try {
       if (path.canRead())
         return path.openRead();
-      else
-        return null;
+      else {
+        String resource = "META-INF/resources" + uripath;
+
+        return getClassLoader().getResourceAsStream(resource);
+      }
     } catch (IOException e) {
       log.log(Level.FINEST, e.toString(), e);
 
