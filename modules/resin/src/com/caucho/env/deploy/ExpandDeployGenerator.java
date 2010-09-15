@@ -405,12 +405,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    *
    * @param name a name, without an extension
    */
-  public Path getExpandPath(String name)
+  public Path getExpandPath(String key)
   {
-    if (! isDeployedKey(nameToKey(name)))
+    if (! isDeployedKey(key))
       return null;
 
-    return _directoryManager.getExpandPath(nameToKey(name));
+    return _directoryManager.getExpandPath(key);
 
     /*
     if (expandDir.isDirectory())
@@ -444,7 +444,10 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
       _lastCheckTime = Alarm.getCurrentTime();
 
-      _isModified = _expandManager.isModified();
+      if (_expandManager != null)
+        _isModified = _expandManager.isModified();
+      else
+        _isModified = true;
 
       return _isModified;
     } catch (Exception e) {
@@ -483,7 +486,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    */
   protected boolean isDeployedKey(String key)
   {
-    if (_deployedKeys.contains(key))
+    if (key == null)
+      return false;
+    else if (_deployedKeys.contains(key))
       return true;
     else if (_expandManager.getKeySet().contains(key))
       return true;

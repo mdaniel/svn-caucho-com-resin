@@ -29,7 +29,6 @@
 
 package com.caucho.env.deploy;
 
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +41,6 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
-import com.caucho.vfs.Path;
 
 /**
  * DeployController controls the lifecycle of the DeployInstance.
@@ -59,6 +57,9 @@ abstract public class DeployController<I extends DeployInstance>
   private ClassLoader _parentLoader;
   
   private final String _id;
+  private final String _idStage;
+  private final String _idType;
+  private final String _idKey;
 
   private DeployMode _startupMode = DeployMode.DEFAULT;
   private DeployMode _redeployMode = DeployMode.DEFAULT;
@@ -92,6 +93,14 @@ abstract public class DeployController<I extends DeployInstance>
     _parentLoader = parentLoader;
 
     _lifecycle = new Lifecycle(getLog(), toString(), Level.FINEST);
+    
+    int p1 = id.indexOf('/');
+    _idStage = id.substring(0, p1);
+    
+    int p2 = id.indexOf('/', p1 + 1);
+    _idType = id.substring(p1 + 1, p2);
+    
+    _idKey = id.substring(p2 + 1);
   }
 
   /**
@@ -106,6 +115,21 @@ abstract public class DeployController<I extends DeployInstance>
   public final String getId()
   {
     return _id;
+  }
+  
+  public final String getIdStage()
+  {
+    return _idStage;
+  }
+  
+  public final String getIdType()
+  {
+    return _idType;
+  }
+  
+  public final String getIdKey()
+  {
+    return _idKey;
   }
 
   /**

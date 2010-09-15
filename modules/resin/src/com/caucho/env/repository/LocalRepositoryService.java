@@ -66,6 +66,11 @@ public class LocalRepositoryService
     return _fileRepository;
   }
   
+  public RepositorySpi getRepositorySpi()
+  {
+    return _fileRepository;
+  }
+  
   @Override
   public int getStartPriority()
   {

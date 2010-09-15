@@ -108,6 +108,10 @@ public class HostController
     getVariableMap().put("host", _hostVar);
 
     setContainer(container);
+    
+    if (! isErrorHost()) {
+      _admin = new HostAdmin(this);
+    }
   }
 
   public HostController(String id,
@@ -115,27 +119,19 @@ public class HostController
                         String hostName,
                         HostContainer container)
   {
-    super(id, rootDirectory);
-
-    addHostAlias(hostName);
-    setHostName(hostName);
-
-    // jsp/101r
-    // getVariableMap().put("name", id);
-    getVariableMap().put("host", _hostVar);
-    
-    setContainer(container);
-    
-    if (! getId().startsWith("/error/")) {
-      _admin = new HostAdmin(this);
-    }
+    this(id, rootDirectory, hostName, null, container, null);
+  }
+  
+  private boolean isErrorHost()
+  {
+    return getId().startsWith("error/");
   }
 
   public void setContainer(HostContainer container)
   {
     _container = container;
     
-    if (_container != null) {
+    if (_container != null && ! isErrorHost()) {
       for (HostConfig defaultConfig : _container.getHostDefaultList())
         addConfigDefault(defaultConfig);
     }

@@ -123,8 +123,10 @@ public class CompilingLoader extends Loader implements Make {
     this(loader);
     
     if (classDir.getScheme().equals("http")
-        || classDir.getScheme().equals("https"))
-      throw new RuntimeException("compiling class loader can't be http.  Use compile=false.");
+        || classDir.getScheme().equals("https")) {
+      throw new ConfigException(L.l("compiling class loader can't be '{0}'.  Use compile=false.",
+                                    classDir));
+    }
 
     _sourceDir = sourceDir;
     _classDir = classDir;
@@ -292,19 +294,22 @@ public class CompilingLoader extends Loader implements Make {
     if (_classDir == null)
       throw new ConfigException(L.l("'path' is a required attribute of <compiling-loader>."));
 
-    try {
-      _classDir.mkdirs();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
+    String scheme = _classDir.getScheme();
     
-    try {
-      _codeSource = new CodeSource(new URL(_classDir.getURL()), (Certificate []) null);
-    } catch (Exception e) {
-      String scheme = _classDir.getScheme();
-      
-      if (scheme != null && ! scheme.equals("memory"))
+    if (scheme != null
+        && ! scheme.equals("memory")
+        && ! scheme.equals("error")) {
+      try {
+        _classDir.mkdirs();
+      } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
+      }
+    
+      try {
+        _codeSource = new CodeSource(new URL(_classDir.getURL()), (Certificate []) null);
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
     }
     
     super.init();

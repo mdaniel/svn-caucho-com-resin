@@ -50,7 +50,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempOutputStream;
 
-abstract public class AbstractRepository implements Repository
+abstract public class AbstractRepository implements Repository, RepositorySpi
 {
   private static final Logger log
     = Logger.getLogger(AbstractRepository.class.getName());
@@ -177,9 +177,8 @@ abstract public class AbstractRepository implements Repository
    * @param commitMetaData additional commit attributes
    */
   @Override
-  abstract public boolean putTag(String tagName,
+  abstract public boolean putTag(String tag,
                                  String contentHash,
-                                 String commitMessage,
                                  Map<String,String> commitMetaData);
 
   /**
@@ -190,23 +189,25 @@ abstract public class AbstractRepository implements Repository
    * @param commitMetaData additional commit meta-data
    */
   @Override
-  abstract public boolean removeTag(String tagName,
-                                    String commitMessage,
+  abstract public boolean removeTag(String tag,
                                     Map<String,String> commitMetaData);
 
   /**
-   * Convenience method for adding the content of a directory.
+   * Convenience method for adding the content of a jar.
    */
   @Override
-  public String putTagContent(String tagName,
-                              Path path,
-                              String commitMessage,
-                              Map<String,String> commitMetaData)
+  public String commitArchive(CommitBuilder commit,
+                              Path archivePath)
   {
-    String contentHash = addPath(path);
+    commit.validate();
     
-    if (putTag(tagName, contentHash, commitMessage, commitMetaData))
+    String contentHash = addArchive(archivePath);
+    
+    if (putTag(commit.getId(), 
+               contentHash, 
+               commit.getAttributes())) {
       return contentHash;
+    }
     else
       return null;
   }
@@ -215,17 +216,11 @@ abstract public class AbstractRepository implements Repository
    * Convenience method for adding the content of a jar.
    */
   @Override
-  public String putTagArchive(String tagName,
-                              Path archivePath,
-                              String commitMessage,
-                              Map<String,String> commitMetaData)
+  public boolean removeTag(CommitBuilder commit)
   {
-    String contentHash = addArchive(archivePath);
+    commit.validate();
     
-    if (putTag(tagName, contentHash, commitMessage, commitMetaData))
-      return contentHash;
-    else
-      return null;
+    return removeTag(commit.getId(), commit.getAttributes());
   }
   
   /**
@@ -238,7 +233,6 @@ abstract public class AbstractRepository implements Repository
    */
   protected RepositoryTagMap addTagData(String tagName,
                                         String contentHash,
-                                        String message,
                                         Map<String,String> commitMetaData)
   {
     try {
@@ -253,7 +247,8 @@ abstract public class AbstractRepository implements Repository
                                           contentHash));
       
       if (log.isLoggable(Level.FINE)) {
-        log.fine(this + " committing " + tagName + "\n  '" + message
+        log.fine(this + " committing " + tagName + "\n  '"
+                 + commitMetaData.get("message")
                  + "'\n  " + contentHash);
       }
 
@@ -293,7 +288,6 @@ abstract public class AbstractRepository implements Repository
    * @param version symbolic version name for the commit
    */
   protected RepositoryTagMap removeTagData(String tagName,
-                                           String commitMessage,
                                            Map<String,String> commitMetaData)
   {
     try {

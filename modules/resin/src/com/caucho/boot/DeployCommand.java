@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
@@ -59,6 +60,7 @@ public class DeployCommand extends AbstractBootCommand {
                                     war));
     }
     
+    
     int p = war.lastIndexOf('.');
     
     String name = args.getArg("-name");
@@ -71,10 +73,13 @@ public class DeployCommand extends AbstractBootCommand {
     if (host == null)
       host = "default";
     
+    CommitBuilder commit = new CommitBuilder();
+    commit.tagKey(host + "/" + name);
+    
     String stage = args.getArg("-stage");
     
-    if (stage == null)
-      stage = "production";
+    if (stage != null)
+      commit.stage(stage);
     
     String tag = stage + "/webapp/" + host + "/" + name;
     
@@ -88,14 +93,16 @@ public class DeployCommand extends AbstractBootCommand {
     String message = args.getArg("-m");
     
     if (message == null)
-      args.getArg("-message");
+      message = args.getArg("-message");
     
     if (message == null)
       message = "deploy " + war + " from command line";
     
-    HashMap<String,String> attributes = new HashMap<String,String>();
+    commit.message(message);
     
-    deployClient.putTagArchive(tag, path, message, attributes);
+    commit.attribute("user", System.getProperty("user.name"));
+    
+    deployClient.commitArchive(commit, path);
     
     deployClient.close();
     

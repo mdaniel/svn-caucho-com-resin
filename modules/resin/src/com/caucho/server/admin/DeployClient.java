@@ -30,7 +30,6 @@ package com.caucho.server.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,13 +38,16 @@ import com.caucho.bam.ActorClient;
 import com.caucho.bam.Broker;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
-import com.caucho.env.git.GitCommit;
+import com.caucho.cloud.deploy.CopyTagQuery;
+import com.caucho.cloud.deploy.RemoveTagQuery;
+import com.caucho.cloud.deploy.SetTagQuery;
 import com.caucho.env.git.GitCommitJar;
 import com.caucho.env.git.GitCommitTree;
-import com.caucho.env.git.GitTree;
-import com.caucho.env.git.GitType;
-import com.caucho.env.repository.AbstractRepository;
+import com.caucho.env.repository.CommitBuilder;
+import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryException;
+import com.caucho.env.repository.RepositoryTagEntry;
+import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
@@ -56,7 +58,7 @@ import com.caucho.vfs.StreamSource;
 /**
  * Deploy Client API
  */
-public class DeployClient extends AbstractRepository
+public class DeployClient implements Repository
 {
   private static final L10N L = new L10N(DeployClient.class);
   public static final String USER_ATTRIBUTE = "user";
@@ -131,74 +133,26 @@ public class DeployClient extends AbstractRepository
    * @param attributes commit attributes including user, message, and version
    */
   @Override
-  public String putTagArchive(String tag,
-                              Path jar,
-                              String commitMessage,
-                              Map<String,String> attributes)
+  public String commitArchive(CommitBuilder commit,
+                              Path jar)
   {
-    GitCommitJar commit = null;
+    commit.validate();
+    
+    GitCommitJar gitCommit = null;
 
     try {
-      commit = new GitCommitJar(jar);
+      gitCommit = new GitCommitJar(jar);
       
-      return deployJar(tag, commit, commitMessage, attributes);
+      String tag = commit.getId();
+      
+      return deployJar(tag, gitCommit, commit.getAttributes());
     }
     catch (IOException e) {
       throw new RepositoryException(e);
     }
     finally {
-      if (commit != null)
-        commit.close();
-    }
-  }
-
-  /**
-   * Uploads the contents of a jar/zip file to a Resin server.  
-   * The jar is unzipped and each component is uploaded separately.
-   * For wars, this means that only the changed files need updates.
-   *
-   * @param tag symbolic name of the jar file to add
-   * @param jar path to the jar file
-   * @param attributes commit attributes including user, message, and version
-   */
-  public String deployJarContents(String tag,
-                                  Path jar,
-                                  HashMap<String,String> attributes)
-    throws IOException
-  {
-    GitCommitJar commit = new GitCommitJar(jar);
-
-    String message = "deploy jar";
-    
-    try {
-      return deployJar(tag, commit, message, attributes);
-    } 
-    finally {
-      commit.close();
-    }
-  }
-
-  /**
-   * Uploads a stream to a jar/zip file to a Resin server
-   *
-   * @param tag symbolic name of the jar file to add
-   * @param is stream containing a jar/zip
-   * @param attributes commit attributes including user, message, and version
-   */
-  public String deployJarContents(String tag,
-                                  InputStream is,
-                                  HashMap<String,String> attributes)
-    throws IOException
-  {
-    GitCommitJar commit = new GitCommitJar(is);
-    
-    String message = "init message";
-
-    try {
-      return deployJar(tag, commit, message, attributes);
-    } 
-    finally {
-      commit.close();
+      if (gitCommit != null)
+        gitCommit.close();
     }
   }
 
@@ -209,22 +163,17 @@ public class DeployClient extends AbstractRepository
    * @param sourceTag the source tag from which to copy
    * @param attributes commit attributes including user and message
    */
-  public Boolean copyTag(String tag,
-                         String sourceTag,
-                         HashMap<String,String> attributes)
+  public Boolean copyTag(CommitBuilder target,
+                         CommitBuilder source)
   {
-    String user = null;
-    String message = null;
-    String version = null;
+    target.validate();
+    source.validate();
+    
+    String targetId = target.getId();
+    String sourceId = source.getId();
 
-    if (attributes != null) {
-      user = attributes.get(USER_ATTRIBUTE);
-      message = attributes.get(MESSAGE_ATTRIBUTE);
-      version = attributes.get(VERSION_ATTRIBUTE);
-    }
-
-    CopyTagQuery query = 
-      new CopyTagQuery(tag, sourceTag, user, message, version);
+    CopyTagQuery query
+      = new CopyTagQuery(targetId, sourceId, target.getAttributes());
 
     return (Boolean) querySet(query);
   }
@@ -235,13 +184,14 @@ public class DeployClient extends AbstractRepository
    * @param tag the tag to remove
    * @param attributes commit attributes including user and message
    */
-  public Boolean removeTag(String tag, 
-                           HashMap<String,String> attributes)
+  @Override
+  public boolean removeTag(CommitBuilder commit)
   {
-    String user = attributes.get(USER_ATTRIBUTE);
-    String message = attributes.get(MESSAGE_ATTRIBUTE);
+    commit.validate();
+    
+    String tag = commit.getId();
 
-    RemoveTagQuery query = new RemoveTagQuery(tag, user, message);
+    RemoveTagQuery query = new RemoveTagQuery(tag, commit.getAttributes());
 
     return (Boolean) querySet(query);
   }
@@ -280,10 +230,9 @@ public class DeployClient extends AbstractRepository
   // low-level routines
   //
 
-  protected String deployJar(String tag,
-                             GitCommitJar commit,
-                             String commitMessage,
-                             Map<String,String> attributes)
+  private String deployJar(String tag,
+                           GitCommitJar commit,
+                           Map<String,String> attributes)
     throws IOException
   {
     String []files = getCommitList(commit.getCommitList());
@@ -297,7 +246,7 @@ public class DeployClient extends AbstractRepository
       querySet(query);
     }
     
-    putTag(tag, commit.getDigest(), commitMessage, attributes);
+    putTag(tag, commit.getDigest(), attributes);
     
     return commit.getDigest();
   }
@@ -310,7 +259,6 @@ public class DeployClient extends AbstractRepository
     writeRawGitFile(sha1, blobIs);
   }
 
-  @Override
   public void writeRawGitFile(String sha1, InputStream is)
     throws IOException
   {
@@ -345,11 +293,9 @@ public class DeployClient extends AbstractRepository
     return (String) querySet(query);
   }
 
-  @Override
-  public boolean putTag(String tag,
-                        String contentHash,
-                        String commitMessage,
-                        Map<String,String> attributes)
+  private boolean putTag(String tag,
+                         String contentHash,
+                         Map<String,String> attributes)
   {
     if (tag == null)
       throw new NullPointerException();
@@ -363,23 +309,18 @@ public class DeployClient extends AbstractRepository
     else
       attributeCopy = new HashMap<String,String>();
     
-
-    String user = attributeCopy.remove(USER_ATTRIBUTE);
-    String version = attributeCopy.remove(VERSION_ATTRIBUTE);
-
     // server/2o66
     SetTagQuery query
-      = new SetTagQuery(tag, contentHash, user, commitMessage, version, 
-                        attributeCopy);
+      = new SetTagQuery(tag, contentHash, attributeCopy);
 
     querySet(query);
     
     return true;
   }
   
-  protected String setTag(String tag,
-                          String sha1,
-                          HashMap<String,String> attributes)
+  private String setTag(String tag,
+                        String contentHash,
+                        HashMap<String,String> attributes)
   {
     HashMap<String,String> attributeCopy;
 
@@ -388,13 +329,9 @@ public class DeployClient extends AbstractRepository
     else
       attributeCopy = new HashMap<String,String>();
 
-    String user = attributeCopy.remove(USER_ATTRIBUTE);
-    String message = attributeCopy.remove(MESSAGE_ATTRIBUTE);
-    String version = attributeCopy.remove(VERSION_ATTRIBUTE);
-
     // server/2o66
     SetTagQuery query
-      = new SetTagQuery(tag, sha1, user, message, version, attributeCopy);
+      = new SetTagQuery(tag, contentHash, attributeCopy);
 
     return (String) querySet(query);
   }
@@ -547,134 +484,43 @@ public class DeployClient extends AbstractRepository
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#addCommit(com.caucho.env.git.GitCommit)
+   * @see com.caucho.env.repository.Repository#addListener(java.lang.String, com.caucho.env.repository.RepositoryTagListener)
    */
   @Override
-  public String addCommit(GitCommit commit) throws IOException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#exists(java.lang.String)
-   */
-  @Override
-  public boolean exists(String sha1)
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#expandToPath(java.lang.String, com.caucho.vfs.Path)
-   */
-  @Override
-  public void expandToPath(String contentHash, Path path)
+  public void addListener(String tagName, RepositoryTagListener listener)
   {
     // TODO Auto-generated method stub
     
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#getRepositoryRootHash()
+   * @see com.caucho.env.repository.Repository#getTagContentHash(java.lang.String)
    */
   @Override
-  public String getRepositoryRootHash()
+  public String getTagContentHash(String tag)
   {
     // TODO Auto-generated method stub
     return null;
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#getType(java.lang.String)
+   * @see com.caucho.env.repository.Repository#getTagMap()
    */
   @Override
-  public GitType getType(String sha1)
+  public Map<String, RepositoryTagEntry> getTagMap()
   {
     // TODO Auto-generated method stub
     return null;
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#openBlob(java.lang.String)
+   * @see com.caucho.env.repository.Repository#removeListener(java.lang.String, com.caucho.env.repository.RepositoryTagListener)
    */
   @Override
-  public InputStream openBlob(String sha1) throws IOException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#openRawGitFile(java.lang.String)
-   */
-  @Override
-  public InputStream openRawGitFile(String contentHash) throws IOException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#readCommit(java.lang.String)
-   */
-  @Override
-  public GitCommit readCommit(String commitHash) throws IOException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#readTree(java.lang.String)
-   */
-  @Override
-  public GitTree readTree(String treeHash) throws IOException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#removeTag(java.lang.String, java.lang.String, java.util.Map)
-   */
-  @Override
-  public boolean removeTag(String tagName, String commitMessage,
-                           Map<String, String> commitMetaData)
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#setRepositoryRootHash(java.lang.String)
-   */
-  @Override
-  public void setRepositoryRootHash(String repositoryCommitHash)
+  public void removeListener(String tagName, RepositoryTagListener listener)
   {
     // TODO Auto-generated method stub
     
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.AbstractRepository#writeBlobToStream(java.lang.String, java.io.OutputStream)
-   */
-  @Override
-  public void writeBlobToStream(String blobHash, OutputStream os)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.Repository#addBlob(java.io.InputStream)
-   */
-  @Override
-  public String addBlob(InputStream is) throws IOException
-  {
-    // TODO Auto-generated method stub
-    return null;
   }
 }
 

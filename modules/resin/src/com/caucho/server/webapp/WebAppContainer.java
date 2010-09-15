@@ -619,7 +619,7 @@ public class WebAppContainer
    */
   public String getURL()
   {
-    return "";
+    return _host.getURL();
   }
 
   /**

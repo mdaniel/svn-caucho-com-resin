@@ -90,14 +90,12 @@ public class FileRepository extends AbstractRepository
   @Override
   public boolean putTag(String tagName,
                         String contentHash,
-                        String commitMessage,
                         Map<String,String> commitMetaData)
   {
     RepositoryTagMap tagMap;
 
     do {
-      tagMap = addTagData(tagName, contentHash, commitMessage, commitMetaData);
-
+      tagMap = addTagData(tagName, contentHash, commitMetaData);
     } while (! setTagMap(tagMap));
     
     return true;
@@ -112,13 +110,12 @@ public class FileRepository extends AbstractRepository
    */
   @Override
   public boolean removeTag(String tagName,
-                           String commitMessage,
                            Map<String,String> commitMetaData)
   {
     RepositoryTagMap tagMap;
 
     do {
-      tagMap = removeTagData(tagName, commitMessage, commitMetaData);
+      tagMap = removeTagData(tagName, commitMetaData);
     } while (! setTagMap(tagMap));
 
     return true;

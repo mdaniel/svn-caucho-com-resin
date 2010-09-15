@@ -88,6 +88,7 @@ import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.ErrorPage;
+import com.caucho.server.webapp.ErrorPageManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
@@ -946,7 +947,20 @@ public class Server
    */
   public WebApp getErrorWebApp()
   {
-    return _hostContainer.getErrorWebApp();
+    if (isActive())
+      return _hostContainer.getErrorWebApp();
+    else
+      return null;
+  }
+  
+  public ErrorPageManager getErrorPageManager()
+  {
+    WebApp errorWebApp = getErrorWebApp();
+    
+    if (errorWebApp != null)
+      return errorWebApp.getErrorPageManager();
+    else
+      return null;
   }
 
   /**

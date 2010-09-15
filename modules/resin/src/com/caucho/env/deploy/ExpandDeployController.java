@@ -40,8 +40,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.types.FileSetType;
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.DynamicClassLoader;
@@ -69,7 +71,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private static final String APPLICATION_HASH_PATH
     = "META-INF/resin.application-hash";
 
-  private final String _autoDeployTag;
+  private final String _autoDeployStage;
   
   private Path _rootDirectory;
   private Path _archivePath;
@@ -77,6 +79,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private String _rootHash;
 
   private Repository _repository;
+  private RepositorySpi _repositorySpi;
 
   private FileSetType _expandCleanupFileSet;
   
@@ -106,7 +109,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     _rootDirectory = rootDirectory;
     
-    _autoDeployTag = "server/" + ResinSystem.getCurrentId() + "/" + id; 
+    _autoDeployStage = "server-" + ResinSystem.getCurrentId();
   }
 
   /**
@@ -187,9 +190,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     _expandCleanupFileSet = fileSet;
   }
 
-  public String getAutoDeployTag()
+  public String getAutoDeployStage()
   {
-    return _autoDeployTag;
+    return _autoDeployStage;
   }
   
   /**
@@ -203,6 +206,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     RepositoryService repositoryService = RepositoryService.create(); 
     _repository = repositoryService.getRepository();
     _repository.addListener(getId(), this);
+    _repositorySpi = repositoryService.getRepositorySpi();
     
     DeployControllerService deployService = DeployControllerService.create();
 
@@ -368,6 +372,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       loader.addManifestClassPath(classPath, pwd);
   }
 
+  public String getAutoDeployTag()
+  {
+    return (getAutoDeployStage() + "/" + getIdType() + "/" + getIdKey());
+  }
+  
   /**
    * Adds any updated .war file to the server-specific repository. The 
    * application will be extracted as part of the usual repository system.
@@ -389,25 +398,20 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     String hash = Long.toHexString(archivePath.getCrc64());
     
     if (log.isLoggable(Level.FINE)){
-      log.fine(this + " adding .war to repository from " + archivePath);
+      log.fine(this + " adding archive to repository from " + archivePath);
     }
 
     try {
-      HashMap<String,String> props = new HashMap<String,String>();
+      CommitBuilder commit = new CommitBuilder();
+      commit.stage(getAutoDeployStage());
+      commit.type(getIdType());
+      commit.tagKey(getIdKey());
       
-      props.put("archive-digest", hash);
+      commit.attribute("archive-digest", hash);
+      commit.message(".war added to repository from "
+                     + archivePath.getNativePath());
       
-      long archiveDate = archivePath.getLastModified();
-      QDate qDate = QDate.allocateLocalDate();
-      qDate.setGMTTime(archiveDate);
-      props.put("date", qDate.printISO8601());
-      QDate.freeLocalDate(qDate);
-      
-      _repository.putTagArchive(_autoDeployTag, 
-                                archivePath,
-                                ".war added to repository from " 
-                                + archivePath.getNativePath(), 
-                                props);
+      _repository.commitArchive(commit, archivePath);
       
       return true;
     } catch (Exception e) {
@@ -424,16 +428,16 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     throws IOException
   {
     try {
-      if (_repository == null)
+      if (_repositorySpi == null)
         return false;
       
       String tag = getId();
-      String treeHash = _repository.getTagContentHash(tag);
+      String treeHash = _repositorySpi.getTagContentHash(tag);
 
       if (treeHash == null) {
-        tag = _autoDeployTag;
+        tag = getAutoDeployTag();
 
-        treeHash = _repository.getTagContentHash(tag);
+        treeHash = _repositorySpi.getTagContentHash(tag);
       }
       
       if (treeHash == null)
@@ -454,7 +458,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
                  + "\n  contentHash=" + treeHash);
       }
 
-      _repository.expandToPath(treeHash, pwd);
+      _repositorySpi.expandToPath(treeHash, pwd);
       
       writeRootHash(treeHash);
       
@@ -548,11 +552,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (getArchivePath() != null)
       _depend.add(new Depend(getArchivePath()));
 
-    String value = getRepository().getTagContentHash(getId());
+    String value = _repositorySpi.getTagContentHash(getId());
     _depend.add(new RepositoryDependency(getId(), value));
     
-    value = getRepository().getTagContentHash(_autoDeployTag);
-    _depend.add(new RepositoryDependency(_autoDeployTag, value));
+    value = _repositorySpi.getTagContentHash(getAutoDeployTag());
+    _depend.add(new RepositoryDependency(getAutoDeployTag(), value));
   }
 
   /**

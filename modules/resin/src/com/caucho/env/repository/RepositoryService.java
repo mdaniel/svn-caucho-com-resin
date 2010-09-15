@@ -96,7 +96,22 @@ public class RepositoryService extends AbstractResinService
     return service.getRepository();
   }
   
+  public static RepositorySpi getCurrentRepositorySpi()
+  {
+    RepositoryService service = getCurrent();
+    
+    if (service == null)
+      throw new IllegalStateException(L.l("RepositoryService is not available in this context"));
+    
+    return service.getRepositorySpi();
+  }
+  
   public Repository getRepository()
+  {
+    return _repository;
+  }
+  
+  public RepositorySpi getRepositorySpi()
   {
     return _repository;
   }

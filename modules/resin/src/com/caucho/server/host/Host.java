@@ -184,10 +184,6 @@ public class Host
 
     addHostAlias(name);
 
-    // getEnvironmentClassLoader().setId("host:" + name);
-
-    // _jmxContext.put("J2EEServer", name);
-
     int p = name.indexOf("://");
 
     if (p >= 0)

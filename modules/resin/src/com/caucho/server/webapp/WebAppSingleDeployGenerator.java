@@ -278,7 +278,6 @@ public class WebAppSingleDeployGenerator
   /**
    * Merges the controllers.
    */
-  /*
   @Override
   public WebAppController mergeController(WebAppController controller,
                                           String name)
@@ -291,7 +290,9 @@ public class WebAppSingleDeployGenerator
       
       controller.setDynamicDeploy(false);
       
-      return controller.merge(_controller);
+      controller.merge(_controller);
+      
+      return controller;
     }
     // else if the names don't match, return the new controller
     else if (! _controller.isNameMatch(name))
@@ -300,7 +301,6 @@ public class WebAppSingleDeployGenerator
     else
       return _controller;
   }
-  */
 
   /**
    * Initialize the deployment.

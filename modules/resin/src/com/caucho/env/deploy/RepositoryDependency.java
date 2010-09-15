@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySpi;
 import com.caucho.vfs.PersistentDependency;
 
 /**
@@ -42,7 +43,7 @@ public class RepositoryDependency implements PersistentDependency {
   private String _tag;
   private String _sha1;
 
-  private transient Repository _repository;
+  private transient RepositorySpi _repository;
 
   /**
    * Create a new dependency with an already known modified time and length.
@@ -54,7 +55,7 @@ public class RepositoryDependency implements PersistentDependency {
     _tag = tag;
     _sha1 = sha1;
 
-    _repository = RepositoryService.getCurrentRepository();
+    _repository = RepositoryService.getCurrentRepositorySpi();
   }
 
   /**
@@ -75,7 +76,7 @@ public class RepositoryDependency implements PersistentDependency {
       return false;
   }
 
-  private Repository getRepository()
+  private RepositorySpi getRepository()
   {
     return _repository;
   }

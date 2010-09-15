@@ -227,10 +227,7 @@ public class WebAppController
    */
   public String getURL()
   {
-    if (_container != null)
-      return _container.getURL() + _contextPath;
-    else
-      return _contextPath;
+    return getHost().getURL() + _contextPath;
   }
 
   /**
@@ -702,9 +699,9 @@ public class WebAppController
   public String toString()
   {
     if (com.caucho.util.Alarm.isTest())
-      return "WebAppController" +  "[" + getId() + "]";
+      return getClass().getSimpleName() + "[" + getId() + "]";
     else
-      return "WebAppController$" + System.identityHashCode(this) + "[" + getId() + "]";
+      return getClass().getSimpleName() + "$" + System.identityHashCode(this) + "[" + getId() + "]";
   }
 
   /**
@@ -733,7 +730,7 @@ public class WebAppController
       if (getWarName() != null)
         name = getWarName();
       else
-        name = getId();
+        name = getContextPath();
 
       if (name.startsWith("/"))
         return name;
@@ -779,7 +776,7 @@ public class WebAppController
     @Override
     public String toString()
     {
-      return "WebApp[" + getURL() + "]";
+      return "WebApp[" + getId() + "]";
     }
   }
 }

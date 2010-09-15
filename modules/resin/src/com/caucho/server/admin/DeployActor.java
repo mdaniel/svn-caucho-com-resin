@@ -48,12 +48,16 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
+import com.caucho.cloud.deploy.CopyTagQuery;
+import com.caucho.cloud.deploy.RemoveTagQuery;
+import com.caucho.cloud.deploy.SetTagQuery;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
 import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.deploy.DeployTagItem;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.DeployControllerMXBean;
@@ -80,7 +84,7 @@ public class DeployActor extends SimpleActor
 
   private Server _server;
 
-  private Repository _repository;
+  private RepositorySpi _repository;
 
   private AtomicBoolean _isInit = new AtomicBoolean();
 
@@ -111,7 +115,7 @@ public class DeployActor extends SimpleActor
       throw new ConfigException(L.l("resin:DeployService requires an active Server.\n  {0}",
                                     Thread.currentThread().getContextClassLoader()));
 
-    _repository = RepositoryService.getCurrentRepository();
+    _repository = RepositoryService.getCurrentRepositorySpi();
 
     setLinkStream(getBroker().getBrokerStream());
     getBroker().addActor(getActorStream());
@@ -165,18 +169,14 @@ public class DeployActor extends SimpleActor
     
     TreeMap<String,String> metaDataMap = new TreeMap<String,String>();
     
-    if (query.getUser() != null)
-      metaDataMap.put("user", query.getUser());
+    if (query.getAttributes() != null)
+      metaDataMap.putAll(query.getAttributes());
     
     if (server != null)
       metaDataMap.put("server", server);
-    
-    if (query.getVersion() != null)
-      metaDataMap.put("version", query.getVersion());
 
     boolean result = _repository.putTag(tag,
-                                        entry.getRoot(),  
-                                        query.getMessage(),
+                                        entry.getRoot(),
                                         metaDataMap);
 
     getLinkStream().queryResult(id, from, to, result);
@@ -221,13 +221,12 @@ public class DeployActor extends SimpleActor
     
     HashMap<String,String> commitMetaData = new HashMap<String,String>();
     
+    if (query.getAttributes() != null)
+      commitMetaData.putAll(query.getAttributes());
+    
     commitMetaData.put("server", server);
     
-    if (query.getUser() != null)
-      commitMetaData.put("user", query.getUser());
-    
     boolean result = _repository.removeTag(query.getTag(),
-                                           query.getMessage(),
                                            commitMetaData);
 
     getLinkStream().queryResult(id, from, to, result);
@@ -264,7 +263,7 @@ public class DeployActor extends SimpleActor
   public boolean setTagQuery(long id, String to, String from, SetTagQuery query)
   {
     String tagName = query.getTag();
-    String contentHash = query.getHex();
+    String contentHash = query.getContentHash();
     
     if (contentHash == null)
       throw new NullPointerException();
@@ -273,17 +272,13 @@ public class DeployActor extends SimpleActor
     
     TreeMap<String,String> commitMetaData = new TreeMap<String,String>();
     
+    if (query.getAttributes() != null)
+      commitMetaData.putAll(query.getAttributes());
+    
     commitMetaData.put("server", server);
-    
-    if (query.getUser() != null)
-      commitMetaData.put("user", query.getUser());
-    
-    if (query.getVersion() != null)
-      commitMetaData.put("user", query.getVersion());
     
     boolean result = _repository.putTag(tagName, 
                                         contentHash,
-                                        query.getMessage(),
                                         commitMetaData);
 
     getLinkStream().queryResult(id, from, to, String.valueOf(result));
@@ -509,7 +504,10 @@ public class DeployActor extends SimpleActor
                                     String from,
                                     UndeployQuery query)
   {
-    String status = undeploy(query.getTag(), query.getUser(), query.getMessage());
+    if (true)
+      throw new UnsupportedOperationException();
+    
+    String status = null;//undeploy(query.getTag(), query.getUser(), query.getMessage());
 
     log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
 
@@ -518,7 +516,7 @@ public class DeployActor extends SimpleActor
     return true;
   }
 
-  private String undeploy(String tag, String user, String commitMessage)
+  private String undeploy(String tag, Map<String,String> commitMetaData)
   {
     DeployControllerMXBean controller = findController(tag);
 
@@ -535,14 +533,14 @@ public class DeployActor extends SimpleActor
       if (controller.destroy()) {
         String server = "default";
         
-        HashMap<String,String> commitMetaData = new HashMap<String,String>();
+        HashMap<String,String> metaDataCopy = new HashMap<String,String>();
         
-        commitMetaData.put("server", server);
+        if (commitMetaData != null)
+          metaDataCopy.putAll(commitMetaData);
         
-        if (user != null)
-          commitMetaData.put("user", user);
+        metaDataCopy.put("server", server);
         
-        _repository.removeTag(tag, commitMessage, commitMetaData);
+        _repository.removeTag(tag, metaDataCopy);
 
         return "undeployed";
       }

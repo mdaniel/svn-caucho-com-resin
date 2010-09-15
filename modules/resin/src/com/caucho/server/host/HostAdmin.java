@@ -54,6 +54,7 @@ public class HostAdmin extends DeployControllerAdmin<HostController>
     super(controller);
   }
 
+  @Override
   public String getName()
   {
     String name = getController().getName();

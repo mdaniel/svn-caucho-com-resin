@@ -175,7 +175,7 @@ public abstract class AbstractHttpRequest
     if (server == null)
       throw new NullPointerException();
     
-    _errorManager = server.getErrorWebApp().getErrorPageManager();
+    _errorManager = server.getErrorPageManager();
     
     _conn = conn;
 

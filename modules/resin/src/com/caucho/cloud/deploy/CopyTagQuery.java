@@ -27,66 +27,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.admin;
+package com.caucho.cloud.deploy;
 
 import java.util.*;
 
-public class SetTagQuery implements java.io.Serializable
+@SuppressWarnings("serial")
+public class CopyTagQuery implements java.io.Serializable
 {
-  private String _tag;
-  private String _hex;
-  private String _user;
-  private String _message;
-  private String _version;
-  private HashMap<String,String> _attr;
+  private String _targetTag;
+  private String _sourceTag;
+  private Map<String,String> _attributes;
 
-  private SetTagQuery()
+  @SuppressWarnings("unused")
+  private CopyTagQuery()
   {
   }
 
-  public SetTagQuery(String tag,
-                     String hex,
-                     String user,
-                     String message,
-                     String version,
-                     HashMap<String,String> attr)
+  public CopyTagQuery(String targetTag,
+                      String sourceTag,
+                      Map<String,String> attributes)
   {
-    _tag = tag;
-    _hex = hex;
-    _user = user;
-    _message = message;
-    _version = version;
-    _attr = attr;
+    _targetTag = targetTag;
+    _sourceTag = sourceTag;
+    _attributes = attributes;
   }
 
   public String getTag()
   {
-    return _tag;
+    return _targetTag;
   }
 
-  public String getHex()
+  public String getSourceTag()
   {
-    return _hex;
+    return _sourceTag;
   }
 
-  public String getUser()
+  public Map<String,String> getAttributes()
   {
-    return _user;
-  }
-
-  public String getMessage()
-  {
-    return _message;
-  }
-
-  public String getVersion()
-  {
-    return _version;
+    return _attributes;
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _tag + "," + _hex + "]";
+    return getClass().getSimpleName() + "[" + _targetTag + "," + _sourceTag + "]";
   }
 }

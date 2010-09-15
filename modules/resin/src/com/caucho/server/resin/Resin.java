@@ -72,6 +72,7 @@ import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.LocalRepositoryService;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectoryService;
 import com.caucho.env.shutdown.ExitCode;
@@ -892,7 +893,7 @@ public class Resin
     LocalRepositoryService localRepositoryService
       = new LocalRepositoryService();
 
-    Repository localRepository = localRepositoryService.getRepository();
+    RepositorySpi localRepository = localRepositoryService.getRepositorySpi();
 
     _resinSystem.addService(localRepositoryService);
 
@@ -901,7 +902,7 @@ public class Resin
     _resinSystem.addService(new RepositoryService(repository));
   }
   
-  protected AbstractRepository createRepository(Repository localRepository)
+  protected AbstractRepository createRepository(RepositorySpi localRepository)
   {
     return (AbstractRepository) localRepository;
   }

@@ -430,7 +430,7 @@ public class WebApp extends ServletContextImpl
   WebApp(WebAppController controller)
   {
     _controller = controller;
-
+    
     _classLoader
       = EnvironmentClassLoader.create(controller.getParentClassLoader(),
                                       "web-app:" + getId());
@@ -909,10 +909,7 @@ public class WebApp extends ServletContextImpl
    */
   public String getHostName()
   {
-    if (_parent != null)
-      return _parent.getHostName();
-    else
-      return null;
+    return _host.getHostName();
   }
 
   /**
@@ -920,10 +917,7 @@ public class WebApp extends ServletContextImpl
    */
   public HostMXBean getHostAdmin()
   {
-    if (_parent != null && _parent.getHost() != null)
-      return _parent.getHost().getAdmin();
-    else
-      return null;
+    return _host.getAdmin();
   }
 
   /**

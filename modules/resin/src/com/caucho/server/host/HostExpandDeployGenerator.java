@@ -152,32 +152,35 @@ public class HostExpandDeployGenerator
   @Override
   public HostController createController(ExpandVersion version)
   {
-    String name = version.getKey();
+    String key = version.getKey();
     
+    /*
     // server/13g3
     if (name.equals(""))
       return null;
+      */
     
     /*
     if (! isDeployedKey(name))
       return null;
     */
     
-    Path rootDirectory = getExpandDirectory().lookup("./" + name);
+    Path rootDirectory = getExpandPath(key);
 
-    String hostName = name;
+    String hostName = keyToName(key);
 
     String stage = _container.getServer().getStage();
-    String id = stage + "/host/" + hostName;
+    String id = stage + "/host/" + key;
     
-    if ("default".equals(hostName))
-      hostName = "";
 
     HostController controller
       = new HostController(id, rootDirectory, hostName, _container);
 
-    Path jarPath = getArchiveDirectory().lookup("./" + name + ".jar");
+    Path jarPath = getArchivePath(key);
     controller.setArchivePath(jarPath);
+    
+    for (int i = 0; i < _hostDefaults.size(); i++)
+      controller.addConfigDefault(_hostDefaults.get(i));
     
     /*
     if (rootDirectory.isDirectory()
@@ -247,6 +250,24 @@ public class HostExpandDeployGenerator
 
     return controller;
   }
+  
+  @Override
+  public String nameToKey(String name)
+  {
+    if (name.isEmpty())
+      return "default";
+    else
+      return name;
+  }
+  
+  @Override
+  public String keyToName(String key)
+  {
+    if (key.equals("default"))
+      return "";
+    else
+      return key;
+  }
 
   @Override
   protected void destroyImpl()
@@ -274,6 +295,6 @@ public class HostExpandDeployGenerator
 
   public String toString()
   {
-    return "HostExpandDeployGenerator[" + getExpandDirectory() + "]";
+    return getClass().getSimpleName() + "[" + getExpandDirectory() + "]";
   }
 }

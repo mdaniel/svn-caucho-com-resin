@@ -27,33 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.admin;
+package com.caucho.cloud.deploy;
 
 import java.util.*;
 
-public class CopyTagQuery implements java.io.Serializable
+@SuppressWarnings("serial")
+public class SetTagQuery implements java.io.Serializable
 {
   private String _tag;
-  private String _sourceTag;
-  private String _user;
-  private String _message;
-  private String _version;
+  private String _hash;
+  private HashMap<String,String> _attr;
 
-  private CopyTagQuery()
+  @SuppressWarnings("unused")
+  private SetTagQuery()
   {
   }
 
-  public CopyTagQuery(String tag,
-                      String sourceTag,
-                      String user,
-                      String message,
-                      String version)
+  public SetTagQuery(String tag,
+                     String hash,
+                     HashMap<String,String> attr)
   {
     _tag = tag;
-    _sourceTag = sourceTag;
-    _user = user;
-    _message = message;
-    _version = version;
+    _hash = hash;
+    _attr = attr;
   }
 
   public String getTag()
@@ -61,29 +57,19 @@ public class CopyTagQuery implements java.io.Serializable
     return _tag;
   }
 
-  public String getSourceTag()
+  public String getContentHash()
   {
-    return _sourceTag;
+    return _hash;
   }
-
-  public String getMessage()
+  
+  public HashMap<String,String> getAttributes()
   {
-    return _message;
-  }
-
-  public String getUser()
-  {
-    return _user;
-  }
-
-  public String getVersion()
-  {
-    return _version;
+    return _attr;
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _tag + "," + _sourceTag + "," + _user + "]";
+    return getClass().getSimpleName() + "[" + _tag + "," + _hash + "]";
   }
 }

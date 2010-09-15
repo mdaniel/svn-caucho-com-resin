@@ -27,47 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.j2ee.deployclient;
+package com.caucho.cloud.deploy;
 
-import javax.enterprise.deploy.spi.Target;
-import javax.enterprise.deploy.spi.TargetModuleID;
-import javax.enterprise.deploy.spi.status.ProgressObject;
-import java.io.InputStream;
+import java.util.Map;
 
 /**
- * Interface for the deployment manager.
+ * Deployment query to delete a tag.
  */
-public interface DeploymentProxyAPI {
-  /**
-   * Returns the targets for the server.
-   */
-  public TargetImpl []getTargets();
+@SuppressWarnings("serial")
+public class RemoveTagQuery implements java.io.Serializable
+{
+  private String _tag;
+  private Map<String,String> _attributes;
 
-  /**
-   * Gets the current modules.
-   */
-  public TargetModuleID []getAvailableModules(String moduleType);
+  @SuppressWarnings("unused")
+  private RemoveTagQuery()
+  {
+  }
 
-  /**
-   * Distributes the archive.
-   */
-  public ProgressObject distribute(Target []targets,
-                                   InputStream deploymentPlan,
-                                   InputStream archiveIs);
-  /**
-   * Starts the archive.
-   */
-  public ProgressObject start(TargetModuleID []ids);
+  public RemoveTagQuery(String tag,
+                        Map<String,String> attributes)
+  {
+    _tag = tag;
+    _attributes = attributes;
+  }
 
-  /**
-   * Stops the archive.
-   */
-  public ProgressObject stop(TargetModuleID []ids);
+  public String getTag()
+  {
+    return _tag;
+  }
 
-  /**
-   * Undeploys the archive.
-   */
-  public ProgressObject undeploy(TargetModuleID []ids);
+  public Map<String,String> getAttributes()
+  {
+    return _attributes;
+  }
 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _tag + "]";
+  }
 }
-
