@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.HashSet;
@@ -74,18 +75,16 @@ public class Persistence {
    */
   public static EntityManagerFactory createEntityManagerFactory(String name)
   {
-    PersistenceProvider []providers = getProviderList();
-
-    for (int i = 0; i < providers.length; i++) {
+    for (PersistenceProvider provider: getProviderList()) {
       EntityManagerFactory factory;
 
-      factory = providers[i].createEntityManagerFactory(name, null);
+      factory = provider.createEntityManagerFactory(name, null);
 
       if (factory != null)
         return factory;
     }
 
-    return null;
+    throw new PersistenceException("no persistence provider found for `" + name + '\'');
   }
 
   /**
@@ -107,7 +106,7 @@ public class Persistence {
         return factory;
     }
 
-    return null;
+    throw new PersistenceException("no persistence provider found for `" + name + '\'');
   }
   
   public static PersistenceUtil getPersistenceUtil()
@@ -142,10 +141,7 @@ public class Persistence {
       while (e.hasMoreElements()) {
         URL url = e.nextElement();
 
-        PersistenceProvider provider = loadProvider(url, loader);
-
-        if (provider != null)
-          list.add(provider);
+        list.addAll(loadProviders(url, loader));
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -159,8 +155,11 @@ public class Persistence {
     return providers;
   }
 
-  private static PersistenceProvider loadProvider(URL url, ClassLoader loader)
+  private static List<PersistenceProvider> loadProviders(URL url,
+                                                        ClassLoader loader)
   {
+    List<PersistenceProvider> providers = new ArrayList<PersistenceProvider>();
+    
     InputStream is = null;
     try {
       is = url.openStream();
@@ -184,9 +183,13 @@ public class Persistence {
 
           String className = sb.toString();
 
-          Class<?> cl = Class.forName(className, false, loader);
+          try {
+            Class<?> cl = Class.forName(className, false, loader);
 
-          return (PersistenceProvider) cl.newInstance();
+            providers.add((PersistenceProvider) cl.newInstance());
+          } catch (Exception e) {
+            log.log(Level.FINER, e.getMessage(), e);
+          }
         }
       }
     } catch (Exception e) {
@@ -199,7 +202,7 @@ public class Persistence {
       }
     }
 
-    return null;
+    return providers;
   }
   
   private static class PersistenceUtilImpl implements PersistenceUtil {
