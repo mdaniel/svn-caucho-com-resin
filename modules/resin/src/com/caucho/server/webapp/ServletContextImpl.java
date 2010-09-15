@@ -38,6 +38,7 @@ import javax.servlet.*;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -302,10 +303,59 @@ public class ServletContextImpl extends ServletContextCompat
     Path rootDirectory = getRootDirectory();
     Path path = rootDirectory.lookupNative(realPath);
 
+    URL url = new URL("jndi:/server" + getContextPath() + name);
+
     if (path.exists())
-      return new URL(path.getURL());
+      return url;
+    else if (getClassLoader().getResource(
+      "META-INF/resources/" + realPath) != null) {
+      return url;
+    }
 
     return null;
+  }
+
+  public URLConnection getResource(URL url)
+    throws IOException
+  {
+    if (! "jndi".equals(url.getProtocol()))
+      return null;
+
+    //handle jndi:/server (single slash) parsing (gf)
+    String file = url.getFile();
+
+    if ("".equals(url.getHost()) && file.startsWith("/server"))
+      file = file.substring(7, file.length());
+
+    String realPath = getRealPath(file);
+    Path rootDirectory = getRootDirectory();
+    Path path = rootDirectory.lookup(realPath);
+
+    if (path.exists())
+      return new URL(path.getURL()).openConnection();
+
+    int fileIdx;
+
+    URLConnection connection = null;
+
+    if (file.length() > 1 && (fileIdx = file.indexOf("/", 1)) > -1) {
+      String context = file.substring(0, file.indexOf("/", 1));
+
+      if (context.equals(getContextPath())) {// disable cross-context lookup
+
+        file = file.substring(fileIdx, file.length());
+        realPath = getRealPath(file);
+        path = rootDirectory.lookup(realPath);
+
+        if (path.exists())
+          connection = new URL(path.getURL()).openConnection();
+      }
+    }
+
+    if (connection != null)
+      return connection;
+
+    return new FileNotFoundURLConnection(url);
   }
   
   public Path getCauchoPath(String name)
@@ -585,3 +635,31 @@ public class ServletContextImpl extends ServletContextCompat
     return null;
   }
 }
+
+class FileNotFoundURLConnection extends URLConnection {
+
+  FileNotFoundURLConnection(URL url)
+  {
+    super(url);
+  }
+
+  @Override
+  public void connect()
+    throws IOException
+  {
+  }
+
+  @Override
+  public InputStream getInputStream()
+    throws IOException
+  {
+    throw new FileNotFoundException(url.toString());
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + url + "]";
+  }
+}
+

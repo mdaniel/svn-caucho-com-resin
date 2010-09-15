@@ -37,6 +37,7 @@ import java.lang.reflect.Method;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -198,6 +199,12 @@ public class Resin
       loader = ClassLoader.getSystemClassLoader();
 
     initEnvironment();
+
+    try {
+      URL.setURLStreamHandlerFactory(new ResinURLStreamHandlerFactory());
+    } catch (java.lang.Error e) {
+      //operation permitted once per jvm; catching for harness.
+    }
   }
 
   /**
