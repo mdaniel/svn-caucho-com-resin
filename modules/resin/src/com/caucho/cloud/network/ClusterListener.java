@@ -38,12 +38,16 @@ import com.caucho.network.listen.SocketLinkListener;
  * Represents a protocol connection.
  */
 public class ClusterListener extends SocketLinkListener {
+  
   public ClusterListener(String address, int port)
   {
     try {
       setAddress(address);
       
       setPort(port);
+      
+      setKeepaliveConnectionTimeMaxMillis(Long.MAX_VALUE / 2);
+      setKeepaliveTimeoutMillis(60 * 60 * 1000);
       
       // setProtocol(new HmuxProtocol());
     } catch (Exception e) {

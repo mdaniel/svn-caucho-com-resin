@@ -637,6 +637,7 @@ public class TcpSocketLink extends AbstractSocketLink
       
       isKeepalive = true;
     } while (_state.isKeepaliveAllocated());
+    System.out.println("FALL: " + result + " " + _state + " " + Thread.currentThread());
 
     return result;
   }
@@ -1158,7 +1159,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
         boolean isKeepalive = false;
         result = handleRequests(isKeepalive);
-
+        
         if (result == RequestState.THREAD_DETACHED) {
           return result;
         }

@@ -637,6 +637,11 @@ public class SocketLinkListener extends TaskWorker
   {
     return _keepaliveTimeMax;
   }
+  
+  protected void setKeepaliveConnectionTimeMaxMillis(long timeout)
+  {
+    _keepaliveTimeMax = timeout;
+  }
 
   /**
    * Gets the suspend max.
@@ -659,6 +664,11 @@ public class SocketLinkListener extends TaskWorker
   public long getKeepaliveTimeout()
   {
     return _keepaliveTimeout;
+  }
+  
+  protected void setKeepaliveTimeoutMillis(long timeout)
+  {
+    _keepaliveTimeout = timeout;
   }
 
   public boolean isKeepaliveSelectEnabled()

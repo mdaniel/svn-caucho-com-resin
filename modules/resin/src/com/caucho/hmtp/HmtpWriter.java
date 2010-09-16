@@ -344,11 +344,13 @@ public class HmtpWriter implements ActorStream
     }
   }
 
+  @Override
   public boolean isClosed()
   {
     return _out == null;
   }
 
+  @Override
   public void close()
   {
     if (log.isLoggable(Level.FINER))

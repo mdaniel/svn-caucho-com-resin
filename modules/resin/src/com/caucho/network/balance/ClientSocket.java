@@ -94,6 +94,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Returns the owning pool
    */
+  @Override
   public ClientSocketFactory getPool()
   {
     return _pool;
@@ -102,6 +103,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Returns the input stream.
    */
+  @Override
   public ReadStream getInputStream()
   {
     _idleStartTime = 0;
@@ -112,6 +114,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Returns the write stream.
    */
+  @Override
   public WriteStream getOutputStream()
   {
     _idleStartTime = 0;
@@ -139,6 +142,7 @@ public class ClientSocket implements ClientSocketApi {
    * Returns the idle start time, 
    * i.e. the time the connection was last idle.
    */
+  @Override
   public long getIdleStartTime()
   {
     return _idleStartTime;
@@ -150,6 +154,7 @@ public class ClientSocket implements ClientSocketApi {
    * start time instead of the request end time for the
    * idle start time.
    */
+  @Override
   public void setIdleStartTime(long idleStartTime)
   {
     _idleStartTime = idleStartTime;
@@ -158,6 +163,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Sets the idle start time.
    */
+  @Override
   public void clearIdleStartTime()
   {
     _idleStartTime = 0;
@@ -167,6 +173,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Returns true if nearing end of free time.
    */
+  @Override
   public boolean isIdleExpired()
   {
     long now = Alarm.getCurrentTime();
@@ -177,6 +184,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Returns true if nearing end of free time.
    */
+  @Override
   public boolean isIdleAlmostExpired(long delta)
   {
     long now = Alarm.getCurrentTime();
@@ -187,6 +195,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Returns true if the sequence id is valid.
    */
+  @Override
   public boolean isPoolSequenceIdValid()
   {
     return _poolSequenceId == _pool.getStartSequenceId();
@@ -225,6 +234,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Returns the debug id.
    */
+  @Override
   public String getDebugId()
   {
     return _debugId;
@@ -233,6 +243,7 @@ public class ClientSocket implements ClientSocketApi {
   /**
    * Clears the recycled connections.
    */
+  @Override
   public void clearRecycle()
   {
     _pool.clearRecycle();
@@ -248,6 +259,7 @@ public class ClientSocket implements ClientSocketApi {
    * @param idleStartTime the time to be used as the start 
    * of the idle period.
    */
+  @Override
   public void free(long idleStartTime)
   {
     if (_is == null) {
@@ -284,6 +296,7 @@ public class ClientSocket implements ClientSocketApi {
     _pool.free(this);
   }
 
+  @Override
   public void toActive()
   {
     if (_isIdle) {
@@ -294,11 +307,13 @@ public class ClientSocket implements ClientSocketApi {
     _requestStartTime = _requestTimeProbe.start();
   }
   
+  @Override
   public boolean isClosed()
   {
     return _is == null;
   }
 
+  @Override
   public void close()
   {
     if (_is != null)

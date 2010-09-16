@@ -534,14 +534,16 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     
     Level newEffectiveLevel = calculateEffectiveLevel(loader);
 
-    
+    /*
     if (loader == _systemClassLoader) {
       _finestEffectiveLevel = newEffectiveLevel;
       _finestEffectiveLevelValue = newEffectiveLevel.intValue();
       super.setLevel(_finestEffectiveLevel);
     }
+    */
     
-    if (oldEffectiveLevel == newEffectiveLevel.intValue())
+    if (oldEffectiveLevel == newEffectiveLevel.intValue()
+        && loader != _systemClassLoader)
       return;
     
     _finestEffectiveLevel = newEffectiveLevel;

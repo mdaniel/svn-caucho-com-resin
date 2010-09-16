@@ -41,7 +41,6 @@ import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
 import com.caucho.hmtp.AuthQuery;
 import com.caucho.hmtp.AuthResult;
-import com.caucho.hmtp.GetPublicKeyQuery;
 import com.caucho.hmtp.NonceQuery;
 
 /**

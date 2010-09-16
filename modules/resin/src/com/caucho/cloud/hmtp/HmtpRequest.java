@@ -210,8 +210,9 @@ public class HmtpRequest extends AbstractProtocolConnection
     ActorStream linkStream = _linkStream;
     _linkStream = null;
 
-    if (linkActor!= null)
+    if (linkActor != null) {
       linkActor.onCloseConnection();
+    }
 
     if (linkStream != null)
       linkStream.close();
@@ -235,6 +236,6 @@ public class HmtpRequest extends AbstractProtocolConnection
   @Override
   public String toString()
   {
-    return "HmuxRequest" + dbgId();
+    return getClass().getSimpleName() + dbgId();
   }
 }
