@@ -728,6 +728,14 @@ public class Server
   }
 
   /**
+   * Sets the max-uri
+   */
+  public void setMaxUriLength(int length)
+  {
+    getInvocationDecoder().setMaxURILength(length);
+  }
+
+  /**
    * Sets the session cookie
    */
   public void setSessionCookie(String cookie)

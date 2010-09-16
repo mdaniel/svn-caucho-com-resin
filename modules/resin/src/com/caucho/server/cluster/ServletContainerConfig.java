@@ -436,7 +436,7 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   @Configurable
   public void setMaxUriLength(int max)
   {
-    _servletContainer.setUrlLengthMax(max);
+    _servletContainer.setMaxUriLength(max);
   }
   
   @Configurable

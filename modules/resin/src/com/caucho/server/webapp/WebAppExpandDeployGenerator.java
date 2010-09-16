@@ -118,6 +118,12 @@ public class WebAppExpandDeployGenerator
 
     _admin = new WebAppExpandDeployGeneratorAdmin(this);
   }
+  
+  @Override
+  public String getId()
+  {
+    return super.getId() + _urlPrefix; 
+  }
 
   /**
    * Gets the webApp container.

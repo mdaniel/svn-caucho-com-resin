@@ -162,6 +162,9 @@ class ExpandRepositoryManager
       if (tag.startsWith(prefix)) {
         String key = tag.substring(prefix.length());
         
+        if (key.indexOf('/') >= 0)
+          continue;
+        
         keySet.add(key);
       }
     }

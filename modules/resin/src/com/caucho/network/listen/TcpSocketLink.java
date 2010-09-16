@@ -637,7 +637,6 @@ public class TcpSocketLink extends AbstractSocketLink
       
       isKeepalive = true;
     } while (_state.isKeepaliveAllocated());
-    System.out.println("FALL: " + result + " " + _state + " " + Thread.currentThread());
 
     return result;
   }

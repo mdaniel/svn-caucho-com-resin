@@ -892,8 +892,6 @@ public class HttpRequest extends AbstractHttpRequest
   private boolean readRequest(ReadStream s)
     throws IOException
   {
-    int i = 0;
-
     byte []readBuffer = s.getBuffer();
     int readOffset = s.getOffset();
     int readLength = s.getLength();

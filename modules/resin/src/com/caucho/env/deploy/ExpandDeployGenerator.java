@@ -477,7 +477,10 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     updateIfModified();
     
     for (String key : _deployedKeys) {
-      names.add(keyToName(key));
+      String name = keyToName(key);
+      
+      if (name != null)
+        names.add(name);
     }
   }
 
