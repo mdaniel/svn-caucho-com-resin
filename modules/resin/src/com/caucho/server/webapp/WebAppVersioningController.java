@@ -83,6 +83,7 @@ public class WebAppVersioningController extends WebAppController {
     _isModified = isModified;
   }
 
+  @Override
   public boolean isVersioning()
   {
     return true;

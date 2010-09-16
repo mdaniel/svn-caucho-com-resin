@@ -136,7 +136,7 @@ public class WebAppController
 
     _contextPath = contextPath;
     
-    if (! getId().startsWith("error/")) {
+    if (! getId().startsWith("error/") && ! isVersioning()) {
       _admin = new WebAppAdmin(this);
     }
   }
@@ -171,6 +171,11 @@ public class WebAppController
     // server/1h10
 
     _contextPath = contextPath;
+  }
+  
+  protected boolean isVersioning()
+  {
+    return false;
   }
 
   /**
