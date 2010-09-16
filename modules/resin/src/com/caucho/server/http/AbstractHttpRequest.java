@@ -138,7 +138,7 @@ public abstract class AbstractHttpRequest
   private final HashMapImpl<String,String[]> _form
     = new HashMapImpl<String,String[]>();
 
-  private final ErrorPageManager _errorManager;
+  private ErrorPageManager _errorManager;
 
   // Efficient date class for printing date headers
   private final QDate _calendar = new QDate();
@@ -174,8 +174,6 @@ public abstract class AbstractHttpRequest
     
     if (server == null)
       throw new NullPointerException();
-    
-    _errorManager = server.getErrorPageManager();
     
     _conn = conn;
 
@@ -1592,6 +1590,9 @@ public abstract class AbstractHttpRequest
    */
   protected ErrorPageManager getErrorManager()
   {
+    if (_errorManager == null)
+      _errorManager = _server.getErrorPageManager();
+
     return _errorManager;
   }
 

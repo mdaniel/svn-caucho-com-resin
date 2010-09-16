@@ -87,7 +87,7 @@
                 rollover-period="1W"/>
 
       <!-- creates the webapps directory for .war expansion -->
-      <web-app-deploy path="webapps"/>
+      <web-app-deploy path="webapps" versioning="true"/>
 
       <!--
          - Defaults applied to each web-app.

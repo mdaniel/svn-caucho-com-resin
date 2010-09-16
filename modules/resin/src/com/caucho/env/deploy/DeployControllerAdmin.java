@@ -89,6 +89,12 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
   {
     unregisterSelf();
   }
+  
+  @Override
+  public String getId()
+  {
+    return _controller.getId();
+  }
 
   @Override
   public String getName()

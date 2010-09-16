@@ -66,6 +66,8 @@ public class HostController
   
   private HostContainer _container;
 
+  private final String _idKey;
+  
   // The host name is the canonical name
   private final String _hostName;
 
@@ -109,6 +111,9 @@ public class HostController
 
     setContainer(container);
     
+    int p = id.lastIndexOf('/');
+    _idKey = id.substring(p + 1);
+    
     if (! isErrorHost()) {
       _admin = new HostAdmin(this);
     }
@@ -150,7 +155,7 @@ public class HostController
     else
       return name;
       */
-    return getHostName();
+    return _idKey;
   }
 
   /**
@@ -308,7 +313,7 @@ public class HostController
   @Override
   protected String getMBeanId()
   {
-    String name = _hostName;
+    String name = getName();
     
     if (name == null)
       name = "";

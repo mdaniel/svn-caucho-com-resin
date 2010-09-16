@@ -481,6 +481,9 @@ public class HostContainer implements InvocationBuilder {
   
   private Host getErrorHost()
   {
+    if (! _lifecycle.isActive())
+      return null;
+    
     Host defaultHost = getHost("", 0);
     
     if (defaultHost != null)

@@ -173,7 +173,7 @@ public class HostSingleDeployGenerator
       
       HostController host;
       host = new HostController(_controller.getId(), rootDirectory,
-                                _controller.getName(), _config,
+                                _controller.getHostName(), _config,
                                 _container, null);
       
       // host = host.merge(_controller);

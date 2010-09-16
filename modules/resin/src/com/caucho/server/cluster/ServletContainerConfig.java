@@ -152,8 +152,10 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   @Configurable
   public PersistentStoreConfig createPersistentStore()
   {
-    if (_persistentStoreConfig == null)
+    if (_persistentStoreConfig == null) {
       _persistentStoreConfig = new PersistentStoreConfig();
+      _servletContainer.setPersistentStore(_persistentStoreConfig);
+    }
 
     return _persistentStoreConfig;
   }

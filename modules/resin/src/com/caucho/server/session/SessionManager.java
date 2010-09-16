@@ -211,7 +211,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     _selfIndex = _selfServer.getIndex();
 
     // copy defaults from store for backward compat
-    PersistentStoreConfig cfg = null;//_server.getPersistentStoreConfig();
+    PersistentStoreConfig cfg = _servletContainer.getPersistentStore();
     if (cfg != null) {
       setAlwaysSaveSession(cfg.isAlwaysSave());
 

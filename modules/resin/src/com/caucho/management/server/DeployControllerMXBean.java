@@ -41,6 +41,12 @@ import java.util.Map;
 public interface DeployControllerMXBean extends ManagedObjectMXBean
 {
   //
+  // The unique deployment id
+  //
+  @Description("The unique repository id for the deployed controller")
+  public String getId();
+  
+  //
   // Configuration
   //
   

@@ -78,6 +78,7 @@ import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.dispatch.InvocationServer;
+import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -154,6 +155,8 @@ public class Server
   private Alarm _alarm;
   private AbstractProxyCache _proxyCache;
 
+  private PersistentStoreConfig _persistentStoreConfig;
+  
   //
   // internal databases
   //
@@ -830,6 +833,16 @@ public class Server
   public void addErrorPage(ErrorPage errorPage)
   {
     getErrorWebApp().addErrorPage(errorPage);
+  }
+  
+  public void setPersistentStore(PersistentStoreConfig config)
+  {
+    _persistentStoreConfig = config;
+  }
+  
+  public PersistentStoreConfig getPersistentStore()
+  {
+    return _persistentStoreConfig;
   }
 
   //

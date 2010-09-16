@@ -726,7 +726,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public final void addListener(ClassLoaderListener listener)
   {
-    if (_lifecycle.isDestroyed()) {
+    ArrayList<ClassLoaderListener> listeners = _listeners;
+    
+    if (_lifecycle.isDestroyed() || listeners == null) {
       IllegalStateException e = new IllegalStateException(L().l("attempted to add listener to a closed classloader {0}", this));
 
       log().log(Level.WARNING, e.toString(), e);
@@ -734,14 +736,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return;
     }
 
-    ArrayList<ClassLoaderListener> listeners = _listeners;
     WeakCloseListener closeListener = null;
 
-    synchronized (listeners) {
-      if (listeners.size() == 0) {
-        closeListener = new WeakCloseListener(this);
+    if (listeners != null && listeners.size() == 0) {
+      closeListener = new WeakCloseListener(this);
         //_closeListener = closeListener;
-      }
     }
 
     if (closeListener != null) {

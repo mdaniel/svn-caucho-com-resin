@@ -66,7 +66,8 @@ abstract public class DeployController<I extends DeployInstance>
 
   private int _startupPriority = Integer.MAX_VALUE;
 
-  private DeployControllerStrategy _strategy;
+  private DeployControllerStrategy _strategy
+    = StartManualRedeployManualStrategy.STRATEGY;
 
   protected final Lifecycle _lifecycle;
 

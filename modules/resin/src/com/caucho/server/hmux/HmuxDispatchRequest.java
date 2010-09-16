@@ -228,7 +228,7 @@ public class HmuxDispatchRequest {
       writeString(os, HMUX_NO_CHANGE, "");
       return;
     }
-    else if (etag.equals("h-" + host.getHostName())) {
+    else if (etag.equals("h-" + host.getName())) {
       if (isLoggable) {
         log.fine(dbgId() + "host alias '" + hostName + " -> '"
                  + host + "' no change");
