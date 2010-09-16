@@ -59,14 +59,8 @@ public class DeployCommand extends AbstractBootCommand {
       throw new ConfigException(L.l("Deploy expects to be used with a *.war file at {0}",
                                     war));
     }
-    
-    
-    int p = war.lastIndexOf('.');
-    
-    String name = args.getArg("-name");
-    
-    if (name == null)
-      name = war.substring(0, p);
+     
+     String name = args.getArg("-name");
     
     String host = args.getArg("-host");
     
@@ -74,16 +68,24 @@ public class DeployCommand extends AbstractBootCommand {
       host = "default";
     
     CommitBuilder commit = new CommitBuilder();
-    commit.tagKey(host + "/" + name);
+    commit.type("webapp");
     
     String stage = args.getArg("-stage");
     
     if (stage != null)
       commit.stage(stage);
     
-    String tag = stage + "/webapp/" + host + "/" + name;
-    
     Path path = Vfs.lookup(war);
+    
+    if (name == null) {
+      String tail = path.getTail();
+      
+      int p = tail.lastIndexOf('.');
+
+      name = tail.substring(0, p);
+    }
+    
+    commit.tagKey(host + "/" + name);
     
     if (! path.isFile()) {
       throw new ConfigException(L.l("'{0}' is not a readable file.",
@@ -106,7 +108,7 @@ public class DeployCommand extends AbstractBootCommand {
     
     deployClient.close();
     
-    System.out.println("Deployed " + tag + " as " + war + " to "
+    System.out.println("Deployed " + commit.getId() + " as " + war + " to "
                        + deployClient.getUrl());
   }
   

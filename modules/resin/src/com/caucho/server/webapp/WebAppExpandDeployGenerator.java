@@ -258,7 +258,7 @@ public class WebAppExpandDeployGenerator
     
     if (isVersioning()) {
       WebAppVersioningController controller
-        = new WebAppVersioningController(id,
+        = new WebAppVersioningController(getId() + "/" + baseKey,
                                          baseKey,
                                          contextPath,
                                          this,
@@ -307,6 +307,9 @@ public class WebAppExpandDeployGenerator
 
     controller.setDynamicDeploy(true);
     controller.setSourceType("expand");
+    
+    controller.setStartupMode(getStartupMode());
+    controller.setRedeployMode(getRedeployMode());
 
     controller.setVersion(version.getVersion());
     

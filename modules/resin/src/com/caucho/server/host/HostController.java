@@ -63,12 +63,12 @@ public class HostController
 {
   private static final Logger log
     = Logger.getLogger(HostController.class.getName());
-  private static final L10N L = new L10N(HostController.class);
   
   private HostContainer _container;
 
   // The host name is the canonical name
-  private String _hostName;
+  private final String _hostName;
+
   // The regexp name is the matching name of the regexp
   private String _regexpName;
 
@@ -100,7 +100,7 @@ public class HostController
   {
     super(id, rootDirectory, config);
 
-    setHostName(hostName);
+    _hostName = hostName;
 
     if (varMap != null)
       getVariableMap().putAll(varMap);
@@ -142,6 +142,14 @@ public class HostController
    */
   public String getName()
   {
+    /*
+    String name = getHostName();
+    
+    if (name.isEmpty())
+      return "default";
+    else
+      return name;
+      */
     return getHostName();
   }
 
@@ -151,25 +159,6 @@ public class HostController
   public String getHostName()
   {
     return _hostName;
-  }
-
-  /**
-   * Sets the host's canonical name
-   */
-  public void setHostName(String name)
-  {
-    if (name != null)
-      name = name.trim();
-    
-    if (name == null || name.equals("*"))
-      name = "";
-    
-    name = name.toLowerCase();
-    
-    if (name.equals("default"))
-      name = "";
-
-    _hostName = name;
   }
 
   /**
@@ -272,6 +261,7 @@ public class HostController
   protected void initBegin()
   {
     try {
+      /*
       try {
         if (getConfig() == null || getHostName() != null) {
         }
@@ -287,6 +277,7 @@ public class HostController
 
       if (_hostName == null)
         _hostName = "";
+      */
 
       ArrayList<String> aliases = null;
 
@@ -394,7 +385,7 @@ public class HostController
       }
 
       varMap.put("regexp", vars);
-      varMap.put("host", new TestVar(matcher.group(0), vars));
+      varMap.put("host", new HostRegexpVar(matcher.group(0), vars));
 
       Path path = PathBuilder.lookupPath(_rootDirectoryPattern, varMap);
       
@@ -564,35 +555,5 @@ public class HostController
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getId() + "]";
-  }
-
-  /**
-   * EL variables for the host, when testing for regexp identity .
-   */
-  public class TestVar {
-    private String _name;
-    private ArrayList<String> _regexp;
-
-    TestVar(String name, ArrayList<String> regexp)
-    {
-      _name = name;
-      _regexp = regexp;
-    }
-    
-    public String getName()
-    {
-      return _name;
-    }
-    
-    public String getHostName()
-    {
-      return _name;
-    }
-    
-    public ArrayList<String> getRegexp()
-    {
-      // server/13t0
-      return _regexp;
-    }
   }
 }

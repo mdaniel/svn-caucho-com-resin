@@ -216,6 +216,26 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
    * Convenience method for adding the content of a jar.
    */
   @Override
+  public String commitArchive(CommitBuilder commit,
+                              InputStream is)
+  {
+    commit.validate();
+    
+    String contentHash = addArchive(is);
+    
+    if (putTag(commit.getId(), 
+               contentHash, 
+               commit.getAttributes())) {
+      return contentHash;
+    }
+    else
+      return null;
+  }
+
+  /**
+   * Convenience method for adding the content of a jar.
+   */
+  @Override
   public boolean removeTag(CommitBuilder commit)
   {
     commit.validate();
@@ -601,6 +621,26 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
 
     try {
       commit = new GitCommitJar(path);
+      
+      return addArchive(commit);
+    } catch (IOException e) {
+      throw new RepositoryException(e);
+    } finally {
+      if (commit != null)
+        commit.close();
+    }
+  }
+
+  /**
+   * Adds a path to the repository.  If the path is a directory, 
+   * adds the contents recursively.
+   */
+  public String addArchive(InputStream is)
+  {
+    GitCommitJar commit = null;
+
+    try {
+      commit = new GitCommitJar(is);
       
       return addArchive(commit);
     } catch (IOException e) {

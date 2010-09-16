@@ -481,7 +481,12 @@ public class HostContainer implements InvocationBuilder {
   
   private Host getErrorHost()
   {
-    return _errorHost;
+    Host defaultHost = getHost("", 0);
+    
+    if (defaultHost != null)
+      return defaultHost;
+    else
+      return _errorHost;
   }
 
   /**

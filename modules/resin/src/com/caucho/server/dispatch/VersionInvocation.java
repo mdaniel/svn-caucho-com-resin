@@ -74,6 +74,7 @@ public class VersionInvocation extends Invocation
    * Returns true if the invocation has been modified.  Generally only
    * true if the webApp has been modified.
    */
+  @Override
   public boolean isModified()
   {
     long now = Alarm.getCurrentTime();
@@ -87,6 +88,7 @@ public class VersionInvocation extends Invocation
   /**
    * Log the reason for modification.
    */
+  @Override
   public boolean logModified(Logger log)
   {
     long now = Alarm.getCurrentTime();
@@ -105,10 +107,12 @@ public class VersionInvocation extends Invocation
    *
    * @param request the servlet request
    */
+  @Override
   public Invocation getRequestInvocation(HttpServletRequestImpl request)
   {
-    if (_expireTime < Alarm.getCurrentTime())
+    if (_expireTime < Alarm.getCurrentTime()) {
       return _invocation;
+    }
 
     request.setInvocation(this);
     String sessionId = request.getRequestedSessionId();
@@ -125,8 +129,9 @@ public class VersionInvocation extends Invocation
         && oldSessionManager.containsSession(sessionId)) {
       return _oldInvocation;
     }
-    else
+    else {
       return _invocation;
+    }
   }
 
   /**

@@ -1282,7 +1282,6 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     SessionImpl session = _sessions.get(sessionId);
     
     boolean isNew = false;
-    boolean killSession = false;
 
     if (session == null
         && sessionId != null

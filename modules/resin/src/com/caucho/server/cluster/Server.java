@@ -143,7 +143,7 @@ public class Server
 
   private long _shutdownWaitMax = 60 * 1000;
   
-  private boolean _isIgnoreClientDisconnect;
+  private boolean _isIgnoreClientDisconnect = true;
 
   // <cluster> configuration
 

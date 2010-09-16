@@ -44,6 +44,7 @@ import com.caucho.vfs.Path;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -172,6 +173,19 @@ public class HostExpandDeployGenerator
     String stage = _container.getServer().getStage();
     String id = stage + "/host/" + key;
     
+    String hostNamePattern = getHostName();
+
+    if (hostNamePattern != null && ! key.equals("default")) {
+      HashMap<String,Object> varMap = new HashMap<String,Object>();
+      varMap.put("host", new HostRegexpVar(key));
+      
+      ELContext parentEnv = Config.getEnvironment();
+      ELResolver resolver = new MapVariableResolver(varMap);
+
+      ELContext env = new ConfigELContext(resolver);
+
+      hostName = EL.evalString(hostNamePattern, env);
+    }
 
     HostController controller
       = new HostController(id, rootDirectory, hostName, _container);
@@ -190,28 +204,6 @@ public class HostExpandDeployGenerator
              && ! jarPath.isFile())
       return null;
       */
-
-    try {
-      String hostNamePattern = getHostName();
-
-      if (hostNamePattern != null) {
-        ELContext parentEnv = Config.getEnvironment();
-        ELResolver resolver
-          = new MapVariableResolver(controller.getVariableMap());
-
-        ELContext env = new ConfigELContext(resolver);
-
-        controller.setHostName(EL.evalString(hostNamePattern, env));
-      }
-      else
-        controller.setHostName(hostName);
-
-      controller.addDepend(jarPath);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-      
-      controller.setConfigException(e);
-    }
 
     return controller;
   }

@@ -133,6 +133,10 @@ public class StartLazyRedeployAutomaticStrategy
       // server/1d00
       return controller.getDeployInstance();
     }
+    else if (state.isError()) {
+      // server/1d13
+      return controller.restartImpl();
+    }
     else if (controller.isModified()) {
       // server/1d0i
       return controller.restartImpl();

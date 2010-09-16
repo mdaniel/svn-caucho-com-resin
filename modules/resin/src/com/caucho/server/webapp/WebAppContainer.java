@@ -1188,7 +1188,7 @@ public class WebAppContainer
       try {
         thread.setContextClassLoader(_classLoader);
 
-        Path errorRoot = Vfs.lookup("error:");
+        Path errorRoot = Vfs.lookup("memory:");
         
         WebAppController webAppController
           = new WebAppController("error/webapp/default/error", errorRoot, this);

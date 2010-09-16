@@ -29,15 +29,15 @@
 
 package com.caucho.server.webapp;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
+
 import com.caucho.config.ConfigException;
 import com.caucho.env.deploy.ExpandVersion;
-import com.caucho.env.deploy.VersionEntry;
-import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
-
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.caucho.util.L10N;
 
 /**
  * A configuration entry for a versioning web-app.
@@ -83,12 +83,10 @@ public class WebAppVersioningController extends WebAppController {
     _isModified = isModified;
   }
 
-  /*
   public boolean isVersioning()
   {
     return true;
   }
-  */
 
   @Override
   public String getVersion()
@@ -137,6 +135,11 @@ public class WebAppVersioningController extends WebAppController {
     else
       return null;
   }
+  
+  @Override
+  protected void destroyInstance(WebApp instance)
+  {
+  }
 
   /**
    * Initialize the controller.
@@ -165,7 +168,7 @@ public class WebAppVersioningController extends WebAppController {
 
   public void updateVersion()
   {
-    _isModified = true;
+//    _isModified = true;
 
     updateVersionImpl();
   }

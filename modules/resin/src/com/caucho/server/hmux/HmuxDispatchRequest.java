@@ -345,7 +345,7 @@ public class HmuxDispatchRequest {
     }
     else {
       // aliased hosts use the host name as the etag
-      writeString(os, HMUX_ETAG, "h-" + host.getHostName());
+      writeString(os, HMUX_ETAG, "h-" + host.getName());
     }
   }
   

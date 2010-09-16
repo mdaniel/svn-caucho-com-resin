@@ -29,6 +29,7 @@
 
 package com.caucho.env.repository;
 
+import java.io.InputStream;
 import java.util.Map;
 
 import com.caucho.vfs.Path;
@@ -59,6 +60,12 @@ public interface Repository
    */
   public String commitArchive(CommitBuilder commitTag,
                               Path contentArchive);
+  
+  /**
+   * Adds and commits a full path, recursively
+   */
+  public String commitArchive(CommitBuilder commitTag,
+                              InputStream is);
 
   /**
    * Removes a tag

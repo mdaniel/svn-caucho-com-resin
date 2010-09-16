@@ -362,8 +362,9 @@ abstract public class DeployController<I extends DeployInstance>
   @Override
   public boolean isModified()
   {
-    if (isControllerModified())
+    if (isControllerModified()) {
       return true;
+    }
     
     DeployInstance instance = getDeployInstance();
 
@@ -683,7 +684,7 @@ abstract public class DeployController<I extends DeployInstance>
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     
-    DeployInstance oldInstance = _deployInstance;
+    I oldInstance = _deployInstance;
     boolean isStopping = false;
 
     try {
@@ -701,7 +702,7 @@ abstract public class DeployController<I extends DeployInstance>
       }
 
       if (oldInstance != null) {
-        oldInstance.destroy();
+        destroyInstance(oldInstance);
       }
     } finally  {
       if (isStopping) {
@@ -714,6 +715,11 @@ abstract public class DeployController<I extends DeployInstance>
     }
 
     return;
+  }
+  
+  protected void destroyInstance(I instance)
+  {
+    instance.destroy();
   }
   
   //

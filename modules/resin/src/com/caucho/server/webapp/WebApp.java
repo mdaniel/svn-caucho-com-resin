@@ -154,8 +154,6 @@ import com.caucho.security.RoleMapManager;
 import com.caucho.security.SingleSignon;
 import com.caucho.server.cache.AbstractProxyCache;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.dispatch.InvocationBuilder;
-import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.FilterChainBuilder;
@@ -164,6 +162,7 @@ import com.caucho.server.dispatch.FilterManager;
 import com.caucho.server.dispatch.FilterMapper;
 import com.caucho.server.dispatch.FilterMapping;
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.ServletConfigImpl;
 import com.caucho.server.dispatch.ServletManager;
@@ -187,7 +186,6 @@ import com.caucho.server.security.WebResourceCollection;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webbeans.SessionContextContainer;
-import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -526,6 +524,10 @@ public class WebApp extends ServletContextImpl
 
       _constraintManager = new ConstraintManager();
       _errorPageManager = new ErrorPageManager(_server, this);
+      
+      if (! getId().startsWith("error/")) {
+        _errorPageManager.setParent(_host.getErrorPageManager());
+      }
 
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
@@ -536,6 +538,8 @@ public class WebApp extends ServletContextImpl
 
         _invocationDependency.add(new RepositoryDependency(baseTag, baseValue));
       }
+      
+      _invocationDependency.add(_controller);
 
       _cdiManager = InjectManager.create(_classLoader);
       _cdiManager.addPath(getRootDirectory().lookup("WEB-INF/beans.xml"));
@@ -998,7 +1002,8 @@ public class WebApp extends ServletContextImpl
     _oldWebAppExpireTime = expireTime;
   }
 
-  public Ordering createAbsoluteOrdering() {
+  public Ordering createAbsoluteOrdering()
+  {
     if (_absoluteOrdering == null)
       _absoluteOrdering = new Ordering();
 
@@ -2764,9 +2769,10 @@ public class WebApp extends ServletContextImpl
       while (fragments.hasMoreElements()) {
         URL url = fragments.nextElement();
 
-        if (log.isLoggable(Level.FINER))
+        if (log.isLoggable(Level.FINER)) {
           log.log(Level.FINER,
             L.l("Loading web-fragment '{0}:{1}'.", this, url));
+        }
 
         WebAppFragmentConfig fragmentConfig = new WebAppFragmentConfig();
         config.configure(fragmentConfig, Vfs.lookup(url.toString()));

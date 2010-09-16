@@ -87,7 +87,7 @@ public class ErrorPageManager {
   public static String SHUTDOWN = "com.caucho.shutdown";
 
   private final Server _server;
-  private final WebApp _app;
+  private final WebApp _webApp;
   private WebAppContainer _appContainer;
   private HashMap<Object,String> _errorPageMap = new HashMap<Object,String>();
   private String _defaultLocation;
@@ -107,7 +107,7 @@ public class ErrorPageManager {
    */
   public ErrorPageManager(Server server, WebApp app)
   {
-    _app = app;
+    _webApp = app;
 
     _server = server;
     
@@ -163,8 +163,8 @@ public class ErrorPageManager {
    */
   protected boolean isDevelopmentModeErrorPage()
   {
-    if (_app != null && _app.getServer() != null)
-      return _app.getServer().isDevelopmentModeErrorPage();
+    if (_webApp != null && _webApp.getServer() != null)
+      return _webApp.getServer().isDevelopmentModeErrorPage();
     else if (Resin.getCurrent() != null
              && Resin.getCurrent().getServer() != null) {
       return Resin.getCurrent().getServer().isDevelopmentModeErrorPage();
@@ -419,8 +419,8 @@ public class ErrorPageManager {
         // can't use filters because of error pages due to filters
         // or security.
 
-        if (_app != null)
-          disp = _app.getRequestDispatcher(location);
+        if (_webApp != null)
+          disp = _webApp.getRequestDispatcher(location);
         else if (_appContainer != null)
           disp = _appContainer.getRequestDispatcher(location);
 
@@ -716,7 +716,7 @@ public class ErrorPageManager {
     if (location == null && _parent != null)
       return _parent.handleErrorStatus(request, response, code, message);
 
-    if (_app == null && _appContainer == null)
+    if (_webApp == null && _appContainer == null)
       return false;
 
     if (location != null && ! location.equals(request.getRequestURI())) {
@@ -736,8 +736,8 @@ public class ErrorPageManager {
         RequestDispatcher disp = null;
         // can't use filters because of error pages due to filters
         // or security.
-        if (_app != null)
-          disp = _app.getRequestDispatcher(location);
+        if (_webApp != null)
+          disp = _webApp.getRequestDispatcher(location);
         else if (_appContainer != null)
           disp = _appContainer.getRequestDispatcher(location);
 
@@ -912,7 +912,7 @@ public class ErrorPageManager {
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _app + "]";
+    return getClass().getSimpleName() + "[" + _webApp + "]";
   }
 
   static {

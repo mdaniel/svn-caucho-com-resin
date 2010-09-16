@@ -66,6 +66,7 @@ import com.caucho.server.e_app.EarDeployGenerator;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.ErrorPage;
+import com.caucho.server.webapp.ErrorPageManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.WebAppContainer;
@@ -419,6 +420,16 @@ public class Host
     WebApp errorWebApp = getWebAppContainer().getErrorWebApp();
     
     errorWebApp.getErrorPageManager().addErrorPage(errorPage);
+  }
+  
+  public ErrorPageManager getErrorPageManager()
+  {
+    WebApp errorWebApp = getWebAppContainer().getErrorWebApp();
+
+    if (errorWebApp != null)
+      return errorWebApp.getErrorPageManager();
+    else
+      return null;
   }
   
   @Configurable
