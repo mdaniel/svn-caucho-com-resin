@@ -298,12 +298,7 @@ function display_heartbeat()
       
         $is_health = $s_server;
       
-        if ($is_health) {
-          echo "<span style='color:#00c000'>&#x2713;</span>";
-        }
-        else {
-          echo "<span style='color:#c00000'>&#x2717;</span>";
-        }
+        print_check_or_x($is_health);
       
         echo "</td>"
         echo "<td width='5em'>";

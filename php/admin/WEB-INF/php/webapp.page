@@ -13,8 +13,6 @@ $is_secure = $request->isSecure();
 $user = quercus_get_request()->getUserPrincipal();
 $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
 
-resin_var_dump($client);
-
 if ($is_secure) {
   $action = $_POST['action'];
 
@@ -588,8 +586,6 @@ function display_deploy_form($mbean_server)
 
 function process_deploy_args()
 {
-  resin_var_dump($_POST);
-  resin_var_dump($_FILES);
   $path = $_FILES['application']['tmp_name'];
 
   $stage = $_POST['stage'];
@@ -630,8 +626,6 @@ function javascript_autocomplete()
   global $client;
 
   $tags = $client->queryTags("[^/]*/webapp/.*");
-  resin_debug("tags");
-  resin_var_dump($tags);
 
   $stages = array();
   $hosts = array();

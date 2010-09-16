@@ -12,6 +12,8 @@ if ($_REQUEST['period'])
 if ($_REQUEST['np'])
   $p_period = $_REQUEST['np'];
 
+$p_servers = explode(" ", htmlspecialchars($_REQUEST['server-set']));
+
 $user = quercus_servlet_request()->getRemoteUser();
 
 $user_item = $cache->get($user);
@@ -33,23 +35,15 @@ if ($p_hash && ! $p_submit) {
   $item = $cache->get($p_hash);
   $p_name = $item['name'];
   $p_checks = $item['checks'];
-  $p_servers = $item['servers'];
 }
 else if ($p_submit) {
   $is_refresh = true;
 
   $p_name = $_REQUEST['name'];
   $p_checks = $_REQUEST['checks'];
-  $p_servers = $_REQUEST['servers'];
-
-  if (! $p_name) {
-    $p_submit = null;
-    $p_name = $p_servers[0] . "|" . $p_checks[0];
-  }
 
   $item = array("name"=>$p_name,
-                "checks"=>$p_checks,
-                "servers"=>$p_servers);
+                "checks"=>$p_checks);
 
   $ser = serialize($item);
   $p_hash = dechex(crc32($ser));
@@ -70,13 +64,6 @@ else if ($p_submit) {
 }
 
 $query = "&h=" . $p_hash . "&p=" . $p_period;
-
-if ($is_refresh) {
-  // redirect so the refresh will work
-  $g_next_url = "?q=" . $_REQUEST['q'] . "&s=" . $_REQUEST['s'] . $query;
-  header("Location: " . $_SERVER['SCRIPT_URL'] . $g_next_url);
-  return;
-}
 
 require_once "WEB-INF/php/inc.php";
 
@@ -110,12 +97,6 @@ foreach ($p_checks as $check) {
 if (! $p_name)
   $p_name = $p_names[0];
 
-/*
-if (! $p_name) {
-  $p_name = $self_index . "|Resin|Server|Uptime";
-  $p_names[] = $p_name;
-}*/
-
 echo "<div id='canvas-warning'><p><b>Note:</b> this page requires HTML 5 
 canvas support.  You may need to use Firefox 3.5 or other HTML 5-capable browser
 to see the graphs properly.</p></div>\n";
@@ -142,9 +123,11 @@ function display_graph_selection()
   global $p_hash;
   global $user_item;
   global $g_next_url;
+  global $g_server;
+  global $self_index;
 
   echo "<form name='def_graph' method='POST' action='" . $g_next_url . "'>";
-  echo "<b>Select Defined Meter Set:</b>\n";
+  echo "<b>Meter Set:</b>\n";
   echo "<select name='graph' onchange='javascript:document.forms.def_graph.submit();'>\n";
 
   $selected = false;
@@ -154,10 +137,65 @@ function display_graph_selection()
       $selected = true;
       echo " selected";
     }
-    echo " value='" . $name . "'>" . $name . "\n";
+    echo " value='{$name}'>{$name}</option>\n";
   }
   if (! $selected)
-    echo "<option selected>--------\n";
+    echo "<option selected>--------</option>\n";
+
+  echo "</select>\n";
+
+  $cluster_size = count($g_server->Cluster->Servers);
+
+  echo "<b>Server Set:</b>\n";
+  echo "<select name='server-set'>\n";
+
+  echo "<option value='$self_index'";
+
+  if ($_REQUEST['server-set'] == $self_index)
+    echo " selected";
+
+  echo ">This Server</option>\n";
+
+  for ($i = 0; $i < min(3, $cluster_size); $i++) {
+    $triad .= sprintf("%02d ", $i);
+  }
+
+  $triad = trim($triad);
+
+  echo "<option value='$triad'";
+
+  if ($_REQUEST['server-set'] == $triad)
+    echo " selected";
+
+  echo ">Triad</option>\n";
+
+  if ($cluster_size > 3) {
+    for ($i = 3; $i < $cluster_size; $i++) {
+      $non_triad .= sprintf("%02d ", $i);
+    }
+
+    $non_triad = trim($non_triad);
+
+    echo "<option value='$non_triad'";
+
+    if ($_REQUEST['server-set'] == $non_triad)
+      echo " selected";
+
+    echo ">Non-triad servers</option>\n";
+  }
+
+  for ($i = 0; $i < $cluster_size; $i++) {
+    $all .= sprintf("%02d ", $i);
+  }
+
+  $all = trim($all);
+
+  echo "<option value='$all'";
+
+  if ($_REQUEST['server-set'] == $all)
+    echo " selected";
+
+  echo ">All servers in cluster</option>\n";
 
   echo "</select>\n";
   echo "</form>";
@@ -272,39 +310,23 @@ function display_new_graph_form()
   // server
   echo "<form method='post' action='" . $g_next_url . "'>"
   echo "<input type='hidden' name='submit' value='true'>\n";
-
-  echo "<input name='name' size='40'>";
-  echo "<input type='submit' value='Save'><br>\n";
-
-  echo "Servers: ";
-  ksort($servers);
-  foreach ($servers as $server) {
-    echo "<input class='server' type='checkbox' name='servers[]'";
-    echo " value='$server'>$server\n";      
-  }
-  echo "<br>";
-  echo "<h2>Meters</h2>";
+  echo "<h2>Meters<span id='meter-switch' class='switch'></span></h2>";
+  echo "<button id='show-selected-meters' style='margin: 0 1em'>Show Selected Meters</button>";
+  echo "<button id='clear-selected-meters' style='margin: 0 1em'>Clear Graph</button>";
 
   $i = 0;
 
   ksort($sections);
-  echo "<ul>"
+  echo "<ul class='meters'>"
   foreach ($sections as $section => $names) {
     $i++;
-
-    echo "<li class='open' id='lc_$i'>";
-    echo "<img src='images/close-item.png'";
-    echo " onclick='show_n(\"lo_$i\");hide(\"lc_$i\");'/> ";
-    echo "$section"
-    echo "</li>";
-
-    echo "<li class='open' id='lo_$i' style='display:none'";
-    echo "<img src='images/open-item.png'";
-    echo " onclick='show_n(\"lc_$i\");hide(\"lo_$i\");'/> ";
-    echo $section;
+    echo "<li>";
+    
+    $section_id = "meter-" . crc32($section);
+    echo "<span class='switch' id='$section_id'>$section</span>";
 
     sort($names);
-    echo "<ul style='list-style-type:none'>";
+    echo "<ul class='toggle-meter-switch toggle-$section_id'>";
     foreach ($names as $name) {
       echo "<li><input class='meter' type='checkbox' name='checks[]' ";
 
@@ -320,6 +342,12 @@ function display_new_graph_form()
     echo "</li>";
   }
   echo "</ul>";
+
+  echo "<div style='text-align: right'>\n";
+  echo "<div id='validation-notice' class='ui-state-error ui-corner-all' style='display:none'></div>\n";
+  echo "<input name='name' style='width: 100%;'></input>\n";
+  echo "<input type='submit' value='Save Meter Set'><br>\n";
+  echo "</div>\n";
 
   echo "</form>\n";
 }
@@ -338,25 +366,6 @@ if (document.createElement('canvas').getContext) {
   $("div#graph-content").show();
 }
 
-/*
-var newGraphForm = $("#new-graph-form");
-var newGraphDrawer = $("#new-graph-drawer");
-var drawerSlide = $("<div></div>");
-drawerSlide.css("width", "20px");
-drawerSlide.css("background-color", "#aaa");
-drawerSlide.css("height", newGraphForm.height() + "px");
-drawerSlide.css("padding", "0");
-drawerSlide.css("margin", "0");
-drawerSlide.css("float", "left");
-drawerSlide.click(function() {
-  if (newGraphForm.css("display") == "none")
-    newGraphForm.show();
-  else
-    newGraphForm.hide();
-});
-newGraphForm.before(drawerSlide);
-*/
-
 function GraphManager() {
   var graphDiv = $('div.graph');
 
@@ -366,9 +375,14 @@ function GraphManager() {
   };
 
   var refresh = function() {
+    /*
     var servers = $("input.server:checkbox:checked").map(function() {
       return $(this).attr("value");
-    });
+    });*/
+
+    var servers = $("select[name=server-set] option:selected")
+                    .attr("value")
+                    .split(" ");
 
     var checks = $("input.meter:checkbox:checked").map(function() {
       return $(this).attr("value");
@@ -387,7 +401,66 @@ function GraphManager() {
   refresh();
   window.setInterval(refresh, 60000);
 
-  $("input:checkbox").change(refresh);
+  $("input.meter:checkbox").change(refresh);
+  $("select[name=server-set]").change(refresh);
+
+  $("button#show-selected-meters").click(function() {
+    var showParent = function() {
+      var switchElement = $(this).closest("ul").siblings(".switch");
+      switchElement.trigger("toggle-to-show");
+    };
+
+    $("input.meter:checkbox:checked").each(showParent);
+
+    return false;
+  });
+
+  $("button#clear-selected-meters").click(function() {
+    $("input.meter:checkbox:checked").each(function() {
+      $(this).attr("checked", false);
+      $(this).change();
+    });
+    
+    return false;
+  });
+
+  var nameInput = $("input[name=name]");
+
+  nameInput.attr("value", "Meter Set Name");
+  nameInput.css("color", "#999");
+  nameInput.focusin(function() {
+    if (nameInput.attr("value") == "Meter Set Name") {
+      nameInput.attr("value", "");
+      nameInput.css("color", "black");
+    }
+  });
+
+  nameInput.focusout(function() {
+    if (nameInput.attr("value") == "") {
+      nameInput.attr("value", "Meter Set Name");
+      nameInput.css("color", "#999");
+    }
+  });
+
+  var validationNotice = $("#validation-notice");
+  nameInput.closest("form").submit( function() {
+    var html = "";
+
+    if ($("input.meter:checkbox:checked").length == 0) {
+      html += "Please select at least one meter for this set<br/>";
+    }
+
+    if (nameInput.attr("value") == "Meter Set Name"
+        || nameInput.attr("value") == "") {
+      html += "Please input a name for this meter set<br/>";
+    }
+
+    if (html != "") {
+      validationNotice.html(html);
+      validationNotice.show();
+      return false;
+    }
+  });
 }
 
 new GraphManager();

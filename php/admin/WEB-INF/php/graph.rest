@@ -10,13 +10,25 @@ $graph = $_REQUEST['graph'];
 $checks = $_REQUEST['checks'];
 $servers = $_REQUEST['servers'];
 
-if (! $hash && ! $graph && ! $checks) {
-  /*
-  // the default uptime graph
-  $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
+if (isset($_REQUEST["width"])) {
+  $width = htmlspecialchars($_REQUEST["width"]);
+}
 
-  $name = $self_index . "|Resin|Server|Uptime";
-  $names[] = $name;*/
+if (isset($_REQUEST["height"])) {
+  $height = htmlspecialchars($_REQUEST["height"]);
+}
+
+if (! $hash && ! $graph && ! $checks) {
+  $style .= "text-align: center;";
+  $style .= "border: 1px solid black;";
+  if ($width)
+    $style .= "width: {$width}px;";
+
+  if ($height)
+    $style .= "height: {$height}px;";
+
+  echo "<div style='$style'><strong>No meters specified</strong></div>";
+  return;
 }
 else {
   if (! $checks) {
@@ -50,7 +62,7 @@ else {
 
   foreach ($checks as $check) {
     foreach ($servers as $server) {
-      $names[] = "$server|$check";
+      $names[] = htmlspecialchars("$server|$check");
     }
   }
 }
@@ -60,20 +72,10 @@ else {
 # 
 
 $canvas = "graph-{$hash}";
-$width = 220;
-$height = 150;
 $period = 60;
 
 if (isset($_REQUEST["canvas"])) {
   $canvas = htmlspecialchars($_REQUEST["canvas"]);
-}
-
-if (isset($_REQUEST["width"])) {
-  $width = htmlspecialchars($_REQUEST["width"]);
-}
-
-if (isset($_REQUEST["height"])) {
-  $height = htmlspecialchars($_REQUEST["height"]);
 }
 
 if (isset($_REQUEST["period"])) {

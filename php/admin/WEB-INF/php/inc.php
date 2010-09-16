@@ -863,12 +863,17 @@ function display_health()
     }
   }
 
-  if (count($down_servers) == 0) {
-    echo "<span class='ok'>System Health</span>";
+  $health = (count($down_servers) == 0);
+
+
+  if ($health) {
+    print_check_or_x($health);
+    echo "System Health";
   }
   else {
     echo "<span class='menu-switch' id='down-servers'>"
-    echo "<span class='fail'>System Health</span>";
+    print_check_or_x($health);
+    echo "System Health (" . count($down_servers) . ")";
     echo "<ul class='toggle-down-servers' style='display: none'>";
     foreach ($down_servers as $down_server) {
       list($display_name, $error) = $down_server;
@@ -1138,6 +1143,16 @@ function print_fail($message)
 function print_warn($message)
 {
   echo "<span style='color:#c0c000'>?$message</span>";
+}
+
+function print_check_or_x($status)
+{
+  if ($status) {
+    echo "<span style='color:#00c000'>&#x2713;</span>";
+  }
+  else {
+    echo "<span style='color:#c00000'>&#x2717;</span>";
+  }
 }
 
 ?>
