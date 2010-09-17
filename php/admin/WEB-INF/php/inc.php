@@ -965,7 +965,7 @@ function display_footer($script, $javascript="")
 <script type="text/javascript" src="flot/jquery.flot.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {
-    initializeToggleSwitches();
+    init();
 
     <?= $javascript ?>
 

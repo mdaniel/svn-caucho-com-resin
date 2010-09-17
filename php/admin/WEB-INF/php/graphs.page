@@ -2,15 +2,13 @@
 
 $cache = resin_create_distcache("resin:admin:graph");
 
-$p_hash = $_REQUEST['h'];
+$p_hash = htmlspecialchars($_REQUEST['h']);
 
 $p_submit = $_REQUEST['submit'];
-$p_graph = $_REQUEST['graph'];
-$p_period = $_REQUEST['p'];
+$p_graph = htmlspecialchars($_REQUEST['graph']);
+$p_period = htmlspecialchars($_REQUEST['p']);
 if ($_REQUEST['period'])
-  $p_period = $_REQUEST['period'];
-if ($_REQUEST['np'])
-  $p_period = $_REQUEST['np'];
+  $p_period = htmlspecialchars($_REQUEST['period']);
 
 $p_servers = explode(" ", htmlspecialchars($_REQUEST['server-set']));
 
@@ -39,8 +37,8 @@ if ($p_hash && ! $p_submit) {
 else if ($p_submit) {
   $is_refresh = true;
 
-  $p_name = $_REQUEST['name'];
-  $p_checks = $_REQUEST['checks'];
+  $p_name = htmlspecialchars($_REQUEST['name']);
+  $p_checks = array_map(htmlspecialchars, $_REQUEST['checks']);
 
   $item = array("name"=>$p_name,
                 "checks"=>$p_checks);
@@ -120,6 +118,7 @@ display_footer($g_page, javascript_main_graph());
 
 function display_graph_selection()
 {
+  global $p_period;
   global $p_hash;
   global $user_item;
   global $g_next_url;
@@ -127,7 +126,8 @@ function display_graph_selection()
   global $self_index;
 
   echo "<form name='def_graph' method='POST' action='" . $g_next_url . "'>";
-  echo "<b>Meter Set:</b>\n";
+  echo "<input type='hidden' name='period' value='$p_period'/>\n";
+  echo "<b>Meters:</b>\n";
   echo "<select name='graph' onchange='javascript:document.forms.def_graph.submit();'>\n";
 
   $selected = false;
@@ -197,7 +197,24 @@ function display_graph_selection()
 
   echo ">All servers in cluster</option>\n";
 
-  echo "</select>\n";
+  echo "</select><br/>\n";
+
+  $graph_layout = $_REQUEST['graph-layout'];
+
+  echo "<input name='graph-layout' type='radio' value='single-graph'";
+
+  if ($graph_layout != 'multi-graph')
+    echo " checked";
+
+  echo ">Show one graph for all servers</input><br/>";
+
+  echo "<input name='graph-layout' type='radio' value='multi-graph'";
+
+  if ($graph_layout == 'multi-graph')
+    echo " checked";
+
+  echo ">Show graphs for each server</input>";
+
   echo "</form>";
 }
 
@@ -206,36 +223,49 @@ function display_period_selection()
   global $p_period;
   global $g_next_url;
 
-  echo "<div class='graph-period'>";
+  echo "<div class='graph-period'>\n";
 
   echo "Time: "
 
+  echo "<select name='period'>\n";
+
+  echo " <option value='" . (60) . "'";
+
   if ($p_period == 60)
-    echo " 1h";
-  else
-    echo " <a href=" . $g_next_url . "&np=" . (60) . ">1h</a>";
+    echo " selected";
+
+  echo ">1 hour</option>\n";
+
+  echo " <option value='" . (6 * 60) . "'";
 
   if ($p_period == 6 * 60)
-    echo " 6h";
-  else
-    echo " <a href=" . $g_next_url . "&np=" . (6 * 60) . ">6h</a>";
+    echo " selected";
+
+  echo ">6 hours</option>\n";
+
+  echo " <option value='" . (24 * 60) . "'";
 
   if ($p_period == 24 * 60)
-    echo " 24h";
-  else
-    echo " <a href=" . $g_next_url . "&np=" . (24 * 60) . ">24h</a>";
+    echo " selected";
+
+  echo ">24 hours</option>\n";
+
+  echo " <option value='" . (7 * 24 * 60) . "'";
 
   if ($p_period == 7 * 24 * 60)
-    echo " 7d";
-  else
-    echo " <a href=" . $g_next_url . "&np=" . (7 * 24 * 60) . ">7d</a>";
+    echo " selected";
 
-  if ($p_period == 30 * 24 * 60)
-    echo " 30d";
-  else
-    echo " <a href=" . $g_next_url . "&np=" . (30 * 24 * 60) . ">30d</a>";
+  echo ">7 days</option>\n";
 
-  echo "</div>";
+  echo " <option value='" . (7 * 24 * 60) . "'";
+
+  if ($p_period == 7 * 24 * 60)
+    echo " selected";
+
+  echo ">7 days</option>\n";
+
+  echo "</select>\n";
+  echo "</div>\n";
 }
 
 function display_main_graph() 
@@ -246,10 +276,12 @@ function display_main_graph()
   global $p_hash;
   global $p_period;
 
-  echo "<div class='graph'></div>";
-
   display_period_selection();
 
+  echo "<div class='graph'></div>";
+
+  /*
+   * XXX graph now requires flot -- include in rest output?
   if ($p_graph) {
     $rest_url = "rest.php?q=graph&graph={$p_graph}&period={$p_period}";
 
@@ -259,7 +291,7 @@ function display_main_graph()
     $rest_url = "rest.php?q=graph&hash={$p_hash}&period={$p_period}";
 
     echo "<div><a href='{$rest_url}'>Embedded graph URL</a></div>";
-  }
+  }*/
 
   echo "<br>";
 }
@@ -311,8 +343,7 @@ function display_new_graph_form()
   echo "<form method='post' action='" . $g_next_url . "'>"
   echo "<input type='hidden' name='submit' value='true'>\n";
   echo "<h2>Meters<span id='meter-switch' class='switch'></span></h2>";
-  echo "<button id='show-selected-meters' style='margin: 0 1em'>Show Selected Meters</button>";
-  echo "<button id='clear-selected-meters' style='margin: 0 1em'>Clear Graph</button>";
+  echo "<button id='clear-graph' style='margin: 0 1em'>Clear Graph</button>";
 
   $i = 0;
 
@@ -320,7 +351,7 @@ function display_new_graph_form()
   echo "<ul class='meters'>"
   foreach ($sections as $section => $names) {
     $i++;
-    echo "<li>";
+    echo "<li class='meter-section'>";
     
     $section_id = "meter-" . crc32($section);
     echo "<span class='switch' id='$section_id'>$section</span>";
@@ -354,7 +385,7 @@ function display_new_graph_form()
 
 function javascript_main_graph()
 {
-  global $p_period;
+  global $g_next_url;
 
   $width = 600 - 60;
   $height = 400 - 40;
@@ -369,16 +400,26 @@ if (document.createElement('canvas').getContext) {
 function GraphManager() {
   var graphDiv = $('div.graph');
 
-  var updateGraph = function(canvasHtml) {
-    graphDiv.empty();
-    graphDiv.append(canvasHtml);
+  var updateGraph = function(element, canvasHtml) {
+    element.empty();
+    element.append(canvasHtml);
+  };
+
+  var highlightSections = function() {
+    $("li.meter-section").each(function() {
+      var switchElement = $(this).find("span.switch");
+      var meterCheckedCount = 
+        $(this).find("input.meter:checkbox:checked").length;
+
+      if (meterCheckedCount > 0) 
+        switchElement.css("font-weight", "bold");
+      else  
+        switchElement.css("font-weight", "normal");
+    });
   };
 
   var refresh = function() {
-    /*
-    var servers = $("input.server:checkbox:checked").map(function() {
-      return $(this).attr("value");
-    });*/
+    highlightSections();
 
     var servers = $("select[name=server-set] option:selected")
                     .attr("value")
@@ -388,34 +429,57 @@ function GraphManager() {
       return $(this).attr("value");
     });
 
-    $.post("rest.php?q=graph",
-           { servers: servers,
-             checks : checks,
-             period : "${p_period}",
-             width : "${width}",
-             height : "${height}" },
-           updateGraph,
-           "text/html");
+    var period = $("select[name=period] option:selected").attr("value");
+
+    // synchronize the period in the hidden input in the Meters form
+    $("input[name=period]").attr("value", period);
+
+    var isMultiGraph = 
+      ($("input[name=graph-layout]:checked").attr("value") == "multi-graph");
+
+    if (isMultiGraph) {
+      graphDiv.empty();
+
+      $.each(servers, function(i, server) {
+        var element = $("<div></div>");
+        graphDiv.append(element);
+
+        $.post("rest.php?q=graph",
+               { canvas : "graph-" + server,
+                 servers: [ server ],
+                 checks : checks,
+                 period : period,
+                 width : "${width}",
+                 height : "${height}" },
+               function(canvasHtml) {
+                 updateGraph(element, canvasHtml);
+               },
+               "text/html");
+      });
+    }
+    else {
+      $.post("rest.php?q=graph",
+             { canvas : "graph-" + servers.join("-"),
+               servers: servers,
+               checks : checks,
+               period : period,
+               width : "${width}",
+               height : "${height}" },
+             function(canvasHtml) {
+               updateGraph(graphDiv, canvasHtml);
+             },
+             "text/html");
+    }   
   };
 
   refresh();
   window.setInterval(refresh, 60000);
 
   $("input.meter:checkbox").change(refresh);
-  $("select[name=server-set]").change(refresh);
+  $("form[name=def_graph] :input:not(input[type=hidden])").change(refresh);
+  $("select[name=period]").change(refresh);
 
-  $("button#show-selected-meters").click(function() {
-    var showParent = function() {
-      var switchElement = $(this).closest("ul").siblings(".switch");
-      switchElement.trigger("toggle-to-show");
-    };
-
-    $("input.meter:checkbox:checked").each(showParent);
-
-    return false;
-  });
-
-  $("button#clear-selected-meters").click(function() {
+  $("button#clear-graph").click(function() {
     $("input.meter:checkbox:checked").each(function() {
       $(this).attr("checked", false);
       $(this).change();

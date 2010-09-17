@@ -4,16 +4,18 @@
  * */
 
          
-var colors = ["#FFFF55",
-              "#FFD555",
-              "#FFC20B",
+var colors = [
+              "#FDE982",
+              "#FDE255",
+              "#FDD682",
+              "#FAD81D",
+              "#FDC855",
               "#FAB41D",
-              "#FF850B",
-              "#D55000",
-              "#806000",
-              "#804000",
-              "#802000",
-              "#4C2004"];
+              "#BB943F",
+              "#A37209",
+              "#BBA83F",
+              "#A38B09",
+             ];
 
 var miscColor = "#c0c0c0"; // gray
 
@@ -59,10 +61,10 @@ function pieChart(table, chartId, labelId,
                   numTopSlices) {
 
   // Config settings
-  var chartSizePercent = 70;                        // The chart radius relative to the canvas width/height (in percent)
+  var chartSizePercent = 60;                        // The chart radius relative to the canvas width/height (in percent)
   var sliceBorderWidth = 1;                         // Width (in pixels) of the border around each slice
   var sliceBorderStyle = "#fff";                    // Colour of the border around each slice
-  var sliceGradientColour = "#888";                 // Colour to use for one end of the chart gradient
+  var sliceGradientColour = "#FDE982";                 // Colour to use for one end of the chart gradient
   var maxPullOutDistance = 0.05;                       // How far, in % of the radius, to pull slices out when clicked
   var pullOutFrameStep = 0.10;                        // How percent to move a slice with each animation frame
   var pullOutFrameInterval = 40;                    // How long (in ms) between each animation frame

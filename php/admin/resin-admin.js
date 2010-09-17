@@ -164,6 +164,30 @@ function initializeToggleSwitches() {
   });
 }
 
+function initializeValidators() {
+  $("form").each(function() {
+    var required = $(this).find(".required");
+
+    $(this).submit(function() {
+      var areRequiredGiven = true;
+
+      for (var i = 0; i < required.length; i++) { 
+        if (required[i].attr("value") == "") {
+          required.effect("highlight");
+          areRequiredGiven = false;
+        } 
+      }
+
+      if (! areRequiredGiven) {
+        return false;
+      }
+
+      return true;
+    });
+  });
+}
+
 function init() {
+  initializeValidators();
   initializeToggleSwitches();
 }

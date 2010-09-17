@@ -31,16 +31,16 @@ if ($is_secure) {
   elseif ($action == 'update') {
     $path = $_FILES['application']['tmp_name'];
 
-    list($tag, $commit_message) = process_deploy_args();
+    $commit = process_deploy_args();
 
-    $client->putTagArchive($tag, $path, $commit_message, $attributes);
+    $client->commitArchive($commit, $path);
   }
   elseif ($action == 'deploy') {
     $path = $_FILES['application']['tmp_name'];
 
-    list($tag, $commit_message) = process_deploy_args();
+    $commit = process_deploy_args();
 
-    $client->putTagArchive($tag, $path, $commit_message, $attributes);
+    $client->commitArchive($commit, $path);
   }
 }
 
@@ -563,42 +563,74 @@ function display_deploy_form($mbean_server)
   echo "<form enctype='multipart/form-data' method='POST'>";
   echo "<input type='hidden' name='action' value='deploy'>";
 
-  echo "<h4>Stage</h4>";
-  echo "<input class='stage' type='text' name='stage' value='production'>";
-  echo "<h4>Host</h4>";
-  echo "<input class='host' type='text' name='host' value='default'>";
+  echo "<h4>Application archive file</h4>";
+  echo "<input type='file' name='application'>\n";
+
   echo "<h4>Name</h4>";
-  echo "<input type='text' name='name' value=''>\n";
+  echo "<input type='text' name='name' value='' class='required'>\n";
+
+  echo "<h4>Version</h4>";
+  echo "<input type='number' min='0' size='3' name='version-major' title='Major Version Number' value='0' class='required'>\n";
+  echo "<input type='number' min='0' size='3' name='version-minor' title='Minor Version Number' value='0' class='required'>\n";
+  echo "<input type='number' min='0' size='3' name='version-micro' title='Micro Version Number' value='0' class='required'>\n";
+  echo "<input type='text' name='version-qualifier' title='Version Qualifier (free form)' value=''>\n";
+
+  echo "<h4>Host</h4>";
+  echo "<input class='host' type='radio' name='host' value='default' checked>";
+  echo "Deploy to default host";
+  echo "</input><br/>\n";
+  echo "<span class='another-host'>\n";
+  echo "<input type='radio' name='host' value=''>";
+  echo "Deploy to another host: ";
+  echo "<input type='text' name='host' value='' disabled>";
+  echo "</input>\n";
+  echo "</span>\n";
+
+  echo "<h4>Stage</h4>";
+  echo "<input class='stage' type='radio' name='stage' value='production' checked>";
+  echo "Deploy to production";
+  echo "</input><br/>\n";
+  echo "<span class='another-stage'>\n";
+  echo "<input type='radio' name='stage' value=''>";
+  echo "Deploy to another stage: ";
+  echo "<input type='text' name='stage' value='' disabled>";
+  echo "</input>\n";
+  echo "</span>\n";
 
   echo "<h4>Commit message</h4>";
   echo "<textarea name='commit-message'></textarea>\n";
-  echo "<h4>Version</h4>";
 
-  echo "<input type='text' name='version' value=''>\n";
-  echo "<h4>Application archive file</h4>";
-  echo "<input type='file' name='application'>\n";
   echo "<div style='text-align: right'>";
-  echo "<input type='submit' name='submit' value='deploy' $disabled>";
+  echo "<input class='deploy' type='submit' name='submit' value='Deploy' $disabled>";
   echo "</div>";
+
   echo "</form>";
   echo "</div>";
 }
 
 function process_deploy_args()
 {
+  global $user;
+
+  $commit = new Java("com.caucho.env.repository.CommitBuilder");
+
+  $commit->type("webapp");
+
   $path = $_FILES['application']['tmp_name'];
 
-  $stage = $_POST['stage'];
+  $stage = htmlspecialchars($_POST['stage']);
 
-  if (! $stage)
-    $stage = "production";
+  if ($stage)
+    $commit->stage($stage);
+  else
+    $commit->stage("production");
 
-  $host = $_POST['host'];
+  $host = htmlspecialchars($_POST['host']);
 
   if (! $host)
     $host = "default";
 
-  $name = $_POST['name'];
+  $name = htmlspecialchars($_POST['name']);
 
   if ($name == '/')
     $name = "/ROOT";
@@ -606,19 +638,21 @@ function process_deploy_args()
   if ($name[0] != '/')
     $name = '/' . $name;
 
-  $version = $_POST['version'];
+  $commit->tagKey($host . $name);
 
-  if ($version != '')
-    $version = "-" . $version;
+  $commit->version(htmlspecialchars($_POST['version-major']), 
+                   htmlspecialchars($_POST['version-minor']),
+                   htmlspecialchars($_POST['version-micro']),
+                   htmlspecialchars($_POST['version-qualifier']));
 
-  $commit_message = $_POST['commit-message'];
+  if ($_POST['commit-message'])
+    $commit->message($_POST['commit-message']);
+  else
+    $commit->message("updated via resin-admin web form");
 
-  if ($commit_message == "")
-    $commit_message = "updated via resin-admin web form";
+  $commit->attribute("user", $user);
 
-  $tag = $stage . "/webapp/" . $host . $name . $version;
-
-  return array($tag, $commit_message);
+  return $commit;
 }
 
 function javascript_autocomplete()
@@ -644,16 +678,70 @@ function javascript_autocomplete()
 
   $javascript = <<<EOF
     var stages = ${stage_array};
-    $("input.stage").autocomplete({ source: stages });
+    $("input:text.stage").autocomplete({ source: stages });
     var hosts = ${host_array};
-    $("input.host").autocomplete({ source: hosts });
+    $("input:text.host").autocomplete({ source: hosts });
+EOF;
+
+  return $javascript;
+}
+
+function javascript_deploy_form()
+{
+  $javascript = javascript_autocomplete();
+
+  $javascript .= <<<EOF
+    var applicationNameInput = $(".deploy-application input[name=name]");
+    var applicationFileInput = $(".deploy-application input:file[name='application']");
+
+    applicationFileInput.change(function() {
+      if (applicationNameInput.val() == "") {
+        var filename = applicationFileInput.val();
+        var match = /(.*\/)*(.*)\.war$/.exec(filename);
+
+        if (match) {
+          applicationNameInput.val(match[2]);
+        }
+      }
+      
+    });
+
+    var hostRadio = $("input:radio[name=host]");
+    var anotherHostRadio = $(".another-host input:radio");
+    var anotherHostInput = $(".another-host input:text");
+
+    hostRadio.change(function() {
+      if (anotherHostRadio.attr("checked")) {
+        $(".another-host").css("color", "black");
+        anotherHostInput.attr('disabled', false);
+      }
+      else {
+        $(".another-host").css("color", "#999");
+        anotherHostInput.attr('disabled', true);
+      }
+    });
+
+    var stageRadio = $("input:radio[name=stage]");
+    var anotherStageRadio = $(".another-stage input:radio");
+    var anotherStageInput = $(".another-stage input:text");
+
+    stageRadio.change(function() {
+      if (anotherStageRadio.attr("checked")) {
+        $(".another-stage").css("color", "black");
+        anotherStageInput.attr('disabled', false);
+      }
+      else {
+        $(".another-stage").css("color", "#999");
+        anotherStageInput.attr('disabled', true);
+      }
+    });
 EOF;
 
   return $javascript;
 }
 
 $javascript = javascript_create_tab("webapp-tabs") .
-              javascript_autocomplete();
+              javascript_deploy_form();
 
 display_footer($g_page, $javascript);
 ?>

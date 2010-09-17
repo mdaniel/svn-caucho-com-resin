@@ -156,7 +156,7 @@ function display_profile_results($partition, $groups, $profile)
 
     $count++;
 
-    echo "<div id='${name}-tab'>"
+    echo "<div id='${name}-tab' class='profile-tab'>"
     print_profile_tab($entries, $name, $count, $profile);
     echo "</div>\n";
   }
@@ -166,7 +166,7 @@ function display_profile_results($partition, $groups, $profile)
 
 function print_profile_tab($entries, $name, $count, $profile)
 {
-  echo "<div style='display:inline-block; float: right;' class='pie-chart'>";
+  echo "<div class='pie-chart'>";
   echo "<canvas id='${name}-table-chart'/ width='300' height='300' style='display: block'></canvas>\n";
   echo "<div id='${name}-table-label' class='chart-label'></div>\n";
   echo "</div>\n";

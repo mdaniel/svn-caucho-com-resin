@@ -668,7 +668,7 @@ a.hideOptional {
 .jmx-header {
   margin: 2px;
   padding: 1px;
-  width: 100%;
+  width: 90%;
   font-weight : bold;
 }
 
@@ -903,7 +903,7 @@ table.schema tr th {
 }
 
 .pie-chart {
-  width: 300px;
+  width: 350px;
 }
 
 .chart-label {
@@ -911,14 +911,25 @@ table.schema tr th {
   padding-right: 1em;
   text-align: center;
   overflow: hidden;
-  width: 100%;
+  width: 85%;
   border: 1px solid gray;
   min-height: 1em;
+  font-weight: bolder;
 }
 
 textarea {
-  width: 90%;
+  width: 50%;
   min-height: 3em;
+}
+
+ul.meters {
+  list-style-type: none;
+  padding-left: 1em;
+}
+
+ul.meters ul {
+  list-style-type: none;
+  padding-left: 2em;
 }
 
 #graph-content {
@@ -935,6 +946,7 @@ textarea {
   float:right;
   background-color: #cccccc;
 }
+
 #new-graph-drawer * {
   background-color: #fafafa;
 }
@@ -948,4 +960,34 @@ textarea {
 
 .graph-period {
   text-align: right;
+}
+
+.another-stage { 
+  color: #999;
+}
+
+.another-host { 
+  color: #999;
+}
+
+div.heap-dump-tab {
+  display: inline-block;
+  min-height: 400px;
+  position: relative;
+}
+
+div.profile-tab { 
+  position: relative;
+  display: inline-block;
+  min-height: 400px;
+}
+
+div.pie-chart {
+  position: absolute;
+  right: 1em;
+}
+
+input.deploy {
+  padding: 1em;
+  font-size: 130%;
 }
