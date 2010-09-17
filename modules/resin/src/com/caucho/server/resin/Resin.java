@@ -1100,7 +1100,7 @@ public class Resin
     if (serverName == null || serverName.isEmpty())
       serverName = "default";
   
-    dataDirectory = dataDirectory.lookup(serverName);
+    dataDirectory = dataDirectory.lookup("./" + serverName);
     
     RootDirectoryService rootService
       = new RootDirectoryService(_rootDirectory, dataDirectory);

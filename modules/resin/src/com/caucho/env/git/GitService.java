@@ -57,6 +57,7 @@ public class GitService extends AbstractResinService {
   public GitService()
   {
   }
+  
   public GitService(Path root)
   {
     _root = root;

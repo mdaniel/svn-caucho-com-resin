@@ -525,9 +525,12 @@ public class WebApp extends ServletContextImpl
       _constraintManager = new ConstraintManager();
       _errorPageManager = new ErrorPageManager(_server, this);
       
+      // server/003a
+      /*
       if (! getId().startsWith("error/")) {
         _errorPageManager.setParent(_host.getErrorPageManager());
       }
+      */
 
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);

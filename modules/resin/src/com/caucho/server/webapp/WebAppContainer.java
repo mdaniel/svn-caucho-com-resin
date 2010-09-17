@@ -1183,6 +1183,13 @@ public class WebAppContainer
   public WebApp getErrorWebApp()
   {
     if (_errorWebApp == null) {
+      WebApp defaultWebApp = findWebAppByURI("/");
+      
+      if (defaultWebApp != null) {
+        _errorWebApp = defaultWebApp;
+        return _errorWebApp;
+      }
+      
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
       try {
