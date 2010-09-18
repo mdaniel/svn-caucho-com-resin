@@ -487,8 +487,12 @@ public class DeploymentManagerImpl
 
         String host = targetModuleID.getTarget().getName();
         String tag = targetModuleID.getModuleID();
+        
+        CommitBuilder builder = new CommitBuilder();
+        builder.type("webapp");
+        builder.tagKey(tag);
 
-        _deployClient.undeploy(tag, _user, "", null);
+        _deployClient.undeploy(builder);
 
         sb.append(tag).append(' ');
       }
