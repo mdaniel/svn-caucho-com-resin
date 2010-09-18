@@ -65,4 +65,9 @@ class HostRegexpVar
     // server/13t0
     return _regexp;
   }
+  
+  public ArrayList<String> getRegex()
+  {
+    return getRegexp();
+  }
 }

@@ -29,24 +29,6 @@
 
 package com.caucho.server.host;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.types.PathBuilder;
-import com.caucho.el.EL;
-import com.caucho.env.deploy.DeployController;
-import com.caucho.env.deploy.DeployControllerAdmin;
-import com.caucho.env.deploy.DeployControllerApi;
-import com.caucho.env.deploy.EnvironmentDeployController;
-import com.caucho.management.server.HostMXBean;
-import com.caucho.server.e_app.EarConfig;
-import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +36,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.caucho.config.Config;
+import com.caucho.config.types.PathBuilder;
+import com.caucho.el.EL;
+import com.caucho.env.deploy.DeployControllerAdmin;
+import com.caucho.env.deploy.DeployControllerApi;
+import com.caucho.env.deploy.DeployControllerType;
+import com.caucho.env.deploy.EnvironmentDeployController;
+import com.caucho.management.server.HostMXBean;
+import com.caucho.server.e_app.EarConfig;
+import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * A configuration entry for a host
@@ -113,6 +110,14 @@ public class HostController
     
     int p = id.lastIndexOf('/');
     _idKey = id.substring(p + 1);
+    
+    if (config != null) {
+      _regexp = config.getRegexp();
+      _entryHostAliases.addAll(config.getHostAliases());
+      _hostAliases.addAll(config.getHostAliases());
+      _entryHostAliasRegexps.addAll(config.getHostAliasRegexps());
+      _hostAliasRegexps.addAll(config.getHostAliasRegexps());
+    }
     
     if (! isErrorHost()) {
       _admin = new HostAdmin(this);
@@ -226,6 +231,15 @@ public class HostController
   {
     _regexp = regexp;
   }
+  
+  @Override
+  public DeployControllerType getControllerType()
+  {
+    if (_regexp != null)
+      return DeployControllerType.DYNAMIC;
+    else
+      return super.getControllerType();
+  }
 
   /**
    * Sets the root directory pattern
@@ -263,6 +277,7 @@ public class HostController
   /**
    * Initialize the entry.
    */
+  @Override
   protected void initBegin()
   {
     try {
@@ -336,8 +351,11 @@ public class HostController
       return true;
 
     for (int i = _hostAliases.size() - 1; i >= 0; i--) {
-      if (name.equalsIgnoreCase(_hostAliases.get(i)))
+      String alias = _hostAliases.get(i);
+      
+      if (name.equalsIgnoreCase(alias)) {
         return true;
+      }
     }
 
     for (int i = _hostAliasRegexps.size() - 1; i >= 0; i--) {
@@ -478,11 +496,13 @@ public class HostController
     
     _hostAliases.addAll(newController._hostAliases);
     _hostAliasRegexps.addAll(newController._hostAliasRegexps);
-
+    
+    /*
     if (_regexp == null) {
       _regexp = newController._regexp;
       _rootDirectoryPattern = newController._rootDirectoryPattern;
     }
+    */
   }
 
   /**

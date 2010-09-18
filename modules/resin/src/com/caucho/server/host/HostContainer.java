@@ -111,11 +111,13 @@ public class HostContainer implements InvocationBuilder {
     _classLoader = server.getClassLoader();
 
     _rootDir = Vfs.lookup();
-    
+
+    /*
     _errorHost = createErrorHost();
     
     if (_errorHost == null)
       throw new NullPointerException();
+      */
   }
   
   public String getStageTag()
@@ -380,6 +382,20 @@ public class HostContainer implements InvocationBuilder {
   }
 
   /**
+   * Returns the matching host.
+   */
+  public HostController getHostController(String hostName, int port)
+  {
+    try {
+      return findHost(hostName, port);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      return null;
+    }
+  }
+
+  /**
    * Finds the best matching host entry.
    */
   private HostController findHost(String rawHost, int rawPort)
@@ -449,7 +465,12 @@ public class HostContainer implements InvocationBuilder {
    */
   public WebApp getErrorWebApp()
   {
-    return getErrorHost().getWebAppContainer().getErrorWebApp();
+    Host errorHost = getErrorHost();
+    
+    if (errorHost != null)
+      return errorHost.getWebAppContainer().getErrorWebApp();
+    else
+      return null;
   }
   
   private Host createErrorHost()
@@ -465,12 +486,10 @@ public class HostContainer implements InvocationBuilder {
                              null, this, null);
       controller.init();
       controller.startOnInit();
-
+      controller.start();
+      
       Host host = controller.request();
-      
-      if (host == null)
-        throw new NullPointerException();
-      
+
       return host;
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -488,8 +507,12 @@ public class HostContainer implements InvocationBuilder {
     
     if (defaultHost != null)
       return defaultHost;
-    else
+    else {
+      if (_errorHost == null)
+        _errorHost = createErrorHost();
+
       return _errorHost;
+    }
   }
 
   /**

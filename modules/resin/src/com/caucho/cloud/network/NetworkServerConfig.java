@@ -118,7 +118,7 @@ public class NetworkServerConfig {
    * Adds a port-default
    */
   @Configurable
-  public void addPortDefault(ConfigProgram program)
+  public void addPortDefault(ContainerProgram program)
   {
     addListenDefault(program);
   }

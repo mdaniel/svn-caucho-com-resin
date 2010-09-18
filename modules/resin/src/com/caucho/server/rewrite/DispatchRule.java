@@ -29,13 +29,13 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.config.ConfigException;
+import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
-import java.util.regex.Matcher;
+
+import com.caucho.config.ConfigException;
+import com.caucho.server.dispatch.RewriteDispatchFilterChain;
 
 public class DispatchRule
   extends AbstractRuleWithConditions
@@ -81,8 +81,15 @@ public class DispatchRule
   @Override
   public String rewrite(String uri, Matcher matcher)
   {
-    if (_target != null)
-      return matcher.replaceAll(_target);
+    if (_target != null) {
+      String rewrite = matcher.replaceAll(_target);
+
+      // server/1ks6
+      if (uri.equals("/") && rewrite.endsWith("/") && ! _target.endsWith("/"))
+        rewrite = rewrite.substring(0, rewrite.length() - 1);
+      
+      return rewrite;
+    }
     else
       return uri;
   }

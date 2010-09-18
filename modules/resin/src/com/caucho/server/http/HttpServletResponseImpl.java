@@ -613,7 +613,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     if (webApp != null)
       errorManager = webApp.getErrorPageManager();
     else
-      errorManager = getRequest().getServer().getErrorWebApp().getErrorPageManager();
+      errorManager = getRequest().getServer().getErrorPageManager();
 
     setStatus(code, value);
 

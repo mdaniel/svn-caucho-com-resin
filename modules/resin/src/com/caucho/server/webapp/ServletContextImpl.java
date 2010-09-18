@@ -324,8 +324,24 @@ public class ServletContextImpl extends ServletContextCompat
     //handle jndi:/server (single slash) parsing (gf)
     String file = url.getFile();
 
-    if ("".equals(url.getHost()) && file.startsWith("/server"))
+    if ("".equals(url.getHost()) && file.startsWith("/server")) {
       file = file.substring(7, file.length());
+      
+      if (file.startsWith(getContextPath()))
+        file = file.substring(getContextPath().length());
+      else {
+        // server/102p
+        int p = file.indexOf('/', 1);
+        
+        if (p > 0) {
+          String contextPath = file.substring(0, p);
+          WebApp webApp = (WebApp) getContext(contextPath);
+          
+          if (webApp != null)
+            return webApp.getResource(url);
+        }
+      }
+    }
 
     String realPath = getRealPath(file);
     Path rootDirectory = getRootDirectory();

@@ -41,6 +41,7 @@ import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
+import com.caucho.server.host.HostController;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
@@ -200,12 +201,19 @@ public class HmuxDispatchRequest {
 
     Host host = _server.getHost(hostName, 80);
     if (host == null) {
-      writeString(os, HmuxRequest.HMUX_HEADER, "check-interval");
-      writeString(os, HmuxRequest.HMUX_STRING,
-                  String.valueOf(_server.getDependencyCheckInterval() / 1000));
+      HostController controller = _server.getHostController(hostName, 80);
+      
+      if (controller != null) {
+        writeString(os, HMUX_UNAVAILABLE, "");
+      }
+      else {
+        writeString(os, HmuxRequest.HMUX_HEADER, "check-interval");
+        writeString(os, HmuxRequest.HMUX_STRING,
+                    String.valueOf(_server.getDependencyCheckInterval() / 1000));
+      }
 
       if (isLoggable)
-        log.fine(dbgId() + "host '" + host + "' not configured");
+        log.fine(dbgId() + "host '" + hostName + "' not configured");
       return;
     }
     else if (! host.getState().isActive()) {

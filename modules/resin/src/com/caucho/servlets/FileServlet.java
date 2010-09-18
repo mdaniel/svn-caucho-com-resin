@@ -293,9 +293,9 @@ public class FileServlet extends GenericServlet {
         String queryString = req.getQueryString();
         
         if (queryString != null)
-          res.sendRedirect(uri + "/?" + queryString);
+          sendRedirect(res, uri + "/?" + queryString);
         else
-          res.sendRedirect(uri + "/");
+          sendRedirect(res, uri + "/");
       }
       else if (_dir != null)
         _dir.forward(req, res);
@@ -400,6 +400,12 @@ public class FileServlet extends GenericServlet {
       OutputStream os = res.getOutputStream();
       cache.getPath().writeToStream(os);
     }
+  }
+  
+  private void sendRedirect(HttpServletResponse res, String url)
+  {
+    res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+    res.setHeader("Location", res.encodeRedirectURL(url));
   }
 
   private boolean handleRange(HttpServletRequest req,

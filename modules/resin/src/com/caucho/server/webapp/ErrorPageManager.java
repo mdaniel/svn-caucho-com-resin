@@ -55,6 +55,7 @@ import com.caucho.java.LineMapException;
 import com.caucho.java.ScriptStackTrace;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.BadRequestException;
+import com.caucho.server.host.Host;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.HttpServletRequestImpl;
@@ -87,6 +88,7 @@ public class ErrorPageManager {
   public static String SHUTDOWN = "com.caucho.shutdown";
 
   private final Server _server;
+  private final Host _host;
   private final WebApp _webApp;
   private WebAppContainer _appContainer;
   private HashMap<Object,String> _errorPageMap = new HashMap<Object,String>();
@@ -99,17 +101,26 @@ public class ErrorPageManager {
    */
   public ErrorPageManager(Server server)
   {
-    this(server, null);
+    this(server, null, null);
   }
 
   /**
    * Create error page manager.
    */
-  public ErrorPageManager(Server server, WebApp app)
+  public ErrorPageManager(Server server, WebApp webApp)
   {
+    this(server, null, webApp);
+  }
+  
+  /**
+   * Create error page manager.
+   */
+  public ErrorPageManager(Server server, Host host, WebApp app)
+    {
     _webApp = app;
 
     _server = server;
+    _host = host;
     
     if (_server == null)
       throw new IllegalStateException(L.l("{0} requires an active {1}",
@@ -163,14 +174,7 @@ public class ErrorPageManager {
    */
   protected boolean isDevelopmentModeErrorPage()
   {
-    if (_webApp != null && _webApp.getServer() != null)
-      return _webApp.getServer().isDevelopmentModeErrorPage();
-    else if (Resin.getCurrent() != null
-             && Resin.getCurrent().getServer() != null) {
-      return Resin.getCurrent().getServer().isDevelopmentModeErrorPage();
-    }
-    else
-      return true;
+    return _server.isDevelopmentModeErrorPage();
   }
 
   /**
@@ -419,10 +423,12 @@ public class ErrorPageManager {
         // can't use filters because of error pages due to filters
         // or security.
 
-        if (_webApp != null)
-          disp = _webApp.getRequestDispatcher(location);
-        else if (_appContainer != null)
-          disp = _appContainer.getRequestDispatcher(location);
+        WebApp webApp = getWebApp();
+        
+        if (webApp != null)
+          disp = webApp.getRequestDispatcher(location);
+        else if (_host != null)
+          disp = _host.getWebAppContainer().getRequestDispatcher(location);
 
         if (disp != null) {
           ((RequestDispatcherImpl) disp).error(request, response);
@@ -716,7 +722,9 @@ public class ErrorPageManager {
     if (location == null && _parent != null)
       return _parent.handleErrorStatus(request, response, code, message);
 
-    if (_webApp == null && _appContainer == null)
+    WebApp webApp = getWebApp();
+    
+    if (webApp == null && _host == null)
       return false;
 
     if (location != null && ! location.equals(request.getRequestURI())) {
@@ -736,10 +744,10 @@ public class ErrorPageManager {
         RequestDispatcher disp = null;
         // can't use filters because of error pages due to filters
         // or security.
-        if (_webApp != null)
-          disp = _webApp.getRequestDispatcher(location);
-        else if (_appContainer != null)
-          disp = _appContainer.getRequestDispatcher(location);
+        if (webApp != null)
+          disp = webApp.getRequestDispatcher(location);
+        else if (_host != null)
+          disp = _host.getWebAppContainer().getRequestDispatcher(location);
 
         //disp.forward(request, this, "GET", false);
 
@@ -798,6 +806,16 @@ public class ErrorPageManager {
     }
 
     return null;
+  }
+  
+  private WebApp getWebApp()
+  {
+    if (_webApp != null)
+      return _webApp;
+    else if (_host != null)
+      return _host.getWebAppContainer().findWebAppByURI("/");
+    else
+      return null;
   }
 
   /**
@@ -918,22 +936,24 @@ public class ErrorPageManager {
   static {
     MSIE_PADDING = ("\n\n\n\n" +
                     "<!--\n" +
-                    "   - Unfortunately, Microsoft has added a clever new\n" +
-                    "   - \"feature\" to Internet Explorer.  If the text in\n" +
-                    "   - an error's message is \"too small\", specifically\n" +
-                    "   - less than 512 bytes, Internet Explorer returns\n" +
-                    "   - its own error message.  Yes, you can turn that\n" +
-                    "   - off, but *surprise* it's pretty tricky to find\n" +
-                    "   - buried as a switch called \"smart error\n" +
-                    "   - messages\"  That means, of course, that many of\n" +
-                    "   - Resin's error messages are censored by default.\n" +
-                    "   - And, of course, you'll be shocked to learn that\n" +
-                    "   - IIS always returns error messages that are long\n" +
-                    "   - enough to make Internet Explorer happy.  The\n" +
-                    "   - workaround is pretty simple: pad the error\n" +
-                    "   - message with a big comment to push it over the\n" +
-                    "   - five hundred and twelve byte minimum.  Of course,\n" +
-                    "   - that's exactly what you're reading right now.\n" +
+                    "   - Because some older browsers replace their own messages\n" +
+                    "   - to replace server error messages if the server\n" +
+                    "   - message is too short, it's necessary to pad out\n" +
+                    "   - the error message to be at least 512 bytes.  With\n" +
+                    "   - this padding, Resin more informative error messages\n" +
+                    "   - are available, making  debugging more straightforward.\n" +
+                    "   - \n" +
+                    "   - \n" +
+                    "   - Padding message repeats:\n" +
+                    "   - \n" +
+                    "   - \n" +
+                    "   - Because some older browsers replace their own messages\n" +
+                    "   - to replace server error messages if the server\n" +
+                    "   - message is too short, it's necessary to pad out\n" +
+                    "   - the error message to be at least 512 bytes.  With\n" +
+                    "   - this padding, Resin more informative error messages\n" +
+                    "   - are available, making  debugging more straightforward.\n" +
+                    "   - \n" +
                     "   -->\n").toCharArray();
   }
 }

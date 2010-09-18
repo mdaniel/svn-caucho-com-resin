@@ -523,7 +523,8 @@ public class WebApp extends ServletContextImpl
       _errorFilterMapper.setFilterManager(_filterManager);
 
       _constraintManager = new ConstraintManager();
-      _errorPageManager = new ErrorPageManager(_server, this);
+      
+      // _errorPageManager = new ErrorPageManager(_server, this);
       
       // server/003a
       /*
@@ -536,10 +537,13 @@ public class WebApp extends ServletContextImpl
       _invocationDependency.add(this);
 
       if (_controller.getRepository() != null) {
-        String baseTag = _controller.getId();
-        String baseValue = _controller.getRepository().getTagContentHash(baseTag);
+        String tag = _controller.getId();
+        String tagValue = _controller.getRepository().getTagContentHash(tag);
 
-        _invocationDependency.add(new RepositoryDependency(baseTag, baseValue));
+        _invocationDependency.add(new RepositoryDependency(tag, tagValue));
+        
+        if (_controller.getVersionDependency() != null)
+          _invocationDependency.add(_controller.getVersionDependency());
       }
       
       _invocationDependency.add(_controller);
@@ -1740,7 +1744,7 @@ public class WebApp extends ServletContextImpl
   @Configurable
   public void addErrorPage(ErrorPage errorPage)
   {
-    _errorPageManager.addErrorPage(errorPage);
+    getErrorPageManager().addErrorPage(errorPage);
   }
 
   /**
@@ -1956,6 +1960,11 @@ public class WebApp extends ServletContextImpl
 
       add(redirect);
     }
+  }
+  
+  public boolean isSecure()
+  {
+    return _isSecure;
   }
 
   @Override
@@ -3932,6 +3941,11 @@ public class WebApp extends ServletContextImpl
    */
   public ErrorPageManager getErrorPageManager()
   {
+    if (_errorPageManager == null) {
+      _errorPageManager = new ErrorPageManager(_server, this);
+      _errorPageManager.setParent(_host.getErrorPageManager());
+    }
+    
     return _errorPageManager;
   }
 

@@ -52,7 +52,7 @@ public class DeployConfig {
     = Logger.getLogger(DeployConfig.class.getName());
 
   // The deploy id
-  private String _id = "";
+  private String _id;
 
   // The root directory
   private String _rootDirectory;

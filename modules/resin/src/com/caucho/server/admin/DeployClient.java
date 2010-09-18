@@ -422,33 +422,10 @@ public class DeployClient implements Repository
    * Undeploy a controller based on a deployment tag: wars/foo.com/my-war
    *
    * @param tag the encoded controller name
-   *
-   * @deprecated
    */
-  public Boolean undeploy(String tag)
+  public boolean undeploy(CommitBuilder tag)
   {
-    ControllerUndeployQuery query = new ControllerUndeployQuery(tag);
-
-    return (Boolean) querySet(query);
-  }
-
-  /**
-   * Undeploys a tag
-   *
-   * @param tag symbolic name of the jar file to add
-   * @param user user name for the commit message
-   * @param message the commit message
-   *
-   * @deprecated
-   */
-  public Boolean undeploy(String tag,
-                          String user,
-                          String message,
-                          HashMap<String,String> extraAttr)
-  {
-    UndeployQuery query = new UndeployQuery(tag, user, message);
-
-    return (Boolean) querySet(query);
+    return removeTag(tag);
   }
 
   /**

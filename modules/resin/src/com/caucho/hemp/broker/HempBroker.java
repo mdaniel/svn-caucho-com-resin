@@ -362,6 +362,7 @@ public class HempBroker
   /**
    * Query an entity
    */
+  @Override
   public void querySet(long id,
                        String to,
                        String from,
@@ -369,24 +370,30 @@ public class HempBroker
   {
     ActorStream stream = findActorStream(to);
 
-    if (stream == null) {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(this + " querySet to unknown stream '" + to
-                 + "' from=" + from);
+    if (stream != null) {
+      try {
+        stream.querySet(id, to, from, payload);
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+
+        ActorError error = ActorError.create(e);
+
+        queryError(id, from, to, payload, error);
       }
-
-      String msg = L.l("'{0}' is an unknown actor for querySet", to);
-
-      ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.SERVICE_UNAVAILABLE,
-                                      msg);
-
-      queryError(id, from, to, payload, error);
 
       return;
     }
 
-    stream.querySet(id, to, from, payload);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(this + " querySet to unknown stream '" + to
+               + "' from=" + from);
+    }
+
+    String msg = L.l("'{0}' is an unknown actor for querySet", to);
+
+    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
+                                      ActorError.SERVICE_UNAVAILABLE,
+                                      msg);
   }
 
   /**

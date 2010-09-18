@@ -734,7 +734,6 @@ public class SocketLinkListener extends TaskWorker
   @Configurable
   public void addContentProgram(ConfigProgram program)
   {
-    
   }
 
   //

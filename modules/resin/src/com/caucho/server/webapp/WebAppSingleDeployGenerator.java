@@ -268,7 +268,7 @@ public class WebAppSingleDeployGenerator
                                     _urlPrefix);
 
       webApp.setArchivePath(_controller.getArchivePath());
-      
+      webApp.setStartupPriority(_controller.getStartupPriority());
       webApp.merge(_controller);
 
       list.add(webApp);

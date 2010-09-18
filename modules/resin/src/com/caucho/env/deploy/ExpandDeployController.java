@@ -53,6 +53,7 @@ import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
@@ -86,6 +87,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private DeployTagItem _deployItem;
   
   private DependencyContainer _depend = new DependencyContainer();
+  
+  private Dependency _versionDependency;
 
   private Object _applicationExtractLock = new Object();
 
@@ -557,6 +560,16 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     
     value = _repositorySpi.getTagContentHash(getAutoDeployTag());
     _depend.add(new RepositoryDependency(getAutoDeployTag(), value));
+  }
+  
+  public Dependency getVersionDependency()
+  {
+    return _versionDependency;
+  }
+  
+  public void setVersionDependency(Dependency versionDependency)
+  {
+    _versionDependency = versionDependency;
   }
 
   /**

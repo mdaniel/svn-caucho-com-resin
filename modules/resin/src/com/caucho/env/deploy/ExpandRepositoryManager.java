@@ -73,7 +73,7 @@ class ExpandRepositoryManager
     if (_oldRepositoryMap == _repository.getTagMap())
       return false;
     else
-      return _digest != getDigest();
+      return _digest != calculateDigest();
   }
 
   /**
@@ -81,7 +81,7 @@ class ExpandRepositoryManager
    */
   boolean logModified(Logger log)
   {
-    long digest = getDigest();
+    long digest = calculateDigest();
 
     if (_digest != digest) {
       log.info(this + " is modified");
@@ -100,7 +100,7 @@ class ExpandRepositoryManager
     long oldDigest = _digest;
     TreeSet<String> oldKeys = _keySet;
     
-    long newDigest = getDigest();
+    long newDigest = calculateDigest();
       
     if (oldDigest == newDigest) {
       return oldKeys;
@@ -118,7 +118,7 @@ class ExpandRepositoryManager
     }
   }
 
-  private long getDigest()
+  public long calculateDigest()
   {
     long digest = 0;
     

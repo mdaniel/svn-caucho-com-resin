@@ -130,6 +130,8 @@ public class Server
 
   private InvocationServer _invocationServer;
   private HostContainer _hostContainer;
+  
+  private ErrorPageManager _errorPageManager = new ErrorPageManager(this);
 
   private String _stage = "production";
   private boolean _isPreview;
@@ -981,7 +983,7 @@ public class Server
     if (errorWebApp != null)
       return errorWebApp.getErrorPageManager();
     else
-      return null;
+      return _errorPageManager;
   }
 
   /**
@@ -1005,6 +1007,20 @@ public class Server
     try {
       return _hostContainer.getHost(hostName, port);
     } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return null;
+    }
+  }
+
+  /**
+   * Returns the matching servlet pattern for a URL.
+   */
+  public HostController getHostController(String hostName, int port)
+  {
+    try {
+      return _hostContainer.getHostController(hostName, port);
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
       return null;

@@ -293,6 +293,8 @@ public class ResinEmbed
         port.bindTo(_server);
       }
 
+      _resin.start();
+      
       HostConfig hostConfig = new HostConfig();
       _server.addHost(hostConfig);
       _host = _server.getHost("", 0);
@@ -315,8 +317,6 @@ public class ResinEmbed
 
         _host.getWebAppContainer().addWebApp(config);
       }
-      
-      _resin.start();
     } catch (Exception e) {
       throw ConfigException.create(e);
     } finally {

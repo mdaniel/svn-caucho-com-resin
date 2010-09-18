@@ -1569,7 +1569,12 @@ public abstract class AbstractHttpRequest
     throws IOException
   {
     try {
-      getErrorManager().sendServletError(e, _requestFacade, _responseFacade);
+      ErrorPageManager errorManager = getErrorManager();
+      
+      if (errorManager != null)
+        getErrorManager().sendServletError(e, _requestFacade, _responseFacade);
+      else
+        _responseFacade.sendError(503);
     } catch (ClientDisconnectException e1) {
       throw e1;
     } catch (Throwable e1) {

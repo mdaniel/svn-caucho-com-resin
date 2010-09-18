@@ -1295,13 +1295,18 @@ public final class InjectManager
       
       if (beanSet != null && beanSet.size() > 0) {
         Bean<?> bean = resolve(beanSet);
-        refFactory = getReferenceFactory(bean);
+
+        // server/10sx
+        if (name.equals(bean.getName())) {
+          refFactory = getReferenceFactory(bean);
         
-        // ioc/0301
-        if (refFactory instanceof DependentReferenceFactoryImpl<?>)
-          refFactory = new DependentElReferenceFactoryImpl((ManagedBeanImpl<?>) bean);
+          // ioc/0301
+          if (refFactory instanceof DependentReferenceFactoryImpl<?>)
+            refFactory = new DependentElReferenceFactoryImpl((ManagedBeanImpl<?>) bean);
+        }
       }
-      else {
+      
+      if (refFactory == null) {
         refFactory = new UnresolvedReferenceFactory();
       }
       

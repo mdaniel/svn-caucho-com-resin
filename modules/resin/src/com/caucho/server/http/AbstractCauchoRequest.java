@@ -374,6 +374,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     if (principal == null)
       throw new ServletException("can't authenticate a user");
   }
+  
   @Override
   public boolean login(boolean isFail)
   {
@@ -383,6 +384,15 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       if (webApp == null) {
         if (log.isLoggable(Level.FINE))
           log.finer("authentication failed, no web-app found");
+
+        getResponse().sendError(HttpServletResponse.SC_FORBIDDEN);
+
+        return false;
+      }
+      
+      if (webApp.isSecure() && ! isSecure()) {
+        if (log.isLoggable(Level.FINE))
+          log.finer("authentication failed, requires secure");
 
         getResponse().sendError(HttpServletResponse.SC_FORBIDDEN);
 

@@ -180,7 +180,8 @@ public class InlineBeanType<T> extends ConfigType<T>
         InjectionTargetBuilder<T> builder
           = new InjectionTargetBuilder<T>(cdiManager, type);
 
-        builder.setGenerateInterception(false);
+        // server/2m09
+        // builder.setGenerateInterception(false);
 
         _injectionTarget = builder;
 

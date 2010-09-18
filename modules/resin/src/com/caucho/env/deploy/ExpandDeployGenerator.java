@@ -44,10 +44,12 @@ import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.loader.Environment;
+import com.caucho.make.DependencyContainer;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
+import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 
 /**
@@ -102,6 +104,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   
   private ExpandManager _expandManager;
   private Set<String> _deployedKeys = new TreeSet<String>();
+  private Set<String> _versionKeys = new TreeSet<String>();
   
   private long _lastCheckTime;
   private AtomicBoolean _isChecking = new AtomicBoolean();
@@ -444,8 +447,10 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
       _lastCheckTime = Alarm.getCurrentTime();
 
-      if (_expandManager != null)
+      if (_expandManager != null) {
         _isModified = _expandManager.isModified();
+        _digest = _expandManager.getDigest();
+      }
       else
         _isModified = true;
 
@@ -554,34 +559,44 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       thread.setContextClassLoader(_loader);
       
       Set<String> oldKeys = _deployedKeys;
+      Set<String> oldVersion = _versionKeys;
       
       deploy();
       
       Set<String> newKeys = _deployedKeys;
+      Set<String> newVersion = _versionKeys;
 
-      if (oldKeys.equals(newKeys))
-        return;
+      if (! oldKeys.equals(newKeys)) {
+        ArrayList<String> updatedKeys = new ArrayList<String>();
 
-      ArrayList<String> updatedKeys = new ArrayList<String>();
+        for (String key : oldKeys) {
+          if (! newKeys.contains(key))
+            updatedKeys.add(key);
+        }
 
-      for (String key : oldKeys) {
-        if (! newKeys.contains(key))
-          updatedKeys.add(key);
+        for (String key : newKeys) {
+          if (! oldKeys.contains(key))
+            updatedKeys.add(key);
+        }
+
+        for (String key : updatedKeys) {
+          getDeployContainer().update(keyToName(key));
+        }
       }
 
-      for (String key : newKeys) {
-        if (! oldKeys.contains(key))
-          updatedKeys.add(key);
-      }
-
-      for (String key : updatedKeys) {
-        getDeployContainer().update(keyToName(key));
+      if (! oldVersion.equals(newVersion)) {
+        afterUpdate();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
       
       _isDeploying.set(false);
     }
+  }
+  
+  protected void afterUpdate()
+  {
+    
   }
   
   private void deploy()
@@ -594,7 +609,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
                                          _isVersioning);
       
       _deployedKeys = _expandManager.getBaseKeySet();
-      
+      _versionKeys = _expandManager.getKeySet();
+            
       _isModified = false;
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -633,6 +649,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
       if (controller != null) {
         controller.setExpandCleanupFileSet(_expandCleanupFileSet);
+        
+        /*
+        if (_isVersioning) {
+          controller.setVersionDependency(new VersionDependency());
+        }
+        */
 
         controllerList.add(controller);
 
@@ -899,5 +921,32 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getExpandDirectory() + "]";
+  }
+  
+  class VersionDependency implements Dependency {
+    private Set<String> _oldVersionKeys;
+    
+    VersionDependency()
+    {
+      _versionKeys = _oldVersionKeys;
+    }
+    
+    @Override
+    public boolean isModified()
+    {
+      return ! _versionKeys.equals(_oldVersionKeys);
+    }
+    
+    @Override
+    public boolean logModified(Logger log)
+    {
+      if (! _versionKeys.equals(_oldVersionKeys)) {
+        log.info(ExpandDeployGenerator.this + " version is modified");
+        return true;
+      }
+      
+      return false;
+    }
+    
   }
 }

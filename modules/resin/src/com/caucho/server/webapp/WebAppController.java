@@ -72,6 +72,8 @@ public class WebAppController
 
   private WebAppController _parent;
 
+  private String _idTail;
+  
   // The context path is the URL prefix for the web-app
   private String _contextPath;
   private String _version = "";
@@ -136,11 +138,24 @@ public class WebAppController
 
     _contextPath = contextPath;
     
+    _idTail = calculateIdTail(getId());
+    
     if (! getId().startsWith("error/") && ! isVersioning()) {
       _admin = new WebAppAdmin(this);
     }
   }
   
+  private static String calculateIdTail(String id)
+  {
+    int p1 = id.indexOf('/');
+    //String stage = id.substring(0, p1);
+    int p2 = id.indexOf('/', p1 + 1);
+    //String type = id.substring(p1 + 1, p2);
+    int p3 = id.indexOf('/', p2 + 1);
+    //String host = id.substring(p2 + 1, p3);
+    
+    return id.substring(p3);
+  }
   private static String calculateId(WebAppContainer container,
                                     String contextPath)
   {
@@ -155,7 +170,8 @@ public class WebAppController
   
   public String getName()
   {
-    return getContextPath();
+    // return getContextPath();
+    return _idTail;
   }
 
   /**
@@ -345,11 +361,14 @@ public class WebAppController
   @Override
   protected String getMBeanId()
   {
+    return getName();
+    /*
     String name = getContextPath();
     if (name.equals(""))
       name = "/";
 
     return name;
+    */
   }
 
   /**

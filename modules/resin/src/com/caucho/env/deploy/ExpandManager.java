@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import com.caucho.util.Crc64;
+
 /**
  * Manages the expansion sub-managers
  */
@@ -78,6 +80,17 @@ class ExpandManager
     return (_directoryManager.isModified()
             || _archiveManager.isModified()
             || _repositoryManager.isModified());
+  }
+  
+  long getDigest()
+  {
+    long digest = 0;
+    
+    digest = Crc64.generate(digest, _directoryManager.getDigest());
+    // digest = Crc64.generate(digest, _archiveManager.getDigest());
+    digest = Crc64.generate(digest, _repositoryManager.calculateDigest());
+
+    return digest;
   }
   
   boolean logModified(Logger log)

@@ -106,6 +106,7 @@ public class Host
   private int _serverPort = 0;
   
   private final WebAppContainer _webAppContainer;
+  private ErrorPageManager _errorPageManager;
 
   // The secure host
   private String _secureHostName;
@@ -417,19 +418,16 @@ public class Host
   @Configurable
   public void addErrorPage(ErrorPage errorPage)
   {
-    WebApp errorWebApp = getWebAppContainer().getErrorWebApp();
-    
-    errorWebApp.getErrorPageManager().addErrorPage(errorPage);
+    getErrorPageManager().addErrorPage(errorPage);
   }
   
   public ErrorPageManager getErrorPageManager()
   {
-    WebApp errorWebApp = getWebAppContainer().getErrorWebApp();
-
-    if (errorWebApp != null)
-      return errorWebApp.getErrorPageManager();
-    else
-      return null;
+    if (_errorPageManager == null) {
+      _errorPageManager = new ErrorPageManager(getServer(), this, null);
+    }
+    
+    return _errorPageManager;
   }
   
   @Configurable
@@ -469,7 +467,7 @@ public class Host
   @Configurable
   public WebAppExpandDeployGenerator createWebAppDeploy()
   {
-    return createWarDeploy();
+    return getWebAppContainer().createWebAppDeploy();
   }
 
   /**

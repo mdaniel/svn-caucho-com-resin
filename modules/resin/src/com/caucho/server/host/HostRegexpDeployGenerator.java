@@ -129,6 +129,8 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
       }
 
       varMap.put("regexp", vars);
+      
+      varMap.put("host", new HostRegexpVar(hostName, vars));
 
       if (_config.getHostName() != null) {
         try {

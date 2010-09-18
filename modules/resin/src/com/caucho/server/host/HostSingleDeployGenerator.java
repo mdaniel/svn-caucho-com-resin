@@ -180,7 +180,7 @@ public class HostSingleDeployGenerator
       host = new HostController(_controller.getId(), rootDirectory,
                                 _controller.getHostName(), _config,
                                 _container, null);
-      
+
       // host = host.merge(_controller);
       
       list.add(host);

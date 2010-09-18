@@ -343,6 +343,12 @@ public class WebAppExpandDeployGenerator
 
     return controller;
   }
+  
+  @Override
+  protected void afterUpdate()
+  {
+    _container.clearCache();
+  }
 
   /**
    * Returns the segment-name of the web-app, i.e. the versioned
