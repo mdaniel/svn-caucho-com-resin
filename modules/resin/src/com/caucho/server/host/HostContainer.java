@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
 import com.caucho.config.ConfigException;
@@ -330,7 +331,8 @@ public class HostContainer implements InvocationBuilder {
       String queryString = invocation.getQueryString();
 
       FilterChain chain = invocation.getFilterChain();
-      FilterChain rewriteChain = _rewriteDispatch.map(url,
+      FilterChain rewriteChain = _rewriteDispatch.map(DispatcherType.REQUEST,
+                                                      url,
                                                       queryString,
                                                       chain);
 
@@ -480,7 +482,7 @@ public class HostContainer implements InvocationBuilder {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      Path rootDirectory = Vfs.lookup("error:");
+      Path rootDirectory = Vfs.lookup("memory:/error");
       HostController controller
         = new HostController("error/host/error", rootDirectory, "error", 
                              null, this, null);

@@ -31,6 +31,7 @@ package com.caucho.rewrite;
 
 import java.util.ArrayList;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
@@ -73,25 +74,28 @@ public class Location extends AbstractRegexpDispatchRule
   }
 
   @Override
-  public FilterChain map(String uri,
+  public FilterChain map(DispatcherType type,
+                         String uri,
                          String queryString,
                          FilterChain next,
                          FilterChain tail)
     throws ServletException
   {
-    return super.map(uri, queryString, next, next);
+    return super.map(type, uri, queryString, next, next);
   }
 
   @Override
-  protected FilterChain createDispatch(String uri,
+  protected FilterChain createDispatch(DispatcherType type,
+                                       String uri,
                                        String queryString,
                                        String target,
                                        FilterChain next)
   {
-    return mapChain(0, uri, queryString, next);
+    return mapChain(0, type, uri, queryString, next);
   }
 
   private FilterChain mapChain(int index,
+                               DispatcherType type,
                                String uri, String queryString,
                                FilterChain chain)
   {
@@ -103,9 +107,9 @@ public class Location extends AbstractRegexpDispatchRule
     
       uri = rule.rewriteUri(uri, queryString);
 
-      FilterChain next = mapChain(index + 1, uri, queryString, chain);
+      FilterChain next = mapChain(index + 1, type, uri, queryString, chain);
 
-      return rule.map(uri, queryString, next, chain);
+      return rule.map(type, uri, queryString, next, chain);
     } catch (ServletException e) {
       throw ConfigException.create(e);
     }

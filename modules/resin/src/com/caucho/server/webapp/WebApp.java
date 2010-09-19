@@ -1871,6 +1871,20 @@ public class WebApp extends ServletContextImpl
 
       _requestRewriteDispatch.addRule(rule);
     }
+    
+    if (rule.isForward()) {
+      if (_forwardRewriteDispatch == null)
+        _forwardRewriteDispatch = new RewriteDispatch(this);
+
+      _forwardRewriteDispatch.addRule(rule);
+    }
+    
+    if (rule.isInclude()) {
+      if (_includeRewriteDispatch == null)
+        _includeRewriteDispatch = new RewriteDispatch(this);
+
+      _includeRewriteDispatch.addRule(rule);
+    }
   }
 
   /**
@@ -3330,7 +3344,8 @@ public class WebApp extends ServletContextImpl
 
           if (_requestRewriteDispatch != null) {
             FilterChain newChain
-              = _requestRewriteDispatch.map(invocation.getContextURI(),
+              = _requestRewriteDispatch.map(DispatcherType.REQUEST,
+                                            invocation.getContextURI(),
                                             invocation.getQueryString(),
                                             chain);
 
@@ -3508,13 +3523,15 @@ public class WebApp extends ServletContextImpl
 
         if (_includeRewriteDispatch != null
             && filterMapper == _includeFilterMapper) {
-          chain = _includeRewriteDispatch.map(invocation.getContextURI(),
+          chain = _includeRewriteDispatch.map(DispatcherType.INCLUDE,
+                                              invocation.getContextURI(),
                                               invocation.getQueryString(),
                                               chain);
         }
         else if (_forwardRewriteDispatch != null
                  && filterMapper == _forwardFilterMapper) {
-          chain = _forwardRewriteDispatch.map(invocation.getContextURI(),
+          chain = _forwardRewriteDispatch.map(DispatcherType.FORWARD,
+                                              invocation.getContextURI(),
                                               invocation.getQueryString(),
                                               chain);
         }

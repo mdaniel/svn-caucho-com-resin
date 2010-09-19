@@ -1668,7 +1668,9 @@ public class QDate {
       _zoneOffset = 0;
     }
     else {
-      _zoneOffset = _timeZone.getOffset(_localTimeOfEpoch);
+      // server/1470
+      long tempOffset = _timeZone.getOffset(_localTimeOfEpoch);
+      _zoneOffset = _timeZone.getOffset(_localTimeOfEpoch - tempOffset);
 
       if (_zoneOffset == _timeZone.getRawOffset()) {
         _isDaylightTime = false;

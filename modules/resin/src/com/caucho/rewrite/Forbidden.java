@@ -29,6 +29,7 @@
 
 package com.caucho.rewrite;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,7 +51,8 @@ import com.caucho.server.dispatch.ErrorFilterChain;
 public class Forbidden extends AbstractTargetDispatchRule
 {
   @Override
-  public FilterChain createDispatch(String uri,
+  public FilterChain createDispatch(DispatcherType type,
+                                    String uri,
                                     String queryString,
                                     String target,
                                     FilterChain next)

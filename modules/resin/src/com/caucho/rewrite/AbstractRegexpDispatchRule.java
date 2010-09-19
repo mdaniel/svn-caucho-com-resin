@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -113,7 +114,8 @@ abstract public class AbstractRegexpDispatchRule extends AbstractDispatchRule
   }
   
   @Override
-  public FilterChain map(String uri,
+  public FilterChain map(DispatcherType type,
+                         String uri,
                          String queryString,
                          FilterChain next,
                          FilterChain tail)
@@ -124,7 +126,7 @@ abstract public class AbstractRegexpDispatchRule extends AbstractDispatchRule
     if (_regexp == null || (matcher = _regexp.matcher(uri)).find()) {
       String target = rewriteTarget(matcher, uri, queryString);
 
-      FilterChain chain = createDispatch(uri, queryString, target, tail);
+      FilterChain chain = createDispatch(type, uri, queryString, target, tail);
 
       for (int i = _filters.length - 1; i >= 0; i--) {
         chain = _filters[i].map(uri, queryString, chain);
@@ -139,7 +141,8 @@ abstract public class AbstractRegexpDispatchRule extends AbstractDispatchRule
       return next;
   }
 
-  protected FilterChain createDispatch(String uri,
+  protected FilterChain createDispatch(DispatcherType type,
+                                       String uri,
                                        String queryString,
                                        String target,
                                        FilterChain next)

@@ -48,48 +48,35 @@ import com.caucho.util.L10N;
  * 
  * It matches the &lt;cluster> tag in the resin.xml
  */
-public class BootClusterConfig implements SchemaBean
+public class BootPodConfig
 {
-  private static final L10N L = new L10N(BootClusterConfig.class);
+  private static final L10N L = new L10N(BootPodConfig.class);
   
-  private BootResinConfig _resinConfig;
+  private BootClusterConfig _clusterConfig;
   private CloudCluster _cloudCluster;
+  private CloudPod _cloudPod;
   
   private String _id;
-
-  private ContainerProgram _clusterProgram
-    = new ContainerProgram();
 
   private ContainerProgram _serverDefaultProgram
     = new ContainerProgram();
 
-  private ArrayList<BootPodConfig> _pods
-    = new ArrayList<BootPodConfig>();
+  private ContainerProgram _podProgram
+    = new ContainerProgram();
 
-  /*
   private ArrayList<BootServerConfig> _servers
     = new ArrayList<BootServerConfig>();
-    */
 
   /**
    * Creates a new resin server.
    */
-  public BootClusterConfig(BootResinConfig resinConfig)
+  public BootPodConfig(BootClusterConfig clusterConfig)
   {
-    _resinConfig = resinConfig;
-  }
-
-  /**
-   * Returns the relax schema.
-   */
-  @Override
-  public String getSchema()
-  {
-    return "com/caucho/server/resin/cluster.rnc";
+    _clusterConfig = clusterConfig;
   }
   
   /**
-   * Returns the cluster's id
+   * Returns the pod's id
    */
   public String getId()
   {
@@ -97,12 +84,17 @@ public class BootClusterConfig implements SchemaBean
   }
   
   /**
-   * Sets the cluster's id
+   * Sets the pod's id
    */
   @Configurable
   public void setId(String id)
   {
     _id = id;
+  }
+  
+  public BootClusterConfig getCluster()
+  {
+    return _clusterConfig;
   }
   
   /**
@@ -120,97 +112,61 @@ public class BootClusterConfig implements SchemaBean
   }
 
   @Configurable
-  public BootPodConfig createPod()
-    throws ConfigException
-  {
-    BootPodConfig pod = new BootPodConfig(this);
-    
-    _pods.add(pod);
-
-    return pod;
-  }
-
-  @Configurable
-  public void addPod(BootPodConfig pod)
-  {
-    _pods.add(pod);
-  }
-
-  @Configurable
   public BootServerConfig createServer()
     throws ConfigException
   {
-    if (_pods.size() == 0) {
-      addPod(createPod());
-    }
+    BootServerConfig server = new BootServerConfig(this);
+    
+    _servers.add(server);
 
-    BootPodConfig pod = _pods.get(0);
-
-    return pod.createServer();
+    return server;
   }
 
   @Configurable
   public void addServer(BootServerConfig server)
   {
-    if (_pods.size() == 0) {
-      addPod(createPod());
-    }
-    
-    BootPodConfig pod = _pods.get(0);
-
-    pod.addServer(server);
+    _servers.add(server);
   }
 
-  public ArrayList<BootPodConfig> getPodList()
+  public ArrayList<BootServerConfig> getServerList()
   {
-    return _pods;
+    return _servers;
   }
   
   public void addContentProgram(ConfigProgram program)
   {
-    _clusterProgram.addProgram(program);
+    _podProgram.addProgram(program);
   }
   
   ConfigProgram getProgram()
   {
-    return _clusterProgram;
+    return _podProgram;
   }
   
   @PostConstruct
   public void init()
   {
+    /*
     if (_id == null)
-      throw new ConfigException(L.l("'id' is a require attribute for <cluster>"));
+      throw new ConfigException(L.l("'id' is a required attribute for <pod>"));
+      */
     
-    CloudCluster cluster = getCloudCluster();
+    CloudPod pod = getCloudPod();
     
-    cluster.putData(new ClusterServerProgram(_serverDefaultProgram));
+    pod.putData(new ClusterServerProgram(_serverDefaultProgram));
 
     getCloudPod();
   }
   
-  CloudCluster getCloudCluster()
-  {
-    if (_id == null)
-      throw new ConfigException(L.l("'id' is a require attribute for <cluster>"));
-    
-    if (_cloudCluster == null) {
-      _cloudCluster = _resinConfig.getCloudSystem().findCluster(_id);
-      
-      if (_cloudCluster == null)
-        _cloudCluster = _resinConfig.getCloudSystem().createCluster(_id);
-    }
-    
-    return _cloudCluster;
-  }
-  
   CloudPod getCloudPod()
   {
-    if (_pods.size() == 0) {
-      addPod(createPod());
+    if (_cloudPod == null) {
+      CloudCluster cluster = _clusterConfig.getCloudCluster();
+    
+      _cloudPod = cluster.createPod();
     }
     
-    return _pods.get(0).getCloudPod();
+    return _cloudPod;
   }
   
   @Override

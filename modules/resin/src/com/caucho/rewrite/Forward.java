@@ -31,6 +31,7 @@ package com.caucho.rewrite;
 
 import java.util.regex.Matcher;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
 import com.caucho.config.ConfigException;
@@ -109,7 +110,8 @@ public class Forward extends AbstractRegexpDispatchRule
   }
 
   @Override
-  public FilterChain createDispatch(String uri,
+  public FilterChain createDispatch(DispatcherType type,
+                                    String uri,
                                     String queryString,
                                     String target,
                                     FilterChain next)

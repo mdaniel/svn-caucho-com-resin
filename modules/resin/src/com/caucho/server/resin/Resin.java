@@ -71,7 +71,6 @@ import com.caucho.env.lock.LockService;
 import com.caucho.env.lock.SingleLockManager;
 import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.LocalRepositoryService;
-import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.service.ResinSystem;
@@ -1137,15 +1136,18 @@ public class Resin
         throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
                                         _serverId));
       }
-        
-      if (clusterConfig.getServerList().size() > 0) {
+      
+      /*
+      if (clusterConfig.getPodList().size() > 0) {
         throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
                                         _serverId));
       }
+      */
       
       bootServer = clusterConfig.createServer();
       bootServer.setId("");
       bootServer.init();
+      clusterConfig.addServer(bootServer);
       // bootServer.configureServer();
     }
     
@@ -1186,7 +1188,7 @@ public class Resin
     
     _servletContainerConfig = new ServletContainerConfig(_servletContainer);
 
-    bootServer.getCluster().getProgram().configure(_servletContainerConfig);
+    bootServer.getPod().getCluster().getProgram().configure(_servletContainerConfig);
     
     ServerConfig config = new ServerConfig(_servletContainerConfig);
     bootServer.getServerProgram().configure(config);

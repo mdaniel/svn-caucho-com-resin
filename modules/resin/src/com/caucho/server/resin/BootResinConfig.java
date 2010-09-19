@@ -38,7 +38,6 @@ import com.caucho.config.DependencyBean;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 import com.caucho.vfs.Vfs;
@@ -142,9 +141,11 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   BootServerConfig findServer(String id)
   {
     for (BootClusterConfig cluster : getClusterList()) {
-      for (BootServerConfig server : cluster.getServerList()) {
-        if (id.equals(server.getId()))
-          return server;
+      for (BootPodConfig pod : cluster.getPodList()) {
+        for (BootServerConfig server : pod.getServerList()) {
+          if (id.equals(server.getId()))
+            return server;
+        }
       }
     }
     

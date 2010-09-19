@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -778,7 +779,8 @@ public class WebAppContainer
       String uri = invocation.getURI();
       String queryString = invocation.getQueryString();
 
-      FilterChain rewriteChain = _rewriteDispatch.map(uri,
+      FilterChain rewriteChain = _rewriteDispatch.map(DispatcherType.REQUEST,
+                                                      uri,
                                                       queryString,
                                                       chain);
 

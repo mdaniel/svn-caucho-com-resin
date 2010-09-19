@@ -35,11 +35,13 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
 import com.caucho.config.Configurable;
 import com.caucho.server.dispatch.RewriteDispatchFilterChain;
+import com.caucho.server.dispatch.RewriteIncludeFilterChain;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -91,7 +93,7 @@ public class WelcomeFile extends AbstractDispatchRule
   @Override
   public boolean isInclude()
   {
-    return false;
+    return true;
   }
 
   @Override
@@ -112,26 +114,31 @@ public class WelcomeFile extends AbstractDispatchRule
   }
   
   @Override
-  public FilterChain map(String uri,
+  public FilterChain map(DispatcherType type,
+                         String uri,
                          String queryString,
                          FilterChain next,
                          FilterChain tail)
     throws ServletException
   {
-    String welcomeUri = matchWelcomeFileResource(uri, null);
-    
+    String welcomeUri = matchWelcomeFileResource(type, uri, null);
+
     if (welcomeUri == null) {
       return next;
     }
-    else if (queryString == null) {
+    
+    if (queryString != null) {
+      welcomeUri = welcomeUri + '?' + queryString;
+    }
+
+    if (DispatcherType.INCLUDE.equals(type))
+      return new RewriteIncludeFilterChain(next, welcomeUri);
+    else
       return new RewriteDispatchFilterChain(welcomeUri);
-    }
-    else {
-      return new RewriteDispatchFilterChain(welcomeUri + '?' + queryString);
-    }
   }
 
-  private String matchWelcomeFileResource(String uri,
+  private String matchWelcomeFileResource(DispatcherType type,
+                                          String uri,
                                           ArrayList<String> vars)
   {
     if (matchWelcomeUri(uri) != Match.NONE) {
@@ -169,8 +176,10 @@ public class WelcomeFile extends AbstractDispatchRule
 
       if (uri.endsWith("/"))
         welcomeUri = uri + file;
+      else if (! DispatcherType.REQUEST.equals(type)) {
+        welcomeUri = uri + '/' + file;
+      }
       else {
-        // welcomeUri = uri + '/' + file;
         continue;
       }
 
@@ -210,16 +219,6 @@ public class WelcomeFile extends AbstractDispatchRule
     }
     
     return Match.NONE;
-  }
-  
-  private boolean isMappedServlet(String uri)
-  {
-    try {
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-    
-    return false;
   }
   
   enum Match {

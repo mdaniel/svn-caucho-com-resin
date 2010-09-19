@@ -29,6 +29,7 @@
 
 package com.caucho.rewrite;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
@@ -85,7 +86,8 @@ public interface DispatchRule
    * @param next the next rewrite FilterChain dispatch
    * @param tail the plain servlet/filter chain for a match
    */
-  public FilterChain map(String uri,
+  public FilterChain map(DispatcherType type,
+                         String uri,
                          String queryString,
                          FilterChain next,
                          FilterChain tail)

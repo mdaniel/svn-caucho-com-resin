@@ -29,9 +29,9 @@
 
 package com.caucho.server.security;
 
-import com.caucho.servlet.comet.CometFilterChain;
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.server.http.CauchoResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -39,9 +39,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
 
 public class SecurityFilterChain implements FilterChain {
   private FilterChain _next;

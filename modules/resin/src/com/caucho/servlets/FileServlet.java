@@ -32,6 +32,7 @@ package com.caucho.servlets;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Base64;
@@ -183,7 +185,7 @@ public class FileServlet extends GenericServlet {
       isInclude = true;
     else
       uri = req.getRequestURI();
-
+    
     Cache cache = _pathCache.get(uri);
 
     String filename = null;
@@ -267,10 +269,10 @@ public class FileServlet extends GenericServlet {
 
       String mimeType = webApp.getMimeType(relPath);
 
-      boolean isPathRedable = path.canRead();
+      boolean isPathReadable = path.canRead();
       Path jarPath = null;
 
-      if (! isPathRedable) {
+      if (! isPathReadable) {
         String resource = "META-INF/resources" + relPath;
         URL url = webApp.getClassLoader().getResource(resource);
 
@@ -402,10 +404,37 @@ public class FileServlet extends GenericServlet {
     }
   }
   
-  private void sendRedirect(HttpServletResponse res, String url)
+  private void sendRedirect(HttpServletResponse res, String url) 
+    throws IOException
   {
+    String encUrl;
+    
+    HttpServletResponseImpl resImpl = null;
+    
+    if (res instanceof HttpServletResponseImpl) {
+      resImpl = (HttpServletResponseImpl) res;
+
+      encUrl = resImpl.encodeAbsoluteRedirect(url);
+    }
+    else
+      encUrl = res.encodeRedirectURL(url);
+    
+    try {
+      res.reset();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
     res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-    res.setHeader("Location", res.encodeRedirectURL(url));
+    res.setHeader("Location", encUrl);
+    res.setContentType("text/html; charset=utf-8");
+    
+    PrintWriter out = res.getWriter();
+    
+    out.println("The URL has moved <a href=\"" + encUrl + "\">here</a>");
+    
+    if (resImpl != null)
+      resImpl.close();
   }
 
   private boolean handleRange(HttpServletRequest req,

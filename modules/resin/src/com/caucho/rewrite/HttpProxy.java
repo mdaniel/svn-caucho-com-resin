@@ -32,6 +32,7 @@ package com.caucho.rewrite;
 import java.io.IOException;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -116,7 +117,8 @@ public class HttpProxy extends AbstractTargetDispatchRule
   }
 
   @Override
-  public FilterChain createDispatch(String uri,
+  public FilterChain createDispatch(DispatcherType type,
+                                    String uri,
                                     String queryString,
                                     String target,
                                     FilterChain next)

@@ -361,14 +361,12 @@ public class WebAppController
   @Override
   protected String getMBeanId()
   {
-    return getName();
-    /*
-    String name = getContextPath();
-    if (name.equals(""))
-      name = "/";
-
-    return name;
-    */
+    String name = getName();
+    
+    if (name.equals("/ROOT"))
+      return "/";
+    else
+      return name;
   }
 
   /**

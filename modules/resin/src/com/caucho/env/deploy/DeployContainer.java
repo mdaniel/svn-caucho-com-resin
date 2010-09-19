@@ -328,9 +328,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
       return null;
     
     for (C controller : controllerList) {
-      if (controller != bestController) {
-        bestController.merge((DeployControllerApi) controller);
-      }
+      bestController.merge((DeployControllerApi) controller);
     }
     
     bestController = _deployListGenerator.mergeController(bestController, name);

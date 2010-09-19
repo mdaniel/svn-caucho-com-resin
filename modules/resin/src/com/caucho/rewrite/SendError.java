@@ -29,6 +29,7 @@
 
 package com.caucho.rewrite;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
 import com.caucho.config.Configurable;
@@ -68,7 +69,8 @@ public class SendError extends AbstractTargetDispatchRule
   }
 
   @Override
-  public FilterChain createDispatch(String uri,
+  public FilterChain createDispatch(DispatcherType type,
+                                    String uri,
                                     String queryString,
                                     String target,
                                     FilterChain next)

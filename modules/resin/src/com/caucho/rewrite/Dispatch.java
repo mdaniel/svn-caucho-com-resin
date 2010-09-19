@@ -29,6 +29,7 @@
 
 package com.caucho.rewrite;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
 import com.caucho.config.Configurable;
@@ -53,7 +54,8 @@ import com.caucho.server.dispatch.RewriteDispatchFilterChain;
 public class Dispatch extends AbstractTargetDispatchRule
 {
   @Override
-  public FilterChain createDispatch(String uri,
+  public FilterChain createDispatch(DispatcherType type,
+                                    String uri,
                                     String queryString,
                                     String target,
                                     FilterChain next)

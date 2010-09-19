@@ -175,7 +175,12 @@ public class WebAppRegexpDeployGenerator
         String stage = _container.getServer().getStage();
         String hostId = _container.getHost().getIdTail();
         
-        String id = stage + "/webapp/" + hostId + "/" + name;
+        String id;
+        
+        if (name.startsWith("/"))
+          id = stage + "/webapp/" + hostId + name;
+        else
+          id = stage + "/webapp/" + hostId + "/" + name;
 
         controller = new WebAppController(id, appDir, _container, name);
 

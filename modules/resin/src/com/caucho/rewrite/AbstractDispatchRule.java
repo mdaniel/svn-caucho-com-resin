@@ -29,6 +29,7 @@
 
 package com.caucho.rewrite;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
@@ -59,7 +60,8 @@ abstract public class AbstractDispatchRule implements DispatchRule
   }
   
   @Override
-  public FilterChain map(String uri,
+  public FilterChain map(DispatcherType type,
+                         String uri,
                          String queryString,
                          FilterChain next,
                          FilterChain tail)

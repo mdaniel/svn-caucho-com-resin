@@ -169,6 +169,9 @@ public class HostConfig extends DeployConfig {
         }
       }
     }
+    
+    if (name.equals("*"))
+      name = "";
 
     if (! _hostAliases.contains(name))
       _hostAliases.add(name);

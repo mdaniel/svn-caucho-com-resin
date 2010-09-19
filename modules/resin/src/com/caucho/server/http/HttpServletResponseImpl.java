@@ -907,6 +907,39 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     resetBuffer();
 
     setStatus(SC_MOVED_TEMPORARILY);
+
+    String encoding = getCharacterEncoding();
+    boolean isLatin1 = "iso-8859-1".equals(encoding);
+    
+    String path = encodeAbsoluteRedirect(url);
+
+    setHeader("Location", path);
+    
+    if (isLatin1)
+      setHeader("Content-Type", "text/html; charset=iso-8859-1");
+    else
+      setHeader("Content-Type", "text/html; charset=utf-8");
+
+    String msg = "The URL has moved <a href=\"" + path + "\">here</a>";
+
+    // The data is required for some WAP devices that can't handle an
+    // empty response.
+    if (_writer != null) {
+      _writer.println(msg);
+    }
+    else {
+      ServletOutputStream out = getOutputStream();
+      out.println(msg);
+    }
+    // closeConnection();
+
+    _request.saveSession(); // #503
+
+    close();
+  }
+  
+  public String encodeAbsoluteRedirect(String url)
+  {
     String path = getAbsolutePath(url);
 
     // Bug #3051
@@ -921,6 +954,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
       if (ch == '<')
         cb.append("%3c");
+      else if (ch == '"') {
+        cb.append("%22");
+      }
       else if (ch < 0x80)
         cb.append(ch);
       else if (isLatin1) {
@@ -944,31 +980,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       }
     }
 
-    path = cb.toString();
-
-    setHeader("Location", path);
-
-    if (isLatin1)
-      setHeader("Content-Type", "text/html; charset=iso-8859-1");
-    else
-      setHeader("Content-Type", "text/html; charset=utf-8");
-
-    String msg = "The URL has moved <a href=\"" + path + "\">here</a>";
-
-    // The data is required for some WAP devices that can't handle an
-    // empty response.
-    if (_writer != null) {
-      _writer.println(msg);
-    }
-    else {
-      ServletOutputStream out = getOutputStream();
-      out.println(msg);
-    }
-    // closeConnection();
-
-    _request.saveSession(); // #503
-
-    close();
+    return cb.toString();
   }
 
   /**
