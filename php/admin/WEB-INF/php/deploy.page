@@ -23,16 +23,39 @@ else if ($is_secure) {
     $host = $_REQUEST['host'];
     if (! $host)
       $host = "default";
+
+    $url = $_REQUEST['url'];
+    if (! $url) {
+      $name = $_FILES['warfile']['name'];
+
+      if (preg_match("/(.+)\.war/", $name, $values)) {
+        $name = $values[1];
+      }
+    }
+
+    if ($name && $path) {
+      $commit = java("com.caucho.env.repository.CommitBuilder");
+      $commit->type("webapp");
       
-    $tag = "production/webapp/" . $host . $_REQUEST['url'];
+      $commit->tagKey($host . '/' . $name);
+      $commit->attribute("message", "commit from web form");
     
-    $client->putTagArchive($tag, $path, "commit from web form", $attributes);
+      $client->commitArchive($commit, $path);
+
+      echo "<h3>Updated " . $commit->getId() . "</h3>";
+    }
+    else if ($path) {
+      echo "<h3>Path is required</h3>";
+    }
+    else {
+      echo "<h3>Upload Invalid " . $name . "</h3>";
+    }
   }
 }
 
-deploy();
+deploy($is_secure);
 
-function deploy()
+function deploy($is_secure)
 {
 ?>
 

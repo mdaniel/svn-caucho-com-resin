@@ -143,6 +143,12 @@ public final class ClusterServer {
     // XXX: active isn't quite right here
     if (cloudServer.getPod() != networkService.getSelfServer().getPod())
       _isActive.set(true);
+    
+    // self default are different
+    // XXX: need to distinguish load-balance from cluster?
+    if (cloudServer.getPod() == networkService.getSelfServer().getPod()) {
+      _loadBalanceIdleTime = 120 * 60000;
+    }
 
     StringBuilder sb = new StringBuilder();
 

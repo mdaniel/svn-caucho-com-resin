@@ -69,6 +69,7 @@ if (! admin_init($query, false)) {
   return;
 }
 
+echo "<h1>Graphs" . print_help("Graphs") . "</h1>\n";
 $names = array();
 
 $full_height = 500;
@@ -342,8 +343,8 @@ function display_new_graph_form()
   // server
   echo "<form method='post' action='" . $g_next_url . "'>"
   echo "<input type='hidden' name='submit' value='true'>\n";
-  echo "<h2>Meters<span id='meter-switch' class='switch'></span></h2>";
-  echo "<button id='clear-graph' style='margin: 0 1em'>Clear Graph</button>";
+  echo "<h2><span id='meter-switch' class='switch'></span>Meters</h2>";
+  echo "<button id='clear-graph' style='margin: 0 1em'>Clear Meters</button>";
 
   $i = 0;
 
@@ -377,7 +378,7 @@ function display_new_graph_form()
   echo "<div style='text-align: right'>\n";
   echo "<div id='validation-notice' class='ui-state-error ui-corner-all' style='display:none'></div>\n";
   echo "<input name='name' style='width: 100%;'></input>\n";
-  echo "<input type='submit' value='Save Meter Set'><br>\n";
+  echo "<input type='submit' value='Save Meters'><br>\n";
   echo "</div>\n";
 
   echo "</form>\n";

@@ -30,14 +30,6 @@ if (! admin_init(false)) {
 </td>
 
 <tr>
-<!-- Cluster -->
-<td>
-<h2><a href="?q=cluster">Cluster</a></h2>
-
-<p>Overview of the cluster status.</p>
-
-</td>
-
 <!-- Config -->
 <td>
 <h2><a href="?q=config">Config</a></h2>
@@ -46,6 +38,15 @@ if (! admin_init(false)) {
 the current Resin instance.</p>
 
 </td>
+
+<!-- Deploy -->
+<td>
+<h2><a href="?q=deploy">Deploy</a></h2>
+
+<p>Deploy new .war versions to the server.</p>
+
+</td>
+
 </tr>
 
 <tr>
@@ -58,6 +59,17 @@ a HTML 5 browser like Firefox 3.5.</p>
 
 </td>
 
+<!-- Health -->
+<td>
+<h2><a href="?q=health">Health</a></h2>
+
+<p>Health check overview of the servers.</p>
+
+</td>
+</tr>
+
+<tr>
+
 <!-- JMX -->
 <td>
 <h2><a href="?q=jmx">JMX</a></h2>
@@ -65,9 +77,7 @@ a HTML 5 browser like Firefox 3.5.</p>
 <p>Table-based view of all JMX beans registered with the JVM.</p>
 
 </td>
-</tr>
 
-<tr>
 <!-- Memory -->
 <td>
 <h2><a href="?q=memory">Memory</a></h2>
@@ -76,6 +86,9 @@ a HTML 5 browser like Firefox 3.5.</p>
 The heap dump requires Resin-Pro.</p>
 
 </td>
+</tr>
+
+<tr>
 
 <!-- Postmortem -->
 <td>
@@ -85,23 +98,13 @@ The heap dump requires Resin-Pro.</p>
 restarted.</p>
 
 </td>
-</tr>
 
-<tr>
 <!-- Profile -->
 <td>
 <h2><a href="?q=profile">CPU Profile</a></h2>
 
 <p>CPU profiling of the running instance.  Because the profiling is
 lightweight and sample-based, it can be used in a runtime environment.</p>
-
-</td>
-
-<!-- Quercus -->
-<td>
-<h2><a href="?q=quercus">Quercus</a></h2>
-
-<p>Experimental Quercus profiling.</p>
 
 </td>
 </tr>

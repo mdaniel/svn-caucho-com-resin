@@ -57,7 +57,7 @@ import com.caucho.util.Alarm;
 public class ServerAdmin extends AbstractEmitterObject
   implements ServerMXBean
 {
-  private static final String BYTES_PROBE = "Resin|Request|Http Request Bytes";
+  private static final String BYTES_PROBE = "Resin|Http|Request Bytes";
   private TotalMeter _httpBytesProbe;
 
   private Server _server;

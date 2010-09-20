@@ -241,7 +241,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
     _alarm = new WeakAlarm(this);
     _sessionSaveSample
-      = MeterService.createAverageMeter("Resin|WebApp|Session Save", "Size");
+      = MeterService.createAverageMeter("Resin|Http|Session Save", "Size");
 
     _admin = new SessionManagerAdmin(this);
   }

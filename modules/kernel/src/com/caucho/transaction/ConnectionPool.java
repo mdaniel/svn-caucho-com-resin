@@ -151,7 +151,7 @@ public class ConnectionPool extends AbstractManagedObject
 
   private ActiveTimeMeter _connectionTime;
   private ActiveTimeMeter _idleTime;
-  private ActiveTimeMeter _activeTime;
+  private ActiveTimeMeter _queryTime;
 
   private final AtomicLong _connectionCountTotal = new AtomicLong();
   private final AtomicLong _connectionCreateCountTotal = new AtomicLong();
@@ -501,7 +501,7 @@ public class ConnectionPool extends AbstractManagedObject
    */
   public ActiveTimeMeter getActiveTimeProbe()
   {
-    return _activeTime;
+    return _queryTime;
   }
 
   /**
@@ -582,7 +582,7 @@ public class ConnectionPool extends AbstractManagedObject
 
     _connectionTime = MeterService.createActiveTimeMeter("Resin|Database|Connection");
     _idleTime = MeterService.createActiveTimeMeter("Resin|Database|Idle");
-    _activeTime = MeterService.createActiveTimeMeter("Resin|Database|Active");
+    _queryTime = MeterService.createActiveTimeMeter("Resin|Database|Query");
 
     registerSelf();
 

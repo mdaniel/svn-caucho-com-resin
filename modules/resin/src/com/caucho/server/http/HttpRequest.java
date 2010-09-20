@@ -79,11 +79,11 @@ public class HttpRequest extends AbstractHttpRequest
   static final CharBuffer _http10Cb = new CharBuffer("HTTP/1.0");
 
   private static final String REQUEST_TIME_PROBE
-    = "Resin|Request|Http Request";
+    = "Resin|Http|Request";
   private static final String REQUEST_COUNT_PROBE
-    = "Resin|Request|Http Request Count";
+    = "Resin|Http|Request Count";
   private static final String REQUEST_BYTES_PROBE
-    = "Resin|Request|Http Request Bytes";
+    = "Resin|Http|Request Bytes";
 
   private final CharBuffer _method     // "GET"
     = new CharBuffer();

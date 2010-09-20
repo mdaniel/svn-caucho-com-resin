@@ -94,7 +94,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     _length = 0;
     */
 
-    _semaphoreProbe = MeterService.createSemaphoreMeter("Resin|Log|Semaphore");
+    // _semaphoreProbe = MeterService.createSemaphoreMeter("Resin|Log|Semaphore");
   }
 
   @Override
@@ -230,7 +230,8 @@ public class AccessLogWriter extends AbstractRolloverLog
       Thread.interrupted();
       _logSemaphore.acquire();
 
-      _semaphoreProbe.acquire();
+      if (_semaphoreProbe != null)
+        _semaphoreProbe.acquire();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -246,7 +247,9 @@ public class AccessLogWriter extends AbstractRolloverLog
   void freeBuffer(LogBuffer logBuffer)
   {
     _logSemaphore.release();
-    _semaphoreProbe.release();
+    
+    if (_semaphoreProbe != null)
+      _semaphoreProbe.release();
 
     logBuffer.setNext(null);
 
