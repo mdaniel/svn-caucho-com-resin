@@ -101,8 +101,6 @@ public final class ClusterServer {
   private String _stage;
   private ArrayList<String> _pingUrls = new ArrayList<String>();
 
-  private boolean _isSelf;
-
   // runtime
 
   private ClientSocketFactory _serverPool;
