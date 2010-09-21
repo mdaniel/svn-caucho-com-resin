@@ -355,7 +355,7 @@ public class HmtpWriter implements ActorStream
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " close");
-    
+
     try {
       Hessian2Output out = _out;
       _out = null;

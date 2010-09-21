@@ -246,9 +246,16 @@ public class LogHandlerConfig extends BeanConfig {
   /**
    * Returns the tag name.
    */
+  @Override
   public String getTagName()
   {
     return "log-handler";
+  }
+  
+  @Configurable
+  public void add(Handler handler)
+  {
+    _handler = handler;
   }
 
   /**
@@ -258,7 +265,12 @@ public class LogHandlerConfig extends BeanConfig {
   public void init()
     throws ConfigException
   {
-    if (_pathHandler == null) {
+    if (_handler != null) {
+      
+    }
+    else if (_pathHandler != null) {
+    }
+    else {
       super.init();
 
       _handler = (Handler) getObject();
@@ -283,6 +295,10 @@ public class LogHandlerConfig extends BeanConfig {
       _pathHandler.init();
 
       _handler = _pathHandler;
+    }
+    
+    if (_handler == null) {
+      throw new ConfigException(L.l("<log-handler> requires a configured log handler"));
     }
       
     Logger logger = Logger.getLogger(getName());

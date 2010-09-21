@@ -289,6 +289,7 @@ public class AsyncContextImpl
   /**
    * CometHandler callback when the connection times out.
    */
+  @Override
   public void onTimeout()
   {
     AsyncEvent event = new AsyncEvent(this, _request, _response);
@@ -322,6 +323,7 @@ public class AsyncContextImpl
     }
   }
   
+  @Override
   public void onComplete()
   {
     AsyncEvent event = new AsyncEvent(this, _request, _response);
@@ -337,6 +339,7 @@ public class AsyncContextImpl
     }
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _cometController + "]";

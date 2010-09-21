@@ -38,6 +38,9 @@ import com.caucho.network.listen.SocketLinkListener;
  * Represents a protocol connection.
  */
 public class ClusterListener extends SocketLinkListener {
+  private static final long KEEPALIVE_TIME_MAX = Long.MAX_VALUE / 2;
+  private static final long KEEPALIVE_TIMEOUT = 60 * 60 * 1000;
+  private static final long SOCKET_TIMEOUT = 10 * 60 * 1000;
   
   public ClusterListener(String address, int port)
   {
@@ -46,8 +49,9 @@ public class ClusterListener extends SocketLinkListener {
       
       setPort(port);
       
-      setKeepaliveConnectionTimeMaxMillis(Long.MAX_VALUE / 2);
-      setKeepaliveTimeoutMillis(60 * 60 * 1000);
+      setKeepaliveConnectionTimeMaxMillis(KEEPALIVE_TIME_MAX);
+      setKeepaliveTimeoutMillis(KEEPALIVE_TIMEOUT);
+      setSocketTimeoutMillis(SOCKET_TIMEOUT);
       
       // setProtocol(new HmuxProtocol());
     } catch (Exception e) {

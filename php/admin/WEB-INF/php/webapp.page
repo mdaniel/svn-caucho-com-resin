@@ -640,10 +640,17 @@ function process_deploy_args()
 
   $commit->tagKey($host . $name);
 
-  $commit->version(htmlspecialchars($_POST['version-major']), 
-                   htmlspecialchars($_POST['version-minor']),
-                   htmlspecialchars($_POST['version-micro']),
-                   htmlspecialchars($_POST['version-qualifier']));
+  $major = $_POST['version-major'];
+  $minor = $_POST['version-minor'];
+  $micro = $_POST['version-micro'];
+  $qualifier = $_POST['version-qualifier'];
+
+  if ($major || $minor || $micro || $qualifier) {
+    $commit->version(htmlspecialchars($major),
+                     htmlspecialchars($minor),
+                     htmlspecialchars($micro),
+                     htmlspecialchars($qualifier));
+  }
 
   if ($_POST['commit-message'])
     $commit->message($_POST['commit-message']);
