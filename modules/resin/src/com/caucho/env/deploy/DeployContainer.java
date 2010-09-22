@@ -271,22 +271,6 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   }
 
   /**
-   * Starts a particular controller.
-   *
-   * @param name the domain-specified name matching the controller, e.g. the
-   *  hostname or the context-path.
-   */
-  private C startImpl(String name)
-  {
-    C oldController = findDeployedController(name);
-
-    if (oldController != null)
-      return oldController;
-      
-    return generateController(name);
-  }
-
-  /**
    * Called to explicitly remove an entry from the cache.
    */
   @Override

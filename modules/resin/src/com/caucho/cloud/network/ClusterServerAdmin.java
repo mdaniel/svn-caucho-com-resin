@@ -147,7 +147,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   @Override
   public long getIdleTime()
   {
-    return _server.getLoadBalanceIdleTime();
+    return _server.getClusterIdleTime();
   }
 
   /**

@@ -75,6 +75,8 @@ public class WebAppEmbed
 
   private final ArrayList<FilterMappingEmbed> _filterMappingList
     = new ArrayList<FilterMappingEmbed>();
+  
+  private WebApp _webApp;
 
   /**
    * Creates a new embedded webapp
@@ -212,12 +214,19 @@ public class WebAppEmbed
   {
     _contextParamMap.put(name, value);
   }
+  
+  public WebApp getWebApp()
+  {
+    return _webApp;
+  }
 
   /**
    * Configures the web-app (for internal use)
    */
   protected void configure(WebApp webApp)
   {
+    _webApp = webApp;
+    
     try {
       for (Map.Entry<String,String> entry : _contextParamMap.entrySet()) {
         InitParam initParam = new InitParam(entry.getKey(), entry.getValue());

@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.java.*;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -43,6 +44,9 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.SimpleLoader;
+import com.caucho.resin.ResinEmbed;
+import com.caucho.resin.WebAppEmbed;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppController;
@@ -77,6 +81,7 @@ public class JspCompiler implements EnvironmentBean {
   private static final Logger log
     = Logger.getLogger(JspCompiler.class.getName());
 
+  private ResinSystem _system;
   private ClassLoader _loader;
 
   private WebApp _app;
@@ -101,10 +106,13 @@ public class JspCompiler implements EnvironmentBean {
 
   private ArrayList<JspCompilerInstance> _pending =
     new ArrayList<JspCompilerInstance>();
+  
+  private ResinEmbed _resin;
 
   public JspCompiler()
   {
-    _loader = EnvironmentClassLoader.create();
+    _system = new ResinSystem("jsp-compiler");
+    _loader = _system.getClassLoader();
 
     _tagFileManager = new TagFileManager(this);
   }
@@ -116,11 +124,8 @@ public class JspCompiler implements EnvironmentBean {
   {
     return _loader;
   }
-
-  /**
-   * Returns the classloader for configuration.
-   */
-  private void setClassLoader(ClassLoader loader)
+  
+  public void setClassLoader(ClassLoader loader)
   {
     _loader = loader;
   }
@@ -331,12 +336,16 @@ public class JspCompiler implements EnvironmentBean {
     if (_app == null) {
       if (rootDirectory == null)
         rootDirectory = getAppDir();
-      
-      WebAppController controller
-        = new WebAppController("compiler/webapp/default/ROOT",
-                               rootDirectory, null);
 
-      _app = controller.getDeployInstance();
+      _resin = new ResinEmbed();
+      
+      WebAppEmbed webAppEmbed = new WebAppEmbed();
+      webAppEmbed.setRootDirectory(rootDirectory.getURL());
+      
+      _resin.addWebApp(webAppEmbed);
+      _resin.start();
+      
+      _app = webAppEmbed.getWebApp();
     }
 
     return _app;
@@ -544,8 +553,6 @@ public class JspCompiler implements EnvironmentBean {
   public Page loadStatic(String className, boolean isSession)
     throws Exception
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
     // If the loading fails, remove the class because it may be corrupted
     String staticName = className.replace('.', '/') + ".static";
 
@@ -574,6 +581,14 @@ public class JspCompiler implements EnvironmentBean {
         }
       }
     }
+  }
+  
+  public void close()
+  {
+    ResinEmbed resin = _resin;
+    
+    if (resin != null)
+      resin.destroy();
   }
 
   public static void main(String []args)
@@ -714,7 +729,8 @@ public class JspCompiler implements EnvironmentBean {
       if (app == null && getAppDir() != null) {
         app = createWebApp(null);
 
-        app.setRootDirectory(getAppDir());
+        if (app != null)
+          app.setRootDirectory(getAppDir());
         setWebApp(app);
       }
 

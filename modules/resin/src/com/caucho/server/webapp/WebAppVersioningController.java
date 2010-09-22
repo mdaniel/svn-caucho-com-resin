@@ -97,6 +97,15 @@ public class WebAppVersioningController extends WebAppController {
     else
       return "";
   }
+  
+  @Override
+  public WebAppAdmin getAdmin()
+  {
+    if (_primaryController != null)
+      return _primaryController.getAdmin();
+    else
+      return null;
+  }
 
   /**
    * Returns the instance for a top-level request
@@ -166,7 +175,7 @@ public class WebAppVersioningController extends WebAppController {
 */
     return false;
   }
-
+  
   public void updateVersion()
   {
 //    _isModified = true;
