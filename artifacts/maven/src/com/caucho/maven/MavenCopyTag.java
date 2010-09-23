@@ -29,6 +29,7 @@
 
 package com.caucho.maven;
 
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.StatusQuery;
@@ -58,7 +59,7 @@ public class MavenCopyTag extends AbstractDeployMojo
   private String _sourceContextRoot = null;
 
   /**
-   * The stage of the source tag to copy 
+   * The stage of the source tag to copy
    * @parameter
    */
   public void setSourceStage(String stage)
@@ -76,7 +77,7 @@ public class MavenCopyTag extends AbstractDeployMojo
   }
 
   /**
-   * The explicit source tag to copy 
+   * The explicit source tag to copy
    * @parameter
    */
   public void setSourceTag(String tag)
@@ -85,7 +86,7 @@ public class MavenCopyTag extends AbstractDeployMojo
   }
 
   /**
-   * The context root of the source tag to copy 
+   * The context root of the source tag to copy
    * @parameter
    */
   public void setSourceContextRoot(String contextRoot)
@@ -94,7 +95,7 @@ public class MavenCopyTag extends AbstractDeployMojo
   }
 
   /**
-   * The version of the source tag to copy 
+   * The version of the source tag to copy
    * @parameter
    */
   public void setSourceVersion(String version)
@@ -103,7 +104,7 @@ public class MavenCopyTag extends AbstractDeployMojo
   }
 
   /**
-   * The virtual host of the source tag to copy 
+   * The virtual host of the source tag to copy
    * @parameter
    */
   public void setSourceVirtualHost(String virtualHost)
@@ -124,13 +125,13 @@ public class MavenCopyTag extends AbstractDeployMojo
 
     Properties properties = System.getProperties();
 
-    String sourceStage = 
+    String sourceStage =
       properties.getProperty("resin.sourceStage");
-    String sourceVirtualHost = 
+    String sourceVirtualHost =
       properties.getProperty("resin.sourceVirtualHost");
-    String sourceContextRoot = 
+    String sourceContextRoot =
       properties.getProperty("resin.sourceContextRoot");
-    String sourceVersion = 
+    String sourceVersion =
       properties.getProperty("resin.sourceVersion");
 
     String tag = properties.getProperty("resin.tag");
@@ -151,7 +152,7 @@ public class MavenCopyTag extends AbstractDeployMojo
     if (tag != null)
       _tag = tag;
 
-    if (sourceTag != null) 
+    if (sourceTag != null)
       _sourceTag = sourceTag;
   }
 
@@ -159,7 +160,7 @@ public class MavenCopyTag extends AbstractDeployMojo
   protected void printParameters()
   {
     super.printParameters();
-    
+
     Log log = getLog();
 
     log.debug("  sourceStage = " + _sourceStage);
@@ -172,7 +173,7 @@ public class MavenCopyTag extends AbstractDeployMojo
 
   @Override
   protected void validate()
-    throws MojoExecutionException 
+    throws MojoExecutionException
   {
     super.validate();
 
@@ -187,27 +188,28 @@ public class MavenCopyTag extends AbstractDeployMojo
    * Executes the maven resin:run task
    */
   @Override
-  protected void doTask(WebAppDeployClient client) 
+  protected void doTask(WebAppDeployClient client)
     throws MojoExecutionException
   {
     Log log = getLog();
 
-    String tag = _tag;
-    String sourceTag = _sourceTag;
+    CommitBuilder tag = null; //_tag;
+    CommitBuilder sourceTag = null; // _sourceTag;
 
     if (tag == null)
       tag = buildVersionedWarTag();
 
     if (sourceTag == null) {
-      sourceTag = WebAppDeployClient.createTag(_sourceStage, 
-                                               _sourceVirtualHost,
-                                               _sourceContextRoot,
-                                               _sourceVersion);
+      sourceTag = new CommitBuilder();
+      sourceTag.type("webapp");
+      sourceTag.stage(_sourceStage);
+      sourceTag.tagKey(_sourceVirtualHost + _sourceContextRoot);
+      // _sourceVersion);
     }
 
     log.info("Copying " + sourceTag + " to " + tag);
 
-    boolean result = client.copyTag(tag, sourceTag, getCommitAttributes());
+    boolean result = client.copyTag(tag, sourceTag);
 
     if (! result)
       log.warn("Failed to copy " + sourceTag + " to " + tag);

@@ -29,6 +29,7 @@
 
 package com.caucho.maven;
 
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.StatusQuery;
@@ -45,7 +46,7 @@ import org.apache.maven.plugin.logging.Log;
 
 /**
  * The Maven Upload War Mojo
- * @goal upload-war 
+ * @goal upload-war
  */
 public class MavenUploadWar extends AbstractDeployMojo
 {
@@ -71,8 +72,9 @@ public class MavenUploadWar extends AbstractDeployMojo
       if (lastSlash < 0)
         lastSlash = 0;
 
-      setContextRoot(_warFile.substring(lastSlash, 
-                                        _warFile.length() - ".war".length()));
+      int end = _warFile.length() - ".war".length();
+
+      setContextRoot(_warFile.substring(lastSlash, end));
     }
   }
 
@@ -88,7 +90,7 @@ public class MavenUploadWar extends AbstractDeployMojo
   }
 
   /**
-   * Sets whether to set the head tag for this war if a version is 
+   * Sets whether to set the head tag for this war if a version is
    * specified.
    * @parameter
    */
@@ -133,7 +135,7 @@ public class MavenUploadWar extends AbstractDeployMojo
   protected void printParameters()
   {
     super.printParameters();
-    
+
     Log log = getLog();
 
     log.debug("  warFile = " + _warFile);
@@ -155,7 +157,7 @@ public class MavenUploadWar extends AbstractDeployMojo
    * Executes the maven resin:run task
    */
   @Override
-  protected void doTask(WebAppDeployClient client) 
+  protected void doTask(WebAppDeployClient client)
     throws MojoExecutionException
   {
     Log log = getLog();
@@ -167,22 +169,21 @@ public class MavenUploadWar extends AbstractDeployMojo
       String archiveTag = _archive;
 
       if ("true".equals(archiveTag)) {
-        archiveTag = client.createArchiveTag(getVirtualHost(), 
-                                             getContextRoot(), 
+        archiveTag = client.createArchiveTag(getVirtualHost(),
+                                             getContextRoot(),
                                              getVersion());
       }
       else if ("false".equals(archiveTag)) {
         archiveTag = null;
       }
 
-      String tag = buildVersionedWarTag();
+      CommitBuilder commit = buildVersionedWarTag();
 
-      HashMap<String,String> attributes = getCommitAttributes();
+      client.commitArchive(commit, path);
 
-      client.deployJarContents(tag, path, attributes);
+      log.info("Deployed " + path + " to tag " + commit.getId());
 
-      log.info("Deployed " + path + " to tag " + tag);
-
+      /*
       if (archiveTag != null) {
         client.copyTag(archiveTag, tag, attributes);
 
@@ -196,8 +197,9 @@ public class MavenUploadWar extends AbstractDeployMojo
 
         log.info("Wrote head version tag " + headTag);
       }
+      */
     }
-    catch (IOException e) {
+    catch (Exception e) {
       throw new MojoExecutionException("Resin upload war failed", e);
     }
   }

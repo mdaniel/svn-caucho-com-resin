@@ -29,6 +29,7 @@
 
 package com.caucho.maven;
 
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.StatusQuery;
@@ -79,7 +80,7 @@ public class MavenDeleteTag extends AbstractDeployMojo
   protected void printParameters()
   {
     super.printParameters();
-    
+
     Log log = getLog();
 
     log.debug("  tag = " + _tag);
@@ -87,7 +88,7 @@ public class MavenDeleteTag extends AbstractDeployMojo
 
   @Override
   protected void validate()
-    throws MojoExecutionException 
+    throws MojoExecutionException
   {
     super.validate();
 
@@ -99,19 +100,19 @@ public class MavenDeleteTag extends AbstractDeployMojo
    * Executes the maven resin:run task
    */
   @Override
-  protected void doTask(WebAppDeployClient client) 
+  protected void doTask(WebAppDeployClient client)
     throws MojoExecutionException
   {
     Log log = getLog();
 
-    String tag = _tag;
+    CommitBuilder tag = null; // = _tag;
 
     if (tag == null)
       tag = buildVersionedWarTag();
 
     log.info("Deleting tag " + tag);
 
-    if (! client.removeTag(tag, getCommitAttributes()))
+    if (! client.removeTag(tag))
       log.warn("Failed to delete tag " + tag);
   }
 }

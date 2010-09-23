@@ -29,6 +29,7 @@
 
 package com.caucho.maven;
 
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.StatusQuery;
@@ -200,19 +201,28 @@ abstract public class AbstractDeployMojo extends AbstractMojo
       throw new MojoExecutionException("user is required by " + getMojoName());
   }
 
-  protected String buildWarTag()
+  protected CommitBuilder buildWarTag()
   {
-    return WebAppDeployClient.createTag(_stage,
-                                        _virtualHost,
-                                        _contextRoot);
+    CommitBuilder commit = new CommitBuilder();
+    commit.type("webapp");
+
+    if (_stage != null)
+      commit.stage(_stage);
+
+    commit.tagKey(_virtualHost + _contextRoot);
+
+    return commit;
   }
 
-  protected String buildVersionedWarTag()
+  protected CommitBuilder buildVersionedWarTag()
   {
+    return buildWarTag();
+    /*
     return WebAppDeployClient.createTag(_stage,
                                         _virtualHost,
                                         _contextRoot,
                                         _version);
+    */
   }
 
   protected HashMap<String,String> getCommitAttributes()

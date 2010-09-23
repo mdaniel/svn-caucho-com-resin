@@ -29,6 +29,7 @@
 
 package com.caucho.maven;
 
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
@@ -72,7 +73,7 @@ public class MavenQueryTags extends AbstractDeployMojo
   {
     return _printValues;
   }
-  
+
   protected String getMojoName()
   {
     return "resin-query-tags";
@@ -96,7 +97,7 @@ public class MavenQueryTags extends AbstractDeployMojo
   protected void printParameters()
   {
     super.printParameters();
-    
+
     Log log = getLog();
 
     log.debug("  pattern = " + _pattern);
@@ -108,7 +109,7 @@ public class MavenQueryTags extends AbstractDeployMojo
   {
     super.validate();
 
-    if (_pattern == null 
+    if (_pattern == null
         && getStage() == null
         && getVirtualHost() == null
         && getContextRoot() == null
@@ -120,7 +121,7 @@ public class MavenQueryTags extends AbstractDeployMojo
    * Executes the maven resin:run task
    */
   @Override
-  protected void doTask(WebAppDeployClient client) 
+  protected void doTask(WebAppDeployClient client)
     throws MojoExecutionException
   {
     Log log = getLog();
@@ -131,7 +132,8 @@ public class MavenQueryTags extends AbstractDeployMojo
       if (getContextRoot() == null)
         setContextRoot(".*");
 
-      pattern = buildVersionedWarTag();
+      CommitBuilder commit = buildVersionedWarTag();
+      pattern = commit.getId();
     }
 
     log.debug("Query pattern = '" + pattern + "'");
@@ -139,10 +141,10 @@ public class MavenQueryTags extends AbstractDeployMojo
     TagResult []tags = client.queryTags(pattern);
 
     for (TagResult tag : tags) {
-      if (_printValues) 
+      if (_printValues)
         log.info(tag.getTag() + " -> " + tag.getRoot());
       else
         log.info(tag.getTag());
-    }  
+    }
   }
 }
