@@ -57,7 +57,6 @@ public class StringMarshal extends Marshal {
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-
     return value.toJavaString();
   }
 

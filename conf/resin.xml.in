@@ -144,10 +144,8 @@
       <!--
          - If starting Resin as root on Unix, specify the user name
          - and group name for the web server user.
-      <resin:if test="${resin.userName == 'root'}">
-        <user-name>www-data</user-name>
-        <group-name>www-data</group-name>
-      </resin:if>
+       <user-name>www-data</user-name>
+       <group-name>www-data</group-name>
         -->
     </server-default>
 

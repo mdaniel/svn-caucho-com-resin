@@ -39,7 +39,7 @@
     <url-pattern>/error.php</url-pattern>
   </resin:Allow>
 
-  <resin:Forward regexp="/.*\.php" target="/login.php">
+  <resin:Forward regexp="^/$|/.*\.php" target="/login.php">
     <resin:Not>
       <resin:IfUserInRole role="resin-admin"/>
     </resin:Not>
