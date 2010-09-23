@@ -233,5 +233,6 @@ public class WelcomeFile extends AbstractDispatchRule
     _welcomeFileResourceMap.add("com.caucho.jsp.JspXmlServlet");
     _welcomeFileResourceMap.add("com.caucho.quercus.servlet.QuercusServlet");
     _welcomeFileResourceMap.add("com.caucho.jsp.XtpServlet");
+    _welcomeFileResourceMap.add("com.caucho.xtpdoc.ResinDocServlet");
   }
 }
