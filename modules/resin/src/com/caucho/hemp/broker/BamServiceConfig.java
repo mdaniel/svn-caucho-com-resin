@@ -59,6 +59,7 @@ public class BamServiceConfig extends AbstractBeanConfig
   {
   }
 
+  @Override
   protected void initImpl()
   {
     if (getInstanceClass() == null)

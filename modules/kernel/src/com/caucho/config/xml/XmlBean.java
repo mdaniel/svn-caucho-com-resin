@@ -29,7 +29,6 @@
 
 package com.caucho.config.xml;
 
-import java.lang.reflect.Constructor;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
@@ -44,8 +43,6 @@ import com.caucho.config.inject.BeanWrapper;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.inject.Module;
 
 /**

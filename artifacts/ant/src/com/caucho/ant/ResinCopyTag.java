@@ -43,10 +43,10 @@ import org.apache.tools.ant.types.Path;
 /**
  * Ant task to copy a tag in the repository.  A tag can be copied by
  * specifying the source tag explicitly using the "sourceTag" attribute
- * or using the "sourceStage", "sourceType", "sourceVirtualHost", 
+ * or using the "sourceStage", "sourceType", "sourceVirtualHost",
  * "sourceContextRoot", and "sourceVersion" attributes.  The target
  * tag can be specified explicitly using the "tag" attribute or by using
- * the "stage", "type", "virtualHost", "contextRoot", and "version" 
+ * the "stage", "type", "virtualHost", "contextRoot", and "version"
  * attributes.
  */
 public class ResinCopyTag extends ResinDeployClientTask {
@@ -102,11 +102,11 @@ public class ResinCopyTag extends ResinDeployClientTask {
     super.validate();
 
     if (_tag == null && getContextRoot() == null)
-      throw new BuildException("tag or contextRoot is required by " 
+      throw new BuildException("tag or contextRoot is required by "
                                + getTaskName());
 
     if (_sourceTag == null && _sourceContextRoot == null)
-      throw new BuildException("sourceTag or sourceContextRoot is required by " 
+      throw new BuildException("sourceTag or sourceContextRoot is required by "
                                + getTaskName());
   }
 
@@ -116,12 +116,13 @@ public class ResinCopyTag extends ResinDeployClientTask {
   {
     String tag = _tag;
     String sourceTag = _sourceTag;
-
+    /*
     if (tag == null)
       tag = buildVersionedWarTag();
+    */
 
     if (sourceTag == null) {
-      sourceTag = WebAppDeployClient.createTag(_sourceStage, 
+      sourceTag = WebAppDeployClient.createTag(_sourceStage,
                                                _sourceVirtualHost,
                                                _sourceContextRoot,
                                                _sourceVersion);
@@ -129,8 +130,10 @@ public class ResinCopyTag extends ResinDeployClientTask {
 
     log("Copying " + sourceTag + " to " + tag);
 
-    boolean result = client.copyTag(tag, sourceTag, getCommitAttributes());
-
+    boolean result = false;
+    /*
+    result = client.copyTag(tag, sourceTag, getCommitAttributes());
+    */
     if (! result)
       log("Failed to copy " + sourceTag + " to " + tag);
   }

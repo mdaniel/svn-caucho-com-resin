@@ -233,6 +233,26 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   }
 
   /**
+   * Convenience method for adding a path/directory.
+   */
+  @Override
+  public String commitPath(CommitBuilder commit,
+                           Path directoryPath)
+  {
+    commit.validate();
+    
+    String contentHash = addPath(directoryPath);
+    
+    if (putTag(commit.getId(), 
+               contentHash, 
+               commit.getAttributes())) {
+      return contentHash;
+    }
+    else
+      return null;
+  }
+
+  /**
    * Convenience method for adding the content of a jar.
    */
   @Override

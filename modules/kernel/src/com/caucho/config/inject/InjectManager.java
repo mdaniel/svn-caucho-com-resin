@@ -4311,7 +4311,7 @@ public final class InjectManager
       
       if (env == null)
         env = new OwnerCreationalContext<T>(bean, parentEnv);
-      
+
       instance = _context.get(bean, env);
         
       if (instance == null)

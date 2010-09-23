@@ -34,6 +34,7 @@ import java.io.IOException;
 
 import java.util.HashMap;
 
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.TagResult;
@@ -74,8 +75,10 @@ public class ResinUploadWar extends ResinDeployClientTask {
       if (lastSlash < 0)
         lastSlash = 0;
 
-      setContextRoot(_warFile.substring(lastSlash, 
-                                        _warFile.length() - ".war".length()));
+      int end = _warFile.length() - ".war".length();
+      String name = _warFile.substring(lastSlash, end);
+
+      setContextRoot(name);
     }
   }
 
@@ -110,37 +113,41 @@ public class ResinUploadWar extends ResinDeployClientTask {
       String archiveTag = _archive;
 
       if ("true".equals(archiveTag)) {
-        archiveTag = client.createArchiveTag(getVirtualHost(), 
-                                             getContextRoot(), 
+        archiveTag = client.createArchiveTag(getVirtualHost(),
+                                             getContextRoot(),
                                              getVersion());
       }
       else if ("false".equals(archiveTag)) {
         archiveTag = null;
       }
 
-      String tag = buildVersionedWarTag();
+      CommitBuilder  tag = buildVersionedWarTag();
 
       HashMap<String,String> attributes = getCommitAttributes();
 
-      client.deployJarContents(tag, path, attributes);
+      client.commitArchive(tag, path);
 
       log("Deployed " + path + " to tag " + tag);
 
+      /*
       if (archiveTag != null) {
-        client.copyTag(archiveTag, tag, attributes);
+        client.copyTag(archiveTag, tag);
 
         log("Created archive tag " + archiveTag);
       }
+      */
 
+      /*
       if (getVersion() != null && _writeHead) {
-        String headTag = buildWarTag();
+        CommitBuilder headTag = buildWarTag();
 
-        client.copyTag(headTag, tag, attributes);
+        client.copyTag(headTag, tag);
 
         log("Wrote head version tag " + headTag);
       }
+      */
     }
-    catch (IOException e) {
+    catch (Exception e) {
       throw new BuildException(e);
     }
   }

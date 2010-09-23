@@ -962,8 +962,8 @@ public class ConnectionPool extends AbstractManagedObject
           try {
             long now = Alarm.getCurrentTimeActual();
             
-            long delta = now - expireTime;
-        
+            long delta = expireTime - now;
+
             if (delta <= 0)
               return false;
         

@@ -68,7 +68,7 @@ public class ResinDeleteTag extends ResinDeployClientTask {
     super.validate();
 
     if (_tag == null && getContextRoot() == null)
-      throw new BuildException("tag or contextRoot is required by " + 
+      throw new BuildException("tag or contextRoot is required by " +
                                getTaskName());
   }
 
@@ -78,6 +78,7 @@ public class ResinDeleteTag extends ResinDeployClientTask {
   {
     String tag = _tag;
 
+    /*
     if (tag == null)
       tag = buildVersionedWarTag();
 
@@ -85,5 +86,6 @@ public class ResinDeleteTag extends ResinDeployClientTask {
       log("Deleted tag " + tag);
     else
       log("Failed to delete tag " + tag);
+    */
   }
 }

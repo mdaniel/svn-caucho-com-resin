@@ -36,6 +36,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.inject.Qualifier;
+
 /**
  * An annotation cookie for matching AnnotatedTypes to InjectionTargets.
  */

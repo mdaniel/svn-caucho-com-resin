@@ -37,8 +37,6 @@ import javax.mail.Session;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.AbstractBeanConfig;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.InjectManager;
 
 /**
  * Configuration for a javamail.
@@ -222,7 +220,7 @@ public class JavaMailConfig extends AbstractBeanConfig {
 
       if (auth == null && _user != null && _password != null)
         auth = new StandardAuthenticator(_user, _password);
-      
+
       if (auth != null)
         _session = Session.getInstance(_props, auth);
       else

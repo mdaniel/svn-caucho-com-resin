@@ -218,7 +218,7 @@ public class ShutdownService extends AbstractResinService
       log.warning("Shutdown Resin reason: " + exitCode);
 
       if (! _isEmbedded) {
-        Thread.dumpStack();
+        // Thread.dumpStack();
         System.exit(exitCode.ordinal());
       }
     }

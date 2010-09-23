@@ -190,6 +190,39 @@ public class DeployClient implements Repository
   }
 
   /**
+   * Uploads the contents of a jar/zip file to a Resin server.  
+   * The jar is unzipped and each component is uploaded separately.
+   * For wars, this means that only the changed files need updates.
+   *
+   * @param tag symbolic name of the jar file to add
+   * @param jar path to the jar file
+   * @param attributes commit attributes including user, message, and version
+   */
+  @Override
+  public String commitPath(CommitBuilder commit,
+                           Path path)
+  {
+    commit.validate();
+    
+    GitCommitJar gitCommit = null;
+
+    try {
+      gitCommit = new GitCommitJar(path);
+      
+      String tag = commit.getId();
+      
+      return deployJar(tag, gitCommit, commit.getAttributes());
+    }
+    catch (IOException e) {
+      throw new RepositoryException(e);
+    }
+    finally {
+      if (gitCommit != null)
+        gitCommit.close();
+    }
+  }
+
+  /**
    * Copies a tag
    *
    * @param tag the new tag to create

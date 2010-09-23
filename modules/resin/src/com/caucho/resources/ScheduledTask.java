@@ -35,9 +35,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Startup;
 import javax.el.ELContext;
 import javax.el.MethodExpression;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.enterprise.inject.Instance;
 import javax.resource.spi.work.Work;
 import javax.servlet.RequestDispatcher;
@@ -67,7 +69,8 @@ import com.caucho.util.L10N;
  * intervals.
  */
 
-@Service
+@Singleton
+@Startup
 @Unbound
 @Configurable  
 public class ScheduledTask
@@ -179,6 +182,12 @@ public class ScheduledTask
   public Runnable getTask()
   {
     return _task;
+  }
+  
+  @Configurable
+  public void add(Runnable task)
+  {
+    _task = task;
   }
 
   /**

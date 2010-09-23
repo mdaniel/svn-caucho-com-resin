@@ -64,6 +64,7 @@ import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.type.TypeFactory;
 import com.caucho.config.xml.XmlBeanConfig;
+import com.caucho.config.xml.XmlCookie;
 import com.caucho.inject.Module;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
@@ -87,7 +88,7 @@ public class BeanConfig {
 
   private XmlBeanConfig _customBean;
 
-  private InjectManager _beanManager;
+  private InjectManager _cdiManager;
 
   private Class<?> _cl;
 
@@ -113,7 +114,7 @@ public class BeanConfig {
 
   public BeanConfig()
   {
-    _beanManager = InjectManager.create();
+    _cdiManager = InjectManager.create();
 
     if (getDefaultScope() != null)
       setScope(getDefaultScope());
@@ -123,7 +124,7 @@ public class BeanConfig {
 
   public InjectManager getBeanManager()
   {
-    return _beanManager;
+    return _cdiManager;
   }
 
   protected String getDefaultScope()
@@ -167,8 +168,11 @@ public class BeanConfig {
   {
     _cl = cl;
 
+    // env/1072
+    /*
     if (_name == null)
       _name = Introspector.decapitalize(cl.getSimpleName());
+      /*/
 
     Class<?> type = getBeanConfigClass();
 
@@ -228,7 +232,7 @@ public class BeanConfig {
     else if ("conversation".equals(scope))
       _scope = ConversationScoped.class;
     else {
-      Class cl = null;
+      Class<?> cl = null;
 
       try {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -537,8 +541,9 @@ public class BeanConfig {
       builder.qualifier(qualifier);
     }
     
-    if (_name != null)
+    if (_name != null) {
       builder.qualifier(Names.create(_name));
+    }
     
     if (_qualifierList.size() == 0)
       builder.qualifier(DefaultLiteral.DEFAULT);
@@ -555,6 +560,8 @@ public class BeanConfig {
     if (Singleton.class == _scope) {
       builder.annotation(new StartupLiteral());
     }
+    
+    builder.annotation(_cdiManager.generateXmlCookie());
 
     /*
     if (_isService) {
@@ -614,9 +621,9 @@ public class BeanConfig {
   public Object getObject()
   {
     if (_bean != null) {
-      CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
+      CreationalContext<?> env = _cdiManager.createCreationalContext(_bean);
 
-      Object value = _beanManager.getReference(_bean, _bean.getBeanClass(), env);
+      Object value = _cdiManager.getReference(_bean, _bean.getBeanClass(), env);
 
       /*
       if (_init != null)
@@ -632,9 +639,9 @@ public class BeanConfig {
   public Object createObjectNoInit()
   {
     if (_bean != null) {
-      CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
+      CreationalContext<?> env = _cdiManager.createCreationalContext(_bean);
       // XXX:
-      return _beanManager.getReference(_bean, (Class<?>) null, env);
+      return _cdiManager.getReference(_bean, (Class<?>) null, env);
       // return _bean.createNoInit();
     }
     else

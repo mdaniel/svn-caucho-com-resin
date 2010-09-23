@@ -87,6 +87,7 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
   }
 
   @Override
+  @PostConstruct
   public void init()
   {
     super.init();
@@ -124,6 +125,7 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     beanManager.addBean(bean);
     
     ((InjectionBean) bean).introspectProduces();
+    System.out.println("ZOME: " + bean);
   }
 
   @Override

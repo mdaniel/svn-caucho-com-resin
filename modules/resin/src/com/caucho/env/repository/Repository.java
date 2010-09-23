@@ -56,16 +56,22 @@ public interface Repository
   public String getTagContentHash(String tag);
   
   /**
-   * Adds and commits a full path, recursively
+   * Adds and commits a jar/zip archive
    */
   public String commitArchive(CommitBuilder commitTag,
                               Path contentArchive);
   
   /**
-   * Adds and commits a full path, recursively
+   * Adds and commits a jar/zip archive.
    */
   public String commitArchive(CommitBuilder commitTag,
                               InputStream is);
+  
+  /**
+   * Adds and commits a full path, recursively
+   */
+  public String commitPath(CommitBuilder commitTag,
+                           Path contentDirectory);
 
   /**
    * Removes a tag

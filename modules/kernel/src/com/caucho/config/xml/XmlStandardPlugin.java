@@ -60,7 +60,6 @@ import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.extension.ProcessBeanImpl;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScheduleBean;
 import com.caucho.config.inject.SingletonHandle;
 import com.caucho.inject.LazyExtension;

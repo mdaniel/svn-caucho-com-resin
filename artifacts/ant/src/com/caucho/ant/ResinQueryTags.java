@@ -32,6 +32,7 @@ package com.caucho.ant;
 import java.io.File;
 import java.io.IOException;
 
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.TagResult;
@@ -43,7 +44,7 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
 
 /**
- * Ant task to query tags of Resin applications deployed via the 
+ * Ant task to query tags of Resin applications deployed via the
  * ResinDeployWar task to production.
  */
 public class ResinQueryTags extends ResinDeployClientTask {
@@ -76,14 +77,14 @@ public class ResinQueryTags extends ResinDeployClientTask {
   {
     return _printValues;
   }
-  
+
   @Override
   protected void validate()
     throws BuildException
   {
     super.validate();
 
-    if (_pattern == null 
+    if (_pattern == null
         && getStage() == null
         && getVirtualHost() == null
         && getContextRoot() == null
@@ -101,7 +102,8 @@ public class ResinQueryTags extends ResinDeployClientTask {
       if (getContextRoot() == null)
         setContextRoot(".*");
 
-      pattern = buildVersionedWarTag();
+      CommitBuilder commit = buildVersionedWarTag();
+      pattern = commit.getId();
     }
 
     log("Query pattern = '" + pattern + "'", Project.MSG_DEBUG);
@@ -109,7 +111,7 @@ public class ResinQueryTags extends ResinDeployClientTask {
     TagResult []tags = client.queryTags(pattern);
 
     for (TagResult tag : tags) {
-      if (_printValues) 
+      if (_printValues)
         log(tag.getTag() + " -> " + tag.getRoot());
       else
         log(tag.getTag());

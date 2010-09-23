@@ -52,6 +52,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.util.Nonbinding;
 
+import com.caucho.config.xml.XmlCookie;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
@@ -221,6 +222,14 @@ abstract public class AbstractBean<T>
       for (String annString : annList) {
         out.print(";");
         out.print(annString);
+      }
+      
+      // ioc/0l34
+      if (getAnnotatedType() != null) {
+        XmlCookie xmlCookie = getAnnotatedType().getAnnotation(XmlCookie.class);
+        if (xmlCookie != null) {
+          out.print(";xmlcookie=" + xmlCookie.value());
+        }
       }
 
       out.close();

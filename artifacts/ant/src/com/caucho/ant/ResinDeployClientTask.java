@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.*;
 
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
@@ -56,6 +57,10 @@ public abstract class ResinDeployClientTask extends Task {
   private String _virtualHost = "default";
   private String _contextRoot;
   private String _version;
+
+  public ResinDeployClientTask()
+  {
+  }
 
   public void setServer(String server)
   {
@@ -147,19 +152,19 @@ public abstract class ResinDeployClientTask extends Task {
     return _version;
   }
 
-  protected String buildWarTag()
+  protected CommitBuilder buildWarTag()
   {
-    return WebAppDeployClient.createTag(_stage,
-                                        _virtualHost,
-                                        _contextRoot);
+    CommitBuilder builder = new CommitBuilder();
+    builder.type("webapp");
+    builder.stage(_stage);
+    builder.tagKey(_virtualHost + _contextRoot);
+
+    return builder;
   }
 
-  protected String buildVersionedWarTag()
+  protected CommitBuilder buildVersionedWarTag()
   {
-    return WebAppDeployClient.createTag(_stage,
-                                        _virtualHost,
-                                        _contextRoot,
-                                        _version);
+    return buildWarTag();
   }
 
   protected void validate()

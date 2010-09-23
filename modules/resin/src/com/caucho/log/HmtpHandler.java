@@ -81,6 +81,7 @@ public class HmtpHandler extends Handler {
   /**
    * Publishes the record.
    */
+  @Override
   public void publish(LogRecord record)
   {
     if (! isLoggable(record))
@@ -110,6 +111,7 @@ public class HmtpHandler extends Handler {
   /**
    * Flushes the buffer.
    */
+  @Override
   public void flush()
   {
   }
@@ -117,10 +119,12 @@ public class HmtpHandler extends Handler {
   /**
    * Closes the handler.
    */
+  @Override
   public void close()
   {
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _to + "]";
