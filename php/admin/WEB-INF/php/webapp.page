@@ -454,13 +454,17 @@ function display_webapp_expanded_actions($webapp, $beans, $refresh_id)
   echo "<input type='hidden' name='stage' value='{$g_server->Stage}'>";
   echo "<input type='hidden' name='host' value='{$webapp->Host->Name}'>";
   echo "<input type='hidden' name='action' value='update'>";
-  echo "<input type='hidden' name='name' value='$name'>\n";
+  echo "<input type='hidden' name='name' value='{$webapp->ContextPath}'>\n";
 
   echo "<h4>Commit message</h4>";
   echo "<textarea name='commit-message'></textarea>\n";
   echo "<h4>Version</h4>";
 
-  echo "<input type='text' name='version' value=''>\n";
+  echo "<input type='number' min='0' size='3' name='version-major' title='Major Version Number' value='0' class='required'>\n";
+  echo "<input type='number' min='0' size='3' name='version-minor' title='Minor Version Number' value='0' class='required'>\n";
+  echo "<input type='number' min='0' size='3' name='version-micro' title='Micro Version Number' value='0' class='required'>\n";
+  echo "<input type='text' name='version-qualifier' title='Version Qualifier (free form)' value=''>\n";
+
   echo "<h4>Application archive file</h4>";
   echo "<input type='file' name='application'>\n";
   echo "<div style='text-align: right'>";

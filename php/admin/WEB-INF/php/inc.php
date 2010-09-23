@@ -26,9 +26,7 @@ function admin_init($query="", $is_refresh=false)
   global $g_server;
   global $g_page;
 
-  mbean_init();
-  
-  if (! $g_mbean_server) {
+  if (! mbean_init()) {
     if ($g_server_id)
       $title = "Resin: $g_page for server $g_server_id";
     else
@@ -58,6 +56,8 @@ function mbean_init()
   global $g_resin;
   global $g_server;
 
+  $is_valid = 1;
+
   $g_server_index = $_GET["s"];
 
   if (isset($_REQUEST["new_s"])) {
@@ -78,15 +78,32 @@ function mbean_init()
     $server = server_find_by_index($g_mbean_server, $g_server_index);
 
     $g_server_id = $server->Name;
-    $g_mbean_server = new MBeanServer($g_server_id);
 
-    $g_server = $g_mbean_server->lookup("resin:type=Server");
+    try {
+      $mbean_server = new MBeanServer($g_server_id);
+
+      $server = $mbean_server->lookup("resin:type=Server");
+
+      if ($server) {
+        $g_mbean_server = $mbean_server;
+        $g_server = $server;
+      }
+      else {
+        $is_valid = false;
+      }
+    } catch (Exception $e) {
+      $is_valid = false;
+    }
   }
 
   if ($g_mbean_server) {
     $g_resin = $g_mbean_server->lookup("resin:type=Resin");
     $g_server = $g_mbean_server->lookup("resin:type=Server");
+
+    return $is_valid;
   }
+  else
+    return false;
 }
 
 function load_pages($suffix)
@@ -633,7 +650,10 @@ if ($is_refresh) {
 <?
 if (! empty($server)) {
   $server_name = $server->Id ? $server->Id : "default";
-
+}
+else {
+  $server_name = "default";
+}
 ?>
 <ul class='status'>
    <li class="server status-item"><?php display_servers($server); ?></li>
@@ -643,7 +663,6 @@ if (! empty($server)) {
    <li class="status-item"><?php display_health(); ?></li>
    <li class="status-item status-log"><?php display_status_log($server); ?></li>
 </ul>
-<? }  ?>
 </div>
 
 <div style='float: right; width: 20%; text-align: right;'>
@@ -893,6 +912,11 @@ function display_servers($server)
 {
   global $g_next_url;
   global $g_server_index;
+  global $g_server;
+
+  if (! $server) {
+    $server = $g_server;
+  }
 
   echo "<form class='status-item' name='servers' method='POST' action='" . $g_next_url . "'>";
   echo "Server: "; 
