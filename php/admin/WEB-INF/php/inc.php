@@ -1166,7 +1166,7 @@ function print_fail($message)
     
 function print_warn($message)
 {
-  echo "<span style='color:#c0c000'>?$message</span>";
+  echo "<span style='color:#cc8811'>?$message</span>";
 }
 
 function print_check_or_x($status)
