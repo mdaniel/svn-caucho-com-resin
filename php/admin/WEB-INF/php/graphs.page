@@ -402,8 +402,13 @@ function GraphManager() {
   var graphDiv = $('div.graph');
 
   var updateGraph = function(element, canvasHtml) {
-    element.empty();
-    element.append(canvasHtml);
+    if (canvasHtml.indexOf("<div") == 0) {
+      element.empty();
+      element.append(canvasHtml);
+    }
+    else {
+      location.reload();
+    }
   };
 
   var highlightSections = function() {
