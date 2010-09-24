@@ -29,9 +29,6 @@
 
 package com.caucho.resin.eclipse;
 
-import java.io.IOException;
-import java.util.HashMap;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,8 +40,9 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleArtifact;
 import org.eclipse.wst.server.core.internal.ServerPlugin;
 
+import com.caucho.env.repository.CommitBuilder;
+import com.caucho.env.repository.RepositoryException;
 import com.caucho.server.admin.DeployClient;
-import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -76,21 +74,20 @@ public class ResinGitPublisher extends ResinPublisher
     String user = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
                                                  DEPLOY_USERNAME);
     
-    String tag = 
-      WebAppDeployClient.createTag("default", host, getModuleName());
+    CommitBuilder commit = new CommitBuilder();
+    commit.type("webapp")
+           .stage("production")
+           .tagKey(host + "/" + getModuleName());
+    commit.attribute("user", user);
+    commit.message("updated via Resin Eclipse plugin");
+    
     Path war = getWarPath();
-
-    HashMap<String,String> attributes = new HashMap<String,String>();
-    attributes.put(DeployClient.USER_ATTRIBUTE, user);
-    attributes.put("user.name", 
-      System.getProperties().getProperty("user.name"));
-    attributes.put("client", "Eclipse Resin plugin");
 
     try {
       // XXX add support for message, version, and stage
-      getDeployClient().deployJarContents(tag, war, attributes);
+      getDeployClient().commitArchive(commit, war);
     }
-    catch (IOException e) {
+    catch (RepositoryException e) {
       IStatus s = new Status(IStatus.ERROR, 
                              CorePlugin.PLUGIN_ID, 
                              0, 

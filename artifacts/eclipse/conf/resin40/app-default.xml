@@ -11,7 +11,6 @@
   <class-loader>
     <compiling-loader path="WEB-INF/classes"/>
     <library-loader path="WEB-INF/lib"/>
-    <project-loader path="WEB-INF/pom.xml"/>
   </class-loader>
 
   <servlet servlet-name="resin-file"
@@ -29,7 +28,7 @@
   <servlet servlet-name="resin-jspx"
            servlet-class="com.caucho.jsp.JspServlet">
     <init>
-      <load-tld-on-init>false</load-tld-on-init>	   
+      <load-tld-on-init>false</load-tld-on-init>     
       <page-cache-max>1024</page-cache-max>
       <xml>true</xml>
     </init>
@@ -53,6 +52,10 @@
 
   <servlet servlet-name="j_security_check"
            servlet-class="com.caucho.server.security.FormLoginServlet"/>
+
+  <!--
+     - <multipart-form enable="true"/>
+    -->
 
   <!-- Configures the special index files to check for directory URLs -->
   <welcome-file-list>
@@ -234,7 +237,7 @@
     
   <mime-mapping extension=".zip" mime-type="application/zip"/>
   <mime-mapping extension=".z" mime-type="application/octet-stream"/>
-  
+
   <resin:import path="WEB-INF/resin-web-pre.xml" optional="true"/>
   <resin:import path="WEB-INF/web.xml" optional="true"/>
   <resin:import path="WEB-INF/resin-web.xml" optional="true"/>
@@ -242,5 +245,3 @@
 </web-app-default>
 
 </cluster>
-
-

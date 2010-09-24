@@ -22,7 +22,7 @@
     <resin:import path="${__DIR__}/app-default.xml"/>
 
     <host id="" root-directory=".">
-      <web-app-deploy path="webapps"/>
+      <web-app-deploy path="webapps" versioning="true"/>
     </host>
   </cluster>
 </resin>
