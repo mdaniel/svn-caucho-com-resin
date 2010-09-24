@@ -21,21 +21,13 @@ clean	:
 	- rm -r $(LIBEXEC)
 
 install	:
-	@ if test "$(resin_home)" != $(abs_builddir); then \
-	  mkdir -p $(resin_home)/bin; \
-	  mkdir -p $(resin_home)/keys; \
-	  mkdir -p $(resin_home)/licenses; \
-	  mkdir -p $(resin_home)/lib; \
-	  mkdir -p $(resin_home)/$(LIBEXEC); \
-	  cp bin/* $(resin_home)/bin; \
-	  cp lib/*.jar $(resin_home)/lib; \
-	fi
 	@ if test "$(resin_root)" != $(abs_builddir); then \
-		if test -e $(resin_root); then\
+		if test -e "$(resin_root)"; then \
 			echo "-------------------------------------------------------";\
 			echo "Will not overwrite Resin root directory ($(resin_root))";\
 			echo "-------------------------------------------------------";\
-		else\ 
+		else \
+			echo "Installing Resin root directory $(resin_root)"; \
 			mkdir -p $(resin_root)/webapps; \
 			cp -r $(CP_U_FLAG) webapps/* $(resin_root)/webapps; \
 			mkdir -p $(resin_root)/doc; \
@@ -44,6 +36,16 @@ install	:
 			cp -r $(CP_U_FLAG) project-jars/* $(resin_root)/project-jars; \
 			mkdir -p $(resin_log); \
 		fi;\
+	fi
+	@ echo "Installing Resin home directory $(resin_root)"
+	@ if test "$(resin_home)" != $(abs_builddir); then \
+	  mkdir -p $(resin_home)/bin; \
+	  mkdir -p $(resin_home)/keys; \
+	  mkdir -p $(resin_home)/licenses; \
+	  mkdir -p $(resin_home)/lib; \
+	  mkdir -p $(resin_home)/$(LIBEXEC); \
+	  cp bin/* $(resin_home)/bin; \
+	  cp lib/*.jar $(resin_home)/lib; \
 	fi
 	@ if test "$(resin_conf)" != $(abs_builddir)/conf; then \
 	  mkdir -p $(resin_conf); \
@@ -75,5 +77,5 @@ install	:
 			mkdir -p `dirname $(resin_init_d)`;\
 			cp $(abs_builddir)/init.d/resin $(resin_init_d); \
 			chmod +x $(resin_init_d) && echo "$(resin_init_d) installed."; \
-	  fi; \
+		fi; \
 	fi
