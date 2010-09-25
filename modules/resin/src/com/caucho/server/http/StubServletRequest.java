@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
+import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.server.webapp.WebApp;
@@ -492,6 +493,12 @@ public class StubServletRequest implements CauchoRequest {
 
   public void setSessionId(String sessionId)
   {
+  }
+
+  @Override
+  public SocketLink getSocketLink()
+  {
+    return null;
   }
 }
   

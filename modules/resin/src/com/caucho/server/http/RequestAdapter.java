@@ -28,6 +28,7 @@
 
 package com.caucho.server.http;
 
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.FreeList;
@@ -546,6 +547,15 @@ public class RequestAdapter extends RequestWrapper
   public boolean isKeepaliveAllowed()
   {
     return true;
+  }
+
+  @Override
+  public SocketLink getSocketLink()
+  {
+    if (getRequest() instanceof CauchoRequest)
+      return ((CauchoRequest) getRequest()).getSocketLink();
+    else
+      return null;
   }
 
   public boolean isClientDisconnect()
