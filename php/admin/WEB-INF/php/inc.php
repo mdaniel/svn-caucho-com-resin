@@ -64,8 +64,8 @@ function mbean_init()
     $g_server_index = $_REQUEST["new_s"];
   }
 
+  $g_mbean_server = new MBeanServer();
   if (! isset($g_server_index)) {
-    $g_mbean_server = new MBeanServer();
     $g_server = $g_mbean_server->lookup("resin:type=Server");
     $g_server_index = $g_server->SelfServer->ClusterIndex;
     $g_server_id = $g_server->Id;
@@ -74,7 +74,6 @@ function mbean_init()
       $g_server_id = "default";
   }
   else {
-    $g_mbean_server = new MBeanServer("");
     $server = server_find_by_index($g_mbean_server, $g_server_index);
 
     $g_server_id = $server->Name;
@@ -827,7 +826,8 @@ function display_health()
 {
   global $g_server;
   $resin = $g_server->Cluster->Resin;
-  $clusters = $resin->Clusters;
+  // $clusters = $resin->Clusters;
+  $clusters = array($g_server->Cluster);
 
   $down_servers = array();
 
