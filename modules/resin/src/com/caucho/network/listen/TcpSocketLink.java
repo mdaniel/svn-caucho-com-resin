@@ -276,6 +276,18 @@ public class TcpSocketLink extends AbstractSocketLink
   }
 
   @Override
+  public void requestShutdownBegin()
+  {
+    _port.requestShutdownBegin();
+  }
+
+  @Override
+  public void requestShutdownEnd()
+  {
+    _port.requestShutdownEnd();
+  }
+
+  @Override
   public boolean isCometActive()
   {
     return _state.isCometActive() && ! _isCompleteRequested;

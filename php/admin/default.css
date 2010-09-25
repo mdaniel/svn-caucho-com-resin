@@ -6,6 +6,7 @@
 /* yellow (hover) #ffcc33 */
 /* hr #fab41d */
 /* red #98012e;  */
+/* example : #e5d1ac; */
 
 html {
   height: 100%;
@@ -88,10 +89,11 @@ code {
   font-family : monospace;
 }
 
+/* background : #fab41d; */
 hr {
   border : 0;
   height : 1px;
-  background : #fab41d;
+  background : #4c2004;
   margin : 0.2em 0em;
 }
 
@@ -109,33 +111,33 @@ h1.title {
 
 h1 {
   margin-right : 1em;
-  border-bottom : 1px solid #fab41d;
+  border-bottom : 1px solid #4c2004;
 
   font-family : Helvetica, Arial, sans-serif;
   font-size : 170%;
 
-  color : #003366;
+  color : #4c2004;
 }
 
 h2 {
   font-family : Helvetica, Arial, sans-serif;
   font-weight : normal;
 
-  color : #003366;
+  color : #4c2004;
 }
 
 h2.section {
   font-family : Helvetica, Arial, sans-serif;
   font-weight : normal;
 
-  color : #003366;
+  color : #4c2004;
   padding : 2px;
-  background-color : #ccccdd;
+  background-color : #ddccbb;
 }
 
 h3 {
   font-family : Helvetical, Arial, sans-serif;
-  color : #6699cc;
+  color : #4c2004;
 }
 
 h4 {
@@ -698,20 +700,20 @@ a.hideOptional {
 
 .jmx-data th {
   text-align: left;
-  background: #e0e6f8;
+  background: #f4f4f4;
   margin: 0px;
   padding: 0px;
   border: 0px;
 }
+/*  background: #f4f4f4; */
 
 table.data {
   font-size: 100%;
   color: black;
   border-collapse: collapse;
-  background: #f4f4f4;
   empty-cells: hide;
 }
-
+/*
 tr.ra {
   background: #f4f4f4;
 }
@@ -719,27 +721,37 @@ tr.ra {
 tr.rb {
   background: #e4e4e4;
 }
+*/
 
+tr.ra {
+  background: #f6f2e8;
+}
+
+tr.rb {
+  background: #f0ece0;
+}
 .data td {
   padding: 3px 4px 3px 4px;
   border: thin solid grey;
 }
+/* old background: #e0e6f8; */
 
 .data th {
   padding: 3px 4px 3px 4px;
-  background: #e0e6f8;
+  background: #e5d1ac;
   text-align: center;
   border: thin solid grey;
 }
 
 /*  background : #d0e4ff; */
 .data td.group {
-  background : #CDE;
+  background : #e5d1ac;
   font-weight : bold;
 }
 
+/* background : #e0e6f8; */
 .data td.item {
-  background : #e0e6f8;
+  background : #e5d1ac;
   font-weight : bold;
 }
 

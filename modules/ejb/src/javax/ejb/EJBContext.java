@@ -49,22 +49,29 @@ public interface EJBContext {
   public EJBLocalHome getEJBLocalHome();
   
   public Properties getEnvironment();
+  
+  // XA
+
+  public UserTransaction getUserTransaction()
+    throws IllegalStateException;
 
   public boolean getRollbackOnly()
     throws IllegalStateException;
 
-  public TimerService getTimerService()
+  public void setRollbackOnly()
     throws IllegalStateException;
-
-  public UserTransaction getUserTransaction()
-    throws IllegalStateException;
+  
+  // security
 
   public boolean isCallerInRole(Identity role);
 
   public boolean isCallerInRole(String roleName);
 
   public Object lookup(String name);
-
-  public void setRollbackOnly()
+  
+  // timer
+  
+  public TimerService getTimerService()
     throws IllegalStateException;
+
 }

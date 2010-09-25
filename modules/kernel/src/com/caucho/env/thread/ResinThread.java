@@ -133,6 +133,10 @@ final class ResinThread extends Thread {
 
   private void runTasks()
   {
+    // is first is needed since the onThreadStart must be called after
+    // the first item pickup.
+    boolean isFirst = true;
+    
     ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
     
     Thread thread = this;
@@ -143,8 +147,11 @@ final class ResinThread extends Thread {
       ClassLoader classLoader = null;
 
       ThreadTask taskItem = _pool.nextTask(this);
-
+      
       if (taskItem != null) {
+        if (isFirst)
+          _pool.onThreadFirstTask();
+        
         _pool.startIdleThread();
         
         task = taskItem.getRunnable();
@@ -153,15 +160,20 @@ final class ResinThread extends Thread {
         taskItem.wake();
       }
       else if (_pool.isIdleExpire()) {
+        if (isFirst)
+          _pool.onThreadFirstTask();
+          
         return;
       }
-      else if ((task = waitForTask()) != null) {
+      else if ((task = waitForTask(isFirst)) != null) {
         classLoader = _taskLoader;
         _taskLoader = null;
       }
       else {
         return;
       }
+      
+      isFirst = false;
 
       try {
         // if the task is available, run it in the proper context
@@ -174,11 +186,18 @@ final class ResinThread extends Thread {
         thread.setContextClassLoader(systemClassLoader);
       }
     }
+    
+    if (isFirst) {
+    }
   }
   
-  private Runnable waitForTask()
+  private Runnable waitForTask(boolean isFirst)
   {
     _pool.pushIdleThread(this);
+    
+    if (isFirst)
+      _pool.onThreadFirstTask();
+    
     /*
     for (int i = 1000; i >= 0; i--) {
       Runnable task = _taskRef.getAndSet(null);

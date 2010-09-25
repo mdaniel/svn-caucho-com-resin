@@ -1501,14 +1501,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
         name = defaultName;
 
       if (name == null || name.equals("")) {
-        String className = type.getJavaClass().getName();
-
-        int p = className.lastIndexOf('.');
-
-        if (p > 0)
-          name = className.substring(p + 1);
-        else
-          name = className;
+        name = type.getJavaClass().getSimpleName();
       }
 
       setEJBName(name);

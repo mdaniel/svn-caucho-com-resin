@@ -141,6 +141,10 @@ public interface SocketLink {
 
   public void killKeepalive();
 
+  public void requestShutdownBegin();
+
+  public void requestShutdownEnd();
+
   //
   // comet support
   //

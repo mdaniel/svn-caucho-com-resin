@@ -36,6 +36,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.ReadStream;
 
@@ -84,4 +85,5 @@ public interface CauchoRequest extends HttpServletRequest {
 
   public ServletResponse getServletResponse();
   public AbstractHttpRequest getAbstractHttpRequest();
+  public SocketLink getSocketLink();
 }

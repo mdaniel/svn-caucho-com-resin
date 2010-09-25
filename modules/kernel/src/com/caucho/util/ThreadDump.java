@@ -87,6 +87,8 @@ public class ThreadDump
     buildThreads(sb, info, Thread.State.WAITING, false);
     buildThreads(sb, info, Thread.State.TIMED_WAITING, false);
     buildThreads(sb, info, null, false);
+    
+    System.out.println("DUMP2:\n " + sb);
 
     log.info(sb.toString());
   }

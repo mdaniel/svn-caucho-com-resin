@@ -872,9 +872,12 @@ public final class ThreadPool {
 
     _createCount.incrementAndGet();
     
-    _launcher.wake();
-    
     return _resetCount.get();
+  }
+  
+  void onThreadFirstTask()
+  {
+    _launcher.wake();
   }
   
   void onThreadEnd()
@@ -891,20 +894,22 @@ public final class ThreadPool {
   {
     int idleCount = _idleCount.get();
     int priorityIdleCount = _priorityIdleCount.get();
-    int startingCount = _startingCount.get();
+    int startingCount = _startingCount.incrementAndGet();
 
     int threadCount = _activeCount.get() + startingCount;
     
     if (_threadMax < threadCount) {
+      _startingCount.decrementAndGet();
+      
       return false;
     }
     else if (idleCount + startingCount < _idleMin
-             || priorityIdleCount + startingCount < _priorityIdleMin) {
-      _startingCount.incrementAndGet();
-
+             || priorityIdleCount + idleCount + startingCount < _priorityIdleMin) {
       return true;
     }
     else {
+      _startingCount.decrementAndGet();
+      
       return false;
     }
   }

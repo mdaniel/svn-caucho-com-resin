@@ -11,11 +11,6 @@ This <var>stateless session</var> bean example annotates a single
 business method with a SUPPORTS transaction attribute, marking the
 method as a read-only transaction boundary.</p>
 
-<p>See also:</p>
-<ul>
-<li>The <a href="doc|resin-ejb.xtp">Resin-EJB</a> reference.
-</li></ul>
-
 </description>
 </header>
 

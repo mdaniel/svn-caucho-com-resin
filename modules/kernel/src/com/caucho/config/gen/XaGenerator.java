@@ -243,13 +243,6 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
     out.pushDepth();
     
     if (_isContainerManaged) {
-      /*
-      out.println("if (_xa.getTransaction() != null) {");
-      out.println("  _xa.markRollback(e);");
-      //out.println("  isXAValid = true;");
-      out.println("}");
-      */
-      
       if (isEjb()) {
         switch (_transactionType) {
         case SUPPORTS:
@@ -278,13 +271,6 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
     }
     else {
       if (isEjb()) {
-        /*
-        out.println("if (_xa.getTransaction() != null) {");
-        out.println("  _xa.markRollback(e);");
-        //out.println("  isXAValid = true;");
-        out.println("}");
-        */
-        
         out.println("_xa.rethrowEjbException(e, false);");
       }
     }

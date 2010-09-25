@@ -171,6 +171,10 @@ public class SocketLinkListener extends TaskWorker
   private final AtomicInteger _idleThreadCount = new AtomicInteger();
   private final AtomicInteger _startThreadCount = new AtomicInteger();
 
+  // active requests that are closing after the request like an access-log
+  // but should not trigger a new thread launch.
+  private final AtomicInteger _shutdownRequestCount = new AtomicInteger();
+  
   // reaper alarm for timed out comet requests
   private Alarm _suspendAlarm;
 
@@ -838,7 +842,11 @@ public class SocketLinkListener extends TaskWorker
    */
   private boolean isStartThreadRequired()
   {
-    return (_startThreadCount.get() + _idleThreadCount.get() < _idleThreadMin);
+    int startCount = _startThreadCount.get();
+    int idleCount = _idleThreadCount.get();
+    int shutdownCount = _shutdownRequestCount.get();
+    
+    return (startCount + idleCount + shutdownCount < _idleThreadMin);
   }
   
   /**
@@ -1258,6 +1266,22 @@ public class SocketLinkListener extends TaskWorker
     _startThreadCount.decrementAndGet();
 
     wake();
+  }
+
+  /**
+   * request threads in a shutdown, but not yet idle.
+   */
+  void requestShutdownBegin()
+  {
+    _shutdownRequestCount.incrementAndGet();
+  }
+
+  /**
+   * request threads in a shutdown, but not yet idle.
+   */
+  void requestShutdownEnd()
+  {
+    _shutdownRequestCount.decrementAndGet();
   }
 
   /**

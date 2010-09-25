@@ -40,6 +40,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.network.listen.SocketLink;
+import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.log.AbstractAccessLog;
 
 /**
@@ -85,19 +87,33 @@ public class AccessLogFilterChain implements CauchoFilterChain {
    * @param response the servlet response
    * @since Servlet 2.3
    */
+  @Override
   public void doFilter(ServletRequest request,
                        ServletResponse response)
     throws ServletException, IOException
   {
     _next.doFilter(request, response);
     
+    SocketLink socketLink = null;
+    
+    if (request instanceof CauchoRequest) {
+      socketLink = ((CauchoRequest) request).getSocketLink();
+    }
+    
     try {
+      if (socketLink != null)
+        socketLink.requestShutdownBegin();
+      
       _accessLog.log((HttpServletRequest) request,
                      (HttpServletResponse) response,
                      _webApp);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
+    } finally {
+      if (socketLink != null)
+        socketLink.requestShutdownEnd();
     }
+    
   }
 
   @Override

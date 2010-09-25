@@ -32,6 +32,7 @@ package com.caucho.server.http;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
@@ -585,7 +586,16 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     return inRole;
   }
 
-
+  @Override
+  public SocketLink getSocketLink()
+  {
+    AbstractHttpRequest request = getAbstractHttpRequest();
+    
+    if (request != null)
+      return request.getConnection();
+    else
+      return null;
+  }
   //
   // lifecycle
   //

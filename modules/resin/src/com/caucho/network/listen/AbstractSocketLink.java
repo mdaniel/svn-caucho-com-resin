@@ -215,6 +215,16 @@ public abstract class AbstractSocketLink
   {
   }
 
+  @Override
+  public void requestShutdownBegin()
+  {
+  }
+
+  @Override
+  public void requestShutdownEnd()
+  {
+  }
+
   public SocketLinkState getState()
   {
     return SocketLinkState.REQUEST_ACTIVE_KA;

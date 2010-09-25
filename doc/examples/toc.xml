@@ -29,7 +29,9 @@
       <item link="ioc-basic/index.xtp" title="Basic Resource"/>
       -->
       <item link="ioc-injection/index.xtp" title="Injection"/>
+      <!--
       <item link="ioc-periodictask/index.xtp" title="Periodic Task"/>
+      -->
       <item link="ioc-appconfig/index.xtp" title="IoC appconfig"/>
     </item>
 

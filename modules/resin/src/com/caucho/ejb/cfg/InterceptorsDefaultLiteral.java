@@ -34,7 +34,7 @@ import com.caucho.config.gen.DefaultInterceptors;
 
 /**
  * <pre>
- * boolean-literal ::= (true="1", false="0")
+ * @DefaultInterceptors({Interceptor1.class})
  * </pre>            
  */
 public class InterceptorsDefaultLiteral 
