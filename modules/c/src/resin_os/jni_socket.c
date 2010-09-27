@@ -823,10 +823,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeListen(JNIEnv *env,
   if (backlog < 0)
     backlog = 0;
 
-  if (backlog < 0)
-    listen(ss->fd, 100);
-  else
-    listen(ss->fd, backlog);
+  listen(ss->fd, backlog);
 }
 
 JNIEXPORT jint JNICALL

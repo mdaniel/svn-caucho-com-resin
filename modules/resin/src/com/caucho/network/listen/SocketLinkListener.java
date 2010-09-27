@@ -118,9 +118,9 @@ public class SocketLinkListener extends TaskWorker
   private InetAddress _socketAddress;
 
   private int _idleThreadMin = 2;
-  private int _idleThreadMax = 8;
+  private int _idleThreadMax = 20;
 
-  private int _acceptListenBacklog = 100;
+  private int _acceptListenBacklog = 1000;
 
   private int _connectionMax = 1024 * 1024;
 
@@ -662,7 +662,6 @@ public class SocketLinkListener extends TaskWorker
 
   public void setKeepaliveTimeout(Period period)
   {
-    Thread.dumpStack();
     _keepaliveTimeout = period.getPeriod();
   }
 
@@ -674,7 +673,6 @@ public class SocketLinkListener extends TaskWorker
   protected void setKeepaliveTimeoutMillis(long timeout)
   {
     _keepaliveTimeout = timeout;
-    Thread.dumpStack();
   }
 
   public boolean isKeepaliveSelectEnabled()
@@ -1136,8 +1134,9 @@ public class SocketLinkListener extends TaskWorker
   void enable()
   {
     if (_lifecycle.toActive()) {
-      if (_serverSocket != null)
+      if (_serverSocket != null) {
         _serverSocket.listen(_acceptListenBacklog);
+      }
     }
   }
 
