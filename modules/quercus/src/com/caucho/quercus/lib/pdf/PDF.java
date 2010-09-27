@@ -1019,6 +1019,11 @@ public class PDF {
   public boolean end_document(@Optional String optList)
     throws IOException
   {
+    if(null == _out)
+    {
+      // output stream already closed;
+      return false;
+    }
     if (_pageGroup.size() > 0) {
       _out.writePageGroup(_pageParentId, _pageGroup);
       _pageGroup.clear();
