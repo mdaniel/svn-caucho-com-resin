@@ -29,23 +29,30 @@
 
 package com.caucho.server.http;
 
-import com.caucho.VersionFactory;
-import com.caucho.server.cache.*;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.session.CookieImpl;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.webapp.ErrorPageManager;
-import com.caucho.util.*;
-import com.caucho.xml.XmlChar;
-
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+
+import com.caucho.VersionFactory;
+import com.caucho.server.cache.AbstractCacheEntry;
+import com.caucho.server.cache.AbstractCacheFilterChain;
+import com.caucho.server.session.CookieImpl;
+import com.caucho.server.session.SessionManager;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.ErrorPageManager;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.HTTPUtil;
+import com.caucho.util.L10N;
 
 /**
  * User facade for http responses.
@@ -861,7 +868,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       if (encoding != null
           && _charEncoding != null
           && ! encoding.equalsIgnoreCase(_charEncoding)) {
-        log.fine(_request.getRequestURI() + ": setEncoding(" + encoding + ") ignored because writer already initialized with charset=" + _charEncoding);
+        if (log.isLoggable(Level.FINE))
+          log.fine(_request.getRequestURI() + ": setEncoding(" + encoding + ") ignored because writer already initialized with charset=" + _charEncoding);
       }
 
       return;

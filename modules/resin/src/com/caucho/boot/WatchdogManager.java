@@ -59,7 +59,6 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DependencyCheckInterval;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.log.EnvironmentStream;
-import com.caucho.log.LogConfig;
 import com.caucho.log.LogHandlerConfig;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.SocketLinkListener;
@@ -134,8 +133,8 @@ class WatchdogManager implements AlarmListener {
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(_system.getClassLoader());
 
-    ThreadPool.getThreadPool().setIdleMin(1);
-    ThreadPool.getThreadPool().setPriorityIdleMin(1);
+    ThreadPool.getThreadPool().setIdleMin(4);
+    ThreadPool.getThreadPool().setPriorityIdleMin(4);
 
     ResinELContext elContext = _args.getELContext();
     
@@ -217,8 +216,8 @@ class WatchdogManager implements AlarmListener {
 
     _httpPort.setAddress(server.getWatchdogAddress());
 
-    _httpPort.setAcceptThreadMin(1);
-    _httpPort.setAcceptThreadMax(2);
+    _httpPort.setAcceptThreadMin(2);
+    _httpPort.setAcceptThreadMax(3);
 
     _httpPort.init();
 

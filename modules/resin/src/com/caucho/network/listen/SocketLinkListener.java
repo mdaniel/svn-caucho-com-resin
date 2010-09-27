@@ -1267,7 +1267,9 @@ public class SocketLinkListener extends TaskWorker
   {
     _startThreadCount.decrementAndGet();
 
-    wake();
+    if (isStartThreadRequired()) {
+      wake();
+    }
   }
 
   /**
@@ -1285,7 +1287,9 @@ public class SocketLinkListener extends TaskWorker
   {
     _shutdownRequestCount.decrementAndGet();
 
-    wake();
+    if (isStartThreadRequired()) {
+      wake();
+    }
   }
 
   /**

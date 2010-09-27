@@ -29,15 +29,6 @@
 
 package com.caucho.server.http;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.*;
-import com.caucho.server.webapp.WebApp;
-
-import java.io.*;
-import java.util.*;
-import java.security.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 abstract public class AbstractCauchoResponse implements CauchoResponse {
   @Override
