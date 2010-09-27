@@ -60,6 +60,7 @@ import com.caucho.loader.DependencyCheckInterval;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
+import com.caucho.log.LogHandlerConfig;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.security.AdminAuthenticator;
@@ -93,6 +94,7 @@ class WatchdogManager implements AlarmListener {
 
   private String _adminCookie;
   private BootManagementConfig _management;
+  private final ResinSystem _system;
 
   private Server _server;
   private SocketLinkListener _httpPort;
@@ -106,6 +108,8 @@ class WatchdogManager implements AlarmListener {
     _watchdog = this;
 
     _args = new WatchdogArgs(argv);
+    
+    _system = new ResinSystem("watchdog");
 
     Vfs.setPwd(_args.getRootDirectory());
     
@@ -122,30 +126,23 @@ class WatchdogManager implements AlarmListener {
     EnvironmentStream.setStdout(out);
     EnvironmentStream.setStderr(out);
 
-    LogConfig log = new LogConfig();
+    LogHandlerConfig log = new LogHandlerConfig();
     log.setName("");
     log.setPath(logPath);
-    log.setLevel("all");
     log.init();
-
-    if (System.getProperty("log.level") != null) {
-      Logger.getLogger("").setLevel(Level.FINER);
-    }
-    else
-      Logger.getLogger("").setLevel(Level.INFO);
+    
+    Thread thread = Thread.currentThread();
+    thread.setContextClassLoader(_system.getClassLoader());
 
     ThreadPool.getThreadPool().setIdleMin(1);
     ThreadPool.getThreadPool().setPriorityIdleMin(1);
 
     ResinELContext elContext = _args.getELContext();
     
-    Resin resin = Resin.createWatchdog();
+    Resin resin = Resin.createWatchdog(_system);
     
     resin.preConfigureInit();
     
-    Thread thread = Thread.currentThread();
-    thread.setContextClassLoader(resin.getClassLoader());
-
     // XXX: needs to be config
 
     InjectManager cdiManager = InjectManager.create();
@@ -160,9 +157,9 @@ class WatchdogManager implements AlarmListener {
     ResinConfigLibrary.configure(cdiManager);
 
     _watchdogPort = _args.getWatchdogPort();
-
+    
     readConfig(_args);
-
+    
     WatchdogChild server = null;
 
     if (_args.isDynamicServer()) {
@@ -207,9 +204,8 @@ class WatchdogManager implements AlarmListener {
     thread.setContextClassLoader(_server.getClassLoader());
     
     
-    ResinSystem resinSystem = resin.getResinSystem();
     NetworkListenService listenService 
-      = resinSystem.getService(NetworkListenService.class);
+      = _system.getService(NetworkListenService.class);
     
     _httpPort = new SocketLinkListener();
     _httpPort.setProtocol(new HttpProtocol());
@@ -231,7 +227,7 @@ class WatchdogManager implements AlarmListener {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_server.getClassLoader());
+      thread.setContextClassLoader(_system.getClassLoader());
 
       cdiManager = InjectManager.create();
       AdminAuthenticator auth = null;
@@ -280,6 +276,11 @@ class WatchdogManager implements AlarmListener {
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  ClassLoader getClassLoader()
+  {
+    return _system.getClassLoader();
   }
 
   static WatchdogManager getWatchdog()
@@ -394,7 +395,7 @@ class WatchdogManager implements AlarmListener {
     throws ConfigException
   {
     synchronized (_watchdogMap) {
-      WatchdogArgs args = new WatchdogArgs(argv);
+      WatchdogArgs args = new WatchdogArgs(argv, false);
 
       Vfs.setPwd(_args.getRootDirectory());
 
@@ -486,7 +487,7 @@ class WatchdogManager implements AlarmListener {
     config.setIgnoreEnvironment(true);
 
     Vfs.setPwd(args.getRootDirectory());
-    BootResinConfig resin = new BootResinConfig(args);
+    BootResinConfig resin = new BootResinConfig(_system, args);
 
     config.configure(resin,
                      args.getResinConf(),
@@ -547,7 +548,7 @@ class WatchdogManager implements AlarmListener {
         watchdog.close();
     }
 
-    watchdog = new WatchdogChild(server);
+    watchdog = new WatchdogChild(_system, server);
 
     _watchdogMap.put(server.getId(), watchdog);
 

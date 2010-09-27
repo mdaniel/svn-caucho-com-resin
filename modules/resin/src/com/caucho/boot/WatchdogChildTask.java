@@ -33,6 +33,7 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
 
@@ -49,14 +50,17 @@ class WatchdogChildTask implements Runnable
   private static final Logger log
     = Logger.getLogger(WatchdogChildTask.class.getName());
 
+  private final ResinSystem _system;
   private final WatchdogChild _watchdog;
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private WatchdogChildProcess _process;
 
-  WatchdogChildTask(WatchdogChild watchdog)
+  WatchdogChildTask(ResinSystem system,
+                    WatchdogChild watchdog)
   {
+    _system = system;
     _watchdog = watchdog;
 
     if (watchdog == null)
@@ -169,7 +173,7 @@ class WatchdogChildTask implements Runnable
 
         log.info(_watchdog + " starting");
 
-        _process = new WatchdogChildProcess(id, _watchdog);
+        _process = new WatchdogChildProcess(id, _system, _watchdog);
 
         try {
           _process.run();

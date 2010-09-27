@@ -36,6 +36,7 @@ import com.caucho.cloud.security.SecurityService;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.security.AdminAuthenticator;
@@ -62,6 +63,7 @@ public class BootResinConfig implements EnvironmentBean
 
   private ClassLoader _classLoader;
 
+  private ResinSystem _system;
   private WatchdogArgs _args;
   
   private Path _resinHome;
@@ -71,11 +73,13 @@ public class BootResinConfig implements EnvironmentBean
   private BootManagementConfig _management;
   private String _resinSystemKey;
   
-  BootResinConfig(WatchdogArgs args)
+  BootResinConfig(ResinSystem system,
+                  WatchdogArgs args)
   {
+    _system = system;
     _args = args;
   
-    _classLoader = EnvironmentClassLoader.create();
+    _classLoader = _system.getClassLoader();
   }
   
   WatchdogArgs getArgs()
@@ -246,7 +250,7 @@ public class BootResinConfig implements EnvironmentBean
 
     addServer(config);
 
-    WatchdogClient client = new WatchdogClient(BootResinConfig.this, config);
+    WatchdogClient client = new WatchdogClient(_system, BootResinConfig.this, config);
     addClient(client);
 
     return client;
@@ -259,7 +263,7 @@ public class BootResinConfig implements EnvironmentBean
   {
     _isWatchdogManagerConfig = true;
     
-    return new WatchdogManagerConfig(this);
+    return new WatchdogManagerConfig(_system, this);
   }
 
   /**
@@ -272,7 +276,7 @@ public class BootResinConfig implements EnvironmentBean
 
   public BootClusterConfig createCluster()
   {
-    BootClusterConfig cluster = new BootClusterConfig(this);
+    BootClusterConfig cluster = new BootClusterConfig(_system, this);
 
     for (int i = 0; i < _clusterDefaultList.size(); i++)
       _clusterDefaultList.get(i).configure(cluster);

@@ -134,7 +134,7 @@ public class Resin
 
   private Path _resinDataDirectory;
   
-  private ResinSystem _resinSystem;
+  private final ResinSystem _resinSystem;
   
   private long _shutdownWaitMax = 60000L;
 
@@ -174,15 +174,15 @@ public class Resin
   /**
    * Creates a new resin server.
    */
-  protected Resin(ClassLoader loader, boolean isWatchdog)
+  protected Resin(ResinSystem system, boolean isWatchdog)
   {
-    this(loader, isWatchdog, null);
+    this(system, isWatchdog, null);
   }
 
   /**
    * Creates a new resin server.
    */
-  protected Resin(ClassLoader loader,
+  protected Resin(ResinSystem system,
                   boolean isWatchdog,
                   String licenseErrorMessage)
   {
@@ -193,9 +193,8 @@ public class Resin
 
     // DynamicClassLoader.setJarCacheEnabled(true);
     Environment.init();
-
-    if (loader == null)
-      loader = ClassLoader.getSystemClassLoader();
+    
+    _resinSystem = system;
 
     initEnvironment();
 
@@ -209,19 +208,19 @@ public class Resin
   /**
    * Creates a new Resin instance
    */
-  public static Resin create()
+  public static Resin create(String id)
   {
-    return create(Thread.currentThread().getContextClassLoader(), false);
+    ResinSystem system = new ResinSystem(id);
+    
+    return create(system, false);
   }
 
   /**
    * Creates a new Resin instance
    */
-  public static Resin createWatchdog()
+  public static Resin createWatchdog(ResinSystem system)
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    Resin resin = create(loader, true);
+    Resin resin = create(system, true);
 
     return resin;
   }
@@ -229,20 +228,17 @@ public class Resin
   /**
    * Creates a new Resin instance
    */
-  public static Resin create(ClassLoader loader, boolean isWatchdog)
+  public static Resin create(ResinSystem system, boolean isWatchdog)
   {
     String licenseErrorMessage = null;
 
     Resin resin = null;
-    
-    if (loader == null)
-      loader = Thread.currentThread().getContextClassLoader();
 
     try {
       Class<?> cl = Class.forName("com.caucho.server.resin.ProResin");
-      Constructor<?> ctor = cl.getConstructor(new Class[] { ClassLoader.class, boolean.class });
+      Constructor<?> ctor = cl.getConstructor(new Class[] { ResinSystem.class, boolean.class });
 
-      resin = (Resin) ctor.newInstance(loader, isWatchdog);
+      resin = (Resin) ctor.newInstance(system, isWatchdog);
     } catch (ConfigException e) {
       log().log(Level.FINER, e.toString(), e);
 
@@ -294,10 +290,10 @@ public class Resin
         // message should already be set above
       }
 
-      resin = new Resin(loader, isWatchdog, licenseErrorMessage);
+      resin = new Resin(system, isWatchdog, licenseErrorMessage);
     }
 
-    _resinLocal.set(resin, loader);
+    _resinLocal.set(resin, system.getClassLoader());
 
     // resin.initEnvironment();
 
@@ -307,17 +303,19 @@ public class Resin
   /**
    * Creates a new Resin instance
    */
-  public static Resin createOpenSource()
+  public static Resin createOpenSource(String id)
   {
-    return createOpenSource(Thread.currentThread().getContextClassLoader());
+    ResinSystem system = new ResinSystem(id);
+    
+    return createOpenSource(system);
   }
 
   /**
    * Creates a new Resin instance
    */
-  public static Resin createOpenSource(ClassLoader loader)
+  public static Resin createOpenSource(ResinSystem system)
   {
-    return new Resin(loader, false, null);
+    return new Resin(system, false, null);
   }
 
   /**
@@ -407,11 +405,13 @@ public class Resin
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
+      /*
       String serverName = getServerId();
       if (serverName == null || "".equals(serverName))
         serverName = "default";
       
       _resinSystem = new ResinSystem(serverName);
+      */
       
       thread.setContextClassLoader(getClassLoader());
 
@@ -425,6 +425,8 @@ public class Resin
 
         if (_rootDirectory == null)
           setRootDirectory(_args.getRootDirectory());
+        
+        _pingSocket = _args.getPingSocket();
       }
       
       if (getRootDirectory() == null)
@@ -1271,9 +1273,11 @@ public class Resin
 
       validateEnvironment();
       
-      final Resin resin = Resin.create();
+      ResinArgs args = new ResinArgs(argv);
 
-      ResinArgs args = new ResinArgs(resin, argv);
+      ResinSystem system = new ResinSystem(args.getServerId());
+      
+      final Resin resin = Resin.create(system, false);
 
       resin.setArgs(args);
 

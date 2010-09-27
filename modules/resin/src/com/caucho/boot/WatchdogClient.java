@@ -42,6 +42,7 @@ import com.caucho.VersionFactory;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.config.ConfigException;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -64,6 +65,7 @@ class WatchdogClient
   private final BootResinConfig _bootManager;
   private String _id = "";
 
+  private ResinSystem _system;
   private WatchdogConfig _config;
   private WatchdogChild _watchdog;
 
@@ -71,8 +73,11 @@ class WatchdogClient
 
   private Boot _jniBoot;
 
-  WatchdogClient(BootResinConfig bootManager, WatchdogConfig config)
+  WatchdogClient(ResinSystem system,
+                 BootResinConfig bootManager,
+                 WatchdogConfig config)
   {
+    _system = system;
     _bootManager = bootManager;
     _config = config;
     _id = config.getId();
@@ -172,7 +177,7 @@ class WatchdogClient
     throws IOException
   {
     if (_watchdog == null)
-      _watchdog = new WatchdogChild(_config);
+      _watchdog = new WatchdogChild(_system, _config);
 
     return _watchdog.startConsole();
   }

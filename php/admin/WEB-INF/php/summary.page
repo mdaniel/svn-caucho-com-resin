@@ -191,11 +191,11 @@ if ($stat_service) {
   echo "<tr><th>Request Count<th>Request Time<th>Threads";
   echo "<tr valign='top'><td>";
   stat_graph("request", $width, $height, $start, $end,
-             array("$si|Resin|Request|Http Request Count"));
+             array("$si|Resin|Http|Request Count"));
   echo "<td>";
   stat_graph("request_time", $width, $height, $start, $end,
-             array("$si|Resin|Request|Http Request Time",
-                   "$si|Resin|Request|Http Request Time Max"));
+             array("$si|Resin|Http|Request Time",
+                   "$si|Resin|Http|Request Time Max"));
   echo "<td>";
   stat_graph("thread", $width, $height, $start, $end,
              array("$si|JVM|Thread|JVM Thread Count",

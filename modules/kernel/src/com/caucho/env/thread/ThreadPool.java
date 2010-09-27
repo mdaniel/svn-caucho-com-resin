@@ -670,7 +670,7 @@ public final class ThreadPool {
       return false;
     }
     
-    if (_taskQueue.isEmpty()) {
+    if (_taskQueue.isEmpty() || isPriority) {
       ResinThread thread = popIdleThread();
 
       if (thread != null) {
@@ -894,7 +894,7 @@ public final class ThreadPool {
   {
     int idleCount = _idleCount.get();
     int priorityIdleCount = _priorityIdleCount.get();
-    int startingCount = _startingCount.incrementAndGet();
+    int startingCount = _startingCount.getAndIncrement();
 
     int threadCount = _activeCount.get() + startingCount;
     
@@ -904,7 +904,7 @@ public final class ThreadPool {
       return false;
     }
     else if (idleCount + startingCount < _idleMin
-             || priorityIdleCount + idleCount + startingCount < _priorityIdleMin) {
+             || priorityIdleCount + startingCount < _priorityIdleMin) {
       return true;
     }
     else {

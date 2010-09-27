@@ -54,14 +54,14 @@ class ResinArgs
   private static final Logger log = Logger.getLogger(ResinArgs.class.getName());
   private static final L10N L = new L10N(ResinArgs.class);
 
-  private final Resin _resin;
-  
-  private String _serverId = "";
+  private String _serverId = "default";
 
   private Path _resinHome;
   private Path _rootDirectory;
 
   private String _resinConf;
+  
+  private Socket _pingSocket;
   
   private DynamicServer _dynServer;
 
@@ -71,11 +71,9 @@ class ResinArgs
   private String _stage = null;
   private boolean _isDumpHeapOnExit;
   
-  public ResinArgs(Resin resin, String []args)
+  public ResinArgs(String []args)
     throws Exception
   {
-    _resin = resin;
-    
     preConfigureInit();
     
     parseCommandLine(args);
@@ -124,6 +122,11 @@ class ResinArgs
   public Path getRootDirectory()
   {
     return _rootDirectory;
+  }
+  
+  public Socket getPingSocket()
+  {
+    return _pingSocket;
   }
 
   /**
@@ -284,6 +287,10 @@ class ResinArgs
                && (argv[i].equals("-server")
                    || argv[i].equals("--server"))) {
         _serverId = argv[i + 1];
+        
+        if (_serverId.equals(""))
+          _serverId = "default";
+        
         i += 2;
       }
       else if (argv[i].equals("-resin-home")
@@ -298,7 +305,7 @@ class ResinArgs
                || argv[i].equals("--resin-root")
                || argv[i].equals("-server-root")
                || argv[i].equals("--server-root")) {
-        _resin.setRootDirectory(_resinHome.lookup(argv[i + 1]));
+        _rootDirectory = _resinHome.lookup(argv[i + 1]);
 
         i += 2;
       }
@@ -347,7 +354,7 @@ class ResinArgs
           _waitIn = socket.getInputStream();
         */
 
-        _resin.setPingSocket(socket);
+        _pingSocket = socket;
 
         //socket.setSoTimeout(60000);
 
@@ -396,12 +403,12 @@ class ResinArgs
       }
       else if ("-stage".equals(argv[i])
                || "--stage".equals(argv[i])) {
-        _resin.setStage(argv[i + 1]);
+        _stage = argv[i + 1];
         i += 2;
       }
       else if ("-preview".equals(argv[i])
                || "--preview".equals(argv[i])) {
-        _resin.setStage("preview");
+        _stage = "preview";
         i += 1;
       }
       else if ("-debug-port".equals(argv[i])

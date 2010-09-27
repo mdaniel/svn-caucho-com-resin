@@ -73,9 +73,15 @@ class WatchdogArgs
 
   WatchdogArgs(String[] argv)
   {
-    String logLevel = System.getProperty("caucho.logger.level");
+    this(argv, true);
+  }
 
-    setLogLevel(logLevel);
+  WatchdogArgs(String[] argv, boolean isTop)
+  {
+    String logLevel = System.getProperty("resin.log.level");
+
+    if (isTop)
+      setLogLevel(logLevel);
 
     _resinHome = calculateResinHome();
     _rootDirectory = calculateResinRoot(_resinHome);
@@ -233,7 +239,7 @@ class WatchdogArgs
 
   private void setLogLevel(String levelName)
   {
-    Level level = Level.WARNING;
+    Level level = Level.INFO;
 
     if ("off".equals(levelName))
       level = Level.OFF;

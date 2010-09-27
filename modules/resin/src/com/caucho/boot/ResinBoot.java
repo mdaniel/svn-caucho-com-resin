@@ -120,15 +120,15 @@ public class ResinBoot {
     Path rootDirectory = _args.getRootDirectory();
     Path dataDirectory = rootDirectory.lookup("watchdog-data");
     
-    ResinSystem networkServer = new ResinSystem("watchdog",
+    ResinSystem system = new ResinSystem("watchdog",
                                                 rootDirectory,
                                                 dataDirectory);
 
     Thread thread = Thread.currentThread();
-    thread.setContextClassLoader(networkServer.getClassLoader());
+    thread.setContextClassLoader(system.getClassLoader());
 
     Config config = new Config();
-    BootResinConfig bootManager = new BootResinConfig(_args);
+    BootResinConfig bootManager = new BootResinConfig(system, _args);
 
     ResinELContext elContext = _args.getELContext();
 

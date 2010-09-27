@@ -46,6 +46,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bootjni.JniProcess;
 import com.caucho.config.ConfigException;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.hmtp.HmtpLink;
@@ -75,6 +76,7 @@ class WatchdogChildProcess
   private static Boot _jniBoot;
 
   private final String _id;
+  private final ResinSystem _system;
   private final WatchdogChild _watchdog;
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -87,9 +89,12 @@ class WatchdogChildProcess
 
   private int _status = -1;
 
-  WatchdogChildProcess(String id, WatchdogChild watchdog)
+  WatchdogChildProcess(String id,
+                       ResinSystem system,
+                       WatchdogChild watchdog)
   {
     _id = id;
+    _system = system;
     _watchdog = watchdog;
   }
 
@@ -119,6 +124,8 @@ class WatchdogChildProcess
     if (! _lifecycle.toActive())
       return;
     
+    Thread.currentThread().setContextClassLoader(_system.getClassLoader());
+    
     WriteStream jvmOut = null;
     ServerSocket ss = null;
     Socket s = null;
@@ -128,10 +135,10 @@ class WatchdogChildProcess
 
       int port = ss.getLocalPort();
 
-      log.info("Watchdog starting Resin[" + _watchdog.getId() + "]");
+      log.warning("Watchdog starting Resin[" + _watchdog.getId() + "]");
 
       jvmOut = createJvmOut();
-
+      
       _process = createProcess(port, jvmOut);
       
       if (_process != null) {
@@ -742,7 +749,7 @@ class WatchdogChildProcess
           dir.changeGroup(groupName);
       }
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.WARNING, e.toString(), e);
     }
 
     RotateStream rotateStream = RotateStream.create(jvmPath);

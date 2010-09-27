@@ -662,6 +662,7 @@ public class SocketLinkListener extends TaskWorker
 
   public void setKeepaliveTimeout(Period period)
   {
+    Thread.dumpStack();
     _keepaliveTimeout = period.getPeriod();
   }
 
@@ -673,6 +674,7 @@ public class SocketLinkListener extends TaskWorker
   protected void setKeepaliveTimeoutMillis(long timeout)
   {
     _keepaliveTimeout = timeout;
+    Thread.dumpStack();
   }
 
   public boolean isKeepaliveSelectEnabled()
@@ -1226,8 +1228,9 @@ public class SocketLinkListener extends TaskWorker
 
         Thread.interrupted();
         if (_serverSocket.accept(socket)) {
-          if (_throttle.accept(socket))
+          if (_throttle.accept(socket)) {
             return true;
+          }
           else
             socket.close();
         }
@@ -1282,6 +1285,8 @@ public class SocketLinkListener extends TaskWorker
   void requestShutdownEnd()
   {
     _shutdownRequestCount.decrementAndGet();
+
+    wake();
   }
 
   /**
@@ -1356,7 +1361,7 @@ public class SocketLinkListener extends TaskWorker
 
     // boolean isSelectManager = getServer().isSelectManagerEnabled();
 
-    if (_isKeepaliveSelectEnable) {
+    if (_isKeepaliveSelectEnable && _selectManager != null) {
       timeout = getBlockingTimeoutForSelect();
     }
 

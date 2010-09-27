@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.caucho.env.service.ResinSystem;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.WatchdogMXBean;
 import com.caucho.network.listen.SocketLinkListener;
@@ -49,6 +50,7 @@ class WatchdogChild
   private static final L10N L = new L10N(WatchdogChild.class);
   private final String _id;
 
+  private final ResinSystem _system;
   private final WatchdogConfig _config;
   private final WatchdogAdmin _admin;
   
@@ -62,20 +64,28 @@ class WatchdogChild
   private Date _lastStartTime;
   private int _startCount;
 
-  WatchdogChild(String id, WatchdogArgs args, Path rootDirectory)
+  WatchdogChild(String id,
+                ResinSystem system,
+                WatchdogArgs args, 
+                Path rootDirectory)
   {
     _id = id;
+    
+    _system = system;
     _config = new WatchdogConfig(args, rootDirectory);
 
     _admin = new WatchdogAdmin();
   }
 
-  WatchdogChild(WatchdogConfig config)
+  WatchdogChild(ResinSystem system,
+                WatchdogConfig config)
   {
     _id = config.getId();
     _config = config;
     
     _admin = new WatchdogAdmin();
+    
+    _system = system;
   }
 
   /**
@@ -300,7 +310,7 @@ class WatchdogChild
   {
     _isConsole = true;
     
-    WatchdogChildTask task = new WatchdogChildTask(this);
+    WatchdogChildTask task = new WatchdogChildTask(_system, this);
 
     if (! _taskRef.compareAndSet(null, task))
       return -1;
@@ -315,7 +325,7 @@ class WatchdogChild
    */
   public void start()
   {
-    WatchdogChildTask task = new WatchdogChildTask(this);
+    WatchdogChildTask task = new WatchdogChildTask(_system, this);
 
     if (! _taskRef.compareAndSet(null, task)) {
       WatchdogChildTask oldTask = _taskRef.get();

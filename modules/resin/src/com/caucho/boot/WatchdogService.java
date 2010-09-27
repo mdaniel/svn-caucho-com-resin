@@ -104,6 +104,8 @@ class WatchdogService extends SimpleActor
   public boolean watchdogStatus(long id, String to, String from,
                                 WatchdogStatusQuery status)
   {
+    System.out.println("STATUS: " + status + " " + to  + " " + from);
+    Thread.dumpStack();
     try {
       String result = _manager.status();
     

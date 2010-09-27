@@ -52,7 +52,7 @@ public class ResinEmbed
   private static final String EMBED_CONF
     = "com/caucho/server/embed/resin-embed.xml";
   
-  private Resin _resin = Resin.create();
+  private Resin _resin = Resin.create("embed");
   private Host _host;
   private Server _server;
   

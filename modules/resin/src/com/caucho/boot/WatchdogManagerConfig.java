@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.env.service.ResinSystem;
 
 import com.caucho.util.L10N;
 import java.util.ArrayList;
@@ -38,13 +39,15 @@ import java.util.ArrayList;
 class WatchdogManagerConfig {
   private static final L10N L = new L10N(WatchdogManagerConfig.class);
   
+  private ResinSystem _system;
   private BootResinConfig _resin;
   
   private ArrayList<ContainerProgram> _watchdogDefaultList
     = new ArrayList<ContainerProgram>();
 
-  WatchdogManagerConfig(BootResinConfig resin)
+  WatchdogManagerConfig(ResinSystem system, BootResinConfig resin)
   {
+    _system = system;
     _resin = resin;
   }
 
@@ -80,6 +83,6 @@ class WatchdogManagerConfig {
       throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
                                     config.getId()));
       
-    _resin.addClient(new WatchdogClient(_resin, config));
+    _resin.addClient(new WatchdogClient(_system, _resin, config));
   }
 }

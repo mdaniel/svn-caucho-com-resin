@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.env.service.ResinSystem;
 
 import com.caucho.util.L10N;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 public class BootClusterConfig {
   private static final L10N L = new L10N(BootClusterConfig.class);
   
+  private ResinSystem _system;
   private BootResinConfig _resin;
   
   private String _id = "";
@@ -46,8 +48,10 @@ public class BootClusterConfig {
   private ArrayList<ContainerProgram> _serverDefaultList
     = new ArrayList<ContainerProgram>();
 
-  BootClusterConfig(BootResinConfig resin)
+  BootClusterConfig(ResinSystem system,
+                    BootResinConfig resin)
   {
+    _system = system;
     _resin = resin;
   }
 
@@ -106,7 +110,7 @@ public class BootClusterConfig {
                                     config.getId()));
       
     _resin.addServer(config);
-    _resin.addClient(new WatchdogClient(_resin, config));
+    _resin.addClient(new WatchdogClient(_system, _resin, config));
   }
   
   /**

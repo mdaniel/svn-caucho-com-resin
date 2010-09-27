@@ -88,7 +88,7 @@ public class ResinEmbed
   private static final String EMBED_CONF
     = "classpath:com/caucho/resin/resin-embed.xml";
 
-  private Resin _resin = Resin.create();
+  private final Resin _resin;
   private String _configFile = EMBED_CONF;
 
   private CloudCluster _cluster;
@@ -116,7 +116,7 @@ public class ResinEmbed
    */
   public ResinEmbed()
   {
-    _resin = Resin.create();
+    _resin = Resin.create("embed");
     _resin.setRootDirectory(Vfs.lookup());
   }
 
