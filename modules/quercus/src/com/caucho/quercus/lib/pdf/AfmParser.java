@@ -30,10 +30,13 @@
 package com.caucho.quercus.lib.pdf;
 
 import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
 import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -48,13 +51,40 @@ public class AfmParser {
   private ReadStream _is;
 
   /**
-   * Parses the AFM
+   * Parses the AFM file.
+   * If the webInfLibPath is not null or empty and is the valid absolute path to this
+   * applications WEB-INF/lib folder (or any other folder containing jars to load),
+   * jars inside that folder are also searched for fonts.
    */
-  public Font parse(String name)
+  public Font parse(String webInfLibPath, String name)
     throws IOException
   {
     MergePath mergePath = new MergePath();
     mergePath.addClassPath();
+
+    File webInfLibFile = new File(webInfLibPath);
+    if(webInfLibPath != null && !webInfLibPath.isEmpty() && webInfLibFile.isDirectory())
+    {
+      Path webInfPath = Vfs.lookup(webInfLibFile.getAbsolutePath());
+      for( File f : webInfLibFile.listFiles())
+      {
+        /*
+        only look for files that are either jars or zips
+         */
+        if(f.isFile() && (f.getAbsolutePath().endsWith(".jar") || f.getAbsolutePath().endsWith(".zip")))
+        {
+          /*
+          get a path object with the Jar relative to WEB-INF/lib
+           */
+          Path jarPath = webInfPath.lookup(f.getName());
+          /*
+            Encapsulate it as a JarPath, else mergePath.lookup does not look
+            "into" the jar when looking for resources
+           */
+          mergePath.addMergePath(JarPath.create(jarPath));
+        }
+      }
+    }
 
     Path path = mergePath.lookup("com/caucho/quercus/lib/pdf/font/" + name + ".afm");
 
