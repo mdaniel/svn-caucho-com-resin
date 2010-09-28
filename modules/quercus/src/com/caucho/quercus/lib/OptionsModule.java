@@ -62,6 +62,9 @@ public class OptionsModule extends AbstractQuercusModule {
   public static final String PHP_OS
     = System.getProperty("os.name").toUpperCase();
 
+  public static final String PHP_EOL
+    = System.getProperty("line.separator");
+
   public static final int ASSERT_ACTIVE = 1;
   public static final int ASSERT_CALLBACK = 2;
   public static final int ASSERT_BAIL = 3;
