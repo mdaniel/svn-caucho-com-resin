@@ -172,7 +172,7 @@ $si = sprintf("%02d", $server->ServerIndex);
 // $si = sprintf("%02d", $g_server_index);
 $stat_service = $mbean_server->lookup("resin:type=StatService");
 
-echo "<h2>Health</h2>";
+echo "<h2>Health"; print_Help("Health"); echo "</h2>\n";
 
 display_health_status();
 
@@ -346,8 +346,9 @@ $thread_pool = $server->ThreadPool;
 $ports = $server->Ports;
 
 if ($ports) {
+
+echo "<h2>TCP ports"; print_help("Ports"); echo "</h2>\n";
 ?>
-<h2>TCP ports</h2>
 
 <table class="data">
   <tr>
@@ -397,17 +398,18 @@ if ($ports) {
 
 echo "</table>";
 
-echo "<h3>Open Connections</h3>";
-
-echo "<table class='data'>";
-echo "<tr><th><th>time<th>id<th>url<th>IP</tr>\n";
-
 $conn = null;
 
 $jvm_thread = $mbean_server->lookup("java.lang:type=Threading");
 
 $row = 0;
 @ usort($connInfoList, "conn_time_cmp");
+
+echo "<h3>Open Connections</h3>";
+
+echo "<table class='data'>";
+echo "<tr><th><th>time<th>id<th>url<th>IP</tr>\n";
+
 foreach ($connInfoList as $connInfo) {
   if ($connInfo->requestTime >= 0 && $connInfo->threadId >= 0) {
     echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
@@ -462,12 +464,16 @@ foreach ($connInfoList as $connInfo) {
 ?>
 <?php 
 }
+
+echo "</table>\n";
+
+echo "<!-- Cluster -->\n";
+
+echo "<h2>Load Balance and Clusters";
+print_help("Load Balance");
+echo "</h2>\n"
+
 ?>
-</table>
-
-<!-- Cluster -->
-
-<h2>Servers</h2>
 
 <table class="data">
   <tr>
@@ -529,7 +535,11 @@ if ($mbean_server) {
 
 if ($db_pools) {
   require_once("WEB-INF/php/db.php");
-  echo "<h2>Database Pools</h2>\n";
+
+  echo "<h2>Database Pools";
+  print_help("Database Pools");
+  echo "</h2>\n"
+
   echo print_db_pools($db_pools);
 }
 ?>
