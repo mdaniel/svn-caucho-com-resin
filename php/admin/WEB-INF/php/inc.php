@@ -357,6 +357,7 @@ function redirect_nocache($relative_url)
 if (is_null($target_uri))
   $target_uri = $_SERVER['PHP_SELF'];
 
+$user_principal = quercus_servlet_request()->getUserPrincipal();
 $is_read_role = quercus_servlet_request()->isUserInRole("read");
 $is_write_role = quercus_servlet_request()->isUserInRole("write");
 
@@ -579,6 +580,7 @@ function display_header($script, $title, $server,
   global $g_server_index;
   global $g_page;
   global $g_next_url;
+  global $user_principal;
 
   $title = $title . " for server " . $g_server_id;
 
@@ -644,6 +646,9 @@ if ($is_refresh) {
 
 <body>
 
+<?
+if ($user_principal) {
+?>
 <div id="status-bar">
 <div style='float: left; width: 80%; padding: 0; margin: 0;'>
 <?
@@ -653,6 +658,7 @@ if (! empty($server)) {
 else {
   $server_name = "default";
 }
+
 ?>
 <ul class='status'>
    <li class="server status-item"><?php display_servers($server); ?></li>
@@ -669,6 +675,9 @@ else {
  <span class='status-item logout'><a href="?q=index.php&logout=true">logout</a></span>
 </div>
 </div>
+<?php
+}
+?>
 
 <table id="layout" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>

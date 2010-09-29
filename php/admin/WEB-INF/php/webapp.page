@@ -567,19 +567,36 @@ function display_deploy_form($mbean_server)
   echo "<form enctype='multipart/form-data' method='POST'>";
   echo "<input type='hidden' name='action' value='deploy'>";
 
-  echo "<h4>Application archive file</h4>";
+  echo "<div class='form-input-block'>";
+  echo "<div class='form-input-title'>Application archive file</div>";
+  echo "<div class='form-input-input'>";
   echo "<input type='file' name='application'>\n";
+  echo "</div>";
+  echo "<div class='form-input-help'>The .war file to upload</div>";
+  echo "</div>";
 
-  echo "<h4>Name</h4>";
+  echo "<div class='form-input-block'>";
+  echo "<div class='form-input-title'>Name</div>";
+  echo "<div class='form-input-input'>";
   echo "<input type='text' name='name' value='' class='required'>\n";
+  echo "</div>";
+  echo "<div class='form-input-help'>The context root and name of the application</div>";
+  echo "</div>";
 
-  echo "<h4>Version</h4>";
+  echo "<div class='form-input-block'>";
+  echo "<div class='form-input-title'>Version</div>";
+  echo "<div class='form-input-input'>";
   echo "<input type='number' min='0' size='3' name='version-major' title='Major Version Number' value='0' class='required'>\n";
   echo "<input type='number' min='0' size='3' name='version-minor' title='Minor Version Number' value='0' class='required'>\n";
   echo "<input type='number' min='0' size='3' name='version-micro' title='Micro Version Number' value='0' class='required'>\n";
   echo "<input type='text' name='version-qualifier' title='Version Qualifier (free form)' value=''>\n";
+  echo "</div>";
+  echo "<div class='form-input-help'>The version for the application, using the &lt;major>.&lt;minor>.&lt;micro>.&lt;qualifier> format.</div>";
+  echo "</div>";
 
-  echo "<h4>Host</h4>";
+  echo "<div class='form-input-block'>";
+  echo "<div class='form-input-title'>Host</div>";
+  echo "<div class='form-input-input'>";
   echo "<input class='host' type='radio' name='host' value='default' checked>";
   echo "Deploy to default host";
   echo "</input><br/>\n";
@@ -589,8 +606,13 @@ function display_deploy_form($mbean_server)
   echo "<input type='text' name='host' value='' disabled>";
   echo "</input>\n";
   echo "</span>\n";
+  echo "</div>";
+  echo "<div class='form-input-help'>The virtual host where the application will appear.</div>";
+  echo "</div>";
 
-  echo "<h4>Stage</h4>";
+  echo "<div class='form-input-block'>";
+  echo "<div class='form-input-title'>Stage</div>";
+  echo "<div class='form-input-input'>";
   echo "<input class='stage' type='radio' name='stage' value='production' checked>";
   echo "Deploy to production";
   echo "</input><br/>\n";
@@ -600,9 +622,17 @@ function display_deploy_form($mbean_server)
   echo "<input type='text' name='stage' value='' disabled>";
   echo "</input>\n";
   echo "</span>\n";
+  echo "</div>";
+  echo "<div class='form-input-help'>The stage where the application will appear.</div>";
+  echo "</div>";
 
-  echo "<h4>Commit message</h4>";
+  echo "<div class='form-input-block'>";
+  echo "<div class='form-input-title'>Commit message</div>";
+  echo "<div class='form-input-input'>";
   echo "<textarea name='commit-message'></textarea>\n";
+  echo "</div>";
+  echo "<div class='form-input-help'>A message to save along with this deployment.</div>";
+  echo "</div>";
 
   echo "<div style='text-align: right'>";
   echo "<input class='deploy' type='submit' name='submit' value='Deploy' $disabled>";

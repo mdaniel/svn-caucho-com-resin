@@ -930,7 +930,7 @@ table.schema tr th {
 }
 
 textarea {
-  width: 50%;
+  width: 85%;
   min-height: 3em;
 }
 
@@ -1003,3 +1003,31 @@ input.deploy {
   padding: 1em;
   font-size: 130%;
 }
+
+div.form-input-block {
+  display: block;
+  width: 85%;
+  margin-top: 2em;
+  margin-bottom: 4em;
+}
+
+div.form-input-title {
+  float: left;
+  width: 40%;
+  font-weight: bold;
+  font-size: 110%;
+}
+
+div.form-input-input {
+  display: inline-block;
+  width: 50%;
+}
+
+div.form-input-help {
+  padding-left: 2em;
+  font-weight: 100;
+  font-style: italic;
+  font-size: 90%;
+}
+
+
