@@ -33,8 +33,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.ejb.Stateful;
 import javax.ejb.SessionBean;
+import javax.ejb.Stateful;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectBeanFactory;
@@ -42,27 +42,25 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.session.StatefulHandle;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
 
 /**
  * Generates the skeleton for a stateful bean.
  */
 @Module
-public class StatefulGenerator<X> extends SessionGenerator<X> 
-{
+public class StatefulGenerator<X> extends SessionGenerator<X> {
   private final AspectBeanFactory<X> _aspectBeanFactory;
-  
+
   public StatefulGenerator(String ejbName, AnnotatedType<X> beanType,
-                           ArrayList<AnnotatedType<? super X>> localApi,
-                           AnnotatedType<X> localBean,
-                           ArrayList<AnnotatedType<? super X>> remoteApi)
+      ArrayList<AnnotatedType<? super X>> localApi, AnnotatedType<X> localBean,
+      ArrayList<AnnotatedType<? super X>> remoteApi)
   {
-    super(ejbName, beanType, localApi, localBean, remoteApi, 
-          Stateful.class.getSimpleName());
-    
+    super(ejbName, beanType, localApi, localBean, remoteApi, Stateful.class
+        .getSimpleName());
+
     InjectManager manager = InjectManager.create();
-    
-    _aspectBeanFactory = new StatefulAspectBeanFactory<X>(manager, getBeanType());
+
+    _aspectBeanFactory = new StatefulAspectBeanFactory<X>(manager,
+        getBeanType());
   }
 
   @Override
@@ -70,13 +68,13 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   {
     return _aspectBeanFactory;
   }
-  
+
   @Override
   public boolean isStateless()
   {
     return false;
   }
-  
+
   @Override
   protected boolean isTimerSupported()
   {
@@ -89,8 +87,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   }
 
   /**
-   * True if the implementation is a proxy, i.e. an interface stub which
-   * calls an instance class.
+   * True if the implementation is a proxy, i.e. an interface stub which calls
+   * an instance class.
    */
   @Override
   public boolean isProxy()
@@ -111,7 +109,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     // return getViewClass().getJavaClass().getSimpleName() + "__Bean";
     return getBeanType().getJavaClass().getName();
   }
-  
+
   //
   // introspection
   //
@@ -120,11 +118,11 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
    * Scans for the @Local interfaces
    */
   @Override
-  protected AnnotatedType<? super X> introspectLocalDefault() 
+  protected AnnotatedType<? super X> introspectLocalDefault()
   {
     return getBeanType();
   }
-  
+
   //
   // Java code generation
   //
@@ -150,22 +148,21 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println("import javax.transaction.*;");
 
     generateClassHeader(out);
-    
+
     out.println("{");
     out.pushDepth();
 
     generateClassStaticFields(out);
-    
+
     generateClassContent(out);
 
     generateDependency(out);
-    
+
     out.popDepth();
     out.println("}");
   }
-  
-  private void generateClassHeader(JavaWriter out) 
-    throws IOException
+
+  private void generateClassHeader(JavaWriter out) throws IOException
   {
     out.println();
     out.println("public class " + getClassName() + "<T>");
@@ -182,41 +179,37 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     for (AnnotatedType<? super X> apiType : getRemoteApi()) {
       out.print(", " + apiType.getJavaClass().getName());
     }
-    
+
     out.println();
   }
 
   @Override
-  protected void generateClassContent(JavaWriter out)
-    throws IOException
+  protected void generateClassContent(JavaWriter out) throws IOException
   {
     out.println("private transient StatefulManager _manager;");
     out.println("private transient StatefulContext _context;");
 
     out.println("private " + getBeanClassName() + " _bean;");
 
-    out.println("private transient boolean _isActive;");
-    
-    HashMap<String,Object> map = new HashMap<String,Object>();
-    
+    HashMap<String, Object> map = new HashMap<String, Object>();
+
     generateContentImpl(out, map);
-    
+
     generateSerialization(out);
   }
-  
-  protected void generateContentImpl(JavaWriter out,
-                                     HashMap<String,Object> map)
-    throws IOException
+
+  protected void generateContentImpl(JavaWriter out, HashMap<String, Object> map)
+      throws IOException
   {
-    
+
     generateConstructor(out, map);
-    
+
     generateProxyFactory(out);
 
     generateBeanPrologue(out, map);
 
     generateBusinessMethods(out, map);
-    
+
     generateEpilogue(out, map);
     generateInject(out, map);
     generateDelegate(out, map);
@@ -224,12 +217,11 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     generateDestroy(out, map);
   }
 
-  private void generateConstructor(JavaWriter out,
-                                   HashMap<String,Object> map)
-    throws IOException
+  private void generateConstructor(JavaWriter out, HashMap<String, Object> map)
+      throws IOException
   {
     // generateProxyConstructor(out);
-    
+
     out.println();
     out.print("public " + getClassName() + "(StatefulManager manager, ");
     out.println("StatefulContext context)");
@@ -238,7 +230,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.println("_manager = manager;");
     out.println("_context = context;");
-    
+
     out.println("if (__caucho_exception != null)");
     out.println("  throw __caucho_exception;");
 
@@ -247,41 +239,41 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.println();
     out.println("private " + getClassName() + "(StatefulManager manager"
-                + ", StatefulContext context"
-                + ", CreationalContextImpl<T> env)");
+        + ", StatefulContext context" + ", CreationalContextImpl<T> env)");
     out.println("{");
     out.pushDepth();
-    
+
     out.println("_manager = manager;");
     out.println("_context = context;");
 
-    out.println("_bean = (" + getBeanClassName() + ") _manager.newInstance(env);");
-    
+    out.println("_bean = (" + getBeanClassName()
+        + ") _manager.newInstance(env);");
+
     // ejb/5011
     if (SessionBean.class.isAssignableFrom(getBeanType().getJavaClass())) {
       out.println("_bean.setSessionContext(context);");
     }
-    
+
     generateContextObjectConstructor(out);
 
     out.popDepth();
     out.println("}");
   }
 
-  private void generateProxyFactory(JavaWriter out)
-    throws IOException
+  private void generateProxyFactory(JavaWriter out) throws IOException
   {
     out.println();
     out.println("@Override");
     out.println("public T __caucho_createProxy(CreationalContextImpl<T> env)");
     out.println("{");
-    out.println("  return (T) new " + getClassName() + "(_manager, _context, env);");
+    out.println("  return (T) new " + getClassName()
+        + "(_manager, _context, env);");
     out.println("}");
   }
- 
+
   @Override
-  public void generateDestroy(JavaWriter out, HashMap<String,Object> map)
-    throws IOException
+  public void generateDestroy(JavaWriter out, HashMap<String, Object> map)
+      throws IOException
   {
     super.generateDestroy(out, map);
 
@@ -289,28 +281,26 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println("@Override");
     out.println("public void __caucho_destroy() {}");
   }
-  
+
   @Override
-  protected void generateDestroyImpl(JavaWriter out)
-    throws IOException
+  protected void generateDestroyImpl(JavaWriter out) throws IOException
   {
     super.generateDestroyImpl(out);
-  
+
     out.println("_manager.destroy(_bean, env);");
     out.println("_bean = null;");
   }
-  
-  private void generateSerialization(JavaWriter out)
-    throws IOException
+
+  private void generateSerialization(JavaWriter out) throws IOException
   {
     out.println("private Object writeReplace()");
     out.println("{");
     out.pushDepth();
-    
+
     out.print("return new ");
     out.printClass(StatefulHandle.class);
     out.println("(_manager.getEJBName(), null);");
-    
+
     out.popDepth();
     out.println("}");
   }
