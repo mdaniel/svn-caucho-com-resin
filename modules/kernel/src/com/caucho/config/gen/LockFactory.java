@@ -72,8 +72,8 @@ public class LockFactory<X> extends AbstractAspectFactory<X> {
   /**
    * Creates an aspect for interception if the method should be intercepted.
    */
-  @SuppressWarnings("unchecked")
   @Override
+  @SuppressWarnings({ "unchecked", "rawtypes" })  
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
       boolean isEnhanced)
   {
