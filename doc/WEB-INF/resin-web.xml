@@ -29,11 +29,11 @@
     <servlet servlet-name="reference" 
              servlet-class="com.caucho.xtpdoc.ReferenceServlet">
       <init>
-        <reference-document>${webApp.root}/admin/reference.xtp</reference-document>
+        <reference-document>${webApp.root}/reference.xtp</reference-document>
       </init>
     </servlet>
 
-    <servlet-mapping url-pattern="/admin/reference/*" 
+    <servlet-mapping url-pattern="/reference/*" 
                      servlet-name="reference"/>
 		   
     <welcome-file-list>

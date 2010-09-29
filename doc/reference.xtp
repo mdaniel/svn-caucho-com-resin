@@ -8905,7 +8905,7 @@ element security-provider {
 
 </defun> <!-- security-provider -->
 
-<defun title="&lt;server>" version="Resin 3.1">
+<defun title="&lt;server>" version="Resin 3.1" name="server">
 <parents>cluster</parents>
 <p>&lt;server> configures a JVM instance in the cluster.
 Each &lt;server&gt; is uniquely identified by

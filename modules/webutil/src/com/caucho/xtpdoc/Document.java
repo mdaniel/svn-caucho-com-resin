@@ -257,35 +257,41 @@ public class Document {
       return _referenceDocument;
 
     String uri = _uri;
-
-    int p = uri.lastIndexOf('/');
-    if (p > 0)
-      uri = uri.substring(0, p + 1);
-
     ServletContext rootWebApp = _webApp.getContext("/");
 
-    if (! uri.equals("") && rootWebApp != null) {
-      String realPath = rootWebApp.getRealPath(uri);
+    if (rootWebApp != null) {
 
-      Path path = Vfs.lookup(realPath);
+      while (! uri.equals("")) {
+        int p = uri.lastIndexOf('/');
+        if (p > 0)
+          uri = uri.substring(0, p);
+        else 
+          break;
 
-      Path ref = path.lookup("reference.xtp");
+        String realPath = rootWebApp.getRealPath(uri + '/');
 
-      if (ref.canRead()) {
-        Config config = new Config();
-        config.setEL(false);
+        Path path = Vfs.lookup(realPath);
 
-        try {
-          _referenceDocument = 
-            new ReferenceDocument(_webApp, ref, _contextPath, 
-                                  uri + "reference.xtp", _encoding);
+        Path ref = path.lookup("reference.xtp");
 
-          config.configure(_referenceDocument, ref);
-        }
-        catch (Exception e) {
-          log.log(Level.FINE, e.toString(), e);
+        if (ref.canRead()) {
+          Config config = new Config();
+          config.setEL(false);
 
-          _referenceDocument = null;
+          try {
+            _referenceDocument = 
+              new ReferenceDocument(_webApp, ref, _contextPath, 
+                                    uri + "/reference.xtp", _encoding);
+
+            config.configure(_referenceDocument, ref);
+
+            break;
+          }
+          catch (Exception e) {
+            log.log(Level.FINE, e.toString(), e);
+
+            _referenceDocument = null;
+          }
         }
       }
     }

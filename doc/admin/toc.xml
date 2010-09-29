@@ -2,8 +2,6 @@
   
   <item link="index.xtp" title="admin">
     
-    <item link="reference.xtp" title="reference"/>
-    
     <item link="starting-resin.xtp" title="Starting Resin">
       
       <item link="starting-resin-install.xtp" title="Installation"

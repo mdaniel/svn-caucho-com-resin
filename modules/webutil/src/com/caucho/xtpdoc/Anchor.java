@@ -97,7 +97,10 @@ public class Anchor extends FormattedText {
     ReferenceDocument referenceDocument 
       = getDocument().getReferenceDocument();
 
-    if (referenceDocument != null) {
+    boolean isLinked = referenceDocument != null 
+                       && referenceDocument.getURI() != null;
+
+    if (isLinked) {
       out.writeStartElement("a");
       out.writeAttribute("href", referenceDocument.getURI() 
                                  + '#' + _configTag);
@@ -113,7 +116,7 @@ public class Anchor extends FormattedText {
     setDefaultText(_configTag);
     super.writeHtml(out);
 
-    if (referenceDocument != null)
+    if (isLinked)
       out.writeEndElement(); // a
   }
 
