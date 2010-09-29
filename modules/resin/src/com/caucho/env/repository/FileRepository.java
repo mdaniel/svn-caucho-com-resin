@@ -72,7 +72,7 @@ public class FileRepository extends AbstractRepository
   @Override
   public void checkForUpdate()
   {
-    update(getRepositoryRootHash());
+    update(getRepositoryRootHash(), false);
   }
 
   //

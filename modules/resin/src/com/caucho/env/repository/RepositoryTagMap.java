@@ -36,6 +36,7 @@ import com.caucho.vfs.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Map of the current tags.
@@ -43,6 +44,8 @@ import java.util.*;
 @Module
 public class RepositoryTagMap
 {
+  private static final Logger log = Logger.getLogger(RepositoryTagMap.class.getName());
+  
   private static final L10N L = new L10N(RepositoryTagMap.class);
 
   private final String _commitHash;
@@ -66,13 +69,15 @@ public class RepositoryTagMap
   }
 
   public RepositoryTagMap(AbstractRepository repository,
-                          String commitHash)
+                          String commitHash,
+                          boolean isValidate)
     throws IOException
   {
     _commitHash = commitHash;
 
     // force loading and validation from backend
-    repository.validateHash(commitHash);
+    if (isValidate)
+      repository.validateHash(commitHash);
 
     _commit = repository.readCommit(commitHash);
 

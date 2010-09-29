@@ -98,34 +98,35 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   @Override
   public void checkForUpdate()
   {
-    update(getRepositoryRootHash());
+    update(getRepositoryRootHash(), false);
   }
 
   /**
    * Updates based on a sha1 commit entry
    */
-  protected boolean update(String sha1)
+  protected boolean update(String sha1, boolean isNew)
   {
     String oldSha1 = _tagMap.getCommitHash();
-
+    
     if (sha1 == null || sha1.equals(oldSha1)) {
       return true;
     }
 
-    updateLoad(sha1);
+    updateLoad(sha1, isNew);
 
     return false;
   }
 
-  protected void updateLoad(String sha1)
+  protected void updateLoad(String sha1, boolean isNew)
   {
-    updateTagMap(sha1);
+    updateTagMap(sha1, isNew);
   }
 
-  protected void updateTagMap(String sha1)
+  protected void updateTagMap(String sha1, boolean isNew)
   {
     try {
-      RepositoryTagMap tagMap = new RepositoryTagMap(this, sha1);
+      RepositoryTagMap tagMap 
+        = new RepositoryTagMap(this, sha1, isNew);
 
       setTagMap(tagMap);
     } catch (IOException e) {

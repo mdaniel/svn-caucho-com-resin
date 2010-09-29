@@ -11,7 +11,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.11 snapshot">
+<s2 title="4.0.11 - Sept 29, 2010">
 <ul>
 <li>hessian: XSS protection against bogus message (rep by Dan Cornell)</li>
 <li>servlet: CauchoResponseWrapper shouldn't assume wrapping CauchoResponse (#4206)</li>
