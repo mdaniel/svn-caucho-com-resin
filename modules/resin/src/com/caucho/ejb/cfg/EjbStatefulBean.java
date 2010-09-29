@@ -37,21 +37,19 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import com.caucho.inject.Module;
 
 /**
- * Configuration for an ejb stateless session bean.
+ * Configuration for an ejb stateful session bean.
  */
 @Module
 public class EjbStatefulBean<X> extends EjbSessionBean<X> {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbStatefulBean(EjbConfig ejbConfig,
-                         AnnotatedType<X> rawAnnType,
-                         AnnotatedType<X> annType,
-                         String moduleName)
+  public EjbStatefulBean(EjbConfig ejbConfig, AnnotatedType<X> rawAnnType,
+      AnnotatedType<X> annType, String moduleName)
   {
     super(ejbConfig, rawAnnType, annType, moduleName);
   }
-  
+
   @Override
   public Class<? extends Annotation> getSessionType()
   {
