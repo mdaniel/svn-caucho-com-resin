@@ -84,8 +84,16 @@ public class IteratorAggregateDelegate
   {
     Value target = getTarget(env, qThis);
     
-    if (target instanceof ObjectValue)
-      return _iteratorDelegate.getValueIterator(env, (ObjectValue) target);
+    if (target instanceof ObjectValue){
+      if(target.isA("iteratoraggregate"))
+      {
+        return target.getValueIterator(env);
+      }
+      else
+      {
+        return _iteratorDelegate.getValueIterator(env, (ObjectValue) target);
+      }
+    }
     else
       throw new QuercusException(L.l("'{0}' is not a valid Traversable",
                                      qThis));
