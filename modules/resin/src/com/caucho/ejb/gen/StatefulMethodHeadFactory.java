@@ -29,7 +29,9 @@
 
 package com.caucho.ejb.gen;
 
+import javax.ejb.AccessTimeout;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectFactory;
 import com.caucho.config.gen.AspectGenerator;
@@ -37,23 +39,59 @@ import com.caucho.config.gen.MethodHeadFactory;
 import com.caucho.inject.Module;
 
 /**
- * Represents a stateless local business method
+ * Represents a stateful local business method
  */
 @Module
-public class StatefulMethodHeadFactory<X> extends MethodHeadFactory<X>
-{
+public class StatefulMethodHeadFactory<X> extends MethodHeadFactory<X> {
+  private AccessTimeout _classAccessTimeout;
+
   public StatefulMethodHeadFactory(StatefulAspectBeanFactory<X> beanFactory,
-                                    AspectFactory<X> next)
+      AspectFactory<X> next)
   {
     super(beanFactory, next);
+
+    AnnotatedType<X> beanType = beanFactory.getBeanType();
+
+    _classAccessTimeout = beanType.getAnnotation(AccessTimeout.class);
   }
-  
+
   @Override
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
-                                   boolean isEnhanced)
+      boolean isEnhanced)
   {
+    // TODO The annotation resolution algorithm should probably be re-factored
+    // in a superclass.
+
+    AnnotatedType<?> declaringType = method.getDeclaringType();
+
+    AccessTimeout accessTimeout = null;
+
+    AccessTimeout methodLevelAccessTimeout = method
+        .getAnnotation(AccessTimeout.class);
+
+    AccessTimeout declaringClassAccessTimeout = (declaringType != null) ? declaringType
+        .getAnnotation(AccessTimeout.class) : null;
+
+    // The method-level annotation takes precedence.
+    if (methodLevelAccessTimeout != null) {
+      accessTimeout = methodLevelAccessTimeout;
+    }
+    // Then the class-level annotation at the declaring class takes precedence.
+    else if (declaringClassAccessTimeout != null) {
+      accessTimeout = declaringClassAccessTimeout;
+    }
+    // Finally, the top level class annotation takes effect.
+    else {
+      accessTimeout = _classAccessTimeout;
+    }
+
     AspectGenerator<X> next = super.create(method, true);
-    
-    return new StatefulMethodHeadGenerator<X>(this, method, next);
+
+    if (accessTimeout != null) {
+      return new StatefulMethodHeadGenerator<X>(this, method, next,
+          accessTimeout.value(), accessTimeout.unit());
+    } else {
+      return new StatefulMethodHeadGenerator<X>(this, method, next);
+    }
   }
 }
