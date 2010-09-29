@@ -60,9 +60,11 @@ function display_webapp_page($mbean_server, $webapp)
 
   $session = $webapp->SessionManager;
   
-  echo <<<END
-<h2>WebApp</h2>
+  echo "<h2>WebApp";
+  print_help("WebApp");
+  echo "</h2>\n";
 
+  echo <<<END
 <table class="data">
   <tr>
     <th>Web-App</th>
@@ -198,10 +200,13 @@ function display_webapp_summary($g_mbean_server, $is_idle)
 {
   global $is_secure;
   
+  echo "<h2>WebApps";
+  print_help("WebApp");
+  echo "</h2>\n";
+  
 ?>
 
 <!-- Applications -->
-<h2>WebApps</h2>
 
 <table class="data">
   <tr>

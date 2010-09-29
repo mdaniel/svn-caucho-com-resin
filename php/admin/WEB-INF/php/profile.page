@@ -28,7 +28,10 @@ if ($profile) {
   }
 
   if ($profile->active) {
-    echo "<h2>Profile Active for Server " . $g_server->Id . "</h2>";
+    echo "<h2>Profile";
+    print_help("Profile");
+    echo " Active for Server " . $g_server->Id;
+    echo "</h2>";
     echo "Period: {$profile->period}ms Depth: {$profile->depth}";
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";
@@ -50,7 +53,9 @@ if ($profile) {
   }
   else {
     echo "<h2>";
-    echo "Profile Stopped";
+    echo "Profile";
+    print_help("Profile");
+    echo " Stopped";
     echo "</h2>";
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";

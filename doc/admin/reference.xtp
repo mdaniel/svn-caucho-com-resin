@@ -510,6 +510,62 @@ using the same requirement as /resin-admin.</p>
 
 </defun>
 
+<defun title="&lt;authenticator>" version="Resin 3.1" name="authenticator">
+<parents>cluster, host, web-app</parents>
+<!-- deprecated -->
+
+<description>
+<p>The &lt;authenticator> tag as been replaced by CDI-style
+authenticator configuration. It exists only for backward compatibility.
+To upgrade, see the authenticator-specific tags like <a href="#resin:XmlAuthenticator">resin:XmlAuthenticator</a>.</p>
+
+<p>The new name will be the old class="..." name. So class="com.caucho.security.XmlAuthenticator"
+becomes &lt;resin:XmlAuthenticator>.</p>
+
+</description>
+
+<example title="XmlAuthenticator in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+  ...
+  &lt;resin:XmlAuthenticator password-digest="none">
+    &lt;resin:user name="Harry Potter" password="quidditch" group="user,gryffindor"/>
+    &lt;resin:user name="Draco Malfoy" password="pureblood" group="user,slytherin"/>
+  &lt;/resin:XmlAuthenticator>
+  ...
+&lt;/web-app>  
+</example>
+
+</defun>
+
+<defun title="&lt;bean>" version="Resin 3.1" name="bean">
+<parents>cluster, host, web-app</parents>
+<!-- deprecated -->
+
+<description>
+<p>The &lt;bean> tag as been replaced by CDI-style
+configuration. It exists only for backward compatibility.</p>
+
+<p>The new tag name will be the old class="..." name and the XML prefix
+will be the package. So class="com.mycom.FooBean"
+becomes &lt;mycom:FooBean xmlns:mycom="urn:com.mycom">.</p>
+
+</description>
+
+<example title="MyBean in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin"
+            xmlns:mypkg="urn:java:com.mycom.mypkg">
+  ...
+  &lt;mypkg:MyBean resin:JndiName="java:comp/env/my-name">
+    &lt;my-attribute>my-value&lt;/my-attribute>
+  &lt;/mypkg:MyBean>
+  ...
+&lt;/web-app>  
+</example>
+
+</defun>
+
 <defun title="&lt;cache>" version="Resin 3.1" name="cache">
 <parents>cluster</parents>
 
@@ -2184,12 +2240,36 @@ element ejb-server {
 
 </defun>
 
-<!-- XXX there's some good description in here, even though the actual
-     configuration has changed to CDI. Consider retaining some for 
-     a topic page or the CDI page.
-
 <defun title="&lt;ejb-stateful-bean>" name="ejb-stateful-bean">
 <parents>resin, host-default, host, web-app-default, web-app</parents>
+<!-- deprecated -->
+
+<description>
+<p>&lt;ejb-stateful-bean> is deprecated and replaced by CDI-style
+configuration. EJB stateful beans are now either scanned automatically
+if configured with the @Stateful annotation or can be configured as
+CDI beans with the &lt;ee:Stateful> tag.</p>
+</description>
+
+<example title="Stateful bean in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:ee="urn:java:ee"
+         xmlny:mypkg="urn:java:com.mycom.mypkg">
+
+  &lt;mypkg:MyBean>
+    &lt;ee:Stateful/>
+
+    &lt;my-attribute>my-value&lt;/my-attribute>
+  &lt;/mypkg:MyBean>
+
+&lt;/web-app>  
+</example>
+</defun>
+
+<!-- old description
+     XXX there's some good description in here, even though the actual
+     configuration has changed to CDI. Consider retaining some for 
+     a topic page or the CDI page.
 
 <description>
 <p>&lt;ejb-stateful-bean> configures an EJB @Stateful bean.  The
@@ -2310,6 +2390,32 @@ element ejb-stateless-bean {
 
 </defun>
 -->
+
+<defun title="&lt;ejb-stateless-bean>" name="ejb-stateless-bean">
+<parents>resin, host-default, host, web-app-default, web-app</parents>
+<!-- deprecated -->
+
+<description>
+<p>&lt;ejb-stateless-bean> is deprecated and replaced by CDI-style
+configuration. EJB stateless beans are now either scanned automatically
+if configured with the @Stateless annotation or can be configured as
+CDI beans with the &lt;ee:Stateless> tag.</p>
+</description>
+
+<example title="Stateless bean in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:ee="urn:java:ee"
+         xmlny:mypkg="urn:java:com.mycom.mypkg">
+
+  &lt;mypkg:MyBean>
+    &lt;ee:Stateless/>
+
+    &lt;my-attribute>my-value&lt;/my-attribute>
+  &lt;/mypkg:MyBean>
+
+&lt;/web-app>  
+</example>
+</defun>
 
 <defun title="&lt;environment-system-properties>" name="environment-system-properties">
 <default>true</default>
@@ -2531,6 +2637,17 @@ was not found.
 &lt;/body&gt;
 &lt;/html&gt;
 </example>
+
+</defun>
+
+<defun title="&lt;expand-cleanup-fileset>" name="expand-cleanup-fileset">
+<parents>web-app-deploy</parents>
+
+<description>
+<p>The expand-cleanup-fileset tag lets you configure which files are to
+be kept on a .war redeploy. By default, Resin deletes the entire .war
+directory on a restart.</p>
+</description>
 
 </defun>
 
@@ -3547,6 +3664,14 @@ element properties {
 }
 </schema>
 
+</defun>
+
+<defun title="&lt;jpa-persistence-unit>" name="jpa-persistence-unit" occur="*" version="Resin 3.1">
+<parents>resin, cluster, host, web-app</parents>
+
+<description>
+<p>Replacement for jpa-persistence.</p>
+</description>
 </defun>
 
 <defun title="&lt;jsf>" name="jsf" type="defun">
@@ -8579,6 +8704,30 @@ print the allocation stack trace, which is more informative for
 tracking down errors.</p>
 </description>
 
+</defun>
+
+<defun title="&lt;scheduled-task>" name="scheduled-task">
+<parents>web-app</parents>
+
+<description>
+<p>The &lt;scheduled-task> is replaced by bean-style <a href="#resin:ScheduledTask">resin:ScheduleTask</a>.</p>
+</description>
+
+<example title="ScheduledTask in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:ee="urn:java:ee"
+         xmlns:mypkg="urn:java:com.mycom.mypkg">
+
+  &lt;resin:ScheduleTask>
+    &lt;cron>* * 23 * *&lt;/cron>
+    
+    &lt;task>
+      &lt;mypkg:MyBean/>
+    &lt;/task>
+  &lt;/resin:ScheduleTask>
+  
+&lt;/web-app>
+</example>
 </defun>
 
 <defun title="&lt;secure>" name="secure">

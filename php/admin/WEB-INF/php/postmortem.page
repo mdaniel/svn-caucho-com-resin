@@ -16,7 +16,9 @@ $server = $g_server;
 if ($g_mbean_server)
   $stat = $g_mbean_server->lookup("resin:type=StatService");
 
-echo "<h1>Postmortem Analysis</h1>\n";
+echo "<h1>Postmortem";
+print_help("Postmortem");
+echo " Analysis</h1>\n";
   
 if (! $stat) {
   ?>
@@ -97,7 +99,7 @@ stat_graph("request_time", 300, $height, $start, $end,
 echo "<tr><th>Database Query Active<th>Database Query Time";
 echo "<tr valign='top'><td>";
 stat_graph("database", 300, $height, $start, $end,
-           array("$si|Resin|Database|Query Active Max"));
+           array("$si|Resin|Database|Query Active"));
 
 echo "<td>";
 stat_graph("database_time", 300, $height, $start, $end,
@@ -110,13 +112,14 @@ stat_graph("thread", 300, $height, $start, $end,
            array("$si|JVM|Thread|JVM Thread Count",
                  "$si|Resin|Thread|Thread Count",
                  "$si|Resin|Thread|Thread Active Count",
+                 "$si|Resin|Thread|Thread Idle Count",
                  "$si|Resin|Thread|Thread Task Queue",
                  "$si|Resin|Thread|Thread Priority Queue",
                  "$si|Resin|Thread|Thread Overflow Count"));
 
 echo "<td>";
-stat_graph("cpu", 300, $height, $start, $end,
-           array("$si|OS|CPU|CPU Active"));
+stat_graph_regexp("cpu", 300, $height, $start, $end,
+                  "/^$si\|OS\|CPU\|CPU Active/");
 
 echo "<tr><th>Memory<th>GC Time";
 echo "<tr valign='top'><td>";
@@ -139,7 +142,7 @@ if ($log_mbean) {
   // startup
   //
   $messages = $log_mbean->findMessages(($restart_time - 60 * 60) * 1000,
-                                       ($restart_time - 2) * 1000);
+                                       ($restart_time + 10) * 1000);
 
   if (! empty($messages)) {
     echo "<h2>Log Messages</h2>\n";
