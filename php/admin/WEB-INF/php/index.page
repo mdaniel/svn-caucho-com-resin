@@ -39,6 +39,17 @@ the current Resin instance.</p>
 
 </td>
 
+<!-- Deploy -->
+<td>
+<h2><a href="?q=deploy">Deploy</a></h2>
+
+<p>Deploy and update new applications throughout the cluster.</p>
+
+</td>
+
+</tr>
+
+<tr>
 <!-- Graphs -->
 <td>
 <h2><a href="?q=graphs">Graphs</a></h2>
@@ -48,9 +59,6 @@ a HTML 5 browser like Firefox 3.5.</p>
 
 </td>
 
-</tr>
-
-<tr>
 <!-- Health -->
 <td>
 <h2><a href="?q=health">Health</a></h2>
@@ -58,6 +66,8 @@ a HTML 5 browser like Firefox 3.5.</p>
 <p>Health check overview of the servers.</p>
 
 </td>
+
+<tr>
 
 <!-- JMX -->
 <td>
@@ -67,7 +77,6 @@ a HTML 5 browser like Firefox 3.5.</p>
 
 </td>
 
-<tr>
 
 <!-- Memory -->
 <td>
@@ -76,6 +85,7 @@ a HTML 5 browser like Firefox 3.5.</p>
 <p>Heap dump to debug memory leaks and memory overview.
 The heap dump requires Resin-Pro.</p>
 
+<tr>
 <!-- Postmortem -->
 <td>
 <h2><a href="?q=postmortem">Postmortem</a></h2>
@@ -86,9 +96,7 @@ restarted.</p>
 </td>
 
 </td>
-</tr>
 
-<tr>
 
 <!-- Profile -->
 <td>
@@ -99,6 +107,7 @@ lightweight and sample-based, it can be used in a runtime environment.</p>
 
 </td>
 
+<tr>
 <!-- Thread -->
 <td>
 <h2><a href="?q=thread">Thread Dump</a></h2>
@@ -106,9 +115,6 @@ lightweight and sample-based, it can be used in a runtime environment.</p>
 <p>Provides thread dumps to check the current status of a Resin instance.</p>
 
 </td>
-</tr>
-
-<tr>
 
 <!-- Web-App -->
 <td>
@@ -118,6 +124,7 @@ lightweight and sample-based, it can be used in a runtime environment.</p>
 
 </td>
 
+<tr>
 <td>
 <h2><a href="rest.php">REST</a></h2>
 

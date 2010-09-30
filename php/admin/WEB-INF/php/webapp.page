@@ -175,7 +175,7 @@ function display_webapp_summary_page($g_mbean_server)
   echo "<ul>\n";
   echo "<li><a href='#webapp-active'>Active</a></li>\n";
   echo "<li><a href='#webapp-idle'>Idle</a></li>\n";
-  echo "<li><a href='#webapp-deploy'>Deploy</a></li>\n";
+  //echo "<li><a href='#webapp-deploy'>Deploy</a></li>\n";
   echo "</ul>\n";
 
   echo "<div id='webapp-active'>\n";
@@ -186,9 +186,10 @@ function display_webapp_summary_page($g_mbean_server)
   display_webapp_summary($g_mbean_server, true);
   echo "</div>\n";
 
+  /*
   echo "<div id='webapp-deploy'>\n";
   display_deploy_form($g_mbean_server);
-  echo "</div>\n";
+  echo "</div>\n";*/
   
   echo "</div>\n";
 }  
@@ -749,7 +750,6 @@ function javascript_deploy_form()
           applicationNameInput.val(match[2]);
         }
       }
-      
     });
 
     var hostRadio = $("input:radio[name=host]");
