@@ -29,11 +29,15 @@
 
 package com.caucho.management.server;
 
+import com.caucho.util.QDate;
+
 /**
  * Persistent logging.
  */
+@SuppressWarnings("serial")
 public class LogMessage implements java.io.Serializable
 {
+  private String _type;
   private String _name;
   
   private String _server;
@@ -46,6 +50,16 @@ public class LogMessage implements java.io.Serializable
 
   public LogMessage()
   {
+  }
+  
+  public String getType()
+  {
+    return _type;
+  }
+  
+  public void setType(String type)
+  {
+    _type = type;
   }
 
   /**
@@ -144,10 +158,12 @@ public class LogMessage implements java.io.Serializable
     return _message;
   }
 
+  @Override
   public String toString()
   {
     return (getClass().getSimpleName()
-            + "[" + _name + ", " + _level
-            + ", " + _thread + ", " + _message + "]");
+            + "[" + _type + ", " + QDate.formatISO8601(_timestamp)
+            + ", " + _name + ", " + _level
+            + ", " + _message + "]");
   }
 }

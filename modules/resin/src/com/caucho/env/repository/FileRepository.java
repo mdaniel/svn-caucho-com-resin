@@ -39,7 +39,6 @@ import com.caucho.env.git.GitObjectStream;
 import com.caucho.env.git.GitService;
 import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
-import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
