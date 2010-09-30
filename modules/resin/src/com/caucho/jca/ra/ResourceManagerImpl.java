@@ -29,8 +29,8 @@
 package com.caucho.jca.ra;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.dbpool.ConnectionPool;
 import com.caucho.loader.*;
-import com.caucho.transaction.ConnectionPool;
 import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.L10N;
 

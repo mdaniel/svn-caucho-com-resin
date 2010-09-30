@@ -28,12 +28,25 @@
 
 package com.caucho.transaction;
 
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+
 /**
- * A resource with a close method.
+ * Managed resource registered with the transaction.
  */
-public interface CloseResource {
-  /**
-   * Closes the resource.
-   */
-  public void close();
+public interface ManagedXAResource extends XAResource {
+  public Xid getXid();
+  
+  public boolean supportsTransaction();
+  
+  public void setTransaction(UserTransactionImpl userTrans);
+  
+  public void enableLocalTransactionOptimization(boolean isEnabled);
+
+  public boolean share(ManagedResource userPoolItem);
+
+  public void abortConnection();
+
+  public void destroy();
 }
+

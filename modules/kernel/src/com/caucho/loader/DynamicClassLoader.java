@@ -150,6 +150,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
   // Lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
+  
+  // marker for a closed classloader to help heap dumps
+  @SuppressWarnings("unused")
+  private ZombieMarker _zombieMarker;
 
   private boolean _hasNewLoader = true;
 
@@ -2037,6 +2041,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void destroy()
   {
+    _zombieMarker = new ZombieMarker();
+    
     try {
       stop();
     } catch (Throwable e) {

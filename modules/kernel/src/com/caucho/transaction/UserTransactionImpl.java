@@ -29,16 +29,21 @@
 
 package com.caucho.transaction;
 
-import com.caucho.util.L10N;
-
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.security.auth.Subject;
-import javax.transaction.*;
-import javax.transaction.xa.Xid;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.UserTransaction;
+import javax.transaction.xa.Xid;
+
+import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * Implementation of the UserTransactionImpl for a thread instance.
@@ -52,12 +57,10 @@ public class UserTransactionImpl
 
   private TransactionManagerImpl _transactionManager;
 
-  private ArrayList<UserPoolItem> _resources = new ArrayList<UserPoolItem>();
-  private ArrayList<ManagedPoolItem> _poolItems = new ArrayList<ManagedPoolItem>();
-  private ArrayList<BeginResource> _beginResources
-    = new ArrayList<BeginResource>();
-  private ArrayList<CloseResource> _closeResources
-    = new ArrayList<CloseResource>();
+  private ArrayList<ManagedResource> _resources
+    = new ArrayList<ManagedResource>();
+  private ArrayList<ManagedXAResource> _xaResources
+    = new ArrayList<ManagedXAResource>();
 
   private boolean _isInContext;
   private boolean _isTransactionActive;
@@ -107,150 +110,95 @@ public class UserTransactionImpl
   {
     _isInContext = isInContext;
   }
+  
+  public boolean isActive()
+  {
+    return _isTransactionActive;
+  }
 
   /**
    * Enlist a resource.
    */
-  void enlistResource(UserPoolItem resource)
+  public void enlistResource(ManagedResource resource)
     throws SystemException, RollbackException
   {
+    if (resource == null)
+      throw new NullPointerException();
+    
     if (_resources.contains(resource))
       return;
     
     TransactionImpl xa = _transactionManager.getTransaction();
     if (xa != null && xa.isActive()) {
-      ManagedPoolItem poolItem = resource.getXAPoolItem();
+      ManagedXAResource xaResource = resource.getXAResource();
 
-      enlistPoolItem(xa, poolItem);
+      if (xaResource != null)
+        enlistXaResource(xa, xaResource);
     }
     
     _resources.add(resource);
   }
 
-  private void enlistPoolItem(Transaction xa, ManagedPoolItem poolItem)
+  private void enlistXaResource(Transaction xa,
+                                ManagedXAResource xaResource)
     throws SystemException, RollbackException
   {
-    if (poolItem == null)
+    if (xaResource == null)
       return;
-    else if (! poolItem.supportsTransaction()) {
+    else if (! xaResource.supportsTransaction()) {
       // server/164j
       return;
     }
     
-    // XXX: new
-    if (_poolItems.contains(poolItem))
+    if (_xaResources.contains(xaResource))
       return;
     
-    poolItem.setTransaction(this);
+    xaResource.setTransaction(this);
 
     if (xa instanceof TransactionImpl) {
       TransactionImpl xaImpl = (TransactionImpl) xa;
       
       // server/164l
       if (xaImpl.allowLocalTransactionOptimization())
-        poolItem.enableLocalTransactionOptimization(true);
+        xaResource.enableLocalTransactionOptimization(true);
     }
 
-    if (poolItem.getXid() == null)
-      xa.enlistResource(poolItem);
+    if (xaResource.getXid() == null)
+      xa.enlistResource(xaResource);
     
-    _poolItems.add(poolItem);
+    _xaResources.add(xaResource);
   }
 
   /**
-   * Delist a pool item
+   * Delist an xa resource
    */
-  void delistPoolItem(ManagedPoolItem poolItem, int flags)
+  /*
+  private void delistXaResource(ManagedXAResource xaResource, int flags)
     throws SystemException, RollbackException
   {
     Transaction xa = _transactionManager.getTransaction();
 
     try {
       if (xa != null)
-        xa.delistResource(poolItem, flags);
+        xa.delistResource(xaResource, flags);
     } finally {
-      _poolItems.remove(poolItem);
+      _xaResources.remove(xaResource);
     }
   }
+  */
 
   /**
    * Delist a resource.
    */
-  void delistResource(UserPoolItem resource)
+  public void delistResource(ManagedResource resource)
   {
     _resources.remove(resource);
   }
-
-  /**
-   * Enlist a resource automatically called when a transaction begins
-   */
-  public void enlistBeginResource(BeginResource resource)
+  
+  @Module
+  public ArrayList<ManagedXAResource> getXaResources()
   {
-    _beginResources.add(resource);
-
-    try {
-      Transaction xa = _transactionManager.getTransaction();
-      if (xa != null)
-        resource.begin(xa);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Enlist a resource automatically closed when the context ends.
-   */
-  public void enlistCloseResource(CloseResource resource)
-  {
-    _closeResources.add(resource);
-  }
-
-  /**
-   * Allocates a resource matching the parameters.  If none matches,
-   * return null.
-   */
-  UserPoolItem allocate(ManagedConnectionFactory mcf,
-                        Subject subject,
-                        ConnectionRequestInfo info)
-  {
-    if (! _isTransactionActive)
-      return null;
-    
-    ArrayList<ManagedPoolItem> poolItems = _poolItems;
-    int length = poolItems.size();
-    
-    for (int i = 0; i < length; i++) {
-      ManagedPoolItem poolItem = poolItems.get(i);
-
-      UserPoolItem item = poolItem.allocateXA(mcf, subject, info);
-
-      if (item != null)
-        return item;
-    }
-
-    return null;
-  }
-
-  /**
-   * Finds the pool item joined to this one.
-   * return null.
-   */
-  ManagedPoolItem findJoin(ManagedPoolItem item)
-  {
-    if (! _isTransactionActive)
-      return null;
-    
-    ArrayList<ManagedPoolItem> poolItems = _poolItems;
-    int length = poolItems.size();
-    
-    for (int i = 0; i < length; i++) {
-      ManagedPoolItem poolItem = poolItems.get(i);
-
-      if (poolItem.isJoin(item))
-        return poolItem;
-    }
-
-    return null;
+    return _xaResources;
   }
 
   /**
@@ -268,7 +216,7 @@ public class UserTransactionImpl
   }
 
   /**
-   * Returns the XID.
+   * Returns the number of currently enlisted resources.
    */
   public int getEnlistedResourceCount()
     throws SystemException, RollbackException
@@ -299,50 +247,39 @@ public class UserTransactionImpl
       TransactionImpl xa = (TransactionImpl) _transactionManager.getTransaction();
       xa.setUserTransaction(this);
     
-      _poolItems.clear();
+      _xaResources.clear();
     
-      // enlist "cached" connections
+      // enlist "cached" resources
       int length = _resources.size();
 
       for (int i = 0; i < length; i++) {
-        UserPoolItem userPoolItem = _resources.get(i);
+        ManagedResource resource = _resources.get(i);
 
-        for (int j = _poolItems.size() - 1; j >= 0; j--) {
-          ManagedPoolItem poolItem = _poolItems.get(j);
+        for (int j = _xaResources.size() - 1; j >= 0; j--) {
+          ManagedXAResource xaResource = _xaResources.get(j);
 
-          if (poolItem.share(userPoolItem)) {
+          if (xaResource.share(resource)) {
             break;
           }
         }
 
-        ManagedPoolItem xaPoolItem = userPoolItem.getXAPoolItem();
-        if (! _poolItems.contains(xaPoolItem))
-          _poolItems.add(xaPoolItem);
+        ManagedXAResource xaResource = resource.getXAResource();
+        if (xaResource != null && ! _xaResources.contains(xaResource))
+          _xaResources.add(xaResource);
       }
 
-      for (int i = 0; i < _poolItems.size(); i++) {
-        ManagedPoolItem poolItem = _poolItems.get(i);
+      for (int i = 0; i < _xaResources.size(); i++) {
+        ManagedXAResource xaResource = _xaResources.get(i);
 
-        poolItem.enableLocalTransactionOptimization(_poolItems.size() == 1);
+        xaResource.enableLocalTransactionOptimization(_xaResources.size() == 1);
 
         try {
-          xa.enlistResource(poolItem);
+          xa.enlistResource(xaResource);
         } catch (Exception e) {
           String message = L.l("Failed to begin UserTransaction due to: {0}", e);
           log.log(Level.SEVERE, message, e);
 
           throw new SystemException(message);
-        }
-      }
-
-      // enlist begin resources
-      for (int i = 0; i < _beginResources.size(); i++) {
-        try {
-          BeginResource resource = _beginResources.get(i);
-
-          resource.begin(xa);
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
         }
       }
 
@@ -356,13 +293,16 @@ public class UserTransactionImpl
         // something has gone very wrong
         _isTransactionActive = false;
 
-        ArrayList<ManagedPoolItem> recoveryList = new ArrayList<ManagedPoolItem>(_poolItems);
-        _poolItems.clear();
+        ArrayList<ManagedXAResource> xaResources
+          = new ArrayList<ManagedXAResource>(_xaResources);
+        _xaResources.clear();
+        
+        // XXX: need to free _resources as well
         _resources.clear();
 
-        for (int i = 0; i < recoveryList.size(); i++) {
+        for (int i = 0; i < xaResources.size(); i++) {
           try {
-            ManagedPoolItem item = recoveryList.get(i);
+            ManagedXAResource item = xaResources.get(i);
 
             item.abortConnection();
 
@@ -388,8 +328,8 @@ public class UserTransactionImpl
     _isTransactionActive = false;
     
     UserTransactionSuspendState state;
-    state = new UserTransactionSuspendState(_poolItems);
-    _poolItems.clear();
+    state = new UserTransactionSuspendState(_xaResources);
+    _xaResources.clear();
 
     return state;
   }
@@ -404,7 +344,7 @@ public class UserTransactionImpl
 
     _isTransactionActive = true;
 
-    _poolItems.addAll(state.getPoolItems());
+    _xaResources.addAll(state.getXAResources());
   }
   
   /**
@@ -432,16 +372,15 @@ public class UserTransactionImpl
   @Override
   public void commit()
     throws IllegalStateException, RollbackException, HeuristicMixedException,
-    HeuristicRollbackException, SecurityException, SystemException
+           HeuristicRollbackException, SecurityException, SystemException
   {
     try {
-      // XXX: interaction with hessian XA
       if (! _isTransactionActive)
         throw new IllegalStateException("UserTransaction.commit() requires an active transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back.");
 
       _transactionManager.commit();
     } finally {
-      _poolItems.clear();
+      _xaResources.clear();
 
       _isTransactionActive = false;
     }
@@ -459,7 +398,7 @@ public class UserTransactionImpl
     } finally {
       _isTransactionActive = false;
       
-      _poolItems.clear();
+      _xaResources.clear();
     }
   }
 
@@ -476,19 +415,20 @@ public class UserTransactionImpl
     boolean isTransactionActive = _isTransactionActive;
     _isTransactionActive = false;
 
-    if (! isTransactionActive && _poolItems.size() > 0) {
+    if (! isTransactionActive && _xaResources.size() > 0) {
       Exception e = new IllegalStateException("Internal error: user transaction pool broken because poolItems exist, but no transaction is active.");
       log.log(Level.WARNING, e.toString(), e);
     }
     
-    _poolItems.clear();
+    _xaResources.clear();
 
     if (isTransactionActive) {
       try {
         exn = new IllegalStateException(L.l("Transactions must have a commit() or rollback() in a finally block."));
 
-        log.warning("Rolling back dangling transaction.  All transactions must have a commit() or rollback() in a finally block.");
+        log.warning("Rolling back unclosed transaction.  All transactions must have a commit() or rollback() in a finally block.");
 
+        _transactionManager.addUnclosedTransaction("Rolling back unclosed transaction.");
         _transactionManager.rollback();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString());
@@ -496,54 +436,9 @@ public class UserTransactionImpl
 
     }
 
-    _beginResources.clear();
-
-    while (_closeResources.size() > 0) {
-      try {
-        CloseResource resource;
-
-        resource = _closeResources.remove(_closeResources.size() - 1);
-        resource.close();
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    boolean hasWarning = false;
-
-    while (_resources.size() > 0) {
-      UserPoolItem userPoolItem = _resources.remove(_resources.size() - 1);
-
-      if (! userPoolItem.isCloseDanglingConnections())
-        continue;
-
-      if (! hasWarning) {
-        hasWarning = true;
-
-        log.warning("Closing dangling connections.  All connections must have a close() in a finally block.");
-      }
-
-      try {
-        IllegalStateException stackTrace = userPoolItem.getAllocationStackTrace();
-
-        if (stackTrace != null)
-          log.log(Level.WARNING, stackTrace.getMessage(), stackTrace);
-        else {
-          // start saving the allocation stack trace.
-          userPoolItem.setSaveAllocationStackTrace(true);
-        }
-
-        if (exn == null)
-          exn = new IllegalStateException(L.l("Connection {0} was not closed. Connections must have a close() in a finally block.",
-                                              userPoolItem.getUserConnection()));
-
-        userPoolItem.abortConnection();
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    _poolItems.clear();
+    _xaResources.clear();
+    
+    exn = clearDanglingResources(exn);
 
     try {
       _transactionManager.setTransactionTimeout(0);
@@ -553,6 +448,60 @@ public class UserTransactionImpl
 
     if (exn != null)
       throw exn;
+  }
+  
+  private IllegalStateException clearDanglingResources(IllegalStateException exn)
+  {
+    if (_resources.size() == 0)
+      return exn;
+
+    ArrayList<ManagedResource> resourceList
+      = new ArrayList<ManagedResource>(_resources);
+    
+    _resources.clear();
+
+    boolean hasWarning = false;
+    for (ManagedResource resource : resourceList) {
+      if (! resource.isCloseDanglingConnections())
+        continue;
+
+      if (! hasWarning) {
+        hasWarning = true;
+
+        log.warning("Closing dangling resources.  Applications must close all resources in a finally block.");
+      }
+
+      try {
+        IllegalStateException stackTrace = resource.getAllocationStackTrace();
+
+        if (stackTrace != null)
+          log.log(Level.WARNING, stackTrace.getMessage(), stackTrace);
+        else {
+          // start saving the allocation stack trace.
+          resource.setSaveAllocationStackTrace(true);
+        }
+        
+        String msg = L.l("Resource {0} was not closed. Applications must close all resources in a finally block.",
+                         resource.getUserConnection());
+
+        if (exn == null)
+          exn = new IllegalStateException(msg);
+        
+        _transactionManager.addUnclosedResource(msg);
+
+        resource.abortConnection();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+
+    return exn;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }
 

@@ -27,8 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.transaction;
+package com.caucho.env.dbpool;
 
+import com.caucho.transaction.ManagedResource;
+import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.util.L10N;
 
 import javax.resource.ResourceException;
@@ -57,7 +59,7 @@ import java.util.logging.Logger;
  * When the XA completes, the UserPoolItem restores
  * its current XA PoolItem to the ownPoolItem.
  */
-class UserPoolItem {
+class UserPoolItem implements ManagedResource {
   private static final L10N L = new L10N(UserPoolItem.class);
   private static final Logger log
     = Logger.getLogger(UserPoolItem.class.getName());
@@ -185,6 +187,7 @@ class UserPoolItem {
   /**
    * Returns the allocation stack trace.
    */
+  @Override
   public IllegalStateException getAllocationStackTrace()
   {
     return _allocationStackTrace;
@@ -193,6 +196,7 @@ class UserPoolItem {
   /**
    * Enables saving of the allocation stack traces.
    */
+  @Override
   public void setSaveAllocationStackTrace(boolean enable)
   {
     _cm.setSaveAllocationStackTrace(enable);
@@ -201,6 +205,7 @@ class UserPoolItem {
   /**
    * Return true if connections should be closed automatically.
    */
+  @Override
   public boolean isCloseDanglingConnections()
   {
     return _cm.isCloseDanglingConnections();
@@ -228,7 +233,8 @@ class UserPoolItem {
   /**
    * Returns the xa item.
    */
-  public ManagedPoolItem getXAPoolItem()
+  @Override
+  public ManagedPoolItem getXAResource()
   {
     return _sharePoolItem;
   }
@@ -236,6 +242,7 @@ class UserPoolItem {
   /**
    * Gets the user connection.
    */
+  @Override
   public Object getUserConnection()
   {
     return _userConn;
@@ -354,8 +361,8 @@ class UserPoolItem {
   /**
    * Close the connection, called from UserTransactionImpl.
    */
-  void abortConnection()
-    throws ResourceException
+  @Override
+  public void abortConnection()
   {
     ManagedPoolItem poolItem = _ownPoolItem;
     _ownPoolItem = null;

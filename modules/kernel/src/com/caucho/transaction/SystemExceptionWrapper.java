@@ -30,6 +30,7 @@ package com.caucho.transaction;
 
 import javax.transaction.SystemException;
 
+@SuppressWarnings("serial")
 public class SystemExceptionWrapper extends SystemException {
   private Throwable _rootCause;
   

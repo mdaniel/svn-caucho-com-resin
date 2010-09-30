@@ -30,9 +30,6 @@ package com.caucho.transaction;
 
 import javax.transaction.xa.Xid;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
-
 /**
  * Transaction identifier implementation.
  */

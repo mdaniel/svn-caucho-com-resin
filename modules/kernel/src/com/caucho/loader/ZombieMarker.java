@@ -19,21 +19,19 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.transaction;
+package com.caucho.loader;
+
 
 /**
- * Transaction identifier implementation.
+ * Marker for an object that should be garbage-collected.
  */
-public interface TransactionListener {
-  /**
-   * Begins a transaction.
-   */
-  public void beginTransaction();
+public class ZombieMarker {
 }

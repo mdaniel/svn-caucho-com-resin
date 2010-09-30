@@ -28,28 +28,25 @@
 
 package com.caucho.sql;
 
-import com.caucho.util.L10N;
-
-import javax.resource.ResourceException;
-import javax.resource.spi.ConnectionManager;
-import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-/**
- * The wrapped data source.
- */
-public class DataSourceImpl implements DataSource {
-  protected static final Logger log
-    = Logger.getLogger(DataSourceImpl.class.getName());
-  private static final L10N L = new L10N(DataSourceImpl.class);
+import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionManager;
+import javax.sql.DataSource;
 
+/**
+ * The User DataSource returned from Resin's pool.
+ */
+public class UserDataSource implements DataSource {
+  protected static final Logger log
+    = Logger.getLogger(UserDataSource.class.getName());
   private final ManagedFactoryImpl _managedFactory;
   private final ConnectionManager _connManager;
 
-  DataSourceImpl(ManagedFactoryImpl factory, ConnectionManager cm)
+  UserDataSource(ManagedFactoryImpl factory, ConnectionManager cm)
   {
     _managedFactory = factory;
     _connManager = cm;
@@ -66,6 +63,7 @@ public class DataSourceImpl implements DataSource {
   /**
    * Returns a connection.
    */
+  @Override
   public Connection getConnection()
     throws SQLException
   {
@@ -87,6 +85,7 @@ public class DataSourceImpl implements DataSource {
   /**
    * Returns a connection.
    */
+  @Override
   public Connection getConnection(String username, String password)
     throws SQLException
   {
@@ -113,6 +112,7 @@ public class DataSourceImpl implements DataSource {
   /**
    * Returns the login timeout.
    */
+  @Override
   public int getLoginTimeout()
   {
     return 0;
@@ -121,6 +121,7 @@ public class DataSourceImpl implements DataSource {
   /**
    * Returns the login timeout.
    */
+  @Override
   public void setLoginTimeout(int seconds)
   {
   }
@@ -128,6 +129,7 @@ public class DataSourceImpl implements DataSource {
   /**
    * Returns the log writer.
    */
+  @Override
   public PrintWriter getLogWriter()
   {
     return null;
@@ -136,6 +138,7 @@ public class DataSourceImpl implements DataSource {
   /**
    * Sets the log writer.
    */
+  @Override
   public void setLogWriter(PrintWriter out)
   {
   }
@@ -148,12 +151,18 @@ public class DataSourceImpl implements DataSource {
     return false;
   }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  @Override
+  public <T> T unwrap(Class<T> iface) 
+    throws SQLException
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  @Override
+  public boolean isWrapperFor(Class<?> iface)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 }
 

@@ -39,6 +39,7 @@ import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.env.dbpool.ConnectionPool;
 import com.caucho.jca.ra.ResourceManagerImpl;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.jmx.Jmx;
@@ -48,7 +49,6 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.StartListener;
 import com.caucho.naming.Jndi;
-import com.caucho.transaction.ConnectionPool;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 

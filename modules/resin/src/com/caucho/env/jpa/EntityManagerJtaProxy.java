@@ -46,7 +46,8 @@ import javax.transaction.Transaction;
 
 import com.caucho.amber.AmberRuntimeException;
 import com.caucho.config.inject.HandleAware;
-import com.caucho.transaction.CloseResource;
+import com.caucho.transaction.ManagedResource;
+import com.caucho.transaction.ManagedXAResource;
 import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.FreeList;
@@ -873,7 +874,7 @@ public class EntityManagerJtaProxy
 
         _threadEntityManager.set(em);
 
-        ut.enlistCloseResource(new EntityManagerCloseResource(em));
+        ut.enlistResource(new EntityManagerCloseResource(em));
 
         return em;
       }
@@ -937,10 +938,12 @@ public class EntityManagerJtaProxy
       _em = em;
     }
 
+    @Override
     public void beforeCompletion()
     {
     }
 
+    @Override
     public void afterCompletion(int status)
     {
       _threadEntityManager.set(null);
@@ -949,7 +952,7 @@ public class EntityManagerJtaProxy
     }
   }
 
-  class EntityManagerCloseResource implements CloseResource {
+  class EntityManagerCloseResource implements ManagedResource {
     private EntityManager _em;
 
     EntityManagerCloseResource(EntityManager em)
@@ -962,6 +965,42 @@ public class EntityManagerJtaProxy
       _threadEntityManager.set(null);
 
       freeEntityManager(_em);
+    }
+
+    @Override
+    public void abortConnection()
+    {
+      close();
+    }
+
+    @Override
+    public IllegalStateException getAllocationStackTrace()
+    {
+      return null;
+    }
+
+    @Override
+    public Object getUserConnection()
+    {
+      return EntityManagerJtaProxy.this;
+    }
+
+    @Override
+    public ManagedXAResource getXAResource()
+    {
+      return null;
+    }
+
+    @Override
+    public boolean isCloseDanglingConnections()
+    {
+      return false;
+    }
+
+    @Override
+    public void setSaveAllocationStackTrace(boolean isEnable)
+    {
+
     }
   }
 }

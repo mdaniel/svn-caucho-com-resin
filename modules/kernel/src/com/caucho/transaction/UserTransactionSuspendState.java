@@ -28,35 +28,29 @@
 
 package com.caucho.transaction;
 
-import com.caucho.util.L10N;
-
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Saved state for a suspend.
  */
 public class UserTransactionSuspendState {
-  private static final Logger log
-    = Logger.getLogger(UserTransactionSuspendState.class.getName());
-  private static final L10N L = new L10N(UserTransactionSuspendState.class);
-
-  private ArrayList<ManagedPoolItem> _poolItems = new ArrayList<ManagedPoolItem>();
+  private ArrayList<ManagedXAResource> _xaResources
+    = new ArrayList<ManagedXAResource>();
   
   /**
    * Creates the suspend state.
    */
-  public UserTransactionSuspendState(ArrayList<ManagedPoolItem> poolItems)
+  public UserTransactionSuspendState(ArrayList<ManagedXAResource> xaResources)
   {
-    _poolItems.addAll(poolItems);
+    _xaResources.addAll(xaResources);
   }
 
   /**
    * Returns the pooled items.
    */
-  public ArrayList<ManagedPoolItem> getPoolItems()
+  public ArrayList<ManagedXAResource> getXAResources()
   {
-    return _poolItems;
+    return _xaResources;
   }
 }
 

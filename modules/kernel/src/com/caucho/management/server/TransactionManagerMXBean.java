@@ -27,19 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.transaction;
+package com.caucho.management.server;
 
-import javax.ejb.TransactionAttributeType;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.caucho.jmx.Description;
 
 /**
- * Marks a class as enhanced.
+ * MBean API for the TransactionManager connection pool.
+ *
+ * <pre>
+ * resin:type=TransactionManager,...
+ * </pre>
  */
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface TransactionAnn {
-  TransactionAttributeType value() default TransactionAttributeType.REQUIRED;
+@Description("The TransactionManager")
+public interface TransactionManagerMXBean extends ManagedObjectMXBean {
+  
+  //
+  // Statistics
+  //
+  
+  /**
+   * Returns the total number of in-progress transactions.
+   */
+  @Description("The count of in-progress transactions")
+  public int getTransactionCount();
+  
+  /**
+   * Returns the total number of committed transaction.
+   */
+  @Description("The total number of committed transactions")
+  public long getCommitCountTotal();
+  
+  /**
+   * Returns the total number of rollbacks transaction.
+   */
+  @Description("The total number of rolledback transactions")
+  public long getRollbackCountTotal();
 }

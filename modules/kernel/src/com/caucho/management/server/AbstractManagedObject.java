@@ -98,14 +98,16 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
   /**
    * The JMX name property of the mbean.
    */
+  @Override
   abstract public String getName();
 
   /**
    * The JMX type of this MBean, defaults to the prefix of the FooMXBean..
    */
+  @Override
   public String getType()
   {
-    Class []interfaces = getClass().getInterfaces();
+    Class<?> []interfaces = getClass().getInterfaces();
 
     for (int i = 0; i < interfaces.length; i++) {
       String className = interfaces[i].getName();

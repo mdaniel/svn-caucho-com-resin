@@ -31,6 +31,7 @@ package com.caucho.transaction;
 /**
  * Wrapper exception.
  */
+@SuppressWarnings("serial")
 public class TransactionRuntimeException extends RuntimeException {
   /**
    * Creates an empty exception

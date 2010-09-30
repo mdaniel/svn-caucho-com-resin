@@ -29,24 +29,28 @@
 
 package com.caucho.transaction;
 
-import com.caucho.util.L10N;
-import com.caucho.config.inject.*;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
 
-import javax.transaction.*;
-import javax.transaction.xa.*;
-import java.util.logging.Logger;
+import com.caucho.config.inject.SingletonBindingHandle;
 
 /**
  * Implementation of the UserTransactionImpl for a thread instance.
  */
+@SuppressWarnings("serial")
 public class UserTransactionProxy
   implements UserTransaction, TransactionManager,
              java.io.Serializable
 {
-  private static final Logger log
-    = Logger.getLogger(UserTransactionProxy.class.getName());
-  private static final L10N L = new L10N(UserTransactionProxy.class);
-
   /*
   private static final EnvironmentLocal<UserTransactionProxy> _localUT =
     new EnvironmentLocal<UserTransactionProxy>();
@@ -174,24 +178,6 @@ public class UserTransactionProxy
     throws IllegalStateException, SecurityException, SystemException
   {
     getUserTransaction().rollback();
-  }
-
-  /**
-   * Enlist a begin resource
-   */
-  public void enlistBeginResource(BeginResource resource)
-    throws IllegalStateException
-  {
-    getUserTransaction().enlistBeginResource(resource);
-  }
-
-  /**
-   * Enlist a close resource
-   */
-  public void enlistCloseResource(CloseResource resource)
-    throws IllegalStateException
-  {
-    getUserTransaction().enlistCloseResource(resource);
   }
 
   /**

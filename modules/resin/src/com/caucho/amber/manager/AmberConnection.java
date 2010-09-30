@@ -29,50 +29,6 @@
 
 package com.caucho.amber.manager;
 
-import com.caucho.amber.AmberException;
-import com.caucho.amber.AmberObjectNotFoundException;
-import com.caucho.amber.AmberQuery;
-import com.caucho.amber.AmberRuntimeException;
-import com.caucho.amber.cfg.EntityResultConfig;
-import com.caucho.amber.cfg.NamedNativeQueryConfig;
-import com.caucho.amber.cfg.SqlResultSetMappingConfig;
-import com.caucho.amber.collection.AmberCollection;
-import com.caucho.amber.entity.*;
-import com.caucho.amber.query.AbstractQuery;
-import com.caucho.amber.query.QueryCacheKey;
-import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.query.ResultSetCacheChunk;
-import com.caucho.amber.query.UserQuery;
-import com.caucho.amber.table.AmberTable;
-import com.caucho.amber.type.EntityType;
-import com.caucho.config.ConfigException;
-import com.caucho.ejb.EJBExceptionWrapper;
-import com.caucho.jdbc.JdbcMetaData;
-import com.caucho.transaction.BeginResource;
-import com.caucho.transaction.CloseResource;
-import com.caucho.transaction.UserTransactionProxy;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.EntityTransaction;
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
-import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
-import javax.persistence.TransactionRequiredException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.metamodel.Metamodel;
-import javax.sql.DataSource;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.Transaction;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -83,15 +39,65 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+import javax.persistence.RollbackException;
+import javax.persistence.TransactionRequiredException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.metamodel.Metamodel;
+import javax.sql.DataSource;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.Transaction;
+
+import com.caucho.amber.AmberException;
+import com.caucho.amber.AmberObjectNotFoundException;
+import com.caucho.amber.AmberQuery;
+import com.caucho.amber.AmberRuntimeException;
+import com.caucho.amber.cfg.EntityResultConfig;
+import com.caucho.amber.cfg.NamedNativeQueryConfig;
+import com.caucho.amber.cfg.SqlResultSetMappingConfig;
+import com.caucho.amber.collection.AmberCollection;
+import com.caucho.amber.entity.AmberCompletion;
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.entity.CacheableEntityItem;
+import com.caucho.amber.entity.Entity;
+import com.caucho.amber.entity.EntityFactory;
+import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.entity.EntityKey;
+import com.caucho.amber.entity.EntityState;
+import com.caucho.amber.entity.RowInsertCompletion;
+import com.caucho.amber.entity.RowInvalidateCompletion;
+import com.caucho.amber.query.AbstractQuery;
+import com.caucho.amber.query.QueryCacheKey;
+import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.query.ResultSetCacheChunk;
+import com.caucho.amber.query.UserQuery;
+import com.caucho.amber.table.AmberTable;
+import com.caucho.amber.type.EntityType;
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
 /**
  * The entity manager from a entity manager proxy.
  */
 public class AmberConnection
-  implements BeginResource, CloseResource, Synchronization, EntityManager
+  implements Synchronization, EntityManager
 {
   private static final L10N L = new L10N(AmberConnection.class);
   private static final Logger log
@@ -705,10 +711,12 @@ public class AmberConnection
   void register()
   {
     if (! _isRegistered) {
+      /*
       if (! _isAppManaged)
         UserTransactionProxy.getInstance().enlistCloseResource(this);
 
       UserTransactionProxy.getInstance().enlistBeginResource(this);
+      */
     }
 
     _isRegistered = true;

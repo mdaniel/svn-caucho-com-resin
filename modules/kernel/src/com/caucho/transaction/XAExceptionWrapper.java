@@ -33,6 +33,7 @@ import javax.transaction.xa.XAException;
 /**
  * Configuration for the init-param pattern.
  */
+@SuppressWarnings("serial")
 public class XAExceptionWrapper extends XAException {
   private Throwable _cause;
 
@@ -43,6 +44,7 @@ public class XAExceptionWrapper extends XAException {
     _cause = cause;
   }
 
+  @Override
   public Throwable getCause()
   {
     return _cause;

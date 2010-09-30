@@ -32,6 +32,7 @@ package com.caucho.transaction;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,8 +53,8 @@ import javax.transaction.xa.Xid;
 
 import com.caucho.config.inject.SingletonBindingHandle;
 import com.caucho.config.types.Period;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
+import com.caucho.env.meter.MeterService;
+import com.caucho.env.meter.TimeSensor;
 import com.caucho.loader.Environment;
 import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.transaction.xalog.AbstractXALogStream;
@@ -67,8 +68,7 @@ import com.caucho.util.RandomUtil;
  */
 public class TransactionManagerImpl 
   implements TransactionManager, 
-             Serializable,
-             ClassLoaderListener
+             Serializable
 {
   private static final long serialVersionUID = 1L;
   private static L10N L = new L10N(TransactionManagerImpl.class);
@@ -95,9 +95,36 @@ public class TransactionManagerImpl
     = new ArrayList<WeakReference<TransactionImpl>>();
 
   private long _timeout = -1;
+  
+  // statistics and counters
+  // private TransactionManagerAdmin _admin;
+  
+  private TimeSensor _commitSensor
+    = MeterService.createTimeMeter("Resin|XA|Commit");
+  
+  private TimeSensor _rollbackSensor
+    = MeterService.createTimeMeter("Resin|XA|Rollback");
+  
+  private AtomicInteger _transactionCount
+    = new AtomicInteger();
+  
+  private AtomicLong _commitCount
+    = new AtomicLong();
+  
+  private AtomicLong _rollbackCount
+    = new AtomicLong();
+  
+  private AtomicLong _unclosedResourceCount
+    = new AtomicLong();
+  
+  private String _lastUnclosedResourceMessage;
+  
+  private AtomicLong _unclosedTransactionCount
+    = new AtomicLong();
 
   public TransactionManagerImpl()
   {
+    new TransactionManagerAdmin(this);
   }
 
   /**
@@ -396,18 +423,80 @@ public class TransactionManagerImpl
     if (_xaLogManager != null)
       _xaLogManager.flush();
   }
-
+  
   /**
-   * Handles the case where a class loader has completed initialization
+   * Statistics
    */
-  public void classLoaderInit(DynamicClassLoader loader)
+  
+  long beginTransactionTime()
   {
+    _transactionCount.incrementAndGet();
+    
+    return Alarm.getCurrentTime();
+  }
+  
+  int getTransactionCount()
+  {
+    return _transactionCount.get();
+  }
+  
+  long getCommitCount()
+  {
+    return _commitCount.get();
+  }
+  
+  void endCommitTime(long startTime)
+  {
+    _transactionCount.decrementAndGet();
+    
+    _commitCount.incrementAndGet();
+    _commitSensor.add(startTime);
+  }
+  
+  long getRollbackCount()
+  {
+    return _rollbackCount.get();
+  }
+  
+  void endRollbackTime(long startTime)
+  {
+    _transactionCount.decrementAndGet();
+    
+    _rollbackCount.incrementAndGet();
+    _rollbackSensor.add(startTime);
+  }
+  
+  void addUnclosedResource(String message)
+  {
+    _unclosedResourceCount.incrementAndGet();
+    _lastUnclosedResourceMessage = message;
+  }
+  
+  long getUnclosedResourceCount()
+  {
+    return _unclosedResourceCount.get();
+  }
+  
+  String getLastUnclosedResourceMessage()
+  {
+    return _lastUnclosedResourceMessage;
+  }
+  
+  void addUnclosedTransaction(String message)
+  {
+    _unclosedTransactionCount.incrementAndGet();
+    // _lastUnclosedTransactionMessage = message;
+  }
+  
+  long getUnclosedTransactionCount()
+  {
+    return _unclosedTransactionCount.get();
   }
 
   /**
    * Handles the case where a class loader is dropped.
    */
-  public void classLoaderDestroy(DynamicClassLoader loader)
+  public void destroy()
   {
     AbstractXALogManager xaLogManager = _xaLogManager;
     _xaLogManager = null;

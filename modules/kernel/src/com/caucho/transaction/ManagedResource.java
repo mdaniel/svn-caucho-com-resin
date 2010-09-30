@@ -28,41 +28,20 @@
 
 package com.caucho.transaction;
 
-import javax.transaction.RollbackException;
+/**
+ * Managed resource like a database connection registered with the transaction.
+ */
+public interface ManagedResource {
+  public ManagedXAResource getXAResource();
 
-@SuppressWarnings("serial")
-public class RollbackExceptionWrapper extends RollbackException {
-  private Throwable _rootCause;
-  
-  public RollbackExceptionWrapper(String message)
-  {
-    super(message);
-  }
-  
-  public RollbackExceptionWrapper(String message, Throwable e)
-  {
-    super(message);
+  public boolean isCloseDanglingConnections();
 
-    _rootCause = e;
-  }
-  
-  public RollbackExceptionWrapper(Throwable e)
-  {
-    super(String.valueOf(e));
+  public IllegalStateException getAllocationStackTrace();
 
-    _rootCause = e;
-  }
+  public void setSaveAllocationStackTrace(boolean isEnable);
 
-  public static RollbackException create(Throwable e)
-  {
-    if (e instanceof RollbackException)
-      return (RollbackException) e;
-    else
-      return new RollbackExceptionWrapper(e);
-  }
-  
-  public Throwable getCause()
-  {
-    return _rootCause;
-  }
+  public Object getUserConnection();
+
+  public void abortConnection();
 }
+

@@ -30,9 +30,9 @@
 package com.caucho.sql;
 
 import com.caucho.cloud.network.ClusterServer;
+import com.caucho.env.dbpool.IdlePoolSet;
 import com.caucho.server.cluster.*;
 import com.caucho.server.resin.Resin;
-import com.caucho.transaction.IdlePoolSet;
 import com.caucho.util.L10N;
 
 import javax.resource.ResourceException;
@@ -118,7 +118,7 @@ public class ManagedFactoryImpl
   public Object createConnectionFactory(ConnectionManager connManager)
     throws ResourceException
   {
-    return new DataSourceImpl(this, connManager);
+    return new UserDataSource(this, connManager);
   }
 
   /**

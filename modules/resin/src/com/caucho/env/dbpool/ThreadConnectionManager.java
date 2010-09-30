@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.transaction;
+package com.caucho.env.dbpool;
 
 import com.caucho.util.L10N;
 

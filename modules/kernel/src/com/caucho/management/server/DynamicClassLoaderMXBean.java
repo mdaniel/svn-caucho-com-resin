@@ -29,8 +29,6 @@
 
 package com.caucho.management.server;
 
-import com.caucho.config.ConfigException;
-
 /**
  * Interface for a class loader, letting applications change the logging level.
  *

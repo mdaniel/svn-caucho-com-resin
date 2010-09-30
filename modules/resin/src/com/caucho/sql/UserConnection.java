@@ -93,7 +93,7 @@ public class UserConnection implements java.sql.Connection {
     return _mConn.getDBPool().getTimeProbe();
   }
 
-  public Class getDriverClass()
+  public Class<?> getDriverClass()
   {
     return getMConn().getDriverClass();
   }
@@ -118,6 +118,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @return a new JDBC statement.
    */
+  @Override
   public Statement createStatement()
     throws SQLException
   {
@@ -147,6 +148,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @return a new JDBC statement.
    */
+  @Override
   public Statement createStatement(int resultSetType, int resultSetConcurrency)
     throws SQLException
   {
@@ -172,6 +174,7 @@ public class UserConnection implements java.sql.Connection {
   /**
    * Creates a statement.
    */
+  @Override
   public Statement createStatement(int resultSetType,
                                    int resultSetConcurrency,
                                    int resultSetHoldability)
@@ -203,6 +206,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @param sql the prepared sql.
    */
+  @Override
   public PreparedStatement prepareStatement(String sql)
     throws SQLException
   {
@@ -233,6 +237,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @param sql the prepared sql.
    */
+  @Override
   public PreparedStatement prepareStatement(String sql,
                                             int resultSetType,
                                             int resultSetConcurrency)
@@ -265,6 +270,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @param sql the prepared sql.
    */
+  @Override
   public PreparedStatement prepareStatement(String sql,
                                             int resultSetType,
                                             int resultSetConcurrency,
@@ -301,6 +307,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @param sql the prepared sql.
    */
+  @Override
   public PreparedStatement prepareStatement(String sql,
                                             int resultSetType)
     throws SQLException
@@ -336,6 +343,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @param sql the prepared sql.
    */
+  @Override
   public PreparedStatement prepareStatement(String sql,
                                             int []columnIndexes)
     throws SQLException
@@ -367,6 +375,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @param sql the prepared sql.
    */
+  @Override
   public PreparedStatement prepareStatement(String sql,
                                             String []columnNames)
     throws SQLException
@@ -393,6 +402,7 @@ public class UserConnection implements java.sql.Connection {
       return stmt;
   }
 
+  @Override
   public CallableStatement prepareCall(String sql, int resultSetType,
                int resultSetConcurrency)
     throws SQLException
@@ -419,6 +429,7 @@ public class UserConnection implements java.sql.Connection {
       return stmt;
   }
 
+  @Override
   public CallableStatement prepareCall(String sql)
     throws SQLException
   {
@@ -444,6 +455,7 @@ public class UserConnection implements java.sql.Connection {
       return stmt;
   }
 
+  @Override
   public CallableStatement prepareCall(String sql,
                                        int resultSetType,
                                        int resultSetConcurrency,
@@ -480,6 +492,7 @@ public class UserConnection implements java.sql.Connection {
    *
    * @return the JDBC catalog.
    */
+  @Override
   public String getCatalog()
     throws SQLException
   {
@@ -494,6 +507,7 @@ public class UserConnection implements java.sql.Connection {
   /**
    * Sets the JDBC catalog.
    */
+  @Override
   public void setCatalog(String catalog)
     throws SQLException
   {
@@ -503,6 +517,7 @@ public class UserConnection implements java.sql.Connection {
   /**
    * Gets the connection's metadata.
    */
+  @Override
   public DatabaseMetaData getMetaData()
     throws SQLException
   {
@@ -517,7 +532,8 @@ public class UserConnection implements java.sql.Connection {
   /**
    * Returns the connection's type map.
    */
-  public Map getTypeMap()
+  @Override
+  public Map<String,Class<?>> getTypeMap()
     throws SQLException
   {
     try {
@@ -859,6 +875,7 @@ public class UserConnection implements java.sql.Connection {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
@@ -976,17 +993,6 @@ public class UserConnection implements java.sql.Connection {
 
     if (mConn != null)
       mConn.fatalEvent();
-  }
-
-  /**
-   * Returns the underlying connection.
-   */
-  private void fatalEvent(SQLException exn)
-  {
-    ManagedConnectionImpl mConn = _mConn;
-
-    if (mConn != null)
-      mConn.fatalEvent(exn);
   }
 
   /**

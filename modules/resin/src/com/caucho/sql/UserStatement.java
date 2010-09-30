@@ -28,24 +28,20 @@
 
 package com.caucho.sql;
 
-import com.caucho.env.meter.ActiveTimeSensor;
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.logging.Logger;
+
+import com.caucho.env.meter.ActiveTimeSensor;
+import com.caucho.util.L10N;
 
 
 /**
  * User-view of a statement;
  */
 public class UserStatement implements Statement {
-  private final static Logger log
-    = Logger.getLogger(UserStatement.class.getName());
   protected final static L10N L = new L10N(UserStatement.class);
 
   // The connection
@@ -768,11 +764,15 @@ public class UserStatement implements Statement {
     }
   }
 
-  public boolean isClosed() throws SQLException
+  @Override
+  public boolean isClosed() 
+    throws SQLException
   {
     return _stmt == null;
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
@@ -782,6 +782,7 @@ public class UserStatement implements Statement {
       return _stmt.unwrap(iface);
   }
 
+  @Override
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
