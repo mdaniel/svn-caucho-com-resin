@@ -34,7 +34,6 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
 import com.caucho.env.thread.TaskWorker;
-import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -45,15 +44,14 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-import java.io.FilterOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import java.util.zip.DeflaterOutputStream;
 
 /**
  * Abstract class for a log that rolls over based on size or period.
@@ -610,7 +608,13 @@ public class AbstractRolloverLog {
         }
         else if (savedName.endsWith(".zip")) {
           os = savedPath.openWrite();
-          out = new ZipOutputStream(os);
+
+          ZipOutputStream zip = new ZipOutputStream(os);
+          String entryName = savedName.substring(0, savedName.length() - 4);
+          ZipEntry entry = new ZipEntry(entryName);
+          zip.putNextEntry(entry);
+
+          out = zip;
         }
         else {
           path.renameTo(savedPath);

@@ -13,6 +13,7 @@
 
 <s2 title="4.0.12 - snapshot">
 <ul>
+<li>resin: access.log rotation into zip archive fixes (#4216)</li>
 <li>dist: war files with many entries cause recursive overflow (rep by Steve Francis)</li>
 </ul>
 </s2>
