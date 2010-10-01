@@ -39,6 +39,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -134,7 +135,7 @@ public class DriverConfig
 
   // statistics
   private long _connectionCountTotal;
-  private long _connectionFailCountTotal;
+  private AtomicLong _connectionFailCountTotal = new AtomicLong();
   private long _lastFailTime;
 
   private ProfilerPoint _profilerPoint;
@@ -187,7 +188,7 @@ public class DriverConfig
     }
   }
 
-  private boolean hasDriverTypeMethod(Class cl)
+  private boolean hasDriverTypeMethod(Class<?> cl)
   {
     if (cl == null)
       return false;
@@ -230,7 +231,7 @@ public class DriverConfig
   /**
    * Returns the JDBC driver class for the pooled object.
    */
-  public Class getDriverClass()
+  public Class<?> getDriverClass()
   {
     return _driverClass;
   }
@@ -238,7 +239,7 @@ public class DriverConfig
   /**
    * Sets the JDBC driver class underlying the pooled object.
    */
-  public void setType(Class driverClass)
+  public void setType(Class<?> driverClass)
     throws ConfigException
   {
     _driverClass = driverClass;
@@ -689,10 +690,8 @@ public class DriverConfig
 
       return conn;
     } catch (SQLException e) {
-      synchronized (this) {
-        _connectionFailCountTotal++;
-        _lastFailTime = Alarm.getCurrentTime();
-      }
+      _connectionFailCountTotal.incrementAndGet();
+      _lastFailTime = Alarm.getCurrentTime();
       
       throw e;
     }
@@ -713,7 +712,7 @@ public class DriverConfig
         throw new ConfigException(L.l("url='{0}' does not have a known driver.  The driver class must be specified by a 'type' parameter.",
                                       _driverURL));
 
-      Class driverClass = null;
+      Class<?> driverClass = null;
       try {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -748,7 +747,7 @@ public class DriverConfig
                                         _driverClass, getDBPool().getName()));
     }
 
-    ConfigType configType = TypeFactory.getType(driverObject);
+    ConfigType<?> configType = TypeFactory.getType(driverObject);
 
     // server/14g1
     if (_driverURL != null) {
@@ -791,26 +790,6 @@ public class DriverConfig
     }
   }
 
-  private boolean hasSetter(Class cl, String name)
-  {
-    if (true) return true;
-    for (Method method : cl.getMethods()) {
-      String methodName = method.getName();
-      
-      if (! methodName.startsWith("set"))
-        continue;
-      else if (method.getParameterTypes().length != 1)
-        continue;
-
-      methodName = methodName.substring(3).toLowerCase();
-
-      if (methodName.equals(name))
-        return true;
-    }
-
-    return false;
-  }
-
   protected String findDriverByUrl(String url)
   {
     String driver = DatabaseManager.findDriverByUrl(_driverURL);
@@ -820,10 +799,10 @@ public class DriverConfig
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     try {
-      Enumeration e = loader.getResources("META-INF/services/java.sql.Driver");
+      Enumeration<URL> e = loader.getResources("META-INF/services/java.sql.Driver");
 
       while (e.hasMoreElements()) {
-        URL serviceUrl = (URL) e.nextElement();
+        URL serviceUrl = e.nextElement();
 
         driver = testDriver(url, serviceUrl);
 
@@ -858,11 +837,10 @@ public class DriverConfig
           continue;
 
         try {
-          Class cl = Class.forName(line, false, loader);
+          Class<?> cl = Class.forName(line, false, loader);
 
           Driver driver = (Driver) cl.newInstance();
 
-          System.out.println("NOM: " + driver.acceptsURL(url) + " " + url + " " + driver);
           if (driver.acceptsURL(url))
             return cl.getName();
         } catch (Exception e) {
@@ -895,7 +873,7 @@ public class DriverConfig
    */
   public long getConnectionFailCountTotal()
   {
-    return _connectionFailCountTotal;
+    return _connectionFailCountTotal.get();
   }
   
   /**

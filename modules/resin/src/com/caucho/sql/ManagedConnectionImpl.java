@@ -119,7 +119,10 @@ public class ManagedConnectionImpl
   // old value for isolation
   private int _oldIsolation = -1;
   // old value for getTypeMap
-  private Map _typeMap;
+  private Map<String,Class<?>> _typeMap;
+  
+  // returns true if a ping is required
+  private boolean _isPingRequired;
 
   ManagedConnectionImpl(ManagedFactoryImpl factory,
                         DriverConfig driver,
@@ -177,6 +180,7 @@ public class ManagedConnectionImpl
   /**
    * Returns the underlying connection.
    */
+  @Override
   public Object getConnection(Subject subject,
                               ConnectionRequestInfo info)
     throws ResourceException
@@ -195,6 +199,7 @@ public class ManagedConnectionImpl
   /**
    * Associates the associate connection.
    */
+  @Override
   public void associateConnection(Object connection)
     throws ResourceException
   {
@@ -208,6 +213,7 @@ public class ManagedConnectionImpl
   /**
    * Adds a connection event listener.
    */
+  @Override
   public void addConnectionEventListener(ConnectionEventListener listener)
   {
     if (_listener != null && _listener != listener)
@@ -219,6 +225,7 @@ public class ManagedConnectionImpl
   /**
    * Removes a connection event listener.
    */
+  @Override
   public void removeConnectionEventListener(ConnectionEventListener listener)
   {
     if (_listener == listener)
@@ -334,7 +341,7 @@ public class ManagedConnectionImpl
   /*
    * Returns the driver.
    */
-  public Class getDriverClass()
+  public Class<?> getDriverClass()
   {
     return _driver.getDriverClass();
   }
@@ -350,6 +357,7 @@ public class ManagedConnectionImpl
   /**
    * Returns the XA resource for the connection.
    */
+  @Override
   public XAResource getXAResource()
     throws ResourceException
   {
@@ -362,6 +370,7 @@ public class ManagedConnectionImpl
   /**
    * Returns the XA resource for the connection.
    */
+  @Override
   public LocalTransaction getLocalTransaction()
     throws ResourceException
   {
@@ -371,6 +380,7 @@ public class ManagedConnectionImpl
   /**
    * Returns the meta data.
    */
+  @Override
   public ManagedConnectionMetaData getMetaData()
     throws ResourceException
   {
@@ -380,6 +390,7 @@ public class ManagedConnectionImpl
   /**
    * Sets the log writer.
    */
+  @Override
   public void setLogWriter(PrintWriter out)
     throws ResourceException
   {
@@ -388,6 +399,7 @@ public class ManagedConnectionImpl
   /**
    * Gets the log writer.
    */
+  @Override
   public PrintWriter getLogWriter()
     throws ResourceException
   {
@@ -484,12 +496,14 @@ public class ManagedConnectionImpl
     _preparedStatementCache.remove(key);
   }
 
+  @Override
   public void connectionClosed(javax.sql.ConnectionEvent event)
   {
     sendFatalEvent(new SQLException(L.l("unexpected close event from pool")));
     closeEvent(null);
   }
 
+  @Override
   public void connectionErrorOccurred(javax.sql.ConnectionEvent event)
   {
     sendFatalEvent(event.getSQLException());
@@ -561,6 +575,16 @@ public class ManagedConnectionImpl
 
       _listener.connectionErrorOccurred(event);
     }
+  }
+  
+  public void onSqlException(SQLException e)
+  {
+    _isPingRequired = true;
+  }
+  
+  public void onRuntimeException(RuntimeException e)
+  {
+    _isPingRequired = true;
   }
 
   /**
@@ -641,7 +665,7 @@ public class ManagedConnectionImpl
   /**
    * Sets the connection's type map.
    */
-  public void setTypeMap(Map map)
+  public void setTypeMap(Map<String,Class<?>> map)
     throws SQLException
   {
     try {
@@ -674,6 +698,7 @@ public class ManagedConnectionImpl
   /**
    * Cleans up the instance.
    */
+  @Override
   public void cleanup()
     throws ResourceException
   {
@@ -740,7 +765,7 @@ public class ManagedConnectionImpl
   {
     try {
       return ping();
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
       return false;
@@ -757,22 +782,31 @@ public class ManagedConnectionImpl
 
     long now = Alarm.getCurrentTime();
 
-    if (now < _lastEventTime + 1000)
-      return true;
-
-    if (! dbPool.isPing())
-      return true;
-
-    long pingInterval = dbPool.getPingInterval();
-    if (pingInterval > 0 && now < _lastEventTime + pingInterval)
+    if (now < _lastEventTime + 1000 && ! _isPingRequired)
       return true;
 
     Connection conn = _driverConnection;
-
+    
     try {
       if (conn == null || conn.isClosed()) {
         return false;
       }
+      
+      _lastEventTime = now;
+
+      if (! _isPingRequired) {
+        return true;
+      }
+
+      if (! dbPool.isPing())
+        return true;
+
+      /*
+      long pingInterval = dbPool.getPingInterval();
+      if (pingInterval > 0 && now < _lastEventTime + pingInterval) {
+        return true;
+      }
+      */
 
       String pingQuery = dbPool.getPingQuery();
 
@@ -783,6 +817,7 @@ public class ManagedConnectionImpl
 
       try {
         ResultSet rs = stmt.executeQuery(pingQuery);
+        rs.next();
         rs.close();
 
         return true;
@@ -790,6 +825,7 @@ public class ManagedConnectionImpl
         stmt.close();
       }
     } catch (SQLException e) {
+      e.printStackTrace();
       throw new ResourceException(e);
     }
   }
@@ -797,6 +833,7 @@ public class ManagedConnectionImpl
   /**
    * Destroys the physical connection.
    */
+  @Override
   public void destroy()
     throws ResourceException
   { 
@@ -837,6 +874,7 @@ public class ManagedConnectionImpl
     }
   }
 
+  @Override
   public String toString()
   {
     return "ManagedConnectionImpl[" + _id + "]";
@@ -845,6 +883,7 @@ public class ManagedConnectionImpl
   class LocalTransactionImpl implements LocalTransaction {
     private boolean _oldAutoCommit;
 
+    @Override
     public void begin()
       throws ResourceException
     {
@@ -857,6 +896,7 @@ public class ManagedConnectionImpl
       }
     }
 
+    @Override
     public void commit()
       throws ResourceException
     {
@@ -878,6 +918,7 @@ public class ManagedConnectionImpl
       }
     }
 
+    @Override
     public void rollback()
       throws ResourceException
     {

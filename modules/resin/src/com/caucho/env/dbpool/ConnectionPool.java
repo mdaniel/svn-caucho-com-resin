@@ -669,7 +669,7 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Allocates the connection.
    *
-   * @return connection handle for EIS specific connection.
+   * @return connection handle for driver specific connection.
    */
   @Override
   public Object allocateConnection(ManagedConnectionFactory mcf,
@@ -699,7 +699,7 @@ public class ConnectionPool extends AbstractManagedObject
       UserTransactionImpl transaction = _tm.getUserTransaction();
 
       if (transaction != null)
-        userPoolItem = allocate(transaction, mcf, subject, info);
+        userPoolItem = allocateShared(transaction, mcf, subject, info);
 
       if (userPoolItem == null)
         userPoolItem = allocatePoolConnection(mcf, subject, info, null);
@@ -719,10 +719,10 @@ public class ConnectionPool extends AbstractManagedObject
    * Allocates a resource matching the parameters.  If none matches,
    * return null.
    */
-  UserPoolItem allocate(UserTransactionImpl transaction,
-                        ManagedConnectionFactory mcf,
-                        Subject subject,
-                        ConnectionRequestInfo info)
+  private UserPoolItem allocateShared(UserTransactionImpl transaction,
+                                      ManagedConnectionFactory mcf,
+                                      Subject subject,
+                                      ConnectionRequestInfo info)
   {
     if (! transaction.isActive())
       return null;
@@ -850,7 +850,7 @@ public class ConnectionPool extends AbstractManagedObject
 
       long now = Alarm.getCurrentTime();
 
-      if (_lastValidCheckTime + 1000L < now) {
+      if (_lastValidCheckTime + 15000L < now) {
         _lastValidCheckTime = now;
 
         if (mcf instanceof ValidatingManagedConnectionFactory) {
@@ -874,15 +874,19 @@ public class ConnectionPool extends AbstractManagedObject
             return null;
 
           // remove can fail for threading reasons, so only succeed if it works.
-          if (_idlePool.remove(mConn)) {
-            poolItem = findPoolItem(mConn);
-            
-            if (poolItem == null)
-              throw new IllegalStateException(L.l("Unexpected non-matching PoolItem found for {0}",
-                                                  mConn));
-
-            break;
+          if (! _idlePool.remove(mConn)) {
+            mConn = null;
           }
+        }
+        
+        if (mConn != null) {
+          poolItem = findPoolItem(mConn);
+            
+          if (poolItem == null)
+            throw new IllegalStateException(L.l("Unexpected non-matching PoolItem found for {0}",
+                                                mConn));
+
+          break;
         }
       }
 

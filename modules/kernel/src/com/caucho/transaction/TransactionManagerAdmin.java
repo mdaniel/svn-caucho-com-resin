@@ -64,6 +64,12 @@ class TransactionManagerAdmin extends AbstractManagedObject
   {
     return _tm.getCommitCount();
   }
+  
+  @Override
+  public long getCommitResourceFailCountTotal()
+  {
+    return _tm.getCommitResourceFailCount();
+  }
 
   @Override
   public long getRollbackCountTotal()

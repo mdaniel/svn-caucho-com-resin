@@ -61,9 +61,7 @@ import java.util.logging.Logger;
  */
 class UserPoolItem implements ManagedResource {
   private static final L10N L = new L10N(UserPoolItem.class);
-  private static final Logger log
-    = Logger.getLogger(UserPoolItem.class.getName());
-
+  
   private ConnectionPool _cm;
   private String _id;
 

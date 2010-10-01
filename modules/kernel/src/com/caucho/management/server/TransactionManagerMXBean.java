@@ -58,6 +58,12 @@ public interface TransactionManagerMXBean extends ManagedObjectMXBean {
   public long getCommitCountTotal();
   
   /**
+   * Returns the number of failed commits in the final resource commit
+   */
+  @Description("The total number of failed committed transactions")
+  public long getCommitResourceFailCountTotal();
+  
+  /**
    * Returns the total number of rollbacks transaction.
    */
   @Description("The total number of rolledback transactions")

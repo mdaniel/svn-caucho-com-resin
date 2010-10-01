@@ -111,6 +111,9 @@ public class TransactionManagerImpl
   private AtomicLong _commitCount
     = new AtomicLong();
   
+  private AtomicLong _commitResourceFailCount
+    = new AtomicLong();
+  
   private AtomicLong _rollbackCount
     = new AtomicLong();
   
@@ -239,6 +242,7 @@ public class TransactionManagerImpl
   /**
    * Suspend the transaction.
    */
+  @Override
   public Transaction suspend() throws SystemException
   {
     TransactionImpl trans = _threadTransaction.get();
@@ -257,6 +261,7 @@ public class TransactionManagerImpl
   /**
    * Resume the transaction.
    */
+  @Override
   public void resume(Transaction tobj) throws InvalidTransactionException,
       SystemException
   {
@@ -277,6 +282,7 @@ public class TransactionManagerImpl
   /**
    * Force any completion to be a rollback.
    */
+  @Override
   public void setRollbackOnly() throws SystemException
   {
     getCurrent().setRollbackOnly();
@@ -293,6 +299,7 @@ public class TransactionManagerImpl
   /**
    * Returns the transaction's status
    */
+  @Override
   public int getStatus() throws SystemException
   {
     return getCurrent().getStatus();
@@ -319,6 +326,7 @@ public class TransactionManagerImpl
   /**
    * Rollback the transaction.
    */
+  @Override
   public void rollback()
   {
     getCurrent().rollback();
@@ -438,6 +446,16 @@ public class TransactionManagerImpl
   int getTransactionCount()
   {
     return _transactionCount.get();
+  }
+  
+  void addCommitResourceFail()
+  {
+    _commitResourceFailCount.incrementAndGet();
+  }
+  
+  long getCommitResourceFailCount()
+  {
+    return _commitResourceFailCount.get();
   }
   
   long getCommitCount()
