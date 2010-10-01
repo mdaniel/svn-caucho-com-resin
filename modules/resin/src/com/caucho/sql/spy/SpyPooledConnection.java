@@ -28,6 +28,7 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 import javax.sql.ConnectionEventListener;
@@ -48,8 +49,6 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
   protected String _id;
 
   private SpyDataSource _spyDataSource;
-  private int _connCount;
-
   // The underlying connection
   private PooledConnection _pconn;
 
@@ -63,20 +62,49 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
     _pconn = conn;
     _id = id;
   }
+  
+  protected long start()
+  {
+    return Alarm.getExactTime();
+  }
+  
+  protected void log(long start, String msg)
+  {
+    long delta = Alarm.getExactTime() - start;
+    
+    log.fine("[" + delta + "ms] " + _id + ":" + msg);
+  }
 
+  @Override
   public void addConnectionEventListener(ConnectionEventListener listener)
   {
     _pconn.addConnectionEventListener(listener);
   }
 
+  @Override
   public void removeConnectionEventListener(ConnectionEventListener listener)
   {
     _pconn.removeConnectionEventListener(listener);
   }
+
+  @Override
+  public void addStatementEventListener(StatementEventListener listener)
+  {
+    _pconn.addStatementEventListener(listener);
+  }
+
+  @Override
+  public void removeStatementEventListener(StatementEventListener listener)
+  {
+    _pconn.removeStatementEventListener(listener);
+  }
   
+  @Override
   public Connection getConnection()
     throws SQLException
   {
+    long start = start();
+    
     try {
       Connection conn = _pconn.getConnection();
 
@@ -85,17 +113,18 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
       if (log.isLoggable(Level.FINE)) {
         connId = _spyDataSource.createConnectionId();
 
-        log.fine(_id + ":connect() -> " + connId + ":" + conn);
+        log(start, "connect() -> " + connId + ":" + conn);
       }
 
       return new SpyConnection(conn, _spyDataSource, connId);
     } catch (SQLException e) {
-      log.fine(_id + ":exn-connect(" + e + ")");
+      log(start, "exn-connect(" + e + ")");
       
       throw e;
     }
   }
 
+  @Override
   public void close()
     throws SQLException
   {
@@ -110,16 +139,9 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
     }
   }
 
+  @Override
   public String toString()
   {
-    return "SpyPooledConnection[id=" + _id + ",conn=" + _pconn + "]";
+    return getClass().getSimpleName() + "[id=" + _id + ",conn=" + _pconn + "]";
   }
-
-    public void addStatementEventListener(StatementEventListener listener) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void removeStatementEventListener(StatementEventListener listener) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

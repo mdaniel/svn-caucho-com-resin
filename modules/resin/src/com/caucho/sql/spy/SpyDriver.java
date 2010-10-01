@@ -28,6 +28,7 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 import java.sql.Connection;
@@ -37,6 +38,7 @@ import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -67,61 +69,86 @@ public class SpyDriver implements java.sql.Driver {
     _id = _staticId++;
   }
   
+  protected long start()
+  {
+    return Alarm.getExactTime();
+  }
+  
+  protected void log(long start, String msg)
+  {
+    long delta = Alarm.getExactTime() - start;
+    
+    log.fine("[" + delta + "ms] " + _id + ":" + msg);
+  }
+
+  @Override
   public boolean acceptsURL(String url)
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean result = _driver.acceptsURL(url);
 
-      log.fine(_id + ":acceptsURL(" + url + ") -> " + result);
+      if (log.isLoggable(Level.FINE))
+        log(start, "acceptsURL(" + url + ") -> " + result);
       
       return result;
     } catch (SQLException e) {
-      log.fine(_id + ":exn-acceptURL(" + e + ")");
+      log(start, "exn-acceptURL(" + e + ")");
       
       throw e;
     }
   }
   
+  @Override
   public Connection connect(String url, Properties fine)
     throws SQLException
   {
+    long start = start();
+    
     try {
       Connection conn = _driver.connect(url, fine);
 
       int connId = _connCount++;
 
-      log.fine(_id + ":connect(" + url + ",fine=" + fine + ") -> " + connId + ":" + conn);
+      if (log.isLoggable(Level.FINE))
+        log(start, "connect(" + url + ",fine=" + fine + ") -> " + connId + ":" + conn);
 
       return new SpyConnection(conn, _spyDataSource);
     } catch (SQLException e) {
-      log.fine(_id + ":exn-connect(" + e + ")");
+      log(start, "exn-connect(" + e + ")");
       
       throw e;
     }
   }
   
+  @Override
   public int getMajorVersion()
   {
-      int result = _driver.getMajorVersion();
+    int result = _driver.getMajorVersion();
 
-      log.fine(_id + ":getMajorVersion() -> " + result);
+    log.fine(_id + ":getMajorVersion() -> " + result);
 
-      return result;
+    return result;
   }
   
+  @Override
   public int getMinorVersion()
   {
-      int result = _driver.getMinorVersion();
+    int result = _driver.getMinorVersion();
 
-      log.fine(_id + ":getMinorVersion() -> " + result);
+    log.fine(_id + ":getMinorVersion() -> " + result);
 
-      return result;
+    return result;
   }
   
+  @Override
   public DriverPropertyInfo []getPropertyInfo(String url, Properties fine)
     throws SQLException
   {
+    long start = start();
+    
     try {
       DriverPropertyInfo []result = _driver.getPropertyInfo(url, fine);
 
@@ -137,16 +164,17 @@ public class SpyDriver implements java.sql.Driver {
       if (cleanFine.get("password") != null)
         cleanFine.put("password", "****");
       
-      log.fine(_id + ":getPropertyInfo(" + url + ") -> " + result);
+      log(start, "getPropertyInfo(" + url + ") -> " + result);
 
       return result;
     } catch (SQLException e) {
-      log.fine(_id + ":exn-getPropertyInfo(" + e + ")");
+      log(start, "exn-getPropertyInfo(" + e + ")");
       
       throw e;
     }
   }
   
+  @Override
   public boolean jdbcCompliant()
   {
     boolean result = _driver.jdbcCompliant();
@@ -156,6 +184,7 @@ public class SpyDriver implements java.sql.Driver {
     return result;
   }
 
+  @Override
   public String toString()
   {
     return "SpyDriver[id=" + _id + ",driver=" + _driver + "]";

@@ -852,6 +852,321 @@ public class UserConnection implements java.sql.Connection {
     }
   }
 
+  public void setHoldability(int hold)
+    throws SQLException
+  {
+    try {
+      getDriverConnection().setHoldability(hold);
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+
+  @Override
+  public int getHoldability()
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().getHoldability();
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public Savepoint setSavepoint()
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().setSavepoint();
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public Savepoint setSavepoint(String name)
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().setSavepoint(name);
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public void releaseSavepoint(Savepoint savepoint)
+    throws SQLException
+  {
+    try {
+      getDriverConnection().releaseSavepoint(savepoint);
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public void rollback(Savepoint savepoint)
+    throws SQLException
+  {
+    try {
+      getDriverConnection().rollback(savepoint);
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public Clob createClob()
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().createClob();
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public Blob createBlob()
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().createBlob();
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public NClob createNClob()
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().createNClob();
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public SQLXML createSQLXML()
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().createSQLXML();
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public boolean isValid(int timeout)
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().isValid(timeout);
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public void setClientInfo(String name, String value)
+    throws SQLClientInfoException
+  {
+    try {
+      getDriverConnection().setClientInfo(name, value);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+
+  @Override
+  public void setClientInfo(Properties properties)
+    throws SQLClientInfoException
+  {
+    try {
+      getDriverConnection().setClientInfo(properties);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+
+  @Override
+  public String getClientInfo(String name)
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().getClientInfo(name);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public Properties getClientInfo()
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().getClientInfo();
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public Array createArrayOf(String typeName, Object[] elements)
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().createArrayOf(typeName, elements);
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  public Struct createStruct(String typeName, Object[] attributes)
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().createStruct(typeName, attributes);
+    } catch (SQLException e) {
+      onSqlException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+
+      throw e;
+    }
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> T unwrap(Class<T> iface)
+    throws SQLException
+  {
+    return (T) getConnection();
+  }
+
+  @Override
+  public boolean isWrapperFor(Class<?> iface)
+    throws SQLException
+  {
+    return iface.isAssignableFrom(getConnection().getClass());
+  }
+
   /**
    * Returns true if the connection is closed.
    */
@@ -880,6 +1195,7 @@ public class UserConnection implements java.sql.Connection {
    * Reset the connection and return the underlying JDBC connection to
    * the pool.
    */
+  @Override
   public void close() throws SQLException
   {
     ManagedConnectionImpl mConn;
@@ -926,160 +1242,6 @@ public class UserConnection implements java.sql.Connection {
       _statements = new ArrayList<Statement>();
       _statements.add(stmt);
     }
-  }
-
-  public void setHoldability(int hold)
-    throws SQLException
-  {
-    getDriverConnection().setHoldability(hold);
-  }
-
-  public int getHoldability()
-    throws SQLException
-  {
-    return getDriverConnection().getHoldability();
-  }
-
-  public Savepoint setSavepoint()
-    throws SQLException
-  {
-    return getDriverConnection().setSavepoint();
-  }
-
-  public Savepoint setSavepoint(String name)
-    throws SQLException
-  {
-    return getDriverConnection().setSavepoint(name);
-  }
-
-  public void releaseSavepoint(Savepoint savepoint)
-    throws SQLException
-  {
-    getDriverConnection().releaseSavepoint(savepoint);
-  }
-
-  public void rollback(Savepoint savepoint)
-    throws SQLException
-  {
-    getDriverConnection().rollback(savepoint);
-  }
-
-  @Override
-  public Clob createClob()
-    throws SQLException
-  {
-    return getDriverConnection().createClob();
-  }
-
-  @Override
-  public Blob createBlob()
-    throws SQLException
-  {
-    return getDriverConnection().createBlob();
-  }
-
-  @Override
-  public NClob createNClob()
-    throws SQLException
-  {
-    return getDriverConnection().createNClob();
-  }
-
-  @Override
-  public SQLXML createSQLXML()
-    throws SQLException
-  {
-    return getDriverConnection().createSQLXML();
-  }
-
-  @Override
-  public boolean isValid(int timeout)
-    throws SQLException
-  {
-    return getDriverConnection().isValid(timeout);
-  }
-
-  @Override
-  public void setClientInfo(String name, String value)
-    throws SQLClientInfoException
-  {
-    try {
-      getDriverConnection().setClientInfo(name, value);
-    } catch (SQLClientInfoException e) {
-      onSqlException(e);
-      
-      throw e;
-    } catch (SQLException e) {
-      onSqlException(e);
-      
-      throw new RuntimeException(e);
-    } catch (RuntimeException e) {
-      onRuntimeException(e);
-      
-      throw e;
-    }
-  }
-
-  @Override
-  public void setClientInfo(Properties properties)
-    throws SQLClientInfoException
-  {
-    try {
-      getDriverConnection().setClientInfo(properties);
-    } catch (SQLClientInfoException e) {
-      throw e;
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public String getClientInfo(String name)
-    throws SQLException
-  {
-    try {
-      return getDriverConnection().getClientInfo(name);
-    } catch (SQLClientInfoException e) {
-      throw e;
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public Properties getClientInfo()
-    throws SQLException
-  {
-      return getDriverConnection().getClientInfo();
-  }
-
-  @Override
-  public Array createArrayOf(String typeName, Object[] elements)
-    throws SQLException
-  {
-      return getDriverConnection().createArrayOf(typeName, elements);
-  }
-
-  @Override
-  public Struct createStruct(String typeName, Object[] attributes)
-    throws SQLException
-  {
-    return getDriverConnection().createStruct(typeName, attributes);
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <T> T unwrap(Class<T> iface)
-    throws SQLException
-  {
-    return (T) getConnection();
-  }
-
-  @Override
-  public boolean isWrapperFor(Class<?> iface)
-    throws SQLException
-  {
-    return iface.isAssignableFrom(getConnection().getClass());
   }
 
   /**
@@ -1209,6 +1371,14 @@ public class UserConnection implements java.sql.Connection {
     if (mConn != null)
       mConn.onRuntimeException(e);
   }
+  
+  protected void setPingRequired()
+  {
+    ManagedConnectionImpl mConn = _mConn;
+
+    if (mConn != null)
+      mConn.setPingRequired();
+  }
 
   /**
    * Returns the underlying connection.
@@ -1232,14 +1402,16 @@ public class UserConnection implements java.sql.Connection {
       mConn.killPool();
   }
 
+  @Override
   protected void finalize()
     throws Exception
   {
     close();
   }
 
+  @Override
   public String toString()
   {
-    return "UserConnection[" + _mConn + "]";
+    return getClass().getSimpleName() + "[" + _mConn + "]";
   }
 }

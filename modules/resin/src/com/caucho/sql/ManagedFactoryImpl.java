@@ -29,11 +29,12 @@
 
 package com.caucho.sql;
 
-import com.caucho.cloud.network.ClusterServer;
-import com.caucho.env.dbpool.IdlePoolSet;
-import com.caucho.server.cluster.*;
-import com.caucho.server.resin.Resin;
-import com.caucho.util.L10N;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
@@ -43,16 +44,16 @@ import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.ResourceAdapter;
 import javax.resource.spi.ValidatingManagedConnectionFactory;
 import javax.security.auth.Subject;
-import java.io.PrintWriter;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.logging.Logger;
+
+import com.caucho.cloud.network.ClusterServer;
+import com.caucho.env.dbpool.IdlePoolSet;
+import com.caucho.server.cluster.Server;
+import com.caucho.util.L10N;
 
 /**
  * The managed factory implementation.
  */
+@SuppressWarnings("serial")
 public class ManagedFactoryImpl
   implements ManagedConnectionFactory, ValidatingManagedConnectionFactory
 {

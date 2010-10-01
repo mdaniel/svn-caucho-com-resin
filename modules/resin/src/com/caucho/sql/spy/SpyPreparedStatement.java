@@ -60,963 +60,1093 @@ public class SpyPreparedStatement extends SpyStatement
     _sql = sql;
   }
 
+  @Override
   public java.sql.ResultSet executeQuery()
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":executeQuery(" + _sql + ")");
-
       ResultSet rs = _pstmt.executeQuery();
+
+      if (log.isLoggable(Level.FINE))
+        log(start, "executeQuery(" + _sql + ")");
 
       return rs;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-executeQuery(" + e + ")");
+        log(start, "exn-executeQuery(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int executeUpdate()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int result = _pstmt.executeUpdate();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":executeUpdate(" + _sql + ") -> " + result);
+        log(start, "executeUpdate(" + _sql + ") -> " + result);
 
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-executeUpdate(" + e + ")");
+        log(start, "exn-executeUpdate(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public boolean execute()
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean result = _pstmt.execute();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":execute(" + _sql + ") -> " + result);
+        log(start, "execute(" + _sql + ") -> " + result);
 
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-execute(" + e + ")");
+        log(start, "exn-execute(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void addBatch()
     throws SQLException
   {
+    long start = start();
+    
     try {
       _pstmt.addBatch();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":addBatch()");
+        log(start, "addBatch()");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-addBatch(" + e + ")");
+        log(start, "exn-addBatch(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void clearParameters()
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":clearParameters()");
-
       _pstmt.clearParameters();
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "clearParameters()");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-clearParameters(" + e + ")");
+        log(start, "exn-clearParameters(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public ResultSetMetaData getMetaData()
     throws SQLException
   {
+    long start = start();
+    
     try {
       ResultSetMetaData result = _pstmt.getMetaData();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getMetaData() -> " + result);
+        log(start, "getMetaData() -> " + result);
 
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getMetaData(" + e + ")");
+        log(start, "exn-getMetaData(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public ParameterMetaData getParameterMetaData()
     throws SQLException
-  {
-    return _pstmt.getParameterMetaData();
+  { 
+    long start = start();
+    
+    try {
+      ParameterMetaData md = _pstmt.getParameterMetaData();
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "getParameterMetaData()");
+      
+      return md;
+    } catch (SQLException e) {
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-getParameterMetaData() -> " + e);
+      
+      throw e;
+    }
   }
 
+  @Override
   public void setNull(int parameterIndex, int sqlType)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setNull(" + parameterIndex + ",type=" + sqlType + ")");
-
       _pstmt.setNull(parameterIndex, sqlType);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setNull(" + parameterIndex + ",type=" + sqlType + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setNull(" + e + ")");
+        log(start, "exn-setNull(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setNull(int parameterIndex, int sqlType, String typeName)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setNull(" + parameterIndex + ",type=" + sqlType +
-              ",typeName=" + typeName + ")");
-
       _pstmt.setNull(parameterIndex, sqlType, typeName);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setNull(" + parameterIndex + ",type=" + sqlType +
+            ",typeName=" + typeName + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setNull(" + e + ")");
+        log(start, "exn-setNull(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBoolean(int index, boolean value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setBoolean(" + index + "," + value + ")");
-
       _pstmt.setBoolean(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setBoolean(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBoolean(" + e + ")");
+        log(start, "exn-setBoolean(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setByte(int index, byte value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setByte(" + index + "," + value + ")");
-
       _pstmt.setByte(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setByte(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setByte(" + e + ")");
+        log(start, "exn-setByte(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setShort(int index, short value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setShort(" + index + "," + value + ")");
-
       _pstmt.setShort(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setShort(" + index + "," + value + ")");
+
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setShort(" + e + ")");
+        log(start, "exn-setShort(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setInt(int index, int value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setInt(" + index + "," + value + ")");
-
       _pstmt.setInt(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setInt(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setInt(" + e + ")");
+        log(start, "exn-setInt(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setLong(int index, long value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setLong(" + index + "," + value + ")");
-
       _pstmt.setLong(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setLong(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setLong(" + e + ")");
+        log(start, "exn-setLong(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setFloat(int index, float value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setFloat(" + index + "," + value + ")");
-
       _pstmt.setFloat(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setFloat(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setFloat(" + e + ")");
+        log(start, "exn-setFloat(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setDouble(int index, double value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setDouble(" + index + "," + value + ")");
-
       _pstmt.setDouble(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setDouble(" + index + "," + value + ")");
+
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setDouble(" + e + ")");
+        log(start, "exn-setDouble(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBigDecimal(int index, BigDecimal value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setBigDecimal(" + index + "," + value + ")");
-
       _pstmt.setBigDecimal(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setBigDecimal(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBigDecimal(" + e + ")");
+        log(start, "exn-setBigDecimal(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setString(int index, String value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setString(" + index + "," + value + ")");
-
       _pstmt.setString(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setString(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setString(" + e + ")");
+        log(start, "exn-setString(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBytes(int index, byte []value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (value != null)
-        if (log.isLoggable(Level.FINE))
-          log.fine(getId() + ":setBytes(" + index + ",len=" + value.length + ")");
-      else
-        if (log.isLoggable(Level.FINE))
-          log.fine(getId() + ":setBytes(" + index + ",null");
-
       _pstmt.setBytes(index, value);
+      
+      if (log.isLoggable(Level.FINE)) {
+        if (value != null)
+          log(start, "setBytes(" + index + ",len=" + value.length + ")");
+        else
+          log(start, ":setBytes(" + index + ",null");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBytes(" + e + ")");
+        log(start, "exn-setBytes(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setDate(int index, Date value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setDate(" + index + "," + value + ")");
-
       _pstmt.setDate(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setDate(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setDate(" + e + ")");
+        log(start, "exn-setDate(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setDate(int index, Date value, Calendar cal)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setDate(" + index + "," + value + ",cal=" + cal + ")");
-
       _pstmt.setDate(index, value, cal);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setDate(" + index + "," + value + ",cal=" + cal + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setDate(" + e + ")");
+        log(start, "exn-setDate(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setTime(int index, Time value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setTime(" + index + "," + value + ")");
-
       _pstmt.setTime(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setTime(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setTime(" + e + ")");
+        log(start, "exn-setTime(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setTime(int index, Time value, Calendar cal)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setTime(" + index + "," + value + ",cal=" + cal + ")");
-
       _pstmt.setTime(index, value, cal);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setTime(" + index + "," + value + ",cal=" + cal + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setTime(" + e + ")");
+        log(start, "exn-setTime(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setTimestamp(int index, Timestamp value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setTimestamp(" + index + "," + value + ")");
-
       _pstmt.setTimestamp(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setTimestamp(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setTimestamp(" + e + ")");
+        log(start, "exn-setTimestamp(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setTimestamp(int index, Timestamp value, Calendar cal)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setTimestamp(" + index + "," + value + ",cal=" + cal + ")");
-
       _pstmt.setTimestamp(index, value, cal);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setTimestamp(" + index + "," + value + ",cal=" + cal + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setTimestamp(" + e + ")");
+        log(start, "exn-setTimestamp(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setAsciiStream(int index, InputStream value, int length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setAsciiStream(" + index + "," + value + ",len=" + length + ")");
-
       _pstmt.setAsciiStream(index, value, length);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setAsciiStream(" + index + "," + value + ",len=" + length + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setAsciiStream(" + e + ")");
+        log(start, "exn-setAsciiStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
+  @SuppressWarnings("deprecation")
   public void setUnicodeStream(int index, InputStream value, int length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setUnicodeStream(" + index + "," + value + ",len=" + length + ")");
-
       _pstmt.setUnicodeStream(index, value, length);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setUnicodeStream(" + index + "," + value + ",len=" + length + ")");
+
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setUnicodeStream(" + e + ")");
+        log(start, "exn-setUnicodeStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBinaryStream(int index, InputStream value, int length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setBinaryStream(" + index + "," + value + ",len=" + length + ")");
-
       _pstmt.setBinaryStream(index, value, length);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setBinaryStream(" + index + "," + value + ",len=" + length + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBinaryStream(" + e + ")");
+        log(start, "exn-setBinaryStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setCharacterStream(int index, Reader value, int length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setCharacterStream(" + index + "," + value + ",len=" + length + ")");
-
       _pstmt.setCharacterStream(index, value, length);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setCharacterStream(" + index + "," + value + ",len=" + length + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setCharacterStream(" + e + ")");
+        log(start, "exn-setCharacterStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setObject(int index, Object value, int type, int scale)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setObject(" + index + "," + value +
-              ",type=" + type + ",scale=" + scale + ")");
-
       _pstmt.setObject(index, value, type, scale);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setObject(" + index + "," + value +
+            ",type=" + type + ",scale=" + scale + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setObject(" + e + ")");
+        log(start, "exn-setObject(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setObject(int index, Object value, int type)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setObject(" + index + "," + value +
-              ",type=" + type +  ")");
-
       _pstmt.setObject(index, value, type);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setObject(" + index + "," + value +
+            ",type=" + type +  ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setObject(" + e + ")");
+        log(start, "exn-setObject(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setObject(int index, Object value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setObject(" + index + "," + value + ")");
-
       _pstmt.setObject(index, value);
-    } catch (Throwable e) {
-      e.printStackTrace();
-
+      
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setObject(" + e + ")");
+        log(start, "setObject(" + index + "," + value + ")");
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-setObject(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
-
+  
+  @Override
   public void setRef(int index, Ref value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setRef(" + index + "," + value + ")");
-
       _pstmt.setRef(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setRef(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setRef(" + e + ")");
+        log(start, "exn-setRef(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBlob(int index, Blob value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setBlob(" + index + "," + value + ")");
-
       _pstmt.setBlob(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setBlob(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBlob(" + e + ")");
+        log(start, "exn-setBlob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setClob(int index, Clob value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setClob(" + index + "," + value + ")");
-
       _pstmt.setClob(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setClob(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setClob(" + e + ")");
+        log(start, "exn-setClob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setArray(int index, Array value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setArray(" + index + "," + value + ")");
-
       _pstmt.setArray(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setArray(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setArray(" + e + ")");
+        log(start, "exn-setArray(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setURL(int index, URL value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setURL(" + index + "," + value + ")");
-
       _pstmt.setURL(index, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setURL(" + index + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setURL(" + e + ")");
+        log(start, "exn-setURL(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
-
   }
 
+  @Override
   public void setRowId(int parameterIndex, RowId x)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setRowId(" + parameterIndex + "," + x + ")");
-
       _pstmt.setRowId(parameterIndex, x);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setRowId(" + parameterIndex + "," + x + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setRowId(" + e + ")");
+        log(start, "exn-setRowId(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setNString(int parameterIndex, String value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setNString(" + parameterIndex + "," + value + ")");
-
       _pstmt.setNString(parameterIndex, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setNString(" + parameterIndex + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setNString(" + e + ")");
+        log(start, "exn-setNString(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setNCharacterStream(int parameterIndex, Reader value, long length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setNCharacterStream("
-          + parameterIndex
-          + ","
-          + value
-          + ","
-          + length
-          + ")");
-
       _pstmt.setNCharacterStream(parameterIndex, value, length);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setNCharacterStream(" + parameterIndex
+            + "," + value
+            + ","
+            + length + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setNCharacterStream(" + e + ")");
+        log(start, "exn-setNCharacterStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setNClob(int parameterIndex, NClob value)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setNClob(" + parameterIndex + "," + value + ")");
-
       _pstmt.setNClob(parameterIndex, value);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setNClob(" + parameterIndex + "," + value + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setNClob(" + e + ")");
+        log(start, "exn-setNClob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setClob(int parameterIndex, Reader reader, long length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setClob("
-          + parameterIndex
-          + ","
-          + reader
-          + ","
-          + length
-          + ")");
-
       _pstmt.setClob(parameterIndex, reader, length);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setClob(" + parameterIndex
+            + "," + reader
+            + "," + length + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setClob(" + e + ")");
+        log(start, "exn-setClob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBlob(int parameterIndex, InputStream inputStream, long length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setBlob("
-          + parameterIndex
-          + ","
-          + inputStream
-          + ","
-          + length
-          + ")");
-
       _pstmt.setBlob(parameterIndex, inputStream, length);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setBlob(" + parameterIndex
+            + "," + inputStream
+            + "," + length + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBlob(" + e + ")");
+        log(start, "exn-setBlob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setNClob("
-          + parameterIndex
-          + ","
-          + reader
-          + ","
-          + length
-          + ")");
-
       _pstmt.setNClob(parameterIndex, reader, length);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setNClob(" + parameterIndex
+            + "," + reader + "," + length + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setNClob(" + e + ")");
+        log(start, "exn-setNClob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setSQLXML(int parameterIndex, SQLXML xmlObject)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setSQLXML("
-          + parameterIndex
-          + ","
-          + xmlObject
-          + ")");
-
       _pstmt.setSQLXML(parameterIndex, xmlObject);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setSQLXML(" + parameterIndex
+            + "," + xmlObject + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setSQLXML(" + e + ")");
+        log(start, "exn-setSQLXML(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setAsciiStream(int parameterIndex, InputStream x, long length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setAsciiStream("
-          + parameterIndex
-          + ","
-          + x
-          + ","
-          + length
-          + ")");
-
       _pstmt.setAsciiStream(parameterIndex, x, length);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setAsciiStream(" + parameterIndex
+            + "," + x + "," + length + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setAsciiStream(" + e + ")");
+        log(start, "exn-setAsciiStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBinaryStream(int parameterIndex, InputStream x, long length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setBinaryStream("
-          + parameterIndex
-          + ","
-          + x
-          + ","
-          + length
-          + ")");
-
       _pstmt.setBinaryStream(parameterIndex, x, length);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setBinaryStream(" + parameterIndex
+            + "," + x + "," + length + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBinaryStream(" + e + ")");
+        log(start, "exn-setBinaryStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setCharacterStream(int parameterIndex, Reader reader, long length)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setCharacterStream("
-          + parameterIndex
-          + ","
-          + reader
-          + ","
-          + length
-          + ")");
-
       _pstmt.setCharacterStream(parameterIndex, reader, length);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setCharacterStream(" + parameterIndex
+            + "," + reader + "," + length + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setCharacterStream(" + e + ")");
+        log(start, "exn-setCharacterStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setAsciiStream(int parameterIndex, InputStream x)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setAsciiStream(" + parameterIndex + "," + x + ")");
-
       _pstmt.setAsciiStream(parameterIndex, x);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setAsciiStream(" + parameterIndex + "," + x + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setAsciiStream(" + e + ")");
+        log(start, "exn-setAsciiStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBinaryStream(int parameterIndex, InputStream x)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setBinaryStream("
-          + parameterIndex
-          + ","
-          + x
-          + ")");
-
       _pstmt.setBinaryStream(parameterIndex, x);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setBinaryStream(" + parameterIndex + "," + x + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBinaryStream(" + e + ")");
+        log(start, "exn-setBinaryStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setCharacterStream(int parameterIndex, Reader reader)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setCharacterStream("
-          + parameterIndex
-          + ","
-          + reader
-          + ")");
-
       _pstmt.setCharacterStream(parameterIndex, reader);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setCharacterStream(" + parameterIndex
+            + "," + reader + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setCharacterStream(" + e + ")");
+        log(start, "exn-setCharacterStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setNCharacterStream(int parameterIndex, Reader reader)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setNCharacterStream("
-          + parameterIndex
-          + ","
-          + reader
-          + ")");
-
       _pstmt.setNCharacterStream(parameterIndex, reader);
+      
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "setNCharacterStream(" + parameterIndex
+            + "," + reader + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setNCharacterStream(" + e + ")");
+        log(start, "exn-setNCharacterStream(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setClob(int parameterIndex, Reader reader)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setClob(" + parameterIndex + "," + reader + ")");
-
       _pstmt.setClob(parameterIndex, reader);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setClob(" + parameterIndex + "," + reader + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setClob(" + e + ")");
+        log(start, "exn-setClob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setBlob(int parameterIndex, InputStream inputStream)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId()
-          + ":setBlob("
-          + parameterIndex
-          + ","
-          + inputStream
-          + ")");
-
       _pstmt.setBlob(parameterIndex, inputStream);
+      
+      if (log.isLoggable(Level.FINE)) {
+          log(start, "setBlob(" + parameterIndex
+              + "," + inputStream + ")");
+      }
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setBlob(" + e + ")");
+        log(start, "exn-setBlob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setNClob(int parameterIndex, Reader reader)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setNClob(" + parameterIndex + "," + reader + ")");
-
       _pstmt.setNClob(parameterIndex, reader);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setNClob(" + parameterIndex + "," + reader + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setNClob(" + e + ")");
+        log(start, "exn-setNClob(" + e + ")");
 
       throw SQLExceptionWrapper.create(e);
     }

@@ -28,12 +28,14 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -46,7 +48,7 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
 
   private static int _staticId;
   private int _id;
-  private int _connCount;
+  private AtomicInteger _connCount = new AtomicInteger();
 
   // The underlying data source
   private ConnectionPoolDataSource _dataSource;
@@ -63,19 +65,22 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
   /**
    * Returns the pooled connection.
    */
+  @Override
   public PooledConnection getPooledConnection()
     throws SQLException
   {
+    long start = start();
+    
     try {
       PooledConnection conn = _dataSource.getPooledConnection();
 
-      String connId = _id + "." + _connCount++;
+      String connId = _id + "." + _connCount.getAndIncrement();
 
-      log.fine(_id + ":getConnectionPool() -> " + connId + ":" + conn);
+      log(start, "getConnectionPool() -> " + connId + ":" + conn);
 
       return new SpyPooledConnection(conn, connId);
     } catch (SQLException e) {
-      log.fine(_id + ":exn-connect(" + e + ")");
+      log(start, "exn-connect(" + e + ")");
       
       throw e;
     }
@@ -84,19 +89,22 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
   /**
    * Returns the XAConnection.
    */
+  @Override
   public PooledConnection getPooledConnection(String user, String password)
     throws SQLException
   {
+    long start = start();
+    
     try {
       PooledConnection conn = _dataSource.getPooledConnection(user, password);
 
-      String connId = _id + "." + _connCount++;
+      String connId = _id + "." + _connCount.getAndIncrement();
 
-      log.fine(_id + ":getPooledConnection(" + user + ") -> " + connId + ":" + conn);
+      log(start, "getPooledConnection(" + user + ") -> " + connId + ":" + conn);
 
       return new SpyPooledConnection(conn, connId);
     } catch (SQLException e) {
-      log.fine(_id + ":exn-connect(" + e + ")");
+      log(start, "exn-connect(" + e + ")");
       
       throw e;
     }
@@ -105,6 +113,7 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
   /**
    * Returns the login timeout.
    */
+  @Override
   public int getLoginTimeout()
     throws SQLException
   {
@@ -114,6 +123,7 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
   /**
    * Sets the login timeout.
    */
+  @Override
   public void setLoginTimeout(int timeout)
     throws SQLException
   {
@@ -123,6 +133,7 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
   /**
    * Returns the log writer
    */
+  @Override
   public PrintWriter getLogWriter()
     throws SQLException
   {
@@ -132,10 +143,23 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
   /**
    * Sets the log writer.
    */
+  @Override
   public void setLogWriter(PrintWriter log)
     throws SQLException
   {
     _dataSource.setLogWriter(log);
+  }
+  
+  protected long start()
+  {
+    return Alarm.getExactTime();
+  }
+  
+  protected void log(long start, String msg)
+  {
+    long delta = Alarm.getExactTime() - start;
+    
+    log.fine("[" + delta + "ms] " + _id + ":" + msg);
   }
 
   public String toString()

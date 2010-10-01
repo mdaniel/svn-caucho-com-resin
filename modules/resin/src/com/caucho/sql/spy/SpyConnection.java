@@ -171,11 +171,11 @@ public class SpyConnection implements java.sql.Connection {
   /**
    * Returns the connection's type map.
    */
-  public Map getTypeMap()
+  public Map<String,Class<?>> getTypeMap()
     throws SQLException
   {
     try {
-      Map map = _conn.getTypeMap();
+      Map<String,Class<?>> map = _conn.getTypeMap();
 
       log.fine(getId() + ":getTypeMap() -> " + map);
       

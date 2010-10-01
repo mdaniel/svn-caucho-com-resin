@@ -126,7 +126,7 @@ public class DatabaseManager {
 
           ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-          Class driverClass = Class.forName(driverName, false, loader);
+          Class<?> driverClass = Class.forName(driverName, false, loader);
 
           driver.setType(driverClass);
           driver.setURL(url);
@@ -174,10 +174,10 @@ public class DatabaseManager {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
       
-      Enumeration iter
+      Enumeration<URL> iter
         = loader.getResources("META-INF/services/java.sql.Driver");
       while (iter.hasMoreElements()) {
-        URL url = (URL) iter.nextElement();
+        URL url = iter.nextElement();
 
         ReadStream is = null;
         try {
@@ -196,7 +196,7 @@ public class DatabaseManager {
               continue;
 
             try {
-              Class cl = Class.forName(filename, false, loader);
+              Class<?> cl = Class.forName(filename, false, loader);
               Driver driver = null;
 
               if (Driver.class.isAssignableFrom(cl))

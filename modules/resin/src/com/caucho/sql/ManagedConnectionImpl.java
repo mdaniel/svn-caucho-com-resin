@@ -566,6 +566,8 @@ public class ManagedConnectionImpl
    */
   public void sendFatalEvent(Exception e)
   {
+    _isPingRequired = true;
+    
     if (_listener != null) {
       ConnectionEvent event;
 
@@ -579,10 +581,15 @@ public class ManagedConnectionImpl
   
   public void onSqlException(SQLException e)
   {
-    _isPingRequired = true;
+    setPingRequired();
   }
   
   public void onRuntimeException(RuntimeException e)
+  {
+    setPingRequired();
+  }
+  
+  public void setPingRequired()
   {
     _isPingRequired = true;
   }
@@ -798,8 +805,9 @@ public class ManagedConnectionImpl
         return true;
       }
 
-      if (! dbPool.isPing())
-        return true;
+      if (! dbPool.isPing()) {
+        return false;
+      }
 
       /*
       long pingInterval = dbPool.getPingInterval();

@@ -35,6 +35,7 @@ import java.sql.SQLException;
 /**
  * Wraps an exception in a SQLException wrapper.
  */
+@SuppressWarnings("serial")
 public class SQLExceptionWrapper extends java.sql.SQLException
   implements ExceptionWrapper {
   private Throwable _rootCause;

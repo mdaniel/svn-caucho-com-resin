@@ -29,12 +29,17 @@
 
 package com.caucho.sql;
 
-import com.caucho.util.L10N;
-
 import java.io.PrintWriter;
-import java.sql.*;
-import java.util.Map;
-import javax.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.ConnectionEventListener;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.StatementEventListener;
+
+import com.caucho.util.L10N;
 
 /**
  * Adapter for DataSource used as a Driver.

@@ -34,12 +34,9 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.sql.SQLException;
-
+import java.sql.Statement;
 import java.util.ArrayList;
-
-import javax.management.*;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.JdbcQueryMXBean;

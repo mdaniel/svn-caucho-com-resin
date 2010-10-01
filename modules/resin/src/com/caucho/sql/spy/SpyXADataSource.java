@@ -28,6 +28,7 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 import javax.sql.XAConnection;
@@ -63,19 +64,22 @@ public class SpyXADataSource implements XADataSource {
   /**
    * Returns the XAConnection.
    */
+  @Override
   public XAConnection getXAConnection()
     throws SQLException
   {
+    long start = start();
+    
     try {
       XAConnection conn = _dataSource.getXAConnection();
 
       String connId = _id + "." + _connCount++;
 
-      log.fine(_id + ":getXAConnection() -> " + connId + ":" + conn);
+      log(start, "getXAConnection() -> " + connId + ":" + conn);
 
       return new SpyXAConnection(conn, connId);
     } catch (SQLException e) {
-      log.fine(_id + ":exn-connect(" + e + ")");
+      log(start, "exn-connect(" + e + ")");
       
       throw e;
     }
@@ -84,19 +88,22 @@ public class SpyXADataSource implements XADataSource {
   /**
    * Returns the XAConnection.
    */
+  @Override
   public XAConnection getXAConnection(String user, String password)
     throws SQLException
   {
+    long start = start();
+    
     try {
       XAConnection conn = _dataSource.getXAConnection(user, password);
 
       String connId = _id + "." + _connCount++;
 
-      log.fine(_id + ":getXAConnection(" + user + ") -> " + connId + ":" + conn);
+      log(start, "getXAConnection(" + user + ") -> " + connId + ":" + conn);
 
       return new SpyXAConnection(conn, connId);
     } catch (SQLException e) {
-      log.fine(_id + ":exn-connect(" + e + ")");
+      log(start, "exn-connect(" + e + ")");
       
       throw e;
     }
@@ -105,6 +112,7 @@ public class SpyXADataSource implements XADataSource {
   /**
    * Returns the login timeout.
    */
+  @Override
   public int getLoginTimeout()
     throws SQLException
   {
@@ -114,6 +122,7 @@ public class SpyXADataSource implements XADataSource {
   /**
    * Sets the login timeout.
    */
+  @Override
   public void setLoginTimeout(int timeout)
     throws SQLException
   {
@@ -123,6 +132,7 @@ public class SpyXADataSource implements XADataSource {
   /**
    * Returns the log writer
    */
+  @Override
   public PrintWriter getLogWriter()
     throws SQLException
   {
@@ -132,12 +142,26 @@ public class SpyXADataSource implements XADataSource {
   /**
    * Sets the log writer.
    */
+  @Override
   public void setLogWriter(PrintWriter log)
     throws SQLException
   {
     _dataSource.setLogWriter(log);
   }
+  
+  protected long start()
+  {
+    return Alarm.getExactTime();
+  }
+  
+  protected void log(long start, String msg)
+  {
+    long delta = Alarm.getExactTime() - start;
+    
+    log.fine("[" + delta + "ms] " + _id + ":" + msg);
+  }
 
+  @Override
   public String toString()
   {
     return "SpyXADataSource[id=" + _id + ",data-source=" + _dataSource + "]";

@@ -29,24 +29,18 @@
 
 package com.caucho.sql;
 
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.*;
-import com.caucho.loader.*;
-
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
+
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.loader.EnvironmentLocal;
 
 /**
  * The configuration database-default.
  */
 public class DatabaseConfig {
-  private final static Logger log
-    = Logger.getLogger(DatabaseConfig.class.getName());
-
   private final static
     EnvironmentLocal<ArrayList<DatabaseConfig>> _databaseDefault
     = new EnvironmentLocal<ArrayList<DatabaseConfig>>();

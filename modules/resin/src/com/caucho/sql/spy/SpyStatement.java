@@ -28,10 +28,6 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.sql.SQLExceptionWrapper;
-import com.caucho.util.L10N;
-
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -39,7 +35,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 /**
  * Spying on a statement;
@@ -64,6 +65,18 @@ public class SpyStatement implements java.sql.Statement {
     _conn = conn;
     _stmt = stmt;
   }
+  
+  protected long start()
+  {
+    return Alarm.getExactTime();
+  }
+  
+  protected void log(long start, String msg)
+  {
+    long delta = Alarm.getExactTime() - start;
+    
+    log.fine("[" + delta + "ms] " + getId() + ":" + msg);
+  }
 
   public String getId()
   {
@@ -78,65 +91,77 @@ public class SpyStatement implements java.sql.Statement {
     return _stmt;
   }
 
+  @Override
   public void addBatch(String sql)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":addBatch(" + sql + ")");
-      
       _stmt.addBatch(sql);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "addBatch(" + sql + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-addBatch(" + e + ")");
+        log(start, "exn-addBatch(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void cancel()
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":cancel()");
-      
       _stmt.cancel();
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "cancel()");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-cancel(" + e + ")");
+        log(start, "exn-cancel(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void clearBatch()
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":clearBatch()");
-      
       _stmt.clearBatch();
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "clearBatch()");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-clearBatch(" + e + ")");
+        log(start, "exn-clearBatch(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void clearWarnings()
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":clearWarnings()");
-      
       _stmt.clearWarnings();
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "clearWarnings()");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-clearWarnings(" + e + ")");
+        log(start, "exn-clearWarnings(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -146,172 +171,194 @@ public class SpyStatement implements java.sql.Statement {
   public void close()
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":close()");
-      
       Statement stmt = _stmt;
       _stmt = null;
       
       if (stmt != null)
         stmt.close();
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "close()");
+      
     } catch (RuntimeException e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-close(" + e + ")");
-      
+        log(start, "exn-close(" + e + ")");
     } catch (Exception e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-close(" + e + ")");
+        log(start, "exn-close(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public java.sql.ResultSet executeQuery(String sql)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":executeQuery(" + sql + ")");
-      
       ResultSet rs = _stmt.executeQuery(sql);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "executeQuery(" + sql + ")");
 
       return rs;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-executeQuery(" + sql + ") -> " + e);
+        log(start, "exn-executeQuery(" + sql + ") -> " + e);
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int executeUpdate(String sql)
     throws SQLException
   {
+    long start = start();
+    
     try {
       int count = _stmt.executeUpdate(sql);
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":executeUpdate(" + sql + ") -> " + count);
+        log(start, "executeUpdate(" + sql + ") -> " + count);
       
       return count;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-executeUpdate(" + sql + ") -> " + e);
+        log(start, "exn-executeUpdate(" + sql + ") -> " + e);
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public boolean execute(String sql)
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean hasResult = _stmt.execute(sql);
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":execute(" + sql + ") -> " + hasResult);
+        log(start, "execute(" + sql + ") -> " + hasResult);
       
       return hasResult;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-execute(" + sql + ") -> " + e);
+        log(start, "exn-execute(" + sql + ") -> " + e);
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int[]executeBatch()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int []result = _stmt.executeBatch();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":executeBatch()");
+        log(start, "executeBatch()");
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-executeBatch(" + e + ")");
+        log(start, "exn-executeBatch(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public java.sql.ResultSet getResultSet()
     throws SQLException
   {
+    long start = start();
+    
     try {
       ResultSet result = _stmt.getResultSet();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getResultSet() -> " + (result != null ? result.getClass().getName() : ""));
+        log(start, "getResultSet() -> " + (result != null ? result.getClass().getName() : ""));
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getResultSet(" + e + ")");
+        log(start, "exn-getResultSet(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int getUpdateCount()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int updateCount = _stmt.getUpdateCount();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getUpdateCount() -> " + updateCount);
+        log(start, "getUpdateCount() -> " + updateCount);
       
       return updateCount;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getUpdateCount(" + e + ")");
+        log(start, "exn-getUpdateCount(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public java.sql.Connection getConnection()
     throws SQLException
   {
-    int updateCount = _stmt.getUpdateCount();
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(getId() + ":getConnection()");
-      
     return _conn;
   }
 
+  @Override
   public int getFetchDirection()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int result = _stmt.getFetchDirection();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getFetchDirection() -> " + result);
+        log(start, "getFetchDirection() -> " + result);
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getFetchDirection(" + e + ")");
+        log(start, "exn-getFetchDirection(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int getFetchSize()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int result = _stmt.getFetchSize();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getFetchSize() -> " + result);
+        log(start, "getFetchSize() -> " + result);
       
       return result;
     } catch (Throwable e) {
@@ -322,172 +369,202 @@ public class SpyStatement implements java.sql.Statement {
     }
   }
 
+  @Override
   public int getMaxFieldSize()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int result = _stmt.getMaxFieldSize();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getMaxFieldSize() -> " + result);
+        log(start, "getMaxFieldSize() -> " + result);
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getMaxFieldSize(" + e + ")");
+        log(start, "exn-getMaxFieldSize(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int getMaxRows()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int result = _stmt.getMaxRows();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getMaxRows() -> " + result);
+        log(start, "getMaxRows() -> " + result);
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getMaxRows(" + e + ")");
+        log(start, "exn-getMaxRows(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
   
+  @Override
   public void setMaxRows(int max)
     throws SQLException
   {
+    long start = start();
+    
     try {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setMaxRows(" + max + ")");
+        log(start, "setMaxRows(" + max + ")");
 
       _stmt.setMaxRows(max);
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setMaxRows(" + e + ")");
+        log(start, "exn-setMaxRows(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public boolean getMoreResults()
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean result = _stmt.getMoreResults();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getMoreResults() -> " + result);
+        log(start, "getMoreResults() -> " + result);
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getMoreResults(" + e + ")");
+        log(start, "exn-getMoreResults(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int getQueryTimeout()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int result = _stmt.getQueryTimeout();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getQueryTimeout() -> " + result);
+        log(start, "getQueryTimeout() -> " + result);
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getQueryTimeout(" + e + ")");
+        log(start, "exn-getQueryTimeout(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int getResultSetConcurrency()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int result = _stmt.getResultSetConcurrency();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getResultSetConcurrency() -> " + result);
+        log(start, "getResultSetConcurrency() -> " + result);
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getResultSetConcurrency(" + e + ")");
+        log(start, ":exn-getResultSetConcurrency(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public int getResultSetType()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int result = _stmt.getResultSetType();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getResultSetType() -> " + result);
+        log(start, "getResultSetType() -> " + result);
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getResultSetType(" + e + ")");
+        log(start, "exn-getResultSetType(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public SQLWarning getWarnings()
     throws SQLException
   {
+    long start = start();
+    
     try {
       SQLWarning result = _stmt.getWarnings();
 
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":getWarnings() -> " + result);
+        log(start, "getWarnings() -> " + result);
       
       return result;
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-getWarnings(" + e + ")");
+        log(start, "exn-getWarnings(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setCursorName(String name)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setCursorName(" + name + ")");
-
       _stmt.setCursorName(name);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setCursorName(" + name + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setCursorName(" + e + ")");
+        log(start, "exn-setCursorName(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setEscapeProcessing(boolean enable)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setEscapeProcessing(" + enable + ")");
-
       _stmt.setEscapeProcessing(enable);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setEscapeProcessing(" + enable + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
         log.fine(getId() + ":exn-setEscapeProcessing(" + e + ")");
@@ -496,301 +573,365 @@ public class SpyStatement implements java.sql.Statement {
     }
   }
 
+  @Override
   public void setFetchDirection(int direction)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setFetchDirection(" + direction + ")");
-
       _stmt.setFetchDirection(direction);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setFetchDirection(" + direction + ")");
+
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setFetchDirection(" + e + ")");
+        log(start, "exn-setFetchDirection(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setFetchSize(int rows)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setFetchSize(" + rows + ")");
-
       _stmt.setFetchSize(rows);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setFetchSize(" + rows + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setFetchSize(" + e + ")");
+        log(start, "exn-setFetchSize(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
+  @Override
   public void setMaxFieldSize(int max)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setMaxFieldSize(" + max + ")");
-
       _stmt.setMaxFieldSize(max);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setMaxFieldSize(" + max + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setMaxFieldSize(" + e + ")");
+        log(start, "exn-setMaxFieldSize(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
   
+  @Override
   public void setQueryTimeout(int seconds)
     throws SQLException
   {
+    long start = start();
+    
     try {
-      if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":setQueryTimeout(" + seconds + ")");
-
       _stmt.setQueryTimeout(seconds);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "setQueryTimeout(" + seconds + ")");
     } catch (Throwable e) {
       if (log.isLoggable(Level.FINE))
-        log.fine(getId() + ":exn-setQueryTimeout(" + e + ")");
+        log(start, "exn-setQueryTimeout(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
   }
 
-  // jdk 1.4
+  @Override
   public boolean getMoreResults(int count)
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean moreResults = _stmt.getMoreResults(count);
 
-      log.fine(getId() + ":getMoreResults(" + count + ") -> " + moreResults);
+      if (log.isLoggable(Level.FINE))
+        log(start, "getMoreResults(" + count + ") -> " + moreResults);
 
       return moreResults;
     } catch (SQLException e) {
-      log.fine(getId() + ":getMoreResults(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "getMoreResults(" + e + ")");
 
       throw e;
     }
   }
-  
+
+  @Override
   public java.sql.ResultSet getGeneratedKeys()
     throws SQLException
   {
+    long start = start();
+    
     try {
       ResultSet generatedKeys = _stmt.getGeneratedKeys();
 
-      log.fine(getId() + ":getGeneratedKeys() -> " + generatedKeys);
+      if (log.isLoggable(Level.FINE))
+        log(start, "getGeneratedKeys() -> " + generatedKeys);
 
       return generatedKeys;
     } catch (SQLException e) {
-      log.fine(getId() + ":getGeneratedKeys(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "getGeneratedKeys(" + e + ")");
 
       throw e;
     }
   }
-  
+
+  @Override
   public int executeUpdate(String query, int resultType)
     throws SQLException
   {
+    long start = start();
+    
     try {
       int rowsUpdated = _stmt.executeUpdate(query, resultType);
 
-      log.fine(getId()
-        + ":executeUpdate("
-        + query
-        + ", resultType="
-        + resultType
-        + ") -> "
-        + rowsUpdated);
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "executeUpdate(" + query 
+            + ", resultType="      + resultType
+            + ") -> " + rowsUpdated);
+      }
 
       return rowsUpdated;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-executeUpdate(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-executeUpdate(" + e + ")");
 
       throw e;
     }
   }
   
+  @Override
   public int executeUpdate(String query, int []columns)
     throws SQLException
   {
+    long start = start();
+    
     try {
       int rowsUpdated = _stmt.executeUpdate(query, columns);
 
-      List<Integer> list = new ArrayList<Integer>();
-      for (int column : columns)
-        list.add(column);
+      if (log.isLoggable(Level.FINE)) { 
+        List<Integer> list = new ArrayList<Integer>();
+        for (int column : columns)
+          list.add(column);
 
-      log.fine(getId()
-        + ":executeUpdate("
-        + query
-        + ", columns="
-        + list
-        + ") -> "
-        + rowsUpdated);
+        log(start, "executeUpdate(" + query
+            + ", columns=" + list
+            + ") -> " + rowsUpdated);
+      }
 
       return rowsUpdated;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-executeUpdate(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-executeUpdate(" + e + ")");
 
       throw e;
     }
   }
   
+  @Override
   public int executeUpdate(String query, String []columns)
     throws SQLException
   {
+    long start = start();
+    
     try {
       int rowsUpdated = _stmt.executeUpdate(query, columns);
 
-      log.fine(getId()
-        + ":executeUpdate("
-        + query
-        + ", columns="
-        + Arrays.asList(columns)
-        + ") -> "
-        + rowsUpdated);
+      if (log.isLoggable(Level.FINE)){ 
+        log(start, "executeUpdate(" + query
+            + ", columns=" + Arrays.asList(columns)
+            + ") -> " + rowsUpdated);
+      }
 
       return rowsUpdated;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-executeUpdate(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-executeUpdate(" + e + ")");
 
       throw e;
     }
   }
   
+  @Override
   public boolean execute(String query, int resultType)
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean isResultSet = _stmt.execute(query, resultType);
 
-      log.fine(getId()
-        + ":execute("
-        + query
-        + ", resultType="
-        + resultType
-        + ") -> "
-        + isResultSet);
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "execute(" + query
+            + ", resultType=" + resultType
+            + ") -> " + isResultSet);
+      }
 
       return isResultSet;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-execute("+e+")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-execute(" + e + ")");
 
       throw e;
     }
   }
   
+  @Override
   public boolean execute(String query, int []columns)
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean isResultSet = _stmt.execute(query, columns);
 
-      List<Integer> list = new ArrayList<Integer>();
-      for (int column : columns)
-        list.add(column);
+      if (log.isLoggable(Level.FINE)) {
+        List<Integer> list = new ArrayList<Integer>();
+        for (int column : columns)
+          list.add(column);
 
-      log.fine(getId() + ":execute(" + query + ", columns=" + list + ")");
+          log(start, "execute(" + query + ", columns=" + list + ")");
+      }
 
       return isResultSet;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-execute(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-execute(" + e + ")");
 
       throw e;
     }
   }
   
+  @Override
   public boolean execute(String query, String []columns)
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean isResultSet = _stmt.execute(query, columns);
 
-      log.fine(getId() + ":execute(" + query + ", columns=" + Arrays.asList(
-        columns) + ") -> " + isResultSet);
+      if (log.isLoggable(Level.FINE)) {
+        log(start, "execute(" + query
+            + ", columns=" + Arrays.asList(columns) + ") -> " + isResultSet);
+      }
 
       return isResultSet;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-execute(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-execute(" + e + ")");
 
       throw e;
     }
   }
 
+  @Override
   public int getResultSetHoldability()
     throws SQLException
   {
+    long start = start();
+    
     try {
       int holdability =  _stmt.getResultSetHoldability();
 
-      log.fine(getId() + ":getResultSetHoldability() -> " + holdability);
+      if (log.isLoggable(Level.FINE))
+        log(start, "getResultSetHoldability() -> " + holdability);
 
       return holdability;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-getResultSetHoldability(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-getResultSetHoldability(" + e + ")");
 
       throw e;
     }
   }
 
+  @Override
   public boolean isClosed()
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean closed = _stmt.isClosed();
 
-      log.fine(getId() + ":isClosed() -> " + closed);
+      if (log.isLoggable(Level.FINE))
+        log(start, "isClosed() -> " + closed);
 
       return closed;
     } catch (SQLException e) {
-      log.fine(getId() + ":isClosed(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "isClosed(" + e + ")");
 
       throw e;
     }
   }
 
+  @Override
   public void setPoolable(boolean poolable)
     throws SQLException
   {
+    long start = start();
+    
     try {
       _stmt.setPoolable(poolable);
 
-      log.fine(getId() + ":setPoolable(" + poolable + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "setPoolable(" + poolable + ")");
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-setPoolable(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-setPoolable(" + e + ")");
 
       throw e;
     }
   }
 
+  @Override
   public boolean isPoolable()
     throws SQLException
   {
+    long start = start();
+    
     try {
       boolean isPoolable = _stmt.isPoolable();
 
-      log.fine(getId() + ":isPoolable() -> " + isPoolable);
+      if (log.isLoggable(Level.FINE))
+        log(start, "isPoolable() -> " + isPoolable);
 
       return isPoolable;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-isPoolable(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log(start, "exn-isPoolable(" + e + ")");
 
       throw e;
     }
   }
 
+  @Override
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
     try {
       T t = _stmt.unwrap(iface);
 
-      log.fine(getId() + ":unwrap(" + iface + ") -> " + t);
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":unwrap(" + iface + ") -> " + t);
 
       return t;
     } catch (SQLException e) {
@@ -800,23 +941,28 @@ public class SpyStatement implements java.sql.Statement {
     }
   }
 
+  @Override
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
     try {
       boolean isWrapper = _stmt.isWrapperFor(iface);
 
-      log.fine(getId() + ":isWrapperFor(" + iface + ") -> " + isWrapper);
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":isWrapperFor(" + iface + ") -> " + isWrapper);
       
       return isWrapper;
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-isWrapperFor(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-isWrapperFor(" + e + ")");
 
       throw e;
     }
   }
 
-  public String toString() {
+  @Override
+  public String toString()
+  {
     return getClass().getSimpleName() + "[" + _id + "]";
   }
 }

@@ -36,6 +36,7 @@ import java.sql.SQLException;
  * <p>Each PoolItem encapsulates the driver's PooledConnection and
  * 
  */
+@SuppressWarnings("serial")
 class StatementOverflowException extends SQLException {
   public StatementOverflowException()
   {

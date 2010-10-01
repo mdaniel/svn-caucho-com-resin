@@ -28,6 +28,7 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 import javax.transaction.xa.XAException;
@@ -65,20 +66,38 @@ public class SpyXAResource implements XAResource {
   {
     return _xaResource;
   }
+  
+  protected long start()
+  {
+    return Alarm.getExactTime();
+  }
+  
+  protected void log(long start, String msg)
+  {
+    long delta = Alarm.getExactTime() - start;
+    
+    log.fine("[" + delta + "ms] " + _id + ":" + msg);
+  }
 
   /**
    * Sets the transaction timeout.
    */
+  @Override
   public boolean setTransactionTimeout(int seconds)
     throws XAException
   {
+    long start = start();
+    
     try {
       boolean ok = _xaResource.setTransactionTimeout(seconds);
-      log.fine(_id + ":set-transaction-timeout(" + seconds + ")->" + ok);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "set-transaction-timeout(" + seconds + ")->" + ok);
 
       return ok;
     } catch (XAException e) {
       log.log(Level.FINE, e.toString(), e);
+      
       throw e;
     } catch (RuntimeException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -89,13 +108,17 @@ public class SpyXAResource implements XAResource {
   /**
    * Gets the transaction timeout.
    */
+  @Override
   public int getTransactionTimeout()
     throws XAException
   {
+    long start = start();
+    
     try {
       int seconds = _xaResource.getTransactionTimeout();
-      
-      log.fine(_id + ":transaction-timeout()->" + seconds);
+    
+      if (log.isLoggable(Level.FINE))
+        log(start, "transaction-timeout()->" + seconds);
 
       return seconds;
     } catch (XAException e) {
@@ -110,16 +133,20 @@ public class SpyXAResource implements XAResource {
   /**
    * Returns true if the underlying RM is the same.
    */
+  @Override
   public boolean isSameRM(XAResource resource)
     throws XAException
   {
+    long start = start();
+    
     try {
       if (resource instanceof SpyXAResource)
         resource = ((SpyXAResource) resource).getXAResource();
 
       boolean same = _xaResource.isSameRM(resource);
-      
-      log.fine(_id + ":is-same-rm(resource=" + resource + ")->" + same);
+
+      if (log.isLoggable(Level.FINE))
+        log(start, "is-same-rm(resource=" + resource + ")->" + same);
 
       return same;
     } catch (XAException e) {
@@ -134,24 +161,33 @@ public class SpyXAResource implements XAResource {
   /**
    * Starts the resource.
    */
+  @Override
   public void start(Xid xid, int flags)
     throws XAException
   {
+    long start = start();
+    
     try {
-      String flagName = "";
-
-      if ((flags & TMJOIN) != 0)
-        flagName += ",join";
-      if ((flags & TMRESUME) != 0)
-        flagName += ",resume";
-      
-      log.fine(_id + ":start(xid=" + xid + flagName + ")");
-
       _xaResource.start(xid, flags);
+      
+      if (log.isLoggable(Level.FINE)) { 
+        String flagName = "";
+
+        if ((flags & TMJOIN) != 0)
+          flagName += ",join";
+        if ((flags & TMRESUME) != 0)
+          flagName += ",resume";
+      
+        log(start, "start(xid=" + xid + flagName + ")");
+      }
     } catch (XAException e) {
+      log(start, "exn-start(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
+      log(start, "exn-start(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     }
@@ -160,24 +196,33 @@ public class SpyXAResource implements XAResource {
   /**
    * Starts the resource.
    */
+  @Override
   public void end(Xid xid, int flags)
     throws XAException
   {
+    long start = start();
+    
     try {
-      String flagName = "";
-
-      if ((flags & TMFAIL) != 0)
-        flagName += ",fail";
-      if ((flags & TMSUSPEND) != 0)
-        flagName += ",suspend";
-      
-      log.fine(_id + ":end(xid=" + xid + flagName + ")");
-
       _xaResource.end(xid, flags);
+      
+      if (log.isLoggable(Level.FINE)) { 
+        String flagName = "";
+
+        if ((flags & TMFAIL) != 0)
+          flagName += ",fail";
+        if ((flags & TMSUSPEND) != 0)
+          flagName += ",suspend";
+      
+        log(start, "end(xid=" + xid + flagName + ")");
+      }
     } catch (XAException e) {
       log.log(Level.FINE, e.toString(), e);
+      log(start, "exn-end(" + xid + ") -> " + e);
+      
       throw e;
     } catch (RuntimeException e) {
+      log(start, "exn-end(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     }
@@ -186,18 +231,27 @@ public class SpyXAResource implements XAResource {
   /**
    * Rolls the resource back
    */
+  @Override
   public int prepare(Xid xid)
     throws XAException
   {
+    long start = start();
+    
     try {
       int value = _xaResource.prepare(xid);
-      log.fine(_id + ":prepare(xid=" + xid + ")->" + value);
+    
+      if (log.isLoggable(Level.FINE))
+        log(start, "prepare(xid=" + xid + ")->" + value);
 
       return value;
     } catch (XAException e) {
+      log(start, "exn-prepare(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
+      log(start, "exn-prepare(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     }
@@ -206,17 +260,25 @@ public class SpyXAResource implements XAResource {
   /**
    * Commits the resource
    */
+  @Override
   public void commit(Xid xid, boolean onePhase)
     throws XAException
   {
+    long start = start();
+    
     try {
-      log.fine(_id + ":commit(xid=" + xid + (onePhase ? ",1P)" : ",2P)"));
-
       _xaResource.commit(xid, onePhase);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "commit(xid=" + xid + (onePhase ? ",1P)" : ",2P)"));
     } catch (XAException e) {
+      log(start, "exn-commit(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
+      log(start, "exn-commit(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     }
@@ -225,17 +287,25 @@ public class SpyXAResource implements XAResource {
   /**
    * Rolls the resource back
    */
+  @Override
   public void rollback(Xid xid)
     throws XAException
   {
+    long start = start();
+    
     try {
-      log.fine(_id + ":rollback(xid=" + xid + ")");
-
       _xaResource.rollback(xid);
+
+      if (log.isLoggable(Level.FINE))
+        log(start, "rollback(xid=" + xid + ")");
     } catch (XAException e) {
+      log(start, "exn-rollback(xid) -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
+      log(start, "exn-rollback(xid) -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     }
@@ -244,29 +314,40 @@ public class SpyXAResource implements XAResource {
   /**
    * Rolls the resource back
    */
+  @Override
   public Xid []recover(int flags)
     throws XAException
   {
+    long start = start();
+    
     try {
-      String flagString = "";
+      Xid [] xids = _xaResource.recover(flags);
+      
+      if (log.isLoggable(Level.FINE)){ 
+        String flagString = "";
 
-      if ((flags & XAResource.TMSTARTRSCAN) != 0)
-        flagString += "start";
+        if ((flags & XAResource.TMSTARTRSCAN) != 0)
+          flagString += "start";
 
-      if ((flags & XAResource.TMENDRSCAN) != 0) {
-        if (! flagString.equals(""))
-          flagString += ",";
+        if ((flags & XAResource.TMENDRSCAN) != 0) {
+          if (! flagString.equals(""))
+            flagString += ",";
 
-        flagString += "end";
+          flagString += "end";
+        }
+      
+        log(start, "recover(flags=" + flagString + ")");
       }
       
-      log.fine(_id + ":recover(flags=" + flagString + ")");
-
-      return _xaResource.recover(flags);
+      return xids;
     } catch (XAException e) {
+      log(start, "exn-recover() " + e);
+      
       log.fine(e.toString());
       throw e;
     } catch (RuntimeException e) {
+      log(start, "exn-recover() " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     }
@@ -275,24 +356,34 @@ public class SpyXAResource implements XAResource {
   /**
    * Forgets the transaction
    */
+  @Override
   public void forget(Xid xid)
     throws XAException
   {
+    long start = start();
+    
     try {
-      log.fine(_id + ":forget(xid=" + xid + ")");
-
       _xaResource.forget(xid);
+      
+      if (log.isLoggable(Level.FINE))
+        log(start, "forget(xid=" + xid + ")");
     } catch (XAException e) {
+      log(start, "exn-force(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
+      log(start, "exn-force(" + xid + ") -> " + e);
+      
       log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
 
+  @Override
   public String toString()
   {
-    return "SpyXAResource[id=" + _id + ",resource=" + _xaResource + "]";
+    return (getClass().getSimpleName()
+            + "[id=" + _id + ",resource=" + _xaResource + "]");
   }
 }

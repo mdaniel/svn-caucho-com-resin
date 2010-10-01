@@ -28,11 +28,7 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.util.L10N;
-
-import java.sql.*;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Source for spy connections
@@ -40,7 +36,7 @@ import java.util.logging.Logger;
 public class SpyDataSource {
   private String _name;
   
-  private int _connIdCount;
+  private AtomicInteger _connIdCount = new AtomicInteger();;
 
   /**
    * Creates a new SpyDataSource
@@ -71,8 +67,6 @@ public class SpyDataSource {
    */
   public String createConnectionId()
   {
-    synchronized (this) {
-      return _name + _connIdCount++;
-    }
+    return _name + _connIdCount.getAndIncrement();
   }
 }

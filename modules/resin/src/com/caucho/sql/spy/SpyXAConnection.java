@@ -60,6 +60,7 @@ public class SpyXAConnection extends SpyPooledConnection
   /**
    * Returns the XAResource.
    */
+  @Override
   public XAResource getXAResource()
     throws SQLException
   {
