@@ -46,8 +46,6 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
-  private static final int DEFAULT_TIMEOUT = 10000;
-
   private boolean _isRemoveRetainIfException;
   private long _lockTimeout;
   private TimeUnit _lockTimeoutUnit;
@@ -57,8 +55,8 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
   {
     super(factory, method, next);
 
-    _lockTimeout = DEFAULT_TIMEOUT;
-    _lockTimeoutUnit = TimeUnit.MILLISECONDS;
+    _lockTimeout = -1;
+    _lockTimeoutUnit = null;
   }
 
   public StatefulMethodHeadGenerator(StatefulMethodHeadFactory<X> factory,
@@ -71,8 +69,8 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
       _lockTimeout = lockTimeout;
       _lockTimeoutUnit = lockTimeoutUnit;
     } else {
-      _lockTimeout = DEFAULT_TIMEOUT;
-      _lockTimeoutUnit = TimeUnit.MILLISECONDS;
+      _lockTimeout = -1;
+      _lockTimeoutUnit = null;
     }
   }
 
