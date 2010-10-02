@@ -13,22 +13,13 @@ $is_secure = $request->isSecure();
 $user = quercus_get_request()->getUserPrincipal();
 $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
 
+echo "<h1>Deploy new application</h1>";
+
 if ($is_secure) {
   $action = $_POST['action'];
 
-  if ($action == 'update') {
-    $path = $_FILES['application']['tmp_name'];
-
-    $commit = process_deploy_args();
-
-    $client->commitArchive($commit, $path);
-  }
-  elseif ($action == 'deploy') {
-    $path = $_FILES['application']['tmp_name'];
-
-    $commit = process_deploy_args();
-
-    $client->commitArchive($commit, $path);
+  if ($action == 'deploy') {
+    deploy();
   }
 }
 
@@ -38,9 +29,6 @@ function display_deploy_form($mbean_server)
 {
   global $is_secure;
 
-  echo "<div class='deploy-application'>";
-  echo "<h1>Deploy new application</h1>";
-
   if ($is_secure) {
     $disabled = "";
   }
@@ -49,96 +37,95 @@ function display_deploy_form($mbean_server)
     echo "<div class='warn'>Actions can only be performed over a secure connection (SSL)</div>";
   }
 
-  echo "<form enctype='multipart/form-data' method='POST'>";
-  echo "<input type='hidden' name='action' value='deploy'>";
+?>
+  <form id='deploy' enctype='multipart/form-data' method='POST'>
+    <input type='hidden' name='action' value='deploy'>
 
-  echo "<div class='form-input-block'>";
-  echo "<div class='form-input-title'>Application archive file</div>";
-  echo "<div class='form-input-input'>";
-  echo "<input type='file' name='application'>\n";
-  echo "</div>";
-  echo "<div class='form-input-help'>The .war file to upload</div>";
-  echo "</div>";
+    <div class='form-input-block'>
+      <div id='file-title' class='form-input-title'>Application archive file</div>
+      <div class='form-input-input'> 
+        <input type='file' name='application'>
+      </div>
+      <div class='form-input-help'>The .war file to upload</div>
+    </div>
 
-  echo "<div class='form-input-block'>";
-  echo "<div class='form-input-title'>Name</div>";
-  echo "<div class='form-input-input'>";
-  echo "<input type='text' name='name' value='' class='required'>\n";
-  echo "</div>";
-  echo "<div class='form-input-help'>The context root and name of the application</div>";
-  echo "</div>";
+    <div class='form-input-block'>
+      <div id='name-title' class='form-input-title'>Name</div>
+      <div class='form-input-input'>
+        <input type='text' name='name' value='<?= $_GET['update-name'] ?>' class='required'>
+      </div>
+      <div class='form-input-help'>The context root and name of the application</div>
+    </div>
 
-  echo "<div class='form-input-block'>";
-  echo "<div class='form-input-title'>Version</div>";
-  echo "<div class='form-input-input'>";
-  echo "<input type='number' min='0' size='3' name='version-major' title='Major Version Number' value='0' class='required'>\n";
-  echo "<input type='number' min='0' size='3' name='version-minor' title='Minor Version Number' value='0' class='required'>\n";
-  echo "<input type='number' min='0' size='3' name='version-micro' title='Micro Version Number' value='0' class='required'>\n";
-  echo "<input type='text' name='version-qualifier' title='Version Qualifier (free form)' value=''>\n";
-  echo "</div>";
-  echo "<div class='form-input-help'>The version for the application, using the &lt;major>.&lt;minor>.&lt;micro>.&lt;qualifier> format.</div>";
-  echo "</div>";
+  <div class='form-input-block'>
+    <div class='form-input-title'>Version</div>
+    <div class='form-input-input'>
+      <input type='number' min='0' size='3' name='version-major' title='Major Version Number' value='0' class='required'>
+      <input type='number' min='0' size='3' name='version-minor' title='Minor Version Number' value='0' class='required'>
+      <input type='number' min='0' size='3' name='version-micro' title='Micro Version Number' value='0' class='required'>
+      <input type='text' name='version-qualifier' title='Version Qualifier (free form)' value=''>
+    </div>
+    <div class='form-input-help'>The version for the application, using the &lt;major>.&lt;minor>.&lt;micro>.&lt;qualifier> format.</div>
+  </div>
 
-  echo "<div class='form-input-block'>\n";
-  echo "<div class='form-input-title'>Commit message</div>\n";
-  echo "<div class='form-input-input'>\n";
-  echo "<textarea name='commit-message'></textarea>\n";
-  echo "</div>\n";
-  echo "<div class='form-input-help'>A message to save along with this deployment.</div>\n";
-  echo "</div>\n";
+  <div class='form-input-block'>
+    <div class='form-input-title'>Commit message</div>
+    <div class='form-input-input'>
+      <textarea name='commit-message'></textarea>
+    </div>
+    <div class='form-input-help'>A message to save along with this deployment.</div>
+  </div>
 
-  echo "<div class='switch' id='deploy-advanced-options' style='margin-bottom: 2em;'>Advanced Options</div>\n";
-  echo "<div class='toggle-deploy-advanced-options option-box'>\n";
+  <div class='switch' id='deploy-advanced-options' style='margin-bottom: 2em;'>Advanced Options</div>
+    <div class='toggle-deploy-advanced-options option-box' style="display: none">
 
-  echo "<div class='form-input-block'>";
-  echo "<div class='form-input-title'>Host</div>";
-  echo "<div class='form-input-input'>";
-  echo "<input class='host' type='radio' name='host' value='default' checked>";
-  echo "Deploy to default host";
-  echo "</input><br/>\n";
-  echo "<span class='another-host'>\n";
-  echo "<input type='radio' name='host' value=''>";
-  echo "Deploy to another host: ";
-  echo "<input type='text' name='host' value='' disabled>";
-  echo "</input>\n";
-  echo "</span>\n";
-  echo "</div>";
-  echo "<div class='form-input-help'>The virtual host where the application will appear.</div>";
-  echo "</div>";
+    <div class='form-input-block'>
+      <div class='form-input-title'>Host</div>
+      <div class='form-input-input'>
+        <input class='host' type='radio' name='host' value='default' checked>
+          Deploy to default host
+        <br/>
+        <span class='another-host'>
+          <input type='radio' name='host' value=''>Deploy to another host: 
+          <input type='text' name='host' value='' disabled>
+        </span>
+      </div>
+      <div class='form-input-help'>The virtual host where the application will appear.</div>
+    </div>
 
-  echo "<div class='form-input-block'>";
-  echo "<div class='form-input-title'>Stage</div>";
-  echo "<div class='form-input-input'>";
-  echo "<input class='stage' type='radio' name='stage' value='production' checked>";
-  echo "Deploy to production";
-  echo "</input><br/>\n";
-  echo "<span class='another-stage'>\n";
-  echo "<input type='radio' name='stage' value=''>";
-  echo "Deploy to another stage: ";
-  echo "<input type='text' name='stage' value='' disabled>";
-  echo "</input>\n";
-  echo "</span>\n";
-  echo "</div>";
-  echo "<div class='form-input-help'>The stage where the application will appear.</div>";
-  echo "</div>";
-  echo "</div>";
+    <div class='form-input-block'>
+      <div class='form-input-title'>Stage</div>
+      <div class='form-input-input'>
+        <input class='stage' type='radio' name='stage' value='production' checked>
+          Deploy to production
+        <br/>
+        <span class='another-stage'>
+          <input type='radio' name='stage' value=''>
+          Deploy to another stage: 
+          <input type='text' name='stage' value='' disabled>
+        </span>
+      </div>
+      <div class='form-input-help'>The stage where the application will appear.</div>
+    </div>
+  </div>
 
-  echo "<div id='deploy-info-box' class='info-box ui-state-highlight' style='display:none'></div>";
+  <div id='deploy-info-box' class='info-box ui-state-highlight' style='display:none'></div>
 
-  echo "<input class='deploy' type='submit' name='submit' value='Deploy' $disabled>\n";
-  echo "</form>\n";
-  echo "</div>\n";
+  <input class='deploy' type='submit' value='Deploy' <?= $disabled ?>>
+  </form>
+<?
 }
 
-function process_deploy_args()
+function deploy()
 {
   global $user;
+  global $client;
+  global $g_mbean_server;
+  global $g_server_index;
 
   $commit = new Java("com.caucho.env.repository.CommitBuilder");
 
   $commit->type("webapp");
-
-  $path = $_FILES['application']['tmp_name'];
 
   $stage = htmlspecialchars($_POST['stage']);
 
@@ -181,7 +168,35 @@ function process_deploy_args()
 
   $commit->attribute("user", $user);
 
-  return $commit;
+  $path = $_FILES['application']['tmp_name'];
+
+  if (! $path) {
+?>
+<div class='ui-state-error info-box' style='margin-bottom: 0.5em'>
+  <span class='ui-icon ui-icon-alert' style='float: left; margin: 15px 5px;'></span>
+  <h3>Deploy failed</h3>
+  <p><strong>Please specify an application archive file</strong></p>
+</div>
+<? 
+  }
+  else {
+    $client->commitArchive($commit, $path);
+
+    $date = $commit->getAttributes()['date'];
+    $message = $commit->getAttributes()['message'];
+
+?>
+<div class='ui-state-highlight info-box' style='margin-bottom: 0.5em'>
+  <span class='ui-icon ui-icon-info' style='float: left; margin: 15px 5px;'></span>
+  <h3>Successfully deployed application</h3>
+  <p>The application may take a few moments to be propagated throughout the cluster.  Please check the <a href="?q=webapp&s=<?= $g_server_index ?>">webapp</a> page for more informtion.</p>
+  <div><b>Name:</b><?= $name ?></div>
+  <div><b>Version:</b><?= $commit->getVersion() ?></div>
+  <div><b>Deploy date:</b><?= $date ?></div>
+  <div><b>Commit message:</b><?= $message ?></div>
+</div>
+<?
+  }
 }
 
 function javascript_autocomplete()
@@ -245,11 +260,13 @@ EOF;
 
 function javascript_deploy_form()
 {
+  $triggerChange = $_GET['update-name'] ? "true" : "false";
+
   $javascript = javascript_autocomplete();
 
   $javascript .= <<<EOF
-    var applicationNameInput = $(".deploy-application input[name=name]");
-    var applicationFileInput = $(".deploy-application input:file[name='application']");
+    var applicationNameInput = $("input[name=name]");
+    var applicationFileInput = $("input:file[name='application']");
     var hostRadio = $("input:radio[name=host]");
     var anotherHostRadio = $(".another-host input:radio");
     var anotherHostInput = $(".another-host input:text");
@@ -317,9 +334,9 @@ function javascript_deploy_form()
           infoBox.html("<div style='margin-bottom: 0.5em'>" +
                        "<span class='ui-icon ui-icon-info' " +
                        "style='float: left; margin: 0px 5px;'></span>" + 
-                       "<h3>Upgrading existing application</h3></div>" +
+                       "<h3>Updating existing application</h3></div>" +
                        "<div><b>Name:</b> " + contextPath + "</div>" +
-                       "<div><b>Version:</b> " + version + "</div>" +
+                       "<div><b>Current version:</b> " + version + "</div>" +
                        "<div><b>Deploy date:</b> " + app["date"] + "</div>" +
                        "<div><b>Commit message:</b> " + app["message"] + "</div>");
           infoBox.show();
@@ -348,6 +365,9 @@ function javascript_deploy_form()
       }
     });
 
+    if ($triggerChange)
+      applicationNameInput.change();
+
     hostRadio.change(function() {
       if (anotherHostRadio.attr("checked")) {
         $(".another-host").css("color", "black");
@@ -372,6 +392,32 @@ function javascript_deploy_form()
         $(".another-stage").css("color", "#999");
         anotherStageInput.attr('disabled', true);
       }
+    });
+
+    $("input:submit").click(function() { 
+      var problems = "";
+
+      if (applicationFileInput.val() == "") {
+        $("#file-title").effect("highlight");
+        problems += "<p>Select an application archive</p>";
+      }
+
+      if (applicationNameInput.val() == "") {
+        $("#name-title").effect("highlight");
+        problems += "<p>Enter an application name</p>";
+      } 
+
+      if (problems.length > 0) {
+        infoBox.addClass("ui-state-error");
+        infoBox.html("<span class='ui-icon ui-icon-alert' " +
+                     "style='float: left; margin: 15px 5px;'></span>" + 
+                     "<h3>Please correct the following problems</h3>" + 
+                     problems);
+        infoBox.show();
+        return false;
+      }
+
+      return true;
     });
 EOF;
 

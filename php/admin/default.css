@@ -670,7 +670,7 @@ a.hideOptional {
 .jmx-header {
   margin: 2px;
   padding: 1px;
-  width: 90%;
+  width: 85%;
   font-weight : bold;
 }
 
@@ -680,11 +680,11 @@ a.hideOptional {
 
 .jmx-data {
   margin-left: 0.5em;
-  width: 95%;
+  width: 85%;
 }
 
 .jmx-data-table {
-  width: 95%;
+  width: 100%;
   border-collapse: collapse;
 }
 
