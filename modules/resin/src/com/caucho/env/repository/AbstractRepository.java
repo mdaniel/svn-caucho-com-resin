@@ -107,7 +107,7 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   protected boolean update(String sha1, boolean isNew)
   {
     String oldSha1 = _tagMap.getCommitHash();
-    
+
     if (sha1 == null || sha1.equals(oldSha1)) {
       return true;
     }
@@ -125,7 +125,7 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   protected void updateTagMap(String sha1, boolean isNew)
   {
     try {
-      RepositoryTagMap tagMap 
+      RepositoryTagMap tagMap
         = new RepositoryTagMap(this, sha1, isNew);
 
       setTagMap(tagMap);
@@ -203,6 +203,11 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     commit.validate();
     
     String contentHash = addArchive(archivePath);
+    
+    RepositoryTagEntry oldEntry = getTagMap().get(commit.getId());
+    
+    if (oldEntry != null && oldEntry.getRoot().equals(contentHash))
+      return contentHash;
     
     if (putTag(commit.getId(), 
                contentHash, 
@@ -373,8 +378,9 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     synchronized (this) {
       oldTagMap = _tagMap;
       
-      if (tagMap.getSequence() <= oldTagMap.getSequence())
+      if (tagMap.getSequence() <= oldTagMap.getSequence()) {
         return false;
+      }
         
       _tagMap = tagMap;
 
@@ -536,6 +542,7 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     throws IOException
   {
     GitType type = getType(sha1);
+    Thread.dumpStack();
 
     if (type == GitType.BLOB) {
       if (log.isLoggable(Level.FINEST))

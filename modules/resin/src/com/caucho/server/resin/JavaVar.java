@@ -27,16 +27,54 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.management.server;
+package com.caucho.server.resin;
+
+import java.util.Properties;
+
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
- * Interface for the persistent logging.
- *
- * <pre>
- * resin:type=LogServiceManager
- * </pre>
+ * Java variables in Resin configuration ${java}.
  */
-public interface LogServiceMXBean extends ManagedObjectMXBean
-{
-  public LogMessage []findMessages(String level, long minTime, long maxTime);
+public class JavaVar {
+  /**
+   * Returns true for JDK 5
+   */
+  public boolean isJava5()
+  {
+    return true;
+  }
+
+  /**
+   * Returns the JDK home
+   */
+  public Path getHome()
+  {
+    return Vfs.lookup(System.getProperty("java.home"));
+  }
+
+  /**
+   * Returns the JDK properties
+   */
+  public Properties getProperties()
+  {
+    return System.getProperties();
+  }
+
+  /**
+   * Returns the user name
+   */
+  public String getUserName()
+  {
+    return System.getProperty("user.name");
+  }
+
+  /**
+   * Returns the JDK version
+   */
+  public String getVersion()
+  {
+    return System.getProperty("java.version");
+  }
 }

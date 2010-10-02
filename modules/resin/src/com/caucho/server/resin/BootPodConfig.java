@@ -38,10 +38,8 @@ import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.util.L10N;
 
 /**
  * The BootClusterConfig is the first-pass configuration of the cluster.
@@ -50,10 +48,7 @@ import com.caucho.util.L10N;
  */
 public class BootPodConfig
 {
-  private static final L10N L = new L10N(BootPodConfig.class);
-  
   private BootClusterConfig _clusterConfig;
-  private CloudCluster _cloudCluster;
   private CloudPod _cloudPod;
   
   private String _id;

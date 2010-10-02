@@ -13,8 +13,12 @@
 
 <s2 title="4.0.12 - snapshot">
 <ul>
+<li>host: allow id=":8081" for /resin-admin as virtual host</li>
+<li>dbpool: ping now only occurs after an error</li>
+<li>xa: detach JCA pooling from UserTransaction</li>
+<li>xa: add meters, JMX and HealthCheck for transaction manager</li>
 <li>resin: access.log rotation into zip archive fixes (#4216)</li>
-<li>dist: war files with many entries cause recursive overflow (rep by Steve Francis)</li>
+<li>dist: war files with many entries cause recursive overflow (rep by Steve Francis, #4236)</li>
 </ul>
 </s2>
 

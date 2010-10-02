@@ -35,11 +35,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.BindException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.util.Date;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -444,10 +442,17 @@ public class Resin
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
       InjectManager cdiManager = InjectManager.create();
+      
+      ResinVar resinVar = new ResinVar(getServerId(),
+                                       getResinHome(),
+                                       getRootDirectory(),
+                                       getResinConf(),
+                                       isProfessional(),
+                                       null);
 
       Config.setProperty("resinHome", getResinHome());
-      Config.setProperty("resin", new Var());
-      Config.setProperty("server", new Var());
+      Config.setProperty("resin", resinVar);
+      Config.setProperty("server", resinVar);
       Config.setProperty("java", new JavaVar());
       Config.setProperty("system", System.getProperties());
       Config.setProperty("getenv", System.getenv());
@@ -1357,251 +1362,5 @@ public class Resin
       _log = Logger.getLogger(Resin.class.getName());
 
     return _log;
-  }
-
-  /**
-   * EL variables
-   */
-  public class Var {
-    /**
-     * Returns the resin.id
-     */
-    public String getId()
-    {
-      return _serverId;
-    }
-
-    /**
-     * Returns the local address
-     *
-     * @return IP address
-     */
-    public String getAddress()
-    {
-      try {
-        if (_selfServer != null) {
-          return _selfServer.getAddress();
-        }
-        else
-          return InetAddress.getLocalHost().getHostAddress();
-      } catch (Exception e) {
-        log().log(Level.FINE, e.toString(), e);
-
-        return "localhost";
-      }
-    }
-
-    /**
-     * Returns the port (backward compat)
-     */
-    public int getPort()
-    {
-      if (_selfServer != null) {
-        return _selfServer.getPort();
-      }
-      else
-        return 0;
-    }
-
-    /**
-     * Returns the port (backward compat)
-     */
-    public String getHttpAddress()
-    {
-      return getAddress();
-    }
-
-    /**
-     * Returns the port (backward compat)
-     */
-    public String getHttpsAddress()
-    {
-      return getAddress();
-    }
-
-    /**
-     * Returns the port (backward compat)
-     */
-    public int getHttpPort()
-    {
-      return 0;
-    }
-
-    /**
-     * Returns the port (backward compat)
-     */
-    public int getHttpsPort()
-    {
-      return 0;
-    }
-
-    /**
-     * Returns the resin config.
-     */
-    public Path getConf()
-    {
-      if (Alarm.isTest())
-        return Vfs.lookup("file:/home/resin/conf/resin.xml");
-      else
-        return getResinConf();
-    }
-
-    /**
-     * Returns the resin home.
-     */
-    public Path getHome()
-    {
-      if (Alarm.isTest())
-        return Vfs.lookup("file:/home/resin");
-      else
-        return Resin.this.getResinHome();
-    }
-
-    /**
-     * Returns the root directory.
-     *
-     * @return the root directory
-     */
-    public Path getRoot()
-    {
-      /*
-      if (Alarm.isTest())
-        return Vfs.lookup("file:/var/www");
-      else
-        return Resin.this.getRootDirectory();
-        */
-      return Resin.this.getRootDirectory();
-    }
-
-    public String getUserName()
-    {
-      return System.getProperty("user.name");
-    }
-
-    /**
-     * Returns the version
-     *
-     * @return version
-     */
-    public String getVersion()
-    {
-      if (Alarm.isTest())
-        return "3.1.test";
-      else
-        return VersionFactory.getVersion();
-    }
-
-    /**
-     * Returns the version date
-     *
-     * @return version
-     */
-    public String getVersionDate()
-    {
-      if (Alarm.isTest())
-        return "19980508T0251";
-      else
-        return VersionFactory.getVersionDate();
-    }
-
-    /**
-     * Returns the local hostname
-     *
-     * @return version
-     */
-    public String getHostName()
-    {
-      try {
-        if (Alarm.isTest())
-          return "localhost";
-        else
-          return InetAddress.getLocalHost().getHostName();
-      } catch (Exception e) {
-        log().log(Level.FINE, e.toString(), e);
-
-        return "localhost";
-      }
-    }
-
-    /**
-     * Returns the root directory.
-     *
-     * @return resin.home
-     */
-    public Path getRootDir()
-    {
-      return getRoot();
-    }
-
-    /**
-     * Returns the root directory.
-     *
-     * @return resin.home
-     */
-    public Path getRootDirectory()
-    {
-      return getRoot();
-    }
-
-    /**
-     * Returns true for Resin professional.
-     */
-    public boolean isProfessional()
-    {
-      return Resin.this.isProfessional();
-    }
-
-    /**
-     * Returns the -server id
-     */
-    public String getServerId()
-    {
-      return _serverId;
-    }
-  }
-
-  /**
-   * Java variables
-   */
-  public class JavaVar {
-    /**
-     * Returns true for JDK 5
-     */
-    public boolean isJava5()
-    {
-      return true;
-    }
-
-    /**
-     * Returns the JDK properties
-     */
-    public Properties getProperties()
-    {
-      return System.getProperties();
-    }
-
-    /**
-     * Returns the user name
-     */
-    public String getUserName()
-    {
-      return System.getProperty("user.name");
-    }
-
-    /**
-     * Returns the JDK version
-     */
-    public String getVersion()
-    {
-      return System.getProperty("java.version");
-    }
-
-    /**
-     * Returns the JDK home
-     */
-    public Path getHome()
-    {
-      return Vfs.lookup(System.getProperty("java.home"));
-    }
   }
 }

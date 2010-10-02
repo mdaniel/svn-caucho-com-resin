@@ -141,7 +141,8 @@ if ($log_mbean) {
   //
   // startup
   //
-  $messages = $log_mbean->findMessages(($restart_time - 60 * 60) * 1000,
+  $messages = $log_mbean->findMessages("warning",
+                                       ($restart_time - 60 * 60) * 1000,
                                        ($restart_time + 10) * 1000);
 
   if (! empty($messages)) {

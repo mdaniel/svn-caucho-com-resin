@@ -256,7 +256,9 @@ function recent_messages()
   if ($mbean) {
     $now = time();
 
-    $messages = $mbean->findMessages(($now - 24 * 3600) * 1000, $now * 1000);
+    $messages = $mbean->findMessages("warning",
+                                     ($now - 24 * 3600) * 1000,
+                                     $now * 1000);
 
     if (! empty($messages)) {
       echo "<h2>Recent Messages</h2>\n";

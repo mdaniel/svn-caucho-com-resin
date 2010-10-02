@@ -433,6 +433,9 @@ public class HostContainer implements InvocationBuilder {
       hostController = findHostController(shortHost);
 
     if (hostController == null || hostController.getState().isDestroyed())
+      hostController = findHostController(":" + rawPort);
+
+    if (hostController == null || hostController.getState().isDestroyed())
       hostController = findHostController("");
 
     if (hostController == null) {

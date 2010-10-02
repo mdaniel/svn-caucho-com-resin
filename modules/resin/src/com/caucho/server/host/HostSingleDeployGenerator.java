@@ -119,15 +119,15 @@ public class HostSingleDeployGenerator
     if (rawId != null) {
       hostId = Config.evalString(rawId);
 
-      if (hostId.equals("*"))  // server/1f20
-        hostId = "";
+      if (hostId.startsWith("*"))  // server/1f20
+        hostId = hostId.substring(1);
     }
 
     if (rawHostName != null) {
       hostName = Config.evalString(rawHostName);
 
-      if (rawHostName.equals("*"))  // server/1f20
-        hostName = "";
+      if (rawHostName.startsWith("*"))  // server/1f20
+        hostName = rawHostName.substring(1);
     }
     
     String stage = _container.getServer().getStage();
@@ -136,6 +136,8 @@ public class HostSingleDeployGenerator
     
     if (hostName.equals(""))
       id = stage + "/host/default";
+    else if (hostName.startsWith(":"))
+      id = stage + "/host/default" + hostName;
     else
       id = stage + "/host/" + hostName;
       

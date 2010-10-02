@@ -45,7 +45,6 @@ import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownService;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.env.warning.WarningService;
-import com.caucho.log.EnvironmentStream;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 
