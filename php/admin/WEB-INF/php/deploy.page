@@ -13,7 +13,9 @@ $is_secure = $request->isSecure();
 $user = quercus_get_request()->getUserPrincipal();
 $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
 
-echo "<h1>Deploy new application</h1>";
+echo "<h1>Deploy new application";
+print_help("Deploy");
+echo "</h1>";
 
 if ($is_secure) {
   $action = $_POST['action'];
