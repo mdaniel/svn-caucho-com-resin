@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 import com.caucho.env.meter.ActiveTimeMeter;
 import com.caucho.env.meter.AverageMeter;
 import com.caucho.env.meter.MeterService;
-import com.caucho.env.meter.SampleCountMeter;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
@@ -64,24 +63,16 @@ public class HttpRequest extends AbstractHttpRequest
   private static final Logger log
     = Logger.getLogger(HttpRequest.class.getName());
 
-  static final int HTTP_0_9 = 0x0009;
-  static final int HTTP_1_0 = 0x0100;
-  static final int HTTP_1_1 = 0x0101;
+  public static final int HTTP_0_9 = 0x0009;
+  public static final int HTTP_1_0 = 0x0100;
+  public static final int HTTP_1_1 = 0x0101;
 
-  static final CharBuffer _getCb = new CharBuffer("GET");
-  static final CharBuffer _headCb = new CharBuffer("HEAD");
-  static final CharBuffer _postCb = new CharBuffer("POST");
-
-  static final char []_hostCb = "Host".toCharArray();
-  static final char []_userAgentCb = "User-Agent".toCharArray();
-
-  static final CharBuffer _http11Cb = new CharBuffer("HTTP/1.1");
-  static final CharBuffer _http10Cb = new CharBuffer("HTTP/1.0");
+  private static final CharBuffer _getCb = new CharBuffer("GET");
+  private static final CharBuffer _headCb = new CharBuffer("HEAD");
+  private static final CharBuffer _postCb = new CharBuffer("POST");
 
   private static final String REQUEST_TIME_PROBE
     = "Resin|Http|Request";
-  private static final String REQUEST_COUNT_PROBE
-    = "Resin|Http|Request Count";
   private static final String REQUEST_BYTES_PROBE
     = "Resin|Http|Request Bytes";
 
@@ -91,8 +82,6 @@ public class HttpRequest extends AbstractHttpRequest
 
   private final CharBuffer _uriHost    // www.caucho.com:8080
     = new CharBuffer();
-  private final CharBuffer _hostBuffer
-    = new CharBuffer();
   private CharSequence _host;
 
   private byte []_uri;                 // "/path/test.jsp/Junk?query=7"
@@ -101,8 +90,6 @@ public class HttpRequest extends AbstractHttpRequest
   private final CharBuffer _protocol   // "HTTP/1.0"
     = new CharBuffer();
   private int _version;
-
-  private final InvocationKey _invocationKey = new InvocationKey();
 
   private char []_headerBuffer;
 
@@ -115,7 +102,6 @@ public class HttpRequest extends AbstractHttpRequest
   private RawInputStream _rawInputStream = new RawInputStream();
 
   private ActiveTimeMeter _requestTimeProbe;
-  private SampleCountMeter _requestCountProbe;
   private AverageMeter _requestBytesProbe;
 
   /**
@@ -143,6 +129,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Return true if the request waits for a read before beginning.
    */
+  @Override
   public final boolean isWaitForRead()
   {
     return true;
@@ -186,6 +173,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns the HTTP method (GET, POST, HEAD, etc.)
    */
+  @Override
   public String getMethod()
   {
     if (_methodString == null) {
@@ -219,6 +207,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns the virtual host of the request
    */
+  @Override
   protected CharSequence getHost()
   {
     if (_host != null)
@@ -264,6 +253,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns the byte buffer containing the request URI
    */
+  @Override
   public byte []getUriBuffer()
   {
     return _uri;
@@ -272,6 +262,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns the length of the request URI
    */
+  @Override
   public int getUriLength()
   {
     return _uriLength;
@@ -280,6 +271,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns the protocol.
    */
+  @Override
   public String getProtocol()
   {
     switch (_version) {
@@ -366,9 +358,11 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns the header.
    */
+  @Override
   public String getHeader(String key)
   {
     CharSegment buf = getHeaderBuffer(key);
+    
     if (buf != null)
       return buf.toString();
     else
@@ -445,6 +439,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns the header value for the key, returned as a CharSegment.
    */
+  @Override
   public CharSegment getHeaderBuffer(String key)
   {
     int i = matchNextHeader(0, key);
@@ -461,6 +456,7 @@ public class HttpRequest extends AbstractHttpRequest
    * @param values ArrayList which will contain the maching values.
    * @param key the header key to select.
    */
+  @Override
   public void getHeaderBuffers(String key, ArrayList<CharSegment> values)
   {
     int i = -1;
@@ -474,9 +470,11 @@ public class HttpRequest extends AbstractHttpRequest
    * @param key the header key to match.
    * @return the enumeration of the headers.
    */
-  public Enumeration getHeaders(String key)
+  @Override
+  public Enumeration<String> getHeaders(String key)
   {
     ArrayList<String> values = new ArrayList<String>();
+    
     int i = -1;
     while ((i = matchNextHeader(i + 1, key)) >= 0)
       values.add(_headerValues[i].toString());
@@ -532,7 +530,8 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns an enumeration of all the header keys.
    */
-  public Enumeration getHeaderNames()
+  @Override
+  public Enumeration<String> getHeaderNames()
   {
     ArrayList<String> names = new ArrayList<String>();
 
@@ -559,6 +558,7 @@ public class HttpRequest extends AbstractHttpRequest
    * @param key the key of the new header
    * @param value the value for the new header
    */
+  @Override
   public void setHeader(String key, String value)
   {
     int tail;
@@ -681,6 +681,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns a stream for reading POST data.
    */
+  @Override
   public boolean initStream(ReadStream readStream, ReadStream rawRead)
     throws IOException
   {
@@ -698,9 +699,8 @@ public class HttpRequest extends AbstractHttpRequest
 
     long contentLength = getLongContentLength();
 
-    String te;
     if (contentLength < 0 && HTTP_1_1 <= getVersion()
-        && (te = getHeader("Transfer-Encoding")) != null) {
+        && getHeader("Transfer-Encoding") != null) {
       _chunkedInputStream.init(rawRead);
       readStream.init(_chunkedInputStream, null);
       return true;
@@ -727,6 +727,7 @@ public class HttpRequest extends AbstractHttpRequest
     }
   }
 
+  @Override
   protected void skip()
     throws IOException
   {
@@ -739,6 +740,7 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * Returns the raw input stream.
    */
+  @Override
   public ReadStream getRawInput()
   {
     return getRawRead();
@@ -752,6 +754,7 @@ public class HttpRequest extends AbstractHttpRequest
    *
    * @return true if the connection should stay open (keepalive)
    */
+  @Override
   public boolean handleRequest()
     throws IOException
   {
@@ -1119,7 +1122,6 @@ public class HttpRequest extends AbstractHttpRequest
 
     char []headerBuffer = _headerBuffer;
     int headerOffset = 1;
-    int headerBufferSize = headerBuffer.length;
     headerBuffer[0] = 'z';
     int headerSize = 0;
     _headerSize = 0;
@@ -1238,6 +1240,7 @@ public class HttpRequest extends AbstractHttpRequest
     return context;
   }
 
+  @Override
   public final void onCloseConnection()
   {
   }
@@ -1254,6 +1257,7 @@ public class HttpRequest extends AbstractHttpRequest
     skip();
   }
 
+  @Override
   protected String dbgId()
   {
     String serverId = getServer().getServerId();
@@ -1265,6 +1269,7 @@ public class HttpRequest extends AbstractHttpRequest
       return "Http[" + serverId + ", " + connId + "] ";
   }
 
+  @Override
   public String toString()
   {
     String serverId = getServer().getServerId();

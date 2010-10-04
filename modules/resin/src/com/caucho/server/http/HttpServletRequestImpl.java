@@ -1619,11 +1619,13 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     _request.setHeader(key, value);
   }
 
-  public void setSyntheticCacheHeader(boolean isTop)
+  @Override
+  public void setSyntheticCacheHeader(boolean isSynthetic)
   {
-    _isSyntheticCacheHeader = isTop;
+    _isSyntheticCacheHeader = isSynthetic;
   }
 
+  @Override
   public boolean isSyntheticCacheHeader()
   {
     return _isSyntheticCacheHeader;

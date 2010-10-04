@@ -130,6 +130,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * Returns an output stream for writing to the client.  You can use
    * the output stream to write binary data.
    */
+  @Override
   public ServletOutputStream getOutputStream()
     throws IOException
   {

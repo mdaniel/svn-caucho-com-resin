@@ -75,7 +75,6 @@ public class FileServlet extends GenericServlet {
   private WebApp _app;
   private RequestDispatcher _dir;
   private LruCache<String,Cache> _pathCache;
-  private QDate _calendar = new QDate();
   private boolean _isCaseInsensitive;
   private boolean _isEnableRange = true;
   private boolean _isGenerateSession;
@@ -280,13 +279,19 @@ public class FileServlet extends GenericServlet {
           jarPath = Vfs.lookup(url);
       }
 
-      cache = new Cache(_calendar, path, jarPath, relPath, mimeType);
+      cache = new Cache(path, jarPath, relPath, mimeType);
 
       _pathCache.put(uri, cache);
     }
+    else if (cache.isModified()) {
+      cache = new Cache(cache.getPath(), 
+                        cache.getJarPath(), 
+                        cache.getRelPath(),
+                        cache.getMimeType());
+      
+      _pathCache.put(uri, cache);
+    }
 
-    cache.update();
-    
     if (_isGenerateSession)
       req.getSession(true);
 
@@ -338,18 +343,21 @@ public class FileServlet extends GenericServlet {
       }
       else {
         long ifModifiedTime;
+        
+        QDate date = QDate.allocateLocalDate();
 
-        synchronized (_calendar) {
-          try {
-            ifModifiedTime = _calendar.parseDate(ifModified);
-          } catch (Exception e) {
-            log.log(Level.FINER, e.toString(), e);
+        try {
+          ifModifiedTime = date.parseDate(ifModified);
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
 
-            ifModifiedTime = 0;
-          }
+          ifModifiedTime = 0;
         }
+        
+        QDate.freeLocalDate(date);
 
-        isModified = ifModifiedTime != cache.getLastModified();
+        isModified = (ifModifiedTime == 0
+                      || ifModifiedTime != cache.getLastModified());
       }
 
       if (! isModified) {
@@ -609,34 +617,36 @@ public class FileServlet extends GenericServlet {
   }
 
   static class Cache {
-    QDate _calendar;
-    Path _path;
-    Path _jarPath;
-    Path _pathResolved;
-    boolean _isDirectory;
-    boolean _canRead;
-    long _length;
-    long _expireTime;
-    long _lastModified = 0xdeadbabe1ee7d00dL;
-    String _relPath;
-    String _etag;
-    String _lastModifiedString;
-    String _mimeType;
+    private Path _path;
+    private Path _jarPath;
+    private Path _pathResolved;
+    private boolean _isDirectory;
+    private boolean _canRead;
+    private long _length;
+    private long _lastModified = 0xdeadbabe1ee7d00dL;
+    private String _relPath;
+    private String _etag;
+    private String _lastModifiedString;
+    private String _mimeType;
 
-    Cache(QDate calendar, Path path, Path jarPath, String relPath, String mimeType)
+    Cache(Path path, Path jarPath, String relPath, String mimeType)
     {
-      _calendar = calendar;
       _path = path;
       _jarPath = jarPath;
       _relPath = relPath;
       _mimeType = mimeType;
 
-      //update();
+      fillData();
     }
 
     Path getPath()
     {
       return _pathResolved;
+    }
+    
+    Path getJarPath()
+    {
+      return _jarPath;
     }
 
     boolean canRead()
@@ -679,14 +689,15 @@ public class FileServlet extends GenericServlet {
       return _mimeType;
     }
 
-    void update()
+    boolean isModified()
     {
-      synchronized (this) {
-        updateData();
-      }
+      long lastModified = _pathResolved.getLastModified();
+      long length = _pathResolved.getLength();
+
+      return (lastModified != _lastModified || length != _length);
     }
 
-    private void updateData()
+    private void fillData()
     {
       _pathResolved = _path;
 
@@ -696,23 +707,23 @@ public class FileServlet extends GenericServlet {
       long lastModified = _pathResolved.getLastModified();
       long length = _pathResolved.getLength();
 
-      if (lastModified != _lastModified || length != _length) {
-        _lastModified = lastModified;
-        _length = length;
-        _canRead = _pathResolved.canRead();
-        _isDirectory = _pathResolved.isDirectory();
+      _lastModified = lastModified;
+      _length = length;
+      _canRead = _pathResolved.canRead();
+      _isDirectory = _pathResolved.isDirectory();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append('"');
-        Base64.encode(sb, _pathResolved.getCrc64());
-        sb.append('"');
-        _etag = sb.toString();
+      StringBuilder sb = new StringBuilder();
+      sb.append('"');
+      Base64.encode(sb, _pathResolved.getCrc64());
+      sb.append('"');
+      _etag = sb.toString();
 
-        synchronized (_calendar) {
-          _calendar.setGMTTime(lastModified);
-          _lastModifiedString = _calendar.printDate();
-        }
-      }
+      QDate cal = QDate.allocateLocalDate();
+        
+      cal.setGMTTime(lastModified);
+      _lastModifiedString = cal.printDate();
+        
+      QDate.freeLocalDate(cal);
 
       if (lastModified == 0) {
         _canRead = false;
