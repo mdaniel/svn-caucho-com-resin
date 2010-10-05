@@ -577,7 +577,8 @@ public final class ReadStream extends InputStream
    * @param length maximum number of characters to read
    * @return number of characters read or -1 on end of file.
    */
-  public final int read(char []buf, int offset, int length) throws IOException
+  public final int read(char []buf, int offset, int length)
+    throws IOException
   {
     if (_readEncoding != null)
       return _readEncoding.read(buf, offset, length);

@@ -133,25 +133,27 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   /**
    * Reads a buffer from a file, returning -1 on EOF.
    */
+  @Override
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
-    if (_is != null) {
-      /*
-//      return _is.read(buffer, offset, length);
-        ad issue 3894:
-        PHP expects to read the full amount of bytes given by length or
-        to read until EOF comes. _is.read(..) does not provide this as
-        it reads to a maximum of 8192 bytes from the stream if length < 8192
-         (e.g. when only reading 500 bytes at a time.) and then returns
-        (which should only happen with userspace streams)
-        @see: http://php.net/manual/en/function.fread.php
-        @see QA: php/0i82.qa 
-       */
-      return _is.readAll(buffer, offset, length);
-    }
-    else
+    ReadStream is = _is;
+    
+    if (is == null)
       return -1;
+
+    int readLength = 0;
+    
+    do {
+      int sublen = is.read(buffer, offset, length);
+      
+      if (sublen < 0)
+        return readLength > 0 ? readLength : sublen;
+        
+      readLength += sublen;
+    } while (length > 0 && is.getAvailable() > 0);
+    
+    return readLength;
   }
 
   /**
