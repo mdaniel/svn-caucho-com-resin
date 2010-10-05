@@ -29,17 +29,16 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.CharSegment;
-import com.caucho.vfs.i18n.EncodingWriter;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.Iterator;
 import java.util.Locale;
+
+import com.caucho.util.CharSegment;
+import com.caucho.vfs.i18n.EncodingWriter;
 
 /**
  * A fast bufferered output stream supporting both character
@@ -93,8 +92,8 @@ public class WriteStream extends OutputStreamWithBuffer
 
   private StreamPrintWriter _printWriter;
 
-  private String newline = "\n";
-  private byte []newlineBytes = lfBytes;
+  private String _newline = "\n";
+  private byte []_newlineBytes = lfBytes;
 
   /**
    * Creates an uninitialized stream. Use <code>init</code> to initialize.
@@ -144,14 +143,21 @@ public class WriteStream extends OutputStreamWithBuffer
     _writeLength = 0;
     
     flushOnNewline = source.getFlushOnNewline();
+    
     // Possibly, this should be dependent on the source.  For example,
     // a http: stream should behave the same on Mac as on unix.
     // For now, CauchoSystem.getNewlineString() returns "\n".
-    newline = _sysNewline;
-    newlineBytes = _sysNewlineBytes;
+    _newline = "\n";
+    _newlineBytes = lfBytes;
 
     _writeEncoding = null;
     _writeEncodingName = "ISO-8859-1";
+  }
+  
+  public void setSysNewline()
+  {
+    _newline = _sysNewline;
+    _newlineBytes = _sysNewlineBytes;
   }
 
   /**
@@ -279,11 +285,10 @@ public class WriteStream extends OutputStreamWithBuffer
       flush();
   }
   
-  private boolean _isDebug;
-
   /**
    * Writes a byte array
    */
+  @Override
   public void write(byte []buf, int offset, int length) throws IOException
   {
     byte []buffer = _writeBuffer;
@@ -516,7 +521,7 @@ public class WriteStream extends OutputStreamWithBuffer
    */
   public String getNewlineString()
   {
-    return newline;
+    return _newline;
   }
 
   /**
@@ -525,21 +530,21 @@ public class WriteStream extends OutputStreamWithBuffer
   public void setNewlineString(String newline)
   {
     if (newline != null) {
-      if (this.newline == newline || newline.equals(this.newline)) {
+      if (this._newline == newline || newline.equals(this._newline)) {
       }
       else if (newline == "\n" || newline.equals("\n")) {
-        this.newlineBytes = lfBytes;
+        this._newlineBytes = lfBytes;
       }
       else if (newline == "\r\n" || newline.equals("\r\n")) {
-        this.newlineBytes = crlfBytes;
+        this._newlineBytes = crlfBytes;
       }
       else if (newline == "\r" || newline.equals("\r")) {
-        this.newlineBytes = crBytes;
+        this._newlineBytes = crBytes;
       }
       else {
-        this.newlineBytes = newline.getBytes();
+        this._newlineBytes = newline.getBytes();
       }
-      this.newline = newline;
+      this._newline = newline;
     }
   }
 
@@ -862,7 +867,7 @@ public class WriteStream extends OutputStreamWithBuffer
    */
   public final void println() throws IOException
   {
-    write(newlineBytes, 0, newlineBytes.length);
+    write(_newlineBytes, 0, _newlineBytes.length);
     if (flushOnNewline)
       flush();
   }
@@ -874,7 +879,7 @@ public class WriteStream extends OutputStreamWithBuffer
     throws IOException
   {
     print(buf, offset, length);
-    write(newlineBytes, 0, newlineBytes.length);
+    write(_newlineBytes, 0, _newlineBytes.length);
     if (flushOnNewline)
       flush();
   }
@@ -885,7 +890,7 @@ public class WriteStream extends OutputStreamWithBuffer
   public final void println(String string) throws IOException
   {
     print(string);
-    write(newlineBytes, 0, newlineBytes.length);
+    write(_newlineBytes, 0, _newlineBytes.length);
     if (flushOnNewline)
       flush();
   }
@@ -904,7 +909,7 @@ public class WriteStream extends OutputStreamWithBuffer
   public final void println(char ch) throws IOException
   {
     write(ch);
-    write(newlineBytes, 0, newlineBytes.length);
+    write(_newlineBytes, 0, _newlineBytes.length);
     if (flushOnNewline)
       flush();
   }
@@ -915,7 +920,7 @@ public class WriteStream extends OutputStreamWithBuffer
   public final void println(int i) throws IOException
   {
     print(i);
-    write(newlineBytes, 0, newlineBytes.length);
+    write(_newlineBytes, 0, _newlineBytes.length);
     if (flushOnNewline)
       flush();
   }
@@ -926,7 +931,7 @@ public class WriteStream extends OutputStreamWithBuffer
   public final void println(long l) throws IOException
   {
     print(l);
-    write(newlineBytes, 0, newlineBytes.length);
+    write(_newlineBytes, 0, _newlineBytes.length);
     if (flushOnNewline)
       flush();
   }

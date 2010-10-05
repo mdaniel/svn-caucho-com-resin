@@ -542,7 +542,6 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     throws IOException
   {
     GitType type = getType(sha1);
-    Thread.dumpStack();
 
     if (type == GitType.BLOB) {
       if (log.isLoggable(Level.FINEST))

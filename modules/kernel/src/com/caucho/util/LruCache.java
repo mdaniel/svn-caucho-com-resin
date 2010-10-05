@@ -156,6 +156,11 @@ public final class LruCache<K,V> {
   {
     _isEnableListeners = isEnable;
   }
+  
+  public void setEnableStatistics(boolean isEnable)
+  {
+    _isEnableStatistics = isEnable;
+  }
 
   /**
    * Returns the current number of entries in the cache.

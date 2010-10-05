@@ -32,11 +32,13 @@ package com.caucho.management.server;
 /**
  * Cache entry
  */
+@SuppressWarnings("serial")
 public class CacheItem implements java.io.Serializable
 {
   private String _url;
 
   private boolean _isCacheable;
+  private boolean _isCached;
   private long _hitCount;
   private long _missCount;
 
@@ -62,6 +64,16 @@ public class CacheItem implements java.io.Serializable
   public void setCacheable(boolean isCacheable)
   {
     _isCacheable = isCacheable;
+  }
+  
+  public boolean isCached()
+  {
+    return _isCached;
+  }
+  
+  public void setCached(boolean isCached)
+  {
+    _isCached = isCached;
   }
 
   public long getHitCount()

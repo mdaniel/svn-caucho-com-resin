@@ -113,6 +113,9 @@ public class GitObjectStream extends InputStream {
 
       StringBuilder value = new StringBuilder();
       for (; ch >= 0 && ch != '\n'; ch = _is.read()) {
+        if (ch == '\r')
+          continue;
+        
         value.append((char) ch);
       }
 
@@ -171,6 +174,7 @@ public class GitObjectStream extends InputStream {
     return _is.read();
   }
 
+  @Override
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {

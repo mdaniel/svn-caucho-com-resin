@@ -509,6 +509,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   /**
    * Set if the page is non-cacheable.
    */
+  @Override
   public void killCache()
   {
     _isDisableCache = true;
@@ -772,7 +773,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       return;
     }
 
-    ContentType item = _response.parseContentType(value);
+    ContentType item = AbstractHttpResponse.parseContentType(value);
 
     _contentType = item.getContentType();
 

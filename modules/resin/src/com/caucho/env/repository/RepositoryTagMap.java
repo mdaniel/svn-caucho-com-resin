@@ -80,8 +80,13 @@ public class RepositoryTagMap
       repository.validateHash(commitHash);
 
     _commit = repository.readCommit(commitHash);
-
-    _sequence = Long.parseLong(_commit.get("sequence"));
+    
+    String sequence = _commit.get("sequence");
+    
+    if (sequence != null)
+      _sequence = Long.parseLong(sequence);
+    else
+      _sequence = 1;
 
     _tree = repository.readTree(_commit.getTree());
 

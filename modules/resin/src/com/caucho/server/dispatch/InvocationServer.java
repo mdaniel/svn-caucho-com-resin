@@ -145,6 +145,7 @@ public class InvocationServer implements Dependency {
   public void init()
   {
     _invocationCache = new LruCache<Object,Invocation>(_invocationCacheSize);
+    _invocationCache.setEnableStatistics(true);
   }
 
   /**

@@ -69,6 +69,16 @@ public interface ProxyCacheMXBean extends ManagedObjectMXBean {
    */
   public CacheItem []getUncacheableEntries(int max);
 
+  /**
+   * Return most used cached connections.
+   */
+  public CacheItem []getCachedEntries(int max);
+
+  /**
+   * Return most used uncached connections.
+   */
+  public CacheItem []getUncachedEntries(int max);
+
   //
   // Operations
   //
