@@ -773,7 +773,17 @@ th.fail {
 }
 
 .warning td {
-  background : #fe9;
+  background: #f6f2e8;
+}
+/*  color : #750; */
+/* yellow (hover) #ffcc33 */
+/* hr #fab41d */
+/* red #98012e;  */
+
+.severe td {
+  color : #d02;
+  background : #e5d1ac;
+  font-style : bold;
 }
 
 span.warning {

@@ -44,6 +44,19 @@ public class DeployService extends AbstractResinService
     
     ResinSystem.getCurrent().addService(this);
   }
+  
+  public static DeployService create()
+  {
+    DeployService service = ResinSystem.getCurrentService(DeployService.class);
+    
+    if (service == null) {
+      service = new DeployService();
+      
+      service = ResinSystem.getCurrentService(DeployService.class);
+    }
+    
+    return service;
+  }
 
   @Override
   public void start()

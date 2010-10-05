@@ -72,10 +72,7 @@
     <resin:DeployService/>
     
     <resin:if test="${resin.professional}">
-      <resin:JmxService/>
-      <resin:LogService/>
-      <resin:StatService/>
-      <resin:XaLogService/>
+      <resin:AdminServices/>
     </resin:if>
 
     <!--

@@ -278,7 +278,7 @@ function recent_messages()
       foreach ($messages as $message) {
         echo "<tr class='{$message->level}'>";
         echo "  <td class='date'>";
-        echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+        echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $message->timestamp / 1000);
         echo "</td>";
         echo "  <td class='level'>{$message->level}</td>";
         echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90));

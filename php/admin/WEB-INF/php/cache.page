@@ -15,11 +15,25 @@ $proxy_cache = $g_mbean_server->lookup("resin:type=ProxyCache");
 echo "<h1>Proxy Cache";
 print_help("Proxy Cache");
 echo "</h1>";
+
+echo "<div id='cache-tabs' style='display: none'>\n";
+echo "<ul>\n";
+echo "<li><a href='#overview'>Overview</a></li>\n";
+
+if ($proxy_cache) {
+  echo "<li><a href='#cached'>Cached</a></li>\n";
+  echo "<li><a href='#uncached'>Uncached</a></li>\n";
+}  
+
+echo "</ul>";
+
 ?>
 
+<div id="overview">
+<h2>Overview</h2>
 <table class="data">
   <tr title="Percentage of requests that have been served from the proxy cache:">
-    <th>Proxy cache miss ratio:</th>
+    <th>Proxy cache miss ratio:<?php print_help("Proxy Cache#miss ratio"); ?></th>
     <td><?= format_miss_ratio($proxy_cache->HitCountTotal,
                               $proxy_cache->MissCountTotal) ?></td>
   </tr>
@@ -33,19 +47,21 @@ echo "</h1>";
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
 
   <tr>
-    <th>Invocation miss ratio:</th>
+    <th>Invocation miss ratio:<?php print_help("Proxy Cache#invocation"); ?></th>
     <td><?= format_miss_ratio($g_server->InvocationCacheHitCountTotal,
                               $g_server->InvocationCacheMissCountTotal) ?></td>
   </tr>
 
 </table>
+</div>
 
 <?php
 
 if ($proxy_cache) {
   $cacheable = $proxy_cache->getCachedEntries(20);
 
-  echo "<h3>Cached Pages</h3>";
+  echo "<div id='cached'>";
+  echo "<h2>Cached Pages</h2>";
 
   echo "<table class='data'>";
   echo "<tr><th>Miss Ratio</th><th>url</th></tr>\n";
@@ -64,9 +80,11 @@ if ($proxy_cache) {
     echo "</tr>\n";
   }
   echo "</table>";
+  echo "</div>";
 
   $uncacheable = $proxy_cache->getUncachedEntries(20);
-  
+
+  echo "<div id='uncached'>";
   echo "<h3>Uncached Pages</h3>";
 
   echo "<table class='data'>";
@@ -77,8 +95,9 @@ if ($proxy_cache) {
     echo "</tr>\n";
   }
   echo "</table>";
+  echo "</div>";
 }
+echo "</div>";
 
-?>
-
-<?php display_footer("cache.php"); ?>
+// display_tabs();
+display_footer($g_page, javascript_create_tab("cache-tabs"));
