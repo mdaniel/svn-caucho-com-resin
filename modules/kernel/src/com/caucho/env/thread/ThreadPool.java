@@ -619,10 +619,8 @@ public final class ThreadPool {
       return true;
     }
 
-    _launcher.wake();
-    
     if (! isQueueIfFull && isThreadMax()) {
-      return false;
+      throw new IllegalStateException(L.l("Thread pool full"));
     }
     
     Thread requestThread = null;
@@ -649,6 +647,8 @@ public final class ThreadPool {
     else if (isPriority && (thread = popPriorityThread()) != null) {
       thread.scheduleTask(NULL_RUNNABLE, null);
     }
+    
+    _launcher.wake();
     
     if (! isQueueIfFull) {
       taskItem.park(expireTime);
@@ -785,6 +785,8 @@ public final class ThreadPool {
     
     if (thread != null) {
       _priorityIdleCount.decrementAndGet();
+      
+      _launcher.wake();
     }
     
     return thread;

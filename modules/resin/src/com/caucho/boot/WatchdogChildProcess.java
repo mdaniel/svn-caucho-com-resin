@@ -153,7 +153,7 @@ class WatchdogChildProcess
         WatchdogProcessLogThread logThread
           = new WatchdogProcessLogThread(stdIs, jvmOut);
 
-        ThreadPool.getCurrent().schedule(logThread);
+        ThreadPool.getCurrent().start(logThread);
 
         s = connectToChild(ss);
 

@@ -93,8 +93,8 @@ public class ConnectionPool extends AbstractManagedObject
   // max idle size
   private int _maxIdleCount = 1024;
 
-  // time before an idle connection is closed (300s default)
-  private long _idleTimeout = 300000L;
+  // time before an idle connection is closed (60s default)
+  private long _idleTimeout = 60000L;
 
   // time before an active connection is closed (6h default)
   private long _activeTimeout = 6L * 3600L * 1000L;

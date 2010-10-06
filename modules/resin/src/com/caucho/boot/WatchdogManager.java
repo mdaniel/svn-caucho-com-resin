@@ -454,9 +454,24 @@ class WatchdogManager implements AlarmListener {
 
     watchdog.kill();
   }
+  
+  /**
+   * Checks to see if any watchdog is active.
+   */
+  boolean isEmpty()
+  {
+    synchronized (_watchdogMap) {
+      for (WatchdogChild child : _watchdogMap.values()) {
+        if (child.isActive())
+          return false;
+      }
+    }
+    
+    return true;
+  }
 
   /**
-   * Called from the hessian API to restart a Resin instance.
+   * Called from the HMTP API to restart a Resin instance.
    *
    * @param serverId the server identifier to restart
    * @param argv the command-line arguments to apply to the start

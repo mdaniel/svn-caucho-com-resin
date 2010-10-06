@@ -30,7 +30,6 @@
 package com.caucho.boot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;

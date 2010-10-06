@@ -29,6 +29,7 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 import java.sql.*;
@@ -622,6 +623,7 @@ public class SpyConnection implements java.sql.Connection {
     }
   }
 
+  @Override
   public boolean getAutoCommit()
     throws SQLException
   {
@@ -638,6 +640,7 @@ public class SpyConnection implements java.sql.Connection {
     }
   }
 
+  @Override
   public void setAutoCommit(boolean autoCommit)
     throws SQLException
   {
@@ -652,29 +655,37 @@ public class SpyConnection implements java.sql.Connection {
     }
   }
 
+  @Override
   public void commit()
     throws SQLException
   {
+    long start = start();
+    
     try {
-      logXA.fine(getId() + ":commit()");
-
       _conn.commit();
+      
+      if (logXA.isLoggable(Level.FINE))
+        logXA(start, "commit()");
     } catch (SQLException e) {
-      logXA.fine(getId() + ":exn-commit(" + e + ")");
+      logXA(start, "exn-commit(" + e + ")");
 
       throw e;
     }
   }
 
+  @Override
   public void rollback()
     throws SQLException
   {
+    long start = start();
+    
     try {
-      logXA.fine(getId() + ":rollback()");
-      
       _conn.rollback();
+      
+      if (logXA.isLoggable(Level.FINE))
+        logXA(start, "rollback()");
     } catch (SQLException e) {
-      logXA.fine(getId() + ":exn-rollback(" + e + ")");
+      logXA(start, "exn-rollback(" + e + ")");
 
       throw e;
     }
@@ -705,12 +716,14 @@ public class SpyConnection implements java.sql.Connection {
    */
   public void close() throws SQLException
   {
-    log.fine(getId() + ":close()");
+    long start = start();
 
     try {
       _conn.close();
+      
+      log(start, "close()");
     } catch (SQLException e) {
-      log.fine(getId() + ":exn-close(" + e + ")");
+      log(start, "exn-close(" + e + ")");
 
       throw e;
     }
@@ -1013,6 +1026,25 @@ public class SpyConnection implements java.sql.Connection {
 
       throw e;
     }
+  }
+  
+  protected long start()
+  {
+    return Alarm.getExactTime();
+  }
+  
+  protected void logXA(long start, String msg)
+  {
+    long delta = Alarm.getExactTime() - start;
+    
+    logXA.fine("[" + delta + "ms] " + getId() + ":" + msg);
+  }
+  
+  protected void log(long start, String msg)
+  {
+    long delta = Alarm.getExactTime() - start;
+    
+    log.fine("[" + delta + "ms] " + getId() + ":" + msg);
   }
 
   public String toString()

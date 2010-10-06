@@ -150,6 +150,10 @@ class WatchdogService extends SimpleActor
                                     new ResultStatus(false, msg));
     }
     
+    if (_manager.isEmpty()) {
+      new Thread(new Shutdown()).start();
+    }
+    
     return true;
   }
 
@@ -177,6 +181,10 @@ class WatchdogService extends SimpleActor
     
       getLinkStream().queryResult(id, from, to,
                                     new ResultStatus(false, msg));
+    }
+    
+    if (_manager.isEmpty()) {
+      new Thread(new Shutdown()).start();
     }
     
     return true;
