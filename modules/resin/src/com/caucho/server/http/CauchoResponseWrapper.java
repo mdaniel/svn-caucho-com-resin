@@ -152,11 +152,13 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
     _response.reset();
   }
 
+  @Override
   public void resetBuffer()
   {
     _response.resetBuffer();
   }
 
+  @Override
   public void setContentLength(int len)
   {
     _response.setContentLength(len);
@@ -166,23 +168,28 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
   // HttpServletResponse
   //
 
+  @Override
   public void setStatus(int sc)
   {
     _response.setStatus(sc);
   }
 
+  @Override
   public void sendError(int sc, String msg)
     throws IOException
   {
-    if (! sendInternalError(sc, msg))
+    if (! sendInternalError(sc, msg)) {
       _response.sendError(sc, msg);
+    }
   }
 
+  @Override
   public void sendError(int sc)
     throws IOException
   {
-    if (! sendInternalError(sc, null))
+    if (! sendInternalError(sc, null)) {
       _response.sendError(sc);
+    }
   }
 
   protected boolean sendInternalError(int sc, String msg)
@@ -221,6 +228,7 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
     return true;
   }
 
+  @Override
   public void sendRedirect(String location)
     throws IOException
   {

@@ -715,7 +715,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       return false;
     }
     else if (_matchCacheEntry != null) {
-      if (_responseStream.isCommitted()) {
+      if (isCommitted()) {
         return false;
       }
 

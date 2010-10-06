@@ -740,6 +740,11 @@ abstract public class AbstractHttpResponse {
 
     if (res == null)
       return false;
+    
+    if (res.getStatus() == HttpServletResponse.SC_NOT_MODIFIED) {
+      res.handleNotModified();
+      length = -1;
+    }
 
     _isHeaderWritten = true;
     boolean isHead = false;

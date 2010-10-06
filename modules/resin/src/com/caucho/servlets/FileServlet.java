@@ -718,12 +718,12 @@ public class FileServlet extends GenericServlet {
       sb.append('"');
       _etag = sb.toString();
 
-      QDate cal = QDate.allocateLocalDate();
+      QDate cal = QDate.allocateGmtDate();
         
       cal.setGMTTime(lastModified);
       _lastModifiedString = cal.printDate();
         
-      QDate.freeLocalDate(cal);
+      QDate.freeGmtDate(cal);
 
       if (lastModified == 0) {
         _canRead = false;

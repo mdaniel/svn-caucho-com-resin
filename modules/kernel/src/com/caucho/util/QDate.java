@@ -110,6 +110,9 @@ public class QDate {
   private static final FreeList<QDate> _freeLocalDate
     = new FreeList<QDate>(8);
   
+  private static final FreeList<QDate> _freeGmtDate
+    = new FreeList<QDate>(8);
+  
   private TimeZone _timeZone;
   private Calendar _calendar;
 
@@ -255,6 +258,21 @@ public class QDate {
   public static void freeLocalDate(QDate date)
   {
     _freeLocalDate.free(date);
+  }
+  
+  public static QDate allocateGmtDate()
+  {
+    QDate date = _freeGmtDate.allocate();
+    
+    if (date == null)
+      date = new QDate(false);
+    
+    return date;
+  }
+  
+  public static void freeGmtDate(QDate date)
+  {
+    _freeGmtDate.free(date);
   }
   
   

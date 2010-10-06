@@ -78,6 +78,7 @@ public class FilterFilterChain implements FilterChain
    * @param response the servlet response
    * @since Servlet 2.3
    */
+  @Override
   public void doFilter(ServletRequest request,
                        ServletResponse response)
     throws ServletException, IOException
@@ -91,6 +92,6 @@ public class FilterFilterChain implements FilterChain
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _filter + "]";
+    return getClass().getSimpleName() + "[" + _filter + ",next=" + _next + "]";
   }
 }

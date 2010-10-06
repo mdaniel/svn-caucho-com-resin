@@ -265,11 +265,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
     if (! isClosing() || isCharFlushing())
       length = -1;
 
-    setCommitted();
-
     startCaching(true);
 
     _response.writeHeaders(length);
+
+    // server/2hf3
+    setCommitted();
   }
 
   @Override
