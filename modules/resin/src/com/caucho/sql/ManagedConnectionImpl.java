@@ -788,32 +788,32 @@ public class ManagedConnectionImpl
     DBPoolImpl dbPool = _factory.getDBPool();
 
     long now = Alarm.getCurrentTime();
+    
+    long pingInterval = dbPool.getPingInterval();
 
-    if (now < _lastEventTime + 1000 && ! _isPingRequired)
+    if (_isPingRequired) {
+    }
+    else if (pingInterval > 0 && now < _lastEventTime + pingInterval) {
       return true;
+    }
+    else if (now < _lastEventTime + 1000) {
+      return true;
+    }
 
     Connection conn = _driverConnection;
     
     try {
-      if (conn == null || conn.isClosed()) {
+      _lastEventTime = now;
+      
+      if (! dbPool.isPing()) {
         return false;
       }
       
-      _lastEventTime = now;
-
-      if (! _isPingRequired) {
-        return true;
-      }
-
-      if (! dbPool.isPing()) {
+      if (conn == null || conn.isClosed()) {
         return false;
       }
 
       /*
-      long pingInterval = dbPool.getPingInterval();
-      if (pingInterval > 0 && now < _lastEventTime + pingInterval) {
-        return true;
-      }
       */
 
       String pingQuery = dbPool.getPingQuery();
