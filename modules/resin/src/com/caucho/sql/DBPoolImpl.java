@@ -171,8 +171,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private String _pingQuery;
   // Ping when the connection is reused.
   private Boolean _isPing;
+  
   // How long between pings
-  private long _pingInterval = 1000;
+  private long _pingInterval = 60000;
 
   // True if the pool is transactional
   private boolean _isTransactional = true;

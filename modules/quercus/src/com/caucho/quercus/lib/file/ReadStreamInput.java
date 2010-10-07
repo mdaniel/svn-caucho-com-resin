@@ -151,6 +151,8 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
         return readLength > 0 ? readLength : sublen;
         
       readLength += sublen;
+      length -= sublen;
+      offset += sublen;
     } while (length > 0 && is.getAvailable() > 0);
     
     return readLength;

@@ -876,7 +876,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
         _status = Status.STATUS_COMMITTING;
 
-        commitResources(allowSinglePhase);
+        Exception exn = commitResources(allowSinglePhase);
+        
+        if (heuristicExn == null)
+          heuristicExn = exn; 
       }
 
       if (heuristicExn != null && log.isLoggable(Level.FINE))

@@ -724,6 +724,8 @@ public class ManagedConnectionImpl
         return;
       }
       */
+      
+      _lastEventTime = Alarm.getCurrentTime();
 
       if (_readOnly)
         conn.setReadOnly(false);
@@ -799,18 +801,18 @@ public class ManagedConnectionImpl
     else if (now < _lastEventTime + 1000) {
       return true;
     }
-
+    
     Connection conn = _driverConnection;
     
     try {
       _lastEventTime = now;
       
-      if (! dbPool.isPing()) {
-        return false;
-      }
-      
       if (conn == null || conn.isClosed()) {
         return false;
+      }
+
+      if (! dbPool.isPing()) {
+        return true;
       }
 
       /*

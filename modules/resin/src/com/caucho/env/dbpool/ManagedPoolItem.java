@@ -243,12 +243,15 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     long maxIdleTime = _cm.getMaxIdleTime();
     long maxPoolTime = _cm.getMaxPoolTime();
 
-    if (_hasConnectionError)
+    if (_hasConnectionError) {
       return null;
-    else if (0 < maxIdleTime && _poolEventTime + maxIdleTime < now)
+    }
+    else if (0 < maxIdleTime && _poolEventTime + maxIdleTime < now) {
       return null;
-    else if (0 < maxPoolTime && _poolStartTime + maxPoolTime < now)
+    }
+    else if (0 < maxPoolTime && _poolStartTime + maxPoolTime < now) {
       return null;
+    }
     else if (_shareHead != null)
       throw new IllegalStateException(L.l("trying to activate active pool item."));
 
@@ -270,8 +273,9 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     else
       userPoolItem = new UserPoolItem(_cm, this);
     
-    if (! isValid(subject, info, userPoolItem))
+    if (! isValid(subject, info, userPoolItem)) {
       return null;
+    }
 
     _subject = subject;
     _requestInfo = info;
@@ -477,8 +481,9 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     try {
       ManagedConnection mConn = getManagedConnection();
 
-      if (mConn == null)
+      if (mConn == null) {
         return false;
+      }
 
       Object userConn = userPoolItem.getUserConnection();
 
