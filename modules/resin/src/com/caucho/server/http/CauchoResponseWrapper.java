@@ -187,13 +187,14 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
   public void sendError(int sc)
     throws IOException
   {
-    if (! sendInternalError(sc, null)) {
-      _response.sendError(sc);
-    }
+    sendError(sc, null);
   }
 
   protected boolean sendInternalError(int sc, String msg)
   {
+    if (sc == HttpServletResponse.SC_NOT_MODIFIED)
+      return false;
+    
     // server/10su
     CauchoRequest req = _request;
 

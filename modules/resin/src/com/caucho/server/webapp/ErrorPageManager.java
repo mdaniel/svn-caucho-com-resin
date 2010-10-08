@@ -600,15 +600,13 @@ public class ErrorPageManager {
                             int code, String message)
     throws IOException
   {
-    if (message == null)
-      Thread.dumpStack();
     response.resetBuffer();
 
     /* XXX: if we've already got an error, won't this just mask it?
     if (responseStream.isCommitted())
       throw new IllegalStateException("response can't sendError() after commit");
     */
-
+    
     response.setStatus(code, message);
 
     try {

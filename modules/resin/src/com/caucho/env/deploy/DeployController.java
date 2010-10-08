@@ -654,6 +654,8 @@ abstract public class DeployController<I extends DeployInstance>
       }
       else
         _lifecycle.toError();
+      
+      onStartComplete();
 
       // server/
       if (loader instanceof DynamicClassLoader)
@@ -732,6 +734,10 @@ abstract public class DeployController<I extends DeployInstance>
   }
   
   protected void onError(Throwable e)
+  {
+  }
+  
+  protected void onStartComplete()
   {
   }
   

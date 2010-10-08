@@ -52,7 +52,6 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
-import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownService;
@@ -1402,7 +1401,7 @@ public class Server
     if (isStopping())
       return;
 
-    if (log.isLoggable(Level.FINEST))
+    if (log.isLoggable(Level.FINER))
       log.finest("ServletServer clearCache");
 
     // the invocation cache must be cleared first because the old

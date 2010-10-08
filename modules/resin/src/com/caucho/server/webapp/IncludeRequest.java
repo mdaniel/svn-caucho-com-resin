@@ -168,7 +168,8 @@ public class IncludeRequest extends CauchoRequestWrapper {
   }
 
   @Override
-  public String getHeader(String name) {
+  public String getHeader(String name)
+  {
     if ("If-Modified-Since".equals(name) || "If-None-Match".equals(name))
       return null;
 
@@ -176,7 +177,8 @@ public class IncludeRequest extends CauchoRequestWrapper {
   }
 
   @Override
-  public Enumeration<String> getHeaders(String name) {
+  public Enumeration<String> getHeaders(String name)
+  {
     if ("If-Modified-Since".equals(name) || "If-None-Match".equals(name))
       return _emptyEnum;
 
@@ -184,7 +186,8 @@ public class IncludeRequest extends CauchoRequestWrapper {
   }
 
   @Override
-  public Enumeration<String> getHeaderNames() {
+  public Enumeration<String> getHeaderNames()
+  {
     // jsp/17eh jsp/17ek
     if (_headerNames == null) {
       _headerNames = new ArrayList<String>();
@@ -223,6 +226,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
   /**
    * Returns an enumeration of the form names.
    */
+  @Override
   public Enumeration<String> getParameterNames()
   {
     if (_filledForm == null)

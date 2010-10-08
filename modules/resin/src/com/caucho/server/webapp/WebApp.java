@@ -3431,22 +3431,18 @@ public class WebApp extends ServletContextImpl
    */
   public void clearCache()
   {
-    Server server = getServer();
-
-    if (server != null)
-      server.clearCache();
-
-    WebAppContainer parent = _parent;
-
-    if (parent != null)
-      parent.clearCache();
-
     // server/1kg1
     synchronized (_filterChainCache) {
       _filterChainCache.clear();
       _dispatcherCache = null;
     }
+
+    WebAppController controller = _controller;
+
+    if (controller != null)
+      controller.clearCache();
   }
+  
   /**
    * Fills the invocation for an include request.
    */
@@ -4166,6 +4162,8 @@ public class WebApp extends ServletContextImpl
       thread.setContextClassLoader(oldLoader);
 
       _lifecycle.toStop();
+      
+      clearCache();
     }
   }
 
@@ -4176,8 +4174,6 @@ public class WebApp extends ServletContextImpl
   public void destroy()
   {
     stop();
-
-    clearCache();
     
     if (! _lifecycle.toDestroy()) {
       return;
@@ -4214,6 +4210,8 @@ public class WebApp extends ServletContextImpl
       thread.setContextClassLoader(oldLoader);
 
       _classLoader.destroy();
+
+      clearCache();
     }
   }
 

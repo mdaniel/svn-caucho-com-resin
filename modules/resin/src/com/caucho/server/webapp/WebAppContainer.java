@@ -119,9 +119,11 @@ public class WebAppContainer
 
   private boolean _hasWarGenerator;
 
+  private static final int URI_CACHE_SIZE = 8192;
+  
   // LRU cache for the webApp lookup
   private LruCache<String,WebAppController> _uriToAppCache
-    = new LruCache<String,WebAppController>(8192);
+  = new LruCache<String,WebAppController>(URI_CACHE_SIZE);
 
   // List of default webApp configurations
   private ArrayList<WebAppConfig> _webAppDefaultList
@@ -377,6 +379,8 @@ public class WebAppContainer
       DeployGenerator<WebAppController> deploy
         = new WebAppRegexpDeployGenerator(_appDeploySpi, this, config);
       _appDeploy.add(deploy);
+      
+      clearCache();
       return;
     }
 
@@ -499,10 +503,10 @@ public class WebAppContainer
   public void updateWebAppDeploy(String name)
     throws Throwable
   {
-    clearCache();
-
     _appDeploy.update();
     WebAppController controller = _appDeploy.update(name);
+
+    clearCache();
 
     if (controller != null) {
       Throwable configException = controller.getConfigException();
@@ -529,7 +533,7 @@ public class WebAppContainer
     throws Throwable
   {
     clearCache();
-
+    
     _earDeploy.update();
     EarDeployController entry = _earDeploy.update(name);
 
@@ -541,6 +545,8 @@ public class WebAppContainer
       if (configException != null)
         throw configException;
     }
+    
+    clearCache();
   }
 
   /**
@@ -549,12 +555,14 @@ public class WebAppContainer
   public void expandEarDeploy(String name)
   {
     clearCache();
-
+    
     _earDeploy.update();
     EarDeployController entry = _earDeploy.update(name);
 
     if (entry != null)
       entry.start();
+    
+    clearCache();
   }
 
   /**
@@ -563,12 +571,14 @@ public class WebAppContainer
   public void startEarDeploy(String name)
   {
     clearCache();
-
+    
     _earDeploy.update();
     EarDeployController entry = _earDeploy.update(name);
 
     if (entry != null)
       entry.start();
+    
+    clearCache();
   }
 
   /**
@@ -710,9 +720,9 @@ public class WebAppContainer
    */
   public void clearCache()
   {
+    _uriToAppCache = new LruCache<String,WebAppController>(URI_CACHE_SIZE);
+    
     _server.clearCache();
-
-    _uriToAppCache.clear();
   }
 
   /**

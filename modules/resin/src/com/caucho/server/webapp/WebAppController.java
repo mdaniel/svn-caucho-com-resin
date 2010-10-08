@@ -68,7 +68,7 @@ public class WebAppController
   private static final Logger log
     = Logger.getLogger(WebAppController.class.getName());
 
-  protected WebAppContainer _container;
+  private final WebAppContainer _container;
 
   private WebAppController _parent;
 
@@ -603,6 +603,30 @@ public class WebAppController
     }
 
     super.configureInstanceVariables(webApp);
+  }
+
+  @Override
+  protected void onStartComplete()
+  {
+    super.onStartComplete();
+    
+    clearCache();
+  }
+
+  @Override
+  protected void onStop()
+  {
+    super.onStop();
+    
+    clearCache();
+  }
+
+  /**
+   * Clears the 
+   */
+  public void clearCache()
+  {
+    _container.clearCache();
   }
 
   /**
