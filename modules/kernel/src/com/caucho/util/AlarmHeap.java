@@ -139,7 +139,7 @@ public class AlarmHeap {
     if (_heapTop < i)
       throw new IllegalStateException();
 
-    return (i == 1);
+    return (i <= 1);
   }
 
   public void dequeue(Alarm alarm)
@@ -147,7 +147,7 @@ public class AlarmHeap {
     synchronized (_queueLock) {
       if (alarm.getHeapIndex() < 0)
         return;
-      
+
       dequeueImpl(alarm);
     }
   }
@@ -225,18 +225,18 @@ public class AlarmHeap {
       item.setHeapIndex(i);
     }
   }
-  
+
   public Alarm []toArray()
   {
     int heapTop = _heapTop;
     Alarm []heap = _heap;
-    
+
     Alarm []array = new Alarm[heapTop + 1];
-    
+
     for (int i = 0; i <= heapTop; i++) {
       array[i] = heap[i];
     }
-    
+
     return array;
   }
 

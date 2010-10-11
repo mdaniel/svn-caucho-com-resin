@@ -225,7 +225,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
       _cookieName = decoder.getSessionCookie();
       _sslCookieName = decoder.getSSLSessionCookie();
-      
+
       if (_sslCookieName != null && ! _sslCookieName.equals(_cookieName))
         _isSecure = true;
     }
@@ -326,6 +326,11 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   WebApp getWebApp()
   {
     return _webApp;
+  }
+
+  ClassLoader getClassLoader()
+  {
+    return getWebApp().getClassLoader();
   }
 
   /**
@@ -711,7 +716,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   {
     _isPersistenceEnabled = enable;
   }
-  
+
   public boolean isUsePersistentStore()
   {
     return isPersistenceEnabled();
@@ -1106,7 +1111,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     throws IOException
   {
     if (_isHessianSerialization)
-      return new HessianSessionSerializer(os);
+      return new HessianSessionSerializer(os, getClassLoader());
     else
       return new JavaSessionSerializer(os);
   }
@@ -1115,7 +1120,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     throws IOException
   {
     if (_isHessianSerialization)
-      return new HessianSessionDeserializer(is);
+      return new HessianSessionDeserializer(is, getClassLoader());
     else
       return new JavaSessionDeserializer(is);
   }
@@ -1209,7 +1214,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     }
 
     index = server.getIndex();
-    
+
     ClusterServer clusterServer = server.getData(ClusterServer.class);
 
     clusterServer.generateIdPrefix(sb);
@@ -1278,7 +1283,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       return null;
 
     SessionImpl session = _sessions.get(sessionId);
-    
+
     boolean isNew = false;
     boolean killSession = false;
 

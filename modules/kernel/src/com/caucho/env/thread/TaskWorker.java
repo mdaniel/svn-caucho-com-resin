@@ -43,9 +43,9 @@ abstract public class TaskWorker implements Runnable {
   private static final int TASK_PARK = 0;
   private static final int TASK_SLEEP = 1;
   private static final int TASK_READY = 2;
-  
+
   private static final AtomicLong _idGen = new AtomicLong();
-  
+
   private final AtomicInteger _taskState = new AtomicInteger();
   private final AtomicBoolean _isActive = new AtomicBoolean();
 
@@ -62,16 +62,21 @@ abstract public class TaskWorker implements Runnable {
     _threadPool = ThreadPool.getCurrent();
   }
 
+  public boolean isTaskActive()
+  {
+    return _isActive.get();
+  }
+
   protected boolean isPermanent()
   {
     return false;
   }
-  
+
   protected boolean isClosed()
   {
     return _isClosed;
   }
-  
+
   abstract public long runTask();
 
   public void destroy()
@@ -79,7 +84,7 @@ abstract public class TaskWorker implements Runnable {
     _isClosed = true;
 
     wake();
-    
+
     Thread thread = _thread;
 
     if (thread != null)
@@ -108,11 +113,11 @@ abstract public class TaskWorker implements Runnable {
     // return getClass().getSimpleName() + "-" + _idGen.incrementAndGet();
     return toString() + "-" + _idGen.incrementAndGet();
   }
-  
+
   protected void onThreadStart()
   {
   }
-  
+
   protected void onThreadComplete()
   {
   }
@@ -126,7 +131,7 @@ abstract public class TaskWorker implements Runnable {
       _thread.setContextClassLoader(_classLoader);
       oldName = _thread.getName();
       _thread.setName(getThreadName());
-      
+
       onThreadStart();
 
       long expires;
@@ -135,7 +140,7 @@ abstract public class TaskWorker implements Runnable {
         expires = Alarm.getCurrentTimeActual() + _idleTimeout;
         while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
           long delta = runTask();
-          
+
           if (delta < 0)
             expires = Alarm.getCurrentTimeActual() + _idleTimeout;
           else
@@ -144,10 +149,13 @@ abstract public class TaskWorker implements Runnable {
 
         if (isClosed())
           return;
-        
+
         if (_taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
           Thread.interrupted();
           LockSupport.parkUntil(expires);
+
+          if (isPermanent())
+            _taskState.set(TASK_READY);
         }
       } while (_taskState.get() == TASK_READY
                || Alarm.getCurrentTimeActual() < expires
@@ -162,7 +170,7 @@ abstract public class TaskWorker implements Runnable {
         wake();
 
       onThreadComplete();
-      
+
       if (thread != null && oldName != null)
         thread.setName(oldName);
     }

@@ -67,7 +67,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
   private static long _testTime;
   private static long _testNanoDelta;
-  
+
   private long _wakeTime;
   private AlarmListener _listener;
   private ClassLoader _contextLoader;
@@ -184,7 +184,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   {
     _name = name;
   }
-  
+
   public static boolean isActive()
   {
     return _testTime == 0 && _alarmThread != null;
@@ -200,10 +200,10 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     if (! _isCurrentTimeUsed) {
       if (_testTime > 0)
         return _testTime;
-      
+
       if (_alarmThread == null)
         return System.currentTimeMillis();
-      
+
       if (_isSlowTime) {
         return System.currentTimeMillis();
       }
@@ -279,17 +279,17 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   {
     return _wakeTime;
   }
-  
+
   void setWakeTime(long wakeTime)
   {
     _wakeTime = wakeTime;
   }
-  
+
   int getHeapIndex()
   {
     return _heapIndex;
   }
-  
+
   void setHeapIndex(int index)
   {
     _heapIndex = index;
@@ -375,7 +375,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   public void queue(long delta)
   {
     long now = getCurrentTime();
-    
+
     boolean isNotify = _heap.queueAt(this, now + delta);
 
     if (isNotify) {
@@ -481,7 +481,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   {
     _heap.testClear();
   }
-  
+
   static void setTestTime(long time)
   {
     _testTime = time;
@@ -540,17 +540,17 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
             _currentTime = _testTime;
 
             LockSupport.park();
-            
+
             continue;
           }
-          
+
           long now = System.currentTimeMillis();
-            
+
           _currentTime = now;
-            
+
           boolean isCurrentTimeUsed = _isCurrentTimeUsed;
           _isCurrentTimeUsed = false;
-          
+
           if (isCurrentTimeUsed) {
             _isSlowTime = false;
           }
@@ -563,7 +563,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           }
 
           long sleepTime = _isSlowTime ? 1000L : 5L;
-              
+
           LockSupport.parkNanos(sleepTime * 1000000L);
         } catch (Throwable e) {
         }
@@ -577,7 +577,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     {
       return true;
     }
-    
+
     /**
      * Runs the coordinator task.
      */
@@ -586,7 +586,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     {
       try {
         Alarm alarm;
-        
+
         if ((alarm = _heap.extractAlarm(getCurrentTime())) != null) {
           // throttle alarm invocations by 5ms so quick alarms don't need
           // extra threads
@@ -630,10 +630,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       // #3548 - getCurrentTime for consistency
       long now = getCurrentTime();
 
-      if (next < 0)
-        next = now + 120000L;
+      long delta;
 
-      return next;
+      if (next < 0)
+        delta = 120000L;
+      else
+        delta = next - now;
+
+      return delta;
     }
   }
 

@@ -31,6 +31,7 @@ package com.caucho.server.session;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.HessianDebugInputStream;
+import com.caucho.hessian.io.SerializerFactory;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -43,10 +44,16 @@ import java.util.logging.Logger;
 public class HessianSessionDeserializer extends SessionDeserializer {
   private static final Logger log
     = Logger.getLogger(HessianSessionSerializer.class.getName());
-  
+
   private Hessian2Input _in;
 
   public HessianSessionDeserializer(InputStream is)
+  {
+    this(is, Thread.currentThread().getContextClassLoader());
+  }
+
+  public HessianSessionDeserializer(InputStream is,
+                                    ClassLoader loader)
   {
     if (log.isLoggable(Level.FINEST)) {
       HessianDebugInputStream dis
@@ -55,10 +62,11 @@ public class HessianSessionDeserializer extends SessionDeserializer {
       dis.setDepth(2);
       is = dis;
     }
-  
+
     _in = new Hessian2Input(is);
+    _in.setSerializerFactory(new SerializerFactory(loader));
   }
-  
+
   public int readInt()
     throws IOException
   {
