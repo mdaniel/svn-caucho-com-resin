@@ -48,6 +48,13 @@ public class JavaSessionDeserializer extends SessionDeserializer {
   public JavaSessionDeserializer(InputStream is)
     throws IOException
   {
+    this(is, Thread.currentThread().getContextClassLoader());
+  }
+
+  public JavaSessionDeserializer(InputStream is,
+                                 ClassLoader loader)
+    throws IOException
+  {
     _in = new ContextObjectInputStream(is);
   }
   

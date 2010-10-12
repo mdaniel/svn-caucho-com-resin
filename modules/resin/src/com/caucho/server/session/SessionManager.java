@@ -325,6 +325,11 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   {
     return _webApp;
   }
+  
+  ClassLoader getClassLoader()
+  {
+    return getWebApp().getClassLoader();
+  }
 
   /**
    * Returns the SessionManager's authenticator
@@ -1108,18 +1113,18 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     throws IOException
   {
     if (_isHessianSerialization)
-      return new HessianSessionSerializer(os);
+      return new HessianSessionSerializer(os, getClassLoader());
     else
-      return new JavaSessionSerializer(os);
+      return new JavaSessionSerializer(os, getClassLoader());
   }
 
   public SessionDeserializer createSessionDeserializer(InputStream is)
     throws IOException
   {
     if (_isHessianSerialization)
-      return new HessianSessionDeserializer(is);
+      return new HessianSessionDeserializer(is, getClassLoader());
     else
-      return new JavaSessionDeserializer(is);
+      return new JavaSessionDeserializer(is, getClassLoader());
   }
 
   /**

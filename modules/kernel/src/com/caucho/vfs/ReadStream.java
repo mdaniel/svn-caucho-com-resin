@@ -1251,33 +1251,6 @@ public final class ReadStream extends InputStream
     }
   }
 
-  private boolean readBuffer(int off)
-    throws IOException
-  {
-    if (_readBuffer == null)
-      return false;
-
-    if (_sibling != null)
-      _sibling.flush();
-
-    _readOffset = 0;
-    int readLength = _source.read(_readBuffer, off, _readBuffer.length - off);
-
-    // Setting to 0 is needed to avoid int to long conversion errors with AIX
-    if (readLength > 0) {
-      _readLength = readLength;
-      _position += readLength;
-      
-      if (_isEnableReadTime)
-        _readTime = Alarm.getCurrentTime();
-      return true;
-    }
-    else {
-      _readLength = 0;
-      return false;
-    }
-  }
-
   /**
    * Disables close.  Sometimes an application will pass a stream
    * to a client that may close the stream at an inappropriate time.

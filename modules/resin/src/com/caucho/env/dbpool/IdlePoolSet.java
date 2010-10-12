@@ -85,6 +85,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   /**
    * Adds an element.
    */
+  @Override
   public boolean add(ManagedConnection o)
   {
     synchronized (this) {
@@ -106,6 +107,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   /**
    * Clears the set.
    */
+  @Override
   public void clear()
   {
     _head = _tail = 0;
@@ -117,6 +119,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   /**
    * Returns true if the item is in the set.
    */
+  @Override
   public boolean contains(Object o)
   {
     for (int i = _tail; i != _head; i = (i + 1) % _entriesLength) {
@@ -130,9 +133,10 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   /**
    * Returns true if the item is in the set.
    */
+  @Override
   public boolean containsAll(Collection<?> c)
   {
-    Iterator iter = c.iterator();
+    Iterator<?> iter = c.iterator();
 
     while (iter.hasNext()) {
       if (! contains(iter.next()))
@@ -145,6 +149,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   /**
    * Returns an iterator to the set.
    */
+  @Override
   public Iterator<ManagedConnection> iterator()
   {
     return new IdlePoolIterator();
@@ -153,6 +158,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   /**
    * Removes an element of the set.
    */
+  @Override
   public boolean remove(Object o)
   {
     for (int i = _tail; i != _head; i = (i + 1) % _entriesLength) {
@@ -167,9 +173,10 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   /**
    * Removes an element of the set.
    */
+  @Override
   public boolean removeAll(Collection<?> c)
   {
-    Iterator iter = c.iterator();
+    Iterator<?> iter = c.iterator();
     boolean result = true;
 
     while (iter.hasNext()) {

@@ -49,6 +49,7 @@ public class DatabaseAdmin extends AbstractManagedObject
     _jcaPool = jcaPool;
   }
 
+  @Override
   public String getUrl()
   {
     return _dbPool.getURL();
@@ -57,6 +58,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns true if spy is enabled
    */
+  @Override
   public boolean isSpy()
   {
     return _dbPool.isSpy();
@@ -65,6 +67,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the pool's jdbc drivers
    */
+  @Override
   public JdbcDriverMXBean []getDrivers()
   {
     return _dbPool.getDriverAdmin();
@@ -83,6 +86,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the maximum number of connections.
    */
+  @Override
   public int getMaxConnections()
   {
     return _jcaPool.getMaxConnections();
@@ -91,6 +95,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the number of overflow connections.
    */
+  @Override
   public int getMaxOverflowConnections()
   {
     return _jcaPool.getMaxOverflowConnections();
@@ -99,6 +104,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the max number of connections trying to connect.
    */
+  @Override
   public int getMaxCreateConnections()
   {
     return _jcaPool.getMaxCreateConnections();
@@ -107,6 +113,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the pool idle time in milliseconds.
    */
+  @Override
   public long getMaxIdleTime()
   {
     return _jcaPool.getMaxIdleTime();
@@ -115,6 +122,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the maximum number of idle connections
    */
+  @Override
   public int getMaxIdleCount()
   {
     return _jcaPool.getMaxIdleCount();
@@ -123,6 +131,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the pool active time in milliseconds.
    */
+  @Override
   public long getMaxActiveTime()
   {
     return _jcaPool.getMaxActiveTime();
@@ -131,6 +140,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the pool time in milliseconds.
    */
+  @Override
   public long getMaxPoolTime()
   {
     return _jcaPool.getMaxPoolTime();
@@ -139,6 +149,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * How long to wait for connections when timed out.
    */
+  @Override
   public long getConnectionWaitTime()
   {
     return _jcaPool.getConnectionWaitTime();
@@ -147,6 +158,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns true for the JCA shared attribute.
    */
+  @Override
   public boolean isShareable()
   {
     return _jcaPool.isShareable();
@@ -155,6 +167,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns true if the local-transaction-optimization is allowed
    */
+  @Override
   public boolean isLocalTransactionOptimization()
   {
     return _jcaPool.isLocalTransactionOptimization();
@@ -167,6 +180,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the total number of connections.
    */
+  @Override
   public int getConnectionCount()
   {
     return _jcaPool.getConnectionCount();
@@ -175,6 +189,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the number of active connections.
    */
+  @Override
   public int getConnectionActiveCount()
   {
     return _jcaPool.getConnectionActiveCount();
@@ -183,14 +198,25 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the number of idle connections.
    */
+  @Override
   public int getConnectionIdleCount()
   {
     return _jcaPool.getConnectionIdleCount();
   }
 
   /**
+   * Returns the number of idle connections.
+   */
+  @Override
+  public int getConnectionCreateCount()
+  {
+    return _jcaPool.getConnectionCreateCount();
+  }
+
+  /**
    * Returns the total number of connections.
    */
+  @Override
   public long getConnectionCountTotal()
   {
     return _jcaPool.getConnectionCountTotal();
@@ -199,6 +225,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the total number of created connections.
    */
+  @Override
   public long getConnectionCreateCountTotal()
   {
     return _jcaPool.getConnectionCreateCountTotal();
@@ -207,6 +234,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the total number of failed connections.
    */
+  @Override
   public long getConnectionFailCountTotal()
   {
     return _jcaPool.getConnectionFailCountTotal();
@@ -215,6 +243,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Returns the last failed connection time.
    */
+  @Override
   public Date getLastFailTime()
   {
     return _jcaPool.getLastFailTime();
@@ -227,6 +256,7 @@ public class DatabaseAdmin extends AbstractManagedObject
   /**
    * Clears all idle connections in the pool.
    */
+  @Override
   public void clear()
   {
     _jcaPool.clear();

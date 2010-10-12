@@ -30,23 +30,17 @@
 package com.caucho.util;
 
 import java.io.InputStream;
-import java.lang.ref.SoftReference;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Localization
  */
 public class L10N {
-  private static Logger _log;
-  
   private static final HashMap<String,Properties> _l10nMap
     = new HashMap<String,Properties>();
 
-  private Class _cl;
+  private Class<?> _cl;
   
   private Boolean _isMessageFileAvailable;
   private Boolean _isStringFileAvailable;
@@ -54,7 +48,7 @@ public class L10N {
   private Properties _messages;
   private Properties _strings;
   
-  public L10N(Class cl)
+  public L10N(Class<?> cl)
   {
     _cl = cl;
   }
@@ -413,6 +407,48 @@ public class L10N {
     
     return cb.toString();
   }
+  
+  public String l(String msg, Object ...objects)
+  {
+    msg = getTranslated(msg);
+    
+    StringBuilder cb = new StringBuilder();
+
+    int length = msg.length();
+    int i = 0;
+
+    while (i < length) {
+      char ch = msg.charAt(i);
+
+      if (ch != '{' || i + 2 >= length) {
+        cb.append(ch);
+        i++;
+      }
+      else {
+        ch = msg.charAt(i + 1);
+        
+        if (ch == '{') {
+          cb.append('{');
+          i += 2;
+        }
+        else if ('0' <= ch && ch <= '9') {
+          int index = ch - '0';
+          
+          cb.append(objects[index]);
+          i += 3;
+        }
+        else if (ch == '{') {
+          cb.append('{');
+          i += 2;
+        }
+        else {
+          i = parseString(msg, i + 1, cb);
+        }
+      }
+    }
+    
+    return cb.toString();
+  }
 
   private int parseString(String msg, int i, StringBuilder sb)
   {
@@ -554,67 +590,5 @@ public class L10N {
     }
 
     return null;
-  }
-
-  private void init(String path)
-  {
-    if (! path.startsWith("/"))
-      path = "/" + path;
-
-    Properties messages = _l10nMap.get(path);
-    
-    InputStream is = null;
-    Locale locale = Locale.getDefault();
-    
-    try {
-      String language = locale.getLanguage();
-
-      String xmlName = path + "_" + language;
-
-      /* XXX: punt for now
-      is = getClass().getResourceAsStream(xmlName);
-      
-      if (is != null) {
-        RegistryNode registry = null;
-
-        try {
-          ReadStream rs = Vfs.openRead(is);
-        
-          Registry root = Registry.parse(rs);
-          registry = root.getTop();
-
-          rs.close();
-        } finally {
-          is.close();
-        }
-
-        messages = new HashMap<String,String>();
-        
-        l10nMap.put(path, messages);
-
-        RegistryNode localization = registry.lookup("localization");
-        Iterator iter = localization.select("message");
-        while (iter.hasNext()) {
-          RegistryNode msg = (RegistryNode) iter.next();
-
-          String key = msg.getString("key", null);
-          String value = msg.getString("value", null);
-
-          if (key != null && value != null)
-            messages.put(key, value);
-        }
-      }
-      */
-    } catch (Exception e) {
-      log().log(Level.FINE, e.toString(), e);
-    }
-  }
-
-  private Logger log()
-  {
-    if (_log == null)
-      _log = Logger.getLogger(L10N.class.getName());
-
-    return _log;
   }
 }

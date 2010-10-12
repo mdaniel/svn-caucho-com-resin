@@ -13,6 +13,8 @@
 
 <s2 title="4.0.12 - snapshot">
 <ul>
+<li>dbpool: ping on connection/statement errors instead of discarding</li>
+<li>health: add ConnectionPoolHealthCheck</li>
 <li>watchdog: "stop" should shutdown the watchdog manager if the last server is stopped</li>
 <li>health: log HealthCheck warnings and failures</li>
 <li>host: allow id=":8081" for /resin-admin as virtual host</li>

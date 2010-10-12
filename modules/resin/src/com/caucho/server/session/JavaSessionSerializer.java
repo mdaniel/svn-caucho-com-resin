@@ -47,9 +47,17 @@ public class JavaSessionSerializer extends SessionSerializer {
   public JavaSessionSerializer(OutputStream os)
     throws IOException
   {
+    this(os, Thread.currentThread().getContextClassLoader());
+  }
+
+  public JavaSessionSerializer(OutputStream os,
+                               ClassLoader loader)
+    throws IOException
+  {
     _out = new ObjectOutputStream(os);
   }
   
+  @Override
   public void writeInt(int v)
     throws IOException
   {

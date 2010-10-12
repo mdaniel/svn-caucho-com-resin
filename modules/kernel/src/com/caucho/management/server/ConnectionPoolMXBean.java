@@ -130,6 +130,12 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
    */
   @Description("The current number of idle connections")
   public int getConnectionIdleCount();
+  
+  /**
+   * Returns the number of connections being created.
+   */
+  @Description("The number of creatingconnections")
+  public int getConnectionCreateCount();
 
   /**
    * Returns the total number of connections.

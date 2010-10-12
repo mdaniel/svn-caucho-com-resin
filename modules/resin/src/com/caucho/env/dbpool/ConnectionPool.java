@@ -60,6 +60,7 @@ import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadDump;
 import com.caucho.util.WeakAlarm;
 
 /**
@@ -529,9 +530,19 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Returns the idle connections.
    */
+  @Override
   public int getConnectionIdleCount()
   {
     return _idlePool.size();
+  }
+  
+  /**
+   * Current number of connections being created.
+   */
+  @Override
+  public int getConnectionCreateCount()
+  {
+    return _createCount.get();
   }
 
   /**
@@ -813,16 +824,18 @@ public class ConnectionPool extends AbstractManagedObject
     if (! _lifecycle.isActive())
       throw new IllegalStateException(L.l("Can't allocate connection because the connection pool is closed."));
 
-    log.warning(this + " pool overflow");
+    String message = (this + " pool overflow"
+        + " (pool-size=" + _connectionPool.size()
+        + ", max-connections=" + _maxConnections
+        + ", create-count=" + _createCount.get()
+        + ", max-create-connections=" + _maxCreateConnections
+        + ")");
 
-    // XXX: must restore
-    /*
-    Resin resin = Resin.getCurrent();
+    ConnectionPoolHealthCheck.currentWarning(message);
 
-    if (resin != null) {
-      resin.dumpThreads();
-    }
-    */
+    log.warning(message);
+
+    ThreadDump.dumpThreads();
 
     if (startCreateOverflow()) {
       try {
@@ -831,7 +844,7 @@ public class ConnectionPool extends AbstractManagedObject
         finishCreateConnection();
       }
     }
-    
+
     throw new ResourceException(L.l("Can't create overflow connection connection-max={0}",
                                     _maxConnections));
   }
@@ -1025,14 +1038,26 @@ public class ConnectionPool extends AbstractManagedObject
       return true;
       
     _createCount.decrementAndGet();
-      
-    throw new ResourceException(L.l("Can't allocate overflow connection after {0}ms timeout because pool is full."
-                                    + "\n  max-connections={1}, max-overflow-connections={2}, create-count={3}, pool-size={4}.",
-                                    _connectionWaitTimeout,
-                                    _maxConnections,
-                                    _maxOverflowConnections,
-                                    _createCount,
-                                    size));
+    String message = L.l("{0} cannot create overflow connection after {1}ms"
+                         + " (pool-size={2}"
+                         + ", max-connections={3}"
+                         + ", create-count={4}"
+                         + ", max-create-connections={5}"
+                         + ", max-overflow-connections={6})",
+                         this,
+                         _connectionWaitTimeout,
+                         _connectionPool.size(),
+                         _maxConnections,
+                         _createCount.get(),
+                         _maxCreateConnections,
+                         _maxOverflowConnections);
+
+    ConnectionPoolHealthCheck.currentWarning(message);
+
+    log.warning(message);
+
+    
+    throw new ResourceException(message);
  }
   
   private boolean waitForAvailableConnection(long expireTime)

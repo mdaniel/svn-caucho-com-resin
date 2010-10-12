@@ -183,6 +183,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
    *
    * @return the current session
    */
+  @Override
   public HttpSession getSession(boolean create)
   {
     if (_session != null) {

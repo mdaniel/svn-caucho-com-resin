@@ -82,18 +82,13 @@ public class DriverConfig
     = Logger.getLogger(DriverConfig.class.getName());
   private static final L10N L = new L10N(DriverConfig.class);
 
+  @SuppressWarnings("unused")
   private static final int TYPE_UNKNOWN = 0;
   private static final int TYPE_DRIVER = 1;
   private static final int TYPE_POOL = 2;
   private static final int TYPE_XA = 3;
   private static final int TYPE_JCA = 4;
   private static final int TYPE_DATA_SOURCE = 5;
-
-  /**
-   * The beginning of the URL used to connect to a database with
-   * this pooled connection driver.
-   */
-  private static final String URL_PREFIX = "jdbc:caucho:" ;
 
   /**
    * The key used to look into the properties passed to the

@@ -29,12 +29,11 @@
 
 package com.caucho.util;
 
-import javax.annotation.*;
-import javax.management.*;
-import java.lang.management.*;
-import java.io.IOException;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -88,8 +87,6 @@ public class ThreadDump
     buildThreads(sb, info, Thread.State.TIMED_WAITING, false);
     buildThreads(sb, info, null, false);
     
-    System.out.println("DUMP2:\n " + sb);
-
     log.info(sb.toString());
   }
 
