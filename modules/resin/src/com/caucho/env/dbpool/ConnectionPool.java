@@ -707,19 +707,22 @@ public class ConnectionPool extends AbstractManagedObject
     UserPoolItem userPoolItem = null;
 
     try {
-      UserTransactionImpl transaction = _tm.getUserTransaction();
+      while(true){
+        UserTransactionImpl transaction = _tm.getUserTransaction();
 
-      if (transaction != null)
-        userPoolItem = allocateShared(transaction, mcf, subject, info);
+        if (transaction != null)
+          userPoolItem = allocateShared(transaction, mcf, subject, info);
 
-      if (userPoolItem == null)
-        userPoolItem = allocatePoolConnection(mcf, subject, info, null);
+        if (userPoolItem == null)
+          userPoolItem = allocatePoolConnection(mcf, subject, info, null);
 
-      Object dataSource = userPoolItem.allocateUserConnection();
-
-      userPoolItem = null;
-
-      return dataSource;
+        Object userConn = userPoolItem.allocateUserConnection();
+        
+        if (userConn != null)
+          return userConn;
+        
+        userPoolItem.abortConnection();
+      }
     } finally {
       if (userPoolItem != null)
         userPoolItem.close();

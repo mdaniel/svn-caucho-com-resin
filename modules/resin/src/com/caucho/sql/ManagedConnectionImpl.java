@@ -792,8 +792,11 @@ public class ManagedConnectionImpl
     long now = Alarm.getCurrentTime();
     
     long pingInterval = dbPool.getPingInterval();
+    
+    boolean isPingRequired = _isPingRequired;
+    _isPingRequired = false;
 
-    if (_isPingRequired) {
+    if (isPingRequired) {
     }
     else if (pingInterval > 0 && now < _lastEventTime + pingInterval) {
       return true;
@@ -807,21 +810,22 @@ public class ManagedConnectionImpl
     try {
       _lastEventTime = now;
       
-      if (conn == null || conn.isClosed()) {
+      if (conn == null) {
         return false;
       }
 
-      if (! dbPool.isPing()) {
-        return true;
-      }
-
-      /*
-      */
-
       String pingQuery = dbPool.getPingQuery();
 
-      if (pingQuery == null)
-        return true;
+      if (! dbPool.isPing() || pingQuery == null) {
+        if (isPingRequired)
+          return false;
+        else
+          return ! conn.isClosed();
+      }
+      
+      if (conn.isClosed()) {
+        return false;
+      }
       
       Statement stmt = conn.createStatement();
 
