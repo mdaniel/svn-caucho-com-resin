@@ -29,30 +29,33 @@
 
 package com.caucho.jmx;
 
-import com.caucho.util.L10N;
-import com.caucho.loader.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import javax.management.*;
-import java.util.*;
-import java.util.logging.Logger;
+import javax.management.BadAttributeValueExpException;
+import javax.management.BadBinaryOpValueExpException;
+import javax.management.BadStringOperationException;
+import javax.management.InvalidApplicationException;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.management.QueryExp;
+
+import com.caucho.loader.EnvironmentClassLoader;
 
 /**
  * The view for administration.
  */
 public class MBeanView {
-  private static final Logger log
-    = Logger.getLogger(MBeanView.class.getName());
-  private static final L10N L = new L10N(MBeanView.class);
-
-
   private ClassLoader _classLoader;
 
   private AbstractMBeanServer _mbeanServer;
 
-  private MBeanServerDelegateImpl _delegate;
-  
-  private HashMap<ObjectName,MBeanWrapper> _mbeans
-    = new HashMap<ObjectName,MBeanWrapper>();
+  private ConcurrentHashMap<ObjectName,MBeanWrapper> _mbeans
+    = new ConcurrentHashMap<ObjectName,MBeanWrapper>();
 
   MBeanView(AbstractMBeanServer mbeanServer,
             ClassLoader loader,
@@ -70,7 +73,6 @@ public class MBeanView {
     _mbeanServer = mbeanServer;
 
     _classLoader = loader;
-    _delegate = new MBeanServerDelegateImpl(agentId);
   }
 
   /**
@@ -148,18 +150,16 @@ public class MBeanView {
    */
   protected void getDomains(ArrayList<String> domains)
   {
-    synchronized (_mbeans) {
-      Iterator<ObjectName> names = _mbeans.keySet().iterator();
-      while (names.hasNext()) {
-        ObjectName name = names.next();
+    Iterator<ObjectName> names = _mbeans.keySet().iterator();
+    while (names.hasNext()) {
+      ObjectName name = names.next();
 
-        String domain = name.getDomain();
+      String domain = name.getDomain();
 
-        if (! domains.contains(domain))
-          domains.add(domain);
-      }
+      if (! domains.contains(domain))
+        domains.add(domain);
     }
-
+ 
     MBeanView parent = getParentView();
 
     if (parent != null)
@@ -194,15 +194,13 @@ public class MBeanView {
            BadAttributeValueExpException,
            InvalidApplicationException
   {
-    synchronized (_mbeans) {
-      Iterator<ObjectName> iter = _mbeans.keySet().iterator();
+    Iterator<ObjectName> iter = _mbeans.keySet().iterator();
 
-      while (iter.hasNext()) {
-        ObjectName name = iter.next();
+    while (iter.hasNext()) {
+      ObjectName name = iter.next();
 
-        if (isMatch(name, queryName, query)) {
-          set.add(name);
-        }
+      if (isMatch(name, queryName, query)) {
+        set.add(name);
       }
     }
 
@@ -239,18 +237,16 @@ public class MBeanView {
            BadAttributeValueExpException,
            InvalidApplicationException
   {
-    synchronized (_mbeans) {
-      Iterator<ObjectName> iter = _mbeans.keySet().iterator();
+    Iterator<ObjectName> iter = _mbeans.keySet().iterator();
 
-      while (iter.hasNext()) {
-        ObjectName testName = iter.next();
+    while (iter.hasNext()) {
+      ObjectName testName = iter.next();
 
-        if (isMatch(testName, name, query)) {
-          MBeanWrapper mbean = _mbeans.get(testName);
+      if (isMatch(testName, name, query)) {
+        MBeanWrapper mbean = _mbeans.get(testName);
 
-          if (mbean != null)
-            set.add(mbean.getObjectInstance());
-        }
+        if (mbean != null)
+          set.add(mbean.getObjectInstance());
       }
     }
 
@@ -322,15 +318,13 @@ public class MBeanView {
    */
   boolean add(ObjectName name, MBeanWrapper mbean, boolean overwrite)
   {
-    synchronized (_mbeans) {
-      if (overwrite || _mbeans.get(name) == null) {
-        _mbeans.put(name, mbean);
+    if (overwrite) {
+      _mbeans.put(name, mbean);
 
-        return true;
-      }
-      else
-        return false;
+      return true;
     }
+    else 
+      return _mbeans.putIfAbsent(name, mbean) == null;
   }
 
   /**
@@ -338,9 +332,7 @@ public class MBeanView {
    */
   MBeanWrapper remove(ObjectName name)
   {
-    synchronized (_mbeans) {
-      return _mbeans.remove(name);
-    }
+    return _mbeans.remove(name);
   }
 
   /**
@@ -348,12 +340,10 @@ public class MBeanView {
    */
   MBeanWrapper remove(ObjectName name, MBeanWrapper mbean)
   {
-    synchronized (_mbeans) {
-      if (mbean != null && _mbeans.get(name) != mbean)
-        return null;
+    if (mbean != null && _mbeans.get(name) != mbean)
+      return null;
     
-      return _mbeans.remove(name);
-    }
+    return _mbeans.remove(name);
   }
   
   /**
@@ -361,14 +351,12 @@ public class MBeanView {
    */
   public MBeanWrapper getMBean(ObjectName name)
   {
-    synchronized (_mbeans) {
-      MBeanWrapper mbean = _mbeans.get(name);
-      if (mbean != null)
-        return mbean;
+    MBeanWrapper mbean = _mbeans.get(name);
+    if (mbean != null)
+      return mbean;
 
-      if (_classLoader == null)
-        return null;
-    }
+    if (_classLoader == null)
+      return null;
 
     MBeanView parentView = getParentView();
 
@@ -386,10 +374,10 @@ public class MBeanView {
     _mbeans = null;
   }
 
+  @Override
   public String toString()
   {
-    return "MBeanView[" + _classLoader + "]";
+    return getClass().getSimpleName() + "[" + _classLoader + "]";
   }
-
 }
 
