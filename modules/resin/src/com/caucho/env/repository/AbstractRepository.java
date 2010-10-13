@@ -98,6 +98,11 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   @Override
   public void checkForUpdate()
   {
+    loadLocalRoot();
+  }
+  
+  protected void loadLocalRoot()
+  {
     update(getRepositoryRootHash(), false);
   }
 
@@ -115,6 +120,16 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     updateLoad(sha1, isNew);
 
     return false;
+  }
+  
+  protected String getTagHash()
+  {
+    return _tagMap.getCommitHash();
+  }
+  
+  protected long getTagSequence()
+  {
+    return _tagMap.getSequence();
   }
 
   protected void updateLoad(String sha1, boolean isNew)
@@ -378,13 +393,19 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     synchronized (this) {
       oldTagMap = _tagMap;
       
-      if (tagMap.getSequence() <= oldTagMap.getSequence()) {
+      if (tagMap.getCommitHash().equals(oldTagMap.getCommitHash()))
+        return false;
+      
+      else if (tagMap.compareTo(oldTagMap) < 0) {
+        updateRepositoryRoot(oldTagMap.getCommitHash(),
+                             oldTagMap.getSequence());
+        
         return false;
       }
         
       _tagMap = tagMap;
 
-      setRepositoryRootHash(tagMap.getCommitHash());
+      updateRepositoryRoot(tagMap.getCommitHash(), tagMap.getSequence());
     }
 
     if (log.isLoggable(Level.FINER))
@@ -393,6 +414,11 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     notifyTagListeners(oldTagMap.getTagMap(), tagMap.getTagMap());
 
     return true;
+  }
+  
+  protected void updateRepositoryRoot(String sha1, long sequence)
+  {
+    setRepositoryRootHash(sha1);
   }
   
   private void notifyTagListeners(Map<String,RepositoryTagEntry> oldTagMap,

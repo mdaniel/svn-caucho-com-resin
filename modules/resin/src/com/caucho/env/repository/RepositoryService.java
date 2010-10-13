@@ -41,7 +41,7 @@ public class RepositoryService extends AbstractResinService
 {
   private static final L10N L = new L10N(RepositoryService.class);
   
-  public static final int START_PRIORITY = DistCacheService.START_PRIORITY + 1;
+  public static final int START_PRIORITY = START_PRIORITY_CLUSTER_SERVICE;
   
   private AbstractRepository _repository;
 

@@ -45,7 +45,7 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
   private static final Logger log
     = Logger.getLogger(AbstractManagedObject.class.getName());
   
-  private ClassLoader _classLoader;
+  private transient ClassLoader _classLoader;
   private ObjectName _objectName;
 
   protected AbstractManagedObject()

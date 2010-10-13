@@ -126,7 +126,12 @@ public class FileRepository extends AbstractRepository
   @Override
   public String getRepositoryRootHash()
   {
-    return _git.getTag(getRepositoryTag());
+    String value = _git.getTag(getRepositoryTag());
+    
+    if (value != null && value.length() > 6)
+      return value;
+    else
+      return null;
   }
   
   /**
@@ -135,7 +140,8 @@ public class FileRepository extends AbstractRepository
   @Override
   public void setRepositoryRootHash(String sha1)
   {
-    _git.writeTag(getRepositoryTag(), sha1);
+    if (sha1 != null)
+      _git.writeTag(getRepositoryTag(), sha1);
   }
 
   /**

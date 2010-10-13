@@ -32,7 +32,6 @@ package com.caucho.env.repository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 import com.caucho.management.server.AbstractManagedObject;
@@ -71,12 +70,12 @@ class LocalRepositoryAdmin
     
     TreeMap<String,Map<String,String>> resultMap
       = new TreeMap<String,Map<String,String>>();
-    
+
     ArrayList<String> tags = new ArrayList<String>(tagMap.keySet());
     Collections.sort(tags);
     
     for (String tag : tags) {
-      RepositoryTagEntry tagEntry = tagMap.get(tags);
+      RepositoryTagEntry tagEntry = tagMap.get(tag);
       
       TreeMap<String,String> entryMap = new TreeMap<String,String>();
       resultMap.put(tag, entryMap);
