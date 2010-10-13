@@ -708,6 +708,7 @@ public class ConnectionPool extends AbstractManagedObject
 
     try {
       while(true){
+        userPoolItem = null;
         UserTransactionImpl transaction = _tm.getUserTransaction();
 
         if (transaction != null)
@@ -718,10 +719,12 @@ public class ConnectionPool extends AbstractManagedObject
 
         Object userConn = userPoolItem.allocateUserConnection();
         
-        if (userConn != null)
+        if (userConn != null) {
+          userPoolItem = null;
           return userConn;
+        }
         
-        userPoolItem.abortConnection();
+        userPoolItem.close();
       }
     } finally {
       if (userPoolItem != null)

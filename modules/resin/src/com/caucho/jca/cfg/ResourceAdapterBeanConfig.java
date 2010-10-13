@@ -125,7 +125,6 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     beanManager.addBean(bean);
     
     ((InjectionBean) bean).introspectProduces();
-    System.out.println("ZOME: " + bean);
   }
 
   @Override

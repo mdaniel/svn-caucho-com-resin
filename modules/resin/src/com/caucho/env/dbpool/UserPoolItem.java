@@ -29,17 +29,16 @@
 
 package com.caucho.env.dbpool;
 
-import com.caucho.transaction.ManagedResource;
-import com.caucho.transaction.UserTransactionImpl;
-import com.caucho.util.L10N;
-
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionEvent;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
 import javax.transaction.RollbackException;
-import java.util.logging.Logger;
+
+import com.caucho.transaction.ManagedResource;
+import com.caucho.transaction.UserTransactionImpl;
+import com.caucho.util.L10N;
 
 /**
  * Pool item representing the user connection, i.e. matching to a Connection
@@ -376,7 +375,6 @@ class UserPoolItem implements ManagedResource {
    */
   void close()
   {
-    ManagedPoolItem ownPoolItem = _ownPoolItem;
     _ownPoolItem = null;
 
     _userConn = null;
