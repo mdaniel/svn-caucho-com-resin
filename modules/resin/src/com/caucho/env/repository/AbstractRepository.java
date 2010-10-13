@@ -103,7 +103,10 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   
   protected void loadLocalRoot()
   {
-    update(getRepositoryRootHash(), false);
+    String sha1 = getRepositoryRootHash();
+    
+    if (sha1 != null)
+      updateTagMap(sha1, false);
   }
 
   /**
