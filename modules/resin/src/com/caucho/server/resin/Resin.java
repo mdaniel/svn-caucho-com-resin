@@ -414,7 +414,7 @@ public class Resin
       if (_args != null) {
         setServerId(_args.getServerId());
 
-        if (_rootDirectory == null)
+        if (_args.getRootDirectory() != null)
           setRootDirectory(_args.getRootDirectory());
         
         _pingSocket = _args.getPingSocket();
