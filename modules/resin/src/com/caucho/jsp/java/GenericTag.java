@@ -411,8 +411,6 @@ abstract public class GenericTag extends JspContainerNode
     _tag = parent.findTag(getQName(), _attributeNames,
                           hasBodyContent);
 
-    System.out.println("TAG: " + _tag + " " + getQName() + " " + parent);
-    Thread.dumpStack();
     if (_tag == null || ! _parseState.isRecycleTags()) {
       _tag = parent.addTag(_gen, getQName(), _tagInfo, _tagClass,
                            _attributeNames, _attributeValues,

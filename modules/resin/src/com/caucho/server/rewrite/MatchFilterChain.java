@@ -39,6 +39,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -88,5 +89,12 @@ public class MatchFilterChain
       log.finest(this + " match");
 
     _passChain.doFilter(request, response);
+  }
+  
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+            + "[test=" + Arrays.asList(_predicates)
+            + ",pass=" + _passChain + ",fail=" + _failChain + "]"); 
   }
 }

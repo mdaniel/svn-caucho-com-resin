@@ -184,14 +184,20 @@ class Skeleton<S extends SimpleActorStream>
         handler.invoke(actor, id, to, from, payload);
       }
       catch (RuntimeException e) {
+        linkStream.queryError(id, from, to, payload, ActorError.create(e));
+        
         throw e;
       }
       catch (InvocationTargetException e) {
         Throwable cause = e.getCause();
 
+        linkStream.queryError(id, from, to, payload, ActorError.create(cause));
+        
         throw SkeletonInvocationException.createRuntimeException(cause);
       }
       catch (Exception e) {
+        linkStream.queryError(id, from, to, payload, ActorError.create(e));
+        
         throw SkeletonInvocationException.createRuntimeException(e);
       }
     }
@@ -224,14 +230,20 @@ class Skeleton<S extends SimpleActorStream>
         handler.invoke(actor, id, to, from, payload);
       }
       catch (RuntimeException e) {
+        linkStream.queryError(id, from, to, payload, ActorError.create(e));
+        
         throw e;
       }
       catch (InvocationTargetException e) {
         Throwable cause = e.getCause();
+        
+        linkStream.queryError(id, from, to, payload, ActorError.create(cause));
 
         throw SkeletonInvocationException.createRuntimeException(cause);
       }
       catch (Exception e) {
+        linkStream.queryError(id, from, to, payload, ActorError.create(e));
+        
         throw SkeletonInvocationException.createRuntimeException(e);
       }
     }

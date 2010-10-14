@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
@@ -65,9 +66,12 @@ import com.caucho.vfs.StreamSource;
 public class DeployClient implements Repository
 {
   private static final L10N L = new L10N(DeployClient.class);
+  
   public static final String USER_ATTRIBUTE = "user";
   public static final String MESSAGE_ATTRIBUTE = "message";
   public static final String VERSION_ATTRIBUTE = "version";
+  
+  private static final long DEPLOY_TIMEOUT = 600 * 1000L;
 
   private Broker _broker;
   private ActorClient _bamClient;
@@ -313,19 +317,7 @@ public class DeployClient implements Repository
       cb.sendNext();
     }
     
-    cb.waitForDone(Integer.MAX_VALUE);
-
-    /*
-    for (String sha1 : files) {
-      GitJarStreamSource gitSource = new GitJarStreamSource(sha1, commit);
-      StreamSource source = new StreamSource(gitSource);
-
-      DeploySendQuery query = new DeploySendQuery(sha1, source);
-
-      querySet(query);
-    }
-    return (Serializable) _bamClient.querySet(_deployJid, query);
-    */
+    cb.waitForDone(DEPLOY_TIMEOUT);
     
     putTag(tag, commit.getDigest(), attributes);
     
@@ -586,6 +578,9 @@ public class DeployClient implements Repository
     
     private ActorError _error;
     private GitCommitJar _commit;
+    
+    private AtomicInteger _inProgressCount = new AtomicInteger();
+    
     private volatile boolean _isDone;
     
     SendQueryCallback(String []hashList,
@@ -612,11 +607,21 @@ public class DeployClient implements Repository
     public void onQueryResult(String to, String from, Serializable payload)
     {
       sendNext();
+      
+      _inProgressCount.decrementAndGet();
+      
+      if (_inProgressCount.get() == 0)
+        onDone();
     }
     
     boolean isEmpty()
     {
       return _list.isEmpty();
+    }
+    
+    boolean isDone()
+    {
+      return _isDone || _inProgressCount.get() == 0 && _list.isEmpty();
     }
     
     void sendNext()
@@ -625,21 +630,32 @@ public class DeployClient implements Repository
       
       synchronized (_list) {
         if (_list.size() > 0) {
+          _inProgressCount.incrementAndGet();
           sha1 = _list.remove(0);
         }
       }
       
       if (sha1 == null) {
-        onDone();
+        if (_inProgressCount.get() == 0)
+          onDone();
         return;
       }
       
-      GitJarStreamSource gitSource = new GitJarStreamSource(sha1, _commit);
-      StreamSource source = new StreamSource(gitSource);
+      boolean isValid = false;
+      
+      try {
+        GitJarStreamSource gitSource = new GitJarStreamSource(sha1, _commit);
+        StreamSource source = new StreamSource(gitSource);
 
-      DeploySendQuery query = new DeploySendQuery(sha1, source);
+        DeploySendQuery query = new DeploySendQuery(sha1, source);
 
-      _bamClient.querySet(_deployJid, query, this);
+        _bamClient.querySet(_deployJid, query, this);
+        
+        isValid = true;
+      } finally {
+        if (! isValid)
+          onDone();
+      }
     }
     
     void onDone()
@@ -657,7 +673,7 @@ public class DeployClient implements Repository
       synchronized (this) {
         long delta;
         
-        while (! _isDone
+        while (! isDone()
                && (delta = (expires - Alarm.getCurrentTimeActual())) > 0) {
           try {
             Thread.interrupted();

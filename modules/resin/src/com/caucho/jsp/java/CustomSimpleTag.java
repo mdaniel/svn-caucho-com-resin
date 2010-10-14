@@ -157,8 +157,6 @@ public class CustomSimpleTag extends GenericTag
     throws Exception
   {
     String name = _tag.getId();
-    String className = _tagInfo.getTagClassName();
-    Class cl = _tagClass;
 
     if (! isReuse()) {
       generateTagInit(out);

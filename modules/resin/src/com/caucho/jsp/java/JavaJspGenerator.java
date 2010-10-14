@@ -1594,54 +1594,31 @@ public class JavaJspGenerator extends JspGenerator {
   private void generateFragments(JspJavaWriter out) throws Exception
   {
     boolean hasFragment = false;
-
+/*
     for (int i = 0; i < _fragmentList.size(); i++) {
       JspFragmentNode node = _fragmentList.get(i);
 
       if (node.isStatic()) {
       }
-      /*
-      else if (node.isValueFragment()) {
-        node.generateValueMethod(out);
-      }
-      */
       else
         hasFragment = true;
     }
 
     if (! hasFragment)
       return;
-
+*/
     Collections.sort(_fragmentList, new FragmentComparator());
-
     for (int i = 0; i < _fragmentList.size(); i++) {
       JspFragmentNode frag = _fragmentList.get(i);
 
-      if (frag.isStatic())
-        continue;
-      
       if (frag.isValueFragment()) {
         // jsp/1cje
         frag.generateValueMethod(out);
-//        generateValueFragment(out, frag, frag.getFragmentCode());
       }
       else {
         generateNonValueFragment(out, frag, frag.getFragmentCode());
       }
     }
-
-    /*
-    for (int i = 0; i < _fragmentList.size(); i++) {
-      JspFragmentNode frag = _fragmentList.get(i);
-
-      if (frag.isStatic())
-        continue;
-
-      if (frag.isValueFragment()) {
-        frag.generateValueMethod(out);
-      }
-    }
-    */
   }
   
   private void generateNonValueFragment(JspJavaWriter out,
@@ -1719,7 +1696,7 @@ public class JavaJspGenerator extends JspGenerator {
   {
     out.println();
 //  out.println("private void " + frag.getFragmentName() + "(JspWriter out)");
-    out.println("private void _jsp_invoke(JspWriter out)");
+    out.println("protected void _jsp_invoke(JspWriter out)");
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();

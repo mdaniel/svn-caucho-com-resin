@@ -93,6 +93,11 @@ public abstract class JspNode {
   {
     _gen = gen;
   }
+  
+  public JavaJspGenerator getGenerator()
+  {
+    return _gen;
+  }
 
   /**
    * Sets the parse state
@@ -1025,8 +1030,6 @@ public abstract class JspNode {
                                     String contextVar)
     throws Exception
   {
-    int index = _gen.addFragment(frag);
-    
     StringBuffer cb = new StringBuffer();
 
     if (frag.isStatic()) {
@@ -1040,6 +1043,9 @@ public abstract class JspNode {
       return cb.toString();
     }
 
+    int index = frag.getFragmentCode();
+    
+    getGenerator().addFragment(frag);
     String fragmentVar = frag.getFragmentName();
 
     JspNode parentTag = getParentTagNode();
@@ -1048,15 +1054,15 @@ public abstract class JspNode {
     boolean isParentSimpleTag = (parentTag instanceof CustomSimpleTag); 
 
     if (! isParentSimpleTag) {
-      cb.append(fragmentVar + " = createFragment(" + fragmentVar
-                + ", " + index
+      cb.append(fragmentVar + " = createFragment_" + index
+                + "(" + fragmentVar
                 + ", _jsp_parentContext"
                 + ", " + contextVar
                 + ", ");
     }
     else {
-      cb.append(fragmentVar + " = createFragment(null"
-                + ", " + index
+      cb.append(fragmentVar + " = createFragment_" + index
+                + "(null"
                 + ", _jsp_parentContext"
                 + ", " + contextVar
                 + ", ");
@@ -1153,7 +1159,7 @@ public abstract class JspNode {
    * Generate include params.
    */
   void generateIncludeParams(JspJavaWriter out,
-                             ArrayList params)
+                             ArrayList<JspParam> params)
     throws Exception
   {
     boolean hasQuery = false;
@@ -1237,13 +1243,13 @@ public abstract class JspNode {
       out.print(" + com.caucho.el.Expr.toString(" + outValue + ", null)");
   }
 
-  String generateJstlValue(Class type, String value)
+  String generateJstlValue(Class<?> type, String value)
     throws Exception
   {
     return generateParameterValue(type, value, true, null, false);
   }
 
-  String generateValue(Class type, String value)
+  String generateValue(Class<?> type, String value)
     throws Exception
   {
     return generateParameterValue(type, value, true, null,
@@ -1364,8 +1370,6 @@ public abstract class JspNode {
         return ("_caucho_expr_" + exprIndex);
       }
       else if (com.caucho.xpath.Expr.class.equals(type)) {
-        int exprIndex;
-
         com.caucho.xpath.Expr expr;
         if (isEmpty)
           expr = XPath.parseExpr("");
@@ -1469,7 +1473,7 @@ public abstract class JspNode {
     }
   }
     
-  protected String generateELValue(Class type, String value)
+  protected String generateELValue(Class<?> type, String value)
     throws Exception
   {
     if (type.equals(com.caucho.el.Expr.class)) {
@@ -1699,7 +1703,7 @@ public abstract class JspNode {
       out.print("(" + type + ")" + value);
   }
 
-  protected String classToString(Class cl)
+  protected String classToString(Class<?> cl)
   {
     if (cl.isArray())
       return classToString(cl.getComponentType()) + "[]";
@@ -1814,7 +1818,7 @@ public abstract class JspNode {
   /**
    * Converts a string-valued expression to the given type.
    */
-  String stringToValue(Class type, String obj)
+  String stringToValue(Class<?> type, String obj)
   {
     if (boolean.class.equals(type))
       return "com.caucho.jsp.PageContextImpl.toBoolean(" + obj + ")";
@@ -1857,7 +1861,7 @@ public abstract class JspNode {
   /**
    * Converts a string-valued expression to the given type.
    */
-  Object staticStringToValue(Class type, String obj)
+  Object staticStringToValue(Class<?> type, String obj)
   {
     if (boolean.class.equals(type) || Boolean.class.equals(type))
       return Boolean.valueOf(obj);
@@ -1903,7 +1907,7 @@ public abstract class JspNode {
       return null;
   }
   
-  public static String toELObject(String expr, Class type)
+  public static String toELObject(String expr, Class<?> type)
   {
     if (boolean.class.equals(type))
       return "((" + expr + ") ? Boolean.TRUE : Boolean.FALSE)";

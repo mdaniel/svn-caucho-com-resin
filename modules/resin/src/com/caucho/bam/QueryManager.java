@@ -319,5 +319,14 @@ public class QueryManager {
       if (thread != null)
         LockSupport.unpark(thread);
     }
+    
+    @Override
+    public String toString()
+    {
+      return (getClass().getSimpleName()
+              + "[to=" + _to 
+              + ",from=" + _from
+              + ",payload=" + _payload + "]");
+    }
   }
 }

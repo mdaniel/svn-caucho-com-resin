@@ -157,7 +157,7 @@ abstract public class JspFragmentNode extends JspContainerNode
     if (isStatic())
       out.println("com.caucho.jsp.StaticJspFragmentSupport " + _fragmentName + " = null;");
     else
-      out.println("_CauchoFragment " + _fragmentName + " = null;");
+      out.println("_CauchoFragment_" + _fragmentCode + " " + _fragmentName + " = null;");
   }
 
   /**
