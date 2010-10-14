@@ -29,46 +29,59 @@
 
 package com.caucho.jsp.java;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.el.ELContext;
+import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.tagext.PageData;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryValidator;
+import javax.servlet.jsp.tagext.ValidationMessage;
+
 import com.caucho.VersionFactory;
 import com.caucho.config.types.Signature;
 import com.caucho.el.Expr;
 import com.caucho.java.CompileClassNotFound;
 import com.caucho.java.LineMap;
 import com.caucho.java.LineMapWriter;
-import com.caucho.jsp.*;
+import com.caucho.jsp.JspGenerator;
+import com.caucho.jsp.JspPageConfig;
+import com.caucho.jsp.JspParseException;
+import com.caucho.jsp.ParseState;
+import com.caucho.jsp.ParseTagManager;
+import com.caucho.jsp.QPageData;
+import com.caucho.jsp.StaticPage;
+import com.caucho.jsp.TagInstance;
+import com.caucho.jsp.Taglib;
 import com.caucho.jsp.cfg.TldFunction;
 import com.caucho.jsp.el.JspELParser;
-import com.caucho.loader.DynamicClassLoader;
 import com.caucho.make.ClassDependency;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
-import com.caucho.i18n.*;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
 import com.caucho.xpath.NamespaceContext;
 import com.caucho.xpath.XPath;
 import com.caucho.xpath.XPathParseException;
-
-import javax.el.ELContext;
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.tagext.PageData;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagLibraryValidator;
-import javax.servlet.jsp.tagext.ValidationMessage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Generates JSP code.  JavaGenerator, JavaScriptGenerator, and
@@ -87,7 +100,7 @@ public class JavaJspGenerator extends JspGenerator {
   static final String IE_URL = "http://java.sun.com/products/plugin/1.2.2/jinstall-1_2_2-win.cab#Version=1,2,2,0";
   static final String NS_URL = "http://java.sun.com/products/plugin/";
 
-  static HashMap<String,Class> _primitiveClasses;
+  static HashMap<String,Class<?>> _primitiveClasses;
   static HashMap<String,String> _primitives;
 
   protected JspNode _rootNode;
@@ -125,9 +138,8 @@ public class JavaJspGenerator extends JspGenerator {
 
   protected String _fullClassName;
   protected String _className;
-  private HashMap<String,Class> _classes;
-  private ClassLoader _parentLoader;
-
+  private HashMap<String,Class<?>> _classes;
+  
   private HashSet<String> _declaredVariables = new HashSet<String>();
 
   private String _filename;
@@ -162,14 +174,10 @@ public class JavaJspGenerator extends JspGenerator {
     = new ArrayList<JspFragmentNode>();
 
   private String _workPath;
-  private String _sourceName;
   protected String _pkg;
   private int _uniqueId = 0;
   private int _jspId = 1;
 
-  private boolean _hasReleaseTag;
-  private boolean _hasBundle = false;
-  private boolean _hasBundlePrefix = false;
   private boolean _requireSource = false;
 
   private boolean _isOmitXmlDeclaration = false;
@@ -650,7 +658,7 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Adds a dependency based on a class.
    */
-  public void addDepend(Class cl)
+  public void addDepend(Class<?> cl)
   {
     addDepend(new ClassDependency(cl));
   }
@@ -1096,13 +1104,6 @@ public class JavaJspGenerator extends JspGenerator {
     }
   }
 
-  private void printTry(JspJavaWriter out) throws IOException
-  {
-    out.println("try {");
-    out.pushDepth();
-    //    out.println("_caucho_init_tags(pageContext, _jsp_tags);");
-  }
-
   public int addString(String string)
   {
     int index = _strings.get(string);
@@ -1123,13 +1124,13 @@ public class JavaJspGenerator extends JspGenerator {
     throws Exception
   {
     if (_classes == null)
-      _classes = new HashMap<String,Class>();
+      _classes = new HashMap<String,Class<?>>();
 
     try {
       if (_primitives.get(typeName) != null)
         return;
 
-      Class cl = getBeanClass(typeName);
+      Class<?> cl = getBeanClass(typeName);
 
       if (cl == null)
         throw error(L.l("Can't find class '{0}'",
@@ -1151,7 +1152,7 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Loads a bean based on the class name.
    */
-  public Class getBeanClass(String typeName)
+  public Class<?> getBeanClass(String typeName)
     throws ClassNotFoundException
   {
     // Generics parameters should be removed and only the base class loaded
@@ -1162,7 +1163,7 @@ public class JavaJspGenerator extends JspGenerator {
     // Arrays need to use Array.newInstance(cl, new int[]);
     p = typeName.indexOf('[');
     if (p > 0) {
-      Class cl = getBeanClass(typeName.substring(0, p));
+      Class<?> cl = getBeanClass(typeName.substring(0, p));
       int count = 0;
       for (int i = 0; i < typeName.length(); i++)
         if (typeName.charAt(i) == '[')
@@ -1176,7 +1177,7 @@ public class JavaJspGenerator extends JspGenerator {
       return obj.getClass();
     }
 
-    Class cl = loadBeanClass(typeName);
+    Class<?> cl = loadBeanClass(typeName);
     if (cl != null)
       return cl;
 
@@ -1184,7 +1185,7 @@ public class JavaJspGenerator extends JspGenerator {
     int i = typeName.lastIndexOf('.');
     for (; i >= 0; i = typeName.lastIndexOf('.', i - 1)) {
       String mainClassName = typeName.substring(0, i);
-      Class mainClass = loadBeanClass(mainClassName);
+      Class<?> mainClass = loadBeanClass(mainClassName);
 
       typeName = mainClassName + '$' + typeName.substring(i + 1);
 
@@ -1195,9 +1196,9 @@ public class JavaJspGenerator extends JspGenerator {
     return null;
   }
 
-  Class loadBeanClass(String typeName)
+  Class<?> loadBeanClass(String typeName)
   {
-    Class cl = _primitiveClasses.get(typeName);
+    Class<?> cl = _primitiveClasses.get(typeName);
 
     if (cl != null)
       return cl;
@@ -1236,7 +1237,7 @@ public class JavaJspGenerator extends JspGenerator {
     return null;
   }
 
-  public Class getClass(String id)
+  public Class<?> getClass(String id)
   {
     if (_classes == null)
       return null;
@@ -1341,7 +1342,7 @@ public class JavaJspGenerator extends JspGenerator {
       if (type == null || type.equals(""))
         _valueExprList.add(new ValueExpr(value, expr, Object.class));
       else {
-        Class cl = getBeanClass(type);
+        Class<?> cl = getBeanClass(type);
 
         if (cl == null)
           throw new NullPointerException(type);
@@ -1365,8 +1366,8 @@ public class JavaJspGenerator extends JspGenerator {
 
     com.caucho.el.Expr expr = parser.parse();
 
-    Class retType = void.class;
-    Class []args = new Class[0];
+    Class<?> retType = void.class;
+    Class<?> []args = new Class[0];
 
     try {
       if (sigString != null && ! sigString.equals("")) {
@@ -1426,7 +1427,7 @@ public class JavaJspGenerator extends JspGenerator {
   private void generateExprs(JspJavaWriter out) throws IOException
   {
     for (int i = 0; i < _exprList.size(); i++) {
-      String expr = _exprList.get(i);
+      // String expr = _exprList.get(i);
 
       out.println("private static com.caucho.el.Expr _caucho_expr_" + i + ";");
       /*
@@ -1437,11 +1438,12 @@ public class JavaJspGenerator extends JspGenerator {
     }
 
     for (int i = 0; i < _valueExprList.size(); i++) {
+      /*
       ValueExpr expr = _valueExprList.get(i);
 
       String exprType = "ObjectValueExpression";
 
-      Class retType = expr.getReturnType();
+      Class<?> retType = expr.getReturnType();
 
       if (String.class.equals(retType))
         exprType = "StringValueExpression";
@@ -1473,13 +1475,12 @@ public class JavaJspGenerator extends JspGenerator {
         exprType = "BigIntegerValueExpression";
       else if (BigDecimal.class.equals(retType))
         exprType = "BigDecimalValueExpression";
+        */
 
       out.println("private static javax.el.ValueExpression _caucho_value_expr_" + i + ";");
     }
 
     for (int i = 0; i < _methodExprList.size(); i++) {
-      MethodExpr expr = _methodExprList.get(i);
-
       out.println("private static javax.el.MethodExpression _caucho_method_expr_" + i + ";");
     }
   }
@@ -1518,8 +1519,6 @@ public class JavaJspGenerator extends JspGenerator {
       return;
 
     for (int i = 0; i < _xpathExprList.size(); i++) {
-      com.caucho.xpath.Expr expr = _xpathExprList.get(i);
-
       out.println("private static com.caucho.xpath.Expr _caucho_xpath_" + i + ";");
     }
 
@@ -1613,112 +1612,25 @@ public class JavaJspGenerator extends JspGenerator {
     if (! hasFragment)
       return;
 
-    out.println();
-    out.println("_CauchoFragment createFragment(_CauchoFragment frag, int code,");
-    out.println("                               javax.servlet.jsp.JspContext _jsp_parentContext,");
-    out.println("                               com.caucho.jsp.PageContextImpl pageContext,");
-    out.println("                               javax.servlet.jsp.tagext.JspTag parent,");
-    out.println("                               javax.servlet.jsp.tagext.JspFragment jspBody,");
-    out.println("                               TagState _jsp_state,");
-    out.println("                               com.caucho.jsp.PageManager _jsp_pageManager)");
-    out.println("{");
-    out.pushDepth();
-    out.println("if (frag == null) {");
-    out.println("  frag = new _CauchoFragment(code, _jsp_parentContext,");
-    out.println("               pageContext, parent, jspBody, _jsp_state,");
-    out.println("               _jsp_pageManager);");
-    out.println("}");
-    out.println();
-    out.println();
-    out.println("return frag;");
-    out.popDepth();
-    out.println("}");
-
-    out.println("public class _CauchoFragment extends com.caucho.jsp.JspFragmentSupport {");
-    out.pushDepth();
-    out.println("private int _frag_code;");
-    out.println("private TagState _jsp_state;");
-
-    out.println("_CauchoFragment(int code,");
-    out.println("                javax.servlet.jsp.JspContext _jsp_parentContext,");
-    out.println("                com.caucho.jsp.PageContextImpl pageContext,");
-    out.println("                javax.servlet.jsp.tagext.JspTag parent,");
-    out.println("                javax.servlet.jsp.tagext.JspFragment jspBody,");
-    out.println("                TagState _jsp_state,");
-    out.println("                com.caucho.jsp.PageManager _jsp_pageManager)");
-    out.println("{");
-    out.pushDepth();
-    out.println("this._frag_code = code;");
-    out.println("this._jsp_parentContext = _jsp_parentContext;");
-    out.println("this.pageContext = pageContext;");
-    out.println("this._jsp_env = pageContext.getELContext();");
-    out.println("this._jsp_parent_tag = parent;");
-    out.println("this._jspBody = jspBody;");
-    out.println("this._jsp_state = _jsp_state;");
-    out.println("this._jsp_pageManager = _jsp_pageManager;");
-    out.popDepth();
-    out.println("}");
+    Collections.sort(_fragmentList, new FragmentComparator());
 
     for (int i = 0; i < _fragmentList.size(); i++) {
       JspFragmentNode frag = _fragmentList.get(i);
 
       if (frag.isStatic())
         continue;
-
+      
       if (frag.isValueFragment()) {
-        continue; // frag.generateValueMethod(out);
+        // jsp/1cje
+        frag.generateValueMethod(out);
+//        generateValueFragment(out, frag, frag.getFragmentCode());
       }
       else {
-        out.println();
-        out.println("private void " + frag.getFragmentName() + "(JspWriter out)");
-        out.println("  throws Throwable");
-        out.println("{");
-        out.pushDepth();
-
-        HashSet<String> oldDeclaredVariables = _declaredVariables;
-        _declaredVariables = new HashSet<String>();
-        try {
-          if (frag.hasScripting()) {
-            generateScriptingVariables(out);
-          }
-
-          frag.generatePrologueChildren(out);
-          frag.generate(out);
-        } finally {
-          _declaredVariables = oldDeclaredVariables;
-        }
-
-        out.popDepth();
-        out.println("}");
+        generateNonValueFragment(out, frag, frag.getFragmentCode());
       }
     }
 
-    out.println();
-    out.println("protected void _jsp_invoke(JspWriter out)");
-    out.println("  throws Throwable");
-    out.println("{");
-    out.pushDepth();
-    out.println("switch (_frag_code) {");
-
-    for (int i = 0; i < _fragmentList.size(); i++) {
-      JspFragmentNode frag = _fragmentList.get(i);
-
-      if (frag.isStatic() || frag.isValueFragment())
-        continue;
-
-      out.println("case " + i + ":");
-      out.println("  " + frag.getFragmentName() + "(out);");
-      out.println("  break;");
-    }
-
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
-
+    /*
     for (int i = 0; i < _fragmentList.size(); i++) {
       JspFragmentNode frag = _fragmentList.get(i);
 
@@ -1729,6 +1641,104 @@ public class JavaJspGenerator extends JspGenerator {
         frag.generateValueMethod(out);
       }
     }
+    */
+  }
+  
+  private void generateNonValueFragment(JspJavaWriter out,
+                                        JspFragmentNode frag,
+                                        int id)
+    throws Exception
+  {
+    out.println();
+    out.println("_CauchoFragment_" + id + " createFragment_" + id + "(_CauchoFragment_" + id + " frag,");
+    out.println("                               javax.servlet.jsp.JspContext _jsp_parentContext,");
+    out.println("                               com.caucho.jsp.PageContextImpl pageContext,");
+    out.println("                               javax.servlet.jsp.tagext.JspTag parent,");
+    out.println("                               javax.servlet.jsp.tagext.JspFragment jspBody,");
+    out.println("                               TagState _jsp_state,");
+    out.println("                               com.caucho.jsp.PageManager _jsp_pageManager)");
+    out.println("{");
+    out.pushDepth();
+    out.println("if (frag == null) {");
+    out.println("  frag = new _CauchoFragment_" + id + "(_jsp_parentContext,");
+    out.println("               pageContext, parent, jspBody, _jsp_state,");
+    out.println("               _jsp_pageManager);");
+    out.println("}");
+    out.println();
+    out.println();
+    out.println("return frag;");
+    out.popDepth();
+    out.println("}");
+
+    out.println("public class _CauchoFragment_" + id + " extends com.caucho.jsp.JspFragmentSupport {");
+    out.pushDepth();
+    // out.println("private int _frag_code;");
+    out.println("private TagState _jsp_state;");
+
+    out.println("_CauchoFragment_" + id + "(");
+    out.println("                javax.servlet.jsp.JspContext _jsp_parentContext,");
+    out.println("                com.caucho.jsp.PageContextImpl pageContext,");
+    out.println("                javax.servlet.jsp.tagext.JspTag parent,");
+    out.println("                javax.servlet.jsp.tagext.JspFragment jspBody,");
+    out.println("                TagState _jsp_state,");
+    out.println("                com.caucho.jsp.PageManager _jsp_pageManager)");
+    out.println("{");
+    out.pushDepth();
+    // out.println("this._frag_code = code;");
+    out.println("this._jsp_parentContext = _jsp_parentContext;");
+    out.println("this.pageContext = pageContext;");
+    out.println("this._jsp_env = pageContext.getELContext();");
+    out.println("this._jsp_parent_tag = parent;");
+    out.println("this._jspBody = jspBody;");
+    out.println("this._jsp_state = _jsp_state;");
+    out.println("this._jsp_pageManager = _jsp_pageManager;");
+    out.popDepth();
+    out.println("}");
+
+    generateNonValueFragment(out, frag);
+    // frag.generateValueMethod(out);
+    /*
+    out.println();
+    out.println("protected void _jsp_invoke(JspWriter out)");
+    out.println("  throws Throwable");
+    out.println("{");
+    out.pushDepth();
+    
+
+    out.popDepth();
+    out.println("}");
+    */
+
+    out.popDepth();
+    out.println("}");
+  }
+    
+  private void generateNonValueFragment(JspJavaWriter out,
+                                        JspFragmentNode frag)
+    throws Exception
+  {
+    out.println();
+//  out.println("private void " + frag.getFragmentName() + "(JspWriter out)");
+    out.println("private void _jsp_invoke(JspWriter out)");
+    out.println("  throws Throwable");
+    out.println("{");
+    out.pushDepth();
+
+    HashSet<String> oldDeclaredVariables = _declaredVariables;
+    _declaredVariables = new HashSet<String>();
+    try {
+      if (frag.hasScripting()) {
+        generateScriptingVariables(out);
+      }
+
+      frag.generatePrologueChildren(out);
+      frag.generate(out);
+    } finally {
+      _declaredVariables = oldDeclaredVariables;
+    }
+
+    out.popDepth();
+    out.println("}");
   }
 
   private void generateScriptingVariables(JspJavaWriter out) throws IOException
@@ -2021,7 +2031,7 @@ public class JavaJspGenerator extends JspGenerator {
 
       out.print(", new Class[] {");
 
-      Class []args = expr.getArgs();
+      Class<?> []args = expr.getArgs();
       if (args != null) {
         for (int j = 0; j < args.length; j++) {
           if (j != 0)
@@ -2303,7 +2313,7 @@ public class JavaJspGenerator extends JspGenerator {
       return;
 
     out.println();
-    Iterator iter = _strings.iterator();
+    Iterator<?> iter = _strings.iterator();
     while (iter.hasNext()) {
       Object key = iter.next();
       int j = _strings.get(key);
@@ -2393,7 +2403,7 @@ public class JavaJspGenerator extends JspGenerator {
   Path getGeneratedPath()
     throws IOException
   {
-    String name = _pkg + "." + _className;
+    // String name = _pkg + "." + _className;
 
     Path dir = getJspCompiler().getClassDir().lookup(_workPath);
     Path javaPath = dir.lookup(_className + ".java");
@@ -2440,7 +2450,7 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Returns the tag with the given qname.
    */
-  public Class getTagClass(QName qname)
+  public Class<?> getTagClass(QName qname)
     throws Exception
   {
     return _tagManager.getTagClass(qname);
@@ -2509,11 +2519,11 @@ public class JavaJspGenerator extends JspGenerator {
   static class MethodExpr {
     private String _exprString;
     com.caucho.el.Expr _expr;
-    Class []_args;
-    Class _retType;
+    Class<?> []_args;
+    Class<?> _retType;
 
     MethodExpr(String exprString,
-               com.caucho.el.Expr expr, Class []args, Class retType)
+               com.caucho.el.Expr expr, Class<?> []args, Class<?> retType)
     {
       _exprString = exprString;
       _expr = expr;
@@ -2531,12 +2541,12 @@ public class JavaJspGenerator extends JspGenerator {
       return _expr;
     }
 
-    Class []getArgs()
+    Class<?> []getArgs()
     {
       return _args;
     }
 
-    Class getReturnType()
+    Class<?> getReturnType()
     {
       return _retType;
     }
@@ -2545,9 +2555,9 @@ public class JavaJspGenerator extends JspGenerator {
   static class ValueExpr {
     private String _exprString;
     com.caucho.el.Expr _expr;
-    Class _retType;
+    Class<?> _retType;
 
-    ValueExpr(String exprString, com.caucho.el.Expr expr, Class retType)
+    ValueExpr(String exprString, com.caucho.el.Expr expr, Class<?> retType)
     {
       _exprString = exprString;
       _expr = expr;
@@ -2564,9 +2574,28 @@ public class JavaJspGenerator extends JspGenerator {
       return _expr;
     }
 
-    Class getReturnType()
+    Class<?> getReturnType()
     {
       return _retType;
+    }
+  }
+  
+  static class FragmentComparator implements Comparator<JspFragmentNode> {
+    @Override
+    public int compare(JspFragmentNode a, JspFragmentNode b)
+    {
+      return getDepth(a) - getDepth(b);
+    }
+    
+    private int getDepth(JspNode node)
+    {
+      int depth = 0;
+      
+      for (; node != null; node = node.getParent()) {
+        depth++;
+      }
+      
+      return depth;
     }
   }
 
@@ -2581,7 +2610,7 @@ public class JavaJspGenerator extends JspGenerator {
     _primitives.put("float", "float");
     _primitives.put("double", "double");
 
-    _primitiveClasses = new HashMap<String,Class>();
+    _primitiveClasses = new HashMap<String,Class<?>>();
     _primitiveClasses.put("boolean", boolean.class);
     _primitiveClasses.put("byte", byte.class);
     _primitiveClasses.put("short", short.class);

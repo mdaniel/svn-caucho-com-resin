@@ -59,6 +59,7 @@ import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.repository.RepositoryTagEntry;
+import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.management.server.EAppMXBean;
@@ -118,7 +119,10 @@ public class DeployActor extends SimpleActor
     _repository = RepositoryService.getCurrentRepositorySpi();
 
     setLinkStream(getBroker().getBrokerStream());
-    getBroker().addActor(getActorStream());
+    HempMemoryQueue queue
+      = new HempMemoryQueue(getActorStream(), getLinkStream(), 2);
+    
+    getBroker().addActor(queue);
   }
 
   @QueryGet

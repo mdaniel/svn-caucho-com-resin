@@ -112,7 +112,7 @@ public class ServerAuthManager {
     if (credentials instanceof SignedCredentials) {
       SignedCredentials signedCred = (SignedCredentials) credentials;
 
-      String uid= signedCred.getUid();
+      String uid = signedCred.getUid();
       String nonce = signedCred.getNonce();
       String signature = signedCred.getSignature();
       
@@ -127,7 +127,6 @@ public class ServerAuthManager {
       String serverSignature;
       
       if (uid != null && ! uid.equals("")) {
-        // XXXX:
         serverSignature = _security.signSystem(uid, nonce);
       }
       else if (_security.isSystemAuthKey() || ! _isAuthenticationRequired)

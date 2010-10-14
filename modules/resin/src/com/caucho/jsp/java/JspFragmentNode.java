@@ -44,7 +44,7 @@ abstract public class JspFragmentNode extends JspContainerNode
 
   private boolean _isValueFragment;
   private boolean _isJspFragment;
-
+  
   public JspFragmentNode()
   {
   }
@@ -122,6 +122,11 @@ abstract public class JspFragmentNode extends JspContainerNode
     return _isValueFragment;
   }
   
+  public int getFragmentCode()
+  {
+    return _fragmentCode;
+  }
+  
   /**
    * Set true if the fragment is used as a fragment object.
    */
@@ -158,6 +163,7 @@ abstract public class JspFragmentNode extends JspContainerNode
   /**
    * Generates the children.
    */
+  @Override
   public void generate(JspJavaWriter out)
     throws Exception
   {
@@ -251,6 +257,14 @@ abstract public class JspFragmentNode extends JspContainerNode
         throw node.error(L.l("Fragments may not contain scripting elements"));
     }
     
+    /*
+    out.println();
+    out.println("protected void _jsp_invoke(JspWriter out)");
+    out.println("  throws Throwable");
+    out.println("{");
+    out.println("}");
+    */
+    
     out.println();
     // jsp/1c0o - non-static
     
@@ -277,7 +291,7 @@ abstract public class JspFragmentNode extends JspContainerNode
       out.println("javax.servlet.ServletContext application = pageContext.getServletContext();");
       out.println("javax.servlet.ServletConfig config = pageContext.getServletConfig();");
     }
-
+    
     out.println("try {");
     out.pushDepth();
 

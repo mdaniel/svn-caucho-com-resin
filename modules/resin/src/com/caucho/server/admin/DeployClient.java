@@ -31,11 +31,14 @@ package com.caucho.server.admin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorError;
 import com.caucho.bam.Broker;
+import com.caucho.bam.QueryCallback;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.cloud.deploy.CopyTagQuery;
@@ -50,6 +53,7 @@ import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.Server;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.InputStreamSource;
 import com.caucho.vfs.Path;
@@ -303,6 +307,15 @@ public class DeployClient implements Repository
   {
     String []files = getCommitList(commit.getCommitList());
 
+    SendQueryCallback cb = new SendQueryCallback(files, commit);
+    
+    for (int i = 0; ! cb.isEmpty() && i < 5; i++) {
+      cb.sendNext();
+    }
+    
+    cb.waitForDone(Integer.MAX_VALUE);
+
+    /*
     for (String sha1 : files) {
       GitJarStreamSource gitSource = new GitJarStreamSource(sha1, commit);
       StreamSource source = new StreamSource(gitSource);
@@ -311,6 +324,8 @@ public class DeployClient implements Repository
 
       querySet(query);
     }
+    return (Serializable) _bamClient.querySet(_deployJid, query);
+    */
     
     putTag(tag, commit.getDigest(), attributes);
     
@@ -564,6 +579,99 @@ public class DeployClient implements Repository
   {
     // TODO Auto-generated method stub
     
+  }
+  
+  class SendQueryCallback implements QueryCallback {
+    private ArrayList<String> _list;
+    
+    private ActorError _error;
+    private GitCommitJar _commit;
+    private volatile boolean _isDone;
+    
+    SendQueryCallback(String []hashList,
+                      GitCommitJar commit)
+    {
+      _list = new ArrayList<String>();
+      for (String hash : hashList)
+        _list.add(hash);
+      
+      _commit = commit;
+    }
+
+    @Override
+    public void onQueryError(String to, String from, Serializable payload,
+                             ActorError error)
+    {
+      if (_error == null)
+        _error = error;
+      
+      onDone();
+    }
+
+    @Override
+    public void onQueryResult(String to, String from, Serializable payload)
+    {
+      sendNext();
+    }
+    
+    boolean isEmpty()
+    {
+      return _list.isEmpty();
+    }
+    
+    void sendNext()
+    {
+      String sha1 = null;
+      
+      synchronized (_list) {
+        if (_list.size() > 0) {
+          sha1 = _list.remove(0);
+        }
+      }
+      
+      if (sha1 == null) {
+        onDone();
+        return;
+      }
+      
+      GitJarStreamSource gitSource = new GitJarStreamSource(sha1, _commit);
+      StreamSource source = new StreamSource(gitSource);
+
+      DeploySendQuery query = new DeploySendQuery(sha1, source);
+
+      _bamClient.querySet(_deployJid, query, this);
+    }
+    
+    void onDone()
+    {
+      synchronized (this) {
+        _isDone = true;
+        notifyAll();
+      }
+    }
+    
+    boolean waitForDone(long timeout)
+    {
+      long expires = Alarm.getCurrentTimeActual() + timeout;
+
+      synchronized (this) {
+        long delta;
+        
+        while (! _isDone
+               && (delta = (expires - Alarm.getCurrentTimeActual())) > 0) {
+          try {
+            Thread.interrupted();
+            wait(delta);
+          } catch (Exception e) {
+          }
+        }
+      }
+      
+      if (_error != null)
+        throw _error.createException();
+      
+      return _isDone;
+    }
   }
 }
 

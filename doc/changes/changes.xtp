@@ -13,6 +13,8 @@
 
 <s2 title="4.0.12 - snapshot">
 <ul>
+<li>dist: cr-nl issue on windows for .git commit  (#4241, rep by James Gittelson)</li>
+<li>session: serialization issues with classloader and timeout (#4254, rep by Steven Nicholai)</li>
 <li>dbpool: ping on connection/statement errors instead of discarding</li>
 <li>health: add ConnectionPoolHealthCheck</li>
 <li>watchdog: "stop" should shutdown the watchdog manager if the last server is stopped</li>

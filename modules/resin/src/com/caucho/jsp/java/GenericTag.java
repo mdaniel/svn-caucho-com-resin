@@ -63,7 +63,7 @@ abstract public class GenericTag extends JspContainerNode
   
   protected TagInstance _tag;
   protected TagInfo _tagInfo;
-  protected Class _tagClass;
+  protected Class<?> _tagClass;
   protected VariableInfo []_varInfo;
 
   private boolean _isDeclaringInstance;
@@ -411,6 +411,8 @@ abstract public class GenericTag extends JspContainerNode
     _tag = parent.findTag(getQName(), _attributeNames,
                           hasBodyContent);
 
+    System.out.println("TAG: " + _tag + " " + getQName() + " " + parent);
+    Thread.dumpStack();
     if (_tag == null || ! _parseState.isRecycleTags()) {
       _tag = parent.addTag(_gen, getQName(), _tagInfo, _tagClass,
                            _attributeNames, _attributeValues,
@@ -419,7 +421,6 @@ abstract public class GenericTag extends JspContainerNode
       if (! JspTagFileSupport.class.isAssignableFrom(_tagClass)) {
         out.printClass(_tagClass);
         out.println(" " + _tag.getId() + " = null;");
-
       }
       _isDeclaringInstance = true;
 

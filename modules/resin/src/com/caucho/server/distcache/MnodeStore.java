@@ -60,6 +60,8 @@ public class MnodeStore implements AlarmListener {
   private FreeList<CacheMapConnection> _freeConn
     = new FreeList<CacheMapConnection>(32);
 
+  private final String _serverName;
+  
   private final Path _path;
   private final String _tableName;
 
@@ -88,6 +90,7 @@ public class MnodeStore implements AlarmListener {
   public MnodeStore(Path path, String serverName)
     throws Exception
   {
+    _serverName = serverName;
     _path = path.lookup("distcache");
     // _tableName = serverNameToTableName(serverName);
     _tableName = "mnode";
@@ -720,7 +723,7 @@ public class MnodeStore implements AlarmListener {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() +  "[" + _tableName + "]";
+    return getClass().getSimpleName() +  "[" + _serverName + "]";
   }
 
   class CacheMapConnection {

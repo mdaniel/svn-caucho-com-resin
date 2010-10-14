@@ -472,6 +472,7 @@ public abstract class JspContainerNode extends JspNode {
   /**
    * generates data for prologue children.
    */
+  @Override
   public void generatePrologueChildren(JspJavaWriter out)
     throws Exception
   {
