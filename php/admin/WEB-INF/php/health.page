@@ -83,15 +83,15 @@ function display_health_status($s)
   $label = $si . " - " . $s->Name;
 
   if (! $health) {
-    print_fail(" $label");
+    print_fail("&nbsp;$label");
     $message = " : cannot connect to server $label";
   }
   else if ($health->Status == "OK") {
     print_ok("");
-    echo " $label";
+    echo "&nbsp;$label";
   }
   else if ($health->Status == "FAIL") {
-    print_fail(" $label");
+    print_fail("&nbsp;$label");
   }
   else {
     echo $label;
@@ -112,13 +112,13 @@ function display_health_status($s)
       echo "<td>";
 
       if ($s_health->Status == "FAIL") {
-        print_fail(" " . $s_health->Name);
+        print_fail("&nbsp;" . $s_health->Name);
       }
       else if ($s_health->Status == "OK") {
-        print_ok(""); echo " " . $s_health->Name;
+        print_ok(""); echo "&nbsp;" . $s_health->Name;
       }
       else {
-        print_warn(" " . $s_health->Name);
+        print_warn("&nbsp;" . $s_health->Name);
       }
 
       echo "</td>";

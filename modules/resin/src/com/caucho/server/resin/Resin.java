@@ -167,8 +167,6 @@ public class Resin
   
   private ResinWaitForExitService _waitForExitService;
 
-  private String _stage = null;
-
   /**
    * Creates a new resin server.
    */
@@ -355,11 +353,6 @@ public class Resin
   public void setPingSocket(Socket socket)
   {
     _pingSocket = socket;
-  }
-  
-  public void setStage(String stage)
-  {
-    _stage = stage; 
   }
   
   public void setEmbedded(boolean isEmbedded)
@@ -1178,8 +1171,8 @@ public class Resin
     
     _servletContainer = createServer(networkService);
 
-    if (_stage != null)
-      _servletContainer.setStage(_stage);
+    if (_args != null && _args.getStage() != null)
+      _servletContainer.setStage(_args.getStage());
     
     NetworkListenService listenService
       = new NetworkListenService(_selfServer);
