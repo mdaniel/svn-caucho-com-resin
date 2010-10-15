@@ -163,6 +163,8 @@ namespace Caucho
     {
       StringBuilder jvmArgs = new StringBuilder();
       StringBuilder resinArgs = new StringBuilder();
+
+      Command = "gui";
      
       int argsIdx = 1;
       while (argsIdx < arguments.Count) {
