@@ -671,6 +671,7 @@ else {
 </div>
 
 <div style='float: right; width: 20%; text-align: right;'>
+ <span class='status-item'><a target="caucho-wiki" href="http://wiki.caucho.com/Admin: <?= ucfirst($g_page) ?>">help</a></span>
  <span class='status-item'><a href="<?= $g_next_url ?>">refresh</a></span>
  <span class='status-item logout'><a href="?q=index.php&logout=true">logout</a></span>
 </div>
