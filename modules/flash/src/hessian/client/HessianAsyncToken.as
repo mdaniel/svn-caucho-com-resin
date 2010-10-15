@@ -103,7 +103,7 @@ package hessian.client
         var ch:int = stream.readByte();
 
         if (ch != 'H'.charCodeAt())
-          throw new Error("expected hessian reply at " + ch);
+          throw new Error("expected hessian reply at " + codeName(ch));
 
         var major:int = stream.readByte();
         var minor:int = stream.readByte();
