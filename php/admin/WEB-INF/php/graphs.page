@@ -5,13 +5,12 @@ $cache = resin_create_distcache("resin:admin:graph");
 $p_hash = htmlspecialchars($_REQUEST['h']);
 
 $p_submit = $_REQUEST['submit'];
-$p_graph = htmlspecialchars($_REQUEST['graph']);
+$p_graph = htmlspecialchars($_REQUEST['user-meters']);
 $p_period = htmlspecialchars($_REQUEST['p']);
 if ($_REQUEST['period'])
   $p_period = htmlspecialchars($_REQUEST['period']);
 
 $p_servers = explode(" ", htmlspecialchars($_REQUEST['server-set']));
-
 $user = quercus_servlet_request()->getRemoteUser();
 
 $user_item = $cache->get($user);
@@ -89,6 +88,9 @@ if ($p_servers == null) {
 
 foreach ($p_checks as $check) {
   foreach ($p_servers as $server) {
+    if ($server == 'self')
+      $server = $self_index;
+      
     $p_names[] = "$server|$check";
   }
 }
@@ -129,7 +131,8 @@ function display_graph_selection()
   echo "<form name='def_graph' method='POST' action='" . $g_next_url . "'>";
   echo "<input type='hidden' name='period' value='$p_period'/>\n";
   echo "<b>Meters:</b>\n";
-  echo "<select name='graph' onchange='javascript:document.forms.def_graph.submit();'>\n";
+
+  echo "<select name='user-meters' onchange='javascript:document.forms.def_graph.submit();'>\n";
 
   $selected = false;
   foreach ($user_item['user-graphs'] as $name => $hash) {
@@ -311,7 +314,7 @@ function display_new_graph_form()
   }
 
   // server
-  echo "<form method='post' action='" . $g_next_url . "'>"
+  echo "<form name='name_form' method='post' action='" . $g_next_url . "'>"
   echo "<input type='hidden' name='submit' value='true'>\n";
   echo "<h2><span id='meter-switch' class='switch'></span>Meters</h2>";
   echo "<button id='clear-graph' style='margin: 0 1em'>Clear Meters</button>";
@@ -347,7 +350,9 @@ function display_new_graph_form()
 
   echo "<div style='text-align: right'>\n";
   echo "<div id='validation-notice' class='ui-state-error ui-corner-all' style='display:none'></div>\n";
-  echo "<input name='name' style='width: 100%;'></input>\n";
+  echo "<input name='name' style='width: 100%;'>"
+  echo "</input>\n";
+
   echo "<input type='submit' value='Save Meters'><br>\n";
   echo "</div>\n";
 

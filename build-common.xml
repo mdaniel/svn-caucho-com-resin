@@ -1247,6 +1247,8 @@
       
       <fileset dir="${resin.install}">
         <include name="bin/resin.sh"/>
+        <include name="bin/start.bat"/>
+        <include name="bin/stop.bat"/>
       </fileset>
       
       <fileset dir="${resin.install}/dist/libexec">
