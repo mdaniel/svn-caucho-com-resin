@@ -733,6 +733,8 @@
       <fileset dir="${dist}/${dist.name}">
         <include name="configure"/>
         <include name="bin/resin.sh"/>
+        <include name="bin/start.bat"/>
+        <include name="bin/stop.bat"/>
         <include name="automake/missing"/>
         <include name="automake/install-sh"/>
         <include name="automake/config.sub"/>
