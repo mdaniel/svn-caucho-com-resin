@@ -145,7 +145,7 @@ package hessian.client
       request.method = "POST";
       request.contentType = "binary/octet-stream";
 
-      return new HessianAsyncToken(request, _returnTypes[name]);
+      return new HessianAsyncToken(request, new Hessian2Input(), _returnTypes[name]);
     }
 
     /**

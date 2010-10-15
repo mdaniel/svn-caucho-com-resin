@@ -77,13 +77,13 @@ package hessian.client
                                       input:Hessian2Input,
                                       returnType:Class = null)
     {
+      _returnType = returnType;
+      _input = input;
+
       var stream:URLStream = new URLStream();
       stream.addEventListener(Event.COMPLETE, handleComplete);
       stream.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
       stream.load(request);
-
-      _returnType = returnType;
-      _input = input;
     }
 
     /** @private */
@@ -99,14 +99,24 @@ package hessian.client
 
       var ret:Object = null;
       var event:Event = null;
-
       try {
+        var ch:int = stream.readByte();
+
+        if (ch != 'H'.charCodeAt())
+          throw new Error("expected hessian reply at " + ch);
+
+        var major:int = stream.readByte();
+        var minor:int = stream.readByte();
+
+        // XXX: do something with the version
+
         _input.init(stream);
         ret = _input.readReply(_returnType);
+
         event = new HessianResultEvent(this, ret);
       }
       catch (e:Error) {
-        event = new HessianErrorEvent(this, e);
+        event = new HessianErrorEvent(this, e);;
       }
       finally {
         stream.close();
@@ -121,6 +131,15 @@ package hessian.client
     public function get returnType():Class
     {
       return _returnType;
+    }
+
+    protected function codeName(ch:int):String
+    {
+      if (ch < 0)
+        return "end of file";
+      else
+        return "0x" + (ch & 0xff).toString(16) +
+               " (" + String.fromCharCode(ch) + ")";
     }
 
     public function set returnType(returnType:Class):void
