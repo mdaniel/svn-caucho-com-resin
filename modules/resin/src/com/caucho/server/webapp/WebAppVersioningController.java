@@ -63,7 +63,7 @@ public class WebAppVersioningController extends WebAppController {
   private ExpandVersion _primaryVersion;
   private WebAppController _primaryController;
   
-  private boolean _isModified = true;
+  private boolean _isModified = false;
   private AtomicBoolean _isUpdating = new AtomicBoolean();
 
   public WebAppVersioningController(String id,
@@ -145,6 +145,27 @@ public class WebAppVersioningController extends WebAppController {
     else
       return null;
   }
+
+  @Override
+  public WebApp getDeployInstance()
+  {
+    WebAppController controller = _primaryController;
+
+    if (controller != null)
+      return controller.request();
+    else
+      return null;
+  }
+  
+  @Override
+  protected void stopImpl()
+  {
+  }
+  
+  @Override
+  protected void stopLazyImpl()
+  {
+  }
   
   @Override
   protected void destroyInstance(WebApp instance)
@@ -165,28 +186,22 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   public boolean isModified()
   {
-    if (_isModified)
-      return true;
-
-    // VersionEntry entry = _generator.getVersionEntry(getId());
-/*
-    if (entry == null)
-      return false;
-*/
-    return false;
+    boolean isModified = updateVersion();
+    
+    return isModified;
   }
   
-  public void updateVersion()
+  public boolean updateVersion()
   {
 //    _isModified = true;
 
-    updateVersionImpl();
+    return updateVersionImpl();
   }
 
-  private void updateVersionImpl()
+  private boolean updateVersionImpl()
   {
     if (! _isUpdating.compareAndSet(false, true))
-      return;
+      return false;
 
     try {
       synchronized (this) {
@@ -196,9 +211,9 @@ public class WebAppVersioningController extends WebAppController {
         WebAppController newPrimaryController = null;
 
         ExpandVersion version = _generator.getPrimaryVersion(_baseKey);
-        
+
         if (oldPrimaryVersion != null && oldPrimaryVersion.equals(version))
-          return;
+          return false;
 
         if (version != null) {
           newPrimaryController = _generator.createVersionController(version);
@@ -210,7 +225,7 @@ public class WebAppVersioningController extends WebAppController {
         }
 
         if (newPrimaryController == oldPrimaryController)
-          return;
+          return false;
 
         log.fine(this + " updating primary to " + newPrimaryController);
 
@@ -235,6 +250,9 @@ public class WebAppVersioningController extends WebAppController {
         }
 
         _restartTime = Alarm.getCurrentTime();
+        clearCache();
+        
+        return true;
       }
     } finally {
       _isUpdating.set(false);

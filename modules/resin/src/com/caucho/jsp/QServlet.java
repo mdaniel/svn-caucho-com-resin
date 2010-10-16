@@ -259,7 +259,6 @@ abstract public class QServlet implements Servlet {
       servletPath = "/";
 
     String uri;
-    String pageURI;
 
     if (cauchoRequest != null)
       uri = cauchoRequest.getPageURI();
@@ -271,7 +270,6 @@ abstract public class QServlet implements Servlet {
     String realPath;
     Path subcontext;
 
-    Page page;
     ServletConfig config = null;
 
     String jspPath = (String) req.getAttribute("caucho.jsp.jsp-file");
@@ -291,6 +289,7 @@ abstract public class QServlet implements Servlet {
       pathInfo = RequestAdapter.getPagePathInfo(req);
 
     subcontext = getPagePath(servletPath);
+
     if (subcontext != null)
       return _manager.getPage(servletPath, subcontext);
 
@@ -348,9 +347,9 @@ abstract public class QServlet implements Servlet {
    */
   private Path getPagePath(String pathName)
   {
-    Path appDir = _webApp.getRootDirectory();
+    Path rootDir = _webApp.getRootDirectory();
     String realPath = _webApp.getRealPath(pathName);
-    Path path = appDir.lookupNative(realPath);
+    Path path = rootDir.lookupNative(realPath);
 
     if (path.isFile() && path.canRead())
       return path;

@@ -327,12 +327,12 @@ abstract public class PageManager {
                  ") -> " + path);
       }
      
-      Path appDir = getWebApp().getRootDirectory();
+      Path rootDir = getWebApp().getRootDirectory();
 
       String rawClassName = pageURI;
 
-      if (path.getPath().startsWith(appDir.getPath()))
-        rawClassName = path.getPath().substring(appDir.getPath().length());
+      if (path.getPath().startsWith(rootDir.getPath()))
+        rawClassName = path.getPath().substring(rootDir.getPath().length());
 
       String className = JavaCompiler.mangleName("jsp/" + rawClassName);
 

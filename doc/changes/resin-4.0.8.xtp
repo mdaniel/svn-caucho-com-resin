@@ -16,9 +16,9 @@ JavaEE Web Profile</p>
 <p>The current list of completed Web Profile components is:</p>
 
 <ul>
-<li>Servlet
-<li>JSP
-<li>CDI
+<li>Servlet</li>
+<li>JSP</li>
+<li>CDI</li>
 </ul>
 
 </s1>

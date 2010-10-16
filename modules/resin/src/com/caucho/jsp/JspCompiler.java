@@ -111,7 +111,11 @@ public class JspCompiler implements EnvironmentBean {
 
   public JspCompiler()
   {
-    _system = new ResinSystem("jsp-compiler");
+    _system = ResinSystem.getCurrent();
+    
+    if (_system == null)
+      _system = new ResinSystem("jsp-compiler");
+    
     _loader = _system.getClassLoader();
 
     _tagFileManager = new TagFileManager(this);

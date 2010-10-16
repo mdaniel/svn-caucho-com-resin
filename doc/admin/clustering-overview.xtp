@@ -4,11 +4,10 @@
 <description>
 
 <p>
-Multiple servers are automatically placed into a Resin cluster as your traffic
-grows beyond the limitations of a single virtual-machine instance. The
-clustered servers gain the reliability of a triple-redundant backup, the
-"triad", which serves as the hub of Resin's clustering system,
-allowing servers to be dynamically added and removed as load varies.
+When your traffic grows beyond the limitations of a single virtual-machine
+instance, your additional servers expand into a Resin cluster.
+The clustered servers gain the reliability of a triple-redundant hub, the
+"triad", which serves as the replicated backup of Resin's clustering system.
 The cluster provides automatic health checks and sensor statistics,
 reliable cluster-wise deployment, load-balancing, failover and
 distributed caching and session management.
@@ -21,41 +20,42 @@ distributed caching and session management.
 
 <s1 title="Overview">
 
-<p>In Resin, clustering is automatic because every server
-automatically belongs to a cluster. Even if you only have a single
-server, the server belongs to its own cluster. As you add more
+<p>In Resin, clustering is always enabled since every server
+belongs to a cluster. Even if you only have a single
+server, that server belongs to its own cluster. As you add more
 servers, the servers are added to the cluster, and automatically gain
 benefits like clustered health monitoring, heartbeats, distributed
 management, triple redundancy, and distributed deployment.</p>
 
-<p>The Resin clustering features include:</p>
+<p>The Resin clustering gives your application:</p>
 
 <ul>
-<li>Triple-redundant triad as the hub of the cluster.</li>
-<li>Heartbeat monitoring of all servers in the cluster.</li>
-<li>Health sensors, metering and statistics across the cluster.</li>
 <li>Distributed deployment and versioning of applications.</li>
 <li>HTTP Load balancing and failover requests.</li>
+<li>Heartbeat monitoring of all servers in the cluster.</li>
+<li>Health sensors, metering and statistics across the cluster.</li>
+<li>A triple-redundant triad as the hub of the cluster.</li>
 <li>Clustered JMS queues and topics.</li>
 <li>Distributed JMX management.</li>
 <li>Clustered caches and distributed sessions.</li>
 </ul>
 
-<p> Most web applications start their
-life-cycle being deployed to a single server. This is a very simple
-deployment model and certainly the one developers are most familiar
-with since single servers are usually used for development and testing
-(especially on a developer's local machine). The problem is that as
-the usage of a web application grows beyond moderate numbers, the
-hardware limitations of a single machine simply is not enough (the
-problem is even more acute when you have more than one high-use
-application deployed to a single machine). The physical hardware
-limits of a server usually manifest themselves as chronic high CPU and
-memory usage despite reasonable performance tuning and hardware
-upgrades.</p>
+<p>While most web applications start their life-cycle being deployed
+to a single server, it eventually becomes necessary to add servers
+either for performance or for increased reliability. The single-server
+deployment model is very simple and
+certainly the one developers are most familiar with since single
+servers are usually used for development and testing (especially on a
+developer's local machine). As the usage of a web application grows
+beyond moderate numbers, the hardware limitations of a single machine
+simply is not enough (the problem is even more acute when you have
+more than one high-use application deployed to a single machine). The
+physical hardware limits of a server usually manifest themselves as
+chronic high CPU and memory usage despite reasonable performance
+tuning and hardware upgrades.</p>
 
-<p> Server <i>load-balancing</i> solves this problem by allowing you
-to deploy a single web application to more than one physical
+<p> Server <i>load-balancing</i> solves the scaling problem by letting you
+deploy a single web application to more than one physical
 machine. These machines can then be used to share the web application
 traffic, reducing the total workload on a single machine and providing
 better performance from the perspective of the user. We'll discuss
@@ -119,16 +119,27 @@ the cluster. Because Resin cluster deployment is based on Git, it also
 allows for application versioning and staging across the cluster.
 </p>
 
+<p>When Resin is up and running, you can use following command-line
+to deploy a new war to the cluster:</p>
+
+<example>
+unix> bin/resin.sh deploy test.war -user my-user -password my-pass
+
+Deployed production/webapp/default/test from /home/caucho/ws/test.war
+  to http://192.168.1.10:8080/hmtp
+</example>
+
 <p> In order to use Resin clustered deployment, you must first enable
-remote deployment on the server, which is disabled by default. You do
-this using the following Resin configuration: </p>
+remote deployment on the server, which is disabled by default for security.
+You do this using the following Resin configuration: </p>
 
 <example title="Enabling Resin Clustered Deployment">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin">
   &lt;cluster id="app-tier">
+
     &lt;resin:AdminAuthenticator password-digest="none">
-      &lt;resin:user name="admin" password="myadminpass"/>
+      &lt;resin:user name="my-user" password="my-pass"/>
     &lt;/resin:AdminAuthenticator>
     
     &lt;resin:RemoteAdminService/>
@@ -144,40 +155,6 @@ enabled for any remote administration and deployment for obvious
 security reasons. To keep things simple, we used a clear-text password
 above, but you should likely use a password hash instead.  </p>
 
-<p>Once the cluster is up and running, you can use the Ant snippet
-below to do a remote deployment: </p>
-
-<example title="Clustered Deployment via Ant">
-&lt;project name="test" default="test" basedir=".">
-  &lt;property name="resin.home" value="/usr/share/resin"/>
-  &lt;target name="test">
-    &lt;taskdef name="resin-upload-war"
-             classname="com.caucho.ant.ResinUploadWar">
-      &lt;classpath>
-        &lt;fileset dir="${resin.home}">
-          &lt;include name="lib/*.jar"/>
-          &lt;include name="plugins/resin-ant.jar"/>
-        &lt;/fileset>
-      &lt;/classpath>
-    &lt;/taskdef>
-
-    &lt;resin-upload-war server="localhost"
-                      port="8080"
-                      user="admin"
-                      password="myadminpass"
-                      warFile="foo.war"/>
-  &lt;/target>
-&lt;/project>
-</example>
-
-<p>
-After you run the Ant script above, you will see output like this:
-</p>
-
-<example>
-[resin-upload-war] Deployed foo.war to tag wars/default/default/foo
-</example>
-
 <p> The output exposes a few important details about the underlying
 remote deployment implementation for Resin that you should
 understand. Remote deployment for Resin uses Git under the hood. In
@@ -190,331 +167,43 @@ host, web application context root name and version. The format used
 is this: </p>
 
 <example>
-type/stage/virtual host/context root[-version]
+stage/type/host/webapp[-version]
 </example>
-<p>
-In the example, all web applications are stored under <var>wars</var>, we didn't 
-specify a stage or virtual host in the Ant task so <var>default</var> is used, the 
-web application root is foo and no version is used since one was not specified. 
-This format is key to the versioning and staging featured we will discuss shortly.
+
+<p> In the example, all web applications are stored under
+<var>webapp</var>, we didn't specify a stage or virtual host in the
+Ant task so <var>default</var> is used, the web application root is
+foo and no version is used since one was not specified.  This format
+is key to the versioning and staging featured we will discuss shortly.
 </p>
-<p>
-As soon as your web application is uploaded to the Resin deployment repository, it is 
-propagated to all the servers in the cluster - including any dynamic servers that are 
-added to the cluster at a later point in time after initial propagation happens.
-</p>
+
+<p>As soon as your web application is uploaded to the Resin
+deployment repository, it is propagated to all the servers in the
+cluster - including any dynamic servers that are added to the cluster
+at a later point in time after initial propagation happens.</p>
+
 <figure src="deployment.png"/>
-<p>
-Doing remote deployment with the Resin Maven plug-in is very similar. You'll need to 
-setup the plug-in like this:
-</p>
-<example title="Clustered Deployment via Maven">
-&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         http://maven.apache.org/maven-v4_0_0.xsd">
-  &lt;modelVersion>4.0.0&lt;/modelVersion>
-  &lt;groupId>com.test&lt;/groupId>
-  &lt;artifactId>test&lt;/artifactId>
-  &lt;packaging>war&lt;/packaging>
-  &lt;version>1.0-SNAPSHOT&lt;/version>
-  &lt;name>Test Maven Web Application&lt;/name>
-  &lt;url>http://maven.apache.org&lt;/url>
-  &lt;dependencies>
-  &lt;/dependencies>
-  &lt;pluginRepositories>
-    &lt;pluginRepository>
-      &lt;snapshots>
-        &lt;enabled>true&lt;/enabled>
-        &lt;updatePolicy>always&lt;/updatePolicy>
-        &lt;checksumPolicy>ignore&lt;/checksumPolicy>
-      &lt;/snapshots>
-      &lt;id>caucho&lt;/id>
-      &lt;name>Caucho&lt;/name>
-      &lt;url>http://caucho.com/m2-snapshot&lt;/url>
-    &lt;/pluginRepository>
-  &lt;/pluginRepositories>
-  &lt;build>
-    &lt;finalName>foo&lt;/finalName>
-    &lt;plugins>
-      &lt;plugin>
-        &lt;groupId>com.caucho&lt;/groupId>
-        &lt;artifactId>resin-maven-plugin&lt;/artifactId>
-        &lt;version>4.0-SNAPSHOT&lt;/version>
-        &lt;configuration>
-          &lt;server>127.0.0.1&lt;/server>
-          &lt;port>8086&lt;/port>
-          &lt;user>admin&lt;/user>
-          &lt;password>myadminpass&lt;/password>
-        &lt;/configuration>
-      &lt;/plugin>
-    &lt;/plugins>
-  &lt;/build>
-&lt;/project>
-</example>
-<p>
-You can then remote deploy your application from the command line using Maven like so:
-</p>
-<example title="Maven Remote Deployment">
-mvn resin:upload-war
-</example>
-<s2 title="Deployment Versioning">
-<p>
-In addition to automatically propagating a deployment to all clustered nodes, Resin 
-remote deployment also supports versioning. When you upload an application, you can 
-specify a version number for it. Resin then determines what the latest version of an 
-application is and renders it to application users as they arrive. Any users of the 
-older version of the application can continue using the application until they log off 
-or their session is timed out. Next time these users access the application they get 
-the newer version instead of the older one. Versioning is very useful for rolling-back 
-a deployment quickly. In order to do a roll-back, you will need to set the older 
-version of the application already stored in the Resin deployment Git repository as 
-the active one.
-</p>
-<p>
-The best way to understand how this works is through a simple example. Here is a 
-modified version of the previous Ant deployment example:
-</p>
-<example title="Deployment Versioning via Ant">
-&lt;resin-upload-war server="localhost"
-                  port="8080"
-                  user="admin"
-                  password="myadminpass"
-                  warFile="foo.war"
-                  version="1.0"/>
-</example>
-<p>
-Notice in this case we've explicitly set a version number (in a real life Ant script 
-you would of course likely externalize things like versions through properties instead 
-of hard-coding them). After you run the Ant script, you should see something like 
-this:
-</p>
-<example>
-[resin-upload-war] Deployed foo.war to tag wars/default/default/foo-1.0
-[resin-upload-war] Wrote head version tag wars/default/default/foo
-</example>
-<p>
-The Maven equivalent of this command would look like the following where 
-resin.version system property should be explictly specified:
-</p>
-<example title="Application Versioning via Maven">
-mvn resin:upload-war -Dresin.version="1.0"
-</example>
-<p>
-This application could be upgraded with the following Ant script:
-</p>
-<example title="Upgrading Application Version via Ant">
-&lt;resin-upload-war server="localhost"
-                  port="8080"
-                  user="admin"
-                  password="myadminpass"
-                  warFile="foo.war"
-                  version="2.0"/>
-</example>
-<p>
-In this case the application was upgraded to version 2.0, so the head tag in Git 
-will be updated to point to the newly uploaded file, as indicated by Ant task output:
-</p>
-<example>
-[resin-upload-war] Deployed foo.war to tag wars/default/default/foo-2.0
-[resin-upload-war] Wrote head version tag wars/default/default/foo
-</example>
-<p>
-The Maven version of the application upgrade would be like this:
-</p>
-<example title="Upgrading Application Version via Maven">
-mvn resin:upload-war -Dresin.version="2.0"
-</example>
-<p>
-Keep in mind, although the head revision was updated so that users start to see the 
-new version of the application, the older application remains intact in the deployment 
-repository. This is extremely powerful if you need to back out the new deployment 
-quickly. This can be done by simply copying back the older file to the head tag like 
-this:
-</p>
-<example title="Reverting to Old Application Version via Ant">
-&lt;project name="test" default="test" basedir=".">
-  &lt;property name="resin.home" value="/usr/share/resin"/>
-  &lt;target name="test">
-    &lt;taskdef name="resin-copy-tag"
-             classname="com.caucho.ant.ResinCopyTag"/>
-    ...
-    &lt;resin-copy-tag server="localhost"
-                    port="8080"
-                    user="admin"
-                    password="myadminpass"
-                    sourceVersion="1.0"
-                    sourceContextRoot="foo"
-                    contextRoot="foo"/>
-  &lt;/target>
-&lt;/project>
-</example>
-<p>
-The key here is specifying the source version to be 1.0. <var>resin-copy-tag</var> 
-also has a <var>version</var> attribute to specify where the tag is being copied to, 
-which was omitted because we want to copy to the default head revision. The output 
-from running the Ant task reveals the end result:
-</p>
-<example>
-[resin-copy-tag] Copying wars/default/default/foo-1.0 to wars/default/default/foo
-</example>
-<p>
-Here is the Maven version of the command:
-</p>
-<example title="Reverting to Old Application Version via Maven">
-mvn resin:copy-tag -Dresin.sourceContextRoot='foo' -Dresin.sourceVersion="1.0" -Dresin.contextRoot="foo"
-</example>
-<p>
-If you feel you don't need extra versions of applications in the repository, you can 
-always delete them. For example, you can delete the faulty 2.0 deployment like this:
-</p>
-<example title="Deleting Application Version via Ant">
-&lt;project name="test" default="test" basedir=".">
-  &lt;property name="resin.home" value="/usr/share/resin"/>
-  &lt;target name="test">
-    &lt;taskdef name="resin-delete-tag"
-             classname="com.caucho.ant.ResinDeleteTag">
-      &lt;classpath>
-        &lt;fileset dir="${resin.home}">
-          &lt;include name="lib/*.jar"/>
-          &lt;include name="plugins/resin-ant.jar"/>
-        &lt;/fileset>
-      &lt;/classpath>
-    &lt;/taskdef>
-    ...
-    &lt;resin-delete-tag server="localhost"
-                      port="8080"
-                      user="admin"
-                      password="myadminpass"
-                      version="2.0"
-                      contextRoot="foo"/>
-  &lt;/target>
-&lt;/project>
-</example>
-<p>
-The Maven version is:
-</p>
-<example title="Deleting Application Version via Ant">
-mvn resin:delete-tag -Dresin.version="2.0" -Dresin.contextRoot="foo"
-</example>
-<p>
-You can also always check out what versions of the application are currently 
-installed in the Resin deployment repository:
-</p>
-<example title="Query Application Versions via Ant">
-&lt;project name="test" default="test" basedir=".">
-  &lt;property name="resin.home" value="/usr/share/resin"/>
-  &lt;target name="test">
-    &lt;taskdef name="resin-query-tags"
-             classname="com.caucho.ant.ResinQueryTags"/>
-    ...
-    &lt;resin-query-tags server="localhost"
-                      port="8080"
-                      user="admin"
-                      password="myadminpass"
-                      contextRoot="foo"/>
-  &lt;/target>
-&lt;/project>
-</example>
-<p>The output from the query should look something like this:</p>
-<example>
-[resin-query-tags] wars/default/default/foo-1.0
-[resin-query-tags] wars/default/default/foo-2.0
-</example>
-<p>
-The Maven version of the query looks like this:
-</p>
-<example title="Query Application Versions via Maven">
-mvn resin:query-tags -Dresin.version='.*
-</example>
-</s2>
-<s2 title="Staging Deployments">
-<p>
-Stages are essentially application versioning applied at the server level. As we 
-discussed in the previous sections, you can apply a development stage to each uploaded 
-application. On the other hand, each server instance in the cluster can have an 
-associated stage. The server only publishes applications that match the stage it is 
-currently in. Applications in all other stages are ignored even if it is propagated 
-and stored in the repository for the server instance.
-</p>
-<figure src="staging.png"/>
-<p>
-Using this feature you can use an actual production cluster server for things like 
-beta testing or user acceptance testing. Staging can also simply be used as away to 
-do a last minute reality check in the production environment before doing a final 
-roll-out. In this technique, you first deploy an application in something other than 
-the default stage. This application is propagated to all instances in the cluster. 
-This is how you do it using Ant:
-</p>
-<example title="Deployment Staging Using Ant">
-&lt;resin-upload-war server="localhost"
-                  port="8080"
-                  user="admin"
-                  password="myadminpass"
-                  warFile="foo.war"
-                  stage="preview"/>
-</example>
-<p>
-Notice the explicit specification of the application stage in the Ant task. The Maven 
-version of this looks like this:
-</p>
-<example title="Deployment Staging Using Maven">
-mvn resin:upload-war -Dresin.stage="preview"
-</example>
-<p>
-All servers in the default stage will simply ignore this application even though it 
-is in the repository. All servers are normally in the default stage when started 
-as below:
-</p>
-<example>
-java -jar $RESIN_HOME/lib/resin.jar -server a start
-</example>
-<p>
-In order for a server to actually publish the application above, the server instance 
-must be started in the "preview" stage (in general, you would probably want to start 
-a preview stage server as a dynamic server). You can do this as below:
-</p>
-<example>
-java -jar $RESIN_HOME/lib/resin.jar -server b -stage preview start
-</example>
-<p>
-You can use this server to do user acceptance testing or simply a last minute check 
-(typically you will use IP blocking to isolate this server from normal production 
-users). Once you are satisfied with the results, you can change the application 
-to the default stage by doing a copy as below:
-</p>
-<example title="Changing Deployment Stage Using Ant">
-&lt;resin-copy-tag server="localhost"
-                port="8080"
-                user="admin"
-                password="myadminpass"
-                sourceStage="preview"
-                sourceContextRoot="foo"
-                stage="default"
-                contextRoot="foo"/>
-</example>
-<p>The following is the output of this command:</p>
-<example>
-[resin-copy-tag] Copying wars/preview/default/foo to wars/default/default/foo
-</example>
-<p>The Maven version of this looks like the following:</p>
-<example title="Changing Deployment Stage Using Maven">
-mvn resin:copy-tag -Dresin.sourceContextRoot='foo' -Dresin.sourceStage="preview" -Dresin.stage="default"
-</example>
-<p>
-Because the application already resides in all clustered instances, switching things 
-over to production happens almost instantaneously. You can interplay staging and 
-versioning as well by staging new versions before deployment.
-</p>
-</s2>
-<p>
-The details for each Ant and Maven based clustered deployment API is outlined 
-<a href="clustering-deployment-ref.xtp">here</a>.
-</p>
+
+<p>When you deploy an application, it's always a good idea to check that
+all servers in the cluster have received the correct web-app. Because
+Resin's deployment is based on a transactional version-control system,
+you can compare the exact version across all servers in the cluster
+using the /resin-admin web-app page.</p>
+
+<p>The following screenshot shows the /hello1 webapp deployed across the
+cluster using a .war deployment in the webapps/ directory. Each
+version (date) is in green to indicate that the hash validation matches
+for each server. If one server had a different content, the date would be
+marked with a red 'x'.</p>
+
+<figure src="webapp-deploy.png"/>
+
+<p> The details for each Ant and Maven based clustered deployment API
+is outlined <a href="clustering-deployment-ref.xtp">here</a>.  </p>
+
 </s1>
 
 <s1 title="Load Balancing and Failover">
-<!-- XXX: Should we add some images here? -->
 
 <p> Clustering and load-balancing are intrinsic to resin.xml
 configuration - you may only define &lt;server> and &lt;host> inside a
@@ -572,16 +261,16 @@ content caching as well as load-balancing: </p>
 
 &lt;/resin&gt;
 </example>
-<p>
-In the configuration above, the <var>web-tier</var> cluster server load balances 
-across the <var>app-tier</var> cluster servers because of the 
-<var>cluster</var> attribute specified in the &lt;resin:LoadBalance> tag. 
-The &lt;cache> tag enables proxy caching at the web tier. The web-tier forwards 
-requests evenly and skips any app-tier server that's down for maintenance/upgrade or 
-restarting due to a crash. The load balancer also steers traffic from a single session 
-to the same app-tier server (a.k.a sticky sessions), improving caching and session 
-performance.
-</p>
+
+<p> In the configuration above, the <var>web-tier</var> cluster server
+load balances across the <var>app-tier</var> cluster servers because
+of the <var>cluster</var> attribute specified in the
+&lt;resin:LoadBalance> tag.  The &lt;cache> tag enables proxy caching
+at the web tier. The web-tier forwards requests evenly and skips any
+app-tier server that's down for maintenance/upgrade or restarting due
+to a crash. The load balancer also steers traffic from a single
+session to the same app-tier server (a.k.a sticky sessions), improving
+caching and session performance.  </p>
 
 <p> Each app-tier server produces the same application because they
 have the same virtual hosts, web-applications and Servlets, and use
@@ -630,20 +319,22 @@ doesn't inadvertantly send the management request to the app-tier.
 </p>
 
 <s2 title="Sticky/Persistent Sessions">
-<p>
-To understand what sticky sessions are and why they are important, it is easiest to
-see what will happen without them. Let us take our previous example and assume that 
-the web tier distributes sessions across the application tier in a totally random 
-fashion. Recall that while Resin can replicate the HTTP session across the cluster, it 
-does not do so by default. Now lets assume that the first request to the web 
-application resolves to app-a and results in the login being stored in the session. 
-If the load-balancer distributes sessions randomly, there is no guarantee that the 
-next request will come to app-a. If it goes to app-b, that server instance will have 
-no knowledge of the login and will start a fresh session, forcing the user to login 
-again. The same issue would be repeated as the user continues to use the application 
-from in what their view should be a single session with well-defined state, making for 
-a pretty confusing experience with application state randomly getting lost!
-</p>
+
+<p> To understand what sticky sessions are and why they are important,
+it is easiest to see what will happen without them. Let us take our
+previous example and assume that the web tier distributes sessions
+across the application tier in a totally random fashion. Recall that
+while Resin can replicate the HTTP session across the cluster, it does
+not do so by default. Now lets assume that the first request to the
+web application resolves to app-a and results in the login being
+stored in the session.  If the load-balancer distributes sessions
+randomly, there is no guarantee that the next request will come to
+app-a. If it goes to app-b, that server instance will have no
+knowledge of the login and will start a fresh session, forcing the
+user to login again. The same issue would be repeated as the user
+continues to use the application from in what their view should be a
+single session with well-defined state, making for a pretty confusing
+experience with application state randomly getting lost!  </p>
 
 <p> One way to solve this issue would be to fully synchronize the
 session across the load-balanced servers. Resin does support this
@@ -760,6 +451,7 @@ connection (15s)</li>
 <li><b>socket-timeout</b>: the app-tier timeout for a read or
 write (65s)</li>
 </ul>
+
 <p>When an app-tier server is down due to maintenance or a crash, Resin will use the 
 <b>load-balance-recover-time</b> as a delay before retrying
 the downed server.  With the failover and recover timeout, the load balancer
@@ -860,7 +552,7 @@ For details on the tags used for clustering, please refer to
 </s1>
 
 <s1 title="Clustered Sessions">
-<!-- XXX: Should we add some images here? -->
+
 
 <p> The most easily understood process of clustering (synchronizing
 state across a set of servers) is to replicate the entire session
@@ -872,17 +564,19 @@ requests. Instead of opting for this "brute force" approach, Resin
 opts to do what is sometimes referred to as "buddy replication"
 clustering.  </p>
 
-<p>
-In this scheme, the session state is stored on a 
-single "master" server (usually the server that originated the session). One or more 
-other servers are randomly chosen to store a backup copy of the session (the "buddies"). 
-In case the server that owns the session goes down, one of the back-up servers take over
-as the owner. All other servers get an updated copy of the data as needed from the server
-that owns the data. The data is always fully synchronized across the owning and backup
-servers. By default, only one server is chosen as the back-up, but you can choose to have
-two back-ups for extra reliability (together these three servers are the called the 
-"triad" - a concept we will discuss further in the elastic computing section). 
-</p>
+<p> In this scheme, the session state is stored on a single "master"
+server (usually the server that originated the session). One or more
+other servers are randomly chosen to store a backup copy of the
+session (the "buddies").  In case the server that owns the session
+goes down, one of the back-up servers take over as the owner. All
+other servers get an updated copy of the data as needed from the
+server that owns the data. The data is always fully synchronized
+across the owning and backup servers. By default, only one server is
+chosen as the back-up, but you can choose to have two back-ups for
+extra reliability (together these three servers are the called the
+"triad" - a concept we will discuss further in the elastic computing
+section).  </p>
+
 <p>
 This scheme works especially nicely with sticky sessions since only one server needs to 
 have a copy of the session data anyway. It also works with simple hardware based 
@@ -935,16 +629,16 @@ following example shows how you can do this: </p>
   &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-<!-- XXX: Is the following accurate? -->
-<p>
-The above example also shows how you can override the clustering behaviour for Resin. 
-By default, Resin uses TCP based replication (called a "cluster" store) and only one
-backup server. By specifying <var>triplicate=true</var>, you are indicating that you
-would like to use two backup servers (that is, have three copies of the session - in 
-"triplicate"). In addition to the <var>triplicate</var> attribute, the 
-&lt;persistent-store type="cluster"&gt; has a number of other attributes:
-</p>
-<!-- XXX: These need much better descriptions. It is not clear what they do -->
+
+<p> The above example also shows how you can override the clustering
+behaviour for Resin.  By default, Resin uses TCP based replication
+(called a "cluster" store) and only one backup server. By specifying
+<var>triplicate=true</var>, you are indicating that you would like to
+use two backup servers (that is, have three copies of the session - in
+"triplicate"). In addition to the <var>triplicate</var> attribute, the
+&lt;persistent-store type="cluster"&gt; has a number of other
+attributes: </p>
+
 <deftable title="cluster store attributes">
 <tr>
   <th>Attribute</th>
@@ -974,17 +668,20 @@ items earlier)</td>
 </tr>
 </deftable>
 
-<p>
-For single-server configurations, the "cluster" store saves session
-data on disk, allowing for recovery after system restart. This is basically identical 
-to the file persistence feature discussed below.
-</p>
+<p> For single-server configurations, the "cluster" store saves
+session data on disk, allowing for recovery after system restart. This
+is basically identical to the file persistence feature discussed
+below.  </p>
 
 <s2 title="always-save-session">
-<p>Resin's distributed sessions need to know when a session has changed in order to 
-save/synchronize the new session value. Although Resin does detect when an application 
-calls <var>HttpSession.setAttribute</var>, it can't tell if an internal session value 
-has changed. The following Counter class shows the issue:</p>
+
+<p>Resin's distributed sessions need to know when a session has
+changed in order to save/synchronize the new session value. Although
+Resin does detect when an application calls
+<var>HttpSession.setAttribute</var>, it can't tell if an internal
+session value has changed. The following Counter class shows the
+issue:</p>
+
 <example title="Counter.java">
 package test;
 
@@ -994,12 +691,17 @@ public class Counter implements java.io.Serializable {
   public int nextCount() { return _count++; }
 }
 </example>
-<p>Assuming a copy of the Counter is saved as a session attribute, Resin doesn't know
-if the application has called <var>nextCount</var>. If it can't detect a change, Resin 
-will not backup/synchronize the new session, unless <var>always-save-session</var> 
-is set on the &lt;session-config&gt;. When <var>always-save-session</var> is true, 
-Resin will back up the entire session at the end of every request. Otherwise, a 
-session is only changed when a change is detected.</p>
+
+<p>Assuming a copy of the Counter is saved as a session attribute,
+Resin doesn't know if the application has called
+<var>nextCount</var>. If it can't detect a change, Resin will not
+backup/synchronize the new session, unless
+<var>always-save-session</var> is set on the
+&lt;session-config&gt;. When <var>always-save-session</var> is true,
+Resin will back up the entire session at the end of every
+request. Otherwise, a session is only changed when a change is
+detected.</p>
+
 <example>
 ...
 &lt;web-app id="/foo"&gt;
@@ -1012,16 +714,22 @@ session is only changed when a change is detected.</p>
 &lt;/web-app&gt;
 </example>
 </s2>
+
 <s2 title="Serialization">
-<p>Resin's distributed sessions relies on Hessian serialization to save and restore 
-sessions. Application objects must implement <var>java.io.Serializable</var> for 
-distributed sessions to work.</p>
+
+<p>Resin's distributed sessions relies on Hessian serialization to
+save and restore sessions. Application objects must implement
+<var>java.io.Serializable</var> for distributed sessions to work.</p>
+
 </s2>
 <s2 title="No Distributed Locking">
-<p>Resin's clustering does not lock sessions for replication. For browser-based 
-sessions, only one request will typically execute at a time. Since browser sessions 
-have no concurrency, there's really no need for distributed locking. However, it's a 
-good idea to be aware of the lack of distributed locking in Resin clustering.</p>
+
+<p>Resin's clustering does not lock sessions for replication. For
+browser-based sessions, only one request will typically execute at a
+time. Because browser sessions have no concurrency, there's really no
+need for distributed locking. However, it's a good idea to be aware of
+the lack of distributed locking in Resin clustering.</p>
+
 </s2>
 <p>
 For details on the tags used for clustering, please refer to 
@@ -1029,52 +737,59 @@ For details on the tags used for clustering, please refer to
 </p>
 </s1>
 
+<!--
 <s1 title="Dynamic Server Addition and Removal">
-<!-- XXX: Should we add some imeges here? -->
 
-<p>
-For many organizations, user demand fluctuates significantly over time. For example, 
-many eductational or government institutions do not have much user demand throughout 
-most of the year but demand increases dramatically during periods before and after a 
-deadline (such as admissions deadlines, tax deadlines, etc). Similarly many e-commerce 
-sites experience dramatic increases in traffic around the holidays. For these 
-situations, there is really no need to maintain a lot of server capacity throughout 
-the year. What these organizations need is a flexible system that allows for 
-dynamically adding and removing servers from the cluster as traffic fluctuates. This 
-allows these organizations to save money by not having a lot of excess capacity in 
-their server-farms that is not used most of the time. This is the central idea behind 
-elastic computing. It is also a fundamental capability needed for private and public 
-clouds that must allocate computing capacity on demand.
-</p>
-<!-- XXX: Is all of this correct? -->
-<p>
-Resin has excellent support for elastic computing through the concept of dynamic 
-servers and the triad. A dynamic server is a Resin instance that can be added to the 
-cluster without being statically configured in resin.xml. Because these servers can 
-also be taken off-line at any time, they are never used as a back-up server and never 
-own session data. Rather, they retrieve, cache and synchronize session data from the 
-"triad" servers. The triad on the other hand, is a set of three or more statically 
-configured servers that basically function as the data store for the cluster. If you 
-recall the "triplicate" concept from the TCP based clustering configuration section 
-above, triplicate copies of the session are automacitally enabled in the dynamic 
-server case for increased reliability. For dynamic clustering to work, ideally all the 
-statically defined servers should be up and running, but in the least at least one 
-statically defined server must be active at any given time. When dynamic servers join 
-the cluster, they announce their availability to the statically defined servers and 
-start synchronizing state with the triad. While dynamic servers synchronize data with 
-the triad in real-time, they also maintain cached copies of frequently used data as an 
-optimization. Each triad member keeps track of currently available dynamic servers. 
-The dynamic server information is shared and synchronized across the triad so that 
-even if a daynamic server is added while a triad member was down, they are made aware
-of the dynamic server as soon as the triad member comes back on-line.
-</p>
+<p> For many organizations, user demand fluctuates significantly over
+time. For example, many eductational or government institutions do not
+have much user demand throughout most of the year but demand increases
+dramatically during periods before and after a deadline (such as
+admissions deadlines, tax deadlines, etc). Similarly many e-commerce
+sites experience dramatic increases in traffic around the
+holidays. For these situations, there is really no need to maintain a
+lot of server capacity throughout the year. What these organizations
+need is a flexible system that allows for dynamically adding and
+removing servers from the cluster as traffic fluctuates. This allows
+these organizations to save money by not having a lot of excess
+capacity in their server-farms that is not used most of the time. This
+is the central idea behind elastic computing. It is also a fundamental
+capability needed for private and public clouds that must allocate
+computing capacity on demand.  </p>
+
+<p> Resin has excellent support for elastic computing through the
+concept of dynamic servers and the triad. A dynamic server is a Resin
+instance that can be added to the cluster without being statically
+configured in resin.xml. Because these servers can also be taken
+off-line at any time, they are never used as a back-up server and
+never own session data. Rather, they retrieve, cache and synchronize
+session data from the "triad" servers. The triad on the other hand, is
+a set of three or more statically configured servers that basically
+function as the data store for the cluster. If you recall the
+"triplicate" concept from the TCP based clustering configuration
+section above, triplicate copies of the session are automacitally
+enabled in the dynamic server case for increased reliability. For
+dynamic clustering to work, ideally all the statically defined servers
+should be up and running, but in the least at least one statically
+defined server must be active at any given time. When dynamic servers
+join the cluster, they announce their availability to the statically
+defined servers and start synchronizing state with the triad. While
+dynamic servers synchronize data with the triad in real-time, they
+also maintain cached copies of frequently used data as an
+optimization. Each triad member keeps track of currently available
+dynamic servers.  The dynamic server information is shared and
+synchronized across the triad so that even if a daynamic server is
+added while a triad member was down, they are made aware of the
+dynamic server as soon as the triad member comes back on-line.  </p>
+
 <p>
 Adding a dynamic server to a cluster is a simple two-step process:
 </p>
+
 <ol>
 <li>Register the dynamic server with a triad server.</li>
 <li>Start the new dynamic server using the registration in the previous step.</li>
 </ol>
+
 <s2 title="Preliminaries">
 <p>
 Before adding a dynamic server, you must:
@@ -1121,11 +836,13 @@ like the following example:
 </ul>
 </s2>
 <s2 title="Registering A Dynamic Server">
+
 <p>
 For the first step of registration, you can use a JMX tool like jconsole or
 simply use the Resin administration web console.  We'll show how to do
 the latter method here. For registration, you'll specify three values:
 </p>
+
 <deftable title="Dynamic server deployment options">
 <tr>
   <th>Name</th>
@@ -1144,46 +861,48 @@ the latter method here. For registration, you'll specify three values:
   <td>The server port of the new dynamic server. Usually 6800.</td>
 </tr>
 </deftable>
-<p>
-With these three values, browse to the Resin administration application's
-"cluster" tab. If you have enabled dynamic servers for your cluster, you 
-should see a form allowing you to register the server in the "Cluster Overview"
-table.
-</p>
+
+<p> With these three values, browse to the Resin administration
+application's "cluster" tab. If you have enabled dynamic servers for
+your cluster, you should see a form allowing you to register the
+server in the "Cluster Overview" table.  </p>
+
 <figure src="dynamic-server-add.png"/>
-<p>
-Once you have entered the values and added the server, it should show up 
-in the table as a dead server because we haven't started it yet.  The
-dynamic server's registration will be propagated to all the servers in the
-cluster.
-</p>
+
+<p> Once you have entered the values and added the server, it should
+show up in the table as a dead server because we haven't started it
+yet.  The dynamic server's registration will be propagated to all the
+servers in the cluster.  </p>
+
 <figure src="dynamic-server-added.png"/>
 </s2>
+
 <s2 title="Starting a Dynamic Server">
-<p>
-Now that we've registered the dynamic server, we can start it
-and have it join the cluster.  In order for the new server to be
-recognized and accepted by the triad, it needs to start with the
-same resin.xml that the triad is using, the name of the cluster it is
+
+<p> Now that we've registered the dynamic server, we can start it and
+have it join the cluster.  In order for the new server to be
+recognized and accepted by the triad, it needs to start with the same
+resin.xml that the triad is using, the name of the cluster it is
 joining, and the values entered in the registration step.  These can
-all be specified on the command line when starting the server:
-</p>
+all be specified on the command line when starting the server: </p>
+
 <example>
 dynamic-server> java -jar $RESIN_HOME/lib/resin.jar -conf /etc/resin/resin.xml \
                      -dynamic-server app-tier:123.45.67.89:6800 start
 </example>
-<p>
-Specifying the configuration file allows the new server to configure
-itself using the &lt;server-default> options, to find the triad servers
-of the cluster it is joining, and to authenticate using the administration
-logins.  This command starts the server, which immediately contacts the
-triad to join the cluster. Once it has successfully joined, the "Cluster"
-tab of the administration application should look like this:
-</p>
+
+<p> Specifying the configuration file allows the new server to
+configure itself using the &lt;server-default> options, to find the
+triad servers of the cluster it is joining, and to authenticate using
+the administration logins.  This command starts the server, which
+immediately contacts the triad to join the cluster. Once it has
+successfully joined, the "Cluster" tab of the administration
+application should look like this: </p>
+
 <figure src="dynamic-server-started.png"/>
 </s2>
 </s1>
-
+-->
 <s1 title="Distributed Caching">
 
 <p> Distributed caching is a very useful technique for reducing

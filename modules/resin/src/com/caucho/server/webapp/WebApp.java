@@ -428,7 +428,7 @@ public class WebApp extends ServletContextImpl
   WebApp(WebAppController controller)
   {
     _controller = controller;
-    
+
     _classLoader
       = EnvironmentClassLoader.create(controller.getParentClassLoader(),
                                       "web-app:" + getId());
@@ -3235,6 +3235,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns the servlet context for the URI.
    */
+  @Override
   public ServletContext getContext(String uri)
   {
     if (uri == null)
@@ -3251,8 +3252,16 @@ public class WebApp extends ServletContextImpl
     try {
       if (_isDisableCrossContext)
         return uri.startsWith(getContextPath()) ? this : null;
-      else if (_parent != null)
-        return _parent.findSubWebAppByURI(uri);
+      else if (_parent != null) {
+        ServletContext subContext = _parent.findSubWebAppByURI(uri);
+        
+        if (subContext == null)
+          return null;
+        else if (getContextPath().equals(subContext.getContextPath()))
+          return this;
+        else
+          return subContext;
+      }
       else
         return this;
     } catch (Exception e) {
@@ -3792,15 +3801,15 @@ public class WebApp extends ServletContextImpl
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    WebApp app = (WebApp) getContext(fullURI);
+    WebApp webApp = (WebApp) getContext(fullURI);
 
-    if (app == null)
+    if (webApp == null)
       return null;
 
-    String cp = app.getContextPath();
+    String cp = webApp.getContextPath();
     String tail = fullURI.substring(cp.length());
 
-    realPath = app.getRealPathImpl(tail);
+    realPath = webApp.getRealPathImpl(tail);
 
     if (log.isLoggable(Level.FINEST))
       log.finest("real-path " + uri + " -> " + realPath);

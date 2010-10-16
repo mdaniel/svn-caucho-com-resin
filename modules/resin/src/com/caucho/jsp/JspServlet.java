@@ -76,6 +76,7 @@ public class JspServlet extends QServlet {
    * Initializes the servlet.  Primarily, this sets the PageManager to the
    * correct JspManager.
    */
+  @Override
   public void init(ServletConfig conf)
     throws ServletException
   {
@@ -109,11 +110,13 @@ public class JspServlet extends QServlet {
       JspFactory.setDefaultFactory(new QJspFactory());
   }
 
+  @Override
   public String getServletInfo()
   {
     return "JSP";
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getServletContext() + "]";

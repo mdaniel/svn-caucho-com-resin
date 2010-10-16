@@ -221,7 +221,7 @@ public class JspManager extends PageManager {
                boolean isGenerated)
     throws Exception
   {
-    WebApp app = getWebApp();
+    WebApp webApp = getWebApp();
     JspCompiler compiler = new JspCompiler();
 
     compiler.setWebApp(_webApp);
@@ -230,9 +230,10 @@ public class JspManager extends PageManager {
     Page page = null;
 
     try {
-      if (_precompile || _autoCompile)
-        page = preload(className, app.getClassLoader(), app.getRootDirectory(),
+      if (_precompile || _autoCompile) {
+        page = preload(className, webApp.getClassLoader(), webApp.getRootDirectory(),
                        config);
+      }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -312,8 +313,7 @@ public class JspManager extends PageManager {
     */
 
     loader = SimpleLoader.create(parentLoader, getClassDir(), null);
-
-    Class cl = null;
+    Class<?> cl = null;
 
     // If the loading fails, remove the class because it may be corrupted
     try {
@@ -374,49 +374,6 @@ public class JspManager extends PageManager {
 
     return page;
   }
-
-  // XXX: disable static pages.  The slight memory gain is probably
-  // not worth the separate code paths.
-  private Page preloadStatic(String mangledName)
-  {
-    String staticName = mangledName + ".static";
-    String dependName = mangledName + ".depend";
-
-    Path staticPath = getClassDir().lookup(staticName);
-
-    if (! staticPath.canRead())
-      return null;
-
-    Path dependPath = getClassDir().lookup(dependName);
-
-    if (! dependPath.canRead())
-      return null;
-
-    try {
-      ArrayList<Depend> dependList = StaticPage.parseDepend(dependPath);
-
-      if (dependList == null)
-        return null;
-
-      StaticPage page = new StaticPage(staticPath, true);
-
-      for (int i = 0; i < dependList.size(); i++) {
-        Depend depend = dependList.get(i);
-
-        if (depend.isModified())
-          return null;
-
-        page._caucho_addDepend(depend);
-      }
-
-      return page;
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    return null;
-  }
-
 
   /**
    * Loads an already-compiled JSP class.

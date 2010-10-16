@@ -29,8 +29,6 @@
 
 package com.caucho.env.deploy;
 
-import java.util.logging.Logger;
-
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.LifecycleState;
 
@@ -125,7 +123,7 @@ public class StartAutoRedeployAutoStrategy
   I request(DeployController<I> controller)
   {
     LifecycleState state = controller.getState();
-    
+
     if (state.isIdle()) {
       // server/1d16
       return controller.startImpl();

@@ -357,4 +357,23 @@ public class Invocation extends ServletInvocation implements Dependency
   {
     _webApp = null;
   }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    sb.append(getContextPath());
+
+    if (getQueryString() != null)
+      sb.append("?").append(getQueryString());
+    
+    sb.append(",").append(_webApp);
+
+    sb.append("]");
+
+    return sb.toString();
+  }
 }

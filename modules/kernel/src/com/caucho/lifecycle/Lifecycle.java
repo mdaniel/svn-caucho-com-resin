@@ -642,8 +642,9 @@ public final class Lifecycle {
 
     _lastChangeTime = Alarm.getCurrentTime();
 
-    if (_log != null && _log.isLoggable(_lowLevel))
+    if (_log != null && _log.isLoggable(_lowLevel)) {
       _log.log(_lowLevel, _name + " " + newState);
+    }
 
     notifyListeners(state, newState);
 

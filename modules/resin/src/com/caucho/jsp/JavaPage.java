@@ -43,6 +43,7 @@ import java.util.ArrayList;
 
 public abstract class JavaPage extends Page implements HttpJspPage
 {
+  @Override
   public void init(ServletConfig config)
     throws ServletException
   {
@@ -51,10 +52,12 @@ public abstract class JavaPage extends Page implements HttpJspPage
     jspInit();
   }
 
+  @Override
   public void jspInit()
   {
   }
 
+  @Override
   public void service(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -62,10 +65,12 @@ public abstract class JavaPage extends Page implements HttpJspPage
                 (HttpServletResponse) response);
   }
 
+  @Override
   abstract public void _jspService(HttpServletRequest request,
                                    HttpServletResponse response)
     throws ServletException, IOException;
 
+  @Override
   public String getServletInfo()
   {
     return "A Java JSP page";
@@ -82,6 +87,7 @@ public abstract class JavaPage extends Page implements HttpJspPage
     pList.add(depend);
   }
 
+  @Override
   public void destroy()
   {
     if (isDead()) {
@@ -96,6 +102,7 @@ public abstract class JavaPage extends Page implements HttpJspPage
     super.destroy();
   }
 
+  @Override
   public void jspDestroy()
   {
   }
