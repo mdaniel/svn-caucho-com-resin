@@ -15,13 +15,47 @@ $mbean_server = $g_mbean_server;
 $resin = $g_resin;
 $server = $g_server;
 
-$runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
-$os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
+echo "<div id='summary-tabs'>\n";
+echo "<ul>\n";
 
-?>
+echo "<li><a href='#overview-tab'>Overview</a></li>\n";
+echo "<li><a href='#meter-tab'>Meters</a></li>\n";
+echo "<li><a href='#table-tab'>Tables</a></li>\n";
+echo "<li><a href='#log-tab'>Logs</a></li>\n";
+echo "</ul>";
 
-<h2>Server: <?= $server->Id ? $server->Id : "default" ?></h2>
-<?php
+echo "<div id='overview-tab'>";
+
+print_overview();
+
+echo "<h2>Health"; print_Help("Health"); echo "</h2>\n";
+
+display_health_status();
+
+echo "</div>";
+
+echo "<div id='meter-tab'>\n";
+
+print_graphs();
+
+echo "</div>\n";
+
+echo "<div id='table-tab'>\n";
+
+print_threads();
+print_tcp_ports();
+print_load_balance();
+print_database_pools();
+
+echo "</div>\n";
+
+echo "<div id='log-tab'>";
+
+recent_messages();
+
+echo "</div>";
+
+echo "</div>";
 
 function print_overview()
 {
@@ -174,19 +208,16 @@ function print_overview()
 
 /* graphs */
 
-$si = sprintf("%02d", $server->ServerIndex);
-
-$stat_service = $mbean_server->lookup("resin:type=StatService");
-
-echo "<h2>Health"; print_Help("Health"); echo "</h2>\n";
-
-display_health_status();
-
-print_graphs();
 function print_graphs()
 {
-  global $si;
-  global $stat_service;
+  global $g_mbean_server;
+  global $g_server;
+
+  $mbean_server = $g_mbean_server;
+  $server = $g_server;
+  
+  $si = sprintf("%02d", $server->ServerIndex);
+  $stat_service = $mbean_server->lookup("resin:type=StatService");
 
   if ($stat_service) {
     echo "<h2>Graphs</h2>\n";
@@ -196,7 +227,7 @@ function print_graphs()
     $start = $end - $period;
 
     $height = 150;
-    $width = 220;
+    $width = 240;
 
     echo "<table>";
 
@@ -220,7 +251,7 @@ function print_graphs()
     echo "<tr><th>Database Query Active<th>Database Query Time<th>CPU";
     echo "<tr valign='top'><td>";
     stat_graph("database", $width, $height, $start, $end,
-               array("$si|Resin|Database|Query Active Max"));
+               array("$si|Resin|Database|Connection Active"));
 
     echo "<td>";
     stat_graph("database_time", $width, $height, $start, $end,
@@ -276,8 +307,8 @@ function recent_messages()
       echo "<table class='data'>\n";
   /*
       //echo "<thead class='scroll'>\n";
-      echo "<tr><th class='date'>Date</th>"
-      echo "    <th class='level'>Level</th>"
+      echo "<tr><th class='date'>Date</th>";
+      echo "    <th class='level'>Level</th>";
       echo "    <th class='message'>Message</th></tr>\n";
       //echo "</thead>\n";
   */
@@ -313,8 +344,8 @@ function recent_messages()
       echo "<table class='data'>\n";
 /*
     //echo "<thead class='scroll'>\n";
-    echo "<tr><th class='date'>Date</th>"
-    echo "    <th class='level'>Level</th>"
+    echo "<tr><th class='date'>Date</th>";
+    echo "    <th class='level'>Level</th>";
     echo "    <th class='message'>Message</th></tr>\n";
     //echo "</thead>\n";
 */
@@ -410,7 +441,6 @@ function print_tcp_ports()
   }
 }
 
-print_threads();
 function print_threads()
 {
   global $mbean_server;
@@ -481,8 +511,6 @@ function print_threads()
   echo "</table>\n";
 }
 
-print_load_balance();
-
 function print_load_balance()
 {
   global $resin;
@@ -546,8 +574,6 @@ function print_load_balance()
   echo "</table>\n";
 }  
 
-print_database_pools();
-
 function print_database_pools()
 {
   global $mbean_server;
@@ -589,8 +615,6 @@ function conn_time_cmp($conn_a, $conn_b)
 {
   return $conn_b->requestTime - $conn_a->requestTime;
 }
-
-recent_messages();
 
 function display_health_status()
 {
@@ -657,9 +681,11 @@ function display_health_status()
 function display_health_graph()
 {
   global $mbean_server;
-  global $si;
+  global $server;
 
+  $si = sprintf("%02d", $server->ServerIndex);
   $stat_service = $mbean_server->lookup("resin:type=StatService");
+
   if ($stat_service) {
     $period = 24 * 60 * 60;
     $end = time();
@@ -673,6 +699,6 @@ function display_health_graph()
   }
 }
 
-  display_footer($g_page, $javascript);
+  display_footer($g_page, $javascript. javascript_create_tab("summary-tabs"));
 
 ?>
