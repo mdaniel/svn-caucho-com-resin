@@ -215,7 +215,7 @@ enum SocketLinkState {
     {
       conn.getPort().keepaliveFree();
       
-      return REQUEST_ACTIVE_KA; 
+      return REQUEST_ACTIVE_NKA; 
     }
 
     @Override
