@@ -1,0 +1,432 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+$webapp = $g_mbean_server->lookup($_GET['id']);
+
+$request = quercus_servlet_request();
+$is_secure = $request->isSecure();
+$user = quercus_get_request()->getUserPrincipal();
+$client = @new Java("com.caucho.server.admin.WebAppDeployClient");
+
+echo "<h1>Deploy new application";
+print_help("Deploy");
+echo "</h1>";
+
+if ($is_secure) {
+  $action = $_POST['action'];
+
+  if ($action == 'deploy') {
+    deploy();
+  }
+}
+
+display_deploy_form($g_mbean_server);
+
+function display_deploy_form($mbean_server)
+{
+  global $is_secure;
+
+  if ($is_secure) {
+    $disabled = "";
+  }
+  else {
+    $disabled = "disabled='true'";
+    echo "<div class='warn'>Actions can only be performed over a secure connection (SSL)</div>";
+  }
+
+?>
+  <form id='deploy' enctype='multipart/form-data' method='POST'>
+    <input type='hidden' name='action' value='deploy'>
+
+    <div class='form-input-block'>
+      <div id='file-title' class='form-input-title'>Application archive file</div>
+      <div class='form-input-input'> 
+        <input type='file' name='application'>
+      </div>
+      <div class='form-input-help'>The .war file to upload</div>
+    </div>
+
+    <div class='form-input-block'>
+      <div id='name-title' class='form-input-title'>Name</div>
+      <div class='form-input-input'>
+        <input type='text' name='name' value='<?= $_GET['update-name'] ?>' class='required'>
+      </div>
+      <div class='form-input-help'>The context root and name of the application</div>
+    </div>
+
+  <div class='form-input-block'>
+    <div class='form-input-title'>Version</div>
+    <div class='form-input-input'>
+      <input type='number' min='0' size='3' name='version-major' title='Major Version Number' value='0' class='required'>
+      <input type='number' min='0' size='3' name='version-minor' title='Minor Version Number' value='0' class='required'>
+      <input type='number' min='0' size='3' name='version-micro' title='Micro Version Number' value='0' class='required'>
+      <input type='text' name='version-qualifier' title='Version Qualifier (free form)' value=''>
+    </div>
+    <div class='form-input-help'>The version for the application, using the &lt;major>.&lt;minor>.&lt;micro>.&lt;qualifier> format.</div>
+  </div>
+
+  <div class='form-input-block'>
+    <div class='form-input-title'>Commit message</div>
+    <div class='form-input-input'>
+      <textarea name='commit-message'></textarea>
+    </div>
+    <div class='form-input-help'>A message to save along with this deployment.</div>
+  </div>
+
+  <div class='switch' id='deploy-advanced-options' style='margin-bottom: 2em;'>Advanced Options</div>
+    <div class='toggle-deploy-advanced-options option-box' style="display: none">
+
+    <div class='form-input-block'>
+      <div class='form-input-title'>Host</div>
+      <div class='form-input-input'>
+        <input class='host' type='radio' name='host' value='default' checked>
+          Deploy to default host
+        <br/>
+        <span class='another-host'>
+          <input type='radio' name='host' value=''>Deploy to another host: 
+          <input type='text' name='host' value='' disabled>
+        </span>
+      </div>
+      <div class='form-input-help'>The virtual host where the application will appear.</div>
+    </div>
+
+    <div class='form-input-block'>
+      <div class='form-input-title'>Stage</div>
+      <div class='form-input-input'>
+        <input class='stage' type='radio' name='stage' value='production' checked>
+          Deploy to production
+        <br/>
+        <span class='another-stage'>
+          <input type='radio' name='stage' value=''>
+          Deploy to another stage: 
+          <input type='text' name='stage' value='' disabled>
+        </span>
+      </div>
+      <div class='form-input-help'>The stage where the application will appear.</div>
+    </div>
+  </div>
+
+  <div id='deploy-info-box' class='info-box ui-state-highlight' style='display:none'></div>
+
+  <input class='deploy' type='submit' value='Deploy' <?= $disabled ?>>
+  </form>
+<?
+}
+
+function deploy()
+{
+  global $user;
+  global $client;
+  global $g_mbean_server;
+  global $g_server_index;
+
+  $commit = new Java("com.caucho.env.repository.CommitBuilder");
+
+  $commit->type("webapp");
+
+  $stage = htmlspecialchars($_POST['stage']);
+
+  if ($stage)
+    $commit->stage($stage);
+  else
+    $commit->stage("production");
+
+  $host = htmlspecialchars($_POST['host']);
+
+  if (! $host)
+    $host = "default";
+
+  $name = htmlspecialchars($_POST['name']);
+
+  if ($name == '/')
+    $name = "/ROOT";
+
+  if ($name[0] != '/')
+    $name = '/' . $name;
+
+  $commit->tagKey($host . $name);
+
+  $major = $_POST['version-major'];
+  $minor = $_POST['version-minor'];
+  $micro = $_POST['version-micro'];
+  $qualifier = $_POST['version-qualifier'];
+
+  if ($major || $minor || $micro || $qualifier) {
+    $commit->version(htmlspecialchars($major),
+                     htmlspecialchars($minor),
+                     htmlspecialchars($micro),
+                     htmlspecialchars($qualifier));
+  }
+
+  if ($_POST['commit-message'])
+    $commit->message($_POST['commit-message']);
+  else
+    $commit->message("updated via resin-admin web form");
+
+  $commit->attribute("user", $user);
+
+  $path = $_FILES['application']['tmp_name'];
+
+  if (! $path) {
+?>
+<div class='ui-state-error info-box' style='margin-bottom: 0.5em'>
+  <span class='ui-icon ui-icon-alert' style='float: left; margin: 15px 5px;'></span>
+  <h3>Deploy failed</h3>
+  <p><strong>Please specify an application archive file</strong></p>
+</div>
+<? 
+  }
+  else {
+    $client->commitArchive($commit, $path);
+
+    $date = $commit->getAttributes()['date'];
+    $message = $commit->getAttributes()['message'];
+
+?>
+<div class='ui-state-highlight info-box' style='margin-bottom: 0.5em'>
+  <span class='ui-icon ui-icon-info' style='float: left; margin: 15px 5px;'></span>
+  <h3>Successfully deployed application</h3>
+  <p>The application may take a few moments to be propagated throughout the cluster.  Please check the <a href="?q=webapp&s=<?= $g_server_index ?>">webapp</a> page for more informtion.</p>
+  <div><b>Name:</b><?= $name ?></div>
+  <div><b>Version:</b><?= $commit->getVersion() ?></div>
+  <div><b>Deploy date:</b><?= $date ?></div>
+  <div><b>Commit message:</b><?= $message ?></div>
+</div>
+<?
+  }
+}
+
+function javascript_autocomplete()
+{
+  global $client;
+  global $g_mbean_server;
+
+  $tags = $client->queryTags("[^/]*/webapp/.*");
+
+  $stages = array("production");
+  $hosts = array();
+  
+  foreach ($tags as $tag) {
+    $elements = explode("/", $tag->getTag());
+    array_push($stages, "'{$elements[0]}'");
+    array_push($hosts, "'{$elements[2]}'");
+  }
+
+  $stages = array_unique($stages);
+  $hosts = array_unique($hosts);
+
+  $stage_json = json_encode($stages);
+  $host_json = json_encode($hosts);
+
+  $javascript = <<<EOF
+    var stages = ${stage_json};
+    $("input:text.stage").autocomplete({ source: stages });
+    var hosts = ${host_json};
+    $("input:text.host").autocomplete({ source: hosts });
+
+EOF;
+
+  $webapps = $g_mbean_server->query("resin:*,type=WebApp");
+  $apps = array();
+
+  foreach ($webapps as $webapp) { 
+    $contextPath = $webapp->getContextPath();
+
+    if ($contextPath == "")
+      $contextPath = "/ROOT";
+
+    $key = $webapp->getHost()->getName() . $contextPath;
+    $metadata = $webapp->getRepositoryMetaData();
+
+    if (count($metadata) == 0) {
+      $apps[$key] = array("rootDirectory" => $webapp->getRootDirectory());
+    } 
+    else {
+      $apps[$key] = $metadata;
+    }
+  }
+
+  $apps_json = json_encode($apps);
+  $javascript .= <<<EOF
+    var apps = {$apps_json}; 
+
+EOF;
+
+  return $javascript;
+}
+
+function javascript_deploy_form()
+{
+  $triggerChange = $_GET['update-name'] ? "true" : "false";
+
+  $javascript = javascript_autocomplete();
+
+  $javascript .= <<<EOF
+    var applicationNameInput = $("input[name=name]");
+    var applicationFileInput = $("input:file[name='application']");
+    var hostRadio = $("input:radio[name=host]");
+    var anotherHostRadio = $(".another-host input:radio");
+    var anotherHostInput = $(".another-host input:text");
+    var infoBox = $("#deploy-info-box");  
+
+    applicationFileInput.change(function() {
+      if (applicationNameInput.val() == "") {
+        var filename = applicationFileInput.val();
+        var match = /(.*(\/|\\\\))*(.*)\.war$/.exec(filename);
+
+        if (match) {
+          applicationNameInput.val(match[3]);
+          applicationNameInput.change();
+        }
+      }
+    });
+
+    applicationNameInput.change(function() {
+      var contextPath = applicationNameInput.val();
+
+      if (contextPath == '/') 
+        contextPath = "/ROOT";
+
+      var appKey = hostRadio.val();
+
+      if (contextPath.charAt(0) == '/')
+        appKey += contextPath;
+      else 
+        appKey += '/' + contextPath;
+
+      if (appKey in apps) {
+        var app = apps[appKey];
+
+        if ("tag" in app) {
+          var version = app["version"];
+          var match = /^([^.]+)\.([^.]+)\.([^.]+)(\.([.*]))?$/.exec(version);
+
+          if (match) {
+            var major = match[1];
+            var minor = match[2];
+            var micro = match[3];
+
+            var majorInput = $("input[name=version-major]");
+            var minorInput = $("input[name=version-minor]");
+            var microInput = $("input[name=version-micro]");
+            var qualifierInput = $("input[name=version-qualifier]");
+
+            if (majorInput.val() == "0"
+                && minorInput.val() == "0"
+                && microInput.val() == "0"
+                && qualifierInput.val() == "") {
+              majorInput.val(major);
+              minorInput.val(minor);
+              microInput.val(parseInt(micro) + 1);
+
+              if (match.length > 5) {
+                var qualifier = match[5];
+                qualifierInput.val(qualifier);
+              }
+            }
+          }
+
+          infoBox.addClass("ui-state-highlight");
+          infoBox.removeClass("ui-state-error");
+          infoBox.html("<div style='margin-bottom: 0.5em'>" +
+                       "<span class='ui-icon ui-icon-info' " +
+                       "style='float: left; margin: 0px 5px;'></span>" + 
+                       "<h3>Updating existing application</h3></div>" +
+                       "<div><b>Name:</b> " + contextPath + "</div>" +
+                       "<div><b>Current version:</b> " + version + "</div>" +
+                       "<div><b>Deploy date:</b> " + app["date"] + "</div>" +
+                       "<div><b>Commit message:</b> " + app["message"] + "</div>");
+          infoBox.show();
+        }
+        else {
+          infoBox.removeClass("ui-state-highlight");
+          infoBox.addClass("ui-state-error");
+          infoBox.html("<div style='margin-bottom: 0.5em'>" +
+                       "<span class='ui-icon ui-icon-alert' " +
+                       "style='float: left; margin: 0px 5px;'></span>" + 
+                       "<h3>Overwriting file system-based application</h3>" +
+                       "</div>" +
+                       "<p>An application with the same name is already " +
+                       "deployed on this system, but was not deployed via " +
+                       "the distributed deployment mechanism.</p>" +
+                       "<p><strong>This operation will overwrite the " +
+                       "existing application and is not " + 
+                       "reversable.</strong></p>" + 
+                       "<div><b>Name:</b> " + contextPath + "</div>" +
+                       "<div><b>Root directory:</b> " + app["rootDirectory"] + "</div>");
+          infoBox.show();
+        }
+      }
+      else {
+        infoBox.hide();
+      }
+    });
+
+    if ($triggerChange)
+      applicationNameInput.change();
+
+    hostRadio.change(function() {
+      if (anotherHostRadio.attr("checked")) {
+        $(".another-host").css("color", "black");
+        anotherHostInput.attr('disabled', false);
+      }
+      else {
+        $(".another-host").css("color", "#999");
+        anotherHostInput.attr('disabled', true);
+      }
+    });
+
+    var stageRadio = $("input:radio[name=stage]");
+    var anotherStageRadio = $(".another-stage input:radio");
+    var anotherStageInput = $(".another-stage input:text");
+
+    stageRadio.change(function() {
+      if (anotherStageRadio.attr("checked")) {
+        $(".another-stage").css("color", "black");
+        anotherStageInput.attr('disabled', false);
+      }
+      else {
+        $(".another-stage").css("color", "#999");
+        anotherStageInput.attr('disabled', true);
+      }
+    });
+
+    $("input:submit").click(function() { 
+      var problems = "";
+
+      if (applicationFileInput.val() == "") {
+        $("#file-title").effect("highlight");
+        problems += "<p>Select an application archive</p>";
+      }
+
+      if (applicationNameInput.val() == "") {
+        $("#name-title").effect("highlight");
+        problems += "<p>Enter an application name</p>";
+      } 
+
+      if (problems.length > 0) {
+        infoBox.addClass("ui-state-error");
+        infoBox.html("<span class='ui-icon ui-icon-alert' " +
+                     "style='float: left; margin: 15px 5px;'></span>" + 
+                     "<h3>Please correct the following problems</h3>" + 
+                     problems);
+        infoBox.show();
+        return false;
+      }
+
+      return true;
+    });
+EOF;
+
+  return $javascript;
+}
+
+$javascript = javascript_deploy_form();
+
+display_footer($g_page, $javascript);
+?>

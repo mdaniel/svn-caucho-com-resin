@@ -1,0 +1,122 @@
+<?php
+
+mbean_init();
+
+#
+# load graph
+# 
+$hash = htmlspecialchars($_REQUEST['hash']);
+$graph = $_REQUEST['graph'];
+$checks = $_REQUEST['checks'];
+$servers = $_REQUEST['servers'];
+
+if (isset($_REQUEST["width"])) {
+  $width = htmlspecialchars($_REQUEST["width"]);
+}
+
+if (isset($_REQUEST["height"])) {
+  $height = htmlspecialchars($_REQUEST["height"]);
+}
+
+if (! $hash && ! $graph && ! $checks) {
+  $style .= "text-align: center;";
+  $style .= "border: 1px solid black;";
+  if ($width)
+    $style .= "width: {$width}px;";
+
+  if ($height)
+    $style .= "height: {$height}px;";
+
+  echo "<div style='$style'><strong>No meters specified</strong></div>";
+  return;
+}
+else {
+  if (! $checks) {
+    $cache = resin_create_distcache("resin:admin:graph");
+
+    if (! $hash) {
+      $user = quercus_servlet_request()->getRemoteUser();
+      $user_item = $cache->get($user);
+
+      $hash = $user_item['user-graphs'][$graph];
+    }
+
+    $item = $cache->get($hash);
+
+    if (! $item) {
+    ?>
+    <b>Graph unavailable (Hash: <?= $hash ?></b>
+    <?php
+      return;
+    }
+
+    $name = $item['name'];
+    $checks = $item['checks'];
+    $servers = $item['servers'];
+  }
+
+  if ($servers == null) {
+    $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
+    $servers = array($self_index);
+  }
+
+  foreach ($checks as $check) {
+    foreach ($servers as $server) {
+      $names[] = htmlspecialchars("$server|$check");
+    }
+  }
+}
+
+#
+# formatting parameters
+# 
+
+$canvas = "graph-{$hash}";
+$period = 60;
+
+if (isset($_REQUEST["canvas"])) {
+  $canvas = htmlspecialchars($_REQUEST["canvas"]);
+}
+
+if (isset($_REQUEST["period"])) {
+  $period = htmlspecialchars($_REQUEST["period"]);
+}
+
+# 
+# compute time bounds
+# 
+
+$now = time();
+$start = $now - $period * 60;
+$dt = date_create();
+$tz = date_timezone_get($dt);
+$offset = timezone_offset_get($tz, $dt);
+
+$time = $start + $offset;
+
+if ($p_period <= 60) {
+}
+else if ($p_period <= 12 * 60) {
+  $time += 3600 - 1;
+  $time -= $time % 3600;
+}
+else if ($p_period <= 24 * 60) {
+  $time += 3 * 3600 - 1;
+  $time -= $time % (3 * 3600);
+}
+else {
+  $time += 24 * 3600 - 1;
+  $time -= $time % (24 * 3600);
+}
+
+$start = $time - $offset;
+$end = $start + $period * 60;
+
+# 
+# output graph
+# 
+
+require_once "WEB-INF/php/graph_flot.php";
+
+stat_graph($canvas, $width, $height, $start, $end, $names);
+?>
