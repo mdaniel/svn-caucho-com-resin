@@ -663,6 +663,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
       _currentRequest.set(_request);
       RequestContext.begin();
+      _requestStartTime = Alarm.getCurrentTime();
 
       _isWakeRequested = false;
       
@@ -674,6 +675,8 @@ public class TcpSocketLink extends AbstractSocketLink
       if (! getRequest().handleRequest()) {
         _state = _state.toKillKeepalive(this);
       }
+      
+      _requestStartTime = 0;
     }
     finally {
       thread.setContextClassLoader(_loader);
@@ -1331,11 +1334,13 @@ public class TcpSocketLink extends AbstractSocketLink
       return _name;
     }
 
+    @Override
     public long getThreadId()
     {
       return TcpSocketLink.this.getThreadId();
     }
 
+    @Override
     public long getRequestActiveTime()
     {
       if (_requestStartTime > 0)
@@ -1344,6 +1349,7 @@ public class TcpSocketLink extends AbstractSocketLink
         return -1;
     }
 
+    @Override
     public String getUrl()
     {
       ProtocolConnection request = TcpSocketLink.this.getRequest();

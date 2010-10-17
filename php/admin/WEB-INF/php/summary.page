@@ -60,6 +60,10 @@ echo "</div>";
 function print_overview()
 {
   global $g_mbean_server;
+  global $g_server;
+  global $resin;
+
+  $server = $g_server;
 
   $runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
   $os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
@@ -413,9 +417,8 @@ function print_tcp_ports()
 <?php
     $count = 0;
     $row = 0;
-    $connInfoList = array();
 
-    foreach ($ports as $port) {
+    foreach ($server->Ports as $port) {
       $count++;
 ?>
 
@@ -432,9 +435,6 @@ function print_tcp_ports()
     <td><?= $port->CometIdleCount ?>
   </tr>
 <?php
-      $portConnInfo = $port->connectionInfo();
-      if ($portConnInfo)
-        $connInfoList = array_merge($connInfoList, $portConnInfo);
     }
 
     echo "</table>";
@@ -444,10 +444,20 @@ function print_tcp_ports()
 function print_threads()
 {
   global $mbean_server;
+  global $server;
 
   $conn = null;
 
   $jvm_thread = $mbean_server->lookup("java.lang:type=Threading");
+
+  $connInfoList = array();
+
+  foreach ($server->Ports as $port) {
+    $portConnInfo = $port->connectionInfo();
+
+    if ($portConnInfo)
+      $connInfoList = array_merge($connInfoList, $portConnInfo);
+  }
 
   $row = 0;
   @ usort($connInfoList, "conn_time_cmp");
