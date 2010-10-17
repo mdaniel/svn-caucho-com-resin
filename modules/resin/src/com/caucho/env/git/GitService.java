@@ -647,8 +647,13 @@ public class GitService extends AbstractResinService {
       InflaterInputStream zin = new InflaterInputStream(is);
       DigestInputStream din = new DigestInputStream(zin, md);
 
-      while (din.read() >= 0) {
+      TempBuffer tBuf = TempBuffer.allocate();
+      byte []buffer = tBuf.getBuffer();
+      
+      while (din.read(buffer, 0, buffer.length) >= 0) {
       }
+      
+      TempBuffer.free(tBuf);
 
       din.close();
 
