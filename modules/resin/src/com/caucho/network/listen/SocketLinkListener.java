@@ -1345,7 +1345,7 @@ public class SocketLinkListener extends TaskWorker
     int value = _keepaliveAllocateCount.decrementAndGet();
     
     if (value < 0) {
-      System.out.println("FAILED keepalive; " + value);
+      System.out.println("FAILED keepTalive; " + value);
       Thread.dumpStack();
     }
   }
