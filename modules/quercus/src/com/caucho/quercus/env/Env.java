@@ -275,13 +275,16 @@ public class Env
   private LinkedList<FieldGetEntry> _fieldGetList
     = new LinkedList<FieldGetEntry>();
 
+  private LinkedList<FieldGetEntry> _fieldSetList
+    = new LinkedList<FieldGetEntry>();
+
   private LinkedList<FieldGetEntry> _issetList
     = new LinkedList<FieldGetEntry>();
 
   private LinkedList<FieldGetEntry> _unsetList
     = new LinkedList<FieldGetEntry>();
 
-  public final enum OVERLOADING_TYPES {INVALID_FIRST, FIELDGET, FIELDSET, ISSET, UNSET, INVALID_LAST};
+  public enum OVERLOADING_TYPES {INVALID_FIRST, FIELDGET, FIELDSET, ISSET, UNSET, INVALID_LAST};
 
 
   private Path _selfPath;
@@ -3048,7 +3051,7 @@ public class Env
               list = _fieldGetList;
               break;
           case FIELDSET:
-              // TODO recursion check for __set
+              list = _fieldSetList;
               break;
           case ISSET:
               list = _issetList;
@@ -3060,7 +3063,6 @@ public class Env
           case INVALID_LAST:
               // defensive programming according to &quot;Code Complete 2nd Edition, MS Press&quot;
               throw new IllegalStateException("IllegalState: pushFieldGet with FIRST/LAST Element");
-              break;
       }
 
       if(list == null)
@@ -3082,7 +3084,7 @@ public class Env
               _fieldGetList.pop();
               break;
           case FIELDSET:
-              // TODO recursion check for __set
+              _fieldSetList.pop();
               break;
           case ISSET:
               _issetList.pop();

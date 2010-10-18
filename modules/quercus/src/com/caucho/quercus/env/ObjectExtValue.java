@@ -204,18 +204,23 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public final Value getField(Env env, StringValue name)
   {
-    int hash = (name.hashCode() & 0x7fffffff) % _prime;
+    Value returnValue = getFieldExt(env, name);
+    if(returnValue == UnsetValue.UNSET)
+    {
+        // __get didn't work, lets look in the class itself
+        int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
-    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-      StringValue entryKey = entry._key;
+        for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
+          StringValue entryKey = entry._key;
 
-      if (name == entryKey || name.equals(entryKey)) {
-        // php/09ks vs php/091m
-        return entry._value.toValue();
-      }
+          if (name == entryKey || name.equals(entryKey)) {
+            // php/09ks vs php/091m
+            returnValue = entry._value.toValue();
+          }
+        }
     }
 
-    return getFieldExt(env, name);
+    return returnValue;
   }
 
   /**
@@ -563,29 +568,42 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public void unsetField(StringValue name)
   {
-    int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
-    for (Entry entry = _entries[hash];
-         entry != null;
-         entry = entry._next) {
-      if (name.equals(entry.getKey())) {
-        Entry prev = entry._prev;
-        Entry next = entry._next;
 
-        if (prev != null)
-          prev._next = next;
-        else
-          _entries[hash] = next;
+    Value returnValue = _quercusClass.unsetField(Env.getCurrent(),this,name);
+    if(returnValue == UnsetValue.UNSET)
+    {
+        // __unset didn't work, lets look in the class itself
+        int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
-        if (next != null)
-          next._prev = prev;
+        for (Entry entry = _entries[hash];
+             entry != null;
+             entry = entry._next) {
+          if (name.equals(entry.getKey())) {
+            Entry prev = entry._prev;
+            Entry next = entry._next;
 
-        _size--;
+            if (prev != null)
+              prev._next = next;
+            else
+              _entries[hash] = next;
 
-        return;
-      }
+            if (next != null)
+              next._prev = prev;
+
+            _size--;
+
+            return;
+          }
+        }
     }
+
+    return;
+
   }
+
+
+
 
   /**
    * Removes the field array ref.
@@ -1392,6 +1410,31 @@ public class ObjectExtValue extends ObjectValue
   private static String toMethod(char []key, int keyLength)
   {
     return new String(key, 0, keyLength);
+  }
+
+
+  @Override
+  public boolean issetField( StringValue name) {
+
+    Value returnValue = _quercusClass.issetField(Env.getCurrent(),this,name);
+    if(returnValue == UnsetValue.UNSET)
+    {
+        // setter didn't work, lets look in the class itself
+        int hash = (name.hashCode() & 0x7fffffff) % _prime;
+
+        for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
+          StringValue entryKey = entry._key;
+
+          if (name == entryKey || name.equals(entryKey)) {
+            // php/09ks vs php/091m
+//            returnValue = entry._value.toValue();
+              return true;
+          }
+        }
+    }
+
+    return returnValue.toBoolean();
+
   }
 
   @Override

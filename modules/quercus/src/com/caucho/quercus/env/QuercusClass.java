@@ -1086,26 +1086,76 @@ public class QuercusClass extends NullValue {
     // push/pop to prevent infinite recursion
     
     if (_fieldGet != null) {
-      if (! env.pushFieldGet(qThis.getClassName(), name))
+      if (! env.pushFieldGet(Env.OVERLOADING_TYPES.FIELDGET, qThis.getClassName(), name))
         return UnsetValue.UNSET;
-      
+
       try {
         return _fieldGet.callMethod(env, this, qThis, name);
       } finally {
-        env.popFieldGet();
+        env.popFieldGet(Env.OVERLOADING_TYPES.FIELDGET);
       }
     }
     else
       return UnsetValue.UNSET;
   }
 
+  public Value issetField(Env env, Value qThis, StringValue name)
+  {
+    // basically a copy of the __get code with slightly different semantics
+
+    if (_isset != null) {
+      if (! env.pushFieldGet(Env.OVERLOADING_TYPES.ISSET, qThis.getClassName(), name))
+        return UnsetValue.UNSET;
+
+      try {
+          return _isset.callMethod(env, this, qThis, name);
+      } finally {
+        env.popFieldGet(Env.OVERLOADING_TYPES.ISSET);
+      }
+    }
+    else
+    {
+        return issetField(name)? BooleanValue.TRUE : BooleanValue.FALSE;
+    }
+  }
+
+  public Value unsetField(Env env, Value qThis, StringValue name)
+  {
+    // basically a copy of the __get code with slightly different semantics
+
+    if (_unset != null) {
+      if (! env.pushFieldGet(Env.OVERLOADING_TYPES.UNSET, qThis.getClassName(), name))
+        return UnsetValue.UNSET;
+
+      try {
+        return _unset.callMethod(env, this, qThis, name);
+      } finally {
+        env.popFieldGet(Env.OVERLOADING_TYPES.UNSET);
+      }
+    }
+    else
+      unsetField(name);
+
+    return NullValue.NULL;
+  }
+
   /**
    * Implements the __set method call.
    */
-  public void setField(Env env, Value qThis, StringValue name, Value value)
+  public Value setField(Env env, Value qThis, StringValue name, Value value)
   {
-    if (_fieldSet != null)
-      _fieldSet.callMethod(env, this, qThis, name, value);
+    if (_fieldSet != null){
+        if (! env.pushFieldGet(Env.OVERLOADING_TYPES.FIELDSET, qThis.getClassName(), name))
+          return UnsetValue.UNSET;
+
+        try {
+            return _fieldSet.callMethod(env, this, qThis, name, value);
+        }
+        finally {
+            env.popFieldGet(Env.OVERLOADING_TYPES.FIELDSET);
+        }
+    }
+    return UnsetValue.UNSET;
   }
 
   /**
