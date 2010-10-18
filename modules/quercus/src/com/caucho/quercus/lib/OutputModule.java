@@ -162,6 +162,9 @@ public class OutputModule extends AbstractQuercusModule
 
   /**
    * Returns the contents of the output buffer, emptying it afterwards.
+   * From the PHP Docs:
+   *  Gets the current buffer contents and delete current output buffer.
+   *  ob_get_clean() essentially executes both ob_get_contents() and ob_end_clean()
    */
   public static Value ob_get_clean(Env env)
   {
@@ -170,7 +173,7 @@ public class OutputModule extends AbstractQuercusModule
     if (ob != null) {
       Value result = ob.getContents();
 
-      ob.clean();
+      ob_end_clean(env);
 
       return result;
     }
