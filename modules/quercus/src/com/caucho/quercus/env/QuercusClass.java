@@ -82,6 +82,8 @@ public class QuercusClass extends NullValue {
   private AbstractFunction _call;
   private AbstractFunction _invoke;
   private AbstractFunction _toString;
+  private AbstractFunction _isset;
+  private AbstractFunction _unset;
 
   private ArrayDelegate _arrayDelegate;
   private TraversableDelegate _traversableDelegate;
@@ -1825,6 +1827,26 @@ public class QuercusClass extends NullValue {
     {
       return _name;
     }
+  }
+
+  public void setIsset(AbstractFunction isset)
+  {
+    _isset = isset;
+  }
+
+  public void setUnset(AbstractFunction unset)
+  {
+    _unset = unset;
+  }
+
+  public AbstractFunction getIsset()
+  {
+    return _isset;
+  }
+
+  public AbstractFunction getUnset()
+  {
+    return _unset;
   }
 }
 
