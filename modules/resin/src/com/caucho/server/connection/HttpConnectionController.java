@@ -33,6 +33,7 @@ import java.util.*;
 import javax.servlet.*;
 
 import com.caucho.servlet.comet.CometController;
+import com.caucho.servlet.comet.CometCloseListener;
 
 import com.caucho.server.port.*;
 import com.caucho.server.connection.*;
@@ -46,7 +47,9 @@ public class HttpConnectionController extends ConnectionController
 {
   private AbstractHttpRequest _request;
   private HashMap<String,Object> _map = new HashMap<String,Object>(8);
-  
+
+  private ArrayList<CometCloseListener> _closeListeners;
+
   private long _maxIdleTime;
 
   public HttpConnectionController(ServletRequest request)
@@ -66,7 +69,7 @@ public class HttpConnectionController extends ConnectionController
   {
     return (AbstractHttpRequest) request;
   }
-  
+
   /**
    * Sets the max idle time.
    */
@@ -75,7 +78,7 @@ public class HttpConnectionController extends ConnectionController
     if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime)
       _maxIdleTime = Long.MAX_VALUE / 2;
   }
-  
+
   /**
    * Gets the max idle time.
    */
@@ -83,7 +86,7 @@ public class HttpConnectionController extends ConnectionController
   {
     return _maxIdleTime;
   }
-  
+
   /**
    * Gets a request attribute.
    */
@@ -91,13 +94,13 @@ public class HttpConnectionController extends ConnectionController
   {
     if (_map != null) {
       synchronized (_map) {
-	return _map.get(name);
+        return _map.get(name);
       }
     }
     else
       return null;
   }
-  
+
   /**
    * Sets a request attribute.
    */
@@ -105,11 +108,11 @@ public class HttpConnectionController extends ConnectionController
   {
     if (_map != null) {
       synchronized (_map) {
-	_map.put(name, value);
+        _map.put(name, value);
       }
     }
   }
-  
+
   /**
    * Remove a request attribute.
    */
@@ -117,20 +120,40 @@ public class HttpConnectionController extends ConnectionController
   {
     if (_map != null) {
       synchronized (_map) {
-	_map.remove(name);
+        _map.remove(name);
       }
     }
   }
-  
+
+  public void addCloseListener(CometCloseListener listener)
+  {
+    if (_closeListeners == null)
+      _closeListeners = new ArrayList<CometCloseListener>();
+
+    _closeListeners.add(listener);
+  }
+
   /**
    * Closes the connection.
    */
   @Override
   public void close()
   {
+    ArrayList<CometCloseListener> listeners = _closeListeners;
+    _closeListeners = null;
+
+    if (listeners != null) {
+      for (int i = 0; i < listeners.size(); i++) {
+        CometCloseListener listener = listeners.get(i);
+
+        listener.onClose(this);
+      }
+    }
+
     _request = null;
-    
+
     super.close();
+
   }
 
   public String toString()

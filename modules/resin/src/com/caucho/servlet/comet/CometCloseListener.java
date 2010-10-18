@@ -32,49 +32,6 @@ package com.caucho.servlet.comet;
 /**
  * Public API to control a comet connection.
  */
-public interface CometController {
-  /**
-   * Sets the max idle time.
-   */
-  public void setMaxIdleTime(long idleTime);
-
-  /**
-   * Gets the max idle time.
-   */
-  public long getMaxIdleTime();
-
-  /**
-   * Gets a request attribute.
-   */
-  public Object getAttribute(String name);
-
-  /**
-   * Sets a request attribute.
-   */
-  public void setAttribute(String name, Object value);
-
-  /**
-   * Remove a request attribute.
-   */
-  public void removeAttribute(String name);
-
-  /**
-   * Wakes the connection.
-   */
-  public boolean wake();
-
-  /**
-   * Returns true if the connection is closed.
-   */
-  public boolean isClosed();
-
-  /**
-   * Adds a close listener
-   */
-  public void addCloseListener(CometCloseListener listener);
-
-  /**
-   * Closes the connection.
-   */
-  public void close();
+public interface CometCloseListener {
+  public void onClose(CometController controller);
 }

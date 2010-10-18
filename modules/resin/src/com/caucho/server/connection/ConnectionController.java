@@ -72,7 +72,7 @@ public class ConnectionController
   {
     return _conn;
   }
-  
+
   /**
    * Wakes the connection.
    */
