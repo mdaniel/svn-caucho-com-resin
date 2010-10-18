@@ -5,9 +5,10 @@
 
 <p>
 When your traffic grows beyond the limitations of a single virtual-machine
-instance, your additional servers expand into a Resin cluster.
-The clustered servers gain the reliability of a triple-redundant hub, the
-"triad", which serves as the replicated backup of Resin's clustering system.
+instance, Resin's clustering will manage your additional servers.
+With Resins' clustering, your servers gain the reliability of a
+triple-redundant hub, the "triad", which serves as the replicated
+backup of Resin's clustering system.
 The cluster provides automatic health checks and sensor statistics,
 reliable cluster-wise deployment, load-balancing, failover and
 distributed caching and session management.
@@ -20,21 +21,20 @@ distributed caching and session management.
 
 <s1 title="Overview">
 
-<p>In Resin, clustering is always enabled since every server
-belongs to a cluster. Even if you only have a single
+<p>In Resin, clustering is always enabled. Even if you only have a single
 server, that server belongs to its own cluster. As you add more
 servers, the servers are added to the cluster, and automatically gain
 benefits like clustered health monitoring, heartbeats, distributed
 management, triple redundancy, and distributed deployment.</p>
 
-<p>The Resin clustering gives your application:</p>
+<p>Resin clustering gives you:</p>
 
 <ul>
+<li>HTTP Load balancing and failover.</li>
 <li>Distributed deployment and versioning of applications.</li>
-<li>HTTP Load balancing and failover requests.</li>
+<li>A triple-redundant triad as the reliable cluster hub.</li>
 <li>Heartbeat monitoring of all servers in the cluster.</li>
 <li>Health sensors, metering and statistics across the cluster.</li>
-<li>A triple-redundant triad as the hub of the cluster.</li>
 <li>Clustered JMS queues and topics.</li>
 <li>Distributed JMX management.</li>
 <li>Clustered caches and distributed sessions.</li>
@@ -54,7 +54,7 @@ physical hardware limits of a server usually manifest themselves as
 chronic high CPU and memory usage despite reasonable performance
 tuning and hardware upgrades.</p>
 
-<p> Server <i>load-balancing</i> solves the scaling problem by letting you
+<p> Server <em>load-balancing</em> solves the scaling problem by letting you
 deploy a single web application to more than one physical
 machine. These machines can then be used to share the web application
 traffic, reducing the total workload on a single machine and providing
@@ -68,6 +68,18 @@ because even if one or more servers go down or are brought down for
 maintenance, other servers can still continue to handle traffic. With
 a single server application, any down-time is directly visible to the
 user, drastically decreasing reliability.  </p>
+
+<p>If your application runs on multiple servers,
+Resin's <em>clustered deployment</em> helps you updating new versions
+of your application to all servers, and verify that all servers in the
+cluster are running the same version. When you deploy a new version,
+Resin ensures that all servers have an identical copy, validates the
+application, and then deploys it consistently.  The clustered
+deployment is reliable across failures because its built on a
+transactional version control system (Git).  After a new server starts
+or a failed server restarts, it checks with the redundant triad for
+the latest application version, copying it as necessary and deploying it.
+</p>
 
 <p> If web applications were entirely stateless, load-balancing alone
 would be sufficient in meeting all application server scalability
@@ -107,7 +119,7 @@ administering the cluster.</p>
 
 <s1 title="Deploying Applications to a Cluster">
 
-<p> The simplest mechanism for doing deployment in a clustered
+<p>The simplest mechanism for doing deployment in a clustered
 environment is to copy files to each server's deployment
 directory. The biggest issue with this approach is that it is very
 difficult to synchronize deployment across the cluster and it often
@@ -119,8 +131,34 @@ the cluster. Because Resin cluster deployment is based on Git, it also
 allows for application versioning and staging across the cluster.
 </p>
 
-<p>When Resin is up and running, you can use following command-line
-to deploy a new war to the cluster:</p>
+<p>Although the upload and copy of application archives is common for
+single servers, it becomes more difficult to manage as your site
+scales to multiple servers. Along with the mechanics of copying the
+same file many times, you also need to consider the synchronization of
+applications across all the servers, making sure that each server has
+a complete, consistent copy. The benefits of using Resin's clustered
+deployment include:</p>
+
+<ul>
+<li>Verify complete upload by secure digest before deployment begins.</li>
+<li>Verify all servers receive the same copy of the application.</li>
+<li>Versioned deployment, including transparent user upgrades.</li>
+</ul>
+
+<p>Because each organization has different deployment strategies,
+Resin provides several deployment techniques to match
+your internal deployment strategy:</p>
+
+<ul>
+<li>Upload and copy .war files individually.</li>
+<li>Use from command-line with "deploy" command.</li>
+<li>Use /resin-admin deploy form.</li>
+<li>Use ant script with Resin's deployment plugin.</li>
+<li>Use maven script with Resin's deployment plugin.</li>
+</ul>
+
+<p>As an example, the command-line deployment of a .war file to a
+running Resin instance looks like the following:</p>
 
 <example>
 unix> bin/resin.sh deploy test.war -user my-user -password my-pass
@@ -203,15 +241,31 @@ is outlined <a href="clustering-deployment-ref.xtp">here</a>.  </p>
 
 </s1>
 
-<s1 title="Load Balancing and Failover">
+<s1 title="HTTP Load Balancing and Failover">
 
-<p> Clustering and load-balancing are intrinsic to resin.xml
-configuration - you may only define &lt;server> and &lt;host> inside a
-&lt;cluster> tag. The &lt;cluster> tag defines a logically grouped set
-of servers to be load-balanced and clustered across.  Although you can
-definitely use a hardware load balancer with Resin, it is easier to
-understand how Resin clustering works via it's support for software
-based load-balancing. Load balancing in Resin is accomplished through
+<p>Once your traffic increases beyond the capacity of a single
+application server, your site needs to add a HTTP load balancer as
+well as the second application server. Your system is now a two
+tier system: an app-tier with your program and a web-tier for
+HTTP load-balancing and HTTP proxy caching. Since the load-balancing
+web-tier is focusing on
+HTTP and proxy caching, you can usually handle many app-tier servers
+with a single web-tier load balancer. Although the largest sites will
+pay for an expensive hardware load balancer, medium and small sites
+can use Resin's built-in load-balancer as a cost-effective and
+efficient way to scale a moderate number of servers, while gaining the
+performance advantage of Resin's HTTP proxy caching.</p>
+
+<p>A load balanced system has three main requirements: define the servers
+to use as the application-tier, define the servers in the web-tier,
+and select which requests are forwarded (proxied) to the backend
+app-tier servers. Since Resin's clustering configuration already
+defines the servers in a cluster, the only additional configuration
+is to use the &lt;resin:LoadBalance> tag to forward request to the backend.</p>
+
+<figure src="cluster-load-balance.png"/>
+
+<p>Dispatching requests with load balancing in Resin is accomplished through
 the <a href="http-rewrite-ref.xtp">&lt;resin:LoadBalance></a> tag
 placed on a cluster.  In effect, the <a
 href="http-rewrite-ref.xtp">&lt;resin:LoadBalance></a> tag turns a set
@@ -225,8 +279,8 @@ servers in the application server tier.  </p>
 
 <p> The best way to understand how this works is through a simple
 example configuration.  The following resin.xml configuration shows
-servers split into application and web tiers with the web tier doing
-content caching as well as load-balancing: </p>
+servers split into two clusters: a web-tier for load balancing and
+HTTP, and an app-tier to process the application:</p>
 
 <example title="Example: resin.xml for Load-Balancing">
 &lt;resin xmlns="http://caucho.com/ns/resin"
@@ -250,7 +304,7 @@ content caching as well as load-balancing: </p>
       &lt;http port="80"/&gt;
     &lt;/server>
 
-    &lt;cache memory-size="256M"/&gt;
+    &lt;proxy-cache memory-size="256M"/&gt;
 
     &lt;host id=""&gt;
     
@@ -338,7 +392,7 @@ experience with application state randomly getting lost!  </p>
 
 <p> One way to solve this issue would be to fully synchronize the
 session across the load-balanced servers. Resin does support this
-through it's clustering features (which is discussed in detail in the
+through its clustering features (which is discussed in detail in the
 following sections). The problem is that the cost of continuously
 doing this synchronization across the entire cluster is very high and
 relatively unnecessary. This is where sticky sessions come in. With
@@ -366,16 +420,19 @@ generate cookies like this: </p>
   <td><var>b</var>xxx</td>
 </tr>
 </deftable>
-<p>On the web-tier, Resin will decode the session cookie and send it to the appropriate 
-host. So <var>bacX8ZwooOz</var> would go to app-b. In the infrequent case that app-b 
-fails, Resin will send the request to app-a. Because the session is not clustered, the 
-user will lose the session but they won't see a connection failure (to see how
-to avoid losing the session, check out the following section on clustering).
-</p>
+
+<p>On the web-tier, Resin decoded the session cookie and sends it
+to the appropriate server. So <var>baaX8ZwooOz</var> will go to
+app-b. If app-b fails or is down for maintenance, Resin will send the
+request a backup server calculated from the session id, in this
+case app-a. Because the session is not clustered, the user will
+lose the session but they won't see a connection failure (to see how
+to avoid losing the session, check out the following section on
+clustering).  </p>
+
 </s2>
 
 <s2 title="Manually Choosing a Server">
-
 
 <p> For testing purposes you might want to send requests to a specific
 servers in the app-tier manually. You can easily do this since the
@@ -383,12 +440,11 @@ web-tier uses the value of the <var>jsessionid</var> to maintain
 sticky sessions. You can include an explicit <var>jsessionid</var> to
 force the web-tier to use a particular server in the app-tier.  </p>
 
-<p>
-Since Resin uses the first character of the <var>jsessionid</var> to identify the 
-server to use, starting with 'a' will resolve the request to app-a. 
-If wwww.example.com resolves to your web-tier, then you can use values like this for 
-testing:
-</p>
+<p> Since Resin uses the first character of the <var>jsessionid</var>
+to identify the server to use, starting with 'a' will resolve the
+request to app-a.  If wwww.example.com resolves to your web-tier, then
+you can use values like this for testing: </p>
+
 <ol>
 <li>http://www.example.com/proxooladmin;jsessionid=aaaXXXXX</li>
 <li>http://www.example.com/proxooladmin;jsessionid=baaXXXXX</li>
@@ -410,18 +466,16 @@ configuration might look like: </p>
       &lt;http port='80'/&gt;
     &lt;/server-default>
 
-    &lt;server id='app-a' address='192.168.0.1'/&gt;
-    &lt;server id='app-b' address='192.168.0.2'/&gt;
-    &lt;server id='app-c' address='192.168.0.3'/&gt;
+    &lt;server id='app-a' address='192.168.0.1' port="6800"/&gt;
+    &lt;server id='app-b' address='192.168.0.2' port="6800"/&gt;
+    &lt;server id='app-c' address='192.168.0.3' port="6800"/&gt;
 
   &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
-<p>
-Each server will be started as <var>-server a</var>, <var>-server b</var>, etc to grab 
-its specific configuration.
-</p>
+<p> Each server will be started as <var>-server a</var>, <var>-server
+b</var>, etc to grab its specific configuration.  </p>
 
 </s2>
 
@@ -452,47 +506,51 @@ connection (15s)</li>
 write (65s)</li>
 </ul>
 
-<p>When an app-tier server is down due to maintenance or a crash, Resin will use the 
-<b>load-balance-recover-time</b> as a delay before retrying
-the downed server.  With the failover and recover timeout, the load balancer
-reduces the cost of a failed server to almost no time at all.  Every
-recover-time, Resin will try a new connection and wait for
-<b>load-balance-connect-timeout</b> for the server to respond.  At most, one
-request every 15 seconds might wait an extra 5 seconds to connect to the
-backend server.  All other requests will automatically go
-to the other servers.</p>
+<p>When an app-tier server is down due to maintenance or a crash,
+Resin will use the <b>load-balance-recover-time</b> as a delay before
+retrying the downed server.  With the failover and recover timeout,
+the load balancer reduces the cost of a failed server to almost no
+time at all.  Every recover-time, Resin will try a new connection and
+wait for <b>load-balance-connect-timeout</b> for the server to
+respond.  At most, one request every 15 seconds might wait an extra 5
+seconds to connect to the backend server.  All other requests will
+automatically go to the other servers.</p>
+
 <p>The socket-timeout values tell Resin when a socket connection is
 dead and should be dropped.  The web-tier timeout
 <b>load-balance-socket-timeout</b> is much larger than the app-tier
 timeout <b>socket-timeout</b> because the web-tier needs to wait for
-the application to generate the response.  If your application has some
-very slow pages, like a complicated nightly report, you may need to
-increase the <b>load-balance-socket-timeout</b> to avoid the web-tier
-disconnecting it.</p>
-<p>Likewise, the <b>load-balance-idle-time</b> and <b>keepalive-timeout</b>
-are a matching pair for the socket idle pool.  The idle-time tells the
-web-tier how long it can keep an idle socket before closing it.  The
-keepalive-timeout tells the app-tier how long it should listen for
-new requests on the socket.  The <b>keepalive-timeout</b> must be
-significantly larger than the <b>load-balance-idle-time</b> so the app-tier
-doesn't close its sockets too soon.  The keepalive timeout can be large
-since the app-tier can use the
-<a href="http-server-ref.xtp">keepalive-select</a>
-manager to efficiently wait for many connections at once.</p>
-</s2>
+the application to generate the response.  If your application has
+some very slow pages, like a complicated nightly report, you may need
+to increase the <b>load-balance-socket-timeout</b> to avoid the
+web-tier disconnecting it.</p>
 
-<s2 title="Dispatching">
+<p>Likewise, the <b>load-balance-idle-time</b> and
+<b>keepalive-timeout</b> are a matching pair for the socket idle pool.
+The idle-time tells the web-tier how long it can keep an idle socket
+before closing it.  The keepalive-timeout tells the app-tier how long
+it should listen for new requests on the socket.  The
+<b>keepalive-timeout</b> must be significantly larger than the
+<b>load-balance-idle-time</b> so the app-tier doesn't close its
+sockets too soon.  The keepalive timeout can be large since the
+app-tier can use the <a
+href="http-server-ref.xtp">keepalive-select</a> manager to efficiently
+wait for many connections at once.</p> </s2>
+
+<s2 title="resin:LoadBalance Dispatching">
 
 <p>&lt;resin:LoadBalance> is part of Resin's <a
 href="http-rewrite.xtp">rewrite</a> capabilities, Resin's equivalent
 of the Apache mod_rewrite module, providing powerful and detailed URL
-matching and decoding, so more complicated sites might load-balance
-based on the virtual host or URL.</p>
+matching and decoding. More sophisticated sites might load-balance
+based on the virtual host or URL using multiple &lt;resin:LoadBalance>
+tags.</p>
 
 <p>In most cases, the web-tier will dispatch everything to the
 app-tier servers.  Because of Resin's <a
-href="../doc/proxy-cache.xtp">proxy cache</a>, the web-tier servers
-will serve static pages as fast as if they were local pages.</p>
+href="http-proxy-cache.xtp">proxy
+cache</a>, the web-tier servers will serve static pages as
+fast as if they were local pages.</p>
 
 <p>In some cases, though, it may be important to send different
 requests to different backend clusters. The <a
@@ -518,7 +576,7 @@ the bar-tier cluster, and keeps anything else on the web-tier.</p>
       &lt;http port="80"/>
     &lt;/server>
 
-    &lt;cache memory-size="64m"/>
+    &lt;proxy-cache memory-size="64m"/>
 
     &lt;host id="">
       &lt;web-app id="/">
@@ -551,54 +609,64 @@ For details on the tags used for clustering, please refer to
 
 </s1>
 
+<s1 title="Triple Redundant Clustering (the Triad)">
+
+<p>After many years of developing Resin's distributed clustering for a
+wide variety of user configurations, we refined our clustering network to a
+hub-and-spoke model using a triple-redundant triad of servers as the
+cluster hub. The triad model provides interlocking benefits for the
+dynamically scaling server configurations people are using.</p>
+
+<ul>
+<li>When you bring down one server for maintenance, the triple
+redundancy continues to maintain reliability.</li>
+<li>You can add and remove dynamic servers safely without
+affecting the redundant state.</li>
+<li>Your network processing will be load-balanced across three
+servers, eliminating a single point of failure.</li>
+<li>Your servers will scale evenly across the cluster pod because each
+new server only needs to speak to the triad, not all servers.</li>
+<li>Your large site can split the cluster into independent "pods" of less
+than 64-servers to maintain scalability.</li>
+</ul>
+
+<figure src="resin-cloud.jpg"/>
+
+<s2 title="Cluster Heartbeat">
+
+<p>As part of Resin's health check system, the cluster continually
+checks that all servers are alive and responding properly.  Every
+60 seconds, each server sends a heartbeat to the triad, and each triad
+server sends a heartbeat to all the other servers.</p>
+
+<p>When a server failure is detected, Resin immediately detects the
+failure, logging it for an administrator's analysis and internally
+prepares to failover to backup servers for any messaging for
+distributed storage like the clustered sessions and the
+clustered deployment.</p>
+
+<p>When the server comes back up, the heartbeat is reestablished and
+any missing data is recovered.</p>
+
+</s2>
+
+</s1>
+
 <s1 title="Clustered Sessions">
 
+<p>Because load balancing, maintenance and failover should be
+invisible to your users, Resin can replicate user's session data across
+the cluster. When the load-balancer fails over a request to a backup
+server, or when you dynamically remove a server, the backup can grab
+the session and continue processing. From the user's perspective,
+nothing has changed. To make this process fast and reliable, Resin
+uses the triad servers as a triplicate backup for the user's session.</p>
 
-<p> The most easily understood process of clustering (synchronizing
-state across a set of servers) is to replicate the entire session
-state across the cluster on every change in real time. Although this
-is possible in theory the problem is that this model of clustering
-does not scale very well across a mildly large set of servers and
-often floods internal network traffic with frivolous synchronization
-requests. Instead of opting for this "brute force" approach, Resin
-opts to do what is sometimes referred to as "buddy replication"
-clustering.  </p>
-
-<p> In this scheme, the session state is stored on a single "master"
-server (usually the server that originated the session). One or more
-other servers are randomly chosen to store a backup copy of the
-session (the "buddies").  In case the server that owns the session
-goes down, one of the back-up servers take over as the owner. All
-other servers get an updated copy of the data as needed from the
-server that owns the data. The data is always fully synchronized
-across the owning and backup servers. By default, only one server is
-chosen as the back-up, but you can choose to have two back-ups for
-extra reliability (together these three servers are the called the
-"triad" - a concept we will discuss further in the elastic computing
-section).  </p>
-
-<p>
-This scheme works especially nicely with sticky sessions since only one server needs to 
-have a copy of the session data anyway. It also works with simple hardware based 
-load-balancers that do not support sticky sessions since any server has access to 
-session data, although this approach incurs more network bandwidth usage. Also, while
-using sticky sessions, you have the option of not doing clustering at all. While not using
-sticky sessions, the only way to ensure session consistency is using clustering.
-</p>
 <p>
 The following is a simple example of how to enable clustering on Resin:
 </p>
-<example>
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-  ...
-  &lt;cluster id="app-tier"&gt;
-    &lt;server id="app-a" host="192.168.0.1" port="6802"/>
-    &lt;server id="app-b" host="192.168.0.2" port="6802"/>
-    ...
-  &lt;/cluster>
-&lt;/resin>
-</example>
-<example>
+
+<example title="Example: resin-web.xml enabling clustered sessions">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;session-config&gt;
     &lt;use-persistent-store="true"/&gt;
@@ -611,7 +679,7 @@ href="deploy-ref.xtp#session-config">&lt;use-persistent-store&gt;</a>
 tag under <a
 href="deploy-ref.xtp#session-config">&lt;session-config&gt;</a> is
 used to enable clustering. Note, clustering is enabled on a
-per-web-application basis since not all web applications under a host
+per-web-application basis because not all web applications under a host
 need be clustered. If you want to cluster all web applications under a
 host, you can place &lt;use-persistent-store&gt; under <a
 href="deploy-ref.xtp#web-app-default">&lt;web-app-default&gt;</a>. The
@@ -631,11 +699,8 @@ following example shows how you can do this: </p>
 </example>
 
 <p> The above example also shows how you can override the clustering
-behaviour for Resin.  By default, Resin uses TCP based replication
-(called a "cluster" store) and only one backup server. By specifying
-<var>triplicate=true</var>, you are indicating that you would like to
-use two backup servers (that is, have three copies of the session - in
-"triplicate"). In addition to the <var>triplicate</var> attribute, the
+behaviour for Resin.  By default, Resin uses a triad based replication
+with all three triad servers backing up the data server. THe
 &lt;persistent-store type="cluster"&gt; has a number of other
 attributes: </p>
 
@@ -644,11 +709,6 @@ attributes: </p>
   <th>Attribute</th>
   <th>Description</th>
   <th>Default</th>
-</tr>
-<tr>
-  <td>always-load</td>
-  <td>Always load the value</td>
-  <td>false</td>
 </tr>
 <tr>
   <td>always-save</td>
@@ -661,15 +721,11 @@ attributes: </p>
 items earlier)</td>
   <td>24h</td>
 </tr>
-<tr>
-  <td>path</td>
-  <td>Directory to store the objects</td>
-  <td>required</td>
-</tr>
 </deftable>
 
-<p> For single-server configurations, the "cluster" store saves
-session data on disk, allowing for recovery after system restart. This
+<p>The cluster store is valuable for single-server configurations,
+because Resin stores a copy of the session data on disk, allowing
+for recovery after system restart. This
 is basically identical to the file persistence feature discussed
 below.  </p>
 
@@ -722,6 +778,7 @@ save and restore sessions. Application objects must implement
 <var>java.io.Serializable</var> for distributed sessions to work.</p>
 
 </s2>
+
 <s2 title="No Distributed Locking">
 
 <p>Resin's clustering does not lock sessions for replication. For
@@ -731,6 +788,7 @@ need for distributed locking. However, it's a good idea to be aware of
 the lack of distributed locking in Resin clustering.</p>
 
 </s2>
+
 <p>
 For details on the tags used for clustering, please refer to 
 <a href="clustering-ref.xtp">this page</a>.
@@ -903,6 +961,7 @@ application should look like this: </p>
 </s2>
 </s1>
 -->
+
 <s1 title="Distributed Caching">
 
 <p> Distributed caching is a very useful technique for reducing

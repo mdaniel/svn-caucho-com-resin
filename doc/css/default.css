@@ -23,8 +23,8 @@ body {
   font-family : Verdana, Helvetica, Arial, sans-serif;
 }
 
+/*  text-decoration : none; */
 a {
-  text-decoration : none;
   color : #4c2004;
 }
 
