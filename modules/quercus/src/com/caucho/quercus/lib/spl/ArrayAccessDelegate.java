@@ -32,7 +32,7 @@ package com.caucho.quercus.lib.spl;
 import com.caucho.quercus.env.*;
 
 /**
- * A delegate that intercepts array acces methods on the
+ * A delegate that intercepts array access methods on the
  * target objects that implement
  * the {@link com.caucho.quercus.lib.spl.ArrayAccess} interface.
  */
@@ -71,8 +71,13 @@ public class ArrayAccessDelegate implements ArrayDelegate
   public boolean isset(ObjectValue qThis, Value index)
   {
     Env env = Env.getInstance();
-    
-    return qThis.callMethod(env, OFFSET_EXISTS, index).toBoolean();
+    Value returnValue = qThis.getQuercusClass().issetField(env,qThis,index.toString(env));
+    if(returnValue == UnsetValue.UNSET)
+    {
+      return qThis.callMethod(env, OFFSET_EXISTS, index).toBoolean();
+    }
+    else
+      return returnValue.toBoolean();
   }
 
   public Value unset(ObjectValue qThis, Value index)
