@@ -1102,7 +1102,6 @@ public class QuercusClass extends NullValue {
   public Value issetField(Env env, Value qThis, StringValue name)
   {
     // basically a copy of the __get code with slightly different semantics
-
     if (_isset != null) {
       if (! env.pushFieldGet(Env.OVERLOADING_TYPES.ISSET, qThis.getClassName(), name))
         return UnsetValue.UNSET;
@@ -1115,7 +1114,7 @@ public class QuercusClass extends NullValue {
     }
     else
     {
-        return issetField(name)? BooleanValue.TRUE : BooleanValue.FALSE;
+      return UnsetValue.UNSET;
     }
   }
 

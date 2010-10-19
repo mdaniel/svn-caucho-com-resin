@@ -1425,9 +1425,8 @@ public class ObjectExtValue extends ObjectValue
         for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
           StringValue entryKey = entry._key;
 
-          if (name == entryKey || name.equals(entryKey)) {
+          if ((name == entryKey || name.equals(entryKey)) && entry._value != NullValue.NULL ) {
             // php/09ks vs php/091m
-//            returnValue = entry._value.toValue();
               return true;
           }
         }
