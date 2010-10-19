@@ -571,7 +571,7 @@ public class ObjectExtValue extends ObjectValue
 
 
     Value returnValue = _quercusClass.unsetField(Env.getCurrent(),this,name);
-    if(returnValue == UnsetValue.UNSET)
+    if(returnValue == UnsetValue.UNSET || returnValue == NullValue.NULL)
     {
         // __unset didn't work, lets look in the class itself
         int hash = (name.hashCode() & 0x7fffffff) % _prime;

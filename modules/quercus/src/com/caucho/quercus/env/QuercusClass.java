@@ -1119,6 +1119,19 @@ public class QuercusClass extends NullValue {
     }
   }
 
+  @Override
+  public boolean issetField(StringValue name) {
+    if(_fieldMap.containsKey(name))
+      return true;
+    return false;
+  }
+
+  @Override
+  public void unsetField(StringValue name) {
+    if(_fieldMap.containsKey(name))
+      _fieldMap.remove(name);
+  }
+
   public Value unsetField(Env env, Value qThis, StringValue name)
   {
     // basically a copy of the __get code with slightly different semantics
