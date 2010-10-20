@@ -74,7 +74,8 @@ public class TableIterator {
     _table = table;
     
     if (table.getId() == 0) {
-      throw new IllegalStateException(L.l("iterating with closed table."));
+      throw new IllegalStateException(L.l("iterating with closed table {0}",
+                                          table));
     }
       
     table.getColumns();

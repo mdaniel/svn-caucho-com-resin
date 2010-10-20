@@ -158,7 +158,7 @@ public class EjbConfigManager extends EjbConfig {
   private <X> void addClassByName(String className, String moduleName)
   {
     try {
-      ClassLoader loader = _ejbContainer.getClassLoader();
+      ClassLoader loader = _ejbManager.getClassLoader();
       
       Class<X> type = (Class<X>) Class.forName(className, false, loader);
       

@@ -219,10 +219,13 @@ abstract public class AbstractContext<X> implements EJBContext {
     try {
       TransactionImpl xa = TransactionManagerImpl.getLocal().getCurrent();
 
-      if (xa != null && xa.getStatus() != Status.STATUS_NO_TRANSACTION)
-        xa.setRollbackOnly();
-      else
+      if (xa == null || xa.getStatus() == Status.STATUS_NO_TRANSACTION)
         throw new IllegalStateException(L.l("setRollbackOnly() called with no active transaction."));
+      
+      if (Boolean.FALSE.equals(xa.getAttribute("allowRollback")))
+        throw new IllegalStateException(L.l("setRollbackOnly() called in forbidden context"));
+      
+      xa.setRollbackOnly();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -242,10 +245,13 @@ abstract public class AbstractContext<X> implements EJBContext {
 
     TransactionImpl xa = TransactionManagerImpl.getLocal().getCurrent();
 
-    if (xa != null && xa.getStatus() != Status.STATUS_NO_TRANSACTION)
-      return xa.isRollbackOnly();
-    else
-      throw new IllegalStateException(L.l("getRollbackOnly() called with no active transaction."));
+    if (xa == null || xa.getStatus() == Status.STATUS_NO_TRANSACTION)
+      throw new IllegalStateException(L.l("setRollbackOnly() called with no active transaction."));
+    
+    if (Boolean.FALSE.equals(xa.getAttribute("allowRollback")))
+      throw new IllegalStateException(L.l("setRollbackOnly() called in forbidden context"));
+    
+    return xa.isRollbackOnly();
   }
 
   /**

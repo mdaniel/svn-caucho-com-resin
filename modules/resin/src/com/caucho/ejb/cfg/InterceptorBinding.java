@@ -120,6 +120,26 @@ public class InterceptorBinding {
     return new InterceptorsLiteral(values);
   }
   
+  public InterceptorsLiteral mergeAnnotation(AnnotatedMethod<?> m)
+  {
+    javax.interceptor.Interceptors interceptors;
+    
+    interceptors = m.getAnnotation(javax.interceptor.Interceptors.class);
+    
+    ArrayList<Class<?>> classList = new ArrayList<Class<?>>(_interceptors);
+    
+    if (interceptors != null) {
+      for (Class<?> cl : interceptors.value())
+        classList.add(cl);
+    }
+    
+    Class<?> []values = new Class<?>[classList.size()];
+    
+    classList.toArray(values);
+    
+    return new InterceptorsLiteral(values);
+  }
+  
   public boolean isMatch(AnnotatedMethod<?> method)
   {
     for (EjbMethod ejbMethod : _methodList) {
@@ -133,5 +153,12 @@ public class InterceptorBinding {
   public void addMethod(EjbMethod method)
   {
     _methodList.add(method);
+  }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName() + "[" + _ejbName + ", " + _methodList
+           + " " + _interceptors + "]");
   }
 }

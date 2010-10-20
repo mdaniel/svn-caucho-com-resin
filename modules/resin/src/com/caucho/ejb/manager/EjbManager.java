@@ -83,6 +83,8 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   private final EjbProtocolManager _protocolManager;
 
   private final HashSet<String> _ejbUrls = new HashSet<String>();
+  
+  private InjectManager _cdiManager;
 
   // the exact list of root to scan - used by EJBContainer
   private ArrayList<Path> _scannableRoots = null;
@@ -124,6 +126,8 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     _configManager = new EjbConfigManager(this);
 
     // _workDir = WorkDir.getLocalWorkDir().lookup("ejb");
+    
+    _cdiManager = InjectManager.getCurrent(_classLoader);
 
     _classLoader.addScanListener(this);
 
@@ -238,6 +242,11 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     return _protocolManager;
   }
 
+  public InjectManager getInjectManager()
+  {
+    return _cdiManager;
+  }
+  
   /**
    * true if beans should be auto-compiled
    */
@@ -439,8 +448,10 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   {
     if (Modifier.isInterface(modifiers))
       return null;
+    /*
     else if (Modifier.isAbstract(modifiers))
       return null;
+      */
     else
       return new EjbScanClass(root, className, this);
   }

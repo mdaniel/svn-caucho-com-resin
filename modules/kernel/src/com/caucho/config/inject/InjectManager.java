@@ -2298,7 +2298,7 @@ public final class InjectManager
     return null;
   }
   
-  InjectionPointHandler 
+  public InjectionPointHandler 
   getInjectionPointHandler(Class<? extends Annotation> annType)
   {
     return _injectionMap.get(annType);

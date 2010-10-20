@@ -27,41 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.cfg;
-
-import java.lang.annotation.Annotation;
-
-import javax.ejb.Stateful;
-import javax.enterprise.inject.spi.AnnotatedType;
-
-import com.caucho.inject.Module;
+package com.caucho.ejb.session;
 
 /**
- * Configuration for an ejb stateful session bean.
+ * Component for stateful beans
  */
-@Module
-public class EjbStatefulBean<X> extends EjbSessionBean<X> {
-  /**
-   * Creates a new session bean configuration.
-   */
-  public EjbStatefulBean(EjbConfig ejbConfig, AnnotatedType<X> rawAnnType,
-                         AnnotatedType<X> annType, String moduleName)
-  {
-    super(ejbConfig, rawAnnType, annType, moduleName);
-  }
-
-  @Override
-  public Class<? extends Annotation> getSessionType()
-  {
-    return Stateful.class;
-  }
-
-  /**
-   * Returns the kind of bean.
-   */
-  @Override
-  public String getEJBKind()
-  {
-    return "stateful";
-  }
+public interface StatefulProxy
+{
+  public String __caucho_getId();
 }

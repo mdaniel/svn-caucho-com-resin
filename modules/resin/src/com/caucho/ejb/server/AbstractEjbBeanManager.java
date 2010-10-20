@@ -226,7 +226,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   }
 
   /**
-   * Returns's the module that defined this ejb.
+   * Returns the module that defined this ejb.
    */
   public String getModuleName()
   {

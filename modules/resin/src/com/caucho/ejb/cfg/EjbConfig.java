@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ejb.ApplicationException;
+import javax.ejb.EJBs;
 import javax.ejb.MessageDriven;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
@@ -44,6 +45,8 @@ import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.ApplicationExceptionConfig;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
@@ -59,7 +62,7 @@ import com.caucho.vfs.Path;
 public class EjbConfig {
   private static final L10N L = new L10N(EjbConfig.class);
   
-  protected final EjbManager _ejbContainer;
+  protected final EjbManager _ejbManager;
 
   private ArrayList<FileSetType> _fileSetList = new ArrayList<FileSetType>();
 
@@ -89,11 +92,14 @@ public class EjbConfig {
     = new HashMap<Class<?>,ApplicationExceptionConfig>(); 
 
   private ConcurrentHashMap<Class<?>,AppExceptionItem> _appExceptionMap
-    = new ConcurrentHashMap<Class<?>,AppExceptionItem>(); 
+    = new ConcurrentHashMap<Class<?>,AppExceptionItem>();
+  
+  private ArrayList<AnnotatedType<?>> _bindTypes
+    = new ArrayList<AnnotatedType<?>>();
 
   public EjbConfig(EjbManager ejbContainer)
   {
-    _ejbContainer = ejbContainer;
+    _ejbManager = ejbContainer;
   }
 
   /**
@@ -125,7 +131,7 @@ public class EjbConfig {
    */
   public EjbManager getEjbContainer()
   {
-    return _ejbContainer;
+    return _ejbManager;
   }
 
   /**
@@ -243,9 +249,9 @@ public class EjbConfig {
                                                       boolean isSystem)
   {
     if (exn == Error.class || exn == RuntimeException.class)
-      return new AppExceptionItem(true, true, true);
+      return new AppExceptionItem(false, true, true);
     else if (exn == Exception.class)
-      return new AppExceptionItem(false, false, true);
+      return new AppExceptionItem(true, false, true);
     
     ApplicationExceptionConfig cfg = _appExceptionConfig.get(exn);
     
@@ -256,18 +262,19 @@ public class EjbConfig {
     ApplicationException appExn = exn.getAnnotation(ApplicationException.class);
     
     if (appExn != null) {
-      return new AppExceptionItem(true, appExn.rollback(), true);
+      // ejb/1276
+      return new AppExceptionItem(true, appExn.rollback(), appExn.inherit());
     }
     
     AppExceptionItem parentItem = getApplicationException(exn.getSuperclass(),
                                                           isSystem);
-    
+
     if (parentItem.isInherited())
       return parentItem;
     else if (isSystem)
-      return new AppExceptionItem(true, true, true);
+      return new AppExceptionItem(false, true, true);
     else
-      return new AppExceptionItem(false, false, true);
+      return new AppExceptionItem(true, false, true);
     
   }
   
@@ -361,19 +368,37 @@ public class EjbConfig {
       }
       else if (annType.isAnnotationPresent(JmsMessageListener.class)) {
         JmsMessageListener listener
-        = annType.getAnnotation(JmsMessageListener.class);
+          = annType.getAnnotation(JmsMessageListener.class);
 
         EjbMessageBean<X> bean
-        = new EjbMessageBean<X>(this, rawAnnType, annType, listener.destination());
+          = new EjbMessageBean<X>(this, rawAnnType, annType, listener.destination());
 
         bean.setInjectionTarget(injectTarget);
 
         setBeanConfig(bean.getEJBName(), bean);
       }
+      
+      EJBs ejbs = annType.getAnnotation(EJBs.class);
+      if (ejbs != null) {
+        _bindTypes.add(annType);
+      }
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);
+    }
+  }
+  
+  private void addEjbRefs(AnnotatedType<?> annType)
+  {
+    InjectManager cdiManager = _ejbManager.getInjectManager();
+
+    try {
+    ConfigProgram program
+      = cdiManager.getInjectionPointHandler(EJBs.class).introspectType(annType);
+    System.out.println("PROGRAM: " + program);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -463,9 +488,9 @@ public class EjbConfig {
     throws ConfigException
   {
     try {
-      ClassLoader parentLoader = _ejbContainer.getClassLoader();
+      ClassLoader parentLoader = _ejbManager.getClassLoader();
 
-      Path workDir = _ejbContainer.getWorkDir();
+      Path workDir = _ejbManager.getWorkDir();
 
       JavaClassGenerator javaGen = new JavaClassGenerator();
       javaGen.setWorkDir(workDir);
@@ -476,6 +501,8 @@ public class EjbConfig {
       _deployingBeans.clear();
 
       deployBeans(deployingBeans, javaGen);
+      
+      deployBindings(_bindTypes);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -494,7 +521,7 @@ public class EjbConfig {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_ejbContainer.getClassLoader());
+      thread.setContextClassLoader(_ejbManager.getClassLoader());
 
       // ejb/0g1c, ejb/0f68, ejb/0f69
       ArrayList<EjbBean<?>> beanList = new ArrayList<EjbBean<?>>();
@@ -527,7 +554,7 @@ public class EjbConfig {
 
     AbstractEjbBeanManager<X> server = initBean(bean, lazyGenerator);
     
-    _ejbContainer.addServer(server);
+    _ejbManager.addServer(server);
     
     ArrayList<String> dependList = bean.getBeanDependList();
 
@@ -560,16 +587,26 @@ public class EjbConfig {
            EjbLazyGenerator<X> lazyGenerator)
     throws Exception
   {
-    AbstractEjbBeanManager<X> server = bean.deployServer(_ejbContainer, lazyGenerator);
+    AbstractEjbBeanManager<X> server = bean.deployServer(_ejbManager, lazyGenerator);
 
     server.init();
 
     return server;
   }
+  
+  private void deployBindings(ArrayList<AnnotatedType<?>> bindTypes)
+  {
+    InjectManager cdiManager = _ejbManager.getInjectManager();
+    for (AnnotatedType<?> annType : bindTypes) {
+      // ioc/123q
+      cdiManager.getInjectionPointHandler(EJBs.class).introspectType(annType);
+    }
+  }
 
+  @Override
   public String toString()
   {
-    String id = _ejbContainer.getClassLoader().getId();
+    String id = _ejbManager.getClassLoader().getId();
     
     return getClass().getSimpleName() + "[" + id + "]";
   }

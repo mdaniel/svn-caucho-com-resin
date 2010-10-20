@@ -87,4 +87,10 @@ public class EjbRootConfig  {
   {
     _moduleName = moduleName;
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _root + "]";
+  }
 }

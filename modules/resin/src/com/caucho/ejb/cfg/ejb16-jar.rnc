@@ -81,6 +81,10 @@ ejb16_cmr-field = element cmr-field {
   ejb16_deployment-extension*
 }
 
+ejb16_concurrency-management-type = element concurrency-management-type {
+  string
+}
+
 ejb16_container-transaction = element container-transaction {
   attribute id { string }?,
   ejb16_description*,
@@ -553,19 +557,21 @@ ejb16_session = element session {
 
   ejb16_local?,
 
-  ejb16_local-bean?,
-
   ejb16_business-local*,
 
   ejb16_business-remote*,
-  
-  element local-bean { empty }?,
+
+  ejb16_local-bean?,
 
   element service-endpoint { javaee_class }?,
 
   ejb16_ejb-class?,
 
   element session-type { "Stateful" | "Stateless" }?,
+
+  ejb16_stateful-timeout?,
+
+  ejb16_concurrency-management-type?,
 
   ejb16_timeout-method?,
 
@@ -590,6 +596,11 @@ ejb16_session = element session {
   ejb16_security-identity?,
 
   ejb16_init-on-startup?
+}
+
+ejb16_stateful-timeout = element stateful-timeout {
+  element timeout { string },
+  element unit { string }
 }
 
 ejb16_timeout-method = element timeout-method {

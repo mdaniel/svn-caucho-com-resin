@@ -99,7 +99,7 @@ public abstract class EJBContainer {
     return null;
   }
   
-  private static Class loadProviderClass(URL url, ClassLoader loader)
+  private static Class<?> loadProviderClass(URL url, ClassLoader loader)
   {
     InputStream is = null;
 

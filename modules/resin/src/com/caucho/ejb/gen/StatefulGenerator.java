@@ -170,14 +170,17 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     if (hasNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
 
-    out.print("  implements SessionProxyFactory<T>, com.caucho.config.gen.CandiEnhancedBean, java.io.Serializable");
+    out.print("  implements SessionProxyFactory<T>");
+    out.print(",\n  com.caucho.ejb.session.StatefulProxy");
+    out.print(",\n  com.caucho.config.gen.CandiEnhancedBean");
+    out.print(",\n  java.io.Serializable");
 
     for (AnnotatedType<? super X> api : getLocalApi()) {
-      out.print(", " + api.getJavaClass().getName());
+      out.print(",\n  " + api.getJavaClass().getName());
     }
 
     for (AnnotatedType<? super X> apiType : getRemoteApi()) {
-      out.print(", " + apiType.getJavaClass().getName());
+      out.print(",\n  " + apiType.getJavaClass().getName());
     }
 
     out.println();
@@ -186,6 +189,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
   @Override
   protected void generateClassContent(JavaWriter out) throws IOException
   {
+    out.println("private String _id;");
+    out.println("private transient long _lastAccessTime;");
     out.println("private transient StatefulManager _manager;");
     out.println("private transient StatefulContext _context;");
 
@@ -198,7 +203,9 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     generateSerialization(out);
   }
 
-  protected void generateContentImpl(JavaWriter out, HashMap<String, Object> map)
+  @Override
+  protected void generateContentImpl(JavaWriter out, 
+                                     HashMap<String, Object> map)
       throws IOException
   {
 
@@ -214,6 +221,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     generateInject(out, map);
     generateDelegate(out, map);
     generatePostConstruct(out, map);
+    generateValidate(out, map);
     generateDestroy(out, map);
   }
 
@@ -222,6 +230,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
   {
     // generateProxyConstructor(out);
 
+    // proxy factory constructor
     out.println();
     out.print("public " + getClassName() + "(StatefulManager manager, ");
     out.println("StatefulContext context)");
@@ -236,6 +245,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
 
     out.popDepth();
     out.println("}");
+    
+    // proxy constructor
 
     out.println();
     out.println("private " + getClassName() + "(StatefulManager manager"
@@ -243,6 +254,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     out.println("{");
     out.pushDepth();
 
+    out.println("_id = manager.generateKey();");
+    out.println("_lastAccessTime = com.caucho.util.Alarm.getCurrentTime();");
     out.println("_manager = manager;");
     out.println("_context = context;");
 
@@ -258,6 +271,13 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
 
     out.popDepth();
     out.println("}");
+    
+    out.println();
+    out.println("@Override");
+    out.println("public String __caucho_getId()");
+    out.println("{");
+    out.println("  return _id;");
+    out.println("}");
   }
 
   private void generateProxyFactory(JavaWriter out) throws IOException
@@ -267,7 +287,32 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     out.println("public T __caucho_createProxy(CreationalContextImpl<T> env)");
     out.println("{");
     out.println("  return (T) new " + getClassName()
-        + "(_manager, _context, env);");
+                + "(_manager, _context, env);");
+    out.println("}");
+  }
+
+  public void generateValidate(JavaWriter out, HashMap<String, Object> map)
+      throws IOException
+  {
+    out.println();
+    out.println("public void __caucho_validate()");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("long now = com.caucho.util.Alarm.getCurrentTime();");
+    
+    out.println("if (_manager.getIdleTimeout() < now - _lastAccessTime) {");
+    out.println("  __caucho_destroy(null);");
+    out.println("}");
+    out.println();
+    out.println("if (_bean == null)");
+    out.println("  throw new javax.ejb.NoSuchEJBException(\"Stateful instance "
+                + getClassName() + " is no longer valid\");");
+    
+    out.println();
+    out.println("_lastAccessTime = now;");
+
+    out.popDepth();
     out.println("}");
   }
 
@@ -279,7 +324,9 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
 
     out.println();
     out.println("@Override");
-    out.println("public void __caucho_destroy() {}");
+    out.println("public void __caucho_destroy()");
+    out.println("{");
+    out.println("}");
   }
 
   @Override

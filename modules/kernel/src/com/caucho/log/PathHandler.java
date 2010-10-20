@@ -235,8 +235,9 @@ public class PathHandler extends Handler {
         if (thrown != null) {
           if (message != null
               && ! message.equals(thrown.toString())
-              && ! message.equals(thrown.getMessage()))
+              && ! message.equals(thrown.getMessage())) {
             _os.println(message);
+          }
 
           record.getThrown().printStackTrace(_os.getPrintWriter());
         }

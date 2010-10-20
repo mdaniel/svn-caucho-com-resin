@@ -168,7 +168,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     _ejbConfig = ejbConfig;
     _ejbModuleName = ejbModuleName;
-
+    
     _loader = ejbConfig.getEjbContainer().getClassLoader();
   }
 
@@ -1048,7 +1048,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
             AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) method;
             
             if (binding.getAnnotation() != null)
-              methodImpl.addAnnotationIfAbsent(binding.getAnnotation());
+              methodImpl.addAnnotation(binding.mergeAnnotation(methodImpl));
             
             if (binding.isExcludeClassInterceptors())
               methodImpl.addAnnotationIfAbsent(new ExcludeClassInterceptorsLiteral());
@@ -1071,11 +1071,16 @@ public class EjbBean<X> extends DescriptionGroupConfig
       */
       Interceptor interceptor = _ejbConfig.getInterceptor(className);
 
-      if (interceptor != null) {
-        interceptor.init();
-
-        addInterceptor(interceptor, binding.isDefault());
+      if (interceptor == null) {
+        interceptor = new Interceptor();
+        interceptor.setInterceptorClass(className);
+        
+        _ejbConfig.addInterceptor(interceptor);
       }
+
+      interceptor.init();
+
+      addInterceptor(interceptor, binding.isDefault());
     }
   }
 

@@ -355,9 +355,8 @@ public class EjbProtocolManager {
     }
   }
 
-  private void bindPortableJndiApis(AbstractEjbBeanManager manager)
+  private <X> void bindPortableJndiApis(AbstractEjbBeanManager<X> manager)
   {
-    String jndiName = null;
     String appName = null;
 
     EnterpriseApplication app = EnterpriseApplication.getCurrent();
@@ -381,7 +380,7 @@ public class EjbProtocolManager {
         bindPortableJndi(appName, moduleName, suffix, proxy);
       }
 
-      ArrayList<AnnotatedType<?>> apiList = manager.getLocalApi();
+      ArrayList<AnnotatedType<? super X>> apiList = manager.getLocalApi();
 
       if (apiList.size() == 1) {
         String suffix = manager.getEJBName();

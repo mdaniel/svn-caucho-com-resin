@@ -147,7 +147,7 @@ public class CandiElResolver extends ELResolver {
     }
     
     context.setPropertyResolved(true);
-    
+
     return factory.create(null, cxt, null);
   }
 

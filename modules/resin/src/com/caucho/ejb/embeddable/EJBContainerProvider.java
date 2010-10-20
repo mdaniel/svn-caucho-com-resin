@@ -35,16 +35,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.ejb.EJBException;
 import javax.ejb.embeddable.EJBContainer;
-import javax.naming.Context;
-import javax.xml.stream.*;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 import com.caucho.java.WorkDir;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.xml.stream.*;
+import com.caucho.xml.stream.XMLStreamReaderImpl;
 
 public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider 
 {
@@ -58,7 +59,6 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
     throws EJBException
   {
     EJBContainerImpl container = null;
-
 
     if (properties == null) {
       container = new EJBContainerImpl();

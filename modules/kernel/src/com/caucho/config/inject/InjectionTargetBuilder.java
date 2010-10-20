@@ -122,6 +122,11 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
     _annotatedType = beanType;
     _bean = bean;
+
+    if (beanType.toString().endsWith("Client")) {
+      System.out.println("BUILDER: " + beanType);
+      Thread.dumpStack();
+    }
   }
   
   public InjectionTargetBuilder(InjectManager cdiManager,

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import javax.ejb.Remove;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
@@ -60,8 +61,10 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
   }
 
   public StatefulMethodHeadGenerator(StatefulMethodHeadFactory<X> factory,
-      AnnotatedMethod<? super X> method, AspectGenerator<X> next,
-      long lockTimeout, TimeUnit lockTimeoutUnit)
+                                     AnnotatedMethod<? super X> method,
+                                     AspectGenerator<X> next,
+                                     long lockTimeout, 
+                                     TimeUnit lockTimeoutUnit)
   {
     super(factory, method, next);
 
@@ -83,7 +86,8 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
    * Generates the class prologue.
    */
   @Override
-  public void generateMethodPrologue(JavaWriter out, HashMap<String, Object> map)
+  public void generateMethodPrologue(JavaWriter out, 
+                                     HashMap<String, Object> map)
       throws IOException
   {
     if (map.get("caucho.ejb.semaphore") == null) {
@@ -105,10 +109,13 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
 
     out.println(beanClassName + " bean = _bean;");
 
+    out.println("__caucho_validate();");
+    /*
     out.println();
     out.println("if (bean == null)");
     out.println("  throw new javax.ejb.NoSuchEJBException(\"Stateful instance "
         + getJavaClass().getSimpleName() + " is no longer valid\");");
+        */
 
     // Implicit semaphore on stateful beans.
     out.println();
@@ -151,6 +158,17 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
     out.println("thread.setContextClassLoader(_manager.getClassLoader());");
 
     super.generatePreCall(out);
+  }
+  
+  @Override
+  public void generateCall(JavaWriter out)
+    throws IOException
+  {
+    super.generateCall(out);
+    
+    if (getMethod().isAnnotationPresent(Remove.class)) {
+      out.println("__caucho_destroy(null);");
+    }
   }
 
   /**

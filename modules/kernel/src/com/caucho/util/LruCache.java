@@ -687,8 +687,10 @@ public final class LruCache<K,V> {
    */
   public Iterator<K> keys()
   {
-    KeyIterator iter = new KeyIterator<K,V>(this);
+    KeyIterator<K,V> iter = new KeyIterator<K,V>(this);
+    
     iter.init(this);
+    
     return iter;
   }
 
@@ -697,8 +699,10 @@ public final class LruCache<K,V> {
    */
   public Iterator<K> keys(Iterator<K> oldIter)
   {
-    KeyIterator iter = (KeyIterator) oldIter;
+    KeyIterator<K,V> iter = (KeyIterator<K,V>) oldIter;
+    
     iter.init(this);
+    
     return oldIter;
   }
 
@@ -707,14 +711,15 @@ public final class LruCache<K,V> {
    */
   public Iterator<V> values()
   {
-    ValueIterator iter = new ValueIterator<K,V>(this);
+    ValueIterator<K,V> iter = new ValueIterator<K,V>(this);
     iter.init(this);
     return iter;
   }
 
+  @SuppressWarnings("unchecked")
   public Iterator<V> values(Iterator<V> oldIter)
   {
-    ValueIterator iter = (ValueIterator) oldIter;
+    ValueIterator<K,V> iter = (ValueIterator<K,V>) oldIter;
     iter.init(this);
     return oldIter;
   }
@@ -797,6 +802,7 @@ public final class LruCache<K,V> {
     /**
      * Returns the next entry in the cache.
      */
+    @Override
     public boolean hasNext()
     {
       return _item != null;
@@ -805,6 +811,7 @@ public final class LruCache<K,V> {
     /**
      * Returns the next key.
      */
+    @Override
     public K next()
     {
       CacheItem<K,V> entry = _item;
@@ -823,6 +830,7 @@ public final class LruCache<K,V> {
         return null;
     }
 
+    @Override
     public void remove()
     {
       throw new UnsupportedOperationException();

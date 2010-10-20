@@ -136,6 +136,12 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
         out.println("_xa.beginMandatory();");
         break;
       }
+      
+      case SUPPORTS: {
+        out.println();
+        out.println("_xa.beginSupports();");
+        break;
+      }
 
       case NEVER: {
         out.println();
@@ -236,9 +242,13 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
 
   @Override
   public void generateSystemException(JavaWriter out, Class<?> exn)
-      throws IOException
+    throws IOException
   {
-    out.println("isXAValid = true;");
+    boolean isError = Error.class.isAssignableFrom(exn);
+
+    if (! isError)
+      out.println("isXAValid = true;");
+    
     out.println("if (_xa.systemException(e)) {");
     out.pushDepth();
     
@@ -250,6 +260,9 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
           break;
           
         case REQUIRES_NEW:
+          out.println("_xa.rethrowEjbException(e, " + isError + ");");
+          break;
+          
         case NOT_SUPPORTED:
         case NEVER:
           out.println("_xa.rethrowEjbException(e, false);");
@@ -328,6 +341,9 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
 
       case REQUIRES_NEW: {
         out.println("_xa.endRequiresNew(xa);");
+        
+        out.println("if (! isXAValid)");
+        out.println("  _xa.markRollback();");
         break;
       }
       }

@@ -52,11 +52,11 @@ public class Mojarra12InjectionProvider
   protected ServletContext _context;
   protected BeanManager _manager;
 
-  private Map<Class, AnnotatedType> _types
-    = new HashMap<Class, AnnotatedType>();
+  private Map<Class<?>, AnnotatedType<?>> _types
+    = new HashMap<Class<?>, AnnotatedType<?>>();
 
-  private Map<AnnotatedType, InjectionTarget> _targets
-    = new HashMap<AnnotatedType, InjectionTarget>();
+  private Map<AnnotatedType<?>, InjectionTarget<?>> _targets
+    = new HashMap<AnnotatedType<?>, InjectionTarget<?>>();
 
   public Mojarra12InjectionProvider(ServletContext context)
   {
@@ -69,11 +69,12 @@ public class Mojarra12InjectionProvider
         _manager,
         _context));
   }
-
+  
+  @Override
   public void inject(Object o)
     throws com.sun.faces.spi.InjectionProviderException
   {
-    Class cl = o.getClass();
+    Class<?> cl = o.getClass();
 
     InjectionTarget target = getInjectionTarget(cl);
 
@@ -86,7 +87,7 @@ public class Mojarra12InjectionProvider
   public void invokePreDestroy(Object o)
     throws com.sun.faces.spi.InjectionProviderException
   {
-    Class cl = o.getClass();
+    Class<?> cl = o.getClass();
 
     InjectionTarget target = getInjectionTarget(cl);
 
@@ -96,10 +97,11 @@ public class Mojarra12InjectionProvider
     target.preDestroy(o);
   }
 
+  @Override
   public void invokePostConstruct(Object o)
     throws com.sun.faces.spi.InjectionProviderException
   {
-    Class cl = o.getClass();
+    Class<?> cl = o.getClass();
 
     InjectionTarget target = getInjectionTarget(cl);
 
@@ -109,16 +111,16 @@ public class Mojarra12InjectionProvider
     target.postConstruct(o);
   }
 
-  private InjectionTarget getInjectionTarget(Class cl)
+  private <X> InjectionTarget<X> getInjectionTarget(Class<X> cl)
   {
-    AnnotatedType type = _types.get(cl);
+    AnnotatedType<X> type = (AnnotatedType<X>) _types.get(cl);
 
     if (type == null) {
       type = _manager.createAnnotatedType(cl);
       _types.put(cl, type);
     }
 
-    InjectionTarget target = _targets.get(type);
+    InjectionTarget<X> target = (InjectionTarget<X>) _targets.get(type);
 
     if (target == null) {
       target = _manager.createInjectionTarget(type);

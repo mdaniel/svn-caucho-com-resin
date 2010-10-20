@@ -30,6 +30,7 @@
 package com.caucho.ejb.manager;
 
 import javax.annotation.ManagedBean;
+import javax.ejb.EJBs;
 import javax.ejb.MessageDriven;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
@@ -43,15 +44,23 @@ import com.caucho.vfs.Path;
  */
 class EjbScanClass extends AbstractScanClass {
   private static final char []STATELESS
-    = Stateless.class.getName().toCharArray();
+    = javax.ejb.Stateless.class.getName().toCharArray();
+  
   private static final char []STATEFUL
-    = Stateful.class.getName().toCharArray();
+    = javax.ejb.Stateful.class.getName().toCharArray();
+  
   private static final char []SINGLETON
-    = Singleton.class.getName().toCharArray();
+    = javax.ejb.Singleton.class.getName().toCharArray();
+  
   private static final char []MESSAGE_DRIVEN
-    = MessageDriven.class.getName().toCharArray();
+    = javax.ejb.MessageDriven.class.getName().toCharArray();
+  
   private static final char []MANAGED_BEAN
-    = ManagedBean.class.getName().toCharArray();
+    = javax.annotation.ManagedBean.class.getName().toCharArray();
+  
+  private static final char []EJBS
+    = javax.ejb.EJBs.class.getName().toCharArray();
+  private static final int EJBS_LENGTH = 14;
   
   private Path _root;
   private String _className;
@@ -81,6 +90,9 @@ class EjbScanClass extends AbstractScanClass {
       _isEjb = true;
     }
     else if (isMatch(buffer, offset, length, MANAGED_BEAN)) {
+      _isEjb = true;
+    }
+    else if (isMatch(buffer, offset, length, EJBS)) {
       _isEjb = true;
     }
   }

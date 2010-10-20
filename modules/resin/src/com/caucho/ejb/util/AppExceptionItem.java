@@ -51,6 +51,11 @@ public class AppExceptionItem {
     return _isApplicationException;
   }
   
+  public boolean isSystemException()
+  {
+    return ! isApplicationException();
+  }
+  
   public boolean isRollback()
   {
     return _isRollback;
@@ -59,5 +64,14 @@ public class AppExceptionItem {
   public boolean isInherited()
   {
     return _isInherited;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+            + "[" + (_isApplicationException ? "application" : "system")
+            + (_isRollback ? ",rollback" : "")
+            + (_isInherited ? ",inherit" : "") + "]");
   }
 }

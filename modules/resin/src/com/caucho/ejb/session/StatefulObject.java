@@ -62,7 +62,7 @@ abstract public class StatefulObject
   public String __caucho_getId()
   {
     if (_primaryKey == null)
-      _primaryKey = getStatefulServer().createSessionKey(this);
+      _primaryKey = getStatefulServer().generateKey();
     
     return _primaryKey;
   }

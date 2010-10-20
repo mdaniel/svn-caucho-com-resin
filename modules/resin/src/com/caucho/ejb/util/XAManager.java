@@ -243,6 +243,27 @@ public class XAManager {
   }
 
   /**
+   * Begins a not-supported transaction, i.e. suspend any current transaction.
+   * 
+   * @return the current transaction if it exists
+   */
+  public void beginSupports()
+  {
+    try {
+      TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
+
+      TransactionImpl xa = tm.getTransaction();
+      
+      if (xa != null)
+        xa.setAttribute("allowRollback", Boolean.FALSE);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBException(e);
+    }
+  }
+
+  /**
    * Gets the active transaction.
    * 
    * @return The current transaction if it exists.
@@ -260,7 +281,7 @@ public class XAManager {
     }
   }
 
-  public boolean systemException(RuntimeException e)
+  public boolean systemException(Throwable e)
   {
     TransactionImpl xa = getTransaction();
     
@@ -273,7 +294,7 @@ public class XAManager {
       if (xa != null)
         xa.setRollbackOnly(e);
       
-      return appExn == null;
+      return appExn == null || appExn.isSystemException();
     }
     else
       return false;
@@ -320,10 +341,34 @@ public class XAManager {
   public void rethrowEjbException(Exception e, boolean isClientXa)
   {
     if (isClientXa) {
-      throw new EJBTransactionRolledbackException(e.getMessage(), e);
+      RuntimeException exn;
+      
+      exn = new EJBTransactionRolledbackException(e.getMessage(), e);
+      
+      throw exn;
     }
+    else if (e instanceof EJBException)
+      throw (RuntimeException) e;
     else
       throw new EJBException(e);
+  }
+  
+  public void rethrowEjbException(Error e, boolean isClientXa)
+  {
+    if (isClientXa) {
+      RuntimeException exn;
+      
+      exn = new EJBTransactionRolledbackException(e.getMessage());
+      exn.initCause(e);
+      
+      throw exn;
+    }
+    else {
+      RuntimeException exn = new EJBException();
+      exn.initCause(e);
+      
+      throw exn;
+    }
   }
 
   /**

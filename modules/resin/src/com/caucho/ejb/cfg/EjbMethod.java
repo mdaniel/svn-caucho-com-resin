@@ -69,4 +69,10 @@ public class EjbMethod {
   {
     return _methodName.equals(otherMethod.getName());
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _methodName + "]";
+  }
 }

@@ -190,11 +190,13 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
     }
 
     exceptionSet.add(RuntimeException.class);
+    exceptionSet.add(Error.class);
 
     Class<?> exn;
     while ((exn = selectException(exceptionSet)) != null) {
       boolean isSystemException
-        = (RuntimeException.class.isAssignableFrom(exn)
+        = ((RuntimeException.class.isAssignableFrom(exn)
+            || Error.class.isAssignableFrom(exn))
             && ! exn.isAnnotationPresent(ApplicationException.class));
 
       out.println("} catch (" + exn.getName() + " e) {");

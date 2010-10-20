@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 import javax.annotation.Resource;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.ejb.EJBs;
 import javax.inject.Inject;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
@@ -284,6 +285,11 @@ public class TagAnalyzer
   {
     if (cl == null)
       return;
+    
+    if (cl.isAnnotationPresent(EJB.class)
+        || cl.isAnnotationPresent(EJBs.class)) {
+      tag.setHasInjection(true);
+    }
     
     for (Method method : cl.getDeclaredMethods()) {
       if (method.getDeclaringClass() == Object.class)
