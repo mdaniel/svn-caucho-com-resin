@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.session;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -96,12 +97,13 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   private String[] _declaredRoles;
 
   public AbstractSessionManager(EjbManager manager,
+                                String ejbName,
                                 String moduleName,
                                 AnnotatedType<X> rawAnnType,
                                 AnnotatedType<X> annotatedType,
                                 EjbLazyGenerator<X> lazyGenerator)
   {
-    super(manager, moduleName, rawAnnType, annotatedType);
+    super(manager, ejbName, moduleName, rawAnnType, annotatedType);
     
     _lazyGenerator = lazyGenerator;
     
@@ -527,13 +529,22 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
         AnnotatedMethodImpl<? super X> extMethod
           = new AnnotatedMethodImpl(apiMethod.getDeclaringType(),
                                     method,
-                                    apiMethod.getJavaMember());
+                                    apiMethod.getJavaMember(),
+                                    toArray(apiMethod.getAnnotations()));
 
         return extMethod;
       }
     }
     
     return null;
+  }
+  
+  private Annotation []toArray(Set<Annotation> annSet)
+  {
+    Annotation []ann = new Annotation[annSet.size()];
+    annSet.toArray(ann);
+    
+    return ann;
   }
   
   private <T> void registerLocalSession(InjectManager beanManager, 

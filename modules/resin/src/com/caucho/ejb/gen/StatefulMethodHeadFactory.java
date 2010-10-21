@@ -57,39 +57,22 @@ public class StatefulMethodHeadFactory<X> extends MethodHeadFactory<X> {
 
   @Override
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
-      boolean isEnhanced)
+                                   boolean isEnhanced)
   {
-    // TODO The annotation resolution algorithm should probably be re-factored
-    // in a superclass.
-
     AnnotatedType<?> declaringType = method.getDeclaringType();
 
-    AccessTimeout accessTimeout = null;
+    AccessTimeout accessTimeout
+      = method.getAnnotation(AccessTimeout.class);
 
-    AccessTimeout methodLevelAccessTimeout = method
-        .getAnnotation(AccessTimeout.class);
-
-    AccessTimeout declaringClassAccessTimeout = (declaringType != null) ? declaringType
-        .getAnnotation(AccessTimeout.class) : null;
-
-    // The method-level annotation takes precedence.
-    if (methodLevelAccessTimeout != null) {
-      accessTimeout = methodLevelAccessTimeout;
-    }
-    // Then the class-level annotation at the declaring class takes precedence.
-    else if (declaringClassAccessTimeout != null) {
-      accessTimeout = declaringClassAccessTimeout;
-    }
-    // Finally, the top level class annotation takes effect.
-    else {
-      accessTimeout = _classAccessTimeout;
-    }
-
+    if (accessTimeout == null)
+      accessTimeout = declaringType.getAnnotation(AccessTimeout.class);
+    
     AspectGenerator<X> next = super.create(method, true);
 
     if (accessTimeout != null) {
       return new StatefulMethodHeadGenerator<X>(this, method, next,
-          accessTimeout.value(), accessTimeout.unit());
+                                                accessTimeout.value(), 
+                                                accessTimeout.unit());
     } else {
       return new StatefulMethodHeadGenerator<X>(this, method, next);
     }

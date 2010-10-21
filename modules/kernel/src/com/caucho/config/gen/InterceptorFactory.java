@@ -164,14 +164,14 @@ public class InterceptorFactory<X>
     boolean isExcludeClassInterceptors = false;
     
     if (method.isAnnotationPresent(ExcludeClassInterceptors.class)
-        || declType.isAnnotationPresent(ExcludeClassInterceptors.class)) {
+        || getBeanType().isAnnotationPresent(ExcludeClassInterceptors.class)) {
       isExcludeClassInterceptors = true;
     }
     
     boolean isExcludeDefaultInterceptors = false;
     
     if (method.isAnnotationPresent(ExcludeDefaultInterceptors.class)
-        || declType.isAnnotationPresent(ExcludeDefaultInterceptors.class)) {
+        || getBeanType().isAnnotationPresent(ExcludeDefaultInterceptors.class)) {
       isExcludeDefaultInterceptors = true;
     }
     
@@ -311,6 +311,9 @@ public class InterceptorFactory<X>
     interceptors = addInterceptors(interceptors,
                                    _selfInterceptors.getClassInterceptors(), 
                                    annType);
+    interceptors = addInterceptors(interceptors,
+                                   _selfInterceptors.getDefaultInterceptors(), 
+                                   annType);
     interceptors = addInterceptors(interceptors, 
                                    _selfInterceptors.getSelfInterceptors(),
                                    annType);
@@ -329,16 +332,33 @@ public class InterceptorFactory<X>
   {
     if (! _isInterceptorOrDecorator && isEnhanced()) {
       HashSet<Class<?>> set = null;
-      
+
+      /*
       set = addInterceptors(set,
                             _selfInterceptors.getClassInterceptors(),
                             PostConstruct.class);
+      set = addInterceptors(set,
+                            _selfInterceptors.getDefaultInterceptors(),
+                            PostConstruct.class);
+                            */
+      set = addInterceptors(set,
+                            _selfInterceptors.getClassInterceptors(),
+                            AroundInvoke.class);
+      set = addInterceptors(set,
+                            _selfInterceptors.getDefaultInterceptors(),
+                            AroundInvoke.class);
 
       if (set != null) {
+        /*
         InterceptorGenerator<X> gen
           = new InterceptorGenerator<X>(this,
                                         set,
                                         InterceptionType.POST_CONSTRUCT);
+                                        */
+        InterceptorGenerator<X> gen
+        = new InterceptorGenerator<X>(this,
+                                      set,
+                                      InterceptionType.AROUND_INVOKE);
         
         gen.generateClassPostConstruct(out, map);
         
@@ -403,6 +423,9 @@ public class InterceptorFactory<X>
     
     interceptors = addInterceptors(interceptors, 
                                    _selfInterceptors.getClassInterceptors(), 
+                                   annType);
+    interceptors = addInterceptors(interceptors, 
+                                   _selfInterceptors.getDefaultInterceptors(), 
                                    annType);
     interceptors = addInterceptors(interceptors,
                                    _selfInterceptors.getSelfInterceptors(),

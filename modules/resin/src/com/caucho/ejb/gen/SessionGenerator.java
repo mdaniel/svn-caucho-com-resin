@@ -94,7 +94,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
 
     _nonBusinessAspectBeanFactory 
       = new NonBusinessAspectBeanFactory<X>(getBeanType());
-   }
+ }
 
   public static String toFullClassName(String ejbName, String className,
                                        String beanType)
@@ -105,26 +105,18 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     
     sb.append("__");
     
-    // XXX: restore this to distinguish similar beans
-    /*
-    if (!Character.isJavaIdentifierStart(ejbName.charAt(0)))
-      sb.append('_');
+    if (! className.endsWith(ejbName)) {
+      for (int i = 0; i < ejbName.length(); i++) {
+        char ch = ejbName.charAt(i);
 
-    for (int i = 0; i < ejbName.length(); i++) {
-      char ch = ejbName.charAt(i);
-
-      if (ch == '/')
-        sb.append('.');
-      else if (Character.isJavaIdentifierPart(ch))
-        sb.append(ch);
-      else
-        sb.append('_');
+        if (ch == '/')
+          sb.append('_');
+        else if (Character.isJavaIdentifierPart(ch))
+          sb.append(ch);
+        else
+          sb.append('_');
+      }
     }
-
-    sb.append(".");
-    sb.append(className);
-    sb.append("__");
-    */
     
     sb.append(beanType);
     sb.append("Proxy");
@@ -208,11 +200,13 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
       }
     }
     
-    for (AnnotatedType<? super X> type : _localApi)
+    for (AnnotatedType<? super X> type : _localApi) {
       introspectType(type);
+    }
     
-    for (AnnotatedType<? super X> type : _remoteApi)
+    for (AnnotatedType<? super X> type : _remoteApi) {
       introspectType(type);
+    }
     
     introspectImpl();
     
@@ -226,8 +220,9 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   
   private void introspectType(AnnotatedType<? super X> type)
   {
-    for (AnnotatedMethod<? super X> method : type.getMethods())
+    for (AnnotatedMethod<? super X> method : type.getMethods()) {
       introspectMethod(method);
+    }
   }
   
   private void introspectMethod(AnnotatedMethod<? super X> method)
@@ -245,8 +240,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     
     if (baseMethod == null)
       throw new IllegalStateException(L.l("{0} does not have a matching base method in {1}",
-                                          method, getBeanType()));
-    
+                                          method));
     // XXX: merge annotations
     
     _annotatedMethods.add(baseMethod);

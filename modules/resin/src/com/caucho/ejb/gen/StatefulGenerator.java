@@ -50,12 +50,14 @@ import com.caucho.java.JavaWriter;
 public class StatefulGenerator<X> extends SessionGenerator<X> {
   private final AspectBeanFactory<X> _aspectBeanFactory;
 
-  public StatefulGenerator(String ejbName, AnnotatedType<X> beanType,
-      ArrayList<AnnotatedType<? super X>> localApi, AnnotatedType<X> localBean,
-      ArrayList<AnnotatedType<? super X>> remoteApi)
+  public StatefulGenerator(String ejbName,
+                           AnnotatedType<X> beanType,
+                           ArrayList<AnnotatedType<? super X>> localApi, 
+                           AnnotatedType<X> localBean,
+                           ArrayList<AnnotatedType<? super X>> remoteApi)
   {
-    super(ejbName, beanType, localApi, localBean, remoteApi, Stateful.class
-        .getSimpleName());
+    super(ejbName, beanType, localApi, localBean, remoteApi, 
+          Stateful.class.getSimpleName());
 
     InjectManager manager = InjectManager.create();
 
@@ -301,6 +303,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     
     out.println("long now = com.caucho.util.Alarm.getCurrentTime();");
     
+    out.println("System.out.println(\"TO: \" + (now - _lastAccessTime));");
     out.println("if (_manager.getIdleTimeout() < now - _lastAccessTime) {");
     out.println("  __caucho_destroy(null);");
     out.println("}");

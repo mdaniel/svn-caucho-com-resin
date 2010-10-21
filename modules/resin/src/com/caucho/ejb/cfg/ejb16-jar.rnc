@@ -13,6 +13,11 @@ cmp-field-type-Type = string
 
 ejb16_abstract-schema-name = element abstract-schema-name { string }
 
+ejb16_access-timeout = element access-timeout {
+  ejb16_timeout,
+  element unit { string }
+}
+
 ejb16_activation-config-property = element activation-config-property {
   attribute id { string }?,
   element activation-config-property-name { string },
@@ -24,6 +29,14 @@ ejb16_activation-config = element activation-config {
   ejb16_description*,
   ejb16_activation-config-property+,
   ejb16_deployment-extension*
+}
+
+ejb16_after-begin-method = element after-begin-method {
+  ejb16_named-method-Type
+}
+
+ejb16_after-completion-method = element after-completion-method {
+  ejb16_named-method-Type
 }
 
 ejb16_application-exception = element application-exception {
@@ -38,6 +51,11 @@ ejb16_around-invoke = element around-invoke {
   ejb16_method-name
 }
 
+ejb16_around-timeout = element around-timeout {
+  ejb16_class?,
+  ejb16_method-name
+}
+
 ejb16_assembly-descriptor = element assembly-descriptor {
   attribute id { string }?,
   javaee_security-role*,
@@ -48,6 +66,14 @@ ejb16_assembly-descriptor = element assembly-descriptor {
   ejb16_message-destination*,
   ejb16_exclude-list?,
   ejb16_application-exception*
+}
+
+ejb16_async-method = element async-method {
+  ejb16_named-method-Type
+}
+
+ejb16_before-completion-method = element before-completion-method {
+  ejb16_named-method-Type
 }
 
 ejb16_business-remote = element business-remote {
@@ -81,8 +107,19 @@ ejb16_cmr-field = element cmr-field {
   ejb16_deployment-extension*
 }
 
+ejb16_concurrency-lock-type = element concurrency-lock-type {
+  string
+}
+
 ejb16_concurrency-management-type = element concurrency-management-type {
   string
+}
+
+ejb16_concurrent-method = element concurrent-method {
+  attribute id { string }?,
+  ejb16_method,
+  ejb16_lock?,
+  ejb16_access-timeout?
 }
 
 ejb16_container-transaction = element container-transaction {
@@ -90,6 +127,11 @@ ejb16_container-transaction = element container-transaction {
   ejb16_description*,
   ejb16_method+,
   element trans-attribute { "Bean" | "Container" }
+}
+
+ejb16_depends-on = element depends-on {
+  attribute id { string }?,
+  ejb16_ejb-name+
 }
 
 ejb16_deployment-extension = element deployment-extension { string }
@@ -248,6 +290,22 @@ ejb16_init-method = element init-method {
   element bean-method { string }
 }
 
+ejb16_inherited = element inherited {
+  string
+}
+
+ejb16_init-on-start = element init-on-startup {
+  string
+}
+
+ejb16_local-bean = element local-bean {
+  string
+}
+
+ejb16_lock = element lock {
+  string
+}
+
 ejb16_interceptor = element interceptor {
   attribute id { string }?,
 
@@ -256,6 +314,8 @@ ejb16_interceptor = element interceptor {
   element interceptor-class { string },
 
   ejb16_around-invoke*,
+
+  ejb16_around-timeout*,
 
   ejb16_ejb_env,
 
@@ -504,29 +564,11 @@ ejb16_remove-method = element remove-method {
   element retain-if-exception { string }?
 }
 
-ejb16_async-method = element async-method {
-  attribute id { string }?,
-
-  element method-name { string },
-
-  ejb16_method-params?
-}
-
 ejb16_rollback = element rollback {
   string
 }
 
-ejb16_inherited = element inherited {
-  string
-}
-
-ejb16_init-on-startup = element init-on-startup {
-  string
-}
-
-ejb16_local-bean = element local-bean {
-  string
-}
+ejb16_schedule = element schedule { string }
 
 ejb16_security-identity = element security-identity {
   ejb16_description*,
@@ -571,19 +613,35 @@ ejb16_session = element session {
 
   ejb16_stateful-timeout?,
 
+  ejb16_timeout-method?,
+
+  ejb16_timer*,
+
+  ejb16_init-on-start?,
+
   ejb16_concurrency-management-type?,
 
-  ejb16_timeout-method?,
+  ejb16_concurrent-method*,
+
+  ejb16_depends-on?,
 
   ejb16_init-method*,
 
   ejb16_remove-method*,
   
   ejb16_async-method*,  
-
+  
   ejb16_transaction-type?,
 
+  ejb16_after-begin-method?,
+
+  ejb16_before-completion-method?,
+
+  ejb16_after-completion-method?,
+
   ejb16_around-invoke*,
+
+  ejb16_around-timeout*,
 
   ejb16_ejb_env,
 
@@ -593,18 +651,42 @@ ejb16_session = element session {
 
   javaee_security-role-ref*,
 
-  ejb16_security-identity?,
-
-  ejb16_init-on-startup?
+  ejb16_security-identity?
 }
 
 ejb16_stateful-timeout = element stateful-timeout {
-  element timeout { string },
+  ejb16_timeout,
   element unit { string }
+}
+
+ejb16_timeout = element timeout {
+  string
 }
 
 ejb16_timeout-method = element timeout-method {
   ejb16_named-method-Type
+}
+
+ejb16_timer = element timer {
+  attribute id { string }?,
+  ejb16_schedule,
+  element start { string }?,
+  element end { string }?,
+  ejb16_timeout-method,
+  element persistent { string }?,
+  element timezone { string }?,
+  element info { string }?
+}  
+
+ejb16_timer-schedule = element timer-schedule {
+  attribute id { string }?,
+  element second { string }?,
+  element minute { string }?,
+  element hour { string }?,
+  element day-of-month { string }?,
+  element month { string }?,
+  element day-of-week { string }?,
+  element year { string }?
 }
 
 ejb16_trans-attribute = element trans-attribute {

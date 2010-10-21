@@ -19,58 +19,30 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config.core;
+package com.caucho.ejb.cfg;
 
-import java.util.logging.Logger;
-
-import javax.annotation.PostConstruct;
-
-import com.caucho.util.CharBuffer;
+import javax.ejb.Remove;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * Logs an EL value.
+ * Configuration for @Remove@SuppressWarnings("serial")
  */
-public class ResinLog {
-  private String _name = "com.caucho.config.core.ResinLog";
-  private CharBuffer _text = new CharBuffer();
+public class RemoveLiteral 
+  extends AnnotationLiteral<Remove> 
+  implements Remove
+{
+  private boolean _isRetainIfException;
 
-  public ResinLog()
+  @Override
+  public boolean retainIfException()
   {
-  }
-
-  /**
-   * Sets the log name.
-   */
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  /**
-   * The value to be logged.
-   */
-  public void addText(String text)
-  {
-    _text.append(text);
-  }
-
-  /**
-   * Initialization logs the data.
-   */
-  @PostConstruct
-  public void init()
-  {
-    Logger log = Logger.getLogger(_name);
-
-    log.info(_text.toString());
+    return _isRetainIfException;
   }
 }
-

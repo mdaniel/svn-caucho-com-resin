@@ -35,9 +35,11 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Local;
 import javax.ejb.LocalBean;
 import javax.ejb.Remote;
+import javax.ejb.StatefulTimeout;
 import javax.ejb.Timeout;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -47,6 +49,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import javax.interceptor.AroundInvoke;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.gen.BeanGenerator;
@@ -115,13 +118,17 @@ public class EjbBean<X> extends DescriptionGroupConfig
   protected ArrayList<AnnotatedType<? super X>> _localList
     = new ArrayList<AnnotatedType<? super X>>();
   
-  protected AnnotatedType<X> _localBean;
+  private boolean _isLocalBean;
+  private AnnotatedType<X> _localBean;
 
   // protected BeanGenerator<X> _bean;
 
   private boolean _isAllowPOJO = true;
 
   protected boolean _isContainerTransaction = true;
+  
+  private ConcurrencyManagementType _concurrencyManagementType;
+  private StatefulTimeout _statefulTimeout;
 
   ArrayList<PersistentDependency> _dependList
     = new ArrayList<PersistentDependency>();
@@ -132,6 +139,9 @@ public class EjbBean<X> extends DescriptionGroupConfig
   ArrayList<String> _beanDependList = new ArrayList<String>();
 
   protected ArrayList<EjbMethodPattern<X>> _methodList
+    = new ArrayList<EjbMethodPattern<X>>();
+
+  protected ArrayList<EjbMethodPattern<X>> _beanMethodList
     = new ArrayList<EjbMethodPattern<X>>();
 
   private ContainerProgram _initProgram;
@@ -157,9 +167,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
   private String _timeoutMethodName;
 
   private long _transactionTimeout;
-  
-  private ArrayList<RemoveMethod> _removeMethods
-    = new ArrayList<RemoveMethod>();
 
   /**
    * Creates a new entity bean configuration.
@@ -229,6 +236,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Returns the remove-method for the given method.
    */
+  /*
   public RemoveMethod getRemoveMethod(Method method)
   {
     for (RemoveMethod removeMethod : _removeMethods) {
@@ -238,14 +246,17 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
     return null;
   }
+  */
 
   /**
    * Returns the remove-method list.
    */
+  /*
   public ArrayList<RemoveMethod> getRemoveMethods()
   {
     return _removeMethods;
   }
+  */
 
   /**
    * Returns the timeout method name.
@@ -258,9 +269,21 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Adds a new remove-method
    */
-  public void addRemoveMethod(RemoveMethod removeMethod)
+  @Configurable
+  public void addRemoveMethod(RemoveMethod<X> removeMethod)
   {
-    _removeMethods.add(removeMethod);
+    // _removeMethods.add(removeMethod);
+    _beanMethodList.add(removeMethod);
+  }
+
+  /**
+   * Adds a new concurrent-method
+   */
+  @Configurable
+  public void addConcurrentMethod(ConcurrentMethod<X> concurrentMethod)
+  {
+    // _removeMethods.add(removeMethod);
+    _beanMethodList.add(concurrentMethod);
   }
 
   /**
@@ -561,7 +584,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Sets the ejb local interface
    */
-  public void addLocal(Class<? super X> local)
+  public void addLocal(Class<?> local)
     throws ConfigException
   {
     AnnotatedTypeImpl<X> annType;
@@ -643,6 +666,22 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     _isContainerTransaction = isContainerTransaction;
   }
+  
+  public void setConcurrencyManagementType(String type)
+  {
+    if ("Container".equals(type))
+      _concurrencyManagementType = ConcurrencyManagementType.CONTAINER;
+    else if ("Bean".equals(type))
+      _concurrencyManagementType = ConcurrencyManagementType.BEAN;
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown concurrency-management-type",
+                                    type));
+  }
+  
+  public void setStatefulTimeout(EjbTimeout timeout)
+  {
+    _statefulTimeout = new StatefulTimeoutLiteral(timeout.getTimeoutValue());
+  }
 
   /**
    * Adds a method.
@@ -687,7 +726,8 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Gets the best method.
    */
-  public EjbMethodPattern<X> getMethodPattern(AnnotatedMethod<?> method, String intf)
+  public EjbMethodPattern<X> getMethodPattern(AnnotatedMethod<?> method, 
+                                              String intf)
   {
     EjbMethodPattern<X> bestMethod = null;
     int bestCost = -1;
@@ -721,7 +761,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     _transactionTimeout = timeout.getPeriod();
   }
   
-  public void addBusinessLocal(Class localApi)
+  public void addBusinessLocal(Class<?> localApi)
   {
     addLocal(localApi);
   }
@@ -729,6 +769,14 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public void addBusinessRemote(Class<?> remoteApi)
   {
     addRemote(remoteApi);
+  }
+  
+  public void setLocalBean(boolean isLocal)
+  {
+    _isLocalBean = true;
+    
+    if (_localBean == null)
+      _localBean = getAnnotatedType();
   }
 
   /**
@@ -1015,6 +1063,16 @@ public class EjbBean<X> extends DescriptionGroupConfig
     
     configureAroundInvoke(getAnnotatedType());
     configureAsync(getAnnotatedType());
+    configureMethods(getAnnotatedType());
+    
+    if (_concurrencyManagementType != null)
+      getAnnotatedType().addAnnotation(new ConcurrencyManagementLiteral(_concurrencyManagementType));
+    
+    if (_statefulTimeout != null)
+      getAnnotatedType().addAnnotation(_statefulTimeout);
+    
+    if (_isLocalBean)
+      _localBean = getAnnotatedType();
   }
   
   private void introspectInterceptor(InterceptorBinding binding)
@@ -1029,8 +1087,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
       if (interceptorClasses.isEmpty()) {
         InterceptorOrder interceptorOrder = binding.getInterceptorOrder();
 
-        if (interceptorOrder != null)
-          interceptorClasses = interceptorOrder.getInterceptorClasses();
+        if (interceptorOrder != null) {
+          for (Class<?> cl : interceptorOrder.getInterceptorClasses()) {
+            interceptorClasses.add(cl.getName());
+          }
+        }
       }
       
       AnnotatedTypeImpl<?> typeImpl = (AnnotatedTypeImpl<?>) getAnnotatedType();
@@ -1513,7 +1574,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
       Local local = type.getAnnotation(Local.class);
       if (local != null) {
-        for (Class localClass : local.value()) {
+        for (Class<?> localClass : local.value()) {
           addLocal(localClass);
         }
       }
@@ -1553,9 +1614,9 @@ public class EjbBean<X> extends DescriptionGroupConfig
         setPatternTransaction(pattern, xa);
       }
 
-      configureMethods(type);
-      configureAroundInvoke(type);
-      configureAsync(type);
+      configureMethods(getAnnotatedType());
+      configureAroundInvoke(getAnnotatedType());
+      configureAsync(getAnnotatedType());
       /*
         for (int i = 0; i < _initList.size(); i++)
         addInitProgram(_initList.get(i).getBuilderProgram());
@@ -1569,11 +1630,13 @@ public class EjbBean<X> extends DescriptionGroupConfig
     }
   }
 
+  /*
   private <Y> void configureMethods(AnnotatedType<Y> type)
     throws ConfigException
   {
-    configureMethods(type);
+    //configureBeanMethods(type);
   }
+  */
 
   private <Y> void configureBeanMethods(AnnotatedType<Y> type)
     throws ConfigException
@@ -1674,6 +1737,20 @@ public class EjbBean<X> extends DescriptionGroupConfig
     }
     
     configureAsync(type, cl.getSuperclass(), async);
+  }
+  
+  private void configureMethods(AnnotatedTypeImpl<X> type)
+  {
+    for (AnnotatedMethod<?> method : type.getMethods()) {
+      for (EjbMethodPattern<?> cfgMethod : _beanMethodList) {
+        if (cfgMethod.isMatch(method)) {
+          cfgMethod.configure(method);
+          System.out.println("M: " + method + " " + method.getAnnotations()
+                             + "\n  " + System.identityHashCode(method)
+                             + "\n  T=" + System.identityHashCode(type));
+        }
+      }
+    }
   }
     
   private void setPatternTransaction(EjbMethodPattern<X> pattern,

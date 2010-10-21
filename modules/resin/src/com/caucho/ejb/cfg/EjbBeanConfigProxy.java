@@ -183,4 +183,10 @@ public class EjbBeanConfigProxy implements DependencyBean {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _ejbName + "]";
+  }
 }

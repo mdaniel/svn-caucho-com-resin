@@ -29,19 +29,19 @@
 
 package com.caucho.config.core;
 
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
+import org.w3c.dom.Document;
+
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.SchemaBean;
-import com.caucho.config.types.*;
+import com.caucho.config.types.FileVar;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.xml.LooseXml;
-
-import org.w3c.dom.Document;
-
-import javax.annotation.PostConstruct;
-import java.util.logging.Logger;
 
 /**
  * Imports values from a separate file.
@@ -52,15 +52,13 @@ public class ResinInclude extends ResinControl {
     = Logger.getLogger(ResinInclude.class.getName());
 
   private Path _path;
-  private boolean _isOptional = true;
-  private String _systemId;
 
   /**
    * Sets the current location.
    */
   public void setConfigSystemId(String systemId)
   {
-    _systemId = systemId;
+    // _systemId = systemId;
   }
   
   /**
@@ -84,7 +82,7 @@ public class ResinInclude extends ResinControl {
    */
   public void setOptional(boolean optional)
   {
-    _isOptional = optional;
+    // _isOptional = optional;
   }
 
   @PostConstruct
@@ -102,13 +100,6 @@ public class ResinInclude extends ResinControl {
     }
     
     Object object = getObject();
-
-    String schema = null;
-
-    // Use the relax schema for beans with schema.
-    if (object instanceof SchemaBean) {
-      schema = ((SchemaBean) object).getSchema();
-    }
 
     log.config(L.l("resin:include '{0}'.\nresin:include is deprecated.  Please use resin:import instead.", _path.getNativePath()));
 

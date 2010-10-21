@@ -29,25 +29,19 @@
 
 package com.caucho.config.core;
 
-import com.caucho.config.Config;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.naming.Jndi;
-import com.caucho.util.L10N;
-
 import javax.annotation.PostConstruct;
+
+import com.caucho.config.Config;
+import com.caucho.naming.Jndi;
 
 /**
  * Sets an EL value.
  */
 public class ResinSet {
-  private static L10N L = new L10N(ResinSet.class);
-
   private String _jndiName;
   private String _var;
   
   private Object _value;
-  private boolean _hasValue;
   
   private Object _default;
   
@@ -73,7 +67,6 @@ public class ResinSet {
    */
   public void setValue(Object value)
   {
-    _hasValue = true;
     _value = value;
   }
 
@@ -90,8 +83,6 @@ public class ResinSet {
    */
   public void setProperty(String name, Object value)
   {
-    InjectManager webBeans = InjectManager.create();
-    
     //BeanFactory factory = webBeans.createBeanFactory(value.getClass());
     //factory.name(name);
     //factory.type();
@@ -109,7 +100,7 @@ public class ResinSet {
       Jndi.rebindDeepShort(_jndiName, _value);
     
     if (_var != null) {
-      InjectManager webBeans = InjectManager.create();
+      // InjectManager webBeans = InjectManager.create();
 
       if (_value != null) {
         Config.setProperty(_var, _value);

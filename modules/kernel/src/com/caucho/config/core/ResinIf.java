@@ -29,19 +29,16 @@
 
 package com.caucho.config.core;
 
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.type.FlowBean;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Sets an EL value.
  */
 public class ResinIf extends ResinControl implements FlowBean {
-  private static final L10N L = new L10N(ResinIf.class);
-
   private ContainerProgram _init = new ContainerProgram();
 
   private boolean _test = false;

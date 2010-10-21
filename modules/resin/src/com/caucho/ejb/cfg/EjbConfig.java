@@ -396,7 +396,7 @@ public class EjbConfig {
     try {
     ConfigProgram program
       = cdiManager.getInjectionPointHandler(EJBs.class).introspectType(annType);
-    System.out.println("PROGRAM: " + program);
+
     } catch (Exception e) {
       e.printStackTrace();
     }

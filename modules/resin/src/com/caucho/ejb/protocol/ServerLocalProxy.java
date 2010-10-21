@@ -39,13 +39,13 @@ import java.util.Hashtable;
  */
 public class ServerLocalProxy implements ObjectProxy, java.io.Serializable {
   // The server
-  private AbstractEjbBeanManager _server;
+  private AbstractEjbBeanManager<?> _server;
   private Class<?> _clientApi;
 
   /**
    * Creates a new server proxy
    */
-  public ServerLocalProxy(AbstractEjbBeanManager server, Class clientApi)
+  public ServerLocalProxy(AbstractEjbBeanManager<?> server, Class<?> clientApi)
   {
     _server = server;
     _clientApi = clientApi;

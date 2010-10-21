@@ -67,7 +67,7 @@ public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
 
         if (env != null)
           env.push(_proxy);
-
+        
         getServer().initProxy(_proxy, env);
       }
       

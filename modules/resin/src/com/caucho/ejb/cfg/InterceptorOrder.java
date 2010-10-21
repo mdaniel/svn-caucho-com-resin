@@ -40,7 +40,8 @@ public class InterceptorOrder {
 
   private String _id;
 
-  private ArrayList<String> _interceptorClasses = new ArrayList<String>();
+  private ArrayList<Class<?>> _interceptorClasses
+    = new ArrayList<Class<?>>();
 
   public InterceptorOrder()
   {
@@ -56,12 +57,12 @@ public class InterceptorOrder {
     _id = id;
   }
 
-  public void addInterceptorClass(String interceptorClass)
+  public void addInterceptorClass(Class<?> interceptorClass)
   {
     _interceptorClasses.add(interceptorClass);
   }
 
-  public ArrayList<String> getInterceptorClasses()
+  public ArrayList<Class<?>> getInterceptorClasses()
   {
     return _interceptorClasses;
   }

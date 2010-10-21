@@ -28,25 +28,20 @@
 
 package com.caucho.config.core;
 
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Separate environment for a bean
  */
 public class ResinEnv extends ResinControl implements EnvironmentBean {
-  private static final L10N L = new L10N(ResinEnv.class);
-
   private EnvironmentClassLoader _loader;
 
   private ContainerProgram _init = new ContainerProgram();
-
-  private boolean _test;
 
   /**
    * Instantiates the environment.

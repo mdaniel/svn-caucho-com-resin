@@ -41,6 +41,8 @@ import com.caucho.util.L10N;
 public class StatefulContext<X,T> extends AbstractSessionContext<X,T> {
   private static final L10N L = new L10N(StatefulContext.class);
   
+  private ThreadLocal<T> _businessLocal = new ThreadLocal<T>();
+  
   public StatefulContext(StatefulManager<X> manager, Class<T> api)
   {
     super(manager, api);
@@ -73,5 +75,24 @@ public class StatefulContext<X,T> extends AbstractSessionContext<X,T> {
     throws IllegalStateException
   {
     throw new IllegalStateException(L.l("Stateful session beans cannot call SessionContext.getTimerService()"));
+  }
+  
+  public T startLocal(T local)
+  {
+    T oldLocal = _businessLocal.get();
+    
+    _businessLocal.set(local);
+    
+    return oldLocal;
+  }
+  
+  public void endLocal(T oldLocal)
+  {
+    _businessLocal.set(oldLocal);
+  }
+  
+  protected T getLocal()
+  {
+    return _businessLocal.get();
   }
 }

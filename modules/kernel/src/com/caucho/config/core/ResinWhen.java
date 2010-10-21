@@ -30,14 +30,11 @@ package com.caucho.config.core;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.util.L10N;
 
 /**
  * Executes code when an expression is valid.
  */
 public class ResinWhen extends ResinControl {
-  private static final L10N L = new L10N(ResinWhen.class);
-
   private ContainerProgram _init = new ContainerProgram();
 
   private boolean _test;

@@ -99,6 +99,8 @@ public class InterceptorBinding {
   public void setInterceptorOrder(InterceptorOrder interceptorOrder)
   {
     _interceptorOrder = interceptorOrder;
+    
+    _interceptors.addAll(interceptorOrder.getInterceptorClasses());
   }
 
   public void addInterceptorClass(Class<?> interceptorClass)

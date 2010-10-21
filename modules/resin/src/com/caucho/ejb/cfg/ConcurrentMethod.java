@@ -32,40 +32,46 @@ package com.caucho.ejb.cfg;
 import java.lang.reflect.Method;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.AccessTimeout;
+import javax.ejb.LockType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.reflect.AnnotatedMethodImpl;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for remove-method.
  */
-public class RemoveMethod<X> extends EjbMethodPattern<X> {
+public class ConcurrentMethod<X> extends EjbMethodPattern<X> {
+  private static final L10N L = new L10N(ConcurrentMethod.class);
   private BeanMethod _beanMethod;
-  private boolean _retainIfException;
+  private AccessTimeoutLiteral _accessTimeout;
+  private LockType _lock;
 
-  public RemoveMethod()
+  public ConcurrentMethod()
   {
   }
 
-  public BeanMethod getBeanMethod()
-  {
-    return _beanMethod;
-  }
-
-  public boolean isRetainIfException()
-  {
-    return _retainIfException;
-  }
-
-  public void setBeanMethod(BeanMethod beanMethod)
+  public void setMethod(BeanMethod beanMethod)
   {
     _beanMethod = beanMethod;
   }
-
-  public void setRetainIfException(boolean retainIfException)
+  
+  public void setAccessTimeout(EjbTimeout timeout)
   {
-    _retainIfException = retainIfException;
+    _accessTimeout = new AccessTimeoutLiteral(timeout.getTimeoutValue());
+  }
+  
+  public void setLock(String lock)
+  {
+    if ("Read".equals(lock))
+      _lock = LockType.READ;
+    else if ("Write".equals(lock))
+      _lock = LockType.WRITE;
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown lock type", lock));
   }
 
   @PostConstruct
@@ -89,7 +95,16 @@ public class RemoveMethod<X> extends EjbMethodPattern<X> {
     if (isMatch(method)) {
       AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) method;
       
-      methodImpl.addAnnotation(new RemoveLiteral());
+      System.out.println("AT: " + _accessTimeout + " " + _lock + " " + methodImpl
+                         + " " + System.identityHashCode(method));
+      if (_accessTimeout != null) {
+        methodImpl.addAnnotation(_accessTimeout);
+        System.out.println("GEEK: " + methodImpl.getAnnotation(
+                                                               AccessTimeout.class));
+      }
+      
+      if (_lock != null)
+        methodImpl.addAnnotation(new LockLiteral(_lock));
     }
   }
 }

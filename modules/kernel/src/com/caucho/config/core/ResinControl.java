@@ -28,14 +28,11 @@
 
 package com.caucho.config.core;
 
-import com.caucho.util.L10N;
 
 /**
  * Handled control classes.
  */
 public class ResinControl {
-  private static L10N L = new L10N(ResinControl.class);
-
   private Object _object;
 
   public void setParent(Object parent)

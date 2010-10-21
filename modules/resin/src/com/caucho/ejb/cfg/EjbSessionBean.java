@@ -166,12 +166,6 @@ public class EjbSessionBean<X> extends EjbBean<X> {
           L.l("'{0}' is an unknown transaction-type.  transaction-type must be 'Container' or 'Bean'.",
               type));
   }
-  
-  @Configurable
-  public void setLocalBean(boolean isLocalBean)
-  {
-    
-  }
 
   /**
    * Configure initialization.
@@ -305,10 +299,10 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
     // ioc/0312
     if (type.isAnnotationPresent(LocalBean.class)) {
-      _localBean = type;
+      setLocalBean(true);
     }
     else if (_localList.size() == 0) {
-      _localBean = type;
+      setLocalBean(true);
     }
   }
   
@@ -382,7 +376,8 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     AbstractSessionManager<X> manager;
     
     if (Stateless.class.equals(getSessionType())) {
-      manager = new StatelessManager<X>(ejbContainer, 
+      manager = new StatelessManager<X>(ejbContainer,
+                                        getEJBName(),
                                         getModuleName(),
                                         getRawAnnotatedType(),
                                         getAnnotatedType(),
@@ -390,6 +385,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
     else if (Stateful.class.equals(getSessionType())) {
       manager = new StatefulManager<X>(ejbContainer,
+                                       getEJBName(),
                                        getModuleName(),
                                        getRawAnnotatedType(),
                                        getAnnotatedType(),
@@ -397,6 +393,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
     else if (Singleton.class.equals(getSessionType())) {
       manager = new SingletonManager<X>(ejbContainer,
+                                        getEJBName(),
                                         getModuleName(),
                                         getRawAnnotatedType(),
                                         getAnnotatedType(),
@@ -405,7 +402,6 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     else
       throw new IllegalStateException(String.valueOf(getSessionType()));
 
-    manager.setEJBName(getEJBName());
     manager.setMappedName(getMappedName());
     manager.setId(getEJBModuleName() + "#" + getEJBName());
     manager.setContainerTransaction(_isContainerTransaction);

@@ -406,6 +406,8 @@ abstract public class BeanGenerator<X> extends GenClass
     throws IOException
   {
     for (int i = 0; i < methods.size(); i++) {
+      Method method = methods.get(i);
+      
       out.println("try {");
       out.pushDepth();
       

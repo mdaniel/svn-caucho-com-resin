@@ -76,12 +76,14 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
 
 
   public SingletonManager(EjbManager ejbContainer,
+                          String ejbName,
                           String moduleName,
                           AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annotatedType,
                           EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, moduleName, rawAnnType, annotatedType, lazyGenerator);
+    super(ejbContainer, ejbName, moduleName, 
+          rawAnnType, annotatedType, lazyGenerator);
   }
 
   @Override

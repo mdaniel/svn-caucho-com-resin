@@ -29,8 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import java.lang.reflect.Method;
-
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.inject.Module;
@@ -41,6 +39,7 @@ import com.caucho.inject.Module;
 @Module
 public class BeanMethod {
   private String _methodName;
+  private MethodParams _params;
 
   public BeanMethod()
   {
@@ -58,15 +57,33 @@ public class BeanMethod {
 
   public void setMethodParams(MethodParams methodParams)
   {
+    _params = methodParams;
   }
 
   public boolean isMatch(AnnotatedMethod<?> otherMethod)
   {
-    return _methodName.equals(otherMethod.getJavaMember().getName());
+    if (! _methodName.equals(otherMethod.getJavaMember().getName()))
+      return false;
+    
+    if (_params != null && ! _params.isMatch(otherMethod))
+      return false;
+    
+    return true;
   }
 
+  /*
   public boolean isMatch(Method otherMethod)
   {
     return _methodName.equals(otherMethod.getName());
+  }
+  */
+  
+  public MethodSignature getSignature()
+  {
+    MethodSignature sig = new MethodSignature();
+    
+    sig.setMethodName(_methodName);
+    
+    return sig;
   }
 }

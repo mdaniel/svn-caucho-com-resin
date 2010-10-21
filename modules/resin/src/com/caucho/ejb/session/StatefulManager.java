@@ -85,12 +85,14 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   private List<Decorator<?>> _decoratorBeans;
 
   public StatefulManager(EjbManager ejbContainer,
+                         String ejbName,
                          String moduleName,
                          AnnotatedType<X> rawAnnType,
                          AnnotatedType<X> annotatedType,
                          EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, moduleName, rawAnnType, annotatedType, lazyGenerator);
+    super(ejbContainer, ejbName, moduleName, 
+          rawAnnType, annotatedType, lazyGenerator);
     
     StatefulTimeout timeout = annotatedType.getAnnotation(StatefulTimeout.class);
     
@@ -101,6 +103,8 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
     
     if (_idleTimeout < 0)
       _idleTimeout = Long.MAX_VALUE / 2;
+    
+    System.out.println("IDLE: " + _idleTimeout + " " + timeout + " " + annotatedType); 
   }
 
   @Override
@@ -288,7 +292,9 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   {
     EjbLazyGenerator<X> lazyGen = getLazyGenerator();
     
-    return new StatefulGenerator<X>(getEJBName(), getAnnotatedType(),
+    // getAnnotatedType()
+    return new StatefulGenerator<X>(getEJBName(), 
+                                    lazyGen.getBeanType(),
                                     lazyGen.getLocalApi(),
                                     lazyGen.getLocalBean(),
                                     lazyGen.getRemoteApi());

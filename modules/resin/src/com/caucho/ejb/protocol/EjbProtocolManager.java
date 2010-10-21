@@ -386,8 +386,7 @@ public class EjbProtocolManager {
         String suffix = manager.getEJBName();
         Class<?> api = apiList.get(0).getJavaClass();
 
-        if (proxy == null)
-          proxy = new ServerLocalProxy(manager, api); 
+        proxy = new ServerLocalProxy(manager, api); 
 
         if (manager.getLocalBean() == null)
           bindPortableJndi(appName, moduleName, suffix, proxy);
@@ -399,8 +398,7 @@ public class EjbProtocolManager {
         for (AnnotatedType<?> api : apiList) {
           String suffix = manager.getEJBName() + '!' + api.getJavaClass().getName();
 
-          if (proxy == null)
-            proxy = new ServerLocalProxy(manager, api.getJavaClass()); 
+          proxy = new ServerLocalProxy(manager, api.getJavaClass()); 
 
           bindPortableJndi(appName, moduleName, suffix, proxy);
         }

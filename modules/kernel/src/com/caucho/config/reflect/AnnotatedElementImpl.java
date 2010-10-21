@@ -57,8 +57,8 @@ public class AnnotatedElementImpl implements Annotated
   private AnnotationSet _annSet;
 
   public AnnotatedElementImpl(Type type,
-                                 Annotated annotated,
-                                 Annotation []annList)
+                              Annotated annotated,
+                              Annotation []annList)
   {
     _type = type;
 
@@ -69,12 +69,18 @@ public class AnnotatedElementImpl implements Annotated
         _annSet = new AnnotationSet(annSet);
       }
     }
-    else if (annList != null && annList.length > 0) {
-      _annSet = new AnnotationSet();
+    
+    if (annList != null && annList.length > 0) {
+      if (_annSet == null)
+        _annSet = new AnnotationSet();
       
       for (Annotation ann : annList) {
         _annSet.add(ann);
       }
+    }
+    
+    if (String.valueOf(annotated).indexOf("ping") >= 0) {
+      System.out.println("AM2: " + System.identityHashCode(this) + " " + annotated + " " + _annSet);
     }
   }
 

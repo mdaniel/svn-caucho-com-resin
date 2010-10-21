@@ -94,10 +94,14 @@ public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
   @Override
   public T create(CreationalContext<T> env)
   {
+    T proxy;
+    
     if (env instanceof CreationalContextImpl<?>)
-      return _context.createProxy((CreationalContextImpl<T>) env);
+      proxy = _context.createProxy((CreationalContextImpl<T>) env);
     else
-      return _context.createProxy(null);
+      proxy = _context.createProxy(null);
+    
+    return proxy;
   }
 
   @Override

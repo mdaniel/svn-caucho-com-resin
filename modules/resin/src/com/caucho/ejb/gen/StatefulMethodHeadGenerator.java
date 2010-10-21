@@ -52,7 +52,8 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
   private TimeUnit _lockTimeoutUnit;
 
   public StatefulMethodHeadGenerator(StatefulMethodHeadFactory<X> factory,
-      AnnotatedMethod<? super X> method, AspectGenerator<X> next)
+                                     AnnotatedMethod<? super X> method, 
+                                     AspectGenerator<X> next)
   {
     super(factory, method, next);
 
@@ -156,6 +157,7 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
   public void generatePreCall(JavaWriter out) throws IOException
   {
     out.println("thread.setContextClassLoader(_manager.getClassLoader());");
+    out.println("_context.startLocal(this);");
 
     super.generatePreCall(out);
   }
@@ -200,6 +202,8 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
     out.println();
     out.println("_semaphore.release();");
 
+    out.println("_context.endLocal(null);");
+    
     if (!_isRemoveRetainIfException) {
       out.println("if (! isValid) {");
       out.pushDepth();

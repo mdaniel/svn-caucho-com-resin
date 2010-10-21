@@ -117,7 +117,9 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     if (_proxyFactory == null)
       bind();
     
-    return _proxyFactory.__caucho_createProxy(env);
+    T proxy = _proxyFactory.__caucho_createProxy(env);
+    
+    return proxy;
   }
   
   public void destroyProxy(T instance, CreationalContextImpl<T> env)
@@ -203,7 +205,13 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
                                           getServer().getEjbClass().getName()));
     }
     
-    return context.createProxy(null);
+    // return context.createProxy(null);
+    return context.getLocal();
+  }
+  
+  protected T getLocal()
+  {
+    return createProxy(null);
   }
 
   @Override

@@ -381,8 +381,12 @@ public class EjbMethodPattern<X> {
     return _signature.equals(method.getSignature());
   }
 
+  @Override
   public String toString()
   {
-    return "EJBMethodPattern[" + _signature.getName() + "]";
+    if (_signature != null)
+      return getClass().getSimpleName() + "[" + _signature.getName() + "]";
+    else
+      return getClass().getSimpleName() + "[]";
   }
 }

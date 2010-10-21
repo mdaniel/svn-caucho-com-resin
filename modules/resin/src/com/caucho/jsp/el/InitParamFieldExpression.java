@@ -29,18 +29,12 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.Expr;
-import com.caucho.jsp.PageContextImpl;
-import com.caucho.vfs.WriteStream;
-
-import javax.el.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
 import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.PageContext;
-import java.io.IOException;
-import java.util.*;
 
+@SuppressWarnings("serial")
 public class InitParamFieldExpression extends AbstractValueExpression
 {
   private final String _field;

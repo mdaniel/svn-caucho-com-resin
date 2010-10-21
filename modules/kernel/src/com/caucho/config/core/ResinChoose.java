@@ -28,18 +28,16 @@
 
 package com.caucho.config.core;
 
-import com.caucho.config.type.FlowBean;
-import com.caucho.util.L10N;
+import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
+
+import com.caucho.config.type.FlowBean;
 
 /**
  * Executes code when an expression is valid.
  */
 public class ResinChoose extends ResinControl implements FlowBean {
-  private static final L10N L = new L10N(ResinWhen.class);
-
   private ArrayList<ResinWhen> _whenList = new ArrayList<ResinWhen>();
   private ResinWhen _otherwise;
   

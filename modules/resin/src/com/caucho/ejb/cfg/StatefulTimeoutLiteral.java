@@ -19,58 +19,43 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config.core;
+package com.caucho.ejb.cfg;
 
-import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
-import com.caucho.util.CharBuffer;
+import javax.ejb.StatefulTimeout;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * Logs an EL value.
+ * Configuration for @Remove@SuppressWarnings("serial")
  */
-public class ResinLog {
-  private String _name = "com.caucho.config.core.ResinLog";
-  private CharBuffer _text = new CharBuffer();
-
-  public ResinLog()
+public class StatefulTimeoutLiteral 
+  extends AnnotationLiteral<StatefulTimeout> 
+  implements StatefulTimeout
+{
+  private long _timeout;
+  
+  StatefulTimeoutLiteral(long timeout)
   {
+    _timeout = timeout;
   }
 
-  /**
-   * Sets the log name.
-   */
-  public void setName(String name)
+  @Override
+  public long value()
   {
-    _name = name;
+    return _timeout;
   }
-
-  /**
-   * The value to be logged.
-   */
-  public void addText(String text)
+  
+  @Override
+  public TimeUnit unit()
   {
-    _text.append(text);
-  }
-
-  /**
-   * Initialization logs the data.
-   */
-  @PostConstruct
-  public void init()
-  {
-    Logger log = Logger.getLogger(_name);
-
-    log.info(_text.toString());
+    return TimeUnit.MILLISECONDS;
   }
 }
-

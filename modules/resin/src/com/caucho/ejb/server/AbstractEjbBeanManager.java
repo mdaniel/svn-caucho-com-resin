@@ -90,7 +90,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   private Bean<X> _bean;
 
   private String _id;
-  private String _ejbName;
+  private final String _ejbName;
   // name for IIOP, Hessian, JNDI
   protected String _mappedName;
 
@@ -121,10 +121,13 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
    *          the owning server container
    */
   public AbstractEjbBeanManager(EjbManager ejbManager,
+                                String ejbName,
                                 String moduleName,
                                 AnnotatedType<X> rawAnnotatedType,
                                 AnnotatedType<X> annotatedType)
   {
+    _ejbName = ejbName;
+    
     _rawAnnotatedType = rawAnnotatedType;
     _annotatedType = annotatedType;
     _ejbManager = ejbManager;
@@ -207,14 +210,6 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
   {
-  }
-
-  /**
-   * Sets the ejb name.
-   */
-  public void setEJBName(String ejbName)
-  {
-    _ejbName = ejbName;
   }
 
   /**

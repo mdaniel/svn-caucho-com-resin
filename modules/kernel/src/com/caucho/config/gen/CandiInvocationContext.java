@@ -169,6 +169,8 @@ public class CandiInvocationContext implements InvocationContext {
   public Object proceed()
     throws Exception
   {
+    boolean isTop = _index == 0;
+    
     try {
       Object result;
       
@@ -202,6 +204,10 @@ public class CandiInvocationContext implements InvocationContext {
         throw (Exception) cause;
       else
         throw e;
+    }
+    finally {
+      if (isTop)
+        _contextDataLocal.set(null);
     }
   }
   

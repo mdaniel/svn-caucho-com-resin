@@ -691,6 +691,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
 
 
       manager = new MessageManager<X>(ejbManager,
+                                      getEJBName(),
                                       moduleName,
                                       getRawAnnotatedType(), 
                                       getAnnotatedType(),
@@ -698,7 +699,6 @@ public class EjbMessageBean<X> extends EjbBean<X> {
 
       manager.setConfigLocation(getFilename(), getLine());
 
-      manager.setEJBName(getEJBName());
       manager.setMappedName(getMappedName());
       manager.setId(getEJBModuleName() + "#" + getMappedName());
 
