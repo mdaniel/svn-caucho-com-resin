@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,7 +73,7 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   private static final Logger log =
     Logger.getLogger(SingletonManager.class.getName());
 
-  private X _instance;
+  private AtomicReference<X> _instanceRef = new AtomicReference<X>();
   
   private Object _decoratorClass;
   private List<Decorator<?>> _decoratorBeans;
@@ -165,11 +166,17 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   @Override
   public X newInstance(CreationalContextImpl<X> env)
   {
-    if (_instance == null) {
-      _instance = super.newInstance(env);
+    X instance = _instanceRef.get();
+    
+    if (instance == null) {
+      instance = super.newInstance(env);
+      
+      _instanceRef.compareAndSet(null, instance);
+      
+      instance = _instanceRef.get();
     }
     
-    return _instance;
+    return instance;
   }
 
   @Override

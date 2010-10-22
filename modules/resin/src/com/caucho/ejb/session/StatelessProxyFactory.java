@@ -27,15 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.session;
 
-import com.caucho.config.inject.CreationalContextImpl;
 
 /**
- * Interface for a Candi enhanced bean.
+ * Factory for a session bean.
  */
-public interface CandiEnhancedBean extends CandiLifecycleBean {
-  public void __caucho_inject(Object []delegates, CreationalContextImpl<?> parentEnv);
-  
-  public Object __caucho_getDelegate();
+public interface StatelessProxyFactory {
+  public void __caucho_postConstruct()
+    throws Exception;
 }

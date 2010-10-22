@@ -49,6 +49,7 @@ import com.caucho.java.JavaWriter;
 @Module
 public class StatefulGenerator<X> extends SessionGenerator<X> {
   private final AspectBeanFactory<X> _aspectBeanFactory;
+  private final AspectBeanFactory<X> _lifecycleAspectFactory;
 
   public StatefulGenerator(String ejbName,
                            AnnotatedType<X> beanType,
@@ -63,12 +64,19 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
 
     _aspectBeanFactory = new StatefulAspectBeanFactory<X>(manager,
         getBeanType());
+    _lifecycleAspectFactory = new LifecycleAspectBeanFactory<X>(_aspectBeanFactory, manager, getBeanType());
   }
 
   @Override
   protected AspectBeanFactory<X> getAspectBeanFactory()
   {
     return _aspectBeanFactory;
+  }
+
+  @Override
+  protected AspectBeanFactory<X> getLifecycleAspectFactory()
+  {
+    return _lifecycleAspectFactory;
   }
 
   @Override
@@ -303,7 +311,6 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     
     out.println("long now = com.caucho.util.Alarm.getCurrentTime();");
     
-    out.println("System.out.println(\"TO: \" + (now - _lastAccessTime));");
     out.println("if (_manager.getIdleTimeout() < now - _lastAccessTime) {");
     out.println("  __caucho_destroy(null);");
     out.println("}");

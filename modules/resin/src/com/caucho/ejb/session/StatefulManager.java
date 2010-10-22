@@ -58,11 +58,14 @@ import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
+import com.caucho.config.j2ee.EJBExceptionWrapper;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.inject.StatefulBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
+import com.caucho.ejb.server.EjbInjectionTarget;
+import com.caucho.ejb.server.SingletonInjectionTarget;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -103,8 +106,6 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
     
     if (_idleTimeout < 0)
       _idleTimeout = Long.MAX_VALUE / 2;
-    
-    System.out.println("IDLE: " + _idleTimeout + " " + timeout + " " + annotatedType); 
   }
 
   @Override
@@ -168,6 +169,12 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   {
     return (StatefulContext<X,T>) super.getSessionContext(api);
   }
+  
+  @Override
+  protected EjbInjectionTarget<X> createInjectionTarget()
+  {
+    return new SingletonInjectionTarget<X>(this, getAnnotatedType());
+  }
 
   /**
    * Returns the JNDI proxy object to create instances of the
@@ -226,6 +233,16 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
       Object []delegates = createDelegates(env);
       
       bean.__caucho_inject(delegates, env);
+      
+      try {
+        bean.__caucho_postConstruct();
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (InvocationTargetException e) {
+        throw new EJBExceptionWrapper(e.getCause());
+      } catch (Exception e) {
+        throw new EJBExceptionWrapper(e);
+      }
     }
     
     if (instance instanceof StatefulProxy) {

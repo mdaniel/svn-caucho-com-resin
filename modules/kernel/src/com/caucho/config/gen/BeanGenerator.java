@@ -312,9 +312,17 @@ abstract public class BeanGenerator<X> extends GenClass
                                        HashMap<String,Object> map)
      throws IOException
   {
-    ArrayList<Method> postConstructMethods 
-      = getLifecycleMethods(PostConstruct.class);
- 
+    out.println();
+    out.println("public void __caucho_postConstruct()");
+    out.println("  throws Exception");
+    out.println("{");
+    out.println("}");
+  }
+  
+  protected void generatePostConstructImpl(JavaWriter out, 
+                                           HashMap<String,Object> map)
+       throws IOException
+  {
     out.println();
     out.println("public void __caucho_postConstruct()");
     out.println("  throws Exception");
@@ -327,6 +335,9 @@ abstract public class BeanGenerator<X> extends GenClass
       
     }
     */
+    
+    ArrayList<Method> postConstructMethods 
+    = getLifecycleAspects(PostConstruct.class);
     
     for (Method method : postConstructMethods) {
       out.println("__caucho_lifecycle_" + method.getName() + "();");
@@ -419,13 +430,11 @@ abstract public class BeanGenerator<X> extends GenClass
     throws IOException
   {
     for (int i = 0; i < methods.size(); i++) {
-      Method method = methods.get(i);
-      
       out.println("try {");
       out.pushDepth();
       
       out.print("__caucho_" + lifecycleType + "_" + i + ".invoke(");
-      out.print(getAspectBeanFactory().getBeanInstance());
+      out.print(getLifecycleInstance());
       out.println(");");
       
       out.popDepth();
@@ -440,6 +449,11 @@ abstract public class BeanGenerator<X> extends GenClass
       out.println("  throw new RuntimeException(ex);");
       out.println("}");
     }
+  }
+  
+  protected String getLifecycleInstance()
+  {
+    return getAspectBeanFactory().getBeanInstance();
   }
 
   
@@ -463,10 +477,10 @@ abstract public class BeanGenerator<X> extends GenClass
     return methods;
   }
   
-  protected ArrayList<AspectGenerator<?>> 
+  protected ArrayList<Method> 
   getLifecycleAspects(Class<? extends Annotation> annType)
   {
-    ArrayList<AspectGenerator<?>> aspects = new ArrayList<AspectGenerator<?>>();
+    ArrayList<Method> aspects = new ArrayList<Method>();
     
     for (AspectGenerator<?> gen : getMethods()) {
       AnnotatedMethod<?> method = gen.getMethod();
@@ -477,10 +491,11 @@ abstract public class BeanGenerator<X> extends GenClass
       if (method.getParameters().size() != 0)
         continue;
       
-      aspects.add(gen);
+      aspects.add(method.getJavaMember());
     }
     
-    Collections.sort(aspects, new PostConstructAspectComparator());
+    
+    Collections.sort(aspects, new PostConstructComparator());
     
     return aspects;
   }

@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.ManagedBean;
 import javax.ejb.MessageDriven;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
@@ -193,6 +194,10 @@ public class ResinStandardPlugin implements Extension {
       }
     }
     
+    if (annotated.isAnnotationPresent(ManagedBean.class)){
+      registerManagedBean(annotated, bean);
+    }
+
     if (annotated.isAnnotationPresent(MBean.class)) {
       MBean manage = annotated.getAnnotation(MBean.class);
       
@@ -234,6 +239,29 @@ public class ResinStandardPlugin implements Extension {
         broker.addStartupActor(event.getBean(), service.name(), service
             .threadMax());
       }
+    }
+  }
+  
+  private void registerManagedBean(Annotated annotated,
+                                   Bean<?> bean)
+  {
+    ManagedBean manage = annotated.getAnnotation(ManagedBean.class);
+    String jndiName = manage.value();
+
+    if ("".equals(jndiName)) {
+      jndiName = bean.getBeanClass().getSimpleName();
+    }
+    
+    JndiBeanProxy<?> proxy = new JndiBeanProxy(_cdiManager, bean);
+    
+    if (log.isLoggable(Level.FINE))
+      log.fine("bind to JNDI '" + jndiName + "' for " + bean);
+               
+    try {
+      com.caucho.naming.Jndi.bindDeepShort("java:module/" + jndiName, proxy);
+      com.caucho.naming.Jndi.bindDeepShort(jndiName, proxy);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 

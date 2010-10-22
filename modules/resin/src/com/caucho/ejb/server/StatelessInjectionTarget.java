@@ -27,15 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.server;
 
-import com.caucho.config.inject.CreationalContextImpl;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 /**
- * Interface for a Candi enhanced bean.
+ * Creates an configures an ejb instance
  */
-public interface CandiEnhancedBean extends CandiLifecycleBean {
-  public void __caucho_inject(Object []delegates, CreationalContextImpl<?> parentEnv);
-  
-  public Object __caucho_getDelegate();
+public class StatelessInjectionTarget<T> extends EjbInjectionTarget<T> {
+  public StatelessInjectionTarget(AbstractEjbBeanManager<T> manager,
+                     AnnotatedType<T> annotatedType)
+  {
+    super(manager, annotatedType);
+  }
+
+  @Override
+  protected void postConstruct(T instance)
+  {
+  }
 }

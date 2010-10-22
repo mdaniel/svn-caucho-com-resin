@@ -180,6 +180,8 @@ public class EjbHandler extends JavaeeInjectionHandler {
     if (name != null && ! "".equals(name))
       bindJndi(name, gen, name);
     
+    bindJndi(javaMethod, gen);
+    
     return new MethodGeneratorProgram(javaMethod, gen);
   }
   

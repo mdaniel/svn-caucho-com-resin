@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.session;
 
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -59,14 +60,20 @@ public class StatelessPool<X,T> {
   
   private final FreeList<Item<X>> _freeList;
   
+  private final ThreadLocal<Item<X>> _lifecycleInstanceLocal
+    = new ThreadLocal<Item<X>>();
+  private final StatelessProxyFactory _proxy;
+  
   private final Semaphore _concurrentSemaphore;
   private final long _concurrentTimeout;
 
   StatelessPool(StatelessManager<X> manager,
+                StatelessProxyFactory proxy,
                 StatelessContext<X,T> context,
                 List<Interceptor<?>> interceptorBeans)
   {
     _manager = manager;
+    _proxy = proxy;
     _context = context;
     _interceptorBeans = interceptorBeans;
     
@@ -134,6 +141,19 @@ public class StatelessPool<X,T> {
         }
         
         beanItem = new Item<X>(instance, bindings);
+        
+        Item<X> oldInstance = _lifecycleInstanceLocal.get();
+        try {
+          _lifecycleInstanceLocal.set(beanItem);
+          
+          _proxy.__caucho_postConstruct();
+        } catch (RuntimeException e) {
+          throw e;
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        } finally {
+          _lifecycleInstanceLocal.set(oldInstance);
+        }
         // _ejbProducer.newInstance();
       }
       
@@ -144,6 +164,11 @@ public class StatelessPool<X,T> {
       if (! isValid && semaphore != null)
         semaphore.release();
     }
+  }
+  
+  public Item<X> getLifecycleInstance()
+  {
+    return _lifecycleInstanceLocal.get();
   }
 
   public void free(Item<X> beanItem)

@@ -50,6 +50,9 @@ import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.inject.StatelessBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
+import com.caucho.ejb.server.EjbInjectionTarget;
+import com.caucho.ejb.server.SingletonInjectionTarget;
+import com.caucho.ejb.server.StatelessInjectionTarget;
 import com.caucho.util.L10N;
 
 /**
@@ -182,10 +185,17 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   /**
    * Called by the StatelessProxy on initialization.
    */
-  public <T> StatelessPool<X,T> createStatelessPool(StatelessContext<X,T> context,
+  public <T> StatelessPool<X,T> createStatelessPool(StatelessProxyFactory proxy,
+                                                    StatelessContext<X,T> context,
                                                     List<Interceptor<?>> interceptorBeans)
   {
-    return new StatelessPool<X,T>(this, context, interceptorBeans);
+    return new StatelessPool<X,T>(this, proxy, context, interceptorBeans);
+  }
+  
+  @Override
+  protected EjbInjectionTarget<X> createInjectionTarget()
+  {
+    return new StatelessInjectionTarget<X>(this, getAnnotatedType());
   }
 
   /**

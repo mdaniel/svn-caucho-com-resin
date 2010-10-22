@@ -387,6 +387,14 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     generateDestroy(out, map);
   }
 
+  @Override
+  protected void generatePostConstruct(JavaWriter out, 
+                                       HashMap<String,Object> map)
+     throws IOException
+  {
+    generatePostConstructImpl(out, map);
+  }
+ 
   protected AspectBeanFactory<X> getScheduledAspectBeanFactory()
   {
     throw new UnsupportedOperationException();

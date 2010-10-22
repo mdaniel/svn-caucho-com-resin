@@ -159,21 +159,27 @@ public class InterceptorFactory<X>
     if (_isInterceptorOrDecorator)
       return super.create(method, isEnhanced);
     
-    if (Modifier.isPrivate(method.getJavaMember().getModifiers())) {
-      return super.create(method, isEnhanced);
-    }
+    boolean isPrivate
+      = Modifier.isPrivate(method.getJavaMember().getModifiers());
+
+    AnnotatedType<?> beanType;
+    
+    if (isPrivate)
+      beanType = method.getDeclaringType();
+    else
+      beanType = getBeanType();
     
     boolean isExcludeClassInterceptors = false;
     
     if (method.isAnnotationPresent(ExcludeClassInterceptors.class)
-        || getBeanType().isAnnotationPresent(ExcludeClassInterceptors.class)) {
+        || beanType.isAnnotationPresent(ExcludeClassInterceptors.class)) {
       isExcludeClassInterceptors = true;
     }
     
     boolean isExcludeDefaultInterceptors = false;
     
     if (method.isAnnotationPresent(ExcludeDefaultInterceptors.class)
-        || getBeanType().isAnnotationPresent(ExcludeDefaultInterceptors.class)) {
+        || beanType.isAnnotationPresent(ExcludeDefaultInterceptors.class)) {
       isExcludeDefaultInterceptors = true;
     }
     
@@ -193,7 +199,7 @@ public class InterceptorFactory<X>
     }
     
     // ejb/0cb3
-    ClassInterceptors typeInterceptors = getTypeInterceptors(getBeanType());
+    ClassInterceptors typeInterceptors = getTypeInterceptors(beanType);
     
     if (! isExcludeDefaultInterceptors) {
       methodInterceptors = addInterceptors(methodInterceptors,

@@ -81,7 +81,7 @@ public class LifecycleMethodTailGenerator<X> extends MethodTailGenerator<X>
     out.println("try {");
     out.pushDepth();
     
-    String superVar = _factory.getAspectBeanFactory().getBeanInstance();
+    String superVar = _factory.getAspectBeanFactory().getInterceptorInstance();
     
     out.println(_invokeMethodName + ".invoke(" + superVar + ");");
     
@@ -89,7 +89,7 @@ public class LifecycleMethodTailGenerator<X> extends MethodTailGenerator<X>
     out.println("} catch (RuntimeException e) {");
     out.println("  throw e;");
     out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
-    out.println("  throw new RuntimeException(e);");
+    out.println("  throw new RuntimeException(e.getCause());");
     out.println("} catch (Exception e) {");
     out.println("  throw new RuntimeException(e);");
     out.println("}");

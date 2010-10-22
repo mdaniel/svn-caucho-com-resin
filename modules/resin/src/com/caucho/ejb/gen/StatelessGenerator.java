@@ -68,6 +68,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
   
   private final AspectBeanFactory<X> _aspectBeanFactory;
   private final StatelessScheduledAspectBeanFactory<X> _scheduledBeanFactory;
+  private final AspectBeanFactory<X> _lifecycleAspectFactory;
   
   public StatelessGenerator(String ejbName, 
                             AnnotatedType<X> beanType,
@@ -84,6 +85,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
       = new StatelessAspectBeanFactory<X>(manager, getBeanType());
     _scheduledBeanFactory
       = new StatelessScheduledAspectBeanFactory<X>(manager, getBeanType());
+    _lifecycleAspectFactory = new StatelessLifecycleAspectBeanFactory<X>(_aspectBeanFactory, manager, getBeanType());
   }
 
   @Override
@@ -96,6 +98,12 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
   protected AspectBeanFactory<X> getScheduledAspectBeanFactory()
   {
     return _scheduledBeanFactory;
+  }
+
+  @Override
+  protected AspectBeanFactory<X> getLifecycleAspectFactory()
+  {
+    return _lifecycleAspectFactory;
   }
   
   @Override
@@ -147,6 +155,12 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     return getBeanType().getJavaClass().getName();
     // return getViewClass().getJavaClass().getSimpleName() + "__Bean";
     // return getStatelessBean().getClassName();
+  }
+  
+  @Override
+  protected String getLifecycleInstance()
+  {
+    return "_statelessPool.getLifecycleInstance()";
   }
   
   //
@@ -273,6 +287,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
       out.println("  extends " + getBeanType().getJavaClass().getName());
 
     out.print("  implements SessionProxyFactory<T>");
+    out.print(", StatelessProxyFactory");
     
     for (AnnotatedType<? super X> api : getLocalApi()) {
       out.print(", " + api.getJavaClass().getName());
@@ -317,6 +332,8 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.println("}");
 
     generateTimeoutCallback(out);*/
+    
+    generatePostConstruct(out, map);
 
     out.println();
     out.println("public void destroy()");
@@ -357,7 +374,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.pushDepth();
 
     out.println("_manager = manager;");
-    out.println("_statelessPool = manager.createStatelessPool(context, __caucho_interceptor_beans);");
+    out.println("_statelessPool = manager.createStatelessPool(this, context, __caucho_interceptor_beans);");
   
     generateProxyConstructor(out);
 
