@@ -275,10 +275,15 @@ public class EjbInjectionTarget<T> {
     instance = _injectionTarget.produce(env);
     
     _injectionTarget.inject(instance, env);
-
-    _injectionTarget.postConstruct(instance);
     
+    postConstruct(instance);
+
     return instance;
+  }
+  
+  protected void postConstruct(T instance)
+  {
+    _injectionTarget.postConstruct(instance);
   }
   
   /**

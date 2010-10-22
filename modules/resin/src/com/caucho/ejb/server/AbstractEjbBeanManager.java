@@ -147,12 +147,17 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     _loader.setAttribute("caucho.inject", false);
     _loader.setAttribute("ejb.manager", false);
     
-    _producer = new EjbInjectionTarget<X>(this, annotatedType);
+    _producer = createInjectionTarget();
     
     _moduleInjectManager = InjectManager.create();
     _ejbInjectManager = InjectManager.create(_loader);
     
     _ejbInjectManager.setJndiClassLoader(_moduleInjectManager.getClassLoader());
+  }
+  
+  protected EjbInjectionTarget<X> createInjectionTarget()
+  {
+    return new EjbInjectionTarget<X>(this, getAnnotatedType());
   }
 
   /**

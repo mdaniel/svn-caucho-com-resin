@@ -18,16 +18,18 @@ import org.eclipse.persistence.transaction.resin.ResinTransactionController;
 
 public class ResinPlatform extends ServerPlatformBase {
 
-    public ResinPlatform(DatabaseSession newDatabaseSession) {
-        super(newDatabaseSession);
+    public ResinPlatform(DatabaseSession newDatabaseSession)
+    {
+      super(newDatabaseSession);
     }
 
     @SuppressWarnings("unchecked")
-    public Class getExternalTransactionControllerClass() {
-
-            if (externalTransactionControllerClass == null){
-                    externalTransactionControllerClass = ResinTransactionController.class;
-            }
-        return externalTransactionControllerClass;
+    public Class getExternalTransactionControllerClass()
+    {
+      if (externalTransactionControllerClass == null){
+        externalTransactionControllerClass = ResinTransactionController.class;
+      }
+      
+      return externalTransactionControllerClass;
     }
 }

@@ -144,7 +144,8 @@ public class CandiUtil {
     if (! beans.contains(staticBean))
       beans.add(staticBean);
     
-    addStaticBean(staticBean.getParent(), indexList, beans, type);
+    if (staticBean.isAllowParent(type))
+      addStaticBean(staticBean.getParent(), indexList, beans, type);
 
     if (staticBean.intercepts(type)) {
       int index = beans.indexOf(staticBean);

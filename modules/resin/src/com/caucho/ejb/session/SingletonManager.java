@@ -54,11 +54,14 @@ import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
+import com.caucho.config.j2ee.EJBExceptionWrapper;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.SingletonGenerator;
 import com.caucho.ejb.inject.SessionBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
+import com.caucho.ejb.server.EjbInjectionTarget;
+import com.caucho.ejb.server.SingletonInjectionTarget;
 import com.caucho.util.L10N;
 
 /**
@@ -102,6 +105,12 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   protected <T> SingletonContext<X,T> getSessionContext(Class<T> api)
   {
     return (SingletonContext<X,T>) super.getSessionContext(api);
+  }
+  
+  @Override
+  protected EjbInjectionTarget<X> createInjectionTarget()
+  {
+    return new SingletonInjectionTarget<X>(this, getAnnotatedType());
   }
 
   /**
@@ -156,8 +165,9 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   @Override
   public X newInstance(CreationalContextImpl<X> env)
   {
-    if (_instance == null)
+    if (_instance == null) {
       _instance = super.newInstance(env);
+    }
     
     return _instance;
   }
@@ -165,24 +175,37 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   @Override
   protected void postStart()
   {
-    CreationalContextImpl<X> env = new OwnerCreationalContext<X>(getBean());
+    super.postStart();
     
-    newInstance(env);
+    CreationalContextImpl<X> env = new OwnerCreationalContext<X>(getBean());
+    getBean().create(env);
+    //newInstance(env);
   }
   
   public <T> T initProxy(T proxy, CreationalContextImpl<T> env)
   {
     if (proxy instanceof CandiEnhancedBean) {
-      try {
-        CandiEnhancedBean bean = (CandiEnhancedBean) proxy;
+      CandiEnhancedBean bean = (CandiEnhancedBean) proxy;
       
-        Object []delegates = createDelegates((CreationalContextImpl) env);
+      try {
+        Object []delegates = createDelegates(env);
         
         bean.__caucho_inject(delegates, env);
+        
       } catch (Exception e) {
         e.printStackTrace();
         
         log.log(Level.WARNING, e.toString(), e);
+      }
+      
+      try {
+        bean.__caucho_postConstruct();
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (InvocationTargetException e) {
+        throw new EJBExceptionWrapper(e.getCause());
+      } catch (Exception e) {
+        throw new EJBExceptionWrapper(e);
       }
     }
     

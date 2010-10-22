@@ -159,7 +159,9 @@ public class InterceptorFactory<X>
     if (_isInterceptorOrDecorator)
       return super.create(method, isEnhanced);
     
-    AnnotatedType<? super X> declType = method.getDeclaringType();
+    if (Modifier.isPrivate(method.getJavaMember().getModifiers())) {
+      return super.create(method, isEnhanced);
+    }
     
     boolean isExcludeClassInterceptors = false;
     
@@ -180,6 +182,7 @@ public class InterceptorFactory<X>
     InterceptionType type = InterceptionType.AROUND_INVOKE;
     Class<? extends Annotation> annType = AroundInvoke.class;
     
+
     if (method.isAnnotationPresent(PostConstruct.class)){
       type = InterceptionType.POST_CONSTRUCT;
       annType = PostConstruct.class;
@@ -241,7 +244,10 @@ public class InterceptorFactory<X>
                                       method.getJavaMember().getDeclaringClass().getName(),
                                       method.getJavaMember().getName()));
       }
-      // ioc/0c57
+    }
+    
+    if (method.isAnnotationPresent(Inject.class)) {
+      // ioc/0c57, ejb/60b0
       return super.create(method, isEnhanced);
     }
 
@@ -407,7 +413,7 @@ public class InterceptorFactory<X>
       return;
     
     if (isEnhanced()) {
-      generateEpilogue(out, map, POST_CONSTRUCT, PostConstruct.class);
+      //generateEpilogue(out, map, POST_CONSTRUCT, PostConstruct.class);
       generateEpilogue(out, map, AROUND_INVOKE, AroundInvoke.class);
       generateEpilogue(out, map, PRE_DESTROY, PreDestroy.class);
     }

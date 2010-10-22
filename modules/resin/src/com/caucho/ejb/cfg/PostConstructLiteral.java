@@ -19,29 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.cfg;
 
-import com.caucho.config.inject.CreationalContextImpl;
+import javax.annotation.PostConstruct;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * Interface for a Candi enhanced bean.
+ * <pre>
+ * @PostConstruct
+ * </pre>            
  */
-public interface CandiEnhancedBean {
-  public void __caucho_inject(Object []delegates, CreationalContextImpl<?> parentEnv);
-  
-  public Object __caucho_getDelegate();
-  
-  public void __caucho_postConstruct()
-    throws Exception;
-  
-  public void __caucho_destroy(CreationalContextImpl<?> env);
-
+public class PostConstructLiteral extends AnnotationLiteral<PostConstruct>
+  implements PostConstruct
+{
 }

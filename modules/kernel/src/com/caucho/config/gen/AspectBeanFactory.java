@@ -73,6 +73,11 @@ public interface AspectBeanFactory<X> {
   public String getBeanInstance();
   
   /**
+   * Returns the interceptor instance Java reference.
+   */
+  public String getInterceptorInstance();
+  
+  /**
    * Returns the bean instance call.
    */
   public String getBeanSuper();

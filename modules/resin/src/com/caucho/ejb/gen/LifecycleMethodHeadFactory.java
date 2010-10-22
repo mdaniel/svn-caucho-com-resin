@@ -27,21 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
-import com.caucho.config.inject.CreationalContextImpl;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.config.gen.AspectFactory;
+import com.caucho.config.gen.AspectGenerator;
+import com.caucho.config.gen.MethodHeadFactory;
+import com.caucho.inject.Module;
 
 /**
- * Interface for a Candi enhanced bean.
+ * Represents a lifecycle method
  */
-public interface CandiEnhancedBean {
-  public void __caucho_inject(Object []delegates, CreationalContextImpl<?> parentEnv);
+@Module
+public class LifecycleMethodHeadFactory<X> extends MethodHeadFactory<X>
+{
+  public LifecycleMethodHeadFactory(LifecycleAspectBeanFactory<X> beanFactory,
+                                    AspectFactory<X> next)
+  {
+    super(beanFactory, next);
+  }
   
-  public Object __caucho_getDelegate();
-  
-  public void __caucho_postConstruct()
-    throws Exception;
-  
-  public void __caucho_destroy(CreationalContextImpl<?> env);
-
+  @Override
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
+                                   boolean isEnhanced)
+  {
+    AspectGenerator<X> next = super.create(method, true);
+    
+    return new LifecycleMethodHeadGenerator<X>(this, method, next);
+  }
 }

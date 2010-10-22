@@ -93,7 +93,7 @@ public class NonBusinessAspectBeanFactory<X> implements AspectBeanFactory<X>
   {
     return true;
   }
- 
+  
   /**
    * Generates the underlying bean object
    */
@@ -101,6 +101,15 @@ public class NonBusinessAspectBeanFactory<X> implements AspectBeanFactory<X>
   public String getBeanInstance()
   {
     return "bean";
+  }
+  
+  /**
+   * Generates the underlying bean object
+   */
+  @Override
+  public String getInterceptorInstance()
+  {
+    return getBeanInstance();
   }
   
   /**

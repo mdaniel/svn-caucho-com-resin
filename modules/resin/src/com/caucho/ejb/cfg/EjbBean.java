@@ -66,7 +66,6 @@ import com.caucho.config.types.EjbRef;
 import com.caucho.config.types.EnvEntry;
 import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.config.types.Period;
-import com.caucho.config.types.PostConstructType;
 import com.caucho.config.types.ResourceEnvRef;
 import com.caucho.config.types.ResourceGroupConfig;
 import com.caucho.config.types.ResourceRef;
@@ -145,8 +144,10 @@ public class EjbBean<X> extends DescriptionGroupConfig
     = new ArrayList<EjbMethodPattern<X>>();
 
   private ContainerProgram _initProgram;
+  
   private ArrayList<ConfigProgram> _postConstructList
     = new ArrayList<ConfigProgram>();
+  
   private ContainerProgram _serverProgram;
   private ArrayList<ResourceGroupConfig> _resourceList
     = new ArrayList<ResourceGroupConfig>();
@@ -960,9 +961,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
     _initProgram.addProgram(init);
   }
 
-  public void addPostConstruct(PostConstructType postConstruct)
+  public void addPostConstruct(PostConstructType<X> postConstruct)
   {
-    _postConstructList.add(postConstruct.getProgram(getEJBClass()));
+    _beanMethodList.add(postConstruct);
+    
+    // _postConstructList.add(postConstruct.getProgram(getEJBClass()));
   }
 
   /**
@@ -970,6 +973,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
    */
   public ContainerProgram getInitProgram()
   {
+    /*
     if (_postConstructList != null) {
       if (_initProgram == null)
         _initProgram = new ContainerProgram();
@@ -979,6 +983,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
       _postConstructList = null;
     }
+    */
 
     return _initProgram;
   }
@@ -1745,9 +1750,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
       for (EjbMethodPattern<?> cfgMethod : _beanMethodList) {
         if (cfgMethod.isMatch(method)) {
           cfgMethod.configure(method);
-          System.out.println("M: " + method + " " + method.getAnnotations()
-                             + "\n  " + System.identityHashCode(method)
-                             + "\n  T=" + System.identityHashCode(type));
         }
       }
     }

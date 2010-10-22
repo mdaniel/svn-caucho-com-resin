@@ -317,14 +317,23 @@ abstract public class BeanGenerator<X> extends GenClass
  
     out.println();
     out.println("public void __caucho_postConstruct()");
+    out.println("  throws Exception");
     out.println("{");
     out.pushDepth();
 
-    for (AspectGenerator<X> method : getMethods()) {
-      method.generatePostConstruct(out, map);
+    /*
+    for (AspectGenerator<?> method : getLifecycleAspects(PostConstruct.class)) {
+      // method.generatePostConstruct(out, map);
+      
     }
-     
-    getAspectBeanFactory().generatePostConstruct(out, map);
+    */
+    
+    for (Method method : postConstructMethods) {
+      out.println("__caucho_lifecycle_" + method.getName() + "();");
+    }
+ 
+      
+    // getAspectBeanFactory().generatePostConstruct(out, map);
 
     out.popDepth();
     out.println("}");
@@ -333,7 +342,6 @@ abstract public class BeanGenerator<X> extends GenClass
     
     out.println();
     out.println("private void __caucho_postConstructImpl()");
-    out.println("  throws Exception");
     out.println("{");
     out.pushDepth();
     
@@ -385,11 +393,12 @@ abstract public class BeanGenerator<X> extends GenClass
     for (int i = 0; i < methods.size(); i++) {
       Method method = methods.get(i);
       
+      String methodName = "__caucho_" + lifecycleType + "_" + i;
 
       out.println();
-      out.println("java.lang.reflect.Method __caucho_" + lifecycleType + "_" + i + " = ");
+      out.println("static java.lang.reflect.Method " + methodName);
       
-      out.print("  ");
+      out.print("  = ");
       
       out.printClass(CandiUtil.class);
       out.print(".findMethod(");
@@ -397,6 +406,10 @@ abstract public class BeanGenerator<X> extends GenClass
       out.print(".class, \"");
       out.print(method.getName());
       out.println("\");");
+      
+      out.println("static {");
+      out.println("  " + methodName + ".setAccessible(true);");
+      out.println("}");
     }
   }
   
@@ -416,17 +429,21 @@ abstract public class BeanGenerator<X> extends GenClass
       out.println(");");
       
       out.popDepth();
+      out.println("} catch (RuntimeException ex) {");
+      out.println("  throw ex;");
       out.println("} catch (java.lang.reflect.InvocationTargetException ex) {");
-      out.println("  if (ex.getCause() instanceof Exception)");
-      out.println("    throw (Exception) ex.getCause();");
+      out.println("  if (ex.getCause() instanceof RuntimeException)");
+      out.println("    throw (RuntimeException) ex.getCause();");
       out.println("  else");
-      out.println("    throw ex;");
+      out.println("    throw new RuntimeException(ex);");
+      out.println("} catch (Exception ex) {");
+      out.println("  throw new RuntimeException(ex);");
       out.println("}");
     }
   }
 
   
-  protected ArrayList<Method> 
+  protected ArrayList<Method>
   getLifecycleMethods(Class<? extends Annotation> annType)
   {
     ArrayList<Method> methods = new ArrayList<Method>();
@@ -444,6 +461,28 @@ abstract public class BeanGenerator<X> extends GenClass
     Collections.sort(methods, new PostConstructComparator());
     
     return methods;
+  }
+  
+  protected ArrayList<AspectGenerator<?>> 
+  getLifecycleAspects(Class<? extends Annotation> annType)
+  {
+    ArrayList<AspectGenerator<?>> aspects = new ArrayList<AspectGenerator<?>>();
+    
+    for (AspectGenerator<?> gen : getMethods()) {
+      AnnotatedMethod<?> method = gen.getMethod();
+      
+      if (! method.isAnnotationPresent(annType))
+        continue;
+      
+      if (method.getParameters().size() != 0)
+        continue;
+      
+      aspects.add(gen);
+    }
+    
+    Collections.sort(aspects, new PostConstructAspectComparator());
+    
+    return aspects;
   }
 
   protected void generateEpilogue(JavaWriter out, HashMap<String,Object> map)
@@ -481,6 +520,28 @@ abstract public class BeanGenerator<X> extends GenClass
     @Override
     public int compare(Method a, Method b)
     {
+      Class<?> classA = a.getDeclaringClass();
+      Class<?> classB = b.getDeclaringClass();
+      
+      if (classA == classB)
+        return a.getName().compareTo(b.getName());
+      else if (classA.isAssignableFrom(classB))
+        return -1;
+      else if (classB.isAssignableFrom(classA))
+        return 1;
+      else
+        return a.getName().compareTo(b.getName());
+    }
+  }
+  
+  static class PostConstructAspectComparator 
+    implements Comparator<AspectGenerator<?>> {
+    @Override
+    public int compare(AspectGenerator<?> genA, AspectGenerator<?> genB)
+    {
+      Method a = genA.getMethod().getJavaMember();
+      Method b = genB.getMethod().getJavaMember();
+      
       Class<?> classA = a.getDeclaringClass();
       Class<?> classB = b.getDeclaringClass();
       

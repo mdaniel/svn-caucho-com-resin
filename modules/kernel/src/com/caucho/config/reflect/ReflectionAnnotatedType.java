@@ -214,8 +214,10 @@ public class ReflectionAnnotatedType<T>
         continue;
       
       // ejb/4018
+      // ejb/8501
       // hasBeanAnnotation(method)
-      if (hasBeanAnnotation(method)
+      if (true 
+          || hasBeanAnnotation(method)
           || ! Modifier.isPrivate(method.getModifiers())) {
         AnnotatedMethod<?> childMethod = null;
         

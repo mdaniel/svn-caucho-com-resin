@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
 import javax.ejb.Schedules;
@@ -254,16 +255,20 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private void introspectImpl()
   {
     for (AnnotatedMethod<? super X> method : getAnnotatedMethods()) {
-      introspectMethodImpl(method);
-    }
-    
-    /*
-    for (AnnotatedMethod<? super X> method : getBeanType().getMethods()) {
       if (method.isAnnotationPresent(PostConstruct.class)) {
+      }
+      else {
         introspectMethodImpl(method);
       }
     }
-    */
+    
+    for (AnnotatedMethod<? super X> method : getBeanType().getMethods()) {
+      if (method.isAnnotationPresent(PostConstruct.class)) {
+        // only one post construct
+        addPostConstructMethod(method);
+        // break;
+      }
+    }
   }
 
   private void introspectMethodImpl(AnnotatedMethod<? super X> apiMethod)
@@ -303,8 +308,9 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     if (! isBusinessMethod(javaMethod) 
         && ! Modifier.isPublic(modifiers)
         && (javaMethod.isAnnotationPresent(Schedule.class)
-            || javaMethod.isAnnotationPresent(Schedules.class)))
+            || javaMethod.isAnnotationPresent(Schedules.class))) {
       addScheduledMethod(apiMethod);
+    }
   }
   
   protected void addBusinessMethod(AnnotatedMethod<? super X> method)
@@ -313,6 +319,18 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
       
     if (bizMethod != null && ! _businessMethods.contains(bizMethod)) {
       _businessMethods.add(bizMethod);
+    }
+  }
+  
+  protected void addPostConstructMethod(AnnotatedMethod<? super X> method)
+  {
+    if (getLifecycleAspectFactory() == null)
+      return;
+    
+    AspectGenerator<X> initMethod = getLifecycleAspectFactory().create(method);
+      
+    if (initMethod != null && ! _businessMethods.contains(initMethod)) {
+      _businessMethods.add(initMethod);
     }
   }
 
@@ -376,6 +394,11 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   
   abstract protected boolean isTimerSupported();
   abstract protected AspectBeanFactory<X> getAspectBeanFactory();
+  
+  protected AspectBeanFactory<X> getLifecycleAspectFactory()
+  {
+    return null;
+  }
   
   // abstract protected void generateBody(JavaWriter out) throws IOException;
   

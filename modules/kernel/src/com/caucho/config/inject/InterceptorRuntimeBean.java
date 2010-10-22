@@ -66,7 +66,10 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
   private InterceptorRuntimeBean<X> _child;
 
   private Method _aroundInvoke;
+  
   private Method _postConstruct;
+  private boolean _isPostConstructOverride;
+  
   private Method _preDestroy;
   private Method _prePassivate;
   private Method _postActivate;
@@ -110,6 +113,14 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
   public InterceptorRuntimeBean<?> getParent()
   {
     return _parent;
+  }
+  
+  public boolean isAllowParent(InterceptionType type)
+  {
+    if (_parent == null)
+      return false;
+   
+    return true;
   }
   
   /**
@@ -289,7 +300,7 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
       // XXX:
       if (isAnnotationPresent(method, annMethod, AroundInvoke.class)) {
         Method childMethod 
-          = AnnotatedTypeUtil.findDeclaredMethod(childClass, method);
+        = AnnotatedTypeUtil.findDeclaredMethod(childClass, method);
 
         if (childMethod == null
             || Modifier.isPrivate(childMethod.getModifiers())) {
@@ -299,11 +310,24 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
         }
       }
 
-      if (method.isAnnotationPresent(PostConstruct.class)
-          && (_child == null
-              || ! isMethodMatch(_child._postConstruct, method))) {
-        _postConstruct = method;
-        method.setAccessible(true);
+      if (method.isAnnotationPresent(PostConstruct.class)) {
+        Method childMethod 
+          = AnnotatedTypeUtil.findDeclaredMethod(childClass, method);
+
+        if (_child != null && _child._isPostConstructOverride) {
+          _isPostConstructOverride = true;
+        }
+        else if (childMethod == null) {
+          _postConstruct = method;
+          method.setAccessible(true);
+        }
+        else if (Modifier.isPrivate(childMethod.getModifiers())) {
+          _postConstruct = method;
+          method.setAccessible(true);
+        }
+        else if (_child != null) {
+          _isPostConstructOverride = true;
+        }
       }
 
       if (method.isAnnotationPresent(PreDestroy.class)
@@ -341,48 +365,6 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
       return false;
   }
 
-  private void introspectOverrideMethods(Class<?> cl)
-  {
-    if (cl == null)
-      return;
-    
-    for (Method method : cl.getDeclaredMethods()) {
-      if (Modifier.isStatic(method.getModifiers()))
-        continue;
-
-      if (_aroundInvoke != null
-          && cl != _aroundInvoke.getDeclaringClass()
-          && isMethodMatch(method, _aroundInvoke)) {
-        // ioc/0cb1
-        _aroundInvoke = null;
-      }
-
-      if (_postConstruct != null
-          && cl != _postConstruct.getDeclaringClass()
-          && isMethodMatch(method, _postConstruct)) {
-        _postConstruct = null;
-      }
-
-      if (_preDestroy != null
-          && cl != _preDestroy.getDeclaringClass()
-          && isMethodMatch(method, _preDestroy)) {
-        _preDestroy= null;
-      }
-
-      if (_prePassivate != null
-          && cl != _prePassivate.getDeclaringClass()
-          && isMethodMatch(method, _prePassivate)) {
-        _prePassivate= null;
-      }
-
-      if (_postActivate != null
-          && cl != _postActivate.getDeclaringClass()
-          && isMethodMatch(method, _postActivate)) {
-        _postActivate = null;
-      }
-    }
-  }
-  
   private boolean isMethodMatch(Method a, Method b)
   {
     if (a == b)

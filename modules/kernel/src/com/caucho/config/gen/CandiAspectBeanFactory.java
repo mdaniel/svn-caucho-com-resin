@@ -108,6 +108,15 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   }
   
   /**
+   * Returns the interceptor instance Java reference.
+   */
+  @Override
+  public String getInterceptorInstance()
+  {
+    return getBeanInstance();
+  }
+  
+  /**
    * Returns the bean super reference.
    */
   @Override

@@ -49,6 +49,7 @@ import com.caucho.java.JavaWriter;
 public class SingletonGenerator<X> extends SessionGenerator<X> {
   
   private final AspectBeanFactory<X> _aspectBeanFactory;
+  private final AspectBeanFactory<X> _lifecycleAspectFactory;
 
   public SingletonGenerator(String ejbName, AnnotatedType<X> ejbClass,
                             ArrayList<AnnotatedType<? super X>> localApi,
@@ -61,12 +62,19 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     InjectManager manager = InjectManager.create();
     
     _aspectBeanFactory = new SingletonAspectBeanFactory<X>(manager, getBeanType());
+    _lifecycleAspectFactory = new LifecycleAspectBeanFactory<X>(_aspectBeanFactory, manager, getBeanType());
   }
   
   @Override
   protected AspectBeanFactory<X> getAspectBeanFactory()
   {
     return _aspectBeanFactory;
+  }
+
+  @Override
+  protected AspectBeanFactory<X> getLifecycleAspectFactory()
+  {
+    return _lifecycleAspectFactory;
   }
 
   @Override

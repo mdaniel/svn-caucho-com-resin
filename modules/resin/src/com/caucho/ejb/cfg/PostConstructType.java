@@ -27,19 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.types;
+package com.caucho.ejb.cfg;
 
 import java.lang.reflect.Method;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.util.L10N;
 
 /**
  * Configuration for the init-param pattern.
  */
-public class PostConstructType
+public class PostConstructType<X> extends EjbMethodPattern<X>
 {
   private static L10N L = new L10N(PostConstructType.class);
 
@@ -62,7 +66,31 @@ public class PostConstructType
   {
     _methodName = name;
   }
+  
+  @PostConstruct
+  public void init()
+  {
+    MethodSignature sig = new MethodSignature();
+    sig.setMethodName(_methodName);
+    
+    setSignature(sig);
+  }
+  
+  @Override
+  public boolean isMatch(AnnotatedMethod<?> method)
+  {
+    return method.getJavaMember().getName().equals(_methodName);
+  }
+  
+  @Override
+  public void configure(AnnotatedMethod<?> method)
+  {
+    AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) method;
+    
+    methodImpl.addAnnotation(new PostConstructLiteral());
+  }
 
+  /*
   public ConfigProgram getProgram(Class<?> cl)
   {
     if (cl == null) {
@@ -86,9 +114,10 @@ public class PostConstructType
 
     return getProgram(cl.getSuperclass());
   }
+  */
 
   public String toString()
   {
-    return "PostConstructType[" + _methodName + "]";
+    return getClass().getSimpleName() + "[" + _methodName + "]";
   }
 }

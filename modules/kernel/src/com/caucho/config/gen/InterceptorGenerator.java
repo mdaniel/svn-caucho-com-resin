@@ -243,7 +243,10 @@ public class InterceptorGenerator<X>
       key = "caucho.interceptor.preDestroyName";
     
     _uniqueName = (String) map.get(key);
-   
+    /*
+    if (_uniqueName == null)
+      return;
+   */
     generateBeanPrologue(out, map);
     generateMethodPrologue(out, map);
     
@@ -869,7 +872,7 @@ public class InterceptorGenerator<X>
     
     out.printClass(InterceptionType.class);
     out.println("." + _interceptionType + ", ");
-    out.print(_factory.getAspectBeanFactory().getBeanInstance());
+    out.print(_factory.getAspectBeanFactory().getInterceptorInstance());
 
     out.println(", ");
     // generateThis(out);
@@ -1207,8 +1210,6 @@ public class InterceptorGenerator<X>
 
       apiMap.put(apis, apiName);
     }
-
-    Class<?> decoratorType = apis.get(0);
 
     out.println();
     out.print("public ");
@@ -1696,6 +1697,8 @@ public class InterceptorGenerator<X>
   public void generateTailCall(JavaWriter out, String superVar)
     throws IOException
   {
+    super.generateCall(out);
+    /*
     Method javaMethod = getJavaMethod();
     
     if (Modifier.isStatic(javaMethod.getModifiers()))
@@ -1718,12 +1721,12 @@ public class InterceptorGenerator<X>
     }
 
     out.println(");");
-
+*/
     /*
     // ejb/12b0
     if (! "super".equals(superVar))
       generatePostCall(out);
-    */
+      */
   }
 
   private boolean containsMethod(ArrayList<Method> methodList, Method method)
@@ -1810,11 +1813,14 @@ public class InterceptorGenerator<X>
                                  Class<?>[] paramTypes)
     throws IOException
   {
-    if (_interceptionType == InterceptionType.POST_CONSTRUCT) {
+    if (false && _interceptionType == InterceptionType.POST_CONSTRUCT) {
+      if (methodName.equals("nullMethod"))
+        Thread.dumpStack();
+      
       out.printClass(CandiUtil.class);
       out.print(".getMethod(");
       out.print(_factory.getGeneratedClassName());
-      out.print(".class, \"__caucho_postConstructImpl\");");
+      out.print(".class, \"__caucho_postConstruct_" + methodName + "\");");
     }
     else {
       out.printClass(CandiUtil.class);

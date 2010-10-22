@@ -106,7 +106,10 @@ public class CandiInvocationContext implements InvocationContext {
   public Object[] getParameters()
     throws IllegalStateException
   {
-    return _param;
+    if (_param != null && _param.length > 0)
+      return _param;
+    else
+      throw new IllegalStateException(L.l("No parameters are allowed in this context"));
   }
 
   @Override
@@ -204,8 +207,9 @@ public class CandiInvocationContext implements InvocationContext {
         throw (Exception) cause;
       else
         throw e;
-    }
-    finally {
+    } catch (RuntimeException e) {
+      throw e;
+    } finally {
       if (isTop)
         _contextDataLocal.set(null);
     }

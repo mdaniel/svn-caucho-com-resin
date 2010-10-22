@@ -50,6 +50,12 @@ public class MethodTailGenerator<X> extends NullGenerator<X> {
     _factory = factory;
     _method = method;
   }
+  
+  @Override
+  public AnnotatedMethod<? super X> getMethod()
+  {
+    return _method;
+  }
 
   /**
    * Generates the call to the implementation bean.

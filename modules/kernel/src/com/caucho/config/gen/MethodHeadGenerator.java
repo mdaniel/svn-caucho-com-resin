@@ -49,7 +49,12 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   {
     super(factory, method, next);
   }
-
+  
+  protected String getMethodNamePrefix()
+  {
+    return "";
+  }
+  
   protected boolean isOverride()
   {
     return true;
@@ -72,7 +77,7 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   {
     generateMethodPrologue(out, prologueMap);
     
-    String prefix = "";
+    String prefix = getMethodNamePrefix();
     String suffix = "";
  
     int modifiers = getJavaMethod().getModifiers();
@@ -104,7 +109,7 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
     out.popDepth();
     out.println("}");
   }
-
+  
   @Override
   public boolean equals(Object o)
   {
