@@ -99,13 +99,13 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
 
     String prefix = "";
     String suffix = "";
+    String methodName = prefix + getJavaMethod().getName() + suffix;
 
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
                                        accessModifier, 
-                                       prefix, 
+                                       methodName,
                                        getJavaMethod(),
-                                       suffix, 
                                        getThrowsExceptions());
 
 

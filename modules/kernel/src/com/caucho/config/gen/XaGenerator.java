@@ -342,8 +342,12 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
       case REQUIRES_NEW: {
         out.println("_xa.endRequiresNew(xa);");
         
+        // XXX: ejb30/lite/tx/cm/stateful/annotated/localRequiresNewTest
+        // vs localSystemExceptionTest
+
         out.println("if (! isXAValid)");
         out.println("  _xa.markRollback();");
+
         break;
       }
       }

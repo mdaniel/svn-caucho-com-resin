@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
+package com.caucho.config.gen;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -35,8 +35,6 @@ import java.util.HashMap;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.config.gen.CandiUtil;
-import com.caucho.config.gen.MethodTailGenerator;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -53,7 +51,11 @@ public class LifecycleMethodTailGenerator<X> extends MethodTailGenerator<X>
   {
     super(factory, method);
     
-    _invokeMethodName = "__caucho_postConstruct_" + method.getJavaMember().getName();
+    Method javaMethod = method.getJavaMember();
+    
+    String declName = javaMethod.getDeclaringClass().getSimpleName();
+    String methodName = javaMethod.getName();
+    _invokeMethodName = "__caucho_postConstruct_" + declName + "_" + methodName;
   }
   
   @Override
@@ -74,7 +76,7 @@ public class LifecycleMethodTailGenerator<X> extends MethodTailGenerator<X>
     String methodName = method.getName();
     
     out.println();
-    out.println("public void __caucho_postConstruct_" + methodName + "()");
+    out.println("public void " + _invokeMethodName + "()");
     out.println("{");
     out.pushDepth();
     
@@ -105,7 +107,7 @@ public class LifecycleMethodTailGenerator<X> extends MethodTailGenerator<X>
     Method method = getMethod().getJavaMember();
     String methodName = method.getName();
     
-    out.println("__caucho_postConstruct_" + methodName + "();");
+    out.println(_invokeMethodName + "();");
     /*
     String superVar = _factory.getAspectBeanFactory().getBeanSuper();
  

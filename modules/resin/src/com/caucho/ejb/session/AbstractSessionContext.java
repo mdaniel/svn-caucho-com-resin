@@ -122,6 +122,11 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     return proxy;
   }
   
+  protected SessionProxyFactory<T> getProxyFactory()
+  {
+    return _proxyFactory;
+  }
+  
   public void destroyProxy(T instance, CreationalContextImpl<T> env)
   {
     if (instance instanceof CandiEnhancedBean) {

@@ -286,6 +286,16 @@ public class EjbBean<X> extends DescriptionGroupConfig
     // _removeMethods.add(removeMethod);
     _beanMethodList.add(concurrentMethod);
   }
+  
+  public void addAfterBeginMethod(AfterBeginMethod<X> method)
+  {
+    _beanMethodList.add(method);
+  }
+  
+  public void addBeforeCompletionMethod(BeforeCompletionMethod<X> method)
+  {
+    _beanMethodList.add(method);
+  }
 
   /**
    * Adds a new interceptor.

@@ -39,6 +39,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.inject.Qualifier;
@@ -63,6 +64,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
   private AnnotatedType<X> _beanClass;
 
   private AspectBeanFactory<X> _aspectFactory;
+  private AspectBeanFactory<X> _lifecycleAspectFactory;
 
   private ArrayList<AspectGenerator<X>> _businessMethods
     = new ArrayList<AspectGenerator<X>>();
@@ -93,6 +95,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     _beanClass = beanClass;
     
     _aspectFactory = new CandiAspectBeanFactory<X>(manager, beanClass);
+    _lifecycleAspectFactory = new LifecycleAspectBeanFactory<X>(_aspectFactory, manager, beanClass);
   }
   
   public void setSingleton(boolean isSingleton)
@@ -103,6 +106,11 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
   public ArrayList<AspectGenerator<X>> getBusinessMethods()
   {
     return _businessMethods;
+  }
+  
+  public AspectBeanFactory<X> getLifecycleAspectFactory()
+  {
+    return _lifecycleAspectFactory;
   }
 
   @Override
@@ -127,7 +135,18 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       
       int modifiers = method.getJavaMember().getModifiers();
       
-      if (method.isStatic() || Modifier.isPrivate(modifiers))
+      if (method.isStatic())
+        continue;
+      
+      if (method.isAnnotationPresent(PostConstruct.class)) {
+        AspectGenerator<X> bizMethod = _lifecycleAspectFactory.create(method);
+
+        _businessMethods.add(bizMethod);
+        
+        continue;
+      }
+      
+      if (Modifier.isPrivate(modifiers))
         continue;
 
       boolean isEnhance = false;

@@ -78,6 +78,8 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   private Object _decoratorClass;
   private List<Decorator<?>> _decoratorBeans;
 
+  private Object []_delegates;
+  private Object []_interceptors;
 
   public SingletonManager(EjbManager ejbContainer,
                           String ejbName,
@@ -195,10 +197,10 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
       CandiEnhancedBean bean = (CandiEnhancedBean) proxy;
       
       try {
-        Object []delegates = createDelegates(env);
-        
-        bean.__caucho_inject(delegates, env);
-        
+        if (_delegates == null)
+          _delegates = createDelegates(env);
+
+        _interceptors = bean.__caucho_inject(_delegates, _interceptors, env);
       } catch (Exception e) {
         e.printStackTrace();
         

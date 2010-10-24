@@ -67,6 +67,9 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   private int _sessionIdleMax = 16;
   private int _sessionConcurrentMax = -1;
   private long _sessionConcurrentTimeout = -1;
+  
+  private ThreadLocal<StatelessPool<X,?>> _localSessionPool
+    = new ThreadLocal<StatelessPool<X,?>>();
 
   /**
    * Creates a new stateless server.
@@ -142,6 +145,16 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   public <T> T getLocalProxy(Class<T> api)
   {
     return getSessionContext(api).createProxy(null);
+  }
+  
+  public void setLocalStatelessPool(StatelessPool<X,?> pool)
+  {
+    _localSessionPool.set(pool);
+  }
+  
+  public StatelessPool<X,?> getLocalStatelessPool()
+  {
+    return _localSessionPool.get();
   }
 
   @Override

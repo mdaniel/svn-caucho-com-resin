@@ -163,11 +163,16 @@ public class InterceptorFactory<X>
       = Modifier.isPrivate(method.getJavaMember().getModifiers());
 
     AnnotatedType<?> beanType;
-    
+
+    // XXX: interceptor/singleton/business/annotated
+    // packaging/war/mbean/interceptor/lifecycle
     if (isPrivate)
       beanType = method.getDeclaringType();
     else
       beanType = getBeanType();
+
+    // beanType = method.getDeclaringType();
+    // beanType = getBeanType();
     
     boolean isExcludeClassInterceptors = false;
     

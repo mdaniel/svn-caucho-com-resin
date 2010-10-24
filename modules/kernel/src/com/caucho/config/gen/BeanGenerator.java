@@ -273,13 +273,16 @@ abstract public class BeanGenerator<X> extends GenClass
     throws IOException
   {
     out.println();
-    out.println("public void __caucho_inject(Object []delegates"
+    out.println("public Object []__caucho_inject(Object []delegates"
+                + ", Object []interceptors"
                 + ", com.caucho.config.inject.CreationalContextImpl<?> parentEnv)");
     out.println("{");
     out.pushDepth();
 
     generateInjectContent(out, map);
 
+    out.println("return interceptors;");
+    
     out.popDepth();
     out.println("}");
   }
@@ -312,11 +315,7 @@ abstract public class BeanGenerator<X> extends GenClass
                                        HashMap<String,Object> map)
      throws IOException
   {
-    out.println();
-    out.println("public void __caucho_postConstruct()");
-    out.println("  throws Exception");
-    out.println("{");
-    out.println("}");
+    generatePostConstructImpl(out, map);
   }
   
   protected void generatePostConstructImpl(JavaWriter out, 
@@ -340,7 +339,10 @@ abstract public class BeanGenerator<X> extends GenClass
     = getLifecycleAspects(PostConstruct.class);
     
     for (Method method : postConstructMethods) {
-      out.println("__caucho_lifecycle_" + method.getName() + "();");
+      String declName = method.getDeclaringClass().getSimpleName();
+      String methodName = method.getName();
+      
+      out.println("__caucho_lifecycle_" + declName + "_" + methodName + "();");
     }
  
       

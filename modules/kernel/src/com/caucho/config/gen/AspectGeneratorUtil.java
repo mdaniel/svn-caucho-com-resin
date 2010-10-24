@@ -51,9 +51,8 @@ public class AspectGeneratorUtil {
   public static void generateHeader(JavaWriter out,
                                     boolean isOverride,
                                     String accessModifier,
-                                    String prefix,
+                                    String methodName,
                                     Method method,
-                                    String suffix, 
                                     Class<?> []exnList)
     throws IOException
   {
@@ -69,7 +68,7 @@ public class AspectGeneratorUtil {
 
     out.printClass(method.getReturnType());
     out.print(" ");
-    out.print(prefix + method.getName() + suffix);
+    out.print(methodName);
     out.print("(");
 
     Class<?>[] types = method.getParameterTypes();

@@ -47,11 +47,13 @@ public class InterceptorSelfBean<X> extends InterceptorRuntimeBean<X>
   public InterceptorSelfBean(Class<X> type)
   {
     super(null, type);
-    
+
+    /*
     RuntimeException exn = new RuntimeException("SELFX: " + type);
     exn.fillInStackTrace();
     
     log.log(Level.INFO, exn.toString(), exn);
+    */
   }
 
   @Override
@@ -59,7 +61,6 @@ public class InterceptorSelfBean<X> extends InterceptorRuntimeBean<X>
   {
     return this;
   }
-
  
   //
   // lifecycle

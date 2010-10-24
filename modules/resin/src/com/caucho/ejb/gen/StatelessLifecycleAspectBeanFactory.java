@@ -41,6 +41,7 @@ import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.AsynchronousFactory;
 import com.caucho.config.gen.CandiAspectBeanFactory;
 import com.caucho.config.gen.InterceptorFactory;
+import com.caucho.config.gen.LifecycleAspectBeanFactory;
 import com.caucho.config.gen.LockFactory;
 import com.caucho.config.gen.SecurityFactory;
 import com.caucho.config.gen.XaFactory;

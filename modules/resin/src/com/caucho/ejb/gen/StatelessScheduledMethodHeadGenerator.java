@@ -75,13 +75,14 @@ public class StatelessScheduledMethodHeadGenerator<X>
     String prefix = "__caucho_schedule_";
     String suffix = "";
     String accessModifier = "public";
+    
+    String methodName = prefix + getJavaMethod().getName() + suffix;
 
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
                                        accessModifier, 
-                                       prefix, 
+                                       methodName,
                                        getJavaMethod(), 
-                                       suffix, 
                                        getThrowsExceptions());
 
     out.println("{");

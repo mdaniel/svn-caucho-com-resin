@@ -44,47 +44,35 @@ import com.caucho.util.L10N;
 /**
  * Configuration for remove-method.
  */
-public class ConcurrentMethod<X> extends EjbMethodPattern<X> {
-  private static final L10N L = new L10N(ConcurrentMethod.class);
-  private BeanMethod _beanMethod;
-  private AccessTimeoutLiteral _accessTimeout;
-  private LockType _lock;
+public class BeforeCompletionMethod<X> extends EjbMethodPattern<X> {
+  private static final L10N L = new L10N(BeforeCompletionMethod.class);
+  private String _methodName;
 
-  public ConcurrentMethod()
+  public BeforeCompletionMethod()
   {
   }
 
-  public void setMethod(BeanMethod beanMethod)
+  public void setMethodName(String methodName)
   {
-    _beanMethod = beanMethod;
+    _methodName = methodName;
   }
   
-  public void setAccessTimeout(EjbTimeout timeout)
-  {
-    _accessTimeout = new AccessTimeoutLiteral(timeout.getTimeoutValue());
-  }
-  
-  public void setLock(String lock)
-  {
-    if ("Read".equals(lock))
-      _lock = LockType.READ;
-    else if ("Write".equals(lock))
-      _lock = LockType.WRITE;
-    else
-      throw new ConfigException(L.l("'{0}' is an unknown lock type", lock));
-  }
-
   @PostConstruct
   public void init()
   {
-    setSignature(_beanMethod.getSignature());
+    MethodSignature sig = new MethodSignature();
+    sig.setMethodName(_methodName);
+    
+    setSignature(sig);
   }
   
+  /*
   @Override
   public boolean isMatch(AnnotatedMethod<?> method)
   {
-    return _beanMethod.isMatch(method);
+    return _methodName.equals(method.getJavaMember().getName());
   }
+  */
 
   /**
    * Configures the bean with the override values
@@ -94,13 +82,8 @@ public class ConcurrentMethod<X> extends EjbMethodPattern<X> {
   {
     if (isMatch(method)) {
       AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) method;
-      
-      if (_accessTimeout != null) {
-        methodImpl.addAnnotation(_accessTimeout);
-      }
-      
-      if (_lock != null)
-        methodImpl.addAnnotation(new LockLiteral(_lock));
+
+      methodImpl.addAnnotation(new BeforeCompletionLiteral());
     }
   }
 }

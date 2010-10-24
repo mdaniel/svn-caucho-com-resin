@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.InterceptionType;
@@ -372,7 +373,10 @@ public class InterceptorGenerator<X>
     map.put("interceptor_object_init", true);
 
     out.println("int size = __caucho_interceptor_beans.size();");
-    out.println("Object []objects = new Object[size];");
+    
+    out.println("if (interceptors == null) {");
+    out.pushDepth();
+    out.println("interceptors = new Object[size];");
 
     out.println();
     // XXX: should be parent bean
@@ -387,23 +391,26 @@ public class InterceptorGenerator<X>
     out.println("javax.enterprise.context.spi.CreationalContext env");
     out.println("  = new " + DependentCreationalContext.class.getName() + "(bean, parentEnv, null);");
     
-    out.print("objects[i] = ");
+    out.print("interceptors[i] = ");
     out.println("__caucho_manager.getReference(bean, bean.getBeanClass(), env);");
 
     // ejb/6032
-    out.print("if (objects[i] == null && (bean instanceof ");
+    out.print("if (interceptors[i] == null && (bean instanceof ");
     out.printClass(InterceptorSelfBean.class);
     out.println("))");
-    out.print("  objects[i] = ");
+    out.print("  interceptors[i] = ");
     out.print(getBeanFactory().getBeanInstance());
     out.println(";");
 
-    out.println("else if (objects[i] == null)");
+    out.println("else if (interceptors[i] == null)");
     out.println("  throw new NullPointerException(String.valueOf(bean));");
     out.popDepth();
     out.println("}");
     
-    out.println("__caucho_interceptor_objects = objects;");
+    out.popDepth();
+    out.println("}");
+    
+    out.println("__caucho_interceptor_objects = interceptors;");
 
     for (Class<?> iClass : _ownInterceptors) {
       String var = _interceptorVarMap.get(iClass);
@@ -894,7 +901,11 @@ public class InterceptorGenerator<X>
     Class<?>[] paramTypes
       = (javaMethod != null ? javaMethod.getParameterTypes() : null);
 
-    if (paramTypes == null || paramTypes.length == 0) {
+    if (getMethod() == null
+        || getMethod().isAnnotationPresent(PostConstruct.class)) {
+      out.println("null");
+    }
+    else if (paramTypes == null || paramTypes.length == 0) {
       out.println("com.caucho.config.gen.CandiUtil.NULL_OBJECT_ARRAY");
     }
     else {

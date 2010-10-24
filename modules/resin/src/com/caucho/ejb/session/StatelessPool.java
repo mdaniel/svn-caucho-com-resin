@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.session;
 
-import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -125,12 +124,11 @@ public class StatelessPool<X,T> {
     
       if (beanItem == null) {
         CreationalContextImpl<X> env = new OwnerCreationalContext<X>(_manager.getBean());
-        
         Object []bindings;
+
+        X instance = _context.newInstance(env);
         
         bindings = _manager.getInterceptorBindings(_interceptorBeans, env);
-        
-        X instance = _context.newInstance(env);
                
         if (instance instanceof SessionBean) {
           try {
@@ -158,6 +156,8 @@ public class StatelessPool<X,T> {
       }
       
       isValid = true;
+      
+      _manager.setLocalStatelessPool(this);
     
       return beanItem;
     } finally {
@@ -177,6 +177,8 @@ public class StatelessPool<X,T> {
     if (semaphore != null)
       semaphore.release();
     
+    _manager.setLocalStatelessPool(null);
+    
     if (! _freeList.free(beanItem)) {
       destroyImpl(beanItem);
     }
@@ -191,6 +193,8 @@ public class StatelessPool<X,T> {
     if (semaphore != null)
       semaphore.release();
     
+    _manager.setLocalStatelessPool(null);
+    
     destroyImpl(beanItem);
   }
   
@@ -202,6 +206,11 @@ public class StatelessPool<X,T> {
     Semaphore semaphore = _concurrentSemaphore;
     if (semaphore != null)
       semaphore.release();
+  }
+  
+  public Class<?> getLocalApi()
+  {
+    return _context.getApi();
   }
   
   private void destroyImpl(Item<X> beanItem)

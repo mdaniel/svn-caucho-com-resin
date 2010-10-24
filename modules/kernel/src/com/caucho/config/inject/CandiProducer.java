@@ -202,7 +202,9 @@ public class CandiProducer<X> implements InjectionTarget<X>
       if (value instanceof CandiEnhancedBean) {
         CandiEnhancedBean enhancedBean = (CandiEnhancedBean) value;
         
-        enhancedBean.__caucho_inject(delegates, env);
+        Object []interceptors = null;
+        
+        enhancedBean.__caucho_inject(delegates, interceptors, env);
       }
 
       return value;

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
+package com.caucho.config.gen;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,15 +35,6 @@ import java.util.HashMap;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.gen.AspectBeanFactory;
-import com.caucho.config.gen.AspectFactory;
-import com.caucho.config.gen.AspectGenerator;
-import com.caucho.config.gen.AsynchronousFactory;
-import com.caucho.config.gen.CandiAspectBeanFactory;
-import com.caucho.config.gen.InterceptorFactory;
-import com.caucho.config.gen.LockFactory;
-import com.caucho.config.gen.SecurityFactory;
-import com.caucho.config.gen.XaFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;

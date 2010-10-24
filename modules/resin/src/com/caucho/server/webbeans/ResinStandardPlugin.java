@@ -219,8 +219,8 @@ public class ResinStandardPlugin implements Extension {
 
       HempBroker broker = HempBroker.getCurrent();
 
-      broker.addStartupActor(event.getBean(), service.name(), service
-          .threadMax());
+      broker.addStartupActor(event.getBean(), service.name(), 
+                             service.threadMax());
     }
 
     if (annotated.isAnnotationPresent(AdminService.class)) {
@@ -236,8 +236,8 @@ public class ResinStandardPlugin implements Extension {
       if (!server.isWatchdog()) {
         HempBroker broker = (HempBroker) server.getAdminBroker();
 
-        broker.addStartupActor(event.getBean(), service.name(), service
-            .threadMax());
+        broker.addStartupActor(event.getBean(), service.name(), 
+                               service.threadMax());
       }
     }
   }

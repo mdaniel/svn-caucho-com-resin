@@ -162,6 +162,22 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     return null;
   }
   
+  @SuppressWarnings("unchecked")
+  public
+  static <X> X findAny(CreationalContextImpl<?> ptr, Class<X> type)
+  {
+    if (ptr == null)
+      return null;
+    
+    for (ptr = ptr.getOwner(); ptr != null; ptr = ptr.getNext()) {
+      if (ptr._value != null && type.isAssignableFrom(ptr._value.getClass())) {
+        return (X) ptr._value;
+      }
+    }
+
+    return null;
+  }
+ 
   public static Object findByName(CreationalContextImpl<?> ptr, String name)
   {
     for (; ptr != null; ptr = ptr._parent) {

@@ -273,7 +273,7 @@ public class EjbInjectionTarget<T> {
       = new DependentCreationalContext<T>(_bean, parentEnv, null);
     
     instance = _injectionTarget.produce(env);
-    
+
     _injectionTarget.inject(instance, env);
     
     postConstruct(instance);

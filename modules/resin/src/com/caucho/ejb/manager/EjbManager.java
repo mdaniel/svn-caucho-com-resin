@@ -536,11 +536,49 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     
     InjectManager.create().bind();
     
-    for (AbstractEjbBeanManager<?> server : _serverList) {
-      server.bind();
+    for (AbstractEjbBeanManager<?> manager : sortManagers()) {
+      manager.bind();
     }
   }
+  
+  private ArrayList<AbstractEjbBeanManager<?>> sortManagers()
+  {
+    
+    ArrayList<AbstractEjbBeanManager<?>> serverList
+    = new ArrayList<AbstractEjbBeanManager<?>>(_serverList);
+    
+    ArrayList<AbstractEjbBeanManager<?>> bindList
+    = new ArrayList<AbstractEjbBeanManager<?>>();
+    
+    AbstractEjbBeanManager<?> server;
+    
+    while ((server = nextBindServer(serverList, bindList)) != null) {
+    }
+    
+    return bindList;
+  }
+  
+  private AbstractEjbBeanManager<?> 
+  nextBindServer(ArrayList<AbstractEjbBeanManager<?>> serverList,
+                 ArrayList<AbstractEjbBeanManager<?>> bindList)
+  {
+    if (serverList.size() == 0)
+      return null;
 
+    for (AbstractEjbBeanManager<?> server : serverList) {
+      if (server.isDependValid(bindList)) {
+        serverList.remove(server);
+        bindList.add(server);
+      
+        return server;
+      }
+    }
+    
+    AbstractEjbBeanManager<?> server = serverList.remove(0);
+    bindList.add(server);
+    return server;
+  }
+  
   public void start() throws ConfigException
   {
     try {
@@ -551,7 +589,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
 
-      for (AbstractEjbBeanManager<?> server : _serverList) {
+      for (AbstractEjbBeanManager<?> server : sortManagers()) {
         try {
           thread.setContextClassLoader(server.getClassLoader());
 

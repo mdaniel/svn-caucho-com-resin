@@ -180,6 +180,7 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
   public void generatePostCall(JavaWriter out) throws IOException
   {
     out.println("isValid = true;");
+    super.generatePostCall(out);
   }
 
   /**

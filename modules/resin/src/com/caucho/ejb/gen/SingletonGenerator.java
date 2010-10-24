@@ -38,6 +38,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.CandiEnhancedBean;
+import com.caucho.config.gen.LifecycleAspectBeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;

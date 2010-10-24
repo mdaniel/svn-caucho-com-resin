@@ -231,8 +231,9 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
       CandiEnhancedBean bean = (CandiEnhancedBean) instance;
       
       Object []delegates = createDelegates(env);
+      Object []interceptors = null;
       
-      bean.__caucho_inject(delegates, env);
+      bean.__caucho_inject(delegates, interceptors, env);
       
       try {
         bean.__caucho_postConstruct();

@@ -19,41 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
+package com.caucho.ejb.cfg;
 
-import javax.enterprise.inject.spi.AnnotatedMethod;
-
-import com.caucho.config.gen.AspectFactory;
-import com.caucho.config.gen.AspectGenerator;
-import com.caucho.config.gen.MethodHeadFactory;
-import com.caucho.inject.Module;
+import javax.ejb.BeforeCompletion;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * Represents a lifecycle method
+ * <pre>
+ * @BeforeCompletion
+ * </pre>            
  */
-@Module
-public class LifecycleMethodHeadFactory<X> extends MethodHeadFactory<X>
+public class BeforeCompletionLiteral extends AnnotationLiteral<BeforeCompletion>
+  implements BeforeCompletion
 {
-  public LifecycleMethodHeadFactory(LifecycleAspectBeanFactory<X> beanFactory,
-                                    AspectFactory<X> next)
-  {
-    super(beanFactory, next);
-  }
-  
-  @Override
-  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
-                                   boolean isEnhanced)
-  {
-    AspectGenerator<X> next = super.create(method, true);
-    
-    return new LifecycleMethodHeadGenerator<X>(this, method, next);
-  }
 }

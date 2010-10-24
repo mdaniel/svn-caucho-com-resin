@@ -183,7 +183,9 @@ public class InterceptorBean<X> extends InterceptorRuntimeBean<X>
   @Override
   public X create(CreationalContext<X> creationalContext)
   {
-    return _bean.create(creationalContext);
+    X instance = _bean.create(creationalContext);
+    
+    return instance;
   }
 
   /**

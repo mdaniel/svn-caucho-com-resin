@@ -29,6 +29,7 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
@@ -53,6 +54,11 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   protected String getMethodNamePrefix()
   {
     return "";
+  }
+  
+  protected String getMethodName()
+  {
+    return getMethodNamePrefix() + getJavaMethod().getName();
   }
   
   protected boolean isOverride()
@@ -96,9 +102,8 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
                                        accessModifier, 
-                                       prefix, 
+                                       getMethodName(),
                                        getJavaMethod(), 
-                                       suffix, 
                                        getThrowsExceptions());
 
     out.println("{");
@@ -111,6 +116,12 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   }
   
   @Override
+  public int hashCode()
+  {
+    return getJavaMethod().getName().hashCode();
+  }
+  
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)
@@ -119,7 +130,11 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
       return false;
 
     MethodHeadGenerator<?> bizMethod = (MethodHeadGenerator<?>) o;
+    
+    Method aMethod = getJavaMethod();
+    Method bMethod = bizMethod.getJavaMethod();
 
-    return AnnotatedTypeUtil.isMatch(getJavaMethod(), bizMethod.getJavaMethod());
+    return (AnnotatedTypeUtil.isMatch(aMethod, bMethod)
+            && aMethod.getDeclaringClass().equals(bMethod.getDeclaringClass()));
   }
 }

@@ -27,13 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
+package com.caucho.config.gen;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.config.gen.AspectBeanFactory;
-import com.caucho.config.gen.AspectGenerator;
-import com.caucho.config.gen.MethodTailFactory;
 import com.caucho.inject.Module;
 
 /**

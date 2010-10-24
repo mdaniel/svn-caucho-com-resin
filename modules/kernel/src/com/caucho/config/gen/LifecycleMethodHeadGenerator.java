@@ -27,16 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
+package com.caucho.config.gen;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.config.gen.AspectGenerator;
-import com.caucho.config.gen.MethodHeadGenerator;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -58,6 +57,17 @@ public class LifecycleMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
     return "__caucho_lifecycle_";
   }
   
+  public String getMethodName()
+  {
+    Method method = getMethod().getJavaMember();
+    
+    String methodDeclName = method.getDeclaringClass().getSimpleName();
+    String methodBaseName = method.getName();
+    String methodName = getMethodNamePrefix() + methodDeclName + "_" + methodBaseName;
+
+    return methodName;
+  }
+  
   @Override
   protected boolean isOverride()
   {
@@ -74,9 +84,7 @@ public class LifecycleMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
   public void generatePostConstruct(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
-    String methodBaseName = getMethod().getJavaMember().getName();
-    String methodName = getMethodNamePrefix() + methodBaseName;
     
-    out.println(methodName + "();");
+    out.println(getMethodName() + "();");
   }
 }

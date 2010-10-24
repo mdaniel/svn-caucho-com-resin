@@ -34,6 +34,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import javax.ejb.DependsOn;
 import javax.ejb.Startup;
 import javax.ejb.Stateless;
 import javax.enterprise.context.spi.CreationalContext;
@@ -64,6 +65,7 @@ import com.caucho.config.inject.ScheduleBean;
 import com.caucho.config.inject.SingletonHandle;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 /**
@@ -72,6 +74,8 @@ import com.caucho.vfs.Path;
 @Module
 public class XmlStandardPlugin implements Extension
 {
+  private static final L10N L = new L10N(XmlStandardPlugin.class);
+  
   private static final String SCHEMA = "com/caucho/config/cfg/resin-beans.rnc";
 
   private InjectManager _cdiManager;
@@ -82,7 +86,7 @@ public class XmlStandardPlugin implements Extension
 
   private ArrayList<BeansConfig> _pendingBeans = new ArrayList<BeansConfig>();
 
-  private ArrayList<Bean<?>> _pendingService = new ArrayList<Bean<?>>();
+  private ArrayList<StartupItem> _pendingService = new ArrayList<StartupItem>();
 
   private Throwable _configException;
 
@@ -226,16 +230,22 @@ public class XmlStandardPlugin implements Extension
     Bean<?> bean = event.getBean();
     
     if (isStartup(annotated)) {
-      _pendingService.add(bean);
+      _pendingService.add(new StartupItem(bean, annotated));
     }
   }
 
   public void processAfterValidation(@Observes AfterDeploymentValidation event)
   {
-    ArrayList<Bean<?>> startupBeans = new ArrayList<Bean<?>>(_pendingService);
+    ArrayList<StartupItem> startupBeans
+      = new ArrayList<StartupItem>(_pendingService);
+    
     _pendingService.clear();
     
-    for (Bean<?> bean : startupBeans) {
+    ArrayList<Bean<?>> runningBeans = new ArrayList<Bean<?>>();
+    
+    Bean<?> bean;
+    
+    while ((bean = nextStartup(startupBeans, runningBeans)) != null) {
       CreationalContext<?> env = _cdiManager.createCreationalContext(bean);
 
       Object value = _cdiManager.getReference(bean, bean.getBeanClass(), env);
@@ -253,6 +263,52 @@ public class XmlStandardPlugin implements Extension
         ((HandleAware) value).setSerializationHandle(new SingletonHandle(id));
       }
     }
+  }
+  
+  private Bean<?> nextStartup(ArrayList<StartupItem> startupBeans,
+                              ArrayList<Bean<?>> runningBeans)
+  {
+    if (startupBeans.size() == 0)
+      return null;
+    
+    for (StartupItem item : startupBeans) {
+      Bean<?> bean = item.getBean();
+      
+      DependsOn dependsOn = item.getAnnotated().getAnnotation(DependsOn.class);
+      
+      if (dependsOn == null || isStarted(runningBeans, dependsOn)) {
+        startupBeans.remove(item);
+        runningBeans.add(bean);
+      
+        return bean;
+      }
+    }
+    
+    throw new ConfigException(L.l("Dependency circularity {0}",
+                                  startupBeans));
+  }
+  
+  private boolean isStarted(ArrayList<Bean<?>> runningBeans, DependsOn depends)
+  {
+    for (String dep : depends.value()) {
+      if (! isStarted(runningBeans, dep))
+        return false;
+    }
+    
+    return true;
+  }
+  
+  private boolean isStarted(ArrayList<Bean<?>> runningBeans, String dep)
+  {
+    for (Bean<?> bean : runningBeans) {
+      String name = bean.getName();
+      String className = bean.getBeanClass().getSimpleName();
+      
+      if (dep.equals(name) || dep.equals(className))
+        return true;
+    }
+    
+    return false;
   }
 
   private boolean isStartup(Annotated annotated)
@@ -290,5 +346,26 @@ public class XmlStandardPlugin implements Extension
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+  
+  static class StartupItem {
+    private Bean<?> _bean;
+    private Annotated _annotated;
+    
+    public StartupItem(Bean<?> bean, Annotated annotated)
+    {
+      _bean = bean;
+      _annotated = annotated;
+    }
+    
+    public Bean<?> getBean()
+    {
+      return _bean;
+    }
+    
+    public Annotated getAnnotated()
+    {
+      return _annotated;
+    }
   }
 }

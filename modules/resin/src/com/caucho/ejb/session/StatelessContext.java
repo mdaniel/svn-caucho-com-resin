@@ -52,6 +52,17 @@ public class StatelessContext<X,T> extends AbstractSessionContext<X,T> {
     return (StatelessManager<X>) super.getServer();
   }
   
+  @Override
+  public Class<?> getInvokedBusinessInterface()
+  {
+    StatelessPool<X,?> pool = getServer().getLocalStatelessPool();
+    
+    if (pool != null)
+      return pool.getLocalApi();
+    else
+      return super.getInvokedBusinessInterface();
+  }
+  
   /**
    * Returns the timer service.
    */

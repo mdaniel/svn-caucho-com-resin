@@ -38,6 +38,7 @@ import javax.ejb.Stateful;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectBeanFactory;
+import com.caucho.config.gen.LifecycleAspectBeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.session.StatefulHandle;
 import com.caucho.inject.Module;

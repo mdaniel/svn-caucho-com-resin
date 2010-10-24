@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.DependsOn;
 import javax.ejb.FinderException;
 import javax.ejb.Timer;
 import javax.ejb.TimerService;
@@ -360,6 +361,36 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   public String encodeId(Object primaryKey)
   {
     return String.valueOf(primaryKey);
+  }
+
+  /**
+   * @param bindList
+   * @return
+   */
+  public boolean isDependValid(ArrayList<AbstractEjbBeanManager<?>> bindList)
+  {
+    DependsOn dependsOn = getAnnotatedType().getAnnotation(DependsOn.class);
+    
+    if (dependsOn == null)
+      return true;
+    
+    for (String dep : dependsOn.value()) {
+      if (! isStarted(dep, bindList))
+        return false;
+    }
+    
+    return true;
+  }
+  
+  private boolean isStarted(String dep, 
+                            ArrayList<AbstractEjbBeanManager<?>> bindList)
+  {
+    for (AbstractEjbBeanManager<?> manager : bindList) {
+      if (dep.equals(manager.getEJBName()))
+        return true;
+    }
+    
+    return false;
   }
 
   /**

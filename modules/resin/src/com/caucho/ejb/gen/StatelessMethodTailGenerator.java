@@ -72,6 +72,8 @@ public class StatelessMethodTailGenerator<X> extends MethodTailGenerator<X>
   {
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
+    
+    out.println("thread.setContextClassLoader(_manager.getClassLoader());");
 
     super.generatePreTry(out);
 
