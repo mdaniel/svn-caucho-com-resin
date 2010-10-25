@@ -31,11 +31,13 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.ejb.SessionSynchronization;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.transaction.Synchronization;
 
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -60,6 +62,9 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
     _transactionType = xa;
 
     _isContainerManaged = ! isBeanManaged;
+    Class<?> javaClass = factory.getBeanType().getJavaClass();
+    
+    _isSessionSynchronization = SessionSynchronization.class.isAssignableFrom(javaClass);
   }
 
   /**
@@ -195,7 +200,13 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
 
     if (_isContainerManaged && _isSessionSynchronization) {
       out.print("_xa.registerSynchronization(");
-      // XXX: getBusinessMethod().generateThis(out);
+      out.print(getBeanFactory().getBeanInstance());
+      out.println(");");
+    }
+    
+    if (_isContainerManaged && getBeanType().isAnnotationPresent(XaCallback.class)) {
+      out.print("_xa.registerSynchronization(");
+      out.print("new __caucho_synchronization()");
       out.println(");");
     }
 

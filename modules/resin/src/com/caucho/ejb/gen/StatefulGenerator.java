@@ -30,15 +30,25 @@
 package com.caucho.ejb.gen;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.ejb.AfterBegin;
+import javax.ejb.AfterCompletion;
+import javax.ejb.BeforeCompletion;
+import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.Stateful;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectBeanFactory;
+import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.gen.LifecycleAspectBeanFactory;
+import com.caucho.config.gen.XaCallback;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.session.StatefulHandle;
 import com.caucho.inject.Module;
@@ -227,6 +237,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     generateBeanPrologue(out, map);
 
     generateBusinessMethods(out, map);
+    
+    generateXa(out, map);
 
     generateEpilogue(out, map);
     generateInject(out, map);
@@ -347,6 +359,159 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
 
     out.println("_manager.destroy(_bean, env);");
     out.println("_bean = null;");
+  }
+
+  public void generateXa(JavaWriter out, HashMap<String, Object> map)
+      throws IOException
+  {
+    AnnotatedType<X> beanType = getBeanType();
+    
+    if (! beanType.isAnnotationPresent(XaCallback.class)) {
+      return;
+    }
+    
+    generateXaCallbackReflection(out);
+    
+    out.println("class __caucho_synchronization");
+    out.println("  implements javax.ejb.SessionSynchronization {");
+    out.pushDepth();
+    
+    out.println("Object _syncBean = _bean;");
+    
+    out.println("@Override");
+    out.println("public void afterBegin()");
+    out.println("  throws javax.ejb.EJBException, java.rmi.RemoteException");
+    out.println("{");
+    out.pushDepth();
+    
+    generateXaCallbackMethods(out, AfterBegin.class);
+    
+    out.popDepth();
+    out.println("}");
+    
+    out.println("@Override");
+    out.println("public void beforeCompletion()");
+    out.println("  throws javax.ejb.EJBException, java.rmi.RemoteException");
+    out.println("{");
+    out.pushDepth();
+    
+    generateXaCallbackMethods(out, BeforeCompletion.class);
+    
+    out.popDepth();
+    out.println("}");
+    
+    out.println("@Override");
+    out.println("public void afterCompletion(boolean isCommitted)");
+    out.println("  throws javax.ejb.EJBException, java.rmi.RemoteException");
+    out.println("{");
+    out.pushDepth();
+    
+    generateXaAfterCompletion(out, AfterCompletion.class);
+
+    out.popDepth();
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+  }
+  
+  private void generateXaCallbackMethods(JavaWriter out,
+                                         Class<? extends Annotation> annType)
+    throws IOException
+  {
+    for (AnnotatedMethod<?> m : getBeanType().getMethods()) {
+      if (! m.isAnnotationPresent(annType))
+        continue;
+      
+      Method javaMethod = m.getJavaMember();
+      Class<?> declClass = javaMethod.getDeclaringClass();
+      
+      out.println("try {");
+      out.pushDepth();
+      
+      String name = ("__caucho_xa_" +  declClass.getSimpleName()
+                     + "_" + javaMethod.getName());
+      
+      out.println(name + ".invoke(_syncBean);");
+
+      out.popDepth();
+      out.println("} catch (RuntimeException e) {");
+      out.println("  throw e;");
+      out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
+      out.println("  if (e.getCause() instanceof RuntimeException)");
+      out.println("    throw (RuntimeException) e.getCause();");
+      out.println("  else");
+      out.println("    throw new javax.ejb.EJBException(e);");
+      out.println("} catch (Exception e) {");
+      out.println("  throw new javax.ejb.EJBException(e);");
+      out.println("}");
+    }
+  }
+  
+  private void generateXaCallbackReflection(JavaWriter out)
+    throws IOException
+  {
+    for (AnnotatedMethod<?> m : getBeanType().getMethods()) {
+      if (! m.isAnnotationPresent(AfterBegin.class)
+          && ! m.isAnnotationPresent(BeforeCompletion.class)
+          && ! m.isAnnotationPresent(AfterCompletion.class)) {
+        continue;
+      }
+      
+      Method javaMethod = m.getJavaMember();
+      Class<?> declClass = javaMethod.getDeclaringClass();
+      
+      String name = ("__caucho_xa_" +  declClass.getSimpleName()
+                     + "_" + javaMethod.getName());
+   
+      out.print("static final java.lang.reflect.Method");
+      out.println("  " + name);
+      out.print("  = " + CandiUtil.class.getName() + ".findAccessibleMethod(");
+      out.print(declClass.getName() + ".class");
+      out.print(", \"" + javaMethod.getName() + "\"");
+      
+      for (Class<?> param : javaMethod.getParameterTypes()) {
+        out.print(", ");
+        out.printClass(param);
+        out.print(".class");
+      }
+      
+      out.println(");");
+    }
+  }
+  
+  private void generateXaAfterCompletion(JavaWriter out,
+                                         Class<? extends Annotation> annType)
+    throws IOException
+  {
+    for (AnnotatedMethod<?> m : getBeanType().getMethods()) {
+      if (! m.isAnnotationPresent(annType))
+        continue;
+      
+      
+      Method javaMethod = m.getJavaMember();
+      Class<?> declClass = javaMethod.getDeclaringClass();
+      
+      out.println("try {");
+      out.pushDepth();
+      
+      String name = ("__caucho_xa_" +  declClass.getSimpleName()
+                     + "_" + javaMethod.getName());
+      
+      out.println(name + ".invoke(_syncBean, isCommitted);");
+      
+      out.popDepth();
+      out.println("} catch (RuntimeException e) {");
+      out.println("  throw e;");
+      out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
+      out.println("  if (e.getCause() instanceof RuntimeException)");
+      out.println("    throw (RuntimeException) e.getCause();");
+      out.println("  else");
+      out.println("    throw new javax.ejb.EJBException(e);");
+      out.println("} catch (Exception e) {");
+      out.println("  throw new javax.ejb.EJBException(e);");
+      out.println("}");
+    }
   }
 
   private void generateSerialization(JavaWriter out) throws IOException

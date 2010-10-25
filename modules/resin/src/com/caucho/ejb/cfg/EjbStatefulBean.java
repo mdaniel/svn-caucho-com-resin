@@ -31,9 +31,14 @@ package com.caucho.ejb.cfg;
 
 import java.lang.annotation.Annotation;
 
+import javax.ejb.AfterBegin;
+import javax.ejb.AfterCompletion;
+import javax.ejb.BeforeCompletion;
 import javax.ejb.Stateful;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.gen.XaCallbackLiteral;
 import com.caucho.inject.Module;
 
 /**
@@ -63,5 +68,20 @@ public class EjbStatefulBean<X> extends EjbSessionBean<X> {
   public String getEJBKind()
   {
     return "stateful";
+  }
+  
+  @Override
+  public void initIntrospect()
+  {
+    super.initIntrospect();
+    
+    for (AnnotatedMethod<?> m : getAnnotatedType().getMethods()) {
+      if (m.isAnnotationPresent(AfterBegin.class)
+          || m.isAnnotationPresent(BeforeCompletion.class)
+          || m.isAnnotationPresent(AfterCompletion.class)) {
+        getAnnotatedType().addAnnotation(new XaCallbackLiteral());
+        
+      }
+    }
   }
 }

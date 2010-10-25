@@ -329,7 +329,19 @@ public class CandiUtil {
     
     return null;
   }
-
+  
+  public static Method findAccessibleMethod(Class<?> cl,
+                                            String methodName,
+                                            Class<?> ...paramTypes)
+  {
+    Method method = findMethod(cl, methodName, paramTypes);
+    
+    if (method != null)
+      method.setAccessible(true);
+    
+    return method;
+  }
+    
   public static Object []generateProxyDelegate(InjectManager manager,
                                                List<Decorator<?>> beans,
                                                Object delegateProxy,
