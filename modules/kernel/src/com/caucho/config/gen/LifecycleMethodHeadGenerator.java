@@ -74,11 +74,13 @@ public class LifecycleMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
     return false;
   }
   
+  /*
   @Override
   protected Class<?> []getThrowsExceptions()
   {
     return new Class<?>[] { Exception.class };
   }
+  */
   
   @Override
   public void generatePostConstruct(JavaWriter out, HashMap<String,Object> map)

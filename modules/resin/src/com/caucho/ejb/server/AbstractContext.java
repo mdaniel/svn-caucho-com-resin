@@ -246,10 +246,10 @@ abstract public class AbstractContext<X> implements EJBContext {
     TransactionImpl xa = TransactionManagerImpl.getLocal().getCurrent();
 
     if (xa == null || xa.getStatus() == Status.STATUS_NO_TRANSACTION)
-      throw new IllegalStateException(L.l("setRollbackOnly() called with no active transaction."));
+      throw new IllegalStateException(L.l("getRollbackOnly() called with no active transaction."));
     
     if (Boolean.FALSE.equals(xa.getAttribute("allowRollback")))
-      throw new IllegalStateException(L.l("setRollbackOnly() called in forbidden context"));
+      throw new IllegalStateException(L.l("getRollbackOnly() called in forbidden context"));
     
     return xa.isRollbackOnly();
   }

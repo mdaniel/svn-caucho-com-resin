@@ -28,19 +28,15 @@
 
 package com.caucho.ejb.session;
 
-import java.util.logging.Logger;
-
 import javax.ejb.TimerService;
 
+import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.inject.CreationalContextImpl;
 
 /**
  * Abstract base class for an session context
  */
 public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
-  private static final Logger log
-    = Logger.getLogger(SingletonContext.class.getName());
-  
   private T _proxy;
   
   public SingletonContext(SingletonManager<X> manager,
@@ -83,5 +79,20 @@ public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
     throws IllegalStateException
   {
     throw new IllegalStateException("Singleton session beans cannot call SessionContext.getTimerService()");
+  }
+  
+  @Override
+  public void destroy() throws Exception
+  {
+    super.destroy();
+    
+    T proxy = _proxy;
+    _proxy = null;
+    
+    if (proxy instanceof CandiEnhancedBean) {
+      CandiEnhancedBean bean = (CandiEnhancedBean) proxy;
+
+      bean.__caucho_destroy(null);
+    }
   }
 }

@@ -633,6 +633,12 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     }
   }
 
+  protected void registerInjection()
+  {
+    _producer.setEnvLoader(_loader);
+    _producer.registerInjection();
+  }
+
   protected void bindInjection()
   {
     _producer.setEnvLoader(_loader);

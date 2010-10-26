@@ -89,7 +89,6 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
     }
     
     getBuilderProgram().configure(ejbBean);
-    
   }
   
   private <T> EjbBean<T> createEjbBean(Class<T> ejbClass)
@@ -103,6 +102,18 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
     String description = null;
     String mappedName = null;
     String moduleName = getEJBModuleName();
+    
+    if (_sessionType == null) {
+      if (ejbClass.isAnnotationPresent(Singleton.class))
+        _sessionType = "Singleton";
+      else if (ejbClass.isAnnotationPresent(Stateless.class))
+        _sessionType = "Stateless";
+      else if (ejbClass.isAnnotationPresent(Stateful.class))
+        _sessionType = "Stateful";
+      else
+        throw new ConfigException(L.l("'{0}' needs a configured session-type",
+                                      ejbClass.getName()));
+    }
 
     if ("Stateless".equals(_sessionType)) {
       Stateless stateless = new StatelessLiteral(name, mappedName, description);

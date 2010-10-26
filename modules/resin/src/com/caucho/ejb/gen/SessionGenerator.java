@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
 import javax.ejb.Schedules;
@@ -255,7 +256,8 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private void introspectImpl()
   {
     for (AnnotatedMethod<? super X> method : getAnnotatedMethods()) {
-      if (method.isAnnotationPresent(PostConstruct.class)) {
+      if (method.isAnnotationPresent(PostConstruct.class)
+          || method.isAnnotationPresent(PreDestroy.class)) {
       }
       else {
         introspectMethodImpl(method);
@@ -266,7 +268,9 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
       if (method.isAnnotationPresent(PostConstruct.class)) {
         // only one post construct
         addPostConstructMethod(method);
-        // break;
+      }
+      else if (method.isAnnotationPresent(PreDestroy.class)) {
+        addPreDestroyMethod(method);
       }
     }
   }
@@ -323,6 +327,18 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   }
   
   protected void addPostConstructMethod(AnnotatedMethod<? super X> method)
+  {
+    if (getLifecycleAspectFactory() == null)
+      return;
+    
+    AspectGenerator<X> initMethod = getLifecycleAspectFactory().create(method);
+      
+    if (initMethod != null && ! _businessMethods.contains(initMethod)) {
+      _businessMethods.add(initMethod);
+    }
+  }
+  
+  protected void addPreDestroyMethod(AnnotatedMethod<? super X> method)
   {
     if (getLifecycleAspectFactory() == null)
       return;

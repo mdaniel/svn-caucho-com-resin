@@ -95,8 +95,19 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
    * Generates the method interception code.
    */
   @Override
-  public void generatePreCall(JavaWriter out) throws IOException
+  public void generatePreTry(JavaWriter out) throws IOException
   {
+    super.generatePreTry(out);
+    
+    out.println("boolean isLocked = false;");
+  }
+
+    /**
+     * Generates the method interception code.
+     */
+    @Override
+    public void generatePreCall(JavaWriter out) throws IOException
+    {
     if (_isContainerManaged && (_lockType != null)) {
       out.println();
 
@@ -127,6 +138,8 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
         break;
       }
     }
+    
+    out.println("isLocked = true;");
 
     super.generatePreCall(out);
   }
@@ -141,16 +154,14 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
       switch (_lockType) {
       case READ:
         out.println();
-        // XXX: This should probably be put behind the lock utility as well,
-            // mostly to maintain code symmetry.
-        out.println("_readWriteLock.readLock().unlock();");
+        out.println("if (isLocked)");
+        out.println("  _readWriteLock.readLock().unlock();");
 
         break;
       case WRITE:
         out.println();
-        // XXX: This should probably be put behind the lock utility as well,
-            // mostly to maintain code symmetry.
-        out.println("_readWriteLock.writeLock().unlock();");
+        out.println("if (isLocked)");
+        out.println("  _readWriteLock.writeLock().unlock();");
         break;
       }
     }

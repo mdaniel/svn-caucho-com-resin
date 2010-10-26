@@ -31,6 +31,7 @@ package com.caucho.ejb.server;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.ejb.TimedObject;
 import javax.ejb.Timeout;
@@ -64,7 +65,8 @@ public class EjbInjectionTarget<T> {
   private Class<T> _ejbClass;
   private AnnotatedType<T> _annotatedType;
   
-  private Bean<T> _bean;
+  private ManagedBeanImpl<T> _bean;
+  private AtomicBoolean _isBind = new AtomicBoolean();
   
   private ClassLoader _envLoader;
   
@@ -181,7 +183,7 @@ public class EjbInjectionTarget<T> {
     return _timeoutMethod;
   }
 
-  public void bindInjection()
+  public void registerInjection()
   {
     if (_bean != null)
       return;
@@ -192,13 +194,12 @@ public class EjbInjectionTarget<T> {
     try {
       thread.setContextClassLoader(_manager.getClassLoader());
       
-      InjectManager beanManager = InjectManager.create();
+      InjectManager cdiManager = InjectManager.create();
 
       ManagedBeanImpl<T> managedBean
-        = beanManager.createManagedBean(_annotatedType);
+        = cdiManager.createManagedBean(_annotatedType);
 
       _bean = managedBean;
-      setInjectionTarget(managedBean.getInjectionTarget());
 
       _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
 
@@ -207,19 +208,36 @@ public class EjbInjectionTarget<T> {
 
       // Injection binding occurs in the start phase
 
-      InjectManager inject = InjectManager.create();
-
-      // server/4751
-      if (_injectionTarget == null) {
-        _injectionTarget = inject.createInjectionTarget(_ejbClass);
-        _injectionTarget.getInjectionPoints();
-      }
-
       // _resourceProgram = _manager.getResourceProgram(_ejbClass);
 
       if (_timerService != null) {
-        BeanBuilder<TimerService> factory = inject.createBeanFactory(TimerService.class);
-        inject.addBean(factory.singleton(_timerService));
+        BeanBuilder<TimerService> factory = cdiManager.createBeanFactory(TimerService.class);
+        cdiManager.addBean(factory.singleton(_timerService));
+      }
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
+  }
+
+  public void bindInjection()
+  {
+    if (! _isBind.compareAndSet(false, true))
+      return;
+    
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(_manager.getClassLoader());
+
+      InjectManager cdiManager= InjectManager.create();
+      
+      setInjectionTarget(_bean.getInjectionTarget());
+
+      // server/4751
+      if (_injectionTarget == null) {
+        _injectionTarget = cdiManager.createInjectionTarget(_ejbClass);
+        _injectionTarget.getInjectionPoints();
       }
     } finally {
       thread.setContextClassLoader(loader);

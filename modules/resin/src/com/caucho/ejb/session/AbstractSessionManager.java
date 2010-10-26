@@ -45,6 +45,7 @@ import java.util.logging.Logger;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.SessionContext;
+import javax.ejb.TimerService;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AnnotatedField;
@@ -200,6 +201,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       super.init();
       
       _injectManager = InjectManager.create();
+      
+      registerInjection();
 
       for (AnnotatedType<? super X> localApi : _lazyGenerator.getLocalApi()) {
         createContext(localApi.getJavaClass());
@@ -282,8 +285,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     InjectManager injectManager = context.getInjectManager();
     
     BeanBuilder<SessionContext> factory
-      = injectManager.createBeanFactory(SessionContext.class);
-  
+    = injectManager.createBeanFactory(SessionContext.class);
+
     context.setDeclaredRoles(_declaredRoles);
 
     // XXX: separate additions?
@@ -300,6 +303,18 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       Jndi.bindDeep("java:comp/" + beanName + "/sessionContext", context);
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
+    }
+    
+    try {
+      TimerService timer = context.getTimerService();
+      
+      BeanBuilder<TimerService> timerBuilder
+        = injectManager.createBeanFactory(TimerService.class);
+      
+      if (injectManager.getBeans(TimerService.class).size() == 0)
+        injectManager.addBean(timerBuilder.singleton(timer));
+    } catch (Exception e) {
+      log.log(Level.ALL, e.toString(), e);
     }
     
     /*

@@ -284,8 +284,14 @@ public class XmlStandardPlugin implements Extension
       }
     }
     
-    throw new ConfigException(L.l("Dependency circularity {0}",
-                                  startupBeans));
+    StringBuilder sb = new StringBuilder();
+    
+    for (StartupItem item : startupBeans) {
+      sb.append("\n  " + item.getBean());
+    }
+    
+    throw new ConfigException(L.l("@DependsOn circularity {0}",
+                                  sb));
   }
   
   private boolean isStarted(ArrayList<Bean<?>> runningBeans, DependsOn depends)

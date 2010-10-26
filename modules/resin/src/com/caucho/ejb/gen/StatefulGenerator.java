@@ -32,14 +32,12 @@ package com.caucho.ejb.gen;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.ejb.AfterBegin;
 import javax.ejb.AfterCompletion;
 import javax.ejb.BeforeCompletion;
-import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.Stateful;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -349,6 +347,17 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     out.println("@Override");
     out.println("public void __caucho_destroy()");
     out.println("{");
+    out.pushDepth();
+    
+    out.println("try {");
+    out.println("  __caucho_preDestroyImpl();");
+    out.println("} catch (RuntimeException e) {");
+    out.println("  throw e;");
+    out.println("} catch (Exception e) {");
+    out.println("  throw new RuntimeException(e);");
+    out.println("}");
+    
+    out.popDepth();
     out.println("}");
   }
 

@@ -194,10 +194,10 @@ abstract public class BeanGenerator<X> extends GenClass
     out.println("public void __caucho_destroy(com.caucho.config.inject.CreationalContextImpl env)");
     out.println("{");
     out.pushDepth();
-
-    generateDestroyImpl(out);
     
     out.println("__caucho_preDestroy();");
+
+    generateDestroyImpl(out);
 
     out.popDepth();
     out.println("}");
@@ -336,8 +336,8 @@ abstract public class BeanGenerator<X> extends GenClass
     */
     
     ArrayList<Method> postConstructMethods 
-    = getLifecycleAspects(PostConstruct.class);
-    
+      = getLifecycleAspects(PostConstruct.class);
+
     for (Method method : postConstructMethods) {
       String declName = method.getDeclaringClass().getSimpleName();
       String methodName = method.getName();
@@ -368,18 +368,30 @@ abstract public class BeanGenerator<X> extends GenClass
                                   HashMap<String,Object> map)
      throws IOException
   {
-    ArrayList<Method> preDestroyMethods = getLifecycleMethods(PreDestroy.class);
+    ArrayList<Method> preDestroyMethods = getLifecycleAspects(PreDestroy.class);
     
     out.println();
     out.println("public void __caucho_preDestroy()");
     out.println("{");
     out.pushDepth();
 
+    for (Method method : preDestroyMethods) {
+      String declName = method.getDeclaringClass().getSimpleName();
+      String methodName = method.getName();
+      
+      out.println("__caucho_lifecycle_" + declName + "_" + methodName + "();");
+    }
+ 
+      
+    // getAspectBeanFactory().generatePostConstruct(out, map);
+
+    /*
     for (AspectGenerator<X> method : getMethods()) {
       method.generatePreDestroy(out, map);
     }
      
     getAspectBeanFactory().generatePreDestroy(out, map);
+    */
 
     out.popDepth();
     out.println("}");
@@ -387,7 +399,7 @@ abstract public class BeanGenerator<X> extends GenClass
     generateLifecycleMethodReflection(out, preDestroyMethods, "preDestroy");
     
     out.println();
-    out.println("private void __caucho_preDestroyImplConstructImpl()");
+    out.println("private void __caucho_preDestroyImpl()");
     out.println("  throws Exception");
     out.println("{");
     out.pushDepth();
@@ -434,10 +446,16 @@ abstract public class BeanGenerator<X> extends GenClass
     for (int i = 0; i < methods.size(); i++) {
       out.println("try {");
       out.pushDepth();
+
+      out.println("if (" + getLifecycleInstance() + " != null) {");
+      out.pushDepth();
       
       out.print("__caucho_" + lifecycleType + "_" + i + ".invoke(");
       out.print(getLifecycleInstance());
       out.println(");");
+      
+      out.popDepth();
+      out.println("}");
       
       out.popDepth();
       out.println("} catch (RuntimeException ex) {");

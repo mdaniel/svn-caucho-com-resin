@@ -236,12 +236,13 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
       return null;
   }
   
-  public void destroy(Object instance, CreationalContextImpl env)
+  @Override
+  public void destroy(Object instance, CreationalContextImpl<?> env)
   {
   }
   
   /**
-   * Initialize an instance
+   * Destroy an instance
    */
   public void destroyInstance(X instance)
   {

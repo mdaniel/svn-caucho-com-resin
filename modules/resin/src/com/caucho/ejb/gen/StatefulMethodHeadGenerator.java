@@ -47,7 +47,6 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
-  private boolean _isRemoveRetainIfException;
   private long _lockTimeout;
   private TimeUnit _lockTimeoutUnit;
 
@@ -167,10 +166,12 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
     throws IOException
   {
     super.generateCall(out);
-    
+
+    /*
     if (getMethod().isAnnotationPresent(Remove.class)) {
       out.println("__caucho_destroy(null);");
     }
+    */
   }
 
   /**
@@ -193,7 +194,8 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
     // ejb/5070
     super.generateApplicationException(out, exn);
 
-    out.println("isValid = true;");
+    // ejb/5064
+    // out.println("isValid = true;");
   }
 
   @Override
@@ -205,19 +207,28 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
 
     out.println("_context.endLocal(null);");
     
-    if (!_isRemoveRetainIfException) {
-      out.println("if (! isValid) {");
-      out.pushDepth();
+    Remove remove = getMethod().getAnnotation(Remove.class);
+    
+    if (remove != null) {
+      if (remove.retainIfException()) {
+        out.println("if (isValid) {");
+        out.pushDepth();
+      }
 
+      out.println("__caucho_destroy(null);");
+      /*
       out.println("_bean = null;");
       out.println();
       out.println("if (bean != null)");
       out.print("  _manager.destroyInstance(");
       out.print(getBeanFactory().getBeanInstance());
       out.println(");");
+      */
 
-      out.popDepth();
-      out.println("}");
+      if (remove.retainIfException()) {
+        out.popDepth();
+        out.println("}");
+      }
     }
 
     out.println("thread.setContextClassLoader(oldLoader);");
