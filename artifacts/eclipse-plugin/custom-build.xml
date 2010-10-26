@@ -7,7 +7,7 @@
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="com.caucho.resin.eclipse"/>
-	<property name="bundleVersion" value="4.0.11"/>
+	<property name="bundleVersion" value="${resin.version}"/>
 	<property name="p2.publishonerror" value="false"/>
 
 	<!-- Compiler settings. -->
@@ -47,7 +47,7 @@
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/com.caucho.resin.eclipse_4.0.11"		>
+		<condition property="build.result.folder" value="${pluginTemp}/com.caucho.resin.eclipse_${bundleVersion}"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -77,7 +77,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="${plugin.destination}/com.caucho.resin.eclipse_4.0.11.jar" basedir="${temp.folder}/com.caucho.resin.eclipse_4.0.11" filesetmanifest="merge"/>
+		<jar destfile="${plugin.destination}/com.caucho.resin.eclipse_${bundleVersion}.jar" basedir="${temp.folder}/com.caucho.resin.eclipse_${bundleVersion}" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -244,9 +244,9 @@
 			<pathelement path="${eclipse.home}/plugins/org.eclipse.wst.common.uriresolver_1.1.401.v201004280700.jar"/>
 			<pathelement path="${eclipse.home}/plugins/org.eclipse.jst.common.project.facet.ui_1.4.102.v201008182136.jar"/>
 			<pathelement path="lib/resin.jar"/>
-			<pathelement path="${build.result.folder}/../com.caucho.resin.eclipse_4.0.11/lib/resin.jar"/>
+			<pathelement path="${build.result.folder}/../com.caucho.resin.eclipse_${bundleVersion}/lib/resin.jar"/>
 			<pathelement path="lib/javaee-16.jar"/>
-			<pathelement path="${build.result.folder}/../com.caucho.resin.eclipse_4.0.11/lib/javaee-16.jar"/>
+			<pathelement path="${build.result.folder}/../com.caucho.resin.eclipse_${bundleVersion}/lib/javaee-16.jar"/>
 		</path>
 		<!-- compile the source code -->
 		<javac destdir="${temp.folder}/resin-eclipse.jar.bin" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"		>
@@ -254,7 +254,7 @@
 			<classpath refid="resin-eclipse.jar.classpath" />
 			<src path="src/"			/>
 			<src path="servers/"			/>
-			<compilerarg value="@${basedir}/javaCompiler.resin-eclipse.jar.args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
+			<compilerarg value="@${basedir}/custom-javaCompiler.resin-eclipse.jar.args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
 			<compilerarg line="-log &apos;${temp.folder}/resin-eclipse.jar.bin${logExtension}&apos;" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
 		</javac>
 		<antcall target="checkCompilationResults"/>
@@ -306,8 +306,8 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="com.caucho.resin.eclipse_4.0.11${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError bundle="com.caucho.resin.eclipse_4.0.11" log="${compilation.prereq.log}">
+		<echo file="${compilation.problem.marker}" message="com.caucho.resin.eclipse_${bundleVersion}${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.caucho.resin.eclipse_${bundleVersion}" log="${compilation.prereq.log}">
 		</eclipse.logCompileError>
 	</target>
 
@@ -317,7 +317,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/com.caucho.resin.eclipse_4.0.11"/>
+		<mkdir dir="${build.result.folder}/com.caucho.resin.eclipse_${bundleVersion}"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -341,13 +341,13 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11"/>
-		<copy todir="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}"/>
+		<copy todir="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="resin-eclipse.jar"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11" failonerror="true" overwrite="true">
+		<copy todir="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/"/>
 				<include name="plugin.xml"/>
@@ -361,9 +361,9 @@
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
-			<param name="target.folder" value="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11/resin-eclipse.jar:/Users/alex/Documents/projects/caucho/trunk/resin/artifacts/eclipse-plugin/lib/resin.jar"/>
+			<param name="binary.folders" value="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}/resin-eclipse.jar:/Users/alex/Documents/projects/caucho/trunk/resin/artifacts/eclipse-plugin/lib/resin.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 	</target>
@@ -372,10 +372,10 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11"/>
-		<copy file="${build.result.folder}/resin-eclipsesrc.zip" todir="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}"/>
+		<copy file="${build.result.folder}/resin-eclipsesrc.zip" todir="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}" failonerror="false" overwrite="false"/>
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}"/>
 		</antcall>
 	</target>
 
@@ -397,8 +397,8 @@
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11"/>
-		<copy todir="${destination.temp.folder}/com.caucho.resin.eclipse_4.0.11" failonerror="false" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}"/>
+		<copy todir="${destination.temp.folder}/com.caucho.resin.eclipse_${bundleVersion}" failonerror="false" overwrite="false">
 			<fileset dir="${temp.folder}">
 				<include name="resin-eclipse.jar.bin${logExtension}"/>
 			</fileset>
@@ -408,8 +408,8 @@
 	<target name="clean" depends="init" description="Clean the plug-in: com.caucho.resin.eclipse of all the zips, jars and logs created.">
 		<delete file="${build.result.folder}/resin-eclipse.jar"/>
 		<delete file="${build.result.folder}/resin-eclipsesrc.zip"/>
-		<delete file="${plugin.destination}/com.caucho.resin.eclipse_4.0.11.jar"/>
-		<delete file="${plugin.destination}/com.caucho.resin.eclipse_4.0.11.zip"/>
+		<delete file="${plugin.destination}/com.caucho.resin.eclipse_${bundleVersion}.jar"/>
+		<delete file="${plugin.destination}/com.caucho.resin.eclipse_${bundleVersion}.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
@@ -435,7 +435,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="${plugin.destination}/com.caucho.resin.eclipse_4.0.11.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/com.caucho.resin.eclipse_${bundleVersion}.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 

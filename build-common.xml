@@ -104,6 +104,12 @@
     </condition>
     <property name="maven.m2" value="m2-snapshot"/>
     <property name="maven.root" value="${resin.dist}/${maven.m2}"/>
+
+    <!--nversion must be a nubmer, used with eclipse-plugin-->
+    <condition property="nversion" value="${version}">
+      <isset property="version"/>
+    </condition>
+    <property name="nversion" value="4.0.${snapshotdate}"/>
     
     <property name="version" value="4.0.s${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
