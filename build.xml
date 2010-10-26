@@ -9,6 +9,8 @@
 
   <property name="debian.component" value="universe"/>
 
+  <property name="eclipse.home" value="${user.home}/eclipse"/>
+
   <target name="compile" 
           depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext, j2ee-management, j2ee-deploy">
   </target>
@@ -152,7 +154,42 @@
       <param name="artifact.name" value="xwork2"/>
     </antcall>
   </target>
-  
+
+  <target name="eclipse2">
+    <!--
+      compiles plugin and feature jars
+      eclipse-plugin/com.caucho.resin.eclipse_4.0.11.jar
+      elicpse-feature/com.caucho.resin.eclipse_4.0.11.jar
+
+      the task will be parameterised for version
+
+      xxx: assumes resin.jar in eclipse-plugin/lib
+    -->
+    <java jar="${eclipse.home}/plugins/org.eclipse.equinox.launcher_1.1.0.v20100507.jar" fork='true'>
+      <arg line="-application org.eclipse.ant.core.antRunner"/>
+      <arg line="-buildfile ${basedir}/artifacts/eclipse-feature/build.xml clean build.update.jar"/>
+    </java>
+
+    <mkdir dir="${basedir}/artifacts/eclipse-site/features"/>
+    <mkdir dir="${basedir}/artifacts/eclipse-site/plugins"/>
+
+    <copy file="${basedir}/artifacts/eclipse-feature/com.caucho.resin.eclipse_4.0.11.jar"
+          tofile="${basedir}/artifacts/eclipse-site/features/com.caucho.resin.eclipse_4.0.11.jar"/>
+
+    <copy file="${basedir}/artifacts/eclipse-plugin/com.caucho.resin.eclipse_4.0.11.jar"
+          tofile="${basedir}/artifacts/eclipse-site/plugins/com.caucho.resin.eclipse_4.0.11.jar"/>
+
+    <java jar="${eclipse.home}/plugins/org.eclipse.equinox.launcher_1.1.0.v20100507.jar" fork='true'>
+      <arg line="-application org.eclipse.equinox.p2.publisher.UpdateSitePublisher"/>
+      <arg line="-source ${basedir}/artifacts/eclipse-site"/>
+      <arg line="-metadataRepository file:///${basedir}/artifacts/eclipse-site"/>
+      <arg line="-artifactRepository file:///${basedir}/artifacts/eclipse-site"/>
+      <arg line="-compress"/>
+      <arg line="-publishArtifacts"/>
+    </java>
+
+  </target>
+
   <target name="compat" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="compat"/>
