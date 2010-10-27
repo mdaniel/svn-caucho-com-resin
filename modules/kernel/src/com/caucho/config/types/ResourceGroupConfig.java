@@ -175,9 +175,9 @@ abstract public class ResourceGroupConfig extends ConfigProgram
         
         if (getJndiClassLoader() != null)
           thread.setContextClassLoader(getJndiClassLoader());
-        
-        String jndiName = "java:comp/env/" + targetClassName + "/" + targetMethod;
 
+        String jndiName = "java:comp/env/" + targetClassName + "/" + targetMethod;
+        
         Jndi.bindDeep(jndiName, this);
       } catch (ConfigException e) {
         throw e;

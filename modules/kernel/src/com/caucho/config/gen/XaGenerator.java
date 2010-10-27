@@ -31,13 +31,13 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.ejb.MessageDriven;
 import javax.ejb.SessionSynchronization;
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.transaction.Synchronization;
 
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -101,7 +101,8 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   {
     return (getBeanType().isAnnotationPresent(Stateless.class)
             || getBeanType().isAnnotationPresent(Stateful.class)
-            || getBeanType().isAnnotationPresent(Singleton.class));
+            || getBeanType().isAnnotationPresent(Singleton.class)
+            || getBeanType().isAnnotationPresent(MessageDriven.class));
   }
   //
   // method generation code
@@ -257,14 +258,14 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   {
     boolean isError = Error.class.isAssignableFrom(exn);
 
-    if (! isError)
-      out.println("isXAValid = true;");
+    if (isEjb()) {
+      if (! isError)
+        out.println("isXAValid = true;");
     
-    out.println("if (_xa.systemException(e)) {");
-    out.pushDepth();
+      out.println("if (_xa.systemException(e)) {");
+      out.pushDepth();
     
-    if (_isContainerManaged) {
-      if (isEjb()) {
+      if (_isContainerManaged) {
         switch (_transactionType) {
         case SUPPORTS:
           out.println("  _xa.rethrowEjbException(e, _xa.getTransaction() != null);");
@@ -292,15 +293,13 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
           break;
         }
       }
-    }
-    else {
-      if (isEjb()) {
+      else {
         out.println("_xa.rethrowEjbException(e, false);");
       }
-    }
     
-    out.popDepth();
-    out.println("}");
+      out.popDepth();
+      out.println("}");
+    }
   }
 
   /**

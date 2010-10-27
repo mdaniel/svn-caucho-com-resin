@@ -45,6 +45,7 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.XAConnection;
+import javax.jms.XASession;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -305,15 +306,16 @@ public class JmsResourceAdapter implements ResourceAdapter {
       throws Exception
     {
       if (conn instanceof XAConnection) {
-        /*
         XASession xaSession = ((XAConnection) conn).createXASession();
         _session = xaSession;
         _xaResource = xaSession.getXAResource();
-        */
+
+        /*
         // ejb/09a0 - needs to be auto-ack because if processing throws
         // an exception because of a bug, can't just replay
-        boolean transacted = false;
+        boolean transacted = true;
         _session = conn.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
+        */
       }
       else {
         boolean transacted = false;

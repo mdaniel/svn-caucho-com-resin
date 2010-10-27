@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.message;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -49,13 +48,10 @@ import javax.transaction.xa.XAResource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.OwnerCreationalContext;
-import com.caucho.config.inject.InjectManager.ReferenceFactory;
-import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.MessageGenerator;
@@ -189,7 +185,7 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
       
         _proxyImplClass = (Class<X>) javaGen.loadClass(fullClassName);
         
-        InjectManager cdiManager = InjectManager.create();
+        InjectManager cdiManager = InjectManager.create(getClassLoader());
         
         AnnotatedType annType = ReflectionAnnotatedFactory.introspectType(_proxyImplClass);
         
@@ -283,7 +279,7 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
   {
     try {
       Object listener = createMessageListener();
-
+      
       ((CauchoMessageEndpoint) listener).__caucho_setXAResource(xaResource);
       
       return (MessageEndpoint) listener;

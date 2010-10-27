@@ -900,11 +900,10 @@ public class EjbBean<X> extends DescriptionGroupConfig
     EnvEntry env = new EnvEntry();
     
     env.setProgram(true);
-    // ejb/7038
-    /*
+    // ejb/7038, ejb/8203
+
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     env.setJndiClassLoader(loader);
-    */
     
     _resourceList.add(env);
     

@@ -723,7 +723,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     _isXA = false;
     
-    ArrayList<TransactedMessage> messages = _transactedMessages;    
+    ArrayList<TransactedMessage> messages = _transactedMessages;
     if (messages == null || messages.size() == 0) {
       return;
     }
@@ -1293,17 +1293,26 @@ public class JmsSession implements XASession, ThreadTask, XAResource
         throw new NullPointerException();
     }
 
+    @Override
     void commit()
       throws JMSException
     {
-      _queue.acknowledge(_message.getJMSMessageID());
+        _queue.acknowledge(_message.getJMSMessageID());
     }
 
+    @Override
     void rollback()
       throws JMSException
     {
-      _queue.rollback(_message.getJMSMessageID());
-      _message.setJMSRedelivered(true);
+      // ejb/700b
+      if (_message.getJMSRedelivered()) {
+        log.warning(this + " removing rollbacked message " + _message);
+        _queue.acknowledge(_message.getJMSMessageID());
+      }
+      else {
+        _queue.rollback(_message.getJMSMessageID());
+        _message.setJMSRedelivered(true);
+      }
     }
     
     void close()

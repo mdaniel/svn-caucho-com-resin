@@ -63,8 +63,6 @@ public class StatefulHandle
     
     Object proxy = ejbManager.getStatefulProxy(_primaryKey);
     
-    System.out.println("READ: " + _ejbName + " " + ejbManager + " " + proxy);
-    
     return proxy;
   }
 }

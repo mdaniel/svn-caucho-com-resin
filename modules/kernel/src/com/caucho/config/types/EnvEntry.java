@@ -187,8 +187,10 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
     try {
+      /*
       if (getJndiClassLoader() != null)
         thread.setContextClassLoader(getJndiClassLoader());
+        */
     
       Jndi.bindDeepShort(_name, this);
     } catch (Exception e) {
