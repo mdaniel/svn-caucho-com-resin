@@ -470,7 +470,8 @@ public class MessageConsumerImpl<E> implements MessageConsumer
       _listener = listener;
       _classLoader = Thread.currentThread().getContextClassLoader();
     }
-    
+
+    @Override
     public void messageReceived(String msgId, E payload)
     {
       MessageImpl message = null;

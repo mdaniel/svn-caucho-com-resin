@@ -35,6 +35,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.LocalBean;
 import javax.ejb.MessageDrivenBean;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -44,6 +45,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.LifecycleAspectBeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.inject.Module;
@@ -62,6 +64,8 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
   private ArrayList<AnnotatedMethod<? super X>> _annotatedMethods
     = new ArrayList<AnnotatedMethod<? super X>>();
   
+  private final AspectBeanFactory<X> _lifecycleAspectFactory;
+  
   public MessageGenerator(String ejbName, AnnotatedType<X> ejbClass)
   {
     super(toFullClassName(ejbName, ejbClass.getJavaClass().getName()), ejbClass);
@@ -69,6 +73,12 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     InjectManager manager = InjectManager.create();
     
     _aspectBeanFactory = new MessageAspectBeanFactory<X>(manager, getBeanType());
+    _lifecycleAspectFactory = new LifecycleAspectBeanFactory<X>(_aspectBeanFactory, manager, getBeanType());
+  }
+
+  protected AspectBeanFactory<X> getLifecycleAspectFactory()
+  {
+    return _lifecycleAspectFactory;
   }
 
   private static String toFullClassName(String ejbName, String className)
@@ -110,6 +120,12 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
   public String getViewClassName()
   {
     return getClassName();
+  }
+
+  @Override
+  protected AspectBeanFactory<X> getAspectBeanFactory()
+  {
+    return _aspectBeanFactory;
   }
 
   /**
@@ -202,7 +218,10 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     if (Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))
       return;
 
-    addBusinessMethod(apiMethod);
+    if (apiMethod.isAnnotationPresent(PostConstruct.class))
+      addLifecycleMethod(apiMethod);
+    else
+      addBusinessMethod(apiMethod);
   }
   
   public void addBusinessMethod(AnnotatedMethod<? super X> method)
@@ -212,6 +231,18 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
       
     if (bizMethod != null) {
       _businessMethods.add(bizMethod);
+    }
+  }
+  
+  protected void addLifecycleMethod(AnnotatedMethod<? super X> method)
+  {
+    if (getLifecycleAspectFactory() == null)
+      return;
+    
+    AspectGenerator<X> initMethod = getLifecycleAspectFactory().create(method);
+      
+    if (initMethod != null && ! _businessMethods.contains(initMethod)) {
+      _businessMethods.add(initMethod);
     }
   }
 
@@ -390,20 +421,12 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     for (AspectGenerator<X> bizMethod : _businessMethods) {
       bizMethod.generate(out, map);
     }
+    
+    generatePostConstruct(out, map);
   }
   
   private AnnotatedMethod<? super X> getImplMethod(String name, Class<?> []param)
   {
     return AnnotatedTypeUtil.findMethod(getBeanType(), name, param);
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.config.gen.BeanGenerator#getAspectBeanFactory()
-   */
-  @Override
-  protected AspectBeanFactory<X> getAspectBeanFactory()
-  {
-    // TODO Auto-generated method stub
-    return null;
   }
 }

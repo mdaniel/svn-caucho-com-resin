@@ -45,8 +45,6 @@ import javax.annotation.PostConstruct;
 public class ModuleConfig
 {
   private static final L10N L = new L10N(ModuleConfig.class);
-  private static final Logger log
-    = Logger.getLogger(ModuleConfig.class.getName());
 
   private Path _path;
 

@@ -32,6 +32,7 @@ package com.caucho.ejb.cfg;
 import static javax.ejb.TransactionAttributeType.REQUIRED;
 import static javax.ejb.TransactionManagementType.BEAN;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
 import javax.annotation.PostConstruct;
@@ -184,10 +185,10 @@ public class EjbMessageBean<X> extends EjbBean<X> {
   /**
    * Sets the JMS destination.
    */
-  public void setDestination(Destination destination)
+  public void setDestination(String destinationName)
     throws ConfigException
   {
-    _jmsActivationConfig.setDestinationObject(destination);
+    _jmsActivationConfig.setDestinationName(destinationName);
   }
 
   /**
@@ -356,7 +357,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
   {
     if ("destination".equals(name)) {
       if (value instanceof Destination) {
-        setDestination((Destination) value);
+        setDestinationValue((Destination) value);
       }
       else {
         Config.setAttribute(_jmsActivationConfig, "destinationName", value);
@@ -464,6 +465,8 @@ public class EjbMessageBean<X> extends EjbBean<X> {
       if (type != null && ! Object.class.equals(type))
         _messagingType = type;
     }
+    
+    validate();
 
     JmsMessageListener listener
       = getAnnotatedType().getAnnotation(JmsMessageListener.class);
@@ -472,6 +475,29 @@ public class EjbMessageBean<X> extends EjbBean<X> {
       addActivationConfigProperty("destination", listener.destination());
       addActivationConfigProperty("consumer-max",
                                   String.valueOf(listener.consumerMax()));
+    }
+  }
+  
+  private void validate()
+  {
+    if (! Modifier.isPublic(getEJBClass().getModifiers())) {
+      throw new ConfigException(L.l("'{0}' must be public because it's a MessageDriven bean",
+                                    getEJBClass().getName()));
+    }
+    Constructor<?> zeroCtor = null;
+    
+    for (Constructor<?> ctor : getEJBClass().getConstructors()) {
+      if (ctor.getParameterTypes().length == 0)
+        zeroCtor = ctor;
+    }
+    
+    if (zeroCtor == null)
+      throw new ConfigException(L.l("'{0}' needs a zero-arg constructor because it's a MessageDriven bean",
+                                    getEJBClass().getName()));
+    
+    if (! Modifier.isPublic(zeroCtor.getModifiers())) {
+      throw new ConfigException(L.l("'{0}' needs a public zero-arg constructor beause it's a MessageDriven bean",
+                                    getEJBClass().getName()));
     }
   }
 
@@ -575,10 +601,16 @@ public class EjbMessageBean<X> extends EjbBean<X> {
                                                 EjbLazyGenerator<X> lazyGenerator)
     throws ClassNotFoundException
   {
+    AbstractEjbBeanManager<X> manager;
+    
     if (_activationSpec != null)
-      return deployActivationSpecServer(ejbManager, lazyGenerator);
+      manager = deployActivationSpecServer(ejbManager, lazyGenerator);
     else
-      return deployJmsServer(ejbManager, lazyGenerator);
+      manager = deployJmsServer(ejbManager, lazyGenerator);
+    
+    manager.setResourceList(getResourceList());
+    
+    return manager;
   }
 
   private AbstractEjbBeanManager<X> 
@@ -796,7 +828,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
     public void setJndiName(JndiBuilder destination)
       throws ConfigException, NamingException
     {
-      setDestination((Destination) destination.getObject());
+      setDestinationValue((Destination) destination.getObject());
     }
   }
 }

@@ -95,12 +95,12 @@ public class MessageDestinationRef
     _refName = refName;
   }
 
-  public void setMessageDestinationType(Class type)
+  public void setMessageDestinationRefType(Class<?> type)
   {
     _type = type;
   }
 
-  public void setMessageDestinationUsage(String usage)
+  public void setMessageDestinationRefUsage(String usage)
   {
   }
 

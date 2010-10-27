@@ -132,7 +132,6 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     if (_type == null)
       throw new ConfigException(L.l("env-entry needs 'env-entry-type' attribute"));
       */
-
     super.init();
 
     // actually, should register for validation
@@ -140,7 +139,6 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     if (_value == null)
       return;
       */
-    
     
     if (! isProgram())
       deploy();
@@ -191,7 +189,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     try {
       if (getJndiClassLoader() != null)
         thread.setContextClassLoader(getJndiClassLoader());
-      
+    
       Jndi.bindDeepShort(_name, this);
     } catch (Exception e) {
       throw ConfigException.create(e);

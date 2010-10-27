@@ -301,8 +301,7 @@ public class EjbRef extends BaseRef {
       return Jndi.lookup(lookup);
     }
     
-    if (_type == null)
-      throw new IllegalStateException(String.valueOf(this));
+    Class<?> type = calculateType();
     
     InjectManager injectManager = InjectManager.getCurrent();
     
@@ -349,6 +348,27 @@ public class EjbRef extends BaseRef {
 
     return _target;
     */
+  }
+  
+  
+  private Class<?> calculateType()
+  {
+    if (_type != null)
+      return _type;
+    
+    if (_ejbRefType != null) {
+      try {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        
+        _type = Class.forName(_ejbRefType, false, loader);
+        
+        return _type;
+      } catch (ClassNotFoundException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
+    throw new IllegalStateException(String.valueOf(this));
   }
 
   public Object getByType(Class<?> type)

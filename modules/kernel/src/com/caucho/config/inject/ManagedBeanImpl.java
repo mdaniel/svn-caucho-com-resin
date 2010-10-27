@@ -33,11 +33,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ejb.Timer;
@@ -45,18 +43,12 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.bytecode.ScopeAdapter;
@@ -425,7 +417,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     throws InvocationTargetException,
            IllegalAccessException
     {
-            method.invoke(_bean);
+      method.invoke(_bean);
     }
 
     @Override

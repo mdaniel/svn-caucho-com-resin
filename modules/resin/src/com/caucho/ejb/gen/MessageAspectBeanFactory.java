@@ -34,7 +34,6 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import com.caucho.config.gen.AspectFactory;
 import com.caucho.config.gen.CandiAspectBeanFactory;
 import com.caucho.config.gen.InterceptorFactory;
-import com.caucho.config.gen.MethodTailFactory;
 import com.caucho.config.gen.SecurityFactory;
 import com.caucho.config.gen.XaFactory;
 import com.caucho.config.inject.InjectManager;
@@ -58,7 +57,7 @@ public class MessageAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   @Override
   public String getBeanInstance()
   {
-    return "_bean";
+    return "this";
   }
   
   /**
@@ -84,7 +83,7 @@ public class MessageAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   {
     InjectManager manager = InjectManager.getCurrent();
     
-    AspectFactory<X> next = new MethodTailFactory<X>(this);
+    AspectFactory<X> next = new MessageMethodTailFactory<X>(this);
     
     next = new InterceptorFactory<X>(this, next, manager);
     next = new XaFactory<X>(this, next);

@@ -226,16 +226,37 @@ public class RewriteDispatch
                                FilterChain chain)
     throws ServletException
   {
-    if (_ruleList.size() <= index)
-      return chain;
-
-    DispatchRule rule = _ruleList.get(index);
+    FilterChain next = chain;
     
-    uri = rule.rewriteUri(uri, queryString);
+    int size = _ruleList.size();
+    
+    if (size <= index)
+      return next;
+    
+    DispatchRule firstRule = _ruleList.get(index);
+    
+    uri = firstRule.rewriteUri(uri, queryString);
 
-    FilterChain next = mapChain(index + 1, type, uri, queryString, chain);
+    // scan unless the URI is rewritten, then force recursion 
+    int tail = index + 1;
+    for (; tail < size; tail++) {
+      DispatchRule uriRule = _ruleList.get(tail);
+      
+      String newUri = uriRule.rewriteUri(uri, queryString);
+      
+      if (newUri != uri) {
+        next = mapChain(tail, type, uri, queryString, chain);
+        break;
+      }
+    }
 
-    return rule.map(type, uri, queryString, next, chain);
+    for (int i = tail - 1; index <= i; i--) {
+      DispatchRule rule = _ruleList.get(i);
+    
+      next = rule.map(type, uri, queryString, next, chain);
+    }
+
+    return next;
   }
 
   public void clearCache()

@@ -221,6 +221,8 @@ public class EjbInjectionTarget<T> {
 
   public void bindInjection()
   {
+    registerInjection();
+    
     if (! _isBind.compareAndSet(false, true))
       return;
     
@@ -231,7 +233,7 @@ public class EjbInjectionTarget<T> {
       thread.setContextClassLoader(_manager.getClassLoader());
 
       InjectManager cdiManager= InjectManager.create();
-      
+
       setInjectionTarget(_bean.getInjectionTarget());
 
       // server/4751
@@ -275,7 +277,7 @@ public class EjbInjectionTarget<T> {
   
   public T newInstance(CreationalContextImpl<?> parentEnv)
   {
-    if (_bean == null)
+    if (! _isBind.get())
       bindInjection();
     
     T instance = CreationalContextImpl.find(parentEnv, _bean);

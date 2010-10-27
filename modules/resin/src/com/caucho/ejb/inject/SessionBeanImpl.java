@@ -129,10 +129,11 @@ public class SessionBeanImpl<X,T>
     else
       env = null;
     
-    _context.destroyProxy(instance, env);
-    
+    // ejb5012
     if (env != null)
       env.release();
+    else 
+      _context.destroyProxy(instance, env);
   }
 
   /**

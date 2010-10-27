@@ -701,6 +701,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   /**
    * Commits the messages.
    */
+  @Override
   public void commit()
     throws JMSException
   {

@@ -58,7 +58,7 @@ public class TimerTask implements AlarmListener {
 
   /**
    * Constructs a new scheduled task.
-   * 
+   *
    * @param targetBean
    *          The target bean to be invoked by the task.
    * @param targetMethod
@@ -79,7 +79,8 @@ public class TimerTask implements AlarmListener {
    *          The data to be passed to the invocation target.
    */
   public TimerTask(TimeoutInvoker invoker, Runnable task,
-      CronExpression cronExpression, Trigger trigger, Serializable data)
+                   CronExpression cronExpression, Trigger trigger,
+                   Serializable data)
   {
     _taskId = _currentTaskId.incrementAndGet();
 
@@ -105,7 +106,7 @@ public class TimerTask implements AlarmListener {
 
   /**
    * Gets task ID.
-   * 
+   *
    * @return Task ID.
    */
   public long getTaskId()
@@ -115,7 +116,7 @@ public class TimerTask implements AlarmListener {
 
   /**
    * Gets the cron expression used to create the schedule.
-   * 
+   *
    * @return Cron expression used to create the schedule, if one was used.
    */
   public CronExpression getCronExpression()
@@ -125,7 +126,7 @@ public class TimerTask implements AlarmListener {
 
   /**
    * Gets the data to be passed to the invocation target.
-   * 
+   *
    * @return Data to be passed to the invocation target.
    */
   public Serializable getData()
@@ -136,7 +137,7 @@ public class TimerTask implements AlarmListener {
   /**
    * Get the next time, in milliseconds, when the alarm will be triggered for
    * the scheduled task.
-   * 
+   *
    * @return The next time, in milliseconds, when the alarm will be triggered
    *         for the scheduled task.
    */
@@ -160,7 +161,7 @@ public class TimerTask implements AlarmListener {
 
   /**
    * Gets the current status of this task.
-   * 
+   *
    * @return Status of the scheduled task.
    */
   public ScheduledTaskStatus getStatus()
@@ -186,7 +187,7 @@ public class TimerTask implements AlarmListener {
 
   /**
    * Handles alarm.
-   * 
+   *
    * @param alarm
    *          Alarm to handle.
    */
@@ -213,7 +214,7 @@ public class TimerTask implements AlarmListener {
 
   /**
    * Gets the hash code for this object.
-   * 
+   *
    * @return Hash code for this object.
    */
   @Override
@@ -227,7 +228,7 @@ public class TimerTask implements AlarmListener {
 
   /**
    * Checks for equality with another object.
-   * 
+   *
    * @param object
    *          The object to compare with.
    * @return True if the objects are not equal, false otherwise.

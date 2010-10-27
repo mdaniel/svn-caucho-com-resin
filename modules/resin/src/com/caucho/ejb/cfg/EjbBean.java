@@ -800,7 +800,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
   public MessageDestinationRef createMessageDestinationRef()
   {
-    return new MessageDestinationRef(Vfs.lookup(_ejbModuleName));
+    return new MessageDestinationRef(Vfs.lookup());
   }
   /**
    * Sets the security identity
@@ -900,8 +900,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
     EnvEntry env = new EnvEntry();
     
     env.setProgram(true);
+    // ejb/7038
+    /*
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     env.setJndiClassLoader(loader);
+    */
     
     _resourceList.add(env);
     

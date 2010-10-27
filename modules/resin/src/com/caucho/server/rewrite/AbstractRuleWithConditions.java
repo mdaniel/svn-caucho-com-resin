@@ -36,6 +36,10 @@ import com.caucho.vfs.CaseInsensitive;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +51,8 @@ public abstract class AbstractRuleWithConditions
 {
   private static final L10N L = new L10N(AbstractRuleWithConditions.class);
   private static final Logger log = Logger.getLogger(AbstractRuleWithConditions.class.getName());
+  
+  private static final FilterChainNext NEXT = new FilterChainNext();
 
   private final boolean _isFiner;
   private final boolean _isFinest;
@@ -170,17 +176,42 @@ public abstract class AbstractRuleWithConditions
     super.init();
   }
 
+  @Override
   public FilterChain map(String uri,
                          String queryString,
                          FilterChain accept)
     throws ServletException
   {
+    AbstractRuleWithConditions rule = this;
+    
+    while (rule != null) {
+      FilterChain next = rule.mapImpl(uri, queryString, accept);
 
+      if (next != NEXT)
+        return next;
+      
+      FilterChainMapper nextRule = rule.getFailFilterChainMapper();
+      
+      if (nextRule instanceof AbstractRuleWithConditions) {
+        rule = (AbstractRuleWithConditions) nextRule;
+      }
+      else
+        return nextRule.map(uri, queryString, accept);
+    }
+    
+    return null;
+  }
+  
+  public FilterChain mapImpl(String uri,
+                             String queryString,
+                             FilterChain accept)
+    throws ServletException
+  {
     if (!isEnabled()) {
       if (_isFinest)
         log.finest(getLogPrefix() + " not enabled, no match");
 
-      return getFailFilterChainMapper().map(uri, queryString, accept);
+      return NEXT;
     }
 
     Matcher matcher;
@@ -192,7 +223,7 @@ public abstract class AbstractRuleWithConditions
         if (_isFinest)
           log.finest(getLogPrefix() + " does not match " + uri);
 
-        return getFailFilterChainMapper().map(uri, queryString, accept);
+        return NEXT;
       }
     }
     else if (_urlRegexp != null) {
@@ -206,7 +237,7 @@ public abstract class AbstractRuleWithConditions
       matcher = _urlRegexp.matcher(fullUrl);
 
       if (! matcher.find()) {
-        return getFailFilterChainMapper().map(uri, queryString, accept);
+        return NEXT;
       }
     }
     else
@@ -302,4 +333,11 @@ public abstract class AbstractRuleWithConditions
     super.destroy();
   }
 
+  static class FilterChainNext implements FilterChain {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response)
+        throws ServletException, IOException
+    {
+    }
+  }
 }

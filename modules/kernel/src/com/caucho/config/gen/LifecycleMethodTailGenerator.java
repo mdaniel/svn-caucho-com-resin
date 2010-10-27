@@ -73,8 +73,6 @@ public class LifecycleMethodTailGenerator<X> extends MethodTailGenerator<X>
     out.println("  " + _invokeMethodName + ".setAccessible(true);");
     out.println("}");
     
-    String methodName = method.getName();
-    
     out.println();
     out.println("public void " + _invokeMethodName + "()");
     out.println("{");
@@ -84,8 +82,9 @@ public class LifecycleMethodTailGenerator<X> extends MethodTailGenerator<X>
     out.pushDepth();
     
     String superVar = _factory.getAspectBeanFactory().getInterceptorInstance();
-    
-    out.println(_invokeMethodName + ".invoke(" + superVar + ");");
+
+    out.println("if (" + superVar + " != null)");
+    out.println("  " + _invokeMethodName + ".invoke(" + superVar + ");");
     
     out.popDepth();
     out.println("} catch (RuntimeException e) {");

@@ -58,7 +58,9 @@ public class MethodTimeoutInvoker extends TimeoutInvoker {
       _isTimer = true;
     else
       throw new ConfigException(L.l("'{0}' is an invalid schedule method",
-          method));
+                                    method));
+    
+    method.setAccessible(true);
   }
 
   public void timeout(Timer timer)

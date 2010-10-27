@@ -284,6 +284,7 @@ public class EjbProtocolManager {
 
         log.finest(server + " local binding to '" + jndiName + "' " + loader);
       }
+      
 
       Object localHome = null;
 

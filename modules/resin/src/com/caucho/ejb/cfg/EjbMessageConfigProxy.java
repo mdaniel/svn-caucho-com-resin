@@ -53,23 +53,29 @@ public class EjbMessageConfigProxy extends EjbBeanConfigProxy {
   /**
    * Initializes and configures the message bean.
    */
-  @PostConstruct
-  public void init()
+  // @PostConstruct
+  @Override
+  public void configure()
   {
-    EjbBean oldBean = getConfig().getBeanConfig(getEjbName());
+    EjbBean<?> oldBean = getConfig().getBeanConfig(getEjbName());
 
     if (oldBean == null) {
       _message = new EjbMessageBean(getConfig(), getEJBModuleName());
       _message.setEJBName(getEjbName());
       _message.setLocation(getLocation());
+      
+      if (getEjbClass() != null)
+        _message.setEJBClass(getEjbClass());
+      
+      getConfig().setBeanConfig(getEjbName(), _message);
     }
-    else if (! (oldBean instanceof EjbMessageBean)) {
+    else if (! (oldBean instanceof EjbMessageBean<?>)) {
       throw new ConfigException(L.l("message bean '{0}' conflicts with prior {1} bean at {2}.",
                                     getEjbName(), oldBean.getEJBKind(),
                                     oldBean.getLocation()));
     }
     else
-      _message = (EjbMessageBean) oldBean;
+      _message = (EjbMessageBean<?>) oldBean;
 
     _message.addDependencyList(getDependencyList());
 

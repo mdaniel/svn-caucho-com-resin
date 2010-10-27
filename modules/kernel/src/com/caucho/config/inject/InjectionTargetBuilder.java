@@ -72,6 +72,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SerializeHandle;
 import com.caucho.config.bytecode.SerializationAdapter;
 import com.caucho.config.gen.CandiBeanGenerator;
+import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.j2ee.PreDestroyInject;
@@ -122,11 +123,6 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
     _annotatedType = beanType;
     _bean = bean;
-
-    if (beanType.toString().endsWith("Client")) {
-      System.out.println("BUILDER: " + beanType);
-      Thread.dumpStack();
-    }
   }
   
   public InjectionTargetBuilder(InjectManager cdiManager,

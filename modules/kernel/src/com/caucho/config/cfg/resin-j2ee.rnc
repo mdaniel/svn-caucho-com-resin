@@ -212,7 +212,7 @@ r_message-ref = element message-ref {
 }
 
 r_message-destination-ref-name = element message-destination-ref-name {
-  r_jndi-name
+  string
 }
 
 r_message-destination-ref-type = element message-destination-ref-type {
