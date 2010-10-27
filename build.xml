@@ -157,30 +157,35 @@
 
   <target name="eclipse2" depends="init">
     <!--
-      compiles plugin and feature jars
-      eclipse-plugin/com.caucho.resin.eclipse_4.0.11.jar
-      elicpse-feature/com.caucho.resin.eclipse_4.0.11.jar
-
-      the task will be parameterised for version
-
-      xxx: assumes resin.jar in eclipse-plugin/lib
+      xxx: assumes resin.jar and javaee-16.jar are in eclipse-plugin/lib
+      xxx: ^ fix it!
     -->
 
-    <copy
-        file="${basedir}/artifacts/eclipse-feature/feature.xml.in"
-        tofile="${basedir}/artifacts/eclipse-feature/feature.xml"
-        preservelastmodified="true"
-        overwrite="true">
+    <property name="eclipse.rep"
+              value="${basedir}/artifacts/eclipse-site/repository"/>
+
+    <delete dir="${eclipse.rep}" failonerror="false"/>
+    <delete dir="${basedir}/artifacts/eclipse-site/features"
+            failonerror="false"/>
+    <delete dir="${basedir}/artifacts/eclipse-site/plugins"
+            failonerror="false"/>
+    <delete failonerror="false">
+      <fileset dir="${basedir}/artifacts/eclipse-site/" includes="*.jar"/>
+    </delete>
+
+    <copy file="${basedir}/artifacts/eclipse-feature/feature.xml.in"
+          tofile="${basedir}/artifacts/eclipse-feature/feature.xml"
+          preservelastmodified="true"
+          overwrite="true">
       <filterset>
         <filter token="resin.version" value="${nversion}"/>
       </filterset>
     </copy>
 
-    <copy
-        file="${basedir}/artifacts/eclipse-plugin/META-INF/MANIFEST.MF.in"
-        tofile="${basedir}/artifacts/eclipse-plugin/META-INF/MANIFEST.MF"
-        preservelastmodified="true"
-        overwrite="true">
+    <copy file="${basedir}/artifacts/eclipse-plugin/META-INF/MANIFEST.MF.in"
+          tofile="${basedir}/artifacts/eclipse-plugin/META-INF/MANIFEST.MF"
+          preservelastmodified="true"
+          overwrite="true">
       <filterset>
         <filter token="resin.version" value="${nversion}"/>
       </filterset>
@@ -196,7 +201,8 @@
       </filterset>
     </copy>
 
-    <java jar="${eclipse.home}/plugins/org.eclipse.equinox.launcher_1.1.0.v20100507.jar" fork='true'>
+    <java jar="${eclipse.home}/plugins/org.eclipse.equinox.launcher_1.1.0.v20100507.jar"
+          fork='true'>
       <jvmarg line="-Dresin.version=${nversion}"/>
       <arg line="-application org.eclipse.ant.core.antRunner"/>
       <arg line="-buildfile ${basedir}/artifacts/eclipse-feature/custom-build.xml clean build.update.jar"/>
@@ -211,15 +217,18 @@
     <copy file="${basedir}/artifacts/eclipse-plugin/com.caucho.resin.eclipse_${nversion}.jar"
           tofile="${basedir}/artifacts/eclipse-site/plugins/com.caucho.resin.eclipse_${nversion}.jar"/>
 
-    <java jar="${eclipse.home}/plugins/org.eclipse.equinox.launcher_1.1.0.v20100507.jar" fork='true'>
+    <java jar="${eclipse.home}/plugins/org.eclipse.equinox.launcher_1.1.0.v20100507.jar"
+          fork='true'>
       <arg line="-application org.eclipse.equinox.p2.publisher.UpdateSitePublisher"/>
       <arg line="-source ${basedir}/artifacts/eclipse-site"/>
       <arg line="-metadataRepository file:///${basedir}/artifacts/eclipse-site"/>
-      <arg line="-artifactRepository file:///${basedir}/artifacts/eclipse-site"/>
+      <arg line="-artifactRepository file:///${eclipse.rep}"/>
       <arg line="-compress"/>
       <arg line="-publishArtifacts"/>
     </java>
 
+    <copy file="${basedir}/artifacts/eclipse-site/content.jar"
+          tofile="${eclipse.rep}/content.jar"/>
   </target>
 
   <target name="compat" depends="init">

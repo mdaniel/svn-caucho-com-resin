@@ -17,7 +17,7 @@
 	<property name="logExtension" value=".log"/>
 	<property name="compilerArg" value=""/>
 	<property name="compilation.prereq.log" value="${buildDirectory}/prereqErrors.log"/>
-	<property name="javacSource" value="1.6"/>
+	<property name="javacSource" value="1.5"/>
 	<property name="javacTarget" value="1.5"/>
 	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
 		<os family="mac"/>
@@ -250,12 +250,12 @@
 		</path>
 		<!-- compile the source code -->
 		<javac destdir="${temp.folder}/resin-eclipse.jar.bin" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"		>
-			<compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
+			<!--compilerarg line="${compilerArg}" compiler="${build.compiler}"/-->
 			<classpath refid="resin-eclipse.jar.classpath" />
-			<src path="src/"			/>
-			<src path="servers/"			/>
-			<compilerarg value="@${basedir}/custom-javaCompiler.resin-eclipse.jar.args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
-			<compilerarg line="-log &apos;${temp.folder}/resin-eclipse.jar.bin${logExtension}&apos;" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
+			<src path="src/"/>
+			<src path="servers/"/>
+			<!--compilerarg value="@${basedir}/custom-javaCompiler.resin-eclipse.jar.args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+			<compilerarg line="-log &apos;${temp.folder}/resin-eclipse.jar.bin${logExtension}&apos;" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/-->
 		</javac>
 		<antcall target="checkCompilationResults"/>
 		<!-- Copy necessary resources -->
@@ -358,6 +358,7 @@
 				<include name="buildfiles/"/>
 				<include name="resin-eclipse.jar"/>
 				<include name="lib/resin.jar"/>
+				<include name="lib/javaee-16.jar"/>
 			</fileset>
 		</copy>
 		<antcall target="apitools.generation">
