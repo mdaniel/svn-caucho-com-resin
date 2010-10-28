@@ -112,6 +112,7 @@
         <include name="org.eclipse.jst.server.generic.ui_1.0.*.jar"/>
         <include name="org.eclipse.swt.*3.6.*.jar"/>
         <include name="org.eclipse.wst.server.ui_1.1.*.jar"/>
+        <include name="org.eclipse.ui.workbench_3.6.1.*.jar"/>
       </fileset>
 
       <pathelement path="lib/resin.jar"/>
