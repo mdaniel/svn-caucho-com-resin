@@ -334,22 +334,35 @@ abstract public class BeanGenerator<X> extends GenClass
       
     }
     */
-    
+
     ArrayList<Method> postConstructMethods 
       = getLifecycleAspects(PostConstruct.class);
+    /*
+    ArrayList<Method> postConstructMethods 
+      = getLifecycleMethods(PostConstruct.class);
+      */
 
-    for (Method method : postConstructMethods) {
+    if (postConstructMethods.size() > 0) {
+      Method method = postConstructMethods.get(0);
+
       String declName = method.getDeclaringClass().getSimpleName();
       String methodName = method.getName();
       
       out.println("__caucho_lifecycle_" + declName + "_" + methodName + "();");
     }
- 
+
+    for (int i = 1; i < postConstructMethods.size(); i++) {
+      Method method = postConstructMethods.get(i);
+      
+      generateLifecycleMethod(out, i, method, "postConstruct");
+    }
       
     // getAspectBeanFactory().generatePostConstruct(out, map);
 
     out.popDepth();
     out.println("}");
+    
+    postConstructMethods = getLifecycleMethods(PostConstruct.class);
     
     generateLifecycleMethodReflection(out, postConstructMethods, "postConstruct");
     
@@ -421,20 +434,16 @@ abstract public class BeanGenerator<X> extends GenClass
       String methodName = "__caucho_" + lifecycleType + "_" + i;
 
       out.println();
-      out.println("static java.lang.reflect.Method " + methodName);
+      out.println("static final java.lang.reflect.Method " + methodName);
       
       out.print("  = ");
       
       out.printClass(CandiUtil.class);
-      out.print(".findMethod(");
+      out.print(".findAccessibleMethod(");
       out.printClass(method.getDeclaringClass());
       out.print(".class, \"");
       out.print(method.getName());
       out.println("\");");
-      
-      out.println("static {");
-      out.println("  " + methodName + ".setAccessible(true);");
-      out.println("}");
     }
   }
   
@@ -444,31 +453,40 @@ abstract public class BeanGenerator<X> extends GenClass
     throws IOException
   {
     for (int i = 0; i < methods.size(); i++) {
-      out.println("try {");
-      out.pushDepth();
-
-      out.println("if (" + getLifecycleInstance() + " != null) {");
-      out.pushDepth();
-      
-      out.print("__caucho_" + lifecycleType + "_" + i + ".invoke(");
-      out.print(getLifecycleInstance());
-      out.println(");");
-      
-      out.popDepth();
-      out.println("}");
-      
-      out.popDepth();
-      out.println("} catch (RuntimeException ex) {");
-      out.println("  throw ex;");
-      out.println("} catch (java.lang.reflect.InvocationTargetException ex) {");
-      out.println("  if (ex.getCause() instanceof RuntimeException)");
-      out.println("    throw (RuntimeException) ex.getCause();");
-      out.println("  else");
-      out.println("    throw new RuntimeException(ex);");
-      out.println("} catch (Exception ex) {");
-      out.println("  throw new RuntimeException(ex);");
-      out.println("}");
+      generateLifecycleMethod(out, i, methods.get(i), lifecycleType);
     }
+  }
+  
+  protected void generateLifecycleMethod(JavaWriter out,
+                                         int i,
+                                         Method method,
+                                         String lifecycleType)
+    throws IOException
+  {
+    out.println("try {");
+    out.pushDepth();
+
+    out.println("if (" + getLifecycleInstance() + " != null) {");
+    out.pushDepth();
+      
+    out.print("__caucho_" + lifecycleType + "_" + i + ".invoke(");
+    out.print(getLifecycleInstance());
+    out.println(");");
+      
+    out.popDepth();
+    out.println("}");
+      
+    out.popDepth();
+    out.println("} catch (RuntimeException ex) {");
+    out.println("  throw ex;");
+    out.println("} catch (java.lang.reflect.InvocationTargetException ex) {");
+    out.println("  if (ex.getCause() instanceof RuntimeException)");
+    out.println("    throw (RuntimeException) ex.getCause();");
+    out.println("  else");
+    out.println("    throw new RuntimeException(ex);");
+    out.println("} catch (Exception ex) {");
+    out.println("  throw new RuntimeException(ex);");
+    out.println("}");
   }
   
   protected String getLifecycleInstance()

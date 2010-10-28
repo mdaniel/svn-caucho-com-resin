@@ -48,7 +48,6 @@ import com.caucho.amber.AmberRuntimeException;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.transaction.ManagedResource;
 import com.caucho.transaction.ManagedXAResource;
-import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -221,13 +220,22 @@ public class EntityManagerJtaProxy
   {
     EntityManager em = getCurrent();
     
-    if (em != null)
-      return em.find(entityClass, primaryKey);
+    if (em != null) {
+      try {
+        T value = em.find(entityClass, primaryKey);
+
+        return value;
+      } catch (RuntimeException e) {
+        throw e;
+      }
+    }
     
     em = createEntityManager();
     
     try {
-      return em.find(entityClass, primaryKey);
+      T value = em.find(entityClass, primaryKey);
+
+      return value;
     } finally {
       freeEntityManager(em);
     }
@@ -867,6 +875,8 @@ public class EntityManagerJtaProxy
         return em;
       }
 
+      // env/0e70
+      /*
       UserTransactionImpl ut = _ut.getCurrentUserTransactionImpl();
 
       if (ut != null && ut.isInContext()) {
@@ -878,6 +888,7 @@ public class EntityManagerJtaProxy
 
         return em;
       }
+      */
       
       return null;
     } catch (RuntimeException e) {
@@ -894,10 +905,11 @@ public class EntityManagerJtaProxy
   {
     EntityManager em = _idleEntityManagerPool.allocate();
     
-    if (em != null)
-      return em;
-    else
-      return _emf.createEntityManager(_persistenceUnit.getProperties());
+    if (em == null) {
+      em = _emf.createEntityManager(_persistenceUnit.getProperties());
+    }
+      
+    return em;
   }
   
   private void freeEntityManager(EntityManager em)

@@ -1074,13 +1074,15 @@ public class TransactionImpl implements Transaction, AlarmListener {
     
     // server/16h2
     for (int i = 0; _synchronizations != null && i < _synchronizations.size(); i++) {
-      Synchronization synchronization = _synchronizations.get(i);
+      Synchronization sync = _synchronizations.get(i);
       
       if (log.isLoggable(Level.FINEST))
-        log.finest(this + " beforeCompletion " + synchronization);
+        log.finest(this + " beforeCompletion " + sync);
 
       try {
-        synchronization.beforeCompletion();
+        System.out.println("BEFORE: " + sync);
+        log.info("BEFORE: " + sync);
+        sync.beforeCompletion();
       } catch (RuntimeException e) {
         setRollbackOnly(e);
 
@@ -1094,9 +1096,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
     }
 
     if (_interposedSynchronizations != null) {
-      for (Synchronization interposedSynchronization : _interposedSynchronizations) {
+      for (Synchronization sync : _interposedSynchronizations) {
         try {
-          interposedSynchronization.beforeCompletion();
+          System.out.println("BEFORE2: " + sync);
+          log.info("BEFORE2: " + sync);
+          sync.beforeCompletion();
         } catch (RuntimeException e) {
           setRollbackOnly(e);
 
@@ -1175,7 +1179,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     int length = (interposedSynchronizations == null 
                   ? 0
                   : interposedSynchronizations.size());
-    for (int i = 0; i < length; i++) {
+    for (int i = length - 1; i >= 0; i--) {
       Synchronization sync
         = (Synchronization) interposedSynchronizations.get(i);
 
@@ -1183,6 +1187,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
         if (log.isLoggable(Level.FINEST))
           log.finest(this + " afterCompletion " + sync);
 
+        log.info("AFTER: " + sync + " " + status);
+        System.out.println("AFTER: " + sync + " " + status);
         sync.afterCompletion(status);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
@@ -1190,13 +1196,15 @@ public class TransactionImpl implements Transaction, AlarmListener {
     }
 
     length = synchronizations == null ? 0 : synchronizations.size();
-    for (int i = 0; i < length; i++) {
+    for (int i = length - 1; i >= 0; i--) {
       Synchronization sync = (Synchronization) synchronizations.get(i);
 
       try {
         if (log.isLoggable(Level.FINEST))
           log.finest(this + " afterCompletion " + sync);
 
+        log.info("AFTER2: " + sync + " " + status);
+        System.out.println("AFTER2: " + sync + " " + status);
         sync.afterCompletion(status);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);

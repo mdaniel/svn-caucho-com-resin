@@ -78,10 +78,6 @@ public class AnnotatedElementImpl implements Annotated
         _annSet.add(ann);
       }
     }
-    
-    if (String.valueOf(annotated).indexOf("ping") >= 0) {
-      System.out.println("AM2: " + System.identityHashCode(this) + " " + annotated + " " + _annSet);
-    }
   }
 
   public AnnotatedElementImpl(Annotated annotated)

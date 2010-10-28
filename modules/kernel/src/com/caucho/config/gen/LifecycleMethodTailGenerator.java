@@ -56,6 +56,7 @@ public class LifecycleMethodTailGenerator<X> extends MethodTailGenerator<X>
     String declName = javaMethod.getDeclaringClass().getSimpleName();
     String methodName = javaMethod.getName();
     _invokeMethodName = "__caucho_postConstruct_" + declName + "_" + methodName;
+    // _invokeMethodName = "__caucho_postConstructImpl";
   }
   
   @Override

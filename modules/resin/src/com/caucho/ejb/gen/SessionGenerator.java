@@ -265,11 +265,15 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     }
     
     for (AnnotatedMethod<? super X> method : getBeanType().getMethods()) {
-      if (method.isAnnotationPresent(PostConstruct.class)) {
-        // only one post construct
+      Method javaMethod = method.getJavaMember();
+      
+      if (method.isAnnotationPresent(PostConstruct.class)
+          && javaMethod.getParameterTypes().length == 0) {
+        // ejb/1060 only one post construct
         addPostConstructMethod(method);
       }
-      else if (method.isAnnotationPresent(PreDestroy.class)) {
+      else if (method.isAnnotationPresent(PreDestroy.class)
+               && javaMethod.getParameterTypes().length == 0) {
         addPreDestroyMethod(method);
       }
     }

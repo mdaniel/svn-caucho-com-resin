@@ -161,15 +161,29 @@ public class InterceptorFactory<X>
     
     boolean isPrivate
       = Modifier.isPrivate(method.getJavaMember().getModifiers());
+    
+    boolean isLifecycle
+      = method.isAnnotationPresent(PostConstruct.class);
 
     AnnotatedType<?> beanType;
 
     // XXX: interceptor/singleton/business/annotated
     // packaging/war/mbean/interceptor/lifecycle
+    /*
     if (isPrivate)
       beanType = method.getDeclaringType();
     else
       beanType = getBeanType();
+      */
+    
+    /*
+    if (isLifecycle)
+      beanType = method.getDeclaringType();
+    else
+      beanType = getBeanType();
+      */
+    
+    beanType = getBeanType();
 
     // beanType = method.getDeclaringType();
     // beanType = getBeanType();
