@@ -34,7 +34,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.vfs.CaseInsensitive;
 
-import javax.servlet.FilterChain;
+import javax.servlet.*;
+import java.io.*;
 import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -47,6 +48,8 @@ public abstract class AbstractRuleWithConditions
 {
   private static final L10N L = new L10N(AbstractRuleWithConditions.class);
   private static final Logger log = Logger.getLogger(AbstractRuleWithConditions.class.getName());
+
+  private static final FilterChainNext NEXT = new FilterChainNext();
 
   private final boolean _isFiner;
   private final boolean _isFinest;
@@ -170,9 +173,35 @@ public abstract class AbstractRuleWithConditions
     super.init();
   }
 
+  @Override
   public FilterChain map(String uri,
                          String queryString,
                          FilterChain accept)
+    throws ServletException
+  {
+    AbstractRuleWithConditions rule = this;
+
+    while (rule != null) {
+      FilterChain next = rule.mapImpl(uri, queryString, accept);
+
+      if (next != NEXT)
+        return next;
+
+      FilterChainMapper nextRule = rule.getFailFilterChainMapper();
+
+      if (nextRule instanceof AbstractRuleWithConditions) {
+        rule = (AbstractRuleWithConditions) nextRule;
+      }
+      else
+        return nextRule.map(uri, queryString, accept);
+    }
+
+    return null;
+  }
+
+  public FilterChain mapImpl(String uri,
+                             String queryString,
+                             FilterChain accept)
     throws ServletException
   {
 
@@ -180,7 +209,7 @@ public abstract class AbstractRuleWithConditions
       if (_isFinest)
         log.finest(getLogPrefix() + " not enabled, no match");
 
-      return getFailFilterChainMapper().map(uri, queryString, accept);
+      return NEXT;
     }
 
     Matcher matcher;
@@ -192,21 +221,21 @@ public abstract class AbstractRuleWithConditions
         if (_isFinest)
           log.finest(getLogPrefix() + " does not match " + uri);
 
-        return getFailFilterChainMapper().map(uri, queryString, accept);
+        return NEXT;
       }
     }
     else if (_urlRegexp != null) {
       String fullUrl;
-      
+
       if (queryString != null)
         fullUrl = uri + '?' + queryString;
       else
         fullUrl = uri;
-      
+
       matcher = _urlRegexp.matcher(fullUrl);
 
       if (! matcher.find()) {
-        return getFailFilterChainMapper().map(uri, queryString, accept);
+        return NEXT;
       }
     }
     else
@@ -215,10 +244,10 @@ public abstract class AbstractRuleWithConditions
     String targetUri = rewrite(uri, matcher);
 
     FilterChain ruleChain = dispatch(targetUri, queryString,
-				     accept, getPassFilterChainMapper());
+                                     accept, getPassFilterChainMapper());
 
     Condition []conditions = _conditions;
-    
+
     if (conditions == null) {
       if (_isFiner)
         log.finer(getLogPrefix() + " '" + uri + "' --> '" + targetUri + "'");
@@ -233,14 +262,14 @@ public abstract class AbstractRuleWithConditions
 
       if (passChain == null) {
         passChain = new ContinueMapFilterChain(targetUri,
-					       queryString,
+                                               queryString,
                                                accept,
                                                getPassFilterChainMapper());
       }
 
       FilterChain failChain
         = new ContinueMapFilterChain(uri,
-				     queryString,
+                                     queryString,
                                      accept,
                                      getFailFilterChainMapper());
 
@@ -275,7 +304,7 @@ public abstract class AbstractRuleWithConditions
    * @param next
    */
   abstract public FilterChain dispatch(String targetUri,
-				       String queryString,
+                                       String queryString,
                                        FilterChain accept,
                                        FilterChainMapper next)
     throws ServletException;
@@ -302,4 +331,11 @@ public abstract class AbstractRuleWithConditions
     super.destroy();
   }
 
+  static class FilterChainNext implements FilterChain {
+    @Override
+      public void doFilter(ServletRequest request, ServletResponse response)
+      throws ServletException, IOException
+    {
+    }
+  }
 }
