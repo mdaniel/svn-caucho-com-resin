@@ -29,45 +29,36 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.util.L10N;
-
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
-import java.util.logging.Logger;
+
+import com.caucho.config.inject.InjectManager;
 
 /**
  * Generator for a component value.
  */
 public class ComponentValueGenerator extends ValueGenerator {
-  private static final Logger log
-    = Logger.getLogger(ComponentValueGenerator.class.getName());
-  private static final L10N L = new L10N(ComponentValueGenerator.class);
+  private final InjectManager _cdiManager;
+  private final Bean<?> _bean;
 
-  private final InjectManager _beanManager;
-  private final Bean _bean;
-
-  private final String _location;
-
-  public ComponentValueGenerator(String location, Bean bean)
+  public ComponentValueGenerator(String location, Bean<?> bean)
   {
     if (bean == null)
       throw new NullPointerException();
 
-    _location = location;
-
-    _beanManager = InjectManager.create();
+    _cdiManager = InjectManager.create();
     _bean = bean;
   }
 
   /**
    * Creates the value.
    */
+  @Override
   public Object create()
   {
-    CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
-    Class type = _bean.getBeanClass();
+    CreationalContext<?> env = _cdiManager.createCreationalContext(_bean);
+    Class<?> type = _bean.getBeanClass();
 
-    return _beanManager.getReference(_bean, type, env);
+    return _cdiManager.getReference(_bean, type, env);
   }
 }

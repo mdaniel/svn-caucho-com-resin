@@ -59,7 +59,6 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
     throws EJBException
   {
     EJBContainerImpl container = null;
-
     if (properties == null) {
       container = new EJBContainerImpl();
 
@@ -79,7 +78,7 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
 
       String name = (String) properties.get(EJBContainer.APP_NAME);
 
-      container = new EJBContainerImpl(name);
+      container = new EJBContainerImpl(name, properties);
 
       // FYI: only a single module is required for web profile
       addModules(container, properties.get(EJBContainer.MODULES));

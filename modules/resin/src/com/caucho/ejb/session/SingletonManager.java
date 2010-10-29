@@ -173,6 +173,9 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
     if (instance == null) {
       instance = super.newInstance(env);
       
+      if (instance == null)
+        throw new NullPointerException(toString());
+      
       _instanceRef.compareAndSet(null, instance);
       
       instance = _instanceRef.get();

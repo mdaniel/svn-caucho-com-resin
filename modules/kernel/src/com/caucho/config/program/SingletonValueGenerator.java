@@ -29,23 +29,26 @@
 
 package com.caucho.config.program;
 
-import com.caucho.naming.*;
-import java.util.*;
-
 /**
  * Creates a new value.
  */
-abstract public class ValueGenerator implements ObjectProxy {
-  public Class<?> getType()
+public class SingletonValueGenerator extends ValueGenerator {
+  private Object _value;
+  
+  public SingletonValueGenerator(Object value)
   {
-    return null;
+    _value = value;
   }
   
   @Override
-  public Object createObject(Hashtable<?,?> env)
+  public Class<?> getType()
   {
-    return create();
+    return _value.getClass();
   }
   
-  abstract public Object create();
+  @Override
+  public Object create()
+  {
+    return _value;
+  }
 }

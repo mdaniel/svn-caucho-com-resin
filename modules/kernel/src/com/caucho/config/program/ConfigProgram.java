@@ -36,12 +36,15 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
 /**
  * A saved program for configuring an object.
  */
 public abstract class ConfigProgram implements Comparable<ConfigProgram> {
+  private static final L10N L = new L10N(ConfigProgram.class);
+  
   /**
    * Returns the program's QName
    */
@@ -89,7 +92,8 @@ public abstract class ConfigProgram implements Comparable<ConfigProgram> {
 
   public void addProgram(ConfigProgram program)
   {
-    throw new UnsupportedOperationException("Cannot add a program to a BuilderProgram. You probably need a BuilderProgramContainer.");
+    throw new UnsupportedOperationException(L.l("{0}: Cannot add a program ({1}) to a BuilderProgram. You probably need a BuilderProgramContainer.",
+                                                this, program));
   }
 
   /**

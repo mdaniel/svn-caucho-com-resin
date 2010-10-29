@@ -31,6 +31,8 @@ package com.caucho.ejb.embeddable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,10 +72,11 @@ public class EJBContainerImpl extends EJBContainer {
   public EJBContainerImpl()
     throws EJBException
   {
-    this(null);
+    this(null, new HashMap<String,String>());
   }
 
-  public EJBContainerImpl(String name)
+  public EJBContainerImpl(String name,
+                          Map<?,?> properties)
     throws EJBException
   {
     preInit(name);

@@ -30,6 +30,8 @@
 package com.caucho.ejb.manager;
 
 import javax.annotation.ManagedBean;
+import javax.annotation.sql.DataSourceDefinition;
+import javax.annotation.sql.DataSourceDefinitions;
 import javax.ejb.EJBs;
 import javax.ejb.MessageDriven;
 import javax.ejb.Singleton;
@@ -62,6 +64,12 @@ class EjbScanClass extends AbstractScanClass {
     = javax.ejb.EJBs.class.getName().toCharArray();
   private static final int EJBS_LENGTH = 14;
   
+  private static final char []DATA_SOURCE_DEFINITION
+    = DataSourceDefinition.class.getName().toCharArray();
+  
+  private static final char []DATA_SOURCE_DEFINITIONS
+    = DataSourceDefinitions.class.getName().toCharArray();
+  
   private Path _root;
   private String _className;
   private EjbManager _ejbContainer;
@@ -93,6 +101,13 @@ class EjbScanClass extends AbstractScanClass {
       _isEjb = true;
     }
     else if (isMatch(buffer, offset, length, EJBS)) {
+      _isEjb = true;
+    }
+    else if (isMatch(buffer, offset, length, DATA_SOURCE_DEFINITION)) {
+      // ejb/3042
+      _isEjb = true;
+    }
+    else if (isMatch(buffer, offset, length, DATA_SOURCE_DEFINITIONS)) {
       _isEjb = true;
     }
   }

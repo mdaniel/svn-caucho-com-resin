@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.sql.DataSourceDefinition;
+import javax.annotation.sql.DataSourceDefinitions;
 import javax.ejb.ApplicationException;
 import javax.ejb.EJBs;
 import javax.ejb.MessageDriven;
@@ -382,23 +384,23 @@ public class EjbConfig {
       if (ejbs != null) {
         _bindTypes.add(annType);
       }
+      
+      // ejb/3042
+      DataSourceDefinition dbDef
+        = annType.getAnnotation(DataSourceDefinition.class);
+      if (dbDef != null) {
+        _bindTypes.add(annType);
+      }
+      
+      DataSourceDefinitions dbDefs
+        = annType.getAnnotation(DataSourceDefinitions.class);
+      if (dbDefs != null) {
+        _bindTypes.add(annType);
+      }
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);
-    }
-  }
-  
-  private void addEjbRefs(AnnotatedType<?> annType)
-  {
-    InjectManager cdiManager = _ejbManager.getInjectManager();
-
-    try {
-    ConfigProgram program
-      = cdiManager.getInjectionPointHandler(EJBs.class).introspectType(annType);
-
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
@@ -597,9 +599,13 @@ public class EjbConfig {
   private void deployBindings(ArrayList<AnnotatedType<?>> bindTypes)
   {
     InjectManager cdiManager = _ejbManager.getInjectManager();
+
     for (AnnotatedType<?> annType : bindTypes) {
       // ioc/123q
       cdiManager.getInjectionPointHandler(EJBs.class).introspectType(annType);
+      
+      cdiManager.getInjectionPointHandler(DataSourceDefinition.class).introspectType(annType);
+      cdiManager.getInjectionPointHandler(DataSourceDefinitions.class).introspectType(annType);
     }
   }
 

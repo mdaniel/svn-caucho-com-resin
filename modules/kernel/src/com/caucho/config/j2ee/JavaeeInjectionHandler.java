@@ -146,7 +146,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     try {
       if (_manager.getJndiClassLoader() != null)
         thread.setContextClassLoader(_manager.getJndiClassLoader());
-
+      
       Jndi.bindDeep(name, gen);
     } catch (NamingException e) {
       throw ConfigException.create(e);

@@ -12,9 +12,34 @@ javaee_boolean =
   | "no"
 
 javaee_description = element description {
-  attribute xml:lang { string }?,
+
+attribute xml:lang { string }?,
 
   string
+}
+
+javaee_data-source = element data-source {
+  attribute id { string }?,
+  javaee_description-Group,
+
+  element name { string }?,
+  element class-name { string }?,
+  element server-name { string }?,
+  element port-number { string }?,
+  element database-name { string }?,
+  element url {string }?,
+  element user { string }?,
+  element password { string }?,
+  element property {javaee_property-Type } *,
+  element login-timeout { string }?,
+  element transactional { string }?,
+  element isolation-level { string }?,
+  element initial-pool-size { string }?,
+  element max-pool-size { string }?,
+  element min-pool-size { string }?,
+  element max-idle-time { string }?,
+  element max-statements { string }?
+
 }
 
 javaee_description-Group =
@@ -143,6 +168,8 @@ javaee_injection-target = element injection-target {
 javaee_java-identifier = string
 
 javaee_jndi-environment-refs-Group =
+  javaee_data-source*,
+
   javaee_env-entry*,
 
   javaee_ejb-ref*,

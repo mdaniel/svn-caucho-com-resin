@@ -56,6 +56,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.Resource;
+import javax.annotation.sql.DataSourceDefinition;
+import javax.annotation.sql.DataSourceDefinitions;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.ejb.Stateful;
@@ -119,10 +121,12 @@ import com.caucho.config.el.CandiExpressionFactory;
 import com.caucho.config.event.EventBeanImpl;
 import com.caucho.config.event.EventManager;
 import com.caucho.config.extension.ExtensionManager;
+import com.caucho.config.j2ee.DataSourceDefinitionHandler;
 import com.caucho.config.j2ee.EjbHandler;
 import com.caucho.config.j2ee.PersistenceContextHandler;
 import com.caucho.config.j2ee.PersistenceUnitHandler;
 import com.caucho.config.j2ee.ResourceHandler;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ResourceProgramManager;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
@@ -203,6 +207,7 @@ public final class InjectManager
 
   private EnvironmentClassLoader _classLoader;
   private ClassLoader _jndiClassLoader;
+  private boolean _isChildManager;
   
   private final InjectScanManager _scanManager;
   private final ExtensionManager _extensionManager
@@ -300,6 +305,9 @@ public final class InjectManager
 
   private ArrayList<Bean<?>> _pendingServiceList
     = new ArrayList<Bean<?>>();
+  
+  private ArrayList<ConfigProgram> _globalProgram
+    = new ArrayList<ConfigProgram>();
   
   private ConcurrentHashMap<Bean<?>,ReferenceFactory<?>> _refFactoryMap
     = new ConcurrentHashMap<Bean<?>,ReferenceFactory<?>>();
@@ -406,6 +414,10 @@ public final class InjectManager
                         new EjbHandler(this));
       _injectionMap.put(EJBs.class,
                         new EjbHandler(this));
+      _injectionMap.put(DataSourceDefinition.class,
+                        new DataSourceDefinitionHandler(this));
+      _injectionMap.put(DataSourceDefinitions.class,
+                        new DataSourceDefinitionHandler(this));
 
       _deploymentMap.put(CauchoDeployment.class, 0);
       // DEFAULT_PRIORITY
@@ -588,6 +600,10 @@ public final class InjectManager
   
   public void setJndiClassLoader(ClassLoader loader)
   {
+    if (_parent == null)
+      throw new IllegalStateException();
+    
+    _isChildManager = true;
     _jndiClassLoader = loader;
   }
 
@@ -1267,6 +1283,17 @@ public final class InjectManager
       */
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
+  public void addGlobalProgram(ConfigProgram program)
+  {
+    if (program != null) {
+      if (_isChildManager)
+        _parent.addGlobalProgram(program);
+      else { 
+        _globalProgram.add(program);
+      }
     }
   }
 
@@ -3421,6 +3448,8 @@ public final class InjectManager
       
       addDecorators();
       addInterceptors();
+      
+      bindGlobals();
 
       validate();
       
@@ -3439,6 +3468,19 @@ public final class InjectManager
       throw e;
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
+  public void bindGlobals()
+  {
+    if (_globalProgram.size() > 0) {
+      ArrayList<ConfigProgram> programList
+        = new ArrayList<ConfigProgram>(_globalProgram);
+      _globalProgram.clear();
+
+      for (ConfigProgram program : programList) {
+        program.inject(this, null);
+      }
     }
   }
   

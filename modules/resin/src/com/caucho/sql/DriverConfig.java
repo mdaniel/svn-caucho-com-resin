@@ -55,6 +55,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.PropertyStringProgram;
+import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.TypeFactory;
 import com.caucho.config.types.InitParam;
@@ -280,6 +281,11 @@ public class DriverConfig
   public void addBuilderProgram(ConfigProgram program)
   {
     _init.addProgram(program);
+  }
+  
+  public void setProperty(String name, Object value)
+  {
+    _init.addProgram(new PropertyValueProgram(name, value));
   }
 
   /**

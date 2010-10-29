@@ -534,8 +534,8 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   {
     config();
     
-    InjectManager.create().bind();
-    
+    _cdiManager.bind();
+
     for (AbstractEjbBeanManager<?> manager : sortManagers()) {
       manager.bind();
     }

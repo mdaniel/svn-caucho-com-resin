@@ -195,7 +195,7 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
     super.generateApplicationException(out, exn);
 
     // ejb/5064
-    if (getMethod().getAnnotation(Remove.class) != null) {
+    if (getMethod().getAnnotation(Remove.class) == null) {
       out.println("isValid = true;");
     }
   }

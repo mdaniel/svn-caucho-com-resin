@@ -48,6 +48,7 @@ import com.caucho.amber.AmberRuntimeException;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.transaction.ManagedResource;
 import com.caucho.transaction.ManagedXAResource;
+import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -71,8 +72,8 @@ public class EntityManagerJtaProxy
   private final FreeList<EntityManager> _idleEntityManagerPool
     = new FreeList<EntityManager>(8);
 
-  private final ThreadLocal<EntityManager> _threadEntityManager
-    = new ThreadLocal<EntityManager>();
+  private final ThreadLocal<EntityManagerItem> _threadEntityManager
+    = new ThreadLocal<EntityManagerItem>();
 
   private Object _serializationHandle;
   
@@ -853,38 +854,43 @@ public class EntityManagerJtaProxy
    */
   private EntityManager getCurrent()
   {
-    EntityManager em = _threadEntityManager.get();
-
-    if (em != null)
-      return em;
-
     try {
+      EntityManagerItem item = _threadEntityManager.get();
+      Transaction xa = _ut.getTransaction();
+      
+      if (item != null && xa == item.getXa())
+        return item.getEntityManager();
+
       if (_emf == null) {
         _emf = _persistenceUnit.getEntityManagerFactoryDelegate();
       }
 
-      Transaction xa = _ut.getTransaction();
-
+      EntityManager em;
+      
       if (xa != null) {
         em = _emf.createEntityManager(_persistenceUnit.getProperties());
 
-        _threadEntityManager.set(em);
+        item = new EntityManagerItem(item, em, xa);
+        
+        _threadEntityManager.set(item);
 
-        xa.registerSynchronization(new EntityManagerSynchronization(em));
+        xa.registerSynchronization(item);
 
         return em;
       }
 
-      // env/0e70
       /*
+      // env/0e70
       UserTransactionImpl ut = _ut.getCurrentUserTransactionImpl();
 
       if (ut != null && ut.isInContext()) {
         em = _emf.createEntityManager(_persistenceUnit.getProperties());
 
-        _threadEntityManager.set(em);
+        item = new EntityManagerItem(null, em, xa);
+        
+        _threadEntityManager.set(item);
 
-        ut.enlistResource(new EntityManagerCloseResource(em));
+        ut.enlistResource(item);
 
         return em;
       }
@@ -942,12 +948,34 @@ public class EntityManagerJtaProxy
     return getClass().getSimpleName() + "[" + _persistenceUnit + "]";
   }
 
-  class EntityManagerSynchronization implements Synchronization {
-    private EntityManager _em;
-
-    EntityManagerSynchronization(EntityManager em)
+  class EntityManagerItem implements Synchronization, ManagedResource {
+    private final EntityManagerItem _prev;
+    
+    private final EntityManager _em;
+    private final Transaction _xa;
+    
+    EntityManagerItem(EntityManagerItem prev,
+                      EntityManager em,
+                      Transaction xa)
     {
+      _prev = prev;
       _em = em;
+      _xa = xa;
+    }
+    
+    EntityManager getEntityManager()
+    {
+      return _em;
+    }
+    
+    Transaction getXa()
+    {
+      return _xa;
+    }
+    
+    EntityManagerItem getPrev()
+    {
+      return _prev;
     }
 
     @Override
@@ -958,23 +986,12 @@ public class EntityManagerJtaProxy
     @Override
     public void afterCompletion(int status)
     {
-      _threadEntityManager.set(null);
-
-      freeEntityManager(_em);
-    }
-  }
-
-  class EntityManagerCloseResource implements ManagedResource {
-    private EntityManager _em;
-
-    EntityManagerCloseResource(EntityManager em)
-    {
-      _em = em;
+      close();
     }
 
     public void close()
     {
-      _threadEntityManager.set(null);
+      _threadEntityManager.set(_prev);
 
       freeEntityManager(_em);
     }

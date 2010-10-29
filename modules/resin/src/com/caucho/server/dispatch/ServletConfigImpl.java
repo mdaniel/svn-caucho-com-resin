@@ -268,7 +268,7 @@ public class ServletConfigImpl
   public MultipartConfigElement getMultipartConfig()
   {
     if (_multipartConfigElement == null) {
-      Class servletClass = getServletClass();
+      Class<?> servletClass = getServletClass();
 
       if (servletClass != null) {
         MultipartConfig config
@@ -427,8 +427,18 @@ public class ServletConfigImpl
         ((WebApp) _servletContext).createJsp().setLoadTldOnInit(true);
     }
 
-    InjectManager beanManager = InjectManager.create();
-    beanManager.addConfiguredBean(servletClassName);
+    InjectManager cdiManager = InjectManager.create();
+    cdiManager.addConfiguredBean(servletClassName);
+    
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    try {
+      _servletClass = Class.forName(servletClassName, false, loader);
+
+      if (_comp == null)
+        _comp = cdiManager.createInjectionTarget(_servletClass);
+    } catch (ClassNotFoundException e) {
+      log.log(Level.ALL, e.toString(), e);
+    }
   }
   
   private boolean isFacesServlet()
@@ -443,6 +453,7 @@ public class ServletConfigImpl
       throw new IllegalStateException();
 
     _servletClass = servletClass;
+    System.out.println("SC@: " + servletClass);
   }
 
   /**
@@ -462,6 +473,7 @@ public class ServletConfigImpl
         ClassLoader loader = thread.getContextClassLoader();
 
         _servletClass = Class.forName(_servletClassName, false, loader);
+        System.out.println("SC: " + _servletClass);
       } catch (Exception e) {
         throw error(L.l("'{0}' is not a known servlet class.  Servlets belong in the classpath, for example WEB-INF/classes.",
                         _servletClassName),
@@ -1285,7 +1297,8 @@ public class ServletConfigImpl
     else if (servletClass != null) {
       InjectManager inject = InjectManager.create();
 
-      _comp = inject.createInjectionTarget(servletClass);
+      if (_comp == null)
+        _comp = inject.createInjectionTarget(servletClass);
 
       CreationalContextImpl env = new OwnerCreationalContext(null);
 

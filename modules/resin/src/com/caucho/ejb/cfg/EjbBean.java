@@ -60,6 +60,7 @@ import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
+import com.caucho.config.types.DataSourceRef;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.EjbLocalRef;
 import com.caucho.config.types.EjbRef;
@@ -894,6 +895,20 @@ public class EjbBean<X> extends DescriptionGroupConfig
   //
   // references and resources
   //
+  
+  public DataSourceRef createDataSource()
+  {
+    DataSourceRef def = new DataSourceRef();
+    
+    def.setProgram(true);
+
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    def.setJndiClassLoader(loader);
+    
+    _resourceList.add(def);
+    
+    return def;
+  }
   
   public EnvEntry createEnvEntry()
   {

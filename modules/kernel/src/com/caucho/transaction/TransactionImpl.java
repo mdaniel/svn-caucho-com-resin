@@ -1071,35 +1071,35 @@ public class TransactionImpl implements Transaction, AlarmListener {
   private void callBeforeCompletion() throws RollbackException
   {
     _alarm.dequeue();
-    
-    // server/16h2
-    for (int i = 0; _synchronizations != null && i < _synchronizations.size(); i++) {
-      Synchronization sync = _synchronizations.get(i);
-      
-      if (log.isLoggable(Level.FINEST))
-        log.finest(this + " beforeCompletion " + sync);
-
-      try {
-        System.out.println("BEFORE: " + sync);
-        log.info("BEFORE: " + sync);
-        sync.beforeCompletion();
-      } catch (RuntimeException e) {
-        setRollbackOnly(e);
-
-        RollbackException newException = new RollbackException(e.toString());
-        newException.initCause(e);
-
-        throw newException;
-      } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-    }
 
     if (_interposedSynchronizations != null) {
-      for (Synchronization sync : _interposedSynchronizations) {
+      for (int i = _interposedSynchronizations.size() - 1; i >= 0; i--) {
+        Synchronization sync = _interposedSynchronizations.get(i);
+        
         try {
-          System.out.println("BEFORE2: " + sync);
-          log.info("BEFORE2: " + sync);
+          sync.beforeCompletion();
+        } catch (RuntimeException e) {
+          setRollbackOnly(e);
+
+          RollbackException newException = new RollbackException(e.toString());
+          newException.initCause(e);
+
+          throw newException;
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+      }
+    }
+    
+    // server/16h2
+    if (_synchronizations != null) {
+      for (int i = _synchronizations.size() - 1; i >= 0; i--) {
+        Synchronization sync = _synchronizations.get(i);
+
+        if (log.isLoggable(Level.FINEST))
+          log.finest(this + " beforeCompletion " + sync);
+
+        try {
           sync.beforeCompletion();
         } catch (RuntimeException e) {
           setRollbackOnly(e);
@@ -1187,8 +1187,6 @@ public class TransactionImpl implements Transaction, AlarmListener {
         if (log.isLoggable(Level.FINEST))
           log.finest(this + " afterCompletion " + sync);
 
-        log.info("AFTER: " + sync + " " + status);
-        System.out.println("AFTER: " + sync + " " + status);
         sync.afterCompletion(status);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
@@ -1203,8 +1201,6 @@ public class TransactionImpl implements Transaction, AlarmListener {
         if (log.isLoggable(Level.FINEST))
           log.finest(this + " afterCompletion " + sync);
 
-        log.info("AFTER2: " + sync + " " + status);
-        System.out.println("AFTER2: " + sync + " " + status);
         sync.afterCompletion(status);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);

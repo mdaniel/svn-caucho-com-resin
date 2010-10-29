@@ -261,7 +261,8 @@ public class ManagedConnectionImpl
       _driverConnection = _driver.createDriverConnection(user, password);
 
     if (_driverConnection == null)
-      throw new SQLException(L.l("Failed to create driver connection."));
+      throw new SQLException(L.l("Failed to create driver connection for {0}.",
+                                 _driver));
 
     DBPoolImpl dbPool = getDBPool();
 

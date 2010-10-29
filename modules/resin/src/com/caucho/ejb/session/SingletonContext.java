@@ -57,18 +57,19 @@ public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
   @Override
   public T createProxy(CreationalContextImpl<T> env)
   {
-    synchronized (this) {
-      if (_proxy == null) {
-        _proxy = super.createProxy(env);
+    if (_proxy == null) {
+      T proxy = super.createProxy(env);
 
-        if (env != null)
-          env.push(_proxy);
-        
-        getServer().initProxy(_proxy, env);
-      }
-      
-      return _proxy;
+      if (env != null)
+        env.push(proxy);
+
+      getServer().initProxy(proxy, env);
+
+      if (_proxy == null)
+        _proxy = proxy;
     }
+    
+    return _proxy;
   }
 
   /**
