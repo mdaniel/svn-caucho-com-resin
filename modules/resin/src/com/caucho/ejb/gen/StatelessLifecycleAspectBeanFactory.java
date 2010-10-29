@@ -67,7 +67,7 @@ public class StatelessLifecycleAspectBeanFactory<X>
   @Override
   public String getInterceptorInstance()
   {
-    return getBeanInfo() + ".getValue()";
+    return "_statelessPool.getLifecycleInstance()";
   }
   
   /**
@@ -76,6 +76,6 @@ public class StatelessLifecycleAspectBeanFactory<X>
   @Override
   public String getBeanInfo()
   {
-    return "_statelessPool.getLifecycleInstance()";
+    return "_statelessPool.getLifecycleItem()";
   }
 }

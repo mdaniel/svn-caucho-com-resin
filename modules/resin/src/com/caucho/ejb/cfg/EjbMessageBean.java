@@ -732,7 +732,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
       manager.setConfigLocation(getFilename(), getLine());
 
       manager.setMappedName(getMappedName());
-      manager.setId(getEJBModuleName() + "#" + getMappedName());
+      manager.setId(getEJBClass().getSimpleName() + "#" + getEJBName());
 
       manager.setContainerTransaction(isContainerTransaction());
 

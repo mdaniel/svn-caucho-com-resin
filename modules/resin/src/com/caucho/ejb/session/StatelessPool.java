@@ -166,7 +166,17 @@ public class StatelessPool<X,T> {
     }
   }
   
-  public Item<X> getLifecycleInstance()
+  public X getLifecycleInstance()
+  {
+    Item<X> item = _lifecycleInstanceLocal.get();
+    
+    if (item != null)
+      return item.getValue();
+    else
+      return null;
+  }
+  
+  public Item<X> getLifecycleItem()
   {
     return _lifecycleInstanceLocal.get();
   }

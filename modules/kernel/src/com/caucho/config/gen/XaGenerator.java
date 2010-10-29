@@ -258,12 +258,12 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   {
     boolean isError = Error.class.isAssignableFrom(exn);
 
+    out.println("if (_xa.systemException(e)) {");
+    out.pushDepth();
+  
     if (isEjb()) {
       if (! isError)
         out.println("isXAValid = true;");
-    
-      out.println("if (_xa.systemException(e)) {");
-      out.pushDepth();
     
       if (_isContainerManaged) {
         switch (_transactionType) {
@@ -296,10 +296,12 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
       else {
         out.println("_xa.rethrowEjbException(e, false);");
       }
-    
-      out.popDepth();
-      out.println("}");
     }
+    
+    out.popDepth();
+    out.println("} else {");
+    out.println("  isXAValid = true;");
+    out.println("}");
   }
 
   /**
