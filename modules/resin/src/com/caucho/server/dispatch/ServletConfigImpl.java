@@ -449,11 +449,10 @@ public class ServletConfigImpl
   @DisableConfig
   public void setServletClass(Class<? extends Servlet> servletClass)
   {
-    if (_servletClass != null)
+    if (_servletClass == null)
       throw new IllegalStateException();
 
     _servletClass = servletClass;
-    System.out.println("SC@: " + servletClass);
   }
 
   /**
@@ -473,7 +472,6 @@ public class ServletConfigImpl
         ClassLoader loader = thread.getContextClassLoader();
 
         _servletClass = Class.forName(_servletClassName, false, loader);
-        System.out.println("SC: " + _servletClass);
       } catch (Exception e) {
         throw error(L.l("'{0}' is not a known servlet class.  Servlets belong in the classpath, for example WEB-INF/classes.",
                         _servletClassName),

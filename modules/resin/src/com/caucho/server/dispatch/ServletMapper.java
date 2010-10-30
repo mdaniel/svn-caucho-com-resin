@@ -638,7 +638,7 @@ public class ServletMapper {
     ServletConfigImpl config = new ServletConfigImpl();
     config.setServletContext(_webApp);
     config.setServletName(servletName);
-
+    
     try {
       config.setServletClass(servletName);
     } catch (RuntimeException e) {
