@@ -29,19 +29,37 @@
 
 package com.caucho.resin.eclipse;
 
+import java.awt.Color;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.jst.server.generic.core.internal.GenericServer;
 import org.eclipse.jst.server.generic.core.internal.GenericServerRuntime;
 import org.eclipse.jst.server.generic.ui.internal.GenericServerWizardFragment;
@@ -52,22 +70,27 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.internal.browser.WorkbenchBrowserSupport;
+import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
@@ -78,15 +101,18 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
 {
   public static final String SERVER_PROPERTIES_ENTERED =
     "resin.server.properties.entered";
+  private final static String resinPlugin = "com.caucho.resin.eclipse";
 
   private String _resinConfType = ResinServer.RESIN_CONF_BUNDLE;
   private Combo _versionCombo = null;
-  private Button _downloadButton = null;
+  private Button _resinDownloadButton = null;
   private Text _resinHomeTextField = null;
   private Text _resinRootTextField = null;
   private Text _userConfTextField = null;
+  private ProgressBar _progressBar = null;
   private boolean _copyConfig = false;
   private IWizardHandle _wizard = null;
+  private ILog _log = null;
 
   @Override
   public void createContent(final Composite parent, final IWizardHandle handle)
@@ -94,144 +120,10 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     createResinPathsContent(parent);
     super.createContent(parent, handle);
     createConfigContent(parent);
-
     _wizard = handle;
+   _log = ResourcesPlugin.getPlugin().getLog();
   }
 
-  private void download(SelectionEvent event, Composite parent)
-  {
-    ((Button) event.getSource()).setEnabled(false);
-
-    String[] versions = getVersions(parent.getShell());
-
-    _versionCombo.setData(versions);
-
-    _versionCombo.removeAll();
-
-    if (versions == null) {
-      _versionCombo.setText("Please download manually.");
-      _versionCombo.setEnabled(false);
-    }
-    else {
-      for (String version : versions) {
-        StringBuilder v = new StringBuilder();
-        boolean pro = false;
-        boolean snap = false;
-        char[] chars = version.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-          char c = chars[i];
-          if (Character.isDigit(c)) {
-            v.append(c);
-          }
-          else if ('-' == c) {
-          }
-          else if ('_' == c || '.' == c) {
-            v.append('.');
-          }
-          else if (c == 'o' && chars[i - 2] == 'p') {
-            pro = true;
-          }
-          else if (c == 'p' && chars[i - 3] == 's') {
-            snap = true;
-          }
-        }
-
-        String item = "Resin " + (pro ? "Pro " : " ")
-          + v.substring(0, v.length() - 1) + (snap ? " Snapshot" : "");
-        _versionCombo.add(item);
-      }
-
-      _versionCombo.select(0);
-      _versionCombo.setEnabled(true);
-      _versionCombo.setListVisible(true);
-    }
-
-    _downloadButton.setEnabled(true);
-  }
-
-  private String[] getVersions(Composite parent)
-  {
-    try {
-      URL url = new URL("http://www.caucho.com/download/");
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-      BufferedReader reader = new BufferedReader(new InputStreamReader(
-        connection.getInputStream(),
-        "UTF-8"));
-      int c;
-      List<String> versions = new ArrayList<String>();
-      StringBuilder href = new StringBuilder();
-      while ((c = reader.read()) > 0) {
-        if ('\"' == c) {
-          if (href.length() > 9
-            && href.charAt(0) == 'r' && href.charAt(1) == 'e'
-            && href.charAt(2) == 's' && href.charAt(3) == 'i'
-            && href.charAt(4) == 'n' && href.charAt(5) == '-'
-            && href.lastIndexOf(".zip") == href.length() - 4
-            && href.charAt(href.length() - 5) != 'c') {
-            versions.add(href.toString());
-          }
-          else {
-            href = new StringBuilder();
-          }
-        }
-        else if (' ' == c
-          || '<' == c
-          || '=' == c
-          || '>' == c
-          || '\n' == c
-          || '\r' == c
-          || '\t' == c) {
-          href = new StringBuilder();
-        }
-        else {
-          href.append((char) c);
-        }
-      }
-
-      return versions.toArray(new String[versions.size()]);
-    } catch (MalformedURLException e) {
-    } catch (IOException e) {
-      e.printStackTrace();
-      MessageBox mb = new MessageBox(parent.getShell());
-      mb.setText("Can not connect to Caucho.com.");
-      mb.setMessage(e.getMessage());
-      mb.open();
-    }
-
-    return null;
-  }
-
-  private void go(SelectionEvent event, Composite parent)
-  {
-    String[] version = (String[]) _versionCombo.getData();
-    if (version == null || true) {
-      int style = IWorkbenchBrowserSupport.AS_EXTERNAL
-        | IWorkbenchBrowserSupport.LOCATION_BAR
-        | IWorkbenchBrowserSupport.STATUS;
-
-      IWebBrowser browser;
-      try {
-        browser = WorkbenchBrowserSupport.getInstance().createBrowser(style,
-                                                                      "",
-                                                                      "",
-                                                                      "");
-        browser.openURL(new URL("http://www.caucho.com/download/"));
-      } catch (PartInitException e) {
-        e.printStackTrace();
-      } catch (MalformedURLException e) {
-        e.printStackTrace();
-      }
-
-      return;
-    }
-
-    DirectoryDialog dialog = new DirectoryDialog(parent.getShell());
-    String currentText =
-      _resinRootTextField.getText().replace('\\', '/');
-    dialog.setFilterPath(currentText);
-    String filename = dialog.open();
-  }
 
   private void createResinPathsContent(final Composite parent)
   {
@@ -245,36 +137,31 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     GridData indentedRowFillGridData =
       new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1);
     indentedRowFillGridData.horizontalIndent = 20;
-
+    
     Button downloadButton = new Button(composite, SWT.TOGGLE);
     downloadButton.setText("Download Resin");
     downloadButton.addSelectionListener(new SelectionListener()
     {
       public void widgetDefaultSelected(SelectionEvent event)
       {
-        download(event, parent.getShell());
+        downloadVersions(event, parent.getShell());
       }
 
       public void widgetSelected(SelectionEvent event)
       {
-        download(event, parent.getShell());
+        downloadVersions(event, parent.getShell());
       }
     });
 
     _versionCombo = new Combo(composite,
                               SWT.SINGLE | SWT.SHADOW_IN | SWT.BORDER);
-    _versionCombo.setLayoutData(new GridData(SWT.FILL,
-                                             SWT.CENTER,
-                                             true,
-                                             false,
-                                             1,
-                                             1));
+    _versionCombo.setLayoutData(singleColumnFillGridData);
     _versionCombo.setEnabled(false);
 
-    _downloadButton = new Button(composite, SWT.PUSH);
-    _downloadButton.setText("Go");
-    _downloadButton.setEnabled(false);
-    _downloadButton.addSelectionListener(new SelectionListener()
+    _resinDownloadButton = new Button(composite, SWT.PUSH);
+    _resinDownloadButton.setText("  Go  ");
+    _resinDownloadButton.setEnabled(false);
+    _resinDownloadButton.addSelectionListener(new SelectionListener()
     {
       public void widgetDefaultSelected(SelectionEvent event)
       {
@@ -282,9 +169,17 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
 
       public void widgetSelected(SelectionEvent event)
       {
-        go(event, parent);
+        downloadResin(event, parent);
       }
     });
+
+    new Label(composite, SWT.NONE);
+    _progressBar = new ProgressBar(composite, SWT.SMOOTH);
+    GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1);
+    gridData.heightHint = 7;
+    _progressBar.setLayoutData(gridData);
+    _progressBar.setVisible(false);
+    new Label(composite, SWT.NONE);
 
     Label resinHomeLabel = new Label(composite, SWT.NONE);
     resinHomeLabel.setText("Resin Home");
@@ -439,7 +334,7 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     resinHomeAppDefaultLabel.setVisible(false);
 
     GridData resinHomeAppDefaultLabelGridData =
-      new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
+      new GridData(SWT.FILL, SWT.CENTER, true, true, 3, 1);
     resinHomeAppDefaultLabelGridData.widthHint =
       composite.getShell().getClientArea().width;
     resinHomeAppDefaultLabelGridData.horizontalIndent = 20;
@@ -703,6 +598,293 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     label.setText(text);
     label.redraw();
     label.getShell().pack();
+  }
+
+  private void downloadVersions(SelectionEvent event, final Composite parent)
+  {
+    ((Button)event.getSource()).setEnabled(false);
+
+    _progressBar.setMinimum(0);
+    _progressBar.setMaximum(10);
+    _progressBar.setVisible(true);
+
+    final Display display = parent.getDisplay();
+
+    IRunnableWithProgress task = new IRunnableWithProgress() {
+      public void run(IProgressMonitor monitor){
+        asyncDownloadVersions(monitor, display, parent);
+      }
+    };
+
+    try {
+      _wizard.run(true, true, task);
+    } catch (Exception e) {
+      _log.log(new Status(Status.ERROR, resinPlugin, 0, e.getMessage(),e));
+    }
+
+    _versionCombo.setEnabled(true);
+    _resinDownloadButton.setEnabled(true);
+  }
+
+  private void asyncDownloadVersions(final IProgressMonitor monitor,
+      final Display display, final Composite parent)
+  {
+    try {
+      monitor.beginTask("Download Resin Versions", 1);
+      URL url = new URL("http://www.caucho.com/download/");
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+      BufferedReader reader = new BufferedReader(new InputStreamReader(
+          connection.getInputStream(), "UTF-8"));
+      int c;
+      final List<String> versions = new ArrayList<String>();
+      StringBuilder href = new StringBuilder();
+      while ((c = reader.read()) > 0) {
+        if ('\"' == c) {
+          if (href.length() > 9 && href.charAt(0) == 'r'
+              && href.charAt(1) == 'e' && href.charAt(2) == 's'
+              && href.charAt(3) == 'i' && href.charAt(4) == 'n'
+              && href.charAt(5) == '-'
+              && href.lastIndexOf(".zip") == href.length() - 4
+              && href.charAt(href.length() - 5) != 'c') {
+            versions.add(href.toString());
+            display.asyncExec(new Runnable() {
+              public void run() {
+                _progressBar.setSelection(_progressBar.getSelection() + 1);
+              }
+            });
+          } else {
+            href = new StringBuilder();
+          }
+        } else if (' ' == c || '<' == c || '=' == c || '>' == c || '\n' == c
+            || '\r' == c || '\t' == c) {
+          href = new StringBuilder();
+        } else {
+          href.append((char) c);
+        }
+      }
+
+      Runnable uiTask = new Runnable() {
+        public void run() {
+          _versionCombo.setData(versions);
+          _versionCombo.removeAll();
+          if (versions.size() == 0) {
+            _versionCombo.setText("Please download manually.");
+          } else {
+            for (String version : versions) {
+              StringBuilder v = new StringBuilder();
+              boolean pro = false;
+              boolean snap = false;
+              char []chars = version.toCharArray();
+              for (int i = 0; i < chars.length; i++) {
+                char c = chars[i];
+                if (Character.isDigit(c)) {
+                  v.append(c);
+                } else if ('_' == c || '.' == c) {
+                  v.append('.');
+                } else if (c == 'o' && chars[i - 2] == 'p') {
+                  pro = true;
+                } else if (c == 'p' && chars[i - 3] == 's') {
+                  snap = true;
+                }
+              }
+
+              String item = "Resin " + (pro ? "Pro " : " ")
+                  + v.substring(0, v.length() - 1) + (snap ? " Snapshot" : "");
+              _versionCombo.add(item);
+            }
+
+            _versionCombo.select(0);
+          }
+
+          monitor.done();
+        }
+      };
+
+      display.asyncExec(uiTask);
+    } catch (final Exception e) {
+      _log.log(new Status(Status.ERROR, resinPlugin, 0, e.getMessage(), e));
+
+      Runnable uiTask = new Runnable() {
+        public void run() {
+          MessageBox mb = new MessageBox(parent.getShell());
+          mb.setText("Can not connect to Caucho.com.");
+          mb.setMessage(e.getMessage());
+          mb.open();
+        }
+      };
+
+      display.asyncExec(uiTask);
+    }
+  }
+
+  private void downloadResin(SelectionEvent event, final Composite parent)
+  {
+    DirectoryDialog dialog = new DirectoryDialog(parent.getShell());
+    dialog.setMessage("Select directory where Resin will be installed");
+    final String dest = dialog.open();
+
+    if (dest == null)
+      return;
+
+    _resinDownloadButton.setEnabled(false);
+    List<String> versions = (List<String>) _versionCombo.getData();
+    final String version = versions.get(_versionCombo.getSelectionIndex());
+
+    IRunnableWithProgress task = new IRunnableWithProgress() {
+      public void run(IProgressMonitor monitor){
+        asyncDownloadResin(monitor, parent.getDisplay(), parent, version, dest);
+      }
+    };
+
+    try {
+      _wizard.run(true, true, task);
+    } catch (Exception e) {
+      _log.log(new Status(Status.ERROR, resinPlugin, 0, e.getMessage(),e));
+    }
+
+    _resinDownloadButton.setEnabled(true);
+  }
+
+  private void asyncDownloadResin(IProgressMonitor monitor,
+      final Display display,
+      final Composite parent,
+      String version, String dest) {
+    InputStream in = null;
+    OutputStream out = null;
+    JarFile jar = null;
+    boolean success = false;
+    String resinHome = null;
+    try {
+      URL url = new URL("http://www.caucho.com/download/" + version);
+      String temp = System.getProperty("java.io.tmpdir");
+      HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+      final int len = connection.getHeaderFieldInt("Content-Length", 20000000);
+      display.asyncExec(new Runnable(){
+        public void run() {
+          _progressBar.setSelection(0);
+          _progressBar.setMinimum(0);
+          _progressBar.setMaximum(len * 2);
+        }
+      });
+      in = connection.getInputStream();
+
+      String jarFile = temp + File.separatorChar + version;
+
+      out = new FileOutputStream(jarFile);
+      byte []buffer = new byte[65536];
+      int bytesRead;
+      final int []x = new int[1];
+      Runnable uiTask = new Runnable(){
+        public void run() {
+          _progressBar.setSelection(_progressBar.getSelection() + x[0]);
+        }
+      };
+      while ((bytesRead = in.read(buffer)) > 0) {
+        out.write(buffer, 0, bytesRead);
+        out.flush();
+        x[0] = bytesRead;
+        display.asyncExec(uiTask);
+      }
+      out.close();
+      in.close();
+
+      jar = new JarFile(jarFile);
+
+      Enumeration<JarEntry> entries = jar.entries();
+      while (entries.hasMoreElements()) {
+        JarEntry entry = entries.nextElement();
+        if (entry.isDirectory() && resinHome == null) {
+          StringBuilder path = new StringBuilder();
+          char []name = entry.getName().toCharArray();
+          for (char c: name) {
+            if (c == '/' || c =='\\')
+              break;
+            else
+              path.append(c);
+          }
+
+          resinHome = dest + File.separatorChar + path.toString();
+
+          continue;
+        } else if (entry.isDirectory()) {
+          continue;
+        }
+
+        String name = entry.getName();
+        File file = new File(dest + File.separator + name);
+        file.getParentFile().mkdirs();
+
+        in =  jar.getInputStream(entry);
+        out = new FileOutputStream(file);
+        while((bytesRead = in.read(buffer)) > 0) {
+          out.write(buffer, 0, bytesRead);
+          out.flush();
+        }
+
+        out.close();
+        in.close();
+
+        x[0] = (int)entry.getCompressedSize();
+        display.asyncExec(uiTask);
+      }
+
+      success = true;
+    } catch (Exception e) {
+      _log.log(new Status(Status.ERROR, resinPlugin, 0, e.getMessage(),e));
+    } finally {
+      try {
+        if (in != null)
+          in.close();
+      } catch (IOException e) {
+      }
+
+      try {
+        if (out != null)
+          out.close();
+      } catch (IOException e) {
+      }
+
+      try {
+        if (jar != null)
+          jar.close();
+      } catch (IOException e) {
+        _log.log(new Status(Status.ERROR, resinPlugin, 0, e.getMessage(),e));
+      }
+
+      final String resinHomeDir = resinHome;
+      display.asyncExec(new Runnable() {
+        public void run() {
+          _progressBar.setSelection(_progressBar.getMaximum());
+          if (resinHomeDir != null) {
+            _resinHomeTextField.setText(resinHomeDir);
+            _resinRootTextField.setText(resinHomeDir);
+          }
+        }
+      });
+    }
+
+    if (!success) {
+      display.asyncExec(new Runnable() {
+        public void run() {
+          // fetch manually then
+          int style = IWorkbenchBrowserSupport.AS_EXTERNAL
+              | IWorkbenchBrowserSupport.LOCATION_BAR
+              | IWorkbenchBrowserSupport.STATUS;
+          IWebBrowser browser;
+          try {
+            browser = WorkbenchBrowserSupport.getInstance().createBrowser(
+                style, "", "", "");
+            browser.openURL(new URL("http://www.caucho.com/download/"));
+          } catch (PartInitException e) {
+            _log.log(new Status(Status.ERROR, resinPlugin, 0, e.getMessage(),e));
+          } catch (MalformedURLException e) {
+            _log.log(new Status(Status.ERROR, resinPlugin, 0, e.getMessage(),e));
+          }
+          return;
+        }
+      });
+    }
   }
 
   @Override
