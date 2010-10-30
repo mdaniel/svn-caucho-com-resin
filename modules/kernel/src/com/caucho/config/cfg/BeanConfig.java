@@ -467,7 +467,7 @@ public class BeanConfig {
 
   protected boolean isStartup()
   {
-    return true;
+    return _scope == Singleton.class;
   }
 
   @PostConstruct

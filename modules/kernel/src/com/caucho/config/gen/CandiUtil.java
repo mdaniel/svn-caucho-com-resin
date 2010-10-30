@@ -92,6 +92,10 @@ public class CandiUtil {
                                          InterceptionType type,
                                          Annotation ...bindings)
   {
+    // ioc/05ah
+    if (manager.isChildManager())
+      manager = manager.getParent();
+    
     ArrayList<Integer> indexList = new ArrayList<Integer>();
     
     List<Interceptor<?>> interceptors;
@@ -204,8 +208,8 @@ public class CandiUtil {
   {
     Class<?> beanClass = bean.getBeanClass();
 
-    if (! Serializable.class.isAssignableFrom(beanClass)
-        && false) {
+    // ioc/05ai
+    if (! Serializable.class.isAssignableFrom(beanClass)) {
       ConfigException exn
       = new ConfigException(L.l("{0}: {1} is an invalid {2} because it is not serializable.",
                                 cl.getName(),

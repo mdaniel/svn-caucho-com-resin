@@ -598,6 +598,11 @@ public final class InjectManager
     return _jndiClassLoader;
   }
   
+  public boolean isChildManager()
+  {
+    return _isChildManager;
+  }
+  
   public void setJndiClassLoader(ClassLoader loader)
   {
     if (_parent == null)

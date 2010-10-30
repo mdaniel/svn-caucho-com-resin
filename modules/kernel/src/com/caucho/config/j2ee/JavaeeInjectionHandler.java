@@ -124,9 +124,11 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
 
       throw injectManager.unsatisfiedException(type, qualifiers);
     } catch (UnsatisfiedResolutionException e) {
-      throw new UnsatisfiedResolutionException(location + e, e);
+      throw new UnsatisfiedResolutionException(location + e.getMessage(), e);
+    } catch (AmbiguousResolutionException e) {
+      throw new AmbiguousResolutionException(location + e.getMessage(), e);
     } catch (InjectionException e) {
-      throw new InjectionException(location + e, e);
+      throw new InjectionException(location + e.getMessage(), e);
     }
   }
   

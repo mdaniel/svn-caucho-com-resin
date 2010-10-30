@@ -115,12 +115,17 @@ public class InterceptorFactory<X>
   private boolean _isExcludeDefaultInterceptors;
   
   private boolean _isPassivating;
+  private boolean _isStateful;
   
   public InterceptorFactory(AspectBeanFactory<X> beanFactory,
                             AspectFactory<X> next,
                             InjectManager manager)
   {
     super(beanFactory, next);
+    
+    // ejb/0i5c
+    if (manager.isChildManager())
+      manager = manager.getParent();
     
     _manager = manager;
 
@@ -141,6 +146,11 @@ public class InterceptorFactory<X>
   public boolean isPassivating()
   {
     return _isPassivating;
+  }
+  
+  public boolean isStateful()
+  {
+    return _isStateful;
   }
   
   public boolean isSelfInterceptor()
@@ -598,8 +608,12 @@ public class InterceptorFactory<X>
     }
     
     for (Annotation ann : getBeanType().getAnnotations()) {
-      if (_manager.isPassivatingScope(ann.annotationType())
-          || Stateful.class.equals(ann.annotationType())) {
+      if (_manager.isPassivatingScope(ann.annotationType())) {
+        _isPassivating = true;
+      }
+      else if (Stateful.class.equals(ann.annotationType())) {
+        _isStateful = true;
+        // ioc/05as
         _isPassivating = true;
       }
     }
@@ -609,7 +623,7 @@ public class InterceptorFactory<X>
     introspectClassInterceptorBindings();
     introspectClassDecorators();
     
-    if (_isPassivating)
+    if (isPassivating())
       validatePassivating();
   }
   
@@ -798,7 +812,7 @@ public class InterceptorFactory<X>
 
     List<Decorator<?>> decorators
       = _manager.resolveDecorators(types, decoratorBindings);
-    
+
     if (decorators.size() == 0)
       return;
     

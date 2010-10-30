@@ -57,8 +57,9 @@ public class AsynchronousFactory<X>
   {
     AnnotatedType<?> type = method.getDeclaringType();
     
-    if (type.isAnnotationPresent(Asynchronous.class)
-        || method.isAnnotationPresent(Asynchronous.class)) {
+    if (type != null
+        && (type.isAnnotationPresent(Asynchronous.class)
+            || method.isAnnotationPresent(Asynchronous.class))) {
       AspectGenerator<X> next = super.create(method, true);
 
       AspectGenerator<X> head = new AsyncHeadGenerator<X>(this, method, next);

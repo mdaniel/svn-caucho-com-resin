@@ -38,4 +38,10 @@ import javax.enterprise.util.AnnotationLiteral;
 public class EjbQualifierLiteral extends AnnotationLiteral<EjbQualifier>
   implements EjbQualifier {
   public static final EjbQualifier QUALIFIER = new EjbQualifierLiteral();
+  
+  @Override
+  public String toString()
+  {
+    return "@" + EjbQualifier.class.getSimpleName() + "()";
+  }
 }

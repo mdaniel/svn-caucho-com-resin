@@ -266,7 +266,8 @@ public class InterceptorGenerator<X>
     
     out.println(");");
     
-    if (_factory.isPassivating()) {
+    if (_factory.isPassivating()
+        || _factory.isStateful() && _interceptorBinding.size() > 0) {
       String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
       
       out.println();
@@ -673,14 +674,16 @@ public class InterceptorGenerator<X>
   private String getSuperMethodName()
   {
     Method javaMethod = getJavaMethod();
+    String declName = javaMethod.getDeclaringClass().getSimpleName(); 
 
     if (hasDecorator())
       return "__caucho_" + javaMethod.getName() + "_decorator";
     else if (isProxy())
       return javaMethod.getName();
     else {
-      return ("__caucho_" + javaMethod.getName()
-          + "_" + _interceptionType);
+      return ("__caucho_" + declName
+              + "_" + javaMethod.getName()
+              + "_" + _interceptionType);
     }
   }
 
@@ -834,15 +837,6 @@ public class InterceptorGenerator<X>
 
     out.println(");");
     
-    if (_factory.isPassivating()) {
-      String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
-      
-      out.println();
-      out.print("com.caucho.config.gen.CandiUtil.validatePassivating(");
-      out.print(beanClassName + ".class, ");
-      out.println("__caucho_interceptor_beans);");
-    }
-
     out.println();
     out.println(chainName + "_methodChain = ");
     out.println("  com.caucho.config.gen.CandiUtil.createMethods(");
@@ -850,6 +844,16 @@ public class InterceptorGenerator<X>
     out.println("    " + InterceptionType.class.getName()
                 + "." + _interceptionType + ",");
     out.println("    " + chainName + "_objectIndexChain);");
+    
+    if (_factory.isPassivating()
+        || _factory.isStateful() && _interceptorBinding.size() > 0) {
+      String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
+      
+      out.println();
+      out.print("com.caucho.config.gen.CandiUtil.validatePassivating(");
+      out.print(beanClassName + ".class, ");
+      out.println("__caucho_interceptor_beans);");
+    }
   }
 
   private void generateInterceptorCall(JavaWriter out,
@@ -1102,7 +1106,7 @@ public class InterceptorGenerator<X>
       out.println(");");
     }
     
-    if (_factory.isPassivating()) {
+    if (_factory.isPassivating() || _factory.isStateful()) {
       String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
       
       out.println();
@@ -1359,7 +1363,8 @@ public class InterceptorGenerator<X>
     }
     else {
       out.print("var.__caucho_getBean().");
-      out.print("__caucho_" + method.getName() + "_" + _interceptionType);
+      String declName = annMethod.getDeclaringType().getJavaClass().getSimpleName();
+      out.print("__caucho_" + declName + "_" + method.getName() + "_" + _interceptionType);
     }
 
     out.print("(");
@@ -1649,7 +1654,9 @@ public class InterceptorGenerator<X>
     out.print("private ");
     out.printClass(javaMethod.getReturnType());
     out.print(" __caucho_");
-    out.print(javaMethod.getName() + "_" + _interceptionType);
+    out.print(javaMethod.getDeclaringClass().getSimpleName());
+    out.print("_" + javaMethod.getName());
+    out.print("_" + _interceptionType);
     out.print("(");
 
     Class<?>[] types = javaMethod.getParameterTypes();
@@ -1825,9 +1832,6 @@ public class InterceptorGenerator<X>
     throws IOException
   {
     if (false && _interceptionType == InterceptionType.POST_CONSTRUCT) {
-      if (methodName.equals("nullMethod"))
-        Thread.dumpStack();
-      
       out.printClass(CandiUtil.class);
       out.print(".getMethod(");
       out.print(_factory.getGeneratedClassName());

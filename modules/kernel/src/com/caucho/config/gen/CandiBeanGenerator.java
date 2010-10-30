@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.inject.Qualifier;
@@ -138,7 +139,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       if (method.isStatic())
         continue;
       
-      if (method.isAnnotationPresent(PostConstruct.class)) {
+      if (method.isAnnotationPresent(PostConstruct.class)
+          || method.isAnnotationPresent(PreDestroy.class)) {
         AspectGenerator<X> bizMethod = _lifecycleAspectFactory.create(method);
 
         _businessMethods.add(bizMethod);
