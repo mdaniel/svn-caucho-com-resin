@@ -122,6 +122,8 @@ public class Table extends BlockStore {
   private final AtomicLong _rowTailOffset = new AtomicLong();
 
   private final RowAllocator _rowAllocator = new RowAllocator();
+  
+  private final AtomicLong _rowDeleteCount = new AtomicLong();
 
   // clock counters for row insert allocation
   private long _rowClockTop;
@@ -131,6 +133,7 @@ public class Table extends BlockStore {
   private long _clockRowUsed;
   
   private long _clockBlockFree;
+  private long _clockRowDeleteCount;
 
   private long _autoIncrementValue = -1;
 
@@ -917,34 +920,6 @@ public class Table extends BlockStore {
       }
     }
   }
-
-  private boolean resetClock()
-  {
-    // force 50% free rows before clock starts again
-    long newRowCount = (_clockRowUsed - _clockRowFree) / _rowsPerBlock;
-
-    // minimum 256 blocks of free rows
-    if (_clockRowFree < ROW_CLOCK_MIN && _rowClockOffset > 0) {
-      newRowCount = ROW_CLOCK_MIN;
-    }
-    
-    if (newRowCount > 0) {
-      _rowTailTop = _rowTailOffset.get() + newRowCount * _rowLength;
-    }
-    
-    // System.out.println("RESET: used=" + _clockRowUsed + " free=" + _clockRowFree + " top=" + _rowTailTop);
-
-    _rowClockOffset = 0;
-    _rowClockTop = _rowTailOffset.get();
-    _clockRowUsed = 0;
-    _clockRowFree = 0;
-
-    if (newRowCount > 0) {
-      return false;
-    }
-    
-    return true;
-  }
   
   private boolean scanClock()
   {
@@ -974,6 +949,40 @@ public class Table extends BlockStore {
     }
     
     return false;
+  }
+
+  private boolean resetClock()
+  {
+    // force 50% free rows before clock starts again
+    long newRowCount = (_clockRowUsed - _clockRowFree) / _rowsPerBlock;
+    long deleteRowCount = (_rowDeleteCount.get() - _clockRowDeleteCount) / _rowsPerBlock;
+
+    if (_clockRowFree < ROW_CLOCK_MIN && _rowClockOffset > 0) {
+      // minimum 256 blocks of free rows
+      newRowCount = ROW_CLOCK_MIN;
+    }
+    else if (deleteRowCount < ROW_CLOCK_MIN) {
+      // if none deleted, don't clock
+      newRowCount = ROW_CLOCK_MIN;
+    }
+    
+    if (newRowCount > 0) {
+      _rowTailTop = _rowTailOffset.get() + newRowCount * _rowLength;
+      _rowClockOffset = _rowTailTop;
+      
+      return false;
+    }
+    else {
+      // System.out.println("RESET: used=" + _clockRowUsed + " free=" + _clockRowFree + " top=" + _rowTailTop);
+
+      _rowClockOffset = 0;
+      _rowClockTop = _rowTailOffset.get();
+      _clockRowUsed = 0;
+      _clockRowFree = 0;
+      _clockRowDeleteCount = _rowDeleteCount.get();
+      
+      return true;
+    }
   }
   
   /**
@@ -1112,6 +1121,8 @@ public class Table extends BlockStore {
     }
 
     buffer[rowOffset] = 0;
+    
+    _rowDeleteCount.incrementAndGet();
   }
 
   @Override

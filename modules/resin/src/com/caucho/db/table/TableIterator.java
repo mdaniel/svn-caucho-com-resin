@@ -375,6 +375,16 @@ public class TableIterator {
   }
 
   /**
+   * Returns the string for the column at the given index.
+   */
+  public void setString(Transaction xa, Column column, String value)
+    throws SQLException
+  {
+    column.setString(xa, _buffer, _rowOffset, value);
+    setDirty();
+  }
+
+  /**
    * Returns the column's value as an integer
    *
    * @param index column index in the row
@@ -385,6 +395,16 @@ public class TableIterator {
     throws SQLException
   {
     return column.getInteger(getBlockId(), _buffer, _rowOffset);
+  }
+
+  /**
+   * Returns the integer for the column at the given index.
+   */
+  public void setInteger(Transaction xa, Column column, int value)
+    throws SQLException
+  {
+    column.setInteger(xa, _buffer, _rowOffset, value);
+    setDirty();
   }
 
   /**
@@ -401,6 +421,16 @@ public class TableIterator {
   }
 
   /**
+   * Returns the long for the column at the given index.
+   */
+  public void setLong(Transaction xa, Column column, long value)
+    throws SQLException
+  {
+    column.setLong(xa, _buffer, _rowOffset, value);
+    setDirty();
+  }
+
+  /**
    * Returns the column's double value.
    *
    * @param index column index in the row
@@ -411,6 +441,16 @@ public class TableIterator {
     throws SQLException
   {
     return column.getDouble(getBlockId(), _buffer, _rowOffset);
+  }
+
+  /**
+   * Returns the double for the column at the given index.
+   */
+  public void setDouble(Transaction xa, Column column, double value)
+    throws SQLException
+  {
+    column.setDouble(xa, _buffer, _rowOffset, value);
+    setDirty();
   }
 
   public boolean isEqual(Column column, byte []matchBuffer)

@@ -51,6 +51,8 @@ public class DataSourceImpl implements DataSource {
 
   private boolean _createDatabase;
   private boolean _isInit;
+  
+  private boolean _isFlushDirtyBlocksOnWrite = true;
 
   /**
    * Creates a new data source
@@ -96,7 +98,12 @@ public class DataSourceImpl implements DataSource {
   {
     _database.setRemoveOnError(remove);
   }
-
+  
+  public void setFlushDirtyBlocksOnWrite(boolean isFlush)
+  {
+    _database.setFlushDirtyBlocksOnCommit(isFlush);
+  }
+  
   /**
    * Initialize the data source.
    */

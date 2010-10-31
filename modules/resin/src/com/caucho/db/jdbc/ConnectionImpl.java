@@ -149,13 +149,35 @@ public class ConnectionImpl implements java.sql.Connection {
     }
   }
 
+  @Override
   public java.sql.Statement createStatement()
+    throws SQLException
+  {
+      if (_db == null)
+        throw new SQLException(L.l("Connection is already closed"));
+      
+      StatementImpl stmt = new StatementImpl(this);
+
+      if (_statement == null)
+        _statement = stmt;
+      else {
+        if (_statements == null)
+          _statements = new ArrayList<StatementImpl>();
+        _statements.add(stmt);
+      }
+      
+      return stmt;
+  }
+
+  @Override
+  public java.sql.Statement createStatement(int resultSetType,
+                                            int resultSetConcurrency)
     throws SQLException
   {
     if (_db == null)
       throw new SQLException(L.l("Connection is already closed"));
     
-    StatementImpl stmt = new StatementImpl(this);
+    StatementImpl stmt = new CursorStatementImpl(this);
 
     if (_statement == null)
       _statement = stmt;
@@ -166,13 +188,6 @@ public class ConnectionImpl implements java.sql.Connection {
     }
     
     return stmt;
-  }
-
-  public java.sql.Statement createStatement(int resultSetType,
-                                            int resultSetConcurrency)
-    throws SQLException
-  {
-    return createStatement();
   }
 
   public boolean getAutoCommit()
@@ -310,7 +325,19 @@ public class ConnectionImpl implements java.sql.Connection {
                                                      int resultSetConcurrency)
     throws SQLException
   {
-    return prepareStatement(sql);
+    Query query = _db.parseQuery(sql);
+    
+    PreparedStatementImpl stmt = new CursorPreparedStatementImpl(this, query);
+
+    if (_statement == null)
+      _statement = stmt;
+    else {
+      if (_statements == null)
+        _statements = new ArrayList<StatementImpl>();
+      _statements.add(stmt);
+    }
+    
+    return stmt;
   }
 
   public java.sql.PreparedStatement prepareStatement(String sql,
@@ -328,19 +355,19 @@ public class ConnectionImpl implements java.sql.Connection {
   private PreparedStatementImpl prepareStatementImpl(String sql)
     throws SQLException
   {
-    Query query = _db.parseQuery(sql);
-    
-    PreparedStatementImpl stmt = new PreparedStatementImpl(this, query);
+      Query query = _db.parseQuery(sql);
+      
+      PreparedStatementImpl stmt = new PreparedStatementImpl(this, query);
 
-    if (_statement == null)
-      _statement = stmt;
-    else {
-      if (_statements == null)
-        _statements = new ArrayList<StatementImpl>();
-      _statements.add(stmt);
-    }
-    
-    return stmt;
+      if (_statement == null)
+        _statement = stmt;
+      else {
+        if (_statements == null)
+          _statements = new ArrayList<StatementImpl>();
+        _statements.add(stmt);
+      }
+      
+      return stmt;
   }
 
   public void rollback(Savepoint savepoint)

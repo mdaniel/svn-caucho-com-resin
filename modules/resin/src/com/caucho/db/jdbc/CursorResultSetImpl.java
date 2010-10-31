@@ -27,6 +27,8 @@
  */
 package com.caucho.db.jdbc;
 
+import com.caucho.db.sql.QueryContext;
+import com.caucho.db.sql.SelectCursor;
 import com.caucho.db.sql.SelectResult;
 
 import java.io.InputStream;
@@ -44,15 +46,20 @@ import java.sql.Timestamp;
 /**
  * The JDBC statement implementation.
  */
-public class ResultSetImpl extends AbstractResultSet {
+public class CursorResultSetImpl extends AbstractResultSet {
   private StatementImpl _stmt;
   private SelectResult _rs;
+  private SelectCursor _cursor;
   private int _rowNumber;
+  private QueryContext _cxt;
   
-  ResultSetImpl(StatementImpl stmt, SelectResult rs)
+  CursorResultSetImpl(StatementImpl stmt,
+                      QueryContext cxt,
+                      SelectCursor cursor)
   {
     _stmt = stmt;
-    _rs = rs;
+    _cxt = cxt;
+    _cursor = cursor;
   }
 
   public int getRow()
@@ -106,9 +113,10 @@ public class ResultSetImpl extends AbstractResultSet {
   public boolean next()
     throws SQLException
   {
-    if (_rs == null)
+    if (_cursor == null)
       return false;
-    else if (_rs.next()) {
+    
+    else if (_cursor.next()) {
       _rowNumber++;
       
       return true;
@@ -129,12 +137,20 @@ public class ResultSetImpl extends AbstractResultSet {
   /**
    * Returns the boolean value for the column.
    */
+  @Override
   public boolean getBoolean(int columnIndex)
     throws SQLException
   {
     String s = getString(columnIndex);
     
     return s != null && ! s.equals("") && ! s.equals("0") && ! s.equals("n");
+  }
+  
+  @Override
+  public void updateBoolean(int columnIndex, boolean value)
+    throws SQLException
+  {
+    updateString(columnIndex, value ? "1" : "0");
   }
 
   /**
@@ -154,37 +170,69 @@ public class ResultSetImpl extends AbstractResultSet {
   /**
    * Returns the double value for the column.
    */
+  @Override
   public double getDouble(int columnIndex)
     throws SQLException
   {
-    return _rs.getDouble(columnIndex - 1);
+    return _cursor.getDouble(columnIndex - 1);
+  }
+  
+  @Override
+  public void updateDouble(int columnIndex, double value)
+    throws SQLException
+  {
+    _cursor.updateDouble(columnIndex - 1, value);
   }
 
   /**
    * Returns the integer value for the column.
    */
+  @Override
   public int getInt(int columnIndex)
     throws SQLException
   {
-    return _rs.getInt(columnIndex - 1);
+    return _cursor.getInt(columnIndex - 1);
+  }
+  
+  @Override
+  public void updateInt(int columnIndex, int value)
+    throws SQLException
+  {
+    _cursor.updateInt(columnIndex - 1, value);
   }
 
   /**
    * Returns the long value for the column.
    */
+  @Override
   public long getLong(int columnIndex)
     throws SQLException
   {
-    return _rs.getLong(columnIndex - 1);
+    return _cursor.getLong(columnIndex - 1);
+  }
+  
+  @Override
+  public void updateLong(int columnIndex, long value)
+    throws SQLException
+  {
+    _cursor.updateLong(columnIndex - 1, value);
   }
 
   /**
    * Returns the string value for the column.
    */
+  @Override
   public String getString(int columnIndex)
     throws SQLException
   {
-    return _rs.getString(columnIndex - 1);
+    return _cursor.getString(columnIndex - 1);
+  }
+  
+  @Override
+  public void updateString(int columnIndex, String stringValue)
+    throws SQLException
+  {
+    _cursor.updateString(columnIndex - 1, stringValue);
   }
 
   /**
@@ -247,15 +295,21 @@ public class ResultSetImpl extends AbstractResultSet {
   {
     return _rs.getClob(columnIndex - 1);
   }
+  
+  public void updateRow()
+    throws SQLException
+  {
+    _cursor.updateRow();
+  }
 
   public void close()
     throws SQLException
   {
-    SelectResult result = _rs;
-    _rs = null;
+    SelectCursor cursor = _cursor;
+    _cursor= null;
 
-    if (result != null)
-      result.close();
+    if (cursor != null)
+      cursor.close();
   }
 
     public RowId getRowId(int columnIndex) throws SQLException {

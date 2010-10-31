@@ -266,6 +266,15 @@ abstract public class Expr {
   public String evalString(QueryContext context)
     throws SQLException
   {
+      throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Updates the expression as a string
+   */
+  public void updateString(QueryContext context, String value)
+    throws SQLException
+  {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
@@ -286,6 +295,15 @@ abstract public class Expr {
     else
       return Long.parseLong(strValue);
   }
+  
+  /**
+   * Updates the expression as a long
+   */
+  public void updateLong(QueryContext context, long value)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Evaluates the expression as a double.
@@ -303,6 +321,15 @@ abstract public class Expr {
       return 0;
     else
       return Double.parseDouble(strValue);
+  }
+  
+  /**
+   * Updates the expression as a double
+   */
+  public void updateDouble(QueryContext context, double value)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

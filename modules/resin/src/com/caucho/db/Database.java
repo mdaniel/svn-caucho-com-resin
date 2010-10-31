@@ -70,6 +70,7 @@ public class Database
   private Lock _databaseLock = new Lock("db");
 
   private boolean _removeOnError;
+  private boolean _isFlushDirtyBlocksOnCommit;
 
   private final Lifecycle _lifecycle = new Lifecycle(log, null, Level.FINER);
 
@@ -110,6 +111,16 @@ public class Database
   public void setRemoveOnError(boolean remove)
   {
     _removeOnError = remove;
+  }
+  
+  public void setFlushDirtyBlocksOnCommit(boolean isFlush)
+  {
+    _isFlushDirtyBlocksOnCommit = isFlush;
+  }
+  
+  public boolean isFlushDirtyBlocksOnCommit()
+  {
+    return _isFlushDirtyBlocksOnCommit;
   }
 
   /**
@@ -177,6 +188,7 @@ public class Database
   {
     log.fine("adding table " + table.getName());
 
+    table.setFlushDirtyBlocksOnCommit(_isFlushDirtyBlocksOnCommit);
     table.init();
 
     _tables.put(table.getName(), table);
@@ -204,6 +216,7 @@ public class Database
         if (table == null)
           return null;
 
+        table.setFlushDirtyBlocksOnCommit(_isFlushDirtyBlocksOnCommit);
         table.init();
 
         _tables.put(name, table);

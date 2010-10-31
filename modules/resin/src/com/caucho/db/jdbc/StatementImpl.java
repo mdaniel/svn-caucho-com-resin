@@ -67,6 +67,16 @@ public class StatementImpl implements java.sql.Statement {
   {
   }
   
+  protected Database getDatabase()
+  {
+    return _db;
+  }
+  
+  protected ConnectionImpl getConnectionImpl()
+  {
+    return _conn;
+  }
+  
   protected QueryContext getQueryContext()
   {
     return _queryContext;
@@ -396,5 +406,11 @@ public class StatementImpl implements java.sql.Statement {
   public boolean isWrapperFor(Class<?> iface) throws SQLException
   {
     throw new UnsupportedOperationException("Not supported yet.");
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _db + "]";
   }
 }

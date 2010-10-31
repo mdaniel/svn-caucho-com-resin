@@ -626,7 +626,9 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   {
   }
 
+  @Override
   public void updateRow()
+    throws SQLException
   {
   }
 
@@ -690,7 +692,9 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
     updateBinaryStream(findColumn(columnName), x, length);
   }
 
+  @Override
   public void updateBoolean(int columnIndex, boolean x)
+    throws SQLException
   {
   }
 
@@ -701,17 +705,21 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   }
 
   public void updateByte(int columnIndex, byte x)
+  throws SQLException
   {
+    updateInt(columnIndex, x);
   }
 
   public void updateByte(String columnName, byte x)
-    throws SQLException
+  throws SQLException
   {
     updateByte(findColumn(columnName), x);
   }
 
   public void updateShort(int columnIndex, short x)
+  throws SQLException
   {
+    updateInt(columnIndex, x);
   }
 
   public void updateShort(String columnName, short x)
@@ -721,6 +729,7 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   }
 
   public void updateInt(int columnIndex, int x)
+  throws SQLException
   {
   }
 
@@ -731,6 +740,7 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   }
 
   public void updateLong(int columnIndex, long x)
+  throws SQLException
   {
   }
 
@@ -740,8 +750,11 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
     updateLong(findColumn(columnName), x);
   }
 
+  @Override
   public void updateFloat(int columnIndex, float x)
+  throws SQLException
   {
+    updateDouble(columnIndex, x);
   }
 
   public void updateFloat(String columnName, float x)
@@ -751,6 +764,7 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   }
 
   public void updateDouble(int columnIndex, double x)
+    throws SQLException
   {
   }
 
@@ -761,6 +775,7 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   }
 
   public void updateString(int columnIndex, String x)
+  throws SQLException
   {
   }
 
@@ -770,7 +785,9 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
     updateString(findColumn(columnName), x);
   }
 
+  @Override
   public void updateBytes(int columnIndex, byte[] x)
+    throws SQLException
   {
   }
 
@@ -886,5 +903,11 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   public void close()
     throws SQLException
   {
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

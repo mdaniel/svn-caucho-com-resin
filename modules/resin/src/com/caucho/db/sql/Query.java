@@ -665,6 +665,15 @@ abstract public class Query {
     throws SQLException;
 
   /**
+   * Executes the query.
+   */
+  public SelectCursor executeCursor(QueryContext queryCtx, Transaction xa)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException(toString());
+  }
+
+  /**
    * Starts the query.
    */
   protected boolean start(TableIterator []rows, int rowLength,

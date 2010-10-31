@@ -68,6 +68,18 @@ public class PreparedStatementImpl extends StatementImpl
 
     _query = query;
   }
+  
+  protected Query getQuery()
+  {
+    return _query;
+  }
+  
+  protected void setResultSet(ResultSet rs)
+  {
+    _resultSet = rs;
+    _count = 0;
+    _wasResultSet = true;
+  }
 
   void setReturnGeneratedKeys(boolean isReturnGeneratedKeys)
   {

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.xa.Transaction;
 
 final class IdExpr extends Expr {
   private final FromItem _fromItem;
@@ -181,6 +182,20 @@ final class IdExpr extends Expr {
   }
 
   /**
+   * Update the expression as a string.
+   */
+  @Override
+  public void updateString(QueryContext context, String value)
+    throws SQLException
+  {
+    Transaction xa = context.getTransaction();
+    TableIterator []rows = context.getTableIterators();
+    TableIterator row = rows[_tableIndex];
+
+    row.setString(xa, _column, value);
+  }
+
+  /**
    * Evaluates the expression as a boolean.
    */
   @Override
@@ -223,6 +238,20 @@ final class IdExpr extends Expr {
     return row.getLong(_column);
   }
 
+  /**
+   * Update the expression as a string.
+   */
+  @Override
+  public void updateLong(QueryContext context, long value)
+    throws SQLException
+  {
+    Transaction xa = context.getTransaction();
+    TableIterator []rows = context.getTableIterators();
+    TableIterator row = rows[_tableIndex];
+
+    row.setLong(xa, _column, value);
+  }
+
   @Override
   public double evalDouble(QueryContext context)
     throws SQLException
@@ -231,6 +260,20 @@ final class IdExpr extends Expr {
     TableIterator row = rows[_tableIndex];
 
     return row.getDouble(_column);
+  }
+
+  /**
+   * Update the expression as a string.
+   */
+  @Override
+  public void updateDouble(QueryContext context, double value)
+    throws SQLException
+  {
+    Transaction xa = context.getTransaction();
+    TableIterator []rows = context.getTableIterators();
+    TableIterator row = rows[_tableIndex];
+
+    row.setDouble(xa, _column, value);
   }
 
   /**

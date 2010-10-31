@@ -92,6 +92,7 @@ public class SelectQuery extends Query {
     _groupFields[index] = true;
   }
 
+  @Override
   protected void bind()
     throws SQLException
   {
@@ -132,6 +133,7 @@ public class SelectQuery extends Query {
   /**
    * Returns true for select queries.
    */
+  @Override
   public boolean isSelect()
   {
     return true;
@@ -140,7 +142,7 @@ public class SelectQuery extends Query {
   /**
    * Returns the type of the child.
    */
-  Class getType()
+  Class<?> getType()
   {
     if (_results.length == 1)
       return _results[0].getType();
@@ -151,6 +153,7 @@ public class SelectQuery extends Query {
   /**
    * Executes the query.
    */
+  @Override
   public void execute(QueryContext context, Transaction xa)
     throws SQLException
   {
@@ -267,6 +270,57 @@ public class SelectQuery extends Query {
         results[i].evalToResult(context, result);
       }
     }
+  }
+
+  /**
+   * Executes the query.
+   */
+  @Override
+  public SelectCursor executeCursor(QueryContext context, Transaction xa)
+    throws SQLException
+  {
+    if (isGroup())
+      throw new IllegalStateException();
+    if (_order != null)
+      throw new IllegalStateException();
+    
+    FromItem []fromItems = getFromItems();
+    TableIterator []rows = null;
+
+    SelectCursor cursor = new SelectCursor(_results, this, context);
+
+    rows = cursor.initRows(fromItems);
+    context.init(xa, rows, isReadOnly());
+
+    int rowLength = fromItems.length;
+
+    if (start(rows, rowLength, context, xa)) {
+      context.unlock();
+      
+      return cursor;
+    }
+    else
+      return null;
+  }
+
+  /**
+   * Executes the query.
+   */
+  boolean nextCursor(TableIterator []rows,
+                     QueryContext context,
+                     Transaction xa)
+    throws SQLException
+  {
+    FromItem []fromItems = getFromItems();
+    int rowLength = fromItems.length;
+    
+    context.lock();
+
+    boolean value = nextTuple(rows, rowLength, context, xa);
+    
+    context.unlock();
+    
+    return value;
   }
 
   public String toString()
