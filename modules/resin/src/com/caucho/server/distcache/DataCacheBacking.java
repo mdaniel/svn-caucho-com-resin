@@ -275,7 +275,11 @@ public class DataCacheBacking implements CacheDataBacking {
   
   public void close()
   {
-    _mnodeStore.close();
+    MnodeStore mnodeStore = _mnodeStore;
+    _mnodeStore = null;
+    
+    if (mnodeStore != null)
+      mnodeStore.close();
     // _dataStore.close();
   }
 }

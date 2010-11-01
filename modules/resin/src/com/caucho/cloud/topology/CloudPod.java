@@ -307,7 +307,7 @@ public class CloudPod
       else
         server = new CloudServer(id, this, index, address, port, isSSL, isStatic);
   
-      //_serverList.set(index, server);
+      _serverList.set(index, server);
       _servers = _serverList.toArray();
       
       if (_maxIndex < index)
@@ -385,7 +385,6 @@ public class CloudPod
    */
   private void updateDispatcher()
   {
-    
     switch (_maxIndex) {
     case 0:
       _serverDispatcher
