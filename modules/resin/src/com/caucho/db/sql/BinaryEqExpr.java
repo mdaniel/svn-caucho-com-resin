@@ -30,7 +30,6 @@ package com.caucho.db.sql;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 class BinaryEqExpr extends Expr {
   private ColumnExpr _column;
@@ -56,7 +55,7 @@ class BinaryEqExpr extends Expr {
   /**
    * Returns the type of the expression.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return boolean.class;
   }

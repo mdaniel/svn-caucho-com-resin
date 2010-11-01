@@ -93,8 +93,8 @@ public final class Block implements SyncCacheListener {
 
     _buffer = allocateBuffer();
     
-    if (log.isLoggable(Level.FINEST))
-      log.finest(this + " create");
+    if (log.isLoggable(Level.ALL))
+      log.log(Level.ALL, this + " create");
   }
 
   /**
@@ -195,8 +195,8 @@ public final class Block implements SyncCacheListener {
       return false;
     }
 
-    if (log.isLoggable(Level.FINEST))
-      log.finest(this + " allocate (" + useCount + ")");
+    if (log.isLoggable(Level.ALL))
+      log.log(Level.ALL, this + " allocate (" + useCount + ")");
 
     //System.out.println(this + " ALLOCATE " + _useCount);
 
@@ -346,8 +346,8 @@ public final class Block implements SyncCacheListener {
   {
     int useCount = _useCount.decrementAndGet();
 
-    if (log.isLoggable(Level.FINEST))
-      log.finest(this + " free (" + useCount + ")");
+    if (log.isLoggable(Level.ALL))
+      log.log(Level.ALL, this + " free (" + useCount + ")");
     
     if (useCount < 2 && _isDeallocate) {
       _isDeallocate = false;

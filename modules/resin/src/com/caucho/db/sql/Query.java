@@ -462,7 +462,7 @@ abstract public class Query {
       costItems.add(item);
       
       long indexCost = calculateOrderIndexCost(costItems, andProduct);
-      
+
       if (indexCost < bestCost) {
         bestCost = indexCost;
         bestIndex = j;
@@ -503,6 +503,8 @@ abstract public class Query {
                                       ArrayList<Expr> andProduct)
   {
     long cost = Long.MAX_VALUE;
+    int count = 0;
+    
     for (int k = 0; k < andProduct.size(); k++) {
       Expr expr = andProduct.get(k);
 
@@ -512,11 +514,16 @@ abstract public class Query {
         return -1;
       }
 
-      if (subCost < cost)
+      if (subCost < cost) {
         cost = subCost;
+        count = 0;
+      }
+      else if (subCost == cost) {
+        count++;
+      }
     }
     
-    return cost;
+    return cost - count;
   }
 
   /**
@@ -526,16 +533,23 @@ abstract public class Query {
                                        ArrayList<Expr> andProduct)
   {
     long cost = Long.MAX_VALUE;
+    int count = 0;
+    
     for (int k = 0; k < andProduct.size(); k++) {
       Expr expr = andProduct.get(k);
 
       long subCost = expr.indexCost(costItems);
 
-      if (subCost < cost)
+      if (subCost < cost) {
         cost = subCost;
+        count = 0;
+      }
+      else if (subCost == cost) {
+        count++;
+      }
     }
     
-    return cost;
+    return cost - count;
   }
   
   private void orderFromItemsUpdateAnd(ArrayList<Expr> andProduct,

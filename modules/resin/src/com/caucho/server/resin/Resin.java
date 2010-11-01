@@ -494,7 +494,7 @@ public class Resin
     ShutdownService shutdown = new ShutdownService(_resinSystem, _isEmbedded);
     _resinSystem.addService(shutdown);
     
-    TopologyService topology = new TopologyService(_resinSystem.getId());
+    TopologyService topology = new TopologyService(_serverId);
     _resinSystem.addService(topology);
     topology.getSystem();
     

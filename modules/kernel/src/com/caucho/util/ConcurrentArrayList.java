@@ -139,6 +139,21 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
     }
   }
   
+  public E set(int index, E value)
+  {
+    synchronized (_list) {
+      while (_list.size() <= index) {
+        _list.add(null);
+      }
+      
+      E oldValue = _list.set(index, value);
+      
+      updateArray();
+      
+      return oldValue;
+    }
+  }
+  
   @Override
   public boolean remove(Object value)
   {
@@ -148,6 +163,17 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
       updateArray();
       
       return result;
+    }
+  }
+  
+  public Object remove(int index)
+  {
+    synchronized (_list) {
+      Object value = _list.remove(index);
+      
+      updateArray();
+      
+      return value;
     }
   }
   
@@ -189,11 +215,6 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
     _list.toArray(array);
   
     _array = array;
-  }
-  
-  private Class<?> calculateType()
-  {
-    return calculateType(getClass());
   }
   
   public static Class<?> calculateType(Class<?> cl)

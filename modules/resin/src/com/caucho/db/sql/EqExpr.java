@@ -186,7 +186,7 @@ final class EqExpr extends Expr {
   {
     long leftCost = _left.indexSubCost(costItems);
     long rightCost = _right.indexSubCost(costItems);
-    
+
     if (leftCost < rightCost)
       return leftCost;
     else

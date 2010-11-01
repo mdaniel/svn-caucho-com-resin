@@ -56,7 +56,7 @@ public class CloudSystem
   }
 
   /**
-   * Returns the domain id.
+   * Returns the server id.
    */
   public String getId()
   {

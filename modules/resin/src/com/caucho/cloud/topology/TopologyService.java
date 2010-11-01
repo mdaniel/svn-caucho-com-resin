@@ -44,11 +44,13 @@ public class TopologyService extends AbstractResinService
   public static final int START_PRIORITY
     = ResinService.START_PRIORITY_NETWORK_CLUSTER;
   
+  private final String _serverId;
   private final CloudSystem _system;
   
-  public TopologyService(String systemId)
+  public TopologyService(String serverId)
   {
-    _system = new CloudSystem(systemId);
+    _serverId = serverId;
+    _system = new CloudSystem(serverId);
   }
   
   public static TopologyService getCurrent()
@@ -96,6 +98,16 @@ public class TopologyService extends AbstractResinService
   public CloudSystem getSystem()
   {
     return _system;
+  }
+  
+  public String getId()
+  {
+    return _serverId;
+  }
+  
+  public CloudServer getSelfServer()
+  {
+    return _system.findServer(_serverId);
   }
   
   @Override

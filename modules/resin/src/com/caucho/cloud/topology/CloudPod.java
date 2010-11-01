@@ -32,6 +32,7 @@ package com.caucho.cloud.topology;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.L10N;
 
 /**
@@ -48,7 +49,10 @@ public class CloudPod
 
   private final int _index;
   
-  private final CloudServer []_servers = new CloudServer[64];
+  private final ConcurrentArrayList<CloudServer> _serverList
+    = new ConcurrentArrayList<CloudServer>(CloudServer.class);
+  
+  private CloudServer []_servers = new CloudServer[0];
   
   private final CopyOnWriteArrayList<CloudServerListener> _listeners
     = new CopyOnWriteArrayList<CloudServerListener>();
@@ -167,7 +171,12 @@ public class CloudPod
    */
   public CloudServer findServer(int index)
   {
-    return _servers[index];
+    CloudServer []servers = _servers;
+    
+    if (0 <= index && index <= servers.length)
+      return servers[index];
+    else
+      return null;
   }
 
   /**
@@ -175,8 +184,10 @@ public class CloudPod
    */
   public CloudServer findServer(String address, int port)
   {
-    for (int i = 0; i <= _maxIndex; i++) {
-      CloudServer server = _servers[i];
+    CloudServer []servers = _servers;
+    
+    for (int i = 0; i < servers.length; i++) {
+      CloudServer server = servers[i];
       
       if (server != null 
           && server.getAddress().equals(address)
@@ -278,7 +289,7 @@ public class CloudPod
     CloudServer server;
     boolean isSSL = false;
     
-    synchronized (this) {
+    synchronized (_serverList) {
       if (findServer(id) != null)
         throw new IllegalArgumentException(L.l("'{0}' is an invalid server name because that name already exists as\n  {1}.",
                                                id, 
@@ -295,8 +306,9 @@ public class CloudPod
         server = new TriadServer(id, this, index, address, port, isSSL, isStatic);
       else
         server = new CloudServer(id, this, index, address, port, isSSL, isStatic);
-      
-      _servers[index] = server;
+  
+      _serverList.set(index, server);
+      _servers = _serverList.toArray();
       
       if (_maxIndex < index)
         _maxIndex = index;
@@ -313,6 +325,47 @@ public class CloudPod
     }
     
     return server;
+  }
+  
+  public CloudServer removeDynamicServer(String name)
+  {
+    CloudServer removedServer = null;
+    
+    synchronized (_serverList) {
+      for (int i = 0; i < _serverList.size(); i++) {
+        CloudServer server = _serverList.get(i);
+        
+        if (name.equals(server.getId())) {
+          
+          if (server.isStatic())
+            throw new IllegalStateException(L.l("{0} must be dynamic for removeDynamicServer",
+                                                server));
+          
+          _serverList.set(i, null);
+          
+          removedServer = server;
+        }
+      }
+      
+      while (_serverList.size() > 0
+             && _serverList.get(_serverList.size() - 1) == null) {
+        _serverList.remove(_serverList.size() - 1);
+      }
+    
+      _servers = _serverList.toArray();
+    }
+
+    if (removedServer != null) {
+      for (CloudServerListener listener : _listeners) {
+        listener.onServerRemove(removedServer);
+        
+        if (removedServer instanceof TriadServer)
+          listener.onTriadRemove((TriadServer) removedServer);
+        
+      }
+    }
+    
+    return removedServer;
   }
   
   //

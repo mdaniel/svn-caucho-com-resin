@@ -58,6 +58,8 @@ public class CloudServer {
   private final CloudPod _pod;
   private final int _index;
   
+  private final boolean _isStatic;
+  
   // unique identifier for the server within the cluster
   private String _uniqueClusterId;
   // unique identifier for the server within all Resin clusters
@@ -101,6 +103,7 @@ public class CloudServer {
     _address = address;
     _port = port;
     _isSSL = isSSL;
+    _isStatic = isStatic;
 
     // _clusterPort = new ClusterPort(this);
     // _ports.add(_clusterPort);
@@ -173,7 +176,7 @@ public class CloudServer {
    */
   public boolean isStatic()
   {
-    return true;
+    return _isStatic;
   }
   
   //

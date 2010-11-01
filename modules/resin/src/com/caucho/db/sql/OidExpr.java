@@ -29,6 +29,7 @@
 package com.caucho.db.sql;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
@@ -77,6 +78,24 @@ class OidExpr extends Expr {
   public Table getTable()
   {
     return _table;
+  }
+  
+  @Override
+  public long indexSubCost(ArrayList<FromItem> costItems)
+  {
+    if (! costItems.contains(_fromItem))
+      return INDEX_COST_INDEX;
+    else
+      return COST_INVALID - 1;
+  }
+  
+  @Override
+  public long subCost(ArrayList<FromItem> costItems)
+  {
+    if (costItems.contains(_fromItem))
+      return 0;
+    else
+      return COST_INVALID;
   }
   
   @Override
@@ -161,6 +180,6 @@ class OidExpr extends Expr {
 
   public String toString()
   {
-    return "OidExpr[" + _tableIndex + "]";
+    return getClass().getSimpleName() + "[" + _fromItem + "," + _tableIndex + "]";
   }
 }
