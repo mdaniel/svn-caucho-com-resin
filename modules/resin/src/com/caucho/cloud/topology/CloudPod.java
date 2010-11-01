@@ -307,7 +307,7 @@ public class CloudPod
       else
         server = new CloudServer(id, this, index, address, port, isSSL, isStatic);
   
-      _serverList.set(index, server);
+      //_serverList.set(index, server);
       _servers = _serverList.toArray();
       
       if (_maxIndex < index)
@@ -341,7 +341,7 @@ public class CloudPod
             throw new IllegalStateException(L.l("{0} must be dynamic for removeDynamicServer",
                                                 server));
           
-          _serverList.set(i, null);
+          // _serverList.set(i, null);
           
           removedServer = server;
         }

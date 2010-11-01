@@ -61,6 +61,7 @@ public class FileRandomAccessStream extends RandomAccessStream
   public FileRandomAccessStream(RandomAccessFile file)
   {
     _file = file;
+    Thread.dumpStack();
   }
 
   public RandomAccessFile getRandomAccessFile()

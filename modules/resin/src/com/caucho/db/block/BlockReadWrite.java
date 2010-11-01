@@ -40,6 +40,7 @@ import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Filesystem access for the BlockStore.
@@ -101,6 +102,9 @@ public class BlockReadWrite {
       throw new SQLException(L.l("CREATE for path '{0}' failed, because the file already exists.  CREATE can not override an existing table.",
                                  _path.getNativePath()));
     }
+    
+    WriteStream os = _path.openWrite();
+    os.close();
   }
 
   boolean isFileExist()
