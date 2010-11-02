@@ -54,7 +54,7 @@ abstract public class AbstractHealthService extends AbstractResinService {
       
       if (healthService == null) {
         try {
-          healthService = (AbstractHealthService) _healthServiceClass.newInstance();
+          healthService = (AbstractHealthService) _healthServiceClass.getConstructor(ResinSystem.class).newInstance(system);
           
           system.addService(healthService);
           
