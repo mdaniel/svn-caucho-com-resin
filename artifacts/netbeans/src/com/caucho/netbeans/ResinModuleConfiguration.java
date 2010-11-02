@@ -34,7 +34,6 @@ import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfigurati
 import org.openide.util.Lookup;
 
 import java.util.logging.*;
-import org.openide.util.lookup.Lookups;
 
 public class ResinModuleConfiguration
   implements ModuleConfiguration
@@ -52,7 +51,7 @@ public class ResinModuleConfiguration
   public Lookup getLookup()
   {
     //return new ResinLookup();
-    return Lookups.fixed(this);
+    return Lookup.fixed(this);
   }
 
   public J2eeModule getJ2eeModule() 

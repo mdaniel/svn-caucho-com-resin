@@ -29,7 +29,6 @@
 
 package com.caucho.netbeans.util;
 
-import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
@@ -51,10 +50,10 @@ import java.util.Map;
  */
 public final class LogSupport
 {
-  private final Map/*<Link, Link>*/ links
+  private final Map/*<Link, Link>*/ _links
     = Collections.synchronizedMap(new HashMap());
-  private Annotation errAnnot;
-  private String prevMessage;
+  private Annotation _errAnnot;
+  private String _prevMessage;
 
   public LineInfo analyzeLine(String logLine)
   {
@@ -137,7 +136,7 @@ public final class LogSupport
             }
             catch (NumberFormatException nfe) { // ignore it
             }
-            message = prevMessage;
+            message = _prevMessage;
           }
           int firstDolarIdx
             = classWithMethod.indexOf('$'); // > -1 for inner classes
@@ -146,6 +145,7 @@ public final class LogSupport
                                                        ? firstDolarIdx
                                                        : lastDotIdx);
           path = className.replace('.', '/') + ".java"; // NOI18N
+          
           accessible = GlobalPathRegistry.getDefault().findResource(path) !=
                        null;
         }
@@ -153,7 +153,7 @@ public final class LogSupport
     }
     // every other message treat as normal info message
     else {
-      prevMessage = logLine;
+      _prevMessage = logLine;
     }
     return new LineInfo(path, line, message, error, accessible);
   }
@@ -169,11 +169,11 @@ public final class LogSupport
   public Link getLink(String errorMsg, String path, int line)
   {
     Link newLink = new Link(errorMsg, path, line);
-    Link cachedLink = (Link) links.get(newLink);
+    Link cachedLink = (Link) _links.get(newLink);
     if (cachedLink != null) {
       return cachedLink;
     }
-    links.put(newLink, newLink);
+    _links.put(newLink, newLink);
     return newLink;
   }
 
@@ -182,8 +182,8 @@ public final class LogSupport
    */
   public void detachAnnotation()
   {
-    if (errAnnot != null) {
-      errAnnot.detach();
+    if (_errAnnot != null) {
+      _errAnnot.detach();
     }
   }
 
@@ -379,31 +379,31 @@ public final class LogSupport
         catch (IndexOutOfBoundsException iobe) {
           return;
         }
-        if (errAnnot != null) {
-          errAnnot.detach();
+        if (_errAnnot != null) {
+          _errAnnot.detach();
         }
         String errorMsg = msg;
         if (errorMsg == null || errorMsg.equals("")) {
           errorMsg = "Exception occured";
         }
-        errAnnot = new ErrorAnnotation(errorMsg);
-        errAnnot.attach(errorLine);
-        errAnnot.moveToFront();
+        _errAnnot = new ErrorAnnotation(errorMsg);
+        _errAnnot.attach(errorLine);
+        _errAnnot.moveToFront();
         errorLine.show(Line.SHOW_TRY_SHOW);
       }
     }
 
     /**
      * If a link is cleared, error annotation is detached and link cache is
-     * clared.
+     * cleared.
      */
     public void outputLineCleared(OutputEvent ev)
     {
-      if (errAnnot != null) {
-        errAnnot.detach();
+      if (_errAnnot != null) {
+        _errAnnot.detach();
       }
-      if (!links.isEmpty()) {
-        links.clear();
+      if (!_links.isEmpty()) {
+        _links.clear();
       }
     }
 

@@ -30,16 +30,12 @@
 package com.caucho.netbeans.nodes;
 
 import com.caucho.netbeans.ResinDeploymentManager;
-import com.caucho.netbeans.nodes.actions.AdminConsoleAction;
-import com.caucho.netbeans.nodes.actions.ServerLogAction;
 
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
-import org.openide.util.actions.SystemAction;
 
-import java.awt.*;
 import java.util.logging.*;
 
 /**
@@ -63,7 +59,7 @@ public class ResinManagerNode
 
     _lookup = lookup;
     
-    getCookieSet().add(this);
+    getCookieSet().add((Cookie)this);
 
     /*
     setIconBaseWithExtension("com/caucho/netbeans/resources/resin.png"); // NOI18N

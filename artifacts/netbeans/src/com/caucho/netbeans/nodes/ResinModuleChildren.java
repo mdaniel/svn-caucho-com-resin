@@ -57,13 +57,13 @@ public class ResinModuleChildren
 {
 
   private static final String WAIT_NODE = "wait_node"; // NOI18N
-  private final Lookup lookup;
-  private final ModuleType moduleType;
+  private final Lookup _lookup;
+  private final ModuleType _moduleType;
 
   ResinModuleChildren(Lookup lookup, ModuleType moduleType)
   {
-    this.lookup = lookup;
-    this.moduleType = moduleType;
+    _lookup = lookup;
+    _moduleType = moduleType;
   }
 
   public void updateKeys()
@@ -75,14 +75,14 @@ public class ResinModuleChildren
     {
       public void run()
       {
-        ResinDeploymentManager manager = (ResinDeploymentManager) lookup.lookup(
+        ResinDeploymentManager manager = (ResinDeploymentManager) _lookup.lookup(
           ResinDeploymentManager.class);
-        Target target = (Target) lookup.lookup(Target.class);
+        Target target = (Target) _lookup.lookup(Target.class);
         ArrayList<ResinModule> list = new ArrayList();
         if (manager != null && target != null) {
           // TODO: add a check whether the server is not in suspended state
           try {
-            TargetModuleID[] modules = manager.getRunningModules(moduleType,
+            TargetModuleID[] modules = manager.getRunningModules(_moduleType,
                                                                  new Target[]{
                                                                    target});
             for (TargetModuleID tmID : modules) {
@@ -116,7 +116,7 @@ public class ResinModuleChildren
   {
     if (key instanceof ResinModule) {
       ResinModule module = (ResinModule) key;
-      ResinModuleNode node = new ResinModuleNode(module, moduleType);
+      ResinModuleNode node = new ResinModuleNode(module, _moduleType);
       module.setRepresentedNode(node);
       return new Node[]{node};
     }

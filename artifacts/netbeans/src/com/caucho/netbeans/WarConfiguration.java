@@ -57,7 +57,7 @@ public class WarConfiguration
 
   public Lookup getLookup()
   {
-    return Lookups.fixed(this);
+    return Lookup.fixed(this);
   }
 
   public J2eeModule getJ2eeModule() 
