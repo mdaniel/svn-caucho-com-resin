@@ -45,6 +45,7 @@ import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.SocketPollService;
 import com.caucho.server.hmux.HmuxProtocol;
 import com.caucho.util.L10N;
 
@@ -58,7 +59,7 @@ public class NetworkClusterService extends AbstractResinService
   private static final Logger log
     = Logger.getLogger(NetworkClusterService.class.getName());
   
-  public static final int START_PRIORITY = TopologyService.START_PRIORITY + 1;
+  public static final int START_PRIORITY = SocketPollService.START_PRIORITY + 1;
   
   private final CloudServer _selfServer;
   

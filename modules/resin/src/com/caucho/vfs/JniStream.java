@@ -170,6 +170,7 @@ public class JniStream extends StreamImpl {
   /**
    * Closes the stream.
    */
+  @Override
   public void close() throws IOException
   {
     _socket.close();

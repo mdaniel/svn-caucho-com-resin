@@ -140,7 +140,7 @@ public class CGIServlet extends GenericServlet {
         if (log.isLoggable(Level.FINE))
           log.fine(L.l("no script path index for `{0}'", fullPath));
 
-        res.sendError(res.SC_NOT_FOUND);
+        res.sendError(HttpServletResponse.SC_NOT_FOUND);
 
         return;
       }
@@ -160,7 +160,7 @@ public class CGIServlet extends GenericServlet {
       if (log.isLoggable(Level.FINE))
         log.fine(L.l("script '{0}' is unreadable", vfsPath));
 
-      res.sendError(res.SC_NOT_FOUND);
+      res.sendError(HttpServletResponse.SC_NOT_FOUND);
 
       return;
     }
@@ -420,6 +420,7 @@ public class CGIServlet extends GenericServlet {
     env.add("SERVER_SOFTWARE=Resin/" + VersionFactory.getVersion());
 
     env.add("SERVER_NAME=" + req.getServerName());
+    env.add("REDIRECT_STATUS=200");
     //env.add("SERVER_ADDR=" + req.getServerAddr());
     env.add("SERVER_PORT=" + req.getServerPort());
 

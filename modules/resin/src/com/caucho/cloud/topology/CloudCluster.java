@@ -52,7 +52,7 @@ public class CloudCluster
 
   private CloudPod []_podList = new CloudPod[0];
   
-  private CloudClusterAdmin _admin = new CloudClusterAdmin(this);
+  private CloudClusterAdmin _admin;
   
   private final CopyOnWriteArrayList<CloudPodListener> _listeners
     = new CopyOnWriteArrayList<CloudPodListener>();
@@ -101,6 +101,11 @@ public class CloudCluster
   
   void init()
   {
+  }
+  
+  void start()
+  {
+    _admin = new CloudClusterAdmin(this);
     _admin.register();
   }
   

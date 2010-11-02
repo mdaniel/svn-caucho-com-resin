@@ -354,8 +354,8 @@ public class XmlConfigContext {
       type.beforeConfigure(this, bean, node);
       type.beforeConfigureBean(this, bean, node);
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest("config begin " + type);
+      if (log.isLoggable(Level.ALL))
+        log.log(Level.ALL, "config begin " + type);
 
       configureNodeAttributes(node, bean, type);
 
@@ -367,8 +367,8 @@ public class XmlConfigContext {
         configureChildNode(childNode, qName, bean, type, false);
       }
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest("config end " + type);
+      if (log.isLoggable(Level.ALL))
+        log.log(Level.ALL, "config end " + type);
 
       type.afterConfigure(this, bean);
     } catch (LineConfigException e) {

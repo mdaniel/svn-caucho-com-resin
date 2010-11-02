@@ -70,7 +70,7 @@ public class Database
   private Lock _databaseLock = new Lock("db");
 
   private boolean _removeOnError;
-  private boolean _isFlushDirtyBlocksOnCommit;
+  private boolean _isFlushDirtyBlocksOnCommit = true;
 
   private final Lifecycle _lifecycle = new Lifecycle(log, null, Level.FINER);
 

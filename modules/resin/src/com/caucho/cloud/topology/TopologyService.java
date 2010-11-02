@@ -117,6 +117,12 @@ public class TopologyService extends AbstractResinService
   }
   
   @Override
+  public void start()
+  {
+    _system.start();
+  }
+  
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _system + "]";

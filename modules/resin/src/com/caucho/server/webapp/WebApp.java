@@ -1498,7 +1498,8 @@ public class WebApp extends ServletContextImpl
 
     mapping.addURLRegexp(servletRegexp.getURLRegexp());
     mapping.setServletName(servletRegexp.getServletName());
-    mapping.setServletClass(servletRegexp.getServletClass());
+    if (servletRegexp.getServletClass() != null)
+      mapping.setServletClass(servletRegexp.getServletClass());
     mapping.setServletContext(this);
     servletRegexp.getBuilderProgram().configure(mapping);
     mapping.setStrictMapping(getStrictMapping());

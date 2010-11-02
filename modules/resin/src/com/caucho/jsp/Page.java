@@ -517,6 +517,9 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
         _lastModified = lastModified;
       }
 
+      res.setHeader("ETag", etag);
+      res.setHeader("Last-Modified", _lastModifiedString);
+      
       String ifMatch = req.getHeader("If-None-Match");
       if (etag.equals(ifMatch)) {
         res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
@@ -528,9 +531,6 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
         res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
         return;
       }
-
-      res.setHeader("ETag", etag);
-      res.setHeader("Last-Modified", _lastModifiedString);
     }
 
     // jsp/0510, jsp/17f?

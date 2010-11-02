@@ -82,7 +82,7 @@ public class JniTroubleshoot {
         if (! isLogged)
           _loggedLibraries.add(_libraryName);
       }
-
+      
       if (! isLogged) {
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, getMessage(), _cause);
@@ -188,5 +188,11 @@ public class JniTroubleshoot {
     else {
       return libexec.lookup("lib" + _libraryName + ".so");
     }
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _libraryName + "," + _isValid + "]";
   }
 }

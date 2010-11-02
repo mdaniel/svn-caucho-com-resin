@@ -34,7 +34,9 @@ import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.xa.Transaction;
+import com.caucho.quercus.lib.db.SQLExceptionWrapper;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
@@ -112,6 +114,8 @@ class UpdateQuery extends Query {
 
         context.setRowUpdateCount(++count);
       } while (nextTuple(rows, rows.length, context, xa));
+    } catch (IOException e) {
+      throw new SQLExceptionWrapper(e);
     } finally {
       // autoCommitWrite must be before freeRows in case freeRows
       // throws an exception

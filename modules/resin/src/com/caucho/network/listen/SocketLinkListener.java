@@ -1010,18 +1010,12 @@ public class SocketLinkListener extends TaskWorker
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 
     if (_serverSocket.isJni()) {
-      ResinSystem server = ResinSystem.getCurrent();
-
-      if (server != null) {
-        SocketPollService pollService 
-          = server.getService(SocketPollService.class);
+      SocketPollService pollService = SocketPollService.getCurrent();
         
-        if (pollService != null) {
-          _selectManager = pollService.getSelectManager();
-          
-        }
+      if (pollService != null) {
+        _selectManager = pollService.getSelectManager();
       }
-
+      
       /*
       if (_selectManager == null) {
         throw new IllegalStateException(L.l("Cannot load select manager"));

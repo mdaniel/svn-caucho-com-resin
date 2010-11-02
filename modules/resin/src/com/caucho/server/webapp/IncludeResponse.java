@@ -52,7 +52,7 @@ import com.caucho.util.QDate;
 /**
  * Internal response for an include() or forward()
  */
-class IncludeResponse extends CauchoResponseWrapper
+public class IncludeResponse extends CauchoResponseWrapper
 {
   private static final L10N L = new L10N(IncludeResponse.class);
   
@@ -143,6 +143,20 @@ class IncludeResponse extends CauchoResponseWrapper
   //
   // status and headers
   //
+
+  @Override
+  public void setStatus(int code)
+  {
+    System.out.println("STATUS: " + code);
+    Thread.dumpStack();
+  }
+  
+  @Override
+  public void setStatus(int code, String msg)
+  {
+    System.out.println("STATUS2: " + code);
+    Thread.dumpStack();
+  }
 
   @Override
   public void sendError(int code, String msg)

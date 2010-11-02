@@ -306,21 +306,25 @@ public class SelectQuery extends Query {
   /**
    * Executes the query.
    */
-  boolean nextCursor(TableIterator []rows,
-                     QueryContext context,
-                     Transaction xa)
+  public final boolean nextCursor(TableIterator []rows,
+                                  QueryContext context,
+                                  Transaction xa)
     throws SQLException
   {
-    FromItem []fromItems = getFromItems();
-    int rowLength = fromItems.length;
-    
-    context.lock();
+    try {
+      FromItem []fromItems = getFromItems();
+      int rowLength = fromItems.length;
 
-    boolean value = nextTuple(rows, rowLength, context, xa);
-    
-    context.unlock();
-    
-    return value;
+      context.lock();
+
+      boolean value = nextTuple(rows, rowLength, context, xa);
+
+      context.unlock();
+
+      return value;
+    } catch (IOException e) {
+      throw new SQLExceptionWrapper(e);
+    }
   }
 
   public String toString()

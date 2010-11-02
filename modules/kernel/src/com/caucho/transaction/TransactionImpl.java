@@ -1073,7 +1073,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     _alarm.dequeue();
 
     if (_interposedSynchronizations != null) {
-      for (int i = _interposedSynchronizations.size() - 1; i >= 0; i--) {
+      // env/06a2
+      for (int i = 0; i < _interposedSynchronizations.size(); i++) {
         Synchronization sync = _interposedSynchronizations.get(i);
         
         try {
@@ -1093,7 +1094,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     
     // server/16h2
     if (_synchronizations != null) {
-      for (int i = _synchronizations.size() - 1; i >= 0; i--) {
+      // env/06a2
+      for (int i = 0; i < _synchronizations.size(); i++) {
         Synchronization sync = _synchronizations.get(i);
 
         if (log.isLoggable(Level.FINEST))

@@ -51,8 +51,6 @@ public class DataSourceImpl implements DataSource {
 
   private boolean _createDatabase;
   private boolean _isInit;
-  
-  private boolean _isFlushDirtyBlocksOnWrite = true;
 
   /**
    * Creates a new data source

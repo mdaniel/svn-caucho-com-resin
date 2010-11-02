@@ -317,7 +317,7 @@ abstract public class AbstractHttpResponse {
   {
     int i = 0;
     boolean hasHeader = false;
-
+    
     ArrayList<String> keys = _headerKeys;
     ArrayList<String> values = _headerValues;
 

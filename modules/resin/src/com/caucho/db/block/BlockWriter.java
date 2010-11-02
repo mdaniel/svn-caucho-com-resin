@@ -134,7 +134,7 @@ public class BlockWriter extends TaskWorker {
   public long runTask()
   {
     try {
-      int retryMax = 10;
+      int retryMax = 25;
       int retry = retryMax;
 
       while (true) {

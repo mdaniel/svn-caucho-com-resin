@@ -531,6 +531,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     Object oldValue = attributes.remove(name);
 
     WebApp webApp = getWebApp();
+    
+    if (webApp == null)
+      return;
 
     for (ServletRequestAttributeListener listener
            : webApp.getRequestAttributeListeners()) {

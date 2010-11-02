@@ -29,6 +29,7 @@
 
 package com.caucho.network.listen;
 
+import com.caucho.cloud.topology.TopologyService;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
 
@@ -37,14 +38,10 @@ import com.caucho.env.service.ResinSystem;
  */
 public class SocketPollService extends AbstractResinService
 {
-  public static final int START_PRIORITY = START_PRIORITY_NETWORK_CLUSTER;
+  public static final int START_PRIORITY = TopologyService.START_PRIORITY + 1;
   
-  private AbstractSelectManager _selectManager;
-  
-  public SocketPollService(ResinSystem server, 
-                           AbstractSelectManager manager)
+  public SocketPollService()
   {
-    _selectManager = manager;
   }
   
   public static SocketPollService getCurrent()
@@ -67,7 +64,7 @@ public class SocketPollService extends AbstractResinService
   
   public AbstractSelectManager getSelectManager()
   {
-    return _selectManager;
+    return null;
   }
  
   @Override

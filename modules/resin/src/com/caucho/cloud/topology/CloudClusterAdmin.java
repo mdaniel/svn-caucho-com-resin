@@ -46,10 +46,15 @@ public class CloudClusterAdmin extends AbstractManagedObject
   implements ClusterMXBean
 {
   private final CloudCluster _cluster;
+  private ResinMXBean _resinAdmin;
 
   public CloudClusterAdmin(CloudCluster cluster)
   {
     _cluster = cluster;
+    Resin resin = Resin.getCurrent();
+    
+    if (resin != null)
+      _resinAdmin = resin.getAdmin();
   }
 
   @Override
@@ -80,7 +85,10 @@ public class CloudClusterAdmin extends AbstractManagedObject
   @Override
   public ResinMXBean getResin()
   {
-    return Resin.getCurrent().getAdmin();
+    if (_resinAdmin == null && Resin.getCurrent() != null)
+      _resinAdmin = Resin.getCurrent().getAdmin();
+
+    return _resinAdmin;
   }
 
   @Override

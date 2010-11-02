@@ -343,7 +343,11 @@ public class GzipFilter implements Filter {
     {
       super.setStatus(status);
 
+      /*
       if (status == 206 || status == 200)
+        return;
+        */
+      if (status == 200)
         return;
 
       _allowGzip = false;
@@ -363,6 +367,7 @@ public class GzipFilter implements Filter {
     /**
      * Returns the underlying stream
      */
+    @Override
     public OutputStream getStream() throws IOException
     {
       if (_useVary)
@@ -372,7 +377,7 @@ public class GzipFilter implements Filter {
         return _response.getOutputStream();
       
       OutputStream os = _response.getOutputStream();
-
+      
       if (_useDeflate)
         _response.setHeader("Content-Encoding", "deflate");
       else
