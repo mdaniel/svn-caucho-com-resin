@@ -457,8 +457,8 @@ public class XmlBeanConfig<T> {
     
     if (! _isInlineBean) {
       _cdiManager.discoverBean(_annotatedType);
-      // ioc/23n3
-      _cdiManager.processPendingAnnotatedTypes();
+      // ioc/23n3, ioc/0603
+      // _cdiManager.processPendingAnnotatedTypes();
     }
     
     //beanManager.addBean(_bean);

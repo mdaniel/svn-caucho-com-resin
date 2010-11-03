@@ -201,7 +201,7 @@ class InjectScanManager
       return null;
     else {
       InjectScanClass scanClass = createScanClass(className);
-      
+
       scanClass.setScanClass();
       
       return scanClass;

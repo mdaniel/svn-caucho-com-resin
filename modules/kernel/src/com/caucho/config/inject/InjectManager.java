@@ -61,7 +61,6 @@ import javax.annotation.sql.DataSourceDefinitions;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.ejb.Stateful;
-import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 import javax.enterprise.context.ContextNotActiveException;
@@ -108,7 +107,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 
 import com.caucho.config.CauchoDeployment;
-import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configured;
 import com.caucho.config.ContextDependent;
@@ -155,7 +153,7 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 
 /**
- * The web beans container for a given environment.
+ * The cdi container for a given environment.
  */
 @ModulePrivate
 @SuppressWarnings("serial")
@@ -1307,6 +1305,7 @@ public final class InjectManager
    *
    * @param name the name of the bean to match
    */
+  @Override
   public Set<Bean<?>> getBeans(String name)
   {
     ArrayList<Bean<?>> beanList = findByName(name);
@@ -1320,6 +1319,9 @@ public final class InjectManager
   @Module
   public ReferenceFactory<?> getReferenceFactory(String name)
   {
+    // ioc/23n3
+    update();
+    
     ReferenceFactory<?> refFactory = _namedRefFactoryMap.get(name);
     
     if (refFactory == null) {
@@ -1597,7 +1599,7 @@ public final class InjectManager
     
     InjectScanClass scanClass
       = _scanManager.getScanClass(rawClass.getName());
-    
+
     if (scanClass != null && ! scanClass.isRegistered()) {
       discoverScanClass(scanClass);
       processPendingAnnotatedTypes();

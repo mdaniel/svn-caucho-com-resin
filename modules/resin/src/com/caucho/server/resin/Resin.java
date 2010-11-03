@@ -1187,10 +1187,13 @@ public class Resin
     bootResin.getProgram().configure(resinConfig);
     
     _servletContainerConfig = new ServletContainerConfig(_servletContainer);
+    
+    BootClusterConfig cluster = bootServer.getPod().getCluster();
 
-    bootServer.getPod().getCluster().getProgram().configure(_servletContainerConfig);
+    cluster.getProgram().configure(_servletContainerConfig);
     
     ServerConfig config = new ServerConfig(_servletContainerConfig);
+    cluster.getServerDefault().configure(config);
     bootServer.getServerProgram().configure(config);
     
     _servletContainerConfig.init();

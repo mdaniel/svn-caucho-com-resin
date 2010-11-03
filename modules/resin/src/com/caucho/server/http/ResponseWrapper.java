@@ -38,10 +38,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
-import com.caucho.util.L10N;
 
 /**
  * Wraps a servlet response in another response.  Filters may
@@ -52,8 +50,6 @@ import com.caucho.util.L10N;
  * @since servlet 2.3
  */
 public class ResponseWrapper implements ServletResponse {
-  private static final L10N L = new L10N(ResponseWrapper.class);
-  
   // the wrapped response
   protected HttpServletResponse _response;
   
@@ -117,6 +113,7 @@ public class ResponseWrapper implements ServletResponse {
    *
    * @param type the mime type of the output
    */
+  @Override
   public void setContentType(String type)
   {
     _response.setContentType(type);
@@ -127,6 +124,7 @@ public class ResponseWrapper implements ServletResponse {
    *
    * @since 2.4
    */
+  @Override
   public String getContentType()
   {
     return _response.getContentType();
@@ -135,6 +133,7 @@ public class ResponseWrapper implements ServletResponse {
   /**
    * Returns the character encoding the response is using for output.
    */
+  @Override
   public String getCharacterEncoding()
   {
     return _response.getCharacterEncoding();
@@ -145,6 +144,7 @@ public class ResponseWrapper implements ServletResponse {
    *
    * @since 2.4
    */
+  @Override
   public void setCharacterEncoding(String encoding)
   {
     _response.setCharacterEncoding(encoding);
@@ -155,64 +155,79 @@ public class ResponseWrapper implements ServletResponse {
    * based on the locale.  For example, setting the "kr" locale will set
    * the character encoding to "EUC_KR".
    */
+  @Override
   public void setLocale(Locale locale)
   {
     _response.setLocale(locale);
   }
+  
   /**
    * Returns the output locale.
    */
+  @Override
   public Locale getLocale()
   {
     return _response.getLocale();
   }
+  
   /**
    * Returns an output stream for writing to the client.  You can use
    * the output stream to write binary data.
    */
+  @Override
   public ServletOutputStream getOutputStream()
     throws IOException
   {
     return _response.getOutputStream();
   }
+  
   /**
    * Returns a PrintWriter with the proper character encoding for writing
    * text data to the client.
    */
+  @Override
   public PrintWriter getWriter()
     throws IOException
   {
     return _response.getWriter();
   }
+  
   /**
    * Sets the output buffer size to <code>size</code>.  The servlet engine
    * may round the size up.
    *
    * @param size the new output buffer size.
    */
+  @Override
   public void setBufferSize(int size)
   {
     _response.setBufferSize(size);
   }
+  
   /**
    * Returns the size of the output buffer.
    */
+  @Override
   public int getBufferSize()
   {
     return _response.getBufferSize();
   }
+  
   /**
    * Flushes the buffer to the client.
    */
+  @Override
   public void flushBuffer()
     throws IOException
   {
     _response.flushBuffer();
   }
+  
   /**
    * Returns true if some data has actually been send to the client.  The
    * data will be sent if the buffer overflows or if it's explicitly flushed.
    */
+  @Override
   public boolean isCommitted()
   {
     return _response.isCommitted();
@@ -224,6 +239,7 @@ public class ResponseWrapper implements ServletResponse {
    *
    * @throws IllegalStateException if <code>isCommitted()</code> is true.
    */
+  @Override
   public void reset()
   {
     _response.reset();
@@ -236,16 +252,19 @@ public class ResponseWrapper implements ServletResponse {
    *
    * @throws IllegalStateException if <code>isCommitted()</code> is true.
    */
+  @Override
   public void resetBuffer()
   {
     _response.resetBuffer();
   }
+  
   /**
    * Resin automatically handles output content length and chunking.  This
    * method is ignored.
    *
    * @deprecated
    */
+  @Override
   public void setContentLength(int len)
   {
     _response.setContentLength(len);
@@ -260,6 +279,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.setStatus(sc);
   }
+  
   /**
    * Sends an HTTP error page based on the status code
    *
@@ -270,6 +290,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.sendError(sc, msg);
   }
+  
   /**
    * Sends an HTTP error page based on the status code
    *
@@ -280,6 +301,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.sendError(sc);
   }
+  
   /**
    * Redirects the client to another page.
    *
@@ -290,6 +312,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.sendRedirect(location);
   }
+  
   /**
    * Sets a header.  This will override a previous header
    * with the same name.
@@ -301,6 +324,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.setHeader(name, value);
   }
+  
   /**
    * Adds a header.  If another header with the same name exists, both
    * will be sent to the client.
@@ -312,6 +336,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.addHeader(name, value);
   }
+  
   /**
    * Returns true if the output headers include <code>name</code>
    *
@@ -321,6 +346,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     return _response.containsHeader(name);
   }
+  
   /**
    * Sets a header by converting a date to a string.
    *
@@ -337,6 +363,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.setDateHeader(name, date);
   }
+  
   /**
    * Adds a header by converting a date to a string.
    *
@@ -347,6 +374,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.addDateHeader(name, date);
   }
+  
   /**
    * Sets a header by converting an integer value to a string.
    *
@@ -357,6 +385,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.setIntHeader(name, value);
   }
+  
   /**
    * Adds a header by converting an integer value to a string.
    *
@@ -367,6 +396,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.addIntHeader(name, value);
   }
+  
   /**
    * Sends a new cookie to the client.
    */
@@ -374,6 +404,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     _response.addCookie(cookie);
   }
+  
   /**
    * Encodes session information in a URL. Calling this will enable
    * sessions for users who have disabled cookies.
@@ -385,6 +416,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     return _response.encodeURL(url);
   }
+  
   /**
    * Encodes session information in a URL suitable for
    * <code>sendRedirect()</code> 
@@ -397,10 +429,12 @@ public class ResponseWrapper implements ServletResponse {
     return _response.encodeRedirectURL(name);
   }
   
+  @SuppressWarnings("deprecation")
   public void setStatus(int sc, String msg)
   {
     _response.setStatus(sc, msg);
   }
+  
   /**
    * @deprecated
    */
@@ -408,6 +442,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     return encodeURL(url);
   }
+  
   /**
    * @deprecated
    */

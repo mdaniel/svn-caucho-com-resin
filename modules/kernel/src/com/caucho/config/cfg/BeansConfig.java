@@ -35,15 +35,11 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Stereotype;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.Interceptor;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.TagName;
-import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.inject.Module;
@@ -61,7 +57,7 @@ public class BeansConfig {
 
   private Path _beansFile;
 
-  private ArrayList<Class<?>> _deployList
+  private ArrayList<Class<?>> _alternativesList
     = new ArrayList<Class<?>>();
 
   private ArrayList<Class<?>> _interceptorList
@@ -136,9 +132,9 @@ public class BeansConfig {
     _isConfigured = isConfigured;
   }
 
-  public ArrayList<Class<?>> getDeployList()
+  public ArrayList<Class<?>> getAlternativesList()
   {
-    return _deployList;
+    return _alternativesList;
   }
 
   //
@@ -318,7 +314,7 @@ public class BeansConfig {
                                       cl.getName()));
       */
 
-      _deployList.add(cl);
+      _alternativesList.add(cl);
     }
   }
 
@@ -335,11 +331,11 @@ public class BeansConfig {
         throw new ConfigException(L.l("'{0}' is an invalid alternative because it does not have an @Alternative annotation.",
                                       cl.getName()));
      
-      if (_deployList.contains(cl))
+      if (_alternativesList.contains(cl))
         throw new ConfigException(L.l("'{0}' is an invalid alternative because it is listed twice.",
                                       cl.getName()));
         
-      _deployList.add(cl);
+      _alternativesList.add(cl);
     }
 
     public void addStereotype(Class<?> cl)
@@ -352,7 +348,7 @@ public class BeansConfig {
         throw new ConfigException(L.l("'{0}' is an invalid alternative because it is missing an @Alternative.",
                                       cl.getName()));
       
-      _deployList.add(cl);
+      _alternativesList.add(cl);
     }
   }
 }

@@ -497,7 +497,7 @@ class WatchdogChildProcess
     HashMap<String,String> env = new HashMap<String,String>();
 
     env.putAll(System.getenv());
-
+    
     Path resinHome = _watchdog.getResinHome();
 
     ArrayList<String> classPathList = new ArrayList<String>();
@@ -606,7 +606,7 @@ class WatchdogChildProcess
       // #3331, windows can't add -server automatically
       jvmArgs.add("-server");
     }
-
+    
     return jvmArgs;
   }
 

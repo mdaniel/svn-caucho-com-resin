@@ -294,7 +294,7 @@ public class XmlBeanType<T> extends ConfigType<T>
   @Override
   public void init(Object bean)
   {
-    XmlBeanConfig customBean = (XmlBeanConfig) bean;
+    XmlBeanConfig<?> customBean = (XmlBeanConfig<?>) bean;
 
     customBean.init();
   }

@@ -117,7 +117,7 @@ public class XmlStandardPlugin implements Extension
       for (int i = 0; i < _pendingBeans.size(); i++) {
         BeansConfig config = _pendingBeans.get(i);
 
-        ArrayList<Class<?>> deployList = config.getDeployList();
+        ArrayList<Class<?>> deployList = config.getAlternativesList();
 
         if (deployList != null && deployList.size() > 0) {
           _cdiManager.setDeploymentTypes(deployList);

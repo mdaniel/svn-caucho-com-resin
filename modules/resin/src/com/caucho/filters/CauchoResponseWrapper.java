@@ -107,6 +107,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
       _originalStream.close();
   }
 
+  @Override
   public ServletResponse getResponse()
   {
     return _response;
@@ -115,6 +116,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   /**
    * Sets the response content type.
    */
+  @Override
   public void setContentType(String value)
   {
     _response.setContentType(value);
@@ -128,6 +130,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   /**
    * Sets the ResponseStream
    */
+  @Override
   public void setResponseStream(AbstractResponseStream stream)
   {
     _stream = stream;
@@ -139,6 +142,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   /**
    * Gets the response stream.
    */
+  @Override
   public AbstractResponseStream getResponseStream()
   {
     return _stream;
@@ -147,6 +151,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   /**
    * Returns true for a caucho response stream.
    */
+  @Override
   public boolean isCauchoResponseStream()
   {
     return true;
@@ -155,6 +160,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   /**
    * Returns the servlet output stream.
    */
+  @Override
   public ServletOutputStream getOutputStream() throws IOException
   {
     return _os;
@@ -163,6 +169,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   /**
    * Returns the print writer.
    */
+  @Override
   public PrintWriter getWriter() throws IOException
   {
     return _writer;
@@ -192,6 +199,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
     return _flushBuffer;
   }
 
+  @Override
   public void flushBuffer()
     throws IOException
   {
@@ -203,6 +211,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
     //_response.flushBuffer();
   }
 
+  @Override
   public void reset()
   {
     super.reset();
@@ -210,6 +219,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
     resetBuffer();
   }
   
+  @Override
   public void resetBuffer()
   {
     if (_stream != null)
@@ -223,6 +233,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
     resetBuffer();
   }
 
+  @Override
   public void setLocale(Locale locale)
   {
     _response.setLocale(locale);
@@ -237,6 +248,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
    * caucho
    */
 
+  @Override
   public String getHeader(String key)
   {
     return null;
@@ -247,12 +259,14 @@ public class CauchoResponseWrapper extends ResponseWrapper
     return false;
   }
 
+  @Override
   public void setFooter(String key, String value)
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setFooter(key, value);
   }
 
+  @Override
   public void addFooter(String key, String value)
   {
     if (_response instanceof CauchoResponse)
@@ -274,6 +288,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
    * When set to true, RequestDispatcher.forward() is disallowed on
    * this stream.
    */
+  @Override
   public void setForbidForward(boolean forbid)
   {
   }
@@ -282,22 +297,25 @@ public class CauchoResponseWrapper extends ResponseWrapper
    * Returns true if RequestDispatcher.forward() is disallowed on
    * this stream.
    */
+  @Override
   public boolean getForbidForward()
   {
     return false;
   }
 
+  @Override
   public String getStatusMessage()
   {
     if (_response instanceof CauchoResponse)
       return ((CauchoResponse) _response).getStatusMessage();
 
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getSimpleName());
   }
 
   /**
    * Set to true while processing an error.
    */
+  @Override
   public void setHasError(boolean hasError)
   {
     _hasError = hasError;
@@ -306,6 +324,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   /**
    * Returns true if we're processing an error.
    */
+  @Override
   public boolean hasError()
   {
     return _hasError;
@@ -314,52 +333,64 @@ public class CauchoResponseWrapper extends ResponseWrapper
   /**
    * Kills the cache for an error.
    */
+  @Override
   public void killCache()
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).killCache();
   }
   
+  @Override
   public void setSessionId(String id)
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setSessionId(id);
   }
   
+  @Override
   public void setPrivateCache(boolean isPrivate)
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setPrivateCache(isPrivate);
   }
   
+  @Override
   public void setNoCache(boolean isPrivate)
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setNoCache(isPrivate);
   }
 
+  @Override
   public int getStatus()
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return _response.getStatus();
   }
 
+  @Override
   public Collection<String> getHeaders(String name)
   {
     return _response.getHeaders(name);
   }
 
+  @Override
   public Collection<String> getHeaderNames()
   {
     return _response.getHeaderNames();
   }
 
-  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  @Override
+  public void setForwardEnclosed(boolean isForwardEnclosed)
+  {
   }
 
-  public boolean isForwardEnclosed() {
+  @Override
+  public boolean isForwardEnclosed()
+  {
     return false;
   }
 
+  @Override
   public boolean isNoCacheUnlessVary()
   {
     return false;

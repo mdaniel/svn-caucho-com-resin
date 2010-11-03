@@ -151,6 +151,7 @@ public class FileServlet extends GenericServlet {
       _characterEncoding = encoding;
   }
 
+  @Override
   public void service(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -166,15 +167,6 @@ public class FileServlet extends GenericServlet {
       req = (HttpServletRequest) request;
 
     res = (HttpServletResponse) response;
-
-    String method = req.getMethod();
-    if (! method.equalsIgnoreCase("GET")
-        && ! method.equalsIgnoreCase("HEAD")
-        && ! method.equalsIgnoreCase("POST")) {
-      res.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, 
-                    "Method not implemented");
-      return;
-    }
 
     boolean isInclude = false;
     String uri;
@@ -317,6 +309,16 @@ public class FileServlet extends GenericServlet {
         throw new FileNotFoundException(uri);
       else
         res.sendError(HttpServletResponse.SC_NOT_FOUND);
+      return;
+    }
+
+    // server/4500, #4218
+    String method = req.getMethod();
+    if (! method.equalsIgnoreCase("GET")
+        && ! method.equalsIgnoreCase("HEAD")
+        && ! method.equalsIgnoreCase("POST")) {
+      res.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, 
+                    "Method not implemented");
       return;
     }
 

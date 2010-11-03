@@ -11,6 +11,17 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.13 - snapshot">
+<ul>
+<li>ejb: EjbInjectionTarget ordering (#4057, rep by Jeff Schnitzer)</li>
+<li>file servlet: 404 should take precedence over OPTIONS (#4218, rep by stbu)</li>
+<li>conf: server-default not configured property (#4251, rep by snw)</li>
+<li>jsp: fragment/attribute issues with jsp (#4258, rep by nfederov)</li>
+<li>rewrite: convert recursion to iteration to handle many rewrite rules (#4272, rep by Nick Pilch)</li>
+<li>cdi: @Alternatives processing ordering issues rep by (Wesley Wu)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.12 - Oct 15, 2010">
 <ul>
 <li>dist: cr-nl issue on windows for .git commit  (#4241, rep by James Gittelson)</li>
