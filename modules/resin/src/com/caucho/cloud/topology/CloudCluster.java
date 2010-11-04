@@ -111,7 +111,8 @@ public class CloudCluster
   
   void destroy()
   {
-    _admin.unregister();
+    if (_admin != null)
+      _admin.unregister();
   }
 
   /**

@@ -613,8 +613,8 @@ public class InterceptorFactory<X>
       }
       else if (Stateful.class.equals(ann.annotationType())) {
         _isStateful = true;
-        // ioc/05as
-        _isPassivating = true;
+        // ioc/05as, ejb/5019
+        // _isPassivating = true;
       }
     }
     

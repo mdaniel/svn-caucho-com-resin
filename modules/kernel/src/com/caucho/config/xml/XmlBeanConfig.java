@@ -55,6 +55,7 @@ import org.w3c.dom.Node;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfiguredLiteral;
+import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.program.Arg;
@@ -97,8 +98,11 @@ public class XmlBeanConfig<T> {
   private boolean _hasBindings;
   private boolean _hasInterceptorBindings;
   private boolean _isInlineBean;
+  private boolean _isBeansXml;
 
-  public XmlBeanConfig(QName name, Class<T> cl)
+  public XmlBeanConfig(QName name,
+                       Class<T> cl,
+                       Object parent)
   {
     _name = name;
 
@@ -128,6 +132,9 @@ public class XmlBeanConfig<T> {
       if (methodImpl.isAnnotationPresent(Produces.class))
         methodImpl.addAnnotation(ConfiguredLiteral.create());
     }
+    
+    if (parent instanceof BeansConfig)
+      _isBeansXml = true;
   }
 
   public ConfigType<T> getConfigType()
@@ -159,6 +166,11 @@ public class XmlBeanConfig<T> {
   public void setInlineBean(boolean isInline)
   {
     _isInlineBean = isInline;
+  }
+  
+  public void setBeansXml(boolean isBeansXml)
+  {
+    _isBeansXml = isBeansXml;
   }
   
   public void addArg(ConfigProgram arg)
@@ -458,7 +470,9 @@ public class XmlBeanConfig<T> {
     if (! _isInlineBean) {
       _cdiManager.discoverBean(_annotatedType);
       // ioc/23n3, ioc/0603
-      // _cdiManager.processPendingAnnotatedTypes();
+      if (! _isBeansXml) {
+        _cdiManager.update();
+      }
     }
     
     //beanManager.addBean(_bean);

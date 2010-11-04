@@ -269,7 +269,7 @@ public class InterceptorGenerator<X>
     if (_factory.isPassivating()
         || _factory.isStateful() && _interceptorBinding.size() > 0) {
       String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
-      
+      System.out.println("PASSIV: " + _factory.isPassivating() + " " + _interceptorBinding);
       out.println();
       out.print("com.caucho.config.gen.CandiUtil.validatePassivating(");
       out.print(beanClassName + ".class, ");

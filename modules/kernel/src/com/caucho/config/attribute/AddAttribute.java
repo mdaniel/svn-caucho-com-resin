@@ -97,7 +97,7 @@ public class AddAttribute<T> extends Attribute {
       return new AnnotationConfig(cl);
     }
     else {
-      XmlBeanConfig<?> config = new XmlBeanConfig(qName, cl);
+      XmlBeanConfig<?> config = new XmlBeanConfig(qName, cl, parent);
       config.setInlineBean(true);
 
       // config.setScope("singleton");

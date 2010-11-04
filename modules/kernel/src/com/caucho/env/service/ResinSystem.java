@@ -123,6 +123,7 @@ public class ResinSystem
       Environment.init();
       
       _injectManager = InjectManager.create();
+      addService(new CdiService(this));
       
       BeanBuilder<ResinSystem> beanFactory
         = _injectManager.createBeanFactory(ResinSystem.class);

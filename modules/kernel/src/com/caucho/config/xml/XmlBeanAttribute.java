@@ -93,7 +93,7 @@ public class XmlBeanAttribute extends Attribute {
 
       Class<?> cl = factory.getDriverClassByScheme(api, localName);
 
-      return new XmlBeanConfig(qName, cl);
+      return new XmlBeanConfig(qName, cl, parent);
     }
 
     if (! uri.startsWith("urn:java:"))
@@ -117,7 +117,7 @@ public class XmlBeanAttribute extends Attribute {
       return new AnnotationConfig(cl);
     }
     else {
-      XmlBeanConfig config = new XmlBeanConfig(qName, cl);
+      XmlBeanConfig config = new XmlBeanConfig(qName, cl, parent);
 
       // config.setScope("singleton");
 

@@ -147,15 +147,11 @@ public class IncludeResponse extends CauchoResponseWrapper
   @Override
   public void setStatus(int code)
   {
-    System.out.println("STATUS: " + code);
-    Thread.dumpStack();
   }
   
   @Override
   public void setStatus(int code, String msg)
   {
-    System.out.println("STATUS2: " + code);
-    Thread.dumpStack();
   }
 
   @Override
