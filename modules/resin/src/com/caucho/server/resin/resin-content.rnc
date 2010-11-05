@@ -162,6 +162,9 @@ r_host = element host {
 
   & r_root-directory?
 
+  & (attribute set-request-secure { string }
+    | element set-request-secure { string })?
+
   & (attribute secure-host-name { string }
     | element secure-host-name { string })?
 

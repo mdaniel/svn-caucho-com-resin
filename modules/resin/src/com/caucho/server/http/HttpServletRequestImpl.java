@@ -412,8 +412,18 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
     AbstractHttpRequest request = _request;
 
-    if (request != null)
+    if (request != null) {
+      WebApp webApp = request.getWebApp();
+      
+      if (webApp != null) {
+        Boolean isSecure = webApp.isRequestSecure();
+        
+        if (isSecure != null)
+          return isSecure;
+      }
+      
       return request.isSecure();
+    }
     else
       return false;
   }

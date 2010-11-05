@@ -254,13 +254,14 @@ public class ServletConfigImpl
     }
   }
 
+  @Override
   public void setMultipartConfig(MultipartConfigElement multipartConfig)
   {
     if (multipartConfig == null)
       throw new IllegalArgumentException();
 
     if (! _webApp.isInitializing())
-      throw new IllegalStateException();
+      throw new IllegalStateException(L.l("setMultipartConfig must be called during initialization."));
 
     _multipartConfigElement = multipartConfig;
   }
@@ -268,8 +269,14 @@ public class ServletConfigImpl
   public MultipartConfigElement getMultipartConfig()
   {
     if (_multipartConfigElement == null) {
-      Class<?> servletClass = getServletClass();
-
+      Class<?> servletClass = null;
+      
+      try {
+        servletClass = getServletClass();
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+      
       if (servletClass != null) {
         MultipartConfig config
           = (MultipartConfig) servletClass.getAnnotation(MultipartConfig.class);
@@ -352,7 +359,7 @@ public class ServletConfigImpl
   {
     return _initParams;
   }
-
+  
   public void setAsyncSupported(boolean asyncSupported)
   {
     if (_webApp != null && ! _webApp.isInitializing())
@@ -361,7 +368,8 @@ public class ServletConfigImpl
     _asyncSupported = asyncSupported;
   }
 
-  public boolean isAsyncSupported() {
+  public boolean isAsyncSupported()
+  {
     return _asyncSupported;
   }
 
@@ -471,7 +479,7 @@ public class ServletConfigImpl
         Thread thread = Thread.currentThread();
         ClassLoader loader = thread.getContextClassLoader();
 
-        _servletClass = Class.forName(_servletClassName, false, loader);
+        _servletClass = Class.forName(calculateServletClassName(), false, loader);
       } catch (Exception e) {
         throw error(L.l("'{0}' is not a known servlet class.  Servlets belong in the classpath, for example WEB-INF/classes.",
                         _servletClassName),
@@ -480,6 +488,11 @@ public class ServletConfigImpl
     }
 
     return _servletClass;
+  }
+  
+  protected String calculateServletClassName()
+  {
+    return getServletClassName();
   }
 
   public void setServlet(Servlet servlet)
@@ -1445,6 +1458,12 @@ public class ServletConfigImpl
     log.warning(e1.toString());
 
     return e1;
+  }
+  
+  protected void copyFrom(ServletConfigImpl source)
+  {
+    _initParams.putAll(source._initParams);
+    _init = source._init;
   }
 
   /**

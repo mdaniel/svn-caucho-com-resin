@@ -36,6 +36,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -1494,8 +1495,10 @@ public class WebApp extends ServletContextImpl
   public void addServletRegexp(ServletRegexp servletRegexp)
     throws ServletException, ClassNotFoundException
   {
-    ServletMapping mapping = new ServletMapping();
+    // servletRegexp.initRegexp(this, _servletMapper, _regexp);
 
+    ServletMapping mapping = new ServletMapping();
+    
     mapping.addURLRegexp(servletRegexp.getURLRegexp());
     mapping.setServletName(servletRegexp.getServletName());
     if (servletRegexp.getServletClass() != null)
@@ -1640,6 +1643,11 @@ public class WebApp extends ServletContextImpl
     _welcomeFileList = new ArrayList<String>(fileList);
     
     //    _servletMapper.setWelcomeFileList(fileList);
+  }
+  
+  public ArrayList<String> getWelcomeFileList()
+  {
+    return _welcomeFileList;
   }
 
   /**
@@ -1980,6 +1988,16 @@ public class WebApp extends ServletContextImpl
   public boolean isSecure()
   {
     return _isSecure;
+  }
+  
+  public Boolean isRequestSecure()
+  {
+    Host host = _host;
+    
+    if (host != null)
+      return host.isRequestSecure();
+    else
+      return null;
   }
 
   @Override
@@ -3030,6 +3048,7 @@ public class WebApp extends ServletContextImpl
       }
     }
 
+    Collections.sort(filters, new ClassComparator());
     for (Class<?> filterClass : filters) {
       WebFilter webFilter
         = filterClass.getAnnotation(WebFilter.class);
@@ -4422,7 +4441,16 @@ public class WebApp extends ServletContextImpl
       if (_isValid) {
         _pendingClasses.add(_className);
       }
-  }    
+    }    
+  }
+  
+  static class ClassComparator implements Comparator<Class<?>> {
+    @Override
+    public int compare(Class<?> a, Class<?> b)
+    {
+      return a.getName().compareTo(b.getName());
+    }
+    
   }
 
   static {

@@ -276,7 +276,7 @@ public class FileServlet extends GenericServlet {
       _pathCache.put(uri, cache);
     }
     else if (cache.isModified()) {
-      cache = new Cache(cache.getPath(), 
+      cache = new Cache(cache.getFilePath(), 
                         cache.getJarPath(), 
                         cache.getRelPath(),
                         cache.getMimeType());
@@ -645,6 +645,11 @@ public class FileServlet extends GenericServlet {
     {
       return _pathResolved;
     }
+
+    Path getFilePath()
+    {
+      return _path;
+    }
     
     Path getJarPath()
     {
@@ -695,6 +700,10 @@ public class FileServlet extends GenericServlet {
     {
       long lastModified = _pathResolved.getLastModified();
       long length = _pathResolved.getLength();
+
+      // server/1t06
+      if (_path != _pathResolved && _path.canRead())
+        return true;
 
       return (lastModified != _lastModified || length != _length);
     }

@@ -1028,7 +1028,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     }
 
     int port = _request.getServerPort();
-
+System.out.println("SN: " + serverName + " " + host);
     if (hostPrefix != null && ! hostPrefix.equals("")) {
     }
     else if (serverName.startsWith("http:")

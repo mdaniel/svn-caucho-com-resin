@@ -35,6 +35,7 @@ import com.caucho.config.ConfigELContext;
 import com.caucho.config.types.RawString;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
 import javax.el.ELContext;
@@ -131,8 +132,8 @@ public class ServletRegexp {
   /**
    * Initialize for a regexp.
    */
-  String initRegexp(ServletContext application,
-                    ServletManager manager,
+  public String initRegexp(WebApp webApp,
+                           ServletMapper mapper,
                     ArrayList<String> vars)
     throws ServletException
   {
@@ -152,12 +153,26 @@ public class ServletRegexp {
     try {
       String servletName = EL.evalString(rawName, mapEnv);
 
+      /*
       if (manager.getServletConfig(servletName) != null)
         return servletName;
+        */
       
       String className = EL.evalString(rawClassName, mapEnv);
 
       ServletConfigImpl config = new ServletConfigImpl();
+
+      ServletMapping mapping = new ServletMapping();
+      
+      mapping.addURLRegexp(getURLRegexp());
+      mapping.setServletName(getServletName());
+      mapping.setServletClass(rawClassName);
+      mapping.setServletContext(webApp);
+      getBuilderProgram().configure(mapping);
+      mapping.setStrictMapping(webApp.getStrictMapping());
+      mapping.init(mapper);
+      
+      /*
 
       config.setServletName(servletName);
       config.setServletClass(className);
@@ -168,6 +183,7 @@ public class ServletRegexp {
       config.init();
 
       manager.addServlet(config);
+      */
 
       return servletName;
     } catch (RuntimeException e) {
@@ -182,8 +198,9 @@ public class ServletRegexp {
   /**
    * Returns a printable representation of the servlet config object.
    */
+  @Override
   public String toString()
   {
-    return "ServletRegexp[" + _urlRegexp + "]";
+    return getClass().getSimpleName() + "[" + _urlRegexp + "]";
   }
 }

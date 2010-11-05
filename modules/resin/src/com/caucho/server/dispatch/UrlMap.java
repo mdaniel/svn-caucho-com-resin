@@ -132,10 +132,14 @@ public class UrlMap<E> {
                      boolean ifAbsent)
     throws PatternSyntaxException
   {
+    if (pattern.length() == 0) {
+      addRegexp(-1, "^/$", flags, value, true, isIgnore, ifAbsent);
+      return;
+    }
+    
     boolean startsWithSlash = pattern.charAt(0) == '/';
 
-    if (pattern.length() == 0
-        || pattern.length() == 1 && startsWithSlash) {
+    if (pattern.length() == 1 && startsWithSlash) {
       addRegexp(-1, "", flags, value, true, isIgnore, ifAbsent);
       return;
     }

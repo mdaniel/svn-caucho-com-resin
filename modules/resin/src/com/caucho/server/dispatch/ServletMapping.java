@@ -55,6 +55,7 @@ public class ServletMapping extends ServletConfigImpl {
     = new ArrayList<Mapping>();
 
   private boolean _isStrictMapping;
+  private boolean _isRegexp;
   private boolean _ifAbsent;
 
   /**
@@ -119,13 +120,19 @@ public class ServletMapping extends ServletConfigImpl {
 
     if (getServletName() == null)
       setServletName(getServletNameDefault());
+    
+    if (getServletName() != null && getServletName().indexOf("${") >= 0)
+      _isRegexp = true;
+    
+    if (getServletClassName() != null && getServletClassName().indexOf("${") >= 0)
+      _isRegexp = true;
 
     for (int i = 0; i < _mappingList.size(); i++) {
       Mapping mapping = _mappingList.get(i);
 
       String urlPattern = mapping.getUrlPattern();
       String urlRegexp = mapping.getUrlRegexp();
-
+      
       if (getServletName() == null
           && getServletClassName() != null
           && urlPattern != null) {
@@ -155,14 +162,21 @@ public class ServletMapping extends ServletConfigImpl {
     }
     */
   }
+  
+  Class<?> getServletClass(ArrayList<String> vars)
+  {
+    if (vars.size() > 0) {
+      return initRegexpClass(vars);
+    }
+    else {
+      return getServletClass();
+    }
+  }
 
   /**
    * Initialize for a regexp.
    */
-  String initRegexp(ServletContext webApp,
-                    ServletManager manager,
-                    ArrayList<String> vars)
-    throws ServletException
+  String initRegexpName(ArrayList<String> vars)
   {
     HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("regexp", vars);
@@ -179,45 +193,105 @@ public class ServletMapping extends ServletConfigImpl {
       rawClassName = rawName;
 
     try {
-      String servletName = EL.evalString(rawName, mapEnv);
+      return EL.evalString(rawName, mapEnv);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
 
-      if (manager.getServletConfig(servletName) != null)
-        return servletName;
+  /**
+   * Initialize for a regexp.
+   */
+  Class<?> initRegexpClass(ArrayList<String> vars)
+  {
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    map.put("regexp", vars);
 
+    ELContext mapEnv = new ConfigELContext(new MapVariableResolver(map));
+
+    String rawName = getServletName();
+    String rawClassName = getServletClassName();
+
+    if (rawName == null)
+      rawName = rawClassName;
+
+    if (rawClassName == null)
+      rawClassName = rawName;
+
+    try {
       String className = EL.evalString(rawClassName, mapEnv);
 
       try {
         WebApp app = (WebApp) getServletContext();
 
-        Class.forName(className, false, app.getClassLoader());
+        return Class.forName(className, false, app.getClassLoader());
       } catch (ClassNotFoundException e) {
         log.log(Level.WARNING, e.toString(), e);
 
         return null;
       }
-
-      ServletConfigImpl config = new ServletConfigImpl();
-
-      config.setServletName(servletName);
-      config.setServletClass(className);
-      config.setServletContext(webApp);
-
-      ContainerProgram program = getInit();
-
-      if (program != null)
-        config.setInit(program);
-
-      config.init();
-
-      manager.addServlet(config);
-
-      return servletName;
     } catch (RuntimeException e) {
       throw e;
-    } catch (ServletException e) {
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Initialize for a regexp.
+   */
+  ServletMapping initRegexpConfig(ArrayList<String> vars)
+  {
+    if (vars.size() == 0 || ! _isRegexp)
+      return null;
+    
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    map.put("regexp", vars);
+
+    ELContext mapEnv = new ConfigELContext(new MapVariableResolver(map));
+
+    String rawName = getServletName();
+    String rawClassName = getServletClassName();
+
+    if (rawName == null)
+      rawName = rawClassName;
+
+    if (rawClassName == null)
+      rawClassName = rawName;
+
+    try {
+      String servletName = EL.evalString(rawName, mapEnv);
+      
+      String className = EL.evalString(rawClassName, mapEnv);
+      
+      ServletMapping config = new ServletMapping();
+      config.setServletContext(getServletContext());
+      config.setServletName(servletName);
+      config.setServletClass(className);
+      
+      config.copyFrom(this);
+      
+      config.init();
+      
+      return config;
+      
+      /*
+      try {
+        WebApp app = (WebApp) getServletContext();
+
+        return Class.forName(className, false, app.getClassLoader());
+      } catch (ClassNotFoundException e) {
+        log.log(Level.WARNING, e.toString(), e);
+
+        return null;
+      }
+      */
+    } catch (RuntimeException e) {
       throw e;
-    } catch (Throwable e) {
-      throw new ServletException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 
@@ -248,10 +322,9 @@ public class ServletMapping extends ServletConfigImpl {
     builder.append("name=");
     builder.append(getServletName());
 
-    if (getServletClass() != null) {
+    if (getServletClassName() != null) {
       builder.append(", class=");
-      builder.append(getServletClass().getName());
-
+      builder.append(getServletClassName());
     }
 
     builder.append("]");
