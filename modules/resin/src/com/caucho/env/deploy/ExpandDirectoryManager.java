@@ -45,6 +45,7 @@ import com.caucho.vfs.Path;
 class ExpandDirectoryManager
 {
   private static final L10N L = new L10N(ExpandDirectoryManager.class);
+  private static final Logger log = Logger.getLogger(ExpandDirectoryManager.class.getName());
 
   private final String _id;
   
@@ -222,7 +223,14 @@ class ExpandDirectoryManager
       if (! rootDirectory.lookup(file).canRead())
         return false;
     }
+    
+    Path expandHash = rootDirectory.lookup(ExpandDeployController.APPLICATION_HASH_PATH);
 
+    if (expandHash.canRead()) {
+      log.finer(this + " " + rootDirectory + " contains an application hash");
+      return false;
+    }
+    
     return true;
   }
 

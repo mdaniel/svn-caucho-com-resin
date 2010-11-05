@@ -414,9 +414,12 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    *
    * @param entry the saved cache entry
    */
+  @Override
   public void setMatchCacheEntry(AbstractCacheEntry entry)
   {
     assert(_matchCacheEntry == null);
+    
+    System.out.println("MCE: " + entry);
 
     _matchCacheEntry = entry;
   }
@@ -711,11 +714,15 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   boolean handleNotModified()
     throws IOException
   {
+    System.out.println("STAT: " + _status + " " + _matchCacheEntry);
+    Thread.dumpStack();
     if (_status != SC_NOT_MODIFIED) {
       return false;
     }
     else if (_matchCacheEntry != null) {
+      System.out.println("MCE:");
       if (isCommitted()) {
+        System.out.println("COMMIT:");
         return false;
       }
 
@@ -1028,7 +1035,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     }
 
     int port = _request.getServerPort();
-System.out.println("SN: " + serverName + " " + host);
+
     if (hostPrefix != null && ! hostPrefix.equals("")) {
     }
     else if (serverName.startsWith("http:")

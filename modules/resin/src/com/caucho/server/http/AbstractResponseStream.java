@@ -44,6 +44,10 @@ import com.caucho.vfs.Path;
 public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   private State _state = State.START;
   
+  public void setCauchoResponse(CauchoResponse res)
+  {
+  }
+  
   /**
    * Starts the response stream.
    */

@@ -53,6 +53,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   private final byte []_singleByteBuffer = new byte[1];
 
   private AbstractHttpResponse _response;
+  private CauchoResponse _cauchoResponse;
 
   private AbstractCacheFilterChain _cacheInvocation;
   private AbstractCacheEntry _newCacheEntry;
@@ -84,7 +85,16 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     return _response;
   }
-
+  
+  public void setCauchoResponse(CauchoResponse response)
+  {
+    _cauchoResponse = response;
+  }
+  
+  public CauchoResponse getCauchoResponse()
+  {
+    return _cauchoResponse;
+  }
   /**
    * initializes the Response stream at the beginning of a request.
    */
@@ -264,6 +274,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
     // server/05ef
     if (! isClosing() || isCharFlushing())
       length = -1;
+    
+    if (_cauchoResponse != null)
+      _cauchoResponse.writeHeaders(length);
 
     startCaching(true);
 

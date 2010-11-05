@@ -945,7 +945,7 @@ public class ServletConfigImpl
       if (_servletClass != null) {
       }
       else if (requireClass) {
-        throw error(L.l("'{0}' is not a known servlet.  Servlets belong in the classpath, often in WEB-INF/classes.", _servletClassName));
+        throw error(L.l("'{0}' is not a known servlet class.  Servlets belong in the classpath, for example WEB-INF/classes.", _servletClassName));
       }
       else {
         String location = _location != null ? _location : "";

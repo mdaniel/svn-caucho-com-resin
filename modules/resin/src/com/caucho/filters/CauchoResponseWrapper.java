@@ -360,6 +360,14 @@ public class CauchoResponseWrapper extends ResponseWrapper
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setNoCache(isPrivate);
   }
+  
+  @Override
+  public void writeHeaders(int length)
+    throws IOException
+  {
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).writeHeaders(length);
+  }
 
   @Override
   public int getStatus()

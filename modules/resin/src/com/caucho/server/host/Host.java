@@ -867,6 +867,23 @@ public class Host
     }
   }
 
+  /**
+   * @param shortHost
+   * @return
+   */
+  public static String calculateCanonicalIPv6(String host)
+  {
+    try {
+      InetAddress addr = InetAddress.getByName(host);
+      
+      return "[" + addr.getHostAddress() + "]";
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return host;
+    }
+  }
+
   @Override
   public String toString()
   {

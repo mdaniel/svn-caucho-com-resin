@@ -463,9 +463,9 @@ public class DeployClient implements Repository
    *
    * @param tag the encoded controller name
    */
-  public boolean undeploy(CommitBuilder tag)
+  public boolean undeploy(CommitBuilder commit)
   {
-    return removeTag(tag);
+    return removeTag(commit);
   }
 
   /**

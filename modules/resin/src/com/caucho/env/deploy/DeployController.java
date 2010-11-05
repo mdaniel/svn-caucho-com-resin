@@ -801,9 +801,15 @@ abstract public class DeployController<I extends DeployInstance>
       alarm.close();
     }
     
+    onDestroy();
+    
     return true;
   }
-
+  
+  protected void onDestroy()
+  {
+  }
+  
   /**
    * Returns the appropriate log for debugging.
    */

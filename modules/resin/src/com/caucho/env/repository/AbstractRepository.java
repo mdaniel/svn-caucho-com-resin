@@ -391,8 +391,11 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
 
   protected boolean setTagMap(RepositoryTagMap tagMap)
   {
-    RepositoryTagMap oldTagMap = null;
+    if (tagMap == null)
+      throw new NullPointerException();
 
+    RepositoryTagMap oldTagMap = null;
+    
     synchronized (this) {
       oldTagMap = _tagMap;
       

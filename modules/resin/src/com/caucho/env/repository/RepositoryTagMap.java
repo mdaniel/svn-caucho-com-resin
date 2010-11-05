@@ -60,7 +60,7 @@ public class RepositoryTagMap
 
   public RepositoryTagMap()
   {
-    _commitHash = null;
+    _commitHash = "";
     _commit = null;
     _sequence = 0;
     _tagMap
@@ -75,6 +75,9 @@ public class RepositoryTagMap
     throws IOException
   {
     _commitHash = commitHash;
+    
+    if (commitHash == null)
+      throw new NullPointerException();
 
     // force loading and validation from backend
     if (isValidate)

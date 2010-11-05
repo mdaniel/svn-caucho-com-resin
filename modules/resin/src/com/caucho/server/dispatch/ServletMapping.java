@@ -165,7 +165,7 @@ public class ServletMapping extends ServletConfigImpl {
   
   Class<?> getServletClass(ArrayList<String> vars)
   {
-    if (vars.size() > 0) {
+    if (vars.size() > 1 || _isRegexp) {
       return initRegexpClass(vars);
     }
     else {

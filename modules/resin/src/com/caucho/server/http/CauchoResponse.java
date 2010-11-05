@@ -48,6 +48,9 @@ public interface CauchoResponse extends HttpServletResponse {
   public void setFooter(String key, String value);
   public void addFooter(String key, String value);
   
+  public void writeHeaders(int length)
+    throws IOException;
+  
   public void close() throws IOException;
 
   // to support the JSP getRemaining

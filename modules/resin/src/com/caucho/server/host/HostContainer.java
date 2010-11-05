@@ -414,6 +414,9 @@ public class HostContainer implements InvocationBuilder {
     if (p > 0 && q < p)
       shortHost = rawHost.substring(0, p);
     
+    if (shortHost.startsWith("["))
+      shortHost = Host.calculateCanonicalIPv6(shortHost);
+    
     String fullHost = shortHost + ':' + rawPort;
 
     HostController hostController = null;

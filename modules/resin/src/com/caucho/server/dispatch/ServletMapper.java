@@ -224,8 +224,19 @@ public class ServletMapper {
       if (servletMap != null && servletMap.isServletConfig())
         config = servletMap;
 
-      if (servletMap != null)
+      if (servletMap != null) {
         servletRegexp = servletMap.initRegexpConfig(vars);
+        
+        if (servletRegexp != null) {
+          try {
+            servletRegexp.getServletClass();
+          } catch (Exception e) {
+            log.log(Level.FINER, e.toString(), e);
+
+            return new ErrorFilterChain(404);
+          }
+        }
+      }
 
       if (servletRegexp != null) {
         servletName = servletRegexp.getServletName();

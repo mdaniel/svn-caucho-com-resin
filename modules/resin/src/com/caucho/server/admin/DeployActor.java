@@ -399,13 +399,15 @@ public class DeployActor extends SimpleActor
 
   private String start(String tag)
   {
-    DeployControllerMXBean controller = findController(tag);
+    DeployControllerService service = DeployControllerService.getCurrent();
+    
+    DeployTagItem controller = service.getTagItem(tag);
 
     if (controller == null)
       return L.l("'{0}' is an unknown controller", controller);
 
     try {
-      controller.start();
+      controller.toStart();
 
       return controller.getState();
     } catch (Exception e) {
@@ -435,13 +437,15 @@ public class DeployActor extends SimpleActor
 
   private String stop(String tag)
   {
-    DeployControllerMXBean controller = findController(tag);
+    DeployControllerService service = DeployControllerService.getCurrent();
+    
+    DeployTagItem controller = service.getTagItem(tag);
 
     if (controller == null)
       return L.l("'{0}' is an unknown controller", controller);
 
     try {
-      controller.stop();
+      controller.toStop();
 
       return controller.getState();
     } catch (Exception e) {

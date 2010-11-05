@@ -403,6 +403,12 @@ public class ResponseAdapter extends ResponseWrapper
   {
     return false;
   }
+  
+  @Override
+  public void writeHeaders(int length)
+  {
+    
+  }
 
   public static void free(ResponseAdapter resAdapt)
   {

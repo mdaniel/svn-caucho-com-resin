@@ -307,8 +307,7 @@ public class ServletContextImpl extends ServletContextCompat
 
     if (path.exists())
       return url;
-    else if (getClassLoader().getResource(
-      "META-INF/resources/" + realPath) != null) {
+    else if (getClassLoader().getResource("META-INF/resources/" + realPath) != null) {
       return url;
     }
 
@@ -410,7 +409,7 @@ public class ServletContextImpl extends ServletContextCompat
   /**
     * Returns an enumeration of all the resources.
     */
-  public Set getResourcePaths(String prefix)
+  public Set<String> getResourcePaths(String prefix)
   {
     if (! prefix.endsWith("/"))
       prefix = prefix + "/";
@@ -430,6 +429,25 @@ public class ServletContextImpl extends ServletContextCompat
       }
     } catch (IOException e) {
     }
+
+    /*
+    try {
+      Enumeration<URL> paths = getClassLoader().getResources(resourceName);
+      
+      while (paths.hasMoreElements()) {
+        URL subPath = paths.nextElement();
+        
+        String subPathName = subPath.toString();
+
+        int p = subPathName.indexOf("META-INF/resources");
+        
+        if (p >= 0)
+          set.add(subPathName.substring(p + "META-INF/resources".length()));
+      }
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    */
      
     return set;
   }

@@ -30,6 +30,7 @@
 package com.caucho.env.deploy;
 
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.util.ConcurrentArrayList;
 
 /**
  * Interface for a service registered with the Resin Server.
@@ -38,6 +39,9 @@ public class DeployTagItem {
   private final String _tag;
   
   private final Lifecycle _lifecycle = new Lifecycle();
+  
+  private final ConcurrentArrayList<DeployControllerListener> _listeners
+    = new ConcurrentArrayList<DeployControllerListener>(DeployControllerListener.class);
   
   private Throwable _deployException;
 
@@ -69,6 +73,10 @@ public class DeployTagItem {
   {
     if (_lifecycle.toActive()) {
       _deployException = null;
+      
+      for (DeployControllerListener listener : _listeners.toArray()) {
+        listener.onStart();
+      }
     }
   }
   
@@ -77,7 +85,11 @@ public class DeployTagItem {
    */
   public void toStop()
   {
-    _lifecycle.toStop();
+    if (_lifecycle.toStop()) {
+      for (DeployControllerListener listener : _listeners.toArray()) {
+        listener.onStop();
+      }
+    }
   }
   
   /**
@@ -96,6 +108,16 @@ public class DeployTagItem {
   public Throwable getDeployException()
   {
     return _deployException;
+  }
+  
+  public void addListener(DeployControllerListener listener)
+  {
+    _listeners.add(listener);
+  }
+  
+  public void removeListener(DeployControllerListener listener)
+  {
+    _listeners.remove(listener);
   }
   
   public String toString()

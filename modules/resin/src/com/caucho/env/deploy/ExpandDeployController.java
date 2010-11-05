@@ -31,6 +31,7 @@ package com.caucho.env.deploy;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -69,7 +70,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private static final Logger log
     = Logger.getLogger(ExpandDeployController.class.getName());
   
-  private static final String APPLICATION_HASH_PATH
+  public static final String APPLICATION_HASH_PATH
     = "META-INF/resin.application-hash";
 
   private final String _autoDeployStage;
@@ -85,6 +86,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private FileSetType _expandCleanupFileSet;
   
   private DeployTagItem _deployItem;
+  private DeployListener _deployListener;
   
   private DependencyContainer _depend = new DependencyContainer();
   
@@ -215,6 +217,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     deployService.addTag(getId());
     _deployItem = deployService.getTagItem(getId());
+    _deployListener = new DeployListener(this);
+    _deployItem.addListener(_deployListener);
     
     _rootHash = readRootHash();
   }
@@ -657,6 +661,15 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (_deployItem != null)
       _deployItem.toStop();
   }
+  
+  @Override
+  protected void onDestroy()
+  {
+    super.onDestroy();
+    
+    if (_deployItem != null)
+      _deployItem.removeListener(_deployListener);
+  }
 
   /**
    * Returns the hash code.
@@ -681,5 +694,32 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     // XXX: s/b getRootDirectory?
     return getId().equals(controller.getId());
+  }
+  
+  static class DeployListener implements DeployControllerListener {
+    private WeakReference<ExpandDeployController<?>> _controller;
+    
+    DeployListener(ExpandDeployController<?> controller)
+    {
+      _controller = new WeakReference<ExpandDeployController<?>>(controller);
+    }
+
+    @Override
+    public void onStart()
+    {
+      ExpandDeployController<?> controller = _controller.get();
+      
+      if (controller != null)
+        controller.start();
+    }
+
+    @Override
+    public void onStop()
+    {
+      ExpandDeployController<?> controller = _controller.get();
+      
+      if (controller != null)
+        controller.stop();
+    }
   }
 }

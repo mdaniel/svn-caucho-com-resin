@@ -27,21 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.http;
+package com.caucho.env.deploy;
 
-import java.io.IOException;
-
-
-abstract public class AbstractCauchoResponse implements CauchoResponse {
-  @Override
-  public void writeHeaders(int length)
-    throws IOException
-  {
-  }
+/**
+ * Interface for NetworkDeployService tag listeners, i.e. when tags are
+ * added or removed.
+ */
+public interface DeployControllerListener {
+  public void onStart();
   
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
-  }
+  public void onStop();
 }
