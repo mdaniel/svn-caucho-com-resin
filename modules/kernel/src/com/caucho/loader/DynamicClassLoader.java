@@ -41,6 +41,8 @@ import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -2069,8 +2071,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-        // Use reverse order so the last resources will be destroyed first.
         if (listeners != null) {
+          // Sort listeners for QA consistent close
+          Collections.sort(listeners, LISTENER_SORT);
           for (int i = listeners.size() - 1; i >= 0; i--) {
             ClassLoaderListener listener = listeners.get(i);
 
@@ -2224,6 +2227,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     destroy();
   }
   */
+  
+  private static final ListenerComparator LISTENER_SORT
+    = new ListenerComparator();
+  
+  static class ListenerComparator implements Comparator<Object> {
+    public int compare(Object a, Object b)
+    {
+      return a.getClass().getName().compareTo(b.getClass().getName());
+    }
+  }
 
   static {
     URL url = null;
@@ -2235,4 +2248,5 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     NULL_URL = url;
   }
+
 }

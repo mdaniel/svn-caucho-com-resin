@@ -714,6 +714,7 @@ public class SpyConnection implements java.sql.Connection {
    * Reset the connection and return the underlying JDBC connection to
    * the pool.
    */
+  @Override
   public void close() throws SQLException
   {
     long start = start();

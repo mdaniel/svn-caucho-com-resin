@@ -267,8 +267,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       SystemException
   {
     if (resource == null) {
-      throw new IllegalArgumentException(L
-          .l("Resource must not be null in enlistResource"));
+      throw new IllegalArgumentException(L.l("Resource must not be null in enlistResource"));
     }
 
     if (_isSuspended) {
@@ -1150,6 +1149,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     _synchronizations = null;
 
     _userTransaction = null;
+    // env/0660
+    _timeout = _transactionManager.getTimeout();
 
     XidImpl xid = _xid;
     _xid = null;
@@ -1274,6 +1275,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       mappedResources.clear();
 
     _xid = null;
+    _timeout = _transactionManager.getTimeout();
   }
 
   /**
