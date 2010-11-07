@@ -112,6 +112,9 @@ public class DeployTagItem {
   
   public void addListener(DeployControllerListener listener)
   {
+    if (listener == null)
+      throw new NullPointerException();
+    
     _listeners.add(listener);
   }
   

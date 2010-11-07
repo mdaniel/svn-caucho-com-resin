@@ -135,7 +135,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   {
     CauchoResponse cauchoRes = null;
 
-    boolean allowForward = true;
+    boolean allowForward = false;
     
     if (_webApp != null)
       allowForward = _webApp.isAllowForwardAfterFlush();

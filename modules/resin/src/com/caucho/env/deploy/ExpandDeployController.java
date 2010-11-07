@@ -78,8 +78,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private Path _rootDirectory;
   private Path _archivePath;
   
+  private DeployContainerApi<?> _container;
+  
   private String _rootHash;
 
+  private boolean _isAllowRepository = true;
   private Repository _repository;
   private RepositorySpi _repositorySpi;
 
@@ -100,12 +103,13 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
   protected ExpandDeployController(String id)
   {
-    this(id, null, null);
+    this(id, null, null, null);
   }
 
   protected ExpandDeployController(String id,
                                    ClassLoader loader,
-                                   Path rootDirectory)
+                                   Path rootDirectory,
+                                   DeployContainerApi<?> container)
   {
     super(id, loader);
 
@@ -113,6 +117,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       rootDirectory = Vfs.getPwd(getParentClassLoader());
 
     _rootDirectory = rootDirectory;
+    _container = container;
     
     _autoDeployStage = "server-" + ResinSystem.getCurrentId();
   }
@@ -147,6 +152,16 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   public void setArchivePath(Path path)
   {
     _archivePath = path;
+  }
+  
+  public void setAllowRepository(boolean isAllowRepository)
+  {
+    _isAllowRepository = isAllowRepository;
+  }
+  
+  public boolean isAllowRepository()
+  {
+    return _isAllowRepository;
   }
 
   /**
@@ -208,17 +223,23 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   {
     super.initEnd();
     
-    RepositoryService repositoryService = RepositoryService.create(); 
-    _repository = repositoryService.getRepository();
-    _repository.addListener(getId(), this);
-    _repositorySpi = repositoryService.getRepositorySpi();
-    
+    if (isAllowRepository()) {
+      RepositoryService repositoryService = RepositoryService.create(); 
+      _repository = repositoryService.getRepository();
+      _repository.addListener(getId(), this);
+      _repositorySpi = repositoryService.getRepositorySpi();
+    }
+      
     DeployControllerService deployService = DeployControllerService.create();
 
     deployService.addTag(getId());
     _deployItem = deployService.getTagItem(getId());
-    _deployListener = new DeployListener(this);
-    _deployItem.addListener(_deployListener);
+    
+    if (_container != null) {
+      _deployListener = new DeployListener(_container, getId());
+    
+      _deployItem.addListener(_deployListener);
+    }
     
     _rootHash = readRootHash();
   }
@@ -456,7 +477,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       Path pwd = getRootDirectory();
 
       pwd.mkdirs();
-      
+
       removeExpandDirectory(pwd);
 
       if (log.isLoggable(Level.FINE)) {
@@ -697,29 +718,41 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
   
   static class DeployListener implements DeployControllerListener {
-    private WeakReference<ExpandDeployController<?>> _controller;
+    private WeakReference<DeployContainerApi<?>> _container;
+    private String _tag;
     
-    DeployListener(ExpandDeployController<?> controller)
+    DeployListener(DeployContainerApi<?> container, String tag)
     {
-      _controller = new WeakReference<ExpandDeployController<?>>(controller);
+      _container = new WeakReference<DeployContainerApi<?>>(container);
+      _tag = tag;
+      
+      // 
     }
 
     @Override
     public void onStart()
     {
-      ExpandDeployController<?> controller = _controller.get();
+      DeployContainerApi<?> container = _container.get();
       
-      if (controller != null)
-        controller.start();
+      if (container != null) {
+        DeployControllerApi<?> controller = container.findControllerById(_tag);
+        
+        if (controller != null)
+          controller.start();
+      }
     }
 
     @Override
     public void onStop()
     {
-      ExpandDeployController<?> controller = _controller.get();
+      DeployContainerApi<?> container = _container.get();
       
-      if (controller != null)
-        controller.stop();
+      if (container != null) {
+        DeployControllerApi<?> controller = container.findControllerById(_tag);
+        
+        if (controller != null)
+          controller.stop();
+      }
     }
   }
 }

@@ -197,6 +197,14 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   }
 
   /**
+   * Returns the matching entry.
+   */
+  public C findControllerById(String name)
+  {
+    return findDeployedControllerById(name);
+  }
+
+  /**
    * Returns the deployed entries.
    */
   public C []getControllers()

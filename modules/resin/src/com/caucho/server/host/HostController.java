@@ -97,7 +97,7 @@ public class HostController
                  HostContainer container,
                  Map<String,Object> varMap)
   {
-    super(id, rootDirectory, config);
+    super(id, rootDirectory, config, container.getHostDeployContainer());
 
     _hostName = hostName;
 

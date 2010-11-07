@@ -87,14 +87,15 @@ abstract public class
   public EnvironmentDeployController(String id, 
                                      Path rootDirectory)
   {
-    this(id, rootDirectory, null);
+    this(id, rootDirectory, null, null);
   }
 
     public EnvironmentDeployController(String id, 
                                        Path rootDirectory,
-                                       C config)
+                                       C config,
+                                       DeployContainerApi<?> container)
     {
-    super(id, null, rootDirectory);
+    super(id, null, rootDirectory, container);
 
     _jmxContext = Jmx.copyContextProperties(getParentClassLoader());
     

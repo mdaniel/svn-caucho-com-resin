@@ -1117,6 +1117,11 @@ public class WebAppContainer
     return controller;
   }
 
+  public DeployContainerApi<WebAppController> getWebAppDeployContainer()
+  {
+    return _appDeploy;
+  }
+  
   /**
    * Finds the web-app for the entry, not checking for sub-apps.
    * (used by LocalDeployServlet)
@@ -1134,6 +1139,10 @@ public class WebAppContainer
     return _appDeploy.getControllers();
   }
 
+  public DeployContainerApi<EarDeployController> getEarDeployContainer()
+  {
+    return _earDeploy;
+  }
   /**
    * Returns a list of the webApps.
    */

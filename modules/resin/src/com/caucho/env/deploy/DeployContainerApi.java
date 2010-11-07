@@ -73,6 +73,11 @@ public interface DeployContainerApi<C extends DeployControllerApi<?>>
   public C findController(String name);
 
   /**
+   * Returns the matching controller by the id.
+   */
+  public C findControllerById(String tag);
+
+  /**
    * Returns the deployed entries.
    */
   public C []getControllers();

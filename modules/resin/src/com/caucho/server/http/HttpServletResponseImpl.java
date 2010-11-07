@@ -288,6 +288,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     // jsp/15ma
     _responseStream.killCaching();
+
     /*
     if (_currentWriter instanceof JspPrintWriter)
       ((JspPrintWriter) _currentWriter).clear();
@@ -419,8 +420,6 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   {
     assert(_matchCacheEntry == null);
     
-    System.out.println("MCE: " + entry);
-
     _matchCacheEntry = entry;
   }
 
@@ -714,15 +713,11 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   boolean handleNotModified()
     throws IOException
   {
-    System.out.println("STAT: " + _status + " " + _matchCacheEntry);
-    Thread.dumpStack();
     if (_status != SC_NOT_MODIFIED) {
       return false;
     }
     else if (_matchCacheEntry != null) {
-      System.out.println("MCE:");
       if (isCommitted()) {
-        System.out.println("COMMIT:");
         return false;
       }
 

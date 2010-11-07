@@ -358,12 +358,13 @@ public class IncludeResponse extends CauchoResponseWrapper
     resetBuffer();
   }
 
+  @Override
   public void resetBuffer()
   {
-    _stream.clearBuffer();
-
     // jsp/15ma
-    // killCaching();
+    super.resetBuffer();
+    
+    _stream.clearBuffer();
   }
 
   /**
@@ -378,20 +379,25 @@ public class IncludeResponse extends CauchoResponseWrapper
       throw new IllegalStateException(L.l("response cannot be reset() after committed"));
     
     _stream.clearBuffer();
+    
+    // killCaching()
   }
 
   public void clearBuffer()
   {
     _stream.clearBuffer();
+    // killCaching()
   }
 
   @Override
-  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  public void setForwardEnclosed(boolean isForwardEnclosed)
+  {
     _isForwardEnclosed = isForwardEnclosed;
   }
 
   @Override
-  public boolean isForwardEnclosed() {
+  public boolean isForwardEnclosed()
+  {
     if (_isForwardEnclosed)
       return true;
     else if (getResponse() instanceof CauchoResponse)

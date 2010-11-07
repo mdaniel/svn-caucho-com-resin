@@ -1930,18 +1930,18 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
     if (protocol != null)
       _response.setHeader("WebSocket-Protocol", protocol);
-    
-    try {
-      _response.getOutputStream().flush();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
 
     WebSocketContextImpl duplex
       = new WebSocketContextImpl(this, _response, listener);
 
     SocketLinkDuplexController controller = _request.startDuplex(duplex);
     duplex.setController(controller);
+    
+    try {
+      _response.getOutputStream().flush();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
     try {
       duplex.onStart();

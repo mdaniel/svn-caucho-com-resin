@@ -69,7 +69,7 @@ public class EarDeployController
                       WebAppContainer container,
                       EarConfig config)
   {
-    super(id, rootDirectory, config);
+    super(id, rootDirectory, config, container.getEarDeployContainer());
 
     _container = container;
 

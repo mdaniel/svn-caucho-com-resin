@@ -103,7 +103,7 @@ public class GitService extends AbstractResinService {
   {
     if (_root == null)
       _root = RootDirectoryService.getCurrentDataDirectory().lookup(".git");
-    
+
     if (_root.lookup("HEAD").canRead())
       return;
 

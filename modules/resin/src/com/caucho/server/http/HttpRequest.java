@@ -962,8 +962,11 @@ public class HttpRequest extends AbstractHttpRequest
         ch = readBuffer[readOffset++];
       }
       
-      if (ch != '/')
+      if (ch != '/') {
+        log.warning("Invalid Request (method=" + _method + " url ch=0x" + Integer.toHexString(ch) + ") (IP=" + getRemoteHost() + ")");
+        
         throw new BadRequestException("Invalid Request(Remote IP=" + getRemoteHost() + ")");
+      }
 
       if (readLength <= readOffset) {
         if ((readLength = s.fillBuffer()) < 0) {
@@ -1237,7 +1240,7 @@ public class HttpRequest extends AbstractHttpRequest
 
     _rawInputStream.init(conn.getReadStream());
     getReadStream().setSource(_rawInputStream);
-
+    
     return context;
   }
 

@@ -828,6 +828,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
       if (cacheWriter != null)
         cacheWriter.close();
+
       if (_newCacheEntry != null) {
         HttpServletRequestImpl request
           = _response.getRequest().getRequestFacade();

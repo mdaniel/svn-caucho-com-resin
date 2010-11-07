@@ -875,7 +875,7 @@ public class Host
   {
     try {
       InetAddress addr = InetAddress.getByName(host);
-      
+
       return "[" + addr.getHostAddress() + "]";
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
