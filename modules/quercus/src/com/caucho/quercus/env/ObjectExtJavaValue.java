@@ -77,6 +77,12 @@ public class ObjectExtJavaValue extends ObjectExtValue
     }
     
     Value value = _javaClassDef.getField(env, this, name);
+    Value quercusValue = _quercusClass.getField(env,this, name);
+
+    if(quercusValue != null && quercusValue != UnsetValue.UNSET && quercusValue != NullValue.NULL)
+    {
+        return quercusValue;
+    }
 
     if (value != null)
       return value;

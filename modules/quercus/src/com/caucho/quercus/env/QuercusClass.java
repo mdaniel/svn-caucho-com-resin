@@ -1087,7 +1087,15 @@ public class QuercusClass extends NullValue {
     // push/pop to prevent infinite recursion
     if(issetField(name) && _fieldMap.get(name).isPublic())
     {
-        return this.get(name); // TODO: move to ObjectExtValue if possible
+        Value v_current = this.get(name); // TODO: move to ObjectExtValue if possible
+
+        if(v_current != NullValue.NULL && v_current != UnsetValue.UNSET)
+        {
+            return v_current;
+        }
+        if(_fieldGet == null){
+            return ((ClassField) _fieldMap.get(name)).getInitValue().eval(env);
+        }
     }
 
     if (_fieldGet != null) {
