@@ -1,0 +1,20 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.13 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 4.0.13">
+
+<p>Resin 4.0.13 finishes the first pass over the EJB TCK. Because of
+regression work (particularly with CDI regressions related to the EJB
+TCK work), the complete Web Profile pass will be the main focus of 4.0.14.</p>
+
+</s1>
+
+</body>
+</document>
