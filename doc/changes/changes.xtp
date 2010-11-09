@@ -13,6 +13,7 @@
 
 <s2 title="4.0.13 - snapshot">
 <ul>
+<li>hessian: java.sql.Timestamp deserialization NPE (#4286, rep by Matt Poirier and Shawn Frederickson)</li>
 <li>servlet: url-mapping="" was not handled properly (#4283, rep by Peter Yuill)</li>
 <li>welcome-file: use 301 instead of 302 (#4212, rep by jkowall)</li>
 <li>conf: sample resin.xml no longer uses www-data user-name (#4220, rep by Arthur Naylor)</li>
