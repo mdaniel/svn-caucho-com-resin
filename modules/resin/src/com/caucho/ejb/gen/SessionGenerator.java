@@ -256,12 +256,16 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private void introspectImpl()
   {
     for (AnnotatedMethod<? super X> method : getAnnotatedMethods()) {
+      // ejb/5015
+      introspectMethodImpl(method);
+      /*
       if (method.isAnnotationPresent(PostConstruct.class)
           || method.isAnnotationPresent(PreDestroy.class)) {
       }
       else {
         introspectMethodImpl(method);
       }
+      */
     }
     
     for (AnnotatedMethod<? super X> method : getBeanType().getMethods()) {
@@ -337,9 +341,16 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     
     AspectGenerator<X> initMethod = getLifecycleAspectFactory().create(method);
       
+    // ejb/5015
+    if (initMethod != null) {
+      _businessMethods.add(initMethod);
+    }
+    
+    /*
     if (initMethod != null && ! _businessMethods.contains(initMethod)) {
       _businessMethods.add(initMethod);
     }
+    */
   }
   
   protected void addPreDestroyMethod(AnnotatedMethod<? super X> method)
@@ -349,7 +360,13 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     
     AspectGenerator<X> initMethod = getLifecycleAspectFactory().create(method);
       
+    // ejb/5015
+    /*
     if (initMethod != null && ! _businessMethods.contains(initMethod)) {
+      _businessMethods.add(initMethod);
+    }
+    */
+    if (initMethod != null) {
       _businessMethods.add(initMethod);
     }
   }

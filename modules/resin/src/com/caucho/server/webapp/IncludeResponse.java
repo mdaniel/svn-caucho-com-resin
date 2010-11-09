@@ -147,16 +147,19 @@ public class IncludeResponse extends CauchoResponseWrapper
   @Override
   public void setStatus(int code)
   {
+    _request.setAttribute("com.caucho.dispatch.response.statusCode", code);
   }
   
   @Override
   public void setStatus(int code, String msg)
   {
+    setStatus(code);
   }
 
   @Override
   public void sendError(int code, String msg)
   {
+    setStatus(code);
   }
   
   @Override
@@ -353,6 +356,7 @@ public class IncludeResponse extends CauchoResponseWrapper
     // XXX: _responseStream.setDisableAutoFlush(disable);
   }
 
+  @Override
   public void reset()
   {
     resetBuffer();
@@ -361,8 +365,8 @@ public class IncludeResponse extends CauchoResponseWrapper
   @Override
   public void resetBuffer()
   {
-    // jsp/15ma
-    super.resetBuffer();
+    // jsp/15ma vs server/2h71
+    // getResponse().resetBuffer();
     
     _stream.clearBuffer();
   }

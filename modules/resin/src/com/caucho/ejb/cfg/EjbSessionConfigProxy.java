@@ -28,6 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
@@ -46,6 +48,7 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   private static final L10N L = new L10N(EjbSessionConfigProxy.class);
   
   private String _sessionType;
+  private AtomicBoolean _isConfigured = new AtomicBoolean();
   
   /**
    * Creates a new session bean configuration.
@@ -71,6 +74,9 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   @Override
   public void configure()
   {
+    if (! _isConfigured.compareAndSet(false, true))
+      return;
+    
     EjbBean<?> ejbBean = getConfig().getBeanConfig(getEjbName());
     
     if (ejbBean == null) {
@@ -87,7 +93,7 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
       
       getConfig().setBeanConfig(getEjbName(), ejbBean);
     }
-    
+
     getBuilderProgram().configure(ejbBean);
   }
   

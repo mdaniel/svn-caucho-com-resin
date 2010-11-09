@@ -440,7 +440,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       if (url.equals(""))
         continue;
 
-      addJar(pwd.lookup(url));
+      Path jar = pwd.lookup(url);
+      
+      if (jar.canRead())
+        addJar(jar);
     }
 
     // ejb/0i20, #3601

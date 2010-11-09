@@ -370,6 +370,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     throws IOException
   {
     DynamicClassLoader loader = Environment.getDynamicClassLoader();
+
     if (loader == null)
       return;
 

@@ -1236,7 +1236,7 @@ public class PageContextImpl extends PageContext
                            request.getRequestURI());
 
       // jsp/01ck
-      // response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
       try {
         RequestDispatcher rd = getCauchoRequest().getRequestDispatcher(_errorPage);

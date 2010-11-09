@@ -3272,8 +3272,8 @@ public class WebApp extends ServletContextImpl
     try {
       if (_isDisableCrossContext)
         return uri.startsWith(getContextPath()) ? this : null;
-      else if (_parent != null) {
-        ServletContext subContext = _parent.findSubWebAppByURI(uri);
+      else if (_host != null) {
+        ServletContext subContext = _host.getWebAppContainer().findSubWebAppByURI(uri);
         
         if (subContext == null)
           return null;

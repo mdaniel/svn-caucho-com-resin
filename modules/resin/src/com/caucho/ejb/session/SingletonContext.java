@@ -63,10 +63,11 @@ public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
       if (env != null)
         env.push(proxy);
 
-      getServer().initProxy(proxy, env);
-
       if (_proxy == null)
         _proxy = proxy;
+      
+      // ejb/6032
+      getServer().initProxy(proxy, env);
     }
     
     return _proxy;

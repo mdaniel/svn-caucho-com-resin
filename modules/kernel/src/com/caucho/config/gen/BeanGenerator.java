@@ -342,8 +342,10 @@ abstract public class BeanGenerator<X> extends GenClass
       = getLifecycleMethods(PostConstruct.class);
       */
 
+    Method postConstructMethod = null;
     if (postConstructMethods.size() > 0) {
       Method method = postConstructMethods.get(0);
+      postConstructMethod = method;
 
       String declName = method.getDeclaringClass().getSimpleName();
       String methodName = method.getName();
@@ -351,10 +353,15 @@ abstract public class BeanGenerator<X> extends GenClass
       out.println("__caucho_lifecycle_" + declName + "_" + methodName + "();");
     }
 
+    int j = 1;
     for (int i = 1; i < postConstructMethods.size(); i++) {
       Method method = postConstructMethods.get(i);
+
+      // ejb/
+      if (postConstructMethod != null && method.equals(postConstructMethod))
+        continue;
       
-      generateLifecycleMethod(out, i, method, "postConstruct");
+      generateLifecycleMethod(out, j++, method, "postConstruct");
     }
       
     // getAspectBeanFactory().generatePostConstruct(out, map);

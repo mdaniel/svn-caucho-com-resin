@@ -350,8 +350,6 @@ public class Jar implements CacheListener {
    */
   public boolean isDirectory(String path)
   {
-    boolean result = false;
-    
     try {
       ZipEntry entry = getJarEntry(path);
 

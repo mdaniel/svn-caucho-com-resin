@@ -287,6 +287,11 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
       return;
     
     InjectManager cdiManager = InjectManager.create();
+
+    // XXX: EJB TCK
+    if (cdiManager.getBeans(_name).size() > 0)
+      return;
+    
     BeanBuilder<?> builder = cdiManager.createBeanFactory(value.getClass());
     
     // CDI names can't have '.'
