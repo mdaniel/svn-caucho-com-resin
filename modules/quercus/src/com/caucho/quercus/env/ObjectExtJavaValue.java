@@ -75,7 +75,10 @@ public class ObjectExtJavaValue extends ObjectExtValue
     if (_object == null) {
       _object = createJavaObject(env);
     }
-    
+    Value parentValue = super.getFieldExt(env, name);
+    if(parentValue != NullValue.NULL && parentValue != UnsetValue.UNSET)
+        return parentValue;
+
     Value value = _javaClassDef.getField(env, this, name);
     Value quercusValue = _quercusClass.getField(env,this, name);
 
