@@ -61,7 +61,7 @@ public class ReflectionSimpleAnnotatedType<X>
   
   public ReflectionSimpleAnnotatedType(InjectManager manager, BaseType type)
   {
-    super(type.toType(),
+    super(type,
           type.getTypeClosure(manager),
           type.getRawClass().getAnnotations());
     

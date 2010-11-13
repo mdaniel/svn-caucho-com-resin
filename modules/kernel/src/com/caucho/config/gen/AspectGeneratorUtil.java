@@ -30,7 +30,13 @@ package com.caucho.config.gen;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.List;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+
+import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -52,7 +58,7 @@ public class AspectGeneratorUtil {
                                     boolean isOverride,
                                     String accessModifier,
                                     String methodName,
-                                    Method method,
+                                    AnnotatedMethod<?> method,
                                     Class<?> []exnList)
     throws IOException
   {
@@ -65,24 +71,33 @@ public class AspectGeneratorUtil {
       out.print(accessModifier);
       out.print(" ");
     }
+    
+    Type returnType = method.getBaseType();
 
-    out.printClass(method.getReturnType());
+    out.printType(returnType);
     out.print(" ");
     out.print(methodName);
     out.print("(");
+    
+    Method javaMethod = method.getJavaMember();
 
-    Class<?>[] types = method.getParameterTypes();
-    for (int i = 0; i < types.length; i++) {
-      Class<?> type = types[i];
+    List<AnnotatedParameter<?>> params = (List) method.getParameters();
+    for (int i = 0; i < params.size(); i++) {
+      AnnotatedParameter<?> param = params.get(i);
+      Type type = param.getBaseType();
+      Class<?> cl = null;
+      
+      if (type instanceof Class<?>)
+        cl = (Class<?>) type;
 
       if (i != 0)
         out.print(", ");
 
-      if (i == types.length - 1 && type.isArray() && method.isVarArgs()) {
-        out.printClass(type.getComponentType());
+      if (i == params.size() - 1 && cl != null && cl.isArray() && javaMethod.isVarArgs()) {
+        out.printClass(cl.getComponentType());
         out.print("...");
       } else
-        out.printClass(type);
+        out.printType(type);
 
       out.print(" a" + i);
     }

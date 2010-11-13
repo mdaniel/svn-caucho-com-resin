@@ -48,6 +48,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.env.service.ResinSystem;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.HttpServletResponseImpl;
@@ -71,10 +73,19 @@ import com.caucho.vfs.Vfs;
 public class FileServlet extends GenericServlet {
   private static final Logger log
     = Logger.getLogger(FileServlet.class.getName());
+  
+  private static final EnvironmentLocal<LruCache<String,Cache>> _pathCacheLocal
+    = new EnvironmentLocal<LruCache<String,Cache>>();
+  
+  private final LruCache<String,Cache> _pathCache;
+  
+  private final LruCache<String,Cache> _localCache
+    = new LruCache<String,Cache>(16 * 1024);
+  
   private Path _context;
   private WebApp _app;
   private RequestDispatcher _dir;
-  private LruCache<String,Cache> _pathCache;
+
   private boolean _isCaseInsensitive;
   private boolean _isEnableRange = true;
   private boolean _isGenerateSession;
@@ -82,6 +93,18 @@ public class FileServlet extends GenericServlet {
 
   public FileServlet()
   {
+    ResinSystem resin = ResinSystem.getCurrent();
+    
+    LruCache<String,Cache> pathCache;
+    
+    pathCache = _pathCacheLocal.get(resin.getClassLoader());
+    if (pathCache == null) {
+      pathCache = new LruCache<String,Cache>(256 * 1024);
+      _pathCacheLocal.set(pathCache, resin.getClassLoader());
+    }
+    
+    _pathCache = pathCache;
+    
     _isCaseInsensitive = CaseInsensitive.isCaseInsensitive();
   }
 
@@ -112,10 +135,12 @@ public class FileServlet extends GenericServlet {
   /**
    * Clears the cache
    */
+  /*
   public void clearCache()
   {
     _pathCache.clear();
   }
+  */
 
   /**
    * Removes an entry from the cache
@@ -139,8 +164,6 @@ public class FileServlet extends GenericServlet {
     } catch (Exception e) {
       log.finest(e.toString());
     }
-
-    _pathCache = new LruCache<String,Cache>(1024);
 
     String enable = getInitParameter("enable-range");
     if (enable != null && enable.equals("false"))
@@ -177,10 +200,21 @@ public class FileServlet extends GenericServlet {
     else
       uri = req.getRequestURI();
     
-    Cache cache = _pathCache.get(uri);
+    Cache cache = _localCache.get(uri);
 
     String filename = null;
+    
+    String cacheUrl = null;
 
+    if (cache == null) {
+      cacheUrl = getCacheUrl(req, uri);
+      
+      cache = _pathCache.get(cacheUrl);
+      
+      if (cache != null)
+        _localCache.put(uri, cache);
+    }
+    
     if (cache == null) {
       CharBuffer cb = new CharBuffer();
       String servletPath;
@@ -273,7 +307,9 @@ public class FileServlet extends GenericServlet {
 
       cache = new Cache(path, jarPath, relPath, mimeType);
 
-      _pathCache.put(uri, cache);
+      _localCache.put(uri, cache);
+      
+      _pathCache.put(cacheUrl, cache);
     }
     else if (cache.isModified()) {
       cache = new Cache(cache.getFilePath(), 
@@ -281,7 +317,9 @@ public class FileServlet extends GenericServlet {
                         cache.getRelPath(),
                         cache.getMimeType());
       
-      _pathCache.put(uri, cache);
+      cacheUrl = getCacheUrl(req, uri);
+      _pathCache.put(cacheUrl, cache);
+      _localCache.put(uri, cache);
     }
 
     if (_isGenerateSession)
@@ -406,12 +444,19 @@ public class FileServlet extends GenericServlet {
     if (res instanceof CauchoResponse) {
       CauchoResponse cRes = (CauchoResponse) res;
 
+      System.out.println("SENDFILE: " + cache.getPath());
       cRes.getResponseStream().sendFile(cache.getPath(), cache.getLength());
     }
     else {
       OutputStream os = res.getOutputStream();
       cache.getPath().writeToStream(os);
     }
+  }
+  
+  private String getCacheUrl(HttpServletRequest req, String uri)
+  {
+    WebApp webApp = (WebApp) req.getServletContext();
+    return webApp.getId() + "|" + uri;
   }
   
   private void sendRedirect(HttpServletResponse res, String url) 
@@ -512,9 +557,7 @@ public class FileServlet extends GenericServlet {
       }
 
       head = off;
-
       long cacheLength = cache.getLength();
-
       if (! hasLast) {
         if (first == 0)
           return false;
@@ -535,9 +578,7 @@ public class FileServlet extends GenericServlet {
         // XXX: actually, an error
         break;
       }
-
       res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-
       StringBuilder cb = new StringBuilder();
       cb.append("bytes ");
       cb.append(first);

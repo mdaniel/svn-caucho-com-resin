@@ -51,6 +51,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configured;
 import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.event.EventManager;
 import com.caucho.config.event.ObserverMethodImpl;
@@ -308,7 +309,10 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     Class<? extends Annotation> scopeType = getScope();
     
     if (javaClass.getTypeParameters().length != 0) {
-      if (! Dependent.class.equals(scopeType)) {
+      if (_annotatedType.isAnnotationPresent(Configured.class)) {
+        // ioc/2601
+      }
+      else if (! Dependent.class.equals(scopeType)) {
         throw new ConfigException(L.l("'{0}' is an invalid bean because it has a generic type and a non-dependent scope.",
                                       javaClass.getName()));
       }

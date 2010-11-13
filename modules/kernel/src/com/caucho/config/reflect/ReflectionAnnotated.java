@@ -39,14 +39,14 @@ import javax.enterprise.inject.spi.Annotated;
 /**
  * Annotated object based only on reflection.
  */
-public class ReflectionAnnotated implements Annotated
+public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
 {
   private static final LinkedHashSet<Annotation> _emptyAnnSet
     = new  LinkedHashSet<Annotation>();
 
   private static final Annotation []_emptyAnnArray = new Annotation[0];
 
-  private Type _type;
+  private BaseType _type;
 
   private Set<Type> _typeSet;
 
@@ -54,7 +54,7 @@ public class ReflectionAnnotated implements Annotated
 
   private Annotation []_annArray;
 
-  protected ReflectionAnnotated(Type type,
+  protected ReflectionAnnotated(BaseType type,
                                 Set<Type> typeClosure,
                                 Annotation []annList)
   {
@@ -81,6 +81,11 @@ public class ReflectionAnnotated implements Annotated
    * Returns the base type of the annotated member.
    */
   public Type getBaseType()
+  {
+    return _type.toType();
+  }
+  
+  public BaseType getBaseTypeImpl()
   {
     return _type;
   }

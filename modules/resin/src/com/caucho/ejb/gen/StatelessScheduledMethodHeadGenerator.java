@@ -82,7 +82,7 @@ public class StatelessScheduledMethodHeadGenerator<X>
                                        isOverride(),
                                        accessModifier, 
                                        methodName,
-                                       getJavaMethod(), 
+                                       getMethod(), 
                                        getThrowsExceptions());
 
     out.println("{");

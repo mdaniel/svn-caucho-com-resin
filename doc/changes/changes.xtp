@@ -11,7 +11,18 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.13 - snapshot">
+<s2 title="4.0.14 - snapshot">
+<ul>
+<li>thread: refactor ThreadLauncher to use AbstractTaskWorker</li>
+<li>cdi: error with @Produces method with generic result and @Named (#4265, rep by jharting)</li>
+<li>cdi: allow &lt;resin:FileQueue> to be assigned to BlockingQueue&lt;MyItem> (#4067, rep by Jeff Schnitzer)</li>
+<li>jsp: cross-context forward classloader/.tld not updating (#4284, rep by Brian Deng)</li>
+<li>ejb: generic interface issues MyBean implements Foo&lt;String> (#4266, rep by jharting)</li>
+<li>servlet: cross context forward classloader not properly updated (#4248, rep by jessicay)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.13 - Nov 10, 2010">
 <ul>
 <li>hessian: java.sql.Timestamp deserialization NPE (#4286, rep by Matt Poirier and Shawn Frederickson)</li>
 <li>servlet: url-mapping="" was not handled properly (#4283, rep by Peter Yuill)</li>

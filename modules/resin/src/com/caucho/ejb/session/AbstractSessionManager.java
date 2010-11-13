@@ -55,7 +55,6 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.SessionBeanType;
-import javax.inject.Named;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;

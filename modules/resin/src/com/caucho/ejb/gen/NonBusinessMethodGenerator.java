@@ -105,7 +105,7 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
                                        isOverride(),
                                        accessModifier, 
                                        methodName,
-                                       getJavaMethod(),
+                                       getMethod(),
                                        getThrowsExceptions());
 
 

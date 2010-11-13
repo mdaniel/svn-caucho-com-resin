@@ -58,7 +58,7 @@ import com.caucho.jms.memory.MemoryQueueImpl;
 @Startup
 @Singleton
 @Configurable  
-public class MemoryQueue extends MemoryQueueImpl<Object>
+public class MemoryQueue<X> extends MemoryQueueImpl<X>
 {
   /**
    * Standard Injection constructor

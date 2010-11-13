@@ -307,7 +307,7 @@ public class WriteStream extends OutputStreamWithBuffer
         return;
       }
     }
-
+    
     while (length > 0) {
       int sublen = bufferLength - writeLength;
 

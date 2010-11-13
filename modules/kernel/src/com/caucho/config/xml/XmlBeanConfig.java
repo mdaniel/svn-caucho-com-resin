@@ -65,6 +65,7 @@ import com.caucho.config.program.NodeBuilderChildProgram;
 import com.caucho.config.reflect.AnnotatedElementImpl;
 import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.TypeFactory;
@@ -113,7 +114,9 @@ public class XmlBeanConfig<T> {
     // XXX:
     // _component = new SimpleBean(cl);
     // _component.setScopeClass(Dependent.class);
-    AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(cl); 
+    // ioc/2601
+    BaseType baseType = _cdiManager.createSourceBaseType(cl);
+    AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(baseType); 
     _annotatedType = new AnnotatedTypeImpl<T>(annType);
       
     _cdiManager.addConfiguredBean(cl.getName());
@@ -456,7 +459,7 @@ public class XmlBeanConfig<T> {
     _annotatedType.addAnnotation(xmlCookie);
     
     ManagedBeanImpl<T> managedBean
-      = new ManagedBeanImpl<T>(_cdiManager,_annotatedType, false);
+      = new ManagedBeanImpl<T>(_cdiManager, _annotatedType, false);
     
     managedBean.introspect();
     
@@ -464,7 +467,7 @@ public class XmlBeanConfig<T> {
       = new XmlInjectionTarget(managedBean, javaCtor, newProgram, injectProgram);
     
     _bean = new XmlBean<T>(managedBean, injectionTarget);
-    
+
     _cdiManager.addXmlInjectionTarget(xmlCookie.value(), injectionTarget);
     
     if (! _isInlineBean) {

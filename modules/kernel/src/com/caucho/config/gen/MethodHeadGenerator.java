@@ -83,9 +83,6 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   {
     generateMethodPrologue(out, prologueMap);
     
-    String prefix = getMethodNamePrefix();
-    String suffix = "";
- 
     int modifiers = getJavaMethod().getModifiers();
     String accessModifier = null;
     
@@ -93,17 +90,12 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
       accessModifier = "public";
     else if (Modifier.isProtected(modifiers))
       accessModifier = "protected";
-    /*
-    else
-      throw new IllegalStateException(getJavaMethod().toString()
-                                      + " must be public or protected");
-     */
-
+    
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
                                        accessModifier, 
                                        getMethodName(),
-                                       getJavaMethod(), 
+                                       getMethod(), 
                                        getThrowsExceptions());
 
     out.println("{");

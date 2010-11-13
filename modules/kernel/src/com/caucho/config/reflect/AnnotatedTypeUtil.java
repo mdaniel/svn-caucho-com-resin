@@ -31,11 +31,15 @@ package com.caucho.config.reflect;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
 
@@ -50,11 +54,50 @@ public class AnnotatedTypeUtil {
   public static <X> AnnotatedMethod<? super X>
   findMethod(AnnotatedType<X> type, AnnotatedMethod<?> method)
   {
+    return findMethod(type.getMethods(), method);
+  }
+  
+  /**
+   * Finds any method matching the method name and parameter types.
+   */
+  public static <X> AnnotatedMethod<? super X>
+  findMethod(Collection<AnnotatedMethod<? super X>> methodList, 
+             AnnotatedMethod<?> method)
+  {
     Method javaMethod = method.getJavaMember();
+    String name = javaMethod.getName();
+    List<AnnotatedParameter<?>> paramList = (List) method.getParameters();
     
-    return findMethod(type, 
-                      javaMethod.getName(),
-                      javaMethod.getParameterTypes());
+    for (AnnotatedMethod<? super X> testMethod : methodList) {
+      Method testJavaMethod = testMethod.getJavaMember();
+      
+      if (! name.equals(testJavaMethod.getName()))
+        continue;
+      
+      List<AnnotatedParameter<?>> testParamList = (List) testMethod.getParameters();
+      
+      if (isMatch(paramList, testParamList)) {
+        return testMethod;
+      }
+    }
+    
+    return null;
+  }
+  
+  private static boolean isMatch(List<AnnotatedParameter<?>> listA,
+                                 List<AnnotatedParameter<?>> listB)
+  {
+    if (listA.size() != listB.size())
+      return false;
+    
+    int len = listA.size();
+    
+    for (int i = 0; i < len; i++) {
+      if (! listA.get(i).getBaseType().equals(listB.get(i).getBaseType()))
+        return false;
+    }
+    
+    return true;
   }
   /**
    * Finds any method matching the method name and parameter types.
@@ -167,9 +210,21 @@ public class AnnotatedTypeUtil {
       return true;
     else if (methodA == null || methodB == null)
       return false;
-    else {
-      return isMatch(methodA.getJavaMember(), methodB.getJavaMember());
+    
+    Method javaMethodA = methodA.getJavaMember();
+    Method javaMethodB = methodB.getJavaMember();
+    
+    if (! javaMethodA.getName().equals(javaMethodB.getName()))
+      return false;
+    
+    List<AnnotatedParameter<?>> paramListA = (List) methodA.getParameters();
+    List<AnnotatedParameter<?>> paramListB = (List) methodB.getParameters();
+    
+    if (isMatch(paramListA, paramListB)) {
+      return true;
     }
+    
+    return false;
   }
 
   /**
@@ -243,6 +298,14 @@ public class AnnotatedTypeUtil {
     }
 
     return false;
+  }
+
+  public static BaseType getBaseType(Annotated annotated)
+  {
+    if (annotated instanceof BaseTypeAnnotated)
+      return ((BaseTypeAnnotated) annotated).getBaseTypeImpl();
+    else
+      return InjectManager.create().createTargetBaseType(annotated.getBaseType());
   }
 
 }

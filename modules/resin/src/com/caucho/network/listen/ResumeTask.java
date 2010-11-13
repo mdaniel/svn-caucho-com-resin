@@ -6,7 +6,7 @@
  * Each copy or derived work must preserve the copyright notice and this
  * notice unmodified.
  *
- * Resin Open Source is free software; you can redistribute it and/or modify
+ * Resin Open Source is software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -27,24 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.network.listen;
 
+import com.caucho.inject.Module;
 
 /**
- * A task worker based on the Resin thread pool.
+ * A protocol-independent TcpConnection.  TcpConnection controls the
+ * TCP Socket and provides buffered streams.
+ *
+ * <p>Each TcpConnection has its own thread.
  */
-abstract public class TaskWorker extends AbstractTaskWorker {
-  private final ThreadPool _threadPool;
-
-  protected TaskWorker()
+@Module
+class ResumeTask extends ConnectionReadTask {
+  ResumeTask(TcpSocketLink socketLink)
   {
-    super(Thread.currentThread().getContextClassLoader());
-    _threadPool = ThreadPool.getCurrent();
+    super(socketLink);
   }
-
+  
   @Override
-  protected void startWorkerThread()
+  public void run()
   {
-    _threadPool.schedulePriority(this);
+    SocketLinkThreadLauncher launcher = getLauncher();
+    
+    launcher.onChildThreadResume();
+    try {
+      super.run();
+    } finally {
+      launcher.onChildThreadEnd();
+    }
+  }
+  
+  @Override
+  public RequestState doTask()
+  {
+    getSocketLink().doResume();
+    
+    return RequestState.THREAD_DETACHED;
   }
 }

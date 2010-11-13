@@ -173,11 +173,13 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     out.print(", " + CandiEnhancedBean.class.getName());
 
     for (AnnotatedType<? super X> apiType : getLocalApi()) {
-      out.print(", " + apiType.getJavaClass().getName());
+      out.print(", ");
+      out.printType(apiType.getBaseType());
     }
 
     for (AnnotatedType<? super X> apiType : getRemoteApi()) {
-      out.print(", " + apiType.getJavaClass().getName());
+      out.print(", ");
+      out.printType(apiType.getBaseType());
     }
     
     out.println();

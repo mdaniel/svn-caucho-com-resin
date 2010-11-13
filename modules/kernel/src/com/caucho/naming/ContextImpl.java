@@ -525,10 +525,14 @@ public class ContextImpl implements Context {
         return;
       }
       else if (value != null)
-        throw new NotContextException(L.l("{0}: expected intermediate context at `{1}'",
-                                          getFullPath(name), value));
+        throw new NotContextException(L.l("{0}: expected intermediate context at '{1}'\n  {2}",
+                                          getFullPath(name), value,
+                                          Thread.currentThread().getContextClassLoader()));
       else
-        throw new NameNotFoundException(getFullPath(name));
+        throw new NameNotFoundException(L.l("{0}: JNDI rebind requires the parent Context '{1}' to be created but it is null.\n  {2}',",
+                                            getFullPath(name), 
+                                            first,
+                                            Thread.currentThread().getContextClassLoader()));
     }
   }
   

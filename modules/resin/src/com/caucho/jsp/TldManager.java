@@ -110,20 +110,20 @@ public class TldManager {
   }
 
   static TldManager create(JspResourceManager resourceManager,
-                           WebApp app)
+                           WebApp webApp)
     throws JspParseException, IOException
   {
 
     TldManager manager = null;
 
     synchronized (_localManager) {
-      manager = _localManager.getLevel();
+      manager = _localManager.getLevel(webApp.getClassLoader());
 
       if (manager != null)
         return manager;
 
-      manager = new TldManager(resourceManager, app);
-      _localManager.set(manager);
+      manager = new TldManager(resourceManager, webApp);
+      _localManager.set(manager, webApp.getClassLoader());
     }
 
     return manager;

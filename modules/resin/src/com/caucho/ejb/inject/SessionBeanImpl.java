@@ -76,7 +76,7 @@ public class SessionBeanImpl<X,T>
     _bean = bean;
     
     _types.addAll(apiList);
-    
+
     introspectObservers(bean.getAnnotatedType(), extAnnType);
   }
   
@@ -222,7 +222,7 @@ public class SessionBeanImpl<X,T>
         // ioc/0b0h
         AnnotatedMethodImpl<? super X> apiMethodImpl
           = (AnnotatedMethodImpl<? super X>) apiMethod;
-        
+
         apiMethodImpl.addAnnotations(beanMethod.getAnnotations());
         
         for (int i = 0; i < apiMethod.getParameters().size(); i++) {

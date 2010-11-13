@@ -80,6 +80,7 @@ public class QueryContext {
   private int _blockLockLength;
 
   private boolean _isLocked;
+  private boolean _isNonLocking;
 
   private HashMap<GroupItem,GroupItem> _groupMap;
 
@@ -104,8 +105,14 @@ public class QueryContext {
 
     queryContext.clearParameters();
     queryContext._limit = -1;
+    queryContext._isNonLocking = false;
 
     return queryContext;
+  }
+  
+  public void setNonLocking()
+  {
+    _isNonLocking = true;
   }
 
   public void clearParameters()
@@ -531,6 +538,9 @@ public class QueryContext {
   public void lock()
     throws SQLException
   {
+    if (_isNonLocking)
+      return;
+    
     if (_isLocked) {
       throw new IllegalStateException(L.l("blocks are already locked"));
     }
@@ -597,6 +607,9 @@ public class QueryContext {
   public void unlock()
     throws SQLException
   {
+    if (_isNonLocking)
+      return;
+    
     if (! _isLocked) {
       return;
     }

@@ -30,17 +30,12 @@
 package com.caucho.env.thread;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownService;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -55,12 +50,6 @@ public final class ThreadPool {
     = Logger.getLogger(ThreadPool.class.getName());
 
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
-
-  private static final int DEFAULT_THREAD_MAX = 8192;
-  private static final int DEFAULT_IDLE_MIN = 4;
-  private static final int DEFAULT_PRIORITY_IDLE_MIN = 4;
-
-  private static final long DEFAULT_IDLE_TIMEOUT = 120000L;
   
   private static final int DEFAULT_EXECUTOR_TASK_MAX = 16;
 
@@ -72,17 +61,8 @@ public final class ThreadPool {
     = new AtomicReference<ThreadPool>();
   
   private final String _name;
-
-  private final AtomicInteger _gId = new AtomicInteger();
   
   // configuration items
-
-  private int _threadMax = DEFAULT_THREAD_MAX;
-  private int _idleMin = DEFAULT_IDLE_MIN;
-  private long _idleTimeout = DEFAULT_IDLE_TIMEOUT;
-
-  // the minimum number of free threads reserved for priority tasks
-  private int _priorityIdleMin = DEFAULT_PRIORITY_IDLE_MIN;
 
   private int _executorTaskMax = DEFAULT_EXECUTOR_TASK_MAX;
 
@@ -98,16 +78,7 @@ public final class ThreadPool {
   //
   // thread max and thread lifetime counts
   //
-
-  private final AtomicInteger _activeCount = new AtomicInteger();
-  // number of threads which are in the process of starting
-  private final AtomicInteger _startingCount = new AtomicInteger();
-  
-  private final AtomicLong _createCount = new AtomicLong();
   private final AtomicLong _overflowCount = new AtomicLong();
-
-  // next time when an idle thread can expire
-  private final AtomicLong _threadIdleExpireTime = new AtomicLong();
   
   //
   // the idle stack
@@ -116,15 +87,8 @@ public final class ThreadPool {
   private final AtomicReference<ThreadNode> _idleHead
     = new AtomicReference<ThreadNode>();
   
-  private final AtomicInteger _idleCount = new AtomicInteger();
-  
   private final AtomicReference<ThreadNode> _priorityIdleHead
     = new AtomicReference<ThreadNode>();
-  
-  private final AtomicInteger _priorityIdleCount = new AtomicInteger();
-  
-
-  // number of threads in the wait queue
 
   //
   // task/priority overflow queues
@@ -158,7 +122,7 @@ public final class ThreadPool {
   {
     _name = name;
     
-    _launcher = new ThreadLauncher();
+    _launcher = new ThreadLauncher(this);
 
     // initialize default values
     init();
@@ -196,14 +160,7 @@ public final class ThreadPool {
    */
   public void setThreadMax(int max)
   {
-    if (max < _idleMin)
-      throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-max> ({1})", _idleMin, max));
-    if (max < 1)
-      throw new ConfigException(L.l("<thread-max> ({0}) must be greater than zero", max));
-
-    _threadMax = max;
-
-    init();
+    _launcher.setThreadMax(max);
   }
 
   /**
@@ -211,7 +168,7 @@ public final class ThreadPool {
    */
   public int getThreadMax()
   {
-    return _threadMax;
+    return _launcher.getThreadMax();
   }
 
   /**
@@ -219,14 +176,7 @@ public final class ThreadPool {
    */
   public void setIdleMin(int min)
   {
-    if (_threadMax < min)
-      throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-max> ({1})", min, _threadMax));
-    if (min <= 0)
-      throw new ConfigException(L.l("<thread-idle-min> ({0}) must be greater than 0.", min));
-
-    _idleMin = min;
-
-    init();
+    _launcher.setIdleMin(min);
   }
 
   /**
@@ -234,7 +184,7 @@ public final class ThreadPool {
    */
   public int getIdleMin()
   {
-    return _idleMin;
+    return _launcher.getIdleMin();
   }
   
   /**
@@ -242,7 +192,7 @@ public final class ThreadPool {
    */
   public void setIdleTimeout(long timeout)
   {
-    _idleTimeout = timeout;
+    _launcher.setIdleTimeout(timeout);
   }
   
   /**
@@ -250,7 +200,7 @@ public final class ThreadPool {
    */
   public long getIdleTimeout()
   {
-    return _idleTimeout;
+    return _launcher.getIdleTimeout();
   }
 
   /**
@@ -258,14 +208,12 @@ public final class ThreadPool {
    */
   public void setPriorityIdleMin(int priority)
   {
-    _priorityIdleMin = priority;
-
-    init();
+    _launcher.setPriorityIdleMin(priority);
   }
 
   public int getPriorityIdleMin()
   {
-    return _priorityIdleMin;
+    return _launcher.getPriorityIdleMin();
   }
 
   /**
@@ -273,9 +221,9 @@ public final class ThreadPool {
    */
   public void setExecutorTaskMax(int max)
   {
-    if (_threadMax < max)
+    if (getThreadMax() < max)
       throw new ConfigException(L.l("<thread-executor-max> ({0}) must be less than <thread-max> ({1})",
-                                    max, _threadMax));
+                                    max, getThreadMax()));
 
     if (max == 0)
       throw new ConfigException(L.l("<thread-executor-max> must not be zero."));
@@ -300,7 +248,7 @@ public final class ThreadPool {
    */
   public int getThreadCount()
   {
-    return _activeCount.get();
+    return _launcher.getThreadCount();
   }
 
   /**
@@ -308,7 +256,9 @@ public final class ThreadPool {
    */
   public int getThreadActiveCount()
   {
-    return _activeCount.get() - _idleCount.get() - _priorityIdleCount.get();
+    return (getThreadCount()
+            - getThreadIdleCount()
+            - getPriorityIdleCount());
   }
 
   /**
@@ -316,7 +266,7 @@ public final class ThreadPool {
    */
   public int getThreadStartingCount()
   {
-    return _startingCount.get();
+    return _launcher.getStartingCount();
   }
 
   /**
@@ -324,7 +274,7 @@ public final class ThreadPool {
    */
   public int getThreadIdleCount()
   {
-    return _idleCount.get();
+    return _launcher.getIdleCount();
   }
 
   /**
@@ -332,7 +282,7 @@ public final class ThreadPool {
    */
   public int getPriorityIdleCount()
   {
-    return _priorityIdleCount.get();
+    return _launcher.getPriorityIdleCount();
   }
 
   /**
@@ -348,7 +298,7 @@ public final class ThreadPool {
    */
   public int getFreeThreadCount()
   {
-    return _threadMax - _activeCount.get() - _startingCount.get();
+    return getThreadMax() - getThreadCount() - _launcher.getStartingCount();
   }
 
   /**
@@ -356,7 +306,7 @@ public final class ThreadPool {
    */
   public long getThreadCreateCountTotal()
   {
-    return _createCount.get();
+    return _launcher.getCreateCountTotal();
   }
 
   /**
@@ -389,16 +339,17 @@ public final class ThreadPool {
 
   private void init()
   {
-    long now = Alarm.getCurrentTime();
-    
-    _threadIdleExpireTime.set(now + _idleTimeout);
+    update();
+  }
+
+  private void update()
+  {
+    _launcher.update();
   }
   
   public void start()
   {
-    if (_lifecycle.toActive()) {
-      _launcher.start();
-    }
+    _launcher.start();
   }
 
   //
@@ -452,10 +403,12 @@ public final class ThreadPool {
 
     if (! scheduleImpl(task, loader, expire, isPriority, isQueue)) {
       log.warning(this + " unable to schedule priority thread " + task
-                  + " pri=" + _priorityIdleMin
-                  + " active=" + _activeCount.get()
-                  + " idle=" + (_idleCount.get() + _startingCount.get())
-                  + " max=" + _threadMax);
+                  + " pri-min=" + getPriorityIdleMin()
+                  + " thread=" + getThreadCount()
+                  + " idle=" + getThreadIdleCount()
+                  + " pri-idle=" + getPriorityIdleCount()
+                  + " starting=" + getThreadStartingCount()
+                  + " max=" + getThreadMax());
 
       OverflowThread item = new OverflowThread(task);
       item.start();
@@ -573,11 +526,12 @@ public final class ThreadPool {
 
     if (! scheduleImpl(task, loader, expire, isPriority, isQueue)) {
       log.warning(this + " unable to start priority thread " + task
-                  + " pri=" + _priorityIdleMin
-                  + " active=" + _activeCount.get()
-                  + " idle=" + _idleCount.get()
-                  + " starting=" + _startingCount.get()
-                  + " max=" + _threadMax);
+                  + " pri-min=" + getPriorityIdleMin()
+                  + " thread=" + getThreadCount()
+                  + " idle=" + getThreadIdleCount()
+                  + " pri-idle=" + getPriorityIdleCount()
+                  + " starting=" + getThreadStartingCount()
+                  + " max=" + getThreadMax());
 
       ThreadDump.dumpThreads();
 
@@ -619,7 +573,7 @@ public final class ThreadPool {
       return true;
     }
 
-    if (! isQueueIfFull && isThreadMax()) {
+    if (! isQueueIfFull && _launcher.isThreadMax()) {
       throw new IllegalStateException(L.l("Thread pool full"));
     }
     
@@ -655,11 +609,6 @@ public final class ThreadPool {
     }
 
     return true;
-  }
-
-  private boolean isThreadMax()
-  {
-    return _threadMax <= _activeCount.get() && _startingCount.get() == 0;
   }
   
   private boolean scheduleIdle(Runnable task,
@@ -699,72 +648,84 @@ public final class ThreadPool {
     _launcher.wake();
   }
   
+  void beginIdle(ResinThread thread)
+  {
+    if (_launcher.beginPriorityIdle()) {
+      pushIdleThread(_priorityIdleHead, thread);
+    }
+    else {
+      _launcher.onChildIdleBegin();
+
+      pushIdleThread(_idleHead, thread);
+    }
+    
+    ThreadTask item = nextQueueTask();
+    
+    if (item == null)
+      return;
+    
+    ResinThread itemThread = popIdleThread();
+      
+    if (itemThread == null)
+      itemThread = popPriorityThread();
+      
+    if (itemThread != null) {
+      itemThread.scheduleTask(item.getRunnable(), item.getLoader());
+    }
+    else {
+      _priorityQueue.offer(item);
+      _launcher.wake();
+    }
+  }
+  
   /**
-   * Returns the next available task, returning null if the thread
+   * Returns the next available task from the queue.
    * should exit.
    */
-  ThreadTask nextTask(ResinThread thread)
+  private ThreadTask nextQueueTask()
   {
     ThreadTask item = _priorityQueue.poll();
     
     if (item != null)
       return item;
+    
+    if (_taskQueue.size() == 0)
+      return null;
 
-    int priorityIdleCount = _priorityIdleCount.get();
-    int idleCount = _idleCount.get();
+    int priorityIdleMin = _launcher.getPriorityIdleMin();
+    int priorityIdleCount = _launcher.getPriorityIdleCount();
+    int idleCount = _launcher.getIdleCount();
 
     // if we have spare threads, process any task queue item
-    if (_priorityIdleMin <= priorityIdleCount + idleCount) {
-      item = _taskQueue.poll();
-      
-      if (item != null)
-        return item;
+    if (priorityIdleMin <= priorityIdleCount + idleCount) {
+      return _taskQueue.poll();
     }
 
     return null;
   }
   
-  //
-  // idle stack management
-  //
-  
-  /**
-   * Returns true if the idle thread should expire.
-   */
-  boolean isIdleExpire()
+  private ResinThread popIdleThread()
   {
-    if (! _lifecycle.isActive())
-      return true;
+    ResinThread thread = popIdleThread(_idleHead);
     
-    long now = Alarm.getCurrentTimeActual();
-    
-    long idleExpire = _threadIdleExpireTime.get();
-
-    // if idle queue is full and the expire is set, return and exit
-    if (_idleMin < _idleCount.get() && idleExpire < now) {
-      long nextIdleExpire = now + _idleTimeout;
-      
-      return _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire);
+    if (thread != null) {
+      _launcher.onChildIdleEnd();
     }
     
-    return false;
+    return thread;
   }
   
-  void pushIdleThread(ResinThread thread)
+  private ResinThread popPriorityThread()
   {
-    int priorityIdle = _priorityIdleCount.get();
+    ResinThread thread = popIdleThread(_priorityIdleHead);
     
-    if (priorityIdle < _priorityIdleMin
-        && _priorityIdleCount.compareAndSet(priorityIdle, priorityIdle + 1)) {
-      pushIdleThread(_priorityIdleHead, thread);
+    if (thread != null) {
+      _launcher.onPriorityIdleEnd();
     }
-    else {
-      _idleCount.incrementAndGet();
-
-      pushIdleThread(_idleHead, thread);
-    }
+    
+    return thread;
   }
-  
+ 
   private void pushIdleThread(AtomicReference<ThreadNode> idleHeadRef,
                               ResinThread thread)
   {
@@ -777,38 +738,6 @@ public final class ThreadPool {
       
       head.setNext(next);
     } while (! idleHeadRef.compareAndSet(next, head));
-  }
-  
-  private ResinThread popPriorityThread()
-  {
-    ResinThread thread = popIdleThread(_priorityIdleHead);
-    
-    if (thread != null) {
-      _priorityIdleCount.decrementAndGet();
-      
-      _launcher.wake();
-    }
-    
-    return thread;
-  }
-  
-  private ResinThread popIdleThread()
-  {
-    ResinThread thread = popIdleThread(_idleHead);
-    
-    if (thread != null) {
-      int idleCount = _idleCount.decrementAndGet();
-
-      if (_idleMin <= idleCount)
-        return thread;
-    }
-      
-    long now = Alarm.getCurrentTimeActual();
-    _threadIdleExpireTime.set(now + _idleTimeout);
-
-    _launcher.wake();
-    
-    return thread;
   }
   
   private ResinThread popIdleThread(AtomicReference<ThreadNode> idleHeadRef)
@@ -832,6 +761,11 @@ public final class ThreadPool {
   // lifecycle methods
   //
 
+  boolean isActive()
+  {
+    return _lifecycle.isActive();
+    
+  }
   /**
    * Resets the thread pool, letting old threads drain.
    */
@@ -861,6 +795,7 @@ public final class ThreadPool {
     }
   }
 
+  /*
   long onThreadStart()
   {
     _activeCount.incrementAndGet();
@@ -888,12 +823,17 @@ public final class ThreadPool {
 
     _launcher.wake();
   }
+  */
 
   /**
    * Checks if the launcher should start another thread.
    */
-  private boolean doStart()
+  /*
+  boolean doStart()
   {
+    if (! isActive())
+      return false;
+    
     int idleCount = _idleCount.get();
     int priorityIdleCount = _priorityIdleCount.get();
     int startingCount = _startingCount.getAndIncrement();
@@ -915,6 +855,7 @@ public final class ThreadPool {
       return false;
     }
   }
+  */
 
   public void close()
   {
@@ -922,6 +863,8 @@ public final class ThreadPool {
       throw new IllegalStateException(L.l("Cannot close global thread pool"));
     
     _lifecycle.toDestroy();
+    _launcher.destroy();
+    
     interrupt();
   }
 
@@ -958,86 +901,6 @@ public final class ThreadPool {
         _task.run();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-  }
-
-  final class ThreadLauncher extends Thread {
-    private final AtomicBoolean _isWake = new AtomicBoolean();
-
-    private ThreadLauncher()
-    {
-      super("resin-thread-launcher");
-      setDaemon(true);
-    }
-
-    void wake()
-    {
-      if (! _isWake.getAndSet(true)) {
-        LockSupport.unpark(this);
-      }
-    }
-
-    /**
-     * Starts a new connection
-     */
-    private boolean startConnection(boolean isWait)
-      throws InterruptedException
-    {
-      if (doStart()) {
-        try {
-          long now = Alarm.getCurrentTimeActual();
-          _threadIdleExpireTime.set(now + _idleTimeout);
-          
-          int id = _gId.incrementAndGet();
-
-          ResinThread poolThread = new ResinThread(ThreadPool.this, id);
-          poolThread.start();
-
-          return true;
-        } catch (Throwable e) {
-          e.printStackTrace();
-          
-          String msg = "Resin exiting because of failed thread";
-
-          ShutdownService.shutdownActive(ExitCode.THREAD, msg);
-        }
-      }
-      else {
-        Thread.interrupted();
-
-        if (isWait && ! _isWake.getAndSet(false)) {
-          LockSupport.park();
-        }
-      }
-
-      return false;
-    }
-
-    @Override
-    public void run()
-    {
-      ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
-
-      Thread.currentThread().setContextClassLoader(systemLoader);
-
-      try {
-        while (startConnection(false)) {
-        }
-      } catch (Throwable e) {
-        e.printStackTrace();
-      }
-
-      while (_lifecycle.isActive()) {
-        try {
-          startConnection(true);
-        } catch (Throwable e) {
-          e.printStackTrace();
-          
-          String msg = "ThreadPool start connection failed";
-          
-          ShutdownService.shutdownActive(ExitCode.THREAD, msg);
-        }
       }
     }
   }

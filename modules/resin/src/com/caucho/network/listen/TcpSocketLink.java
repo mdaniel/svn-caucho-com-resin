@@ -47,7 +47,6 @@ import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
-import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StreamImpl;
 
 /**
@@ -78,12 +77,11 @@ public class TcpSocketLink extends AbstractSocketLink
   private final ClassLoader _loader;
   private final byte []_testBuffer = new byte[1];
 
-  private final AcceptTask _acceptTask = new AcceptTask();
+  private final AcceptTask _acceptTask;
   // HTTP keepalive task
-  private final KeepaliveRequestTask _keepaliveTask
-    = new KeepaliveRequestTask();
+  private final KeepaliveRequestTask _keepaliveTask;
   // Comet resume task
-  private final ResumeTask _resumeTask = new ResumeTask();
+  private final ResumeTask _resumeTask;
   // duplex (websocket) task
   private DuplexReadTask _duplexReadTask;
 
@@ -115,24 +113,28 @@ public class TcpSocketLink extends AbstractSocketLink
    * @param request The protocol Request
    */
   TcpSocketLink(int connId,
-                SocketLinkListener port,
+                SocketLinkListener listener,
                 QSocket socket)
   {
     _connectionId = connId;
 
-    _port = port;
+    _port = listener;
     _socket = socket;
 
     int id = getId();
 
-    _loader = port.getClassLoader();
+    _loader = listener.getClassLoader();
 
-    Protocol protocol = port.getProtocol();
+    Protocol protocol = listener.getProtocol();
 
     _request = protocol.createConnection(this);
 
-    _id = port.getDebugId() + "-" + id;
+    _id = listener.getDebugId() + "-" + id;
     _name = _id;
+
+    _acceptTask = new AcceptTask(this);
+    _keepaliveTask = new KeepaliveRequestTask(this);
+    _resumeTask = new ResumeTask(this);
   }
 
   /**
@@ -158,6 +160,11 @@ public class TcpSocketLink extends AbstractSocketLink
   public int getId()
   {
     return _connectionId;
+  }
+  
+  public String getDebugId()
+  {
+    return _id;
   }
 
   /**
@@ -459,6 +466,11 @@ public class TcpSocketLink extends AbstractSocketLink
     else
       return -1;
   }
+  
+  void setThread(Thread thread)
+  {
+    _thread = thread;
+  }
 
   //
   // request information
@@ -694,7 +706,7 @@ public class TcpSocketLink extends AbstractSocketLink
    * If it returns false, either the connection is closed,
    * or the connection has been registered with the select.
    */
-  private RequestState processKeepalive()
+  RequestState processKeepalive()
     throws IOException
   {
     SocketLinkListener port = _port;
@@ -750,6 +762,55 @@ public class TcpSocketLink extends AbstractSocketLink
   // state transitions
   //
 
+  /**
+   * Change to the accepting state.
+   */
+  void toAccept()
+  {
+    setStatState("accept");
+    _state = _state.toAccept();
+  }
+  
+  RequestState doAccept()
+    throws IOException
+  {
+    return _acceptTask.doTask();
+  }
+
+  /**
+   * Start a connection
+   */
+  void toStartConnection()
+    throws IOException
+  {
+    _connectionStartTime = Alarm.getCurrentTime();
+
+    setStatState("read");
+    initSocket();
+
+    _request.onStartConnection();
+  }
+  
+  /**  
+   * Initialize the socket for a new connection
+   */
+  private void initSocket()
+    throws IOException
+  {
+    _idleTimeout = _port.getKeepaliveTimeout();
+
+    getWriteStream().init(_socket.getStream());
+
+    // ReadStream cannot use getWriteStream or auto-flush
+    // because of duplex mode
+    getReadStream().init(_socket.getStream(), null);
+
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(dbgId() + "starting connection " + this + ", total=" + _port.getConnectionCount());
+    }
+  }
+  
+  
   /**
    * Sets the keepalive state.  Called only by the SelectManager and Port.
    */
@@ -873,6 +934,47 @@ public class TcpSocketLink extends AbstractSocketLink
     }
   }
 
+  void doResume()
+  {
+    boolean isValid = false;
+
+    try {
+      // _state = _state.toCometResume();
+
+      _isWakeRequested = false;
+
+      _state = _state.toCometDispatch();
+
+      AsyncController controller = _controller;
+      _controller = null;
+
+      if (controller != null)
+        controller.close();
+
+      getRequest().handleResume();
+
+      if (_state.isCometActive() && toSuspend()) {
+        isValid = true;
+      } else if (_state.isKeepaliveAllocated()) {
+        isValid = true;
+        _isCompleteRequested = false;
+        _keepaliveTask.run();
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } catch (OutOfMemoryError e) {
+      String msg = "TcpSocketLink OutOfMemory";
+
+      ShutdownService.shutdownActive(ExitCode.MEMORY, msg);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      if (! isValid) {
+        finishThread();
+      }
+    }
+  }
+  
   void toCometTimeout()
   {
     _isCompleteRequested = true;
@@ -915,7 +1017,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
     _controller = duplex;
 
-    _duplexReadTask = new DuplexReadTask(duplex);
+    _duplexReadTask = new DuplexReadTask(this, duplex);
     
     if (log.isLoggable(Level.FINER))
       log.finer(this + " starting duplex " + handler);
@@ -929,6 +1031,19 @@ public class TcpSocketLink extends AbstractSocketLink
     }
 
     return duplex;
+  }
+  
+  RequestState doDuplex()
+    throws IOException
+  {
+    setStatState("duplex");
+
+    return _duplexReadTask.doTask();
+  }
+  
+  void toDuplexActive()
+  {
+    _state = _state.toDuplexActive(this);
   }
 
   public void closeController(TcpCometController controller)
@@ -952,6 +1067,8 @@ public class TcpSocketLink extends AbstractSocketLink
 
   public void close()
   {
+    setStatState(null);
+    
     closeImpl();
   }
 
@@ -1067,260 +1184,6 @@ public class TcpSocketLink extends AbstractSocketLink
   public String toString()
   {
     return getClass().getSimpleName() + "[id=" + _id + "," + _port.toURL() + "," + _state + "]";
-  }
-
-  enum RequestState {
-    REQUEST,
-    THREAD_DETACHED,
-    DUPLEX,
-    EXIT
-  };
-
-  abstract class ConnectionReadTask implements Runnable {
-    /**
-     * Handles the read request for the connection
-     */
-    abstract RequestState doTask()
-      throws IOException;
-
-    @Override
-    public void run()
-    {
-      runThread();
-    }
-
-    public void runThread()
-    {
-      Thread thread = Thread.currentThread();
-      String oldThreadName = thread.getName();
-
-      thread.setName(_id);
-      _thread = thread;
-
-      ClassLoader systemLoader = _systemClassLoader;
-      thread.setContextClassLoader(systemLoader);
-
-      RequestState result = null;
-
-      _port.threadBegin(TcpSocketLink.this);
-
-      try {
-        result = doTask();
-      } catch (OutOfMemoryError e) {
-        String msg = "TcpSocketLink OutOfMemory";
-        
-        ShutdownService.shutdownActive(ExitCode.MEMORY, msg); 
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      } finally {
-        thread.setName(oldThreadName);
-        _port.threadEnd(TcpSocketLink.this);
-
-        if (result == null)
-          destroy();
-
-        if (result != RequestState.THREAD_DETACHED)
-          finishThread();
-      }
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + TcpSocketLink.this + "]";
-    }
-  }
-
-  class AcceptTask extends ConnectionReadTask {
-    @Override
-    public void run()
-    {
-      SocketLinkListener port = _port;
-      
-      port.startConnection(TcpSocketLink.this);
-
-      runThread();
-    }
-
-    /**
-     * Loop to accept new connections.
-     */
-    @Override
-    RequestState doTask()
-      throws IOException
-    {
-      RequestState result = RequestState.EXIT;
-
-      // _state = _state.toAccept();
-
-      while (! _port.isClosed() && ! _state.isDestroyed()) {
-        _state = _state.toAccept();
-        setStatState("accept");
-
-        if (! _port.accept(_socket)) {
-          setStatState(null);
-          close();
-
-          return RequestState.EXIT;
-        }
-
-        _connectionStartTime = Alarm.getCurrentTime();
-
-        setStatState("read");
-        initSocket();
-
-        _request.onStartConnection();
-
-        boolean isKeepalive = false;
-        result = handleRequests(isKeepalive);
-        
-        if (result == RequestState.THREAD_DETACHED) {
-          return result;
-        }
-        else if (result == RequestState.DUPLEX) {
-          setStatState("duplex");
-
-          return _duplexReadTask.doTask();
-        }
-
-        setStatState(null);
-
-        close();
-      }
-
-      return RequestState.EXIT;
-    }
-
-    /**
-     * Initialize the socket for a new connection
-     */
-    private void initSocket()
-      throws IOException
-    {
-      _idleTimeout = _port.getKeepaliveTimeout();
-
-      getWriteStream().init(_socket.getStream());
-
-      // ReadStream cannot use getWriteStream or auto-flush
-      // because of duplex mode
-      getReadStream().init(_socket.getStream(), null);
-
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(dbgId() + "starting connection " + TcpSocketLink.this + ", total=" + _port.getConnectionCount());
-      }
-    }
-  }
-
-  class KeepaliveRequestTask extends ConnectionReadTask {
-    public void run()
-    {
-      runThread();
-    }
-
-    @Override
-    public RequestState doTask()
-      throws IOException
-    {
-      boolean isKeepalive = true;
-      RequestState result = handleRequests(isKeepalive);
-
-      if (result == RequestState.THREAD_DETACHED) {
-        return result;
-      }
-      else if (result == RequestState.DUPLEX) {
-        return _duplexReadTask.doTask();
-      }
-
-      close();
-
-      // acceptTask significantly faster than finishing
-      return _acceptTask.doTask();
-    }
-  }
-
-  class DuplexReadTask extends ConnectionReadTask {
-    private final SocketLinkDuplexController _duplex;
-
-    DuplexReadTask(SocketLinkDuplexController duplex)
-    {
-      _duplex = duplex;
-    }
-
-    @Override
-    public void run()
-    {
-      runThread();
-    }
-
-    @Override
-    public RequestState doTask()
-      throws IOException
-    {
-      _state = _state.toDuplexActive(TcpSocketLink.this);
-
-      RequestState result;
-
-      ReadStream readStream = getReadStream();
-
-      while ((result = processKeepalive()) == RequestState.REQUEST) {
-        long position = readStream.getPosition();
-
-        _duplex.serviceRead();
-
-        if (position == readStream.getPosition()) {
-          log.warning(_duplex + " was not processing any data. Shutting down.");
-          setStatState(null);
-          close();
-          
-          return RequestState.EXIT;
-        }
-      }
-
-      return result;
-    }
-  }
-
-  class ResumeTask implements Runnable {
-    public void run()
-    {
-      boolean isValid = false;
-
-      try {
-        // _state = _state.toCometResume();
-
-        _isWakeRequested = false;
-        
-        _state = _state.toCometDispatch();
-        
-        AsyncController controller = _controller;
-        _controller = null;
-
-        if (controller != null)
-          controller.close();
-
-        getRequest().handleResume();
-        
-        if (_state.isCometActive() && toSuspend()) {
-          isValid = true;
-        } else if (_state.isKeepaliveAllocated()) {
-          isValid = true;
-          _isCompleteRequested = false;
-          _keepaliveTask.run();
-        }
-     } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
-      } catch (OutOfMemoryError e) {
-        String msg = "TcpSocketLink OutOfMemory";
-        
-        ShutdownService.shutdownActive(ExitCode.MEMORY, msg);
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      } finally {
-        if (! isValid) {
-          finishThread();
-        }
-      }
-    }
   }
 
   class Admin extends AbstractManagedObject implements TcpConnectionMXBean {

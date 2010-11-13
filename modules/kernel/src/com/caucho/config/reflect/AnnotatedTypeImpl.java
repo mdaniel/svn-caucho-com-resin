@@ -32,11 +32,8 @@ package com.caucho.config.reflect;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
@@ -72,10 +69,10 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
 
   public AnnotatedTypeImpl(Class<X> javaClass)
   {
-    this(javaClass, javaClass);
+    this(createBaseType(javaClass), javaClass);
   }
 
-  public AnnotatedTypeImpl(Type type, Class<X> javaClass)
+  public AnnotatedTypeImpl(BaseType type, Class<X> javaClass)
   {
     super(type, null, javaClass.getDeclaredAnnotations());
 
@@ -239,11 +236,5 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     }
 
     introspectInheritedAnnotations(cl.getSuperclass(), isScope);
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _javaClass + "]";
   }
 }

@@ -27,24 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.config.reflect;
 
 
 /**
- * A task worker based on the Resin thread pool.
+ * Abstract introspected view of a Bean
  */
-abstract public class TaskWorker extends AbstractTaskWorker {
-  private final ThreadPool _threadPool;
-
-  protected TaskWorker()
-  {
-    super(Thread.currentThread().getContextClassLoader());
-    _threadPool = ThreadPool.getCurrent();
-  }
-
-  @Override
-  protected void startWorkerThread()
-  {
-    _threadPool.schedulePriority(this);
-  }
+public interface BaseTypeAnnotated {
+  public BaseType getBaseTypeImpl();
 }

@@ -51,7 +51,9 @@ public class AnnotatedFieldImpl<X>
   
   public AnnotatedFieldImpl(AnnotatedType<X> declaringType, Field field)
   {
-    super(field.getGenericType(), null, field.getAnnotations());
+    super(createBaseType(declaringType, field.getGenericType()),
+          null, 
+          field.getAnnotations());
 
     _declaringType = declaringType;
     _field = field;

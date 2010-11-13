@@ -79,7 +79,7 @@ public class AsyncHeadGenerator<X> extends AbstractAspectGenerator<X> {
                                        isOverride(),
                                        "public", 
                                        methodName,
-                                       getJavaMethod(), 
+                                       getMethod(), 
                                        getThrowsExceptions());
 
     out.println("{");

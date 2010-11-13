@@ -50,8 +50,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Period;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.PortMXBean;
@@ -72,8 +70,7 @@ import com.caucho.vfs.SSLFactory;
  * Represents a protocol connection.
  */
 @Configurable
-public class SocketLinkListener extends TaskWorker
-  implements Runnable
+public class SocketLinkListener
 {
   private static final L10N L = new L10N(SocketLinkListener.class);
 
@@ -86,11 +83,13 @@ public class SocketLinkListener extends TaskWorker
   // themselves are buffering the free connections
   private FreeList<TcpSocketLink> _idleConn
     = new FreeList<TcpSocketLink>(32);
-
+  
   // The owning server
   // private ProtocolDispatchServer _server;
 
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
+  
+  private SocketLinkThreadLauncher _launcher;
 
   private ClassLoader _classLoader
     = Thread.currentThread().getContextClassLoader();
@@ -116,9 +115,6 @@ public class SocketLinkListener extends TaskWorker
   private boolean _isSecure;
 
   private InetAddress _socketAddress;
-
-  private int _idleThreadMin = 2;
-  private int _idleThreadMax = 20;
 
   private int _acceptListenBacklog = 1000;
 
@@ -168,9 +164,6 @@ public class SocketLinkListener extends TaskWorker
   private Set<TcpSocketLink> _suspendConnectionSet
     = Collections.synchronizedSet(new HashSet<TcpSocketLink>());
 
-  private final AtomicInteger _idleThreadCount = new AtomicInteger();
-  private final AtomicInteger _startThreadCount = new AtomicInteger();
-
   // active requests that are closing after the request like an access-log
   // but should not trigger a new thread launch.
   private final AtomicInteger _shutdownRequestCount = new AtomicInteger();
@@ -179,8 +172,6 @@ public class SocketLinkListener extends TaskWorker
   private Alarm _suspendAlarm;
 
   // statistics
-
-  private final AtomicInteger _threadCount = new AtomicInteger();
 
   private volatile long _lifetimeRequestCount;
   private volatile long _lifetimeKeepaliveCount;
@@ -206,6 +197,8 @@ public class SocketLinkListener extends TaskWorker
       // on 64-bit machines we can use more threads before parking in nio
       _keepaliveSelectThreadTimeout = 60000;
     }
+    
+    _launcher = new SocketLinkThreadLauncher(this);
   }
 
   /**
@@ -451,8 +444,8 @@ public class SocketLinkListener extends TaskWorker
   {
     if (minSpare < 1)
       throw new ConfigException(L.l("accept-thread-min must be at least 1."));
-
-    _idleThreadMin = minSpare;
+    
+    _launcher.setIdleMin(minSpare);
   }
 
   /**
@@ -460,7 +453,7 @@ public class SocketLinkListener extends TaskWorker
    */
   public int getAcceptThreadMin()
   {
-    return _idleThreadMin;
+    return _launcher.getIdleMin();
   }
 
   /**
@@ -473,7 +466,7 @@ public class SocketLinkListener extends TaskWorker
     if (maxSpare < 1)
       throw new ConfigException(L.l("accept-thread-max must be at least 1."));
 
-    _idleThreadMax = maxSpare;
+    // _idleThreadMax = maxSpare;
   }
 
   /**
@@ -481,7 +474,9 @@ public class SocketLinkListener extends TaskWorker
    */
   public int getAcceptThreadMax()
   {
-    return _idleThreadMax;
+    // return _idleThreadMax;
+    
+    return -1;
   }
 
   /**
@@ -739,6 +734,14 @@ public class SocketLinkListener extends TaskWorker
   public void addContentProgram(ConfigProgram program)
   {
   }
+  
+  /**
+   * Returns the thread launcher for the link.
+   */
+  SocketLinkThreadLauncher getLauncher()
+  {
+    return _launcher;
+  }
 
   //
   // statistics
@@ -749,7 +752,7 @@ public class SocketLinkListener extends TaskWorker
    */
   public int getThreadCount()
   {
-    return _threadCount.get();
+    return _launcher.getThreadCount();
   }
 
   /**
@@ -757,7 +760,7 @@ public class SocketLinkListener extends TaskWorker
    */
   public int getActiveThreadCount()
   {
-    return _threadCount.get() - _idleThreadCount.get();
+    return _launcher.getThreadCount() - _launcher.getIdleCount();
   }
 
   /**
@@ -765,7 +768,7 @@ public class SocketLinkListener extends TaskWorker
    */
   public int getIdleThreadCount()
   {
-    return _idleThreadCount.get();
+    return _launcher.getIdleCount();
   }
 
   /**
@@ -773,7 +776,7 @@ public class SocketLinkListener extends TaskWorker
    */
   public int getStartThreadCount()
   {
-    return _startThreadCount.get();
+    return _launcher.getStartingCount();
   }
 
   /**
@@ -806,7 +809,7 @@ public class SocketLinkListener extends TaskWorker
    */
   public int getActiveConnectionCount()
   {
-    return _threadCount.get() - _idleThreadCount.get();
+    return getActiveThreadCount();
   }
 
   /**
@@ -834,19 +837,6 @@ public class SocketLinkListener extends TaskWorker
       return _selectManager.getSelectCount();
     else
       return -1;
-  }
-
-  /**
-   * Returns true if the port should start a new thread because there are
-   * less than _idleThreadMin accepting threads.
-   */
-  private boolean isStartThreadRequired()
-  {
-    int startCount = _startThreadCount.get();
-    int idleCount = _idleThreadCount.get();
-    int shutdownCount = _shutdownRequestCount.get();
-    
-    return (startCount + idleCount + shutdownCount < _idleThreadMin);
   }
   
   /**
@@ -1110,7 +1100,7 @@ public class SocketLinkListener extends TaskWorker
 
       enable();
 
-      wake();
+      _launcher.start();
 
       _suspendAlarm = new Alarm(new SuspendReaper());
       _suspendAlarm.queue(_suspendReaperTimeout);
@@ -1198,27 +1188,11 @@ public class SocketLinkListener extends TaskWorker
 
   /**
    * Accepts a new connection.
-   *
-   * @param isStart boolean to mark the first request on the thread for
-   *   bookkeeping.
    */
   public boolean accept(QSocket socket)
   {
-    boolean isDecrementIdle = true;
-
     try {
-      int idleThreadCount = _idleThreadCount.incrementAndGet();
-
       while (_lifecycle.isActive()) {
-        idleThreadCount = _idleThreadCount.get();
-
-        if (_idleThreadMax < idleThreadCount
-            && _idleThreadCount.compareAndSet(idleThreadCount,
-                                              idleThreadCount - 1)) {
-          isDecrementIdle = false;
-          return false;
-        }
-
         Thread.interrupted();
         if (_serverSocket.accept(socket)) {
           if (_throttle.accept(socket)) {
@@ -1231,15 +1205,6 @@ public class SocketLinkListener extends TaskWorker
     } catch (Throwable e) {
       if (_lifecycle.isActive() && log.isLoggable(Level.FINER))
         log.log(Level.FINER, e.toString(), e);
-    } finally {
-      if (isDecrementIdle)
-        _idleThreadCount.decrementAndGet();
-
-      if (isStartThreadRequired()) {
-        // if there are not enough idle threads, wake the manager to
-        // create a new one
-        wake();
-      }
     }
 
     return false;
@@ -1252,18 +1217,6 @@ public class SocketLinkListener extends TaskWorker
   {
     if (_throttle != null)
       _throttle.close(socket);
-  }
-
-  /**
-   * Registers the new connection as started
-   */
-  void startConnection(TcpSocketLink conn)
-  {
-    _startThreadCount.decrementAndGet();
-
-    if (isStartThreadRequired()) {
-      wake();
-    }
   }
 
   /**
@@ -1280,28 +1233,6 @@ public class SocketLinkListener extends TaskWorker
   void requestShutdownEnd()
   {
     _shutdownRequestCount.decrementAndGet();
-
-    if (isStartThreadRequired()) {
-      wake();
-    }
-  }
-
-  /**
-   * Marks a new thread as running.
-   */
-  void threadBegin(TcpSocketLink conn)
-  {
-    _threadCount.incrementAndGet();
-  }
-
-  /**
-   * Marks a new thread as stopped.
-   */
-  void threadEnd(TcpSocketLink conn)
-  {
-    _threadCount.decrementAndGet();
-
-    wake();
   }
 
   /**
@@ -1448,7 +1379,6 @@ public class SocketLinkListener extends TaskWorker
   /**
    * Returns true if the port is closed.
    */
-  @Override
   public boolean isClosed()
   {
     return ! _lifecycle.getState().isRunnable();
@@ -1558,44 +1488,22 @@ public class SocketLinkListener extends TaskWorker
     return null;
   }
 
-  /**
-   * The port thread is responsible for creating new connections.
-   */
-  @Override
-  public long runTask()
+  TcpSocketLink allocateConnection()
+    throws IOException
   {
-    if (_lifecycle.isDestroyed())
-      return -1;
+    TcpSocketLink startConn = _idleConn.allocate();
+    
+    if (startConn != null) {
+      startConn.toInit(); // change to the init/ready state
+    }
+    else {
+      int connId = _connectionCount.incrementAndGet();
+      QSocket socket = _serverSocket.createSocket();
 
-    try {
-      TcpSocketLink startConn = null;
-      if (isStartThreadRequired()
-          && _lifecycle.isActive()
-          && _activeConnectionCount.get() < _connectionMax) {
-        startConn = _idleConn.allocate();
-
-        if (startConn != null) {
-          startConn.toInit(); // change to the init/ready state
-        }
-        else {
-          int connId = _connectionCount.incrementAndGet();
-          QSocket socket = _serverSocket.createSocket();
-          startConn = new TcpSocketLink(connId, this, socket);
-        }
-
-        _startThreadCount.incrementAndGet();
-        _activeConnectionCount.incrementAndGet();
-        _activeConnectionSet.add(startConn);
-
-        if (! _threadPool.schedule(startConn.getAcceptTask())) {
-          log.severe(L.l("Schedule failed for {0}", startConn));
-        }
-      }
-    } catch (Throwable e) {
-      log.log(Level.SEVERE, e.toString(), e);
+      startConn = new TcpSocketLink(connId, this, socket);
     }
     
-    return -1;
+    return startConn;
   }
 
   /**
@@ -1628,8 +1536,7 @@ public class SocketLinkListener extends TaskWorker
     _activeConnectionSet.remove(conn);
     _activeConnectionCount.decrementAndGet();
 
-    // wake the start thread
-    wake();
+    _launcher.wake();
   }
 
   /**
@@ -1644,7 +1551,7 @@ public class SocketLinkListener extends TaskWorker
     if (log.isLoggable(Level.FINE))
       log.fine(this + " closing");
 
-    super.destroy();
+    _launcher.destroy();
 
     Alarm suspendAlarm = _suspendAlarm;
     _suspendAlarm = null;
@@ -1710,7 +1617,7 @@ public class SocketLinkListener extends TaskWorker
     }
 
     // wake the start thread
-    wake();
+    _launcher.wake();
 
     // Close the socket server socket and send some request to make
     // sure the Port accept thread is woken and dies.
@@ -1719,7 +1626,7 @@ public class SocketLinkListener extends TaskWorker
 
     // ping the accept port to wake the listening threads
     if (localPort > 0) {
-      int idleCount = _idleThreadCount.get() + _startThreadCount.get();
+      int idleCount = getIdleThreadCount() + getStartThreadCount();
 
       for (int i = 0; i < idleCount + 10; i++) {
         InetSocketAddress addr;
@@ -1767,11 +1674,13 @@ public class SocketLinkListener extends TaskWorker
     return getUrl();
   }
 
+  /*
   @Override
   protected String getThreadName()
   {
     return "resin-port-" + getAddress() + ":" + getPort();
   }
+  */
 
   @Override
   public String toString()

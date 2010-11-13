@@ -127,7 +127,11 @@ public class ClassType extends BaseType
         if (bound.isObject())
           continue;
         
-        if (! isAssignableFrom(bound))
+        // if (! isAssignableFrom(bound))
+        //  return false;
+        
+        // ioc/2601
+        if (! bound.isAssignableFrom(this))
           return false;
         
         // ioc/024n        

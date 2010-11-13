@@ -62,26 +62,48 @@ jvmdi_reload_native(JNIEnv *env,
 		    jint length);
 */		    
 
-static int
+int
 resin_set_byte_array_region(JNIEnv *env,
 			    jbyteArray j_buf,
 			    jint offset,
 			    jint sublen,
 			    char *c_buf)
 {
+  /* JDK uses SetByteArrayRegion */
   (*env)->SetByteArrayRegion(env, j_buf, offset, sublen, (void*) c_buf);
+
+  /*
+  jbyte *cBuf = (*env)->GetPrimitiveArrayCritical(env, j_buf, 0);
+  if (! cBuf)
+    return 0;
+
+  memcpy(cBuf + offset, c_buf, sublen);
+
+  (*env)->ReleasePrimitiveArrayCritical(env, j_buf, cBuf, 0);
+  */
   
   return 1;
 }
 
-static int
+int
 resin_get_byte_array_region(JNIEnv *env,
-			    jbyteArray buf,
+			    jbyteArray j_buf,
 			    jint offset,
 			    jint sublen,
-			    char *buffer)
+			    char *c_buf)
 {
-  (*env)->GetByteArrayRegion(env, buf, offset, sublen, (void*) buffer);
+  /* JDK uses GetByteArrayRegion */
+  (*env)->GetByteArrayRegion(env, j_buf, offset, sublen, (void*) c_buf);
+
+  /*
+  jbyte *cBuf = (*env)->GetPrimitiveArrayCritical(env, j_buf, 0);
+  if (! cBuf)
+    return 0;
+
+  memcpy(c_buf, cBuf + offset, sublen);
+
+  (*env)->ReleasePrimitiveArrayCritical(env, j_buf, cBuf, 0);
+  */
   
   return 1;
 }
@@ -485,7 +507,8 @@ Java_com_caucho_vfs_JniFileStream_nativeRead(JNIEnv *env,
   int sublen;
   char buffer[STACK_BUFFER_SIZE];
   int read_length = 0;
-  if (fd < 0)
+
+  if (fd < 0 || ! buf)
     return -1;
 
   while (length > 0) {
@@ -545,7 +568,7 @@ Java_com_caucho_vfs_JniFileStream_nativeWrite(JNIEnv *env,
   char buffer[STACK_BUFFER_SIZE];
   int read_length = 0;
 
-  if (fd < 0)
+  if (fd < 0 || ! buf)
     return -1;
 
   while (length > 0) {

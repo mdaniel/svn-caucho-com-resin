@@ -84,6 +84,8 @@ public class CursorPreparedStatementImpl extends PreparedStatementImpl
   {
     Transaction xa = getConnectionImpl().getTransaction();
     
+    queryContext.setNonLocking();
+    
     SelectCursor result = query.executeCursor(queryContext, xa);
 
     return new CursorResultSetImpl(this, queryContext, result);

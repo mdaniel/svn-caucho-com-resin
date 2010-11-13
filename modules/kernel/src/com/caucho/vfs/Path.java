@@ -1204,6 +1204,15 @@ public abstract class Path {
   /**
    * Opens a random-access stream.
    */
+  public RandomAccessStream openMemoryMappedFile(long fileSize) 
+    throws IOException
+  {
+    return null;
+  }
+
+  /**
+   * Opens a random-access stream.
+   */
   public RandomAccessStream openRandomAccess() throws IOException
   {
     clearStatusCache();

@@ -57,7 +57,7 @@ public class AnnotatedConstructorImpl<T>
   
   public AnnotatedConstructorImpl(AnnotatedType<T> declaringType, Constructor<T> ctor)
   {
-    super(declaringType.getBaseType(), null, ctor.getAnnotations());
+    super(createBaseType(declaringType), null, ctor.getAnnotations());
 
     _declaringType = declaringType;
     

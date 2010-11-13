@@ -35,6 +35,8 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * Writing class for generated Java code.
@@ -413,7 +415,7 @@ public class JavaWriter extends Writer {
   /**
    * Prints the Java represention of the class
    */
-  public void printClass(Class cl)
+  public void printClass(Class<?> cl)
     throws IOException
   {
     if (! cl.isArray())
@@ -425,12 +427,37 @@ public class JavaWriter extends Writer {
   }
   
   /**
+   * Prints the Java represention of the class
+   */
+  public void printType(Type type)
+    throws IOException
+  {
+    if (type instanceof Class<?>)
+      printClass((Class<?>) type);
+    else if (type instanceof ParameterizedType) {
+      ParameterizedType paramType = (ParameterizedType) type;
+      
+      printType(paramType.getRawType());
+      print("<");
+      Type []params = paramType.getActualTypeArguments();
+      for (int i = 0; i < params.length; i++) {
+        if (i != 0)
+          print(",");
+        printType(params[i]);
+      }
+      print(">");
+    }
+    else
+      throw new UnsupportedOperationException(type.getClass().getName() + " " + String.valueOf(type));
+  }
+  
+  /**
    * Converts a java primitive type to a Java object.
    *
    * @param value the java expression to be converted
    * @param javaType the type of the converted expression.
    */
-  public void printJavaTypeToObject(String value, Class javaType)
+  public void printJavaTypeToObject(String value, Class<?> javaType)
     throws IOException
   {
     if (Object.class.isAssignableFrom(javaType))
@@ -510,7 +537,7 @@ public class JavaWriter extends Writer {
 
       WriteStream out = smap.openWrite();
       try {
-        String srcName = _lineMap.getLastSourceFilename();
+        // String srcName = _lineMap.getLastSourceFilename();
 
         LineMapWriter writer = new LineMapWriter(out);
 

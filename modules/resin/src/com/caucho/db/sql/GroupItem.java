@@ -30,8 +30,6 @@ package com.caucho.db.sql;
 
 import com.caucho.util.FreeList;
 
-import java.util.logging.Logger;
-
 /**
  * Represents a row of a group item.
  */

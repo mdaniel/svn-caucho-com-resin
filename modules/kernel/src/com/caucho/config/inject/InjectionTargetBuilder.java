@@ -81,6 +81,7 @@ import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ResourceProgramManager;
 import com.caucho.config.reflect.AnnotatedConstructorImpl;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -102,6 +103,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   private Bean<X> _bean;
 
   private final AnnotatedType<X> _annotatedType;
+  
+  private Class<X> _rawClass;
 
   private AnnotatedConstructor<X> _beanCtor;
   
@@ -123,6 +126,13 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
     _annotatedType = beanType;
     _bean = bean;
+    
+    Type type = _annotatedType.getBaseType();
+    
+    // ioc/2601
+    BaseType baseType = getBeanManager().createSourceBaseType(type);
+    
+    _rawClass= (Class<X>) baseType.getRawClass();
     
     introspectInjectClass(_annotatedType);
   }
@@ -255,7 +265,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
       introspect();
       
-      Class<X> cl = (Class<X>) _annotatedType.getBaseType();
+      Class<X> cl = _rawClass;
+      
 
       if (_beanCtor == null) {
         // XXX:
@@ -296,7 +307,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
         }
       }
 
-      ConfigProgram []injectProgram = introspectInject(_annotatedType);
+      ConfigProgram []injectProgram = introspectInject();
       ConfigProgram []initProgram = introspectPostConstruct(_annotatedType);
 
       ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
@@ -598,13 +609,13 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     return qualifiers;
   }
 
-  private ConfigProgram []introspectInject(AnnotatedType<X> type)
+  private ConfigProgram []introspectInject()
   {
     ArrayList<ConfigProgram> injectProgramList = new ArrayList<ConfigProgram>();
     
     _injectionPointSet = new HashSet<InjectionPoint>();
     
-    introspectInject(type, injectProgramList);
+    introspectInject(injectProgramList);
     
     ConfigProgram []injectProgram = new ConfigProgram[injectProgramList.size()];
     injectProgramList.toArray(injectProgram);
@@ -614,10 +625,11 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     return injectProgram;
   }
   
-  private void introspectInject(AnnotatedType<X> type,
-                                ArrayList<ConfigProgram> injectProgramList)
+  private void introspectInject(ArrayList<ConfigProgram> injectProgramList)
   {
-    Class<?> rawType = (Class<?>) type.getBaseType();
+    AnnotatedType<X> type = _annotatedType;
+    
+    Class<?> rawType = _rawClass;
 
     if (rawType == null || Object.class.equals(rawType))
       return;

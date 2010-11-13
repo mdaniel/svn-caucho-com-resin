@@ -160,9 +160,9 @@ public class EjbConfigManager extends EjbConfig {
     try {
       ClassLoader loader = _ejbManager.getClassLoader();
       
-      Class<X> type = (Class<X>) Class.forName(className, false, loader);
-      
       InjectManager manager = InjectManager.create(loader);
+      
+      Class<X> type = loadClass(className, loader);
       
       AnnotatedType<X> annType = manager.createAnnotatedType(type);
       
@@ -180,6 +180,13 @@ public class EjbConfigManager extends EjbConfig {
     catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+  
+  @SuppressWarnings("unchecked")
+  private <X> Class<X> loadClass(String className, ClassLoader loader)
+    throws ClassNotFoundException
+  {
+    return (Class<X>) Class.forName(className, false, loader);
   }
   
   /**

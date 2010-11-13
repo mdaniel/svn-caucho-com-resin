@@ -56,6 +56,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.BeanArg;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -334,7 +336,9 @@ public class ProducesBuilder {
         String namedValue = named.value();
 
         if ("".equals(namedValue)) {
-          String name = ((Class) annotated.getBaseType()).getSimpleName();
+          BaseType baseType = AnnotatedTypeUtil.getBaseType(annotated);
+          
+          String name = baseType.getRawClass().getSimpleName();
 
           ann = Names.create(name);
         }

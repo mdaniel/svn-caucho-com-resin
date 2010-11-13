@@ -54,11 +54,13 @@ import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.inject.AnnotatedOverrideMap;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.types.DataSourceRef;
 import com.caucho.config.types.DescriptionGroupConfig;
@@ -208,6 +210,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public EjbManager getEjbContainer()
   {
     return _ejbConfig.getEjbContainer();
+  }
+  
+  public InjectManager getCdiManager()
+  {
+    return getEjbContainer().getInjectManager();
   }
 
   public String getModuleName()
@@ -550,10 +557,18 @@ public class EjbBean<X> extends DescriptionGroupConfig
     return getEJBFullClassName();
   }
   
+  public <T> void addRemote(Class<T> remote)
+    throws ConfigException
+  {
+    BaseType type = getCdiManager().createTargetBaseType(remote);
+    
+    addRemoteType(type);
+  }
+  
   /**
    * Sets the ejb remote interface
    */
-  public <T> void addRemote(Class<T> remote)
+  public <T> void addRemoteType(BaseType remote)
     throws ConfigException
   {
     AnnotatedTypeImpl<X> annType;
@@ -598,6 +613,13 @@ public class EjbBean<X> extends DescriptionGroupConfig
    */
   public void addLocal(Class<?> local)
     throws ConfigException
+    {
+      BaseType type = getCdiManager().createTargetBaseType(local);
+      
+      addLocalType(type);
+    }
+  
+  protected void addLocalType(BaseType local)
   {
     AnnotatedTypeImpl<X> annType;
     
@@ -1349,18 +1371,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
   public String getSkeletonName()
   {
-    /*
-    String className = getEJBClass().getName();
-    int p = className.lastIndexOf('.');
-
-    if (p > 0)
-      className = className.substring(p + 1);
-
-    String ejbName = getEJBName();
-
-    String fullClassName = "_ejb." + ejbName + "." + className + "__" + getBeanType() + "Context";
-    */
-    
+     
     // XXX: needs to match generator
     
     StringBuilder sb = new StringBuilder();
@@ -1659,41 +1670,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
       throw e;
     } catch (Exception e) {
       throw ConfigException.createLine(_location, e);
-    }
-  }
-
-  /*
-  private <Y> void configureMethods(AnnotatedType<Y> type)
-    throws ConfigException
-  {
-    //configureBeanMethods(type);
-  }
-  */
-
-  private <Y> void configureBeanMethods(AnnotatedType<Y> type)
-    throws ConfigException
-  {
-    for (AnnotatedMethod<? super Y> method : type.getMethods()) {
-      AnnotatedMethodImpl<?> methodImpl = null;
-      
-      if (method instanceof AnnotatedMethodImpl<?>)
-        methodImpl = (AnnotatedMethodImpl<?>) method;
-      
-      TransactionAttribute xa
-        = (TransactionAttribute) method.getAnnotation(TransactionAttribute.class);
-
-      if (xa != null) {
-        EjbMethodPattern<X> pattern = createMethod(getSignature(method));
-
-        setPatternTransaction(pattern, xa);
-      }
-
-      Annotation timeout = method.getAnnotation(Timeout.class);
-
-      // ejb/0fj0
-      if (timeout != null) {
-        _timeoutMethodName = method.getJavaMember().getName();
-      }
     }
   }
 

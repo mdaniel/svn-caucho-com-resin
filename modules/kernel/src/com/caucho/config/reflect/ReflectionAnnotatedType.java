@@ -84,7 +84,7 @@ public class ReflectionAnnotatedType<T>
   ReflectionAnnotatedType(InjectManager manager, 
                           BaseType type)
   {
-    super(type.getRawClass(),
+    super(type,
           type.getTypeClosure(manager),
           type.getRawClass().getDeclaredAnnotations());
 
@@ -451,11 +451,5 @@ public class ReflectionAnnotatedType<T>
     String name = annType.getName();
 
     return name.startsWith("javax.");
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _javaClass + "]";
   }
 }

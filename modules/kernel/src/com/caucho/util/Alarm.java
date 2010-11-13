@@ -589,7 +589,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
         long next = _heap.nextAlarmTime();
         // #3548 - getCurrentTime for consistency
-        long now = getCurrentTime();
+        long now = getCurrentTimeActual();
 
         if (next < 0)
           return 120000L;
@@ -603,7 +603,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       try {
         Alarm alarm;
 
-        if ((alarm = _heap.extractAlarm(getCurrentTime())) != null) {
+        if ((alarm = _heap.extractAlarm(getCurrentTimeActual())) != null) {
           // throttle alarm invocations by 5ms so quick alarms don't need
           // extra threads
           /*

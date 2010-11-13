@@ -41,9 +41,11 @@ final class ResinThread extends Thread {
   private static final Logger log 
     = Logger.getLogger(ResinThread.class.getName());
   
-  private final ThreadPool _pool;
   private final int _id;
   private final String _name;
+  
+  private final ThreadPool _pool;
+  private final ThreadLauncher _launcher;
   
   private volatile ResinThread _next;
   private boolean _isClose;
@@ -53,12 +55,14 @@ final class ResinThread extends Thread {
   private final AtomicReference<Runnable> _taskRef
     = new AtomicReference<Runnable>();
 
-  ResinThread(ThreadPool pool, int id)
+  ResinThread(int id, ThreadPool pool, ThreadLauncher launcher)
   {
-    _pool = pool;
     _id = id;
     _name = "resin-" + _id;
     
+    _pool = pool;
+    _launcher = launcher;
+
     setDaemon(true);
   }
 
@@ -121,22 +125,18 @@ final class ResinThread extends Thread {
   public void run()
   {
     try {
-      _pool.onThreadStart();
+      _launcher.onChildThreadBegin();
       
       runTasks();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _pool.onThreadEnd();
+      _launcher.onChildThreadEnd();
     }
   }
 
   private void runTasks()
   {
-    // is first is needed since the onThreadStart must be called after
-    // the first item pickup.
-    boolean isFirst = true;
-    
     ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
     
     Thread thread = this;
@@ -146,26 +146,10 @@ final class ResinThread extends Thread {
       Runnable task = null;
       ClassLoader classLoader = null;
 
-      ThreadTask taskItem = _pool.nextTask(this);
-      
-      if (taskItem != null) {
-        if (isFirst)
-          _pool.onThreadFirstTask();
-        
-        _pool.startIdleThread();
-        
-        task = taskItem.getRunnable();
-        classLoader = taskItem.getLoader();
-        
-        taskItem.wake();
-      }
-      else if (_pool.isIdleExpire()) {
-        if (isFirst)
-          _pool.onThreadFirstTask();
-          
+      if (_launcher.isIdleExpire()) {
         return;
       }
-      else if ((task = waitForTask(isFirst)) != null) {
+      else if ((task = waitForTask()) != null) {
         classLoader = _taskLoader;
         _taskLoader = null;
       }
@@ -173,8 +157,6 @@ final class ResinThread extends Thread {
         return;
       }
       
-      isFirst = false;
-
       try {
         // if the task is available, run it in the proper context
         thread.setContextClassLoader(classLoader);
@@ -186,27 +168,12 @@ final class ResinThread extends Thread {
         thread.setContextClassLoader(systemClassLoader);
       }
     }
-    
-    if (isFirst) {
-    }
   }
   
-  private Runnable waitForTask(boolean isFirst)
+  private Runnable waitForTask()
   {
-    _pool.pushIdleThread(this);
-    
-    if (isFirst)
-      _pool.onThreadFirstTask();
-    
-    /*
-    for (int i = 1000; i >= 0; i--) {
-      Runnable task = _taskRef.getAndSet(null);
+    _pool.beginIdle(this);
 
-      if (task != null)
-        return task;
-    }
-    */
-    
     while (! _isClose) {
       Runnable task = _taskRef.getAndSet(null);
 
@@ -217,7 +184,7 @@ final class ResinThread extends Thread {
       Thread.interrupted();
       LockSupport.park();
     }
-    
+
     return null;
   }
 }

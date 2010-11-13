@@ -33,6 +33,7 @@ import static javax.ejb.TransactionAttributeType.REQUIRED;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
@@ -52,7 +53,9 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.gen.TransactionAttributeLiteral;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.session.AbstractSessionManager;
 import com.caucho.ejb.session.SingletonManager;
@@ -261,8 +264,8 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     
     Class<?> ejbClass = type.getJavaClass();
 
-    ArrayList<Class<?>> interfaceList = new ArrayList<Class<?>>();
-
+    ArrayList<BaseType> interfaceList = new ArrayList<BaseType>();
+    
     addInterfaces(interfaceList, ejbClass, true);
 
     Local local = type.getAnnotation(Local.class);
@@ -294,7 +297,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
           L.l("'{0}' has multiple interfaces, but none are marked as @Local or @Remote.\n{1}",
               type.getJavaClass().getName(), interfaceList.toString()));
     else {
-      addLocal((Class) interfaceList.get(0));
+      addLocalType(interfaceList.get(0));
     }
 
     // ioc/0312
@@ -306,52 +309,59 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
   }
   
-  private void addInterfaces(ArrayList<Class<?>> interfaceList,
+  private void addInterfaces(ArrayList<BaseType> interfaceList,
                              Class<?> ejbClass,
                              boolean isTop)
   {
     if (ejbClass == null)
       return;
+    
+    InjectManager cdiManager = InjectManager.getCurrent();
 
-    for (Class<?> localApi : ejbClass.getInterfaces()) {
-      Local local = localApi.getAnnotation(Local.class);
+    for (Type localApi : ejbClass.getGenericInterfaces()) {
+      BaseType type = cdiManager.createTargetBaseType(localApi);
+      
+      Class<?> rawClass = type.getRawClass();
+      
+      Local local = rawClass.getAnnotation(Local.class);
 
       if (local != null) {
-        addLocal((Class) localApi);
+        addLocalType(type);
         continue;
       }
 
-      javax.ejb.Remote remote = localApi.getAnnotation(javax.ejb.Remote.class);
+      javax.ejb.Remote remote = rawClass.getAnnotation(javax.ejb.Remote.class);
 
-      if (remote != null || java.rmi.Remote.class.isAssignableFrom(localApi)) {
-        addRemote(localApi);
+      if (remote != null || java.rmi.Remote.class.isAssignableFrom(rawClass)) {
+        addRemoteType(type);
         continue;
       }
 
-      if (localApi.getName().equals("java.io.Serializable"))
+      if (rawClass.getName().equals("java.io.Serializable"))
         continue;
 
-      if (localApi.getName().equals("java.io.Externalizable"))
+      if (rawClass.getName().equals("java.io.Externalizable"))
         continue;
 
-      if (localApi.getName().startsWith("javax.ejb"))
+      if (rawClass.getName().startsWith("javax.ejb"))
         continue;
 
-      if (localApi.getName().equals("java.rmi.Remote"))
+      if (rawClass.getName().equals("java.rmi.Remote"))
         continue;
 
       if (isTop)
-        addInterface(interfaceList, localApi);
+        addInterface(interfaceList, type);
     }
     
     // ejb/6040
     // addInterfaces(interfaceList, ejbClass.getSuperclass(), false);
   }
   
-  private void addInterface(ArrayList<Class<?>> interfaceList, Class<?> cl)
+  private void addInterface(ArrayList<BaseType> interfaceList,
+                            BaseType cl)
   {
     for (int i = interfaceList.size() - 1; i >= 0; i--) {
-      Class<?> oldClass = interfaceList.get(i);
+      BaseType oldClass = interfaceList.get(i);
       
       if (oldClass.isAssignableFrom(cl)) {
         interfaceList.set(i, cl);

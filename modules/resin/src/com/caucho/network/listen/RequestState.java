@@ -6,7 +6,7 @@
  * Each copy or derived work must preserve the copyright notice and this
  * notice unmodified.
  *
- * Resin Open Source is free software; you can redistribute it and/or modify
+ * Resin Open Source is software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -27,24 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
-
+package com.caucho.network.listen;
 
 /**
- * A task worker based on the Resin thread pool.
+ * Return state for request handling.
  */
-abstract public class TaskWorker extends AbstractTaskWorker {
-  private final ThreadPool _threadPool;
 
-  protected TaskWorker()
-  {
-    super(Thread.currentThread().getContextClassLoader());
-    _threadPool = ThreadPool.getCurrent();
-  }
-
-  @Override
-  protected void startWorkerThread()
-  {
-    _threadPool.schedulePriority(this);
-  }
+enum RequestState {
+  REQUEST,
+  THREAD_DETACHED,
+  DUPLEX,
+  EXIT
 }

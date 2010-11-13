@@ -236,4 +236,18 @@ symbol_table_add(jvmtiEnv *jvmti,
 
 jlong crc64_generate(jlong crc, char *value);
 
+int 
+resin_set_byte_array_region(JNIEnv *env,
+                            jbyteArray j_buf, 
+                            jint offset,
+                            jint sublen,
+                            char *c_buf);
+
+int
+resin_get_byte_array_region(JNIEnv *env,
+                            jbyteArray buf,
+                            jint offset,
+                            jint sublen,
+                            char *buffer);
+
 #endif /* RESIN_H */

@@ -290,11 +290,13 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.print(", StatelessProxyFactory");
     
     for (AnnotatedType<? super X> api : getLocalApi()) {
-      out.print(", " + api.getJavaClass().getName());
+      out.print(", ");
+      out.printType(api.getBaseType());
     }
 
     for (AnnotatedType<? super X> apiType : getRemoteApi()) {
-      out.print(", " + apiType.getJavaClass().getName());
+      out.print(", ");
+      out.printType(apiType.getBaseType());
     }
     
     out.println();

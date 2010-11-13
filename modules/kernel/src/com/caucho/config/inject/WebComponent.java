@@ -51,7 +51,7 @@ import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 
 /**
- * Configuration for the web bean component.
+ * Configuration for the cdi bean component.
  */
 @Module
 public class WebComponent {
@@ -266,7 +266,9 @@ public class WebComponent {
 
     boolean isMatch(BaseType type)
     {
-      return type.isAssignableFrom(_type);
+      boolean isMatch = type.isAssignableFrom(_type);
+      
+      return isMatch;
     }
 
     boolean isMatch(Annotation []qualifierArgs)

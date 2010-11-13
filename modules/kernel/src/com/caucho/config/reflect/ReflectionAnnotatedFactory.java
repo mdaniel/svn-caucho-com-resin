@@ -33,6 +33,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.loader.EnvironmentLocal;
 
 import java.lang.ref.SoftReference;
+import java.lang.reflect.Type;
 import java.util.WeakHashMap;
 
 /**
@@ -43,11 +44,11 @@ public class ReflectionAnnotatedFactory
   private static EnvironmentLocal<ReflectionAnnotatedFactory> _current
     = new EnvironmentLocal<ReflectionAnnotatedFactory>();
 
-  private WeakHashMap<Class<?>,SoftReference<ReflectionSimpleAnnotatedType>> _simpleTypeMap
-    = new WeakHashMap<Class<?>,SoftReference<ReflectionSimpleAnnotatedType>>();
+  private WeakHashMap<Type,SoftReference<ReflectionSimpleAnnotatedType<?>>> _simpleTypeMap
+    = new WeakHashMap<Type,SoftReference<ReflectionSimpleAnnotatedType<?>>>();
 
-  private WeakHashMap<Class<?>,SoftReference<ReflectionAnnotatedType>> _typeMap
-    = new WeakHashMap<Class<?>,SoftReference<ReflectionAnnotatedType>>();
+  private WeakHashMap<Type,SoftReference<ReflectionAnnotatedType<?>>> _typeMap
+    = new WeakHashMap<Type,SoftReference<ReflectionAnnotatedType<?>>>();
 
   /**
    * Returns the factory for the given loader.
@@ -81,28 +82,28 @@ public class ReflectionAnnotatedFactory
    */
   synchronized
   private <T> ReflectionSimpleAnnotatedType<T>
-  introspectSimpleTypeImpl(Class<T> cl)
+  introspectSimpleTypeImpl(Type type)
   {
-    SoftReference<ReflectionSimpleAnnotatedType> typeRef
-      = _simpleTypeMap.get(cl);
+    SoftReference<ReflectionSimpleAnnotatedType<?>> typeRef
+      = _simpleTypeMap.get(type);
 
-    ReflectionSimpleAnnotatedType type = null;
+    ReflectionSimpleAnnotatedType<T> annType = null;
 
     if (typeRef != null)
-      type = typeRef.get();
+      annType = (ReflectionSimpleAnnotatedType<T>) typeRef.get();
 
     if (type == null) {
       InjectManager inject = InjectManager.create();
-      BaseType baseType = inject.createSourceBaseType(cl);
+      BaseType baseType = inject.createSourceBaseType(type);
       
-      type = new ReflectionSimpleAnnotatedType(inject, baseType);
+      annType = new ReflectionSimpleAnnotatedType(inject, baseType);
 
-      typeRef = new SoftReference<ReflectionSimpleAnnotatedType>(type);
+      typeRef = new SoftReference<ReflectionSimpleAnnotatedType<?>>(annType);
 
-      _simpleTypeMap.put(cl, typeRef);
+      _simpleTypeMap.put(type, typeRef);
     }
 
-    return type;
+    return annType;
   }
 
   /**
@@ -115,30 +116,72 @@ public class ReflectionAnnotatedFactory
   }
 
   /**
+   * Introspects a simple reflection type, i.e. a type without
+   * fields and methods.
+   */
+  public static <X> ReflectionAnnotatedType<X> introspectType(BaseType type)
+  {
+    ClassLoader loader = type.getRawClass().getClassLoader();
+    
+    return create(loader).introspectTypeImpl(type);
+  }
+
+  /**
    * Introspects the reflection type
    */
   synchronized
-  private <X> ReflectionAnnotatedType<X> introspectTypeImpl(Class<X> cl)
+  private <X> ReflectionAnnotatedType<X> introspectTypeImpl(Type type)
   {
-    SoftReference<ReflectionAnnotatedType> typeRef
-      = _typeMap.get(cl);
+    SoftReference<ReflectionAnnotatedType<?>> typeRef
+      = _typeMap.get(type);
 
-    ReflectionAnnotatedType type = null;
+    ReflectionAnnotatedType<?> annType = null;
 
     if (typeRef != null)
-      type = typeRef.get();
+      annType = typeRef.get();
 
-    if (type == null) {
+    if (annType == null) {
       InjectManager inject = InjectManager.create();
       
-      type = new ReflectionAnnotatedType<X>(inject, inject.createSourceBaseType(cl));
+      BaseType baseType = inject.createSourceBaseType(type);
+      
+      annType = new ReflectionAnnotatedType<X>(inject, baseType);
 
-      typeRef = new SoftReference<ReflectionAnnotatedType>(type);
+      typeRef = new SoftReference<ReflectionAnnotatedType<?>>(annType);
 
-      _typeMap.put(cl, typeRef);
+      _typeMap.put(type, typeRef);
     }
 
-    return type;
+    return (ReflectionAnnotatedType<X>) annType;
+  }
+
+  /**
+   * Introspects the reflection type
+   */
+  synchronized
+  private <X> ReflectionAnnotatedType<X> introspectTypeImpl(BaseType baseType)
+  {
+    Type type = baseType.toType();
+    
+    SoftReference<ReflectionAnnotatedType<?>> typeRef
+      = _typeMap.get(type);
+
+    ReflectionAnnotatedType<?> annType = null;
+
+    if (typeRef != null)
+      annType = typeRef.get();
+
+    if (annType == null) {
+      InjectManager inject = InjectManager.create();
+      
+      annType = new ReflectionAnnotatedType<X>(inject, baseType);
+
+      typeRef = new SoftReference<ReflectionAnnotatedType<?>>(annType);
+
+      _typeMap.put(type, typeRef);
+    }
+
+    return (ReflectionAnnotatedType<X>) annType;
   }
 
   @Override

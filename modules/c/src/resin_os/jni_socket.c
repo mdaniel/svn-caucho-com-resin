@@ -77,24 +77,6 @@ q_strdup(char *str)
   return dup;
 }
 
-static int
-set_byte_array_region(JNIEnv *env, jbyteArray j_buf, jint offset, jint sublen,
-		      char *c_buf)
-{
-  (*env)->SetByteArrayRegion(env, j_buf, offset, sublen, (void*) c_buf);
-  
-  return 1;
-}
-
-static int
-get_byte_array_region(JNIEnv *env, jbyteArray buf, jint offset, jint sublen,
-		      char *buffer)
-{
-  (*env)->GetByteArrayRegion(env, buf, offset, sublen, (void*) buffer);
-  
-  return 1;
-}
-
 JNIEXPORT jlong JNICALL
 Java_com_caucho_vfs_JniSocketImpl_nativeAllocate(JNIEnv *env,
 						 jobject obj)
@@ -130,7 +112,7 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
   int sublen;
   char buffer[STACK_BUFFER_SIZE];
 
-  if (! conn || conn->fd < 0)
+  if (! conn || conn->fd < 0 || ! buf)
     return -1;
 
   conn->jni_env = env;
@@ -147,7 +129,7 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
     return sublen;
   }
 
-  set_byte_array_region(env, buf, offset, sublen, buffer);
+  resin_set_byte_array_region(env, buf, offset, sublen, buffer);
 
   return sublen;
 }
@@ -164,7 +146,7 @@ Java_com_caucho_vfs_JniStream_readNonBlockNative(JNIEnv *env,
   int sublen;
   char buffer[STACK_BUFFER_SIZE];
 
-  if (! conn || conn->fd < 0)
+  if (! conn || conn->fd < 0 || ! buf)
     return -1;
 
   conn->jni_env = env;
@@ -180,7 +162,7 @@ Java_com_caucho_vfs_JniStream_readNonBlockNative(JNIEnv *env,
   if (sublen < 0)
     return sublen;
 
-  set_byte_array_region(env, buf, offset, sublen, buffer);
+  resin_set_byte_array_region(env, buf, offset, sublen, buffer);
 
   return sublen;
 }
@@ -211,7 +193,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
     else
       sublen = sizeof(buffer);
 
-    get_byte_array_region(env, buf, offset, sublen, buffer);
+    resin_get_byte_array_region(env, buf, offset, sublen, buffer);
     
     result = conn->ops->write(conn, buffer, sublen);
     
@@ -254,7 +236,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative2(JNIEnv *env,
   while (sizeof(buffer) < len1) {
     sublen = sizeof(buffer);
     
-    get_byte_array_region(env, buf1, off1, sublen, buffer);
+    resin_get_byte_array_region(env, buf1, off1, sublen, buffer);
       
     sublen = conn->ops->write(conn, buffer, sublen);
 
@@ -268,7 +250,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative2(JNIEnv *env,
     write_length += sublen;
   }
 
-  get_byte_array_region(env, buf1, off1, len1, buffer);
+  resin_get_byte_array_region(env, buf1, off1, len1, buffer);
   buffer_offset = len1;
 
   while (buffer_offset + len2 > 0) {
@@ -279,7 +261,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative2(JNIEnv *env,
     else
       sublen = sizeof(buffer) - buffer_offset;
 
-    get_byte_array_region(env, buf2, off2, sublen,
+    resin_get_byte_array_region(env, buf2, off2, sublen,
 			       buffer + buffer_offset);
       
     result = conn->ops->write(conn, buffer, buffer_offset + sublen);
@@ -433,9 +415,9 @@ Java_com_caucho_vfs_JniSocketImpl_getCipherBits(JNIEnv *env,
 #ifdef POLL
 JNIEXPORT jboolean JNICALL
 Java_com_caucho_vfs_JniSocketImpl_nativeReadNonBlock(JNIEnv *env,
-                                                  jobject obj,
-                                                  jlong conn_fd,
-						  jint ms)
+                                                     jobject obj,
+                                                     jlong conn_fd,
+                                                     jint ms)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   struct pollfd poll_item[1];
@@ -954,6 +936,9 @@ socket_fill_address(JNIEnv *env, jobject obj,
   char temp_buf[1024];
   struct sockaddr_in *sin;
 
+  if (! local_addr || ! remote_addr)
+    return;
+
   if (ss->_isSecure) {
     jboolean is_secure = conn->sock != 0 && conn->ssl_cipher != 0;
     
@@ -964,7 +949,7 @@ socket_fill_address(JNIEnv *env, jobject obj,
     /* the 16 must match JniSocketImpl 16 bytes ipv6 */
     get_address(conn->server_sin, temp_buf, 16);
 
-    set_byte_array_region(env, local_addr, 0, 16, temp_buf);
+    resin_set_byte_array_region(env, local_addr, 0, 16, temp_buf);
   }
 
   if (ss->_localPort) {
@@ -980,7 +965,7 @@ socket_fill_address(JNIEnv *env, jobject obj,
     /* the 16 must match JniSocketImpl 16 bytes ipv6 */
     get_address(conn->client_sin, temp_buf, 16);
 
-    set_byte_array_region(env, remote_addr, 0, 16, temp_buf);
+    resin_set_byte_array_region(env, remote_addr, 0, 16, temp_buf);
   }
 
   if (ss->_remotePort) {
@@ -1034,7 +1019,7 @@ Java_com_caucho_vfs_JniSocketImpl_getClientCertificate(JNIEnv *env,
   int sublen;
   char buffer[8192];
 
-  if (! conn)
+  if (! conn || ! buf)
     return -1;
 
   if (length < 8192)
@@ -1048,7 +1033,7 @@ Java_com_caucho_vfs_JniSocketImpl_getClientCertificate(JNIEnv *env,
   if (sublen < 0 || length < sublen)
     return sublen;
 
-  set_byte_array_region(env, buf, offset, sublen, buffer);
+  resin_set_byte_array_region(env, buf, offset, sublen, buffer);
 
   return sublen;
 }

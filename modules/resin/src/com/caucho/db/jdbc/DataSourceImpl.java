@@ -97,7 +97,7 @@ public class DataSourceImpl implements DataSource {
     _database.setRemoveOnError(remove);
   }
   
-  public void setFlushDirtyBlocksOnWrite(boolean isFlush)
+  public void setFlushDirtyBlocksOnCommit(boolean isFlush)
   {
     _database.setFlushDirtyBlocksOnCommit(isFlush);
   }

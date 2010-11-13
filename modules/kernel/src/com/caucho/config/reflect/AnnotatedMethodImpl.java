@@ -35,7 +35,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -62,7 +61,7 @@ public class AnnotatedMethodImpl<T>
   {
     this(null, null, method);
   }
-  
+
   public AnnotatedMethodImpl(AnnotatedType<T> declaringType,
                              Annotated annotated,
                              Method method)
@@ -75,7 +74,8 @@ public class AnnotatedMethodImpl<T>
                              Method method,
                              Annotation []annotations)
   {
-    super(method.getGenericReturnType(), annotated, annotations);
+    super(createBaseType(declaringType, method.getGenericReturnType()),
+          annotated, annotations);
 
     _declaringType = declaringType;
     _method = method;
@@ -179,6 +179,13 @@ public class AnnotatedMethodImpl<T>
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _method + "]";
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    sb.append(_method);
+    sb.append("]");
+    
+    return sb.toString(); 
   }
 }

@@ -315,11 +315,7 @@ public class SelectQuery extends Query {
       FromItem []fromItems = getFromItems();
       int rowLength = fromItems.length;
 
-      context.lock();
-
       boolean value = nextTuple(rows, rowLength, context, xa);
-
-      context.unlock();
 
       return value;
     } catch (IOException e) {

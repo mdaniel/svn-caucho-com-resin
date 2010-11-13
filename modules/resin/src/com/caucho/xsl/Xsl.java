@@ -344,7 +344,7 @@ public class Xsl extends AbstractStylesheetFactory {
 
       e.printStackTrace();
     } finally {
-      System.exit(0);
+      System.exit(1);
     }
   }
 

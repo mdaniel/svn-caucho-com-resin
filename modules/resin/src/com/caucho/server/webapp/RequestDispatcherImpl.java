@@ -265,8 +265,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     boolean isValid = false;
 
     subRequest.startRequest();
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
 
     try {
+      // server/1s30
+      thread.setContextClassLoader(_webApp.getClassLoader());
+      
       invocation.service(topRequest, topResponse);
 
       isValid = true;
@@ -283,6 +288,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       if (isValid) {
         finishResponse(topResponse);
       }
+      
+      thread.setContextClassLoader(loader);
     }
   }
 
