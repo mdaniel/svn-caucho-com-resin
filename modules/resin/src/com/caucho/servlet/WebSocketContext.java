@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -53,9 +54,17 @@ public interface WebSocketContext {
     throws IOException;
 
   /**
-   * Returns the output stream.
+   * Returns the output stream for a binary message.
+   * The message will complete when the OutputStream is closed.
    */
-  public OutputStream getOutputStream()
+  public OutputStream startBinaryMessage()
+    throws IOException;
+
+  /**
+   * Returns the output stream for a binary message.
+   * The message will complete when the Writer is closed.
+   */
+  public PrintWriter startTextMessage()
     throws IOException;
 
   /**

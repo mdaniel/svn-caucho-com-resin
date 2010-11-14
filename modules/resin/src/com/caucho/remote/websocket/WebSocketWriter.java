@@ -29,131 +29,230 @@
 
 package com.caucho.remote.websocket;
 
-import com.caucho.vfs.*;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 
 /**
- * WebSocketWriter writes a single WebSocket packet.
+ * WebSocketOutputStream writes a single WebSocket packet.
  *
  * <code><pre>
- * 0x00 utf-8 data 0xff
  * </pre></code>
  */
-public class WebSocketWriter extends Writer {
+public class WebSocketWriter extends Writer
+  implements WebSocketConstants
+{
   private OutputStream _os;
+  private byte []_buffer;
+  private int _offset;
+  
+  private MessageState _state = MessageState.IDLE;
+  private boolean _isAutoFlush = true;
 
-  public WebSocketWriter()
-  {
-  }
-
-  public WebSocketWriter(OutputStream os)
-    throws IOException
-  {
-    init(os);
-  }
-
-  public void init(OutputStream os)
+  public WebSocketWriter(OutputStream os, byte []buffer)
     throws IOException
   {
     _os = os;
-
-    os.write(0x00);
+    _buffer = buffer;
   }
-
-  public void write(int ch)
+  
+  public void init()
     throws IOException
   {
-    OutputStream os = _os;
+    if (_state != MessageState.IDLE)
+      throw new IllegalStateException(String.valueOf(_state));
     
+    _state = MessageState.FIRST;
+    
+    if (_buffer.length <= _offset) {
+      _os.flush();
+    }
+    
+    _offset = 4;
+  }
+
+  @Override
+  public void write(int ch)
+  {
+    if (! _state.isActive())
+      throw new IllegalStateException(String.valueOf(_state));
+    
+    byte []buffer = _buffer;
+
+    if (_offset == buffer.length) {
+      complete(false);
+    }
+
     if (ch < 0x80)
-      os.write(ch);
+      buffer[_offset++] = (byte) ch;
     else if (ch < 0x800) {
-      os.write(0xc0 | (ch >> 6));
-      os.write(0x80 | (ch & 0x3f));
+      if (buffer.length <= _offset + 1) {
+        complete(false);
+      }
+      
+      buffer[_offset++] = (byte) (0xc0 + (ch >> 6)); 
+      buffer[_offset++] = (byte) (0x80 + (ch & 0x3f));
     }
     else {
-      os.write(0xe0 | ((ch >> 12) & 0x1f));
-      os.write(0x80 | ((ch >> 6) & 0x3f));
-      os.write(0x80 | (ch & 0x3f));
+      if (buffer.length <= _offset + 2) { 
+        complete(false);
+      }
+      
+      buffer[_offset++] = (byte) (0xe0 + (ch >> 12)); 
+      buffer[_offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+      buffer[_offset++] = (byte) (0x80 + (ch & 0x3f));
     }
   }
 
-  public void write(char []buf)
-    throws IOException
+  @Override
+  public void write(char []buffer, int offset, int length)
   {
-    write(buf, 0, buf.length);
-  }
-  
-  public void write(char []buf, int offset, int length)
-    throws IOException
-  {
-    OutputStream os = _os;
-
-    int end = offset + length;
+    if (! _state.isActive())
+      throw new IllegalStateException(String.valueOf(_state));
     
-    for (; offset < end; offset++) {
-      int ch = buf[offset];
+    byte []wsBuffer = _buffer;
+    int wsOffset = _offset;
+
+    for (; length > 0; length--) {
+      if (wsOffset + 2 >= wsBuffer.length) {
+        _offset = wsOffset;
+        complete(false);
+      }
       
+      char ch = buffer[offset++];
+
       if (ch < 0x80)
-        os.write(ch);
+        wsBuffer[wsOffset++] = (byte) ch;
       else if (ch < 0x800) {
-        os.write(0xc0 | (ch >> 6));
-        os.write(0x80 | (ch & 0x3f));
+        wsBuffer[wsOffset++] = (byte) (0xc0 + (ch >> 6)); 
+        wsBuffer[wsOffset++] = (byte) (0x80 + (ch & 0x3f));
       }
       else {
-        os.write(0xe0 | ((ch >> 12) & 0x1f));
-        os.write(0x80 | ((ch >> 6) & 0x3f));
-        os.write(0x80 | (ch & 0x3f));
+        wsBuffer[wsOffset++] = (byte) (0xe0 + (ch >> 12)); 
+        wsBuffer[wsOffset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+        wsBuffer[wsOffset++] = (byte) (0x80 + (ch & 0x3f));
       }
     }
-  }
-
-  public void write(String s)
-    throws IOException
-  {
-    write(s, 0, s.length());
-  }
-  
-  public void write(String s, int offset, int length)
-    throws IOException
-  {
-    OutputStream os = _os;
-
-    int end = offset + length;
     
-    for (; offset < end; offset++) {
-      int ch = s.charAt(offset);
-      
-      if (ch < 0x80)
-        os.write(ch);
-      else if (ch < 0x800) {
-        os.write(0xc0 | (ch >> 6));
-        os.write(0x80 | (ch & 0x3f));
-      }
-      else {
-        os.write(0xe0 | ((ch >> 12) & 0x1f));
-        os.write(0x80 | ((ch >> 6) & 0x3f));
-        os.write(0x80 | (ch & 0x3f));
-      }
-    }
+    _offset = wsOffset;
   }
 
+  @Override
   public void flush()
-    throws IOException
   {
-    if (_os != null)
+    try {
+      complete(false);
+
       _os.flush();
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
+  @Override
   public void close()
+  {
+    if (_state == MessageState.IDLE)
+      return;
+
+    try {
+      complete(true);
+    
+      _state = MessageState.IDLE;
+    
+      if (_isAutoFlush)
+        _os.flush();
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  private void complete(boolean isFinal)
+  {
+    try {
+      byte []buffer = _buffer;
+
+      int offset = _offset;
+      _offset = 4;
+      int length = offset - 4;
+      
+      // don't flush empty chunk
+      if (length == 0 && ! isFinal)
+        return;
+
+      int code1;
+
+      if (_state == MessageState.FIRST)
+        code1 = OP_TEXT;
+      else
+        code1 = OP_CONT;
+
+      _state = MessageState.CONT;
+
+      if (isFinal)
+        code1 |= FLAG_FIN;
+
+      if (length < 0x7e) {
+        buffer[2] = (byte) code1;
+        buffer[3] = (byte) length;
+
+        _os.write(buffer, 2, offset - 2);
+      }
+      else {
+        buffer[0] = (byte) code1;
+        buffer[1] = (byte) 0x7e;
+        buffer[2] = (byte) (length >> 8);
+        buffer[3] = (byte) (length);
+
+        _os.write(buffer, 0, offset);
+      }
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+  
+  public void destroy()
     throws IOException
   {
-    OutputStream os = _os;
-    _os = null;
-
-    if (os != null) {
-      os.write(0xff);
+    _state = MessageState.DESTROYED;
+  }
+  
+  enum MessageState {
+    IDLE,
+    FIRST {
+      @Override
+      public boolean isActive() { return true; } 
+    },
+    CONT {
+      @Override
+      public boolean isActive() { return true; }
+    },
+    DESTROYED;
+    
+    public boolean isActive()
+    {
+      return false;
+    }
+  };
+  
+  static class DummyWriter extends Writer {
+    public void write(int ch) throws IOException
+    {
+      
+    }
+    
+    public void write(char []data, int offset, int length) throws IOException
+    {
+      
+    }
+    
+    public void flush()
+    {
+      
+    }
+    
+    public void close()
+    {
     }
   }
 }

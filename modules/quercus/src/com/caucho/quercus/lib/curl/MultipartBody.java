@@ -49,7 +49,7 @@ import com.caucho.vfs.TempBuffer;
 
 public class MultipartBody extends PostBody
 {
-  private static final L10N L = new L10N(HttpRequest.class);
+  private static final L10N L = new L10N(CurlHttpRequest.class);
   
   private ArrayList<MultipartEntry> _postItems
     = new ArrayList<MultipartEntry>();

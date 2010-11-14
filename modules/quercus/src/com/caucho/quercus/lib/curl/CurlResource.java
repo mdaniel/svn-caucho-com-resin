@@ -748,7 +748,7 @@ public class CurlResource
   {
     init();
 
-    HttpRequest httpRequest = HttpRequest.getRequest(this);
+    CurlHttpRequest httpRequest = CurlHttpRequest.getRequest(this);
 
     env.addCleanup(httpRequest);
 

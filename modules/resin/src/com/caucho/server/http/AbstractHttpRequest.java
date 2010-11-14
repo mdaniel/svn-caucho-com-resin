@@ -102,6 +102,7 @@ public abstract class AbstractHttpRequest
 
   private static final char []CONTINUE_100 = "100-continue".toCharArray();
   private static final char []CLOSE = "close".toCharArray();
+  private static final char []KEEPALIVE = "keepalive".toCharArray();
 
   private static final boolean []TOKEN;
   private static final boolean []VALUE;
@@ -639,8 +640,8 @@ public abstract class AbstractHttpRequest
     case 'C':
       if (keyLen == CONNECTION.length
           && match(keyBuf, keyOff, keyLen, CONNECTION)) {
-        if (match(value.getBuffer(), value.getOffset(), value.getLength(),
-                  CLOSE)) {
+        if (! match(value.getBuffer(), value.getOffset(), value.getLength(),
+                    KEEPALIVE)) {
           handleConnectionClose();
         }
       }

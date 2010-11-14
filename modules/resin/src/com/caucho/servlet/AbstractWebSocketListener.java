@@ -38,44 +38,66 @@ import java.io.Reader;
  *
  * The read stream should only be read by the <code>onRead</code> thread.
  *
- * The write stream must be synchronized if it's ever written by a thread
+ * The write stream must be synchronized if it's every written by a thread
  * other than the <code>serviceRead</code>
  */
-public interface WebSocketListener
+abstract public class AbstractWebSocketListener implements WebSocketListener
 {
   /**
-   * Called after the server sends its handshake response.
+   * Called when the connection is established
    */
+  @Override
   public void onStart(WebSocketContext context)
-    throws IOException;
-
+    throws IOException
+  {
+  }
+  
   /**
-   * Called after the handshake completes.
+   * Called when the handshake completes
    */
+  @Override
   public void onHandshakeComplete(WebSocketContext context, boolean isSuccess)
-    throws IOException;
+    throws IOException
+  {
+  }
 
   /**
    * Called when a binary message is available
    */
+  @Override
   public void onReadBinary(WebSocketContext context, InputStream is)
-    throws IOException;
+    throws IOException
+  {
+      throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Called when a text message is available
    */
+  @Override
   public void onReadText(WebSocketContext context, Reader is)
-    throws IOException;
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Called when the connection closes
    */
+  @Override
   public void onComplete(WebSocketContext context)
-    throws IOException;
+    throws IOException
+  {
+    
+  }
 
   /**
    * Called when the connection times out
    */
+  @Override
   public void onTimeout(WebSocketContext context)
-    throws IOException;
+    throws IOException
+  {
+    
+  }
 }

@@ -38,69 +38,73 @@ import java.io.*;
  * WebSocketInputStream reads a single WebSocket packet.
  *
  * <code><pre>
- * 0x80 0x8X 0x8X 0x0X binarydata
+ * +-+------+---------+-+---------+
+ * |F|xxx(3)|opcode(4)|R|len(7)   |
+ * +-+------+---------+-+---------+
+ * 
+ * OPCODES
+ *   0 - close
+ *   1 - hello
+ *   2 - binary
+ *   3 - text
+ *   4 - ping
+ *   5 - pong
  * </pre></code>
  */
-public class WebSocketInputStream extends InputStream {
+public class WebSocketInputStream extends InputStream 
+  implements WebSocketConstants
+{
   private static final L10N L = new L10N(WebSocketInputStream.class);
   
   private InputStream _is;
-  private int _code;
-  private int _offset;
-  private int _length;
-
-  public WebSocketInputStream()
-  {
-  }
+  
+  private boolean _isFinal;
+  private long _length;
 
   public WebSocketInputStream(InputStream is)
     throws IOException
   {
-    init(is);
+    _is = is;
   }
 
-  public void init(InputStream is)
+  public void init(boolean isFinal, long length)
     throws IOException
   {
-    _is = is;
-
-    readChunkLength();
+    _isFinal = isFinal;
+    _length = length;
   }
 
-  public int getCode()
-  {
-    return _code;
-  }
-
-  public int getLength()
+  public long getLength()
   {
     return _length;
   }
 
+  @Override
   public int read()
     throws IOException
   {
     InputStream is = _is;
-
-    if (is == null)
-      return -1;
-
-    if (_length <= _offset) {
-      if (! readChunkLength())
-        return -1;
+    
+    if (_length == 0 && ! _isFinal) {
+      readFrameHeader();
     }
 
-    int ch = is.read();
-    _offset++;
-    return ch;
+    if (_length > 0) {
+      int ch = is.read();
+      _length--;
+      return ch;
+    }
+    else
+      return -1;
   }
 
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
+    /*
     InputStream is = _is;
 
-    if (_length <= _offset) {
+    if (_length <= 0) {
       if (! readChunkLength())
         return -1;
     }
@@ -123,43 +127,62 @@ public class WebSocketInputStream extends InputStream {
       close();
       return -1;
     }
+    */
+    
+    return -1;
   }
 
-  protected boolean readChunkLength()
+  private void readFrameHeader()
     throws IOException
   {
     InputStream is = _is;
 
-    if (is == null)
-      return false;
+    if (_isFinal || _length > 0)
+      throw new IllegalStateException();
     
-    int ch = is.read();
+    while (! _isFinal && _length == 0) {
+      int frame1 = is.read();
+      int frame2 = is.read();
 
-    if ((ch & 0x80) != 0x80)
-      throw new IOException(L.l("{0}: expected 0x80 at '0x{1}' because WebSocket binary protocol expects 0x80 at beginning",
-                                this, Integer.toHexString(ch & 0xffff)));
+      boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
+      int op = frame1 & 0xf;
 
-    _code = ch;
+      if (op != OP_CONT) {
+        throw new IOException(L.l("{0}: expected op=CONT '0x{1}' because WebSocket binary protocol expects 0x80 at beginning",
+                                  this, Integer.toHexString(frame1 & 0xffff)));
+      }
 
-    int length = 0;
-    do {
-      ch = is.read();
-      length = (length << 7) + (ch & 0x7f);
-    } while ((ch & 0x80) == 0x80);
+      _isFinal = isFinal;
 
-    _length = length;
-    _offset = 0;
+      long length = frame2 & 0x7f;
 
-    if (length == 0)
-      close();
+      if (length < 0x7e) {
+      }
+      else if (length == 0x7e) {
+        length = ((((long) is.read()) << 8)
+            + (((long) is.read())));
+      }
+      else {
+        length = ((((long) is.read()) << 56)
+            + (((long) is.read()) << 48)
+            + (((long) is.read()) << 40)
+            + (((long) is.read()) << 32)
+            + (((long) is.read()) << 24)
+            + (((long) is.read()) << 16)
+            + (((long) is.read()) << 8)
+            + (((long) is.read())));
+      }
 
-    return length > 0;
+      _length = length;
+    }
   }
 
+  @Override
   public void close()
     throws IOException
   {
-    InputStream is = _is;
-    _is = null;
+    while (_length > 0 && !_isFinal) {
+      skip(_length);
+    }
   }
 }

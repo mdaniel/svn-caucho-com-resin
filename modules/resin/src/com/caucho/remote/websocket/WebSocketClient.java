@@ -245,9 +245,14 @@ public class WebSocketClient {
       return _is;
     }
 
-    public OutputStream getOutputStream()
+    public OutputStream startBinaryMessage()
     {
       return _os;
+    }
+
+    public PrintWriter startTextMessage()
+    {
+      throw new UnsupportedOperationException();
     }
 
     public void complete()
@@ -293,7 +298,7 @@ public class WebSocketClient {
       // _listener.onStart(this);
 
       while (! isClosed() && _is.waitForRead()) {
-        _listener.onRead(this);
+        _listener.onReadBinary(this, _is);
       }
     }
   }

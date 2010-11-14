@@ -40,7 +40,7 @@ import java.net.ProtocolException;
  * Represents a PUT Http request.
  */
 public class HttpPutRequest
-  extends HttpRequest
+  extends CurlHttpRequest
 {
   public HttpPutRequest(CurlResource curlResource)
   {

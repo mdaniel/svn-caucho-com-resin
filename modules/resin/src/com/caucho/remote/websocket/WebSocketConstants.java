@@ -24,19 +24,31 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Nam Nguyen
+ * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib.curl;
+package com.caucho.remote.websocket;
+
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import java.io.*;
 
 /**
- * Represents a GET Http request.
+ * WebSocketOutputStream writes a single WebSocket packet.
+ *
+ * <code><pre>
+ * 0x84 0x8X 0x8X 0x0X binarydata
+ * </pre></code>
  */
-public class HttpGetRequest
-  extends CurlHttpRequest
-{
-  public HttpGetRequest(CurlResource curlResource)
-  {
-    super(curlResource);
-  }
+public interface WebSocketConstants {
+  public static final int FLAG_FIN = 0x80;
+  
+  public static final int OP_CONT = 0x00;
+  public static final int OP_CLOSE = 0x01;
+  public static final int OP_PING = 0x02;
+  public static final int OP_PONG = 0x03;
+  public static final int OP_TEXT = 0x04;
+  public static final int OP_BINARY = 0x05;
+  public static final int OP_HELLO = 0x0F;
 }

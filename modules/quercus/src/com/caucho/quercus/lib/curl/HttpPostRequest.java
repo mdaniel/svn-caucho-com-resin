@@ -39,7 +39,7 @@ import java.net.ProtocolException;
  * Represents a POST Http request.
  */
 public class HttpPostRequest
-  extends HttpRequest
+  extends CurlHttpRequest
 {
   private PostBody _body;
   

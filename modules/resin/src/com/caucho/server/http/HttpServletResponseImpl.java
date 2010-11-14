@@ -568,6 +568,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     // server/2h0g
     if (code != SC_OK && code != SC_NOT_MODIFIED)
       killCache();
+    
+    if (code == SC_BAD_REQUEST || code == SC_SWITCHING_PROTOCOLS) {
+      _request.killKeepalive();
+    }
 
     _status = code;
     _statusMessage = message;

@@ -31,6 +31,7 @@ package com.caucho.remote;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,6 +55,7 @@ import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
+import com.caucho.servlet.AbstractWebSocketListener;
 import com.caucho.servlet.WebSocketContext;
 import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.L10N;
@@ -159,7 +161,7 @@ public class HmtpServlet extends GenericServlet {
     webSocket.setTimeout(30 * 60 * 1000L);
   }
   
-  class WebSocketHandler implements WebSocketListener {
+  class WebSocketHandler extends AbstractWebSocketListener {
     private String _ipAddress;
     
     private HmtpReader _in;
@@ -179,7 +181,7 @@ public class HmtpServlet extends GenericServlet {
     public void onStart(WebSocketContext context) throws IOException
     {
       _in = new HmtpReader(context.getInputStream());
-      _out = new HmtpWriter(context.getOutputStream());
+      _out = new HmtpWriter(context.startBinaryMessage());
       _linkStream = new HempMemoryQueue(_out, _broker.getBrokerStream(), 1);
       
       _linkService = new ServerLinkActor(_linkStream, _broker, _authManager,
@@ -195,18 +197,27 @@ public class HmtpServlet extends GenericServlet {
     }
 
     @Override
-    public void onRead(WebSocketContext context) throws IOException
+    public void onReadBinary(WebSocketContext context,
+                             InputStream is)
+      throws IOException
     {
-      InputStream is = context.getInputStream();
-      
-      while (_in.readPacket(_brokerStream)
-            && is.available() > 0) {
-      }
+      _in.readPacket(_brokerStream);
     }
 
     @Override
     public void onTimeout(WebSocketContext context) throws IOException
     {
+    }
+
+    /* (non-Javadoc)
+     * @see com.caucho.servlet.WebSocketListener#onReadText(com.caucho.servlet.WebSocketContext, java.io.Reader)
+     */
+    @Override
+    public void onReadText(WebSocketContext context, Reader is)
+        throws IOException
+    {
+      // TODO Auto-generated method stub
+      
     }
   }
 }

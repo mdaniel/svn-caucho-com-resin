@@ -234,7 +234,7 @@ public class WebSocketModule
     
     // XXX: validate path
 
-    WebSocketListener listener = new WebSocketListener(env, path);
+    QuercusWebSocketListener listener = new QuercusWebSocketListener(env, path);
 
     SocketLinkDuplexController context = null;//request.startDuplex(listener);
 
@@ -245,11 +245,11 @@ public class WebSocketModule
     return context;
   }
 
-  public static class WebSocketListener implements SocketLinkDuplexListener {
+  public static class QuercusWebSocketListener implements SocketLinkDuplexListener {
     private Env _env;
     private StringValue _path;
 
-    WebSocketListener(Env env, StringValue path)
+    QuercusWebSocketListener(Env env, StringValue path)
     {
       _env = env;
       _path = path;

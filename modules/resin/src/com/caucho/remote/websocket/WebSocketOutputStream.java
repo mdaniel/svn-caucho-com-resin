@@ -38,62 +38,68 @@ import java.io.*;
  * WebSocketOutputStream writes a single WebSocket packet.
  *
  * <code><pre>
- * 0x80 0x8X 0x8X 0x0X binarydata
+ * 0x84 0x8X 0x8X 0x0X binarydata
  * </pre></code>
  */
-public class WebSocketOutputStream extends OutputStream {
+public class WebSocketOutputStream extends OutputStream 
+  implements WebSocketConstants
+{
   private static final L10N L = new L10N(WebSocketOutputStream.class);
-
+  
   private OutputStream _os;
   private TempBuffer _tBuf;
   private byte []_buffer;
   private int _offset;
-
-  public WebSocketOutputStream()
-  {
-  }
+  
+  private MessageState _state = MessageState.IDLE;
+  private boolean _isAutoFlush = true;
 
   public WebSocketOutputStream(OutputStream os)
-    throws IOException
-  {
-    init(os);
-  }
-
-  public void init(OutputStream os)
     throws IOException
   {
     _os = os;
 
     _tBuf = TempBuffer.allocate();
     _buffer = _tBuf.getBuffer();
-    _offset = 3;
+  }
+  
+  public void init()
+  {
+    if (_state != MessageState.IDLE)
+      throw new IllegalStateException(String.valueOf(_state));
+    
+    _state = MessageState.FIRST;
+    
+    _offset = 4;
   }
 
+  @Override
   public void write(int ch)
     throws IOException
   {
+    if (! _state.isActive())
+      throw new IllegalStateException(String.valueOf(_state));
+    
     byte []buffer = _buffer;
 
-    if (buffer == null)
-      return;
-
     if (_offset == buffer.length)
-      flush();
+      complete(false);
 
     buffer[_offset++] = (byte) ch;
   }
 
+  @Override
   public void write(byte []buffer, int offset, int length)
     throws IOException
   {
+    if (! _state.isActive())
+      throw new IllegalStateException(String.valueOf(_state));
+    
     byte []wsBuffer = _buffer;
-
-    if (wsBuffer == null)
-      return;
 
     while (length > 0) {
       if (_offset == wsBuffer.length)
-        flush();
+        complete(false);
 
       int sublen = wsBuffer.length - _offset;
       if (length < sublen)
@@ -107,60 +113,93 @@ public class WebSocketOutputStream extends OutputStream {
     }
   }
 
-  public void complete()
-    throws IOException
-  {
-    byte []buffer = _buffer;
-
-    if (buffer == null)
-      return;
-
-    int offset = _offset;
-    _offset = 3;
-
-    // don't flush empty chunk
-    if (offset == 3)
-      return;
-
-    int length = offset - 3;
-
-    buffer[0] = (byte) 0x80;
-    buffer[1] = (byte) (0x80 + ((length >> 7) & 0x3f));
-    buffer[2] = (byte) (0x00 + (length & 0x3f));
-
-    _os.write(buffer, 0, offset);
-  }
-
+  @Override
   public void flush()
     throws IOException
   {
-    complete();
+    complete(false);
 
     _os.flush();
   }
 
+  @Override
   public void close()
     throws IOException
   {
-    flush();
+    if (_state == MessageState.IDLE)
+      return;
+    
+    complete(true);
+    
+    _state = MessageState.IDLE;
+    
+    if (_isAutoFlush)
+      _os.flush();
+  }
 
-    OutputStream os = _os;
-    _os = null;
-
+  private void complete(boolean isFinal)
+    throws IOException
+  {
     byte []buffer = _buffer;
-    _buffer = null;
 
-    TempBuffer tBuf = _tBuf;
-    _tBuf = null;
+    int offset = _offset;
+    _offset = 4;
 
-    if (buffer == null)
+    // don't flush empty chunk
+    if (offset == 4 && ! isFinal)
       return;
 
-    buffer[0] = (byte) 0x80;
-    buffer[1] = (byte) 0x00;
+    int length = offset - 4;
+    
+    int code1;
+    
+    if (_state == MessageState.FIRST)
+      code1 = OP_BINARY;
+    else
+      code1 = OP_CONT;
+    
+    _state = MessageState.CONT;
+    
+    if (isFinal)
+      code1 |= FLAG_FIN;
 
-    os.write(buffer, 0, 2);
-
-    TempBuffer.free(tBuf);
+    if (length < 0x7e) {
+      buffer[2] = (byte) code1;
+      buffer[3] = (byte) (length);
+      
+      _os.write(buffer, 2, offset - 2);
+    }
+    else if (length >= 0x7e) {
+      buffer[0] = (byte) code1;
+      buffer[1] = (byte) 0x7f;
+      buffer[2] = (byte) (length >> 8);
+      buffer[3] = (byte) (length);
+      
+      _os.write(buffer, 0, offset);
+    }
   }
+  
+  public void destroy()
+    throws IOException
+  {
+    _state = MessageState.DESTROYED;
+  }
+  
+  enum MessageState {
+    IDLE,
+    FIRST {
+      @Override
+      public boolean isActive() { return true; } 
+    },
+    CONT {
+      @Override
+      public boolean isActive() { return true; }
+    },
+    DESTROYED;
+    
+    public boolean isActive()
+    {
+      return false;
+    }
+  };
 }

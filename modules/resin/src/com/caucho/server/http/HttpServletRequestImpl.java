@@ -60,6 +60,7 @@ import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import com.caucho.config.scope.ScopeRemoveListener;
@@ -1875,32 +1876,81 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   // WebSocket
   //
 
+  @Override
   public WebSocketContext startWebSocket(WebSocketListener listener)
+    throws IOException
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " upgrade HTTP to WebSocket " + listener);
+    
+    String method = getMethod();
+    
+    if (! "WEBSOCKET".equals(method)) {
+      getResponse().sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+      
+      throw new IllegalStateException(L.l("HTTP Method must be 'WEBSOCKET', because the WebSocket protocol requires an Upgrade: WebSocket header.\n  remote-IP: {0}",
+                                          getRemoteAddr()));
+    }
 
     String connection = getHeader("Connection");
     String upgrade = getHeader("Upgrade");
 
     if (! "WebSocket".equals(upgrade)) {
-      throw new IllegalStateException(L.l("HTTP Upgrade header '{0}' must be 'WebSocket', because the WebSocket protocol requires an Upgrade: WebSocket header.",
-                                          upgrade));
+      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      
+      throw new IllegalStateException(L.l("HTTP Upgrade header '{0}' must be 'WebSocket', because the WebSocket protocol requires an Upgrade: WebSocket header.\n  remote-IP: {1}",
+                                          upgrade,
+                                          getRemoteAddr()));
     }
 
     if (! "Upgrade".equalsIgnoreCase(connection)) {
-      throw new IllegalStateException(L.l("HTTP Connection header '{0}' must be 'Upgrade', because the WebSocket protocol requires a Connection: Upgrade header.",
-                                          connection));
+      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      
+      throw new IllegalStateException(L.l("HTTP Connection header '{0}' must be 'Upgrade', because the WebSocket protocol requires a Connection: Upgrade header.\n  remote-IP: {1}",
+                                          connection,
+                                          getRemoteAddr()));
     }
 
     String origin = getHeader("Origin");
 
     if (origin == null) {
-      throw new IllegalStateException(L.l("HTTP Origin header is required, because the WebSocket protocol requires an Origin header."));
+      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      
+      throw new IllegalStateException(L.l("HTTP Origin header is required, because the WebSocket protocol requires an Origin header.\n  remote-IP: {0}",
+                                          getRemoteAddr()));
     }
+    
+    String cNonceString = getHeader("Sec-WebSocket-Nonce");
 
+    if (cNonceString == null) {
+      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      
+      throw new IllegalStateException(L.l("Sec-WebSocket-Nonce header is missing, but it is required by the WebSocket protocol.\n  remote-IP: {0}",
+                                          getRemoteAddr()));
+    }
+    
+    byte []cnonce = parseWebSocketNonce(cNonceString);
+    
+    if (cnonce == null) {
+      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      
+      throw new IllegalStateException(L.l("Sec-WebSocket-Nonce must have an 8 byte hex nonce, but '{0}' received.\n  remote-IP: {1}",
+                                          cNonceString,
+                                          getRemoteAddr()));
+    }
+    
+    if (cnonce.length != 8) {
+      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      
+      throw new IllegalStateException(L.l("Sec-WebSocket-Nonce must have an 8 byte nonce, but '{0}' received.\n  remote-IP: {1}",
+                                          cNonceString,
+                                          getRemoteAddr()));
+    }
+    
     _response.setStatus(101, "Web Socket Protocol Handshake");
     _response.setHeader("Upgrade", "WebSocket");
+
+    String hash = hashWebSocket(cnonce, "WebSocket");
 
     _response.setContentLength(0);
 
@@ -1932,24 +1982,100 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       _response.setHeader("WebSocket-Protocol", protocol);
 
     WebSocketContextImpl duplex
-      = new WebSocketContextImpl(this, _response, listener);
-
+      = new WebSocketContextImpl(this, _response, listener,
+                                 cnonce);
+    
     SocketLinkDuplexController controller = _request.startDuplex(duplex);
     duplex.setController(controller);
     
+    boolean isValid = false;
     try {
       _response.getOutputStream().flush();
+      
+      duplex.sendHello();
+      duplex.flush();
+
+      duplex.onStart();
+    
+      duplex.readHello();
+      
+      isValid = true;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
-    }
-
-    try {
-      duplex.onStart();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    } finally {
+      duplex.onHandshakeComplete(isValid);
     }
 
     return duplex;
+  }
+  
+  private String hashWebSocket(byte []nonce, String key)
+  {
+    int len = nonce.length;
+    
+    if (key.length() < len)
+      len = key.length();
+    
+    char []buffer = new char[2 * len];
+    
+    for (int i = 0; i < len; i++) {
+      int a = nonce[i];
+      int b = key.charAt(i);
+      
+      int value = a ^ b;
+      
+      buffer[2 * i]     = toHex(value >> 4);
+      buffer[2 * i + 1] = toHex(value);
+    }
+    
+    return new String(buffer);
+  }
+  
+  private char toHex(int value)
+  {
+    value = value & 0xf;
+    
+    if (value < 10)
+      return (char) ('0' + value);
+    else
+      return (char) ('a' + value - 10);
+  }
+  
+  private byte[]parseWebSocketNonce(String nonceString)
+  {
+    int len = nonceString.length() / 2;
+    
+    if (len < 1)
+      throw new IllegalStateException(L.l("Cnonce is too small"));
+    
+    byte []nonce = new byte[len];
+    
+    for (int i = 0; i < len; i++) {
+      char d1 = nonceString.charAt(2 * i);
+      char d2 = nonceString.charAt(2 * i + 1);
+      
+      nonce[i] = (byte) (16 * decodeHex(d1) + decodeHex(d2));
+    }
+    
+    for (int j = len; j < nonce.length; j++) {
+      nonce[j] = nonce[j % len]; 
+    }
+    
+    return nonce;
+  }
+  
+  private int decodeHex(char ch)
+  {
+    if ('0' <= ch && ch <= '9')
+      return ch - '0';
+    else if ('a' <= ch && ch <= 'f')
+      return ch - 'a' + 10;
+    else if ('A' <= ch && ch <= 'F')
+      return ch - 'A' + 10;
+    else
+      return 0;
   }
 
   int getAvailable()
@@ -2234,97 +2360,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       }
 
       return _value;
-    }
-  }
-
-  static class WebSocketContextImpl
-    implements WebSocketContext, SocketLinkDuplexListener
-  {
-    private final HttpServletRequestImpl _request;
-    private final WebSocketListener _listener;
-
-    private SocketLinkDuplexController _controller;
-
-    WebSocketContextImpl(HttpServletRequestImpl request,
-                         HttpServletResponseImpl response,
-                         WebSocketListener listener)
-    {
-      _request = request;
-      _listener = listener;
-    }
-
-    public void setController(SocketLinkDuplexController controller)
-    {
-      _controller = controller;
-    }
-
-    public void setTimeout(long timeout)
-    {
-      _controller.setIdleTimeMax(timeout);
-    }
-
-    public long getTimeout()
-    {
-      return _controller.getIdleTimeMax();
-    }
-
-    public InputStream getInputStream()
-      throws IOException
-    {
-      return _controller.getReadStream();
-    }
-
-    public OutputStream getOutputStream()
-      throws IOException
-    {
-      return _controller.getWriteStream();
-    }
-
-    public void complete()
-    {
-      _controller.complete();
-    }
-
-    void onStart()
-      throws IOException
-    {
-      _listener.onStart(this);
-    }
-
-    public void onRead(SocketLinkDuplexController duplex)
-      throws IOException
-    {
-      do {
-        _listener.onRead(this);
-      } while (_request.getAvailable() > 0);
-    }
-
-    public void onComplete(SocketLinkDuplexController duplex)
-      throws IOException
-    {
-      _listener.onComplete(this);
-    }
-
-    public void onTimeout(SocketLinkDuplexController duplex)
-      throws IOException
-    {
-      _listener.onTimeout(this);
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _listener + "]";
-    }
-
-    /* (non-Javadoc)
-     * @see com.caucho.network.listen.SocketLinkDuplexListener#onStart(com.caucho.network.listen.SocketLinkDuplexController)
-     */
-    @Override
-    public void onStart(SocketLinkDuplexController context) throws IOException
-    {
-      // TODO Auto-generated method stub
-      
     }
   }
 }

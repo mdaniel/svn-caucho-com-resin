@@ -31,6 +31,7 @@ package com.caucho.hmtp;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,6 +43,7 @@ import com.caucho.bam.SimpleActorClient;
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.remote.websocket.WebSocketClient;
+import com.caucho.servlet.AbstractWebSocketListener;
 import com.caucho.servlet.WebSocketContext;
 import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.Alarm;
@@ -241,26 +243,25 @@ public class HmtpClient extends SimpleActorClient {
     close();
   }
   
-  class HmtpWebSocketHandler implements WebSocketListener {
+  class HmtpWebSocketHandler extends AbstractWebSocketListener {
     private HmtpReader _in;
     private HmtpWriter _out;
     
     @Override
     public void onStart(WebSocketContext context) throws IOException
     {
-      _out = new HmtpWriter(context.getOutputStream());
+      _out = new HmtpWriter(context.startBinaryMessage());
       setLinkStream(new HempMemoryQueue(_out, getActorStream(), 1));
       
       _in = new HmtpReader(context.getInputStream());
     }
 
     @Override
-    public void onRead(WebSocketContext context) throws IOException
+    public void onReadBinary(WebSocketContext context,
+                             InputStream is)
+      throws IOException
     {
-      InputStream is = context.getInputStream();
-      
-      while (_in.readPacket(getActorStream()) && is.available() > 0) {
-      }
+      _in.readPacket(getActorStream());
     }
 
     @Override
@@ -271,6 +272,17 @@ public class HmtpClient extends SimpleActorClient {
     @Override
     public void onTimeout(WebSocketContext context) throws IOException
     {
+    }
+
+    /* (non-Javadoc)
+     * @see com.caucho.servlet.WebSocketListener#onReadText(com.caucho.servlet.WebSocketContext, java.io.Reader)
+     */
+    @Override
+    public void onReadText(WebSocketContext context, Reader is)
+        throws IOException
+    {
+      // TODO Auto-generated method stub
+      
     }    
   }
 }

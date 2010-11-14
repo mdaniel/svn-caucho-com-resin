@@ -33,7 +33,7 @@ import java.io.IOException;
 
 /**
  * <code><pre>
- * GET /test HTTP/1.1
+ * WEBSOCKET /test HTTP/1.1
  * Upgrade: WebSocket
  * Connection: Upgrade
  * Origin: foo
@@ -49,5 +49,6 @@ public interface WebSocketServletRequest {
   /**
    * Upgrade the current HTTP connection to a WebSocket connection
    */
-  public WebSocketContext startWebSocket(WebSocketListener listener);
+  public WebSocketContext startWebSocket(WebSocketListener listener)
+    throws IOException;
 }

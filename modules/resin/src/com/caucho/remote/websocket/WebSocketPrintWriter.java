@@ -24,19 +24,35 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Nam Nguyen
+ * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib.curl;
+package com.caucho.remote.websocket;
+
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
- * Represents a GET Http request.
+ * WebSocketOutputStream writes a single WebSocket packet.
+ *
+ * <code><pre>
+ * </pre></code>
  */
-public class HttpGetRequest
-  extends CurlHttpRequest
+public class WebSocketPrintWriter extends PrintWriter
 {
-  public HttpGetRequest(CurlResource curlResource)
+  private WebSocketWriter _out;
+  
+  public WebSocketPrintWriter(WebSocketWriter out)
+    throws IOException
   {
-    super(curlResource);
+    super(out);
+    
+    _out = out;
+  }
+
+  @Override
+  public void close()
+  {
+    _out.close();
   }
 }
