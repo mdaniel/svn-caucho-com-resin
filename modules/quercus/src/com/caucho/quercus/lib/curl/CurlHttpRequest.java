@@ -55,17 +55,17 @@ import java.util.zip.InflaterInputStream;
 /**
  * Represents a generic Http request.
  */
-public class HttpRequest
+public class CurlHttpRequest
   implements EnvCleanup
 {
   private static final Logger log
-    = Logger.getLogger(HttpRequest.class.getName());
-  private static final L10N L = new L10N(HttpRequest.class);
+    = Logger.getLogger(CurlHttpRequest.class.getName());
+  private static final L10N L = new L10N(CurlHttpRequest.class);
 
   private CurlResource _curl;
   private HttpConnection _conn;
 
-  public HttpRequest(CurlResource curlResource)
+  public CurlHttpRequest(CurlResource curlResource)
   {
     _curl = curlResource;
   }
@@ -73,7 +73,7 @@ public class HttpRequest
   /**
    * Returns a HttpRequest specific to the Http request method.
    */
-  public static final HttpRequest getRequest(CurlResource curl)
+  public static final CurlHttpRequest getRequest(CurlResource curl)
   {
     String requestMethod = curl.getRequestMethod();
 
@@ -84,7 +84,7 @@ public class HttpRequest
     else if (requestMethod.equals("PUT"))
       return new HttpPutRequest(curl);
     else
-      return new HttpRequest(curl);
+      return new CurlHttpRequest(curl);
   }
 
   /**
