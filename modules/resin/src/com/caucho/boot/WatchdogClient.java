@@ -342,9 +342,11 @@ class WatchdogClient
   private ActorClient getConnection()
   {
     if (_conn == null) {
-      HmtpClient client = new HmtpClient("http://" + getWatchdogAddress()
-                                         + ":" + getWatchdogPort()
-                                         + "/hmtp");
+      HmtpClient client = new HmtpClient();
+      
+      client.setUrl("http://" + getWatchdogAddress()
+                    + ":" + getWatchdogPort()
+                    + "/hmtp");
 
       client.setVirtualHost("admin.resin");
       

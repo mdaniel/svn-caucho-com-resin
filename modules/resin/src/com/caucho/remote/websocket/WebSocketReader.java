@@ -29,10 +29,11 @@
 
 package com.caucho.remote.websocket;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
-import java.io.*;
+import com.caucho.util.L10N;
 
 /**
  * WebSocketReader reads a single WebSocket packet.
@@ -41,102 +42,159 @@ import java.io.*;
  * 0x00 utf-8 data 0xff
  * </pre></code>
  */
-public class WebSocketReader extends Reader {
+public class WebSocketReader extends Reader
+  implements WebSocketConstants
+{
   private static final L10N L = new L10N(WebSocketReader.class);
-  
+
   private InputStream _is;
 
-  public WebSocketReader()
-  {
-  }
+  private boolean _isFinal;
+  private long _length;
 
   public WebSocketReader(InputStream is)
     throws IOException
   {
-    init(is);
-  }
-
-  public void init(InputStream is)
-    throws IOException
-  {
     _is = is;
-
-    int ch = is.read();
-
-    if (ch != 0x00)
-      throw new IOException(L.l("{0}: expected 0x00 at '0x{1}' because WebSocket protocol expects 0x00 at beginning",
-                                this, Integer.toHexString(ch & 0xffff)));
   }
 
+  public void init(boolean isFinal, long length)
+  throws IOException
+  {
+    _isFinal = isFinal;
+    _length = length;
+  }
+
+  public long getLength()
+  {
+    return _length;
+  }
+
+  @Override
   public int read()
     throws IOException
   {
+    int d1 = readByte();
+    
+    if (d1 < 0x80)
+      return d1;
+    
+    if ((d1 & 0xe0) == 0xc0) {
+      int d2 = readByte();
+      
+      return ((d1 & 0x1f) << 6) + (d2 & 0x3f);
+    }
+    else {
+      int d2 = readByte();
+      int d3 = readByte();
+      
+      return ((d2 & 0xf) << 12) + ((d2 & 0x3f) << 6) + (d3 & 0x3f);
+    }
+  }
+  
+  private int readByte()
+    throws IOException
+  {
     InputStream is = _is;
 
-    if (is == null)
-      return -1;
-
-    int ch = is.read();
-
-    if (ch == 0xff || ch < 0) {
-      _is = null;
-      return -1;
+    if (_length == 0 && ! _isFinal) {
+      readFrameHeader();
     }
 
-    if (ch < 0x80)
+    if (_length > 0) {
+      int ch = is.read();
+      _length--;
       return ch;
-    else if ((ch & 0xe0) == 0xc0) {
-      int ch2 = is.read();
-
-      if (ch2 < 0) {
-        _is = null;
-        return -1;
-      }
-
-      return ((ch & 0x1f) << 6) + (ch2 & 0x7f);
-    }
-    else if ((ch & 0xf0) == 0xe0) {
-      int ch2 = is.read();
-      int ch3 = is.read();
-
-      if (ch2 < 0) {
-        _is = null;
-        return -1;
-      }
-
-      return ((ch & 0xf) << 12) + ((ch2 & 0x3f) << 6) + (ch3 & 0x3f);
     }
     else
-      return 0xfeff;
+      return -1;
   }
 
   public int read(char []buffer, int offset, int length)
-    throws IOException
+  throws IOException
   {
-    int start = offset;
-    int end = offset + length;
+    /*
+  InputStream is = _is;
 
-    for (; offset < end; offset++) {
-      int ch = read();
-
-      if (ch >= 0) {
-        buffer[offset] = (char) ch;
-      }
-      else {
-        break;
-      }
-    }
-
-    if (start == offset)
+  if (_length <= 0) {
+    if (! readChunkLength())
       return -1;
-    else
-      return offset - start;
   }
 
-  public void close()
-    throws IOException
+  int sublen = _length - _offset;
+
+  if (sublen <= 0 || is == null)
+    return -1;
+
+  if (length < sublen)
+    sublen = length;
+
+  sublen = is.read(buffer, offset, sublen);
+
+  if (sublen > 0) {
+    _offset += sublen;
+    return sublen;
+  }
+  else {
+    close();
+    return -1;
+  }
+     */
+
+    return -1;
+  }
+
+  private void readFrameHeader()
+  throws IOException
   {
     InputStream is = _is;
-    _is = null;
+
+    if (_isFinal || _length > 0)
+      throw new IllegalStateException();
+
+    while (! _isFinal && _length == 0) {
+      int frame1 = is.read();
+      int frame2 = is.read();
+
+      boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
+      int op = frame1 & 0xf;
+
+      if (op != OP_CONT) {
+        throw new IOException(L.l("{0}: expected op=CONT '0x{1}' because WebSocket binary protocol expects 0x80 at beginning",
+                                  this, Integer.toHexString(frame1 & 0xffff)));
+      }
+
+      _isFinal = isFinal;
+
+      long length = frame2 & 0x7f;
+
+      if (length < 0x7e) {
+      }
+      else if (length == 0x7e) {
+        length = ((((long) is.read()) << 8)
+            + (((long) is.read())));
+      }
+      else {
+        length = ((((long) is.read()) << 56)
+            + (((long) is.read()) << 48)
+            + (((long) is.read()) << 40)
+            + (((long) is.read()) << 32)
+            + (((long) is.read()) << 24)
+            + (((long) is.read()) << 16)
+            + (((long) is.read()) << 8)
+            + (((long) is.read())));
+      }
+
+      _length = length;
+    }
+  }
+
+  @Override
+  public void close()
+  throws IOException
+  {
+    while (_length > 0 && !_isFinal) {
+      skip(_length);
+    }
   }
 }

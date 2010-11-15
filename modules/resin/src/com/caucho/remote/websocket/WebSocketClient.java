@@ -36,12 +36,13 @@ import com.caucho.vfs.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.security.MessageDigest;
 import java.util.logging.*;
 
 /**
  * WebSocketClient
  */
-public class WebSocketClient {
+public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   private static final Logger log
     = Logger.getLogger(WebSocketClient.class.getName());
   private static final L10N L = new L10N(WebSocketClient.class);
@@ -63,8 +64,28 @@ public class WebSocketClient {
   private boolean _isClosed;
 
   private ClientContext _context;
+  
+  private WebSocketInputStream _wsIs;
+  private WebSocketOutputStream _wsOs;
 
-  public WebSocketClient(String url)
+  public WebSocketClient()
+  {
+    
+  }
+  public WebSocketClient(String url, WebSocketListener listener)
+  {
+    setUrl(url);
+    
+    _listener = listener;
+    
+    if (url == null)
+      throw new IllegalArgumentException();
+    
+    if (_listener == null)
+      throw new IllegalArgumentException();
+  }
+  
+  public void setUrl(String url)
   {
     _url = url;
     parseUrl(url);
@@ -74,15 +95,15 @@ public class WebSocketClient {
   {
     _virtualHost = virtualHost;
   }
+  
+  public void setListener(WebSocketListener listener)
+  {
+    _listener = listener;
+  }
 
-  public void connect(WebSocketListener listener)
+  public void connect()
     throws IOException
   {
-    if (listener == null)
-      throw new NullPointerException(L.l("listener is a required argument for connect()"));
-
-    _listener = listener;
-
     connectImpl();
   }
 
@@ -127,7 +148,7 @@ public class WebSocketClient {
     _is = Vfs.openRead(_s.getInputStream());
     _os = Vfs.openWrite(_s.getOutputStream());
 
-    _os.print("GET " + _path + " HTTP/1.1\r\n");
+    _os.print("WEBSOCKET " + _path + " HTTP/1.1\r\n");
     
     if (_virtualHost != null)
       _os.print("Host: " + _virtualHost + "\r\n");
@@ -136,6 +157,8 @@ public class WebSocketClient {
     else
       _os.print("Host: localhost\r\n");
     
+    byte []clientNonce = new byte[8];
+    _os.print("Sec-WebSocket-Nonce: 0000000000000000\r\n");
     _os.print("Upgrade: WebSocket\r\n");
     _os.print("Connection: Upgrade\r\n");
     _os.print("Origin: Foo\r\n");
@@ -147,9 +170,15 @@ public class WebSocketClient {
     // _wsOut = new WebSocketOutputStream(_out);
     // _wsIn = new WebSocketInputStream(_is);
 
+    byte []serverNonce = readHello(_is);
+    
+    writeHello(_os, clientNonce, serverNonce);
+    _os.flush();
+    
     _context = new ClientContext();
     
-    _listener.onStart(_context);
+    _listener.onStart(this);
+    _listener.onHandshakeComplete(this, true);
     
     // XXX: ThreadPool?
     Thread thread = new Thread(_context);
@@ -174,12 +203,71 @@ public class WebSocketClient {
       }
     }
   }
-
-  public OutputStream getOutputStream()
+  
+  private byte []readHello(ReadStream is)
+    throws IOException
   {
-    return _os;
+    int frame1 = is.read();
+    int frame2 = is.read();
+    
+    if (frame2 < 0)
+      throw new EOFException(L.l("unexpected EOF waiting for HELLO"));
+    
+    int op = frame1 & 0xf;
+    int len = frame2 & 0x7f;
+    
+    if (op != OP_HELLO) {
+      throw new EOFException(L.l("expected WebSocket HELLO at {0}", op));
+    }
+    
+    if (len != 0x18) {
+      throw new EOFException(L.l("unexpected HELLO length {0}", len));
+    }
+    
+    byte []serverNonce = new byte[8];
+    
+    is.readAll(serverNonce, 0, serverNonce.length);
+    
+    byte []serverHash = new byte[16];
+    is.readAll(serverHash, 0, serverHash.length);
+    
+    return serverNonce;
+  }
+  
+  private void writeHello(WriteStream os, byte []clientNonce, byte []serverNonce)
+    throws IOException
+  {
+    byte []hash = calculateHash(serverNonce, clientNonce);
+   
+    os.write(FLAG_FIN|OP_HELLO);
+    os.write(hash.length);
+    
+    os.write(hash);
+    os.flush();
   }
 
+  private byte []calculateHash(byte []nonce1, byte []nonce2)
+  {
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      
+      md.update(nonce1);
+      
+      String webSocket = "WebSocket";
+      for (int i = 0; i < webSocket.length(); i++) {
+        md.update((byte) webSocket.charAt(i));
+      }
+      md.update(nonce2);
+      
+      byte []digest = md.digest();
+      
+      return digest;
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+  }
+  
+  @Override
   public void complete()
   {
     OutputStream os = _os;
@@ -231,6 +319,37 @@ public class WebSocketClient {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
+  public InputStream getInputStream()
+  {
+    return _is;
+  }
+
+  @Override
+  public OutputStream startBinaryMessage()
+    throws IOException
+  {
+    if (_wsOs == null)
+      _wsOs = new WebSocketOutputStream(_os, new byte[4096]);
+    
+    _wsOs.init();
+    
+    return _wsOs;
+  }
+
+  public PrintWriter startTextMessage()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public long getTimeout()
+  {
+    return 0;
+  }
+
+  public void setTimeout(long timeout)
+  {
+  }
+
 
   @Override
   public String toString()
@@ -238,41 +357,8 @@ public class WebSocketClient {
     return getClass().getSimpleName() + "[" + _url + "]";
   }
 
-  class ClientContext implements Runnable, WebSocketContext
+  class ClientContext implements Runnable
   {
-    public InputStream getInputStream()
-    {
-      return _is;
-    }
-
-    public OutputStream startBinaryMessage()
-    {
-      return _os;
-    }
-
-    public PrintWriter startTextMessage()
-    {
-      throw new UnsupportedOperationException();
-    }
-
-    public void complete()
-    {
-      try {
-        _os.close();
-      } catch (IOException e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    public long getTimeout()
-    {
-      return 0;
-    }
-
-    public void setTimeout(long timeout)
-    {
-    }
-
     public void run()
     {
       try {
@@ -284,10 +370,12 @@ public class WebSocketClient {
           log.log(Level.WARNING, e.toString(), e);
       } finally {
         try {
-          _listener.onComplete(this);
+          _listener.onComplete(WebSocketClient.this);
         } catch (IOException e) {
           log.log(Level.WARNING, e.toString(), e);
         }
+        
+        close();
       }
     }
 
@@ -296,9 +384,48 @@ public class WebSocketClient {
     {
       // server/2h20
       // _listener.onStart(this);
+      
+      InputStream is = _is;
 
-      while (! isClosed() && _is.waitForRead()) {
-        _listener.onReadBinary(this, _is);
+      while (! isClosed()) {
+        int frame1 = is.read();
+        int frame2 = is.read();
+        
+        if (frame2 < 0)
+          return;
+        
+        int op = frame1 & 0x0f;
+        boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
+        long len = frame2 & 0x7f;
+        
+        if (len == 0x7e) {
+          len = ((is.read() << 8) + is.read());
+        }
+        else if (len == 0x7f) {
+          len = (((long) is.read() << 56)
+              + ((long) is.read() << 48)
+              + ((long) is.read() << 40)
+              + ((long) is.read() << 32)
+              + ((long) is.read() << 24)
+              + ((long) is.read() << 16)
+              + ((long) is.read() << 8)
+              + ((long) is.read()));
+          
+        }
+        
+        switch (op) {
+        case OP_BINARY:
+          if (_wsIs == null)
+            _wsIs = new WebSocketInputStream(_is);
+          
+          _wsIs.init(isFinal, len);
+          
+          _listener.onReadBinary(WebSocketClient.this, _wsIs);
+          break;
+          
+        default:
+          return;
+        }
       }
     }
   }

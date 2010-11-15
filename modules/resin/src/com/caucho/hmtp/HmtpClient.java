@@ -68,20 +68,29 @@ public class HmtpClient extends SimpleActorClient {
 
   private ClientAuthManager _authManager = new ClientAuthManager();
 
-  public HmtpClient(String url)
+  public HmtpClient()
   {
-    _url = url;
-    
-    _webSocketClient = new WebSocketClient(url);
     _webSocketHandler = new HmtpWebSocketHandler();
+    _webSocketClient = new WebSocketClient();
+    _webSocketClient.setListener(_webSocketHandler);
   }
-
+  
   public HmtpClient(String url, ActorStream actorStream)
     throws IOException
   {
-    this(url);
+    this();
+    
+    _url = url;
     
     setClientStream(actorStream);
+    
+    _webSocketClient = new WebSocketClient(url, _webSocketHandler);
+  }
+  
+  public void setUrl(String url)
+  {
+    _url = url;
+    _webSocketClient.setUrl(url);
   }
 
   public void setVirtualHost(String host)
@@ -110,7 +119,7 @@ public class HmtpClient extends SimpleActorClient {
   protected void connectImpl()
   {
     try {
-      _webSocketClient.connect(_webSocketHandler);
+      _webSocketClient.connect();
     } catch (ActorException e) {
       _connException = e;
 

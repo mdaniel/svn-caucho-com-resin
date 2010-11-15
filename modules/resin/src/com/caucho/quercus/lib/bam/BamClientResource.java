@@ -51,7 +51,7 @@ public class BamClientResource
 
   public BamClientResource(String url)
   {
-    _client = new HmtpClient(url);
+    // _client = new HmtpClient(url);
   }
 
   public HmtpClient getClient()

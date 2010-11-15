@@ -98,40 +98,6 @@ public class WebSocketInputStream extends InputStream
       return -1;
   }
 
-  public int read(byte []buffer, int offset, int length)
-    throws IOException
-  {
-    /*
-    InputStream is = _is;
-
-    if (_length <= 0) {
-      if (! readChunkLength())
-        return -1;
-    }
-    
-    int sublen = _length - _offset;
-
-    if (sublen <= 0 || is == null)
-      return -1;
-
-    if (length < sublen)
-      sublen = length;
-
-    sublen = is.read(buffer, offset, sublen);
-
-    if (sublen > 0) {
-      _offset += sublen;
-      return sublen;
-    }
-    else {
-      close();
-      return -1;
-    }
-    */
-    
-    return -1;
-  }
-
   private void readFrameHeader()
     throws IOException
   {

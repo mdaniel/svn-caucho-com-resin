@@ -47,20 +47,24 @@ public class WebSocketOutputStream extends OutputStream
   private static final L10N L = new L10N(WebSocketOutputStream.class);
   
   private OutputStream _os;
-  private TempBuffer _tBuf;
   private byte []_buffer;
   private int _offset;
   
   private MessageState _state = MessageState.IDLE;
   private boolean _isAutoFlush = true;
 
-  public WebSocketOutputStream(OutputStream os)
+  public WebSocketOutputStream(OutputStream os, byte []buffer)
     throws IOException
   {
+    if (os == null)
+      throw new NullPointerException();
+    
+    if (buffer == null)
+      throw new NullPointerException();
+    
     _os = os;
 
-    _tBuf = TempBuffer.allocate();
-    _buffer = _tBuf.getBuffer();
+    _buffer = buffer;
   }
   
   public void init()

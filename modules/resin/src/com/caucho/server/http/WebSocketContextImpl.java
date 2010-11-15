@@ -41,6 +41,7 @@ import com.caucho.remote.websocket.WebSocketConstants;
 import com.caucho.remote.websocket.WebSocketInputStream;
 import com.caucho.remote.websocket.WebSocketOutputStream;
 import com.caucho.remote.websocket.WebSocketPrintWriter;
+import com.caucho.remote.websocket.WebSocketReader;
 import com.caucho.remote.websocket.WebSocketWriter;
 import com.caucho.servlet.WebSocketContext;
 import com.caucho.servlet.WebSocketListener;
@@ -71,6 +72,7 @@ class WebSocketContextImpl
   
   private WebSocketWriter _textOut;
   private PrintWriter _textWriter;
+  private WebSocketReader _textIn;
 
   WebSocketContextImpl(HttpServletRequestImpl request,
                        HttpServletResponseImpl response,
@@ -127,7 +129,8 @@ class WebSocketContextImpl
   throws IOException
   {
     if (_binaryOut == null)
-      _binaryOut = new WebSocketOutputStream(_controller.getWriteStream());
+      _binaryOut = new WebSocketOutputStream(_controller.getWriteStream(),
+                                             TempBuffer.allocate().getBuffer());
     
     _binaryOut.init();
     
@@ -186,7 +189,9 @@ class WebSocketContextImpl
       
       md.update(_serverNonce);
       
-      return md.digest();
+      byte []digest = md.digest();
+      
+      return digest;
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
@@ -219,6 +224,9 @@ class WebSocketContextImpl
 
     int frame1 = is.read();
     int frame2 = is.read();
+    
+    if (frame2 < 0)
+      throw new IllegalStateException(L.l("Unexpected end-of-file waiting for HELLO"));
 
     boolean isFinal = (frame1 & FLAG_FIN) != 0;
     int opcode = frame1 & 0x0f;
@@ -334,6 +342,15 @@ class WebSocketContextImpl
         _binaryIn.init(isFinal, len);
         
         _listener.onReadBinary(this, _binaryIn);
+        break;
+        
+      case OP_TEXT:
+        if (_textIn == null)
+          _textIn = new WebSocketReader(is);
+        
+        _textIn.init(isFinal, len);
+        
+        _listener.onReadText(this, _textIn);
         break;
         
       default:
