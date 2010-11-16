@@ -42,6 +42,7 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.DependencyComponent;
@@ -115,6 +116,11 @@ abstract public class BeanGenerator<X> extends GenClass
   }
   
   protected abstract AspectBeanFactory<X> getAspectBeanFactory();
+  
+  protected AspectBeanFactory<X> getLifecycleAspectFactory()
+  {
+    return getAspectBeanFactory();
+  }
 
   public void introspect()
   {
@@ -322,6 +328,13 @@ abstract public class BeanGenerator<X> extends GenClass
                                            HashMap<String,Object> map)
        throws IOException
   {
+    ArrayList<Method> postConstructMethods 
+      = getLifecycleAspects(PostConstruct.class);
+    
+    if (postConstructMethods.size() == 0) {
+      generateDummyPostConstruct(postConstructMethods, out, map);
+    }
+    
     out.println();
     out.println("public void __caucho_postConstruct()");
     out.println("  throws Exception");
@@ -334,13 +347,6 @@ abstract public class BeanGenerator<X> extends GenClass
       
     }
     */
-
-    ArrayList<Method> postConstructMethods 
-      = getLifecycleAspects(PostConstruct.class);
-    /*
-    ArrayList<Method> postConstructMethods 
-      = getLifecycleMethods(PostConstruct.class);
-      */
 
     Method postConstructMethod = null;
     if (postConstructMethods.size() > 0) {
@@ -382,6 +388,32 @@ abstract public class BeanGenerator<X> extends GenClass
     
     out.popDepth();
     out.println("}");
+  }
+  
+  private void generateDummyPostConstruct(ArrayList<Method> postConstructMethods,
+                                          JavaWriter out,
+                                          HashMap<String,Object> map)
+    throws IOException
+  {
+    if (postConstructMethods.size() > 0)
+      throw new IllegalStateException();
+    
+    Method method = CandiUtil.getDummyPostConstruct();
+    
+    AnnotatedMethodImpl annMethod;
+    annMethod = new AnnotatedMethodImpl(getBeanType(), null, method);
+    annMethod.addAnnotation(new PostConstructLiteral());
+    
+    AspectGenerator<X> methodGen
+      = getLifecycleAspectFactory().create(annMethod);
+   
+    if (methodGen != null) {
+      methodGen.generate(out, map);
+      
+      out.println("public static void __caucho_CandiUtil_dummyPostConstruct_POST_CONSTRUCT() {}");
+      
+      postConstructMethods.add(method);
+    }
   }
 
   private void generatePreDestroy(JavaWriter out, 

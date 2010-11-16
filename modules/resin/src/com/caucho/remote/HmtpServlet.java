@@ -50,6 +50,7 @@ import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.hemp.servlet.ServerLinkActor;
 import com.caucho.hmtp.HmtpReader;
+import com.caucho.hmtp.HmtpWebSocketContextWriter;
 import com.caucho.hmtp.HmtpWriter;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Server;
@@ -165,7 +166,7 @@ public class HmtpServlet extends GenericServlet {
     private String _ipAddress;
     
     private HmtpReader _in;
-    private HmtpWriter _out;
+    private HmtpWebSocketContextWriter _out;
     
     private ActorStream _linkStream;
     private ActorStream _brokerStream;
@@ -180,8 +181,8 @@ public class HmtpServlet extends GenericServlet {
     @Override
     public void onStart(WebSocketContext context) throws IOException
     {
-      _in = new HmtpReader(context.getInputStream());
-      _out = new HmtpWriter(context.startBinaryMessage());
+      _in = new HmtpReader();
+      _out = new HmtpWebSocketContextWriter(context);
       _linkStream = new HempMemoryQueue(_out, _broker.getBrokerStream(), 1);
       
       _linkService = new ServerLinkActor(_linkStream, _broker, _authManager,
@@ -201,7 +202,7 @@ public class HmtpServlet extends GenericServlet {
                              InputStream is)
       throws IOException
     {
-      _in.readPacket(_brokerStream);
+      _in.readPacket(is, _brokerStream);
     }
 
     @Override

@@ -47,6 +47,7 @@ public class ResinLink extends HmtpLink implements Runnable {
   protected OutputStream _os;
 
   public ResinLink(ResinActor resinActor, InputStream is, OutputStream os)
+    throws IOException
   {
     super(resinActor, is, os);
     

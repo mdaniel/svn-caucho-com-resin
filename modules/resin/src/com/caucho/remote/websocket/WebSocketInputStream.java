@@ -73,6 +73,44 @@ public class WebSocketInputStream extends InputStream
     _isFinal = isFinal;
     _length = length;
   }
+  
+  public boolean startBinaryMessage()
+    throws IOException
+  {
+    int frame1 = _is.read();
+    int frame2 = _is.read();
+    
+    if (frame2 < 0)
+      return false;
+    
+    boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
+    
+    int op = frame1 & 0xf;
+    
+    if (op != OP_BINARY)
+      throw new IllegalStateException(getClass().getSimpleName() + " requires a binary frame");
+    
+    long len = frame2 & 0x7f;
+    
+    if (len == 0x7e) {
+      len = (_is.read() << 8) + _is.read();
+    }
+    else if (len == 0x7f) {
+      len = (((long) _is.read() << 56)
+            + ((long) _is.read() << 48)
+            + ((long) _is.read() << 40)
+            + ((long) _is.read() << 32)
+            + ((long) _is.read() << 24)
+            + ((long) _is.read() << 16)
+            + ((long) _is.read() << 8)
+            + ((long) _is.read()));
+    }
+    
+    _isFinal = isFinal;
+    _length = len;
+    
+    return true;
+  }
 
   public long getLength()
   {
@@ -98,7 +136,7 @@ public class WebSocketInputStream extends InputStream
       return -1;
   }
 
-  private void readFrameHeader()
+  private boolean readFrameHeader()
     throws IOException
   {
     InputStream is = _is;
@@ -109,6 +147,9 @@ public class WebSocketInputStream extends InputStream
     while (! _isFinal && _length == 0) {
       int frame1 = is.read();
       int frame2 = is.read();
+      
+      if (frame2 < 0)
+        return false;
 
       boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
       int op = frame1 & 0xf;
@@ -141,6 +182,8 @@ public class WebSocketInputStream extends InputStream
 
       _length = length;
     }
+    
+    return true;
   }
 
   @Override

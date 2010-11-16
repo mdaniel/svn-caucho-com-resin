@@ -48,18 +48,19 @@ public class HmtpLink implements Runnable {
 
   private ActorStream _actorStream;
   
-  private HmtpWriter _toLinkStream;
-  private HmtpReader _in;
+  private HmtpWebSocketWriter _toLinkStream;
+  private HmtpWebSocketReader _in;
 
   public HmtpLink(Actor actor, InputStream is, OutputStream os)
+    throws IOException
   {
     _actorStream = actor.getActorStream();
     
     _is = is;
     _os = os;
 
-    _toLinkStream = new HmtpWriter(_os);
-    _in = new HmtpReader(_is);
+    _toLinkStream = new HmtpWebSocketWriter(_os);
+    _in = new HmtpWebSocketReader(_is);
 
     if (actor.getJid() == null)
       actor.setJid(actor.getClass().getSimpleName() + "@link");

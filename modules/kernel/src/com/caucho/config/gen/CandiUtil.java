@@ -66,6 +66,8 @@ public class CandiUtil {
   private static final Logger log = Logger.getLogger(CandiUtil.class.getName());
 
   public static final Object []NULL_OBJECT_ARRAY = new Object[0];
+  
+  private static final Method _dummyPostConstruct;
 
   private CandiUtil()
   {
@@ -443,5 +445,22 @@ public class CandiUtil {
     }
 
     return index;
+  }
+  
+  public static Method getDummyPostConstruct()
+  {
+    return _dummyPostConstruct;
+  }
+  
+  public static void dummyPostConstruct()
+  {
+  }
+  
+  static {
+    try {
+      _dummyPostConstruct = CandiUtil.class.getMethod("dummyPostConstruct");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

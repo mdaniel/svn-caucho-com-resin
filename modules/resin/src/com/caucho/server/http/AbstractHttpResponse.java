@@ -893,8 +893,7 @@ abstract public class AbstractHttpResponse {
       cb.append(_calendar.format("%a, %d-%b-%Y %H:%M:%S GMT"));
     }
 
-    WebApp app = _request.getWebApp();
-    if (app.getCookieHttpOnly() || app.getSessionManager().isCookieHttpOnly()) {
+    if (cookie.isHttpOnly()) {
       cb.append("; HttpOnly");
     }
 

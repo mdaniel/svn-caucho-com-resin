@@ -30,21 +30,16 @@
 package com.caucho.hmtp;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.Actor;
 import com.caucho.bam.ActorException;
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.cloud.security.SecurityService;
-import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.remote.websocket.WebSocketClient;
-import com.caucho.servlet.AbstractWebSocketListener;
-import com.caucho.servlet.WebSocketContext;
 import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -62,7 +57,10 @@ public class HmtpClient extends SimpleActorClient {
   private String _jid;
 
   private WebSocketClient _webSocketClient;
+  
   private WebSocketListener _webSocketHandler;
+  
+  private Actor _actor;
 
   private ActorException _connException;
 
@@ -70,27 +68,35 @@ public class HmtpClient extends SimpleActorClient {
 
   public HmtpClient()
   {
-    _webSocketHandler = new HmtpWebSocketHandler();
     _webSocketClient = new WebSocketClient();
-    _webSocketClient.setListener(_webSocketHandler);
   }
   
-  public HmtpClient(String url, ActorStream actorStream)
+  public HmtpClient(String url, Actor actor)
     throws IOException
   {
     this();
     
     _url = url;
     
-    setClientStream(actorStream);
+    setActor(actor);
     
-    _webSocketClient = new WebSocketClient(url, _webSocketHandler);
+    _webSocketClient.setUrl(url);
+    
+    connectImpl();
   }
   
   public void setUrl(String url)
   {
     _url = url;
     _webSocketClient.setUrl(url);
+  }
+  
+  public void setActor(Actor actor)
+  {
+    super.setClientStream(actor.getActorStream());
+    
+    _webSocketHandler = new HmtpWebSocketListener(actor);
+    _webSocketClient.setListener(_webSocketHandler);
   }
 
   public void setVirtualHost(String host)
@@ -118,6 +124,9 @@ public class HmtpClient extends SimpleActorClient {
 
   protected void connectImpl()
   {
+    if (_actor == null)
+      setActor(this);
+    
     try {
       _webSocketClient.connect();
     } catch (ActorException e) {
@@ -243,55 +252,12 @@ public class HmtpClient extends SimpleActorClient {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _jid + "," + _url + "]";
+    return getClass().getSimpleName() + "[" + _actor + "," + _url + "]";
   }
 
   @Override
   protected void finalize()
   {
     close();
-  }
-  
-  class HmtpWebSocketHandler extends AbstractWebSocketListener {
-    private HmtpReader _in;
-    private HmtpWriter _out;
-    
-    @Override
-    public void onStart(WebSocketContext context) throws IOException
-    {
-      _out = new HmtpWriter(context.startBinaryMessage());
-      setLinkStream(new HempMemoryQueue(_out, getActorStream(), 1));
-      
-      _in = new HmtpReader(context.getInputStream());
-    }
-
-    @Override
-    public void onReadBinary(WebSocketContext context,
-                             InputStream is)
-      throws IOException
-    {
-      _in.readPacket(getActorStream());
-    }
-
-    @Override
-    public void onComplete(WebSocketContext context) throws IOException
-    {
-    }
-
-    @Override
-    public void onTimeout(WebSocketContext context) throws IOException
-    {
-    }
-
-    /* (non-Javadoc)
-     * @see com.caucho.servlet.WebSocketListener#onReadText(com.caucho.servlet.WebSocketContext, java.io.Reader)
-     */
-    @Override
-    public void onReadText(WebSocketContext context, Reader is)
-        throws IOException
-    {
-      // TODO Auto-generated method stub
-      
-    }    
   }
 }

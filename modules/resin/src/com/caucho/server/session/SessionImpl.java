@@ -29,28 +29,39 @@
 
 package com.caucho.server.session;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.NotSerializableException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionContext;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
 import com.caucho.distcache.ByteStreamCache;
 import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.hessian.io.*;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.security.AbstractAuthenticator;
-import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
-import com.caucho.security.AbstractLogin;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
 import com.caucho.util.L10N;
 import com.caucho.vfs.IOExceptionWrapper;
 import com.caucho.vfs.TempOutputStream;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.*;
-import java.io.*;
-import java.security.Principal;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implements a HTTP session.

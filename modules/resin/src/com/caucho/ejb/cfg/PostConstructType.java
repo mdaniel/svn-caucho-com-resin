@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.PostConstructLiteral;
 import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.reflect.AnnotatedMethodImpl;

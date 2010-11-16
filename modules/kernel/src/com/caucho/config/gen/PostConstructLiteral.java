@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.cfg;
+package com.caucho.config.gen;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.util.AnnotationLiteral;

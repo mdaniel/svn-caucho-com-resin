@@ -175,7 +175,7 @@ public class WebSocketOutputStream extends OutputStream
     }
     else if (length >= 0x7e) {
       buffer[0] = (byte) code1;
-      buffer[1] = (byte) 0x7f;
+      buffer[1] = (byte) 0x7e;
       buffer[2] = (byte) (length >> 8);
       buffer[3] = (byte) (length);
       

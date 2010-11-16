@@ -39,8 +39,8 @@ import com.caucho.bam.Broker;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.hessian.io.HessianDebugInputStream;
-import com.caucho.hmtp.HmtpReader;
-import com.caucho.hmtp.HmtpWriter;
+import com.caucho.hmtp.HmtpWebSocketReader;
+import com.caucho.hmtp.HmtpWebSocketWriter;
 import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.util.L10N;
@@ -71,8 +71,8 @@ public class HmtpRequest extends AbstractProtocolConnection
   
   private boolean _isFirst;
 
-  private HmtpReader _hmtpReader;
-  private HmtpWriter _hmtpWriter;
+  private HmtpWebSocketReader _hmtpReader;
+  private HmtpWebSocketWriter _hmtpWriter;
   private ActorStream _linkStream;
   
   private HmtpLinkActor _linkActor;
@@ -151,20 +151,11 @@ public class HmtpRequest extends AbstractProtocolConnection
       rawIs = dIs;
     }
 
-    if (_hmtpReader != null)
-      _hmtpReader.init(rawIs);
-    else {
-      _hmtpReader = new HmtpReader(rawIs);
-      _hmtpReader.setId(getRequestId());
-    }
+    _hmtpReader = new HmtpWebSocketReader(rawIs);
 
-    if (_hmtpWriter != null)
-      _hmtpWriter.init(_rawWrite);
-    else {
-      _hmtpWriter = new HmtpWriter(_rawWrite);
-      // _hmtpWriter.setId(getRequestId());
-      _hmtpWriter.setAutoFlush(true);
-    }
+    _hmtpWriter = new HmtpWebSocketWriter(_rawWrite);
+    // _hmtpWriter.setId(getRequestId());
+    // _hmtpWriter.setAutoFlush(true);
 
     Broker broker = _bamService.getBroker();
     ActorStream brokerStream = broker.getBrokerStream();
@@ -185,7 +176,7 @@ public class HmtpRequest extends AbstractProtocolConnection
   private boolean dispatchHmtp()
     throws IOException
   {
-    HmtpReader in = _hmtpReader;
+    HmtpWebSocketReader in = _hmtpReader;
 
     do {
       ActorStream brokerStream = _linkActor.getBrokerStream();
@@ -217,7 +208,7 @@ public class HmtpRequest extends AbstractProtocolConnection
     if (linkStream != null)
       linkStream.close();
 
-    HmtpWriter writer = _hmtpWriter;
+    HmtpWebSocketWriter writer = _hmtpWriter;
 
     if (writer != null)
       writer.close();

@@ -1183,6 +1183,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    *
    * @param cookie the response cookie
    */
+  @Override
   public void addCookie(Cookie cookie)
   {
     _request.setHasCookie();
@@ -1277,6 +1278,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       // server/12zc (tck)
       cookie.setSecure(true);
    }
+    
+    if (manager.isCookieHttpOnly())
+      cookie.setHttpOnly(true);
 
     return cookie;
   }

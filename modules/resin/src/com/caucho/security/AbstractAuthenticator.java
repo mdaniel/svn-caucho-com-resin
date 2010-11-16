@@ -40,7 +40,6 @@ import javax.servlet.ServletException;
 
 import com.caucho.config.inject.HandleAware;
 import com.caucho.server.security.PasswordDigest;
-import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 
 /**
@@ -260,22 +259,41 @@ public class AbstractAuthenticator
                                    PasswordCredentials cred,
                                    Object details)
   {
-    PasswordUser user = getPasswordUser(principal);
-
-    if (user == null || user.isDisabled())
-      return null;
-    
-    char []password = cred.getPassword();
+    return authenticate(principal, cred.getPassword());
+  }
+  
+  /**
+   * Password-based authenticator.
+   */
+  protected Principal authenticate(Principal principal,
+                                   char []password)
+  {
     char []digest = getPasswordDigest(principal.getName(), password);
     
     if (digest == null)
+      return null;
+    
+    Principal user = authenticateDigest(principal, digest);
+    
+    Arrays.fill(digest, 'a');
+    
+    return user;
+  }
+  
+  /**
+   * Password-based after the digest is calculated.
+   */
+  protected Principal authenticateDigest(Principal principal,
+                                         char []digest)
+  {
+    PasswordUser user = getPasswordUser(principal);
+
+    if (user == null || user.isDisabled())
       return null;
 
     if (! isMatch(digest, user.getPassword()) && ! user.isAnonymous()) {
       user = null;
     }
-    
-    Arrays.fill(digest, 'a');
 
     if (user != null)
       return user.getPrincipal();

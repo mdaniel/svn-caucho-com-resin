@@ -27,53 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlet;
+package com.caucho.hmtp;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.security.Principal;
+
+import com.caucho.bam.Actor;
+import com.caucho.servlet.AbstractWebSocketListener;
+import com.caucho.servlet.WebSocketContext;
 
 /**
- * Bidirectional TCP connection based on a HTTP upgrade, e.g. WebSocket.
- *
- * The context and its values are not thread safe.  The DuplexListener
- * thread normally is the only thread reading from the input stream.
+ * HmtpReader stream handles client packets received from the server.
  */
-public interface WebSocketContext {
-  /**
-   * Returns the input stream
-   */
-  public InputStream getInputStream()
-    throws IOException;
+public class HmtpWebSocketListener extends AbstractWebSocketListener {
+  private Actor _actor;
+  
+  private HmtpReader _hIn;
+  private HmtpWebSocketContextWriter _hOut;
 
-  /**
-   * Returns the output stream for a binary message.
-   * The message will complete when the OutputStream is closed.
-   */
-  public OutputStream startBinaryMessage()
-    throws IOException;
+  public HmtpWebSocketListener(Actor actor)
+  {
+    if (actor == null)
+      throw new IllegalArgumentException();
+    
+    _actor = actor;
+  }
 
+  @Override
+  public void onStart(WebSocketContext context)
+  {
+    _hOut = new HmtpWebSocketContextWriter(context);
+    _hIn = new HmtpReader();
+    
+    _actor.setLinkStream(_hOut);
+  }
+  
   /**
-   * Returns the output stream for a binary message.
-   * The message will complete when the Writer is closed.
+   * Reads the next HMTP packet from the stream, returning false on
+   * end of file.
    */
-  public PrintWriter startTextMessage()
-    throws IOException;
+  @Override
+  public void onReadBinary(WebSocketContext context, InputStream is)
+    throws IOException
+  {
+    _hIn.readPacket(is, _actor.getActorStream());
+  }
 
-  /**
-   * Sets the read timeout.
-   */
-  public void setTimeout(long timeout);
-
-  /**
-   * Gets the read timeout.
-   */
-  public long getTimeout();
-
-  /**
-   * Complete and close the connection.
-   */
-  public void complete();
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _actor + "]";
+  }
 }

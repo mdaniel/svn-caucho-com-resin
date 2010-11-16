@@ -143,6 +143,9 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   protected void connectImpl()
     throws IOException
   {
+    if (_listener == null)
+      throw new IllegalStateException("missing listener");
+    
     _s = new Socket(_host, _port);
 
     _is = Vfs.openRead(_s.getInputStream());
@@ -176,7 +179,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     _os.flush();
     
     _context = new ClientContext();
-    
+
     _listener.onStart(this);
     _listener.onHandshakeComplete(this, true);
     

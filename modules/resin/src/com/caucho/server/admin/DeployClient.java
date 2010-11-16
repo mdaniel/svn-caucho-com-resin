@@ -113,7 +113,6 @@ public class DeployClient implements Repository
     HmtpClient client = new HmtpClient();
     try {
       client.setUrl(url);
-      
       client.setVirtualHost("admin.resin");
 
       client.connect(userName, password);

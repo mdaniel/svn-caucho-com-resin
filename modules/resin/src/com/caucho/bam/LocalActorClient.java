@@ -289,4 +289,24 @@ public class LocalActorClient implements ActorClient {
 
     close();
   }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.Actor#setActorStream(com.caucho.bam.ActorStream)
+   */
+  @Override
+  public void setActorStream(ActorStream actorStream)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.Actor#setJid(java.lang.String)
+   */
+  @Override
+  public void setJid(String jid)
+  {
+    // TODO Auto-generated method stub
+    
+  }
 }

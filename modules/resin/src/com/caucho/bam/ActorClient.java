@@ -35,7 +35,7 @@ import java.io.Serializable;
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's JID as the "from" parameter.
  */
-public interface ActorClient {
+public interface ActorClient extends Actor {
   /**
    * Returns the Actor's jid used for all "from" parameters.
    */
