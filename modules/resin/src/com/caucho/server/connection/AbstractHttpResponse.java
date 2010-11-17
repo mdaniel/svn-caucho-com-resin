@@ -96,17 +96,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected String _contentPrefix;
   protected String _charEncoding;
   protected boolean _hasCharEncoding;
-  
+
   protected final ArrayList<String> _headerKeys = new ArrayList<String>();
   protected final ArrayList<String> _headerValues = new ArrayList<String>();
-  
+
   protected final ArrayList<String> _footerKeys = new ArrayList<String>();
   protected final ArrayList<String> _footerValues = new ArrayList<String>();
 
   protected final ArrayList<Cookie> _cookiesOut = new ArrayList<Cookie>();
 
   private final AbstractResponseStream _originalResponseStream;
-  
+
   private final ServletOutputStreamImpl _responseOutputStream;
   private final ResponseWriter _responsePrintWriter;
 
@@ -134,7 +134,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected long _contentLength;
   protected boolean _isClosed;
   protected boolean _hasSentLog;
-  
+
   protected boolean _hasWriter;
   protected boolean _hasOutputStream;
 
@@ -163,7 +163,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected AbstractHttpResponse()
   {
     _originalResponseStream = createResponseStream();
-    
+
     _responseOutputStream = new ServletOutputStreamImpl();
     _responsePrintWriter = new ResponseWriter();
 
@@ -179,10 +179,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected AbstractHttpResponse(CauchoRequest request)
   {
     this();
-    
+
     _request = request;
     _originalRequest = request;
-    
+
     _responseOutputStream.init(_originalResponseStream);
     _responsePrintWriter.init(_originalResponseStream);
   }
@@ -299,7 +299,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _headerKeys.clear();
     _headerValues.clear();
-    
+
     _footerKeys.clear();
     _footerValues.clear();
 
@@ -342,7 +342,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _forbidForward = false;
 
     _originalResponseStream.start();
-    
+
     _responseStream = _originalResponseStream;
 
     _responseOutputStream.init(_responseStream);
@@ -418,13 +418,13 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     AbstractCacheFilterChain oldCache = _cacheInvocation;
     _cacheInvocation = null;
-    
+
     AbstractCacheEntry oldEntry = _newCacheEntry;
     _newCacheEntry = null;
 
     if (oldEntry != null)
       oldCache.killCaching(oldEntry);
-      
+
     _cacheInvocation = cacheInvocation;
   }
 
@@ -445,12 +445,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     if (message != null) {
     }
-    else if (code == SC_OK)  
+    else if (code == SC_OK)
       message = "OK";
-    
-    else if (code == SC_NOT_MODIFIED)  
+
+    else if (code == SC_NOT_MODIFIED)
       message = "Not Modified";
-    
+
     else if (message == null) {
       message = (String) _errors.get(String.valueOf(code));
 
@@ -487,7 +487,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       if (handleNotModified(_isTopCache))
         return;
     }
-    
+
     if (isCommitted())
       throw new IllegalStateException(L.l("sendError() forbidden after buffer has been committed."));
 
@@ -517,7 +517,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       }
       else if (errorManager != null) {
         errorManager.sendError(getOriginalRequest(), this,
-			       code, _statusMessage);
+                               code, _statusMessage);
         // _request.killKeepalive();
         // close, but don't force a flush
         // XXX: finish(false);
@@ -557,23 +557,23 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       if (app == null) {
       }
       else if (app.getServer() != null
-	       && app.getServer().getServerHeader() != null) {
-	version = app.getServer().getServerHeader();
+               && app.getServer().getServerHeader() != null) {
+        version = app.getServer().getServerHeader();
       }
       else if (CauchoSystem.isTesting()) {
       }
       else
-	version = com.caucho.Version.FULL_VERSION;
-    
+        version = com.caucho.Version.FULL_VERSION;
+
       if (version != null) {
-	s.println("<p /><hr />");
-	s.println("<small>");
-	
-	s.println(version);
-	  
-	s.println("</small>");
+        s.println("<p /><hr />");
+        s.println("<small>");
+
+        s.println(version);
+
+        s.println("</small>");
       }
-      
+
       s.println("</body></html>");
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -595,16 +595,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     if (url == null)
       throw new NullPointerException();
-    
+
     if (_originalResponseStream.isCommitted())
       throw new IllegalStateException(L.l("Can't sendRedirect() after data has committed to the client."));
 
     _responseStream.clearBuffer();
     _originalResponseStream.clearBuffer();
-    
+
     _responseStream = _originalResponseStream;
     resetBuffer();
-    
+
     setStatus(SC_MOVED_TEMPORARILY);
     String path = getAbsolutePath(url);
 
@@ -614,32 +614,32 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       char ch = path.charAt(i);
 
       if (ch == '<')
-	cb.append("%3c");
+        cb.append("%3c");
       else if (ch < 0x80)
-	cb.append(ch);
+        cb.append(ch);
       else if (_charEncoding == null) {
-	addHex(cb, ch);
+        addHex(cb, ch);
       }
       else if (ch < 0x800) {
-	int d1 = 0xc0 + ((ch >> 6) & 0x1f);
-	int d2 = 0x80 + (ch & 0x3f);
+        int d1 = 0xc0 + ((ch >> 6) & 0x1f);
+        int d2 = 0x80 + (ch & 0x3f);
 
-	addHex(cb, d1);
-	addHex(cb, d2);
+        addHex(cb, d1);
+        addHex(cb, d2);
       }
       else if (ch < 0x8000) {
-	int d1 = 0xe0 + ((ch >> 12) & 0xf);
-	int d2 = 0x80 + ((ch >> 6) & 0x3f);
-	int d3 = 0x80 + (ch & 0x3f);
+        int d1 = 0xe0 + ((ch >> 12) & 0xf);
+        int d2 = 0x80 + ((ch >> 6) & 0x3f);
+        int d3 = 0x80 + (ch & 0x3f);
 
-	addHex(cb, d1);
-	addHex(cb, d2);
-	addHex(cb, d3);
+        addHex(cb, d1);
+        addHex(cb, d2);
+        addHex(cb, d3);
       }
     }
 
     path = cb.toString();
-    
+
     setHeader("Location", path);
     setHeader("Content-Type", "text/html");
 
@@ -648,7 +648,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     ServletOutputStream out = getOutputStream();
     out.println("The URL has moved <a href=\"" + path + "\">here</a>");
     // closeConnection();
-    
+
     if (_request instanceof AbstractHttpRequest) {
       AbstractHttpRequest request = (AbstractHttpRequest) _request;
 
@@ -662,7 +662,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     int d1 = (hex >> 4) & 0xf;
     int d2 = (hex) & 0xf;
-    
+
     cb.append('%');
     cb.append(d1 < 10 ? (char) (d1 + '0') : (char) (d1 - 10 + 'a'));
     cb.append(d2 < 10 ? (char) (d2 + '0') : (char) (d2 - 10 + 'a'));
@@ -694,7 +694,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   private String getAbsolutePath(String path)
   {
     int slash = path.indexOf('/');
-    
+
     int len = path.length();
 
     for (int i = 0; i < len; i++) {
@@ -722,16 +722,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (hostPrefix != null && ! hostPrefix.equals("")) {
     }
     else if (serverName.startsWith("http:")
-	     || serverName.startsWith("https:"))
+             || serverName.startsWith("https:"))
       hostPrefix = serverName;
     else if (host != null) {
       hostPrefix = _request.getScheme() + "://" + host;
     }
     else {
       hostPrefix = _request.getScheme() + "://" + serverName;
-      
+
       if (serverName.indexOf(':') < 0
-	  && port != 0 && port != 80 && port != 443)
+          && port != 0 && port != 80 && port != 443)
         hostPrefix += ":" + port;
     }
 
@@ -746,7 +746,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       queryString = path.substring(p + 1);
       path = path.substring(0, p);
     }
-    
+
     p = uri.lastIndexOf('/');
 
     if (p >= 0)
@@ -771,17 +771,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     for (int i = 0; i < _headerKeys.size(); i++) {
       String oldKey = _headerKeys.get(i);
- 
+
       if (oldKey.equalsIgnoreCase(name))
- 	return true;
+        return true;
     }
 
     if (name.equalsIgnoreCase("content-type"))
       return _contentType != null;
-    
+
     if (name.equalsIgnoreCase("content-length"))
       return _contentLength >= 0;
- 
+
     return false;
   }
 
@@ -794,17 +794,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     for (int i = 0; i < _headerKeys.size(); i++) {
       String oldKey = (String) _headerKeys.get(i);
- 
+
       if (oldKey.equalsIgnoreCase(name))
- 	return (String) _headerValues.get(i);
+        return (String) _headerValues.get(i);
     }
 
     if (name.equalsIgnoreCase("content-type"))
       return _contentType;
- 
+
     if (name.equalsIgnoreCase("content-length"))
       return _contentLength >= 0 ? String.valueOf(_contentLength) : null;
- 
+
     return null;
   }
 
@@ -831,15 +831,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       String oldKey = _headerKeys.get(i);
 
       if (oldKey.equalsIgnoreCase(key)) {
-	if (hasHeader) {
-	  _headerKeys.remove(i);
-	  _headerValues.remove(i);
-	}
-	else {
-	  hasHeader = true;
+        if (hasHeader) {
+          _headerKeys.remove(i);
+          _headerValues.remove(i);
+        }
+        else {
+          hasHeader = true;
 
-	  _headerValues.set(i, value);
-	}
+          _headerValues.set(i, value);
+        }
       }
     }
 
@@ -876,7 +876,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     int length = key.length();
     if (256 <= length)
       return false;
-    
+
     key.getChars(0, length, _headerBuffer, 0);
 
     switch (_headerCodes.get(_headerBuffer, length)) {
@@ -886,25 +886,25 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       else if (value.equals("x-anonymous")) {
       }
       else
-	_hasCacheControl = true;
+        _hasCacheControl = true;
       return false;
-	
+
     case HEADER_CONNECTION:
       if ("close".equalsIgnoreCase(value))
-	_request.killKeepalive();
+        _request.killKeepalive();
       return true;
-	
+
     case HEADER_CONTENT_TYPE:
       setContentType(value);
       return true;
-	
+
     case HEADER_CONTENT_LENGTH:
       _contentLength = Long.parseLong(value);
       return true;
-	
+
     case HEADER_DATE:
       return true;
-	
+
     case HEADER_SERVER:
       return false;
 
@@ -912,12 +912,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return false;
     }
   }
-  
+
   public void removeHeader(String key)
   {
     if (_disableHeaders)
       return;
-    
+
     for (int i = _headerKeys.size() - 1; i >= 0; i--) {
       String oldKey = (String) _headerKeys.get(i);
 
@@ -1029,17 +1029,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       _contentType = "text/html";
       return;
     }
-    
+
     _contentType = value;
-    
+
     int length = value.length();
     int i;
     int ch;
 
     for (i = 0;
-	 i < length && value.charAt(i) != ';'
-	   && ! Character.isWhitespace(value.charAt(i));
-	 i++) {
+         i < length && value.charAt(i) != ';'
+           && ! Character.isWhitespace(value.charAt(i));
+         i++) {
     }
 
     if (i < length)
@@ -1058,26 +1058,26 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
              ch != '=';
            j++) {
       }
-      
+
       if (length <= j)
-	break;
+        break;
       else if ((ch = value.charAt(i)) != 'c' && ch != 'C') {
       }
       else if (value.substring(i, j).equalsIgnoreCase("charset")) {
-	for (; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
-	}
+        for (; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
+        }
 
         if (length <= j || value.charAt(j) != '=')
           continue;
-        
-	for (j++; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
-	}
+
+        for (j++; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
+        }
 
         String encoding;
 
         if (j < length && value.charAt(j) == '"') {
           int k = ++j;
-          
+
           for (; j < length && value.charAt(j) != '"'; j++) {
           }
 
@@ -1093,23 +1093,23 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
           encoding = value.substring(k, j);
         }
 
-	int tail = value.indexOf(';', semicolon + 1);
+        int tail = value.indexOf(';', semicolon + 1);
 
-	StringBuilder sb = new StringBuilder();
-	sb.append(value, 0, semicolon);
-	if (tail > 0)
-	  sb.append(value, tail, value.length());
-	
-	_contentType = sb.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append(value, 0, semicolon);
+        if (tail > 0)
+          sb.append(value, tail, value.length());
 
-	if (! _hasWriter) {
-	  _hasCharEncoding = true;
-	  _charEncoding = encoding;
-	}
-	break;
+        _contentType = sb.toString();
+
+        if (! _hasWriter) {
+          _hasCharEncoding = true;
+          _charEncoding = encoding;
+        }
+        break;
       }
       else
-	i = j;
+        i = j;
     }
 
     // XXX: conflict with servlet exception throwing order?
@@ -1147,7 +1147,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     WebApp app = _request.getWebApp();
 
     String encoding = null;
-    
+
     if (app != null)
       encoding = app.getCharacterEncoding();
 
@@ -1256,15 +1256,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       String oldKey = _footerKeys.get(i);
 
       if (oldKey.equalsIgnoreCase(key)) {
-	if (hasFooter) {
-	  _footerKeys.remove(i);
-	  _footerValues.remove(i);
-	}
-	else {
-	  hasFooter = true;
+        if (hasFooter) {
+          _footerKeys.remove(i);
+          _footerValues.remove(i);
+        }
+        else {
+          hasFooter = true;
 
-	  _footerValues.set(i, value);
-	}
+          _footerValues.set(i, value);
+        }
       }
     }
 
@@ -1327,7 +1327,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     return _responseStream.isCauchoResponseStream();
   }
-  
+
   /**
    * Returns the ServletOutputStream for the response.
    */
@@ -1347,7 +1347,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       // _responseStream.setOutputStreamOnly(true);
     }
     */
-    
+
     return _responseOutputStream;
   }
 
@@ -1381,9 +1381,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       _hasWriter = true;
 
       if (_charEncoding != null)
-	_responseStream.setEncoding(_charEncoding);
+        _responseStream.setEncoding(_charEncoding);
     }
-    
+
     return _responsePrintWriter;
   }
 
@@ -1405,12 +1405,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public String encodeURL(String string)
   {
     CauchoRequest request = getRequest();
-    
+
     WebApp app = request.getWebApp();
 
     if (app == null)
       return string;
-    
+
     if (request.isRequestedSessionIdFromCookie())
       return string;
 
@@ -1432,7 +1432,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       int p = string.indexOf('?');
 
       if (p == 0) {
-	cb.append(string);
+        cb.append(string);
       }
       else if (p > 0) {
         cb.append(string, 0, p);
@@ -1454,31 +1454,31 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     }
     else {
       int p = string.indexOf("://");
-      
+
       if (p < 0) {
-	cb.append(altPrefix);
-	cb.append(session.getId());
-	
-	if (! string.startsWith("/")) {
-	  cb.append(_request.getContextPath());
-	  cb.append('/');
-	}
+        cb.append(altPrefix);
+        cb.append(session.getId());
+
+        if (! string.startsWith("/")) {
+          cb.append(_request.getContextPath());
+          cb.append('/');
+        }
         cb.append(string);
       }
       else {
-	int q = string.indexOf('/', p + 3);
+        int q = string.indexOf('/', p + 3);
 
-	if (q < 0) {
-	  cb.append(string);
-	  cb.append(altPrefix);
-	  cb.append(session.getId());
-	}
-	else {
-	  cb.append(string.substring(0, q));
-	  cb.append(altPrefix);
-	  cb.append(session.getId());
-	  cb.append(string.substring(q));
-	}
+        if (q < 0) {
+          cb.append(string);
+          cb.append(altPrefix);
+          cb.append(session.getId());
+        }
+        else {
+          cb.append(string.substring(0, q));
+          cb.append(altPrefix);
+          cb.append(session.getId());
+          cb.append(string.substring(q));
+        }
       }
     }
 
@@ -1570,7 +1570,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     if (! force && _originalResponseStream.isCommitted())
       throw new IllegalStateException(L.l("response cannot be reset() after committed"));
-    
+
     _responseStream.clearBuffer();
     /*
     if (_currentWriter instanceof JspPrintWriter)
@@ -1587,7 +1587,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _contentLength = -1;
     //_isNoCache = false;
     //_isPrivateCache = false;
-    
+
     _charEncoding = null;
     _locale = null;
 
@@ -1617,7 +1617,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         if (_charEncoding != null) {
           // _originalStream.setEncoding(_charEncoding);
           _responseStream.setEncoding(_charEncoding);
-	}
+        }
       } catch (IOException e) {
       }
     }
@@ -1633,7 +1633,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         cb.append(locale.getVariant());
       }
     }
-    
+
     setHeader("Content-Language", cb.toString());
   }
 
@@ -1646,7 +1646,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   }
 
   // needed to support JSP
-  
+
   public int getRemaining()
   {
     return _responseStream.getRemaining();
@@ -1689,7 +1689,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     _isHeaderWritten = isWritten;
   }
-  
+
   /**
    * Writes the continue
    */
@@ -1701,7 +1701,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       _rawWrite.flush();
     }
   }
-  
+
   /**
    * Writes the continue
    */
@@ -1727,7 +1727,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     // server/1373 for getBufferSize()
     boolean canCache = startCaching(true);
     _isHeaderWritten = true;
-    
+
     if (_request.getMethod().equals("HEAD")) {
       _originalResponseStream.setHead();
     }
@@ -1738,7 +1738,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     if (webApp != null) {
       if (majorCode == 5)
-	webApp.addStatus500();
+        webApp.addStatus500();
     }
 
     HttpSession session = _originalRequest.getMemorySession();
@@ -1747,16 +1747,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     if (_sessionId != null && ! _hasSessionCookie) {
       _hasSessionCookie = true;
-      
+
       SessionManager manager = webApp.getSessionManager();
 
       String cookieName;
 
       if (_request.isSecure())
-	cookieName = manager.getSSLCookieName();
+        cookieName = manager.getSSLCookieName();
       else
-	cookieName = manager.getCookieName();
-      
+        cookieName = manager.getCookieName();
+
       CookieImpl cookie = new CookieImpl(cookieName, _sessionId);
       cookie.setVersion(manager.getCookieVersion());
       String domain = manager.getCookieDomain();
@@ -1766,14 +1766,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       if (maxAge > 0)
         cookie.setMaxAge((int) (maxAge / 1000));
       cookie.setPath("/");
-      
+
       cookie.setPort(manager.getCookiePort());
       if (manager.getCookieSecure()) {
-	cookie.setSecure(_request.isSecure());
-	/*
-	else if (manager.getCookiePort() == null)
-	  cookie.setPort(String.valueOf(_request.getServerPort()));
-	*/
+        cookie.setSecure(_request.isSecure());
+        /*
+        else if (manager.getCookiePort() == null)
+          cookie.setPort(String.valueOf(_request.getServerPort()));
+        */
       }
 
       addCookie(cookie);
@@ -1795,7 +1795,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     if (_statusCode == SC_OK && ! _disableCaching) // && getBufferSize() > 0)
       return startCaching(_headerKeys, _headerValues,
-			  _contentType, _charEncoding, isByte);
+                          _contentType, _charEncoding, isByte);
     else
       return false;
   }
@@ -1812,7 +1812,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   boolean startCaching(ArrayList<String> keys, ArrayList<String> values,
                        String contentType, String charEncoding,
-		       boolean isByte)
+                       boolean isByte)
   {
     if (_cacheInvocation == null)
       return false;
@@ -1833,35 +1833,35 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     }
     else {
       CauchoRequest request = (CauchoRequest) _originalRequest;
-      
+
       _newCacheEntry = _cacheInvocation.startCaching(request,
-						     this, keys, values,
-						     contentType,
-						     charEncoding,
-						     _contentLength);
+                                                     this, keys, values,
+                                                     contentType,
+                                                     charEncoding,
+                                                     _contentLength);
 
       if (_newCacheEntry == null) {
-	return false;
+        return false;
       }
       else if (isByte) {
-	_cacheStream = _newCacheEntry.openOutputStream();
+        _cacheStream = _newCacheEntry.openOutputStream();
 
-	if (_cacheStream != null)
-	  _originalResponseStream.setByteCacheStream(_cacheStream);
-      
-	return _cacheStream != null;
+        if (_cacheStream != null)
+          _originalResponseStream.setByteCacheStream(_cacheStream);
+
+        return _cacheStream != null;
       }
       else {
-	_cacheWriter = _newCacheEntry.openWriter();
+        _cacheWriter = _newCacheEntry.openWriter();
 
-	if (_cacheWriter != null)
-	  _originalResponseStream.setCharCacheStream(_cacheWriter);
-      
-	return _cacheWriter != null;
+        if (_cacheWriter != null)
+          _originalResponseStream.setCharCacheStream(_cacheWriter);
+
+        return _cacheWriter != null;
       }
     }
   }
-  
+
 
   /**
    * Handle a SC_NOT_MODIFIED response.  If we've got a cache, fill the
@@ -1895,7 +1895,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         _matchCacheEntry = null;
 
         finish(); // Don't force a flush to avoid extra TCP packet
-      
+
         return true;
       }
     }
@@ -1903,11 +1903,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     else if (_cacheInvocation != null) {
       CauchoRequest req = (CauchoRequest) _originalRequest;
       WebApp app = req.getWebApp();
-      
+
       long maxAge = app.getMaxAge(req.getRequestURI());
 
       if (maxAge > 0 && ! containsHeader("Expires")) {
-	setDateHeader("Expires", maxAge + Alarm.getCurrentTime());
+        setDateHeader("Expires", maxAge + Alarm.getCurrentTime());
       }
     }
 
@@ -1939,7 +1939,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   }
 
   /**
-   * Sets true if the cache is only for the browser and 
+   * Sets true if the cache is only for the browser and
    * Resin's cache but not proxies.
    */
   public void setPrivateOrResinCache(boolean isPrivate)
@@ -1948,7 +1948,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _isPrivateCache = isPrivate;
   }
-  
+
   /**
    * Returns the value of the private cache.
    */
@@ -2002,11 +2002,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public boolean fillCookie(CharBuffer cb, Cookie cookie,
                             long date, int version,
-			    boolean isCookie2)
+                            boolean isCookie2)
   {
     // How to deal with quoted values?  Old browsers can't deal with
     // the quotes.
-    
+
     cb.clear();
     cb.append(cookie.getName());
     if (isCookie2) {
@@ -2023,7 +2023,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (domain != null && ! domain.equals("")) {
       if (isCookie2) {
         cb.append("; Domain=");
-      
+
         cb.append('"');
         cb.append(domain);
         cb.append('"');
@@ -2038,21 +2038,21 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (path != null && ! path.equals("")) {
       if (isCookie2) {
         cb.append("; Path=");
-      
+
         cb.append('"');
         cb.append(path);
         cb.append('"');
       }
       else {
-	// Caps from TCK test
-	if (version > 0)
-	  cb.append("; Path=");
-	else
-	  cb.append("; path=");
+        // Caps from TCK test
+        if (version > 0)
+          cb.append("; Path=");
+        else
+          cb.append("; path=");
         cb.append(path);
       }
     }
-    
+
     if (cookie.getSecure()) {
       if (version > 0)
         cb.append("; Secure");
@@ -2066,10 +2066,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         cb.append("; Max-Age=");
         cb.append(maxAge);
       }
-      
+
       cb.append("; Version=");
       cb.append(version);
-      
+
       if (cookie.getComment() != null) {
         cb.append("; Comment=\"");
         cb.append(cookie.getComment());
@@ -2077,14 +2077,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       }
 
       if (cookie instanceof CookieImpl) {
-	CookieImpl extCookie = (CookieImpl) cookie;
-	String port = extCookie.getPort();
+        CookieImpl extCookie = (CookieImpl) cookie;
+        String port = extCookie.getPort();
 
-	if (port != null && isCookie2) {
-	  cb.append("; Port=\"");
-	  cb.append(port);
-	  cb.append("\"");
-	}
+        if (port != null && isCookie2) {
+          cb.append("; Port=\"");
+          cb.append(port);
+          cb.append("\"");
+        }
       }
     }
 
@@ -2121,9 +2121,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void upgradeProtocol(TcpConnectionHandler handler)
   {
     throw new IllegalStateException(L.l("'{0}' does not support upgrading",
-					this));
+                                        this));
   }
-  
+
   /**
    * Complete the request.  Flushes the streams, completes caching
    * and writes the appropriate logs.
@@ -2145,52 +2145,52 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     ConnectionController controller = null;
-    
+
     try {
       if (_originalRequest instanceof AbstractHttpRequest) {
-	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
-	
-	Connection conn = request.getConnection();
-	controller = conn.getController();
+        AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
 
-	try {
-	  request.skip();
-	} catch (BadRequestException e) {
-	  log.warning(e.toString());
-	  log.log(Level.FINE, e.toString(), e);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        Connection conn = request.getConnection();
+        controller = conn.getController();
+
+        try {
+          request.skip();
+        } catch (BadRequestException e) {
+          log.warning(e.toString());
+          log.log(Level.FINE, e.toString(), e);
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       if (_statusCode == SC_NOT_MODIFIED) {
-	handleNotModified(_isTopCache);
+        handleNotModified(_isTopCache);
       }
 
       if (controller != null && ! controller.isClosed())
-	isClose = false;
+        isClose = false;
 
       // include() files finish too, but shouldn't force a flush, hence
       // flush is false
       // Never send flush?
       if (isClose)
-	_responseStream.close();
+        _responseStream.close();
       else if (_responseStream != _originalResponseStream)
-	_responseStream.finish();
+        _responseStream.finish();
       else if (controller == null)
-	_responseStream.finish();
+        _responseStream.finish();
       else
-	_responseStream.flush();
+        _responseStream.flush();
 
       if (_responseStream != _originalResponseStream) {
-	if (isClose)
-	  _originalResponseStream.close();
-	else if (controller == null)
-	  _originalResponseStream.finish();
+        if (isClose)
+          _originalResponseStream.close();
+        else if (controller == null)
+          _originalResponseStream.finish();
       }
 
       if (controller == null)
-	_isClosed = true;
+        _isClosed = true;
 
       if (_rawWrite == null) {
       }
@@ -2198,59 +2198,59 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       // else if (isClose)
       // _rawWrite.close();
       else
-	_rawWrite.flushBuffer();
+        _rawWrite.flushBuffer();
 
       if (_cacheInvocation == null) {
       }
       else if (_newCacheEntry != null) {
-	OutputStream cacheStream = _cacheStream;
-	_cacheStream = null;
-	
-	Writer cacheWriter = _cacheWriter;
-	_cacheWriter = null;
+        OutputStream cacheStream = _cacheStream;
+        _cacheStream = null;
 
-	if (cacheStream != null)
-	  cacheStream.close();
+        Writer cacheWriter = _cacheWriter;
+        _cacheWriter = null;
 
-	if (cacheWriter != null)
-	  cacheWriter.close();
-	
-	if (_statusCode == 200 && _allowCache) {
-	  AbstractCacheFilterChain cache = _cacheInvocation;
-	  _cacheInvocation = null;
+        if (cacheStream != null)
+          cacheStream.close();
 
-	  AbstractCacheEntry cacheEntry = _newCacheEntry;
-	  _newCacheEntry = null;
-	  
-	  cache.finishCaching(cacheEntry);
-	}
+        if (cacheWriter != null)
+          cacheWriter.close();
+
+        if (_statusCode == 200 && _allowCache) {
+          AbstractCacheFilterChain cache = _cacheInvocation;
+          _cacheInvocation = null;
+
+          AbstractCacheEntry cacheEntry = _newCacheEntry;
+          _newCacheEntry = null;
+
+          cache.finishCaching(cacheEntry);
+        }
       }
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
 
       if (isIgnoreClientDisconnect())
-	log.fine(e.toString());
+        log.fine(e.toString());
       else
-	throw e;
+        throw e;
     } catch (IOException e) {
       _request.killKeepalive();
-      
+
       throw e;
     } finally {
       if (controller == null)
-	_isClosed = true;
+        _isClosed = true;
 
       AbstractCacheFilterChain cache = _cacheInvocation;
       _cacheInvocation = null;
-      
+
       AbstractCacheEntry cacheEntry = _newCacheEntry;
       _newCacheEntry = null;
-      
+
       _cacheStream = null;
       _cacheWriter = null;
 
       if (cacheEntry != null)
-	cache.killCaching(cacheEntry);
+        cache.killCaching(cacheEntry);
     }
   }
 
@@ -2258,7 +2258,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     AbstractCacheFilterChain cache = _cacheInvocation;
     _cacheInvocation = null;
-    
+
     AbstractCacheEntry cacheEntry = _newCacheEntry;
     _newCacheEntry = null;
 
