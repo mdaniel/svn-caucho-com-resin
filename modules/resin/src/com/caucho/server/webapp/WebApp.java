@@ -3813,21 +3813,26 @@ public class WebApp extends ServletContextImpl
     if (realPath != null)
       return realPath;
 
-    String fullURI = getContextPath() + "/" + uri;
+    WebApp webApp = this;
+    String tail = uri;
+    
+    if (isActive()) {
+      String fullURI = getContextPath() + "/" + uri;
 
-    try {
-      fullURI = getInvocationDecoder().normalizeUri(fullURI);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      try {
+        fullURI = getInvocationDecoder().normalizeUri(fullURI);
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
+      webApp = (WebApp) getContext(fullURI);
+
+      if (webApp == null)
+        return null;
+
+      String cp = webApp.getContextPath();
+      tail = fullURI.substring(cp.length());
     }
-
-    WebApp webApp = (WebApp) getContext(fullURI);
-
-    if (webApp == null)
-      return null;
-
-    String cp = webApp.getContextPath();
-    String tail = fullURI.substring(cp.length());
 
     realPath = webApp.getRealPathImpl(tail);
 
@@ -4128,6 +4133,8 @@ public class WebApp extends ServletContextImpl
 
       long beginStop = Alarm.getCurrentTime();
 
+      clearCache();
+      
       while (_requestCount.get() > 0
              && Alarm.getCurrentTime() < beginStop + _shutdownWaitTime
              && ! Alarm.isTest()) {

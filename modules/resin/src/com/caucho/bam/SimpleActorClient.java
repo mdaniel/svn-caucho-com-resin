@@ -44,7 +44,7 @@ public class SimpleActorClient implements ActorClient {
 
   private final QueryManager _queryManager = new QueryManager();
 
-  private long _timeout = 10000L;
+  private long _timeout = 120000L;
 
   public SimpleActorClient()
   {

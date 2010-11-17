@@ -46,7 +46,7 @@ public class ProcessProducerMethodImpl<X,T> extends ProcessBeanImpl<T>
   protected ProcessProducerMethodImpl(InjectManager manager, 
                                       ProducesMethodBean<X,T> bean)
   {
-    super(manager, bean, bean.getAnnotatedType());
+    super(manager, bean, bean.getProducesMethod());
     
     _bean = bean;
   }

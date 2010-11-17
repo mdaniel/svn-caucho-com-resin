@@ -628,6 +628,7 @@ abstract public class AbstractParser implements XMLReader, Parser
    *
    * @param source source containing the XML
    */
+  @Override
   public void parse(InputSource source)
     throws IOException, SAXException
   {

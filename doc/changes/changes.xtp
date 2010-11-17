@@ -13,6 +13,7 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>db-pool: increased default DB create count to 20 (#4252, rep by Wesley Wu)</li>
 <li>hessian: change HessianServlet to extend HttpServlet (#4193, rep by voodude)</li>
 <li>cookie: change &lt;http-only> to apply only to the session cookie (#4217, rep by gzhu)</li>
 <li>thread: priority thread queue fixes (#4228, #4291, rep by Jamison Novak)</li>

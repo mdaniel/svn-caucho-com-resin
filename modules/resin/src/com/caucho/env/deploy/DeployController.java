@@ -696,6 +696,8 @@ abstract public class DeployController<I extends DeployInstance>
       
       isStopping = _lifecycle.toStopping();
 
+      _lifecycle.toStop();
+      
       if (! isStopping)
         return;
 
@@ -709,8 +711,6 @@ abstract public class DeployController<I extends DeployInstance>
       }
     } finally  {
       if (isStopping) {
-        _lifecycle.toStop();
-        
         onStop();
       }
       

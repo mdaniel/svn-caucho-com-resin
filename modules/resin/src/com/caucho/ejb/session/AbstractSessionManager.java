@@ -330,7 +330,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     
     Class<?> ejbClass = getAnnotatedType().getJavaClass();
   
-    if (Modifier.isPublic(ejbClass.getModifiers())) {
+    if (isPublic(ejbClass)) {
       proxyImplClass = javaGen.loadClass(skeletonName);
     }
     else {
@@ -353,6 +353,24 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     // contextImplClass.getDeclaredConstructors();
     
     return proxyImplClass;
+  }
+  
+  private boolean isPublic(Class<?> cl)
+  {
+    if (! Modifier.isPublic(cl.getModifiers()))
+      return false;
+    
+    Class<?> superClass = cl.getSuperclass();
+    if (superClass != null && ! Modifier.isPublic(superClass.getModifiers()))
+      return false;
+    
+    // ejb/5092 - CDI TCK
+    for (Class<?> ifClass : cl.getInterfaces()) {
+      if (! Modifier.isPublic(ifClass.getModifiers()))
+        return false;
+    }
+    
+    return true;
   }
   
   @Override
@@ -571,7 +589,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     SessionRegistrationBean<X,T> regBean
       = new SessionRegistrationBean<X,T>(beanManager, context, _bean, beanName);
       
-    beanManager.addBean(regBean);
+    beanManager.addBeanImpl(regBean, regBean.getAnnotated());
   }
 
   protected Bean<X> getBean()

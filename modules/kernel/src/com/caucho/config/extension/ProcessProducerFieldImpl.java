@@ -45,7 +45,7 @@ public class ProcessProducerFieldImpl<X,T> extends ProcessBeanImpl<T>
   protected ProcessProducerFieldImpl(InjectManager manager, 
                                      ProducesFieldBean<X,T> bean)
   {
-    super(manager, bean, bean.getAnnotatedType());
+    super(manager, bean, bean.getField());
     
     _bean = bean;
   }

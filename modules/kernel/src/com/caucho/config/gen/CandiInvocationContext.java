@@ -183,7 +183,7 @@ public class CandiInvocationContext implements InvocationContext {
         
         if (_chainObjects[_chainIndex[i]] == null)
           throw new NullPointerException(i + " index[i]=" + _chainIndex[i] + " " + _type + " " + _chainMethods[i]);
-        
+
         result = _chainMethods[i].intercept(_type,
                                             _chainObjects[_chainIndex[i]], 
                                             this);
@@ -208,6 +208,8 @@ public class CandiInvocationContext implements InvocationContext {
       else
         throw e;
     } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
       throw e;
     } finally {
       if (isTop)

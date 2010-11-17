@@ -196,6 +196,7 @@ public class XmlParser extends AbstractParser {
    *
    * @return The parsed document.
    */
+  @Override
   Document parseInt(ReadStream is)
     throws IOException, SAXException
   {
@@ -242,7 +243,6 @@ public class XmlParser extends AbstractParser {
       _owner = new QDocument();
     if (_defaultEncoding != null)
       _owner.setAttribute("encoding", _defaultEncoding);
-    _owner.addDepend(is.getPath());
     
     _activeNode = DOC_NAME;
     
@@ -271,6 +271,10 @@ public class XmlParser extends AbstractParser {
 
     QDocument owner = _owner;
     _owner = null;
+    
+    is.close();
+    owner.addDepend(is.getPath());
+    
       
     return owner;
   }
