@@ -137,22 +137,22 @@ public class ELParser
         }
       }
       else if (ch == '$' || ch == '#') {
-        if (expr != null && _isMethodExpr)
-          throw new ELParseException(L.l("Invalid method expression `{0}'",
-                                         _string));
-
-        if (exprToken != -1 && exprToken != ch)
-          throw error(L.l("Mixed '#' and '$'. Expected `{0}' at `{1}'",
-                          Character.toString((char)exprToken),
-                          Character.toString((char)ch)));
-
-        exprToken = ch;
-
         int origChar = ch;
 
         ch = read();
 
         if (ch == '{') {
+          if (expr != null && _isMethodExpr)
+            throw new ELParseException(L.l("Invalid method expression '{0}'",
+                                           _string));
+
+          if (exprToken != -1 && exprToken != origChar)
+            throw error(L.l("Mixed '#' and '$'. Expected '{0}' at '{1}'",
+                            Character.toString((char) exprToken),
+                            Character.toString((char) origChar)));
+
+          exprToken = ch;
+
           if (text.length() > 0) {
             StringLiteral right = new StringLiteral(text.toString());
 

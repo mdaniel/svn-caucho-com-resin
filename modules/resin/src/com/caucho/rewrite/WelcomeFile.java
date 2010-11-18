@@ -197,7 +197,6 @@ public class WelcomeFile extends AbstractDispatchRule
   private Match matchWelcomeUri(String welcomeUri)
   {
     try {
-      
       InputStream is;
       is = _webApp.getResourceAsStream(welcomeUri);
 
@@ -207,7 +206,7 @@ public class WelcomeFile extends AbstractDispatchRule
       if (is != null)
         return Match.FILE;
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
     }
       
     String servletClassName

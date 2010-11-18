@@ -661,7 +661,9 @@
         <include name="lib/jsf-api.jar"/>
         <include name="lib/jsf-impl.jar"/>
         <include name="lib/jsf.LICENSE"/>
+        <!--
         <include name="lib/slf4j-api-1.6.1.jar"/>
+          -->
         <include name="lib/validation-api-1.0.0.GA.jar"/>
         <include name="lib/webutil.jar"/>
         <include name="lib/webservices-api.jar"/>
@@ -687,6 +689,19 @@
         <include name="description-pak"/>
       </fileset>
     </copy>
+    <!--
+    <copy todir="${dist}/${dist.name}/project-jars"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${resin.install}/lib">
+        <exclude name="**/*~"/>
+        <exclude name="**/.cvsignore"/>
+        <exclude name="**/.svnignore"/>
+
+        <include name="lib/slf4j-api-1.6.1.jar"/>
+      </fileset>
+    </copy>
+    -->
 
     <copy todir="${resin.dist}/${dist.name}/doc/resin-doc">
       <fileset dir="${resin.install}/doc">

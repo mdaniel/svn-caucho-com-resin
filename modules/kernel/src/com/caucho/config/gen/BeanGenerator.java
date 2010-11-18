@@ -41,6 +41,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.interceptor.Interceptors;
 
 import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.inject.Module;
@@ -331,7 +332,8 @@ abstract public class BeanGenerator<X> extends GenClass
     ArrayList<Method> postConstructMethods 
       = getLifecycleAspects(PostConstruct.class);
     
-    if (postConstructMethods.size() == 0) {
+    if (postConstructMethods.size() == 0
+        && getBeanType().isAnnotationPresent(Interceptors.class)) {
       generateDummyPostConstruct(postConstructMethods, out, map);
     }
     

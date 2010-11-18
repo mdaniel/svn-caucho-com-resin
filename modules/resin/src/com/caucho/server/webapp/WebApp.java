@@ -3393,28 +3393,7 @@ public class WebApp extends ServletContextImpl
             _filterChainCache.put(invocation.getContextURI(), entry);
         }
 
-        // the cache must be outside of the WebAppFilterChain because
-        // the CacheListener in ServletInvocation needs the top to
-        // be a CacheListener.  Otherwise, the cache won't get lru.
-
-        if (_isStatisticsEnabled)
-          chain = new StatisticsFilterChain(chain, this);
-
-        WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
-
-        webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
-        chain = webAppChain;
-
-        // TCK: cache needs to be outside because the cache flush conflicts
-        // with the request listener destroy callback
-        // top-level filter elements
-        // server/021h - cache not logging
-
-        if (_cache != null)
-          chain = _cache.createFilterChain(chain, this);
-
-        if (getAccessLog() != null)
-          chain = new AccessLogFilterChain(chain, this);
+        chain = createWebAppFilterChain(chain, invocation);
 
         invocation.setFilterChain(chain);
         invocation.setPathInfo(entry.getPathInfo());
@@ -3448,6 +3427,35 @@ public class WebApp extends ServletContextImpl
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  FilterChain createWebAppFilterChain(FilterChain chain,
+                                      Invocation invocation)
+  {
+    // the cache must be outside of the WebAppFilterChain because
+    // the CacheListener in ServletInvocation needs the top to
+    // be a CacheListener.  Otherwise, the cache won't get lru.
+
+    if (_isStatisticsEnabled)
+      chain = new StatisticsFilterChain(chain, this);
+
+    WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
+
+    webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
+    chain = webAppChain;
+
+    // TCK: cache needs to be outside because the cache flush conflicts
+    // with the request listener destroy callback
+    // top-level filter elements
+    // server/021h - cache not logging
+
+    if (_cache != null)
+      chain = _cache.createFilterChain(chain, this);
+
+    if (getAccessLog() != null)
+      chain = new AccessLogFilterChain(chain, this);
+    
+    return chain;
   }
 
   public ServletMapper getServletMapper()

@@ -35,7 +35,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -207,11 +206,14 @@ public class SessionBeanImpl<X,T>
   {
     EventManager eventManager = _context.getModuleInjectManager().getEventManager();
 
+    // ioc/0b26
     for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
+      /*
       if (! beanMethod.getJavaMember().getDeclaringClass().equals(beanType.getJavaClass())
           && ! beanType.isAnnotationPresent(Specializes.class)) {
         continue;
       }
+      */
       
       AnnotatedMethod<? super X> apiMethod
         = AnnotatedTypeUtil.findMethod(extAnnType, beanMethod);

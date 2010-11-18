@@ -158,7 +158,7 @@ class InjectScanClass implements ScanClass
       
       if (_registerAnnotationSet.contains(annType.getType())) {
         if (annType.getType() == Observes.class)
-          _isObserves = true;
+          setObserves();
         
         _isRegisterRequired = true;
         return;
@@ -182,6 +182,19 @@ class InjectScanClass implements ScanClass
       log.log(Level.FINER, e.toString(), e);
     }
   }
+  
+  private void setObserves()
+  {
+    _isObserves = true;
+    _isRegisterRequired = true;
+    
+    // ioc/0b25
+    if (_children != null) {
+      for (InjectScanClass scanClass : _children) {
+        scanClass.setObserves();
+      }
+    }
+  }
 
   @Override
   public void addPoolString(char[] buffer, int offset, int length)
@@ -193,8 +206,7 @@ class InjectScanClass implements ScanClass
       _isRegisterRequired = true;
     }
     else if (isMatch(buffer, offset, length, OBSERVES)) {
-      _isRegisterRequired = true;
-      _isObserves = true;
+      setObserves();
     }
   }
 
@@ -220,6 +232,10 @@ class InjectScanClass implements ScanClass
     
     if (! _children.contains(child))
       _children.add(child);
+    
+    if (_isObserves) {
+      child.setObserves();
+    }
   }
   
   void register()

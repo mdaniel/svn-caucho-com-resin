@@ -3084,8 +3084,8 @@ public final class InjectManager
     
     if (scanClass == null)
       return true;
-    else
-      return scanClass.isObserves();
+    
+    return scanClass.isObserves();
   }
   
   private boolean isValidSimpleBean(Class<?> type)

@@ -53,10 +53,12 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.Producer;
 import javax.inject.Named;
+import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.program.Arg;
+import com.caucho.config.reflect.AnnotatedElementImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
@@ -133,7 +135,7 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
     
     Method javaMethod = producesMethod.getJavaMember();
     int modifiers = javaMethod.getModifiers();
-    
+
     if (producesMethod.isAnnotationPresent(Specializes.class)) {
       if (Modifier.isStatic(modifiers)) {
         throw new ConfigException(L.l("{0}.{1} is an invalid @Specializes @Producer because the method is static.",
@@ -157,6 +159,15 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
                                       javaMethod.getName()));
 
 
+      }
+      
+      for (Annotation ann : parentMethod.getAnnotations()) {
+        if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
+          // ioc/07a5
+          if (producesMethod instanceof AnnotatedElementImpl) {
+            ((AnnotatedElementImpl) producesMethod).addAnnotation(ann);
+          }
+        }
       }
     }
   }

@@ -429,7 +429,7 @@ abstract public class AbstractHttpResponse {
     case HEADER_CONTENT_LENGTH:
       // server/05a8
       // php/164v
-      _contentLength = Long.parseLong(value.trim());
+      _contentLength = parseLong(value);
       return true;
 
     case HEADER_DATE:
@@ -441,6 +441,45 @@ abstract public class AbstractHttpResponse {
     default:
       return false;
     }
+  }
+  
+  private long parseLong(String string)
+  {
+    int length = string.length();
+   
+    int i;
+    int ch = 0;
+    for (i = 0;
+         i < length && Character.isWhitespace((ch = string.charAt(i)));
+         i++) {
+    }
+    
+    int sign = 1;
+    long value = 0;
+    
+    if (ch == '-') {
+      sign = -1;
+      
+      if (i < length)
+        ch = string.charAt(i++);
+    }
+    else if (ch == '+') {
+      if (i < length)
+        ch = string.charAt(i++);
+    }
+    
+    if (! ('0' <= ch && ch <= '9')) {
+      throw new IllegalArgumentException(L.l("'{0}' is an invalid content-length",
+                                             string));
+    }
+    
+    for (;
+         i < length && '0' <= (ch = string.charAt(i)) && ch <= '9';
+         i++) {
+      value = 10 * value + ch - '0';
+    }
+
+    return sign * value;
   }
 
   public void removeHeader(String key)
@@ -1029,6 +1068,8 @@ abstract public class AbstractHttpResponse {
       } catch (BadRequestException e) {
         log.warning(e.toString());
         log.log(Level.FINE, e.toString(), e);
+      } catch (ClientDisconnectException e) {
+        log.log(Level.FINER, e.toString(), e);
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       }

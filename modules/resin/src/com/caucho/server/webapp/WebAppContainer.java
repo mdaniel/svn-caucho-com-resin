@@ -802,6 +802,8 @@ public class WebAppContainer
           invocation.setWebApp(webApp);
         else
           invocation.setWebApp(getErrorWebApp());
+        
+        rewriteChain = webApp.createWebAppFilterChain(rewriteChain, invocation);
 
         invocation.setFilterChain(rewriteChain);
         isAlwaysModified = false;

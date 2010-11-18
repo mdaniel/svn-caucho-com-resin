@@ -48,6 +48,7 @@ import javax.ejb.SessionContext;
 import javax.ejb.TimerService;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -462,6 +463,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       
     apiList.add(Object.class);
     
+    // ioc/024p
+    /*
     if (remoteApiList != null) {
       for (AnnotatedType<? super X> api : remoteApiList) {
         if (baseApi == null)
@@ -472,6 +475,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
         apiList.addAll(sourceApi.getTypeClosure(moduleBeanManager));
       }
     }
+    */
     
     if (baseApi == null)
       throw new NullPointerException();
@@ -522,9 +526,10 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       
       if (extMethod != null)
         extAnnType.addMethod(extMethod);
-      else if (method.isAnnotationPresent(Produces.class)) {
+      else if (method.isAnnotationPresent(Produces.class)
+               && ! baseType.isAnnotationPresent(Specializes.class)) {
         // TCK: conflict
-        // ioc/07fa
+        // ioc/07fa, ioc/07a4
         throw new ConfigException(L.l("{0}.{1} is an invalid @Produces EJB method because the method is not in a @Local interface.",
                                       method.getDeclaringType().getJavaClass().getName(),
                                       method.getJavaMember().getName()));

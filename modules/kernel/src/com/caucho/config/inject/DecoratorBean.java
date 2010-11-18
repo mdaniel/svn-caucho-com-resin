@@ -300,7 +300,8 @@ public class DecoratorBean<T> implements Decorator<T>
         if (baseType.getRawClass().equals(Serializable.class))
           continue;
         
-        if (baseType.isAssignableFrom(delegateType)) {
+        if (true || baseType.isAssignableFrom(delegateType)) {
+          // ioc/0i3r
           _typeSet.add(type);
         }
         else if (isDeclaredInterface(selfType, baseType)){

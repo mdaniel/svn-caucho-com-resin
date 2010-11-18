@@ -266,8 +266,7 @@ public class InterceptorGenerator<X>
     
     out.println(");");
     
-    if (_factory.isPassivating()
-        || _factory.isStateful() && _interceptorBinding.size() > 0) {
+    if (isPassivating()) {
       String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
 
       out.println();
@@ -285,6 +284,16 @@ public class InterceptorGenerator<X>
     out.println("}");
 
     map.put(key, _uniqueName);
+  }
+  
+  private boolean isPassivating()
+  {
+    if (_factory.isPassivating())
+      return true;
+    else if (_factory.isStateful())
+      return _interceptorBinding.size() > 0 || _decoratorSet != null;
+    else
+      return false;
   }
 
   /**
@@ -845,8 +854,7 @@ public class InterceptorGenerator<X>
                 + "." + _interceptionType + ",");
     out.println("    " + chainName + "_objectIndexChain);");
     
-    if (_factory.isPassivating()
-        || _factory.isStateful() && _interceptorBinding.size() > 0) {
+    if (isPassivating()) {
       String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
       
       out.println();
@@ -1106,7 +1114,7 @@ public class InterceptorGenerator<X>
       out.println(");");
     }
     
-    if (_factory.isPassivating() || _factory.isStateful()) {
+    if (isPassivating()) {
       String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
       
       out.println();

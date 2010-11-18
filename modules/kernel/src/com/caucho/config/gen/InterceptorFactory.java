@@ -150,7 +150,7 @@ public class InterceptorFactory<X>
   
   public boolean isStateful()
   {
-    return _isStateful;
+    return _isStateful || getBeanType().isAnnotationPresent(Stateful.class);
   }
   
   public boolean isSelfInterceptor()
@@ -816,7 +816,7 @@ public class InterceptorFactory<X>
     if (decorators.size() == 0)
       return;
     
-    if (isPassivating()) {
+    if (isPassivating() || isStateful()) {
       // ioc/0i5e
       CandiUtil.validatePassivatingDecorators(getBeanType().getJavaClass(), decorators);
     }

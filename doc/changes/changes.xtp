@@ -13,6 +13,11 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>jsp-el: parsing confusion with "0#${foo}" (#4190, rep by olaf2010)</li>
+<li>rewrite: host-level rewrite issues with access-log (#4198)</li>
+<li>distribution: slf4j.jar removed from resin/lib (#4271, rep by Nicolai Steven)</li>
+<li>servlet: setHeader("Content-Length", "12;") was throwing an exception (#4210, rep by mkjang)</li>
+<li>servlet: getOutputStream was not allowed after flushBuffer (#4289, rep by vbavin)</li>
 <li>db-pool: increased default DB create count to 20 (#4252, rep by Wesley Wu)</li>
 <li>hessian: change HessianServlet to extend HttpServlet (#4193, rep by voodude)</li>
 <li>cookie: change &lt;http-only> to apply only to the session cookie (#4217, rep by gzhu)</li>
