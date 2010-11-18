@@ -620,13 +620,13 @@ services.
 
 <tr>
   <td>
-    <a href="http://caucho.com/resin-4.0-javadoc/com/caucho/jms/JmsListener.html">@JmsListener</a>
+    <a href="http://caucho.com/resin-4.0-javadoc/com/caucho/jms/JmsMessageListener.html">@JmsMessageListener</a>
   </td>
   <td>JMS based EJB message driven bean</td>
   <td>
 <def>
 &lt;mypkg:MyBean>
-  &lt;resin:JmsListener destination="my_queue"/>
+  &lt;resin:JmsMessageListener destination="my_queue"/>
 &lt;/mypkg:MyBean>
 </def>
   </td>
@@ -2200,7 +2200,7 @@ resin:import is used to read configuration information from another file.
   <th>description</th>
 </tr>
 <tr>
-  <td><a javadoc="com.caucho.admin.JmsService">&lt;resin:JmxService></a></td>
+  <td><a javadoc="com.caucho.admin.JmxService">&lt;resin:JmxService></a></td>
   <td>Enables cluster-wide JMX administration.</td>
 </tr>
 <tr>
@@ -2378,7 +2378,7 @@ resin:import is used to read configuration information from another file.
   <th>description</th>
 </tr>
 <tr>
-  <td><a javadoc="com.caucho.server/repository.PorjectJarRepository">&lt;resin:ProjectJarRepository></a></td>
+  <td><a javadoc="com.caucho.server/repository.ProjectJarRepository">&lt;resin:ProjectJarRepository></a></td>
   <td>Maven-style library jar management for webapps.</td>
 </tr>
 </deftable>
