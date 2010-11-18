@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
+       xmlns:resin="urn:java:com.caucho.resin">
 
   <log-handler name="" level="all" path="stdout:"
                timestamp="[%H:%M:%S.%s] {%{thread}} "/>
