@@ -29,14 +29,18 @@
 
 package com.caucho.java;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+
 import com.caucho.bytecode.JClass;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 /**
  * Writing class for generated Java code.
@@ -427,28 +431,110 @@ public class JavaWriter extends Writer {
   }
   
   /**
-   * Prints the Java represention of the class
+   * Prints the Java representation of the type
    */
-  public void printType(Type type)
-    throws IOException
+  @SuppressWarnings("unchecked")
+  public void printType(Type type) throws IOException
   {
-    if (type instanceof Class<?>)
+    if (type instanceof Class<?>) {
       printClass((Class<?>) type);
-    else if (type instanceof ParameterizedType) {
-      ParameterizedType paramType = (ParameterizedType) type;
-      
-      printType(paramType.getRawType());
+    } else if (type instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) type;
+
+      printType(parameterizedType.getRawType());
+
       print("<");
-      Type []params = paramType.getActualTypeArguments();
-      for (int i = 0; i < params.length; i++) {
-        if (i != 0)
-          print(",");
-        printType(params[i]);
+
+      Type[] typeParameters = parameterizedType.getActualTypeArguments();
+
+      for (int i = 0; i < typeParameters.length; i++) {
+        if (i != 0) {
+          print(", ");
+        }
+
+        printType(typeParameters[i]);
       }
+
       print(">");
+    } else if (type instanceof WildcardType) {
+      WildcardType wildcardType = (WildcardType) type;
+
+      print("?");
+
+      Type[] upperBounds = wildcardType.getUpperBounds();
+
+      if ((upperBounds != null) && (upperBounds.length > 0)) {
+        print(" extends ");
+
+        for (int i = 0; i < upperBounds.length; i++) {
+          if (i != 0) {
+            print(" & ");
+          }
+
+          printType(upperBounds[i]);
+        }
+      }
+
+      Type[] lowerBounds = wildcardType.getLowerBounds();
+
+      if ((lowerBounds != null) && (lowerBounds.length > 0)) {
+        print(" super ");
+
+        for (int i = 0; i < lowerBounds.length; i++) {
+          if (i != 0) {
+            print(" & ");
+          }
+
+          printType(lowerBounds[i]);
+        }
+      }
+    } else if (type instanceof TypeVariable<?>) {
+      TypeVariable<? extends GenericDeclaration> typeVariable = (TypeVariable<? extends GenericDeclaration>) type;
+
+      print(typeVariable.getName());
+
+      Type[] bounds = typeVariable.getBounds();
+
+      if ((bounds != null) && (bounds.length > 0)) {
+        print(" extends ");
+
+        for (int i = 0; i < bounds.length; i++) {
+          if (i != 0) {
+            print(" & ");
+          }
+
+          printType(bounds[i]);
+        }
+      }
+
+      GenericDeclaration genericDeclaration = typeVariable
+          .getGenericDeclaration();
+
+      Type[] typeParameters = genericDeclaration.getTypeParameters();
+
+      if ((typeParameters != null) && (typeParameters.length > 0)) {
+        print("<");
+
+        for (int i = 0; i < typeParameters.length; i++) {
+          if (i != 0) {
+            print(", ");
+          }
+
+          printType(typeParameters[i]);
+        }
+
+        print(">");
+      }
+
+    } else if (type instanceof GenericArrayType) {
+      GenericArrayType genericArrayType = (GenericArrayType) type;
+
+      printType(genericArrayType.getGenericComponentType());
+      print("[]");
+    } else {
+      throw new UnsupportedOperationException(type.getClass().getName() + " "
+          + String.valueOf(type));
     }
-    else
-      throw new UnsupportedOperationException(type.getClass().getName() + " " + String.valueOf(type));
   }
   
   /**
