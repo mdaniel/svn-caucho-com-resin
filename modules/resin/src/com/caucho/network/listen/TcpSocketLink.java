@@ -1101,7 +1101,7 @@ public class TcpSocketLink extends AbstractSocketLink
     _duplexReadTask = null;
 
     SocketLinkListener port = getPort();
-Thread.dumpStack();
+
     if (log.isLoggable(Level.FINER)) {
       if (port != null)
         log.finer(dbgId() + "closing connection " + this + ", total=" + port.getConnectionCount());

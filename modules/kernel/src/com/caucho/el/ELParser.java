@@ -151,7 +151,7 @@ public class ELParser
                             Character.toString((char) exprToken),
                             Character.toString((char) origChar)));
 
-          exprToken = ch;
+          exprToken = origChar;
 
           if (text.length() > 0) {
             StringLiteral right = new StringLiteral(text.toString());

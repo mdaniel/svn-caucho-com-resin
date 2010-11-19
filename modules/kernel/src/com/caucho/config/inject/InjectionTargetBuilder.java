@@ -721,8 +721,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   private void introspectInjectMethod(AnnotatedType<X> type,
                                       ArrayList<ConfigProgram> injectProgramList)
   {
-
     for (AnnotatedMethod method : type.getMethods()) {
+
       if (method.getAnnotations().size() == 0)
         continue;
 

@@ -271,7 +271,7 @@ public class ParamType extends BaseType implements ParameterizedType
   {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(getRawClass());
+    sb.append(getRawClass().getName());
     sb.append("<");
 
     for (int i = 0; i < _param.length; i++) {

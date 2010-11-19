@@ -95,7 +95,7 @@ class AcceptTask extends ConnectionReadTask {
       else if (result == RequestState.DUPLEX) {
         return socketLink.doDuplex();
       }
-      System.out.println("RESULT: " + result);
+
       socketLink.close();
     }
 

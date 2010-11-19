@@ -74,6 +74,7 @@ import com.caucho.ejb.inject.SessionRegistrationBean;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
@@ -331,12 +332,13 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     
     Class<?> ejbClass = getAnnotatedType().getJavaClass();
   
-    if (isPublic(ejbClass)) {
-      proxyImplClass = javaGen.loadClass(skeletonName);
-    }
-    else {
+    if (! isPublic(ejbClass)
+        && (ejbClass.getClassLoader() instanceof DynamicClassLoader)) {
       // ejb/1103
       proxyImplClass = javaGen.loadClassParentLoader(skeletonName, ejbClass);
+    }
+    else {
+      proxyImplClass = javaGen.loadClass(skeletonName);
     }
     
     try {
