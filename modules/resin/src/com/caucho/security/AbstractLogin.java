@@ -114,6 +114,7 @@ public abstract class AbstractLogin implements Login {
   /**
    * Gets the authenticator.
    */
+  @Override
   public Authenticator getAuthenticator()
   {
     if (_auth == null) {
@@ -143,7 +144,7 @@ public abstract class AbstractLogin implements Login {
 
         _singleSignon = abstractAuth.getSingleSignon();
       }
-
+      
       // server/1al4
       /*
       if (_singleSignon == null) {
@@ -200,14 +201,6 @@ public abstract class AbstractLogin implements Login {
     throws ServletException
   {
     // server/12cc - XXX: this should be allowed, though
-    /*
-    try {
-      if (_auth == null)
-        _auth = _webBeans.getInstanceByType(Authenticator.class);
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-    */
 
     // XXX: order
     if (_singleSignon == null && ! _signonInstance.isUnsatisfied()) {
@@ -219,6 +212,7 @@ public abstract class AbstractLogin implements Login {
    * Returns the authentication type.  <code>getAuthType</code> is called
    * by <code>HttpServletRequest.getAuthType</code>.
    */
+  @Override
   public String getAuthType()
   {
     return "none";
@@ -228,6 +222,7 @@ public abstract class AbstractLogin implements Login {
    * Returns true if the login can be used for this request. This lets
    * webapps use multiple login methods.
    */
+  @Override
   public boolean isLoginUsedForRequest(HttpServletRequest request)
   {
     return true;
@@ -245,6 +240,7 @@ public abstract class AbstractLogin implements Login {
    *
    * @return the logged in principal on success, null on failure.
    */
+  @Override
   public Principal getUserPrincipal(HttpServletRequest request)
   {
     Principal user = (Principal) request.getAttribute(LOGIN_NAME);
@@ -282,21 +278,29 @@ public abstract class AbstractLogin implements Login {
    *
    * @return the logged in principal on success, null on failure.
    */
+  @Override
   public Principal login(HttpServletRequest request,
                          HttpServletResponse response,
                          boolean isFail)
   {
-    // Most login classes will extract the user and password (or some other
-    // credentials) from the request and call auth.login.
-
+    Principal user = (Principal) request.getAttribute(LOGIN_USER);
+    
+    if (user != null)
+      return user;
+    
     Principal savedUser = findSavedUser(request);
 
     // server/12c9 - new login overrides old
     if (savedUser != null && isSavedUserValid(request, savedUser)) {
+      request.setAttribute(LOGIN_USER, savedUser);
+      
       return savedUser;
     }
 
-    Principal user = getLoginPrincipalImpl(request);
+    user = login(request, response);
+    
+    if (user != null)
+      request.setAttribute(LOGIN_USER, user);
 
     try {
       if (user != null || savedUser != null) {
@@ -321,7 +325,20 @@ public abstract class AbstractLogin implements Login {
 
     return null;
   }
+  
+  /**
+   * Attempts to login the user if the user cannot be found in the 
+   * session or the single-signon. 
+   */
+  protected Principal login(HttpServletRequest request,
+                            HttpServletResponse response)
+  {
+    // Most login classes will extract the user and password (or some other
+    // credentials) from the request and call auth.login.
 
+    return getLoginPrincipalImpl(request);
+  }
+  
   /**
    * Looks up the user based on session or single signon.
    */
@@ -338,8 +355,24 @@ public abstract class AbstractLogin implements Login {
     else
       sessionId = request.getRequestedSessionId();
 
-    if (sessionId != null && singleSignon != null)
-      return singleSignon.get(sessionId);
+    if (sessionId == null)
+      return null;
+    else if (singleSignon != null) {
+      Principal user = singleSignon.get(sessionId);
+      
+      if (user != null && log.isLoggable(Level.FINER))
+        log.finer(this + " load user '" + user + "' from " + singleSignon);
+      
+      return user;
+    }
+    else if (isSessionSaveLogin() && session != null) {
+      Principal user = (Principal) session.getAttribute(LOGIN_USER);
+      
+      if (user != null && log.isLoggable(Level.FINER))
+        log.finer(this + " load user '" + user + "' from session");
+      
+      return user;
+    }
     else
       return null;
   }
@@ -350,8 +383,6 @@ public abstract class AbstractLogin implements Login {
   protected void saveUser(HttpServletRequest request,
                           Principal user)
   {
-    request.setAttribute(LOGIN_NAME, user);
-
     SingleSignon singleSignon = getSingleSignon();
 
     SessionImpl session;
@@ -368,10 +399,23 @@ public abstract class AbstractLogin implements Login {
     else
       sessionId = request.getRequestedSessionId();
 
-    if (sessionId != null && singleSignon != null)
+    if (sessionId == null) {
+    }
+    else if (singleSignon != null) {
       singleSignon.put(sessionId, user);
+      
+      if (log.isLoggable(Level.FINER))
+        log.finer(this + " save user '" + user +"' in single signon " + singleSignon);
+    }
+    else if (isSessionSaveLogin()) {
+      session.setAttribute(LOGIN_USER, user);
+      
+      if (log.isLoggable(Level.FINER))
+        log.finer(this + " save user '" + user +"' in session " + singleSignon);
+    }
   }
 
+  @Override
   public boolean isPasswordBased()
   {
     return false;

@@ -82,6 +82,12 @@ public class HmtpRequest extends AbstractProtocolConnection
   {
     _conn = conn;
     _bamService = bamService;
+    
+    if (conn == null)
+      throw new NullPointerException();
+    
+    if (bamService == null)
+      throw new NullPointerException();
 
     _rawRead = conn.getReadStream();
     _rawWrite = conn.getWriteStream();
@@ -143,11 +149,13 @@ public class HmtpRequest extends AbstractProtocolConnection
     boolean isAdmin = is.read() != 0;
 
     InputStream rawIs = is;
+    
+    is.skip(len);
 
     if (log.isLoggable(Level.FINEST)) {
       HessianDebugInputStream dIs
         = new HessianDebugInputStream(is, log, Level.FINEST);
-      dIs.startStreaming();
+      // dIs.startStreaming();
       rawIs = dIs;
     }
 
@@ -185,7 +193,7 @@ public class HmtpRequest extends AbstractProtocolConnection
         return false;
       }
     } while (in.isDataAvailable());
-    
+
     return true;
   }
 

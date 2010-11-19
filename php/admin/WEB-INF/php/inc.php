@@ -840,6 +840,7 @@ function display_health()
   $clusters = array($g_server->Cluster);
 
   $down_servers = array();
+  $error = "";
 
   foreach ($clusters as $c) {
     $servers = $c->Servers;

@@ -13,6 +13,7 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>security: FormLogin persistence/session issues (#4299, rep by Jamison Novak)</li>
 <li>jsp-el: parsing confusion with "0#${foo}" (#4190, rep by olaf2010)</li>
 <li>rewrite: host-level rewrite issues with access-log (#4198)</li>
 <li>distribution: slf4j.jar removed from resin/lib (#4271, rep by Nicolai Steven)</li>

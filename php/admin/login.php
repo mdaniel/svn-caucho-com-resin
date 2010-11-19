@@ -6,7 +6,7 @@ $title = "Resin Admin Login";
 
 display_header("login.php", $title, null);
 
-if ($error) {
+if ($GLOBAL["error"]) {
   echo "<h3 class='fail'>Error: $error</h3>";
 }
 

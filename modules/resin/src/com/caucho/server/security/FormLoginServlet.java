@@ -54,19 +54,20 @@ public class FormLoginServlet extends GenericServlet {
     = Logger.getLogger(FormLoginServlet.class.getName());
   private static final L10N L = new L10N(FormLoginServlet.class);
   
+  @Override
   public void service(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    WebApp app = (WebApp) getServletContext();
-    FormLogin login = getFormLogin(app.getLogin());
+    WebApp webApp = (WebApp) getServletContext();
+    FormLogin login = getFormLogin(webApp.getLogin());
 
     Principal user = login.login(req, res, true);
 
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " login " + user);
+      log.fine(this + " login " + user + " using " + login);
 
     if (res.isCommitted())
       return;
@@ -75,7 +76,7 @@ public class FormLoginServlet extends GenericServlet {
       // A failure internally redirects to the error page (not redirect)
       String errorPage = login.getFormErrorPage();
       RequestDispatcherImpl disp;
-      disp = (RequestDispatcherImpl) app.getRequestDispatcher(errorPage);
+      disp = (RequestDispatcherImpl) webApp.getRequestDispatcher(errorPage);
 
       // req.setAttribute("caucho.login", "login");
       if (res instanceof CauchoResponse) {
@@ -93,8 +94,8 @@ public class FormLoginServlet extends GenericServlet {
     
     HttpSession session = req.getSession();
     
-    String uri = (String) session.getValue(FormLogin.LOGIN_SAVED_PATH);
-    String query = (String) session.getValue(FormLogin.LOGIN_SAVED_QUERY);
+    String uri = (String) session.getAttribute(FormLogin.LOGIN_SAVED_PATH);
+    String query = (String) session.getAttribute(FormLogin.LOGIN_SAVED_QUERY);
 
     session.removeAttribute(FormLogin.LOGIN_SAVED_PATH);
     session.removeAttribute(FormLogin.LOGIN_SAVED_QUERY);
@@ -158,7 +159,7 @@ public class FormLoginServlet extends GenericServlet {
     if (useInternalForward
         && uri.startsWith(uriPwd)
         && uri.indexOf('/', uriPwd.length() + 1) < 0) {
-      WebApp newApp = (WebApp) app.getContext(uri);
+      WebApp newApp = (WebApp) webApp.getContext(uri);
       String suffix = uri.substring(newApp.getContextPath().length());
       
       // force authorization of the page because the normal forward()

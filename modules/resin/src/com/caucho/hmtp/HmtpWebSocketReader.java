@@ -59,7 +59,7 @@ public class HmtpWebSocketReader {
   {
     if (actorStream == null)
       throw new IllegalStateException("HmtpReader.readPacket requires a valid ActorStream for callbacks");
-    
+
     if (_wsIs.startBinaryMessage()) {
       boolean isPacket =_hIn.readPacket(_wsIs, actorStream);
       

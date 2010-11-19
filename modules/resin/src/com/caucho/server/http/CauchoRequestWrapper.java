@@ -810,6 +810,6 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _request + "]";
+    return getClass().getSimpleName() + "[" + getPageURI() + "," + _request + "]";
   }
 }

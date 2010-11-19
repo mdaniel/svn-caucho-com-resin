@@ -2666,9 +2666,10 @@ public class WebApp extends ServletContextImpl
       _cdiManager = InjectManager.getCurrent();
       _cdiManager.update();
       
+      // server/1al4 vs server/1ak1, server/1la5
+      /*
       SingleSignon singleSignon = AbstractSingleSignon.getCurrent();
       
-      // server/1al4 vs server/1ak1
       if (singleSignon == null && Server.getCurrent() != null) {
         if (getSessionManager().isUsePersistentStore()) {
           ClusterSingleSignon clusterSignon = new ClusterSingleSignon("web-app");
@@ -2682,6 +2683,8 @@ public class WebApp extends ServletContextImpl
           
         AbstractSingleSignon.setCurrent(singleSignon);
       }
+      */
+      
       try {
         // server/1a36
 

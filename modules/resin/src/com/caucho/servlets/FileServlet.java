@@ -162,7 +162,7 @@ public class FileServlet extends GenericServlet {
     try {
       _dir = _app.getNamedDispatcher("directory");
     } catch (Exception e) {
-      log.finest(e.toString());
+      log.log(Level.ALL, e.toString(), e);
     }
 
     String enable = getInitParameter("enable-range");

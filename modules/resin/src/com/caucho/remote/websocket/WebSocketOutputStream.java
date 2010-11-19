@@ -130,10 +130,12 @@ public class WebSocketOutputStream extends OutputStream
   public void close()
     throws IOException
   {
+    System.out.println("CLOSE: " + this + " " + _state);
     if (_state == MessageState.IDLE)
       return;
     
     complete(true);
+    System.out.println("COMPLETE: " + this + " " + _isAutoFlush + " " + _os);
     
     _state = MessageState.IDLE;
     

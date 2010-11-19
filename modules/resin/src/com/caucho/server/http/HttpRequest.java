@@ -1133,7 +1133,7 @@ public class HttpRequest extends AbstractHttpRequest
     CharSegment []headerKeys = _headerKeys;
     CharSegment []headerValues = _headerValues;
 
-    boolean debug = log.isLoggable(Level.FINE);
+    boolean isLogFine = log.isLoggable(Level.FINE);
 
     while (true) {
       int ch;
@@ -1209,7 +1209,7 @@ public class HttpRequest extends AbstractHttpRequest
       int valueLength = headerOffset - valueOffset;
       headerValues[headerSize].init(headerBuffer, valueOffset, valueLength);
 
-      if (debug) {
+      if (isLogFine) {
         log.fine(dbgId() +
                  headerKeys[headerSize] + ": " + headerValues[headerSize]);
       }

@@ -169,6 +169,7 @@ public class FormLogin extends AbstractLogin
    * Initialize
    */
   @PostConstruct
+  @Override
   public void init()
     throws ServletException
   {
@@ -187,6 +188,7 @@ public class FormLogin extends AbstractLogin
   /**
    * Returns the authentication type.
    */
+  @Override
   public String getAuthType()
   {
     return "Form";
@@ -303,8 +305,6 @@ public class FormLogin extends AbstractLogin
       return;
     }
 
-    String uri = request.getRequestURI();
-
     if (path.endsWith("/j_security_check")) {
       RequestDispatcher disp;
       disp = app.getNamedDispatcher("j_security_check");
@@ -326,6 +326,7 @@ public class FormLogin extends AbstractLogin
    *
    * @return the logged in principal on success, null on failure.
    */
+  @Override
   public void loginChallenge(HttpServletRequest request,
                              HttpServletResponse response)
     throws ServletException, IOException
@@ -382,8 +383,8 @@ public class FormLogin extends AbstractLogin
 
     HttpSession session = request.getSession();
 
-    session.putValue(LOGIN_SAVED_PATH, path);
-    session.putValue(LOGIN_SAVED_QUERY, request.getQueryString());
+    session.setAttribute(LOGIN_SAVED_PATH, path);
+    session.setAttribute(LOGIN_SAVED_QUERY, request.getQueryString());
 
     if (response instanceof CauchoResponse) {
       ((CauchoResponse) response).killCache();

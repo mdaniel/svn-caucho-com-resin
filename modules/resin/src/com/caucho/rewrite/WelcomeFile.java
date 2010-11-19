@@ -206,7 +206,8 @@ public class WelcomeFile extends AbstractDispatchRule
       if (is != null)
         return Match.FILE;
     } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
+      log.fine("welcome-file lookup failed: " + welcomeUri);
+      log.log(Level.ALL, e.toString(), e);
     }
       
     String servletClassName

@@ -890,7 +890,9 @@ public class HmuxRequest extends AbstractHttpRequest
         
         _isHmtpRequest = true;
         
-        return _hmtpRequest.handleRequest();
+        boolean result = _hmtpRequest.handleRequest();
+
+        return result;
       }
 
       case ' ': case '\n':

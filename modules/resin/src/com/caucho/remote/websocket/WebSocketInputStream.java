@@ -79,7 +79,7 @@ public class WebSocketInputStream extends InputStream
   {
     int frame1 = _is.read();
     int frame2 = _is.read();
-    
+
     if (frame2 < 0)
       return false;
     

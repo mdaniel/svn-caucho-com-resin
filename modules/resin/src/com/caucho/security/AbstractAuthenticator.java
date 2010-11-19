@@ -56,7 +56,8 @@ public class AbstractAuthenticator
 {
   private static final Logger log
     = Logger.getLogger(AbstractAuthenticator.class.getName());
-  static final L10N L = new L10N(AbstractAuthenticator.class);
+  
+  private static final SingleSignon NULL_SINGLE_SIGNON = new NullSingleSignon(); 
   
   protected String _passwordDigestAlgorithm = "MD5-base64";
   protected String _passwordDigestRealm = "resin";
@@ -534,10 +535,13 @@ public class AbstractAuthenticator
       _singleSignon = AbstractSingleSignon.getCurrent();
     
       if (_singleSignon == null)
-        _singleSignon = new NullSingleSignon();
+        _singleSignon = NULL_SINGLE_SIGNON;
     }
     
-    return _singleSignon;
+    if (_singleSignon != NULL_SINGLE_SIGNON)
+      return _singleSignon;
+    else
+      return null;
   }
 
   //
