@@ -24,46 +24,39 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package com.caucho.netbeans;
+package com.caucho.netbeans.actions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eeModule;
-import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfiguration;
-import org.openide.util.Lookup;
-import org.openide.util.lookup.Lookups;
+import org.openide.nodes.Node;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.actions.NodeAction;
 
-import java.util.logging.*;
-import org.openide.util.Lookup.Result;
+public class ViewAdminConsoleAction extends NodeAction {
 
-public class WarConfiguration
-  implements ModuleConfiguration
-{
-  private static final Logger log
-    = Logger.getLogger(WarConfiguration.class.getName());
-  
-  private J2eeModule _module;
-  
-  public WarConfiguration(J2eeModule module)
-  {
-    log.info("WarConfiguration");
-    
-    _module = module;
-  }
+    @Override
+    protected void performAction(Node[] activatedNodes) {
+    }
 
-  public Lookup getLookup()
-  {
-    return Lookups.fixed(this);
-  }
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+      return true;
+    }
 
-  public J2eeModule getJ2eeModule() 
-  {
-    return _module;
-  }
+    @Override
+    protected boolean asynchronous() {
+      return true;
+    }
 
-  public void dispose() {
-  }
+    @Override
+    public String getName() {
+        return NbBundle.getMessage(ViewAdminConsoleAction.class, "CTL_ViewAdminConsoleAction"); // NOI18N
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+        return HelpCtx.DEFAULT_HELP;
+    }
 }

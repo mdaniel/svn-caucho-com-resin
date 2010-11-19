@@ -46,6 +46,7 @@ public class ResinModuleConfigurationFactory
   public ModuleConfiguration create(J2eeModule module)
           throws ConfigurationException
   {
+    System.out.println("ResinModuleConfigurationFactory.create(): " + module);
     if (J2eeModule.WAR == module.getModuleType())
       return new WarConfiguration(module);
     else {

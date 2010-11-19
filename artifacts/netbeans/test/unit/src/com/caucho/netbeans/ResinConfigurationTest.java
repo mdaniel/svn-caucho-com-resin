@@ -1,9 +1,10 @@
 package com.caucho.netbeans;
 
-import junit.framework.TestCase;
+//import junit.framework.TestCase;
 
-public class ResinConfigurationTest extends TestCase
+public class ResinConfigurationTest// extends TestCase
 {
+  /*
   public void testParseURI()
   {
     uriTest("resin:home=/bar", "resin:home=/bar");
@@ -39,4 +40,5 @@ public class ResinConfigurationTest extends TestCase
 
     assertEquals(configuration.getURI(), compare);
   }
+   */
 }

@@ -24,46 +24,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package com.caucho.netbeans;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eeModule;
-import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfiguration;
-import org.openide.util.Lookup;
-import org.openide.util.lookup.Lookups;
+import javax.swing.*;
 
-import java.util.logging.*;
-import org.openide.util.Lookup.Result;
-
-public class WarConfiguration
-  implements ModuleConfiguration
+public class VmCustomizer extends JPanel
 {
-  private static final Logger log
-    = Logger.getLogger(WarConfiguration.class.getName());
-  
-  private J2eeModule _module;
-  
-  public WarConfiguration(J2eeModule module)
-  {
-    log.info("WarConfiguration");
-    
-    _module = module;
-  }
-
-  public Lookup getLookup()
-  {
-    return Lookups.fixed(this);
-  }
-
-  public J2eeModule getJ2eeModule() 
-  {
-    return _module;
-  }
-
-  public void dispose() {
-  }
 }

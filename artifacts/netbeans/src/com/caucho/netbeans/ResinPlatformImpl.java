@@ -26,8 +26,6 @@
  *
  * @author Sam
  */
-
-
 package com.caucho.netbeans;
 
 import org.netbeans.api.java.platform.JavaPlatform;
@@ -45,31 +43,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-
 public class ResinPlatformImpl
-  extends J2eePlatformImpl
-{
-  private static final Logger log
-    = Logger.getLogger(ResinPlatformImpl.class.getName());
+        extends J2eePlatformImpl {
+
+  private static final Logger log = Logger.getLogger(ResinPlatformImpl.class.getName());
   private static final PluginL10N L = new PluginL10N(ResinPlatformImpl.class);
-
-  private static final Set<Object> SUPPORTED_MODULE_TYPES
-    = new LinkedHashSet<Object>();
-
-  private static final Set<String> SUPPORTED_SPEC_VERSIONS
-    = new LinkedHashSet<String>();
-
-  private static final Set<String> SUPPORTED_JAVA_PLATFORM_VERSIONS
-    = new LinkedHashSet<String>();
-
+  private static final Set<Object> SUPPORTED_MODULE_TYPES = new LinkedHashSet<Object>();
+  private static final Set<String> SUPPORTED_SPEC_VERSIONS = new LinkedHashSet<String>();
+  private static final Set<String> SUPPORTED_JAVA_PLATFORM_VERSIONS = new LinkedHashSet<String>();
   private String _displayName;
   private ResinConfiguration _resinConfiguration;
+  private final List<LibraryImplementation> _libraries = new ArrayList<LibraryImplementation>();
 
-  private final List<LibraryImplementation> _libraries
-    = new ArrayList<LibraryImplementation>();
-
-  ResinPlatformImpl(ResinDeploymentManager resinDeploymentManager)
-  {
+  ResinPlatformImpl(ResinDeploymentManager resinDeploymentManager) {
     _resinConfiguration = resinDeploymentManager.getResinConfiguration();
     _displayName = _resinConfiguration.getDisplayName();
 
@@ -84,20 +70,18 @@ public class ResinPlatformImpl
     _libraries.add(library);
   }
 
-  private void initLibrary(LibraryImplementation library)
-  {
+  private void initLibrary(LibraryImplementation library) {
     library.setContent(J2eeLibraryTypeProvider.VOLUME_TYPE_CLASSPATH,
-                       _resinConfiguration.getClasses());
+            _resinConfiguration.getClasses());
 
     library.setContent(J2eeLibraryTypeProvider.VOLUME_TYPE_JAVADOC,
-                       _resinConfiguration.getJavadocs());
+            _resinConfiguration.getJavadocs());
 
     library.setContent(J2eeLibraryTypeProvider.VOLUME_TYPE_SRC,
-                       _resinConfiguration.getSources());
+            _resinConfiguration.getSources());
   }
 
-  public void notifyLibrariesChanged()
-  {
+  public void notifyLibrariesChanged() {
     LibraryImplementation libraryImplementation = _libraries.get(0);
 
     initLibrary(libraryImplementation);
@@ -105,53 +89,43 @@ public class ResinPlatformImpl
     firePropertyChange(PROP_LIBRARIES, null, _libraries);
   }
 
-  public LibraryImplementation[] getLibraries()
-  {
+  public LibraryImplementation[] getLibraries() {
     return _libraries.toArray(new LibraryImplementation[_libraries.size()]);
   }
 
-  public String getDisplayName()
-  {
+  public String getDisplayName() {
     return _displayName;
   }
 
-  public Image getIcon()
-  {
+  public Image getIcon() {
     return Utilities.loadImage("com/caucho/netbeans/resources/CauchoFLY_blu16.gif");
   }
 
-  public File[] getPlatformRoots()
-  {
-    return new File[] { _resinConfiguration.getResinHome() };
+  public File[] getPlatformRoots() {
+    return new File[]{_resinConfiguration.getResinHome()};
   }
 
-  public File[] getToolClasspathEntries(String toolName)
-  {
+  public File[] getToolClasspathEntries(String toolName) {
     return new File[0];
   }
 
-  public boolean isToolSupported(String toolName)
-  {
+  public boolean isToolSupported(String toolName) {
     return false;
   }
 
-  public Set getSupportedModuleTypes()
-  {
+  public Set getSupportedModuleTypes() {
     return SUPPORTED_MODULE_TYPES;
   }
 
-  public Set<String> getSupportedSpecVersions()
-  {
+  public Set<String> getSupportedSpecVersions() {
     return SUPPORTED_SPEC_VERSIONS;
   }
 
-  public Set<String> getSupportedJavaPlatformVersions()
-  {
+  public Set<String> getSupportedJavaPlatformVersions() {
     return SUPPORTED_JAVA_PLATFORM_VERSIONS;
   }
 
-  public JavaPlatform getJavaPlatform()
-  {
+  public JavaPlatform getJavaPlatform() {
     return _resinConfiguration.getJavaPlatform();
   }
 

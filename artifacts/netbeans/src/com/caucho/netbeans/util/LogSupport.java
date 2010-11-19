@@ -39,6 +39,7 @@ import org.openide.text.Annotation;
 import org.openide.text.Line;
 import org.openide.windows.OutputEvent;
 import org.openide.windows.OutputListener;
+import org.netbeans.api.java.classpath.GlobalPathRegistry;
 
 import java.io.File;
 import java.util.Collections;

@@ -164,6 +164,7 @@ public final class ResinModule
       res
         = getShortDescription().compareToIgnoreCase(other.getShortDescription());
     }
+    
     return res;
   }
 }

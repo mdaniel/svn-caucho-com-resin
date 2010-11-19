@@ -32,6 +32,7 @@ package com.caucho.netbeans;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eeModule;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfiguration;
 import org.openide.util.Lookup;
+import org.openide.util.lookup.*;
 
 import java.util.logging.*;
 
@@ -51,7 +52,7 @@ public class ResinModuleConfiguration
   public Lookup getLookup()
   {
     //return new ResinLookup();
-    return Lookup.fixed(this);
+    return Lookups.fixed(this);
   }
 
   public J2eeModule getJ2eeModule() 

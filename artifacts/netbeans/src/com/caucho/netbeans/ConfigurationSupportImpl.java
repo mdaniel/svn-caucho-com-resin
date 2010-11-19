@@ -37,15 +37,22 @@ import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.spi.DeploymentConfiguration;
 import javax.enterprise.deploy.spi.exceptions.ConfigurationException;
 import java.io.File;
+import java.util.logging.Logger;
 
 public class ConfigurationSupportImpl
   //  extends ConfigurationSupport
 {
 
+  private static final Logger log
+          = Logger.getLogger(ConfigurationSupportImpl.class.getName()); // NOI18N
+
+  public ConfigurationSupportImpl() {
+    log.config("new ConfigurationSupportImpl");
+  }
+
   public void setMappingInfo(DeploymentConfiguration config,
                              OriginalCMPMapping[] mappings)
   {
-    // no op
   }
 
   public void ensureResourceDefined(DeploymentConfiguration config, DDBean bean)

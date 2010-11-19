@@ -26,8 +26,6 @@
  *
  * @author Sam
  */
-
-
 package com.caucho.netbeans;
 
 import org.netbeans.modules.j2ee.deployment.plugins.spi.J2eePlatformFactory;
@@ -37,14 +35,13 @@ import javax.enterprise.deploy.spi.DeploymentManager;
 import java.util.logging.*;
 
 public class ResinPlatformFactory
-  extends J2eePlatformFactory
-{
-  private static final Logger log
-    = Logger.getLogger(ResinPlatformFactory.class.getName());
-  
-  public J2eePlatformImpl getJ2eePlatformImpl(DeploymentManager deploymentManager)
-  {
+        extends J2eePlatformFactory {
+
+  private static final Logger log = Logger.getLogger(ResinPlatformFactory.class.getName());
+
+  public J2eePlatformImpl getJ2eePlatformImpl(DeploymentManager deploymentManager) {
     log.info("Resin j2ee platform");
+    System.out.println("ResinPlatformFactory.getJ2eePlatformImpl()" + deploymentManager);
 
     return new ResinPlatformImpl((ResinDeploymentManager) deploymentManager);
   }

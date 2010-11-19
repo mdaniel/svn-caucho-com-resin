@@ -1,6 +1,8 @@
 <netbeans-deployment>
     <disconnected-string>resin:http://localhost:8080</disconnected-string>
 
+    <!--container-limitation><war-deploy/></container-limitation-->
+
     <web-context-root>
         <xpath>/</xpath>
         <prop-name>contextRoot</prop-name>

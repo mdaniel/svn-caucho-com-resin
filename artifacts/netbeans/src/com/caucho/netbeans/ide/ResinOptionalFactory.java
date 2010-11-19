@@ -26,15 +26,16 @@
  *
  * @author Sam
  */
-
 package com.caucho.netbeans.ide;
 
 import com.caucho.netbeans.ResinDeploymentManager;
 import com.caucho.netbeans.ResinStartServer;
+import com.caucho.netbeans.ResinWizardProvider;
 
 import org.netbeans.modules.j2ee.deployment.plugins.spi.FindJSPServlet;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.IncrementalDeployment;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.OptionalDeploymentManagerFactory;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.ServerInstanceDescriptor;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.StartServer;
 import org.openide.WizardDescriptor.InstantiatingIterator;
 
@@ -42,37 +43,55 @@ import javax.enterprise.deploy.spi.DeploymentManager;
 import java.util.logging.*;
 
 public class ResinOptionalFactory
-  extends OptionalDeploymentManagerFactory
-{
+        extends OptionalDeploymentManagerFactory {
+
+  static {
+    System.setProperty("com.caucho.level", "100");
+    System.out.println("ResinOptionalFactory.<clinit>()");
+  }
+
   private static final Logger log = Logger.getLogger(ResinOptionalFactory.class.getName());
 
-  public StartServer getStartServer(DeploymentManager deploymentManager)
-  {
+  public ResinOptionalFactory() {
+    log.config("new ResinOptionalFactory");
+    System.out.println("ResinOptionalFactory.<init>()");
+    //new RuntimeException("constructor ResinOptionalFactory").printStackTrace();
+  }
+
+  public StartServer getStartServer(DeploymentManager deploymentManager) {
+    System.out.println("ResinOptionalFactory.getStartServer() " + deploymentManager);
     return new ResinStartServer((ResinDeploymentManager) deploymentManager);
   }
 
-  public IncrementalDeployment getIncrementalDeployment(DeploymentManager deploymentManager)
-  {
+  public IncrementalDeployment getIncrementalDeployment(DeploymentManager deploymentManager) {
+    System.out.println("ResinOptionaFactory.getIncrementalDeployment()" + deploymentManager);
+
     return null;
+  }
+
+  @Override
+  public ServerInstanceDescriptor getServerInstanceDescriptor(DeploymentManager dm) {
+    System.out.println("ResinOptionalFactory.getServerInstanceDescriptor()" + dm);
+    return super.getServerInstanceDescriptor(dm);
   }
 
   /*
   public TargetModuleIDResolver getTargetModuleIDResolver(DeploymentManager deploymentManager)
   {
-    return new ResinTargetModuleIDResolver(deploymentManager);
+  return new ResinTargetModuleIDResolver(deploymentManager);
   }
-  */
+   */
+  public FindJSPServlet getFindJSPServlet(DeploymentManager deploymentManager) {
 
-  public FindJSPServlet getFindJSPServlet(DeploymentManager deploymentManager)
-  {
+    System.out.println("ResinOptionalFactory.getFindJSPServlet()" + deploymentManager);
+
     // return new ResinFindJSPServlet(deploymentManager);
 
     return null;
   }
 
   @Override
-  public InstantiatingIterator getAddInstanceIterator()
-  {
-    return new AddInstanceIterator();
+  public InstantiatingIterator getAddInstanceIterator() {
+    return ResinWizardProvider.getInstance().getInstantiatingIterator();
   }
 }
