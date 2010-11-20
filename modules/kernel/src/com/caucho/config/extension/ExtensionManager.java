@@ -227,8 +227,8 @@ public class ExtensionManager
                                        method.getArgs());
 
       _cdiManager.getEventManager().addExtensionObserver(observer,
-                                                            method.getBaseType(),
-                                                            method.getQualifiers());
+                                                         method.getBaseType(),
+                                                         method.getQualifiers());
       
       if ((ProcessAnnotatedType.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
@@ -474,7 +474,7 @@ public class ExtensionManager
       = new AfterDeploymentValidationImpl(_cdiManager);
   
     getEventManager().fireExtensionEvent(event);
-  
+
     /*
     if (event.getDeploymentProblem() != null)
       throw ConfigException.create(event.getDeploymentProblem());
@@ -493,7 +493,6 @@ public class ExtensionManager
 
     BaseType baseType = cdi.createTargetBaseType(ProcessAnnotatedTypeImpl.class);
     baseType = baseType.fill(cdi.createTargetBaseType(type.getBaseType()));
-    
     getEventManager().fireExtensionEvent(processType, baseType);
 
     if (processType.isVeto()) {

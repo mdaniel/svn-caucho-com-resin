@@ -85,12 +85,12 @@ public class ObserverEntry<T> {
     if (! _type.isAssignableFrom(type)) {
       return false;
     }
-
+    
     /*
     if (qualifiers.length < _qualifiers.length)
       return false;
       */
-
+    
     return isMatch(qualifiers);
   }
   

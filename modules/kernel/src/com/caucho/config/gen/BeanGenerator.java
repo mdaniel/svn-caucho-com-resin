@@ -41,6 +41,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.interceptor.InterceptorBinding;
 import javax.interceptor.Interceptors;
 
 import com.caucho.config.reflect.AnnotatedMethodImpl;
@@ -424,6 +425,11 @@ abstract public class BeanGenerator<X> extends GenClass
   {
     ArrayList<Method> preDestroyMethods = getLifecycleAspects(PreDestroy.class);
     
+    if (preDestroyMethods.size() == 0
+        && isInterceptorPresent(getBeanType())) {
+      generateDummyPreDestroy(preDestroyMethods, out, map);
+    }
+    
     out.println();
     out.println("public void __caucho_preDestroy()");
     out.println("{");
@@ -462,6 +468,46 @@ abstract public class BeanGenerator<X> extends GenClass
     
     out.popDepth();
     out.println("}");
+  }
+  
+  private boolean isInterceptorPresent(AnnotatedType<?> beanType)
+  {
+    for (Annotation ann : beanType.getAnnotations()) {
+      Class<?> annType = ann.annotationType();
+      
+      if (Interceptors.class.equals(annType))
+        return true;
+      else if (annType.isAnnotationPresent(InterceptorBinding.class))
+        return true;
+    }
+    
+    return false;
+  }
+  
+  private void generateDummyPreDestroy(ArrayList<Method> preDestroyMethods,
+                                       JavaWriter out,
+                                       HashMap<String,Object> map)
+    throws IOException
+  {
+    if (preDestroyMethods.size() > 0)
+      throw new IllegalStateException();
+    
+    Method method = CandiUtil.getDummyPreDestroy();
+    
+    AnnotatedMethodImpl annMethod;
+    annMethod = new AnnotatedMethodImpl(getBeanType(), null, method);
+    annMethod.addAnnotation(new PreDestroyLiteral());
+    
+    AspectGenerator<X> methodGen
+      = getLifecycleAspectFactory().create(annMethod);
+   
+    if (methodGen != null) {
+      methodGen.generate(out, map);
+      
+      out.println("public static void __caucho_CandiUtil_dummyPreDestroy_PRE_DESTROY() {}");
+      
+      preDestroyMethods.add(method);
+    }
   }
   
   protected void generateLifecycleMethodReflection(JavaWriter out,

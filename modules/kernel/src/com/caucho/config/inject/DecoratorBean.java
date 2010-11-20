@@ -300,8 +300,8 @@ public class DecoratorBean<T> implements Decorator<T>
         if (baseType.getRawClass().equals(Serializable.class))
           continue;
         
-        if (true || baseType.isAssignableFrom(delegateType)) {
-          // ioc/0i3r
+        // ioc/0i5g, ioc/0i3r
+        if (baseType.isAssignableFrom(delegateType)) {
           _typeSet.add(type);
         }
         else if (isDeclaredInterface(selfType, baseType)){
@@ -309,6 +309,10 @@ public class DecoratorBean<T> implements Decorator<T>
           // only types declared directly are errors
           throw new ConfigException(L.l("{0}: '{1}' is an Decorator type not implemented by the delegate {2}",
                                         _type, baseType, delegateType));
+        }
+        else {
+          // ioc/0i3r
+          _typeSet.add(type);
         }
       }
     }

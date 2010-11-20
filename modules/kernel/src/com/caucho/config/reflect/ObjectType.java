@@ -96,6 +96,6 @@ public class ObjectType extends ClassType
   @Override
   public String toString()
   {
-    return getRawClass().toString();
+    return getRawClass().getName();
   }
 }

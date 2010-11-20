@@ -93,6 +93,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
     _messageConsumerMax = messageConsumerMax;
   }
 
+  @Override
   public void initImpl()
   {
     if (getInstanceClass() == null)

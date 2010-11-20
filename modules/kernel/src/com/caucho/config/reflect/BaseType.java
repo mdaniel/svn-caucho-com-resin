@@ -76,7 +76,7 @@ abstract public class BaseType
                                 HashMap<String,BaseType> paramMap,
                                 Type parentType,
                                 boolean isClassFillParamObject)
-    {
+  {
     if (type instanceof Class<?>) {
       Class<?> cl = (Class<?>) type;
       

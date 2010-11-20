@@ -71,6 +71,7 @@ import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
@@ -442,8 +443,9 @@ public class ServletConfigImpl
     try {
       _servletClass = Class.forName(servletClassName, false, loader);
 
-      if (_comp == null)
+      if (_comp == null) {
         _comp = cdiManager.createInjectionTarget(_servletClass);
+      }
     } catch (ClassNotFoundException e) {
       log.log(Level.ALL, e.toString(), e);
     }
@@ -905,17 +907,18 @@ public class ServletConfigImpl
       }
     }
 
-    InjectManager webBeans = InjectManager.create();
+    InjectManager cdiManager = InjectManager.create();
 
     if (_var != null) {
       validateClass(true);
 
       Object servlet = createServlet(false);
 
-      BeanBuilder factory = webBeans.createBeanFactory(servlet.getClass());
-      factory.name(_var);
+      BeanBuilder factory = cdiManager.createBeanFactory(servlet.getClass());
+      if (_var != null)
+        factory.name(_var);
 
-      webBeans.addBean(factory.singleton(servlet));
+      cdiManager.addBean(factory.singleton(servlet));
     }
   }
 
@@ -1308,8 +1311,9 @@ public class ServletConfigImpl
     else if (servletClass != null) {
       InjectManager inject = InjectManager.create();
 
-      if (_comp == null)
+      if (_comp == null) {
         _comp = inject.createInjectionTarget(servletClass);
+      }
 
       CreationalContextImpl env = new OwnerCreationalContext(null);
 

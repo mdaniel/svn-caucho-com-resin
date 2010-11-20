@@ -2425,7 +2425,7 @@ public final class InjectManager
                                        baseType, ij));
                                        */
     if (baseType.isGenericVariable())
-      throw new InjectionException(L.l("'{0}' is an invalid type for injection because it's a variable . {1}",
+      throw new InjectionException(L.l("'{0}' is an invalid type for injection because it's a variable generic type.\n  {1}",
                                        baseType, ij));
 
     Set<Bean<?>> set = resolveRec(baseType, qualifiers);
@@ -3720,6 +3720,10 @@ public final class InjectManager
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+    
+    // ioc/0p30
+    if (_configException != null)
+      throw _configException;
   }
 
   public void addDefinitionError(Throwable t)
@@ -3733,6 +3737,11 @@ public final class InjectManager
     else {
       _configException = ConfigException.create(t);
     }
+  }
+  
+  public RuntimeException getConfigException()
+  {
+    return _configException;
   }
 
   public void addConfiguredBean(String className)

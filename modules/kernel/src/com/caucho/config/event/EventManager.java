@@ -269,6 +269,7 @@ public class EventManager
   public void fireExtensionEvent(Object event, 
                                  Annotation... qualifiers)
   {
+    _cdiManager.getExtensionManager().updateExtensions();
     fireLocalEvent(_extObserverMap, event, qualifiers);
   }
 
@@ -276,6 +277,7 @@ public class EventManager
   public void fireExtensionEvent(Object event, BaseType eventType, 
                                  Annotation... qualifiers)
   {
+    _cdiManager.getExtensionManager().updateExtensions();
     fireLocalEvent(_extObserverMap, event, eventType, qualifiers);
   }
 

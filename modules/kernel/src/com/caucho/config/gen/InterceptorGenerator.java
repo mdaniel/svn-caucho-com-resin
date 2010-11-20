@@ -646,11 +646,19 @@ public class InterceptorGenerator<X>
         superMethodName = javaMethod.getName();
     }
       
-    
-    generateGetMethod(out,
-                      className,
-                      superMethodName,
-                      javaMethod.getParameterTypes());
+    // ejb/1061
+    if (Modifier.isStatic(javaMethod.getModifiers())) {
+      generateGetMethod(out,
+                        javaMethod.getDeclaringClass().getName(),
+                        javaMethod.getName(),
+                        javaMethod.getParameterTypes());
+    }
+    else {
+      generateGetMethod(out,
+                        className,
+                        superMethodName,
+                        javaMethod.getParameterTypes());
+    }
     out.println(";");
 
     /*
@@ -1841,13 +1849,13 @@ public class InterceptorGenerator<X>
   {
     if (false && _interceptionType == InterceptionType.POST_CONSTRUCT) {
       out.printClass(CandiUtil.class);
-      out.print(".getMethod(");
+      out.print(".findAccessible(");
       out.print(_factory.getGeneratedClassName());
       out.print(".class, \"__caucho_postConstruct_" + methodName + "\");");
     }
     else {
       out.printClass(CandiUtil.class);
-      out.print(".getMethod(");
+      out.print(".findAccessibleMethod(");
       out.print(className);
       out.print(".class, \"" + methodName + "\"");
 

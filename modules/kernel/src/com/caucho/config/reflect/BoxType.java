@@ -119,6 +119,6 @@ public class BoxType extends ClassType
   @Override
   public String toString()
   {
-    return getRawClass().toString();
+    return super.getRawClass().getName();
   }
 }

@@ -177,6 +177,11 @@ public class ParamType extends BaseType implements ParameterizedType
     if (! getRawClass().isAssignableFrom(type.getRawClass()))
       return false;
     
+    if (! getRawClass().equals(type.getRawClass())) {
+      // ioc/0pb0
+      return false;
+    }
+    
     BaseType []paramA = getParameters();
     BaseType []paramB = type.getParameters();
 
@@ -271,7 +276,7 @@ public class ParamType extends BaseType implements ParameterizedType
   {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(getRawClass().getName());
+    sb.append(getRawClass().toString());
     sb.append("<");
 
     for (int i = 0; i < _param.length; i++) {

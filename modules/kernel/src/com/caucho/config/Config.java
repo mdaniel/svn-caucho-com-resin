@@ -300,8 +300,6 @@ public class Config {
 
       XmlConfigContext builder = createBuilder();
 
-      InjectManager cdiManager = InjectManager.create();
-
       setProperty("__FILE__", FileVar.__FILE__);
       setProperty("__DIR__", DirVar.__DIR__);
 

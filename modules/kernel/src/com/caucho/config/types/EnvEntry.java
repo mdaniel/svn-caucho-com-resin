@@ -193,6 +193,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
       Jndi.bindDeepShort(_name, this);
     } catch (Exception e) {
+      e.printStackTrace();
       throw ConfigException.create(e);
     } finally {
       thread.setContextClassLoader(loader);
