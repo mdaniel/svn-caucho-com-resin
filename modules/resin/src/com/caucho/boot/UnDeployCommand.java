@@ -24,12 +24,10 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package com.caucho.boot;
-
-import java.util.ArrayList;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
@@ -39,8 +37,10 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-public class DeployCommand extends AbstractBootCommand {
-  private static final L10N L = new L10N(DeployCommand.class);
+import java.util.ArrayList;
+
+public class UnDeployCommand extends DeployCommand {
+  private static final L10N L = new L10N(UnDeployCommand.class);
   
   @Override
   public void doCommand(WatchdogArgs args,
@@ -48,24 +48,17 @@ public class DeployCommand extends AbstractBootCommand {
   {
     WebAppDeployClient deployClient = getDeployClient(args, client);
     
-    String war = args.getDefaultArg();
-    
-    if (war == null) {
-      throw new ConfigException(L.l("Cannot find .war argument in command line"));
+    String name = args.getDefaultArg();
+
+    if (name == null) {
+      throw new ConfigException(L.l("Cannot find context argument in command line"));
     }
-    
-    if (! war.endsWith(".war")) {
-      throw new ConfigException(L.l("Deploy expects to be used with a *.war file at {0}",
-                                    war));
-    }
-     
-     String name = args.getArg("-name");
     
     String host = args.getArg("-host");
     
     if (host == null)
       host = "default";
-    
+
     CommitBuilder commit = new CommitBuilder();
     commit.type("webapp");
     
@@ -73,80 +66,27 @@ public class DeployCommand extends AbstractBootCommand {
     
     if (stage != null)
       commit.stage(stage);
-    
-    Path path = Vfs.lookup(war);
-    
-    if (name == null) {
-      String tail = path.getTail();
-      
-      int p = tail.lastIndexOf('.');
 
-      name = tail.substring(0, p);
-    }
-    
+
     commit.tagKey(host + "/" + name);
-    
-    if (! path.isFile()) {
-      throw new ConfigException(L.l("'{0}' is not a readable file.",
-                                    path.getFullPath()));
-    }
-    
+
     String message = args.getArg("-m");
     
     if (message == null)
       message = args.getArg("-message");
     
     if (message == null)
-      message = "deploy " + war + " from command line";
+      message = "undeploy " + name + " from command line";
     
     commit.message(message);
     
     commit.attribute("user", System.getProperty("user.name"));
-    
-    deployClient.commitArchive(commit, path);
-    
+
+    deployClient.removeTag(commit);
+
     deployClient.close();
     
-    System.out.println("Deployed " + commit.getId() + " as " + war + " to "
+    System.out.println("Undeployed " + name + " from "
                        + deployClient.getUrl());
-  }
-  
-  protected WebAppDeployClient getDeployClient(WatchdogArgs args,
-                                             WatchdogClient client)
-  {
-    String address = client.getConfig().getAddress();
-    
-    int port = findPort(client);
-    
-    if (port == 0) {
-      throw new ConfigException(L.l("HTTP listener {0}:{1} was not found",
-                                    address, port));
-    }
-    
-    String user = args.getArg("-user");
-    String password = args.getArg("-password");
-    
-    /*
-    if (user == null) {
-      user = "";
-      password = client.getResinSystemAuthKey();
-    }
-    */
-    
-    return new WebAppDeployClient(address, port, user, password);
-  }
-  
-  private int findPort(WatchdogClient client)
-  {
-    for (SocketLinkListener listener : client.getConfig().getPorts()) {
-      if (listener instanceof OpenPort) {
-        OpenPort openPort = (OpenPort) listener;
-        
-        if ("http".equals(openPort.getProtocolName()))
-          return openPort.getPort();
-      }
-    }
-    
-    return 0;
   }
 }

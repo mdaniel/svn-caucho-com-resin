@@ -391,5 +391,6 @@ public class ResinBoot {
   
   static {
     _commandMap.put(StartMode.DEPLOY, new DeployCommand());
+    _commandMap.put(StartMode.UNDEPLOY, new UnDeployCommand());
   }
 }

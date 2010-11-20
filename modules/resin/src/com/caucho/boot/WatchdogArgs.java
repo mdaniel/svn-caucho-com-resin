@@ -237,6 +237,28 @@ class WatchdogArgs
     return new ResinBootELContext();
   }
 
+  /**
+   * finds first argument that follows no dash prefixed token
+   * @return
+   */
+  public String getDefaultArg()
+  {
+    ArrayList<String> tailArgs = getTailArgs();
+
+    for (int i = 0; i < tailArgs.size(); i++) {
+      String arg = tailArgs.get(i);
+
+      if (arg.startsWith("-")) {
+        i++;
+        continue;
+      }
+
+      return arg;
+    }
+
+    return null;
+  }
+
   private void setLogLevel(String levelName)
   {
     Level level = Level.INFO;
@@ -356,6 +378,9 @@ class WatchdogArgs
       }
       else if ("deploy".equals(arg)) {
         _startMode = StartMode.DEPLOY;
+      }
+      else if ("undeploy".equals(arg)) {
+        _startMode = StartMode.UNDEPLOY;
       }
       else if ("status".equals(arg)) {
         _startMode = StartMode.STATUS;
@@ -710,6 +735,7 @@ class WatchdogArgs
   enum StartMode {
     CONSOLE,
     DEPLOY,
+    UNDEPLOY,
     STATUS,
     START,
     GUI,
