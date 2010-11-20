@@ -33,7 +33,7 @@ namespace Caucho
 {
   public class ResinArgs
   {
-    public static String USAGE = @"usage: {0} [flags] gui | console | status | start | stop | restart | kill | shutdown
+    public static String USAGE = @"usage: {0} [flags] gui | console | status | start | stop | restart | kill | shutdown | deploy | undeploy
 
     COMMANDS:
       gui - start Resin with a Graphic UI
@@ -44,6 +44,8 @@ namespace Caucho
       restart - restart a Resin server
       kill - force a kill of a Resin server
       shutdown - shutdown the watchdog
+      deploy - deploys an application to remote server
+      undeploy - undeploys an application on remote server
 
     OPTIONS:
       -h                                     : this help
@@ -64,6 +66,16 @@ namespace Caucho
       -preview                               : run as a preview server
       -debug-port <port>                     : configure a debug port
       -jmx-port <port>                       : configure an unauthenticated jmx port
+
+    OPTIONS (deploy, undeploy)
+      -user                                  : specifies user
+      -password                              : specifies password
+      -name                                  : name of the context
+      -stage                                 : specifies stage
+    
+    Examples:
+      deploying some.war to /foo context: resin.exe deploy -user admin -password secret -name foo some.war
+      undeploying an app from /foo context: resin.exe undeploy -user admin -password secret foo   
 ";
     public bool IsVerbose { get; private set; }
     public bool IsNoJit { get; private set; }
@@ -75,6 +87,7 @@ namespace Caucho
     //used with -install / -remove.
     //value of true indicates that the process is started
     //from resin.exe with elevated privileges
+    public String WinUser { get; private set; }
     public String User { get; private set; }
     public String Password { get; private set; }
     public String JavaExe { get; private set; }
@@ -197,9 +210,10 @@ namespace Caucho
           argsIdx++;
         } else if ("-user".Equals(arguments[argsIdx])) {
           User = arguments[argsIdx + 1];
+          WinUser = arguments[argsIdx + 1];
 
-          if (!User.StartsWith(".\\") && User.IndexOf('\\') < 0)
-            User = ".\\" + User;
+          if (!WinUser.StartsWith(".\\") && WinUser.IndexOf('\\') < 0)
+            WinUser = ".\\" + WinUser;
 
           argsIdx += 2;
         } else if ("-password".Equals(arguments[argsIdx])) {
@@ -376,7 +390,9 @@ namespace Caucho
                    "stop".Equals(arguments[argsIdx]) ||
                    "restart".Equals(arguments[argsIdx]) ||
                    "kill".Equals(arguments[argsIdx]) ||
-                   "shutdown".Equals(arguments[argsIdx])) {
+                   "shutdown".Equals(arguments[argsIdx])||
+                   "deploy".Equals(arguments[argsIdx])||
+                   "undeploy".Equals(arguments[argsIdx])) {
           Command = arguments[argsIdx];
 
           argsIdx++;
