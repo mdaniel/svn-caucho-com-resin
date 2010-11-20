@@ -195,9 +195,8 @@ namespace Caucho
         if (ResinArgs.Password != null)
           arguments.Append("-password ").Append(ResinArgs.Password).Append(' ');
            
-        //XXX:
-        if (ResinArgs.ServiceName != null)
-          arguments.Append("-name ").Append(ResinArgs.ServiceName).Append(' ');
+        if (ResinArgs.Name != null)
+          arguments.Append("-name ").Append(ResinArgs.Name).Append(' ');
 
         arguments.Append(ResinArgs.ResinArguments);
       } else if (command == null) {

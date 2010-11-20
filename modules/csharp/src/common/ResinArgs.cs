@@ -101,6 +101,7 @@ namespace Caucho
     public String DisplayName { get; private set; }
     public String Command { get; private set; }
     public String ResinDataDir { get; private set; }
+    public String Name { get; private set; }
     public String ServiceName { get; private set; }
     public String Exe { get; private set; }
     public String Server { get; private set; }
@@ -221,6 +222,7 @@ namespace Caucho
 
           argsIdx += 2;
         } else if ("-name".Equals(arguments[argsIdx])) {
+          Name = arguments[argsIdx + 1];
           ServiceName = arguments[argsIdx + 1];
 
           argsIdx += 2;
