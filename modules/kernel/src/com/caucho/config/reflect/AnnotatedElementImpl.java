@@ -111,12 +111,15 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
                                            Type type)
   {
     // ioc/0242
-    return createBaseType(declaringType, type, true);
+    BaseType baseType = createBaseType(declaringType, type, 
+                                       BaseType.ClassFill.PLAIN);
+    
+    return baseType;
   }
   
   protected static BaseType createBaseType(AnnotatedType<?> declaringType,
                                            Type type,
-                                           boolean isClassFillParamObject)
+                                           BaseType.ClassFill classFill)
     {
     BaseType declBaseType;
     
@@ -125,7 +128,7 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
 
       return declBaseType.create(type, 
                                  declBaseType.getParamMap(), 
-                                 isClassFillParamObject);
+                                 classFill);
     }
     /*
     else if (declaringType instanceof ReflectionAnnotatedType<?>) {

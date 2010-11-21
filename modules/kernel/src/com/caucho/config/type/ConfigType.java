@@ -87,6 +87,14 @@ abstract public class ConfigType<T>
   }
   
   /**
+   * Returns the config type of the child bean.
+   */
+  public ConfigType<?> getType(Object childBean)
+  {
+    return TypeFactory.getType(childBean);
+  }
+  
+  /**
    * Inject and initialize the type
    */
   public void inject(Object bean)
@@ -312,14 +320,20 @@ abstract public class ConfigType<T>
   {
   }
 
+  public boolean isConstructableFromString()
+  {
+    return true;
+  }
+
+  public boolean isInlineType(ConfigType<?> type)
+  {
+    System.out.println("INLINE: " + this + " " + type);
+    return false;
+  }
+
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getTypeName() + "]";
-  }
-
-  public boolean isConstructableFromString()
-  {
-    return true;
   }
 }

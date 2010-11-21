@@ -171,6 +171,14 @@ public abstract class Attribute {
   {
     return null;
   }
+  
+  /**
+   * Returns the config type of the child bean.
+   */
+  public ConfigType<?> getType(Object childBean)
+  {
+    return getConfigType().getType(childBean);
+  }
 
   /**
    * Replaces the given bean.

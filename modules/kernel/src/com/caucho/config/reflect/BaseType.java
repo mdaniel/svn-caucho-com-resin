@@ -55,27 +55,27 @@ abstract public class BaseType
   public static BaseType createForTarget(Type type, 
                                          HashMap<String,BaseType> paramMap)
   {
-    return create(type, paramMap, true);
+    return create(type, paramMap, ClassFill.TARGET);
   }
   
   public static BaseType createForSource(Type type, 
                                          HashMap<String,BaseType> paramMap)
   {
 //  return create(type, paramMap, false);
-    return create(type, paramMap, false);
+    return create(type, paramMap, ClassFill.SOURCE);
   }
   
   public static BaseType create(Type type, 
                                 HashMap<String,BaseType> paramMap,
-                                boolean isClassFillParamObject)
+                                ClassFill classFill)
   {
-    return create(type, paramMap, null, isClassFillParamObject);
+    return create(type, paramMap, null, classFill);
   }
     
   public static BaseType create(Type type, 
                                 HashMap<String,BaseType> paramMap,
                                 Type parentType,
-                                boolean isClassFillParamObject)
+                                ClassFill classFill)
   {
     if (type instanceof Class<?>) {
       Class<?> cl = (Class<?>) type;
@@ -85,12 +85,21 @@ abstract public class BaseType
       if (typeParam == null || typeParam.length == 0)
         return ClassType.create(cl);
 
-      if (! isClassFillParamObject)
-        return createClass(cl);
+      if (classFill == ClassFill.PLAIN)
+        return ClassType.create(cl);
+      else if (classFill == ClassFill.SOURCE)
+        return createGenericClass(cl);
       
-      // ioc/1238
+      if (Set.class.equals(cl)) {
+        System.out.println("CL: " + cl);
+        Thread.dumpStack();
+      }
+      
+      // ioc/0p80 vs ioc/1238
+      /*
       if (true)
         return ClassType.create(cl);
+        */
       
       BaseType []args = new BaseType[typeParam.length];
 
@@ -127,7 +136,7 @@ abstract public class BaseType
       BaseType []args = new BaseType[typeArgs.length];
 
       for (int i = 0; i < args.length; i++) {
-        args[i] = create(typeArgs[i], paramMap, type, true);
+        args[i] = create(typeArgs[i], paramMap, type, ClassFill.TARGET);
 
         if (args[i] == null) {
           throw new NullPointerException("unsupported BaseType: " + type);
@@ -149,7 +158,8 @@ abstract public class BaseType
     else if (type instanceof GenericArrayType) {
       GenericArrayType aType = (GenericArrayType) type;
 
-      BaseType baseType = create(aType.getGenericComponentType(), paramMap, isClassFillParamObject);
+      BaseType baseType = create(aType.getGenericComponentType(), paramMap, 
+                                 classFill);
       Class<?> rawType = Array.newInstance(baseType.getRawClass(), 0).getClass();
       
       return new ArrayType(baseType, rawType);
@@ -175,7 +185,7 @@ abstract public class BaseType
         for (int i = 0; i < bounds.length; i++) {
           // ejb/1243 - Enum
           if (bounds[i] != parentType)
-            baseBounds[i] = create(bounds[i], paramMap, type, true);
+            baseBounds[i] = create(bounds[i], paramMap, type, ClassFill.TARGET);
           else
             baseBounds[i] = ObjectType.OBJECT_TYPE;
         }
@@ -206,6 +216,21 @@ abstract public class BaseType
    */
   public static BaseType createClass(Class<?> type)
   {
+    // ioc/1238
+    // ioc/07f2
+
+    if (type.getName().equals("qa.MyBean"))
+      Thread.dumpStack();
+    
+    return ClassType.create(type);
+  }
+
+  /**
+   * Create a class-based type, where any parameters are filled with the
+   * variables, not Object.
+   */
+  public static BaseType createGenericClass(Class<?> type)
+  {
     TypeVariable<?> []typeParam = type.getTypeParameters();
       
     if (typeParam == null || typeParam.length == 0)
@@ -216,7 +241,7 @@ abstract public class BaseType
     HashMap<String,BaseType> newParamMap = new HashMap<String,BaseType>();
 
     for (int i = 0; i < args.length; i++) {
-      args[i] = create(typeParam[i], newParamMap, true);
+      args[i] = create(typeParam[i], newParamMap, ClassFill.TARGET);
 
       if (args[i] == null) {
         throw new NullPointerException("unsupported BaseType: " + type);
@@ -239,7 +264,7 @@ abstract public class BaseType
     BaseType []baseTypes = new BaseType[types.length];
 
     for (int i = 0; i < types.length; i++) {
-      baseTypes[i] = create(types[i], paramMap, true);
+      baseTypes[i] = create(types[i], paramMap, ClassFill.TARGET);
     }
 
     return baseTypes;
@@ -380,5 +405,11 @@ abstract public class BaseType
   public String toString()
   {
     return getRawClass().getName();
+  }
+  
+  public enum ClassFill {
+    PLAIN,
+    SOURCE,
+    TARGET;
   }
 }

@@ -333,6 +333,7 @@ class NamespaceConfig {
     
     NS_DEFAULT= new NamespaceConfig("", true);
     NS_DEFAULT.initCore();
+    NS_DEFAULT.initResin();
     
     URN_RESIN = new NamespaceConfig("urn:java:com.caucho.resin", false);
     URN_RESIN.initCore();

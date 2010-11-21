@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+< * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -629,7 +629,7 @@ public class TypeFactory implements AddLoaderListener
       _driverTypeMap.clear();
 
       if (_parent == null) {
-        //addNamespace(NamespaceConfig.NS_DEFAULT);
+        addNamespace(NamespaceConfig.NS_DEFAULT);
         addNamespace(NamespaceConfig.NS_RESIN);
         addNamespace(NamespaceConfig.NS_RESIN_CORE);
         addNamespace(NamespaceConfig.URN_RESIN);

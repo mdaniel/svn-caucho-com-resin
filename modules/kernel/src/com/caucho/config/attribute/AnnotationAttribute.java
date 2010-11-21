@@ -65,6 +65,22 @@ public class AnnotationAttribute<T> extends Attribute {
   }
 
   /**
+   * True if it allows inline beans
+   */
+  @Override
+  public boolean isInlineType(ConfigType<?> type)
+  {
+    if (type == null)
+      return false;
+    else if (type.isReplace())
+      return true;
+    else if (_type.isInlineType(type))
+      return true;
+    else
+      return _type.getType().isAssignableFrom(type.getType());
+  }
+
+  /**
    * Creates the child bean.
    */
   public Object create(Object parent, QName name)

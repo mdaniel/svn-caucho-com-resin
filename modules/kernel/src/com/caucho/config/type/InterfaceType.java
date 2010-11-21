@@ -44,16 +44,16 @@ import javax.enterprise.inject.spi.Bean;
  * Represents an interface.  The interface will try to lookup the
  * value in webbeans.
  */
-public class InterfaceType extends ConfigType
+public class InterfaceType<T> extends ConfigType<T>
 {
   private static final L10N L = new L10N(InterfaceType.class);
 
-  private final Class _type;
+  private final Class<T> _type;
 
   /**
    * Create the interface type
    */
-  public InterfaceType(Class type)
+  public InterfaceType(Class<T> type)
   {
     _type = type;
   }
@@ -61,7 +61,8 @@ public class InterfaceType extends ConfigType
   /**
    * Returns the Java type.
    */
-  public Class getType()
+  @Override
+  public Class<T> getType()
   {
     return _type;
   }

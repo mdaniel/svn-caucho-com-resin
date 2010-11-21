@@ -56,16 +56,20 @@ public class InterfaceConfig extends BeanConfig {
   
   public InterfaceConfig()
   {
+    Thread.dumpStack();
   }
   
   public InterfaceConfig(Class<?> type)
   {
+    this();
+    
     setBeanConfigClass(type);
   }
   
   public InterfaceConfig(Class<?> type, String tagName)
   {
-    setBeanConfigClass(type);
+    this(type);
+
     setTagName(tagName);
   }
 

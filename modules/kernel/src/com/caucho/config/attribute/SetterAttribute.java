@@ -88,6 +88,8 @@ public class SetterAttribute<T> extends Attribute {
       return false;
     else if (type.isReplace())
       return true;
+    else if (getConfigType().isInlineType(type))
+      return true;
     else
       return _type.isAssignableFrom(type.getType());
   }

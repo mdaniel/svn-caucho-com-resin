@@ -34,7 +34,7 @@ import com.caucho.xml.QName;
 /**
  * Represents a Object type.
  */
-public final class ObjectType extends InterfaceType
+public final class ObjectType extends ConfigType<Object>
 {
   public static final ObjectType TYPE = new ObjectType();
   
@@ -43,14 +43,13 @@ public final class ObjectType extends InterfaceType
    */
   private ObjectType()
   {
-    super(Object.class);
   }
   
   /**
    * Returns the Java type.
    */
   @Override
-  public Class<?> getType()
+  public Class<Object> getType()
   {
     return Object.class;
   }
@@ -62,15 +61,25 @@ public final class ObjectType extends InterfaceType
   public ConfigType<?> createType(QName name)
   {
     TypeFactory factory = TypeFactory.create();
-    
+
     return factory.getEnvironmentType(name);
   }
   
   /**
    * Converts the object to a value of the type.
    */
+  @Override
   public Object valueOf(String text)
   {
     return text;
+  }
+
+  /**
+   * Converts the value to a value of the type.
+   */
+  @Override
+  public Object valueOf(Object value)
+  {
+    return value;
   }
 }

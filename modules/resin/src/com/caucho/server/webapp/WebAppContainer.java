@@ -73,6 +73,7 @@ import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -1218,8 +1219,9 @@ public class WebAppContainer
       try {
         thread.setContextClassLoader(_classLoader);
 
-        Path errorRoot = Vfs.lookup("memory:/error-root");
-        
+        Path errorRoot = new MemoryPath().lookup("/error-root");
+        errorRoot.mkdirs();
+
         WebAppController webAppController
           = new WebAppController("error/webapp/default/error", errorRoot, this);
         webAppController.init();
