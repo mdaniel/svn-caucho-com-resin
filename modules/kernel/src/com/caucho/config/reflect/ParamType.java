@@ -62,6 +62,13 @@ public class ParamType extends BaseType implements ParameterizedType
     for (int i = 0; i < param.length; i++) {
       _actualArguments[i] = param[i].toType();
     }
+    
+    /*
+    if (type.equals(Set.class)) {
+      // System.out.println("PTYPE: " + this + " " + type + " " + paramMap);
+      // Thread.dumpStack();
+    }
+    */
   }
   
   @Override

@@ -47,15 +47,15 @@ public class ListType extends ConfigType
   private static final Logger log
     = Logger.getLogger(ListType.class.getName());
 
-  private final Class _listClass;
-  private final Class _instanceClass;
+  private final Class<?> _listClass;
+  private final Class<?> _instanceClass;
 
   public ListType()
   {
     this(ArrayList.class);
   }
 
-  public ListType(Class listClass)
+  public ListType(Class<?> listClass)
   {
     _listClass = listClass;
 
@@ -70,7 +70,7 @@ public class ListType extends ConfigType
   /**
    * Returns the given type.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return _listClass;
   }
@@ -98,7 +98,9 @@ public class ListType extends ConfigType
    */
   public Attribute getAttribute(QName name)
   {
-    return TypeFactory.getFactory().getListAttribute(name);
+    Attribute attr = TypeFactory.getFactory().getListAttribute(name);
+    
+    return attr;
   }
   
   /**

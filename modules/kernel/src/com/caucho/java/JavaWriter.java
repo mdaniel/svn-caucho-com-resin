@@ -417,95 +417,19 @@ public class JavaWriter extends Writer {
   public void printType(Type type) throws IOException
   {
     if (type instanceof Class<?>) {
-      printClass((Class<?>) type);
+      printTypeClass((Class<?>) type);
     } else if (type instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) type;
-
-      printType(parameterizedType.getRawType());
-
-      print("<");
-
-      Type[] typeParameters = parameterizedType.getActualTypeArguments();
-
-      for (int i = 0; i < typeParameters.length; i++) {
-        if (i != 0) {
-          print(", ");
-        }
-
-        printType(typeParameters[i]);
-      }
-
-      print(">");
+      
+      printParameterizedType(parameterizedType);
     } else if (type instanceof WildcardType) {
       WildcardType wildcardType = (WildcardType) type;
-
-      print("?");
-
-      Type[] lowerBounds = wildcardType.getLowerBounds();
-
-      if ((lowerBounds != null) && (lowerBounds.length > 0)) {
-        print(" super ");
-
-        for (int i = 0; i < lowerBounds.length; i++) {
-          if (i != 0) {
-            print(" & ");
-          }
-
-          printType(lowerBounds[i]);
-        }
-      } else {
-        Type[] upperBounds = wildcardType.getUpperBounds();
-
-        if ((upperBounds != null) && (upperBounds.length > 0)) {
-          print(" extends ");
-
-          for (int i = 0; i < upperBounds.length; i++) {
-            if (i != 0) {
-              print(" & ");
-            }
-
-            printType(upperBounds[i]);
-          }
-        }
-      }
+      
+      printWildcardType(wildcardType);
     } else if (type instanceof TypeVariable<?>) {
       TypeVariable<? extends GenericDeclaration> typeVariable = (TypeVariable<? extends GenericDeclaration>) type;
-
-      print(typeVariable.getName());
-
-      Type[] bounds = typeVariable.getBounds();
-
-      if ((bounds != null) && (bounds.length > 0)) {
-        print(" extends ");
-
-        for (int i = 0; i < bounds.length; i++) {
-          if (i != 0) {
-            print(" & ");
-          }
-
-          printType(bounds[i]);
-        }
-      }
-
-      GenericDeclaration genericDeclaration = typeVariable
-          .getGenericDeclaration();
-
-      Type[] typeParameters = genericDeclaration.getTypeParameters();
-
-      if ((typeParameters != null) && (typeParameters.length > 0)) {
-        print("<");
-
-        for (int i = 0; i < typeParameters.length; i++) {
-          if (i != 0) {
-            print(", ");
-          }
-
-          printType(typeParameters[i]);
-        }
-
-        print(">");
-      }
-
+      
+      printTypeVariable(typeVariable);
     } else if (type instanceof GenericArrayType) {
       GenericArrayType genericArrayType = (GenericArrayType) type;
 
@@ -517,6 +441,136 @@ public class JavaWriter extends Writer {
     }
   }
 
+  private void printTypeClass(Class<?> cl)
+    throws IOException
+  {
+    printClass(cl);
+    
+    if (true)
+      return;
+
+    // ioc/1238
+    Type []param = cl.getTypeParameters();
+
+    if (param == null || param.length == 0)
+      return;
+
+    print("<");
+    
+    for (int i = 0; i < param.length; i++) {
+      if (i != 0)
+        print(",");
+      
+      print("java.lang.Object");
+    }
+    print(">");
+  }
+
+  private void printParameterizedType(ParameterizedType parameterizedType)
+    throws IOException
+  {
+    Type rawType = parameterizedType.getRawType();
+
+    if (rawType instanceof Class<?>)
+      printClass((Class<?>) rawType);
+    else
+      printType(rawType);
+
+    print("<");
+
+    Type[] typeParameters = parameterizedType.getActualTypeArguments();
+
+    for (int i = 0; i < typeParameters.length; i++) {
+      if (i != 0) {
+        print(", ");
+      }
+
+      printType(typeParameters[i]);
+    }
+
+    print(">");
+  }
+
+  private void printTypeVariable(TypeVariable<?> typeVariable)
+    throws IOException
+  {
+    print(typeVariable.getName());
+
+    Type[] bounds = typeVariable.getBounds();
+
+    if ((bounds != null) && (bounds.length > 0)) {
+      print(" extends ");
+
+      for (int i = 0; i < bounds.length; i++) {
+        if (i != 0) {
+          print(" & ");
+        }
+
+        printType(bounds[i]);
+      }
+    }
+
+    GenericDeclaration genericDeclaration
+    = typeVariable.getGenericDeclaration();
+
+    Type[] typeParameters = null;
+
+    typeParameters = genericDeclaration.getTypeParameters();
+
+    if ((typeParameters != null) && (typeParameters.length > 0)) {
+      print("<");
+
+      for (int i = 0; i < typeParameters.length; i++) {
+        if (i != 0) {
+          print(", ");
+        }
+
+        printType(typeParameters[i]);
+      }
+
+      print(">");
+    }
+  }
+
+  private void printWildcardType(WildcardType wildcardType)
+    throws IOException
+  {
+    print("?");
+
+    Type[] upperBounds = wildcardType.getUpperBounds();
+
+    if (upperBounds == null || upperBounds.length == 0) {
+    }
+    else if (upperBounds.length == 1 && upperBounds[0].equals(Object.class)) {
+      // skip printing "extends Object"
+    }
+    else {
+      print(" extends ");
+
+      for (int i = 0; i < upperBounds.length; i++) {
+        if (i != 0) {
+          print(" & ");
+        }
+
+        printType(upperBounds[i]);
+      }
+    }
+
+    Type[] lowerBounds = wildcardType.getLowerBounds();
+
+    if (lowerBounds != null && lowerBounds.length > 0) {
+      print(" super ");
+
+      for (int i = 0; i < lowerBounds.length; i++) {
+        if (i != 0) {
+          print(" & ");
+        }
+
+        printType(lowerBounds[i]);
+      }
+    }
+    
+  }
   /**
    * Converts a java primitive type to a Java object.
    * 

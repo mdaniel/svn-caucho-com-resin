@@ -146,6 +146,16 @@ public class ClassType extends BaseType
     else
       return false;
   }
+
+  /**
+   * Fills in a parameter with a given name.
+   */
+  @Override
+  public BaseType fill(BaseType ... baseType)
+  {
+    // ioc/1238
+    return this;
+  }
    
   @Override
   public void fillTypeClosure(InjectManager manager, Set<Type> typeSet)

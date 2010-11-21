@@ -29,35 +29,66 @@
 
 package com.caucho.config.type;
 
-import com.caucho.config.*;
-import com.caucho.config.attribute.*;
-import com.caucho.config.program.*;
-import com.caucho.config.types.RawString;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorManager;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.el.MethodExpression;
+
+import org.w3c.dom.Node;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.attribute.EnvironmentAttribute;
+import com.caucho.config.attribute.FlowAttribute;
+import com.caucho.config.attribute.ListValueAttribute;
+import com.caucho.config.attribute.SetValueAttribute;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.types.AnnotationConfig;
+import com.caucho.config.types.RawString;
 import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlBeanType;
 import com.caucho.el.Expr;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.loader.AddLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.QName;
-
-import java.beans.*;
-import java.io.*;
-import java.net.URL;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.*;
-import java.util.regex.Pattern;
-import java.util.logging.*;
-
-import javax.annotation.*;
-import javax.el.*;
-import javax.sql.*;
-
-import org.w3c.dom.Node;
 
 /**
  * Factory for returning type strategies.
@@ -89,14 +120,14 @@ public class TypeFactory implements AddLoaderListener
   private final HashMap<String,ArrayList<String>> _packageImportMap
     = new HashMap<String,ArrayList<String>>();
 
-  private final HashMap<String,ConfigType> _typeMap
-    = new HashMap<String,ConfigType>();
+  private final HashMap<String,ConfigType<?>> _typeMap
+    = new HashMap<String,ConfigType<?>>();
 
-  private final HashMap<String,XmlBeanType> _customBeanMap
-    = new HashMap<String,XmlBeanType>();
+  private final HashMap<String,XmlBeanType<?>> _customBeanMap
+    = new HashMap<String,XmlBeanType<?>>();
 
-  private final ConcurrentHashMap<QName,ConfigType> _attrMap
-    = new ConcurrentHashMap<QName,ConfigType>();
+  private final ConcurrentHashMap<QName,ConfigType<?>> _attrMap
+    = new ConcurrentHashMap<QName,ConfigType<?>>();
   
   private final ConcurrentHashMap<QName,Class<?>> _customClassMap
     = new ConcurrentHashMap<QName,Class<?>>();
@@ -143,8 +174,8 @@ public class TypeFactory implements AddLoaderListener
    */
   public static ConfigType<?> getType(Object bean)
   {
-    if (bean instanceof XmlBeanConfig)
-      return ((XmlBeanConfig) bean).getConfigType();
+    if (bean instanceof XmlBeanConfig<?>)
+      return ((XmlBeanConfig<?>) bean).getConfigType();
     else if (bean instanceof AnnotationConfig)
       return ((AnnotationConfig) bean).getConfigType();
 
@@ -245,9 +276,9 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Returns an environment type.
    */
-  protected ConfigType getEnvironmentTypeRec(QName name)
+  protected ConfigType<?> getEnvironmentTypeRec(QName name)
   {
-    ConfigType type = _attrMap.get(name);
+    ConfigType<?> type = _attrMap.get(name);
 
     if (type != null) {
       return type == NotFoundConfigType.NULL ? null : type;
@@ -267,8 +298,6 @@ public class TypeFactory implements AddLoaderListener
     NamespaceConfig ns = _nsMap.get(uri);
 
     if (ns != null) {
-      ns.loadBeans();
-
       type = ns.getBean(name.getLocalName());
 
       if (type != null) {
@@ -359,12 +388,12 @@ public class TypeFactory implements AddLoaderListener
     if (attr != null)
       return attr;
 
-    ConfigType type = getEnvironmentType(name);
+    ConfigType<?> type = getEnvironmentType(name);
 
     if (type == null)
       return null;
 
-    if (type instanceof FlowBeanType)
+    if (type instanceof FlowBeanType<?>)
       attr = new FlowAttribute(type);
     else
       attr = new EnvironmentAttribute(type);
@@ -496,7 +525,7 @@ public class TypeFactory implements AddLoaderListener
     }
   }
 
-  private ConfigType createType(Class<?> type)
+  ConfigType createType(Class<?> type)
   {
     PropertyEditor editor = null;
 
@@ -599,24 +628,11 @@ public class TypeFactory implements AddLoaderListener
       _driverTypeSet.clear();
       _driverTypeMap.clear();
 
-      Enumeration<URL> urls
-        = loader.getResources("META-INF/caucho/com.caucho.config.namespace.xml");
-
-      while (urls.hasMoreElements()) {
-        URL url = urls.nextElement();
-
-        if (hasConfig(url))
-          continue;
-
-        _configSet.add(url);
-
-        InputStream is = url.openStream();
-
-        try {
-          new Config(loader).configure(this, is);
-        } finally {
-          is.close();
-        }
+      if (_parent == null) {
+        //addNamespace(NamespaceConfig.NS_DEFAULT);
+        addNamespace(NamespaceConfig.NS_RESIN);
+        addNamespace(NamespaceConfig.NS_RESIN_CORE);
+        addNamespace(NamespaceConfig.URN_RESIN);
       }
     } catch (RuntimeException e) {
       throw e;
@@ -893,179 +909,9 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Adds an new environment attribute.
    */
-  public NamespaceConfig createNamespace()
-  {
-    return new NamespaceConfig();
-  }
-
-  /**
-   * Adds an new environment attribute.
-   */
-  public void addNamespace(NamespaceConfig ns)
+  private void addNamespace(NamespaceConfig ns)
   {
     _nsMap.put(ns.getName(), ns);
-
-    if (ns.isDefault())
-      _nsMap.put(ns.getName(), ns);
-  }
-
-  // configuration types
-  public class NamespaceConfig {
-    private String _ns = "";
-    private boolean _isDefault;
-    private Path _path;
-
-    private AtomicBoolean _isBeansLoaded = new AtomicBoolean();
-
-    private HashMap<String,BeanConfig> _beanMap
-      = new HashMap<String,BeanConfig>();
-
-    public void setName(String ns)
-    {
-      if ("default".equals(ns))
-        ns = "";
-
-      _ns = ns;
-    }
-
-    public String getName()
-    {
-      return _ns;
-    }
-
-    public void setDefault(boolean isDefault)
-    {
-      _isDefault = isDefault;
-    }
-
-    public boolean isDefault()
-    {
-      return _isDefault;
-    }
-
-    public void setPath(String path)
-    {
-      if (path.indexOf(':') < 0)
-        _path = Vfs.lookup("classpath:" + path);
-      else
-        _path = Vfs.lookup(path);
-    }
-
-    public Path getPath()
-    {
-      return _path;
-    }
-
-    public void loadBeans()
-    {
-      if (_isBeansLoaded.getAndSet(true))
-        return;
-
-      try {
-        new Config().configure(this, _path);
-      } catch (IOException e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    public ConfigType getBean(String name)
-    {
-      BeanConfig beanConfig = _beanMap.get(name);
-
-      if (beanConfig != null)
-        return beanConfig.getConfigType();
-      else
-        return null;
-    }
-
-    public BeanConfig createBean()
-    {
-      return new BeanConfig(_ns, _isDefault);
-    }
-
-    public void addBean(BeanConfig bean)
-    {
-      _beanMap.put(bean.getName(), bean);
-    }
-
-    public FlowConfig createFlow()
-    {
-      return new FlowConfig(_ns, _isDefault);
-    }
-
-    public void addFlow(FlowConfig flow)
-    {
-      _beanMap.put(flow.getName(), flow);
-    }
-  }
-
-  public class BeanConfig {
-    private String _ns;
-    private boolean _isDefault;
-
-    private String _name;
-    private String _className;
-
-    private ConfigType<?> _configType;
-    private ClassLoader _loader;
-
-    BeanConfig(String ns, boolean isDefault)
-    {
-      _ns = ns;
-      _isDefault = isDefault;
-      _loader = Thread.currentThread().getContextClassLoader();
-    }
-
-    public void setName(String name)
-    {
-      _name = name;
-    }
-
-    public String getName()
-    {
-      return _name;
-    }
-
-    public void setClass(String className)
-    {
-      _className = className;
-    }
-
-    public ConfigType<?> getConfigType()
-    {
-      try {
-        if (_configType == null) {
-          Class<?> cl = Class.forName(_className, false, _loader);
-
-          ConfigType<?> type = createType(cl);
-
-          type.introspect();
-
-          _configType = type;
-        }
-
-        return _configType;
-      } catch (Exception e) {
-        throw ConfigException.create(e);
-      }
-    }
-
-    @PostConstruct
-    public void init()
-    {
-      if (_name == null)
-        throw new ConfigException(L.l("bean requires a 'name' attribute"));
-
-      if (_className == null)
-        throw new ConfigException(L.l("bean requires a 'class' attribute"));
-    }
-  }
-
-  public class FlowConfig extends BeanConfig {
-    FlowConfig(String ns, boolean isDefault)
-    {
-      super(ns, isDefault);
-    }
   }
 
   public String toString()

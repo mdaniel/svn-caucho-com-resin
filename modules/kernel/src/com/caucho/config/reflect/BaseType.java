@@ -88,14 +88,26 @@ abstract public class BaseType
       if (! isClassFillParamObject)
         return createClass(cl);
       
+      // ioc/1238
+      if (true)
+        return ClassType.create(cl);
+      
       BaseType []args = new BaseType[typeParam.length];
 
       HashMap<String,BaseType> newParamMap = new HashMap<String,BaseType>();
 
       for (int i = 0; i < args.length; i++) {
+        BaseType value = null;
+        
+        if (paramMap != null)
+          value = paramMap.get(typeParam[i].getName());
+        
         // ioc/0246
-        args[i] = TargetObjectType.OBJECT_TYPE;
-
+        if (value != null)
+          args[i] = value;
+        else
+          args[i] = TargetObjectType.OBJECT_TYPE;
+        
         if (args[i] == null) {
           throw new NullPointerException("unsupported BaseType: " + type);
         }
@@ -130,7 +142,9 @@ abstract public class BaseType
         newParamMap.put(typeVars[i].getName(), args[i]);
       }
 
-      return new ParamType(rawType, args, newParamMap);
+      ParamType paramType = new ParamType(rawType, args, newParamMap);
+      
+      return paramType;
     }
     else if (type instanceof GenericArrayType) {
       GenericArrayType aType = (GenericArrayType) type;

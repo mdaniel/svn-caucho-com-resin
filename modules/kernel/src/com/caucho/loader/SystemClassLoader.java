@@ -29,17 +29,14 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.*;
-import java.net.URLClassLoader;
+
+import com.caucho.config.Config;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * ClassLoader that initalizes the environment and allows byte code

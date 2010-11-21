@@ -35,13 +35,13 @@ import com.caucho.util.*;
 /**
  * Represents a long or Long type.
  */
-public final class LongType extends ConfigType
+public final class LongType extends ConfigType<Long>
 {
   private static final L10N L = new L10N(LongType.class);
   
   public static final LongType TYPE = new LongType();
   
-  private static final Long ZERO = new Long(0);
+  // private static final Long ZERO = new Long(0);
   
   /**
    * The LongType is a singleton
@@ -53,7 +53,7 @@ public final class LongType extends ConfigType
   /**
    * Returns the Java type.
    */
-  public Class getType()
+  public Class<Long> getType()
   {
     return Long.class;
   }

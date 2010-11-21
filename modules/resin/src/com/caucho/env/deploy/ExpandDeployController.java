@@ -45,6 +45,7 @@ import com.caucho.env.repository.CommitBuilder;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositorySpi;
+import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.DynamicClassLoader;
@@ -425,10 +426,6 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       return true;
     
     String hash = Long.toHexString(archivePath.getCrc64());
-    
-    if (log.isLoggable(Level.FINE)){
-      log.fine(this + " adding archive to repository from " + archivePath);
-    }
 
     try {
       CommitBuilder commit = new CommitBuilder();
@@ -436,9 +433,21 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       commit.type(getIdType());
       commit.tagKey(getIdKey());
       
+      String commitId = commit.getId();
+      
+      RepositoryTagEntry tagEntry = _repositorySpi.getTagMap().get(commitId);
+      
+      if (tagEntry != null 
+          && hash.equals(tagEntry.getAttributeMap().get("archive-digest"))) {
+        return true;
+      }
+
       commit.attribute("archive-digest", hash);
       commit.message(".war added to repository from "
                      + archivePath.getNativePath());
+      
+      if (log.isLoggable(Level.FINE))
+        log.fine(this + " adding archive to repository from " + archivePath);
       
       _repository.commitArchive(commit, archivePath);
       

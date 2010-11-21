@@ -55,7 +55,7 @@ public class ArrayType<T,X> extends ConfigType<T>
   {
     _componentType = componentType;
     _componentClass = componentClass;
-
+    
     Class<?> type = null;
     try {
       type = Array.newInstance(componentClass, 0).getClass();
@@ -92,7 +92,9 @@ public class ArrayType<T,X> extends ConfigType<T>
   @Override
   public Object create(Object parent, QName name)
   {
-    return new ArrayList<X>();
+    // ioc/2184
+    // return new ArrayList<X>();
+    return getComponentType().create(parent, name);
   }
 
   /**
@@ -102,7 +104,6 @@ public class ArrayType<T,X> extends ConfigType<T>
   public Attribute getAttribute(QName name)
   {
     // XXX: type
-    
     return TypeFactory.getFactory().getListAttribute(name);
   }
 

@@ -211,7 +211,7 @@ public class JarPath extends FilesystemPath {
     return getJar().openReadImpl(this);
   }
 
-  protected Jar getJar()
+  public Jar getJar()
   {
     return Jar.create(_backing);
   }

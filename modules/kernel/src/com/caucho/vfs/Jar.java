@@ -94,6 +94,10 @@ public class Jar implements CacheListener {
   // cached zip file to read jar entries
   private final AtomicReference<SoftReference<JarFile>> _jarFileRef
     = new AtomicReference<SoftReference<JarFile>>();
+
+  // cached zip file to read jar entries
+  private final AtomicReference<SoftReference<ZipFile>> _zipFileRef
+    = new AtomicReference<SoftReference<ZipFile>>();
     
   private Boolean _isSigned;
 
@@ -466,7 +470,7 @@ public class Jar implements CacheListener {
     ZipEntry entry;
     InputStream is = null;
     
-    JarFile zipFile = getJarFile();
+    ZipFile zipFile = getZipFile();
 
     try {
       entry = zipFile.getEntry(pathName);
@@ -480,7 +484,7 @@ public class Jar implements CacheListener {
       }
     } finally {
       if (is == null) {
-        closeJarFile(zipFile);
+        closeZipFile(zipFile);
       }
     }
   }
@@ -503,9 +507,22 @@ public class Jar implements CacheListener {
       }
     } catch (Exception e) {
     }
+
+    SoftReference<ZipFile> zipFileRef = _zipFileRef.getAndSet(null);
+
+    ZipFile zipFile = null;
+    if (zipFileRef != null)
+      zipFile = zipFileRef.get();
+
+    try {
+      if (zipFile != null) {
+        zipFile.close();
+      }
+    } catch (Exception e) {
+    }
   }
 
-  private ZipEntry getJarEntry(String path)
+  public ZipEntry getJarEntry(String path)
     throws IOException
   {
     ZipEntry entry = _zipEntryCache.get(path);
@@ -535,15 +552,15 @@ public class Jar implements CacheListener {
     if (path.startsWith("/"))
       path = path.substring(1);
 
-    JarFile jarFile = getJarFile();
+    ZipFile zipFile = getZipFile();
 
     try {
-      if (jarFile != null)
-        return jarFile.getJarEntry(path);
+      if (zipFile != null)
+        return zipFile.getEntry(path);
       else
         return null;
     } finally {
-      closeJarFile(jarFile);
+      closeZipFile(zipFile);
     }
   }
 
@@ -585,6 +602,46 @@ public class Jar implements CacheListener {
     }
 
     return jarFile;
+  }
+
+  /**
+   * Returns the Java ZipFile for this Jar.  Accessing the entries with
+   * the ZipFile is faster than scanning through them.
+   *
+   * getJarFile is not thread safe.
+   */
+  private ZipFile getZipFile()
+    throws IOException
+  {
+    ZipFile zipFile = null;
+
+    isCacheValid();
+    
+    SoftReference<ZipFile> zipFileRef = _zipFileRef.getAndSet(null);
+
+    if (zipFileRef != null) {
+      zipFile = zipFileRef.get();
+
+      if (zipFile != null) {
+        return zipFile;
+      }
+    }
+
+    if (_backingIsFile) {
+      try {
+        zipFile = new ZipFile(_backing.getNativePath());
+      }
+      catch (IOException ex) {
+        if (log.isLoggable(Level.FINE))
+          log.log(Level.FINE, L.l("Error opening jar file '{0}'", _backing.getNativePath()));
+
+        throw ex;
+      }
+
+      getLastModifiedImpl();
+    }
+
+    return zipFile;
   }
   
   /**
@@ -631,7 +688,7 @@ public class Jar implements CacheListener {
       _changeSequence.incrementAndGet();
       
       // If the file has changed, close the old file
-      SoftReference<JarFile> oldFileRef = _jarFileRef.getAndSet(null);
+      clearCache();
       
       _depend = null;
       _isSigned = null;
@@ -641,18 +698,6 @@ public class Jar implements CacheListener {
       _length = newLength;
       
       _lastTime = now;
-
-
-      if (oldFileRef != null) {
-        JarFile oldFile = oldFileRef.get();
-        
-        try {
-          if (oldFile != null) {
-            oldFile.close();
-          }
-        } catch (Throwable e) {
-        }
-      }
 
       return false;
     }
@@ -680,6 +725,28 @@ public class Jar implements CacheListener {
     }
   }
 
+  public void closeZipFile(ZipFile zipFile)
+  {
+    if (zipFile == null)
+      return;
+    
+    SoftReference<ZipFile> oldZipFileRef = _zipFileRef.get();
+    
+    if (oldZipFileRef == null || oldZipFileRef.get() == null) {
+      SoftReference<ZipFile> zipFileRef = new SoftReference<ZipFile>(zipFile);
+      
+      if (_zipFileRef.compareAndSet(oldZipFileRef, zipFileRef)) {
+        return;
+      }
+    }
+    
+    try {
+      zipFile.close();
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
   public void close()
   {
     removeEvent();
@@ -688,19 +755,7 @@ public class Jar implements CacheListener {
   @Override
   public void removeEvent()
   {
-    SoftReference<JarFile> jarFileRef = _jarFileRef.getAndSet(null);
-
-    JarFile jarFile = null;
-    
-    if (jarFileRef != null)
-      jarFile = jarFileRef.get();
-    
-    try {
-      if (jarFile != null)
-        jarFile.close();
-    } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
+    clearCache();
   }
 
   public boolean equals(Object o)
@@ -753,7 +808,7 @@ public class Jar implements CacheListener {
    * StreamImpl to read from a ZIP file.
    */
   class ZipStreamImpl extends StreamImpl {
-    private JarFile _zipFile;
+    private ZipFile _zipFile;
     private InputStream _zis;
     private InputStream _is;
 
@@ -764,7 +819,7 @@ public class Jar implements CacheListener {
      * @param is the backing stream.
      * @param path the path to the jar entry.
      */
-    ZipStreamImpl(JarFile file, InputStream zis, InputStream is, Path path)
+    ZipStreamImpl(ZipFile file, InputStream zis, InputStream is, Path path)
     {
       _zipFile = file;
       _zis = zis;
@@ -799,7 +854,7 @@ public class Jar implements CacheListener {
     @Override
     public void close() throws IOException
     {
-      JarFile zipFile = _zipFile;
+      ZipFile zipFile = _zipFile;
       _zipFile = null;
       
       InputStream zis = _zis;
@@ -816,7 +871,7 @@ public class Jar implements CacheListener {
 
       try {
         if (zipFile != null)
-          closeJarFile(zipFile);
+          closeZipFile(zipFile);
       } catch (Throwable e) {
       }
 

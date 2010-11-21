@@ -35,7 +35,7 @@ import com.caucho.util.*;
 /**
  * Represents a short type.
  */
-public final class ShortPrimitiveType extends ConfigType
+public final class ShortPrimitiveType extends ConfigType<Short>
 {
   private static final L10N L = new L10N(ShortPrimitiveType.class);
   
@@ -53,7 +53,7 @@ public final class ShortPrimitiveType extends ConfigType
   /**
    * Returns the Java type.
    */
-  public Class getType()
+  public Class<Short> getType()
   {
     return short.class;
   }

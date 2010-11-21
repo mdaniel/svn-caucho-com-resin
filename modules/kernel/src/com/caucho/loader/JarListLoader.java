@@ -29,16 +29,19 @@
 
 package com.caucho.loader;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
 
 import com.caucho.config.ConfigException;
 import com.caucho.make.DependencyContainer;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Jar;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 
@@ -191,6 +194,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
    *
    * @param name name of the class
    */
+  @Override
   protected ClassEntry getClassEntry(String name, String pathName)
     throws ClassNotFoundException
   {
@@ -200,7 +204,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
       if (jarEntryList != null) {
         JarEntry jarEntry = jarEntryList.getEntry();
 
-        Path filePath = jarEntry.getJarPath().lookup(pathName);
+        Path path = jarEntry.getJarPath();
+        Path filePath = path.lookup(pathName);
 
         return createEntry(name, pathName, jarEntry, filePath);
       }
@@ -209,12 +214,21 @@ abstract public class JarListLoader extends Loader implements Dependency {
       // Find the path corresponding to the class
       for (int i = 0; i < _jarList.size(); i++) {
         JarEntry jarEntry = _jarList.get(i);
-        Path path = jarEntry.getJarPath();
+        JarPath path = jarEntry.getJarPath();
+        Jar jar = path.getJar();
+        
+        try {
+          ZipEntry zipEntry = jar.getJarEntry(pathName);
 
-        Path filePath = path.lookup(pathName);
-      
-        if (filePath.canRead() && filePath.getLength() > 0) {
-          return createEntry(name, pathName, jarEntry, filePath);
+        // if (filePath.canRead() && filePath.getLength() > 0) {
+        
+          if (zipEntry != null && zipEntry.getSize() > 0) {
+            Path filePath = path.lookup(pathName);
+          
+            return createEntry(name, pathName, jarEntry, filePath);
+          }
+        } catch (IOException e) {
+          log.log(Level.FINER, e.toString(), e);
         }
       }
     }

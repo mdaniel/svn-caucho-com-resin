@@ -122,7 +122,7 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
     
     if (declaringType instanceof BaseTypeAnnotated) {
       declBaseType = ((BaseTypeAnnotated) declaringType).getBaseTypeImpl();
-      
+
       return declBaseType.create(type, 
                                  declBaseType.getParamMap(), 
                                  isClassFillParamObject);

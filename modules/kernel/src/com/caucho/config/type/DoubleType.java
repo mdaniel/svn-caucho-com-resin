@@ -35,13 +35,13 @@ import com.caucho.util.*;
 /**
  * Represents a double or Double type.
  */
-public final class DoubleType extends ConfigType
+public final class DoubleType extends ConfigType<Double>
 {
   private static final L10N L = new L10N(DoubleType.class);
   
   public static final DoubleType TYPE = new DoubleType();
   
-  private static final Double ZERO = new Double(0);
+  // private static final Double ZERO = new Double(0);
   
   /**
    * The DoubleType is a singleton
@@ -53,7 +53,8 @@ public final class DoubleType extends ConfigType
   /**
    * Returns the Java type.
    */
-  public Class getType()
+  @Override
+  public Class<Double> getType()
   {
     return Double.class;
   }
@@ -61,6 +62,7 @@ public final class DoubleType extends ConfigType
   /**
    * Converts the string to a value of the type.
    */
+  @Override
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
@@ -72,6 +74,7 @@ public final class DoubleType extends ConfigType
   /**
    * Converts the value to a value of the type.
    */
+  @Override
   public Object valueOf(Object value)
   {
     if (value instanceof Double)

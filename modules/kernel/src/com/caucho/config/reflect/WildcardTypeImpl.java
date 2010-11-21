@@ -172,7 +172,8 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
     }
     
     for (BaseType type : _upperBounds) {
-      sb.append(" extends ").append(type);
+      if (! Object.class.equals(type.getRawClass()))
+        sb.append(" extends ").append(type);
     }
     
     return sb.toString();

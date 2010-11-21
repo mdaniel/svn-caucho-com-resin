@@ -37,6 +37,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
@@ -46,7 +47,6 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import org.w3c.dom.Node;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.TagName;
 import com.caucho.config.annotation.DisableConfig;
@@ -93,8 +93,8 @@ public class InlineBeanType<T> extends ConfigType<T>
 
   private final Class<T> _beanClass;
   
-  private HashMap<QName,Attribute> _nsAttributeMap
-    = new HashMap<QName,Attribute>();
+  private ConcurrentHashMap<QName,Attribute> _nsAttributeMap
+    = new ConcurrentHashMap<QName,Attribute>();
   
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
@@ -273,6 +273,7 @@ public class InlineBeanType<T> extends ConfigType<T>
       DependencyBean dependencyBean = (DependencyBean) bean;
       
       ArrayList<Dependency> dependencyList = env.getDependencyList();
+
       if (dependencyList != null) {
         for (Dependency depend : dependencyList) {
           dependencyBean.addDependency((PersistentDependency) depend);
@@ -287,18 +288,16 @@ public class InlineBeanType<T> extends ConfigType<T>
   @Override
   public Attribute getAttribute(QName name)
   {
-    synchronized (_nsAttributeMap) {
-      Attribute attr = _nsAttributeMap.get(name);
+    Attribute attr = _nsAttributeMap.get(name);
 
-      if (attr == null) {
-        attr = getAttributeImpl(name);
+    if (attr == null) {
+      attr = getAttributeImpl(name);
 
-        if (attr != null)
-          _nsAttributeMap.put(name, attr);
-      }
-
-      return attr;
+      if (attr != null)
+        _nsAttributeMap.put(name, attr);
     }
+
+    return attr;
   }
 
   protected Attribute getAttributeImpl(QName name)
@@ -345,7 +344,7 @@ public class InlineBeanType<T> extends ConfigType<T>
    * Returns any add attributes to add arbitrary content
    */
   @Override
-  public Attribute getAddAttribute(Class cl)
+  public Attribute getAddAttribute(Class<?> cl)
   {
     if (cl == null)
       return null;

@@ -60,7 +60,7 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   @Override
   public D getGenericDeclaration()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return (D) new GenericDeclarationImpl();
   }
 
   @Override
@@ -172,5 +172,14 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     }
     
     return sb.toString();
+  }
+  
+  static class GenericDeclarationImpl implements GenericDeclaration {
+    @Override
+    public TypeVariable<?>[] getTypeParameters()
+    {
+      return null;
+    }
+    
   }
 }

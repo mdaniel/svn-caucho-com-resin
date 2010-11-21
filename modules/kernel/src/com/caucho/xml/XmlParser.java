@@ -271,10 +271,11 @@ public class XmlParser extends AbstractParser {
 
     QDocument owner = _owner;
     _owner = null;
-    
+
+    // ioc/23l0
+    Path path = is.getPath();
     is.close();
-    owner.addDepend(is.getPath());
-    
+    owner.addDepend(path);
       
     return owner;
   }

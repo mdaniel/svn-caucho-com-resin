@@ -29,27 +29,13 @@
 
 package com.caucho.config.type;
 
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.config.*;
-import com.caucho.config.attribute.*;
-import com.caucho.loader.*;
-import com.caucho.make.*;
-import com.caucho.el.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import org.w3c.dom.Node;
-
 /**
  * Represents an introspected bean type for configuration which implements
  * control flow like if/choose.
  */
-public class FlowBeanType extends InlineBeanType
+public class FlowBeanType<T> extends InlineBeanType<T>
 {
-  public FlowBeanType(Class beanClass)
+  public FlowBeanType(Class<T> beanClass)
   {
     super(beanClass);
   }

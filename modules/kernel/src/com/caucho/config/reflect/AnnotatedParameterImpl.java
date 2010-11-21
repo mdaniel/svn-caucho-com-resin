@@ -68,6 +68,8 @@ public class AnnotatedParameterImpl<T>
       
       Type declType = declAnnType.getBaseType();
 
+      return createBaseType(declAnnType, type);
+      /*
       if (declType instanceof Class<?>)
         return createBaseType(type);
       
@@ -81,6 +83,7 @@ public class AnnotatedParameterImpl<T>
       BaseType paramType = declBaseType.createForTarget(type, declBaseType.getParamMap());
       
       return paramType;
+      */
     }
     
     return createBaseType(type);
