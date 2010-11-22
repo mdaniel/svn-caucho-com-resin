@@ -29,10 +29,10 @@
 
 package com.caucho.remote.websocket;
 
-import com.caucho.servlet.WebSocketContext;
-import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.websocket.WebSocketContext;
+import com.caucho.websocket.WebSocketListener;
 
 import java.io.*;
 import java.net.Socket;

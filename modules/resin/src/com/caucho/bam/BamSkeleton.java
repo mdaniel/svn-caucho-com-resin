@@ -46,14 +46,14 @@ import com.caucho.util.L10N;
  * {@link com.caucho.bam.SimpleActor}
  * or {@link com.caucho.bam.SimpleActorStream}.
  */
-class Skeleton<S extends SimpleActorStream>
+class BamSkeleton<S>
 {
-  private static final L10N L = new L10N(Skeleton.class);
+  private static final L10N L = new L10N(BamSkeleton.class);
   private static final Logger log
-    = Logger.getLogger(Skeleton.class.getName());
+    = Logger.getLogger(BamSkeleton.class.getName());
 
-  private final static WeakHashMap<Class<?>, SoftReference<Skeleton>> _skeletonRefMap
-    = new WeakHashMap<Class<?>, SoftReference<Skeleton>>();
+  private final static WeakHashMap<Class<?>, SoftReference<BamSkeleton<?>>> _skeletonRefMap
+    = new WeakHashMap<Class<?>, SoftReference<BamSkeleton<?>>>();
 
   private Class<?> _cl;
 
@@ -70,7 +70,7 @@ class Skeleton<S extends SimpleActorStream>
   private final HashMap<Class<?>, Method> _queryErrorHandlers
     = new HashMap<Class<?>, Method>();
   
-  private Skeleton(Class<S> cl)
+  private BamSkeleton(Class<S> cl)
   {
     _cl = cl;
 
@@ -83,6 +83,7 @@ class Skeleton<S extends SimpleActorStream>
    * Dispatches a message to the actorStream.
    */
   public void message(S actor,
+                      ActorStream fallback,
                       String to,
                       String from,
                       Serializable payload)
@@ -116,11 +117,12 @@ class Skeleton<S extends SimpleActorStream>
       }
     }
     else {
-      actor.messageFallback(to, from, payload);
+      fallback.message(to, from, payload);
     }
   }
 
   public void messageError(S actor,
+                           ActorStream fallback,
                            String to,
                            String from,
                            Serializable payload,
@@ -155,11 +157,12 @@ class Skeleton<S extends SimpleActorStream>
       }
     }
     else {
-      actor.messageErrorFallback(to, from, payload, error);
+      fallback.messageError(to, from, payload, error);
     }
   }
 
   public void queryGet(S actor,
+                       ActorStream fallback,
                        ActorStream linkStream,
                        long id,
                        String to,
@@ -202,11 +205,12 @@ class Skeleton<S extends SimpleActorStream>
       }
     }
     else {
-      actor.queryGetFallback(id, to, from, payload);
+      fallback.queryGet(id, to, from, payload);
     }
   }
 
   public void querySet(S actor,
+                       ActorStream fallback,
                        ActorStream linkStream,
                        long id,
                        String to,
@@ -248,11 +252,12 @@ class Skeleton<S extends SimpleActorStream>
       }
     }
     else {
-      actor.querySetFallback(id, to, from, payload);
+      fallback.querySet(id, to, from, payload);
     }
   }
 
   public void queryResult(S actor,
+                          ActorStream fallback,
                           long id,
                           String to,
                           String from,
@@ -287,11 +292,12 @@ class Skeleton<S extends SimpleActorStream>
       }
     }
     else {
-      actor.queryResultFallback(id, to, from, payload);
+      fallback.queryResult(id, to, from, payload);
     }
   }
 
   public void queryError(S actor,
+                         ActorStream fallback,
                          long id,
                          String to,
                          String from,
@@ -327,7 +333,7 @@ class Skeleton<S extends SimpleActorStream>
       }
     }
     else {
-      actor.queryErrorFallback(id, to, from, payload, error);
+      fallback.queryError(id, to, from, payload, error);
     }
   }
 
@@ -488,20 +494,20 @@ class Skeleton<S extends SimpleActorStream>
   }
 
   @SuppressWarnings("unchecked")
-  public static Skeleton<? extends SimpleActorStream>
-  getSkeleton(Class<? extends SimpleActorStream> cl)
+  public static BamSkeleton<?>
+  getSkeleton(Class<? extends ActorStream> cl)
   {
     synchronized(_skeletonRefMap) {
-      SoftReference<Skeleton> skeletonRef = _skeletonRefMap.get(cl);
+      SoftReference<BamSkeleton<?>> skeletonRef = _skeletonRefMap.get(cl);
 
-      Skeleton<? extends SimpleActorStream> skeleton = null;
+      BamSkeleton<?> skeleton = null;
 
       if (skeletonRef != null)
         skeleton = skeletonRef.get();
 
       if (skeleton == null) {
-        skeleton = new Skeleton(cl);
-        _skeletonRefMap.put(cl, new SoftReference<Skeleton>(skeleton));
+        skeleton = new BamSkeleton(cl);
+        _skeletonRefMap.put(cl, new SoftReference<BamSkeleton<?>>(skeleton));
       }
 
       return skeleton;

@@ -74,9 +74,6 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.WebSocketContext;
-import com.caucho.servlet.WebSocketListener;
-import com.caucho.servlet.WebSocketServletRequest;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
 import com.caucho.util.HashMapImpl;
@@ -88,6 +85,9 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+import com.caucho.websocket.WebSocketContext;
+import com.caucho.websocket.WebSocketListener;
+import com.caucho.websocket.WebSocketServletRequest;
 
 /**
  * User facade for http requests.

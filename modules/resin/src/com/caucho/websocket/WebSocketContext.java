@@ -27,13 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlet;
+package com.caucho.websocket;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.security.Principal;
 
 /**
  * Bidirectional TCP connection based on a HTTP upgrade, e.g. WebSocket.

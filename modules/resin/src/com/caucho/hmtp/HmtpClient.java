@@ -40,9 +40,9 @@ import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.remote.websocket.WebSocketClient;
-import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.websocket.WebSocketListener;
 
 /**
  * HMTP client protocol
@@ -79,6 +79,20 @@ public class HmtpClient extends SimpleActorClient {
     _url = url;
     
     setActor(actor);
+    
+    _webSocketClient.setUrl(url);
+    
+    connectImpl();
+  }
+  
+  public HmtpClient(String url)
+    throws IOException
+  {
+    this();
+    
+    _url = url;
+    
+    setActor(this);
     
     _webSocketClient.setUrl(url);
     

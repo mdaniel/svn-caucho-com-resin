@@ -36,7 +36,7 @@ import java.io.Serializable;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.ProtocolException;
-import com.caucho.servlet.WebSocketContext;
+import com.caucho.websocket.WebSocketContext;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.

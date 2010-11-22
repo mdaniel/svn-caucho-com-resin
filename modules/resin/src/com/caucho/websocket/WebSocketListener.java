@@ -27,47 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlet;
+package com.caucho.websocket;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Reader;
+
 
 /**
- * Bidirectional TCP connection based on a HTTP upgrade, e.g. WebSocket.
+ * Application handler for a WebSocket tcp stream
  *
- * The context and its values are not thread safe.  The DuplexListener
- * thread normally is the only thread reading from the input stream.
+ * The read stream should only be read by the <code>onRead</code> thread.
+ *
+ * The write stream must be synchronized if it's ever written by a thread
+ * other than the <code>serviceRead</code>
  */
-public interface JanusContext {
+public interface WebSocketListener
+{
   /**
-   * Returns an input stream to the current message. The input stream will
-   * return bytes until the message is complete.
-   * 
-   * To read the next message, call openMessageInputStream() again.
+   * Called after the server sends its handshake response.
    */
-  public InputStream openMessageInputStream()
+  public void onStart(WebSocketContext context)
     throws IOException;
 
   /**
-   * Opens an output stream to the next message. Because the stream is 
-   * locked until the message complete, it's important to write without blocking.
+   * Called after the handshake completes.
    */
-  public OutputStream openMessageOutputStream()
+  public void onHandshakeComplete(WebSocketContext context, boolean isSuccess)
     throws IOException;
 
   /**
-   * Sets the read timeout.
+   * Called when a binary message is available
    */
-  public void setTimeout(long timeout);
+  public void onReadBinary(WebSocketContext context, InputStream is)
+    throws IOException;
 
   /**
-   * Gets the read timeout.
+   * Called when a text message is available
    */
-  public long getTimeout();
+  public void onReadText(WebSocketContext context, Reader is)
+    throws IOException;
 
   /**
-   * Complete and close the connection.
+   * Called when the connection closes
    */
-  public void complete();
+  public void onComplete(WebSocketContext context)
+    throws IOException;
+
+  /**
+   * Called when the connection times out
+   */
+  public void onTimeout(WebSocketContext context)
+    throws IOException;
 }

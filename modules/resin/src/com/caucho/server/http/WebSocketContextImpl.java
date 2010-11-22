@@ -43,14 +43,14 @@ import com.caucho.remote.websocket.WebSocketOutputStream;
 import com.caucho.remote.websocket.WebSocketPrintWriter;
 import com.caucho.remote.websocket.WebSocketReader;
 import com.caucho.remote.websocket.WebSocketWriter;
-import com.caucho.servlet.WebSocketContext;
-import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
+import com.caucho.websocket.WebSocketContext;
+import com.caucho.websocket.WebSocketListener;
 
 /**
  * User facade for http requests.

@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
+ * 
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -27,46 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlet;
+package com.caucho.websocket;
 
 import java.io.IOException;
 
+
 /**
- * The WebSocket bidirectional message listener receives events on each
- * new message in the WebSocket stream.
+ * <code><pre>
+ * WEBSOCKET /test HTTP/1.1
+ * Upgrade: WebSocket
+ * Connection: Upgrade
+ * Origin: foo
+ * Host: localhost
+ * Content-Length: 0
+ * </pre></code>
  *
- * To read a message, read the input stream until the end of the message,
- * when it returns an end of file.
- * 
- * To write a message, write the output stream and close it. Remember, the
- * output will be locked until the output stream completes.
+ * <code><pre>
+ * </pre></code>
  */
-public interface JanusListener
-{
-  /**
-   * Called when the connection is established, allowing for any initial
-   * messages.
-   * 
-   * @param context the bidirectional message context for reading new messages. 
-   */
-  public void onStart(JanusContext context)
-    throws IOException;
 
+public interface WebSocketServletRequest {
   /**
-   * Called when a new message is available is available.
+   * Upgrade the current HTTP connection to a WebSocket connection
    */
-  public void onMessage(JanusContext context)
-    throws IOException;
-
-  /**
-   * Called when the connection closes
-   */
-  public void onComplete(JanusContext context)
-    throws IOException;
-
-  /**
-   * Called when the connection times out
-   */
-  public void onTimeout(JanusContext context)
+  public WebSocketContext startWebSocket(WebSocketListener listener)
     throws IOException;
 }

@@ -57,8 +57,6 @@ import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.JanusContext;
-import com.caucho.servlet.JanusListener;
 import com.caucho.util.NullEnumeration;
 import com.caucho.vfs.ReadStream;
 
@@ -460,11 +458,6 @@ public class StubServletRequest implements CauchoRequest {
   public AsyncContext startAsync(ServletRequest servletRequest,
                                  ServletResponse servletResponse)
     throws IllegalStateException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public JanusContext startWebSocket(JanusListener listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

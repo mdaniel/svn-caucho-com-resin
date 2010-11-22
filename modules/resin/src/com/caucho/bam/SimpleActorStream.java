@@ -29,10 +29,9 @@
 
 package com.caucho.bam;
 
-import java.util.logging.*;
-import java.util.concurrent.atomic.*;
-
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base ActorStream implementation using introspection and
@@ -52,19 +51,32 @@ import java.io.Serializable;
  * public void myMessage(String to, String from, MyPayload payload);
  * </pre></code>
  */
-public class SimpleActorStream implements ActorStream
+public class SimpleActorStream implements ActorStream, Actor
 {
   private static final Logger log
     = Logger.getLogger(SimpleActorStream.class.getName());
   
-  private final Skeleton _skeleton;
+  private final BamSkeleton _skeleton;
+  
+  private final ActorStream _fallback;
 
   private String _jid;
   private ActorStream _linkStream;
  
   public SimpleActorStream()
   {
-    _skeleton = Skeleton.getSkeleton(getClass());
+    _skeleton = createSkeleton();
+    _fallback = createFallbackStream();
+  }
+  
+  protected BamSkeleton createSkeleton()
+  {
+    return BamSkeleton.getSkeleton(getClass());
+  }
+  
+  protected ActorStream createFallbackStream()
+  {
+    return new FallbackActorStream(this);
   }
 
   /**
@@ -103,6 +115,18 @@ public class SimpleActorStream implements ActorStream
   {
     _linkStream = linkStream;
   }
+  
+  @Override
+  public ActorStream getActorStream()
+  {
+    return this;
+  }
+  
+  @Override
+  public void setActorStream(ActorStream actorStream)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   //
   // message
@@ -122,11 +146,12 @@ public class SimpleActorStream implements ActorStream
    * @param from the sending actor's JID
    * @param payload the message payload
    */
+  @Override
   public void message(String to,
                       String from,
                       Serializable payload)
   {
-    _skeleton.message(this, to, from, payload);
+    _skeleton.message(this, _fallback, to, from, payload);
   }
 
   /**
@@ -144,12 +169,13 @@ public class SimpleActorStream implements ActorStream
    * @param payload the message payload
    * @param error the message error
    */
+  @Override
   public void messageError(String to,
                            String from,
                            Serializable payload,
                            ActorError error)
   {
-    _skeleton.messageError(this, to, from, payload, error);
+    _skeleton.messageError(this, _fallback, to, from, payload, error);
   }
 
   //
@@ -175,12 +201,13 @@ public class SimpleActorStream implements ActorStream
    * @param from the client actor's JID
    * @param payload the query payload
    */
+  @Override
   public void queryGet(long id,
                        String to,
                        String from,
                        Serializable payload)
   {
-    _skeleton.queryGet(this, getLinkStream(), id, to, from, payload);
+    _skeleton.queryGet(this, _fallback, getLinkStream(), id, to, from, payload);
   }
 
   /**
@@ -202,12 +229,13 @@ public class SimpleActorStream implements ActorStream
    * @param from the client actor's JID
    * @param payload the query payload
    */
+  @Override
   public void querySet(long id,
                        String to,
                        String from,
                        Serializable payload)
   {
-    _skeleton.querySet(this, getLinkStream(), id, to, from, payload);
+    _skeleton.querySet(this, _fallback, getLinkStream(), id, to, from, payload);
   }
 
   /**
@@ -225,12 +253,13 @@ public class SimpleActorStream implements ActorStream
    * @param from the client actor's JID
    * @param payload the query payload
    */
+  @Override
   public void queryResult(long id,
                           String to,
                           String from,
                           Serializable payload)
   {
-    _skeleton.queryResult(this, id, to, from, payload);
+    _skeleton.queryResult(this, _fallback, id, to, from, payload);
   }
 
   /**
@@ -249,16 +278,17 @@ public class SimpleActorStream implements ActorStream
    * @param payload the query payload
    * @param error the error information
    */
+  @Override
   public void queryError(long id,
                          String to,
                          String from,
                          Serializable payload,
                          ActorError error)
   {
-    _skeleton.queryError(this, id, to, from, payload, error);
+    _skeleton.queryError(this, _fallback, id, to, from, payload, error);
   }
 
-  protected Skeleton getSkeleton()
+  protected BamSkeleton getSkeleton()
   {
     return _skeleton;
   }

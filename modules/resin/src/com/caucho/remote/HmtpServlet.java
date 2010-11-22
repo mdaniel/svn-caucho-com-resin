@@ -56,10 +56,10 @@ import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.servlet.AbstractWebSocketListener;
-import com.caucho.servlet.WebSocketContext;
-import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.L10N;
+import com.caucho.websocket.AbstractWebSocketListener;
+import com.caucho.websocket.WebSocketContext;
+import com.caucho.websocket.WebSocketListener;
 
 /**
  * Main protocol handler for the HTTP version of BAM.

@@ -27,11 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlet;
+package com.caucho.websocket;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+
 
 /**
  * Application handler for a WebSocket tcp stream

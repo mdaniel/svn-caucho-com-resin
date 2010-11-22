@@ -33,8 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.caucho.bam.Actor;
-import com.caucho.servlet.AbstractWebSocketListener;
-import com.caucho.servlet.WebSocketContext;
+import com.caucho.websocket.AbstractWebSocketListener;
+import com.caucho.websocket.WebSocketContext;
 
 /**
  * HmtpReader stream handles client packets received from the server.
