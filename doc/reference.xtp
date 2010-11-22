@@ -1,4 +1,4 @@
-<document>
+	<document>
 <header>
   <product>resin</product>
   <title>references</title>
@@ -191,7 +191,7 @@ in.</p>
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
 extend a custom class from <a javadoc="com.caucho.http.log.AccessLog"/>.  
-<a href="config-candi.xtp">Resin-IoC initialization</a> can be used to set bean
+<a href="admin/config-candi.xtp">Resin-IoC initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
 
@@ -206,7 +206,7 @@ parameters in the custom class.</p>
 <tr>
   <td>path</td>
   <td>Output path for the log entries,
-see <a href="logging.xtp#path">"Log Paths"</a>.</td>
+see <a href="admin/logging.xtp#path">"Log Paths"</a>.</td>
   <td>required</td>
 </tr>
 <tr>
@@ -252,7 +252,7 @@ see <a href="logging.xtp#path">"Log Paths"</a>.</td>
 <tr>
   <td>rollover-period</td>
   <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
-        months (1M), or hours (1h). See <a href="logging.xtp#rollover">"Rollovers"</a>. 
+        months (1M), or hours (1h). See <a href="admin/logging.xtp#rollover">"Rollovers"</a>. 
   </td>
   <td>none</td>
 </tr>
@@ -260,14 +260,14 @@ see <a href="logging.xtp#path">"Log Paths"</a>.</td>
   <td>rollover-size</td>
   <td>maximum size of the file before a rollover occurs, in bytes (50000), 
         kb (128kb), or megabytes (10mb).  
-        See <a href="logging.xtp#rollover">"Rollovers"</a>.
+        See <a href="admin/logging.xtp#rollover">"Rollovers"</a>.
   </td>
   <td>1mb</td>
 </tr>
 <tr>
   <td>rollover-count</td>
   <td>maximum number of rollover files before the oldest ones get overwritten. 
-        See <a href="logging.xtp#rollover">"Rollovers"</a>.
+        See <a href="admin/logging.xtp#rollover">"Rollovers"</a>.
   </td>
   <td>1mb</td>
 </tr>
@@ -466,9 +466,9 @@ element archive-path {
 In Resin's JdbcAuthenticator, normal users are in the "user" role.
 Think of a role as a group of users.</p>
 
-<p>The roles are defined by the authenticators (see <a href="security-overview.xtp">Resin security</a>).  When using Resin's &lt;resin:AdminAuthenticator>
+<p>The roles are defined by the authenticators (see <a href="admin/security-overview.xtp">Resin security</a>).  When using Resin's &lt;resin:AdminAuthenticator>
 as a default, the role name is <var>resin-admin</var>.  (See
-<a href="resin-admin.xtp">Resin management</a>.)</p>
+<a href="admin/resin-admin.xtp">Resin management</a>.)</p>
 </description>
 
 <attributes>
@@ -647,7 +647,7 @@ element cache {
 <description>
 <p>&lt;cache-mapping> specifies <var>max-age</var> and <var>Expires</var> times for cacheable pages.</p>
 
-<p>See <a href="http-proxy-cache.xtp">caching</a> for more information.</p>
+<p>See <a href="admin/http-proxy-cache.xtp">caching</a> for more information.</p>
 
 <p>&lt;cache-mapping> is intended to provide Expires times for pages that
 have ETags or Last-Modified specified, but do not wish to hard-code the
@@ -1028,7 +1028,7 @@ matching the -server-id on the command line.</p>
 <schema>
 element cluster {
   attribute id { string }
-  &amp; <a href="config-overview.xtp">environment resources</a>
+  &amp; <a href="admin/config-overview.xtp">environment resources</a>
   &amp; access-log?
   &amp; cache?
   &amp; connection-error-page?
@@ -1137,7 +1137,7 @@ which ports the server should listen to.</p>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
 </deftable-childtags>
-<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
+<p>The class that corresponds to &lt;srun&gt; is <a javadoc="com.caucho.server.cluster.ClusterPort"/></p>
 </defun>
 
 <defun title="&lt;compiling-loader>" name="compiling-loader" occur="*" version="Resin 3.0" type="defun">
@@ -1583,9 +1583,9 @@ copied to the log.</p>
 <description>
 <p>&lt;database> defines a database (i.e. DataSource)  resource.</p>
 
-<p>The <a href="database.xtp">database configuration</a> section has
+<p>The <a href="admin/database.xtp">database configuration</a> section has
 more details on the configuration.  A code pattern for using databases
-is in a <a href="../examples/db-jdbc/index.xtp">DataSource tutorial.</a></p>
+is in a <a href="examples/db-jdbc/index.xtp">DataSource tutorial.</a></p>
 </description>
 
 <attributes>
@@ -1830,7 +1830,7 @@ driver = element driver {
 <description>
 <p>&lt;database-default> defines default database values to be used
 for any &lt;database> definition, or runtime database creation
-(see <a href="http://caucho.com/resin-javadoc/com/caucho/sql/DatabaseManager.html">DatabaseManager</a>).</p>
+(see <a javadoc="com.caucho.sql.DatabaseManager">DatabaseManager</a>).</p>
 </description>
 
 <schema>
@@ -2068,7 +2068,7 @@ dependency injection, transaction attributes, and aspect interception.
 </p>
 
 <p>The message bean can plug into custom messaging systems.  The
-application will need to define a <a href="http://caucho.com/resin-javadoc/javax/resource/spi/ResourceAdapter.html">ResourceAdapter</a> and
+application will need to define a <a javadoc="javax.resource.spi.ResourceAdapter">ResourceAdapter</a> and
 an <code>ActivationSpec</code>.  </p>
 </description>
 
@@ -2284,7 +2284,7 @@ of the application and destroyed by the application.  @Stateful beans are
 never singletons.  For singleton-style beans, either use a &lt;bean> or
 a @Stateless session bean.</p>
 
-<p>@Stateful beans may optionally implement a <a href="http://caucho.com/resin-javadoc/javax/ejb/SessionSynchronization.html">SessionSynchronization</a> interface for transaction callbacks.</p>
+<p>@Stateful beans may optionally implement a <a javadoc="javax.ejb.SessionSynchronization">SessionSynchronization</a> interface for transaction callbacks.</p>
 </description>
 
 <attributes>
@@ -2717,7 +2717,7 @@ MATCH    lib/baz/foo.jar
 
 <description>
 <p>Defines a filter name for later mapping.  Because Filters are fully
-integrated with <a href="config-candi.xtp">Resin CanDI</a>, they can
+integrated with <a href="admin/config-candi.xtp">Resin CanDI</a>, they can
 use dependency-injection, transactional aspects, custom interception
 with @InterceptorType, and event handling with @Observes.
 </p>
@@ -2738,7 +2738,7 @@ with @InterceptorType, and event handling with @Observes.
 </tr>
 <tr>
   <td>init</td>
-  <td>Resin-IoC initialization configuration, see <a href="config-candi.xtp">Resin-IoC</a></td>
+  <td>Resin-IoC initialization configuration, see <a href="admin/config-candi.xtp">Resin-IoC</a></td>
 </tr>
 <tr>
   <td>init-param</td>
@@ -4139,7 +4139,7 @@ element lazy-servlet-validate {
 classpath.  Jar files are recognized wihen they have a filename extension
 of <code>.jar</code> or <code>.zip</code>.</p>
 
-<p>See <a href="http://caucho.com/resin-javadoc/javadoc/com/caucho/loader/LibraryLoader.html">DirectoryLoader</a>.</p>
+<p>See <a javadoc="com.caucho.loader.DirectoryLoader.html">DirectoryLoader</a>.</p>
 </description>
 
 <attributes>
@@ -4180,7 +4180,7 @@ element fileset {
 <description>
 <p>&lt;listener> configures servlet event listeners.  The listeners
 are registered based on interfaces they implement.  The listener
-instances are fully <a href="config-candi.xtp">Resin-IoC</a> aware,
+instances are fully <a href="admin/config-candi.xtp">Resin-IoC</a> aware,
 including dependency injection, observing events, and supporting aspects.</p>
 
 <deftable title="listener interfaces">
@@ -4189,31 +4189,31 @@ including dependency injection, observing events, and supporting aspects.</p>
   <th>Description</th>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/servlet/ServletContextListener.html">javax.servlet.ServletContextListener</a></td>
+  <td><a javadoc="javax.servlet.ServletContextListener"/></td>
   <td>Called when the web-app starts and stops</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/servlet/ServletContextAttributeListener.html">javax.servlet.ServletContextAttributeListener</a></td>
+  <td><a javadoc="javax.servlet.ServletContextAttributeListener"/></td>
   <td>Called when the web-app attributes change</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/servlet/ServletRequestListener.html">javax.servlet.ServletRequestListener</a></td>
+  <td><a javadoc="javax.servlet.ServletRequestListener"/></td>
   <td>Called when the request starts and stops</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/servlet/ServletRequestAttributeListener.html">javax.servlet.ServletRequestAttributeListener</a></td>
+  <td><a javadoc="javax.servlet.ServletRequestAttributeListener"/></td>
   <td>Called when request attributes change</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/servlet/http/HttpSessionListener.html">javax.servlet.http.HttpSessionListener</a></td>
+  <td><a javadoc="javax.servlet.http.HttpSessionListener"/></td>
   <td>Called when HTTP sessions start or stop</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/servlet/http/HttpSessionAttributeListener.html">javax.servlet.http.HttpSessionAttributeListener</a></td>
+  <td><a javadoc="javax.servlet.http.HttpSessionAttributeListener"/></td>
   <td>Called when HTTP sessions attributes change</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/servlet/http/HttpSessionActivationListener.html">javax.servlet.http.HttpSessionActivationListener</a></td>
+  <td><a javadoc="javax.servlet.http.HttpSessionActivationListener"/></td>
   <td>Called when HTTP sessions passivate or activate</td>
 </tr>
 </deftable>
@@ -4251,7 +4251,7 @@ element listener {
 <description>
 <p>&lt;load-balance-connect-timeout> configures the maximum time
 a client connection to a cluster-port should
-take.  The <a href="clustering-overview.xtp">load balance</a> and
+take.  The <a href="admin/clustering-overview.xtp">load balance</a> and
 <a href="deploy-ref.xtp#session-config">persistent sessions</a> use load-balance-connect-timeout
 to connect to backend or peer servers in the cluster.</p>
 
@@ -4282,7 +4282,7 @@ can timeout too quickly for a live server with some network congestion.</p>
 
 <description>
 <p>&lt;load-balance-recover-time> is the maximum time
-the <a href="clustering-overview.xtp">load balancer</a>
+the <a href="admin/clustering-overview.xtp">load balancer</a>
 will consider the server dead after a failure before retrying
 the connection.</p>
 
@@ -4317,7 +4317,7 @@ contact unavailable servers.</p>
 
 <description>
 <p>&lt;load-balance-idle-time> is the maximum time the
-<a href="clustering-overview.xtp">load balancer</a> and <a
+<a href="admin/clustering-overview.xtp">load balancer</a> and <a
 href="deploy-ref.xtp#session-config">distributed sessions</a> will leave
 an idle socket before closing it.</p>
 
@@ -4342,7 +4342,7 @@ the chance of connecting to a closed server.</p>
 <default>60s</default>
 
 <description>
-<p>The time the <a href="clustering-overview.xtp">load balancer</a>
+<p>The time the <a href="admin/clustering-overview.xtp">load balancer</a>
 uses to throttle connections to an <g>app-tier</g> server that's just
 starting up.</p>
 
@@ -4413,7 +4413,7 @@ the app-tier server.</p>
 <p>Configures the login method for authentication, one of BASIC,
 DIGEST or FORM.</p>
 
-<p>See also: <a href="security-overview.xtp">Resin security</a> for an
+<p>See also: <a href="admin/security-overview.xtp">Resin security</a> for an
 overview.</p>
 </description>
 
@@ -4424,7 +4424,7 @@ overview.</p>
 </tr>
 <tr>
   <td>auth-method</td>
-  <td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security-overview.xtp">Digest Authentication</a>.</td>
+  <td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="admin/security-overview.xtp">Digest Authentication</a>.</td>
 </tr>
 <tr>
   <td>authenticator</td>
@@ -4451,7 +4451,7 @@ overview.</p>
 <p>HTTP Authentication is defined in the RFC <a href="http://www.faqs.org/rfcs/rfc2617.html">HTTP Authentication: Basic and
 Digest</a>.</p> 
 
-<p>HTTP digest authentication is discussed in <a href="security-overview.xtp">Digest Passwords</a>.</p>
+<p>HTTP digest authentication is discussed in <a href="admin/security-overview.xtp">Digest Passwords</a>.</p>
 
 <schema>
 element login-config {
@@ -4612,7 +4612,7 @@ will set the actual logging level.</p>
 
 <p>&lt;log> configures JDK 1.4 java.util.logger Logger level.</p>
 
-<p>The <a href="logging-ref.xtp">log configuration</a> describes
+<p>The <a href="admin/logging.xtp">log configuration</a> describes
 log in detail.</p>
 
 <attributes>
@@ -4705,7 +4705,7 @@ javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
 </td></tr><tr><td>${log.thrown}</td><td>Get any <a javadoc="java.lang.Throwable"/> associated with the logging request
 </td></tr></deftable>
 
-<p>You can also use the <a href="config-el.xtp">Environment EL variables</a> in your format string:</p>
+<p>You can also use the <a href="admin/config-el.xtp">Environment EL variables</a> in your format string:</p>
 
 <example title="log format string using an Environment EL variable.">
 &lt;host ...&gt;
@@ -5831,9 +5831,9 @@ It uses a Java interface and a URI to select the web-service.</p>
 location is typically a HTTP URL.</p>
 
 <ul>
-<li>See <a href="../examples/remoting.xtp">Resin remoting</a> for more
+<li>See <a href="examples/remoting.xtp">Resin remoting</a> for more
 information, including how to write an adapter for Resin remoting.</li>
-<li>See the <a href="../examples/remote-hello-world/">hello world tutorial</a>
+<li>See the <a href="examples/remote-hello-world/">hello world tutorial</a>
 for an example.</li>
 </ul>
 </description>
@@ -5856,7 +5856,7 @@ for an example.</li>
 </tr>
 <tr>
   <td>name</td>
-  <td><a href="config-candi.xtp#@Named">@Named</a> binding for Resin-IoC</td>
+  <td><a href="admin/config-candi.xtp#@Named">@Named</a> binding for Resin-IoC</td>
   <td></td>
 </tr>
 <tr>
@@ -6115,7 +6115,7 @@ authentication mechanism can be convenient for quick protection of
 internal pages or administration when writing a form isn't necessary. If
 you use basic authentication for applications outside the fire-wall,
 it is highly recommended that you secure the transport layer using <a
-href="security-ssl.xtp">SSL</a>. The &lt;resin:BasicLogin> tag is
+href="admin/security-ssl.xtp">SSL</a>. The &lt;resin:BasicLogin> tag is
 used to configure basic authentication.
 </p>
 </description>
@@ -6244,7 +6244,7 @@ element resin:otherwise {
 The DatabaseAuthenticator asks a back-end relational database for the
 password matching a user's name. It uses the DataSource specified by
 the <var>data-source</var> attribute. <var>data-source</var> refers to
-an existing <a href="database-ref.xtp">configured</a> DataSource.  </p>
+an existing <a href="admin/database.xtp">configured</a> DataSource.  </p>
 </description>
 
 <attributes>
@@ -7480,7 +7480,7 @@ and &lt;host-alias> to customize the virtual host configuration.</p>
 </example>
 
 <p>Some applications may want to split their configuration into multiple
-files using the fileset.  For example, a <a href="config-candi.xtp">Resin-IoC</a>
+files using the fileset.  For example, a <a href="admin/config-candi.xtp">Resin-IoC</a>
 application might want to define beans in WEB-INF/beans/*.xml and give
 the web-app flexibility in which bean files to create.</p>
 
@@ -7916,7 +7916,7 @@ element resin:otherwise {
 
   
 <defun title="&lt;resin:PingMailer>" name="resin:PingMailer">
-<javadoc class="com.caucho.admin/PingMailer.html"/>
+<javadoc class="com.caucho.admin.PingMailer"/>
 <description>
 <p>
   Mails a notification when a ping check fails.
@@ -7925,7 +7925,7 @@ element resin:otherwise {
 </defun>
 
 <defun title="&lt;resin:PingThread>" name="resin:PingThread">
-<javadoc class="com.caucho.admin/PingThread.html"/>
+<javadoc class="com.caucho.admin.PingThread"/>
 <description>
 <p>
   Checks status of Resin sutomatically.
@@ -8553,7 +8553,7 @@ class name.</p>
 </tr>
 <tr>
   <td>name</td>
-  <td><a href="config-candi.xtp#@Named">@Named</a> binding for Resin-IoC injection.</td>
+  <td><a href="admin/config-candi.xtp#@Named">@Named</a> binding for Resin-IoC injection.</td>
   <td></td>
 </tr>
 <tr>
@@ -8754,7 +8754,7 @@ redirection.  For some security configurations, Resin needs to redirect from
 an insecure site to a secure one.  The &lt;secure-host-name> configures
 the host to redirect to.</p>
 
-<p>See <a href="security.xtp">Resin security</a>.</p>
+<p>See <a href="admin/security.xtp">Resin security</a>.</p>
 </description>
 
 <schema>
@@ -8771,12 +8771,12 @@ element secure-host-name {
 <description>
 <p>Specifies protected areas of the web site.  Sites using
 authentication as an optional personalization feature will typically
-not use any security constraints.  See <a href="security-overview.xtp">Resin
+not use any security constraints.  See <a href="admin/security-overview.xtp">Resin
 security</a> for an overview.</p>
 
 <p>Security constraints can also be custom classes.</p>
 
-<p>See <a href="security-overview.xtp">Resin security</a> for an overview of
+<p>See <a href="admin/security-overview.xtp">Resin security</a> for an overview of
 security issues and configuration.</p>
 </description>
 
@@ -8848,7 +8848,7 @@ element security-constraint {
 &lt;security-manager> enables the use of the security manager for the JVM.
 Because the JVM security manager is very slow, we generally do not
 recommend enabling it for server applications.  Instead, see the
-<a href="starting-resin-watchdog.xtp">watchdog</a> configuration for alternative
+<a href="admin/starting-resin-watchdog.xtp">watchdog</a> configuration for alternative
 methods for securiting the JVM in ISP configurations.
 </p>
 </description>
@@ -9068,12 +9068,12 @@ element server-header {
 <defun title="&lt;servlet>" name="servlet" version="Servlet 2.2">
 <description>
 <p>Defines a servlet to process HTTP URL
-requests.  The servlet class can either implement <a
-href="http://caucho.com/resin-javadoc/javax/servlet/Servlet.html">javax.servlet.Servlet</a>
+requests.  The servlet class can either implement 
+<a javadoc="javax.servlet.Servlet"/>
 to handle the HTTP request directly or it can use a remoting protocol
 like Hessian to handle remoting requests.</p>
 
-<p>Since servlets are full <a href="config-candi.xtp">Resin-CanDI</a> beans,
+<p>Since servlets are full <a href="admin/config-candi.xtp">Resin-CanDI</a> beans,
 they can use dependency injection, EJB aspects like @TransactionAttribute,
 custom @InterceptorType interceptors, and listen for @Observes events.</p>
 </description>
@@ -9085,7 +9085,7 @@ custom @InterceptorType interceptors, and listen for @Observes events.</p>
 </tr>
 <tr>
   <td>init</td>
-  <td><a href="config-candi.xtp">Resin-IoC</a> initialization</td>
+  <td><a href="admin/config-candi.xtp">Resin-IoC</a> initialization</td>
 </tr>
 <tr>
   <td>init-param</td>
@@ -9097,7 +9097,7 @@ custom @InterceptorType interceptors, and listen for @Observes events.</p>
 </tr>
 <tr>
  <td>protocol</td>
- <td>Protocol configuration for <!--<a href="resin-remoting.xtp">-->Resin remoting.</td>
+ <td>Protocol configuration for <a href="examples/remoting.xtp">Resin remoting</a>.</td>
 </tr>
 <tr>
   <td>run-at</td>
@@ -9235,12 +9235,11 @@ children, <var>url-pattern</var> and <var>servlet-name</var>.
 </tr>
 <tr>
   <td>init</td>
-  <td><a href="config-candi.xtp">Resin-IoC</a> configuration of the servlet.</td>
+  <td><a href="admin/config-candi.xtp">Resin-IoC</a> configuration of the servlet.</td>
 </tr>
 <tr>
   <td>protocol</td>
-  <td>Defines the optional <!--<a href="resin-remoting.xtp">-->remoting
-protocol.</td>
+  <td>Defines the optional <a href="examples/remoting.xtp">remoting protocol</a>.</td>
 </tr>
 <tr>
   <td>servlet-class</td>
@@ -9440,7 +9439,7 @@ element session-cookie {
 <p>&lt;session-config> configures Resin's session handling, including the
 cookies Resin sends, the maximum sessions, and session persistence and clustering.</p>
 
-<p>See also: <a href="clustering-overview.xtp">Resin clustering</a> for more
+<p>See also: <a href="admin/clustering-overview.xtp">Resin clustering</a> for more
 information about distributed sessions and persistence.</p>
 </description>
 
@@ -9688,7 +9687,7 @@ element simple-loader {
 
 <description>
 <p>&lt;socket-timeout> is the maximum time
-a socket <a href="clustering-overview.xtp">load balancer</a>
+a socket <a href="admin/clustering-overview.xtp">load balancer</a>
 and <a href="deploy-ref.xtp#session-config">distributed sessions</a> will wait for
 a read or write to a cluster socket.</p>
 
@@ -9879,7 +9878,7 @@ element statistics-enable {
 <p>Configures the destination for <code>System.err</code>.</p>
 </description>
 
-<p>The <a href="logging-ref.xtp">log configuration</a> describes
+<p>The <a href="admin/logging.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 
 <attributes>
@@ -9944,7 +9943,7 @@ element stderr-log {
 <description>
 <p>Configures the destination for <code>System.out</code>.</p>
 
-<p>The <a href="logging-ref.xtp">log configuration</a> describes
+<p>The <a href="admin/logging.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 </description>
 
@@ -10907,7 +10906,7 @@ the application upgrade.</p>
 
 <description>
 <p>Specifies a collection of areas of the web site for security purposes.
-See <a href="security-overview.xtp">Resin security</a> for an overview.</p>
+See <a href="admin/security-overview.xtp">Resin security</a> for an overview.</p>
 </description>
 
 <attributes>
