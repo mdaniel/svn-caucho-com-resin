@@ -9,8 +9,6 @@ import javax.servlet.http.*;
 
 import javax.inject.Inject;
 
-import com.caucho.servlet.comet.*;
-
 public class TestCometServlet extends GenericServlet
 {
   @Inject

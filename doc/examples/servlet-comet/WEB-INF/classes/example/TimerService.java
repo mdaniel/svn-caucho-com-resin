@@ -6,8 +6,6 @@ import java.util.concurrent.*;
 import javax.inject.Singleton;
 import javax.inject.Inject;
 
-import com.caucho.servlet.comet.*;
-
 /**
  * The TimerService is an injectible service used to provide example events
  * for the comet application.  The ScheduledExecutorService schedules

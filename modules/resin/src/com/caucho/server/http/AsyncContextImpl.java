@@ -273,7 +273,6 @@ public class AsyncContextImpl
                       ServletResponse response)
   {
     AsyncEvent event = new AsyncEvent(this, request, response);
-    Thread.dumpStack();
     
     for (AsyncListenerNode node = _listenerNode;
          node != null;
