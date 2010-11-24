@@ -26,12 +26,15 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.netbeans;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.net.UnknownHostException;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,6 +43,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -48,8 +52,12 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.openide.WizardDescriptor;
+import org.openide.WizardValidationException;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 
 public class AddResinServerPanel extends JPanel {
@@ -69,7 +77,8 @@ public class AddResinServerPanel extends JPanel {
   private JTextField _port;
   private java.util.List<String> _versions;
   private ChangeSupport _support;
-  private WizardDescriptor.Panel _panel;
+  private WizardDescriptor.ValidatingPanel _panel;
+  private WizardDescriptor _wd;
 
   AddResinServerPanel() {
     init();
@@ -196,11 +205,11 @@ public class AddResinServerPanel extends JPanel {
     constraints.weightx = 0;
     add(new JLabel("Address"), constraints);
 
+    _address = new JTextField("127.0.0.1");
     constraints.gridx = 1;
     constraints.insets.right = 20;
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.weightx = 1;
-    _address = new JTextField("127.0.0.1");
     add(_address, constraints);
 
     //-------
@@ -228,6 +237,82 @@ public class AddResinServerPanel extends JPanel {
     //
   }
 
+  public void setWizardDescriptor(WizardDescriptor wd) {
+    _wd = wd;
+  }
+
+  public void checkInput() throws WizardValidationException {
+    _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, null);
+
+    if (_home.getText() == null || _home.getText().isEmpty()) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Supply Resin Home");
+
+      throw new WizardValidationException(_home, "", "");
+    }
+
+    if (!ResinInstance.isResinHome(_home.getText())) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Invalid Resin Home");
+
+      throw new WizardValidationException(_home, "", "");
+    }
+
+    if (_root.getText() == null || _root.getText().isEmpty()) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Invalid Resin Root");
+
+      throw new WizardValidationException(_root, "", "");
+    }
+
+    String address = _address.getText();
+    if (address == null || address.isEmpty()) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Supply Address");
+
+      throw new WizardValidationException(_address, "", "");
+    }
+
+    address = address.trim();
+
+    if (address.trim() != "*" && !isValidAddress(address)) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Invalid Address");
+
+      throw new WizardValidationException(_address, "", "");
+    }
+
+    String port = _port.getText();
+    try {
+      Integer.parseInt(port);
+    } catch (Exception e) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Invalid Port");
+
+      throw new WizardValidationException(_port, "", "");
+    }
+  }
+
+  private boolean isValidAddress(String address) {
+    try {
+      InetAddress inetAddress = InetAddress.getByName(address);
+
+      if (inetAddress.isLoopbackAddress()) {
+        return true;
+      }
+
+      if (inetAddress.isSiteLocalAddress()) {
+        return true;
+      }
+
+      if (inetAddress.isAnyLocalAddress()) {
+        return true;
+      }
+
+      if (inetAddress.isLinkLocalAddress()) {
+        return true;
+      }
+    } catch (UnknownHostException ex) {
+      log.severe(ex.getMessage());
+    }
+
+    return false;
+  }
+
   public String getHome() {
     return _home.getText().trim();
   }
@@ -249,16 +334,19 @@ public class AddResinServerPanel extends JPanel {
   }
 
   public void readSettings(Object data) {
-    System.out.println("AddResinServerPanel.readSettings(): " + data);
   }
 
   public void storeSettings(Object data) {
-    System.out.println("AddResinServerPanel.storeSettings(): " + data);
   }
 
-  public WizardDescriptor.Panel getWizardDescriptorPanel() {
+  public WizardDescriptor.ValidatingPanel getWizardDescriptorPanel() {
     if (_panel == null) {
-      _panel = new WizardDescriptor.Panel() {
+      _panel = new WizardDescriptor.ValidatingPanel() {
+
+        @Override
+        public void validate() throws WizardValidationException {
+          checkInput();
+        }
 
         @Override
         public void addChangeListener(ChangeListener cl) {

@@ -50,13 +50,13 @@ public class ResinWizardProvider implements ServerWizardProvider {
   private final static Logger log = Logger.getLogger(ResinWizardProvider.class.getName());
   private static ResinWizardProvider _instance;
   private NewResinWizardPanels _instantiatingIterator;
+  private static PluginL10N L = new PluginL10N(ResinWizardProvider.class);
 
   public final static ResinWizardProvider getInstance() {
+
     if (_instance == null) {
       _instance = new ResinWizardProvider();
     }
-
-    System.out.println("ResinWizardProvider.getInstance()");
 
     return _instance;
   }
@@ -70,7 +70,7 @@ public class ResinWizardProvider implements ServerWizardProvider {
   // ------------------------------------------------------------------------
   @Override
   public String getDisplayName() {
-    return "ResinWizardProvider.displayName";
+    return "Resin";
   }
 
   @Override
@@ -120,6 +120,7 @@ class NewResinWizardPanels<Data> extends WizardDescriptor.ArrayIterator implemen
   public void initialize(WizardDescriptor wd) {
     //org.netbeans.modules.server.ui.wizard.AddServerInstanceWizard.
     _wizardDescriptor = wd;
+    _addResinServerPanel.setWizardDescriptor(wd);
   }
 
   @Override

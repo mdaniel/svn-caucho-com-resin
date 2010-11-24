@@ -26,9 +26,9 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.netbeans;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.logging.Logger;
@@ -68,11 +68,11 @@ public class ResinInstance implements ServerInstanceImplementation {
   private String _address;
   private int _port;
   private String _url;
-  private String _user;
-  private String _password;
+  private String _user = "deploy";
+  private String _password = "deploy";
 
   public ResinInstance(InstanceProperties properties) {
-   _instanceProperties = properties;
+    _instanceProperties = properties;
     _url = properties.getString(URL_ATTR, null);
     _displayName = properties.getString(DISPLAY_NAME_ATTR, null);
     _home = properties.getString("home", null);
@@ -117,12 +117,12 @@ public class ResinInstance implements ServerInstanceImplementation {
 
   @Override
   public String getDisplayName() {
-    return ResinInstance.class.getSimpleName();
+    return _displayName;
   }
 
   @Override
   public String getServerDisplayName() {
-    return ResinInstance.class.getSimpleName();
+    return _displayName;
   }
 
   public String getName() {
@@ -196,8 +196,7 @@ public class ResinInstance implements ServerInstanceImplementation {
   @Override
   public Node getFullNode() {
     if (_fullNode == null) {
-      _fullNode = new ResinNode(Children.LEAF);
-      _fullNode.setResinServerInstance(this);
+      _fullNode = new ResinNode(Children.LEAF, this);
     }
 
     return _fullNode;
@@ -206,8 +205,7 @@ public class ResinInstance implements ServerInstanceImplementation {
   @Override
   public Node getBasicNode() {
     if (_basicNode == null) {
-      _basicNode = new ResinNode(Children.LEAF);
-      _basicNode.setResinServerInstance(this);
+      _basicNode = new ResinNode(Children.LEAF, this);
     }
 
     return _basicNode;
@@ -215,15 +213,15 @@ public class ResinInstance implements ServerInstanceImplementation {
 
   @Override
   public JComponent getCustomizer() {
-    JPanel commonCustomizer = new ResinInstanceCustomizer();
-    JPanel vmCustomizer = new VmCustomizer();
+    JPanel commonCustomizer = new ResinInstanceCustomizer(this);
+    //JPanel vmCustomizer = new VmCustomizer();
 
     Collection<JPanel> pages = new LinkedList<JPanel>();
     //Collection<? extends CustomizerCookie> lookupAll = lookup.lookupAll(CustomizerCookie.class);
     //for (CustomizerCookie cookie : lookupAll) {
     //pages.addAll(cookie.getCustomizerPages());
     //}
-    pages.add(vmCustomizer);
+    //pages.add(vmCustomizer);
 
     JTabbedPane tabbedPane = null;
     for (JPanel page : pages) {
@@ -257,4 +255,24 @@ public class ResinInstance implements ServerInstanceImplementation {
 
     return url.toString();
   }
+
+  public static boolean isResinHome(String value) {
+    if (value == null || value.isEmpty())
+      return false;
+
+    File home = new File(value);
+
+    if (! home.exists() || ! home.isDirectory())
+      return false;
+
+    if (!new File(home, "conf/resin.xml").exists())
+      return false;
+
+    if (! new File(home, "lib/resin.jar").exists())
+      return false;
+
+    return true;
+  }
+
+
 }

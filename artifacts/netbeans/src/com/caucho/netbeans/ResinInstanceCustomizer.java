@@ -26,11 +26,153 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.netbeans;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.util.logging.Logger;
 import javax.swing.*;
+import org.openide.WizardDescriptor;
+import org.openide.util.ChangeSupport;
 
-public class ResinInstanceCustomizer extends JPanel
-{
+public class ResinInstanceCustomizer extends JPanel {
+
+  private final static Logger log = Logger.getLogger(AddResinServerPanel.class.getName());
+  //
+  private JComboBox _versionsBox;
+  private JButton _goBtn;
+  private JProgressBar _progressBar;
+  private JTextField _home;
+  private JCheckBox _useHomeAsRootChk;
+  private JLabel _rootLbl;
+  private JTextField _root;
+  private JButton _rootBtn;
+  private JTextField _hostName;
+  private JTextField _address;
+  private JTextField _port;
+  private java.util.List<String> _versions;
+  private ChangeSupport _support;
+  private WizardDescriptor.ValidatingPanel _panel;
+  private WizardDescriptor _wd;
+
+  ResinInstanceCustomizer(ResinInstance resin) {
+    init(resin);
+  }
+
+  public void init(ResinInstance resin) {
+    _support = new ChangeSupport(this);
+    //
+    setLayout(new GridBagLayout());
+    //download: button, choose resin combobox, go button
+    GridBagConstraints constraints = new GridBagConstraints();
+    constraints.anchor = GridBagConstraints.WEST;
+    constraints.gridx = 0;
+    constraints.gridy = 0;
+
+    //-------
+    //resin-home: label, resin home dir,
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.left = constraints.insets.right = 0;
+    constraints.insets.top = constraints.insets.bottom = 0;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.weightx = 0;
+    add(new JLabel("Resin Home"), constraints);
+
+    _home = new JTextField(resin.getHome());
+    _home.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_home, constraints);
+
+    /*    JButton button = new JButton(new SelectResinHomeAction());
+    constraints.gridx = 2;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.weightx = 0;
+    add(button, constraints);
+     */
+    //-------
+    //resin-root: label, editbox, button
+    _rootLbl = new JLabel("Resin root");
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.left = 0;
+    constraints.gridwidth = 1;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.weightx = 0;
+    add(_rootLbl, constraints);
+
+    _root = new JTextField(resin.getRoot());
+    _root.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_root, constraints);
+
+    /*
+    _rootBtn = new JButton("...");
+    _rootBtn.setEnabled(false);
+    constraints.gridx = 2;
+    constraints.insets.left = 0;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.weightx = 0;
+    add(_rootBtn, constraints);
+     */
+
+    //-------
+    //host name: label, editbox
+    constraints.gridx = 0;
+    constraints.gridy++;
+    add(new JLabel("Resin's host name"), constraints);
+
+    _hostName = new JTextField(resin.getHost());
+    _hostName.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.insets.right = 20;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_hostName, constraints);
+    //-------
+    //address/ip: label, editbox
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.right = 0;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.weightx = 0;
+    add(new JLabel("Address"), constraints);
+
+    _address = new JTextField(resin.getAddress());
+    _address.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.insets.right = 20;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_address, constraints);
+
+    //-------
+    //http-port: label,editbox
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.right = 0;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 0;
+    add(new JLabel("Port"), constraints);
+
+    _port = new JTextField(Integer.toString(resin.getPort()));
+    _port.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.insets.right = 20;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_port, constraints);
+
+    //-------
+    //label: "Select which resin configuration you want to use with this server
+    //-------
+    //radio: copy default configuration into the project
+    //-------
+    //use configuration in resin-home
+    //
+  }
 }

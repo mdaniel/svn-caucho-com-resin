@@ -26,7 +26,6 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.netbeans;
 
 import com.caucho.netbeans.actions.DeleteAction;
@@ -56,20 +55,18 @@ public class ResinNode extends Node {
 
   private ResinInstance _resin;
 
-  public ResinNode(Children h, Lookup lookup) throws IllegalStateException {
-    super(h, lookup);
-    setName("Resin31");
-    setDisplayName("Resin 31");
-  }
-
-  public ResinNode(Children h) throws IllegalStateException {
+  public ResinNode(Children h, ResinInstance resin) throws IllegalStateException {
     super(h);
-    setName("Resin31");
-    setDisplayName("Resin 31");
+    _resin = resin;
+    setName(resin.getName());
+    setDisplayName(resin.getDisplayName());
   }
 
-  public void setResinServerInstance(ResinInstance resin) {
+  public ResinNode(Children h, Lookup lookup, ResinInstance resin) throws IllegalStateException {
+    super(h, lookup);
     _resin = resin;
+    setName(resin.getName());
+    setDisplayName(resin.getDisplayName());
   }
 
   public ResinInstance getResinServerInstance() {
@@ -78,10 +75,7 @@ public class ResinNode extends Node {
 
   @Override
   public Node cloneNode() {
-    ResinNode clone = new ResinNode(this.getChildren(), getLookup());
-    clone.setName(this.getName());
-    clone.setDisplayName(this.getName());
-    clone.setResinServerInstance(_resin);
+    ResinNode clone = new ResinNode(this.getChildren(), getLookup(), _resin);
 
     return clone;
   }
@@ -114,14 +108,14 @@ public class ResinNode extends Node {
   @Override
   public Action[] getActions(boolean context) {
     return new Action[]{
-              SystemAction.get(StartAction.class),
-              SystemAction.get(StartAction.class),
-              SystemAction.get(StopAction.class),
-              SystemAction.get(RestartAction.class),
+              //SystemAction.get(StartAction.class),
+              //SystemAction.get(StopAction.class),
+              //SystemAction.get(RestartAction.class),
               null,
               SystemAction.get(DeleteAction.class),
               null,
-              SystemAction.get(PropertiesAction.class)};
+              SystemAction.get(PropertiesAction.class)
+            };
   }
 
   @Override
@@ -181,7 +175,6 @@ public class ResinNode extends Node {
 
   @Override
   public Handle getHandle() {
-    System.out.println(ResinNode.class.getSimpleName() + ".getHandle()");
     return null;
   }
 }
