@@ -26,44 +26,50 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.netbeans;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.netbeans.modules.j2ee.deployment.common.api.ConfigurationException;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eeModule;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfiguration;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 
 import java.util.logging.*;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ContextRootConfiguration;
 import org.openide.util.Lookup.Result;
 
 public class WarConfiguration
-  implements ModuleConfiguration
-{
-  private static final Logger log
-    = Logger.getLogger(WarConfiguration.class.getName());
-  
+        implements ModuleConfiguration, ContextRootConfiguration {
+
+  private static final Logger log = Logger.getLogger(WarConfiguration.class.getName());
   private J2eeModule _module;
-  
-  public WarConfiguration(J2eeModule module)
-  {
-    log.info("WarConfiguration");
-    
+  private String _contextRoot = "/";
+
+  public WarConfiguration(J2eeModule module) {
     _module = module;
   }
 
-  public Lookup getLookup()
-  {
+  public Lookup getLookup() {
     return Lookups.fixed(this);
   }
 
-  public J2eeModule getJ2eeModule() 
-  {
+  public J2eeModule getJ2eeModule() {
     return _module;
   }
 
   public void dispose() {
+  }
+
+  @Override
+  public String getContextRoot() throws ConfigurationException {
+    return _contextRoot;
+  }
+
+  @Override
+  public void setContextRoot(String contextRoot) throws ConfigurationException {
+    _contextRoot = contextRoot;
   }
 }

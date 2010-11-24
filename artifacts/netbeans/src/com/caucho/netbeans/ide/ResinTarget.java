@@ -37,25 +37,27 @@ import javax.enterprise.deploy.spi.Target;
 public final class ResinTarget
   implements Target
 {
-  private final String _name;
   private final ResinConfiguration _config;
   private final ResinProcess _process;
 
-  public ResinTarget(String uri, ResinConfiguration resinConfiguration)
+  public ResinTarget(ResinConfiguration resinConfiguration)
   {
-    _name = uri;
     _config = resinConfiguration;
-    _process = new ResinProcess(uri, resinConfiguration);
+    _process = new ResinProcess(resinConfiguration);
   }
 
   public String getName()
   {
-    return _name;
+    return _config.getResinInstance().getDisplayName();
   }
 
   public String getDescription()
   {
     return _config.getDisplayName();
+  }
+
+  public ResinConfiguration getResinConfiguration() {
+    return _config;
   }
 
   public String toString()

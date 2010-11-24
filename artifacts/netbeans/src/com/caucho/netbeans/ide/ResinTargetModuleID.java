@@ -60,14 +60,14 @@ public final class ResinTargetModuleID
     _path = path;
   }
   
-  public ResinTargetModuleID(ResinTarget target)
+  public ResinTargetModuleID(ResinTarget target, String moduleId, String url, String path)
   {
     _target = target;
-    _moduleID = "test-module";
-    _webURL = "/";
+    _moduleID = moduleId;
+    _webURL = url;
     _parentTargetModuleID = null;
     _childTargetModuleID = new TargetModuleID[0];
-    _path = "path";
+    _path = path;
   }
 
   public Target getTarget()

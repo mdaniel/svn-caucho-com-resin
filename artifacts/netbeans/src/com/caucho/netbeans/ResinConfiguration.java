@@ -72,27 +72,13 @@ public class ResinConfiguration
   private int _debugPort = 0;
   private int _startTimeout = 60 * 1000;
   private int _stopTimeout = 60 * 1000;
-  private InstanceProperties _ip;
 
-  /*  public ResinConfiguration()
-  {
-  JavaPlatformManager platformManager = JavaPlatformManager.getDefault();
-  _javaPlatform = platformManager.getDefaultPlatform();
+  public ResinConfiguration(ResinInstance resin) throws DeploymentManagerCreationException {
+    _resin = resin;
   }
 
-   */
-  public ResinConfiguration(InstanceProperties ip) throws DeploymentManagerCreationException {
-    _ip = ip;
-
-    String url = ip.getProperty(InstanceProperties.URL_ATTR);
-
-    ResinInstance resin = ResinInstanceProvider.getInstance().getResinInstance(url);
-
-    if (resin == null) {
-      throw new DeploymentManagerCreationException("Resin not found for url: " + url);
-    }
-
-    _resin = resin;
+  public ResinInstance getResinInstance() {
+    return _resin;
   }
 
   String getContextPath() {
@@ -141,7 +127,7 @@ public class ResinConfiguration
   }
 
   /**
-   * Returns the debug port, 0 means a free port should be determnined.
+   * Returns the debug port, 0 means a free port should be determined.
    */
   public int getDebugPort() {
     return _debugPort;

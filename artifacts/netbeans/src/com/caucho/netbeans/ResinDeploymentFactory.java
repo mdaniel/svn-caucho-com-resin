@@ -45,7 +45,7 @@ public class ResinDeploymentFactory
   private static final String RESIN_PREFIX = "resin:"; // NOI18N
   private static final String DISCONNECTED_URI = "resin:virtual";
   private static DeploymentFactory _instance;
-  private static final WeakHashMap<InstanceProperties, ResinDeploymentManager> _managerCache = new WeakHashMap<InstanceProperties, ResinDeploymentManager>();
+  private static final WeakHashMap<ResinInstance, ResinDeploymentManager> _managerCache = new WeakHashMap<ResinInstance, ResinDeploymentManager>();
 
   public static synchronized DeploymentFactory create() {
     if (_instance == null) {
@@ -68,21 +68,15 @@ public class ResinDeploymentFactory
     if (!handlesURI(uri)) {
       throw new DeploymentManagerCreationException(L.l("'{0}' is not a Resin URI", uri));
     }
+    
+    ResinInstance resin = ResinInstanceProvider.getInstance().getResinInstance(uri);
 
-    InstanceProperties ip = InstanceProperties.getInstanceProperties(uri);
-
-    if (ip == null) {
-      if (!DISCONNECTED_URI.equals(uri)) {
-        throw new DeploymentManagerCreationException(L.l("Resin instance '{0}' is not registered.", uri));
-      }
-    }
-
-    ResinDeploymentManager manager = _managerCache.get(ip);
+    ResinDeploymentManager manager = _managerCache.get(resin);
 
     if (manager == null) {
       try {
-        manager = new ResinDeploymentManager(uri, ip);
-        _managerCache.put(ip, manager);
+        manager = new ResinDeploymentManager(resin);
+        _managerCache.put(resin, manager);
       } catch (IllegalArgumentException e) {
         Exception t = new DeploymentManagerCreationException(L.l("Cannot create deployment manager for Resin instance: {0}", uri));
 

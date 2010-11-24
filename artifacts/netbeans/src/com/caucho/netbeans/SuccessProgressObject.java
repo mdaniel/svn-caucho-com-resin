@@ -26,8 +26,6 @@
  *
  * @author Sam
  */
-
-
 package com.caucho.netbeans;
 
 import com.caucho.netbeans.ide.ResinTarget;
@@ -41,69 +39,53 @@ import javax.enterprise.deploy.spi.status.DeploymentStatus;
 import javax.enterprise.deploy.spi.status.ProgressListener;
 import javax.enterprise.deploy.spi.status.ProgressObject;
 
-public class SuccessProgressObject implements ProgressObject
-{
-  private static final Logger log
-    = Logger.getLogger(SuccessProgressObject.class.getName());
-  
-  private Target []_target;
-  private TargetModuleID []_targetModuleIDs = new TargetModuleID[0];
-  
-  public SuccessProgressObject(Target []target)
-  {
+public class SuccessProgressObject implements ProgressObject {
+
+  private static final Logger log = Logger.getLogger(SuccessProgressObject.class.getName());
+  private Target[] _target;
+  private TargetModuleID[] _targetModuleIDs = new TargetModuleID[0];
+
+  public SuccessProgressObject(Target[] target, TargetModuleID targetModuleID) {
     _target = target;
-    _targetModuleIDs = new TargetModuleID[] {
-      new ResinTargetModuleID((ResinTarget) target[0]),
-    };
+    _targetModuleIDs = new TargetModuleID[]{targetModuleID};
   }
 
-  public SuccessProgressObject()
-  {
+  public SuccessProgressObject() {
   }
 
-  SuccessProgressObject(TargetModuleID[] targetModuleIDs)
-  {
+  SuccessProgressObject(TargetModuleID[] targetModuleIDs) {
     _targetModuleIDs = targetModuleIDs;
   }
 
-  public DeploymentStatus getDeploymentStatus()
-  {
+  public DeploymentStatus getDeploymentStatus() {
     return SuccessStatus.SUCCESS;
   }
 
-  public TargetModuleID[] getResultTargetModuleIDs()
-  {
+  public TargetModuleID[] getResultTargetModuleIDs() {
     return _targetModuleIDs;
   }
 
-  public ClientConfiguration getClientConfiguration(TargetModuleID arg0)
-  {
+  public ClientConfiguration getClientConfiguration(TargetModuleID arg0) {
     return null;
   }
 
-  public boolean isCancelSupported()
-  {
+  public boolean isCancelSupported() {
     return false;
   }
 
-  public void cancel() throws OperationUnsupportedException
-  {
+  public void cancel() throws OperationUnsupportedException {
   }
 
-  public boolean isStopSupported()
-  {
+  public boolean isStopSupported() {
     return false;
   }
 
-  public void stop() throws OperationUnsupportedException
-  {
+  public void stop() throws OperationUnsupportedException {
   }
 
-  public void addProgressListener(ProgressListener arg0)
-  {
+  public void addProgressListener(ProgressListener arg0) {
   }
 
-  public void removeProgressListener(ProgressListener arg0)
-  {
+  public void removeProgressListener(ProgressListener arg0) {
   }
 }

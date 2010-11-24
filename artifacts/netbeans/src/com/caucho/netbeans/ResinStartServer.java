@@ -27,9 +27,7 @@
  * @author Sam
  */
 
-
 package com.caucho.netbeans;
-
 
 import org.netbeans.modules.j2ee.deployment.plugins.api.ServerDebugInfo;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.StartServer;
@@ -263,5 +261,4 @@ public final class ResinStartServer
       _eventSupport.removeProgressListener(progressListener);
     }
   }
-
 }

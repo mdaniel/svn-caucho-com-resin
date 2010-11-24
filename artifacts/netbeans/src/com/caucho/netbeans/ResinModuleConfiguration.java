@@ -52,6 +52,7 @@ public class ResinModuleConfiguration
   public Lookup getLookup()
   {
     //return new ResinLookup();
+    System.out.println("ResinModuleConfiguration.getLookup()");
     return Lookups.fixed(this);
   }
 

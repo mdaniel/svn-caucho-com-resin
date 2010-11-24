@@ -63,7 +63,7 @@
 
         <file name="ModuleConfigurationFactory.instance">
           <attr name="instanceCreate"
-                newvalue="com.caucho.netbeans.ResinModuleConfigurationFactory"/>
+                methodvalue="com.caucho.netbeans.ResinModuleConfigurationFactory.create"/>
           <attr name="instanceClass"
                 stringvalue="com.caucho.netbeans.ResinModuleConfigurationFactory"/>
           <attr name="instanceOf"

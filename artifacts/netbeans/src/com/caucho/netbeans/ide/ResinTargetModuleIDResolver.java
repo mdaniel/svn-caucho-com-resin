@@ -26,8 +26,6 @@
  *
  * @author Sam
  */
-
-
 package com.caucho.netbeans.ide;
 
 import com.caucho.netbeans.ResinDeploymentManager;
@@ -42,49 +40,44 @@ import javax.enterprise.deploy.spi.TargetModuleID;
 import java.util.ArrayList;
 import java.util.Map;
 
-
 public final class ResinTargetModuleIDResolver
-  extends TargetModuleIDResolver
-{
+        extends TargetModuleIDResolver {
+
   private final ResinDeploymentManager _manager;
 
-  public ResinTargetModuleIDResolver(DeploymentManager manager)
-  {
+  public ResinTargetModuleIDResolver(DeploymentManager manager) {
     this._manager = (ResinDeploymentManager) manager;
   }
 
   public TargetModuleID[] lookupTargetModuleID(Map targetModuleInfo,
-                                               Target[] targets)
-  {
+          Target[] targets) {
+    System.out.println("ReisnTargetModuleIDResolver.lookupTargetModuleID():" + targetModuleInfo);
     String contextRoot = (String) targetModuleInfo.get(KEY_CONTEXT_ROOT);
 
-    if (contextRoot == null)
+    if (contextRoot == null) {
       return EMPTY_TMID_ARRAY;
+    }
 
     if ("".equals(contextRoot)) {
       contextRoot = "/"; // NOI18N
-    }
-    else {
+    } else {
       contextRoot = contextRoot.substring(1);
     }
 
     ArrayList<TargetModuleID> result = new ArrayList<TargetModuleID>();
 
     try {
-      TargetModuleID[] targetModuleIDs
-        = _manager.getAvailableModules(ModuleType.WAR, targets);
+      TargetModuleID[] targetModuleIDs = _manager.getAvailableModules(ModuleType.WAR, targets);
 
       for (TargetModuleID targetModuleID1 : targetModuleIDs) {
 
-        ResinTargetModuleID targetModuleID
-          = (ResinTargetModuleID) targetModuleID1;
+        ResinTargetModuleID targetModuleID = (ResinTargetModuleID) targetModuleID1;
 
         if (contextRoot.equals(targetModuleID.getPath())) {
           result.add(targetModuleID);
         }
       }
-    }
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
     }
 
