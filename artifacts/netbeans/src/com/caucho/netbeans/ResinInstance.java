@@ -70,6 +70,7 @@ public class ResinInstance implements ServerInstanceImplementation {
   private String _url;
   private String _user = "deploy";
   private String _password = "deploy";
+  private String _conf;
 
   public ResinInstance(InstanceProperties properties) {
     _instanceProperties = properties;
@@ -80,16 +81,22 @@ public class ResinInstance implements ServerInstanceImplementation {
     _host = properties.getString("host", null);
     _address = properties.getString("address", null);
     _port = properties.getInt(HTTP_PORT_NUMBER, 8080);
+    _user = properties.getString(USERNAME_ATTR, "admin");
+    _password = properties.getString(PASSWORD_ATTR, "deploy");
+    _conf = properties.getString("conf", null);
   }
 
-  public ResinInstance(String displayName, String home, String root, String host, String address, int port) {
+  public ResinInstance(String displayName, String home, String root, String host, String address, int port, String user, String password, String conf) {
     _displayName = displayName;
     _home = home;
     _root = root;
     _host = host;
     _address = address;
     _port = port;
-    _url = createUrl(home, root, host, address, port);
+    _user = user;
+    _password = password;
+    _conf = conf;
+    _url = createUrl(home, root, host, address, port, displayName);
   }
 
   void persist(InstanceProperties properties) {
@@ -100,6 +107,9 @@ public class ResinInstance implements ServerInstanceImplementation {
     properties.putString("root", _root);
     properties.putString("host", _host);
     properties.putString("address", _address);
+    properties.putString(USERNAME_ATTR, _user);
+    properties.putString(PASSWORD_ATTR, _password);
+    properties.putString("conf", _conf);
     properties.putInt(HTTP_PORT_NUMBER, _port);
   }
 
@@ -189,6 +199,14 @@ public class ResinInstance implements ServerInstanceImplementation {
     this._user = _user;
   }
 
+  public String getConf() {
+    return _conf;
+  }
+
+  public void setConf(String _conf) {
+    this._conf = _conf;
+  }
+
   public String getUrl() {
     return _url;
   }
@@ -246,33 +264,55 @@ public class ResinInstance implements ServerInstanceImplementation {
     return true;
   }
 
-  public String createUrl(String home, String root, String host, String address, int port) {
+  public String createUrl(String home, String root, String host, String address, int port, String displayName) {
     StringBuilder url = new StringBuilder();
     url.append("resin:home:").append('"').append(home).append("\":").
             append("root:").append('"').append(root).append("\":").
             append("host:").append('"').append(host).append("\":").
-            append("address:").append('"').append(address).append(':').append(port);
+            append("address:").append('"').append(address).append(':').append(port).
+            append("display-name:").append('"').append(displayName).append('"');
 
     return url.toString();
   }
 
+  public static String makeConfName(String resinName) {
+    StringBuilder builder = new StringBuilder("netbeans-");
+    for (char c : resinName.toCharArray()) {
+      if (c == ' ') {
+        builder.append('_');
+      } else if (c == ':') {
+        builder.append('_');
+      } else if (c == '/' || c == '\\') {
+        builder.append('_');
+      } else {
+        builder.append(c);
+      }
+    }
+
+    builder.append(".xml");
+
+    return builder.toString();
+  }
+
   public static boolean isResinHome(String value) {
-    if (value == null || value.isEmpty())
+    if (value == null || value.isEmpty()) {
       return false;
+    }
 
     File home = new File(value);
 
-    if (! home.exists() || ! home.isDirectory())
+    if (!home.exists() || !home.isDirectory()) {
       return false;
+    }
 
-    if (!new File(home, "conf/resin.xml").exists())
+    if (!new File(home, "conf/resin.xml").exists()) {
       return false;
+    }
 
-    if (! new File(home, "lib/resin.jar").exists())
+    if (!new File(home, "lib/resin.jar").exists()) {
       return false;
+    }
 
     return true;
   }
-
-
 }

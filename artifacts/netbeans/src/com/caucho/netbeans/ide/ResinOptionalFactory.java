@@ -47,31 +47,24 @@ public class ResinOptionalFactory
 
   static {
     System.setProperty("com.caucho.level", "100");
-    System.out.println("ResinOptionalFactory.<clinit>()");
   }
 
   private static final Logger log = Logger.getLogger(ResinOptionalFactory.class.getName());
 
   public ResinOptionalFactory() {
     log.config("new ResinOptionalFactory");
-    System.out.println("ResinOptionalFactory.<init>()");
-    //new RuntimeException("constructor ResinOptionalFactory").printStackTrace();
   }
 
   public StartServer getStartServer(DeploymentManager deploymentManager) {
-    System.out.println("ResinOptionalFactory.getStartServer() " + deploymentManager);
     return new ResinStartServer((ResinDeploymentManager) deploymentManager);
   }
 
   public IncrementalDeployment getIncrementalDeployment(DeploymentManager deploymentManager) {
-    System.out.println("ResinOptionaFactory.getIncrementalDeployment()" + deploymentManager);
-
     return null;
   }
 
   @Override
   public ServerInstanceDescriptor getServerInstanceDescriptor(DeploymentManager dm) {
-    System.out.println("ResinOptionalFactory.getServerInstanceDescriptor()" + dm);
     return super.getServerInstanceDescriptor(dm);
   }
 
@@ -82,11 +75,7 @@ public class ResinOptionalFactory
   }
    */
   public FindJSPServlet getFindJSPServlet(DeploymentManager deploymentManager) {
-
-    System.out.println("ResinOptionalFactory.getFindJSPServlet()" + deploymentManager);
-
     // return new ResinFindJSPServlet(deploymentManager);
-
     return null;
   }
 

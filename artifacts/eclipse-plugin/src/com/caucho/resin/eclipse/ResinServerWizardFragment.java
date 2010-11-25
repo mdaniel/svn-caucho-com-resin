@@ -884,7 +884,7 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
           return;
         }
       });
-    }
+    }   
   }
 
   @Override

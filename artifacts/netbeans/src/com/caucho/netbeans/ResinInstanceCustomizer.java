@@ -28,16 +28,18 @@
  */
 package com.caucho.netbeans;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.util.logging.Logger;
-import javax.swing.*;
 import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 
-public class ResinInstanceCustomizer extends JPanel {
+import javax.swing.*;
+import java.awt.*;
+import java.util.logging.Logger;
 
-  private final static Logger log = Logger.getLogger(AddResinServerPanel.class.getName());
+public class ResinInstanceCustomizer extends JPanel
+{
+
+  private final static Logger log
+    = Logger.getLogger(AddResinServerPanel.class.getName());
   //
   private JComboBox _versionsBox;
   private JButton _goBtn;
@@ -50,16 +52,21 @@ public class ResinInstanceCustomizer extends JPanel {
   private JTextField _hostName;
   private JTextField _address;
   private JTextField _port;
+  private JTextField _user;
+  private JTextField _password;
+  private JTextField _conf;
   private java.util.List<String> _versions;
   private ChangeSupport _support;
   private WizardDescriptor.ValidatingPanel _panel;
   private WizardDescriptor _wd;
 
-  ResinInstanceCustomizer(ResinInstance resin) {
+  ResinInstanceCustomizer(ResinInstance resin)
+  {
     init(resin);
   }
 
-  public void init(ResinInstance resin) {
+  public void init(ResinInstance resin)
+  {
     _support = new ChangeSupport(this);
     //
     setLayout(new GridBagLayout());
@@ -166,6 +173,54 @@ public class ResinInstanceCustomizer extends JPanel {
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.weightx = 1;
     add(_port, constraints);
+
+    //-------
+    //user: label,editbox
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.right = 0;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 0;
+    add(new JLabel("User"), constraints);
+
+    _user = new JTextField(resin.getUser());
+    _user.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.insets.right = 20;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_user, constraints);
+
+    //password: label,editbox
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.right = 0;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 0;
+    add(new JLabel("Password"), constraints);
+
+    _password = new JTextField(resin.getPassword());
+    _password.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.insets.right = 20;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_password, constraints);
+
+    //configuration: resin.xml
+    JLabel confLbl = new JLabel("Configuration");
+    constraints.gridy++;
+    constraints.gridx = 0;
+    constraints.gridwidth = 1;
+    constraints.insets.top = 0;
+    constraints.weightx = 0;
+    add(confLbl, constraints);
+
+    _conf = new JTextField(resin.getConf());
+    _conf.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.weightx = 1;
+    add(_conf, constraints);
 
     //-------
     //label: "Select which resin configuration you want to use with this server

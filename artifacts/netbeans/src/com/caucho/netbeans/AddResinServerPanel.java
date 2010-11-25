@@ -28,13 +28,17 @@
  */
 package com.caucho.netbeans;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.net.UnknownHostException;
+import org.openide.WizardDescriptor;
+import org.openide.WizardValidationException;
+import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
+import org.openide.util.HelpCtx;
+
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusListener;
+import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,24 +49,19 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import org.openide.WizardDescriptor;
-import org.openide.WizardValidationException;
-import org.openide.util.ChangeSupport;
-import org.openide.util.Exceptions;
-import org.openide.util.HelpCtx;
 
-public class AddResinServerPanel extends JPanel {
+public class AddResinServerPanel extends JPanel
+{
 
-  private final static Logger log = Logger.getLogger(AddResinServerPanel.class.getName());
+  private final static Logger log
+    = Logger.getLogger(AddResinServerPanel.class.getName());
   //
   private JComboBox _versionsBox;
   private JButton _goBtn;
@@ -75,16 +74,27 @@ public class AddResinServerPanel extends JPanel {
   private JTextField _hostName;
   private JTextField _address;
   private JTextField _port;
+  private JTextField _user;
+  private JTextField _password;
+  private JCheckBox _useDefaultConf;
+  private JLabel _pluginConf;
+  private JLabel _confLbl;
+  private JTextField _conf;
+  private JButton _confSelect;
   private java.util.List<String> _versions;
   private ChangeSupport _support;
   private WizardDescriptor.ValidatingPanel _panel;
   private WizardDescriptor _wd;
 
-  AddResinServerPanel() {
+  private String _pluginConfName;
+
+  AddResinServerPanel()
+  {
     init();
   }
 
-  public void init() {
+  public void init()
+  {
     _support = new ChangeSupport(this);
     //
     setLayout(new GridBagLayout());
@@ -229,35 +239,207 @@ public class AddResinServerPanel extends JPanel {
     add(_port, constraints);
 
     //-------
+    //user: label,editbox
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.right = 0;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 0;
+    add(new JLabel("User"), constraints);
+
+    _user = new JTextField("admin");
+    constraints.gridx = 1;
+    constraints.insets.right = 20;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_user, constraints);
+
+    //password: label,editbox
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.right = 0;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 0;
+    add(new JLabel("Password"), constraints);
+
+    _password = new JTextField("password");
+    constraints.gridx = 1;
+    constraints.insets.right = 20;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weightx = 1;
+    add(_password, constraints);
+
+    //-------
     //label: "Select which resin configuration you want to use with this server
+    JLabel label = new JLabel(
+      "Select configuration you want to use with this server");
+    constraints.gridx = 0;
+    constraints.gridy++;
+    constraints.insets.right = 0;
+    constraints.insets.top = 10;
+    constraints.gridwidth = 3;
+    constraints.weightx = 1;
+    add(label, constraints);
     //-------
     //radio: copy default configuration into the project
+    _useDefaultConf = new JCheckBox();
+    _useDefaultConf.setSelected(true);
+    constraints.gridy++;
+    constraints.insets.right = 0;
+    constraints.insets.top = 5;
+    constraints.gridwidth = 3;
+    constraints.weightx = 1;
+    add(_useDefaultConf, constraints);
+
+    _pluginConf = new JLabel(" ");
+    constraints.gridy++;
+    add(_pluginConf, constraints);
     //-------
-    //use configuration in resin-home
+    //configuration: resin.xml
+    _confLbl = new JLabel("Configuration");
+    _confLbl.setEnabled(false);
+    constraints.gridy++;
+    constraints.gridwidth = 1;
+    constraints.insets.top = 0;
+    constraints.weightx = 0;
+    add(_confLbl, constraints);
+
+    _conf = new JTextField();
+    _conf.setEnabled(false);
+    constraints.gridx = 1;
+    constraints.weightx = 1;
+    add(_conf, constraints);
+
+    _confSelect = new JButton(new AbstractAction("Select")
+    {
+
+      @Override
+      public void actionPerformed(ActionEvent ae)
+      {
+        selectConfiguration();
+      }
+    });
+    _confSelect.setEnabled(false);
+    constraints.gridx = 2;
+    constraints.weightx = 0;
+    add(_confSelect, constraints);
+    //
+    _useDefaultConf.setAction(new AbstractAction(
+      "Copy plugin supplied configuration file into Resin Home")
+    {
+
+      @Override
+      public void actionPerformed(ActionEvent ae)
+      {
+        copyPluginSuppliedConfigrationFile();
+      }
+    });
+
     //
   }
 
-  public void setWizardDescriptor(WizardDescriptor wd) {
+  public void copyPluginSuppliedConfigrationFile()
+  {
+    if (_useDefaultConf.isSelected()) {
+      _confLbl.setEnabled(false);
+      _conf.setEnabled(false);
+      _confSelect.setEnabled(false);
+      initPluginConfFileName();
+    }
+    else {
+      _confLbl.setEnabled(true);
+      _conf.setEnabled(true);
+      _confSelect.setEnabled(true);
+      _pluginConf.setText("Please select configuration file below");
+    }
+  }
+
+  public void selectConfiguration()
+  {
+    String home = _home.getText();
+    String confDir = null;
+
+    if (ResinInstance.isResinHome(home)) {
+      confDir = home + "/conf";
+    }
+
+    JFileChooser chooser;
+
+    if (confDir == null) {
+      chooser = new JFileChooser();
+    }
+    else {
+      chooser = new JFileChooser(confDir);
+    }
+
+    chooser.setFileFilter(new FileFilter()
+    {
+
+      @Override
+      public String getDescription()
+      {
+        return "Accepts files ending with .xml and .conf extensions";
+      }
+
+      @Override
+      public boolean accept(File file)
+      {
+        String path = file.getPath();
+
+        if (path.endsWith(".xml") || path.endsWith(".conf")) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+    });
+    chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+    chooser.setDialogTitle("Select directory where Resin will be installed");
+    chooser.setMultiSelectionEnabled(false);
+    chooser.showOpenDialog(this);
+    final File dest = chooser.getSelectedFile();
+
+    if (dest != null) {
+      _conf.setText(dest.getPath());
+    }
+  }
+
+  public void initPluginConfFileName()
+  {
+    String displayName = _wd.getProperty("ServInstWizard_displayName")
+      .toString();
+    String confName = ResinInstance.makeConfName(displayName);
+    _pluginConfName = confName;
+    _pluginConf.setText("Configuration is set to $RESIN_HOME/conf/" + confName);
+  }
+
+  public void setWizardDescriptor(WizardDescriptor wd)
+  {
     _wd = wd;
   }
 
-  public void checkInput() throws WizardValidationException {
+  public void checkInput()
+    throws WizardValidationException
+  {
     _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, null);
 
     if (_home.getText() == null || _home.getText().isEmpty()) {
-      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Supply Resin Home");
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                      "Supply Resin Home");
 
       throw new WizardValidationException(_home, "", "");
     }
 
     if (!ResinInstance.isResinHome(_home.getText())) {
-      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Invalid Resin Home");
-
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                      "Invalid Resin Home");
       throw new WizardValidationException(_home, "", "");
     }
 
     if (_root.getText() == null || _root.getText().isEmpty()) {
-      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Invalid Resin Root");
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                      "Invalid Resin Root");
 
       throw new WizardValidationException(_root, "", "");
     }
@@ -285,9 +467,39 @@ public class AddResinServerPanel extends JPanel {
 
       throw new WizardValidationException(_port, "", "");
     }
+
+    String conf = _conf.getText();
+    if (_useDefaultConf.isSelected()) {
+    }
+    else if (!_useDefaultConf.isSelected() && (conf == null
+      || conf.isEmpty())) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Specify Config");
+
+      throw new WizardValidationException(_confSelect, "", "");
+    }
+    else if (!_useDefaultConf.isSelected() && !new File(conf).exists()) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                      "File '" + conf + "' does not exist");
+
+      throw new WizardValidationException(_confSelect, "", "");
+    }
+
+    if (_user.getText() == null || _user.getText().isEmpty()) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE, "Specify user");
+
+      throw new WizardValidationException(_user, "", "");
+    }
+
+    if (_password.getText() == null || _password.getText().isEmpty()) {
+      _wd.putProperty(WizardDescriptor.PROP_WARNING_MESSAGE,
+                      "Specify password");
+
+      throw new WizardValidationException(_password, "", "");
+    }
   }
 
-  private boolean isValidAddress(String address) {
+  private boolean isValidAddress(String address)
+  {
     try {
       InetAddress inetAddress = InetAddress.getByName(address);
 
@@ -313,73 +525,116 @@ public class AddResinServerPanel extends JPanel {
     return false;
   }
 
-  public String getHome() {
+  public String getHome()
+  {
     return _home.getText().trim();
   }
 
-  public String getRoot() {
+  public String getRoot()
+  {
     return _root.getText().trim();
   }
 
-  public String getHost() {
+  public String getHost()
+  {
     return _hostName.getText().trim();
   }
 
-  public String getAddress() {
+  public String getAddress()
+  {
     return _address.getText().trim();
   }
 
-  public int getPort() {
+  public int getPort()
+  {
     return Integer.parseInt(_port.getText().trim());
   }
 
-  public void readSettings(Object data) {
+  public String getUser()
+  {
+    return _user.getText().trim();
   }
 
-  public void storeSettings(Object data) {
+  public String getPassword()
+  {
+    return _password.getText().trim();
   }
 
-  public WizardDescriptor.ValidatingPanel getWizardDescriptorPanel() {
+  public String getConf()
+  {
+    if (_useDefaultConf.isSelected()) {
+      return getHome() + "/conf/" + _pluginConfName;
+    }
+    else {
+      return _conf.getText().trim();
+    }
+  }
+
+  public boolean isUsingPluginConfiguration()
+  {
+    return _useDefaultConf.isSelected();
+  }
+
+  public void readSettings(Object data)
+  {
+  }
+
+  public void storeSettings(Object data)
+  {
+  }
+
+  public WizardDescriptor.ValidatingPanel getWizardDescriptorPanel()
+  {
     if (_panel == null) {
-      _panel = new WizardDescriptor.ValidatingPanel() {
+      _panel = new WizardDescriptor.ValidatingPanel()
+      {
 
         @Override
-        public void validate() throws WizardValidationException {
+        public void validate()
+          throws WizardValidationException
+        {
           checkInput();
         }
 
         @Override
-        public void addChangeListener(ChangeListener cl) {
+        public void addChangeListener(ChangeListener cl)
+        {
           _support.addChangeListener(cl);
         }
 
         @Override
-        public Component getComponent() {
+        public Component getComponent()
+        {
           return AddResinServerPanel.this;
         }
 
         @Override
-        public HelpCtx getHelp() {
+        public HelpCtx getHelp()
+        {
           return HelpCtx.DEFAULT_HELP;
         }
 
         @Override
-        public boolean isValid() {
+        public boolean isValid()
+        {
           return true;
         }
 
         @Override
-        public void readSettings(Object data) {
+        public void readSettings(Object data)
+        {
           AddResinServerPanel.this.readSettings(data);
         }
 
         @Override
-        public void removeChangeListener(ChangeListener cl) {
+        public void removeChangeListener(ChangeListener cl)
+        {
           _support.removeChangeListener(cl);
         }
 
         @Override
-        public void storeSettings(Object data) {
+        public void storeSettings(Object data)
+        {
           AddResinServerPanel.this.storeSettings(data);
         }
       };
@@ -388,15 +643,19 @@ public class AddResinServerPanel extends JPanel {
     return _panel;
   }
 
-  void downloadVersions() {
+  void downloadVersions()
+  {
     _progressBar.setMinimum(0);
     _progressBar.setMaximum(10);
     _progressBar.setVisible(true);
 
-    SwingWorker download = new SwingWorker() {
+    SwingWorker download = new SwingWorker()
+    {
 
       @Override
-      protected Object doInBackground() throws Exception {
+      protected Object doInBackground()
+        throws Exception
+      {
         asyncDownloadVersions();
 
         return null;
@@ -406,72 +665,93 @@ public class AddResinServerPanel extends JPanel {
     download.execute();
   }
 
-  private void asyncDownloadVersions() {
+  private void asyncDownloadVersions()
+  {
     try {
       //monitor.beginTask("Download Resin Versions", 1);
       URL url = new URL("http://www.caucho.com/download/");
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(
-              connection.getInputStream(), "UTF-8"));
+        connection.getInputStream(), "UTF-8"));
+
       int c;
       _versions = new ArrayList<String>();
       StringBuilder href = new StringBuilder();
+
       while ((c = reader.read()) > 0) {
         if ('\"' == c) {
           if (href.length() > 9 && href.charAt(0) == 'r'
-                  && href.charAt(1) == 'e' && href.charAt(2) == 's'
-                  && href.charAt(3) == 'i' && href.charAt(4) == 'n'
-                  && href.charAt(5) == '-'
-                  && href.lastIndexOf(".zip") == href.length() - 4
-                  && href.charAt(href.length() - 5) != 'c') {
+            && href.charAt(1) == 'e' && href.charAt(2) == 's'
+            && href.charAt(3) == 'i' && href.charAt(4) == 'n'
+            && href.charAt(5) == '-'
+            && href.lastIndexOf(".zip") == href.length() - 4
+            && href.charAt(href.length() - 5) != 'c') {
             _versions.add(href.toString());
 
-            SwingUtilities.invokeLater(new Runnable() {
+            SwingUtilities.invokeLater(new Runnable()
+            {
 
-              public void run() {
+              public void run()
+              {
                 _progressBar.setValue(_progressBar.getValue() + 1);
               }
             });
-          } else {
+          }
+          else {
             href = new StringBuilder();
           }
-        } else if (' ' == c || '<' == c || '=' == c || '>' == c || '\n' == c
-                || '\r' == c || '\t' == c) {
+        }
+        else if (' ' == c || '<' == c || '=' == c || '>' == c || '\n' == c
+          || '\r' == c || '\t' == c) {
           href = new StringBuilder();
-        } else {
+        }
+        else {
           href.append((char) c);
         }
       }
 
-      Runnable uiTask = new Runnable() {
+      Runnable uiTask = new Runnable()
+      {
 
-        public void run() {
+        public void run()
+        {
           _versionsBox.removeAllItems();
+
           if (_versions.size() == 0) {
             _versionsBox.addItem("Please download manually.");
             _versionsBox.setSelectedIndex(0);
-          } else {
+          }
+          else {
             for (String version : _versions) {
               StringBuilder v = new StringBuilder();
+
               boolean pro = false;
+
               boolean snap = false;
+
               char[] chars = version.toCharArray();
-              for (int i = 0; i < chars.length; i++) {
+
+              for (int i = 0; i
+                < chars.length; i++) {
                 char c = chars[i];
+
                 if (Character.isDigit(c)) {
                   v.append(c);
-                } else if ('_' == c || '.' == c) {
+                }
+                else if ('_' == c || '.' == c) {
                   v.append('.');
-                } else if (c == 'o' && chars[i - 2] == 'p') {
+                }
+                else if (c == 'o' && chars[i - 2] == 'p') {
                   pro = true;
-                } else if (c == 'p' && chars[i - 3] == 's') {
+                }
+                else if (c == 'p' && chars[i - 3] == 's') {
                   snap = true;
                 }
               }
 
               String item = "Resin " + (pro ? "Pro " : " ")
-                      + v.substring(0, v.length() - 1) + (snap ? " Snapshot" : "");
+                + v.substring(0, v.length() - 1) + (snap ? " Snapshot" : "");
               _versionsBox.addItem(item);
             }
 
@@ -482,6 +762,7 @@ public class AddResinServerPanel extends JPanel {
           _goBtn.setEnabled(true);
 
           //monitor.done();
+
         }
       };
 
@@ -489,9 +770,11 @@ public class AddResinServerPanel extends JPanel {
     } catch (final Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
-      Runnable uiTask = new Runnable() {
+      Runnable uiTask = new Runnable()
+      {
 
-        public void run() {
+        public void run()
+        {
           JDialog dialog = new JDialog();
           dialog.add(new JLabel("Can not connect to Caucho.com"));
           dialog.setVisible(true);
@@ -502,7 +785,8 @@ public class AddResinServerPanel extends JPanel {
     }
   }
 
-  private void downloadResin() {
+  private void downloadResin()
+  {
     JFileChooser chooser = new JFileChooser(System.getProperty("user.home"));
     chooser.setDialogType(JFileChooser.OPEN_DIALOG);
     chooser.setDialogTitle("Select directory where Resin will be installed");
@@ -521,10 +805,13 @@ public class AddResinServerPanel extends JPanel {
 
     final String version = _versions.get(_versionsBox.getSelectedIndex());
 
-    SwingWorker download = new SwingWorker() {
+    SwingWorker download = new SwingWorker()
+    {
 
       @Override
-      protected Object doInBackground() throws Exception {
+      protected Object doInBackground()
+        throws Exception
+      {
         asyncDownloadResin(version, dest);
 
         return null;
@@ -535,20 +822,25 @@ public class AddResinServerPanel extends JPanel {
   }
 
   private void asyncDownloadResin(
-          String version, File dest) {
+    String version, File dest)
+  {
     InputStream in = null;
     OutputStream out = null;
     JarFile jar = null;
+
     boolean success = false;
     File resinHome = null;
+
     try {
       URL url = new URL("http://www.caucho.com/download/" + version);
       String temp = System.getProperty("java.io.tmpdir");
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       final int len = connection.getHeaderFieldInt("Content-Length", 20000000);
-      SwingUtilities.invokeLater(new Runnable() {
+      SwingUtilities.invokeLater(new Runnable()
+      {
 
-        public void run() {
+        public void run()
+        {
           _progressBar.setMaximum(len * 2);
         }
       });
@@ -557,19 +849,26 @@ public class AddResinServerPanel extends JPanel {
       String jarFile = temp + File.separatorChar + version;
 
       out = new FileOutputStream(jarFile);
+
       byte[] buffer = new byte[65536];
+
       int bytesRead;
       final int[] x = new int[1];
-      Runnable uiTask = new Runnable() {
+      Runnable uiTask = new Runnable()
+      {
 
-        public void run() {
+        public void run()
+        {
           _progressBar.setValue(_progressBar.getValue() + x[0]);
         }
       };
+
       while ((bytesRead = in.read(buffer)) > 0) {
         out.write(buffer, 0, bytesRead);
         out.flush();
-        x[0] = bytesRead;
+        x[
+
+          0] = bytesRead;
         SwingUtilities.invokeLater(uiTask);
       }
       out.close();
@@ -578,15 +877,20 @@ public class AddResinServerPanel extends JPanel {
       jar = new JarFile(jarFile);
 
       Enumeration<JarEntry> entries = jar.entries();
+
       while (entries.hasMoreElements()) {
         JarEntry entry = entries.nextElement();
+
         if (entry.isDirectory() && resinHome == null) {
           StringBuilder path = new StringBuilder();
+
           char[] name = entry.getName().toCharArray();
+
           for (char c : name) {
             if (c == '/' || c == '\\') {
               break;
-            } else {
+            }
+            else {
               path.append(c);
             }
           }
@@ -594,7 +898,8 @@ public class AddResinServerPanel extends JPanel {
           resinHome = new File(dest, path.toString());
 
           continue;
-        } else if (entry.isDirectory()) {
+        }
+        else if (entry.isDirectory()) {
           continue;
         }
 
@@ -604,6 +909,7 @@ public class AddResinServerPanel extends JPanel {
 
         in = jar.getInputStream(entry);
         out = new FileOutputStream(file);
+
         while ((bytesRead = in.read(buffer)) > 0) {
           out.write(buffer, 0, bytesRead);
           out.flush();
@@ -643,10 +949,13 @@ public class AddResinServerPanel extends JPanel {
       }
 
       final String resinHomeDir = resinHome.toString();
-      SwingUtilities.invokeLater(new Runnable() {
+      SwingUtilities.invokeLater(new Runnable()
+      {
 
-        public void run() {
+        public void run()
+        {
           _progressBar.setValue(_progressBar.getMaximum());
+
           if (resinHomeDir != null) {
             _home.setText(resinHomeDir);
             _root.setText(resinHomeDir);
@@ -681,14 +990,17 @@ public class AddResinServerPanel extends JPanel {
     }
   }
 
-  private class SelectResinHomeAction extends AbstractAction {
+  private class SelectResinHomeAction extends AbstractAction
+  {
 
-    public SelectResinHomeAction() {
+    public SelectResinHomeAction()
+    {
       super("...");
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
+    public void actionPerformed(ActionEvent ae)
+    {
       String home = _home.getText();
       if (home == null) {
         home = System.getProperty("user.home");
@@ -715,20 +1027,24 @@ public class AddResinServerPanel extends JPanel {
     }
   }
 
-  private class UseResinHomeAsRootAction extends AbstractAction {
+  private class UseResinHomeAsRootAction extends AbstractAction
+  {
 
-    public UseResinHomeAsRootAction() {
+    public UseResinHomeAsRootAction()
+    {
       super("Use Resin home as Resin root");
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
+    public void actionPerformed(ActionEvent ae)
+    {
       if (_useHomeAsRootChk.isSelected()) {
         _rootLbl.setEnabled(false);
         _root.setText(_home.getText());
         _root.setEnabled(false);
         _rootBtn.setEnabled(false);
-      } else {
+      }
+      else {
         _rootLbl.setEnabled(true);
         _root.setEnabled(true);
         _rootBtn.setEnabled(true);
@@ -736,27 +1052,33 @@ public class AddResinServerPanel extends JPanel {
     }
   }
 
-  private class DownloadVersionsAction extends AbstractAction {
+  private class DownloadVersionsAction extends AbstractAction
+  {
 
-    public DownloadVersionsAction() {
+    public DownloadVersionsAction()
+    {
       super("Download");
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
+    public void actionPerformed(ActionEvent ae)
+    {
       ((JToggleButton) ae.getSource()).setEnabled(false);
       downloadVersions();
     }
   }
 
-  private class DownloadResinAction extends AbstractAction {
+  private class DownloadResinAction extends AbstractAction
+  {
 
-    public DownloadResinAction() {
+    public DownloadResinAction()
+    {
       super("Go");
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
+    public void actionPerformed(ActionEvent ae)
+    {
       downloadResin();
     }
   }

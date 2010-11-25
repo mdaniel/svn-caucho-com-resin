@@ -51,7 +51,6 @@ public final class ResinTargetModuleIDResolver
 
   public TargetModuleID[] lookupTargetModuleID(Map targetModuleInfo,
           Target[] targets) {
-    System.out.println("ReisnTargetModuleIDResolver.lookupTargetModuleID():" + targetModuleInfo);
     String contextRoot = (String) targetModuleInfo.get(KEY_CONTEXT_ROOT);
 
     if (contextRoot == null) {
