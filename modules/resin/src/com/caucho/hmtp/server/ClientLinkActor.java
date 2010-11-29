@@ -43,26 +43,25 @@ import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.BamSkeleton;
 import com.caucho.hmtp.HmtpWebSocketListener;
+import com.caucho.hmtp.HmtpWebSocketWriter;
 import com.caucho.websocket.WebSocketListener;
 import com.caucho.websocket.WebSocketServletRequest;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.
  */
-@SuppressWarnings("serial")
-public class HmtpServlet extends HttpServlet implements Actor, ActorStream
+public class ClientLinkActor implements Actor, ActorStream
 {
   private static final Logger log
-    = Logger.getLogger(HmtpServlet.class.getName());
+    = Logger.getLogger(ClientLinkActor.class.getName());
 
   private String _jid;
+  private HmtpWebSocketWriter _out;
 
-  private BamSkeleton _skeleton;
-  private Actor _actor;
-
-  public HmtpServlet()
+  public ClientLinkActor(String jid, HmtpWebSocketWriter out)
   {
     _jid = getClass().getSimpleName() + "@localhost";
+    _out = out;
   }
 
   @Override
@@ -74,46 +73,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   @Override
   public void setJid(String jid)
   {
-    _jid = jid;
-  }
-
-  @Override
-  public void init()
-  {
-    _skeleton = BamSkeleton.getSkeleton(getClass());
-  }
-  
-  @Override
-  public void service(ServletRequest request,
-                      ServletResponse response)
-    throws IOException, ServletException
-  {
-    WebSocketServletRequest req = (WebSocketServletRequest) request;
-    
-    WebSocketListener listener = createWebSocketListener();
-    
-    req.startWebSocket(listener);
-  }
-  
-  protected WebSocketListener createWebSocketListener()
-  {
-    Actor actor = createClientLinkActor();
-    
-    return new HmtpWebSocketListener(actor);
-  }
-  
-  /**
-   * Creates and returns the actor for the client link
-   */
-  
-  protected Actor createClientLinkActor()
-  {
-    return null;
-  }
-  
-  protected Actor createActor()
-  {
-    return null;
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /* (non-Javadoc)
@@ -146,16 +106,14 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
     
   }
 
+  /* (non-Javadoc)
+   * @see com.caucho.bam.Actor#setLinkStream(com.caucho.bam.ActorStream)
+   */
   @Override
   public void setLinkStream(ActorStream linkStream)
   {
-    // _linkStream = linkStream;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    // TODO Auto-generated method stub
+    
   }
 
   /* (non-Javadoc)

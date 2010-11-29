@@ -46,7 +46,7 @@ import com.caucho.util.L10N;
  * {@link com.caucho.bam.SimpleActor}
  * or {@link com.caucho.bam.SimpleActorStream}.
  */
-class BamSkeleton<S>
+public class BamSkeleton<S>
 {
   private static final L10N L = new L10N(BamSkeleton.class);
   private static final Logger log
@@ -77,6 +77,27 @@ class BamSkeleton<S>
     log.finest(L.l("{0} introspecting class {1}", this, cl.getName()));
 
     introspect(cl);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> BamSkeleton<T>
+  getSkeleton(Class<T> cl)
+  {
+    synchronized(_skeletonRefMap) {
+      SoftReference<BamSkeleton<?>> skeletonRef = _skeletonRefMap.get(cl);
+
+      BamSkeleton<?> skeleton = null;
+
+      if (skeletonRef != null)
+        skeleton = skeletonRef.get();
+
+      if (skeleton == null) {
+        skeleton = new BamSkeleton(cl);
+        _skeletonRefMap.put(cl, new SoftReference<BamSkeleton<?>>(skeleton));
+      }
+
+      return (BamSkeleton<T>) skeleton;
+    }
   }
 
   /**
@@ -491,27 +512,6 @@ class BamSkeleton<S>
     */
 
     return paramTypes[3];
-  }
-
-  @SuppressWarnings("unchecked")
-  public static BamSkeleton<?>
-  getSkeleton(Class<? extends ActorStream> cl)
-  {
-    synchronized(_skeletonRefMap) {
-      SoftReference<BamSkeleton<?>> skeletonRef = _skeletonRefMap.get(cl);
-
-      BamSkeleton<?> skeleton = null;
-
-      if (skeletonRef != null)
-        skeleton = skeletonRef.get();
-
-      if (skeleton == null) {
-        skeleton = new BamSkeleton(cl);
-        _skeletonRefMap.put(cl, new SoftReference<BamSkeleton<?>>(skeleton));
-      }
-
-      return skeleton;
-    }
   }
 
   public String toString()
