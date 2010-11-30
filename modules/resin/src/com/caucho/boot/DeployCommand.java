@@ -29,8 +29,6 @@
 
 package com.caucho.boot;
 
-import java.util.ArrayList;
-
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.network.listen.SocketLinkListener;
@@ -102,9 +100,9 @@ public class DeployCommand extends AbstractBootCommand {
     commit.message(message);
     
     commit.attribute("user", System.getProperty("user.name"));
-    
+
     deployClient.commitArchive(commit, path);
-    
+
     deployClient.close();
     
     System.out.println("Deployed " + commit.getId() + " as " + war + " to "
@@ -114,10 +112,28 @@ public class DeployCommand extends AbstractBootCommand {
   protected WebAppDeployClient getDeployClient(WatchdogArgs args,
                                              WatchdogClient client)
   {
-    String address = client.getConfig().getAddress();
-    
-    int port = findPort(client);
-    
+    String address = args.getArg("-address");
+
+    if (address == null || address.isEmpty())
+      address = client.getConfig().getAddress();
+
+    int port = -1;
+
+    String portArg = args.getArg("-port");
+
+    try {
+    if (portArg != null && !portArg.isEmpty())
+      port = Integer.parseInt(portArg);
+    } catch (NumberFormatException e) {
+      NumberFormatException e1 = new NumberFormatException("-port argument is not a number '" + portArg + "'");
+      e1.setStackTrace(e.getStackTrace());
+
+      throw e;
+    }
+
+    if (port == -1)
+      port = findPort(client);
+
     if (port == 0) {
       throw new ConfigException(L.l("HTTP listener {0}:{1} was not found",
                                     address, port));

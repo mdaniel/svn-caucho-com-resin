@@ -29,37 +29,58 @@
 
 package com.caucho.ant;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.logging.*;
-
-import com.caucho.env.repository.CommitBuilder;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.DeployClient;
-import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.vfs.Vfs;
-
-import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
-import org.apache.tools.ant.types.Path;
+import org.apache.tools.ant.taskdefs.Java;
 
-public abstract class ResinDeployClientTask extends Task {
-  private String _server;
-  private int _port = -1;
-  private String _user;
-  private String _message;
-  private String _password;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
-  private String _stage = "production";
-  private String _virtualHost = "default";
-  private String _contextRoot;
-  private String _version;
+public abstract class ResinDeployClientTask extends Task
+{
+  protected String _server;
+  protected int _port = -1;
+  protected String _user;
+  protected String _message;
+  protected String _password;
+  protected String _resinHome;
+  protected String _resinConf;
+
+  protected String _stage = "production";
+  protected String _virtualHost = "default";
+  protected String _contextRoot;
+  protected String _version;
+  protected Level _level = Level.WARNING;
+
+  private File _resinJar;
 
   public ResinDeployClientTask()
   {
+  }
+
+  public String getResinHome()
+  {
+    return _resinHome;
+  }
+
+  public void setResinHome(String resinHome)
+  {
+    _resinHome = resinHome;
+  }
+
+  public String getResinConf()
+  {
+    return _resinConf;
+  }
+
+  public void setResinConf(String resinConf)
+  {
+    _resinConf = resinConf;
   }
 
   public void setServer(String server)
@@ -152,24 +173,48 @@ public abstract class ResinDeployClientTask extends Task {
     return _version;
   }
 
-  protected CommitBuilder buildWarTag()
+  public String getMessage()
   {
-    CommitBuilder builder = new CommitBuilder();
-    builder.type("webapp");
-    builder.stage(_stage);
-    builder.tagKey(_virtualHost + _contextRoot);
-
-    return builder;
+    return _message;
   }
 
-  protected CommitBuilder buildVersionedWarTag()
+  public void setMessage(String message)
   {
-    return buildWarTag();
+    _message = message;
+  }
+
+  public Level getLevel()
+  {
+    return _level;
+  }
+
+  public void setLevel(Level level)
+  {
+    _level = level;
+  }
+
+  public void setLogLevel(String level)
+  {
+    if (level == null || level.isEmpty())
+      return;
+
+    level = level.toUpperCase();
+
+    _level = Level.parse(level);
   }
 
   protected void validate()
     throws BuildException
   {
+    if (_resinHome == null)
+      throw new BuildException("resin-home is requried by " + getTaskName());
+
+    _resinJar = new File(_resinHome, "lib/resin.jar");
+    if (!_resinJar.exists() || !_resinJar.canRead())
+      throw new BuildException("resin-home '"
+        + _resinHome
+        + "' appears invalid");
+
     if (_server == null)
       throw new BuildException("server is required by " + getTaskName());
 
@@ -178,66 +223,68 @@ public abstract class ResinDeployClientTask extends Task {
 
     if (_user == null)
       throw new BuildException("user is required by " + getTaskName());
+
+    if (_password == null)
+      throw new BuildException("password is required by " + getTaskName());
   }
 
-  protected abstract void doTask(WebAppDeployClient client)
-    throws BuildException;
-
-  protected HashMap<String,String> getCommitAttributes()
+  public void fillBaseArgs(List<String> args)
   {
-    HashMap<String,String> attributes = new HashMap<String,String>();
+    args.add("-resin-home");
+    args.add('"' + _resinHome + '"');
 
-    attributes.put(DeployClient.USER_ATTRIBUTE, _user);
-    attributes.put(DeployClient.MESSAGE_ATTRIBUTE, _message);
-    attributes.put(DeployClient.VERSION_ATTRIBUTE, _version);
+    if (_resinConf != null) {
+      args.add("-conf");
+      args.add('"' + _resinConf + '"');
+    }
 
-    attributes.put("user.name",
-                   System.getProperties().getProperty("user.name"));
-    attributes.put("client", "ant (" + getClass().getSimpleName() + ")");
+    args.add("-address");
+    args.add(_server);
 
-    return attributes;
+    args.add("-port");
+    args.add(Integer.toString(_port));
+
+    args.add("-user");
+    args.add(_user);
+
+    args.add("-password");
+    args.add(_password);
+
+    if (getMessage() != null) {
+      args.add("-m");
+      args.add(getMessage());
+    }
   }
+
+  protected abstract void fillArgs(List<String> args);
 
   /**
    * Executes the ant task.
-   **/
+   */
   @Override
   public void execute()
     throws BuildException
   {
     validate();
 
-    // fix the class loader
+    Java java = new Java(this);
+    java.setFailonerror(true);
+    java.setFork(true);
+    java.setJar(_resinJar);
 
-    ClassLoader loader = WebAppDeployClient.class.getClassLoader();
+    List<String> args = new ArrayList<String>();
+    fillArgs(args);
 
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
+    for (String arg : args)
+      java.createArg().setLine(arg);
 
-    Logger clientLogger = Logger.getLogger(WebAppDeployClient.class.getName());
-    AntLogHandler antLogHandler = new AntLogHandler();
-    boolean useParentHandlers = clientLogger.getUseParentHandlers();
-    Level oldLevel = clientLogger.getLevel();
+    log(java.getCommandLine().toString(), _level.intValue());
 
-    try {
-      clientLogger.setLevel(Level.ALL);
-      clientLogger.setUseParentHandlers(false);
-      clientLogger.addHandler(antLogHandler);
-
-      thread.setContextClassLoader(loader);
-
-      doTask(new WebAppDeployClient(_server, _port, _user, _password));
-    }
-    finally {
-      thread.setContextClassLoader(oldLoader);
-
-      clientLogger.removeHandler(antLogHandler);
-      clientLogger.setUseParentHandlers(useParentHandlers);
-      clientLogger.setLevel(oldLevel);
-    }
+    java.executeJava();
   }
 
-  private class AntLogHandler extends Handler {
+  private class AntLogHandler extends Handler
+  {
     @Override
     public void close()
       throws SecurityException
@@ -253,15 +300,15 @@ public abstract class ResinDeployClientTask extends Task {
     public void publish(LogRecord record)
     {
       if (Level.ALL.equals(record.getLevel())
-          || Level.INFO.equals(record.getLevel())
-          || Level.CONFIG.equals(record.getLevel()))
+        || Level.INFO.equals(record.getLevel())
+        || Level.CONFIG.equals(record.getLevel()))
         log(record.getMessage());
 
       else if (Level.FINE.equals(record.getLevel()))
         log(record.getMessage(), Project.MSG_VERBOSE);
 
       else if (Level.FINER.equals(record.getLevel())
-               || Level.FINEST.equals(record.getLevel()))
+        || Level.FINEST.equals(record.getLevel()))
         log(record.getMessage(), Project.MSG_DEBUG);
 
       else if (Level.SEVERE.equals(record.getLevel()))

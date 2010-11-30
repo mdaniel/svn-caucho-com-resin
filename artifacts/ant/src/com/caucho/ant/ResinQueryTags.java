@@ -29,19 +29,9 @@
 
 package com.caucho.ant;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.caucho.env.repository.CommitBuilder;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.server.admin.TagResult;
-import com.caucho.vfs.Vfs;
-
-import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.types.Path;
+
+import java.util.List;
 
 /**
  * Ant task to query tags of Resin applications deployed via the
@@ -93,28 +83,9 @@ public class ResinQueryTags extends ResinDeployClientTask {
   }
 
   @Override
-  protected void doTask(WebAppDeployClient client)
-    throws BuildException
+  protected void fillArgs(List<String> args)
   {
-    String pattern = _pattern;
 
-    if (pattern == null) {
-      if (getContextRoot() == null)
-        setContextRoot(".*");
-
-      CommitBuilder commit = buildVersionedWarTag();
-      pattern = commit.getId();
-    }
-
-    log("Query pattern = '" + pattern + "'", Project.MSG_DEBUG);
-
-    TagResult []tags = client.queryTags(pattern);
-
-    for (TagResult tag : tags) {
-      if (_printValues)
-        log(tag.getTag() + " -> " + tag.getRoot());
-      else
-        log(tag.getTag());
-    }
   }
 }
+

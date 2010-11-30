@@ -29,17 +29,9 @@
 
 package com.caucho.ant;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.server.admin.TagResult;
-import com.caucho.vfs.Vfs;
-
-import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.types.Path;
+
+import java.util.List;
 
 /**
  * Ant task to delete a tag in the repository.  The tag may be specified
@@ -73,19 +65,8 @@ public class ResinDeleteTag extends ResinDeployClientTask {
   }
 
   @Override
-  protected void doTask(WebAppDeployClient client)
-    throws BuildException
+  protected void fillArgs(List<String> args)
   {
-    String tag = _tag;
 
-    /*
-    if (tag == null)
-      tag = buildVersionedWarTag();
-
-    if (client.removeTag(tag, getCommitAttributes()))
-      log("Deleted tag " + tag);
-    else
-      log("Failed to delete tag " + tag);
-    */
   }
 }

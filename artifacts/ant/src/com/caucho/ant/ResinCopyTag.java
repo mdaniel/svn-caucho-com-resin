@@ -29,16 +29,9 @@
 
 package com.caucho.ant;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.vfs.Vfs;
-
-import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.types.Path;
+
+import java.util.List;
 
 /**
  * Ant task to copy a tag in the repository.  A tag can be copied by
@@ -111,30 +104,7 @@ public class ResinCopyTag extends ResinDeployClientTask {
   }
 
   @Override
-  protected void doTask(WebAppDeployClient client)
-    throws BuildException
+  protected void fillArgs(List<String> args)
   {
-    String tag = _tag;
-    String sourceTag = _sourceTag;
-    /*
-    if (tag == null)
-      tag = buildVersionedWarTag();
-    */
-
-    if (sourceTag == null) {
-      sourceTag = WebAppDeployClient.createTag(_sourceStage,
-                                               _sourceVirtualHost,
-                                               _sourceContextRoot,
-                                               _sourceVersion);
-    }
-
-    log("Copying " + sourceTag + " to " + tag);
-
-    boolean result = false;
-    /*
-    result = client.copyTag(tag, sourceTag, getCommitAttributes());
-    */
-    if (! result)
-      log("Failed to copy " + sourceTag + " to " + tag);
   }
 }

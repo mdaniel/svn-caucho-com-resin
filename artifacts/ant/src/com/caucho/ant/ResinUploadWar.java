@@ -29,34 +29,22 @@
 
 package com.caucho.ant;
 
-import java.io.File;
-import java.io.IOException;
-
-import java.util.HashMap;
-
-import com.caucho.env.repository.CommitBuilder;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.server.admin.TagResult;
-import com.caucho.util.QDate;
-import com.caucho.vfs.Vfs;
-
-import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.types.Path;
+
+import java.util.List;
 
 /**
  * Ant task to deploy war files to resin
  */
-public class ResinUploadWar extends ResinDeployClientTask {
+public class ResinUploadWar extends ResinDeployClientTask
+{
   private String _warFile;
   private String _archive;
   private boolean _writeHead = true;
 
   /**
    * For ant.
-   **/
+   */
   public ResinUploadWar()
   {
   }
@@ -64,7 +52,7 @@ public class ResinUploadWar extends ResinDeployClientTask {
   public void setWarFile(String warFile)
     throws BuildException
   {
-    if (! warFile.endsWith(".war"))
+    if (!warFile.endsWith(".war"))
       throw new BuildException("war-file must have .war extension");
 
     _warFile = warFile;
@@ -102,53 +90,24 @@ public class ResinUploadWar extends ResinDeployClientTask {
       throw new BuildException("war-file is required by " + getTaskName());
   }
 
-  @Override
-  protected void doTask(WebAppDeployClient client)
-    throws BuildException
+  @Override protected void fillArgs(List<String> args)
   {
-    try {
-      // upload
-      com.caucho.vfs.Path path = Vfs.lookup(_warFile);
+    args.add("deploy");
+    fillBaseArgs(args);
 
-      String archiveTag = _archive;
-
-      if ("true".equals(archiveTag)) {
-        archiveTag = client.createArchiveTag(getVirtualHost(),
-                                             getContextRoot(),
-                                             getVersion());
-      }
-      else if ("false".equals(archiveTag)) {
-        archiveTag = null;
-      }
-
-      CommitBuilder  tag = buildVersionedWarTag();
-
-      HashMap<String,String> attributes = getCommitAttributes();
-
-      client.commitArchive(tag, path);
-
-      log("Deployed " + path + " to tag " + tag);
-
-      /*
-      if (archiveTag != null) {
-        client.copyTag(archiveTag, tag);
-
-        log("Created archive tag " + archiveTag);
-      }
-      */
-
-      /*
-      if (getVersion() != null && _writeHead) {
-        CommitBuilder headTag = buildWarTag();
-
-        client.copyTag(headTag, tag);
-
-        log("Wrote head version tag " + headTag);
-      }
-      */
+    if (getStage() != null) {
+      args.add("-stage");
+      args.add(getStage());
     }
-    catch (Exception e) {
-      throw new BuildException(e);
+
+    if (getVersion() != null) {
+      args.add("-version");
+      args.add(getVersion());
     }
+
+    args.add("-name");
+    args.add(getContextRoot());
+
+    args.add(_warFile);
   }
 }
