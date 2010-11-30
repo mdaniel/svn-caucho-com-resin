@@ -477,7 +477,7 @@ public class Jar implements CacheListener {
       if (entry != null) {
         InputStream is = zipFile.getInputStream(entry);
 
-        zipIs = new ZipStreamImpl(zipFile, is, null, path);
+        zipIs = new ZipStreamImpl(zipFile, is, path);
         
         return zipIs;
       }
@@ -554,10 +554,10 @@ public class Jar implements CacheListener {
     if (path.startsWith("/"))
       path = path.substring(1);
 
-    ZipFile zipFile = getZipFile();
-    
     boolean isValid = false;
 
+    ZipFile zipFile = getZipFile();
+    
     try {
       if (zipFile != null) {
         ZipEntry entry = zipFile.getEntry(path);
@@ -682,7 +682,7 @@ public class Jar implements CacheListener {
   {
     if (zipFile == null)
       return;
-    
+
     SoftReference<ZipFile> oldZipFileRef = _zipFileRef.get();
     
     if (oldZipFileRef == null || oldZipFileRef.get() == null) {
@@ -822,7 +822,6 @@ public class Jar implements CacheListener {
   class ZipStreamImpl extends StreamImpl {
     private ZipFile _zipFile;
     private InputStream _zis;
-    private InputStream _is;
 
     /**
      * Create the new stream  impl.
@@ -831,11 +830,10 @@ public class Jar implements CacheListener {
      * @param is the backing stream.
      * @param path the path to the jar entry.
      */
-    ZipStreamImpl(ZipFile file, InputStream zis, InputStream is, Path path)
+    ZipStreamImpl(ZipFile zipFile, InputStream zis, Path path)
     {
-      _zipFile = file;
+      _zipFile = zipFile;
       _zis = zis;
-      _is = is;
       
       setPath(path);
     }
@@ -872,9 +870,6 @@ public class Jar implements CacheListener {
       InputStream zis = _zis;
       _zis = null;
       
-      InputStream is = _is;
-      _is = null;
-      
       try {
         if (zis != null)
           zis.close();
@@ -883,12 +878,9 @@ public class Jar implements CacheListener {
 
       try {
         if (zipFile != null)
-          closeZipFile(zipFile);
+          zipFile.close();
       } catch (Throwable e) {
       }
-
-      if (is != null)
-        is.close();
     }
 
     @Override

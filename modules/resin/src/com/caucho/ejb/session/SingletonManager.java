@@ -205,8 +205,6 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
 
         _interceptors = bean.__caucho_inject(_delegates, _interceptors, env);
       } catch (Exception e) {
-        e.printStackTrace();
-        
         log.log(Level.WARNING, e.toString(), e);
       }
       

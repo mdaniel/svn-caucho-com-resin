@@ -2684,36 +2684,6 @@ public class WebApp extends ServletContextImpl
         AbstractSingleSignon.setCurrent(singleSignon);
       }
       */
-      
-      try {
-        // server/1a36
-
-        Authenticator auth = _cdiManager.getReference(Authenticator.class);
-
-        setAttribute("caucho.authenticator", auth);
-      } catch (Exception e) {
-        log.finest(e.toString());
-      }
-
-      try {
-        if (_login == null) {
-          _login = _cdiManager.getReference(Login.class);
-        }
-
-        if (_login == null) {
-          Bean<?> loginBean = _cdiManager.createManagedBean(BasicLogin.class);
-          
-          _cdiManager.addBean(loginBean);
-          // server/1aj0
-          _defaultLogin = _cdiManager.getReference(Login.class);
-
-          _authenticator = _cdiManager.getReference(Authenticator.class);
-        }
-
-        setAttribute("caucho.login", _login);
-      } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
-      }
 
       // server/5030
       _cdiManager.addBean(_cdiManager.createManagedBean(WebServiceContextProxy.class));
@@ -2834,7 +2804,8 @@ public class WebApp extends ServletContextImpl
     }
   }
 
-  private List<WebAppFragmentConfig> sortWebFragments() {
+  private List<WebAppFragmentConfig> sortWebFragments() 
+  {
     Map<String, WebAppFragmentConfig> namedFragments
       = new HashMap<String, WebAppFragmentConfig>();
 
@@ -2960,7 +2931,8 @@ public class WebApp extends ServletContextImpl
   private List<WebAppFragmentConfig> getWebFragments(final WebAppFragmentConfig config,
                                                      Ordering ordering,
                                                      Map<String, WebAppFragmentConfig> namedFragments,
-                                                     List<WebAppFragmentConfig> anonFragments) {
+                                                     List<WebAppFragmentConfig> anonFragments)
+  {
     if (ordering == null)
       return null;
 
@@ -3097,7 +3069,7 @@ public class WebApp extends ServletContextImpl
         return;
 
       isOkay = false;
-
+      
       if (_accessLog == null)
         _accessLog = _accessLogLocal.get();
 
@@ -3127,6 +3099,8 @@ public class WebApp extends ServletContextImpl
       // the persistence manager
       if (_configException == null)
         _configException = Environment.getConfigException();
+
+      startAuthenticators();
 
       try {
         if (getSessionManager() != null)
@@ -3188,6 +3162,39 @@ public class WebApp extends ServletContextImpl
         _lifecycle.toError();
 
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
+  private void startAuthenticators()
+  {
+    try {
+      // server/1a36
+
+      Authenticator auth = _cdiManager.getReference(Authenticator.class);
+
+      setAttribute("caucho.authenticator", auth);
+    } catch (Exception e) {
+      log.finest(e.toString());
+    }
+
+    try {
+      if (_login == null) {
+        _login = _cdiManager.getReference(Login.class);
+      }
+
+      if (_login == null) {
+        Bean<?> loginBean = _cdiManager.createManagedBean(BasicLogin.class);
+        
+        _cdiManager.addBean(loginBean);
+        // server/1aj0
+        _defaultLogin = _cdiManager.getReference(Login.class);
+
+        _authenticator = _cdiManager.getReference(Authenticator.class);
+      }
+
+      setAttribute("caucho.login", _login);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
     }
   }
 

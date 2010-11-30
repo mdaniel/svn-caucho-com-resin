@@ -109,7 +109,6 @@ public class EjbHandler extends JavaeeInjectionHandler {
     if (ejb != null)
       introspectClass(getClass().getName(), ejb);
     
-
     return new NullProgram();
   }
 

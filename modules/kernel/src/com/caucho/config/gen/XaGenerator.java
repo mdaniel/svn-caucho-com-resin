@@ -175,7 +175,7 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   @Override
   public void generatePreCall(JavaWriter out) throws IOException
   {
-    if (!_isContainerManaged) {
+    if (! _isContainerManaged) {
       out.println("xa = _xa.beginNotSupported();");
     } else if (_transactionType != null) {
       switch (_transactionType) {

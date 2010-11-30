@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -886,7 +887,7 @@ public class InterceptorGenerator<X>
 
     if (javaMethod != null && ! void.class.equals(javaMethod.getReturnType())) {
       out.print("result = (");
-      printCastClass(out, javaMethod.getReturnType());
+      printCastClass(out, getMethod().getBaseType());
       out.print(") ");
     }
 
@@ -1868,12 +1869,10 @@ public class InterceptorGenerator<X>
     }
   }
 
-  protected void printCastClass(JavaWriter out, Class<?> type)
+  protected void printCastClass(JavaWriter out, Type type)
     throws IOException
   {
-    if (! type.isPrimitive())
-      out.printClass(type);
-    else if (boolean.class.equals(type))
+    if (boolean.class.equals(type))
       out.print("Boolean");
     else if (char.class.equals(type))
       out.print("Character");
@@ -1890,7 +1889,7 @@ public class InterceptorGenerator<X>
     else if (double.class.equals(type))
       out.print("Double");
     else
-      throw new IllegalStateException(type.getName());
+      out.printType(type);
   }
   
   public static void nullMethod()

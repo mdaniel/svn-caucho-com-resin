@@ -344,6 +344,8 @@ abstract public class BeanGenerator<X> extends GenClass
     out.println("{");
     out.pushDepth();
 
+    postConstructMethods = getLifecycleMethods(PostConstruct.class);
+    
     /*
     for (AspectGenerator<?> method : getLifecycleAspects(PostConstruct.class)) {
       // method.generatePostConstruct(out, map);
@@ -352,33 +354,36 @@ abstract public class BeanGenerator<X> extends GenClass
     */
 
     Method postConstructMethod = null;
-    if (postConstructMethods.size() > 0) {
-      Method method = postConstructMethods.get(0);
+    int methodsSize = postConstructMethods.size();
+    if (methodsSize > 0) {
+      Method method = postConstructMethods.get(methodsSize - 1);
       postConstructMethod = method;
-
-      String declName = method.getDeclaringClass().getSimpleName();
-      String methodName = method.getName();
-      
-      out.println("__caucho_lifecycle_" + declName + "_" + methodName + "();");
     }
 
-    int j = 1;
-    for (int i = 1; i < postConstructMethods.size(); i++) {
+    int j = 0;
+    for (int i = 0; i < methodsSize - 1; i++) {
       Method method = postConstructMethods.get(i);
 
-      // ejb/
       if (postConstructMethod != null && method.equals(postConstructMethod))
         continue;
-      
-      generateLifecycleMethod(out, j++, method, "postConstruct");
+
+      generateLifecycleMethod(out, i, method, "postConstruct");
+    }
+
+    // ejb/1060 - TCK
+    if (postConstructMethod != null) {
+      Method method = postConstructMethod;
+    
+      String declName = method.getDeclaringClass().getSimpleName();
+      String methodName = method.getName();
+    
+      out.println("__caucho_lifecycle_" + declName + "_" + methodName + "();");
     }
       
     // getAspectBeanFactory().generatePostConstruct(out, map);
 
     out.popDepth();
     out.println("}");
-    
-    postConstructMethods = getLifecycleMethods(PostConstruct.class);
     
     generateLifecycleMethodReflection(out, postConstructMethods, "postConstruct");
     
