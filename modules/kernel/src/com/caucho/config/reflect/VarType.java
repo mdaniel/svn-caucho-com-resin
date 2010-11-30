@@ -32,6 +32,7 @@ package com.caucho.config.reflect;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Set;
 
 import com.caucho.inject.Module;
 
@@ -137,6 +138,12 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   {
     // ioc/0i3m
     return isAssignableFrom(type);
+  }
+
+  @Override
+  public void fillSyntheticTypes(Set<VarType<?>> varTypeList)
+  {
+    varTypeList.add(this);
   }
 
   @Override

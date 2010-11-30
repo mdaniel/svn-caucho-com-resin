@@ -31,6 +31,8 @@ package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -80,14 +82,37 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
   /**
    * Returns the base type of the annotated member.
    */
+  @Override
   public Type getBaseType()
   {
     return _type.toType();
   }
   
+  @Override
   public BaseType getBaseTypeImpl()
   {
     return _type;
+  }
+  
+  @Override
+  public Set<VarType<?>> getTypeVariables()
+  {
+    HashSet<VarType<?>> typeVariables = new HashSet<VarType<?>>();
+    
+    fillTypeVariables(typeVariables);
+    
+    return typeVariables;
+  }
+
+  protected void fillTypeVariables(Set<VarType<?>> typeVariables)
+  {
+    getBaseTypeImpl().fillSyntheticTypes(typeVariables);
+  }
+
+  @Override
+  public HashMap<String,BaseType> getBaseTypeParamMap()
+  {
+    return _type.getParamMap();
   }
 
   /**

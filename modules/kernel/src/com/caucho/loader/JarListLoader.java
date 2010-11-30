@@ -218,7 +218,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
         Jar jar = path.getJar();
         
         try {
-          ZipEntry zipEntry = jar.getJarEntry(pathName);
+          ZipEntry zipEntry = jar.getZipEntry(pathName);
 
         // if (filePath.canRead() && filePath.getLength() > 0) {
         

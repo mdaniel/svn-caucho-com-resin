@@ -83,6 +83,7 @@ public class StatelessScheduledMethodHeadGenerator<X>
                                        accessModifier, 
                                        methodName,
                                        getMethod(), 
+                                       getTypeVariables(),
                                        getThrowsExceptions());
 
     out.println("{");

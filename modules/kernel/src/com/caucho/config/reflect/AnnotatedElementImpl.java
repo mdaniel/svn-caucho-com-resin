@@ -32,6 +32,8 @@ package com.caucho.config.reflect;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.enterprise.inject.spi.Annotated;
@@ -121,14 +123,14 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
                                            Type type,
                                            BaseType.ClassFill classFill)
     {
-    BaseType declBaseType;
-    
-    if (declaringType instanceof BaseTypeAnnotated) {
-      declBaseType = ((BaseTypeAnnotated) declaringType).getBaseTypeImpl();
-
-      return declBaseType.create(type, 
-                                 declBaseType.getParamMap(), 
-                                 classFill);
+      if (declaringType instanceof BaseTypeAnnotated) {
+        BaseTypeAnnotated baseTypeAnn = (BaseTypeAnnotated) declaringType;
+        
+        BaseType declBaseType = baseTypeAnn.getBaseTypeImpl();
+      
+        return declBaseType.create(type, 
+                                   baseTypeAnn.getBaseTypeParamMap(), 
+                                   classFill);
     }
     /*
     else if (declaringType instanceof ReflectionAnnotatedType<?>) {
@@ -154,9 +156,31 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
     return _type.toType();
   }
   
+  @Override
   public BaseType getBaseTypeImpl()
   {
     return _type;
+  }
+  
+  @Override
+  public HashMap<String,BaseType> getBaseTypeParamMap()
+  {
+    return getBaseTypeImpl().getParamMap();
+  }
+  
+  @Override
+  public Set<VarType<?>> getTypeVariables()
+  {
+    HashSet<VarType<?>> typeVariables = new HashSet<VarType<?>>();
+    
+    fillTypeVariables(typeVariables);
+    
+    return typeVariables;
+  }
+
+  protected void fillTypeVariables(Set<VarType<?>> typeVariables)
+  {
+    getBaseTypeImpl().fillSyntheticTypes(typeVariables);
   }
 
   @Override

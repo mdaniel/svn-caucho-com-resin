@@ -66,7 +66,8 @@ public class JavaWriter extends Writer {
   // Generates a unique string.
   private int _uniqueId;
 
-  public JavaWriter(WriteStream os) {
+  public JavaWriter(WriteStream os) 
+  {
     _os = os;
   }
 
@@ -414,28 +415,34 @@ public class JavaWriter extends Writer {
    * Prints the Java representation of the type
    */
   @SuppressWarnings("unchecked")
-  public void printType(Type type) throws IOException
+  public void printType(Type type)
+    throws IOException
   {
     if (type instanceof Class<?>) {
       printTypeClass((Class<?>) type);
-    } else if (type instanceof ParameterizedType) {
+    } 
+    else if (type instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) type;
       
       printParameterizedType(parameterizedType);
-    } else if (type instanceof WildcardType) {
+    }
+    else if (type instanceof WildcardType) {
       WildcardType wildcardType = (WildcardType) type;
       
       printWildcardType(wildcardType);
-    } else if (type instanceof TypeVariable<?>) {
+    }
+    else if (type instanceof TypeVariable<?>) {
       TypeVariable<? extends GenericDeclaration> typeVariable = (TypeVariable<? extends GenericDeclaration>) type;
       
       printTypeVariable(typeVariable);
-    } else if (type instanceof GenericArrayType) {
+    }
+    else if (type instanceof GenericArrayType) {
       GenericArrayType genericArrayType = (GenericArrayType) type;
 
       printType(genericArrayType.getGenericComponentType());
       print("[]");
-    } else {
+    }
+    else {
       throw new UnsupportedOperationException(type.getClass().getName() + " "
           + String.valueOf(type));
     }
@@ -466,6 +473,13 @@ public class JavaWriter extends Writer {
     print(">");
   }
 
+  /**
+   * Prints a parameterized type declaration:
+   * 
+   * <pre>
+   * T&lt;X>
+   * </pre>
+   */
   private void printParameterizedType(ParameterizedType parameterizedType)
     throws IOException
   {
@@ -495,6 +509,9 @@ public class JavaWriter extends Writer {
     throws IOException
   {
     print(typeVariable.getName());
+    
+    if (true)
+      return;
 
     Type[] bounds = typeVariable.getBounds();
 
@@ -529,6 +546,54 @@ public class JavaWriter extends Writer {
       }
 
       print(">");
+    }
+  }
+
+  public void printVarType(TypeVariable<?> typeVariable)
+    throws IOException
+  {
+    print(typeVariable.getName());
+
+    GenericDeclaration genericDeclaration
+      = typeVariable.getGenericDeclaration();
+
+    Type[] typeParameters = null;
+
+    typeParameters = genericDeclaration.getTypeParameters();
+
+    if ((typeParameters != null) && (typeParameters.length > 0)) {
+      print("<");
+
+      for (int i = 0; i < typeParameters.length; i++) {
+        if (i != 0) {
+          print(", ");
+        }
+
+        printType(typeParameters[i]);
+      }
+
+      print(">");
+    }
+
+    Type[] bounds = typeVariable.getBounds();
+
+    if (bounds != null) {
+      boolean isFirst = true;
+      
+      for (int i = 0; i < bounds.length; i++) {
+        /*if (bounds[i].equals(Object.class))
+          continue;
+          */
+        
+        if (isFirst)
+          print(" extends ");
+        else
+          print(" & ");
+
+        isFirst = false;
+        
+        printType(bounds[i]);
+      }
     }
   }
 

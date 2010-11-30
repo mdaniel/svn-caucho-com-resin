@@ -31,6 +31,7 @@ package com.caucho.config.reflect;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -89,11 +90,6 @@ abstract public class BaseType
         return ClassType.create(cl);
       else if (classFill == ClassFill.SOURCE)
         return createGenericClass(cl);
-      
-      if (Set.class.equals(cl)) {
-        System.out.println("CL: " + cl);
-        Thread.dumpStack();
-      }
       
       // ioc/0p80 vs ioc/1238
       /*
@@ -166,34 +162,8 @@ abstract public class BaseType
     }
     else if (type instanceof TypeVariable<?>) {
       TypeVariable<?> aType = (TypeVariable<?>) type;
-
-      BaseType actualType = null;
-
-      if (paramMap != null)
-        actualType = (BaseType) paramMap.get(aType.getName());
-
-      if (actualType != null)
-        return actualType;
-
-      BaseType []baseBounds;
-
-      if (aType.getBounds() != null) {
-        Type []bounds = aType.getBounds();
-
-        baseBounds = new BaseType[bounds.length];
-
-        for (int i = 0; i < bounds.length; i++) {
-          // ejb/1243 - Enum
-          if (bounds[i] != parentType)
-            baseBounds[i] = create(bounds[i], paramMap, type, ClassFill.TARGET);
-          else
-            baseBounds[i] = ObjectType.OBJECT_TYPE;
-        }
-      }
-      else
-        baseBounds = new BaseType[0];
       
-      return new VarType(aType.getName(), baseBounds);
+      return createVar(aType, paramMap, parentType, classFill);
     }
     else if (type instanceof WildcardType) {
       WildcardType aType = (WildcardType) type;
@@ -208,8 +178,67 @@ abstract public class BaseType
       throw new IllegalStateException("unsupported BaseType: " + type
                                       + " " + (type != null ? type.getClass() : null));
     }
+    
   }
+  
+  private static BaseType createVar(Type type,
+                                    HashMap<String,BaseType> paramMap,
+                                    Type parentType,
+                                    ClassFill classFill)
+  {
+    TypeVariable aType = (TypeVariable) type;
 
+    BaseType actualType = null;
+
+    if (paramMap != null)
+      actualType = (BaseType) paramMap.get(aType.getName());
+
+    if (actualType != null)
+      return actualType;
+    
+    String varName;
+    
+    if (paramMap != null)
+      varName = createVarName(paramMap);
+    else
+      varName = aType.getName();
+    
+    BaseType []baseBounds;
+
+    if (aType.getBounds() != null) {
+      Type []bounds = aType.getBounds();
+
+      baseBounds = new BaseType[bounds.length];
+
+      for (int i = 0; i < bounds.length; i++) {
+        // ejb/1243 - Enum
+        if (bounds[i] != parentType)
+          baseBounds[i] = create(bounds[i], paramMap, type, ClassFill.TARGET);
+        else
+          baseBounds[i] = ObjectType.OBJECT_TYPE;
+      }
+    }
+    else
+      baseBounds = new BaseType[0];
+    
+    VarType<?> varType = new VarType(varName, baseBounds);
+    
+    if (paramMap != null)
+      paramMap.put(aType.getName(), varType);
+    
+    return varType;
+  }
+  
+  private static String createVarName(HashMap<String,BaseType> paramMap)
+  {
+    for (int i = 0; true; i++) {
+      String name = "T_" + i;
+      
+      if (! paramMap.containsKey(name))
+        return name;
+    }
+  }
+  
   /**
    * Create a class-based type, where any parameters are filled with the
    * variables, not Object.
@@ -219,9 +248,6 @@ abstract public class BaseType
     // ioc/1238
     // ioc/07f2
 
-    if (type.getName().equals("qa.MyBean"))
-      Thread.dumpStack();
-    
     return ClassType.create(type);
   }
 
@@ -394,6 +420,10 @@ abstract public class BaseType
   protected void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
   {
     typeSet.add(toType());
+  }
+  
+  public void fillSyntheticTypes(Set<VarType<?>> varTypeList)
+  {
   }
 
   public String getSimpleName()

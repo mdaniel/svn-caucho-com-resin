@@ -35,6 +35,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -70,6 +71,8 @@ public class ReflectionAnnotatedType<T>
 
   private Class<T> _javaClass;
   
+  private HashMap<String,BaseType> _paramMap = new HashMap<String,BaseType>();
+  
   private ReflectionAnnotatedType<?> _parentType;
 
   private Set<AnnotatedConstructor<T>> _constructorSet
@@ -95,6 +98,9 @@ public class ReflectionAnnotatedType<T>
     if (parentClass != null && ! parentClass.equals(Object.class))
       _parentType = ReflectionAnnotatedFactory.introspectType(parentClass);
     
+    if (getBaseTypeImpl().getParamMap() != null)
+      _paramMap.putAll(getBaseTypeImpl().getParamMap());
+    
     introspect(_javaClass);
   }
 
@@ -105,6 +111,12 @@ public class ReflectionAnnotatedType<T>
   public Class<T> getJavaClass()
   {
     return _javaClass;
+  }
+  
+  @Override
+  public HashMap<String,BaseType> getBaseTypeParamMap()
+  {
+    return _paramMap;
   }
 
   /**

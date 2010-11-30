@@ -29,39 +29,30 @@
 
 package com.caucho.hmtp.server;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
 
 import com.caucho.bam.Actor;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.BamSkeleton;
-import com.caucho.hmtp.HmtpWebSocketListener;
 import com.caucho.hmtp.HmtpWebSocketWriter;
-import com.caucho.websocket.WebSocketListener;
-import com.caucho.websocket.WebSocketServletRequest;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.
  */
-public class ClientLinkActor implements Actor, ActorStream
+class ClientLinkActor implements Actor, ActorStream
 {
-  private static final Logger log
-    = Logger.getLogger(ClientLinkActor.class.getName());
-
   private String _jid;
-  private HmtpWebSocketWriter _out;
+  
+  private ActorStream _linkStream;
+  private ActorStream _actorStream;
+  private ActorStream _out;
 
-  public ClientLinkActor(String jid, HmtpWebSocketWriter out)
+  public ClientLinkActor(String jid, ActorStream out)
   {
-    _jid = getClass().getSimpleName() + "@localhost";
+    _jid = jid;
     _out = out;
+    
+    _actorStream = _out;
   }
 
   @Override
@@ -76,125 +67,91 @@ public class ClientLinkActor implements Actor, ActorStream
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.Actor#getActorStream()
-   */
   @Override
   public ActorStream getActorStream()
   {
-    // TODO Auto-generated method stub
-    return null;
+    return _actorStream;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.Actor#getLinkStream()
-   */
-  @Override
-  public ActorStream getLinkStream()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.bam.Actor#setActorStream(com.caucho.bam.ActorStream)
-   */
   @Override
   public void setActorStream(ActorStream actorStream)
   {
-    // TODO Auto-generated method stub
-    
+    _actorStream = actorStream;
+  }
+  
+  @Override
+  public ActorStream getLinkStream()
+  {
+    return _linkStream;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.Actor#setLinkStream(com.caucho.bam.ActorStream)
-   */
   @Override
   public void setLinkStream(ActorStream linkStream)
   {
-    // TODO Auto-generated method stub
-    
+    _linkStream = linkStream;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#close()
-   */
   @Override
   public void close()
   {
-    // TODO Auto-generated method stub
-    
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#isClosed()
-   */
   @Override
   public boolean isClosed()
   {
-    // TODO Auto-generated method stub
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#message(java.lang.String, java.lang.String, java.io.Serializable)
-   */
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    // TODO Auto-generated method stub
-    
+    getLinkStream().message(to, getJid(), payload);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#messageError(java.lang.String, java.lang.String, java.io.Serializable, com.caucho.bam.ActorError)
-   */
   @Override
-  public void messageError(String to, String from, Serializable value,
+  public void messageError(String to, String from, Serializable payload,
                            ActorError error)
   {
-    // TODO Auto-generated method stub
-    
+    getLinkStream().messageError(to, getJid(), payload, error);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#queryError(long, java.lang.String, java.lang.String, java.io.Serializable, com.caucho.bam.ActorError)
-   */
-  @Override
-  public void queryError(long id, String to, String from, Serializable payload,
-                         ActorError error)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#queryGet(long, java.lang.String, java.lang.String, java.io.Serializable)
-   */
   @Override
   public void queryGet(long id, String to, String from, Serializable payload)
   {
-    // TODO Auto-generated method stub
-    
+    getLinkStream().queryGet(id, to, getJid(), payload);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#queryResult(long, java.lang.String, java.lang.String, java.io.Serializable)
-   */
   @Override
-  public void queryResult(long id, String to, String from, Serializable payload)
+  public void querySet(long id,
+                       String to,
+                       String from,
+                       Serializable payload)
   {
-    // TODO Auto-generated method stub
-    
+    getLinkStream().querySet(id, to, getJid(), payload);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#querySet(long, java.lang.String, java.lang.String, java.io.Serializable)
-   */
   @Override
-  public void querySet(long id, String to, String from, Serializable payload)
+  public void queryResult(long id, 
+                          String to, 
+                          String from, 
+                          Serializable payload)
   {
-    // TODO Auto-generated method stub
-    
+    getLinkStream().queryResult(id, to, getJid(), payload);
+  }
+
+  @Override
+  public void queryError(long id, 
+                         String to,
+                         String from, 
+                         Serializable payload,
+                         ActorError error)
+  {
+    getLinkStream().queryError(id, to, getJid(), payload, error);
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getJid() + "]";
   }
 }

@@ -32,11 +32,13 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 
 import com.caucho.config.reflect.BaseType;
+import com.caucho.config.reflect.VarType;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -59,6 +61,7 @@ public class AspectGeneratorUtil {
                                     String accessModifier,
                                     String methodName,
                                     AnnotatedMethod<?> method,
+                                    Set<VarType<?>> typeVariables,
                                     Class<?> []exnList)
     throws IOException
   {
@@ -71,7 +74,20 @@ public class AspectGeneratorUtil {
       out.print(accessModifier);
       out.print(" ");
     }
-    
+        
+    if (typeVariables != null && typeVariables.size() > 0) {
+      out.print("<");
+      boolean isFirst = true;
+      for (VarType<?> var : typeVariables) {
+        if (! isFirst)
+          out.print(",");
+        isFirst = false;
+        
+        out.printVarType(var);
+      }
+      out.println(">");
+    }
+
     Type returnType = method.getBaseType();
 
     out.printType(returnType);

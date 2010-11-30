@@ -34,6 +34,7 @@ import java.lang.annotation.Inherited;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
@@ -57,7 +58,9 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     = Logger.getLogger(AnnotatedTypeImpl.class.getName());
 
   private Class<X> _javaClass;
-
+  
+  private HashMap<String,BaseType> _paramMap = new HashMap<String,BaseType>();
+  
   private Set<AnnotatedConstructor<X>> _constructorSet
     = new CopyOnWriteArraySet<AnnotatedConstructor<X>>();
 
@@ -78,6 +81,9 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
 
     _javaClass = javaClass;
     
+    if (getBaseTypeImpl().getParamMap() != null)
+      _paramMap.putAll(getBaseTypeImpl().getParamMap());
+    
     introspect(javaClass);
   }
   
@@ -86,6 +92,9 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     super(annType);
     
     _javaClass = annType.getJavaClass();
+    
+    if (getBaseTypeImpl().getParamMap() != null)
+      _paramMap.putAll(getBaseTypeImpl().getParamMap());
   
     _constructorSet.addAll(annType.getConstructors());
     _fieldSet.addAll(annType.getFields());
@@ -114,6 +123,12 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   public Class<X> getJavaClass()
   {
     return _javaClass;
+  }
+  
+  @Override
+  public HashMap<String,BaseType> getBaseTypeParamMap()
+  {
+    return _paramMap;
   }
 
   /**

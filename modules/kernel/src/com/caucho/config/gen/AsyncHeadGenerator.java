@@ -74,12 +74,13 @@ public class AsyncHeadGenerator<X> extends AbstractAspectGenerator<X> {
     String prefix = "";
     String suffix = "_async";
     String methodName = prefix + getJavaMethod().getName() + suffix;
-
+    
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
                                        "public", 
                                        methodName,
                                        getMethod(), 
+                                       getTypeVariables(),
                                        getThrowsExceptions());
 
     out.println("{");

@@ -33,11 +33,14 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.AspectGeneratorUtil;
+import com.caucho.config.reflect.BaseTypeAnnotated;
+import com.caucho.config.reflect.VarType;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -67,6 +70,15 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
     return _method;
   }
   
+  protected Set<VarType<?>> getTypeVariables()
+  {
+    BaseTypeAnnotated annType = (BaseTypeAnnotated) getMethod();
+    
+    Set<VarType<?>> varSet = annType.getTypeVariables();
+    
+    return varSet;
+  }
+   
   /**
    * Returns the JavaMethod for this aspect.
    */
@@ -106,6 +118,7 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
                                        accessModifier, 
                                        methodName,
                                        getMethod(),
+                                       getTypeVariables(),
                                        getThrowsExceptions());
 
 

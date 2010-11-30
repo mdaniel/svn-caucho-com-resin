@@ -232,11 +232,11 @@ public final class InjectManager
   // self configuration
   //
 
-  private HashMap<Class<?>,ArrayList<TypedBean>> _selfBeanMap
-    = new HashMap<Class<?>,ArrayList<TypedBean>>();
+  private ConcurrentHashMap<Class<?>,ArrayList<TypedBean>> _selfBeanMap
+    = new ConcurrentHashMap<Class<?>,ArrayList<TypedBean>>();
 
-  private HashMap<String,ArrayList<Bean<?>>> _selfNamedBeanMap
-    = new HashMap<String,ArrayList<Bean<?>>>();
+  private ConcurrentHashMap<String,ArrayList<Bean<?>>> _selfNamedBeanMap
+    = new ConcurrentHashMap<String,ArrayList<Bean<?>>>();
 
   private HashMap<String,Bean<?>> _selfPassivationBeanMap
     = new HashMap<String,Bean<?>>();
@@ -1994,17 +1994,15 @@ public final class InjectManager
 
   private Set<Bean<?>> resolveAllBeans()
   {
-    synchronized (_beanMap) {
-      LinkedHashSet<Bean<?>> beans = new LinkedHashSet<Bean<?>>();
+    LinkedHashSet<Bean<?>> beans = new LinkedHashSet<Bean<?>>();
 
-      for (ArrayList<TypedBean> comp : _selfBeanMap.values()) {
-        for (TypedBean typedBean : comp) {
-          beans.add(typedBean.getBean());
-        }
+    for (ArrayList<TypedBean> comp : _selfBeanMap.values()) {
+      for (TypedBean typedBean : comp) {
+        beans.add(typedBean.getBean());
       }
-
-      return beans;
     }
+
+    return beans;
   }
 
   @Override
