@@ -43,7 +43,7 @@ abstract class ConnectionReadTask implements Runnable {
   private static final Logger log 
     = Logger.getLogger(ConnectionReadTask.class.getName());
   
-  private final SocketLinkListener _listener;
+  private final TcpSocketLinkListener _listener;
   private final TcpSocketLink _socketLink;
   private SocketLinkThreadLauncher _launcher;
   
@@ -59,7 +59,7 @@ abstract class ConnectionReadTask implements Runnable {
     return _socketLink;
   }
   
-  protected final SocketLinkListener getListener()
+  protected final TcpSocketLinkListener getListener()
   {
     return _listener;
   }

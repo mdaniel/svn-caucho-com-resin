@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
-import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -154,7 +154,7 @@ public class DeployCommand extends AbstractBootCommand {
   
   private int findPort(WatchdogClient client)
   {
-    for (SocketLinkListener listener : client.getConfig().getPorts()) {
+    for (TcpSocketLinkListener listener : client.getConfig().getPorts()) {
       if (listener instanceof OpenPort) {
         OpenPort openPort = (OpenPort) listener;
         

@@ -44,7 +44,7 @@ import com.caucho.cloud.topology.TopologyService;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.network.listen.SocketPollService;
 import com.caucho.server.hmux.HmuxProtocol;
 import com.caucho.util.L10N;
@@ -63,7 +63,7 @@ public class NetworkClusterService extends AbstractResinService
   
   private final CloudServer _selfServer;
   
-  private SocketLinkListener _clusterListener;
+  private TcpSocketLinkListener _clusterListener;
   
   private CopyOnWriteArrayList<ClusterServerListener> _serverListeners
   = new CopyOnWriteArrayList<ClusterServerListener>();
@@ -127,7 +127,7 @@ public class NetworkClusterService extends AbstractResinService
   /**
    * Returns the cluster port.
    */
-  public SocketLinkListener getClusterListener()
+  public TcpSocketLinkListener getClusterListener()
   {
     return _clusterListener;
   }
@@ -292,7 +292,7 @@ public class NetworkClusterService extends AbstractResinService
   private void startClusterListener()
     throws Exception
   {
-    SocketLinkListener listener = _clusterListener;
+    TcpSocketLinkListener listener = _clusterListener;
     
     if (listener != null) {
       listener.setProtocol(new HmuxProtocol());

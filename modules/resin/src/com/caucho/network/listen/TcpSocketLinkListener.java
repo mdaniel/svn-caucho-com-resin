@@ -70,12 +70,12 @@ import com.caucho.vfs.SSLFactory;
  * Represents a protocol connection.
  */
 @Configurable
-public class SocketLinkListener
+public class TcpSocketLinkListener
 {
-  private static final L10N L = new L10N(SocketLinkListener.class);
+  private static final L10N L = new L10N(TcpSocketLinkListener.class);
 
   private static final Logger log
-    = Logger.getLogger(SocketLinkListener.class.getName());
+    = Logger.getLogger(TcpSocketLinkListener.class.getName());
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
@@ -191,7 +191,7 @@ public class SocketLinkListener
   // The port lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  public SocketLinkListener()
+  public TcpSocketLinkListener()
   {
     if ("64".equals(System.getProperty("sun.arch.data.model"))) {
       // on 64-bit machines we can use more threads before parking in nio
@@ -231,15 +231,7 @@ public class SocketLinkListener
   public void setProtocol(Protocol protocol)
     throws ConfigException
   {
-    /* server/0170
-    if (_server == null)
-      throw new IllegalStateException(L.l("Server is not set."));
-    */
-
     _protocol = protocol;
-
-    // protocol.setPort(this);
-    // _protocol.setServer(_server);
   }
 
   /**
@@ -1701,6 +1693,7 @@ public class SocketLinkListener
     private ArrayList<TcpSocketLink> _completeSet
       = new ArrayList<TcpSocketLink>();
 
+    @Override
     public void handleAlarm(Alarm alarm)
     {
       try {
@@ -1710,10 +1703,7 @@ public class SocketLinkListener
 
         long now = Alarm.getCurrentTime();
 
-        synchronized (_suspendConnectionSet) {
-          _suspendSet.addAll(_suspendConnectionSet);
-        }
-
+        _suspendSet.addAll(_suspendConnectionSet);
         for (int i = _suspendSet.size() - 1; i >= 0; i--) {
           TcpSocketLink conn = _suspendSet.get(i);
           
@@ -1746,10 +1736,13 @@ public class SocketLinkListener
           if (log.isLoggable(Level.FINE))
             log.fine(this + " async end-of-file " + conn);
 
+          conn.toCometComplete();
+          /*
           AsyncController async = conn.getAsyncController();
 
           if (async != null)
             async.complete();
+            */
 
           // server/1lc2
           // conn.wake();

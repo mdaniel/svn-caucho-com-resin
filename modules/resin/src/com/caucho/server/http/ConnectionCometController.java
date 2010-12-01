@@ -39,7 +39,7 @@ import javax.servlet.ServletResponse;
 
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.network.listen.AsyncController;
-import com.caucho.network.listen.CometHandler;
+import com.caucho.network.listen.SocketLinkCometListener;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.servlet.comet.CometController;
 import com.caucho.util.L10N;
@@ -49,7 +49,7 @@ import com.caucho.util.L10N;
  */
 @SuppressWarnings("deprecation")
 public class ConnectionCometController
-  implements CometController, CometHandler {
+  implements CometController, SocketLinkCometListener {
   private static final L10N L = new L10N(ConnectionCometController.class);
   private final AsyncController _cometController;
   

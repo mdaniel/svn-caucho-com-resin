@@ -161,7 +161,7 @@
       <!--
          - Administration application /resin-admin
         -->
-      <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
+      <web-app id="/resin-admin" root-directory="${resin.home}/doc/admin">
         <prologue>
           <resin:set var="resin_admin_external" value="false"/>
           <resin:set var="resin_admin_insecure" value="true"/>

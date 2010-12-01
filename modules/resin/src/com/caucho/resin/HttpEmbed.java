@@ -32,7 +32,7 @@ package com.caucho.resin;
 import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.http.HttpProtocol;
 
@@ -41,7 +41,7 @@ import com.caucho.server.http.HttpProtocol;
  */
 public class HttpEmbed extends PortEmbed
 {
-  private SocketLinkListener _port;
+  private TcpSocketLinkListener _port;
   
   /**
    * Creates a new HttpEmbed configuration.
@@ -89,7 +89,7 @@ public class HttpEmbed extends PortEmbed
   public void bindTo(Server server)
   {
     try {
-      _port = new SocketLinkListener();
+      _port = new TcpSocketLinkListener();
       
       _port.setProtocol(new HttpProtocol());
 

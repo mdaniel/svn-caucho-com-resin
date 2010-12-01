@@ -32,15 +32,15 @@ package com.caucho.network.listen;
 /**
  * Application handler for a comet controller.
  */
-public interface CometHandler
+public interface SocketLinkCometListener
 {
-  /**
-   * Called when the connection closes
-   */
-  public void onComplete();
-  
   /**
    * Called when the connection times out
    */
   public void onTimeout();
+  
+  /**
+   * Called when the connection closes
+   */
+  public void onComplete();
 }

@@ -156,7 +156,7 @@ public class StreamSocketLink extends AbstractSocketLink {
   }
 
   @Override
-  public AsyncController toComet(CometHandler handler)
+  public AsyncController toComet(SocketLinkCometListener handler)
   {
     StreamAsyncController asyncController
       = new StreamAsyncController(handler);
@@ -165,7 +165,7 @@ public class StreamSocketLink extends AbstractSocketLink {
   }
 
   class StreamAsyncController extends AsyncController {
-    StreamAsyncController(CometHandler handler)
+    StreamAsyncController(SocketLinkCometListener handler)
     {
     }
 

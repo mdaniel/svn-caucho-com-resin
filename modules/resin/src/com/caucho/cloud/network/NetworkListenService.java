@@ -39,7 +39,7 @@ import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -61,10 +61,10 @@ public class NetworkListenService
   
   private final CloudServer _cloudServer;
   
-  private SocketLinkListener _clusterListener;
+  private TcpSocketLinkListener _clusterListener;
   
-  private final ArrayList<SocketLinkListener> _listeners
-    = new ArrayList<SocketLinkListener>();
+  private final ArrayList<TcpSocketLinkListener> _listeners
+    = new ArrayList<TcpSocketLinkListener>();
 
   private boolean _isBindPortsAtEnd = true;
   
@@ -98,12 +98,12 @@ public class NetworkListenService
   /**
    * Returns the cluster listener, if in a clustered environment.
    */
-  public SocketLinkListener getClusterListener()
+  public TcpSocketLinkListener getClusterListener()
   {
    return _clusterListener;
   }
 
-  public void addListener(SocketLinkListener listener)
+  public void addListener(TcpSocketLinkListener listener)
   {
     try {
       if (! _listeners.contains(listener))
@@ -138,9 +138,9 @@ public class NetworkListenService
   }
 
   /**
-   * Returns the {@link SocketLinkListener}s for this server.
+   * Returns the {@link TcpSocketLinkListener}s for this server.
    */
-  public Collection<SocketLinkListener> getListeners()
+  public Collection<TcpSocketLinkListener> getListeners()
   {
     return Collections.unmodifiableList(_listeners);
   }
@@ -152,7 +152,7 @@ public class NetworkListenService
       address = null;
 
     for (int i = 0; i < _listeners.size(); i++) {
-      SocketLinkListener serverPort = _listeners.get(i);
+      TcpSocketLinkListener serverPort = _listeners.get(i);
 
       if (port != serverPort.getPort())
         continue;
@@ -175,7 +175,7 @@ public class NetworkListenService
    */
   public TcpSocketLink findConnectionByThreadId(long threadId)
   {
-    for (SocketLinkListener listener : getListeners()) {
+    for (TcpSocketLinkListener listener : getListeners()) {
       TcpSocketLink conn = listener.findConnectionByThreadId(threadId);
 
       if (conn != null)
@@ -206,7 +206,7 @@ public class NetworkListenService
   {
     boolean isFirst = true;
 
-    for (SocketLinkListener listener : _listeners) {
+    for (TcpSocketLinkListener listener : _listeners) {
       if (listener == _clusterListener)
         continue;
 
@@ -254,7 +254,7 @@ public class NetworkListenService
   public void handleAlarm(Alarm alarm)
   {
     try {
-      for (SocketLinkListener listener : _listeners) {
+      for (TcpSocketLinkListener listener : _listeners) {
         if (listener.isClosed()) {
           log.severe("Resin restarting due to closed listener: " + listener);
           // destroy();
@@ -285,7 +285,7 @@ public class NetworkListenService
     if (alarm != null)
       alarm.dequeue();
 
-    for (SocketLinkListener listener : _listeners) {
+    for (TcpSocketLinkListener listener : _listeners) {
       try {
         if (listener != _clusterListener) {
           listener.close();

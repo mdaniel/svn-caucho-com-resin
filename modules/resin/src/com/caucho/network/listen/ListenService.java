@@ -58,8 +58,8 @@ public class ListenService extends AbstractResinService
   
   private final ResinSystem _server;
   
-  private final ArrayList<SocketLinkListener> _listeners
-    = new ArrayList<SocketLinkListener>();
+  private final ArrayList<TcpSocketLinkListener> _listeners
+    = new ArrayList<TcpSocketLinkListener>();
   
   private final ContainerProgram _listenDefaults
     = new ContainerProgram();
@@ -76,9 +76,9 @@ public class ListenService extends AbstractResinService
    * Creates a listener with the defaults applied.
    * The listener will not be registered until addListener is called.
    */
-  public SocketLinkListener createListener()
+  public TcpSocketLinkListener createListener()
   {
-    SocketLinkListener listener = new SocketLinkListener();
+    TcpSocketLinkListener listener = new TcpSocketLinkListener();
   
     applyListenerDefaults(listener);
     
@@ -88,7 +88,7 @@ public class ListenService extends AbstractResinService
   /**
    * Registers a listener with the service.
    */
-  public void addListener(SocketLinkListener listener)
+  public void addListener(TcpSocketLinkListener listener)
   {
     try {
       if (_listeners.contains(listener))
@@ -107,14 +107,14 @@ public class ListenService extends AbstractResinService
   }
 
   /**
-   * Returns the {@link SocketLinkListener}s for this server.
+   * Returns the {@link TcpSocketLinkListener}s for this server.
    */
-  public Collection<SocketLinkListener> getListeners()
+  public Collection<TcpSocketLinkListener> getListeners()
   {
     return Collections.unmodifiableList(_listeners);
   }
 
-  private void applyListenerDefaults(SocketLinkListener port)
+  private void applyListenerDefaults(TcpSocketLinkListener port)
   {
     _listenDefaults.configure(port);
   }
@@ -141,9 +141,9 @@ public class ListenService extends AbstractResinService
   public void stop()
     throws Exception
   {
-    ArrayList<SocketLinkListener> listeners = _listeners;
+    ArrayList<TcpSocketLinkListener> listeners = _listeners;
     for (int i = 0; i < listeners.size(); i++) {
-      SocketLinkListener listener = listeners.get(i);
+      TcpSocketLinkListener listener = listeners.get(i);
 
       try {
         listener.close();
@@ -167,11 +167,11 @@ public class ListenService extends AbstractResinService
     try {
       thread.setContextClassLoader(_server.getClassLoader());
 
-      ArrayList<SocketLinkListener> listeners = _listeners;
+      ArrayList<TcpSocketLinkListener> listeners = _listeners;
       boolean isFirst = true;
 
       for (int i = 0; i < listeners.size(); i++) {
-        SocketLinkListener listener = listeners.get(i);
+        TcpSocketLinkListener listener = listeners.get(i);
           
         if (listener.isAfterBind())
           continue;
@@ -203,9 +203,9 @@ public class ListenService extends AbstractResinService
     try {
       thread.setContextClassLoader(_server.getClassLoader());
 
-      ArrayList<SocketLinkListener> listeners = _listeners;
+      ArrayList<TcpSocketLinkListener> listeners = _listeners;
       for (int i = 0; i < listeners.size(); i++) {
-        SocketLinkListener listener = listeners.get(i);
+        TcpSocketLinkListener listener = listeners.get(i);
 
         listener.start();
       }

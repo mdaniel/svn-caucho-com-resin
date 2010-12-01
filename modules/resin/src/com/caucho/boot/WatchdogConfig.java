@@ -39,7 +39,7 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.log.RotateStream;
-import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -85,7 +85,7 @@ class WatchdogConfig
   private String _userName;
   private String _groupName;
 
-  private ArrayList<SocketLinkListener> _ports = new ArrayList<SocketLinkListener>();
+  private ArrayList<TcpSocketLinkListener> _ports = new ArrayList<TcpSocketLinkListener>();
   
   private long _shutdownWaitTime = 60000L;
 
@@ -203,7 +203,7 @@ class WatchdogConfig
   /**
    * Adds a custom-protocol port.
    */
-  public SocketLinkListener createProtocol()
+  public TcpSocketLinkListener createProtocol()
     throws ConfigException
   {
     OpenPort port = new OpenPort();
@@ -216,7 +216,7 @@ class WatchdogConfig
   /**
    * Adds a watchdog managed port
    */
-  public void addOpenPort(SocketLinkListener port)
+  public void addOpenPort(TcpSocketLinkListener port)
   {
     _ports.add(port);
   }
@@ -378,7 +378,7 @@ class WatchdogConfig
     return _args;
   }
 
-  Iterable<SocketLinkListener> getPorts()
+  Iterable<TcpSocketLinkListener> getPorts()
   {
     return _ports;
   }

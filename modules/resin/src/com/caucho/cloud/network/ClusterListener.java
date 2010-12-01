@@ -32,12 +32,12 @@ package com.caucho.cloud.network;
 import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
-import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.TcpSocketLinkListener;
 
 /**
  * Represents a protocol connection.
  */
-public class ClusterListener extends SocketLinkListener {
+public class ClusterListener extends TcpSocketLinkListener {
   private static final long KEEPALIVE_TIME_MAX = Long.MAX_VALUE / 2;
   private static final long KEEPALIVE_TIMEOUT = 60 * 60 * 1000;
   private static final long SOCKET_TIMEOUT = 10 * 60 * 1000;

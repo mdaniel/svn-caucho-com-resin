@@ -47,9 +47,9 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
     = Logger.getLogger(SocketLinkThreadLauncher.class.getName());
   
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
-  private SocketLinkListener _listener;
+  private TcpSocketLinkListener _listener;
 
-  SocketLinkThreadLauncher(SocketLinkListener listener)
+  SocketLinkThreadLauncher(TcpSocketLinkListener listener)
   {
     _listener = listener;
   }

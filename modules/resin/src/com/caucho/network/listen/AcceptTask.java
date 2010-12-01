@@ -68,7 +68,7 @@ class AcceptTask extends ConnectionReadTask {
   throws IOException
   {
     TcpSocketLink socketLink = getSocketLink();
-    SocketLinkListener listener = getListener();
+    TcpSocketLinkListener listener = getListener();
     
     RequestState result = RequestState.EXIT;
 

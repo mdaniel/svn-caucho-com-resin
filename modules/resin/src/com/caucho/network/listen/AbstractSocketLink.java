@@ -273,7 +273,7 @@ public abstract class AbstractSocketLink
    * Starts a comet request
    */
   @Override
-  public AsyncController toComet(CometHandler cometHandler)
+  public AsyncController toComet(SocketLinkCometListener cometHandler)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

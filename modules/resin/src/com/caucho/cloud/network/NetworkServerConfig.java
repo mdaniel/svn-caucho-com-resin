@@ -34,7 +34,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.network.listen.AbstractProtocol;
-import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.cluster.ProtocolPort;
 import com.caucho.server.cluster.ProtocolPortConfig;
 import com.caucho.server.http.HttpProtocol;
@@ -58,16 +58,16 @@ public class NetworkServerConfig {
   }
 
   @Configurable
-  public SocketLinkListener createClusterPort()
+  public TcpSocketLinkListener createClusterPort()
   {
    return getListenService().getClusterListener();
   }
   
   @Configurable
-  public SocketLinkListener createHttp()
+  public TcpSocketLinkListener createHttp()
     throws ConfigException
   {
-    SocketLinkListener listener = new SocketLinkListener();
+    TcpSocketLinkListener listener = new TcpSocketLinkListener();
     
     applyPortDefaults(listener);
 
@@ -80,7 +80,7 @@ public class NetworkServerConfig {
   }
 
   @Configurable
-  public SocketLinkListener createProtocol()
+  public TcpSocketLinkListener createProtocol()
   {
     ProtocolPortConfig port = new ProtocolPortConfig();
 
@@ -90,7 +90,7 @@ public class NetworkServerConfig {
   }
 
   @Configurable
-  public SocketLinkListener createListen()
+  public TcpSocketLinkListener createListen()
   {
     ProtocolPortConfig listener= new ProtocolPortConfig();
 
@@ -102,7 +102,7 @@ public class NetworkServerConfig {
   @Configurable
   public void add(ProtocolPort protocolPort)
   {
-    SocketLinkListener listener = new SocketLinkListener();
+    TcpSocketLinkListener listener = new TcpSocketLinkListener();
 
     AbstractProtocol protocol = protocolPort.getProtocol();
     listener.setProtocol(protocol);
@@ -147,7 +147,7 @@ public class NetworkServerConfig {
     _listenerDefaults.addProgram(builder);
   }
 
-  private void applyPortDefaults(SocketLinkListener port)
+  private void applyPortDefaults(TcpSocketLinkListener port)
   {
     _listenerDefaults.configure(port);
   }

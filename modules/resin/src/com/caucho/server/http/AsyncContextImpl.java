@@ -30,7 +30,6 @@
 package com.caucho.server.http;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,20 +44,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.network.listen.AsyncController;
-import com.caucho.network.listen.CometHandler;
-import com.caucho.network.listen.SocketLink;
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.webapp.AsyncRequest;
-import com.caucho.server.webapp.RequestDispatcherImpl;
+import com.caucho.network.listen.SocketLinkCometListener;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.comet.CometController;
 import com.caucho.util.L10N;
 
 /**
  * Public API to control a comet connection.
  */
 public class AsyncContextImpl
-  implements AsyncContext, CometHandler {
+  implements AsyncContext, SocketLinkCometListener {
   private static final L10N L = new L10N(ConnectionCometController.class);
   private static final Logger log = Logger
       .getLogger(ConnectionCometController.class.getName());
