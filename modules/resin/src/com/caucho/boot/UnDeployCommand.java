@@ -31,15 +31,11 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
-import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
-import java.util.ArrayList;
-
-public class UnDeployCommand extends DeployCommand {
+public class UnDeployCommand extends AbstractRepositoryCommand
+{
   private static final L10N L = new L10N(UnDeployCommand.class);
   
   @Override
@@ -81,6 +77,10 @@ public class UnDeployCommand extends DeployCommand {
     commit.message(message);
     
     commit.attribute("user", System.getProperty("user.name"));
+
+    String version = args.getArg("-version");
+    if (version != null)
+      fillInVersion(commit, version);
 
     deployClient.removeTag(commit);
 

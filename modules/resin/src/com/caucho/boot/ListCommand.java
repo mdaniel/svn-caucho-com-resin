@@ -24,48 +24,36 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package com.caucho.server.admin;
+package com.caucho.boot;
 
-public class UndeployQuery implements java.io.Serializable
+import com.caucho.server.admin.TagResult;
+import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.util.L10N;
+
+public class ListCommand extends AbstractRepositoryCommand
 {
-  private String _tag;
-  private String _user;
-  private String _message;
-
-  private UndeployQuery()
-  {
-  }
-
-  public UndeployQuery(String tag,
-                       String user,
-                       String message)
-  {
-    _tag = tag;
-    _user = user;
-    _message = message;
-  }
-
-  public String getTag()
-  {
-    return _tag;
-  }
-
-  public String getMessage()
-  {
-    return _message;
-  }
-
-  public String getUser()
-  {
-    return _user;
-  }
-
+  private static final L10N L = new L10N(ListCommand.class);
+  
   @Override
-  public String toString()
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client)
   {
-    return getClass().getSimpleName() + "[" + _tag + "," + _user + "]";
+    WebAppDeployClient deployClient = getDeployClient(args, client);
+
+    
+    String pattern = args.getDefaultArg();
+    if (pattern == null)
+      pattern = ".*";
+
+    TagResult[] tags = deployClient.queryTags(pattern);
+
+    deployClient.close();
+    
+    for (TagResult tag : tags) {
+      System.out.println(tag.getTag());
+    }
   }
 }

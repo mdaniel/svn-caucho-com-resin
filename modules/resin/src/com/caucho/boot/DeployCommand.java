@@ -31,13 +31,12 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
-import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-public class DeployCommand extends AbstractBootCommand {
+public class DeployCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(DeployCommand.class);
   
   @Override
@@ -56,8 +55,8 @@ public class DeployCommand extends AbstractBootCommand {
       throw new ConfigException(L.l("Deploy expects to be used with a *.war file at {0}",
                                     war));
     }
-     
-     String name = args.getArg("-name");
+
+    String name = args.getArg("-name");
     
     String host = args.getArg("-host");
     
@@ -101,68 +100,15 @@ public class DeployCommand extends AbstractBootCommand {
     
     commit.attribute("user", System.getProperty("user.name"));
 
+    String version = args.getArg("-version");
+    if (version != null)
+      fillInVersion(commit, version);
+
     deployClient.commitArchive(commit, path);
 
     deployClient.close();
     
     System.out.println("Deployed " + commit.getId() + " as " + war + " to "
                        + deployClient.getUrl());
-  }
-  
-  protected WebAppDeployClient getDeployClient(WatchdogArgs args,
-                                             WatchdogClient client)
-  {
-    String address = args.getArg("-address");
-
-    if (address == null || address.isEmpty())
-      address = client.getConfig().getAddress();
-
-    int port = -1;
-
-    String portArg = args.getArg("-port");
-
-    try {
-    if (portArg != null && !portArg.isEmpty())
-      port = Integer.parseInt(portArg);
-    } catch (NumberFormatException e) {
-      NumberFormatException e1 = new NumberFormatException("-port argument is not a number '" + portArg + "'");
-      e1.setStackTrace(e.getStackTrace());
-
-      throw e;
-    }
-
-    if (port == -1)
-      port = findPort(client);
-
-    if (port == 0) {
-      throw new ConfigException(L.l("HTTP listener {0}:{1} was not found",
-                                    address, port));
-    }
-    
-    String user = args.getArg("-user");
-    String password = args.getArg("-password");
-    
-    /*
-    if (user == null) {
-      user = "";
-      password = client.getResinSystemAuthKey();
-    }
-    */
-    
-    return new WebAppDeployClient(address, port, user, password);
-  }
-  
-  private int findPort(WatchdogClient client)
-  {
-    for (TcpSocketLinkListener listener : client.getConfig().getPorts()) {
-      if (listener instanceof OpenPort) {
-        OpenPort openPort = (OpenPort) listener;
-        
-        if ("http".equals(openPort.getProtocolName()))
-          return openPort.getPort();
-      }
-    }
-    
-    return 0;
   }
 }

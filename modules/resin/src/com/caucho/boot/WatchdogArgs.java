@@ -382,6 +382,12 @@ class WatchdogArgs
       else if ("undeploy".equals(arg)) {
         _startMode = StartMode.UNDEPLOY;
       }
+      else if ("list".equals(arg)) {
+        _startMode = StartMode.LIST;
+      }
+      else if ("copy".equals(arg)) {
+        _startMode = StartMode.COPY;
+      }
       else if ("status".equals(arg)) {
         _startMode = StartMode.STATUS;
       }
@@ -736,6 +742,8 @@ class WatchdogArgs
     CONSOLE,
     DEPLOY,
     UNDEPLOY,
+    LIST,
+    COPY,
     STATUS,
     START,
     GUI,
