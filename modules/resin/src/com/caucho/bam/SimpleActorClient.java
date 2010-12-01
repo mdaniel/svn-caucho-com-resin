@@ -83,6 +83,9 @@ public class SimpleActorClient implements ActorClient {
    */
   public void setClientStream(ActorStream clientStream)
   {
+    if (clientStream == _actorStream)
+      throw new IllegalArgumentException(String.valueOf(clientStream));
+    
     _clientStream = clientStream;
   }
 
@@ -385,7 +388,9 @@ public class SimpleActorClient implements ActorClient {
       ActorStream clientStream = getClientStream();
       
       if (clientStream == null) {
-        clientStream = new SimpleActorStream();
+        NullActorStream nullStream = new NullActorStream("null");
+        nullStream.setLinkStream(getLinkStream());
+        clientStream = nullStream;
       }
       
       return clientStream;

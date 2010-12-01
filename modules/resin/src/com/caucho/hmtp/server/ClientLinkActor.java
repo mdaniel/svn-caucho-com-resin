@@ -48,6 +48,12 @@ class ClientLinkActor implements Actor, ActorStream
 
   public ClientLinkActor(String jid, ActorStream out)
   {
+    if (jid == null)
+      throw new IllegalArgumentException();
+    
+    if (out == null)
+      throw new IllegalArgumentException();
+    
     _jid = jid;
     _out = out;
     

@@ -107,7 +107,7 @@ public class HmtpClient extends SimpleActorClient {
   
   public void setActor(Actor actor)
   {
-    super.setClientStream(actor.getActorStream());
+    // super.setClientStream(actor.getActorStream());
     
     _webSocketHandler = new HmtpWebSocketListener(actor);
     _webSocketClient.setListener(_webSocketHandler);

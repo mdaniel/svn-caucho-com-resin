@@ -32,7 +32,6 @@ package com.caucho.hmtp.server;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.bam.Actor;
 import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWebSocketContextWriter;
 import com.caucho.websocket.AbstractWebSocketListener;
@@ -43,7 +42,7 @@ import com.caucho.websocket.WebSocketContext;
  */
 public class HmtpClientWebSocketListener extends AbstractWebSocketListener {
   private HmtpServlet _hmtpServlet;
-  private Actor _linkActor;
+  private ClientLinkActor _linkActor;
   
   private HmtpReader _hIn;
   private HmtpWebSocketContextWriter _hOut;
@@ -65,6 +64,7 @@ public class HmtpClientWebSocketListener extends AbstractWebSocketListener {
     String uid = null;
     
     _linkActor = _hmtpServlet.createClientLinkActor(uid, _hOut);
+    _hOut.setJid(_linkActor.getJid());
     
     _hmtpServlet.addClientLinkActor(_linkActor);
   }
@@ -77,7 +77,7 @@ public class HmtpClientWebSocketListener extends AbstractWebSocketListener {
   public void onReadBinary(WebSocketContext context, InputStream is)
     throws IOException
   {
-    _hIn.readPacket(is, _linkActor.getActorStream());
+    _hIn.readPacket(is, _linkActor);
   }
   
   @Override

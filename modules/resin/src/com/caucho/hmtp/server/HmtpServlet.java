@@ -45,7 +45,6 @@ import com.caucho.bam.ActorStream;
 import com.caucho.bam.BamSkeleton;
 import com.caucho.bam.FallbackActorStream;
 import com.caucho.bam.HashMapBroker;
-import com.caucho.hmtp.HmtpWebSocketListener;
 import com.caucho.websocket.WebSocketListener;
 import com.caucho.websocket.WebSocketServletRequest;
 
@@ -127,8 +126,8 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
    * Creates and returns the actor for the client link
    */
   
-  protected Actor createClientLinkActor(String uid,
-                                        ActorStream hmtpStream)
+  protected ClientLinkActor createClientLinkActor(String uid,
+                                                  ActorStream hmtpStream)
   {
     if (uid == null)
       uid = "anon";
@@ -142,6 +141,8 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
 
   public void addClientLinkActor(Actor linkActor)
   {
+    linkActor.setLinkStream(_broker);
+    _broker.addActor(linkActor.getActorStream());
   }  
 
   public void removeClientLinkActor(Actor linkActor)

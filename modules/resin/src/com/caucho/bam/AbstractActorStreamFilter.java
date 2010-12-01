@@ -56,6 +56,11 @@ abstract public class AbstractActorStreamFilter implements ActorStream
    */
   public void message(String to, String from, Serializable payload)
   {
+    if (this == getNext()) {
+      System.out.println("THIS: " + this);
+      Thread.dumpStack();
+      return;
+    }
     getNext().message(to, from, payload);
   }
   

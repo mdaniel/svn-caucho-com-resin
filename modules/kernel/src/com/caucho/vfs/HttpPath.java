@@ -308,6 +308,7 @@ public class HttpPath extends FilesystemPath {
   /**
    * Returns the last modified time.
    */
+  @Override
   public long getLastModified()
   {
     return getCache().lastModified;
@@ -316,6 +317,7 @@ public class HttpPath extends FilesystemPath {
   /**
    * Returns the file's length
    */
+  @Override
   public long getLength()
   {
     return getCache().length;
@@ -324,33 +326,45 @@ public class HttpPath extends FilesystemPath {
   /**
    * Returns true if the file exists.
    */
+  @Override
   public boolean exists()
   {
-    return getCache().lastModified >= 0;
+    // php/1x1e
+    // return getCache().lastModified >= 0;
+    return true;
   }
 
   /**
    * Returns true if the file exists.
    */
+  @Override
   public boolean isFile()
   {
-    return ! getPath().endsWith("/") && getCache().lastModified >= 0;
+    // php/1x1e
+    // return ! getPath().endsWith("/") && getCache().lastModified >= 0;
+    return true;
   }
 
   /**
    * Returns true if the file is readable.
    */
+  @Override
   public boolean canRead()
   {
-    return isFile();
+    // php/1x1e
+    // return isFile();
+    return true;
   }
 
   /**
    * Returns the last modified time.
    */
+  @Override
   public boolean isDirectory()
   {
-    return getPath().endsWith("/") && getCache().lastModified >= 0;
+    // php/1x1e
+    // return getPath().endsWith("/") && getCache().lastModified >= 0;
+    return false;
   }
   
   /**
@@ -458,6 +472,7 @@ public class HttpPath extends FilesystemPath {
   /**
    * Returns a read stream for a GET request.
    */
+  @Override
   public StreamImpl openReadImpl() throws IOException
   {
     return HttpStream.openRead(this);
@@ -482,6 +497,7 @@ public class HttpPath extends FilesystemPath {
   /**
    * Returns the string form of the http path.
    */
+  @Override
   public String toString()
   {
     return getURL();
@@ -490,6 +506,7 @@ public class HttpPath extends FilesystemPath {
   /**
    * Returns a hashCode for the path.
    */
+  @Override
   public int hashCode()
   {
     return 65537 * super.hashCode() + 37 * _host.hashCode() + _port;
