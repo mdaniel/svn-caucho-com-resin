@@ -13,6 +13,7 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>quercus: add array_replace, array_replace_recursive (#4312, rep by Homayoun Zariv)</li>
 <li>quercus: simplexml_load_file not working properly with http: (#4311, rep by Akara Sucharitakul)</li>
 <li>cdi: InjectManager.resolveAllBeans with incorrect synchronization (rep by Wesley Wu)</li>
 <li>security: FormLogin persistence/session issues (#4299, rep by Jamison Novak)</li>

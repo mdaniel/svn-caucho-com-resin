@@ -288,31 +288,6 @@ public class ArrayModule
     return result;
   }
 
-  /*
-   * Returns an array whose keys are the values of the keyArray passed in,
-   * and whose values are all the value passed in.
-   * 
-   * @param keyArray whose values are used to populate the keys of the new
-   * array
-   * @param value used as the value of the keys
-   * 
-   * @return newly filled array
-   */
-  public static ArrayValue array_fill_keys(Env env,
-                                           ArrayValue keyArray,
-                                           Value value)
-  {
-    ArrayValue array = new ArrayValueImpl();
-    
-    Iterator<Value> iter = keyArray.getValueIterator(env);
-    
-    while (iter.hasNext()) {
-      array.put(iter.next(), value.copy());
-    }
-    
-    return array;
-  }
-
   /**
    * Returns an array with everything that is in array and not in the other
    * arrays, keys also used
@@ -583,8 +558,31 @@ public class ArrayModule
 
     return diffArray;
   }
-  
-  // XXX: array_fill_keys
+
+  /*
+   * Returns an array whose keys are the values of the keyArray passed in,
+   * and whose values are all the value passed in.
+   * 
+   * @param keyArray whose values are used to populate the keys of the new
+   * array
+   * @param value used as the value of the keys
+   * 
+   * @return newly filled array
+   */
+  public static ArrayValue array_fill_keys(Env env,
+                                           ArrayValue keyArray,
+                                           Value value)
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    Iterator<Value> iter = keyArray.getValueIterator(env);
+    
+    while (iter.hasNext()) {
+      array.put(iter.next(), value.copy());
+    }
+    
+    return array;
+  }
 
   /**
    * Returns an array with a number of indices filled with the given value,
@@ -1526,11 +1524,9 @@ public class ArrayModule
 
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       try {
-        // XXX: will this callback modify the array?
         result = callable.call(env, result, entry.getValue());
       }
       catch (Exception t) {
-        // XXX: may be used for error checking later
         log.log(Level.WARNING, t.toString(), t);
         env.warning("An error occurred while invoking the reduction callback");
 
@@ -1541,8 +1537,62 @@ public class ArrayModule
     return result;
   }
   
-  // XXX: array_replace_recursive
-  // XXX: array_replace
+  /**
+   * Replace elements in the first array with values from successive ones
+   */
+  public static Value array_replace_recursive(Env env,
+                                              Value []args)
+  {
+    ArrayValue result = new ArrayValueImpl();
+    
+    for (int i = 0;i < args.length; i++) {
+      replaceRecursive(env, result, args[i]);
+    }
+    
+    return result;
+  }
+  
+  private static void replaceRecursive(Env env,
+                                       Value result,
+                                       Value newValue)
+  {
+    Iterator<Map.Entry<Value,Value>>iter =  newValue.toArray().getIterator(env);
+  
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+      
+      Value key = entry.getKey();
+      Value value = entry.getValue();
+      
+      if (value.isArray()) {
+        replaceRecursive(env, result.getArray(key), value);
+      }
+      else {
+        result.put(key, value);
+      }
+    }
+  }
+
+  /**
+   * Replace elements in the first array with values from successive ones
+   */
+  public static Value array_replace(Env env,
+                                    Value []args)
+  {
+    ArrayValue result = new ArrayValueImpl();
+    
+    for (int i = 0;i < args.length; i++) {
+      Iterator<Map.Entry<Value,Value>>iter =  args[i].toArray().getIterator(env);
+      
+      while (iter.hasNext()) {
+        Map.Entry<Value,Value> entry = iter.next();
+        
+        result.put(entry.getKey(), entry.getValue());
+      }
+    }
+    
+    return result;
+  }
 
   /**
    * Returns the inputted array reversed, preserving the keys if keyed is true
@@ -1558,8 +1608,8 @@ public class ArrayModule
     if (inputArray == null)
       return NullValue.NULL;
 
-    Map.Entry<Value, Value>[] entryArray =
-      new Map.Entry[inputArray.getSize()];
+    Map.Entry<Value, Value>[] entryArray
+      = new Map.Entry[inputArray.getSize()];
 
     inputArray.entrySet().toArray(entryArray);
 
@@ -2675,10 +2725,6 @@ public class ArrayModule
     return value.end();
   }
 
-  // XXX:You'll need to mark the function as XXX:, because I need to add an
-  // attribute like @ModifiedSymbolTable and change some analysis of the
-  // compilation based on that attribute.
-  //
   // Basically, the compiled mode uses Java variables to store PHP
   // variables.  The extract() call messes that up, or at least forces the
   // compiler to synchronize its view of the variables.

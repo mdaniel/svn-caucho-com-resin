@@ -23,7 +23,8 @@ public abstract class AbstractIteratorImpl<T> implements Iterator<T> {
     private final AbstractFunction _validFun;
     private boolean _needNext;
 
-    public AbstractIteratorImpl(Env env, ObjectValue obj)
+    public AbstractIteratorImpl(Env env, 
+                                ObjectValue obj)
     {
       _env = env;
       _qClass = obj.getQuercusClass();
