@@ -160,10 +160,6 @@ public class ContextImpl implements Context {
   public Object lookup(String name)
     throws NamingException
   {
-    if (name.endsWith("rollbackBean")) {
-      System.out.println("LOOKUP: " + name + "\n  " + Thread.currentThread().getContextClassLoader());
-      Thread.dumpStack();
-    }
     Object value = lookupImpl(name);
     
     if (value == NullValue.NULL) {
@@ -384,12 +380,6 @@ public class ContextImpl implements Context {
   {
     String tail = name;
     AbstractModel model = _model;
-    
-    if (name.endsWith("rollbackBean")) {
-      System.out.println("ROLLBACK: " + name + " " + obj + "\n  " + Thread.currentThread().getContextClassLoader());
-      Thread.dumpStack();
-    }
-    
 
     if (obj == null)
       obj = NullValue.NULL;

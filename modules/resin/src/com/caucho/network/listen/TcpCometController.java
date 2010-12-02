@@ -186,15 +186,6 @@ class TcpCometController extends AsyncController {
 
     return conn == null || _isCompleteRequested;
   }
-  
-  void onComplete()
-  {
-    try {
-      _cometHandler.onComplete();
-    } finally {
-      _conn = null;
-    }
-  }
 
   /**
    * 
@@ -206,15 +197,16 @@ class TcpCometController extends AsyncController {
   }
 
   @Override
-  public void closeImpl()
+  public void onClose()
   {
-    // complete();
-
     TcpSocketLink conn = _conn;
     _conn = null;
-
-    if (conn != null)
-      conn.closeController(this);
+    
+    try {
+      _cometHandler.onComplete();
+    } finally {
+      _conn = null;
+    }
   }
 
   @Override

@@ -146,12 +146,13 @@ public class HmtpRequest extends AbstractProtocolConnection
                                                   Integer.toHexString(ch)));
 
     int len = (is.read() << 8) + is.read();
-    boolean isAdmin = is.read() != 0;
+    int adminCode = is.read();
+    boolean isAdmin = adminCode != 0;
 
     InputStream rawIs = is;
     
-    is.skip(len);
-
+    is.skip(len - 1);
+    
     if (log.isLoggable(Level.FINEST)) {
       HessianDebugInputStream dIs
         = new HessianDebugInputStream(is, log, Level.FINEST);

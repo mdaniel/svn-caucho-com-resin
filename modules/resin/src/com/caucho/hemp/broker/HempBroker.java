@@ -44,6 +44,7 @@ import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Extension;
 
+import com.caucho.bam.AbstractBrokerStream;
 import com.caucho.bam.Actor;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
@@ -62,7 +63,7 @@ import com.caucho.util.L10N;
 /**
  * Broker
  */
-public class HempBroker
+public class HempBroker extends AbstractBrokerStream
   implements Broker, ActorStream, Extension
 {
   private static final Logger log
@@ -290,144 +291,8 @@ public class HempBroker
     return _domain;
   }
 
-  /**
-   * Sends a message
-   */
-  public void message(String to, String from, Serializable value)
-  {
-    ActorStream stream = findActorStream(to);
-
-    if (stream != null)
-      stream.message(to, from, value);
-    else {
-      log.fine(this + " sendMessage to=" + to + " from=" + from
-               + " is an unknown actor stream.");
-    }
-  }
-
-  /**
-   * Sends a message
-   */
-  public void messageError(String to,
-                               String from,
-                               Serializable value,
-                               ActorError error)
-  {
-    ActorStream stream = findActorStream(to);
-
-    if (stream != null)
-      stream.messageError(to, from, value, error);
-    else {
-      log.fine(this + " sendMessageError to=" + to + " from=" + from
-               + " error=" + error + " is an unknown actor stream.");
-    }
-  }
-
-  /**
-   * Query an entity
-   */
-  public void queryGet(long id, String to, String from,
-                              Serializable payload)
-  {
-    ActorStream stream = findActorStream(to);
-
-    if (stream != null) {
-      try {
-        stream.queryGet(id, to, from, payload);
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-
-        ActorError error = ActorError.create(e);
-
-        queryError(id, from, to, payload, error);
-      }
-
-      return;
-    }
-
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " queryGet to unknown stream to='" + to
-               + "' from=" + from);
-    }
-
-    String msg = L.l("'{0}' is an unknown actor for queryGet", to);
-
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                    ActorError.SERVICE_UNAVAILABLE,
-                                    msg);
-
-    queryError(id, from, to, payload, error);
-  }
-
-  /**
-   * Query an entity
-   */
   @Override
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    ActorStream stream = findActorStream(to);
-
-    if (stream != null) {
-      try {
-        stream.querySet(id, to, from, payload);
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-
-        ActorError error = ActorError.create(e);
-
-        queryError(id, from, to, payload, error);
-      }
-
-      return;
-    }
-
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " querySet to unknown stream '" + to
-               + "' from=" + from);
-    }
-
-    String msg = L.l("'{0}' is an unknown actor for querySet", to);
-
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.SERVICE_UNAVAILABLE,
-                                      msg);
-  }
-
-  /**
-   * Query an entity
-   */
-  public void queryResult(long id, String to, String from, Serializable value)
-  {
-    ActorStream stream = findActorStream(to);
-
-    if (stream != null)
-      stream.queryResult(id, to, from, value);
-    else
-      throw new RuntimeException(L.l("{0}: {1} is an unknown actor stream.",
-                                     this, to));
-  }
-
-  /**
-   * Query an entity
-   */
-  public void queryError(long id,
-                         String to,
-                         String from,
-                         Serializable payload,
-                         ActorError error)
-  {
-    ActorStream stream = findActorStream(to);
-
-    if (stream != null)
-      stream.queryError(id, to, from, payload, error);
-    else
-      throw new RuntimeException(L.l("{0} is an unknown actor stream.", to));
-  }
-
-  protected ActorStream findActorStream(String jid)
+  protected ActorStream getActorStream(String jid)
   {
     if (jid == null)
       return null;

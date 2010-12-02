@@ -33,13 +33,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.caucho.env.warning.WarningService;
 import com.caucho.util.Alarm;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
 abstract public class AbstractTaskWorker implements Runnable {
+  private static final Logger log
+    = Logger.getLogger(AbstractTaskWorker.class.getName());
+  
   private static final int TASK_PARK = 0;
   private static final int TASK_SLEEP = 1;
   private static final int TASK_READY = 2;
@@ -134,6 +140,7 @@ abstract public class AbstractTaskWorker implements Runnable {
   public final void run()
   {
     String oldName = null;
+    
     try {
       _thread = Thread.currentThread();
       _thread.setContextClassLoader(_classLoader);
@@ -148,6 +155,8 @@ abstract public class AbstractTaskWorker implements Runnable {
       
       do {
         while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
+          _thread.setContextClassLoader(_classLoader);
+
           long delta = runTask();
           
           now = getCurrentTimeActual();
@@ -173,6 +182,9 @@ abstract public class AbstractTaskWorker implements Runnable {
       } while (_taskState.get() == TASK_READY
                || isPermanent()
                || getCurrentTimeActual() < expires);
+    } catch (Throwable e) {
+      WarningService.sendCurrentWarning(e.toString());
+      log.log(Level.WARNING, e.toString(), e);
     } finally {
       Thread thread = _thread;
       _thread = null;

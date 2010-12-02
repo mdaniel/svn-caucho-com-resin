@@ -32,6 +32,8 @@ package com.caucho.hmtp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
@@ -43,6 +45,9 @@ import com.caucho.remote.websocket.WebSocketOutputStream;
  */
 public class HmtpWebSocketWriter implements ActorStream
 {
+  private static final Logger log
+    = Logger.getLogger(HmtpWebSocketWriter.class.getName());
+    
   private String _jid;
   
   private WebSocketOutputStream _wsOut;
@@ -250,7 +255,10 @@ public class HmtpWebSocketWriter implements ActorStream
    */
   public void flush()
   {
-    // TODO Auto-generated method stub
-    
+    try {
+      _wsOut.flush();
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 }

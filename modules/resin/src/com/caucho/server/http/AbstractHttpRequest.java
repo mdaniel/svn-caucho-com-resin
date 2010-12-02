@@ -172,7 +172,7 @@ public abstract class AbstractHttpRequest
   protected AbstractHttpRequest(Server server, SocketLink conn)
   {
     _server = server;
-    
+
     if (server == null)
       throw new NullPointerException();
     
@@ -379,7 +379,7 @@ public abstract class AbstractHttpRequest
   public void clientDisconnect()
   {
     if (_tcpConn != null)
-      _tcpConn.close();
+      _tcpConn.requestClose();
   }
 
   public final HttpServletRequestImpl getRequestFacade()

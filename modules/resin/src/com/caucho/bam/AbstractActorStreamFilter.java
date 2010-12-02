@@ -123,4 +123,10 @@ abstract public class AbstractActorStreamFilter implements ActorStream
   public void close()
   {
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getNext() + "]";
+  }
 }

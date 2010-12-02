@@ -76,7 +76,12 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
 
   protected AbstractThreadLauncher()
   {
-    super(ClassLoader.getSystemClassLoader());
+    this(Thread.currentThread().getContextClassLoader());
+  }
+
+  protected AbstractThreadLauncher(ClassLoader loader)
+  {
+    super(loader);
     
     setWorkerIdleTimeout(LAUNCHER_TIMEOUT);
     

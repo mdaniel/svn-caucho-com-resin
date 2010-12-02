@@ -96,4 +96,9 @@ class DuplexReadTask extends ConnectionReadTask {
 
     return result;
   }
+  
+  void onClose()
+  {
+    _duplex.onClose();
+  }
 }

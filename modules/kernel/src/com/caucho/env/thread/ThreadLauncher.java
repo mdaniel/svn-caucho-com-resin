@@ -47,6 +47,8 @@ class ThreadLauncher extends AbstractThreadLauncher {
 
   ThreadLauncher(ThreadPool pool)
   {
+    super(ClassLoader.getSystemClassLoader());
+    
     _pool = pool;
     
     setPriorityIdleMin(DEFAULT_PRIORITY_IDLE_MIN);

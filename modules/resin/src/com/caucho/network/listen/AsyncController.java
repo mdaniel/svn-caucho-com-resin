@@ -76,9 +76,9 @@ public class AsyncController {
   }
 
   /**
-   * Closes the connection.
+   * Called when the connection closes.
    */
-  public void closeImpl()
+  public void onClose()
   {
   }
 }
