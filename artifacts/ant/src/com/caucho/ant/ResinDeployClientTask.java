@@ -51,8 +51,8 @@ public abstract class ResinDeployClientTask extends Task
   protected String _resinHome;
   protected String _resinConf;
 
-  protected String _stage = "production";
-  protected String _virtualHost = "default";
+  protected String _stage;
+  protected String _host;
   protected String _context;
   protected String _version;
   protected Level _level = Level.WARNING;
@@ -143,14 +143,14 @@ public abstract class ResinDeployClientTask extends Task
     return _stage;
   }
 
-  public void setVirtualHost(String virtualHost)
+  public void setHost(String host)
   {
-    _virtualHost = virtualHost;
+    _host = host;
   }
 
-  public String getVirtualHost()
+  public String getHost()
   {
-    return _virtualHost;
+    return _host;
   }
 
   public void setContext(String context)

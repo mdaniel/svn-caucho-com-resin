@@ -93,6 +93,11 @@ public class ResinUploadWar extends ResinDeployClientTask
       args.add(getVersion());
     }
 
+    if (getHost() != null) {
+      args.add("-host");
+      args.add(getHost());
+    }
+
     args.add("-name");
     args.add(getContext());
 

@@ -43,7 +43,6 @@ public class ListCommand extends AbstractRepositoryCommand
   {
     WebAppDeployClient deployClient = getDeployClient(args, client);
 
-    
     String pattern = args.getDefaultArg();
     if (pattern == null)
       pattern = ".*";

@@ -67,6 +67,25 @@ public class ResinDeleteTag extends ResinDeployClientTask {
   @Override
   protected void fillArgs(List<String> args)
   {
+    args.add("undeploy");
+    
+    fillBaseArgs(args);
 
+    if (_stage != null && ! _stage.isEmpty()) {
+      args.add("-stage");
+      args.add(_stage);
+    }
+
+    if (_host != null && ! _host.isEmpty()) {
+      args.add("-host");
+      args.add(_host);
+    }
+
+    if (_version != null && ! _version.isEmpty()) {
+      args.add("-version");
+      args.add(_version);
+    }
+
+    args.add(_context);
   }
 }

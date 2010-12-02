@@ -76,7 +76,7 @@ public class ResinQueryTags extends ResinDeployClientTask {
 
     if (_pattern == null
         && getStage() == null
-        && getVirtualHost() == null
+        && getHost() == null
         && getContext() == null
         && getVersion() == null)
       throw new BuildException("At least one of pattern, stage, virtualHost, contextRoot, or version is required by " + getTaskName());
@@ -85,7 +85,50 @@ public class ResinQueryTags extends ResinDeployClientTask {
   @Override
   protected void fillArgs(List<String> args)
   {
+    args.add("list");
 
+    fillBaseArgs(args);
+
+    if (_pattern != null) {
+      args.add(_pattern);
+
+      return;
+    }
+
+    StringBuilder pattern = new StringBuilder("^");
+    if (_stage != null && ! _stage.isEmpty() && ! ".*".equals(_stage)) {
+      pattern.append(_stage);
+    } else {
+      pattern.append("[^/]+");
+    }
+
+    pattern.append("/webapp/");
+
+    if (_host != null && ! _host.isEmpty() && ! ".*".equals(_host)) {
+      pattern.append(_host);
+    } else {
+      pattern.append("[^/]+");
+    }
+
+    boolean hasVersion = _version != null
+      && !_version.isEmpty()
+      && ! ".*".equals(_version);
+
+    String version = null;
+
+    if (hasVersion)
+      version = _version.replace(".", "\\.");
+
+    if (_context != null && ! _context.isEmpty() && ! ".*".equals(_context) && hasVersion) {
+      pattern.append('/').append(_context).append("-").append(version).append(".*");
+    } else if (_context != null && ! _context.isEmpty() && ! ".*".equals(_context)) {
+      pattern.append('/').append(_context);
+    } else if (hasVersion){
+      pattern.append("/[^/]+-").append(version).append(".*");
+    } else {
+      pattern.append("/.*");
+    }
+
+    args.add(pattern.toString());
   }
 }
-
