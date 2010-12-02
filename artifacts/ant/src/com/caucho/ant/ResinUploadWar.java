@@ -39,8 +39,6 @@ import java.util.List;
 public class ResinUploadWar extends ResinDeployClientTask
 {
   private String _warFile;
-  private String _archive;
-  private boolean _writeHead = true;
 
   /**
    * For ant.
@@ -68,16 +66,6 @@ public class ResinUploadWar extends ResinDeployClientTask
 
       setContextRoot(name);
     }
-  }
-
-  public void setArchive(String tag)
-  {
-    _archive = tag;
-  }
-
-  public void setWriteHead(boolean writeHead)
-  {
-    _writeHead = writeHead;
   }
 
   @Override

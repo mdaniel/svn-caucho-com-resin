@@ -44,14 +44,17 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
 
   protected final void fillInVersion(CommitBuilder commit, String version) {
     String []parts = version.split("\\.");
-    if (parts.length < 3)
+    if (parts.length < 2)
       throw new ConfigException(L.l(
-        "erroneous version '{0}'. Version expected in format %d.%d.%d[.%s]",
+        "erroneous version '{0}'. Version expected in format %d.%d[.%d[.%s]]",
         version));
 
     int major = Integer.parseInt(parts[0]);
     int minor = Integer.parseInt(parts[1]);
-    int micro = Integer.parseInt(parts[2]);
+    int micro = 0;
+
+    if (parts.length > 2)
+      micro = Integer.parseInt(parts[2]);
 
     String qualifier = null;
 
