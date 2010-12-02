@@ -77,7 +77,7 @@ public class ResinQueryTags extends ResinDeployClientTask {
     if (_pattern == null
         && getStage() == null
         && getVirtualHost() == null
-        && getContextRoot() == null
+        && getContext() == null
         && getVersion() == null)
       throw new BuildException("At least one of pattern, stage, virtualHost, contextRoot, or version is required by " + getTaskName());
   }

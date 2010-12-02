@@ -42,50 +42,103 @@ import java.util.List;
  * the "stage", "type", "virtualHost", "contextRoot", and "version"
  * attributes.
  */
-public class ResinCopyTag extends ResinDeployClientTask {
-  private String _tag;
-  private String _sourceTag;
-
-  private String _sourceStage = "default";
+public class ResinCopyTag extends ResinDeployClientTask
+{
+  private String _sourceContext;
+  private String _sourceStage;
   private String _sourceVersion;
-  private String _sourceVirtualHost = "default";
-  private String _sourceContextRoot = null;
+  private String _sourceHost;
+
+  private String _targetStage;
+  private String _targetVersion;
+  private String _targetHost;
+  private String _targetContext;
 
   /**
    * For ant.
-   **/
+   */
   public ResinCopyTag()
   {
   }
 
-  public void setSourceStage(String stage)
+  public String getSourceContext()
   {
-    _sourceStage = stage;
+    return _sourceContext;
   }
 
-  public void setTag(String tag)
+  public void setSourceContext(String sourceContext)
   {
-    _tag = tag;
+    _sourceContext = sourceContext;
   }
 
-  public void setSourceTag(String tag)
+  public String getSourceStage()
   {
-    _sourceTag = tag;
+    return _sourceStage;
   }
 
-  public void setSourceContextRoot(String contextRoot)
+  public void setSourceStage(String sourceStage)
   {
-    _sourceContextRoot = contextRoot;
+    _sourceStage = sourceStage;
   }
 
-  public void setSourceVersion(String version)
+  public String getSourceVersion()
   {
-    _sourceVersion = version;
+    return _sourceVersion;
   }
 
-  public void setSourceVirtualHost(String virtualHost)
+  public void setSourceVersion(String sourceVersion)
   {
-    _sourceVirtualHost = virtualHost;
+    _sourceVersion = sourceVersion;
+  }
+
+  public String getSourceHost()
+  {
+    return _sourceHost;
+  }
+
+  public void setSourceHost(String sourceHost)
+  {
+    _sourceHost = sourceHost;
+  }
+
+  public String getTargetStage()
+  {
+    return _targetStage;
+  }
+
+  public void setTargetStage(String targetStage)
+  {
+    _targetStage = targetStage;
+  }
+
+  public String getTargetVersion()
+  {
+    return _targetVersion;
+  }
+
+  public void setTargetVersion(String targetVersion)
+  {
+    _targetVersion = targetVersion;
+  }
+
+  public String getTargetHost()
+  {
+    return _targetHost;
+  }
+
+  public void setTargetHost(String targetHost)
+  {
+    _targetHost = targetHost;
+  }
+
+  public String getTargetContext()
+  {
+    return _targetContext;
+  }
+
+  public void setTargetContext(String targetContext)
+  {
+    _targetContext = targetContext;
   }
 
   @Override
@@ -94,17 +147,57 @@ public class ResinCopyTag extends ResinDeployClientTask {
   {
     super.validate();
 
-    if (_tag == null && getContextRoot() == null)
-      throw new BuildException("tag or contextRoot is required by "
-                               + getTaskName());
+    if (_sourceContext == null || _sourceContext.isEmpty())
+      throw new BuildException("sourcesContext is required by "
+        + getTaskName());
 
-    if (_sourceTag == null && _sourceContextRoot == null)
+    if (_targetContext == null || _targetContext.isEmpty())
       throw new BuildException("sourceTag or sourceContextRoot is required by "
-                               + getTaskName());
+        + getTaskName());
   }
 
   @Override
   protected void fillArgs(List<String> args)
   {
+    args.add("copy");
+
+    fillBaseArgs(args);
+
+    args.add("-source");
+    args.add(_sourceContext);
+
+    if(_sourceHost != null && ! _sourceHost.isEmpty()) {
+      args.add("-source-host");
+      args.add(_sourceHost);
+    }
+
+    if(_sourceStage != null && ! _sourceStage.isEmpty()) {
+      args.add("-source-stage");
+      args.add(_sourceStage);
+    }
+
+    if (_sourceVersion != null && ! _sourceVersion.isEmpty()) {
+      args.add("-source-version");
+      args.add(_sourceVersion);
+    }
+
+    args.add("-target");
+    args.add(_targetContext);
+
+    if(_targetHost != null && ! _targetHost.isEmpty()) {
+      args.add("-target-host");
+      args.add(_targetHost);
+    }
+
+    if(_targetStage != null && ! _targetStage.isEmpty()) {
+      args.add("-target-stage");
+      args.add(_targetStage);
+    }
+
+    if (_targetVersion != null && ! _targetVersion.isEmpty()) {
+      args.add("-target-version");
+      args.add(_targetVersion);
+    }
+
   }
 }

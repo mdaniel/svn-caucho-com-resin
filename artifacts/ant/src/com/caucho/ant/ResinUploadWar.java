@@ -55,7 +55,7 @@ public class ResinUploadWar extends ResinDeployClientTask
 
     _warFile = warFile;
 
-    if (getContextRoot() == null) {
+    if (getContext() == null) {
       int lastSlash = _warFile.lastIndexOf("/");
 
       if (lastSlash < 0)
@@ -64,7 +64,7 @@ public class ResinUploadWar extends ResinDeployClientTask
       int end = _warFile.length() - ".war".length();
       String name = _warFile.substring(lastSlash, end);
 
-      setContextRoot(name);
+      setContext(name);
     }
   }
 
@@ -94,7 +94,7 @@ public class ResinUploadWar extends ResinDeployClientTask
     }
 
     args.add("-name");
-    args.add(getContextRoot());
+    args.add(getContext());
 
     args.add(_warFile);
   }
