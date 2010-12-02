@@ -241,9 +241,6 @@ public final class PacketQueue
 
   static class QueueItem
   {
-    private static final Logger log
-      = Logger.getLogger(QueueItem.class.getName());
-
     private static final AtomicReferenceFieldUpdater<QueueItem,QueueItem> _casNext
       = AtomicReferenceFieldUpdater.newUpdater(QueueItem.class,
                                                QueueItem.class,

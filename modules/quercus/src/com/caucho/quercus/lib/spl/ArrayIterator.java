@@ -190,6 +190,7 @@ public class ArrayIterator
   @Override
   public void rewind()
   {
+    // php/4as8
     _iterator = _value.getBaseIterator(_env);
     
     if (_iterator.hasNext())

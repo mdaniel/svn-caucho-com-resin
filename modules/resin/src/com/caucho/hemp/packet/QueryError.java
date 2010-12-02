@@ -46,6 +46,7 @@ public class QueryError extends Packet {
   /**
    * zero-arg constructor for Hessian
    */
+  @SuppressWarnings("unused")
   private QueryError()
   {
     _id = 0;

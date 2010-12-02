@@ -156,8 +156,13 @@ class TcpCometController extends AsyncController {
   {
     return _conn != null;
   }
+
+  final void setCompleteRequested()
+  {
+    _isCompleteRequested = true;
+  }
   
-  public final boolean isCompleteRequested()
+  final boolean isCompleteRequested()
   {
     return _isCompleteRequested;
   }
@@ -169,7 +174,7 @@ class TcpCometController extends AsyncController {
   {
     TcpSocketLink conn = _conn;
 
-    return conn != null && ! conn.isCometComplete();
+    return conn != null && ! _isCompleteRequested;
   }
 
   /**
@@ -179,7 +184,7 @@ class TcpCometController extends AsyncController {
   {
     TcpSocketLink conn = _conn;
 
-    return conn == null || conn.isCometComplete();
+    return conn == null || _isCompleteRequested;
   }
   
   void onComplete()
@@ -189,6 +194,15 @@ class TcpCometController extends AsyncController {
     } finally {
       _conn = null;
     }
+  }
+
+  /**
+   * 
+   */
+  public void toResume()
+  {
+    // TODO Auto-generated method stub
+    
   }
 
   @Override
@@ -236,23 +250,5 @@ class TcpCometController extends AsyncController {
     sb.append("]");
 
     return sb.toString();
-  }
-
-  /**
-   * @param b
-   */
-  public void setCompleteRequested(boolean b)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /**
-   * 
-   */
-  public void toResume()
-  {
-    // TODO Auto-generated method stub
-    
   }
 }

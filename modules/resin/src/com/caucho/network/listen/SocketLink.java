@@ -162,11 +162,11 @@ public interface SocketLink {
   /**
    * Returns true for a comet connection
    */
-  public boolean isCometSuspend();
+  // public boolean isCometSuspend();
   
-  public boolean isCometComplete();
+  // public boolean isCometComplete();
 
-  public boolean wake();
+  // public boolean wake();
   
   //
   // duplex support

@@ -48,7 +48,6 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.util.WaitQueue;
 
 /**
  * Queue of hmtp packets
@@ -183,9 +182,9 @@ public class HempMemoryQueue implements ActorStream, Closeable
    */
   @Override
   public void queryResult(long id,
-                              String to,
-                              String from,
-                              Serializable value)
+                          String to,
+                          String from,
+                          Serializable value)
   {
     enqueue(new QueryResult(id, to, from, value));
   }
@@ -195,10 +194,10 @@ public class HempMemoryQueue implements ActorStream, Closeable
    */
   @Override
   public void queryError(long id,
-                             String to,
-                             String from,
-                             Serializable query,
-                             ActorError error)
+                         String to,
+                         String from,
+                         Serializable query,
+                         ActorError error)
   {
     enqueue(new QueryError(id, to, from, query, error));
   }

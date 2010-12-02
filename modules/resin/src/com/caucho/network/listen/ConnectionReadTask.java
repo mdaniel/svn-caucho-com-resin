@@ -50,7 +50,7 @@ abstract class ConnectionReadTask implements Runnable {
   ConnectionReadTask(TcpSocketLink socketLink)
   {
     _socketLink = socketLink;
-    _listener = _socketLink.getPort();
+    _listener = _socketLink.getListener();
     _launcher = _listener.getLauncher();
   }
   

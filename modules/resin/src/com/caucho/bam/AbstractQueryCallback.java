@@ -27,62 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.broker;
+package com.caucho.bam;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.env.thread.TaskWorker;
-import com.caucho.hemp.packet.Packet;
+import com.caucho.bam.ActorError;
+import java.io.Serializable;
 
 /**
- * Queue of hmtp packets
+ * callback for a query
  */
-public class QueueWorker extends TaskWorker
-{
-  private static final Logger log
-    = Logger.getLogger(QueueWorker.class.getName());
-
-  private final HempMemoryQueue _queue;
-  
-  private volatile boolean _isRunning;
-
-  public QueueWorker(HempMemoryQueue queue)
-  {
-    _queue = queue;
-  }
-  
-  boolean isRunning()
-  {
-    return _isRunning;
-  }
-
+public class AbstractQueryCallback implements QueryCallback {
   @Override
-  public long runTask()
+  public void onQueryResult(String to, String from, Serializable payload)
   {
-    _isRunning = true;
-
-    try {
-      Packet packet;
-    
-      while ((packet = _queue.dequeue()) != null) {
-        if (log.isLoggable(Level.FINEST))
-          log.finest(this + " dequeue " + packet);
-
-        packet.unparkDequeue();
-
-        _queue.dispatch(packet);
-      }
-    
-      return -1;
-    } finally {
-      _isRunning = false;
-    }
   }
   
   @Override
-  public String toString()
+  public void onQueryError(String to,
+                           String from,
+                           Serializable payload,
+                           ActorError error)
   {
-    return getClass().getSimpleName() + "[" + _queue.getJid() + "]";
   }
 }

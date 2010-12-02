@@ -1736,9 +1736,11 @@ public abstract class AbstractHttpRequest
       HttpBufferStore httpBuffer = _httpBuffer;
       _httpBuffer = null;
 
+      /*
       if (_tcpConn != null) {
         _tcpConn.finishRequest();
       }
+      */
 
       if (httpBuffer != null)
         HttpBufferStore.free(httpBuffer);

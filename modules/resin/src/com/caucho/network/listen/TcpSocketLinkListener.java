@@ -1262,7 +1262,7 @@ public class TcpSocketLinkListener
     int value = _keepaliveAllocateCount.decrementAndGet();
     
     if (value < 0) {
-      System.out.println("FAILED keepTalive; " + value);
+      System.out.println("FAILED keep-alive; " + value);
       Thread.dumpStack();
     }
   }
@@ -1324,6 +1324,8 @@ public class TcpSocketLinkListener
    */
   void cometSuspend(TcpSocketLink conn)
   {
+    conn.toCometSuspend();
+    
     if (conn.isWakeRequested()) {
       conn.toCometResume();
       
@@ -1332,7 +1334,8 @@ public class TcpSocketLinkListener
     else {
       _suspendConnectionSet.add(conn);
 
-      // XXX: wake
+      if (conn.isWakeRequested())
+        cometResume(conn);
     }
   }
 

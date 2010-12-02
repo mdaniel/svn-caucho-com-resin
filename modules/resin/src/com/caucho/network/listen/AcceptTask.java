@@ -72,13 +72,11 @@ class AcceptTask extends ConnectionReadTask {
     
     RequestState result = RequestState.EXIT;
 
-    // _state = _state.toAccept();
-
     while (! listener.isClosed()
            && ! socketLink.getState().isDestroyed()) {
       socketLink.toAccept();
 
-      if (! accept()) { // _port.accept(_socket)) {
+      if (! accept()) {
         socketLink.close();
 
         return RequestState.EXIT;

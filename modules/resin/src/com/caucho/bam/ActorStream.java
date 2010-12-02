@@ -51,6 +51,11 @@ public interface ActorStream
    * of the stream.
    */
   public String getJid();
+
+  /**
+   * Tests if the stream is closed.
+   */
+  public boolean isClosed();
   
   //
   // messages
@@ -81,7 +86,7 @@ public interface ActorStream
    */
   public void messageError(String to,
                            String from,
-                           Serializable value,
+                           Serializable payload,
                            ActorError error);
 
   //
@@ -157,15 +162,6 @@ public interface ActorStream
                          String from,
                          Serializable payload,
                          ActorError error);
-
-  //
-  // presence
-  //
-
-  /**
-   * Tests if the stream is closed.
-   */
-  public boolean isClosed();
 
   /**
    * Closes the stream

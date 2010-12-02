@@ -166,10 +166,6 @@ public interface ActorProxy {
   public void querySet(Serializable payload,
                        QueryCallback callback);
 
-  //
-  // presence handling
-  //
-
   /**
    * Registers a callback {@link com.caucho.bam.ActorStream} with the client
    */

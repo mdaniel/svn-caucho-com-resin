@@ -47,8 +47,6 @@ public class Packet
   private final String _to;
   private final String _from;
 
-  private final long _createTime;
-
   private Thread _waitThread;
   private volatile boolean _isDequeue;
 
@@ -57,8 +55,6 @@ public class Packet
    */
   public Packet()
   {
-    _createTime = 0;
-
     _to = null;
     _from = null;
   }
@@ -71,8 +67,6 @@ public class Packet
    */
   public Packet(String to, String from)
   {
-    _createTime = Alarm.getCurrentTime();
-
     _to = to;
     _from = from;
   }
