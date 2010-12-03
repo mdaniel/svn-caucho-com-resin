@@ -29,7 +29,6 @@
 
 package com.caucho.hemp.broker;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -44,12 +43,12 @@ import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Extension;
 
-import com.caucho.bam.AbstractBrokerStream;
 import com.caucho.bam.Actor;
-import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.Broker;
-import com.caucho.bam.BrokerListener;
+import com.caucho.bam.broker.AbstractBroker;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.BrokerListener;
+import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -63,7 +62,7 @@ import com.caucho.util.L10N;
 /**
  * Broker
  */
-public class HempBroker extends AbstractBrokerStream
+public class HempBroker extends AbstractBroker
   implements Broker, ActorStream, Extension
 {
   private static final Logger log
@@ -517,7 +516,7 @@ public class HempBroker extends AbstractBrokerStream
     // queue
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
-      actorStream = new HempMemoryQueue(actorStream, this, threadMax);
+      actorStream = new MultiworkerMailbox(actorStream, this, threadMax);
       bamActor.setActorStream(actorStream);
     }
 
@@ -551,7 +550,7 @@ public class HempBroker extends AbstractBrokerStream
     // queue
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
-      actorStream = new HempMemoryQueue(actorStream, this, threadMax);
+      actorStream = new MultiworkerMailbox(actorStream, this, threadMax);
       bamActor.setActorStream(actorStream);
     }
 

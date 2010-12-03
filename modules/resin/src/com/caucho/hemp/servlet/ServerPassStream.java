@@ -195,7 +195,6 @@ public class ServerPassStream extends AbstractActorStream {
     return _brokerStream == null;
   }
 
-  @Override
   public void close()
   {
     _brokerStream = null;

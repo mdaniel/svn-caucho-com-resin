@@ -29,13 +29,13 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.ActorMissingEvent;
-import com.caucho.bam.Broker;
-import com.caucho.bam.BrokerListener;
+import com.caucho.bam.broker.ActorMissingEvent;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.BrokerListener;
 
 /**
  * An ActorManager dynamically registers {@link com.caucho.bam.Actor Actors}
- * with the {@link com.caucho.bam.Broker Broker} based on matching jids.
+ * with the {@link com.caucho.bam.broker.Broker Broker} based on matching jids.
  * The ActorManager is registered with the Broker and waits for requests
  * for new or unknown jids.
  *
@@ -65,7 +65,7 @@ public class AbstractActorManager implements BrokerListener
     return _broker;
   }
   /**
-   * Called by the {@link com.caucho.bam.Broker} to request creation
+   * Called by the {@link com.caucho.bam.broker.Broker} to request creation
    * of an {@link com.caucho.bam.Actor} with the given jid.  If the
    * ActorManager supports the jid, it will create an Actor, register
    * it with the Broker, and return true.
@@ -80,7 +80,7 @@ public class AbstractActorManager implements BrokerListener
   }
 
   /**
-   * Called by the {@link com.caucho.bam.Broker} to request removal
+   * Called by the {@link com.caucho.bam.broker.Broker} to request removal
    * of an {@link com.caucho.bam.Actor} with the given jid.  If the
    * ActorManager supports the jid, it will unregister the Actor
    * from the Broker, and return true.
