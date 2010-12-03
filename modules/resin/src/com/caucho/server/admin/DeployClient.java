@@ -422,6 +422,19 @@ public class DeployClient implements Repository
    *
    * @param tag the encoded controller name
    *
+   */
+  public Boolean restart(String tag)
+  {
+    ControllerRestartQuery query = new ControllerRestartQuery(tag);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * Starts a controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   *
    * @deprecated
    */
   public Boolean start(String tag)

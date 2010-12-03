@@ -370,38 +370,52 @@ class WatchdogArgs
       else if ("console".equals(arg)) {
         _startMode = StartMode.CONSOLE;
       }
-      else if ("gui".equals(arg)) {
-        _startMode = StartMode.GUI;
-      }
-      else if ("kill".equals(arg)) {
-        _startMode = StartMode.KILL;
+      else if ("copy".equals(arg)) {
+        _startMode = StartMode.COPY;
       }
       else if ("deploy".equals(arg)) {
         _startMode = StartMode.DEPLOY;
       }
-      else if ("undeploy".equals(arg)) {
-        _startMode = StartMode.UNDEPLOY;
+      else if ("gui".equals(arg)) {
+        _startMode = StartMode.GUI;
+      }
+/*
+      else if ("jspc".equals(arg)) {
+        _startMode = StartMode.JSPC;
+      }
+*/
+      else if ("kill".equals(arg)) {
+        _startMode = StartMode.KILL;
       }
       else if ("list".equals(arg)) {
         _startMode = StartMode.LIST;
       }
-      else if ("copy".equals(arg)) {
-        _startMode = StartMode.COPY;
+      else if ("restart".equals(arg)) {
+        _startMode = StartMode.RESTART;
       }
-      else if ("status".equals(arg)) {
-        _startMode = StartMode.STATUS;
+      else if ("restart-webapp".equals(arg)) {
+        _startMode = StartMode.RESTART_WEBAPP;
+      }
+      else if ("shutdown".equals(arg)) {
+        _startMode = StartMode.SHUTDOWN;
       }
       else if ("start".equals(arg)) {
         _startMode = StartMode.START;
       }
+      else if ("start-webapp".equals(arg)) {
+        _startMode = StartMode.START_WEBAPP;
+      }
+      else if ("status".equals(arg)) {
+        _startMode = StartMode.STATUS;
+      }
       else if ("stop".equals(arg)) {
         _startMode = StartMode.STOP;
       }
-      else if ("restart".equals(arg)) {
-        _startMode = StartMode.RESTART;
+      else if ("stop-webapp".equals(arg)) {
+        _startMode = StartMode.STOP_WEBAPP;
       }
-      else if ("shutdown".equals(arg)) {
-        _startMode = StartMode.SHUTDOWN;
+      else if ("undeploy".equals(arg)) {
+        _startMode = StartMode.UNDEPLOY;
       }
       else if ("version".equals(arg)) {
         System.out.println(VersionFactory.getFullVersion());
@@ -740,16 +754,20 @@ class WatchdogArgs
 
   enum StartMode {
     CONSOLE,
-    DEPLOY,
-    UNDEPLOY,
-    LIST,
     COPY,
-    STATUS,
-    START,
+    DEPLOY,
     GUI,
-    STOP,
+    //JSPC,
     KILL,
+    LIST,
     RESTART,
+    RESTART_WEBAPP,
     SHUTDOWN,
+    START,
+    START_WEBAPP,
+    STATUS,
+    STOP,
+    STOP_WEBAPP,
+    UNDEPLOY,
   };
 }

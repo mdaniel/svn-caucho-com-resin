@@ -408,7 +408,20 @@ public class DeployActor extends SimpleActor
     try {
       controller.toStart();
 
-      return controller.getState();
+         //XXX: hack
+      ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
+      String name = tag.substring(tag.lastIndexOf('/') + 1);
+      for (Object proxy : Jmx.query(pattern)) {
+        WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
+
+        warDeploy.start(name);
+
+        return warDeploy.getState();
+      }
+
+      return L.l("'{0}' is an unknown controller", controller);
+
+      //return controller.getState();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -437,7 +450,7 @@ public class DeployActor extends SimpleActor
   private String stop(String tag)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
-    
+
     DeployTagItem controller = service.getTagItem(tag);
 
     if (controller == null)
@@ -446,7 +459,58 @@ public class DeployActor extends SimpleActor
     try {
       controller.toStop();
 
-      return controller.getState();
+      //XXX: hack
+      ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
+      String name = tag.substring(tag.lastIndexOf('/') + 1);
+      for (Object proxy : Jmx.query(pattern)) {
+        WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
+
+        warDeploy.stop(name);
+
+        return warDeploy.getState();
+      }
+
+      return L.l("'{0}' is an unknown controller", controller);
+
+      //return controller.getState();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return e.toString();
+    }
+  }
+
+  @QuerySet
+  public boolean controllerRestart(long id,
+                                   String to,
+                                   String from,
+                                   ControllerRestartQuery query)
+  {
+    String status = restart(query.getTag());
+
+    log.fine(this + " restart '" + query.getTag() + "' -> " + status);
+
+    getLinkStream().queryResult(id, from, to, true);
+
+    return true;
+  }
+
+  private String restart(String tag)
+  {
+    try {
+      //XXX: hack
+      ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
+      String name = tag.substring(tag.lastIndexOf('/') + 1);
+      for (Object proxy : Jmx.query(pattern)) {
+        WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
+
+        warDeploy.stop(name);
+        warDeploy.start(name);
+
+        return warDeploy.getState();
+      }
+
+      return L.l("'{0}' is an unknown tag", tag);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
