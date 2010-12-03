@@ -27,11 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.broker;
 
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 
 /**
  * The abstract implementation of an {@link com.caucho.bam.ActorStream}
@@ -342,14 +345,6 @@ abstract public class AbstractBrokerStream implements ActorStream
     return false;
   }
 
-  /**
-   * Closes the stream
-   */
-  @Override
-  public void close()
-  {
-  }
-  
   @Override
   public String toString()
   {

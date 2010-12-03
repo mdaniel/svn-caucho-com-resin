@@ -27,29 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.mailbox;
 
 /**
- * HMPP wrapper
+ * Mailbox types for a mailbox.
  */
-@SuppressWarnings("serial")
-public class ProtocolException extends ActorException {
-  public ProtocolException()
-  {
-  }
-
-  public ProtocolException(String msg)
-  {
-    super(msg);
-  }
-
-  public ProtocolException(Throwable e)
-  {
-    super(e);
-  }
-
-  public ProtocolException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
+public enum MailboxType
+{
+  DEFAULT,
+  SINGLE_WORKER,
+  MULTI_WORKER,
+  NON_QUEUED;
 }

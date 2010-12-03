@@ -44,7 +44,7 @@ import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.BamSkeleton;
 import com.caucho.bam.FallbackActorStream;
-import com.caucho.bam.HashMapBroker;
+import com.caucho.bam.broker.HashMapBroker;
 import com.caucho.websocket.WebSocketListener;
 import com.caucho.websocket.WebSocketServletRequest;
 
@@ -269,11 +269,6 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
                          from, 
                          payload,
                          error);
-  }
-
-  @Override
-  public void close()
-  {
   }
 
   @Override

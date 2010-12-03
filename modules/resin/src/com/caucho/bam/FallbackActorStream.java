@@ -67,7 +67,7 @@ public class FallbackActorStream implements ActorStream
   }
 
   /**
-   * Returns the Actor's jid so the {@link com.caucho.bam.Broker} can
+   * Returns the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
    * register it.
    */
   @Override
@@ -197,14 +197,6 @@ public class FallbackActorStream implements ActorStream
   public boolean isClosed()
   {
     return false;
-  }
-
-  /**
-   * Close the stream
-   */
-  @Override
-  public void close()
-  {
   }
 
   @Override

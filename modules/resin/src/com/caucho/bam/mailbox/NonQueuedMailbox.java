@@ -27,126 +27,116 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.server;
+package com.caucho.bam.mailbox;
 
 import java.io.Serializable;
 
-import com.caucho.bam.Actor;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 
 /**
- * HmtpWriteStream writes HMTP packets to an OutputStream.
+ * mailbox for BAM messages waiting to be sent to the Actor.
  */
-class ClientLinkActor implements Actor, ActorStream
+public class NonQueuedMailbox implements Mailbox
 {
-  private String _jid;
-  
-  private ActorStream _linkStream;
-  private ActorStream _actorStream;
-  private ActorStream _out;
+  private final ActorStream _actorStream;
 
-  public ClientLinkActor(String jid, ActorStream out)
+  public NonQueuedMailbox(ActorStream actorStream)
   {
-    if (jid == null)
-      throw new IllegalArgumentException();
+    if (actorStream == null)
+      throw new NullPointerException();
     
-    if (out == null)
-      throw new IllegalArgumentException();
-    
-    _jid = jid;
-    _out = out;
-    
-    _actorStream = _out;
+    _actorStream = actorStream;
   }
 
+  /**
+   * Returns the actor's jid
+   */
   @Override
   public String getJid()
   {
-    return _jid;
+    return _actorStream.getJid();
   }
 
   @Override
-  public void setJid(String jid)
+  public boolean isClosed()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _actorStream.isClosed();
   }
-
+  
   @Override
   public ActorStream getActorStream()
   {
     return _actorStream;
   }
 
-  @Override
-  public void setActorStream(ActorStream actorStream)
-  {
-    _actorStream = actorStream;
-  }
-  
-  @Override
-  public ActorStream getLinkStream()
-  {
-    return _linkStream;
-  }
-
-  @Override
-  public void setLinkStream(ActorStream linkStream)
-  {
-    _linkStream = linkStream;
-  }
-
-  @Override
-  public boolean isClosed()
-  {
-    return false;
-  }
-
+  /**
+   * Sends a message
+   */
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    getLinkStream().message(to, getJid(), payload);
+    _actorStream.message(to, from, payload);
   }
 
+  /**
+   * Sends a message
+   */
   @Override
-  public void messageError(String to, String from, Serializable payload,
+  public void messageError(String to,
+                           String from,
+                           Serializable payload,
                            ActorError error)
   {
-    getLinkStream().messageError(to, getJid(), payload, error);
+    _actorStream.messageError(to, from, payload, error);
   }
 
+  /**
+   * Query an entity
+   */
   @Override
-  public void queryGet(long id, String to, String from, Serializable payload)
+  public void queryGet(long id,
+                       String to,
+                       String from,
+                       Serializable query)
   {
-    getLinkStream().queryGet(id, to, getJid(), payload);
+    _actorStream.queryGet(id, to, from, query);
   }
 
-  @Override
+  /**
+   * Query an entity
+   */
   public void querySet(long id,
                        String to,
                        String from,
                        Serializable payload)
   {
-    getLinkStream().querySet(id, to, getJid(), payload);
+    _actorStream.querySet(id, to, from, payload);
   }
 
+  /**
+   * Query an entity
+   */
   @Override
-  public void queryResult(long id, 
-                          String to, 
-                          String from, 
-                          Serializable payload)
+  public void queryResult(long id,
+                          String to,
+                          String from,
+                          Serializable value)
   {
-    getLinkStream().queryResult(id, to, getJid(), payload);
+    _actorStream.queryResult(id, to, from, value);
   }
 
+  /**
+   * Query an entity
+   */
   @Override
-  public void queryError(long id, 
+  public void queryError(long id,
                          String to,
-                         String from, 
-                         Serializable payload,
+                         String from,
+                         Serializable query,
                          ActorError error)
   {
-    getLinkStream().queryError(id, to, getJid(), payload, error);
+    _actorStream.queryError(id, to, from, query, error);
   }
   
   @Override

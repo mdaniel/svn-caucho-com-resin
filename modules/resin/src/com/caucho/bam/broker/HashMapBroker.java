@@ -27,12 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.broker;
 
-import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.bam.ActorStream;
 
 /**
  * The abstract implementation of an {@link com.caucho.bam.ActorStream}
@@ -44,7 +43,7 @@ import java.util.logging.Logger;
  * introspection with {@link com.caucho.bam.Message @Message} annotations
  * to simplify Actor development.
  */
-public class HashMapBroker extends AbstractBrokerStream
+public class HashMapBroker extends AbstractBroker
 {
   private final String _jid;
   

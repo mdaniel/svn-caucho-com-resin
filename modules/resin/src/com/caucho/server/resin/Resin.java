@@ -45,7 +45,7 @@ import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 
 import com.caucho.VersionFactory;
-import com.caucho.bam.Broker;
+import com.caucho.bam.broker.Broker;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.loadbalance.LoadBalanceFactory;
 import com.caucho.cloud.loadbalance.LoadBalanceService;

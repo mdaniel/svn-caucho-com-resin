@@ -32,6 +32,7 @@ package com.caucho.bam;
 /**
  * Bam exception when a service address does not exist
  */
+@SuppressWarnings("serial")
 public class ServiceUnavailableException
   extends ErrorPacketException
 {

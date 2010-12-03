@@ -36,9 +36,9 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorMissingEvent;
-import com.caucho.bam.BrokerListener;
-import com.caucho.bam.Broker;
+import com.caucho.bam.broker.ActorMissingEvent;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.BrokerListener;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;

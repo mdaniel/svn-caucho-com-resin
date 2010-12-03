@@ -27,43 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.mailbox;
+
+import com.caucho.bam.ActorStream;
 
 /**
- * ActorMissingEvent is sent by a Broker when an Actor is missing.
+ * Mailbox for an actor
  */
-public class ActorMissingEvent {
-  private Broker _broker;
-  private String _jid;
-  
-  public ActorMissingEvent()
-  {
-  }
-  
-  public ActorMissingEvent(Broker broker, String jid)
-  {
-    _broker = broker;
-    _jid = jid;
-  }
-  
+public interface Mailbox extends ActorStream
+{
   /**
-   * Returns the Broker which sent the missing actor event.
+   * Returns the actor stream for the actor itself.
    */
-  public Broker getBroker()
-  {
-    return _broker;
-  }
-  
-  /**
-   * The JID of the missing actor.
-   */
-  public String getJid()
-  {
-    return _jid;
-  }
-  
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _jid + "]";
-  }
+  public ActorStream getActorStream();
 }

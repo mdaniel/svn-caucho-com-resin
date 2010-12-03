@@ -32,6 +32,7 @@ package com.caucho.bam;
 /**
  * HMPP wrapper
  */
+@SuppressWarnings("serial")
 public class RemoteConnectionFailedException
   extends ErrorPacketException
 {

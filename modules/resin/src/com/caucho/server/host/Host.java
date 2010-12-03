@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import com.caucho.bam.Broker;
+import com.caucho.bam.broker.Broker;
 import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.config.ConfigException;

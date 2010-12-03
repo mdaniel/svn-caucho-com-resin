@@ -80,7 +80,7 @@ public class SimpleActorStream implements ActorStream, Actor
   }
 
   /**
-   * Returns the Actor's jid so the {@link com.caucho.bam.Broker} can
+   * Returns the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
    * register it.
    */
   @Override
@@ -90,7 +90,7 @@ public class SimpleActorStream implements ActorStream, Actor
   }
 
   /**
-   * Sets the Actor's jid so the {@link com.caucho.bam.Broker} can
+   * Sets the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
    * register it.
    */
   public void setJid(String jid)

@@ -27,7 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
+
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 
 /**
  * A BAM Actor sends and receives messages as the core class in a
@@ -37,7 +40,7 @@ package com.caucho.bam;
  *
  * Each actor has a unique JID, which is the address for messages sent to
  * the actor.  JIDs look like email addresses: harry@caucho.com
- * or harry@caucho.com/browser.
+ * or harry@caucho.com/browser13.
  *
  * {@link com.caucho.bam.ActorStream} is the key customizable interface
  * for an agent developer.  Developers will implement callbacks for each
@@ -47,37 +50,56 @@ package com.caucho.bam;
  * instead of implementing Actor directly.  SimpleActor adds an
  * annotation-based message dispatching system to simplify Actor development.
  */
-public interface Actor
+public class AbstractAgent implements Agent
 {
+  private String _jid;
+  private Mailbox _mailbox;
+  private Broker _broker;
+  
+  protected AbstractAgent()
+  {
+  }
+  
+  public AbstractAgent(String jid,
+                       Mailbox mailbox,
+                       Broker broker)
+  {
+    _jid = jid;
+    _mailbox = mailbox;
+    _broker = broker;
+  }
+  
   /**
    * Returns the actor's jid, so the {@link com.caucho.bam.broker.Broker} can
    * deliver messages to this actor.
    */
-  public String getJid();
-
-  /**
-   * Set the actor's jid, when the actor is
-   * registered with the broker {@link com.caucho.bam.broker.Broker}.
-   */
-  public void setJid(String jid);
-
-  /**
-   * The stream to send messages to the actor.
-   */
-  public ActorStream getActorStream();
+  @Override
+  public String getJid()
+  {
+    return _jid;
+  }
 
   /**
    * The stream to send messages to the actor.
    */
-  public void setActorStream(ActorStream actorStream);
+  @Override
+  public Mailbox getMailbox()
+  {
+    return _mailbox;
+  }
 
   /**
-   * The stream to send messages to the link.
+   * Returns the actor's broker.
    */
-  public ActorStream getLinkStream();
+  @Override
+  public Broker getBroker()
+  {
+    return _broker;
+  }
 
-  /**
-   * The stream to send messages to the link.
-   */
-  public void setLinkStream(ActorStream linkStream);
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getJid() + "," + getMailbox() + "]";
+  }
 }

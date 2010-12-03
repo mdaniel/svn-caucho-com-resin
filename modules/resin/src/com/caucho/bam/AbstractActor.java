@@ -41,7 +41,7 @@ public class AbstractActor implements Actor
   private String _jid;
 
   /**
-   * The jid to the {@link com.caucho.bam.Broker} for addressing
+   * The jid to the {@link com.caucho.bam.broker.Broker} for addressing
    * from other Actors.
    */
   public void setJid(String jid)
@@ -50,7 +50,7 @@ public class AbstractActor implements Actor
   }
 
   /**
-   * The jid to the {@link com.caucho.bam.Broker} for addressing
+   * The jid to the {@link com.caucho.bam.broker.Broker} for addressing
    * from other Actors.
    */
   public String getJid()

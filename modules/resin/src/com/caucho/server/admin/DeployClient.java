@@ -38,10 +38,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
-import com.caucho.bam.Broker;
 import com.caucho.bam.QueryCallback;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
+import com.caucho.bam.broker.Broker;
 import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
 import com.caucho.cloud.deploy.SetTagQuery;

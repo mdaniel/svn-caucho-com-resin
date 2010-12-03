@@ -225,23 +225,13 @@ public class HmtpWebSocketContextWriter implements ActorStream
     }
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#close()
-   */
-  @Override
   public void close()
   {
-    // TODO Auto-generated method stub
-    
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#isClosed()
-   */
   @Override
   public boolean isClosed()
   {
-    // TODO Auto-generated method stub
     return false;
   }
 }

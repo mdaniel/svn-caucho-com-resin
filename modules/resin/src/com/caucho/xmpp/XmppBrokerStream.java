@@ -40,7 +40,7 @@ import javax.xml.stream.XMLStreamException;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.Broker;
+import com.caucho.bam.broker.Broker;
 import com.caucho.inject.Module;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;

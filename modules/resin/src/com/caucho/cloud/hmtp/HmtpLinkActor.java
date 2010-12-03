@@ -30,8 +30,8 @@
 package com.caucho.cloud.hmtp;
 
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.Broker;
 import com.caucho.bam.Message;
+import com.caucho.bam.broker.Broker;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.hemp.servlet.ServerAuthManager;

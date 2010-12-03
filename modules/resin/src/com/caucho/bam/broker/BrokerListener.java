@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.broker;
 
 import java.util.EventListener;
+
 
 
 /**
@@ -44,7 +45,7 @@ import java.util.EventListener;
 public interface BrokerListener extends EventListener
 {
   /**
-   * Called by the {@link com.caucho.bam.Broker} when it cannot
+   * Called by the {@link com.caucho.bam.broker.Broker} when it cannot
    * find an actor in the current host.
    *
    * @param event the actor missing event
@@ -52,7 +53,7 @@ public interface BrokerListener extends EventListener
   public void resourceMissing(ActorMissingEvent event);
   
   /**
-   * Called by the {@link com.caucho.bam.Broker} when it cannot
+   * Called by the {@link com.caucho.bam.broker.Broker} when it cannot
    * find an actor in the current host.
    *
    * @param event the actor missing event
@@ -60,7 +61,7 @@ public interface BrokerListener extends EventListener
   public void userMissing(ActorMissingEvent event);
   
   /**
-   * Called by the {@link com.caucho.bam.Broker} when it cannot
+   * Called by the {@link com.caucho.bam.broker.Broker} when it cannot
    * find an host for the actor.
    *
    * @param event the host missing event

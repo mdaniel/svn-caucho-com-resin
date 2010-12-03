@@ -43,10 +43,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.Broker;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.config.Admin;
 import com.caucho.hemp.broker.HempBroker;
-import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.hemp.servlet.ServerLinkActor;
 import com.caucho.hmtp.HmtpReader;
@@ -183,7 +183,7 @@ public class HmtpServlet extends GenericServlet {
     {
       _in = new HmtpReader();
       _out = new HmtpWebSocketContextWriter(context);
-      _linkStream = new HempMemoryQueue(_out, _broker.getBrokerStream(), 1);
+      _linkStream = new MultiworkerMailbox(_out, _broker.getBrokerStream(), 1);
       
       _linkService = new ServerLinkActor(_linkStream, _broker, _authManager,
                                            _ipAddress, false);
@@ -193,7 +193,6 @@ public class HmtpServlet extends GenericServlet {
     @Override
     public void onComplete(WebSocketContext context) throws IOException
     {
-      _brokerStream.close();
       _linkService.close();
     }
 

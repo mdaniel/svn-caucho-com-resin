@@ -31,6 +31,8 @@ package com.caucho.bam;
 
 import java.io.Serializable;
 
+import com.caucho.bam.broker.Broker;
+
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's JID as the "from" parameter.

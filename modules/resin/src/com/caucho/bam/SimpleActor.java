@@ -55,7 +55,7 @@ public class SimpleActor extends SimpleActorStream
 
   /**
    * Returns the custom {@link com.caucho.bam.ActorStream} to the
-   * {@link com.caucho.bam.Broker}, so the Broker can send messages to
+   * {@link com.caucho.bam.broker.Broker}, so the Broker can send messages to
    * the agent.
    *
    * Developers will customize the ActorStream to receive messages from
@@ -76,7 +76,7 @@ public class SimpleActor extends SimpleActorStream
   
 
   /**
-   * Sets the Actor's jid so the {@link com.caucho.bam.Broker} can
+   * Sets the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
    * register it.
    */
   @Override

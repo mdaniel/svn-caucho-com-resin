@@ -27,29 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.broker;
+
 
 /**
- * HMPP wrapper
+ * ActorMissingEvent is sent by a Broker when an Actor is missing.
  */
-@SuppressWarnings("serial")
-public class ProtocolException extends ActorException {
-  public ProtocolException()
+public class ActorMissingEvent {
+  private Broker _broker;
+  private String _jid;
+  
+  public ActorMissingEvent()
   {
   }
-
-  public ProtocolException(String msg)
+  
+  public ActorMissingEvent(Broker broker, String jid)
   {
-    super(msg);
+    _broker = broker;
+    _jid = jid;
   }
-
-  public ProtocolException(Throwable e)
+  
+  /**
+   * Returns the Broker which sent the missing actor event.
+   */
+  public Broker getBroker()
   {
-    super(e);
+    return _broker;
   }
-
-  public ProtocolException(String msg, Throwable e)
+  
+  /**
+   * The JID of the missing actor.
+   */
+  public String getJid()
   {
-    super(msg, e);
+    return _jid;
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _jid + "]";
   }
 }

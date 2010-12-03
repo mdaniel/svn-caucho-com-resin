@@ -44,10 +44,11 @@ import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.Broker;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
 import com.caucho.cloud.deploy.SetTagQuery;
@@ -55,11 +56,9 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
 import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.deploy.DeployTagItem;
-import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.repository.RepositoryTagEntry;
-import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.management.server.EAppMXBean;
@@ -119,8 +118,8 @@ public class DeployActor extends SimpleActor
     _repository = RepositoryService.getCurrentRepositorySpi();
 
     setLinkStream(getBroker().getBrokerStream());
-    HempMemoryQueue queue
-      = new HempMemoryQueue(getActorStream(), getLinkStream(), 2);
+    MultiworkerMailbox queue
+      = new MultiworkerMailbox(getActorStream(), getLinkStream(), 2);
     
     getBroker().addActor(queue);
   }

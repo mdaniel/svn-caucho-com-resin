@@ -32,6 +32,7 @@ package com.caucho.bam;
 /**
  * HMPP wrapper
  */
+@SuppressWarnings("serial")
 public class ItemNotFoundException extends ErrorPacketException {
   public ItemNotFoundException()
   {

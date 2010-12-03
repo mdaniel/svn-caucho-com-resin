@@ -27,7 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.broker;
+
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.actor.Agent;
+import com.caucho.bam.mailbox.MailboxType;
 
 
 /**
@@ -54,6 +58,17 @@ public interface Broker
    * Removes an actor.
    */
   public void removeActor(ActorStream actorStream);
+  
+  /**
+   * Creates an agent with a default mailbox
+   */
+  public Agent createAgent(ActorStream actorStream);
+  
+  /**
+   * Creates an agent
+   */
+  public Agent createAgent(ActorStream actorStream,
+                           MailboxType mailboxType);
   
   /**
    * Registers the client under a unique id. The

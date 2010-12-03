@@ -35,7 +35,7 @@ import java.io.Serializable;
  * Primary {@link com.caucho.bam.Actor} stream handling all packets.
  *
  * {@link com.caucho.bam.Actor Actors} send packets to the 
- * {@link com.caucho.bam.Broker} for delivery to other Actors.
+ * {@link com.caucho.bam.broker.Broker} for delivery to other Actors.
  *
  * Packets are divided into three groups:
  * <ul>
@@ -162,9 +162,4 @@ public interface ActorStream
                          String from,
                          Serializable payload,
                          ActorError error);
-
-  /**
-   * Closes the stream
-   */
-  public void close();
 }

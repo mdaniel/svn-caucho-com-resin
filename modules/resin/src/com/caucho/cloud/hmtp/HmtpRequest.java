@@ -35,9 +35,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.Broker;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.cloud.bam.BamService;
-import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpWebSocketReader;
 import com.caucho.hmtp.HmtpWebSocketWriter;
@@ -171,7 +171,7 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     _hmtpWriter.setJid("hmtp-server-" + _conn.getId() + "-hmtp");
 
-    _linkStream = new HempMemoryQueue(_hmtpWriter, brokerStream, 1);
+    _linkStream = new MultiworkerMailbox(_hmtpWriter, brokerStream, 1);
 
     _linkActor = new HmtpLinkActor(_linkStream,
                                    broker,
@@ -214,8 +214,10 @@ public class HmtpRequest extends AbstractProtocolConnection
       linkActor.onCloseConnection();
     }
 
+    /*
     if (linkStream != null)
       linkStream.close();
+      */
 
     HmtpWebSocketWriter writer = _hmtpWriter;
 

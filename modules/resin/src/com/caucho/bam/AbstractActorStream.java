@@ -258,14 +258,6 @@ abstract public class AbstractActorStream implements ActorStream
   {
     return false;
   }
-
-  /**
-   * Closes the stream
-   */
-  @Override
-  public void close()
-  {
-  }
   
   @Override
   public String toString()

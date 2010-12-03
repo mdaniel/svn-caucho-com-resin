@@ -34,6 +34,7 @@ package com.caucho.bam;
  * service {@link com.caucho.bam.Actor}
  * does not understand or implement the message or RPC query.
  */
+@SuppressWarnings("serial")
 public class FeatureNotImplementedException
   extends ErrorPacketException
 {

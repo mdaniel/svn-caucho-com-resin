@@ -31,7 +31,7 @@ package com.caucho.server.admin;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.bam.Broker;
+import com.caucho.bam.broker.Broker;
 import com.caucho.config.AdminLiteral;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;

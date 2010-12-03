@@ -32,6 +32,7 @@ package com.caucho.bam;
 /**
  * Exception caught by the skeleton invocation
  */
+@SuppressWarnings("serial")
 public class SkeletonInvocationException extends ActorException {
   public SkeletonInvocationException()
   {

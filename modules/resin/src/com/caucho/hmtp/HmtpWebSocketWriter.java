@@ -231,16 +231,6 @@ public class HmtpWebSocketWriter implements ActorStream
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.bam.ActorStream#close()
-   */
-  @Override
-  public void close()
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
    * @see com.caucho.bam.ActorStream#isClosed()
    */
   @Override
@@ -260,5 +250,10 @@ public class HmtpWebSocketWriter implements ActorStream
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     }
+  }
+  
+  public void close()
+  {
+    
   }
 }

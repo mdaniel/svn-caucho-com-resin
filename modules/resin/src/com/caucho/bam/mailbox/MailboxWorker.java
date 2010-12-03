@@ -27,29 +27,60 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.mailbox;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.bam.packet.Packet;
+import com.caucho.env.thread.TaskWorker;
 
 /**
- * HMPP wrapper
+ * Queue of hmtp packets
  */
-@SuppressWarnings("serial")
-public class ProtocolException extends ActorException {
-  public ProtocolException()
+public class MailboxWorker extends TaskWorker
+{
+  private static final Logger log
+    = Logger.getLogger(MailboxWorker.class.getName());
+
+  private final MultiworkerMailbox _queue;
+  
+  private volatile boolean _isRunning;
+
+  public MailboxWorker(MultiworkerMailbox queue)
   {
+    _queue = queue;
+  }
+  
+  boolean isRunning()
+  {
+    return _isRunning;
   }
 
-  public ProtocolException(String msg)
+  @Override
+  public long runTask()
   {
-    super(msg);
-  }
+    _isRunning = true;
 
-  public ProtocolException(Throwable e)
-  {
-    super(e);
-  }
+    try {
+      Packet packet;
+    
+      while ((packet = _queue.dequeue()) != null) {
+        if (log.isLoggable(Level.FINEST))
+          log.finest(this + " dequeue " + packet);
 
-  public ProtocolException(String msg, Throwable e)
+        _queue.dispatch(packet);
+      }
+    
+      return -1;
+    } finally {
+      _isRunning = false;
+    }
+  }
+  
+  @Override
+  public String toString()
   {
-    super(msg, e);
+    return getClass().getSimpleName() + "[" + _queue.getJid() + "]";
   }
 }
