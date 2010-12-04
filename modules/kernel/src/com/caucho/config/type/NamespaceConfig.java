@@ -243,7 +243,7 @@ class NamespaceConfig {
     addBean("authenticator", "com.caucho.security.Authenticator");
     addBean("bam-service", "com.caucho.hemp.broker.BamServiceConfig");
     addBean("bean", "com.caucho.config.cfg.BeanConfig");
-    addBean("case-insensitive", "com.caucho.vfs.CaseInsensitiveConfig");
+    addBean("case-insensitive", "com.caucho.vfs.CaseInsensitive");
     addBean("character-encoding", "com.caucho.i18n.CharacterEncoding");
     addBean("choose", "com.caucho.config.core.ResinChoose");
     addBean("class-loader", "com.caucho.loader.ClassLoaderConfig");

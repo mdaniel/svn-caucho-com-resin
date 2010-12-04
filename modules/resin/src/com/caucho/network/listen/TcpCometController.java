@@ -199,9 +199,6 @@ class TcpCometController extends AsyncController {
   @Override
   public void onClose()
   {
-    TcpSocketLink conn = _conn;
-    _conn = null;
-    
     try {
       _cometHandler.onComplete();
     } finally {
@@ -232,6 +229,9 @@ class TcpCometController extends AsyncController {
 
     if (tcpConn != null && tcpConn.isCometComplete())
       sb.append(",complete");
+
+    if (_isTimeout)
+      sb.append(",timeout");
 
     if (tcpConn != null && tcpConn.isCometSuspend())
       sb.append(",suspended");

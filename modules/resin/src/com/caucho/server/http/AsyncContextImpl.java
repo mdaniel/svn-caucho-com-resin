@@ -245,14 +245,16 @@ public class AsyncContextImpl
   {
     AsyncController cometController = _cometController;
     
-    if (cometController == null)
-      return;
-
-    try {
+    if (cometController != null) {
       cometController.complete();
+    }
+    
+    /*
+    try {
     } finally {
       _cometController = null;
     }
+    */
   }
   
   //

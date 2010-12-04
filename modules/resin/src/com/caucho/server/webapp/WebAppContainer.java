@@ -799,10 +799,12 @@ public class WebAppContainer
         // server/13sf, server/1kq1
         webApp = findWebAppByURI("/");
 
-        if (webApp != null)
-          invocation.setWebApp(webApp);
-        else
-          invocation.setWebApp(getErrorWebApp());
+        if (webApp == null) {
+          // server/1u12
+          webApp = getErrorWebApp();
+        }
+        
+        invocation.setWebApp(webApp);
         
         rewriteChain = webApp.createWebAppFilterChain(rewriteChain, invocation);
 

@@ -352,7 +352,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     if (! login.isPasswordBased())
       throw new ServletException(L.l("Authentication mechanism '{0}' does not support password authentication", login));
 
-    removeAttribute(Login.LOGIN_USER);
+    removeAttribute(Login.LOGIN_USER_NAME);
+    removeAttribute(Login.LOGIN_USER_PRINCIPAL);
     removeAttribute(Login.LOGIN_PASSWORD);
 
     Principal principal = login.getUserPrincipal(this);
@@ -360,14 +361,14 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     if (principal != null)
       throw new ServletException(L.l("UserPrincipal object has already been established"));
 
-    setAttribute(Login.LOGIN_USER, username);
+    setAttribute(Login.LOGIN_USER_NAME, username);
     setAttribute(Login.LOGIN_PASSWORD, password);
 
     try {
       login.login(this, getResponse(), false);
     }
     finally {
-      removeAttribute(Login.LOGIN_USER);
+      removeAttribute(Login.LOGIN_USER_NAME);
       removeAttribute(Login.LOGIN_PASSWORD);
     }
 
@@ -408,7 +409,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
         Principal user = login.login(this, getResponse(), isFail);
 
         if (user != null) {
-          setAttribute(Login.LOGIN_USER, user);
+          setAttribute(Login.LOGIN_USER_PRINCIPAL, user);
           
           return true;
         }
@@ -469,7 +470,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     Principal principal = login.login(this, response, true);
 
     if (principal != null) {
-      setAttribute(Login.LOGIN_USER, principal);
+      setAttribute(Login.LOGIN_USER_PRINCIPAL, principal);
     
       return true;
     }
@@ -485,7 +486,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     requestLogin();
 
     Principal user;
-    user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
+    user = (Principal) getAttribute(AbstractLogin.LOGIN_USER_NAME);
 
     if (user != null)
       return user;

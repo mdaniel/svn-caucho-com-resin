@@ -524,7 +524,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
       request.setAttribute("javax.servlet.request.X509Certificate",
                            new X509Certificate[]{cert});
-      request.setAttribute(com.caucho.security.AbstractLogin.LOGIN_NAME,
+      request.setAttribute(com.caucho.security.AbstractLogin.LOGIN_USER_NAME,
                            ((X509Certificate) cert).getSubjectDN());
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -856,7 +856,7 @@ public class HmuxRequest extends AbstractHttpRequest
         is.readAll(cb, len);
         if (isLoggable)
           log.fine(dbgId() + (char) code + " " + cb);
-        getRequestFacade().setAttribute(com.caucho.security.AbstractLogin.LOGIN_NAME,
+        getRequestFacade().setAttribute(com.caucho.security.AbstractLogin.LOGIN_USER_NAME,
                                         new com.caucho.security.BasicPrincipal(cb.toString()));
         break;
 

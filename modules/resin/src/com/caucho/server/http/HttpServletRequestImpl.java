@@ -1391,7 +1391,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
    */
   public String getAuthType()
   {
-    Object login = getAttribute(AbstractLogin.LOGIN_NAME);
+    Object login = getAttribute(AbstractLogin.LOGIN_USER_NAME);
 
     if (login instanceof X509Certificate)
       return HttpServletRequest.CLIENT_CERT_AUTH;
@@ -1554,7 +1554,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       return null;
     */
 
-    Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
+    Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_USER_NAME);
 
     if (user == null && create)
       user = getUserPrincipal();
@@ -1778,10 +1778,13 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
   public void finishInvocation()
   {
+    // server/11d4
+    /*
     AsyncContextImpl asyncContext = _asyncContext;
 
     if (asyncContext != null)
       asyncContext.onComplete();
+      */
 
     _request.finishInvocation();
   }

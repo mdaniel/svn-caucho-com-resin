@@ -92,7 +92,7 @@ public class BasicLogin extends AbstractLogin {
   {
     final String authorization = request.getHeader("authorization");
 
-    String userName = (String) request.getAttribute(LOGIN_USER);
+    String userName = (String) request.getAttribute(LOGIN_USER_NAME);
     char []password = null;
 
     if (authorization != null) {

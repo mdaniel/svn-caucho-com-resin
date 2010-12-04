@@ -56,7 +56,6 @@ public class InterfaceConfig extends BeanConfig {
   
   public InterfaceConfig()
   {
-    Thread.dumpStack();
   }
   
   public InterfaceConfig(Class<?> type)

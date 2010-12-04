@@ -108,6 +108,8 @@ public class StreamSocketLink extends AbstractSocketLink {
     VfsStream _vfsStream = new VfsStream(is, os);
     getWriteStream().init(_vfsStream);
     getReadStream().init(_vfsStream, getWriteStream());
+    
+    _isKeepalive = true;
   }
 
   public void setSecure(boolean isSecure)

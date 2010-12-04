@@ -620,7 +620,7 @@ public class HttpRequest extends AbstractHttpRequest
       if (certs != null && certs.length > 0) {
         request.setAttribute("javax.servlet.request.X509Certificate",
                              certs); //spec mandates array
-        request.setAttribute(com.caucho.security.AbstractLogin.LOGIN_NAME,
+        request.setAttribute(com.caucho.security.AbstractLogin.LOGIN_USER_NAME,
                              certs[0].getSubjectDN());
       }
     } catch (Exception e) {

@@ -43,8 +43,8 @@ import javax.servlet.http.HttpSession;
  * @since Resin 4.0.0
  */
 public interface Login {
-  public static final String LOGIN_NAME = "caucho.login";
-  public static final String LOGIN_USER = "caucho.user";
+  public static final String LOGIN_USER_NAME = "caucho.user.name";
+  public static final String LOGIN_USER_PRINCIPAL = "caucho.user.principal";
   public static final String LOGIN_PASSWORD = "caucho.password";
 
   /**

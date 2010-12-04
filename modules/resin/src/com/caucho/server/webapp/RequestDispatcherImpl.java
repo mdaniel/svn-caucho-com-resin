@@ -62,6 +62,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   private Invocation _forwardInvocation;
   private Invocation _errorInvocation;
   private Invocation _dispatchInvocation;
+  private Invocation _asyncInvocation;
   private boolean _isLogin;
 
   RequestDispatcherImpl(Invocation includeInvocation,
@@ -90,7 +91,19 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   
   public Invocation getAsyncInvocation()
   {
-    return _dispatchInvocation;
+    if (_asyncInvocation == null) {
+      Invocation invocation = new Invocation();
+      invocation.copyFrom(_dispatchInvocation);
+      
+      FilterChain chain = invocation.getFilterChain();
+      chain = new ResumeFilterChain(chain, invocation.getWebApp());
+      
+      invocation.setFilterChain(chain);
+      
+      _asyncInvocation = invocation;
+    }
+    
+    return _asyncInvocation;
   }
 
   @Override
@@ -104,8 +117,9 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   public void dispatchResume(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
+    // server/1lb1
     dispatchResume((HttpServletRequest) request, (HttpServletResponse) response,
-                  _forwardInvocation);
+                   getAsyncInvocation());
   }
 
   public void error(ServletRequest request, ServletResponse response)

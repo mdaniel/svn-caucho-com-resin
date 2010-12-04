@@ -102,7 +102,7 @@ public abstract class AbstractHttpRequest
 
   private static final char []CONTINUE_100 = "100-continue".toCharArray();
   private static final char []CLOSE = "close".toCharArray();
-  private static final char []KEEPALIVE = "keepalive".toCharArray();
+  private static final char []KEEPALIVE = "keep-alive".toCharArray();
 
   private static final boolean []TOKEN;
   private static final boolean []VALUE;
@@ -1652,7 +1652,7 @@ public abstract class AbstractHttpRequest
   public boolean isKeepaliveAllowed()
   {
     SocketLink conn = _conn;
-
+    
     if (conn != null)
       return conn.isKeepaliveAllocated();
     else

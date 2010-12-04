@@ -243,7 +243,7 @@ public abstract class AbstractLogin implements Login {
   @Override
   public Principal getUserPrincipal(HttpServletRequest request)
   {
-    Principal user = (Principal) request.getAttribute(LOGIN_NAME);
+    Principal user = (Principal) request.getAttribute(LOGIN_USER_NAME);
 
     if (user != null)
       return user;
@@ -252,7 +252,7 @@ public abstract class AbstractLogin implements Login {
 
     // server/12c9 - new login overrides old
     if (savedUser != null && isSavedUserValid(request, savedUser)) {
-      request.setAttribute(LOGIN_NAME, savedUser);
+      request.setAttribute(LOGIN_USER_NAME, savedUser);
 
       return savedUser;
     }
@@ -283,7 +283,7 @@ public abstract class AbstractLogin implements Login {
                          HttpServletResponse response,
                          boolean isFail)
   {
-    Principal user = (Principal) request.getAttribute(LOGIN_USER);
+    Principal user = (Principal) request.getAttribute(LOGIN_USER_PRINCIPAL);
     
     if (user != null)
       return user;
@@ -292,7 +292,7 @@ public abstract class AbstractLogin implements Login {
 
     // server/12c9 - new login overrides old
     if (savedUser != null && isSavedUserValid(request, savedUser)) {
-      request.setAttribute(LOGIN_USER, savedUser);
+      request.setAttribute(LOGIN_USER_PRINCIPAL, savedUser);
       
       return savedUser;
     }
@@ -300,7 +300,7 @@ public abstract class AbstractLogin implements Login {
     user = login(request, response);
     
     if (user != null)
-      request.setAttribute(LOGIN_USER, user);
+      request.setAttribute(LOGIN_USER_PRINCIPAL, user);
 
     try {
       if (user != null || savedUser != null) {
@@ -366,7 +366,7 @@ public abstract class AbstractLogin implements Login {
       return user;
     }
     else if (isSessionSaveLogin() && session != null) {
-      Principal user = (Principal) session.getAttribute(LOGIN_USER);
+      Principal user = (Principal) session.getAttribute(LOGIN_USER_PRINCIPAL);
       
       if (user != null && log.isLoggable(Level.FINER))
         log.finer(this + " load user '" + user + "' from session");
@@ -408,7 +408,7 @@ public abstract class AbstractLogin implements Login {
         log.finer(this + " save user '" + user +"' in single signon " + singleSignon);
     }
     else if (isSessionSaveLogin()) {
-      session.setAttribute(LOGIN_USER, user);
+      session.setAttribute(LOGIN_USER_PRINCIPAL, user);
       
       if (log.isLoggable(Level.FINER))
         log.finer(this + " save user '" + user +"' in session " + singleSignon);

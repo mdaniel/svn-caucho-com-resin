@@ -297,7 +297,7 @@ public class TcpSocketLink extends AbstractSocketLink
   public boolean isCometActive()
   {
     TcpCometController async = _async;
-    
+
     return (_state.isCometActive()
             && async != null 
             && ! async.isCompleteRequested());
