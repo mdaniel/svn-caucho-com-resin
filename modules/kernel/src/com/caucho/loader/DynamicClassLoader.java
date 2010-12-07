@@ -194,7 +194,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
         addPermissions(loader.getPermissions());
 
-        // loader.addListener(this);
+        // loader.addNotificationListener(this);
 
         _dependencies.add(loader);
         _dependencies.setCheckInterval(loader.getDependencyCheckInterval());

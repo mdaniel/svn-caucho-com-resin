@@ -37,12 +37,16 @@ import com.caucho.util.ConcurrentArrayList;
  */
 public class DeployTagItem {
   private final String _tag;
-  
+
   private final Lifecycle _lifecycle = new Lifecycle();
-  
-  private final ConcurrentArrayList<DeployControllerListener> _listeners
-    = new ConcurrentArrayList<DeployControllerListener>(DeployControllerListener.class);
-  
+
+  private final ConcurrentArrayList<DeployNotificationListener> _listeners
+    = new ConcurrentArrayList<DeployNotificationListener>(
+    DeployNotificationListener.class);
+
+  private final ConcurrentArrayList<DeployActionHandler> _actionHandlers
+    = new ConcurrentArrayList<DeployActionHandler>(DeployActionHandler.class);
+
   private Throwable _deployException;
 
   public DeployTagItem(String tag)
@@ -59,39 +63,67 @@ public class DeployTagItem {
   }
   
   /**
+   * Change the state to an active state.
+   */
+  public void toStart()
+  {
+    if (! _lifecycle.toActive())
+      return;
+
+    _deployException = null;
+
+    for (DeployActionHandler handler : _actionHandlers.toArray()) {
+      handler.toStart();
+    }
+  }
+
+  /**
+   * Change the state to the stopped state.
+   */
+  public void toStop()
+  {
+    if (! _lifecycle.toStop())
+      return;
+
+    for (DeployActionHandler handler : _actionHandlers.toArray()) {
+      handler.toStop();
+    }
+  }
+
+  public void toRestart()
+  {
+    _lifecycle.toStop();
+
+    if (!_lifecycle.toActive())
+      return;
+
+    for (DeployActionHandler handler : _actionHandlers) {
+      handler.toRestart();
+    }
+  }
+
+  public void onStart()
+  {
+    for (DeployNotificationListener listener : _listeners.toArray()) {
+      listener.onStart();
+    }
+  }
+
+  public void onStop()
+  {
+    for (DeployNotificationListener listener : _listeners.toArray()) {
+      listener.onStop();
+    }
+  }
+
+  /**
    * Returns the lifecycle state of the item.
    */
   public String getState()
   {
     return _lifecycle.getStateName();
   }
-  
-  /**
-   * Change the state to an active state.
-   */
-  public void toStart()
-  {
-    if (_lifecycle.toActive()) {
-      _deployException = null;
-      
-      for (DeployControllerListener listener : _listeners.toArray()) {
-        listener.onStart();
-      }
-    }
-  }
-  
-  /**
-   * Change the state to the stopped state.
-   */
-  public void toStop()
-  {
-    if (_lifecycle.toStop()) {
-      for (DeployControllerListener listener : _listeners.toArray()) {
-        listener.onStop();
-      }
-    }
-  }
-  
+
   /**
    * Change the state to an error state.
    */
@@ -110,7 +142,7 @@ public class DeployTagItem {
     return _deployException;
   }
   
-  public void addListener(DeployControllerListener listener)
+  public void addNotificationListener(DeployNotificationListener listener)
   {
     if (listener == null)
       throw new NullPointerException();
@@ -118,13 +150,24 @@ public class DeployTagItem {
     _listeners.add(listener);
   }
   
-  public void removeListener(DeployControllerListener listener)
+  public void removeNotificationListener(DeployNotificationListener listener)
   {
     _listeners.remove(listener);
   }
-  
+
+  public void addActionHandler(DeployActionHandler handler)
+  {
+    _actionHandlers.add(handler);
+  }
+
+  public void removeActionHandler(DeployActionHandler handler)
+  {
+    _actionHandlers.remove(handler);
+  }
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _tag + "]";
   }
+
 }

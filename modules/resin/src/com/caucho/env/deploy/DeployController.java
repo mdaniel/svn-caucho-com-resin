@@ -46,7 +46,7 @@ import com.caucho.vfs.Dependency;
  * DeployController controls the lifecycle of the DeployInstance.
  */
 abstract public class DeployController<I extends DeployInstance>
-  implements DeployControllerApi<I>, Dependency
+  implements DeployControllerApi<I>, Dependency, DeployActionHandler
 {
   private static final Logger log
     = Logger.getLogger(DeployController.class.getName());
@@ -72,6 +72,8 @@ abstract public class DeployController<I extends DeployInstance>
   protected final Lifecycle _lifecycle;
 
   private DeployControllerAlarm<DeployController<I>> _alarm;
+
+  private DeployTagItem _deployTagItem;
   
   private long _waitForActiveTimeout = 10000L;
   private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
@@ -305,6 +307,13 @@ abstract public class DeployController<I extends DeployInstance>
           _strategy = StartAutoRedeployAutoStrategy.create();
       }
       }
+
+      DeployControllerService deployService
+        = DeployControllerService.create();
+      
+      _deployTagItem = deployService.addTag(getId());
+
+      _deployTagItem.addActionHandler(this);
 
       initEnd();
 
@@ -615,6 +624,8 @@ abstract public class DeployController<I extends DeployInstance>
 
       deployInstance.start();
 
+      _deployTagItem.onStart();
+
       isActive = true;
 
       _startTime = Alarm.getCurrentTime();
@@ -771,6 +782,27 @@ abstract public class DeployController<I extends DeployInstance>
     
   }
 
+
+  //
+  // DeployActionHandler
+  //
+
+  @Override
+  public void toStart()
+  {
+    start();
+  }
+
+  @Override public void toStop()
+  {
+    stop();
+  }
+
+  @Override public void toRestart()
+  {
+    restart();
+  }
+
   @Override
   public final void alarm()
   {
@@ -800,6 +832,8 @@ abstract public class DeployController<I extends DeployInstance>
     if (alarm != null) {
       alarm.close();
     }
+
+    _deployTagItem.removeActionHandler(this);
     
     onDestroy();
     

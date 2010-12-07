@@ -127,7 +127,7 @@ public class Environment {
     
     /*
     if (_envSystemClassLoader != null) {
-      _envSystemClassLoader.addListener(listener);
+      _envSystemClassLoader.addNotificationListener(listener);
       return;
     }
     */
@@ -256,7 +256,7 @@ public class Environment {
     
     /*
     if (_envSystemClassLoader != null) {
-      _envSystemClassLoader.addListener(listener);
+      _envSystemClassLoader.addNotificationListener(listener);
       return;
     }
     */

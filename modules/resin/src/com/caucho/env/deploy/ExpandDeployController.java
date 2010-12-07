@@ -32,7 +32,6 @@ package com.caucho.env.deploy;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
@@ -53,7 +52,6 @@ import com.caucho.loader.Environment;
 import com.caucho.make.DependencyContainer;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
-import com.caucho.util.QDate;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
@@ -239,7 +237,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (_container != null) {
       _deployListener = new DeployListener(_container, getId());
     
-      _deployItem.addListener(_deployListener);
+      _deployItem.addNotificationListener(_deployListener);
     }
     
     _rootHash = readRootHash();
@@ -699,7 +697,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     super.onDestroy();
     
     if (_deployItem != null)
-      _deployItem.removeListener(_deployListener);
+      _deployItem.removeNotificationListener(_deployListener);
   }
 
   /**
@@ -727,7 +725,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     return getId().equals(controller.getId());
   }
   
-  static class DeployListener implements DeployControllerListener {
+  static class DeployListener implements DeployNotificationListener
+  {
     private WeakReference<DeployContainerApi<?>> _container;
     private String _tag;
     

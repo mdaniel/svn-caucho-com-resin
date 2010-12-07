@@ -24,17 +24,21 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package com.caucho.env.deploy;
 
-/**
- * Interface for NetworkDeployService tag listeners, i.e. when tags are
- * added or removed.
- */
-public interface DeployControllerListener {
-  public void onStart();
-  
-  public void onStop();
+public class AbstractDeployNotificationListener
+  implements DeployNotificationListener
+{
+  @Override
+  public void onStart()
+  {
+  }
+
+  @Override
+  public void onStop()
+  {
+  }
 }

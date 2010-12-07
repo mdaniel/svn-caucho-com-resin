@@ -408,20 +408,7 @@ public class DeployActor extends SimpleActor
     try {
       controller.toStart();
 
-         //XXX: hack
-      ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
-      String name = tag.substring(tag.lastIndexOf('/') + 1);
-      for (Object proxy : Jmx.query(pattern)) {
-        WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
-
-        warDeploy.start(name);
-
-        return warDeploy.getState();
-      }
-
-      return L.l("'{0}' is an unknown controller", controller);
-
-      //return controller.getState();
+      return controller.getState();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -459,20 +446,7 @@ public class DeployActor extends SimpleActor
     try {
       controller.toStop();
 
-      //XXX: hack
-      ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
-      String name = tag.substring(tag.lastIndexOf('/') + 1);
-      for (Object proxy : Jmx.query(pattern)) {
-        WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
-
-        warDeploy.stop(name);
-
-        return warDeploy.getState();
-      }
-
-      return L.l("'{0}' is an unknown controller", controller);
-
-      //return controller.getState();
+      return controller.getState();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -497,20 +471,17 @@ public class DeployActor extends SimpleActor
 
   private String restart(String tag)
   {
+    DeployControllerService service = DeployControllerService.getCurrent();
+
+    DeployTagItem controller = service.getTagItem(tag);
+
+    if (controller == null)
+      return L.l("'{0}' is an unknown controller", controller);
+
     try {
-      //XXX: hack
-      ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
-      String name = tag.substring(tag.lastIndexOf('/') + 1);
-      for (Object proxy : Jmx.query(pattern)) {
-        WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
+      controller.toRestart();
 
-        warDeploy.stop(name);
-        warDeploy.start(name);
-
-        return warDeploy.getState();
-      }
-
-      return L.l("'{0}' is an unknown tag", tag);
+      return controller.getState();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 

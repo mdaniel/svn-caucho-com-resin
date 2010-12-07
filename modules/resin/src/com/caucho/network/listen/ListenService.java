@@ -74,7 +74,7 @@ public class ListenService extends AbstractResinService
 
   /**
    * Creates a listener with the defaults applied.
-   * The listener will not be registered until addListener is called.
+   * The listener will not be registered until addNotificationListener is called.
    */
   public TcpSocketLinkListener createListener()
   {

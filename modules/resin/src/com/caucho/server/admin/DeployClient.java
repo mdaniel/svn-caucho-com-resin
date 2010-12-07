@@ -548,7 +548,7 @@ public class DeployClient implements Repository
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.env.repository.Repository#addListener(java.lang.String, com.caucho.env.repository.RepositoryTagListener)
+   * @see com.caucho.env.repository.Repository#addNotificationListener(java.lang.String, com.caucho.env.repository.RepositoryTagListener)
    */
   @Override
   public void addListener(String tagName, RepositoryTagListener listener)
@@ -578,7 +578,7 @@ public class DeployClient implements Repository
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.env.repository.Repository#removeListener(java.lang.String, com.caucho.env.repository.RepositoryTagListener)
+   * @see com.caucho.env.repository.Repository#removeNotificationListener(java.lang.String, com.caucho.env.repository.RepositoryTagListener)
    */
   @Override
   public void removeListener(String tagName, RepositoryTagListener listener)
