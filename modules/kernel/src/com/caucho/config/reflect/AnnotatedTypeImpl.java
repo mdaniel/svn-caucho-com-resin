@@ -61,6 +61,8 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   
   private HashMap<String,BaseType> _paramMap = new HashMap<String,BaseType>();
   
+  private AnnotatedTypeImpl<?> _parentType;
+  
   private Set<AnnotatedConstructor<X>> _constructorSet
     = new CopyOnWriteArraySet<AnnotatedConstructor<X>>();
 
@@ -108,12 +110,45 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     }
   }
   
+  public AnnotatedTypeImpl(AnnotatedType<X> annType,
+                           AnnotatedTypeImpl<?> parentType)
+  {
+    super(annType);
+    
+    _javaClass = annType.getJavaClass();
+    
+    if (getBaseTypeImpl().getParamMap() != null)
+      _paramMap.putAll(getBaseTypeImpl().getParamMap());
+    
+    _parentType = parentType;
+  
+    _constructorSet.addAll(annType.getConstructors());
+    _fieldSet.addAll(annType.getFields());
+    
+    for (AnnotatedMethod<? super X> annMethod : annType.getMethods()) {
+      if (annMethod.getDeclaringType() == annType)
+        _methodSet.add(new AnnotatedMethodImpl(this, annMethod, 
+                                               annMethod.getJavaMember()));
+      else
+        _methodSet.add(annMethod);
+    }
+  }
+  
   public static <X> AnnotatedTypeImpl<X> create(AnnotatedType<X> annType)
   {
     if (annType instanceof AnnotatedTypeImpl<?>)
       return (AnnotatedTypeImpl<X>) annType;
     else
       return new AnnotatedTypeImpl<X>(annType);
+  }
+  
+  public static <X> AnnotatedTypeImpl<X> create(AnnotatedType<X> annType,
+                                                AnnotatedTypeImpl<?> parentType)
+  {
+    if (annType instanceof AnnotatedTypeImpl<?>)
+      return (AnnotatedTypeImpl<X>) annType;
+    else
+      return new AnnotatedTypeImpl<X>(annType, parentType);
   }
 
   /**
@@ -129,6 +164,11 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   public HashMap<String,BaseType> getBaseTypeParamMap()
   {
     return _paramMap;
+  }
+  
+  public AnnotatedTypeImpl<?> getParentType()
+  {
+    return _parentType;
   }
 
   /**

@@ -29,18 +29,24 @@
 
 package com.caucho.quercus.lib.simplexml;
 
-import com.caucho.quercus.annotation.Hide;
-import com.caucho.quercus.annotation.JsonEncode;
-import com.caucho.quercus.annotation.Name;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.annotation.EntrySet;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -50,19 +56,27 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.quercus.annotation.EntrySet;
+import com.caucho.quercus.annotation.Hide;
+import com.caucho.quercus.annotation.JsonEncode;
+import com.caucho.quercus.annotation.Name;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.ObjectExtJavaValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * SimpleXMLElement object oriented API facade.
@@ -983,6 +997,31 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   public void __set(String name, StringValue value)
   {
     addAttribute(_env, name, value, null);
+  }
+  
+  /**
+   * Implementation for getting the indices of this class.
+   * i.e. <code>count($a->foo[0])</code>
+   */
+  public int __count(Env env)
+  {
+    ArrayList<SimpleXMLElement> children = _parent._children;
+    
+    if (children != null) {
+      int size = children.size();
+      int count = 0;
+
+      for (int j = 0; j < size; j++) {
+        SimpleXMLElement child = children.get(j);
+
+        if (child.getName().equals(getName()))
+          count++;
+      }
+      
+      return count;
+    }
+    else
+      return 1;
   }
   
   /**

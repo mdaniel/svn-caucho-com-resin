@@ -72,6 +72,7 @@ import com.caucho.config.inject.AnnotatedOverrideMap;
 import com.caucho.config.inject.AnyLiteral;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
@@ -227,8 +228,9 @@ public class InterceptorFactory<X>
       annType = PreDestroy.class;
     }
     
-    // ejb/0cb3
+    // ejb/0cb3, ejb/1060
     ClassInterceptors typeInterceptors = getTypeInterceptors(beanType);
+    //ClassInterceptors typeInterceptors = getTypeInterceptors(method.getDeclaringType());
     
     if (! isExcludeDefaultInterceptors) {
       methodInterceptors = addInterceptors(methodInterceptors,
@@ -686,6 +688,9 @@ public class InterceptorFactory<X>
   private ArrayList<Class<?>> 
   introspectClassInterceptors(AnnotatedType<?> beanType)
   {
+    if (beanType == null)
+      return null;
+    
     ArrayList<Class<?>> classInterceptors = null;
     
     if (beanType.isAnnotationPresent(ExcludeClassInterceptors.class)) {
@@ -702,6 +707,7 @@ public class InterceptorFactory<X>
           classInterceptors.add(iClass);
       }
     }
+    
     return classInterceptors;
   }
   

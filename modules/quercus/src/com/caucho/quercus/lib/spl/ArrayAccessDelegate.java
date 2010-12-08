@@ -72,8 +72,8 @@ public class ArrayAccessDelegate implements ArrayDelegate
   {
     Env env = Env.getInstance();
     Value returnValue = qThis.getQuercusClass().issetField(env,qThis,index.toString(env));
-    if(returnValue == UnsetValue.UNSET)
-    {
+    
+    if (returnValue == UnsetValue.UNSET) {
       return qThis.callMethod(env, OFFSET_EXISTS, index).toBoolean();
     }
     else
@@ -85,5 +85,11 @@ public class ArrayAccessDelegate implements ArrayDelegate
     Env env = Env.getInstance();
     
     return qThis.callMethod(env, OFFSET_UNSET, index);
+  }
+  
+  @Override
+  public long count(ObjectValue qThis)
+  {
+    return 1;
   }
 }

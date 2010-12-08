@@ -112,10 +112,10 @@ public class QuercusServlet
 
     if (isResin) {
       try {
-        Class cl = Class.forName(
+        Class<?> cl = Class.forName(
             "com.caucho.quercus.servlet.ProResinQuercusServlet");
 
-        Constructor cons = cl.getConstructor(File.class);
+        Constructor<?> cons = cl.getConstructor(File.class);
 
         impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
 
@@ -132,7 +132,7 @@ public class QuercusServlet
 
       if (impl == null) {
         try {
-          Class cl = Class.forName(
+          Class<?> cl = Class.forName(
               "com.caucho.quercus.servlet.ResinQuercusServlet");
           impl = (QuercusServletImpl) cl.newInstance();
         } catch (Exception e) {
@@ -143,10 +143,10 @@ public class QuercusServlet
 
     if (impl == null) {
       try {
-        Class cl = Class.forName(
+        Class<?> cl = Class.forName(
             "com.caucho.quercus.servlet.ProQuercusServlet");
 
-        Constructor cons = cl.getConstructor(java.io.File.class);
+        Constructor<?> cons = cl.getConstructor(java.io.File.class);
 
         impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
 
@@ -164,6 +164,8 @@ public class QuercusServlet
 
     if (impl == null)
       impl = new QuercusServletImpl();
+    
+    log.info("QuercusServlet starting as " + impl.getClass().getSimpleName());
 
     return impl;
   }

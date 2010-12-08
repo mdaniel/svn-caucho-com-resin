@@ -12,7 +12,7 @@
   <property name="eclipse.home" value="${user.home}/eclipse"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext, j2ee-management, j2ee-deploy">
+          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, j2ee-deploy">
   </target>
 
   <!--
@@ -342,7 +342,7 @@
     </antcall>
   </target>
   
-  <target name="resin-kernel" depends="init, inject, servlet16, version">
+  <target name="resin-kernel" depends="init, cdi, servlet16, version">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="kernel"/>
       <param name="module.dist" value="${lib}"/>
@@ -411,11 +411,11 @@
     </antcall>
   </target>
 
-  <target name="inject" depends="init">
+  <target name="cdi" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="webbeans"/>
       <param name="module.dist" value="${lib}"/>
-      <param name="module.jar" value="inject-16.jar"/>
+      <param name="module.jar" value="cdi-16.jar"/>
     </antcall>
     
     <antcall target="module" inheritRefs="true">
@@ -459,7 +459,7 @@
     </copy>
   </target>
 
-  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, jcache, jstl, jta, inject">
+  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, jcache, jstl, jta, cdi">
     <!--
        - javaee-16.jar
       -->
@@ -1050,8 +1050,8 @@
     <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/javaee-16.jar"
           file="${resin.dist}/${dist.name}/lib/javaee-16.jar"/>
 
-    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/inject-16.jar"
-          file="${resin.lib}/inject-16.jar"/>
+    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/cdi-16.jar"
+          file="${resin.lib}/cdi-16.jar"/>
 
     <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/javamail-141.jar"
           file="${resin.lib}/javamail-141.jar"/>
@@ -1074,7 +1074,7 @@
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${dist}/${quercus.dist.name}">
         <include name="WEB-INF/lib/resin.jar"/>
-        <include name="WEB-INF/lib/inject-16.jar"/>
+        <include name="WEB-INF/lib/cdi-16.jar"/>
         <include name="WEB-INF/lib/javamail-141.jar"/>
         <include name="WEB-INF/licenses"/>
         <include name="WEB-INF/web.xml"/>

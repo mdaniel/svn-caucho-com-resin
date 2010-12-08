@@ -649,7 +649,6 @@ public class ModuleContext
   private void introspectPhpModuleClass(Class<?> cl)
     throws IllegalAccessException, InstantiationException, ConfigException
   {
-    log.info("CLAXX: " + cl);
     synchronized (_moduleInfoMap) {
       if (_moduleInfoMap.get(cl.getName()) != null)
         return;

@@ -40,6 +40,7 @@ import com.caucho.quercus.env.*;
 public class FunctionArrayDelegate implements ArrayDelegate {
   private JavaInvoker _arrayGet;
   private JavaInvoker _arrayPut;
+  private JavaInvoker _arrayCount;
 
   public FunctionArrayDelegate()
   {
@@ -59,6 +60,14 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   public void setArrayPut(JavaInvoker arrayPut)
   {
     _arrayPut = arrayPut;
+  }
+
+  /**
+   * Sets the custom function for the array set.
+   */
+  public void setArrayCount(JavaInvoker arrayCount)
+  {
+    _arrayCount = arrayCount;
   }
   
   /**
@@ -116,5 +125,20 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   public Value unset(ObjectValue qThis, Value key)
   {
     return UnsetValue.UNSET;
+  }
+  
+  /**
+   * Returns the value for the specified key.
+   */
+  @Override
+  public long count(ObjectValue qThis)
+  {
+    if (_arrayCount!= null) {
+      return _arrayCount .callMethod(Env.getInstance(),
+                                     _arrayGet.getQuercusClass(),
+                                     qThis).toLong();
+    }
+    else
+      return 1;
   }
 }

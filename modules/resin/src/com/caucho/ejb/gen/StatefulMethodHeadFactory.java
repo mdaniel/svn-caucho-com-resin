@@ -30,6 +30,9 @@
 package com.caucho.ejb.gen;
 
 import javax.ejb.AccessTimeout;
+import javax.ejb.AfterBegin;
+import javax.ejb.AfterCompletion;
+import javax.ejb.BeforeCompletion;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
@@ -60,6 +63,14 @@ public class StatefulMethodHeadFactory<X> extends MethodHeadFactory<X> {
                                    boolean isEnhanced)
   {
     AnnotatedType<?> declaringType = method.getDeclaringType();
+
+    /*
+    if (method.isAnnotationPresent(AfterBegin.class)
+        || method.isAnnotationPresent(BeforeCompletion.class)
+        || method.isAnnotationPresent(AfterCompletion.class)) {
+      return null;
+    }
+    */
 
     AccessTimeout accessTimeout
       = method.getAnnotation(AccessTimeout.class);

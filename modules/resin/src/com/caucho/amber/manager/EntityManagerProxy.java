@@ -70,6 +70,7 @@ public class EntityManagerProxy
   /**
    * Makes the instance managed.
    */
+  @Override
   public void persist(Object entity)
   {
     getCurrent().persist(entity);

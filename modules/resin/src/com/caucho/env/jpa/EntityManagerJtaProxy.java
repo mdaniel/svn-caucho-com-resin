@@ -48,6 +48,7 @@ import com.caucho.amber.AmberRuntimeException;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.transaction.ManagedResource;
 import com.caucho.transaction.ManagedXAResource;
+import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.FreeList;
@@ -323,7 +324,7 @@ public class EntityManagerJtaProxy
   public void persist(Object entity)
   {
     EntityManager em = getCurrent();
-    
+
     if (em != null) {
       em.persist(entity);
       return;

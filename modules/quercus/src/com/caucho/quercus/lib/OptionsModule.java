@@ -572,10 +572,17 @@ public class OptionsModule extends AbstractQuercusModule {
 
   private static void phpinfoGeneral(Env env)
   {
-    if (hasRequest(env))
-      env.println("<h1>Quercus</h1>");
+    String quercusName;
+    
+    if (env.getQuercus().isPro())
+      quercusName = "Quercus Pro";
     else
-      env.println("Quercus");
+      quercusName = "Quercus";
+    
+    if (hasRequest(env))
+      env.println("<h1>" + quercusName + "</h1>");
+    else
+      env.println(quercusName);
 
     if (hasRequest(env)) {
       env.println("<pre>");

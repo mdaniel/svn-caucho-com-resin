@@ -327,7 +327,6 @@ abstract public class ConfigType<T>
 
   public boolean isInlineType(ConfigType<?> type)
   {
-    System.out.println("INLINE: " + this + " " + type);
     return false;
   }
 

@@ -52,6 +52,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
+import javax.interceptor.Interceptors;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
@@ -111,6 +112,11 @@ public class ReflectionAnnotatedType<T>
   public Class<T> getJavaClass()
   {
     return _javaClass;
+  }
+  
+  public ReflectionAnnotatedType<?> getParentType()
+  {
+    return _parentType;
   }
   
   @Override
@@ -353,6 +359,7 @@ public class ReflectionAnnotatedType<T>
       if (cl == _javaClass)
         continue;
 
+      // ejb/1062
       if (! annType.isAnnotationPresent(Inherited.class)) {
         continue;
       }

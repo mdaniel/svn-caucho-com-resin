@@ -2150,6 +2150,8 @@ public class QuercusContext
     public void shutdown()
     {
       _isRunnable = false;
+      
+      LockSupport.unpark(this);
     }
 
     public void run()

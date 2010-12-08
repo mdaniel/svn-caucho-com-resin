@@ -13,6 +13,8 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>quercus: SimpleXMLElement needs a __count function (#4318, rep by Homayoun Zariv)</li>
+<li>quercus: list($a) = each($this->foo) was not compiled properly (#4319, rep by Akara Sucharitakul)</li>
 <li>quercus: add array_replace, array_replace_recursive (#4312, rep by Homayoun Zariv)</li>
 <li>quercus: simplexml_load_file not working properly with http: (#4311, rep by Akara Sucharitakul)</li>
 <li>cdi: InjectManager.resolveAllBeans with incorrect synchronization (rep by Wesley Wu)</li>

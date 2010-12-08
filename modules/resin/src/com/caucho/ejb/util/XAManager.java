@@ -93,9 +93,9 @@ public class XAManager {
       Transaction xa = tm.getTransaction();
 
       if (xa != null && sync != null) {
-        sync.afterBegin();
-
         xa.registerSynchronization(new SynchronizationAdapter(sync));
+        
+        sync.afterBegin();
       }
     } catch (RuntimeException e) {
       throw e;
