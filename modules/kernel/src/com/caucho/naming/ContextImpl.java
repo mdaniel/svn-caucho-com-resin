@@ -491,11 +491,6 @@ public class ContextImpl implements Context {
     if (log.isLoggable(Level.FINEST))
       log.finest(L.l("JNDI rebind `{0}' value: {1}", name, obj));
     
-    if (name.endsWith("rollbackBean")) {
-      System.out.println("ROLLBACK: " + name + " " + obj + "\n  " + Thread.currentThread().getContextClassLoader());
-      Thread.dumpStack();
-    }
-    
     String tail = name;
     AbstractModel model = _model;
     
