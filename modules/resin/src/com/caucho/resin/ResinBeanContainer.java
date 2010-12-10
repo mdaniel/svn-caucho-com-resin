@@ -415,6 +415,39 @@ public class ResinBeanContainer
   }
 
   /**
+   * Executes code in the Resin bean classloader and creates a request scope.
+   *
+   * <code><pre>
+   * resinBean.request (new Runnable() {
+   *   doMyCode();
+   * });
+   * </pre></code>
+   *
+   * @return the RequestContext which must be passed to
+   *    <code>completeContext</code>
+   */
+  public void request(Runnable runnable)
+  {
+    Thread thread = Thread.currentThread();
+
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    BeanContainerRequest oldContext = _localContext.get();
+
+    BeanContainerRequest context = new BeanContainerRequest(this, oldLoader, oldContext);
+
+    thread.setContextClassLoader(_classLoader);
+
+    _localContext.set(context);
+    
+    try {
+      runnable.run();
+    } finally {
+      context.close();
+    }
+  }
+
+  /**
    * Enters the Resin context and begins a new request on the thread. The
    * the returned context must be passed to the completeRequest. To ensure
    * the request is properly closed, use the following pattern:
@@ -480,6 +513,7 @@ public class ResinBeanContainer
     return _classLoader;
   }
 
+  @Override
   public String toString()
   {
     return getClass().getName() + "[]";

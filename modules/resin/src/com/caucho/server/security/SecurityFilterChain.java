@@ -77,6 +77,7 @@ public class SecurityFilterChain implements FilterChain {
   {
   }
 
+  @Override
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -129,5 +130,11 @@ public class SecurityFilterChain implements FilterChain {
     }
 
     _next.doFilter(request, response);
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _webApp + "]";
   }
 }

@@ -32,6 +32,7 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -338,13 +339,15 @@ abstract public class BeanGenerator<X> extends GenClass
       generateDummyPostConstruct(postConstructMethods, out, map);
     }
     
+    // postConstructMethods = getLifecycleAspects(PostConstruct.class);
+    
     out.println();
     out.println("public void __caucho_postConstruct()");
     out.println("  throws Exception");
     out.println("{");
     out.pushDepth();
 
-    postConstructMethods = getLifecycleMethods(PostConstruct.class);
+    // postConstructMethods = getLifecycleMethods(PostConstruct.class);
     
     /*
     for (AspectGenerator<?> method : getLifecycleAspects(PostConstruct.class)) {
@@ -355,31 +358,34 @@ abstract public class BeanGenerator<X> extends GenClass
 
     Method postConstructMethod = null;
     int methodsSize = postConstructMethods.size();
-    if (methodsSize > 0) {
-      // Method method = postConstructMethods.get(methodsSize - 1);
-      Method method = postConstructMethods.get(0);
+    for (int i = 0; i < methodsSize && postConstructMethod == null; i++) {
+      Method method = postConstructMethods.get(i);
+      
+      if (Modifier.isPrivate(method.getModifiers())
+          && i + 1 < methodsSize) {
+        // ejb/1064, ejb/1063
+        continue;
+      }
+                             
       postConstructMethod = method;
     }
 
     // ejb/1060 - TCK
-    if (postConstructMethod != null) {
-      Method method = postConstructMethod;
-    
-      String declName = method.getDeclaringClass().getSimpleName();
-      String methodName = method.getName();
-    
-      out.println("__caucho_lifecycle_" + declName + "_" + methodName + "();");
-    }
-
-    // ejb/1060 - TCK
-    int j = 0;
-    for (int i = 1; i < methodsSize; i++) {
+    boolean isLifecycle = false;
+    for (int i = 0; i < methodsSize; i++) {
       Method method = postConstructMethods.get(i);
 
-      if (postConstructMethod != null && method.equals(postConstructMethod))
-        continue;
+      if (postConstructMethod != method) {
+        generateLifecycleMethod(out, i, method, "postConstruct");
+      }
+      else if (! isLifecycle) {
+        isLifecycle = true;
+        
+        String declName = method.getDeclaringClass().getSimpleName();
+        String methodName = method.getName();
 
-      generateLifecycleMethod(out, i, method, "postConstruct");
+        out.println("__caucho_lifecycle_" + declName + "_" + methodName + "();");
+      }
     }
     
     /*

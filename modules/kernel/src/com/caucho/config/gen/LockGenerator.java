@@ -97,17 +97,7 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
   @Override
   public void generatePreTry(JavaWriter out) throws IOException
   {
-    super.generatePreTry(out);
-    
     out.println("boolean isLocked = false;");
-  }
-
-    /**
-     * Generates the method interception code.
-     */
-    @Override
-    public void generatePreCall(JavaWriter out) throws IOException
-    {
     if (_isContainerManaged && (_lockType != null)) {
       out.println();
 
@@ -141,7 +131,7 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
     
     out.println("isLocked = true;");
 
-    super.generatePreCall(out);
+    super.generatePreTry(out);
   }
 
   /**

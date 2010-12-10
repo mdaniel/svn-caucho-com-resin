@@ -314,8 +314,11 @@ public abstract class AbstractLogin implements Login {
         return user;
       }
 
-      if (isFail)
+      if (isFail) {
+        log.fine(this + " sending login challenge");
+        
         loginChallenge(request, response);
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

@@ -48,6 +48,8 @@ public class StreamSocketLink extends AbstractSocketLink {
   private int _remotePort;
   private boolean _isSecure;
   private boolean _isKeepalive = true;
+  
+  private StreamAsyncController _asyncController;
 
   public StreamSocketLink()
   {
@@ -160,15 +162,37 @@ public class StreamSocketLink extends AbstractSocketLink {
   @Override
   public AsyncController toComet(SocketLinkCometListener handler)
   {
-    StreamAsyncController asyncController
-      = new StreamAsyncController(handler);
+    StreamAsyncController asyncController = _asyncController;
+    
+    if (asyncController == null)
+      asyncController = _asyncController = new StreamAsyncController(handler);
 
     return asyncController;
   }
+  
+  public void onRequestComplete()
+  {
+    StreamAsyncController asyncController = _asyncController;
+    _asyncController = null;
 
+    if (asyncController != null)
+      asyncController.onClose();
+  }
+  
   class StreamAsyncController extends AsyncController {
+    private SocketLinkCometListener _handler;
+    
     StreamAsyncController(SocketLinkCometListener handler)
     {
+      _handler = handler;
+    }
+    
+    @Override
+    public void onClose()
+    {
+      super.onClose();
+      
+      _handler.onComplete();
     }
 
     public String toString()
