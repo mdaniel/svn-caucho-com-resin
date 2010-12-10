@@ -174,7 +174,7 @@ public class SimpleActorProxy implements ActorProxy {
    *
    * @param payload the query payload
    */
-  public Serializable queryGet(Serializable payload)
+  public Serializable query(Serializable payload)
   {
     ActorStream linkStream = getLinkStream();
 
@@ -186,7 +186,7 @@ public class SimpleActorProxy implements ActorProxy {
     QueryFuture future
       = _queryManager.addQueryFuture(id, getTo(), getJid(), payload, _timeout);
     
-    linkStream.queryGet(id, getTo(), getJid(), payload);
+    linkStream.query(id, getTo(), getJid(), payload);
 
     return future.get();
   }
@@ -205,8 +205,8 @@ public class SimpleActorProxy implements ActorProxy {
    *
    * @param payload the query payload
    */
-  public Serializable queryGet(Serializable payload,
-                               long timeout)
+  public Serializable query(Serializable payload,
+                            long timeout)
   {
     ActorStream linkStream = getLinkStream();
 
@@ -218,7 +218,7 @@ public class SimpleActorProxy implements ActorProxy {
     QueryFuture future
       = _queryManager.addQueryFuture(id, getTo(), getJid(), payload, timeout);
 
-    linkStream.queryGet(id, getTo(), getJid(), payload);
+    linkStream.query(id, getTo(), getJid(), payload);
 
     return future.get();
    }
@@ -239,8 +239,8 @@ public class SimpleActorProxy implements ActorProxy {
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
-  public void queryGet(Serializable payload,
-                       QueryCallback callback)
+  public void query(Serializable payload,
+                    QueryCallback callback)
   {
     ActorStream linkStream = getLinkStream();
 
@@ -251,106 +251,8 @@ public class SimpleActorProxy implements ActorProxy {
     
     _queryManager.addQueryCallback(id, callback);
 
-    linkStream.queryGet(id, getTo(), getJid(), payload);
+    linkStream.query(id, getTo(), getJid(), payload);
   }
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param payload the query payload
-   */
-  public Serializable querySet(Serializable payload)
-  {
-    ActorStream linkStream = getLinkStream();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.generateQueryId();
-    
-    QueryFuture future
-      = _queryManager.addQueryFuture(id, getTo(), getJid(), payload, _timeout);
-
-    linkStream.querySet(id, getTo(), getJid(), payload);
-
-    return future.get();
-  }
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param payload the query payload
-   */
-  public Serializable querySet(Serializable payload,
-                               long timeout)
-  {
-    ActorStream linkStream = getLinkStream();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.generateQueryId();
-    
-    QueryFuture future
-      = _queryManager.addQueryFuture(id, getTo(), getJid(), payload, _timeout);
-
-    linkStream.querySet(id, getTo(), getJid(), payload);
-
-    return future.get();
-  }
-
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * providing a callback to receive the result or error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param payload the query payload
-   * @param callback the application's callback for the result
-   */
-  public void querySet(Serializable payload,
-                       QueryCallback callback)
-  {
-    ActorStream linkStream = getLinkStream();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.generateQueryId();
-    
-    _queryManager.addQueryCallback(id, callback);
-
-    linkStream.querySet(id, getTo(), getJid(), payload);
-  }
-
-  //
-  // presence handling
-  //
 
   /**
    * Returns true if the client is closed

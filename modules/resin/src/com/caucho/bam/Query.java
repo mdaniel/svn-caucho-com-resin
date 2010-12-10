@@ -37,22 +37,22 @@ import java.lang.annotation.Target;
 
 /**
  * The @QueryGet annotation marks a SimpleBamService method as handling
- * a SET RPC query.  SET calls may modify state in the service.  If you
- * just need information, use a GET call instead.  Queries
+ * a GET RPC query.  GET calls must not modify any state in the service,
+ * because SET calls are responsible for modifying state.  Queries
  * are matched to results using a long id, which is unique for each
- * query in the connection.  SET queries must send either a queryResult
+ * query in the connection.  GET queries must send either a queryResult
  * or a queryError to the caller, because the client may be blocking
  * waiting for a reply.
  *
  * <code><pre>
- * @QuerySet
- * boolean querySet(long id, String to, String from, MySetQuery value)
+ * @QueryGet
+ * boolean queryGet(long id, String to, String from, MyGetQuery value)
  * </pre></code>
  *
  * A ping RPC query handler would look like:
  *
  * <code><pre>
- * @QuerySet
+ * @QueryGet
  * public boolean pingQuery(long id, String to, String from, PingQuery value)
  * {
  *   getBrokerStream().queryResult(id, from, to, value);
@@ -64,5 +64,5 @@ import java.lang.annotation.Target;
 @Target({METHOD})
 @Retention(RUNTIME)
 @Documented  
-public @interface QuerySet {
+public @interface Query {
 }

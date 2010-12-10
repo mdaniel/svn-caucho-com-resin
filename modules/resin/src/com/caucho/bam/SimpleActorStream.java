@@ -187,10 +187,10 @@ public class SimpleActorStream implements ActorStream, Actor
    * the SimpleActorStream.
    *
    * By default, queryGet invokes a method
-   * annotated by {@link com.caucho.bam.QueryGet @QueryGet} with
+   * annotated by {@link com.caucho.bam.Query @QueryGet} with
    * a payload class matching the queryGet payload.
    *
-   * The {@link com.caucho.bam.QueryGet @QueryGet} method MUST
+   * The {@link com.caucho.bam.Query @QueryGet} method MUST
    * send either a queryResult or queryError as a response.
    *
    * If no method is found, queryGet sends a queryError response with
@@ -202,40 +202,12 @@ public class SimpleActorStream implements ActorStream, Actor
    * @param payload the query payload
    */
   @Override
-  public void queryGet(long id,
+  public void query(long id,
                        String to,
                        String from,
                        Serializable payload)
   {
-    _skeleton.queryGet(this, _fallback, getLinkStream(), id, to, from, payload);
-  }
-
-  /**
-   * Dispatches a querySet to a matching method on
-   * the SimpleActorStream.
-   *
-   * By default, querySet invokes a method
-   * annotated by {@link com.caucho.bam.QuerySet @QuerySet} with
-   * a payload class matching the querySet payload.
-   *
-   * The {@link com.caucho.bam.QuerySet @QuerySet} method MUST
-   * send either a queryResult or queryError as a response.
-   *
-   * If no method is found, querySet sends a queryError response with
-   * a feature-not-implemented error.
-   *
-   * @param id a correlation id to match the result or error
-   * @param to the SimpleActorStream's JID
-   * @param from the client actor's JID
-   * @param payload the query payload
-   */
-  @Override
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    _skeleton.querySet(this, _fallback, getLinkStream(), id, to, from, payload);
+    _skeleton.query(this, _fallback, getLinkStream(), id, to, from, payload);
   }
 
   /**

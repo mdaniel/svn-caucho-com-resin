@@ -44,8 +44,7 @@ import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.QueryGet;
-import com.caucho.bam.QuerySet;
+import com.caucho.bam.Query;
 import com.caucho.bam.SimpleActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
@@ -124,7 +123,7 @@ public class DeployActor extends SimpleActor
     getBroker().addActor(queue);
   }
 
-  @QueryGet
+  @Query
   public boolean commitList(long id, String to, String from,
                             DeployCommitListQuery commitList)
   {
@@ -145,7 +144,7 @@ public class DeployActor extends SimpleActor
     return true;
   }
 
-  @QuerySet
+  @Query
   public void tagCopy(long id,
                       String to,
                       String from,
@@ -185,7 +184,7 @@ public class DeployActor extends SimpleActor
     getLinkStream().queryResult(id, from, to, result);
   }
 
-  @QueryGet
+  @Query
   public void tagState(long id,
                        String to,
                        String from,
@@ -214,7 +213,7 @@ public class DeployActor extends SimpleActor
       getLinkStream().queryResult(id, from, to, null);
   }
 
-  @QuerySet
+  @Query
   public void removeTag(long id,
                         String to,
                         String from,
@@ -235,7 +234,7 @@ public class DeployActor extends SimpleActor
     getLinkStream().queryResult(id, from, to, result);
   }
 
-  @QuerySet
+  @Query
   public boolean sendFileQuery(long id, String to, String from,
                                DeploySendQuery query)
   {
@@ -262,7 +261,7 @@ public class DeployActor extends SimpleActor
     return true;
   }
 
-  @QuerySet
+  @Query
   public boolean setTagQuery(long id, String to, String from, SetTagQuery query)
   {
     String tagName = query.getTag();
@@ -289,7 +288,7 @@ public class DeployActor extends SimpleActor
     return true;
   }
 
-  @QueryGet
+  @Query
   public boolean queryTags(long id,
                            String to,
                            String from,
@@ -316,7 +315,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    */
-  @QuerySet
+  @Query
   public boolean controllerDeploy(long id,
                                   String to,
                                   String from,
@@ -381,7 +380,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    */
-  @QuerySet
+  @Query
   public boolean controllerStart(long id,
                                  String to,
                                  String from,
@@ -419,7 +418,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    */
-  @QuerySet
+  @Query
   public boolean controllerStop(long id,
                                 String to,
                                 String from,
@@ -454,7 +453,7 @@ public class DeployActor extends SimpleActor
     }
   }
 
-  @QuerySet
+  @Query
   public boolean controllerRestart(long id,
                                    String to,
                                    String from,
@@ -492,7 +491,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    */
-  @QuerySet
+  @Query
   public boolean controllerUndeploy(long id,
                                     String to,
                                     String from,
@@ -540,7 +539,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    */
-  @QuerySet
+  @Query
   public boolean controllerUndeploy(long id,
                                     String to,
                                     String from,
@@ -600,7 +599,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    */
-  @QuerySet
+  @Query
   public boolean sendAddFileQuery(long id, String to, String from,
                                   DeployAddFileQuery query)
   {
@@ -645,7 +644,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    **/
-  @QueryGet
+  @Query
   public boolean listWebApps(long id,
                              String to,
                              String from,
@@ -686,7 +685,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    **/
-  @QueryGet
+  @Query
   public boolean listTags(long id,
                           String to,
                           String from,
@@ -718,7 +717,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    **/
-  @QueryGet
+  @Query
   public boolean listHosts(long id,
                            String to,
                            String from,
@@ -745,7 +744,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    **/
-  @QueryGet
+  @Query
   public boolean status(long id,
                         String to,
                         String from,

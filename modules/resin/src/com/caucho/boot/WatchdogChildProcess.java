@@ -114,7 +114,7 @@ class WatchdogChildProcess
   Serializable queryGet(Serializable payload)
   {
     if (_watchdogActor != null)
-      return _watchdogActor.queryGet(payload);
+      return _watchdogActor.query(payload);
     else
       return null;
   }

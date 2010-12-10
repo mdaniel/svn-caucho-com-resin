@@ -221,27 +221,15 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   }
 
   @Override
-  public void queryGet(long id, String to, String from, Serializable payload)
+  public void query(long id, String to, String from, Serializable payload)
   {
-    _skeleton.queryGet(this,
-                       getFallbackStream(),
-                       getLinkStream(),
-                       id,
-                       to, 
-                       from, 
-                       payload);
-  }
-
-  @Override
-  public void querySet(long id, String to, String from, Serializable payload)
-  {
-    _skeleton.querySet(this,
-                       getFallbackStream(),
-                       getLinkStream(),
-                       id,
-                       to, 
-                       from, 
-                       payload);
+    _skeleton.query(this,
+                    getFallbackStream(),
+                    getLinkStream(),
+                    id,
+                    to, 
+                    from, 
+                    payload);
   }
 
   @Override

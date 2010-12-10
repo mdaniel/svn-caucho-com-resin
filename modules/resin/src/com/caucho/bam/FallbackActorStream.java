@@ -113,46 +113,21 @@ public class FallbackActorStream implements ActorStream
   }
   
   /**
-   * Fallback for messages which don't match the skeleton.
+   * Fallback for messages that don't match the skeleton.
    */
   @Override
-  public void queryGet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
+  public void query(long id,
+                    String to,
+                    String from,
+                    Serializable payload)
   {
     if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " queryGet not implemented for " + payload
+      log.fine(this + " query not implemented for " + payload
                + " {id: " + id + ", from: " + from + " to: " + to + "}");
     }
 
     String msg;
-    msg = (this + ": queryGet is not implemented for this payload:\n"
-           + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
-
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.FEATURE_NOT_IMPLEMENTED,
-                                      msg);
-
-    getLinkStream().queryError(id, from, to, payload, error);
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  @Override
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " querySet not implemented for " + payload
-               + " {id: " + id + ", from: " + from + " to: " + to + "}");
-    }
-
-    String msg;
-    msg = (this + ": querySet is not implemented for this payload:\n"
+    msg = (this + ": query is not implemented for this payload:\n"
            + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
 
     ActorError error = new ActorError(ActorError.TYPE_CANCEL,

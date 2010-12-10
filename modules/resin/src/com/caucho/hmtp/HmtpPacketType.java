@@ -37,8 +37,7 @@ public enum HmtpPacketType {
   MESSAGE,
   MESSAGE_ERROR,
 
-  QUERY_GET,
-  QUERY_SET,
+  QUERY,
   QUERY_RESULT,
   QUERY_ERROR;
   

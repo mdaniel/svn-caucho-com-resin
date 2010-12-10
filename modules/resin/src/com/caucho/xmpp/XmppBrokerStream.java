@@ -228,26 +228,13 @@ public class XmppBrokerStream
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public void queryGet(long id,
-                              String to,
-                              String from,
-                              Serializable value)
+  @Override
+  public void query(long id,
+                    String to,
+                    String from,
+                    Serializable value)
   {
-    _toBroker.queryGet(id, to, _jid, value);
-  }
-  
-  /**
-   * Handles a set query.
-   *
-   * The set handler must respond with either
-   * a QueryResult or a QueryError 
-   */
-  public void querySet(long id,
-                              String to,
-                              String from,
-                              Serializable value)
-  {
-    _toBroker.querySet(id, to, _jid, value);
+    _toBroker.query(id, to, _jid, value);
   }
   
   /**
@@ -255,10 +242,11 @@ public class XmppBrokerStream
    *
    * The result id will match a pending get or set.
    */
+  @Override
   public void queryResult(long id,
-                              String to,
-                              String from,
-                              Serializable value)
+                          String to,
+                          String from,
+                          Serializable value)
   {
     _toBroker.queryResult(id, to, _jid, value);
   }
@@ -268,11 +256,12 @@ public class XmppBrokerStream
    *
    * The result id will match a pending get or set.
    */
+  @Override
   public void queryError(long id,
-                             String to,
-                             String from,
-                             Serializable value,
-                             ActorError error)
+                         String to,
+                         String from,
+                         Serializable value,
+                         ActorError error)
   {
     _toBroker.queryError(id, to, _jid, value, error);
   }

@@ -40,9 +40,8 @@ import com.caucho.bam.packet.Message;
 import com.caucho.bam.packet.MessageError;
 import com.caucho.bam.packet.Packet;
 import com.caucho.bam.packet.QueryError;
-import com.caucho.bam.packet.QueryGet;
+import com.caucho.bam.packet.Query;
 import com.caucho.bam.packet.QueryResult;
-import com.caucho.bam.packet.QuerySet;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
@@ -159,23 +158,12 @@ public class MultiworkerMailbox implements Mailbox, Closeable
    * Query an entity
    */
   @Override
-  public void queryGet(long id,
+  public void query(long id,
                        String to,
                        String from,
                        Serializable query)
   {
-    enqueue(new QueryGet(id, to, from, query));
-  }
-
-  /**
-   * Query an entity
-   */
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    enqueue(new QuerySet(id, to, from, payload));
+    enqueue(new Query(id, to, from, query));
   }
 
   /**

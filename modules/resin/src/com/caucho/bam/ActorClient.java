@@ -116,14 +116,14 @@ public interface ActorClient extends Actor {
    * @param to the target actor's JID
    * @param payload the query payload
    */
-  public Serializable queryGet(String to,
-                               Serializable payload);
+  public Serializable query(String to,
+                            Serializable payload);
 
   /**
-   * Sends a query information call (get) to an actor,
+   * Sends a query information call to an actor,
    * blocking until the actor responds with a result or an error.
    *
-   * The target actor of a <code>queryGet</code> acts as a service and the
+   * The target actor of a <code>query</code> acts as a service and the
    * caller acts as a client.  Because BAM Actors are symmetrical, all
    * Actors can act as services and clients for different RPC calls.
    *
@@ -135,9 +135,9 @@ public interface ActorClient extends Actor {
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
-  public Serializable queryGet(String to,
-                               Serializable payload,
-                               long timeout);
+  public Serializable query(String to,
+                            Serializable payload,
+                            long timeout);
 
   /**
    * Sends a query information call (get) to an actor,
@@ -155,65 +155,7 @@ public interface ActorClient extends Actor {
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
-  public void queryGet(String to,
-                       Serializable payload,
-                       QueryCallback callback);
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's JID
-   * @param payload the query payload
-   */
-  public Serializable querySet(String to,
-                               Serializable payload);
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's JID
-   * @param payload the query payload
-   * @param timeout time spent waiting for the query to return
-   */
-  public Serializable querySet(String to,
-                               Serializable payload,
-                               long timeout);
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * providing a callback to receive the result or error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's JID
-   * @param payload the query payload
-   * @param callback the application's callback for the result
-   */
-  public void querySet(String to,
-                       Serializable payload,
-                       QueryCallback callback);
+  public void query(String to,
+                    Serializable payload,
+                    QueryCallback callback);
 }

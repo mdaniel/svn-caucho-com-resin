@@ -113,7 +113,7 @@ public class XmppAgentStream implements ActorStream
     }
   }
   
-  public void queryGet(long id,
+  public void query(long id,
                               String to,
                               String from,
                               Serializable query)

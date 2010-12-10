@@ -68,6 +68,7 @@ public class LocalActorClient implements ActorClient {
   /**
    * Returns the jid
    */
+  @Override
   public String getJid()
   {
     return _client.getJid();
@@ -76,6 +77,7 @@ public class LocalActorClient implements ActorClient {
   /**
    * Sets the message handler
    */
+  @Override
   public void setClientStream(ActorStream stream)
   {
     _client.setClientStream(stream);
@@ -84,6 +86,7 @@ public class LocalActorClient implements ActorClient {
   /**
    * Gets the message listener
    */
+  @Override
   public ActorStream getClientStream()
   {
     return _client.getClientStream();
@@ -92,6 +95,7 @@ public class LocalActorClient implements ActorClient {
   /**
    * The stream to the ActorClient.
    */
+  @Override
   public ActorStream getActorStream()
   {
     return _client.getActorStream();
@@ -100,6 +104,7 @@ public class LocalActorClient implements ActorClient {
   /**
    * The stream to the link.
    */
+  @Override
   public ActorStream getLinkStream()
   {
     return _client.getLinkStream();
@@ -108,11 +113,13 @@ public class LocalActorClient implements ActorClient {
   /**
    * The stream to the link.
    */
+  @Override
   public void setLinkStream(ActorStream linkStream)
   {
     _client.setLinkStream(linkStream);
   }
 
+  @Override
   public void message(String to,
                       Serializable payload)
   {
@@ -123,51 +130,36 @@ public class LocalActorClient implements ActorClient {
   // RPC
   //
 
-  public Serializable queryGet(String to,
+  @Override
+  public Serializable query(String to,
                                Serializable payload)
   {
-    return _client.queryGet(to, payload);
+    return _client.query(to, payload);
   }
 
-  public Serializable queryGet(String to,
-                               Serializable payload,
-                               long timeout)
+  @Override
+  public Serializable query(String to,
+                            Serializable payload,
+                            long timeout)
   {
-    return _client.queryGet(to, payload, timeout);
+    return _client.query(to, payload, timeout);
   }
 
-  public void queryGet(String to,
-                       Serializable payload,
-                       QueryCallback callback)
+  @Override
+  public void query(String to,
+                    Serializable payload,
+                    QueryCallback callback)
   {
-    _client.queryGet(to, payload, callback);
+    _client.query(to, payload, callback);
   }
 
-  public Serializable querySet(String to,
-                               Serializable payload)
-  {
-    return _client.querySet(to, payload);
-  }
-
-  public Serializable querySet(String to,
-                               Serializable payload,
-                               long timeout)
-  {
-    return _client.querySet(to, payload, timeout);
-  }
-
-  public void querySet(String to,
-                       Serializable payload,
-                       QueryCallback callback)
-  {
-    _client.querySet(to, payload, callback);
-  }
-
+  @Override
   public boolean isClosed()
   {
     return _client.isClosed();
   }
 
+  @Override
   public void close()
   {
     _client.close();

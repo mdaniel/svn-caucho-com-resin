@@ -95,23 +95,12 @@ public class NonQueuedMailbox implements Mailbox
    * Query an entity
    */
   @Override
-  public void queryGet(long id,
+  public void query(long id,
                        String to,
                        String from,
                        Serializable query)
   {
-    _actorStream.queryGet(id, to, from, query);
-  }
-
-  /**
-   * Query an entity
-   */
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    _actorStream.querySet(id, to, from, payload);
+    _actorStream.query(id, to, from, query);
   }
 
   /**

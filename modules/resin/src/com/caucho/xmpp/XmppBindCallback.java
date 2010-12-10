@@ -58,7 +58,6 @@ public class XmppBindCallback extends AbstractActorStream
     return _xmppBroker;
   }
 
-  @Override
   public void querySet(long id,
                           String to, String from,
                           Serializable value)

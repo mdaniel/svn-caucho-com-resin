@@ -123,7 +123,7 @@ abstract public class AbstractActorStream implements ActorStream
   //
   
   /**
-   * Receives a query information call (get), acting as a service for
+   * Receives a query call, acting as a service for
    * the query.
    *
    * The default implementation returns a feature-not-implemented QueryError
@@ -137,18 +137,18 @@ abstract public class AbstractActorStream implements ActorStream
    * @return true if this stream understand the query, false otherwise
    */
   @Override
-  public void queryGet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
+  public void query(long id,
+                    String to,
+                    String from,
+                    Serializable payload)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " queryGet not implemented " + payload
+      log.finer(this + " query not implemented " + payload
                 + " {id:" + id + ", from:" + from + ", to:" + to + "}");
     }
 
     String msg;
-    msg = (this + ": queryGet is not implemented by this actor.\n"
+    msg = (this + ": query is not implemented by this actor.\n"
            + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
 
     ActorError error = new ActorError(ActorError.TYPE_CANCEL,
@@ -160,49 +160,6 @@ abstract public class AbstractActorStream implements ActorStream
     if (linkStream == null)
       throw new IllegalStateException(this + ".getLinkStream() did not return an ActorStream, which is needed to send an error for a QueryGet");
     
-    linkStream.queryError(id, from, to, payload, error);
-  }
-  
-  /**
-   * Receives a query update call (set), acting as a service for
-   * the query.
-   *
-   * The default implementation returns a feature-not-implemented QueryError
-   * message to the client.
-   *
-   * @param id the query identifier used to match requests with responses
-   * @param to the service actor's JID
-   * @param from the client actor's JID
-   * @param payload the query payload
-   *
-   * @return true if this stream understand the query, false otherwise
-   */
-  @Override
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " querySet not implemented " + payload
-                + " {id:" + id + ", from:" + from + ", to:" + to + "}");
-    }
-
-    String msg;
-    msg = (this + ": querySet is not implemented for this payload:\n"
-           + "  " + payload
-           + " {id:" + id + ", from:" + from + ", to:" + to + "}");
-
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.FEATURE_NOT_IMPLEMENTED,
-                                      msg);
-
-
-    ActorStream linkStream = getLinkStream();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + ".getLinkStream() did not return an ActorStream, which is needed to send an error for a QuerySet");
-        
     linkStream.queryError(id, from, to, payload, error);
   }
   

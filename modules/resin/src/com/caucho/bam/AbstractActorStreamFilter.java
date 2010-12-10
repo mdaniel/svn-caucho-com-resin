@@ -42,6 +42,7 @@ abstract public class AbstractActorStreamFilter implements ActorStream
   /**
    * Returns the jid of the final actor
    */
+  @Override
   public String getJid()
   {
     return getNext().getJid();
@@ -54,13 +55,9 @@ abstract public class AbstractActorStreamFilter implements ActorStream
    * @param from the source JID
    * @param payload the message payload
    */
+  @Override
   public void message(String to, String from, Serializable payload)
   {
-    if (this == getNext()) {
-      System.out.println("THIS: " + this);
-      Thread.dumpStack();
-      return;
-    }
     getNext().message(to, from, payload);
   }
   
@@ -71,6 +68,7 @@ abstract public class AbstractActorStreamFilter implements ActorStream
    * @param from the source JID
    * @param payload the message payload
    */
+  @Override
   public void messageError(String to,
                            String from,
                            Serializable payload,
@@ -79,22 +77,16 @@ abstract public class AbstractActorStreamFilter implements ActorStream
     getNext().messageError(to, from, payload, error);
   }
   
-  public void queryGet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
+  @Override
+  public void query(long id,
+                    String to,
+                    String from,
+                    Serializable payload)
   {
-    getNext().queryGet(id, to, from, payload);
+    getNext().query(id, to, from, payload);
   }
   
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    getNext().querySet(id, to, from, payload);
-  }
-  
+  @Override
   public void queryResult(long id,
                           String to,
                           String from,
@@ -103,6 +95,7 @@ abstract public class AbstractActorStreamFilter implements ActorStream
     getNext().queryResult(id, to, from, payload);
   }
   
+  @Override
   public void queryError(long id,
                          String to,
                          String from,
@@ -112,6 +105,7 @@ abstract public class AbstractActorStreamFilter implements ActorStream
     getNext().queryError(id, to, from, payload, error);
   }
   
+  @Override
   public boolean isClosed()
   {
     return getNext().isClosed();

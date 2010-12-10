@@ -35,8 +35,7 @@ import java.util.logging.Logger;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorException;
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.QueryGet;
-import com.caucho.bam.QuerySet;
+import com.caucho.bam.Query;
 import com.caucho.bam.SimpleActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.hmtp.AuthQuery;
@@ -100,7 +99,7 @@ public class ServerLinkActor extends SimpleActor {
   // message handling
   //
 
-  @QueryGet
+  @Query
   public void getNonce(long id, String to, String from,
                        NonceQuery query)
   {
@@ -109,13 +108,13 @@ public class ServerLinkActor extends SimpleActor {
     getLinkStream().queryResult(id, from, to, result);
   }
 
-  @QuerySet
+  @Query
   public void authLogin(long id, String to, String from, LoginQuery query)
   {
     login(id, to, from, query.getAuth(), query.getAddress());
   }
 
-  @QuerySet
+  @Query
   public void authLogin(long id, String to, String from, AuthQuery query)
   {
     login(id, to, from, query, _ipAddress);

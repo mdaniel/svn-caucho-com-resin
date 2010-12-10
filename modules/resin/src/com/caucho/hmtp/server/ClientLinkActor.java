@@ -116,18 +116,12 @@ class ClientLinkActor implements Actor, ActorStream
   }
 
   @Override
-  public void queryGet(long id, String to, String from, Serializable payload)
+  public void query(long id, 
+                    String to, 
+                    String from, 
+                    Serializable payload)
   {
-    getLinkStream().queryGet(id, to, getJid(), payload);
-  }
-
-  @Override
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    getLinkStream().querySet(id, to, getJid(), payload);
+    getLinkStream().query(id, to, getJid(), payload);
   }
 
   @Override

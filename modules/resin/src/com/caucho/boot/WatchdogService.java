@@ -29,8 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.bam.QueryGet;
-import com.caucho.bam.QuerySet;
+import com.caucho.bam.Query;
 import com.caucho.bam.SimpleActor;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -66,7 +65,7 @@ class WatchdogService extends SimpleActor
   /**
    * Start queries
    */
-  @QuerySet
+  @Query
   public boolean watchdogStart(long id, String to, String from,
                                WatchdogStartQuery start)
   {
@@ -100,7 +99,7 @@ class WatchdogService extends SimpleActor
   /**
    * Status queries
    */
-  @QueryGet
+  @Query
   public boolean watchdogStatus(long id, String to, String from,
                                 WatchdogStatusQuery status)
   {
@@ -125,7 +124,7 @@ class WatchdogService extends SimpleActor
   /**
    * Handles stop queries
    */
-  @QuerySet
+  @Query
   public boolean watchdogStop(long id, String to, String from,
                               WatchdogStopQuery stop)
   {
@@ -158,7 +157,7 @@ class WatchdogService extends SimpleActor
   /**
    * Handles kill queries
    */
-  @QuerySet
+  @Query
   public boolean watchdogKill(long id, String to, String from,
                               WatchdogKillQuery kill)
   {
@@ -191,7 +190,7 @@ class WatchdogService extends SimpleActor
   /**
    * Handles shutdown queries
    */
-  @QuerySet
+  @Query
   public boolean watchdogShutdown(long id, String to, String from,
                                   WatchdogShutdownQuery shutdown)
   {

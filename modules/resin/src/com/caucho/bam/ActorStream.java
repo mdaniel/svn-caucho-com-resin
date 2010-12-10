@@ -37,11 +37,10 @@ import java.io.Serializable;
  * {@link com.caucho.bam.Actor Actors} send packets to the 
  * {@link com.caucho.bam.broker.Broker} for delivery to other Actors.
  *
- * Packets are divided into three groups:
+ * Packets are divided into two groups:
  * <ul>
  * <li>message - unidirectional messages
  * <li>query - RPC call/reply packets
- * <li>presence - publish/subscribe management
  * </ul>
  */
 public interface ActorStream
@@ -94,9 +93,9 @@ public interface ActorStream
   //
   
   /**
-   * Sends a query information call (get).
+   * Sends a query/RPCinformation call
    *
-   * The receiver of a <code>queryGet</code> acts as a service and the
+   * The receiver of a <code>query</code> acts as a service and the
    * caller acts as a client.  Because BAM Actors are symmetrical, all
    * Actors can act as services and clients for different RPC calls.
    *
@@ -109,34 +108,13 @@ public interface ActorStream
    * @param from the client actor's JID
    * @param payload the query payload
    */
-  public void queryGet(long id,
-                          String to,
-                          String from,
-                          Serializable payload);
-  
-  /**
-   * Sends a query update request (set).
-   *
-   * The receiver of a <code>queryGet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The handler MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the sender using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param id query identifier used to match requests with responses
-   * @param to the service actor's JID
-   * @param from the client actor's JID
-   * @param payload the query payload
-   */
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload);
+  public void query(long id,
+                    String to,
+                    String from,
+                    Serializable payload);
 
   /**
-   * Sends a query response for a queryGet or querySet.
+   * Sends a query response for a query
    *
    * @param id the query identifier used to match requests with responses
    * @param to the client actor's JID
@@ -149,7 +127,7 @@ public interface ActorStream
                           Serializable payload);
   
   /**
-   * Sends a query error from a failed queryGet or querySet.
+   * Sends a query error from a failed query.
    *
    * @param id the query identifier used to match requests with responses
    * @param to the client actor's JID

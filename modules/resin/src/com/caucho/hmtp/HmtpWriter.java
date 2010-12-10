@@ -162,13 +162,13 @@ public class HmtpWriter
   //
 
   /**
-   * Low-level query get
+   * Low-level query
    */
-  public void queryGet(OutputStream os,
-                       long id,
-                       String to,
-                       String from,
-                       Serializable value)
+  public void query(OutputStream os,
+                    long id,
+                    String to,
+                    String from,
+                    Serializable value)
     throws IOException
   {
     init(os);
@@ -179,42 +179,11 @@ public class HmtpWriter
       return;
 
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " queryGet " + value
+      log.finer(this + " query " + value
                 + " {id: " + id + ", to:" + to + ", from:" + from + "}");
     }
 
-    out.writeInt(HmtpPacketType.QUERY_GET.ordinal());
-    writeJid(out, to);
-    writeJid(out, from);
-    out.writeLong(id);
-    out.writeObject(value);
-
-    out.flushBuffer();
-  }
-
-  /**
-   * Low-level query set
-   */
-  public void querySet(OutputStream os,
-                       long id,
-                       String to,
-                       String from,
-                       Serializable value)
-    throws IOException
-  {
-    init(os);
-    
-    Hessian2Output out = _out;
-
-    if (out == null)
-      return;
-
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " querySet " + value
-                + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-    }
-
-    out.writeInt(HmtpPacketType.QUERY_SET.ordinal());
+    out.writeInt(HmtpPacketType.QUERY.ordinal());
     writeJid(out, to);
     writeJid(out, from);
     out.writeLong(id);

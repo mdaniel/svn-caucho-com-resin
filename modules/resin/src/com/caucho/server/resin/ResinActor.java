@@ -36,8 +36,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.QueryGet;
-import com.caucho.bam.QuerySet;
+import com.caucho.bam.Query;
 import com.caucho.bam.SimpleActor;
 import com.caucho.boot.PidQuery;
 import com.caucho.boot.WatchdogStopQuery;
@@ -89,7 +88,7 @@ public class ResinActor extends SimpleActor
   /**
    * Query for the process pid.
    */
-  @QueryGet
+  @Query
   public void queryPid(long id,
                        String to,
                        String from,
@@ -128,7 +127,7 @@ public class ResinActor extends SimpleActor
     }
    }
 
-  @QuerySet
+  @Query
   public void stop(long id,
                    String to,
                    String from,

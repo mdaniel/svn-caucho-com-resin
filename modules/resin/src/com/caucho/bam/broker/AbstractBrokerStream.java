@@ -158,7 +158,7 @@ abstract public class AbstractBrokerStream implements ActorStream
   //
   
   /**
-   * Receives a query information call (get), acting as a service for
+   * Receives a query call, acting as a service for
    * the query.
    *
    * The default implementation returns a feature-not-implemented QueryError
@@ -172,76 +172,25 @@ abstract public class AbstractBrokerStream implements ActorStream
    * @return true if this stream understand the query, false otherwise
    */
   @Override
-  public void queryGet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
+  public void query(long id,
+                    String to,
+                    String from,
+                    Serializable payload)
   {
     if (log.isLoggable(Level.FINEST)) {
-      log.finest(this + ": queryGet(" + id + ") " + payload
+      log.finest(this + ": query(" + id + ") " + payload
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
     ActorStream toStream = getActorStream(to);
     
     if (toStream != null) {
-      toStream.queryGet(id, to, from, payload);
+      toStream.query(id, to, from, payload);
       return;
     }
 
     String msg;
-    msg = (this + ": queryGet(" + id + ") to unknown actor to:" + to
-           + "\n  from:" + from
-           + "\n  payload:" + payload);
-    
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(msg);
-    }
-
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.ITEM_NOT_FOUND,
-                                      msg);
-
-    ActorStream fromStream = getActorStream(from);
-
-    if (fromStream != null)
-      fromStream.queryError(id, from, to, payload, error);
-  }
-  
-  /**
-   * Receives a query update call (set), acting as a service for
-   * the query.
-   *
-   * The default implementation returns a feature-not-implemented QueryError
-   * message to the client.
-   *
-   * @param id the query identifier used to match requests with responses
-   * @param to the service actor's JID
-   * @param from the client actor's JID
-   * @param payload the query payload
-   *
-   * @return true if this stream understand the query, false otherwise
-   */
-  @Override
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    if (log.isLoggable(Level.FINEST)) {
-      log.finest(this + ": querySet(" + id + ") " + payload
-                 + "\n  {to: " + to + ", from:" + from + "}");
-    }
-    
-    ActorStream toStream = getActorStream(to);
-    
-    if (toStream != null) {
-      toStream.querySet(id, to, from, payload);
-      return;
-    }
-
-    String msg;
-    msg = (this + ": querySet(" + id + ") to unknown actor to:" + to
+    msg = (this + ": query(" + id + ") to unknown actor to:" + to
            + "\n  from:" + from
            + "\n  payload:" + payload);
     

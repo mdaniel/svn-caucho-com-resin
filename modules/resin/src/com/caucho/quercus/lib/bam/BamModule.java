@@ -313,24 +313,13 @@ public class BamModule extends AbstractQuercusModule
     getBrokerStream(env).messageError(to, getJid(env), value, error);
   }
 
-  public static Value bam_send_query_get(Env env, 
+  public static Value bam_send_query(Env env, 
                                          long id, 
                                          String to, 
                                          Serializable value)
   {
     String from = getJid(env);
-    getBrokerStream(env).queryGet(id, to, from, value);
-
-    return BooleanValue.TRUE;
-  }
-
-  public static Value bam_send_query_set(Env env, 
-                                         long id, 
-                                         String to, 
-                                         Serializable value)
-  {
-    String from = getJid(env);
-    getBrokerStream(env).querySet(id, to, from, value);
+    getBrokerStream(env).query(id, to, from, value);
 
     return BooleanValue.TRUE;
   }

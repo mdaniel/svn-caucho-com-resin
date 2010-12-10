@@ -39,7 +39,7 @@ import java.io.Serializable;
  * to match the query with the response.  The target must either respond
  * with a QueryResult or QueryError.
  */
-public class QueryGet extends Packet {
+public class Query extends Packet {
   private final long _id;
   
   private final Serializable _value;
@@ -52,7 +52,7 @@ public class QueryGet extends Packet {
    * @param from the source jid
    * @param value the query content
    */
-  public QueryGet(long id, String to, String from, Serializable value)
+  public Query(long id, String to, String from, Serializable value)
   {
     super(to, from);
 
@@ -82,7 +82,7 @@ public class QueryGet extends Packet {
   @Override
   public void dispatch(ActorStream handler, ActorStream toSource)
   {
-    handler.queryGet(getId(), getTo(), getFrom(), getValue());
+    handler.query(getId(), getTo(), getFrom(), getValue());
   }
 
   /**

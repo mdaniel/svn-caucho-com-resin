@@ -198,7 +198,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.queryGet(WATCHDOG_JID, new WatchdogStatusQuery());
+        conn.query(WATCHDOG_JID, new WatchdogStatusQuery());
 
       if (status.isSuccess())
         return status.getMessage();
@@ -244,7 +244,7 @@ class WatchdogClient
       conn = getConnection();
 
       ResultStatus status = (ResultStatus)
-        conn.querySet(WATCHDOG_JID, new WatchdogStartQuery(argv), BAM_TIMEOUT);
+        conn.query(WATCHDOG_JID, new WatchdogStartQuery(argv), BAM_TIMEOUT);
 
       if (status.isSuccess())
         return;
@@ -269,7 +269,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.querySet(WATCHDOG_JID, new WatchdogStopQuery(getId()), BAM_TIMEOUT);
+        conn.query(WATCHDOG_JID, new WatchdogStopQuery(getId()), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog stop failed because of '{1}'",
@@ -288,7 +288,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.querySet(WATCHDOG_JID, new WatchdogKillQuery(getId()), BAM_TIMEOUT);
+        conn.query(WATCHDOG_JID, new WatchdogKillQuery(getId()), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog kill failed because of '{1}'",
@@ -325,7 +325,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.querySet(WATCHDOG_JID, new WatchdogShutdownQuery(), BAM_TIMEOUT);
+        conn.query(WATCHDOG_JID, new WatchdogShutdownQuery(), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog shutdown failed because of '{1}'",

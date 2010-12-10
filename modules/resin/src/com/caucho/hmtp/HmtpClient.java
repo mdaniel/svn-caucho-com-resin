@@ -176,7 +176,7 @@ public class HmtpClient extends SimpleActorClient {
         
         NonceQuery nonceQuery = new NonceQuery(uid, clientNonce);
         NonceQuery nonceResult
-          = (NonceQuery) queryGet(null, nonceQuery);
+          = (NonceQuery) query(null, nonceQuery);
         
         String serverNonce = nonceResult.getNonce();
         String serverSignature = nonceResult.getSignature();
@@ -198,7 +198,7 @@ public class HmtpClient extends SimpleActorClient {
       }
 
       AuthResult result;
-      result = (AuthResult) querySet(null, new AuthQuery(uid, credentials));
+      result = (AuthResult) query(null, new AuthQuery(uid, credentials));
 
       _jid = result.getJid();
 

@@ -132,40 +132,15 @@ public class HmtpWebSocketContextWriter implements ActorStream
    * @param payload the message payload
    */
   @Override
-  public void queryGet(long id,
-                       String to, 
-                       String from, 
-                       Serializable payload)
+  public void query(long id,
+                    String to, 
+                    String from, 
+                    Serializable payload)
   {
     try {
       OutputStream os = _ws.startBinaryMessage();
       
-      _hOut.queryGet(os, id, to, from, payload);
-      
-      os.close();
-    } catch (IOException e) {
-      throw new ProtocolException(e);
-    }
-  }
-
-  /**
-   * Sends a querySet to a given jid
-   * 
-   * @param id the query id
-   * @param to the jid of the target actor
-   * @param from the jid of the source actor
-   * @param payload the message payload
-   */
-  @Override
-  public void querySet(long id,
-                       String to, 
-                       String from, 
-                       Serializable payload)
-  {
-    try {
-      OutputStream os = _ws.startBinaryMessage();
-      
-      _hOut.querySet(os, id, to, from, payload);
+      _hOut.query(os, id, to, from, payload);
       
       os.close();
     } catch (IOException e) {

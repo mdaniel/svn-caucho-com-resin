@@ -61,9 +61,7 @@ public class BamSkeleton<S>
     = new HashMap<Class<?>, Method>();
   private final HashMap<Class<?>, Method> _messageErrorHandlers
     = new HashMap<Class<?>, Method>();
-  private final HashMap<Class<?>, Method> _queryGetHandlers
-    = new HashMap<Class<?>, Method>();
-  private final HashMap<Class<?>, Method> _querySetHandlers
+  private final HashMap<Class<?>, Method> _queryHandlers
     = new HashMap<Class<?>, Method>();
   private final HashMap<Class<?>, Method> _queryResultHandlers
     = new HashMap<Class<?>, Method>();
@@ -182,25 +180,25 @@ public class BamSkeleton<S>
     }
   }
 
-  public void queryGet(S actor,
-                       ActorStream fallback,
-                       ActorStream linkStream,
-                       long id,
-                       String to,
-                       String from,
-                       Serializable payload)
+  public void query(S actor,
+                    ActorStream fallback,
+                    ActorStream linkStream,
+                    long id,
+                    String to,
+                    String from,
+                    Serializable payload)
   {
     Method handler;
 
     if (payload != null)
-      handler = _queryGetHandlers.get(payload.getClass());
+      handler = _queryHandlers.get(payload.getClass());
     else {
       handler = null;
     }
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actor + " queryGet " + payload
+        log.finest(actor + " query " + payload
                    + " {id: " + id + ", from:" + from + ", to:" + to + "}");
       }
 
@@ -226,54 +224,7 @@ public class BamSkeleton<S>
       }
     }
     else {
-      fallback.queryGet(id, to, from, payload);
-    }
-  }
-
-  public void querySet(S actor,
-                       ActorStream fallback,
-                       ActorStream linkStream,
-                       long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    Method handler;
-
-    if (payload != null)
-      handler = _querySetHandlers.get(payload.getClass());
-    else
-      handler = null;
-
-    if (handler != null) {
-      if (log.isLoggable(Level.FINEST)) {
-        log.finest(actor + " querySet " + payload
-                   + " {id: " + id + ", from:" + from + ", to:" + to + "}");
-      }
-
-      try {
-        handler.invoke(actor, id, to, from, payload);
-      }
-      catch (RuntimeException e) {
-        linkStream.queryError(id, from, to, payload, ActorError.create(e));
-        
-        throw e;
-      }
-      catch (InvocationTargetException e) {
-        Throwable cause = e.getCause();
-        
-        linkStream.queryError(id, from, to, payload, ActorError.create(cause));
-
-        throw SkeletonInvocationException.createRuntimeException(cause);
-      }
-      catch (Exception e) {
-        linkStream.queryError(id, from, to, payload, ActorError.create(e));
-        
-        throw SkeletonInvocationException.createRuntimeException(e);
-      }
-    }
-    else {
-      fallback.querySet(id, to, from, payload);
+      fallback.query(id, to, from, payload);
     }
   }
 
@@ -394,27 +345,15 @@ public class BamSkeleton<S>
         continue;
       }
 
-      payloadType = getQueryPayloadType(QueryGet.class, method);
+      payloadType = getQueryPayloadType(Query.class, method);
 
       if (payloadType != null) {
-        log.finest(L.l("{0} @QueryGet {1} method={2}",
+        log.finest(L.l("{0} @Query {1} method={2}",
                        this, payloadType.getName(), method));
 
         method.setAccessible(true);
 
-        _queryGetHandlers.put(payloadType, method);
-        continue;
-      }
-
-      payloadType = getQueryPayloadType(QuerySet.class, method);
-
-      if (payloadType != null) {
-        log.finest(L.l("{0} @QuerySet {1} method={2}",
-                       this, payloadType.getName(), method));
-
-        method.setAccessible(true);
-
-        _querySetHandlers.put(payloadType, method);
+        _queryHandlers.put(payloadType, method);
         continue;
       }
 

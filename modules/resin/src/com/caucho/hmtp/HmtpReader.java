@@ -151,32 +151,17 @@ public class HmtpReader {
         break;
       }
 
-    case QUERY_GET:
+    case QUERY:
       {
         long id = hIn.readLong();
         Serializable value = (Serializable) hIn.readObject();
 
         if (log.isLoggable(Level.FINER)) {
-          log.finer(this + " queryGet " + value
+          log.finer(this + " query " + value
                     + " {id:" + id + ", to:" + to + ", from:" + from + "}");
         }
 
-        actorStream.queryGet(id, to, from, value);
-
-        break;
-      }
-
-    case QUERY_SET:
-      {
-        long id = hIn.readLong();
-        Serializable value = (Serializable) hIn.readObject();
-
-        if (log.isLoggable(Level.FINER)) {
-          log.finer(this + " querySet " + value
-                    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-        }
-
-        actorStream.querySet(id, to, from, value);
+        actorStream.query(id, to, from, value);
 
         break;
       }

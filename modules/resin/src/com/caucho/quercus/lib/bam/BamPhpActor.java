@@ -205,7 +205,7 @@ public class BamPhpActor extends SimpleActor {
   }
 
   @Override
-  public void queryGet(long id, String to, String from, Serializable value)
+  public void query(long id, String to, String from, Serializable value)
   {
     BamEventType eventType = BamEventType.QUERY_GET;
 
@@ -252,25 +252,6 @@ public class BamPhpActor extends SimpleActor {
     featureNames.addAll(_featureNames);
   }
   */
-
-  @Override
-  public void querySet(long id, String to, String from, Serializable value)
-  {
-    Env env = createEnv(_page, BamEventType.QUERY_SET, to, from, value);
-    boolean understood = false;
-
-    try {
-      setId(env, id);
-
-      _page.executeTop(env);
-
-      understood = 
-        env.getGlobalValue("_quercus_bam_function_return").toBoolean();
-    }
-    finally {
-      env.close();
-    }
-  }
 
   @Override
   public void queryResult(long id, String to, String from, Serializable value)

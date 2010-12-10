@@ -111,43 +111,23 @@ public class ServerPassStream extends AbstractActorStream {
   }
 
   /**
-   * Handles a get query.
+   * Handles a query.
    *
-   * The get handler must respond with either
+   * The query handler must respond with either
    * a QueryResult or a QueryError
    */
   @Override
-  public void queryGet(long id,
+  public void query(long id,
                        String to,
                        String from,
                        Serializable payload)
   {
     if (to == null)
-      _linkService.queryGet(id, to, from, payload);
+      _linkService.query(id, to, from, payload);
     else if (_brokerStream != null)
-      _brokerStream.queryGet(id, to, from, payload);
+      _brokerStream.query(id, to, from, payload);
     else
-      super.queryGet(id, to, from, payload);
-  }
-
-  /**
-   * Handles a set query.
-   *
-   * The set handler must respond with either
-   * a QueryResult or a QueryError
-   */
-  @Override
-  public void querySet(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
-  {
-    if (to == null)
-      _linkService.querySet(id, to, from, payload);
-    else if (_brokerStream != null)
-      _brokerStream.querySet(id, to, from, payload);
-    else
-      super.querySet(id, to, from, payload);
+      super.query(id, to, from, payload);
   }
 
   /**

@@ -75,7 +75,7 @@ public interface ActorProxy {
    *
    * @param payload the query payload
    */
-  public Serializable queryGet(Serializable payload);
+  public Serializable query(Serializable payload);
 
   /**
    * Sends a query information call (get) to an actor,
@@ -92,8 +92,8 @@ public interface ActorProxy {
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
-  public Serializable queryGet(Serializable payload,
-                               long timeout);
+  public Serializable query(Serializable payload,
+                            long timeout);
 
   /**
    * Sends a query information call (get) to an actor,
@@ -111,60 +111,8 @@ public interface ActorProxy {
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
-  public void queryGet(Serializable payload,
-                       QueryCallback callback);
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param payload the query payload
-   */
-  public Serializable querySet(Serializable payload);
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param payload the query payload
-   * @param timeout time spent waiting for the query to return
-   */
-  public Serializable querySet(Serializable payload,
-                               long timeout);
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * providing a callback to receive the result or error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param payload the query payload
-   * @param callback the application's callback for the result
-   */
-  public void querySet(Serializable payload,
-                       QueryCallback callback);
+  public void query(Serializable payload,
+                    QueryCallback callback);
 
   /**
    * Registers a callback {@link com.caucho.bam.ActorStream} with the client

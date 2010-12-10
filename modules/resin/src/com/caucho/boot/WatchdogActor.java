@@ -53,17 +53,17 @@ public class WatchdogActor extends SimpleActor
     _child = watchdog;
   }
   
-  public Serializable queryGet(Serializable payload)
+  public Serializable query(Serializable payload)
   {
-    return getLinkClient().queryGet("resin@admin.resin.caucho", payload);
+    return getLinkClient().query("resin@admin.resin.caucho", payload);
   }
 
   public void sendShutdown()
   {
-    getLinkStream().querySet(1,
-                             "resin@admin.resin.caucho",
-                             "watchdog@admin.resin.caucho",
-                             new WatchdogStopQuery(""));
+    getLinkStream().query(1,
+                          "resin@admin.resin.caucho",
+                          "watchdog@admin.resin.caucho",
+                          new WatchdogStopQuery(""));
   }
   
   @Message

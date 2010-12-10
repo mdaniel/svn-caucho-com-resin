@@ -66,11 +66,13 @@ public class SimpleActorClient implements ActorClient {
   /**
    * Returns the Actor's jid used for all "from" parameters.
    */
+  @Override
   public String getJid()
   {
     return _jid;
   }
   
+  @Override
   public void setJid(String jid)
   {
     _jid = jid;
@@ -83,6 +85,7 @@ public class SimpleActorClient implements ActorClient {
   /**
    * Registers a callback {@link com.caucho.bam.ActorStream} with the client
    */
+  @Override
   public void setClientStream(ActorStream clientStream)
   {
     if (clientStream == _actorStream)
@@ -94,6 +97,7 @@ public class SimpleActorClient implements ActorClient {
   /**
    * Returns the registered callback {@link com.caucho.bam.ActorStream}.
    */
+  @Override
   public ActorStream getClientStream()
   {
     return _clientStream;
@@ -102,6 +106,7 @@ public class SimpleActorClient implements ActorClient {
   /**
    * Sets the stream to the client
    */
+  @Override
   public void setActorStream(ActorStream actorStream)
   {
     _actorStream = actorStream;
@@ -110,6 +115,7 @@ public class SimpleActorClient implements ActorClient {
   /**
    * Returns the registered callback {@link com.caucho.bam.ActorStream}.
    */
+  @Override
   public ActorStream getActorStream()
   {
     return _actorStream;
@@ -118,6 +124,7 @@ public class SimpleActorClient implements ActorClient {
   /**
    * The underlying, low-level stream to the link
    */
+  @Override
   public ActorStream getLinkStream()
   {
     return _linkStream;
@@ -126,6 +133,7 @@ public class SimpleActorClient implements ActorClient {
   /**
    * The underlying, low-level stream to the link
    */
+  @Override
   public void setLinkStream(ActorStream linkStream)
   {
     _linkStream = linkStream;
@@ -142,6 +150,7 @@ public class SimpleActorClient implements ActorClient {
    * @param to the target actor's JID
    * @param payload the message payload
    */
+  @Override
   public void message(String to, Serializable payload)
   {
     ActorStream linkStream = getLinkStream();
@@ -171,8 +180,9 @@ public class SimpleActorClient implements ActorClient {
    * @param to the target actor's JID
    * @param payload the query payload
    */
-  public Serializable queryGet(String to,
-                               Serializable payload)
+  @Override
+  public Serializable query(String to,
+                            Serializable payload)
   {
     ActorStream linkStream = getLinkStream();
 
@@ -184,7 +194,7 @@ public class SimpleActorClient implements ActorClient {
     QueryFuture future
       = _queryManager.addQueryFuture(id, to, getJid(), payload, _timeout);
 
-    linkStream.queryGet(id, to, getJid(), payload);
+    linkStream.query(id, to, getJid(), payload);
 
     return future.get();
   }
@@ -204,9 +214,10 @@ public class SimpleActorClient implements ActorClient {
    * @param to the target actor's JID
    * @param payload the query payload
    */
-  public Serializable queryGet(String to,
-                               Serializable payload,
-                               long timeout)
+  @Override
+  public Serializable query(String to,
+                            Serializable payload,
+                            long timeout)
   {
     ActorStream linkStream = getLinkStream();
 
@@ -218,7 +229,7 @@ public class SimpleActorClient implements ActorClient {
     QueryFuture future
       = _queryManager.addQueryFuture(id, to, getJid(), payload, timeout);
 
-    linkStream.queryGet(id, to, getJid(), payload);
+    linkStream.query(id, to, getJid(), payload);
 
     return future.get();
   }
@@ -240,9 +251,10 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
-  public void queryGet(String to,
-                       Serializable payload,
-                       QueryCallback callback)
+  @Override
+  public void query(String to,
+                    Serializable payload,
+                    QueryCallback callback)
   {
     ActorStream linkStream = getLinkStream();
 
@@ -253,112 +265,8 @@ public class SimpleActorClient implements ActorClient {
     
     _queryManager.addQueryCallback(id, callback);
 
-    linkStream.queryGet(id, to, getJid(), payload);
+    linkStream.query(id, to, getJid(), payload);
   }
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's JID
-   * @param payload the query payload
-   */
-  public Serializable querySet(String to,
-                               Serializable payload)
-  {
-    ActorStream linkStream = getLinkStream();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.generateQueryId();
-    
-    QueryFuture future
-      = _queryManager.addQueryFuture(id, to, getJid(), payload, _timeout);
-
-    linkStream.querySet(id, to, getJid(), payload);
-
-    return future.get();
-  }
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's JID
-   * @param payload the query payload
-   */
-  public Serializable querySet(String to,
-                               Serializable payload,
-                               long timeout)
-  {
-    ActorStream linkStream = getLinkStream();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.generateQueryId();
-    
-    QueryFuture future
-      = _queryManager.addQueryFuture(id, to, getJid(), payload, timeout);
-
-    linkStream.querySet(id, to, getJid(), payload);
-
-    return future.get();
-  }
-
-
-  /**
-   * Sends a query update call (set) to an actor,
-   * providing a callback to receive the result or error.
-   *
-   * The target actor of a <code>querySet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's JID
-   * @param payload the query payload
-   * @param callback the application's callback for the result
-   */
-  public void querySet(String to,
-                       Serializable payload,
-                       QueryCallback callback)
-  {
-    ActorStream linkStream = getLinkStream();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.generateQueryId();
-    
-    _queryManager.addQueryCallback(id, callback);
-
-    linkStream.querySet(id, to, getJid(), payload);
-  }
-
-  //
-  // presence handling
-  //
 
   /**
    * Returns true if the client is closed

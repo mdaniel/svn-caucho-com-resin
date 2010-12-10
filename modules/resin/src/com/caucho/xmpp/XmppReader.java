@@ -407,14 +407,16 @@ public class XmppReader
       long bamId = _xmppContext.addId(id);
 
       if (_handler != null)
-        _handler.queryGet(bamId, to, from, query);
+        _handler.query(bamId, to, from, query);
     }
+    /*
     else if ("set".equals(type)) {
       long bamId = _xmppContext.addId(id);
 
       if (_handler != null)
         _handler.querySet(bamId, to, from, query);
     }
+    */
     else if ("result".equals(type)) {
       long bamId = Long.parseLong(id);
 
