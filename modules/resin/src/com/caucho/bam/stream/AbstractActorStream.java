@@ -27,14 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.stream;
 
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.ActorError;
+
 /**
- * The abstract implementation of an {@link com.caucho.bam.ActorStream}
+ * The abstract implementation of an {@link com.caucho.bam.stream.ActorStream}
  * returns query errors for RPC packets, and ignores unknown packets
  * for messages and presence announcement.
  *

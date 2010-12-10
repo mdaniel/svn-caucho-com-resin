@@ -27,9 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.stream;
 
 import java.io.Serializable;
+
+import com.caucho.bam.ActorError;
 
 /**
  * Primary {@link com.caucho.bam.Actor} stream handling all packets.

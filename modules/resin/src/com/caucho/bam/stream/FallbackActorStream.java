@@ -27,11 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.stream;
 
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.bam.Actor;
+import com.caucho.bam.ActorError;
 
 /**
  * Base ActorStream implementation using introspection and

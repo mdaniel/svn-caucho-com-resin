@@ -27,9 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.stream;
 
 import java.io.Serializable;
+
+import com.caucho.bam.ActorError;
+
 
 /**
  * Abstract implementation of a BAM filter.  The default operation
