@@ -34,10 +34,10 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorException;
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.Query;
 import com.caucho.bam.SimpleActor;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.hmtp.AuthQuery;
 import com.caucho.hmtp.AuthResult;
 import com.caucho.hmtp.NonceQuery;

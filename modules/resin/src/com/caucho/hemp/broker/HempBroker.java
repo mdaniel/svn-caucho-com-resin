@@ -44,11 +44,11 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Extension;
 
 import com.caucho.bam.Actor;
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.BrokerListener;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;

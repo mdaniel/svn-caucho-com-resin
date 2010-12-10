@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.loader.EnvironmentLocal;
 
 
