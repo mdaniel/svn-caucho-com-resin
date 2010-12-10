@@ -34,8 +34,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.caucho.bam.Actor;
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.stream.ActorStream;
 
 /**
  * HMTP client protocol

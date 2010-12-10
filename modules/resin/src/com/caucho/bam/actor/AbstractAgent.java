@@ -42,7 +42,7 @@ import com.caucho.bam.mailbox.Mailbox;
  * the actor.  JIDs look like email addresses: harry@caucho.com
  * or harry@caucho.com/browser13.
  *
- * {@link com.caucho.bam.ActorStream} is the key customizable interface
+ * {@link com.caucho.bam.stream.ActorStream} is the key customizable interface
  * for an agent developer.  Developers will implement callbacks for each
  * packet type the agent understands.
  *

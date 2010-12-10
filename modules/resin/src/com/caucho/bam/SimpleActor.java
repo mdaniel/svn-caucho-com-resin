@@ -29,6 +29,8 @@
 
 package com.caucho.bam;
 
+import com.caucho.bam.stream.ActorStream;
+
 /**
  * Base class for implementing an Agent.
  */
@@ -54,7 +56,7 @@ public class SimpleActor extends SimpleActorStream
   //
 
   /**
-   * Returns the custom {@link com.caucho.bam.ActorStream} to the
+   * Returns the custom {@link com.caucho.bam.stream.ActorStream} to the
    * {@link com.caucho.bam.broker.Broker}, so the Broker can send messages to
    * the agent.
    *

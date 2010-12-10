@@ -36,8 +36,8 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.SimpleActorClient;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.quercus.annotation.ClassImplementation;

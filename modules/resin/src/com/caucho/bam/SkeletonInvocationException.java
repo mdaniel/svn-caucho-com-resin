@@ -29,6 +29,7 @@
 
 package com.caucho.bam;
 
+
 /**
  * Exception caught by the skeleton invocation
  */

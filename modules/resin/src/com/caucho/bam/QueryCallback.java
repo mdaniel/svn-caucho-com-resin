@@ -29,7 +29,7 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.ActorError;
+
 import java.io.Serializable;
 
 /**

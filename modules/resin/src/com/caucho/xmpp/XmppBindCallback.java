@@ -31,8 +31,8 @@ package com.caucho.xmpp;
 
 import java.io.Serializable;
 
-import com.caucho.bam.AbstractActorStream;
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.AbstractActorStream;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.xmpp.im.ImBindQuery;
 
 /**

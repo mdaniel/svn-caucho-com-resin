@@ -35,13 +35,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.packet.Message;
 import com.caucho.bam.packet.MessageError;
 import com.caucho.bam.packet.Packet;
 import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.Query;
 import com.caucho.bam.packet.QueryResult;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 

@@ -42,9 +42,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.config.Admin;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.servlet.ServerAuthManager;

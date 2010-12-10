@@ -30,7 +30,7 @@
 package com.caucho.bam.packet;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.ActorStream;
 
 import java.io.Serializable;
 

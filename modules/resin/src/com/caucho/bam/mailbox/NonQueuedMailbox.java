@@ -32,7 +32,7 @@ package com.caucho.bam.mailbox;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.ActorStream;
 
 /**
  * mailbox for BAM messages waiting to be sent to the Actor.

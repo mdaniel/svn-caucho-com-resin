@@ -43,8 +43,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import com.caucho.bam.AbstractActorStream;
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.AbstractActorStream;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;

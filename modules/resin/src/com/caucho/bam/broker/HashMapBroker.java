@@ -31,10 +31,10 @@ package com.caucho.bam.broker;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.ActorStream;
 
 /**
- * The abstract implementation of an {@link com.caucho.bam.ActorStream}
+ * The abstract implementation of an {@link com.caucho.bam.stream.ActorStream}
  * returns query errors for RPC packets, and ignores unknown packets
  * for messages and presence announcement.
  *

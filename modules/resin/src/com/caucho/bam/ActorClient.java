@@ -31,6 +31,8 @@ package com.caucho.bam;
 
 import java.io.Serializable;
 
+import com.caucho.bam.stream.ActorStream;
+
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's JID as the "from" parameter.
@@ -60,12 +62,12 @@ public interface ActorClient extends Actor {
   //
 
   /**
-   * Registers a callback {@link com.caucho.bam.ActorStream} with the client
+   * Registers a callback {@link com.caucho.bam.stream.ActorStream} with the client
    */
   public void setClientStream(ActorStream clientStream);
 
   /**
-   * Returns the registered callback {@link com.caucho.bam.ActorStream}.
+   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
    */
   public ActorStream getClientStream();
   

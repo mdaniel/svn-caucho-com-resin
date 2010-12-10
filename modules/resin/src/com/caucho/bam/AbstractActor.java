@@ -29,6 +29,8 @@
 
 package com.caucho.bam;
 
+import com.caucho.bam.stream.ActorStream;
+
 
 /**
  * Abstract implementation of a BAM actor.

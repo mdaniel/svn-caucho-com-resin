@@ -34,9 +34,9 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpWebSocketReader;

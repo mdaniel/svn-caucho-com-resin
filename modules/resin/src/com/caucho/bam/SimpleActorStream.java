@@ -33,6 +33,9 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.FallbackActorStream;
+
 /**
  * Base ActorStream implementation using introspection and
  * {@link com.caucho.bam.Message @Message} annotations to simplify

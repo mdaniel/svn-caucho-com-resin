@@ -36,8 +36,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.ProtocolException;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.remote.websocket.WebSocketOutputStream;
 
 /**

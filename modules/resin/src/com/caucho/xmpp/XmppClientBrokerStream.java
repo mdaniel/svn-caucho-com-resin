@@ -33,6 +33,7 @@ import com.caucho.xmpp.im.Text;
 import com.caucho.xmpp.im.ImPresence;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.*;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
 import java.io.Serializable;

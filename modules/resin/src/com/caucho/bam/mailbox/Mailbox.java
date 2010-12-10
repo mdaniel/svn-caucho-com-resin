@@ -29,7 +29,7 @@
 
 package com.caucho.bam.mailbox;
 
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.ActorStream;
 
 /**
  * Mailbox for an actor

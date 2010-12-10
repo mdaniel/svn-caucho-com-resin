@@ -32,6 +32,8 @@ package com.caucho.bam;
 import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.stream.AbstractActorStreamFilter;
+import com.caucho.bam.stream.ActorStream;
 
 /**
  * ActorProxy is a convenience API for sending messages to other Actors,
@@ -89,7 +91,7 @@ public class SimpleActorProxy implements ActorProxy {
   //
 
   /**
-   * Registers a callback {@link com.caucho.bam.ActorStream} with the client
+   * Registers a callback {@link com.caucho.bam.stream.ActorStream} with the client
    */
   public void setClientStream(ActorStream clientStream)
   {
@@ -97,7 +99,7 @@ public class SimpleActorProxy implements ActorProxy {
   }
 
   /**
-   * Returns the registered callback {@link com.caucho.bam.ActorStream}.
+   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
    */
   public ActorStream getClientStream()
   {
@@ -113,7 +115,7 @@ public class SimpleActorProxy implements ActorProxy {
   }
 
   /**
-   * Returns the registered callback {@link com.caucho.bam.ActorStream}.
+   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
    */
   public ActorStream getActorStream()
   {

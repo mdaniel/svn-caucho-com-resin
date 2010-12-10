@@ -32,7 +32,7 @@ package com.caucho.bam.packet;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.ActorStream;
 
 /**
  * Base packet class.  Contains only a 'to' and a 'from' field.

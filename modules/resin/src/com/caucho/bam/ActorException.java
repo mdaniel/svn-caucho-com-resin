@@ -29,6 +29,7 @@
 
 package com.caucho.bam;
 
+
 /**
  * General BAM exception
  */

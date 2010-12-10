@@ -33,7 +33,7 @@ import java.io.Serializable;
 
 import com.caucho.bam.Actor;
 import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorStream;
+import com.caucho.bam.stream.ActorStream;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.

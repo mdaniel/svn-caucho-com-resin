@@ -32,6 +32,9 @@ package com.caucho.bam;
 import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.stream.AbstractActorStreamFilter;
+import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.NullActorStream;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
@@ -83,7 +86,7 @@ public class SimpleActorClient implements ActorClient {
   //
 
   /**
-   * Registers a callback {@link com.caucho.bam.ActorStream} with the client
+   * Registers a callback {@link com.caucho.bam.stream.ActorStream} with the client
    */
   @Override
   public void setClientStream(ActorStream clientStream)
@@ -95,7 +98,7 @@ public class SimpleActorClient implements ActorClient {
   }
 
   /**
-   * Returns the registered callback {@link com.caucho.bam.ActorStream}.
+   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
    */
   @Override
   public ActorStream getClientStream()
@@ -113,7 +116,7 @@ public class SimpleActorClient implements ActorClient {
   }
 
   /**
-   * Returns the registered callback {@link com.caucho.bam.ActorStream}.
+   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
    */
   @Override
   public ActorStream getActorStream()

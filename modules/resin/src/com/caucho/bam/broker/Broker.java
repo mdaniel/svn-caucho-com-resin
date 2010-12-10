@@ -29,9 +29,9 @@
 
 package com.caucho.bam.broker;
 
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.actor.Agent;
 import com.caucho.bam.mailbox.MailboxType;
+import com.caucho.bam.stream.ActorStream;
 
 
 /**

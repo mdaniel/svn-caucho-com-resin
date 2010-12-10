@@ -29,6 +29,7 @@
 
 package com.caucho.bam;
 
+
 /**
  * Actor exception when a feature does not exist because the
  * service {@link com.caucho.bam.Actor}
