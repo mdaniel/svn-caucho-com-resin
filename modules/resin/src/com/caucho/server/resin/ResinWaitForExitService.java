@@ -108,13 +108,14 @@ class ResinWaitForExitService extends AbstractResinService
         Thread.sleep(10);
 
         if (! checkMemory(runtime)) {
-          shutdown.startFailSafeShutdown("Resin shutdown from out of memory");
+          shutdown.shutdown(ExitCode.MEMORY, "Resin shutdown from out of memory");
           // dumpHeapOnExit();
           return;
         }
 
         if (! checkFileDescriptor()) {
-          shutdown.startFailSafeShutdown("Resin shutdown from out of file descriptors");
+          shutdown.shutdown(ExitCode.MEMORY, 
+                            "Resin shutdown from out of file descriptors");
           //dumpHeapOnExit();
           return;
         }
@@ -123,10 +124,12 @@ class ResinWaitForExitService extends AbstractResinService
           if (_waitIn.read() >= 0) {
             socketExceptionCount = 0;
           }
-          else
-            log.warning(L.l("Stopping due to watchdog or user."));
+          else {
+            shutdown.shutdown(ExitCode.WATCHDOG_EXIT,
+                              "Stopping due to watchdog or user.");
 
-          return;
+            return;
+          }
         }
         else {
           synchronized (this) {

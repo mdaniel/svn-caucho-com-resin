@@ -160,10 +160,11 @@ public class ScanManager {
                                  JarByteCodeMatcher matcher)
   {
     ZipFile zipFile = null;
+    Jar jar = JarPath.create(path).getJar();
 
     try {
-      zipFile = new ZipFile(path.getNativePath());
-
+      zipFile = jar.getZipFile();
+      System.out.println("SCAN: " + path);
       Enumeration<? extends ZipEntry> e = zipFile.entries();
 
       while (e.hasMoreElements()) {
@@ -190,11 +191,7 @@ public class ScanManager {
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
-      try {
-        if (zipFile != null)
-          zipFile.close();
-      } catch (Exception e) {
-      }
+      jar.closeZipFile(zipFile);
     }
   }
 

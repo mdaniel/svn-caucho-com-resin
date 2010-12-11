@@ -1288,8 +1288,10 @@ public class Resin
 
       resin.waitForExit();
 
-      ShutdownService.shutdownActive(ExitCode.OK,
-                                     "Resin shutdown from watchdog exit");
+      if (! resin.isClosing()) {
+        ShutdownService.shutdownActive(ExitCode.FAIL_SAFE_HALT,
+                                       "Resin shutdown from unknown reason");
+      }
     } catch (Throwable e) {
       Throwable cause;
 

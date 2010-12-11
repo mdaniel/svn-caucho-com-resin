@@ -109,10 +109,21 @@ class ThreadLauncher extends AbstractThreadLauncher {
   @Override
   protected void startWorkerThread()
   {
-    Thread thread = new Thread(this);
-    thread.setDaemon(true);
-    thread.setName("resin-thread-launcher");
-    thread.start();
+    boolean isValid = false;
+    
+    try {
+      Thread thread = new Thread(this);
+      thread.setDaemon(true);
+      thread.setName("resin-thread-launcher");
+      thread.start();
+      
+      isValid = true;
+    } finally {
+      if (! isValid) {
+        ShutdownService.shutdownActive(ExitCode.THREAD,
+                                       "Cannot create ThreadPool thread.");
+      }
+    }
   }
   
   @Override

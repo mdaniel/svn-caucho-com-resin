@@ -263,4 +263,13 @@ public class NullGenerator<X> implements AspectGenerator<X> {
     throws IOException
   {
   }
+
+  /**
+   * Generates finally code for the method
+   */
+  @Override
+  public void generatePostFinally(JavaWriter out)
+    throws IOException
+  {
+  }
 }

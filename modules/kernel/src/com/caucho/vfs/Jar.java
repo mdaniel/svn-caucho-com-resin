@@ -52,6 +52,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.CachedDependency;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
@@ -92,10 +93,6 @@ public class Jar implements CacheListener {
   private long _lastTime;
 
   // cached zip file to read jar entries
-  private final AtomicReference<SoftReference<JarFile>> _jarFileRef
-    = new AtomicReference<SoftReference<JarFile>>();
-
-  // cached zip file to read jar entries
   private final AtomicReference<SoftReference<ZipFile>> _zipFileRef
     = new AtomicReference<SoftReference<ZipFile>>();
     
@@ -112,6 +109,11 @@ public class Jar implements CacheListener {
       throw new IllegalStateException();
     
     _backing = backing;
+    
+    /*
+    if (backing.getNativePath().indexOf("cssparser.jar") >= 0)
+      System.out.println("JAR: " + backing);
+      */
     
     _backingIsFile = (_backing.getScheme().equals("file")
                       && _backing.canRead());
@@ -311,8 +313,7 @@ public class Jar implements CacheListener {
           return entry.getCertificates();
         }
       } finally {
-        if (jarFile != null)
-          closeJarFile(jarFile);
+        closeJarFile(jarFile);
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -460,10 +461,17 @@ public class Jar implements CacheListener {
    *
    * @param path relative path into the jar.
    */
-  public StreamImpl openReadImpl(Path path) throws IOException
+  public ZipStreamImpl openReadImpl(Path path) 
+    throws IOException
   {
     String pathName = path.getPath();
-
+    
+    return openReadImpl(pathName);
+  }
+  
+  public ZipStreamImpl openReadImpl(String pathName)
+    throws IOException
+  {
     if (pathName.length() > 0 && pathName.charAt(0) == '/')
       pathName = pathName.substring(1);
 
@@ -477,12 +485,12 @@ public class Jar implements CacheListener {
       if (entry != null) {
         InputStream is = zipFile.getInputStream(entry);
 
-        zipIs = new ZipStreamImpl(zipFile, is, path);
+        zipIs = new ZipStreamImpl(zipFile, entry, is, pathName);
         
         return zipIs;
       }
       else {
-        throw new FileNotFoundException(path.toString());
+        throw new FileNotFoundException(pathName);
       }
     } finally {
       if (zipIs == null) {
@@ -496,20 +504,6 @@ public class Jar implements CacheListener {
    */
   public void clearCache()
   {
-    JarFile jarFile = null;
-
-    SoftReference<JarFile> jarFileRef = _jarFileRef.getAndSet(null);
-
-    if (jarFileRef != null)
-      jarFile = jarFileRef.get();
-
-    try {
-      if (jarFile != null) {
-        jarFile.close();
-      }
-    } catch (Exception e) {
-    }
-
     SoftReference<ZipFile> zipFileRef = _zipFileRef.getAndSet(null);
 
     ZipFile zipFile = null;
@@ -517,6 +511,7 @@ public class Jar implements CacheListener {
       zipFile = zipFileRef.get();
 
     try {
+      // System.out.println("Clear: " + zipFile + " " + this);
       if (zipFile != null) {
         zipFile.close();
       }
@@ -588,20 +583,15 @@ public class Jar implements CacheListener {
     JarFile jarFile = null;
 
     isCacheValid();
-    
-    SoftReference<JarFile> jarFileRef = _jarFileRef.getAndSet(null);
-
-    if (jarFileRef != null) {
-      jarFile = jarFileRef.get();
-
-      if (jarFile != null) {
-        return jarFile;
-      }
-    }
 
     if (_backingIsFile) {
       try {
         jarFile = new JarFile(_backing.getNativePath());
+        
+        /*
+        if (_backing.getNativePath().indexOf("cssparser.jar") > 0)
+          System.out.println("JAR: " + _backing + " " + jarFile);
+          */
       }
       catch (IOException ex) {
         if (log.isLoggable(Level.FINE))
@@ -610,31 +600,19 @@ public class Jar implements CacheListener {
         throw ex;
       }
 
-      getLastModifiedImpl();
+      // getLastModifiedImpl();
     }
 
     return jarFile;
   }
-
-  public void closeJarFile(JarFile jarFile)
+  
+  private void closeJarFile(JarFile jarFile)
   {
-    if (jarFile == null)
-      return;
-    
-    SoftReference<JarFile> oldJarFileRef = _jarFileRef.get();
-    
-    if (oldJarFileRef == null || oldJarFileRef.get() == null) {
-      SoftReference<JarFile> jarFileRef = new SoftReference<JarFile>(jarFile);
-      
-      if (_jarFileRef.compareAndSet(oldJarFileRef, jarFileRef)) {
-        return;
-      }
-    }
-    
     try {
-      jarFile.close();
+      if (jarFile != null)
+        jarFile.close();
     } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 
@@ -644,7 +622,7 @@ public class Jar implements CacheListener {
    *
    * getJarFile is not thread safe.
    */
-  private ZipFile getZipFile()
+  public ZipFile getZipFile()
     throws IOException
   {
     ZipFile zipFile = null;
@@ -664,6 +642,13 @@ public class Jar implements CacheListener {
     if (_backingIsFile) {
       try {
         zipFile = new ZipFile(_backing.getNativePath());
+       
+        /*
+        if (_backing.getNativePath().indexOf("cssparser") >= 0) {
+          System.out.println("ZIP: " + _backing.getNativePath() + " " + zipFile);
+          Thread.dumpStack();
+        }
+        */
       }
       catch (IOException ex) {
         if (log.isLoggable(Level.FINE))
@@ -678,14 +663,17 @@ public class Jar implements CacheListener {
     return zipFile;
   }
 
-  private void closeZipFile(ZipFile zipFile)
+  public void closeZipFile(ZipFile zipFile)
   {
     if (zipFile == null)
       return;
 
     SoftReference<ZipFile> oldZipFileRef = _zipFileRef.get();
     
-    if (oldZipFileRef == null || oldZipFileRef.get() == null) {
+    if (true) {
+      
+    }
+    else if (oldZipFileRef == null || oldZipFileRef.get() == null) {
       SoftReference<ZipFile> zipFileRef = new SoftReference<ZipFile>(zipFile);
       
       if (_zipFileRef.compareAndSet(oldZipFileRef, zipFileRef)) {
@@ -694,6 +682,11 @@ public class Jar implements CacheListener {
     }
     
     try {
+      /*
+      if (_backing.getNativePath().indexOf("cssparser") >= 0)
+        System.out.println("CLOSE-ZIP: " + _backing.getNativePath() + " " + zipFile);
+        */
+      
       zipFile.close();
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -819,9 +812,12 @@ public class Jar implements CacheListener {
   /**
    * StreamImpl to read from a ZIP file.
    */
-  class ZipStreamImpl extends StreamImpl {
+  public class ZipStreamImpl extends StreamImpl {
     private ZipFile _zipFile;
+    private ZipEntry _zipEntry;
     private InputStream _zis;
+    
+    private String _pathName;
 
     /**
      * Create the new stream  impl.
@@ -830,12 +826,22 @@ public class Jar implements CacheListener {
      * @param is the backing stream.
      * @param path the path to the jar entry.
      */
-    ZipStreamImpl(ZipFile zipFile, InputStream zis, Path path)
+    ZipStreamImpl(ZipFile zipFile,
+                  ZipEntry zipEntry,
+                  InputStream zis, 
+                  String pathName)
     {
       _zipFile = zipFile;
+      _zipEntry = zipEntry;
       _zis = zis;
       
-      setPath(path);
+      // System.out.println("OPEN: " + pathName + " " + zis);
+      // setPath(path);
+    }
+    
+    public ZipEntry getZipEntry()
+    {
+      return _zipEntry;
     }
 
     /**
@@ -871,24 +877,29 @@ public class Jar implements CacheListener {
       _zis = null;
       
       try {
-        if (zis != null)
-          zis.close();
+        IoUtil.close(zis);
+//      //  System.out.println("CLOSE: " + zis + " " + _pathName);
       } catch (Throwable e) {
       }
 
       try {
+        closeZipFile(zipFile);
+        /*
         if (zipFile != null)
           zipFile.close();
+          */
       } catch (Throwable e) {
       }
     }
 
+    /*
     @Override
     protected void finalize()
       throws IOException
     {
       close();
     }
+    */
   }
 
   class JarDepend extends CachedDependency

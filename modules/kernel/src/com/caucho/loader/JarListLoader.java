@@ -87,6 +87,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
    * True if any of the loaded classes have been modified.  If true, the
    * caller should drop the classpath and create a new one.
    */
+  @Override
   public boolean isModified()
   {
     return _dependencyList.isModified();
@@ -96,6 +97,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
    * True if any of the loaded classes have been modified.  If true, the
    * caller should drop the classpath and create a new one.
    */
+  @Override
   public boolean logModified(Logger log)
   {
     return _dependencyList.logModified(log);
@@ -260,6 +262,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
   /**
    * Adds resources to the enumeration.
    */
+  @Override
   public void getResources(Vector<URL> vector, String name)
   {
     if (_pathMap != null) {
@@ -309,6 +312,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
    *
    * @return the matching path or null
    */
+  @Override
   public Path getPath(String pathName)
   {
     if (_pathMap != null) {

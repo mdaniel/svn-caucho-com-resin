@@ -13,6 +13,7 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>thread: if Thread cannot be instantiated, restart Resin (rep by B Hafezi)</li>
 <li>quercus: SimpleXMLElement needs a __count function (#4318, rep by Homayoun Zariv)</li>
 <li>quercus: list($a) = each($this->foo) was not compiled properly (#4319, rep by Akara Sucharitakul)</li>
 <li>quercus: add array_replace, array_replace_recursive (#4312, rep by Homayoun Zariv)</li>

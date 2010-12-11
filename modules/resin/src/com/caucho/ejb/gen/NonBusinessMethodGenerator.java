@@ -340,6 +340,12 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
     throws IOException
   {
   }
+  
+  @Override
+  public void generatePostFinally(JavaWriter out)
+    throws IOException
+  {
+  }
 
   @Override
   public String toString()

@@ -58,6 +58,7 @@ import com.caucho.java.JavaWriter;
  *   } finally {
  *     [finally]
  *   }
+ *   [post-finally]
  * }
  * </pre></code>
  */
@@ -224,7 +225,40 @@ public interface AspectGenerator<X> {
   
   /**
    * Generates finally code for the method
+   * <code><pre>
+   * retType myMethod(...)
+   * {
+   *   try {
+   *     ...
+   *     value = bean.myMethod(...);
+   *     ...
+   *     return value;
+   *   } finally {
+   *     [finally]
+   *   }
+   * }
+   * </pre></code>
    */
   public void generateFinally(JavaWriter out)
+    throws IOException;
+  
+  /**
+   * Generates finally code for the method
+   * <code><pre>
+   * retType myMethod(...)
+   * {
+   *   try {
+   *     ...
+   *     value = bean.myMethod(...);
+   *     ...
+   *     return value;
+   *   } finally {
+   *     ...
+   *   }
+   *   [post-finally]
+   * }
+   * </pre></code>
+   */
+  public void generatePostFinally(JavaWriter out)
     throws IOException;
 }

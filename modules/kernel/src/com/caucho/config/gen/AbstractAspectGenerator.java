@@ -185,6 +185,8 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
 
     out.popDepth();
     out.println("}");
+    
+    generatePostFinally(out);
   }
   
 
@@ -475,6 +477,13 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
     throws IOException
   {
     _next.generateFinally(out);
+  }
+  
+  @Override
+  public void generatePostFinally(JavaWriter out)
+    throws IOException
+  {
+    _next.generatePostFinally(out);
   }
 
   protected <Z extends Annotation> Z getAnnotation(Class<Z> annotationType,

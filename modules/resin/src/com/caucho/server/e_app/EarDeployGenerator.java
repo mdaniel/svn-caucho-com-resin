@@ -29,17 +29,15 @@
 
 package com.caucho.server.e_app;
 
+import java.util.ArrayList;
+
 import com.caucho.config.ConfigException;
 import com.caucho.env.deploy.DeployContainer;
 import com.caucho.env.deploy.ExpandDeployGenerator;
 import com.caucho.env.deploy.ExpandVersion;
-import com.caucho.env.repository.RepositoryService;
 import com.caucho.inject.Module;
-import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.vfs.Path;
-
-import java.util.ArrayList;
 
 /**
  * The generator for the ear-deploy
@@ -70,14 +68,6 @@ public class EarDeployGenerator
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
-    /*
-    String hostName = parentContainer.getHostName();
-    if ("".equals(hostName))
-      hostName = "default";
-    
-    setRepositoryTag("ears/default/" + hostName);
-    */
 
     _parentContainer = parentContainer;
 

@@ -250,7 +250,8 @@ public class WebAppSingleDeployGenerator
   @Override
   protected void fillDeployedNames(Set<String> keys)
   {
-    keys.add(_controller.getContextPath());
+    if (_controller != null)
+      keys.add(_controller.getContextPath());
   }
   
   /**

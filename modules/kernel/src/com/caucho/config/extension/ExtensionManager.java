@@ -74,6 +74,7 @@ import com.caucho.config.program.BeanArg;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.Module;
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -91,6 +92,8 @@ public class ExtensionManager
   
   private final InjectManager _cdiManager;
 
+  private String _classLoaderHash = "";
+  
   private HashSet<URL> _extensionSet = new HashSet<URL>();
   
   private HashMap<Class<?>,ExtensionItem> _extensionMap
@@ -115,6 +118,13 @@ public class ExtensionManager
 
       if (loader == null)
         return;
+      
+      String hash = DynamicClassLoader.getHash(loader);
+      
+      if (_classLoaderHash.equals(hash))
+        return;
+      
+      _classLoaderHash = hash;
 
       Enumeration<URL> e = loader.getResources("META-INF/services/" + Extension.class.getName());
 

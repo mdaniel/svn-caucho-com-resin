@@ -187,22 +187,24 @@ public class JarMap {
 
       if (! isValidScan && jar.canRead()) {
         ZipFile file = new ZipFile(jar.getNativePath());
+        System.out.println("SCAN2: " + jar);
+        try {
+          Enumeration<? extends ZipEntry> e = file.entries();
+          while (e.hasMoreElements()) {
+            ZipEntry entry = e.nextElement();
+            String name = entry.getName();
 
-        Enumeration<? extends ZipEntry> e = file.entries();
-        while (e.hasMoreElements()) {
-          ZipEntry entry = e.nextElement();
-          String name = entry.getName();
+            add(name, jarEntry);
 
-          add(name, jarEntry);
-
-          // server/249b
-          /*
+            // server/249b
+            /*
             if (name.endsWith("/"))
             name = name.substring(0, name.length() - 1);
-           */
+             */
+          }
+        } finally {
+          file.close();
         }
-
-        file.close();
       }
     } catch (IOException e) {
       if (jar.canRead())

@@ -42,8 +42,6 @@ import com.caucho.env.deploy.ExpandDeployGenerator;
 import com.caucho.env.deploy.ExpandVersion;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.util.L10N;
-import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
 
 /**
@@ -53,7 +51,6 @@ public class WebAppExpandDeployGenerator
   extends ExpandDeployGenerator<WebAppController>
   implements EnvironmentListener
 {
-  private static final L10N L = new L10N(WebAppExpandDeployGenerator.class);
   private static final Logger log
     = Logger.getLogger(WebAppExpandDeployGenerator.class.getName());
 
@@ -98,21 +95,6 @@ public class WebAppExpandDeployGenerator
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
-
-    /*
-    String hostName = webAppContainer.getHostName();
-    if ("".equals(hostName))
-      hostName = "default";
-
-    String stage = "production";
-
-    Server server = Server.getCurrent();
-
-    if (server != null)
-      stage = server.getStage();
-
-    setRepositoryTag(stage + "/webapp/" + stage + "/" + hostName);
-    */
 
     setEntryNamePrefix("/");
 
@@ -375,43 +357,6 @@ public class WebAppExpandDeployGenerator
 
     return controller;
   }
-
-  /**
-   * Converts the name.
-   */
-  /*
-  @Override
-  protected String pathNameToEntryName(String name)
-  {
-    String entryName = super.pathNameToEntryName(name);
-
-    if (entryName == null)
-      return null;
-
-    if (CaseInsensitive.isCaseInsensitive()) {
-      try {
-        String []list = getExpandDirectory().list();
-
-        String matchName = null;
-
-        for (int i = 0; i < list.length; i++) {
-          if (list[i].equalsIgnoreCase(entryName))
-            matchName = list[i];
-        }
-
-        if (matchName == null)
-          matchName = entryName.toLowerCase();
-      } catch (Exception e) {
-        entryName = entryName.toLowerCase();
-      }
-    }
-
-    if (entryName.equalsIgnoreCase("root"))
-      return _urlPrefix;
-    else
-      return _urlPrefix + "/" + entryName;
-  }
-  */
   
   @Override
   protected String keyToName(String key)
@@ -446,21 +391,6 @@ public class WebAppExpandDeployGenerator
     
     return key;
   }
-
-  /*
-  @Override
-  protected String entryNameToArchiveName(String entryName)
-  {
-    String prefix = _urlPrefix + "/";
-
-    if (entryName.equals(_urlPrefix))
-      return "ROOT" + getExtension();
-    else if (entryName.startsWith(prefix))
-      return entryName.substring(prefix.length()) + getExtension();
-    else
-      return null;
-  }
-  */
 
   /**
    * Destroy the deployment.

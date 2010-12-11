@@ -194,6 +194,6 @@ public class EarDeployController
    */
   public String toString()
   {
-    return "EarDeployController[" + getId() + "]";
+    return getClass().getSimpleName() + "[" + getId() + "]";
   }
 }

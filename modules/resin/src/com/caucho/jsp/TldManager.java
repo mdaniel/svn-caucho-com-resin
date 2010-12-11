@@ -29,30 +29,36 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.FileSetType;
-import com.caucho.jsp.cfg.*;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-import com.caucho.jsf.cfg.JsfPropertyGroup;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.FileSetType;
+import com.caucho.jsf.cfg.JsfPropertyGroup;
+import com.caucho.jsp.cfg.JsfTldPreload;
+import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.jsp.cfg.TldPreload;
+import com.caucho.jsp.cfg.TldTaglib;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.ZipScanner;
 
 /**
  * Stores the parsed tlds.
@@ -400,13 +406,7 @@ public class TldManager {
       return;
 
     String nativePath = jarBacking.getNativePath();
-    ZipFile zipFile;
     JarPath jar = JarPath.create(jarBacking);
-
-    if (nativePath.endsWith(".jar"))
-      zipFile = new JarFile(nativePath);
-    else
-      zipFile = new ZipFile(nativePath);
 
     ArrayList<Path> tldPaths = new ArrayList<Path>();
 
@@ -434,6 +434,8 @@ public class TldManager {
     }
 
     if (! isValidScan) {
+      ZipFile zipFile = jar.getJar().getZipFile();
+      
       try {
         Enumeration<? extends ZipEntry> en = zipFile.entries();
         while (en.hasMoreElements()) {
@@ -446,7 +448,7 @@ public class TldManager {
           }
         }
       } finally {
-        zipFile.close();
+        jar.getJar().closeZipFile(zipFile);
       }
     }
 

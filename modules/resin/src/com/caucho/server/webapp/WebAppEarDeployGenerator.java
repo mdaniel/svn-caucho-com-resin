@@ -119,6 +119,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   /**
    * Returns the log.
    */
+  @Override
   protected Logger getLog()
   {
     return log;
@@ -138,14 +139,27 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   /**
    * Return true if modified.
    */
+  @Override
   public boolean isModified()
   {
-    return _earContainer.isModified();
+    boolean isModified = _earContainer.isModified();
+    
+    return isModified;
+  }
+
+  /**
+   * Log the modification
+   */
+  @Override
+  public boolean logModified(Logger log)
+  {
+    return _earContainer.logModified(log);
   }
 
   /**
    * Redeploys if modified.
    */
+  @Override
   public void update()
   {
     _earContainer.update();
@@ -158,6 +172,10 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   public void generateController(String name,
                                  ArrayList<WebAppController> list)
   {
+    if (_earContainer.isModified()) {
+      _earContainer.update();
+    }
+    
     for (EarDeployController earController : _earContainer.getControllers()) {
       WebAppController webAppController;
 
@@ -192,8 +210,9 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
     super.destroyImpl();
   }
 
+  @Override
   public String toString()
   {
-    return "WebAppEarDeployGenerator[" + _earDeploy + "]";
+    return getClass().getSimpleName() + "[" + _earDeploy + "]";
   }
 }

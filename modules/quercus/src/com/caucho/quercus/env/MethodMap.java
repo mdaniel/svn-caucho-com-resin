@@ -140,7 +140,8 @@ public final class MethodMap<V>
                     key));
     }
     
-    throw new IllegalStateException();
+    throw new IllegalStateException(L.l("Call to undefined function {0}",
+                                        key));
   }
 
   public V getRaw(StringValue key)

@@ -30,6 +30,7 @@
 package com.caucho.server.http;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,6 +66,7 @@ public class AsyncContextImpl
   private boolean _isOriginal;
 
   private AsyncListenerNode _listenerNode;
+  private AtomicBoolean _isComplete = new AtomicBoolean();
 
   private WebApp _dispatchWebApp;
   private String _dispatchPath;
@@ -248,7 +250,9 @@ public class AsyncContextImpl
     if (cometController != null) {
       cometController.complete();
     }
-    
+
+    // TCK: 
+    onComplete();
     /*
     try {
     } finally {
@@ -321,6 +325,9 @@ public class AsyncContextImpl
   @Override
   public void onComplete()
   {
+    if (_isComplete.getAndSet(true))
+      return;
+    
     AsyncEvent event = new AsyncEvent(this, _request, _response);
     
     for (AsyncListenerNode node = _listenerNode;
