@@ -396,14 +396,6 @@ public class Server
   }
 
   /**
-   * Returns the stream to the public broker.
-   */
-  public ActorStream getBamStream()
-  {
-    return getBamBroker().getBrokerStream();
-  }
-
-  /**
    * Returns the bam broker.
    */
   public Broker getAdminBroker()
@@ -417,14 +409,6 @@ public class Server
   public ActorClient createAdminClient(String uid)
   {
     return new SimpleActorClient(getAdminBroker(), uid, null);
-  }
-
-  /**
-   * Returns the stream to the admin broker.
-   */
-  public ActorStream getAdminStream()
-  {
-    return getAdminBroker().getBrokerStream();
   }
 
   /**

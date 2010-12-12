@@ -1853,10 +1853,14 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
     boolean isOriginal = (request == this && response == _response);
 
-    _asyncContext = new AsyncContextImpl(_request, request, response, isOriginal);
-
-    if (_asyncTimeout > 0)
-      _asyncContext.setTimeout(_asyncTimeout);
+    if (_asyncContext == null) {
+      _asyncContext = new AsyncContextImpl(_request);
+      
+      if (_asyncTimeout > 0)
+        _asyncContext.setTimeout(_asyncTimeout);
+    }
+    
+    _asyncContext.init(request, response, isOriginal);
 
     return _asyncContext;
   }
@@ -2096,7 +2100,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   protected void finishRequest()
     throws IOException
   {
-    AsyncContextImpl comet = _asyncContext;
+    AsyncContextImpl async = _asyncContext;
     _asyncContext = null;
 
     /* server/1ld5
@@ -2104,6 +2108,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       comet.onComplete();
     }
     */
+    
+    if (async != null) {
+      async.onComplete();
+    }
 
     super.finishRequest();
 

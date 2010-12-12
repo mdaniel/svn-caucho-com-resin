@@ -31,6 +31,7 @@ package com.caucho.xmpp;
 
 import java.io.Serializable;
 
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.xmpp.im.ImBindQuery;
@@ -53,7 +54,7 @@ public class XmppBindCallback extends AbstractActorStream
   }
 
   @Override
-  public ActorStream getLinkStream()
+  public Broker getBroker()
   {
     return _xmppBroker;
   }

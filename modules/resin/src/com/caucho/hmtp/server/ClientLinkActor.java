@@ -85,7 +85,7 @@ class ClientLinkActor implements Actor, ActorStream
   }
   
   @Override
-  public ActorStream getLinkStream()
+  public ActorStream getBroker()
   {
     return _linkStream;
   }
@@ -105,14 +105,14 @@ class ClientLinkActor implements Actor, ActorStream
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    getLinkStream().message(to, getJid(), payload);
+    getBroker().message(to, getJid(), payload);
   }
 
   @Override
   public void messageError(String to, String from, Serializable payload,
                            ActorError error)
   {
-    getLinkStream().messageError(to, getJid(), payload, error);
+    getBroker().messageError(to, getJid(), payload, error);
   }
 
   @Override
@@ -121,7 +121,7 @@ class ClientLinkActor implements Actor, ActorStream
                     String from, 
                     Serializable payload)
   {
-    getLinkStream().query(id, to, getJid(), payload);
+    getBroker().query(id, to, getJid(), payload);
   }
 
   @Override
@@ -130,7 +130,7 @@ class ClientLinkActor implements Actor, ActorStream
                           String from, 
                           Serializable payload)
   {
-    getLinkStream().queryResult(id, to, getJid(), payload);
+    getBroker().queryResult(id, to, getJid(), payload);
   }
 
   @Override
@@ -140,7 +140,7 @@ class ClientLinkActor implements Actor, ActorStream
                          Serializable payload,
                          ActorError error)
   {
-    getLinkStream().queryError(id, to, getJid(), payload, error);
+    getBroker().queryError(id, to, getJid(), payload, error);
   }
   
   @Override

@@ -167,11 +167,10 @@ public class HmtpRequest extends AbstractProtocolConnection
     // _hmtpWriter.setAutoFlush(true);
 
     Broker broker = _bamService.getBroker();
-    ActorStream brokerStream = broker.getBrokerStream();
 
     _hmtpWriter.setJid("hmtp-server-" + _conn.getId() + "-hmtp");
 
-    _linkStream = new MultiworkerMailbox(_hmtpWriter, brokerStream, 1);
+    _linkStream = new MultiworkerMailbox(_hmtpWriter, broker, 1);
 
     _linkActor = new HmtpLinkActor(_linkStream,
                                    broker,

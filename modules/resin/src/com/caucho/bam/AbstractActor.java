@@ -82,7 +82,7 @@ public class AbstractActor implements Actor
    * The stream to the link is used by the Actor to send messages to
    * all other Actors in the system.
    */
-  public ActorStream getLinkStream()
+  public Broker getBroker()
   {
     return _linkStream;
   }

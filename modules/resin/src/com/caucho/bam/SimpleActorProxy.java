@@ -32,6 +32,7 @@ package com.caucho.bam;
 import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.stream.AbstractActorStreamFilter;
 import com.caucho.bam.stream.ActorStream;
 
@@ -59,14 +60,14 @@ public class SimpleActorProxy implements ActorProxy {
     _actorStream = new QueryFilterStream();
   }
 
-  public SimpleActorProxy(Broker broker,
+  public SimpleActorProxy(ManagedBroker broker,
                           String toJid,
                           String uid,
                           String resource)
   {
     this(toJid);
 
-    _linkStream = broker.getBrokerStream();
+    _linkStream = broker;
     _jid = broker.createClient(_actorStream, uid, resource);
   }
 

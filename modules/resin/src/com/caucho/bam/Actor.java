@@ -29,6 +29,7 @@
 
 package com.caucho.bam;
 
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -76,7 +77,7 @@ public interface Actor
   /**
    * The stream to send messages to the link.
    */
-  public ActorStream getLinkStream();
+  public Broker getBroker();
 
   /**
    * The stream to send messages to the link.

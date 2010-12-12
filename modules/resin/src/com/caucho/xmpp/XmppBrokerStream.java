@@ -40,6 +40,7 @@ import javax.xml.stream.XMLStreamException;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.inject.Module;
 import com.caucho.network.listen.SocketLinkDuplexController;
@@ -52,7 +53,7 @@ import com.caucho.vfs.WriteStream;
  */
 @Module
 public class XmppBrokerStream
-  implements SocketLinkDuplexListener, ActorStream
+  implements SocketLinkDuplexListener, Broker
 {
   private static final Logger log
     = Logger.getLogger(XmppBrokerStream.class.getName());
@@ -164,8 +165,8 @@ public class XmppBrokerStream
     
     _uid = uid + _broker.getJid();
     
-    _toBroker = _broker.getBrokerStream();
-    _jid = _broker.createClient(_toClient, uid, resource);
+    _toBroker = _broker;
+    // _jid = _broker.createClient(_toClient, uid, resource);
 
     return _jid;
   }
@@ -174,8 +175,8 @@ public class XmppBrokerStream
   {
     String password = null;
     
-    _toBroker = _broker.getBrokerStream();
-    _jid = _broker.createClient(_toClient, jid, resource);
+    _toBroker = _broker;
+    // _jid = _broker.createClient(_toClient, jid, resource);
      
     return _jid;
   }
@@ -295,5 +296,25 @@ public class XmppBrokerStream
   {
     // TODO Auto-generated method stub
     
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.broker.Broker#getBrokerMailbox()
+   */
+  @Override
+  public Mailbox getBrokerMailbox()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.broker.Broker#getMailbox(java.lang.String)
+   */
+  @Override
+  public Mailbox getMailbox(String jid)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

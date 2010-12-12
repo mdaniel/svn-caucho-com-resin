@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -54,7 +55,7 @@ abstract public class AbstractBrokerStream implements ActorStream
   /**
    * Returns the actor stream for the given jid.
    */
-  abstract protected ActorStream getActorStream(String jid);
+  abstract protected Mailbox getMailbox(String jid);
   
   /**
    * Returns the jid for the broker itself.
@@ -88,7 +89,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getActorStream(to);
+    ActorStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.message(to, from, payload);
@@ -108,7 +109,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                                       ActorError.ITEM_NOT_FOUND,
                                       msg);
 
-    ActorStream fromStream = getActorStream(from);
+    ActorStream fromStream = getMailbox(from);
 
     if (fromStream != null)
       fromStream.messageError(from, to, payload, error);
@@ -136,7 +137,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getActorStream(to);
+    ActorStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.messageError(to, from, payload, error);
@@ -182,7 +183,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getActorStream(to);
+    ActorStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.query(id, to, from, payload);
@@ -202,7 +203,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                                       ActorError.ITEM_NOT_FOUND,
                                       msg);
 
-    ActorStream fromStream = getActorStream(from);
+    ActorStream fromStream = getMailbox(from);
 
     if (fromStream != null)
       fromStream.queryError(id, from, to, payload, error);
@@ -228,7 +229,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getActorStream(to);
+    ActorStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.queryResult(id, to, from, payload);
@@ -268,7 +269,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getActorStream(to);
+    ActorStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.queryError(id, to, from, payload, error);

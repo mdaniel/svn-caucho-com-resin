@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 
 /**
  * The abstract implementation of an {@link com.caucho.bam.stream.ActorStream}
@@ -54,12 +55,18 @@ abstract public class AbstractActorStream implements ActorStream
    * Returns the jid at the end of the stream.
    */
   @Override
-  abstract public String getJid();
+  public String getJid()
+  {
+    return getClass().getSimpleName() + "@" + getBroker().getJid();
+  }
 
   /**
-   * Returns the stream to the link.
+   * Returns the stream to the broker.
    */
-  abstract public ActorStream getLinkStream();
+  public Broker getBroker()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   //
   // Unidirectional messages
@@ -92,7 +99,7 @@ abstract public class AbstractActorStream implements ActorStream
                                       ActorError.FEATURE_NOT_IMPLEMENTED,
                                       msg);
 
-    ActorStream linkStream = getLinkStream();
+    ActorStream linkStream = getBroker();
 
     if (linkStream != null)
       linkStream.messageError(from, to, payload, error);
@@ -157,10 +164,10 @@ abstract public class AbstractActorStream implements ActorStream
                                       ActorError.FEATURE_NOT_IMPLEMENTED,
                                       msg);
 
-    ActorStream linkStream = getLinkStream();
+    ActorStream linkStream = getBroker();
 
     if (linkStream == null)
-      throw new IllegalStateException(this + ".getLinkStream() did not return an ActorStream, which is needed to send an error for a QueryGet");
+      throw new IllegalStateException(this + ".getLinkStream() did not return an ActorStream, which is needed to send an error for a query");
     
     linkStream.queryError(id, from, to, payload, error);
   }

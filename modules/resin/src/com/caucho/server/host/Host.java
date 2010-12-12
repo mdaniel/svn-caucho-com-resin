@@ -716,7 +716,7 @@ public class Host
     webBeans.addBean(webBeans.createBeanFactory(Broker.class)
                      .name("bamBroker").singleton(_bamBroker));
 
-    webBeans.addExtension(_bamBroker);
+    // webBeans.addExtension(_bamBroker);
 
     // XXX: webBeans.addRegistrationListener(new BamRegisterListener());
   }

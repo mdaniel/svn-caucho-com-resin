@@ -105,7 +105,7 @@ public class ServerLinkActor extends SimpleActor {
   {
     NonceQuery result = _authManager.generateNonce(query);
 
-    getLinkStream().queryResult(id, from, to, result);
+    getBroker().queryResult(id, from, to, result);
   }
 
   @Query
@@ -131,14 +131,14 @@ public class ServerLinkActor extends SimpleActor {
     } catch (ActorException e) {
       log.log(Level.FINE, e.toString(), e);
     
-      getLinkStream().queryError(id, from, to, query,
+      getBroker().queryError(id, from, to, query,
                                  e.createActorError());
 
       return;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     
-      getLinkStream().queryError(id, from, to, query,
+      getBroker().queryError(id, from, to, query,
                                  new ActorError(ActorError.TYPE_AUTH,
                                                 ActorError.NOT_AUTHORIZED,
                                                 e.getMessage()));
@@ -148,12 +148,12 @@ public class ServerLinkActor extends SimpleActor {
     }
 
     if (_serverLinkStream != null)
-      _serverLinkStream.setBrokerStream(_broker.getBrokerStream());
+      _serverLinkStream.setBrokerStream(getBroker());
     if (_serverPassStream != null)
-      _serverPassStream.setBrokerStream(_broker.getBrokerStream());
+      _serverPassStream.setBrokerStream(getBroker());
 
     String jid
-      = _broker.createClient(getLinkStream(), uid, query.getResource());
+      = _broker.createClient(getBroker(), uid, query.getResource());
 
     if (_serverLinkStream != null)
       _serverLinkStream.setJid(jid);
@@ -163,7 +163,7 @@ public class ServerLinkActor extends SimpleActor {
     notifyValidLogin(from);
     
     AuthResult result = new AuthResult(jid);
-    getLinkStream().queryResult(id, from, to, result);
+    getBroker().queryResult(id, from, to, result);
   }
   
   protected void notifyValidLogin(String jid)

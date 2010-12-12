@@ -240,6 +240,15 @@ public abstract class AbstractSocketLink
   }
 
   /**
+   * Returns true for a comet connection
+   */
+  @Override
+  public boolean isCometSuspend()
+  {
+    return false;
+  }
+
+  /**
    * Returns true for a duplex connection
    */
   @Override

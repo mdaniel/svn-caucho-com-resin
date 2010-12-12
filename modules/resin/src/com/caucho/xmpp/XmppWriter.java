@@ -48,7 +48,7 @@ public class XmppWriter extends AbstractActorStream
   }
 
   @Override
-  public ActorStream getLinkStream()
+  public ActorStream getBroker()
   {
     return null;
   }

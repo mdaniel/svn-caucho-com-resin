@@ -29,42 +29,44 @@
 
 package com.caucho.bam.broker;
 
-import java.util.EventListener;
-
+import com.caucho.bam.actor.Agent;
+import com.caucho.bam.mailbox.Mailbox;
+import com.caucho.bam.mailbox.MailboxType;
+import com.caucho.bam.stream.ActorStream;
 
 
 /**
- * The BrokerListener listens for broker events. Typically, a listener
- * will listen for actor missing events.
- *
- * For example, an Instant Messaging system stores its users in a database
- * and only creates Actors for a users when they log on.  When a new
- * Actor logs on, the Broker asks its registered ActorManagers if they
- * manage the jid.
+ * Broker is the hub which routes messages to mailboxes.
  */
-public interface BrokerListener extends EventListener
+public interface ManagedBroker extends Broker
 {
   /**
-   * Called by the {@link com.caucho.bam.broker.Broker} when it cannot
-   * find an actor in the current host.
-   *
-   * @param event the actor missing event
+   * Adds a mailbox
    */
-  public void resourceMissing(ActorMissingEvent event);
+  public void addMailbox(Mailbox mailbox);
   
   /**
-   * Called by the {@link com.caucho.bam.broker.Broker} when it cannot
-   * find an actor in the current host.
-   *
-   * @param event the actor missing event
+   * Removes a mailbox
    */
-  public void userMissing(ActorMissingEvent event);
+  public void removeMailbox(Mailbox mailbox);
   
   /**
-   * Called by the {@link com.caucho.bam.broker.Broker} when it cannot
-   * find an host for the actor.
-   *
-   * @param event the host missing event
+   * Creates an agent
    */
-  public void hostMissing(ActorMissingEvent event);
+  public Agent createAgent(ActorStream actorStream);
+    
+  /**
+   * Creates an agent
+   */
+  public Agent createAgent(ActorStream actorStream,
+                           MailboxType mailboxType);
+
+  /**
+   * @param actorStream
+   * @param uid
+   * @param resource
+   * @return
+   */
+  public String createClient(ActorStream actorStream, String uid,
+                             String resource);
 }

@@ -97,7 +97,8 @@ public class DeployActor extends SimpleActor
     return "deploy@resin.caucho";
   }
 
-  private Broker getBroker()
+  @Override
+  public Broker getBroker()
   {
     return _server.getAdminBroker();
   }
@@ -116,11 +117,11 @@ public class DeployActor extends SimpleActor
 
     _repository = RepositoryService.getCurrentRepositorySpi();
 
-    setLinkStream(getBroker().getBrokerStream());
+    setLinkStream(getBroker());
     MultiworkerMailbox queue
-      = new MultiworkerMailbox(getActorStream(), getLinkStream(), 2);
+      = new MultiworkerMailbox(getActorStream(), getBroker(), 2);
     
-    getBroker().addActor(queue);
+    getBroker().addMailbox(queue);
   }
 
   @Query
@@ -139,7 +140,7 @@ public class DeployActor extends SimpleActor
     DeployCommitListQuery resultList
       = new DeployCommitListQuery(uncommittedList);
 
-    getLinkStream().queryResult(id, from, to, resultList);
+    getBroker().queryResult(id, from, to, resultList);
 
     return true;
   }
@@ -158,7 +159,7 @@ public class DeployActor extends SimpleActor
     if (entry == null) {
       log.fine(this + " copyError dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
 
-      getLinkStream().queryError(id, from, to, query,
+      getBroker().queryError(id, from, to, query,
                                    new ActorError(ActorError.TYPE_CANCEL,
                                                   ActorError.ITEM_NOT_FOUND,
                                                   "unknown tag"));
@@ -181,7 +182,7 @@ public class DeployActor extends SimpleActor
                                         entry.getRoot(),
                                         metaDataMap);
 
-    getLinkStream().queryResult(id, from, to, result);
+    getBroker().queryResult(id, from, to, result);
   }
 
   @Query
@@ -207,10 +208,10 @@ public class DeployActor extends SimpleActor
       TagStateQuery result = new TagStateQuery(tag, item.getState(), 
                                                item.getDeployException());
       
-      getLinkStream().queryResult(id, from, to, result);
+      getBroker().queryResult(id, from, to, result);
     }
     else
-      getLinkStream().queryResult(id, from, to, null);
+      getBroker().queryResult(id, from, to, null);
   }
 
   @Query
@@ -231,7 +232,7 @@ public class DeployActor extends SimpleActor
     boolean result = _repository.removeTag(query.getTag(),
                                            commitMetaData);
 
-    getLinkStream().queryResult(id, from, to, result);
+    getBroker().queryResult(id, from, to, result);
   }
 
   @Query
@@ -249,11 +250,11 @@ public class DeployActor extends SimpleActor
 
       _repository.writeRawGitFile(sha1, is);
 
-      getLinkStream().queryResult(id, from, to, true);
+      getBroker().queryResult(id, from, to, true);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
-      getLinkStream().queryResult(id, from, to, false);
+      getBroker().queryResult(id, from, to, false);
     } finally {
       IoUtil.close(is);
     }
@@ -283,7 +284,7 @@ public class DeployActor extends SimpleActor
                                         contentHash,
                                         commitMetaData);
 
-    getLinkStream().queryResult(id, from, to, String.valueOf(result));
+    getBroker().queryResult(id, from, to, String.valueOf(result));
 
     return true;
   }
@@ -306,7 +307,7 @@ public class DeployActor extends SimpleActor
         tags.add(new TagResult(tag, entry.getValue().getRoot()));
     }
 
-    getLinkStream()
+    getBroker()
       .queryResult(id, from, to, tags.toArray(new TagResult[tags.size()]));
 
     return true;
@@ -325,7 +326,7 @@ public class DeployActor extends SimpleActor
 
     log.fine(this + " deploy '" + query.getTag() + "' -> " + status);
 
-    getLinkStream().queryResult(id, from, to, true);
+    getBroker().queryResult(id, from, to, true);
 
     return true;
   }
@@ -390,7 +391,7 @@ public class DeployActor extends SimpleActor
 
     log.fine(this + " start '" + query.getTag() + "' -> " + status);
 
-    getLinkStream().queryResult(id, from, to, true);
+    getBroker().queryResult(id, from, to, true);
 
     return true;
   }
@@ -428,7 +429,7 @@ public class DeployActor extends SimpleActor
 
     log.fine(this + " stop '" + query.getTag() + "' -> " + status);
 
-    getLinkStream().queryResult(id, from, to, true);
+    getBroker().queryResult(id, from, to, true);
 
     return true;
   }
@@ -463,7 +464,7 @@ public class DeployActor extends SimpleActor
 
     log.fine(this + " restart '" + query.getTag() + "' -> " + status);
 
-    getLinkStream().queryResult(id, from, to, true);
+    getBroker().queryResult(id, from, to, true);
 
     return true;
   }
@@ -501,7 +502,7 @@ public class DeployActor extends SimpleActor
 
     log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
 
-    getLinkStream().queryResult(id, from, to, true);
+    getBroker().queryResult(id, from, to, true);
 
     return true;
   }
@@ -552,7 +553,7 @@ public class DeployActor extends SimpleActor
 
     log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
 
-    getLinkStream().queryResult(id, from, to, true);
+    getBroker().queryResult(id, from, to, true);
 
     return true;
   }
@@ -614,7 +615,7 @@ public class DeployActor extends SimpleActor
         if (log.isLoggable(Level.FINE))
           log.fine(this + " sendAddFileQuery '" + tag + "' is an unknown DeployController");
 
-        getLinkStream().queryResult(id, from, to, "no-deploy: " + tag);
+        getBroker().queryResult(id, from, to, "no-deploy: " + tag);
 
         return true;
       }
@@ -629,13 +630,13 @@ public class DeployActor extends SimpleActor
 
       _repository.expandToPath(contentHash, path);
 
-      getLinkStream().queryResult(id, from, to, "ok");
+      getBroker().queryResult(id, from, to, "ok");
 
       return true;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
-      getLinkStream().queryResult(id, from, to, "fail");
+      getBroker().queryResult(id, from, to, "fail");
 
       return true;
     }
@@ -676,7 +677,7 @@ public class DeployActor extends SimpleActor
       }
     }
 
-    getLinkStream()
+    getBroker()
       .queryResult(id, from, to, apps.toArray(new WebAppQuery[apps.size()]));
 
     return true;
@@ -708,7 +709,7 @@ public class DeployActor extends SimpleActor
       }
     }
 
-    getLinkStream()
+    getBroker()
       .queryResult(id, from, to, tags.toArray(new TagQuery[tags.size()]));
 
     return true;
@@ -735,7 +736,7 @@ public class DeployActor extends SimpleActor
       hosts.add(q);
     }
 
-    getLinkStream()
+    getBroker()
       .queryResult(id, from, to, hosts.toArray(new HostQuery[hosts.size()]));
 
     return true;
@@ -757,7 +758,7 @@ public class DeployActor extends SimpleActor
 
     StatusQuery result = new StatusQuery(tag, state, errorMessage);
 
-    getLinkStream().queryResult(id, from, to, result);
+    getBroker().queryResult(id, from, to, result);
 
     return true;
   }

@@ -579,7 +579,7 @@ public class XmppClient {
     }
     
     @Override
-    public ActorStream getLinkStream()
+    public ActorStream getBroker()
     {
       throw new UnsupportedOperationException();
     }

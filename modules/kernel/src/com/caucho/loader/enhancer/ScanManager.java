@@ -164,7 +164,7 @@ public class ScanManager {
 
     try {
       zipFile = jar.getZipFile();
-      System.out.println("SCAN: " + path);
+
       Enumeration<? extends ZipEntry> e = zipFile.entries();
 
       while (e.hasMoreElements()) {

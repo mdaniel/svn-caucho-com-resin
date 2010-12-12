@@ -29,68 +29,36 @@
 
 package com.caucho.bam.broker;
 
-import com.caucho.bam.actor.Agent;
-import com.caucho.bam.mailbox.MailboxType;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 
 
 /**
- * Broker is the hub which routes messages to actors.
+ * Broker is the hub which routes messages to mailboxes.
  */
-public interface Broker
+public interface Broker extends ActorStream
 {
   /**
-   * Returns the broker's jid, i.e. the virtual host domain name.
+   * Returns the mailbox to the broker itself.
    */
-  public String getJid();
+  public Mailbox getBrokerMailbox();
   
   /**
-   * Returns the stream to the broker
-   */
-  public ActorStream getBrokerStream();
-  
-  /**
-   * Adds an actor.
-   */
-  public void addActor(ActorStream actorStream);
-  
-  /**
-   * Removes an actor.
-   */
-  public void removeActor(ActorStream actorStream);
-  
-  /**
-   * Creates an agent with a default mailbox
-   */
-  public Agent createAgent(ActorStream actorStream);
-  
-  /**
-   * Creates an agent
-   */
-  public Agent createAgent(ActorStream actorStream,
-                           MailboxType mailboxType);
-  
-  /**
-   * Registers the client under a unique id. The
-   * resource is only a suggestion; the broker may
-   * return a different resource id.
+   * Returns a mailbox for the given jid, or null if the mailbox does not exist.
    * 
-   * @param clientStream the stream to the client
-   * @param uid the client's uid
-   * @param resource the suggested resource for the jid
-   * @return the generated jid
+   * @param jid the address of the mailbox
+   * 
+   * @return the mailbox with the given jid or null
    */
-  public String createClient(ActorStream clientStream,
-                             String uid,
-                             String resource);
+  public Mailbox getMailbox(String jid);
   
   /**
-   * Registers an listener for broker events, e.g. a missing actor.
+   * Adds a mailbox (optional operation).
    */
-  public void addBrokerListener(BrokerListener listener);   
+  // public void addMailbox(Mailbox mailbox);
   
   /**
-   * Returns true if the broker has been closed
+   * Removes a mailbox (optional operation).
    */
-  public boolean isClosed();  
+  // public void removeMailbox(Mailbox mailbox);
 }

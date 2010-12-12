@@ -78,7 +78,7 @@ public class ResinActor extends SimpleActor
    */
   public void sendWarning(String msg)
   {
-    getLinkStream().message("watchdog", getJid(), new WarningMessage(msg));
+    getBroker().message("watchdog", getJid(), new WarningMessage(msg));
   }
   
   //
@@ -104,7 +104,7 @@ public class ResinActor extends SimpleActor
       String runtimeName = (String) server.getAttribute(objName, "Name");
       
       if (runtimeName == null) {
-        getLinkStream().queryError(id, from, to, query, 
+        getBroker().queryError(id, from, to, query, 
                                    new ActorError("null runtime name"));
         return;
       }
@@ -114,15 +114,15 @@ public class ResinActor extends SimpleActor
       if (p > 0) {
         int pid = Integer.parseInt(runtimeName.substring(0, p));
       
-        getLinkStream().queryResult(id, from, to, new PidQuery(pid));
+        getBroker().queryResult(id, from, to, new PidQuery(pid));
         return;
       }
       
-      getLinkStream().queryError(id, from, to, query,
+      getBroker().queryError(id, from, to, query,
                                  new ActorError("malformed name=" + runtimeName));
    
     } catch (Exception e) {
-      getLinkStream().queryError(id, from, to, query,
+      getBroker().queryError(id, from, to, query,
                                  ActorError.create(e));
     }
    }
@@ -137,7 +137,7 @@ public class ResinActor extends SimpleActor
     
     String msg = L.l("Resin shutdown from watchdog stop '" + from + "'");
 
-    getLinkStream().queryResult(id, from, to, query);
+    getBroker().queryResult(id, from, to, query);
     
     ShutdownService.shutdownActive(ExitCode.OK, msg);
   }

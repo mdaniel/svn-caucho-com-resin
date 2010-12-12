@@ -85,7 +85,7 @@ public class FallbackActorStream implements ActorStream
    */
   public ActorStream getLinkStream()
   {
-    return _actor.getLinkStream();
+    return _actor.getBroker();
   }
   
   /**

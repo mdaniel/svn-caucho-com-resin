@@ -32,6 +32,7 @@ package com.caucho.hemp.servlet;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 
@@ -41,16 +42,20 @@ import com.caucho.bam.stream.ActorStream;
  * the link service and the broker.
  */
 public class ServerLinkStream extends AbstractActorStream {
+  private final Broker _broker;
+  
   private final ActorStream _linkStream; // string to the link
   private final ActorStream _linkService;
   
-  private ActorStream _brokerStream;
-
+  private boolean _isAuthenticated;
   private String _jid;
 
-  public ServerLinkStream(ActorStream linkStream,
+  public ServerLinkStream(Broker broker,
+                          ActorStream linkStream,
                           ActorStream linkService)
   {
+    _broker = broker;
+    
     _linkStream = linkStream;
     _linkService = linkService;
   }
@@ -66,15 +71,19 @@ public class ServerLinkStream extends AbstractActorStream {
     _jid = jid;
   }
   
-  public void setBrokerStream(ActorStream brokerStream)
+  public Broker getBroker()
   {
-    _brokerStream = brokerStream;
+    return _broker;
   }
   
-  @Override
   public ActorStream getLinkStream()
   {
     return _linkStream;
+  }
+  
+  protected boolean isActive()
+  {
+    return true;
   }
 
   /**
@@ -87,8 +96,8 @@ public class ServerLinkStream extends AbstractActorStream {
   {
     if (to == null)
       _linkService.message(to, from, payload);
-    else if (_brokerStream != null)
-      _brokerStream.message(to, _jid, payload);
+    else if (isActive())
+      getBroker().message(to, _jid, payload);
     else
       super.message(to, from, payload);
   }
@@ -104,8 +113,8 @@ public class ServerLinkStream extends AbstractActorStream {
   {     
     if (to == null)
       _linkService.messageError(to, from, payload, error);
-    else if (_brokerStream != null)
-      _brokerStream.messageError(to, _jid, payload, error);
+    else if (isActive())
+      getBroker().messageError(to, _jid, payload, error);
     else
       super.messageError(to, from, payload, error);
   }
@@ -124,8 +133,8 @@ public class ServerLinkStream extends AbstractActorStream {
   {
     if (to == null)
       _linkService.query(id, to, from, payload);
-    else if (_brokerStream != null)
-      _brokerStream.query(id, to, _jid, payload);
+    else if (isActive())
+      getBroker().query(id, to, _jid, payload);
     else
       super.query(id, to, from, payload);
   }
@@ -143,8 +152,8 @@ public class ServerLinkStream extends AbstractActorStream {
   {
     if (to == null)
       _linkService.queryResult(id, to, from, payload);
-    else if (_brokerStream != null)
-      _brokerStream.queryResult(id, to, _jid, payload);
+    else if (isActive())
+      getBroker().queryResult(id, to, _jid, payload);
     else
       super.queryResult(id, to, from, payload);
   }
@@ -163,8 +172,8 @@ public class ServerLinkStream extends AbstractActorStream {
   {
     if (to == null)
       _linkService.queryError(id, to, from, payload, error);
-    else if (_brokerStream != null)
-      _brokerStream.queryError(id, to, _jid, payload, error);
+    else if (isActive())
+      getBroker().queryError(id, to, _jid, payload, error);
     else
       super.queryError(id, to, from, payload, error);
   }
@@ -172,12 +181,12 @@ public class ServerLinkStream extends AbstractActorStream {
   @Override
   public boolean isClosed()
   {
-    return _brokerStream == null;
+    return false; // _brokerStream == null;
   }
 
   public void close()
   {
-    _brokerStream = null;
+    // _brokerStream = null;
  }
 
   @Override

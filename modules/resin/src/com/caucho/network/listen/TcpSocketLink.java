@@ -303,7 +303,8 @@ public class TcpSocketLink extends AbstractSocketLink
             && ! async.isCompleteRequested());
   }
 
-  boolean isCometSuspend()
+  @Override
+  public boolean isCometSuspend()
   {
     return _state.isCometSuspend();
   }
@@ -889,6 +890,15 @@ public class TcpSocketLink extends AbstractSocketLink
 
   private boolean toSuspend()
   {
+    TcpCometController async = _async;
+    
+    if (async != null && async.isCompleteRequested()) {
+      // server/1l80
+      _state = _state.toCometComplete();
+
+      return false;
+    }
+    
     _idleStartTime = Alarm.getCurrentTime();
     _idleExpireTime = _idleStartTime + _idleTimeout;
 

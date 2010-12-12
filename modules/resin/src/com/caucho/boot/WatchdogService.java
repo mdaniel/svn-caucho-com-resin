@@ -76,7 +76,7 @@ class WatchdogService extends SimpleActor
 
       String msg = L.l("{0}: started server", this);
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -89,7 +89,7 @@ class WatchdogService extends SimpleActor
         msg = L.l("{0}: start server failed because of exception\n  {1}'",
                   this, e.toString());
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(false, msg));
     }
     
@@ -106,7 +106,7 @@ class WatchdogService extends SimpleActor
     try {
       String result = _manager.status();
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(true, result));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -114,7 +114,7 @@ class WatchdogService extends SimpleActor
       String msg = L.l("{0}: status failed because of exception\n{1}'",
                        this, e.toString());
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(false, msg));
     }
     
@@ -135,7 +135,7 @@ class WatchdogService extends SimpleActor
 
       String msg = L.l("{0}: stopped server='{1}'", this, serverId);
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -143,7 +143,7 @@ class WatchdogService extends SimpleActor
       String msg = L.l("{0}: stop server='{1}' failed because of exception\n{2}'",
                        this, serverId, e.toString());
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(false, msg));
     }
     
@@ -168,7 +168,7 @@ class WatchdogService extends SimpleActor
 
       String msg = L.l("{0}: killed server='{1}'", this, serverId);
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -176,7 +176,7 @@ class WatchdogService extends SimpleActor
       String msg = L.l("{0}: kill server='{1}' failed because of exception\n{2}'",
                        this, serverId, e.toString());
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(false, msg));
     }
     
@@ -201,7 +201,7 @@ class WatchdogService extends SimpleActor
     
       new Thread(new Shutdown()).start();
       
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -209,7 +209,7 @@ class WatchdogService extends SimpleActor
       String msg = L.l("{0}: shutdown failed because of exception\n{2}'",
                        this, e.toString());
     
-      getLinkStream().queryResult(id, from, to,
+      getBroker().queryResult(id, from, to,
                                     new ResultStatus(false, msg));
     }
     

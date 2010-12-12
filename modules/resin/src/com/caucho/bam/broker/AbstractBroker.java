@@ -29,13 +29,7 @@
 
 package com.caucho.bam.broker;
 
-import com.caucho.bam.actor.AbstractAgent;
-import com.caucho.bam.actor.Agent;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.mailbox.MailboxType;
-import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.mailbox.NonQueuedMailbox;
-import com.caucho.bam.stream.ActorStream;
 
 
 /**
@@ -55,92 +49,15 @@ abstract public class AbstractBroker
   }
   
   /**
-   * Returns the stream to the broker
+   * Returns the stream to the broker itself
    */
-  @Override
-  public ActorStream getBrokerStream()
-  {
-    return this;
-  }
-  
-  /**
-   * Adds an actor.
-   */
-  @Override
-  abstract public void addActor(ActorStream actorStream);
-  
-  /**
-   * Removes an actor.
-   */
-  @Override
-  abstract public void removeActor(ActorStream actorStream);
-  
-  /**
-   * Creates an agent
-   */
-  @Override
-  public Agent createAgent(ActorStream actorStream)
-  {
-    return createAgent(actorStream, MailboxType.DEFAULT);
-  }
-    
-  /**
-   * Creates an agent
-   */
-  @Override
-  public Agent createAgent(ActorStream actorStream,
-                           MailboxType mailboxType)
-  {
-    Mailbox mailbox = createMailbox(actorStream, mailboxType);
-    
-    Agent agent = new AbstractAgent(actorStream.getJid(),
-                                    mailbox,
-                                    this);
-    
-    addActor(agent.getMailbox());
-    
-    return agent;
-  }
-  
-  protected Mailbox createMailbox(ActorStream actorStream,
-                                  MailboxType mailboxType)
-  {
-    switch (mailboxType) {
-    case NON_QUEUED:
-      return new NonQueuedMailbox(actorStream);
-      
-    default:
-      return new MultiworkerMailbox(actorStream, getBrokerStream(), 1);
-    }
-  }
-  
-  /**
-   * Registers the client under a unique id. The
-   * resource is only a suggestion; the broker may
-   * return a different resource id.
-   * 
-   * @param clientStream the stream to the client
-   * @param uid the client's uid
-   * @param resource the suggested resource for the jid
-   * @return the generated jid
-   */
-  @Override
-  public String createClient(ActorStream clientStream,
-                             String uid,
-                             String resource)
+  // @Override
+  public Mailbox getBrokerMailbox()
   {
     throw new UnsupportedOperationException(getClass().getName());
+    // return new NullActorStream(getJid(), this);
   }
-  
-  /**
-   * Registers an listener for broker events, e.g. a missing actor.
-   */
-  @Override
-  public void addBrokerListener(BrokerListener listener)
-  {
 
-  }
-  
   /**
    * Returns true if the broker has been closed
    */

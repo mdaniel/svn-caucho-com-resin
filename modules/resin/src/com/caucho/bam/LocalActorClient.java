@@ -107,9 +107,9 @@ public class LocalActorClient implements ActorClient {
    * The stream to the link.
    */
   @Override
-  public ActorStream getLinkStream()
+  public ActorStream getBroker()
   {
-    return _client.getLinkStream();
+    return _client.getBroker();
   }
 
   /**

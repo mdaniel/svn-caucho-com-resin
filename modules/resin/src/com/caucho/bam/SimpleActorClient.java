@@ -44,7 +44,7 @@ public class SimpleActorClient implements ActorClient {
   private String _jid;
 
   private ActorStream _actorStream;
-  private ActorStream _linkStream;
+  private Broker _broker;
   private ActorStream _clientStream;
 
   private final QueryManager _queryManager = new QueryManager();
@@ -62,7 +62,7 @@ public class SimpleActorClient implements ActorClient {
   {
     this();
     
-    _linkStream = broker.getBrokerStream();
+    _broker = broker;
     _jid = broker.createClient(_actorStream, uid, resource);
   }
 
@@ -128,18 +128,9 @@ public class SimpleActorClient implements ActorClient {
    * The underlying, low-level stream to the link
    */
   @Override
-  public ActorStream getLinkStream()
+  public Broker getBroker()
   {
-    return _linkStream;
-  }
-
-  /**
-   * The underlying, low-level stream to the link
-   */
-  @Override
-  public void setLinkStream(ActorStream linkStream)
-  {
-    _linkStream = linkStream;
+    return _broker;
   }
 
   //
@@ -156,7 +147,7 @@ public class SimpleActorClient implements ActorClient {
   @Override
   public void message(String to, Serializable payload)
   {
-    ActorStream linkStream = getLinkStream();
+    ActorStream linkStream = getBroker();
 
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a message because the link is closed.");
@@ -187,7 +178,7 @@ public class SimpleActorClient implements ActorClient {
   public Serializable query(String to,
                             Serializable payload)
   {
-    ActorStream linkStream = getLinkStream();
+    ActorStream linkStream = getBroker();
 
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
@@ -222,7 +213,7 @@ public class SimpleActorClient implements ActorClient {
                             Serializable payload,
                             long timeout)
   {
-    ActorStream linkStream = getLinkStream();
+    ActorStream linkStream = getBroker();
 
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
@@ -259,7 +250,7 @@ public class SimpleActorClient implements ActorClient {
                     Serializable payload,
                     QueryCallback callback)
   {
-    ActorStream linkStream = getLinkStream();
+    ActorStream linkStream = getBroker();
 
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
@@ -301,8 +292,7 @@ public class SimpleActorClient implements ActorClient {
       ActorStream clientStream = getClientStream();
       
       if (clientStream == null) {
-        NullActorStream nullStream = new NullActorStream("null");
-        nullStream.setLinkStream(getLinkStream());
+        NullActorStream nullStream = new NullActorStream("null", getBroker());
         clientStream = nullStream;
       }
       

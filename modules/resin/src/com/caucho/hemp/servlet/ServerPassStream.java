@@ -72,7 +72,7 @@ public class ServerPassStream extends AbstractActorStream {
   }
 
   @Override
-  public ActorStream getLinkStream()
+  public ActorStream getBroker()
   {
     return _linkStream;
   }

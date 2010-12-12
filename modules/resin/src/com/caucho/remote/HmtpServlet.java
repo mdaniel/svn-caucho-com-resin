@@ -183,7 +183,7 @@ public class HmtpServlet extends GenericServlet {
     {
       _in = new HmtpReader();
       _out = new HmtpWebSocketContextWriter(context);
-      _linkStream = new MultiworkerMailbox(_out, _broker.getBrokerStream(), 1);
+      _linkStream = new MultiworkerMailbox(_out, _broker, 1);
       
       _linkService = new ServerLinkActor(_linkStream, _broker, _authManager,
                                            _ipAddress, false);

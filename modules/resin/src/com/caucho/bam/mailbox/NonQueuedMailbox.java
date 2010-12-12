@@ -32,6 +32,7 @@ package com.caucho.bam.mailbox;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -39,10 +40,17 @@ import com.caucho.bam.stream.ActorStream;
  */
 public class NonQueuedMailbox implements Mailbox
 {
+  private final Broker _broker;
   private final ActorStream _actorStream;
 
-  public NonQueuedMailbox(ActorStream actorStream)
+  public NonQueuedMailbox(Broker broker,
+                          ActorStream actorStream)
   {
+    if (broker == null)
+      throw new NullPointerException();
+    
+    _broker = broker;
+    
     if (actorStream == null)
       throw new NullPointerException();
     
@@ -56,6 +64,12 @@ public class NonQueuedMailbox implements Mailbox
   public String getJid()
   {
     return _actorStream.getJid();
+  }
+  
+  @Override
+  public Broker getBroker()
+  {
+    return _broker;
   }
 
   @Override

@@ -105,7 +105,7 @@ public class SimpleActorStream implements ActorStream, Actor
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
    */
-  public ActorStream getLinkStream()
+  public ActorStream getBroker()
   {
     return _linkStream;
   }
@@ -210,7 +210,7 @@ public class SimpleActorStream implements ActorStream, Actor
                        String from,
                        Serializable payload)
   {
-    _skeleton.query(this, _fallback, getLinkStream(), id, to, from, payload);
+    _skeleton.query(this, _fallback, getBroker(), id, to, from, payload);
   }
 
   /**
@@ -314,7 +314,7 @@ public class SimpleActorStream implements ActorStream, Actor
                                       ActorError.FEATURE_NOT_IMPLEMENTED,
                                       msg);
 
-    getLinkStream().queryError(id, from, to, payload, error);
+    getBroker().queryError(id, from, to, payload, error);
   }
   
   /**
@@ -338,7 +338,7 @@ public class SimpleActorStream implements ActorStream, Actor
                                       ActorError.FEATURE_NOT_IMPLEMENTED,
                                       msg);
 
-    getLinkStream().queryError(id, from, to, payload, error);
+    getBroker().queryError(id, from, to, payload, error);
   }
   
   /**

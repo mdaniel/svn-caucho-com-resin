@@ -264,7 +264,7 @@ class WatchdogManager implements AlarmListener {
 
       service.setLinkStream(broker.getBrokerStream());
 
-      broker.addActor(service);
+      broker.createAgent(service);
 
       ResinSystem.getCurrent().start();
 

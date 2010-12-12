@@ -64,7 +64,7 @@ class XmppClientBrokerStream extends XmppWriter
   }
 
   @Override
-  public ActorStream getLinkStream()
+  public ActorStream getBroker()
   {
     return this;
   }

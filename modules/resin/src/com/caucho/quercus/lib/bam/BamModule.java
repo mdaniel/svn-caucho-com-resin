@@ -121,11 +121,11 @@ public class BamModule extends AbstractQuercusModule
     BamPhpActor actor = getActor(env);
 
     if (actor != null)
-      return actor.getLinkStream();
+      return actor.getBroker();
 
     ActorClient connection = getActorClient(env);
 
-    return connection.getLinkStream();
+    return connection.getBroker();
   }
 
   private static String getJid(Env env)
@@ -224,7 +224,7 @@ public class BamModule extends AbstractQuercusModule
     if (service == null)
       return BooleanValue.FALSE;
 
-    manager.getBroker().removeActor(service);
+    manager.getBroker().removeMailbox(service);
 
     return BooleanValue.TRUE;
   }

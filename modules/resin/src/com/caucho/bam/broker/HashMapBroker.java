@@ -31,6 +31,7 @@ package com.caucho.bam.broker;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -43,12 +44,12 @@ import com.caucho.bam.stream.ActorStream;
  * introspection with {@link com.caucho.bam.Message @Message} annotations
  * to simplify Actor development.
  */
-public class HashMapBroker extends AbstractBroker
+public class HashMapBroker extends AbstractManagedBroker
 {
   private final String _jid;
   
-  private final ConcurrentHashMap<String,ActorStream> _actorMap
-    = new ConcurrentHashMap<String,ActorStream>();
+  private final ConcurrentHashMap<String,Mailbox> _mailboxMap
+    = new ConcurrentHashMap<String,Mailbox>();
 
   public HashMapBroker(String jid)
   {
@@ -68,31 +69,32 @@ public class HashMapBroker extends AbstractBroker
    * Returns the actor stream for the given jid.
    */
   @Override
-  protected ActorStream getActorStream(String jid)
+  public Mailbox getMailbox(String jid)
   {
-    return _actorMap.get(jid);
+    return _mailboxMap.get(jid);
   }
   
   /**
    * Adds a new actor to the broker.
    */
-  public void addActor(ActorStream actor)
+  @Override
+  public void addMailbox(Mailbox mailbox)
   {
-    String jid = actor.getJid();
+    String jid = mailbox.getJid();
     
     if (jid == null)
-      throw new NullPointerException(String.valueOf(actor) + " has a null jid");
+      throw new NullPointerException(String.valueOf(mailbox) + " has a null jid");
     
-    _actorMap.put(jid, actor);
+    _mailboxMap.put(jid, mailbox);
   }
 
   /**
    * Removes an actor from the broker.
    */
-  public void removeActor(ActorStream actor)
+  public void removeMailbox(ActorStream actor)
   {
     String jid = actor.getJid();
     
-    _actorMap.remove(jid);
+    _mailboxMap.remove(jid);
   }
 }

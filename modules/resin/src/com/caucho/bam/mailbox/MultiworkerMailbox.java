@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.packet.Message;
 import com.caucho.bam.packet.MessageError;
 import com.caucho.bam.packet.Packet;
@@ -55,7 +56,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     = Logger.getLogger(MultiworkerMailbox.class.getName());
 
   private final String _name;
-  private final ActorStream _linkStream;
+  private final Broker _broker;
   private final ActorStream _actorStream;
 
   private final MailboxWorker []_workers;
@@ -64,16 +65,16 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   private final Lifecycle _lifecycle = new Lifecycle();
 
   public MultiworkerMailbox(ActorStream actorStream,
-                            ActorStream linkStream,
+                            Broker broker,
                             int threadMax)
   {
-    if (linkStream == null)
+    if (broker == null)
       throw new NullPointerException();
 
     if (actorStream == null)
       throw new NullPointerException();
 
-    _linkStream = linkStream;
+    _broker = broker;
     _actorStream = actorStream;
     
     if (_actorStream.getJid() == null) {
@@ -122,9 +123,10 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   /**
    * Returns the stream back to the link for error packets
    */
-  public ActorStream getLinkStream()
+  @Override
+  public Broker getBroker()
   {
-    return _linkStream;
+    return _broker;
   }
 
   @Override
@@ -237,7 +239,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
    */
   protected void dispatch(Packet packet)
   {
-    packet.dispatch(getActorStream(), _linkStream);
+    packet.dispatch(getActorStream(), _broker);
   }
   
   protected Packet dequeue()
@@ -280,7 +282,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   @Override
   public boolean isClosed()
   {
-    return _lifecycle.isDestroying() || _linkStream.isClosed();
+    return _lifecycle.isDestroying() || _broker.isClosed();
   }
 
   @Override

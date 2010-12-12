@@ -29,6 +29,8 @@
 
 package com.caucho.bam.stream;
 
+import com.caucho.bam.broker.Broker;
+
 
 /**
  * NullActorStream always ignores messages and returns errors for RPC calls.
@@ -36,16 +38,18 @@ package com.caucho.bam.stream;
 public class NullActorStream extends AbstractActorStream
 {
   private String _jid;
-  private ActorStream _linkStream;
+  private Broker _broker;
 
-  public NullActorStream(String jid)
+  public NullActorStream(String jid, Broker broker)
   {
     _jid = jid;
+    _broker = broker;
   }
 
   /**
    * Returns the jid at the end of the stream.
    */
+  @Override
   public String getJid()
   {
     return _jid;
@@ -54,16 +58,9 @@ public class NullActorStream extends AbstractActorStream
   /**
    * The stream to the link.
    */
-  public ActorStream getLinkStream()
+  @Override
+  public Broker getBroker()
   {
-    return _linkStream;
-  }
-
-  /**
-   * The stream to the link.
-   */
-  public void setLinkStream(ActorStream linkStream)
-  {
-    _linkStream = linkStream;
+    return _broker;
   }
 }

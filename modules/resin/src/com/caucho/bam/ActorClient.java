@@ -31,6 +31,7 @@ package com.caucho.bam;
 
 import java.io.Serializable;
 
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -41,6 +42,7 @@ public interface ActorClient extends Actor {
   /**
    * Returns the Actor's jid used for all "from" parameters.
    */
+  @Override
   public String getJid();
 
   //
@@ -74,17 +76,14 @@ public interface ActorClient extends Actor {
   /**
    * Returns the stream to this client.
    */
+  @Override
   public ActorStream getActorStream();
 
   /**
    * The ActorStream to the link.
    */
-  public ActorStream getLinkStream();
-
-  /**
-   * Sets the ActorStream to the link.
-   */
-  public void setLinkStream(ActorStream linkStream);
+  @Override
+  public Broker getBroker();
 
   //
   // message handling

@@ -29,6 +29,7 @@
 
 package com.caucho.hemp.broker;
 
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.loader.EnvironmentLocal;
 
@@ -51,7 +52,7 @@ abstract public class DomainManager
     return _localDomain.get();
   }
 
-  abstract public ActorStream findDomain(String name);
+  abstract public Mailbox findDomain(String name);
 
   /**
    * Close the domain manager on shutdown.

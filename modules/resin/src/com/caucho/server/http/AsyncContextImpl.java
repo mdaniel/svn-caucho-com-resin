@@ -45,7 +45,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.network.listen.AsyncController;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkCometListener;
+import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
@@ -58,10 +60,11 @@ public class AsyncContextImpl
   private static final Logger log = Logger
       .getLogger(ConnectionCometController.class.getName());
 
+  private SocketLink _tcpConnection;
   private AsyncController _cometController;
 
-  private final ServletRequest _request;
-  private final ServletResponse _response;
+  private ServletRequest _request;
+  private ServletResponse _response;
   
   private boolean _isOriginal;
 
@@ -70,11 +73,16 @@ public class AsyncContextImpl
 
   private WebApp _dispatchWebApp;
   private String _dispatchPath;
+  
+  public AsyncContextImpl(AbstractHttpRequest httpConn)
+  {
+    _tcpConnection = httpConn.getConnection();
+    _cometController = httpConn.getConnection().toComet(this);
+  }
 
-  public AsyncContextImpl(AbstractHttpRequest httpConn,
-                          ServletRequest request,
-                          ServletResponse response,
-                          boolean isOriginal)
+  public void init(ServletRequest request,
+                   ServletResponse response,
+                   boolean isOriginal)
   {
     _request = request;
     _response = response;
@@ -97,14 +105,14 @@ public class AsyncContextImpl
     else
       _dispatchPath = servletPath + pathInfo;
     
-    _cometController = httpConn.getConnection().toComet(this);
-    
     /* XXX: tck
     if (_cometController == null)
       throw new NullPointerException();
       */
 
     _isOriginal = isOriginal;
+    
+    onStart(req, response);
   }
 
   /**
@@ -247,12 +255,18 @@ public class AsyncContextImpl
   {
     AsyncController cometController = _cometController;
     
+    boolean isSuspend = _tcpConnection.isCometSuspend();
+
     if (cometController != null) {
       cometController.complete();
     }
 
     // TCK: 
-    onComplete();
+    // XXX: should be on completing thread.
+    if (! isSuspend) {
+      onComplete();
+    }
+
     /*
     try {
     } finally {
@@ -266,12 +280,14 @@ public class AsyncContextImpl
   //
   
   /**
-   * CometHandler callback when the connection times out.
+   * CometHandler callback when the connection starts.
    */
-  public void onStart(ServletContext webApp,
-                      ServletRequest request,
+  public void onStart(ServletRequest request,
                       ServletResponse response)
   {
+    if (_listenerNode == null)
+      return;
+    
     AsyncEvent event = new AsyncEvent(this, request, response);
     
     for (AsyncListenerNode node = _listenerNode;
