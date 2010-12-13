@@ -32,6 +32,7 @@ package com.caucho.hemp.servlet;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 
@@ -41,17 +42,17 @@ import com.caucho.bam.stream.ActorStream;
  * the link service and the broker.
  */
 public class ServerPassStream extends AbstractActorStream {
-  private final ActorStream _linkStream; // string to the link
+  private final Broker  _linkBroker; // string to the link
   private final ActorStream _linkService;
 
   private ActorStream _brokerStream;
 
   private String _jid;
 
-  public ServerPassStream(ActorStream linkStream,
+  public ServerPassStream(Broker linkBroker,
                           ActorStream linkService)
   {
-    _linkStream = linkStream;
+    _linkBroker = linkBroker;
     _linkService = linkService;
   }
 
@@ -72,9 +73,9 @@ public class ServerPassStream extends AbstractActorStream {
   }
 
   @Override
-  public ActorStream getBroker()
+  public Broker getBroker()
   {
-    return _linkStream;
+    return _linkBroker;
   }
 
   /**

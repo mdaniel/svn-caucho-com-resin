@@ -43,6 +43,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.broker.PassthroughBroker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.config.Admin;
@@ -168,7 +170,7 @@ public class HmtpServlet extends GenericServlet {
     private HmtpReader _in;
     private HmtpWebSocketContextWriter _out;
     
-    private ActorStream _linkStream;
+    private Broker _linkStream;
     private ActorStream _brokerStream;
     
     private ServerLinkActor _linkService;
@@ -183,9 +185,9 @@ public class HmtpServlet extends GenericServlet {
     {
       _in = new HmtpReader();
       _out = new HmtpWebSocketContextWriter(context);
-      _linkStream = new MultiworkerMailbox(_out, _broker, 1);
-      
-      _linkService = new ServerLinkActor(_linkStream, _broker, _authManager,
+      _linkStream = new PassthroughBroker(new MultiworkerMailbox(_out, _broker, 1));
+      ManagedBroker broker = null;
+      _linkService = new ServerLinkActor(_linkStream, broker, _authManager,
                                            _ipAddress, false);
       _brokerStream = _linkService.getBrokerStream();
     }

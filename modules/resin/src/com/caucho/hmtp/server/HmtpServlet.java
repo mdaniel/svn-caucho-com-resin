@@ -44,7 +44,9 @@ import com.caucho.bam.ActorError;
 import com.caucho.bam.BamSkeleton;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.HashMapBroker;
+import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.Mailbox;
+import com.caucho.bam.mailbox.NonQueuedMailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.FallbackActorStream;
 import com.caucho.websocket.WebSocketListener;
@@ -62,7 +64,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   private final AtomicInteger _gId = new AtomicInteger();
 
   private String _jid;
-  private ActorStream _servletLinkStream;
+  private ManagedBroker _servletBroker;
   private ActorStream _servletActorStream = this;
 
   private BamSkeleton _skeleton;
@@ -141,8 +143,8 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
 
   public void addClientLinkActor(Actor linkActor)
   {
-    linkActor.setLinkStream(_broker);
-    _broker.addMailbox(linkActor.getActorStream());
+    linkActor.setBroker(_broker);
+    _broker.createAgent(linkActor.getActorStream());
   }  
 
   public void removeClientLinkActor(Actor linkActor)
@@ -157,7 +159,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   {
     _servletFallbackStream = new FallbackActorStream(this);
     
-    return this;
+    return new NonQueuedMailbox(_broker, this);
   }
 
   //
@@ -177,15 +179,15 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   }
   
   @Override
-  public Broker getBroker()
+  public ManagedBroker getBroker()
   {
-    return _servletLinkStream;
+    return _servletBroker;
   }
   
   @Override
-  public void setLinkStream(ActorStream linkStream)
+  public void setBroker(Broker broker)
   {
-    _servletLinkStream = linkStream;
+    _servletBroker = (ManagedBroker) broker;
   }
   
   protected ActorStream getFallbackStream()

@@ -100,6 +100,12 @@ abstract public class AbstractManagedBroker
       return new MultiworkerMailbox(actorStream, this, 1);
     }
   }
+  
+  public String createClient(ActorStream actorStream, String uid,
+                             String resource)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
  
   /**
    * Returns true if the broker has been closed

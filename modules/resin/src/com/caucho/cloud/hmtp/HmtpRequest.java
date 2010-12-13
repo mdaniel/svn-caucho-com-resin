@@ -35,6 +35,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.broker.PassthroughBroker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.cloud.bam.BamService;
@@ -73,7 +75,7 @@ public class HmtpRequest extends AbstractProtocolConnection
 
   private HmtpWebSocketReader _hmtpReader;
   private HmtpWebSocketWriter _hmtpWriter;
-  private ActorStream _linkStream;
+  private Broker _linkStream;
   
   private HmtpLinkActor _linkActor;
 
@@ -166,11 +168,11 @@ public class HmtpRequest extends AbstractProtocolConnection
     // _hmtpWriter.setId(getRequestId());
     // _hmtpWriter.setAutoFlush(true);
 
-    Broker broker = _bamService.getBroker();
+    ManagedBroker broker = _bamService.getBroker();
 
     _hmtpWriter.setJid("hmtp-server-" + _conn.getId() + "-hmtp");
 
-    _linkStream = new MultiworkerMailbox(_hmtpWriter, broker, 1);
+    _linkStream = new PassthroughBroker(new MultiworkerMailbox(_hmtpWriter, broker, 1));
 
     _linkActor = new HmtpLinkActor(_linkStream,
                                    broker,

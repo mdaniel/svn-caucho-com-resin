@@ -51,11 +51,17 @@ abstract public class AbstractBroker
   /**
    * Returns the stream to the broker itself
    */
-  // @Override
+  @Override
   public Mailbox getBrokerMailbox()
   {
     throw new UnsupportedOperationException(getClass().getName());
     // return new NullActorStream(getJid(), this);
+  }
+  
+  @Override
+  public Mailbox getMailbox(String jid)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

@@ -29,6 +29,7 @@
 
 package com.caucho.bam;
 
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -102,10 +103,10 @@ public class SimpleActor extends SimpleActorStream
    * low-level messaging.
    */
   @Override
-  public void setLinkStream(ActorStream linkStream)
+  public void setBroker(Broker broker)
   {
-    super.setLinkStream(linkStream);
+    super.setBroker(broker);
     
-    _linkClient.setLinkStream(linkStream);
+    _linkClient.setBroker(broker);
   }
 }

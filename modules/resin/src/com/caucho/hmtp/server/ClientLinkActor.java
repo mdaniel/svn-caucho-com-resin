@@ -33,6 +33,7 @@ import java.io.Serializable;
 
 import com.caucho.bam.Actor;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -42,7 +43,7 @@ class ClientLinkActor implements Actor, ActorStream
 {
   private String _jid;
   
-  private ActorStream _linkStream;
+  private Broker _broker;
   private ActorStream _actorStream;
   private ActorStream _out;
 
@@ -85,15 +86,15 @@ class ClientLinkActor implements Actor, ActorStream
   }
   
   @Override
-  public ActorStream getBroker()
+  public Broker getBroker()
   {
-    return _linkStream;
+    return _broker;
   }
 
   @Override
-  public void setLinkStream(ActorStream linkStream)
+  public void setBroker(Broker broker)
   {
-    _linkStream = linkStream;
+    _broker = broker;
   }
 
   @Override

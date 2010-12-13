@@ -37,13 +37,16 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ProtocolException;
+import com.caucho.bam.broker.AbstractBroker;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.remote.websocket.WebSocketOutputStream;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.
  */
-public class HmtpWebSocketWriter implements ActorStream
+public class HmtpWebSocketWriter extends AbstractBroker
 {
   private static final Logger log
     = Logger.getLogger(HmtpWebSocketWriter.class.getName());
@@ -231,4 +234,5 @@ public class HmtpWebSocketWriter implements ActorStream
   {
     
   }
+
 }

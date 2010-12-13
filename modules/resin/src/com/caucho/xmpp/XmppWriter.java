@@ -32,13 +32,17 @@ package com.caucho.xmpp;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.AbstractBroker;
+import com.caucho.bam.broker.AbstractBrokerStream;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 
 /**
  * xmpp client to broker
  */
-public class XmppWriter extends AbstractActorStream
+public class XmppWriter extends AbstractBroker
 {
   private XmppWriterImpl _out;
 
@@ -47,8 +51,8 @@ public class XmppWriter extends AbstractActorStream
     _out = out;
   }
 
-  @Override
-  public ActorStream getBroker()
+  // @Override
+  public Broker getBrokerStream()
   {
     return null;
   }
@@ -137,5 +141,15 @@ public class XmppWriter extends AbstractActorStream
   public String toString()
   {
     return getClass().getSimpleName() + "[" + "]";
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.broker.AbstractBrokerStream#getMailbox(java.lang.String)
+   */
+  @Override
+  public Mailbox getMailbox(String jid)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

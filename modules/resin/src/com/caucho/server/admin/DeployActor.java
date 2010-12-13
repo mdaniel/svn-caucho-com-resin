@@ -47,6 +47,7 @@ import com.caucho.bam.ActorError;
 import com.caucho.bam.Query;
 import com.caucho.bam.SimpleActor;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
@@ -98,7 +99,7 @@ public class DeployActor extends SimpleActor
   }
 
   @Override
-  public Broker getBroker()
+  public ManagedBroker getBroker()
   {
     return _server.getAdminBroker();
   }
@@ -117,7 +118,7 @@ public class DeployActor extends SimpleActor
 
     _repository = RepositoryService.getCurrentRepositorySpi();
 
-    setLinkStream(getBroker());
+    setBroker(getBroker());
     MultiworkerMailbox queue
       = new MultiworkerMailbox(getActorStream(), getBroker(), 2);
     

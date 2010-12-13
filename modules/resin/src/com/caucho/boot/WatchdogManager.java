@@ -262,7 +262,7 @@ class WatchdogManager implements AlarmListener {
       broker.setAllowNullAdminAuthenticator(true);
       */
 
-      service.setLinkStream(broker.getBrokerStream());
+      service.setBroker(broker);
 
       broker.createAgent(service);
 

@@ -37,6 +37,7 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 
@@ -107,7 +108,7 @@ public class LocalActorClient implements ActorClient {
    * The stream to the link.
    */
   @Override
-  public ActorStream getBroker()
+  public Broker getBroker()
   {
     return _client.getBroker();
   }
@@ -116,9 +117,9 @@ public class LocalActorClient implements ActorClient {
    * The stream to the link.
    */
   @Override
-  public void setLinkStream(ActorStream linkStream)
+  public void setBroker(Broker broker)
   {
-    _client.setLinkStream(linkStream);
+    _client.setBroker(broker);
   }
 
   @Override

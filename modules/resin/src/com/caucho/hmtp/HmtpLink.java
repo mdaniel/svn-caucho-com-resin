@@ -65,7 +65,7 @@ public class HmtpLink implements Runnable {
     if (actor.getJid() == null)
       actor.setJid(actor.getClass().getSimpleName() + "@link");
     
-    actor.setLinkStream(_toLinkStream);
+    actor.setBroker(_toLinkStream);
   }
 
   public String getJid()

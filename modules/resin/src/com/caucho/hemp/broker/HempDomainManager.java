@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.server.cluster.Server;
 
@@ -45,17 +46,17 @@ public class HempDomainManager extends DomainManager
   private static final Logger log
     = Logger.getLogger(HempDomainManager.class.getName());
   // domains
-  private final HashMap<String,WeakReference<ActorStream>> _domainMap
-    = new HashMap<String,WeakReference<ActorStream>>();
+  private final HashMap<String,WeakReference<Mailbox>> _domainMap
+    = new HashMap<String,WeakReference<Mailbox>>();
 
   public HempDomainManager()
   {
   }
 
-  public void addDomain(String name, ActorStream domain)
+  public void addDomain(String name, Mailbox domain)
   {
     synchronized (_domainMap) {
-      _domainMap.put(name, new WeakReference<ActorStream>(domain));
+      _domainMap.put(name, new WeakReference<Mailbox>(domain));
     }
 
     if (log.isLoggable(Level.FINER))
@@ -64,7 +65,7 @@ public class HempDomainManager extends DomainManager
 
   public ActorStream removeDomain(String name)
   {
-    WeakReference<ActorStream> domainRef = null;
+    WeakReference<Mailbox> domainRef = null;
     
     synchronized (_domainMap) {
       domainRef = _domainMap.remove(name);
@@ -80,9 +81,9 @@ public class HempDomainManager extends DomainManager
       return null;
   }
 
-  public ActorStream findDomain(String name)
+  public Mailbox findDomain(String name)
   {
-    WeakReference<ActorStream> domainRef = null;
+    WeakReference<Mailbox> domainRef = null;
     
     synchronized (_domainMap) {
       domainRef = _domainMap.get(name);

@@ -32,6 +32,7 @@ package com.caucho.bam;
 import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.stream.AbstractActorStreamFilter;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.NullActorStream;
@@ -44,7 +45,7 @@ public class SimpleActorClient implements ActorClient {
   private String _jid;
 
   private ActorStream _actorStream;
-  private Broker _broker;
+  private ManagedBroker _broker;
   private ActorStream _clientStream;
 
   private final QueryManager _queryManager = new QueryManager();
@@ -56,7 +57,7 @@ public class SimpleActorClient implements ActorClient {
     _actorStream = new QueryFilterStream();
   }
   
-  public SimpleActorClient(Broker broker, 
+  public SimpleActorClient(ManagedBroker broker, 
                            String uid, 
                            String resource)
   {
@@ -131,6 +132,12 @@ public class SimpleActorClient implements ActorClient {
   public Broker getBroker()
   {
     return _broker;
+  }
+  
+  @Override
+  public void setBroker(Broker broker)
+  {
+    _broker = (ManagedBroker) broker;
   }
 
   //

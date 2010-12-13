@@ -33,6 +33,7 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.FallbackActorStream;
 
@@ -64,7 +65,7 @@ public class SimpleActorStream implements ActorStream, Actor
   private final ActorStream _fallback;
 
   private String _jid;
-  private ActorStream _linkStream;
+  private Broker _broker;
  
   public SimpleActorStream()
   {
@@ -105,18 +106,19 @@ public class SimpleActorStream implements ActorStream, Actor
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
    */
-  public ActorStream getBroker()
+  public Broker getBroker()
   {
-    return _linkStream;
+    return _broker;
   }
 
   /**
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
    */
-  public void setLinkStream(ActorStream linkStream)
+  @Override
+  public void setBroker(Broker broker)
   {
-    _linkStream = linkStream;
+    _broker = broker;
   }
   
   @Override

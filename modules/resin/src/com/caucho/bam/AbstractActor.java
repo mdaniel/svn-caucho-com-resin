@@ -29,6 +29,7 @@
 
 package com.caucho.bam;
 
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 
@@ -38,7 +39,7 @@ import com.caucho.bam.stream.ActorStream;
 public class AbstractActor implements Actor
 {
   private ActorStream _actorStream;
-  private ActorStream _linkStream;
+  private Broker _broker;
 
   private String _jid;
 
@@ -84,16 +85,16 @@ public class AbstractActor implements Actor
    */
   public Broker getBroker()
   {
-    return _linkStream;
+    return _broker;
   }
 
   /**
    * The stream to the link is used by the Actor to send messages to
    * all other Actors in the system.
    */
-  public void setLinkStream(ActorStream linkStream)
+  public void setBroker(Broker broker)
   {
-    _linkStream = linkStream;
+    _broker = broker;
   }
 
   @Override

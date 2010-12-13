@@ -37,6 +37,8 @@ import com.caucho.bam.ActorException;
 import com.caucho.bam.Query;
 import com.caucho.bam.SimpleActor;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.hmtp.AuthQuery;
 import com.caucho.hmtp.AuthResult;
@@ -50,7 +52,7 @@ public class ServerLinkActor extends SimpleActor {
   private static final Logger log
     = Logger.getLogger(ServerLinkActor.class.getName());
   
-  private final Broker _broker;
+  private final ManagedBroker _broker;
   private final ServerLinkStream _serverLinkStream;
   private final ServerPassStream _serverPassStream;
   private final ActorStream _brokerStream;
@@ -60,8 +62,8 @@ public class ServerLinkActor extends SimpleActor {
   /**
    * Creates the LinkService for low-level link messages
    */
-  public ServerLinkActor(ActorStream linkStream,
-                         Broker broker,
+  public ServerLinkActor(Broker linkStream,
+                         ManagedBroker broker,
                          ServerAuthManager authManager,
                          String ipAddress,
                          boolean isUnidir)
@@ -72,7 +74,7 @@ public class ServerLinkActor extends SimpleActor {
     if (broker == null)
       throw new NullPointerException();
     
-    setLinkStream(linkStream);
+    setBroker(broker);
     
     _broker = broker;
     _authManager = authManager;
@@ -85,7 +87,7 @@ public class ServerLinkActor extends SimpleActor {
     }
     else {
       _serverPassStream = null;
-      _serverLinkStream = new ServerLinkStream(linkStream, this);
+      _serverLinkStream = new ServerLinkStream(broker, linkStream, this);
       _brokerStream = _serverLinkStream;
     }
   }
@@ -147,8 +149,6 @@ public class ServerLinkActor extends SimpleActor {
       log.log(Level.FINER, e.toString(), e);
     }
 
-    if (_serverLinkStream != null)
-      _serverLinkStream.setBrokerStream(getBroker());
     if (_serverPassStream != null)
       _serverPassStream.setBrokerStream(getBroker());
 

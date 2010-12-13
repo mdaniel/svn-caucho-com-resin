@@ -59,7 +59,7 @@ public class HmtpWebSocketListener extends AbstractWebSocketListener {
     _hOut = new HmtpWebSocketContextWriter(context);
     _hIn = new HmtpReader();
     
-    _actor.setLinkStream(_hOut);
+    _actor.setBroker(_hOut);
   }
   
   /**

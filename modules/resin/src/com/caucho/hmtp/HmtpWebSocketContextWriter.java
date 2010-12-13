@@ -35,13 +35,14 @@ import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ProtocolException;
+import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.websocket.WebSocketContext;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.
  */
-public class HmtpWebSocketContextWriter implements ActorStream
+public class HmtpWebSocketContextWriter extends AbstractBroker
 {
   private String _jid;
   

@@ -33,6 +33,7 @@ import com.caucho.xmpp.im.Text;
 import com.caucho.xmpp.im.ImPresence;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.*;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
@@ -63,8 +64,8 @@ class XmppClientBrokerStream extends XmppWriter
     throw new UnsupportedOperationException();
   }
 
-  @Override
-  public ActorStream getBroker()
+  // @Override
+  public Broker getBroker()
   {
     return this;
   }

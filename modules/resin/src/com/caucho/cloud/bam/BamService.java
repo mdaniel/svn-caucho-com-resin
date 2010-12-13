@@ -30,6 +30,7 @@
 package com.caucho.cloud.bam;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.hemp.broker.DomainManager;
@@ -109,7 +110,7 @@ public class BamService extends AbstractResinService
     return _jid;
   }
   
-  public Broker getBroker()
+  public ManagedBroker getBroker()
   {
     return _broker;
   }

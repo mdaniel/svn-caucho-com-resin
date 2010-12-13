@@ -41,6 +41,7 @@ import com.caucho.VersionFactory;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.network.ClusterServer;
@@ -390,7 +391,7 @@ public class Server
   /**
    * Returns the bam broker.
    */
-  public Broker getBamBroker()
+  public ManagedBroker getBamBroker()
   {
     return _bamService.getBroker();
   }
@@ -398,7 +399,7 @@ public class Server
   /**
    * Returns the bam broker.
    */
-  public Broker getAdminBroker()
+  public ManagedBroker getAdminBroker()
   {
     return getBamBroker();
   }

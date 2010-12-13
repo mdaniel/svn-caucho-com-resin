@@ -82,5 +82,5 @@ public interface Actor
   /**
    * The stream to send messages to the link.
    */
-  public void setLinkStream(ActorStream linkStream);
+  public void setBroker(Broker broker);
 }

@@ -43,6 +43,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.env.thread.ThreadPool;
@@ -579,7 +580,7 @@ public class XmppClient {
     }
     
     @Override
-    public ActorStream getBroker()
+    public Broker getBroker()
     {
       throw new UnsupportedOperationException();
     }

@@ -50,6 +50,7 @@ import com.caucho.bam.broker.Broker;
 // import com.caucho.bam.broker.BrokerListener;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.bam.mailbox.NonQueuedMailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.loader.Environment;
@@ -329,7 +330,7 @@ public class HempBroker extends AbstractManagedBroker
       actorStream = actor.getActorStream();
 
       if (actorStream != null) {
-        return putActorStream(jid, actorStream);
+        return putActorStream(jid, new MultiworkerMailbox(actorStream, this, 1));
       }
     }
     else {
@@ -503,7 +504,7 @@ public class HempBroker extends AbstractManagedBroker
 
     Actor actor = (Actor) beanManager.getReference(bean);
 
-    actor.setLinkStream(this);
+    actor.setBroker(this);
 
     String jid = name;
 
@@ -522,14 +523,19 @@ public class HempBroker extends AbstractManagedBroker
 
     Actor bamActor = actor;
 
+    Mailbox mailbox;
+    
     // queue
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
-      actorStream = new MultiworkerMailbox(actorStream, this, threadMax);
+      mailbox = new MultiworkerMailbox(actorStream, this, threadMax);
       bamActor.setActorStream(actorStream);
     }
+    else {
+      mailbox = new NonQueuedMailbox(this, bamActor.getActorStream());
+    }
 
-    addMailbox(bamActor.getActorStream());
+    addMailbox(mailbox);
 
     Environment.addCloseListener(new ActorClose(bamActor));
   }
@@ -540,7 +546,7 @@ public class HempBroker extends AbstractManagedBroker
 
     Actor actor = (Actor) beanManager.getReference(bean);
 
-    actor.setLinkStream(this);
+    actor.setBroker(this);
 
     String jid = bamService.name();
 
@@ -555,15 +561,15 @@ public class HempBroker extends AbstractManagedBroker
     int threadMax = bamService.threadMax();
 
     Actor bamActor = actor;
-
+    Mailbox mailbox = null;
     // queue
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
-      actorStream = new MultiworkerMailbox(actorStream, this, threadMax);
+      mailbox = new MultiworkerMailbox(actorStream, this, threadMax);
       bamActor.setActorStream(actorStream);
     }
 
-    addMailbox(bamActor.getActorStream());
+    addMailbox(mailbox);
 
     Environment.addCloseListener(new ActorClose(bamActor));
   }
@@ -690,5 +696,16 @@ public class HempBroker extends AbstractManagedBroker
     {
       removeMailbox(_actor.getActorStream());
     }
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.broker.ManagedBroker#createClient(com.caucho.bam.stream.ActorStream, java.lang.String, java.lang.String)
+   */
+  @Override
+  public String createClient(ActorStream actorStream, String uid,
+                             String resource)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

@@ -224,7 +224,7 @@ public class BamModule extends AbstractQuercusModule
     if (service == null)
       return BooleanValue.FALSE;
 
-    manager.getBroker().removeMailbox(service);
+    // XXX: manager.getBroker().removeMailbox(service);
 
     return BooleanValue.TRUE;
   }
