@@ -45,7 +45,7 @@ public class SimpleActorClient implements ActorClient {
   private String _jid;
 
   private ActorStream _actorStream;
-  private ManagedBroker _broker;
+  private Broker _broker;
   private ActorStream _clientStream;
 
   private final QueryManager _queryManager = new QueryManager();
@@ -134,10 +134,15 @@ public class SimpleActorClient implements ActorClient {
     return _broker;
   }
   
+  protected ManagedBroker getManagedBroker()
+  {
+    return (ManagedBroker) getBroker();
+  }
+  
   @Override
   public void setBroker(Broker broker)
   {
-    _broker = (ManagedBroker) broker;
+    _broker = broker;
   }
 
   //

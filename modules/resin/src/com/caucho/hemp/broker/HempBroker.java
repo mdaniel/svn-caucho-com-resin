@@ -41,16 +41,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.Extension;
 
 import com.caucho.bam.Actor;
-import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.AbstractManagedBroker;
 import com.caucho.bam.broker.Broker;
-// import com.caucho.bam.broker.BrokerListener;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.mailbox.NonQueuedMailbox;
+import com.caucho.bam.mailbox.PassthroughMailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.loader.Environment;
@@ -330,7 +327,7 @@ public class HempBroker extends AbstractManagedBroker
       actorStream = actor.getActorStream();
 
       if (actorStream != null) {
-        return putActorStream(jid, new MultiworkerMailbox(actorStream, this, 1));
+        return putActorStream(jid, new MultiworkerMailbox(jid, actorStream, this, 1));
       }
     }
     else {
@@ -528,11 +525,11 @@ public class HempBroker extends AbstractManagedBroker
     // queue
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
-      mailbox = new MultiworkerMailbox(actorStream, this, threadMax);
+      mailbox = new MultiworkerMailbox(jid, actorStream, this, threadMax);
       bamActor.setActorStream(actorStream);
     }
     else {
-      mailbox = new NonQueuedMailbox(this, bamActor.getActorStream());
+      mailbox = new PassthroughMailbox(jid, this, bamActor.getActorStream());
     }
 
     addMailbox(mailbox);
@@ -565,7 +562,7 @@ public class HempBroker extends AbstractManagedBroker
     // queue
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
-      mailbox = new MultiworkerMailbox(actorStream, this, threadMax);
+      mailbox = new MultiworkerMailbox(jid, actorStream, this, threadMax);
       bamActor.setActorStream(actorStream);
     }
 
@@ -696,16 +693,5 @@ public class HempBroker extends AbstractManagedBroker
     {
       removeMailbox(_actor.getActorStream());
     }
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.bam.broker.ManagedBroker#createClient(com.caucho.bam.stream.ActorStream, java.lang.String, java.lang.String)
-   */
-  @Override
-  public String createClient(ActorStream actorStream, String uid,
-                             String resource)
-  {
-    // TODO Auto-generated method stub
-    return null;
   }
 }

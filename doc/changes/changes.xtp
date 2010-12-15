@@ -13,6 +13,7 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>access-log: off-by-one issue with access log rollover causing missed 1D (rep by Steve Francis)</li>
 <li>thread: if Thread cannot be instantiated, restart Resin (rep by B Hafezi)</li>
 <li>quercus: SimpleXMLElement needs a __count function (#4318, rep by Homayoun Zariv)</li>
 <li>quercus: list($a) = each($this->foo) was not compiled properly (#4319, rep by Akara Sucharitakul)</li>

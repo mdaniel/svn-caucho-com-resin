@@ -46,7 +46,7 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.HashMapBroker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.mailbox.NonQueuedMailbox;
+import com.caucho.bam.mailbox.PassthroughMailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.FallbackActorStream;
 import com.caucho.websocket.WebSocketListener;
@@ -159,7 +159,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   {
     _servletFallbackStream = new FallbackActorStream(this);
     
-    return new NonQueuedMailbox(_broker, this);
+    return new PassthroughMailbox(getJid(), _broker, this);
   }
 
   //
@@ -181,13 +181,13 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   @Override
   public ManagedBroker getBroker()
   {
-    return _servletBroker;
+    return _broker;
   }
   
   @Override
   public void setBroker(Broker broker)
   {
-    _servletBroker = (ManagedBroker) broker;
+//    _servletBroker = (ManagedBroker) broker;
   }
   
   protected ActorStream getFallbackStream()

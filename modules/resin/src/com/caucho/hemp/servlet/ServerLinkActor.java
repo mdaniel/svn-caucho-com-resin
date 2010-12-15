@@ -53,48 +53,52 @@ public class ServerLinkActor extends SimpleActor {
     = Logger.getLogger(ServerLinkActor.class.getName());
   
   private final ManagedBroker _broker;
+  private final Broker _linkBroker;
   private final ServerLinkStream _serverLinkStream;
   private final ServerPassStream _serverPassStream;
-  private final ActorStream _brokerStream;
+  private final Broker _proxyBroker;
   private final ServerAuthManager _authManager;
   private final String _ipAddress;
   
   /**
    * Creates the LinkService for low-level link messages
    */
-  public ServerLinkActor(Broker linkStream,
+  public ServerLinkActor(Broker linkBroker,
                          ManagedBroker broker,
                          ServerAuthManager authManager,
                          String ipAddress,
                          boolean isUnidir)
   {
-    if (linkStream == null)
+    if (linkBroker == null)
       throw new NullPointerException();
+    
+    _linkBroker = linkBroker;
     
     if (broker == null)
       throw new NullPointerException();
     
-    setBroker(broker);
-    
     _broker = broker;
+    
+    setBroker(linkBroker);
+    
     _authManager = authManager;
     _ipAddress = ipAddress;
    
     if (isUnidir) {
-      _serverPassStream = new ServerPassStream(linkStream, this);
-      _brokerStream = _serverPassStream;
+      _serverPassStream = new ServerPassStream(linkBroker, this);
+      _proxyBroker = _serverPassStream;
       _serverLinkStream = null;
     }
     else {
       _serverPassStream = null;
-      _serverLinkStream = new ServerLinkStream(broker, linkStream, this);
-      _brokerStream = _serverLinkStream;
+      _serverLinkStream = new ServerLinkStream(broker, linkBroker, this);
+      _proxyBroker = _serverLinkStream;
     }
   }
   
-  public ActorStream getBrokerStream()
+  public Broker getForwardBroker()
   {
-    return _brokerStream;
+    return _proxyBroker;
   }
 
   //

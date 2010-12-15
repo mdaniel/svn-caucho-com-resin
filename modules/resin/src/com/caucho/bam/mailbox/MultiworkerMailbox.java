@@ -56,6 +56,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     = Logger.getLogger(MultiworkerMailbox.class.getName());
 
   private final String _name;
+  private final String _jid;
   private final Broker _broker;
   private final ActorStream _actorStream;
 
@@ -64,15 +65,17 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  public MultiworkerMailbox(ActorStream actorStream,
+  public MultiworkerMailbox(String jid, ActorStream actorStream,
                             Broker broker,
                             int threadMax)
   {
+    _jid = jid;
+    
     if (broker == null)
-      throw new NullPointerException();
+      throw new NullPointerException(L.l("broker must not be null"));
 
     if (actorStream == null)
-      throw new NullPointerException();
+      throw new NullPointerException(L.l("actorStream must not be null"));
 
     _broker = broker;
     _actorStream = actorStream;
@@ -109,7 +112,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   @Override
   public String getJid()
   {
-    return _actorStream.getJid();
+    return _jid;
   }
 
   /**

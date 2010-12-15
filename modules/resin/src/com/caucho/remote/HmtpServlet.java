@@ -78,7 +78,7 @@ public class HmtpServlet extends GenericServlet {
   private @Inject Instance<Authenticator> _authInstance;
   private @Inject @Admin Instance<Authenticator> _adminInstance;
 
-  private Broker _broker;
+  private ManagedBroker _broker;
   private Authenticator _auth;
   private ServerAuthManager _authManager;
 
@@ -164,6 +164,11 @@ public class HmtpServlet extends GenericServlet {
     webSocket.setTimeout(30 * 60 * 1000L);
   }
   
+  protected ManagedBroker getBroker()
+  {
+    return _broker;
+  }
+  
   class WebSocketHandler extends AbstractWebSocketListener {
     private String _ipAddress;
     
@@ -171,7 +176,7 @@ public class HmtpServlet extends GenericServlet {
     private HmtpWebSocketContextWriter _out;
     
     private Broker _linkStream;
-    private ActorStream _brokerStream;
+    private Broker _broker;
     
     private ServerLinkActor _linkService;
 
@@ -185,17 +190,18 @@ public class HmtpServlet extends GenericServlet {
     {
       _in = new HmtpReader();
       _out = new HmtpWebSocketContextWriter(context);
-      _linkStream = new PassthroughBroker(new MultiworkerMailbox(_out, _broker, 1));
-      ManagedBroker broker = null;
+      ManagedBroker broker = getBroker();
+      _linkStream = new PassthroughBroker(new MultiworkerMailbox(_out.getJid(), _out, broker, 1));
       _linkService = new ServerLinkActor(_linkStream, broker, _authManager,
                                            _ipAddress, false);
-      _brokerStream = _linkService.getBrokerStream();
+      _broker = _linkService.getForwardBroker();
     }
 
     @Override
     public void onComplete(WebSocketContext context) throws IOException
     {
-      _linkService.close();
+      if (_linkService != null)
+        _linkService.close();
     }
 
     @Override
@@ -203,7 +209,7 @@ public class HmtpServlet extends GenericServlet {
                              InputStream is)
       throws IOException
     {
-      _in.readPacket(is, _brokerStream);
+      _in.readPacket(is, _broker);
     }
 
     @Override

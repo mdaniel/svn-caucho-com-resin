@@ -99,6 +99,20 @@ public class HmtpClient extends SimpleActorClient {
     connectImpl();
   }
   
+  public HmtpClient(String url, String user, String password)
+    throws IOException
+  {
+    this();
+    
+    _url = url;
+    
+    setActor(this);
+    
+    _webSocketClient.setUrl(url);
+    
+    connectImpl();
+  }
+  
   public void setUrl(String url)
   {
     _url = url;
@@ -124,15 +138,11 @@ public class HmtpClient extends SimpleActorClient {
 
   public void connect(String user, String password)
   {
-    connectImpl();
-
     loginImpl(user, password);
   }
 
   public void connect(String user, Serializable credentials)
   {
-    connectImpl();
-
     loginImpl(user, credentials);
   }
 

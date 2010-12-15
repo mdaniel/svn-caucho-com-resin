@@ -172,7 +172,7 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     _hmtpWriter.setJid("hmtp-server-" + _conn.getId() + "-hmtp");
 
-    _linkStream = new PassthroughBroker(new MultiworkerMailbox(_hmtpWriter, broker, 1));
+    _linkStream = new PassthroughBroker(new MultiworkerMailbox(_hmtpWriter.getJid(), _hmtpWriter, broker, 1));
 
     _linkActor = new HmtpLinkActor(_linkStream,
                                    broker,
@@ -189,9 +189,9 @@ public class HmtpRequest extends AbstractProtocolConnection
     HmtpWebSocketReader in = _hmtpReader;
 
     do {
-      ActorStream brokerStream = _linkActor.getBrokerStream();
+      Broker broker = _linkActor.getForwardBroker();
       
-      if (! in.readPacket(brokerStream)) {
+      if (! in.readPacket(broker)) {
         return false;
       }
     } while (in.isDataAvailable());

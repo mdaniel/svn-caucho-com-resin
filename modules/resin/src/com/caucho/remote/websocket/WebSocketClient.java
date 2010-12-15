@@ -331,8 +331,13 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   public OutputStream startBinaryMessage()
     throws IOException
   {
-    if (_wsOs == null)
-      _wsOs = new WebSocketOutputStream(_os, new byte[4096]);
+    if (_wsOs == null) {
+      OutputStream os = _os;
+      if (os == null)
+        throw new IllegalStateException(L.l("startBinaryMessage cannot be called with a closed context"));
+      
+      _wsOs = new WebSocketOutputStream(os, new byte[4096]);
+    }
     
     _wsOs.init();
     

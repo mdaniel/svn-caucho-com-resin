@@ -29,38 +29,44 @@
 
 package com.caucho.hemp.broker;
 
+import java.lang.annotation.Annotation;
+
+import javax.enterprise.util.AnnotationLiteral;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.AbstractBeanConfig;
+import com.caucho.remote.BamService;
 import com.caucho.util.L10N;
 
 /**
  * bam-service configuration
  */
-public class BamServiceConfig extends AbstractBeanConfig
+public class BamServiceLiteral extends AnnotationLiteral<BamService>
+  implements BamService
 {
-  private static final L10N L = new L10N(BamServiceConfig.class);
-  public BamServiceConfig()
+  private String _name;
+  
+  public BamServiceLiteral(String name)
   {
-    HempBroker.getCurrent();
-
-    setScope("singleton");
+    _name = name;
   }
 
-  public void setThreadMax(int threadMax)
-  {
-  }
-
+  /* (non-Javadoc)
+   * @see com.caucho.remote.BamService#name()
+   */
   @Override
-  protected void initImpl()
+  public String name()
   {
-    if (getInstanceClass() == null)
-      throw new ConfigException(L.l("ejb-stateful-bean requires a 'class' attribute"));
+    return _name;
+  }
 
-    final String name = getName();
-
-    add(new BamServiceLiteral(name));
-    
-    deploy();
+  /* (non-Javadoc)
+   * @see com.caucho.remote.BamService#threadMax()
+   */
+  @Override
+  public int threadMax()
+  {
+    return 5;
   }
 }
 

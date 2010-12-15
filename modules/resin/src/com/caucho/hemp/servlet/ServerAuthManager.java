@@ -29,27 +29,22 @@
 
 package com.caucho.hemp.servlet;
 
-import java.io.ByteArrayInputStream;
 import java.security.Key;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.Principal;
-import java.security.PublicKey;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 
 import com.caucho.bam.NotAuthorizedException;
 import com.caucho.cloud.security.SecurityService;
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hmtp.GetPublicKeyQuery;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.hmtp.NonceQuery;
 import com.caucho.hmtp.SignedCredentials;
 import com.caucho.security.Authenticator;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.security.DigestCredentials;
 import com.caucho.security.PasswordCredentials;
-import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -64,6 +59,7 @@ public class ServerAuthManager {
   private static final L10N L = new L10N(ServerAuthManager.class);
   
   private SecurityService _security;
+  private Authenticator _auth;
 
   private KeyPair _authKeyPair; // authentication key pair
   private boolean _isAuthenticationRequired = true;
@@ -74,6 +70,10 @@ public class ServerAuthManager {
   public ServerAuthManager()
   {
     _security = SecurityService.create();
+    
+    InjectManager cdiManager = InjectManager.getCurrent();
+    
+    _auth = cdiManager.getReference(Authenticator.class);
   }
   
   public void setAuthenticationRequired(boolean isAuthenticationRequired)
@@ -83,7 +83,10 @@ public class ServerAuthManager {
   
   public Authenticator getAuth()
   {
-    return _security.getAuthenticator();
+    if (_auth != null)
+      return _auth;
+    else
+      return _security.getAuthenticator();
   }
 
   //
@@ -108,7 +111,7 @@ public class ServerAuthManager {
   void authenticate(String to, Object credentials, String ipAddress)
   {
     Authenticator auth = getAuth();
-    
+
     if (credentials instanceof SignedCredentials) {
       SignedCredentials signedCred = (SignedCredentials) credentials;
 

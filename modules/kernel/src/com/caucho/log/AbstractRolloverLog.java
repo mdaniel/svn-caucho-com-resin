@@ -35,6 +35,7 @@ import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.util.Alarm;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Path;
@@ -102,13 +103,13 @@ public class AbstractRolloverLog {
 
   protected String _pathFormat;
 
-  private String _format;
+  // private String _format;
 
   // The time of the next period-based rollover
   private long _nextPeriodEnd = -1;
   private long _nextRolloverCheckTime = -1;
 
-  private long _lastTime;
+  // private long _lastTime;
 
   private final RolloverWorker _rolloverWorker = new RolloverWorker();
   private final Object _logLock = new Object();
@@ -291,7 +292,7 @@ public class AbstractRolloverLog {
 
   public void setLastTime(long lastTime)
   {
-    _lastTime = lastTime;
+    // _lastTime = lastTime;
   }
 
   /**
@@ -316,18 +317,12 @@ public class AbstractRolloverLog {
       if (lastModified <= 0 || now < lastModified)
         lastModified = now;
 
-      _calendar.setGMTTime(lastModified);
+      // _calendar.setGMTTime(lastModified);
 
-      if (_rolloverCron != null)
-        _nextPeriodEnd = _rolloverCron.nextTime(lastModified);
-      else
-        _nextPeriodEnd = Period.periodEnd(lastModified, getRolloverPeriod());
+      _nextPeriodEnd = nextRolloverTime(lastModified);
     }
     else {
-      if (_rolloverCron != null)
-        _nextPeriodEnd = _rolloverCron.nextTime(now);
-      else
-        _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+      _nextPeriodEnd = nextRolloverTime(now);
     }
 
     if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
@@ -345,6 +340,14 @@ public class AbstractRolloverLog {
       _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
 
     rolloverLog();
+  }
+  
+  private long nextRolloverTime(long time)
+  {
+    if (_rolloverCron != null)
+      return _rolloverCron.nextTime(time);
+    else
+      return Period.periodEnd(time, getRolloverPeriod());
   }
 
   public long getNextRolloverCheckTime()
@@ -364,9 +367,7 @@ public class AbstractRolloverLog {
 
   public boolean rollover()
   {
-    long now = Alarm.getCurrentTime();
-
-    if (_nextPeriodEnd <= now || _nextRolloverCheckTime <= now) {
+    if (isRollover()) {
       rolloverLog();
       return true;
     }
@@ -454,42 +455,28 @@ public class AbstractRolloverLog {
 
       Path savedPath = null;
 
-      long lastPeriodEnd = _nextPeriodEnd;
-
       long now = Alarm.getCurrentTime();
 
-      if (_rolloverCron != null)
-        _nextPeriodEnd = _rolloverCron.nextTime(now);
-      else
-        _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+      long lastPeriodEnd = _nextPeriodEnd;
+
+      _nextPeriodEnd = nextRolloverTime(now);
 
       Path path = getPath();
 
       synchronized (_logLock) {
-        if (lastPeriodEnd < now) {
+        if (lastPeriodEnd <= now) {
           closeLogStream();
 
-          if (getPathFormat() == null) {
-            savedPath = getArchivePath(lastPeriodEnd - 1);
-          }
-
-          /*
-            if (log.isLoggable(Level.FINE))
-            log.fine(getPath() + ": next rollover at " +
-            QDate.formatLocal(_nextPeriodEnd));
-          */
+          savedPath = getSavedPath(lastPeriodEnd - 1);
         }
         else if (path != null && getRolloverSize() <= path.getLength()) {
           closeLogStream();
 
-          if (getPathFormat() == null) {
-            savedPath = getArchivePath(now);
-          }
+          savedPath = getSavedPath(now);
         }
 
-        long nextPeriodEnd = _nextPeriodEnd;
-        if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
-          _nextRolloverCheckTime = _nextPeriodEnd;
+        _nextRolloverCheckTime 
+          = Math.min(_nextRolloverCheckTime, _nextPeriodEnd);
       }
 
       // archiving of path is outside of the synchronized block to
@@ -498,11 +485,19 @@ public class AbstractRolloverLog {
         movePathToArchive(savedPath);
       }
     } finally {
+      _isRollingOver = false;
       synchronized (_logLock) {
-        _isRollingOver = false;
         flushTempStream();
       }
     }
+  }
+  
+  private Path getSavedPath(long time)
+  {
+    if (getPathFormat() == null)
+      return getArchivePath(time);
+    else
+      return null;
   }
 
   /**
@@ -512,15 +507,10 @@ public class AbstractRolloverLog {
   {
     closeLogStream();
 
-    try {
-      WriteStream os = _os;
-      _os = null;
+    WriteStream os = _os;
+    _os = null;
 
-      if (os != null)
-        os.close();
-    } catch (Throwable e) {
-      // can't log in log routines
-    }
+    IoUtil.close(os);
 
     Path path = getPath();
 
@@ -539,7 +529,7 @@ public class AbstractRolloverLog {
           */
         }
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       logWarning(L.l("Can't create log directory {0}.\n  Exception={1}",
                      parent, e), e);
     }
@@ -616,9 +606,6 @@ public class AbstractRolloverLog {
 
           out = zip;
         }
-        else {
-          path.renameTo(savedPath);
-        }
 
         if (out != null) {
           try {
@@ -637,6 +624,9 @@ public class AbstractRolloverLog {
               // can't log in log rotation routines
             }
           }
+        }
+        else {
+          path.renameTo(savedPath);
         }
       }
     } catch (Exception e) {
@@ -795,13 +785,13 @@ public class AbstractRolloverLog {
       time = Alarm.getCurrentTime();
 
     if (format != null)
-      return _calendar.formatLocal(time, format);
+      return QDate.formatLocal(time, format);
     else if (_rolloverCron != null)
-      return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d.%H");
+      return _rolloverPrefix + "." + QDate.formatLocal(time, "%Y%m%d.%H");
     else if (getRolloverPeriod() % (24 * 3600 * 1000L) == 0)
-      return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d");
+      return _rolloverPrefix + "." + QDate.formatLocal(time, "%Y%m%d");
     else
-      return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d.%H");
+      return _rolloverPrefix + "." + QDate.formatLocal(time, "%Y%m%d.%H");
   }
 
   /**

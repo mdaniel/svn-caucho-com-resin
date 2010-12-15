@@ -29,13 +29,16 @@
 
 package com.caucho.bam.broker;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.caucho.bam.actor.AbstractAgent;
 import com.caucho.bam.actor.Agent;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.mailbox.NonQueuedMailbox;
+import com.caucho.bam.mailbox.PassthroughMailbox;
 import com.caucho.bam.stream.ActorStream;
+import com.caucho.util.Alarm;
 
 /**
  * Broker is the hub which routes messages to actors.
@@ -44,6 +47,8 @@ abstract public class AbstractManagedBroker
   extends AbstractBroker
   implements ManagedBroker
 {
+  private final AtomicLong _sequence = new AtomicLong(Alarm.getCurrentTime());
+  
   /**
    * Adds a mailbox.
    */
@@ -78,7 +83,9 @@ abstract public class AbstractManagedBroker
   public Agent createAgent(ActorStream actorStream,
                            MailboxType mailboxType)
   {
-    Mailbox mailbox = createMailbox(actorStream, mailboxType);
+    Mailbox mailbox = createMailbox(actorStream.getJid(),
+                                    actorStream, 
+                                    mailboxType);
     
     Agent agent = new AbstractAgent(actorStream.getJid(),
                                     mailbox,
@@ -92,19 +99,51 @@ abstract public class AbstractManagedBroker
   protected Mailbox createMailbox(ActorStream actorStream,
                                   MailboxType mailboxType)
   {
+    return createMailbox(actorStream.getJid(), actorStream, mailboxType);
+  }
+  
+  protected Mailbox createMailbox(String jid,
+                                  ActorStream actorStream,
+                                  MailboxType mailboxType)
+  {
     switch (mailboxType) {
     case NON_QUEUED:
-      return new NonQueuedMailbox(this, actorStream);
+      return new PassthroughMailbox(jid, this, actorStream);
       
     default:
-      return new MultiworkerMailbox(actorStream, this, 1);
+      return new MultiworkerMailbox(jid, actorStream, this, 1);
     }
   }
   
-  public String createClient(ActorStream actorStream, String uid,
+  @Override
+  public String createClient(ActorStream actorStream, 
+                             String uid,
                              String resource)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    String jid = null;
+    
+    if (uid == null)
+      uid = Long.toHexString(_sequence.incrementAndGet());
+    
+    if (resource != null) {
+      jid = uid + "@" + getJid() + "/" + resource;
+      
+      Mailbox mailbox = getMailbox(jid);
+      
+      if (mailbox != null)
+        jid = (uid + "@" + getJid()
+            + "/" + resource + "-" + Long.toHexString(_sequence.incrementAndGet()));
+    }
+    else {
+      jid = (uid + "@" + getJid()
+             + "/" + Long.toHexString(_sequence.incrementAndGet()));
+    }
+   
+    Mailbox mailbox = createMailbox(jid, actorStream, MailboxType.DEFAULT);
+    
+    addMailbox(mailbox);
+    
+    return jid;
   }
  
   /**

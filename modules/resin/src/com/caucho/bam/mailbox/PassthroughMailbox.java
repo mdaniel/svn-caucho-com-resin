@@ -38,14 +38,18 @@ import com.caucho.bam.stream.ActorStream;
 /**
  * mailbox for BAM messages waiting to be sent to the Actor.
  */
-public class NonQueuedMailbox implements Mailbox
+public class PassthroughMailbox implements Mailbox
 {
+  private final String _jid;
   private final Broker _broker;
   private final ActorStream _actorStream;
 
-  public NonQueuedMailbox(Broker broker,
-                          ActorStream actorStream)
+  public PassthroughMailbox(String jid,
+                            Broker broker,
+                            ActorStream actorStream)
   {
+    _jid = jid;
+    
     if (broker == null)
       throw new NullPointerException();
     
@@ -63,7 +67,7 @@ public class NonQueuedMailbox implements Mailbox
   @Override
   public String getJid()
   {
-    return _actorStream.getJid();
+    return _jid;
   }
   
   @Override

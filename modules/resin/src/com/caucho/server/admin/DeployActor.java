@@ -120,7 +120,7 @@ public class DeployActor extends SimpleActor
 
     setBroker(getBroker());
     MultiworkerMailbox queue
-      = new MultiworkerMailbox(getActorStream(), getBroker(), 2);
+      = new MultiworkerMailbox(getActorStream().getJid(), getActorStream(), getBroker(), 2);
     
     getBroker().addMailbox(queue);
   }

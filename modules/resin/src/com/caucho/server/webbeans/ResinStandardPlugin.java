@@ -220,7 +220,6 @@ public class ResinStandardPlugin implements Extension {
       BamService service = annotated.getAnnotation(BamService.class);
 
       HempBroker broker = HempBroker.getCurrent();
-
       broker.addStartupActor(event.getBean(), service.name(), 
                              service.threadMax());
     }

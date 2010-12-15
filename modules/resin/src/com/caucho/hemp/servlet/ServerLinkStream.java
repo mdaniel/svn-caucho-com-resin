@@ -32,8 +32,8 @@ package com.caucho.hemp.servlet;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 
 
@@ -41,22 +41,22 @@ import com.caucho.bam.stream.ActorStream;
  * Handles the requests to the server from the link, dispatching requests to
  * the link service and the broker.
  */
-public class ServerLinkStream extends AbstractActorStream {
+public class ServerLinkStream extends AbstractBroker {
   private final Broker _broker;
   
-  private final ActorStream _linkStream; // string to the link
+  private final ActorStream _linkBroker; // string to the link
   private final ActorStream _linkService;
   
   private boolean _isAuthenticated;
   private String _jid;
 
   public ServerLinkStream(Broker broker,
-                          ActorStream linkStream,
+                          Broker linkBroker,
                           ActorStream linkService)
   {
     _broker = broker;
     
-    _linkStream = linkStream;
+    _linkBroker = linkBroker;
     _linkService = linkService;
   }
 
@@ -78,7 +78,7 @@ public class ServerLinkStream extends AbstractActorStream {
   
   public ActorStream getLinkStream()
   {
-    return _linkStream;
+    return _linkBroker;
   }
   
   protected boolean isActive()
