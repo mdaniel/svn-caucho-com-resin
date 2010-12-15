@@ -42,16 +42,17 @@ import com.caucho.bam.stream.ActorStream;
  * the link service and the broker.
  */
 public class ServerPassStream extends AbstractBroker {
-  private final Broker  _linkBroker; // string to the link
+  private final Broker _broker;
+  private final Broker _linkBroker; // string to the link
   private final ActorStream _linkService;
-
-  private ActorStream _brokerStream;
 
   private String _jid;
 
-  public ServerPassStream(Broker linkBroker,
+  public ServerPassStream(Broker broker,
+                          Broker linkBroker,
                           ActorStream linkService)
   {
+    _broker = broker;
     _linkBroker = linkBroker;
     _linkService = linkService;
   }
@@ -67,11 +68,6 @@ public class ServerPassStream extends AbstractBroker {
     _jid = jid;
   }
 
-  public void setBrokerStream(ActorStream brokerStream)
-  {
-    _brokerStream = brokerStream;
-  }
-
   /*
   @Override
   public Broker getBrokerMailbox()
@@ -79,6 +75,11 @@ public class ServerPassStream extends AbstractBroker {
     return _linkBroker;
   }
   */
+  
+  private boolean isActive()
+  {
+    return true;
+  }
 
   /**
    * Sends a message to the link service if 'to' is null, else send it to the broker.
@@ -90,8 +91,8 @@ public class ServerPassStream extends AbstractBroker {
   {
     if (to == null)
       _linkService.message(to, from, payload);
-    else if (_brokerStream != null)
-      _brokerStream.message(to, from, payload);
+    else if (isActive())
+      _broker.message(to, from, payload);
     else
       super.message(to, from, payload);
   }
@@ -107,8 +108,8 @@ public class ServerPassStream extends AbstractBroker {
   {
     if (to == null)
       _linkService.messageError(to, from, payload, error);
-    else if (_brokerStream != null)
-      _brokerStream.messageError(to, from, payload, error);
+    else if (isActive())
+      _broker.messageError(to, from, payload, error);
     else
       super.messageError(to, from, payload, error);
   }
@@ -127,8 +128,8 @@ public class ServerPassStream extends AbstractBroker {
   {
     if (to == null)
       _linkService.query(id, to, from, payload);
-    else if (_brokerStream != null)
-      _brokerStream.query(id, to, from, payload);
+    else if (isActive())
+      _broker.query(id, to, from, payload);
     else
       super.query(id, to, from, payload);
   }
@@ -146,8 +147,8 @@ public class ServerPassStream extends AbstractBroker {
   {
     if (to == null)
       _linkService.queryResult(id, to, from, payload);
-    else if (_brokerStream != null)
-      _brokerStream.queryResult(id, to, from, payload);
+    else if (isActive())
+      _broker.queryResult(id, to, from, payload);
     else
       super.queryResult(id, to, from, payload);
   }
@@ -166,8 +167,8 @@ public class ServerPassStream extends AbstractBroker {
   {
     if (to == null)
       _linkService.queryError(id, to, from, payload, error);
-    else if (_brokerStream != null)
-      _brokerStream.queryError(id, to, from, payload, error);
+    else if (isActive())
+      _broker.queryError(id, to, from, payload, error);
     else
       super.queryError(id, to, from, payload, error);
   }
@@ -175,12 +176,11 @@ public class ServerPassStream extends AbstractBroker {
   @Override
   public boolean isClosed()
   {
-    return _brokerStream == null;
+    return false;
   }
 
   public void close()
   {
-    _brokerStream = null;
   }
 
   @Override

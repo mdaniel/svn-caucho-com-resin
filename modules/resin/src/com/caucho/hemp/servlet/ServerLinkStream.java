@@ -96,8 +96,10 @@ public class ServerLinkStream extends AbstractBroker {
   {
     if (to == null)
       _linkService.message(to, from, payload);
-    else if (isActive())
+    else if (isActive()) {
+      System.out.println("MESSAGE: " + payload + " " + getBroker());
       getBroker().message(to, _jid, payload);
+    }
     else
       super.message(to, from, payload);
   }

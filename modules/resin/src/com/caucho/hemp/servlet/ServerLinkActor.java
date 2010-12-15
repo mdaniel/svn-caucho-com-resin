@@ -85,7 +85,7 @@ public class ServerLinkActor extends SimpleActor {
     _ipAddress = ipAddress;
    
     if (isUnidir) {
-      _serverPassStream = new ServerPassStream(linkBroker, this);
+      _serverPassStream = new ServerPassStream(broker, linkBroker, this);
       _proxyBroker = _serverPassStream;
       _serverLinkStream = null;
     }
@@ -152,9 +152,6 @@ public class ServerLinkActor extends SimpleActor {
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
-
-    if (_serverPassStream != null)
-      _serverPassStream.setBrokerStream(getBroker());
 
     String jid
       = _broker.createClient(getBroker(), uid, query.getResource());
