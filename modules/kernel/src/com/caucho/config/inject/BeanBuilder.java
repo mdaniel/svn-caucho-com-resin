@@ -239,6 +239,6 @@ public class BeanBuilder<T>
   public String toString()
   {
     return (getClass().getSimpleName() + "[" + _managedBean.getBeanClass()
-            + _bindings + ", " + _name + "]");
+            + ", " + _bindings + ", " + _name + "]");
   }
 }
