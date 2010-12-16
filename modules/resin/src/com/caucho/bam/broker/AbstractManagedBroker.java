@@ -108,7 +108,7 @@ abstract public class AbstractManagedBroker
   {
     switch (mailboxType) {
     case NON_QUEUED:
-      return new PassthroughMailbox(jid, this, actorStream);
+      return new PassthroughMailbox(jid, actorStream, this);
       
     default:
       return new MultiworkerMailbox(jid, actorStream, this, 1);

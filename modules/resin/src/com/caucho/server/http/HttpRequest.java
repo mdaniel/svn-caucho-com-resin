@@ -1244,11 +1244,6 @@ public class HttpRequest extends AbstractHttpRequest
     return context;
   }
 
-  @Override
-  public final void onCloseConnection()
-  {
-  }
-
   /**
    * Cleans up at the end of the invocation
    */

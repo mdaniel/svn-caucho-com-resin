@@ -104,6 +104,9 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   public void connect()
     throws IOException
   {
+    if (_s != null)
+      return;
+    
     connectImpl();
   }
 

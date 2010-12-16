@@ -529,7 +529,7 @@ public class HempBroker extends AbstractManagedBroker
       bamActor.setActorStream(actorStream);
     }
     else {
-      mailbox = new PassthroughMailbox(jid, this, bamActor.getActorStream());
+      mailbox = new PassthroughMailbox(jid, bamActor.getActorStream(), this);
     }
 
     addMailbox(mailbox);

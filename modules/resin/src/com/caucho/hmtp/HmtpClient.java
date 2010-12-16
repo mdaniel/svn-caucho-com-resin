@@ -138,11 +138,15 @@ public class HmtpClient extends SimpleActorClient {
 
   public void connect(String user, String password)
   {
+    connectImpl();
+    
     loginImpl(user, password);
   }
 
   public void connect(String user, Serializable credentials)
   {
+    connectImpl();
+    
     loginImpl(user, credentials);
   }
 

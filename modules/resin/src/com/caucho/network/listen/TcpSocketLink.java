@@ -93,6 +93,7 @@ public class TcpSocketLink extends AbstractSocketLink
   private TcpCometController _async;
 
   private long _idleTimeout;
+  private long _suspendTimeout;
 
   private long _connectionStartTime;
   private long _requestStartTime;
@@ -208,6 +209,7 @@ public class TcpSocketLink extends AbstractSocketLink
   public void setIdleTimeout(long idleTimeout)
   {
     _idleTimeout = idleTimeout;
+    _suspendTimeout = idleTimeout;
   }
 
   /**
@@ -733,7 +735,7 @@ public class TcpSocketLink extends AbstractSocketLink
    *
    * If keepaliveRead() returns true, data is available.
    * If it returns false, either the connection is closed,
-   * or the connection has be)en registered with the select.
+   * or the connection has been registered with the select.
    */
   RequestState processKeepalive()
     throws IOException
@@ -835,6 +837,7 @@ public class TcpSocketLink extends AbstractSocketLink
     throws IOException
   {
     _idleTimeout = _listener.getKeepaliveTimeout();
+    _suspendTimeout = _listener.getSuspendTimeMax();
 
     getWriteStream().init(_socket.getStream());
 
@@ -900,7 +903,7 @@ public class TcpSocketLink extends AbstractSocketLink
     }
     
     _idleStartTime = Alarm.getCurrentTime();
-    _idleExpireTime = _idleStartTime + _idleTimeout;
+    _idleExpireTime = _idleStartTime + _suspendTimeout;
 
     if (log.isLoggable(Level.FINER))
       log.finer(this + " suspending comet");

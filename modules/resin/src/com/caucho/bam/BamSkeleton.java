@@ -183,7 +183,7 @@ public class BamSkeleton<S>
 
   public void query(S actor,
                     ActorStream fallback,
-                    ActorStream linkStream,
+                    ActorStream broker,
                     long id,
                     String to,
                     String from,
@@ -207,19 +207,19 @@ public class BamSkeleton<S>
         handler.invoke(actor, id, to, from, payload);
       }
       catch (RuntimeException e) {
-        linkStream.queryError(id, from, to, payload, ActorError.create(e));
+        // broker.queryError(id, from, to, payload, ActorError.create(e));
         
         throw e;
       }
       catch (InvocationTargetException e) {
         Throwable cause = e.getCause();
 
-        linkStream.queryError(id, from, to, payload, ActorError.create(cause));
+        // broker.queryError(id, from, to, payload, ActorError.create(cause));
         
         throw SkeletonInvocationException.createRuntimeException(cause);
       }
       catch (Exception e) {
-        linkStream.queryError(id, from, to, payload, ActorError.create(e));
+        // broker.queryError(id, from, to, payload, ActorError.create(e));
         
         throw SkeletonInvocationException.createRuntimeException(e);
       }

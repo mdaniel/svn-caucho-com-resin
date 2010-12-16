@@ -30,10 +30,10 @@
 package com.caucho.server.http;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -45,7 +45,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.nio.charset.Charset;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -67,7 +66,6 @@ import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
-import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Login;
 import com.caucho.server.cluster.Server;
@@ -141,7 +139,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   private boolean _isSyntheticCacheHeader;
 
   // comet
-  private long _asyncTimeout = 10000;
+  private long _asyncTimeout;
   private AsyncContextImpl _asyncContext;
 
   private ArrayList<Path> _closeOnExit;
@@ -1859,6 +1857,8 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       if (_asyncTimeout > 0)
         _asyncContext.setTimeout(_asyncTimeout);
     }
+    else
+      _asyncContext.restart();
     
     _asyncContext.init(request, response, isOriginal);
 

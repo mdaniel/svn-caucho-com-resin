@@ -30,6 +30,7 @@
 package com.caucho.server.http;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +48,6 @@ import com.caucho.env.thread.ThreadPool;
 import com.caucho.network.listen.AsyncController;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkCometListener;
-import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
@@ -68,7 +68,7 @@ public class AsyncContextImpl
   
   private boolean _isOriginal;
 
-  private AsyncListenerNode _listenerNode;
+  private ArrayList<AsyncListenerNode> _listeners;
   private AtomicBoolean _isComplete = new AtomicBoolean();
 
   private WebApp _dispatchWebApp;
@@ -77,7 +77,12 @@ public class AsyncContextImpl
   public AsyncContextImpl(AbstractHttpRequest httpConn)
   {
     _tcpConnection = httpConn.getConnection();
-    _cometController = httpConn.getConnection().toComet(this);
+    _cometController = _tcpConnection.toComet(this);
+  }
+  
+  public void restart()
+  {
+    _cometController = _tcpConnection.toComet(this);
   }
 
   public void init(ServletRequest request,
@@ -193,8 +198,10 @@ public class AsyncContextImpl
                           ServletRequest request,
                           ServletResponse response)
   {
-    _listenerNode
-      = new AsyncListenerNode(listener, request, response, _listenerNode);
+    if (_listeners == null)
+      _listeners = new ArrayList<AsyncListenerNode>();
+    
+    _listeners.add(new AsyncListenerNode(listener, request, response, null));
   }
 
   @Override
@@ -285,14 +292,12 @@ public class AsyncContextImpl
   public void onStart(ServletRequest request,
                       ServletResponse response)
   {
-    if (_listenerNode == null)
+    if (_listeners == null)
       return;
     
     AsyncEvent event = new AsyncEvent(this, request, response);
     
-    for (AsyncListenerNode node = _listenerNode;
-         node != null;
-         node = node.getNext()) {
+    for (AsyncListenerNode node : _listeners) {
       try {
         node.onStart(event);
       } catch (IOException e) {
@@ -307,11 +312,12 @@ public class AsyncContextImpl
   @Override
   public void onTimeout()
   {
+    if (_listeners == null)
+      return;
+    
     AsyncEvent event = new AsyncEvent(this, _request, _response);
     
-    for (AsyncListenerNode node = _listenerNode;
-         node != null;
-         node = node.getNext()) {
+    for (AsyncListenerNode node : _listeners) {
       try {
         node.onTimeout(event);
       } catch (IOException e) {
@@ -325,11 +331,12 @@ public class AsyncContextImpl
    */
   public void onError()
   {
+    if (_listeners == null)
+      return;
+    
     AsyncEvent event = new AsyncEvent(this, _request, _response);
     
-    for (AsyncListenerNode node = _listenerNode;
-         node != null;
-         node = node.getNext()) {
+    for (AsyncListenerNode node : _listeners) {
       try {
         node.onError(event);
       } catch (IOException e) {
@@ -344,11 +351,12 @@ public class AsyncContextImpl
     if (_isComplete.getAndSet(true))
       return;
     
+    if (_listeners == null)
+      return;
+    
     AsyncEvent event = new AsyncEvent(this, _request, _response);
     
-    for (AsyncListenerNode node = _listenerNode;
-         node != null;
-         node = node.getNext()) {
+    for (AsyncListenerNode node : _listeners) {
       try {
         node.onComplete(event);
       } catch (IOException e) {

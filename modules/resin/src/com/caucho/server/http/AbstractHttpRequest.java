@@ -1747,6 +1747,16 @@ public abstract class AbstractHttpRequest
     }
   }
 
+  @Override
+  public void onCloseConnection()
+  {
+    try {
+      finishRequest();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
   public void cleanup()
   {
     HttpServletRequestImpl requestFacade = getRequestFacade();

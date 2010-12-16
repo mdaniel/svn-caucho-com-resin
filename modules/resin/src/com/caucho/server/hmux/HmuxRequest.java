@@ -1562,6 +1562,8 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     _isHmtpRequest = false;
     _hmtpRequest.onCloseConnection();
+    
+    super.onCloseConnection();
   }
 
   protected String getRequestId()

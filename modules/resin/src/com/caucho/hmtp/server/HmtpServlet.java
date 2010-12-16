@@ -159,7 +159,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   {
     _servletFallbackStream = new FallbackActorStream(this);
     
-    return new PassthroughMailbox(getJid(), _broker, this);
+    return new PassthroughMailbox(getJid(), this, _broker);
   }
 
   //

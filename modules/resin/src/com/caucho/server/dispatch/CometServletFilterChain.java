@@ -170,8 +170,12 @@ public class CometServletFilterChain implements FilterChain {
         return;
         */
       
+      AsyncContext oldContext = _context;
+      
       _context = _request.startAsync();
-      _context.addListener(this);
+
+      if (oldContext != null)
+        _context.addListener(this);
       
       _isWake.set(false);
     }

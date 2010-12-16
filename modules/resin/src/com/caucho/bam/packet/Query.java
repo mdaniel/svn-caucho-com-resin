@@ -29,10 +29,10 @@
 
 package com.caucho.bam.packet;
 
+import java.io.Serializable;
+
 import com.caucho.bam.ActorError;
 import com.caucho.bam.stream.ActorStream;
-
-import java.io.Serializable;
 
 /**
  * RPC call requesting information/data.  The "id" field is used
@@ -82,7 +82,19 @@ public class Query extends Packet {
   @Override
   public void dispatch(ActorStream handler, ActorStream toSource)
   {
-    handler.query(getId(), getTo(), getFrom(), getValue());
+    try {
+      handler.query(getId(), getTo(), getFrom(), getValue());
+    } catch (RuntimeException e) {
+      toSource.queryError(getId(), getFrom(), getTo(), getValue(),
+                          ActorError.create(e));
+      
+      throw e;
+    } catch (Error e) {
+      toSource.queryError(getId(), getFrom(), getTo(), getValue(),
+                          ActorError.create(e));
+      
+      throw e;
+    }
   }
 
   /**

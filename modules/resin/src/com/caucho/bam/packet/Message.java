@@ -29,9 +29,10 @@
 
 package com.caucho.bam.packet;
 
-import com.caucho.bam.stream.ActorStream;
-
 import java.io.Serializable;
+
+import com.caucho.bam.ActorError;
+import com.caucho.bam.stream.ActorStream;
 
 /**
  * Unidirectional message with a value.
@@ -67,7 +68,19 @@ public class Message extends Packet {
   @Override
   public void dispatch(ActorStream handler, ActorStream toSource)
   {
-    handler.message(getTo(), getFrom(), _value);
+    try {
+      handler.message(getTo(), getFrom(), getValue());
+    } catch (RuntimeException e) {
+      toSource.messageError(getFrom(), getTo(), getValue(),
+                            ActorError.create(e));
+      
+      throw e;
+    } catch (Error e) {
+      toSource.messageError(getFrom(), getTo(), getValue(),
+                            ActorError.create(e));
+    
+      throw e;
+    }
   }
 
   @Override

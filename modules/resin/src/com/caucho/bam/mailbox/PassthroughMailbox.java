@@ -30,6 +30,8 @@
 package com.caucho.bam.mailbox;
 
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.broker.Broker;
@@ -40,13 +42,16 @@ import com.caucho.bam.stream.ActorStream;
  */
 public class PassthroughMailbox implements Mailbox
 {
+  private static final Logger log
+    = Logger.getLogger(PassthroughMailbox.class.getName());
+  
   private final String _jid;
   private final Broker _broker;
   private final ActorStream _actorStream;
 
   public PassthroughMailbox(String jid,
-                            Broker broker,
-                            ActorStream actorStream)
+                            ActorStream actorStream,
+                            Broker broker)
   {
     _jid = jid;
     
@@ -94,7 +99,17 @@ public class PassthroughMailbox implements Mailbox
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    _actorStream.message(to, from, payload);
+    try {
+      _actorStream.message(to, from, payload);
+    } catch (Throwable e) {
+      // Throwable caught because the Mailbox conceptually operates in
+      // a new thread and the caller would never receive the exception.
+      
+      getBroker().messageError(from, to, payload,
+                               ActorError.create(e));
+      
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**
@@ -106,7 +121,11 @@ public class PassthroughMailbox implements Mailbox
                            Serializable payload,
                            ActorError error)
   {
-    _actorStream.messageError(to, from, payload, error);
+    try {
+      _actorStream.messageError(to, from, payload, error);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**
@@ -116,9 +135,18 @@ public class PassthroughMailbox implements Mailbox
   public void query(long id,
                        String to,
                        String from,
-                       Serializable query)
+                       Serializable payload)
   {
-    _actorStream.query(id, to, from, query);
+    try {
+      _actorStream.query(id, to, from, payload);
+    } catch (Throwable e) {
+      // Throwable caught because the Mailbox conceptually operates in
+      // a new thread and the caller would never receive the exception.
+    
+      getBroker().queryError(id, from, to, payload, ActorError.create(e));
+    
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**
@@ -128,9 +156,13 @@ public class PassthroughMailbox implements Mailbox
   public void queryResult(long id,
                           String to,
                           String from,
-                          Serializable value)
+                          Serializable payload)
   {
-    _actorStream.queryResult(id, to, from, value);
+    try {
+      _actorStream.queryResult(id, to, from, payload);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**
@@ -140,10 +172,14 @@ public class PassthroughMailbox implements Mailbox
   public void queryError(long id,
                          String to,
                          String from,
-                         Serializable query,
+                         Serializable payload,
                          ActorError error)
   {
-    _actorStream.queryError(id, to, from, query, error);
+    try {
+      _actorStream.queryError(id, to, from, payload, error);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
   
   @Override
