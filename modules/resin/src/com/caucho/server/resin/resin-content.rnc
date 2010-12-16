@@ -691,8 +691,6 @@ r_server-Content =
 
   & r_memory-free-min?
 
-  & r_ping*
-
   & (attribute ping-url { string }
      | element ping-url { string })*
 
