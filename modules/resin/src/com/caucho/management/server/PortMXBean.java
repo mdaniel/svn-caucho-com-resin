@@ -249,7 +249,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
    */
   @Description("The total number of bytes that requests"
                + " serviced by this port have read")
-  @Units("milliseconds")
+  @Units("bytes")
   public long getReadBytesTotal();
 
   /**
@@ -258,7 +258,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
    */
   @Description("The total number of bytes that requests"
                + " serviced by this port have written")
-  @Units("milliseconds")
+  @Units("bytes")
   public long getWriteBytesTotal();
 
   //
