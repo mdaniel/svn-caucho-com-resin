@@ -121,15 +121,22 @@ public class TldManager {
   {
 
     TldManager manager = null;
+    
+    ClassLoader loader;
+    
+    if (webApp != null)
+      loader = webApp.getClassLoader();
+    else
+      loader = Thread.currentThread().getContextClassLoader();
 
     synchronized (_localManager) {
-      manager = _localManager.getLevel(webApp.getClassLoader());
+      manager = _localManager.getLevel(loader);
 
       if (manager != null)
         return manager;
 
       manager = new TldManager(resourceManager, webApp);
-      _localManager.set(manager, webApp.getClassLoader());
+      _localManager.set(manager, loader);
     }
 
     return manager;

@@ -63,7 +63,12 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   @Override
   protected void launchChildThread(int id)
   {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
     try {
+      thread.setContextClassLoader(_listener.getClassLoader());
+      
       TcpSocketLink startConn = _listener.allocateConnection();
 
       if (! _threadPool.schedule(startConn.getAcceptTask())) {
@@ -71,6 +76,8 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      thread.setContextClassLoader(loader);
     }
   }
 

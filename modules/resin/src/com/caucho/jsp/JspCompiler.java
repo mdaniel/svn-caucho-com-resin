@@ -243,30 +243,30 @@ public class JspCompiler implements EnvironmentBean {
   {
     synchronized (this) {
       if (_taglibManager == null) {
-        WebApp app = getWebApp();
+        WebApp webApp = getWebApp();
 
         Path appDir = getAppDir();
-        if (appDir == null && app != null)
-          appDir = app.getRootDirectory();
+        if (appDir == null && webApp != null)
+          appDir = webApp.getRootDirectory();
 
         JspResourceManager resourceManager = getResourceManager();
         if (resourceManager != null) {
         }
-        else if (app != null)
-          resourceManager = new AppResourceManager(app);
+        else if (webApp != null)
+          resourceManager = new AppResourceManager(webApp);
         else {
           resourceManager = new AppDirResourceManager(appDir);
         }
 
         _taglibManager = new TaglibManager(resourceManager,
-                                           app,
+                                           webApp,
                                            _tagFileManager);
-        _taglibManager.setWebApp(app);
+        _taglibManager.setWebApp(webApp);
 
         JspConfig jspConfig = null;
 
-        if (app != null)
-          jspConfig = (JspConfig) app.getExtension("jsp-config");
+        if (webApp != null)
+          jspConfig = (JspConfig) webApp.getExtension("jsp-config");
 
         if (jspConfig != null) {
           ArrayList<JspTaglib> tldMapList = jspConfig.getTaglibList();
@@ -278,8 +278,8 @@ public class JspCompiler implements EnvironmentBean {
           }
         }
 
-        if (app != null) {
-          ArrayList<JspTaglib> taglibs = app.getTaglibList();
+        if (webApp != null) {
+          ArrayList<JspTaglib> taglibs = webApp.getTaglibList();
           for (int i = 0; taglibs != null && i < taglibs.size(); i++) {
             JspTaglib taglib = taglibs.get(i);
 

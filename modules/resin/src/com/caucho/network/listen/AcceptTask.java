@@ -30,6 +30,8 @@
 package com.caucho.network.listen;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.inject.Module;
 
@@ -38,6 +40,8 @@ import com.caucho.inject.Module;
  */
 @Module
 class AcceptTask extends ConnectionReadTask {
+  private static final Logger log = Logger.getLogger(AcceptTask.class.getName());
+  
   AcceptTask(TcpSocketLink socketLink)
   {
     super(socketLink);
@@ -48,15 +52,23 @@ class AcceptTask extends ConnectionReadTask {
   {
     // SocketLinkListener listener = getListener();
     SocketLinkThreadLauncher launcher = getLauncher();
-    
-    launcher.onChildThreadBegin();
 
+    Thread thread = Thread.currentThread();
+    String threadName = thread.getName();
+    thread.setName(getSocketLink().getDebugId());
+    
     try {
+      launcher.onChildThreadBegin();
+
+      if (log.isLoggable(Level.FINER))
+        log.finer(getSocketLink() + " starting listen thread");
       // listener.startConnection(getSocketLink());
       
       super.run();
     } finally {
       launcher.onChildThreadEnd();
+      
+      thread.setName(threadName);
     }
   }
 
@@ -84,6 +96,10 @@ class AcceptTask extends ConnectionReadTask {
 
       socketLink.toStartConnection();
 
+      if (log.isLoggable(Level.FINER)) {
+        log.finer(socketLink + " accept");
+      }
+
       boolean isKeepalive = false;
       result = socketLink.handleRequests(isKeepalive);
 
@@ -108,7 +124,6 @@ class AcceptTask extends ConnectionReadTask {
       return false;
     
     launcher.onChildIdleBegin();
-    
     try {
       return getListener().accept(getSocketLink().getSocket());
     } finally {

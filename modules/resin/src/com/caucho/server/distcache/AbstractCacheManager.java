@@ -67,6 +67,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
   private static final L10N L = new L10N(AbstractCacheManager.class);
   
+  private final ResinSystem _resinSystem;
+  
   private DataCacheBacking _dataBacking;
   private CacheClusterBacking _clusterBacking;
   
@@ -75,6 +77,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   
   public AbstractCacheManager(ResinSystem resinSystem)
   {
+    _resinSystem = resinSystem;
     // new AdminPersistentStore(this);
     _dataBacking = new DataCacheBacking();
     _clusterBacking = new AbstractCacheClusterBacking();
@@ -184,7 +187,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
     if (value == null) {
       // Recovery from dropped or corrupted data
-      log.warning("Missing or corrupted data for " + mnodeValue);
+      log.warning("Missing or corrupted data in get for " 
+                  + mnodeValue + " " + entry);
       remove(entry, config);
     }
 
@@ -218,7 +222,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     boolean isData = readData(valueHash, config.getFlags(), os);
     
     if (! isData) {
-      log.warning("Missing or corrupted data for " + mnodeValue);
+      log.warning("Missing or corrupted data for getStream " + mnodeValue
+                  + " " + entry);
       // Recovery from dropped or corrupted data
       remove(entry, config);
     }
@@ -931,7 +936,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       if (getDataBacking().loadData(valueKey, out))
         return true;
 
-      log.warning(this + " unexpected load failure");
+      log.warning(this + " unexpected load failure in readValue " + valueKey);
 
       // XXX: error?  since we have the value key, it should exist
 
@@ -988,5 +993,11 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   public void close()
   {
     getDataBacking().close();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _resinSystem.getId() + "]";
   }
 }

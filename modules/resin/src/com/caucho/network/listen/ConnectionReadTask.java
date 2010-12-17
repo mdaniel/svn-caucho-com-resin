@@ -88,8 +88,7 @@ abstract class ConnectionReadTask implements Runnable {
 
     thread.setName(_socketLink.getDebugId());
 
-    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
-    thread.setContextClassLoader(systemLoader);
+    thread.setContextClassLoader(_listener.getClassLoader());
 
     RequestState result = null;
 

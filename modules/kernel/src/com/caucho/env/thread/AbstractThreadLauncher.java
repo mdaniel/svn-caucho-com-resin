@@ -44,7 +44,7 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   private static final long LAUNCHER_TIMEOUT = 60000L;
 
   private static final int DEFAULT_THREAD_MAX = 8192;
-  private static final int DEFAULT_IDLE_MIN = 2;
+  private static final int DEFAULT_IDLE_MIN = 1;
 
   private static final long DEFAULT_IDLE_TIMEOUT = 120000L;
   
@@ -296,7 +296,7 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     int startingCount = _startingCount.getAndIncrement();
 
     int threadCount = _threadCount.get() + startingCount;
-    
+
     if (_threadMax < threadCount) {
       _startingCount.decrementAndGet();
       

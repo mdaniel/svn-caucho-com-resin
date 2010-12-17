@@ -111,7 +111,7 @@ abstract public class AbstractManagedBroker
       return new PassthroughMailbox(jid, actorStream, this);
       
     default:
-      return new MultiworkerMailbox(jid, actorStream, this, 1);
+      return new MultiworkerMailbox(jid, actorStream, this, 5);
     }
   }
   
