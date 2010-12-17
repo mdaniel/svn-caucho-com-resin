@@ -29,9 +29,7 @@
 
 package com.caucho.server.cache;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.env.service.RootDirectoryService;
+import com.caucho.env.service.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -41,41 +39,43 @@ import com.caucho.vfs.Path;
 public class TempFileService extends AbstractResinService
 {
   private static final L10N L = new L10N(TempFileService.class);
+  
   private final TempFileManager _manager;
   
-  private TempFileService(TempFileManager manager)
+  public TempFileService(TempFileManager manager)
   {
     _manager = manager;
   }
 
-  public static TempFileService create()
+  public static TempFileService createAndAddService()
   {
-    synchronized (TempFileService.class) {
-      ResinSystem resinSystem = ResinSystem.getCurrent();
-      
-      if (resinSystem == null)
-        throw new IllegalStateException(L.l("TempFileService cannot start because it depends on ResinSystem"));
-      
-      TempFileService service = resinSystem.getService(TempFileService.class);
-      
-      if (service == null) {
-        RootDirectoryService rootService = RootDirectoryService.getCurrent();
-        
-        if (rootService == null)
-          throw new IllegalStateException(L.l("TempFileService cannot start because it depends on RootDirectoryService"));
-        
-        Path dataDirectory = rootService.getDataDirectory();
-        
-        TempFileManager manager 
-          = new TempFileManager(dataDirectory.lookup("tmp"));
-        
-        service = new TempFileService(manager);
-        
-        resinSystem.addService(service);
-      }
-      
-      return service;
+    RootDirectoryService rootService = RootDirectoryService.getCurrent();
+    if (rootService == null)
+    {
+      throw new IllegalStateException(L.l("{0} requires an active {1}",
+          TempFileService.class.getSimpleName(),
+          RootDirectoryService.class.getSimpleName()));
     }
+
+    Path dataDirectory = rootService.getDataDirectory();
+    TempFileManager manager = new TempFileManager(dataDirectory.lookup("tmp"));
+
+    return createAndAddService(manager);
+  }
+  
+  public static TempFileService createAndAddService(TempFileManager manager)
+  {
+    ResinSystem system = preCreate(TempFileService.class);
+
+    TempFileService service = new TempFileService(manager);
+    system.addService(TempFileService.class, service);
+
+    return service;
+  }
+  
+  public static TempFileService getCurrent()
+  {
+    return ResinSystem.getCurrentService(TempFileService.class);
   }
   
   public TempFileManager getManager()

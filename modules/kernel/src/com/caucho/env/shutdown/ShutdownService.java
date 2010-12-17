@@ -32,15 +32,12 @@ package com.caucho.env.shutdown;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 import com.caucho.env.warning.WarningService;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.lifecycle.LifecycleState;
-import com.caucho.util.Alarm;
+import com.caucho.lifecycle.*;
+import com.caucho.util.*;
 
 /**
  * The Resin class represents the top-level container for Resin.
@@ -48,10 +45,11 @@ import com.caucho.util.Alarm;
  */
 public class ShutdownService extends AbstractResinService
 {
-  private static final Logger log
-    = Logger.getLogger(ShutdownService.class.getName());
-  
   public static final int START_PRIORITY = 1;
+
+  private static final Logger log = 
+    Logger.getLogger(ShutdownService.class.getName());
+  private static final L10N L = new L10N(ShutdownService.class);
 
   private static final AtomicReference<ShutdownService> _activeService
     = new AtomicReference<ShutdownService>();
@@ -70,30 +68,35 @@ public class ShutdownService extends AbstractResinService
   
   private boolean _isDumpHeapOnExit;
 
-  /**
-   * Creates a new resin server.
-   */
-  public ShutdownService(ResinSystem resinSystem)
+  private ShutdownService(boolean isEmbedded)
   {
-    this(resinSystem, Alarm.isTest());
-  }
-
-  /**
-   * Creates a new resin server.
-   */
-  public ShutdownService(ResinSystem resinSystem,
-                         boolean isEmbedded)
-  {
-    _resinSystemRef = new WeakReference<ResinSystem>(resinSystem);
-    
-    _warningService = WarningService.create(resinSystem);
-    
     _isEmbedded = isEmbedded;
+    
+    _resinSystemRef = new WeakReference<ResinSystem>(ResinSystem.getCurrent());
+    
+    _warningService = ResinSystem.getCurrentService(WarningService.class);
+    if (_warningService == null) {
+      throw new IllegalStateException(L.l("{0} requires an active {1}",
+          ShutdownService.class.getSimpleName(),
+          WarningService.class.getSimpleName()));
+    }
   }
   
-  /**
-   * Returns the resin server.
-   */
+  public static ShutdownService createAndAddService()
+  {
+    return createAndAddService(false);
+  }
+
+  public static ShutdownService createAndAddService(boolean isEmbedded)
+  {
+    ResinSystem system = preCreate(ShutdownService.class);
+      
+    ShutdownService service = new ShutdownService(isEmbedded);
+    system.addService(ShutdownService.class, service);
+    
+    return service;
+  }
+
   public static ShutdownService getCurrent()
   {
     return ResinSystem.getCurrentService(ShutdownService.class);
@@ -179,7 +182,7 @@ public class ShutdownService extends AbstractResinService
       haltThread.startShutdown();
     }
 
-    _warningService.warning(msg);
+    _warningService.sendWarning(this, msg, true);
   }
 
   /**

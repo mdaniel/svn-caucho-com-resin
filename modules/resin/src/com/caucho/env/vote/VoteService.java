@@ -29,22 +29,29 @@
 
 package com.caucho.env.vote;
 
-import java.util.concurrent.locks.Lock;
-
-import com.caucho.env.lock.AbstractLockManager;
-import com.caucho.env.lock.LockManager;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 
 /**
  * Manages the distributed lock
  */
-public class VoteService extends AbstractResinService {
+public class VoteService extends AbstractResinService 
+{
   private AbstractVoteManager _voteManager;
   
   public VoteService(AbstractVoteManager voteManager)
   {
     _voteManager = voteManager;
+  }
+  
+  public static VoteService
+      createAndAddService(AbstractVoteManager voteManager)
+  {
+    ResinSystem system = preCreate(VoteService.class);
+
+    VoteService service = new VoteService(voteManager);
+    system.addService(VoteService.class, service);
+
+    return service;
   }
   
   public static VoteService getCurrent()

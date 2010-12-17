@@ -29,8 +29,7 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 
 /**
  * The main servlet service in a Resin server. 
@@ -42,6 +41,16 @@ public class ServletService extends AbstractResinService
   public ServletService(Server server)
   {
     _server = server;
+  }
+  
+  public static ServletService createAndAddService(Server server)
+  {
+    ResinSystem system = preCreate(ServletService.class);
+    
+    ServletService service = new ServletService(server);
+    system.addService(ServletService.class, service);
+    
+    return service;
   }
   
   public static ServletService getCurrent()

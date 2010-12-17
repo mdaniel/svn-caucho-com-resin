@@ -32,8 +32,7 @@ package com.caucho.env.warning;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 import com.caucho.util.L10N;
 
 /**
@@ -42,92 +41,97 @@ import com.caucho.util.L10N;
  */
 public class WarningService extends AbstractResinService
 {
-  private static final L10N L = new L10N(WarningService.class);
-  
   public static final int START_PRIORITY = 1;
-  
-  private static final Logger log
-    = Logger.getLogger(WarningService.class.getName());
-  
-  private final CopyOnWriteArrayList<WarningHandler> _handlerList
-    = new CopyOnWriteArrayList<WarningHandler>();
 
-  /**
-   * Creates a new resin server.
-   */
+  private static final Logger log = 
+    Logger.getLogger(WarningService.class.getName());
+  private static final L10N L = new L10N(WarningService.class);
+
+  private final CopyOnWriteArrayList<WarningHandler> _highPriorityHandlerList = 
+    new CopyOnWriteArrayList<WarningHandler>();
+  
+  private final CopyOnWriteArrayList<WarningHandler> _handlerList = 
+    new CopyOnWriteArrayList<WarningHandler>();
+
   public WarningService()
   {
+    
   }
   
-  /**
-   * Returns the warning service.
-   */
+  public static WarningService createAndAddService()
+  {
+    ResinSystem system = preCreate(WarningService.class);
+    
+    WarningService service = new WarningService();
+    system.addService(WarningService.class, service);
+    
+    return service;
+  }
+  
   public static WarningService getCurrent()
   {
     return ResinSystem.getCurrentService(WarningService.class);
   }
   
   /**
-   * Returns the warning service.
+   * Send a warning message to any registered handlers.  A high priority warning 
+   * only goes to all handlers, high priority first.  High priority handlers
+   * do not receive non-high priority warnings.
+   * @param source source of the message, usually you
+   * @param msg test to print or send as an alert
+   * @param isHighPriority set true to send to high priority warning handlers
    */
-  public static WarningService create()
+  public void sendWarning(Object source, String msg, boolean isHighPriority)
   {
-    return create(ResinSystem.getCurrent());
-  }
+    String s = L.l("WarningService[{0}]: {1}", 
+        (isHighPriority ? "High Priority" : "Low Priority"), msg);
+    
+    if(isHighPriority)
+      log.warning(s);
+    else
+      log.info(s);
 
-  /**
-   * Returns the warning service.
-   */
-  public static WarningService create(ResinSystem resinSystem)
-  {
-    if (resinSystem == null) {
-      throw new IllegalStateException(L.l("{0} requires an active {1}",
-                                          WarningService.class.getSimpleName(),
-                                          ResinSystem.class.getSimpleName()));
-    }
-
-    WarningService service = resinSystem.getService(WarningService.class);
-
-    if (service == null) {
-      service = new WarningService();
+    // if warning is high-priority then send to high priority handlers first
+    if(isHighPriority)
+    {
+      System.err.println(s);
       
-      resinSystem.addServiceIfAbsent(service);
-      
-      service = resinSystem.getService(WarningService.class);
+      for (WarningHandler handler : _highPriorityHandlerList)
+        handler.warning(source, msg);
     }
     
-    return service;
+    // now send to the all handlers regardless of if it's high priority
+    for (WarningHandler handler : _handlerList)
+      handler.warning(source, msg);
   }
-  
-  /**
-   * Sends a warning
-   */
-  public void warning(String msg)
-  {
-    log.warning("WarningService: " + msg);
-    System.err.println("WarningService: " + msg);
-    
-    for (WarningHandler handler : _handlerList) {
-      handler.warning(msg);
-    }
-  }
-  
+
   /**
    * Sends a warning to the current service.
    */
-  public static void sendCurrentWarning(String msg)
+  public static void sendCurrentWarning(Object source, String msg, 
+      boolean isHighPriority)
   {
     WarningService warning = getCurrent();
     
     if (warning != null)
-      warning.warning(msg);
+      warning.sendWarning(source, msg, isHighPriority);
   }
   
-  public void addHandler(WarningHandler handler)
+  /**
+   * Add a warning event handler.  High priority handlers ONLY get high 
+   * priority warnings, and they are notified first.  Other handlers gets all
+   * warnings after high priority handlers are notified.
+   * @param handler an object that implements WarningHandler
+   * @param isHighPriority high priority handlers only get high priority warnings.
+   */
+  public void addHandler(WarningHandler handler, boolean isHighPriority)
   {
-    _handlerList.add(handler);
+    if(isHighPriority)
+      _highPriorityHandlerList.add(handler);
+    else
+      _handlerList.add(handler);
   }
-  
+
   @Override
   public int getStartPriority()
   {

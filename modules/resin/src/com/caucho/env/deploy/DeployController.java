@@ -308,8 +308,8 @@ abstract public class DeployController<I extends DeployInstance>
       }
       }
 
-      DeployControllerService deployService
-        = DeployControllerService.create();
+      DeployControllerService deployService = 
+        DeployControllerService.getCurrent();
       
       _deployTagItem = deployService.addTag(getId());
 

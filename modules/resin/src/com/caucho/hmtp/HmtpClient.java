@@ -203,7 +203,7 @@ public class HmtpClient extends SimpleActorClient {
 
         String signature = _authManager.sign(uid, serverNonce, password);
 
-        SecurityService security = new SecurityService();
+        SecurityService security = SecurityService.getCurrent();
         
         if ("".equals(uid))
           credentials = new SignedCredentials(uid, serverNonce, signature);

@@ -29,9 +29,7 @@
 
 package com.caucho.cloud.topology;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 import com.caucho.util.L10N;
 
 /**
@@ -39,10 +37,10 @@ import com.caucho.util.L10N;
  */
 public class TopologyService extends AbstractResinService
 {
+  public static final int START_PRIORITY = 
+    ResinService.START_PRIORITY_NETWORK_CLUSTER;
+
   private static final L10N L = new L10N(TopologyService.class);
-  
-  public static final int START_PRIORITY
-    = ResinService.START_PRIORITY_NETWORK_CLUSTER;
   
   private final String _serverId;
   private final CloudSystem _system;
@@ -51,6 +49,16 @@ public class TopologyService extends AbstractResinService
   {
     _serverId = serverId;
     _system = new CloudSystem(serverId);
+  }
+  
+  public static TopologyService createAndAddService(String serverId)
+  {
+    ResinSystem system = preCreate(TopologyService.class);
+    
+    TopologyService service = new TopologyService(serverId);
+    system.addService(TopologyService.class, service);
+    
+    return service;
   }
   
   public static TopologyService getCurrent()

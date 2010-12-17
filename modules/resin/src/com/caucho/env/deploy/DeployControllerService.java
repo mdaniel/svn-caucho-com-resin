@@ -29,16 +29,13 @@
 
 package com.caucho.env.deploy;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 import com.caucho.cloud.network.NetworkClusterService;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 import com.caucho.inject.Module;
-import com.caucho.util.L10N;
 
 /**
  * Deployment service for detecting changes in a controller, managed
@@ -47,11 +44,9 @@ import com.caucho.util.L10N;
 @Module
 public class DeployControllerService extends AbstractResinService
 {
-  private static final L10N L = new L10N(DeployControllerService.class);
-  
-  public static final int START_PRIORITY
-    = NetworkClusterService.START_PRIORITY_CLUSTER_SERVICE;
-  
+  public static final int START_PRIORITY =
+      NetworkClusterService.START_PRIORITY_CLUSTER_SERVICE;
+
   private final ConcurrentHashMap<String,DeployTagItem> _deployMap
     = new ConcurrentHashMap<String,DeployTagItem>();
   
@@ -61,40 +56,24 @@ public class DeployControllerService extends AbstractResinService
   private final List<DeployUpdateListener> _updateListeners
     = new CopyOnWriteArrayList<DeployUpdateListener>();
   
-  //
-  // Returns the current service if available.
-  //
-  public static DeployControllerService getCurrent()
+  public DeployControllerService()
   {
-    ResinSystem server = ResinSystem.getCurrent();
     
-    if (server != null)
-      return server.getService(DeployControllerService.class);
-    else
-      return null;
   }
   
-  public static DeployControllerService create()
+  public static DeployControllerService createAndAddService()
   {
-    ResinSystem system = ResinSystem.getCurrent();
-    
-    if (system == null) {
-      throw new IllegalStateException(L.l("{0} requires an active {1}",
-                                          DeployControllerService.class.getSimpleName(),
-                                          ResinSystem.class.getSimpleName()));
-    }
-    
-    DeployControllerService service = system.getService(DeployControllerService.class);
-    
-    if (service == null) {
-      service = new DeployControllerService();
+    ResinSystem system = preCreate(DeployControllerService.class);
       
-      system.addServiceIfAbsent(service);
-      
-      service = system.getService(DeployControllerService.class);
-    }
+    DeployControllerService service = new DeployControllerService();
+    system.addService(DeployControllerService.class, service);
     
     return service;
+  }
+
+  public static DeployControllerService getCurrent()
+  {
+    return ResinSystem.getCurrentService(DeployControllerService.class);
   }
   
   //

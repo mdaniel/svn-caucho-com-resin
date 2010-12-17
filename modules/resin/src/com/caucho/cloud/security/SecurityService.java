@@ -37,44 +37,30 @@ import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.AdminLiteral;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.security.Authenticator;
-import com.caucho.security.DigestCredentials;
+import com.caucho.env.service.*;
+import com.caucho.security.*;
 import com.caucho.util.Base64;
-import com.caucho.util.L10N;
 
-/**
- * Interface for a service registered with the Resin Server.
- */
 public class SecurityService extends AbstractResinService
 {
   public static final int START_PRIORITY = 30;
   
-  private static final L10N L = new L10N(SecurityService.class);
-  
   private String _signatureSecret;
   private Authenticator _authenticator;
   
-  public static SecurityService create()
+  public SecurityService()
   {
-    ResinSystem server = ResinSystem.getCurrent();
-
-    if (server == null) {
-      throw new IllegalStateException(L.l("ResinSystem is not active in {0}",
-                                          Thread.currentThread().getContextClassLoader()));
-    }
-
-    synchronized (server) {
-      SecurityService service = server.getService(SecurityService.class);
-
-      if (service == null) {
-        service = new SecurityService();
-        server.addService(service);
-      }
+    
+  }
   
-      return service;
-    }
+  public static SecurityService createAndAddService()
+  {
+    ResinSystem system = preCreate(SecurityService.class);
+    
+    SecurityService service = new SecurityService();
+    system.addService(SecurityService.class, service);
+    
+    return service;
   }
   
   public static SecurityService getCurrent()

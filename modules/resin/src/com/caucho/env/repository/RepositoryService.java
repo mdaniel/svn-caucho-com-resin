@@ -29,9 +29,7 @@
 
 package com.caucho.env.repository;
 
-import com.caucho.env.distcache.DistCacheService;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 import com.caucho.util.L10N;
 
 /**
@@ -39,51 +37,39 @@ import com.caucho.util.L10N;
  */
 public class RepositoryService extends AbstractResinService
 {
-  private static final L10N L = new L10N(RepositoryService.class);
-  
   public static final int START_PRIORITY = START_PRIORITY_CLUSTER_SERVICE;
+
+  private static final L10N L = new L10N(RepositoryService.class);
   
   private AbstractRepository _repository;
 
   public RepositoryService(AbstractRepository repository)
   {
-    _repository = repository;
-    
     if (repository == null)
       throw new NullPointerException();
+    
+    _repository = repository;
   }
 
-  public RepositoryService()
+  public static RepositoryService createAndAddService()
   {
-    this(new FileRepository());
+    return createAndAddService(new FileRepository());
+  }
+  
+  public static RepositoryService createAndAddService(
+      AbstractRepository repository)
+  {
+    ResinSystem system = preCreate(RepositoryService.class);
+
+    RepositoryService service = new RepositoryService(repository);
+    system.addService(RepositoryService.class, service);
+
+    return service;
   }
   
   public static RepositoryService getCurrent()
   {
     return ResinSystem.getCurrentService(RepositoryService.class);
-  }
-  
-  public static RepositoryService create()
-  {
-    ResinSystem system = ResinSystem.getCurrent();
-    
-    if (system == null) {
-      throw new IllegalStateException(L.l("{0} requires an active {1}",
-                                          RepositoryService.class.getSimpleName(),
-                                          ResinSystem.class.getSimpleName()));
-    }
-
-    RepositoryService service = system.getService(RepositoryService.class);
-    
-    if (service == null) {
-      service = new RepositoryService();
-      
-      system.addServiceIfAbsent(service);
-      
-      service = system.getService(RepositoryService.class);
-    }
-    
-    return service;
   }
   
   public static Repository getCurrentRepository()

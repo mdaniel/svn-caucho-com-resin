@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.lifecycle.Lifecycle;
@@ -90,8 +91,7 @@ public class ResinSystem
   /**
    * Creates a new servlet server.
    */
-  public ResinSystem(String id,
-                     ClassLoader loader)
+  public ResinSystem(String id, ClassLoader loader)
   {
     if (id == null || id.isEmpty())
       id = "default";
@@ -123,7 +123,7 @@ public class ResinSystem
       Environment.init();
       
       _injectManager = InjectManager.create();
-      addService(new CdiService(this));
+      CdiService.createAndAddService();
       
       BeanBuilder<ResinSystem> beanFactory
         = _injectManager.createBeanFactory(ResinSystem.class);
@@ -138,27 +138,41 @@ public class ResinSystem
   /**
    * Creates a new servlet server.
    */
-  public ResinSystem(String id,
-                     Path rootDirectory)
-    throws IOException
+  public ResinSystem(String id, Path rootDirectory) throws IOException
   {
-    this(id);
-    
-    addService(new RootDirectoryService(rootDirectory));
+    this(id, rootDirectory, rootDirectory.lookup("resin-data"));
   }
 
   /**
    * Creates a new servlet server.
    */
-  public ResinSystem(String id,
-                      Path rootDirectory,
-                      Path dataDirectory)
-    throws IOException
+  public ResinSystem(String id, Path rootDirectory, Path dataDirectory)
+      throws IOException
   {
     this(id);
-    
-    addService(new RootDirectoryService(rootDirectory, dataDirectory));
+    configureRoot(rootDirectory, dataDirectory);
   }
+
+  private void configureRoot(Path rootDirectory, Path dataDirectory)
+      throws IOException
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try 
+    {
+      thread.setContextClassLoader(_classLoader);
+      RootDirectoryService.createAndAddService(rootDirectory, dataDirectory);
+    }
+    catch (Exception e) 
+    {
+      throw ConfigException.create(e);
+    } 
+    finally 
+    {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }  
  
   /**
    * Returns the current server

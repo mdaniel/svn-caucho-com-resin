@@ -39,6 +39,7 @@ import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.util.L10N;
 
+
 /**
  * The BAM service registered in the Resin network.
  */
@@ -46,19 +47,12 @@ public class BamService extends AbstractResinService
 {
   public static final int START_PRIORITY = START_PRIORITY_NETWORK_CLUSTER;
   
-  private static final L10N L = new L10N(BamService.class);
-  
   private String _jid;
   
   private final HempBrokerManager _brokerManager;
   private final HempBroker _broker;
   
   private ServerAuthManager _linkManager;
-  
-  public BamService()
-  {
-    this(null);
-  }
   
   public BamService(String jid)
   {
@@ -74,35 +68,19 @@ public class BamService extends AbstractResinService
     _brokerManager.addBroker("resin.caucho", _broker);
   }
   
-  public static BamService create(String jid)
+  public static BamService createAndAddService(String jid)
   {
-    ResinSystem server = ResinSystem.getCurrent();
-
-    if (server == null) {
-      throw new IllegalStateException(L.l("NetworkServer is not active in {0}",
-                                          Thread.currentThread().getContextClassLoader()));
-    }
+    ResinSystem system = preCreate(BamService.class);
+      
+    BamService service = new BamService(jid);
+    system.addService(service);
     
-    synchronized (server) {
-      BamService service = server.getService(BamService.class);
-      
-      if (service == null) {
-        service = new BamService(jid);
-        server.addService(service);
-      }
-      
-      return service;
-    }
+    return service;
   }
   
   public static BamService getCurrent()
   {
-    ResinSystem server = ResinSystem.getCurrent();
-
-    if (server != null)
-      return server.getService(BamService.class);
-    else
-      return null;
+    return ResinSystem.getCurrentService(BamService.class);
   }
   
   public String getJid()

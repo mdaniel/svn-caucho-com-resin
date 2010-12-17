@@ -29,17 +29,13 @@
 
 package com.caucho.network.listen;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
@@ -49,12 +45,12 @@ import com.caucho.util.L10N;
  */
 public class ListenService extends AbstractResinService
 {
-  private static final L10N L = new L10N(ListenService.class);
-  private static final Logger log
-    = Logger.getLogger(ListenService.class.getName());
-  
   public static final int START_PRIORITY_LISTEN = 2000;
   public static final int START_PRIORITY_CLUSTER = 2100;
+
+  private static final L10N L = new L10N(ListenService.class);
+  private static final Logger log = 
+    Logger.getLogger(ListenService.class.getName());
   
   private final ResinSystem _server;
   
@@ -67,9 +63,24 @@ public class ListenService extends AbstractResinService
   private final Lifecycle _lifecycle = new Lifecycle();
   private AtomicBoolean _isStartedListeners = new AtomicBoolean();
   
-  public ListenService(ResinSystem server)
+  private ListenService()
   {
-    _server = server;
+    _server = ResinSystem.getCurrent();
+  }
+
+  public static ListenService createAndAddService()
+  {
+    ResinSystem system = preCreate(ListenService.class);
+
+    ListenService service = new ListenService();
+    system.addService(ListenService.class, service);
+    
+    return service;
+  }
+  
+  public static ListenService getCurrent()
+  {
+    return ResinSystem.getCurrentService(ListenService.class);
   }
 
   /**

@@ -50,6 +50,11 @@ public class FileRepository extends AbstractRepository
 
   private GitService _git;
   
+  public FileRepository()
+  {
+    this(GitService.getCurrent());
+  }
+
   public FileRepository(GitService git)
   {
     _git = git;
@@ -58,11 +63,6 @@ public class FileRepository extends AbstractRepository
       throw new IllegalStateException(L.l("{0} is required for {1}",
                                           GitService.class.getSimpleName(),
                                           getClass().getSimpleName()));
-  }
-  
-  public FileRepository()
-  {
-    this(GitService.create());
   }
 
   /**

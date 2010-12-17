@@ -29,8 +29,7 @@
 
 package com.caucho.env.dbpool;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -50,6 +49,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.env.meter.ActiveTimeMeter;
 import com.caucho.env.meter.MeterService;
+import com.caucho.env.warning.WarningService;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
@@ -57,11 +57,7 @@ import com.caucho.management.server.ConnectionPoolMXBean;
 import com.caucho.transaction.ManagedXAResource;
 import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.transaction.UserTransactionProxy;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
-import com.caucho.util.ThreadDump;
-import com.caucho.util.WeakAlarm;
+import com.caucho.util.*;
 
 /**
  * Implementation of the connection manager.
@@ -837,8 +833,7 @@ public class ConnectionPool extends AbstractManagedObject
         + ", max-create-connections=" + _maxCreateConnections
         + ")");
 
-    ConnectionPoolHealthCheck.currentWarning(message);
-
+    WarningService.sendCurrentWarning(this, message, false);
     log.warning(message);
 
     if (startCreateOverflow()) {
@@ -1067,10 +1062,8 @@ public class ConnectionPool extends AbstractManagedObject
                          _maxCreateConnections,
                          _maxOverflowConnections);
 
-    ConnectionPoolHealthCheck.currentWarning(message);
-
+    WarningService.sendCurrentWarning(this, message, false);
     log.warning(message);
-
     
     throw new ResourceException(message);
  }

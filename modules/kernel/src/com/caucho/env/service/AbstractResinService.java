@@ -29,12 +29,16 @@
 
 package com.caucho.env.service;
 
+import com.caucho.util.L10N;
+
 
 /**
  * Interface for a service registered with the Resin Server.
  */
 public class AbstractResinService implements ResinService
 {
+  private static final L10N L = new L10N(AbstractResinService.class);
+
   @Override
   public int getStartPriority()
   {
@@ -68,5 +72,21 @@ public class AbstractResinService implements ResinService
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+
+  // convenience method for subclass's create methods
+  protected static <E extends AbstractResinService> ResinSystem preCreate(Class<E> serviceClass)
+  {
+    ResinSystem system = ResinSystem.getCurrent();
+    if(system == null)
+      throw new IllegalStateException(L.l("{0} must be created before {1}",
+          ResinSystem.class.getSimpleName(),
+          serviceClass.getSimpleName()));
+    
+    if(system.getService(serviceClass) != null)
+      throw new IllegalStateException(L.l("{0} was previously created",
+          serviceClass.getSimpleName()));
+    
+    return system;
   }
 }

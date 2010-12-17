@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.caucho.env.service.AbstractResinService;
 
+//TODO: service cleanup
 public class MeterService extends AbstractResinService {
   private static MeterService _manager = new MeterService();
 

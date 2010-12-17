@@ -97,7 +97,7 @@ public class ResinConfig implements EnvironmentBean
   @Configurable
   public void setResinSystemAuthKey(String key)
   {
-    SecurityService security = SecurityService.create();
+    SecurityService security = SecurityService.getCurrent();
     security.setSignatureSecret(key);
   }
 

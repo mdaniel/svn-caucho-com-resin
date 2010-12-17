@@ -520,12 +520,6 @@ public final class ClusterServer {
   {
     _pingUrls.add(url);
   }
-  
-  public Object createPing() throws ConfigException
-  {
-    return null;
-  }
-
 
   /**
    * Returns the ping url list

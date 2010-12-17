@@ -46,7 +46,7 @@ public class HmtpProtocol extends AbstractProtocol {
   {
     setProtocolName("hmtp");
     
-    _bamService = BamService.create(null);
+    _bamService = BamService.getCurrent();
   }
 
   /**

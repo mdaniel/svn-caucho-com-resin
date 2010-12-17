@@ -29,36 +29,30 @@
 
 package com.caucho.env.service;
 
-import java.io.IOException;
-
 import com.caucho.config.inject.InjectManager;
-import com.caucho.java.WorkDir;
-import com.caucho.util.L10N;
-import com.caucho.vfs.MemoryPath;
-import com.caucho.vfs.Path;
 
-/**
- * Root service for the root and data directories.
- *
- */
 public class CdiService extends AbstractResinService 
 {
-  private static final L10N L = new L10N(CdiService.class);
   public static final int START_PRIORITY = 1;
   
   private InjectManager _cdiManager;
   
-  /**
-   * Creates a new servlet server.
-   */
-  public CdiService(ResinSystem system)
+  private CdiService()
   {
+    ResinSystem system = ResinSystem.getCurrent();
     _cdiManager = InjectManager.create(system.getClassLoader());
   }
 
-  /**
-   * Returns the current active directory service.
-   */
+  public static CdiService createAndAddService()
+  {
+    ResinSystem system = preCreate(CdiService.class);
+      
+    CdiService service = new CdiService();
+    system.addService(CdiService.class, service);
+    
+    return service;
+  }
+
   public static CdiService getCurrent()
   {
     return ResinSystem.getCurrentService(CdiService.class);

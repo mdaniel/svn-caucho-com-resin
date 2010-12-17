@@ -30,22 +30,12 @@
 package com.caucho.cloud.network;
 
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
-import com.caucho.cloud.topology.AbstractCloudClusterListener;
-import com.caucho.cloud.topology.AbstractCloudPodListener;
-import com.caucho.cloud.topology.AbstractCloudServerListener;
-import com.caucho.cloud.topology.CloudCluster;
-import com.caucho.cloud.topology.CloudPod;
-import com.caucho.cloud.topology.CloudServer;
-import com.caucho.cloud.topology.CloudSystem;
-import com.caucho.cloud.topology.TopologyService;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.cloud.topology.*;
+import com.caucho.env.service.*;
 import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.network.listen.TcpSocketLinkListener;
-import com.caucho.network.listen.SocketPollService;
+import com.caucho.network.listen.*;
 import com.caucho.server.hmux.HmuxProtocol;
 import com.caucho.util.L10N;
 
@@ -55,11 +45,11 @@ import com.caucho.util.L10N;
  */
 public class NetworkClusterService extends AbstractResinService
 {
-  private static final L10N L = new L10N(NetworkClusterService.class);
-  private static final Logger log
-    = Logger.getLogger(NetworkClusterService.class.getName());
-  
   public static final int START_PRIORITY = SocketPollService.START_PRIORITY + 1;
+
+  private static final L10N L = new L10N(NetworkClusterService.class);
+  private static final Logger log = 
+    Logger.getLogger(NetworkClusterService.class.getName());
   
   private final CloudServer _selfServer;
   
@@ -71,10 +61,7 @@ public class NetworkClusterService extends AbstractResinService
   private CopyOnWriteArrayList<ClusterLinkListener> _linkListeners
   = new CopyOnWriteArrayList<ClusterLinkListener>();
 
-  /**
-   * Creates a new network cluster service.
-   */
-  public NetworkClusterService(CloudServer selfServer)
+  private NetworkClusterService(CloudServer selfServer)
   {
     _selfServer = selfServer;
     
@@ -85,7 +72,21 @@ public class NetworkClusterService extends AbstractResinService
                                              _selfServer.getPort());
     }
   }
-  
+
+  /**
+   * Creates a new network cluster service.
+   */
+  public static NetworkClusterService
+      createAndAddService(CloudServer selfServer)
+  {
+    ResinSystem system = preCreate(NetworkClusterService.class);
+
+    NetworkClusterService service = new NetworkClusterService(selfServer);
+    system.addService(NetworkClusterService.class, service);
+
+    return service;
+  }
+
   /**
    * Returns the current network service.
    */

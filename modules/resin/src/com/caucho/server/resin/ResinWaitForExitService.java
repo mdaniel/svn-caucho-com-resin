@@ -39,7 +39,6 @@ import java.net.SocketTimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.service.AbstractResinService;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownService;
@@ -51,7 +50,7 @@ import com.caucho.vfs.ReadStream;
 /**
  * The wait-for-exit service waits for Resin to exit.
  */
-class ResinWaitForExitService extends AbstractResinService
+class ResinWaitForExitService
 {
   private static final Logger log 
     = Logger.getLogger(ResinWaitForExitService.class.getSimpleName());
@@ -254,11 +253,9 @@ class ResinWaitForExitService extends AbstractResinService
     try {
       thread.setContextClassLoader(_resinSystem.getClassLoader());
       
+      WarningService warning = WarningService.getCurrent();
       _resinActor = new ResinActor(_resin);
-      
-      WarningService warning = WarningService.create();
-      
-      warning.addHandler(new ResinWarningHandler(_resinActor));
+      warning.addHandler(new ResinWarningHandler(_resinActor), true);
 
       if (_pingSocket != null) {
         InputStream is = _pingSocket.getInputStream();

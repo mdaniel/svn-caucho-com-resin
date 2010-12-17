@@ -223,13 +223,13 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     super.initEnd();
     
     if (isAllowRepository()) {
-      RepositoryService repositoryService = RepositoryService.create(); 
+      RepositoryService repositoryService = RepositoryService.getCurrent();
       _repository = repositoryService.getRepository();
       _repository.addListener(getId(), this);
       _repositorySpi = repositoryService.getRepositorySpi();
     }
       
-    DeployControllerService deployService = DeployControllerService.create();
+    DeployControllerService deployService = DeployControllerService.getCurrent();
 
     deployService.addTag(getId());
     _deployItem = deployService.getTagItem(getId());

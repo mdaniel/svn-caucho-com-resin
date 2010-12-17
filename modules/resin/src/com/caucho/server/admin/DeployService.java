@@ -30,8 +30,7 @@
 package com.caucho.server.admin;
 
 import com.caucho.config.Service;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 
 @Service
 public class DeployService extends AbstractResinService
@@ -41,21 +40,21 @@ public class DeployService extends AbstractResinService
   public DeployService()
   {
     _deployActor = new DeployActor();
-    
-    ResinSystem.getCurrent().addService(this);
   }
   
-  public static DeployService create()
+  public static DeployService createAndAddService()
   {
-    DeployService service = ResinSystem.getCurrentService(DeployService.class);
+    ResinSystem system = preCreate(DeployService.class);
     
-    if (service == null) {
-      service = new DeployService();
-      
-      service = ResinSystem.getCurrentService(DeployService.class);
-    }
+    DeployService service = new DeployService();
+    system.addService(DeployService.class, service);
     
     return service;
+  }
+
+  public static DeployService getCurrent()
+  {
+    return ResinSystem.getCurrentService(DeployService.class);
   }
 
   @Override

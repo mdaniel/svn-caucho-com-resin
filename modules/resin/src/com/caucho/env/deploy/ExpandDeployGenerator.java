@@ -136,7 +136,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
     _loader = Thread.currentThread().getContextClassLoader();
     
-    _deployService = DeployControllerService.create();
+    _deployService = DeployControllerService.getCurrent();
     _deployService.addUpdateListener(this);
     
     _repository = RepositoryService.getCurrentRepository();

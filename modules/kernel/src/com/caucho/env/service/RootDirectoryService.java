@@ -33,8 +33,7 @@ import java.io.IOException;
 
 import com.caucho.java.WorkDir;
 import com.caucho.util.L10N;
-import com.caucho.vfs.MemoryPath;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 /**
  * Root service for the root and data directories.
@@ -42,48 +41,54 @@ import com.caucho.vfs.Path;
  */
 public class RootDirectoryService extends AbstractResinService 
 {
-  private static final L10N L = new L10N(RootDirectoryService.class);
   public static final int START_PRIORITY_ROOT_DIRECTORY = 20;
+
+  private static final L10N L = new L10N(RootDirectoryService.class);
   
   private final Path _rootDirectory;
   private final Path _dataDirectory;
 
-  /**
-   * Creates a new servlet server.
-   */
-  public RootDirectoryService(Path rootDirectory)
-    throws IOException
-  {
-    this(rootDirectory, rootDirectory.lookup("resin-data"));
-  }
-
-  /**
-   * Creates a new servlet server.
-   */
-  public RootDirectoryService(Path rootDirectory,
-                              Path dataDirectory)
-    throws IOException
+  public RootDirectoryService(Path rootDirectory, Path dataDirectory)
+      throws IOException
   {
     if (rootDirectory == null)
       throw new NullPointerException();
-    
+
     if (dataDirectory == null)
       throw new NullPointerException();
-    
-    if (dataDirectory instanceof MemoryPath) { // QA
-      dataDirectory = WorkDir.getTmpWorkDir().lookup("qa/" + dataDirectory.getFullPath());
+
+    if (dataDirectory instanceof MemoryPath)
+    { // QA
+      dataDirectory =
+          WorkDir.getTmpWorkDir().lookup("qa/" + dataDirectory.getFullPath());
     }
-    
+
     _rootDirectory = rootDirectory;
     _dataDirectory = dataDirectory;
-    
+
     rootDirectory.mkdirs();
     dataDirectory.mkdirs();
   }
+  
+  public static RootDirectoryService createAndAddService(Path rootDirectory)
+      throws IOException
+  {
+    return createAndAddService(rootDirectory,
+        rootDirectory.lookup("resin-data"));
+  }
 
-  /**
-   * Returns the current active directory service.
-   */
+  public static RootDirectoryService createAndAddService(Path rootDirectory,
+      Path dataDirectory) throws IOException
+  {
+    ResinSystem system = preCreate(RootDirectoryService.class);
+
+    RootDirectoryService service =
+        new RootDirectoryService(rootDirectory, dataDirectory);
+    system.addService(RootDirectoryService.class, service);
+
+    return service;
+  }
+
   public static RootDirectoryService getCurrent()
   {
     return ResinSystem.getCurrentService(RootDirectoryService.class);

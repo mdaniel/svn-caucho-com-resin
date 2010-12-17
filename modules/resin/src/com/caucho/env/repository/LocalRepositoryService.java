@@ -29,13 +29,12 @@
 
 package com.caucho.env.repository;
 
+
 import com.caucho.env.git.GitService;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 import com.caucho.util.L10N;
 
-public class LocalRepositoryService
-  extends AbstractResinService
+public class LocalRepositoryService extends AbstractResinService
 {
   public static final int START_PRIORITY = GitService.START_PRIORITY + 1;
   
@@ -45,17 +44,24 @@ public class LocalRepositoryService
   
   private LocalRepositoryAdmin _admin;
   
-  public LocalRepositoryService()
+  private LocalRepositoryService()
   {
-    GitService git = GitService.create();
-    
-    if (git == null) {
+    GitService git = GitService.getCurrent();
+    if (git == null)
       throw new IllegalStateException(L.l("{0} is required for {1}",
-                                          GitService.class.getSimpleName(),
-                                          getClass().getSimpleName()));
-    }
-    
+          GitService.class.getSimpleName(), getClass().getSimpleName()));
+
     _fileRepository = new FileRepository(git);
+  }
+  
+  public static LocalRepositoryService createAndAddService()
+  {
+    ResinSystem system = preCreate(LocalRepositoryService.class);
+    
+    LocalRepositoryService service = new LocalRepositoryService();
+    system.addService(LocalRepositoryService.class, service);
+    
+    return service;
   }
 
   public static LocalRepositoryService getCurrent()

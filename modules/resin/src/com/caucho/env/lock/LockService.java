@@ -31,13 +31,13 @@ package com.caucho.env.lock;
 
 import java.util.concurrent.locks.Lock;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 
 /**
  * Manages the distributed lock
  */
-public class LockService extends AbstractResinService {
+public class LockService extends AbstractResinService 
+{
   private AbstractLockManager _lockManager;
   
   public LockService(AbstractLockManager lockManager)
@@ -45,6 +45,16 @@ public class LockService extends AbstractResinService {
     _lockManager = lockManager;
   }
   
+  public static LockService createAndAddService(AbstractLockManager lockManager)
+  {
+    ResinSystem system = preCreate(LockService.class);
+    
+    LockService service = new LockService(lockManager);
+    system.addService(LockService.class, service);
+    
+    return service;
+  }
+
   public static LockService getCurrent()
   {
     return ResinSystem.getCurrentService(LockService.class);

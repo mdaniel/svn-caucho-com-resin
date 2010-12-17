@@ -29,33 +29,25 @@
 
 package com.caucho.cloud.network;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.network.listen.TcpSocketLinkListener;
-import com.caucho.network.listen.TcpSocketLink;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
+import com.caucho.env.service.*;
+import com.caucho.network.listen.*;
+import com.caucho.util.*;
 import com.caucho.vfs.QServerSocket;
 
-public class NetworkListenService
-  extends AbstractResinService 
+public class NetworkListenService extends AbstractResinService 
   implements AlarmListener
 {
+  public static final int START_PRIORITY_AT_BEGIN = 50;
+  public static final int START_PRIORITY_AT_END = 90;
+
   private static final L10N L = new L10N(NetworkListenService.class);
   private static final Logger log
     = Logger.getLogger(NetworkListenService.class.getName());
-
-  public static final int START_PRIORITY_AT_BEGIN = 50;
-  public static final int START_PRIORITY_AT_END = 90;
   
   private static final long ALARM_TIMEOUT = 120 * 1000L;
   
@@ -70,10 +62,7 @@ public class NetworkListenService
   
   private Alarm _alarm;
   
-  /**
-   * Creates a new servlet server.
-   */
-  public NetworkListenService(CloudServer cloudServer)
+  private NetworkListenService(CloudServer cloudServer)
   {
     _cloudServer = cloudServer;
     
@@ -88,6 +77,16 @@ public class NetworkListenService
     NetworkServerConfig config = new NetworkServerConfig(this);
    
     configure(_cloudServer, config);
+  }
+  
+  public static NetworkListenService createAndAddService(CloudServer cloudServer)
+  {
+    ResinSystem system = preCreate(NetworkListenService.class);
+    
+    NetworkListenService service = new NetworkListenService(cloudServer);
+    system.addService(NetworkListenService.class, service);
+    
+    return service;
   }
   
   public static NetworkListenService getCurrent()

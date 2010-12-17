@@ -254,7 +254,7 @@ public class Server
 
     _alarm = new Alarm(this);
     
-    _bamService = BamService.create(getBamAdminName());
+    _bamService = BamService.getCurrent();
 
     _authManager = new ServerAuthManager();
     // XXX:

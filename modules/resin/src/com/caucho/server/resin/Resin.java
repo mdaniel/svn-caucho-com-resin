@@ -52,6 +52,7 @@ import com.caucho.cloud.loadbalance.LoadBalanceService;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterService;
 import com.caucho.cloud.network.NetworkListenService;
+import com.caucho.cloud.security.SecurityService;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.cloud.topology.TopologyService;
@@ -63,10 +64,11 @@ import com.caucho.config.inject.WebBeansAddLoaderListener;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
+import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.distcache.DistCacheService;
+import com.caucho.env.git.GitService;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
-import com.caucho.env.lock.LockService;
-import com.caucho.env.lock.SingleLockManager;
+import com.caucho.env.lock.*;
 import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.LocalRepositoryService;
 import com.caucho.env.repository.RepositoryService;
@@ -75,6 +77,7 @@ import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectoryService;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownService;
+import com.caucho.env.warning.WarningService;
 import com.caucho.java.WorkDir;
 import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
@@ -360,6 +363,11 @@ public class Resin
     _isEmbedded = isEmbedded;
   }
   
+  public boolean isEmbedded()
+  {
+    return _isEmbedded;
+  }
+  
   private void initEnvironment()
   {
     String resinHome = System.getProperty("resin.home");
@@ -491,32 +499,29 @@ public class Resin
   
   protected void addPreTopologyServices()
   {
-    ShutdownService shutdown = new ShutdownService(_resinSystem, _isEmbedded);
-    _resinSystem.addService(shutdown);
+    WarningService.createAndAddService();
     
-    TopologyService topology = new TopologyService(_serverId);
-    _resinSystem.addService(topology);
-    topology.getSystem();
+    ShutdownService.createAndAddService(_isEmbedded);
     
-    DistCacheService distCache = createDistCacheService();
-    _resinSystem.addService(DistCacheService.class, distCache);
+    TopologyService.createAndAddService(_serverId);
+    
+    createDistCacheService();
   }
   
   protected void addServices()
   {
-    LockService lockService = createLockService();
-    _resinSystem.addService(LockService.class, lockService);
-    
+    LockService.createAndAddService(createLockManager());
   }
   
   protected DistCacheService createDistCacheService()
   {
-    return new DistCacheService(new FileCacheManager(getResinSystem()));
+    return DistCacheService.createAndAddService(new FileCacheManager(
+        getResinSystem()));
   }
   
-  protected LockService createLockService()
+  protected AbstractLockManager createLockManager()
   {
-    return new LockService(new SingleLockManager());
+    return new SingleLockManager();
   }
   
   private void setArgs(ResinArgs args)
@@ -897,16 +902,15 @@ public class Resin
   
   private void initRepository()
   {
-    LocalRepositoryService localRepositoryService
-      = new LocalRepositoryService();
+    GitService.createAndAddService();
+    
+    LocalRepositoryService localRepositoryService = 
+      LocalRepositoryService.createAndAddService();
 
     RepositorySpi localRepository = localRepositoryService.getRepositorySpi();
 
-    _resinSystem.addService(localRepositoryService);
-
     AbstractRepository repository = createRepository(localRepository);
-    
-    _resinSystem.addService(new RepositoryService(repository));
+    RepositoryService.createAndAddService(repository);
   }
   
   protected AbstractRepository createRepository(RepositorySpi localRepository)
@@ -1084,8 +1088,7 @@ public class Resin
   /**
    * Configures the root directory and dataDirectory.
    */
-  private void configureRoot(BootResinConfig bootConfig)
-    throws IOException
+  private void configureRoot(BootResinConfig bootConfig) throws IOException
   {
     Path dataDirectory;
   
@@ -1101,10 +1104,7 @@ public class Resin
   
     dataDirectory = dataDirectory.lookup("./" + serverName);
     
-    RootDirectoryService rootService
-      = new RootDirectoryService(_rootDirectory, dataDirectory);
-    
-    _resinSystem.addService(rootService);
+    RootDirectoryService.createAndAddService(_rootDirectory, dataDirectory);
   }
   
   /**
@@ -1153,19 +1153,18 @@ public class Resin
     
     _selfServer = bootServer.getCloudServer();
     
-    NetworkClusterService networkService
-      = new NetworkClusterService(_selfServer);
-    _resinSystem.addService(networkService);
+    NetworkClusterService networkService = 
+      NetworkClusterService.createAndAddService(_selfServer);
     
     ClusterServer server = _selfServer.getData(ClusterServer.class);
     
-    LoadBalanceService loadBalanceService;
-    loadBalanceService = new LoadBalanceService(createLoadBalanceFactory());
+    LoadBalanceService.createAndAddService(createLoadBalanceFactory());
     
-    _resinSystem.addService(loadBalanceService);
+    BamService.createAndAddService(server.getBamAdminName());
     
-    BamService bamService = new BamService(server.getBamAdminName());
-    _resinSystem.addService(bamService);
+    DeployControllerService.createAndAddService();
+    
+    SecurityService.createAndAddService();
     
     initRepository();
     
@@ -1174,13 +1173,9 @@ public class Resin
     if (_args != null && _args.getStage() != null)
       _servletContainer.setStage(_args.getStage());
     
-    NetworkListenService listenService
-      = new NetworkListenService(_selfServer);
+    NetworkListenService.createAndAddService(_selfServer);
     
-    _resinSystem.addService(listenService);
-    
-    ServletService servletService = new ServletService(_servletContainer);
-    _resinSystem.addService(servletService);
+    ServletService.createAndAddService(_servletContainer);
     
     ResinConfig resinConfig = new ResinConfig(this);
     
@@ -1218,7 +1213,10 @@ public class Resin
 
   public Management createResinManagement()
   {
-    return new Management(this);
+    if (_management == null) 
+      _management = new Management(this);
+
+    return _management;
   }
   
   private void addRandom()

@@ -34,5 +34,5 @@ package com.caucho.env.warning;
  */
 public interface WarningHandler 
 {
-  public void warning(String msg);
+  public void warning(Object source, String msg);
 }

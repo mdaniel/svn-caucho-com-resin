@@ -29,66 +29,53 @@
 
 package com.caucho.env.git;
 
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.env.service.RootDirectoryService;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import java.io.*;
 import java.security.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.zip.*;
 
+import com.caucho.env.service.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
 /**
  * Top-level class for a repository
  */
-public class GitService extends AbstractResinService {
-  private static final L10N L = new L10N(GitService.class);
-  private static final Logger log
-    = Logger.getLogger(GitService.class.getName());
-  
+public class GitService extends AbstractResinService 
+{
   public static final int START_PRIORITY
-    = RootDirectoryService.START_PRIORITY_ROOT_DIRECTORY + 1; 
+  = RootDirectoryService.START_PRIORITY_ROOT_DIRECTORY + 1; 
+
+  private static final L10N L = new L10N(GitService.class);
+  private static final Logger log = 
+    Logger.getLogger(GitService.class.getName());
   
   private Path _root;
-
-  public GitService()
-  {
-  }
   
   public GitService(Path root)
   {
     _root = root;
   }
   
+  public static GitService createAndAddService()
+  {
+    return createAndAddService(null);
+  }
+
+  public static GitService createAndAddService(Path root)
+  {
+    ResinSystem system = preCreate(GitService.class);
+    
+    GitService service = new GitService(root);
+    system.addService(GitService.class, service);
+    
+    return service;
+  }
+
   public static GitService getCurrent()
   {
     return ResinSystem.getCurrentService(GitService.class);
-  }
-  
-  public static GitService create()
-  {
-    ResinSystem resinSystem = ResinSystem.getCurrent();
-    
-    if (resinSystem == null) {
-      throw new IllegalStateException(L.l("{0} requires an active {1} environment.",
-                                          GitService.class.getSimpleName(),
-                                          ResinSystem.class.getSimpleName()));
-    }
-    
-    GitService git = resinSystem.getService(GitService.class);
-    
-    if (git == null) {
-      git = new GitService();
-      
-      resinSystem.addServiceIfAbsent(git);
-      
-      git = resinSystem.getService(GitService.class);
-    }
-    
-    return git;
   }
 
   @Override

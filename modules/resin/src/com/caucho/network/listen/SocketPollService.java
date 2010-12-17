@@ -30,8 +30,7 @@
 package com.caucho.network.listen;
 
 import com.caucho.cloud.topology.TopologyService;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 
 /**
  * The socket poll service, provides nio-style socket listening.
@@ -39,17 +38,25 @@ import com.caucho.env.service.ResinSystem;
 public class SocketPollService extends AbstractResinService
 {
   public static final int START_PRIORITY = TopologyService.START_PRIORITY + 1;
-  
+
   public SocketPollService()
   {
+    
+  }
+  
+  public static SocketPollService createAndAddService()
+  {
+    ResinSystem system = preCreate(SocketPollService.class);
+    
+    SocketPollService service = new SocketPollService();
+    system.addService(SocketPollService.class, service);
+    
+    return service;
   }
   
   public static SocketPollService getCurrent()
   {
-    SocketPollService pollService 
-      = ResinSystem.getCurrentService(SocketPollService.class);
-    
-    return pollService;
+    return ResinSystem.getCurrentService(SocketPollService.class);
   }
   
   public static AbstractSelectManager getCurrentSelectManager()

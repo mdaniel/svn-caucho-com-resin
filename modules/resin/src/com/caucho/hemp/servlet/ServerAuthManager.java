@@ -69,7 +69,7 @@ public class ServerAuthManager {
   
   public ServerAuthManager()
   {
-    _security = SecurityService.create();
+    _security = SecurityService.getCurrent();
     
     InjectManager cdiManager = InjectManager.getCurrent();
     

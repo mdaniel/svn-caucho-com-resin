@@ -30,28 +30,39 @@
 package com.caucho.env.distcache;
 
 import com.caucho.distcache.CacheManager;
-import com.caucho.env.service.AbstractResinService;
-import com.caucho.env.service.ResinSystem;
+import com.caucho.env.service.*;
 import com.caucho.server.distcache.AbstractCacheManager;
 
 /**
  * The local cache repository.
  */
-public class DistCacheService extends AbstractResinService {
+public class DistCacheService extends AbstractResinService 
+{
   public static final int START_PRIORITY = START_PRIORITY_CACHE_SERVICE;
-  
+
   private CacheManager _cacheManager;
   private AbstractCacheManager<?> _distCacheManager;
   
   public DistCacheService(AbstractCacheManager<?> distCacheManager)
   {
-    _cacheManager = new CacheManager();
-    _distCacheManager = distCacheManager;
-    
     if (distCacheManager == null)
       throw new NullPointerException();
+
+    _cacheManager = new CacheManager();
+    _distCacheManager = distCacheManager;
   }
   
+  public static DistCacheService createAndAddService(
+      AbstractCacheManager<?> distCacheManager)
+  {
+    ResinSystem system = preCreate(DistCacheService.class);
+
+    DistCacheService service = new DistCacheService(distCacheManager);
+    system.addService(DistCacheService.class, service);
+
+    return service;
+  }
+
   public static DistCacheService getCurrent()
   {
     return ResinSystem.getCurrentService(DistCacheService.class);
