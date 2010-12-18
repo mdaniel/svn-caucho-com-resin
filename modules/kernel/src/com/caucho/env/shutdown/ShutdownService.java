@@ -77,14 +77,14 @@ public class ShutdownService extends AbstractResinService
     _warningService = ResinSystem.getCurrentService(WarningService.class);
     if (_warningService == null) {
       throw new IllegalStateException(L.l("{0} requires an active {1}",
-          ShutdownService.class.getSimpleName(),
-          WarningService.class.getSimpleName()));
+                                           ShutdownService.class.getSimpleName(),
+                                           WarningService.class.getSimpleName()));
     }
   }
   
   public static ShutdownService createAndAddService()
   {
-    return createAndAddService(false);
+    return createAndAddService(Alarm.isTest());
   }
 
   public static ShutdownService createAndAddService(boolean isEmbedded)
