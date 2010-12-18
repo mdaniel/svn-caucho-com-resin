@@ -27,9 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.query;
 
 import java.io.Serializable;
+
+import com.caucho.bam.ActorException;
+import com.caucho.bam.TimeoutException;
 
 /**
  * QueryCallbackManager is used to generate query ids and to wait

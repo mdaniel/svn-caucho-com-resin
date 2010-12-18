@@ -27,38 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.query;
 
 import java.io.Serializable;
 
-import com.caucho.bam.query.QueryCallback;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.broker.Broker;
 
 /**
- * ActorProxy is a convenience API for sending messages to a specific Actors,
- * which always using the actor's JID as the "from" parameter.
+ * QuerySender is a convenience API for an Actor to send and manage
+ * queries.
  */
-public interface ActorProxy {
+public interface QuerySender {
   /**
-   * Returns the proxy's jid used for all "from" parameters.
+   * Returns the Actor's jid used for all "from" parameters.
    */
   public String getJid();
 
+
   /**
-   * Returns the target actor's jid used for all "to" parameters.
+   * The underlying broker.
    */
-  public String getTo();
+  public Broker getBroker();
 
   //
   // message handling
   //
 
   /**
-   * Sends a unidirectional message to the target {@link com.caucho.bam.Actor},
+   * Sends a unidirectional message to an {@link com.caucho.bam.Actor},
+   * addressed by the Actor's JID.
    *
+   * @param to the target actor's JID
    * @param payload the message payload
    */
-  public void message(Serializable payload);
+  public void message(String to, Serializable payload);
 
   //
   // query handling
@@ -76,15 +78,17 @@ public interface ActorProxy {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
+   * @param to the target actor's JID
    * @param payload the query payload
    */
-  public Serializable query(Serializable payload);
+  public Serializable query(String to,
+                            Serializable payload);
 
   /**
-   * Sends a query information call (get) to an actor,
+   * Sends a query information call to an actor,
    * blocking until the actor responds with a result or an error.
    *
-   * The target actor of a <code>queryGet</code> acts as a service and the
+   * The target actor of a <code>query</code> acts as a service and the
    * caller acts as a client.  Because BAM Actors are symmetrical, all
    * Actors can act as services and clients for different RPC calls.
    *
@@ -92,10 +96,12 @@ public interface ActorProxy {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
+   * @param to the target actor's JID
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
-  public Serializable query(Serializable payload,
+  public Serializable query(String to,
+                            Serializable payload,
                             long timeout);
 
   /**
@@ -114,45 +120,7 @@ public interface ActorProxy {
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
-  public void query(Serializable payload,
+  public void query(String to,
+                    Serializable payload,
                     QueryCallback callback);
-
-  /**
-   * Registers a callback {@link com.caucho.bam.stream.ActorStream} with the client
-   */
-  public void setClientStream(ActorStream clientStream);
-
-  /**
-   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
-   */
-  public ActorStream getClientStream();
-
-  /**
-   * Returns the stream to this client.
-   */
-  public ActorStream getActorStream();
-
-  /**
-   * The ActorStream to the link.
-   */
-  public ActorStream getLinkStream();
-
-  /**
-   * Sets the ActorStream to the link.
-   */
-  public void setLinkStream(ActorStream linkStream);
-  
-  //
-  // lifecycle
-  //
-
-  /**
-   * Returns true if the proxy is closed
-   */
-  public boolean isClosed();
-
-  /**
-   * Closes the proxy
-   */
-  public void close();
 }

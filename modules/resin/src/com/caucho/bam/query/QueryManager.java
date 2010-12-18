@@ -27,13 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.query;
 
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorException;
+import com.caucho.bam.TimeoutException;
 import com.caucho.util.Alarm;
 
 /**
@@ -57,7 +60,7 @@ public class QueryManager {
   /**
    * Generates a new unique query identifier.
    */
-  public final long generateQueryId()
+  public final long nextQueryId()
   {
     return _qId.incrementAndGet();
   }
@@ -261,6 +264,7 @@ public class QueryManager {
       return _result;
     }
 
+    @Override
     public Serializable get()
       throws TimeoutException, ActorException
     {
@@ -298,6 +302,7 @@ public class QueryManager {
       return _isResult.get();
     }
 
+    @Override
     public void onQueryResult(String fromJid, String toJid,
                               Serializable payload)
     {
@@ -309,6 +314,7 @@ public class QueryManager {
         LockSupport.unpark(thread);
     }
 
+    @Override
     public void onQueryError(String fromJid, String toJid,
                              Serializable payload, ActorError error)
     {

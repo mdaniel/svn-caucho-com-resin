@@ -32,13 +32,15 @@ package com.caucho.bam;
 import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.query.QueryCallback;
+import com.caucho.bam.query.QuerySender;
 import com.caucho.bam.stream.ActorStream;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's JID as the "from" parameter.
  */
-public interface ActorClient extends Actor {
+public interface ActorClient extends Actor, QuerySender {
   /**
    * Returns the Actor's jid used for all "from" parameters.
    */
@@ -102,6 +104,11 @@ public interface ActorClient extends Actor {
   // query handling
   //
 
+  /**
+   * Returns the next query identifier.
+   */
+  public long nextQueryId();
+  
   /**
    * Sends a query information call (get) to an actor,
    * blocking until the actor responds with a result or an error.

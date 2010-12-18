@@ -83,6 +83,14 @@ abstract public class DistributedCacheManager
   abstract public boolean remove(HashKey hashKey);
 
   /**
+   * For QA
+   */
+  public byte[] calculateValueHash(Object value, CacheConfig config)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
    * Closes the manager
    */
   public void close()
@@ -170,4 +178,5 @@ abstract public class DistributedCacheManager
     {
     }
   }
+
 }

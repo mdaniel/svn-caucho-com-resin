@@ -250,8 +250,8 @@ public class HempBroker extends AbstractManagedBroker
       _actorStreamMap.put(jid, new WeakReference<Mailbox>(mailbox));
     }
 
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " addActor jid=" + jid + " " + mailbox);
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " addMailbox jid=" + jid + " " + mailbox);
  }
 
   /**

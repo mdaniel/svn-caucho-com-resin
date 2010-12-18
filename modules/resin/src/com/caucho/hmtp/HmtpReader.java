@@ -126,8 +126,8 @@ public class HmtpReader {
       {
         Serializable value = (Serializable) hIn.readObject();
 
-        if (log.isLoggable(Level.FINER)) {
-          log.finer(this + " message " + value
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest(this + " message " + value
                     + " {to:" + to + ", from:" + from + "}");
         }
 
@@ -141,8 +141,8 @@ public class HmtpReader {
         Serializable value = (Serializable) hIn.readObject();
         ActorError error = (ActorError) hIn.readObject();
 
-        if (log.isLoggable(Level.FINER)) {
-          log.finer(this + " messageError " + error + " " + value
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest(this + " messageError " + error + " " + value
                     + " {to:" + to + ", from:" + from + "}");
         }
 
@@ -156,8 +156,8 @@ public class HmtpReader {
         long id = hIn.readLong();
         Serializable value = (Serializable) hIn.readObject();
 
-        if (log.isLoggable(Level.FINER)) {
-          log.finer(this + " query " + value
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest(this + " query " + value
                     + " {id:" + id + ", to:" + to + ", from:" + from + "}");
         }
 
@@ -171,8 +171,8 @@ public class HmtpReader {
         long id = hIn.readLong();
         Serializable value = (Serializable) hIn.readObject();
 
-        if (log.isLoggable(Level.FINER)) {
-          log.finer(this + " queryResult " + value
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest(this + " queryResult " + value
                     + " {id:" + id + ", to:" + to + ", from:" + from + "}");
         }
 
@@ -187,8 +187,8 @@ public class HmtpReader {
         Serializable value = (Serializable) hIn.readObject();
         ActorError error = (ActorError) hIn.readObject();
 
-        if (log.isLoggable(Level.FINER)) {
-          log.finer(this + " queryError " + error + " " + value
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest(this + " queryError " + error + " " + value
                     + " {id:" + id + ", to:" + to + ", from:" + from + "}");
         }
 

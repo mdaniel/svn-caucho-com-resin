@@ -33,6 +33,9 @@ import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.query.QueryCallback;
+import com.caucho.bam.query.QueryFuture;
+import com.caucho.bam.query.QueryManager;
 import com.caucho.bam.stream.AbstractActorStreamFilter;
 import com.caucho.bam.stream.ActorStream;
 
@@ -184,7 +187,7 @@ public class SimpleActorProxy implements ActorProxy {
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    long id = _queryManager.generateQueryId();
+    long id = _queryManager.nextQueryId();
     
     QueryFuture future
       = _queryManager.addQueryFuture(id, getTo(), getJid(), payload, _timeout);
@@ -216,7 +219,7 @@ public class SimpleActorProxy implements ActorProxy {
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    long id = _queryManager.generateQueryId();
+    long id = _queryManager.nextQueryId();
     
     QueryFuture future
       = _queryManager.addQueryFuture(id, getTo(), getJid(), payload, timeout);
@@ -250,7 +253,7 @@ public class SimpleActorProxy implements ActorProxy {
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    long id = _queryManager.generateQueryId();
+    long id = _queryManager.nextQueryId();
     
     _queryManager.addQueryCallback(id, callback);
 

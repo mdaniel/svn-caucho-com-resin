@@ -38,6 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.stream.ActorStream;
 
 
@@ -132,6 +133,12 @@ public class LocalActorClient implements ActorClient {
   //
   // RPC
   //
+  
+  @Override
+  public long nextQueryId()
+  {
+    return _client.nextQueryId();
+  }
 
   @Override
   public Serializable query(String to,

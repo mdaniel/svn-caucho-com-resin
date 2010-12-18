@@ -27,19 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.query;
 
 
 import java.io.Serializable;
 
+import com.caucho.bam.ActorError;
+
 /**
  * callback for a query
  */
-public interface QueryCallback {
-  public void onQueryResult(String to, String from, Serializable payload);
+public class AbstractQueryCallback implements QueryCallback {
+  @Override
+  public void onQueryResult(String to, String from, Serializable payload)
+  {
+  }
   
+  @Override
   public void onQueryError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error);
+                           ActorError error)
+  {
+  }
 }

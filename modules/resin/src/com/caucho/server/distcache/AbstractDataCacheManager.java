@@ -45,11 +45,13 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 
   abstract protected E createCacheEntry(Object key, HashKey hashKey);
 
+  /*
   @Override
   protected void requestClusterData(HashKey valueKey, int flags)
   {
     // _cacheService.requestData(valueKey, flags);
   }
+  */
 
   @Override
   public void start()

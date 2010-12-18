@@ -113,8 +113,8 @@ public class HmtpWriter
     if (out == null)
       return;
 
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " message " + payload
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " message " + payload
                 + " {to:" + to + ", from:" + from + "}");
     }
 
@@ -143,9 +143,9 @@ public class HmtpWriter
     if (out == null)
       return;
 
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " messageError " + value
-                + " {to:" + to + ", from:" + from + "}");
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " messageError " + value
+                 + " {to:" + to + ", from:" + from + "}");
     }
 
     out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
@@ -178,8 +178,8 @@ public class HmtpWriter
     if (out == null)
       return;
 
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " query " + value
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " query " + value
                 + " {id: " + id + ", to:" + to + ", from:" + from + "}");
     }
 
@@ -209,8 +209,8 @@ public class HmtpWriter
     if (out == null)
       return;
 
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " queryResult " + value
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " queryResult " + value
                 + " {id: " + id + ", to:" + to + ", from:" + from + "}");
     }
 
@@ -241,8 +241,8 @@ public class HmtpWriter
     if (out == null)
       return;
 
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " queryError " + error + " " + value
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " queryError " + error + " " + value
                 + " {id: " + id + ", to:" + to + ", from:" + from + "}");
     }
 

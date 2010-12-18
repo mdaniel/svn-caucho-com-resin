@@ -780,9 +780,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                            localReadTimeout, leaseOwner);
   }
 
-  final protected HashKey writeData(HashKey oldValueHash,
-                                    Object value,
-                                    CacheSerializer serializer)
+  final public HashKey writeData(HashKey oldValueHash,
+                                 Object value,
+                                 CacheSerializer serializer)
   {
     TempOutputStream os = null;
 
@@ -813,6 +813,38 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       }
 
       return valueHash;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      if (os != null)
+        os.close();
+    }
+  }
+
+  /**
+   * Used by QA
+   */
+  @Override
+  final public byte[] calculateValueHash(Object value,
+                                          CacheConfig config)
+  {
+    CacheSerializer serializer = config.getValueSerializer();
+    TempOutputStream os = null;
+    
+    try {
+      os = new TempOutputStream();
+
+      Sha256OutputStream mOut = new Sha256OutputStream(os);
+      DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
+
+      serializer.serialize(value, gzOut);
+
+      gzOut.finish();
+      mOut.close();
+
+      byte[] hash = mOut.getDigest();
+
+      return hash;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
@@ -882,7 +914,13 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       WriteStream out = Vfs.openWrite(os);
 
       if (! getDataBacking().loadData(valueKey, out)) {
-        requestClusterData(valueKey, flags);
+        if (! loadClusterData(valueKey, flags)) {
+          log.warning(this + " cannot load data for " + valueKey + " from triad");
+          
+          out.close();
+        
+          return null;
+        }
 
         if (! getDataBacking().loadData(valueKey, out)) {
           out.close();
@@ -931,7 +969,13 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       if (getDataBacking().loadData(valueKey, out))
         return true;
 
-      requestClusterData(valueKey, flags);
+      if (! loadClusterData(valueKey, flags)) {
+        log.warning(this + " cannot load cluster value " + valueKey);
+
+        // XXX: error?  since we have the value key, it should exist
+
+        return false;
+      }
 
       if (getDataBacking().loadData(valueKey, out))
         return true;
@@ -946,9 +990,13 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     }
   }
 
-  protected void requestClusterData(HashKey valueKey, int flags)
+  /**
+   * Load the cluster data from the triad.
+   */
+  protected boolean loadClusterData(HashKey valueKey, int flags)
   {
     // _cacheService.requestData(valueKey, flags);
+    return true;
   }
 
   /**
@@ -993,6 +1041,20 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   public void close()
   {
     getDataBacking().close();
+  }
+  
+  //
+  // QA
+  //
+  
+  public MnodeStore getMnodeStore()
+  {
+    return _dataBacking.getMnodeStore();
+  }
+  
+  public DataStore getDataStore()
+  {
+    return _dataBacking.getDataStore();
   }
   
   @Override

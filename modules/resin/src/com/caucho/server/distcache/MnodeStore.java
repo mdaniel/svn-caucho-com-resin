@@ -460,8 +460,8 @@ public class MnodeStore implements AlarmListener {
                               false);
       }
 
-      if (log.isLoggable(Level.FINER))
-        log.finer(this + " load: no mnode for " + id);
+      if (log.isLoggable(Level.FINEST))
+        log.finest(this + " load: no mnode for cache key " + id);
 
       return null;
     } catch (SQLException e) {

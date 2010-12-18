@@ -56,9 +56,12 @@ import com.caucho.config.types.Period;
 import com.caucho.env.distcache.DistCacheService;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.distcache.AbstractCacheManager;
 import com.caucho.server.distcache.CacheConfig;
+import com.caucho.server.distcache.DataStore;
 import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.DistributedCacheManager;
+import com.caucho.server.distcache.MnodeStore;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
@@ -364,7 +367,7 @@ abstract public class AbstractCache extends AbstractMap
   @Configurable
   public void setScope(String scopeName)
   {
-      _scopeName = scopeName;
+    _scopeName = scopeName;
   }
 
   /**
@@ -444,6 +447,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the object with the given key without checking the backing store.
    */
+  @Override
   public Object peek(Object key)
   {
     DistCacheEntry cacheEntry = _entryCache.get(key);
@@ -455,6 +459,7 @@ abstract public class AbstractCache extends AbstractMap
    * Returns the object with the given key, checking the backing
    * store if necessary.
    */
+  @Override
   public Object get(Object key)
   {
     return getDistCacheEntry(key).get(_config);
@@ -464,6 +469,7 @@ abstract public class AbstractCache extends AbstractMap
    * Returns the object with the given key, updating the backing
    * store if necessary.
    */
+  @Override
   public Object getLazy(Object key)
   {
     return getDistCacheEntry(key).getLazy(_config);
@@ -472,6 +478,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Fills an output stream with the value for a key.
    */
+  @Override
   public boolean get(Object key, OutputStream os)
     throws IOException
   {
@@ -481,6 +488,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the cache entry for the object with the given key.
    */
+  @Override
   public ExtCacheEntry getExtCacheEntry(Object key)
   {
     return getDistCacheEntry(key).getMnodeValue(_config);
@@ -489,6 +497,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the cache entry for the object with the given key.
    */
+  @Override
   public ExtCacheEntry peekExtCacheEntry(Object key)
   {
     return getDistCacheEntry(key).getMnodeValue();
@@ -497,6 +506,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the cache entry for the object with the given key.
    */
+  @Override
   public CacheEntry getCacheEntry(Object key)
   {
     return getExtCacheEntry(key);
@@ -508,6 +518,7 @@ abstract public class AbstractCache extends AbstractMap
    * @param key   the key of the item to put
    * @param value the value of the item to put
    */
+  @Override
   public Object put(Object key, Object value)
   {
     Object object = getDistCacheEntry(key).put(value, _config);
@@ -524,6 +535,7 @@ abstract public class AbstractCache extends AbstractMap
    * @param is          the value of the item to put
    * @param idleTimeout the idle timeout for the item
    */
+  @Override
   public ExtCacheEntry put(Object key,
                            InputStream is,
                            long idleTimeout)
@@ -577,6 +589,7 @@ abstract public class AbstractCache extends AbstractMap
   public Object remove(Object key)
   {
     notifyRemove(key);
+    
     return getDistCacheEntry(key).remove(_config);
   }
 
@@ -948,12 +961,6 @@ abstract public class AbstractCache extends AbstractMap
     _localManager.remove(_guid);
   }
 
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _guid + "]";
-  }
-
   private void initName(String name)
     throws ConfigException
   {
@@ -983,6 +990,38 @@ abstract public class AbstractCache extends AbstractMap
     }
 
     setPersistenceMode(result);
+  }
+  
+  //
+  // QA
+  //
+  
+  public byte []getKeyHash(String name)
+  {
+    return getDistCacheEntry(name).getKeyHash().getHash();
+  }
+  
+  public byte []getValueHash(Object value)
+  {
+    return _manager.calculateValueHash(value, _config);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public MnodeStore getMnodeStore()
+  {
+    return ((AbstractCacheManager) _manager).getMnodeStore();
+  }
+  
+  @SuppressWarnings("unchecked")
+  public DataStore getDataStore()
+  {
+    return ((AbstractCacheManager) _manager).getDataStore();
+  }
+  
+  public void saveData(Object value)
+  {
+    ((AbstractCacheManager) _manager).writeData(null, value, 
+                                                _config.getValueSerializer());
   }
 
   private void initScope(String scopeName)
@@ -1195,5 +1234,11 @@ abstract public class AbstractCache extends AbstractMap
         }
       };
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _guid + "]";
   }
 }
