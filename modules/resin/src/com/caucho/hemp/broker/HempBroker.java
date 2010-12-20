@@ -257,9 +257,10 @@ public class HempBroker extends AbstractManagedBroker
   /**
    * Removes a actor
    */
-  public void removeMailbox(ActorStream actor)
+  @Override
+  public void removeMailbox(Mailbox mailbox)
   {
-    String jid = actor.getJid();
+    String jid = mailbox.getJid();
 
     synchronized (_actorMap) {
       _actorMap.remove(jid);
@@ -270,7 +271,7 @@ public class HempBroker extends AbstractManagedBroker
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " removeActor jid=" + jid + " " + actor);
+      log.fine(this + " removeActor jid=" + jid + " " + mailbox);
   }
 
   /**
@@ -534,7 +535,7 @@ public class HempBroker extends AbstractManagedBroker
 
     addMailbox(mailbox);
 
-    Environment.addCloseListener(new ActorClose(bamActor));
+    Environment.addCloseListener(new ActorClose(mailbox));
   }
 
   private void startActor(Bean bean, AdminService bamService)
@@ -568,7 +569,7 @@ public class HempBroker extends AbstractManagedBroker
 
     addMailbox(mailbox);
 
-    Environment.addCloseListener(new ActorClose(bamActor));
+    Environment.addCloseListener(new ActorClose(mailbox));
   }
 
   public void close()
@@ -682,16 +683,16 @@ public class HempBroker extends AbstractManagedBroker
   }
 
   public class ActorClose {
-    private Actor _actor;
+    private Mailbox _actor;
 
-    ActorClose(Actor actor)
+    ActorClose(Mailbox actor)
     {
       _actor = actor;
     }
 
     public void close()
     {
-      removeMailbox(_actor.getActorStream());
+      removeMailbox(_actor);
     }
   }
 }

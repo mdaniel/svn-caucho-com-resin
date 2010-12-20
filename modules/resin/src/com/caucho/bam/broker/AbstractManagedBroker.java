@@ -116,9 +116,9 @@ abstract public class AbstractManagedBroker
   }
   
   @Override
-  public String createClient(ActorStream actorStream, 
-                             String uid,
-                             String resource)
+  public Mailbox createClient(Mailbox next,
+                              String uid,
+                              String resource)
   {
     String jid = null;
     
@@ -139,11 +139,11 @@ abstract public class AbstractManagedBroker
              + "/" + Long.toHexString(_sequence.incrementAndGet()));
     }
    
-    Mailbox mailbox = createMailbox(jid, actorStream, MailboxType.DEFAULT);
+    Mailbox mailbox = new PassthroughMailbox(jid, next, this);
     
     addMailbox(mailbox);
     
-    return jid;
+    return mailbox;
   }
  
   /**

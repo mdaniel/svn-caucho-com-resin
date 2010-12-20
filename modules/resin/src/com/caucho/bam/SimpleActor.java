@@ -49,9 +49,9 @@ public class SimpleActor extends SimpleActorStream
     setActorStream(_sender.getActorStream());
   }
 
-  public SimpleActor(Broker broker)
+  public SimpleActor(String jid, Broker broker)
   {
-    setBroker(broker);
+    super(jid, broker);
     
     _sender = new SimpleActorClient(this, broker);
     

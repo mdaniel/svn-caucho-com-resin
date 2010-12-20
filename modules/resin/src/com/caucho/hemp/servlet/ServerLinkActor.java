@@ -35,70 +35,39 @@ import java.util.logging.Logger;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorException;
 import com.caucho.bam.Query;
-import com.caucho.bam.SimpleActor;
+import com.caucho.bam.SimpleActorStream;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.broker.ManagedBroker;
-import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
 import com.caucho.hmtp.AuthQuery;
 import com.caucho.hmtp.AuthResult;
 import com.caucho.hmtp.NonceQuery;
 
 /**
- * The LinkService is low-level link
+ * ServerLinkActor handles link messages, i.e. to=null, which is primarily
+ * authentication.
  */
 
-public class ServerLinkActor extends SimpleActor {
+public class ServerLinkActor extends SimpleActorStream
+{
   private static final Logger log
     = Logger.getLogger(ServerLinkActor.class.getName());
   
-  private final ManagedBroker _broker;
-  private final Broker _linkBroker;
-  private final ServerLinkStream _serverLinkStream;
-  private final ServerPassStream _serverPassStream;
-  private final Broker _proxyBroker;
+  private final ClientStubManager _clientManager;
+  
   private final ServerAuthManager _authManager;
   private final String _ipAddress;
   
-  /**
-   * Creates the LinkService for low-level link messages
-   */
-  public ServerLinkActor(Broker linkBroker,
-                         ManagedBroker broker,
+  private String _clientJid;
+  
+  public ServerLinkActor(Broker toLinkBroker,
+                         ClientStubManager clientManager,
                          ServerAuthManager authManager,
-                         String ipAddress,
-                         boolean isUnidir)
+                         String ipAddress)
   {
-    if (linkBroker == null)
-      throw new NullPointerException();
+    super(null, toLinkBroker);
     
-    _linkBroker = linkBroker;
-    
-    if (broker == null)
-      throw new NullPointerException();
-    
-    _broker = broker;
-    
-    setBroker(linkBroker);
-    
+    _clientManager = clientManager;
     _authManager = authManager;
     _ipAddress = ipAddress;
-   
-    if (isUnidir) {
-      _serverPassStream = new ServerPassStream(broker, linkBroker, this);
-      _proxyBroker = _serverPassStream;
-      _serverLinkStream = null;
-    }
-    else {
-      _serverPassStream = null;
-      _serverLinkStream = new ServerLinkStream(broker, linkBroker, this);
-      _proxyBroker = _serverLinkStream;
-    }
-  }
-  
-  public Broker getForwardBroker()
-  {
-    return _proxyBroker;
   }
 
   //
@@ -153,18 +122,17 @@ public class ServerLinkActor extends SimpleActor {
       log.log(Level.FINER, e.toString(), e);
     }
 
-    String jid
-      = _broker.createClient(getBroker(), uid, query.getResource());
-
-    if (_serverLinkStream != null)
-      _serverLinkStream.setJid(jid);
-    if (_serverPassStream != null)
-      _serverPassStream.setJid(jid);
+    _clientManager.login(uid, query.getResource());
     
     notifyValidLogin(from);
     
-    AuthResult result = new AuthResult(jid);
+    AuthResult result = new AuthResult(_clientManager.getJid());
     getBroker().queryResult(id, from, to, result);
+  }
+  
+  protected void onClose()
+  {
+    _clientManager.logout();
   }
   
   protected void notifyValidLogin(String jid)

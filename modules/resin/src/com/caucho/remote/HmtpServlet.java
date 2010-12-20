@@ -45,12 +45,15 @@ import javax.servlet.ServletResponse;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.broker.PassthroughBroker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.config.Admin;
 import com.caucho.hemp.broker.HempBroker;
+import com.caucho.hemp.servlet.ClientStubManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.hemp.servlet.ServerLinkActor;
+import com.caucho.hemp.servlet.ServerProxyBroker;
 import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWebSocketContextWriter;
 import com.caucho.hmtp.HmtpWriter;
@@ -190,11 +193,14 @@ public class HmtpServlet extends GenericServlet {
     {
       _in = new HmtpReader();
       _out = new HmtpWebSocketContextWriter(context);
+      
       ManagedBroker broker = getBroker();
-      _linkStream = new PassthroughBroker(new MultiworkerMailbox(_out.getJid(), _out, broker, 1));
-      _linkService = new ServerLinkActor(_linkStream, broker, _authManager,
-                                           _ipAddress, false);
-      _broker = _linkService.getForwardBroker();
+      Mailbox toLinkMailbox = new MultiworkerMailbox(_out.getJid(), _out, broker, 1);
+      
+      _linkStream = new PassthroughBroker(toLinkMailbox);
+      ClientStubManager clientManager = new ClientStubManager(broker, toLinkMailbox);
+      _linkService = new ServerLinkActor(_linkStream, clientManager, _authManager, _ipAddress);
+      _broker = new ServerProxyBroker(_linkStream, clientManager, _linkService);
     }
 
     @Override

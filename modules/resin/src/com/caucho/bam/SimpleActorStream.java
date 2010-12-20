@@ -66,11 +66,22 @@ public class SimpleActorStream implements ActorStream, Actor
 
   private String _jid;
   private Broker _broker;
- 
+  
   public SimpleActorStream()
   {
     _skeleton = createSkeleton();
     _fallback = createFallbackStream();
+  }
+  
+  public SimpleActorStream(String jid, Broker broker)
+  {
+    this();
+    
+    _jid = jid;
+    _broker = broker;
+    
+    if (_broker == null)
+      throw new NullPointerException();
   }
   
   protected BamSkeleton createSkeleton()

@@ -33,6 +33,8 @@ import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.mailbox.Mailbox;
+import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.query.QueryActorStreamFilter;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
@@ -83,8 +85,16 @@ public class SimpleActorClient implements ActorSender {
                            String resource)
   {
     this(next);
+    
+    Mailbox mailbox = new MultiworkerMailbox(next.getJid(),
+                                             next,
+                                             broker, 
+                                             1);
 
-    _jid = broker.createClient(_actorStream, uid, resource);
+    Mailbox clientMailbox
+      = broker.createClient(mailbox, uid, resource);
+    
+    _jid = clientMailbox.getJid(); 
   }
 
   /**

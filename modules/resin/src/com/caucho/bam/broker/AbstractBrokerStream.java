@@ -97,9 +97,10 @@ abstract public class AbstractBrokerStream implements ActorStream
     }
 
     String msg;
-    msg = (this + ": message to unknown actor to:" + to
-           + "\n  from:" + from
-           + "\n  payload:" + payload);
+    msg = (this + ": message to unknown actor"
+           + "\n  to: " + to
+           + "\n  from: " + from
+           + "\n  payload: " + payload);
     
     if (log.isLoggable(Level.FINER)) {
       log.finer(msg);
@@ -237,9 +238,12 @@ abstract public class AbstractBrokerStream implements ActorStream
     }
 
     String msg;
-    msg = (this + ": queryResult(" + id + ") to unknown actor to:" + to
-           + "\n  from:" + from
-           + "\n  payload:" + payload);
+    msg = (this + ": queryResult(qid=" + id + ") to unknown actor"
+          + "\n  to: " + to
+          + "\n  from: " + from
+          + "\n  payload: " + payload);
+    
+    Thread.dumpStack();
     
     if (log.isLoggable(Level.FINER)) {
       log.finer(msg);

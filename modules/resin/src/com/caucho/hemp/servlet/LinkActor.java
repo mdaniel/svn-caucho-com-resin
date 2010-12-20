@@ -27,47 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.broker;
+package com.caucho.hemp.servlet;
 
-import com.caucho.bam.actor.Agent;
-import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.mailbox.MailboxType;
 import com.caucho.bam.stream.ActorStream;
 
-
 /**
- * Broker is the hub which routes messages to mailboxes.
+ * ServerLinkActor handles link messages, i.e. to=null, which is primarily
+ * authentication.
  */
-public interface ManagedBroker extends Broker
-{
-  /**
-   * Adds a mailbox
-   */
-  public void addMailbox(Mailbox mailbox);
-  
-  /**
-   * Removes a mailbox
-   */
-  public void removeMailbox(Mailbox mailbox);
-  
-  /**
-   * Creates an agent
-   */
-  public Agent createAgent(ActorStream actorStream);
-    
-  /**
-   * Creates an agent
-   */
-  public Agent createAgent(ActorStream actorStream,
-                           MailboxType mailboxType);
 
+public interface LinkActor extends ActorStream {
   /**
-   * @param actorStream
-   * @param uid
-   * @param resource
-   * @return
+   * Returns the JID for a logged-in user.
    */
-  public Mailbox createClient(Mailbox next,
-                              String uid,
-                              String resource);
+  public String getClientJid();
 }

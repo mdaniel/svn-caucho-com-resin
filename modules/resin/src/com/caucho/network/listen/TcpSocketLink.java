@@ -624,6 +624,10 @@ public class TcpSocketLink extends AbstractSocketLink
       if (log.isLoggable(Level.FINE)) {
         log.log(Level.FINE, dbgId() + e, e);
       }
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINE)) {
+        log.log(Level.FINE, dbgId() + e, e);
+      }
     } finally {
       thread.setContextClassLoader(_loader);
 
@@ -1182,7 +1186,7 @@ public class TcpSocketLink extends AbstractSocketLink
     // detach any comet
     if (state.isComet() || state.isCometSuspend())
       getListener().cometDetach(this);
-
+    
     try {
       closeAsync();
     } catch (Throwable e) {

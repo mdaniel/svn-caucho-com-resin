@@ -65,7 +65,8 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  public MultiworkerMailbox(String jid, ActorStream actorStream,
+  public MultiworkerMailbox(String jid, 
+                            ActorStream actorStream,
                             Broker broker,
                             int threadMax)
   {

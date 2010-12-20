@@ -37,9 +37,13 @@ import java.util.logging.Logger;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.broker.PassthroughBroker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.cloud.bam.BamService;
+import com.caucho.hemp.servlet.ClientStubManager;
+import com.caucho.hemp.servlet.ServerProxyBroker;
+import com.caucho.hemp.servlet.ServerProxyPassBroker;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpWebSocketReader;
 import com.caucho.hmtp.HmtpWebSocketWriter;
@@ -75,7 +79,10 @@ public class HmtpRequest extends AbstractProtocolConnection
 
   private HmtpWebSocketReader _hmtpReader;
   private HmtpWebSocketWriter _hmtpWriter;
-  private Broker _linkStream;
+
+  private ClientStubManager _clientManager;
+  private Broker _toLinkBroker;
+  private Broker _proxyBroker;
   
   private HmtpLinkActor _linkActor;
 
@@ -172,13 +179,17 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     _hmtpWriter.setJid("hmtp-server-" + _conn.getId() + "-hmtp");
 
-    _linkStream = new PassthroughBroker(new MultiworkerMailbox(_hmtpWriter.getJid(), _hmtpWriter, broker, 1));
+    Mailbox toLinkMailbox = new MultiworkerMailbox(_hmtpWriter.getJid(), _hmtpWriter, broker, 1);
+    _toLinkBroker = new PassthroughBroker(toLinkMailbox);
+    
+    _clientManager = new ClientStubManager(broker, toLinkMailbox);
 
-    _linkActor = new HmtpLinkActor(_linkStream,
-                                   broker,
+    _linkActor = new HmtpLinkActor(_toLinkBroker,
+                                   _clientManager,
                                    _bamService.getLinkManager(),
-                                   _conn.getRemoteHost(),
-                                   isUnidir);
+                                   _conn.getRemoteHost());
+    
+    _proxyBroker = new ServerProxyPassBroker(broker, _clientManager, _linkActor);
 
     return dispatchHmtp();
   }
@@ -189,7 +200,7 @@ public class HmtpRequest extends AbstractProtocolConnection
     HmtpWebSocketReader in = _hmtpReader;
 
     do {
-      Broker broker = _linkActor.getForwardBroker();
+      Broker broker = _proxyBroker;
       
       if (! in.readPacket(broker)) {
         return false;
@@ -208,8 +219,8 @@ public class HmtpRequest extends AbstractProtocolConnection
     HmtpLinkActor linkActor = _linkActor;
     _linkActor = null;
 
-    ActorStream linkStream = _linkStream;
-    _linkStream = null;
+    ActorStream linkStream = _toLinkBroker;
+    _toLinkBroker = null;
 
     if (linkActor != null) {
       linkActor.onCloseConnection();

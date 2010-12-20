@@ -41,49 +41,34 @@ import com.caucho.bam.stream.ActorStream;
  * Handles the requests to the server from the link, dispatching requests to
  * the link service and the broker.
  */
-public class ServerLinkStream extends AbstractBroker {
+public class ServerProxyBroker extends AbstractBroker {
   private final Broker _broker;
-  
-  private final ActorStream _linkBroker; // string to the link
-  private final ActorStream _linkService;
-  
-  private boolean _isAuthenticated;
-  private String _jid;
+  private final ClientStubManager _clientManager;
+  private final ActorStream _linkActor;
 
-  public ServerLinkStream(Broker broker,
-                          Broker linkBroker,
-                          ActorStream linkService)
+  public ServerProxyBroker(Broker broker,
+                           ClientStubManager clientManager,
+                           ActorStream linkActor)
   {
     _broker = broker;
-    
-    _linkBroker = linkBroker;
-    _linkService = linkService;
+    _clientManager = clientManager;
+    _linkActor = linkActor;
   }
 
   @Override
   public String getJid()
   {
-    return _jid;
+    return null;
   }
   
-  public void setJid(String jid)
+  private boolean isActive()
   {
-    _jid = jid;
+    return _clientManager.isActive();
   }
   
-  public Broker getBroker()
+  public String getClientJid()
   {
-    return _broker;
-  }
-  
-  public ActorStream getLinkStream()
-  {
-    return _linkBroker;
-  }
-  
-  protected boolean isActive()
-  {
-    return true;
+    return _clientManager.getJid();
   }
 
   /**
@@ -95,10 +80,9 @@ public class ServerLinkStream extends AbstractBroker {
                       Serializable payload)
   {
     if (to == null)
-      _linkService.message(to, from, payload);
-    else if (isActive()) {
-      getBroker().message(to, _jid, payload);
-    }
+      _linkActor.message(to, from, payload);
+    else if (isActive())
+      _broker.message(to, getClientJid(), payload);
     else
       super.message(to, from, payload);
   }
@@ -111,11 +95,11 @@ public class ServerLinkStream extends AbstractBroker {
                            String from,
                            Serializable payload,
                            ActorError error)
-  {     
+  {
     if (to == null)
-      _linkService.messageError(to, from, payload, error);
+      _linkActor.messageError(to, from, payload, error);
     else if (isActive())
-      getBroker().messageError(to, _jid, payload, error);
+      _broker.messageError(to, getClientJid(), payload, error);
     else
       super.messageError(to, from, payload, error);
   }
@@ -123,7 +107,7 @@ public class ServerLinkStream extends AbstractBroker {
   /**
    * Handles a query.
    *
-   * The handler must respond with either
+   * The query handler must respond with either
    * a QueryResult or a QueryError
    */
   @Override
@@ -133,9 +117,9 @@ public class ServerLinkStream extends AbstractBroker {
                        Serializable payload)
   {
     if (to == null)
-      _linkService.query(id, to, from, payload);
+      _linkActor.query(id, to, from, payload);
     else if (isActive())
-      getBroker().query(id, to, _jid, payload);
+      _broker.query(id, to, getClientJid(), payload);
     else
       super.query(id, to, from, payload);
   }
@@ -152,9 +136,9 @@ public class ServerLinkStream extends AbstractBroker {
                           Serializable payload)
   {
     if (to == null)
-      _linkService.queryResult(id, to, from, payload);
+      _linkActor.queryResult(id, to, from, payload);
     else if (isActive())
-      getBroker().queryResult(id, to, _jid, payload);
+      _broker.queryResult(id, to, getClientJid(), payload);
     else
       super.queryResult(id, to, from, payload);
   }
@@ -166,15 +150,15 @@ public class ServerLinkStream extends AbstractBroker {
    */
   @Override
   public void queryError(long id,
-                         String to, 
+                         String to,
                          String from,
                          Serializable payload,
                          ActorError error)
   {
     if (to == null)
-      _linkService.queryError(id, to, from, payload, error);
+      _linkActor.queryError(id, to, from, payload, error);
     else if (isActive())
-      getBroker().queryError(id, to, _jid, payload, error);
+      _broker.queryError(id, to, getClientJid(), payload, error);
     else
       super.queryError(id, to, from, payload, error);
   }
@@ -182,17 +166,16 @@ public class ServerLinkStream extends AbstractBroker {
   @Override
   public boolean isClosed()
   {
-    return false; // _brokerStream == null;
+    return false;
   }
 
   public void close()
   {
-    // _brokerStream = null;
- }
+  }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "," + _linkService + "]";
+    return getClass().getSimpleName() + "[" + getJid() + "," + _linkActor + "]";
   }
 }
