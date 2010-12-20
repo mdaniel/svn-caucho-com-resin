@@ -89,4 +89,21 @@ public class UnDeployCommand extends AbstractRepositoryCommand
     System.out.println("Undeployed " + name + " from "
                        + deployClient.getUrl());
   }
+
+  @Override
+  public void usage()
+  {
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] undeploy -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("description:"));
+    System.err.println(L.l("   undeploys application specified in a <name>"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("options:"));
+    System.err.println(L.l("   -address <address>    : ip or host name of the server"));
+    System.err.println(L.l("   -port <port>          : server http port"));
+    System.err.println(L.l("   -host <host>          : virtual host to make application available on"));
+    System.err.println(L.l("   -stage <stage>        : stage to deploy application to, defaults to production"));
+    System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
+    System.err.println(L.l("   -m <message>          : commit message"));
+  }
 }

@@ -321,9 +321,13 @@ public class ResinBoot {
     
     BootCommand command = _commandMap.get(_args.getStartMode());
     
-    if (command != null) {
-      command.doCommand(_args, _client);
+    if (command != null && _args.isHelp()) {
+      command.usage();
       
+      return false;
+    } else if (command != null) {
+      command.doCommand(_args, _client);
+
       return false;
     }
     

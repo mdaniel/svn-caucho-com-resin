@@ -62,6 +62,7 @@ class WatchdogArgs
   private String _serverId = "";
   private int _watchdogPort;
   private boolean _isVerbose;
+  private boolean _isHelp;
   private StartMode _startMode;
   
   private ArrayList<String> _tailArgs = new ArrayList<String>();
@@ -259,6 +260,11 @@ class WatchdogArgs
     return null;
   }
 
+  public boolean isHelp()
+  {
+    return _isHelp;
+  }
+
   private void setLogLevel(String levelName)
   {
     Level level = Level.INFO;
@@ -367,6 +373,9 @@ class WatchdogArgs
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.CONFIG);
       }
+      else if ("help".equals(arg)) {
+        _isHelp = true;
+      }
       else if ("console".equals(arg)) {
         _startMode = StartMode.CONSOLE;
       }
@@ -424,6 +433,8 @@ class WatchdogArgs
       else if (_startMode != null) {
         _tailArgs.add(arg);
       }
+      else if (_isHelp) {
+      }
       else {
         System.out.println(L().l("unknown argument '{0}'", argv[i]));
         System.out.println();
@@ -432,7 +443,19 @@ class WatchdogArgs
       }
     }
 
-    if (_startMode == null) {
+    if (_isHelp && _startMode == null
+      || _startMode == StartMode.CONSOLE
+      || _startMode == StartMode.STATUS
+      || _startMode == StartMode.START
+      || _startMode == StartMode.GUI
+      || _startMode == StartMode.STOP
+      || _startMode == StartMode.RESTART
+      || _startMode == StartMode.KILL
+      || _startMode == StartMode.SHUTDOWN) {
+      usage();
+      System.exit(1);
+    }
+    else if (_startMode == null) {
       System.out.println(L().l("Resin requires a command:"
                                + "\n  console - start Resin in console mode"
                                + "\n  status - watchdog status"
@@ -441,7 +464,16 @@ class WatchdogArgs
                                + "\n  stop - stop a Resin server"
                                + "\n  restart - restart a Resin server"
                                + "\n  kill - force a kill of a Resin server"
-                               + "\n  shutdown - shutdown the watchdog"));
+                               + "\n  shutdown - shutdown the watchdog"
+                               + "\n  deploy - deploys an application"
+                               + "\n  undeploy - undeploys an application"
+                               + "\n  copy - copies an application"
+                               + "\n  list - lists all deployed applications"
+                               + "\n  start-webapp - starts an application"
+                               + "\n  stop-webapp - stops an application"
+                               + "\n  restart-webapp - restarts an application"
+                               + "\n  help <command> - prints command usage message"
+                               + "\n  version - prints version"));
       System.exit(1);
     }
 
@@ -461,7 +493,9 @@ class WatchdogArgs
 
   private static void usage()
   {
-    System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | gui | stop | restart | kill | shutdown]"));
+    System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
+    System.err.println(L().l("       java -jar resin.jar [-options] [deploy | undeploy | copy | list | start-webapp | stop-webapp | restart-webapp]"));
+    System.err.println(L().l("       java -jar resin.jar help <command>"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
     System.err.println(L().l("   -conf <file>          : select a configuration file"));

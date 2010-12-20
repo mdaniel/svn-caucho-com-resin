@@ -35,4 +35,8 @@ public class AbstractBootCommand implements BootCommand {
                         WatchdogClient client)
   {
   }
+
+  @Override
+  public void usage() {
+  }
 }

@@ -45,4 +45,22 @@ public class RestartWebAppCommand extends WebAppCommand
     else
       System.out.println(L.l("'{0}' failed to restart", tag));
   }
+
+  @Override
+  public void usage()
+  {
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] restart-webapp -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("description:"));
+    System.err.println(L.l("   restarts application context specified in a <name>"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("options:"));
+    System.err.println(L.l("   -address <address>    : ip or host name of the server"));
+    System.err.println(L.l("   -port <port>          : server http port"));
+    System.err.println(L.l("   -user <user>          : user name used for authentication to the server"));
+    System.err.println(L.l("   -password <password>  : password used for authentication to the server"));
+    System.err.println(L.l("   -host <host>          : virtual host to make application available on"));
+    System.err.println(L.l("   -stage <stage>        : name of the stage, for servers running in staging mode"));
+    System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
+  }
 }

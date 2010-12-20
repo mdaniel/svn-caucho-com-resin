@@ -106,4 +106,29 @@ public class CopyCommand extends AbstractRepositoryCommand {
 
     System.out.println("copied " + source.getId() + " to " + target.getId());
   }
+
+
+  @Override
+  public void usage()
+  {
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] copy -user <user> -password <password> [options]"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("description:"));
+    System.err.println(L.l("   copies a deployed application according to the given options"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("options:"));
+    System.err.println(L.l("   -address <address>               : ip or host name of the server"));
+    System.err.println(L.l("   -port <port>                     : server http port"));
+    System.err.println(L.l("   -user <user>                     : user name used for authentication to the server"));
+    System.err.println(L.l("   -password <password>             : password used for authentication to the server"));
+    System.err.println(L.l("   -source <source>                 : source context"));
+    System.err.println(L.l("   -source-host <source-host>       : source host"));
+    System.err.println(L.l("   -source-stage <source-stage>     : source stage"));
+    System.err.println(L.l("   -source-version <source-version> : source version"));
+    System.err.println(L.l("   -target <target>                 : target context"));
+    System.err.println(L.l("   -target-host <target-host>       : target host"));
+    System.err.println(L.l("   -target-stage <target-stage>     : target stage"));
+    System.err.println(L.l("   -target-version <target-version> : target version"));
+    System.err.println(L.l("   -m <message>          : commit message"));
+  }
 }
