@@ -193,7 +193,7 @@ public final class OwnerServerTriad
     // force the send.  Server must be active, but pool may have a failure
 
     server = _primary;
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
     
       if (pool != null && server != oldServer)
@@ -201,7 +201,7 @@ public final class OwnerServerTriad
     }
 
     server = _secondary;
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
     
       if (pool != null && server != oldServer)
@@ -209,7 +209,7 @@ public final class OwnerServerTriad
     }
 
     server = _tertiary;
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
     
       if (pool != null && server != oldServer)

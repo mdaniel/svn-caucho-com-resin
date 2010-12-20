@@ -421,7 +421,7 @@ abstract public class ClusterPod
 
     server = getPrimary(owner);
 
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
     
       if (pool != null && pool.isActive() && server != oldServer)
@@ -430,7 +430,7 @@ abstract public class ClusterPod
 
     server = getSecondary(owner);
 
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
     
       if (pool != null && pool.isActive() && server != oldServer)
@@ -439,7 +439,7 @@ abstract public class ClusterPod
 
     server = getTertiary(owner);
 
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
     
       if (pool != null && pool.isActive() && server != oldServer)
@@ -480,7 +480,7 @@ abstract public class ClusterPod
 
     server = getPrimary(owner);
 
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
 
       if (pool == null)
@@ -492,7 +492,7 @@ abstract public class ClusterPod
 
     server = getSecondary(owner);
 
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
 
       if (pool == null)
@@ -504,7 +504,7 @@ abstract public class ClusterPod
 
     server = getTertiary(owner);
 
-    if (server != null && server.isActive()) {
+    if (server != null && server.isHeartbeatActive()) {
       pool = server.getServerPool();
 
       if (pool == null)

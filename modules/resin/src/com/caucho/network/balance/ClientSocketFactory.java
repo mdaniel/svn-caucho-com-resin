@@ -108,6 +108,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   private volatile State _state = State.NEW;
 
   // server start/stop sequence for heartbeat/restarts
+  private volatile boolean _isHeartbeatActive;
   private final AtomicInteger _startSequenceId
     = new AtomicInteger();
 
@@ -190,6 +191,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Returns the user-readable id of the target server.
    */
+  @Override
   public String getId()
   {
     return _targetId;
@@ -198,6 +200,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Returns the debug id.
    */
+  @Override
   public String getDebugId()
   {
     return _debugId;
@@ -206,6 +209,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Returns the hostname of the target server.
    */
+  @Override
   public String getAddress()
   {
     return _address;
@@ -214,6 +218,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Gets the port of the target server.
    */
+  @Override
   public int getPort()
   {
     return _port;
@@ -510,14 +515,24 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Returns true if the server is active.
    */
+  @Override
   public final boolean isActive()
   {
     return _state.isLive();
+  }
+  
+  /**
+   * Returns true if the target server's heartbeat is active.
+   */
+  public final boolean isHeartbeatActive()
+  {
+    return _isHeartbeatActive;
   }
 
   /**
    * Returns true if the server is dead.
    */
+  @Override
   public boolean isDead()
   {
     return ! isActive();
@@ -526,6 +541,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Enable the client
    */
+  @Override
   public void enable()
   {
     start();
@@ -534,6 +550,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Disable the client
    */
+  @Override
   public void disable()
   {
     stop();
@@ -542,6 +559,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Returns the lifecycle state.
    */
+  @Override
   public String getState()
   {
     updateWarmup();
@@ -628,6 +646,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Return true if active.
    */
+  @Override
   public boolean isEnabled()
   {
     return _state.isEnabled();
@@ -727,6 +746,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Called when the server responds with "busy", e.g. HTTP 503
    */
+  @Override
   public void busy()
   {
     getRequestBusyProbe().start();
@@ -749,6 +769,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Called when the server has a successful response
    */
+  @Override
   public void success()
   {
     _currentFailCount = 0;
@@ -764,6 +785,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Enable the client.
    */
+  @Override
   public void start()
   {
     // State state = _state;
@@ -779,6 +801,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Disable the client.
    */
+  @Override
   public void stop()
   {
     _state = _state.toStandby();
@@ -791,6 +814,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Session only
    */
+  @Override
   public void enableSessionOnly()
   {
     _state = _state.toSessionOnly();
@@ -801,6 +825,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    *
    * @return the socket's read/write pair.
    */
+  @Override
   public ClientSocket openWarm()
   {
     State state = _state;
@@ -827,9 +852,10 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    *
    * @return the socket's read/write pair.
    */
+  @Override
   public ClientSocket openIfLive()
   {
-    if (_state == State.CLOSED) {
+    if (_state.isClosed()) {
       return null;
     }
 
@@ -846,6 +872,29 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       // if in fail state, only one thread should try to connect
       return null;
     }
+
+    return connect();
+  }
+
+  /**
+   * Open a stream if the target server's heartbeat is active.
+   *
+   * @return the socket's read/write pair.
+   */
+  public ClientSocket openIfHeartbeatActive()
+  {
+    if (_state.isClosed()) {
+      return null;
+    }
+    
+    if (! _isHeartbeatActive) {
+      return null;
+    }
+
+    ClientSocket stream = openRecycle();
+
+    if (stream != null)
+      return stream;
 
     return connect();
   }
@@ -885,6 +934,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    *
    * @return the socket's read/write pair.
    */
+  @Override
   public ClientSocket open()
   {
     State state = _state;
@@ -950,8 +1000,16 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   private ClientSocket connect()
   {
-    if (_maxConnections <= _activeCount.get() + _startingCount.get())
+    if (_maxConnections <= _activeCount.get() + _startingCount.get()) {
+      if (log.isLoggable(Level.WARNING)) {
+        log.warning(this + " connect exceeded max-connections"
+                    + "\n  max-connections=" + _maxConnections
+                    + "\n  activeCount=" + _activeCount.get()
+                    + "\n  startingCount=" + _startingCount.get());
+      }
+      
       return null;
+    }
 
     _startingCount.incrementAndGet();
 
@@ -1016,6 +1074,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    * We now know that the server is live, e.g. if a sibling has
    * contacted us.
    */
+  @Override
   public void wake()
   {
     synchronized (this) {
@@ -1138,10 +1197,12 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   }
 
   /**
-   * Notify that a start has occurred.
+   * Notify that a heartbeat start has occurred.
    */
-  public void notifyStart()
+  @Override
+  public void notifyHeartbeatStart()
   {
+    _isHeartbeatActive = true;
     // _startSequenceId.incrementAndGet();
 
     clearRecycle();
@@ -1149,10 +1210,12 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   }
 
   /**
-   * Notify that a stop has occurred.
+   * Notify that a heartbeat stop has occurred.
    */
-  public void notifyStop()
+  @Override
+  public void notifyHeartbeatStop()
   {
+    _isHeartbeatActive = false;
     _startSequenceId.incrementAndGet();
 
     clearRecycle();
@@ -1341,6 +1404,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       boolean isEnabled() { return false; }
       boolean isSessionEnabled() { return false; }
     },
+    
     STANDBY {
       boolean isEnabled() { return false; }
       boolean isSessionEnabled() { return false; }
@@ -1349,6 +1413,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       State toBusy() { return this; }
       State toSessionOnly() { return this; }
     },
+    
     SESSION_ONLY {
       boolean isEnabled() { return false; }
 
@@ -1383,6 +1448,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       boolean isClosed() { return true; }
       boolean isSessionEnabled() { return false; }
       boolean isEnabled() { return false; }
+      boolean isLive() { return false; }
 
       State toStart() { return this; }
       State toActive() { return this; }

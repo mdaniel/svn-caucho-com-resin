@@ -150,7 +150,7 @@ public class NetworkClusterService extends AbstractResinService
       if (cloudServer != null) {
         ClusterServer server = cloudServer.getData(ClusterServer.class);
       
-        if (server.isActive())
+        if (server.isHeartbeatActive())
           listener.serverStart(server);
       }
     }
@@ -161,14 +161,14 @@ public class NetworkClusterService extends AbstractResinService
     _serverListeners.remove(listener);
   }
 
-  protected void notifyServerStart(ClusterServer server)
+  protected void notifyHeartbeatStart(ClusterServer server)
   {
     for (ClusterServerListener listener : _serverListeners) {
       listener.serverStart(server);
     }
   }
 
-  protected void notifyServerStop(ClusterServer server)
+  protected void notifyHeartbeatStop(ClusterServer server)
   {
     for (ClusterServerListener listener : _serverListeners) {
       listener.serverStop(server);
@@ -207,7 +207,7 @@ public class NetworkClusterService extends AbstractResinService
     
     ClusterServer selfServer = _selfServer.getData(ClusterServer.class);
     
-    selfServer.notifyStart();
+    selfServer.notifyHeartbeatStart();
 
     CloudSystem cloudSystem = TopologyService.getCurrent().getSystem();
     

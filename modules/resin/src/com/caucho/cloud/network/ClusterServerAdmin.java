@@ -217,7 +217,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   @Override
   public boolean isHeartbeatActive()
   {
-    return _server.isActive();
+    return _server.isHeartbeatActive();
   }
   
   @Override

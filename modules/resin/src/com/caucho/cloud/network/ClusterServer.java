@@ -107,7 +107,7 @@ public final class ClusterServer {
 
   private ClientSocketFactory _serverPool;
 
-  private AtomicBoolean _isActive = new AtomicBoolean();
+  private AtomicBoolean _isHeartbeatActive = new AtomicBoolean();
   private AtomicLong _stateTimestamp = new AtomicLong();
   private AtomicLong _lastHeartbeatTime = new AtomicLong();
 
@@ -142,7 +142,7 @@ public final class ClusterServer {
     
     // XXX: active isn't quite right here
     if (cloudServer.getPod() != networkService.getSelfServer().getPod())
-      _isActive.set(true);
+      _isHeartbeatActive.set(true);
 
     StringBuilder sb = new StringBuilder();
 
@@ -690,9 +690,9 @@ public final class ClusterServer {
   /**
    * Test if the server is active, i.e. has received an active message.
    */
-  public boolean isActive()
+  public boolean isHeartbeatActive()
   {
-    return _isActive.get();
+    return _isHeartbeatActive.get();
   }
 
   /**
@@ -711,13 +711,13 @@ public final class ClusterServer {
   /**
    * Notify that a start event has been received.
    */
-  public boolean notifyStart()
+  public boolean notifyHeartbeatStart()
   {
     long now = Alarm.getCurrentTime();
     
     _lastHeartbeatTime.set(now);
 
-    boolean isActive = _isActive.getAndSet(true);
+    boolean isActive = _isHeartbeatActive.getAndSet(true);
     
     if (isActive)
       return false;
@@ -725,12 +725,12 @@ public final class ClusterServer {
     _stateTimestamp.set(now);
 
     if (_serverPool != null)
-      _serverPool.notifyStart();
+      _serverPool.notifyHeartbeatStart();
 
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " notify-start");
+      log.finer(this + " notify-heartbeat-start");
 
-    _clusterService.notifyServerStart(this);
+    _clusterService.notifyHeartbeatStart(this);
 
     return true;
   }
@@ -738,24 +738,23 @@ public final class ClusterServer {
   /**
    * Notify that a stop event has been received.
    */
-  public boolean notifyStop()
+  public boolean notifyHeartbeatStop()
   {
     _lastHeartbeatTime.set(0);
     
-    boolean isActive = _isActive.getAndSet(false);
+    boolean isActive = _isHeartbeatActive.getAndSet(false);
     
     if (! isActive)
       return false;
     
     _stateTimestamp.set(Alarm.getCurrentTime());
 
+    log.warning(this + " notify-heartbeat-stop");
+
     if (_serverPool != null)
-      _serverPool.notifyStop();
+      _serverPool.notifyHeartbeatStop();
 
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " notify-stop");
-
-    _clusterService.notifyServerStop(this);
+    _clusterService.notifyHeartbeatStop(this);
 
     return true;
   }
@@ -765,11 +764,11 @@ public final class ClusterServer {
    */
   public void stopServer()
   {
-    _isActive.set(false);
+    _isHeartbeatActive.set(false);
     _stateTimestamp.set(Alarm.getCurrentTime());
 
     if (_serverPool != null)
-      _serverPool.notifyStop();
+      _serverPool.notifyHeartbeatStop();
   }
 
   /**
