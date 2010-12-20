@@ -37,8 +37,9 @@ import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
-import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorSender;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
@@ -52,7 +53,7 @@ import com.caucho.vfs.WriteStream;
  * Protocol handler from the TCP/XMPP stream forwarding to the broker
  */
 @Module
-public class XmppBrokerStream
+public class XmppBrokerStream extends AbstractBroker
   implements SocketLinkDuplexListener, Broker
 {
   private static final Logger log
@@ -63,7 +64,7 @@ public class XmppBrokerStream
   private XmppContext _xmppContext;
   
   private Broker _broker;
-  private ActorClient _conn;
+  private ActorSender _conn;
   private ActorStream _toBroker;
 
   private ActorStream _toClient;

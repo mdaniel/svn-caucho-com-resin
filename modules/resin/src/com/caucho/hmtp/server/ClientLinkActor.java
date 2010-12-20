@@ -96,7 +96,7 @@ class ClientLinkActor implements Actor, ActorStream
   {
     _broker = broker;
   }
-
+  
   @Override
   public boolean isClosed()
   {

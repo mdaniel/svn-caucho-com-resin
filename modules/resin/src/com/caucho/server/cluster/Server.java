@@ -38,11 +38,12 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.VersionFactory;
-import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorSender;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.NullActorStream;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterService;
@@ -407,9 +408,11 @@ public class Server
   /**
    * Creates a bam client to the admin.
    */
-  public ActorClient createAdminClient(String uid)
+  public ActorSender createAdminClient(String uid)
   {
-    return new SimpleActorClient(getAdminBroker(), uid, null);
+    NullActorStream stream = new NullActorStream(uid, getAdminBroker());
+    
+    return new SimpleActorClient(stream, getAdminBroker(), uid, null);
   }
 
   /**

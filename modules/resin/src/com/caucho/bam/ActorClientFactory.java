@@ -41,5 +41,5 @@ public interface ActorClientFactory
    * resource is already in use or the resource is missing, the
    * factory will create a new unique name.
    */
-  public ActorClient createClient(String uid, String resource);
+  public ActorSender createClient(String uid, String resource);
 }

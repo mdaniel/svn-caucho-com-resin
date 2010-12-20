@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorSender;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
@@ -74,7 +74,7 @@ public class DeployClient implements Repository
   private static final long DEPLOY_TIMEOUT = 600 * 1000L;
 
   private Broker _broker;
-  private ActorClient _bamClient;
+  private ActorSender _bamClient;
   private String _deployJid;
   
   private String _url;

@@ -55,7 +55,7 @@ public class WatchdogActor extends SimpleActor
   
   public Serializable query(Serializable payload)
   {
-    return getLinkClient().query("resin@admin.resin.caucho", payload);
+    return getSender().query("resin@admin.resin.caucho", payload);
   }
 
   public void sendShutdown()

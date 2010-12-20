@@ -111,11 +111,6 @@ public class SimpleActorStream implements ActorStream, Actor
     return _broker;
   }
 
-  /**
-   * Returns the stream to the broker for query results or errors, or
-   * low-level messaging.
-   */
-  @Override
   public void setBroker(Broker broker)
   {
     _broker = broker;

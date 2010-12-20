@@ -33,6 +33,7 @@ package com.caucho.bam.query;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -60,6 +61,12 @@ public class QueryActorStreamFilter implements ActorStream {
   public boolean isClosed()
   {
     return _next.isClosed();
+  }
+  
+  @Override
+  public Broker getBroker()
+  {
+    return _next.getBroker();
   }
   
   @Override

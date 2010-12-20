@@ -32,6 +32,7 @@ package com.caucho.bam.stream;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 
 /**
  * Primary {@link com.caucho.bam.Actor} stream handling all packets.
@@ -57,6 +58,11 @@ public interface ActorStream
    * Tests if the stream is closed.
    */
   public boolean isClosed();
+  
+  /**
+   * Returns the owning broker
+   */
+  public Broker getBroker();
   
   //
   // messages

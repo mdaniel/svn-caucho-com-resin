@@ -33,6 +33,7 @@ import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.query.QueryActorStreamFilter;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
 import com.caucho.bam.query.QueryManager;
@@ -56,19 +57,20 @@ public class SimpleActorProxy implements ActorProxy {
 
   private long _timeout = 10000L;
 
-  protected SimpleActorProxy(String toJid)
+  protected SimpleActorProxy(String toJid, ActorStream next)
   {
     _toJid = toJid;
 
-    _actorStream = new QueryFilterStream();
+    _actorStream = new QueryActorStreamFilter(next, _queryManager);
   }
 
-  public SimpleActorProxy(ManagedBroker broker,
+  public SimpleActorProxy(ActorStream next,
+                          ManagedBroker broker,
                           String toJid,
                           String uid,
                           String resource)
   {
-    this(toJid);
+    this(toJid, next);
 
     _linkStream = broker;
     _jid = broker.createClient(_actorStream, uid, resource);
@@ -280,46 +282,5 @@ public class SimpleActorProxy implements ActorProxy {
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getJid() + ",to=" + getTo() + "]";
-  }
-
-  final class QueryFilterStream extends AbstractActorStreamFilter {
-    @Override
-    protected ActorStream getNext()
-    {
-      ActorStream clientStream = getClientStream();
-
-      if (clientStream == null) {
-        clientStream = new SimpleActorStream();
-      }
-
-      return clientStream;
-    }
-
-    @Override
-    public void queryResult(long id,
-                            String to,
-                            String from,
-                            Serializable payload)
-    {
-      if (_queryManager.onQueryResult(id, to, from, payload)) {
-        return;
-      }
-
-      super.queryResult(id, to, from, payload);
-    }
-
-    @Override
-    public void queryError(long id,
-                           String to,
-                           String from,
-                           Serializable payload,
-                           ActorError error)
-    {
-      if (_queryManager.onQueryError(id, to, from, payload, error)) {
-        return;
-      }
-
-      super.queryError(id, to, from, payload, error);
-    }
   }
 }

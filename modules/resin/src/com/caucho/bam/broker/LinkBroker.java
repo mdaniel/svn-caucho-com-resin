@@ -33,20 +33,15 @@ import com.caucho.bam.mailbox.Mailbox;
 
 
 /**
- * Broker is the hub which routes messages to actors.
+ * Client/Server Broker from the perspective of the client, i.e. the
+ * broker message methods send to the server.
+ * 
+ * Messages from the server will use getClientMailbox directly. 
  */
-public class PassthroughBroker extends AbstractBroker 
+public interface LinkBroker extends Broker
 {
-  private Mailbox _mailbox;
-  
-  public PassthroughBroker(Mailbox mailbox)
-  {
-    _mailbox = mailbox;
-  }
-  
-  @Override
-  public Mailbox getMailbox(String jid)
-  {
-    return _mailbox;
-  }
+  /**
+   * Returns the mailbox to the client.
+   */
+  public Mailbox getClientMailbox();
 }

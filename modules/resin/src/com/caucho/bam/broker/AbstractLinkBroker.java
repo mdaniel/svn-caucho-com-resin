@@ -29,24 +29,11 @@
 
 package com.caucho.bam.broker;
 
-import com.caucho.bam.mailbox.Mailbox;
-
-
 /**
  * Broker is the hub which routes messages to actors.
  */
-public class PassthroughBroker extends AbstractBroker 
+abstract public class AbstractLinkBroker 
+  extends AbstractBroker
+  implements LinkBroker
 {
-  private Mailbox _mailbox;
-  
-  public PassthroughBroker(Mailbox mailbox)
-  {
-    _mailbox = mailbox;
-  }
-  
-  @Override
-  public Mailbox getMailbox(String jid)
-  {
-    return _mailbox;
-  }
 }

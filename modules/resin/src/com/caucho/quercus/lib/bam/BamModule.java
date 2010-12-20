@@ -34,10 +34,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorSender;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.NullActorStream;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.quercus.annotation.ClassImplementation;
@@ -83,10 +84,10 @@ public class BamModule extends AbstractQuercusModule
     return null;
   }
 
-  private static ActorClient getActorClient(Env env)
+  private static ActorSender getActorClient(Env env)
   {
-    ActorClient connection
-      = (ActorClient) env.getSpecialValue("_quercus_bam_connection");
+    ActorSender connection
+      = (ActorSender) env.getSpecialValue("_quercus_bam_connection");
 
     // create a connection lazily
     if (connection == null) {
@@ -97,8 +98,10 @@ public class BamModule extends AbstractQuercusModule
 
       if (resource.indexOf('/') == 0)
         resource = resource.substring(1);
+      
+      NullActorStream stream = new NullActorStream(jid, broker);
 
-      connection = new SimpleActorClient(broker, jid, resource);
+      connection = new SimpleActorClient(stream, broker, jid, resource);
       env.addCleanup(new BamConnectionResource(connection));
       env.setSpecialValue("_quercus_bam_connection", connection);
     }
@@ -123,7 +126,7 @@ public class BamModule extends AbstractQuercusModule
     if (actor != null)
       return actor.getBroker();
 
-    ActorClient connection = getActorClient(env);
+    ActorSender connection = getActorClient(env);
 
     return connection.getBroker();
   }
@@ -135,7 +138,7 @@ public class BamModule extends AbstractQuercusModule
     if (actor != null)
       return actor.getJid();
 
-    ActorClient connection = getActorClient(env);
+    ActorSender connection = getActorClient(env);
 
     return connection.getJid();
   }

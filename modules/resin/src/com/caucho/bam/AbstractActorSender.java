@@ -33,60 +33,59 @@ import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.query.QueryCallback;
-import com.caucho.bam.query.QuerySender;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.query.QueryFuture;
+import com.caucho.bam.query.QueryManager;
 
 /**
- * ActorClient is a convenience API for sending messages to other Actors,
- * which always using the actor's JID as the "from" parameter.
+ * ActorSender is a convenience API for sending messages to other Actors,
+ * which always using the actor's JID as the "from" parameter and manages
+ * query ids.
  */
-public interface ActorClient extends Actor, QuerySender {
-  /**
-   * Returns the Actor's jid used for all "from" parameters.
-   */
-  @Override
-  public String getJid();
-
+abstract public class AbstractActorSender implements ActorSender {
+  private QueryManager _queryManager = new QueryManager();
+  private long _timeout = 120000;
+  
   //
   // lifecycle
   //
 
   /**
-   * Returns true if the client is closed
+   * Returns true if the sender is closed
    */
-  public boolean isClosed();
+  @Override
+  public boolean isClosed()
+  {
+    return false;
+  }
 
   /**
-   * Closes the client
+   * Closes the sender.
    */
-  public void close();
-
-  //
-  // handlers
-  //
-
-  /**
-   * Registers a callback {@link com.caucho.bam.stream.ActorStream} with the client
-   */
-  public void setClientStream(ActorStream clientStream);
+  @Override
+  public void close()
+  {
+  }
 
   /**
-   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
+   * The underlying broker.
    */
-  public ActorStream getClientStream();
+  abstract public Broker getBroker();
   
-  /**
-   * Returns the stream to this client.
-   */
-  @Override
-  public ActorStream getActorStream();
+  protected QueryManager getQueryManager()
+  {
+    return _queryManager;
+  }
 
-  /**
-   * The ActorStream to the link.
-   */
-  @Override
-  public Broker getBroker();
-
+  public long getTimeout()
+  {
+    return _timeout;
+  }
+  
+  public void setTimeout(long timeout)
+  {
+    _timeout = timeout;
+  }
+  
   //
   // message handling
   //
@@ -98,7 +97,11 @@ public interface ActorClient extends Actor, QuerySender {
    * @param to the target actor's JID
    * @param payload the message payload
    */
-  public void message(String to, Serializable payload);
+  @Override
+  public void message(String to, Serializable payload)
+  {
+    getBroker().message(to, getJid(), payload);
+  }
 
   //
   // query handling
@@ -107,7 +110,11 @@ public interface ActorClient extends Actor, QuerySender {
   /**
    * Returns the next query identifier.
    */
-  public long nextQueryId();
+  @Override
+  public long nextQueryId()
+  {
+    return getQueryManager().nextQueryId();
+  }
   
   /**
    * Sends a query information call (get) to an actor,
@@ -124,8 +131,12 @@ public interface ActorClient extends Actor, QuerySender {
    * @param to the target actor's JID
    * @param payload the query payload
    */
+  @Override
   public Serializable query(String to,
-                            Serializable payload);
+                            Serializable payload)
+  {
+    return query(to, payload, getTimeout());
+    }
 
   /**
    * Sends a query information call to an actor,
@@ -143,9 +154,41 @@ public interface ActorClient extends Actor, QuerySender {
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
+  @Override
   public Serializable query(String to,
                             Serializable payload,
-                            long timeout);
+                            long timeout)
+  {
+    return queryFuture(to, payload, timeout).get();
+  }
+
+  /**
+   * Sends a query information call to an actor,
+   * blocking until the actor responds with a result or an error.
+   *
+   * The target actor of a <code>query</code> acts as a service and the
+   * caller acts as a client.  Because BAM Actors are symmetrical, all
+   * Actors can act as services and clients for different RPC calls.
+   *
+   * The target actor MUST send a <code>queryResult</code> or
+   * <code>queryError</code> to the client using the same <code>id</code>,
+   * because RPC clients rely on a response.
+   *
+   * @param to the target actor's JID
+   * @param payload the query payload
+   * @param timeout time spent waiting for the query to return
+   */
+  public QueryFuture queryFuture(String to,
+                                 Serializable payload,
+                                 long timeout)
+  {
+    long qId = getQueryManager().nextQueryId();
+    
+    QueryFuture future
+      = getQueryManager().addQueryFuture(qId, to, getJid(), payload, timeout);
+    
+    return future;
+  }
 
   /**
    * Sends a query information call (get) to an actor,
@@ -165,5 +208,10 @@ public interface ActorClient extends Actor, QuerySender {
    */
   public void query(String to,
                     Serializable payload,
-                    QueryCallback callback);
+                    QueryCallback callback)
+  {
+    long qId = getQueryManager().nextQueryId();
+    
+    getQueryManager().addQueryCallback(qId, callback); // getTimeout());
+  }
 }

@@ -40,16 +40,22 @@ public class SimpleActor extends SimpleActorStream
 {
   private ActorStream _actorStream;
   
-  private final SimpleActorClient _linkClient;
+  private final SimpleActorClient _sender;
 
   public SimpleActor()
   {
-    setActorStream(this);
+    _sender = new SimpleActorClient(this);
     
-    _linkClient = new SimpleActorClient();
-    _linkClient.setClientStream(this);
+    setActorStream(_sender.getActorStream());
+  }
+
+  public SimpleActor(Broker broker)
+  {
+    setBroker(broker);
     
-    setActorStream(_linkClient.getActorStream());
+    _sender = new SimpleActorClient(this, broker);
+    
+    setActorStream(_sender.getActorStream());
   }
   
   //
@@ -86,27 +92,13 @@ public class SimpleActor extends SimpleActorStream
   public void setJid(String jid)
   {
     super.setJid(jid);
-    _linkClient.setJid(jid);
   }
 
   /**
    * Returns the ActorClient to the link for convenient message calls.
    */
-  public ActorClient getLinkClient()
+  public ActorSender getSender()
   {
-    return _linkClient;
-  }
-  
-
-  /**
-   * Returns the stream to the broker for query results or errors, or
-   * low-level messaging.
-   */
-  @Override
-  public void setBroker(Broker broker)
-  {
-    super.setBroker(broker);
-    
-    _linkClient.setBroker(broker);
+    return _sender;
   }
 }

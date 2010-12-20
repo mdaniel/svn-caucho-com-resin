@@ -49,7 +49,16 @@ abstract public class AbstractBroker
   }
   
   /**
-   * Returns the stream to the broker itself
+   * The broker returns itself for the broker.
+   */
+  @Override
+  public Broker getBroker()
+  {
+    return this;
+  }
+  
+  /**
+   * Returns a mailbox to the broker itself
    */
   @Override
   public Mailbox getBrokerMailbox()

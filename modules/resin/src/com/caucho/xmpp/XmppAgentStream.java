@@ -35,13 +35,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.vfs.WriteStream;
 
 /**
  * Handles callbacks for a xmpp service
  */
-public class XmppAgentStream implements ActorStream
+public class XmppAgentStream extends AbstractActorStream
 {
   private static final Logger log
     = Logger.getLogger(XmppAgentStream.class.getName());

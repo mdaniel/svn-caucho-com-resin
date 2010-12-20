@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.bam;
 
-import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorSender;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.util.L10N;
 
@@ -47,14 +47,14 @@ public class BamConnectionResource
 
   private static final L10N L = new L10N(BamConnectionResource.class);
 
-  private ActorClient _connection;
+  private ActorSender _connection;
 
-  public BamConnectionResource(ActorClient connection)
+  public BamConnectionResource(ActorSender connection)
   {
     _connection = connection;
   }
 
-  public ActorClient getConnection()
+  public ActorSender getConnection()
   {
     return _connection;
   }

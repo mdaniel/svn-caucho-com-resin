@@ -63,6 +63,7 @@ abstract public class AbstractActorStream implements ActorStream
   /**
    * Returns the stream to the broker.
    */
+  @Override
   public Broker getBroker()
   {
     throw new UnsupportedOperationException(getClass().getName());

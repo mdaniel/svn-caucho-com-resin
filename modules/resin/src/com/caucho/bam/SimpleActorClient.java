@@ -33,6 +33,7 @@ import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.query.QueryActorStreamFilter;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
 import com.caucho.bam.query.QueryManager;
@@ -44,29 +45,45 @@ import com.caucho.bam.stream.NullActorStream;
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's JID as the "from" parameter.
  */
-public class SimpleActorClient implements ActorClient {
+public class SimpleActorClient implements ActorSender {
+  private final Broker _broker;
   private String _jid;
 
-  private ActorStream _actorStream;
-  private Broker _broker;
-  private ActorStream _clientStream;
+  private final ActorStream _actorStream;
 
   private final QueryManager _queryManager = new QueryManager();
 
   private long _timeout = 120000L;
 
-  public SimpleActorClient()
+  public SimpleActorClient(String jid, Broker broker)
   {
-    _actorStream = new QueryFilterStream();
+    this(new NullActorStream(jid, broker));
+  }
+
+  public SimpleActorClient(ActorStream next)
+  {
+    this(next, next.getBroker());
+  }
+
+  public SimpleActorClient(ActorStream next, Broker broker)
+  {
+    _broker = broker;
+    
+    if (broker == null)
+      throw new NullPointerException();
+    
+    _actorStream = new QueryActorStreamFilter(next, _queryManager);
+    
+    _jid = _actorStream.getJid();
   }
   
-  public SimpleActorClient(ManagedBroker broker, 
+  public SimpleActorClient(ActorStream next,
+                           ManagedBroker broker,
                            String uid, 
                            String resource)
   {
-    this();
-    
-    _broker = broker;
+    this(next);
+
     _jid = broker.createClient(_actorStream, uid, resource);
   }
 
@@ -78,56 +95,16 @@ public class SimpleActorClient implements ActorClient {
   {
     return _jid;
   }
-  
-  @Override
-  public void setJid(String jid)
-  {
-    _jid = jid;
-  }
 
   //
   // streams
   //
 
-  /**
-   * Registers a callback {@link com.caucho.bam.stream.ActorStream} with the client
-   */
-  @Override
-  public void setClientStream(ActorStream clientStream)
-  {
-    if (clientStream == _actorStream)
-      throw new IllegalArgumentException(String.valueOf(clientStream));
-    
-    _clientStream = clientStream;
-  }
-
-  /**
-   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
-   */
-  @Override
-  public ActorStream getClientStream()
-  {
-    return _clientStream;
-  }
-
-  /**
-   * Sets the stream to the client
-   */
-  @Override
-  public void setActorStream(ActorStream actorStream)
-  {
-    _actorStream = actorStream;
-  }
-
-  /**
-   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
-   */
-  @Override
   public ActorStream getActorStream()
   {
     return _actorStream;
+    
   }
-
   /**
    * The underlying, low-level stream to the link
    */
@@ -142,12 +119,6 @@ public class SimpleActorClient implements ActorClient {
     return (ManagedBroker) getBroker();
   }
   
-  @Override
-  public void setBroker(Broker broker)
-  {
-    _broker = broker;
-  }
-
   //
   // message handling
   //
@@ -303,48 +274,5 @@ public class SimpleActorClient implements ActorClient {
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getJid() + "]";
-  }
-  
-  final class QueryFilterStream
-    extends AbstractActorStreamFilter {
-    @Override
-    protected ActorStream getNext()
-    {
-      ActorStream clientStream = getClientStream();
-      
-      if (clientStream == null) {
-        NullActorStream nullStream = new NullActorStream("null", getBroker());
-        clientStream = nullStream;
-      }
-      
-      return clientStream;
-    }
-
-    @Override
-    public void queryResult(long id,
-                            String to,
-                            String from,
-                            Serializable payload)
-    {
-      if (_queryManager.onQueryResult(id, to, from, payload)) {
-        return;
-      }
-      
-      super.queryResult(id, to, from, payload);
-    }
-
-    @Override
-    public void queryError(long id,
-                           String to,
-                           String from,
-                           Serializable payload,
-                           ActorError error)
-    {
-      if (_queryManager.onQueryError(id, to, from, payload, error)) {
-        return;
-      }
-      
-      super.queryError(id, to, from, payload, error);
-    }
   }
 }

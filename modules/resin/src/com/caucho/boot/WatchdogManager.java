@@ -252,17 +252,16 @@ class WatchdogManager implements AlarmListener {
       adminService.setAuthenticationRequired(false);
       adminService.init();
 
+      HempBroker broker = HempBroker.getCurrent();
+      
       WatchdogService service
         = new WatchdogService(this, "watchdog@admin.resin.caucho");
 
-      HempBroker broker = HempBroker.getCurrent();
 
       /*
       broker.setAdmin(true);
       broker.setAllowNullAdminAuthenticator(true);
       */
-
-      service.setBroker(broker);
 
       broker.createAgent(service);
 

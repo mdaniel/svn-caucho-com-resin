@@ -34,10 +34,13 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.AbstractActorSender;
 import com.caucho.bam.Actor;
 import com.caucho.bam.ActorException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.SimpleActorClient;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.remote.websocket.WebSocketClient;
 import com.caucho.util.Alarm;
@@ -47,23 +50,25 @@ import com.caucho.websocket.WebSocketListener;
 /**
  * HMTP client protocol
  */
-public class HmtpClient extends SimpleActorClient {
+public class HmtpClient extends AbstractActorSender {
   private static final L10N L = new L10N(HmtpClient.class);
   
   private static final Logger log
     = Logger.getLogger(HmtpClient.class.getName());
-
+  
   private String _url;
   private String _jid;
 
+  private ActorStream _actor;
+  
   private WebSocketClient _webSocketClient;
   
   private WebSocketListener _webSocketHandler;
   
-  private Actor _actor;
-
   private ActorException _connException;
 
+  private Broker _linkBroker;
+  
   private ClientAuthManager _authManager = new ClientAuthManager();
 
   public HmtpClient()
@@ -71,14 +76,12 @@ public class HmtpClient extends SimpleActorClient {
     _webSocketClient = new WebSocketClient();
   }
   
-  public HmtpClient(String url, Actor actor)
+  public HmtpClient(String url, ActorStream actor)
     throws IOException
   {
     this();
     
     _url = url;
-    
-    setActor(actor);
     
     _webSocketClient.setUrl(url);
     
@@ -92,8 +95,6 @@ public class HmtpClient extends SimpleActorClient {
     
     _url = url;
     
-    setActor(this);
-    
     _webSocketClient.setUrl(url);
     
     connectImpl();
@@ -105,8 +106,6 @@ public class HmtpClient extends SimpleActorClient {
     this();
     
     _url = url;
-    
-    setActor(this);
     
     _webSocketClient.setUrl(url);
     
@@ -135,6 +134,11 @@ public class HmtpClient extends SimpleActorClient {
   public void setEncryptPassword(boolean isEncrypt)
   {
   }
+  
+  public Broker getBroker()
+  {
+    return _linkBroker;
+  }
 
   public void connect(String user, String password)
   {
@@ -152,9 +156,6 @@ public class HmtpClient extends SimpleActorClient {
 
   protected void connectImpl()
   {
-    if (_actor == null)
-      setActor(this);
-    
     try {
       _webSocketClient.connect();
     } catch (ActorException e) {
@@ -280,7 +281,7 @@ public class HmtpClient extends SimpleActorClient {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _actor + "," + _url + "]";
+    return getClass().getSimpleName() + "[" + _url + "," + _actor + "]";
   }
 
   @Override

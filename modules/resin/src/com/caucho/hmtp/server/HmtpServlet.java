@@ -143,7 +143,6 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
 
   public void addClientLinkActor(Actor linkActor)
   {
-    linkActor.setBroker(_broker);
     _broker.createAgent(linkActor.getActorStream());
   }  
 
@@ -184,10 +183,9 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
     return _broker;
   }
   
-  @Override
   public void setBroker(Broker broker)
   {
-//    _servletBroker = (ManagedBroker) broker;
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   protected ActorStream getFallbackStream()

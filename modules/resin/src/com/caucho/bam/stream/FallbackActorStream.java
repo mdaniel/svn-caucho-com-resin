@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.Actor;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 
 /**
  * Base ActorStream implementation using introspection and
@@ -83,7 +84,8 @@ public class FallbackActorStream implements ActorStream
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
    */
-  public ActorStream getLinkStream()
+  @Override
+  public Broker getBroker()
   {
     return _actor.getBroker();
   }
@@ -137,7 +139,7 @@ public class FallbackActorStream implements ActorStream
                                       ActorError.FEATURE_NOT_IMPLEMENTED,
                                       msg);
 
-    getLinkStream().queryError(id, from, to, payload, error);
+    getBroker().queryError(id, from, to, payload, error);
   }
   
   /**
