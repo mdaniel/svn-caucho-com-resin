@@ -45,7 +45,8 @@ public class LockService extends AbstractResinService
     _lockManager = lockManager;
   }
   
-  public static LockService createAndAddService(AbstractLockManager lockManager)
+  public static LockService 
+    createAndAddService(AbstractLockManager lockManager)
   {
     ResinSystem system = preCreate(LockService.class);
     

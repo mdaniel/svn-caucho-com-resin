@@ -79,7 +79,8 @@ public class NetworkListenService extends AbstractResinService
     configure(_cloudServer, config);
   }
   
-  public static NetworkListenService createAndAddService(CloudServer cloudServer)
+  public static NetworkListenService 
+    createAndAddService(CloudServer cloudServer)
   {
     ResinSystem system = preCreate(NetworkListenService.class);
     

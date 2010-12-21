@@ -47,15 +47,14 @@ public class WarningService extends AbstractResinService
     Logger.getLogger(WarningService.class.getName());
   private static final L10N L = new L10N(WarningService.class);
 
-  private final CopyOnWriteArrayList<WarningHandler> _highPriorityHandlerList = 
+  private final CopyOnWriteArrayList<WarningHandler> _highPriorityHandlers = 
     new CopyOnWriteArrayList<WarningHandler>();
   
-  private final CopyOnWriteArrayList<WarningHandler> _handlerList = 
+  private final CopyOnWriteArrayList<WarningHandler> _handlers = 
     new CopyOnWriteArrayList<WarningHandler>();
 
   public WarningService()
   {
-    
   }
   
   public static WarningService createAndAddService()
@@ -74,42 +73,43 @@ public class WarningService extends AbstractResinService
   }
   
   /**
-   * Send a warning message to any registered handlers.  A high priority warning 
-   * only goes to all handlers, high priority first.  High priority handlers
-   * do not receive non-high priority warnings.
+   * Send a warning message to any registered handlers. A high priority warning
+   * only goes to all handlers, high priority first. High priority handlers do
+   * not receive non-high priority warnings.
+   * 
    * @param source source of the message, usually you
    * @param msg test to print or send as an alert
    * @param isHighPriority set true to send to high priority warning handlers
    */
   public void sendWarning(Object source, String msg, boolean isHighPriority)
   {
-    String s = L.l("WarningService[{0}]: {1}", 
-        (isHighPriority ? "High Priority" : "Low Priority"), msg);
+    String s =
+      L.l("WarningService[{0}]: {1}", (isHighPriority ? "High Priority"
+                                                     : "Low Priority"), msg);
     
-    if(isHighPriority)
+    if (isHighPriority)
       log.warning(s);
     else
       log.info(s);
-
+    
     // if warning is high-priority then send to high priority handlers first
-    if(isHighPriority)
-    {
+    if (isHighPriority) {
       System.err.println(s);
       
-      for (WarningHandler handler : _highPriorityHandlerList)
+      for (WarningHandler handler : _highPriorityHandlers)
         handler.warning(source, msg);
     }
     
     // now send to the all handlers regardless of if it's high priority
-    for (WarningHandler handler : _handlerList)
+    for (WarningHandler handler : _handlers)
       handler.warning(source, msg);
   }
 
   /**
    * Sends a warning to the current service.
    */
-  public static void sendCurrentWarning(Object source, String msg, 
-      boolean isHighPriority)
+  public static void sendCurrentWarning(Object source, String msg,
+                                        boolean isHighPriority)
   {
     WarningService warning = getCurrent();
     
@@ -126,10 +126,10 @@ public class WarningService extends AbstractResinService
    */
   public void addHandler(WarningHandler handler, boolean isHighPriority)
   {
-    if(isHighPriority)
-      _highPriorityHandlerList.add(handler);
+    if (isHighPriority)
+      _highPriorityHandlers.add(handler);
     else
-      _handlerList.add(handler);
+      _handlers.add(handler);
   }
 
   @Override

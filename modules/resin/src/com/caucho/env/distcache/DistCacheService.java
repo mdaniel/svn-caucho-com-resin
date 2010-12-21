@@ -52,8 +52,8 @@ public class DistCacheService extends AbstractResinService
     _distCacheManager = distCacheManager;
   }
   
-  public static DistCacheService createAndAddService(
-      AbstractCacheManager<?> distCacheManager)
+  public static DistCacheService 
+    createAndAddService(AbstractCacheManager<?> distCacheManager)
   {
     ResinSystem system = preCreate(DistCacheService.class);
 

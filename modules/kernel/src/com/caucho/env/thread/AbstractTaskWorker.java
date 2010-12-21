@@ -183,7 +183,7 @@ abstract public class AbstractTaskWorker implements Runnable {
                || isPermanent()
                || getCurrentTimeActual() < expires);
     } catch (Throwable e) {
-      // TODO: clean this up
+      // TODO: should this warning go to the watchdog?
       WarningService.sendCurrentWarning(this, e.toString(), true);
       log.log(Level.WARNING, e.toString(), e);
     } finally {

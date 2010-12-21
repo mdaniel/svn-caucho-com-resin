@@ -36,7 +36,7 @@ import com.caucho.loader.EnvironmentLocal;
 public class DeployService
 {
   private static EnvironmentLocal<DeployActor> _localDeployActor
-  = new EnvironmentLocal<DeployActor>();
+    = new EnvironmentLocal<DeployActor>();
 
   public DeployService()
   {

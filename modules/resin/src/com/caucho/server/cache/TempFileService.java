@@ -51,11 +51,9 @@ public class TempFileService extends AbstractResinService
   {
     RootDirectoryService rootService = RootDirectoryService.getCurrent();
     if (rootService == null)
-    {
       throw new IllegalStateException(L.l("{0} requires an active {1}",
-          TempFileService.class.getSimpleName(),
-          RootDirectoryService.class.getSimpleName()));
-    }
+                                          TempFileService.class.getSimpleName(),
+                                          RootDirectoryService.class.getSimpleName()));
 
     Path dataDirectory = rootService.getDataDirectory();
     TempFileManager manager = new TempFileManager(dataDirectory.lookup("tmp"));

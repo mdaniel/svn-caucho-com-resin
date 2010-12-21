@@ -159,20 +159,15 @@ public class ResinSystem
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     
-    try 
-    {
+    try {
       thread.setContextClassLoader(_classLoader);
       RootDirectoryService.createAndAddService(rootDirectory, dataDirectory);
-    }
-    catch (Exception e) 
-    {
+    } catch (Exception e) {
       throw ConfigException.create(e);
-    } 
-    finally 
-    {
+    } finally {
       thread.setContextClassLoader(oldLoader);
     }
-  }  
+  }
  
   /**
    * Returns the current server

@@ -515,8 +515,8 @@ public class Resin
   
   protected DistCacheService createDistCacheService()
   {
-    return DistCacheService.createAndAddService(new FileCacheManager(
-        getResinSystem()));
+    return DistCacheService.
+      createAndAddService(new FileCacheManager(getResinSystem()));
   }
   
   protected AbstractLockManager createLockManager()
@@ -1088,7 +1088,8 @@ public class Resin
   /**
    * Configures the root directory and dataDirectory.
    */
-  private void configureRoot(BootResinConfig bootConfig) throws IOException
+  private void configureRoot(BootResinConfig bootConfig) 
+    throws IOException
   {
     Path dataDirectory;
   

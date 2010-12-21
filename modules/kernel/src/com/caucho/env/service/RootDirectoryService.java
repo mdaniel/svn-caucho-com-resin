@@ -48,24 +48,23 @@ public class RootDirectoryService extends AbstractResinService
   private final Path _rootDirectory;
   private final Path _dataDirectory;
 
-  public RootDirectoryService(Path rootDirectory, Path dataDirectory)
-      throws IOException
+  public RootDirectoryService(Path rootDirectory, Path dataDirectory) 
+    throws IOException
   {
     if (rootDirectory == null)
       throw new NullPointerException();
-
+    
     if (dataDirectory == null)
       throw new NullPointerException();
-
-    if (dataDirectory instanceof MemoryPath)
-    { // QA
-      dataDirectory =
-          WorkDir.getTmpWorkDir().lookup("qa/" + dataDirectory.getFullPath());
+    
+    if (dataDirectory instanceof MemoryPath) { // QA
+      dataDirectory = 
+        WorkDir.getTmpWorkDir().lookup("qa/" + dataDirectory.getFullPath());
     }
-
+    
     _rootDirectory = rootDirectory;
     _dataDirectory = dataDirectory;
-
+    
     rootDirectory.mkdirs();
     dataDirectory.mkdirs();
   }
@@ -73,19 +72,20 @@ public class RootDirectoryService extends AbstractResinService
   public static RootDirectoryService createAndAddService(Path rootDirectory)
       throws IOException
   {
-    return createAndAddService(rootDirectory,
-        rootDirectory.lookup("resin-data"));
+    return createAndAddService(rootDirectory, 
+                               rootDirectory.lookup("resin-data"));
   }
 
   public static RootDirectoryService createAndAddService(Path rootDirectory,
-      Path dataDirectory) throws IOException
+                                                         Path dataDirectory)
+    throws IOException
   {
     ResinSystem system = preCreate(RootDirectoryService.class);
-
+    
     RootDirectoryService service =
-        new RootDirectoryService(rootDirectory, dataDirectory);
+      new RootDirectoryService(rootDirectory, dataDirectory);
     system.addService(RootDirectoryService.class, service);
-
+    
     return service;
   }
 

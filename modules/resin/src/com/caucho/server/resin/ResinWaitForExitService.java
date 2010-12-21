@@ -97,7 +97,7 @@ class ResinWaitForExitService
                                           this,
                                           ShutdownService.class.getSimpleName()));
     }
-
+    
     /*
      * If the server has a parent process watching over us, close
      * gracefully when the parent dies.
@@ -105,20 +105,20 @@ class ResinWaitForExitService
     while (! _resin.isClosing()) {
       try {
         Thread.sleep(10);
-
+        
         if (! checkMemory(runtime)) {
           shutdown.shutdown(ExitCode.MEMORY, "Resin shutdown from out of memory");
           // dumpHeapOnExit();
           return;
         }
-
+        
         if (! checkFileDescriptor()) {
           shutdown.shutdown(ExitCode.MEMORY, 
                             "Resin shutdown from out of file descriptors");
           //dumpHeapOnExit();
           return;
         }
-
+        
         if (_waitIn != null) {
           if (_waitIn.read() >= 0) {
             socketExceptionCount = 0;
@@ -126,7 +126,7 @@ class ResinWaitForExitService
           else {
             shutdown.shutdown(ExitCode.WATCHDOG_EXIT,
                               "Stopping due to watchdog or user.");
-
+            
             return;
           }
         }
@@ -145,9 +145,9 @@ class ResinWaitForExitService
         // The Solaris JVM will throw SocketException periodically
         // instead of interrupted exception, so those exceptions need to
         // be ignored.
-
+        
         // However, the Windows JVMs will throw connection reset by peer
-        // instead of returning an end of file in the read.  So those
+        // instead of returning an end of file in the read. So those
         // need to be trapped to close the socket.
         if (socketExceptionCount++ == 0) {
           log.log(Level.FINE, e.toString(), e);
@@ -160,7 +160,7 @@ class ResinWaitForExitService
         ShutdownService.shutdownActive(ExitCode.MEMORY, msg);
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
-
+        
         return;
       }
     }
@@ -254,6 +254,7 @@ class ResinWaitForExitService
       thread.setContextClassLoader(_resinSystem.getClassLoader());
       
       WarningService warning = WarningService.getCurrent();
+
       _resinActor = new ResinActor(_resin);
       warning.addHandler(new ResinWarningHandler(_resinActor), true);
 

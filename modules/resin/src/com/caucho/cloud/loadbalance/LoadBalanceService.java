@@ -46,7 +46,8 @@ public class LoadBalanceService extends AbstractResinService
     _factory = factory;
   }
   
-  public static LoadBalanceService createAndAddService(LoadBalanceFactory factory)
+  public static LoadBalanceService
+    createAndAddService(LoadBalanceFactory factory)
   {
     ResinSystem system = preCreate(LoadBalanceService.class);
     
@@ -73,7 +74,6 @@ public class LoadBalanceService extends AbstractResinService
   @Override
   public String toString()
   {
-    return (getClass().getSimpleName()
-            + "[" + "]");
+    return (getClass().getSimpleName() + "[]");
   }
 }
