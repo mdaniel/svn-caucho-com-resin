@@ -330,6 +330,11 @@ public class CacheConfig
   {
     return (getFlags() & CacheConfig.FLAG_BACKUP) != 0;
   }
+  
+  public static boolean isBackup(int flags)
+  {
+    return (flags & CacheConfig.FLAG_BACKUP) != 0;
+  }
 
   /**
    * Sets the backup mode.  If backups are enabled, copies of the
@@ -355,6 +360,11 @@ public class CacheConfig
   {
     return (getFlags() & CacheConfig.FLAG_GLOBAL) != 0;
   }
+  
+  public static boolean isGlobal(int flags)
+  {
+    return (flags & CacheConfig.FLAG_GLOBAL) != 0;
+  }
 
   /**
    * Sets the global mode.  If global is enabled, copies of the
@@ -379,6 +389,11 @@ public class CacheConfig
   public boolean isTriplicate()
   {
     return (getFlags() & CacheConfig.FLAG_TRIPLICATE) != 0;
+  }
+  
+  public static boolean isTriplicate(int flags)
+  {
+    return (flags & CacheConfig.FLAG_TRIPLICATE) != 0;
   }
 
   /**
