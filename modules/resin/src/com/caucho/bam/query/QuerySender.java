@@ -65,6 +65,8 @@ public interface QuerySender {
   //
   // query handling
   //
+  
+  public QueryManager getQueryManager();
 
   /**
    * Sends a query information call (get) to an actor,

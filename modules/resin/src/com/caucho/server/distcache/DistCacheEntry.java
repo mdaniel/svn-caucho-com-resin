@@ -151,10 +151,12 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the object, updating the backing store if necessary.
    */
+  /*
   public Object getLazy(CacheConfig config)
   {
     return get(config);
   }
+  */
 
   /**
    * Fills the value with a stream

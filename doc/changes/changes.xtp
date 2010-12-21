@@ -13,6 +13,8 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>cache: use cursor to update data timeouts</li>
+<li>heartbeat: server connections need to depend on heartbeat only</li>
 <li>access-log: off-by-one issue with access log rollover causing missed 1D (rep by Steve Francis)</li>
 <li>thread: if Thread cannot be instantiated, restart Resin (rep by B Hafezi)</li>
 <li>quercus: SimpleXMLElement needs a __count function (#4318, rep by Homayoun Zariv)</li>

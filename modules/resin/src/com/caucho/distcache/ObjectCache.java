@@ -44,7 +44,7 @@ public interface ObjectCache extends Cache
   /**
    * Gets the value, with a lazy update
    */
-  public Object getLazy(Object key);
+  // public Object getLazy(Object key);
 
   /**
    * Updates the cache if the old value hash matches the current value.

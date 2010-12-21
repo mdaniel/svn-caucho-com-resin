@@ -42,6 +42,7 @@ import com.caucho.hemp.servlet.ServerLinkActor;
  */
 class HmtpLinkActor extends ServerLinkActor {
   private Object _linkClosePayload;
+  private NetworkClusterService _clusterService;
   
   public HmtpLinkActor(Broker toLinkBroker,
                        ClientStubManager clientManager,
@@ -54,11 +55,15 @@ class HmtpLinkActor extends ServerLinkActor {
   void onCloseConnection()
   {
     super.onClose();
+
+    NetworkClusterService clusterService = _clusterService;
+    _clusterService = null;
     
-    if (_linkClosePayload != null) {
-      NetworkClusterService clusterService = NetworkClusterService.getCurrent();
-      
-      clusterService.notifyLinkClose(_linkClosePayload);
+    Object linkClosePayload = _linkClosePayload;
+    _linkClosePayload = null;
+    
+    if (linkClosePayload != null) {
+      clusterService.notifyLinkClose(linkClosePayload);
     }  
   }
   
@@ -108,6 +113,12 @@ class HmtpLinkActor extends ServerLinkActor {
                               String from,
                               HmtpLinkRegisterMessage registerMessage)
   {
+    NetworkClusterService clusterService = NetworkClusterService.getCurrent();
+    
+    if (clusterService == null)
+      throw new IllegalStateException(getClass().getSimpleName());
+    
+    _clusterService = clusterService;
     _linkClosePayload = registerMessage.getPayload();
   }
 }

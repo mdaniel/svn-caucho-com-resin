@@ -71,7 +71,8 @@ abstract public class AbstractActorSender implements ActorSender {
    */
   abstract public Broker getBroker();
   
-  protected QueryManager getQueryManager()
+  @Override
+  public QueryManager getQueryManager()
   {
     return _queryManager;
   }

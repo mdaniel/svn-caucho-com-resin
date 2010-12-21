@@ -465,7 +465,6 @@ public class MnodeStore implements AlarmListener {
 
       return null;
     } catch (SQLException e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)

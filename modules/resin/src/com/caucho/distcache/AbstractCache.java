@@ -469,11 +469,13 @@ abstract public class AbstractCache extends AbstractMap
    * Returns the object with the given key, updating the backing
    * store if necessary.
    */
+  /*
   @Override
   public Object getLazy(Object key)
   {
     return getDistCacheEntry(key).getLazy(_config);
   }
+  */
 
   /**
    * Fills an output stream with the value for a key.
@@ -553,6 +555,7 @@ abstract public class AbstractCache extends AbstractMap
    * @param value   the new value
    * @return true if the update succeeds, false if it fails
    */
+  @Override
   public boolean compareAndPut(Object key,
                                long version,
                                Object value)
@@ -571,6 +574,7 @@ abstract public class AbstractCache extends AbstractMap
    * @param inputStream the new value
    * @return true if the update succeeds, false if it fails
    */
+  @Override
   public boolean compareAndPut(Object key,
                                long version,
                                InputStream inputStream)
@@ -586,6 +590,7 @@ abstract public class AbstractCache extends AbstractMap
    *
    * @return true if the object existed
    */
+  @Override
   public Object remove(Object key)
   {
     notifyRemove(key);
@@ -596,6 +601,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Removes the entry from the cache if the current entry matches the version.
    */
+  @Override
   public boolean compareAndRemove(Object key, long version)
   {
     DistCacheEntry cacheEntry = getDistCacheEntry(key);

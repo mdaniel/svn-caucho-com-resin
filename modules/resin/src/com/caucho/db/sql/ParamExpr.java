@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import com.caucho.util.Hex;
+
 class ParamExpr extends Expr {
   private static final int NULL = 0;
   private static final int BOOLEAN = NULL + 1;
@@ -462,7 +464,9 @@ class ParamExpr extends Expr {
    * @param result the result buffer
    *
    * @return the length of the result
+   * @throws SQLException 
    */
+  /*
   public int evalToBuffer(QueryContext context,
                           byte []buffer,
                           int offset)
@@ -470,6 +474,21 @@ class ParamExpr extends Expr {
   {
     // context.evalToBuffer(_index, buffer, offset);
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  */
+  
+  @Override
+  public int evalToBuffer(QueryContext context, byte []buffer, int offset)
+    throws SQLException
+  {
+    byte []bytes = evalBytes(context);
+    
+    if (bytes == null)
+      return 0;
+    
+    System.arraycopy(bytes, 0, buffer, offset, bytes.length);
+    
+    return bytes.length;
   }
 
   public String toString()

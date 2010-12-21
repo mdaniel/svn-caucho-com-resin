@@ -161,6 +161,12 @@ public class SimpleActorClient implements ActorSender {
     return _queryManager.nextQueryId();
   }
   
+  
+  @Override
+  public QueryManager getQueryManager()
+  {
+    return _queryManager;
+  }
   /**
    * Sends a query information call (get) to an actor,
    * blocking until the actor responds with a result or an error.

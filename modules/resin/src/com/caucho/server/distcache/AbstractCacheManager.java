@@ -141,30 +141,31 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
   /**
    * Gets a cache entry
-   */
   final public Object get(E entry,
                           CacheConfig config,
                           long now)
   {
-    return get(entry, config, now, false);
+    return get(entry, config, now);
   }
+   */
 
   /**
    * Gets a cache entry
    */
+  /*
   final public Object getLazy(E entry,
                               CacheConfig config,
                               long now)
   {
     return get(entry, config, now, true);
   }
+  */
 
-  private Object get(E entry,
-                     CacheConfig config,
-                     long now,
-                     boolean isLazy)
+  final public Object get(E entry,
+                          CacheConfig config,
+                          long now)
   {
-    MnodeValue mnodeValue = getMnodeValue(entry, config, now, isLazy);
+    MnodeValue mnodeValue = getMnodeValue(entry, config, now);//, isLazy);
 
     if (mnodeValue == null)
       return null;
@@ -207,7 +208,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   {
     long now = Alarm.getCurrentTime();
 
-    MnodeValue mnodeValue = getMnodeValue(entry, config, now, false);
+    MnodeValue mnodeValue = getMnodeValue(entry, config, now); // , false);
 
     if (mnodeValue == null)
       return false;
@@ -233,8 +234,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
   final public MnodeValue getMnodeValue(E entry,
                                         CacheConfig config,
-                                        long now,
-                                        boolean isLazy)
+                                        long now)
+                                        // boolean isLazy)
   {
     MnodeValue mnodeValue = loadMnodeValue(entry);
 
@@ -242,12 +243,13 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       reloadValue(entry, config, now);
     else if (isLocalReadValid(mnodeValue, now)) {
     }
-    else if (! isLazy) {
+    else { // if (! isLazy) {
       reloadValue(entry, config, now);
-    }
+    }/*
     else {
       lazyValueUpdate(entry, config);
     }
+    */
 
     mnodeValue = entry.getMnodeValue();
 
@@ -346,7 +348,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     long now = Alarm.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
-    MnodeValue mnodeValue = getMnodeValue(entry, config, now, false);
+    MnodeValue mnodeValue = getMnodeValue(entry, config, now); // , false);
 
     return put(entry, value, config, now, mnodeValue);
   }

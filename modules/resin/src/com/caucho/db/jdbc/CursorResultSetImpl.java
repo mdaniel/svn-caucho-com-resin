@@ -42,11 +42,16 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The JDBC statement implementation.
  */
 public class CursorResultSetImpl extends AbstractResultSet {
+  private static final Logger log
+    = Logger.getLogger(CursorResultSetImpl.class.getName());
+  
   private StatementImpl _stmt;
   private SelectResult _rs;
   private SelectCursor _cursor;
@@ -302,219 +307,234 @@ public class CursorResultSetImpl extends AbstractResultSet {
     _cursor.updateRow();
   }
 
+  @Override
   public void close()
     throws SQLException
   {
     SelectCursor cursor = _cursor;
-    _cursor= null;
+    _cursor = null;
+    
+    QueryContext cxt = _cxt;
+    _cxt = null;
 
-    if (cursor != null)
-      cursor.close();
+    try {
+      if (cursor != null)
+        cursor.close();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    try {
+      if (cxt != null)
+        cxt.close();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
-    public RowId getRowId(int columnIndex) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public RowId getRowId(int columnIndex) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public RowId getRowId(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public RowId getRowId(String columnLabel) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateRowId(int columnIndex, RowId x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateRowId(int columnIndex, RowId x) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateRowId(String columnLabel, RowId x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateRowId(String columnLabel, RowId x) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public int getHoldability() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public int getHoldability() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isClosed() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isClosed() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNString(int columnIndex, String nString) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNString(int columnIndex, String nString) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNString(String columnLabel, String nString) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNString(String columnLabel, String nString) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNClob(String columnLabel, NClob nClob) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNClob(String columnLabel, NClob nClob) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public NClob getNClob(int columnIndex) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public NClob getNClob(int columnIndex) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public NClob getNClob(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public NClob getNClob(String columnLabel) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public SQLXML getSQLXML(int columnIndex) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public SQLXML getSQLXML(int columnIndex) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public SQLXML getSQLXML(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public SQLXML getSQLXML(String columnLabel) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public String getNString(int columnIndex) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public String getNString(int columnIndex) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public String getNString(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public String getNString(String columnLabel) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public Reader getNCharacterStream(int columnIndex) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public Reader getNCharacterStream(int columnIndex) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public Reader getNCharacterStream(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public Reader getNCharacterStream(String columnLabel) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateBlob(String columnLabel, InputStream inputStream, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateBlob(String columnLabel, InputStream inputStream, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateClob(int columnIndex, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateClob(int columnIndex, Reader reader, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateClob(String columnLabel, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateClob(String columnLabel, Reader reader, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNClob(int columnIndex, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNClob(int columnIndex, Reader reader, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNClob(String columnLabel, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNClob(String columnLabel, Reader reader, long length) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNCharacterStream(int columnIndex, Reader x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNCharacterStream(int columnIndex, Reader x) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateAsciiStream(int columnIndex, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateAsciiStream(int columnIndex, InputStream x) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateCharacterStream(int columnIndex, Reader x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateCharacterStream(int columnIndex, Reader x) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateAsciiStream(String columnLabel, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateAsciiStream(String columnLabel, InputStream x) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateCharacterStream(String columnLabel, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateCharacterStream(String columnLabel, Reader reader) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateBlob(int columnIndex, InputStream inputStream) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateBlob(int columnIndex, InputStream inputStream) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateBlob(String columnLabel, InputStream inputStream) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateBlob(String columnLabel, InputStream inputStream) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateClob(int columnIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateClob(int columnIndex, Reader reader) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateClob(String columnLabel, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateClob(String columnLabel, Reader reader) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNClob(int columnIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNClob(int columnIndex, Reader reader) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void updateNClob(String columnLabel, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void updateNClob(String columnLabel, Reader reader) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public <T> T unwrap(Class<T> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _stmt + "]"; 
-    }
+  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _stmt + "]"; 
+  }
 }

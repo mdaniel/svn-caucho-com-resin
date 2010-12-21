@@ -138,7 +138,7 @@ public class QueryContext {
     Thread thread = Thread.currentThread();
 
     if (_thread != null && _thread != thread)
-      throw new IllegalStateException(toString());
+      throw new IllegalStateException(toString() + " attempted query reuse without close");
 
     _thread = thread;
 

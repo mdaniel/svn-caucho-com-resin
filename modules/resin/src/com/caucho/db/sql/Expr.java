@@ -507,6 +507,7 @@ abstract public class Expr {
         return offset;
       }
 
+      /*
     case BINARY:
       {
         byte []bytes = evalBytes(context);
@@ -519,6 +520,12 @@ abstract public class Expr {
         else
           return 0;
       }
+      */
+      
+    case BINARY:
+    {
+      return evalToBuffer(context, buffer, off);
+    }
 
     default:
       throw new UnsupportedOperationException(getClass().getName() + " unknown column: " + columnType);
