@@ -70,10 +70,17 @@ class LeftOuterJoinExpr extends RowIterateExpr {
   /**
    * Returns an index expression if available.
    */
+  @Override
   public RowIterateExpr getIndexExpr(FromItem fromItem)
   {
-    if (_table == fromItem)
-      return this;
+    if (_table == fromItem) {
+      RowIterateExpr indexExpr = _expr.getIndexExpr(fromItem);
+
+      if (indexExpr != null)
+        return new LeftOuterIndexExpr(indexExpr);
+      else
+        return this;
+    }
     else
       return null;
   }
@@ -81,6 +88,7 @@ class LeftOuterJoinExpr extends RowIterateExpr {
   /**
    * Binds the expression.
    */
+  @Override
   public Expr bind(Query query)
     throws SQLException
   {
@@ -114,6 +122,7 @@ class LeftOuterJoinExpr extends RowIterateExpr {
   /**
    * Sets the initial row.
    */
+  @Override
   boolean initRow(QueryContext context, TableIterator rowIter)
     throws SQLException, IOException
   {
@@ -136,6 +145,7 @@ class LeftOuterJoinExpr extends RowIterateExpr {
         return true;
       }
     } while (expr.evalBoolean(context) != TRUE);
+    
     TableIterator parentIter = context.getTableIterators()[1];
     
     return true;

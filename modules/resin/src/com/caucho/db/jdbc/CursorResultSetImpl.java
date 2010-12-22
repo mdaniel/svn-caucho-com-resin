@@ -109,7 +109,7 @@ public class CursorResultSetImpl extends AbstractResultSet {
   public boolean wasNull()
     throws SQLException
   {
-    return _rs.wasNull();
+    return false;
   }
 
   /**
@@ -241,6 +241,15 @@ public class CursorResultSetImpl extends AbstractResultSet {
   }
 
   /**
+   * Returns the blob value for the column.
+   */
+  public byte []getBytes(int columnIndex)
+    throws SQLException
+  {
+    return _cursor.getBytes(columnIndex - 1);
+  }
+
+  /**
    * Returns the time value for the column.
    */
   public Time getTime(int columnIndex)
@@ -272,15 +281,6 @@ public class CursorResultSetImpl extends AbstractResultSet {
     throws SQLException
   {
     return new BigDecimal(_rs.getString(columnIndex - 1));
-  }
-
-  /**
-   * Returns the blob value for the column.
-   */
-  public byte []getBytes(int columnIndex)
-    throws SQLException
-  {
-    return _rs.getBytes(columnIndex - 1);
   }
 
   /**

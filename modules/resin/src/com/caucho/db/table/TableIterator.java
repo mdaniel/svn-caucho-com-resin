@@ -453,6 +453,19 @@ public class TableIterator {
     setDirty();
   }
 
+  /**
+   * Returns the column's bytes value.
+   *
+   * @param index column index in the row
+   *
+   * @return the double value
+   */
+  public byte []getBytes(Column column)
+    throws SQLException
+  {
+    return column.getBytes(getBlockId(), _buffer, _rowOffset);
+  }
+
   public boolean isEqual(Column column, byte []matchBuffer)
     throws SQLException
   {

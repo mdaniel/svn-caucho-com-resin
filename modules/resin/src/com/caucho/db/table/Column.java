@@ -285,7 +285,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    */
   public abstract String getString(long blockId, byte []block, int rowOffset)
-    throws SQLException;
+  throws SQLException;
 
   /**
    * Sets a string value in the column.
@@ -392,6 +392,18 @@ abstract public class Column {
     throws SQLException
   {
     setString(xa, block, rowOffset, String.valueOf(value));
+  }
+
+  /**
+   * Gets a string value from the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   */
+  public byte []getBytes(long blockId, byte []block, int rowOffset)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**

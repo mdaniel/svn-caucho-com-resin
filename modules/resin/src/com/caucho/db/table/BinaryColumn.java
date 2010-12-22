@@ -169,6 +169,22 @@ class BinaryColumn extends Column {
     return new String(buffer, 0, len);
   }
   
+  @Override
+  public byte []getBytes(long blockId, byte []block, int rowOffset)
+  {
+    if (isNull(block, rowOffset))
+      return null;
+    
+    int startOffset = rowOffset + _columnOffset;
+    int len = _length;
+
+    byte []buffer = new byte[len];
+
+    System.arraycopy(block, startOffset, buffer, 0, len);
+
+    return buffer;
+  }
+  
   /**
    * Sets the column based on an expression.
    *

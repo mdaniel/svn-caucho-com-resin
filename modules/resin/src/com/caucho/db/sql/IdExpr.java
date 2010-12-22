@@ -277,6 +277,19 @@ final class IdExpr extends Expr {
   }
 
   /**
+   * Evaluates the expression as a string.
+   */
+  @Override
+  public byte []evalBytes(QueryContext context)
+    throws SQLException
+  {
+    TableIterator []rows = context.getTableIterators();
+    TableIterator row = rows[_tableIndex];
+
+    return row.getBytes(_column);
+  }
+
+  /**
    * Evaluates the expression, writing to the result stream.
    *
    * @param context the query context

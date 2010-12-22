@@ -47,6 +47,7 @@ import javax.sql.DataSource;
 import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
@@ -79,10 +80,14 @@ public class DataStore {
   private final String _dataAvailableQuery;
   private final String _updateExpiresQuery;
   private final String _updateAllExpiresQuery;
+  private final String _selectOrphanQuery;
   private final String _deleteTimeoutQuery;
   private final String _validateQuery;
 
   private final String _countQuery;
+  
+  private final ConcurrentArrayList<MnodeOrphanListener> _orphanListeners
+    = new ConcurrentArrayList<MnodeOrphanListener>(MnodeOrphanListener.class);
 
   private Alarm _alarm;
 
@@ -115,10 +120,21 @@ public class DataStore {
                            + " SET expire_time=?"
                            + " WHERE id=?");
 
-    _updateAllExpiresQuery = ("SELECT d.expire_time, m.value"
+    /*
+    _updateAllExpiresQuery = ("SELECT d.expire_time, d.resin_oid, m.value"
                               + " FROM " + _mnodeTableName + " AS m,"
-                              + " " + _tableName + " AS d"
+                              + "  " + _tableName + " AS d"
                               + " WHERE m.value = d.id");
+                              */
+    _updateAllExpiresQuery = ("SELECT d.expire_time, d.resin_oid, m.value"
+                              + " FROM " + _mnodeTableName + " AS m"
+                              + " LEFT JOIN " + _tableName + " AS d"
+                              + " ON(m.value = d.id)");
+
+    _selectOrphanQuery = ("SELECT m.value, d.id"
+                              + " FROM " + _mnodeTableName + " AS m"
+                              + " LEFT JOIN " + _tableName + " AS d"
+                              + " ON(m.value=d.id)");
 
     _deleteTimeoutQuery = ("DELETE FROM " + _tableName
                            + " WHERE expire_time < ?");
@@ -190,6 +206,16 @@ public class DataStore {
     } finally {
       conn.close();
     }
+  }
+  
+  public void addOrphanListener(MnodeOrphanListener listener)
+  {
+    _orphanListeners.add(listener);
+  }
+  
+  public void removeOrphanListener(MnodeOrphanListener listener)
+  {
+    _orphanListeners.remove(listener);
   }
 
   /**
@@ -440,6 +466,8 @@ public class DataStore {
     long now = Alarm.getCurrentTime();
 
     updateExpire(now);
+    
+    // selectOrphans();
 
     DataConnection conn = null;
 
@@ -483,7 +511,62 @@ public class DataStore {
 
       try {
         while (rs.next()) {
-          rs.updateLong(1, expires);
+          long oid = rs.getLong(2);
+          
+          if (oid > 0)
+            rs.updateLong(1, expires);
+          else {
+            try {
+              notifyOrphan(rs.getBytes(3));
+            } catch (Exception e) {
+              e.printStackTrace();
+              log.log(Level.WARNING, e.toString(), e);
+            }
+          }
+        }
+      } finally {
+        rs.close();
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+      log.log(Level.FINE, e.toString(), e);
+    } catch (Throwable e) {
+      e.printStackTrace();
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      conn.close();
+    }
+  }
+  
+  private void notifyOrphan(byte []valueHash)
+  {
+    if (valueHash == null)
+      return;
+    
+    for (MnodeOrphanListener listener : _orphanListeners) {
+      listener.onOrphanValue(new HashKey(valueHash));
+    }
+  }
+
+  /**
+   * Update used expire times.
+   */
+  private void selectOrphans()
+  {
+    System.out.println("ORPHANS:");
+    DataConnection conn = null;
+
+    try {
+      conn = getConnection();
+
+      PreparedStatement pstmt = conn.prepareSelectOrphan();
+
+      ResultSet rs = pstmt.executeQuery();
+
+      try {
+        while (rs.next()) {
+          byte []data = rs.getBytes(1);
+          System.out.println("D: " + Hex.toHex(data));
         }
       } finally {
         rs.close();
@@ -649,6 +732,7 @@ public class DataStore {
     private PreparedStatement _dataAvailableStatement;
     private PreparedStatement _insertStatement;
     private PreparedStatement _updateAllExpiresStatement;
+    private PreparedStatement _selectOrphanStatement;
     private PreparedStatement _updateExpiresStatement;
     private PreparedStatement _deleteTimeoutStatement;
     private PreparedStatement _validateStatement;
@@ -696,6 +780,15 @@ public class DataStore {
                                                             CONCUR_UPDATABLE);
 
       return _updateAllExpiresStatement;
+    }
+
+    PreparedStatement prepareSelectOrphan()
+      throws SQLException
+    {
+      if (_selectOrphanStatement == null)
+        _selectOrphanStatement = _conn.prepareStatement(_selectOrphanQuery);
+
+      return _selectOrphanStatement;
     }
 
     PreparedStatement prepareUpdateExpires()

@@ -214,6 +214,12 @@ public class SelectCursor {
     _exprs[i].updateDouble(_context, value);
   }
 
+  public byte []getBytes(int i)
+    throws SQLException
+  {
+    return _exprs[i].evalBytes(_context);
+  }
+
   public void updateRow()
   {
     
