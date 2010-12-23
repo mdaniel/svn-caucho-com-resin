@@ -454,7 +454,7 @@ public class SessionModule extends AbstractQuercusModule
           create = true;
         }
       }
-
+      env.removeConstant("SID");
       env.addConstant("SID", env.createString(cookieName + '=' + sessionId),
                       false);
       
@@ -537,7 +537,7 @@ public class SessionModule extends AbstractQuercusModule
     
     StringValue cookieValue
       = env.createString(cookieName + '=' + sessionId);
-    
+    env.removeConstant("SID");
     env.addConstant("SID", 
                             cookieValue,
                             false);
