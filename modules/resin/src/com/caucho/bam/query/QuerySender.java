@@ -54,7 +54,7 @@ public interface QuerySender {
   //
 
   /**
-   * Sends a unidirectional message to an {@link com.caucho.bam.Actor},
+   * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
    * addressed by the Actor's JID.
    *
    * @param to the target actor's JID

@@ -37,7 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
-import com.caucho.bam.SimpleActor;
+import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;

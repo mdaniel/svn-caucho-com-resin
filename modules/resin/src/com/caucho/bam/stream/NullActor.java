@@ -27,52 +27,59 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.resin;
+package com.caucho.bam.stream;
 
-import com.caucho.hmtp.HmtpLinkWorker;
+import com.caucho.bam.actor.Actor;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 
-import java.io.*;
-import java.util.logging.*;
 
 /**
- * HMTP client protocol
+ * NullActorStream always ignores messages and returns errors for RPC calls.
  */
-public class ResinLink extends HmtpLinkWorker implements Runnable {
-  private static final Logger log
-    = Logger.getLogger(ResinLink.class.getName());
-
-  private ResinActor _resinActor;
+public class NullActor extends NullActorStream implements Actor
+{
+  private Mailbox _mailbox;
   
-  protected InputStream _is;
-  protected OutputStream _os;
-
-  public ResinLink(ResinActor resinActor, InputStream is, OutputStream os)
-    throws IOException
+  public NullActor()
   {
-    super(resinActor, is, os);
+    this("null");
+  }
+  
+  public NullActor(String jid)
+  {
+    super();
     
-    _resinActor = resinActor;
+    setJid(jid);
   }
 
-  /**
-   * Receive messages from the client
-   */
   @Override
-  public void run()
+  public void setJid(String jid)
   {
-    try {
-      Thread.currentThread().setName("resin-main-link");
-      ClassLoader loader = ClassLoader.getSystemClassLoader();
-      Thread.currentThread().setContextClassLoader(loader);
-      
-      super.run();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    } finally {
-      if (log.isLoggable(Level.FINE))
-        log.fine(this + " finishing main thread");
-      
-      _resinActor.destroy();
-    }
+    super.setJid(jid);
+  }
+
+  @Override
+  public ActorStream getActorStream()
+  {
+    return this;
+  }
+
+  @Override
+  public void setBroker(Broker broker)
+  {
+    super.setBroker(broker);
+  }
+
+  @Override
+  public Mailbox getMailbox()
+  {
+    return _mailbox;
+  }
+
+  @Override
+  public void setMailbox(Mailbox mailbox)
+  {
+    _mailbox = mailbox;
   }
 }

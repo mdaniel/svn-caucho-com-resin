@@ -29,11 +29,6 @@
 
 package com.caucho.remote.websocket;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import java.io.*;
-
 /**
  * WebSocketOutputStream writes a single WebSocket packet.
  *
@@ -50,5 +45,7 @@ public interface WebSocketConstants {
   public static final int OP_PONG = 0x03;
   public static final int OP_TEXT = 0x04;
   public static final int OP_BINARY = 0x05;
+  
+  public static final int OP_EXT = 0x0E;
   public static final int OP_HELLO = 0x0F;
 }

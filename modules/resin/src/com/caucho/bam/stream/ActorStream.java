@@ -35,9 +35,9 @@ import com.caucho.bam.ActorError;
 import com.caucho.bam.broker.Broker;
 
 /**
- * Primary {@link com.caucho.bam.Actor} stream handling all packets.
+ * Primary {@link com.caucho.bam.actor.Actor} stream handling all packets.
  *
- * {@link com.caucho.bam.Actor Actors} send packets to the 
+ * {@link com.caucho.bam.actor.Actor Actors} send packets to the 
  * {@link com.caucho.bam.broker.Broker} for delivery to other Actors.
  *
  * Packets are divided into two groups:
@@ -49,7 +49,7 @@ import com.caucho.bam.broker.Broker;
 public interface ActorStream
 {
   /**
-   * Returns the jid of the {@link com.caucho.bam.Actor} at the end
+   * Returns the jid of the {@link com.caucho.bam.actor.Actor} at the end
    * of the stream.
    */
   public String getJid();
@@ -69,7 +69,7 @@ public interface ActorStream
   //
   
   /**
-   * Sends a unidirectional message to an {@link com.caucho.bam.Actor},
+   * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
    * addressed by the Actor's JID.
    * 
    * @param to the target actor's JID
@@ -79,7 +79,7 @@ public interface ActorStream
   public void message(String to, String from, Serializable payload);
   
   /**
-   * Sends a message error to an {@link com.caucho.bam.Actor},
+   * Sends a message error to an {@link com.caucho.bam.actor.Actor},
    * addressed by the Actor's JID.  Actor protocols may choose to send
    * error messages if a message fails for some reason.
    *

@@ -39,6 +39,10 @@ public class PassthroughBroker extends AbstractBroker
 {
   private Mailbox _mailbox;
   
+  public PassthroughBroker()
+  {
+  }
+  
   public PassthroughBroker(Mailbox mailbox)
   {
     _mailbox = mailbox;
@@ -48,5 +52,10 @@ public class PassthroughBroker extends AbstractBroker
   public Mailbox getMailbox(String jid)
   {
     return _mailbox;
+  }
+  
+  public void setMailbox(Mailbox mailbox)
+  {
+    _mailbox = mailbox;
   }
 }

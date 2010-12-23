@@ -33,7 +33,7 @@ import java.io.Serializable;
 import java.util.logging.Logger;
 
 import com.caucho.bam.Message;
-import com.caucho.bam.SimpleActor;
+import com.caucho.bam.actor.SimpleActor;
 import com.caucho.server.resin.WarningMessage;
 
 /**

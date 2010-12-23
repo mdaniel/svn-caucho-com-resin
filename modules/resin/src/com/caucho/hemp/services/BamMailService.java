@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.services;
 
-import com.caucho.bam.SimpleActor;
+import com.caucho.bam.actor.SimpleActor;
 import com.caucho.config.types.Period;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;

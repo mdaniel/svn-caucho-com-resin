@@ -40,8 +40,15 @@ public class NullActorStream extends AbstractActorStream
   private String _jid;
   private Broker _broker;
 
+  protected NullActorStream()
+  {
+  }
+  
   public NullActorStream(String jid, Broker broker)
   {
+    if (broker == null)
+      throw new IllegalArgumentException();
+    
     _jid = jid;
     _broker = broker;
   }
@@ -54,6 +61,11 @@ public class NullActorStream extends AbstractActorStream
   {
     return _jid;
   }
+  
+  protected void setJid(String jid)
+  {
+    _jid = jid;
+  }
 
   /**
    * The stream to the link.
@@ -62,5 +74,10 @@ public class NullActorStream extends AbstractActorStream
   public Broker getBroker()
   {
     return _broker;
+  }
+  
+  protected void setBroker(Broker broker)
+  {
+    _broker = broker;
   }
 }

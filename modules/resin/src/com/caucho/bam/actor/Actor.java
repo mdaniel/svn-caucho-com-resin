@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 
 /**
@@ -46,38 +47,23 @@ import com.caucho.bam.stream.ActorStream;
  * for an agent developer.  Developers will implement callbacks for each
  * packet type the agent understands.
  *
- * Most developers will extend from {@link com.caucho.bam.SimpleActor}
+ * Most developers will extend from {@link com.caucho.bam.actor.SimpleActor}
  * instead of implementing Actor directly.  SimpleActor adds an
  * annotation-based message dispatching system to simplify Actor development.
  */
 public interface Actor
 {
-  /**
-   * Returns the actor's jid, so the {@link com.caucho.bam.broker.Broker} can
-   * deliver messages to this actor.
-   */
-  public String getJid();
-
-  /**
-   * Set the actor's jid, when the actor is
-   * registered with the broker {@link com.caucho.bam.broker.Broker}.
-   */
-  public void setJid(String jid);
-
-  /**
-   * The stream to send messages to the actor.
-   */
   public ActorStream getActorStream();
-
-  /**
-   * The stream to send messages to the actor.
-   */
-  public void setActorStream(ActorStream actorStream);
-
-  /**
-   * The stream to send messages to the link.
-   */
+  
+  public String getJid();
+  
+  public void setJid(String jid);
+  
   public Broker getBroker();
   
   public void setBroker(Broker broker);
+  
+  public Mailbox getMailbox();
+  
+  public void setMailbox(Mailbox mailbox);
 }

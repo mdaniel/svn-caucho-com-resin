@@ -31,15 +31,15 @@ package com.caucho.hmtp.server;
 
 import java.io.Serializable;
 
-import com.caucho.bam.Actor;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.actor.Actor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.
  */
-class ClientLinkActor implements Actor, ActorStream
+class ClientLinkActor implements ActorStream
 {
   private String _jid;
   
@@ -47,7 +47,7 @@ class ClientLinkActor implements Actor, ActorStream
   private ActorStream _actorStream;
   private ActorStream _out;
 
-  public ClientLinkActor(String jid, ActorStream out)
+  public ClientLinkActor(String jid, Broker broker, ActorStream out)
   {
     if (jid == null)
       throw new IllegalArgumentException();
@@ -56,6 +56,7 @@ class ClientLinkActor implements Actor, ActorStream
       throw new IllegalArgumentException();
     
     _jid = jid;
+    _broker = broker;
     _out = out;
     
     _actorStream = _out;
@@ -66,20 +67,13 @@ class ClientLinkActor implements Actor, ActorStream
   {
     return _jid;
   }
-
-  @Override
-  public void setJid(String jid)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
+  
+  //@Override
   public ActorStream getActorStream()
   {
     return _actorStream;
   }
 
-  @Override
   public void setActorStream(ActorStream actorStream)
   {
     _actorStream = actorStream;
@@ -91,7 +85,7 @@ class ClientLinkActor implements Actor, ActorStream
     return _broker;
   }
 
-  @Override
+  //@Override
   public void setBroker(Broker broker)
   {
     _broker = broker;

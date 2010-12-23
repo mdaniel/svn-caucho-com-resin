@@ -67,6 +67,8 @@ class WebSocketContextImpl
   private byte []_clientNonce;
   private byte []_serverNonce;
   
+  private byte []_authNonce;
+  
   private WebSocketOutputStream _binaryOut;
   private WebSocketInputStream _binaryIn;
   
@@ -90,14 +92,14 @@ class WebSocketContextImpl
   
   private void setLong(byte []buffer, int offset, long value)
   {
-    _serverNonce[offset + 0] = (byte) (value >> 56);
-    _serverNonce[offset + 1] = (byte) (value >> 48);
-    _serverNonce[offset + 2] = (byte) (value >> 40);
-    _serverNonce[offset + 3] = (byte) (value >> 32);
-    _serverNonce[offset + 4] = (byte) (value >> 24);
-    _serverNonce[offset + 5] = (byte) (value >> 16);
-    _serverNonce[offset + 6] = (byte) (value >> 8);
-    _serverNonce[offset + 7] = (byte) (value >> 0);
+    buffer[offset + 0] = (byte) (value >> 56);
+    buffer[offset + 1] = (byte) (value >> 48);
+    buffer[offset + 2] = (byte) (value >> 40);
+    buffer[offset + 3] = (byte) (value >> 32);
+    buffer[offset + 4] = (byte) (value >> 24);
+    buffer[offset + 5] = (byte) (value >> 16);
+    buffer[offset + 6] = (byte) (value >> 8);
+    buffer[offset + 7] = (byte) (value >> 0);
   }
 
   public void setController(SocketLinkDuplexController controller)
@@ -166,15 +168,35 @@ class WebSocketContextImpl
     throws IOException
   {
     WriteStream out = _controller.getWriteStream();
-    
+
     byte []hash = calculateServerHash();
-    
+
     out.write(FLAG_FIN | OP_HELLO);
     out.write(_serverNonce.length + hash.length);
     out.write(_serverNonce, 0, _serverNonce.length);
     out.write(hash, 0, hash.length);
   }
-  
+
+  void sendAuthChallenge()
+    throws IOException
+  {
+    WriteStream out = _controller.getWriteStream();
+    
+    long nonceValue = RandomUtil.getRandomLong();
+    
+    _authNonce = new byte[8];
+    setLong(_authNonce, 0, nonceValue);
+    
+    String code = "x-authentication/challenge\n";
+    
+    out.write(FLAG_FIN | OP_EXT);
+    out.write(code.length() + _authNonce.length);
+    out.print(code);
+    out.write(_authNonce, 0, _authNonce.length);
+    
+    System.out.println("CHALLENGE");
+  }
+
   private byte []calculateServerHash()
   {
     try {
@@ -258,6 +280,57 @@ class WebSocketContextImpl
     }
   }
   
+  void readAuthResponse()
+    throws IOException
+  {
+    System.out.println("AUTH:");
+    ReadStream is = _controller.getReadStream();
+
+    int frame1 = is.read();
+    int frame2 = is.read();
+    
+    if (frame2 < 0)
+      throw new IllegalStateException(L.l("Unexpected end-of-file waiting for login"));
+
+    boolean isFinal = (frame1 & FLAG_FIN) != 0;
+    int opcode = frame1 & 0x0f;
+    int len = frame2 & 0x7f;
+
+    if (! isFinal) {
+      throw new IllegalStateException(L.l("Invalid login packet. Missing FIN."));
+    }
+
+    if (opcode != OP_EXT) {
+      throw new IllegalStateException(L.l("Invalid login packet. OP=0x{0}.",
+                                          Integer.toHexString(opcode)));
+    }
+    
+    byte []buffer = new byte[len];
+    
+    is.readAll(buffer, 0, len);
+    
+    int p = indexOf(buffer, 0, '\n');
+    int q = indexOf(buffer, p + 1, '\n');
+    
+    String code = new String(buffer, 0, p);
+    String user = new String(buffer, p + 1, q);
+    
+    byte []digest = new byte[buffer.length - q - 1];
+    System.arraycopy(buffer, q + 1, digest, 0, digest.length);
+
+    System.out.println("BUFF: " + code + " " + user + " " + new String(digest));
+  }
+  
+  private int indexOf(byte []buffer, int offset, int ch)
+  {
+    for (int i = offset; i < buffer.length; i++) {
+      if (buffer[i] == ch)
+        return i;
+    }
+    
+    return -1;
+  }
+
   void onHandshakeComplete(boolean isValid)
     throws IOException
   {

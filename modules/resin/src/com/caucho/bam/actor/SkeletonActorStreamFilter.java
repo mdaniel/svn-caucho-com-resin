@@ -27,22 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
 
 import java.io.Serializable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.ActorError;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
-import com.caucho.bam.stream.FallbackActorStream;
 
 /**
  * Base ActorStream implementation using introspection and
  * {@link com.caucho.bam.Message @Message} annotations to simplify
  * Actor development.
  *
- * <h2>Message Handline</h2>
+ * <h2>Message Handling</h2>
  *
  * To handle a message, create a method with the proper signature for
  * the expected payload type and
@@ -55,45 +54,33 @@ import com.caucho.bam.stream.FallbackActorStream;
  * public void myMessage(String to, String from, MyPayload payload);
  * </pre></code>
  */
-public class SimpleActorStream implements ActorStream, Actor
+public class SkeletonActorStreamFilter<T> implements ActorStream
 {
-  private static final Logger log
-    = Logger.getLogger(SimpleActorStream.class.getName());
+  private final BamSkeleton<T> _skeleton;
+  private final T _actor;
   
-  private final BamSkeleton _skeleton;
-  
-  private final ActorStream _fallback;
+  private final ActorStream _next;
 
-  private String _jid;
-  private Broker _broker;
-  
-  public SimpleActorStream()
+  public SkeletonActorStreamFilter(ActorStream next, T actor)
   {
-    _skeleton = createSkeleton();
-    _fallback = createFallbackStream();
-  }
-  
-  public SimpleActorStream(String jid, Broker broker)
-  {
-    this();
+    if (next == null)
+      throw new IllegalStateException("next is a required argument");
     
-    _jid = jid;
-    _broker = broker;
+    if (actor == null)
+      throw new IllegalStateException("actor is a required argument");
     
-    if (_broker == null)
-      throw new NullPointerException();
+    _next = next;
+    _actor = actor;
+    
+    _skeleton = createSkeleton(actor);
   }
   
-  protected BamSkeleton createSkeleton()
+  @SuppressWarnings("unchecked")
+  protected BamSkeleton<T> createSkeleton(T actor)
   {
-    return BamSkeleton.getSkeleton(getClass());
+    return BamSkeleton.getSkeleton((Class<T>) actor.getClass());
   }
   
-  protected ActorStream createFallbackStream()
-  {
-    return new FallbackActorStream(this);
-  }
-
   /**
    * Returns the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
    * register it.
@@ -101,42 +88,23 @@ public class SimpleActorStream implements ActorStream, Actor
   @Override
   public String getJid()
   {
-    return _jid;
+    return _next.getJid();
   }
 
-  /**
-   * Sets the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
-   * register it.
-   */
-  public void setJid(String jid)
-  {
-    _jid = jid;
-  }
+   @Override
+   public boolean isClosed()
+   {
+     return _next.isClosed();
+   }
 
   /**
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
    */
+   @Override
   public Broker getBroker()
   {
-    return _broker;
-  }
-
-  public void setBroker(Broker broker)
-  {
-    _broker = broker;
-  }
-  
-  @Override
-  public ActorStream getActorStream()
-  {
-    return this;
-  }
-  
-  @Override
-  public void setActorStream(ActorStream actorStream)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _next.getBroker();
   }
 
   //
@@ -162,7 +130,7 @@ public class SimpleActorStream implements ActorStream, Actor
                       String from,
                       Serializable payload)
   {
-    _skeleton.message(this, _fallback, to, from, payload);
+    _skeleton.message(_actor, _next, to, from, payload);
   }
 
   /**
@@ -186,7 +154,7 @@ public class SimpleActorStream implements ActorStream, Actor
                            Serializable payload,
                            ActorError error)
   {
-    _skeleton.messageError(this, _fallback, to, from, payload, error);
+    _skeleton.messageError(_actor, _next, to, from, payload, error);
   }
 
   //
@@ -218,7 +186,7 @@ public class SimpleActorStream implements ActorStream, Actor
                        String from,
                        Serializable payload)
   {
-    _skeleton.query(this, _fallback, getBroker(), id, to, from, payload);
+    _skeleton.query(_actor, _next, getBroker(), id, to, from, payload);
   }
 
   /**
@@ -242,7 +210,7 @@ public class SimpleActorStream implements ActorStream, Actor
                           String from,
                           Serializable payload)
   {
-    _skeleton.queryResult(this, _fallback, id, to, from, payload);
+    _skeleton.queryResult(_actor, _next, id, to, from, payload);
   }
 
   /**
@@ -268,130 +236,12 @@ public class SimpleActorStream implements ActorStream, Actor
                          Serializable payload,
                          ActorError error)
   {
-    _skeleton.queryError(this, _fallback, id, to, from, payload, error);
+    _skeleton.queryError(_actor, _next, id, to, from, payload, error);
   }
 
-  protected BamSkeleton getSkeleton()
-  {
-    return _skeleton;
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  protected void messageFallback(String to, String from, Serializable payload)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " message ignored " + payload
-               + " {from: " + from + " to: " + to + "}");
-    }
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  protected void messageErrorFallback(String to,
-                                      String from,
-                                      Serializable payload,
-                                      ActorError error)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " messageError ignored " + error + " " + payload
-               + " {from: " + from + " to: " + to + "}");
-    }
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  protected void queryGetFallback(long id,
-                                  String to,
-                                  String from,
-                                  Serializable payload)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " queryGet not implemented for " + payload
-               + " {id: " + id + ", from: " + from + " to: " + to + "}");
-    }
-
-    String msg;
-    msg = (this + ": queryGet is not implemented for this payload:\n"
-           + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
-
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.FEATURE_NOT_IMPLEMENTED,
-                                      msg);
-
-    getBroker().queryError(id, from, to, payload, error);
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  protected void querySetFallback(long id,
-                                  String to,
-                                  String from,
-                                  Serializable payload)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " querySet not implemented for " + payload
-               + " {id: " + id + ", from: " + from + " to: " + to + "}");
-    }
-
-    String msg;
-    msg = (this + ": querySet is not implemented for this payload:\n"
-           + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
-
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.FEATURE_NOT_IMPLEMENTED,
-                                      msg);
-
-    getBroker().queryError(id, from, to, payload, error);
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  protected void queryResultFallback(long id,
-                                     String to,
-                                     String from,
-                                     Serializable payload)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " queryResult not implemented for " + payload
-               + " {id: " + id + ", from: " + from + " to: " + to + "}");
-    }
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  protected void queryErrorFallback(long id,
-                                    String to,
-                                    String from,
-                                    Serializable payload,
-                                    ActorError error)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " queryError ignored " + error + " " + payload
-               + " {id: " + id + ", from: " + from + " to: " + to + "}");
-    }
-  }
-  
-  public boolean isClosed()
-  {
-    return false;
-  }
-
-  /**
-   * Close the stream
-   */
-  public void close()
-  {
-  }
-
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getJid() + "," + _actor.getClass().getName() + "]";
   }
 }

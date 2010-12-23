@@ -45,10 +45,11 @@ import javax.management.ObjectName;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.Query;
-import com.caucho.bam.SimpleActor;
+import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
 import com.caucho.cloud.deploy.SetTagQuery;
@@ -90,19 +91,16 @@ public class DeployActor extends SimpleActor
 
   public DeployActor()
   {
+    super("deploy@resin.caucho", BamService.getCurrentBroker());
   }
-
-  @Override
-  public String getJid()
-  {
-    return "deploy@resin.caucho";
-  }
-
+  
+  /*
   @Override
   public ManagedBroker getBroker()
   {
     return _server.getAdminBroker();
   }
+  */
 
   @PostConstruct
   public void init()

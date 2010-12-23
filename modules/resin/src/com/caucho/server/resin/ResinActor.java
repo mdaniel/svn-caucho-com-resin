@@ -37,7 +37,7 @@ import javax.management.ObjectName;
 
 import com.caucho.bam.ActorError;
 import com.caucho.bam.Query;
-import com.caucho.bam.SimpleActor;
+import com.caucho.bam.actor.SimpleActor;
 import com.caucho.boot.PidQuery;
 import com.caucho.boot.WatchdogStopQuery;
 import com.caucho.env.shutdown.ExitCode;

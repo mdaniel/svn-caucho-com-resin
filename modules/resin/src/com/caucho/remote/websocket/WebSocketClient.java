@@ -37,6 +37,7 @@ import com.caucho.websocket.WebSocketListener;
 import java.io.*;
 import java.net.Socket;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.*;
 
 /**
@@ -67,12 +68,9 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   
   private WebSocketInputStream _wsIs;
   private WebSocketOutputStream _wsOs;
-
-  public WebSocketClient()
-  {
-    
-  }
-  public WebSocketClient(String url, WebSocketListener listener)
+  
+  public WebSocketClient(String url,
+                         WebSocketListener listener)
   {
     setUrl(url);
     
@@ -85,7 +83,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
       throw new IllegalArgumentException();
   }
   
-  public void setUrl(String url)
+  private void setUrl(String url)
   {
     _url = url;
     parseUrl(url);
@@ -95,19 +93,20 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   {
     _virtualHost = virtualHost;
   }
-  
-  public void setListener(WebSocketListener listener)
-  {
-    _listener = listener;
-  }
 
   public void connect()
+    throws IOException
+  {
+    connect(null, null);
+  }
+
+  public void connect(String userName, String password)
     throws IOException
   {
     if (_s != null)
       return;
     
-    connectImpl();
+    connectImpl(userName, password);
   }
 
   private void parseUrl(String url)
@@ -143,11 +142,11 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     }
   }
 
-  protected void connectImpl()
+  protected void connectImpl(String userName, String password)
     throws IOException
   {
     if (_listener == null)
-      throw new IllegalStateException("missing listener");
+      throw new IllegalStateException("missing websocket listener");
     
     _s = new Socket(_host, _port);
 
@@ -168,6 +167,11 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     _os.print("Upgrade: WebSocket\r\n");
     _os.print("Connection: Upgrade\r\n");
     _os.print("Origin: Foo\r\n");
+    
+    if (userName != null) {
+      _os.print("Sec-WebSocket-Login: true\r\n");
+    }
+    
     _os.print("\r\n");
     _os.flush();
 
@@ -179,6 +183,17 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     byte []serverNonce = readHello(_is);
     
     writeHello(_os, clientNonce, serverNonce);
+    
+    if (userName != null) {
+      byte []authNonce = readAuthNonce(_is);
+      
+      try {
+        writeAuth(_os, authNonce, userName, password);
+      } catch (NoSuchAlgorithmException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    
     _os.flush();
     
     _context = new ClientContext();
@@ -240,6 +255,53 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     return serverNonce;
   }
   
+  private byte []readAuthNonce(ReadStream is)
+    throws IOException
+  {
+    int frame1 = is.read();
+    int frame2 = is.read();
+    
+    if (frame2 < 0)
+      throw new EOFException(L.l("unexpected EOF waiting for auth"));
+    
+    int op = frame1 & 0xf;
+    int len = frame2 & 0x7f;
+    
+    if (op != OP_EXT) {
+      throw new EOFException(L.l("expected WebSocket auth at {0}", op));
+    }
+    
+    byte []data = new byte[len];
+    
+    is.readAll(data, 0, data.length);
+    
+    int p = scanToLf(data);
+    
+    if (p < 0)
+      throw new IllegalStateException("Cannot find authentication in '"
+                                      + new String(data));
+    
+    String key = new String(data, 0, p);
+    
+    if (! "x-authentication/challenge".equals(key))
+      throw new IllegalStateException(key);
+    
+    byte []nonce = new byte[data.length - p - 1];
+    System.arraycopy(data, p + 1, nonce, 0, nonce.length);
+    
+    return nonce;
+  }
+  
+  private int scanToLf(byte []data)
+  {
+    for (int i = 0; i < data.length; i++) {
+      if (data[i] == '\n')
+        return i;
+    }
+    
+    return -1;
+  }
+  
   private void writeHello(WriteStream os, byte []clientNonce, byte []serverNonce)
     throws IOException
   {
@@ -249,7 +311,41 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     os.write(hash.length);
     
     os.write(hash);
-    os.flush();
+  }
+  
+  private void writeAuth(WriteStream os, 
+                         byte []authNonce, 
+                         String userName,
+                         String password)
+    throws IOException, NoSuchAlgorithmException
+  {
+    MessageDigest md = MessageDigest.getInstance("MD5");
+    
+    md.update(userName.getBytes());
+    md.update((byte) ':');
+    md.update(password.getBytes());
+    
+    byte []passwordDigest = md.digest();
+    
+    md.reset();
+    
+    md.update(passwordDigest);
+    md.update(authNonce);
+    
+    byte []digest = md.digest();
+    
+    String code = "x-authentication/response";
+   
+    int length = code.length() + 1 + userName.length() + 1 + digest.length;
+   
+    os.write(FLAG_FIN|OP_EXT);
+    os.write(length);
+    
+    os.print(code);
+    os.print("\n");
+    os.print(userName);
+    os.print("\n");
+    os.write(digest);
   }
 
   private byte []calculateHash(byte []nonce1, byte []nonce2)

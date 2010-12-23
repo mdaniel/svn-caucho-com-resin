@@ -38,8 +38,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.VersionFactory;
-import com.caucho.bam.ActorSender;
-import com.caucho.bam.SimpleActorClient;
+import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.stream.ActorStream;
@@ -412,7 +412,7 @@ public class Server
   {
     NullActorStream stream = new NullActorStream(uid, getAdminBroker());
     
-    return new SimpleActorClient(stream, getAdminBroker(), uid, null);
+    return new SimpleActorSender(stream, getAdminBroker(), uid, null);
   }
 
   /**

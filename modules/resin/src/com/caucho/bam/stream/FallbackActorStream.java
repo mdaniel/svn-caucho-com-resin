@@ -29,12 +29,6 @@
 
 package com.caucho.bam.stream;
 
-import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.bam.Actor;
-import com.caucho.bam.ActorError;
 import com.caucho.bam.broker.Broker;
 
 /**
@@ -42,7 +36,7 @@ import com.caucho.bam.broker.Broker;
  * {@link com.caucho.bam.Message @Message} annotations to simplify
  * Actor development.
  *
- * <h2>Message Handline</h2>
+ * <h2>Message Handling</h2>
  *
  * To handle a message, create a method with the proper signature for
  * the expected payload type and
@@ -55,133 +49,27 @@ import com.caucho.bam.broker.Broker;
  * public void myMessage(String to, String from, MyPayload payload);
  * </pre></code>
  */
-public class FallbackActorStream implements ActorStream
+public class FallbackActorStream extends NullActorStream
 {
-  private static final Logger log
-    = Logger.getLogger(FallbackActorStream.class.getName());
-
-  private Actor _actor;
+  private Class<?> _actorClass;
   
-  public FallbackActorStream(Actor actor)
+  public FallbackActorStream(String jid,
+                             Broker broker,
+                             Class<?> actorClass)
   {
-    _actor = actor;
+    super(jid, broker);
     
-    if (actor == null)
-      throw new IllegalArgumentException();
-  }
-
-  /**
-   * Returns the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
-   * register it.
-   */
-  @Override
-  public String getJid()
-  {
-    return _actor.getJid();
-  }
-
-  /**
-   * Returns the stream to the broker for query results or errors, or
-   * low-level messaging.
-   */
-  @Override
-  public Broker getBroker()
-  {
-    return _actor.getBroker();
+    _actorClass = actorClass;
   }
   
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  @Override
-  public void message(String to, String from, Serializable payload)
+  public FallbackActorStream(ActorStream actorStream)
   {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " message ignored " + payload
-               + " {from: " + from + " to: " + to + "}");
-    }
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  @Override
-  public void messageError(String to,
-                           String from,
-                           Serializable payload,
-                           ActorError error)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " messageError ignored " + error + " " + payload
-               + " {from: " + from + " to: " + to + "}");
-    }
-  }
-  
-  /**
-   * Fallback for messages that don't match the skeleton.
-   */
-  @Override
-  public void query(long id,
-                    String to,
-                    String from,
-                    Serializable payload)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " query not implemented for " + payload
-               + " {id: " + id + ", from: " + from + " to: " + to + "}");
-    }
-
-    String msg;
-    msg = (this + ": query is not implemented for this payload:\n"
-           + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
-
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.FEATURE_NOT_IMPLEMENTED,
-                                      msg);
-
-    getBroker().queryError(id, from, to, payload, error);
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  @Override
-  public void queryResult(long id,
-                          String to,
-                          String from,
-                          Serializable payload)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " queryResult not implemented for " + payload
-               + " {id: " + id + ", from: " + from + " to: " + to + "}");
-    }
-  }
-  
-  /**
-   * Fallback for messages which don't match the skeleton.
-   */
-  @Override
-  public void queryError(long id,
-                         String to,
-                         String from,
-                         Serializable payload,
-                         ActorError error)
-  {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " queryError ignored " + error + " " + payload
-               + " {id: " + id + ", from: " + from + " to: " + to + "}");
-    }
-  }
-  
-  @Override
-  public boolean isClosed()
-  {
-    return false;
+    this(actorStream.getJid(), actorStream.getBroker(), actorStream.getClass());
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "," + _actor.getClass().getSimpleName() + "]";
+    return getClass().getSimpleName() + "[" + getJid() + "," + _actorClass.getSimpleName() + "]";
   }
 }

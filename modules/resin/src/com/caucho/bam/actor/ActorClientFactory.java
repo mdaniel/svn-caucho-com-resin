@@ -27,7 +27,8 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
+
 
 
 /**

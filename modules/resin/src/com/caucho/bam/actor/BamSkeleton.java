@@ -27,7 +27,7 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -39,13 +39,20 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorException;
+import com.caucho.bam.Message;
+import com.caucho.bam.MessageError;
+import com.caucho.bam.Query;
+import com.caucho.bam.QueryError;
+import com.caucho.bam.QueryResult;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.util.L10N;
 
 /**
  * The Skeleton introspects and dispatches messages for a
- * {@link com.caucho.bam.SimpleActor}
- * or {@link com.caucho.bam.SimpleActorStream}.
+ * {@link com.caucho.bam.actor.SimpleActor}
+ * or {@link com.caucho.bam.actor.SkeletonActorStreamFilter}.
  */
 public class BamSkeleton<S>
 {

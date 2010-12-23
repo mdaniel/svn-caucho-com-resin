@@ -32,6 +32,7 @@ package com.caucho.bam.stream;
 import java.io.Serializable;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.broker.Broker;
 
 
 /**
@@ -49,6 +50,15 @@ abstract public class AbstractActorStreamFilter implements ActorStream
   public String getJid()
   {
     return getNext().getJid();
+  }
+  
+  /**
+   * Returns the broker of the final actor.
+   */
+  @Override
+  public Broker getBroker()
+  {
+    return getNext().getBroker();
   }
   
   /**

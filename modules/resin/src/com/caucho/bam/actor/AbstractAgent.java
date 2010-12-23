@@ -46,7 +46,7 @@ import com.caucho.bam.mailbox.Mailbox;
  * for an agent developer.  Developers will implement callbacks for each
  * packet type the agent understands.
  *
- * Most developers will extend from {@link com.caucho.bam.SimpleActor}
+ * Most developers will extend from {@link com.caucho.bam.actor.SimpleActor}
  * instead of implementing Actor directly.  SimpleActor adds an
  * annotation-based message dispatching system to simplify Actor development.
  */

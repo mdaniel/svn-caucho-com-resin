@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.services;
 
-import com.caucho.bam.SimpleActor;
+import com.caucho.bam.actor.SimpleActor;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 

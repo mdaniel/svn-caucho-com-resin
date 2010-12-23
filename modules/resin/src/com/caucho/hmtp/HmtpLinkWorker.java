@@ -33,14 +33,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.caucho.bam.Actor;
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.actor.Actor;
 import com.caucho.bam.stream.ActorStream;
 
 /**
  * HMTP client protocol
  */
-public class HmtpLink implements Runnable {
+public class HmtpLinkWorker implements Runnable {
   protected InputStream _is;
   protected OutputStream _os;
 
@@ -51,7 +51,7 @@ public class HmtpLink implements Runnable {
   private HmtpWebSocketWriter _toLinkStream;
   private HmtpWebSocketReader _in;
 
-  public HmtpLink(Actor actor, InputStream is, OutputStream os)
+  public HmtpLinkWorker(Actor actor, InputStream is, OutputStream os)
     throws IOException
   {
     _actorStream = actor.getActorStream();
@@ -62,8 +62,10 @@ public class HmtpLink implements Runnable {
     _toLinkStream = new HmtpWebSocketWriter(_os);
     _in = new HmtpWebSocketReader(_is);
 
+    /*
     if (actor.getJid() == null)
       actor.setJid(actor.getClass().getSimpleName() + "@link");
+      */
     
     actor.setBroker(_toLinkStream);
   }

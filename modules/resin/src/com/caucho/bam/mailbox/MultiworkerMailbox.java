@@ -65,6 +65,13 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
+  public MultiworkerMailbox(ActorStream actorStream,
+                            Broker broker,
+                            int threadMax)
+  {
+    this(null, actorStream, broker, threadMax);
+  }
+  
   public MultiworkerMailbox(String jid, 
                             ActorStream actorStream,
                             Broker broker,
@@ -113,7 +120,10 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   @Override
   public String getJid()
   {
-    return _jid;
+    if (_jid != null)
+      return _jid;
+    else
+      return _actorStream.getJid();
   }
 
   /**

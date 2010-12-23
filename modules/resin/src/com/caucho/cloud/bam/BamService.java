@@ -83,6 +83,11 @@ public class BamService extends AbstractResinService
     return ResinSystem.getCurrentService(BamService.class);
   }
   
+  public static ManagedBroker getCurrentBroker()
+  {
+    return getCurrent().getBroker();
+  }
+  
   public String getJid()
   {
     return _jid;

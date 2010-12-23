@@ -35,13 +35,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorException;
+import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.actor.AbstractActorSender;
 import com.caucho.bam.actor.Actor;
-import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.client.LinkClient;
-import com.caucho.bam.query.QueryCallback;
-import com.caucho.bam.query.QueryManager;
-import com.caucho.bam.stream.NullActor;
+import com.caucho.bam.client.LinkConnection;
+import com.caucho.bam.client.LinkConnectionFactory;
+import com.caucho.bam.stream.ActorStream;
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.remote.websocket.WebSocketClient;
 import com.caucho.util.Alarm;
@@ -51,45 +52,33 @@ import com.caucho.websocket.WebSocketListener;
 /**
  * HMTP client protocol
  */
-public class HmtpClient implements ActorSender {
-  private static final L10N L = new L10N(HmtpClient.class);
+class HmtpLinkFactory implements LinkConnectionFactory {
+  private static final L10N L = new L10N(HmtpLinkFactory.class);
   
   private static final Logger log
-    = Logger.getLogger(HmtpClient.class.getName());
+    = Logger.getLogger(HmtpLinkFactory.class.getName());
   
   private String _url;
   private String _jid;
 
-  private Actor _actor;
-  
-  private HmtpLinkFactory _linkFactory;
-  private LinkClient _linkClient;
-  
   private WebSocketClient _webSocketClient;
-  
   private WebSocketListener _webSocketHandler;
   
+  private String _user;
+  private String _password;
+  private Serializable _credentials;
+  
   private ActorException _connException;
-
-  private Broker _linkBroker;
   
   private ClientAuthManager _authManager = new ClientAuthManager();
-  
-  public HmtpClient(String url, Actor actor)
-    throws IOException
+
+  public HmtpLinkFactory()
   {
-    _actor = actor;
-    _url = url;
-    
-    init();
   }
   
-  public HmtpClient(String url)
+  public void setUrl(String url)
   {
-    _actor = new NullActor();
     _url = url;
-    
-    init();
   }
 
   public void setVirtualHost(String host)
@@ -100,61 +89,37 @@ public class HmtpClient implements ActorSender {
   public void setEncryptPassword(boolean isEncrypt)
   {
   }
-  
-  @Override
-  public Broker getBroker()
-  {
-    return _linkClient.getBroker();
-  }
 
   public void connect()
   {
-    _linkFactory.connect();
   }
 
   public void connect(String user, String password)
   {
-    _linkFactory.connect(user, password);
+    _user = user;
+    _password = password;
   }
 
   public void connect(String user, Serializable credentials)
   {
-    _linkFactory.connect(user, credentials);
+    _user = user;
+    _credentials = credentials;
   }
 
-  private void init()
-  {
-    _linkFactory = new HmtpLinkFactory();
-    _linkFactory.setUrl(_url);
-    
-    _linkClient = new LinkClient(_linkFactory, _actor);
-  }
-  
-  protected void connectImpl()
+  public LinkConnection open(Broker broker)
   {
     try {
-      _linkClient.start();
-      /*
-      if (_actor != null)
-        _webSocketHandler = new HmtpWebSocketListener(_actor);
-      else
-        _webSocketHandler = new HmtpWebSocketListener(new NullActorStream());
+      HmtpWebSocketListener webSocketHandler = new HmtpWebSocketListener(broker);
         
-      _webSocketClient = new WebSocketClient(_url, _webSocketHandler);
+      _webSocketClient = new WebSocketClient(_url, webSocketHandler);
       
       _webSocketClient.connect();
-        */
-    } catch (ActorException e) {
-      _connException = e;
-
-      throw _connException;
-      /*
+      
+      return new HmtpLinkConnection(_webSocketClient, webSocketHandler);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (IOException e) {
-      _connException = new RemoteConnectionFailedException("Failed to connect to server at " + _url + "\n  " + e, 
-                                                           e);
-
-      throw _connException;
-      */
+      throw new ActorException(e);
     }
   }
       
@@ -179,7 +144,7 @@ public class HmtpClient implements ActorSender {
         
         NonceQuery nonceQuery = new NonceQuery(uid, clientNonce);
         NonceQuery nonceResult = null;
-//          = (NonceQuery) query(null, nonceQuery);
+        //          = (NonceQuery) query(null, nonceQuery);
         
         String serverNonce = nonceResult.getNonce();
         String serverSignature = nonceResult.getSignature();
@@ -201,7 +166,7 @@ public class HmtpClient implements ActorSender {
       }
 
       AuthResult result = null;
-      //result = (AuthResult) query(null, new AuthQuery(uid, credentials));
+      // result = (AuthResult) query(null, new AuthQuery(uid, credentials));
 
       _jid = result.getJid();
 
@@ -266,61 +231,25 @@ public class HmtpClient implements ActorSender {
     _webSocketClient.close();
    }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.actor.ActorSender#isClosed()
-   */
-  @Override
-  public boolean isClosed()
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public long nextQueryId()
-  {
-    return _linkClient.getSender().nextQueryId();
-  }
-
-  @Override
-  public void message(String to, Serializable payload)
-  {
-    _linkClient.getSender().message(to, payload);
-  }
-
-  @Override
-  public Serializable query(String to, Serializable payload)
-  {
-    return _linkClient.getSender().query(to, payload);
-  }
-
-  @Override
-  public Serializable query(String to, Serializable payload, long timeout)
-  {
-    return _linkClient.getSender().query(to, payload, timeout);
-  }
-
-  @Override
-  public void query(String to, Serializable payload, QueryCallback callback)
-  {
-    _linkClient.getSender().query(to, payload, callback);
-  }
-  
-  @Override
-  public QueryManager getQueryManager()
-  {
-    return _linkClient.getSender().getQueryManager();
-  }
-
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _url + "," + _actor + "]";
+    return getClass().getSimpleName() + "[" + _url + "]";
   }
 
   @Override
   protected void finalize()
   {
     close();
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.client.LinkConnectionFactory#isClosed()
+   */
+  @Override
+  public boolean isClosed()
+  {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

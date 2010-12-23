@@ -34,9 +34,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorSender;
 import com.caucho.bam.ActorError;
-import com.caucho.bam.SimpleActorClient;
+import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.NullActorStream;
 import com.caucho.hemp.broker.HempBroker;
@@ -101,7 +101,7 @@ public class BamModule extends AbstractQuercusModule
       
       NullActorStream stream = new NullActorStream(jid, broker);
 
-      connection = new SimpleActorClient(stream, broker, jid, resource);
+      connection = new SimpleActorSender(stream, broker, jid, resource);
       env.addCleanup(new BamConnectionResource(connection));
       env.setSpecialValue("_quercus_bam_connection", connection);
     }

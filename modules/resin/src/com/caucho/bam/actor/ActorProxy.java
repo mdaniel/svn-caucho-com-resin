@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
 
 import java.io.Serializable;
 
@@ -54,7 +54,7 @@ public interface ActorProxy {
   //
 
   /**
-   * Sends a unidirectional message to the target {@link com.caucho.bam.Actor},
+   * Sends a unidirectional message to the target {@link com.caucho.bam.actor.Actor},
    *
    * @param payload the message payload
    */

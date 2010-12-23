@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorException;
 import com.caucho.bam.Query;
-import com.caucho.bam.SimpleActorStream;
+import com.caucho.bam.actor.SkeletonActorStreamFilter;
 import com.caucho.bam.broker.Broker;
 import com.caucho.hmtp.AuthQuery;
 import com.caucho.hmtp.AuthResult;
@@ -46,7 +46,7 @@ import com.caucho.hmtp.NonceQuery;
  * authentication.
  */
 
-public class ServerLinkActor extends SimpleActorStream
+public class ServerLinkActor extends SkeletonActorStreamFilter
 {
   private static final Logger log
     = Logger.getLogger(ServerLinkActor.class.getName());

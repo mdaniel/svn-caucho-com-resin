@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
 
 import java.io.Serializable;
 
@@ -92,7 +92,7 @@ abstract public class AbstractActorSender implements ActorSender {
   //
 
   /**
-   * Sends a unidirectional message to an {@link com.caucho.bam.Actor},
+   * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
    * addressed by the Actor's JID.
    *
    * @param to the target actor's JID
@@ -137,7 +137,7 @@ abstract public class AbstractActorSender implements ActorSender {
                             Serializable payload)
   {
     return query(to, payload, getTimeout());
-    }
+  }
 
   /**
    * Sends a query information call to an actor,

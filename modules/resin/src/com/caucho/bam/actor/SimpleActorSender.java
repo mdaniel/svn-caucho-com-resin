@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
 
 import java.io.Serializable;
 
@@ -47,39 +47,27 @@ import com.caucho.bam.stream.NullActorStream;
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's JID as the "from" parameter.
  */
-public class SimpleActorClient implements ActorSender {
-  private final Broker _broker;
-  private String _jid;
-
+public class SimpleActorSender implements ActorSender {
   private final ActorStream _actorStream;
 
   private final QueryManager _queryManager = new QueryManager();
 
   private long _timeout = 120000L;
 
-  public SimpleActorClient(String jid, Broker broker)
+  public SimpleActorSender(String jid, Broker broker)
   {
     this(new NullActorStream(jid, broker));
   }
 
-  public SimpleActorClient(ActorStream next)
+  public SimpleActorSender(ActorStream next)
   {
-    this(next, next.getBroker());
-  }
-
-  public SimpleActorClient(ActorStream next, Broker broker)
-  {
-    _broker = broker;
-    
-    if (broker == null)
+    if (next == null)
       throw new NullPointerException();
     
     _actorStream = new QueryActorStreamFilter(next, _queryManager);
-    
-    _jid = _actorStream.getJid();
   }
   
-  public SimpleActorClient(ActorStream next,
+  public SimpleActorSender(ActorStream next,
                            ManagedBroker broker,
                            String uid, 
                            String resource)
@@ -94,7 +82,7 @@ public class SimpleActorClient implements ActorSender {
     Mailbox clientMailbox
       = broker.createClient(mailbox, uid, resource);
     
-    _jid = clientMailbox.getJid(); 
+    // _jid = clientMailbox.getJid(); 
   }
 
   /**
@@ -103,7 +91,7 @@ public class SimpleActorClient implements ActorSender {
   @Override
   public String getJid()
   {
-    return _jid;
+    return getActorStream().getJid();
   }
 
   //
@@ -121,7 +109,7 @@ public class SimpleActorClient implements ActorSender {
   @Override
   public Broker getBroker()
   {
-    return _broker;
+    return getActorStream().getBroker();
   }
   
   protected ManagedBroker getManagedBroker()
@@ -134,7 +122,7 @@ public class SimpleActorClient implements ActorSender {
   //
 
   /**
-   * Sends a unidirectional message to an {@link com.caucho.bam.Actor},
+   * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
    * addressed by the Actor's JID.
    *
    * @param to the target actor's JID
@@ -289,6 +277,6 @@ public class SimpleActorClient implements ActorSender {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getActorStream() + "]";
   }
 }

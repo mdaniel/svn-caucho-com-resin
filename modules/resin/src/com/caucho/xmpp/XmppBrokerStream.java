@@ -37,8 +37,8 @@ import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
-import com.caucho.bam.ActorSender;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;

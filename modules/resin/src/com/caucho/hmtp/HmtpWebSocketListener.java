@@ -32,7 +32,8 @@ package com.caucho.hmtp;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.bam.Actor;
+import com.caucho.bam.actor.Actor;
+import com.caucho.bam.broker.Broker;
 import com.caucho.websocket.AbstractWebSocketListener;
 import com.caucho.websocket.WebSocketContext;
 
@@ -40,26 +41,29 @@ import com.caucho.websocket.WebSocketContext;
  * HmtpReader stream handles client packets received from the server.
  */
 public class HmtpWebSocketListener extends AbstractWebSocketListener {
-  private Actor _actor;
+  private Broker _broker;
   
   private HmtpReader _hIn;
   private HmtpWebSocketContextWriter _hOut;
 
-  public HmtpWebSocketListener(Actor actor)
+  public HmtpWebSocketListener(Broker broker)
   {
-    if (actor == null)
+    if (broker == null)
       throw new IllegalArgumentException();
     
-    _actor = actor;
+    _broker = broker;
   }
 
+  HmtpWebSocketContextWriter getOutboundStream()
+  {
+    return _hOut;
+  }
+  
   @Override
   public void onStart(WebSocketContext context)
   {
     _hOut = new HmtpWebSocketContextWriter(context);
     _hIn = new HmtpReader();
-    
-    _actor.setBroker(_hOut);
   }
   
   /**
@@ -70,12 +74,12 @@ public class HmtpWebSocketListener extends AbstractWebSocketListener {
   public void onReadBinary(WebSocketContext context, InputStream is)
     throws IOException
   {
-    _hIn.readPacket(is, _actor.getActorStream());
+    _hIn.readPacket(is, _broker);
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _actor + "]";
+    return getClass().getSimpleName() + "[" + _broker + "]";
   }
 }

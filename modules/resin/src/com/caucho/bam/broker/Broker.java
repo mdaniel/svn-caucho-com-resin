@@ -55,10 +55,10 @@ public interface Broker extends ActorStream
   /**
    * Adds a mailbox (optional operation).
    */
-  // public void addMailbox(Mailbox mailbox);
+  public void addMailbox(Mailbox mailbox);
   
   /**
    * Removes a mailbox (optional operation).
    */
-  // public void removeMailbox(Mailbox mailbox);
+  public void removeMailbox(Mailbox mailbox);
 }

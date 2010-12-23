@@ -39,9 +39,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 
-import com.caucho.bam.Actor;
 import com.caucho.bam.ActorError;
-import com.caucho.bam.BamSkeleton;
+import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.BamSkeleton;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.HashMapBroker;
 import com.caucho.bam.broker.ManagedBroker;
@@ -72,6 +72,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   private Actor _actor;
   
   private HashMapBroker _broker;
+  private Mailbox _mailbox;
   
   public HmtpServlet()
   {
@@ -138,10 +139,10 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
     
     String jid = uid + "@" + getBrokerJid() + "/" + resource;
     
-    return new ClientLinkActor(jid, hmtpStream);
+    return new ClientLinkActor(jid, _broker, hmtpStream);
   }
 
-  public void addClientLinkActor(Actor linkActor)
+  public void addClientLinkActor(ClientLinkActor linkActor)
   {
     _broker.createAgent(linkActor.getActorStream());
   }  
@@ -171,7 +172,6 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
     return _servletActorStream;
   }
 
-  @Override
   public void setActorStream(ActorStream actorStream)
   {
     _servletActorStream = actorStream;
@@ -184,6 +184,17 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   }
   
   public void setBroker(Broker broker)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  @Override
+  public Mailbox getMailbox()
+  {
+    return _mailbox;
+  }
+  
+  public void setMailbox(Mailbox mailbox)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

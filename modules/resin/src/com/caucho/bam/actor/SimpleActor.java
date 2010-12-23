@@ -27,40 +27,70 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
+import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 
 /**
  * Base class for implementing an Agent.
  */
-public class SimpleActor extends SimpleActorStream
+public class SimpleActor extends AbstractActorStream
   implements Actor
 {
-  private ActorStream _actorStream;
+  private final SkeletonActorStreamFilter<?> _skeleton;
+  private final SimpleActorSender _sender;
   
-  private final SimpleActorClient _sender;
+  private String _jid;
+  private Broker _broker;
+  private Mailbox _mailbox;
+  
+  private ActorStream _actorStream;
 
   public SimpleActor()
   {
-    _sender = new SimpleActorClient(this);
+    _jid = getClass().getSimpleName() + "@localhost";
+    
+    _skeleton = new SkeletonActorStreamFilter(this, this);
+    _sender = new SimpleActorSender(_skeleton);
     
     setActorStream(_sender.getActorStream());
   }
 
   public SimpleActor(String jid, Broker broker)
   {
-    super(jid, broker);
+    this();
     
-    _sender = new SimpleActorClient(this, broker);
+    _jid = jid;
+    _broker = broker;
     
-    setActorStream(_sender.getActorStream());
+    if (broker == null)
+      throw new IllegalArgumentException("broker must not be null");
   }
   
   //
   // basic Actor API
   //
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.actor.Actor#setJid(java.lang.String)
+   */
+  @Override
+  public String getJid()
+  {
+    return _jid;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.actor.Actor#setJid(java.lang.String)
+   */
+  @Override
+  public void setJid(String jid)
+  {
+    _jid = jid;
+  }
 
   /**
    * Returns the custom {@link com.caucho.bam.stream.ActorStream} to the
@@ -70,6 +100,7 @@ public class SimpleActor extends SimpleActorStream
    * Developers will customize the ActorStream to receive messages from
    * the Broker.
    */
+  @Override
   public ActorStream getActorStream()
   {
     return _actorStream;
@@ -85,20 +116,46 @@ public class SimpleActor extends SimpleActorStream
   
 
   /**
-   * Sets the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
-   * register it.
-   */
-  @Override
-  public void setJid(String jid)
-  {
-    super.setJid(jid);
-  }
-
-  /**
    * Returns the ActorClient to the link for convenient message calls.
    */
   public ActorSender getSender()
   {
     return _sender;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.Actor#getMailbox()
+   */
+  @Override
+  public Mailbox getMailbox()
+  {
+    return _mailbox;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.Actor#setMailbox(com.caucho.bam.mailbox.Mailbox)
+   */
+  @Override
+  public void setMailbox(Mailbox mailbox)
+  {
+    _mailbox = mailbox;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.Actor#getMailbox()
+   */
+  @Override
+  public Broker getBroker()
+  {
+    return _broker;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.bam.Actor#setMailbox(com.caucho.bam.mailbox.Mailbox)
+   */
+  @Override
+  public void setBroker(Broker broker)
+  {
+    _broker = broker;
   }
 }

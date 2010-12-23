@@ -1954,6 +1954,8 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
                                           getRemoteAddr()));
     }
     
+    String login = getHeader("Sec-WebSocket-Login");
+    
     _response.setStatus(101, "Web Socket Protocol Handshake");
     _response.setHeader("Upgrade", "WebSocket");
 
@@ -1988,23 +1990,32 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     if (protocol != null)
       _response.setHeader("WebSocket-Protocol", protocol);
 
-    WebSocketContextImpl duplex
+    WebSocketContextImpl webSocket
       = new WebSocketContextImpl(this, _response, listener,
                                  cnonce);
     
-    SocketLinkDuplexController controller = _request.startDuplex(duplex);
-    duplex.setController(controller);
+    SocketLinkDuplexController controller = _request.startDuplex(webSocket);
+    webSocket.setController(controller);
     
     boolean isValid = false;
     try {
       _response.getOutputStream().flush();
       
-      duplex.sendHello();
-      duplex.flush();
+      webSocket.sendHello();
+      
+      if (login != null)
+        webSocket.sendAuthChallenge();
+      
+      webSocket.flush();
 
-      duplex.onStart();
+      webSocket.onStart();
     
-      duplex.readHello();
+      webSocket.readHello();
+      
+      if (login != null) {
+        webSocket.readAuthResponse();
+      }
+      System.out.println("LOGIN: " + login);
       
       isValid = true;
     } catch (RuntimeException e) {
@@ -2012,10 +2023,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      duplex.onHandshakeComplete(isValid);
+      webSocket.onHandshakeComplete(isValid);
     }
 
-    return duplex;
+    return webSocket;
   }
   
   private String hashWebSocket(byte []nonce, String key)

@@ -36,8 +36,8 @@ import java.util.logging.LogRecord;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.bam.ActorSender;
-import com.caucho.bam.SimpleActorClient;
+import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.stream.NullActorStream;
 import com.caucho.config.ConfigException;
 import com.caucho.hemp.broker.HempBroker;
@@ -78,7 +78,7 @@ public class HmtpHandler extends Handler {
     
     NullActorStream stream = new NullActorStream("log@localhost", broker);
     
-    _conn = new SimpleActorClient(stream, broker, "log@localhost", null);
+    _conn = new SimpleActorSender(stream, broker, "log@localhost", null);
   }
 
   /**

@@ -29,7 +29,7 @@
 
 package com.caucho.jmtp;
 
-import com.caucho.bam.Actor;
+import com.caucho.bam.actor.Actor;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorException;

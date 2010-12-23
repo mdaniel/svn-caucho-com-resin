@@ -27,7 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
+
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorException;
 
 
 /**

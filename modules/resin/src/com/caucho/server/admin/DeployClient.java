@@ -36,10 +36,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.caucho.bam.ActorSender;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
+import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.cloud.deploy.CopyTagQuery;
@@ -110,9 +110,8 @@ public class DeployClient implements Repository
     
     _url = url;
     
-    HmtpClient client = new HmtpClient();
+    HmtpClient client = new HmtpClient(url);
     try {
-      client.setUrl(url);
       client.setVirtualHost("admin.resin");
 
       client.connect(userName, password);

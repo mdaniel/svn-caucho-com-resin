@@ -49,7 +49,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.thread.ThreadPool;
-import com.caucho.hmtp.HmtpLink;
+import com.caucho.hmtp.HmtpLinkWorker;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.TcpSocketLinkListener;
@@ -365,7 +365,7 @@ class WatchdogChildProcess
 
     _watchdogActor = new WatchdogActor(this);
 
-    HmtpLink link = new HmtpLink(_watchdogActor, watchdogIs, watchdogOs);
+    HmtpLinkWorker link = new HmtpLinkWorker(_watchdogActor, watchdogIs, watchdogOs);
 
     try {
       ThreadPool.getCurrent().schedule(link);

@@ -32,7 +32,7 @@ package com.caucho.bam;
 
 /**
  * Actor exception when a feature does not exist because the
- * service {@link com.caucho.bam.Actor}
+ * service {@link com.caucho.bam.actor.Actor}
  * does not understand or implement the message or RPC query.
  */
 @SuppressWarnings("serial")

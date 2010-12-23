@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.bam.Actor;
+import com.caucho.bam.actor.Actor;
 import com.caucho.bam.broker.AbstractManagedBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
@@ -527,7 +527,7 @@ public class HempBroker extends AbstractManagedBroker
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
       mailbox = new MultiworkerMailbox(jid, actorStream, this, threadMax);
-      bamActor.setActorStream(actorStream);
+      // bamActor.setActorStream(actorStream);
     }
     else {
       mailbox = new PassthroughMailbox(jid, bamActor.getActorStream(), this);
@@ -564,7 +564,7 @@ public class HempBroker extends AbstractManagedBroker
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
       mailbox = new MultiworkerMailbox(jid, actorStream, this, threadMax);
-      bamActor.setActorStream(actorStream);
+      bamActor.setMailbox(mailbox);
     }
 
     addMailbox(mailbox);

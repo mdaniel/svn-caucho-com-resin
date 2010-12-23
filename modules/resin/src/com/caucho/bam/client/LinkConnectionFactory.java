@@ -27,52 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.resin;
+package com.caucho.bam.client;
 
-import com.caucho.hmtp.HmtpLinkWorker;
-
-import java.io.*;
-import java.util.logging.*;
+import com.caucho.bam.broker.Broker;
 
 /**
  * HMTP client protocol
  */
-public class ResinLink extends HmtpLinkWorker implements Runnable {
-  private static final Logger log
-    = Logger.getLogger(ResinLink.class.getName());
-
-  private ResinActor _resinActor;
+public interface LinkConnectionFactory {
+  public boolean isClosed();
   
-  protected InputStream _is;
-  protected OutputStream _os;
-
-  public ResinLink(ResinActor resinActor, InputStream is, OutputStream os)
-    throws IOException
-  {
-    super(resinActor, is, os);
-    
-    _resinActor = resinActor;
-  }
-
-  /**
-   * Receive messages from the client
-   */
-  @Override
-  public void run()
-  {
-    try {
-      Thread.currentThread().setName("resin-main-link");
-      ClassLoader loader = ClassLoader.getSystemClassLoader();
-      Thread.currentThread().setContextClassLoader(loader);
-      
-      super.run();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    } finally {
-      if (log.isLoggable(Level.FINE))
-        log.fine(this + " finishing main thread");
-      
-      _resinActor.destroy();
-    }
-  }
+  public LinkConnection open(Broker broker);
 }

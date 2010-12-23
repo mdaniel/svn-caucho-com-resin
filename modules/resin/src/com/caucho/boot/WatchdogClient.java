@@ -39,8 +39,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.VersionFactory;
-import com.caucho.bam.ActorSender;
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.actor.ActorSender;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.hmtp.HmtpClient;
@@ -342,11 +342,11 @@ class WatchdogClient
   private ActorSender getConnection()
   {
     if (_conn == null) {
-      HmtpClient client = new HmtpClient();
-      
-      client.setUrl("http://" + getWatchdogAddress()
+      String url = ("http://" + getWatchdogAddress()
                     + ":" + getWatchdogPort()
                     + "/hmtp");
+      
+      HmtpClient client = new HmtpClient(url);
 
       client.setVirtualHost("admin.resin");
       

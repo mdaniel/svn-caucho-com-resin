@@ -27,62 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.bam.actor;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 
 
 /**
  * Abstract implementation of a BAM actor.
  */
-public class AbstractActor implements Actor
+abstract public class AbstractActor implements Actor
 {
-  private ActorStream _actorStream;
   private Broker _broker;
-
-  private String _jid;
-
-  /**
-   * The jid to the {@link com.caucho.bam.broker.Broker} for addressing
-   * from other Actors.
-   */
-  public void setJid(String jid)
-  {
-    _jid = jid;
-  }
-
-  /**
-   * The jid to the {@link com.caucho.bam.broker.Broker} for addressing
-   * from other Actors.
-   */
-  public String getJid()
-  {
-    return _jid;
-  }
+  private Mailbox _mailbox;
 
   /**
    * Returns the stream to the Actor from the link so
    * messages from other Actors can be delivered.
    */
-  public ActorStream getActorStream()
-  {
-    return _actorStream;
-  }
-
-  /**
-   * The stream to the Actor from the link so
-   * messages from other Actors can be delivered.
-   */
-  public void setActorStream(ActorStream actorStream)
-  {
-    _actorStream = actorStream;
-  }
+  @Override
+  abstract public ActorStream getActorStream();
 
   /**
    * The stream to the link is used by the Actor to send messages to
    * all other Actors in the system.
    */
+  @Override
   public Broker getBroker()
   {
     return _broker;
@@ -92,14 +63,35 @@ public class AbstractActor implements Actor
    * The stream to the link is used by the Actor to send messages to
    * all other Actors in the system.
    */
+  @Override
   public void setBroker(Broker broker)
   {
     _broker = broker;
   }
 
+  /**
+   * The stream to the link is used by the Actor to send messages to
+   * all other Actors in the system.
+   */
+  @Override
+  public Mailbox getMailbox()
+  {
+    return _mailbox;
+  }
+
+  /**
+   * The stream to the link is used by the Actor to send messages to
+   * all other Actors in the system.
+   */
+  @Override
+  public void setMailbox(Mailbox mailbox)
+  {
+    _mailbox = mailbox;
+  }
+
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getActorStream().getJid() + "]";
   }
 }

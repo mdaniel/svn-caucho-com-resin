@@ -72,6 +72,18 @@ abstract public class AbstractBroker
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  @Override
+  public void addMailbox(Mailbox mailbox)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  @Override
+  public void removeMailbox(Mailbox mailbox)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Returns true if the broker has been closed
