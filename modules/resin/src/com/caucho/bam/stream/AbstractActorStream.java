@@ -149,6 +149,7 @@ abstract public class AbstractActorStream implements ActorStream
                     String from,
                     Serializable payload)
   {
+    Thread.dumpStack();
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " query not implemented " + payload
                 + " {id:" + id + ", from:" + from + ", to:" + to + "}");

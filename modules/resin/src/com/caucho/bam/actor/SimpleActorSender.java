@@ -39,7 +39,6 @@ import com.caucho.bam.query.QueryActorStreamFilter;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
 import com.caucho.bam.query.QueryManager;
-import com.caucho.bam.stream.AbstractActorStreamFilter;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.NullActorStream;
 
@@ -49,6 +48,7 @@ import com.caucho.bam.stream.NullActorStream;
  */
 public class SimpleActorSender implements ActorSender {
   private final ActorStream _actorStream;
+  private Broker _broker;
 
   private final QueryManager _queryManager = new QueryManager();
 
@@ -58,13 +58,18 @@ public class SimpleActorSender implements ActorSender {
   {
     this(new NullActorStream(jid, broker));
   }
-
   public SimpleActorSender(ActorStream next)
+  {
+    this(next, next.getBroker());
+  }
+  
+  public SimpleActorSender(ActorStream next, Broker broker)
   {
     if (next == null)
       throw new NullPointerException();
     
     _actorStream = new QueryActorStreamFilter(next, _queryManager);
+    _broker = broker;
   }
   
   public SimpleActorSender(ActorStream next,
@@ -109,7 +114,12 @@ public class SimpleActorSender implements ActorSender {
   @Override
   public Broker getBroker()
   {
-    return getActorStream().getBroker();
+    return _broker;
+  }
+  
+  public void setBroker(Broker broker)
+  {
+    _broker = broker;
   }
   
   protected ManagedBroker getManagedBroker()
@@ -174,9 +184,9 @@ public class SimpleActorSender implements ActorSender {
   public Serializable query(String to,
                             Serializable payload)
   {
-    ActorStream linkStream = getBroker();
+    Broker broker = getBroker();
 
-    if (linkStream == null)
+    if (broker == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
     long id = _queryManager.nextQueryId();
@@ -184,7 +194,7 @@ public class SimpleActorSender implements ActorSender {
     QueryFuture future
       = _queryManager.addQueryFuture(id, to, getJid(), payload, _timeout);
 
-    linkStream.query(id, to, getJid(), payload);
+    broker.query(id, to, getJid(), payload);
 
     return future.get();
   }

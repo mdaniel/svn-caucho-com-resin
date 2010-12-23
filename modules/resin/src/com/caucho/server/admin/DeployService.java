@@ -29,6 +29,8 @@
 
 package com.caucho.server.admin;
 
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.Service;
 import com.caucho.loader.EnvironmentLocal;
 
@@ -49,6 +51,7 @@ public class DeployService
     return _localDeployActor.get();
   }
   
+  @PostConstruct
   public void init()
   {
     _localDeployActor.get().init();

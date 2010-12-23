@@ -44,6 +44,7 @@ public class NullActor extends NullActorStream implements Actor
   public NullActor()
   {
     this("null");
+    Thread.dumpStack();
   }
   
   public NullActor(String jid)
@@ -51,6 +52,14 @@ public class NullActor extends NullActorStream implements Actor
     super();
     
     setJid(jid);
+  }
+  
+  public NullActor(String jid, Broker broker)
+  {
+    super();
+    
+    setJid(jid);
+    setBroker(broker);
   }
 
   @Override

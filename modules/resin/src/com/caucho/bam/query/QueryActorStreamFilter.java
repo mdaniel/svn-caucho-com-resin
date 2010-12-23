@@ -117,4 +117,10 @@ public class QueryActorStreamFilter implements ActorStream {
       _next.queryError(id, to, from, payload, error);
     }
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
+  }
 }

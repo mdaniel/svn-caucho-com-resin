@@ -1954,7 +1954,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
                                           getRemoteAddr()));
     }
     
-    String login = getHeader("Sec-WebSocket-Login");
+    // String login = getHeader("Sec-WebSocket-Login");
     
     _response.setStatus(101, "Web Socket Protocol Handshake");
     _response.setHeader("Upgrade", "WebSocket");
@@ -2003,8 +2003,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       
       webSocket.sendHello();
       
+      /*
       if (login != null)
         webSocket.sendAuthChallenge();
+        */
       
       webSocket.flush();
 
@@ -2012,16 +2014,21 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     
       webSocket.readHello();
       
+      /*
       if (login != null) {
         webSocket.readAuthResponse();
       }
-      System.out.println("LOGIN: " + login);
+      */
       
       isValid = true;
     } catch (RuntimeException e) {
+      e.printStackTrace();
       throw e;
     } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException(e);
+    } catch (Throwable e) {
+      e.printStackTrace();
     } finally {
       webSocket.onHandshakeComplete(isValid);
     }

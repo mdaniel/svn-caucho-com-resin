@@ -66,63 +66,9 @@ public class WebAppDeployClient extends DeployClient
     super(host, port, userName, password);
   }
 
-  /*
-  public String deployPomegranateWar(String tag,
-                                     Path pomegranateWar,
-                                     String pomegranateTag,
-                                     HashMap<String,PomegranateJar> knownJars,
-                                     HashMap<String,String> attributes)
-    throws IOException
-  {
-    TagResult []results = queryTags(pomegranateTag);
-
-    if (results.length == 0) {
-      throw new RuntimeException("Pomegranate repository at tag " 
-                                 + pomegranateTag + " does not exist");
-    }
-
-    GitWorkingTree pomegranateTree = getWorkingTree(results[0].getRoot());
-    GitCommitTree pomCommitTree = new GitCommitTree(pomegranateTree);
-
-    PomegranateGitCommitWar commit 
-      = new PomegranateGitCommitWar(pomegranateWar, knownJars, pomCommitTree);
-
-    try {
-      return sendPomegranateWarFiles(tag, commit, pomegranateTag, attributes);
-    } finally {
-      commit.close();
-    }
-  }*/
-
   //
   // low-level routines
   //
-
-  /*
-  private String sendPomegranateWarFiles(String tag,
-                                         PomegranateGitCommitWar commit,
-                                         String pomegranateTag,
-                                         HashMap<String,String> attributes)
-    throws IOException
-  {
-    String result = deployJar(tag, commit, attributes);
-
-    String []files = getCommitList(commit.getPomegranateCommitList());
-
-    for (String sha1 : files) { 
-      GitJarStreamSource gitSource = new GitJarStreamSource(sha1, commit);
-      StreamSource source = new StreamSource(gitSource);
-
-      DeploySendQuery sendQuery = new DeploySendQuery(sha1, source);
-
-      querySet(sendQuery);
-    }
-
-    setTag(pomegranateTag, commit.getPomegranateDigest(), attributes);
-
-    return result;
-  }
-  */
 
   //
   // tag construction

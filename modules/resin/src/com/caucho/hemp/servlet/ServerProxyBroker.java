@@ -34,6 +34,7 @@ import java.io.Serializable;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.ActorStream;
 
 
@@ -69,6 +70,12 @@ public class ServerProxyBroker extends AbstractBroker {
   public String getClientJid()
   {
     return _clientManager.getJid();
+  }
+  
+  @Override
+  public Mailbox getMailbox(String jid)
+  {
+    return null;
   }
 
   /**
@@ -118,10 +125,12 @@ public class ServerProxyBroker extends AbstractBroker {
   {
     if (to == null)
       _linkActor.query(id, to, from, payload);
-    else if (isActive())
+    else if (isActive()) {
       _broker.query(id, to, getClientJid(), payload);
-    else
+    }
+    else {
       super.query(id, to, from, payload);
+    }
   }
 
   /**

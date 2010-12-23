@@ -60,6 +60,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
   
   private String _url;
   private String _jid;
+  private String _virtualHost;
 
   private WebSocketClient _webSocketClient;
   private WebSocketListener _webSocketHandler;
@@ -83,7 +84,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
 
   public void setVirtualHost(String host)
   {
-    // _webSocketClient.setVirtualHost(host);
+    _virtualHost = host;
   }
 
   public void setEncryptPassword(boolean isEncrypt)
@@ -112,6 +113,9 @@ class HmtpLinkFactory implements LinkConnectionFactory {
       HmtpWebSocketListener webSocketHandler = new HmtpWebSocketListener(broker);
         
       _webSocketClient = new WebSocketClient(_url, webSocketHandler);
+      
+      if (_virtualHost != null)
+        _webSocketClient.setVirtualHost(_virtualHost);
       
       _webSocketClient.connect();
       

@@ -58,4 +58,10 @@ public class PassthroughBroker extends AbstractBroker
   {
     _mailbox = mailbox;
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _mailbox + "]";
+  }
 }

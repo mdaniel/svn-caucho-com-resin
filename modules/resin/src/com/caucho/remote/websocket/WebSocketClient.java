@@ -468,7 +468,12 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   {
     public void run()
     {
+      Thread thread = Thread.currentThread();
+      String name = thread.getName();
+      
       try {
+        thread.setName("web-socket-client");
+        
         handleRequests();
       } catch (Exception e) {
         if (_isClosed)
@@ -483,6 +488,8 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
         }
         
         close();
+        
+        thread.setName(name);
       }
     }
 

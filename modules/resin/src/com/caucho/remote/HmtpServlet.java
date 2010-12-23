@@ -200,7 +200,8 @@ public class HmtpServlet extends GenericServlet {
       _linkStream = new PassthroughBroker(toLinkMailbox);
       ClientStubManager clientManager = new ClientStubManager(broker, toLinkMailbox);
       _linkService = new ServerLinkActor(_linkStream, clientManager, _authManager, _ipAddress);
-      _broker = new ServerProxyBroker(_linkStream, clientManager, _linkService);
+      _broker = new ServerProxyBroker(broker, clientManager,
+                                      _linkService.getActorStream());
     }
 
     @Override

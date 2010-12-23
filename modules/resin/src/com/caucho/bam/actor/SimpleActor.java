@@ -65,6 +65,7 @@ public class SimpleActor extends AbstractActorStream
     
     _jid = jid;
     _broker = broker;
+    _sender.setBroker(broker);
     
     if (broker == null)
       throw new IllegalArgumentException("broker must not be null");

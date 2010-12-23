@@ -59,6 +59,7 @@ public class HmtpClient implements ActorSender {
   
   private String _url;
   private String _jid;
+  private String _virtualHost;
 
   private Actor _actor;
   
@@ -86,7 +87,7 @@ public class HmtpClient implements ActorSender {
   
   public HmtpClient(String url)
   {
-    _actor = new NullActor();
+    _actor = new NullActor("HmtpClient@" + url);
     _url = url;
     
     init();
@@ -94,7 +95,7 @@ public class HmtpClient implements ActorSender {
 
   public void setVirtualHost(String host)
   {
-    // _webSocketClient.setVirtualHost(host);
+    _linkFactory.setVirtualHost(host);
   }
 
   public void setEncryptPassword(boolean isEncrypt)
@@ -114,12 +115,16 @@ public class HmtpClient implements ActorSender {
 
   public void connect(String user, String password)
   {
-    _linkFactory.connect(user, password);
+    _linkFactory.connect();
+    
+    loginImpl(user, password);
   }
 
   public void connect(String user, Serializable credentials)
   {
-    _linkFactory.connect(user, credentials);
+    _linkFactory.connect();
+    
+    loginImpl(user, credentials);
   }
 
   private void init()
@@ -178,8 +183,7 @@ public class HmtpClient implements ActorSender {
         String clientNonce = String.valueOf(Alarm.getCurrentTime());
         
         NonceQuery nonceQuery = new NonceQuery(uid, clientNonce);
-        NonceQuery nonceResult = null;
-//          = (NonceQuery) query(null, nonceQuery);
+        NonceQuery nonceResult = (NonceQuery) query(null, nonceQuery);
         
         String serverNonce = nonceResult.getNonce();
         String serverSignature = nonceResult.getSignature();
@@ -196,12 +200,15 @@ public class HmtpClient implements ActorSender {
         
         if ("".equals(uid))
           credentials = new SignedCredentials(uid, serverNonce, signature);
-        else
+        else if (security != null)
           credentials = security.createCredentials(uid, password, serverNonce);
+        else {
+          security = new SecurityService();
+          credentials = security.createCredentials(uid, password, serverNonce);
+        }
       }
 
-      AuthResult result = null;
-      //result = (AuthResult) query(null, new AuthQuery(uid, credentials));
+      AuthResult result = (AuthResult) query(null, new AuthQuery(uid, credentials));
 
       _jid = result.getJid();
 
@@ -262,8 +269,9 @@ public class HmtpClient implements ActorSender {
       log.fine(this + " close");
 
     // super.close();
-    
-    _webSocketClient.close();
+
+    if (_webSocketClient != null)
+      _webSocketClient.close();
    }
 
   /* (non-Javadoc)

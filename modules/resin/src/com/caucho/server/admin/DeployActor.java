@@ -46,8 +46,6 @@ import javax.management.ObjectName;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
-import com.caucho.bam.broker.Broker;
-import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.deploy.CopyTagQuery;
@@ -75,7 +73,6 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-@Service
 public class DeployActor extends SimpleActor
 {
   private static final Logger log
@@ -117,10 +114,11 @@ public class DeployActor extends SimpleActor
     _repository = RepositoryService.getCurrentRepositorySpi();
 
     setBroker(getBroker());
-    MultiworkerMailbox queue
-      = new MultiworkerMailbox(getActorStream().getJid(), getActorStream(), getBroker(), 2);
+    MultiworkerMailbox mailbox
+      = new MultiworkerMailbox(getActorStream().getJid(), 
+                               getActorStream(), getBroker(), 2);
     
-    getBroker().addMailbox(queue);
+    getBroker().addMailbox(mailbox);
   }
 
   @Query
