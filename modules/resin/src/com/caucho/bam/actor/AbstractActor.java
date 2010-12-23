@@ -49,6 +49,17 @@ abstract public class AbstractActor implements Actor
   @Override
   abstract public ActorStream getActorStream();
 
+  @Override
+  public String getJid()
+  {
+    return getActorStream().getJid();
+  }
+  
+  @Override
+  public void setJid(String jid)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   /**
    * The stream to the link is used by the Actor to send messages to
    * all other Actors in the system.
