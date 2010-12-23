@@ -46,6 +46,11 @@ public class RemoteConnectionFailedException
     super(msg);
   }
 
+  public RemoteConnectionFailedException(Throwable e)
+  {
+    super(e.getMessage(), e);
+  }
+
   public RemoteConnectionFailedException(String msg, Throwable e)
   {
     super(msg, e);
@@ -64,5 +69,18 @@ public class RemoteConnectionFailedException
   public RemoteConnectionFailedException(ActorError error)
   {
     super(error);
+  }
+
+  @Override
+  public ActorError createActorError()
+  {
+    ActorError error = getActorError();
+
+    if (error != null)
+      return error;
+
+    return new ActorError(ActorError.TYPE_CANCEL,
+                          ActorError.REMOTE_CONNECTION_FAILED,
+                          getMessage());
   }
 }

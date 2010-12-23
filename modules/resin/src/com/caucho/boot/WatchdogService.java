@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
+import com.caucho.bam.broker.Broker;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -48,15 +49,20 @@ class WatchdogService extends SimpleActor
   private final WatchdogManager _manager;
   private final String _jid;
 
-  WatchdogService(WatchdogManager manager, String jid)
+  WatchdogService(WatchdogManager manager,
+                  String jid,
+                  Broker broker)
   {
     _manager = manager;
     _jid = jid;
+    
+    setBroker(broker);
   }
 
   /**
    * Returns the server id of the watchdog.
    */
+  @Override
   public String getJid()
   {
     return _jid;

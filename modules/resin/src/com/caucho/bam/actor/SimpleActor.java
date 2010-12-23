@@ -64,8 +64,8 @@ public class SimpleActor extends AbstractActorStream
     this();
     
     _jid = jid;
-    _broker = broker;
-    _sender.setBroker(broker);
+    
+    setBroker(broker);
     
     if (broker == null)
       throw new IllegalArgumentException("broker must not be null");
@@ -142,21 +142,19 @@ public class SimpleActor extends AbstractActorStream
     _mailbox = mailbox;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.Actor#getMailbox()
-   */
   @Override
   public Broker getBroker()
   {
     return _broker;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.Actor#setMailbox(com.caucho.bam.mailbox.Mailbox)
-   */
   @Override
   public void setBroker(Broker broker)
   {
+    if (broker == null)
+      throw new NullPointerException();
+    
     _broker = broker;
+    _sender.setBroker(broker);
   }
 }

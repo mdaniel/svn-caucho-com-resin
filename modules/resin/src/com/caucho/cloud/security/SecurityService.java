@@ -50,7 +50,6 @@ public class SecurityService extends AbstractResinService
   
   public SecurityService()
   {
-    
   }
   
   public static SecurityService createAndAddService()

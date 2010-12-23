@@ -39,7 +39,6 @@ public class ErrorPacketException extends ActorException {
   
   public ErrorPacketException()
   {
-    Thread.dumpStack();
   }
 
   public ErrorPacketException(String msg)
@@ -85,6 +84,10 @@ public class ErrorPacketException extends ActorException {
   @Override
   public ActorError createActorError()
   {
-    return _error;
+    if (_error != null)
+      return _error;
+    else {
+      return super.createActorError();
+    }
   }
 }

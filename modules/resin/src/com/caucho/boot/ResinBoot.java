@@ -198,6 +198,7 @@ public class ResinBoot {
                                  _client.getWatchdogAddress(),
                                  _client.getWatchdogPort()));
       } catch (Exception e) {
+        e.printStackTrace();
         String eMsg;
 
         if (e instanceof ConfigException)

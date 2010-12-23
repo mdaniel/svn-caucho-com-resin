@@ -149,7 +149,6 @@ abstract public class AbstractActorStream implements ActorStream
                     String from,
                     Serializable payload)
   {
-    Thread.dumpStack();
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " query not implemented " + payload
                 + " {id:" + id + ", from:" + from + ", to:" + to + "}");
@@ -163,12 +162,12 @@ abstract public class AbstractActorStream implements ActorStream
                                       ActorError.FEATURE_NOT_IMPLEMENTED,
                                       msg);
 
-    ActorStream linkStream = getBroker();
+    ActorStream broker = getBroker();
 
-    if (linkStream == null)
-      throw new IllegalStateException(this + ".getLinkStream() did not return an ActorStream, which is needed to send an error for a query");
+    if (broker == null)
+      throw new IllegalStateException(this + ".getBroker() did not return a Broker, which is needed to send an error for a query");
     
-    linkStream.queryError(id, from, to, payload, error);
+    broker.queryError(id, from, to, payload, error);
   }
   
   /**

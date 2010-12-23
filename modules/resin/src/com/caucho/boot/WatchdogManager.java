@@ -129,7 +129,7 @@ class WatchdogManager implements AlarmListener {
     log.setName("");
     log.setPath(logPath);
     log.init();
-    
+
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(_system.getClassLoader());
 
@@ -255,7 +255,7 @@ class WatchdogManager implements AlarmListener {
       HempBroker broker = HempBroker.getCurrent();
       
       WatchdogService service
-        = new WatchdogService(this, "watchdog@admin.resin.caucho");
+        = new WatchdogService(this, "watchdog@admin.resin.caucho", broker);
 
 
       /*
@@ -263,7 +263,7 @@ class WatchdogManager implements AlarmListener {
       broker.setAllowNullAdminAuthenticator(true);
       */
 
-      broker.createAgent(service);
+      broker.createAgent(service.getActorStream());
 
       ResinSystem.getCurrent().start();
 

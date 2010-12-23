@@ -189,7 +189,9 @@ public class HmtpRequest extends AbstractProtocolConnection
                                    _bamService.getLinkManager(),
                                    _conn.getRemoteHost());
     
-    _proxyBroker = new ServerProxyPassBroker(broker, _clientManager, _linkActor);
+    _proxyBroker = new ServerProxyPassBroker(broker,
+                                             _clientManager, 
+                                             _linkActor.getActorStream());
 
     return dispatchHmtp();
   }

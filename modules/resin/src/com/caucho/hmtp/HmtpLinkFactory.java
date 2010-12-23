@@ -123,7 +123,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
     } catch (RuntimeException e) {
       throw e;
     } catch (IOException e) {
-      throw new ActorException(e);
+      throw new RemoteConnectionFailedException(e);
     }
   }
       
