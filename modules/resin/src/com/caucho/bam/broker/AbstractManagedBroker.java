@@ -125,18 +125,19 @@ abstract public class AbstractManagedBroker
     if (uid == null)
       uid = Long.toHexString(_sequence.incrementAndGet());
     
+    if (uid.indexOf('@') < 0)
+      uid = uid + '@' + getJid();
+    
     if (resource != null) {
-      jid = uid + "@" + getJid() + "/" + resource;
+      jid = uid + "/" + resource;
       
       Mailbox mailbox = getMailbox(jid);
       
       if (mailbox != null)
-        jid = (uid + "@" + getJid()
-            + "/" + resource + "-" + Long.toHexString(_sequence.incrementAndGet()));
+        jid = uid + "/" + resource + "-" + Long.toHexString(_sequence.incrementAndGet());
     }
     else {
-      jid = (uid + "@" + getJid()
-             + "/" + Long.toHexString(_sequence.incrementAndGet()));
+      jid = uid + "/" + Long.toHexString(_sequence.incrementAndGet());
     }
    
     Mailbox mailbox = new PassthroughMailbox(jid, next, this);

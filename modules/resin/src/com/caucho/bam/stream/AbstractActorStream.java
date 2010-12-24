@@ -90,8 +90,8 @@ abstract public class AbstractActorStream implements ActorStream
     }
 
     String msg;
-    msg = (this + ": message is not implemented by this actor.\n"
-           + payload + " {from:" + from + ", to:" + to + "}");
+    msg = (this + ": message is not implemented for this payload"
+           + "\n  " + payload + "\n  {from:" + from + ", to:" + to + "}");
 
     ActorError error = new ActorError(ActorError.TYPE_CANCEL,
                                       ActorError.FEATURE_NOT_IMPLEMENTED,
@@ -155,8 +155,8 @@ abstract public class AbstractActorStream implements ActorStream
     }
 
     String msg;
-    msg = (this + ": query is not implemented by this actor.\n"
-           + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
+    msg = (this + ": query is not implemented for this payload"
+           + "\n  " + payload + "\n  {id:" + id + ", from:" + from + ", to:" + to + "}");
 
     ActorError error = new ActorError(ActorError.TYPE_CANCEL,
                                       ActorError.FEATURE_NOT_IMPLEMENTED,

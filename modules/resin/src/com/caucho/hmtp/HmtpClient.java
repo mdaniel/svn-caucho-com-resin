@@ -133,6 +133,8 @@ public class HmtpClient implements ActorSender {
     _linkFactory.setUrl(_url);
     
     _linkClient = new LinkClient(_linkFactory, _actor);
+    
+    _actor.setBroker(_linkClient.getBroker());
   }
   
   protected void connectImpl()
