@@ -71,6 +71,9 @@ public class HashMapBroker extends AbstractManagedBroker
   @Override
   public Mailbox getMailbox(String jid)
   {
+    if (jid == null)
+      return null;
+
     return _mailboxMap.get(jid);
   }
   
