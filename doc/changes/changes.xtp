@@ -13,6 +13,7 @@
 
 <s2 title="4.0.14 - snapshot">
 <ul>
+<li>resin: CLI added deploy, undeploy, list, start-webapp, stop-webapp, restar-webapp commands (#4316, rep by Patrick Brigger)</li>
 <li>cache: use cursor to update data timeouts</li>
 <li>heartbeat: server connections need to depend on heartbeat only</li>
 <li>access-log: off-by-one issue with access log rollover causing missed 1D (rep by Steve Francis)</li>
