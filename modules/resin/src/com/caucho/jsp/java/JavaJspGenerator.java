@@ -587,7 +587,9 @@ public class JavaJspGenerator extends JspGenerator {
               message.append("\n");
             message.append(messages[j].getMessage());
           }
-          
+
+          // TCK: needs to be commented out for TCK
+          /*
           InputStream is = getPageData().getInputStream();
           StringBuilder sb = new StringBuilder();
           int ch;
@@ -595,6 +597,9 @@ public class JavaJspGenerator extends JspGenerator {
             sb.append((char) ch);
 
           throw _rootNode.error(message.toString() + "\n\n" + sb);
+            */
+          
+          throw _rootNode.error(message.toString());
         }
       }
     }
