@@ -411,10 +411,13 @@ public class Server
   public ActorSender createAdminClient(String uid)
   {
     String jid = uid + "@" + getAdminBroker().getJid();
-    
+
     NullActorStream stream = new NullActorStream(jid, getAdminBroker());
     
-    return new SimpleActorSender(stream, getAdminBroker(), jid, null);
+    SimpleActorSender sender 
+      = new SimpleActorSender(stream, getAdminBroker(), jid, null);
+    
+    return sender;
   }
 
   /**

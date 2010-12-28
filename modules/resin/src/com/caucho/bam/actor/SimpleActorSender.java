@@ -47,11 +47,11 @@ import com.caucho.bam.stream.NullActorStream;
  * which always using the actor's JID as the "from" parameter.
  */
 public class SimpleActorSender implements ActorSender {
-  private final ActorStream _actorStream;
+  private ActorStream _actorStream;
   private Broker _broker;
 
   private final QueryManager _queryManager = new QueryManager();
-
+  
   private long _timeout = 120000L;
 
   public SimpleActorSender(String jid, Broker broker)
@@ -80,14 +80,11 @@ public class SimpleActorSender implements ActorSender {
     this(next);
     
     Mailbox mailbox = new MultiworkerMailbox(next.getJid(),
-                                             next,
+                                             _actorStream,
                                              broker, 
                                              1);
 
-    Mailbox clientMailbox
-      = broker.createClient(mailbox, uid, resource);
-    
-    // _jid = clientMailbox.getJid(); 
+    _actorStream = broker.createClient(mailbox, uid, resource);
   }
 
   /**
@@ -141,12 +138,12 @@ public class SimpleActorSender implements ActorSender {
   @Override
   public void message(String to, Serializable payload)
   {
-    ActorStream linkStream = getBroker();
+    ActorStream broker = getBroker();
 
-    if (linkStream == null)
+    if (broker == null)
       throw new IllegalStateException(this + " can't send a message because the link is closed.");
 
-    linkStream.message(to, getJid(), payload);
+    broker.message(to, getJid(), payload);
   }
 
   //

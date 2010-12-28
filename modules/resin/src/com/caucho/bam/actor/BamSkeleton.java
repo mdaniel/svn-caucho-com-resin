@@ -332,8 +332,8 @@ public class BamSkeleton<S>
       Class<?> payloadType = getPayloadType(Message.class, method);
 
       if (payloadType != null) {
-        log.finest(L.l("{0} @Message {1} method={2}",
-                       this, payloadType.getName(), method));
+        log.log(Level.ALL, L.l("{0} introspect @Message {1} method={2}",
+                    this, payloadType.getName(), method));
 
         method.setAccessible(true);
 
@@ -344,7 +344,7 @@ public class BamSkeleton<S>
       payloadType = getPayloadType(MessageError.class, method);
 
       if (payloadType != null) {
-        log.finest(L.l("{0} @MessageError {1} method={2}",
+        log.log(Level.ALL, L.l("{0} introspect @MessageError {1} method={2}",
                        this, payloadType.getName(), method));
 
         method.setAccessible(true);
@@ -356,8 +356,8 @@ public class BamSkeleton<S>
       payloadType = getQueryPayloadType(Query.class, method);
 
       if (payloadType != null) {
-        log.finest(L.l("{0} @Query {1} method={2}",
-                       this, payloadType.getName(), method));
+        log.log(Level.ALL, L.l("{0} @Query {1} method={2}",
+                               this, payloadType.getName(), method));
 
         method.setAccessible(true);
 
@@ -368,7 +368,7 @@ public class BamSkeleton<S>
       payloadType = getQueryPayloadType(QueryResult.class, method);
 
       if (payloadType != null) {
-        log.finest(L.l("{0} @QueryResult {1} method={2}",
+        log.log(Level.ALL, L.l("{0} @QueryResult {1} method={2}",
                        this, payloadType.getName(), method));
 
         method.setAccessible(true);
@@ -380,7 +380,7 @@ public class BamSkeleton<S>
       payloadType = getQueryErrorPayloadType(QueryError.class, method);
 
       if (payloadType != null) {
-        log.finest(L.l("{0} @QueryError {1} method={2}",
+        log.log(Level.ALL, L.l("{0} @QueryError {1} method={2}",
                        this, payloadType.getName(), method));
 
         method.setAccessible(true);

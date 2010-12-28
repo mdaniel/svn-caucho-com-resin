@@ -66,6 +66,7 @@ public class HmtpWebSocketWriter extends AbstractBroker
   /**
    * The jid of the stream
    */
+  @Override
   public String getJid()
   {
     return _jid;

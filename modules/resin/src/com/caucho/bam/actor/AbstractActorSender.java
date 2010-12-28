@@ -188,6 +188,8 @@ abstract public class AbstractActorSender implements ActorSender {
     QueryFuture future
       = getQueryManager().addQueryFuture(qId, to, getJid(), payload, timeout);
     
+    getBroker().query(qId, to, getJid(), payload);
+                      
     return future;
   }
 
@@ -207,6 +209,7 @@ abstract public class AbstractActorSender implements ActorSender {
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
+  @Override
   public void query(String to,
                     Serializable payload,
                     QueryCallback callback)
@@ -214,5 +217,7 @@ abstract public class AbstractActorSender implements ActorSender {
     long qId = getQueryManager().nextQueryId();
     
     getQueryManager().addQueryCallback(qId, callback); // getTimeout());
+    
+    getBroker().query(qId, to, getJid(), payload);
   }
 }

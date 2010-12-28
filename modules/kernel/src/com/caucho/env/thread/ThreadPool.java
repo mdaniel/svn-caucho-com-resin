@@ -661,16 +661,18 @@ public final class ThreadPool {
     
     ThreadTask item = nextQueueTask();
     
-    if (item == null)
+    if (item == null) {
       return;
+    }
     
     ResinThread itemThread = popIdleThread();
       
     if (itemThread == null)
       itemThread = popPriorityThread();
-      
+    
     if (itemThread != null) {
       itemThread.scheduleTask(item.getRunnable(), item.getLoader());
+      item.wake();
     }
     else {
       _priorityQueue.offer(item);
