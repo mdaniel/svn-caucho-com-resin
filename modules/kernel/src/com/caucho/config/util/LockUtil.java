@@ -35,17 +35,21 @@ import java.util.concurrent.TimeUnit;
 import javax.ejb.ConcurrentAccessTimeoutException;
 import javax.ejb.IllegalLoopbackException;
 
+import com.caucho.util.L10N;
+
 /**
  * Utilities to manage locks.
  */
 public class LockUtil {
+  private static final L10N L = new L10N(LockUtil.class);
+  
   public static void lockRead(Lock readLock, long timeout)
   {
     try {
       if (! readLock.tryLock(timeout, TimeUnit.MILLISECONDS))
-        throw new ConcurrentAccessTimeoutException("Timed out acquiring read lock.");
+        throw new ConcurrentAccessTimeoutException(L.l("Timed out acquiring read lock."));
     } catch (InterruptedException e) {
-      throw new ConcurrentAccessTimeoutException("Thread interruption acquiring read lock: " + e.getMessage());
+      throw new ConcurrentAccessTimeoutException(L.l("Thread interruption acquiring read lock: {0}", e.getMessage()));
     }
   }
   
@@ -53,7 +57,7 @@ public class LockUtil {
   {
     if (lock.getReadHoldCount() > 0
         && lock.getWriteHoldCount() == 0) {
-      throw new IllegalLoopbackException("Cannot attempt a nested write lock without an existing write lock.");
+      throw new IllegalLoopbackException(L.l("Cannot attempt a nested write lock without an existing write lock."));
     }
     
     lock.writeLock().lock();
@@ -64,14 +68,14 @@ public class LockUtil {
   {
     if (lock.getReadHoldCount() > 0
         && lock.getWriteHoldCount() == 0) {
-      throw new IllegalLoopbackException("Cannot attempt a nested write lock without an existing write lock.");
+      throw new IllegalLoopbackException(L.l("Cannot attempt a nested write lock without an existing write lock."));
     }
     
     try {
       if (! lock.writeLock().tryLock(timeout, TimeUnit.MILLISECONDS))
-        throw new ConcurrentAccessTimeoutException("Timed out acquiring write lock.");
+        throw new ConcurrentAccessTimeoutException(L.l("Timed out acquiring write lock."));
     } catch (InterruptedException e) {
-      throw new ConcurrentAccessTimeoutException("Thread interruption acquiring write lock: " + e.getMessage());
+      throw new ConcurrentAccessTimeoutException(L.l("Thread interruption acquiring write lock: " + e.getMessage()));
     }
   }
 }

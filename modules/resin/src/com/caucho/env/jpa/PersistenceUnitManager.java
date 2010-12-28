@@ -337,7 +337,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
   {
     return _entityManagerJtaProxy;
   }
-  
+ 
   /**
    * Starts the persistence unit.
    */
@@ -361,6 +361,8 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
     }
     
     createDelegate();
+    
+    _entityManagerJtaProxy.init();
   }
   
   private void addDefaultProperty(String name, String value)

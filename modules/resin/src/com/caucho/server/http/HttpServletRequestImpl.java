@@ -2022,13 +2022,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       
       isValid = true;
     } catch (RuntimeException e) {
-      e.printStackTrace();
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
-    } catch (Throwable e) {
-      e.printStackTrace();
     } finally {
       webSocket.onHandshakeComplete(isValid);
     }

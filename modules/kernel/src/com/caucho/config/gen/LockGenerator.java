@@ -84,8 +84,10 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
         && (map.get("caucho.ejb.lock") == null)) {
       map.put("caucho.ejb.lock", "done");
 
+      // TCK: fairness flag must be true for the tck
       out.println();
-      out.println("private transient final java.util.concurrent.locks.ReentrantReadWriteLock _readWriteLock = new java.util.concurrent.locks.ReentrantReadWriteLock();");
+      out.println("private transient final java.util.concurrent.locks.ReentrantReadWriteLock _readWriteLock");
+      out.println(" = new java.util.concurrent.locks.ReentrantReadWriteLock(true);");
     }
 
     super.generateMethodPrologue(out, map);

@@ -219,7 +219,7 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     String beanClassName = getBeanType().getJavaClass().getName();
     
     out.println("_bean = (" + beanClassName + ") _manager.newInstance(parentEnv);");
-    
+
     super.generateInjectContent(out, map);
   }
 
@@ -231,7 +231,6 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     out.println(", SingletonContext context)");
     out.println("{");
     out.pushDepth();
-
     out.println("_manager = manager;");
     out.popDepth();
     out.println("}");

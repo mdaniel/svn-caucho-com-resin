@@ -41,6 +41,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.Metamodel;
+import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
 
@@ -82,6 +83,10 @@ public class EntityManagerJtaProxy
   {
     _persistenceUnit = pUnit;
     _ut = UserTransactionProxy.getCurrent();
+  }
+  
+  void init()
+  {
   }
 
   @Override
@@ -859,8 +864,10 @@ public class EntityManagerJtaProxy
       EntityManagerItem item = _threadEntityManager.get();
       Transaction xa = _ut.getTransaction();
       
-      if (item != null && xa == item.getXa())
+      if (item != null
+          && xa == item.getXa()) {
         return item.getEntityManager();
+      }
 
       if (_emf == null) {
         _emf = _persistenceUnit.getEntityManagerFactoryDelegate();
@@ -868,7 +875,7 @@ public class EntityManagerJtaProxy
 
       EntityManager em;
       
-      if (xa != null) {
+      if (xa != null && xa.getStatus() == Status.STATUS_ACTIVE) {
         em = _emf.createEntityManager(_persistenceUnit.getProperties());
 
         item = new EntityManagerItem(item, em, xa);
@@ -913,9 +920,13 @@ public class EntityManagerJtaProxy
     EntityManager em = _idleEntityManagerPool.allocate();
     
     if (em == null) {
+      if (_emf == null) {
+        _emf = _persistenceUnit.getEntityManagerFactoryDelegate();
+      }
+      
       em = _emf.createEntityManager(_persistenceUnit.getProperties());
     }
-      
+    
     return em;
   }
   
