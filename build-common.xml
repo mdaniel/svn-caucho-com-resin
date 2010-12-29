@@ -70,6 +70,8 @@
       <fileset refid="dependency.classpath"/>
       <mapper type="flatten"/>
     </copy>
+
+    <delete file="${maven.lib}/ant-1.6.5.jar" failonerror="false"/>
   </target>
 
   <target name="tstamp">

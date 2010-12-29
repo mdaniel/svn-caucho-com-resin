@@ -31,22 +31,20 @@ package com.caucho.ant;
 
 import java.io.*;
 import java.util.*;
-
-import com.caucho.java.*;
-import com.caucho.jsp.*;
-import com.caucho.loader.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.Vfs;
+import java.util.logging.Level;
 
 import org.apache.tools.ant.*;
+import org.apache.tools.ant.taskdefs.Java;
 import org.apache.tools.ant.types.*;
 
 /**
  * Command-line tool and ant task to compile jsp files
  */
-public class Jspc {
+public class Jspc extends Task {
   private File _rootDirectory;
+  private File _resinHome;
   private Vector _classpath = new Vector();
+  protected Level _level = Level.WARNING;
 
   /**
    * For ant.
@@ -65,50 +63,71 @@ public class Jspc {
     _classpath.add(path);
   }
 
+  public File getResinHome()
+  {
+    return _resinHome;
+  }
+
+  public void setResinHome(File resinHome)
+  {
+    _resinHome = resinHome;
+  }
+
+  public Level getLevel()
+  {
+    return _level;
+  }
+
+  public void setLevel(Level level)
+  {
+    _level = level;
+  }
+
+  public void setLogLevel(String level)
+  {
+    if (level == null || level.isEmpty())
+      return;
+
+    level = level.toUpperCase();
+
+    _level = Level.parse(level);
+  }
+
   /**
    * Executes the ant task.
    **/
   public void execute()
     throws BuildException
   {
+    if (_resinHome == null)
+      throw new BuildException("resinHome is required by jspc");
+
     if (_rootDirectory == null)
-      throw new BuildException("root-directory is required by jspc");
+      throw new BuildException("rootDirectory is required by jspc");
 
-    /*
-    if (_classpath.size() == 0)
-      throw new BuildException("classpath is required by jspc");
-    */
+    File resinJar = new File(_resinHome,
+                             "lib" + File.separatorChar + "resin.jar");
 
-    ClassLoader loader = JspCompiler.class.getClassLoader();
+    if (! resinJar.exists())
+      throw new BuildException("resinHome `"
+                                 + _resinHome
+                                 + "' does not appear to be valid");
 
-    String classPath = System.getProperty("java.class.path");
-    
-    if (loader instanceof AntClassLoader)
-      classPath = ((AntClassLoader) loader).getClasspath();
+    Java java = new Java(this);
+    java.setFailonerror(true);
+    java.setFork(true);
+    java.setJar(resinJar);
 
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
+    List<String> args = new ArrayList<String>();
+    args.add("jspc");
+    args.add("-app-dir");
+    args.add(_rootDirectory.getPath());
 
-    try {
-      EnvironmentClassLoader env = EnvironmentClassLoader.create();
+    for (String arg : args)
+      java.createArg().setLine(arg);
 
-      for (String cp : classPath.split("[" + File.pathSeparatorChar + "]")) {
-	com.caucho.vfs.Path path = Vfs.lookup(cp);
+    log(java.getCommandLine().toString(), _level.intValue());
 
-	env.addRoot(path);
-      }
-
-      thread.setContextClassLoader(env);
-      
-      JspCompiler.main(new String[] {
-	"-app-dir", _rootDirectory.getAbsolutePath(),
-      });
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new BuildException(e);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
+    java.executeJava();
   }
 }

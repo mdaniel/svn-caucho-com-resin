@@ -267,7 +267,7 @@ public abstract class ResinDeployClientTask extends Task
   {
     validate();
 
-    Java java = null;//new Java(this);
+    Java java = new Java(this);
     java.setFailonerror(true);
     java.setFork(true);
     java.setJar(_resinJar);

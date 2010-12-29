@@ -388,11 +388,9 @@ class WatchdogArgs
       else if ("gui".equals(arg)) {
         _startMode = StartMode.GUI;
       }
-/*
       else if ("jspc".equals(arg)) {
         _startMode = StartMode.JSPC;
       }
-*/
       else if ("kill".equals(arg)) {
         _startMode = StartMode.KILL;
       }
@@ -791,7 +789,7 @@ class WatchdogArgs
     COPY,
     DEPLOY,
     GUI,
-    //JSPC,
+    JSPC,
     KILL,
     LIST,
     RESTART,

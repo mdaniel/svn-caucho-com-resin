@@ -391,7 +391,7 @@ public class ResinBoot {
   static {
     _commandMap.put(StartMode.COPY, new CopyCommand());
     _commandMap.put(StartMode.DEPLOY, new DeployCommand());
-//    _commandMap.put(StartMode.JSPC, new JspcCommand());
+    _commandMap.put(StartMode.JSPC, new JspcCommand());
     _commandMap.put(StartMode.LIST, new ListCommand());
     _commandMap.put(StartMode.RESTART_WEBAPP, new RestartWebAppCommand());
     _commandMap.put(StartMode.START_WEBAPP, new StartWebAppCommand());
