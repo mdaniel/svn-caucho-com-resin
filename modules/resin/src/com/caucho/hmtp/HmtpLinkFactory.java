@@ -123,7 +123,9 @@ class HmtpLinkFactory implements LinkConnectionFactory {
     } catch (RuntimeException e) {
       throw e;
     } catch (IOException e) {
-      throw new RemoteConnectionFailedException(e);
+      String msg = "Cannot connect to " + _url + "\n  " + e;
+      
+      throw new RemoteConnectionFailedException(msg, e);
     }
   }
       

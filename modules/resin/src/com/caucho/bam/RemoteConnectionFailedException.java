@@ -48,7 +48,9 @@ public class RemoteConnectionFailedException
 
   public RemoteConnectionFailedException(Throwable e)
   {
-    super(e.getMessage(), e);
+    super(e.toString(), e);
+    
+    Thread.dumpStack();
   }
 
   public RemoteConnectionFailedException(String msg, Throwable e)
