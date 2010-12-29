@@ -198,7 +198,6 @@ public class ResinBoot {
                                  _client.getWatchdogAddress(),
                                  _client.getWatchdogPort()));
       } catch (Exception e) {
-        e.printStackTrace();
         String eMsg;
 
         if (e instanceof ConfigException)
@@ -362,19 +361,14 @@ public class ResinBoot {
       }
       
       System.exit(0);
+    } catch (ConfigException e) {
+      System.out.println(e.getMessage());
+
+      System.exit(2);
     } catch (Exception e) {
       e.printStackTrace();
 
-      if (e instanceof ConfigException) {
-        System.out.println(e.getMessage());
-
-        System.exit(2);
-      }
-      else {
-        e.printStackTrace();
-
-        System.exit(3);
-      }
+      System.exit(3);
     }
   }
 

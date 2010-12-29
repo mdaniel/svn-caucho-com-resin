@@ -505,6 +505,8 @@ public class Resin
     
     TopologyService.createAndAddService(_serverId);
     
+    SecurityService.createAndAddService();
+
     createDistCacheService();
   }
   
@@ -1164,8 +1166,6 @@ public class Resin
     BamService.createAndAddService(server.getBamAdminName());
     
     DeployControllerService.createAndAddService();
-    
-    SecurityService.createAndAddService();
     
     initRepository();
     

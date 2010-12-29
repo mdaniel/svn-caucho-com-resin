@@ -82,7 +82,7 @@ public class ServerProxyPassBroker extends AbstractBroker {
     if (to == null)
       _linkActor.message(to, from, payload);
     else if (isActive())
-      _broker.message(to, from, payload);
+      _broker.message(to, getClientJid(), payload);
     else
       super.message(to, from, payload);
   }
@@ -99,7 +99,7 @@ public class ServerProxyPassBroker extends AbstractBroker {
     if (to == null)
       _linkActor.messageError(to, from, payload, error);
     else if (isActive())
-      _broker.messageError(to, from, payload, error);
+      _broker.messageError(to, from, getClientJid(), error);
     else
       super.messageError(to, from, payload, error);
   }
@@ -119,7 +119,7 @@ public class ServerProxyPassBroker extends AbstractBroker {
     if (to == null)
       _linkActor.query(id, to, from, payload);
     else if (isActive())
-      _broker.query(id, to, from, payload);
+      _broker.query(id, to, getClientJid(), payload);
     else
       super.query(id, to, from, payload);
   }
