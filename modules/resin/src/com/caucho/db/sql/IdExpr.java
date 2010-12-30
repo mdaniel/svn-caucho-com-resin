@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 
 final class IdExpr extends Expr {
   private final FromItem _fromItem;
@@ -188,7 +188,7 @@ final class IdExpr extends Expr {
   public void updateString(QueryContext context, String value)
     throws SQLException
   {
-    Transaction xa = context.getTransaction();
+    DbTransaction xa = context.getTransaction();
     TableIterator []rows = context.getTableIterators();
     TableIterator row = rows[_tableIndex];
 
@@ -245,7 +245,7 @@ final class IdExpr extends Expr {
   public void updateLong(QueryContext context, long value)
     throws SQLException
   {
-    Transaction xa = context.getTransaction();
+    DbTransaction xa = context.getTransaction();
     TableIterator []rows = context.getTableIterators();
     TableIterator row = rows[_tableIndex];
 
@@ -269,7 +269,7 @@ final class IdExpr extends Expr {
   public void updateDouble(QueryContext context, double value)
     throws SQLException
   {
-    Transaction xa = context.getTransaction();
+    DbTransaction xa = context.getTransaction();
     TableIterator []rows = context.getTableIterators();
     TableIterator row = rows[_tableIndex];
 

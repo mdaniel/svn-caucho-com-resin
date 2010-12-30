@@ -41,7 +41,7 @@ import java.util.ArrayList;
 public class ResultSetCacheChunk {
   public static final int CACHE_CHUNK_SIZE = 64;
 
-  private SelectQuery _query;
+  private AmberSelectQuery _query;
 
   private ArrayList<FromItem> _fromList;
   private ArrayList<AmberExpr> _resultList;
@@ -72,7 +72,7 @@ public class ResultSetCacheChunk {
   /**
    * Sets the query.
    */
-  public void setQuery(SelectQuery query)
+  public void setQuery(AmberSelectQuery query)
   {
     _query = query;
 
@@ -85,7 +85,7 @@ public class ResultSetCacheChunk {
   /**
    * Gets the query.
    */
-  public SelectQuery getQuery()
+  public AmberSelectQuery getQuery()
   {
     return _query;
   }

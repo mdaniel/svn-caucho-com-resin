@@ -37,7 +37,7 @@ import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.table.Column.ColumnType;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.sql.SQLExceptionWrapper;
 
 class InsertQuery extends Query {
@@ -104,7 +104,7 @@ class InsertQuery extends Query {
   /**
    * Executes the query.
    */
-  public void execute(QueryContext queryContext, Transaction xa)
+  public void execute(QueryContext queryContext, DbTransaction xa)
     throws SQLException
   {
     TableIterator []rows = new TableIterator[1];

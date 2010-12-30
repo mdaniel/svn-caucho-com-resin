@@ -256,7 +256,7 @@ class ResinWaitForExitService
       WarningService warning = WarningService.getCurrent();
 
       _resinActor = new ResinActor(_resin);
-      warning.addHandler(new ResinWarningHandler(_resinActor), true);
+      warning.addHandler(new ResinWarningHandler(_resinActor));
 
       if (_pingSocket != null) {
         InputStream is = _pingSocket.getInputStream();

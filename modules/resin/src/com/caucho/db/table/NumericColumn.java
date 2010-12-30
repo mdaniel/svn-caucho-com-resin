@@ -32,7 +32,7 @@ import com.caucho.db.index.BTree;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.util.CharBuffer;
 
 import java.sql.SQLException;
@@ -124,7 +124,7 @@ class NumericColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setString(Transaction xa, byte []block, int rowOffset, String str)
+  void setString(DbTransaction xa, byte []block, int rowOffset, String str)
     throws SQLException
   {
     if (str == null || str.length() == 0)
@@ -169,7 +169,7 @@ class NumericColumn extends Column {
    * @param value the value to store
    */
   @Override
-  public void setDouble(Transaction xa, byte []block, int rowOffset, double v)
+  public void setDouble(DbTransaction xa, byte []block, int rowOffset, double v)
     throws SQLException
   {
     setNumeric(xa, block, rowOffset, (long) (v * _offset + 0.5));
@@ -239,7 +239,7 @@ class NumericColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void setExpr(Transaction xa,
+  void setExpr(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException
@@ -281,7 +281,7 @@ class NumericColumn extends Column {
    * @param rowAddr the address of the row
    */
   @Override
-  void setIndex(Transaction xa,
+  void setIndex(DbTransaction xa,
                 byte []block, int rowOffset,
                 long rowAddr, QueryContext context)
     throws SQLException
@@ -313,7 +313,7 @@ class NumericColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void deleteIndex(Transaction xa, byte []block, int rowOffset)
+  void deleteIndex(DbTransaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     BTree index = getIndex();
@@ -329,7 +329,7 @@ class NumericColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  void setNumeric(Transaction xa, byte []block, int rowOffset, long value)
+  void setNumeric(DbTransaction xa, byte []block, int rowOffset, long value)
   {
     int offset = rowOffset + _columnOffset;
     

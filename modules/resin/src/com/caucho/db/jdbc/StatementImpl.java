@@ -32,7 +32,7 @@ import com.caucho.db.Database;
 import com.caucho.db.sql.Query;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectQuery;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
@@ -116,7 +116,7 @@ public class StatementImpl implements java.sql.Statement {
                                           QueryContext queryContext)
     throws SQLException
   {
-    Transaction xa = _conn.getTransaction();
+    DbTransaction xa = _conn.getTransaction();
 
     boolean isOkay = false;
     try {
@@ -189,7 +189,7 @@ public class StatementImpl implements java.sql.Statement {
   private int executeUpdate(Query query)
     throws SQLException
   {
-    Transaction xa = _conn.getTransaction();
+    DbTransaction xa = _conn.getTransaction();
     boolean isOkay = false;
 
     int rowUpdateCount = 0;

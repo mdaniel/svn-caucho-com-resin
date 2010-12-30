@@ -30,6 +30,7 @@
 package com.caucho.env.warning;
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.service.*;
@@ -47,7 +48,7 @@ public class WarningService extends AbstractResinService
     Logger.getLogger(WarningService.class.getName());
   private static final L10N L = new L10N(WarningService.class);
 
-  private final CopyOnWriteArrayList<WarningHandler> _highPriorityHandlers = 
+  private final CopyOnWriteArrayList<WarningHandler> _priorityHandlers = 
     new CopyOnWriteArrayList<WarningHandler>();
   
   private final CopyOnWriteArrayList<WarningHandler> _handlers = 
@@ -81,40 +82,81 @@ public class WarningService extends AbstractResinService
    * @param msg test to print or send as an alert
    * @param isHighPriority set true to send to high priority warning handlers
    */
-  public void sendWarning(Object source, String msg, boolean isHighPriority)
+  public void sendWarning(Object source, String msg)
   {
-    String s =
-      L.l("WarningService[{0}]: {1}", (isHighPriority ? "High Priority"
-                                                     : "Low Priority"), msg);
-    
-    if (isHighPriority)
-      log.warning(s);
-    else
-      log.info(s);
+    String s = "WarningService: " + msg;
     
     // if warning is high-priority then send to high priority handlers first
-    if (isHighPriority) {
-      System.err.println(s);
+    System.err.println(s);
       
-      for (WarningHandler handler : _highPriorityHandlers)
-        handler.warning(source, msg);
-    }
+    for (WarningHandler handler : _priorityHandlers)
+      handler.warning(source, msg);
     
-    // now send to the all handlers regardless of if it's high priority
+    // now send to the all handlers regardless of if its high priority
     for (WarningHandler handler : _handlers)
       handler.warning(source, msg);
+
+    log.warning(s);
+  }
+  
+  /**
+   * Send a warning message to any registered handlers. A high priority warning
+   * only goes to all handlers, high priority first. High priority handlers do
+   * not receive non-high priority warnings.
+   * 
+   * @param source source of the message, usually you
+   * @param msg test to print or send as an alert
+   * @param isHighPriority set true to send to high priority warning handlers
+   */
+  public void sendWarning(Object source, Throwable e)
+  {
+    e.printStackTrace();
+    
+    String msg = e.toString();
+    
+    String s = "WarningService: " + e;
+    
+    // if warning is high-priority then send to high priority handlers first
+    System.err.println(s);
+      
+    for (WarningHandler handler : _priorityHandlers)
+      handler.warning(source, msg);
+    
+    // now send to the all handlers regardless of if its high priority
+    for (WarningHandler handler : _handlers)
+      handler.warning(source, msg);
+
+    log.warning(s);
   }
 
   /**
    * Sends a warning to the current service.
    */
-  public static void sendCurrentWarning(Object source, String msg,
-                                        boolean isHighPriority)
+  public static void sendCurrentWarning(Object source, String msg)
   {
     WarningService warning = getCurrent();
     
     if (warning != null)
-      warning.sendWarning(source, msg, isHighPriority);
+      warning.sendWarning(source, msg);
+    else {
+      System.err.println(msg);
+      log.warning(msg);
+    }
+  }
+
+  /**
+   * Sends a warning to the current service.
+   */
+  public static void sendCurrentWarning(Object source, Throwable e)
+  {
+    WarningService warning = getCurrent();
+    
+    if (warning != null)
+      warning.sendWarning(source, e);
+    else {
+      e.printStackTrace();
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
   
   /**
@@ -124,12 +166,21 @@ public class WarningService extends AbstractResinService
    * @param handler an object that implements WarningHandler
    * @param isHighPriority high priority handlers only get high priority warnings.
    */
-  public void addHandler(WarningHandler handler, boolean isHighPriority)
+  public void addHandler(WarningHandler handler)
   {
-    if (isHighPriority)
-      _highPriorityHandlers.add(handler);
-    else
-      _handlers.add(handler);
+    _handlers.add(handler);
+  }
+  
+  /**
+   * Add a warning event handler.  High priority handlers ONLY get high 
+   * priority warnings, and they are notified first.  Other handlers gets all
+   * warnings after high priority handlers are notified.
+   * @param handler an object that implements WarningHandler
+   * @param isHighPriority high priority handlers only get high priority warnings.
+   */
+  public void addPriorityHandler(WarningHandler handler)
+  {
+    _priorityHandlers.add(handler);
   }
 
   @Override

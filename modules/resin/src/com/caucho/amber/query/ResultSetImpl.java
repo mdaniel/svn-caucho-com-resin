@@ -122,7 +122,7 @@ public class ResultSetImpl implements ResultSet {
   /**
    * Sets the query.
    */
-  public void setQuery(SelectQuery query)
+  public void setQuery(AmberSelectQuery query)
   {
     _fromList = query.getFromList();
     _resultList = query.getResultList();

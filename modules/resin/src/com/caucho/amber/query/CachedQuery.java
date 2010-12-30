@@ -44,7 +44,7 @@ import java.util.List;
  * Represents the application's view of the query.
  */
 public class CachedQuery {
-  private SelectQuery _query;
+  private AmberSelectQuery _query;
   private CachedQueryKey _key;
   private ResultSetImpl _rs;
 
@@ -61,7 +61,7 @@ public class CachedQuery {
 
   CachedQuery(UserQuery query)
   {
-    _query = (SelectQuery) query.getQuery();
+    _query = (AmberSelectQuery) query.getQuery();
 
     AmberType []argTypes = query.getArgTypes();
     Object []argValues = query.getArgValues();
@@ -178,7 +178,7 @@ public class CachedQuery {
     ResultSet rs = pstmt.executeQuery();
 
     _rs.setResultSet(rs);
-    _rs.setQuery((SelectQuery) _query);
+    _rs.setQuery((AmberSelectQuery) _query);
     _rs.setSession(aConn);
     _rs.init();
     

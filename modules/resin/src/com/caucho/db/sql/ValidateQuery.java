@@ -32,7 +32,7 @@ package com.caucho.db.sql;
 import com.caucho.db.Database;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.util.CharBuffer;
 
 import java.sql.SQLException;
@@ -59,7 +59,7 @@ class ValidateQuery extends Query {
   /**
    * Executes the query.
    */
-  public void execute(QueryContext context, Transaction xa)
+  public void execute(QueryContext context, DbTransaction xa)
     throws SQLException
   {
     _table.validate();

@@ -43,7 +43,7 @@ import com.caucho.bam.stream.ActorStream;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.hemp.servlet.ClientStubManager;
 import com.caucho.hemp.servlet.ServerProxyBroker;
-import com.caucho.hemp.servlet.ServerProxyPassBroker;
+import com.caucho.hemp.servlet.ServerGatewayBroker;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpWebSocketReader;
 import com.caucho.hmtp.HmtpWebSocketWriter;
@@ -188,10 +188,17 @@ public class HmtpRequest extends AbstractProtocolConnection
                                    _clientManager,
                                    _bamService.getLinkManager(),
                                    _conn.getRemoteHost());
-    
-    _proxyBroker = new ServerProxyPassBroker(broker,
+
+    if (isUnidir) {
+      _proxyBroker = new ServerGatewayBroker(broker,
                                              _clientManager, 
-                                             _linkActor.getActorStream());
+                                               _linkActor.getActorStream());
+    }
+    else {
+      _proxyBroker = new ServerProxyBroker(broker,
+                                           _clientManager, 
+                                           _linkActor.getActorStream());
+    }
 
     return dispatchHmtp();
   }

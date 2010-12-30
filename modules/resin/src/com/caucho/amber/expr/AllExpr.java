@@ -30,16 +30,16 @@ package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.query.SelectQuery;
+import com.caucho.amber.query.AmberSelectQuery;
 import com.caucho.util.CharBuffer;
 
 /**
  * Represents an ALL query expression
  */
 public class AllExpr extends AbstractAmberExpr {
-  private SelectQuery _query;
+  private AmberSelectQuery _query;
 
-  public AllExpr(SelectQuery query)
+  public AllExpr(AmberSelectQuery query)
   {
     _query = query;
   }

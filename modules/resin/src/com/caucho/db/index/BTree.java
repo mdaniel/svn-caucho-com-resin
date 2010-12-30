@@ -34,7 +34,7 @@ import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockManager;
 import com.caucho.db.block.BlockStore;
 // import com.caucho.db.lock.Lock;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.Hex;
 import com.caucho.util.L10N;

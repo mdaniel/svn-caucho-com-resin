@@ -83,6 +83,8 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   private String _statId;
 
   private Path _tcpPath;
+  
+  private boolean _isHeartbeatServer;
 
   private int _maxConnections = Integer.MAX_VALUE / 2;
 
@@ -109,6 +111,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
 
   // server start/stop sequence for heartbeat/restarts
   private volatile boolean _isHeartbeatActive;
+  
   private final AtomicInteger _startSequenceId
     = new AtomicInteger();
 
@@ -224,6 +227,13 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     return _port;
   }
 
+  /**
+   * Foreign server is in the pod's heartbeat range.
+   */
+  public void setHeartbeatServer(boolean isHeartbeatServer)
+  {
+    _isHeartbeatServer = isHeartbeatServer;
+  }
   /**
    * The socket timeout when connecting to the target server.
    */
@@ -887,7 +897,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       return null;
     }
     
-    if (! _isHeartbeatActive) {
+    if (! _isHeartbeatActive && _isHeartbeatServer) {
       return null;
     }
 

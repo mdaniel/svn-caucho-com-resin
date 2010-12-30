@@ -229,14 +229,15 @@ public class MnodeStore implements AlarmListener {
 
         return;
       } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.ALL, e.toString(), e);
         log.finer(this + " " + e.toString());
       }
 
       try {
         stmt.executeQuery("DROP TABLE " + _tableName);
       } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.ALL, e.toString(), e);
+        log.finer(this + " " + e.toString());
       }
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"

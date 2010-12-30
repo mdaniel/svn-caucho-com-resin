@@ -31,7 +31,7 @@ package com.caucho.db.table;
 
 import com.caucho.db.index.BTree;
 import com.caucho.db.sql.QueryContext;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.inject.Module;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
@@ -61,7 +61,7 @@ public class UniqueIndexColumnConstraint extends Constraint {
    */
   @Override
   public void validate(TableIterator []sourceRows,
-                       QueryContext context, Transaction xa)
+                       QueryContext context, DbTransaction xa)
     throws SQLException
   {
     try {

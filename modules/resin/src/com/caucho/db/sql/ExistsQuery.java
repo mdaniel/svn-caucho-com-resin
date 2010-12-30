@@ -30,7 +30,7 @@ package com.caucho.db.sql;
 
 import com.caucho.db.Database;
 import com.caucho.db.table.TableIterator;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.sql.SQLExceptionWrapper;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class ExistsQuery extends SelectQuery {
   /**
    * Executes the query.
    */
-  public boolean exists(QueryContext context, Transaction xa)
+  public boolean exists(QueryContext context, DbTransaction xa)
     throws SQLException
   {
     SelectResult result = SelectResult.create(_nullExprs, null);
@@ -74,7 +74,7 @@ public class ExistsQuery extends SelectQuery {
   private boolean execute(SelectResult result,
                        TableIterator []rows,
                        QueryContext context,
-                       Transaction transaction)
+                       DbTransaction transaction)
     throws SQLException, IOException
   {
     FromItem []fromItems = getFromItems();
@@ -86,7 +86,7 @@ public class ExistsQuery extends SelectQuery {
   /**
    * Executes the query.
    */
-  public void execute(QueryContext queryCtx, Transaction xa)
+  public void execute(QueryContext queryCtx, DbTransaction xa)
     throws SQLException
   {
     throw new UnsupportedOperationException();

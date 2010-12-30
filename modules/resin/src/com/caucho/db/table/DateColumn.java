@@ -33,7 +33,7 @@ import com.caucho.db.index.BTree;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.QDate;
 
@@ -99,7 +99,7 @@ class DateColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setString(Transaction xa, byte []block, int rowOffset, String str)
+  void setString(DbTransaction xa, byte []block, int rowOffset, String str)
     throws SQLException
   {
     if (str == null)
@@ -142,7 +142,7 @@ class DateColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setDate(Transaction xa, byte []block, int rowOffset, long value)
+  void setDate(DbTransaction xa, byte []block, int rowOffset, long value)
   {
     int offset = rowOffset + _columnOffset;
     
@@ -193,7 +193,7 @@ class DateColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setLong(Transaction xa, byte []block, int rowOffset, long value)
+  void setLong(DbTransaction xa, byte []block, int rowOffset, long value)
   {
     setDate(xa, block, rowOffset, value);
   }
@@ -230,7 +230,7 @@ class DateColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setInteger(Transaction xa, byte []block, int rowOffset, int value)
+  void setInteger(DbTransaction xa, byte []block, int rowOffset, int value)
   {
     setDate(xa, block, rowOffset, value);
   }
@@ -297,7 +297,7 @@ class DateColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void setExpr(Transaction xa,
+  void setExpr(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException
@@ -340,7 +340,7 @@ class DateColumn extends Column {
    * @param rowAddr the address of the row
    */
   @Override
-  void setIndex(Transaction xa,
+  void setIndex(DbTransaction xa,
                 byte []block, int rowOffset,
                 long rowAddr, QueryContext context)
     throws SQLException
@@ -357,7 +357,7 @@ class DateColumn extends Column {
    * Sets based on an iterator.
    */
   @Override
-  public void set(Transaction xa,
+  public void set(DbTransaction xa,
                   TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
@@ -374,7 +374,7 @@ class DateColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void deleteIndex(Transaction xa, byte []block, int rowOffset)
+  void deleteIndex(DbTransaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     BTree index = getIndex();

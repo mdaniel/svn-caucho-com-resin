@@ -41,7 +41,7 @@ import com.caucho.db.block.Block;
 import com.caucho.db.jdbc.GeneratedKeysResultSet;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.table.Column.ColumnType;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.inject.Module;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -60,7 +60,7 @@ public class QueryContext {
   private static final FreeList<QueryContext> _freeList
     = new FreeList<QueryContext>(64);
 
-  private Transaction _xa;
+  private DbTransaction _xa;
   private TableIterator []_tableIterators;
   private boolean _isWrite;
 
@@ -128,7 +128,7 @@ public class QueryContext {
   /**
    * Initializes the query state.
    */
-  public void init(Transaction xa,
+  public void init(DbTransaction xa,
                    TableIterator []tableIterators,
                    boolean isReadOnly)
   {
@@ -223,7 +223,7 @@ public class QueryContext {
   /**
    * Sets the transaction.
    */
-  public void setTransaction(Transaction xa)
+  public void setTransaction(DbTransaction xa)
   {
     _xa = xa;
   }
@@ -231,7 +231,7 @@ public class QueryContext {
   /**
    * Returns the transaction.
    */
-  public Transaction getTransaction()
+  public DbTransaction getTransaction()
   {
     return _xa;
   }
@@ -667,6 +667,13 @@ public class QueryContext {
     if (thread != null && thread != Thread.currentThread()) {
       throw new IllegalStateException();
     }
+    
+    DbTransaction xa = _xa;
+    _xa = null;
+    
+    // db/0a10
+    if (xa != null && xa.isAutoCommit())
+      xa.commit();
   }
 
   public static void free(QueryContext cxt)

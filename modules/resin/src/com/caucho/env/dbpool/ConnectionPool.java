@@ -833,7 +833,8 @@ public class ConnectionPool extends AbstractManagedObject
         + ", max-create-connections=" + _maxCreateConnections
         + ")");
 
-    WarningService.sendCurrentWarning(this, message, false);
+    // XXX: This isn't a warning, it's a health nexus message.
+    WarningService.sendCurrentWarning(this, message);
     log.warning(message);
 
     if (startCreateOverflow()) {
@@ -1062,7 +1063,8 @@ public class ConnectionPool extends AbstractManagedObject
                          _maxCreateConnections,
                          _maxOverflowConnections);
 
-    WarningService.sendCurrentWarning(this, message, false);
+    // XXX: not exactly a warning, it's a health check system.
+    WarningService.sendCurrentWarning(this, message);
     log.warning(message);
     
     throw new ResourceException(message);

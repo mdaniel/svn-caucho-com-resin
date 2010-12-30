@@ -32,7 +32,7 @@ package com.caucho.db.sql;
 import com.caucho.db.Database;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.quercus.lib.db.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 
@@ -61,7 +61,7 @@ class DeleteQuery extends Query {
   /**
    * Executes the query.
    */
-  public void execute(QueryContext context, Transaction xa)
+  public void execute(QueryContext context, DbTransaction xa)
     throws SQLException
   {
     int count = 0;

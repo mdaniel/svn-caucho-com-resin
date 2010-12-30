@@ -35,7 +35,7 @@ import com.caucho.db.index.KeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 
 /**
  * Represents a 16-bit integer column.
@@ -120,7 +120,7 @@ class ShortColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setString(Transaction xa, byte []block, int rowOffset, String str)
+  void setString(DbTransaction xa, byte []block, int rowOffset, String str)
   {
     if (str == null)
       setNull(block, rowOffset);
@@ -157,7 +157,7 @@ class ShortColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setInteger(Transaction xa, byte []block, int rowOffset, int value)
+  void setInteger(DbTransaction xa, byte []block, int rowOffset, int value)
   {
     int offset = rowOffset + _columnOffset;
     
@@ -175,7 +175,7 @@ class ShortColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setLong(Transaction xa, byte []block, int rowOffset, long value)
+  void setLong(DbTransaction xa, byte []block, int rowOffset, long value)
   {
     setInteger(xa, block, rowOffset, (int) value);
   }
@@ -200,7 +200,7 @@ class ShortColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void setExpr(Transaction xa,
+  void setExpr(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException
@@ -280,7 +280,7 @@ class ShortColumn extends Column {
    * @param rowAddr the address of the row
    */
   @Override
-  void setIndex(Transaction xa,
+  void setIndex(DbTransaction xa,
                 byte []block, int rowOffset,
                 long rowAddr, QueryContext context)
     throws SQLException
@@ -313,7 +313,7 @@ class ShortColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void deleteIndex(Transaction xa, byte []block, int rowOffset)
+  void deleteIndex(DbTransaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     BTree index = getIndex();

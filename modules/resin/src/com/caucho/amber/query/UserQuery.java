@@ -80,8 +80,8 @@ public class UserQuery implements AmberQuery {
 
     _argLength = argList.length;
 
-    if (query instanceof SelectQuery) {
-      SelectQuery select = (SelectQuery) query;
+    if (query instanceof AmberSelectQuery) {
+      AmberSelectQuery select = (AmberSelectQuery) query;
 
       if (select.getOffset() >= 0)
         _firstResult = select.getOffset();
@@ -314,7 +314,7 @@ public class UserQuery implements AmberQuery {
     if (_rs == null)
       _rs = new ResultSetImpl();
 
-    SelectQuery query = (SelectQuery) _query;
+    AmberSelectQuery query = (AmberSelectQuery) _query;
     
     int firstResult = _firstResult;
     int maxResults = _maxResults;
@@ -381,7 +381,7 @@ public class UserQuery implements AmberQuery {
     return _rs;
   }
 
-  private ResultSetCacheChunk fillCache(SelectQuery query)
+  private ResultSetCacheChunk fillCache(AmberSelectQuery query)
     throws SQLException
   {
     int chunkSize = _aConn.getCacheChunkSize();
@@ -503,7 +503,7 @@ public class UserQuery implements AmberQuery {
   public Object getSingleResult()
     throws SQLException
   {
-    SelectQuery query = (SelectQuery) _query;
+    AmberSelectQuery query = (AmberSelectQuery) _query;
     ResultSet rs = null;
 
     _aConn.pushDepth();
@@ -529,7 +529,7 @@ public class UserQuery implements AmberQuery {
   public void list(List<Object> list)
     throws SQLException
   {
-    SelectQuery query = (SelectQuery) _query;
+    AmberSelectQuery query = (AmberSelectQuery) _query;
     ResultSet rs = null;
 
     _aConn.pushDepth();
@@ -573,7 +573,7 @@ public class UserQuery implements AmberQuery {
            IllegalAccessException,
            InvocationTargetException
   {
-    SelectQuery query = (SelectQuery) _query;
+    AmberSelectQuery query = (AmberSelectQuery) _query;
 
     ResultSet rs = null;
 

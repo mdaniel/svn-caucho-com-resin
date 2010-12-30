@@ -36,7 +36,7 @@ import com.caucho.db.index.KeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -294,7 +294,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  abstract void setString(Transaction xa,
+  abstract void setString(DbTransaction xa,
                           byte []block, int rowOffset, String value)
     throws SQLException;
   
@@ -323,7 +323,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  void setInteger(Transaction xa,
+  void setInteger(DbTransaction xa,
                   byte []block, int rowOffset, int value)
     throws SQLException
   {
@@ -355,7 +355,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  void setLong(Transaction xa,
+  void setLong(DbTransaction xa,
                byte []block, int rowOffset, long value)
     throws SQLException
   {
@@ -387,7 +387,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  void setDouble(Transaction xa,
+  void setDouble(DbTransaction xa,
                  byte []block, int rowOffset, double value)
     throws SQLException
   {
@@ -413,7 +413,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
-  void setExpr(Transaction xa,
+  void setExpr(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException
@@ -443,7 +443,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  void setDate(Transaction xa, byte []block, int rowOffset, long value)
+  void setDate(DbTransaction xa, byte []block, int rowOffset, long value)
     throws SQLException
   {
     throw new UnsupportedOperationException();
@@ -504,7 +504,7 @@ abstract public class Column {
   /**
    * Sets based on an iterator.
    */
-  public void set(Transaction xa,
+  public void set(DbTransaction xa,
                   TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
@@ -521,7 +521,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param rowAddr the address of the row
    */
-  void setIndex(Transaction xa,
+  void setIndex(DbTransaction xa,
                 byte []block, int rowOffset,
                 long rowAddr, QueryContext context)
     throws SQLException
@@ -550,7 +550,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
-  void deleteIndex(Transaction xa, byte []block, int rowOffset)
+  void deleteIndex(DbTransaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     BTree index = getIndex();
@@ -576,7 +576,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param rowAddr the address of the row
    */
-  void validateIndex(Transaction xa,
+  void validateIndex(DbTransaction xa,
                      byte []block, int rowOffset,
                      long rowAddr)
     throws SQLException, IOException
@@ -601,7 +601,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
-  void deleteData(Transaction xa, byte []block, int rowOffset)
+  void deleteData(DbTransaction xa, byte []block, int rowOffset)
     throws SQLException
   {
   }

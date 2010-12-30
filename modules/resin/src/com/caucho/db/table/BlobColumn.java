@@ -35,7 +35,7 @@ import com.caucho.db.blob.Inode;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.util.IoUtil;
 
 import java.io.IOException;
@@ -103,7 +103,7 @@ class BlobColumn extends Column {
    * @param str the string value
    */
   @Override
-  void setString(Transaction xa,
+  void setString(DbTransaction xa,
                  byte []block, int rowOffset, String str)
   {
     if (! isNull(block, rowOffset)) {
@@ -159,7 +159,7 @@ class BlobColumn extends Column {
    * @param rowOffset the offset into the row
    * @param str the string value
    */
-  private void setStream(Transaction xa,
+  private void setStream(DbTransaction xa,
                          byte []block, int rowOffset,
                          InputStream value)
   {
@@ -202,7 +202,7 @@ class BlobColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void deleteData(Transaction xa, byte []block, int rowOffset)
+  void deleteData(DbTransaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     if (! isNull(block, rowOffset)) {
@@ -263,7 +263,7 @@ class BlobColumn extends Column {
    * Sets based on an iterator.
    */
   @Override
-  public void set(Transaction xa,
+  public void set(DbTransaction xa,
                   TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
@@ -288,7 +288,7 @@ class BlobColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void setExpr(Transaction xa,
+  void setExpr(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException

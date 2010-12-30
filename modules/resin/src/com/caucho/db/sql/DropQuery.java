@@ -30,7 +30,7 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.Database;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
@@ -55,7 +55,7 @@ class DropQuery extends Query {
    * Executes the query.
    */
   @Override
-  public void execute(QueryContext queryContext, Transaction xa)
+  public void execute(QueryContext queryContext, DbTransaction xa)
     throws SQLException
   {
     _database.dropTable(_tableName);

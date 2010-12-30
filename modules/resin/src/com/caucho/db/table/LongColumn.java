@@ -35,7 +35,7 @@ import com.caucho.db.index.LongKeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 
 /**
  * Represents a 64-bit long integer column.
@@ -105,7 +105,7 @@ class LongColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setString(Transaction xa, byte []block, int rowOffset, String str)
+  void setString(DbTransaction xa, byte []block, int rowOffset, String str)
   {
     if (str == null)
       setNull(block, rowOffset);
@@ -136,7 +136,7 @@ class LongColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setInteger(Transaction xa, byte []block, int rowOffset, int value)
+  void setInteger(DbTransaction xa, byte []block, int rowOffset, int value)
   {
     setLong(xa, block, rowOffset, value);
   }
@@ -161,7 +161,7 @@ class LongColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setLong(Transaction xa, byte []block, int rowOffset, long value)
+  void setLong(DbTransaction xa, byte []block, int rowOffset, long value)
   {
     int offset = rowOffset + _columnOffset;
     
@@ -224,7 +224,7 @@ class LongColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void setExpr(Transaction xa,
+  void setExpr(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException
@@ -239,7 +239,7 @@ class LongColumn extends Column {
    * Sets based on an expression
    */
   @Override
-  public void set(Transaction xa,
+  public void set(DbTransaction xa,
                   TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {

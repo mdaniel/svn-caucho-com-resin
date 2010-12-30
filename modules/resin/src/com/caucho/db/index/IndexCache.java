@@ -30,7 +30,7 @@
 package com.caucho.db.index;
 
 import com.caucho.util.*;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.env.thread.TaskWorker;
 
 import java.io.IOException;
@@ -94,7 +94,7 @@ public final class IndexCache
    */
   public long lookup(BTree btree,
                      byte []buffer, int offset, int length,
-                     Transaction xa)
+                     DbTransaction xa)
     throws SQLException
   {
     IndexKey value = lookupValue(btree, buffer, offset, length);
@@ -125,7 +125,7 @@ public final class IndexCache
   public void insert(BTree btree,
                      byte []buffer, int offset, int length,
                      long value,
-                     Transaction xa)
+                     DbTransaction xa)
     throws SQLException
   {
     IndexKey key = IndexKey.create(btree, buffer, offset, length, value);
@@ -158,7 +158,7 @@ public final class IndexCache
    */
   public void delete(BTree btree,
                      byte []buffer, int offset, int length,
-                     Transaction xa)
+                     DbTransaction xa)
     throws SQLException
   {
     IndexKey value = lookupValue(btree, buffer, offset, length);
@@ -234,7 +234,7 @@ public final class IndexCache
   class IndexCacheWriter extends TaskWorker {
     public long runTask()
     {
-      Transaction xa = Transaction.create();
+      DbTransaction xa = DbTransaction.create();
       
       try {
         IndexKey key = null;

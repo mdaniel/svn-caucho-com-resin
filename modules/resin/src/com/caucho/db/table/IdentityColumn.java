@@ -34,7 +34,7 @@ import com.caucho.db.block.BlockStore;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.util.L10N;
 
 /**
@@ -112,7 +112,7 @@ class IdentityColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setString(Transaction xa, byte []block, int rowOffset, String str)
+  void setString(DbTransaction xa, byte []block, int rowOffset, String str)
   {
     throw new IllegalStateException(L.l("an IDENTITY column cannot be set"));
   }
@@ -137,7 +137,7 @@ class IdentityColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setInteger(Transaction xa, byte []block, int rowOffset, int value)
+  void setInteger(DbTransaction xa, byte []block, int rowOffset, int value)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -162,7 +162,7 @@ class IdentityColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setLong(Transaction xa, byte []block, int rowOffset, long value)
+  void setLong(DbTransaction xa, byte []block, int rowOffset, long value)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -199,7 +199,7 @@ class IdentityColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void setExpr(Transaction xa,
+  void setExpr(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException
@@ -211,7 +211,7 @@ class IdentityColumn extends Column {
    * Sets based on an expression
    */
   @Override
-  public void set(Transaction xa,
+  public void set(DbTransaction xa,
                   TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {

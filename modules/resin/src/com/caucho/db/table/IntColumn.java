@@ -34,7 +34,7 @@ import com.caucho.db.index.KeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 
 import java.sql.SQLException;
 
@@ -121,7 +121,7 @@ class IntColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setString(Transaction xa, byte []block, int rowOffset, String str)
+  void setString(DbTransaction xa, byte []block, int rowOffset, String str)
   {
     if (str == null)
       setNull(block, rowOffset);
@@ -160,7 +160,7 @@ class IntColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setInteger(Transaction xa, byte []block, int rowOffset, int value)
+  void setInteger(DbTransaction xa, byte []block, int rowOffset, int value)
   {
     int offset = rowOffset + _columnOffset;
     
@@ -180,7 +180,7 @@ class IntColumn extends Column {
    * @param value the value to store
    */
   @Override
-  void setLong(Transaction xa, byte []block, int rowOffset, long value)
+  void setLong(DbTransaction xa, byte []block, int rowOffset, long value)
   {
     setInteger(xa, block, rowOffset, (int) value);
   }
@@ -205,7 +205,7 @@ class IntColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void setExpr(Transaction xa,
+  void setExpr(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException
@@ -283,7 +283,7 @@ class IntColumn extends Column {
    * Sets based on an iterator.
    */
   @Override
-  public void set(Transaction xa,
+  public void set(DbTransaction xa,
                   TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
@@ -300,7 +300,7 @@ class IntColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void deleteIndex(Transaction xa, byte []block, int rowOffset)
+  void deleteIndex(DbTransaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     BTree index = getIndex();

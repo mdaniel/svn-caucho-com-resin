@@ -182,7 +182,7 @@ public class ShutdownService extends AbstractResinService
       haltThread.startShutdown();
     }
 
-    _warningService.sendWarning(this, msg, true);
+    _warningService.sendWarning(this, msg);
   }
 
   /**

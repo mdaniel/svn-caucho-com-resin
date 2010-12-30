@@ -336,7 +336,7 @@ public class QueryParser {
     return parseSelect(false);
   }
 
-  private SelectQuery parseSelect(boolean innerSelect)
+  private AmberSelectQuery parseSelect(boolean innerSelect)
     throws QueryParseException
   {
     int oldParseIndex = _parseIndex;
@@ -354,7 +354,7 @@ public class QueryParser {
     _havingExpr = null;
     _appendResultList = null;
 
-    SelectQuery query = new SelectQuery(_sql, getMetaData());
+    AmberSelectQuery query = new AmberSelectQuery(_sql, getMetaData());
     query.setParentQuery(_query);
     _query = query;
 
@@ -1198,7 +1198,7 @@ public class QueryParser {
     throws QueryParseException
   {
     if (peekToken() == SELECT) {
-      SelectQuery select = parseSelect(true);
+      AmberSelectQuery select = parseSelect(true);
 
       return new SubSelectExpr(select);
     }
@@ -1689,7 +1689,7 @@ public class QueryParser {
             if (peekToken() != SELECT && peekToken() != FROM)
               throw error(L.l(name.toUpperCase() + " requires '(SELECT'"));
 
-            SelectQuery select = parseSelect(true);
+            AmberSelectQuery select = parseSelect(true);
 
             if (peekToken() != ')')
               throw error(L.l(name.toUpperCase() + " requires ')'"));
@@ -2054,7 +2054,7 @@ public class QueryParser {
       break;
 
     case SIZE:
-      if (! (_query instanceof SelectQuery))
+      if (! (_query instanceof AmberSelectQuery))
         throw error(L.l("The SIZE() function is only supported for SELECT or subselect queries"));
 
       // jpa/119l
@@ -2092,14 +2092,14 @@ public class QueryParser {
 
       _groupList.add(groupExpr);
 
-      ((SelectQuery) _query).setGroupList(_groupList);
+      ((AmberSelectQuery) _query).setGroupList(_groupList);
 
       funExpr = SizeFunExpr.create(this, args);
 
       // jpa/1199, jpa/119l
       if (! _parsingResult) {
-        if (_query instanceof SelectQuery) {
-          SelectQuery query = (SelectQuery) _query;
+        if (_query instanceof AmberSelectQuery) {
+          AmberSelectQuery query = (AmberSelectQuery) _query;
           ArrayList<AmberExpr> resultList = query.getResultList();
 
           for (AmberExpr expr : resultList) {

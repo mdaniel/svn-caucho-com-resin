@@ -30,7 +30,7 @@ package com.caucho.db.jdbc;
 
 import com.caucho.db.Database;
 import com.caucho.db.sql.Query;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.util.L10N;
 
 import java.sql.Array;
@@ -65,7 +65,7 @@ public class ConnectionImpl implements java.sql.Connection {
   private boolean _isClosed;
   private boolean _isAutoCommit = true;
 
-  private Transaction _xa;
+  private DbTransaction _xa;
 
   private StatementImpl _statement;
   private ArrayList<StatementImpl> _statements;
@@ -96,22 +96,22 @@ public class ConnectionImpl implements java.sql.Connection {
   {
   }
 
-  public void setTransaction(Transaction xa)
+  public void setTransaction(DbTransaction xa)
   {
     _xa = xa;
   }
 
-  public Transaction getTransaction()
+  public DbTransaction getTransaction()
   {
     if (_isAutoCommit) {
-      Transaction xa = Transaction.create(this);
+      DbTransaction xa = DbTransaction.create(this);
       // XXX: value?
       // xa.setTransactionTimeout(15000);
       xa.setAutoCommit(true);
       return xa;
     }
     else if (_xa == null) {
-      _xa = Transaction.create(this);
+      _xa = DbTransaction.create(this);
       
       if (log.isLoggable(Level.FINER))
         log.finer("start transaction " + this + " " + _xa);
@@ -128,7 +128,7 @@ public class ConnectionImpl implements java.sql.Connection {
     if (log.isLoggable(Level.FINER))
       log.finer("commit " + this + " " + _xa);
     
-    Transaction xa = _xa;
+    DbTransaction xa = _xa;
     _xa = null;
     
     if (xa != null)
@@ -138,7 +138,7 @@ public class ConnectionImpl implements java.sql.Connection {
   public void rollback()
     throws SQLException
   {
-    Transaction xa = _xa;
+    DbTransaction xa = _xa;
     _xa = null;
 
     if (xa != null) {
@@ -199,7 +199,7 @@ public class ConnectionImpl implements java.sql.Connection {
     throws SQLException
   {
     if (! _isAutoCommit && autoCommit) {
-      Transaction xa = _xa;
+      DbTransaction xa = _xa;
       _xa = null;
     
       if (xa != null)

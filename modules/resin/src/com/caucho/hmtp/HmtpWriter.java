@@ -51,6 +51,7 @@ public class HmtpWriter
   private String _jid;
   
   private Hessian2Output _out;
+  private HessianDebugOutputStream _dOut;
   
   private int _jidCacheIndex;
   private HashMap<String,Integer> _jidCache = new HashMap<String,Integer>(256);
@@ -58,15 +59,18 @@ public class HmtpWriter
 
   public HmtpWriter()
   {
-    _out = new Hessian2Output(); 
+    _out = new Hessian2Output();
+    
+    if (log.isLoggable(Level.FINEST)) {
+      _dOut = new HessianDebugOutputStream(log, Level.FINEST);
+    }
   }
 
   protected void init(OutputStream os)
   {
-    if (log.isLoggable(Level.FINEST)) {
-      HessianDebugOutputStream dOut;
-      dOut = new HessianDebugOutputStream(os, log, Level.FINEST);
-      os = dOut;
+    if (_dOut != null) {
+      _dOut.initPacket(os);
+      os = _dOut;
     }
     
     _out.initPacket(os);

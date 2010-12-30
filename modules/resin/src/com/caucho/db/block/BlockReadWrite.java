@@ -223,7 +223,6 @@ public class BlockReadWrite {
         System.out.println("BUFFER: " + buffer + " " + offset + " " + length);
 
       os.write(blockAddress, buffer, offset, length);
-
       freeRowFile(wrapper, isPriority);
       wrapper = null;
 

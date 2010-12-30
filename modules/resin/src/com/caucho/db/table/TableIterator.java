@@ -33,7 +33,7 @@ import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class TableIterator {
   private final static byte []_nullBuffer = new byte[256];
   
   private Table _table;
-  private Transaction _xa;
+  private DbTransaction _xa;
   private QueryContext _queryContext;
 
   private long _blockId;
@@ -145,7 +145,7 @@ public class TableIterator {
   /**
    * Returns the transaction for the iterator.
    */
-  public Transaction getTransaction()
+  public DbTransaction getTransaction()
   {
     return _xa;
   }
@@ -166,7 +166,7 @@ public class TableIterator {
     _queryContext = queryContext;
   }
 
-  public void init(Transaction xa)
+  public void init(DbTransaction xa)
     throws SQLException
   {
     Block block = _block;
@@ -377,7 +377,7 @@ public class TableIterator {
   /**
    * Returns the string for the column at the given index.
    */
-  public void setString(Transaction xa, Column column, String value)
+  public void setString(DbTransaction xa, Column column, String value)
     throws SQLException
   {
     column.setString(xa, _buffer, _rowOffset, value);
@@ -400,7 +400,7 @@ public class TableIterator {
   /**
    * Returns the integer for the column at the given index.
    */
-  public void setInteger(Transaction xa, Column column, int value)
+  public void setInteger(DbTransaction xa, Column column, int value)
     throws SQLException
   {
     column.setInteger(xa, _buffer, _rowOffset, value);
@@ -423,7 +423,7 @@ public class TableIterator {
   /**
    * Returns the long for the column at the given index.
    */
-  public void setLong(Transaction xa, Column column, long value)
+  public void setLong(DbTransaction xa, Column column, long value)
     throws SQLException
   {
     column.setLong(xa, _buffer, _rowOffset, value);
@@ -446,7 +446,7 @@ public class TableIterator {
   /**
    * Returns the double for the column at the given index.
    */
-  public void setDouble(Transaction xa, Column column, double value)
+  public void setDouble(DbTransaction xa, Column column, double value)
     throws SQLException
   {
     column.setDouble(xa, _buffer, _rowOffset, value);

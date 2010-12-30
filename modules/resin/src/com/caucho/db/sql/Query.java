@@ -39,7 +39,7 @@ import com.caucho.db.Database;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.inject.Module;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
@@ -675,13 +675,13 @@ abstract public class Query {
   /**
    * Executes the query.
    */
-  abstract public void execute(QueryContext queryCtx, Transaction xa)
+  abstract public void execute(QueryContext queryCtx, DbTransaction xa)
     throws SQLException;
 
   /**
    * Executes the query.
    */
-  public SelectCursor executeCursor(QueryContext queryCtx, Transaction xa)
+  public SelectCursor executeCursor(QueryContext queryCtx, DbTransaction xa)
     throws SQLException
   {
     throw new UnsupportedOperationException(toString());
@@ -691,7 +691,7 @@ abstract public class Query {
    * Starts the query.
    */
   protected boolean start(TableIterator []rows, int rowLength,
-                          QueryContext queryContext, Transaction xa)
+                          QueryContext queryContext, DbTransaction xa)
     throws SQLException
   {
     try {
@@ -734,7 +734,7 @@ abstract public class Query {
    * Returns the next tuple from the query.
    */
   protected boolean nextTuple(TableIterator []rows, int rowLength,
-                              QueryContext queryContext, Transaction xa)
+                              QueryContext queryContext, DbTransaction xa)
     throws IOException, SQLException
   {
     if (rowLength == 0)

@@ -32,7 +32,7 @@ package com.caucho.db.blob;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.xa.RawTransaction;
 import com.caucho.db.xa.StoreTransaction;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class BlobOutputStream extends OutputStream {
    *
    * @param store the output store
    */
-  public BlobOutputStream(Transaction xa, BlockStore store,
+  public BlobOutputStream(DbTransaction xa, BlockStore store,
                           byte []inode, int inodeOffset)
   {
     init(store, inode, inodeOffset);

@@ -39,7 +39,7 @@ import com.caucho.db.sql.CreateQuery;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.QueryContext;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.inject.Module;
 import com.caucho.sql.SQLExceptionWrapper;
@@ -465,7 +465,7 @@ public class Table extends BlockStore {
   private void rebuildIndexes()
     throws IOException, SQLException
   {
-    Transaction xa = Transaction.create();
+    DbTransaction xa = DbTransaction.create();
     xa.setAutoCommit(true);
 
     try {
@@ -524,7 +524,7 @@ public class Table extends BlockStore {
   public void validateIndexes()
     throws IOException, SQLException
   {
-    Transaction xa = Transaction.create();
+    DbTransaction xa = DbTransaction.create();
     xa.setAutoCommit(true);
 
     try {
@@ -719,7 +719,7 @@ public class Table extends BlockStore {
   /**
    * Inserts a new row, returning the row address.
    */
-  public long insert(QueryContext queryContext, Transaction xa,
+  public long insert(QueryContext queryContext, DbTransaction xa,
                      ArrayList<Column> columns,
                      ArrayList<Expr> values)
     throws IOException, SQLException
@@ -760,7 +760,7 @@ public class Table extends BlockStore {
     }
   }
 
-  private int allocateRow(Block block, Transaction xa)
+  private int allocateRow(Block block, DbTransaction xa)
     throws IOException, SQLException, InterruptedException
   {
     Lock blockLock = block.getWriteLock();
@@ -789,7 +789,7 @@ public class Table extends BlockStore {
     return -1;
   }
 
-  public void insertRow(QueryContext queryContext, Transaction xa,
+  public void insertRow(QueryContext queryContext, DbTransaction xa,
                         ArrayList<Column> columns,
                         ArrayList<Expr> values,
                         Block block, int rowOffset)
@@ -1077,7 +1077,7 @@ public class Table extends BlockStore {
    * Validates the given row.
    */
   private void validate(Block block, int rowOffset,
-                        QueryContext queryContext, Transaction xa)
+                        QueryContext queryContext, DbTransaction xa)
     throws SQLException
   {
     TableIterator row = createTableIterator();
@@ -1090,7 +1090,7 @@ public class Table extends BlockStore {
     }
   }
 
-  void delete(Transaction xa, Block block,
+  void delete(DbTransaction xa, Block block,
               byte []buffer, int rowOffset,
               boolean isDeleteIndex)
     throws SQLException

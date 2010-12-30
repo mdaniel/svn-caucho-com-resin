@@ -672,6 +672,9 @@ public final class ClusterServer {
     pool.setLoadBalanceWarmupTime(getLoadBalanceWarmupTime());
     pool.setLoadBalanceWeight(getLoadBalanceWeight());
     
+    if (getCloudServer().getPod() == _clusterService.getSelfServer().getPod())
+      pool.setHeartbeatServer(true);
+    
     return pool;
   }
 

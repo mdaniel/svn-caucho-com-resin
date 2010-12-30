@@ -30,7 +30,7 @@ package com.caucho.db.sql;
 
 import com.caucho.db.Database;
 import com.caucho.db.table.TableFactory;
-import com.caucho.db.xa.Transaction;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.sql.SQLExceptionWrapper;
 
 import java.sql.SQLException;
@@ -58,7 +58,7 @@ public class CreateQuery extends Query {
   /**
    * Executes the query.
    */
-  public void execute(QueryContext queryContext, Transaction xa)
+  public void execute(QueryContext queryContext, DbTransaction xa)
     throws SQLException
   {
     try {
