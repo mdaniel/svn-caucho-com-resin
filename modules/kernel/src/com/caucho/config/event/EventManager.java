@@ -286,7 +286,6 @@ public class EventManager
   {
     // ioc/0062 - class with type-param handled specially
     BaseType eventType = _cdiManager.createTargetBaseType(event.getClass());
-
     fireLocalEvent(localMap, event, eventType, bindings);
   }
   
@@ -297,7 +296,6 @@ public class EventManager
     Set<ObserverMethod<?>> observerList = new LinkedHashSet<ObserverMethod<?>>();
 
     fillLocalObserverList(localMap, observerList, eventType, qualifiers);
-
     for (ObserverMethod<?> method : observerList) {
       ((ObserverMethod) method).notify(event);
     }
@@ -312,7 +310,7 @@ public class EventManager
       Class<?> rawClass = type.getRawClass();
 
       ObserverMap map = localMap.get(rawClass);
-      
+
       if (map != null) {
         // ioc/0b5c, ioc/0b82
         map.resolveObservers((Set) list, eventType, qualifiers);

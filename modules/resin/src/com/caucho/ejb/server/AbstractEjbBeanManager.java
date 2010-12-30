@@ -147,6 +147,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     // XXX: 4.0.7 this is complicated by decorator vs context injection
     _loader.setAttribute("caucho.inject", false);
     _loader.setAttribute("ejb.manager", false);
+    _loader.setId("ejb:" + ejbName);
     
     _producer = createInjectionTarget();
     

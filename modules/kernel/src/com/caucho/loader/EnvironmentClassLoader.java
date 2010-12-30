@@ -44,6 +44,7 @@ import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanManager;
 import com.caucho.loader.module.ArtifactManager;
 import com.caucho.management.server.EnvironmentMXBean;
+import com.caucho.util.Crc64;
 import com.caucho.util.ResinThreadPoolExecutor;
 
 /**
@@ -79,6 +80,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private AtomicReference<ArtifactManager> _artifactManagerRef
     = new AtomicReference<ArtifactManager>();
   private ArtifactManager _artifactManager;
+  
+  private ArrayList<String> _packageList = new ArrayList<String>();
 
   // Array of listeners
   // server/306i  - can't be weak reference, instead create WeakStopListener
@@ -583,9 +586,29 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       super.addURL(url);
     }
     
+    _packageList.add(rootPackage);
+
     _pendingScanRoots.add(new ScanRoot(url, rootPackage));
     
     sendAddLoaderEvent();
+  }
+  
+  /**
+   * Add the custom packages to the classloader hash.
+   */
+  @Override
+  public String getHash()
+  {
+    String superHash = super.getHash();
+   
+    // ioc/0p61 - package needed for hash to enable scan
+    long crc = Crc64.generate(superHash);
+    
+    for (String pkg : _packageList) {
+      crc = Crc64.generate(crc, pkg);
+    }
+    
+    return Long.toHexString(crc);
   }
 
   /**

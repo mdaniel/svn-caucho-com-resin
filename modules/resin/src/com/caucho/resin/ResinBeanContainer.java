@@ -116,6 +116,8 @@ public class ResinBeanContainer
 {
   private static final L10N L = new L10N(ResinBeanContainer.class);
   private static final String SCHEMA = "com/caucho/resin/resin-context.rnc";
+  
+  private String _id;
 
   private EnvironmentClassLoader _classLoader;
   private InjectManager _injectManager;
@@ -165,6 +167,11 @@ public class ResinBeanContainer
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  public void setId(String id)
+  {
+    _classLoader.setId(id);
   }
 
   /**

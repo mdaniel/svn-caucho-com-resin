@@ -953,7 +953,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     return _classFileTransformerList;
   }
 
-  public final String getHash()
+  public String getHash()
   {
     return String.valueOf(Crc64.generate(getClassPath()));
   }

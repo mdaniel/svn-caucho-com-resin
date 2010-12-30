@@ -208,8 +208,7 @@ public final class InjectManager
   private boolean _isChildManager;
   
   private final InjectScanManager _scanManager;
-  private final ExtensionManager _extensionManager
-    = new ExtensionManager(this);
+  private final ExtensionManager _extensionManager;
   private EventManager _eventManager = new EventManager(this);
   
   private AtomicLong _version = new AtomicLong();
@@ -351,6 +350,7 @@ public final class InjectManager
     
     _parent = parent;
     
+    _extensionManager = new ExtensionManager(this);
     _scanManager = new InjectScanManager(this);
 
     Thread thread = Thread.currentThread();
