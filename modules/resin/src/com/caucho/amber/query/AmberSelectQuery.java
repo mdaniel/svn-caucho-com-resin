@@ -47,7 +47,7 @@ import com.caucho.util.CharBuffer;
 /**
  * Represents an Amber select query
  */
-public class SelectQuery extends AbstractQuery {
+public class AmberSelectQuery extends AbstractQuery {
   private AbstractQuery _parentQuery;
 
   private boolean _isDistinct;
@@ -74,7 +74,7 @@ public class SelectQuery extends AbstractQuery {
 
   private boolean _hasFrom = true;
 
-  SelectQuery(String query, JdbcMetaData metaData)
+  AmberSelectQuery(String query, JdbcMetaData metaData)
   {
     super(query, metaData);
   }

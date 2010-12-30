@@ -46,10 +46,10 @@ import com.caucho.util.L10N;
 /**
  * Represents a single transaction.
  */
-public class Transaction extends StoreTransaction {
+public class DbTransaction extends StoreTransaction {
   private static final Logger log
-    = Logger.getLogger(Transaction.class.getName());
-  private static final L10N L = new L10N(Transaction.class);
+    = Logger.getLogger(DbTransaction.class.getName());
+  private static final L10N L = new L10N(DbTransaction.class);
 
   private static long AUTO_COMMIT_TIMEOUT = 30000L;
 
@@ -75,22 +75,22 @@ public class Transaction extends StoreTransaction {
 
   private long _timeout = AUTO_COMMIT_TIMEOUT;
 
-  private Transaction()
+  private DbTransaction()
   {
   }
 
-  public static Transaction create(ConnectionImpl conn)
+  public static DbTransaction create(ConnectionImpl conn)
   {
-    Transaction xa = new Transaction();
+    DbTransaction xa = new DbTransaction();
     
     xa.init(conn);
 
     return xa;
   }
 
-  public static Transaction create()
+  public static DbTransaction create()
   {
-    Transaction xa = new Transaction();
+    DbTransaction xa = new DbTransaction();
 
     return xa;
   }

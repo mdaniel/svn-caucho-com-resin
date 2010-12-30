@@ -40,15 +40,18 @@ import com.caucho.bam.stream.ActorStream;
 /**
  * Handles the requests to the server from the link, dispatching requests to
  * the link service and the broker.
+ *
+ * The "from" is passed through unchanged because the caller is another
+ * server. 
  */
-public class ServerProxyPassBroker extends AbstractBroker {
+public class ServerGatewayBroker extends AbstractBroker {
   private final Broker _broker;
   private final ClientStubManager _clientManager;
   private final ActorStream _linkActor;
 
-  public ServerProxyPassBroker(Broker broker,
-                           ClientStubManager clientManager,
-                           ActorStream linkActor)
+  public ServerGatewayBroker(Broker broker,
+                               ClientStubManager clientManager,
+                               ActorStream linkActor)
   {
     _broker = broker;
     _clientManager = clientManager;
@@ -82,7 +85,7 @@ public class ServerProxyPassBroker extends AbstractBroker {
     if (to == null)
       _linkActor.message(to, from, payload);
     else if (isActive())
-      _broker.message(to, getClientJid(), payload);
+      _broker.message(to, from, payload);
     else
       super.message(to, from, payload);
   }
@@ -99,7 +102,7 @@ public class ServerProxyPassBroker extends AbstractBroker {
     if (to == null)
       _linkActor.messageError(to, from, payload, error);
     else if (isActive())
-      _broker.messageError(to, from, getClientJid(), error);
+      _broker.messageError(to, from, from, error);
     else
       super.messageError(to, from, payload, error);
   }
@@ -119,7 +122,7 @@ public class ServerProxyPassBroker extends AbstractBroker {
     if (to == null)
       _linkActor.query(id, to, from, payload);
     else if (isActive())
-      _broker.query(id, to, getClientJid(), payload);
+      _broker.query(id, to, from, payload);
     else
       super.query(id, to, from, payload);
   }
