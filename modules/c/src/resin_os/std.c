@@ -200,7 +200,7 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
       return -1;
   }
 
-  if (timeout > 0 && poll_read(fd, timeout) <= 0) {
+  if (timeout >= 0 && poll_read(fd, timeout) <= 0) {
     return TIMEOUT_EXN;
   }
 

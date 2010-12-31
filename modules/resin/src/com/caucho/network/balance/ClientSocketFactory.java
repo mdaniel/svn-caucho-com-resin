@@ -1447,6 +1447,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     },
     FAIL {
       boolean isStarting() { return true; }
+      boolean isLive() { return false; }
     },
     ACTIVE {
       boolean isLive() { return true; }
@@ -1471,7 +1472,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     boolean isInit() { return true; }
     boolean isClosed() { return false; }
     boolean isStarting() { return false; }
-    boolean isLive() { return true; }
+    boolean isLive() { return false; }
     boolean isSessionEnabled() { return true; }
     boolean isEnabled() { return true; }
 

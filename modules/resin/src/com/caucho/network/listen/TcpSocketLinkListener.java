@@ -1303,6 +1303,10 @@ public class TcpSocketLinkListener
     try {
       int result = is.fillWithTimeout(timeout);
 
+      if (isClosed()) {
+        return -1;
+      }
+      
       return result;
     } catch (IOException e) {
       if (isClosed()) {
