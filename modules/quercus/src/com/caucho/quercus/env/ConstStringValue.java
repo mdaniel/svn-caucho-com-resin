@@ -41,13 +41,13 @@ public class ConstStringValue
 {
   public static final ConstStringValue EMPTY = new ConstStringValue();
 
-  protected LongValue _longValue;
-  protected DoubleValue _doubleValue;
-  protected String _string;
+  private LongValue _longValue;
+  private DoubleValue _doubleValue;
+  private String _string;
 
-  protected Value _key;
-  protected ValueType _valueType;
-  protected char []_serializeValue;
+  private Value _key;
+  private ValueType _valueType;
+  private char []_serializeValue;
 
   public ConstStringValue()
   {
@@ -129,6 +129,31 @@ public class ConstStringValue
     return true;
   }
 
+  protected void setLongValue(LongValue value)
+  {
+    _longValue = value;
+  }
+  
+  protected void setDoubleValue(DoubleValue value)
+  {
+    _doubleValue = value;
+  }
+  
+  protected void setString(String value)
+  {
+    _string = value;
+  }
+  
+  protected void setKey(Value value)
+  {
+    _key = value;
+  }
+  
+  protected void setValueType(ValueType valueType)
+  {
+    _valueType = valueType;
+  }
+ 
   /**
    * Converts to a long vaule
    */

@@ -42,25 +42,25 @@ public final class CompiledConstStringValue
   {
     super(s);
 
-    _longValue = s.toLongValue();
-    _doubleValue = s.toDoubleValue();
-    _string = s.toString();
+    setLongValue(s.toLongValue());
+    setDoubleValue(s.toDoubleValue());
+    setString(s.toString());
 
-    _valueType = s.getValueType();
+    setValueType(s.getValueType());
     _compiledHashCode = s.hashCode();
-    _key = s.toKey();
+    setKey(s.toKey());
   }
 
   public CompiledConstStringValue(String s)
   {
     super(s);
 
-    _longValue = super.toLongValue();
-    _doubleValue = super.toDoubleValue();
-    _string = s;
-    _valueType = super.getValueType();
+    setLongValue(super.toLongValue());
+    setDoubleValue(super.toDoubleValue());
+    setString(s);
+    setValueType(super.getValueType());
     _compiledHashCode = super.hashCode();
-    _key = super.toKey();
+    setKey(super.toKey());
   }
 
   public CompiledConstStringValue(char ch,
@@ -72,12 +72,12 @@ public final class CompiledConstStringValue
   {
     super(ch);
 
-    _string = String.valueOf(ch);
-    _longValue = longValue;
-    _doubleValue = doubleValue;
+    setString(String.valueOf(ch));
+    setLongValue(longValue);
+    setDoubleValue(doubleValue);
 
-    _valueType = valueType;
-    _key = key;
+    setValueType(valueType);
+    setKey(key);
     _compiledHashCode = hashCode;
   }
 
@@ -89,12 +89,12 @@ public final class CompiledConstStringValue
   {
     super(ch);
 
-    _string = String.valueOf(ch);
-    _longValue = longValue;
-    _doubleValue = doubleValue;
+    setString(String.valueOf(ch));
+    setLongValue(longValue);
+    setDoubleValue(doubleValue);
 
-    _valueType = valueType;
-    _key = super.toKey();
+    setValueType(valueType);
+    setKey(super.toKey());
     _compiledHashCode = hashCode;
   }
 
@@ -107,12 +107,13 @@ public final class CompiledConstStringValue
   {
     super(s);
 
-    _string = s;
-    _longValue = longValue;
-    _doubleValue = doubleValue;
-    _valueType = valueType;
+    setString(s);
+    setLongValue(longValue);
+    setDoubleValue(doubleValue);
+    setValueType(valueType);
 
-    _key = key;
+    setKey(key);
+    
     _compiledHashCode = hashCode;
   }
 
@@ -124,36 +125,18 @@ public final class CompiledConstStringValue
   {
     super(s);
 
-    _string = s;
-    _longValue = longValue;
-    _doubleValue = doubleValue;
-    _valueType = valueType;
+    setString(s);
+    setLongValue(longValue);
+    setDoubleValue(doubleValue);
+    setValueType(valueType);
 
-    _key = super.toKey();
+    setKey(super.toKey());
     _compiledHashCode = hashCode;
   }
 
   public boolean isStatic()
   {
     return true;
-  }
-
-  /**
-   * Converts to a long vaule
-   */
-  @Override
-  public LongValue toLongValue()
-  {
-    return _longValue;
-  }
-
-  /**
-   * Converts to a double vaule
-   */
-  @Override
-  public DoubleValue toDoubleValue()
-  {
-    return _doubleValue;
   }
 
   /**
@@ -174,32 +157,9 @@ public final class CompiledConstStringValue
     return toDoubleValue().toDouble();
   }
 
-  /**
-   * Returns the ValueType.
-   */
-  @Override
-  public ValueType getValueType()
-  {
-    return _valueType;
-  }
-
-  /**
-   * Converts to a key.
-   */
-  @Override
-  public final Value toKey()
-  {
-    return _key;
-  }
-
   @Override
   public final int hashCode()
   {
     return _compiledHashCode;
-  }
-
-  public final String toString()
-  {
-    return _string;
   }
 }

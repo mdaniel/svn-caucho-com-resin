@@ -29,18 +29,20 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.marshal.Marshal;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP variable value.

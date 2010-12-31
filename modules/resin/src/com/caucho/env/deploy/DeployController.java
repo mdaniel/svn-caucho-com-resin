@@ -798,7 +798,8 @@ abstract public class DeployController<I extends DeployInstance>
     stop();
   }
 
-  @Override public void toRestart()
+  @Override 
+  public void toRestart()
   {
     restart();
   }

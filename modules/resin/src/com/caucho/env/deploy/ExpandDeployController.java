@@ -91,6 +91,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private DeployListener _deployListener;
   
   private DependencyContainer _depend = new DependencyContainer();
+  private long _dependencyCheckInterval = _depend.getCheckInterval();
   
   private Dependency _versionDependency;
 
@@ -212,6 +213,12 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   public String getAutoDeployStage()
   {
     return _autoDeployStage;
+  }
+  
+  public void setDependencyCheckInterval(long period)
+  {
+    _dependencyCheckInterval = period;
+    _depend.setCheckInterval(period);
   }
   
   /**
@@ -584,10 +591,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   protected void addDependencies()
   {
     _depend = new DependencyContainer();
+    _depend.setCheckInterval(_dependencyCheckInterval);
     
     if (getArchivePath() != null)
       _depend.add(new Depend(getArchivePath()));
-
+    
     String value = _repositorySpi.getTagContentHash(getId());
     _depend.add(new RepositoryDependency(getId(), value));
     

@@ -186,7 +186,7 @@ public class StartAutoRedeployAutoStrategy
   void alarm(DeployController<I> controller)
   {
     LifecycleState state = controller.getState();
-    
+
     if (state.isStopped()) {
       // server/1d12
     }

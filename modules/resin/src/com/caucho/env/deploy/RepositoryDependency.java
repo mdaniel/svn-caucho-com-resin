@@ -31,7 +31,6 @@ package com.caucho.env.deploy;
 
 import java.util.logging.Logger;
 
-import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.vfs.PersistentDependency;
@@ -67,7 +66,7 @@ public class RepositoryDependency implements PersistentDependency {
   public boolean isModified()
   {
     String value = getRepository().getTagContentHash(_tag);
-    
+
     if (_sha1 != null && ! _sha1.equals(value))
       return true;
     else if (_sha1 == null && value != null)
