@@ -211,10 +211,21 @@ public class BlockStore {
   public static BlockStore create(Path path)
     throws IOException, SQLException
   {
+    return create(path, true);
+  }
+
+  /**
+   * Creates an independent store.
+   */
+  public static BlockStore create(Path path, boolean isEnableMmap)
+    throws IOException, SQLException
+  {
     Database db = new Database();
     db.init();
 
     BlockStore store = new BlockStore(db, "temp", null, path);
+    
+    store.setEnableMmap(isEnableMmap);
 
     if (path.canRead())
       store.init();
@@ -222,6 +233,11 @@ public class BlockStore {
       store.create();
 
     return store;
+  }
+  
+  public void setEnableMmap(boolean isEnable)
+  {
+    _readWrite.setEnableMmap(isEnable);
   }
 
   /**

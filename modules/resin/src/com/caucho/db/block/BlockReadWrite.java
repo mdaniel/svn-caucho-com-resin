@@ -62,6 +62,7 @@ public class BlockReadWrite {
   private Object _fileLock = new Object();
 
   private RandomAccessStream _mmapFile;
+  private boolean _isEnableMmap = true;
   
   private FreeList<RandomAccessWrapper> _cachedRowFile
     = new FreeList<RandomAccessWrapper>(4);
@@ -84,6 +85,11 @@ public class BlockReadWrite {
 
     if (path == null)
       throw new NullPointerException();
+  }
+  
+  public void setEnableMmap(boolean isEnable)
+  {
+    _isEnableMmap = isEnable;
   }
 
   /**
@@ -303,7 +309,8 @@ public class BlockReadWrite {
           return new RandomAccessWrapper(mmapFile);
         }
         
-        file = path.openMemoryMappedFile(_fileSize);
+        if (_isEnableMmap)
+          file = path.openMemoryMappedFile(_fileSize);
         
         if (file != null)
           _mmapFile = file;

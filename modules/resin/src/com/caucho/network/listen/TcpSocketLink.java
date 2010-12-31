@@ -575,8 +575,9 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     QSocket socket = _socket;
 
-    if (socket == null)
+    if (socket == null) {
       return true;
+    }
 
     try {
       StreamImpl s = socket.getStream();
@@ -1006,7 +1007,7 @@ public class TcpSocketLink extends AbstractSocketLink
   void toCometTimeout()
   {
     TcpCometController async = _async;
-
+    
     if (async != null) {
       async.setTimeout();
     }
