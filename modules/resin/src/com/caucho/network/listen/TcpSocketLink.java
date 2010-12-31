@@ -714,7 +714,7 @@ public class TcpSocketLink extends AbstractSocketLink
       
       if (async != null)
         async.setWakeRequested(false);
-      
+
       if (_listener.isKeepaliveAllowed(_connectionStartTime))
         _state = _state.toActiveWithKeepalive(this);
       else
@@ -983,7 +983,11 @@ public class TcpSocketLink extends AbstractSocketLink
         isValid = true;
       }
       else if (_state.isKeepaliveAllocated()) {
+        // server/1l81
         isValid = true;
+        _state = _state.toKeepalive(this);
+        _async = null;
+        async.complete();
         _keepaliveTask.run();
       }
     } catch (IOException e) {
