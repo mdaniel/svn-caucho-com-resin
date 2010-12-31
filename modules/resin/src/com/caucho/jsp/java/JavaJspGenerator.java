@@ -589,17 +589,17 @@ public class JavaJspGenerator extends JspGenerator {
           }
 
           // TCK: needs to be commented out for TCK
-          /*
-          InputStream is = getPageData().getInputStream();
-          StringBuilder sb = new StringBuilder();
-          int ch;
-          while ((ch = is.read()) >= 0)
-            sb.append((char) ch);
+          if (log.isLoggable(Level.FINE)) {
+            InputStream is = getPageData().getInputStream();
+            StringBuilder sb = new StringBuilder();
+            int ch;
+            while ((ch = is.read()) >= 0)
+              sb.append((char) ch);
 
-          throw _rootNode.error(message.toString() + "\n\n" + sb);
-            */
-          
-          throw _rootNode.error(message.toString());
+            throw _rootNode.error(message.toString() + "\n\n" + sb);
+          }
+          else 
+            throw _rootNode.error(message.toString());
         }
       }
     }
