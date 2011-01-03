@@ -56,6 +56,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   private String _path;
   
   private String _virtualHost;
+  private boolean _isMasked;
 
   private WebSocketListener _listener;
 
@@ -92,6 +93,11 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   public void setVirtualHost(String virtualHost)
   {
     _virtualHost = virtualHost;
+  }
+  
+  public void setMasked(boolean isMasked)
+  {
+    _isMasked = isMasked;
   }
 
   public void connect()
@@ -163,7 +169,12 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
       _os.print("Host: localhost\r\n");
     
     byte []clientNonce = new byte[8];
-    _os.print("Sec-WebSocket-Nonce: 0000000000000000\r\n");
+    
+    if (_isMasked)
+      _os.print("Sec-WebSocket-Nonce: 0000000000000000\r\n");
+    else
+      _os.print("Sec-WebSocket-Protocol: unmasked\r\n");
+    
     _os.print("Upgrade: WebSocket\r\n");
     _os.print("Connection: Upgrade\r\n");
     _os.print("Origin: Foo\r\n");
@@ -180,9 +191,13 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     // _wsOut = new WebSocketOutputStream(_out);
     // _wsIn = new WebSocketInputStream(_is);
 
-    byte []serverNonce = readHello(_is);
+    if (_isMasked) {
+      byte []serverNonce = null;
     
-    writeHello(_os, clientNonce, serverNonce);
+      serverNonce = readHello(_is);
+    
+      writeHello(_os, clientNonce, serverNonce);
+    }
     
     if (userName != null) {
       byte []authNonce = readAuthNonce(_is);

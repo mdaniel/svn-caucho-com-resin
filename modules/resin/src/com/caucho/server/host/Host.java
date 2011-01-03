@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.cloud.network.NetworkListenService;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.config.ConfigException;
@@ -711,10 +712,10 @@ public class Host
         brokerManager.addBroker(alias, _bamBroker);
     }
 
-    InjectManager webBeans = InjectManager.getCurrent();
+    InjectManager cdiManager = InjectManager.getCurrent();
 
-    webBeans.addBean(webBeans.createBeanFactory(Broker.class)
-                     .name("bamBroker").singleton(_bamBroker));
+    cdiManager.addBean(cdiManager.createBeanFactory(ManagedBroker.class)
+                       .name("bamBroker").singleton(_bamBroker));
 
     // webBeans.addExtension(_bamBroker);
 

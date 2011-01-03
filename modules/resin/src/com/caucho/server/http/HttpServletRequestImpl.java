@@ -1927,39 +1927,52 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
                                           getRemoteAddr()));
     }
     
-    String cNonceString = getHeader("Sec-WebSocket-Nonce");
+    String protocolExtensions = getHeader("Sec-WebSocket-Protocol");
+    boolean isMasked = true;
+    
+    if (protocolExtensions != null
+        && protocolExtensions.indexOf("unmasked") >= 0) {
+      isMasked = false;
+    }
+    
+    byte []cnonce = null;
+    
+    if (isMasked) {
+      String cNonceString = getHeader("Sec-WebSocket-Nonce");
 
-    if (cNonceString == null) {
-      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      if (cNonceString == null) {
+        getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       
-      throw new IllegalStateException(L.l("Sec-WebSocket-Nonce header is missing, but it is required by the WebSocket protocol.\n  remote-IP: {0}",
-                                          getRemoteAddr()));
-    }
+        throw new IllegalStateException(L.l("Sec-WebSocket-Nonce header is missing, but it is required by the WebSocket protocol.\n  remote-IP: {0}",
+                                            getRemoteAddr()));
+      }
     
-    byte []cnonce = parseWebSocketNonce(cNonceString);
+      cnonce = parseWebSocketNonce(cNonceString);
     
-    if (cnonce == null) {
-      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      if (cnonce == null) {
+        getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       
-      throw new IllegalStateException(L.l("Sec-WebSocket-Nonce must have an 8 byte hex nonce, but '{0}' received.\n  remote-IP: {1}",
-                                          cNonceString,
-                                          getRemoteAddr()));
-    }
+        throw new IllegalStateException(L.l("Sec-WebSocket-Nonce must have an 8 byte hex nonce, but '{0}' received.\n  remote-IP: {1}",
+                                            cNonceString,
+                                            getRemoteAddr()));
+      }
     
-    if (cnonce.length != 8) {
-      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      if (cnonce.length != 8) {
+        getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       
-      throw new IllegalStateException(L.l("Sec-WebSocket-Nonce must have an 8 byte nonce, but '{0}' received.\n  remote-IP: {1}",
-                                          cNonceString,
-                                          getRemoteAddr()));
+        throw new IllegalStateException(L.l("Sec-WebSocket-Nonce must have an 8 byte nonce, but '{0}' received.\n  remote-IP: {1}",
+                                            cNonceString,
+                                            getRemoteAddr()));
+      }
     }
     
     // String login = getHeader("Sec-WebSocket-Login");
     
     _response.setStatus(101, "Web Socket Protocol Handshake");
     _response.setHeader("Upgrade", "WebSocket");
-
-    String hash = hashWebSocket(cnonce, "WebSocket");
+    
+    if (! isMasked)
+      _response.setHeader("WebSocket-Protocol", "unmasked");
 
     _response.setContentLength(0);
 
@@ -2001,7 +2014,8 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     try {
       _response.getOutputStream().flush();
       
-      webSocket.sendHello();
+      if (isMasked)
+        webSocket.sendHello();
       
       /*
       if (login != null)
@@ -2012,7 +2026,8 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
       webSocket.onStart();
     
-      webSocket.readHello();
+      if (isMasked)
+        webSocket.readHello();
       
       /*
       if (login != null) {
@@ -2032,6 +2047,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     return webSocket;
   }
   
+  /*
   private String hashWebSocket(byte []nonce, String key)
   {
     int len = nonce.length;
@@ -2063,6 +2079,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     else
       return (char) ('a' + value - 10);
   }
+  */
   
   private byte[]parseWebSocketNonce(String nonceString)
   {
@@ -2102,7 +2119,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   int getAvailable()
     throws IOException
   {
-    return _request.getAvailable();
+    if (_request != null)
+      return _request.getAvailable();
+    else
+      return -1;
   }
 
   public DispatcherType getDispatcherType()

@@ -39,6 +39,7 @@ import com.caucho.bam.query.QueryActorStreamFilter;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
 import com.caucho.bam.query.QueryManager;
+import com.caucho.bam.stream.AbstractActorStream;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.NullActorStream;
 
@@ -49,6 +50,7 @@ import com.caucho.bam.stream.NullActorStream;
 public class SimpleActorSender implements ActorSender {
   private ActorStream _actorStream;
   private Broker _broker;
+  private String _clientJid;
 
   private final QueryManager _queryManager = new QueryManager();
   
@@ -56,8 +58,11 @@ public class SimpleActorSender implements ActorSender {
 
   public SimpleActorSender(String jid, Broker broker)
   {
-    this(new NullActorStream(jid, broker));
+    this((ActorStream) null, broker);
+    
+    _clientJid = jid;
   }
+  
   public SimpleActorSender(ActorStream next)
   {
     this(next, next.getBroker());
@@ -66,10 +71,12 @@ public class SimpleActorSender implements ActorSender {
   public SimpleActorSender(ActorStream next, Broker broker)
   {
     if (next == null)
-      throw new NullPointerException();
+      next = new DefaultActorStream();
     
     _actorStream = new QueryActorStreamFilter(next, _queryManager);
     _broker = broker;
+    
+    _clientJid  = next.getJid();
   }
   
   public SimpleActorSender(ActorStream next,
@@ -77,7 +84,7 @@ public class SimpleActorSender implements ActorSender {
                            String uid, 
                            String resource)
   {
-    this(next);
+    this(next, broker);
     
     Mailbox mailbox = new MultiworkerMailbox(next.getJid(),
                                              _actorStream,
@@ -85,6 +92,28 @@ public class SimpleActorSender implements ActorSender {
                                              1);
 
     _actorStream = broker.createClient(mailbox, uid, resource);
+    _clientJid = _actorStream.getJid();
+  }
+  
+  public SimpleActorSender(ManagedBroker broker,
+                           String uid)
+  {
+    this(broker, uid, null);
+  }
+  
+  public SimpleActorSender(ManagedBroker broker,
+                           String uid, 
+                           String resource)
+  {
+    this((ActorStream) null, broker);
+    
+    Mailbox mailbox = new MultiworkerMailbox(null,
+                                             _actorStream,
+                                             broker, 
+                                             1);
+
+    _actorStream = broker.createClient(mailbox, uid, resource);
+    _clientJid = _actorStream.getJid();
   }
 
   /**
@@ -285,5 +314,19 @@ public class SimpleActorSender implements ActorSender {
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getActorStream() + "]";
+  }
+  
+  class DefaultActorStream extends AbstractActorStream {
+    @Override
+    public String getJid()
+    {
+      return _clientJid;
+    }
+    
+    @Override
+    public Broker getBroker()
+    {
+      return SimpleActorSender.this.getBroker();
+    }
   }
 }

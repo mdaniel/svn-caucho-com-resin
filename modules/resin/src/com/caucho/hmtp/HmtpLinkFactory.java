@@ -72,6 +72,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
   private ActorException _connException;
   
   private ClientAuthManager _authManager = new ClientAuthManager();
+  private boolean _isMasked;
 
   public HmtpLinkFactory()
   {
@@ -89,6 +90,11 @@ class HmtpLinkFactory implements LinkConnectionFactory {
 
   public void setEncryptPassword(boolean isEncrypt)
   {
+  }
+  
+  public void setMasked(boolean isMasked)
+  {
+    _isMasked = isMasked;
   }
 
   public void connect()
@@ -116,6 +122,8 @@ class HmtpLinkFactory implements LinkConnectionFactory {
       
       if (_virtualHost != null)
         _webSocketClient.setVirtualHost(_virtualHost);
+      
+      _webSocketClient.setMasked(_isMasked);
       
       _webSocketClient.connect();
       

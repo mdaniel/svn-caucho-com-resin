@@ -29,17 +29,17 @@
 
 package com.caucho.jmtp;
 
-import com.caucho.bam.stream.ActorStream;
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorException;
-import com.caucho.hmtp.HmtpPacketType;
-import com.caucho.json.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.stream.ActorStream;
+import com.caucho.hmtp.HmtpPacketType;
+import com.caucho.json.JsonInput;
 
 /**
  * JmtpReader stream handles client packets received from the server.
@@ -78,19 +78,6 @@ public class JmtpReader {
   {
     if (actorStream == null)
       throw new IllegalStateException("HmtpReader.readPacket requires a valid ActorStream for callbacks");
-
-    int tag;
-
-    try {
-      if (! startPacket()) {
-        close();
-        return false;
-      }
-    } catch (IOException e) {
-      log.fine(this + " exception while reading JMTP packet\n  " + e);
-
-      log.log(Level.FINER, e.toString(), e);
-    }
 
     JsonInput in = _in;
 
@@ -207,7 +194,7 @@ public class JmtpReader {
 
     int ch;
 
-    while ((ch = is.read()) >= 0 && Character.isWhitespace(ch) && ch != 0xff) {
+    while ((ch = is.read()) >= 0 && Character.isWhitespace(ch)) {
     }
 
     if (ch < 0 || ch == 0xff)
@@ -217,8 +204,7 @@ public class JmtpReader {
     sb.append((char) ch);
 
     while ((ch = is.read()) >= 0
-           && ! Character.isWhitespace(ch)
-           && ch != 0xff) {
+           && ! Character.isWhitespace(ch)) {
       sb.append((char) ch);
     }
 

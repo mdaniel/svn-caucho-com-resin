@@ -74,6 +74,8 @@ public class HmtpClient implements ActorSender {
 
   private Broker _linkBroker;
   
+  private boolean _isMasked;
+  
   private ClientAuthManager _authManager = new ClientAuthManager();
   
   public HmtpClient(String url, Actor actor)
@@ -131,6 +133,7 @@ public class HmtpClient implements ActorSender {
   {
     _linkFactory = new HmtpLinkFactory();
     _linkFactory.setUrl(_url);
+    _linkFactory.setMasked(_isMasked);
     
     _linkClient = new LinkClient(_linkFactory, _actor);
     
