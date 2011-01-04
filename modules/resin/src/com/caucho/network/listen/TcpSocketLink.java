@@ -987,8 +987,12 @@ public class TcpSocketLink extends AbstractSocketLink
         isValid = true;
         _state = _state.toKeepalive(this);
         _async = null;
-        async.complete();
+        async.onClose();
         _keepaliveTask.run();
+      }
+      else {
+        _async = null;
+        async.onClose();
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
