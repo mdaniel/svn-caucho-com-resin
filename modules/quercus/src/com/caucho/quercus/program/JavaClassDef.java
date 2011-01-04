@@ -1258,7 +1258,7 @@ public class JavaClassDef extends ClassDef {
         else
           _constJavaMap.put(field.getName().intern(), obj);
       } catch (Throwable e) {
-        log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
     }
 

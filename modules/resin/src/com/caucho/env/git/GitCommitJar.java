@@ -35,12 +35,10 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import com.caucho.java.WorkDir;
 import com.caucho.util.IoUtil;
-import com.caucho.vfs.Jar;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -236,6 +234,14 @@ public class GitCommitJar {
         zipIs.close();
       }
     }
+  }
+  
+  private String canonicalPathName(String pathName)
+  {
+    if (pathName.startsWith("/"))
+      return pathName.substring(1);
+    else
+      return pathName;
   }
 
   public void close()

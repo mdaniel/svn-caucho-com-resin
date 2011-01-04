@@ -482,6 +482,12 @@ public class Jar implements CacheListener {
 
     try {
       entry = zipFile.getEntry(pathName);
+      
+      if (entry == null) {
+        pathName = "/" + pathName;
+        entry = zipFile.getEntry(pathName);
+      }
+
       if (entry != null) {
         InputStream is = zipFile.getInputStream(entry);
 
