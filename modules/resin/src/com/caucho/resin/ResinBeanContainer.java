@@ -117,10 +117,8 @@ public class ResinBeanContainer
   private static final L10N L = new L10N(ResinBeanContainer.class);
   private static final String SCHEMA = "com/caucho/resin/resin-context.rnc";
   
-  private String _id;
-
   private EnvironmentClassLoader _classLoader;
-  private InjectManager _injectManager;
+  private InjectManager _cdiManager;
 
   private ThreadLocal<BeanContainerRequest> _localContext
     = new ThreadLocal<BeanContainerRequest>();
@@ -131,11 +129,11 @@ public class ResinBeanContainer
   public ResinBeanContainer()
   {
     _classLoader = EnvironmentClassLoader.create("resin-context");
-    _injectManager = InjectManager.create(_classLoader);
+    _cdiManager = InjectManager.create(_classLoader);
     
     // ioc/0b07
-    _injectManager.replaceContext(new RequestScope());
-    _injectManager.replaceContext(ThreadContext.getContext());
+    _cdiManager.replaceContext(new RequestScope());
+    _cdiManager.replaceContext(ThreadContext.getContext());
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -156,24 +154,28 @@ public class ResinBeanContainer
       
       Environment.addCloseListener(this);
 
-      _injectManager.addManagedBean(_injectManager.createManagedBean(ResinCdiProducer.class));
+      _cdiManager.addManagedBean(_cdiManager.createManagedBean(ResinCdiProducer.class));
 
       Class<?> resinValidatorClass = ResinCdiProducer.createResinValidatorProducer();
       
-      if (_injectManager != null)
-        _injectManager.addManagedBean(_injectManager.createManagedBean(resinValidatorClass));
+      if (_cdiManager != null)
+        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinValidatorClass));
 
       _classLoader.scanRoot();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
   public void setId(String id)
   {
     _classLoader.setId(id);
   }
 
+  public InjectManager getCdiManager()
+  {
+    return _cdiManager;
+  }
+  
   /**
    * Adds a new module (jar or classes directory)
    */
@@ -288,7 +290,7 @@ public class ResinBeanContainer
 
       Path path = Vfs.lookup(pathName);
 
-      ContextConfig context = new ContextConfig(_injectManager, path);
+      ContextConfig context = new ContextConfig(_cdiManager, path);
 
       Config config = new Config();
       config.configure(context, path, SCHEMA);
@@ -325,9 +327,7 @@ public class ResinBeanContainer
 
       _classLoader.start();
       
-      InjectManager cdiManager = InjectManager.create();
-      
-      cdiManager.update();
+      _cdiManager.update();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -373,12 +373,12 @@ public class ResinBeanContainer
     try {
       thread.setContextClassLoader(_classLoader);
 
-      Set<Bean<?>> beans = _injectManager.getBeans(type, qualifiers);
+      Set<Bean<?>> beans = _cdiManager.getBeans(type, qualifiers);
 
       if (beans.size() > 0) {
-        Bean<?> bean = _injectManager.resolve(beans);
+        Bean<?> bean = _cdiManager.resolve(beans);
 
-        return (T) _injectManager.getReference(bean);
+        return (T) _cdiManager.getReference(bean);
       }
 
       return type.newInstance();
@@ -407,12 +407,12 @@ public class ResinBeanContainer
     try {
       thread.setContextClassLoader(_classLoader);
 
-      Set<Bean<?>> beans = _injectManager.getBeans(name);
+      Set<Bean<?>> beans = _cdiManager.getBeans(name);
 
       if (beans.size() > 0) {
-        Bean<?> bean = _injectManager.resolve(beans);
+        Bean<?> bean = _cdiManager.resolve(beans);
 
-        return _injectManager.getReference(bean);
+        return _cdiManager.getReference(bean);
       }
 
       return null;
@@ -571,7 +571,7 @@ public class ResinBeanContainer
       if (cxt == null)
         throw new IllegalStateException(L.l("No RequestScope is active"));
 
-      return cxt.get(bean, creationalContext, _injectManager);
+      return cxt.get(bean, creationalContext, _cdiManager);
     }
 
     @Override

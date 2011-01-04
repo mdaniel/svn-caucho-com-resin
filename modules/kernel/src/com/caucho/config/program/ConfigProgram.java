@@ -173,26 +173,35 @@ public abstract class ConfigProgram implements Comparable<ConfigProgram> {
   {
     Config.init(bean);
   }
-  
+
+  @Override
   public int compareTo(ConfigProgram peer)
   {
-    // ioc/0119
+    // ioc/0119, ioc/011e
     int cmp = getPriority() - peer.getPriority();
     
-    if (cmp != 0)
+    // ioc/011f - static fields have priority;
+    if ((getPriority() < 0) != (peer.getPriority() < 0))
       return cmp;
-
+    
     Class<?> selfClass = getDeclaringClass();
     Class<?> peerClass = peer.getDeclaringClass();
     
     if (selfClass == peerClass) {
+      if (cmp != 0)
+        return cmp;
+
       return getName().compareTo(peer.getName());
     }
     else if (selfClass.isAssignableFrom(peerClass))
       return -1;
     else if (peerClass.isAssignableFrom(selfClass))
       return 1;
-    else
+    else {
+      if (cmp != 0)
+        return cmp;
+
       return selfClass.getName().compareTo(peerClass.getName());
+    }
   }
 }

@@ -243,7 +243,7 @@ public class ReflectionAnnotatedType<T>
           childMethod = AnnotatedTypeUtil.findMethod(_methodSet, method);
         }
         
-        if (childMethod == null) {
+        if (! isMethodOverride(method, childMethod)) {
           _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
         }
         /*
@@ -279,6 +279,27 @@ public class ReflectionAnnotatedType<T>
       introspectParentMethods(_parentType);
     }
   }
+  
+  private boolean isMethodOverride(Method parentMethod,
+                                   AnnotatedMethod<?> childMethod)
+  {
+    if (childMethod == null)
+      return false;
+    
+    if (Modifier.isPrivate(parentMethod.getModifiers()))
+      return false;
+    
+    if (Modifier.isPublic(parentMethod.getModifiers())
+        || Modifier.isProtected(parentMethod.getModifiers())) {
+      return true;
+    }
+    
+    String parentPkg = parentMethod.getDeclaringClass().getPackage().getName();
+    String childPkg = childMethod.getJavaMember().getDeclaringClass().getPackage().getName();
+
+      // ioc/011b
+    return parentPkg.equals(childPkg);
+  }
 
   private void introspectParentMethods(AnnotatedType<?> parentType)
   {
@@ -295,7 +316,7 @@ public class ReflectionAnnotatedType<T>
         if (! Modifier.isPrivate(javaMethod.getModifiers()))
           childMethod = AnnotatedTypeUtil.findMethod(_methodSet, javaMethod);
             
-        if (childMethod == null) {
+        if (! isMethodOverride(javaMethod, childMethod)) {
           _methodSet.add((AnnotatedMethod<? super T>) annMethod);
         }
         /*

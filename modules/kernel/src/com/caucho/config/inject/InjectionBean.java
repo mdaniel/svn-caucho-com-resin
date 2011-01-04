@@ -58,13 +58,13 @@ public class InjectionBean<T> extends AbstractSingletonBean<T>
   InjectionBean(ManagedBeanImpl<T> managedBean,
                 Set<Type> types,
                 Annotated annotated,
-                Set<Annotation> bindings,
+                Set<Annotation> qualifiers,
                 Set<Class<? extends Annotation>> stereotypes,
                 Class<? extends Annotation> scopeType,
                 String name,
                 InjectionTarget<T> target)
   {
-    super(managedBean, types, annotated, bindings, stereotypes,
+    super(managedBean, types, annotated, qualifiers, stereotypes,
           scopeType, name);
 
     _target = target;

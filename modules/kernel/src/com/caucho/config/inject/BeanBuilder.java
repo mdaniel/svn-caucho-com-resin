@@ -43,6 +43,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.reflect.AnnotatedElementImpl;
+import com.caucho.inject.NamedLiteral;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -59,7 +60,7 @@ public class BeanBuilder<T>
 
   private Set<Type> _types;
   private AnnotatedElementImpl _annotated;
-  private Set<Annotation> _bindings;
+  private Set<Annotation> _qualifiers;
   private Set<Class<? extends Annotation>> _stereotypes;
   private String _name;
   private Class<? extends Annotation> _scopeType;
@@ -86,26 +87,26 @@ public class BeanBuilder<T>
   public BeanBuilder<T> name(String name)
   {
     _name = name;
-
+    
     return this;
   }
 
   public BeanBuilder<T> qualifier(Annotation ann)
   {
-    if (_bindings == null)
-      _bindings = new LinkedHashSet<Annotation>();
+    if (_qualifiers == null)
+      _qualifiers = new LinkedHashSet<Annotation>();
 
-    _bindings.add(ann);
+    _qualifiers.add(ann);
 
     return this;
   }
 
   public BeanBuilder<T> binding(Collection<Annotation> list)
   {
-    if (_bindings == null)
-      _bindings = new LinkedHashSet<Annotation>();
+    if (_qualifiers == null)
+      _qualifiers = new LinkedHashSet<Annotation>();
 
-    _bindings.addAll(list);
+    _qualifiers.addAll(list);
 
     return this;
   }
@@ -205,7 +206,7 @@ public class BeanBuilder<T>
     return new SingletonBean<T>(_managedBean,
                                _types,
                                _annotated,
-                               _bindings,
+                               _qualifiers,
                                _stereotypes,
                                _scopeType,
                                _name,
@@ -217,7 +218,7 @@ public class BeanBuilder<T>
     return new InjectionBean<T>(_managedBean,
                                _types,
                                _annotated,
-                               _bindings,
+                               _qualifiers,
                                _stereotypes,
                                _scopeType,
                                _name,
@@ -226,10 +227,15 @@ public class BeanBuilder<T>
 
   public Bean<T> bean()
   {
+    if (_name != null && _qualifiers == null) {
+      qualifier(DefaultLiteral.DEFAULT);
+      qualifier(new NamedLiteral(_name));
+    }
+    
     return new InjectionBean<T>(_managedBean,
                                _types,
                                _annotated,
-                               _bindings,
+                               _qualifiers,
                                _stereotypes,
                                _scopeType,
                                _name,
@@ -239,6 +245,6 @@ public class BeanBuilder<T>
   public String toString()
   {
     return (getClass().getSimpleName() + "[" + _managedBean.getBeanClass()
-            + ", " + _bindings + ", " + _name + "]");
+            + ", " + _qualifiers + ", " + _name + "]");
   }
 }

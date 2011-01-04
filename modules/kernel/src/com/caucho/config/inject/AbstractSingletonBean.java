@@ -55,7 +55,7 @@ abstract public class AbstractSingletonBean<T> extends BeanWrapper<T>
 
   private Set<Type> _types;
   private Annotated _annotated;
-  private Set<Annotation> _bindings;
+  private Set<Annotation> _qualifiers;
   private Set<Class<? extends Annotation>> _stereotypes;
   private Class<? extends Annotation> _scopeType;
   private String _name;
@@ -76,7 +76,7 @@ abstract public class AbstractSingletonBean<T> extends BeanWrapper<T>
 
     _types = types;
     _annotated = annotated;
-    _bindings = bindings;
+    _qualifiers = bindings;
     _stereotypes = stereotypes;
     _scopeType = scopeType;
     _name = name;
@@ -110,8 +110,8 @@ abstract public class AbstractSingletonBean<T> extends BeanWrapper<T>
   @Override
   public Set<Annotation> getQualifiers()
   {
-    if (_bindings != null)
-      return _bindings;
+    if (_qualifiers != null)
+      return _qualifiers;
     else
       return super.getQualifiers();
   }

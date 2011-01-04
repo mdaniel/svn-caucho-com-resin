@@ -329,7 +329,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     if (! getBeanManager().isNormalScope(scopeType))
       return;
     
-    boolean isPassivation = getBeanManager().isPassivatingScope(scopeType);
+    // boolean isPassivation = getBeanManager().isPassivatingScope(scopeType);
     
     Class<?> cl = _annotatedType.getJavaClass();
     

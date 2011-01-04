@@ -36,6 +36,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -51,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,6 +101,7 @@ import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.Producer;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.interceptor.InterceptorBinding;
@@ -310,7 +313,10 @@ public final class InjectManager
     = new ConcurrentHashMap<Bean<?>,ReferenceFactory<?>>();
   
   private ConcurrentHashMap<String,ReferenceFactory<?>> _namedRefFactoryMap
-    = new ConcurrentHashMap<String,ReferenceFactory<?>>();
+  = new ConcurrentHashMap<String,ReferenceFactory<?>>();
+  
+  private ConcurrentHashMap<Member,AtomicBoolean> _staticMemberMap
+  = new ConcurrentHashMap<Member,AtomicBoolean>();
 
   private ThreadLocal<CreationalContextImpl<?>> _proxyThreadLocal
     = new ThreadLocal<CreationalContextImpl<?>>();
@@ -1317,6 +1323,22 @@ public final class InjectManager
   }
   
   @Module
+  public AtomicBoolean getStaticMemberBoolean(Member member)
+  {
+    AtomicBoolean flag = _staticMemberMap.get(member);
+    
+    if (flag == null) {
+      flag = new AtomicBoolean();
+      
+      _staticMemberMap.putIfAbsent(member, flag);
+      
+      flag = _staticMemberMap.get(member);
+    }
+    
+    return flag;
+  }
+  
+  @Module
   public ReferenceFactory<?> getReferenceFactory(String name)
   {
     // ioc/23n3
@@ -1469,7 +1491,8 @@ public final class InjectManager
 
     Class<?> rawType = baseType.getRawClass();
 
-    if (Instance.class.equals(rawType)) {
+    if (Instance.class.equals(rawType)
+        || Provider.class.equals(rawType)) {
       BaseType []param = baseType.getParameters();
 
       Type beanType;
