@@ -4448,6 +4448,8 @@ public final class InjectManager
       
       _context = context;
       
+      validateNormal(bean);
+      
       ScopeAdapter scopeAdapter = ScopeAdapter.create(bean);
       _scopeAdapter = scopeAdapter.wrap(createNormalInstanceFactory(bean));
     }
