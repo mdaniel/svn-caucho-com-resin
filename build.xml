@@ -1074,6 +1074,7 @@
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${dist}/${quercus.dist.name}">
         <include name="WEB-INF/lib/resin.jar"/>
+	<include name="WEB-INF/lib/javaee-16.jar"/>
         <include name="WEB-INF/lib/cdi-16.jar"/>
         <include name="WEB-INF/lib/javamail-141.jar"/>
         <include name="WEB-INF/licenses"/>
