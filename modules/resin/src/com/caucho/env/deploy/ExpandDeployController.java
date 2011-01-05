@@ -678,7 +678,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     super.onActive();
     
     if (_deployItem != null && ! "error".equals(_deployItem.getState()))
-      _deployItem.toStart();
+      _deployItem.onStart();
   }
   
   @Override

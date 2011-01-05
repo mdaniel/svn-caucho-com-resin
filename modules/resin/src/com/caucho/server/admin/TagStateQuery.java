@@ -74,6 +74,6 @@ public class TagStateQuery implements java.io.Serializable
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _tag + "]";
+    return getClass().getSimpleName() + "[" + _tag + "," + _state + "]";
   }
 }

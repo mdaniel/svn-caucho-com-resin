@@ -113,12 +113,20 @@ class HmtpLinkFactory implements LinkConnectionFactory {
     _credentials = credentials;
   }
 
+  @Override
   public LinkConnection open(Broker broker)
   {
     try {
       HmtpWebSocketListener webSocketHandler = new HmtpWebSocketListener(broker);
         
+      WebSocketClient oldClient = _webSocketClient;
+
       _webSocketClient = new WebSocketClient(_url, webSocketHandler);
+      
+      if (oldClient != null) {
+        System.out.println("CLOSE: " + oldClient);
+        oldClient.close();
+      }
       
       if (_virtualHost != null)
         _webSocketClient.setVirtualHost(_virtualHost);
@@ -245,18 +253,6 @@ class HmtpLinkFactory implements LinkConnectionFactory {
     _webSocketClient.close();
    }
 
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _url + "]";
-  }
-
-  @Override
-  protected void finalize()
-  {
-    close();
-  }
-
   /* (non-Javadoc)
    * @see com.caucho.bam.client.LinkConnectionFactory#isClosed()
    */
@@ -265,5 +261,11 @@ class HmtpLinkFactory implements LinkConnectionFactory {
   {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _url + "]";
   }
 }

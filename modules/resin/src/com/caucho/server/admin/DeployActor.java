@@ -330,49 +330,7 @@ public class DeployActor extends SimpleActor
 
   private String deploy(String gitPath)
   {
-    int p = gitPath.indexOf('/');
-    int q = gitPath.indexOf('/', p + 1);
-    int r = gitPath.lastIndexOf('/');
-
-    if (p < 0 || q < 0 || r < 0 || r <= q)
-      return L.l("'{0}' is an unknown type", gitPath);
-
-    String type = gitPath.substring(0, p);
-    // String stage = gitPath.substring(p + 1, q);
-    // String host = gitPath.substring(q + 1, r);
-    String name = gitPath.substring(r + 1);
-
-    try {
-      if (type.equals("ears")) {
-        ObjectName pattern = new ObjectName("resin:type=EarDeploy,*");
-
-        for (Object proxy : Jmx.query(pattern)) {
-          EarDeployMXBean earDeploy = (EarDeployMXBean) proxy;
-
-          earDeploy.deploy(name);
-
-
-          return statusMessage(gitPath);
-        }
-      }
-      else if (type.equals("wars")) {
-        ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
-
-        for (Object proxy : Jmx.query(pattern)) {
-          WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
-
-          warDeploy.deploy(name);
-
-          return statusMessage(gitPath);
-        }
-      }
-
-      return L.l("'{0}' is an unknown type", gitPath);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return L.l("deploy '{0}' failed\n{1}", gitPath, e.toString());
-    }
+    return start(gitPath);
   }
 
   /**

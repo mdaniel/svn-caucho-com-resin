@@ -274,6 +274,12 @@ public class HmtpClient implements ActorSender {
       log.fine(this + " close");
 
     // super.close();
+    
+    HmtpLinkFactory linkFactory = _linkFactory;
+    _linkFactory = null;
+    
+    if (linkFactory != null)
+      linkFactory.close();
 
     if (_webSocketClient != null)
       _webSocketClient.close();

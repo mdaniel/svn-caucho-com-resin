@@ -104,6 +104,10 @@ public class DeployTagItem {
 
   public void onStart()
   {
+    _lifecycle.toActive();
+
+    _deployException = null;
+    
     for (DeployNotificationListener listener : _listeners.toArray()) {
       listener.onStart();
     }
@@ -111,6 +115,10 @@ public class DeployTagItem {
 
   public void onStop()
   {
+    _lifecycle.toStop();
+
+    _deployException = null;
+    
     for (DeployNotificationListener listener : _listeners.toArray()) {
       listener.onStop();
     }

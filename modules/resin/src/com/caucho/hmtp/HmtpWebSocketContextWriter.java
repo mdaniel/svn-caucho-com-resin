@@ -51,6 +51,7 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
   public HmtpWebSocketContextWriter(WebSocketContext ws)
   {
     _ws = ws;
+
     _hOut = new HmtpWriter();
   }
   

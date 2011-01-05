@@ -2185,6 +2185,7 @@ public final class InjectManager
     if (factory == null) {
       factory = createReferenceFactory(bean);
       _refFactoryMap.put(bean, factory);
+      factory.validate();
     }
     
     return factory;
@@ -4194,6 +4195,10 @@ public final class InjectManager
       return null;
     }
     
+    protected void validate()
+    {
+    }
+    
     public final T create()
     {
       return create(null, null, null);
@@ -4471,10 +4476,13 @@ public final class InjectManager
       
       _context = context;
       
-      validateNormal(bean);
-      
       ScopeAdapter scopeAdapter = ScopeAdapter.create(bean);
       _scopeAdapter = scopeAdapter.wrap(createNormalInstanceFactory(bean));
+    }
+    
+    protected void validate()
+    {
+      validateNormal(_bean);
     }
     
     @Override

@@ -127,7 +127,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     
     _baseType = manager.createSourceBaseType(type);
     
-    Set<Type> baseTypes = _baseType.getTypeClosure(manager);
+    // Set<Type> baseTypes = _baseType.getTypeClosure(manager);
+    
+    // ioc/0p2d - TCK
+    Set<Type> baseTypes = annotated.getTypeClosure();
     
     Typed typed = annotated.getAnnotation(Typed.class);
     

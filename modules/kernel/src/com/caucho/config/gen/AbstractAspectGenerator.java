@@ -101,11 +101,18 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
   
   protected Set<VarType<?>> getTypeVariables()
   {
-    BaseTypeAnnotated annType = (BaseTypeAnnotated) getMethod();
+    AnnotatedMethod<? super X> method = getMethod();
     
-    Set<VarType<?>> varSet = annType.getTypeVariables();
+    if (method instanceof BaseTypeAnnotated) {
+      BaseTypeAnnotated annType = (BaseTypeAnnotated) getMethod();
     
-    return varSet;
+      Set<VarType<?>> varSet = annType.getTypeVariables();
+    
+      return varSet;
+    }
+    else {
+      return new HashSet<VarType<?>>();
+    }
   }
   
   /**
