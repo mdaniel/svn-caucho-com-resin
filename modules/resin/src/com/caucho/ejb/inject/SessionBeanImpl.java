@@ -42,6 +42,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.event.EventManager;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectEnvironmentBean;
@@ -53,6 +54,7 @@ import com.caucho.config.reflect.AnnotatedParameterImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * Internal implementation for a Bean
@@ -62,6 +64,8 @@ public class SessionBeanImpl<X,T>
   implements ScopeAdapterBean<T>, Bean<T>, PassivationCapable, EjbGeneratedBean,
              InjectEnvironmentBean
 {
+  private static final L10N L = new L10N(SessionBeanImpl.class);
+  
   private AbstractSessionContext<X,T> _context;
   private ManagedBeanImpl<X> _bean;
   private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
@@ -239,8 +243,17 @@ public class SessionBeanImpl<X,T>
       
       int param = EventManager.findObserverAnnotation(apiMethod);
       
-      if (param >= 0)
+      if (param >= 0) {
+        if (apiMethod == beanMethod
+            && ! apiMethod.isStatic()
+            && _types.size() > 1) {
+          throw new ConfigException(L.l("{0}.{1} is an invalid @Observes method because @Observes must be in the @Local API.",
+                                        beanMethod.getDeclaringType().getJavaClass().getSimpleName(),
+                                        beanMethod.getJavaMember().getName()));
+        }
+          
         eventManager.addObserver(this, apiMethod);
+      }
     }
   }
   
