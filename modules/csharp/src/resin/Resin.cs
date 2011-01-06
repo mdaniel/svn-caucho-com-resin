@@ -188,7 +188,7 @@ namespace Caucho
       else if (ResinArgs.DynamicServer != null)
         arguments.Append("-dynamic-server ").Append(ResinArgs.DynamicServer).Append(' ');
 
-      if ("deploy".Equals(command) || "undeploy".Equals(command)) {
+      if (ResinArgs.IsAdminCommand) {
         arguments.Append(command).Append(' ');
         if (ResinArgs.WinUser != null)
           arguments.Append("-user ").Append(ResinArgs.User).Append(' ');
