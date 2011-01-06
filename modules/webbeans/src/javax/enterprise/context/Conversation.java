@@ -30,7 +30,7 @@
 package javax.enterprise.context;
 
 /**
- * The web bean conversation
+ * The CDI conversation
  */
 
 public interface Conversation {

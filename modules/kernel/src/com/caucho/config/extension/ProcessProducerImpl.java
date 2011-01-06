@@ -44,7 +44,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
 @Module
-public class ProcessProducerImpl<X,T> implements ProcessProducer<X,T>
+public class ProcessProducerImpl<T,X> implements ProcessProducer<X,T>
 {
   private AnnotatedMember<X> _member;
   private Producer<T> _producer;

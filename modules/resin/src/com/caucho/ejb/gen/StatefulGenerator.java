@@ -71,9 +71,10 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
 
     InjectManager manager = InjectManager.create();
 
-    _aspectBeanFactory = new StatefulAspectBeanFactory<X>(manager,
-        getBeanType());
-    _lifecycleAspectFactory = new LifecycleAspectBeanFactory<X>(_aspectBeanFactory, manager, getBeanType());
+    _aspectBeanFactory
+      = new StatefulAspectBeanFactory<X>(manager, getBeanType());
+    _lifecycleAspectFactory
+      = new LifecycleAspectBeanFactory<X>(_aspectBeanFactory, manager, getBeanType());
   }
 
   @Override

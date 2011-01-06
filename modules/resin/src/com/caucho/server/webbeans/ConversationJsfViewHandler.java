@@ -74,6 +74,10 @@ public class ConversationJsfViewHandler extends ViewHandlerWrapper
     throws IOException, FacesException
   {
     try {
+      if (_conversation.getId() != null) {
+        viewToRender.getAttributes().put("caucho.cid", _conversation.getId());
+      }
+      
       super.renderView(context, viewToRender);
     } finally {
       _conversation.destroy();

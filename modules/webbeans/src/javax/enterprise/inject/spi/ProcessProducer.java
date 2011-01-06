@@ -44,13 +44,13 @@ package javax.enterprise.inject.spi;
  * }
  * </pre></code>
  */
-public interface ProcessProducer<T,X>
+public interface ProcessProducer<X,T>
 {
-  public AnnotatedMember<T> getAnnotatedMember();
+  public AnnotatedMember<X> getAnnotatedMember();
 
-  public Producer<X> getProducer();
+  public Producer<T> getProducer();
   
-  public void setProducer(Producer<X> producer);
+  public void setProducer(Producer<T> producer);
 
   public void addDefinitionError(Throwable t);
 }

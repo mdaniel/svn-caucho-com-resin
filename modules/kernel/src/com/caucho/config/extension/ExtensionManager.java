@@ -328,20 +328,19 @@ public class ExtensionManager
   }
 
   @Module
-  public <T,X> Bean<T> processProducerMethod(ProducesMethodBean<X,T> bean)
+  public <T,X> Bean<X> processProducerMethod(ProducesMethodBean<T,X> bean)
   {
     InjectManager cdi = _cdiManager;
     
-    ProcessProducerMethodImpl<X,T> event
-      = new ProcessProducerMethodImpl<X,T>(_cdiManager, bean);
+    ProcessProducerMethodImpl<T,X> event
+      = new ProcessProducerMethodImpl<T,X>(_cdiManager, bean);
     
-    AnnotatedMethod<? super X> method = bean.getProducesMethod();
+    AnnotatedMethod<? super T> method = bean.getProducesMethod();
     Bean<?> producerBean = bean.getProducerBean();
     
     BaseType baseType = cdi.createTargetBaseType(event.getClass());
-    baseType = baseType.fill(cdi.createTargetBaseType(producerBean.getBeanClass()),
-                             cdi.createTargetBaseType(method.getBaseType()));
-                             
+    baseType = baseType.fill(cdi.createTargetBaseType(method.getBaseType()),
+                             cdi.createTargetBaseType(producerBean.getBeanClass()));
     
     getEventManager().fireExtensionEvent(event, baseType);
 
@@ -362,9 +361,8 @@ public class ExtensionManager
     AnnotatedField<? super T> field = bean.getField();
     
     BaseType baseType = cdi.createTargetBaseType(event.getClass());
-    baseType = baseType.fill(cdi.createTargetBaseType(bean.getProducerBean().getBeanClass()),
-                             cdi.createTargetBaseType(field.getBaseType()));
-                             
+    baseType = baseType.fill(cdi.createTargetBaseType(field.getBaseType()),
+                             cdi.createTargetBaseType(bean.getProducerBean().getBeanClass()));
     
     getEventManager().fireExtensionEvent(event, baseType);
 
@@ -403,8 +401,8 @@ public class ExtensionManager
   {
     InjectManager cdi = _cdiManager;
     
-    ProcessProducerImpl<X,T> event
-      = new ProcessProducerImpl<X,T>(producesMethod, producer);
+    ProcessProducerImpl<T,X> event
+      = new ProcessProducerImpl<T,X>(producesMethod, producer);
     
     AnnotatedType<?> declaringType = producesMethod.getDeclaringType();
     
@@ -416,8 +414,8 @@ public class ExtensionManager
       declaringClass = producesMethod.getJavaMember().getDeclaringClass(); 
     
     BaseType eventType = cdi.createTargetBaseType(ProcessProducerImpl.class);
-    eventType = eventType.fill(cdi.createTargetBaseType(declaringClass),
-                               cdi.createTargetBaseType(producesMethod.getBaseType()));
+    eventType = eventType.fill(cdi.createTargetBaseType(producesMethod.getBaseType()),
+                               cdi.createTargetBaseType(declaringClass));
 
     getEventManager().fireExtensionEvent(event, eventType);
     
@@ -433,14 +431,14 @@ public class ExtensionManager
   {
     InjectManager cdi = _cdiManager;
     
-    ProcessProducerImpl<X,T> event
-      = new ProcessProducerImpl<X,T>(producesField, producer);
+    ProcessProducerImpl<T,X> event
+      = new ProcessProducerImpl<T,X>(producesField, producer);
     
     AnnotatedType<X> declaringType = producesField.getDeclaringType();
     
     BaseType eventType = cdi.createTargetBaseType(ProcessProducerImpl.class);
-    eventType = eventType.fill(cdi.createTargetBaseType(declaringType.getBaseType()),
-                               cdi.createTargetBaseType(producesField.getBaseType()));
+    eventType = eventType.fill(cdi.createTargetBaseType(producesField.getBaseType()),
+                               cdi.createTargetBaseType(declaringType.getBaseType()));
 
     getEventManager().fireExtensionEvent(event, eventType);
     

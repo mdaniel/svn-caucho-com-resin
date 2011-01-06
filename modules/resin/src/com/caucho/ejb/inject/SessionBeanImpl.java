@@ -122,16 +122,16 @@ public class SessionBeanImpl<X,T>
   public void destroy(T instance, CreationalContext<T> cxt)
   {
     CreationalContextImpl<T> env;
-    
+
     if (cxt instanceof CreationalContextImpl<?>)
       env = (CreationalContextImpl<T>) cxt;
     else
       env = null;
     
-    // ejb5012
+    // ejb/5012
     if (env != null)
       env.release();
-    else 
+    else
       _context.destroyProxy(instance, env);
   }
 

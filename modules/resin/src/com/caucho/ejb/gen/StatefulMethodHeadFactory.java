@@ -30,9 +30,6 @@
 package com.caucho.ejb.gen;
 
 import javax.ejb.AccessTimeout;
-import javax.ejb.AfterBegin;
-import javax.ejb.AfterCompletion;
-import javax.ejb.BeforeCompletion;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 

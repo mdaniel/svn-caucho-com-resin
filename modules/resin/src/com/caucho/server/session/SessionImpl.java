@@ -86,6 +86,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   // time the session was last accessed
   private long _accessTime;
   // maximum time the session may stay alive.
+  private long _lastUseTime;
   private long _idleTimeout;
   private boolean _isIdleSet;
 
@@ -122,6 +123,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     _creationTime = creationTime;
     _accessTime = creationTime;
+    _lastUseTime = _accessTime;
     _idleTimeout = manager.getSessionTimeout();
 
     _id = id;
@@ -245,6 +247,14 @@ public class SessionImpl implements HttpSession, CacheListener {
   public boolean isValid()
   {
     return _isValid;
+  }
+  
+  public boolean isTimeout()
+  {
+    if (_useCount.get() > 0)
+      return false;
+    
+    return _lastUseTime + _idleTimeout < Alarm.getCurrentTime();
   }
 
   boolean isClosing()
@@ -487,6 +497,8 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   boolean addUse()
   {
+    _lastUseTime = Alarm.getCurrentTime();
+    
     _useCount.incrementAndGet();
 
     /*

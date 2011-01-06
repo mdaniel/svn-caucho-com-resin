@@ -30,7 +30,6 @@
 package com.caucho.config.reflect;
 
 import java.util.HashMap;
-import java.util.Set;
 
 import com.caucho.inject.Module;
 
@@ -45,11 +44,6 @@ public class GenericParamType extends ParamType
                           HashMap<String,BaseType> paramMap)
   {
     super(type, param, paramMap);
-    
-    if (Set.class.equals(type)) {
-      System.out.println("GENERIC: " + type + " " + paramMap);
-      Thread.dumpStack();
-    }
   }
   
   @Override

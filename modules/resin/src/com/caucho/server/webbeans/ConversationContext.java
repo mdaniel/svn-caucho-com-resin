@@ -30,6 +30,7 @@
 package com.caucho.server.webbeans;
 
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,10 +113,7 @@ public class ConversationContext extends AbstractScopeContext
     Scope scope = createJsfScope();
 
     if (scope._transientConversation == null) {
-      scope._transientConversation = scope._extendedConversation;
-      
-      if (scope._transientConversation == null)
-        scope._transientConversation = new ContextContainer();
+      scope._transientConversation = new ContextContainer();
     }
     
     return scope._transientConversation;
@@ -141,13 +139,18 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   public void begin(String name)
   {
-    Scope scope = createJsfScope();
-
+    Scope scope = createJsfScope(name);
+    
     if (scope._extendedId != null)
       throw new IllegalStateException(L.l("Conversation begin() must only be called when a long-running conversation does not exist."));
     
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    
+    if (name != null)
+      facesContext.getViewRoot().getAttributes().put("caucho.cid", name);
+    
     scope._extendedId = name;
-    scope._extendedConversation = scope._transientConversation;
+    scope.put(name, scope._transientConversation);
   }
 
   /**
@@ -161,11 +164,13 @@ public class ConversationContext extends AbstractScopeContext
     if (scope == null)
       return;
     
-    if (scope._extendedId == null)
+    String id = scope._extendedId;
+    scope._extendedId = null;
+    
+    if (id == null)
       throw new IllegalStateException(L.l("Conversation end() must only be called when a long-running conversation exists."));
 
-    scope._extendedId = null;
-    scope._extendedConversation = null;
+    scope.remove(id);
   }
 
   @Override
@@ -206,26 +211,33 @@ public class ConversationContext extends AbstractScopeContext
     if (facesContext == null)
       return null;
     
-    return getJsfScope(facesContext, false);
+    return getJsfScope(facesContext, null, false);
   }
   
   private Scope createJsfScope()
+  {
+    return createJsfScope(null);
+  }
+  
+  private Scope createJsfScope(String name)
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
     
     if (facesContext == null)
       throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
 
-    return getJsfScope(facesContext, true);
+    return getJsfScope(facesContext, name, true);
   }
     
-  private Scope getJsfScope(FacesContext facesContext, boolean isCreate)
+  private Scope getJsfScope(FacesContext facesContext,
+                            String name,
+                            boolean isCreate)
   {
     ExternalContext extContext = facesContext.getExternalContext();
     Map<String,Object> sessionMap = extContext.getSessionMap();
 
     Scope scope = (Scope) sessionMap.get("caucho.conversation");
-
+    
     if (scope == null) {
       if (! isCreate)
         return null;
@@ -234,8 +246,36 @@ public class ConversationContext extends AbstractScopeContext
       sessionMap.put("caucho.conversation", scope);
     }
     
-    if (scope._transientConversation == null)
-      scope._transientConversation = scope._extendedConversation;
+    Map<String,String> requestMap = extContext.getRequestParameterMap();
+    String cid = (String) requestMap.get("cid");
+    
+    if (cid == null) {
+      cid = (String) facesContext.getViewRoot().getAttributes().get("caucho.cid");
+    }
+    
+    if (scope._transientConversation != null) {
+    }
+    else if (cid != null) {
+      scope._extendedId = cid;
+      scope._transientConversation = scope.get(cid);
+      
+      if (scope._transientConversation == null) {
+        throw new IllegalStateException(L.l("Conversation cid={0} is an unknown conversation",
+                                            cid));
+      }
+    }
+    else if (name != null) {
+      scope._extendedId = name;
+      scope._transientConversation = scope.get(name);
+    }
+    else if (scope._extendedId != null) {
+      scope._transientConversation = scope.get(scope._extendedId);
+      
+      if (scope._transientConversation == null) {
+        throw new IllegalStateException(L.l("Conversation id={0} is an unknown conversation",
+                                            scope._extendedId));
+      }
+    }
 
     return scope;
   }
@@ -250,15 +290,19 @@ public class ConversationContext extends AbstractScopeContext
     ContextContainer context = scope._transientConversation;
     scope._transientConversation = null;
     
-    if (scope._extendedConversation == null && context != null)
+    if (scope._extendedId == null)
       context.close();
+    
+    scope._extendedId = null;
   }
 
   static class Scope implements java.io.Serializable, HttpSessionBindingListener {
     ContextContainer _transientConversation;
     
     String _extendedId;
-    ContextContainer _extendedConversation;
+    
+    String _lastId;
+    private Map<String,ContextContainer> _conversationMap;
     private long _timeout = DEFAULT_TIMEOUT;
     
     public long getTimeout()
@@ -270,6 +314,30 @@ public class ConversationContext extends AbstractScopeContext
     {
       _timeout = timeout;
     }
+    
+    public ContextContainer get(String id)
+    {
+      if (_conversationMap != null)
+        return _conversationMap.get(id);
+      else
+        return null;
+    }
+    
+    public ContextContainer remove(String id)
+    {
+      if (_conversationMap != null)
+        return _conversationMap.remove(id);
+      else
+        return null;
+    }
+    
+    public void put(String id, ContextContainer container)
+    {
+      if (_conversationMap == null)
+        _conversationMap = new HashMap<String,ContextContainer>();
+      
+      _conversationMap.put(id, container);
+    }
 
     @Override
     public void valueBound(HttpSessionBindingEvent event)
@@ -279,12 +347,14 @@ public class ConversationContext extends AbstractScopeContext
     @Override
     public void valueUnbound(HttpSessionBindingEvent event)
     {
-      ContextContainer conversation = _extendedConversation;
+      if (_conversationMap == null)
+        return;
       
-      if (conversation != null)
+      for (ContextContainer conversation: _conversationMap.values()) {
         conversation.close();
+      }
       
-      _extendedConversation = null;
+      _conversationMap = null;
     }
   }
 }
