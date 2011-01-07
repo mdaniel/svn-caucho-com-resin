@@ -62,7 +62,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class JspNode {
-  private static final L10N L = new L10N(JspNode.class);
+  static final L10N L = new L10N(JspNode.class);
   private static final Logger log 
     = Logger.getLogger(JspNode.class.getName());
 
