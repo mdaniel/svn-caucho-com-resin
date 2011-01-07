@@ -244,6 +244,7 @@ public class SessionBeanImpl<X,T>
       int param = EventManager.findObserverAnnotation(apiMethod);
       
       if (param >= 0) {
+        /*
         if (apiMethod == beanMethod
             && ! apiMethod.isStatic()
             && _types.size() > 1) {
@@ -251,6 +252,7 @@ public class SessionBeanImpl<X,T>
                                         beanMethod.getDeclaringType().getJavaClass().getSimpleName(),
                                         beanMethod.getJavaMember().getName()));
         }
+        */
           
         eventManager.addObserver(this, apiMethod);
       }
