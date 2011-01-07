@@ -11,14 +11,16 @@
 <s1 title="Web Profile TCK">
 
 <ul>
-<li>JSR-330 (javax.inject) - pass</li>
-<li>JSR-299 (CDI) - 1 fail (possible bug in TCK test)</li>
 <li>EL - pass</li>
-<li>JSF - pass</li>
-<li>Servlet - pass</li>
-<li>JSP - 1 fail (correct, but error message confuses TCK)</li>
-<li>JSTL - 1 fail (ordering issue with map, possible TCK bug)</li>
 <li>EJB - 1 fail (timing, possible TCK bug)</li>
+<li>JPA - pass</li>
+<li>JSF - pass</li>
+<li>JSP - pass</li>
+<li>JSR-299 (CDI) - 1 fail (possible bug in TCK test)</li>
+<li>JSR-330 (javax.inject) - pass</li>
+<li>JSTL - 1 fail (ordering issue with map, possible TCK bug)</li>
+<li>JTA - pass* (*JTA TCK includes CORBA tests which aren't required by WebProfile)</li>
+<li>Servlet - pass</li>
 </ul>
 
 </s1>

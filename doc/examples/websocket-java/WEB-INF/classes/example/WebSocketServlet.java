@@ -4,7 +4,7 @@ import javax.servlet.*;
 import java.io.*;
 import java.util.logging.*;
 
-import com.caucho.servlet.*;
+import com.caucho.websocket.*;
 
 public class WebSocketServlet extends GenericServlet {
   private static final Logger log
@@ -19,36 +19,22 @@ public class WebSocketServlet extends GenericServlet {
     wsRequest.startWebSocket(new WebSocketHandler());
   }
 
-  static class WebSocketHandler implements WebSocketListener {
-    private InputStream _is;
-    private OutputStream _os;
-
+  static class WebSocketHandler extends AbstractWebSocketListener {
     public void onStart(WebSocketContext context)
       throws IOException
     {
       // sets the connection timeout to 120s
       context.setTimeout(120000);
-
-      _is = context.getInputStream();
-      _os = context.getOutputStream();
     }
 
-    public void onRead(WebSocketContext context)
+    public void onReadBinary(WebSocketContext context, InputStream is)
       throws IOException
     {
       StringBuilder sb = new StringBuilder();
 
-      // The syntax of a websocket string is
-      //  0x00 utf8-encoded-data 0xff
-      int ch = _is.read();
+      int ch;
 
-      if (ch != 0x00) {
-        log.warning("WebSocket unexpected initial byte: "
-                    + " 0x" + Integer.toHexString(ch));
-        return;
-      }
-
-      while ((ch = _is.read()) >= 0 && ch != 0xff) {
+      while ((ch = is.read()) >= 0 && ch != 0xff) {
         sb.append((char) ch);
       }
 
@@ -60,12 +46,11 @@ public class WebSocketServlet extends GenericServlet {
       else if ("server".equals(message))
         result = "Resin";
 
-      // Encode the response with the websocket packet
-      //  0x00 utf8-encoded-data 0xff
-      _os.write(0x00);
-      _os.write(result.getBytes("utf-8"));
-      _os.write(0xff);
-      _os.flush();
+      OutputStream os = context.startBinaryMessage();
+
+      os.write(result.getBytes("utf-8"));
+
+      os.close();
     }
 
     public void onComplete(WebSocketContext context)

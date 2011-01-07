@@ -62,11 +62,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class JspNode {
-  static final L10N L = new L10N(JspNode.class);
+  private static final L10N L = new L10N(JspNode.class);
   private static final Logger log 
     = Logger.getLogger(JspNode.class.getName());
 
-  static final String JSP_NS = JspParser.JSP_NS;
+  private static final String JSP_NS = JspParser.JSP_NS;
 
   protected Path _sourcePath;
   protected String _filename;

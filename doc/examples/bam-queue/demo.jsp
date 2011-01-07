@@ -1,4 +1,4 @@
-<%@ page import="com.caucho.bam.LocalActorClient, java.util.*, example.*"
+<%@ page import="com.caucho.bam.actor.*, com.caucho.bam.broker.*, java.util.*, example.*"
 %><%!
 @javax.inject.Inject
 ExampleService _service;
@@ -6,7 +6,16 @@ ExampleService _service;
 @javax.inject.Inject
 ExampleMessages _messages;
 
-LocalActorClient _client = new LocalActorClient();
+@javax.inject.Inject
+ManagedBroker _broker;
+
+LocalActorSender _client;
+
+@javax.annotation.PostConstruct
+public void init()
+{
+  _client = new LocalActorSender(_broker, "test");
+}
 %>
 <%
 
