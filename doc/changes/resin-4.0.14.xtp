@@ -13,6 +13,7 @@
 <ul>
 <li>JSR-330 (javax.inject) - pass</li>
 <li>JSR-299 (CDI) - 1 fail (possible bug in TCK test)</li>
+<li>EL - pass</li>
 <li>JSF - pass</li>
 <li>Servlet - pass</li>
 <li>JSP - 1 fail (correct, but error message confuses TCK)</li>
