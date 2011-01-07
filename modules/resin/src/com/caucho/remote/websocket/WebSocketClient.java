@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -520,8 +520,9 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
         int frame1 = is.read();
         int frame2 = is.read();
         
-        if (frame2 < 0)
+        if (frame2 < 0) {
           return;
+        }
         
         int op = frame1 & 0x0f;
         boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
@@ -553,7 +554,8 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
           break;
           
         default:
-          return;
+          throw new IllegalStateException("Unknown WebSocket opcode 0x" +
+                                          Integer.toHexString(op));
         }
       }
     }

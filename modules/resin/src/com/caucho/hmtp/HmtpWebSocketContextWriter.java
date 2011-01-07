@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -36,6 +36,7 @@ import java.io.Serializable;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ProtocolException;
 import com.caucho.bam.broker.AbstractBroker;
+import com.caucho.util.IoUtil;
 import com.caucho.websocket.WebSocketContext;
 
 /**
@@ -88,14 +89,16 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
                       String from, 
                       Serializable payload)
   {
+    OutputStream os = null;
+    
     try {
-      OutputStream os = _ws.startBinaryMessage();
+      os = _ws.startBinaryMessage();
       
       _hOut.message(os, to, from, payload);
-      
-      os.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      IoUtil.close(os);
     }
   }
 
@@ -113,14 +116,15 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
                            Serializable payload,
                            ActorError error)
   {
+    OutputStream os = null;
     try {
-      OutputStream os = _ws.startBinaryMessage();
+      os = _ws.startBinaryMessage();
       
       _hOut.messageError(os, to, from, payload, error);
-      
-      os.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      IoUtil.close(os);
     }
   }
 
@@ -138,14 +142,16 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
                     String from, 
                     Serializable payload)
   {
+    OutputStream os = null;
+    
     try {
-      OutputStream os = _ws.startBinaryMessage();
+      os = _ws.startBinaryMessage();
       
       _hOut.query(os, id, to, from, payload);
-      
-      os.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      IoUtil.close(os);
     }
   }
 
@@ -163,14 +169,16 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
                           String from, 
                           Serializable payload)
   {
+    OutputStream os = null;
+    
     try {
-      OutputStream os = _ws.startBinaryMessage();
+      os = _ws.startBinaryMessage();
       
       _hOut.queryResult(os, id, to, from, payload);
-      
-      os.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      IoUtil.close(os);
     }
   }
 
@@ -190,14 +198,16 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
                          Serializable payload,
                          ActorError error)
   {
+    OutputStream os = null;
+    
     try {
-      OutputStream os = _ws.startBinaryMessage();
+      os = _ws.startBinaryMessage();
       
       _hOut.queryError(os, id, to, from, payload, error);
-      
-      os.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      IoUtil.close(os);
     }
   }
 

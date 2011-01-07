@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -631,8 +631,6 @@ abstract public class DeployController<I extends DeployInstance>
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
       log.log(Level.FINEST, e.toString(), e);
-      
-      _lifecycle.toError();
 
       onError(e);
 
@@ -645,8 +643,6 @@ abstract public class DeployController<I extends DeployInstance>
       }
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
-      
-      _lifecycle.toError();
       
       onError(e);
 

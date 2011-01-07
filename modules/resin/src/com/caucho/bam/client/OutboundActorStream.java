@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -152,6 +152,9 @@ public class OutboundActorStream implements ActorStream {
   private ActorStream getLink()
   {
     LinkConnection conn = _connRef.get();
+    
+    if (conn != null && conn.isClosed())
+      conn = null;
     
     if (conn == null) {
       conn = _linkFactory.open(getBroker());

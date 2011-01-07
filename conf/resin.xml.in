@@ -37,6 +37,10 @@
   </resin:AdminAuthenticator>
 
   <!--
+     - <resin-system-auth-key>changeme</resin-system-auth-key>
+    -->
+
+  <!--
      - For production sites, change dependency-check-interval to something
      - like 600s, so it only checks for updates every 10 minutes.
     -->

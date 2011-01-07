@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -44,8 +44,6 @@ import java.io.*;
 public class WebSocketOutputStream extends OutputStream 
   implements WebSocketConstants
 {
-  private static final L10N L = new L10N(WebSocketOutputStream.class);
-  
   private OutputStream _os;
   private byte []_buffer;
   private int _offset;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -53,7 +53,7 @@ public class ReflectionAnnotatedFactory
   /**
    * Returns the factory for the given loader.
    */
-  public static ReflectionAnnotatedFactory create(ClassLoader loader)
+  private static ReflectionAnnotatedFactory create(ClassLoader loader)
   {
     synchronized (_current) {
       ReflectionAnnotatedFactory factory = _current.get(loader);
@@ -121,7 +121,12 @@ public class ReflectionAnnotatedFactory
    */
   public static <X> ReflectionAnnotatedType<X> introspectType(BaseType type)
   {
-    ClassLoader loader = type.getRawClass().getClassLoader();
+    ClassLoader loader;
+    
+    if (type instanceof ClassType)
+      loader = type.getRawClass().getClassLoader();
+    else
+      loader = Thread.currentThread().getContextClassLoader();
     
     return create(loader).introspectTypeImpl(type);
   }

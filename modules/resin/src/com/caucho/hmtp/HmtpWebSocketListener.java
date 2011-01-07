@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -75,6 +75,18 @@ public class HmtpWebSocketListener extends AbstractWebSocketListener {
     throws IOException
   {
     _hIn.readPacket(is, _broker);
+  }
+  
+  @Override
+  public void onComplete(WebSocketContext context)
+  {
+    _hOut = null;
+    _hIn = null;
+  }
+  
+  boolean isClosed()
+  {
+    return _hOut == null;
   }
 
   @Override

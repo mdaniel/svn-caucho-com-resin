@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,25 +29,12 @@
 
 package com.caucho.hmtp;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorException;
-import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.bam.actor.AbstractActorSender;
-import com.caucho.bam.actor.Actor;
-import com.caucho.bam.actor.SimpleActorSender;
-import com.caucho.bam.broker.Broker;
 import com.caucho.bam.client.LinkConnection;
-import com.caucho.bam.client.LinkConnectionFactory;
 import com.caucho.bam.stream.ActorStream;
-import com.caucho.cloud.security.SecurityService;
 import com.caucho.remote.websocket.WebSocketClient;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.websocket.WebSocketListener;
 
 /**
  * HMTP client protocol
@@ -79,6 +66,6 @@ class HmtpLinkConnection implements LinkConnection {
   @Override
   public boolean isClosed()
   {
-    return false;
+    return _hmtpListener.isClosed();
   }
 }

@@ -1,0 +1,26 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.13 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Web Profile TCK">
+
+<ul>
+<li>JSR-330 (javax.inject) - pass</li>
+<li>JSR-299 (CDI) - 1 fail (possible bug in TCK test)</li>
+<li>JSF - pass</li>
+<li>Servlet - pass</li>
+<li>JSP - 1 fail (correct, but error message confuses TCK)</li>
+<li>JSTL - 1 fail (ordering issue with map, possible TCK bug)</li>
+<li>EJB - 1 fail (timing, possible TCK bug)</li>
+</ul>
+
+</s1>
+
+</body>
+</document>
