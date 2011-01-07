@@ -66,7 +66,7 @@ public abstract class JspNode {
   private static final Logger log 
     = Logger.getLogger(JspNode.class.getName());
 
-  private static final String JSP_NS = JspParser.JSP_NS;
+  static final String JSP_NS = JspParser.JSP_NS;
 
   protected Path _sourcePath;
   protected String _filename;
