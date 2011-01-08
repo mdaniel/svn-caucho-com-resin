@@ -12,7 +12,7 @@
   <property name="eclipse.home" value="${user.home}/eclipse"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, j2ee-deploy">
+          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, j2ee-deploy, resin-eclipselink">
   </target>
 
   <!--
@@ -57,7 +57,11 @@
         <exclude name="*.jar"/>
       </fileset>
     </jar>
-	  
+  </target>
+
+  <target name="resin-eclipselink" depends="eclipselink">
+    <copy file="modules/eclipselink/dist/resin-eclipselink.jar"
+          todir="${resin.lib}"/>
   </target>
 
   <target name="richfaces" depends="init">
@@ -123,13 +127,13 @@
       <param name="module.jar" value="resin-junit.jar"/>
     </antcall>
   </target>
-	
+
   <target name="eclipselink" depends="init">
     <antcall target="module" inheritRefs="true">
-	  <param name="module.name" value="eclipselink"/>
-	  <param name="module.jar" value="resin-eclipselink.jar"/>
-	</antcall>
-  </target>	
+      <param name="module.name" value="eclipselink"/>
+      <param name="module.jar" value="resin-eclipselink.jar"/>
+    </antcall>
+  </target>
 
   <target name="hibernate" depends="init">
     <antcall target="module" inheritRefs="true">
