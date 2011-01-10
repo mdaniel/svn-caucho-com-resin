@@ -36,7 +36,7 @@
 <p>We've updated the WebSocket API based on changes to the draft
 IETF specification, available in com.caucho.websocket.*. Since the
 specification itself is moving very slowly (but in incompatible ways),
-Resin's WebSockets can only be used with its own WebSocket client.
+Resin's WebSockets can only be used with its own WebSocket client.</p>
 </s1>
 
 <s1 title="BAM Update">
