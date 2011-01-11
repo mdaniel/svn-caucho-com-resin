@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//NetBeans//DTD Autoupdate Module Info 2.5//EN" "http://www.netbeans.org/dtds/autoupdate-info-2_5.dtd">
 <module codenamebase="com.caucho.netbeans"
         distribution=""
 	homepage="http://caucho.com"
-	license="GPL v2"
 	needsrestart="false"
-	releasedate="2008/01/05">
+	releasedate="2011/01/11">
   <manifest AutoUpdate-Show-In-Client="true"
             OpenIDE-Module="com.caucho.netbeans"
             OpenIDE-Module-Display-Category="Web &amp; Java EE"
@@ -16,5 +17,4 @@
 	    OpenIDE-Module-Requires="org.openide.modules.ModuleFormat1"
 	    OpenIDE-Module-Short-Descripton="Resin"
 	    OpenIDE-Module-Specification-Version="1.0"/>
-  <license name="GPL">GPL</license>
 </module>
