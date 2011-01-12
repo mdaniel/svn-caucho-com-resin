@@ -11,7 +11,24 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.14 - snapshot">
+<s2 title="4.0.15 - snapshot">
+<ul>
+<li>deploy: web-app start needs to synchronize on getDeployInstance (#4342, rep by Jamison Novak)</li>
+<li>session: session cache needs to use createIfAbsent to avoid timing issues (#4340, rep by Jamison Novak)</li>
+<li>access-log: AbstractRolloverLog needs dedicated rollover alarm (#4321, rep by mros2stf)</li>
+<li>access-log: content-length improperly calculated for chunked (#4317, rep by Martin Thompson)</li>
+<li>rewrite: added AddHeader to add cookies (#4326, rep by C. Stokes)</li>
+<li>jni: npe check for nativeWrite (#4323, rep by Prabhu)</li>
+<li>watchdog: check that watchdog-manager.log can be written before starting (#4333)</li>
+<li>cloud: errors for messages which cannot connect log the destination for debugging (#4315, rep by Cameron Stokes)</li>
+<li>proxy-cache: 304 returned for proxy cache (#4239, rep by Jamison Novak)</li>
+<li>proxy-cache: pdf/range using improper recursive call (#4334 rep by C. Fernandez)</li>
+<li>embed: add setAsyncSupported to ServletEmbed (#4332, rep by Michael Barker)</li>
+<li>resin: LoadBalance inside &lt;web-app> needs to pass along context-path (#4304, rep by Kenneth Yeung)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.14 - Jan 7, 2011">
 <ul>
 <li>resin: CLI added deploy, undeploy, list, start-webapp, stop-webapp, restar-webapp commands (#4316, rep by Patrick Brigger)</li>
 <li>cache: use cursor to update data timeouts</li>

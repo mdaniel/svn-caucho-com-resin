@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 public class HttpResponseStream extends ResponseStream {

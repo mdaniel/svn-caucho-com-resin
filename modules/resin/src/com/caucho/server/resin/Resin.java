@@ -76,7 +76,7 @@ import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectoryService;
 import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownService;
+import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.warning.WarningService;
 import com.caucho.java.WorkDir;
 import com.caucho.license.LicenseCheck;
@@ -501,7 +501,7 @@ public class Resin
   {
     WarningService.createAndAddService();
     
-    ShutdownService.createAndAddService(_isEmbedded);
+    ShutdownSystem.createAndAddService(_isEmbedded);
     
     TopologyService.createAndAddService(_serverId);
     
@@ -1288,7 +1288,7 @@ public class Resin
       resin.waitForExit();
 
       if (! resin.isClosing()) {
-        ShutdownService.shutdownActive(ExitCode.FAIL_SAFE_HALT,
+        ShutdownSystem.shutdownActive(ExitCode.FAIL_SAFE_HALT,
                                        "Resin shutdown from unknown reason");
       }
     } catch (Throwable e) {

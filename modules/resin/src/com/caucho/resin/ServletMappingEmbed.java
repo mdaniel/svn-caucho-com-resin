@@ -60,6 +60,7 @@ public class ServletMappingEmbed
   private String _servletName;
   private String _servletClass;
   private int _loadOnStartup = -1;
+  private boolean _asyncSupported;
 
   private HashMap<String,String> _initParamMap = new HashMap<String,String>();
   private ContainerProgram _init = new ContainerProgram();

@@ -354,7 +354,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public final boolean isIdleTimeout()
   {
-    DeployInstance instance = getDeployInstance();
+    DeployInstance instance = getDeployInstanceImpl();
 
     if (instance != null)
       return instance.isDeployIdle();
@@ -376,7 +376,7 @@ abstract public class DeployController<I extends DeployInstance>
       return true;
     }
     
-    DeployInstance instance = getDeployInstance();
+    DeployInstance instance = getDeployInstanceImpl();
 
     return instance == null || instance.isModified();
   }
@@ -389,7 +389,7 @@ abstract public class DeployController<I extends DeployInstance>
     if (isControllerModifiedNow())
       return true;
     
-    DeployInstance instance = getDeployInstance();
+    DeployInstance instance = getDeployInstanceImpl();
 
     return instance == null || instance.isModifiedNow();
   }
@@ -404,7 +404,7 @@ abstract public class DeployController<I extends DeployInstance>
       return true;
     }
     
-    DeployInstance instance = getDeployInstance();
+    DeployInstance instance = getDeployInstanceImpl();
 
     if (instance != null) {
       Thread thread = Thread.currentThread();
@@ -442,6 +442,16 @@ abstract public class DeployController<I extends DeployInstance>
    */
   @Override
   public I getDeployInstance()
+  {
+    _lifecycle.waitForActive(_waitForActiveTimeout);
+    
+    return getDeployInstanceImpl();
+  }
+
+  /**
+   * Returns the current instance.
+   */
+  private I getDeployInstanceImpl()
   {
     return _deployInstance;
   }
@@ -789,7 +799,8 @@ abstract public class DeployController<I extends DeployInstance>
     start();
   }
 
-  @Override public void toStop()
+  @Override 
+  public void toStop()
   {
     stop();
   }

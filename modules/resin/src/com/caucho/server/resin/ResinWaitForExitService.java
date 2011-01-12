@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownService;
+import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.env.warning.WarningService;
 import com.caucho.util.L10N;
@@ -90,12 +90,12 @@ class ResinWaitForExitService
     int socketExceptionCount = 0;
     Runtime runtime = Runtime.getRuntime();
     
-    ShutdownService shutdown = _resinSystem.getService(ShutdownService.class);
+    ShutdownSystem shutdown = _resinSystem.getService(ShutdownSystem.class);
     
     if (shutdown == null) {
       throw new IllegalStateException(L.l("'{0}' requires an active {1}",
                                           this,
-                                          ShutdownService.class.getSimpleName()));
+                                          ShutdownSystem.class.getSimpleName()));
     }
     
     /*
@@ -157,7 +157,7 @@ class ResinWaitForExitService
       } catch (OutOfMemoryError e) {
         String msg = "Resin shutdown from out of memory";
         
-        ShutdownService.shutdownActive(ExitCode.MEMORY, msg);
+        ShutdownSystem.shutdownActive(ExitCode.MEMORY, msg);
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
         

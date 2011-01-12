@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownService;
+import com.caucho.env.shutdown.ShutdownSystem;
 
 /**
  * Task handling the reading from a connection.
@@ -99,7 +99,7 @@ abstract class ConnectionReadTask implements Runnable {
     } catch (OutOfMemoryError e) {
       String msg = "TcpSocketLink OutOfMemory";
 
-      ShutdownService.shutdownActive(ExitCode.MEMORY, msg); 
+      ShutdownSystem.shutdownActive(ExitCode.MEMORY, msg); 
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {

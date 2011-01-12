@@ -408,6 +408,20 @@ abstract public class AbstractCache extends AbstractMap
   @PostConstruct
   public void init()
   {
+    init(false);
+  }
+  
+  public AbstractCache createIfAbsent()
+  {
+    init(true);
+    
+    return _localManager.get(_guid);
+  }
+  
+  
+
+  private void init(boolean ifAbsent)
+  {
     synchronized (this) {
       if (_isInit)
         return;
@@ -434,6 +448,11 @@ abstract public class AbstractCache extends AbstractMap
       }
       
       if (_localManager.putIfAbsent(_guid, this) != null) {
+        if (ifAbsent) {
+          close();
+          return;
+        }
+        
         throw new ConfigException(L.l("'{0}' with full name '{1}' is an invalid Cache name because it's already used by another cache.",
                                       this, _guid));
       }

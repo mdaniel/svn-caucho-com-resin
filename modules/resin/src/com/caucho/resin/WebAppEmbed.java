@@ -77,7 +77,7 @@ public class WebAppEmbed
     = new ArrayList<FilterMappingEmbed>();
   
   private WebApp _webApp;
-
+  
   /**
    * Creates a new embedded webapp
    */

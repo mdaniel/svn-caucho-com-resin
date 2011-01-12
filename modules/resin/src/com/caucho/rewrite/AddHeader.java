@@ -29,68 +29,68 @@
 
 package com.caucho.rewrite;
 
-import java.util.regex.Matcher;
+import javax.servlet.FilterChain;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.server.rewrite.AddHeaderFilterChain;
+import com.caucho.server.rewrite.SetHeaderFilterChain;
 import com.caucho.util.L10N;
 
+/**
+ * Sets a response header in a rewrite rule or as a top-level filter.
+ *
+ * <pre>
+ * &lt;resin:AddHeader url-pattern="/foo/*"
+ *                  name="Foo" value="bar"/>
+ * </pre>
+ */
 @Configurable
-abstract public class AbstractTargetDispatchRule extends AbstractRegexpDispatchRule
+public class AddHeader extends AbstractRewriteFilter
 {
-  private static final L10N L = new L10N(AbstractTargetDispatchRule.class);
+  private static final L10N L = new L10N(AddHeader.class);
 
-  private String _target;
+  private String _name;
+  private String _value;
 
-  public void setTarget(String target)
+  /**
+   * Sets the HTTP header name
+   */
+  @Configurable
+  public void setName(String name)
   {
-    _target = target;
-  }
-
-  public void setAbsoluteTarget(String target)
-  {
-    setTarget(target);
-  }
-
-  public void setTargetHost(String target)
-  {
-  }
-
-  public String getTarget()
-  {
-    return _target;
-  }
-
-  @Override
-  protected String rewriteTarget(Matcher matcher,
-                                 String uri,
-                                 String queryString)
-  {
-    System.out.println("REQRITE: " + _target + " " + uri);
-    if (_target != null)
-      return matcher.replaceFirst(_target);
-    else
-      return rewriteDefault(uri, queryString);
+    _name = name;
   }
   
-  protected String rewriteDefault(String uri, String queryString)
+  /**
+   * Sets the HTTP header value
+   */
+  public void setValue(String value)
   {
-    return uri;
+    _value = value;
   }
 
   //  @Override
   public void init()
     throws ConfigException
   {
-    // super.init();
-
-    if (_target == null) {
-      throw new ConfigException(L.l("'target' is a required attribute of '{0}' because Resin needs to know the destination URL.",
+    if (_name == null) {
+      throw new ConfigException(L.l("'name' is a required attribute of '{0}'.",
                                     getClass().getSimpleName()));
     }
+    
+    if (_value == null) {
+      throw new ConfigException(L.l("'value' is a required attribute of '{0}'.",
+                                    getClass().getSimpleName()));
+    }
+  }
 
-    /*
-    if (getRegexp() == null && getFullUrlRegexp() == null)
-      setRegexp(ALL_PATTERN);
-    */
+  @Override
+  protected FilterChain createFilterChain(String uri,
+                                          String queryString,
+                                          FilterChain next)
+  {
+    return new AddHeaderFilterChain(next, _name, _value);
   }
 }
+

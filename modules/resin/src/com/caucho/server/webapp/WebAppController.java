@@ -37,12 +37,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
-import javax.servlet.jsp.el.ELException;
 
 import com.caucho.config.Config;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.types.PathBuilder;
 import com.caucho.env.deploy.DeployConfig;
 import com.caucho.env.deploy.DeployControllerAdmin;
 import com.caucho.env.deploy.EnvironmentDeployController;
@@ -468,44 +466,6 @@ public class WebAppController
   }
 
   /**
-   * Merges two entries.
-   */
-  /*
-  protected WebAppController merge(WebAppController newController)
-  {
-    if (getConfig() != null && getConfig().getURLRegexp() != null)
-      return newController;
-    else if (newController.getConfig() != null
-             && newController.getConfig().getURLRegexp() != null)
-      return this;
-    else {
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
-
-      try {
-        thread.setContextClassLoader(getParentClassLoader());
-
-        //  The contextPath comes from current web-app
-        WebAppController mergedController
-          = new WebAppController(getId(),
-                                 getRootDirectory(),
-                                 _container,
-                                 getContextPath());
-
-        // server/1h1{2,3}
-        // This controller overrides configuration from the new controller
-        mergedController.mergeController(this);
-        mergedController.mergeController(newController);
-
-        return mergedController;
-      } finally {
-        thread.setContextClassLoader(oldLoader);
-      }
-    }
-  }
-  */
-
-  /**
    * Returns the var.
    */
   public Var getVar()
@@ -648,27 +608,6 @@ public class WebAppController
   protected void extendJMXContext(Map<String,String> context)
   {
     context.put("WebApp", getMBeanId());
-  }
-
-  protected Path calculateRootDirectory()
-    throws ELException
-  {
-    Path appDir = null;
-
-    if (appDir == null && getConfig() != null) {
-      String path = getConfig().getRootDirectory();
-
-      if (path != null)
-        appDir = PathBuilder.lookupPath(path);
-    }
-
-    if (appDir == null && _container != null)
-      appDir = _container.getDocumentDirectory().lookup("./" + _contextPath);
-
-    if (appDir == null && getDeployInstance() != null)
-      appDir = getDeployInstance().getRootDirectory();
-
-    return appDir;
   }
 
   /**

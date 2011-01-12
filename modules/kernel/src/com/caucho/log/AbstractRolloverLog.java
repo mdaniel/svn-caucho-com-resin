@@ -35,9 +35,11 @@ import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
+import com.caucho.util.WeakAlarm;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempStream;
@@ -120,6 +122,9 @@ public class AbstractRolloverLog {
 
   private WriteStream _os;
   private WriteStream _zipOut;
+
+  private boolean _isClosed;
+  private WeakAlarm _rolloverAlarm;
 
   /**
    * Returns the access-log's path.
@@ -294,6 +299,11 @@ public class AbstractRolloverLog {
   {
     // _lastTime = lastTime;
   }
+  
+  protected boolean isClosed()
+  {
+    return _isClosed;
+  }
 
   /**
    * Initialize the log.
@@ -324,6 +334,10 @@ public class AbstractRolloverLog {
     else {
       _nextPeriodEnd = nextRolloverTime(now);
     }
+    
+    Alarm alarm = _rolloverAlarm;
+    if (_nextPeriodEnd > 0 && alarm != null)
+      alarm.queueAt(_nextPeriodEnd);
 
     if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
       _nextRolloverCheckTime = _nextPeriodEnd;
@@ -340,6 +354,11 @@ public class AbstractRolloverLog {
       _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
 
     rolloverLog();
+    
+    if (_nextPeriodEnd > 0) {
+      _rolloverAlarm = new WeakAlarm(new RolloverAlarm());
+      _rolloverAlarm.queueAt(_nextPeriodEnd);
+    }
   }
   
   private long nextRolloverTime(long time)
@@ -824,11 +843,21 @@ public class AbstractRolloverLog {
   public void close()
     throws IOException
   {
+    _isClosed = true;
+    
+    rolloverLog();
+    
     _rolloverWorker.destroy();
 
     synchronized (_logLock) {
       closeLogStream();
     }
+    
+    Alarm alarm = _rolloverAlarm;
+    _rolloverAlarm = null;
+    
+    if (alarm != null)
+      alarm.dequeue();
   }
 
   /**
@@ -894,6 +923,19 @@ public class AbstractRolloverLog {
       rolloverLogImpl();
       
       return -1;
+    }
+  }
+  
+  class RolloverAlarm implements AlarmListener {
+    @Override
+    public void handleAlarm(Alarm alarm)
+    {
+      if (! isClosed()) {
+        rolloverLog();
+        
+        if (_nextPeriodEnd > 0)
+          alarm.queueAt(_nextPeriodEnd);
+      }
     }
   }
 }

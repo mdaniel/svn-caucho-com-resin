@@ -1080,7 +1080,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
         sessionCache.setName("resin:session");
         sessionCache.setBackup(_isSaveBackup);
         sessionCache.setTriplicate(_isSaveTriplicate);
-        sessionCache.init();
+        sessionCache = sessionCache.createIfAbsent();
       }
 
       _sessionStore = sessionCache;

@@ -38,7 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownService;
+import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.inject.Module;
 import com.caucho.inject.RequestContext;
 import com.caucho.loader.Environment;
@@ -999,7 +999,7 @@ public class TcpSocketLink extends AbstractSocketLink
     } catch (OutOfMemoryError e) {
       String msg = "TcpSocketLink OutOfMemory";
 
-      ShutdownService.shutdownActive(ExitCode.MEMORY, msg);
+      ShutdownSystem.shutdownActive(ExitCode.MEMORY, msg);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {

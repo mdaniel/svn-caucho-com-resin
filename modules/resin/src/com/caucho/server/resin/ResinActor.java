@@ -41,7 +41,7 @@ import com.caucho.bam.actor.SimpleActor;
 import com.caucho.boot.PidQuery;
 import com.caucho.boot.WatchdogStopQuery;
 import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownService;
+import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;
 
@@ -57,7 +57,7 @@ public class ResinActor extends SimpleActor
 
   private Resin _resin;
   
-  private ShutdownService _shutdown;
+  private ShutdownSystem _shutdown;
   
   ResinActor(Resin resin)
   {
@@ -65,12 +65,12 @@ public class ResinActor extends SimpleActor
     
     setJid("resin");
     
-    _shutdown = ShutdownService.getCurrent();
+    _shutdown = ShutdownSystem.getCurrent();
     
     if (_shutdown == null)
       throw new IllegalStateException(L.l("'{0}' requires an active {1}.",
                                           this,
-                                          ShutdownService.class.getSimpleName()));
+                                          ShutdownSystem.class.getSimpleName()));
   }
   
   /**
@@ -139,13 +139,13 @@ public class ResinActor extends SimpleActor
 
     getBroker().queryResult(id, from, to, query);
     
-    ShutdownService.shutdownActive(ExitCode.OK, msg);
+    ShutdownSystem.shutdownActive(ExitCode.OK, msg);
   }
 
   public void destroy()
   {
     String msg = L.l("Resin shutdown from unexpected watchdog exit.");
     
-    ShutdownService.shutdownActive(ExitCode.WATCHDOG_EXIT, msg);
+    ShutdownSystem.shutdownActive(ExitCode.WATCHDOG_EXIT, msg);
   }
 }

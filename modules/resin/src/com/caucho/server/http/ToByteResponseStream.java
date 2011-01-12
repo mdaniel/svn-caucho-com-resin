@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.i18n.EncodingWriter;
@@ -43,6 +44,7 @@ import com.caucho.vfs.i18n.EncodingWriter;
  * Handles the dual char/byte buffering for the response stream.
  */
 public abstract class ToByteResponseStream extends AbstractResponseStream {
+  private static final L10N L = new L10N(ToByteResponseStream.class);
   private static final Logger log
     = Logger.getLogger(ToByteResponseStream.class.getName());
   protected static final int SIZE = TempBuffer.SIZE;
@@ -497,6 +499,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public byte []nextBuffer(int offset)
     throws IOException
   {
+    if (offset < 0 || SIZE < offset)
+      throw new IllegalStateException(L.l("Invalid offset: " + offset));
+    
     if (_bufferCapacity <= SIZE
         || _bufferCapacity <= offset + _bufferSize) {
       _tailByteLength = offset;

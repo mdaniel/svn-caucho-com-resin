@@ -115,6 +115,15 @@ class WatchdogManager implements AlarmListener {
     boolean isLogDirectoryExists = getLogDirectory().exists();
 
     Path logPath = getLogDirectory().lookup("watchdog-manager.log");
+    
+    // #4333 - check watchdog-manager.log can be written
+    WriteStream testOut = logPath.openAppend();
+    testOut.close();
+    
+    if (! logPath.canWrite()) {
+      throw new ConfigException("Cannot open " + logPath.getNativePath()
+                                + " required for Resin start. Please check permissions");
+    }
 
     RotateStream logStream = RotateStream.create(logPath);
     logStream.setRolloverSize(64L * 1024 * 1024);

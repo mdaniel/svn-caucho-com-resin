@@ -29,25 +29,17 @@
 
 package com.caucho.server.log;
 
-import com.caucho.env.meter.MeterService;
+import java.io.IOException;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.env.meter.SemaphoreMeter;
 import com.caucho.env.thread.TaskWorker;
-import com.caucho.env.thread.ThreadPool;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.util.Alarm;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.LockSupport;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.util.concurrent.Semaphore;
 
 /**
  * Represents an log of every top-level request to the server.
@@ -57,9 +49,6 @@ public class AccessLogWriter extends AbstractRolloverLog
   protected static final L10N L = new L10N(AccessLogWriter.class);
   protected static final Logger log
     = Logger.getLogger(AccessLogWriter.class.getName());
-
-  private static final int BUFFER_SIZE = 65536;
-  private static final int BUFFER_GAP = 8 * 1024;
 
   private final AccessLog _log;
 

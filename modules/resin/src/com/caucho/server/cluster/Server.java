@@ -56,7 +56,7 @@ import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownService;
+import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
@@ -826,7 +826,10 @@ public class Server
    */
   public void addErrorPage(ErrorPage errorPage)
   {
-    getErrorWebApp().addErrorPage(errorPage);
+    WebApp webApp = getErrorWebApp();
+    
+    if (webApp != null)
+      webApp.addErrorPage(errorPage);
   }
   
   public void setPersistentStore(PersistentStoreConfig config)
@@ -1247,7 +1250,7 @@ public class Server
         // XXX: message slightly wrong
         String msg = L.l("Resin restarting due to configuration change");
 
-        ShutdownService.getCurrent().shutdown(ExitCode.MODIFIED, msg);
+        ShutdownSystem.getCurrent().shutdown(ExitCode.MODIFIED, msg);
         return;
       }
     } finally {
@@ -1440,7 +1443,7 @@ public class Server
   {
     String msg = L.l("Server restarting due to configuration change");
     
-    ShutdownService.shutdownActive(ExitCode.MODIFIED, msg);
+    ShutdownSystem.shutdownActive(ExitCode.MODIFIED, msg);
   }
   /**
    * Closes the server.

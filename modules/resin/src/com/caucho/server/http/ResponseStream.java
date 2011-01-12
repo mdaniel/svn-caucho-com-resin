@@ -179,7 +179,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   }
 
   @Override
-  public int getContentLength()
+  public final int getContentLength()
   {
     // server/05e8
     try {
@@ -504,7 +504,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
         writeLength -= sublen;
         offset += sublen;
         bufferOffset += sublen;
-        _contentLength += sublen - bufferStart;
+        _contentLength += sublen;
 
         if (writeLength > 0) {
           buffer = writeNextBuffer(bufferOffset);

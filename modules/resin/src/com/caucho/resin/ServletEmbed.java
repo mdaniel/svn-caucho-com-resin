@@ -59,6 +59,7 @@ public class ServletEmbed
   private String _servletName;
   private String _servletClass;
   private int _loadOnStartup = -1;
+  private boolean _isAsyncSupported;
   
   private HashMap<String,String> _initParamMap = new HashMap<String,String>();
   private ContainerProgram _init = new ContainerProgram();
@@ -133,6 +134,14 @@ public class ServletEmbed
   {
     _loadOnStartup = loadOnStartup;
   }
+  
+  /**
+   * Sets true if the servlet can use async/comet
+   */
+  public void setAsyncSupported(boolean isSupported)
+  {
+    _isAsyncSupported = isSupported;
+  }
 
   /**
    * Sets an init-param.
@@ -183,6 +192,8 @@ public class ServletEmbed
       if (_protocol != null) {
         servletConfig.setProtocol(_protocol.createProtocol());
       }
+      
+      servletConfig.setAsyncSupported(_isAsyncSupported);
 
       servletConfig.init();
     } catch (Exception e) {

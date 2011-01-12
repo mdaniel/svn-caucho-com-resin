@@ -32,7 +32,7 @@ package com.caucho.env.thread;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownService;
+import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.inject.Module;
 
 @Module
@@ -120,7 +120,7 @@ class ThreadLauncher extends AbstractThreadLauncher {
       isValid = true;
     } finally {
       if (! isValid) {
-        ShutdownService.shutdownActive(ExitCode.THREAD,
+        ShutdownSystem.shutdownActive(ExitCode.THREAD,
                                        "Cannot create ThreadPool thread.");
       }
     }
@@ -143,7 +143,7 @@ class ThreadLauncher extends AbstractThreadLauncher {
 
       String msg = "Resin exiting because of failed thread";
 
-      ShutdownService.shutdownActive(ExitCode.THREAD, msg);
+      ShutdownSystem.shutdownActive(ExitCode.THREAD, msg);
     }
   }
   

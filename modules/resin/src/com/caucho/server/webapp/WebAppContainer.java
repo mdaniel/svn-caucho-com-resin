@@ -1208,39 +1208,44 @@ public class WebAppContainer
    */
   public WebApp getErrorWebApp()
   {
-    if (_errorWebApp == null) {
-      WebApp defaultWebApp = findWebAppByURI("/");
-      
-      if (defaultWebApp != null) {
-        _errorWebApp = defaultWebApp;
-        return _errorWebApp;
+    synchronized (this) {
+      if (_errorWebApp == null) {
+        _errorWebApp = createErrorWebApp();
       }
       
-      Thread thread = Thread.currentThread();
-      ClassLoader loader = thread.getContextClassLoader();
-      try {
-        thread.setContextClassLoader(_classLoader);
-
-        Path errorRoot = new MemoryPath().lookup("/error-root");
-        errorRoot.mkdirs();
-
-        WebAppController webAppController
-          = new WebAppController("error/webapp/default/error", errorRoot, this);
-        webAppController.init();
-        webAppController.startOnInit();
-        
-        _errorWebApp = webAppController.request();
-
-        //_errorWebApp.init();
-        //_errorWebApp.start();
-      } catch (Exception e) {
-        throw ConfigException.create(e);
-      } finally {
-        thread.setContextClassLoader(loader);
-      }
+      return _errorWebApp;
     }
+  }
+  
+  private WebApp createErrorWebApp()
+  {
+    WebApp defaultWebApp = findWebAppByURI("/");
+      
+    if (defaultWebApp != null) {
+      return defaultWebApp;
+    }
+      
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(_classLoader);
 
-    return _errorWebApp;
+      Path errorRoot = new MemoryPath().lookup("/error-root");
+      errorRoot.mkdirs();
+      
+      String id = "error/webapp/" + getHostName()+ "/error";
+
+      WebAppController webAppController
+        = new WebAppController(id, errorRoot, this);
+      webAppController.init();
+      webAppController.startOnInit();
+        
+      return webAppController.request();
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
   }
 
   /**
