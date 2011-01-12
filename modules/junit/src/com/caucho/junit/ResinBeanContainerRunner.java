@@ -29,17 +29,16 @@
 
 package com.caucho.junit;
 
-import org.junit.runner.*;
-import org.junit.runner.notification.*;
-import org.junit.runners.*;
-import org.junit.runners.model.*;
+import org.junit.runner.notification.RunNotifier;
+import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.runners.model.FrameworkMethod;
 
-import com.caucho.resin.*;
-import com.caucho.config.inject.*;
-import com.caucho.vfs.*;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.resin.BeanContainerRequest;
+import com.caucho.resin.ResinBeanContainer;
 
 /**
- * ResinJUnit runner runs a JUnit within the context of Resin.
+ * Resin bean container runner runs a JUnit 4 test backed by a Resin context.
  */
 public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
   private Class<?> _testClass;

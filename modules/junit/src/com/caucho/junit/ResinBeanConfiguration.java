@@ -47,8 +47,6 @@ public @interface ResinBeanConfiguration {
 
   String []beansXml() default {};
   /*
-  String []resinBeansXml() default {};
-
   String persistenceXml() default "";
   */
 }
