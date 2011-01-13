@@ -37,7 +37,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Describes additional configuration for the runner.
+ * Configures the Resin bean container for a given JUnit test.
+ * 
+ *  TODO Add more Javadoc since this is a public API.
  */
 @Documented
 @Retention(RUNTIME)
