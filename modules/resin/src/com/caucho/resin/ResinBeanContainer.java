@@ -60,17 +60,16 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 /**
- * Embeddable Resin context for unit testing of
- * application modules in the correct environment but
- * without the overhead of the Resin server.
+ * Embeddable Resin context for testing of bean container components (CDI managed beans, EJBs, JPA) in an 
+ * environment that mirrors a production runtime but without the overhead of the Resin server. The 
+ * ResinBeanContainer can be embedded into any Java SE environment, including a JUnit test. Note, the
+ * bean container does not support Servlet-based APIs. In order to test the web tier, <code>ResinEmbed</code> 
+ * should be used.
  *
  * <code><pre>
  * static void main(String []args)
  * {
  *   ResinBeanContainer beans = new ResinBeanContainer();
- *   
- *   // optional resin configuration file
- *   // beans.addBeansXml("resin-context.xml");
  *
  *   beans.addModule("test.jar");
  *   beans.start();
@@ -112,6 +111,7 @@ import com.caucho.vfs.Vfs;
  * &lt;/beans>
  * </code></pre>
  */
+// TODO Add JNDI look-up and well as direct access to JNDI/CDI beans manager.
 public class ResinBeanContainer
 {
   private static final L10N L = new L10N(ResinBeanContainer.class);
@@ -124,7 +124,7 @@ public class ResinBeanContainer
     = new ThreadLocal<BeanContainerRequest>();
 
   /**
-   * Creates a new ResinContext.
+   * Creates a new Resin context.
    */
   public ResinBeanContainer()
   {
@@ -143,7 +143,7 @@ public class ResinBeanContainer
       
       // ioc/0p62
       EjbManager.create(_classLoader);
-      // XXX: currently this would cause a scanning of the classpath even
+      // XXX: currently this would cause a scanning of the class-path even
       // if there's no ejb-jar.xml
       // EjbManager.setScanAll();
 
@@ -166,18 +166,21 @@ public class ResinBeanContainer
       thread.setContextClassLoader(oldLoader);
     }
   }
+
+  // TODO Should this be protected instead of public?
   public void setId(String id)
   {
     _classLoader.setId(id);
   }
 
+  // TODO Should this be protected instead of public?
   public InjectManager getCdiManager()
   {
     return _cdiManager;
   }
   
   /**
-   * Adds a new module (jar or classes directory)
+   * Adds a new module (jar or exploded classes directory)
    */
   public void addModule(String modulePath)
   {
@@ -199,6 +202,7 @@ public class ResinBeanContainer
    * @param packageName the name of the package to be treated as a virtual
    * module root.
    */
+  // TODO Should this be protected instead of public?
   public void addPackageModule(String modulePath, String packageName)
   {
     Path root = Vfs.lookup(modulePath);
@@ -218,6 +222,7 @@ public class ResinBeanContainer
    * @param packageName the name of the package to be treated as a virtual
    * module root.
    */
+  // TODO Should this be protected instead of public?
   public void addPackageModule(String packageName)
   {
     try {
@@ -276,7 +281,7 @@ public class ResinBeanContainer
 
   /**
    * Adds a Resin beans configuration file, allowing creation of
-   * databases, or bean configuration.
+   * databases or bean configuration.
    *
    * @param pathName URL/path to the configuration file
    */
@@ -299,6 +304,7 @@ public class ResinBeanContainer
     }
   }
   
+  // TODO Should this be protected instead of public?
   public void addResourceRoot(Path path)
   {
     ResourceLoader loader = new ResourceLoader(_classLoader, path);
@@ -494,7 +500,7 @@ public class ResinBeanContainer
   /**
    * Completes the thread's request and exits the Resin context.
    */
-  void completeRequest(BeanContainerRequest context)
+  public void completeRequest(BeanContainerRequest context)
   {
     Thread thread = Thread.currentThread();
 
@@ -515,6 +521,7 @@ public class ResinBeanContainer
     }
   }
 
+  // TODO Should this be protected instead of public?
   public ClassLoader getClassLoader()
   {
     return _classLoader;
