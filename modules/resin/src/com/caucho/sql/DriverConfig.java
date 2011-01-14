@@ -125,6 +125,7 @@ public class DriverConfig
   private XADataSource _xaDataSource;
   private Driver _driver;
 
+  private int _index;
 
   private Lifecycle _lifecycle = new Lifecycle();
   private DriverAdmin _admin = new DriverAdmin(this);
@@ -473,6 +474,16 @@ public class DriverConfig
   public void setProfilerPoint(ProfilerPoint profilerPoint)
   {
     _profilerPoint = profilerPoint;
+  }
+  
+  public void setIndex(int index)
+  {
+    _index = index;
+  }
+  
+  public int getIndex()
+  {
+    return _index;
   }
 
   /**

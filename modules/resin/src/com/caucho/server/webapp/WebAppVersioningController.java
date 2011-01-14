@@ -134,7 +134,8 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   protected WebApp startImpl()
   {
-    super.startImpl();
+    // server/1h2g
+    // super.startImpl();
     
     updateVersion();
 

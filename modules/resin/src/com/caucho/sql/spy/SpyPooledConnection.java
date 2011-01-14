@@ -28,6 +28,7 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.sql.DriverConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -49,13 +50,15 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
   protected String _id;
 
   private SpyDataSource _spyDataSource;
+
   // The underlying connection
   private PooledConnection _pconn;
 
   /**
    * Creates a new SpyConnection.
    */
-  public SpyPooledConnection(PooledConnection conn, String id)
+  public SpyPooledConnection(PooledConnection conn,
+                             String id)
   {
     _spyDataSource = new SpyDataSource();
     
@@ -111,7 +114,7 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
       String connId = null;
       
       if (log.isLoggable(Level.FINE)) {
-        connId = _spyDataSource.createConnectionId();
+        connId = _spyDataSource.createConnectionId(null);
 
         log(start, "connect() -> " + connId + ":" + conn);
       }

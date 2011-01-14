@@ -647,6 +647,11 @@ public class TcpSocketLinkListener
     _suspendTimeMax = period.getPeriod();
   }
 
+  public void setSuspendReaperTimeout(Period period)
+  {
+    _suspendReaperTimeout = period.getPeriod();
+  }
+
   public void setKeepaliveTimeout(Period period)
   {
     _keepaliveTimeout = period.getPeriod();

@@ -168,7 +168,7 @@ public class ServletMapper {
       }
       else
         _servletMap.addMap(urlPattern, mapping, isIgnore, ifAbsent);
-
+      
       Set<String> patterns = _urlPatterns.get(servletName);
 
       if (patterns == null) {
@@ -301,7 +301,7 @@ public class ServletMapper {
 
       addWelcomeFileDependency(invocation);
     }
-
+    
     if (servletName == null) {
       log.fine(L.l("'{0}' has no default servlet defined", contextURI));
 
@@ -319,26 +319,6 @@ public class ServletMapper {
 
     if (servletRegexp != null)
       config = servletRegexp;
-
-    /*
-    ServletMapping regexp = _regexpMap.get(servletName);
-    System.out.println("REG: " + regexp + " " + servletName);
-    if (regexp != null) {
-      config = regexp.initRegexpConfig(vars);
-      
-      servletName = config.getServletName();
-      System.out.println("SN: " + servletName);
-
-      if (servletName == null) {
-        log.fine(L.l("'{0}' has no matching servlet", contextURI));
-
-        return new ErrorFilterChain(404);
-      }
-
-      // if (regexp.isServletConfig())
-      //   config = regexp;
-    }
-  */
 
     if (servletName.equals("invoker"))
       servletName = handleInvoker(invocation);

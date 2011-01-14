@@ -896,7 +896,7 @@ public class Resin
       */
       
 
-      log().severe(this + " started in " + (Alarm.getExactTime() - _startTime) + "ms");
+      log().info(this + " started in " + (Alarm.getExactTime() - _startTime) + "ms");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

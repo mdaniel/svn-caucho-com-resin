@@ -95,7 +95,7 @@ class WatchdogArgs
     if (! _resinConf.canRead())
       _resinConf = _resinHome.lookup("conf/resin.xml");
 
-    parseCommandLine(argv);
+    parseCommandLine(_argv);
   }
 
   Path getJavaHome()
@@ -332,10 +332,12 @@ class WatchdogArgs
       }
       else if ("-resin-home".equals(arg) || "--resin-home".equals(arg)) {
         _resinHome = Vfs.lookup(argv[i + 1]);
+        argv[i + 1] = _resinHome.getFullPath();
         i++;
       }
       else if ("-root-directory".equals(arg) || "--root-directory".equals(arg)) {
         _rootDirectory = Vfs.lookup(argv[i + 1]);
+        argv[i + 1] = _rootDirectory.getFullPath();
         i++;
       }
       else if ("-server".equals(arg) || "--server".equals(arg)) {
@@ -344,6 +346,7 @@ class WatchdogArgs
       }
       else if ("-server-root".equals(arg) || "--server-root".equals(arg)) {
         _rootDirectory = Vfs.lookup(argv[i + 1]);
+        argv[i + 1] = _rootDirectory.getFullPath();
         i++;
       }
       else if ("-stage".equals(arg) || "--stage".equals(arg)) {
@@ -722,26 +725,31 @@ class WatchdogArgs
     private boolean _isLicenseCheck;
     private boolean _isResinProfessional;
 
+    @Override
     public Path getResinHome()
     {
       return WatchdogArgs.this.getResinHome();
     }
 
+    @Override
     public Path getRootDirectory()
     {
       return WatchdogArgs.this.getRootDirectory();
     }
 
+    @Override
     public Path getResinConf()
     {
       return WatchdogArgs.this.getResinConf();
     }
 
+    @Override
     public String getServerId()
     {
       return WatchdogArgs.this.getServerId();
     }
 
+    @Override
     public boolean isResinProfessional()
     {
       return isProfessional();

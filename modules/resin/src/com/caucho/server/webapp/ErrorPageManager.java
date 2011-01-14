@@ -31,6 +31,7 @@ package com.caucho.server.webapp;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Locale;
@@ -231,7 +232,6 @@ public class ErrorPageManager {
     boolean badRequest = false;
     boolean doStackTrace = true;
     boolean isCompileException = false;
-    boolean isLineCompileException = false;
     boolean isServletException = false;
     Throwable compileException = null;
     String lineMessage = null;
@@ -342,7 +342,7 @@ public class ErrorPageManager {
 
       response.resetBuffer();
 
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST, title);
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
       if (location == null)
         log.warning(e.toString());
@@ -413,10 +413,6 @@ public class ErrorPageManager {
 
       request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, new Integer(500));
       request.setAttribute(RequestDispatcher.ERROR_MESSAGE, errorPageExn.getMessage());
-      /*
-        if (_app != null && _app.getServer().isClosed())
-        setAttribute(SHUTDOWN, "shutdown");
-      */
 
       try {
         RequestDispatcher disp = null;
@@ -453,8 +449,16 @@ public class ErrorPageManager {
       else
         response.setCharacterEncoding("utf-8");
     }
-
-    PrintWriter out = response.getWriter();
+ 
+    PrintWriter out;
+    
+    try {
+      out = response.getWriter();
+    } catch (IllegalStateException e1) {
+      log.log(Level.FINEST, e1.toString(), e1);
+      
+      out = new PrintWriter(new OutputStreamWriter(response.getOutputStream()));
+    }
 
     if (isDevelopmentModeErrorPage()) {
       out.println("<html>");

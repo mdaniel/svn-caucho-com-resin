@@ -461,21 +461,15 @@ abstract public class DeployController<I extends DeployInstance>
    */
   protected final I createDeployInstance()
   {
-    synchronized (this) {
-      if (_deployInstance == null) {
-        Thread thread = Thread.currentThread();
-        ClassLoader oldLoader = thread.getContextClassLoader();
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
-        try {
-          thread.setContextClassLoader(_parentLoader);
+    try {
+      thread.setContextClassLoader(_parentLoader);
 
-          _deployInstance = instantiateDeployInstance();
-        } finally {
-          thread.setContextClassLoader(oldLoader);
-        }
-      }
-
-      return _deployInstance;
+      return instantiateDeployInstance();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 
@@ -621,10 +615,10 @@ abstract public class DeployController<I extends DeployInstance>
       isStarting = _lifecycle.toStarting();
 
       if (! isStarting) {
-        _lifecycle.waitForActive(_waitForActiveTimeout);
-        
-        return deployInstance;
+        return getDeployInstance();
       }
+      
+      _deployInstance = deployInstance;
       
       preConfigureInstance(deployInstance);
       

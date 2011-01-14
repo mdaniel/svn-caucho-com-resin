@@ -28,6 +28,7 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.sql.DriverConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -56,16 +57,19 @@ public class SpyDriver implements java.sql.Driver {
   private int _id;
   private int _connCount;
 
+  private DriverConfig _driverConfig;
   // The underlying driver
   private Driver _driver;
   
   /**
    * Creates a new SpyDriver.
    */
-  public SpyDriver(Driver driver)
+  public SpyDriver(Driver driver,
+                   DriverConfig driverConfig)
   {
     _spyDataSource = new SpyDataSource();
     _driver = driver;
+    _driverConfig = driverConfig;
     _id = _staticId++;
   }
   
@@ -115,7 +119,7 @@ public class SpyDriver implements java.sql.Driver {
       if (log.isLoggable(Level.FINE))
         log(start, "connect(" + url + ",fine=" + fine + ") -> " + connId + ":" + conn);
 
-      return new SpyConnection(conn, _spyDataSource);
+      return new SpyConnection(conn, _spyDataSource, _driverConfig);
     } catch (SQLException e) {
       log(start, "exn-connect(" + e + ")");
       

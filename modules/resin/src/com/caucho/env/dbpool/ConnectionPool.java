@@ -986,8 +986,9 @@ public class ConnectionPool extends AbstractManagedObject
       userPoolItem = poolItem.toActive(subject, info, oldPoolItem);
       
       if (userPoolItem == null) {
-        throw new IllegalStateException(L.l("Connection '{0}' was not valid on creation",
-                                            poolItem));
+        log.fine(L.l("Connection '{0}' was not valid on creation",
+                     poolItem));
+        return null;
       }
         
       _connectionCreateCountTotal.incrementAndGet();

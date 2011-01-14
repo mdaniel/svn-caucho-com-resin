@@ -311,6 +311,7 @@ public class WrapperResponseStream extends AbstractResponseStream {
   /**
    * Flushes the buffer.
    */
+  @Override
   public void flushByte()
     throws IOException
   {

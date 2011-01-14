@@ -292,6 +292,7 @@ public class ServletContextImpl extends ServletContextCompat
    * <p>XXX: jdk 1.1.x doesn't appear to allow creation of private
    * URL streams.
    */
+  @Override
   public URL getResource(String name)
     throws java.net.MalformedURLException
   {
@@ -305,7 +306,7 @@ public class ServletContextImpl extends ServletContextCompat
 
     URL url = new URL("jndi:/server" + getContextPath() + name);
 
-    if (path.exists())
+    if (path.exists() && ! path.isDirectory())
       return url;
     else if (getClassLoader().getResource("META-INF/resources/" + realPath) != null) {
       return url;

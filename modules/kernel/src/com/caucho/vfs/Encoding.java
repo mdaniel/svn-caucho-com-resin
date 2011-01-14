@@ -512,8 +512,9 @@ public class Encoding {
     _mimeName.put("WINDOWS-HACK", "ISO-8859-1");
     _javaName.put("WINDOWS-HACK", "WindowsHack");
 
-    _mimeName.put("MACROMAN", "MacRoman");
-    _javaName.put("MacRoman", "MacRoman");
+    // #4180
+    _mimeName.put("MACROMAN", "utf-8");
+    _javaName.put("MacRoman", "utf-8");
 
     _mimeName.put("KS_C_5601-1987", "ks_c_5601-1987");
     _javaName.put("ks_c_5601-1987", "Cp949");

@@ -22,6 +22,7 @@
 
 JAVA_HOME="@JAVA_HOME@"
 RESIN_HOME="@resin_home@"
+CONSOLE="/var/log/resin/console.log"
 
 # for ubuntu
 if [ ! -d $JAVA_HOME ]; then
@@ -94,7 +95,7 @@ case "$1" in
   start)
 	log_daemon_msg "Starting resin"
 	if test -n "$USER"; then
-  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start""" 1>/dev/null 2>/dev/null
+  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start""" 1>> $CONSOLE 2>> $CONSOLE
 	else
 	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start 2>&1`
 	    if [ $? != 0 ]; then
@@ -107,7 +108,7 @@ case "$1" in
   stop)
 	log_daemon_msg "Stopping resin"
 	if test -n "$USER"; then
-  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown""" 1>/dev/null 2>/dev/null
+  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown""" 1>> $CONSOLE 2>> $CONSOLE
 	else
 	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown 2>&1`
 	    if [ $? != 0 ]; then

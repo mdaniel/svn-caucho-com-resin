@@ -41,8 +41,8 @@
 #include "http_connection.h"
 
 APR_DECLARE_OPTIONAL_FN(char *, ssl_var_lookup,
-						(apr_pool_t *, server_rec *,
-						conn_rec *, request_rec *, char*));
+                        (apr_pool_t *, server_rec *,
+                         conn_rec *, request_rec *, char*));
 
 #ifdef DEBUG
 #include <time.h>

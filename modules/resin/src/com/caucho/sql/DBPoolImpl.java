@@ -237,6 +237,8 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public DriverConfig createDriver()
   {
     DriverConfig driver = new DriverConfig(this);
+    
+    driver.setIndex(_driverList.size() + _backupDriverList.size());
 
     _driverList.add(driver);
 
@@ -250,6 +252,8 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     DriverConfig driver = new DriverConfig(this);
 
+    driver.setIndex(_driverList.size() + _backupDriverList.size());
+    
     _backupDriverList.add(driver);
 
     return driver;
@@ -821,9 +825,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   /**
    * Returns the next spy id.
    */
-  public String newSpyId()
+  public String newSpyId(DriverConfig driver)
   {
-    return _spyDataSource.createConnectionId();
+    return _spyDataSource.createConnectionId(driver);
   }
 
   /**

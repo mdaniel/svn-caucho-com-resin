@@ -13,6 +13,17 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>database: logging adds ".d0", ".d1" to show round-robin (#4222, rep by Anthony Balandran)</li>
+<li>init.d: change init.d/resin to log startup to /var/log/resin/console.log (#4223, rep by Raul Luna)</li>
+<li>i18n: changed MacRoman file.encoding to default to utf-8 (#4180)</li>
+<li>url: invalid utf-8 character parses to %xfffd (#4183, rep by cjohn)</li>
+<li>comet: add suspend-reaper-timeout to port configuration (#4249, rep by baoqinye)</li>
+<li>startup: Resin started message changed to log at INFO level (#4135, rep by briandeng)</li>
+<li>database: check isClosed() on connection reuse to avoid dead connections (#4231)</li>
+<li>log: rollover needs dedicated alarm for proper timeout (#4234, rep by mros2stf)</li>
+<li>watchdog: relative -root-directory was applying the relative path twice (#4198)</li>
+<li>servlet: getResource("/") was returning a URL for the directory incorrectly (#4301, rep by mate)</li>
+<li>watchdog: Resin child needs -Xrs on windows (#4308, rep by robin dun)</li>
 <li>deploy: web-app start needs to synchronize on getDeployInstance (#4342, rep by Jamison Novak)</li>
 <li>session: session cache needs to use createIfAbsent to avoid timing issues (#4340, rep by Jamison Novak)</li>
 <li>access-log: AbstractRolloverLog needs dedicated rollover alarm (#4321, rep by mros2stf)</li>

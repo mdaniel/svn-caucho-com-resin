@@ -116,6 +116,12 @@ class WatchdogManager implements AlarmListener {
 
     Path logPath = getLogDirectory().lookup("watchdog-manager.log");
     
+    try {
+      getLogDirectory().mkdirs();
+    } catch (Exception e) {
+      log().log(Level.ALL, e.toString(), e);
+    }
+    
     // #4333 - check watchdog-manager.log can be written
     WriteStream testOut = logPath.openAppend();
     testOut.close();

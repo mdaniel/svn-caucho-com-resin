@@ -596,15 +596,20 @@ As usual, Apache or IIS will pass matching requests to Resin.</p>
 standalone configuration.  That similarity makes it easy to debug the
 Apache configuration by retreating to Resin standalone if needed.</p>
 
-<p>The <var>ServerName</var> directive in Apache is vital to make Resin's
+<p>The <var>ServerName</var> directive in Apache with
+the <var>UseCanonicalName</var> can be used to 
+select a canonical name for the virtual host
 virtual hosting work.  When Apache passes the request to Resin, it
 tells Resin the <var>ServerName</var>.  Without the <var>ServerName</var>,
-Resin can get very confused which host to serve.</p>
+Apache will use the "Host:" header in the HTTP request to select which
+host to serve.</p>
 
 <example title="httpd.conf">
 LoadModule caucho_module /usr/local/apache/libexec/mod_caucho.so
 
 ResinConfigServer localhost 6802
+
+UseCanonicalName on
 
 &lt;VirtualHost 127.0.0.1&gt;
   ServerName gryffindor.caucho.com
@@ -631,6 +636,8 @@ appropriate back-end Resin JVM for the host: </p>
 <figure src="config-jvmpervirtualhost-apache.png" width="481" height="145"/>
 
 <example title="httpd.conf">
+UseCanonicalName on
+
 &lt;VirtualHost 127.0.0.1&gt;
   ServerName gryffindor.caucho.com
   ResinConfigServer 192.168.0.10 6800

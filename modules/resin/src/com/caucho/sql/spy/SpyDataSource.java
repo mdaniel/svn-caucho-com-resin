@@ -30,6 +30,8 @@ package com.caucho.sql.spy;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.caucho.sql.DriverConfig;
+
 /**
  * Source for spy connections
  */
@@ -65,8 +67,16 @@ public class SpyDataSource {
   /**
    * Creates a connection id.
    */
-  public String createConnectionId()
+  public String createConnectionId(DriverConfig driver)
   {
-    return _name + _connIdCount.getAndIncrement();
+    StringBuilder sb = new StringBuilder();
+    sb.append(_name);
+    
+    if (driver != null)
+      sb.append('d').append(driver.getIndex()).append(".");
+    
+    sb.append(_connIdCount.getAndIncrement());
+    
+    return sb.toString();
   }
 }

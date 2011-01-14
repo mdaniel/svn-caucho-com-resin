@@ -506,6 +506,9 @@ r_port-Parameters =
    & (attribute suspend-time-max { r_period-Type }
       | element suspend-time-max { r_period-Type })?
 
+   & (attribute suspend-reaper-timeout { r_period-Type }
+      | element suspend-reaper-timeout { r_period-Type })?
+
    & (attribute tcp-no-delay { string }
       | element tcp-no-delay { string })?
 

@@ -132,7 +132,7 @@ public class ManagedConnectionImpl
   {
     _factory = factory;
     _dbPool = factory.getDBPool();
-    _id = _dbPool.newSpyId();
+    _id = _dbPool.newSpyId(driver);
       
     _driver = driver;
     _connConfig = connConfig;
@@ -169,6 +169,19 @@ public class ManagedConnectionImpl
     return _credentials;
   }
 
+  public boolean isClosed()
+  {
+    try {
+      if (_driverConnection != null)
+        return _driverConnection.isClosed();
+      else
+        return false;
+    } catch (SQLException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
+      return true;
+    }
+  }
   /**
    * Returns true if statements should be wrapped.
    */
@@ -796,6 +809,11 @@ public class ManagedConnectionImpl
     
     boolean isPingRequired = _isPingRequired;
     _isPingRequired = false;
+    
+    Connection conn = _driverConnection;
+    
+    if (isClosed())
+      return false;
 
     if (isPingRequired) {
     }
@@ -805,8 +823,6 @@ public class ManagedConnectionImpl
     else if (now < _lastEventTime + 1000) {
       return true;
     }
-    
-    Connection conn = _driverConnection;
     
     try {
       _lastEventTime = now;
@@ -892,7 +908,7 @@ public class ManagedConnectionImpl
   @Override
   public String toString()
   {
-    return "ManagedConnectionImpl[" + _id + "]";
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 
   class LocalTransactionImpl implements LocalTransaction {

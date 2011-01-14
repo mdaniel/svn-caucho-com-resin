@@ -65,7 +65,6 @@ abstract public class AbstractTargetDispatchRule extends AbstractRegexpDispatchR
                                  String uri,
                                  String queryString)
   {
-    System.out.println("REQRITE: " + _target + " " + uri);
     if (_target != null)
       return matcher.replaceFirst(_target);
     else

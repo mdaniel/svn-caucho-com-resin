@@ -34,6 +34,7 @@ import com.caucho.server.dispatch.FilterChainBuilder;
 import com.caucho.server.dispatch.ForwardFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.webapp.WebApp;
+//import com.caucho.security.FormLogin;
 import com.caucho.util.L10N;
 
 import javax.servlet.FilterChain;
@@ -77,8 +78,8 @@ public class ConstraintManager extends FilterChainBuilder {
   {
     String uri = invocation.getContextURI();
 
-    WebApp app = invocation.getWebApp();
-    if (app == null)
+    WebApp webApp = invocation.getWebApp();
+    if (webApp == null)
       return next;
 
     String lower = uri.toLowerCase();
@@ -113,25 +114,6 @@ public class ConstraintManager extends FilterChainBuilder {
               methodList = absConstraint.toArray();
             // server/12ba - the first constraint matches, following are
             // ignored
-            /*
-            else {
-
-              AbstractConstraint []newMethods = absConstraint.toArray();
-
-              AbstractConstraint []newList;
-
-              newList = new AbstractConstraint[methodList.length
-                                               + newMethods.length];
-
-              System.arraycopy(methodList, 0, newList, 0, methodList.length);
-              System.arraycopy(newMethods, 0, newList,
-                               methodList.length, newMethods.length);
-
-              methodList = newList;
-            }
-            */
-
-            methodMap.put(method, methodList);
           }
           
           if (methods == null || methods.size() == 0) {
@@ -153,15 +135,6 @@ public class ConstraintManager extends FilterChainBuilder {
             break loop;
         }
       }
-    }
-
-    if (uri.endsWith("/j_security_check")
-        && app.getLogin() instanceof FormLogin) {
-      RequestDispatcher disp = app.getNamedDispatcher("j_security_check");
-      if (disp == null)
-        throw new IllegalStateException(L.l("j_security_check is an undefined servlet"));
-
-      next = new ForwardFilterChain(disp);
     }
 
     if (constraints.size() > 0 || methodMap.size() > 0) {

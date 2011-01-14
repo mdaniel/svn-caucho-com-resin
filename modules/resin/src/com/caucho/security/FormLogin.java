@@ -278,7 +278,7 @@ public class FormLogin extends AbstractLogin
       return;
     request.setAttribute(LOGIN_CHECK, "login");
 
-    WebApp app = _webApp;
+    WebApp webApp = _webApp;
 
     String jUseCookieAuth = (String) request.getParameter("j_use_cookie_auth");
 
@@ -288,7 +288,7 @@ public class FormLogin extends AbstractLogin
         && ((CookieAuthenticator) auth).isCookieSupported(jUseCookieAuth)) {
       CookieAuthenticator cookieAuth = (CookieAuthenticator) auth;
 
-      generateCookie(user, cookieAuth, app, request, response);
+      generateCookie(user, cookieAuth, webApp, request, response);
     }
 
     String path = request.getServletPath();
@@ -307,7 +307,7 @@ public class FormLogin extends AbstractLogin
 
     if (path.endsWith("/j_security_check")) {
       RequestDispatcher disp;
-      disp = app.getNamedDispatcher("j_security_check");
+      disp = webApp.getNamedDispatcher("j_security_check");
 
       if (disp == null)
         throw new ServletException(L.l("j_security_check servlet must be defined to use form-based login."));
@@ -345,7 +345,7 @@ public class FormLogin extends AbstractLogin
       return;
     }
 
-    WebApp app = _webApp;
+    WebApp webApp = _webApp;
 
     String uri = request.getRequestURI();
 
@@ -360,20 +360,8 @@ public class FormLogin extends AbstractLogin
         response.setDateHeader("Expires", 0);
       }
 
-      RequestDispatcher disp = app.getRequestDispatcher(_errorPage);
+      RequestDispatcher disp = webApp.getRequestDispatcher(_errorPage);
       disp.forward(request, response);
-      /*
-      //        && request.getAttribute(LOGIN_CHECK) == null) {
-      request.setAttribute(LOGIN_CHECK, "login");
-
-      RequestDispatcher disp;
-      disp = app.getNamedDispatcher("j_security_check");
-
-      if (disp == null)
-        throw new ServletException(L.l("j_security_check servlet must be defined to use form-based login."));
-
-      disp.forward(request, response);
-      */
       return;
     }
     else if (uri.equals(_loginPage) || uri.equals(_errorPage)) {
@@ -403,7 +391,7 @@ public class FormLogin extends AbstractLogin
     // Forwards to the loginPage, never redirects according to the spec.
     request.setAttribute(LOGIN_CHECK, "login");
     //RequestDispatcher disp = app.getLoginDispatcher(loginPage);
-    RequestDispatcher disp = app.getRequestDispatcher(_loginPage);
+    RequestDispatcher disp = webApp.getRequestDispatcher(_loginPage);
     disp.forward(request, response);
 
     if (log.isLoggable(Level.FINE))

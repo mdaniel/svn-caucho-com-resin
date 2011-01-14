@@ -29,6 +29,7 @@
 
 package com.caucho.sql.spy;
 
+import com.caucho.sql.DriverConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -61,10 +62,13 @@ public class SpyConnection implements java.sql.Connection {
   /**
    * Creates a new SpyConnection.
    */
-  public SpyConnection(Connection conn, SpyDataSource spyDataSource)
+  public SpyConnection(Connection conn, 
+                       SpyDataSource spyDataSource,
+                       DriverConfig driver)
   {
     _spyDataSource = spyDataSource;
     _conn = conn;
+    _id = _spyDataSource.createConnectionId(driver);
   }
 
   /**
@@ -92,9 +96,6 @@ public class SpyConnection implements java.sql.Connection {
    */
   public String getId()
   {
-    if (_id == null)
-      _id = _spyDataSource.createConnectionId();
-
     return _id;
   }
 
