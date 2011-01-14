@@ -200,6 +200,7 @@
         </fileset>
         <fileset dir="${maven.lib}">
           <include name="**/*.jar"/>
+         <exclude name="ant-1.6.5.jar"/>
         </fileset>
       </classpath>
     </javac>

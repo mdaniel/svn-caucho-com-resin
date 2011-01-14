@@ -13,6 +13,7 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>webapp: web-app deployment with invalid root-directory needs warning (#4207)</li>
 <li>database: logging adds ".d0", ".d1" to show round-robin (#4222, rep by Anthony Balandran)</li>
 <li>init.d: change init.d/resin to log startup to /var/log/resin/console.log (#4223, rep by Raul Luna)</li>
 <li>i18n: changed MacRoman file.encoding to default to utf-8 (#4180)</li>

@@ -109,7 +109,7 @@ public class Jspc extends Task {
                              "lib" + File.separatorChar + "resin.jar");
 
     if (! resinJar.exists())
-      throw new BuildException("resinHome `"
+      throw new BuildException("resinHome '"
                                  + _resinHome
                                  + "' does not appear to be valid");
 

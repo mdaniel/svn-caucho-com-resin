@@ -918,6 +918,7 @@ public class AbstractRolloverLog {
   }
 
   class RolloverWorker extends TaskWorker {
+    @Override
     public long runTask()
     {
       rolloverLogImpl();

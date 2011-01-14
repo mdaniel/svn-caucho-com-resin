@@ -3153,6 +3153,10 @@ public class WebApp extends ServletContextImpl
       _lifecycle.toActive();
 
       clearCache();
+      
+      if (! getRootDirectory().canRead()) {
+        log.warning(this + " cannot read root-directory " + getRootDirectory().getNativePath());
+      }
 
       isOkay = true;
     } catch (Exception e) {

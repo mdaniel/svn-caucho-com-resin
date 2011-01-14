@@ -443,9 +443,10 @@ abstract public class DeployController<I extends DeployInstance>
   @Override
   public I getDeployInstance()
   {
-    _lifecycle.waitForActive(_waitForActiveTimeout);
-    
-    return getDeployInstanceImpl();
+    if (_lifecycle.isActive())
+      return getDeployInstanceImpl();
+    else
+      return null;
   }
 
   /**

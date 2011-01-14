@@ -802,8 +802,10 @@ public class ConnectionPool extends AbstractManagedObject
   {
     long expireTime = Alarm.getCurrentTimeActual() + _connectionWaitTimeout;
 
-    if (! _lifecycle.isActive())
-      throw new IllegalStateException(L.l("Can't allocate connection because the connection pool is closed."));
+    if (! _lifecycle.isActive()) {
+      throw new IllegalStateException(L.l("{0}: Can't allocate connection because the connection pool is closed.",
+                                          this));
+    }
 
     do {
       UserPoolItem userPoolItem
@@ -824,7 +826,8 @@ public class ConnectionPool extends AbstractManagedObject
              && waitForAvailableConnection(expireTime));
     
     if (! _lifecycle.isActive())
-      throw new IllegalStateException(L.l("Can't allocate connection because the connection pool is closed."));
+      throw new IllegalStateException(L.l("{0}: Can't allocate connection because the connection pool is closed.",
+                                          this));
 
     String message = (this + " pool throttled create timeout"
         + " (pool-size=" + _connectionPool.size()
@@ -1287,6 +1290,8 @@ public class ConnectionPool extends AbstractManagedObject
   {
     if (! _lifecycle.toStop())
       return;
+    
+    log.finer(this + " stopping");
 
     if (_alarm != null)
       _alarm.dequeue();

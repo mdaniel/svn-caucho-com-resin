@@ -69,18 +69,18 @@ To simplify the example, we'll use the <code>BlockingQueue</code> API instead
 of the JMS producers.  The functionality is the same without the extra
 housekeeping of the JMS API.</p>
 
-<p>The servlet uses <a href="../../doc/resin-ioc.xtp">Resin-IoC</a>
+<p>The servlet uses <a href="../../doc/resin-ioc.xtp">CDI</a>
 dependency injection to get the <code>BlockingQueue</code>.  The
 dependency injection cleans the code by decoupling it from the implementation.
 For example, the actual <code>BlockingQueue</code> could be facade around
 another JMS implementation's queue.</p>
 
 <example title="Example: MessageServlet">
-import javax.webbeans.In;
+import javax.inject.Inject;
 import java.util.concurrent.BlockingQueue;
 
 public class MessageServlet extends GenericServlet {
-  @In BlockingQueue _sender;
+  @Inject BlockingQueue _sender;
 
   ...
   String message = "sample message";

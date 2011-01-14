@@ -37,6 +37,7 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -104,6 +105,9 @@ public class ImageModule extends AbstractQuercusModule {
   public static final int IMG_FILTER_SELECTIVE_BLUR = 8;
   public static final int IMG_FILTER_MEAN_REMOVAL = 9;
   public static final int IMG_FILTER_SMOOTH = 10;
+  
+  private static LruCache<StringValue,Font> _fontMap
+    = new LruCache<StringValue,Font>(4096);
 
   public String []getLoadedExtensions()
   {
@@ -1899,8 +1903,6 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   public static class QuercusImage extends ResourceValue {
-    private HashMap<StringValue,Font> _fontMap
-      = new HashMap<StringValue,Font>();
     private Font []_fontArray = new Font[6];
 
     private int _width;
