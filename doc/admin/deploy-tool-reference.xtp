@@ -312,13 +312,15 @@ http://maven.apache.org/maven-v4_0_0.xsd">
            resource="com/caucho/ant/antlib.xml"
            classpath="path/to/resin-ant.jar"/>
 
-  &lt;resin:upload-war server="192.168.0.10"
-                    port="8080"
-                    user="admin"
-                    password="myadminpass"
-                    warFile="clustered-app.war"
-                    version="1.0"/>
-&lt;/project>
+  &lt;resin:upload-war
+                      resinHome="${resin.home}"
+                      server="localhost"
+                      port="8086"
+                      user="foo"
+                      password="test"
+                      warFile="/tmp/caucho/qa/foo.war"
+                      context="bar"
+                      logLevel="finer"/>
       </example>
       <deftable title="Ant Task Reference">
         <tr>
@@ -329,11 +331,23 @@ http://maven.apache.org/maven-v4_0_0.xsd">
           <th>Description</th>
         </tr>
         <tr>
-          <th rowspan="5">Common properties for all tasks</th>
+          <th rowspan="7">Common properties for all tasks</th>
           <td>server</td>
           <td>Yes</td>
           <td>N/A</td>
           <td>The IP or address of the Resin server</td>
+        </tr>
+        <tr>
+          <td>resinHome</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>Path to Resin Installation</td>
+        </tr>
+        <tr>
+          <td>resinConf</td>
+          <td>No</td>
+          <td>${resin.home}/resin.xml</td>
+          <td>Path to Resin Configuration</td>
         </tr>
         <tr>
           <td>port</td>
@@ -354,17 +368,29 @@ http://maven.apache.org/maven-v4_0_0.xsd">
           <td>The password to use when logging into the Resin server</td>
         </tr>
         <tr>
-          <td>commitMessage</td>
+          <td>message</td>
           <td>No</td>
           <td>N/A</td>
           <td>The commit message to log for any changes to the application repository</td>
         </tr>
         <tr>
-          <th rowspan="7">resin-upload-war (com.caucho.ant.ResinUploadWar)</th>
+          <th rowspan="5">resin-upload-war (com.caucho.ant.ResinUploadWar)</th>
           <td>warFile</td>
           <td>Yes</td>
           <td>N/A</td>
           <td>The war file to upload to the Resin server</td>
+        </tr>
+        <tr>
+          <td>context</td>
+          <td>No</td>
+          <td>/[war file prefix]</td>
+          <td>The context root of the deployed application</td>
+        </tr>
+        <tr>
+          <td>host</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host to use for the deployed application</td>
         </tr>
         <tr>
           <td>stage</td>
@@ -373,59 +399,23 @@ http://maven.apache.org/maven-v4_0_0.xsd">
           <td>The stage to use for the deployed application</td>
         </tr>
         <tr>
-          <td>virtualHost</td>
-          <td>No</td>
-          <td>"default"</td>
-          <td>The virtual host to use for the deployed application</td>
-        </tr>
-        <tr>
-          <td>contextRoot</td>
-          <td>No</td>
-          <td>/[war file prefix]</td>
-          <td>The context root of the deployed application</td>
-        </tr>
-        <tr>
           <td>version</td>
           <td>No</td>
           <td>N/A</td>
           <td>The version to use for the deployed application</td>
         </tr>
         <tr>
-          <td>archive</td>
-          <td>No</td>
-          <td>false</td>
-          <td>When set to true, an archive tag is set in addition to the main tag.  Can also be an explicit tag.</td>
+          <th rowspan="8">resin-copy-tag (com.caucho.ant.ResinCopyTag)</th>
+          <td>sourceContext</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The context root of the source tag</td>
         </tr>
         <tr>
-          <td>writeHead</td>
-          <td>No</td>
-          <td>true</td>
-          <td>When set to true and using versioning, a "head" tag is also set.</td>
-        </tr>
-        <tr>
-          <th rowspan="10">resin-copy-tag (com.caucho.ant.ResinCopyTag)</th>
-          <td>stage</td>
+          <td>sourceHost</td>
           <td>No</td>
           <td>"default"</td>
-          <td>The stage of the target tag</td>
-        </tr>
-        <tr>
-          <td>virtualHost</td>
-          <td>No</td>
-          <td>"default"</td>
-          <td>The virtual host of the target tag</td>
-        </tr>
-        <tr>
-          <td>contextRoot</td>
-          <td>Yes (if tag not given)</td>
-          <td>N/A</td>
-          <td>The context root of the target tag</td>
-        </tr>
-        <tr>
-          <td>version</td>
-          <td>No</td>
-          <td>N/A</td>
-          <td>The version of the target tag</td>
+          <td>The virtual host of the source tag</td>
         </tr>
         <tr>
           <td>sourceStage</td>
@@ -434,54 +424,53 @@ http://maven.apache.org/maven-v4_0_0.xsd">
           <td>The stage of the source tag</td>
         </tr>
         <tr>
-          <td>sourceVirtualHost</td>
-          <td>No</td>
-          <td>"default"</td>
-          <td>The virtual host of the source tag</td>
-        </tr>
-        <tr>
-          <td>sourceContextRoot</td>
-          <td>Yes (if sourceTag not given)</td>
-          <td>N/A</td>
-          <td>The context root of the source tag</td>
-        </tr>
-        <tr>
-          <td>sourceVersion</td>
+          <td>source-version</td>
           <td>No</td>
           <td>N/A</td>
           <td>The version of the source tag</td>
         </tr>
         <tr>
-          <td>tag</td>
-          <td>Yes (if contextRoot not given)</td>
+          <td>targetContext</td>
+          <td>Yes</td>
           <td>N/A</td>
-          <td>An explicit target tag</td>
+          <td>The context of the target tag</td>
         </tr>
         <tr>
-          <td>sourceTag</td>
-          <td>Yes (if sourceContextRoot not given)</td>
-          <td>N/A</td>
-          <td>An explicit source tag</td>
-        </tr>
-        <tr>
-          <th rowspan="5">resin-delete-tag (com.caucho.ant.ResinDeleteTag)
-    </th>
-          <td>stage</td>
+          <td>targetHost</td>
           <td>No</td>
           <td>"default"</td>
-          <td>The stage of the tag to be deleted</td>
+          <td>The virtual host of the target tag</td>
         </tr>
         <tr>
-          <td>resin.virtualHost</td>
+          <td>targetStage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage of the target tag</td>
+        </tr>
+        <tr>
+          <td>targetVersion</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version of the target tag</td>
+        </tr>
+        <tr>
+          <th rowspan="5">resin-delete-tag (com.caucho.ant.ResinDeleteTag)</th>
+          <td>context</td>
+          <td>Yes (if tag not given)</td>
+          <td>N/A</td>
+          <td>The context root of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>host</td>
           <td>No</td>
           <td>"default"</td>
           <td>The virtual host of the tag to be deleted</td>
         </tr>
         <tr>
-          <td>contextRoot</td>
-          <td>Yes (if tag not given)</td>
-          <td>N/A</td>
-          <td>The context root of the tag to be deleted</td>
+          <td>stage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage of the tag to be deleted</td>
         </tr>
         <tr>
           <td>version</td>
@@ -491,28 +480,28 @@ http://maven.apache.org/maven-v4_0_0.xsd">
         </tr>
         <tr>
           <td>tag</td>
-          <td>Yes (if contextRoot not given)</td>
+          <td>Yes (if context not given)</td>
           <td>N/A</td>
           <td>An explicit tag to be deleted</td>
         </tr>
         <tr>
           <th rowspan="5">resin-query-tags (com.caucho.ant.ResinQueryTags)</th>
-          <td>stage</td>
-          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
-          <td>"default"</td>
-          <td>The query pattern for the stage portion of tags in the repository</td>
+          <td>context</td>
+          <td>Yes (At least one pattern (either stage, host, context, version, or pattern) must be given</td>
+          <td>".*"</td>
+          <td>The query pattern for the context root portion of tags in the repository</td>
         </tr>
         <tr>
-          <td>virtualHost</td>
+          <td>host</td>
           <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
           <td>"default"</td>
           <td>The query pattern for the virtual host portion of tags in the repository</td>
         </tr>
         <tr>
-          <td>contextRoot</td>
+          <td>stage</td>
           <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
-          <td>".*"</td>
-          <td>The query pattern for the context root portion of tags in the repository</td>
+          <td>"default"</td>
+          <td>The query pattern for the stage portion of tags in the repository</td>
         </tr>
         <tr>
           <td>version</td>

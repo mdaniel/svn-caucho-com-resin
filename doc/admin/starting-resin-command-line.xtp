@@ -84,6 +84,15 @@
         <td>off</td>
       </tr>
       <tr>
+        <td>-resin-home <var>xxx</var></td>
+        <td>
+           Deprecated. Sets the Resin home directory.
+           Use environment variable <var>RESIN_HOME</var> or
+           <var>&lt;jvm-arg&gt;-Dresin.home=xxx&lt;/jvm-arg&gt;</var> in resin.xml.
+        </td>
+        <td>The parent directory of resin.jar</td>
+      </tr>
+      <tr>
         <td>console</td>
         <td>Starts Resin in console mode for development and debugging</td>
         <td>n/a</td>
@@ -120,13 +129,9 @@
         <td>n/a</td>
       </tr>
       <tr>
-        <td>-resin-home <var>xxx</var></td>
-        <td>
-           Deprecated. Sets the Resin home directory.
-           Use environment variable <var>RESIN_HOME</var> or
-           <var>&lt;jvm-arg&gt;-Dresin.home=xxx&lt;/jvm-arg&gt;</var> in resin.xml.
-        </td>
-        <td>The parent directory of resin.jar</td>
+        <td>help [command]</td>
+        <td>Prints general help message or command help message when command is specified</td>
+        <td>n/a</td>
       </tr>
       </deftable>
       </s2>

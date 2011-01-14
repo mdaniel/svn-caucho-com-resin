@@ -201,6 +201,294 @@ all the servers in the cluster will have the webapp.
 </ol>
 </s1>
 
+<s1 title="command line deployment">
+<p>Command line deployment capabilities were introduced in Resin 4.0.14. The set
+of commands allows deploying, undeploying, listing applications deployed on the
+server and controlling application lifecycle.</p>
+<s2 title="Synopsis of the provided commands and options">
+<deftable title="commands">
+  <tr>
+    <th>Command</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>deploy</td>
+    <td>deploys an application archive</td>
+  </tr>
+  <tr>
+    <td>undeploy</td>
+    <td>un-deploys an application specified by a context</td>
+  </tr>
+  <tr>
+    <td>list</td>
+    <td>lists all applications deployed on a server</td>
+  </tr>
+  <tr>
+    <td>copy</td>
+    <td>copies an application from one context to another</td>
+  </tr>
+  <tr>
+    <td>start-webapp</td>
+    <td>starts web application context</td>
+  </tr>
+  <tr>
+    <td>stop-webapp</td>
+    <td>stops web application context</td>
+  </tr>
+  <tr>
+    <td>restart-webapp</td>
+    <td>restarts web application context</td>
+  </tr>
+</deftable>
+
+<deftable title="common options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-conf</td>
+    <td>configuration file</td>
+    <td>conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-address</td>
+    <td>ip or host name of the server</td>
+    <td>taken from conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-port</td>
+    <td>server http port</td>
+    <td>taken from conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-user</td>
+    <td>user name used for authentication to the server</td>
+    <td>none, required</td>
+  </tr>
+  <tr>
+    <td>-password</td>
+    <td>password used for authentication to the server</td>
+    <td>none, required</td>
+  </tr>
+  <tr>
+    <td>-m</td>
+    <td>commit message</td>
+    <td>none, optional</td>
+  </tr>
+</deftable>
+
+<s3 title="deploying application">
+<p>Deploying an application is done with a <code>deploy</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] deploy -user &lt;user> -password &lt;password> [options] &lt;war-file></code></p>
+<example title="deploying an application from a hello-world.war archive">java -jar lib/resin.jar deploy -user admin -password secret /projects/hello-world/hello-world.war
+Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp</example>
+<deftable title="deploy options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-host</td>
+    <td>virtual host to make application available on</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-name</td>
+    <td>name of the context to deploy to, defaults to war-file name</td>
+    <td>[/foo].war</td>
+  </tr>
+  <tr>
+    <td>-stage</td>
+    <td>specifies stage for staging an application</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-version</td>
+    <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+</deftable>
+</s3>
+
+<s3 title="listing deployed applications">
+  <p>Listing deployed applications is done with a <code>list</code> command</p>
+  <p><code>java -jar resin.jar [-conf &lt;file>] list -user &lt;user> -password &lt;password></code></p>
+  <example title="">java -jar lib/resin.jar list -user admin -password secret
+                    production/webapp/default/hello-world</example>
+</s3>
+
+<s3 title="copy application from context '/hello-world' to context '/foo'">
+<p>Copying an applicaiton is done with a <code>copy</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] copy -user &lt;user> -password &lt;password> [options]</code></p>
+<example title="">java -jar lib/resin.jar copy -user admin -password secret -source hello-world -target foo
+copied production/webapp/default/hello-world to production/webapp/default/foo
+</example>
+<deftable title="copy options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-source</td>
+    <td>context to copy application from</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-source host</td>
+    <td>host to copy application from</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-source-stage</td>
+    <td>source stage</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-source-version</td>
+    <td>version of the source application formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-target</td>
+    <td>context to copy application to</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-target-host</td>
+    <td>host to copy an application to</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-target-stage</td>
+    <td>target stage</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-target-version</td>
+    <td>version application to use for a target, formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+</deftable>
+</s3>
+<s3 title="undeploying application">
+<p>Undeploying an application is done with an <code>undeploy</code> command</p>
+<p><code>java -jar lib/resin.jar [-conf &lt;file>] undeploy -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="">java -jar lib/resin.jar undeploy -user admin -password secret undeploy foo
+Undeployed foo from http://127.0.0.1:8080/hmtp</example>
+  <deftable title="undeploy options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s3>
+<s3 title="starting application">
+<p>Starting an application is done with an <code>start-webapp</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] start-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="start web application deployed at context '/foo'">java -jar lib/resin.jar start-webapp -user admin -password secret foo
+'production/webapp/default/foo' is started</example>
+  <deftable title="start-webapp options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s3>
+<s3 title="stopping application">
+<p>Stopping an application is done with an <code>stop-webapp</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] stop-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="stop web application deployed at context '/foo'">java -jar lib/resin.jar stop-webapp -user admin -password secret foo
+'production/webapp/default/foo' is stopped</example>
+  <deftable title="stop-webapp options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s3>
+<s3 title="restarting application">
+<p>Restarting an application is done with an <code>restart-webapp</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] restart-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="stop web application deployed at context '/foo'">java -jar lib/resin.jar restart-webapp -user admin -password secret foo
+'production/webapp/default/foo' is restarted</example>
+  <deftable title="restart-webapp options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s3>
+</s2>
+</s1>
+
 <s1 title="ant/maven Remote Deployment">
 
 <p>With remote deployment, you can use an ant or maven task to deploy
@@ -231,9 +519,9 @@ administration:</p>
   &lt;resin:AdminAuthenticator>
      &lt;resin:user name="harry" password="..."/>
   &lt;/resin:AdminAuthenticator>
-  
+
   &lt;cluster id="">
-  
+
     &lt;resin:RemoteAdminService/>
     &lt;resin:DeployService/>
 
