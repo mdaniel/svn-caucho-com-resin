@@ -29,37 +29,52 @@
 
 package com.caucho.config;
 
-import com.caucho.config.attribute.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.SoftReference;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+
+import com.caucho.config.attribute.Attribute;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
+import com.caucho.config.types.DirVar;
+import com.caucho.config.types.FileVar;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.el.EL;
 import com.caucho.el.EnvironmentContext;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.relaxng.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.relaxng.CompactVerifierFactoryImpl;
+import com.caucho.relaxng.Schema;
+import com.caucho.relaxng.Verifier;
+import com.caucho.relaxng.VerifierFilter;
+import com.caucho.util.DisplayableException;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.DOMBuilder;
+import com.caucho.xml.QAttr;
 import com.caucho.xml.QDocument;
 import com.caucho.xml.QName;
-import com.caucho.xml.QAttr;
 import com.caucho.xml.Xml;
-
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-
-import javax.el.ELContext;
-import javax.el.ELException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.SoftReference;
-import java.lang.reflect.*;
-import java.net.*;
-import java.util.HashMap;
-import java.util.logging.*;
 
 /**
  * Facade for Resin's configuration builder.

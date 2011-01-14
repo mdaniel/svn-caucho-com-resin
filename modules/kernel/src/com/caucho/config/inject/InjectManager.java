@@ -156,7 +156,7 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 
 /**
- * The cdi container for a given environment.
+ * The CDI container for a given environment.
  */
 @ModulePrivate
 @SuppressWarnings("serial")
