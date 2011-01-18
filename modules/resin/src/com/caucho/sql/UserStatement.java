@@ -195,7 +195,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.executeQuery(sql);
     } catch (RuntimeException e) {
@@ -219,7 +222,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.executeUpdate(sql);
     } catch (RuntimeException e) {
@@ -243,7 +249,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.executeUpdate(query, resultType);
     } catch (RuntimeException e) {
@@ -267,7 +276,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.executeUpdate(query, columns);
     } catch (RuntimeException e) {
@@ -291,7 +303,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.executeUpdate(query, columns);
     } catch (RuntimeException e) {
@@ -314,7 +329,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.execute(sql);
     } catch (RuntimeException e) {
@@ -338,7 +356,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.execute(query, resultType);
     } catch (RuntimeException e) {
@@ -363,7 +384,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.execute(query, columns);
     } catch (RuntimeException e) {
@@ -388,7 +412,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.execute(query, columns);
     } catch (RuntimeException e) {
@@ -412,7 +439,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     long startTime = _timeProbe.start();
-    
+
+    if (_stmt == null)
+      throw new SQLException(L.l("statement `{0}' appears to be closed", this));
+
     try {
       return _stmt.executeBatch();
     } catch (RuntimeException e) {
