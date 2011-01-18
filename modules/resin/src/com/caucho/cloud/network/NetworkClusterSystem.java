@@ -43,13 +43,13 @@ import com.caucho.util.L10N;
  * NetworkClusterService manages the cluster network code, the communication
  * between Resin servers in a cluster. 
  */
-public class NetworkClusterService extends AbstractResinService
+public class NetworkClusterSystem extends AbstractResinService
 {
   public static final int START_PRIORITY = SocketPollService.START_PRIORITY + 1;
 
-  private static final L10N L = new L10N(NetworkClusterService.class);
+  private static final L10N L = new L10N(NetworkClusterSystem.class);
   private static final Logger log = 
-    Logger.getLogger(NetworkClusterService.class.getName());
+    Logger.getLogger(NetworkClusterSystem.class.getName());
   
   private final CloudServer _selfServer;
   
@@ -61,7 +61,7 @@ public class NetworkClusterService extends AbstractResinService
   private CopyOnWriteArrayList<ClusterLinkListener> _linkListeners
   = new CopyOnWriteArrayList<ClusterLinkListener>();
 
-  private NetworkClusterService(CloudServer selfServer)
+  private NetworkClusterSystem(CloudServer selfServer)
   {
     _selfServer = selfServer;
     
@@ -76,13 +76,13 @@ public class NetworkClusterService extends AbstractResinService
   /**
    * Creates a new network cluster service.
    */
-  public static NetworkClusterService
+  public static NetworkClusterSystem
       createAndAddService(CloudServer selfServer)
   {
-    ResinSystem system = preCreate(NetworkClusterService.class);
+    ResinSystem system = preCreate(NetworkClusterSystem.class);
 
-    NetworkClusterService service = new NetworkClusterService(selfServer);
-    system.addService(NetworkClusterService.class, service);
+    NetworkClusterSystem service = new NetworkClusterSystem(selfServer);
+    system.addService(NetworkClusterSystem.class, service);
 
     return service;
   }
@@ -90,9 +90,9 @@ public class NetworkClusterService extends AbstractResinService
   /**
    * Returns the current network service.
    */
-  public static NetworkClusterService getCurrent()
+  public static NetworkClusterSystem getCurrent()
   {
-    return ResinSystem.getCurrentService(NetworkClusterService.class);
+    return ResinSystem.getCurrentService(NetworkClusterSystem.class);
   }
   
   /**
@@ -100,11 +100,11 @@ public class NetworkClusterService extends AbstractResinService
    */
   public static CloudServer getCurrentSelfServer()
   {
-    NetworkClusterService clusterService = getCurrent();
+    NetworkClusterSystem clusterService = getCurrent();
     
     if (clusterService == null)
       throw new IllegalStateException(L.l("{0} is not available in this context",
-                                          NetworkClusterService.class.getSimpleName()));
+                                          NetworkClusterSystem.class.getSimpleName()));
     
     return clusterService.getSelfServer();
   }
@@ -229,6 +229,42 @@ public class NetworkClusterService extends AbstractResinService
             if (pool != null)
               pool.start();
           }
+        }
+      }
+    }
+    
+    validateTriad(_selfServer.getPod());
+  }
+  
+  private void validateTriad(CloudPod pod)
+  {
+    CloudServer []servers = pod.getServerList();
+    
+    if (servers.length == 0)
+      return;
+    
+    String address = servers[0].getAddress();
+    boolean isMultipleAddress = false;
+    
+    for (int i = 0; i < servers.length; i++) {
+      if (! address.equals(servers[i].getAddress()))
+        isMultipleAddress = true;
+    }
+    
+    if (! isMultipleAddress)
+      return;
+    
+    int triadMax = Math.min(servers.length, 3);
+    
+    for (int i = 0; i < triadMax; i++) {
+      for (int j = i + 1; j < triadMax; j++) {
+        CloudServer serverA = servers[i];
+        CloudServer serverB = servers[j];
+        
+        if (serverA.getAddress().equals(serverB.getAddress())) {
+          log.warning(L.l("Triad servers should be on separate machines for better reliability.\n{0}\n{1}",
+                          serverA, serverB));
+          return;
         }
       }
     }

@@ -578,6 +578,14 @@ public class TcpSocketLinkListener
   {
     _isEnableJni = isEnableJni;
   }
+  
+  public boolean isJniEnabled()
+  {
+    if (_serverSocket != null)
+      return _serverSocket.isJni();
+    else
+      return false;
+  }
 
   private Throttle createThrottle()
   {
@@ -1109,10 +1117,15 @@ public class TcpSocketLinkListener
     }
   }
 
+  public boolean isEnabled()
+  {
+    return _lifecycle.isActive();
+  }
+  
   /**
    * Starts the port listening for new connections.
    */
-  void enable()
+  public void enable()
   {
     if (_lifecycle.toActive()) {
       if (_serverSocket != null) {
@@ -1124,7 +1137,7 @@ public class TcpSocketLinkListener
   /**
    * Stops the port from listening for new connections.
    */
-  void disable()
+  public void disable()
   {
     if (_lifecycle.toStop()) {
       if (_serverSocket != null)

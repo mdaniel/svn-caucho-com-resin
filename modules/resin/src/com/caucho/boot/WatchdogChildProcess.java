@@ -118,6 +118,11 @@ class WatchdogChildProcess
     else
       return null;
   }
+  
+  public int getStatus()
+  {
+    return _status;
+  }
 
   public void run()
   {

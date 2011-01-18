@@ -32,7 +32,7 @@ package com.caucho.cloud.hmtp;
 import com.caucho.bam.Message;
 import com.caucho.bam.broker.Broker;
 import com.caucho.cloud.network.ClusterServer;
-import com.caucho.cloud.network.NetworkClusterService;
+import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.hemp.servlet.ClientStubManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.hemp.servlet.ServerLinkActor;
@@ -42,7 +42,7 @@ import com.caucho.hemp.servlet.ServerLinkActor;
  */
 class HmtpLinkActor extends ServerLinkActor {
   private Object _linkClosePayload;
-  private NetworkClusterService _clusterService;
+  private NetworkClusterSystem _clusterService;
   
   public HmtpLinkActor(Broker toLinkBroker,
                        ClientStubManager clientManager,
@@ -56,7 +56,7 @@ class HmtpLinkActor extends ServerLinkActor {
   {
     super.onClose();
 
-    NetworkClusterService clusterService = _clusterService;
+    NetworkClusterSystem clusterService = _clusterService;
     _clusterService = null;
     
     Object linkClosePayload = _linkClosePayload;
@@ -113,7 +113,7 @@ class HmtpLinkActor extends ServerLinkActor {
                               String from,
                               HmtpLinkRegisterMessage registerMessage)
   {
-    NetworkClusterService clusterService = NetworkClusterService.getCurrent();
+    NetworkClusterSystem clusterService = NetworkClusterSystem.getCurrent();
     
     if (clusterService == null)
       throw new IllegalStateException(getClass().getSimpleName());

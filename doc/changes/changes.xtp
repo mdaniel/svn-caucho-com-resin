@@ -13,6 +13,12 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>watchdog: on configuration error, delay Resin restart by 30s (#4202, rep by norlab)</li>
+<li>load-balance: bind-ports-after-start and disable should cause failover during startup (#4129, rep by Wesley Wu)</li>
+<li>date: setMonth(1) when setDay(31) previously was setting to march (#4094, rep by nam)</li>
+<li>admin: add isJniEnabled() property to the Port MBean (#4088, rep by skippopotamus)</li>
+<li>servlet: allow cookies with space values (#3897, rep by ykim)</li>
+<li>cluster: triad warning when triad servers are on same machine (#4177)</li>
 <li>webapp: web-app deployment with invalid root-directory needs warning (#4207)</li>
 <li>database: logging adds ".d0", ".d1" to show round-robin (#4222, rep by Anthony Balandran)</li>
 <li>init.d: change init.d/resin to log startup to /var/log/resin/console.log (#4223, rep by Raul Luna)</li>

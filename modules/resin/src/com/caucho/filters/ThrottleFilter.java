@@ -39,6 +39,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -52,6 +54,9 @@ public class ThrottleFilter implements Filter {
   private IntMap _throttleCache = new IntMap();
 
   private int _maxConcurrentRequests = 2;
+  
+  private int _maxTotalRequests = -1;
+  private Semaphore _requestSemaphore;
 
   /**
    * Sets the maximum number of concurrent requests for a single IP.
@@ -60,12 +65,20 @@ public class ThrottleFilter implements Filter {
   {
     _maxConcurrentRequests = max;
   }
+  
+  public void setMaxTotalRequests(int max)
+  {
+    _maxTotalRequests = max;
+  }
 
   public void init(FilterConfig config)
     throws ServletException
   {
+    if (_maxTotalRequests > 0)
+      _requestSemaphore = new Semaphore(_maxTotalRequests);
   }
 
+  @Override
   public void doFilter(ServletRequest request, ServletResponse response,
                        FilterChain nextFilter)
     throws ServletException, IOException
@@ -96,6 +109,17 @@ public class ThrottleFilter implements Filter {
       return;
     }
 
+    if (_requestSemaphore != null) {
+      try {
+        _requestSemaphore.tryAcquire(120, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        if (response instanceof HttpServletResponse)
+          ((HttpServletResponse) response).sendError(503);
+        
+        return;
+      }
+    }
+    
     try {
       nextFilter.doFilter(request, response);
     } finally {
@@ -106,6 +130,10 @@ public class ThrottleFilter implements Filter {
           _throttleCache.remove(ip);
         else
           _throttleCache.put(ip, count - 1);
+      }
+      
+      if (_requestSemaphore != null) {
+        _requestSemaphore.release();
       }
     }
   }

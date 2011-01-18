@@ -33,7 +33,7 @@ package com.caucho.env.deploy;
 import java.util.*;
 import java.util.concurrent.*;
 
-import com.caucho.cloud.network.NetworkClusterService;
+import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.env.service.*;
 import com.caucho.inject.Module;
 
@@ -45,7 +45,7 @@ import com.caucho.inject.Module;
 public class DeployControllerService extends AbstractResinService
 {
   public static final int START_PRIORITY =
-      NetworkClusterService.START_PRIORITY_CLUSTER_SERVICE;
+      NetworkClusterSystem.START_PRIORITY_CLUSTER_SERVICE;
 
   private final ConcurrentHashMap<String,DeployTagItem> _deployMap
     = new ConcurrentHashMap<String,DeployTagItem>();

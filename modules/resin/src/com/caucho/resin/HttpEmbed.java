@@ -29,7 +29,7 @@
 
 package com.caucho.resin;
 
-import com.caucho.cloud.network.NetworkListenService;
+import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.network.listen.TcpSocketLinkListener;
@@ -99,8 +99,8 @@ public class HttpEmbed extends PortEmbed
       _port.init();
       
       ResinSystem system = server.getResinSystem();
-      NetworkListenService listenService 
-        = system.getService(NetworkListenService.class);
+      NetworkListenSystem listenService 
+        = system.getService(NetworkListenSystem.class);
       
       listenService.addListener(_port);
       

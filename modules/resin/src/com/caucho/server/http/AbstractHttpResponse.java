@@ -843,7 +843,19 @@ abstract public class AbstractHttpResponse {
     }
     else {
       cb.append("=");
-      cb.append(cookie.getValue());
+      String v = cookie.getValue();
+      int len = v.length();
+      
+      for (int i = 0; i < len; i++) {
+        char ch = v.charAt(i);
+        
+        if (ch == ' ') {
+          // server/010y, #3897
+          return fillCookie(cb, cookie, date, version, true);
+        }
+        
+        cb.append(ch);
+      }
     }
 
     String domain = cookie.getDomain();

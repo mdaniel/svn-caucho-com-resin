@@ -32,8 +32,8 @@ package com.caucho.server.cluster;
 import javax.annotation.PostConstruct;
 
 import com.caucho.cloud.network.ClusterServer;
-import com.caucho.cloud.network.NetworkClusterService;
-import com.caucho.cloud.network.NetworkListenService;
+import com.caucho.cloud.network.NetworkClusterSystem;
+import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -104,7 +104,7 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
     
     _resin = servletContainer.getResin();
     
-    _selfServer = NetworkClusterService.getCurrentSelfServer();
+    _selfServer = NetworkClusterSystem.getCurrentSelfServer();
     
     Config.setProperty("server", new ServerVar(_selfServer), getClassLoader());
     Config.setProperty("cluster", new ClusterVar(), getClassLoader());
@@ -758,8 +758,8 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
     private TcpSocketLinkListener getFirstPort(String protocol, boolean isSSL)
     {
       ResinSystem resinSystem = getResinSystem();
-      NetworkListenService listenService 
-        = resinSystem.getService(NetworkListenService.class);
+      NetworkListenSystem listenService 
+        = resinSystem.getService(NetworkListenSystem.class);
       
       for (TcpSocketLinkListener port : listenService.getListeners()) {
         if (protocol.equals(port.getProtocolName()) && (port.isSSL() == isSSL))

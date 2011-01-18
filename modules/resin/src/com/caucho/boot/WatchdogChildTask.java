@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.service.ResinSystem;
+import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
 
@@ -49,6 +50,8 @@ class WatchdogChildTask implements Runnable
 {
   private static final Logger log
     = Logger.getLogger(WatchdogChildTask.class.getName());
+  
+  private static final long BAD_CONFIG_DELAY_TIME = 30 * 1000L;
 
   private final ResinSystem _system;
   private final WatchdogChild _watchdog;
@@ -168,23 +171,34 @@ class WatchdogChildTask implements Runnable
     
       while (_lifecycle.isActive() && i++ < retry) {
         String id = String.valueOf(i);
+        WatchdogChildProcess process;
 
         _watchdog.notifyTaskStarted();
 
         log.info(_watchdog + " starting");
 
-        _process = new WatchdogChildProcess(id, _system, _watchdog);
+        process = new WatchdogChildProcess(id, _system, _watchdog);
+        _process = process;
 
         try {
           _process.run();
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         } finally {
-          WatchdogChildProcess process = _process;
           _process = null;
 
           if (process != null)
             process.kill();
+        }
+        
+        if (_lifecycle.isActive()
+            && process.getStatus() == ExitCode.BAD_CONFIG.ordinal()) {
+          // pause before restarting a bad result
+          try {
+            Thread.sleep(BAD_CONFIG_DELAY_TIME);
+          } catch (Exception e) {
+            
+          }
         }
       }
 

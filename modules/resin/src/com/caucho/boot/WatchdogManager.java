@@ -39,7 +39,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.admin.RemoteAdminService;
-import com.caucho.cloud.network.NetworkListenService;
+import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudSystem;
@@ -218,8 +218,8 @@ class WatchdogManager implements AlarmListener {
     thread.setContextClassLoader(_server.getClassLoader());
     
     
-    NetworkListenService listenService 
-      = _system.getService(NetworkListenService.class);
+    NetworkListenSystem listenService 
+      = _system.getService(NetworkListenSystem.class);
     
     _httpPort = new TcpSocketLinkListener();
     _httpPort.setProtocol(new HttpProtocol());

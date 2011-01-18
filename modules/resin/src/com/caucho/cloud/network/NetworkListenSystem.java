@@ -39,15 +39,15 @@ import com.caucho.network.listen.*;
 import com.caucho.util.*;
 import com.caucho.vfs.QServerSocket;
 
-public class NetworkListenService extends AbstractResinService 
+public class NetworkListenSystem extends AbstractResinService 
   implements AlarmListener
 {
   public static final int START_PRIORITY_AT_BEGIN = 50;
   public static final int START_PRIORITY_AT_END = 90;
 
-  private static final L10N L = new L10N(NetworkListenService.class);
+  private static final L10N L = new L10N(NetworkListenSystem.class);
   private static final Logger log
-    = Logger.getLogger(NetworkListenService.class.getName());
+    = Logger.getLogger(NetworkListenSystem.class.getName());
   
   private static final long ALARM_TIMEOUT = 120 * 1000L;
   
@@ -62,11 +62,11 @@ public class NetworkListenService extends AbstractResinService
   
   private Alarm _alarm;
   
-  private NetworkListenService(CloudServer cloudServer)
+  private NetworkListenSystem(CloudServer cloudServer)
   {
     _cloudServer = cloudServer;
     
-    NetworkClusterService clusterService = NetworkClusterService.getCurrent();
+    NetworkClusterSystem clusterService = NetworkClusterSystem.getCurrent();
     
     if (clusterService != null)
       _clusterListener = clusterService.getClusterListener();
@@ -79,20 +79,20 @@ public class NetworkListenService extends AbstractResinService
     configure(_cloudServer, config);
   }
   
-  public static NetworkListenService 
+  public static NetworkListenSystem 
     createAndAddService(CloudServer cloudServer)
   {
-    ResinSystem system = preCreate(NetworkListenService.class);
+    ResinSystem system = preCreate(NetworkListenSystem.class);
     
-    NetworkListenService service = new NetworkListenService(cloudServer);
-    system.addService(NetworkListenService.class, service);
+    NetworkListenSystem service = new NetworkListenSystem(cloudServer);
+    system.addService(NetworkListenSystem.class, service);
     
     return service;
   }
   
-  public static NetworkListenService getCurrent()
+  public static NetworkListenSystem getCurrent()
   {
-    return ResinSystem.getCurrentService(NetworkListenService.class);
+    return ResinSystem.getCurrentService(NetworkListenSystem.class);
   }
   
   /**

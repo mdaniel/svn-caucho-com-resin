@@ -80,7 +80,7 @@ public class SocketLinkAdmin extends AbstractManagedObject
   {
     return _port.isSSL();
   }
-
+  
   //
   // Config
   //
@@ -173,6 +173,12 @@ public class SocketLinkAdmin extends AbstractManagedObject
   public int getThreadStartCount()
   {
     return _port.getStartThreadCount();
+  }
+  
+  @Override
+  public boolean isJniEnabled()
+  {
+    return _port.isJniEnabled();
   }
 
   @Override

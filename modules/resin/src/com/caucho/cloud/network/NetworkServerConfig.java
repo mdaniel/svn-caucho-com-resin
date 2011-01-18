@@ -40,19 +40,19 @@ import com.caucho.server.cluster.ProtocolPortConfig;
 import com.caucho.server.http.HttpProtocol;
 
 public class NetworkServerConfig {
-  private NetworkListenService _listenService;
+  private NetworkListenSystem _listenService;
   
   private ContainerProgram _listenerDefaults = new ContainerProgram();
 
   /**
    * Creates a new servlet server.
    */
-  NetworkServerConfig(NetworkListenService listenService)
+  NetworkServerConfig(NetworkListenSystem listenService)
   {
     _listenService = listenService;
   }
   
-  private NetworkListenService getListenService()
+  private NetworkListenSystem getListenService()
   {
     return _listenService;
   }

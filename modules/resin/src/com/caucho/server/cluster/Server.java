@@ -46,7 +46,7 @@ import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.NullActorStream;
 import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.network.ClusterServer;
-import com.caucho.cloud.network.NetworkClusterService;
+import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.config.ConfigException;
@@ -117,7 +117,7 @@ public class Server
 
   private final Resin _resin;
   private final ResinSystem _resinSystem;
-  private final NetworkClusterService _clusterService;
+  private final NetworkClusterSystem _clusterService;
   private final ClusterServer _selfServer;
 
   private Throwable _configException;
@@ -179,7 +179,7 @@ public class Server
    */
   public Server(Resin resin,
                 ResinSystem resinSystem,
-                NetworkClusterService clusterService)
+                NetworkClusterSystem clusterService)
   {
     if (resin == null)
       throw new NullPointerException();

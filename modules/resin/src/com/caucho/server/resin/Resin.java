@@ -50,8 +50,8 @@ import com.caucho.cloud.bam.BamService;
 import com.caucho.cloud.loadbalance.LoadBalanceFactory;
 import com.caucho.cloud.loadbalance.LoadBalanceService;
 import com.caucho.cloud.network.ClusterServer;
-import com.caucho.cloud.network.NetworkClusterService;
-import com.caucho.cloud.network.NetworkListenService;
+import com.caucho.cloud.network.NetworkClusterSystem;
+import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.CloudSystem;
@@ -875,8 +875,8 @@ public class Resin
 
       _servletContainer = createServer();
       
-      NetworkListenService listenService 
-        = _resinSystem.getService(NetworkListenService.class);
+      NetworkListenSystem listenService 
+        = _resinSystem.getService(NetworkListenSystem.class);
 
       if (_args != null) {
         for (BoundPort port : _args.getBoundPortList()) {
@@ -1156,8 +1156,8 @@ public class Resin
     
     _selfServer = bootServer.getCloudServer();
     
-    NetworkClusterService networkService = 
-      NetworkClusterService.createAndAddService(_selfServer);
+    NetworkClusterSystem networkService = 
+      NetworkClusterSystem.createAndAddService(_selfServer);
     
     ClusterServer server = _selfServer.getData(ClusterServer.class);
     
@@ -1174,7 +1174,7 @@ public class Resin
     if (_args != null && _args.getStage() != null)
       _servletContainer.setStage(_args.getStage());
     
-    NetworkListenService.createAndAddService(_selfServer);
+    NetworkListenSystem.createAndAddService(_selfServer);
     
     ServletService.createAndAddService(_servletContainer);
     
@@ -1207,7 +1207,7 @@ public class Resin
     return new LoadBalanceFactory();
   }
   
-  protected Server createServer(NetworkClusterService clusterService)
+  protected Server createServer(NetworkClusterSystem clusterService)
   {
     return new Server(this, _resinSystem, clusterService);
   }

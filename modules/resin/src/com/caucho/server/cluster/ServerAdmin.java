@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 
-import com.caucho.cloud.network.NetworkListenService;
+import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.env.meter.MeterService;
 import com.caucho.env.meter.TotalMeter;
 import com.caucho.env.service.ResinSystem;
@@ -173,8 +173,8 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     
     ResinSystem resinSystem = _server.getResinSystem();
-    NetworkListenService listenService 
-      = resinSystem.getService(NetworkListenService.class);
+    NetworkListenSystem listenService 
+      = resinSystem.getService(NetworkListenSystem.class);
     
     return listenService.isBindPortsAfterStart();
   }
@@ -526,14 +526,14 @@ public class ServerAdmin extends AbstractEmitterObject
   
   private Collection<TcpSocketLinkListener> getNetworkListeners()
   {
-    NetworkListenService listenService
-    = _server.getResinSystem().getService(NetworkListenService.class);
+    NetworkListenSystem listenService
+    = _server.getResinSystem().getService(NetworkListenSystem.class);
   
     return listenService.getListeners();
   }
   
-  private NetworkListenService getListenService()
+  private NetworkListenSystem getListenService()
   {
-    return _server.getResinSystem().getService(NetworkListenService.class);
+    return _server.getResinSystem().getService(NetworkListenSystem.class);
   }
 }

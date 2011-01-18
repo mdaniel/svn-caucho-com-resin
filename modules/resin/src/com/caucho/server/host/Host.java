@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
-import com.caucho.cloud.network.NetworkListenService;
+import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -308,8 +308,8 @@ public class Host
         return "http://localhost";
       
       ResinSystem resinSystem = server.getResinSystem();
-      NetworkListenService listenService 
-        = resinSystem.getService(NetworkListenService.class);
+      NetworkListenSystem listenService 
+        = resinSystem.getService(NetworkListenSystem.class);
 
       for (TcpSocketLinkListener port : listenService.getListeners()) {
         if ("http".equals(port.getProtocolName())) {

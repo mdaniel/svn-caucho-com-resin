@@ -91,6 +91,12 @@ public interface PortMXBean extends ManagedObjectMXBean {
    */
   @Description("The configured maximum number of current connections")
   public int getConnectionMax();
+  
+  /**
+   * Returns true if JNI is enabled
+   */
+  @Description("True if JNI is enabled for this port")
+  public boolean isJniEnabled();
 
   /**
    * Returns the maximum number keepalive connections allowed for the port.

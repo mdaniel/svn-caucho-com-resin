@@ -63,7 +63,7 @@ public final class ClusterServer {
 
   private static final int DECODE[];
 
-  private final NetworkClusterService _clusterService;
+  private final NetworkClusterSystem _clusterService;
   private final CloudServer _cloudServer;
 
   private boolean _isDynamic;
@@ -115,7 +115,7 @@ public final class ClusterServer {
 
   private ClusterServerAdmin _admin = new ClusterServerAdmin(this);
 
-  ClusterServer(NetworkClusterService networkService,
+  ClusterServer(NetworkClusterSystem networkService,
                 CloudServer cloudServer)
   {
     _clusterService = networkService;

@@ -394,6 +394,10 @@ public class QDate {
   public void setMonth(int month)
   {
     _month = month;
+    
+    if (DAYS_IN_MONTH[month] <= _dayOfMonth)
+      _dayOfMonth = DAYS_IN_MONTH[month] - 1;
+    
     calculateJoin();
     calculateSplit(_localTimeOfEpoch);
   }
