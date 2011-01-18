@@ -160,6 +160,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   // XXX: changed for JSF
   private boolean _ignoreSerializationErrors = true;
   private boolean _isHessianSerialization = true;
+  private boolean _isSerializeCollectionType = true;
 
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionListener> _listeners;
@@ -514,6 +515,11 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     else
       throw new ConfigException(L.l("'{0}' is an unknown valud for serialization-type.  The valid types are 'hessian' and 'java'.",
                                     type));
+  }
+  
+  public void setSerializeCollectionType(boolean isEnable)
+  {
+    _isSerializeCollectionType = isEnable;
   }
 
   /**
@@ -1112,8 +1118,15 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public SessionSerializer createSessionSerializer(OutputStream os)
     throws IOException
   {
-    if (_isHessianSerialization)
-      return new HessianSessionSerializer(os, getClassLoader());
+    if (_isHessianSerialization) {
+      HessianSessionSerializer ser;
+      
+      ser = new HessianSessionSerializer(os, getClassLoader());
+      
+      ser.setSerializeCollectionType(_isSerializeCollectionType);
+      
+      return ser;
+    }
     else
       return new JavaSessionSerializer(os, getClassLoader());
   }

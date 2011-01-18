@@ -993,6 +993,9 @@ r_session-config = element session-config {
   & (attribute serialization-type { string }
      | element serialization-type { string })?
 
+  & (attribute serialize-collection-type { r_boolean-Type }
+     | element serialize-collection-type { r_boolean-Type })?
+
   & (attribute session-max { r_int }
      | element session-max { r_int })?
 

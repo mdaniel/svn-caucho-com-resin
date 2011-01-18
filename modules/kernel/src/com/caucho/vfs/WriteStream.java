@@ -1188,7 +1188,7 @@ public class WriteStream extends OutputStreamWithBuffer
    */
   public void setDisableClose(boolean disableClose)
   {
-    this._disableClose = disableClose;
+    _disableClose = disableClose;
   }
 
   public boolean getDisableClose()

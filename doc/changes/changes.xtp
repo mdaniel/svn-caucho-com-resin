@@ -13,6 +13,7 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>session: add serialization-collection-type to allow disabling of Hibernate collection serialization (#4211, rep by Matthew Schmidt)</li>
 <li>watchdog: on configuration error, delay Resin restart by 30s (#4202, rep by norlab)</li>
 <li>load-balance: bind-ports-after-start and disable should cause failover during startup (#4129, rep by Wesley Wu)</li>
 <li>date: setMonth(1) when setDay(31) previously was setting to march (#4094, rep by nam)</li>

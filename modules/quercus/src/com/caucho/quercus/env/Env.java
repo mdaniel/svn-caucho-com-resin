@@ -3450,9 +3450,10 @@ public class Env
       _const = newConst;
     }
 
-    if (_const[id] != null)
+    if (_const[id] != null) {
       return notice(L.l("cannot redefine constant {0}",
                         _quercus.getConstantName(id)));
+    }
 
     _const[id] = value;
 

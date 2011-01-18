@@ -28,6 +28,7 @@
 
 package com.caucho.filters;
 
+import com.caucho.config.types.Period;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
@@ -56,6 +57,7 @@ public class ThrottleFilter implements Filter {
   private int _maxConcurrentRequests = 2;
   
   private int _maxTotalRequests = -1;
+  private long _timeout = 120 * 1000L;
   private Semaphore _requestSemaphore;
 
   /**
@@ -69,6 +71,11 @@ public class ThrottleFilter implements Filter {
   public void setMaxTotalRequests(int max)
   {
     _maxTotalRequests = max;
+  }
+  
+  public void setTimeout(Period period)
+  {
+    _timeout = period.getPeriod();
   }
 
   public void init(FilterConfig config)
@@ -110,12 +117,18 @@ public class ThrottleFilter implements Filter {
     }
 
     if (_requestSemaphore != null) {
+      boolean isAcquire = false;
+      
       try {
-        _requestSemaphore.tryAcquire(120, TimeUnit.SECONDS);
+        if (_requestSemaphore.tryAcquire(_timeout, TimeUnit.MILLISECONDS))
+          isAcquire = true;
       } catch (InterruptedException e) {
+      }
+      
+      if (! isAcquire) {
         if (response instanceof HttpServletResponse)
           ((HttpServletResponse) response).sendError(503);
-        
+      
         return;
       }
     }

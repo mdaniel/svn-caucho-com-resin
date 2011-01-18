@@ -62,19 +62,27 @@ public class HessianSessionSerializer extends SessionSerializer {
     _out = new Hessian2Output(os);
     _out.setSerializerFactory(new SerializerFactory(loader));
   }
+
+  public void setSerializeCollectionType(boolean isEnable)
+  {
+    _out.getSerializerFactory().setSendCollectionType(isEnable);
+  }
   
+  @Override
   public void writeInt(int v)
     throws IOException
   {
     _out.writeInt(v);
   }
 
+  @Override
   public void writeObject(Object v)
     throws IOException
   {
     _out.writeObject(v);
   }
 
+  @Override
   public void close()
   {
     Hessian2Output out = _out;
