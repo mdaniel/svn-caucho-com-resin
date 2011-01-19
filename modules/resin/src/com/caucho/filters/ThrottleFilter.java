@@ -58,6 +58,7 @@ public class ThrottleFilter implements Filter {
   
   private int _maxTotalRequests = -1;
   private long _timeout = 120 * 1000L;
+  private long _requestDelay = 0;
   private Semaphore _requestSemaphore;
 
   /**
@@ -76,6 +77,11 @@ public class ThrottleFilter implements Filter {
   public void setTimeout(Period period)
   {
     _timeout = period.getPeriod();
+  }
+  
+  public void setDelay(Period period)
+  {
+    _requestDelay = period.getPeriod();
   }
 
   public void init(FilterConfig config)
@@ -135,6 +141,13 @@ public class ThrottleFilter implements Filter {
     
     try {
       nextFilter.doFilter(request, response);
+      
+      if (_requestDelay > 0) {
+        try {
+          Thread.sleep(_requestDelay);
+        } catch (Exception e) {
+        }
+      }
     } finally {
       synchronized (this) {
         int count = _throttleCache.get(ip);
