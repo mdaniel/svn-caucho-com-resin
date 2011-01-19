@@ -28,9 +28,11 @@
 package com.caucho.config.xml;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +55,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.attribute.Attribute;
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.NodeBuilderChildProgram;
 import com.caucho.config.type.ConfigType;
@@ -595,6 +598,28 @@ public class XmlConfigContext {
 
     if (childNew != null)
       childBean = createNew(type, parent, childNew);
+    else if (type.isQualifier()) {
+      // ioc/04f8
+      Object qualifier = type.create(parent, qName);
+
+      ConfigType<?> qualifierType = TypeFactory.getType(qualifier);
+
+      qualifier = configureChildBean(qualifier, qualifierType,
+                                     childNode, attrStrategy);
+      
+      InjectManager cdiManager = InjectManager.getCurrent();
+      
+      Class<?> attrType = attrStrategy.getConfigType().getType();
+      
+      Set<Bean<?>> beans
+        = cdiManager.getBeans(attrType, (Annotation) qualifier);
+      
+      Bean<?> bean = cdiManager.resolve(beans);
+      
+      CreationalContext cxt = null;
+      
+      childBean = cdiManager.getReference(bean, attrType, cxt); 
+    }
     else
       childBean = type.create(parent, qName);
 

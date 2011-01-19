@@ -34,6 +34,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Qualifier;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.annotation.NonEL;
 import com.caucho.config.attribute.AnnotationAttribute;
@@ -98,6 +100,11 @@ public class AnnotationInterfaceType<T> extends ConfigType<T>
     return _annClass;
   }
 
+  @Override
+  public boolean isQualifier()
+  {
+    return _annClass.isAnnotationPresent(Qualifier.class);
+  }
   /**
    * Creates a new instance of the type.
    */

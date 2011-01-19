@@ -271,6 +271,9 @@ r_jsse-ssl = element jsse-ssl {
   & (attribute cipher-suites { string }
      | element cipher-suites { r_string-Group })?
 
+  & (attribute cipher-suites-forbidden { string }
+     | element cipher-suites-forbidden { r_string-Group })?
+
   & (attribute key-store-file { string }
      | element key-store-file { r_string-Group })?
 

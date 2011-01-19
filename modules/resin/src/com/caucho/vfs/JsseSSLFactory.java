@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.logging.*;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -66,6 +67,7 @@ public class JsseSSLFactory implements SSLFactory {
   private String _keyManagerFactory = "SunX509";
   private String _sslContext = "TLS";
   private String []_cipherSuites;
+  private String []_cipherSuitesForbidden;
   private String []_protocols;
 
   private String _selfSignedName;
@@ -85,6 +87,14 @@ public class JsseSSLFactory implements SSLFactory {
   public void setCipherSuites(String []ciphers)
   {
     _cipherSuites = ciphers;
+  }
+
+  /**
+   * Sets the enabled cipher suites
+   */
+  public void setCipherSuitesForbidden(String []ciphers)
+  {
+    _cipherSuitesForbidden = ciphers;
   }
 
   /**
@@ -283,9 +293,29 @@ public class JsseSSLFactory implements SSLFactory {
       serverSocket = factory.createServerSocket(port, listen, host);
 
     SSLServerSocket sslServerSocket = (SSLServerSocket) serverSocket;
-
+    
     if (_cipherSuites != null) {
       sslServerSocket.setEnabledCipherSuites(_cipherSuites);
+    }
+    
+    if (_cipherSuitesForbidden != null) {
+      String []cipherSuites = sslServerSocket.getEnabledCipherSuites();
+      
+      if (cipherSuites == null)
+        cipherSuites = sslServerSocket.getSupportedCipherSuites();
+      
+      ArrayList<String> cipherList = new ArrayList<String>();
+      
+      for (String cipher : cipherSuites) {
+        if (! isCipherForbidden(cipher, _cipherSuitesForbidden)) {
+          cipherList.add(cipher);
+        }
+      }
+      
+      cipherSuites = new String[cipherList.size()];
+      cipherList.toArray(cipherSuites);
+      
+      sslServerSocket.setEnabledCipherSuites(cipherSuites);
     }
 
     if (_protocols != null) {
@@ -294,8 +324,21 @@ public class JsseSSLFactory implements SSLFactory {
     
     if ("required".equals(_verifyClient))
       sslServerSocket.setNeedClientAuth(true);
+    else if ("optional".equals(_verifyClient))
+      sslServerSocket.setWantClientAuth(true);
 
     return new QServerSocketWrapper(serverSocket);
+  }
+  
+  private boolean isCipherForbidden(String cipher,
+                                    String []forbiddenList)
+  {
+    for (String forbidden : forbiddenList) {
+      if (cipher.equals(forbidden))
+        return true;
+    }
+    
+    return false;
   }
 
   private SSLServerSocketFactory createAnonymousFactory(InetAddress hostAddr,

@@ -1100,6 +1100,8 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("\");");
     }
 
+    // jsp/1e0k, #4007
+    /*
     if (encoding != null) {
       out.println("String _caucho_request_character_encoding = request.getCharacterEncoding();");
       out.println("if (_caucho_request_character_encoding == null || \"\".equals(_caucho_request_character_encoding))");
@@ -1107,6 +1109,7 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("request.setCharacterEncoding(\"" + encoding + "\");");
       out.popDepth();
     }
+    */
   }
 
   public int addString(String string)

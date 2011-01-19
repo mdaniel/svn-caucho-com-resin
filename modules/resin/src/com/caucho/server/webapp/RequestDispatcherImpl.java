@@ -284,7 +284,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     try {
       // server/1s30
-      thread.setContextClassLoader(_webApp.getClassLoader());
+      if (_webApp != null)
+        thread.setContextClassLoader(_webApp.getClassLoader());
       
       invocation.service(topRequest, topResponse);
 

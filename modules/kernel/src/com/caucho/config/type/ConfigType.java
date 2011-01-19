@@ -196,6 +196,14 @@ abstract public class ConfigType<T>
   {
     return false;
   }
+  
+  /**
+   * Returns true for a qualifier annotation
+   */
+  public boolean isQualifier()
+  {
+    return false;
+  }
 
   /**
    * Returns true for a program type.

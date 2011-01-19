@@ -13,6 +13,12 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>ssl: jsse-ssl add cipher-suites-forbidden (#3970, rep by Aaron Freeman)</li>
+<li>jsp: @page contentType should not affect request.getCharacterEncoding() (#4007, rep by Shinomiya Nobuaki)</li>
+<li>ssl: jsse-ssl add verify-client="optional" support (#4052, rep by adamknight)</li>
+<li>ear: ear deployment problems when war context-url is "/" (#4348, rep by koge_pan)</li>
+<li>security: allow FormLogin with selected authenticator (#4143)</li>
+<li>cdi: allow inline injection &lt;value>&lt;qa:MyQualifier>&lt;/value></li>
 <li>session: add serialization-collection-type to allow disabling of Hibernate collection serialization (#4211, rep by Matthew Schmidt)</li>
 <li>watchdog: on configuration error, delay Resin restart by 30s (#4202, rep by norlab)</li>
 <li>load-balance: bind-ports-after-start and disable should cause failover during startup (#4129, rep by Wesley Wu)</li>
