@@ -357,6 +357,30 @@ public class PersistenceManager
       thread.setContextClassLoader(oldLoader);
     }
   }
+  
+  public void close()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      // jpa/1630
+      thread.setContextClassLoader(_classLoader);
+
+      ArrayList<PersistenceUnitManager> pUnitList
+        = new ArrayList<PersistenceUnitManager>();
+      
+      synchronized (_persistenceUnitMap) {
+        pUnitList.addAll(_persistenceUnitMap.values());
+      }
+      
+      for (PersistenceUnitManager pUnit : pUnitList) {
+        pUnit.close();
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
 
   private void registerPersistenceUnit(PersistenceUnitManager pUnit)
   {
@@ -618,16 +642,7 @@ public class PersistenceManager
   @Override
   public void environmentStop(EnvironmentClassLoader loader)
   {
-  }
-
-  /**
-   * @param unitName
-   * @return
-   */
-  private EntityManagerFactory getEntityManagerFactory(String unitName)
-  {
-    // TODO Auto-generated method stub
-    return null;
+    close();
   }
 
   @Override

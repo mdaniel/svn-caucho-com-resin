@@ -604,7 +604,7 @@ public class FilePath extends FilesystemPath {
   /**
    * Returns the stream implementation for a random-access stream.
    */
-  public RandomAccessStream openRandomAccess() throws IOException
+  public RandomAccessStream openFileRandomAccess() throws IOException
   {
     if (_isWindows && isAux())
       throw new FileNotFoundException(_file.toString());

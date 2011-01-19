@@ -133,8 +133,9 @@ public class EntityManagerFactoryProxy
 
   private EntityManagerFactory getDelegate()
   {
-    if (_emfDelegate == null)
+    if (_emfDelegate == null) {
       _emfDelegate = _persistenceUnit.getEntityManagerFactoryDelegate();
+    }
 
     return _emfDelegate;
   }

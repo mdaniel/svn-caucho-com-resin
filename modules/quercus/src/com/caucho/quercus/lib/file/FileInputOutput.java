@@ -92,7 +92,7 @@ public class FileInputOutput extends AbstractBinaryOutput
     if (truncate)
       path.truncate(0L);
 
-    _stream = path.openRandomAccess();
+    _stream = path.openFileRandomAccess();
 
     if (append && _stream.getLength() > 0)
       _stream.seek(_stream.getLength());

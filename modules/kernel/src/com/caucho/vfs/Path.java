@@ -1215,6 +1215,14 @@ public abstract class Path {
    */
   public RandomAccessStream openRandomAccess() throws IOException
   {
+    return openFileRandomAccess();
+  }
+
+  /**
+   * Opens a random-access stream.
+   */
+  public RandomAccessStream openFileRandomAccess() throws IOException
+  {
     clearStatusCache();
 
     throw new UnsupportedOperationException(getClass().getName());
