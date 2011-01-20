@@ -29,45 +29,30 @@
 
 package com.caucho.config.gen;
 
-import java.io.IOException;
-
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
 
 /**
- * Represents a CDI local business method
+ * Represents a stateful local business method
  */
 @Module
-public class CandiHeadGenerator<X> extends MethodHeadGenerator<X>
-{
-  public CandiHeadGenerator(MethodHeadFactory<X> factory,
-                            AnnotatedMethod<? super X> method,
-                            AspectGenerator<X> next)
+public class CandiMethodHeadFactory<X> extends MethodHeadFactory<X> {
+  public CandiMethodHeadFactory(CandiAspectBeanFactory<X> beanFactory,
+                                AspectFactory<X> next)
   {
-    super(factory, method, next);
+    super(beanFactory, next);
   }
 
-  /**
-   * Generates code before the "try" block
-   * <code><pre>
-   * retType myMethod(...)
-   * {
-   *   [pre-try]
-   *   try {
-   *     ...
-   * }
-   * </pre></code>
-   */
   @Override
-  public void generatePreTry(JavaWriter out)
-    throws IOException
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
+                                   boolean isEnhanced)
   {
-    super.generatePreTry(out);
+    AspectGenerator<X> next = super.create(method, isEnhanced);
     
-    String beanClassName = getJavaClass().getName();
-
-    out.println(beanClassName + " bean = this;");
+    if (next != null)
+      return new CandiMethodHeadGenerator<X>(this, method, next);
+    else
+      return null;
   }
 }
