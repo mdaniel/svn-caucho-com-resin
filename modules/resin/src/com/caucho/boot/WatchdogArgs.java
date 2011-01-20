@@ -53,6 +53,7 @@ class WatchdogArgs
   private static final Logger log
     = Logger.getLogger(WatchdogArgs.class.getName());
 
+  private String []_rawArgv;
   private Path _javaHome;
   private Path _resinHome;
   private Path _rootDirectory;
@@ -84,6 +85,8 @@ class WatchdogArgs
     if (isTop)
       setLogLevel(logLevel);
 
+    _rawArgv = argv;
+    
     _resinHome = calculateResinHome();
     _rootDirectory = calculateResinRoot(_resinHome);
 
@@ -98,6 +101,11 @@ class WatchdogArgs
     parseCommandLine(_argv);
   }
 
+  String []getRawArgv()
+  {
+    return _argv;
+  }
+  
   Path getJavaHome()
   {
     return _javaHome;
@@ -211,6 +219,11 @@ class WatchdogArgs
   boolean isConsole()
   {
     return _startMode == StartMode.CONSOLE;
+  }
+
+  boolean isWatchdogConsole()
+  {
+    return _startMode == StartMode.WATCHDOG;
   }
   
   StartMode getStartMode()
@@ -431,6 +444,9 @@ class WatchdogArgs
         System.out.println(VersionFactory.getFullVersion());
         System.exit(0);
       }
+      else if ("watchdog".equals(arg)) {
+        _startMode = StartMode.WATCHDOG;
+      }
       else if (_startMode != null) {
         _tailArgs.add(arg);
       }
@@ -444,15 +460,17 @@ class WatchdogArgs
       }
     }
 
-    if (_isHelp && (_startMode == null
-      || _startMode == StartMode.CONSOLE
-      || _startMode == StartMode.STATUS
-      || _startMode == StartMode.START
-      || _startMode == StartMode.GUI
-      || _startMode == StartMode.STOP
-      || _startMode == StartMode.RESTART
-      || _startMode == StartMode.KILL
-      || _startMode == StartMode.SHUTDOWN)) {
+    if (_isHelp
+        && (_startMode == null
+            || _startMode == StartMode.CONSOLE
+            || _startMode == StartMode.STATUS
+            || _startMode == StartMode.START
+            || _startMode == StartMode.GUI
+            || _startMode == StartMode.STOP
+            || _startMode == StartMode.RESTART
+            || _startMode == StartMode.KILL
+            || _startMode == StartMode.SHUTDOWN
+            || _startMode == StartMode.WATCHDOG)) {
       usage();
       System.exit(1);
     }
@@ -809,5 +827,6 @@ class WatchdogArgs
     STOP,
     STOP_WEBAPP,
     UNDEPLOY,
+    WATCHDOG,
   };
 }

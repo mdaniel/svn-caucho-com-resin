@@ -44,18 +44,18 @@ import javax.annotation.*;
 /**
  * Configures the persistence for a level.
  */
-public class PersistenceManager
+public class AmberPersistenceManager
 {
-  private static final L10N L = new L10N(PersistenceManager.class);
+  private static final L10N L = new L10N(AmberPersistenceManager.class);
   protected static final Logger log
-    = Logger.getLogger(PersistenceManager.class.getName());
+    = Logger.getLogger(AmberPersistenceManager.class.getName());
 
   private AmberContainer _amberManager;
 
   /**
    * Create a persistence manager
    */
-  public PersistenceManager()
+  public AmberPersistenceManager()
     throws ConfigException
   {
     _amberManager = AmberContainer.create();

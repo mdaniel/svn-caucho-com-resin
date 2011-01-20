@@ -148,6 +148,7 @@ public class GzipStream extends OutputStream {
    * @param offset the offset into the byte array.
    * @param length the number of bytes to write.
    */
+  @Override
   public void write(byte []buf, int offset, int length)
     throws IOException
   {
@@ -161,8 +162,6 @@ public class GzipStream extends OutputStream {
     }
     else {
       if (_isGzip && _isFirst) {
-        _isFirst = false;
-
         writeHeader(os);
       }
 
@@ -235,9 +234,14 @@ public class GzipStream extends OutputStream {
   /**
    * Writes the header
    */
-  private static void writeHeader(OutputStream os)
+  private void writeHeader(OutputStream os)
     throws IOException
   {
+    if (! _isFirst)
+      return;
+    
+    _isFirst = false;
+    
     os.write(31);
     os.write(139);
 
@@ -288,6 +292,7 @@ public class GzipStream extends OutputStream {
   /**
    * Flushes the underlying stream.
    */
+  @Override
   public void flush()
     throws IOException
   {

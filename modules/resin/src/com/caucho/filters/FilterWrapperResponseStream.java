@@ -55,6 +55,7 @@ public class FilterWrapperResponseStream extends ToByteResponseStream {
    * @param offset start offset into the buffer
    * @param length length of the data in the buffer
    */
+  @Override
   protected void writeNext(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
@@ -67,12 +68,14 @@ public class FilterWrapperResponseStream extends ToByteResponseStream {
   /**
    * flushing
    */
+  @Override
   public void flush()
     throws IOException
   {
     flushBuffer();
 
     OutputStream os = getStream();
+
     if (os != null)
       os.flush();
   }

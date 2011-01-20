@@ -29,12 +29,13 @@
 
 package com.caucho.jsp;
 
-import com.caucho.server.http.AbstractResponseStream;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.jsp.JspWriter;
-import java.io.IOException;
-import java.util.logging.*;
+
+import com.caucho.server.http.AbstractResponseStream;
 
 /**
  * A buffered JSP writer encapsulating a Writer.
@@ -230,6 +231,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
   /**
    * Flushes the output stream.
    */
+  @Override
   public void flush() throws IOException
   {
     if (_isClosed) {
@@ -237,7 +239,9 @@ public class JspWriterAdapter extends AbstractBodyContent {
       closeError("flush()");
     }
 
-    _out.flushChar();
+    // jsp/01cm
+    // _out.flushChar();
+    _out.flush();
   }
 
   private void closeError(String op)

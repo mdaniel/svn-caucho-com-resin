@@ -2101,7 +2101,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
               listener.classLoaderDestroy(this);
             } catch (Throwable e) {
-              log().log(Level.WARNING, e.toString(), e);
+              log().log(Level.FINE, e.toString(), e);
             }
           }
         }
@@ -2116,7 +2116,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         try {
           loader.destroy();
         } catch (Throwable e) {
-          log().log(Level.WARNING, e.toString(), e);
+          log().log(Level.FINE, e.toString(), e);
         }
       }
     } finally {

@@ -1299,6 +1299,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
     SessionImpl session = _sessions.get(sessionId);
     
+    if (session != null && ! session.isValid())
+      session = null;
+    
     boolean isNew = false;
 
     if (session == null
@@ -1685,9 +1688,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
         SessionImpl session = _sessionList.get(i);
 
         try {
-          session.timeout();
-
           _sessions.remove(session.getId());
+          
+          session.timeout();
         } catch (Throwable e) {
           log.log(Level.FINE, e.toString(), e);
         }

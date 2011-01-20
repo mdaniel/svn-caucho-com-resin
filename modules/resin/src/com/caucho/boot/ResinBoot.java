@@ -307,6 +307,9 @@ public class ResinBoot {
     else if (_args.isConsole()) {
       return _client.startConsole() != 0;
     }
+    else if (_args.isWatchdogConsole()) {
+      WatchdogManager.main(_args.getRawArgv());
+    }
     else if (_args.isGui()) {
       if (_ui != null && _ui.isVisible())
         return true;

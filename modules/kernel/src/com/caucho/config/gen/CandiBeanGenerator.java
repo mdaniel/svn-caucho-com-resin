@@ -122,6 +122,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     introspectClass(_beanClass);
     
     AspectFactory<X> aspectHeadFactory = _aspectFactory.getHeadAspectFactory();
+    ArrayList<AnnotatedMethod<?>> unenhancedMethods
+      = new ArrayList<AnnotatedMethod<?>>();
 
     for (AnnotatedMethod<? super X> method : _beanClass.getMethods()) {
       Method javaMethod = method.getJavaMember();
@@ -154,8 +156,10 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       boolean isEnhance = false;
       AspectGenerator<X> bizMethod = aspectHeadFactory.create(method, isEnhance);
 
-      if (bizMethod == null)
+      if (bizMethod == null) {
+        unenhancedMethods.add(method);
         continue;
+      }
       
       // ioc/0i10
       if (_businessMethods.contains(bizMethod))
@@ -183,6 +187,15 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     
     if (_aspectFactory.isEnhanced())
       _isEnhanced = true;
+    
+    if (_isEnhanced) {
+      for (AnnotatedMethod method : unenhancedMethods) {
+        AspectGenerator bizMethod = aspectHeadFactory.create(method, true);
+        
+        if (! _businessMethods.contains(bizMethod))
+          _businessMethods.add(bizMethod);
+      }
+    }
   }
 
   protected void introspectClass(AnnotatedType<X> cl)
@@ -356,6 +369,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     
     out.println("private static final boolean __caucho_isFiner");
     out.println("  = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
+    
+    out.println("private " + getBeanClassName() + " _bean;");
 
     if (_isSerializeHandle) {
       generateSerializeHandle(out);
@@ -434,6 +449,16 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
 
     out.print("super(");
 
+    for (int i = 0; i < paramTypes.length; i++) {
+      if (i != 0)
+        out.print(", ");
+
+      out.print("a" + i);
+    }
+    out.println(");");
+    
+    // ioc/0c5b
+    out.print("_bean = new " + getBeanClassName() + "(");
     for (int i = 0; i < paramTypes.length; i++) {
       if (i != 0)
         out.print(", ");

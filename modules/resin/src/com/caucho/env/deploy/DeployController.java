@@ -443,7 +443,7 @@ abstract public class DeployController<I extends DeployInstance>
   @Override
   public I getDeployInstance()
   {
-    if (_lifecycle.isActive())
+    if (_lifecycle.isActive() || _lifecycle.isError())
       return getDeployInstanceImpl();
     else
       return null;

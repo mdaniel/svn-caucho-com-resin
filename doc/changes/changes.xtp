@@ -13,6 +13,11 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>jni: JniSelectManager should use toError() is removeNative fails (#4349, rep by Jens Christensen)</li>
+<li>gzip: flush/error issue with JSP (#3893)</li>
+<li>watchdog: add "watchdog" command for MacOS LaunchD (#3891, #4124, rep by Rob Lockstone)</li>
+<li>session: if session is not valid due to timing issues, create new session (#3942, rep by bregnvig)</li>
+<li>jpa: eclipselink was not properly closed on webapp restart (#4154, rep by Riccardo Cohen)</li>
 <li>ssl: jsse-ssl add cipher-suites-forbidden (#3970, rep by Aaron Freeman)</li>
 <li>jsp: @page contentType should not affect request.getCharacterEncoding() (#4007, rep by Shinomiya Nobuaki)</li>
 <li>ssl: jsse-ssl add verify-client="optional" support (#4052, rep by adamknight)</li>

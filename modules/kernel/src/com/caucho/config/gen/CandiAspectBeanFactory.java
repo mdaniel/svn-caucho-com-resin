@@ -78,8 +78,10 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   @Override
   public String getInstanceClassName()
   {
-    return getGeneratedClassName();
+    // ioc/0c5b
+    return getBeanType().getJavaClass().getSimpleName();
   }
+
   /**
    * Returns the head aspect factory
    */
@@ -95,7 +97,8 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   @Override
   public boolean isProxy()
   {
-    return false;
+    // ioc/0c5b
+    return true;
   }
   
   /**
@@ -104,7 +107,9 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   @Override
   public String getBeanInstance()
   {
-    return "this";
+    // ioc/0c5b
+    // return "this";
+    return "_bean";
   }
   
   /**
@@ -122,7 +127,9 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   @Override
   public String getBeanSuper()
   {
-    return "super";
+    // ioc/0c5b
+    // return "super";
+    return "_bean";
   }
   
   /**
@@ -164,7 +171,7 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
     next = new AsynchronousFactory<X>(this, next);
     next = new SecurityFactory<X>(this, next);
     
-    return new MethodHeadFactory<X>(this, next);
+    return new CandiMethodHeadFactory<X>(this, next);
   }
 
   @Override

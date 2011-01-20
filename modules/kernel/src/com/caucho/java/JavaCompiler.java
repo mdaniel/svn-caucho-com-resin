@@ -320,7 +320,8 @@ public class JavaCompiler {
       StringBuilder sb = new StringBuilder();
       sb.append(CauchoSystem.getClassPath());
 
-      buildClassPath(sb, _loader);
+      if (_loader != null)
+        buildClassPath(sb, _loader);
 
       classPath = sb.toString();
     }
