@@ -34,24 +34,29 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.BamLargeMessage;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.ActorStream;
 
 /**
- * mailbox for BAM messages waiting to be sent to the Actor.
+ * Mailbox which filters large messages to a separate queue, so large messages
+ * don't block small messages.
  */
-public class PassthroughMailbox implements Mailbox
+public class DualSizeMailbox implements Mailbox
 {
   private static final Logger log
-    = Logger.getLogger(PassthroughMailbox.class.getName());
+    = Logger.getLogger(DualSizeMailbox.class.getName());
   
   private final String _jid;
   private final Broker _broker;
-  private final ActorStream _actorStream;
+  
+  private final Mailbox _largeMailbox;
+  private final Mailbox _smallMailbox;
 
-  public PassthroughMailbox(String jid,
-                            ActorStream actorStream,
-                            Broker broker)
+  public DualSizeMailbox(String jid,
+                         Broker broker,
+                         Mailbox smallMailbox,
+                         Mailbox largeMailbox)
   {
     _jid = jid;
     
@@ -60,10 +65,15 @@ public class PassthroughMailbox implements Mailbox
     
     _broker = broker;
     
-    if (actorStream == null)
+    if (largeMailbox == null)
       throw new NullPointerException();
     
-    _actorStream = actorStream;
+    _largeMailbox = largeMailbox;
+    
+    if (smallMailbox == null)
+      throw new NullPointerException();
+    
+    _smallMailbox = smallMailbox;
   }
 
   /**
@@ -84,13 +94,13 @@ public class PassthroughMailbox implements Mailbox
   @Override
   public boolean isClosed()
   {
-    return _actorStream.isClosed();
+    return _smallMailbox.isClosed();
   }
   
   @Override
   public ActorStream getActorStream()
   {
-    return _actorStream;
+    return _smallMailbox.getActorStream();
   }
 
   /**
@@ -99,17 +109,10 @@ public class PassthroughMailbox implements Mailbox
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    try {
-      _actorStream.message(to, from, payload);
-    } catch (Throwable e) {
-      // Throwable caught because the Mailbox conceptually operates in
-      // a new thread and the caller would never receive the exception.
-      
-      getBroker().messageError(from, to, payload,
-                               ActorError.create(e));
-      
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    if (payload instanceof BamLargeMessage)
+      _largeMailbox.message(to, from, payload);
+    else
+      _smallMailbox.message(to, from, payload);
   }
 
   /**
@@ -121,11 +124,10 @@ public class PassthroughMailbox implements Mailbox
                            Serializable payload,
                            ActorError error)
   {
-    try {
-      _actorStream.messageError(to, from, payload, error);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    if (payload instanceof BamLargeMessage)
+      _largeMailbox.messageError(to, from, payload, error);
+    else
+      _smallMailbox.messageError(to, from, payload, error);
   }
 
   /**
@@ -137,16 +139,10 @@ public class PassthroughMailbox implements Mailbox
                        String from,
                        Serializable payload)
   {
-    try {
-      _actorStream.query(id, to, from, payload);
-    } catch (Throwable e) {
-      // Throwable caught because the Mailbox conceptually operates in
-      // a new thread and the caller would never receive the exception.
-    
-      getBroker().queryError(id, from, to, payload, ActorError.create(e));
-    
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    if (payload instanceof BamLargeMessage)
+      _largeMailbox.query(id, to, from, payload);
+    else
+      _smallMailbox.query(id, to, from, payload);
   }
 
   /**
@@ -158,11 +154,10 @@ public class PassthroughMailbox implements Mailbox
                           String from,
                           Serializable payload)
   {
-    try {
-      _actorStream.queryResult(id, to, from, payload);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    if (payload instanceof BamLargeMessage)
+      _largeMailbox.queryResult(id, to, from, payload);
+    else
+      _smallMailbox.queryResult(id, to, from, payload);
   }
 
   /**
@@ -175,21 +170,22 @@ public class PassthroughMailbox implements Mailbox
                          Serializable payload,
                          ActorError error)
   {
-    try {
-      _actorStream.queryError(id, to, from, payload, error);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    if (payload instanceof BamLargeMessage)
+      _largeMailbox.queryError(id, to, from, payload, error);
+    else
+      _smallMailbox.queryError(id, to, from, payload, error);
   }
-
+  
   @Override
   public void close()
   {
+    _smallMailbox.close();
+    _largeMailbox.close();
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + _smallMailbox + "," + _largeMailbox + "]";
   }
 }

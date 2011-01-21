@@ -13,6 +13,13 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>meter/sensor: add sensor callback to so failures can be acted on (#3731, rep by Martin Thompson)</li>
+<li>resin-admin: if admin-users.xml.generated cannot be created in resin.conf, use resin-data (#3785)</li>
+<li>network: add listener/port read/write statistics (#4150)</li>
+<li>bam: separate queues for large messages (#4128, rep by Martin Thompson)</li>
+<li>git: validate repository and reload from triad if corrupted (#4341, rep by Jamison Novak)</li>
+<li>cdi: serialization of intercepted beans (#4083, rep by sweigersf)</li>
+<li>cdi: enhanced CDI beans must use proxies (TCK)</li>
 <li>jni: JniSelectManager should use toError() is removeNative fails (#4349, rep by Jens Christensen)</li>
 <li>gzip: flush/error issue with JSP (#3893)</li>
 <li>watchdog: add "watchdog" command for MacOS LaunchD (#3891, #4124, rep by Rob Lockstone)</li>

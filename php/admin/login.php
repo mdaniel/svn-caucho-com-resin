@@ -45,11 +45,19 @@ include "digest.php";
 if (! empty($digest)) {
   admin_init();
   $conf_dir = dirname($g_resin->getConfigFile());
-  $password_file = realpath("{$conf_dir}/admin-users.xml.generated");
+  $root_dir = dirname($g_resin->getRootDir());
+
   // generate temporary config file
   try {
     $old_reporting_level = error_reporting(0);
+
+    $password_file = realpath("{$conf_dir}/admin-users.xml.generated");
     $file = fopen($password_file, "w");
+
+    if (! $file) {
+      $password_file = realpath("{$root_dir}/resin-data/admin-users.xml.generated");
+      $file = fopen($password_file, "w");
+    }
     error_reporting($old_reporting_level);
 
     fwrite($file, <<<EOF

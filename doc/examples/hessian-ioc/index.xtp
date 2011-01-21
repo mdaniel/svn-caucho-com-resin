@@ -89,16 +89,16 @@ service.  The service class can use
 own dependencies.</p>
 
 <example title="resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:example="urn:java:example">
 
-  &lt;servlet-mapping url-pattern="/hessian/greeting"
-                   servlet-class="example.GreetingImpl">
-    &lt;protocol type="hessian"/>
+  &lt;example:GreetingImpl>
+    &lt;resin:Unbound/>
+    &lt;resin:HessianService urlPattern="/hessian/greeting"/>
     
-    &lt;init>
-      &lt;greeting>Hello from resin-web.xml&lt;/greeting>
-    &lt;/init>
-  &lt;/servlet-mapping>
+    &lt;greeting>Hello from resin-web.xml&lt;/greeting>
+  &lt;/example:GreetingImpl>
 
 &lt;/web-app>
 </example>
@@ -127,10 +127,10 @@ how the proxy is implemented, or how the greeting service is
 discovered.</p>
 
 <example title="GreetingClientServlet.java">
-import javax.webbeans.In;
+import javax.inject.Inject;
 
 public class GreetingClientServlet extends GenericServlet {
-  @In private GreetingAPI _greeting;
+  @Inject private GreetingAPI _greeting;
 
   public void service(ServletRequest req, ServletResponse res)
     throws IOException, ServletException
@@ -150,10 +150,13 @@ directly with the WebBeans <code>@In</code> annotation.  Because the
 <code>GreetingAPI</code> is unique, there's no need to give it a name.</p>
 
 <example title="resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin"
+        xmlns:example="urn:java:example">
 
-  &lt;web-service-client class="example.GreetingAPI"
-                      url="hessian:${webApp.url}/hessian/greeting"/>
+  &lt;example:GreetingAPI>
+    &lt;resin:HessianClient url="http:${webApp.url}/hessian/greeting"/>
+  &lt;/example:GreetingAPI>
 
   &lt;servlet-mapping url-pattern="/client/greeting"
                    servlet-class="example.GreetingClientServlet"/>
@@ -162,34 +165,6 @@ directly with the WebBeans <code>@In</code> annotation.  Because the
 </example>
 
 </s2>
-<!--
-<s2 title="JMX Configuration">
-
-<p>The following JMX configuration shows the flexibility of
-the Dependency Injection pattern.  With no changes to either the
-Greeting service or its client, the Greeting service can change to
-a JMX bean used by and the client to use a JMX proxy.</p>
-
-<example title="resin-web.xml">
-&lt;resource mbean-name="type=Greeting"
-          mbean-interface="example.GreetingAPI"
-          type="example.GreetingImpl"&gt;
-  &lt;init&gt;
-    &lt;greeting&gt;Hello, web.xml&lt;/greeting&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
-
-&lt;servlet-mapping url-pattern="/client/greeting"
-                 servlet-class="example.GreetingClientServlet"&gt;
-  &lt;init&gt;
-    &lt;name&gt;JMX Client&lt;/name&gt;
-    &lt;greeting&gt;\${jndi("mbean:type=Greeting")}&lt;/greeting&gt;
-  &lt;/init&gt;
-&lt;/servlet-mapping&gt;
-</example>
-
-</s2>
--->
 </s1>
 
   </body>

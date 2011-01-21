@@ -24,25 +24,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
-package com.caucho.bam.mailbox;
-
-import com.caucho.bam.stream.ActorStream;
+package com.caucho.bam;
 
 /**
- * Mailbox for an actor
+ * Marker for a payload with a large message.
  */
-public interface Mailbox extends ActorStream
-{
-  /**
-   * Returns the actor stream for the actor itself.
-   */
-  public ActorStream getActorStream();
-  
-  /**
-   * Closes the mailbox
-   */
-  public void close();
+public interface BamLargeMessage {
 }

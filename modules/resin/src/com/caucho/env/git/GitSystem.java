@@ -42,40 +42,40 @@ import com.caucho.vfs.*;
 /**
  * Top-level class for a repository
  */
-public class GitService extends AbstractResinService 
+public class GitSystem extends AbstractResinService 
 {
   public static final int START_PRIORITY
   = RootDirectoryService.START_PRIORITY_ROOT_DIRECTORY + 1; 
 
-  private static final L10N L = new L10N(GitService.class);
+  private static final L10N L = new L10N(GitSystem.class);
   private static final Logger log = 
-    Logger.getLogger(GitService.class.getName());
+    Logger.getLogger(GitSystem.class.getName());
   
   private Path _root;
   
-  public GitService(Path root)
+  public GitSystem(Path root)
   {
     _root = root;
   }
   
-  public static GitService createAndAddService()
+  public static GitSystem createAndAddService()
   {
     return createAndAddService(null);
   }
 
-  public static GitService createAndAddService(Path root)
+  public static GitSystem createAndAddService(Path root)
   {
-    ResinSystem system = preCreate(GitService.class);
+    ResinSystem system = preCreate(GitSystem.class);
     
-    GitService service = new GitService(root);
-    system.addService(GitService.class, service);
+    GitSystem service = new GitSystem(root);
+    system.addService(GitSystem.class, service);
     
     return service;
   }
 
-  public static GitService getCurrent()
+  public static GitSystem getCurrent()
   {
-    return ResinSystem.getCurrentService(GitService.class);
+    return ResinSystem.getCurrentService(GitSystem.class);
   }
 
   @Override
@@ -614,6 +614,40 @@ public class GitService extends AbstractResinService
       
     return sha1;
   }
+
+  /**
+   * Validate and remove.
+   */
+  public void validateRawGitFile(String sha1)
+  {
+    Path objectPath = lookupPath(sha1);
+
+    if (! objectPath.exists())
+      return;
+    
+    boolean isValid = false;
+
+    try {
+      String newHex = validate(objectPath);
+
+      if (sha1.equals(newHex))
+        isValid = true;
+      else {
+        log.warning(L.l("{0}: file validation failed because sha-1 hash '{0}' does not match expected '{1}'",
+                        newHex, sha1));
+      }
+    } catch (Exception e) {
+      log.warning("git service " + sha1 + " " + e.toString());
+    } finally {
+      if (! isValid) {
+        try {
+          objectPath.remove();
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
+      }
+    }
+  }
   
   private Path lookupPath(String sha1)
   {
@@ -621,6 +655,50 @@ public class GitService extends AbstractResinService
     String suffix = sha1.substring(2);
     
     return _root.lookup("objects").lookup(prefix).lookup(suffix);
+  }
+  
+  public static GitType validate(String hash, InputStream is)
+    throws IOException, NoSuchAlgorithmException
+  {
+    MessageDigest md = MessageDigest.getInstance("SHA-1");
+
+    InflaterInputStream zin = new InflaterInputStream(is);
+    DigestInputStream din = new DigestInputStream(zin, md);
+
+    TempBuffer tBuf = TempBuffer.allocate();
+    byte []buffer = tBuf.getBuffer();
+    
+    GitType gitType = null;
+    int len;
+
+    while ((len = din.read(buffer, 0, buffer.length)) >= 0) {
+      if (gitType == null) {
+        String value = new String(buffer, 0, len);
+        
+        if (value.startsWith("blob"))
+          gitType = GitType.BLOB;
+        else if (value.startsWith("tree"))
+          gitType = GitType.TREE;
+        else if (value.startsWith("commit"))
+          gitType = GitType.COMMIT;
+      }
+      
+    }
+
+    TempBuffer.free(tBuf);
+
+    din.close();
+
+    byte []digest = md.digest();
+    
+    String digestHash = Hex.toHex(digest);
+    
+    if (! hash.equals(digestHash))
+      throw new IOException(L.l("Git file corrupted.\n  expected: {0}\n actual: {1}",
+                                hash, digestHash));
+
+    
+    return gitType;
   }
 
   private String validate(Path path)

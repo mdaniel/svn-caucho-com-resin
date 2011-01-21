@@ -36,7 +36,7 @@ import java.util.Map;
 
 import com.caucho.env.git.GitCommit;
 import com.caucho.env.git.GitObjectStream;
-import com.caucho.env.git.GitService;
+import com.caucho.env.git.GitSystem;
 import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
 import com.caucho.util.L10N;
@@ -48,20 +48,20 @@ public class FileRepository extends AbstractRepository
 {
   private static final L10N L = new L10N(FileRepository.class);
 
-  private GitService _git;
+  private GitSystem _git;
   
   public FileRepository()
   {
-    this(GitService.getCurrent());
+    this(GitSystem.getCurrent());
   }
 
-  public FileRepository(GitService git)
+  public FileRepository(GitSystem git)
   {
     _git = git;
     
     if (_git == null)
       throw new IllegalStateException(L.l("{0} is required for {1}",
-                                          GitService.class.getSimpleName(),
+                                          GitSystem.class.getSimpleName(),
                                           getClass().getSimpleName()));
   }
 
@@ -268,6 +268,18 @@ public class FileRepository extends AbstractRepository
     throws IOException
   {
     _git.writeRawGitFile(sha1, is);
+  }
+
+  /**
+   * Writes the git file from the StreamInput
+   *
+   * @param sha1 the file hash
+   * @param is the raw contents for the new file
+   */
+  @Override
+  public void validateRawGitFile(String sha1)
+  {
+    _git.validateRawGitFile(sha1);
   }
 
   /**

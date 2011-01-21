@@ -1469,9 +1469,9 @@ public class TcpSocketLinkListener
     return _lifetimeRequestTime;
   }
 
-  void addLifetimeReadBytes(long time)
+  void addLifetimeReadBytes(long bytes)
   {
-    _lifetimeReadBytes += time;
+    _lifetimeReadBytes += bytes;
   }
 
   public long getLifetimeReadBytes()
@@ -1479,9 +1479,9 @@ public class TcpSocketLinkListener
     return _lifetimeReadBytes;
   }
 
-  void addLifetimeWriteBytes(long time)
+  void addLifetimeWriteBytes(long bytes)
   {
-    _lifetimeWriteBytes += time;
+    _lifetimeWriteBytes += bytes;
   }
 
   public long getLifetimeWriteBytes()

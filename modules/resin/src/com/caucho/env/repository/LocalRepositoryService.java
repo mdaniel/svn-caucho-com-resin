@@ -30,13 +30,13 @@
 package com.caucho.env.repository;
 
 
-import com.caucho.env.git.GitService;
+import com.caucho.env.git.GitSystem;
 import com.caucho.env.service.*;
 import com.caucho.util.L10N;
 
 public class LocalRepositoryService extends AbstractResinService
 {
-  public static final int START_PRIORITY = GitService.START_PRIORITY + 1;
+  public static final int START_PRIORITY = GitSystem.START_PRIORITY + 1;
   
   private static final L10N L = new L10N(LocalRepositoryService.class);
 
@@ -46,10 +46,10 @@ public class LocalRepositoryService extends AbstractResinService
   
   private LocalRepositoryService()
   {
-    GitService git = GitService.getCurrent();
+    GitSystem git = GitSystem.getCurrent();
     if (git == null)
       throw new IllegalStateException(L.l("{0} is required for {1}",
-          GitService.class.getSimpleName(), getClass().getSimpleName()));
+          GitSystem.class.getSimpleName(), getClass().getSimpleName()));
 
     _fileRepository = new FileRepository(git);
   }

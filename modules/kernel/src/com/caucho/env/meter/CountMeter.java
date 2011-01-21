@@ -30,11 +30,15 @@ package com.caucho.env.meter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.caucho.util.ConcurrentArrayList;
 
-public final class CountMeter extends AbstractMeter {
+
+public final class CountMeter extends AbstractMeter implements CountSensor {
   // sample data
   private final AtomicLong _totalCount = new AtomicLong();
-
+  
+  private ConcurrentArrayList<CountSensor> _listeners;
+  
   private long _lastTotal;
 
   public CountMeter(String name)
@@ -42,14 +46,22 @@ public final class CountMeter extends AbstractMeter {
     super(name);
   }
 
+  @Override
   public final void start()
   {
     _totalCount.incrementAndGet();
+    
+    if (_listeners != null) {
+      for (CountSensor sensor : _listeners.toArray()) {
+        sensor.start();
+      }
+    }
   }
 
   /**
    * Sample the total count
    */
+  @Override
   public final double sample()
   {
     long totalCount = _totalCount.get();
@@ -57,5 +69,25 @@ public final class CountMeter extends AbstractMeter {
     _lastTotal = totalCount;
 
     return totalCount - lastTotal;
+  }
+  
+  /**
+   * Listeners
+   */
+  
+  public void addListener(CountSensor sensor)
+  {
+    synchronized (this) {
+      if (_listeners == null)
+        _listeners = new ConcurrentArrayList<CountSensor>(CountSensor.class);
+      
+      _listeners.add(sensor);
+    }
+  }
+  
+  public void removeListener(CountSensor sensor)
+  {
+    if (_listeners != null)
+        _listeners.remove(sensor);
   }
 }

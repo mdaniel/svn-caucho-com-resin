@@ -375,6 +375,9 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     if (_isSerializeHandle) {
       generateSerializeHandle(out);
     }
+    else {
+      generateSerialize(out);
+    }
 
     /*
     if (_isReadResolveEnhanced)
@@ -396,6 +399,16 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     out.println("private Object writeReplace()");
     out.println("{");
     out.println("  return _serializationHandle;");
+    out.println("}");
+  }
+
+  protected void generateSerialize(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("private Object writeReplace()");
+    out.println("{");
+    out.println("  return _bean;");
     out.println("}");
   }
 

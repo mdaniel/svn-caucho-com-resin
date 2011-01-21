@@ -177,6 +177,10 @@ public class JmtpServlet extends GenericServlet {
     {
       return null;
     }
-    
+
+    @Override
+    public void close()
+    {
+    }
   }
 }

@@ -97,6 +97,9 @@ public class TcpSocketLink extends AbstractSocketLink
 
   private long _connectionStartTime;
   private long _requestStartTime;
+  
+  private long _readBytes;
+  private long _writeBytes;
 
   private long _idleStartTime;
   private long _idleExpireTime;
@@ -709,6 +712,9 @@ public class TcpSocketLink extends AbstractSocketLink
       _currentRequest.set(_request);
       RequestContext.begin();
       _requestStartTime = Alarm.getCurrentTime();
+      
+      _readBytes = _socket.getTotalReadBytes();
+      _writeBytes = _socket.getTotalWriteBytes();
 
       TcpCometController async = _async;
       
@@ -725,6 +731,15 @@ public class TcpSocketLink extends AbstractSocketLink
       }
       
       _requestStartTime = 0;
+      
+      long readBytes = _socket.getTotalReadBytes();
+      long writeBytes = _socket.getTotalWriteBytes();
+      
+      _listener.addLifetimeReadBytes(readBytes - _readBytes);
+      _listener.addLifetimeReadBytes(writeBytes - _writeBytes);
+      
+      _readBytes = readBytes;
+      _writeBytes = writeBytes;
     }
     finally {
       thread.setContextClassLoader(_loader);

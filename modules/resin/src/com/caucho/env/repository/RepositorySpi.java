@@ -177,6 +177,11 @@ public interface RepositorySpi
    */
   public void writeRawGitFile(String contentHash, InputStream is)
     throws IOException;
+
+  /**
+   * Remove a raw git file
+   */
+  public void validateRawGitFile(String contentHash);
   
   //
   // tag management

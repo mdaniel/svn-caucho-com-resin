@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 
 import com.caucho.env.git.GitCommit;
 import com.caucho.env.git.GitCommitJar;
-import com.caucho.env.git.GitService;
+import com.caucho.env.git.GitSystem;
 import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
 import com.caucho.server.admin.GitJarStreamSource;
@@ -573,7 +573,9 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   public boolean validateHash(String sha1)
     throws IOException
   {
-    GitType type = getType(sha1);
+    //GitType type = getType(sha1);
+    
+    GitType type = validateRawHash(sha1);
 
     if (type == GitType.BLOB) {
       if (log.isLoggable(Level.FINEST))
@@ -614,6 +616,22 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     }
   }
 
+  protected GitType validateRawHash(String hash)
+  {
+    try {
+      InputStream is = openRawGitFile(hash);
+      
+      return GitSystem.validate(hash, is);
+    } catch (Exception e) {
+      log.warning(this + " validate " + hash + " " + e);
+      log.log(Level.FINER, e.toString(), e);
+      
+      validateRawGitFile(hash);
+      
+      return null;
+    }
+  }
+  
   /**
    * Adds a path to the repository.  If the path is a directory, 
    * adds the contents recursively.
@@ -741,7 +759,7 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
 
     TempOutputStream os = new TempOutputStream();
 
-    String hash = GitService.writeData(os, type, is, length);
+    String hash = GitSystem.writeData(os, type, is, length);
 
     writeRawGitFile(hash, os.openInputStream());
     
@@ -781,7 +799,7 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
       TempOutputStream os = new TempOutputStream();
       String type = "tree";
 
-      String contentHash = GitService.writeData(os, type, is, treeLength);
+      String contentHash = GitSystem.writeData(os, type, is, treeLength);
 
       writeRawGitFile(contentHash, os.openInputStream());
       
@@ -818,6 +836,15 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   @Override
   abstract public void writeRawGitFile(String contentHash, InputStream is)
     throws IOException;
+
+  /**
+   * Removes a raw git file
+   */
+  @Override
+  public void validateRawGitFile(String contentHash)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Writes the contents to a stream.
