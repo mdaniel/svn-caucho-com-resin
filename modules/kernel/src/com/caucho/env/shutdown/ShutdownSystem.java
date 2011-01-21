@@ -67,8 +67,6 @@ public class ShutdownSystem extends AbstractResinService
   
   private boolean _isEmbedded;
   
-  private boolean _isDumpHeapOnExit;
-
   private ShutdownSystem(boolean isEmbedded)
   {
     _isEmbedded = isEmbedded;
@@ -149,9 +147,6 @@ public class ShutdownSystem extends AbstractResinService
    */
   public void shutdown(ExitCode exitCode, String msg)
   {
-    if (exitCode == ExitCode.MEMORY)
-      _isDumpHeapOnExit = true;
-
     startFailSafeShutdown(msg);
 
     ShutdownThread shutdownThread = _shutdownThread;
@@ -194,10 +189,6 @@ public class ShutdownSystem extends AbstractResinService
       haltThread.startShutdown();
 
     try {
-      if (_isDumpHeapOnExit) {
-        dumpHeapOnExit();
-      }
-
       try {
         ResinSystem resinSystem = _resinSystemRef.get();
         
@@ -233,11 +224,6 @@ public class ShutdownSystem extends AbstractResinService
       return resinSystemRef.get();
     else
       return null;
-  }
-
-  public void dumpHeapOnExit()
-  {
-
   }
 
   /**

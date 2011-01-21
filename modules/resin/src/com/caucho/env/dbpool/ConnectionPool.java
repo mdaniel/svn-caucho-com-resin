@@ -47,9 +47,9 @@ import javax.transaction.xa.XAResource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.env.health.*;
 import com.caucho.env.meter.ActiveTimeMeter;
 import com.caucho.env.meter.MeterService;
-import com.caucho.env.warning.WarningService;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
@@ -836,9 +836,9 @@ public class ConnectionPool extends AbstractManagedObject
         + ", max-create-connections=" + _maxCreateConnections
         + ")");
 
-    // XXX: This isn't a warning, it's a health nexus message.
-    WarningService.sendCurrentWarning(this, message);
-    log.warning(message);
+    HealthStatusService.updateCurrentHealthStatus(this, 
+                                                  HealthStatus.WARNING, 
+                                                  message);
 
     if (startCreateOverflow()) {
       try {
@@ -855,9 +855,9 @@ public class ConnectionPool extends AbstractManagedObject
         + ", max-create-connections=" + _maxCreateConnections
         + ")");
 
-    log.warning(message);
-
-    ThreadDump.dumpThreads();
+    HealthStatusService.updateCurrentHealthStatus(this, 
+                                                  HealthStatus.FAIL, 
+                                                  message);
 
     throw new ResourceException(L.l("Can't create overflow connection connection-max={0}",
                                     _maxConnections));
@@ -1067,9 +1067,9 @@ public class ConnectionPool extends AbstractManagedObject
                          _maxCreateConnections,
                          _maxOverflowConnections);
 
-    // XXX: not exactly a warning, it's a health check system.
-    WarningService.sendCurrentWarning(this, message);
-    log.warning(message);
+    HealthStatusService.updateCurrentHealthStatus(this, 
+                                                  HealthStatus.WARNING, 
+                                                  message);
     
     throw new ResourceException(message);
  }

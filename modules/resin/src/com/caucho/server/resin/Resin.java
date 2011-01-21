@@ -67,6 +67,7 @@ import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.distcache.DistCacheService;
 import com.caucho.env.git.GitSystem;
+import com.caucho.env.health.HealthStatusService;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.env.lock.*;
 import com.caucho.env.repository.AbstractRepository;
@@ -502,6 +503,8 @@ public class Resin
     WarningService.createAndAddService();
     
     ShutdownSystem.createAndAddService(_isEmbedded);
+    
+    HealthStatusService.createAndAddService();
     
     TopologyService.createAndAddService(_serverId);
     
