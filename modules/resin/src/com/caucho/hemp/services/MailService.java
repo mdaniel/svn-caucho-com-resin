@@ -29,20 +29,15 @@
 
 package com.caucho.hemp.services;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-
-import java.io.Serializable;
-
 import java.util.*;
 import java.util.logging.*;
 
-import javax.mail.Address;
-import javax.mail.Message;
+import javax.mail.*;
 import javax.mail.Message.RecipientType;
-import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
+
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 /**
  * mail service
@@ -56,6 +51,9 @@ public class MailService
 
   private ArrayList<Address> _toList = new ArrayList<Address>();
   private Address []_to;
+  
+  private ArrayList<Address> _fromList = new ArrayList<Address>();
+  private Address []_from;
 
   private String _subject = "Resin MailService messages";
 
@@ -87,6 +85,14 @@ public class MailService
   {
     _toList.add(address);
   }
+  
+  /**
+   * Adds a 'from' value
+   */
+  public void addFrom(Address address)
+  {
+    _fromList.add(address);
+  }
 
   /**
    * Sets a property
@@ -115,14 +121,25 @@ public class MailService
   /**
    * Sends to a mailbox
    */
-  public void send(String text)
+  public void send(String body)
+  {
+    send(_subject, body);
+  }
+
+  /**
+   * Sends to a mailbox
+   */
+  public void send(String subject, String body)
   {
     try {
       MimeMessage msg = new MimeMessage(getSession());
 
+      if(_from.length > 0)
+        msg.addFrom(_from);
       msg.addRecipients(RecipientType.TO, _to);
-      msg.setSubject(_subject);
-      msg.setContent(text, "text/plain");
+      if(subject != null)
+        msg.setSubject(subject);
+      msg.setContent(body, "text/plain");
 
       send(msg);
     } catch (RuntimeException e) {
@@ -168,6 +185,9 @@ public class MailService
 
     _to = new Address[_toList.size()];
     _toList.toArray(_to);
+    
+    _from = new Address[_fromList.size()];
+    _fromList.toArray(_from);
 
     try {
       if (_session == null) {
