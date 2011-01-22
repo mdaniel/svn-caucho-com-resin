@@ -105,6 +105,11 @@ public class DatabaseManager {
   {
     return getLocalManager().findDatabaseImpl(url, driver);
   }
+  
+  public static void closeDatabase(DataSource ds)
+  {
+    getLocalManager().closeImpl(ds);
+  }
 
   /**
    * Looks up the local database, creating if necessary.
@@ -141,6 +146,40 @@ public class DatabaseManager {
     } catch (RuntimeException e) {
       throw e;
     } catch (SQLException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Looks up the local database, creating if necessary.
+   */
+  private void closeImpl(DataSource dataSource)
+  {
+    DBPool db = (DBPool) dataSource;
+    
+    if (db == null)
+      return;
+    
+    try {
+      String key = null;
+
+      synchronized (_databaseMap) {
+        for (Map.Entry<String,DBPool> entry : _databaseMap.entrySet()) {
+          if (entry.getValue() == db) {
+            key = entry.getKey();
+          }
+        }
+        
+        if (key == null)
+          return;
+        
+        _databaseMap.remove(key);
+      }
+      
+      db.close();
+    } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);

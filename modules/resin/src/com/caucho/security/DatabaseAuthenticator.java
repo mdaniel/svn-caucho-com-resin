@@ -597,6 +597,7 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
     return true;
   }
 
+  @Override
   public boolean isUserInRole(Principal principal, String role)
   {
     if (_roleQuery == null)

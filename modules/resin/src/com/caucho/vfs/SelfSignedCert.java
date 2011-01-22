@@ -28,34 +28,35 @@
 
 package com.caucho.vfs;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.crypto.*;
-import javax.net.ssl.*;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.util.logging.*;
-import java.security.*;
-import java.security.cert.*;
+import java.io.Serializable;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.net.*;
-import sun.security.x509.X500Name;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+
 import sun.security.x509.CertAndKeyGen;
+import sun.security.x509.X500Name;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
-public class SelfSignedCert {
+public class SelfSignedCert implements Serializable {
   private static final Logger log
     = Logger.getLogger(SelfSignedCert.class.getName());
 
   private X509Certificate _cert;
   private PrivateKey _key;
-  private KeyManagerFactory _kmf;
+  private transient KeyManagerFactory _kmf;
   
   private SelfSignedCert(X509Certificate cert, PrivateKey key)
     throws Exception
@@ -63,19 +64,7 @@ public class SelfSignedCert {
     _cert = cert;
     _key = key;
     
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-
-    KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-
-    ks.load(null, "password".toCharArray());
-
-      
-    ks.setKeyEntry("anonymous", getPrivateKey(),
-                   "key-password".toCharArray(), getCertificateChain());
-    
-    kmf.init(ks, "key-password".toCharArray());
-
-    _kmf = kmf;
+    _kmf = getKeyManagerFactory();
   }
 
   public static SelfSignedCert create(String name,
@@ -149,7 +138,33 @@ public class SelfSignedCert {
 
   public KeyManager []getKeyManagers()
   {
-    return _kmf.getKeyManagers();
+    try {
+      return getKeyManagerFactory().getKeyManagers();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  private KeyManagerFactory getKeyManagerFactory()
+    throws NoSuchAlgorithmException, IOException, GeneralSecurityException
+  {
+    if (_kmf == null) {
+      KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+
+      KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+      ks.load(null, "password".toCharArray());
+
+        
+      ks.setKeyEntry("anonymous", getPrivateKey(),
+                     "key-password".toCharArray(), getCertificateChain());
+      
+      kmf.init(ks, "key-password".toCharArray());
+
+      _kmf = kmf;
+    }
+      
+    return _kmf;
   }
 
   @Override

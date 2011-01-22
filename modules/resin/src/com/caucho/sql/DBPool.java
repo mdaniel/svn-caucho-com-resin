@@ -889,11 +889,13 @@ public class DBPool
     return _dataSource;
   }
 
-  public <T> T unwrap(Class<T> iface) throws SQLException {
+  public <T> T unwrap(Class<T> iface) throws SQLException
+  {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
-  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+  public boolean isWrapperFor(Class<?> iface) throws SQLException
+  {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
@@ -903,6 +905,12 @@ public class DBPool
   private Object writeReplace()
   {
     return _serializationHandle;
+  }
+  
+  public void close()
+  {
+    _databaseAdmin.close();
+    _connectionPool.destroy();
   }
 
   /**

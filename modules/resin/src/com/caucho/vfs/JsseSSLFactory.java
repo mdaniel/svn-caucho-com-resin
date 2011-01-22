@@ -30,6 +30,10 @@
 package com.caucho.vfs;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.service.RootDirectoryService;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -369,8 +373,7 @@ public class JsseSSLFactory implements SSLFactory {
       }
     }
     
-    SelfSignedCert cert = SelfSignedCert.create(selfSignedName,
-                                                cipherSuites);
+    SelfSignedCert cert = createSelfSignedCert(selfSignedName, cipherSuites);
 
     if (cert == null)
       throw new ConfigException(L.l("Cannot generate anonymous certificate"));
@@ -382,6 +385,61 @@ public class JsseSSLFactory implements SSLFactory {
     SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
 
     return factory;
+  }
+  
+  private SelfSignedCert createSelfSignedCert(String name, 
+                                              String []cipherSuites)
+  {
+    Path dataDir = RootDirectoryService.getCurrentDataDirectory();
+    Path certDir = dataDir.lookup("certs");
+    
+    SelfSignedCert cert = null;
+    
+    try {
+      Path certPath = certDir.lookup(name + ".cert");
+      
+      if (certPath.canRead()) {
+        ReadStream is = certPath.openRead();
+        
+        try {
+          Hessian2Input hIn = new Hessian2Input(is);
+          
+          cert = (SelfSignedCert) hIn.readObject(SelfSignedCert.class);
+          
+          hIn.close();
+          
+          return cert;
+        } finally {
+          IoUtil.close(is);
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+      
+    cert = SelfSignedCert.create(name, cipherSuites);
+    
+    try {
+      certDir.mkdirs();
+      
+      Path certPath = certDir.lookup(name + ".cert");
+      
+      WriteStream os = certPath.openWrite();
+        
+      try {
+        Hessian2Output hOut = new Hessian2Output(os);
+        
+        hOut.writeObject(cert);
+        
+        hOut.close();
+      } finally {
+        IoUtil.close(os);
+      }
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
+    return cert;
   }
   
   /**

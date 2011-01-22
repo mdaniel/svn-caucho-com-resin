@@ -312,7 +312,7 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
       
       if (log.isLoggable(Level.FINE)) {
         log.fine(this + " committing " + tagName + "\n  '"
-                 + commitMetaData.get("message")
+                 + (commitMetaData != null ? commitMetaData.get("message") : null)
                  + "'\n  " + contentHash);
       }
 

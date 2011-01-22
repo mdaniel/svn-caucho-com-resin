@@ -11,7 +11,6 @@ $webapp = $g_mbean_server->lookup($_GET['id']);
 $request = quercus_servlet_request();
 $is_secure = $request->isSecure();
 $user = quercus_get_request()->getUserPrincipal();
-$client = @new Java("com.caucho.server.admin.WebAppDeployClient");
 
 if ($is_secure) {
   $action = $_POST['action'];
@@ -77,7 +76,12 @@ END;
   echo "  <td>" . $webapp->RequestCount . "</td>\n";
   echo "  <td>" . $session->SessionActiveCount . "</td>\n";
   echo "  <td class='" . format_ago_class($webapp->StartTime) . "'>\n";
-  echo "    " . format_ago($webapp->StartTime) . "\n";
+
+  if ($webapp->State == "ACTIVE")
+    echo "  Z  " . format_ago($webapp->StartTime) . "\n";
+  else
+    echo "&nbsp;";
+    
   echo "   </td>\n";
 
         format_ago_td_pair($webapp->Status500CountTotal,
@@ -283,7 +287,12 @@ function display_webapp($webapp, &$is_deploy_valid)
   ?>
     </td>
     <td class='<?= format_ago_class($webapp->StartTime) ?>'>
-      <?= format_ago($webapp->StartTime) ?>
+      <?
+         if ($webapp->State == "ACTIVE")
+           echo format_ago($webapp->StartTime)
+         else
+           echo "&nbsp;";
+      ?>
     </td>
   <?php
   format_ago_td_pair($webapp->Status500CountTotal,

@@ -160,10 +160,8 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       return item;
     }
 
-    V item = putImpl(key, value);
-
-    // forced resizing if 3/4 full
-    if (3 * _values.length <= 4 * _size) {
+    // forced resizing if 1/2 full
+    if (_values.length <= 2 * _size) {
       K []oldKeys = _keys;
       V []oldValues = _values;
 
@@ -181,6 +179,8 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
           putImpl(oldKey, oldValue);
       }
     }
+    
+    V item = putImpl(key, value);
 
     return item;
   }
@@ -193,7 +193,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     V item = null;
 
     int hash = key.hashCode() & _mask;
-    int count = _size + 1;
+    int count = _values.length;
 
     for (; count > 0; count--) {
       item = _values[hash];

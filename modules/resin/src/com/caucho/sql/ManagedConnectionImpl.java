@@ -812,8 +812,9 @@ public class ManagedConnectionImpl
     
     Connection conn = _driverConnection;
     
-    if (isClosed())
+    if (isClosed()) {
       return false;
+    }
 
     if (isPingRequired) {
     }

@@ -13,6 +13,12 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>cdi: enable Conversation scope for JSP/servlets</li>
+<li>database: add DatabaseManager.closeConnection (#3703, rep by Nobuaki Shinomiya)</li>
+<li>servlet: request HashMapImpl fixes for inserts (#3726, rep by Fiaz Hossein)</li>
+<li>install: ${resin.root}/resin-doc will be updated on a new install (#4350, rep by mros2stf)</li>
+<li>resin-admin: use ${resin.root}/resin-doc location for resin-admin (#4350, rep by mros2stf)</li>
+<li>configure: test for dev environment faulty, causing resinssl build issues (#4352, rep by mros2stf)</li>
 <li>meter/sensor: add sensor callback to so failures can be acted on (#3731, rep by Martin Thompson)</li>
 <li>resin-admin: if admin-users.xml.generated cannot be created in resin.conf, use resin-data (#3785)</li>
 <li>network: add listener/port read/write statistics (#4150)</li>

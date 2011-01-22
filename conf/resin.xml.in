@@ -165,7 +165,7 @@
       <!--
          - Administration application /resin-admin
         -->
-      <web-app id="/resin-admin" root-directory="${resin.home}/doc/admin">
+      <web-app id="/resin-admin" root-directory="${resin.root}/resin-doc/admin">
         <prologue>
           <resin:set var="resin_admin_external" value="false"/>
           <resin:set var="resin_admin_insecure" value="true"/>
@@ -175,7 +175,7 @@
       <!--
 	 - Resin documentation - remove for a live site
 	-->
-      <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
+      <web-app id="/resin-doc" root-directory="${resin.root}/resin-doc/resin-doc"/>
 
       <!--
 	 - <resin:LoadBalance regexp="^/load" cluster="backend-tier"/>

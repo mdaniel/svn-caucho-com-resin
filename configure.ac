@@ -112,7 +112,9 @@ resin_pro=.
 resin_os=../resin_os
 is_dev=""
 
-if test -r "../pro/modules/c/src/resin/resin.h"; then
+if test -r "modules/c/src/resin/resin.h"; then
+  resin_pro=.
+elif test -r "../pro/modules/c/src/resin/resin.h"; then
   resin_pro="../pro"
   resin_os="../../../../../resin/modules/c/src/resin_os"
   is_dev="true"

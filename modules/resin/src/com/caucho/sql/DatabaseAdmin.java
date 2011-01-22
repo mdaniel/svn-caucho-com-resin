@@ -267,6 +267,14 @@ public class DatabaseAdmin extends AbstractManagedObject
     registerSelf();
   }
 
+  /**
+   * 
+   */
+  public void close()
+  {
+    unregisterSelf();
+  }
+
   @Override
   public String toString()
   {

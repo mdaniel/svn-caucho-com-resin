@@ -178,6 +178,7 @@ public class JaasAuthenticator extends AbstractAuthenticator {
    * @param user the user to test
    * @param role the role to test
    */
+  @Override
   public boolean isUserInRole(Principal principal, String role)
   {
     if (principal == null)

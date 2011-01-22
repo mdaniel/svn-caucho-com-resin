@@ -39,11 +39,16 @@ import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import com.caucho.config.scope.AbstractScopeContext;
 import com.caucho.config.scope.ContextContainer;
+import com.caucho.config.scope.ScopeRemoveListener;
+import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
@@ -56,6 +61,10 @@ public class ConversationContext extends AbstractScopeContext
 {
   private static final Logger log = Logger.getLogger(ConversationContext.class.getName());
   private static final L10N L = new L10N(ConversationContext.class);
+  
+  private static final String SESSION_CONVERSATION = "caucho.session.conversation";
+  private static final String SESSION_CONVERSATION_ID = "caucho.session.conversation.id";
+  private static final String REQUEST_CONVERSATION = "caucho.request.conversation";
   
   private static final long DEFAULT_TIMEOUT = 120000L;
   
@@ -71,13 +80,19 @@ public class ConversationContext extends AbstractScopeContext
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
-    return facesContext != null;
+    if (facesContext != null)
+      return true;
+    
+    if (isSessionScope())
+      return true;
+    
+    return false;
   }
 
   @Override
   public boolean isTransient()
   {
-    Scope scope = getJsfScope();
+    Scope scope = getConversationScope();
     
     return scope == null || scope._extendedId == null;
   }
@@ -96,7 +111,7 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   protected ContextContainer getContextContainer()
   {
-    Scope scope = getJsfScope();
+    Scope scope = getConversationScope();
     
     if (scope != null)
       return scope._transientConversation;
@@ -110,7 +125,7 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   protected ContextContainer createContextContainer()
   {
-    Scope scope = createJsfScope();
+    Scope scope = createConversationScope();
 
     if (scope._transientConversation == null) {
       scope._transientConversation = new ContextContainer();
@@ -139,17 +154,18 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   public void begin(String name)
   {
-    Scope scope = createJsfScope(name);
+    Scope scope = createConversationScope(name);
     
     if (scope._extendedId != null)
       throw new IllegalStateException(L.l("Conversation begin() must only be called when a long-running conversation does not exist."));
     
     FacesContext facesContext = FacesContext.getCurrentInstance();
     
-    if (name != null)
+    if (facesContext != null && name != null)
       facesContext.getViewRoot().getAttributes().put("caucho.cid", name);
     
     scope._extendedId = name;
+    System.out.println("BEGIN: " + scope._extendedId);
     scope.put(name, scope._transientConversation);
   }
 
@@ -159,14 +175,14 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   public void end()
   {
-    Scope scope = getJsfScope();
+    Scope scope = getConversationScope();
 
     if (scope == null)
       return;
     
     String id = scope._extendedId;
     scope._extendedId = null;
-    
+    System.out.println("END: " + scope._extendedId);
     if (id == null)
       throw new IllegalStateException(L.l("Conversation end() must only be called when a long-running conversation exists."));
 
@@ -176,7 +192,7 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   public String getId()
   {
-    Scope scope = getJsfScope();
+    Scope scope = getConversationScope();
     
     if (scope != null)
       return scope._extendedId;
@@ -187,7 +203,7 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   public long getTimeout()
   {
-    Scope scope = createJsfScope();
+    Scope scope = createConversationScope();
     
     return scope.getTimeout();
   }
@@ -196,7 +212,7 @@ public class ConversationContext extends AbstractScopeContext
   public void setTimeout(long timeout)
   {
     try {
-      Scope scope = createJsfScope();
+      Scope scope = createConversationScope();
     
       scope.setTimeout(timeout);
     } catch (RuntimeException e) {
@@ -204,6 +220,67 @@ public class ConversationContext extends AbstractScopeContext
     }
   }
   
+  public void destroy()
+  {
+    Scope scope = getConversationScope();
+    
+    if (scope == null)
+      return;
+    
+    destroy(scope, true);
+  }
+  
+  private void destroy(Scope scope, boolean isClearId)
+  {  
+    if (scope == null)
+      return;
+    
+    ContextContainer context = scope._transientConversation;
+    
+    if (isClearId)
+      scope._transientConversation = null;
+    
+    if (scope._extendedId == null)
+      context.close();
+    
+    if (isClearId)
+      scope._extendedId = null;
+  }
+  
+  private Scope getConversationScope()
+  {
+    Scope scope = getJsfScope();
+    
+    if (scope != null)
+      return scope;
+    
+    return getSessionScope();
+  }
+  
+  private Scope createConversationScope()
+  {
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    
+    if (facesContext != null)
+      return createJsfScope();
+    
+    return createSessionScope();
+  }
+  
+  private Scope createConversationScope(String name)
+  {
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    
+    if (facesContext != null)
+      return createJsfScope(name);
+    
+    return createSessionScope(name);
+  }
+  
+  
+  /**
+   * Returns the current JSF context if it exists.
+   */
   private Scope getJsfScope()
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -214,11 +291,17 @@ public class ConversationContext extends AbstractScopeContext
     return getJsfScope(facesContext, null, false);
   }
   
+  /**
+   * Creates a scope for a JSF context.
+   */
   private Scope createJsfScope()
   {
     return createJsfScope(null);
   }
   
+  /**
+   * Creates a scope for a JSF context with the given name.
+   */
   private Scope createJsfScope(String name)
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -280,20 +363,100 @@ public class ConversationContext extends AbstractScopeContext
     return scope;
   }
   
-  public void destroy()
+  private boolean isSessionScope()
   {
-    Scope scope = getJsfScope();
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request != null) {
+      HttpSession session = ((HttpServletRequest) request).getSession();
+
+      return session != null;
+    }
+    
+    return false;
+  }
+  
+  private Scope getSessionScope()
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request == null)
+      return null;
+    
+    HttpSession session = ((HttpServletRequest) request).getSession();
+
+    if (session == null)
+      return null;
+    
+    Scope scope = (Scope) session.getAttribute(SESSION_CONVERSATION);
     
     if (scope == null)
-      return;
+      return null;
     
-    ContextContainer context = scope._transientConversation;
-    scope._transientConversation = null;
+    if (scope._transientConversation == null)
+      scope._transientConversation = scope.get(scope._extendedId);
     
-    if (scope._extendedId == null)
-      context.close();
+    return scope;
+  }
+  
+  private Scope createSessionScope()
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request == null)
+      return null;
     
-    scope._extendedId = null;
+    HttpSession session = ((HttpServletRequest) request).getSession();
+
+    if (session == null)
+      return null;
+    
+    Scope scope = (Scope) session.getAttribute(SESSION_CONVERSATION);
+    
+    if (scope == null) {
+      scope = new Scope();
+      session.setAttribute(SESSION_CONVERSATION, scope);
+    }
+    
+    request.setAttribute(REQUEST_CONVERSATION, new RequestListener(scope));
+    
+    return scope;
+  }
+
+  /**
+   * Creates a conversation scope in the current scope.
+   */
+  private Scope createSessionScope(String name)
+  {
+    Scope scope = createSessionScope();
+    
+    if (scope == null)
+      return null;
+    
+    if (scope._transientConversation != null) {
+    }
+    else if (name != null) {
+      // scope._extendedId = name;
+      scope._transientConversation = scope.get(name);
+    }
+    else if (scope._extendedId != null) {
+      scope._transientConversation = scope.get(scope._extendedId);
+    
+      if (scope._transientConversation == null) {
+        throw new IllegalStateException(L.l("Conversation id={0} is an unknown conversation",
+                                            scope._extendedId));
+      }
+    }
+    else
+      scope._transientConversation = new ContextContainer();
+    
+    return scope;
+  }
+ 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 
   static class Scope implements java.io.Serializable, HttpSessionBindingListener {
@@ -355,6 +518,21 @@ public class ConversationContext extends AbstractScopeContext
       }
       
       _conversationMap = null;
+    }
+  }
+  
+  class RequestListener implements ScopeRemoveListener {
+    private Scope _scope;
+    
+    RequestListener(Scope scope)
+    {
+      _scope = scope;
+    }
+    
+    @Override
+    public void removeEvent(Object scope, String name)
+    {
+      destroy(_scope, false);
     }
   }
 }

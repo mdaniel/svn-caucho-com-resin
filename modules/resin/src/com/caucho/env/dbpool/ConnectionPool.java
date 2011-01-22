@@ -713,7 +713,9 @@ public class ConnectionPool extends AbstractManagedObject
         if (userPoolItem == null)
           userPoolItem = allocatePoolConnection(mcf, subject, info, null);
 
-        Object userConn = userPoolItem.allocateUserConnection();
+        Object userConn;
+        
+        userConn = userPoolItem.allocateUserConnection();
         
         if (userConn != null) {
           userPoolItem = null;
@@ -989,9 +991,8 @@ public class ConnectionPool extends AbstractManagedObject
       userPoolItem = poolItem.toActive(subject, info, oldPoolItem);
       
       if (userPoolItem == null) {
-        log.fine(L.l("Connection '{0}' was not valid on creation",
-                     poolItem));
-        return null;
+        throw new ResourceException(L.l("Connection '{0}' was not valid on creation",
+                                   poolItem));
       }
         
       _connectionCreateCountTotal.incrementAndGet();
