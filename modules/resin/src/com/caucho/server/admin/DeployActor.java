@@ -47,7 +47,7 @@ import com.caucho.bam.ActorError;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
 import com.caucho.cloud.deploy.SetTagQuery;
@@ -88,7 +88,7 @@ public class DeployActor extends SimpleActor
 
   public DeployActor()
   {
-    super("deploy@resin.caucho", BamService.getCurrentBroker());
+    super("deploy@resin.caucho", BamSystem.getCurrentBroker());
   }
   
   /*

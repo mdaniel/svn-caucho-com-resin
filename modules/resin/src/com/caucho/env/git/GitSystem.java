@@ -42,10 +42,10 @@ import com.caucho.vfs.*;
 /**
  * Top-level class for a repository
  */
-public class GitSystem extends AbstractResinService 
+public class GitSystem extends AbstractResinSubSystem 
 {
   public static final int START_PRIORITY
-  = RootDirectoryService.START_PRIORITY_ROOT_DIRECTORY + 1; 
+  = RootDirectorySystem.START_PRIORITY_ROOT_DIRECTORY + 1; 
 
   private static final L10N L = new L10N(GitSystem.class);
   private static final Logger log = 
@@ -89,7 +89,7 @@ public class GitSystem extends AbstractResinService
     throws IOException
   {
     if (_root == null)
-      _root = RootDirectoryService.getCurrentDataDirectory().lookup(".git");
+      _root = RootDirectorySystem.getCurrentDataDirectory().lookup(".git");
 
     if (_root.lookup("HEAD").canRead())
       return;

@@ -46,7 +46,7 @@ import javax.management.ObjectName;
 
 import com.caucho.VersionFactory;
 import com.caucho.bam.broker.Broker;
-import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.loadbalance.LoadBalanceFactory;
 import com.caucho.cloud.loadbalance.LoadBalanceService;
 import com.caucho.cloud.network.ClusterServer;
@@ -75,7 +75,7 @@ import com.caucho.env.repository.LocalRepositoryService;
 import com.caucho.env.repository.RepositoryService;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.env.service.RootDirectoryService;
+import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.warning.WarningService;
@@ -1110,7 +1110,7 @@ public class Resin
   
     dataDirectory = dataDirectory.lookup("./" + serverName);
     
-    RootDirectoryService.createAndAddService(_rootDirectory, dataDirectory);
+    RootDirectorySystem.createAndAddService(_rootDirectory, dataDirectory);
   }
   
   /**
@@ -1166,7 +1166,7 @@ public class Resin
     
     LoadBalanceService.createAndAddService(createLoadBalanceFactory());
     
-    BamService.createAndAddService(server.getBamAdminName());
+    BamSystem.createAndAddService(server.getBamAdminName());
     
     DeployControllerService.createAndAddService();
     
@@ -1314,16 +1314,22 @@ public class Resin
 
         System.exit(ExitCode.BIND.ordinal());
       }
-      else if (e instanceof CompileException) {
+      else if (e instanceof ConfigException) {
         System.err.println(e.getMessage());
 
         log().log(Level.CONFIG, e.toString(), e);
+        
+        System.exit(ExitCode.BAD_CONFIG.ordinal());
       }
       else {
+        System.err.println(e.getMessage());
+
+        log().log(Level.WARNING, e.toString(), e);
+        
         e.printStackTrace(System.err);
       }
     } finally {
-      System.exit(ExitCode.BAD_CONFIG.ordinal());
+      System.exit(ExitCode.UNKNOWN.ordinal());
     }
   }
 

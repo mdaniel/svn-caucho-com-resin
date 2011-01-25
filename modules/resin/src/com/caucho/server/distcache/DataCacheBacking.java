@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import com.caucho.config.ConfigException;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.env.service.RootDirectoryService;
+import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
@@ -258,7 +258,7 @@ public class DataCacheBacking implements CacheDataBacking {
   public void start()
   {
     try {
-      Path dataDirectory = RootDirectoryService.getCurrentDataDirectory();
+      Path dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
 
       String serverId = ResinSystem.getCurrentId();
 

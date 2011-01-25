@@ -63,7 +63,7 @@ import com.caucho.inject.Module;
 import com.caucho.jms.JmsMessageListener;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.ModuleConfig;
-import com.caucho.remote.BamService;
+import com.caucho.remote.BamSystem;
 import com.caucho.server.admin.AdminService;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
@@ -216,8 +216,8 @@ public class ResinStandardPlugin implements Extension {
       }
     }
 
-    if (annotated.isAnnotationPresent(BamService.class)) {
-      BamService service = annotated.getAnnotation(BamService.class);
+    if (annotated.isAnnotationPresent(BamSystem.class)) {
+      BamSystem service = annotated.getAnnotation(BamSystem.class);
 
       HempBroker broker = HempBroker.getCurrent();
       broker.addStartupActor(event.getBean(), service.name(), 

@@ -60,11 +60,11 @@ public class ResinSystem
   private final String _id;
   private EnvironmentClassLoader _classLoader;
   
-  private final ConcurrentHashMap<Class<?>,ResinService> _serviceMap
-    = new ConcurrentHashMap<Class<?>,ResinService>();
+  private final ConcurrentHashMap<Class<?>,ResinSubSystem> _serviceMap
+    = new ConcurrentHashMap<Class<?>,ResinSubSystem>();
   
-  private final TreeSet<ResinService> _pendingStart
-    = new TreeSet<ResinService>(new StartComparator());
+  private final TreeSet<ResinSubSystem> _pendingStart
+    = new TreeSet<ResinSubSystem>(new StartComparator());
   
   private InjectManager _injectManager;
 
@@ -123,7 +123,7 @@ public class ResinSystem
       Environment.init();
       
       _injectManager = InjectManager.create();
-      CdiService.createAndAddService();
+      CdiSystem.createAndAddService();
       
       BeanBuilder<ResinSystem> beanFactory
         = _injectManager.createBeanFactory(ResinSystem.class);
@@ -161,7 +161,7 @@ public class ResinSystem
     
     try {
       thread.setContextClassLoader(_classLoader);
-      RootDirectoryService.createAndAddService(rootDirectory, dataDirectory);
+      RootDirectorySystem.createAndAddService(rootDirectory, dataDirectory);
     } catch (Exception e) {
       throw ConfigException.create(e);
     } finally {
@@ -180,7 +180,7 @@ public class ResinSystem
   /**
    * Returns the current identified service.
    */
-  public static <T extends ResinService> T
+  public static <T extends ResinSubSystem> T
   getCurrentService(Class<T> serviceClass)
   {
     ResinSystem manager = getCurrent();
@@ -295,6 +295,14 @@ public class ResinSystem
   }
 
   /**
+   * Returns true before the startup has completed.
+   */
+  public boolean isBeforeActive()
+  {
+    return _lifecycle.getState().isBeforeActive();
+  }
+
+  /**
    * Returns true if the server is stopped.
    */
   public boolean isStopping()
@@ -341,7 +349,7 @@ public class ResinSystem
   /**
    * Adds a new service.
    */
-  public void addService(ResinService service)
+  public void addService(ResinSubSystem service)
   {
     addService(service.getClass(), service);
   }
@@ -349,9 +357,9 @@ public class ResinSystem
   /**
    * Adds a new service.
    */
-  public void addService(Class<?> serviceApi, ResinService service)
+  public void addService(Class<?> serviceApi, ResinSubSystem service)
   {
-    ResinService oldService
+    ResinSubSystem oldService
       = _serviceMap.putIfAbsent(serviceApi, service);
     
     if (oldService != null) {
@@ -369,7 +377,7 @@ public class ResinSystem
   /**
    * Adds a new service.
    */
-  public <T extends ResinService> T addServiceIfAbsent(T service)
+  public <T extends ResinSubSystem> T addServiceIfAbsent(T service)
   {
     return addServiceIfAbsent(service.getClass(), service);
   }
@@ -378,10 +386,10 @@ public class ResinSystem
    * Adds a new service.
    */
   @SuppressWarnings("unchecked")
-  public <T extends ResinService> T 
+  public <T extends ResinSubSystem> T 
   addServiceIfAbsent(Class<?> serviceApi, T service)
   {
-    ResinService oldService
+    ResinSubSystem oldService
       = _serviceMap.putIfAbsent(serviceApi, service);
     
     if (oldService != null) {
@@ -401,7 +409,7 @@ public class ResinSystem
    * Returns the service for the given class.
    */
   @SuppressWarnings("unchecked")
-  public <T extends ResinService> T getService(Class<T> cl)
+  public <T extends ResinSubSystem> T getService(Class<T> cl)
   {
     return (T) _serviceMap.get(cl);
   }
@@ -469,7 +477,7 @@ public class ResinSystem
       thread.setContextClassLoader(_classLoader);
       
       while (_pendingStart.size() > 0) {
-        ResinService service = _pendingStart.first();
+        ResinSubSystem service = _pendingStart.first();
         _pendingStart.remove(service);
         
         thread.setContextClassLoader(_classLoader);
@@ -515,14 +523,14 @@ public class ResinSystem
       if (! _lifecycle.toStopping())
         return;
 
-      TreeSet<ResinService> services
-        = new TreeSet<ResinService>(new StopComparator());
+      TreeSet<ResinSubSystem> services
+        = new TreeSet<ResinSubSystem>(new StopComparator());
       
       services.addAll(_serviceMap.values());
       
       // sort
       
-      for (ResinService service : services) {
+      for (ResinSubSystem service : services) {
         try {
           thread.setContextClassLoader(_classLoader);
 
@@ -557,14 +565,14 @@ public class ResinSystem
     try {
       thread.setContextClassLoader(_classLoader);
 
-      TreeSet<ResinService> services
-        = new TreeSet<ResinService>(new StopComparator());
+      TreeSet<ResinSubSystem> services
+        = new TreeSet<ResinSubSystem>(new StopComparator());
       
       services.addAll(_serviceMap.values());
 
       _serviceMap.clear();
       
-      for (ResinService service : services) {
+      for (ResinSubSystem service : services) {
         try {
           service.destroy();
         } catch (Exception e) {
@@ -594,7 +602,7 @@ public class ResinSystem
             + "[id=" + getId() + "]");
   }
   
-  class ClassLoaderService extends AbstractResinService {
+  class ClassLoaderService extends AbstractResinSubSystem {
     @Override
     public int getStartPriority()
     {
@@ -620,9 +628,9 @@ public class ResinSystem
     }
   }
   
-  static class StartComparator implements Comparator<ResinService> {
+  static class StartComparator implements Comparator<ResinSubSystem> {
     @Override
-    public int compare(ResinService a, ResinService b)
+    public int compare(ResinSubSystem a, ResinSubSystem b)
     {
       int cmp = a.getStartPriority() - b.getStartPriority();
       
@@ -633,9 +641,9 @@ public class ResinSystem
     }
   }
   
-  static class StopComparator implements Comparator<ResinService> {
+  static class StopComparator implements Comparator<ResinSubSystem> {
     @Override
-    public int compare(ResinService a, ResinService b)
+    public int compare(ResinSubSystem a, ResinSubSystem b)
     {
       int cmp = b.getStopPriority() - a.getStopPriority();
       

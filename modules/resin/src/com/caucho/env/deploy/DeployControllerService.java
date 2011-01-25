@@ -42,7 +42,7 @@ import com.caucho.inject.Module;
  * by tags.
  */
 @Module
-public class DeployControllerService extends AbstractResinService
+public class DeployControllerService extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY =
       NetworkClusterSystem.START_PRIORITY_CLUSTER_SERVICE;

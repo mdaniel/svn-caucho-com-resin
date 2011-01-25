@@ -35,9 +35,9 @@ import com.caucho.util.L10N;
 /**
  * Interface for a service registered with the Resin Server.
  */
-public class AbstractResinService implements ResinService
+public class AbstractResinSubSystem implements ResinSubSystem
 {
-  private static final L10N L = new L10N(AbstractResinService.class);
+  private static final L10N L = new L10N(AbstractResinSubSystem.class);
 
   @Override
   public int getStartPriority()
@@ -75,7 +75,7 @@ public class AbstractResinService implements ResinService
   }
 
   // convenience method for subclass's create methods
-  protected static <E extends AbstractResinService> ResinSystem
+  protected static <E extends AbstractResinSubSystem> ResinSystem
     preCreate(Class<E> serviceClass)
   {
     ResinSystem system = ResinSystem.getCurrent();

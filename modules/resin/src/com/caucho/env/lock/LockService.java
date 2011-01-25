@@ -36,7 +36,7 @@ import com.caucho.env.service.*;
 /**
  * Manages the distributed lock
  */
-public class LockService extends AbstractResinService 
+public class LockService extends AbstractResinSubSystem 
 {
   private AbstractLockManager _lockManager;
   

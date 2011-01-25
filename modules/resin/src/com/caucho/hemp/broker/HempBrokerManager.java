@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
@@ -51,18 +52,27 @@ public class HempBrokerManager
   private static EnvironmentLocal<HempBrokerManager> _localBroker
     = new EnvironmentLocal<HempBrokerManager>();
   
+  private ResinSystem _resinSystem;
+  
   // brokers
   private final HashMap<String,WeakReference<Broker>> _brokerMap
     = new HashMap<String,WeakReference<Broker>>();
 
-  public HempBrokerManager()
+  public HempBrokerManager(ResinSystem resinSystem)
   {
+    _resinSystem = resinSystem;
+    
     _localBroker.set(this);
   }
 
   public static HempBrokerManager getCurrent()
   {
     return _localBroker.get();
+  }
+  
+  public ResinSystem getResinSystem()
+  {
+    return _resinSystem;
   }
 
   public void addBroker(String name, Broker broker)

@@ -39,7 +39,7 @@ import com.caucho.network.listen.*;
 import com.caucho.util.*;
 import com.caucho.vfs.QServerSocket;
 
-public class NetworkListenSystem extends AbstractResinService 
+public class NetworkListenSystem extends AbstractResinSubSystem 
   implements AlarmListener
 {
   public static final int START_PRIORITY_AT_BEGIN = 50;

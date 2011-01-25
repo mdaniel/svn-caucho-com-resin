@@ -30,7 +30,7 @@
 package com.caucho.vfs;
 
 import com.caucho.config.ConfigException;
-import com.caucho.env.service.RootDirectoryService;
+import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.util.IoUtil;
@@ -390,7 +390,7 @@ public class JsseSSLFactory implements SSLFactory {
   private SelfSignedCert createSelfSignedCert(String name, 
                                               String []cipherSuites)
   {
-    Path dataDir = RootDirectoryService.getCurrentDataDirectory();
+    Path dataDir = RootDirectorySystem.getCurrentDataDirectory();
     Path certDir = dataDir.lookup("certs");
     
     SelfSignedCert cert = null;

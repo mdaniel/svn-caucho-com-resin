@@ -27,45 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.service;
+package com.caucho.remote;
 
-import com.caucho.config.inject.InjectManager;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.*;
 
-public class CdiService extends AbstractResinService 
-{
-  public static final int START_PRIORITY = 1;
-  
-  private InjectManager _cdiManager;
-  
-  private CdiService()
-  {
-    ResinSystem system = ResinSystem.getCurrent();
-    _cdiManager = InjectManager.create(system.getClassLoader());
-  }
+/**
+ * The @BamService registers a bean with the bam service registry.
+ */
 
-  public static CdiService createAndAddService()
-  {
-    ResinSystem system = preCreate(CdiService.class);
-      
-    CdiService service = new CdiService();
-    system.addService(CdiService.class, service);
-    
-    return service;
-  }
+@Documented
+@Target({TYPE})
+@Retention(RUNTIME)
+public @interface BamSystem {
+  public String name() default "";
 
-  public static CdiService getCurrent()
-  {
-    return ResinSystem.getCurrentService(CdiService.class);
-  }
-  
-  @Override
-  public int getStartPriority()
-  {
-    return START_PRIORITY;
-  }
-  
-  public void start()
-  {
-    _cdiManager.start();
-  }
+  public int threadMax() default 1;
 }

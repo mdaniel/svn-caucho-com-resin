@@ -45,7 +45,7 @@ import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.db.jdbc.DataSourceImpl;
-import com.caucho.env.service.RootDirectoryService;
+import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.loader.Environment;
@@ -114,7 +114,7 @@ public class FileQueueStore
       FileQueueStore store = _localStore.getLevel(loader);
 
       if (store == null) {
-        Path path = RootDirectoryService.getCurrentDataDirectory();
+        Path path = RootDirectorySystem.getCurrentDataDirectory();
         String serverId = server.getServerId();
 
         store = new FileQueueStore(path, serverId, loader, true);

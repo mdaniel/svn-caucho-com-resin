@@ -47,5 +47,6 @@ public enum ExitCode
   HEALTH,
   NETWORK,
   WATCHDOG_EXIT,
-  CPU;
+  CPU,
+  UNKNOWN;
 }

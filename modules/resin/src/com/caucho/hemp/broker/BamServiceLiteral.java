@@ -35,14 +35,14 @@ import javax.enterprise.util.AnnotationLiteral;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.AbstractBeanConfig;
-import com.caucho.remote.BamService;
+import com.caucho.remote.BamSystem;
 import com.caucho.util.L10N;
 
 /**
  * bam-service configuration
  */
-public class BamServiceLiteral extends AnnotationLiteral<BamService>
-  implements BamService
+public class BamServiceLiteral extends AnnotationLiteral<BamSystem>
+  implements BamSystem
 {
   private String _name;
   

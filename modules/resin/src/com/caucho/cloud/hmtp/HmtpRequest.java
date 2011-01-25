@@ -40,7 +40,7 @@ import com.caucho.bam.broker.PassthroughBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.stream.ActorStream;
-import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.bam.BamSystem;
 import com.caucho.hemp.servlet.ClientStubManager;
 import com.caucho.hemp.servlet.ServerProxyBroker;
 import com.caucho.hemp.servlet.ServerGatewayBroker;
@@ -70,7 +70,7 @@ public class HmtpRequest extends AbstractProtocolConnection
   public static final int HMUX_HMTP_OK        = '9';
   
   private SocketLink _conn;
-  private BamService _bamService;
+  private BamSystem _bamService;
   
   private ReadStream _rawRead;
   private WriteStream _rawWrite;
@@ -87,7 +87,7 @@ public class HmtpRequest extends AbstractProtocolConnection
   private HmtpLinkActor _linkActor;
 
   public HmtpRequest(SocketLink conn,
-                     BamService bamService)
+                     BamSystem bamService)
   {
     _conn = conn;
     _bamService = bamService;

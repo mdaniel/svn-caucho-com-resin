@@ -35,10 +35,10 @@ import com.caucho.util.L10N;
 /**
  * Interface for a service registered with the Resin Server.
  */
-public class TopologyService extends AbstractResinService
+public class TopologyService extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = 
-    ResinService.START_PRIORITY_NETWORK_CLUSTER;
+    ResinSubSystem.START_PRIORITY_NETWORK_CLUSTER;
 
   private static final L10N L = new L10N(TopologyService.class);
   

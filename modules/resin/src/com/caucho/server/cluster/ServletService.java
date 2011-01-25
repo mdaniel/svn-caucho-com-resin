@@ -34,7 +34,7 @@ import com.caucho.env.service.*;
 /**
  * The main servlet service in a Resin server. 
  */
-public class ServletService extends AbstractResinService
+public class ServletService extends AbstractResinSubSystem
 {
   private Server _server;
   

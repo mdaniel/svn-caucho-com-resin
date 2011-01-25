@@ -41,7 +41,7 @@ import com.caucho.env.service.*;
 import com.caucho.security.*;
 import com.caucho.util.Base64;
 
-public class SecurityService extends AbstractResinService
+public class SecurityService extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = 30;
   

@@ -39,16 +39,16 @@ import com.caucho.vfs.*;
  * Root service for the root and data directories.
  *
  */
-public class RootDirectoryService extends AbstractResinService 
+public class RootDirectorySystem extends AbstractResinSubSystem 
 {
   public static final int START_PRIORITY_ROOT_DIRECTORY = 20;
 
-  private static final L10N L = new L10N(RootDirectoryService.class);
+  private static final L10N L = new L10N(RootDirectorySystem.class);
   
   private final Path _rootDirectory;
   private final Path _dataDirectory;
 
-  public RootDirectoryService(Path rootDirectory, Path dataDirectory) 
+  public RootDirectorySystem(Path rootDirectory, Path dataDirectory) 
     throws IOException
   {
     if (rootDirectory == null)
@@ -69,29 +69,29 @@ public class RootDirectoryService extends AbstractResinService
     dataDirectory.mkdirs();
   }
   
-  public static RootDirectoryService createAndAddService(Path rootDirectory)
+  public static RootDirectorySystem createAndAddService(Path rootDirectory)
       throws IOException
   {
     return createAndAddService(rootDirectory, 
                                rootDirectory.lookup("resin-data"));
   }
 
-  public static RootDirectoryService createAndAddService(Path rootDirectory,
+  public static RootDirectorySystem createAndAddService(Path rootDirectory,
                                                          Path dataDirectory)
     throws IOException
   {
-    ResinSystem system = preCreate(RootDirectoryService.class);
+    ResinSystem system = preCreate(RootDirectorySystem.class);
     
-    RootDirectoryService service =
-      new RootDirectoryService(rootDirectory, dataDirectory);
-    system.addService(RootDirectoryService.class, service);
+    RootDirectorySystem service =
+      new RootDirectorySystem(rootDirectory, dataDirectory);
+    system.addService(RootDirectorySystem.class, service);
     
     return service;
   }
 
-  public static RootDirectoryService getCurrent()
+  public static RootDirectorySystem getCurrent()
   {
-    return ResinSystem.getCurrentService(RootDirectoryService.class);
+    return ResinSystem.getCurrentService(RootDirectorySystem.class);
   }
 
   /**
@@ -99,11 +99,11 @@ public class RootDirectoryService extends AbstractResinService
    */
   public static Path getCurrentDataDirectory()
   {
-    RootDirectoryService rootService = getCurrent();
+    RootDirectorySystem rootService = getCurrent();
     
     if (rootService == null)
       throw new IllegalStateException(L.l("{0} must be active for getCurrentDataDirectory().",
-                                          RootDirectoryService.class.getSimpleName()));
+                                          RootDirectorySystem.class.getSimpleName()));
     
     return rootService.getDataDirectory();
   }

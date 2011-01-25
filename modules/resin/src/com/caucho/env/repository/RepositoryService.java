@@ -35,7 +35,7 @@ import com.caucho.util.L10N;
 /**
  * Public API for the persistent .git repository
  */
-public class RepositoryService extends AbstractResinService
+public class RepositoryService extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = START_PRIORITY_CLUSTER_SERVICE;
 

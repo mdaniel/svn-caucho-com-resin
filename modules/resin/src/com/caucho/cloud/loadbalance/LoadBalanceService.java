@@ -34,7 +34,7 @@ import com.caucho.env.service.*;
 /**
  * LoadBalanceService distributes requests across a group of clients.
  */
-public class LoadBalanceService extends AbstractResinService
+public class LoadBalanceService extends AbstractResinSubSystem
 {
   private final LoadBalanceFactory _factory;
 

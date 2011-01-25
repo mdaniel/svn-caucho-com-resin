@@ -30,10 +30,10 @@ package com.caucho.env.meter;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.caucho.env.service.AbstractResinService;
+import com.caucho.env.service.AbstractResinSubSystem;
 
 //TODO: service cleanup
-public class MeterService extends AbstractResinService {
+public class MeterService extends AbstractResinSubSystem {
   private static MeterService _manager = new MeterService();
 
   private final ConcurrentHashMap<String,AbstractMeter> _meterMap

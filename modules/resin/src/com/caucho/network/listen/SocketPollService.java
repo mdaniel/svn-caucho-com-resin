@@ -35,7 +35,7 @@ import com.caucho.env.service.*;
 /**
  * The socket poll service, provides nio-style socket listening.
  */
-public class SocketPollService extends AbstractResinService
+public class SocketPollService extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = TopologyService.START_PRIORITY + 1;
 

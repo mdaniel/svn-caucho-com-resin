@@ -34,7 +34,7 @@ import com.caucho.env.git.GitSystem;
 import com.caucho.env.service.*;
 import com.caucho.util.L10N;
 
-public class LocalRepositoryService extends AbstractResinService
+public class LocalRepositoryService extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = GitSystem.START_PRIORITY + 1;
   

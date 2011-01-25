@@ -45,7 +45,7 @@ import com.caucho.util.L10N;
  *
  */
 public class HealthStatusService 
-  extends AbstractResinService 
+  extends AbstractResinSubSystem 
   implements HealthStatusListener
 {
   public static final int START_PRIORITY = 1;

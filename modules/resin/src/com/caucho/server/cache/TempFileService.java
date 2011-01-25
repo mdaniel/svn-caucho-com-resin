@@ -36,7 +36,7 @@ import com.caucho.vfs.Path;
 /**
  * Represents an inode to a temporary file.
  */
-public class TempFileService extends AbstractResinService
+public class TempFileService extends AbstractResinSubSystem
 {
   private static final L10N L = new L10N(TempFileService.class);
   
@@ -49,11 +49,11 @@ public class TempFileService extends AbstractResinService
 
   public static TempFileService createAndAddService()
   {
-    RootDirectoryService rootService = RootDirectoryService.getCurrent();
+    RootDirectorySystem rootService = RootDirectorySystem.getCurrent();
     if (rootService == null)
       throw new IllegalStateException(L.l("{0} requires an active {1}",
                                           TempFileService.class.getSimpleName(),
-                                          RootDirectoryService.class.getSimpleName()));
+                                          RootDirectorySystem.class.getSimpleName()));
 
     Path dataDirectory = rootService.getDataDirectory();
     TempFileManager manager = new TempFileManager(dataDirectory.lookup("tmp"));

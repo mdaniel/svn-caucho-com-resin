@@ -44,7 +44,7 @@ import com.caucho.util.*;
  * thread. If the timeout takes longer than shutdown-wait-max, the ShutdownSystem
  * will force a JVM exit.
  */
-public class ShutdownSystem extends AbstractResinService
+public class ShutdownSystem extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = 1;
 

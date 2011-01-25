@@ -44,7 +44,7 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.bam.stream.NullActorStream;
-import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudCluster;
@@ -127,7 +127,7 @@ public class Server
 
   private InjectManager _cdiManager;
 
-  private BamService _bamService;
+  private BamSystem _bamService;
 
   private InvocationServer _invocationServer;
   private HostContainer _hostContainer;
@@ -255,7 +255,7 @@ public class Server
 
     _alarm = new Alarm(this);
     
-    _bamService = BamService.getCurrent();
+    _bamService = BamSystem.getCurrent();
 
     _authManager = new ServerAuthManager();
     // XXX:
@@ -362,7 +362,7 @@ public class Server
    */
   protected HempBrokerManager createBrokerManager()
   {
-    return new HempBrokerManager();
+    return new HempBrokerManager(_resinSystem);
   }
 
   /**
@@ -615,9 +615,11 @@ public class Server
   /**
    * Sets the url-length-max
    */
-  public void setUrlLengthMax(int max)
+  public void setUrlLengthMax(int length)
   {
-    _urlLengthMax = max;
+    _urlLengthMax = length;
+
+    getInvocationDecoder().setMaxURILength(length);
   }
 
   /**
@@ -722,14 +724,6 @@ public class Server
   public long getDependencyCheckInterval()
   {
     return Environment.getDependencyCheckInterval(getClassLoader());
-  }
-
-  /**
-   * Sets the max-uri
-   */
-  public void setMaxUriLength(int length)
-  {
-    getInvocationDecoder().setMaxURILength(length);
   }
 
   /**

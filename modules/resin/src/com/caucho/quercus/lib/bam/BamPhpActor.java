@@ -53,7 +53,7 @@ import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
-import com.caucho.remote.BamService;
+import com.caucho.remote.BamSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.NullWriteStream;
 import com.caucho.vfs.Path;

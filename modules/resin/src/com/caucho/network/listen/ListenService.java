@@ -43,7 +43,7 @@ import com.caucho.util.L10N;
  * The socket listen service, which accepts sockets and dispatches them to
  * protocols. 
  */
-public class ListenService extends AbstractResinService
+public class ListenService extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY_LISTEN = 2000;
   public static final int START_PRIORITY_CLUSTER = 2100;

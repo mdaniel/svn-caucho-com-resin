@@ -43,7 +43,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.env.service.RootDirectoryService;
+import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentProperties;
@@ -202,7 +202,7 @@ public class ResinConfig implements EnvironmentBean
   public TempFileManager getTempFileManager()
   {
     if (_tempFileManager == null) {
-      Path path = RootDirectoryService.getCurrent().getDataDirectory();
+      Path path = RootDirectorySystem.getCurrent().getDataDirectory();
 
       _tempFileManager = new TempFileManager(path);
     }

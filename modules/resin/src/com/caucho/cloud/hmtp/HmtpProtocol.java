@@ -29,7 +29,7 @@
 
 package com.caucho.cloud.hmtp;
 
-import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.bam.BamSystem;
 import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
@@ -40,13 +40,13 @@ import com.caucho.network.listen.SocketLink;
  * @see com.caucho.network.listen.AbstractProtocol
  */
 public class HmtpProtocol extends AbstractProtocol {
-  private BamService _bamService;
+  private BamSystem _bamService;
   
   public HmtpProtocol()
   {
     setProtocolName("hmtp");
     
-    _bamService = BamService.getCurrent();
+    _bamService = BamSystem.getCurrent();
   }
 
   /**

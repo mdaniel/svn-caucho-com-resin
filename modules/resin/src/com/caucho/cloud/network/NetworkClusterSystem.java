@@ -43,7 +43,7 @@ import com.caucho.util.L10N;
  * NetworkClusterService manages the cluster network code, the communication
  * between Resin servers in a cluster. 
  */
-public class NetworkClusterSystem extends AbstractResinService
+public class NetworkClusterSystem extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = SocketPollService.START_PRIORITY + 1;
 

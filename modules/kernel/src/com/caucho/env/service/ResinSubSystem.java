@@ -32,7 +32,7 @@ package com.caucho.env.service;
 /**
  * Interface for a service registered with the Resin Server.
  */
-public interface ResinService
+public interface ResinSubSystem
 {
   // the start priority of an environment service with no network dependencies
   public static final int START_PRIORITY_ENV_SERVICE = 30;

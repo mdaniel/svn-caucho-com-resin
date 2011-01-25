@@ -34,7 +34,7 @@ import com.caucho.env.service.*;
 /**
  * Manages the distributed lock
  */
-public class VoteService extends AbstractResinService 
+public class VoteService extends AbstractResinSubSystem 
 {
   private AbstractVoteManager _voteManager;
   

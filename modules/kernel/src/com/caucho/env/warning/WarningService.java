@@ -40,7 +40,7 @@ import com.caucho.util.L10N;
  * The WarningService is a general way to send warning and critical
  * system messages such as shutdown messages.
  */
-public class WarningService extends AbstractResinService
+public class WarningService extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = 1;
 

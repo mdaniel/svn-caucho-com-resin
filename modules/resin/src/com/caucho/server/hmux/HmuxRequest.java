@@ -42,7 +42,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.cloud.bam.BamService;
+import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.hmtp.HmtpRequest;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
@@ -295,7 +295,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     _filter = new ServletFilter();
     
-    BamService bamService = BamService.getCurrent();
+    BamSystem bamService = BamSystem.getCurrent();
 
     _hmtpRequest = new HmtpRequest(conn, bamService);
   }
