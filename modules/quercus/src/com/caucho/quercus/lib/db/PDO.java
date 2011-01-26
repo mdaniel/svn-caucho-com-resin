@@ -82,6 +82,9 @@ public class PDO implements EnvCleanup {
   public static final int ATTR_DRIVER_NAME = 16;
   public static final int ATTR_STRINGIFY_FETCHES = 17;
   public static final int ATTR_MAX_COLUMN_LEN = 18;
+  public static final int ATTR_DEFAULT_FETCH_MODE = 19;
+  public static final int ATTR_EMULATE_PREPARES = 20;
+
 
   public static final int CASE_NATURAL = 0;
   public static final int CASE_UPPER = 1;
@@ -107,6 +110,7 @@ public class PDO implements EnvCleanup {
   public static final int FETCH_INTO = 9;
   public static final int FETCH_FUNC = 10;
   public static final int FETCH_NAMED = 11;
+  public static final int FETCH_KEY_PAIR = 12;
 
   public static final int FETCH_GROUP = 0x00010000;
   public static final int FETCH_UNIQUE = 0x00030000;
@@ -120,6 +124,8 @@ public class PDO implements EnvCleanup {
   public static final int FETCH_ORI_ABS = 4;
   public static final int FETCH_ORI_REL = 5;
 
+  public static final int FETCH_PROPS_LATE = 1048576;
+
   public static final int NULL_NATURAL = 0;
   public static final int NULL_EMPTY_STRING = 1;
   public static final int NULL_TO_STRING = 2;
@@ -130,6 +136,14 @@ public class PDO implements EnvCleanup {
   public static final int PARAM_LOB = 3;
   public static final int PARAM_STMT = 4;
   public static final int PARAM_BOOL = 5;
+
+  public static final int PARAM_EVT_ALLOC = 0;
+  public static final int PARAM_EVT_EXEC_POST = 3;
+  public static final int PARAM_EVT_EXEC_PRE = 2;
+  public static final int PARAM_EVT_FETCH_POST = 5;
+  public static final int PARAM_EVT_FETCH_PRE = 4;
+  public static final int PARAM_EVT_FREE = 1;
+  public static final int PARAM_EVT_NORMALIZE = 6;
 
   public static final int PARAM_INPUT_OUTPUT = 0x80000000;
 
