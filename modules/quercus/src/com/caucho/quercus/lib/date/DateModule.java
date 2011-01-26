@@ -77,6 +77,14 @@ public class DateModule extends AbstractQuercusModule {
   private static final long DAY = 24 * HOUR;
 
   /**
+   * Returns true for the date extension.
+   */
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "date" };
+  }
+
+  /**
    * Returns the days in a given month.
    */
   public static int cal_days_in_month(Env env,
