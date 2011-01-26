@@ -380,8 +380,13 @@ class WatchdogManager implements AlarmListener {
           sb.append("  password: missing\n");
         else
           sb.append("  password: ok\n");
+        
+        sb.append("  watchdog-user: " + System.getProperty("user.name") + "\n");
 
-        sb.append("  user: " + System.getProperty("user.name"));
+        if (child.getUserName() != null)
+          sb.append("  user: " + child.getUserName());
+        else
+          sb.append("  user: " + System.getProperty("user.name"));
 
         if (child.getGroupName() != null)
           sb.append("(" + child.getGroupName() + ")");

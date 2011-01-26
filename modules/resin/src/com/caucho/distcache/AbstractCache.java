@@ -53,7 +53,7 @@ import javax.cache.CacheStatistics;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
-import com.caucho.env.distcache.DistCacheService;
+import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.AbstractCacheManager;
@@ -391,7 +391,7 @@ abstract public class AbstractCache extends AbstractMap
 
   public static AbstractCache getMatchingCache(String name)
   {
-    DistCacheService cacheService = DistCacheService.getCurrent();
+    DistCacheSystem cacheService = DistCacheSystem.getCurrent();
     
     CacheManager localManager = cacheService.getCacheManager();
 
@@ -442,7 +442,7 @@ abstract public class AbstractCache extends AbstractMap
                                                      _config.getKeySerializer()));
 
       if (_localManager == null) {
-        DistCacheService cacheService = DistCacheService.getCurrent();
+        DistCacheSystem cacheService = DistCacheSystem.getCurrent();
         
         _localManager = cacheService.getCacheManager();
       }
@@ -1077,7 +1077,7 @@ abstract public class AbstractCache extends AbstractMap
     if (_manager != null)
       return;
     
-    DistCacheService cacheService = DistCacheService.getCurrent();
+    DistCacheSystem cacheService = DistCacheSystem.getCurrent();
 
     if (cacheService == null)
       throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",

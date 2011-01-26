@@ -582,7 +582,7 @@ public final class ClusterServer {
    */
   public boolean isSelf()
   {
-    return _clusterService.getSelfServer() == getCloudServer();
+    return getCloudServer().isSelf();
   }
 
   /**
@@ -644,8 +644,7 @@ public final class ClusterServer {
     _clusterPort.init();
     */
 
-    if (getCloudServer() != _clusterService.getSelfServer()
-        && getCloudServer().getPort() >= 0) {
+    if (! isSelf() && getCloudServer().getPort() >= 0) {
       _serverPool = createServerPool(_clusterService.getServerId());
       _serverPool.init();
     }

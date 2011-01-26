@@ -64,6 +64,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
   private NetworkClusterSystem(CloudServer selfServer)
   {
     _selfServer = selfServer;
+    _selfServer.setSelf(true);
     
     _selfServer.getSystem().addClusterListener(new NetworkClusterListener());
     
@@ -77,7 +78,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
    * Creates a new network cluster service.
    */
   public static NetworkClusterSystem
-      createAndAddService(CloudServer selfServer)
+  createAndAddService(CloudServer selfServer)
   {
     ResinSystem system = preCreate(NetworkClusterSystem.class);
 

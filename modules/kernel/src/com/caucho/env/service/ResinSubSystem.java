@@ -35,7 +35,7 @@ package com.caucho.env.service;
 public interface ResinSubSystem
 {
   // the start priority of an environment service with no network dependencies
-  public static final int START_PRIORITY_ENV_SERVICE = 30;
+  public static final int START_PRIORITY_ENV_SYSTEM = 30;
   
   // the start priority of the cluster network service
   public static final int START_PRIORITY_NETWORK_CLUSTER = 40;

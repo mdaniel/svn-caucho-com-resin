@@ -30,6 +30,7 @@
 package com.caucho.env.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,6 +66,9 @@ public class ResinSystem
   
   private final TreeSet<ResinSubSystem> _pendingStart
     = new TreeSet<ResinSubSystem>(new StartComparator());
+  
+  private final ArrayList<AfterResinStartListener> _afterStartListeners
+    = new ArrayList<AfterResinStartListener>();
   
   private InjectManager _injectManager;
 
@@ -415,6 +419,18 @@ public class ResinSystem
   }
   
   //
+  // listeners
+  //
+  
+  /**
+   * Adds a new AfterStart listener for post-startup cleanup
+   */
+  public void addListener(AfterResinStartListener listener)
+  {
+    _afterStartListeners.add(listener);
+  }
+  
+  //
   // lifecycle operations
   //
 
@@ -460,6 +476,10 @@ public class ResinSystem
       startServices();
 
       _lifecycle.toActive();
+      
+      for (AfterResinStartListener listener : _afterStartListeners) {
+        listener.afterStart();
+      }
     } finally {
       if (! _lifecycle.isActive())
         _lifecycle.toError();

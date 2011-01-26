@@ -1000,16 +1000,6 @@ abstract public class AbstractHttpResponse {
       return;
 
     try {
-      /* XXX:
-      if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {
-        handleNotModified(_isTopCache);
-      }
-      if (_statusCode == SC_NOT_MODIFIED) {
-        boolean isTopCache = true;
-
-        handleNotModified(isTopCache);
-      }
-      */
       // server/137p
       HttpServletResponseImpl response = _request.getResponseFacade();
       if (response != null
@@ -1023,21 +1013,13 @@ abstract public class AbstractHttpResponse {
         _responseStream.close();
         finishResponseStream(isClose);
       }
-      /*
-      else if (_responseStream != _originalResponseStream) {
-        _responseStream.finish();
+      else if (_request.getRequestFacade().isAsyncStarted()) {
+        
       }
-      */
       else {
         _responseStream.flush();
         finishResponseStream(isClose);
       }
-
-      /*
-      if (_rawWrite != null) {
-        _rawWrite.flushBuffer();
-      }
-      */
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
       _isClientDisconnect = true;

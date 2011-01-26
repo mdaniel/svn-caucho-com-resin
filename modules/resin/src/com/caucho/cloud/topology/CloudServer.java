@@ -69,6 +69,8 @@ public class CloudServer {
   private int _port;
   private boolean _isSSL;
   
+  private boolean _isSelf;
+  
   private final ConcurrentHashMap<Class<?>,Object> _dataMap
     = new ConcurrentHashMap<Class<?>,Object>();
 
@@ -177,6 +179,22 @@ public class CloudServer {
   public boolean isStatic()
   {
     return _isStatic;
+  }
+  
+  /**
+   * True for the active server
+   */
+  public boolean isSelf()
+  {
+    return _isSelf;
+  }
+  
+  /**
+   * Sets true for the active server.
+   */
+  public void setSelf(boolean isSelf)
+  {
+    _isSelf = isSelf;
   }
   
   //

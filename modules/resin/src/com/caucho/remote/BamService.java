@@ -40,7 +40,7 @@ import java.lang.annotation.*;
 @Documented
 @Target({TYPE})
 @Retention(RUNTIME)
-public @interface BamSystem {
+public @interface BamService {
   public String name() default "";
 
   public int threadMax() default 1;

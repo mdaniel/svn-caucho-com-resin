@@ -47,7 +47,9 @@ public class BamSystem extends AbstractResinSubSystem
 {
   private static final L10N L = new L10N(BamSystem.class);
   
-  public static final int START_PRIORITY = START_PRIORITY_NETWORK_CLUSTER;
+  // priority must be before network so it's available to handle incoming
+  // messages
+  public static final int START_PRIORITY = START_PRIORITY_ENV_SYSTEM;
   
   private String _jid;
   

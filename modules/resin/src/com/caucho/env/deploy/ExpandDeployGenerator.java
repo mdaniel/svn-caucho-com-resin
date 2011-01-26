@@ -651,12 +651,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
       if (controller != null) {
         controller.setExpandCleanupFileSet(_expandCleanupFileSet);
-        
-        /*
-        if (_isVersioning) {
-          controller.setVersionDependency(new VersionDependency());
-        }
-        */
 
         controllerList.add(controller);
 

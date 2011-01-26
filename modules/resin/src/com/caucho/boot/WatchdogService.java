@@ -113,7 +113,7 @@ class WatchdogService extends SimpleActor
       String result = _manager.status();
     
       getBroker().queryResult(id, from, to,
-                                    new ResultStatus(true, result));
+                              new ResultStatus(true, result));
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       

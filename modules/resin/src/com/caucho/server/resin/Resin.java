@@ -65,7 +65,7 @@ import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.deploy.DeployControllerService;
-import com.caucho.env.distcache.DistCacheService;
+import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.env.git.GitSystem;
 import com.caucho.env.health.HealthStatusService;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
@@ -518,9 +518,9 @@ public class Resin
     LockService.createAndAddService(createLockManager());
   }
   
-  protected DistCacheService createDistCacheService()
+  protected DistCacheSystem createDistCacheService()
   {
-    return DistCacheService.
+    return DistCacheSystem.
       createAndAddService(new FileCacheManager(getResinSystem()));
   }
   

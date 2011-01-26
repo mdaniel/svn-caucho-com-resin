@@ -13,6 +13,11 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>watchdog: "status" was returning the watchdog's user, not the Resin instance user (#4359, rep by mros2stf)</li>
+<li>async/comet: request should not force flush on async (#4360, rep by Manoj Chennath)</li>
+<li>cloud: server.ifSelf() changed to more reliable predicate (#4355, rep by Jamison Novak)</li>
+<li>http: url-length-max wasn't allowing large URLs (#4358, rep by Daniel Kador)</li>
+<li>cloud: messages during startup are queued if mailbox isn't registered yet (rep by Jamison Novak)</li>
 <li>cdi: enable Conversation scope for JSP/servlets</li>
 <li>database: add DatabaseManager.closeConnection (#3703, rep by Nobuaki Shinomiya)</li>
 <li>servlet: request HashMapImpl fixes for inserts (#3726, rep by Fiaz Hossein)</li>

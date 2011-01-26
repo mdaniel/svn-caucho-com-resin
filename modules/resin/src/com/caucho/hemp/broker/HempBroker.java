@@ -54,9 +54,11 @@ import com.caucho.bam.packet.Message;
 import com.caucho.bam.packet.MessageError;
 import com.caucho.bam.packet.Packet;
 import com.caucho.bam.packet.Query;
+import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.QueryResult;
 import com.caucho.bam.stream.ActorStream;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.env.service.AfterResinStartListener;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -121,6 +123,9 @@ public class HempBroker extends AbstractManagedBroker
 
     if (_localBroker.getLevel() == null)
       _localBroker.set(this);
+    
+    if (_resinSystem != null)
+      _resinSystem.addListener(new AfterStartListener(this));
   }
 
   public HempBroker(HempBrokerManager manager, String domain)
@@ -156,6 +161,18 @@ public class HempBroker extends AbstractManagedBroker
   public void addAlias(String domain)
   {
     _aliasList.add(domain);
+  }
+  
+  public void afterStart()
+  {
+    deliverStartupPackets();
+    
+    ArrayList<Packet> deadPackets = new ArrayList<Packet>(_startupPacketList);
+    _startupPacketList.clear();
+    
+    for (Packet packet : deadPackets) {
+      packet.dispatch(this, this);
+    }
   }
 
   //
@@ -333,7 +350,7 @@ public class HempBroker extends AbstractManagedBroker
   }
 
   /**
-   * Sends a query to the desination mailbox.
+   * Sends a query to the destination mailbox.
    */
   @Override
   public void query(long id, String to, String from, Serializable payload)
@@ -357,7 +374,7 @@ public class HempBroker extends AbstractManagedBroker
   }
 
   /**
-   * Sends a query to the desination mailbox.
+   * Sends a query to the destination mailbox.
    */
   @Override
   public void queryResult(long id, String to, String from, Serializable payload)
@@ -377,6 +394,31 @@ public class HempBroker extends AbstractManagedBroker
     else {
       // use default error handling
       super.queryResult(id, to, from, payload);
+    }
+  }
+
+  /**
+   * Sends a query to the destination mailbox.
+   */
+  @Override
+  public void queryError(long id, String to, String from, Serializable payload,
+                         ActorError error)
+  {
+    Mailbox mailbox = getMailbox(to);
+    
+    if (mailbox != null) {
+      mailbox.queryError(id, to, from, payload, error);
+      return;
+    }
+    
+    // on startup, queue the messages until the startup completes
+    if (isBeforeActive()
+        && addStartupPacket(new QueryError(id, to, from, payload, error))) {
+      // startup packets are successful
+    }
+    else {
+      // use default error handling
+      super.queryError(id, to, from, payload, error);
     }
   }
    
@@ -728,7 +770,7 @@ public class HempBroker extends AbstractManagedBroker
 
   private String getJid(Actor actor, Annotation []annList)
   {
-    com.caucho.remote.BamSystem bamAnn = findActor(annList);
+    com.caucho.remote.BamService bamAnn = findActor(annList);
 
     String name = "";
 
@@ -750,7 +792,7 @@ public class HempBroker extends AbstractManagedBroker
 
   private int getThreadMax(Annotation []annList)
   {
-    com.caucho.remote.BamSystem bamAnn = findActor(annList);
+    com.caucho.remote.BamService bamAnn = findActor(annList);
 
     if (bamAnn != null)
       return bamAnn.threadMax();
@@ -758,11 +800,11 @@ public class HempBroker extends AbstractManagedBroker
       return 1;
   }
 
-  private com.caucho.remote.BamSystem findActor(Annotation []annList)
+  private com.caucho.remote.BamService findActor(Annotation []annList)
   {
     for (Annotation ann : annList) {
-      if (ann.annotationType().equals(com.caucho.remote.BamSystem.class))
-        return (com.caucho.remote.BamSystem) ann;
+      if (ann.annotationType().equals(com.caucho.remote.BamService.class))
+        return (com.caucho.remote.BamService) ann;
 
       // XXX: stereotypes
     }
@@ -833,6 +875,24 @@ public class HempBroker extends AbstractManagedBroker
     public void close()
     {
       removeMailbox(_actor);
+    }
+  }
+  
+  static class AfterStartListener implements AfterResinStartListener {
+    private WeakReference<HempBroker> _brokerRef;
+    
+    AfterStartListener(HempBroker broker)
+    {
+      _brokerRef = new WeakReference<HempBroker>(broker);
+    }
+    
+    @Override
+    public void afterStart()
+    {
+      HempBroker broker = _brokerRef.get();
+      
+      if (broker != null)
+        broker.afterStart();
     }
   }
 }
