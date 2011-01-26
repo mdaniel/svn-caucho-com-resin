@@ -84,6 +84,14 @@ public class QuercusDOMModule
   public static final int DOM_INVALID_ACCESS_ERR = 15;
   public static final int DOM_VALIDATION_ERR = 16;
 
+  /**
+   * Returns true for the dom extension.
+   */
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "dom" };
+  }
+
   public static DOMElement dom_import_simplexml(Env env, SimpleXMLElement node)
   {
     if (node == null)
