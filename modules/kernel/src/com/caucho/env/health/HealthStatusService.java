@@ -29,24 +29,21 @@
 
 package com.caucho.env.health;
 
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import com.caucho.env.service.*;
 import com.caucho.util.L10N;
 
 /**
- * A service that any other service can use to send notifications about health 
+ * A service that any component can use to send notifications about health 
  * status changes.  Listeners can register to receive these events.
  * 
  * @author paul
  *
  */
-public class HealthStatusService 
-  extends AbstractResinSubSystem 
-  implements HealthStatusListener
+public class HealthStatusService extends AbstractResinSubSystem 
 {
   public static final int START_PRIORITY = 1;
 
@@ -59,7 +56,7 @@ public class HealthStatusService
   
   private HealthStatusService()
   {
-    _listeners.add(this);
+    
   }
   
   public static HealthStatusService createAndAddService()
@@ -77,13 +74,31 @@ public class HealthStatusService
     return ResinSystem.getCurrentService(HealthStatusService.class);
   }
   
+  /**
+   * Notify all HealthStatusListeners about a change in health status.
+   * @param source object generating the notification; usually "this"
+   * @param status new health status
+   * @param message health status message
+   */
   public void updateHealthStatus(Object source, 
                                  HealthStatus status, String message)
   {
     for (HealthStatusListener listener : _listeners)
-      listener.healthStatusUpdate(source, status, message);
+      listener.updateHealthStatus(source, status, message);
+    
+    if (log.isLoggable(Level.FINE)) {
+      String msg = L.l("Health status {0} from {1}: {2}",
+                       status, source.getClass().getSimpleName(), message); 
+      log.log(Level.FINE, msg);
+    }
   }
 
+  /**
+   * Notify all HealthStatusListeners about a change in health status.
+   * @param source object generating the notification; usually "this"
+   * @param status new health status
+   * @param message health status message
+   */
   public static void updateCurrentHealthStatus(Object source, 
                                                HealthStatus status, 
                                                String message)
@@ -94,31 +109,21 @@ public class HealthStatusService
       service.updateHealthStatus(source, status, message);
     else {
       // this will only happen if HealthStatusService is not registered for some reason
-      String msg = L.l("Health status {0} from {1}: {2}", 
-                      status, source.getClass().getSimpleName(), message); 
+      String msg = L.l("Health status {0} from {1}: {2}",
+                       status, source.getClass().getSimpleName(), message); 
       log.warning(msg);
     }
   }
 
+  /**
+   * Registers a HealthStatusListener to receive health status notifications
+   * @param listener
+   */
   public void addHealthStatusListener(HealthStatusListener listener)
   {
     _listeners.add(listener);
   }
   
-  @Override
-  public void healthStatusUpdate(Object source, 
-                                 HealthStatus status, String message)
-  {
-    String msg = L.l("Health status {0} from {1}: {2}", 
-                     status, source.getClass().getSimpleName(), message); 
-    
-    if (_listeners.size() < 2) {
-      log.warning(msg); // log to warning if there's no other listeners (not pro)
-    } else if (log.isLoggable(Level.FINER)) {
-      log.log(Level.FINER, msg);
-    }
-  }
-
   @Override
   public int getStartPriority()
   {

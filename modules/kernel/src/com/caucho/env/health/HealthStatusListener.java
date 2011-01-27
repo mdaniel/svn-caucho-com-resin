@@ -31,7 +31,7 @@ package com.caucho.env.health;
 
 public interface HealthStatusListener 
 {
-  public void healthStatusUpdate(Object source, 
+  public void updateHealthStatus(Object source, 
                                  HealthStatus status, 
                                  String message);
 }
