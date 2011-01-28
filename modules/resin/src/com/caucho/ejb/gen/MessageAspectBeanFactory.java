@@ -52,6 +52,15 @@ public class MessageAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   }
   
   /**
+   * Returns the superclass
+   */
+  @Override
+  public String getBeanSuper()
+  {
+    return "super";
+  }
+  
+  /**
    * Generates the underlying bean object
    */
   @Override

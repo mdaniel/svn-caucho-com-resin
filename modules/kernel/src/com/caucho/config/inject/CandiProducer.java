@@ -252,6 +252,9 @@ public class CandiProducer<X> implements InjectionTarget<X>
   public void inject(X instance, CreationalContext<X> env)
   {
     try {
+      if (instance instanceof CandiEnhancedBean)
+        instance = (X) ((CandiEnhancedBean) instance).__caucho_getDelegate();
+      
       for (ConfigProgram program : _injectProgram) {
         // log.info("INJECT: " + program);
         program.inject(instance, env);
