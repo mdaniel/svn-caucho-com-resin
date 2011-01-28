@@ -621,8 +621,15 @@ public class InterceptorGenerator<X>
 
     out.print(getUniqueName(out) + "_method = ");
     
+    String declaringClassName = javaMethod.getDeclaringClass().getName();
+    
+    if (hasDecorator()) {
+      // ioc/0c22
+      declaringClassName = _decoratorSet.iterator().next().getName();
+    }
+    
     generateGetMethod(out,
-                      javaMethod.getDeclaringClass().getName(),
+                      declaringClassName,
                       javaMethod.getName(),
                       javaMethod.getParameterTypes());
     
@@ -640,11 +647,14 @@ public class InterceptorGenerator<X>
       superMethodName = javaMethod.getName();
     }
     else {
-      className = getBeanFactory().getInstanceClassName();
+      // ioc/0c22
+      // className = getBeanFactory().getInstanceClassName();
+      className = declaringClassName;
       // ejb/6030 vs ioc/0c00
       
-      if (getBeanFactory().isProxy())
+      if (getBeanFactory().isProxy()) {
         superMethodName = javaMethod.getName();
+      }
     }
       
     // ejb/1061
@@ -900,7 +910,11 @@ public class InterceptorGenerator<X>
     
     out.printClass(InterceptionType.class);
     out.println("." + _interceptionType + ", ");
-    out.print(_factory.getAspectBeanFactory().getInterceptorInstance());
+    
+    if (hasDecorator())
+      out.print("delegate");
+    else
+      out.print(_factory.getAspectBeanFactory().getInterceptorInstance());
 
     out.println(", ");
     // generateThis(out);

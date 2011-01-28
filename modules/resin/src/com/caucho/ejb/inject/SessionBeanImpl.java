@@ -222,8 +222,12 @@ public class SessionBeanImpl<X,T>
       AnnotatedMethod<? super X> apiMethod
         = AnnotatedTypeUtil.findMethod(extAnnType, beanMethod);
       
-      if (apiMethod == null)
+      boolean isBeanMethod = false; 
+      
+      if (apiMethod == null) {
         apiMethod = beanMethod;
+        isBeanMethod = true;
+      }
       else if (apiMethod instanceof AnnotatedMethodImpl<?>) {
         // ioc/0b0h
         AnnotatedMethodImpl<? super X> apiMethodImpl
@@ -244,15 +248,20 @@ public class SessionBeanImpl<X,T>
       int param = EventManager.findObserverAnnotation(apiMethod);
       
       if (param >= 0) {
-        /*
-        if (apiMethod == beanMethod
-            && ! apiMethod.isStatic()
-            && _types.size() > 1) {
+        // ioc/0b0i - TCK
+        
+        if (! isBeanMethod) {
+        }
+        else if (apiMethod.isStatic()) {
+        }
+        else if (_types.size() == 1 
+                 && _types.iterator().next() == beanType.getJavaClass()) {
+        }
+        else {
           throw new ConfigException(L.l("{0}.{1} is an invalid @Observes method because @Observes must be in the @Local API.",
                                         beanMethod.getDeclaringType().getJavaClass().getSimpleName(),
                                         beanMethod.getJavaMember().getName()));
         }
-        */
           
         eventManager.addObserver(this, apiMethod);
       }

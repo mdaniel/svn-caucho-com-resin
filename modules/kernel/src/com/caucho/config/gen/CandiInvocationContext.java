@@ -207,6 +207,10 @@ public class CandiInvocationContext implements InvocationContext {
         throw (Exception) cause;
       else
         throw e;
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException(e + "\n  " + _implMethod
+                                         + "\n  " + _target,
+                                         e);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
