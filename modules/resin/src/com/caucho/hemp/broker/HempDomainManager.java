@@ -81,6 +81,7 @@ public class HempDomainManager extends DomainManager
       return null;
   }
 
+  @Override
   public Mailbox findDomain(String name)
   {
     WeakReference<Mailbox> domainRef = null;
@@ -92,11 +93,6 @@ public class HempDomainManager extends DomainManager
     if (domainRef != null)
       return domainRef.get();
 
-    Server server = Server.getCurrent();
-
-    if (server == null)
-      return null;
-    
     return null;
   }
   

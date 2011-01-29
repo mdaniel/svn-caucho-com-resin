@@ -500,32 +500,7 @@ public class HempBroker extends AbstractManagedBroker
       jid = jid + getDomain();
     }
 
-    ActorStream actorStream;
-    Actor actor = findParentActor(jid);
-
-    if (actor == null) {
-      return putActorStream(jid, findDomain(jid));
-    }
-    else if (jid.equals(actor.getJid())) {
-      actorStream = actor.getActorStream();
-
-      if (actorStream != null) {
-        return putActorStream(jid, new MultiworkerMailbox(jid, actorStream, this, 1));
-      }
-    }
-    else {
-      /*
-      if (! actor.startChild(jid))
-        return null;
-        */
-
-      ref = _actorStreamMap.get(jid);
-
-      if (ref != null)
-        return ref.get();
-    }
-
-    return null;
+    return putActorStream(jid, findDomain(jid));
   }
 
   private Mailbox putActorStream(String jid, Mailbox actorStream)
@@ -543,58 +518,6 @@ public class HempBroker extends AbstractManagedBroker
 
       return actorStream;
     }
-  }
-
-  private Actor findParentActor(String jid)
-  {
-    return null;
-    /*
-    if (jid == null)
-      return null;
-
-    WeakReference<Actor> ref = _actorCache.get(jid);
-
-    if (ref != null)
-      return ref.get();
-
-    if (startActorFromManager(jid)) {
-      ref = _actorCache.get(jid);
-
-      if (ref != null)
-        return ref.get();
-    }
-
-    if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0) {
-      Broker broker = _manager.findBroker(jid);
-      Actor actor = null;
-
-      if (actor != null) {
-        ref = _actorCache.get(jid);
-
-        if (ref != null)
-          return ref.get();
-
-        _actorCache.put(jid, new WeakReference<Actor>(actor));
-
-        return actor;
-      }
-    }
-
-    int p;
-
-    if ((p = jid.indexOf('/')) > 0) {
-      String uid = jid.substring(0, p);
-
-      return findParentActor(uid);
-    }
-    else if ((p = jid.indexOf('@')) > 0) {
-      String domainName = jid.substring(p + 1);
-
-      return findParentActor(domainName);
-    }
-    else
-      return null;
-      */
   }
 
   private Mailbox findDomain(String domain)
@@ -642,7 +565,7 @@ public class HempBroker extends AbstractManagedBroker
     if (p > 0) {
       String owner = jid.substring(0, p);
 
-      Actor actor = findParentActor(owner);
+      Actor actor = null;
 
       /*
       if (actor != null) {
