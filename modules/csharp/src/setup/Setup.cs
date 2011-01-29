@@ -154,8 +154,8 @@ namespace Caucho
         if (imagePath.IndexOf("resin.exe") != -1) {
           ResinArgs resinArgs = new ResinArgs(imagePath);
           Resin resin = null;
-          if (resinArgs.Home != null) {
-            resin = new Resin(resinArgs.Home);
+          if (resinArgs.ResinHome != null) {
+            resin = new Resin(resinArgs.ResinHome);
           } else if (resinArgs.Exe != null) {
             String exe = resinArgs.Exe;
             String home = exe.Substring(0, exe.Length - 10);
@@ -206,9 +206,9 @@ namespace Caucho
           ResinArgs resinArgs = new ResinArgs(imagePath);
 
           ResinService resin = null;
-          if (resinArgs.Home != null) {
+          if (resinArgs.ResinHome != null) {
             resin = new ResinService();
-            resin.Home = resinArgs.Home;
+            resin.Home = resinArgs.ResinHome;
           } else if (resinArgs.Exe != null) {
             String exe = resinArgs.Exe;
             String home = exe.Substring(0, exe.Length - 10);
@@ -228,10 +228,10 @@ namespace Caucho
           resin.Name = name;
           resin.Server = resinArgs.Server;
           resin.DynamicServer = resinArgs.DynamicServer;
-          resin.Root = resinArgs.Root;
+          resin.Root = resinArgs.ResinRoot;
           resin.Conf = resinArgs.Conf;
           resin.Log = resinArgs.Log;
-          resin.User = resinArgs.User;
+          resin.User = "************";
           resin.JavaHome = resinArgs.JavaHome;
           if (resinArgs.JmxPort != null && !"".Equals(resinArgs.JmxPort))
             resin.JmxPort = int.Parse(resinArgs.JmxPort);
@@ -411,6 +411,7 @@ namespace Caucho
       ServiceInstaller srvInst = new ServiceInstaller();
       srvInst.ServiceName = resinService.Name;
       srvInst.DisplayName = resinService.Name;
+      srvInst.Description = "Service: " + Version.FULL_VERSION;
       srvInst.StartType = ServiceStartMode.Automatic;
 
       txInst.Installers.Add(srvInst);
@@ -611,6 +612,7 @@ namespace Caucho
       StringBuilder sb = new StringBuilder();
       sb.Append("-service -name ").Append("\"");
       sb.Append(Name).Append("\"");
+
       if (Conf != null)
         sb.Append(" -conf ").Append('"').Append(Conf).Append('"');
 
