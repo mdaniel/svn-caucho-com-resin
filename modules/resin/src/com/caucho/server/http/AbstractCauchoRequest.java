@@ -521,6 +521,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
    * @param role the named role to test.
    * @return true if the user plays the role.
    */
+  @Override
   public boolean isUserInRole(String role)
   {
     ServletInvocation invocation = getInvocation();

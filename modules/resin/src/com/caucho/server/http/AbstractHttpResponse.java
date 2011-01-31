@@ -1013,7 +1013,8 @@ abstract public class AbstractHttpResponse {
         _responseStream.close();
         finishResponseStream(isClose);
       }
-      else if (_request.getRequestFacade().isAsyncStarted()) {
+      else if (_request.getRequestFacade().isAsyncStarted()
+               && _responseStream.getContentLength() == 0) {
         
       }
       else {

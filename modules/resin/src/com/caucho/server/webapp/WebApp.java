@@ -1205,8 +1205,10 @@ public class WebApp extends ServletContextImpl
       if (securityElement == null)
         continue;
 
+      /*
       ServletSecurity.EmptyRoleSemantic rootRoleSemantic
         = securityElement.getEmptyRoleSemantic();
+        */
 
       final Set<String> patterns = _servletMapper.getUrlPatterns(entry.getKey());
       final Collection<HttpMethodConstraintElement> constraints
@@ -2651,7 +2653,7 @@ public class WebApp extends ServletContextImpl
 
       FilterChainBuilder securityBuilder
         = _constraintManager.getFilterBuilder();
-
+      
       if (securityBuilder != null)
         _filterMapper.addTopFilter(securityBuilder);
 
