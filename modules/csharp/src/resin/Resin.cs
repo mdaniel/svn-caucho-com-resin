@@ -184,7 +184,7 @@ namespace Caucho
 
       if (command != null)
         arguments.Append(command);
-      else
+      else if (ResinArgs.RawArgs.Count == 1)
         arguments.Append("gui");
 
       arguments.Append(ResinArgs.ResinArguments).Append(' ');

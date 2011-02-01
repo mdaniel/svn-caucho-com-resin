@@ -277,11 +277,15 @@ namespace Caucho
 
           argsIdx += 2;
         }
-        else if ("-name".Equals(arguments[argsIdx]))
+        else if ("-name".Equals(arguments[argsIdx]) && IsService)
         {
           ServiceName = arguments[argsIdx + 1];
-          
-          resinArgs.Append(" -name \"").Append(ServiceName).Append("\" ");
+
+          argsIdx += 2;
+        }
+        else if ("-name".Equals(arguments[argsIdx]) && ! IsService)
+        {
+          resinArgs.Append(" -name \"").Append(arguments[argsIdx + 1]).Append("\" ");
 
           argsIdx += 2;
         }
