@@ -187,6 +187,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Writes a char array to the output.
    */
+  @Override
   public void print(char []buffer, int offset, int length)
     throws IOException
   {
@@ -332,6 +333,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Flushes the buffer.
    */
+  @Override
   public void flushBuffer()
     throws IOException
   {
@@ -341,6 +343,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Flushes the buffer.
    */
+  @Override
   public void flushChar()
     throws IOException
   {
@@ -403,6 +406,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Flushes the buffer.
    */
+  @Override
   public void clearBuffer()
   {
     _charLength = 0;

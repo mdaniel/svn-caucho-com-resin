@@ -110,11 +110,25 @@ public class ToCharResponseAdapter extends ResponseAdapter {
     /**
      * Flushes the buffer.
      */
+    @Override
     public void flushChar()
       throws IOException
     {
       flushBuffer();
       
+      getResponse().getWriter().flush();
+    }
+
+    /**
+     * Flushes the buffer.
+     */
+    @Override
+    public void flush()
+      throws IOException
+    {
+      super.flush();
+     
+      // server/1732
       getResponse().getWriter().flush();
     }
 

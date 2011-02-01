@@ -358,6 +358,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   /**
    * flushing
    */
+  @Override
   public void flushByte()
     throws IOException
   {
@@ -369,6 +370,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   /**
    * flushing
    */
+  @Override
   public void flushChar()
     throws IOException
   {

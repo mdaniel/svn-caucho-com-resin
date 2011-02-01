@@ -223,7 +223,7 @@ public class SessionBeanImpl<X,T>
         = AnnotatedTypeUtil.findMethod(extAnnType, beanMethod);
       
       boolean isBeanMethod = false; 
-      
+
       if (apiMethod == null) {
         apiMethod = beanMethod;
         isBeanMethod = true;
@@ -254,10 +254,11 @@ public class SessionBeanImpl<X,T>
         }
         else if (apiMethod.isStatic()) {
         }
-        else if (_types.size() == 1 
-                 && _types.iterator().next() == beanType.getJavaClass()) {
+        else if (_types.contains(beanType.getJavaClass())) {
+          // ioc/0b26
         }
         else {
+          System.out.println("TYPES: " + _types + " " + beanType);
           throw new ConfigException(L.l("{0}.{1} is an invalid @Observes method because @Observes must be in the @Local API.",
                                         beanMethod.getDeclaringType().getJavaClass().getSimpleName(),
                                         beanMethod.getJavaMember().getName()));
