@@ -165,7 +165,6 @@ public class ConversationContext extends AbstractScopeContext
       facesContext.getViewRoot().getAttributes().put("caucho.cid", name);
     
     scope._extendedId = name;
-    System.out.println("BEGIN: " + scope._extendedId);
     scope.put(name, scope._transientConversation);
   }
 
@@ -182,7 +181,7 @@ public class ConversationContext extends AbstractScopeContext
     
     String id = scope._extendedId;
     scope._extendedId = null;
-    System.out.println("END: " + scope._extendedId);
+
     if (id == null)
       throw new IllegalStateException(L.l("Conversation end() must only be called when a long-running conversation exists."));
 
