@@ -78,7 +78,7 @@ public class HostVar
 
   public String getUrl()
   {
-    Host host = _hostController.getDeployInstance();
+    Host host = _hostController.getDeployInstanceImpl();
 
     if (host != null)
       return host.getURL();
@@ -101,7 +101,7 @@ public class HostVar
 
   public Path getRoot()
   {
-    Host host = _hostController.getDeployInstance();
+    Host host = _hostController.getDeployInstanceImpl();
 
     if (host != null)
       return host.getWebAppContainer().getRootDirectory();
@@ -127,7 +127,7 @@ public class HostVar
 
   public Path getDocumentDirectory()
   {
-    Host host = _hostController.getDeployInstance();
+    Host host = _hostController.getDeployInstanceImpl();
 
     if (host != null)
       return host.getWebAppContainer().getDocumentDirectory();
@@ -142,7 +142,7 @@ public class HostVar
 
   public Path getWarDirectory()
   {
-    Host host = _hostController.getDeployInstance();
+    Host host = _hostController.getDeployInstanceImpl();
 
     if (host != null)
       return host.getWebAppContainer().getWarDir();
@@ -157,7 +157,7 @@ public class HostVar
 
   public Path getWarExpandDirectory()
   {
-    Host host = _hostController.getDeployInstance();
+    Host host = _hostController.getDeployInstanceImpl();
 
     if (host != null)
       return host.getWebAppContainer().getWarExpandDir();

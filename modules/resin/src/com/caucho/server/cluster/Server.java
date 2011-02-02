@@ -86,6 +86,7 @@ import com.caucho.server.host.HostConfig;
 import com.caucho.server.host.HostContainer;
 import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
+import com.caucho.server.http.HttpBufferStore;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
@@ -95,6 +96,7 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
@@ -159,6 +161,10 @@ public class Server
   private AbstractProxyCache _proxyCache;
 
   private PersistentStoreConfig _persistentStoreConfig;
+  
+  private final FreeList<HttpBufferStore> _httpBufferFreeList
+    = new FreeList<HttpBufferStore>(256);
+
   
   //
   // internal databases
@@ -1032,6 +1038,21 @@ public class Server
     _systemStore.init();
 
     return _systemStore;
+  }
+
+  public HttpBufferStore allocateHttpBuffer()
+  {
+    HttpBufferStore buffer = _httpBufferFreeList.allocate();
+
+    if (buffer == null)
+      buffer = new HttpBufferStore(getUrlLengthMax());
+
+    return buffer;
+  }
+
+  public void freeHttpBuffer(HttpBufferStore buffer)
+  {
+    _httpBufferFreeList.free(buffer);
   }
 
   /**

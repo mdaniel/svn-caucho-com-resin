@@ -233,7 +233,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     try {
       thread.setContextClassLoader(server.getClassLoader());
 
-      HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) server);
+      HttpBufferStore httpBuffer = server.allocateHttpBuffer();
 
       startRequest(httpBuffer);
       startInvocation();

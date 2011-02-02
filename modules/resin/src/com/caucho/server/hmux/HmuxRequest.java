@@ -365,7 +365,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _filter.init(this, getRawRead(), getRawWrite());
 
     try {
-      HttpBufferStore httpBuffer = HttpBufferStore.allocate(getServer());
+      HttpBufferStore httpBuffer = getServer().allocateHttpBuffer();
       startRequest(httpBuffer);
 
       startInvocation();

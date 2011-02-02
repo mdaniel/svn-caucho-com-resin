@@ -1743,7 +1743,7 @@ public abstract class AbstractHttpRequest
       */
 
       if (httpBuffer != null)
-        HttpBufferStore.free(httpBuffer);
+        getServer().freeHttpBuffer(httpBuffer);
     }
   }
 

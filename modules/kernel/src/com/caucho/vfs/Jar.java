@@ -859,18 +859,23 @@ public class Jar implements CacheListener {
     @Override
     public int getAvailable() throws IOException
     {
-      if (_zis == null)
+      InputStream zis = _zis;
+      
+      if (zis == null)
         return -1;
-      else
-        return _zis.available();
+      
+      return _zis.available();
     }
  
     @Override
     public int read(byte []buf, int off, int len) throws IOException
     {
-      int readLen = _zis.read(buf, off, len);
- 
-      return readLen;
+      InputStream zis = _zis;
+      
+      if (zis == null)
+        return -1;
+      
+      return zis.read(buf, off, len);
     }
  
     @Override

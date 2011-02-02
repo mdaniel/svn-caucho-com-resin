@@ -452,7 +452,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the current instance.
    */
-  private I getDeployInstanceImpl()
+  public I getDeployInstanceImpl()
   {
     return _deployInstance;
   }
