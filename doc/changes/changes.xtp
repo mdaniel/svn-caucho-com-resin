@@ -13,6 +13,7 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>/resin-admin: increased upload_max_filesize for web app deployment. New limit is 128Mb. (#4371 rep by Naoki Yano)</li>
 <li>bam/cluster: HmtpQueue in ProDomainManager needs to be ConcurrentHashMap and not WeakReference (rep by Jamie Novak)</li>
 <li>watchdog: "status" was returning the watchdog's user, not the Resin instance user (#4359, rep by mros2stf)</li>
 <li>async/comet: request should not force flush on async (#4360, rep by Manoj Chennath)</li>

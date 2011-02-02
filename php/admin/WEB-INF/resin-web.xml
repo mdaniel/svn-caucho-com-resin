@@ -3,7 +3,13 @@
 
   <servlet-mapping url-pattern="*.php"
                    servlet-class="com.caucho.quercus.servlet.QuercusServlet">
-     <init compile="false"/>
+     <init compile="false">
+       <!--
+         if the application being deployed is greater then 128Mb (134217728)
+         please increase the value accordingly
+       -->
+       <php-ini upload_max_filesize="134217728"/>
+     </init>
   </servlet-mapping>
 
   <session-config>
