@@ -29,75 +29,17 @@
 
 package com.caucho.server.resin;
 
-import java.lang.management.MemoryUsage;
+import com.caucho.management.server.*;
+import com.caucho.util.MemoryPoolAdapter;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.openmbean.CompositeData;
-
-import com.caucho.config.ConfigException;
-import com.caucho.jmx.Jmx;
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.MemoryMXBean;
-
-/**
- * Facade for the JVM's memory statistics
- */
-public class MemoryAdmin extends AbstractManagedObject
+public class MemoryAdmin extends AbstractManagedObject 
   implements MemoryMXBean
 {
-  private final MBeanServer _mbeanServer;
-
-  private final ObjectName _codeCacheName;
-  private final ObjectName _edenName;
-  private final ObjectName _permGenName;
-  private final ObjectName _survivorName;
-  private final ObjectName _tenuredName;
-
+  private MemoryPoolAdapter _memoryPoolAdapter;
+  
   private MemoryAdmin()
   {
-    _mbeanServer = Jmx.getGlobalMBeanServer();
-
-    try {
-      ObjectName query = new ObjectName("java.lang:type=MemoryPool,*");
-
-      ObjectName codeCacheName
-        = new ObjectName("java.lang:type=MemoryPool,name=Code Cache");
-      ObjectName edenName
-        = new ObjectName("java.lang:type=MemoryPool,name=Eden Space");
-      ObjectName permGenName
-        = new ObjectName("java.lang:type=MemoryPool,name=Perm Gen");
-      ObjectName survivorName
-        = new ObjectName("java.lang:type=MemoryPool,name=Survivor Space");
-      ObjectName tenuredName
-        = new ObjectName("java.lang:type=MemoryPool,name=Tenured Gen");
-      
-      for (ObjectName objName : _mbeanServer.queryNames(query, null)) {
-        String name = objName.getKeyProperty("name");
-
-        if (name.toLowerCase().contains("code"))
-          codeCacheName = objName;
-        else if (name.toLowerCase().contains("eden"))
-          edenName = objName;
-        else if (name.toLowerCase().contains("perm"))
-          permGenName = objName;
-        else if (name.toLowerCase().contains("surv"))
-          survivorName = objName;
-        else if (name.toLowerCase().contains("tenured"))
-          tenuredName = objName;
-        else if (name.toLowerCase().contains("old"))
-          tenuredName = objName;
-      }
-      
-      _codeCacheName = codeCacheName;
-      _edenName = edenName;
-      _permGenName = permGenName;
-      _survivorName = survivorName;
-      _tenuredName = tenuredName;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-
+    _memoryPoolAdapter = new MemoryPoolAdapter();
     registerSelf();
   }
 
@@ -114,281 +56,101 @@ public class MemoryAdmin extends AbstractManagedObject
 
   public long getCodeCacheCommitted()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getCommitted();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getCodeCacheCommitted();
   }
 
   public long getCodeCacheMax()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getCodeCacheMax();
   }
 
   public long getCodeCacheUsed()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getCodeCacheUsed();
   }
 
   public long getCodeCacheFree()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax() - usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getCodeCacheFree();
   }
 
   public long getEdenCommitted()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getCommitted();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getEdenCommitted();
   }
 
   public long getEdenMax()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getEdenMax();
   }
 
   public long getEdenUsed()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getEdenUsed();
   }
 
   public long getEdenFree()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax() - usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getEdenFree();
   }
 
   public long getPermGenCommitted()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getCommitted();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getPermGenCommitted();
   }
 
   public long getPermGenMax()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getPermGenMax();
   }
 
   public long getPermGenUsed()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getPermGenUsed();
   }
 
   public long getPermGenFree()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax() - usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getPermGenFree();
   }
 
   public long getSurvivorCommitted()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getCommitted();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getSurvivorCommitted();
   }
 
   public long getSurvivorMax()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getSurvivorMax();
   }
 
   public long getSurvivorUsed()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getSurvivorUsed();
   }
 
   public long getSurvivorFree()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax() - usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getSurvivorFree();
   }
 
   public long getTenuredCommitted()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getCommitted();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getTenuredCommitted();
   }
 
   public long getTenuredMax()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getTenuredMax();
   }
 
   public long getTenuredUsed()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getTenuredUsed();
   }
 
   public long getTenuredFree()
   {
-    try {
-      CompositeData data
-        = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
-
-      MemoryUsage usage = MemoryUsage.from(data);
-
-      return usage.getMax() - usage.getUsed();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return _memoryPoolAdapter.getTenuredFree();
   }
 }
