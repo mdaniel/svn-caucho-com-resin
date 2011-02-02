@@ -194,7 +194,9 @@ public class FileOutput extends AbstractBinaryOutput
    */
   public boolean unlock()
   {
-    return _os.unlock();
+      if(_os != null)
+        return _os.unlock();
+      return true;
   }
 
   public Value stat()

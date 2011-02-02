@@ -1035,11 +1035,21 @@ public class FileModule extends AbstractQuercusModule {
 
         return LongValue.create(dataWritten);
       } finally {
-        os.close();
+        // unlock the stream before closing at, as we later
+        // don't have a ref on it.
+        if (os != null && (os instanceof LockableStream)
+          && ((flags & LOCK_EX) != 0))
+        {
+            flock(env, (LockableStream) os, LOCK_UN, null);
+        }
+
+          os.close();
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     } finally {
+      // try to unlock it again, in case we haven't done
+      // in the previous finally block.
       if (s != null && (s instanceof LockableStream)
           && ((flags & LOCK_EX) != 0))
         flock(env, (LockableStream) s, LOCK_UN, null);
@@ -1083,7 +1093,6 @@ public class FileModule extends AbstractQuercusModule {
       case LOCK_UN:
         // flock($fd, LOCK_UN) returns true even
         // if no lock is held.
-
         fileV.unlock();
         return true;
       default:
