@@ -255,8 +255,9 @@ abstract public class
   {
     super.initEnd();
 
-    if (getDeployAdmin() != null)
+    if (getDeployAdmin() != null) {
       getDeployAdmin().register();
+    }
   }
 
   /**

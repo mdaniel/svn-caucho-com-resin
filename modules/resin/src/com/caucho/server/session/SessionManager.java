@@ -226,8 +226,10 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     _cookieName = _servletContainer.getSessionCookie();
     _sslCookieName = _servletContainer.getSSLSessionCookie();
       
+    /*
     if (_sslCookieName != null && ! _sslCookieName.equals(_cookieName))
       _isSecure = true;
+      */
 
     String hostName = webApp.getHostName();
     String contextPath = webApp.getContextPath();
@@ -893,6 +895,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     _isSecure = secure;
   }
 
+  @Override
   public boolean isSecure()
   {
     return _isSecure;
@@ -986,7 +989,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   /**
    * Returns the secure of the session cookie.
    */
-  public boolean getCookieSecure()
+  public boolean isCookieSecure()
   {
     if (_isSecure)
       return true;

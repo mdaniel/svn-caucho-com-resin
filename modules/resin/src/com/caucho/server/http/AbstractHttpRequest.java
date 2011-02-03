@@ -1569,6 +1569,8 @@ public abstract class AbstractHttpRequest
   protected void sendRequestError(Throwable e)
     throws IOException
   {
+    killKeepalive();
+    
     try {
       ErrorPageManager errorManager = getErrorManager();
       

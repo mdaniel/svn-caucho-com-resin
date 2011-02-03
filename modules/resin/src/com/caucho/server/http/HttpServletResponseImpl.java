@@ -1279,11 +1279,18 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     cookie.setPort(manager.getCookiePort());
 
     if (manager.isSecure()) {
-      // cookie.setSecure(_request.isSecure());
+      // server/12zc (tck) vs server/01io (#4372)
+      /*
+      if (_request.isSecure())
+        cookie.setSecure(true);
+        */
 
-      // server/12zc (tck)
       cookie.setSecure(true);
-   }
+    }
+    else if (manager.isCookieSecure()) {
+      if (_request.isSecure())
+        cookie.setSecure(true);
+    }
     
     if (manager.isCookieHttpOnly())
       cookie.setHttpOnly(true);

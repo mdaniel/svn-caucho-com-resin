@@ -145,7 +145,7 @@ public class SessionManagerAdmin extends AbstractManagedObject
    */
   public boolean isCookieSecure()
   {
-    return _manager.getCookieSecure();
+    return _manager.isCookieSecure();
   }
 
   /**

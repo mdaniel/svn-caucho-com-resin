@@ -856,7 +856,7 @@ public class HttpRequest extends AbstractHttpRequest
       throw new BadRequestException(L.l("Invalid request: URL or headers are too long"), e);
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
-
+      
       throw new BadRequestException(String.valueOf(e), e);
     }
   }
@@ -983,6 +983,8 @@ public class HttpRequest extends AbstractHttpRequest
             uriBuffer[uriLength++] = (byte) ch;
             _uriLength = uriLength;
           }
+          
+          _version = 0;
 
           return true;
         }
@@ -1001,6 +1003,8 @@ public class HttpRequest extends AbstractHttpRequest
         while (true) {
           if (readLength <= readOffset) {
             if ((readLength = s.fillBuffer()) < 0) {
+              _version = 0;
+              
               return true;
             }
             readOffset = 0;

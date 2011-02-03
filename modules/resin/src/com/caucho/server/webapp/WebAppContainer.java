@@ -797,16 +797,17 @@ public class WebAppContainer
 
       if (rewriteChain != chain) {
         // server/13sf, server/1kq1
-        webApp = findWebAppByURI("/");
+        WebApp rootWebApp = findWebAppByURI("/");
 
-        if (webApp == null) {
+        if (rootWebApp == null) {
           // server/1u12
-          webApp = getErrorWebApp();
+          rootWebApp = getErrorWebApp();
         }
         
-        invocation.setWebApp(webApp);
+        invocation.setWebApp(rootWebApp);
         
-        rewriteChain = webApp.createWebAppFilterChain(rewriteChain, invocation);
+        if (rootWebApp != webApp)
+          rewriteChain = rootWebApp.createWebAppFilterChain(rewriteChain, invocation);
 
         invocation.setFilterChain(rewriteChain);
         isAlwaysModified = false;

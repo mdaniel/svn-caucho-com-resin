@@ -60,6 +60,12 @@ public class SetRequestSecureFilterChain implements FilterChain
   {
     doFilter(request, response, _next, _isSecure);
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
+  }
 
   public static void doFilter(ServletRequest request,
                               ServletResponse response,

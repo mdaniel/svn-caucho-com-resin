@@ -242,6 +242,9 @@ public class WebAppSingleDeployGenerator
     _controller.setSourceType("single");
 
     Environment.addEnvironmentListener(this, _parentLoader);
+
+    // server/1d02
+    //_controller.init();
     
     if (! isDeployed()) {
       log.warning(_controller + " does not have an active root-directory "
@@ -266,12 +269,18 @@ public class WebAppSingleDeployGenerator
   {
     if (_controller == null)
       return false;
+    
+    // server/1d--
+    return true;
+    
+    /*
     if (_controller.getRootDirectory().exists())
       return true;
     else if (_controller.getArchivePath() == null)
       return false;
     else
       return _controller.getArchivePath().canRead();
+      */
   }
   
   /**

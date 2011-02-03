@@ -137,10 +137,6 @@ public class WebAppController
     _contextPath = contextPath;
     
     _idTail = calculateIdTail(getId());
-    
-    if (! getId().startsWith("error/") && ! isVersioning()) {
-      _admin = new WebAppAdmin(this);
-    }
   }
   
   private static String calculateIdTail(String id)
@@ -442,6 +438,10 @@ public class WebAppController
   @Override
   protected void initEnd()
   {
+    if (! getId().startsWith("error/") && ! isVersioning()) {
+      _admin = new WebAppAdmin(this);
+    }
+    
     super.initEnd();
   }
 

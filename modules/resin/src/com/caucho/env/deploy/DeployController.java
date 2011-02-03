@@ -481,7 +481,7 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
-   * Redeploys the entry if it's modified.
+   * Starts the entry on initialization
    */
   @Override
   public void startOnInit()

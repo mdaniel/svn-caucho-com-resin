@@ -172,7 +172,9 @@ public class StartAutoRedeployAutoStrategy
     }
     else { /* active */
       // server/1d1d, server/102p
-      return controller.getDeployInstanceImpl();
+      I instance = controller.getDeployInstanceImpl();
+      
+      return instance;
     }
   }
 
