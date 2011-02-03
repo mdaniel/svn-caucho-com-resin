@@ -50,6 +50,7 @@ import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
+import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
@@ -60,6 +61,8 @@ import com.caucho.vfs.ReadStream;
 public class HttpRequest extends AbstractHttpRequest
   implements ProtocolConnection
 {
+  private static final L10N L = new L10N(HttpRequest.class);
+  
   private static final Logger log
     = Logger.getLogger(HttpRequest.class.getName());
 
@@ -306,7 +309,7 @@ public class HttpRequest extends AbstractHttpRequest
       _version = HTTP_1_1;
       return HTTP_1_1;
     }
-    if (protocol.equals("HTTP/1.0")) {
+    else if (protocol.equals("HTTP/1.0")) {
       _version = HTTP_1_0;
       return _version;
     }
@@ -318,7 +321,6 @@ public class HttpRequest extends AbstractHttpRequest
       _version = HTTP_0_9;
       return _version;
     }
-
 
     int i = protocol.indexOf('/');
     int len = protocol.length();
@@ -848,6 +850,10 @@ public class HttpRequest extends AbstractHttpRequest
       return true;
     } catch (ClientDisconnectException e) {
       throw e;
+    } catch (ArrayIndexOutOfBoundsException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      throw new BadRequestException(L.l("Invalid request: URL or headers are too long"), e);
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
 
@@ -892,6 +898,9 @@ public class HttpRequest extends AbstractHttpRequest
   private boolean readRequest(ReadStream s)
     throws IOException
   {
+    // server/12o3 - default to 1.0 for error messages in request
+    _version = HTTP_1_0;
+    
     byte []readBuffer = s.getBuffer();
     int readOffset = s.getOffset();
     int readLength = s.getLength();
@@ -1024,17 +1033,18 @@ public class HttpRequest extends AbstractHttpRequest
         break uri;
 
       default:
-        // There's no check for overrunning the length because
+        // There's no check for over-running the length because
         // allowing resizing would allow a DOS memory attack and
         // also lets us save a bit of efficiency.
         uriBuffer[uriLength++] = (byte) ch;
         break;
       }
 
-      if (readOffset >= readLength) {
+      if (readLength <= readOffset) {
         readOffset = 0;
         if ((readLength = s.fillBuffer()) < 0) {
           _uriLength = uriLength;
+          _version = 0;
           return true;
         }
       }
@@ -1042,6 +1052,7 @@ public class HttpRequest extends AbstractHttpRequest
     }
     
     _uriLength = uriLength;
+    _version = 0;
 
     // skip whitespace
     while (ch == ' ' || ch == '\t') {
@@ -1074,6 +1085,7 @@ public class HttpRequest extends AbstractHttpRequest
       }
       ch = readBuffer[readOffset++];
     }
+
     _protocol.setLength(offset);
 
     if (offset != 8) {

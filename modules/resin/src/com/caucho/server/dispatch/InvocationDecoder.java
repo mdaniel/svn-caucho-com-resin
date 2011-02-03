@@ -72,6 +72,7 @@ public class InvocationDecoder {
   public InvocationDecoder()
   {
     _encoding = CharacterEncoding.getLocalEncoding();
+    
     if (_encoding == null)
       _encoding = "UTF-8";
   }

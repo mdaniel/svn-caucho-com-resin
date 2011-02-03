@@ -126,13 +126,14 @@ public class EarDeployController
   public WebAppController findWebAppController(String name)
   {
     try {
-      EnterpriseApplication eApp = request();
+      // server/13bb
+      EnterpriseApplication eApp = getDeployInstanceImpl();
 
       if (eApp != null)
         return eApp.findWebAppEntry(name);
       else
         return null;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
 
       return null;

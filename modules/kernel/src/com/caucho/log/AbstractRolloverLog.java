@@ -457,7 +457,7 @@ public class AbstractRolloverLog {
   {
     long now = Alarm.getCurrentTime();
 
-    if (_nextRolloverCheckTime < now) {
+    if (_nextRolloverCheckTime <= now) {
       _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
       _rolloverWorker.wake();
@@ -479,6 +479,10 @@ public class AbstractRolloverLog {
       long lastPeriodEnd = _nextPeriodEnd;
 
       _nextPeriodEnd = nextRolloverTime(now);
+      
+      Alarm alarm = _rolloverAlarm;
+      if (_nextPeriodEnd > 0 && alarm != null)
+        alarm.queueAt(_nextPeriodEnd);
 
       Path path = getPath();
 
@@ -933,9 +937,6 @@ public class AbstractRolloverLog {
     {
       if (! isClosed()) {
         rolloverLog();
-        
-        if (_nextPeriodEnd > 0)
-          alarm.queueAt(_nextPeriodEnd);
       }
     }
   }

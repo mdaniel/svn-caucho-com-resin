@@ -252,8 +252,13 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   {
     _isActive = true;
 
-    if (_alarm != null)
-      _alarm.queue(60000);
+    if (_alarm != null) {
+      if (_autoFlushTime > 0)
+        _alarm.queue(_autoFlushTime);
+      else
+        _alarm.queue(60000);
+    }
+    
 
     if (_format == null)
       _format = "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"";
@@ -272,9 +277,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     _logWriter.init();
     // _sharedBufferLock = _logWriter.getBufferLock();
 
-    if (_autoFlushTime > 0 && _alarm != null)
-      _alarm.queue(_autoFlushTime);
-    
     super.init();
   }
 

@@ -554,6 +554,7 @@ public class EnterpriseApplication
         for (WebAppController webApp : _webApps) {
           // server/13bb
           //_webAppContainer.getWebAppGenerator().updateNoStart(webApp.getContextPath());
+          // _webAppContainer.getWebAppGenerator().update(
           _webAppContainer.getWebAppGenerator().update(webApp.getContextPath());
         }
       }
