@@ -29,8 +29,20 @@
 
 package com.caucho.env.health;
 
+/**
+ * A listener interface for receiving health status updates.
+ * 
+ * @author paul
+ *
+ */
 public interface HealthStatusListener 
 {
+  /**
+   * Invoked when a health status update occurs.
+   * @param source the object that generated the status
+   * @param status health status
+   * @param message health message
+   */
   public void updateHealthStatus(Object source, 
                                  HealthStatus status, 
                                  String message);
