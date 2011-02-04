@@ -251,7 +251,7 @@ class WebSocketContextImpl
       throw new IllegalStateException(L.l("Unexpected end-of-file waiting for HELLO"));
 
     boolean isFinal = (frame1 & FLAG_FIN) != 0;
-    int opcode = frame1 & 0x0f;
+    int opcode = frame1 & OP_HELLO;
     int len = frame2 & 0x7f;
 
     if (! isFinal) {
@@ -293,7 +293,7 @@ class WebSocketContextImpl
       throw new IllegalStateException(L.l("Unexpected end-of-file waiting for login"));
 
     boolean isFinal = (frame1 & FLAG_FIN) != 0;
-    int opcode = frame1 & 0x0f;
+    int opcode = frame1 & OP_HELLO;
     int len = frame2 & 0x7f;
 
     if (! isFinal) {
