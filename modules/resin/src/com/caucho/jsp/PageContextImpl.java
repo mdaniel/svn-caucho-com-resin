@@ -29,11 +29,63 @@
 
 package com.caucho.jsp;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.el.ELContext;
+import javax.el.ELContextEvent;
+import javax.el.ELContextListener;
+import javax.el.ELResolver;
+import javax.el.ValueExpression;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.ErrorData;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.SkipPageException;
+import javax.servlet.jsp.el.ExpressionEvaluator;
+import javax.servlet.jsp.el.VariableResolver;
+import javax.servlet.jsp.jstl.core.Config;
+import javax.servlet.jsp.jstl.fmt.LocalizationContext;
+import javax.servlet.jsp.tagext.BodyContent;
+import javax.servlet.jsp.tagext.JspFragment;
+
+import org.w3c.dom.Node;
+
 import com.caucho.el.ExprEnv;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.jsp.el.*;
+import com.caucho.jsp.el.ExpressionEvaluatorImpl;
+import com.caucho.jsp.el.ImplicitVariableMapper;
+import com.caucho.jsp.el.JspApplicationContextImpl;
+import com.caucho.jsp.el.PageContextAttributeMap;
+import com.caucho.jsp.el.PageContextELResolver;
+import com.caucho.jsp.el.ServletELContext;
 import com.caucho.jstl.JstlPageContext;
-import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
@@ -51,46 +103,6 @@ import com.caucho.vfs.FlushBuffer;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempCharBuffer;
 import com.caucho.xpath.VarEnv;
-
-import org.w3c.dom.Node;
-
-import javax.el.ELContext;
-import javax.el.ELContextEvent;
-import javax.el.ELContextListener;
-import javax.el.ELResolver;
-import javax.el.ValueExpression;
-import javax.servlet.*;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.ErrorData;
-import javax.servlet.jsp.JspContext;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.SkipPageException;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.jstl.core.Config;
-import javax.servlet.jsp.jstl.fmt.LocalizationContext;
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.JspFragment;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PageContextImpl extends PageContext
   implements ExprEnv, JstlPageContext, VariableResolver {
@@ -122,10 +134,7 @@ public class PageContextImpl extends PageContext
 
   private BodyResponseStream _bodyResponseStream;
 
-  private JspPrintWriter _jspPrintWriter;
-
   private int _bufferSize = 8192;
-  private boolean autoFlush;
   private BodyContentImpl _bodyOut;
 
   private Locale _locale;
@@ -136,16 +145,12 @@ public class PageContextImpl extends PageContext
 
   private final CharBuffer _cb = new CharBuffer();
 
-  private VariableResolver _varResolver;
-
   private PageELContext _elContextValue;
   private PageELContext _elContext;
 
   private ELResolver _elResolver;
   private javax.el.FunctionMapper _functionMapper;
   private PageVariableMapper _variableMapper;
-  private boolean _hasException;
-
   private HashMap<String,Method> _functionMap;
 
   private ExpressionEvaluatorImpl _expressionEvaluator;
@@ -159,7 +164,7 @@ public class PageContextImpl extends PageContext
     _bodyResponseStream = new BodyResponseStream();
     _bodyResponseStream.start();
 
-    _jspPrintWriter = new JspPrintWriter();
+    new JspPrintWriter();
   }
 
   public PageContextImpl(WebApp webApp, Servlet servlet)
@@ -190,6 +195,7 @@ public class PageContextImpl extends PageContext
     _functionMap = functionMap;
   }
 
+  @Override
   public void initialize(Servlet servlet,
                          ServletRequest request,
                          ServletResponse response,
@@ -203,7 +209,6 @@ public class PageContextImpl extends PageContext
     if (needsSession)
       session = ((HttpServletRequest) request).getSession(true);
 
-    ServletConfig config = servlet.getServletConfig();
     WebApp app = (WebApp) request.getServletContext();
 
     _webApp = app;
@@ -264,7 +269,6 @@ public class PageContextImpl extends PageContext
     // needed for includes from static pages
 
     _bufferSize = bufferSize;
-    this.autoFlush = autoFlush;
     _session = session;
 
     _out = _topOut;
@@ -278,7 +282,6 @@ public class PageContextImpl extends PageContext
     if (_elContextValue != null)
       _elContextValue.clear();
 
-    _hasException = false;
     //if (_attributes.size() > 0)
     //  _attributes.clear();
     _isFilled = false;
@@ -439,7 +442,7 @@ public class PageContextImpl extends PageContext
     case SESSION_SCOPE:
       {
         HttpSession session = getSession();
-        return session != null ? session.getValue(name) : null;
+        return session != null ? session.getAttribute(name) : null;
       }
     case APPLICATION_SCOPE:
       return getApplication().getAttribute(name);
@@ -449,6 +452,7 @@ public class PageContextImpl extends PageContext
     }
   }
 
+  @Override
   public void setAttribute(String name, Object value, int scope)
   {
     switch (scope) {
@@ -462,7 +466,7 @@ public class PageContextImpl extends PageContext
 
     case SESSION_SCOPE:
       if (getSession() != null)
-        getSession().putValue(name, value);
+        getSession().setAttribute(name, value);
       break;
 
     case APPLICATION_SCOPE:
@@ -474,6 +478,7 @@ public class PageContextImpl extends PageContext
     }
   }
 
+  @Override
   public void removeAttribute(String name, int scope)
   {
     if (name == null)
@@ -491,7 +496,7 @@ public class PageContextImpl extends PageContext
 
     case SESSION_SCOPE:
       if (getSession() != null)
-        getSession().removeValue(name);
+        getSession().removeAttribute(name);
       break;
 
     case APPLICATION_SCOPE:
@@ -503,7 +508,7 @@ public class PageContextImpl extends PageContext
     }
   }
 
-  public Enumeration getAttributeNames(int scope)
+  public Enumeration<String> getAttributeNames(int scope)
   {
     switch (scope) {
     case PAGE_SCOPE:
@@ -513,8 +518,9 @@ public class PageContextImpl extends PageContext
       return getCauchoRequest().getAttributeNames();
 
     case SESSION_SCOPE:
-      if (getSession() != null)
-        return new StringArrayEnum(getSession().getValueNames());
+      if (getSession() != null) {
+        return getSession().getAttributeNames();
+      }
       else
         return NullEnumeration.create();
 
@@ -526,7 +532,7 @@ public class PageContextImpl extends PageContext
     }
   }
 
-  public Enumeration getAttributeNamesInScope(int scope)
+  public Enumeration<String> getAttributeNamesInScope(int scope)
   {
     return getAttributeNames(scope);
   }
@@ -538,6 +544,7 @@ public class PageContextImpl extends PageContext
    *
    * @return the attribute value
    */
+  @Override
   public Object findAttribute(String name)
   {
     Object value;
@@ -583,7 +590,7 @@ public class PageContextImpl extends PageContext
       return REQUEST_SCOPE;
 
     HttpSession session = getSession();
-    if (session != null && session.getValue(name) != null)
+    if (session != null && session.getAttribute(name) != null)
       return SESSION_SCOPE;
 
     if (getApplication().getAttribute(name) != null)
@@ -1179,8 +1186,6 @@ public class PageContextImpl extends PageContext
     response.killCache();
     response.setNoCache(true);
 
-    _hasException = true;
-
     if (e instanceof ClientDisconnectException)
       throw (ClientDisconnectException) e;
 
@@ -1379,31 +1384,9 @@ public class PageContextImpl extends PageContext
   }
 
   /**
-   * Given a relative url, return the absolute url.
-   *
-   * @param value the relative url
-   *
-   * @return the absolute url.
-   */
-  private String getRelativeUrl(String value)
-  {
-    if (value.length() > 0 && value.charAt(0) == '/')
-      return value;
-
-    ServletContext context = getServletContext();
-    String contextPath = RequestAdapter.getPageContextPath(getCauchoRequest());
-    String uri = RequestAdapter.getPageURI(getCauchoRequest());
-    String relPath = uri.substring(contextPath.length());
-
-    int p = relPath.lastIndexOf('/');
-    String urlPwd = p <= 0 ? "/" : relPath.substring(0, p + 1);
-
-    return urlPwd + value;
-  }
-
-  /**
    * Releases the context.
    */
+  @Override
   public void release()
   {
     try {
@@ -1428,20 +1411,23 @@ public class PageContextImpl extends PageContext
           _out = ((AbstractJspWriter) _out).popWriter();
       }
 
-      JspWriter out = _out;
       _out = null;
       _topOut = null;
       _nodeEnv = null;
+
+      _responseStream = null;
+
+      ToCharResponseAdapter resAdapt = _responseAdapter;
+      _responseAdapter = null;
+
+      _servletResponse = null;
+      _response = null;
 
       if (_elContext != null)
         _elContext.clear();
 
       _jspOutputStream.release();
-      AbstractResponseStream responseStream = _responseStream;
-      _responseStream = null;
-
-      ToCharResponseAdapter resAdapt = _responseAdapter;
-      _responseAdapter = null;
+      
       if (resAdapt != null) {
         // jsp/15l3
         resAdapt.finish();
@@ -1455,9 +1441,6 @@ public class PageContextImpl extends PageContext
       if (! _hasException && responseStream != null)
         responseStream.close();
       */
-
-      _servletResponse = null;
-      _response = null;
     } catch (IOException e) {
       _out = null;
     }

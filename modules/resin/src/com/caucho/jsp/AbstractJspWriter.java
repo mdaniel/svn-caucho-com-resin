@@ -41,12 +41,7 @@ import java.util.logging.Logger;
  * A buffered JSP writer encapsulating a Writer.
  */
 abstract class AbstractJspWriter extends BodyContent implements FlushBuffer {
-  private static final Logger log
-    = Logger.getLogger(AbstractJspWriter.class.getName());
   private JspWriter _parent;
-
-  // the underlying writer
-  private Writer _writer;
 
   /**
    * Creates a new QJspWriter
@@ -80,26 +75,31 @@ abstract class AbstractJspWriter extends BodyContent implements FlushBuffer {
   /**
    * Returns the parent JSP writer.
    */
+  @Override
   public final JspWriter getEnclosingWriter()
   {
     return _parent;
   }
 
+  @Override
   public void writeOut(Writer writer) throws IOException
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public String getString()
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public Reader getReader()
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void clearBody()
   {
     throw new UnsupportedOperationException();
@@ -108,6 +108,7 @@ abstract class AbstractJspWriter extends BodyContent implements FlushBuffer {
   /**
    * Returns the autoFlush flag.
    */
+  @Override
   final public boolean isAutoFlush()
   {
     return this.autoFlush;

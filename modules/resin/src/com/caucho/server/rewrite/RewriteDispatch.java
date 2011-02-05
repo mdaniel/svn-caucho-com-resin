@@ -29,25 +29,25 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.*;
-import com.caucho.rewrite.DispatchRule;
-import com.caucho.rewrite.RewriteFilter;
-import com.caucho.server.dispatch.InvocationServer;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.rewrite.DispatchRule;
+import com.caucho.rewrite.RewriteFilter;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for a rewrite-dispatch
@@ -274,5 +274,11 @@ public class RewriteDispatch
     _matchRule.destroy();
   }
   */
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }
   

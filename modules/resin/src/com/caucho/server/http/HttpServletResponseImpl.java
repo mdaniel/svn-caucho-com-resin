@@ -176,8 +176,16 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     if (_writer != null)
       return _writer;
 
-    if (_outputStream != null)
+    if (_outputStream != null) {
+      if (_response.isClosed()) {
+        // jsp/017o
+        _writer = _response.getResponsePrintWriter();
+        _writer.init(_responseStream);
+        return _writer;
+      }
+      
       throw new IllegalStateException(L.l("getWriter() can't be called after getOutputStream()."));
+    }
 
     String encoding = getCharacterEncoding();
 

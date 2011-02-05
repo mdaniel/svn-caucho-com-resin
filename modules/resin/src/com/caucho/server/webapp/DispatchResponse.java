@@ -33,34 +33,40 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.server.http.ResponseAdapter;
 
-public class DispatchResponse extends ResponseAdapter {
-
-  public DispatchResponse(HttpServletResponse response) {
-    super(response);
+public class DispatchResponse extends ResponseAdapter
+{
+  public DispatchResponse()
+  {
   }
 
   @Override
-  public void setDateHeader(String name, long date) {
+  public void setDateHeader(String name, long date)
+  {
   }
 
   @Override
-  public void setHeader(String name, String value) {
+  public void setHeader(String name, String value)
+  {
   }
 
   @Override
-  public void addHeader(String name, String value) {
+  public void addHeader(String name, String value)
+  {
   }
 
   @Override
-  public void addDateHeader(String name, long date) {
+  public void addDateHeader(String name, long date)
+  {
   }
 
   @Override
-  public void addIntHeader(String name, int value) {
+  public void addIntHeader(String name, int value)
+  {
   }
 
   @Override
-  public void setIntHeader(String name, int value) {
+  public void setIntHeader(String name, int value)
+  {
   }
 
   @Override

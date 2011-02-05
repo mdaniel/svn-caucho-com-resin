@@ -29,24 +29,20 @@
 
 package com.caucho.server.http;
 
-import com.caucho.util.FreeList;
+import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.logging.Logger;
+
+import com.caucho.util.FreeList;
 
 public class ToCharResponseAdapter extends ResponseAdapter {
-  private static final Logger log
-    = Logger.getLogger(ToCharResponseAdapter.class.getName());
-  
   private static final FreeList<ToCharResponseAdapter> _freeList
     = new FreeList<ToCharResponseAdapter>(32);
 
   private ToCharResponseStreamWrapper _responseStream;
 
-  private ToCharResponseAdapter(HttpServletResponse response)
+  private ToCharResponseAdapter()
   {
-    super(response);
   }
 
   /**
@@ -57,15 +53,14 @@ public class ToCharResponseAdapter extends ResponseAdapter {
     ToCharResponseAdapter resAdapt = _freeList.allocate();
 
     if (resAdapt == null)
-      resAdapt = new ToCharResponseAdapter(response);
-    else
-      resAdapt.setResponse(response);
+      resAdapt = new ToCharResponseAdapter();
 
     resAdapt.init(response);
 
     return resAdapt;
   }
 
+  @Override
   protected AbstractResponseStream createWrapperResponseStream()
   {
     if (_responseStream == null)
@@ -82,6 +77,7 @@ public class ToCharResponseAdapter extends ResponseAdapter {
     super.init(response);
   }
 
+  @Override
   public void resetBuffer()
   {
     _responseStream.clearBuffer();
@@ -93,6 +89,12 @@ public class ToCharResponseAdapter extends ResponseAdapter {
       ((JspPrintWriter) _currentWriter).clear();
     */
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getResponse() + "]";
+  }
 
   public static void free(ToCharResponseAdapter resAdapt)
   {
@@ -102,6 +104,7 @@ public class ToCharResponseAdapter extends ResponseAdapter {
   }
 
   class ToCharResponseStreamWrapper extends ToCharResponseStream {
+    @Override
     public String getEncoding()
     {
       return getResponse().getCharacterEncoding();
@@ -148,6 +151,7 @@ public class ToCharResponseAdapter extends ResponseAdapter {
     }
     */
     
+    @Override
     protected void writeNext(char []buffer, int offset, int length)
       throws IOException
     {

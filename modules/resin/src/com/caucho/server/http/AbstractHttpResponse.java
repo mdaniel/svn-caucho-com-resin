@@ -1034,6 +1034,9 @@ abstract public class AbstractHttpResponse {
       _isClientDisconnect = true;
 
       throw e;
+    } finally {
+      if (isClose)
+        _isClosed = true;
     }
   }
 

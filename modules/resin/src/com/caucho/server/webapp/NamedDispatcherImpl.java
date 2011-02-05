@@ -112,7 +112,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
     RequestAdapter subRequest = RequestAdapter.create();
     subRequest.init(parentReq, parentRes, _webApp);
 
-    DispatchResponse subResponse = new DispatchResponse(parentRes);
+    DispatchResponse subResponse = new DispatchResponse();
     subResponse.init(parentRes);
 
     if (reqWrapper != null) {

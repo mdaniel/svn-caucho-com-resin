@@ -28,50 +28,39 @@
 
 package com.caucho.server.http;
 
-import com.caucho.util.FreeList;
-import com.caucho.vfs.FlushBuffer;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.logging.Logger;
-import java.util.Collection;
+
+import com.caucho.util.FreeList;
+import com.caucho.vfs.FlushBuffer;
 
 public class ResponseAdapter extends ResponseWrapper
   implements CauchoResponse
 {
-  private static final Logger log
-    = Logger.getLogger(ResponseAdapter.class.getName());
-
   private static final FreeList<ResponseAdapter> _freeList
     = new FreeList<ResponseAdapter>(32);
 
-  protected RequestAdapter _request;
+  private RequestAdapter _request;
 
-  protected FlushBuffer _flushBuffer;
+  private FlushBuffer _flushBuffer;
 
-  protected AbstractResponseStream _originalResponseStream;
-  protected AbstractResponseStream _responseStream;
+  private AbstractResponseStream _originalResponseStream;
+  private AbstractResponseStream _responseStream;
 
   private ServletOutputStreamImpl _os;
   private ResponseWriter _writer;
 
-  private boolean _hasOutputStream;
   private boolean _hasError;
 
-  private ResponseAdapter()
+  protected ResponseAdapter()
   {
-  }
-
-  protected ResponseAdapter(HttpServletResponse response)
-  {
-    setResponse(response);
-
     _originalResponseStream = createWrapperResponseStream();
 
     _os = new ServletOutputStreamImpl();
@@ -86,10 +75,8 @@ public class ResponseAdapter extends ResponseWrapper
     ResponseAdapter resAdapt = _freeList.allocate();
 
     if (resAdapt == null)
-      resAdapt = new ResponseAdapter(response);
-    else
-      resAdapt.setResponse(response);
-
+      resAdapt = new ResponseAdapter();
+    
     resAdapt.init(response);
 
     return resAdapt;
@@ -122,16 +109,19 @@ public class ResponseAdapter extends ResponseWrapper
     _writer.init(_originalResponseStream);
   }
 
+  @Override
   public AbstractResponseStream getResponseStream()
   {
     return _responseStream;
   }
 
+  @Override
   public boolean isCauchoResponseStream()
   {
     return false;
   }
 
+  @Override
   public void setResponseStream(AbstractResponseStream responseStream)
   {
     _responseStream = responseStream;
@@ -145,6 +135,7 @@ public class ResponseAdapter extends ResponseWrapper
     return false;
   }
 
+  @Override
   public void resetBuffer()
   {
     super.resetBuffer();
@@ -152,6 +143,7 @@ public class ResponseAdapter extends ResponseWrapper
     _responseStream.clearBuffer();
   }
 
+  @Override
   public void sendRedirect(String url)
     throws IOException
   {
@@ -172,6 +164,7 @@ public class ResponseAdapter extends ResponseWrapper
     _responseStream.setBufferSize(size);
   }
 
+  @Override
   public ServletOutputStream getOutputStream() throws IOException
   {
     return _os;
@@ -193,11 +186,13 @@ public class ResponseAdapter extends ResponseWrapper
     return _flushBuffer;
   }
 
+  @Override
   public PrintWriter getWriter() throws IOException
   {
     return _writer;
   }
 
+  @Override
   public void setContentType(String value)
   {
     super.setContentType(value);
@@ -220,6 +215,7 @@ public class ResponseAdapter extends ResponseWrapper
    * caucho
    */
 
+  @Override
   public String getHeader(String key)
   {
     return null;
@@ -230,10 +226,12 @@ public class ResponseAdapter extends ResponseWrapper
     return false;
   }
 
+  @Override
   public void setFooter(String key, String value)
   {
   }
 
+  @Override
   public void addFooter(String key, String value)
   {
   }
@@ -247,6 +245,7 @@ public class ResponseAdapter extends ResponseWrapper
    * When set to true, RequestDispatcher.forward() is disallowed on
    * this stream.
    */
+  @Override
   public void setForbidForward(boolean forbid)
   {
   }
@@ -255,11 +254,13 @@ public class ResponseAdapter extends ResponseWrapper
    * Returns true if RequestDispatcher.forward() is disallowed on
    * this stream.
    */
+  @Override
   public boolean getForbidForward()
   {
     return false;
   }
 
+  @Override
   public String getStatusMessage()
   {
     if (_response instanceof CauchoResponse)
@@ -271,6 +272,7 @@ public class ResponseAdapter extends ResponseWrapper
   /**
    * Set to true while processing an error.
    */
+  @Override
   public void setHasError(boolean hasError)
   {
     _hasError = hasError;
@@ -279,6 +281,7 @@ public class ResponseAdapter extends ResponseWrapper
   /**
    * Returns true if we're processing an error.
    */
+  @Override
   public boolean hasError()
   {
     return _hasError;
@@ -287,6 +290,7 @@ public class ResponseAdapter extends ResponseWrapper
   /**
    * Kills the cache for an error.
    */
+  @Override
   public void killCache()
   {
     if (getResponse() instanceof CauchoResponse)
@@ -296,6 +300,7 @@ public class ResponseAdapter extends ResponseWrapper
   /**
    * Sets private caching
    */
+  @Override
   public void setPrivateCache(boolean isPrivate)
   {
     if (getResponse() instanceof CauchoResponse)
@@ -305,18 +310,21 @@ public class ResponseAdapter extends ResponseWrapper
   /**
    * Sets no caching
    */
+  @Override
   public void setNoCache(boolean isPrivate)
   {
     if (getResponse() instanceof CauchoResponse)
       ((CauchoResponse) getResponse()).setNoCache(isPrivate);
   }
 
+  @Override
   public void setSessionId(String id)
   {
     if (getResponse() instanceof CauchoResponse)
       ((CauchoResponse) getResponse()).setSessionId(id);
   }
 
+  @Override
   public boolean isNoCacheUnlessVary()
   {
     CauchoResponse cRes = getCauchoResponse();
