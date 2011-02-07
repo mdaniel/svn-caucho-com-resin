@@ -306,8 +306,12 @@ public class ServletContextImpl extends ServletContextCompat
 
     URL url = new URL("jndi:/server" + getContextPath() + name);
 
-    if (path.exists() && ! path.isDirectory())
+    if (path.exists() && name.startsWith("/resources/")) {
       return url;
+    }
+    else if (path.exists() && path.isFile()) {
+      return url;
+    }
     else if (getClassLoader().getResource("META-INF/resources/" + realPath) != null) {
       return url;
     }
