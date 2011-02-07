@@ -1189,10 +1189,12 @@ public class RegexpModule
       for (int i = 0; i < regexpState.groupCount(); i++) {
         StringValue group = regexpState.group(env, i);
 
-        if (group != null)
+        if (group != null && !group.isEmpty()) // php/154b
           regs.put(group);
+        /* PHP's preg_replace_callback does not return empty groups
         else
           regs.put(empty);
+*/
       }
 
       Value replacement = fun.call(env, regs);
