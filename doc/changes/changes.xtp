@@ -13,6 +13,7 @@
 
 <s2 title="4.0.15 - snapshot">
 <ul>
+<li>eclipse-plugin: require automated eval. license request only for new download (#4379, rep by Daniel Lopez)</li>
 <li>jsp: sendRedirect in JSP could cause IllegalStateException (#4290, rep by Mattias Jiderhamn)</li>
 <li>cookie: ssl-session-cookie should not automatically set Secure for the non-SSL cookie (#4372)</li>
 <li>/resin-admin: increased upload_max_filesize for web app deployment. New limit is 128Mb. (#4371 rep by Naoki Yano)</li>
