@@ -30,10 +30,7 @@
 package com.caucho.quercus.lib.mcrypt;
 
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.util.L10N;
 
 import javax.crypto.Cipher;
@@ -111,7 +108,11 @@ public class Mcrypt {
 
       return _cipher.doFinal(data);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+        throw new QuercusRuntimeException(
+                L.l(
+                        "Failed to initialize the Security Cipher. \n"+
+                        "Please consult http://quercus.caucho.com/mcrypt.xtp"
+                ), e);
     }
   }
 
