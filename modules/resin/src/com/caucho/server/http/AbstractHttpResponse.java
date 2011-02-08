@@ -1034,10 +1034,9 @@ abstract public class AbstractHttpResponse {
       _isClientDisconnect = true;
 
       throw e;
-    } finally {
-      if (isClose)
-        _isClosed = true;
     }
+    
+    // server/2600 - for _isClosed
   }
 
   protected void finishResponseStream(boolean isClose)
