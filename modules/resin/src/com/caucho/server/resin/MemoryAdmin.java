@@ -29,6 +29,8 @@
 
 package com.caucho.server.resin;
 
+import javax.management.JMException;
+
 import com.caucho.management.server.*;
 import com.caucho.util.MemoryPoolAdapter;
 
@@ -56,101 +58,181 @@ public class MemoryAdmin extends AbstractManagedObject
 
   public long getCodeCacheCommitted()
   {
-    return _memoryPoolAdapter.getCodeCacheCommitted();
+    try {
+      return _memoryPoolAdapter.getCodeCacheCommitted();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getCodeCacheMax()
   {
-    return _memoryPoolAdapter.getCodeCacheMax();
+    try {
+      return _memoryPoolAdapter.getCodeCacheMax();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getCodeCacheUsed()
   {
-    return _memoryPoolAdapter.getCodeCacheUsed();
+    try {
+      return _memoryPoolAdapter.getCodeCacheUsed();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getCodeCacheFree()
   {
-    return _memoryPoolAdapter.getCodeCacheFree();
+    try {
+      return _memoryPoolAdapter.getCodeCacheFree();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getEdenCommitted()
   {
-    return _memoryPoolAdapter.getEdenCommitted();
+    try {
+      return _memoryPoolAdapter.getEdenCommitted();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getEdenMax()
   {
-    return _memoryPoolAdapter.getEdenMax();
+    try {
+      return _memoryPoolAdapter.getEdenMax();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getEdenUsed()
   {
-    return _memoryPoolAdapter.getEdenUsed();
+    try {
+      return _memoryPoolAdapter.getEdenUsed();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getEdenFree()
   {
-    return _memoryPoolAdapter.getEdenFree();
+    try {
+      return _memoryPoolAdapter.getEdenFree();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getPermGenCommitted()
   {
-    return _memoryPoolAdapter.getPermGenCommitted();
+    try {
+      return _memoryPoolAdapter.getPermGenCommitted();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getPermGenMax()
   {
-    return _memoryPoolAdapter.getPermGenMax();
+    try {
+      return _memoryPoolAdapter.getPermGenMax();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getPermGenUsed()
   {
-    return _memoryPoolAdapter.getPermGenUsed();
+    try {
+      return _memoryPoolAdapter.getPermGenUsed();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getPermGenFree()
   {
-    return _memoryPoolAdapter.getPermGenFree();
+    try {
+      return _memoryPoolAdapter.getPermGenFree();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getSurvivorCommitted()
   {
-    return _memoryPoolAdapter.getSurvivorCommitted();
+    try {
+      return _memoryPoolAdapter.getSurvivorCommitted();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getSurvivorMax()
   {
-    return _memoryPoolAdapter.getSurvivorMax();
+    try {
+      return _memoryPoolAdapter.getSurvivorMax();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getSurvivorUsed()
   {
-    return _memoryPoolAdapter.getSurvivorUsed();
+    try {
+      return _memoryPoolAdapter.getSurvivorUsed();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getSurvivorFree()
   {
-    return _memoryPoolAdapter.getSurvivorFree();
+    try {
+      return _memoryPoolAdapter.getSurvivorFree();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getTenuredCommitted()
   {
-    return _memoryPoolAdapter.getTenuredCommitted();
+    try {
+      return _memoryPoolAdapter.getTenuredCommitted();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getTenuredMax()
   {
-    return _memoryPoolAdapter.getTenuredMax();
+    try {
+      return _memoryPoolAdapter.getTenuredMax();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getTenuredUsed()
   {
-    return _memoryPoolAdapter.getTenuredUsed();
+    try {
+      return _memoryPoolAdapter.getTenuredUsed();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public long getTenuredFree()
   {
-    return _memoryPoolAdapter.getTenuredFree();
+    try {
+      return _memoryPoolAdapter.getTenuredFree();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
