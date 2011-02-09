@@ -2295,12 +2295,17 @@ abstract public class Value implements java.io.Serializable
 
     Value array = v.toAutoArray();
 
-    if (v == array)
-      return v;
-    else {
+    if (v != array) {
       putField(env, name, array);
 
       return array;
+    }
+    else if (array.isString()) {
+      // php/0484
+      return getFieldVar(env, name);
+    }
+    else {
+      return v;
     }
   }
 

@@ -32,7 +32,6 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Var;
 
 /**
@@ -78,6 +77,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     Value array = _expr.eval(env);
@@ -93,6 +93,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalCopy(Env env)
   {
     Value array = _expr.eval(env);
@@ -108,12 +109,13 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalArray(Env env)
   {
     Value array = _expr.evalArray(env);
     Value index = _index.eval(env);
 
-    return array.getRef(index);
+    return array.getArray(index);
   }
 
   /**
@@ -123,6 +125,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalDirty(Env env)
   {
     Value array = _expr.eval(env);
@@ -138,6 +141,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalObject(Env env)
   {
     Value array = _expr.evalArray(env);
@@ -171,9 +175,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public Var evalVar(Env env)
   {
-    Value value = _expr.evalVar(env);
-    
-    value = value.toAutoArray();
+    Value value = _expr.evalArray(env);
 
     return value.getVar(_index.eval(env));
   }
@@ -188,8 +190,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignValue(Env env, Value value)
   {
-    // php/03mk
-    Value array = _expr.evalRef(env).toAutoArray();
+    // php/03mk, php/04b3
+    Value array = _expr.evalArray(env);
 
     return array.put(_index.eval(env), value);
   }
@@ -205,7 +207,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public Value evalAssignRef(Env env, Value value)
   {
     // php/03mk
-    Value array = _expr.evalRef(env).toAutoArray();
+    Value array = _expr.evalArray(env);
     
     return array.put(_index.eval(env), value);
   }
@@ -229,19 +231,14 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public void evalUnset(Env env)
   {
-    /*
-    Value array = _expr.evalDirty(env);
-    Value index = _index.eval(env);
-
-    array.remove(index);
-    */
-    
     Value index = _index.eval(env);
     _expr.evalUnsetArray(env, index);
   }
 
+  @Override
   public String toString()
   {
     return _expr + "[" + _index + "]";

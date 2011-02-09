@@ -689,6 +689,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Returns the value as an array.
    */
+  @Override
   public Value getArray(Value index)
   {
     // php/3482, php/3483
@@ -705,9 +706,16 @@ public class ArrayValueImpl extends ArrayValue
       value = array;
 
       entry.set(array);
-    }
 
-    return array;
+      return array;
+    }
+    else if (array.isString()) {
+      // php/0482
+      return entry.toRef();
+    }
+    else {
+      return array;
+    }
   }
 
   /**

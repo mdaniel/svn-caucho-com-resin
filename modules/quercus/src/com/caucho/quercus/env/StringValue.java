@@ -828,6 +828,7 @@ abstract public class StringValue
   /**
    * Converts to an array if null.
    */
+  @Override
   public Value toAutoArray()
   {
     if (length() == 0)
