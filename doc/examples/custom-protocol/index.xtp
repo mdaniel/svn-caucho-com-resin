@@ -287,15 +287,15 @@ Connection closed by foreign host.
 
 <s1 title="Compatibility">
 
-<p>The <a href="javadoc|com.caucho.server.port.Protocol|"/> and
-<a href="javadoc|com.caucho.server.port.ServerRequest|"/> classes are of
-course Resin specific.  The <a href="javadoc|com.caucho.vfs.ReadStream|"/> and
-<a href="javadoc|com.caucho.vfs.ReadStream|"/> are as well.</p>
+<p>The <a href="javadoc|com.caucho.server.port.Protocol|">Protocol</a> and
+<a href="javadoc|com.caucho.server.port.ServerRequest|">ServerRequest</a> classes are of
+course Resin specific.  The <a href="javadoc|com.caucho.vfs.ReadStream|">ReadStream</a> and
+<a href="javadoc|com.caucho.vfs.ReadStream|">ReadStream</a> are as well.</p>
 
 <p>If portability is a concern, implement a class that is similar in
-functionality to <a href="javadoc|com.caucho.server.port.ServerRequest|"/>.
-Code that class to get passed a <a href="javadoc|java.io.InputStream|"/> and a
-<a href="javadoc|java.io.OutputStream|"/>.  A bare-bones Resin-specific
+functionality to <a href="javadoc|com.caucho.server.port.ServerRequest|">ServerRequest</a>.
+Code that class to get passed a <a href="javadoc|java.io.InputStream|">InputStream</a> and a
+<a href="javadoc|java.io.OutputStream|">OutputStream</a>.  A bare-bones Resin-specific
 <code>Protocol</code> and <code>ServerRequest</code> can be used as a thin
 wrapper to your custom <var>Request</var> class, and the Resin's ReadStream and
 WriteStream can be passed as the <code>InputStream</code> and

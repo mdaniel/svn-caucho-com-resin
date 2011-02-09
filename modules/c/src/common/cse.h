@@ -238,7 +238,7 @@ typedef struct config_t {
   int is_updating;
 } config_t;
 
-#define BUF_LENGTH (16 * 1024)
+#define BUF_LENGTH (64 * 1024)
 
 struct stream_t {
   struct cluster_srun_t *cluster_srun;

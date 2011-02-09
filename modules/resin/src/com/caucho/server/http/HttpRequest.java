@@ -153,7 +153,7 @@ public class HttpRequest extends AbstractHttpRequest
   {
     return true;
   }
-  
+
   /**
    * Handles a new HTTP request.
    *
@@ -166,113 +166,113 @@ public class HttpRequest extends AbstractHttpRequest
     throws IOException
   {
     boolean hasRequest = false;
-    
+
     try {
       startInvocation();
-      
+
       start();
       _response.start();
 
       try {
-	try {
-	  if (! readRequest(_rawRead)) {
-	    if (log.isLoggable(Level.FINE))
-	      log.fine(dbgId() + "read timeout");
+        try {
+          if (! readRequest(_rawRead)) {
+            if (log.isLoggable(Level.FINE))
+              log.fine(dbgId() + "read timeout");
 
-	    return false;
-	  }
+            return false;
+          }
 
-	  setStartTime();
+          setStartTime();
 
-	  hasRequest = true;
+          hasRequest = true;
 
-	  _isSecure = _conn.isSecure() || _conn.getLocalPort() == 443;
+          _isSecure = _conn.isSecure() || _conn.getLocalPort() == 443;
 
-	  if (_protocol.length() == 0)
-	    _protocol.append("HTTP/0.9");
+          if (_protocol.length() == 0)
+            _protocol.append("HTTP/0.9");
 
-	  if (log.isLoggable(Level.FINE)) {
-	    log.fine(dbgId() + _method + " " +
-		     new String(_uri, 0, _uriLength) + " " + _protocol);
-	    log.fine(dbgId() + "Remote-IP: " + _conn.getRemoteHost() + ":" + _conn.getRemotePort());
-	  }
+          if (log.isLoggable(Level.FINE)) {
+            log.fine(dbgId() + _method + " " +
+                     new String(_uri, 0, _uriLength) + " " + _protocol);
+            log.fine(dbgId() + "Remote-IP: " + _conn.getRemoteHost() + ":" + _conn.getRemotePort());
+          }
 
-	  parseHeaders(_rawRead);
+          parseHeaders(_rawRead);
 
-	  if (getVersion() >= HTTP_1_1 && isForce10()) {
-	    _protocol.clear();
-	    _protocol.append("HTTP/1.0");
-	    _version = HTTP_1_0;
-	  }
-	} catch (ClientDisconnectException e) {
-	  throw e;
-	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
+          if (getVersion() >= HTTP_1_1 && isForce10()) {
+            _protocol.clear();
+            _protocol.append("HTTP/1.0");
+            _version = HTTP_1_0;
+          }
+        } catch (ClientDisconnectException e) {
+          throw e;
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
 
-	  throw new BadRequestException(String.valueOf(e));
-	}
+          throw new BadRequestException(String.valueOf(e));
+        }
 
-	CharSequence host = getHost();
-	if (host == null && getVersion() >= HTTP_1_1)
-	  throw new BadRequestException("HTTP/1.1 requires host");
+        CharSequence host = getHost();
+        if (host == null && getVersion() >= HTTP_1_1)
+          throw new BadRequestException("HTTP/1.1 requires host");
 
-	String ipHost = _conn.getVirtualHost();
-	if (ipHost != null)
-	  host = ipHost;
+        String ipHost = _conn.getVirtualHost();
+        if (ipHost != null)
+          host = ipHost;
 
-	_invocationKey.init(_isSecure,
-			    host, _conn.getLocalPort(),
-			    _uri, _uriLength);
+        _invocationKey.init(_isSecure,
+                            host, _conn.getLocalPort(),
+                            _uri, _uriLength);
 
-	Invocation invocation;
+        Invocation invocation;
 
-	invocation = _server.getInvocation(_invocationKey);
+        invocation = _server.getInvocation(_invocationKey);
 
-	if (invocation == null) {
-	  invocation = _server.createInvocation();
-	  invocation.setSecure(_isSecure);
+        if (invocation == null) {
+          invocation = _server.createInvocation();
+          invocation.setSecure(_isSecure);
 
-	  if (host != null) {
-	    String hostName = host.toString().toLowerCase();
+          if (host != null) {
+            String hostName = host.toString().toLowerCase();
 
-	    invocation.setHost(hostName);
-	    invocation.setPort(_conn.getLocalPort());
+            invocation.setHost(hostName);
+            invocation.setPort(_conn.getLocalPort());
 
-	    // Default host name if the host doesn't have a canonical
-	    // name
-	    int p = hostName.indexOf(':');
-	    if (p > 0)
-	      invocation.setHostName(hostName.substring(0, p));
-	    else
-	      invocation.setHostName(hostName);
-	  }
+            // Default host name if the host doesn't have a canonical
+            // name
+            int p = hostName.indexOf(':');
+            if (p > 0)
+              invocation.setHostName(hostName.substring(0, p));
+            else
+              invocation.setHostName(hostName);
+          }
 
-	  InvocationDecoder decoder = _server.getInvocationDecoder();
+          InvocationDecoder decoder = _server.getInvocationDecoder();
 
-	  decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
+          decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
 
-	  if (_server.isModified()) {
-	    _server.logModified(log);
+          if (_server.isModified()) {
+            _server.logModified(log);
 
-	    _invocation = invocation;
-	    if (_server instanceof Server)
-	      _invocation.setWebApp(((Server) _server).getDefaultWebApp());
+            _invocation = invocation;
+            if (_server instanceof Server)
+              _invocation.setWebApp(((Server) _server).getDefaultWebApp());
 
-	    restartServer();
-	    return false;
-	  }
+            restartServer();
+            return false;
+          }
 
-	  invocation = _server.buildInvocation(_invocationKey.clone(),
-					       invocation);
-	}
+          invocation = _server.buildInvocation(_invocationKey.clone(),
+                                               invocation);
+        }
 
-	invocation = invocation.getRequestInvocation(this);
+        invocation = invocation.getRequestInvocation(this);
 
-	setInvocation(invocation);
+        setInvocation(invocation);
 
-	invocation.service(this, _response);
+        invocation.service(this, _response);
       } finally {
-	finish();
+        finish();
       }
     } catch (ClientDisconnectException e) {
       _response.killCache();
@@ -293,19 +293,19 @@ public class HttpRequest extends AbstractHttpRequest
       }
 
       if (_server instanceof Server) {
-	WebApp webApp = ((Server) _server).getDefaultWebApp();
-	if (webApp != null)
-	  webApp.accessLog(this, _response);
+        WebApp webApp = ((Server) _server).getDefaultWebApp();
+        if (webApp != null)
+          webApp.accessLog(this, _response);
       }
 
       return false;
     } finally {
       finishInvocation();
-      
+
       if (hasRequest)
         _response.finish();
       else
-	super.finish();
+        super.finish();
     }
 
     if (log.isLoggable(Level.FINE)) {
@@ -315,7 +315,7 @@ public class HttpRequest extends AbstractHttpRequest
 
     return isKeepalive();
   }
-  
+
   /**
    * Handles a comet-style resume.
    *
@@ -327,30 +327,30 @@ public class HttpRequest extends AbstractHttpRequest
   {
     boolean isResume = false;
     ConnectionController controller = null;
-    
+
     try {
       startInvocation();
-      
+
       try {
-	setStartTime();
-	
-	Connection conn = getConnection();
-	controller = conn.getController();
+        setStartTime();
 
-	if (controller == null || _invocation == null) {
-	  killKeepalive();
-	}
-	else if (_invocation.doResume(this, _response)) {
-	  controller = null;
-	  isResume = true;
-	}
-	else
-	  killKeepalive();
+        Connection conn = getConnection();
+        controller = conn.getController();
+
+        if (controller == null || _invocation == null) {
+          killKeepalive();
+        }
+        else if (_invocation.doResume(this, _response)) {
+          controller = null;
+          isResume = true;
+        }
+        else
+          killKeepalive();
       } finally {
-	finish();
+        finish();
 
-	if (controller != null)
-	  controller.close();
+        if (controller != null)
+          controller.close();
       }
     } catch (ClientDisconnectException e) {
       _response.killCache();
@@ -367,7 +367,7 @@ public class HttpRequest extends AbstractHttpRequest
       return false;
     } finally {
       finishInvocation();
-      
+
       _response.finish();
     }
 
@@ -482,11 +482,11 @@ public class HttpRequest extends AbstractHttpRequest
       if (length <= offset) {
       }
       else if (ch >= 'a' && ch <= 'z')
-	buffer[offset++] = ((char) (ch + 'A' - 'a'));
+        buffer[offset++] = ((char) (ch + 'A' - 'a'));
       else if (ch > ' ')
-	buffer[offset++] = (char) ch;
+        buffer[offset++] = (char) ch;
       else
-	break;
+        break;
 
       if (readLength <= readOffset) {
         if ((readLength = s.fillBuffer()) < 0)
@@ -578,7 +578,7 @@ public class HttpRequest extends AbstractHttpRequest
     while (true) {
       switch (ch) {
       case ' ': case '\t': case '\n': case '\r':
-	break uri;
+        break uri;
 
       default:
         // There's no check for overrunning the length because
@@ -618,9 +618,9 @@ public class HttpRequest extends AbstractHttpRequest
       if (offset >= length) {
       }
       else if (ch >= 'a' && ch <= 'z')
-	buffer[offset++] = ((char) (ch + 'A' - 'a'));
+        buffer[offset++] = ((char) (ch + 'A' - 'a'));
       else
-	buffer[offset++] = (char) ch;
+        buffer[offset++] = (char) ch;
 
       if (readOffset >= readLength) {
         readOffset = 0;
@@ -815,12 +815,12 @@ public class HttpRequest extends AbstractHttpRequest
       char ch = protocol.charAt(i);
 
       if (ch >= '0' && ch <= '9')
-	major = 10 * major + ch - '0';
+        major = 10 * major + ch - '0';
       else if (ch == '.')
-	break;
+        break;
       else {
-	_version = HTTP_1_0;
-	return _version;
+        _version = HTTP_1_0;
+        return _version;
       }
     }
 
@@ -829,9 +829,9 @@ public class HttpRequest extends AbstractHttpRequest
       char ch = protocol.charAt(i);
 
       if (ch >= '0' && ch <= '9')
-	minor = 10 * minor + ch - '0';
+        minor = 10 * minor + ch - '0';
       else
-	break;
+        break;
     }
 
     _version = 256 * major + minor;
@@ -1151,12 +1151,12 @@ public class HttpRequest extends AbstractHttpRequest
 
       int j;
       for (j = 0; j < names.size(); j++) {
-	String oldName = names.get(j);
-	if (name.matches(oldName))
-	  break;
+        String oldName = names.get(j);
+        if (name.matches(oldName))
+          break;
       }
       if (j == names.size())
-	names.add(j, name.toString());
+        names.add(j, name.toString());
     }
 
     return Collections.enumeration(names);
@@ -1176,7 +1176,7 @@ public class HttpRequest extends AbstractHttpRequest
 
     String te;
     if (contentLength < 0 && HTTP_1_1 <= getVersion() &&
-	(te = getHeader("Transfer-Encoding")) != null) {
+        (te = getHeader("Transfer-Encoding")) != null) {
       _chunkedInputStream.init(rawRead);
       readStream.init(_chunkedInputStream, null);
       return true;
@@ -1391,7 +1391,7 @@ public class HttpRequest extends AbstractHttpRequest
   public String findSessionIdFromConnection()
   {
     TcpConnection tcpConn = _tcpConn;
-    
+
     if (! _isSecure || tcpConn == null)
       return null;
 
@@ -1437,7 +1437,7 @@ public class HttpRequest extends AbstractHttpRequest
     _initAttributes = true;
 
     TcpConnection tcpConn = _tcpConn;
-    
+
     if (! _isSecure || tcpConn == null)
       return;
 
@@ -1462,7 +1462,7 @@ public class HttpRequest extends AbstractHttpRequest
       log.log(Level.FINER, e.toString(), e);
     }
   }
-  
+
   public void protocolCloseEvent()
   {
   }
@@ -1497,7 +1497,7 @@ public class HttpRequest extends AbstractHttpRequest
       return "HttpRequest[" + _conn.getId() + "]";
     else {
       return ("HttpRequest[" + _server.getServerId()
-	      + ", " + _conn.getId() + "]");
+              + ", " + _conn.getId() + "]");
     }
   }
 }

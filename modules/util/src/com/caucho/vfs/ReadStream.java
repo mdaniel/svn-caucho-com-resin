@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  * classes, so all streams have the same API regardless of the underlying
  * implementation.
  *
- * <p>Dynamic streams, like tcp and http 
+ * <p>Dynamic streams, like tcp and http
  * will properly flush writes before reading input.  And random access
  * streams, like RandomAccessFile, can use the same API as normal streams.
  *
@@ -59,7 +59,7 @@ public final class ReadStream extends InputStream
     implements LockableStream
 {
   public static int ZERO_COPY_SIZE = 1024;
-  
+
   private TempBuffer _tempRead;
   private byte []_readBuffer;
   private int _readOffset;
@@ -83,7 +83,7 @@ public final class ReadStream extends InputStream
 
   /**
    * Creates an uninitialized stream. Use <code>init</code> to initialize.
-   */ 
+   */
   public ReadStream()
   {
   }
@@ -124,7 +124,7 @@ public final class ReadStream extends InputStream
     if (_source != null && _source != source) {
       close();
     }
-    
+
     if (source == null)
       throw new IllegalArgumentException();
 
@@ -215,7 +215,7 @@ public final class ReadStream extends InputStream
   {
     return _readTime;
   }
-  
+
   /**
    * Sets the current read position.
    */
@@ -238,18 +238,18 @@ public final class ReadStream extends InputStream
       _readLength = _readOffset = 0;
 
       if (_source != null) {
-	_source.seekStart(pos);
+        _source.seekStart(pos);
 
-	return true;
+        return true;
       }
       else
-	return false;
+        return false;
     }
     else {
       // Seek forward in the stream, skip any buffered bytes
 
       long n = pos - getPosition();
-      
+
       return skip(n) == n;
     }
   }
@@ -283,7 +283,7 @@ public final class ReadStream extends InputStream
 
     if (_sibling != null)
       _sibling.flush();
-    
+
     return _source.getAvailable();
   }
 
@@ -335,7 +335,7 @@ public final class ReadStream extends InputStream
   {
     if (_readLength <= _readOffset) {
       if (! readBuffer())
-	return false;
+        return false;
     }
 
     return true;
@@ -352,6 +352,9 @@ public final class ReadStream extends InputStream
   public long skip(long n)
     throws IOException
   {
+    if (n <= 0)
+      return n;
+
     long buffered = getBufferAvailable();
 
     if (n < buffered) {
@@ -382,7 +385,7 @@ public final class ReadStream extends InputStream
       _readLength = 0;
 
       if (! readBuffer())
-	return buffered;
+        return buffered;
     }
 
     _readOffset += (int) (n - buffered);
@@ -414,16 +417,16 @@ public final class ReadStream extends InputStream
 
         int len = _source.read(buf, offset, length);
 
-	if (len > 0) {
-	  _position += len;
-	  _readTime = Alarm.getCurrentTime();
-	}
+        if (len > 0) {
+          _position += len;
+          _readTime = Alarm.getCurrentTime();
+        }
 
-	return len;
+        return len;
       }
-        
+
       if (! readBuffer())
-	return -1;
+        return -1;
 
       readOffset = _readOffset;
       readLength = _readLength;
@@ -436,7 +439,7 @@ public final class ReadStream extends InputStream
     System.arraycopy(_readBuffer, readOffset, buf, offset, sublen);
 
     _readOffset = readOffset + sublen;
-    
+
     return sublen;
   }
 
@@ -459,7 +462,7 @@ public final class ReadStream extends InputStream
       int sublen = read(buf, offset, length);
 
       if (sublen < 0)
-	return readLength == 0 ? -1 : readLength;
+        return readLength == 0 ? -1 : readLength;
 
       offset += sublen;
       readLength += sublen;
@@ -483,10 +486,10 @@ public final class ReadStream extends InputStream
     throws UnsupportedEncodingException
   {
     String mimeName = Encoding.getMimeName(encoding);
-    
+
     if (mimeName != null && mimeName.equals(_readEncodingName))
       return;
-    
+
     _readEncoding = Encoding.getReadEncoding(this, encoding);
     _readEncodingName = mimeName;
   }
@@ -531,7 +534,7 @@ public final class ReadStream extends InputStream
   {
     if (_readEncoding != null)
       return _readEncoding.read(buf, offset, length);
-    
+
     byte []readBuffer = _readBuffer;
     if (readBuffer == null)
       return -1;
@@ -543,7 +546,7 @@ public final class ReadStream extends InputStream
 
     if (sublen <= 0) {
       if (! readBuffer()) {
-	return -1;
+        return -1;
       }
       readLength = _readLength;
       readOffset = _readOffset;
@@ -578,7 +581,7 @@ public final class ReadStream extends InputStream
       int sublen = read(buf, offset, length);
 
       if (sublen <= 0)
-	return readLength > 0 ? readLength : -1;
+        return readLength > 0 ? readLength : -1;
 
       offset += sublen;
       readLength += sublen;
@@ -679,7 +682,7 @@ public final class ReadStream extends InputStream
   {
     return readLine(cb, true);
   }
-  
+
   /**
    * Reads a line into the character buffer.  \r\n is converted to \n.
    *
@@ -691,7 +694,7 @@ public final class ReadStream extends InputStream
   {
     return readLine(cb, true);
   }
-  
+
   /**
    * Reads a line into the character buffer.  \r\n is converted to \n.
    *
@@ -712,7 +715,7 @@ public final class ReadStream extends InputStream
 
     while (true) {
       int readOffset = _readOffset;
-      
+
       int sublen = _readLength - readOffset;
       if (capacity - offset < sublen)
         sublen = capacity - offset;
@@ -720,47 +723,47 @@ public final class ReadStream extends InputStream
       for (; sublen > 0; sublen--) {
         int ch = readBuffer[readOffset++] & 0xff;
 
-	if (ch != '\n') {
-	  buf[offset++] = (char) ch;
-	}
+        if (ch != '\n') {
+          buf[offset++] = (char) ch;
+        }
         else if (isChop) {
           if (offset > 0 && buf[offset - 1] == '\r')
             cb.setLength(offset - 1);
           else
             cb.setLength(offset);
-          
+
           _readOffset = readOffset;
 
           return true;
         }
-	else {
-	  buf[offset++] = (char) '\n';
+        else {
+          buf[offset++] = (char) '\n';
 
-	  cb.setLength(offset);
+          cb.setLength(offset);
 
-	  _readOffset = readOffset;
+          _readOffset = readOffset;
 
-	  return true;
-	}
+          return true;
+        }
       }
 
       _readOffset = readOffset;
 
       if (_readLength <= readOffset) {
-	if (! readBuffer()) {
-	  cb.setLength(offset);
-	  return offset > 0;
-	}
+        if (! readBuffer()) {
+          cb.setLength(offset);
+          return offset > 0;
+        }
       }
 
       if (capacity <= offset) {
-	cb.setLength(offset + 1);
-	capacity = cb.getCapacity();
-	buf = cb.getBuffer();
+        cb.setLength(offset + 1);
+        capacity = cb.getCapacity();
+        buf = cb.getBuffer();
       }
     }
   }
-  
+
   /**
    * Reads a line into the character buffer.  \r\n is converted to \n.
    *
@@ -774,7 +777,7 @@ public final class ReadStream extends InputStream
   {
     return readLine(buf, length, true);
   }
-  
+
   /**
    * Reads a line into the character buffer.  \r\n is converted to \n.
    *
@@ -789,7 +792,7 @@ public final class ReadStream extends InputStream
     byte []readBuffer = _readBuffer;
 
     int offset = 0;
-    
+
     while (true) {
       int readOffset = _readOffset;
 
@@ -800,22 +803,22 @@ public final class ReadStream extends InputStream
       for (; sublen > 0; sublen--) {
         int ch = readBuffer[readOffset++] & 0xff;
 
-	if (ch != '\n') {
-	}
+        if (ch != '\n') {
+        }
         else if (isChop) {
           _readOffset = readOffset;
-          
+
           if (offset > 0 && buf[offset - 1] == '\r')
             return offset - 1;
           else
             return offset;
         }
         else {
-	  buf[offset++] = (char) ch;
-	  
+          buf[offset++] = (char) ch;
+
           _readOffset = readOffset;
-	  
-	  return offset + 1;
+
+          return offset + 1;
         }
 
         buf[offset++] = (char) ch;
@@ -823,16 +826,16 @@ public final class ReadStream extends InputStream
       _readOffset = readOffset;
 
       if (readOffset <= _readLength) {
-	if (! readBuffer()) {
-	  return offset;
-	}
+        if (! readBuffer()) {
+          return offset;
+        }
       }
 
       if (length <= offset)
         return length + 1;
     }
   }
-  
+
   private boolean readlnEncoded(CharBuffer cb, boolean isChop)
     throws IOException
   {
@@ -840,20 +843,20 @@ public final class ReadStream extends InputStream
       int ch = readChar();
 
       if (ch < 0)
-	return cb.length() > 0;
+        return cb.length() > 0;
 
       if (ch != '\n') {
       }
       else if (isChop) {
-	if (cb.length() > 0 && cb.getLastChar() == '\r')
-	  cb.setLength(cb.getLength() - 1);
+        if (cb.length() > 0 && cb.getLastChar() == '\r')
+          cb.setLength(cb.getLength() - 1);
 
-	return true;
+        return true;
       }
       else {
-	cb.append('\n');
+        cb.append('\n');
 
-	return true;
+        return true;
       }
 
       cb.append((char) ch);
@@ -888,13 +891,13 @@ public final class ReadStream extends InputStream
   {
     while (len > 0) {
       if (_readLength <= _readOffset) {
-	if (! readBuffer())
-	  return;
+        if (! readBuffer())
+          return;
       }
 
       int sublen = _readLength - _readOffset;
       if (len < sublen)
-	sublen = len;
+        sublen = len;
 
       os.write(_readBuffer, _readOffset, sublen);
       _readOffset += sublen;
@@ -934,7 +937,7 @@ public final class ReadStream extends InputStream
   {
     if (_readOffset < _readLength)
       return true;
-    
+
     if (_readBuffer == null) {
       _readOffset = 0;
       _readLength = 0;
@@ -946,12 +949,12 @@ public final class ReadStream extends InputStream
 
     _readOffset = 0;
     _readLength = _source.readNonBlock(_readBuffer, 0, _readBuffer.length);
-    
+
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (_readLength > 0) {
       _position += _readLength;
       _readTime = Alarm.getCurrentTime();
-      
+
       return true;
     }
     else {
@@ -968,7 +971,7 @@ public final class ReadStream extends InputStream
   {
     if (_readOffset < _readLength)
       return true;
-    
+
     if (_readBuffer == null) {
       _readOffset = 0;
       _readLength = 0;
@@ -980,8 +983,8 @@ public final class ReadStream extends InputStream
 
     _readOffset = 0;
     _readLength = _source.readTimeout(_readBuffer, 0, _readBuffer.length,
-				      timeout);
-    
+                                      timeout);
+
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (_readLength > 0) {
       _position += _readLength;
@@ -1013,7 +1016,7 @@ public final class ReadStream extends InputStream
 
     _readOffset = 0;
     _readLength = _source.read(_readBuffer, 0, _readBuffer.length);
-    
+
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (_readLength > 0) {
       _position += _readLength;
@@ -1077,26 +1080,26 @@ public final class ReadStream extends InputStream
   {
     try {
       if (_disableClose)
-	return;
+        return;
 
       if (! _reuseBuffer) {
-	if (_tempRead != null) {
-	  TempBuffer.free(_tempRead);
+        if (_tempRead != null) {
+          TempBuffer.free(_tempRead);
           _tempRead = null;
-	}
-	_readBuffer = null;
+        }
+        _readBuffer = null;
       }
 
       if (_readEncoding != null) {
-	Reader reader = _readEncoding;
-	_readEncoding = null;
-	reader.close();
+        Reader reader = _readEncoding;
+        _readEncoding = null;
+        reader.close();
       }
-    
+
       if (_source != null && ! _isDisableCloseSource) {
-	StreamImpl s = _source;
-	_source = null;
-	s.close();
+        StreamImpl s = _source;
+        _source = null;
+        s.close();
       }
     } catch (IOException e) {
       log().log(Level.FINE, e.toString(), e);
@@ -1112,7 +1115,7 @@ public final class ReadStream extends InputStream
   {
     if (_sibling != null)
       _sibling.flush();
-    
+
     return _source.getAttribute(name);
   }
 
@@ -1124,7 +1127,7 @@ public final class ReadStream extends InputStream
   {
     if (_sibling != null)
       _sibling.flush();
-    
+
     return _source.getAttributeNames();
   }
 
@@ -1249,7 +1252,7 @@ public final class ReadStream extends InputStream
     {
       return ReadStream.this.available() > 0;
     }
-  
+
     public final void close()
       throws IOException
     {

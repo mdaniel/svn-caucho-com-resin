@@ -31,6 +31,7 @@ package com.caucho.server.webapp;
 import com.caucho.log.Log;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
@@ -38,6 +39,7 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
+import com.caucho.server.connection.CauchoRequest;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will
@@ -45,17 +47,17 @@ import java.util.logging.Logger;
  */
 public class DispatchFilterChain implements FilterChain {
   private static final Logger log = Log.open(DispatchFilterChain.class);
-  
+
   // Next filter chain
   private FilterChain _next;
 
   // app
-  private WebApp _app;
+  private WebApp _webApp;
   // class loader
   private ClassLoader _classLoader;
 
   private ServletRequestListener []_requestListeners;
-  
+
   /**
    * Creates a new FilterChainFilter.
    *
@@ -65,11 +67,11 @@ public class DispatchFilterChain implements FilterChain {
   public DispatchFilterChain(FilterChain next, WebApp app)
   {
     _next = next;
-    _app = app;
+    _webApp = app;
     _classLoader = app.getClassLoader();
     _requestListeners = app.getRequestListeners();
   }
-  
+
   /**
    * Invokes the next filter in the chain or the final servlet at
    * the end of the chain.
@@ -84,24 +86,40 @@ public class DispatchFilterChain implements FilterChain {
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
+    // server/10gf, server/10gv - listeners on web-app change
+    ServletContext webApp;
+    if (request instanceof CauchoRequest) {
+      CauchoRequest cReq = (CauchoRequest) request;
+
+      webApp = cReq.getWebApp();
+    }
+    else
+      webApp = _webApp;
+
     try {
       thread.setContextClassLoader(_classLoader);
 
-      for (int i = 0; i < _requestListeners.length; i++) {
-	ServletRequestEvent event = new ServletRequestEvent(_app, request);
-	
-	_requestListeners[i].requestInitialized(event);
+      if (webApp != _webApp) {
+        for (int i = 0; i < _requestListeners.length; i++) {
+          ServletRequestEvent event
+            = new ServletRequestEvent(_webApp, request);
+
+          _requestListeners[i].requestInitialized(event);
+        }
       }
-      
+
       _next.doFilter(request, response);
     } finally {
-      for (int i = _requestListeners.length - 1; i >= 0; i--) {
-	ServletRequestEvent event = new ServletRequestEvent(_app, request);
-	
-	_requestListeners[i].requestDestroyed(event);
+      if (webApp != _webApp) {
+        for (int i = _requestListeners.length - 1; i >= 0; i--) {
+          ServletRequestEvent event
+            = new ServletRequestEvent(_webApp, request);
+
+          _requestListeners[i].requestDestroyed(event);
+        }
       }
-      
+
       thread.setContextClassLoader(oldLoader);
     }
   }
