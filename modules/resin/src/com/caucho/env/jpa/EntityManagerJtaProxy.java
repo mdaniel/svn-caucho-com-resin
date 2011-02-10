@@ -30,6 +30,7 @@
 package com.caucho.env.jpa;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -37,20 +38,20 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
+import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.Metamodel;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 
 import com.caucho.amber.AmberRuntimeException;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.transaction.ManagedResource;
 import com.caucho.transaction.ManagedXAResource;
-import com.caucho.transaction.TransactionImpl;
-import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -63,6 +64,7 @@ import com.caucho.util.L10N;
 public class EntityManagerJtaProxy
   implements EntityManager, java.io.Serializable, HandleAware
 {
+  private static final Logger log = Logger.getLogger(EntityManagerJtaProxy.class.getName());
   private static final L10N L = new L10N(EntityManagerJtaProxy.class);
   
   private final PersistenceUnitManager _persistenceUnit;
@@ -334,7 +336,14 @@ public class EntityManagerJtaProxy
       em.persist(entity);
       return;
     }
-    
+
+    try {
+      if (_ut.getStatus() == Status.STATUS_NO_TRANSACTION)
+        throw new TransactionRequiredException("persist must be called within transaction.");
+    } catch (SystemException e) {
+      throw new RuntimeException(e);
+    }
+
     em = createEntityManager();
     
     try {
@@ -377,7 +386,14 @@ public class EntityManagerJtaProxy
       em.remove(entity);
       return;
     }
-    
+
+    try {
+      if (_ut.getStatus() == Status.STATUS_NO_TRANSACTION)
+        throw new TransactionRequiredException("persist must be called within transaction.");
+    } catch (SystemException e) {
+      throw new RuntimeException(e);
+    }
+
     em = createEntityManager();
     
     try {
@@ -399,7 +415,14 @@ public class EntityManagerJtaProxy
       em.refresh(entity);
       return;
     }
-    
+
+    try {
+      if (_ut.getStatus() == Status.STATUS_NO_TRANSACTION)
+        throw new TransactionRequiredException("persist must be called within transaction.");
+    } catch (SystemException e) {
+      throw new RuntimeException(e);
+    }
+
     em = createEntityManager();
     
     try {
@@ -834,7 +857,10 @@ public class EntityManagerJtaProxy
   @Override
   public void clear()
   {
-    throw new IllegalStateException(L.l("Container-manager @PersistenceContext may not be cleared."));
+    EntityManager em = getCurrent();
+
+    if(em != null)
+      em.clear();
   }
 
   /**
