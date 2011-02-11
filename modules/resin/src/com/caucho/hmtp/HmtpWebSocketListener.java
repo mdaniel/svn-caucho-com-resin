@@ -59,6 +59,11 @@ public class HmtpWebSocketListener extends AbstractWebSocketListener {
     return _hOut;
   }
   
+  String getJid()
+  {
+    return "hmtp@" + _broker.getJid();
+  }
+  
   @Override
   public void onStart(WebSocketContext context)
   {

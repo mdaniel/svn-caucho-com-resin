@@ -71,7 +71,7 @@ public class OutboundActorStream implements ActorStream {
     LinkConnection conn = _connRef.get();
     
     if (conn != null)
-      return conn.getOutboundStream().getJid();
+      return conn.getJid();
     else
       return null;
   }

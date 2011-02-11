@@ -108,16 +108,17 @@ esac
 
 AC_SUBST(resin_init_d)
 
-resin_pro=.
-resin_os=../resin_os
+resin_pro="."
+resin_os="../resin_os"
 is_dev=""
 
 if test -r "modules/c/src/resin/resin.h"; then
-  resin_pro=.
+  resin_pro="."
 elif test -r "../pro/modules/c/src/resin/resin.h"; then
   resin_pro="../pro"
   resin_os="../../../../../resin/modules/c/src/resin_os"
   is_dev="true"
+  echo "development mode"
 fi  
 
 AC_SUBST(resin_os)
@@ -1407,13 +1408,15 @@ echo ""
 echo ""
 echo "Resin Configuration summary:"
 echo ""
-echo "  RESIN_HOME: ${resin_home}"
-echo "      root: ${resin_root}"
-echo "      conf: ${resin_conf}"
-echo "      log : ${resin_log}"
+echo "  RESIN_HOME  : ${resin_home}"
+echo "      root    : ${resin_root}"
+echo "      conf    : ${resin_conf}"
+echo "      log     : ${resin_log}"
+echo "      plugins : ${plugins}" 
+
 
 if test -n "${resin_init_d}"; then
-  echo "      init: ${resin_init_d}"
+  echo "      init    : ${resin_init_d}"
 fi
 
 if test "$JNI" = "false" ; then
@@ -1450,6 +1453,10 @@ else
   else
     echo "    + not using OpenSSL"
   fi
+fi
+
+if test -n "${is_dev}"; then
+  echo "  Development build"
 fi
 
 if test -n "${apache}"; then

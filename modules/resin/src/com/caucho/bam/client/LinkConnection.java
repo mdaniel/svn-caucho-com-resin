@@ -37,5 +37,7 @@ import com.caucho.bam.stream.ActorStream;
 public interface LinkConnection {
   public boolean isClosed();
   
+  public String getJid();
+  
   public ActorStream getOutboundStream();
 }

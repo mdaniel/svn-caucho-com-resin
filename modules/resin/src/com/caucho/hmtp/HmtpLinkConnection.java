@@ -56,6 +56,12 @@ class HmtpLinkConnection implements LinkConnection {
   }
   
   @Override
+  public String getJid()
+  {
+    return _hmtpListener.getJid();
+  }
+  
+  @Override
   public ActorStream getOutboundStream()
   {
     ActorStream stream = _hmtpListener.getOutboundStream();

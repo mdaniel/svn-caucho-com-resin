@@ -115,6 +115,7 @@ public class ResinDocServlet extends HttpServlet {
 
     try {
       response.setContentType("text/html");
+      response.setHeader("Cache-Control", "max-age=3600");
 
       XMLStreamWriter xmlOut
         = _outputFactory.createXMLStreamWriter(os, _encoding);
@@ -125,7 +126,7 @@ public class ResinDocServlet extends HttpServlet {
         response.sendRedirect(document.getRedirect());
         return;
       }
-      
+
       document.writeHtml(xmlOut);
 
       xmlOut.flush();
@@ -137,7 +138,7 @@ public class ResinDocServlet extends HttpServlet {
       response.sendError(404);
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
-      
+
       log.warning(e.toString());
 
       response.sendError(404);

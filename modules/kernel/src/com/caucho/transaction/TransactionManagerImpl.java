@@ -378,12 +378,12 @@ public class TransactionManagerImpl
       xids = xaRes.recover(XAResource.TMSTARTRSCAN | XAResource.TMENDRSCAN);
     } catch (XAException e) {
       int code = e.errorCode;
-      System.out.println("E: " + e + " " + e.errorCode +  " " + e.getMessage());
+
       if (e.getMessage() == null || e.getMessage().isEmpty()) {
         XAException e1 = new XAException(L.l("Error during recovery (code=" + code + ")", e));
-	e1.errorCode = code;
+        e1.errorCode = code;
 
-	throw e1;
+        throw e1;
       }
 
       throw e;
