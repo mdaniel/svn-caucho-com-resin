@@ -12,7 +12,7 @@
   <property name="eclipse.home" value="${user.home}/eclipse"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, j2ee-deploy, resin-eclipselink">
+          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management,   resin-eclipselink">
   </target>
 
   <!--
@@ -166,12 +166,12 @@
     </antcall>
   </target>
 
-  <target name="j2ee-deploy" depends="init">
+  <!--target name="j2ee-deploy" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="j2ee-deploy"/>
       <param name="module.jar" value="j2ee-deploy-10.jar"/>
     </antcall>
-  </target>
+  </target-->
 
   <target name="j2ee-management" depends="init,ejb">
     <antcall target="module" inheritRefs="true">
