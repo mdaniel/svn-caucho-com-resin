@@ -941,6 +941,7 @@ case "$target_cpu" in
 	
   *)
 	CPU=$target_cpu
+	resin_pro_plugins="$resin_pro_plugin $resin_ssl_plugin"
 	;;
 esac
 

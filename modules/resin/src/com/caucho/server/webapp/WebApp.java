@@ -2045,7 +2045,7 @@ public class WebApp extends ServletContextImpl
   {
     if (! hasListener(listener.getListenerClass())) {
       _listeners.add(listener);
-
+      
       //jsp/18n
       if (_lifecycle.isStarting() || _lifecycle.isActive()) {
         addListenerObject(listener.createListenerObject(), true);
@@ -2083,6 +2083,7 @@ public class WebApp extends ServletContextImpl
         try {
           scListener.contextInitialized(event);
         } catch (Exception e) {
+          e.printStackTrace();
           log.log(Level.FINE, e.toString(), e);
         }
       }

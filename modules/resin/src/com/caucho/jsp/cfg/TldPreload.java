@@ -132,16 +132,16 @@ public class TldPreload {
   /**
    * Applies the listeners.
    */
-  public void initListeners(WebApp app)
+  public void initListeners(WebApp webApp)
     throws InstantiationException, IllegalAccessException
   {
-    if (app == null)
+    if (webApp == null)
       return;
 
     for (int i = 0; i < _listeners.size(); i++) {
       TldListener listener = _listeners.get(i);
 
-      listener.register(app);
+      listener.register(webApp);
     }
   }
 

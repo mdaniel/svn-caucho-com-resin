@@ -261,6 +261,17 @@ public class MemoryPoolAdapter
   }
 
   public long getPermGenFree()
+  throws JMException
+  {
+      CompositeData data
+      = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+
+    MemoryUsage usage = MemoryUsage.from(data);
+
+    return usage.getMax() - usage.getUsed();
+  }
+  
+  public MemUsage getPermGenMemUsage()
     throws JMException
   {
     CompositeData data
@@ -268,7 +279,7 @@ public class MemoryPoolAdapter
 
     MemoryUsage usage = MemoryUsage.from(data);
 
-    return usage.getMax() - usage.getUsed();
+    return new MemUsage(usage.getMax(), usage.getUsed());
   }
 
   public long getSurvivorCommitted()
@@ -351,11 +362,49 @@ public class MemoryPoolAdapter
   public long getTenuredFree()
     throws JMException
   {
-    CompositeData data
+      CompositeData data
       = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
     return usage.getMax() - usage.getUsed();
+  }
+  
+  public MemUsage getTenuredMemUsage()
+    throws JMException
+  {
+    CompositeData data
+      = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+
+    MemoryUsage usage = MemoryUsage.from(data);
+
+    return new MemUsage(usage.getMax(), usage.getUsed());
+  }
+
+  public static class MemUsage
+  {
+    private long _max;
+    private long _used;
+    
+    protected MemUsage(long max, long used)
+    {
+      _max = max;
+      _used = used;
+    }
+
+    public long getMax()
+    {
+      return _max;
+    }
+
+    public long getUsed()
+    {
+      return _used;
+    }
+    
+    public long getFree()
+    {
+      return getMax() - getUsed();
+    }
   }
 }

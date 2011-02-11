@@ -412,7 +412,6 @@ public class TldManager {
     if (! jarBacking.canRead())
       return;
 
-    String nativePath = jarBacking.getNativePath();
     JarPath jar = JarPath.create(jarBacking);
 
     ArrayList<Path> tldPaths = new ArrayList<Path>();
@@ -462,7 +461,6 @@ public class TldManager {
     for (Path path : tldPaths) {
       try {
         TldPreload taglib = parseTldPreload(path);
-
         taglibs.add(taglib);
 
         if (taglib.getURI() == null
