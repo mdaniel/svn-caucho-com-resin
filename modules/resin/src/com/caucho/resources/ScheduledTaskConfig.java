@@ -29,8 +29,6 @@
 
 package com.caucho.resources;
 
-import java.util.logging.Logger;
-
 import javax.annotation.PostConstruct;
 import javax.el.MethodExpression;
 import javax.enterprise.context.Dependent;
@@ -41,7 +39,9 @@ import com.caucho.config.Service;
 import com.caucho.config.Unbound;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.types.Period;
-import com.caucho.util.L10N;
+import com.caucho.loader.AbstractEnvironmentListener;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
 
 /**
  * The cron resources starts application Work tasks at cron-specified
@@ -55,10 +55,6 @@ import com.caucho.util.L10N;
 @Unbound
 public class ScheduledTaskConfig extends BeanConfig
 {
-  private static final L10N L = new L10N(ScheduledTaskConfig.class);
-  private static final Logger log
-    = Logger.getLogger(ScheduledTaskConfig.class.getName());
-
   private ScheduledTask _scheduledTask = new ScheduledTask();
 
   private boolean _isTask = false;
@@ -155,9 +151,14 @@ public class ScheduledTaskConfig extends BeanConfig
   public void init()
     throws ConfigException
   {
+    super.init();
+    
+    Environment.addEnvironmentListener(new StartListener());
+  }
+  
+  private void start()
+  {
     if (! _isTask) {
-      super.init();
-
       if (_scheduledTask.getTask() == null)
         _scheduledTask.setTask((Runnable) getObject());
     }
@@ -168,5 +169,12 @@ public class ScheduledTaskConfig extends BeanConfig
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _scheduledTask + "]";
+  }
+  
+  class StartListener extends AbstractEnvironmentListener {
+    public void environmentStart(EnvironmentClassLoader loader)
+    {
+      start();
+    }
   }
 }
