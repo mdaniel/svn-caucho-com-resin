@@ -231,8 +231,9 @@ public class Invocation extends ServletInvocation implements Dependency
   {
     Dependency depend = _dependency;
 
-    if (depend != null && depend.isModified())
+    if (depend != null && depend.isModified()) {
       return true;
+    }
 
     WebApp webApp = _webApp;
 

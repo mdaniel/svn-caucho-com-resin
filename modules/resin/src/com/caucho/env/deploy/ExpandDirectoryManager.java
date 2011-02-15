@@ -35,7 +35,6 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 /**
@@ -44,7 +43,6 @@ import com.caucho.vfs.Path;
  */
 class ExpandDirectoryManager
 {
-  private static final L10N L = new L10N(ExpandDirectoryManager.class);
   private static final Logger log = Logger.getLogger(ExpandDirectoryManager.class.getName());
 
   private final String _id;
