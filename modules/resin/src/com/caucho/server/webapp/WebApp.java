@@ -283,6 +283,8 @@ public class WebApp extends ServletContextImpl
   private FilterMapper _filterMapper;
   // The filter mapper
   private FilterMapper _loginFilterMapper;
+  // The dispatch filter mapper
+  private FilterMapper _dispatchFilterMapper;
   // The include filter mapper
   private FilterMapper _includeFilterMapper;
   // The forward filter mapper
@@ -518,6 +520,10 @@ public class WebApp extends ServletContextImpl
       _forwardFilterMapper = new FilterMapper();
       _forwardFilterMapper.setServletContext(this);
       _forwardFilterMapper.setFilterManager(_filterManager);
+
+      _dispatchFilterMapper = new FilterMapper();
+      _dispatchFilterMapper.setServletContext(this);
+      _dispatchFilterMapper.setFilterManager(_filterManager);
 
       _errorFilterMapper = new FilterMapper();
       _errorFilterMapper.setServletContext(this);
@@ -3539,7 +3545,7 @@ public class WebApp extends ServletContextImpl
   public void buildDispatchInvocation(Invocation invocation)
     throws ServletException
   {
-    buildDispatchInvocation(invocation, _filterMapper);
+    buildDispatchInvocation(invocation, _dispatchFilterMapper);
   }
 
   /**

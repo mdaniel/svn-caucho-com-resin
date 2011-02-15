@@ -119,12 +119,14 @@ class WebSocketContextImpl
     return _controller.getIdleTimeMax();
   }
 
+  /*
   @Override
   public InputStream getInputStream()
   throws IOException
   {
     return _controller.getReadStream();
   }
+  */
 
   @Override
   public OutputStream startBinaryMessage()

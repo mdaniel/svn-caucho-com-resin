@@ -37,10 +37,12 @@ import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
 public class PropertyAttribute extends Attribute {
+  private static final L10N L = new L10N(PropertyAttribute.class);
+  
   private final Method _putMethod;
-  private final ConfigType _type;
+  private final ConfigType<?> _type;
 
-  public PropertyAttribute(Method putMethod, ConfigType type)
+  public PropertyAttribute(Method putMethod, ConfigType<?> type)
   {
     _putMethod = putMethod;
     _type = type;
@@ -49,7 +51,8 @@ public class PropertyAttribute extends Attribute {
   /**
    * Returns the config type of the attribute value.
    */
-  public ConfigType getConfigType()
+  @Override
+  public ConfigType<?> getConfigType()
   {
     return _type;
   }
@@ -61,6 +64,10 @@ public class PropertyAttribute extends Attribute {
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
+    if ("#text".equals(name.getLocalName()))
+      throw new ConfigException(L.l("text is not allowed in this context\n  '{0}'",
+                                    value));
+    
     try {
       _putMethod.invoke(bean, name.getLocalName(), _type.valueOf(value));
     } catch (Exception e) {
@@ -75,6 +82,10 @@ public class PropertyAttribute extends Attribute {
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
+    if ("#text".equals(name.getLocalName()))
+      throw new ConfigException(L.l("text is not allowed in this context\n  '{0}'",
+                                    value));
+    
     try {
       _putMethod.invoke(bean, name.getLocalName(), value);
     } catch (Exception e) {

@@ -42,12 +42,6 @@ import java.io.PrintWriter;
  */
 public interface WebSocketContext {
   /**
-   * Returns the input stream
-   */
-  public InputStream getInputStream()
-    throws IOException;
-
-  /**
    * Returns the output stream for a binary message.
    * The message will complete when the OutputStream is closed.
    */

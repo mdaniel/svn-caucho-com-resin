@@ -13,6 +13,7 @@
 
 <s2 title="4.0.16 - snapshot">
 <ul>
+<li>rewrite: conflict between rewrite (welcome-file) and custom constraint (#4388, rep by K Ding MNP)</li>
 <li>scheduled-task: CDI timing issue between scheduled-task and CDI bean (#4393, rep by Tero Ripattila)</li>
 <li>ssl: JSSE client certificate should not automatically populate getUserPrincipal (#4044, rep by adamknight)</li>
 <li>install: configure was not detecting plugins on x360 (#4383, rep by mros2stf)</li>
