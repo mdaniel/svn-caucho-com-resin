@@ -549,11 +549,16 @@ class WatchdogChildProcess
     ArrayList<String> jvmArgs = new ArrayList<String>();
 
     jvmArgs.add(_watchdog.getJavaExe());
+    
+    boolean isEndorsed = false;
 
     // user args are first so they're displayed by ps
     for (String arg : _watchdog.getJvmArgs()) {
       if (! arg.startsWith("-Djava.class.path"))
         jvmArgs.add(arg);
+      
+      if (arg.startsWith("-Djava.endorsed.dirs"))
+        isEndorsed = true;
     }
     
     jvmArgs.add("-Dresin.server=" + _id);
@@ -565,11 +570,26 @@ class WatchdogChildProcess
     if (systemClassLoader != null && ! "".equals(systemClassLoader)) {
       jvmArgs.add("-Djava.system.class.loader=" + systemClassLoader);
     }
+    
+    Path resinHome = _watchdog.getResinHome();
+    
+    if (! isEndorsed) {
+      String endorsed = System.getProperty("java.endorsed.dirs");
+      String resinEndorsed = resinHome.getNativePath() + File.separator + "endorsed";
+      
+      
+      if (endorsed != null)
+        endorsed = endorsed + File.pathSeparator + resinEndorsed;
+      else
+        endorsed = resinEndorsed;
+      
+      jvmArgs.add("-Djava.endorsed.dirs=" + endorsed);
+    }
+    
     // #2567
     jvmArgs.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     jvmArgs.add("-Djava.awt.headless=true");
 
-    Path resinHome = _watchdog.getResinHome();
     jvmArgs.add("-Dresin.home=" + resinHome.getFullPath());
 
     if (! _watchdog.hasXss())

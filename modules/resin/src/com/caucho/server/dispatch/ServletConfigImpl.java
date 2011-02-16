@@ -332,13 +332,18 @@ public class ServletConfigImpl
     }
   }
 
+  @Override
   public Collection<String> getMappings()
   {
     Set<String> patterns = _servletMapper.getUrlPatterns(_servletName);
-
-    return Collections.unmodifiableSet(new LinkedHashSet<String>(patterns));
+    
+    if (patterns != null)
+      return Collections.unmodifiableSet(new LinkedHashSet<String>(patterns));
+    else
+      return new LinkedHashSet<String>();
   }
 
+  @Override
   public Set<String> setInitParameters(Map<String, String> initParameters)
   {
     if (! _webApp.isInitializing())
