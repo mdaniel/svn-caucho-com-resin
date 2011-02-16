@@ -100,7 +100,7 @@ public class TimerConfig {
    * @param persistent
    *          Flag to indicate if timer should be persisted.
    */
-  public void sePersistent(boolean persistent)
+  public void setPersistent(boolean persistent)
   {
     _persistent = persistent;
   }

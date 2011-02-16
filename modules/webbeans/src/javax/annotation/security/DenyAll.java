@@ -39,6 +39,6 @@ import java.lang.annotation.Documented;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({METHOD})
+@Target({METHOD, TYPE})
 public @interface DenyAll {
 }

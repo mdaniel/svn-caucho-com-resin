@@ -65,7 +65,7 @@ public @interface Resource {
   /**
    * Java type of the resource.
    */
-  Class<?> type() default Object.class;
+  Class type() default Object.class;
 
   /**
    * Product-specific name.

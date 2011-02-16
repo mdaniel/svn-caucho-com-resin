@@ -41,15 +41,16 @@ public class XAException extends Exception {
   public final static int XA_RBPROTO = XA_RBBASE + 5;
   public final static int XA_RBTIMEOUT = XA_RBBASE + 6;
   public final static int XA_RBTRANSIENT = XA_RBBASE + 7;
-  public final static int XA_RBEND = XA_RBBASE + 8;
-  
+  public final static int XA_RBEND = 107; //XXX: second 107 value. Flag to Sun, but keep 107 for signature test
   public final static int XA_NOMIGRATE = 9;
   public final static int XA_HEURHAZ = 8;
   public final static int XA_HEURCOM = 7;
   public final static int XA_HEURRB = 6;
   public final static int XA_HEURMIX = 5;
+  public final static int XA_RETRY = 4;
   public final static int XA_RDONLY = 3;
-  
+
+  public final static int XAER_ASYNC = -2;
   public final static int XAER_RMERR = -3;
   public final static int XAER_NOTA = -4;
   public final static int XAER_INVAL = -5;
@@ -81,21 +82,5 @@ public class XAException extends Exception {
   public XAException(int errCode)
   {
     this.errorCode = errCode;
-  }
-
-  /**
-   * Creates a wrapped exception.
-   */
-  public XAException(Throwable rootCause)
-  {
-    super(rootCause);
-  }
-
-  /**
-   * Creates a wrapped exception.
-   */
-  public XAException(String msg, Throwable rootCause)
-  {
-    super(msg, rootCause);
   }
 }

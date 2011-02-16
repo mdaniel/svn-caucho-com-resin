@@ -33,7 +33,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class AsyncResult<V> implements Future<V> {
+public final class AsyncResult<V> implements Future<V> {
   private V _result;
   
   public AsyncResult(V result)

@@ -502,7 +502,7 @@ public class BeanELResolver extends ELResolver {
       return _descriptor;
     }
 
-    public Class<?> getPropertyType()
+    public Class getPropertyType()
     {
       return _descriptor.getPropertyType();
     }

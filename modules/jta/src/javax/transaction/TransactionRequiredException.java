@@ -41,14 +41,4 @@ public class TransactionRequiredException extends java.rmi.RemoteException {
   {
     super(msg);
   }
-  
-  public TransactionRequiredException(Throwable e)
-  {
-    super(e.toString(), e);
-  }
-  
-  public TransactionRequiredException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
 }

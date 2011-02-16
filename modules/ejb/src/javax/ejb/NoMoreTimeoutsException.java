@@ -23,17 +23,19 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package javax.ejb;
 
+public class NoMoreTimeoutsException extends EJBException
+{
+  public NoMoreTimeoutsException()
+  {
+  }
 
-
-/**
- * The Entity annotation.
- */
-public enum EntityType {
-  CMP,
-  BMP
+  public NoMoreTimeoutsException(String message)
+  {
+    super(message);
+  }
 }

@@ -41,14 +41,4 @@ public class InvalidTransactionException extends java.rmi.RemoteException {
   {
     super(msg);
   }
-  
-  public InvalidTransactionException(Throwable e)
-  {
-    super(e.toString(), e);
-  }
-  
-  public InvalidTransactionException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
 }

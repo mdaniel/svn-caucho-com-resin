@@ -48,7 +48,6 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.ApplicationExceptionConfig;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
@@ -265,7 +264,7 @@ public class EjbConfig {
     
     if (appExn != null) {
       // ejb/1276
-      return new AppExceptionItem(true, appExn.rollback(), appExn.inherit());
+      return new AppExceptionItem(true, appExn.rollback(), appExn.inherited());
     }
     
     AppExceptionItem parentItem = getApplicationException(exn.getSuperclass(),

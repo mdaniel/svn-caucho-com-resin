@@ -438,11 +438,11 @@ public class EjbTimerService implements TimerService {
    *           If this method could not complete due to a system-level failure.
    */
   @Override
-  public Timer createCalendarTimer(ScheduleExpression schedule,
-      Serializable info) throws IllegalArgumentException,
-      IllegalStateException, EJBException
+  public Timer createCalendarTimer(ScheduleExpression schedule)
+    throws IllegalArgumentException,
+    IllegalStateException, EJBException
   {
-    return createScheduledTimer(schedule, info);
+    return createScheduledTimer(schedule, null);
   }
 
   /**

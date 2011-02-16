@@ -37,7 +37,6 @@ import java.lang.annotation.Documented;
 /**
  * Defines a custom datasource
  */
-@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({TYPE})
 public @interface DataSourceDefinition {
