@@ -858,7 +858,7 @@ public class ConnectionPool extends AbstractManagedObject
         + ")");
 
     HealthStatusService.updateCurrentHealthStatus(this, 
-                                                  HealthStatus.FAIL, 
+                                                  HealthStatus.CRITICAL, 
                                                   message);
 
     throw new ResourceException(L.l("Can't create overflow connection connection-max={0}",
