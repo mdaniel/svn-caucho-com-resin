@@ -29,27 +29,20 @@
 
 package com.caucho.jms.connection;
 
-import java.util.logging.Logger;
-
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.QueueReceiver;
 
 import com.caucho.jms.queue.AbstractQueue;
-import com.caucho.util.L10N;
 
 /**
  * A basic message consumer.
  */
-public class QueueReceiverImpl extends MessageConsumerImpl
+public class QueueReceiverImpl<E> extends MessageConsumerImpl<E>
   implements QueueReceiver
 {
-  private static final Logger log
-    = Logger.getLogger(QueueReceiverImpl.class.getName());
-  private static final L10N L = new L10N(QueueReceiverImpl.class);
-  
   QueueReceiverImpl(JmsSession session,
-                    AbstractQueue queue,
+                    AbstractQueue<E> queue,
                     String messageSelector)
     throws JMSException
   {
@@ -57,14 +50,15 @@ public class QueueReceiverImpl extends MessageConsumerImpl
   }
   
   QueueReceiverImpl(JmsSession session,
-      AbstractQueue queue,
-      String messageSelector,
-      boolean noLocal)
+                    AbstractQueue<E> queue,
+                    String messageSelector,
+                    boolean noLocal)
     throws JMSException
   {
     super(session, queue, messageSelector, noLocal);
   }
 
+  @Override
   public Queue getQueue()
     throws JMSException
   {

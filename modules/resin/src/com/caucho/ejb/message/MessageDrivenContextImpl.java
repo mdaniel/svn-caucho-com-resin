@@ -29,40 +29,40 @@
 
 package com.caucho.ejb.message;
 
+import java.util.logging.Logger;
+
+import javax.ejb.EJBException;
+import javax.ejb.EJBHome;
+import javax.ejb.MessageDrivenContext;
+import javax.transaction.Status;
+import javax.transaction.Transaction;
+import javax.transaction.UserTransaction;
+
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.transaction.*;
+import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Server container for a message bean.
  */
-public class MessageDrivenContextImpl extends AbstractContext
+public class MessageDrivenContextImpl<X> extends AbstractContext<X>
   implements MessageDrivenContext
 {
   protected static final L10N L = new L10N(MessageDrivenContextImpl.class);
   protected static final Logger log
     = Logger.getLogger(MessageDrivenContextImpl.class.getName());
 
-  private MessageManager _server;
+  private MessageManager<X> _server;
   private UserTransaction _ut;
-  private boolean _isRollbackOnly;
   
-  MessageDrivenContextImpl(MessageManager server, UserTransaction ut)
+  MessageDrivenContextImpl(MessageManager<X> server, UserTransaction ut)
   {
     _server = server;
     _ut = ut;
   }
 
-  public AbstractEjbBeanManager getServer()
+  public AbstractEjbBeanManager<X> getServer()
   {
     return _server;
   }
@@ -98,12 +98,13 @@ public class MessageDrivenContextImpl extends AbstractContext
    */
   void clearRollbackOnly()
   {
-    _isRollbackOnly = false;
+    // _isRollbackOnly = false;
   }
 
   /**
    * Forces a rollback of the current transaction.
    */
+  @Override
   public void setRollbackOnly()
     throws IllegalStateException
   {
@@ -129,6 +130,7 @@ public class MessageDrivenContextImpl extends AbstractContext
   /**
    * Forces a rollback of the current transaction.
    */
+  @Override
   public boolean getRollbackOnly()
     throws IllegalStateException
   {

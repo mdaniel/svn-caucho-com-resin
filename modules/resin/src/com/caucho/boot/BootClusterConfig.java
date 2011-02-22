@@ -45,6 +45,9 @@ public class BootClusterConfig {
   
   private String _id = "";
   private boolean _isDynamicServerEnable;
+  
+  private ConfigProgram _stdoutLog;
+  
   private ArrayList<ContainerProgram> _serverDefaultList
     = new ArrayList<ContainerProgram>();
 
@@ -91,7 +94,7 @@ public class BootClusterConfig {
   public WatchdogConfig createServer()
   {
     WatchdogConfig config
-      = new WatchdogConfig(_resin.getArgs(), _resin.getRootDirectory());
+      = new WatchdogConfig(this, _resin.getArgs(), _resin.getRootDirectory());
 
     for (int i = 0; i < _serverDefaultList.size(); i++)
       _serverDefaultList.get(i).configure(config);
@@ -111,6 +114,16 @@ public class BootClusterConfig {
       
     _resin.addServer(config);
     _resin.addClient(new WatchdogClient(_system, _resin, config));
+  }
+  
+  public void addStdoutLog(ContainerProgram config)
+  {
+    _stdoutLog = config;
+  }
+  
+  public ConfigProgram getStdoutLog()
+  {
+    return _stdoutLog;
   }
   
   /**

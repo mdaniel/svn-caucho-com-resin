@@ -190,6 +190,43 @@ public class Jmx {
    *
    * @return the instantiated object.
    */
+  public static ObjectInstance registerContext(Object object, String name)
+    throws InstanceAlreadyExistsException,
+           MBeanRegistrationException, MalformedObjectNameException,
+           NotCompliantMBeanException
+  {
+    if (name.indexOf(':') < 0) {
+      Map<String,String> nameProps = parseProperties(name);
+      
+      Map<String,String> props = copyContextProperties();
+      props.putAll(nameProps);
+
+      if (props.get("type") == null) {
+        String type = object.getClass().getName();
+        int p = type.lastIndexOf('.');
+        if (p > 0)
+          type = type.substring(p + 1);
+
+        props.put("type", type);
+      }
+
+      ObjectName objectName = getObjectName("resin", props);
+
+      return register(object, objectName);
+    }
+    else
+      return register(object, new ObjectName(name));
+      
+  }
+  
+  /**
+   * Conditionally registers an MBean with the server.
+   *
+   * @param object the object to be registered as an MBean
+   * @param name the name of the mbean.
+   *
+   * @return the instantiated object.
+   */
   public static ObjectInstance register(Object object,
                                         Map<String,String> properties)
     throws InstanceAlreadyExistsException,
@@ -281,14 +318,17 @@ public class Jmx {
   /**
    * Returns the mbean interface.
    */
-  private static Class getMBeanInterface(Class cl)
+  private static Class<?> getMBeanInterface(Class<?> cl)
   {
     for (; cl != null; cl = cl.getSuperclass()) {
-      Class []interfaces = cl.getInterfaces();
+      Class<?> []interfaces = cl.getInterfaces();
 
       for (int i = 0; i < interfaces.length; i++) {
-        Class ifc = interfaces[i];
+        Class<?> ifc = interfaces[i];
 
+        if (ifc.isAnnotationPresent(MXBean.class))
+          return ifc;
+        
         if (ifc.getName().endsWith("MBean") ||
             ifc.getName().endsWith("MXBean"))
           return ifc;

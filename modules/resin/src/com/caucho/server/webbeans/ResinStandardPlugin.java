@@ -201,16 +201,16 @@ public class ResinStandardPlugin implements Extension {
     }
 
     if (annotated.isAnnotationPresent(MBean.class)) {
-      MBean manage = annotated.getAnnotation(MBean.class);
+      MBean mbean = annotated.getAnnotation(MBean.class);
       
-      String mbeanName = manage.value();
+      String mbeanName = mbean.value();
       if ("".equals(mbeanName))
         mbeanName = "type=" + bean.getBeanClass().getSimpleName();
       
       AnnotatedType<?> annType = (AnnotatedType<?>) annotated;
       
       try {
-        Jmx.register(new BeanMBean(_cdiManager, bean, annType), mbeanName);
+        Jmx.registerContext(new BeanMBean(_cdiManager, bean, annType), mbeanName);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
       }

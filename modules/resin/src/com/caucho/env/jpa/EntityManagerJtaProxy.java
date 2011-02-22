@@ -52,6 +52,7 @@ import com.caucho.amber.AmberRuntimeException;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.transaction.ManagedResource;
 import com.caucho.transaction.ManagedXAResource;
+import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -76,8 +77,10 @@ public class EntityManagerJtaProxy
   private final FreeList<EntityManager> _idleEntityManagerPool
     = new FreeList<EntityManager>(8);
 
+  /*
   private final ThreadLocal<EntityManagerItem> _threadEntityManager
     = new ThreadLocal<EntityManagerItem>();
+    */
 
   private Object _serializationHandle;
   
@@ -887,11 +890,16 @@ public class EntityManagerJtaProxy
   private EntityManager getCurrent()
   {
     try {
-      EntityManagerItem item = _threadEntityManager.get();
-      Transaction xa = _ut.getTransaction();
+      TransactionImpl xa = (TransactionImpl) _ut.getTransaction();
       
-      if (item != null
-          && xa == item.getXa()) {
+      if (xa == null)
+        return null;
+      
+      EntityManagerItem item;
+      
+      item = (EntityManagerItem) xa.getAttribute("resin.env.jpa.EntityManagerItem");
+      
+      if (item != null) {
         return item.getEntityManager();
       }
 
@@ -905,8 +913,10 @@ public class EntityManagerJtaProxy
         em = _emf.createEntityManager(_persistenceUnit.getProperties());
 
         item = new EntityManagerItem(item, em, xa);
+
+        xa.setAttribute("resin.env.jpa.EntityManagerItem", item);
         
-        _threadEntityManager.set(item);
+        // _threadEntityManager.set(item);
 
         xa.registerSynchronization(item);
 
@@ -959,7 +969,7 @@ public class EntityManagerJtaProxy
   private void freeEntityManager(EntityManager em)
   {
     em.clear();
-    
+
     if (! _idleEntityManagerPool.free(em))
       em.close();
   }
@@ -1029,7 +1039,7 @@ public class EntityManagerJtaProxy
 
     public void close()
     {
-      _threadEntityManager.set(_prev);
+      // _threadEntityManager.set(_prev);
 
       freeEntityManager(_em);
     }

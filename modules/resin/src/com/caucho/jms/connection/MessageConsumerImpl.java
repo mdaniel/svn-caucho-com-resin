@@ -58,9 +58,9 @@ import com.caucho.util.L10N;
  */
 public class MessageConsumerImpl<E> implements MessageConsumer
 {
-  static final Logger log
+  private static final Logger log
     = Logger.getLogger(MessageConsumerImpl.class.getName());
-  static final L10N L = new L10N(MessageConsumerImpl.class);
+  private static final L10N L = new L10N(MessageConsumerImpl.class);
 
   private final Object _consumerLock = new Object();
 
@@ -269,7 +269,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
     if (Long.MAX_VALUE / 2 < timeout || timeout < 0)
       timeout = Long.MAX_VALUE / 2;
 
-    long now = Alarm.getCurrentTime();
+    long now = Alarm.getCurrentTimeActual();
     long expireTime = timeout > 0 ? now + timeout : 0;
 
     while (_session.isActive()) {

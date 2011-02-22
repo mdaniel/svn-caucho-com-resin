@@ -37,12 +37,16 @@ import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.util.L10N;
 
 import javax.annotation.*;
+import javax.ejb.Startup;
+import javax.inject.Singleton;
 import javax.jms.*;
 import java.util.logging.Logger;
 
 /**
  * Configures application listeners, avoiding JCA.
  */
+@Singleton
+@Startup
 public class ListenerResource {
   private static L10N L = new L10N(ListenerResource.class);
   protected static Logger log
@@ -56,6 +60,9 @@ public class ListenerResource {
   private int _listenerMax = 5;
   private ListenerConfig _listenerConfig;
 
+  public ListenerResource()
+  {
+  }
   /**
    * Sets the JMS connection factory.
    *
@@ -111,21 +118,27 @@ public class ListenerResource {
 
     if (_destination instanceof Topic)
       _listenerMax = 1;
+    
+    start();
   }
-
-  public void start() throws Throwable
+  
+  private void start()
   {
-    for (int i = 0; i < _listenerMax; i++) {
-      MessageListener listener = _listenerConfig.newInstance();
+    try {
+      for (int i = 0; i < _listenerMax; i++) {
+        MessageListener listener = _listenerConfig.newInstance();
 
-      Session session = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Session session = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-      MessageConsumer consumer = session.createConsumer(_destination);
+        MessageConsumer consumer = session.createConsumer(_destination);
 
-      consumer.setMessageListener(listener);      
+        consumer.setMessageListener(listener);      
+      }
+
+      _conn.start();
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
     }
-
-    _conn.start();
 
     log.fine("ListenerResource[" + _destination + "] started");
   }
@@ -163,7 +176,7 @@ public class ListenerResource {
     {
       _init = init;
     }
-
+    
     @PostConstruct
     public void init() throws ConfigException
     {

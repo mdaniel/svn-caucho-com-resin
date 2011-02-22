@@ -115,6 +115,14 @@ public class RotateLog {
   }
 
   /**
+   * Sets the rollover size.
+   */
+  public void setRolloverSizeBytes(long size)
+  {
+    _rolloverSize = new Bytes(size);
+  }
+
+  /**
    * Sets the rollover count
    */
   public int getRolloverCount()

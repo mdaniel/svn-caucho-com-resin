@@ -36,12 +36,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.LocalBean;
-import javax.ejb.MessageDrivenBean;
+import javax.ejb.TransactionAttribute;
+import static javax.ejb.TransactionAttributeType.REQUIRED;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.ConfigException;
 import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.BeanGenerator;
@@ -158,26 +157,6 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
   
   private void introspectMethod(AnnotatedMethod<? super X> method)
   {
-    /*
-    AnnotatedMethod<? super X> oldMethod 
-      = AnnotatedTypeUtil.findMethod(_annotatedMethods, method);
-    
-    if (oldMethod != null) {
-      // XXX: merge annotations
-      return;
-    }
-    
-    AnnotatedMethod<? super X> baseMethod
-      = AnnotatedTypeUtil.findMethod(getBeanType(), method);
-    
-    if (baseMethod == null)
-      throw new IllegalStateException(L.l("{0} does not have a matching base method in {1}",
-                                          method, getBeanType()));
-    
-    // XXX: merge annotations
-    
-    _annotatedMethods.add(baseMethod);
-     */
     _annotatedMethods.add(method);
   }
 
@@ -321,25 +300,20 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     out.pushDepth();
 
     // XXX: 4.0.7
-    /*
-    for (AspectGenerator<X> bizMethod : _view.getMethods()) {
-      if (REQUIRED.equals(bizMethod.getXa().getTransactionType())) {
-        Method api = bizMethod.getApiMethod().getJavaMember();
-
-        out.print("_xaMethods.add(");
-        out.printClass(api.getDeclaringClass());
-        out.print(".class.getMethod(\"");
-        out.print(api.getName());
-        out.print("\", new Class[] { ");
-
-        for (Class<?> cl : api.getParameterTypes()) {
-          out.printClass(cl);
-          out.print(".class, ");
-        }
-        out.println("}));");
+    for (AspectGenerator<X> bizMethod : getMethods()) {
+      AnnotatedMethod<?> method = bizMethod.getMethod();
+      
+      TransactionAttribute xa;
+      
+      xa = method.getAnnotation(TransactionAttribute.class);
+      
+      if (xa == null)
+        xa = method.getDeclaringType().getAnnotation(TransactionAttribute.class);
+      
+      if (xa != null && REQUIRED.equals(xa.value())) {
+        addXaMethods(out, method.getJavaMember());
       }
     }
-    */
 
     out.popDepth();
     out.println("} catch (Exception e) {");
@@ -361,6 +335,9 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     out.println("{");
     out.println("  if (_xaMethods.contains(method)) {");
     out.println("    _isXa = (_xa.beginRequired() == null);");
+    out.println();
+    out.println("    if (_isXa && _xaResource != null)");
+    out.println("      _xa.enlist(_xaResource);");
     out.println("  }");
     out.println("}");
 
@@ -396,6 +373,35 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     
     out.popDepth();
     out.println("}");
+  }
+  
+  private void addXaMethods(JavaWriter out, Method method)
+    throws IOException
+  {
+    printXaMethod(out, method);
+    
+    for (Class<?> api : method.getDeclaringClass().getInterfaces()) {
+      Method subMethod = AnnotatedTypeUtil.findMethod(api.getMethods(), method);
+      
+      if (subMethod != null)
+        printXaMethod(out, subMethod);
+    }
+  }
+  
+  private void printXaMethod(JavaWriter out, Method api)
+    throws IOException
+  {
+    out.print("_xaMethods.add(");
+    out.printClass(api.getDeclaringClass());
+    out.print(".class.getMethod(\"");
+    out.print(api.getName());
+    out.print("\", new Class[] { ");
+
+    for (Class<?> cl : api.getParameterTypes()) {
+      out.printClass(cl);
+      out.print(".class, ");
+    }
+    out.println("}));");
   }
 
   /**

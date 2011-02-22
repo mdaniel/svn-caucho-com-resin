@@ -170,24 +170,6 @@ public class UserTransactionImpl
   }
 
   /**
-   * Delist an xa resource
-   */
-  /*
-  private void delistXaResource(ManagedXAResource xaResource, int flags)
-    throws SystemException, RollbackException
-  {
-    Transaction xa = _transactionManager.getTransaction();
-
-    try {
-      if (xa != null)
-        xa.delistResource(xaResource, flags);
-    } finally {
-      _xaResources.remove(xaResource);
-    }
-  }
-  */
-
-  /**
    * Delist a resource.
    */
   public void delistResource(ManagedResource resource)

@@ -44,6 +44,12 @@ public interface MessageEndpointFactory {
     throws UnavailableException;
 
   /**
+   * Creates an endpoint with the associated XA resource.
+   */
+  public MessageEndpoint createEndpoint(XAResource xaResource, long timeout)
+    throws UnavailableException;
+
+  /**
    * Returns true to find out whether message deliveries to the
    * message endpoint will be transacted.  This is only a hint.
    */

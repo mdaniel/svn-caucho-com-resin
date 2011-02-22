@@ -51,6 +51,8 @@ class WatchdogConfig
   private static final int WATCHDOG_PORT_DEFAULT = 6600;
   
   private String _id = "";
+  
+  private final BootClusterConfig _cluster;
 
   private WatchdogArgs _args;
   private Path _rootDirectory;
@@ -93,8 +95,12 @@ class WatchdogConfig
   private boolean _hasWatchdogXss;
   private boolean _hasWatchdogXmx;
 
-  WatchdogConfig(WatchdogArgs args, Path rootDirectory)
+  WatchdogConfig(BootClusterConfig cluster,
+                 WatchdogArgs args,
+                 Path rootDirectory)
   {
+    _cluster = cluster;
+    
     _args = args;
     _rootDirectory = rootDirectory;
     
@@ -188,7 +194,11 @@ class WatchdogConfig
     return _jvmClasspath;
   }
 
-
+  public BootClusterConfig getCluster()
+  {
+    return _cluster;
+  }
+  
   /**
    * Adds a http.
    */

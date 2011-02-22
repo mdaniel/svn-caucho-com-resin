@@ -13,6 +13,13 @@
 
 <s2 title="4.0.16 - snapshot">
 <ul>
+<li>watchdog: stdout-log inside &lt;cluster> now configures the watchdog managed jvm-default.log (#4395, rep by Steve Francis)</li>
+<li>openssl: timeout support for solaris (#4280, rep by nicolai)</li>
+<li>configure: change solaris build to include -R/usr/sfw/lib/64 for -d64 and resin_os.so linking (#3045, rep by Eric Bowman)</li>
+<li>ejb: MDB with JMS inflow (ActiveMQ) not properly handling XA (#4327, rep by danc)</li>
+<li>ejb: MDB with JCA inflow and driver XA control not properly handled</li>
+<li>security: add RFC2307 (ldap-style) support for {plain}, {sha}, {ssha}, {md5} (#3432, rep by Laurent Jaccard)</li>
+<li>cdi: @MBean on class automatically registers bean in JMX (#3427, rep by Scott Hernandez)</li>
 <li>webservices: add ${resin.home}/endorsed support for metro support (#3415, #4032, rep by Bartlomeij Kolodziejczyk, Reggie Vito)</li>
 <li>rewrite: conflict between rewrite (welcome-file) and custom constraint (#4388, rep by K Ding MNP)</li>
 <li>scheduled-task: CDI timing issue between scheduled-task and CDI bean (#4393, rep by Tero Ripattila)</li>

@@ -29,8 +29,6 @@
 
 package com.caucho.jms.memory;
 
-import com.caucho.vfs.*;
-
 /**
  * For Backward compat only.  Use com.caucho.jms.MemoryQueue
  * 

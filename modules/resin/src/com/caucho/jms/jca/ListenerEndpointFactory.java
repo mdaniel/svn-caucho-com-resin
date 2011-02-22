@@ -74,6 +74,15 @@ public class ListenerEndpointFactory implements MessageEndpointFactory {
   /**
    * Creates an endpoint with the associated XA resource.
    */
+  public MessageEndpoint createEndpoint(XAResource xaResource, long timeout)
+    throws UnavailableException
+  {
+    return createEndpoint(xaResource);
+  }
+ 
+  /**
+   * Creates an endpoint with the associated XA resource.
+   */
   public MessageEndpoint createEndpoint(XAResource xaResource)
     throws UnavailableException
   {

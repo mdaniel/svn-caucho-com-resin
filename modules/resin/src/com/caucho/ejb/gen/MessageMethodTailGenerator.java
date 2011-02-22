@@ -73,7 +73,7 @@ public class MessageMethodTailGenerator<X> extends MethodTailGenerator<X>
     if (getMethod().isAnnotationPresent(TransactionAttribute.class)
         || declType.isAnnotationPresent(TransactionAttribute.class)) {
       out.println();
-      out.println("if (_xaResource != null)");
+      out.println("if (! _isXa && _xaResource != null)");
       out.println("  _xa.enlist(_xaResource);");
     }
     

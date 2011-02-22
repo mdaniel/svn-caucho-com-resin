@@ -692,7 +692,7 @@
       </fileset>
     </copy>
 
-    <copy todir="${dist}/${dist.name}/project-jars"
+    <copy todir="${dist}/${dist.name}/webapp-jars"
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${resin.install}/lib">
@@ -770,6 +770,8 @@
 
     <mkdir dir="${dist}/${dist.name}/licenses"/>
     <mkdir dir="${dist}/${dist.name}/project-jars"/>
+    <mkdir dir="${dist}/${dist.name}/webapp-jars"/>
+    <mkdir dir="${dist}/${dist.name}/endorsed"/>
     <mkdir dir="${dist}/${dist.name}/keys"/>
     <mkdir dir="${dist}/${dist.name}/ext-lib"/>
     <!--
@@ -807,9 +809,11 @@
       <include name="${dist.name}/conf/**"/>
       <include name="${dist.name}/contrib/**"/>
       <include name="${dist.name}/doc/**"/>
+      <include name="${dist.name}/endorsed/**"/>
       <include name="${dist.name}/init.d/**"/>
       <include name="${dist.name}/lib/**"/>
       <include name="${dist.name}/project-jars/**"/>
+      <include name="${dist.name}/webapp-jars/**"/>
       <include name="${dist.name}/webapps/**"/>
 
       <include name="${dist.name}/LICENSE"/>

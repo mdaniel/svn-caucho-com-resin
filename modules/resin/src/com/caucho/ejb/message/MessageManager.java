@@ -277,6 +277,15 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
   public MessageEndpoint createEndpoint(XAResource xaResource)
     throws UnavailableException
   {
+    return createEndpoint(xaResource, 0);
+  }
+    
+  /**
+   * Creates an endpoint with the associated XA resource.
+   */
+  public MessageEndpoint createEndpoint(XAResource xaResource, long timeout)
+    throws UnavailableException
+  {
     try {
       Object listener = createMessageListener();
       

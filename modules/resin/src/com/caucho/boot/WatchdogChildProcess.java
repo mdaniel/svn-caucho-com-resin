@@ -51,6 +51,8 @@ import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.hmtp.HmtpLinkWorker;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.log.RotateLog;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.util.CauchoSystem;
@@ -128,21 +130,28 @@ class WatchdogChildProcess
   {
     if (! _lifecycle.toActive())
       return;
+    System.out.println("RUN1");
+    EnvironmentClassLoader envLoader
+      = EnvironmentClassLoader.create(_system.getClassLoader());
     
-    Thread.currentThread().setContextClassLoader(_system.getClassLoader());
+    Thread thread = Thread.currentThread();
     
     WriteStream jvmOut = null;
     ServerSocket ss = null;
     Socket s = null;
 
     try {
+      thread.setContextClassLoader(envLoader);
+      envLoader.start();
+      System.out.println("RUN2");
       ss = new ServerSocket(0, 5, InetAddress.getByName("127.0.0.1"));
 
       int port = ss.getLocalPort();
 
       log.warning("Watchdog starting Resin[" + _watchdog.getId() + "]");
-
+System.out.println("RUN3");
       jvmOut = createJvmOut();
+      System.out.println("RUN4:");
       
       _process = createProcess(port, jvmOut);
       
@@ -207,6 +216,8 @@ class WatchdogChildProcess
 
         notifyAll();
       }
+
+      thread.setContextClassLoader(_system.getClassLoader());
     }
   }
   
@@ -782,11 +793,21 @@ class WatchdogChildProcess
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+    System.out.println("JVM: " + jvmPath);
+    RotateLog log = new RotateLog();
+    log.setPath(jvmPath);
+    log.setRolloverSizeBytes(64L * 1024 * 1024);
+    
+    if (_watchdog.getStdoutLog() != null)
+      _watchdog.getStdoutLog().configure(log);
+    System.out.println("CFG: " + _watchdog.getStdoutLog() + " " + log.getPath());
+    log.init();
+    
+    RotateStream rotateStream = log.getRotateStream();
 
-    RotateStream rotateStream = RotateStream.create(jvmPath);
-    rotateStream.getRolloverLog().setRolloverSizeBytes(64L * 1024 * 1024);
-    _watchdog.getConfig().logInit(rotateStream);
-    rotateStream.init();
+    // _watchdog.getConfig().logInit(rotateStream);
+    
+    // rotateStream.init();
     return rotateStream.getStream();
   }
 

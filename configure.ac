@@ -767,14 +767,16 @@ if test -z "${LD_SHLIB}"; then
     *solaris*)
       if test -n "$is_gcc"; then
         CFLAGS_SHLIB="-fPIC"
+        CFLAGS="$CFLAGS -fPIC"
+        CFLAGS_JNI="$CFLAGS_JNI -fPIC"
 
         if test -n "$b64"; then
-          CFLAGS="$CFLAGS -m64 -G -fPIC"
-          LDFLAGS_SHLIB="-m64"
+          CFLAGS="$CFLAGS -m64 -G"
+          LDFLAGS_SHLIB="-m64 -R/usr/sfw/lib/64 -R/usr/local/lib/sparcv9"
         fi
         if test -n "$b64_jni"; then
-          CFLAGS_JNI="$CFLAGS_JNI -m64 -G -fPIC"
-          LDFLAGS_SHLIB="-m64"
+          CFLAGS_JNI="$CFLAGS_JNI -m64 -G"
+          LDFLAGS_SHLIB="-m64 -R/usr/sfw/lib/64 -R/usr/local/lib/sparcv9"
         fi
       else
         CFLAGS_SHLIB="-KPIC"
@@ -843,6 +845,9 @@ fi
 
 case "$target_os" in
   linux*)
+        CFLAGS="$CFLAGS -DHAS_SOCK_TIMEOUT"
+	;;
+  solaris*)
         CFLAGS="$CFLAGS -DHAS_SOCK_TIMEOUT"
 	;;
   darwin*)

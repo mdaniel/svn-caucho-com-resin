@@ -32,6 +32,7 @@ package com.caucho.security;
 import java.security.MessageDigest;
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,7 +41,9 @@ import javax.servlet.ServletException;
 
 import com.caucho.config.inject.HandleAware;
 import com.caucho.server.security.PasswordDigest;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.util.Base64;
 
 /**
  * All applications should extend AbstractAuthenticator to implement
@@ -57,7 +60,10 @@ public class AbstractAuthenticator
   private static final Logger log
     = Logger.getLogger(AbstractAuthenticator.class.getName());
   
-  private static final SingleSignon NULL_SINGLE_SIGNON = new NullSingleSignon(); 
+  private static final SingleSignon NULL_SINGLE_SIGNON = new NullSingleSignon();
+  
+  private static final HashMap<String,DigestBuilder> _digestBuilderMap
+    = new HashMap<String,DigestBuilder>();
   
   protected String _passwordDigestAlgorithm = "MD5-base64";
   protected String _passwordDigestRealm = "resin";
@@ -269,30 +275,13 @@ public class AbstractAuthenticator
   protected Principal authenticate(Principal principal,
                                    char []password)
   {
-    char []digest = getPasswordDigest(principal.getName(), password);
-    
-    if (digest == null)
-      return null;
-    
-    Principal user = authenticateDigest(principal, digest);
-    
-    Arrays.fill(digest, 'a');
-    
-    return user;
-  }
-  
-  /**
-   * Password-based after the digest is calculated.
-   */
-  protected Principal authenticateDigest(Principal principal,
-                                         char []digest)
-  {
     PasswordUser user = getPasswordUser(principal);
 
     if (user == null || user.isDisabled())
       return null;
 
-    if (! isMatch(digest, user.getPassword()) && ! user.isAnonymous()) {
+    if (! isMatch(principal, password, user.getPassword())
+        && ! user.isAnonymous()) {
       user = null;
     }
 
@@ -471,8 +460,17 @@ public class AbstractAuthenticator
     if (user == null || user.isDisabled())
       return null;
 
+    return getDigestSecret(principal, realm, user.getPassword());
+  }
+  
+  protected byte []getDigestSecret(Principal principal,
+                                   String realm,
+                                   char []userPassword)
+  {
+    if (userPassword == null)
+      return null;
     if (_passwordDigest != null)
-      return _passwordDigest.stringToDigest(user.getPassword());
+      return _passwordDigest.stringToDigest(userPassword);
 
     String username = principal.getName();
 
@@ -482,7 +480,7 @@ public class AbstractAuthenticator
       String string = username + ":" + realm + ":";
       byte []data = string.getBytes("UTF8");
       digest.update(data);
-      char []password = user.getPassword();
+      char []password = userPassword;
 
       for (int i = 0; i < password.length; i++)
         digest.update((byte) password[i]);
@@ -614,6 +612,64 @@ public class AbstractAuthenticator
   /**
    * Tests passwords
    */
+  private boolean isMatch(Principal userName,
+                          char []testPassword, 
+                          char []systemDigest)
+  {
+    char []testDigest = getDigest(userName, testPassword, systemDigest);
+
+    boolean isMatch = isMatch(testDigest, systemDigest);
+    
+    Arrays.fill(testDigest, 'a');
+
+    return isMatch;
+  }
+  
+  protected char []getDigest(Principal user,
+                             char []testPassword, 
+                             char []systemDigest)
+  {
+    int len = systemDigest.length;
+    
+    if (len == 0 || systemDigest[0] != '{') {
+      return getPasswordDigest(user.getName(), testPassword);
+    }
+    
+    StringBuilder sb = new StringBuilder();
+    int i = 1;
+    
+    sb.append("{");    
+    for (; i < len && systemDigest[i] != '}'; i++) {
+      sb.append(systemDigest[i]);
+    }
+    sb.append("}");
+    
+    String code = sb.toString();
+    
+    DigestBuilder builder = _digestBuilderMap.get(code.toLowerCase());
+
+    char []digest;
+    
+    if (builder != null) {
+      try {
+        digest = builder.buildDigest(code, user, testPassword, systemDigest);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    else {
+      log.warning(this + " password " + code + " is an unsupportedtype for "
+                  + " " + user);
+      
+      digest = testPassword;
+    }
+    
+    return digest;
+  }
+
+  /**
+   * Tests passwords
+   */
   private boolean isMatch(char []password, char []userPassword)
   {
     int len = password.length;
@@ -676,5 +732,134 @@ public class AbstractAuthenticator
               + "[" + _passwordDigestAlgorithm
               + "," + _passwordDigestRealm + "]");
     }
+  }
+  
+  abstract static class DigestBuilder {
+    abstract public char []buildDigest(String code,
+                                       Principal user, 
+                                       char []password,
+                                       char []systemDigest)
+      throws Exception;
+  }
+  
+  static class NoneDigestBuilder extends DigestBuilder {
+    @Override
+    public char []buildDigest(String code,
+                              Principal user, 
+                              char []password,
+                              char []systemDigest)
+    {
+      char []digest = new char[code.length() + password.length];
+      code.getChars(0, code.length(), digest, 0);
+      
+      System.arraycopy(password, 0, digest, code.length(), password.length);
+      
+      return digest;
+    }
+  }
+  
+  static class ShaDigestBuilder extends DigestBuilder {
+    @Override
+    public char []buildDigest(String code, 
+                              Principal user, 
+                              char []password,
+                              char []systemDigest)
+      throws Exception
+    {
+      StringBuilder sb = new StringBuilder();
+      sb.append(code);
+      
+      MessageDigest md = MessageDigest.getInstance("sha1");
+      
+      for (int i = 0; i < password.length; i++) {
+        md.update((byte) password[i]);
+      }
+      
+      byte []mdDigest = md.digest();
+
+      Base64.encode(sb, mdDigest, 0, mdDigest.length);
+      char []digest = new char[sb.length()];
+      sb.getChars(0, sb.length(), digest, 0);
+      
+      return digest;
+    }
+  }
+  
+  static class SaltShaDigestBuilder extends DigestBuilder {
+    @Override
+    public char []buildDigest(String code, 
+                              Principal user, 
+                              char []password,
+                              char []systemDigest)
+      throws Exception
+    {
+      StringBuilder sb = new StringBuilder();
+      
+      int offset = code.length();
+      String systemBytes = new String(systemDigest, offset, 
+                                      systemDigest.length - offset);
+      
+      byte []decodedBytes = Base64.decodeToByteArray(systemBytes);
+      
+      int baseLength = 20;
+      
+      sb.append(code);
+      
+      byte []mdDigest = new byte[decodedBytes.length];
+      
+      MessageDigest md = MessageDigest.getInstance("sha1");
+      
+      for (int i = 0; i < password.length; i++) {
+        md.update((byte) password[i]);
+      }
+      
+      for (int i = baseLength; i < decodedBytes.length; i++) {
+        md.update(decodedBytes[i]);
+        mdDigest[i] = decodedBytes[i];
+      }
+      
+      md.digest(mdDigest, 0, baseLength);
+
+      Base64.encode(sb, mdDigest, 0, mdDigest.length);
+      
+      char []digest = new char[sb.length()];
+      sb.getChars(0, sb.length(), digest, 0);
+      
+      return digest;
+    }
+  }
+  
+  static class Md5DigestBuilder extends DigestBuilder {
+    @Override
+    public char []buildDigest(String code, 
+                              Principal user, 
+                              char []password,
+                              char []systemDigest)
+      throws Exception
+    {
+      StringBuilder sb = new StringBuilder();
+      sb.append(code);
+      
+      MessageDigest md = MessageDigest.getInstance("sha1");
+      
+      for (int i = 0; i < password.length; i++) {
+        md.update((byte) password[i]);
+      }
+      
+      byte []mdDigest = md.digest();
+
+      Base64.encode(sb, mdDigest, 0, mdDigest.length);
+      char []digest = new char[sb.length()];
+      sb.getChars(0, sb.length(), digest, 0);
+      
+      return digest;
+    }
+  }
+  
+  static {
+    _digestBuilderMap.put("{plain}", new NoneDigestBuilder());
+    _digestBuilderMap.put("{sha}", new ShaDigestBuilder());
+    _digestBuilderMap.put("{ssha}", new SaltShaDigestBuilder());
+    _digestBuilderMap.put("{md5}", new Md5DigestBuilder());
   }
 }

@@ -38,6 +38,37 @@ import javax.servlet.ServletException;
 
 import com.caucho.server.rewrite.MatchFilterChain;
 
+/**
+ * Implements general extended behavior for rewrite filters like 
+ * resin:SetHeader. RewriteFilters act like standard servlet filters,
+ * but are configured using Resin's rewrite syntax.
+ * 
+ * <ul>
+ * <li>regexp</li>
+ * <li>predicates</li>
+ * <li>sub-rewrite-filters</li>
+ * <li>sub-servlet-filters</li>
+ * </ul>
+ * 
+ * <p>Abstract filters have a URL regexp pattern which only
+ * applies the filter to matching URLs. If the regexp is missing, all 
+ * URLs will match.
+ * 
+ * <p>Any rewrite/security predicate like IfUser or IfAddress can be used
+ * to restrict requests. Only requests that match all the predicates will
+ * be filtered.
+ * 
+ * <p>The AbstractRewriteFilter can have child RewriteFilters and child
+ * servlet Filters. The children will only be added to the filter chain if
+ * the predicates match.
+ * 
+ * <pre><code>
+ * &lt;resin:SetHeader regexp="\.pdf$"
+ *                     name="Cache-Control" value="max-age=15">
+ *   &lt;resin:IfUserInRole role="admin"/>
+ * &lt;resin:SetHeader>
+ * </code></pre>
+ */
 abstract public class AbstractRewriteFilter implements RewriteFilter
 {
   private Pattern _regexp;
@@ -57,16 +88,19 @@ abstract public class AbstractRewriteFilter implements RewriteFilter
     _regexp = regexp;
   }
 
+  @Override
   public boolean isRequest()
   {
     return true;
   }
 
+  @Override
   public boolean isInclude()
   {
     return false;
   }
 
+  @Override
   public boolean isForward()
   {
     return false;
@@ -121,6 +155,7 @@ abstract public class AbstractRewriteFilter implements RewriteFilter
     return next;
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[regexp=" + _regexp + "]";

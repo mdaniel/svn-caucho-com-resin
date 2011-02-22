@@ -55,7 +55,6 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 import javax.jms.XASession;
-import javax.naming.InitialContext;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAException;
@@ -157,6 +156,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       }
     }
 
+    // ejb/7000
+    /*
     try {
       InitialContext ic = new InitialContext();
         
@@ -164,6 +165,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
+    */
     
     _connection.addSession(this);
   }

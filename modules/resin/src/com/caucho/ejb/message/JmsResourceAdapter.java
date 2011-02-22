@@ -29,9 +29,11 @@
 
 package com.caucho.ejb.message;
 
-import java.util.*;
-import java.util.logging.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Named;
@@ -49,31 +51,41 @@ import javax.jms.XASession;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.resource.*;
-import javax.resource.spi.*;
-import javax.resource.spi.endpoint.*;
-import javax.resource.spi.work.*;
-import javax.transaction.xa.*;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.ResourceAdapterInternalException;
+import javax.resource.spi.endpoint.MessageEndpoint;
+import javax.resource.spi.endpoint.MessageEndpointFactory;
+import javax.transaction.xa.XAResource;
 
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.cfg.JmsActivationConfig;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.L10N;
 
 public class JmsResourceAdapter implements ResourceAdapter {
   private static final L10N L = new L10N(JmsResourceAdapter.class);
-  private static final Logger
-    log = Logger.getLogger(JmsResourceAdapter.class.getName());
-  
-  private static final Method _onMessage;
+  private static final Logger log
+    = Logger.getLogger(JmsResourceAdapter.class.getName());
 
+  private final static Method _onMessageMethod;
+  
   private final JmsActivationConfig _config;
   
   private final String _ejbName;
   
+  
   private ConnectionFactory _connectionFactory;
   private Destination _destination;
+  
+  private UserTransactionProxy _ut;
 
   private int _consumerMax = 5;
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
@@ -99,7 +111,9 @@ public class JmsResourceAdapter implements ResourceAdapter {
     */
     
     _destination = config.getDestinationObject();
-    }
+    
+    _ut = UserTransactionProxy.getCurrent();
+  }
 
   public void setMessageSelector(String selector)
   {
@@ -153,10 +167,12 @@ public class JmsResourceAdapter implements ResourceAdapter {
   /**
    * Called when the resource adapter is stopped.
    */
+  @Override
   public void stop()
   {
   }
   
+  @SuppressWarnings("unchecked")
   private <T> T getResource(Class<T> type, String name)
   {
     if (name == null) {
@@ -213,6 +229,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
   /**
    * Called during activation of a message endpoint.
    */
+  @Override
   public void endpointActivation(MessageEndpointFactory endpointFactory,
                                  ActivationSpec spec)
     throws NotSupportedException, ResourceException
@@ -238,6 +255,8 @@ public class JmsResourceAdapter implements ResourceAdapter {
       if (_destination instanceof Topic)
         _consumerMax = 1;
 
+      _connection.start();
+
       for (int i = 0; i < _consumerMax; i++) {
         Consumer consumer = new Consumer(_connection, _destination);
 
@@ -245,8 +264,6 @@ public class JmsResourceAdapter implements ResourceAdapter {
 
         consumer.start();
       }
-
-      _connection.start();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -257,6 +274,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
   /**
    * Called during deactivation of a message endpoint.
    */
+  @Override
   public void endpointDeactivation(MessageEndpointFactory endpointFactory,
                                    ActivationSpec spec)
   {
@@ -293,7 +311,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
     return getClass().getName() +  "[" + _ejbName + "," + _destination + "]";
   }
 
-  class Consumer {
+  class Consumer implements Runnable {
     private Session _session;
     
     private XAResource _xaResource;
@@ -301,6 +319,8 @@ public class JmsResourceAdapter implements ResourceAdapter {
     
     private MessageEndpoint _endpoint;
     private MessageListener _listener;
+    
+    private boolean _isActive;
 
     Consumer(Connection conn, Destination destination)
       throws Exception
@@ -345,7 +365,40 @@ public class JmsResourceAdapter implements ResourceAdapter {
         _consumer = _session.createConsumer(_destination, _selector);
       }
       
-      _consumer.setMessageListener(_listener);
+      _isActive = true;
+      ThreadPool.getCurrent().start(this);
+      
+      // _consumer.setMessageListener(_listener);
+    }
+    
+    @Override
+    public void run()
+    {
+      while (_isActive) {
+        try {
+          _endpoint.beforeDelivery(_onMessageMethod);
+          try {
+            handleMessage();
+          } finally {
+            _endpoint.afterDelivery();
+          }
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
+      }
+    }
+    
+    private void handleMessage()
+    {
+      try {
+        Message msg = _consumer.receive();
+        
+        if (msg != null) {
+          _listener.onMessage(msg);
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
     }
 
     /**
@@ -363,16 +416,21 @@ public class JmsResourceAdapter implements ResourceAdapter {
     private void destroy()
       throws JMSException
     {
+      _isActive = false;
+      
       _endpoint.release();
     }
   }
-
+  
   static {
+    Method method = null;
+    
     try {
-      _onMessage = MessageListener.class.getMethod("onMessage",
-                                                   new Class[] { Message.class });
+      method = MessageListener.class.getMethod("onMessage", Message.class);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      log.log(Level.WARNING, e.toString(), e);
     }
+    
+    _onMessageMethod = method;
   }
 }

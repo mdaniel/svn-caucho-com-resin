@@ -8243,13 +8243,17 @@ element set {
   <td>value</td>
   <td>The value to which the header will be set.</td>
 </tr>
+<tr>
+  <td>regexp</td>
+  <td>regular expression matching URLs.</td>
+</tr>
 </attributes>
 
-<example title="Setting a custom header based on network">
+<example title="Example: Setting a custom header based on network">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;resin:SetHeader regexp="\.jsp" name="X-External" value="true">
+  &lt;resin:SetHeader regexp="\.jsp$" name="X-External" value="true">
     &lt;resin:Not>
       &lt;resin:IfNetwork>
         &lt;resin:value>192.168.1.0/24&lt;/resin:value>
@@ -8297,10 +8301,14 @@ element set {
   <td>value</td>
   <td>The value to which the Vary header will be set.</td>
 </tr>
+<tr>
+  <td>regexp</td>
+  <td>regular expression matching URLs.</td>
+</tr>
 </attributes>
 
 
-<example title="Setting the Vary header for JSPs">
+<example title="Example: Setting the Vary header for JSPs">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
 

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.WatchdogMXBean;
@@ -67,12 +68,13 @@ class WatchdogChild
   WatchdogChild(String id,
                 ResinSystem system,
                 WatchdogArgs args, 
-                Path rootDirectory)
+                Path rootDirectory,
+                BootClusterConfig cluster)
   {
     _id = id;
     
     _system = system;
-    _config = new WatchdogConfig(args, rootDirectory);
+    _config = new WatchdogConfig(cluster, args, rootDirectory);
 
     _admin = new WatchdogAdmin();
   }
@@ -254,6 +256,11 @@ class WatchdogChild
   Path getResinConf()
   {
     return _config.getResinConf();
+  }
+  
+  ConfigProgram getStdoutLog()
+  {
+    return _config.getCluster().getStdoutLog();
   }
 
   boolean hasXmx()

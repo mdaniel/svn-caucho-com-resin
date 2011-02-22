@@ -60,11 +60,13 @@ public class MessageXaCallChain<X> extends XaGenerator<X>
   {
     super.generatePreCall(out);
     
+    /*
     if (REQUIRED.equals(getTransactionType())) {
       out.println();
       out.println("if (_xaResource != null)");
       out.println("  _xa.enlist(_xaResource);");
     }
+    */
 
     out.println("/* ... */");
   }

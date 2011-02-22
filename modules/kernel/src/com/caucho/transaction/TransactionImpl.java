@@ -138,7 +138,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
   private AbstractXALogStream _xaLog;
 
-  private HashMap<String, Object> _properties;
+  private HashMap<String, Object> _attributes;
   
   private long _beginTime;
 
@@ -534,10 +534,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
    */
   public void setAttribute(String var, Object value)
   {
-    if (_properties == null)
-      _properties = new HashMap<String, Object>();
+    if (_attributes == null)
+      _attributes = new HashMap<String, Object>();
 
-    _properties.put(var, value);
+    _attributes.put(var, value);
   }
 
   /**
@@ -545,8 +545,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
    */
   public Object getAttribute(String var)
   {
-    if (_properties != null)
-      return _properties.get(var);
+    if (_attributes != null)
+      return _attributes.get(var);
     else
       return null;
   }
@@ -1212,8 +1212,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
     }
 
-    if (_properties != null)
-      _properties.clear();
+    if (_attributes != null)
+      _attributes.clear();
     
     if (status == Status.STATUS_COMMITTED)
       _transactionManager.endCommitTime(_beginTime);

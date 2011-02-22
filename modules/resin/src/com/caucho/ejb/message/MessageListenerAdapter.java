@@ -37,6 +37,7 @@ import javax.ejb.MessageDrivenContext;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
+@SuppressWarnings("serial")
 public class MessageListenerAdapter
   implements MessageListener, MessageDrivenBean
 {
@@ -50,7 +51,7 @@ public class MessageListenerAdapter
   {
     // ejb/0f94
 
-    Class cl = listener.getClass();
+    Class<?> cl = listener.getClass();
 
     _listener = listener;
 

@@ -104,7 +104,7 @@ use conditions as restrictions, just like the dispatch rules.</p>
 target.  Your filter is created using Java Injection syntax and will
 be applied if the Dispatch rule matches.</p>
 
-<example title="Example: SetHeader">
+<example title="Example: dispatching with a custom filter">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
 
@@ -127,7 +127,7 @@ at the "finer" level reveals successful matches.  At the "finest" level both
 successful and unsuccessful matches are logged.
 </p>
 
-<example title="Logging example">
+<example title="Example: Logging example">
 &lt;logger name="com.caucho.server.rewrite" level="finest"/&gt;
 </example>
 
@@ -150,7 +150,7 @@ successful and unsuccessful matches are logged.
     redirect => https://anything.com/anything.html
 </example>
 
-<example title="Configuration">
+<example title="Example: resin.xml configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
     xmlns:resin="urn:java:com.caucho.resin">
     
@@ -191,7 +191,7 @@ successful and unsuccessful matches are logged.
   because Resin would have already resolved the web-app.
   </p>
 
-  <example title="Configuration">
+  <example title="Example: resin.xml configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
   xmlns:resin="urn:java:com.caucho.resin">
 
@@ -225,7 +225,7 @@ successful and unsuccessful matches are logged.
   because Resin would have already resolved the host.
   </p>
 
-<example title="resin.xml Configuration">
+<example title="Example: resin.xml Configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
     xmlns:resin="urn:java:com.caucho.resin">
     

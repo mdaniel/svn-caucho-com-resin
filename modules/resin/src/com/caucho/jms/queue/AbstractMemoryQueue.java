@@ -132,14 +132,17 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
    * Primary message receiving, registers a callback for any new
    * message.
    */
+  @Override
   public QE receiveEntry(long expireTime, boolean isAutoAck) 
      throws MessageException
   {
     return receiveEntry(expireTime, isAutoAck, null);
   }
   
+  @Override
   public QE receiveEntry(long expireTime, boolean isAutoAck, 
-                         QueueEntrySelector selector) throws MessageException
+                         QueueEntrySelector selector) 
+    throws MessageException
   {
     _receiverCount.incrementAndGet();
     
@@ -161,7 +164,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
         return entry;
       }
   
-      if (expireTime <= Alarm.getCurrentTimeActual()) {              
+      if (expireTime <= Alarm.getCurrentTimeActual()) {
         return null;
       }
   

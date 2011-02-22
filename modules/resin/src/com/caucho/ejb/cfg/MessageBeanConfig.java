@@ -52,12 +52,10 @@ import javax.resource.spi.*;
 public class MessageBeanConfig extends AbstractBeanConfig
 {
   private static final L10N L = new L10N(MessageBeanConfig.class);
-  private static final Logger log
-    = Logger.getLogger(MessageBeanConfig.class.getName());
 
   private ActivationSpec _activationSpec;
 
-  private Class _destinationType;
+  private Class<?> _destinationType;
   private String _destinationName;
   private Object _destination;
   private int _messageConsumerMax;
@@ -69,8 +67,13 @@ public class MessageBeanConfig extends AbstractBeanConfig
   {
     _activationSpec = spec;
   }
+  
+  public void add(ActivationSpec spec)
+  {
+    _activationSpec = spec;
+  }
 
-  public void setDestinationType(Class type)
+  public void setDestinationType(Class<?> type)
   {
     _destinationType = type;
   }
