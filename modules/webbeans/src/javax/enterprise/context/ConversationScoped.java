@@ -38,6 +38,7 @@ import javax.inject.Scope;
 /**
  * The @ConversationScoped represents the JSF conversation scope
  */
+@Inherited
 @NormalScope(passivating=true)
 @Documented
 @Retention(RUNTIME)

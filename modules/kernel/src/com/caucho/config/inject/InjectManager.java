@@ -1653,7 +1653,7 @@ public final class InjectManager
     }
   }
 
-  @Override
+  //@Override
   public <X> Bean<X> getMostSpecializedBean(Bean<X> bean)
   {
     throw new UnsupportedOperationException();

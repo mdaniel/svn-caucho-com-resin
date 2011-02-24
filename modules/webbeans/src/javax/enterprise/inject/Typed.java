@@ -35,7 +35,7 @@ import java.lang.annotation.*;
 /**
  * Allows specific type information for scanning.
  */
-@Target({TYPE, METHOD, FIELD})
+@Target({FIELD, METHOD, TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface Typed {

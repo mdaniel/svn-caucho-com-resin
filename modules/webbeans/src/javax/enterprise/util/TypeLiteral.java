@@ -29,6 +29,7 @@
 
 package javax.enterprise.util;
 
+import java.io.Serializable;
 import java.lang.reflect.*;
 
 /**
@@ -38,10 +39,14 @@ import java.lang.reflect.*;
  * new TypeLiteral&lt;ArrayList&lt;String>>() {}
  * </pre></code>
  */
-public abstract class TypeLiteral<T>
+public abstract class TypeLiteral<T> implements Serializable
 {
   private transient Type _type;
-  
+
+  protected TypeLiteral()
+  {
+  }
+
   public final Type getType()
   {
     if (_type == null) {

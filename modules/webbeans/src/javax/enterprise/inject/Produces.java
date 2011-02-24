@@ -36,7 +36,7 @@ import java.lang.annotation.*;
 /**
  * Bean factory methods are declared with the {@literal @Produces} annotation.
  */
-@Target({FIELD, METHOD})
+@Target({METHOD, FIELD})
 @Retention(RUNTIME)
 @Documented
 public @interface Produces {

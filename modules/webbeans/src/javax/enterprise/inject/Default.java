@@ -47,7 +47,7 @@ import javax.inject.Qualifier;
  */
 @Qualifier
 @Documented
-@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Target({TYPE, METHOD, PARAMETER, FIELD})
 @Retention(RUNTIME)
 public @interface Default {
 }

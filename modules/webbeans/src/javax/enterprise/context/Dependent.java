@@ -40,7 +40,7 @@ import javax.inject.Scope;
 @Scope
 @Documented
 @Retention(RUNTIME)
-@Target({TYPE, METHOD, FIELD})
+@Target({METHOD, TYPE, FIELD})
 @Inherited
 public @interface Dependent {
 }

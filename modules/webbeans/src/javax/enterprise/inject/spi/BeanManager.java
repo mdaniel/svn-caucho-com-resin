@@ -143,7 +143,7 @@ public interface BeanManager
    *
    * @param beans the set of beans to select from
    */
-  public <X> Bean<? extends X> getMostSpecializedBean(Bean<X> bean);
+//  public <X> Bean<? extends X> getMostSpecializedBean(Bean<X> bean);
 
   /**
    * Returns the passivation-capable bean with the given id.  Used by

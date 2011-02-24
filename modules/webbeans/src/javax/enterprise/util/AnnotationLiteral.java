@@ -69,7 +69,7 @@ public abstract class AnnotationLiteral<T extends Annotation>
   }
   
   @Override
-  public final Class<T> annotationType()
+  public java.lang.Class<? extends java.lang.annotation.Annotation> annotationType()
   {
     if (_annotationType == null) {
       fillAnnotationType(getClass());
