@@ -341,6 +341,11 @@ public class CauchoResponseWrapper extends ResponseWrapper
   }
   
   @Override
+  public void completeCache()
+  {
+  }
+  
+  @Override
   public void setSessionId(String id)
   {
     if (_response instanceof CauchoResponse)

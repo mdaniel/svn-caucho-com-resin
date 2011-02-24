@@ -3461,11 +3461,9 @@ public class WebApp extends ServletContextImpl
 
     if (_isStatisticsEnabled)
       chain = new StatisticsFilterChain(chain, this);
-
-    WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
-
-    webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
-    chain = webAppChain;
+    
+    if (getRequestListeners() != null && getRequestListeners().length > 0)
+      chain = new WebAppListenerFilterChain(chain, this, getRequestListeners());
 
     // TCK: cache needs to be outside because the cache flush conflicts
     // with the request listener destroy callback
@@ -3474,6 +3472,11 @@ public class WebApp extends ServletContextImpl
 
     if (_cache != null)
       chain = _cache.createFilterChain(chain, this);
+
+    WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
+
+    // webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
+    chain = webAppChain;
 
     if (getAccessLog() != null)
       chain = new AccessLogFilterChain(chain, this);

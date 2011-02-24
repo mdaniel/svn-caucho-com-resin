@@ -72,6 +72,8 @@ public interface CauchoResponse extends HttpServletResponse {
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain);
   public void setMatchCacheEntry(AbstractCacheEntry matchCacheEntry);
   public boolean isNoCacheUnlessVary();
+  
+  public void completeCache();
 
   public AbstractHttpResponse getAbstractHttpResponse();
   /**

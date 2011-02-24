@@ -472,6 +472,25 @@ public class TcpSocketLinkListener
   }
 
   /**
+   * Sets the minimum spare idle timeout.
+   */
+  @Configurable
+  public void setAcceptThreadIdleTimeout(Period timeout)
+    throws ConfigException
+  {
+    _launcher.setIdleTimeout(timeout.getPeriod());
+  }
+
+  /**
+   * Sets the minimum spare idle timeout.
+   */
+  public long getAcceptThreadIdleTimeout()
+    throws ConfigException
+  {
+    return _launcher.getIdleTimeout();
+  }
+
+  /**
    * Sets the operating system listen backlog
    */
   @Configurable

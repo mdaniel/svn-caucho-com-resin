@@ -34,14 +34,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.server.http.ResponseStream;
-import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 public class FastCgiResponseStream extends ResponseStream {
   private static final Logger log
     = Logger.getLogger(FastCgiResponseStream.class.getName());
-  
-  private static final L10N L = new L10N(FastCgiResponseStream.class);
 
   private FastCgiRequest _request;
   private WriteStream _next;
@@ -54,6 +51,12 @@ public class FastCgiResponseStream extends ResponseStream {
 
     _request = request;
     _next = next;
+  }
+  
+  @Override
+  public void start()
+  {
+    super.start();
   }
   
   //
@@ -74,13 +77,13 @@ public class FastCgiResponseStream extends ResponseStream {
   }
   
   @Override
-  protected void setNextBufferOffset(int offset)
+  protected void setNextBufferOffsetImpl(int offset)
   {
     _next.setBufferOffset(offset);
   }
 
   @Override
-  protected byte []writeNextBuffer(int offset)
+  protected byte []writeNextBufferImpl(int offset)
     throws IOException
   {
     if (log.isLoggable(Level.FINE))
@@ -90,7 +93,7 @@ public class FastCgiResponseStream extends ResponseStream {
   }
 
   @Override
-  public void flushNext()
+  protected void flushNextImpl()
     throws IOException
   {
     if (log.isLoggable(Level.FINE))
@@ -100,7 +103,7 @@ public class FastCgiResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void closeNext()
+  protected void closeNextImpl()
     throws IOException
   {
     if (log.isLoggable(Level.FINE))
@@ -110,7 +113,7 @@ public class FastCgiResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void writeTail(boolean isClose)
+  protected void writeTailImpl(boolean isClose)
     throws IOException
   {
     flushBuffer();

@@ -369,6 +369,7 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
       ((CauchoResponse) _response).close();
   }
 
+  @Override
   public boolean getForbidForward()
   {
     if (_response instanceof CauchoResponse)
@@ -377,12 +378,14 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
     return false;
   }
 
+  @Override
   public void setForbidForward(boolean forbid)
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setForbidForward(forbid);
   }
 
+  @Override
   public String getStatusMessage()
   {
     if (_response instanceof CauchoResponse)
@@ -391,6 +394,7 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
       return null;
   }
 
+  @Override
   public boolean hasError()
   {
     if (_response instanceof CauchoResponse)
@@ -399,24 +403,34 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
       return false;
   }
 
+  @Override
   public void setHasError(boolean error)
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setHasError(error);
   }
 
+  @Override
   public void setSessionId(String id)
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setSessionId(id);
   }
 
+  @Override
   public void killCache()
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).killCache();
   }
 
+  @Override
+  public void completeCache()
+  {
+    getResponseStream().completeCache();
+  }
+
+  @Override
   public void setNoCache(boolean killCache)
   {
     if (_response instanceof CauchoResponse)

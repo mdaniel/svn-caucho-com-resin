@@ -354,6 +354,11 @@ public class ResponseAdapter extends ResponseWrapper
     _responseStream = _originalResponseStream;
   }
 
+  @Override
+  public void completeCache()
+  {
+  }
+  
   public void close()
     throws IOException
   {

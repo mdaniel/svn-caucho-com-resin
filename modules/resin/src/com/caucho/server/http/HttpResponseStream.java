@@ -45,7 +45,7 @@ public class HttpResponseStream extends ResponseStream {
     = new byte[] {'\r', '\n', '0', '\r', '\n', '\r', '\n'};
 
   private HttpResponse _response;
-  private WriteStream _next;
+  private WriteStream _nextStream;
 
   private boolean _isChunkedEncoding;
   private int _bufferStartOffset;
@@ -55,7 +55,7 @@ public class HttpResponseStream extends ResponseStream {
     super(response);
 
     _response = response;
-    _next = next;
+    _nextStream = next;
   }
 
   /**
@@ -86,7 +86,7 @@ public class HttpResponseStream extends ResponseStream {
   @Override
   protected byte []getNextBuffer()
   {
-    return _next.getBuffer();
+    return _nextStream.getBuffer();
   }
 
   @Override
@@ -94,8 +94,8 @@ public class HttpResponseStream extends ResponseStream {
   {
     if (_isChunkedEncoding) {
       if (_bufferStartOffset == 0) {
-        _bufferStartOffset = _next.getBufferOffset() + 8;
-        _next.setBufferOffset(_bufferStartOffset);
+        _bufferStartOffset = _nextStream.getBufferOffset() + 8;
+        _nextStream.setBufferOffset(_bufferStartOffset);
       }
     }
 
@@ -108,29 +108,29 @@ public class HttpResponseStream extends ResponseStream {
   {
     if (_isChunkedEncoding) {
       if (_bufferStartOffset == 0) {
-        _bufferStartOffset = _next.getBufferOffset() + 8;
-        _next.setBufferOffset(_bufferStartOffset);
+        _bufferStartOffset = _nextStream.getBufferOffset() + 8;
+        _nextStream.setBufferOffset(_bufferStartOffset);
       }
     }
 
-    return _next.getBufferOffset();
+    return _nextStream.getBufferOffset();
   }
 
   @Override
-  protected void setNextBufferOffset(int offset)
+  protected void setNextBufferOffsetImpl(int offset)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(dbgId() + "write-set-offset(" + offset + ")");
     }
-
-    _next.setBufferOffset(offset);
+    
+    _nextStream.setBufferOffset(offset);
   }
 
   @Override
-  protected byte []writeNextBuffer(int offset)
+  protected byte []writeNextBufferImpl(int offset)
     throws IOException
   {
-    WriteStream next = _next;
+    WriteStream next = _nextStream;
 
     int bufferStart = _bufferStartOffset;
 
@@ -154,7 +154,7 @@ public class HttpResponseStream extends ResponseStream {
   }
 
   @Override
-  public void flushNext()
+  public void flushNextImpl()
     throws IOException
   {
     if (log.isLoggable(Level.FINE))
@@ -162,50 +162,50 @@ public class HttpResponseStream extends ResponseStream {
 
     if (_bufferStartOffset > 0) {
       // server/0506
-      _next.setBufferOffset(_bufferStartOffset - 8);
+      _nextStream.setBufferOffset(_bufferStartOffset - 8);
     }
 
-    _next.flush();
+    _nextStream.flush();
 
     _bufferStartOffset = 0;
   }
 
   @Override
-  protected void closeNext()
+  protected void closeNextImpl()
     throws IOException
   {
     _bufferStartOffset = 0;
 
-    AbstractHttpRequest req = _response.getRequest();
-    if (req.isCometActive() || req.isDuplex()) {
-    }
-    else if (! req.isKeepaliveAllowed()) {
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(dbgId() + "close stream");
+    try {
+      AbstractHttpRequest req = _response.getRequest();
+      if (req.isCometActive() || req.isDuplex()) {
       }
+      else if (! req.isKeepaliveAllowed()) {
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(dbgId() + "close stream");
+        }
 
-      try {
-        _next.close();
-      } catch (IOException e) {
-        log.log(Level.FINER, e.toString(), e);
+        _nextStream.close();
       }
-    }
-    else {
-      // close();
+      else {
+        // close();
 
-      if (log.isLoggable(Level.FINE)) {
-        log.fine(dbgId() + "finish/keepalive");
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(dbgId() + "finish/keepalive");
+        }
       }
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 
   @Override
-  protected void writeTail(boolean isClose)
+  protected void writeTailImpl(boolean isClose)
     throws IOException
   {
     if (! _isChunkedEncoding) {
       // server/0550
-      _next.flush();
+      _nextStream.flush();
       // XXX: the isClose flag isn't accurate with keepalives
       /*
       if (isClose)
@@ -216,14 +216,14 @@ public class HttpResponseStream extends ResponseStream {
 
     int bufferStart = _bufferStartOffset;
 
-    int bufferOffset = _next.getBufferOffset();
+    int bufferOffset = _nextStream.getBufferOffset();
     if (bufferStart < bufferOffset) {
       if (log.isLoggable(Level.FINER))
         log.finer(dbgId() + "write-tail(" + (bufferOffset - bufferStart) + ")");
     }
 
     if (bufferStart > 0) {
-      byte []buffer = _next.getBuffer();
+      byte []buffer = _nextStream.getBuffer();
       int len = bufferOffset - bufferStart;
       
       if (len > 0)
@@ -237,26 +237,26 @@ public class HttpResponseStream extends ResponseStream {
     ArrayList<String> footerKeys = _response.getFooterKeys();
 
     if (footerKeys.size() == 0)
-      _next.write(_tailChunked, 0, _tailChunkedLength);
+      _nextStream.write(_tailChunked, 0, _tailChunkedLength);
     else {
       ArrayList<String> footerValues = _response.getFooterValues();
 
-      _next.print("\r\n0\r\n");
+      _nextStream.print("\r\n0\r\n");
 
       for (int i = 0; i < footerKeys.size(); i++) {
-        _next.print(footerKeys.get(i));
-        _next.print(": ");
-        _next.print(footerValues.get(i));
-        _next.print("\r\n");
+        _nextStream.print(footerKeys.get(i));
+        _nextStream.print(": ");
+        _nextStream.print(footerValues.get(i));
+        _nextStream.print("\r\n");
       }
 
-      _next.print("\r\n");
+      _nextStream.print("\r\n");
     }
 
     if (log.isLoggable(Level.FINER))
       log.finer(dbgId() + "write-chunk-tail(" + _tailChunkedLength + ")");
 
-    _next.flush();
+    _nextStream.flush();
   }
 
   /**

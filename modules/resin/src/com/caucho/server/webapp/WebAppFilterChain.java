@@ -73,12 +73,6 @@ public class WebAppFilterChain implements CauchoFilterChain {
   // error page manager
   private ErrorPageManager _errorPageManager;
 
-  private ServletRequestListener []_requestListeners;
-
-  private HashMap<String,String> _securityRoleMap;
-
-  private AbstractAccessLog _accessLog;
-
   // true it's the top
   private boolean _isTop = true;
 
@@ -105,10 +99,6 @@ public class WebAppFilterChain implements CauchoFilterChain {
     _webApp = webApp;
     _errorPageManager = webApp.getErrorPageManager();
     _isTop = isTop;
-    _requestListeners = webApp.getRequestListeners();
-
-    if (_isTop)
-      _accessLog = webApp.getAccessLog();
 
     try {
       if (_isTop) {
@@ -118,14 +108,6 @@ public class WebAppFilterChain implements CauchoFilterChain {
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
-  }
-
-  /**
-   * Sets the security map.
-   */
-  public void setSecurityRoleMap(HashMap<String,String> map)
-  {
-    _securityRoleMap = map;
   }
 
   /**
@@ -171,31 +153,11 @@ public class WebAppFilterChain implements CauchoFilterChain {
         return;
       }
 
-      /*
-      if (_securityRoleMap != null && request instanceof AbstractHttpRequest)
-        ((AbstractHttpRequest) request).setRoleMap(_securityRoleMap);
-      */
-      for (int i = 0; i < _requestListeners.length; i++) {
-        ServletRequestEvent event = new ServletRequestEvent(_webApp, request);
-
-        _requestListeners[i].requestInitialized(event);
-      }
-
       _next.doFilter(request, response);
     } catch (Throwable e) {
       _errorPageManager.sendServletError(e, request, response);
     } finally {
       webApp.exitWebApp();
-
-      for (int i = _requestListeners.length - 1; i >= 0; i--) {
-        try {
-          ServletRequestEvent event = new ServletRequestEvent(_webApp, request);
-
-          _requestListeners[i].requestDestroyed(event);
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
 
       // put finish() before access log so the session isn't tied up while
       // logging

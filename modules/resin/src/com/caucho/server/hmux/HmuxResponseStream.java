@@ -73,28 +73,28 @@ public class HmuxResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void setNextBufferOffset(int offset)
+  protected void setNextBufferOffsetImpl(int offset)
     throws IOException
   {
     _request.setNextBufferOffset(offset);
   }
 
   @Override
-  protected byte []writeNextBuffer(int offset)
+  protected byte []writeNextBufferImpl(int offset)
     throws IOException
   {
     return _request.writeNextBuffer(offset);
   }
 
   @Override
-  public void flushNext()
+  protected void flushNextImpl()
     throws IOException
   {
     _request.flushNext();
   }
 
   @Override
-  protected void closeNext()
+  protected void closeNextImpl()
     throws IOException
   {
     // only flush buffer because the 'Q' still needs to
@@ -103,7 +103,7 @@ public class HmuxResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void writeTail(boolean isClose)
+  protected void writeTailImpl(boolean isClose)
     throws IOException
   {
     _request.writeTail();

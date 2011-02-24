@@ -40,6 +40,12 @@ abstract public class AbstractCauchoResponse implements CauchoResponse {
   }
   
   @Override
+  public void completeCache()
+  {
+    getResponseStream().completeCache();
+  }
+  
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[]";

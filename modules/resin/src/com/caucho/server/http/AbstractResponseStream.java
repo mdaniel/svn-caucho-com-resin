@@ -326,7 +326,11 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   protected void killCaching()
   {
   }
-
+  
+  public void completeCache()
+  {
+  }
+  
   public final boolean isClosed()
   {
     return _state.isClosed();
@@ -351,6 +355,20 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     } finally {
       _state = _state.toClose();
     }
+  }
+  
+  protected boolean toClosing()
+  {
+    State state = _state;
+    
+    _state = state.toClosing();
+    
+    return ! state.isClosing();
+  }
+  
+  protected void toClose()
+  {
+    _state = _state.toClose();
   }
   
   protected void closeImpl()
@@ -452,4 +470,5 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
       throw new IllegalStateException(toString());
     }
   }
+
 }

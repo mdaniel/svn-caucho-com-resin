@@ -187,6 +187,11 @@ public class StubServletResponse implements CauchoResponse {
   {
   }
   
+  @Override
+  public void completeCache()
+  {
+  }
+  
   public void close() throws IOException
   {
   }

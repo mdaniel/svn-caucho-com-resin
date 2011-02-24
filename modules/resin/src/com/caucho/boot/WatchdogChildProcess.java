@@ -130,7 +130,7 @@ class WatchdogChildProcess
   {
     if (! _lifecycle.toActive())
       return;
-    System.out.println("RUN1");
+
     EnvironmentClassLoader envLoader
       = EnvironmentClassLoader.create(_system.getClassLoader());
     
@@ -143,15 +143,14 @@ class WatchdogChildProcess
     try {
       thread.setContextClassLoader(envLoader);
       envLoader.start();
-      System.out.println("RUN2");
+
       ss = new ServerSocket(0, 5, InetAddress.getByName("127.0.0.1"));
 
       int port = ss.getLocalPort();
 
       log.warning("Watchdog starting Resin[" + _watchdog.getId() + "]");
-System.out.println("RUN3");
+
       jvmOut = createJvmOut();
-      System.out.println("RUN4:");
       
       _process = createProcess(port, jvmOut);
       
@@ -793,14 +792,14 @@ System.out.println("RUN3");
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
-    System.out.println("JVM: " + jvmPath);
+
     RotateLog log = new RotateLog();
     log.setPath(jvmPath);
     log.setRolloverSizeBytes(64L * 1024 * 1024);
     
     if (_watchdog.getStdoutLog() != null)
       _watchdog.getStdoutLog().configure(log);
-    System.out.println("CFG: " + _watchdog.getStdoutLog() + " " + log.getPath());
+
     log.init();
     
     RotateStream rotateStream = log.getRotateStream();

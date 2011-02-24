@@ -46,13 +46,10 @@ import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.ToByteResponseStream;
-import com.caucho.util.L10N;
 
 public class IncludeResponseStream2 extends ToByteResponseStream {
   private static final Logger log
     = Logger.getLogger(IncludeResponseStream2.class.getName());
-  
-  private static final L10N L = new L10N(IncludeResponseStream2.class);
 
   private final IncludeResponse _response;
 
@@ -432,7 +429,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
       _os.flush();
     */
 
-    finishCache();
+    closeCache();
     
     _stream = null;
     _os = null;
@@ -442,12 +439,14 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     _cacheWriter = null;
   }
 
-  public void finishCache()
-    throws IOException
+  public void completeCache()
   {
+
     AbstractCacheFilterChain cache = _response.getCacheInvocation();
       
     try {
+      flushBuffer();
+      
       OutputStream cacheStream = _cacheStream;
       _cacheStream = null;
 
@@ -468,6 +467,8 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
         if (cache != null)
           cache.finishCaching(cacheEntry);
       }
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
     } finally {
       // _response.setCacheInvocation(null);
 
@@ -477,5 +478,29 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
       if (cache != null && cacheEntry != null)
         cache.killCaching(cacheEntry);
     }
+  }
+
+  private void closeCache()
+    throws IOException
+  {
+    AbstractCacheFilterChain cache = _response.getCacheInvocation();
+
+    OutputStream cacheStream = _cacheStream;
+    _cacheStream = null;
+
+    Writer cacheWriter = getCharCacheStream();
+    setCharCacheStream(null);
+
+    if (cacheStream != null)
+      cacheStream.close();
+
+    if (cacheWriter != null)
+      cacheWriter.close();
+
+    AbstractCacheEntry cacheEntry = _cacheEntry;
+    _cacheEntry = null;
+
+    if (cache != null && cacheEntry != null)
+      cache.killCaching(cacheEntry);
   }
 }

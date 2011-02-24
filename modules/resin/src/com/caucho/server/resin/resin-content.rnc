@@ -484,6 +484,9 @@ r_port-Parameters =
    & (attribute accept-thread-max { r_int-Type }
       | element accept-thread-max { r_int-Type })?
 
+   & (attribute accept-thread-idle-timeout { r_period-Type }
+      | element accept-thread-idle-timeout { r_int-Type })?
+
    & (attribute connection-max { r_int-Type }
       | element connection-max { r_int-Type })?
 
@@ -724,6 +727,8 @@ r_server-Content =
 
   & r_thread-idle-min?
 
+  & r_thread-idle-timeout?
+
   & r_user-name?
 
   & (attribute watchdog-address { string }
@@ -818,6 +823,10 @@ r_thread-idle-max =
 r_thread-idle-min =
   attribute thread-idle-min { string }
   | element thread-idle-min { string }
+
+r_thread-idle-timeout =
+  attribute thread-idle-timeout { string }
+  | element thread-idle-timeout { string }
 
 r_transaction-log = element transaction-log {
   r_enable?
