@@ -171,13 +171,11 @@ function display_profile_results($partition, $groups, $profile)
 
 function print_profile_tab($entries, $name, $count, $profile)
 {
-  echo "<div class='pie-chart'>";
-  echo "<canvas id='${name}-table-chart'/ width='300' height='300' style='display: block'></canvas>\n";
-  echo "<div id='${name}-table-label' class='chart-label'></div>\n";
-  echo "</div>\n";
-
   $period = $profile->getPeriod();
   $sample_ticks = $profile->getTicks();
+
+  echo "<table border='0' cellspacing='0' cellpadding='10px'>\n";
+  echo "<tr><td>";
   
   echo "<table class='threads' id='${name}-table' style='display: inline-block; min-height: 400px;'>\n";
 
@@ -250,7 +248,15 @@ function print_profile_tab($entries, $name, $count, $profile)
   }
 
   echo "</table>\n";
+  
+  echo "</td><td style='vertical-align:top'>\n";
+  
+  echo "<div class='pie-chart'>";
+  echo "<canvas id='${name}-table-chart'/ width='300' height='300' style='display: block'></canvas>\n";
+  echo "<div id='${name}-table-label' class='chart-label'></div>\n";
+  echo "</div>\n";
 
+  echo "</table>";
 }
 
 function do_partition_profile($entries)

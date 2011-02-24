@@ -127,23 +127,26 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
     
     echo "];\n";
 
-    echo "graphs[$i] = { label : '${name}', data : values };\n";
+    $name = preg_replace("/\s/", "&nbsp;", $name);
+
+    echo "graphs[$i] = { label : '" . $name . "', data : values };\n";
 
     $i++;
   }
 
   echo '$.plot($("#' . $canvas . '"), graphs,';
   echo '{ ';
-  echo 'xaxis: {mode:"time"}, ';
-  echo "yaxis: {tickFormatter: function(val, axis) {\n";
-  echo "  if (val > 1000000000)\n";
-  echo "    return (val / 1000000000).toFixed(1) + 'G';\n";
-  echo "  if (val > 1000000)\n";
-  echo "    return (val / 1000000).toFixed(1) + 'M';\n";
-  echo "  if (val > 1000)\n";
-  echo "    return (val / 1000).toFixed(1) + 'k';\n";
+  echo 'xaxis: { mode:"time" }, ';
+  echo "yaxis: {labelWidth:40,tickFormatter: function(val, axis) {\n";
+  echo "  if (val >= 1e9)\n";
+  echo "    return (val / 1e9).toFixed(1) + 'G';\n";
+  echo "  if (val >= 1e6)\n";
+  echo "    return (val / 1e6).toFixed(1) + 'M';\n";
+  echo "  if (val >= 1e3)\n";
+  echo "    return (val / 1e3).toFixed(1) + 'k';\n";
   echo "  return val.toFixed(axis.tickDecimals);\n";
-  echo '}}, ' . "\n";
+  echo "  }";
+  echo "}, \n";
   echo 'series: { lines: { lineWidth:1 }}, ';
   echo 'legend: { container: "#' . $canvas . '-legend" }, ';
   echo '});' . "\n";

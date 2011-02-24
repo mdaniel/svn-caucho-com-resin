@@ -80,10 +80,10 @@ abstract public class AbstractCacheFilterChain
    *
    * @param okay if true, the cache if valid
    */
-  abstract public void finishCaching(AbstractCacheEntry entry);
+  abstract public void finishCaching(CauchoResponse res);
 
   /**
    * Cleanup the cache entry on a failed cache attempt.
    */
-  abstract public void killCaching(AbstractCacheEntry entry);
+  abstract public void killCaching(CauchoResponse res);
 }

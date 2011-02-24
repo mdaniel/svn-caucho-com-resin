@@ -1800,6 +1800,7 @@ public final class InjectManager
     
       // TCK conflict
       if (! cl.isInterface()
+          && ! cl.isPrimitive()
           && ! Serializable.class.isAssignableFrom(cl)
           && ! isNormalScope(prodBean.getScope())) {
         RuntimeException exn;

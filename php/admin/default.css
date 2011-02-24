@@ -1003,11 +1003,12 @@ div.profile-tab {
   display: inline-block;
   min-height: 400px;
 }
-
+/*
 div.pie-chart {
   position: absolute;
   right: 1em;
 }
+*/
 
 input.deploy {
   padding: 1em;
@@ -1055,3 +1056,12 @@ div.form-input-help {
   width: 85%;
   margin-bottom: 2em;
 }
+
+.tickLabel {
+  font-size : 90%;
+}
+
+.legendLabel {
+  font-size : 90%;
+}
+

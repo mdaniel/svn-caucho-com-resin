@@ -58,7 +58,6 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   private ServletOutputStream _os;
   private PrintWriter _writer;
   
-  private AbstractCacheEntry _cacheEntry;
   private OutputStream _cacheStream;
   private Writer _cacheWriter;
   private boolean _isCommitted;
@@ -334,22 +333,22 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
 
     int contentLength = -1;
 
-    _cacheEntry
+    AbstractCacheEntry cacheEntry
       = cacheInvocation.startCaching(_response.getRequest(), _response,
                                      _headerKeys, _headerValues,
                                      contentType,
                                      charEncoding,
                                      contentLength);
     
-    if (_cacheEntry == null)
+    if (cacheEntry == null)
       return;
 
-    _cacheEntry.setForwardEnclosed(_response.isForwardEnclosed());
+    cacheEntry.setForwardEnclosed(_response.isForwardEnclosed());
 
     if (isByte)
-      _cacheStream = _cacheEntry.openOutputStream();
+      _cacheStream = cacheEntry.openOutputStream();
     else
-      _cacheWriter = _cacheEntry.openWriter();
+      _cacheWriter = cacheEntry.openWriter();
   }
 
   /**
@@ -459,24 +458,15 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
       if (cacheWriter != null)
         cacheWriter.close();
 
-      AbstractCacheEntry cacheEntry = _cacheEntry;
-
-      if (cacheEntry != null) {
-        _cacheEntry = null;
-
-        if (cache != null)
-          cache.finishCaching(cacheEntry);
-      }
+      if (cache != null)
+        cache.finishCaching(_response);
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       // _response.setCacheInvocation(null);
 
-      AbstractCacheEntry cacheEntry = _cacheEntry;
-      _cacheEntry = null;
-
-      if (cache != null && cacheEntry != null)
-        cache.killCaching(cacheEntry);
+      if (cache != null)
+        cache.killCaching(_response);
     }
   }
 
@@ -497,10 +487,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     if (cacheWriter != null)
       cacheWriter.close();
 
-    AbstractCacheEntry cacheEntry = _cacheEntry;
-    _cacheEntry = null;
-
-    if (cache != null && cacheEntry != null)
-      cache.killCaching(cacheEntry);
+    if (cache != null)
+      cache.killCaching(_response);
   }
 }

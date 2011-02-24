@@ -89,7 +89,6 @@ public class TldListener {
     if ("com.sun.faces.config.ConfigureListener".equals(className)
         && ! webApp.isFacesServletConfigured()) {
       // avoid initializing JSF if it's not used.
-      System.out.println("NOFACES:");
       return;
     }
     

@@ -56,7 +56,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   private CauchoResponse _proxyCacheResponse;
 
   private AbstractCacheFilterChain _cacheInvocation;
-  private AbstractCacheEntry _newCacheEntry;
+
   private OutputStream _cacheStream;
   private long _cacheMaxLength;
 
@@ -66,6 +66,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   private int _contentLength;
 
   private boolean _isAllowFlush = true;
+  private boolean _isComplete;
   private boolean _isNextDisconnect;
 
   public ResponseStream()
@@ -110,6 +111,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     _cacheStream = null;
     _proxyCacheResponse = null;
     _isNextDisconnect = false;
+    _isComplete = false;
   }
 
   /**
@@ -259,6 +261,10 @@ abstract public class ResponseStream extends ToByteResponseStream {
     clearNext();
   }
 
+  public boolean isCloseComplete()
+  {
+    return super.isCloseComplete() || _isComplete;
+  }
   /**
    * Clear the closed state, because of the NOT_MODIFIED
    */
@@ -275,7 +281,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       return;
 
     // server/05ef
-    if (! isClosing() || isCharFlushing())
+    if (! isCloseComplete() || isCharFlushing())
       length = -1;
     
     CauchoResponse proxyCacheResponse = _proxyCacheResponse;
@@ -714,20 +720,20 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
     int contentLength = -1;
 
-    _newCacheEntry
+    AbstractCacheEntry newCacheEntry
       = cacheInvocation.startCaching(req, res,
                                      keys, values,
                                      contentType,
                                      charEncoding,
                                      contentLength);
 
-    if (_newCacheEntry == null) {
+    if (newCacheEntry == null) {
     }
     else if (isByte) {
-      setByteCacheStream(_newCacheEntry.openOutputStream());
+      setByteCacheStream(newCacheEntry.openOutputStream());
     }
     else {
-      setCharCacheStream(_newCacheEntry.openWriter());
+      setCharCacheStream(newCacheEntry.openWriter());
     }
   }
 
@@ -749,11 +755,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
   @Override
   public void killCaching()
   {
-    AbstractCacheEntry cacheEntry = _newCacheEntry;
-    _newCacheEntry = null;
+    AbstractCacheFilterChain cacheInvocation = _cacheInvocation;
 
-    if (cacheEntry != null) {
-      _cacheInvocation.killCaching(cacheEntry);
+    if (cacheInvocation != null) {
+      HttpServletResponseImpl res = _response.getRequest().getResponseFacade();
+      
+      cacheInvocation.killCaching(res);
       setByteCacheStream(null);
       setCharCacheStream(null);
     }
@@ -762,10 +769,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
   @Override
   public void completeCache()
   {
-    if (! toClosing())
-      return;
-    
+    HttpServletResponseImpl res = _response.getRequest().getResponseFacade();
+
     try {
+      _isComplete = true;
+      
       closeBuffer();
       
       if (! isNextValid()) {
@@ -783,40 +791,25 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
       if (cacheWriter != null)
         cacheWriter.close();
+      
+      AbstractCacheFilterChain cache = _cacheInvocation;
 
-      if (_newCacheEntry != null) {
-        HttpServletRequestImpl request
-          = _response.getRequest().getRequestFacade();
+      if (cache != null && res != null) {
+        _cacheInvocation = null;
 
-        if (request == null)
-          return;
-
-        WebApp webApp = request.getWebApp();
+        WebApp webApp = res.getRequest().getWebApp();
         if (webApp != null && webApp.isActive()) {
-          AbstractCacheEntry cacheEntry = _newCacheEntry;
-
-          _cacheInvocation.finishCaching(cacheEntry);
-
-          _newCacheEntry = null;
+          cache.finishCaching(res);
         }
       }
-      
-      writeTail(true);
-      closeCache();
-      closeNext();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      toClose();
-      
       AbstractCacheFilterChain cache = _cacheInvocation;
       _cacheInvocation = null;
 
-      AbstractCacheEntry cacheEntry = _newCacheEntry;
-      _newCacheEntry = null;
-
-      if (cache != null && cacheEntry != null)
-        cache.killCaching(cacheEntry);
+      if (cache != null)
+        cache.killCaching(res);
     }
   }
 
@@ -825,8 +818,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     AbstractCacheFilterChain cache = _cacheInvocation;
     _cacheInvocation = null;
 
-    AbstractCacheEntry cacheEntry = null;
-    _newCacheEntry = null;
+    HttpServletResponseImpl res = _response.getRequest().getResponseFacade();
     
     try {
       OutputStream cacheStream = getByteCacheStream();
@@ -843,8 +835,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      if (cache != null && cacheEntry != null)
-        cache.killCaching(cacheEntry);
+      if (cache != null)
+        cache.killCaching(res);
     }
   }
 
