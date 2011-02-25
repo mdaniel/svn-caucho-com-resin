@@ -534,6 +534,13 @@ if test "$?" = "0"; then
    b64_jni=true
 fi
 
+$JAVA_HOME/bin/amd64/java -version 2> $tmpname
+grep "64-Bit" $tmpname 1> /dev/null
+     
+if test "$?" = "0"; then
+   b64_jni=true
+fi
+
 # Require user to use --enable-64bit if the version is optional
 # in the javac  
 #  
