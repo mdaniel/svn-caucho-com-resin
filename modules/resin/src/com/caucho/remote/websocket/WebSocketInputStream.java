@@ -29,10 +29,10 @@
 
 package com.caucho.remote.websocket;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
 
-import java.io.*;
+import com.caucho.util.L10N;
 
 /**
  * WebSocketInputStream reads a single WebSocket packet.
@@ -43,12 +43,12 @@ import java.io.*;
  * +-+------+---------+-+---------+
  * 
  * OPCODES
- *   0 - close
- *   1 - hello
- *   2 - binary
- *   3 - text
- *   4 - ping
- *   5 - pong
+ *   0 - cont
+ *   1 - close
+ *   2 - ping
+ *   3 - pong
+ *   4 - text
+ *   5 - binary
  * </pre></code>
  */
 public class WebSocketInputStream extends InputStream 
@@ -56,27 +56,27 @@ public class WebSocketInputStream extends InputStream
 {
   private static final L10N L = new L10N(WebSocketInputStream.class);
   
-  private InputStream _is;
-  
-  private boolean _isFinal;
+  private final FrameInputStream _is;
   private long _length;
+  private boolean _isFinal;
 
-  public WebSocketInputStream(InputStream is)
+  public WebSocketInputStream(FrameInputStream is)
     throws IOException
   {
     _is = is;
   }
-
-  public void init(boolean isFinal, long length)
-    throws IOException
-  {
-    _isFinal = isFinal;
-    _length = length;
-  }
   
+  public void init()
+  {
+    _isFinal = _is.isFinal();
+    _length = _is.getLength();
+  }
+
   public boolean startBinaryMessage()
     throws IOException
   {
+    throw new UnsupportedOperationException();
+    /*
     int frame1 = _is.read();
     int frame2 = _is.read();
 
@@ -110,88 +110,33 @@ public class WebSocketInputStream extends InputStream
     _length = len;
     
     return true;
+    */
   }
 
   public long getLength()
   {
-    return _length;
+    return _is.getLength();
   }
 
   @Override
   public int read()
     throws IOException
   {
-    InputStream is = _is;
-    
-    if (_length == 0 && ! _isFinal) {
-      readFrameHeader();
+    while (_length == 0 && ! _isFinal) {
+      if (! _is.readFrameHeader())
+        return -1;
+      
+      _length = _is.getLength();
+      _isFinal = _is.isFinal();
     }
 
     if (_length > 0) {
-      int ch = is.read();
+      int ch = _is.read();
       _length--;
+
       return ch;
     }
     else
       return -1;
-  }
-
-  private boolean readFrameHeader()
-    throws IOException
-  {
-    InputStream is = _is;
-
-    if (_isFinal || _length > 0)
-      throw new IllegalStateException();
-    
-    while (! _isFinal && _length == 0) {
-      int frame1 = is.read();
-      int frame2 = is.read();
-      
-      if (frame2 < 0)
-        return false;
-
-      boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
-      int op = frame1 & 0xf;
-
-      if (op != OP_CONT) {
-        throw new IOException(L.l("{0}: expected op=CONT '0x{1}' because WebSocket binary protocol expects 0x80 at beginning",
-                                  this, Integer.toHexString(frame1 & 0xffff)));
-      }
-
-      _isFinal = isFinal;
-
-      long length = frame2 & 0x7f;
-
-      if (length < 0x7e) {
-      }
-      else if (length == 0x7e) {
-        length = ((((long) is.read()) << 8)
-            + (((long) is.read())));
-      }
-      else {
-        length = ((((long) is.read()) << 56)
-            + (((long) is.read()) << 48)
-            + (((long) is.read()) << 40)
-            + (((long) is.read()) << 32)
-            + (((long) is.read()) << 24)
-            + (((long) is.read()) << 16)
-            + (((long) is.read()) << 8)
-            + (((long) is.read())));
-      }
-
-      _length = length;
-    }
-    
-    return true;
-  }
-
-  @Override
-  public void close()
-    throws IOException
-  {
-    while (_length > 0 && !_isFinal) {
-      skip(_length);
-    }
   }
 }

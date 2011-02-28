@@ -29,22 +29,56 @@
 
 package com.caucho.remote.websocket;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
- * WebSocketOutputStream writes a single WebSocket packet.
+ * WebSocketInputStream reads a single WebSocket packet.
  *
  * <code><pre>
- * 0x84 0x8X 0x8X 0x0X binarydata
+ * +-+------+---------+-+---------+
+ * |F|xxx(3)|opcode(4)|R|len(7)   |
+ * +-+------+---------+-+---------+
+ * 
+ * OPCODES
+ *   0 - cont
+ *   1 - close
+ *   2 - ping
+ *   3 - pong
+ *   4 - text
+ *   5 - binary
  * </pre></code>
  */
-public interface WebSocketConstants {
-  public static final int FLAG_FIN = 0x80;
+abstract public class FrameInputStream extends InputStream 
+  implements WebSocketConstants
+{
+  abstract public void init(InputStream is);
   
-  public static final int OP_CONT = 0x00;
-  public static final int OP_CLOSE = 0x01;
-  public static final int OP_PING = 0x02;
-  public static final int OP_PONG = 0x03;
-  public static final int OP_TEXT = 0x04;
-  public static final int OP_BINARY = 0x05;
+  abstract public int getOpcode();
+
+  abstract public long getLength();
   
-  public static final int OP_EXT = 0x0E;
+  abstract public boolean isFinal();
+
+  public boolean readFrameHeader()
+    throws IOException
+  {
+    long length = getLength();
+    
+    if (length > 0)
+      skip(length);
+
+    return readFrameHeaderImpl();
+  }
+
+  abstract protected boolean readFrameHeaderImpl()
+    throws IOException;
+
+  public void skipToFrameEnd()
+    throws IOException
+  {
+    while (getLength() > 0 && ! isFinal()) {
+      skip(getLength());
+    }
+  }
 }

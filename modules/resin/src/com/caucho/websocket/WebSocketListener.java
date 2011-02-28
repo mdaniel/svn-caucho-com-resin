@@ -45,15 +45,10 @@ import java.io.Reader;
 public interface WebSocketListener
 {
   /**
-   * Called after the server sends its handshake response.
+   * Called after the server sends its handshake response. After receiving
+   * the onStart, the application can send binary and text messages.
    */
   public void onStart(WebSocketContext context)
-    throws IOException;
-
-  /**
-   * Called after the handshake completes.
-   */
-  public void onHandshakeComplete(WebSocketContext context, boolean isSuccess)
     throws IOException;
 
   /**
@@ -69,7 +64,13 @@ public interface WebSocketListener
     throws IOException;
 
   /**
-   * Called when the connection closes
+   * Called when the peer closes the connection gracefully.
+   */
+  public void onClose(WebSocketContext context)
+    throws IOException;
+
+  /**
+   * Called when the connection terminates.
    */
   public void onComplete(WebSocketContext context)
     throws IOException;

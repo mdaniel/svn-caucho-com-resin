@@ -32,7 +32,7 @@ install	:
 			cp -r $(CP_U_FLAG) webapps/* $(resin_root)/webapps; \
 			mkdir -p $(resin_log); \
 		fi;\
-		mkdir -p $(resin_root)/doc; \
+		mkdir -p $(resin_root)/resin-doc; \
 		cp -r $(CP_U_FLAG) doc/* $(resin_root)/resin-doc; \
 		mkdir -p $(resin_root)/project-jars; \
 		cp -r $(CP_U_FLAG) project-jars/* $(resin_root)/project-jars; \

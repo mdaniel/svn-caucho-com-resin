@@ -29,22 +29,69 @@
 
 package com.caucho.remote.websocket;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
- * WebSocketOutputStream writes a single WebSocket packet.
- *
- * <code><pre>
- * 0x84 0x8X 0x8X 0x0X binarydata
- * </pre></code>
+ * User facade for http requests.
  */
-public interface WebSocketConstants {
-  public static final int FLAG_FIN = 0x80;
+public class MaskedInputStream extends InputStream
+{
+  private final byte []_mask = new byte[4];
+  private InputStream _is;
+  private int _offset;
   
-  public static final int OP_CONT = 0x00;
-  public static final int OP_CLOSE = 0x01;
-  public static final int OP_PING = 0x02;
-  public static final int OP_PONG = 0x03;
-  public static final int OP_TEXT = 0x04;
-  public static final int OP_BINARY = 0x05;
+  public void init(InputStream is)
+  {
+    _is = is;
+  }
   
-  public static final int OP_EXT = 0x0E;
+  public boolean readMask()
+    throws IOException
+  {
+    InputStream is = _is;
+    byte []mask = _mask;
+    int ch;
+    
+    mask[0] = (byte) is.read();
+    mask[1] = (byte) is.read();
+    mask[2] = (byte) is.read();
+    
+    ch = is.read();
+    
+    mask[3] = (byte) ch;
+    
+    _offset = 0;
+    
+    return ch >= 0;
+  }
+  
+  @Override
+  public int read()
+    throws IOException
+  {
+    int ch = _is.read();
+    
+    if (ch < 0)
+      return ch;
+    
+    int offset = _offset;
+    
+    _offset = (offset + 1) & 0x3;
+    
+    return (ch ^ _mask[offset]) & 0xff;
+  }
+  
+  @Override
+  public int available()
+    throws IOException
+  {
+    return _is.available();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _is + "]";
+  }
 }

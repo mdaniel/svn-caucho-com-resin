@@ -34,10 +34,10 @@ import java.io.IOException;
 
 /**
  * <code><pre>
- * WEBSOCKET /test HTTP/1.1
+ * GET /test HTTP/1.1
  * Upgrade: WebSocket
  * Connection: Upgrade
- * Origin: foo
+ * Sec-WebSocket-Origin: foo
  * Host: localhost
  * Content-Length: 0
  * </pre></code>

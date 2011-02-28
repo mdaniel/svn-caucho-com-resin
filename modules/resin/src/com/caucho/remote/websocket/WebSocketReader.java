@@ -47,22 +47,22 @@ public class WebSocketReader extends Reader
 {
   private static final L10N L = new L10N(WebSocketReader.class);
 
-  private InputStream _is;
+  private FrameInputStream _is;
 
   private boolean _isFinal;
   private long _length;
 
-  public WebSocketReader(InputStream is)
+  public WebSocketReader(FrameInputStream is)
     throws IOException
   {
     _is = is;
   }
 
-  public void init(boolean isFinal, long length)
-  throws IOException
+  public void init()
+    throws IOException
   {
-    _isFinal = isFinal;
-    _length = length;
+    _isFinal = _is.isFinal();
+    _length = _is.getLength();
   }
 
   public long getLength()
@@ -92,13 +92,35 @@ public class WebSocketReader extends Reader
     }
   }
   
+  @Override
+  public int read(char []buffer, int offset, int length)
+    throws IOException
+  {
+    int i = 0;
+    
+    int ch;
+    
+    while (length-- > 0 && (ch = readByte()) >= 0) {
+      buffer[offset + i++] = (char) ch;
+    }
+    
+    if (i == 0)
+      return -1;
+    else
+      return i;
+  }
+  
   private int readByte()
     throws IOException
   {
-    InputStream is = _is;
+    FrameInputStream is = _is;
 
-    if (_length == 0 && ! _isFinal) {
-      readFrameHeader();
+    while (_length == 0 && ! _isFinal) {
+      if (! is.readFrameHeader())
+        return -1;
+      
+      _isFinal = is.isFinal();
+      _length = is.getLength();
     }
 
     if (_length > 0) {
@@ -110,44 +132,10 @@ public class WebSocketReader extends Reader
       return -1;
   }
 
-  public int read(char []buffer, int offset, int length)
-  throws IOException
-  {
-    /*
-  InputStream is = _is;
-
-  if (_length <= 0) {
-    if (! readChunkLength())
-      return -1;
-  }
-
-  int sublen = _length - _offset;
-
-  if (sublen <= 0 || is == null)
-    return -1;
-
-  if (length < sublen)
-    sublen = length;
-
-  sublen = is.read(buffer, offset, sublen);
-
-  if (sublen > 0) {
-    _offset += sublen;
-    return sublen;
-  }
-  else {
-    close();
-    return -1;
-  }
-     */
-
-    return -1;
-  }
-
   private void readFrameHeader()
-  throws IOException
+    throws IOException
   {
-    InputStream is = _is;
+    FrameInputStream is = _is;
 
     if (_isFinal || _length > 0)
       throw new IllegalStateException();

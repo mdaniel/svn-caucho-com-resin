@@ -34,6 +34,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -66,17 +67,22 @@ import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
+import com.caucho.remote.websocket.FrameInputStream;
+import com.caucho.remote.websocket.MaskedFrameInputStream;
+import com.caucho.remote.websocket.UnmaskedFrameInputStream;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Login;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
 import com.caucho.util.NullEnumeration;
+import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
@@ -1793,17 +1799,17 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     
     String method = getMethod();
     
-    if (! "WEBSOCKET".equals(method)) {
+    if (! "GET".equals(method)) {
       getResponse().sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
       
-      throw new IllegalStateException(L.l("HTTP Method must be 'WEBSOCKET', because the WebSocket protocol requires an Upgrade: WebSocket header.\n  remote-IP: {0}",
+      throw new IllegalStateException(L.l("HTTP Method must be 'GET', because the WebSocket protocol requires 'GET'.\n  remote-IP: {0}",
                                           getRemoteAddr()));
     }
 
     String connection = getHeader("Connection");
     String upgrade = getHeader("Upgrade");
 
-    if (! "WebSocket".equals(upgrade)) {
+    if (! "WebSocket".equalsIgnoreCase(upgrade)) {
       getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       
       throw new IllegalStateException(L.l("HTTP Upgrade header '{0}' must be 'WebSocket', because the WebSocket protocol requires an Upgrade: WebSocket header.\n  remote-IP: {1}",
@@ -1818,203 +1824,109 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
                                           connection,
                                           getRemoteAddr()));
     }
+    
+    String key = getHeader("Sec-WebSocket-Key");
 
-    String origin = getHeader("Origin");
-
-    if (origin == null) {
+    if (key == null) {
       getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       
-      throw new IllegalStateException(L.l("HTTP Origin header is required, because the WebSocket protocol requires an Origin header.\n  remote-IP: {0}",
+      throw new IllegalStateException(L.l("HTTP Sec-WebSocket-Key header is required, because the WebSocket protocol requires an Origin header.\n  remote-IP: {0}",
+                                          getRemoteAddr()));
+    }
+    else if (key.length() != 24) {
+      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      
+      throw new IllegalStateException(L.l("HTTP Sec-WebSocket-Key header is invalid '{0}' because it's not a 16-byte value.\n  remote-IP: {1}",
+                                          key,
+                                          getRemoteAddr()));
+    }
+
+    String version = getHeader("Sec-WebSocket-Version");
+
+    String requiredVersion = "6";
+    if (! requiredVersion.equals(version)) {
+      getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+      
+      throw new IllegalStateException(L.l("HTTP Sec-WebSocket-Version header with value '{0}' is required, because the WebSocket protocol requires an Sec-WebSocket-Version header.\n  remote-IP: {1}",
+                                          requiredVersion,
                                           getRemoteAddr()));
     }
     
-    String protocolExtensions = getHeader("Sec-WebSocket-Protocol");
+    String extensions = getHeader("Sec-WebSocket-Extensions");
+    
     boolean isMasked = true;
     
-    if (protocolExtensions != null
-        && protocolExtensions.indexOf("unmasked") >= 0) {
+    if (extensions != null
+        && extensions.indexOf("x-unmasked") >= 0) {
       isMasked = false;
     }
     
-    byte []cnonce = null;
-    
-    if (isMasked) {
-      String cNonceString = getHeader("Sec-WebSocket-Nonce");
-
-      if (cNonceString == null) {
-        getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
-      
-        throw new IllegalStateException(L.l("Sec-WebSocket-Nonce header is missing, but it is required by the WebSocket protocol.\n  remote-IP: {0}",
-                                            getRemoteAddr()));
-      }
-    
-      cnonce = parseWebSocketNonce(cNonceString);
-    
-      if (cnonce == null) {
-        getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
-      
-        throw new IllegalStateException(L.l("Sec-WebSocket-Nonce must have an 8 byte hex nonce, but '{0}' received.\n  remote-IP: {1}",
-                                            cNonceString,
-                                            getRemoteAddr()));
-      }
-    
-      if (cnonce.length != 8) {
-        getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
-      
-        throw new IllegalStateException(L.l("Sec-WebSocket-Nonce must have an 8 byte nonce, but '{0}' received.\n  remote-IP: {1}",
-                                            cNonceString,
-                                            getRemoteAddr()));
-      }
-    }
-    
-    // String login = getHeader("Sec-WebSocket-Login");
-    
-    _response.setStatus(101, "Web Socket Protocol Handshake");
-    _response.setHeader("Upgrade", "WebSocket");
+    String serverExtensions = null;
     
     if (! isMasked)
-      _response.setHeader("WebSocket-Protocol", "unmasked");
+      serverExtensions = "x-unmasked";
+    
+    _response.setStatus(101);//, "Switching Protocols");
+    _response.setHeader("Upgrade", "websocket");
+    
+    String accept = calculateWebSocketAccept(key);
+    
+    _response.setHeader("Sec-WebSocket-Accept", accept);
+    
+    if (serverExtensions != null)
+      _response.setHeader("Sec-WebSocket-Extensions", serverExtensions);
 
     _response.setContentLength(0);
 
-    StringBuilder sb = new StringBuilder();
-    if (isSecure())
-      sb.append("wss://");
+    WebSocketContextImpl webSocket;
+    
+    if (isMasked)
+      webSocket = new WebSocketContextImpl(this, _response, listener,
+                                           new MaskedFrameInputStream());
     else
-      sb.append("ws://");
-    sb.append(getServerName());
-
-    if (! isSecure() && getServerPort() != 80
-        || isSecure() && getServerPort() != 443) {
-      sb.append(":");
-      sb.append(getServerPort());
-    }
-
-    sb.append(getContextPath());
-    if (getServletPath() != null)
-      sb.append(getServletPath());
-
-    String url = sb.toString();
-
-    _response.setHeader("WebSocket-Location", url);
-    _response.setHeader("WebSocket-Origin", origin.toLowerCase());
-
-    String protocol = getHeader("WebSocket-Protocol");
-
-    if (protocol != null)
-      _response.setHeader("WebSocket-Protocol", protocol);
-
-    WebSocketContextImpl webSocket
-      = new WebSocketContextImpl(this, _response, listener,
-                                 cnonce);
+      webSocket = new WebSocketContextImpl(this, _response, listener,
+                                           new UnmaskedFrameInputStream());
     
     SocketLinkDuplexController controller = _request.startDuplex(webSocket);
     webSocket.setController(controller);
     
-    boolean isValid = false;
     try {
       _response.getOutputStream().flush();
-      
-      if (isMasked)
-        webSocket.sendHello();
-      
-      /*
-      if (login != null)
-        webSocket.sendAuthChallenge();
-        */
       
       webSocket.flush();
 
       webSocket.onStart();
-    
-      if (isMasked)
-        webSocket.readHello();
-      
-      /*
-      if (login != null) {
-        webSocket.readAuthResponse();
-      }
-      */
-      
-      isValid = true;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
-    } finally {
-      webSocket.onHandshakeComplete(isValid);
     }
 
     return webSocket;
   }
   
-  /*
-  private String hashWebSocket(byte []nonce, String key)
+  private String calculateWebSocketAccept(String key)
   {
-    int len = nonce.length;
-    
-    if (key.length() < len)
-      len = key.length();
-    
-    char []buffer = new char[2 * len];
-    
-    for (int i = 0; i < len; i++) {
-      int a = nonce[i];
-      int b = key.charAt(i);
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
       
-      int value = a ^ b;
+      int length = key.length();
+      for (int i = 0; i < length; i++) {
+        md.update((byte) key.charAt(i));
+      }
       
-      buffer[2 * i]     = toHex(value >> 4);
-      buffer[2 * i + 1] = toHex(value);
-    }
-    
-    return new String(buffer);
-  }
-  
-  private char toHex(int value)
-  {
-    value = value & 0xf;
-    
-    if (value < 10)
-      return (char) ('0' + value);
-    else
-      return (char) ('a' + value - 10);
-  }
-  */
-  
-  private byte[]parseWebSocketNonce(String nonceString)
-  {
-    int len = nonceString.length() / 2;
-    
-    if (len < 1)
-      throw new IllegalStateException(L.l("Cnonce is too small"));
-    
-    byte []nonce = new byte[len];
-    
-    for (int i = 0; i < len; i++) {
-      char d1 = nonceString.charAt(2 * i);
-      char d2 = nonceString.charAt(2 * i + 1);
+      String guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+      length = guid.length();
+      for (int i = 0; i < length; i++) {
+        md.update((byte) guid.charAt(i));
+      }
       
-      nonce[i] = (byte) (16 * decodeHex(d1) + decodeHex(d2));
+      byte []digest = md.digest();
+      
+      return Base64.encode(digest);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-    
-    for (int j = len; j < nonce.length; j++) {
-      nonce[j] = nonce[j % len]; 
-    }
-    
-    return nonce;
-  }
-  
-  private int decodeHex(char ch)
-  {
-    if ('0' <= ch && ch <= '9')
-      return ch - '0';
-    else if ('a' <= ch && ch <= 'f')
-      return ch - 'a' + 10;
-    else if ('A' <= ch && ch <= 'F')
-      return ch - 'A' + 10;
-    else
-      return 0;
   }
 
   int getAvailable()

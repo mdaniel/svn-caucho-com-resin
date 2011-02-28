@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.caucho.bam.stream.ActorStream;
+import com.caucho.remote.websocket.UnmaskedFrameInputStream;
 import com.caucho.remote.websocket.WebSocketInputStream;
 
 /**
@@ -47,7 +48,9 @@ public class HmtpWebSocketReader {
     throws IOException
   {
     _hIn = new HmtpReader();
-    _wsIs = new WebSocketInputStream(is);
+    UnmaskedFrameInputStream fIs = new UnmaskedFrameInputStream();
+    fIs.init(is);
+    _wsIs = new WebSocketInputStream(fIs);
   }
 
   /**

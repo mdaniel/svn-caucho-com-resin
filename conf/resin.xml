@@ -54,6 +54,13 @@
      - default configuration applied to all clusters
     -->
   <cluster-default>
+    <!-- shared webapp jars for non-classloader-aware libraries -->
+    <web-app-default>
+      <class-loader>
+        <library-loader path="${resin.home}/webapp-jars"/>
+      </class-loader>
+    </web-app-default>
+
     <!-- standard servlet behavior, including .jsp, .php, and WEB-INF -->
     <resin:import path="${__DIR__}/app-default.xml"/>
 

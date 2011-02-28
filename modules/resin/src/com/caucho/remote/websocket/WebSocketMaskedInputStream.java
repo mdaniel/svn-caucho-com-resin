@@ -29,22 +29,60 @@
 
 package com.caucho.remote.websocket;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.caucho.util.L10N;
+
 /**
- * WebSocketOutputStream writes a single WebSocket packet.
+ * WebSocketInputStream reads a single WebSocket packet.
  *
  * <code><pre>
- * 0x84 0x8X 0x8X 0x0X binarydata
+ * +-+------+---------+-+---------+
+ * |F|xxx(3)|opcode(4)|R|len(7)   |
+ * +-+------+---------+-+---------+
+ * 
+ * OPCODES
+ *   0 - cont
+ *   1 - close
+ *   2 - ping
+ *   3 - pong
+ *   4 - text
+ *   5 - binary
  * </pre></code>
  */
-public interface WebSocketConstants {
-  public static final int FLAG_FIN = 0x80;
+public class WebSocketMaskedInputStream extends WebSocketInputStream 
+{
+  private FrameInputStream _maskIs;
   
-  public static final int OP_CONT = 0x00;
-  public static final int OP_CLOSE = 0x01;
-  public static final int OP_PING = 0x02;
-  public static final int OP_PONG = 0x03;
-  public static final int OP_TEXT = 0x04;
-  public static final int OP_BINARY = 0x05;
-  
-  public static final int OP_EXT = 0x0E;
+  public WebSocketMaskedInputStream(FrameInputStream is)
+    throws IOException
+  {
+    super(is);
+    
+    _maskIs = is;
+  }
+
+  @Override
+  public boolean startBinaryMessage()
+    throws IOException
+  {
+    /*
+    if (! _maskIs.readMask())
+      return false;
+    */
+    return super.startBinaryMessage();
+  }
+
+  public boolean readFrameHeader()
+    throws IOException
+  {
+    /*
+    if (! _maskIs.readMask())
+      return false;
+    
+    return super.readFrameHeader();
+    */
+    return false;
+  }
 }

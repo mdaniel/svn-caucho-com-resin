@@ -52,15 +52,6 @@ abstract public class AbstractWebSocketListener implements WebSocketListener
     throws IOException
   {
   }
-  
-  /**
-   * Called when the handshake completes
-   */
-  @Override
-  public void onHandshakeComplete(WebSocketContext context, boolean isSuccess)
-    throws IOException
-  {
-  }
 
   /**
    * Called when a binary message is available
@@ -83,13 +74,21 @@ abstract public class AbstractWebSocketListener implements WebSocketListener
   }
 
   /**
-   * Called when the connection closes
+   * Called when the peer closes the connection gracefully.
+   */
+  @Override
+  public void onClose(WebSocketContext context)
+    throws IOException
+  {
+  }
+
+  /**
+   * Called when the connection terminates.
    */
   @Override
   public void onComplete(WebSocketContext context)
     throws IOException
   {
-    
   }
 
   /**

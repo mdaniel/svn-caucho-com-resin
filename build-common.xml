@@ -696,12 +696,8 @@
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${resin.install}/lib">
-        <exclude name="**/*~"/>
-        <exclude name="**/.cvsignore"/>
-        <exclude name="**/.svnignore"/>
-
-        <include name="lib/slf4j-api-1.6.1.jar"/>
-        <include name="lib/hibernate-validator-4.0.2.GA.jar"/>
+        <include name="slf4j-api-1.6.1.jar"/>
+        <include name="hibernate-validator-4.0.2.GA.jar"/>
       </fileset>
     </copy>
 
