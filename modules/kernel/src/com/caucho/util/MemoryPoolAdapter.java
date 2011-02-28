@@ -28,6 +28,7 @@
 package com.caucho.util;
 
 import java.lang.management.MemoryUsage;
+import java.util.*;
 
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
@@ -37,12 +38,52 @@ import com.caucho.jmx.Jmx;
 public class MemoryPoolAdapter
 {
   private final MBeanServer _mbeanServer;
+  
+  public static enum PoolType 
+  {
+    CODE_CACHE ("java.lang:type=MemoryPool,name=Code Cache", "class storage","class memory","code cache","class","code"),
+    EDEN ("java.lang:type=MemoryPool,name=Eden Space", "eden"),
+    PERM_GEN("java.lang:type=MemoryPool,name=Perm Gen", "perm gen","perm"),
+    SURVIVOR ("java.lang:type=MemoryPool,name=Survivor Space", "survivor"),
+    TENURED ("java.lang:type=MemoryPool,name=Tenured Gen", "tenured","old gen","java heap","old space","old","heap");
 
-  private ObjectName _codeCacheName;
-  private ObjectName _edenName;
-  private ObjectName _permGenName;
-  private ObjectName _survivorName;
-  private ObjectName _tenuredName;
+    private final String _defaultName;
+    private final String[] _keywords;
+    
+    PoolType(String defaultName, String... keywords) {
+      _defaultName = defaultName;
+      _keywords = keywords;
+    }
+	  
+    public String defaultName()
+    {
+      return _defaultName;
+    }
+	  
+    public String[] keywords()
+    {
+      return _keywords;
+    }
+
+    // this does a breadth first search for the 1st objectName that matches a keyword
+    // keywords are ordered  most specific to least specific
+    public ObjectName find(Set<ObjectName> objectNames) throws MalformedObjectNameException
+    {
+      for (String keyword : _keywords) {
+        for (ObjectName objectName : objectNames) {
+          String name = objectName.getKeyProperty("name").toLowerCase();
+          if (name.contains(keyword)) {
+            return objectName;
+          }
+        }
+      }
+      
+      return new ObjectName(_defaultName);
+    }
+  }
+  
+  private Map<PoolType, ObjectName> _poolNamesMap = 
+    new HashMap<MemoryPoolAdapter.PoolType, ObjectName>();
   
   public MemoryPoolAdapter()
   {
@@ -50,40 +91,12 @@ public class MemoryPoolAdapter
 
     try {
       ObjectName query = new ObjectName("java.lang:type=MemoryPool,*");
-
-      ObjectName codeCacheName
-        = new ObjectName("java.lang:type=MemoryPool,name=Code Cache");
-      ObjectName edenName
-        = new ObjectName("java.lang:type=MemoryPool,name=Eden Space");
-      ObjectName permGenName
-        = new ObjectName("java.lang:type=MemoryPool,name=Perm Gen");
-      ObjectName survivorName
-        = new ObjectName("java.lang:type=MemoryPool,name=Survivor Space");
-      ObjectName tenuredName
-        = new ObjectName("java.lang:type=MemoryPool,name=Tenured Gen");
+      Set<ObjectName> objectNames = _mbeanServer.queryNames(query, null);
       
-      for (ObjectName objName : _mbeanServer.queryNames(query, null)) {
-        String name = objName.getKeyProperty("name");
-
-        if (name.toLowerCase().contains("code"))
-          codeCacheName = objName;
-        else if (name.toLowerCase().contains("eden"))
-          edenName = objName;
-        else if (name.toLowerCase().contains("perm"))
-          permGenName = objName;
-        else if (name.toLowerCase().contains("surv"))
-          survivorName = objName;
-        else if (name.toLowerCase().contains("tenured"))
-          tenuredName = objName;
-        else if (name.toLowerCase().contains("old"))
-          tenuredName = objName;
+      for (PoolType poolType : PoolType.values()) {
+        ObjectName objectName = poolType.find(objectNames);
+        _poolNamesMap.put(poolType, objectName);
       }
-      
-      _codeCacheName = codeCacheName;
-      _edenName = edenName;
-      _permGenName = permGenName;
-      _survivorName = survivorName;
-      _tenuredName = tenuredName;
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
@@ -91,59 +104,59 @@ public class MemoryPoolAdapter
   
   public ObjectName getCodeCacheName()
   {
-    return _codeCacheName;
+    return _poolNamesMap.get(PoolType.CODE_CACHE);
   }
 
   public void setCodeCacheName(ObjectName codeCacheName)
   {
-    _codeCacheName = codeCacheName;
+    _poolNamesMap.put(PoolType.CODE_CACHE, codeCacheName);
   }
 
   public ObjectName getEdenName()
   {
-    return _edenName;
+    return _poolNamesMap.get(PoolType.EDEN);
   }
 
   public void setEdenName(ObjectName edenName)
   {
-    _edenName = edenName;
+    _poolNamesMap.put(PoolType.EDEN, edenName);
   }
 
   public ObjectName getPermGenName()
   {
-    return _permGenName;
+    return _poolNamesMap.get(PoolType.PERM_GEN);
   }
 
   public void setPermGenName(ObjectName permGenName)
   {
-    _permGenName = permGenName;
+    _poolNamesMap.put(PoolType.PERM_GEN, permGenName);
   }
 
   public ObjectName getSurvivorName()
   {
-    return _survivorName;
+    return _poolNamesMap.get(PoolType.SURVIVOR);
   }
 
   public void setSurvivorName(ObjectName survivorName)
   {
-    _survivorName = survivorName;
+    _poolNamesMap.put(PoolType.SURVIVOR, survivorName);
   }
 
   public ObjectName getTenuredName()
   {
-    return _tenuredName;
+    return _poolNamesMap.get(PoolType.TENURED);
   }
 
   public void setTenuredName(ObjectName tenuredName)
   {
-    _tenuredName = tenuredName;
+    _poolNamesMap.put(PoolType.TENURED, tenuredName);
   }
 
   public long getCodeCacheCommitted()
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getCodeCacheName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -154,7 +167,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getCodeCacheName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -165,7 +178,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getCodeCacheName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -176,7 +189,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_codeCacheName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getCodeCacheName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -187,7 +200,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getEdenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -198,7 +211,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getEdenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -209,7 +222,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getEdenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -220,7 +233,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_edenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getEdenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -231,7 +244,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getPermGenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -242,7 +255,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getPermGenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -253,7 +266,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getPermGenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -264,7 +277,7 @@ public class MemoryPoolAdapter
   throws JMException
   {
       CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getPermGenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -275,7 +288,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_permGenName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getPermGenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -286,7 +299,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getSurvivorName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -297,7 +310,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getSurvivorName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -308,7 +321,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getSurvivorName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -319,7 +332,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_survivorName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getSurvivorName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -330,7 +343,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -341,7 +354,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -352,7 +365,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -363,7 +376,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
       CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -374,7 +387,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(_tenuredName, "Usage");
+      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
