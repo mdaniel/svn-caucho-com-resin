@@ -163,8 +163,6 @@ public class PageContextImpl extends PageContext
 
     _bodyResponseStream = new BodyResponseStream();
     _bodyResponseStream.start();
-
-    new JspPrintWriter();
   }
 
   public PageContextImpl(WebApp webApp, Servlet servlet)

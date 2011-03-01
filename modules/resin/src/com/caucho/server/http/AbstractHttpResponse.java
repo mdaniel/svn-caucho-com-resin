@@ -844,7 +844,7 @@ abstract public class AbstractHttpResponse {
     else {
       cb.append("=");
       String v = cookie.getValue();
-      int len = v.length();
+      int len = v != null ? v.length() : 0;
       
       for (int i = 0; i < len; i++) {
         char ch = v.charAt(i);

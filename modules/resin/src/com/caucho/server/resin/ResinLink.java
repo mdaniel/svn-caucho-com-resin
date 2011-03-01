@@ -52,6 +52,9 @@ public class ResinLink extends HmtpLinkWorker implements Runnable {
     super(resinActor, is, os);
     
     _resinActor = resinActor;
+    
+    if (resinActor == null)
+      throw new NullPointerException();
   }
 
   /**
@@ -62,9 +65,9 @@ public class ResinLink extends HmtpLinkWorker implements Runnable {
   {
     try {
       Thread.currentThread().setName("resin-main-link");
-      ClassLoader loader = ClassLoader.getSystemClassLoader();
-      Thread.currentThread().setContextClassLoader(loader);
-      
+      // ClassLoader loader = ClassLoader.getSystemClassLoader();
+      // Thread.currentThread().setContextClassLoader(loader);
+
       super.run();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

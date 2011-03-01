@@ -78,7 +78,11 @@ public class ResinActor extends SimpleActor
    */
   public void sendWarning(String msg)
   {
-    getBroker().message("watchdog", getJid(), new WarningMessage(msg));
+    try {
+      getBroker().message("watchdog", getJid(), new WarningMessage(msg));
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
   
   //

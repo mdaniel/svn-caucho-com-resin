@@ -84,19 +84,26 @@ public class WarningService extends AbstractResinSubSystem
    */
   public void sendWarning(Object source, String msg)
   {
-    String s = "WarningService: " + msg;
+    try {
+      String s = "WarningService: " + msg;
     
-    // if warning is high-priority then send to high priority handlers first
-    System.err.println(s);
+      // if warning is high-priority then send to high priority handlers first
+      System.err.println(s);
       
-    for (WarningHandler handler : _priorityHandlers)
-      handler.warning(source, msg);
+      for (WarningHandler handler : _priorityHandlers) {
+        handler.warning(source, msg);
+      }
     
-    // now send to the all handlers regardless of if its high priority
-    for (WarningHandler handler : _handlers)
-      handler.warning(source, msg);
+      // now send to the all handlers regardless of if its high priority
+      for (WarningHandler handler : _handlers) {
+        handler.warning(source, msg);
+      }
 
-    log.warning(s);
+      log.warning(s);
+    } catch (Throwable e) {
+      // WarningService must not throw exception
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
   
   /**
@@ -110,23 +117,30 @@ public class WarningService extends AbstractResinSubSystem
    */
   public void sendWarning(Object source, Throwable e)
   {
-    e.printStackTrace();
+    try {
+      e.printStackTrace();
     
-    String msg = e.toString();
+      String msg = e.toString();
     
-    String s = "WarningService: " + e;
+      String s = "WarningService: " + e;
     
-    // if warning is high-priority then send to high priority handlers first
-    System.err.println(s);
+      // if warning is high-priority then send to high priority handlers first
+      System.err.println(s);
       
-    for (WarningHandler handler : _priorityHandlers)
-      handler.warning(source, msg);
+      for (WarningHandler handler : _priorityHandlers) {
+        handler.warning(source, msg);
+      }
     
-    // now send to the all handlers regardless of if its high priority
-    for (WarningHandler handler : _handlers)
-      handler.warning(source, msg);
+      // now send to the all handlers regardless of if its high priority
+      for (WarningHandler handler : _handlers) {
+        handler.warning(source, msg);
+      }
 
-    log.warning(s);
+      log.warning(s);
+    } catch (Throwable e1) {
+      // WarningService must not throw exception
+      log.log(Level.WARNING, e1.toString(), e1);
+    }
   }
 
   /**

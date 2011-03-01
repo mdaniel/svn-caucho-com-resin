@@ -75,42 +75,15 @@ public class WebSocketInputStream extends InputStream
   public boolean startBinaryMessage()
     throws IOException
   {
-    throw new UnsupportedOperationException();
-    /*
-    int frame1 = _is.read();
-    int frame2 = _is.read();
-
-    if (frame2 < 0)
+    if (! _is.readFrameHeader())
       return false;
     
-    boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
+    if (_is.getOpcode() != OP_BINARY)
+      throw new UnsupportedOperationException("Expected binary at: " + _is.getOpcode());
     
-    int op = frame1 & 0xf;
-    
-    if (op != OP_BINARY)
-      throw new IllegalStateException(getClass().getSimpleName() + " requires a binary frame");
-    
-    long len = frame2 & 0x7f;
-    
-    if (len == 0x7e) {
-      len = (_is.read() << 8) + _is.read();
-    }
-    else if (len == 0x7f) {
-      len = (((long) _is.read() << 56)
-            + ((long) _is.read() << 48)
-            + ((long) _is.read() << 40)
-            + ((long) _is.read() << 32)
-            + ((long) _is.read() << 24)
-            + ((long) _is.read() << 16)
-            + ((long) _is.read() << 8)
-            + ((long) _is.read()));
-    }
-    
-    _isFinal = isFinal;
-    _length = len;
+    init();
     
     return true;
-    */
   }
 
   public long getLength()

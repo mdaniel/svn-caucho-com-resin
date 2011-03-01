@@ -13,6 +13,7 @@
 
 <s2 title="4.0.16 - snapshot">
 <ul>
+<li>servlet: addCookie should allow cookie with null value (#4410, rep by Brandon Kearby)</li>
 <li>install: resin-doc copy issues (#4408, rep by copart)</li>
 <li>install: validator/slf4j added to webapp-lib (#4386, rep by Jeff Schnitzer)</li>
 <li>proxy-cache: corrupted data with client disconnects (#4398, rep by Luke Jobling)</li>

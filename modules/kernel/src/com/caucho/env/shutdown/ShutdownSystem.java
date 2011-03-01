@@ -175,7 +175,11 @@ public class ShutdownSystem extends AbstractResinSubSystem
       haltThread.startShutdown();
     }
 
-    _warningService.sendWarning(this, msg);
+    try {
+      _warningService.sendWarning(this, msg);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**
@@ -187,6 +191,9 @@ public class ShutdownSystem extends AbstractResinSubSystem
     FailSafeHaltThread haltThread = _failSafeHaltThread;
     if (haltThread != null)
       haltThread.startShutdown();
+
+    if (exitCode == null)
+      exitCode = ExitCode.FAIL_SAFE_HALT;
 
     try {
       try {
@@ -201,9 +208,6 @@ public class ShutdownSystem extends AbstractResinSubSystem
       }
     } finally {
       _lifecycle.toDestroy();
-
-      if (exitCode == null)
-        exitCode = ExitCode.FAIL_SAFE_HALT;
 
       System.err.println("\nShutdown Resin reason: " + exitCode + "\n");
 
