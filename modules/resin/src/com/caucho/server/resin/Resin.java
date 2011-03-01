@@ -1200,7 +1200,7 @@ public class Resin
     _servletContainer.init();
   }
   
-  protected ServletContainerConfig getServletContainerConfig()
+  public ServletContainerConfig getServletContainerConfig()
   {
     return _servletContainerConfig;
   }

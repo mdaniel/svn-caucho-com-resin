@@ -648,7 +648,7 @@ function display_health_status()
     print_ok("");
     echo " health " . $health->Status;
   }
-  else if ($health->Status == "FAIL") {
+  else if ($health->Status == "CRITICAL") {
     print_fail("health " . $health->Status);
   }
   else {
@@ -665,7 +665,7 @@ function display_health_status()
       echo "</td>";
       echo "<td>";
 
-      if ($s_health->Status == "FAIL") {
+      if ($s_health->Status == "CRITICAL") {
         print_fail(" " . $s_health->Name);
       }
       else if ($s_health->Status == "OK") {

@@ -41,16 +41,22 @@ public class MemoryPoolAdapter
   
   public static enum PoolType 
   {
-    CODE_CACHE ("java.lang:type=MemoryPool,name=Code Cache", "class storage","class memory","code cache","class","code"),
-    EDEN ("java.lang:type=MemoryPool,name=Eden Space", "eden"),
-    PERM_GEN("java.lang:type=MemoryPool,name=Perm Gen", "perm gen","perm"),
-    SURVIVOR ("java.lang:type=MemoryPool,name=Survivor Space", "survivor"),
-    TENURED ("java.lang:type=MemoryPool,name=Tenured Gen", "tenured","old gen","java heap","old space","old","heap");
+    CODE_CACHE ("java.lang:type=MemoryPool,name=Code Cache", 
+                "class storage","class memory","code cache","class","code"),
+    EDEN ("java.lang:type=MemoryPool,name=Eden Space", 
+          "eden"),
+    PERM_GEN("java.lang:type=MemoryPool,name=Perm Gen", 
+             "perm gen","perm"),
+    SURVIVOR ("java.lang:type=MemoryPool,name=Survivor Space", 
+              "survivor"),
+    TENURED ("java.lang:type=MemoryPool,name=Tenured Gen", 
+             "tenured","old gen","java heap","old space","old","heap");
 
     private final String _defaultName;
     private final String[] _keywords;
     
-    PoolType(String defaultName, String... keywords) {
+    PoolType(String defaultName, String... keywords) 
+    {
       _defaultName = defaultName;
       _keywords = keywords;
     }
@@ -67,7 +73,8 @@ public class MemoryPoolAdapter
 
     // this does a breadth first search for the 1st objectName that matches a keyword
     // keywords are ordered  most specific to least specific
-    public ObjectName find(Set<ObjectName> objectNames) throws MalformedObjectNameException
+    public ObjectName find(Set<ObjectName> objectNames) 
+      throws MalformedObjectNameException
     {
       for (String keyword : _keywords) {
         for (ObjectName objectName : objectNames) {

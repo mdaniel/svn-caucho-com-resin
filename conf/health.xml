@@ -1,0 +1,98 @@
+<cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  <!--
+     - Health system configuration
+    -->
+         
+  <health:HealthSystem>
+    <enabled>true</enabled>
+    <delay>15m</delay>
+    <period>5m</period>
+    <recheckPeriod>15s</recheckPeriod>
+  </health:HealthSystem>
+
+  <!--
+     - Restart immediately if deadlock is detected
+    -->
+  
+  <health:JvmDeadlockHealthCheck ee:Named="deadlockHealthCheck"/>
+  
+  <health:Restart>
+    <health:IfHealthCritical healthCheck="${deadlockHealthCheck}"/>
+  </health:Restart>
+
+  <!--
+     - Dump heap and restart if memory pools are critically low 
+    -->
+  
+  <health:MemoryTenuredHealthCheck ee:Named="tenuredHealthCheck">
+    <memoryFreeMin>1m</memoryFreeMin>
+  </health:MemoryTenuredHealthCheck>
+  
+  <health:MemoryPermGenHealthCheck ee:Named="permGenHealthCheck">
+    <memoryFreeMin>1m</memoryFreeMin>
+  </health:MemoryPermGenHealthCheck>
+  
+  <health:DumpHeap>
+    <health:Or>
+      <health:IfHealthCritical healthCheck="${tenuredHealthCheck}"/>
+      <health:IfHealthCritical healthCheck="${permGenHealthCheck}"/>
+    </health:Or>
+    <health:IfRechecked/>
+  </health:DumpHeap>
+  
+  <health:Restart>
+    <health:Or>
+      <health:IfHealthCritical healthCheck="${tenuredHealthCheck}"/>
+      <health:IfHealthCritical healthCheck="${permGenHealthCheck}"/>
+    </health:Or>
+    <health:IfRechecked/>
+  </health:Restart>
+  
+  <!--
+     - Dump active threads if cpu usage is critically high
+    -->
+
+  <health:CpuHealthCheck ee:Named="cpuHealthCheck">
+    <warningThreshold>95</warningThreshold>
+    <criticalThreshold>99</criticalThreshold>
+  </health:CpuHealthCheck>
+  
+  <health:DumpThreads>
+    <health:IfHealthCritical healthCheck="${cpuHealthCheck}"/>
+    <health:IfRechecked/>
+  </health:DumpThreads>
+  
+  <!--
+     - Log missing or delayed cluster member heartbeats
+    -->
+
+  <health:HeartbeatHealthCheck ee:Named="heartbeatHealthCheck"/>
+
+  <!--
+     - Log connection pool limits reached
+    -->
+
+  <health:ConnectionPoolHealthCheck ee:Named="connectionPoolHealthCheck"/>
+  
+  <!--
+     - Log transaction manager commit failures 
+    -->
+
+  <health:TransactionHealthCheck ee:Named="transactionHealthCheck"/>
+  
+  <!--
+     - Restart if any health checks are frozen or threads are hung 
+    -->
+    
+  <health:HealthSystemHealthCheck ee:Named="healthSystemHealthCheck"/>
+  
+  <health:Restart>
+    <health:IfHealthCritical healthCheck="${healthSystemHealthCheck}"/>
+    <health:IfRechecked/>
+  </health:Restart>
+  
+</cluster>
