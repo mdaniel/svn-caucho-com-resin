@@ -29,6 +29,8 @@
 
 package javax.portlet;
 
+import java.util.*;
+
 public class WindowState
 {
   public final static WindowState NORMAL = new WindowState("normal");

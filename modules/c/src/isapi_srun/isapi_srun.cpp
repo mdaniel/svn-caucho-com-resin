@@ -248,6 +248,11 @@ BOOL WINAPI TerminateFilter(DWORD dwFlags)
 	return TRUE;
 }
 
+static DWORD
+get_current_time()
+{
+  return GetTickCount64() / 1000;
+}
 
 static void 
 log_event(char *msg)
@@ -381,7 +386,7 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType,
 				}
 			}
 
-			DWORD request_time = GetTickCount() / 1000;
+			DWORD request_time = get_current_time();
 
 			if (cse_match_request(g_config, host, port, url, 1, request_time) ||
 				g_config->enable_caucho_status &&
@@ -431,7 +436,7 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType,
 				}
 			}
 
-         DWORD request_time = GetTickCount() / 1000;
+		DWORD request_time = get_current_time();
  
 		if (cse_match_request(g_config, host, port, url, 1, request_time) ||
 			g_config->enable_caucho_status &&

@@ -28,6 +28,8 @@
 
 package javax.portlet;
 
+import java.util.*;
+
 public class PortletMode
 {
   public final static PortletMode VIEW = new PortletMode("view");

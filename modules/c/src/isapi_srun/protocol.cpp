@@ -104,6 +104,12 @@ cse_kill_socket_cleanup(int socket, void *pool)
 
 }
 
+static DWORD
+get_current_time()
+{
+  return GetTickCount64() / 1000;
+}
+
 void
 cse_log(char *fmt, ...)
 {
@@ -791,7 +797,7 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 	srun_t *srun;
 	resin_host_t *host;
 
-	DWORD now = GetTickCount() / 1000;
+	DWORD now = get_current_time();
 
 	host = cse_match_host(config, host_name, port, now);
 
@@ -934,7 +940,7 @@ cse_caucho_status(config_t *config, EXTENSION_CONTROL_BLOCK *r)
   char *headers = "200 OK\r\nContent-Type: text/html";
   unsigned long size = strlen(headers);
 
-	DWORD now = GetTickCount() / 1000;
+  DWORD now = get_current_time();
 
   if (! config->enable_caucho_status)
 	  return;
@@ -1019,7 +1025,7 @@ cse_handle_request(config_t *config, EXTENSION_CONTROL_BLOCK *r)
 
 	url[0] = 0;
 	if (r->GetServerVariable(r->ConnID, "PATH_INFO", url, &size) && size > 0 && url[0]) {
-		DWORD now = GetTickCount() / 1000;
+	  DWORD now = get_current_time();
 		url[size] = 0;
 
 		if (! strcmp(url, "/caucho-status")) {

@@ -10,8 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.10 snapshot">
+<s2 title="3.1.11 snapshot">
 <ul>
+<li>isapi_srun: use GetTickCount64 for time (#4203)</li>
 <li>servlet: include/forward should not call servlet request.init (#4305, rep by ladlestein)</li>
 <li>ssl: backpatch ssl locking from 4.0 (#4256, rep by dkelly)</li>
 <li>iis: change buffer length to 64k (#4288)</li>
