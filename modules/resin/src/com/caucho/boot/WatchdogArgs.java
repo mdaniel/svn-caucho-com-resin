@@ -395,11 +395,23 @@ class WatchdogArgs
       else if ("console".equals(arg)) {
         _startMode = StartMode.CONSOLE;
       }
-      else if ("copy".equals(arg)) {
-        _startMode = StartMode.COPY;
-      }
       else if ("deploy".equals(arg)) {
         _startMode = StartMode.DEPLOY;
+      }
+      else if ("deploy-copy".equals(arg) || "copy".equals(arg)) {
+        _startMode = StartMode.COPY;
+      }
+      else if ("deploy-list".equals(arg) || "list".equals(arg)) {
+        _startMode = StartMode.LIST;
+      }
+      else if ("deploy-restart".equals(arg) || "restart-webapp".equals(arg)) {
+        _startMode = StartMode.RESTART_WEBAPP;
+      }
+      else if ("deploy-start".equals(arg) || "start-webapp".equals(arg)) {
+        _startMode = StartMode.START_WEBAPP;
+      }
+      else if ("deploy-stop".equals(arg) || "stop-webapp".equals(arg)) {
+        _startMode = StartMode.STOP_WEBAPP;
       }
       else if ("gui".equals(arg)) {
         _startMode = StartMode.GUI;
@@ -410,14 +422,8 @@ class WatchdogArgs
       else if ("kill".equals(arg)) {
         _startMode = StartMode.KILL;
       }
-      else if ("list".equals(arg)) {
-        _startMode = StartMode.LIST;
-      }
       else if ("restart".equals(arg)) {
         _startMode = StartMode.RESTART;
-      }
-      else if ("restart-webapp".equals(arg)) {
-        _startMode = StartMode.RESTART_WEBAPP;
       }
       else if ("shutdown".equals(arg)) {
         _startMode = StartMode.SHUTDOWN;
@@ -425,17 +431,11 @@ class WatchdogArgs
       else if ("start".equals(arg)) {
         _startMode = StartMode.START;
       }
-      else if ("start-webapp".equals(arg)) {
-        _startMode = StartMode.START_WEBAPP;
-      }
       else if ("status".equals(arg)) {
         _startMode = StartMode.STATUS;
       }
       else if ("stop".equals(arg)) {
         _startMode = StartMode.STOP;
-      }
-      else if ("stop-webapp".equals(arg)) {
-        _startMode = StartMode.STOP_WEBAPP;
       }
       else if ("undeploy".equals(arg)) {
         _startMode = StartMode.UNDEPLOY;
@@ -485,12 +485,12 @@ class WatchdogArgs
                                + "\n  kill - force a kill of a Resin server"
                                + "\n  shutdown - shutdown the watchdog"
                                + "\n  deploy - deploys an application"
+                               + "\n  deploy-copy - copies an application"
+                               + "\n  deploy-list - lists all deployed applications"
+                               + "\n  deploy-restart - restarts an application"
+                               + "\n  deploy-start - starts an application"
+                               + "\n  deploy-stop - stops an application"
                                + "\n  undeploy - undeploys an application"
-                               + "\n  copy - copies an application"
-                               + "\n  list - lists all deployed applications"
-                               + "\n  start-webapp - starts an application"
-                               + "\n  stop-webapp - stops an application"
-                               + "\n  restart-webapp - restarts an application"
                                + "\n  help <command> - prints command usage message"
                                + "\n  version - prints version"));
       System.exit(1);
@@ -513,7 +513,7 @@ class WatchdogArgs
   private static void usage()
   {
     System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
-    System.err.println(L().l("       java -jar resin.jar [-options] [deploy | undeploy | copy | list | start-webapp | stop-webapp | restart-webapp]"));
+    System.err.println(L().l("       java -jar resin.jar [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
     System.err.println(L().l("       java -jar resin.jar help <command>"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));

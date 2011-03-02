@@ -29,38 +29,43 @@
 
 package com.caucho.boot;
 
+import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public class RestartWebAppCommand extends WebAppCommand
+public class DeployListCommand extends AbstractRepositoryCommand
 {
-  private static final L10N L = new L10N(RestartWebAppCommand.class);
-
+  private static final L10N L = new L10N(DeployListCommand.class);
+  
   @Override
-  protected void doCommand(WebAppDeployClient deployClient,
-                           String tag)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client)
   {
-    if (deployClient.restart(tag))
-      System.out.println(L.l("'{0}' is restarted", tag));
-    else
-      System.out.println(L.l("'{0}' failed to restart", tag));
+    WebAppDeployClient deployClient = getDeployClient(args, client);
+
+    String pattern = args.getDefaultArg();
+    if (pattern == null)
+      pattern = ".*";
+
+    TagResult[] tags = deployClient.queryTags(pattern);
+
+    deployClient.close();
+    
+    for (TagResult tag : tags) {
+      System.out.println(tag.getTag());
+    }
   }
 
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] restart-webapp -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] deploy-list -user <user> -password <password> [options] [pattern]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   restarts application context specified in a <name>"));
+    System.err.println(L.l("   lists all applications deployed on the server or those that match the [pattern]"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -address <address>    : ip or host name of the server"));
     System.err.println(L.l("   -port <port>          : server http port"));
-    System.err.println(L.l("   -user <user>          : user name used for authentication to the server"));
-    System.err.println(L.l("   -password <password>  : password used for authentication to the server"));
-    System.err.println(L.l("   -host <host>          : virtual host to make application available on"));
-    System.err.println(L.l("   -stage <stage>        : name of the stage, for servers running in staging mode"));
-    System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
   }
 }

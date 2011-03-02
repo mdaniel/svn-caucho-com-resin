@@ -32,27 +32,27 @@ package com.caucho.boot;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public class StopWebAppCommand extends WebAppCommand
+public class DeployRestartCommand extends WebAppCommand
 {
-  private static final L10N L = new L10N(StopWebAppCommand.class);
+  private static final L10N L = new L10N(DeployRestartCommand.class);
 
   @Override
   protected void doCommand(WebAppDeployClient deployClient,
                            String tag)
   {
-    if (deployClient.stop(tag))
-      System.out.println(L.l("'{0}' is stopped", tag));
+    if (deployClient.restart(tag))
+      System.out.println(L.l("'{0}' is restarted", tag));
     else
-      System.out.println(L.l("'{0}' failed to stop", tag));
+      System.out.println(L.l("'{0}' failed to restart", tag));
   }
 
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] stop-webapp -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] deploy-restart -user <user> -password <password> [options] <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   stop application context specified in a <name>"));
+    System.err.println(L.l("   restarts application context specified in a <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -address <address>    : ip or host name of the server"));

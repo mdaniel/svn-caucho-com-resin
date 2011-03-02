@@ -34,8 +34,8 @@ import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public class CopyCommand extends AbstractRepositoryCommand {
-  private static final L10N L = new L10N(CopyCommand.class);
+public class DeployCopyCommand extends AbstractRepositoryCommand {
+  private static final L10N L = new L10N(DeployCopyCommand.class);
   
   @Override
   public void doCommand(WatchdogArgs args,
@@ -111,7 +111,7 @@ public class CopyCommand extends AbstractRepositoryCommand {
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] copy -user <user> -password <password> [options]"));
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] deploy-copy -user <user> -password <password> [options]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   copies a deployed application according to the given options"));

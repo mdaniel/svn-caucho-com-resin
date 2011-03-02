@@ -120,8 +120,6 @@ r_cluster-Content =
 
   & element rcore:if|r:if { rcore_if-Args, r_cluster-Content }*
 
-  & rcore_import*
-
   & element rcore:choose|r:choose {
       element rcore:when|r:when { rcore_when-Args, r_cluster-Content }+,
       element rcore:otherwise|r:otherwise { r_cluster-Content }?
