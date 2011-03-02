@@ -31,7 +31,7 @@ package com.caucho.bam.actor;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * A BAM Actor sends and receives messages as the core class in a
@@ -39,11 +39,11 @@ import com.caucho.bam.stream.ActorStream;
  *
  * <h2>Core API</h2>
  *
- * Each actor has a unique JID, which is the address for messages sent to
- * the actor.  JIDs look like email addresses: harry@caucho.com
+ * Each actor has a unique address, which is the address for messages sent to
+ * the actor.  addresss look like email addresses: harry@caucho.com
  * or harry@caucho.com/browser.
  *
- * {@link com.caucho.bam.stream.ActorStream} is the key customizable interface
+ * {@link com.caucho.bam.stream.MessageStream} is the key customizable interface
  * for an agent developer.  Developers will implement callbacks for each
  * packet type the agent understands.
  *
@@ -53,11 +53,11 @@ import com.caucho.bam.stream.ActorStream;
  */
 public interface Actor
 {
-  public ActorStream getActorStream();
+  public MessageStream getActorStream();
   
-  public String getJid();
+  public String getAddress();
   
-  public void setJid(String jid);
+  public void setAddress(String address);
   
   public Broker getBroker();
   

@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1296,8 +1297,8 @@ public class FileModule extends AbstractQuercusModule {
       return false;
 
     if ((flags & FNM_CASEFOLD) != 0) {
-      string = string.toLowerCase();
-      pattern = pattern.toLowerCase();
+      string = string.toLowerCase(Locale.ENGLISH);
+      pattern = pattern.toLowerCase(Locale.ENGLISH);
     }
 
     // match "leading" periods exactly (i.e. no wildcards)

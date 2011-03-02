@@ -872,7 +872,7 @@ public class MessageImpl implements Message, java.io.Serializable
 
   public static boolean isReserved(String name)
   {
-    return _reserved.contains(name.toUpperCase());
+    return _reserved.contains(name.toUpperCase(Locale.ENGLISH));
   }
 
   static {

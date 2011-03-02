@@ -45,14 +45,14 @@ import java.util.*;
  * }
  *
  * element item {
- *    attribute jid,
+ *    attribute address,
  *    attribute name?,
  *    attribute node?
  * }
  * </pre></code>
  */
 public class DiscoItem implements java.io.Serializable {
-  private String _jid;
+  private String _address;
   private String _node;
   private String _name;
   
@@ -60,16 +60,16 @@ public class DiscoItem implements java.io.Serializable {
   {
   }
   
-  public DiscoItem(String jid)
+  public DiscoItem(String address)
   {
-    _jid = jid;
+    _address = address;
   }
   
-  public DiscoItem(String jid,
+  public DiscoItem(String address,
                    String name,
                    String node)
   {
-    _jid = jid;
+    _address = address;
     _name = name;
     _node = node;
   }
@@ -84,9 +84,9 @@ public class DiscoItem implements java.io.Serializable {
     return _node;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   @Override
@@ -96,7 +96,7 @@ public class DiscoItem implements java.io.Serializable {
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    sb.append("jid=").append(_jid);
+    sb.append("address=").append(_address);
 
     if (_name != null)
       sb.append(",name=").append(_name);

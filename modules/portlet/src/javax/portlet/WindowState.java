@@ -29,6 +29,8 @@
 
 package javax.portlet;
 
+import java.util.*;
+
 public class WindowState
 {
   public final static WindowState NORMAL = new WindowState("normal");
@@ -42,7 +44,7 @@ public class WindowState
     if (name==null)
       throw new IllegalArgumentException("WindowState name can not be NULL");
 
-    _name = name.toLowerCase();
+    _name = name.toLowerCase(Locale.ENGLISH);
   }
 
   public String toString()

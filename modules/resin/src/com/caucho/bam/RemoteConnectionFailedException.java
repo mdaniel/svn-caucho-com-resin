@@ -58,7 +58,7 @@ public class RemoteConnectionFailedException
     super(msg, e);
   }
 
-  public RemoteConnectionFailedException(String msg, ActorError error)
+  public RemoteConnectionFailedException(String msg, BamError error)
   {
     super(msg, error);
   }
@@ -68,21 +68,21 @@ public class RemoteConnectionFailedException
     super(msg, e);
   }
 
-  public RemoteConnectionFailedException(ActorError error)
+  public RemoteConnectionFailedException(BamError error)
   {
     super(error);
   }
 
   @Override
-  public ActorError createActorError()
+  public BamError createActorError()
   {
-    ActorError error = getActorError();
+    BamError error = getActorError();
 
     if (error != null)
       return error;
 
-    return new ActorError(ActorError.TYPE_CANCEL,
-                          ActorError.REMOTE_CONNECTION_FAILED,
+    return new BamError(BamError.TYPE_CANCEL,
+                          BamError.REMOTE_CONNECTION_FAILED,
                           getMessage());
   }
 }

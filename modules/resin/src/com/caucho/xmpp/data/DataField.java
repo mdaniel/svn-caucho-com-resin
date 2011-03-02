@@ -69,7 +69,7 @@ public class DataField implements java.io.Serializable {
   private String _label;
   
   // "boolean", "fixed", "hidden",
-  // "jid-multi", "jid-single",
+  // "address-multi", "address-single",
   // "list-multi", "list-single",
   // "text-multi", "text-private", "text-single"
   private String _type = "text-single";

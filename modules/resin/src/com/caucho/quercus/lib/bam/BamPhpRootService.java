@@ -87,21 +87,21 @@ public class BamPhpRootService extends SimpleActor {
   }
 /*
   @Override
-  public boolean startChild(String jid)
+  public boolean startChild(String address)
   {
     if (log.isLoggable(Level.FINE)) 
-      log.fine(L.l("{0}.startActor({1})", toString(), jid));
+      log.fine(L.l("{0}.startActor({1})", toString(), address));
 
-    BamPhpActor actor = _actors.get(jid);
+    BamPhpActor actor = _actors.get(address);
 
     if (actor == null) {
       actor = new BamPhpActor(_script, _encoding);
-      actor.setJid(jid);
+      actor.setAddress(address);
 
       //InjectManager container = InjectManager.getCurrent();
       //container.injectObject(actor);
 
-      _actors.put(jid, actor);
+      _actors.put(address, actor);
     }
 
     return true;
@@ -110,7 +110,7 @@ public class BamPhpRootService extends SimpleActor {
 
   public String toString()
   {
-    return "BamPhpRootService[jid=" + getJid() + 
+    return "BamPhpRootService[address=" + getAddress() + 
                             ",script=" + _script + "]";
   }
 }

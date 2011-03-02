@@ -39,20 +39,20 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorException;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamException;
 import com.caucho.bam.Message;
 import com.caucho.bam.MessageError;
 import com.caucho.bam.Query;
 import com.caucho.bam.QueryError;
 import com.caucho.bam.QueryResult;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.util.L10N;
 
 /**
  * The Skeleton introspects and dispatches messages for a
  * {@link com.caucho.bam.actor.SimpleActor}
- * or {@link com.caucho.bam.actor.SkeletonActorStreamFilter}.
+ * or {@link com.caucho.bam.actor.SkeletonMessageStreamFilter}.
  */
 public class BamSkeleton<S>
 {
@@ -110,7 +110,7 @@ public class BamSkeleton<S>
    * Dispatches a message to the actorStream.
    */
   public void message(S actor,
-                      ActorStream fallback,
+                      MessageStream fallback,
                       String to,
                       String from,
                       Serializable payload)
@@ -149,11 +149,11 @@ public class BamSkeleton<S>
   }
 
   public void messageError(S actor,
-                           ActorStream fallback,
+                           MessageStream fallback,
                            String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     Method handler;
 
@@ -189,8 +189,8 @@ public class BamSkeleton<S>
   }
 
   public void query(S actor,
-                    ActorStream fallback,
-                    ActorStream broker,
+                    MessageStream fallback,
+                    MessageStream broker,
                     long id,
                     String to,
                     String from,
@@ -237,7 +237,7 @@ public class BamSkeleton<S>
   }
 
   public void queryResult(S actor,
-                          ActorStream fallback,
+                          MessageStream fallback,
                           long id,
                           String to,
                           String from,
@@ -277,12 +277,12 @@ public class BamSkeleton<S>
   }
 
   public void queryError(S actor,
-                         ActorStream fallback,
+                         MessageStream fallback,
                          long id,
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     Method handler;
 
@@ -418,7 +418,7 @@ public class BamSkeleton<S>
         || ! String.class.equals(paramTypes[1])
         || ! String.class.equals(paramTypes[2])
         || ! Serializable.class.isAssignableFrom(paramTypes[3])) {
-      throw new ActorException(method + " is an invalid "
+      throw new BamException(method + " is an invalid "
                              + " @" + annotationType.getSimpleName()
                              + " because queries require (long, String, String, MyPayload)");
     }
@@ -445,8 +445,8 @@ public class BamSkeleton<S>
         || ! String.class.equals(paramTypes[1])
         || ! String.class.equals(paramTypes[2])
         || ! Serializable.class.isAssignableFrom(paramTypes[3])
-        || ! ActorError.class.isAssignableFrom(paramTypes[4])) {
-      throw new ActorException(method + " is an invalid "
+        || ! BamError.class.isAssignableFrom(paramTypes[4])) {
+      throw new BamException(method + " is an invalid "
                              + " @" + annotationType.getSimpleName()
                              + " because queries require (long, String, String, MyPayload, ActorError)");
     }

@@ -29,6 +29,8 @@
 
 package com.caucho.servlets.ssi;
 
+import java.util.Locale;
+
 import com.caucho.VersionFactory;
 import com.caucho.util.Alarm;
 import com.caucho.util.IntMap;
@@ -82,12 +84,12 @@ public class VarExpr extends SSIExpr {
 
   VarExpr(String var, Path path)
   {
-    int code = _varMap.get(var.toLowerCase());
+    int code = _varMap.get(var.toLowerCase(Locale.ENGLISH));
 
     if (code > 0) {
     }
     else if (var.startsWith("HTTP_")) {
-      var = var.substring(5).replace('_', '-').toLowerCase();
+      var = var.substring(5).replace('_', '-').toLowerCase(Locale.ENGLISH);
       code = HTTP_;
     }
     else

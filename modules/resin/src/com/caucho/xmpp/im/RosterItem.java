@@ -41,7 +41,7 @@ import java.util.*;
  * }
  *
  * element item {
- *   jid,
+ *   address,
  *   ask?,
  *   name?,
  *   subscription?,
@@ -50,7 +50,7 @@ import java.util.*;
  * </pre></code>
  */
 public class RosterItem implements Serializable {
-  private final String _jid;
+  private final String _address;
   // subscribe
   private String _ask;
   // description of the item
@@ -65,30 +65,30 @@ public class RosterItem implements Serializable {
    */
   private RosterItem()
   {
-    _jid = null;
+    _address = null;
     _group = null;
     _subscription = "none";
   }
 
-  public RosterItem(String jid, String []group)
+  public RosterItem(String address, String []group)
   {
-    _jid = jid;
+    _address = address;
     _group = group;
     _subscription = "none";
 
-    if (_jid == null)
+    if (_address == null)
       throw new NullPointerException();
   }
 
-  public RosterItem(String ask, String jid, String name, String subscription,
+  public RosterItem(String ask, String address, String name, String subscription,
                     ArrayList<String> groupList)
   {
     _ask = ask;
-    _jid = jid;
+    _address = address;
     _name = name;
     _subscription = subscription;
 
-    if (_jid == null)
+    if (_address == null)
       throw new NullPointerException();
 
     String []group = null;
@@ -101,9 +101,9 @@ public class RosterItem implements Serializable {
     _group = group;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   public String []getGroup()
@@ -153,7 +153,7 @@ public class RosterItem implements Serializable {
     sb.append(getClass().getSimpleName());
 
     sb.append("[");
-    sb.append(_jid);
+    sb.append(_address);
     sb.append(",name=");
     sb.append(_name);
     sb.append(",sub=");

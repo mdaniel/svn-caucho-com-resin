@@ -31,6 +31,7 @@ package com.caucho.vfs;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.Locale;
 
 // TODO: get rid of set/getContentType, use getStrategyForContentType(...) and setStrategy(...)
 // TODO: trap all print(...) for xml escaping, indenting
@@ -749,7 +750,7 @@ public class XmlWriter
       int flags = getFlags(name);
 
       if ( (flags & BOOLEAN_ATTRIBUTE) > 0)
-        value = name.toUpperCase();
+        value = name.toUpperCase(Locale.ENGLISH);
 
       super.writeAttributeValue(writer, name, value);
     }

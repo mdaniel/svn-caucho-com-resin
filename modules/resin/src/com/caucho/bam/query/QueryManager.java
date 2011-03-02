@@ -34,8 +34,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorException;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamException;
 import com.caucho.bam.TimeoutException;
 import com.caucho.util.Alarm;
 
@@ -125,7 +125,7 @@ public class QueryManager {
                                     String to,
                                     String from,
                                     Serializable payload,
-                                    ActorError error)
+                                    BamError error)
   {
     QueryItem item = _queryMap.remove(id);
 
@@ -221,7 +221,7 @@ public class QueryManager {
     void onQueryError(String to,
                       String from,
                       Serializable value,
-                      ActorError error)
+                      BamError error)
     {
       if (_callback != null)
         _callback.onQueryError(to, from, value, error);
@@ -242,7 +242,7 @@ public class QueryManager {
     private final long _timeout;
 
     private volatile Serializable _result;
-    private volatile ActorError _error;
+    private volatile BamError _error;
     private final AtomicBoolean _isResult = new AtomicBoolean();
     private volatile Thread _thread;
 
@@ -266,7 +266,7 @@ public class QueryManager {
 
     @Override
     public Serializable get()
-      throws TimeoutException, ActorException
+      throws TimeoutException, BamException
     {
       if (! waitFor(_timeout)) {
         throw new TimeoutException(this + " query timeout " + _payload
@@ -278,7 +278,7 @@ public class QueryManager {
         return getResult();
     }
 
-    public ActorError getError()
+    public BamError getError()
     {
       return _error;
     }
@@ -303,7 +303,7 @@ public class QueryManager {
     }
 
     @Override
-    public void onQueryResult(String fromJid, String toJid,
+    public void onQueryResult(String fromAddress, String toAddress,
                               Serializable payload)
     {
       _result = payload;
@@ -315,8 +315,8 @@ public class QueryManager {
     }
 
     @Override
-    public void onQueryError(String fromJid, String toJid,
-                             Serializable payload, ActorError error)
+    public void onQueryError(String fromAddress, String toAddress,
+                             Serializable payload, BamError error)
     {
       _error = error;
       _isResult.set(true);

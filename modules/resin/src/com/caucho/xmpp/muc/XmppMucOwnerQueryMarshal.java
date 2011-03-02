@@ -51,7 +51,7 @@ import javax.xml.stream.*;
  * }
  *
  * element destroy {
- *   attribute jid?,
+ *   attribute address?,
  *
  *   password?
  *   &amp; reason?
@@ -145,12 +145,12 @@ public class XmppMucOwnerQueryMarshal extends AbstractXmppMarshal {
   {
     boolean isFinest = log.isLoggable(Level.FINEST);
 
-    String jid = in.getAttributeValue(null, "jid");
+    String address = in.getAttributeValue(null, "address");
     String password = in.getAttributeValue(null, "password");
     String reason = in.getAttributeValue(null, "reason");
 
     skipToEnd(in, "destroy");
 
-    return new MucOwnerDestroyQuery(jid, password, reason);
+    return new MucOwnerDestroyQuery(address, password, reason);
   }
 }

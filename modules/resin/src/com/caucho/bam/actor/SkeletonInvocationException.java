@@ -29,15 +29,15 @@
 
 package com.caucho.bam.actor;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorException;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamException;
 
 
 /**
  * Exception caught by the skeleton invocation
  */
 @SuppressWarnings("serial")
-public class SkeletonInvocationException extends ActorException {
+public class SkeletonInvocationException extends BamException {
   public SkeletonInvocationException()
   {
   }
@@ -65,20 +65,20 @@ public class SkeletonInvocationException extends ActorException {
       return new SkeletonInvocationException(e);
   }
 
-  public ActorError createActorError()
+  public BamError createActorError()
   {
     Throwable cause = getCause();
 
-    if (cause instanceof ActorException)
-      return ((ActorException) cause).createActorError();
+    if (cause instanceof BamException)
+      return ((BamException) cause).createActorError();
     else if (cause != null) {
-      return new ActorError(ActorError.TYPE_CANCEL,
-                            ActorError.INTERNAL_SERVER_ERROR,
+      return new BamError(BamError.TYPE_CANCEL,
+                            BamError.INTERNAL_SERVER_ERROR,
                             cause.toString());
     }
     else {
-      return new ActorError(ActorError.TYPE_CANCEL,
-                            ActorError.INTERNAL_SERVER_ERROR,
+      return new BamError(BamError.TYPE_CANCEL,
+                            BamError.INTERNAL_SERVER_ERROR,
                             toString());
     }
   }

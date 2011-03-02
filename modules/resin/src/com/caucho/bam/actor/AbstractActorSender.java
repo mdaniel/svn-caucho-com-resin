@@ -38,7 +38,7 @@ import com.caucho.bam.query.QueryManager;
 
 /**
  * ActorSender is a convenience API for sending messages to other Actors,
- * which always using the actor's JID as the "from" parameter and manages
+ * which always using the actor's address as the "from" parameter and manages
  * query ids.
  */
 abstract public class AbstractActorSender implements ActorSender {
@@ -93,15 +93,15 @@ abstract public class AbstractActorSender implements ActorSender {
 
   /**
    * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
-   * addressed by the Actor's JID.
+   * addressed by the Actor's address.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the message payload
    */
   @Override
   public void message(String to, Serializable payload)
   {
-    getBroker().message(to, getJid(), payload);
+    getBroker().message(to, getAddress(), payload);
   }
 
   //
@@ -129,7 +129,7 @@ abstract public class AbstractActorSender implements ActorSender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    */
   @Override
@@ -151,7 +151,7 @@ abstract public class AbstractActorSender implements ActorSender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
@@ -175,7 +175,7 @@ abstract public class AbstractActorSender implements ActorSender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
@@ -186,9 +186,9 @@ abstract public class AbstractActorSender implements ActorSender {
     long qId = getQueryManager().nextQueryId();
     
     QueryFuture future
-      = getQueryManager().addQueryFuture(qId, to, getJid(), payload, timeout);
+      = getQueryManager().addQueryFuture(qId, to, getAddress(), payload, timeout);
     
-    getBroker().query(qId, to, getJid(), payload);
+    getBroker().query(qId, to, getAddress(), payload);
                       
     return future;
   }
@@ -205,7 +205,7 @@ abstract public class AbstractActorSender implements ActorSender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
@@ -218,6 +218,6 @@ abstract public class AbstractActorSender implements ActorSender {
     
     getQueryManager().addQueryCallback(qId, callback); // getTimeout());
     
-    getBroker().query(qId, to, getJid(), payload);
+    getBroker().query(qId, to, getAddress(), payload);
   }
 }

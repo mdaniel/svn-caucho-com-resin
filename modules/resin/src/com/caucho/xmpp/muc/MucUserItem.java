@@ -36,14 +36,14 @@ import java.util.*;
  * Muc query
  */
 public class MucUserItem implements java.io.Serializable {
-  // actor jid
+  // actor address
   private String _actor;
   private String _reason;
   private MucContinue _continue;
 
   // "admin", "member", "none", "outcast", "owner"
   private String _affiliation = "none";
-  private String _jid;
+  private String _address;
   private String _nick;
   // "moderator", "none", "participant", "visitor"
   private String _role = "none";
@@ -52,14 +52,14 @@ public class MucUserItem implements java.io.Serializable {
   {
   }
   
-  public MucUserItem(String jid)
+  public MucUserItem(String address)
   {
-    _jid = jid;
+    _address = address;
   }
   
-  public MucUserItem(String jid, String nick)
+  public MucUserItem(String address, String nick)
   {
-    _jid = jid;
+    _address = address;
     _nick = nick;
   }
 
@@ -93,14 +93,14 @@ public class MucUserItem implements java.io.Serializable {
     _continue = mucContinue;
   }  
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }  
 
   public String getNick()
@@ -140,7 +140,7 @@ public class MucUserItem implements java.io.Serializable {
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    sb.append("jid=").append(_jid);
+    sb.append("address=").append(_address);
 
     if (_actor != null)
       sb.append(",actor=").append(_actor);

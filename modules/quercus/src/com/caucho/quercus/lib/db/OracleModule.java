@@ -42,6 +42,7 @@ import com.caucho.util.Log;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.sql.*;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1543,7 +1544,7 @@ public class OracleModule extends AbstractQuercusModule {
       // or stored procedure call can be executed with a CallableStatement.
       query = query.trim();
 
-      String lowerCaseQuery = query.toLowerCase();
+      String lowerCaseQuery = query.toLowerCase(Locale.ENGLISH);
 
       if (lowerCaseQuery.startsWith("insert")
           || lowerCaseQuery.startsWith("update")

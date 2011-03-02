@@ -37,12 +37,12 @@ import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.inject.Module;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
@@ -65,10 +65,10 @@ public class XmppBrokerStream extends AbstractBroker
   
   private Broker _broker;
   private ActorSender _conn;
-  private ActorStream _toBroker;
+  private MessageStream _toBroker;
 
-  private ActorStream _toClient;
-  private ActorStream _authHandler;
+  private MessageStream _toClient;
+  private MessageStream _authHandler;
 
   private ReadStream _is;
   private WriteStream _os;
@@ -78,7 +78,7 @@ public class XmppBrokerStream extends AbstractBroker
 
   private XmppReader _reader;
 
-  private String _jid;
+  private String _address;
   private long _requestId;
 
   private String _uid = "test@localhost";
@@ -117,12 +117,12 @@ public class XmppBrokerStream extends AbstractBroker
     _isFinest = log.isLoggable(Level.FINEST);
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
-  ActorStream getActorStream()
+  MessageStream getActorStream()
   {
     return _toClient;
   }
@@ -164,22 +164,22 @@ public class XmppBrokerStream extends AbstractBroker
   {
     String password = (String) credentials;
     
-    _uid = uid + _broker.getJid();
+    _uid = uid + _broker.getAddress();
     
     _toBroker = _broker;
-    // _jid = _broker.createClient(_toClient, uid, resource);
+    // _address = _broker.createClient(_toClient, uid, resource);
 
-    return _jid;
+    return _address;
   }
 
-  String bind(String resource, String jid)
+  String bind(String resource, String address)
   {
     String password = null;
     
     _toBroker = _broker;
-    // _jid = _broker.createClient(_toClient, jid, resource);
+    // _address = _broker.createClient(_toClient, address, resource);
      
-    return _jid;
+    return _address;
   }
 
   String findId(long bamId)
@@ -210,7 +210,7 @@ public class XmppBrokerStream extends AbstractBroker
                       String from,
                       Serializable value)
   {
-    _toBroker.message(to, _jid, value);
+    _toBroker.message(to, _address, value);
   }
   
   /**
@@ -219,9 +219,9 @@ public class XmppBrokerStream extends AbstractBroker
   public void messageError(String to,
                            String from,
                            Serializable value,
-                           ActorError error)
+                           BamError error)
   {
-    _toBroker.messageError(to, _jid, value, error);
+    _toBroker.messageError(to, _address, value, error);
   }
   
   /**
@@ -236,7 +236,7 @@ public class XmppBrokerStream extends AbstractBroker
                     String from,
                     Serializable value)
   {
-    _toBroker.query(id, to, _jid, value);
+    _toBroker.query(id, to, _address, value);
   }
   
   /**
@@ -250,7 +250,7 @@ public class XmppBrokerStream extends AbstractBroker
                           String from,
                           Serializable value)
   {
-    _toBroker.queryResult(id, to, _jid, value);
+    _toBroker.queryResult(id, to, _address, value);
   }
   
   /**
@@ -263,9 +263,9 @@ public class XmppBrokerStream extends AbstractBroker
                          String to,
                          String from,
                          Serializable value,
-                         ActorError error)
+                         BamError error)
   {
-    _toBroker.queryError(id, to, _jid, value, error);
+    _toBroker.queryError(id, to, _address, value, error);
   }
   
   public boolean isClosed()
@@ -313,7 +313,7 @@ public class XmppBrokerStream extends AbstractBroker
    * @see com.caucho.bam.broker.Broker#getMailbox(java.lang.String)
    */
   @Override
-  public Mailbox getMailbox(String jid)
+  public Mailbox getMailbox(String address)
   {
     // TODO Auto-generated method stub
     return null;

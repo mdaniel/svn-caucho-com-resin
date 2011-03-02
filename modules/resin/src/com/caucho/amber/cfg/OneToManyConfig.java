@@ -47,6 +47,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
+
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.JoinTable;
@@ -230,7 +232,7 @@ class OneToManyConfig extends AbstractRelationConfig
       i += index;
 
       // ASC or DESC
-      index = orderByField.toUpperCase().lastIndexOf("SC");
+      index = orderByField.toUpperCase(Locale.ENGLISH).lastIndexOf("SC");
 
       Boolean asc = Boolean.TRUE;
 

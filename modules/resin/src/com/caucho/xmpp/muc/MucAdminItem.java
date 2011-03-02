@@ -44,12 +44,12 @@ import java.util.*;
  * }
  *
  * element actor {
- *   attribute jid
+ *   attribute address
  * }
  *
  * element item {
  *   attribute affiliation?,
- *   attribute jid?,
+ *   attribute address?,
  *   attribute nick?,
  *   attribute role?,
  *
@@ -68,7 +68,7 @@ public class MucAdminItem implements java.io.Serializable {
 
   // "admin", "member", "none", "outcast", "owner"
   private String _affiliation;
-  private String _jid;
+  private String _address;
   private String _nick;
   // "moderator", "none", "participant", "visitor"
   private String _role;
@@ -77,14 +77,14 @@ public class MucAdminItem implements java.io.Serializable {
   {
   }
 
-  public MucAdminItem(String jid)
+  public MucAdminItem(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
-  public MucAdminItem(String jid, String nick)
+  public MucAdminItem(String address, String nick)
   {
-    _jid = jid;
+    _address = address;
     _nick = nick;
   }
 
@@ -108,14 +108,14 @@ public class MucAdminItem implements java.io.Serializable {
     _affiliation = affiliation;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
   public String getNick()
@@ -154,8 +154,8 @@ public class MucAdminItem implements java.io.Serializable {
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    if (_jid != null)
-      sb.append("jid=").append(_jid);
+    if (_address != null)
+      sb.append("address=").append(_address);
 
     if (_nick != null)
       sb.append(",nick=").append(_nick);

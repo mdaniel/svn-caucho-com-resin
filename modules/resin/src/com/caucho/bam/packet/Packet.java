@@ -31,8 +31,8 @@ package com.caucho.bam.packet;
 
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * Base packet class.  Contains only a 'to' and a 'from' field.
@@ -57,8 +57,8 @@ public class Packet
   /**
    * Creates a packet with a destination and a source.
    *
-   * @param to the destination jid
-   * @param from the source jid
+   * @param to the destination address
+   * @param from the source address
    */
   public Packet(String to, String from)
   {
@@ -85,16 +85,16 @@ public class Packet
   /**
    * SPI method to dispatch the packet to the proper handler
    */
-  public void dispatch(ActorStream handler, ActorStream toSource)
+  public void dispatch(MessageStream handler, MessageStream toSource)
   {
   }
 
   /**
    * SPI method to dispatch the packet to the proper handler
    */
-  public void dispatchError(ActorStream handler,
-                            ActorStream toSource,
-                            ActorError error)
+  public void dispatchError(MessageStream handler,
+                            MessageStream toSource,
+                            BamError error)
   {
     log.fine(this + " dispatchError " + error);
   }

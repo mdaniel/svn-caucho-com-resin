@@ -37,7 +37,7 @@ import com.caucho.bam.mailbox.Mailbox;
 /**
  * NullActorStream always ignores messages and returns errors for RPC calls.
  */
-public class NullActor extends NullActorStream implements Actor
+public class NullActor extends NullMessageStream implements Actor
 {
   private Mailbox _mailbox;
   
@@ -47,29 +47,29 @@ public class NullActor extends NullActorStream implements Actor
     Thread.dumpStack();
   }
   
-  public NullActor(String jid)
+  public NullActor(String address)
   {
     super();
     
-    setJid(jid);
+    setAddress(address);
   }
   
-  public NullActor(String jid, Broker broker)
+  public NullActor(String address, Broker broker)
   {
     super();
     
-    setJid(jid);
+    setAddress(address);
     setBroker(broker);
   }
 
   @Override
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    super.setJid(jid);
+    super.setAddress(address);
   }
 
   @Override
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
     return this;
   }

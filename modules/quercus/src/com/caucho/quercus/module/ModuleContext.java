@@ -236,10 +236,10 @@ public class ModuleContext
       def.setPhpClass(true);
 
       _javaClassWrappers.put(name, def);
-      // _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+      // _lowerJavaClassWrappers.put(name.toLowerCase(Locale.ENGLISH), def);
 
       _staticClasses.put(name, def);
-      // _lowerStaticClasses.put(name.toLowerCase(), def);
+      // _lowerStaticClasses.put(name.toLowerCase(Locale.ENGLISH), def);
 
       // def.introspect();
 
@@ -368,7 +368,7 @@ public class ModuleContext
       if (def != null)
         return def;
 
-      return _lowerJavaClassWrappers.get(name.toLowerCase());
+      return _lowerJavaClassWrappers.get(name.toLowerCase(Locale.ENGLISH));
     }
   }
   */
@@ -426,7 +426,7 @@ public class ModuleContext
       ClassDef def = _staticClasses.get(name);
 
       if (def == null)
-        def = _lowerStaticClasses.get(name.toLowerCase());
+        def = _lowerStaticClasses.get(name.toLowerCase(Locale.ENGLISH));
 
       return def;
     }
@@ -685,7 +685,7 @@ public class ModuleContext
       
           _staticFunctionMap.put(funName, fun);
 
-          // _lowerFunMap.put(funName.toLowerCase(), fun);
+          // _lowerFunMap.put(funName.toLowerCase(Locale.ENGLISH), fun);
 
           int id = getFunctionId(funName);
           _functionMap[id] = fun;
@@ -861,7 +861,7 @@ public class ModuleContext
     synchronized (_javaClassWrappers) {
       _javaClassWrappers.put(name, def);
       _javaClassWrappers.put(type.getName(), def);
-      // _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+      // _lowerJavaClassWrappers.put(name.toLowerCase(Locale.ENGLISH), def);
     }
 
     if (extension != null)
@@ -912,7 +912,7 @@ public class ModuleContext
     _stdClass = new QuercusClass(_stdClassDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClassDef);
-    _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
+    _lowerStaticClasses.put(_stdClass.getName().toLowerCase(Locale.ENGLISH), _stdClassDef);
 
     InterpretedClassDef exn = new InterpretedClassDef("Exception",
                                                       null,
@@ -934,7 +934,7 @@ public class ModuleContext
     // QuercusClass exnCl = new QuercusClass(exn, null);
 
     _staticClasses.put(exn.getName(), exn);
-    _lowerStaticClasses.put(exn.getName().toLowerCase(), exn);
+    _lowerStaticClasses.put(exn.getName().toLowerCase(Locale.ENGLISH), exn);
     */
   }
 

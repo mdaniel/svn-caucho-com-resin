@@ -32,9 +32,9 @@ package com.caucho.bam.actor;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * Base ActorStream implementation using introspection and
@@ -54,14 +54,14 @@ import com.caucho.bam.stream.ActorStream;
  * public void myMessage(String to, String from, MyPayload payload);
  * </pre></code>
  */
-public class SkeletonActorStreamFilter<T> implements ActorStream
+public class SkeletonMessageStreamFilter<T> implements MessageStream
 {
   private final BamSkeleton<T> _skeleton;
   private final T _actor;
   
-  private final ActorStream _next;
+  private final MessageStream _next;
 
-  public SkeletonActorStreamFilter(ActorStream next, T actor)
+  public SkeletonMessageStreamFilter(MessageStream next, T actor)
   {
     if (next == null)
       throw new IllegalStateException("next is a required argument");
@@ -82,13 +82,13 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
   }
   
   /**
-   * Returns the Actor's jid so the {@link com.caucho.bam.broker.Broker} can
+   * Returns the Actor's address so the {@link com.caucho.bam.broker.Broker} can
    * register it.
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _next.getJid();
+    return _next.getAddress();
   }
 
    @Override
@@ -121,8 +121,8 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
    *
    * If no method is found, the message is ignored.
    *
-   * @param to the SimpleActorStream's JID
-   * @param from the sending actor's JID
+   * @param to the SimpleActorStream's address
+   * @param from the sending actor's address
    * @param payload the message payload
    */
   @Override
@@ -143,8 +143,8 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
    *
    * If no method is found, the messageError is ignored.
    *
-   * @param to the SimpleActorStream's JID
-   * @param from the sending actor's JID
+   * @param to the SimpleActorStream's address
+   * @param from the sending actor's address
    * @param payload the message payload
    * @param error the message error
    */
@@ -152,7 +152,7 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     _skeleton.messageError(_actor, _next, to, from, payload, error);
   }
@@ -176,8 +176,8 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
    * a feature-not-implemented error.
    *
    * @param id a correlation id to match the result or error
-   * @param to the SimpleActorStream's JID
-   * @param from the client actor's JID
+   * @param to the SimpleActorStream's address
+   * @param from the client actor's address
    * @param payload the query payload
    */
   @Override
@@ -200,8 +200,8 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
    * If no method is found, queryResult ignores the packet.
    *
    * @param id the correlation id from the original query
-   * @param to the SimpleActorStream's JID
-   * @param from the client actor's JID
+   * @param to the SimpleActorStream's address
+   * @param from the client actor's address
    * @param payload the query payload
    */
   @Override
@@ -224,8 +224,8 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
    * If no method is found, queryError ignores the packet.
    *
    * @param id the correlation id from the original query
-   * @param to the SimpleActorStream's JID
-   * @param from the client actor's JID
+   * @param to the SimpleActorStream's address
+   * @param from the client actor's address
    * @param payload the query payload
    * @param error the error information
    */
@@ -234,7 +234,7 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     _skeleton.queryError(_actor, _next, id, to, from, payload, error);
   }
@@ -242,6 +242,6 @@ public class SkeletonActorStreamFilter<T> implements ActorStream
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "," + _actor.getClass().getName() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "," + _actor.getClass().getName() + "]";
   }
 }

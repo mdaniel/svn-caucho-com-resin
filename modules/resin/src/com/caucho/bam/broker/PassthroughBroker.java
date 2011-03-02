@@ -49,7 +49,7 @@ public class PassthroughBroker extends AbstractBroker
   }
   
   @Override
-  public Mailbox getMailbox(String jid)
+  public Mailbox getMailbox(String address)
   {
     return _mailbox;
   }

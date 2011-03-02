@@ -84,7 +84,7 @@ import java.util.*;
  * }
  *
  * element options {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?,
  *   attribute subid?,
  *
@@ -105,7 +105,7 @@ import java.util.*;
  * }
  *
  * element subscribe {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?
  * }
  *
@@ -114,7 +114,7 @@ import java.util.*;
  * }
  *
  * element subscription {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?,
  *   attribute subid?,
  *   attribute subscription?,
@@ -123,7 +123,7 @@ import java.util.*;
  * }
  *
  * element unsubscribe {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?
  *   attribute subid?
  * }

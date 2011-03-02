@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
@@ -115,7 +115,7 @@ public class DeployActor extends SimpleActor
 
     setBroker(getBroker());
     MultiworkerMailbox mailbox
-      = new MultiworkerMailbox(getActorStream().getJid(), 
+      = new MultiworkerMailbox(getActorStream().getAddress(), 
                                getActorStream(), getBroker(), 2);
     
     getBroker().addMailbox(mailbox);
@@ -157,8 +157,8 @@ public class DeployActor extends SimpleActor
       log.fine(this + " copyError dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
 
       getBroker().queryError(id, from, to, query,
-                                   new ActorError(ActorError.TYPE_CANCEL,
-                                                  ActorError.ITEM_NOT_FOUND,
+                                   new BamError(BamError.TYPE_CANCEL,
+                                                  BamError.ITEM_NOT_FOUND,
                                                   "unknown tag"));
       return;
     }

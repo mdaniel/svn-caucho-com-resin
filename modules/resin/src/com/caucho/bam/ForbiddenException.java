@@ -46,12 +46,12 @@ public class ForbiddenException
     super(msg);
   }
 
-  public ForbiddenException(String msg, ActorError error)
+  public ForbiddenException(String msg, BamError error)
   {
     super(msg, error);
   }
 
-  public ForbiddenException(ActorError error)
+  public ForbiddenException(BamError error)
   {
     super(error);
   }

@@ -31,28 +31,28 @@ package com.caucho.bam.stream;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
 
 /**
- * Primary {@link com.caucho.bam.actor.Actor} stream handling all packets.
+ * Primary stream handling all message packets.
  *
  * {@link com.caucho.bam.actor.Actor Actors} send packets to the 
  * {@link com.caucho.bam.broker.Broker} for delivery to other Actors.
  *
- * Packets are divided into two groups:
+ * Messages are divided into two groups:
  * <ul>
  * <li>message - unidirectional messages
  * <li>query - RPC call/reply packets
  * </ul>
  */
-public interface ActorStream
+public interface MessageStream
 {
   /**
-   * Returns the jid of the {@link com.caucho.bam.actor.Actor} at the end
+   * Returns the address of the {@link com.caucho.bam.actor.Actor} at the end
    * of the stream.
    */
-  public String getJid();
+  public String getAddress();
 
   /**
    * Tests if the stream is closed.
@@ -70,31 +70,31 @@ public interface ActorStream
   
   /**
    * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
-   * addressed by the Actor's JID.
+   * addressed by the Actor's address.
    * 
-   * @param to the target actor's JID
-   * @param from the source actor's JID
+   * @param to the target actor's address
+   * @param from the source actor's address
    * @param payload the message payload
    */
   public void message(String to, String from, Serializable payload);
   
   /**
    * Sends a message error to an {@link com.caucho.bam.actor.Actor},
-   * addressed by the Actor's JID.  Actor protocols may choose to send
+   * addressed by the Actor's address.  Actor protocols may choose to send
    * error messages if a message fails for some reason.
    *
    * In general, Actors should not rely on the delivery of error messages.
    * If an error return is required, use an RPC query instead.
    * 
-   * @param to the target actor's JID
-   * @param from the source actor's JID
+   * @param to the target actor's address
+   * @param from the source actor's address
    * @param payload the message payload
    * @param error the message error
    */
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error);
+                           BamError error);
 
   //
   // queries (iq)
@@ -112,8 +112,8 @@ public interface ActorStream
    * because RPC clients rely on a response.
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the service actor's JID
-   * @param from the client actor's JID
+   * @param to the service actor's address
+   * @param from the client actor's address
    * @param payload the query payload
    */
   public void query(long id,
@@ -125,8 +125,8 @@ public interface ActorStream
    * Sends a query response for a query
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the client actor's JID
-   * @param from the service actor's JID
+   * @param to the client actor's address
+   * @param from the service actor's address
    * @param payload the result payload
    */
   public void queryResult(long id,
@@ -138,8 +138,8 @@ public interface ActorStream
    * Sends a query error from a failed query.
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the client actor's JID
-   * @param from the service actor's JID
+   * @param to the client actor's address
+   * @param from the service actor's address
    * @param payload the query payload
    * @param error additional error information
    */
@@ -147,5 +147,5 @@ public interface ActorStream
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error);
+                         BamError error);
 }

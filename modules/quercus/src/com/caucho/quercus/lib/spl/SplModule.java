@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.spl;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.caucho.quercus.annotation.Optional;
@@ -169,7 +170,7 @@ public class SplModule extends AbstractQuercusModule
     else
       extensionList = extensions.split("[,\\s]+");
     
-    String filePrefix = className.toLowerCase();
+    String filePrefix = className.toLowerCase(Locale.ENGLISH);
 
     for (String ext : extensionList) {
       StringValue filename = new StringBuilderValue(filePrefix).append(ext);

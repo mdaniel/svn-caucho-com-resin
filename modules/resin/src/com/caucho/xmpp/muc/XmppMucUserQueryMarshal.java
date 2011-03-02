@@ -68,13 +68,13 @@ import javax.xml.stream.*;
  * }
  *
  * element destroy {
- *   @jid?
+ *   @address?
  *   &amp; reason?
  * }
  *
  * element item {
  *   @affiliation?
- *   &amp; @jid?
+ *   &amp; @address?
  *   &amp; @nick?
  *   &amp; @role?
  *   &amp; actor?
@@ -83,7 +83,7 @@ import javax.xml.stream.*;
  * }
  *
  * element actor {
- *   @jid
+ *   @address
  * }
  *
  * element continue {
@@ -183,8 +183,8 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     if (destroy != null) {
       out.writeStartElement("destroy");
 
-      if (destroy.getJid() != null)
-        out.writeAttribute("jid", destroy.getJid());
+      if (destroy.getAddress() != null)
+        out.writeAttribute("address", destroy.getAddress());
 
       if (destroy.getReason() != null) {
         out.writeStartElement("reason");
@@ -218,8 +218,8 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     if (item.getAffiliation() != null)
       out.writeAttribute("affiliation", item.getAffiliation());
 
-    if (item.getJid() != null)
-      out.writeAttribute("jid", item.getJid());
+    if (item.getAddress() != null)
+      out.writeAttribute("address", item.getAddress());
 
     if (item.getNick() != null)
       out.writeAttribute("nick", item.getNick());
@@ -229,7 +229,7 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
 
     if (item.getActor() != null) {
       out.writeStartElement("actor");
-      out.writeAttribute("jid", item.getActor());
+      out.writeAttribute("address", item.getActor());
       out.writeEndElement(); // </actor>
     }
 
@@ -364,7 +364,7 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
   public MucDestroy parseDestroy(XMLStreamReader in)
     throws IOException, XMLStreamException
   {
-    String jid = in.getAttributeValue(null, "jid");
+    String address = in.getAttributeValue(null, "address");
     String reason = null;
 
     int tag = in.nextTag();
@@ -374,7 +374,7 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
         debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-        return new MucDestroy(jid, reason);
+        return new MucDestroy(address, reason);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
                && "reason".equals(in.getLocalName())) {
@@ -396,7 +396,7 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     throws IOException, XMLStreamException
   {
     String affiliation = in.getAttributeValue(null, "affiliation");
-    String jid = in.getAttributeValue(null, "jid");
+    String address = in.getAttributeValue(null, "address");
     String nick = in.getAttributeValue(null, "nick");
     String role = in.getAttributeValue(null, "role");
 
@@ -404,8 +404,8 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
     if (affiliation != null)
       item.setAffiliation(affiliation);
     
-    if (jid != null)
-      item.setJid(jid);
+    if (address != null)
+      item.setAddress(address);
     
     if (nick != null)
       item.setNick(nick);
@@ -424,7 +424,7 @@ public class XmppMucUserQueryMarshal extends AbstractXmppMarshal {
       }
       else if (XMLStreamReader.START_ELEMENT == tag
                && "actor".equals(in.getLocalName())) {
-        item.setActor(in.getAttributeValue(null, "jid"));
+        item.setActor(in.getAttributeValue(null, "address"));
 
         skipToEnd(in, "actor");
       }

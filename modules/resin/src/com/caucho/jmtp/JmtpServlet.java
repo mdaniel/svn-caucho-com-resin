@@ -44,8 +44,8 @@ import com.caucho.bam.actor.Actor;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.AbstractActorStream;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.AbstractMessageStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.websocket.AbstractWebSocketListener;
@@ -95,7 +95,7 @@ public class JmtpServlet extends GenericServlet {
 
   static class Listener extends AbstractWebSocketListener {
     private Actor _actor;
-    private ActorStream _actorStream;
+    private MessageStream _actorStream;
 
     private InputStream _is;
     private OutputStream _os;
@@ -153,13 +153,13 @@ public class JmtpServlet extends GenericServlet {
       _listener = listener;
     }
     
-    public Mailbox getMailbox(String jid)
+    public Mailbox getMailbox(String address)
     {
       return _listener._jmtpMailbox;
     }
   }
   
-  private static class JmtpMailbox extends AbstractActorStream implements Mailbox {
+  private static class JmtpMailbox extends AbstractMessageStream implements Mailbox {
     private Listener _listener;
     
     JmtpMailbox(Listener listener)
@@ -173,7 +173,7 @@ public class JmtpServlet extends GenericServlet {
     }
     
     @Override
-    public ActorStream getActorStream()
+    public MessageStream getActorStream()
     {
       return null;
     }

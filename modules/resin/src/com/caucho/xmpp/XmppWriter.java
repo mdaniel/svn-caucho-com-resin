@@ -31,13 +31,13 @@ package com.caucho.xmpp;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.AbstractBrokerStream;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.AbstractActorStream;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.AbstractMessageStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * xmpp client to broker
@@ -57,7 +57,7 @@ public class XmppWriter extends AbstractBroker
     return null;
   }
 
-  public String getJid()
+  public String getAddress()
   {
     return null;
   }
@@ -68,7 +68,7 @@ public class XmppWriter extends AbstractBroker
   }
 
   public void messageError(String to, String from, Serializable value,
-                           ActorError error)
+                           BamError error)
   {
     _out.messageError(to, from, value, error);
   }
@@ -95,7 +95,7 @@ public class XmppWriter extends AbstractBroker
   }
 
   public void queryError(long id, String to, String from, Serializable value,
-                         ActorError error)
+                         BamError error)
   {
     String sid = String.valueOf(id);
     
@@ -147,7 +147,7 @@ public class XmppWriter extends AbstractBroker
    * @see com.caucho.bam.broker.AbstractBrokerStream#getMailbox(java.lang.String)
    */
   @Override
-  public Mailbox getMailbox(String jid)
+  public Mailbox getMailbox(String address)
   {
     // TODO Auto-generated method stub
     return null;

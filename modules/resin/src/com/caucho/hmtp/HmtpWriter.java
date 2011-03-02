@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianDebugOutputStream;
 
@@ -48,14 +48,14 @@ public class HmtpWriter
   private static final Logger log
     = Logger.getLogger(HmtpWriter.class.getName());
 
-  private String _jid;
+  private String _address;
   
   private Hessian2Output _out;
   private HessianDebugOutputStream _dOut;
   
-  private int _jidCacheIndex;
-  private HashMap<String,Integer> _jidCache = new HashMap<String,Integer>(256);
-  private String []_jidCacheRing = new String[256];
+  private int _addressCacheIndex;
+  private HashMap<String,Integer> _addressCache = new HashMap<String,Integer>(256);
+  private String []_addressCacheRing = new String[256];
 
   public HmtpWriter()
   {
@@ -77,19 +77,19 @@ public class HmtpWriter
   }
   
   /**
-   * The jid of the stream
+   * The address of the stream
    */
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   /**
-   * The jid of the stream
+   * The address of the stream
    */
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
   //
@@ -97,11 +97,11 @@ public class HmtpWriter
   //
 
   /**
-   * Sends a message to a given jid
+   * Sends a message to a given address
    * 
    * @param os the output stream for the message
-   * @param to the jid of the target actor
-   * @param from the jid of the source actor
+   * @param to the address of the target actor
+   * @param from the address of the source actor
    * @param payload the message payload
    */
   public void message(OutputStream os, 
@@ -123,21 +123,21 @@ public class HmtpWriter
     }
 
     out.writeInt(HmtpPacketType.MESSAGE.ordinal());
-    writeJid(out, to);
-    writeJid(out, from);
+    writeAddress(out, to);
+    writeAddress(out, from);
     out.writeObject(payload);
 
     out.flushBuffer();
   }
 
   /**
-   * Sends a message error to a given jid
+   * Sends a message error to a given address
    */
   public void messageError(OutputStream os,
                            String to,
                            String from,
                            Serializable value,
-                           ActorError error)
+                           BamError error)
     throws IOException
   {
     init(os);
@@ -153,8 +153,8 @@ public class HmtpWriter
     }
 
     out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
-    writeJid(out, to);
-    writeJid(out, from);
+    writeAddress(out, to);
+    writeAddress(out, from);
     out.writeObject(value);
     out.writeObject(error);
     
@@ -188,8 +188,8 @@ public class HmtpWriter
     }
 
     out.writeInt(HmtpPacketType.QUERY.ordinal());
-    writeJid(out, to);
-    writeJid(out, from);
+    writeAddress(out, to);
+    writeAddress(out, from);
     out.writeLong(id);
     out.writeObject(value);
 
@@ -219,8 +219,8 @@ public class HmtpWriter
     }
 
     out.writeInt(HmtpPacketType.QUERY_RESULT.ordinal());
-    writeJid(out, to);
-    writeJid(out, from);
+    writeAddress(out, to);
+    writeAddress(out, from);
     out.writeLong(id);
     out.writeObject(value);
     
@@ -235,7 +235,7 @@ public class HmtpWriter
                          String to,
                          String from,
                          Serializable value,
-                         ActorError error)
+                         BamError error)
     throws IOException
   {
     init(os);
@@ -251,8 +251,8 @@ public class HmtpWriter
     }
 
     out.writeInt(HmtpPacketType.QUERY_ERROR.ordinal());
-    writeJid(out, to);
-    writeJid(out, from);
+    writeAddress(out, to);
+    writeAddress(out, from);
     out.writeLong(id);
     out.writeObject(value);
     out.writeObject(error);
@@ -260,31 +260,31 @@ public class HmtpWriter
     out.flushBuffer();
   }
   
-  private void writeJid(Hessian2Output out, String jid)
+  private void writeAddress(Hessian2Output out, String address)
     throws IOException
   {
-    if (jid == null) {
+    if (address == null) {
       out.writeString(null);
       return;
     }
     
-    Integer value = _jidCache.get(jid);
+    Integer value = _addressCache.get(address);
     
     if (value != null)
       out.writeInt(value);
     else {
-      out.writeString(jid);
+      out.writeString(address);
       
-      int index = _jidCacheIndex;
+      int index = _addressCacheIndex;
       
-      _jidCacheIndex = (index + 1) % _jidCacheRing.length;
+      _addressCacheIndex = (index + 1) % _addressCacheRing.length;
       
-      if (_jidCacheRing[index] != null) {
-        _jidCache.remove(_jidCacheRing[index]);
+      if (_addressCacheRing[index] != null) {
+        _addressCache.remove(_addressCacheRing[index]);
       }
       
-      _jidCacheRing[index] = jid;
-      _jidCache.put(jid, index);
+      _addressCacheRing[index] = address;
+      _addressCache.put(address, index);
     }
   }
 
@@ -318,6 +318,6 @@ public class HmtpWriter
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
 }

@@ -31,31 +31,31 @@ package com.caucho.hmtp.server;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.actor.Actor;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.
  */
-class ClientLinkActor implements ActorStream
+class ClientLinkActor implements MessageStream
 {
-  private String _jid;
+  private String _address;
   
   private Broker _broker;
-  private ActorStream _actorStream;
-  private ActorStream _out;
+  private MessageStream _actorStream;
+  private MessageStream _out;
 
-  public ClientLinkActor(String jid, Broker broker, ActorStream out)
+  public ClientLinkActor(String address, Broker broker, MessageStream out)
   {
-    if (jid == null)
+    if (address == null)
       throw new IllegalArgumentException();
     
     if (out == null)
       throw new IllegalArgumentException();
     
-    _jid = jid;
+    _address = address;
     _broker = broker;
     _out = out;
     
@@ -63,18 +63,18 @@ class ClientLinkActor implements ActorStream
   }
 
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   //@Override
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
     return _actorStream;
   }
 
-  public void setActorStream(ActorStream actorStream)
+  public void setActorStream(MessageStream actorStream)
   {
     _actorStream = actorStream;
   }
@@ -100,14 +100,14 @@ class ClientLinkActor implements ActorStream
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    getBroker().message(to, getJid(), payload);
+    getBroker().message(to, getAddress(), payload);
   }
 
   @Override
   public void messageError(String to, String from, Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
-    getBroker().messageError(to, getJid(), payload, error);
+    getBroker().messageError(to, getAddress(), payload, error);
   }
 
   @Override
@@ -116,7 +116,7 @@ class ClientLinkActor implements ActorStream
                     String from, 
                     Serializable payload)
   {
-    getBroker().query(id, to, getJid(), payload);
+    getBroker().query(id, to, getAddress(), payload);
   }
 
   @Override
@@ -125,7 +125,7 @@ class ClientLinkActor implements ActorStream
                           String from, 
                           Serializable payload)
   {
-    getBroker().queryResult(id, to, getJid(), payload);
+    getBroker().queryResult(id, to, getAddress(), payload);
   }
 
   @Override
@@ -133,14 +133,14 @@ class ClientLinkActor implements ActorStream
                          String to,
                          String from, 
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
-    getBroker().queryError(id, to, getJid(), payload, error);
+    getBroker().queryError(id, to, getAddress(), payload, error);
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
 }

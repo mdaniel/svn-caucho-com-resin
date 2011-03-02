@@ -35,6 +35,7 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MboxArchive {
@@ -142,7 +143,7 @@ public class MboxArchive {
       return message;
 
     while (subject.length() > 4) {
-      String prefix = subject.substring(0, 4).toLowerCase();
+      String prefix = subject.substring(0, 4).toLowerCase(Locale.ENGLISH);
       
       if (! prefix.equals("re: ") && ! prefix.equals("aw: "))
         return null;
@@ -164,7 +165,7 @@ public class MboxArchive {
       return;
 
     while (subject.length() > 4) {
-      String prefix = subject.substring(0, 4).toLowerCase();
+      String prefix = subject.substring(0, 4).toLowerCase(Locale.ENGLISH);
       
       if (! prefix.equals("re: ") && ! prefix.equals("aw: ")) {
         subjectMap.put(subject, message);

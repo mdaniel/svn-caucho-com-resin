@@ -31,8 +31,8 @@ package com.caucho.bam.packet;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * RPC call requesting information/data.  The "id" field is used
@@ -48,8 +48,8 @@ public class Query extends Packet {
    * A query to a target from a given source
    *
    * @param id the query id
-   * @param to the target jid
-   * @param from the source jid
+   * @param to the target address
+   * @param from the source address
    * @param value the query content
    */
   public Query(long id, String to, String from, Serializable value)
@@ -80,18 +80,18 @@ public class Query extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(ActorStream handler, ActorStream toSource)
+  public void dispatch(MessageStream handler, MessageStream toSource)
   {
     try {
       handler.query(getId(), getTo(), getFrom(), getValue());
     } catch (RuntimeException e) {
       toSource.queryError(getId(), getFrom(), getTo(), getValue(),
-                          ActorError.create(e));
+                          BamError.create(e));
       
       throw e;
     } catch (Error e) {
       toSource.queryError(getId(), getFrom(), getTo(), getValue(),
-                          ActorError.create(e));
+                          BamError.create(e));
       
       throw e;
     }
@@ -101,9 +101,9 @@ public class Query extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatchError(ActorStream handler,
-                            ActorStream toSource,
-                            ActorError error)
+  public void dispatchError(MessageStream handler,
+                            MessageStream toSource,
+                            BamError error)
   {
     toSource.queryError(getId(), getFrom(), getTo(), getValue(), error);
   }

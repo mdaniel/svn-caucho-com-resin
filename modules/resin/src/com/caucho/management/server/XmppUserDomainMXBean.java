@@ -38,7 +38,7 @@ import com.caucho.jmx.Description;
  * resin:type=XmppUserDomain,name=foo.com
  * </pre>
  */
-@Description("A domain of xmpp jid users")
+@Description("A domain of xmpp address users")
 public interface XmppUserDomainMXBean extends ManagedObjectMXBean {
   //
   // Operations

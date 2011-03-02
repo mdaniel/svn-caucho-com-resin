@@ -37,7 +37,7 @@ import com.caucho.bam.query.QuerySender;
 
 /**
  * ActorSender is a convenience API for sending messages to other Actors,
- * which always using the actor's JID as the "from" parameter and manages
+ * which always using the actor's address as the "from" parameter and manages
  * query ids.
  */
 public interface ActorSender extends QuerySender {
@@ -71,9 +71,9 @@ public interface ActorSender extends QuerySender {
 
   /**
    * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
-   * addressed by the Actor's JID.
+   * addressed by the Actor's address.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the message payload
    */
   public void message(String to, Serializable payload);
@@ -99,7 +99,7 @@ public interface ActorSender extends QuerySender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    */
   public Serializable query(String to,
@@ -117,7 +117,7 @@ public interface ActorSender extends QuerySender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
@@ -137,7 +137,7 @@ public interface ActorSender extends QuerySender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param callback the application's callback for the result
    */

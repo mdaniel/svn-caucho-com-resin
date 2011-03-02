@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * The generator for the resource-deploy
@@ -293,7 +294,7 @@ public class ResourceDeploy {
       appName = rarName.substring(0, rarName.length() - 4);
 
       if (CauchoSystem.isCaseInsensitive())
-        appName = appName.toLowerCase();
+        appName = appName.toLowerCase(Locale.ENGLISH);
 
       rarNames.add(appName);
     }
@@ -310,7 +311,7 @@ public class ResourceDeploy {
         continue;
 
       if (CauchoSystem.isCaseInsensitive())
-        rarDirName = rarDirName.toLowerCase();
+        rarDirName = rarDirName.toLowerCase(Locale.ENGLISH);
 
       Path path = rarExpandDir.lookup(rarDirName);
 

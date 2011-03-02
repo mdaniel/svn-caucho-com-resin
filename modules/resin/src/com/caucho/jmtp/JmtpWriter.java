@@ -35,7 +35,7 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.ProtocolException;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.json.JsonOutput;
@@ -49,7 +49,7 @@ public class JmtpWriter extends AbstractBroker
   private static final Logger log
     = Logger.getLogger(JmtpWriter.class.getName());
 
-  private String _jid;
+  private String _address;
 
   private OutputStream _os;
   private JsonOutput _out;
@@ -71,19 +71,19 @@ public class JmtpWriter extends AbstractBroker
   }
 
   /**
-   * The jid of the stream
+   * The address of the stream
    */
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   /**
-   * The jid of the stream
+   * The address of the stream
    */
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
   //
@@ -150,7 +150,7 @@ public class JmtpWriter extends AbstractBroker
   public void messageError(String to,
                            String from,
                            Serializable value,
-                           ActorError error)
+                           BamError error)
   {
     try {
       OutputStream os = _os;
@@ -340,7 +340,7 @@ public class JmtpWriter extends AbstractBroker
                          String to,
                          String from,
                          Serializable value,
-                         ActorError error)
+                         BamError error)
   {
     try {
       OutputStream os = _os;
@@ -446,6 +446,6 @@ public class JmtpWriter extends AbstractBroker
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
 }

@@ -102,8 +102,8 @@ public class Functions {
     if (part == null)
       part = "";
 
-    whole = whole.toUpperCase();
-    part = part.toUpperCase();
+    whole = whole.toUpperCase(Locale.ENGLISH);
+    part = part.toUpperCase(Locale.ENGLISH);
     
     return whole.indexOf(part) >= 0;
   }
@@ -337,7 +337,7 @@ public class Functions {
     if (string == null || string.equals(""))
       return "";
 
-    return string.toLowerCase();
+    return string.toLowerCase(Locale.ENGLISH);
   }
 
   /**
@@ -348,7 +348,7 @@ public class Functions {
     if (string == null || string.equals(""))
       return "";
 
-    return string.toUpperCase();
+    return string.toUpperCase(Locale.ENGLISH);
   }
 
   /**

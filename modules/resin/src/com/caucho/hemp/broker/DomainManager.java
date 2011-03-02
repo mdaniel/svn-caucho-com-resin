@@ -30,7 +30,7 @@
 package com.caucho.hemp.broker;
 
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.loader.EnvironmentLocal;
 
 

@@ -28,6 +28,8 @@
 
 package com.caucho.es;
 
+import java.util.Locale;
+
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntArray;
 

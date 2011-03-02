@@ -46,26 +46,26 @@ public class NotAuthorizedException
     super(msg);
   }
 
-  public NotAuthorizedException(String msg, ActorError error)
+  public NotAuthorizedException(String msg, BamError error)
   {
     super(msg, error);
   }
 
-  public NotAuthorizedException(ActorError error)
+  public NotAuthorizedException(BamError error)
   {
     super(error);
   }
 
   @Override
-  public ActorError createActorError()
+  public BamError createActorError()
   {
-    ActorError error = getActorError();
+    BamError error = getActorError();
 
     if (error != null)
       return error;
 
-    return new ActorError(ActorError.TYPE_AUTH,
-                          ActorError.NOT_AUTHORIZED,
+    return new BamError(BamError.TYPE_AUTH,
+                          BamError.NOT_AUTHORIZED,
                           getMessage());
   }
 }

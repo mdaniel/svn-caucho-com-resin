@@ -35,64 +35,64 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.query.QueryActorStreamFilter;
+import com.caucho.bam.query.QueryMessageStreamFilter;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
 import com.caucho.bam.query.QueryManager;
-import com.caucho.bam.stream.AbstractActorStream;
-import com.caucho.bam.stream.ActorStream;
-import com.caucho.bam.stream.NullActorStream;
+import com.caucho.bam.stream.AbstractMessageStream;
+import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.stream.NullMessageStream;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
- * which always using the actor's JID as the "from" parameter.
+ * which always using the actor's address as the "from" parameter.
  */
 public class SimpleActorSender implements ActorSender {
-  private ActorStream _actorStream;
+  private MessageStream _actorStream;
   private Broker _broker;
-  private String _clientJid;
+  private String _clientAddress;
 
   private final QueryManager _queryManager = new QueryManager();
   
   private long _timeout = 120000L;
 
-  public SimpleActorSender(String jid, Broker broker)
+  public SimpleActorSender(String address, Broker broker)
   {
-    this((ActorStream) null, broker);
+    this((MessageStream) null, broker);
     
-    _clientJid = jid;
+    _clientAddress = address;
   }
   
-  public SimpleActorSender(ActorStream next)
+  public SimpleActorSender(MessageStream next)
   {
     this(next, next.getBroker());
   }
   
-  public SimpleActorSender(ActorStream next, Broker broker)
+  public SimpleActorSender(MessageStream next, Broker broker)
   {
     if (next == null)
       next = new DefaultActorStream();
     
-    _actorStream = new QueryActorStreamFilter(next, _queryManager);
+    _actorStream = new QueryMessageStreamFilter(next, _queryManager);
     _broker = broker;
     
-    _clientJid  = next.getJid();
+    _clientAddress  = next.getAddress();
   }
   
-  public SimpleActorSender(ActorStream next,
+  public SimpleActorSender(MessageStream next,
                            ManagedBroker broker,
                            String uid, 
                            String resource)
   {
     this(next, broker);
     
-    Mailbox mailbox = new MultiworkerMailbox(next.getJid(),
+    Mailbox mailbox = new MultiworkerMailbox(next.getAddress(),
                                              _actorStream,
                                              broker, 
                                              1);
 
     _actorStream = broker.createClient(mailbox, uid, resource);
-    _clientJid = _actorStream.getJid();
+    _clientAddress = _actorStream.getAddress();
   }
   
   public SimpleActorSender(ManagedBroker broker,
@@ -105,7 +105,7 @@ public class SimpleActorSender implements ActorSender {
                            String uid, 
                            String resource)
   {
-    this((ActorStream) null, broker);
+    this((MessageStream) null, broker);
     
     Mailbox mailbox = new MultiworkerMailbox(null,
                                              _actorStream,
@@ -113,23 +113,23 @@ public class SimpleActorSender implements ActorSender {
                                              1);
 
     _actorStream = broker.createClient(mailbox, uid, resource);
-    _clientJid = _actorStream.getJid();
+    _clientAddress = _actorStream.getAddress();
   }
 
   /**
-   * Returns the Actor's jid used for all "from" parameters.
+   * Returns the Actor's address used for all "from" parameters.
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return getActorStream().getJid();
+    return getActorStream().getAddress();
   }
 
   //
   // streams
   //
 
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
     return _actorStream;
     
@@ -159,20 +159,20 @@ public class SimpleActorSender implements ActorSender {
 
   /**
    * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
-   * addressed by the Actor's JID.
+   * addressed by the Actor's address.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the message payload
    */
   @Override
   public void message(String to, Serializable payload)
   {
-    ActorStream broker = getBroker();
+    MessageStream broker = getBroker();
 
     if (broker == null)
       throw new IllegalStateException(this + " can't send a message because the link is closed.");
 
-    broker.message(to, getJid(), payload);
+    broker.message(to, getAddress(), payload);
   }
 
   //
@@ -203,7 +203,7 @@ public class SimpleActorSender implements ActorSender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    */
   @Override
@@ -218,9 +218,9 @@ public class SimpleActorSender implements ActorSender {
     long id = _queryManager.nextQueryId();
     
     QueryFuture future
-      = _queryManager.addQueryFuture(id, to, getJid(), payload, _timeout);
+      = _queryManager.addQueryFuture(id, to, getAddress(), payload, _timeout);
 
-    broker.query(id, to, getJid(), payload);
+    broker.query(id, to, getAddress(), payload);
 
     return future.get();
   }
@@ -237,7 +237,7 @@ public class SimpleActorSender implements ActorSender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    */
   @Override
@@ -245,7 +245,7 @@ public class SimpleActorSender implements ActorSender {
                             Serializable payload,
                             long timeout)
   {
-    ActorStream linkStream = getBroker();
+    MessageStream linkStream = getBroker();
 
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
@@ -253,9 +253,9 @@ public class SimpleActorSender implements ActorSender {
     long id = _queryManager.nextQueryId();
     
     QueryFuture future
-      = _queryManager.addQueryFuture(id, to, getJid(), payload, timeout);
+      = _queryManager.addQueryFuture(id, to, getAddress(), payload, timeout);
 
-    linkStream.query(id, to, getJid(), payload);
+    linkStream.query(id, to, getAddress(), payload);
 
     return future.get();
   }
@@ -273,7 +273,7 @@ public class SimpleActorSender implements ActorSender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
@@ -282,7 +282,7 @@ public class SimpleActorSender implements ActorSender {
                     Serializable payload,
                     QueryCallback callback)
   {
-    ActorStream linkStream = getBroker();
+    MessageStream linkStream = getBroker();
 
     if (linkStream == null)
       throw new IllegalStateException(this + " can't send a query because the link is closed.");
@@ -291,7 +291,7 @@ public class SimpleActorSender implements ActorSender {
     
     _queryManager.addQueryCallback(id, callback);
 
-    linkStream.query(id, to, getJid(), payload);
+    linkStream.query(id, to, getAddress(), payload);
   }
 
   /**
@@ -316,11 +316,11 @@ public class SimpleActorSender implements ActorSender {
     return getClass().getSimpleName() + "[" + getActorStream() + "]";
   }
   
-  class DefaultActorStream extends AbstractActorStream {
+  class DefaultActorStream extends AbstractMessageStream {
     @Override
-    public String getJid()
+    public String getAddress()
     {
-      return _clientJid;
+      return _clientAddress;
     }
     
     @Override

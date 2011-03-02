@@ -172,9 +172,9 @@ public class ArrayModule
         String key = keyValue.toString();
 
         if (toCase == CASE_UPPER)
-          key = key.toUpperCase();
+          key = key.toUpperCase(Locale.ENGLISH);
         else
-          key = key.toLowerCase();
+          key = key.toLowerCase(Locale.ENGLISH);
 
         newArray.put(env.createString(key), entry.getValue());
       }
@@ -3518,8 +3518,8 @@ public class ArrayModule
         String bElement = _getter.get(bEntry).toString();
 
         if (! _isCaseSensitive) {
-          aElement = aElement.toLowerCase();
-          bElement = bElement.toLowerCase();
+          aElement = aElement.toLowerCase(Locale.ENGLISH);
+          bElement = bElement.toLowerCase(Locale.ENGLISH);
         }
 
         StringParser aParser = new StringParser(aElement);

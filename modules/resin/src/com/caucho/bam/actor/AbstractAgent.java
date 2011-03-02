@@ -38,11 +38,11 @@ import com.caucho.bam.mailbox.Mailbox;
  *
  * <h2>Core API</h2>
  *
- * Each actor has a unique JID, which is the address for messages sent to
- * the actor.  JIDs look like email addresses: harry@caucho.com
+ * Each actor has a unique address, which is the address for messages sent to
+ * the actor.  addresss look like email addresses: harry@caucho.com
  * or harry@caucho.com/browser13.
  *
- * {@link com.caucho.bam.stream.ActorStream} is the key customizable interface
+ * {@link com.caucho.bam.stream.MessageStream} is the key customizable interface
  * for an agent developer.  Developers will implement callbacks for each
  * packet type the agent understands.
  *
@@ -52,7 +52,7 @@ import com.caucho.bam.mailbox.Mailbox;
  */
 public class AbstractAgent implements Agent
 {
-  private String _jid;
+  private String _address;
   private Mailbox _mailbox;
   private Broker _broker;
   
@@ -60,23 +60,23 @@ public class AbstractAgent implements Agent
   {
   }
   
-  public AbstractAgent(String jid,
+  public AbstractAgent(String address,
                        Mailbox mailbox,
                        Broker broker)
   {
-    _jid = jid;
+    _address = address;
     _mailbox = mailbox;
     _broker = broker;
   }
   
   /**
-   * Returns the actor's jid, so the {@link com.caucho.bam.broker.Broker} can
+   * Returns the actor's address, so the {@link com.caucho.bam.broker.Broker} can
    * deliver messages to this actor.
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   /**
@@ -100,6 +100,6 @@ public class AbstractAgent implements Agent
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "," + getMailbox() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "," + getMailbox() + "]";
   }
 }

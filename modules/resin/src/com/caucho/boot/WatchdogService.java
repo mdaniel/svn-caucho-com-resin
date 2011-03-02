@@ -47,14 +47,14 @@ class WatchdogService extends SimpleActor
     = Logger.getLogger(WatchdogService.class.getName());
 
   private final WatchdogManager _manager;
-  private final String _jid;
+  private final String _address;
 
   WatchdogService(WatchdogManager manager,
-                  String jid,
+                  String address,
                   Broker broker)
   {
     _manager = manager;
-    _jid = jid;
+    _address = address;
     
     setBroker(broker);
   }
@@ -63,9 +63,9 @@ class WatchdogService extends SimpleActor
    * Returns the server id of the watchdog.
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   /**

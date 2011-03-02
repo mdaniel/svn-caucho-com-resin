@@ -67,6 +67,8 @@ public class InternalCompiler extends AbstractJavaCompiler {
   protected void compileInt(String []path, LineMap lineMap)
     throws IOException, JavaCompileException
   {
+    Path javaHome = null;
+    
     if (! _hasCompiler) {
       JavaCompileException exn = null;
       try {
@@ -81,7 +83,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
         DynamicClassLoader env;
         env = new NonScanDynamicClassLoader(ClassLoader.getSystemClassLoader());
 
-        Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+        javaHome = Vfs.lookup(System.getProperty("java.home"));
         Path jar = javaHome.lookup("./lib/tools.jar");
         if (jar.canRead())
           env.addJar(jar);
@@ -93,7 +95,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
 
         _hasCompiler = true;
       } catch (ClassNotFoundException e) {
-        throw new JavaCompileException(L.l("Resin can't load com.sun.tools.javac.Main.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n\n{0}", String.valueOf(e)), e);
+        throw new JavaCompileException(L.l("Resin can't load com.sun.tools.javac.Main.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n  {0}\n  JAVA_HOME={1}", String.valueOf(e), javaHome.getNativePath()), e);
       }
     }
 

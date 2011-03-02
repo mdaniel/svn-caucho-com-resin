@@ -44,8 +44,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.AbstractActorStream;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.AbstractMessageStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
@@ -71,7 +71,7 @@ public class XmppClient {
   private static final String REGISTER
     = "register{http://jabber.org/features/iq-register}";
 
-  private InetAddress _address;
+  private InetAddress _inetAddress;
   private int _port;
   
   private String _to;
@@ -100,16 +100,16 @@ public class XmppClient {
   private XmppClientBrokerStream _toBroker;
   private BindCallback _bindCallback;
 
-  private String _jid;
+  private String _address;
   
-  private ActorStream _callback;
+  private MessageStream _callback;
 
   public XmppClient(InetAddress address, int port)
   {
-    _address = address;
+    _inetAddress = address;
     _port = port;
 
-    _to = _address.getHostAddress();
+    _to = _inetAddress.getHostAddress();
 
     _isFinest = log.isLoggable(Level.FINEST);
   }
@@ -224,7 +224,7 @@ public class XmppClient {
 
       _reader.readNext();
 
-      if (_jid == null)
+      if (_address == null)
         throw new RuntimeException("expected bind");
       
       _os.print("<iq type='set' id='" + _mId++ + "'>");
@@ -255,11 +255,11 @@ public class XmppClient {
     }
   }
 
-  public void setCallback(ActorStream callback)
+  public void setCallback(MessageStream callback)
   {
     _callback = callback;
 
-    if (_reader != null && _jid != null)
+    if (_reader != null && _address != null)
       _reader.setHandler(callback);
   }
   
@@ -554,7 +554,7 @@ public class XmppClient {
     return false;
   }
 
-  public ActorStream getBrokerStream()
+  public MessageStream getBrokerStream()
   {
     return _toBroker;
   }
@@ -573,8 +573,8 @@ public class XmppClient {
     close();
   }
 
-  class BindCallback extends AbstractActorStream {
-    public String getJid()
+  class BindCallback extends AbstractMessageStream {
+    public String getAddress()
     {
       throw new UnsupportedOperationException();
     }
@@ -592,7 +592,7 @@ public class XmppClient {
       if (value instanceof ImBindQuery) {
         ImBindQuery bind = (ImBindQuery) value;
 
-        _jid = bind.getJid();
+        _address = bind.getAddress();
       }
     }
   }

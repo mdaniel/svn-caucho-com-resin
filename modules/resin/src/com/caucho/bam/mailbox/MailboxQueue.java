@@ -256,8 +256,8 @@ public final class MailboxQueue
     /**
      * Creates a packet with a destination and a source.
      *
-     * @param to the destination jid
-     * @param from the source jid
+     * @param to the destination address
+     * @param from the source address
      */
     public QueueItem(Packet packet)
     {

@@ -41,8 +41,8 @@ import java.util.logging.Logger;
  * The errors are defined in RFC-3920, XMPP
  */
 @SuppressWarnings("serial")
-public class ActorError implements Serializable {
-  private static final Logger log = Logger.getLogger(ActorError.class.getName()); 
+public class BamError implements Serializable {
+  private static final Logger log = Logger.getLogger(BamError.class.getName()); 
 
   /**
    * Retry after providing credentials
@@ -148,14 +148,14 @@ public class ActorError implements Serializable {
   public static final String INTERNAL_SERVER_ERROR = "internal-server-error";
   
   /**
-   * The target jid doesn't exist ("cancel")
+   * The target address doesn't exist ("cancel")
    */
   public static final String ITEM_NOT_FOUND = "item-not-found";
   
   /**
-   * The target jid syntax is invalid ("modify")
+   * The target address syntax is invalid ("modify")
    */
-  public static final String JID_MALFORMED = "jid-malformed";
+  public static final String address_MALFORMED = "address-malformed";
   
   /**
    * The request is forbidden because of application policy, i.e. it's
@@ -243,7 +243,7 @@ public class ActorError implements Serializable {
    * zero-arg constructor for Hessian
    */
   @SuppressWarnings("unused")
-  private ActorError()
+  private BamError()
   {
     this.type = null;
     this.group = null;
@@ -255,7 +255,7 @@ public class ActorError implements Serializable {
    *
    * @param text an error text
    */
-  public ActorError(String text)
+  public BamError(String text)
   {
     this.type = TYPE_CANCEL;
     this.group = INTERNAL_SERVER_ERROR;
@@ -268,7 +268,7 @@ public class ActorError implements Serializable {
    * @param type the error type
    * @param group the error group
    */
-  public ActorError(String type,
+  public BamError(String type,
                     String group)
   {
     this.type = type;
@@ -283,7 +283,7 @@ public class ActorError implements Serializable {
    * @param group the error group
    * @param text the error text
    */
-  public ActorError(String type,
+  public BamError(String type,
                     String group,
                     String text)
   {
@@ -295,16 +295,16 @@ public class ActorError implements Serializable {
   /**
    * Creates an ActorError based on an exception
    */
-  public static ActorError create(Throwable e)
+  public static BamError create(Throwable e)
   {
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, e.toString(), e);
     
-    if (e instanceof ActorException)
-      return ((ActorException) e).createActorError();
+    if (e instanceof BamException)
+      return ((BamException) e).createActorError();
     else {
-      return new ActorError(ActorError.TYPE_CANCEL,
-                            ActorError.INTERNAL_SERVER_ERROR,
+      return new BamError(BamError.TYPE_CANCEL,
+                            BamError.INTERNAL_SERVER_ERROR,
                             e.toString());
     }
   }

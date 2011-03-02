@@ -46,6 +46,7 @@ import com.caucho.util.L10N;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -1676,7 +1677,7 @@ public class QueryParser {
         }
         else {
 
-          name = name.toLowerCase();
+          name = name.toLowerCase(Locale.ENGLISH);
 
           // EXISTS | ALL | ANY | SOME
           if (name.equals("exists") ||
@@ -1687,12 +1688,12 @@ public class QueryParser {
             scanToken();
 
             if (peekToken() != SELECT && peekToken() != FROM)
-              throw error(L.l(name.toUpperCase() + " requires '(SELECT'"));
+              throw error(L.l(name.toUpperCase(Locale.ENGLISH) + " requires '(SELECT'"));
 
             AmberSelectQuery select = parseSelect(true);
 
             if (peekToken() != ')')
-              throw error(L.l(name.toUpperCase() + " requires ')'"));
+              throw error(L.l(name.toUpperCase(Locale.ENGLISH) + " requires ')'"));
 
             scanToken();
 
@@ -2439,7 +2440,7 @@ public class QueryParser {
       unread(ch);
 
       _lexeme = cb.close();
-      String lower = _lexeme.toLowerCase();
+      String lower = _lexeme.toLowerCase(Locale.ENGLISH);
 
       int token = _reserved.get(lower);
 

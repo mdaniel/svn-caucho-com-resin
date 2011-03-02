@@ -319,7 +319,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       case 'r': case 's':
       case 'T': case 'D': case 'o':
       case 'u': case 'U':
-      case 'v':
+      case 'v': case 'S':
         if (cb.length() > 0)
           segments.add(new Segment(this, Segment.TEXT, cb.toString()));
         cb.clear();
@@ -539,6 +539,18 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         buffer[offset++] = (byte) ('0' + (status / 10) % 10);
         buffer[offset++] = (byte) ('0' + status % 10);
         break;
+        
+      case 'S':
+        {
+          String sessionId = request.getRequestedSessionId();
+          if (! request.isRequestedSessionIdValid() || sessionId == null) {
+            buffer[offset++] = (byte) '-';
+          }
+          else {
+            offset = print(buffer, offset, sessionId);
+          }
+          break;
+        }
 
       case 't':
         long date = Alarm.getCurrentTime();

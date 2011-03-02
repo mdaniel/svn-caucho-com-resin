@@ -50,7 +50,7 @@ import javax.xml.stream.*;
  * }
  *
  * element destroy {
- *   attribute jid?,
+ *   attribute address?,
  *
  *   password?
  *   &amp; reason?
@@ -99,8 +99,8 @@ public class XmppMucOwnerDestroyQueryMarshal extends AbstractXmppMarshal {
     
     out.writeStartElement("destroy");
 
-    if (mucOwner.getJid() != null)
-      out.writeAttribute("jid", mucOwner.getJid());
+    if (mucOwner.getAddress() != null)
+      out.writeAttribute("address", mucOwner.getAddress());
 
     if (mucOwner.getPassword() != null)
       out.writeAttribute("password", mucOwner.getPassword());

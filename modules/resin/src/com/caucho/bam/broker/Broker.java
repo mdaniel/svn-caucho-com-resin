@@ -30,13 +30,13 @@
 package com.caucho.bam.broker;
 
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 
 /**
  * Broker is the hub which routes messages to mailboxes.
  */
-public interface Broker extends ActorStream
+public interface Broker extends MessageStream
 {
   /**
    * Returns the mailbox to the broker itself.
@@ -44,13 +44,13 @@ public interface Broker extends ActorStream
   public Mailbox getBrokerMailbox();
   
   /**
-   * Returns a mailbox for the given jid, or null if the mailbox does not exist.
+   * Returns a mailbox for the given address, or null if the mailbox does not exist.
    * 
-   * @param jid the address of the mailbox
+   * @param address the address of the mailbox
    * 
-   * @return the mailbox with the given jid or null
+   * @return the mailbox with the given address or null
    */
-  public Mailbox getMailbox(String jid);
+  public Mailbox getMailbox(String address);
   
   /**
    * Adds a mailbox (optional operation).

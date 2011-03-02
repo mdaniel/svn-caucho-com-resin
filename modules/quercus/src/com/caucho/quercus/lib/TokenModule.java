@@ -41,6 +41,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -915,7 +916,7 @@ public class TokenModule extends AbstractQuercusModule {
 
           readIdentifier();
 
-          int lexeme = _reservedMap.get(_lexeme.toString().toLowerCase());
+          int lexeme = _reservedMap.get(_lexeme.toString().toLowerCase(Locale.ENGLISH));
 
           if (lexeme > 0)
             return lexeme;

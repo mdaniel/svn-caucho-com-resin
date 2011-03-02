@@ -46,6 +46,7 @@ import com.caucho.vfs.Path;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.logging.*;
@@ -60,7 +61,7 @@ public class OptionsModule extends AbstractQuercusModule {
 
   // php/1a0q (phpMyAdmin)
   public static final String PHP_OS
-    = System.getProperty("os.name").toUpperCase();
+    = System.getProperty("os.name").toUpperCase(Locale.ENGLISH);
 
   public static final String PHP_EOL
     = System.getProperty("line.separator");

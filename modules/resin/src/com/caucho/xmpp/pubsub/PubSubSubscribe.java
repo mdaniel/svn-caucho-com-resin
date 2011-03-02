@@ -36,30 +36,30 @@ import java.util.*;
  * Subscribe query
  */
 public class PubSubSubscribe extends PubSubQuery {
-  private final String jid;
+  private final String address;
   private final String node;
 
   public PubSubSubscribe()
   {
-    this.jid = null;
+    this.address = null;
     this.node = null;
   }
 
-  public PubSubSubscribe(String jid)
+  public PubSubSubscribe(String address)
   {
-    this.jid = jid;
+    this.address = address;
     this.node = null;
   }
 
-  public PubSubSubscribe(String jid, String node)
+  public PubSubSubscribe(String address, String node)
   {
-    this.jid = jid;
+    this.address = address;
     this.node = node;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return this.jid;
+    return this.address;
   }
 
   public String getNode()
@@ -71,9 +71,9 @@ public class PubSubSubscribe extends PubSubQuery {
   public String toString()
   {
     if (this.node != null)
-      return (getClass().getSimpleName() + "[" + this.jid
+      return (getClass().getSimpleName() + "[" + this.address
               + ",node=" + this.node + "]");
     else
-      return getClass().getSimpleName() + "[" + this.jid + "]";
+      return getClass().getSimpleName() + "[" + this.address + "]";
   }
 }

@@ -43,6 +43,7 @@ import java.net.URLDecoder;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -371,7 +372,7 @@ public abstract class Path {
         ch = uri.charAt(i);
 
         if (ch == ':')
-          return uri.substring(0, i).toLowerCase();
+          return uri.substring(0, i).toLowerCase(Locale.ENGLISH);
 
         if (! (ch >= 'a' && ch <= 'z' ||
                ch >= 'A' && ch <= 'Z' ||
@@ -520,7 +521,7 @@ public abstract class Path {
    */
   public boolean isWindowsInsecure()
   {
-    String lower = getPath().toLowerCase();
+    String lower = getPath().toLowerCase(Locale.ENGLISH);
 
     int lastCh;
 

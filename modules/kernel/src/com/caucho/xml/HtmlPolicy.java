@@ -37,6 +37,7 @@ import com.caucho.util.StringCharCursor;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
+import java.util.Locale;
 
 /**
  * Policy for parsing an HTML file.
@@ -581,7 +582,7 @@ class HtmlPolicy extends Policy {
     names.put(name, code);
     cbNames.put(new CharBuffer(name), code);
 
-    String upper = name.toUpperCase();
+    String upper = name.toUpperCase(Locale.ENGLISH);
     names.put(upper, code);
     cbNames.put(new CharBuffer(upper), code);
   }

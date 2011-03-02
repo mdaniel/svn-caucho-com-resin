@@ -43,6 +43,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -195,7 +196,7 @@ public final class DefinitionState {
     }
     
     if (_lowerFunMap != null) {
-      fun = _lowerFunMap.get(name.toLowerCase());
+      fun = _lowerFunMap.get(name.toLowerCase(Locale.ENGLISH));
 
       if (fun != null) {
         // copyOnWrite();
@@ -254,7 +255,7 @@ public final class DefinitionState {
     _crc = Crc64.generate(_crc, name);
 
     if (_lowerFunMap != null)
-      _lowerFunMap.put(name.toLowerCase(), fun);
+      _lowerFunMap.put(name.toLowerCase(Locale.ENGLISH), fun);
 
     return BooleanValue.TRUE;
   }
@@ -300,7 +301,7 @@ public final class DefinitionState {
     _crc = Crc64.generate(_crc, name);
 
     if (_lowerClassDefMap != null)
-      _lowerClassDefMap.put(name.toLowerCase(), cl);
+      _lowerClassDefMap.put(name.toLowerCase(Locale.ENGLISH), cl);
   }
 
   /**
@@ -314,7 +315,7 @@ public final class DefinitionState {
       return def;
 
     if (_lowerClassDefMap != null)
-      def = _lowerClassDefMap.get(name.toLowerCase());
+      def = _lowerClassDefMap.get(name.toLowerCase(Locale.ENGLISH));
 
     return def;
   }

@@ -32,49 +32,49 @@ package com.caucho.bam.broker;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
- * The abstract implementation of an {@link com.caucho.bam.stream.ActorStream}
+ * The abstract implementation of an {@link com.caucho.bam.stream.MessageStream}
  * returns query errors for RPC packets, and ignores unknown packets
  * for messages and presence announcement.
  *
- * Most developers will use {@link com.caucho.bam.actor.SkeletonActorStreamFilter}
+ * Most developers will use {@link com.caucho.bam.actor.SkeletonMessageStreamFilter}
  * or {@link com.caucho.bam.actor.SimpleActor} because those classes use
  * introspection with {@link com.caucho.bam.Message @Message} annotations
  * to simplify Actor development.
  */
 public class HashMapBroker extends AbstractManagedBroker
 {
-  private final String _jid;
+  private final String _address;
   
   private final ConcurrentHashMap<String,Mailbox> _mailboxMap
     = new ConcurrentHashMap<String,Mailbox>();
 
-  public HashMapBroker(String jid)
+  public HashMapBroker(String address)
   {
-    _jid = jid;
+    _address = address;
   }
   
   /**
-   * Returns the jid for the broker itself.
+   * Returns the address for the broker itself.
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   /**
-   * Returns the actor stream for the given jid.
+   * Returns the actor stream for the given address.
    */
   @Override
-  public Mailbox getMailbox(String jid)
+  public Mailbox getMailbox(String address)
   {
-    if (jid == null)
+    if (address == null)
       return null;
 
-    return _mailboxMap.get(jid);
+    return _mailboxMap.get(address);
   }
   
   /**
@@ -83,21 +83,21 @@ public class HashMapBroker extends AbstractManagedBroker
   @Override
   public void addMailbox(Mailbox mailbox)
   {
-    String jid = mailbox.getJid();
+    String address = mailbox.getAddress();
     
-    if (jid == null)
-      throw new NullPointerException(String.valueOf(mailbox) + " has a null jid");
+    if (address == null)
+      throw new NullPointerException(String.valueOf(mailbox) + " has a null address");
     
-    _mailboxMap.put(jid, mailbox);
+    _mailboxMap.put(address, mailbox);
   }
 
   /**
    * Removes an actor from the broker.
    */
-  public void removeMailbox(ActorStream actor)
+  public void removeMailbox(MessageStream actor)
   {
-    String jid = actor.getJid();
+    String address = actor.getAddress();
     
-    _mailboxMap.remove(jid);
+    _mailboxMap.remove(address);
   }
 }

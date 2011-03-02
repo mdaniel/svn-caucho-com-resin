@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -899,7 +900,7 @@ public class QuercusContext
     if (def != null)
       return def;
 
-    return _lowerJavaClassWrappers.get(name.toLowerCase());
+    return _lowerJavaClassWrappers.get(name.toLowerCase(Locale.ENGLISH));
   }
 
   /**
@@ -1265,7 +1266,7 @@ public class QuercusContext
     AbstractFunction fun = _funMap.get(name);
 
     if ((fun == null) && ! isStrict())
-      fun = _lowerFunMap.get(name.toLowerCase());
+      fun = _lowerFunMap.get(name.toLowerCase(Locale.ENGLISH));
 
     return fun;
   }
@@ -1314,7 +1315,7 @@ public class QuercusContext
   public int getFunctionId(String name)
   {
     if (! isStrict())
-      name = name.toLowerCase();
+      name = name.toLowerCase(Locale.ENGLISH);
     
     if (name.startsWith("\\")) {
       // php/0m18
@@ -1368,7 +1369,7 @@ public class QuercusContext
   public int findFunctionId(String name)
   {
     if (! isStrict())
-      name = name.toLowerCase();
+      name = name.toLowerCase(Locale.ENGLISH);
     
     if (name.startsWith("\\"))
       name = name.substring(1);
@@ -1421,7 +1422,7 @@ public class QuercusContext
       return id;
 
     synchronized (_classNameMap) {
-      String name = className.toLowerCase();
+      String name = className.toLowerCase(Locale.ENGLISH);
 
       id = _classNameMap.get(name);
 
@@ -1616,7 +1617,7 @@ public class QuercusContext
    */
   public int getConstantLowerId(String name)
   {
-    return getConstantId(name.toLowerCase());
+    return getConstantId(name.toLowerCase(Locale.ENGLISH));
   }
 
   /**
@@ -1711,7 +1712,7 @@ public class QuercusContext
   public boolean isExtensionLoaded(String name)
   {
     return _extensionSet.contains(name)
-           || _extensionSetLowerCase.contains(name.toLowerCase());
+           || _extensionSetLowerCase.contains(name.toLowerCase(Locale.ENGLISH));
   }
 
   /**
@@ -1799,7 +1800,7 @@ public class QuercusContext
 
     for (String ext : info.getLoadedExtensions()) {
       _extensionSet.add(ext);
-      _extensionSetLowerCase.add(ext.toLowerCase());
+      _extensionSetLowerCase.add(ext.toLowerCase(Locale.ENGLISH));
     }
 
     Map<StringValue, Value> map;
@@ -1825,7 +1826,7 @@ public class QuercusContext
       AbstractFunction fun = entry.getValue();
 
       _funMap.put(funName, fun);
-      _lowerFunMap.put(funName.toLowerCase(), fun);
+      _lowerFunMap.put(funName.toLowerCase(Locale.ENGLISH), fun);
 
       setFunction(funName, fun);
     }
@@ -1842,7 +1843,7 @@ public class QuercusContext
       JavaClassDef def = entry.getValue();
 
       _javaClassWrappers.put(name, def);
-      _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+      _lowerJavaClassWrappers.put(name.toLowerCase(Locale.ENGLISH), def);
     }
 
     for (Map.Entry<String,ClassDef> entry

@@ -31,10 +31,10 @@ package com.caucho.hemp.servlet;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 
 /**
@@ -47,11 +47,11 @@ import com.caucho.bam.stream.ActorStream;
 public class ServerGatewayBroker extends AbstractBroker {
   private final Broker _broker;
   private final ClientStubManager _clientManager;
-  private final ActorStream _linkActor;
+  private final MessageStream _linkActor;
 
   public ServerGatewayBroker(Broker broker,
                                ClientStubManager clientManager,
-                               ActorStream linkActor)
+                               MessageStream linkActor)
   {
     _broker = broker;
     _clientManager = clientManager;
@@ -59,7 +59,7 @@ public class ServerGatewayBroker extends AbstractBroker {
   }
 
   @Override
-  public String getJid()
+  public String getAddress()
   {
     return null;
   }
@@ -69,9 +69,9 @@ public class ServerGatewayBroker extends AbstractBroker {
     return _clientManager.isActive();
   }
   
-  public String getClientJid()
+  public String getClientAddress()
   {
-    return _clientManager.getJid();
+    return _clientManager.getAddress();
   }
 
   /**
@@ -97,7 +97,7 @@ public class ServerGatewayBroker extends AbstractBroker {
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     if (to == null)
       _linkActor.messageError(to, from, payload, error);
@@ -156,7 +156,7 @@ public class ServerGatewayBroker extends AbstractBroker {
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     if (to == null)
       _linkActor.queryError(id, to, from, payload, error);
@@ -179,6 +179,6 @@ public class ServerGatewayBroker extends AbstractBroker {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "," + _linkActor + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "," + _linkActor + "]";
   }
 }

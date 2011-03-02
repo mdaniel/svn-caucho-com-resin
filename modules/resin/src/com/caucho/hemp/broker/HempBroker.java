@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.actor.Actor;
 import com.caucho.bam.broker.AbstractManagedBroker;
 import com.caucho.bam.broker.Broker;
@@ -56,7 +56,7 @@ import com.caucho.bam.packet.Packet;
 import com.caucho.bam.packet.Query;
 import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.QueryResult;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.env.service.AfterResinStartListener;
 import com.caucho.env.service.ResinSystem;
@@ -81,7 +81,7 @@ public class HempBroker extends AbstractManagedBroker
   private final static EnvironmentLocal<HempBroker> _localBroker
     = new EnvironmentLocal<HempBroker>();
 
-  private final AtomicLong _jidGenerator
+  private final AtomicLong _addressGenerator
     = new AtomicLong(Alarm.getCurrentTime());
 
   private HempBrokerManager _manager;
@@ -100,7 +100,7 @@ public class HempBroker extends AbstractManagedBroker
     = Collections.synchronizedMap(new HashMap<String,WeakReference<Mailbox>>());
 
   private String _domain = "localhost";
-  private String _managerJid = "localhost";
+  private String _managerAddress = "localhost";
 
   private ArrayList<String> _aliasList = new ArrayList<String>();
   
@@ -133,7 +133,7 @@ public class HempBroker extends AbstractManagedBroker
     this(manager);
     
     _domain = domain;
-    _managerJid = domain;
+    _managerAddress = domain;
   }
 
   public static HempBroker getCurrent()
@@ -179,7 +179,7 @@ public class HempBroker extends AbstractManagedBroker
   // API
   //
 
-  protected String generateJid(String uid, String resource)
+  protected String generateAddress(String uid, String resource)
   {
     StringBuilder sb = new StringBuilder();
 
@@ -195,7 +195,7 @@ public class HempBroker extends AbstractManagedBroker
     if (resource != null)
       sb.append(resource);
     else {
-      Base64.encode(sb, _jidGenerator.incrementAndGet());
+      Base64.encode(sb, _addressGenerator.incrementAndGet());
     }
 
     return sb.toString();
@@ -207,30 +207,30 @@ public class HempBroker extends AbstractManagedBroker
   @Override
   public void addMailbox(Mailbox mailbox)
   {
-    String jid = mailbox.getJid();
+    String address = mailbox.getAddress();
 
     synchronized (_actorMap) {
-      Mailbox oldMailbox = _actorMap.get(jid);
+      Mailbox oldMailbox = _actorMap.get(address);
 
       if (oldMailbox != null)
-        throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
-                                            jid));
+        throw new IllegalStateException(L.l("duplicated address='{0}' is not allowed",
+                                            address));
 
-      _actorMap.put(jid, mailbox);
+      _actorMap.put(address, mailbox);
     }
 
     synchronized (_actorStreamMap) {
-      WeakReference<Mailbox> oldRef = _actorStreamMap.get(jid);
+      WeakReference<Mailbox> oldRef = _actorStreamMap.get(address);
 
       if (oldRef != null && oldRef.get() != null)
-        throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
-                                            jid));
+        throw new IllegalStateException(L.l("duplicated address='{0}' is not allowed",
+                                            address));
 
-      _actorStreamMap.put(jid, new WeakReference<Mailbox>(mailbox));
+      _actorStreamMap.put(address, new WeakReference<Mailbox>(mailbox));
     }
 
     if (log.isLoggable(Level.FINEST))
-      log.finest(this + " addMailbox jid=" + jid + " " + mailbox);
+      log.finest(this + " addMailbox address=" + address + " " + mailbox);
     
     // if in startup phase, deliver the queued messages
     if (isBeforeActive()) {
@@ -244,26 +244,26 @@ public class HempBroker extends AbstractManagedBroker
   @Override
   public void removeMailbox(Mailbox mailbox)
   {
-    String jid = mailbox.getJid();
+    String address = mailbox.getAddress();
 
     synchronized (_actorMap) {
-      _actorMap.remove(jid);
+      _actorMap.remove(address);
     }
 
     synchronized (_actorStreamMap) {
-      _actorStreamMap.remove(jid);
+      _actorStreamMap.remove(address);
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " removeActor jid=" + jid + " " + mailbox);
+      log.fine(this + " removeActor address=" + address + " " + mailbox);
   }
 
   /**
    * Returns the manager's own id.
    */
-  protected String getManagerJid()
+  protected String getManagerAddress()
   {
-    return _managerJid;
+    return _managerAddress;
   }
 
   /**
@@ -275,10 +275,10 @@ public class HempBroker extends AbstractManagedBroker
   }
 
   /**
-   * getJid() returns null for the broker
+   * getAddress() returns null for the broker
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
     return _domain;
   }
@@ -329,7 +329,7 @@ public class HempBroker extends AbstractManagedBroker
   public void messageError(String to, 
                            String from, 
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     Mailbox mailbox = getMailbox(to);
     
@@ -402,7 +402,7 @@ public class HempBroker extends AbstractManagedBroker
    */
   @Override
   public void queryError(long id, String to, String from, Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     Mailbox mailbox = getMailbox(to);
     
@@ -478,15 +478,15 @@ public class HempBroker extends AbstractManagedBroker
   //
   
   /**
-   * Returns the mailbox for the given JID
+   * Returns the mailbox for the given address
    */
   @Override
-  public Mailbox getMailbox(String jid)
+  public Mailbox getMailbox(String address)
   {
-    if (jid == null)
+    if (address == null)
       return null;
 
-    WeakReference<Mailbox> ref = _actorStreamMap.get(jid);
+    WeakReference<Mailbox> ref = _actorStreamMap.get(address);
 
     if (ref != null) {
       Mailbox mailbox = ref.get();
@@ -495,26 +495,26 @@ public class HempBroker extends AbstractManagedBroker
         return mailbox;
     }
 
-    if (jid.endsWith("@")) {
+    if (address.endsWith("@")) {
       // jms/3d00
-      jid = jid + getDomain();
+      address = address + getDomain();
     }
 
-    return putActorStream(jid, findDomain(jid));
+    return putActorStream(address, findDomain(address));
   }
 
-  private Mailbox putActorStream(String jid, Mailbox actorStream)
+  private Mailbox putActorStream(String address, Mailbox actorStream)
   {
     if (actorStream == null)
       return null;
 
     synchronized (_actorStreamMap) {
-      WeakReference<Mailbox> ref = _actorStreamMap.get(jid);
+      WeakReference<Mailbox> ref = _actorStreamMap.get(address);
 
       if (ref != null)
         return ref.get();
 
-      _actorStreamMap.put(jid, new WeakReference<Mailbox>(actorStream));
+      _actorStreamMap.put(address, new WeakReference<Mailbox>(actorStream));
 
       return actorStream;
     }
@@ -544,11 +544,11 @@ public class HempBroker extends AbstractManagedBroker
     return stream;
   }
 
-  protected boolean startActorFromManager(String jid)
+  protected boolean startActorFromManager(String address)
   {
     /*
     for (BrokerListener manager : _actorManagerList) {
-      if (manager.startActor(jid))
+      if (manager.startActor(address))
         return true;
     }
         */
@@ -559,18 +559,18 @@ public class HempBroker extends AbstractManagedBroker
   /**
    * Closes a connection
    */
-  void closeActor(String jid)
+  void closeActor(String address)
   {
-    int p = jid.indexOf('/');
+    int p = address.indexOf('/');
     if (p > 0) {
-      String owner = jid.substring(0, p);
+      String owner = address.substring(0, p);
 
       Actor actor = null;
 
       /*
       if (actor != null) {
         try {
-          actor.onChildStop(jid);
+          actor.onChildStop(address);
         } catch (Exception e) {
           log.log(Level.FINE, e.toString(), e);
         }
@@ -578,10 +578,10 @@ public class HempBroker extends AbstractManagedBroker
       */
     }
 
-    _actorCache.remove(jid);
+    _actorCache.remove(address);
 
     synchronized (_actorStreamMap) {
-      _actorStreamMap.remove(jid);
+      _actorStreamMap.remove(address);
     }
   }
 
@@ -609,20 +609,20 @@ public class HempBroker extends AbstractManagedBroker
 
     actor.setBroker(this);
 
-    String jid = name;
+    String address = name;
 
-    if (jid == null || "".equals(jid))
-      jid = bean.getName();
+    if (address == null || "".equals(address))
+      address = bean.getName();
 
-    if (jid == null || "".equals(jid))
-      jid = bean.getBeanClass().getSimpleName();
+    if (address == null || "".equals(address))
+      address = bean.getBeanClass().getSimpleName();
 
-    if (jid.indexOf('@') < 0)
-      jid = jid + '@' + getJid();
-    else if (jid.endsWith("@"))
-      jid = jid.substring(0, jid.length() - 1);
+    if (address.indexOf('@') < 0)
+      address = address + '@' + getAddress();
+    else if (address.endsWith("@"))
+      address = address.substring(0, address.length() - 1);
 
-    actor.setJid(jid);
+    actor.setAddress(address);
 
     Actor bamActor = actor;
 
@@ -630,12 +630,12 @@ public class HempBroker extends AbstractManagedBroker
     
     // queue
     if (threadMax > 0) {
-      ActorStream actorStream = bamActor.getActorStream();
-      mailbox = new MultiworkerMailbox(jid, actorStream, this, threadMax);
+      MessageStream actorStream = bamActor.getActorStream();
+      mailbox = new MultiworkerMailbox(address, actorStream, this, threadMax);
       // bamActor.setActorStream(actorStream);
     }
     else {
-      mailbox = new PassthroughMailbox(jid, bamActor.getActorStream(), this);
+      mailbox = new PassthroughMailbox(address, bamActor.getActorStream(), this);
     }
 
     addMailbox(mailbox);
@@ -651,15 +651,15 @@ public class HempBroker extends AbstractManagedBroker
 
     actor.setBroker(this);
 
-    String jid = bamService.name();
+    String address = bamService.name();
 
-    if (jid == null || "".equals(jid))
-      jid = bean.getName();
+    if (address == null || "".equals(address))
+      address = bean.getName();
 
-    if (jid == null || "".equals(jid))
-      jid = bean.getBeanClass().getSimpleName();
+    if (address == null || "".equals(address))
+      address = bean.getBeanClass().getSimpleName();
 
-    actor.setJid(jid);
+    actor.setAddress(address);
 
     int threadMax = bamService.threadMax();
 
@@ -667,8 +667,8 @@ public class HempBroker extends AbstractManagedBroker
     Mailbox mailbox = null;
     // queue
     if (threadMax > 0) {
-      ActorStream actorStream = bamActor.getActorStream();
-      mailbox = new MultiworkerMailbox(jid, actorStream, this, threadMax);
+      MessageStream actorStream = bamActor.getActorStream();
+      mailbox = new MultiworkerMailbox(address, actorStream, this, threadMax);
       bamActor.setMailbox(mailbox);
     }
 
@@ -691,7 +691,7 @@ public class HempBroker extends AbstractManagedBroker
     _actorStreamMap.clear();
   }
 
-  private String getJid(Actor actor, Annotation []annList)
+  private String getAddress(Actor actor, Annotation []annList)
   {
     com.caucho.remote.BamService bamAnn = findActor(annList);
 
@@ -701,16 +701,16 @@ public class HempBroker extends AbstractManagedBroker
       name = bamAnn.name();
 
     if (name == null || "".equals(name))
-      name = actor.getJid();
+      name = actor.getAddress();
 
     if (name == null || "".equals(name))
       name = actor.getClass().getSimpleName();
 
-    String jid = name;
-    if (jid.indexOf('@') < 0 && jid.indexOf('/') < 0)
-      jid = name + "@" + getJid();
+    String address = name;
+    if (address.indexOf('@') < 0 && address.indexOf('/') < 0)
+      address = name + "@" + getAddress();
 
-    return jid;
+    return address;
   }
 
   private int getThreadMax(Annotation []annList)

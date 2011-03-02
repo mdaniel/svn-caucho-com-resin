@@ -31,7 +31,7 @@ package com.caucho.bam.query;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorException;
+import com.caucho.bam.BamException;
 import com.caucho.bam.TimeoutException;
 
 /**
@@ -43,5 +43,5 @@ public interface QueryFuture {
    * Returns the query result or throws an ActorException.
    */
   public Serializable get()
-    throws TimeoutException, ActorException;
+    throws TimeoutException, BamException;
 }

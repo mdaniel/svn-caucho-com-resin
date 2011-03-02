@@ -50,12 +50,12 @@ import javax.xml.stream.*;
  * }
  *
  * element actor {
- *   attribute jid
+ *   attribute address
  * }
  *
  * element item {
  *   attribute affiliation?,
- *   attribute jid?,
+ *   attribute address?,
  *   attribute nick?,
  *   attribute role?,
  *
@@ -127,8 +127,8 @@ public class XmppMucAdminQueryMarshal extends AbstractXmppMarshal {
     if (item.getAffiliation() != null)
       out.writeAttribute("affiliation", item.getAffiliation());
 
-    if (item.getJid() != null)
-      out.writeAttribute("jid", item.getJid());
+    if (item.getAddress() != null)
+      out.writeAttribute("address", item.getAddress());
 
     if (item.getNick() != null)
       out.writeAttribute("nick", item.getNick());
@@ -138,7 +138,7 @@ public class XmppMucAdminQueryMarshal extends AbstractXmppMarshal {
 
     if (item.getActor() != null) {
       out.writeStartElement("actor");
-      out.writeAttribute("jid", item.getActor());
+      out.writeAttribute("address", item.getActor());
       out.writeEndElement(); // </actor>
     }
 
@@ -198,7 +198,7 @@ public class XmppMucAdminQueryMarshal extends AbstractXmppMarshal {
     throws IOException, XMLStreamException
   {
     String affiliation = in.getAttributeValue(null, "affiliation");
-    String jid = in.getAttributeValue(null, "jid");
+    String address = in.getAttributeValue(null, "address");
     String nick = in.getAttributeValue(null, "nick");
     String role = in.getAttributeValue(null, "role");
 
@@ -206,8 +206,8 @@ public class XmppMucAdminQueryMarshal extends AbstractXmppMarshal {
     if (affiliation != null)
       item.setAffiliation(affiliation);
     
-    if (jid != null)
-      item.setJid(jid);
+    if (address != null)
+      item.setAddress(address);
     
     if (nick != null)
       item.setNick(nick);
@@ -226,7 +226,7 @@ public class XmppMucAdminQueryMarshal extends AbstractXmppMarshal {
       }
       else if (XMLStreamReader.START_ELEMENT == tag
                && "actor".equals(in.getLocalName())) {
-        item.setActor(in.getAttributeValue(null, "jid"));
+        item.setActor(in.getAttributeValue(null, "address"));
 
         skipToEnd(in, "actor");
       }

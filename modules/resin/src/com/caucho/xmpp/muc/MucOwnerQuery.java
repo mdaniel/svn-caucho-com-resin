@@ -45,7 +45,7 @@ import java.util.*;
  * }
  *
  * element destroy {
- *   attribute jid?,
+ *   attribute address?,
  *
  *   password?
  *   &amp; reason?

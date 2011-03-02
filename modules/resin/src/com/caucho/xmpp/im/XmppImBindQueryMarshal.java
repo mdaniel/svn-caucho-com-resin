@@ -42,7 +42,7 @@ import javax.xml.stream.*;
  * <pre>
  * element bind{urn:ietf:params:xml:ns:xmpp-bind} {
  *   &amp; resource?
- *   &amp; jid?
+ *   &amp; address?
  * }
  * </pre></code>
  */
@@ -91,10 +91,10 @@ public class XmppImBindQueryMarshal extends AbstractXmppMarshal {
       out.writeEndElement(); // </resource>
     }
 
-    if (bind.getJid() != null) {
-      out.writeStartElement("jid");
-      out.writeCharacters(bind.getJid());
-      out.writeEndElement(); // </jid>
+    if (bind.getAddress() != null) {
+      out.writeStartElement("address");
+      out.writeCharacters(bind.getAddress());
+      out.writeEndElement(); // </address>
     }
     
     out.writeEndElement(); // </bind>
@@ -110,14 +110,14 @@ public class XmppImBindQueryMarshal extends AbstractXmppMarshal {
     int tag;
 
     String resource = null;
-    String jid = null;
+    String address = null;
     
     while ((tag = in.nextTag()) > 0) {
       if (isFinest)
         debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-        return new ImBindQuery(resource, jid);
+        return new ImBindQuery(resource, address);
       }
       else if (XMLStreamReader.START_ELEMENT == tag
                && "resource".equals(in.getLocalName())) {
@@ -126,10 +126,10 @@ public class XmppImBindQueryMarshal extends AbstractXmppMarshal {
         skipToEnd(in, "resource");
       }
       else if (XMLStreamReader.START_ELEMENT == tag
-               && "jid".equals(in.getLocalName())) {
-        jid = in.getElementText();
+               && "address".equals(in.getLocalName())) {
+        address = in.getElementText();
 
-        skipToEnd(in, "jid");
+        skipToEnd(in, "address");
       }
       else {
         log.warning(this + " unexpected tag " + in.getLocalName());

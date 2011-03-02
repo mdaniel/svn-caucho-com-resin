@@ -46,6 +46,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -613,7 +614,7 @@ public class Xml {
       for (int i = 0; i < attrs.getLength(); i++) {
         String aName = attrs.getLocalName(i); // Attr name
         if ("".equals(aName)) aName = attrs.getQName(i);
-        if (_xmlOptionCaseFolding) aName = aName.toUpperCase();
+        if (_xmlOptionCaseFolding) aName = aName.toUpperCase(Locale.ENGLISH);
         result.put(
             env.createString(aName), env.createString(attrs.getValue(i)));
       }
@@ -639,7 +640,7 @@ public class Xml {
 
       String eName = lName; // element name
       if ("".equals(eName)) eName = qName;
-      if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
+      if (_xmlOptionCaseFolding) eName = eName.toUpperCase(Locale.ENGLISH);
 
       elementArray.put(_env.createString("tag"), _env.createString(eName));
       elementArray.put(_env.createString("type"), _env.createString("open"));
@@ -678,7 +679,7 @@ public class Xml {
         elementArray = new ArrayValueImpl();
         String eName = sName; // element name
         if ("".equals(sName)) eName = qName;
-        if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
+        if (_xmlOptionCaseFolding) eName = eName.toUpperCase(Locale.ENGLISH);
         elementArray.put(_env.createString("tag"), _env.createString(eName));
         elementArray.put(_env.createString("type"), _env.createString("close"));
         elementArray.put(_env.createString("level"), LongValue.create(_level));
@@ -803,7 +804,7 @@ public class Xml {
         eName = qName;
       
       if (_xmlOptionCaseFolding)
-        eName = eName.toUpperCase();
+        eName = eName.toUpperCase(Locale.ENGLISH);
       
       args[1] = _env.createString(eName);
 
@@ -816,7 +817,7 @@ public class Xml {
           aName = attrs.getQName(i);
 
         if (_xmlOptionCaseFolding)
-          aName = aName.toUpperCase();
+          aName = aName.toUpperCase(Locale.ENGLISH);
 
         args[2].put(
             _env.createString(aName),
@@ -852,7 +853,7 @@ public class Xml {
       try {
         String eName = sName; // element name
         if ("".equals(eName)) eName = qName;
-        if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
+        if (_xmlOptionCaseFolding) eName = eName.toUpperCase(Locale.ENGLISH);
 
         if (_endElementHandler != null)
           _endElementHandler.call(_env, _parser, _env.createString(eName));

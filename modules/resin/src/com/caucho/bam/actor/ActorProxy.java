@@ -32,20 +32,20 @@ package com.caucho.bam.actor;
 import java.io.Serializable;
 
 import com.caucho.bam.query.QueryCallback;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * ActorProxy is a convenience API for sending messages to a specific Actors,
- * which always using the actor's JID as the "from" parameter.
+ * which always using the actor's address as the "from" parameter.
  */
 public interface ActorProxy {
   /**
-   * Returns the proxy's jid used for all "from" parameters.
+   * Returns the proxy's address used for all "from" parameters.
    */
-  public String getJid();
+  public String getAddress();
 
   /**
-   * Returns the target actor's jid used for all "to" parameters.
+   * Returns the target actor's address used for all "to" parameters.
    */
   public String getTo();
 
@@ -110,7 +110,7 @@ public interface ActorProxy {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
@@ -118,29 +118,29 @@ public interface ActorProxy {
                     QueryCallback callback);
 
   /**
-   * Registers a callback {@link com.caucho.bam.stream.ActorStream} with the client
+   * Registers a callback {@link com.caucho.bam.stream.MessageStream} with the client
    */
-  public void setClientStream(ActorStream clientStream);
+  public void setClientStream(MessageStream clientStream);
 
   /**
-   * Returns the registered callback {@link com.caucho.bam.stream.ActorStream}.
+   * Returns the registered callback {@link com.caucho.bam.stream.MessageStream}.
    */
-  public ActorStream getClientStream();
+  public MessageStream getClientStream();
 
   /**
    * Returns the stream to this client.
    */
-  public ActorStream getActorStream();
+  public MessageStream getActorStream();
 
   /**
    * The ActorStream to the link.
    */
-  public ActorStream getLinkStream();
+  public MessageStream getLinkStream();
 
   /**
    * Sets the ActorStream to the link.
    */
-  public void setLinkStream(ActorStream linkStream);
+  public void setLinkStream(MessageStream linkStream);
   
   //
   // lifecycle

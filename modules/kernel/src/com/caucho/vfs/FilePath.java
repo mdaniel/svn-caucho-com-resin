@@ -37,6 +37,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.*;
 import java.security.AccessControlException;
@@ -659,7 +660,7 @@ public class FilePath extends FilesystemPath {
 
     File file = getFile();
 
-    String path = getFullPath().toLowerCase();
+    String path = getFullPath().toLowerCase(Locale.ENGLISH);
 
     int len = path.length();
     int p = path.indexOf("/aux");

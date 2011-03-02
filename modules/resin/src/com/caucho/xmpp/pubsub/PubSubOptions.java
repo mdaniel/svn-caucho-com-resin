@@ -41,7 +41,7 @@ import java.util.*;
  * namespace = http://jabber.org/protocol/pubsub
  *
  * element options {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?,
  *   attribute subid?,
  *
@@ -50,7 +50,7 @@ import java.util.*;
  * </pre></code>
  */
 public class PubSubOptions {
-  private String _jid;
+  private String _address;
   private String _node;
   private String _subid;
 
@@ -58,21 +58,21 @@ public class PubSubOptions {
   {
   }
 
-  public PubSubOptions(String jid)
+  public PubSubOptions(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
-  public PubSubOptions(String jid, String node, String subid)
+  public PubSubOptions(String address, String node, String subid)
   {
-    _jid = jid;
+    _address = address;
     _node = node;
     _subid = subid;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   public String getNode()
@@ -92,7 +92,7 @@ public class PubSubOptions {
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    sb.append("jid=").append(_jid);
+    sb.append("address=").append(_address);
 
     if (_node != null)
       sb.append(",node=").append(_node);

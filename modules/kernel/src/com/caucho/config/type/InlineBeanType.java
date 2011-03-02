@@ -303,7 +303,7 @@ public class InlineBeanType<T> extends ConfigType<T>
   protected Attribute getAttributeImpl(QName name)
   {
     // server/2r10 vs jms/2193
-    // attr = _attributeMap.get(name.getLocalName().toLowerCase());
+    // attr = _attributeMap.get(name.getLocalName().toLowerCase(Locale.ENGLISH));
 
     Attribute attr = _attributeMap.get(name.getLocalName());
 

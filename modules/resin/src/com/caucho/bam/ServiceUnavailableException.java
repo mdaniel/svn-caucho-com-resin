@@ -46,7 +46,7 @@ public class ServiceUnavailableException
     super(msg);
   }
 
-  public ServiceUnavailableException(String msg, ActorError error)
+  public ServiceUnavailableException(String msg, BamError error)
   {
     super(msg, error);
   }
@@ -56,21 +56,21 @@ public class ServiceUnavailableException
     super(msg, e);
   }
 
-  public ServiceUnavailableException(ActorError error)
+  public ServiceUnavailableException(BamError error)
   {
     super(error);
   }
 
   @Override
-  public ActorError createActorError()
+  public BamError createActorError()
   {
-    ActorError error = getActorError();
+    BamError error = getActorError();
 
     if (error != null)
       return error;
 
-    return new ActorError(ActorError.TYPE_CANCEL,
-                          ActorError.SERVICE_UNAVAILABLE,
+    return new BamError(BamError.TYPE_CANCEL,
+                          BamError.SERVICE_UNAVAILABLE,
                           getMessage());
   }
 }

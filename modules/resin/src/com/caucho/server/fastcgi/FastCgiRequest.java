@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -362,7 +363,7 @@ public class FastCgiRequest extends AbstractHttpRequest
       invocation.setSecure(_isSecure);
 
       if (host != null) {
-        String hostName = host.toString().toLowerCase();
+        String hostName = host.toString().toLowerCase(Locale.ENGLISH);
 
         invocation.setHost(hostName);
         invocation.setPort(getConnection().getLocalPort());

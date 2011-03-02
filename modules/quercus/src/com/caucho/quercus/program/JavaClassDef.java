@@ -170,13 +170,13 @@ public class JavaClassDef extends ClassDef {
     
     if (isTop && _isDelegate) {
       _instanceOfSet.add(_name);
-      _instanceOfSetLowerCase.add(_name.toLowerCase());
+      _instanceOfSetLowerCase.add(_name.toLowerCase(Locale.ENGLISH));
     }
     else {
       String name = type.getSimpleName();
       
       _instanceOfSet.add(name);
-      _instanceOfSetLowerCase.add(name.toLowerCase());
+      _instanceOfSetLowerCase.add(name.toLowerCase(Locale.ENGLISH));
     }
 
     fillInstanceOfSet(type.getSuperclass(), false);
@@ -280,7 +280,7 @@ public class JavaClassDef extends ClassDef {
     }
     
     return (_instanceOfSet.contains(name)
-            || _instanceOfSetLowerCase.contains(name.toLowerCase()));
+            || _instanceOfSetLowerCase.contains(name.toLowerCase(Locale.ENGLISH)));
   }
 
   /**
@@ -299,8 +299,8 @@ public class JavaClassDef extends ClassDef {
     if (type == null)
       return;
     
-    interfaceSet.add(_name.toLowerCase());
-    interfaceSet.add(type.getSimpleName().toLowerCase());
+    interfaceSet.add(_name.toLowerCase(Locale.ENGLISH));
+    interfaceSet.add(type.getSimpleName().toLowerCase(Locale.ENGLISH));
 
     if (type.getInterfaces() != null) {
       for (Class iface : type.getInterfaces()) {

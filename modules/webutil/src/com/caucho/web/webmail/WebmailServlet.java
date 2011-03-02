@@ -41,6 +41,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
 
 public class WebmailServlet extends GenericServlet {
   private boolean parseMail(ReadStream is, Path dst)
@@ -93,12 +94,12 @@ public class WebmailServlet extends GenericServlet {
           if (line.length() == 0)
             break;
 
-          String lower = line.toString().toLowerCase();
+          String lower = line.toString().toLowerCase(Locale.ENGLISH);
 
           if (lower.startsWith("subject: ")) {
             subject = line.substring("subject: ".length()).trim();
 
-            if (subject.toLowerCase().startsWith("re:"))
+            if (subject.toLowerCase(Locale.ENGLISH).startsWith("re:"))
               subject = subject.substring(3).trim();
           }
           else if (lower.startsWith("from: ")) {

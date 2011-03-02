@@ -46,6 +46,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -698,7 +699,7 @@ public class XmlPrinter implements XMLWriter {
     _attributeNames.clear();
     _attributeValues.clear();
 
-    if (_isHtml && _verbatimTags.get(qName.toLowerCase()) != null)
+    if (_isHtml && _verbatimTags.get(qName.toLowerCase(Locale.ENGLISH)) != null)
       _inVerbatim = true;
 
     if (_isPretty && _preCount <= 0)
@@ -838,7 +839,7 @@ public class XmlPrinter implements XMLWriter {
   private void printPrettyStart(String qName)
     throws IOException
   {
-    int code = _isHtml ? _prettyMap.get(qName.toLowerCase()) : -1;
+    int code = _isHtml ? _prettyMap.get(qName.toLowerCase(Locale.ENGLISH)) : -1;
 
     if (code == NO_PRETTY) {
       if (_lastTextChar == OMITTED_NEWLINE)
@@ -958,7 +959,7 @@ public class XmlPrinter implements XMLWriter {
       String value = _attributeValues.get(i);
       
       if (_isHtml &&
-          _booleanAttrs.get(qName.toLowerCase()) != null &&
+          _booleanAttrs.get(qName.toLowerCase(Locale.ENGLISH)) != null &&
           (value == null || value.equals("") || value.equals(qName))) {
         print(' ');
         print(qName);
@@ -1059,7 +1060,7 @@ public class XmlPrinter implements XMLWriter {
     if (_isText)
       return;
 
-    String normalName = _isHtml ? qName.toLowerCase() : qName;
+    String normalName = _isHtml ? qName.toLowerCase(Locale.ENGLISH) : qName;
     
     if (_isHtml && _verbatimTags.get(normalName) != null)
       _inVerbatim = false;
@@ -1128,7 +1129,7 @@ public class XmlPrinter implements XMLWriter {
   private void printPrettyEnd(String qName)
     throws IOException
   {
-    int code = _isHtml ? _prettyMap.get(qName.toLowerCase()) : -1;
+    int code = _isHtml ? _prettyMap.get(qName.toLowerCase(Locale.ENGLISH)) : -1;
 
     if (code == PRE) {
       _preCount--;
@@ -1168,7 +1169,7 @@ public class XmlPrinter implements XMLWriter {
    */
   private void closePretty(String qName)
   {
-    int code = _isHtml ? _prettyMap.get(qName.toLowerCase()) : -1;
+    int code = _isHtml ? _prettyMap.get(qName.toLowerCase(Locale.ENGLISH)) : -1;
 
     if (code == PRE) {
       _preCount--;
@@ -1617,13 +1618,13 @@ public class XmlPrinter implements XMLWriter {
   static void add(IntMap map, String name, int value)
   {
     map.put(name, value);
-    map.put(name.toUpperCase(), value);
+    map.put(name.toUpperCase(Locale.ENGLISH), value);
   }
 
   static void add(HashMap<String,String> map, String name)
   {
     map.put(name, name);
-    map.put(name.toUpperCase(), name);
+    map.put(name.toUpperCase(Locale.ENGLISH), name);
   }
 
   static {

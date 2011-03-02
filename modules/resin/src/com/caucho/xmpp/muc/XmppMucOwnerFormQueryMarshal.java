@@ -50,7 +50,7 @@ import javax.xml.stream.*;
  * }
  *
  * element destroy {
- *   attribute jid?,
+ *   attribute address?,
  *
  *   password?
  *   &amp; reason?

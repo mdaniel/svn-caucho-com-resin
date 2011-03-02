@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.ProtocolException;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.util.IoUtil;
@@ -44,7 +44,7 @@ import com.caucho.websocket.WebSocketContext;
  */
 public class HmtpWebSocketContextWriter extends AbstractBroker
 {
-  private String _jid;
+  private String _address;
   
   private WebSocketContext _ws;
   private HmtpWriter _hOut;
@@ -57,20 +57,20 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
   }
   
   /**
-   * The jid of the stream
+   * The address of the stream
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   /**
-   * The jid of the stream
+   * The address of the stream
    */
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
   //
@@ -78,10 +78,10 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
   //
 
   /**
-   * Sends a message to a given jid
+   * Sends a message to a given address
    * 
-   * @param to the jid of the target actor
-   * @param from the jid of the source actor
+   * @param to the address of the target actor
+   * @param from the address of the source actor
    * @param payload the message payload
    */
   @Override
@@ -103,10 +103,10 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
   }
 
   /**
-   * Sends a message error to a given jid
+   * Sends a message error to a given address
    * 
-   * @param to the jid of the target actor
-   * @param from the jid of the source actor
+   * @param to the address of the target actor
+   * @param from the address of the source actor
    * @param payload the message payload
    * @param error the message error
    */
@@ -114,7 +114,7 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
   public void messageError(String to, 
                            String from, 
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     OutputStream os = null;
     try {
@@ -129,11 +129,11 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
   }
 
   /**
-   * Sends a queryGet to a given jid
+   * Sends a queryGet to a given address
    * 
    * @param id the query id
-   * @param to the jid of the target actor
-   * @param from the jid of the source actor
+   * @param to the address of the target actor
+   * @param from the address of the source actor
    * @param payload the message payload
    */
   @Override
@@ -156,11 +156,11 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
   }
 
   /**
-   * Sends a queryResult to a given jid
+   * Sends a queryResult to a given address
    * 
    * @param id the query id
-   * @param to the jid of the target actor
-   * @param from the jid of the source actor
+   * @param to the address of the target actor
+   * @param from the address of the source actor
    * @param payload the message payload
    */
   @Override
@@ -183,11 +183,11 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
   }
 
   /**
-   * Sends a query error to a given jid
+   * Sends a query error to a given address
    * 
    * @param id the query identifier
-   * @param to the jid of the target actor
-   * @param from the jid of the source actor
+   * @param to the address of the target actor
+   * @param from the address of the source actor
    * @param payload the message payload
    * @param error the message error
    */
@@ -196,7 +196,7 @@ public class HmtpWebSocketContextWriter extends AbstractBroker
                          String to, 
                          String from, 
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     OutputStream os = null;
     

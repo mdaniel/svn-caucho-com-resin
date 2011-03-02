@@ -32,7 +32,7 @@ package com.caucho.hmtp;
 import java.util.logging.Logger;
 
 import com.caucho.bam.client.LinkConnection;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.remote.websocket.WebSocketClient;
 import com.caucho.util.L10N;
 
@@ -56,15 +56,15 @@ class HmtpLinkConnection implements LinkConnection {
   }
   
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _hmtpListener.getJid();
+    return _hmtpListener.getAddress();
   }
   
   @Override
-  public ActorStream getOutboundStream()
+  public MessageStream getOutboundStream()
   {
-    ActorStream stream = _hmtpListener.getOutboundStream();
+    MessageStream stream = _hmtpListener.getOutboundStream();
 
     return stream;
   }

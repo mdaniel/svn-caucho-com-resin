@@ -44,12 +44,12 @@ import java.util.*;
  * }
  *
  * element actor {
- *   attribute jid
+ *   attribute address
  * }
  *
  * element item {
  *   attribute affiliation?,
- *   attribute jid?,
+ *   attribute address?,
  *   attribute nick?,
  *   attribute role?,
  *

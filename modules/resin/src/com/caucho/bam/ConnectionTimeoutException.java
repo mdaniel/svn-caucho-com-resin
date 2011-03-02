@@ -44,12 +44,12 @@ public class ConnectionTimeoutException extends ErrorPacketException {
     super(msg);
   }
 
-  public ConnectionTimeoutException(String msg, ActorError error)
+  public ConnectionTimeoutException(String msg, BamError error)
   {
     super(msg, error);
   }
 
-  public ConnectionTimeoutException(ActorError error)
+  public ConnectionTimeoutException(BamError error)
   {
     super(error);
   }

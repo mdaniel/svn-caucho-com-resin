@@ -33,9 +33,9 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * mailbox for BAM messages waiting to be sent to the Actor.
@@ -45,15 +45,15 @@ public class PassthroughMailbox implements Mailbox
   private static final Logger log
     = Logger.getLogger(PassthroughMailbox.class.getName());
   
-  private final String _jid;
+  private final String _address;
   private final Broker _broker;
-  private final ActorStream _actorStream;
+  private final MessageStream _actorStream;
 
-  public PassthroughMailbox(String jid,
-                            ActorStream actorStream,
+  public PassthroughMailbox(String address,
+                            MessageStream actorStream,
                             Broker broker)
   {
-    _jid = jid;
+    _address = address;
     
     if (broker == null)
       throw new NullPointerException();
@@ -67,12 +67,12 @@ public class PassthroughMailbox implements Mailbox
   }
 
   /**
-   * Returns the actor's jid
+   * Returns the actor's address
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   @Override
@@ -88,7 +88,7 @@ public class PassthroughMailbox implements Mailbox
   }
   
   @Override
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
     return _actorStream;
   }
@@ -106,7 +106,7 @@ public class PassthroughMailbox implements Mailbox
       // a new thread and the caller would never receive the exception.
       
       getBroker().messageError(from, to, payload,
-                               ActorError.create(e));
+                               BamError.create(e));
       
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -119,7 +119,7 @@ public class PassthroughMailbox implements Mailbox
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     try {
       _actorStream.messageError(to, from, payload, error);
@@ -143,7 +143,7 @@ public class PassthroughMailbox implements Mailbox
       // Throwable caught because the Mailbox conceptually operates in
       // a new thread and the caller would never receive the exception.
     
-      getBroker().queryError(id, from, to, payload, ActorError.create(e));
+      getBroker().queryError(id, from, to, payload, BamError.create(e));
     
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -173,7 +173,7 @@ public class PassthroughMailbox implements Mailbox
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     try {
       _actorStream.queryError(id, to, from, payload, error);
@@ -190,6 +190,6 @@ public class PassthroughMailbox implements Mailbox
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
 }

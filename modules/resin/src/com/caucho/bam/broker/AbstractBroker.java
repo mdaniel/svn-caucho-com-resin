@@ -40,10 +40,10 @@ abstract public class AbstractBroker
   implements Broker
 {
   /**
-   * Returns the broker's jid, i.e. the virtual host domain name.
+   * Returns the broker's address, i.e. the virtual host domain name.
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
     return getClass().getSimpleName() + ".localhost";
   }
@@ -64,11 +64,11 @@ abstract public class AbstractBroker
   public Mailbox getBrokerMailbox()
   {
     throw new UnsupportedOperationException(getClass().getName());
-    // return new NullActorStream(getJid(), this);
+    // return new NullActorStream(getAddress(), this);
   }
   
   @Override
-  public Mailbox getMailbox(String jid)
+  public Mailbox getMailbox(String address)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

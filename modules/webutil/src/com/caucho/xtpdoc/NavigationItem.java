@@ -38,6 +38,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 public class NavigationItem {
@@ -522,7 +523,7 @@ public class NavigationItem {
     out.writeStartElement("a");
     out.writeAttribute("href", _uri);
     out.writeAttribute("class", "leftnav");
-    out.writeCharacters(_title.toLowerCase());
+    out.writeCharacters(_title.toLowerCase(Locale.ENGLISH));
     out.writeEndElement(); // a
 
     if (_refUri != null) {
@@ -548,7 +549,7 @@ public class NavigationItem {
     out.writeStartElement("a");
     out.writeAttribute("href", _uri);
 
-    out.writeCharacters(_title.toLowerCase());
+    out.writeCharacters(_title.toLowerCase(Locale.ENGLISH));
     out.writeEndElement(); // a
   }
 

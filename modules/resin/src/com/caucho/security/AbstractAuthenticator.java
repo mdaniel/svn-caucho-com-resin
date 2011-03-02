@@ -33,6 +33,7 @@ import java.security.MessageDigest;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -646,7 +647,7 @@ public class AbstractAuthenticator
     
     String code = sb.toString();
     
-    DigestBuilder builder = _digestBuilderMap.get(code.toLowerCase());
+    DigestBuilder builder = _digestBuilderMap.get(code.toLowerCase(Locale.ENGLISH));
 
     char []digest;
     

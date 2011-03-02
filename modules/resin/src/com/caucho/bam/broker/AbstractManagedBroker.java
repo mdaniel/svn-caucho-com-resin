@@ -37,7 +37,7 @@ import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.mailbox.PassthroughMailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.util.Alarm;
 
 /**
@@ -71,7 +71,7 @@ abstract public class AbstractManagedBroker
    * Creates an agent
    */
   // @Override
-  public Agent createAgent(ActorStream actorStream)
+  public Agent createAgent(MessageStream actorStream)
   {
     return createAgent(actorStream, MailboxType.DEFAULT);
   }
@@ -80,14 +80,14 @@ abstract public class AbstractManagedBroker
    * Creates an agent
    */
   // @Override
-  public Agent createAgent(ActorStream actorStream,
+  public Agent createAgent(MessageStream actorStream,
                            MailboxType mailboxType)
   {
-    Mailbox mailbox = createMailbox(actorStream.getJid(),
+    Mailbox mailbox = createMailbox(actorStream.getAddress(),
                                     actorStream, 
                                     mailboxType);
     
-    Agent agent = new AbstractAgent(actorStream.getJid(),
+    Agent agent = new AbstractAgent(actorStream.getAddress(),
                                     mailbox,
                                     this);
     
@@ -96,22 +96,22 @@ abstract public class AbstractManagedBroker
     return agent;
   }
   
-  protected Mailbox createMailbox(ActorStream actorStream,
+  protected Mailbox createMailbox(MessageStream actorStream,
                                   MailboxType mailboxType)
   {
-    return createMailbox(actorStream.getJid(), actorStream, mailboxType);
+    return createMailbox(actorStream.getAddress(), actorStream, mailboxType);
   }
   
-  protected Mailbox createMailbox(String jid,
-                                  ActorStream actorStream,
+  protected Mailbox createMailbox(String address,
+                                  MessageStream actorStream,
                                   MailboxType mailboxType)
   {
     switch (mailboxType) {
     case NON_QUEUED:
-      return new PassthroughMailbox(jid, actorStream, this);
+      return new PassthroughMailbox(address, actorStream, this);
       
     default:
-      return new MultiworkerMailbox(jid, actorStream, this, 5);
+      return new MultiworkerMailbox(address, actorStream, this, 5);
     }
   }
   
@@ -120,27 +120,27 @@ abstract public class AbstractManagedBroker
                               String uid,
                               String resource)
   {
-    String jid = null;
+    String address = null;
     
     if (uid == null)
       uid = Long.toHexString(_sequence.incrementAndGet());
     
     if (uid.indexOf('@') < 0)
-      uid = uid + '@' + getJid();
+      uid = uid + '@' + getAddress();
     
     if (resource != null) {
-      jid = uid + "/" + resource;
+      address = uid + "/" + resource;
       
-      Mailbox mailbox = getMailbox(jid);
+      Mailbox mailbox = getMailbox(address);
       
       if (mailbox != null)
-        jid = uid + "/" + resource + "-" + Long.toHexString(_sequence.incrementAndGet());
+        address = uid + "/" + resource + "-" + Long.toHexString(_sequence.incrementAndGet());
     }
     else {
-      jid = uid + "/" + Long.toHexString(_sequence.incrementAndGet());
+      address = uid + "/" + Long.toHexString(_sequence.incrementAndGet());
     }
    
-    Mailbox mailbox = new PassthroughMailbox(jid, next, this);
+    Mailbox mailbox = new PassthroughMailbox(address, next, this);
     
     addMailbox(mailbox);
     

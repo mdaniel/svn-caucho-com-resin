@@ -33,31 +33,31 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
 
 /**
- * The abstract implementation of an {@link com.caucho.bam.stream.ActorStream}
+ * The abstract implementation of an {@link com.caucho.bam.stream.MessageStream}
  * returns query errors for RPC packets, and ignores unknown packets
  * for messages and presence announcement.
  *
- * Most developers will use {@link com.caucho.bam.actor.SkeletonActorStreamFilter}
+ * Most developers will use {@link com.caucho.bam.actor.SkeletonMessageStreamFilter}
  * or {@link com.caucho.bam.actor.SimpleActor} because those classes use
  * introspection with {@link com.caucho.bam.Message @Message} annotations
  * to simplify Actor development.
  */
-abstract public class AbstractActorStream implements ActorStream
+abstract public class AbstractMessageStream implements MessageStream
 {
   private static final Logger log
-    = Logger.getLogger(AbstractActorStream.class.getName());
+    = Logger.getLogger(AbstractMessageStream.class.getName());
   
   /**
-   * Returns the jid at the end of the stream.
+   * Returns the address at the end of the stream.
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return getClass().getSimpleName() + "@" + getBroker().getJid();
+    return getClass().getSimpleName() + "@" + getBroker().getAddress();
   }
   
   @Override
@@ -75,8 +75,8 @@ abstract public class AbstractActorStream implements ActorStream
    *
    * The abstract implementation ignores the message.
    * 
-   * @param to the target actor's JID
-   * @param from the source actor's JID
+   * @param to the target actor's address
+   * @param from the source actor's address
    * @param payload the message payload
    */
   @Override
@@ -93,11 +93,11 @@ abstract public class AbstractActorStream implements ActorStream
     msg = (this + ": message is not implemented for this payload"
            + "\n  " + payload + "\n  {from:" + from + ", to:" + to + "}");
 
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.FEATURE_NOT_IMPLEMENTED,
+    BamError error = new BamError(BamError.TYPE_CANCEL,
+                                      BamError.FEATURE_NOT_IMPLEMENTED,
                                       msg);
 
-    ActorStream linkStream = getBroker();
+    MessageStream linkStream = getBroker();
 
     if (linkStream != null)
       linkStream.messageError(from, to, payload, error);
@@ -108,8 +108,8 @@ abstract public class AbstractActorStream implements ActorStream
    *
    * The abstract implementation ignores the message.
    * 
-   * @param to the target actor's JID
-   * @param from the source actor's JID
+   * @param to the target actor's address
+   * @param from the source actor's address
    * @param payload the original message payload
    * @param error the message error
    */
@@ -117,7 +117,7 @@ abstract public class AbstractActorStream implements ActorStream
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " messageError ignored " + error + " " + payload
@@ -137,8 +137,8 @@ abstract public class AbstractActorStream implements ActorStream
    * message to the client.
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the service actor's JID
-   * @param from the client actor's JID
+   * @param to the service actor's address
+   * @param from the client actor's address
    * @param payload the query payload
    *
    * @return true if this stream understand the query, false otherwise
@@ -158,11 +158,11 @@ abstract public class AbstractActorStream implements ActorStream
     msg = (this + ": query is not implemented for this payload"
            + "\n  " + payload + "\n  {id:" + id + ", from:" + from + ", to:" + to + "}");
 
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.FEATURE_NOT_IMPLEMENTED,
+    BamError error = new BamError(BamError.TYPE_CANCEL,
+                                      BamError.FEATURE_NOT_IMPLEMENTED,
                                       msg);
 
-    ActorStream broker = getBroker();
+    MessageStream broker = getBroker();
 
     if (broker == null)
       throw new IllegalStateException(this + ".getBroker() did not return a Broker, which is needed to send an error for a query");
@@ -175,8 +175,8 @@ abstract public class AbstractActorStream implements ActorStream
    * The default implementation ignores the packet.
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the client actor's JID
-   * @param from the service actor's JID
+   * @param to the client actor's address
+   * @param from the service actor's address
    * @param payload the result payload
    */
   @Override
@@ -197,8 +197,8 @@ abstract public class AbstractActorStream implements ActorStream
    * The default implementation ignores the packet.
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the client actor's JID
-   * @param from the service actor's JID
+   * @param to the client actor's address
+   * @param from the service actor's address
    * @param payload the result payload
    */
   @Override
@@ -206,7 +206,7 @@ abstract public class AbstractActorStream implements ActorStream
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " queryError ignored " + error + " " + payload
@@ -226,6 +226,6 @@ abstract public class AbstractActorStream implements ActorStream
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
 }

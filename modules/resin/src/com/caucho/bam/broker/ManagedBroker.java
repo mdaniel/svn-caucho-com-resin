@@ -32,7 +32,7 @@ package com.caucho.bam.broker;
 import com.caucho.bam.actor.Agent;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 
 /**
@@ -53,12 +53,12 @@ public interface ManagedBroker extends Broker
   /**
    * Creates an agent
    */
-  public Agent createAgent(ActorStream actorStream);
+  public Agent createAgent(MessageStream actorStream);
     
   /**
    * Creates an agent
    */
-  public Agent createAgent(ActorStream actorStream,
+  public Agent createAgent(MessageStream actorStream,
                            MailboxType mailboxType);
 
   /**

@@ -33,7 +33,7 @@ package com.caucho.bam;
  * HMPP wrapper
  */
 @SuppressWarnings("serial")
-public class ProtocolException extends ActorException {
+public class ProtocolException extends BamException {
   public ProtocolException()
   {
   }

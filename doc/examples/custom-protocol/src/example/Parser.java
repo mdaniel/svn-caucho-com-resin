@@ -56,7 +56,7 @@ public class Parser {
     if (cmd == null) {
       return null;
     }
-    AbstractCommand command = (AbstractCommand) _commands.get(cmd.toLowerCase());
+    AbstractCommand command = (AbstractCommand) _commands.get(cmd.toLowerCase(Locale.ENGLISH));
 
     if (command == null) {
       _error = "Unknown command `" + cmd + "'";

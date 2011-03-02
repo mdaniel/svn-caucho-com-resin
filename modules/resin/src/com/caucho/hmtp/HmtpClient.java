@@ -34,7 +34,7 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorException;
+import com.caucho.bam.BamException;
 import com.caucho.bam.actor.Actor;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
@@ -58,7 +58,7 @@ public class HmtpClient implements ActorSender {
     = Logger.getLogger(HmtpClient.class.getName());
   
   private String _url;
-  private String _jid;
+  private String _address;
   private String _virtualHost;
 
   private Actor _actor;
@@ -70,7 +70,7 @@ public class HmtpClient implements ActorSender {
   
   private WebSocketListener _webSocketHandler;
   
-  private ActorException _connException;
+  private BamException _connException;
 
   private Broker _linkBroker;
   
@@ -154,7 +154,7 @@ public class HmtpClient implements ActorSender {
       
       _webSocketClient.connect();
         */
-    } catch (ActorException e) {
+    } catch (BamException e) {
       _connException = e;
 
       throw _connException;
@@ -196,7 +196,7 @@ public class HmtpClient implements ActorSender {
         String testSignature = _authManager.sign(uid, clientNonce, password);
         
         if (! testSignature.equals(serverSignature) && "".equals(uid))
-          throw new ActorException(L.l("{0} resin-system-auth-key does not match",
+          throw new BamException(L.l("{0} resin-system-auth-key does not match",
                                       this));
 
         String signature = _authManager.sign(uid, serverNonce, password);
@@ -215,7 +215,7 @@ public class HmtpClient implements ActorSender {
 
       AuthResult result = (AuthResult) query(null, new AuthQuery(uid, credentials));
 
-      _jid = result.getJid();
+      _address = result.getAddress();
 
       if (log.isLoggable(Level.FINE))
         log.fine(this + " login");
@@ -227,34 +227,34 @@ public class HmtpClient implements ActorSender {
   }
 
   /**
-   * Returns the jid
+   * Returns the address
    */
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   /**
-   * Returns the broker jid
+   * Returns the broker address
    */
-  public String getBrokerJid()
+  public String getBrokerAddress()
   {
-    String jid = getJid();
+    String address = getAddress();
 
-    if (jid == null)
+    if (address == null)
       return null;
 
-    int p = jid.indexOf('@');
-    int q = jid.indexOf('/');
+    int p = address.indexOf('@');
+    int q = address.indexOf('/');
 
     if (p >= 0 && q >= 0)
-      return jid.substring(p + 1, q);
+      return address.substring(p + 1, q);
     else if (p >= 0)
-      return jid.substring(p + 1);
+      return address.substring(p + 1);
     else if (q >= 0)
-      return jid.substring(0, q);
+      return address.substring(0, q);
     else
-      return jid;
+      return address;
   }
 
   public void flush()

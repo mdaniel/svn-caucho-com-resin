@@ -60,8 +60,8 @@ public final class EnumType extends ConfigType
 
       _nameMap.put(name, enumValue);
       
-      if (_nameMap.get(name.toLowerCase()) == null)
-        _nameMap.put(name.toLowerCase(), enumValue);
+      if (_nameMap.get(name.toLowerCase(Locale.ENGLISH)) == null)
+        _nameMap.put(name.toLowerCase(Locale.ENGLISH), enumValue);
     }
   }
   

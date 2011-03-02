@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorException;
+import com.caucho.bam.BamException;
 import com.caucho.env.meter.ActiveMeter;
 import com.caucho.env.meter.ActiveTimeMeter;
 import com.caucho.server.hmux.HmuxRequest;
@@ -205,7 +205,7 @@ public class ClientSocket implements ClientSocketApi {
   // ActorStream output for HMTP
   //
 
-  public String getJid()
+  public String getAddress()
   {
     return "clusterStream@admin.resin";
   }
@@ -226,7 +226,7 @@ public class ClientSocket implements ClientSocketApi {
       out.write(isAdmin ? 1 : 0);
       out.flush();
     } catch (IOException e) {
-      throw new ActorException(e);
+      throw new BamException(e);
     }
     
   }

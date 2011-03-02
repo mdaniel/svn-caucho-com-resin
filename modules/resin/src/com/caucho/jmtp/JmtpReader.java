@@ -36,8 +36,8 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.hmtp.HmtpPacketType;
 import com.caucho.json.JsonInput;
 
@@ -73,7 +73,7 @@ public class JmtpReader {
    * Reads the next HMTP packet from the stream, returning false on
    * end of file.
    */
-  public boolean readPacket(ActorStream actorStream)
+  public boolean readPacket(MessageStream actorStream)
     throws IOException
   {
     if (actorStream == null)
@@ -115,7 +115,7 @@ public class JmtpReader {
     case MESSAGE_ERROR:
       {
         Serializable value = (Serializable) in.readObject();
-        ActorError error = (ActorError) in.readObject(ActorError.class);
+        BamError error = (BamError) in.readObject(BamError.class);
         in.endPacket();
 
         if (log.isLoggable(Level.FINER)) {
@@ -164,7 +164,7 @@ public class JmtpReader {
       {
         long id = in.readLong();
         Serializable value = (Serializable) in.readObject();
-        ActorError error = (ActorError) in.readObject(ActorError.class);
+        BamError error = (BamError) in.readObject(BamError.class);
         in.endPacket();
 
         if (log.isLoggable(Level.FINER)) {

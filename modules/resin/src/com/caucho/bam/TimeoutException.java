@@ -33,7 +33,7 @@ package com.caucho.bam;
  * HMPP wrapper
  */
 @SuppressWarnings("serial")
-public class TimeoutException extends ActorException {
+public class TimeoutException extends BamException {
   public TimeoutException()
   {
   }

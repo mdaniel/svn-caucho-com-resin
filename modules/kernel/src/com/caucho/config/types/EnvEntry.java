@@ -31,6 +31,7 @@ package com.caucho.config.types;
 
 import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -223,7 +224,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     }
     else if (Boolean.class.equals(type) || boolean.class.equals(type)) {
       if (_value != null)
-        value = new Boolean("true".equals(_value.toLowerCase()));
+        value = new Boolean("true".equalsIgnoreCase(_value));
       else
         value = Boolean.FALSE;
       

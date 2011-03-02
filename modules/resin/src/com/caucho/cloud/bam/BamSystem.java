@@ -51,7 +51,7 @@ public class BamSystem extends AbstractResinSubSystem
   // messages
   public static final int START_PRIORITY = START_PRIORITY_ENV_SYSTEM;
   
-  private String _jid;
+  private String _address;
   
   private final ResinSystem _resinSystem;
   private final HempBrokerManager _brokerManager;
@@ -59,7 +59,7 @@ public class BamSystem extends AbstractResinSubSystem
   
   private ServerAuthManager _linkManager;
   
-  public BamSystem(String jid)
+  public BamSystem(String address)
   {
     _resinSystem = ResinSystem.getCurrent();
     
@@ -69,23 +69,23 @@ public class BamSystem extends AbstractResinSubSystem
                                     ResinSystem.class.getSimpleName()));
     }
     
-    _jid = jid;
+    _address = address;
     
     _brokerManager = new HempBrokerManager(_resinSystem);
 
-    _broker = new HempBroker(_brokerManager, getJid());
+    _broker = new HempBroker(_brokerManager, getAddress());
 
-    if (getJid() != null)
-      _brokerManager.addBroker(getJid(), _broker);
+    if (getAddress() != null)
+      _brokerManager.addBroker(getAddress(), _broker);
     
     _brokerManager.addBroker("resin.caucho", _broker);
   }
   
-  public static BamSystem createAndAddService(String jid)
+  public static BamSystem createAndAddService(String address)
   {
     ResinSystem system = preCreate(BamSystem.class);
       
-    BamSystem service = new BamSystem(jid);
+    BamSystem service = new BamSystem(address);
     system.addService(service);
     
     return service;
@@ -101,9 +101,9 @@ public class BamSystem extends AbstractResinSubSystem
     return getCurrent().getBroker();
   }
   
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   public ManagedBroker getBroker()
@@ -135,6 +135,6 @@ public class BamSystem extends AbstractResinSubSystem
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _jid + "]";
+    return getClass().getSimpleName() + "[" + _address + "]";
   }
 }

@@ -31,8 +31,8 @@ package com.caucho.bam.packet;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * Unidirectional message with a value.
@@ -41,10 +41,10 @@ public class Message extends Packet {
   private final Serializable _value;
 
   /**
-   * An message to a destination with a source jid.
+   * An message to a destination with a source address.
    *
-   * @param to the target jid
-   * @param from the source jid
+   * @param to the target address
+   * @param from the source address
    * @param value the message content
    */
   public Message(String to, String from, Serializable value)
@@ -66,18 +66,18 @@ public class Message extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(ActorStream handler, ActorStream toSource)
+  public void dispatch(MessageStream handler, MessageStream toSource)
   {
     try {
       handler.message(getTo(), getFrom(), getValue());
     } catch (RuntimeException e) {
       toSource.messageError(getFrom(), getTo(), getValue(),
-                            ActorError.create(e));
+                            BamError.create(e));
       
       throw e;
     } catch (Error e) {
       toSource.messageError(getFrom(), getTo(), getValue(),
-                            ActorError.create(e));
+                            BamError.create(e));
     
       throw e;
     }

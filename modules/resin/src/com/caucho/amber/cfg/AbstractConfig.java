@@ -211,7 +211,7 @@ abstract class AbstractConfig implements Completion
 
   public static String toSqlName(String name)
   {
-    return name; // name.toUpperCase();
+    return name; // name.toUpperCase(Locale.ENGLISH);
   }
 
   static ConfigException error(AccessibleObject field, String msg)

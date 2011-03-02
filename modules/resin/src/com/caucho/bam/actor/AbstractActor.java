@@ -31,7 +31,7 @@ package com.caucho.bam.actor;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 
 /**
@@ -47,16 +47,16 @@ abstract public class AbstractActor implements Actor
    * messages from other Actors can be delivered.
    */
   @Override
-  abstract public ActorStream getActorStream();
+  abstract public MessageStream getActorStream();
 
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return getActorStream().getJid();
+    return getActorStream().getAddress();
   }
   
   @Override
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -103,6 +103,6 @@ abstract public class AbstractActor implements Actor
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getActorStream().getJid() + "]";
+    return getClass().getSimpleName() + "[" + getActorStream().getAddress() + "]";
   }
 }

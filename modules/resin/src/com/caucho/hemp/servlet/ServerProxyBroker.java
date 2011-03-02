@@ -31,11 +31,11 @@ package com.caucho.hemp.servlet;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 
 /**
@@ -45,11 +45,11 @@ import com.caucho.bam.stream.ActorStream;
 public class ServerProxyBroker extends AbstractBroker {
   private final Broker _broker;
   private final ClientStubManager _clientManager;
-  private final ActorStream _linkActor;
+  private final MessageStream _linkActor;
 
   public ServerProxyBroker(Broker broker,
                            ClientStubManager clientManager,
-                           ActorStream linkActor)
+                           MessageStream linkActor)
   {
     _broker = broker;
     _clientManager = clientManager;
@@ -57,7 +57,7 @@ public class ServerProxyBroker extends AbstractBroker {
   }
 
   @Override
-  public String getJid()
+  public String getAddress()
   {
     return null;
   }
@@ -67,13 +67,13 @@ public class ServerProxyBroker extends AbstractBroker {
     return _clientManager.isActive();
   }
   
-  public String getClientJid()
+  public String getClientAddress()
   {
-    return _clientManager.getJid();
+    return _clientManager.getAddress();
   }
   
   @Override
-  public Mailbox getMailbox(String jid)
+  public Mailbox getMailbox(String address)
   {
     return null;
   }
@@ -89,7 +89,7 @@ public class ServerProxyBroker extends AbstractBroker {
     if (to == null)
       _linkActor.message(to, from, payload);
     else if (isActive())
-      _broker.message(to, getClientJid(), payload);
+      _broker.message(to, getClientAddress(), payload);
     else
       super.message(to, from, payload);
   }
@@ -101,12 +101,12 @@ public class ServerProxyBroker extends AbstractBroker {
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     if (to == null)
       _linkActor.messageError(to, from, payload, error);
     else if (isActive())
-      _broker.messageError(to, getClientJid(), payload, error);
+      _broker.messageError(to, getClientAddress(), payload, error);
     else
       super.messageError(to, from, payload, error);
   }
@@ -126,7 +126,7 @@ public class ServerProxyBroker extends AbstractBroker {
     if (to == null)
       _linkActor.query(id, to, from, payload);
     else if (isActive()) {
-      _broker.query(id, to, getClientJid(), payload);
+      _broker.query(id, to, getClientAddress(), payload);
     }
     else {
       super.query(id, to, from, payload);
@@ -147,7 +147,7 @@ public class ServerProxyBroker extends AbstractBroker {
     if (to == null)
       _linkActor.queryResult(id, to, from, payload);
     else if (isActive())
-      _broker.queryResult(id, to, getClientJid(), payload);
+      _broker.queryResult(id, to, getClientAddress(), payload);
     else
       super.queryResult(id, to, from, payload);
   }
@@ -162,12 +162,12 @@ public class ServerProxyBroker extends AbstractBroker {
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     if (to == null)
       _linkActor.queryError(id, to, from, payload, error);
     else if (isActive())
-      _broker.queryError(id, to, getClientJid(), payload, error);
+      _broker.queryError(id, to, getClientAddress(), payload, error);
     else
       super.queryError(id, to, from, payload, error);
   }
@@ -185,6 +185,6 @@ public class ServerProxyBroker extends AbstractBroker {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "," + _linkActor + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "," + _linkActor + "]";
   }
 }

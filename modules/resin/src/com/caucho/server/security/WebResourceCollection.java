@@ -119,7 +119,7 @@ public class WebResourceCollection {
     
     /*
     try {
-      HttpMethod.valueOf(method.toUpperCase());
+      HttpMethod.valueOf(method.toUpperCase(Locale.ENGLISH));
     }
     catch (IllegalArgumentException e) {
       StringBuilder builder = new StringBuilder();

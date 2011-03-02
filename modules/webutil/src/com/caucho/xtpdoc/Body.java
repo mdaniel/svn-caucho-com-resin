@@ -33,6 +33,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 public class Body extends ContainerNode {
@@ -192,7 +193,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("h1");
     out.writeAttribute("class", "title");
     if (getDocument().getHeader() != null)
-      out.writeCharacters(getDocument().getHeader().getTitle().toLowerCase());
+      out.writeCharacters(getDocument().getHeader().getTitle().toLowerCase(Locale.ENGLISH));
     out.writeEndElement();
 
     out.writeStartElement("hr");
@@ -440,7 +441,7 @@ public class Body extends ContainerNode {
     out.writeCharacters(" / ");
     out.writeStartElement("a");
     out.writeAttribute("href", item.getLink());
-    out.writeCharacters(item.getTitle().toLowerCase());
+    out.writeCharacters(item.getTitle().toLowerCase(Locale.ENGLISH));
     out.writeEndElement();
   }
 

@@ -397,7 +397,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       parentRes = (HttpServletResponse) topResponse;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletResponse at `{0}'", topResponse));
+        "expected instance of ServletResponse at '{0}'", topResponse));
     }
 
     IncludeRequest subRequest
@@ -405,7 +405,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     
     // server/10yf, jsp/15di
     if (subRequest.getRequestDepth(0) > MAX_DEPTH)
-      throw new ServletException(L.l("too many servlet includes `{0}'", parentReq.getServletPath()));
+      throw new ServletException(L.l("too many servlet includes '{0}'", parentReq.getServletPath()));
 
     IncludeResponse subResponse = subRequest.getResponse();
 

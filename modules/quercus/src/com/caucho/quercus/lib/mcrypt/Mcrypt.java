@@ -37,6 +37,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -60,7 +61,7 @@ public class Mcrypt {
     throws Exception
   {
     _algorithm = algorithm;
-    _mode = mode.toUpperCase();
+    _mode = mode.toUpperCase(Locale.ENGLISH);
 
     String transformation = getTransformation(algorithm, mode);
 
@@ -342,7 +343,7 @@ public class Mcrypt {
   private static String getTransformation(String algorithm, String mode)
     throws Exception
   {
-    mode = mode.toUpperCase();
+    mode = mode.toUpperCase(Locale.ENGLISH);
 
     // php/1q02 & php/1q0s
     // mcrypt thinks OFB == OFB8 while Java thinks OFB == OFB64

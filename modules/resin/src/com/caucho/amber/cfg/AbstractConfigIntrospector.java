@@ -473,7 +473,7 @@ abstract public class AbstractConfigIntrospector {
 
   public static String toSqlName(String name)
   {
-    return name; // name.toUpperCase();
+    return name; // name.toUpperCase(Locale.ENGLISH);
   }
 
   class AnnotationConfig {

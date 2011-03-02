@@ -35,16 +35,16 @@ package com.caucho.bam.broker;
  */
 public class ActorMissingEvent {
   private Broker _broker;
-  private String _jid;
+  private String _address;
   
   public ActorMissingEvent()
   {
   }
   
-  public ActorMissingEvent(Broker broker, String jid)
+  public ActorMissingEvent(Broker broker, String address)
   {
     _broker = broker;
-    _jid = jid;
+    _address = address;
   }
   
   /**
@@ -56,15 +56,15 @@ public class ActorMissingEvent {
   }
   
   /**
-   * The JID of the missing actor.
+   * The address of the missing actor.
    */
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _jid + "]";
+    return getClass().getSimpleName() + "[" + _address + "]";
   }
 }

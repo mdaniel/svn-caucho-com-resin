@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 
 /**
  * Parses a PHP program.
@@ -4598,7 +4599,7 @@ public class QuercusParser {
     if (reserved > 0)
       return reserved;
 
-    reserved = _insensitiveReserved.get(_lexeme.toLowerCase());
+    reserved = _insensitiveReserved.get(_lexeme.toLowerCase(Locale.ENGLISH));
     if (reserved > 0)
       return reserved;
     else

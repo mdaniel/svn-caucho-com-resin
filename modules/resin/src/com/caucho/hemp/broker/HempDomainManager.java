@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.server.cluster.Server;
 
 /**
@@ -63,7 +63,7 @@ public class HempDomainManager extends DomainManager
       log.finer(this + " add " + domain + " as '" + name + "'");
   }
 
-  public ActorStream removeDomain(String name)
+  public MessageStream removeDomain(String name)
   {
     WeakReference<Mailbox> domainRef = null;
     

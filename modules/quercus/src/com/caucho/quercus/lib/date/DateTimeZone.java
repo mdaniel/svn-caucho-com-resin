@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.date;
 
+import java.util.Locale;
 import java.util.TimeZone;
 
 import com.caucho.quercus.env.ArrayValue;
@@ -101,7 +102,7 @@ public class DateTimeZone
     zone.put("timezone_id", tz.getID());
     
     String name = tz.getDisplayName(isDST, TimeZone.SHORT);
-    Value nameV = StringValue.create(name.toLowerCase());
+    Value nameV = StringValue.create(name.toLowerCase(Locale.ENGLISH));
     
     Value zones = array.get(nameV);
     

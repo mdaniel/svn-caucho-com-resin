@@ -128,12 +128,22 @@ public class WarningService extends AbstractResinSubSystem
       System.err.println(s);
       
       for (WarningHandler handler : _priorityHandlers) {
-        handler.warning(source, msg);
+        try {
+          handler.warning(source, msg);
+        } catch (Throwable e1) {
+          // WarningService must not throw exception
+          log.log(Level.WARNING, e1.toString(), e1);
+        }
       }
     
       // now send to the all handlers regardless of if its high priority
       for (WarningHandler handler : _handlers) {
-        handler.warning(source, msg);
+        try {
+          handler.warning(source, msg);
+        } catch (Throwable e1) {
+          // WarningService must not throw exception
+          log.log(Level.WARNING, e1.toString(), e1);
+        }
       }
 
       log.warning(s);

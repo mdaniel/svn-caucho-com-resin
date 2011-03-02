@@ -35,6 +35,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
 
 import java.io.IOException;
+import java.util.Locale;
 
 public class JspDirectiveTag extends JspNode {
   private static final QName IMPORT = new QName("import");
@@ -228,7 +229,7 @@ public class JspDirectiveTag extends JspNode {
   static String parseCharEncoding(String type)
     throws JspParseException
   {
-    type = type.toLowerCase();
+    type = type.toLowerCase(Locale.ENGLISH);
     int i;
     char ch;
     while ((i = type.indexOf(';')) >= 0 && i < type.length()) {

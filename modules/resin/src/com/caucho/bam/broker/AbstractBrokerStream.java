@@ -33,35 +33,35 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
- * The abstract implementation of an {@link com.caucho.bam.stream.ActorStream}
+ * The abstract implementation of an {@link com.caucho.bam.stream.MessageStream}
  * returns query errors for RPC packets, and ignores unknown packets
  * for messages and presence announcement.
  *
- * Most developers will use {@link com.caucho.bam.actor.SkeletonActorStreamFilter}
+ * Most developers will use {@link com.caucho.bam.actor.SkeletonMessageStreamFilter}
  * or {@link com.caucho.bam.actor.SimpleActor} because those classes use
  * introspection with {@link com.caucho.bam.Message @Message} annotations
  * to simplify Actor development.
  */
-abstract public class AbstractBrokerStream implements ActorStream
+abstract public class AbstractBrokerStream implements MessageStream
 {
   private static final Logger log
     = Logger.getLogger(AbstractBrokerStream.class.getName());
 
   /**
-   * Returns the actor stream for the given jid.
+   * Returns the actor stream for the given address.
    */
-  abstract protected Mailbox getMailbox(String jid);
+  abstract protected Mailbox getMailbox(String address);
   
   /**
-   * Returns the jid for the broker itself.
+   * Returns the address for the broker itself.
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
     return getClass().getSimpleName() + ".localhost";
   }
@@ -75,8 +75,8 @@ abstract public class AbstractBrokerStream implements ActorStream
    *
    * The abstract implementation ignores the message.
    * 
-   * @param to the target actor's JID
-   * @param from the source actor's JID
+   * @param to the target actor's address
+   * @param from the source actor's address
    * @param payload the message payload
    */
   @Override
@@ -89,7 +89,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getMailbox(to);
+    MessageStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.message(to, from, payload);
@@ -106,11 +106,11 @@ abstract public class AbstractBrokerStream implements ActorStream
       log.finer(msg);
     }
 
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.ITEM_NOT_FOUND,
+    BamError error = new BamError(BamError.TYPE_CANCEL,
+                                      BamError.ITEM_NOT_FOUND,
                                       msg);
 
-    ActorStream fromStream = getMailbox(from);
+    MessageStream fromStream = getMailbox(from);
 
     if (fromStream != null)
       fromStream.messageError(from, to, payload, error);
@@ -121,8 +121,8 @@ abstract public class AbstractBrokerStream implements ActorStream
    *
    * The abstract implementation ignores the message.
    * 
-   * @param to the target actor's JID
-   * @param from the source actor's JID
+   * @param to the target actor's address
+   * @param from the source actor's address
    * @param payload the original message payload
    * @param error the message error
    */
@@ -130,7 +130,7 @@ abstract public class AbstractBrokerStream implements ActorStream
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     if (log.isLoggable(Level.FINEST)) {
       log.finest(this + ": messageError " + error
@@ -138,7 +138,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getMailbox(to);
+    MessageStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.messageError(to, from, payload, error);
@@ -167,8 +167,8 @@ abstract public class AbstractBrokerStream implements ActorStream
    * message to the client.
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the service actor's JID
-   * @param from the client actor's JID
+   * @param to the service actor's address
+   * @param from the client actor's address
    * @param payload the query payload
    *
    * @return true if this stream understand the query, false otherwise
@@ -184,7 +184,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getMailbox(to);
+    MessageStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.query(id, to, from, payload);
@@ -200,11 +200,11 @@ abstract public class AbstractBrokerStream implements ActorStream
       log.finer(msg);
     }
 
-    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-                                      ActorError.ITEM_NOT_FOUND,
+    BamError error = new BamError(BamError.TYPE_CANCEL,
+                                      BamError.ITEM_NOT_FOUND,
                                       msg);
 
-    ActorStream fromStream = getMailbox(from);
+    MessageStream fromStream = getMailbox(from);
 
     if (fromStream != null)
       fromStream.queryError(id, from, to, payload, error);
@@ -215,8 +215,8 @@ abstract public class AbstractBrokerStream implements ActorStream
    * The default implementation ignores the packet.
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the client actor's JID
-   * @param from the service actor's JID
+   * @param to the client actor's address
+   * @param from the service actor's address
    * @param payload the result payload
    */
   @Override
@@ -230,7 +230,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getMailbox(to);
+    MessageStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.queryResult(id, to, from, payload);
@@ -254,8 +254,8 @@ abstract public class AbstractBrokerStream implements ActorStream
    * The default implementation ignores the packet.
    *
    * @param id the query identifier used to match requests with responses
-   * @param to the client actor's JID
-   * @param from the service actor's JID
+   * @param to the client actor's address
+   * @param from the service actor's address
    * @param payload the result payload
    */
   @Override
@@ -263,7 +263,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     if (log.isLoggable(Level.FINEST)) {
       log.finest(this + ": queryError(" + id + ") " + error
@@ -271,7 +271,7 @@ abstract public class AbstractBrokerStream implements ActorStream
                  + "\n  {to: " + to + ", from:" + from + "}");
     }
     
-    ActorStream toStream = getMailbox(to);
+    MessageStream toStream = getMailbox(to);
     
     if (toStream != null) {
       toStream.queryError(id, to, from, payload, error);
@@ -300,6 +300,6 @@ abstract public class AbstractBrokerStream implements ActorStream
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
 }

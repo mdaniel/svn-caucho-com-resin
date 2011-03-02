@@ -4188,8 +4188,8 @@ public class StringModule extends AbstractQuercusModule {
       }
     }
 
-    haystack = haystack.toLowerCase();
-    needle = needle.toLowerCase();
+    haystack = haystack.toLowerCase(Locale.ENGLISH);
+    needle = needle.toLowerCase(Locale.ENGLISH);
 
     int pos = haystack.lastIndexOf(needle, offset);
 
@@ -5722,7 +5722,7 @@ public class StringModule extends AbstractQuercusModule {
       }
 
       if (_isUpper)
-        value = value.toUpperCase();
+        value = value.toUpperCase(Locale.ENGLISH);
 
       if (! _isLeft) {
         for (int i = len; i < _min; i++) {

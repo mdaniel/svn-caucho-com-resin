@@ -44,6 +44,7 @@ import com.caucho.vfs.PersistentDependency;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -125,7 +126,7 @@ public class QuercusProgram {
     _functionList = functionList;
 
     for (Map.Entry<String,Function> entry : functionMap.entrySet()) {
-      _functionMapLowerCase.put(entry.getKey().toLowerCase(),
+      _functionMapLowerCase.put(entry.getKey().toLowerCase(Locale.ENGLISH),
                                 entry.getValue());
     }
 
@@ -335,7 +336,7 @@ public class QuercusProgram {
       return fun;
 
     if (! _quercus.isStrict())
-      fun = _functionMapLowerCase.get(name.toLowerCase());
+      fun = _functionMapLowerCase.get(name.toLowerCase(Locale.ENGLISH));
 
     return fun;
   }

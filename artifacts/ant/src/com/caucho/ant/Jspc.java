@@ -88,7 +88,7 @@ public class Jspc extends Task {
     if (level == null || level.isEmpty())
       return;
 
-    level = level.toUpperCase();
+    level = level.toUpperCase(Locale.ENGLISH);
 
     _level = Level.parse(level);
   }

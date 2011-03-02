@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
@@ -75,7 +75,7 @@ public class DeployClient implements Repository
 
   private Broker _broker;
   private ActorSender _bamClient;
-  private String _deployJid;
+  private String _deployAddress;
   
   private String _url;
   
@@ -88,7 +88,7 @@ public class DeployClient implements Repository
     
     _bamClient = server.createAdminClient(getClass().getSimpleName());
 
-    _deployJid = "deploy@resin.caucho";
+    _deployAddress = "deploy@resin.caucho";
   }
 
   public DeployClient(String serverId)
@@ -100,7 +100,7 @@ public class DeployClient implements Repository
     
     _bamClient = server.createAdminClient(getClass().getSimpleName());
 
-    _deployJid = "deploy@" + serverId + ".resin.caucho";
+    _deployAddress = "deploy@" + serverId + ".resin.caucho";
   }
   
   public DeployClient(String host, int port,
@@ -118,7 +118,7 @@ public class DeployClient implements Repository
 
       _bamClient = client;
     
-      _deployJid = "deploy@resin.caucho";
+      _deployAddress = "deploy@resin.caucho";
     } catch (RemoteConnectionFailedException e) {
       throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
                                                     url, e.getMessage()),
@@ -520,7 +520,7 @@ public class DeployClient implements Repository
   protected Serializable query(Serializable query)
   {
     try {
-      return (Serializable) _bamClient.query(_deployJid, query);
+      return (Serializable) _bamClient.query(_deployAddress, query);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:DeployService> tag\n  " + e.getMessage(),
                                             e);
@@ -536,7 +536,7 @@ public class DeployClient implements Repository
   public String toString()
   {
     if (_broker != null)
-      return getClass().getSimpleName() + "[" + _deployJid + "]";
+      return getClass().getSimpleName() + "[" + _deployAddress + "]";
     else
       return getClass().getSimpleName() + "[" + _bamClient + "]";
   }
@@ -584,7 +584,7 @@ public class DeployClient implements Repository
   class SendQueryCallback implements QueryCallback {
     private ArrayList<String> _list;
     
-    private ActorError _error;
+    private BamError _error;
     private GitCommitJar _commit;
     
     private AtomicInteger _inProgressCount = new AtomicInteger();
@@ -603,7 +603,7 @@ public class DeployClient implements Repository
 
     @Override
     public void onQueryError(String to, String from, Serializable payload,
-                             ActorError error)
+                             BamError error)
     {
       if (_error == null)
         _error = error;
@@ -657,7 +657,7 @@ public class DeployClient implements Repository
 
         DeploySendQuery query = new DeploySendQuery(sha1, source);
 
-        _bamClient.query(_deployJid, query, this);
+        _bamClient.query(_deployAddress, query, this);
         
         isValid = true;
       } finally {

@@ -48,7 +48,7 @@ public class WatchdogActor extends SimpleActor
   
   WatchdogActor(WatchdogChildProcess watchdog)
   {
-    setJid("watchdog");
+    setAddress("watchdog");
     
     _child = watchdog;
   }

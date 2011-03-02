@@ -42,6 +42,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -111,7 +112,7 @@ class SmtpStream extends MemoryStream {
     throws IOException
   {
     if (_attributes != null)
-      return _attributes.get(name.toLowerCase());
+      return _attributes.get(name.toLowerCase(Locale.ENGLISH));
     else
       return null;
   }
@@ -132,7 +133,7 @@ class SmtpStream extends MemoryStream {
   public void setAttribute(String name, Object value)
     throws IOException
   {
-    name = name.toLowerCase();
+    name = name.toLowerCase(Locale.ENGLISH);
     if (name.equals("date") || 
         name.equals("received") || name.equals("return-path") ||
         name.equals("message-id"))

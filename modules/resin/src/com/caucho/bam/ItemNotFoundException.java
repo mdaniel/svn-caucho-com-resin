@@ -44,26 +44,26 @@ public class ItemNotFoundException extends ErrorPacketException {
     super(msg);
   }
 
-  public ItemNotFoundException(String msg, ActorError error)
+  public ItemNotFoundException(String msg, BamError error)
   {
     super(msg, error);
   }
 
-  public ItemNotFoundException(ActorError error)
+  public ItemNotFoundException(BamError error)
   {
     super(error);
   }
 
   @Override
-  public ActorError createActorError()
+  public BamError createActorError()
   {
-    ActorError error = getActorError();
+    BamError error = getActorError();
 
     if (error != null)
       return error;
 
-    return new ActorError(ActorError.TYPE_CANCEL,
-                          ActorError.ITEM_NOT_FOUND,
+    return new BamError(BamError.TYPE_CANCEL,
+                          BamError.ITEM_NOT_FOUND,
                           getMessage());
   }
 }

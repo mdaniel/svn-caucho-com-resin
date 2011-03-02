@@ -34,7 +34,7 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.packet.Message;
 import com.caucho.bam.packet.MessageError;
@@ -42,7 +42,7 @@ import com.caucho.bam.packet.Packet;
 import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.Query;
 import com.caucho.bam.packet.QueryResult;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
@@ -56,28 +56,28 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     = Logger.getLogger(MultiworkerMailbox.class.getName());
 
   private final String _name;
-  private final String _jid;
+  private final String _address;
   private final Broker _broker;
-  private final ActorStream _actorStream;
+  private final MessageStream _actorStream;
 
   private final MailboxWorker []_workers;
   private final MailboxQueue _queue;
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  public MultiworkerMailbox(ActorStream actorStream,
+  public MultiworkerMailbox(MessageStream actorStream,
                             Broker broker,
                             int threadMax)
   {
     this(null, actorStream, broker, threadMax);
   }
   
-  public MultiworkerMailbox(String jid, 
-                            ActorStream actorStream,
+  public MultiworkerMailbox(String address, 
+                            MessageStream actorStream,
                             Broker broker,
                             int threadMax)
   {
-    _jid = jid;
+    _address = address;
     
     if (broker == null)
       throw new NullPointerException(L.l("broker must not be null"));
@@ -88,11 +88,11 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     _broker = broker;
     _actorStream = actorStream;
     
-    if (_actorStream.getJid() == null) {
+    if (_actorStream.getAddress() == null) {
       _name = _actorStream.getClass().getSimpleName();
     }
     else
-      _name = _actorStream.getJid();
+      _name = _actorStream.getAddress();
     
     _workers = new MailboxWorker[threadMax];
     
@@ -115,15 +115,15 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   }
 
   /**
-   * Returns the actor's jid
+   * Returns the actor's address
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    if (_jid != null)
-      return _jid;
+    if (_address != null)
+      return _address;
     else
-      return _actorStream.getJid();
+      return _actorStream.getAddress();
   }
 
   /**
@@ -144,7 +144,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   }
 
   @Override
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
     return _actorStream;
   }
@@ -165,7 +165,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   public void messageError(String to,
                                String from,
                                Serializable value,
-                               ActorError error)
+                               BamError error)
   {
     enqueue(new MessageError(to, from, value, error));
   }
@@ -202,7 +202,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
                          String to,
                          String from,
                          Serializable query,
-                         ActorError error)
+                         BamError error)
   {
     enqueue(new QueryError(id, to, from, query, error));
   }

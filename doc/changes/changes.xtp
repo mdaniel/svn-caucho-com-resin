@@ -13,6 +13,11 @@
 
 <s2 title="4.0.16 - snapshot">
 <ul>
+<li>access-log: add '%S' for session tracking (#4422, rep by Steffen Busch)</li>
+<li>include/forward: cross-context include/forward was not switching WebApps properly (#4362, rep by igor)</li>
+<li>classloader: enabled jar caching to improve startup times (#4420, rep by Mattias Jiderhamn)</li>
+<li>database: toLowerCase must use toLowerCase(Locale.ENGLISH) for Turkish encodings (#4414, rep by ozgurcakmak)</li>
+<li>watchdog: Resin shutdown warning exceptions need to be caught on shutdown (#4400, #4402, rep by Daniel Lopez, Alex Sharaz)</li>
 <li>servlet: addCookie should allow cookie with null value (#4410, rep by Brandon Kearby)</li>
 <li>install: resin-doc copy issues (#4408, rep by copart)</li>
 <li>install: validator/slf4j added to webapp-lib (#4386, rep by Jeff Schnitzer)</li>

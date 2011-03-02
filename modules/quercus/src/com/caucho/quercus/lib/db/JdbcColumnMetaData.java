@@ -33,6 +33,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Locale;
 
 /**
  * Represents a JDBC column metadata
@@ -73,7 +74,7 @@ public class JdbcColumnMetaData {
     _isNotNull = rs.getInt(11) == DatabaseMetaData.columnNoNulls;
 
     // TYPE_NAME
-    String type = rs.getString(6).toLowerCase();
+    String type = rs.getString(6).toLowerCase(Locale.ENGLISH);
 
     _isUnsigned = type.indexOf("unsigned") >= 0;
     _isZeroFill = type.indexOf("zerofill") >= 0;

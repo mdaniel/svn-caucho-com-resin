@@ -32,14 +32,14 @@ package com.caucho.xmpp;
 import java.io.Serializable;
 
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.AbstractActorStream;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.AbstractMessageStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.xmpp.im.ImBindQuery;
 
 /**
  * Protocol handler from the TCP/XMPP stream forwarding to the broker
  */
-public class XmppBindCallback extends AbstractActorStream
+public class XmppBindCallback extends AbstractMessageStream
 {
   private XmppBrokerStream _xmppBroker;
 
@@ -48,7 +48,7 @@ public class XmppBindCallback extends AbstractActorStream
     _xmppBroker = broker;
   }
 
-  public String getJid()
+  public String getAddress()
   {
     throw new UnsupportedOperationException();
   }
@@ -66,9 +66,9 @@ public class XmppBindCallback extends AbstractActorStream
     if (value instanceof ImBindQuery) {
       ImBindQuery bind = (ImBindQuery) value;
 
-      String jid = _xmppBroker.bind(bind.getResource(), bind.getJid());
+      String address = _xmppBroker.bind(bind.getResource(), bind.getAddress());
 
-      ImBindQuery result = new ImBindQuery(null, jid);
+      ImBindQuery result = new ImBindQuery(null, address);
 
       _xmppBroker.getActorStream().queryResult(id, from, to, result);
     }

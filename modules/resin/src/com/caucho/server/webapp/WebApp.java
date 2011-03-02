@@ -1807,7 +1807,7 @@ public class WebApp extends ServletContextImpl
    */
   public void putLocaleEncoding(String locale, String encoding)
   {
-    _localeMapping.put(locale.toLowerCase(), encoding);
+    _localeMapping.put(locale.toLowerCase(Locale.ENGLISH), encoding);
   }
 
   /**
@@ -1818,21 +1818,21 @@ public class WebApp extends ServletContextImpl
     String encoding;
 
     String key = locale.toString();
-    encoding = _localeMapping.get(key.toLowerCase());
+    encoding = _localeMapping.get(key.toLowerCase(Locale.ENGLISH));
 
     if (encoding != null)
       return encoding;
 
     if (locale.getVariant() != null) {
       key = locale.getLanguage() + '_' + locale.getCountry();
-      encoding = _localeMapping.get(key.toLowerCase());
+      encoding = _localeMapping.get(key.toLowerCase(Locale.ENGLISH));
       if (encoding != null)
         return encoding;
     }
 
     if (locale.getCountry() != null) {
       key = locale.getLanguage();
-      encoding = _localeMapping.get(key.toLowerCase());
+      encoding = _localeMapping.get(key.toLowerCase(Locale.ENGLISH));
       if (encoding != null)
         return encoding;
     }
@@ -3624,6 +3624,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns a dispatcher for the named servlet.
    */
+  @Override
   public RequestDispatcherImpl getRequestDispatcher(String url)
   {
     if (url == null)
@@ -3669,6 +3670,7 @@ public class WebApp extends ServletContextImpl
       }
 
       if (_parent != null && ! isSameWebApp) {
+        // jsp/15ll
         _parent.buildIncludeInvocation(includeInvocation);
         _parent.buildForwardInvocation(forwardInvocation);
         _parent.buildErrorInvocation(errorInvocation);
@@ -3684,7 +3686,13 @@ public class WebApp extends ServletContextImpl
         buildErrorInvocation(errorInvocation);
         buildDispatchInvocation(dispatchInvocation);
       }
-
+      
+      // jsp/15ln
+      buildCrossContextFilter(includeInvocation);
+      buildCrossContextFilter(forwardInvocation);
+      buildCrossContextFilter(errorInvocation);
+      buildCrossContextFilter(dispatchInvocation);
+      
       disp = new RequestDispatcherImpl(includeInvocation,
                                        forwardInvocation,
                                        errorInvocation,
@@ -3701,6 +3709,15 @@ public class WebApp extends ServletContextImpl
 
       return null;
     }
+  }
+  
+  private void buildCrossContextFilter(Invocation invocation)
+  {
+    FilterChain chain = invocation.getFilterChain();
+    
+    chain = new DispatchFilterChain(chain, invocation.getWebApp());
+    
+    invocation.setFilterChain(chain);
   }
 
   /**

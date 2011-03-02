@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -868,7 +869,7 @@ public class Mysqli extends JdbcConnectionResource {
           if (tok.matchesToken("SET")) {
             // SQL SET statement
 
-            String lower = sql.toLowerCase();
+            String lower = sql.toLowerCase(Locale.ENGLISH);
             if (lower.indexOf(" names ") >= 0) {
               // php/1469 - need to control i18n 'names'
               return LongValue.ONE;

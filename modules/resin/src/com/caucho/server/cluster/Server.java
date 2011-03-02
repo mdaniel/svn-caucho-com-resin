@@ -42,8 +42,8 @@ import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
-import com.caucho.bam.stream.ActorStream;
-import com.caucho.bam.stream.NullActorStream;
+import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.stream.NullMessageStream;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterSystem;
@@ -416,12 +416,12 @@ public class Server
    */
   public ActorSender createAdminClient(String uid)
   {
-    String jid = uid + "@" + getAdminBroker().getJid();
+    String address = uid + "@" + getAdminBroker().getAddress();
 
-    NullActorStream stream = new NullActorStream(jid, getAdminBroker());
+    NullMessageStream stream = new NullMessageStream(address, getAdminBroker());
     
     SimpleActorSender sender 
-      = new SimpleActorSender(stream, getAdminBroker(), jid, null);
+      = new SimpleActorSender(stream, getAdminBroker(), address, null);
     
     return sender;
   }
@@ -1449,7 +1449,7 @@ public class Server
   /**
    * Returns any HMTP stream
    */
-  public ActorStream getHmtpStream()
+  public MessageStream getHmtpStream()
   {
     return null;
   }

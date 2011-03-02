@@ -88,7 +88,7 @@ import javax.xml.stream.*;
  * }
  *
  * element options {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?,
  *   attribute subid?,
  *
@@ -109,7 +109,7 @@ import javax.xml.stream.*;
  * }
  *
  * element subscribe {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?
  * }
  *
@@ -118,7 +118,7 @@ import javax.xml.stream.*;
  * }
  *
  * element subscription {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?,
  *   attribute subid?,
  *   attribute subscription?,
@@ -127,7 +127,7 @@ import javax.xml.stream.*;
  * }
  *
  * element unsubscribe {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?
  *   attribute subid?
  * }
@@ -326,10 +326,10 @@ public class XmppPubSubQueryMarshal extends AbstractXmppMarshal {
   public PubSubSubscribeQuery parseSubscribe(XmppStreamReader in)
     throws IOException, XMLStreamException
   {
-    String jid = in.getAttributeValue(null, "jid");
+    String address = in.getAttributeValue(null, "address");
     String node = in.getAttributeValue(null, "node");
     
-    PubSubSubscribeQuery subscribe = new PubSubSubscribeQuery(jid, node);
+    PubSubSubscribeQuery subscribe = new PubSubSubscribeQuery(address, node);
 
     skipToEnd(in, "subscribe");
 
@@ -342,12 +342,12 @@ public class XmppPubSubQueryMarshal extends AbstractXmppMarshal {
   public PubSubUnsubscribeQuery parseUnsubscribe(XmppStreamReader in)
     throws IOException, XMLStreamException
   {
-    String jid = in.getAttributeValue(null, "jid");
+    String address = in.getAttributeValue(null, "address");
     String node = in.getAttributeValue(null, "node");
     String subid = in.getAttributeValue(null, "subid");
     
     PubSubUnsubscribeQuery unsubscribe
-      = new PubSubUnsubscribeQuery(jid, node, subid);
+      = new PubSubUnsubscribeQuery(address, node, subid);
 
     skipToEnd(in, "unsubscribe");
 
@@ -360,11 +360,11 @@ public class XmppPubSubQueryMarshal extends AbstractXmppMarshal {
   public PubSubOptions parseOptions(XmppStreamReader in)
     throws IOException, XMLStreamException
   {
-    String jid = in.getAttributeValue(null, "jid");
+    String address = in.getAttributeValue(null, "address");
     String node = in.getAttributeValue(null, "node");
     String subid = in.getAttributeValue(null, "subid");
     
-    PubSubOptions options = new PubSubOptions(jid, node, subid);
+    PubSubOptions options = new PubSubOptions(address, node, subid);
 
     skipToEnd(in, "options");
 

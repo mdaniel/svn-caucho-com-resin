@@ -35,7 +35,7 @@ import java.io.OutputStream;
 
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.actor.Actor;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * HMTP client protocol
@@ -44,9 +44,9 @@ public class HmtpLinkWorker implements Runnable {
   protected InputStream _is;
   protected OutputStream _os;
 
-  private String _jid;
+  private String _address;
 
-  private ActorStream _actorStream;
+  private MessageStream _actorStream;
   
   private HmtpWebSocketWriter _toLinkStream;
   private HmtpWebSocketReader _in;
@@ -63,24 +63,24 @@ public class HmtpLinkWorker implements Runnable {
     _in = new HmtpWebSocketReader(_is);
 
     /*
-    if (actor.getJid() == null)
-      actor.setJid(actor.getClass().getSimpleName() + "@link");
+    if (actor.getAddress() == null)
+      actor.setAddress(actor.getClass().getSimpleName() + "@link");
       */
     
     actor.setBroker(_toLinkStream);
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
-  public ActorStream getLinkStream()
+  public MessageStream getLinkStream()
   {
     return _toLinkStream;
   }
@@ -89,9 +89,9 @@ public class HmtpLinkWorker implements Runnable {
    * Returns the current stream to the actor, throwing an exception if
    * it's unavailable
    */
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
-    ActorStream stream = _actorStream;
+    MessageStream stream = _actorStream;
 
     if (stream != null)
       return stream;

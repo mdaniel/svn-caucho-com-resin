@@ -32,7 +32,7 @@ package com.caucho.hmtp;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.remote.websocket.UnmaskedFrameInputStream;
 import com.caucho.remote.websocket.WebSocketInputStream;
 
@@ -57,7 +57,7 @@ public class HmtpWebSocketReader {
    * Reads the next HMTP packet from the stream, returning false on
    * end of file.
    */
-  public boolean readPacket(ActorStream actorStream)
+  public boolean readPacket(MessageStream actorStream)
     throws IOException
   {
     if (actorStream == null)

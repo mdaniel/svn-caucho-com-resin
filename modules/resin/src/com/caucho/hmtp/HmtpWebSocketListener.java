@@ -59,9 +59,9 @@ public class HmtpWebSocketListener extends AbstractWebSocketListener {
     return _hOut;
   }
   
-  String getJid()
+  String getAddress()
   {
-    return "hmtp@" + _broker.getJid();
+    return "hmtp@" + _broker.getAddress();
   }
   
   @Override

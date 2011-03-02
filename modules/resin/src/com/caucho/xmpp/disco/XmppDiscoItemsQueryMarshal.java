@@ -50,7 +50,7 @@ import javax.xml.stream.*;
  * }
  *
  * element item {
- *    attribute jid,
+ *    attribute address,
  *    attribute name?,
  *    attribute node?
  * }
@@ -105,7 +105,7 @@ public class XmppDiscoItemsQueryMarshal extends AbstractXmppMarshal {
       for (DiscoItem item : items) {
         out.writeStartElement("item");
 
-        out.writeAttribute("jid", item.getJid());
+        out.writeAttribute("address", item.getAddress());
 
         if (item.getName() != null)
           out.writeAttribute("name", item.getName());
@@ -167,12 +167,12 @@ public class XmppDiscoItemsQueryMarshal extends AbstractXmppMarshal {
   public DiscoItem parseItem(XMLStreamReader in)
     throws IOException, XMLStreamException
   {
-    String jid = in.getAttributeValue(null, "jid");
+    String address = in.getAttributeValue(null, "address");
     String name = in.getAttributeValue(null, "name");
     String node = in.getAttributeValue(null, "node");
 
     skipToEnd(in, "item");
 
-    return new DiscoItem(jid, name, node);
+    return new DiscoItem(address, name, node);
   }
 }

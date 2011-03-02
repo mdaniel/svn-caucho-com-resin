@@ -44,6 +44,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -358,7 +359,7 @@ class HttpStream extends StreamImpl {
     if (! _didGet)
       getConnInput();
     
-    return _attributes.get(name.toLowerCase());
+    return _attributes.get(name.toLowerCase(Locale.ENGLISH));
   }
 
   /**
@@ -395,19 +396,19 @@ class HttpStream extends StreamImpl {
       }
     }
     else {
-      Object oldValue = _attributes.put(name.toLowerCase(), value);
+      Object oldValue = _attributes.put(name.toLowerCase(Locale.ENGLISH), value);
 
       if (oldValue instanceof String[]) {
         String []old = (String []) oldValue;
         String []newValue = new String[old.length + 1];
         System.arraycopy(old, 0, newValue, 0, old.length);
         newValue[old.length] = String.valueOf(value);
-        _attributes.put(name.toLowerCase(), newValue);
+        _attributes.put(name.toLowerCase(Locale.ENGLISH), newValue);
       }
       else if (oldValue != null) {
         String []newValue = new String[] { String.valueOf(oldValue),
                                            String.valueOf(value) };
-        _attributes.put(name.toLowerCase(), newValue);
+        _attributes.put(name.toLowerCase(Locale.ENGLISH), newValue);
       }
     }
   }
@@ -417,7 +418,7 @@ class HttpStream extends StreamImpl {
    */
   public void removeAttribute(String name)
   {
-    _attributes.remove(name.toLowerCase());
+    _attributes.remove(name.toLowerCase(Locale.ENGLISH));
   }
 
   /**
@@ -637,7 +638,7 @@ class HttpStream extends StreamImpl {
     Iterator iter = getAttributeNames();
     while (iter.hasNext()) {
       String name = (String) iter.next();
-      if (_reserved.get(name.toLowerCase()) == null) {
+      if (_reserved.get(name.toLowerCase(Locale.ENGLISH)) == null) {
         Object value = getAttribute(name);
         if (value instanceof String[]) {
           String []values = (String []) value;

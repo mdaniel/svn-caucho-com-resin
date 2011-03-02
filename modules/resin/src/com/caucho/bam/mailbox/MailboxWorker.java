@@ -81,6 +81,6 @@ public class MailboxWorker extends TaskWorker
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _queue.getJid() + "]";
+    return getClass().getSimpleName() + "[" + _queue.getAddress() + "]";
   }
 }

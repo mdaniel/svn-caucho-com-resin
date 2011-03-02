@@ -31,53 +31,45 @@ package com.caucho.bam.stream;
 
 import com.caucho.bam.broker.Broker;
 
-
 /**
- * NullActorStream always ignores messages and returns errors for RPC calls.
+ * Base ActorStream implementation using introspection and
+ * {@link com.caucho.bam.Message @Message} annotations to simplify
+ * Actor development.
+ *
+ * <h2>Message Handling</h2>
+ *
+ * To handle a message, create a method with the proper signature for
+ * the expected payload type and
+ * annotate it with {@link com.caucho.bam.Message @Message}.  To send
+ * a response message or query, use <code>getBrokerStream()</code> or
+ * <code>getClient()</code>.
+ *
+ * <code><pre>
+ * @Message
+ * public void myMessage(String to, String from, MyPayload payload);
+ * </pre></code>
  */
-public class NullActorStream extends AbstractActorStream
+public class FallbackMessageStream extends NullMessageStream
 {
-  private String _jid;
-  private Broker _broker;
-
-  protected NullActorStream()
-  {
-  }
+  private Class<?> _actorClass;
   
-  public NullActorStream(String jid, Broker broker)
+  public FallbackMessageStream(String address,
+                             Broker broker,
+                             Class<?> actorClass)
   {
-    if (broker == null)
-      throw new IllegalArgumentException();
+    super(address, broker);
     
-    _jid = jid;
-    _broker = broker;
-  }
-
-  /**
-   * Returns the jid at the end of the stream.
-   */
-  @Override
-  public String getJid()
-  {
-    return _jid;
+    _actorClass = actorClass;
   }
   
-  protected void setJid(String jid)
+  public FallbackMessageStream(MessageStream actorStream)
   {
-    _jid = jid;
+    this(actorStream.getAddress(), actorStream.getBroker(), actorStream.getClass());
   }
 
-  /**
-   * The stream to the link.
-   */
   @Override
-  public Broker getBroker()
+  public String toString()
   {
-    return _broker;
-  }
-  
-  protected void setBroker(Broker broker)
-  {
-    _broker = broker;
+    return getClass().getSimpleName() + "[" + getAddress() + "," + _actorClass.getSimpleName() + "]";
   }
 }

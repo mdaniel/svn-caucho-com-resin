@@ -31,6 +31,7 @@ package com.caucho.server.security;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
@@ -78,7 +79,7 @@ public class ConstraintManager extends FilterChainBuilder {
     if (webApp == null)
       return next;
 
-    String lower = uri.toLowerCase();
+    String lower = uri.toLowerCase(Locale.ENGLISH);
 
     if (lower.startsWith("/web-inf")
         || lower.startsWith("/meta-inf")) {

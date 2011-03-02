@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -244,7 +245,7 @@ public class FileServlet extends GenericServlet {
       String relPath = cb.toString();
 
       if (_isCaseInsensitive)
-        relPath = relPath.toLowerCase();
+        relPath = relPath.toLowerCase(Locale.ENGLISH);
 
       filename = getServletContext().getRealPath(relPath);
       Path path = _context.lookupNative(filename);

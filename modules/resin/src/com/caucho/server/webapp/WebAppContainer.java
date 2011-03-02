@@ -31,6 +31,7 @@ package com.caucho.server.webapp;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -876,10 +877,10 @@ public class WebAppContainer
   public void buildIncludeInvocation(Invocation invocation)
     throws ServletException
   {
-    WebApp app = buildSubInvocation(invocation);
+    WebApp webApp = buildSubInvocation(invocation);
 
-    if (app != null)
-      app.buildIncludeInvocation(invocation);
+    if (webApp != null)
+      webApp.buildIncludeInvocation(invocation);
   }
 
   /**
@@ -888,10 +889,10 @@ public class WebAppContainer
   public void buildForwardInvocation(Invocation invocation)
     throws ServletException
   {
-    WebApp app = buildSubInvocation(invocation);
+    WebApp webApp = buildSubInvocation(invocation);
 
-    if (app != null)
-      app.buildForwardInvocation(invocation);
+    if (webApp != null)
+      webApp.buildForwardInvocation(invocation);
   }
 
   /**
@@ -958,9 +959,9 @@ public class WebAppContainer
       return null;
     }
 
-    WebApp app = appController.subrequest();
+    WebApp webApp = appController.subrequest();
 
-    if (app == null) {
+    if (webApp == null) {
       UnavailableException e;
       e = new UnavailableException(invocation.getURI());
 
@@ -970,7 +971,7 @@ public class WebAppContainer
       return null;
     }
 
-    return app;
+    return webApp;
   }
 
   /**
@@ -1075,7 +1076,7 @@ public class WebAppContainer
 
     String cleanUri = uri;
     if (CauchoSystem.isCaseInsensitive())
-      cleanUri = cleanUri.toLowerCase();
+      cleanUri = cleanUri.toLowerCase(Locale.ENGLISH);
 
     // server/105w
     try {

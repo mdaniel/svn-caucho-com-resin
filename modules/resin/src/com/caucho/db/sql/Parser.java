@@ -40,6 +40,7 @@ import com.caucho.util.L10N;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1675,7 +1676,7 @@ public class Parser {
           }
           else {
             String funName = (Character.toUpperCase(name.charAt(0)) +
-                              name.substring(1).toLowerCase());
+                              name.substring(1).toLowerCase(Locale.ENGLISH));
 
             funName = "com.caucho.db.fun." + funName + "Expr";
 
@@ -1852,7 +1853,7 @@ public class Parser {
       unread(ch);
 
       _lexeme = cb.toString();
-      String lower = _lexeme.toLowerCase();
+      String lower = _lexeme.toLowerCase(Locale.ENGLISH);
 
       int token = _reserved.get(lower);
 
@@ -2017,7 +2018,7 @@ public class Parser {
       if (token < 128)
         return "'" + String.valueOf((char) token) + "' (" + token + ")";
       else
-        return "'" + _lexeme + "' (" + token + ", '" + _lexeme.toLowerCase() + "')";
+        return "'" + _lexeme + "' (" + token + ", '" + _lexeme.toLowerCase(Locale.ENGLISH) + "')";
     }
   }
 

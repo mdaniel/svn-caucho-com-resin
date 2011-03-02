@@ -45,7 +45,7 @@ import java.util.*;
  * }
  *
  * element destroy {
- *   attribute jid?,
+ *   attribute address?,
  *
  *   password?
  *   &amp; reason?
@@ -53,7 +53,7 @@ import java.util.*;
  * </pre></code>
  */
 public class MucOwnerDestroyQuery extends MucOwnerQuery {
-  private String _jid;
+  private String _address;
   private String _password;
   private String _reason;
   
@@ -61,21 +61,21 @@ public class MucOwnerDestroyQuery extends MucOwnerQuery {
   {
   }
   
-  public MucOwnerDestroyQuery(String jid)
+  public MucOwnerDestroyQuery(String address)
   {
-    _jid = jid;
+    _address = address;
   }
   
-  public MucOwnerDestroyQuery(String jid, String password, String reason)
+  public MucOwnerDestroyQuery(String address, String password, String reason)
   {
-    _jid = jid;
+    _address = address;
     _password = password;
     _reason = reason;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   public String getPassword()
@@ -95,8 +95,8 @@ public class MucOwnerDestroyQuery extends MucOwnerQuery {
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    if (_jid != null)
-      sb.append("jid=").append(_jid);
+    if (_address != null)
+      sb.append("address=").append(_address);
 
     if (_password != null)
       sb.append(",password=").append(_password);

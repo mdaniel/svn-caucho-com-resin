@@ -36,7 +36,7 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.PassthroughBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * HMTP client protocol
@@ -63,7 +63,7 @@ public class LinkClient {
     PassthroughBroker inboundBroker = new PassthroughBroker();
     PassthroughBroker outboundBroker = new PassthroughBroker();
     
-    ActorStream inboundStream = actor.getActorStream();
+    MessageStream inboundStream = actor.getActorStream();
     SimpleActorSender sender = new SimpleActorSender(inboundStream, 
                                                      outboundBroker);
     
@@ -74,8 +74,8 @@ public class LinkClient {
     
     inboundBroker.setMailbox(inboundMailbox);
     
-    ActorStream outboundStream
-      = new OutboundActorStream(_linkFactory, inboundBroker);
+    MessageStream outboundStream
+      = new OutboundMessageStream(_linkFactory, inboundBroker);
     
     Mailbox outboundMailbox = createOutboundMailbox(outboundStream,
                                                     inboundBroker);
@@ -107,13 +107,13 @@ public class LinkClient {
     
   }
   
-  protected Mailbox createInboundMailbox(ActorStream inboundStream,
+  protected Mailbox createInboundMailbox(MessageStream inboundStream,
                                          Broker outboundBroker)
   {
     return new MultiworkerMailbox(inboundStream, outboundBroker, 1);
   }
   
-  protected Mailbox createOutboundMailbox(ActorStream outboundStream,
+  protected Mailbox createOutboundMailbox(MessageStream outboundStream,
                                           Broker inboundBroker)
   {
     return new MultiworkerMailbox(outboundStream, inboundBroker, 1);

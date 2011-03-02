@@ -31,45 +31,53 @@ package com.caucho.bam.stream;
 
 import com.caucho.bam.broker.Broker;
 
+
 /**
- * Base ActorStream implementation using introspection and
- * {@link com.caucho.bam.Message @Message} annotations to simplify
- * Actor development.
- *
- * <h2>Message Handling</h2>
- *
- * To handle a message, create a method with the proper signature for
- * the expected payload type and
- * annotate it with {@link com.caucho.bam.Message @Message}.  To send
- * a response message or query, use <code>getBrokerStream()</code> or
- * <code>getClient()</code>.
- *
- * <code><pre>
- * @Message
- * public void myMessage(String to, String from, MyPayload payload);
- * </pre></code>
+ * NullActorStream always ignores messages and returns errors for RPC calls.
  */
-public class FallbackActorStream extends NullActorStream
+public class NullMessageStream extends AbstractMessageStream
 {
-  private Class<?> _actorClass;
-  
-  public FallbackActorStream(String jid,
-                             Broker broker,
-                             Class<?> actorClass)
+  private String _address;
+  private Broker _broker;
+
+  protected NullMessageStream()
   {
-    super(jid, broker);
-    
-    _actorClass = actorClass;
   }
   
-  public FallbackActorStream(ActorStream actorStream)
+  public NullMessageStream(String address, Broker broker)
   {
-    this(actorStream.getJid(), actorStream.getBroker(), actorStream.getClass());
+    if (broker == null)
+      throw new IllegalArgumentException();
+    
+    _address = address;
+    _broker = broker;
   }
 
+  /**
+   * Returns the address at the end of the stream.
+   */
   @Override
-  public String toString()
+  public String getAddress()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "," + _actorClass.getSimpleName() + "]";
+    return _address;
+  }
+  
+  protected void setAddress(String address)
+  {
+    _address = address;
+  }
+
+  /**
+   * The stream to the link.
+   */
+  @Override
+  public Broker getBroker()
+  {
+    return _broker;
+  }
+  
+  protected void setBroker(Broker broker)
+  {
+    _broker = broker;
   }
 }

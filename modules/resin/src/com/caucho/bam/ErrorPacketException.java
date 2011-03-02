@@ -34,8 +34,8 @@ package com.caucho.bam;
  * HMPP wrapper
  */
 @SuppressWarnings("serial")
-public class ErrorPacketException extends ActorException {
-  private ActorError _error;
+public class ErrorPacketException extends BamException {
+  private BamError _error;
   
   public ErrorPacketException()
   {
@@ -46,7 +46,7 @@ public class ErrorPacketException extends ActorException {
     super(msg);
   }
 
-  public ErrorPacketException(String msg, ActorError error)
+  public ErrorPacketException(String msg, BamError error)
   {
     super(msg);
 
@@ -65,7 +65,7 @@ public class ErrorPacketException extends ActorException {
     _error = e.getActorError();
   }
 
-  public ErrorPacketException(ActorError error)
+  public ErrorPacketException(BamError error)
   {
     super(String.valueOf(error));
 
@@ -73,7 +73,7 @@ public class ErrorPacketException extends ActorException {
   }
 
   @Override
-  public ActorError getActorError()
+  public BamError getActorError()
   {
     if (_error != null)
       return _error;
@@ -82,7 +82,7 @@ public class ErrorPacketException extends ActorException {
   }
 
   @Override
-  public ActorError createActorError()
+  public BamError createActorError()
   {
     if (_error != null)
       return _error;

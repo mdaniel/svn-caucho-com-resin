@@ -431,7 +431,7 @@ public abstract class AbstractHttpRequest
         host = new String(buffer, offset, length);
       }
       else
-        return rawHost.toString().toLowerCase();
+        return rawHost.toString().toLowerCase(Locale.ENGLISH);
     }
 
     if (host == null) {
@@ -1427,7 +1427,7 @@ public abstract class AbstractHttpRequest
     invocation.setSecure(isSecure());
 
     if (host != null) {
-      String hostName = host.toString().toLowerCase();
+      String hostName = host.toString().toLowerCase(Locale.ENGLISH);
 
       invocation.setHost(hostName);
       invocation.setPort(getServerPort());

@@ -42,6 +42,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -117,7 +118,7 @@ abstract public class QuercusPage
     if (fun != null)
       return fun;
 
-    fun = _funMapLowerCase.get(name.toLowerCase());
+    fun = _funMapLowerCase.get(name.toLowerCase(Locale.ENGLISH));
 
     return fun;
   }
@@ -250,7 +251,7 @@ abstract public class QuercusPage
   {
     AbstractFunction oldFun = _funMap.put(name, fun);
     
-    _funMapLowerCase.put(name.toLowerCase(), fun);
+    _funMapLowerCase.put(name.toLowerCase(Locale.ENGLISH), fun);
   }
 
   /**

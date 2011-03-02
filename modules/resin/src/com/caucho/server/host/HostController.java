@@ -31,6 +31,7 @@ package com.caucho.server.host;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -176,7 +177,7 @@ public class HostController
    */
   public void setRegexpName(String name)
   {
-    _regexpName = name.toLowerCase();
+    _regexpName = name.toLowerCase(Locale.ENGLISH);
   }
   
   /**
@@ -190,7 +191,7 @@ public class HostController
     if (name == null || name.equals("*"))
       name = ""; // XXX: default?
     
-    name = name.toLowerCase();
+    name = name.toLowerCase(Locale.ENGLISH);
 
     if (! _entryHostAliases.contains(name))
       _entryHostAliases.add(name);

@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.config.ConfigException;
@@ -135,25 +135,25 @@ public class BamPhpActor extends SimpleActor {
   }
 /*
   @Override
-  public boolean startChild(String jid)
+  public boolean startChild(String address)
   {
     if (log.isLoggable(Level.FINE)) 
-      log.fine(L.l("{0}.startActor({1})", toString(), jid));
+      log.fine(L.l("{0}.startActor({1})", toString(), address));
 
-    return hasChild(jid);
+    return hasChild(address);
   }
 */
-  boolean hasChild(String jid)
+  boolean hasChild(String address)
   {
     synchronized(_children) {
-      return _children.containsKey(jid);
+      return _children.containsKey(address);
     }
   }
 
-  void addChild(String jid, BamPhpActor child)
+  void addChild(String address, BamPhpActor child)
   {
     synchronized(_children) {
-      _children.put(jid, child);
+      _children.put(address, child);
     }
 
     // _broker.addMailbox(child.getActorStream());
@@ -164,11 +164,11 @@ public class BamPhpActor extends SimpleActor {
     env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
   }
 
-  private void setError(Env env, ActorError error)
+  private void setError(Env env, BamError error)
   {
     Value errorValue = NullValue.NULL;
     if (error != null) {
-      JavaClassDef errorClassDef = env.getJavaClassDefinition(ActorError.class);
+      JavaClassDef errorClassDef = env.getJavaClassDefinition(BamError.class);
       errorValue = errorClassDef.wrap(env, error);
     }
 
@@ -190,7 +190,7 @@ public class BamPhpActor extends SimpleActor {
 
   @Override
   public void messageError(String to, String from, Serializable value,
-                           ActorError error)
+                           BamError error)
   {
     Env env = createEnv(_page, BamEventType.MESSAGE_ERROR, to, from, value);
 
@@ -270,7 +270,7 @@ public class BamPhpActor extends SimpleActor {
 
   @Override
   public void queryError(long id, String to, String from, 
-                         Serializable value, ActorError error)
+                         Serializable value, BamError error)
   {
     Env env = createEnv(_page, BamEventType.QUERY_ERROR, to, from, value);
 
@@ -320,7 +320,7 @@ public class BamPhpActor extends SimpleActor {
   public String toString()
   {
     return (getClass().getSimpleName()
-            + "[jid=" + getJid()
+            + "[address=" + getAddress()
             + ",script=" + _script + "]");
   }
 }

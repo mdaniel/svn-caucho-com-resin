@@ -46,7 +46,7 @@ import javax.xml.stream.*;
  *
  * element item {
  *   attribute ask?,
- *   attribute jid,
+ *   attribute address,
  *   attribute name?,
  *   attribute subscription?,
  *
@@ -106,8 +106,8 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
         if (item.getAsk() != null)
           out.writeAttribute("ask", item.getAsk());
 
-        if (item.getJid() != null)
-          out.writeAttribute("jid", item.getJid());
+        if (item.getAddress() != null)
+          out.writeAttribute("address", item.getAddress());
 
         if (item.getName() != null)
           out.writeAttribute("name", item.getName());
@@ -160,7 +160,7 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
       }
 
       String ask = null;
-      String jid = null;
+      String address = null;
       String name = null;
       String subscription = null;
     
@@ -169,8 +169,8 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
 
         if ("ask".equals(attr))
           ask = in.getAttributeValue(i);
-        else if ("jid".equals(attr))
-          jid = in.getAttributeValue(i);
+        else if ("address".equals(attr))
+          address = in.getAttributeValue(i);
         else if ("name".equals(attr))
           name = in.getAttributeValue(i);
         else if ("subscription".equals(attr))
@@ -189,7 +189,7 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
       
       skipToEnd(in, "item");
 
-      RosterItem item = new RosterItem(ask, jid, name, subscription, groups);
+      RosterItem item = new RosterItem(ask, address, name, subscription, groups);
 
       itemList.add(item);
 

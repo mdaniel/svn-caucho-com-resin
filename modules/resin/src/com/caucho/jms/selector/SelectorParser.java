@@ -34,6 +34,8 @@ import com.caucho.util.L10N;
 
 import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
+
+import java.util.Locale;
 import java.util.logging.Logger;
 
 
@@ -450,7 +452,7 @@ public class SelectorParser  {
       unread(ch);
 
       _lexeme = _cb.toString();
-      String lower = _lexeme.toLowerCase();
+      String lower = _lexeme.toLowerCase(Locale.ENGLISH);
 
       int token = _reserved.get(lower);
 

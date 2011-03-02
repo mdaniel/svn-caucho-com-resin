@@ -35,8 +35,8 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2StreamingInput;
 
@@ -53,8 +53,8 @@ public class HmtpReader {
   private Hessian2StreamingInput _in;
   private Hessian2Input _hIn;
   
-  private int _jidCacheIndex;
-  private String []_jidCacheRing = new String[256];
+  private int _addressCacheIndex;
+  private String []_addressCacheRing = new String[256];
 
   public HmtpReader()
   {
@@ -107,7 +107,7 @@ public class HmtpReader {
    * end of file.
    */
   public boolean readPacket(InputStream is,
-                            ActorStream actorStream)
+                            MessageStream actorStream)
     throws IOException
   {
     if (actorStream == null)
@@ -118,8 +118,8 @@ public class HmtpReader {
     hIn.init(is);
 
     int type = hIn.readInt();
-    String to = readJid(hIn);
-    String from = readJid(hIn);
+    String to = readAddress(hIn);
+    String from = readAddress(hIn);
     
     switch (HmtpPacketType.TYPES[type]) {
     case MESSAGE:
@@ -139,7 +139,7 @@ public class HmtpReader {
     case MESSAGE_ERROR:
       {
         Serializable value = (Serializable) hIn.readObject();
-        ActorError error = (ActorError) hIn.readObject();
+        BamError error = (BamError) hIn.readObject();
 
         if (log.isLoggable(Level.FINEST)) {
           log.finest(this + " messageError " + error + " " + value
@@ -185,7 +185,7 @@ public class HmtpReader {
       {
         long id = hIn.readLong();
         Serializable value = (Serializable) hIn.readObject();
-        ActorError error = (ActorError) hIn.readObject();
+        BamError error = (BamError) hIn.readObject();
 
         if (log.isLoggable(Level.FINEST)) {
           log.finest(this + " queryError " + error + " " + value
@@ -204,7 +204,7 @@ public class HmtpReader {
     return true;
   }
   
-  private String readJid(Hessian2Input hIn)
+  private String readAddress(Hessian2Input hIn)
     throws IOException
   {
     Object value = hIn.readObject();
@@ -212,17 +212,17 @@ public class HmtpReader {
     if (value == null)
       return null;
     else if (value instanceof String) {
-      String jid = (String) value;
-      _jidCacheRing[_jidCacheIndex] = jid;
+      String address = (String) value;
+      _addressCacheRing[_addressCacheIndex] = address;
       
-      _jidCacheIndex = (_jidCacheIndex + 1) % _jidCacheRing.length;
+      _addressCacheIndex = (_addressCacheIndex + 1) % _addressCacheRing.length;
       
-      return jid;
+      return address;
     }
     else if (value instanceof Integer) {
       int index = (Integer) value;
       
-      return _jidCacheRing[index];
+      return _addressCacheRing[index];
     }
     else
       throw new IllegalStateException(String.valueOf(value));

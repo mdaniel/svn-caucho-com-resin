@@ -71,7 +71,8 @@ public class SystemClassLoader
 
     String preScan = System.getProperty("caucho.jar.prescan");
     
-    preScan = "false";
+    // #4420 - major performance for Spring-like startup if preScan is disabled
+    // preScan = "false";
     
     if (preScan == null || ! "false".equals(preScan))
       DynamicClassLoader.setJarCacheEnabled(true);

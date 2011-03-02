@@ -39,22 +39,22 @@ import java.util.*;
  * <pre>
  * element bind{urn:ieft:params:xml:ns:xmpp-bind} {
  *   &amp; resource?
- *   &amp; jid?
+ *   &amp; address?
  * }
  * </pre>
  */
 public class ImBindQuery implements Serializable {
   private String _resource;
-  private String _jid;
+  private String _address;
 
   public ImBindQuery()
   {
   }
 
-  public ImBindQuery(String resource, String jid)
+  public ImBindQuery(String resource, String address)
   {
     _resource = resource;
-    _jid = jid;
+    _address = address;
   }
 
   public String getResource()
@@ -62,9 +62,9 @@ public class ImBindQuery implements Serializable {
     return _resource;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   @Override
@@ -73,7 +73,7 @@ public class ImBindQuery implements Serializable {
     StringBuilder sb = new StringBuilder();
     sb.append(getClass().getSimpleName());
     sb.append("[resource=").append(_resource);
-    sb.append(",jid=").append(_jid);
+    sb.append(",address=").append(_address);
     sb.append("]");
     
     return sb.toString();

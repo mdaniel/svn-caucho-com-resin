@@ -57,7 +57,7 @@ import javax.xml.stream.*;
  * }
  *
  * element unsubscribe {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?
  *   attribute subid?
  * }
@@ -106,8 +106,8 @@ public class XmppPubSubUnsubscribeQueryMarshal extends AbstractXmppMarshal {
 
     out.writeStartElement("unsubscribe");
 
-    if (unsubscribe.getJid() != null)
-      out.writeAttribute("jid", unsubscribe.getJid());
+    if (unsubscribe.getAddress() != null)
+      out.writeAttribute("address", unsubscribe.getAddress());
 
     if (unsubscribe.getNode() != null)
       out.writeAttribute("node", unsubscribe.getNode());

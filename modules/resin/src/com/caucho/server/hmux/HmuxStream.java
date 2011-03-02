@@ -40,6 +40,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -292,7 +293,7 @@ class HmuxStream extends StreamImpl {
     if (! _didGet)
       getConnInput();
 
-    return _attributes.get(name.toLowerCase());
+    return _attributes.get(name.toLowerCase(Locale.ENGLISH));
   }
 
   /**
@@ -329,7 +330,7 @@ class HmuxStream extends StreamImpl {
       }
     }
     else
-      _attributes.put(name.toLowerCase(), value);
+      _attributes.put(name.toLowerCase(Locale.ENGLISH), value);
   }
 
   /**
@@ -337,7 +338,7 @@ class HmuxStream extends StreamImpl {
    */
   public void removeAttribute(String name)
   {
-    _attributes.remove(name.toLowerCase());
+    _attributes.remove(name.toLowerCase(Locale.ENGLISH));
   }
 
   /**
@@ -511,7 +512,7 @@ class HmuxStream extends StreamImpl {
     Iterator iter = getAttributeNames();
     while (iter.hasNext()) {
       String name = (String) iter.next();
-      if (_reserved.get(name.toLowerCase()) == null) {
+      if (_reserved.get(name.toLowerCase(Locale.ENGLISH)) == null) {
         writeString(HmuxRequest.HMUX_HEADER, name);
         writeString(HmuxRequest.HMUX_STRING, getAttribute(name));
       }

@@ -24,13 +24,46 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Scott Ferguson
  */
 
 package com.caucho.bam;
 
+
 /**
- * Marker for a payload with a large message.
+ * General BAM exception
  */
-public interface BamLargeMessage {
+public class BamException extends RuntimeException {
+  private static final long serialVersionUID = 3780153710540081318L;
+
+  public BamException()
+  {
+  }
+
+  public BamException(String msg)
+  {
+    super(msg);
+  }
+
+  public BamException(Throwable e)
+  {
+    super(e);
+  }
+
+  public BamException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
+
+  public BamError getActorError()
+  {
+    return null;
+  }
+
+  public BamError createActorError()
+  {
+    return new BamError(BamError.TYPE_CANCEL,
+                          BamError.INTERNAL_SERVER_ERROR,
+                          toString());
+  }
 }

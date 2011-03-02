@@ -53,12 +53,12 @@ import java.util.*;
  * }
  *
  * element subscribe {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?
  * }
  *
  * element options {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?,
  *   attribute subid?,
  *
@@ -67,7 +67,7 @@ import java.util.*;
  * </pre></code>
  */
 public class PubSubSubscribeQuery extends PubSubQuery {
-  private String _jid;
+  private String _address;
   private String _node;
 
   private PubSubOptions _options;
@@ -76,20 +76,20 @@ public class PubSubSubscribeQuery extends PubSubQuery {
   {
   }
 
-  public PubSubSubscribeQuery(String jid)
+  public PubSubSubscribeQuery(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
-  public PubSubSubscribeQuery(String jid, String node)
+  public PubSubSubscribeQuery(String address, String node)
   {
-    _jid = jid;
+    _address = address;
     _node = node;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   public String getNode()
@@ -114,7 +114,7 @@ public class PubSubSubscribeQuery extends PubSubQuery {
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    sb.append("jid=").append(_jid);
+    sb.append("address=").append(_address);
 
     if (_node != null)
       sb.append(",node=").append(_node);

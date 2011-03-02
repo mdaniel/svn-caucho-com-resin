@@ -24,46 +24,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.bam;
 
-
 /**
- * General BAM exception
+ * Marker for a payload with a large message.
  */
-public class ActorException extends RuntimeException {
-  private static final long serialVersionUID = 3780153710540081318L;
-
-  public ActorException()
-  {
-  }
-
-  public ActorException(String msg)
-  {
-    super(msg);
-  }
-
-  public ActorException(Throwable e)
-  {
-    super(e);
-  }
-
-  public ActorException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
-
-  public ActorError getActorError()
-  {
-    return null;
-  }
-
-  public ActorError createActorError()
-  {
-    return new ActorError(ActorError.TYPE_CANCEL,
-                          ActorError.INTERNAL_SERVER_ERROR,
-                          toString());
-  }
+public interface BamLargePayload {
 }

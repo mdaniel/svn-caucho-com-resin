@@ -39,9 +39,9 @@ import com.caucho.bam.broker.Broker;
  */
 public interface QuerySender {
   /**
-   * Returns the Actor's jid used for all "from" parameters.
+   * Returns the Actor's address used for all "from" parameters.
    */
-  public String getJid();
+  public String getAddress();
 
 
   /**
@@ -55,9 +55,9 @@ public interface QuerySender {
 
   /**
    * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
-   * addressed by the Actor's JID.
+   * addressed by the Actor's address.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the message payload
    */
   public void message(String to, Serializable payload);
@@ -80,7 +80,7 @@ public interface QuerySender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    */
   public Serializable query(String to,
@@ -98,7 +98,7 @@ public interface QuerySender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
@@ -118,7 +118,7 @@ public interface QuerySender {
    * <code>queryError</code> to the client using the same <code>id</code>,
    * because RPC clients rely on a response.
    *
-   * @param to the target actor's JID
+   * @param to the target actor's address
    * @param payload the query payload
    * @param callback the application's callback for the result
    */

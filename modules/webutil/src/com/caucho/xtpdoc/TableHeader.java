@@ -33,6 +33,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
+
 import com.caucho.config.types.*;
 
 public class TableHeader extends FormattedTextWithAnchors implements TableCell {
@@ -63,7 +65,7 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
   @Override
   public void addText(RawString text)
   {
-    addItem(new Text(text.getValue().toUpperCase()));
+    addItem(new Text(text.getValue().toUpperCase(Locale.ENGLISH)));
   }
 
   @Override

@@ -28,6 +28,8 @@
 
 package com.caucho.jms.selector;
 
+import java.util.Locale;
+
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
@@ -51,7 +53,7 @@ public class IdentifierSelector extends Selector  {
 
   static Selector create(String name)
   {
-    int type = _specialSelectors.get(name.toLowerCase());
+    int type = _specialSelectors.get(name.toLowerCase(Locale.ENGLISH));
 
     if (type >= 0)
       return new SpecialIdentifierSelector(type);

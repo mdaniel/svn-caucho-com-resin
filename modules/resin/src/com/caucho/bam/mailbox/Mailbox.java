@@ -29,17 +29,17 @@
 
 package com.caucho.bam.mailbox;
 
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * Mailbox for an actor
  */
-public interface Mailbox extends ActorStream
+public interface Mailbox extends MessageStream
 {
   /**
    * Returns the actor stream for the actor itself.
    */
-  public ActorStream getActorStream();
+  public MessageStream getActorStream();
   
   /**
    * Closes the mailbox

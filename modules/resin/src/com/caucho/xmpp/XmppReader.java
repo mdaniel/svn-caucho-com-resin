@@ -40,8 +40,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.vfs.ReadStream;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.xmpp.im.ImPresence;
@@ -57,8 +57,8 @@ public class XmppReader
   private static final Logger log
     = Logger.getLogger(XmppReader.class.getName());
 
-  private ActorStream _toReply;
-  private ActorStream _handler;
+  private MessageStream _toReply;
+  private MessageStream _handler;
 
   private ReadStream _is;
   private XmppStreamReader _in;
@@ -67,15 +67,15 @@ public class XmppReader
   private XmppMarshalFactory _marshalFactory;
 
   private String _uid;
-  private String _jid;
+  private String _address;
 
   private boolean _isFinest;
 
   XmppReader(XmppContext context,
              ReadStream is,
              XmppStreamReader in,
-             ActorStream toReply,
-             ActorStream handler)
+             MessageStream toReply,
+             MessageStream handler)
   {
     _xmppContext = context;
     _marshalFactory = context.getMarshalFactory();
@@ -90,7 +90,7 @@ public class XmppReader
     _isFinest = log.isLoggable(Level.FINEST);
   }
 
-  void setHandler(ActorStream handler)
+  void setHandler(MessageStream handler)
   {
     _handler = handler;
   }
@@ -100,9 +100,9 @@ public class XmppReader
     _uid = uid;
   }
 
-  void setJid(String jid)
+  void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }
   
   boolean readNext()
@@ -323,8 +323,8 @@ public class XmppReader
       extraList.toArray(extraArray);
     }
 
-    if (_jid != null)
-      from = _jid;
+    if (_address != null)
+      from = _address;
 
     if (to == null)
       to = _uid;
@@ -384,12 +384,12 @@ public class XmppReader
     else
       query = readAsXmlString(_in);
 
-    ActorError error = null;
+    BamError error = null;
       
     skipToEnd("iq");
 
-    if (_jid != null)
-      from = _jid;
+    if (_address != null)
+      from = _address;
 
     if (to == null) {
       to = _uid;
@@ -457,7 +457,7 @@ public class XmppReader
     Text status = null;
     int priority = 0;
     ArrayList<Serializable> extraList = new ArrayList<Serializable>();
-    ActorError error = null;
+    BamError error = null;
 
     while ((tag = _in.nextTag()) > 0
            && ! ("presence".equals(_in.getLocalName())
@@ -512,8 +512,8 @@ public class XmppReader
 
     expectEnd("presence", tag);
 
-    if (_jid != null)
-      from = _jid;
+    if (_address != null)
+      from = _address;
 
     if (target == null)
       target = _uid;

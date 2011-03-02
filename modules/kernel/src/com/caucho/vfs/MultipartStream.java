@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /*
  * A stream for reading multipart/mime files.
@@ -195,7 +196,7 @@ public class MultipartStream extends StreamImpl {
    */
   public String getAttribute(String key)
   {
-    List<String> values = _headers.get(key.toLowerCase());
+    List<String> values = _headers.get(key.toLowerCase(Locale.ENGLISH));
 
     if (values != null && values.size() > 0)
       return values.get(0);
@@ -249,7 +250,7 @@ public class MultipartStream extends StreamImpl {
       String key = null;
       String value = null;
       if (i < _line.length()) {
-        key = _line.substring(0, i).trim().toLowerCase();
+        key = _line.substring(0, i).trim().toLowerCase(Locale.ENGLISH);
         value = _line.substring(i + 1).trim();
 
         List<String> values = _headers.get(key);

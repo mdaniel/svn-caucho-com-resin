@@ -39,7 +39,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.actor.Actor;
 import com.caucho.bam.actor.BamSkeleton;
 import com.caucho.bam.broker.Broker;
@@ -47,8 +47,8 @@ import com.caucho.bam.broker.HashMapBroker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.PassthroughMailbox;
-import com.caucho.bam.stream.ActorStream;
-import com.caucho.bam.stream.FallbackActorStream;
+import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.stream.FallbackMessageStream;
 import com.caucho.websocket.WebSocketListener;
 import com.caucho.websocket.WebSocketServletRequest;
 
@@ -56,19 +56,19 @@ import com.caucho.websocket.WebSocketServletRequest;
  * HmtpWriteStream writes HMTP packets to an OutputStream.
  */
 @SuppressWarnings("serial")
-public class HmtpServlet extends HttpServlet implements Actor, ActorStream
+public class HmtpServlet extends HttpServlet implements Actor, MessageStream
 {
   private static final Logger log
     = Logger.getLogger(HmtpServlet.class.getName());
   
   private final AtomicInteger _gId = new AtomicInteger();
 
-  private String _jid;
+  private String _address;
   private ManagedBroker _servletBroker;
-  private ActorStream _servletActorStream = this;
+  private MessageStream _servletActorStream = this;
 
   private BamSkeleton _skeleton;
-  private ActorStream _servletFallbackStream;
+  private MessageStream _servletFallbackStream;
   private Actor _actor;
   
   private HashMapBroker _broker;
@@ -76,22 +76,22 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   
   public HmtpServlet()
   {
-    _jid = getClass().getSimpleName() + "@localhost";
+    _address = getClass().getSimpleName() + "@localhost";
   }
 
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   @Override
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }
   
-  public String getBrokerJid()
+  public String getBrokerAddress()
   {
     return getClass().getSimpleName() + ".broker.localhost";
   }
@@ -99,7 +99,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   @Override
   public void init()
   {
-    _broker = new HashMapBroker(getBrokerJid());
+    _broker = new HashMapBroker(getBrokerAddress());
     
     _skeleton = BamSkeleton.getSkeleton(getClass());
     
@@ -130,16 +130,16 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
    */
   
   protected ClientLinkActor createClientLinkActor(String uid,
-                                                  ActorStream hmtpStream)
+                                                  MessageStream hmtpStream)
   {
     if (uid == null)
       uid = "anon";
     
     int resource = _gId.incrementAndGet();
     
-    String jid = uid + "@" + getBrokerJid() + "/" + resource;
+    String address = uid + "@" + getBrokerAddress() + "/" + resource;
     
-    return new ClientLinkActor(jid, _broker, hmtpStream);
+    return new ClientLinkActor(address, _broker, hmtpStream);
   }
 
   public void addClientLinkActor(ClientLinkActor linkActor)
@@ -157,9 +157,9 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   
   protected Mailbox createServletMailbox()
   {
-    _servletFallbackStream = new FallbackActorStream(this);
+    _servletFallbackStream = new FallbackMessageStream(this);
     
-    return new PassthroughMailbox(getJid(), this, _broker);
+    return new PassthroughMailbox(getAddress(), this, _broker);
   }
 
   //
@@ -167,12 +167,12 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   //
   
   @Override
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
     return _servletActorStream;
   }
 
-  public void setActorStream(ActorStream actorStream)
+  public void setActorStream(MessageStream actorStream)
   {
     _servletActorStream = actorStream;
   }
@@ -199,7 +199,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
     throw new UnsupportedOperationException(getClass().getName());
   }
   
-  protected ActorStream getFallbackStream()
+  protected MessageStream getFallbackStream()
   {
     return _servletFallbackStream;
   }
@@ -221,7 +221,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   public void messageError(String to,
                            String from, 
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     _skeleton.messageError(this, 
                            getFallbackStream(),
@@ -259,7 +259,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
                          String to, 
                          String from, 
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
     _skeleton.queryError(this,
                          getFallbackStream(),
@@ -279,7 +279,7 @@ public class HmtpServlet extends HttpServlet implements Actor, ActorStream
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
 
 }

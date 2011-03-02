@@ -43,6 +43,7 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 import java.io.*;
+import java.util.Locale;
 import java.util.logging.*;
 
 public class WebSocketModule
@@ -225,7 +226,7 @@ public class WebSocketModule
     String url = sb.toString();
 
     if (origin != null)
-      env.getResponse().setHeader("WebSocket-Origin", origin.toLowerCase());
+      env.getResponse().setHeader("WebSocket-Origin", origin.toLowerCase(Locale.ENGLISH));
 
     if (protocol != null)
       env.getResponse().setHeader("WebSocket-Protocol", protocol);

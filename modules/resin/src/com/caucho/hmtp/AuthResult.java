@@ -34,12 +34,12 @@ import java.io.Serializable;
 import com.caucho.inject.Module;
 
 /**
- * Authentication result returns the jid on success
+ * Authentication result returns the address on success
  */
 @Module
 @SuppressWarnings("serial")
 public class AuthResult implements Serializable {
-  private final String _jid;
+  private final String _address;
 
   /**
    * null constructor for Hessian.
@@ -47,20 +47,20 @@ public class AuthResult implements Serializable {
   @SuppressWarnings("unused")
   private AuthResult()
   {
-    _jid = null;
+    _address = null;
   }
 
   /**
    * login packet
    */
-  public AuthResult(final String jid)
+  public AuthResult(final String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   @Override
@@ -70,7 +70,7 @@ public class AuthResult implements Serializable {
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
-    sb.append(_jid);
+    sb.append(_address);
     sb.append("]");
 
     return sb.toString();

@@ -46,7 +46,7 @@ import java.util.*;
  * }
  *
  * element item {
- *    attribute jid,
+ *    attribute address,
  *    attribute node?,
  *    attribute name?,
  *    attribute action { remove, update}?,

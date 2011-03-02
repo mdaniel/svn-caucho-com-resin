@@ -37,6 +37,7 @@ import com.caucho.util.L10N;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Parse scope.
@@ -85,7 +86,7 @@ public class GlobalScope extends Scope {
                           boolean isTop)
   {
     if (isTop)
-      _functionMap.put(name.toLowerCase(), function);
+      _functionMap.put(name.toLowerCase(Locale.ENGLISH), function);
     
     _functionList.add(function);
   }

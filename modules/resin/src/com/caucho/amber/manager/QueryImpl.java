@@ -741,7 +741,7 @@ public class QueryImpl implements Query {
       return true;
 
     if (isNativeQuery()) {
-      String sql = _nativeSql.trim().toUpperCase();
+      String sql = _nativeSql.trim().toUpperCase(Locale.ENGLISH);
 
       if (sql.startsWith("SELECT"))
         return true;

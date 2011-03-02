@@ -37,6 +37,7 @@ import com.caucho.xml.QName;
 import javax.servlet.jsp.HttpJspPage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.*;
 
 public class JspDirectivePage extends JspNode {
@@ -315,7 +316,7 @@ public class JspDirectivePage extends JspNode {
   static String parseCharEncoding(String type)
     throws JspParseException
   {
-    type = type.toLowerCase();
+    type = type.toLowerCase(Locale.ENGLISH);
     int i;
     char ch;
     while ((i = type.indexOf(';')) >= 0 && i < type.length()) {

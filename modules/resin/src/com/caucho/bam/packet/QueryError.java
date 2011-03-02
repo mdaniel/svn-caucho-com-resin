@@ -29,8 +29,8 @@
 
 package com.caucho.bam.packet;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.stream.MessageStream;
 
 import java.io.Serializable;
 
@@ -42,7 +42,7 @@ public class QueryError extends Packet {
   private final long _id;
   
   private final Serializable _value;
-  private final ActorError _error;
+  private final BamError _error;
 
   /**
    * zero-arg constructor for Hessian
@@ -59,8 +59,8 @@ public class QueryError extends Packet {
    * A query to a target
    *
    * @param id the query id
-   * @param to the target jid
-   * @param from the source jid
+   * @param to the target address
+   * @param from the source address
    * @param value copy the query request
    * @param error the query error
    */
@@ -68,7 +68,7 @@ public class QueryError extends Packet {
                     String to,
                     String from,
                     Serializable value,
-                    ActorError error)
+                    BamError error)
   {
     super(to, from);
 
@@ -96,7 +96,7 @@ public class QueryError extends Packet {
   /**
    * Returns the query error
    */
-  public ActorError getError()
+  public BamError getError()
   {
     return _error;
   }
@@ -105,7 +105,7 @@ public class QueryError extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(ActorStream handler, ActorStream toSource)
+  public void dispatch(MessageStream handler, MessageStream toSource)
   {
     handler.queryError(getId(), getTo(), getFrom(),
                            getValue(), getError());

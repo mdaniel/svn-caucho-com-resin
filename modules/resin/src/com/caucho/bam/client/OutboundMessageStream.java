@@ -34,16 +34,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * HMTP client protocol
  */
-public class OutboundActorStream implements ActorStream {
+public class OutboundMessageStream implements MessageStream {
   private static final Logger log 
-    = Logger.getLogger(OutboundActorStream.class.getName());
+    = Logger.getLogger(OutboundMessageStream.class.getName());
   
   private final LinkConnectionFactory _linkFactory;
   
@@ -52,7 +52,7 @@ public class OutboundActorStream implements ActorStream {
   private final AtomicReference<LinkConnection> _connRef
     = new AtomicReference<LinkConnection>();
   
-  public OutboundActorStream(LinkConnectionFactory linkFactory, 
+  public OutboundMessageStream(LinkConnectionFactory linkFactory, 
                              Broker inboundBroker)
   {
     if (linkFactory == null)
@@ -66,12 +66,12 @@ public class OutboundActorStream implements ActorStream {
   }
   
   @Override
-  public String getJid()
+  public String getAddress()
   {
     LinkConnection conn = _connRef.get();
     
     if (conn != null)
-      return conn.getJid();
+      return conn.getAddress();
     else
       return null;
   }
@@ -96,7 +96,7 @@ public class OutboundActorStream implements ActorStream {
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
       
-      getBroker().messageError(from, to, payload, ActorError.create(e));
+      getBroker().messageError(from, to, payload, BamError.create(e));
     }
   }
   
@@ -104,7 +104,7 @@ public class OutboundActorStream implements ActorStream {
   public void messageError(String to, 
                            String from, 
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     try {
       getLink().messageError(to, from, payload, error);
@@ -121,7 +121,7 @@ public class OutboundActorStream implements ActorStream {
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
       
-      getBroker().queryError(id, from, to, payload, ActorError.create(e));
+      getBroker().queryError(id, from, to, payload, BamError.create(e));
     }
   }
   
@@ -140,7 +140,7 @@ public class OutboundActorStream implements ActorStream {
                          String to, 
                          String from, 
                          Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
     try {
       getLink().queryError(id, to, from, payload, error);
@@ -149,7 +149,7 @@ public class OutboundActorStream implements ActorStream {
     }
   }
   
-  private ActorStream getLink()
+  private MessageStream getLink()
   {
     LinkConnection conn = _connRef.get();
     

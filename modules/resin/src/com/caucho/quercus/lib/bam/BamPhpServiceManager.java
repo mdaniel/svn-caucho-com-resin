@@ -132,14 +132,14 @@ public class BamPhpServiceManager { // implements BrokerListener {
     // _broker.addBrokerListener(this);
   }
 
-  public boolean startActor(String jid)
+  public boolean startActor(String address)
   {
     Env env = null;
     boolean started = false;
 
     try {
       QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, "_quercus_bam_start_service", jid);
+      env = createEnv(page, "_quercus_bam_start_service", address);
       page.executeTop(env);
 
       started = env.getGlobalValue("_quercus_bam_function_return").toBoolean();
@@ -152,14 +152,14 @@ public class BamPhpServiceManager { // implements BrokerListener {
     }
   }
 
-  public boolean stopActor(String jid)
+  public boolean stopActor(String address)
   {
     Env env = null;
     boolean stoped = false;
 
     try {
       QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, "_quercus_bam_stop_service", jid);
+      env = createEnv(page, "_quercus_bam_stop_service", address);
       page.executeTop(env);
 
       stoped = env.getGlobalValue("_quercus_bam_function_return").toBoolean();
@@ -172,22 +172,22 @@ public class BamPhpServiceManager { // implements BrokerListener {
     }
   }
 
-  boolean hasChild(String jid)
+  boolean hasChild(String address)
   {
-    return _children.containsKey(jid);
+    return _children.containsKey(address);
   }
 
-  BamPhpActor removeChild(String jid)
+  BamPhpActor removeChild(String address)
   {
-    return _children.remove(jid);
+    return _children.remove(address);
   }
 
-  void addChild(String jid, BamPhpActor child)
+  void addChild(String address, BamPhpActor child)
   {
-    _children.put(jid, child);
+    _children.put(address, child);
   }
 
-  private Env createEnv(QuercusPage page, String type, String jid)
+  private Env createEnv(QuercusPage page, String type, String address)
   {
     WriteStream out = new NullWriteStream();
 
@@ -200,7 +200,7 @@ public class BamPhpServiceManager { // implements BrokerListener {
     env.setGlobalValue("_quercus_bam_service_manager", 
                        actorClassDef.wrap(env, this));
     env.setGlobalValue(type, BooleanValue.TRUE);
-    env.setGlobalValue("_quercus_bam_service_jid", StringValue.create(jid));
+    env.setGlobalValue("_quercus_bam_service_address", StringValue.create(address));
 
     return env;
   }

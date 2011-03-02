@@ -45,7 +45,7 @@ import java.util.*;
  * </pre></code>
  */
 public class MucUserPresence implements java.io.Serializable {
-  // actor jid
+  // actor address
   private String _actor;
   private String _reason;
   private MucContinue _continue;
@@ -55,7 +55,7 @@ public class MucUserPresence implements java.io.Serializable {
   // "moderator", "none", "participant", "visitor"
   private String _role;
   
-  private String _jid;
+  private String _address;
   private String _nick;
   
   private MucDecline _decline;

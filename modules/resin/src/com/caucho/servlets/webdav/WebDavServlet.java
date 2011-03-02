@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1127,7 +1128,7 @@ public class WebDavServlet extends GenericServlet {
     String prefix = request.getScheme() + "://";
     String host = request.getHeader("Host");
     if (host != null)
-      prefix = prefix + host.toLowerCase();
+      prefix = prefix + host.toLowerCase(Locale.ENGLISH);
 
     if (dest.startsWith(prefix))
       return dest.substring(prefix.length());

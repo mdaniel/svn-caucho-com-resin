@@ -29,7 +29,7 @@
 
 package com.caucho.bam.packet;
 
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 import java.io.Serializable;
 
@@ -46,8 +46,8 @@ public class QueryResult extends Packet {
    * A query to a target from a given source
    *
    * @param id the query id
-   * @param to the target jid
-   * @param from the source jid
+   * @param to the target address
+   * @param from the source address
    * @param value the query content
    */
   public QueryResult(long id, String to, String from, Serializable value)
@@ -78,7 +78,7 @@ public class QueryResult extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(ActorStream handler, ActorStream toSource)
+  public void dispatch(MessageStream handler, MessageStream toSource)
   {
     handler.queryResult(getId(), getTo(), getFrom(), getValue());
   }

@@ -34,7 +34,7 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorException;
+import com.caucho.bam.BamException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.actor.AbstractActorSender;
 import com.caucho.bam.actor.Actor;
@@ -42,7 +42,7 @@ import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.client.LinkConnection;
 import com.caucho.bam.client.LinkConnectionFactory;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.remote.websocket.WebSocketClient;
 import com.caucho.util.Alarm;
@@ -59,7 +59,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
     = Logger.getLogger(HmtpLinkFactory.class.getName());
   
   private String _url;
-  private String _jid;
+  private String _address;
   private String _virtualHost;
 
   private WebSocketClient _webSocketClient;
@@ -69,7 +69,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
   private String _password;
   private Serializable _credentials;
   
-  private ActorException _connException;
+  private BamException _connException;
   
   private ClientAuthManager _authManager = new ClientAuthManager();
   private boolean _isMasked;
@@ -173,7 +173,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
         String testSignature = _authManager.sign(uid, clientNonce, password);
         
         if (! testSignature.equals(serverSignature) && "".equals(uid))
-          throw new ActorException(L.l("{0} server signature does not match",
+          throw new BamException(L.l("{0} server signature does not match",
                                       this));
 
         String signature = _authManager.sign(uid, serverNonce, password);
@@ -189,7 +189,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
       AuthResult result = null;
       // result = (AuthResult) query(null, new AuthQuery(uid, credentials));
 
-      _jid = result.getJid();
+      _address = result.getAddress();
 
       if (log.isLoggable(Level.FINE))
         log.fine(this + " login");
@@ -201,34 +201,34 @@ class HmtpLinkFactory implements LinkConnectionFactory {
   }
 
   /**
-   * Returns the jid
+   * Returns the address
    */
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   /**
-   * Returns the broker jid
+   * Returns the broker address
    */
-  public String getBrokerJid()
+  public String getBrokerAddress()
   {
-    String jid = getJid();
+    String address = getAddress();
 
-    if (jid == null)
+    if (address == null)
       return null;
 
-    int p = jid.indexOf('@');
-    int q = jid.indexOf('/');
+    int p = address.indexOf('@');
+    int q = address.indexOf('/');
 
     if (p >= 0 && q >= 0)
-      return jid.substring(p + 1, q);
+      return address.substring(p + 1, q);
     else if (p >= 0)
-      return jid.substring(p + 1);
+      return address.substring(p + 1);
     else if (q >= 0)
-      return jid.substring(0, q);
+      return address.substring(0, q);
     else
-      return jid;
+      return address;
   }
 
   public void flush()

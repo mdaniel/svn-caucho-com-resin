@@ -35,6 +35,7 @@ import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.Location;
 import com.caucho.util.L10N;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
@@ -143,10 +144,10 @@ abstract public class ClassDef {
    */
   public void addInterfaces(HashSet<String> interfaceSet)
   {
-    interfaceSet.add(getName().toLowerCase());
+    interfaceSet.add(getName().toLowerCase(Locale.ENGLISH));
     
     for (String name : getInterfaces()) {
-      interfaceSet.add(name.toLowerCase());
+      interfaceSet.add(name.toLowerCase(Locale.ENGLISH));
     }
   }
 

@@ -42,7 +42,7 @@ import java.util.*;
  * }
  *
  * element item {
- *   jid,
+ *   address,
  *   ask?,
  *   name?,
  *   subscription?,

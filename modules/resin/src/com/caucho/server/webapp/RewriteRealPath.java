@@ -161,7 +161,7 @@ public class RewriteRealPath {
     // server/108j expects case insensitive
     /*
     if (CaseInsensitive.isCaseInsensitive())
-      return nativePath.toLowerCase();
+      return nativePath.toLowerCase(Locale.ENGLISH);
     else
       return nativePath;
     */

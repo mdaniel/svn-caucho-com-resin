@@ -39,7 +39,7 @@ import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.broker.PassthroughBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.hemp.servlet.ClientStubManager;
 import com.caucho.hemp.servlet.ServerProxyBroker;
@@ -177,9 +177,9 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     ManagedBroker broker = _bamService.getBroker();
 
-    _hmtpWriter.setJid("hmtp-server-" + _conn.getId() + "-hmtp");
+    _hmtpWriter.setAddress("hmtp-server-" + _conn.getId() + "-hmtp");
 
-    Mailbox toLinkMailbox = new MultiworkerMailbox(_hmtpWriter.getJid(), _hmtpWriter, broker, 1);
+    Mailbox toLinkMailbox = new MultiworkerMailbox(_hmtpWriter.getAddress(), _hmtpWriter, broker, 1);
     _toLinkBroker = new PassthroughBroker(toLinkMailbox);
     
     _clientManager = new ClientStubManager(broker, toLinkMailbox);
@@ -228,7 +228,7 @@ public class HmtpRequest extends AbstractProtocolConnection
     HmtpLinkActor linkActor = _linkActor;
     _linkActor = null;
 
-    ActorStream linkStream = _toLinkBroker;
+    MessageStream linkStream = _toLinkBroker;
     _toLinkBroker = null;
 
     if (linkActor != null) {

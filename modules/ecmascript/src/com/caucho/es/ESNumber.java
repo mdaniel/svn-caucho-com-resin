@@ -35,6 +35,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Locale;
 
 /**
  * Implementation class for JavaScript numbers.  Essentially, these are
@@ -167,7 +168,7 @@ public class ESNumber extends ESBase implements VfsWriteObject, Externalizable {
     else if (Double.isInfinite(value))
       return (value < 0 ? "-Infinity" : "Infinity");
 
-    return String.valueOf(value).toLowerCase();
+    return String.valueOf(value).toLowerCase(Locale.ENGLISH);
   }
 
   public void print(WriteStream os) throws IOException

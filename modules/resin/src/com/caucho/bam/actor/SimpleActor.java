@@ -31,39 +31,39 @@ package com.caucho.bam.actor;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.AbstractActorStream;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.AbstractMessageStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * Base class for implementing an Agent.
  */
-public class SimpleActor extends AbstractActorStream
+public class SimpleActor extends AbstractMessageStream
   implements Actor
 {
-  private final SkeletonActorStreamFilter<?> _skeleton;
+  private final SkeletonMessageStreamFilter<?> _skeleton;
   private final SimpleActorSender _sender;
   
-  private String _jid;
+  private String _address;
   private Broker _broker;
   private Mailbox _mailbox;
   
-  private ActorStream _actorStream;
+  private MessageStream _actorStream;
 
   public SimpleActor()
   {
-    _jid = getClass().getSimpleName() + "@localhost";
+    _address = getClass().getSimpleName() + "@localhost";
     
-    _skeleton = new SkeletonActorStreamFilter(this, this);
+    _skeleton = new SkeletonMessageStreamFilter(this, this);
     _sender = new SimpleActorSender(_skeleton);
     
     setActorStream(_sender.getActorStream());
   }
 
-  public SimpleActor(String jid, Broker broker)
+  public SimpleActor(String address, Broker broker)
   {
     this();
     
-    _jid = jid;
+    _address = address;
     
     setBroker(broker);
     
@@ -76,25 +76,25 @@ public class SimpleActor extends AbstractActorStream
   //
 
   /* (non-Javadoc)
-   * @see com.caucho.bam.actor.Actor#setJid(java.lang.String)
+   * @see com.caucho.bam.actor.Actor#setAddress(java.lang.String)
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.bam.actor.Actor#setJid(java.lang.String)
+   * @see com.caucho.bam.actor.Actor#setAddress(java.lang.String)
    */
   @Override
-  public void setJid(String jid)
+  public void setAddress(String address)
   {
-    _jid = jid;
+    _address = address;
   }
 
   /**
-   * Returns the custom {@link com.caucho.bam.stream.ActorStream} to the
+   * Returns the custom {@link com.caucho.bam.stream.MessageStream} to the
    * {@link com.caucho.bam.broker.Broker}, so the Broker can send messages to
    * the agent.
    *
@@ -102,7 +102,7 @@ public class SimpleActor extends AbstractActorStream
    * the Broker.
    */
   @Override
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
     return _actorStream;
   }
@@ -110,7 +110,7 @@ public class SimpleActor extends AbstractActorStream
   /**
    * Returns the stream to the actor for broker-forwarded messages.
    */
-  public void setActorStream(ActorStream actorStream)
+  public void setActorStream(MessageStream actorStream)
   {
     _actorStream = actorStream;
   }

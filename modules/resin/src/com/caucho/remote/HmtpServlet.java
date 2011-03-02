@@ -47,7 +47,7 @@ import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.broker.PassthroughBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.config.Admin;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.servlet.ClientStubManager;
@@ -195,7 +195,7 @@ public class HmtpServlet extends GenericServlet {
       _out = new HmtpWebSocketContextWriter(context);
       
       ManagedBroker broker = getBroker();
-      Mailbox toLinkMailbox = new MultiworkerMailbox(_out.getJid(), _out, broker, 1);
+      Mailbox toLinkMailbox = new MultiworkerMailbox(_out.getAddress(), _out, broker, 1);
       
       _linkStream = new PassthroughBroker(toLinkMailbox);
       ClientStubManager clientManager = new ClientStubManager(broker, toLinkMailbox);

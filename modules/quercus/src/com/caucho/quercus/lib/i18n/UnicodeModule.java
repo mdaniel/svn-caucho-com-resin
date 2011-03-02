@@ -42,6 +42,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
@@ -365,7 +366,7 @@ public class UnicodeModule extends AbstractQuercusModule {
   public static Value iconv_get_encoding(Env env,
                        @Optional("all") String type)
   {
-    type = type.toLowerCase();
+    type = type.toLowerCase(Locale.ENGLISH);
 
     if ("all".equals(type)) {
       ArrayValue array = new ArrayValueImpl();
@@ -398,7 +399,7 @@ public class UnicodeModule extends AbstractQuercusModule {
                        String type,
                        StringValue charset)
   {
-    type = type.toLowerCase();
+    type = type.toLowerCase(Locale.ENGLISH);
 
     if ("input_encoding".equals(type)) {
       env.setIni("iconv.input_encoding", charset);

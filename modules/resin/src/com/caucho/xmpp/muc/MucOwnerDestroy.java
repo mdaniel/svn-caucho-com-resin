@@ -37,7 +37,7 @@ import java.util.*;
 public class MucOwnerDestroy implements java.io.Serializable {
   private String password;
   private String reason;
-  private String jid;
+  private String address;
   
   public MucOwnerDestroy()
   {

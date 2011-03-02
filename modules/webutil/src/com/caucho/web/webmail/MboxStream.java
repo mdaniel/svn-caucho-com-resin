@@ -36,6 +36,7 @@ import com.caucho.vfs.StreamImpl;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 
 /*
  * A stream for reading mbox files.
@@ -175,7 +176,7 @@ public class MboxStream extends StreamImpl {
    */
   public Object getAttribute(String key)
   {
-    return headers.get(key.toLowerCase());
+    return headers.get(key.toLowerCase(Locale.ENGLISH));
   }
 
   /**
@@ -219,7 +220,7 @@ public class MboxStream extends StreamImpl {
       String key = null;
       String value = null;
       if (i < line.length()) {
-        key = line.substring(0, i).trim().toLowerCase();
+        key = line.substring(0, i).trim().toLowerCase(Locale.ENGLISH);
         value = line.substring(i + 1).trim();
 
         headers.put(key, value);

@@ -75,7 +75,7 @@ class XmppWriterImpl
   public void messageError(String to,
                            String from,
                            Serializable value,
-                           ActorError error)
+                           BamError error)
   {
     sendMessage(to, from, "error", value, error);
   }
@@ -87,7 +87,7 @@ class XmppWriterImpl
                           String from,
                           String type,
                           Serializable value,
-                          ActorError error)
+                          BamError error)
   {
     try {
       XmppStreamWriterImpl out = _out;
@@ -196,7 +196,7 @@ class XmppWriterImpl
    */
   public void sendQuery(String id, String to, String from,
                         Serializable value, String type,
-                        ActorError error)
+                        BamError error)
   {
     try {
       XmppStreamWriterImpl out = _out;
@@ -238,7 +238,7 @@ class XmppWriterImpl
   void sendPresence(String to, String from,
                     Serializable value,
                     String type,
-                    ActorError error)
+                    BamError error)
   {
     try {
       XmppStreamWriterImpl out = _out;

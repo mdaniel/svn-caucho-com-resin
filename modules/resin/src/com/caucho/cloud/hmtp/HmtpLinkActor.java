@@ -71,29 +71,29 @@ class HmtpLinkActor extends ServerLinkActor {
    * On login, wake the associated ServerPool so we can send a proper response.
    */
   @Override
-  protected void notifyValidLogin(String jid)
+  protected void notifyValidLogin(String address)
   {
-    if (jid == null || ! jid.endsWith("admin.resin"))
+    if (address == null || ! address.endsWith("admin.resin"))
       return;
     
-    int p = jid.indexOf('@');
+    int p = address.indexOf('@');
     
     if (p > 0)
-      jid = jid.substring(p + 1);
+      address = address.substring(p + 1);
     
-    ClusterServer clusterServer = findServerByJid(jid);
+    ClusterServer clusterServer = findServerByAddress(address);
     
     if (clusterServer != null)
       clusterServer.getServerPool().wake();
   }
 
-  private ClusterServer findServerByJid(String jid)
+  private ClusterServer findServerByAddress(String address)
   {
     /*
     for (Cluster cluster : _server.getClusterList()) {
       for (ClusterPod pod : cluster.getPodList()) {
         for (ClusterServer clusterServer : pod.getServerList()) {
-          if (clusterServer.getBamAdminName().equals(jid))
+          if (clusterServer.getBamAdminName().equals(address))
             return clusterServer;
         }
       }

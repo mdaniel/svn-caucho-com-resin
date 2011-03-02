@@ -32,6 +32,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 
 import java.text.CharacterIterator;
+import java.util.Locale;
 
 /**
  * Implementation class for JavaScript strings.
@@ -246,12 +247,12 @@ public class ESString extends ESBase {
 
   ESString toLowerCase()
   { 
-    return ESString.create(string.toLowerCase());
+    return ESString.create(string.toLowerCase(Locale.ENGLISH));
   }
 
   ESString toUpperCase()
   { 
-    return ESString.create(string.toUpperCase());
+    return ESString.create(string.toUpperCase(Locale.ENGLISH));
   }
 
   ESBoolean contains(ESBase b) throws Throwable

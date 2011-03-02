@@ -57,7 +57,7 @@ import javax.xml.stream.*;
  * }
  *
  * element options {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?,
  *   attribute subid?,
  *
@@ -65,7 +65,7 @@ import javax.xml.stream.*;
  * }
  *
  * element subscribe {
- *   attribute jid,
+ *   attribute address,
  *   attribute node?
  * }
  * </pre></code>
@@ -113,8 +113,8 @@ public class XmppPubSubSubscribeQueryMarshal extends AbstractXmppMarshal {
 
     out.writeStartElement("subscribe");
 
-    if (subscribe.getJid() != null)
-      out.writeAttribute("jid", subscribe.getJid());
+    if (subscribe.getAddress() != null)
+      out.writeAttribute("address", subscribe.getAddress());
 
     if (subscribe.getNode() != null)
       out.writeAttribute("node", subscribe.getNode());
@@ -126,8 +126,8 @@ public class XmppPubSubSubscribeQueryMarshal extends AbstractXmppMarshal {
     if (options != null) {
       out.writeStartElement("options");
 
-      if (options.getJid() != null)
-        out.writeAttribute("jid", options.getJid());
+      if (options.getAddress() != null)
+        out.writeAttribute("address", options.getAddress());
 
       if (options.getNode() != null)
         out.writeAttribute("node", options.getNode());

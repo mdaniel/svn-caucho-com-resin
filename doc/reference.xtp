@@ -171,6 +171,8 @@ in.</p>
     <td>request URL</td></tr>
 <tr><td>%s</td>
     <td>status code</td></tr>
+<tr><td>%S</td>
+    <td>requested session id</td></tr>
 <tr><td>%{<var>xxx</var>}t</td>
     <td>request date with optional time format string.</td></tr>
 <tr><td>%T</td>

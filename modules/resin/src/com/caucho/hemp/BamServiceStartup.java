@@ -42,5 +42,5 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface BamServiceStartup
 {
-  String jid();
+  String address();
 }

@@ -73,7 +73,7 @@ public final class ClusterServer {
   // unique identifier for the server within all Resin clusters
   private String _serverDomainId;
   // the bam admin name
-  private String _bamJid;
+  private String _bamAddress;
   
   private String _address = "127.0.0.1";
   private int _port = -1;
@@ -158,7 +158,7 @@ public final class ClusterServer {
 
     _serverDomainId = _serverClusterId + "." + clusterId.replace('.', '_');
 
-    _bamJid = _serverDomainId + ".admin.resin";
+    _bamAddress = _serverDomainId + ".admin.resin";
   }
 
   /**
@@ -203,7 +203,7 @@ public final class ClusterServer {
    */
   public String getBamAdminName()
   {
-    return _bamJid;
+    return _bamAddress;
   }
 
   /**

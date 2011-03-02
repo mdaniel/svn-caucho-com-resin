@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -989,7 +990,7 @@ public class QuercusClass extends NullValue {
    */
   public boolean isA(String name)
   {
-    return _instanceofSet.contains(name.toLowerCase());
+    return _instanceofSet.contains(name.toLowerCase(Locale.ENGLISH));
   }
   
   /*
@@ -1787,7 +1788,7 @@ public class QuercusClass extends NullValue {
     if (fun != null)
       return fun;
 
-    fun = findStaticFunctionLowerCase(name.toLowerCase());
+    fun = findStaticFunctionLowerCase(name.toLowerCase(Locale.ENGLISH));
     */
     
     if (fun != null)

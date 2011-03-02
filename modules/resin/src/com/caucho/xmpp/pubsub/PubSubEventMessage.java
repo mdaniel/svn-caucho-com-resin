@@ -91,7 +91,7 @@ import java.io.Serializable;
  * }
  *
  * element subscription {
- *   @jid
+ *   @address
  *   &amp @expiry?
  *   &amp @node?
  *   &amp @subid?

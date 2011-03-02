@@ -32,8 +32,8 @@ package com.caucho.hemp.servlet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorException;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamException;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.broker.Broker;
@@ -56,7 +56,7 @@ public class ServerLinkActor extends SimpleActor
   private final ServerAuthManager _authManager;
   private final String _ipAddress;
   
-  private String _clientJid;
+  private String _clientAddress;
   
   public ServerLinkActor(Broker toLinkBroker,
                          ClientStubManager clientManager,
@@ -103,7 +103,7 @@ public class ServerLinkActor extends SimpleActor
   
     try {
       _authManager.authenticate(query.getUid(), credentials, ipAddress);
-    } catch (ActorException e) {
+    } catch (BamException e) {
       log.log(Level.FINE, e.toString(), e);
     
       getBroker().queryError(id, from, to, query,
@@ -114,8 +114,8 @@ public class ServerLinkActor extends SimpleActor
       log.log(Level.FINE, e.toString(), e);
     
       getBroker().queryError(id, from, to, query,
-                                 new ActorError(ActorError.TYPE_AUTH,
-                                                ActorError.NOT_AUTHORIZED,
+                                 new BamError(BamError.TYPE_AUTH,
+                                                BamError.NOT_AUTHORIZED,
                                                 e.getMessage()));
       return;
     } catch (Throwable e) {
@@ -126,7 +126,7 @@ public class ServerLinkActor extends SimpleActor
     
     notifyValidLogin(from);
     
-    AuthResult result = new AuthResult(_clientManager.getJid());
+    AuthResult result = new AuthResult(_clientManager.getAddress());
     getBroker().queryResult(id, from, to, result);
   }
   
@@ -135,7 +135,7 @@ public class ServerLinkActor extends SimpleActor
     _clientManager.logout();
   }
   
-  protected void notifyValidLogin(String jid)
+  protected void notifyValidLogin(String address)
   {
   }
 }

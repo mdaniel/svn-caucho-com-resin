@@ -32,7 +32,7 @@ package com.caucho.bam.query;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 
 /**
  * callback for a query
@@ -47,7 +47,7 @@ public class AbstractQueryCallback implements QueryCallback {
   public void onQueryError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
   }
 }

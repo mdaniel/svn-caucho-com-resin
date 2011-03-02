@@ -32,13 +32,14 @@ package com.caucho.quercus.lib.bam;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.SimpleActorSender;
-import com.caucho.bam.stream.ActorStream;
-import com.caucho.bam.stream.NullActorStream;
+import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.stream.NullMessageStream;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.quercus.annotation.ClassImplementation;
@@ -93,15 +94,15 @@ public class BamModule extends AbstractQuercusModule
     if (connection == null) {
       HempBroker broker = HempBroker.getCurrent();
 
-      String jid = "php@" + env.getGlobalVar("_SERVER").get(SERVER_NAME);
+      String address = "php@" + env.getGlobalVar("_SERVER").get(SERVER_NAME);
       String resource = env.getGlobalVar("_SERVER").get(PHP_SELF).toString();
 
       if (resource.indexOf('/') == 0)
         resource = resource.substring(1);
       
-      NullActorStream stream = new NullActorStream(jid, broker);
+      NullMessageStream stream = new NullMessageStream(address, broker);
 
-      connection = new SimpleActorSender(stream, broker, jid, resource);
+      connection = new SimpleActorSender(stream, broker, address, resource);
       env.addCleanup(new BamConnectionResource(connection));
       env.setSpecialValue("_quercus_bam_connection", connection);
     }
@@ -119,7 +120,7 @@ public class BamModule extends AbstractQuercusModule
     return null;
   }
 
-  private static ActorStream getBrokerStream(Env env)
+  private static MessageStream getBrokerStream(Env env)
   {
     BamPhpActor actor = getActor(env);
 
@@ -131,16 +132,16 @@ public class BamModule extends AbstractQuercusModule
     return connection.getBroker();
   }
 
-  private static String getJid(Env env)
+  private static String getAddress(Env env)
   {
     BamPhpActor actor = getActor(env);
 
     if (actor != null)
-      return actor.getJid();
+      return actor.getAddress();
 
     ActorSender connection = getActorClient(env);
 
-    return connection.getJid();
+    return connection.getAddress();
   }
 
   public static Value bam_login(Env env, 
@@ -171,7 +172,7 @@ public class BamModule extends AbstractQuercusModule
     return BooleanValue.TRUE;
   }
 
-  public static Value bam_service_exists(Env env, String jid)
+  public static Value bam_service_exists(Env env, String address)
   {
     BamPhpServiceManager manager = getServiceManager(env);
 
@@ -179,13 +180,13 @@ public class BamModule extends AbstractQuercusModule
       return env.error("bam_service_exists must be called from " + 
                        "service manager script");
 
-    return BooleanValue.create(manager.hasChild(jid));
+    return BooleanValue.create(manager.hasChild(address));
   }
 
   /**
    * Registers a "child" service that is represented by the given script.
    **/
-  public static Value bam_register_service(Env env, String jid, String script)
+  public static Value bam_register_service(Env env, String address, String script)
   {
     BamPhpServiceManager manager = getServiceManager(env);
 
@@ -199,14 +200,14 @@ public class BamModule extends AbstractQuercusModule
       return env.error("script not found: " + script);
 
     BamPhpActor child = new BamPhpActor();
-    child.setJid(jid);
+    child.setAddress(address);
     child.setScript(path);
     // child.setBroker(manager.getBroker());
 
     //InjectManager container = InjectManager.getCurrent();
     //container.injectObject(child);
 
-    manager.addChild(jid, child);
+    manager.addChild(address, child);
 
     return BooleanValue.TRUE;
   }
@@ -214,7 +215,7 @@ public class BamModule extends AbstractQuercusModule
   /**
    * Registers a "child" service that is represented by the given script.
    **/
-  public static Value bam_unregister_service(Env env, String jid)
+  public static Value bam_unregister_service(Env env, String address)
   {
     BamPhpServiceManager manager = getServiceManager(env);
 
@@ -222,7 +223,7 @@ public class BamModule extends AbstractQuercusModule
       return env.error("bam_unregister_service must be called from " + 
                        "service manager script");
 
-    BamPhpActor service = manager.removeChild(jid);
+    BamPhpActor service = manager.removeChild(address);
 
     if (service == null)
       return BooleanValue.FALSE;
@@ -232,20 +233,20 @@ public class BamModule extends AbstractQuercusModule
     return BooleanValue.TRUE;
   }
 
-  public static Value bam_actor_exists(Env env, String jid)
+  public static Value bam_actor_exists(Env env, String address)
   {
     BamPhpActor actor = getActor(env);
 
     if (actor == null)
       return env.error("bam_actor_exists must be called from actor script");
 
-    return BooleanValue.create(actor.hasChild(jid));
+    return BooleanValue.create(actor.hasChild(address));
   }
 
   /**
    * Registers a "child" actor that is represented by the given script.
    **/
-  public static Value bam_register_actor(Env env, String jid, String script)
+  public static Value bam_register_actor(Env env, String address, String script)
   {
     BamPhpActor actor = getActor(env);
 
@@ -253,7 +254,7 @@ public class BamModule extends AbstractQuercusModule
       return env.error("bam_register_actor must be called from actor script");
 
     BamPhpActor child = new BamPhpActor();
-    child.setJid(jid);
+    child.setAddress(address);
 
     Path path = env.getSelfDirectory().lookup(script);
 
@@ -265,21 +266,21 @@ public class BamModule extends AbstractQuercusModule
     //InjectManager container = InjectManager.getCurrent();
     //container.injectObject(child);
 
-    actor.addChild(jid, child);
+    actor.addChild(address, child);
 
     return BooleanValue.TRUE;
   }
 
-  public static String bam_my_jid(Env env)
+  public static String bam_my_address(Env env)
   {
-    return getJid(env);
+    return getAddress(env);
   }
 
   //
   // Utilities
   //
 
-  public static String bam_bare_jid(Env env, String uri)
+  public static String bam_bare_address(Env env, String uri)
   {
     int slash = uri.indexOf('/');
 
@@ -289,7 +290,7 @@ public class BamModule extends AbstractQuercusModule
     return uri.substring(0, slash);
   }
 
-  public static String bam_jid_resource(Env env, String uri)
+  public static String bam_address_resource(Env env, String uri)
   {
     int slash = uri.indexOf('/');
 
@@ -305,15 +306,15 @@ public class BamModule extends AbstractQuercusModule
 
   public static void bam_send_message(Env env, String to, Serializable value)
   {
-    getBrokerStream(env).message(to, getJid(env), value);
+    getBrokerStream(env).message(to, getAddress(env), value);
   }
 
   public static void bam_send_message_error(Env env, 
                                             String to, 
                                             Serializable value, 
-                                            ActorError error)
+                                            BamError error)
   {
-    getBrokerStream(env).messageError(to, getJid(env), value, error);
+    getBrokerStream(env).messageError(to, getAddress(env), value, error);
   }
 
   public static Value bam_send_query(Env env, 
@@ -321,7 +322,7 @@ public class BamModule extends AbstractQuercusModule
                                          String to, 
                                          Serializable value)
   {
-    String from = getJid(env);
+    String from = getAddress(env);
     getBrokerStream(env).query(id, to, from, value);
 
     return BooleanValue.TRUE;
@@ -332,14 +333,14 @@ public class BamModule extends AbstractQuercusModule
                                            String to,
                                            Serializable value)
   {
-    getBrokerStream(env).queryResult(id, to, getJid(env), value);
+    getBrokerStream(env).queryResult(id, to, getAddress(env), value);
   }
 
   public static void bam_send_query_error(Env env, 
                                           long id, String to,
-                                          Serializable value, ActorError error)
+                                          Serializable value, BamError error)
   {
-    getBrokerStream(env).queryError(id, to, getJid(env), value, error);
+    getBrokerStream(env).queryError(id, to, getAddress(env), value, error);
   }
 
   public static Value im_send_message(Env env, 
@@ -412,7 +413,7 @@ public class BamModule extends AbstractQuercusModule
   }
 
   public static RosterItem im_create_roster_item(Env env, 
-                                                 String jid,
+                                                 String address,
                                                  @Optional String name,
                                                  @Optional String subscription,
                                                  @Optional 
@@ -421,7 +422,7 @@ public class BamModule extends AbstractQuercusModule
     if ("".equals(subscription))
       subscription = "to";
 
-    return new RosterItem(null, jid, name, subscription, groupList);
+    return new RosterItem(null, address, name, subscription, groupList);
   }
 
   public static void im_send_roster(Env env, 
@@ -440,7 +441,7 @@ public class BamModule extends AbstractQuercusModule
                                            ArrayList<Serializable> extras)
   {
     if ("".equals(from))
-      from = getJid(env);
+      from = getAddress(env);
 
     if ("".equals(show))
       show = null;
@@ -604,8 +605,8 @@ public class BamModule extends AbstractQuercusModule
         return BooleanValue.FALSE;
       }
 
-      Value jid = env.getGlobalValue("_quercus_bam_service_jid");
-      Value ret = function.call(env, jid);
+      Value address = env.getGlobalValue("_quercus_bam_service_address");
+      Value ret = function.call(env, address);
 
       env.setGlobalValue("_quercus_bam_function_return", ret);
 
@@ -678,7 +679,7 @@ public class BamModule extends AbstractQuercusModule
     if (obj == null)
       return env.findFunction(prefix);
 
-    String typeName = obj.getClass().getSimpleName().toLowerCase();
+    String typeName = obj.getClass().getSimpleName().toLowerCase(Locale.ENGLISH);
     String functionName = prefix + '_' + typeName;
 
     AbstractFunction function = env.findFunction(functionName);

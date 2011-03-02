@@ -48,6 +48,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -461,7 +462,7 @@ public class JdbcStatementResource {
     if (_stmtType.length() == 0)
       _stmtType = "UNKNOWN";
     else {
-      _stmtType = _stmtType.toUpperCase();
+      _stmtType = _stmtType.toUpperCase(Locale.ENGLISH);
       String s = _stmtType.replaceAll(
           "(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
       if (! s.equals(""))

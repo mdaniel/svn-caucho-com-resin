@@ -27,100 +27,113 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.query;
-
+package com.caucho.bam.stream;
 
 import java.io.Serializable;
 
-import com.caucho.bam.ActorError;
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.ActorStream;
+
 
 /**
- * An ActorStream filter that intercepts query results and passes them to
- * the QueryManager to be matched with pending queries.
+ * Abstract implementation of a BAM filter.  The default operation
+ * of most methods is to forward the request to the next stream.
  */
-public class QueryActorStreamFilter implements ActorStream {
-  private final ActorStream _next;
-  private final QueryManager _queryManager;
-  
-  public QueryActorStreamFilter(ActorStream next, 
-                                QueryManager queryManager)
-  {
-    _next = next;
-    _queryManager = queryManager;
-  }
-  
+abstract public class AbstractMessageStreamFilter implements MessageStream
+{
+  abstract protected MessageStream getNext();
+ 
+  /**
+   * Returns the address of the final actor
+   */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _next.getJid();
+    return getNext().getAddress();
   }
   
-  @Override
-  public boolean isClosed()
-  {
-    return _next.isClosed();
-  }
-  
+  /**
+   * Returns the broker of the final actor.
+   */
   @Override
   public Broker getBroker()
   {
-    return _next.getBroker();
+    return getNext().getBroker();
   }
   
+  /**
+   * Sends a unidirectional message
+   * 
+   * @param to the target address
+   * @param from the source address
+   * @param payload the message payload
+   */
   @Override
-  public void message(String to,
-                      String from,
-                      Serializable payload)
+  public void message(String to, String from, Serializable payload)
   {
-    _next.message(to, from, payload);
+    getNext().message(to, from, payload);
   }
   
+  /**
+   * Sends a unidirectional message error
+   * 
+   * @param to the target address
+   * @param from the source address
+   * @param payload the message payload
+   */
   @Override
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
-    _next.messageError(to, from, payload, error);
+    getNext().messageError(to, from, payload, error);
   }
-
+  
   @Override
   public void query(long id,
                     String to,
                     String from,
                     Serializable payload)
   {
-    _next.query(id, to, from, payload);
+    getNext().query(id, to, from, payload);
   }
-
+  
   @Override
   public void queryResult(long id,
                           String to,
                           String from,
                           Serializable payload)
   {
-    if (! _queryManager.onQueryResult(id, to, from, payload)) {
-      _next.queryResult(id, to, from, payload);
-    }
+    getNext().queryResult(id, to, from, payload);
   }
-
+  
   @Override
   public void queryError(long id,
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
-    if (! _queryManager.onQueryError(id, to, from, payload, error)) {
-      _next.queryError(id, to, from, payload, error);
-    }
+    getNext().queryError(id, to, from, payload, error);
+  }
+  
+  @Override
+  public boolean isClosed()
+  {
+    return getNext().isClosed();
+  }
+
+  /**
+   * Closes the filter, but not the child by default.
+   */
+  public void close()
+  {
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _next + "]";
+    return getClass().getSimpleName() + "[" + getNext() + "]";
   }
 }

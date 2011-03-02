@@ -35,22 +35,22 @@ import java.util.*;
  * Muc query
  */
 public class MucDestroy implements java.io.Serializable {
-  private String _jid;
+  private String _address;
   private String _reason;
   
   public MucDestroy()
   {
   }
   
-  public MucDestroy(String jid, String reason)
+  public MucDestroy(String address, String reason)
   {
-    _jid = jid;
+    _address = address;
     _reason = reason;
   }
   
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
 
   public String getReason()
@@ -61,7 +61,7 @@ public class MucDestroy implements java.io.Serializable {
   @Override
   public String toString()
   {
-    return (getClass().getSimpleName() + "[jid=" + _jid
+    return (getClass().getSimpleName() + "[address=" + _address
             + ",reason=" + _reason + "]");
   }
 }

@@ -30,13 +30,11 @@
 package com.caucho.bam.mailbox;
 
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import com.caucho.bam.ActorError;
-import com.caucho.bam.BamLargeMessage;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamLargePayload;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * Mailbox which filters large messages to a separate queue, so large messages
@@ -44,21 +42,18 @@ import com.caucho.bam.stream.ActorStream;
  */
 public class DualSizeMailbox implements Mailbox
 {
-  private static final Logger log
-    = Logger.getLogger(DualSizeMailbox.class.getName());
-  
-  private final String _jid;
+  private final String _address;
   private final Broker _broker;
   
   private final Mailbox _largeMailbox;
   private final Mailbox _smallMailbox;
 
-  public DualSizeMailbox(String jid,
+  public DualSizeMailbox(String address,
                          Broker broker,
                          Mailbox smallMailbox,
                          Mailbox largeMailbox)
   {
-    _jid = jid;
+    _address = address;
     
     if (broker == null)
       throw new NullPointerException();
@@ -77,12 +72,12 @@ public class DualSizeMailbox implements Mailbox
   }
 
   /**
-   * Returns the actor's jid
+   * Returns the actor's address
    */
   @Override
-  public String getJid()
+  public String getAddress()
   {
-    return _jid;
+    return _address;
   }
   
   @Override
@@ -98,7 +93,7 @@ public class DualSizeMailbox implements Mailbox
   }
   
   @Override
-  public ActorStream getActorStream()
+  public MessageStream getActorStream()
   {
     return _smallMailbox.getActorStream();
   }
@@ -109,7 +104,7 @@ public class DualSizeMailbox implements Mailbox
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    if (payload instanceof BamLargeMessage)
+    if (payload instanceof BamLargePayload)
       _largeMailbox.message(to, from, payload);
     else
       _smallMailbox.message(to, from, payload);
@@ -122,9 +117,9 @@ public class DualSizeMailbox implements Mailbox
   public void messageError(String to,
                            String from,
                            Serializable payload,
-                           ActorError error)
+                           BamError error)
   {
-    if (payload instanceof BamLargeMessage)
+    if (payload instanceof BamLargePayload)
       _largeMailbox.messageError(to, from, payload, error);
     else
       _smallMailbox.messageError(to, from, payload, error);
@@ -139,7 +134,7 @@ public class DualSizeMailbox implements Mailbox
                        String from,
                        Serializable payload)
   {
-    if (payload instanceof BamLargeMessage)
+    if (payload instanceof BamLargePayload)
       _largeMailbox.query(id, to, from, payload);
     else
       _smallMailbox.query(id, to, from, payload);
@@ -154,7 +149,7 @@ public class DualSizeMailbox implements Mailbox
                           String from,
                           Serializable payload)
   {
-    if (payload instanceof BamLargeMessage)
+    if (payload instanceof BamLargePayload)
       _largeMailbox.queryResult(id, to, from, payload);
     else
       _smallMailbox.queryResult(id, to, from, payload);
@@ -168,9 +163,9 @@ public class DualSizeMailbox implements Mailbox
                          String to,
                          String from,
                          Serializable payload,
-                         ActorError error)
+                         BamError error)
   {
-    if (payload instanceof BamLargeMessage)
+    if (payload instanceof BamLargePayload)
       _largeMailbox.queryError(id, to, from, payload, error);
     else
       _smallMailbox.queryError(id, to, from, payload, error);

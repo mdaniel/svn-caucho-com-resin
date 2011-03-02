@@ -32,6 +32,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 public class CaseInsensitiveHashMap<V> extends HashMap<String,V>
@@ -39,18 +40,18 @@ public class CaseInsensitiveHashMap<V> extends HashMap<String,V>
   @Override
   public V get(Object name)
   {
-    return super.get(((String) name).toLowerCase());
+    return super.get(((String) name).toLowerCase(Locale.ENGLISH));
   }
   
   @Override
   public V put(String name, V value)
   {
-    return super.put(name.toLowerCase(), value);
+    return super.put(name.toLowerCase(Locale.ENGLISH), value);
   }
   
   @Override
   public V remove(Object name)
   {
-    return super.remove(((String) name).toLowerCase());
+    return super.remove(((String) name).toLowerCase(Locale.ENGLISH));
   }
 }

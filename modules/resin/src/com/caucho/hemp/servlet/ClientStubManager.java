@@ -51,10 +51,10 @@ public class ClientStubManager {
     _toLinkMailbox = toLinkMailbox;
   }
 
-  public String getJid()
+  public String getAddress()
   {
     if (_clientStub != null)
-      return _clientStub.getJid();
+      return _clientStub.getAddress();
     else
       throw new IllegalStateException(L.l("{0}: Client stub has not been registered",
                                           this));

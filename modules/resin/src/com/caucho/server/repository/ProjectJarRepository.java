@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -123,7 +124,7 @@ public class ProjectJarRepository implements ArtifactResolver
       if (! key.endsWith("/pom.xml"))
         continue;
 
-      String lowerKey = key.toLowerCase();
+      String lowerKey = key.toLowerCase(Locale.ENGLISH);
 
       if (! lowerKey.startsWith("meta-inf/maven/"))
         continue;

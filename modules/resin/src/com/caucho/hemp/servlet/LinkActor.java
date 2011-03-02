@@ -29,16 +29,16 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * ServerLinkActor handles link messages, i.e. to=null, which is primarily
  * authentication.
  */
 
-public interface LinkActor extends ActorStream {
+public interface LinkActor extends MessageStream {
   /**
-   * Returns the JID for a logged-in user.
+   * Returns the address for a logged-in user.
    */
-  public String getClientJid();
+  public String getClientAddress();
 }

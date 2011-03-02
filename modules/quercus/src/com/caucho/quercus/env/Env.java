@@ -3321,7 +3321,7 @@ public class Env
       return value;
 
     if (_lowerConstMap != null) {
-      value = _lowerConstMap.get(name.toLowerCase());
+      value = _lowerConstMap.get(name.toLowerCase(Locale.ENGLISH));
 
       if (value != null)
         return value;
@@ -3378,7 +3378,7 @@ public class Env
       return value;
 
     if (_lowerConstMap != null) {
-      value = _lowerConstMap.get(name.toLowerCase());
+      value = _lowerConstMap.get(name.toLowerCase(Locale.ENGLISH));
 
       if (value != null)
         return value;
@@ -3594,7 +3594,7 @@ public class Env
     if (isStrict())
       return null;
 
-    name = name.toLowerCase();
+    name = name.toLowerCase(Locale.ENGLISH);
 
     id = _quercus.findFunctionId(name);
 
@@ -3712,7 +3712,7 @@ public class Env
   public Value addFunction(String name, AbstractFunction fun)
   {
     AbstractFunction staticFun
-      = _quercus.findLowerFunctionImpl(name.toLowerCase());
+      = _quercus.findLowerFunctionImpl(name.toLowerCase(Locale.ENGLISH));
 
     if (staticFun != null)
       throw new QuercusException(L.l("can't redefine function {0}", name));

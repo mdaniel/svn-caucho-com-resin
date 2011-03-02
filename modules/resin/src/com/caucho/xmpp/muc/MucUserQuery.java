@@ -66,13 +66,13 @@ import java.util.*;
  * }
  *
  * element destroy {
- *   @jid?
+ *   @address?
  *   &amp; reason?
  * }
  *
  * element item {
  *   @affiliation?
- *   &amp; @jid?
+ *   &amp; @address?
  *   &amp; @nick?
  *   &amp; @role?
  *   &amp; actor?
@@ -81,7 +81,7 @@ import java.util.*;
  * }
  *
  * element actor {
- *   @jid
+ *   @address
  * }
  *
  * element continue {

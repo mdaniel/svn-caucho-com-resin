@@ -30,11 +30,11 @@
 package com.caucho.bam.actor;
 
 import com.caucho.bam.broker.ManagedBroker;
-import com.caucho.bam.stream.ActorStream;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
- * which always using the actor's JID as the "from" parameter.
+ * which always using the actor's address as the "from" parameter.
  */
 public class LocalActorSender extends SimpleActorSender {
   public LocalActorSender(ManagedBroker broker,
@@ -43,7 +43,7 @@ public class LocalActorSender extends SimpleActorSender {
     super(broker, uid);
   }
  
-  public LocalActorSender(ActorStream next,
+  public LocalActorSender(MessageStream next,
                           ManagedBroker broker)
   {
     super(next, broker);

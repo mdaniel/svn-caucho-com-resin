@@ -31,6 +31,7 @@ package com.caucho.server.host;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -348,7 +349,7 @@ public class Host
    */
   public void addHostAlias(String name)
   {
-    name = name.toLowerCase();
+    name = name.toLowerCase(Locale.ENGLISH);
 
     if (! _aliasList.contains(name))
       _aliasList.add(name);
