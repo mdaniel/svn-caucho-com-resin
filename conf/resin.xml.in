@@ -87,6 +87,13 @@
     </resin:if>
 
     <!--
+       - Configuration for the health monitoring system
+      -->
+    <resin:if test="${resin.professional}">
+      <resin:import path="${__DIR__}/health.xml"/>
+    </resin:if>
+
+    <!--
        - Default host configuration applied to all virtual hosts.
       -->
     <host-default>

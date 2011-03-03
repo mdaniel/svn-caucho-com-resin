@@ -84,6 +84,13 @@
       <resin:StatService/>
       <resin:XaLogService/>
     </resin:if>
+    
+    <!--
+       - Configuration for the health monitoring system
+      -->
+    <resin:if test="${resin.professional}">
+      <resin:import path="${__DIR__}/health.xml"/>
+    </resin:if>
   </cluster-default>
 
   <cluster id="app-tier">

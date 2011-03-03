@@ -4,7 +4,7 @@
          xmlns:ee="urn:java:ee">
 
   <!--
-     - Health system configuration
+     - Health monitoring system default configuration
     -->
          
   <health:HealthSystem>
@@ -12,6 +12,7 @@
     <delay>15m</delay>
     <period>5m</period>
     <recheckPeriod>15s</recheckPeriod>
+    <recheckMax>5</recheckMax>
   </health:HealthSystem>
 
   <!--
@@ -53,7 +54,7 @@
   </health:Restart>
   
   <!--
-     - Dump active threads if cpu usage is critically high
+     - Dump active threads and restart if cpu usage is critically high
     -->
 
   <health:CpuHealthCheck ee:Named="cpuHealthCheck">
@@ -65,6 +66,11 @@
     <health:IfHealthCritical healthCheck="${cpuHealthCheck}"/>
     <health:IfRechecked/>
   </health:DumpThreads>
+  
+  <health:Restart>
+    <health:IfHealthCritical healthCheck="${cpuHealthCheck}"/>
+    <health:IfRechecked/>
+  </health:Restart>
   
   <!--
      - Log missing or delayed cluster member heartbeats
