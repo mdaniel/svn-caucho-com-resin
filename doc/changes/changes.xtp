@@ -13,6 +13,7 @@
 
 <s2 title="4.0.16 - snapshot">
 <ul>
+<li>servlet: ServletContext.getResource("/foo/") was not returning URL when foo is a directory, needed for spring (#4411, rep by ccwf)</li>
 <li>access-log: add '%S' for session tracking (#4422, rep by Steffen Busch)</li>
 <li>include/forward: cross-context include/forward was not switching WebApps properly (#4362, rep by igor)</li>
 <li>classloader: enabled jar caching to improve startup times (#4420, rep by Mattias Jiderhamn)</li>

@@ -391,17 +391,17 @@ public class HmuxDispatchRequest {
       CloudServer cloudServer = servers[0];
       ClusterServer server = cloudServer.getData(ClusterServer.class);
 
-      writeString(os, HmuxRequest.HMUX_HEADER, "live-time");
-      writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceIdleTime() / 1000));
+      crc64 = writeTime(os, crc64, "live-time", 
+                        server.getLoadBalanceIdleTime());
 
-      writeString(os, HmuxRequest.HMUX_HEADER, "dead-time");
-      writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceRecoverTime() / 1000));
-    
-      writeString(os, HmuxRequest.HMUX_HEADER, "read-timeout");
-      writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceSocketTimeout() / 1000));
-    
-      writeString(os, HmuxRequest.HMUX_HEADER, "connect-timeout");
-      writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceConnectTimeout() / 1000));
+      crc64 = writeTime(os, crc64, "dead-time", 
+                        server.getLoadBalanceRecoverTime());
+
+      crc64 = writeTime(os, crc64, "read-timeout", 
+                        server.getLoadBalanceSocketTimeout());
+
+      crc64 = writeTime(os, crc64, "connect-timeout", 
+                        server.getLoadBalanceConnectTimeout());
     }
 
     for (int i = 0; i < serverLength; i++) {
@@ -433,6 +433,17 @@ public class HmuxDispatchRequest {
     }
 
     return crc64;
+  }
+  
+  private long writeTime(WriteStream os, long crc, String header, long time)
+    throws IOException
+  {
+    writeString(os, HmuxRequest.HMUX_HEADER, header);
+    writeString(os, HmuxRequest.HMUX_STRING, "" + (time / 1000));
+    
+    crc = Crc64.generate(crc, time);
+    
+    return crc;
   }
   
   /**

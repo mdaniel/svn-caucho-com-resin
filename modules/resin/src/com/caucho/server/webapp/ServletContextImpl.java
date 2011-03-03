@@ -309,11 +309,14 @@ public class ServletContextImpl extends ServletContextCompat
     if (path.exists() && name.startsWith("/resources/")) {
       return url;
     }
-    else if (path.exists() && path.isFile()) {
+    else if (path.isFile()) {
       return url;
     }
     else if (getClassLoader().getResource("META-INF/resources/" + realPath) != null) {
       return url;
+    }
+    else if (path.exists()) {
+      return new URL(path.getURL());
     }
 
     return null;
