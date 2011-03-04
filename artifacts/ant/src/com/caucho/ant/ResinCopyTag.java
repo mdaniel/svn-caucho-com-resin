@@ -159,7 +159,7 @@ public class ResinCopyTag extends ResinDeployClientTask
   @Override
   protected void fillArgs(List<String> args)
   {
-    args.add("copy");
+    args.add("deploy-copy");
 
     fillBaseArgs(args);
 

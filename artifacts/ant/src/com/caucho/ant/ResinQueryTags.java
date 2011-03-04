@@ -85,7 +85,7 @@ public class ResinQueryTags extends ResinDeployClientTask {
   @Override
   protected void fillArgs(List<String> args)
   {
-    args.add("list");
+    args.add("deploy-list");
 
     fillBaseArgs(args);
 
