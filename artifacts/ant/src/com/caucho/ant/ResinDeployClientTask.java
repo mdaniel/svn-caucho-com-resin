@@ -35,6 +35,7 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.Java;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Handler;
