@@ -33,6 +33,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
@@ -43,6 +46,7 @@ import com.caucho.remote.websocket.WebSocketPrintWriter;
 import com.caucho.remote.websocket.WebSocketReader;
 import com.caucho.remote.websocket.WebSocketWriter;
 import com.caucho.remote.websocket.FrameInputStream;
+import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
@@ -55,6 +59,10 @@ import com.caucho.websocket.WebSocketListener;
 class WebSocketContextImpl
   implements WebSocketContext, WebSocketConstants, SocketLinkDuplexListener
 {
+  private static final L10N L = new L10N(WebSocketContextImpl.class);
+  private static final Logger log
+    = Logger.getLogger(WebSocketContextImpl.class.getName());
+  
   private final HttpServletRequestImpl _request;
   private final WebSocketListener _listener;
 
@@ -70,6 +78,7 @@ class WebSocketContextImpl
   private WebSocketReader _textIn;
   
   private boolean _isReadClosed;
+  private AtomicBoolean _isWriteClosed = new AtomicBoolean();
 
   WebSocketContextImpl(HttpServletRequestImpl request,
                        HttpServletResponseImpl response,
@@ -113,6 +122,10 @@ class WebSocketContextImpl
   public OutputStream startBinaryMessage()
   throws IOException
   {
+    if (_isWriteClosed.get())
+      throw new IllegalStateException(L.l("{0} is closed for writing.",
+                                          this));
+    
     if (_binaryOut == null)
       _binaryOut = new WebSocketOutputStream(_controller.getWriteStream(),
                                              TempBuffer.allocate().getBuffer());
@@ -140,7 +153,20 @@ class WebSocketContextImpl
   @Override
   public void close()
   {
-    disconnect();
+    if (_isWriteClosed.getAndSet(true))
+      return;
+
+    try {
+      WriteStream out = _controller.getWriteStream();
+    
+      out.write(0x81);
+      out.write(0x00);
+      out.flush();
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      disconnect();
+    }
   }
 
   @Override
