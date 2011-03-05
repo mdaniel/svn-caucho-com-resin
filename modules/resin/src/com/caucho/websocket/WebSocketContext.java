@@ -65,7 +65,12 @@ public interface WebSocketContext {
   public long getTimeout();
 
   /**
-   * Complete and close the connection.
+   * gracefully close the connection, waiting for unread messages.
    */
-  public void complete();
+  public void close();
+
+  /**
+   * Disconnect the connection.
+   */
+  public void disconnect();
 }

@@ -68,6 +68,8 @@ class WebSocketContextImpl
   private WebSocketWriter _textOut;
   private PrintWriter _textWriter;
   private WebSocketReader _textIn;
+  
+  private boolean _isReadClosed;
 
   WebSocketContextImpl(HttpServletRequestImpl request,
                        HttpServletResponseImpl response,
@@ -134,9 +136,15 @@ class WebSocketContextImpl
     
     return _textWriter;
   }
+  
+  @Override
+  public void close()
+  {
+    disconnect();
+  }
 
   @Override
-  public void complete()
+  public void disconnect()
   {
     _controller.complete();
   }
@@ -202,10 +210,19 @@ class WebSocketContextImpl
 
       _listener.onReadText(this, _textIn);
       break;
+      
+    case OP_CLOSE:
+      _isReadClosed = true;
+      try {
+        _listener.onClose(this);
+      } finally {
+        close();
+      }
+      break;
 
     default:
       // XXX:
-      complete();
+      disconnect();
       break;
     }
     

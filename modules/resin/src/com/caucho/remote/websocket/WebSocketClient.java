@@ -253,7 +253,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   }
   
   @Override
-  public void complete()
+  public void disconnect()
   {
     OutputStream os = _os;
 
