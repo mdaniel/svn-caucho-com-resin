@@ -13,6 +13,13 @@
 
 <s2 title="4.0.16 - snapshot">
 <ul>
+<li>cluster-cache: mismatched message/query replication for data actor (#4425, rep by Dmitri Kolpakov)</li>
+<li>session: inconsistent setMaxInactiveInterval with timeouts (#4419, rep by vicsanca)</li>
+<li>proxy-cache: check cache refill against invalidated cache (#4413, rep by shine)</li>
+<li>cdi: @Stateless beans need to be treated as serializable for injection (#4405)</li>
+<li>ioc/xml: update error messages for whitespace properties (#4385, rep by jkriesten)</li>
+<li>watchdog: update error message on 500 exception to a watchdog (#4402, rep by Alex Sharaz)</li>
+<li>mod_caucho: configuration etag wasn't including timeouts and therefore wasn't updating (#4259)</li>
 <li>servlet: ServletContext.getResource("/foo/") was not returning URL when foo is a directory, needed for spring (#4411, rep by ccwf)</li>
 <li>access-log: add '%S' for session tracking (#4422, rep by Steffen Busch)</li>
 <li>include/forward: cross-context include/forward was not switching WebApps properly (#4362, rep by igor)</li>

@@ -170,7 +170,7 @@ public class SocketLinkDuplexController extends AsyncController {
         return true;
       }
       else {
-        handler.onComplete(this);
+        handler.onDisconnect(this);
         return false;
       }
     } catch (Exception e) {
@@ -234,7 +234,7 @@ public class SocketLinkDuplexController extends AsyncController {
       try {
         thread.setContextClassLoader(loader);
         
-        listener.onComplete(this);
+        listener.onDisconnect(this);
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {

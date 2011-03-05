@@ -205,7 +205,7 @@ public class HmtpServlet extends GenericServlet {
     }
 
     @Override
-    public void onComplete(WebSocketContext context) throws IOException
+    public void onDisconnect(WebSocketContext context) throws IOException
     {
       /*
       if (_linkService != null)

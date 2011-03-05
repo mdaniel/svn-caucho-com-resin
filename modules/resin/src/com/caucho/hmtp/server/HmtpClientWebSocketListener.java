@@ -81,7 +81,7 @@ public class HmtpClientWebSocketListener extends AbstractWebSocketListener {
   }
   
   @Override
-  public void onComplete(WebSocketContext context)
+  public void onDisconnect(WebSocketContext context)
   {
     //_hmtpServlet.removeClientLinkActor(_linkActor);
     

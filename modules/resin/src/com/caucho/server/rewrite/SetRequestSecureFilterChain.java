@@ -58,21 +58,6 @@ public class SetRequestSecureFilterChain implements FilterChain
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    doFilter(request, response, _next, _isSecure);
-  }
-  
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _next + "]";
-  }
-
-  public static void doFilter(ServletRequest request,
-                              ServletResponse response,
-                              FilterChain next,
-                              boolean isSecure)
-    throws ServletException, IOException
-  {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
@@ -94,25 +79,25 @@ public class SetRequestSecureFilterChain implements FilterChain
     if (req instanceof HttpServletRequestImpl) {
       HttpServletRequestImpl requestFacade = (HttpServletRequestImpl) req;
 
-      requestFacade.setSecure(true);
+      requestFacade.setSecure(_isSecure);
 
       // XXX: finally
 
-      next.doFilter(req, res);
+      _next.doFilter(req, res);
     }
     else {
-      req = new SecureServletRequestWrapper(req, isSecure);
+      req = new SecureServletRequestWrapper(req, _isSecure);
 
-      next.doFilter(req, res);
+      _next.doFilter(req, res);
     }
   }
 
   public static class SecureServletRequestWrapper extends RequestAdapter
   {
-    private Boolean _isSecure;
+    private boolean _isSecure;
 
     public SecureServletRequestWrapper(HttpServletRequest request,
-                                       Boolean isSecure)
+                                       boolean isSecure)
     {
       setRequest(request);
 
@@ -122,6 +107,7 @@ public class SetRequestSecureFilterChain implements FilterChain
       _isSecure = isSecure;
     }
 
+    @Override
     public boolean isSecure()
     {
       return _isSecure;
@@ -130,9 +116,16 @@ public class SetRequestSecureFilterChain implements FilterChain
     /**
      * Returns the request's scheme.
      */
+    @Override
     public String getScheme()
     {
       return isSecure() ? "https" : "http";
     }
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
   }
 }

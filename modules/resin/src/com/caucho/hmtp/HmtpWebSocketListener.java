@@ -83,7 +83,7 @@ public class HmtpWebSocketListener extends AbstractWebSocketListener {
   }
   
   @Override
-  public void onComplete(WebSocketContext context)
+  public void onDisconnect(WebSocketContext context)
   {
     _hOut = null;
     _hIn = null;

@@ -1678,7 +1678,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
         while (_sessionIter.hasNext()) {
           SessionImpl session = _sessionIter.next();
 
-          if (session.isIdle(now))
+          if (session.isTimeout(now))
             _sessionList.add(session);
           else
             liveSessions++;

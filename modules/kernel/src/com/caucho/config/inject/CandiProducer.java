@@ -216,8 +216,9 @@ public class CandiProducer<X> implements InjectionTarget<X>
       else
         throw new CreationException(e.getCause());
     } catch (InstantiationException e) {
-      throw new CreationException(L.l("Exception while creating {0}",
-                                      _javaCtor != null ? _javaCtor : _instanceClass),
+      throw new CreationException(L.l("Exception while creating {0}\n  {1}",
+                                      _javaCtor != null ? _javaCtor : _instanceClass,
+                                      e),
                                   e);
     } catch (Exception e) {
       throw new CreationException(e);

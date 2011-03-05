@@ -1159,6 +1159,8 @@ public class Resin
     
     _selfServer = bootServer.getCloudServer();
     
+    validateServerCluster();
+    
     NetworkClusterSystem networkService = 
       NetworkClusterSystem.createAndAddService(_selfServer);
     
@@ -1198,6 +1200,14 @@ public class Resin
     _servletContainerConfig.init();
     
     _servletContainer.init();
+  }
+  
+  protected void validateServerCluster()
+  {
+    if (_selfServer.getPod().getServerLength() != 1) {
+      throw new ConfigException(L().l("{0} does not support multiple <server> instances in a cluster.\nFor clustered servers, please use Resin Professional with a valid license.",
+                                    this));
+    }
   }
   
   public ServletContainerConfig getServletContainerConfig()

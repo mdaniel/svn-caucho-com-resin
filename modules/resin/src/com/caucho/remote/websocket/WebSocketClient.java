@@ -211,11 +211,13 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   protected void parseHeaders(ReadStream in)
     throws IOException
   {
-    String line = in.readln();
+    String status = in.readln();
 
-    if (! line.startsWith("HTTP/1.1 101"))
-      throw new IOException(L.l("Unexpected response {0}", line));
-
+    if (! status.startsWith("HTTP")) {
+      throw new IOException(L.l("Unexpected response {0}", status));
+    }
+    
+    String line;
     while ((line = in.readln()) != null && line.length() != 0) {
       int p = line.indexOf(':');
 
@@ -223,6 +225,20 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
         String header = line.substring(0, p).trim();
         String value = line.substring(p + 1).trim();
       }
+    }
+
+    if (! status.startsWith("HTTP/1.1 101")) {
+      StringBuilder sb = new StringBuilder();
+      
+      int ch;
+      
+      while (in.available() > 0 && (ch = in.read()) >= 0) {
+        sb.append((char) ch);
+      }
+      
+      throw new IOException(L.l("Unexpected response {0}\n\n{1}",
+                                status, sb));
+      
     }
   }
  
@@ -349,7 +365,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
           log.log(Level.WARNING, e.toString(), e);
       } finally {
         try {
-          _listener.onComplete(WebSocketClient.this);
+          _listener.onDisconnect(WebSocketClient.this);
         } catch (IOException e) {
           log.log(Level.WARNING, e.toString(), e);
         }

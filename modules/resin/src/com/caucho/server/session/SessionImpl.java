@@ -181,6 +181,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    *
    * @return time allowed to live in seconds
    */
+  @Override
   public int getMaxInactiveInterval()
   {
     if (Long.MAX_VALUE / 2 <= _idleTimeout)
@@ -194,6 +195,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    *
    * @param value time allowed to live in seconds
    */
+  @Override
   public void setMaxInactiveInterval(int value)
   {
     if (value < 0)
@@ -251,10 +253,18 @@ public class SessionImpl implements HttpSession, CacheListener {
   
   public boolean isTimeout()
   {
-    if (_useCount.get() > 0)
+    return isTimeout(Alarm.getCurrentTime());
+  }
+
+  boolean isTimeout(long now)
+  {
+    long maxIdleTime = _idleTimeout;
+
+    if (inUse())
       return false;
-    
-    return _lastUseTime + _idleTimeout < Alarm.getCurrentTime();
+    else {
+      return _lastUseTime + maxIdleTime < now;
+    }
   }
 
   boolean isClosing()
@@ -949,17 +959,6 @@ public class SessionImpl implements HttpSession, CacheListener {
     invalidate(Logout.INVALIDATE);
   }
 
-  boolean isIdle(long now)
-  {
-    long maxIdleTime = _idleTimeout;
-
-    if (inUse())
-      return false;
-    else {
-      return _accessTime + maxIdleTime < now;
-    }
-  }
-
   /**
    * Called by the session manager for a session timeout
    */
@@ -1136,8 +1135,6 @@ public class SessionImpl implements HttpSession, CacheListener {
           // server/016r
           ExtCacheEntry entry
             = _manager.getSessionStore().peekExtCacheEntry(_id);
-
-          long now = Alarm.getCurrentTime();
 
           if (entry == null || ! entry.isValid()) {
             isRemove = true;

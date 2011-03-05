@@ -86,7 +86,7 @@ abstract public class AbstractWebSocketListener implements WebSocketListener
    * Called when the connection terminates.
    */
   @Override
-  public void onComplete(WebSocketContext context)
+  public void onDisconnect(WebSocketContext context)
     throws IOException
   {
   }

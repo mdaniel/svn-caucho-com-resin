@@ -109,7 +109,7 @@ public class JaasAuthenticator extends AbstractAuthenticator {
    * Initialize the authenticator.
    */
   @PostConstruct
-  public synchronized void init()
+  public void init()
     throws ServletException
   {
     super.init();

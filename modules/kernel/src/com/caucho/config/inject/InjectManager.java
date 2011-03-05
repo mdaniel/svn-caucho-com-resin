@@ -1802,9 +1802,9 @@ public final class InjectManager
       if (! cl.isInterface()
           && ! cl.isPrimitive()
           && ! Serializable.class.isAssignableFrom(cl)
-          && ! isNormalScope(prodBean.getScope())) {
+          && ! isPassivationCapable(prodBean)) {
         RuntimeException exn;
-        
+
         if (isProduct(prodBean))
           exn = new IllegalProductException(L.l("'{0}' is an invalid injection point of type {1} because it's not serializable for {2}",
                                                 ip.getMember().getName(),
@@ -1821,6 +1821,19 @@ public final class InjectManager
     }
     
     return null;
+  }
+  
+  private boolean isPassivationCapable(Bean<?> bean)
+  {
+    if (isNormalScope(bean.getScope()))
+      return true;
+    
+    // ioc/05e2
+    if (bean instanceof PassivationCapable
+        && ((PassivationCapable) bean).getId() != null)
+      return true;
+    
+    return false;
   }
   
   private boolean isProduct(Bean<?> bean)

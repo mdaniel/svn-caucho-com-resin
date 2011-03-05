@@ -56,7 +56,7 @@ public interface SocketLinkDuplexListener
   /**
    * Called when the connection closes
    */
-  public void onComplete(SocketLinkDuplexController context)
+  public void onDisconnect(SocketLinkDuplexController context)
     throws IOException;
 
   /**

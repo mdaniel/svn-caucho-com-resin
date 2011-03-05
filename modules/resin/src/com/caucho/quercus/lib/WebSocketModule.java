@@ -278,7 +278,7 @@ public class WebSocketModule
       }
     }
     
-    public void onComplete(SocketLinkDuplexController context)
+    public void onDisconnect(SocketLinkDuplexController context)
     {
       try {
         _env.closeDuplex();

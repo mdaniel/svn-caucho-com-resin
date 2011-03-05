@@ -64,9 +64,13 @@ public class PropertyAttribute extends Attribute {
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
-    if ("#text".equals(name.getLocalName()))
-      throw new ConfigException(L.l("text is not allowed in this context\n  '{0}'",
-                                    value));
+    if ("#text".equals(name.getLocalName())) {
+      if (value == null || value.trim().length() == 0)
+        return;
+      
+      throw new ConfigException(L.l("text is not allowed for bean {0}\n  '{1}'",
+                                    bean.getClass().getName(), value.trim()));
+    }
     
     try {
       _putMethod.invoke(bean, name.getLocalName(), _type.valueOf(value));

@@ -70,9 +70,9 @@ public interface WebSocketListener
     throws IOException;
 
   /**
-   * Called when the connection terminates.
+   * Called when the connection disconnects.
    */
-  public void onComplete(WebSocketContext context)
+  public void onDisconnect(WebSocketContext context)
     throws IOException;
 
   /**

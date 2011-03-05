@@ -67,7 +67,6 @@ import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
-import com.caucho.remote.websocket.FrameInputStream;
 import com.caucho.remote.websocket.MaskedFrameInputStream;
 import com.caucho.remote.websocket.UnmaskedFrameInputStream;
 import com.caucho.security.AbstractLogin;
@@ -82,7 +81,6 @@ import com.caucho.util.CharSegment;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
 import com.caucho.util.NullEnumeration;
-import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
@@ -190,9 +188,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     String scheme = _request.getScheme();
 
-    // server/12j2
-    if (isSecure() && "http".equals(scheme))
-      return "https";
+    // server/12j2, server/1kkg
+    if ("http".equals(scheme) || "https".equals(scheme))
+      return isSecure() ? "https" : "http";
     else
       return scheme;
   }
@@ -1506,7 +1504,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     return oldRunAs;
   }
 
-  public void setSecure(boolean isSecure)
+  public void setSecure(Boolean isSecure)
   {
     // server/12ds
     _isSecure = isSecure;

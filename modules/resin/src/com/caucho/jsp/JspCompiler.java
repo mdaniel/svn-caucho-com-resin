@@ -84,7 +84,7 @@ public class JspCompiler implements EnvironmentBean {
   private ResinSystem _system;
   private ClassLoader _loader;
 
-  private WebApp _app;
+  private WebApp _webApp;
 
   private Path _classDir;
   private Path _appDir;
@@ -176,8 +176,8 @@ public class JspCompiler implements EnvironmentBean {
   {
     if (_appDir != null)
       return _appDir;
-    else if (_app != null)
-      return _app.getRootDirectory();
+    else if (_webApp != null)
+      return _webApp.getRootDirectory();
     else
       return null;
   }
@@ -337,7 +337,7 @@ public class JspCompiler implements EnvironmentBean {
    */
   public WebApp createWebApp(Path rootDirectory)
   {
-    if (_app == null) {
+    if (_webApp == null) {
       if (rootDirectory == null)
         rootDirectory = getAppDir();
 
@@ -349,10 +349,10 @@ public class JspCompiler implements EnvironmentBean {
       _resin.addWebApp(webAppEmbed);
       _resin.start();
       
-      _app = webAppEmbed.getWebApp();
+      _webApp = webAppEmbed.getWebApp();
     }
 
-    return _app;
+    return _webApp;
   }
 
   /**
@@ -361,10 +361,10 @@ public class JspCompiler implements EnvironmentBean {
    */
   public void setWebApp(WebApp app)
   {
-    _app = app;
+    _webApp = app;
 
     if (_resourceManager == null)
-      _resourceManager = new AppResourceManager(_app);
+      _resourceManager = new AppResourceManager(_webApp);
   }
 
   /**
@@ -381,7 +381,7 @@ public class JspCompiler implements EnvironmentBean {
    */
   public WebApp getWebApp()
   {
-    return _app;
+    return _webApp;
   }
 
   /**

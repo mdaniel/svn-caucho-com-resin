@@ -109,6 +109,7 @@ public class HttpPath extends FilesystemPath {
    *
    * @return the final path.
    */
+  @Override
   public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
   {
     String newPath;
@@ -153,6 +154,7 @@ public class HttpPath extends FilesystemPath {
    *
    * @return the looked-up path.
    */
+  @Override
   protected Path schemeWalk(String userPath,
                             Map<String,Object> attributes,
                             String uri,

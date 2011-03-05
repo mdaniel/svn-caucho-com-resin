@@ -438,6 +438,9 @@ public class XmlConfigContext {
       attrStrategy = getAttribute(type, qName, childNode);
       
       if (attrStrategy == null) {
+        if (qName.equals(TEXT)) {
+          validateEmptyText(bean, childNode);
+        }
       }
       else if (attrStrategy.isProgram()) {
         attrStrategy.setValue(bean, qName,
@@ -459,6 +462,19 @@ public class XmlConfigContext {
       throw e;
     } catch (Exception e) {
       throw error(e, childNode);
+    }
+  }
+  
+  private void validateEmptyText(Object bean, Node childNode)
+  {
+    CharacterData cData = (CharacterData) childNode;
+    
+    String data = cData.getData().trim();
+    
+    if (data.length() > 0) {
+      throw new ConfigException(L.l("Unexpected text in {0} at\n  '{1}'",
+                                    bean.getClass().getName(),
+                                    data));
     }
   }
 

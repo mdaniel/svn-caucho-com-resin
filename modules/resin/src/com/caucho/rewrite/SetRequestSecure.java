@@ -37,12 +37,20 @@ import com.caucho.server.rewrite.SetRequestSecureFilterChain;
 @Configurable
 public class SetRequestSecure extends AbstractRewriteFilter
 {
+  private boolean _isSecure = true;
+  
   @Override
   protected FilterChain createFilterChain(String uri,
                                           String queryString,
                                           FilterChain next)
   {
-    return new SetRequestSecureFilterChain(next, true);
+    return new SetRequestSecureFilterChain(next, _isSecure);
+  }
+
+  @Configurable
+  public void setValue(boolean isSecure)
+  {
+    _isSecure = isSecure;
   }
 }
 

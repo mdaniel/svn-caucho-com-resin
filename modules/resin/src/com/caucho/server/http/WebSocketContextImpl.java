@@ -218,12 +218,14 @@ class WebSocketContextImpl
     return new WebSocketInputStream(is);
   }
 
-  public void onComplete(SocketLinkDuplexController duplex)
+  @Override
+  public void onDisconnect(SocketLinkDuplexController duplex)
     throws IOException
   {
-    _listener.onComplete(this);
+    _listener.onDisconnect(this);
   }
 
+  @Override
   public void onTimeout(SocketLinkDuplexController duplex)
     throws IOException
   {

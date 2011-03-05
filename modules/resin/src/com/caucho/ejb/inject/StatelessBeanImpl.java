@@ -60,8 +60,9 @@ import com.caucho.util.L10N;
  * Internal implementation for a Bean
  */
 @Module
-public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
-                                    implements ScheduleBean
+public class StatelessBeanImpl<X,T> 
+  extends SessionBeanImpl<X,T>
+  implements ScheduleBean
 {
   private static final L10N L = new L10N(StatelessBeanImpl.class);
   

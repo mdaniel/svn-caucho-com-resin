@@ -143,7 +143,7 @@ public class XmppBrokerStream extends AbstractBroker
     _reader.readNext();
   }
   
-  public void onComplete(SocketLinkDuplexController context)
+  public void onDisconnect(SocketLinkDuplexController context)
     throws IOException
   {
   }
