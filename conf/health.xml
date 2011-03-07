@@ -19,36 +19,36 @@
      - Restart immediately if deadlock is detected
     -->
   
-  <health:JvmDeadlockHealthCheck ee:Named="deadlockHealthCheck"/>
+  <health:JvmDeadlockHealthCheck ee:Named="JvmDeadlockHealthCheck"/>
   
   <health:Restart>
-    <health:IfHealthCritical healthCheck="${deadlockHealthCheck}"/>
+    <health:IfHealthCritical healthCheck="${JvmDeadlockHealthCheck}"/>
   </health:Restart>
 
   <!--
      - Dump heap and restart if memory pools are critically low 
     -->
   
-  <health:MemoryTenuredHealthCheck ee:Named="tenuredHealthCheck">
+  <health:MemoryTenuredHealthCheck ee:Named="MemoryTenuredHealthCheck">
     <memoryFreeMin>1m</memoryFreeMin>
   </health:MemoryTenuredHealthCheck>
   
-  <health:MemoryPermGenHealthCheck ee:Named="permGenHealthCheck">
+  <health:MemoryPermGenHealthCheck ee:Named="MemoryPermGenHealthCheck">
     <memoryFreeMin>1m</memoryFreeMin>
   </health:MemoryPermGenHealthCheck>
   
   <health:DumpHeap>
     <health:Or>
-      <health:IfHealthCritical healthCheck="${tenuredHealthCheck}"/>
-      <health:IfHealthCritical healthCheck="${permGenHealthCheck}"/>
+      <health:IfHealthCritical healthCheck="${MemoryTenuredHealthCheck}"/>
+      <health:IfHealthCritical healthCheck="${MemoryPermGenHealthCheck}"/>
     </health:Or>
     <health:IfRechecked/>
   </health:DumpHeap>
   
   <health:Restart>
     <health:Or>
-      <health:IfHealthCritical healthCheck="${tenuredHealthCheck}"/>
-      <health:IfHealthCritical healthCheck="${permGenHealthCheck}"/>
+      <health:IfHealthCritical healthCheck="${MemoryTenuredHealthCheck}"/>
+      <health:IfHealthCritical healthCheck="${MemoryPermGenHealthCheck}"/>
     </health:Or>
     <health:IfRechecked/>
   </health:Restart>
@@ -57,18 +57,18 @@
      - Dump active threads and restart if cpu usage is critically high
     -->
 
-  <health:CpuHealthCheck ee:Named="cpuHealthCheck">
+  <health:CpuHealthCheck ee:Named="CpuHealthCheck">
     <warningThreshold>95</warningThreshold>
     <criticalThreshold>99</criticalThreshold>
   </health:CpuHealthCheck>
   
   <health:DumpThreads>
-    <health:IfHealthCritical healthCheck="${cpuHealthCheck}"/>
+    <health:IfHealthCritical healthCheck="${CpuHealthCheck}"/>
     <health:IfRechecked/>
   </health:DumpThreads>
   
   <health:Restart>
-    <health:IfHealthCritical healthCheck="${cpuHealthCheck}"/>
+    <health:IfHealthCritical healthCheck="${CpuHealthCheck}"/>
     <health:IfRechecked/>
   </health:Restart>
   
@@ -76,28 +76,28 @@
      - Log missing or delayed cluster member heartbeats
     -->
 
-  <health:HeartbeatHealthCheck ee:Named="heartbeatHealthCheck"/>
+  <health:HeartbeatHealthCheck ee:Named="HeartbeatHealthCheck"/>
 
   <!--
      - Log connection pool limits reached
     -->
 
-  <health:ConnectionPoolHealthCheck ee:Named="connectionPoolHealthCheck"/>
+  <health:ConnectionPoolHealthCheck ee:Named="ConnectionPoolHealthCheck"/>
   
   <!--
      - Log transaction manager commit failures 
     -->
 
-  <health:TransactionHealthCheck ee:Named="transactionHealthCheck"/>
+  <health:TransactionHealthCheck ee:Named="TransactionHealthCheck"/>
   
   <!--
      - Restart if any health checks are frozen or threads are hung 
     -->
     
-  <health:HealthSystemHealthCheck ee:Named="healthSystemHealthCheck"/>
+  <health:HealthSystemHealthCheck ee:Named="HealthSystemHealthCheck"/>
   
   <health:Restart>
-    <health:IfHealthCritical healthCheck="${healthSystemHealthCheck}"/>
+    <health:IfHealthCritical healthCheck="${HealthSystemHealthCheck}"/>
     <health:IfRechecked/>
   </health:Restart>
   
