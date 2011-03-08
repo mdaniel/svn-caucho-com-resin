@@ -32,7 +32,6 @@ package com.caucho.ejb.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -44,7 +43,6 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScheduleBean;
 import com.caucho.config.timer.ScheduleIntrospector;
@@ -90,6 +88,8 @@ public class StatelessBeanImpl<X,T>
       throw new ConfigException(L.l("@{0} is an invalid scope for @Stateless session bean {1} because stateless session beans need @Dependent scope",
                                     scopeType.getName(), getBeanClass().getName()));
     }
+    
+    getBean().setPassivating(true);
   }
  
   @Override
@@ -97,7 +97,7 @@ public class StatelessBeanImpl<X,T>
   {
     return _qualifiers;
   }
-
+  
   @Override
   public void scheduleTimers(Object value)
   {

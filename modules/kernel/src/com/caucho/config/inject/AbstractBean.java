@@ -181,6 +181,7 @@ abstract public class AbstractBean<T>
     return false;
   }
 
+  @Override
   public Class<? extends Annotation> getScope()
   {
     return Dependent.class;

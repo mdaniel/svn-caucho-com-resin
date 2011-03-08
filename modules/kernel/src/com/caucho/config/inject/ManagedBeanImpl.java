@@ -79,7 +79,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
   private boolean _isNormalScope;
   private Object _scopeAdapter;
-
+  
   public ManagedBeanImpl(InjectManager injectManager,
                          AnnotatedType<X> beanType,
                          boolean isSessionBean)
@@ -128,7 +128,8 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     _injectionTarget = target;
   }
   
-  private boolean isNormalScope()
+  @Override
+  protected boolean isNormalScope()
   {
     return _isNormalScope;
   }
@@ -294,7 +295,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     introspect(_annotatedType);
 
     // ioc/0e13
-    if (_injectionTarget instanceof PassivationSetter)
+    if (_injectionTarget instanceof PassivationSetter && getId() != null)
       ((PassivationSetter) _injectionTarget).setPassivationId(getId());
     
     validateBean();

@@ -62,6 +62,7 @@ import javax.annotation.sql.DataSourceDefinition;
 import javax.annotation.sql.DataSourceDefinitions;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
+import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
@@ -1811,9 +1812,10 @@ public final class InjectManager
                                                 ip.getType(),
                                                 bean));
         else
-          exn = new ConfigException(L.l("'{0}' is an invalid injection point of type {1} because it's not serializable for {2}",
+          exn = new ConfigException(L.l("'{0}' is an invalid injection point of type {1} ({2}) because it's not serializable for {3}",
                                         ip.getMember().getName(),
                                         ip.getType(),
+                                        prodBean,
                                         bean));
         
         return exn;
@@ -1830,8 +1832,9 @@ public final class InjectManager
     
     // ioc/05e2
     if (bean instanceof PassivationCapable
-        && ((PassivationCapable) bean).getId() != null)
+        && ((PassivationCapable) bean).getId() != null) {
       return true;
+    }
     
     return false;
   }
@@ -1883,8 +1886,11 @@ public final class InjectManager
     Constructor<?> ctor = null;
     
     for (Constructor<?> ctorPtr : cl.getDeclaredConstructors()) {
-      if (ctorPtr.getParameterTypes().length > 0)
+      if (ctorPtr.getParameterTypes().length > 0
+          && ! ctorPtr.isAnnotationPresent(Inject.class)) {
+        // ioc/05am
         continue;
+      }
       
       if (Modifier.isPrivate(ctorPtr.getModifiers())) {
         throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because its constructor is private for {2}.",

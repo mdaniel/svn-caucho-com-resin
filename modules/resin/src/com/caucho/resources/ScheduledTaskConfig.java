@@ -151,7 +151,9 @@ public class ScheduledTaskConfig extends BeanConfig
   public void init()
     throws ConfigException
   {
-    super.init();
+    if (getClassType() != null) {
+      super.init();
+    }
     
     Environment.addEnvironmentListener(new StartListener());
   }

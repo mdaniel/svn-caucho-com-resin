@@ -676,7 +676,7 @@ public class Jar implements CacheListener {
 
     SoftReference<ZipFile> oldZipFileRef = _zipFileRef.get();
     
-    if (true) {
+    if (false) {
       
     }
     else if (oldZipFileRef == null || oldZipFileRef.get() == null) {

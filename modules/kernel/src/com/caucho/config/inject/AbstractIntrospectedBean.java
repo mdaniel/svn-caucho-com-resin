@@ -41,20 +41,18 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
-import javax.ejb.Singleton;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Specializes;
-import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.Typed;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
@@ -106,6 +104,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   
   private boolean _isAlternative;
 
+  private boolean _isPassivating;
   private String _passivationId;
 
   public AbstractIntrospectedBean(InjectManager manager,
@@ -247,7 +246,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   @Override
   public String getId()
   {
-    if (_passivationId == null)
+    if (_passivationId == null && isPassivating())
       _passivationId = calculatePassivationId();
 
     return _passivationId;
@@ -563,6 +562,22 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   public boolean isPassivationCapable()
   {
     return Serializable.class.isAssignableFrom(getTargetClass());
+  }
+  
+  protected boolean isPassivating()
+  {
+    return (_isPassivating || isNormalScope()
+            || javax.inject.Singleton.class.equals(getScope()));
+  }
+  
+  protected boolean isNormalScope()
+  {
+    return getBeanManager().isNormalScope(getScope());
+  }
+  
+  public void setPassivating(boolean isPassivating)
+  {
+    _isPassivating = isPassivating;
   }
 
   /**

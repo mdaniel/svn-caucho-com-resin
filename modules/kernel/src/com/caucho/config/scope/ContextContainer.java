@@ -50,6 +50,9 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
 
   public Object get(Object id)
   {
+    if (id == null)
+     return null;
+    
     for (ContextItem<?> ptr = _values; ptr != null; ptr = ptr.getNext()) {
       if (id.equals(ptr.getId()))
         return ptr.getObject();
