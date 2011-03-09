@@ -37,6 +37,8 @@ import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.Bean;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.management.MBeanServer;
@@ -152,6 +154,14 @@ public class ResinCdiProducer
 
       return null;
     }
+  }
+  
+  @Produces
+  @CauchoDeployment
+  @ContextDependent
+  public Bean getBean(InjectionPoint injectionPoint)
+  {
+    return injectionPoint.getBean();
   }
 
   /**

@@ -54,7 +54,7 @@
   </health:Restart>
   
   <!--
-     - Dump active threads and restart if cpu usage is critically high
+     - Dump active threads if cpu usage is critically high
     -->
 
   <health:CpuHealthCheck ee:Named="CpuHealthCheck">
@@ -66,11 +66,6 @@
     <health:IfHealthCritical healthCheck="${CpuHealthCheck}"/>
     <health:IfRechecked/>
   </health:DumpThreads>
-  
-  <health:Restart>
-    <health:IfHealthCritical healthCheck="${CpuHealthCheck}"/>
-    <health:IfRechecked/>
-  </health:Restart>
   
   <!--
      - Log missing or delayed cluster member heartbeats
