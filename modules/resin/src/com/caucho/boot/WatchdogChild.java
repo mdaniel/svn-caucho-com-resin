@@ -260,7 +260,10 @@ class WatchdogChild
   
   ConfigProgram getStdoutLog()
   {
-    return _config.getCluster().getStdoutLog();
+    if (_config.getCluster() != null)
+      return _config.getCluster().getStdoutLog();
+    else
+      return null;
   }
 
   boolean hasXmx()

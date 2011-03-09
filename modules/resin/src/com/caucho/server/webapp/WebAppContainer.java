@@ -35,7 +35,6 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
@@ -482,7 +481,7 @@ public class WebAppContainer
   /**
    * Sets the war-expansion
    */
-  public void addDeploy(DeployGenerator deploy)
+  public void addDeploy(DeployGenerator<WebAppController> deploy)
     throws ConfigException
   {
     if (deploy instanceof WebAppExpandDeployGenerator)
@@ -494,7 +493,7 @@ public class WebAppContainer
   /**
    * Removes a web-app-generator.
    */
-  public void removeWebAppDeploy(DeployGenerator deploy)
+  public void removeWebAppDeploy(DeployGenerator<WebAppController> deploy)
   {
     _appDeploy.remove(deploy);
   }
@@ -838,6 +837,7 @@ public class WebAppContainer
     Invocation forwardInvocation = new Invocation();
     Invocation errorInvocation = new Invocation();
     Invocation dispatchInvocation = new Invocation();
+    Invocation requestInvocation = dispatchInvocation;
     InvocationDecoder decoder = new InvocationDecoder();
 
     String rawURI = url;
@@ -861,6 +861,7 @@ public class WebAppContainer
                                     forwardInvocation,
                                     errorInvocation,
                                     dispatchInvocation,
+                                    requestInvocation,
                                     webApp);
 
       return disp;
@@ -1239,8 +1240,8 @@ public class WebAppContainer
       
       String id = "error/webapp/" + getHostName()+ "/error";
 
-      WebAppController webAppController
-        = new WebAppController(id, errorRoot, this);
+      UnknownWebAppController webAppController
+        = new UnknownWebAppController(id, errorRoot, this);
       webAppController.init();
       webAppController.startOnInit();
         

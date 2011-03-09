@@ -75,9 +75,6 @@ abstract public class AbstractCache extends AbstractMap
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
-  private static final Logger log
-    = Logger.getLogger(AbstractCache.class.getName());
-
   private CacheManager _localManager;
   private DistributedCacheManager _manager;
 

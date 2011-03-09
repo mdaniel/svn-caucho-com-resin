@@ -74,8 +74,15 @@ public class DispatchFilterChain implements FilterChain {
   {
     _next = next;
     _webApp = webApp;
-    _classLoader = webApp.getClassLoader();
-    _requestListeners = webApp.getRequestListeners();
+    
+    if (webApp != null) {
+      _classLoader = webApp.getClassLoader();
+      _requestListeners = webApp.getRequestListeners();
+    } else {
+      // server/1d01
+      _classLoader = Thread.currentThread().getContextClassLoader();
+      _requestListeners = new ServletRequestListener[0];
+    }
   }
   
   /**
@@ -118,11 +125,16 @@ public class DispatchFilterChain implements FilterChain {
       
       _next.doFilter(request, response);
     } catch (FileNotFoundException e) {
+      // server/106c
+      /*
       log.log(Level.FINER, e.toString(), e);
       
       HttpServletResponse res = (HttpServletResponse) response;
       
       res.sendError(404);
+      */
+      
+      throw e;
     } finally {
       if (webApp != _webApp) {
         for (int i = _requestListeners.length - 1; i >= 0; i--) {

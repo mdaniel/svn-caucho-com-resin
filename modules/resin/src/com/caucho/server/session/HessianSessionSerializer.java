@@ -55,12 +55,18 @@ public class HessianSessionSerializer extends SessionSerializer {
   public HessianSessionSerializer(OutputStream os,
                                   ClassLoader loader)
   {
+    this(os, new SerializerFactory(loader));
+  }
+
+  public HessianSessionSerializer(OutputStream os,
+                                  SerializerFactory factory)
+  {
     if (log.isLoggable(Level.FINEST)) {
       os = new HessianDebugOutputStream(os, log, Level.FINEST);
     }
     
     _out = new Hessian2Output(os);
-    _out.setSerializerFactory(new SerializerFactory(loader));
+    _out.setSerializerFactory(factory);
   }
 
   public void setSerializeCollectionType(boolean isEnable)

@@ -63,6 +63,7 @@ public class BlockReadWrite {
 
   private RandomAccessStream _mmapFile;
   private boolean _isEnableMmap = true;
+  private boolean _isMmap = false;
   
   private FreeList<RandomAccessWrapper> _cachedRowFile
     = new FreeList<RandomAccessWrapper>(4);
@@ -245,11 +246,14 @@ public class BlockReadWrite {
     throws IOException
   {
     // limit number of active row files
+    
+    boolean isAcquire = false;
 
-    if (! isPriority) {
+    if (! isPriority && ! _isMmap) {
       try {
         Thread.interrupted();
         _rowFileSemaphore.acquire();
+        isAcquire = true;
       } catch (InterruptedException e) {
         log.log(Level.FINE, e.toString(), e);
 
@@ -269,7 +273,7 @@ public class BlockReadWrite {
     } catch (Exception e) {
       throw new IOException(e);
     } finally {
-      if (wrapper == null)
+      if (wrapper == null && ! _isMmap)
         _rowFileSemaphore.release();
     }
   }
@@ -312,8 +316,10 @@ public class BlockReadWrite {
         if (_isEnableMmap)
           file = path.openMemoryMappedFile(_fileSize);
         
-        if (file != null)
+        if (file != null) {
+          _isMmap = true;
           _mmapFile = file;
+        }
         else 
           file = path.openRandomAccess();
 
@@ -330,7 +336,7 @@ public class BlockReadWrite {
     if (wrapper == null)
       return;
 
-    if (! isPriority)
+    if (! isPriority && ! _isMmap)
       _rowFileSemaphore.release();
 
     /*
@@ -353,7 +359,7 @@ public class BlockReadWrite {
     if (wrapper == null)
       return;
 
-    if (! isPriority)
+    if (! isPriority && ! _isMmap)
       _rowFileSemaphore.release();
 
     if (wrapper.getFile() != _mmapFile) {

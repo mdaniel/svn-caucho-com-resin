@@ -37,6 +37,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.*;
@@ -589,6 +592,7 @@ public class FilePath extends FilesystemPath {
     return fws;
   }
 
+  @Override
   public StreamImpl openReadWriteImpl() throws IOException
   {
     VfsStream os;
@@ -605,6 +609,7 @@ public class FilePath extends FilesystemPath {
   /**
    * Returns the stream implementation for a random-access stream.
    */
+  @Override
   public RandomAccessStream openFileRandomAccess() throws IOException
   {
     if (_isWindows && isAux())

@@ -145,14 +145,10 @@ import com.caucho.rewrite.Not;
 import com.caucho.rewrite.RedirectSecure;
 import com.caucho.rewrite.RewriteFilter;
 import com.caucho.rewrite.WelcomeFile;
-import com.caucho.security.AbstractSingleSignon;
 import com.caucho.security.Authenticator;
 import com.caucho.security.BasicLogin;
-import com.caucho.security.ClusterSingleSignon;
 import com.caucho.security.Login;
-import com.caucho.security.MemorySingleSignon;
 import com.caucho.security.RoleMapManager;
-import com.caucho.security.SingleSignon;
 import com.caucho.server.cache.AbstractProxyCache;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ErrorFilterChain;
@@ -294,6 +290,8 @@ public class WebApp extends ServletContextImpl
   // True if includes are allowed to wrap a filter (forbidden by servlet spec)
   private boolean _dispatchWrapsFilters;
 
+  private FilterChainBuilder _securityBuilder;
+
   // The session manager
   private SessionManager _sessionManager;
   // True if the session manager is inherited
@@ -333,6 +331,8 @@ public class WebApp extends ServletContextImpl
   private RewriteDispatch _requestRewriteDispatch;
   private RewriteDispatch _includeRewriteDispatch;
   private RewriteDispatch _forwardRewriteDispatch;
+  
+  private WelcomeFile _welcomeFile;
 
   private LruCache<String,String> _realPathCache
     = new LruCache<String,String>(1024);
@@ -2658,11 +2658,11 @@ public class WebApp extends ServletContextImpl
 
       setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
 
-      FilterChainBuilder securityBuilder
-        = _constraintManager.getFilterBuilder();
+      _securityBuilder = _constraintManager.getFilterBuilder();
       
-      if (securityBuilder != null)
-        _filterMapper.addTopFilter(securityBuilder);
+      if (_securityBuilder != null) {
+        _filterMapper.addTopFilter(_securityBuilder);
+      }
 
       if (_server != null)
         _cache = _server.getProxyCache();
@@ -2737,7 +2737,9 @@ public class WebApp extends ServletContextImpl
       
       WelcomeFile welcomeFile = new WelcomeFile(_welcomeFileList);
       
-      add(welcomeFile);
+      _welcomeFile = welcomeFile;
+      
+      // add(welcomeFile);
 
       if (! _isCompileContext) {
         for (int i = 0; i < _resourceValidators.size(); i++) {
@@ -3393,6 +3395,10 @@ public class WebApp extends ServletContextImpl
           invocation.setMultipartConfig(entry.getMultipartConfig());
         } else {
           chain = _servletMapper.mapServlet(invocation);
+          
+          // server/13s[o-r]
+          _filterMapper.buildDispatchChain(invocation, chain);
+          chain = invocation.getFilterChain();
 
           if (_requestRewriteDispatch != null) {
             FilterChain newChain
@@ -3403,11 +3409,14 @@ public class WebApp extends ServletContextImpl
 
             chain = newChain;
           }
-          
-          // server/13s[o-r]
-          _filterMapper.buildDispatchChain(invocation, chain);
 
+                    /*
+          // server/13s[o-r]
+          // _filterMapper.buildDispatchChain(invocation, chain);
           chain = invocation.getFilterChain();
+           */
+          
+          chain = applyWelcomeFile(invocation, chain);
 
           entry = new FilterChainEntry(chain, invocation);
           chain = entry.getFilterChain();
@@ -3450,6 +3459,19 @@ public class WebApp extends ServletContextImpl
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  private FilterChain applyWelcomeFile(Invocation invocation, FilterChain chain)
+    throws ServletException
+  {
+    if (_welcomeFile != null) {
+      chain = _welcomeFile.map(DispatcherType.REQUEST,
+                               invocation.getContextURI(),
+                               invocation.getQueryString(),
+                               chain, chain);
+    }
+    
+    return chain;
   }
   
   FilterChain createWebAppFilterChain(FilterChain chain,
@@ -3548,7 +3570,14 @@ public class WebApp extends ServletContextImpl
   public void buildDispatchInvocation(Invocation invocation)
     throws ServletException
   {
-    buildDispatchInvocation(invocation, _dispatchFilterMapper);
+    // buildDispatchInvocation(invocation, _dispatchFilterMapper);
+    buildDispatchInvocation(invocation, _filterMapper);
+    
+    if (_securityBuilder != null) {
+      // server/1ksa
+      // _dispatchFilterMapper.addTopFilter(_securityBuilder);
+      invocation.setFilterChain(_securityBuilder.build(invocation.getFilterChain(), invocation));
+    }
   }
 
   /**
@@ -3641,6 +3670,8 @@ public class WebApp extends ServletContextImpl
     Invocation forwardInvocation = new SubInvocation();
     Invocation errorInvocation = new SubInvocation();
     Invocation dispatchInvocation = new SubInvocation();
+    Invocation requestInvocation = dispatchInvocation;
+    
     InvocationDecoder decoder = new InvocationDecoder();
 
     String rawURI = escapeURL(getContextPath() + url);
@@ -3697,6 +3728,7 @@ public class WebApp extends ServletContextImpl
                                        forwardInvocation,
                                        errorInvocation,
                                        dispatchInvocation,
+                                       requestInvocation,
                                        this);
 
       getDispatcherCache().put(url, disp);
@@ -3814,6 +3846,7 @@ public class WebApp extends ServletContextImpl
       disp = new RequestDispatcherImpl(loginInvocation,
                                        loginInvocation,
                                        errorInvocation,
+                                       loginInvocation,
                                        loginInvocation,
                                        this);
       disp.setLogin(true);

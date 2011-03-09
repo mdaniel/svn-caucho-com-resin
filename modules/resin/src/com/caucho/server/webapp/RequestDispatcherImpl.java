@@ -62,6 +62,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   private Invocation _forwardInvocation;
   private Invocation _errorInvocation;
   private Invocation _dispatchInvocation;
+  private Invocation _requestInvocation;
   private Invocation _asyncInvocation;
   private boolean _isLogin;
 
@@ -69,12 +70,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
                         Invocation forwardInvocation,
                         Invocation errorInvocation,
                         Invocation dispatchInvocation,
+                        Invocation requestInvocation,
                         WebApp webApp)
   {
     _includeInvocation = includeInvocation;
     _forwardInvocation = forwardInvocation;
     _errorInvocation = errorInvocation;
     _dispatchInvocation = dispatchInvocation;
+    _requestInvocation = requestInvocation;
 
     _webApp = webApp;
   }
@@ -131,8 +134,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   public void dispatch(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    forward(request, response,
-            "error", _dispatchInvocation, DispatcherType.REQUEST);
+    if (request.getServletContext() instanceof UnknownWebApp) {
+      _requestInvocation.getFilterChain().doFilter(request, response);
+    }
+    else {
+      forward(request, response,
+              "error", _dispatchInvocation, DispatcherType.REQUEST);
+    }
   }
 
   /**

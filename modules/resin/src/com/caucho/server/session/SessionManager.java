@@ -57,6 +57,7 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.env.meter.AverageSensor;
 import com.caucho.env.meter.MeterService;
 import com.caucho.hessian.io.HessianDebugInputStream;
+import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Server;
@@ -160,6 +161,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   // XXX: changed for JSF
   private boolean _ignoreSerializationErrors = true;
   private boolean _isHessianSerialization = true;
+  private SerializerFactory _hessianFactory;
   private boolean _isSerializeCollectionType = true;
 
   // List of the HttpSessionListeners from the configuration file
@@ -1122,9 +1124,12 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     throws IOException
   {
     if (_isHessianSerialization) {
+      if (_hessianFactory == null)
+        _hessianFactory = new SerializerFactory(getClassLoader());
+      
       HessianSessionSerializer ser;
       
-      ser = new HessianSessionSerializer(os, getClassLoader());
+      ser = new HessianSessionSerializer(os, _hessianFactory);
       
       ser.setSerializeCollectionType(_isSerializeCollectionType);
       

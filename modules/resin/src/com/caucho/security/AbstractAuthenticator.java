@@ -841,7 +841,7 @@ public class AbstractAuthenticator
       StringBuilder sb = new StringBuilder();
       sb.append(code);
       
-      MessageDigest md = MessageDigest.getInstance("sha1");
+      MessageDigest md = MessageDigest.getInstance("md5");
       
       for (int i = 0; i < password.length; i++) {
         md.update((byte) password[i]);
