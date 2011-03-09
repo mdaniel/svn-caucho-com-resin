@@ -29,7 +29,7 @@
 
 package com.caucho.bam.client;
 
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
@@ -44,12 +44,12 @@ import com.caucho.bam.stream.MessageStream;
 public class LinkClient {
   private LinkConnectionFactory _linkFactory;
   
-  private Actor _actor;
+  private ActorHolder _actor;
 
   private Broker _outboundBroker;
   private ActorSender _sender;
   
-  public LinkClient(LinkConnectionFactory linkFactory, Actor actor)
+  public LinkClient(LinkConnectionFactory linkFactory, ActorHolder actor)
   {
     if (linkFactory == null)
       throw new NullPointerException();

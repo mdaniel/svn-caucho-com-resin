@@ -40,7 +40,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 
 import com.caucho.bam.BamError;
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.actor.BamSkeleton;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.HashMapBroker;
@@ -56,7 +56,7 @@ import com.caucho.websocket.WebSocketServletRequest;
  * HmtpWriteStream writes HMTP packets to an OutputStream.
  */
 @SuppressWarnings("serial")
-public class HmtpServlet extends HttpServlet implements Actor, MessageStream
+public class HmtpServlet extends HttpServlet implements ActorHolder, MessageStream
 {
   private static final Logger log
     = Logger.getLogger(HmtpServlet.class.getName());
@@ -69,7 +69,7 @@ public class HmtpServlet extends HttpServlet implements Actor, MessageStream
 
   private BamSkeleton _skeleton;
   private MessageStream _servletFallbackStream;
-  private Actor _actor;
+  private ActorHolder _actor;
   
   private HashMapBroker _broker;
   private Mailbox _mailbox;
@@ -147,11 +147,11 @@ public class HmtpServlet extends HttpServlet implements Actor, MessageStream
     _broker.createAgent(linkActor.getActorStream());
   }  
 
-  public void removeClientLinkActor(Actor linkActor)
+  public void removeClientLinkActor(ActorHolder linkActor)
   {
   }
 
-  public void destroyClientLinkActor(Actor linkActor)
+  public void destroyClientLinkActor(ActorHolder linkActor)
   {
   }
   

@@ -105,7 +105,8 @@ public final class ClusterServer {
 
   // runtime
 
-  private ClientSocketFactory _serverPool;
+  private ClientSocketFactory _clusterSocketPool;
+  private ClientSocketFactory _loadBalanceSocketPool;
 
   private AtomicBoolean _isHeartbeatActive = new AtomicBoolean();
   private AtomicLong _stateTimestamp = new AtomicLong();
@@ -584,13 +585,26 @@ public final class ClusterServer {
   {
     return getCloudServer().isSelf();
   }
+  
+  public boolean isRemote()
+  {
+    return ! isSelf();
+  }
 
   /**
-   * Returns the server connector.
+   * Returns the socket pool as a pod cluster connector.
    */
-  public final ClientSocketFactory getServerPool()
+  public final ClientSocketFactory getClusterSocketPool()
   {
-    return _serverPool;
+    return _clusterSocketPool;
+  }
+
+  /**
+   * Returns the socket pool as a load-balancer.
+   */
+  public final ClientSocketFactory getLoadBalanceSocketPool()
+  {
+    return _loadBalanceSocketPool;
   }
   
   /**
@@ -598,7 +612,7 @@ public final class ClusterServer {
    */
   public final boolean isActiveRemote()
   {
-    ClientSocketFactory pool = _serverPool;
+    ClientSocketFactory pool = _clusterSocketPool;
 
     return pool != null && pool.isActive();
   }
@@ -645,18 +659,21 @@ public final class ClusterServer {
     */
 
     if (! isSelf() && getCloudServer().getPort() >= 0) {
-      _serverPool = createServerPool(_clusterService.getServerId());
-      _serverPool.init();
+      _clusterSocketPool = createClusterPool(_clusterService.getServerId());
+      _clusterSocketPool.init();
+      
+      _loadBalanceSocketPool = createLoadBalancePool(_clusterService.getServerId());
+      _loadBalanceSocketPool.init();
     }
 
     _admin.register();
   }
 
-  private ClientSocketFactory createServerPool(String serverId)
+  private ClientSocketFactory createLoadBalancePool(String serverId)
   {
     ClientSocketFactory pool = new ClientSocketFactory(serverId,
                                                        getId(),
-                                                       "Resin|Cluster",
+                                                       "Resin|LoadBalanceSocket",
                                                        getStatId(),
                                                        getAddress(),
                                                        getPort(),
@@ -665,11 +682,26 @@ public final class ClusterServer {
     pool.setLoadBalanceConnectTimeout(getLoadBalanceConnectTimeout());
     pool.setLoadBalanceConnectionMin(getLoadBalanceConnectionMin());
     pool.setLoadBalanceSocketTimeout(getLoadBalanceSocketTimeout());
-    // pool.setLoadBalanceIdleTime(getLoadBalanceIdleTime());
-    pool.setLoadBalanceIdleTime(getClusterIdleTime());
+    pool.setLoadBalanceIdleTime(getLoadBalanceIdleTime());
     pool.setLoadBalanceRecoverTime(getLoadBalanceRecoverTime());
     pool.setLoadBalanceWarmupTime(getLoadBalanceWarmupTime());
     pool.setLoadBalanceWeight(getLoadBalanceWeight());
+    
+    return pool;
+  }
+
+  private ClientSocketFactory createClusterPool(String serverId)
+  {
+    ClientSocketFactory pool = new ClientSocketFactory(serverId,
+                                                       getId(),
+                                                       "Resin|ClusterSocket",
+                                                       getStatId(),
+                                                       getAddress(),
+                                                       getPort(),
+                                                       isSSL());
+
+    pool.setLoadBalanceSocketTimeout(getClusterIdleTime());
+    pool.setLoadBalanceIdleTime(getClusterIdleTime());
     
     if (getCloudServer().getPod() == _clusterService.getSelfServer().getPod())
       pool.setHeartbeatServer(true);
@@ -726,8 +758,8 @@ public final class ClusterServer {
     
     _stateTimestamp.set(now);
 
-    if (_serverPool != null)
-      _serverPool.notifyHeartbeatStart();
+    if (_clusterSocketPool != null)
+      _clusterSocketPool.notifyHeartbeatStart();
 
     if (log.isLoggable(Level.FINER))
       log.finer(this + " notify-heartbeat-start");
@@ -753,8 +785,8 @@ public final class ClusterServer {
 
     log.warning(this + " notify-heartbeat-stop");
 
-    if (_serverPool != null)
-      _serverPool.notifyHeartbeatStop();
+    if (_clusterSocketPool != null)
+      _clusterSocketPool.notifyHeartbeatStop();
 
     _clusterService.notifyHeartbeatStop(this);
 
@@ -769,8 +801,8 @@ public final class ClusterServer {
     _isHeartbeatActive.set(false);
     _stateTimestamp.set(Alarm.getCurrentTime());
 
-    if (_serverPool != null)
-      _serverPool.notifyHeartbeatStop();
+    if (_clusterSocketPool != null)
+      _clusterSocketPool.notifyHeartbeatStop();
   }
 
   /**
@@ -798,8 +830,11 @@ public final class ClusterServer {
    */
   public void close()
   {
-    if (_serverPool != null)
-      _serverPool.close();
+    if (_loadBalanceSocketPool != null)
+      _loadBalanceSocketPool.close();
+    
+    if (_clusterSocketPool != null)
+      _clusterSocketPool.close();
   }
 
   @Override

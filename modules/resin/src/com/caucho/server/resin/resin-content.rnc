@@ -642,6 +642,12 @@ r_server-Content =
 
   & r_cluster-port*
 
+  & (attribute cluster-idle-time { r_period-Type }
+     | element cluster-idle-time { r_period-Type })?
+
+  & (attribute cluster-socket-timeout { r_period-Type }
+     | element cluster-socket-timeout { r_period-Type })?
+
   & (attribute connection-max { r_int-Type }
      | element connection-max { r_int-Type })?
 

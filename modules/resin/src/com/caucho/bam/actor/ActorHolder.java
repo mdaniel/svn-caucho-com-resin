@@ -29,6 +29,8 @@
 
 package com.caucho.bam.actor;
 
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.MessageStream;
 
 /**
@@ -49,6 +51,19 @@ import com.caucho.bam.stream.MessageStream;
  * instead of implementing Actor directly.  SimpleActor adds an
  * annotation-based message dispatching system to simplify Actor development.
  */
-public interface Actor extends MessageStream
+public interface ActorHolder
 {
+  public MessageStream getActorStream();
+  
+  public String getAddress();
+  
+  public void setAddress(String address);
+  
+  public Broker getBroker();
+  
+  public void setBroker(Broker broker);
+  
+  public Mailbox getMailbox();
+  
+  public void setMailbox(Mailbox mailbox);
 }

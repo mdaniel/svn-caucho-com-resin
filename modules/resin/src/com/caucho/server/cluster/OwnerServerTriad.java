@@ -84,7 +84,7 @@ public final class OwnerServerTriad
   {
     ClusterServer primary = _primary;
 
-    if (primary.getServerPool() != null)
+    if (primary.getClusterSocketPool() != null)
       return primary;
     else
       return null;
@@ -99,7 +99,7 @@ public final class OwnerServerTriad
 
     if (secondary == null)
       return null;
-    else if (secondary.getServerPool() != null)
+    else if (secondary.getClusterSocketPool() != null)
       return secondary;
     else
       return null;
@@ -114,7 +114,7 @@ public final class OwnerServerTriad
 
     if (tertiary == null)
       return null;
-    else if (tertiary.getServerPool() != null)
+    else if (tertiary.getClusterSocketPool() != null)
       return tertiary;
     else
       return null;
@@ -173,19 +173,19 @@ public final class OwnerServerTriad
     ClientSocketFactory pool;
 
     server = _primary;
-    pool = server != null ? server.getServerPool() : null;
+    pool = server != null ? server.getClusterSocketPool() : null;
     
     if (pool != null && pool.isActive() && server != oldServer)
       return server;
 
     server = _secondary;
-    pool = server != null ? server.getServerPool() : null;
+    pool = server != null ? server.getClusterSocketPool() : null;
     
     if (pool != null && pool.isActive() && server != oldServer)
       return server;
 
     server = _tertiary;
-    pool = server != null ? server.getServerPool() : null;
+    pool = server != null ? server.getClusterSocketPool() : null;
     
     if (pool != null && pool.isActive() && server != oldServer)
       return server;
@@ -194,7 +194,7 @@ public final class OwnerServerTriad
 
     server = _primary;
     if (server != null && server.isHeartbeatActive()) {
-      pool = server.getServerPool();
+      pool = server.getClusterSocketPool();
     
       if (pool != null && server != oldServer)
         return server;
@@ -202,7 +202,7 @@ public final class OwnerServerTriad
 
     server = _secondary;
     if (server != null && server.isHeartbeatActive()) {
-      pool = server.getServerPool();
+      pool = server.getClusterSocketPool();
     
       if (pool != null && server != oldServer)
         return server;
@@ -210,7 +210,7 @@ public final class OwnerServerTriad
 
     server = _tertiary;
     if (server != null && server.isHeartbeatActive()) {
-      pool = server.getServerPool();
+      pool = server.getClusterSocketPool();
     
       if (pool != null && server != oldServer)
         return server;
@@ -230,7 +230,7 @@ public final class OwnerServerTriad
     server = _primary;
 
     if (server != null) {
-      pool = server.getServerPool();
+      pool = server.getClusterSocketPool();
     
     if (pool == null || pool.isActive() && server != oldServer)
       return server;
@@ -239,7 +239,7 @@ public final class OwnerServerTriad
     server = _secondary;
     
     if (server != null) {
-      pool = server.getServerPool();
+      pool = server.getClusterSocketPool();
     
       if (pool == null || pool.isActive() && server != oldServer)
         return server;
@@ -248,7 +248,7 @@ public final class OwnerServerTriad
     server = _tertiary;
 
     if (server != null) {
-      pool = server.getServerPool();
+      pool = server.getClusterSocketPool();
     
       if (pool == null || pool.isActive() && server != oldServer)
       return server;
@@ -257,19 +257,19 @@ public final class OwnerServerTriad
     // force the send
 
     server = _primary;
-    pool = server != null ? server.getServerPool() : null;
+    pool = server != null ? server.getClusterSocketPool() : null;
     
     if (pool != null && server != oldServer)
       return server;
 
     server = _secondary;
-    pool = server != null ? server.getServerPool() : null;
+    pool = server != null ? server.getClusterSocketPool() : null;
     
     if (pool != null && server != oldServer)
       return server;
 
     server = _tertiary;
-    pool = server != null ? server.getServerPool() : null;
+    pool = server != null ? server.getClusterSocketPool() : null;
     
     if (pool != null && server != oldServer)
       return server;

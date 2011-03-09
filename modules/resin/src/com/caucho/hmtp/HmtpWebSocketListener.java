@@ -32,7 +32,7 @@ package com.caucho.hmtp;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.broker.Broker;
 import com.caucho.websocket.AbstractWebSocketListener;
 import com.caucho.websocket.WebSocketContext;

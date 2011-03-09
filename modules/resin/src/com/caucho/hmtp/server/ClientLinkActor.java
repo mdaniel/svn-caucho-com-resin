@@ -32,7 +32,7 @@ package com.caucho.hmtp.server;
 import java.io.Serializable;
 
 import com.caucho.bam.BamError;
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.MessageStream;
 

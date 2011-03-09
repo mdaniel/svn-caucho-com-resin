@@ -27,68 +27,59 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.stream;
+package com.caucho.bam.manager;
 
-import com.caucho.bam.actor.ActorHolder;
+import com.caucho.bam.actor.Agent;
+import com.caucho.bam.actor.ManagedActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
+import com.caucho.bam.mailbox.MailboxType;
+import com.caucho.bam.stream.MessageStream;
 
 
 /**
- * NullActorStream always ignores messages and returns errors for RPC calls.
+ * Broker is the hub which routes messages to mailboxes.
  */
-public class NullActor extends NullMessageStream implements ActorHolder
+public interface BamManager
 {
-  private Mailbox _mailbox;
+  /**
+   * Returns the managed broker
+   */
+  public Broker getBroker();
   
-  public NullActor()
-  {
-    this("null");
-    Thread.dumpStack();
-  }
+  /**
+   * Adds a mailbox to the broker.
+   */
+  void addMailbox(Mailbox mailbox);
   
-  public NullActor(String address)
-  {
-    super();
+  /**
+   * Removes a mailbox
+   */
+  public void removeMailbox(Mailbox mailbox);
+  
+  /**
+   * Adds an actor and creates a default mailbox
+   */
+  public void addActor(String address, ManagedActor actor);
+  
+  /**
+   * Creates an agent
+   */
+  public Agent createAgent(MessageStream actorStream);
     
-    setAddress(address);
-  }
-  
-  public NullActor(String address, Broker broker)
-  {
-    super();
-    
-    setAddress(address);
-    setBroker(broker);
-  }
+  /**
+   * Creates an agent
+   */
+  public Agent createAgent(MessageStream actorStream,
+                           MailboxType mailboxType);
 
-  @Override
-  public void setAddress(String address)
-  {
-    super.setAddress(address);
-  }
-
-  @Override
-  public MessageStream getActorStream()
-  {
-    return this;
-  }
-
-  @Override
-  public void setBroker(Broker broker)
-  {
-    super.setBroker(broker);
-  }
-
-  @Override
-  public Mailbox getMailbox()
-  {
-    return _mailbox;
-  }
-
-  @Override
-  public void setMailbox(Mailbox mailbox)
-  {
-    _mailbox = mailbox;
-  }
+  /**
+   * @param actorStream
+   * @param uid
+   * @param resource
+   * @return
+   */
+  public Mailbox createClient(Mailbox next,
+                              String uid,
+                              String resource);
 }

@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.BamException;
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.client.LinkClient;
@@ -61,7 +61,7 @@ public class HmtpClient implements ActorSender {
   private String _address;
   private String _virtualHost;
 
-  private Actor _actor;
+  private ActorHolder _actor;
   
   private HmtpLinkFactory _linkFactory;
   private LinkClient _linkClient;
@@ -78,7 +78,7 @@ public class HmtpClient implements ActorSender {
   
   private ClientAuthManager _authManager = new ClientAuthManager();
   
-  public HmtpClient(String url, Actor actor)
+  public HmtpClient(String url, ActorHolder actor)
     throws IOException
   {
     _actor = actor;

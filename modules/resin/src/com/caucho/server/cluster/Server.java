@@ -42,6 +42,7 @@ import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.manager.BamManager;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.bam.stream.NullMessageStream;
 import com.caucho.cloud.bam.BamSystem;
@@ -354,6 +355,11 @@ public class Server
   {
     return _selfServer.getCluster().getSystem().getClusterList();
   }
+  
+  public NetworkClusterSystem getClusterService()
+  {
+    return _clusterService;
+  }
 
   /**
    * Returns the admin path
@@ -409,6 +415,14 @@ public class Server
   public ManagedBroker getAdminBroker()
   {
     return getBamBroker();
+  }
+
+  /**
+   * Returns the bam broker.
+   */
+  public BamManager getAdminBrokerManager()
+  {
+    return _bamService.getBrokerManager();
   }
   
   /**

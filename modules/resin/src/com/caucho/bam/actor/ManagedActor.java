@@ -27,23 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cloud.network;
+package com.caucho.bam.actor;
 
-import com.caucho.config.ConfigException;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 
 /**
- * Represents a protocol connection.
+ * A BAM Actor sends and receives messages as the core class in a
+ * service-oriented architecture.
+ *
+ * <h2>Core API</h2>
+ *
+ * Each actor has a unique address, which is the address for messages sent to
+ * the actor.  addresss look like email addresses: harry@caucho.com
+ * or harry@caucho.com/browser.
+ *
+ * {@link com.caucho.bam.stream.MessageStream} is the key customizable interface
+ * for an agent developer.  Developers will implement callbacks for each
+ * packet type the agent understands.
+ *
+ * Most developers will extend from {@link com.caucho.bam.actor.SimpleActor}
+ * instead of implementing Actor directly.  SimpleActor adds an
+ * annotation-based message dispatching system to simplify Actor development.
  */
-public class ClusterListener extends TcpSocketLinkListener {
-  public ClusterListener(String address, int port)
-  {
-    try {
-      setAddress(address);
-      
-      setPort(port);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
+public interface ManagedActor extends Actor
+{
+  public void setAddress(String address);
+  
+  public void setBroker(Broker broker);
+  
+  public Mailbox getMailbox();
+  
+  public void setMailbox(Mailbox mailbox);
 }

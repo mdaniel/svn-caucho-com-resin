@@ -35,13 +35,12 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.query.QueryMessageStreamFilter;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
 import com.caucho.bam.query.QueryManager;
+import com.caucho.bam.query.QueryMessageStreamFilter;
 import com.caucho.bam.stream.AbstractMessageStream;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.bam.stream.NullMessageStream;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
@@ -158,7 +157,7 @@ public class SimpleActorSender implements ActorSender {
   //
 
   /**
-   * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
+   * Sends a unidirectional message to an {@link com.caucho.bam.actor.ActorHolder},
    * addressed by the Actor's address.
    *
    * @param to the target actor's address

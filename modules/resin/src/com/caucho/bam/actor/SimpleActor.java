@@ -38,7 +38,7 @@ import com.caucho.bam.stream.MessageStream;
  * Base class for implementing an Agent.
  */
 public class SimpleActor extends AbstractMessageStream
-  implements Actor
+  implements ManagedActor, ActorHolder
 {
   private final SkeletonMessageStreamFilter<?> _skeleton;
   private final SimpleActorSender _sender;
@@ -157,4 +157,4 @@ public class SimpleActor extends AbstractMessageStream
     _broker = broker;
     _sender.setBroker(broker);
   }
-}
+}  

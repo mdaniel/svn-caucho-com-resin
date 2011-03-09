@@ -51,15 +51,18 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
   private static final Logger log = 
     Logger.getLogger(NetworkClusterSystem.class.getName());
   
+  private static final long CLUSTER_IDLE_TIME_MAX = Long.MAX_VALUE / 2;
+  private static final long CLUSTER_IDLE_PADDING = 2 * 60 * 1000;
+  
   private final CloudServer _selfServer;
   
   private TcpSocketLinkListener _clusterListener;
   
   private CopyOnWriteArrayList<ClusterServerListener> _serverListeners
-  = new CopyOnWriteArrayList<ClusterServerListener>();
+    = new CopyOnWriteArrayList<ClusterServerListener>();
 
   private CopyOnWriteArrayList<ClusterLinkListener> _linkListeners
-  = new CopyOnWriteArrayList<ClusterLinkListener>();
+    = new CopyOnWriteArrayList<ClusterLinkListener>();
 
   private NetworkClusterSystem(CloudServer selfServer)
   {
@@ -71,7 +74,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     if (_selfServer.getPort() >= 0) {
       _clusterListener = new ClusterListener(_selfServer.getAddress(), 
                                              _selfServer.getPort());
-    }
+     }
   }
 
   /**
@@ -225,7 +228,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
           ClusterServer server = cloudServer.getData(ClusterServer.class);
 
           if (server != null) {
-            ClientSocketFactory pool = server.getServerPool();
+            ClientSocketFactory pool = server.getClusterSocketPool();
 
             if (pool != null)
               pool.start();
@@ -333,6 +336,14 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     TcpSocketLinkListener listener = _clusterListener;
     
     if (listener != null) {
+      ClusterServer clusterServer = _selfServer.getData(ClusterServer.class);
+      
+      long idleTime = clusterServer.getClusterIdleTime() + CLUSTER_IDLE_PADDING;
+      
+      listener.setKeepaliveConnectionTimeMaxMillis(CLUSTER_IDLE_TIME_MAX);
+      listener.setKeepaliveTimeoutMillis(idleTime);
+      listener.setSocketTimeoutMillis(idleTime);
+      
       listener.setProtocol(new HmuxProtocol());
       listener.init();
       

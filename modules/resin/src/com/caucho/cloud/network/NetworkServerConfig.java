@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.types.Period;
 import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.cluster.ProtocolPort;
@@ -43,6 +44,7 @@ public class NetworkServerConfig {
   private NetworkListenSystem _listenService;
   
   private ContainerProgram _listenerDefaults = new ContainerProgram();
+  private boolean _isKeepaliveSelectEnable;
 
   /**
    * Creates a new servlet server.
@@ -60,7 +62,38 @@ public class NetworkServerConfig {
   @Configurable
   public TcpSocketLinkListener createClusterPort()
   {
-   return getListenService().getClusterListener();
+    return getListenService().getClusterListener();
+  }
+  
+  protected TcpSocketLinkListener getClusterListener()
+  {
+    return getListenService().getClusterListener();
+  }
+  
+  @Configurable
+  public void setClusterIdleTime(Period period)
+  {
+    // XXX: non-configurable
+    // getClusterListener().setKeepaliveTimeout(period);
+  }
+  
+  @Configurable
+  public void setClusterSocketTimeout(Period period)
+  {
+    // XXX: non-configurable
+    // getClusterListener().setSocketTimeout(period);
+  }
+  
+  @Configurable
+  public void setKeepaliveSelectEnable(boolean isEnable)
+  {
+    _isKeepaliveSelectEnable = isEnable;
+    getClusterListener().setKeepaliveSelectEnable(isEnable);
+  }
+  
+  public boolean isKeepaliveSelectEnable()
+  {
+    return _isKeepaliveSelectEnable;
   }
   
   @Configurable
@@ -92,7 +125,7 @@ public class NetworkServerConfig {
   @Configurable
   public TcpSocketLinkListener createListen()
   {
-    ProtocolPortConfig listener= new ProtocolPortConfig();
+    ProtocolPortConfig listener = new ProtocolPortConfig();
 
     getListenService().addListener(listener);
 
@@ -150,5 +183,6 @@ public class NetworkServerConfig {
   private void applyPortDefaults(TcpSocketLinkListener port)
   {
     _listenerDefaults.configure(port);
+    port.setKeepaliveSelectEnable(isKeepaliveSelectEnable());
   }
 }

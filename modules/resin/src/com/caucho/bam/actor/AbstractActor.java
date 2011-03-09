@@ -29,80 +29,14 @@
 
 package com.caucho.bam.actor;
 
-import com.caucho.bam.broker.Broker;
-import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.stream.AbstractMessageStream;
 
 
 /**
  * Abstract implementation of a BAM actor.
  */
-abstract public class AbstractActor implements Actor
+abstract public class AbstractActor 
+  extends AbstractMessageStream
+  implements Actor
 {
-  private Broker _broker;
-  private Mailbox _mailbox;
-
-  /**
-   * Returns the stream to the Actor from the link so
-   * messages from other Actors can be delivered.
-   */
-  @Override
-  abstract public MessageStream getActorStream();
-
-  @Override
-  public String getAddress()
-  {
-    return getActorStream().getAddress();
-  }
-  
-  @Override
-  public void setAddress(String address)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  /**
-   * The stream to the link is used by the Actor to send messages to
-   * all other Actors in the system.
-   */
-  @Override
-  public Broker getBroker()
-  {
-    return _broker;
-  }
-
-  /**
-   * The stream to the link is used by the Actor to send messages to
-   * all other Actors in the system.
-   */
-  @Override
-  public void setBroker(Broker broker)
-  {
-    _broker = broker;
-  }
-
-  /**
-   * The stream to the link is used by the Actor to send messages to
-   * all other Actors in the system.
-   */
-  @Override
-  public Mailbox getMailbox()
-  {
-    return _mailbox;
-  }
-
-  /**
-   * The stream to the link is used by the Actor to send messages to
-   * all other Actors in the system.
-   */
-  @Override
-  public void setMailbox(Mailbox mailbox)
-  {
-    _mailbox = mailbox;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + getActorStream().getAddress() + "]";
-  }
 }

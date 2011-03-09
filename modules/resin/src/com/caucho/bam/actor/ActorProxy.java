@@ -54,7 +54,7 @@ public interface ActorProxy {
   //
 
   /**
-   * Sends a unidirectional message to the target {@link com.caucho.bam.actor.Actor},
+   * Sends a unidirectional message to the target {@link com.caucho.bam.actor.ActorHolder},
    *
    * @param payload the message payload
    */

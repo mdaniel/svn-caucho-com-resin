@@ -13,6 +13,7 @@
 
 <s2 title="4.0.16 - snapshot">
 <ul>
+<li>cluster: cluster/network timings split from load-balance configuration (#4429, rep by Dmitri Kolpakov)</li>
 <li>cluster-cache: mismatched message/query replication for data actor (#4425, rep by Dmitri Kolpakov)</li>
 <li>session: inconsistent setMaxInactiveInterval with timeouts (#4419, rep by vicsanca)</li>
 <li>proxy-cache: check cache refill against invalidated cache (#4413, rep by shine)</li>

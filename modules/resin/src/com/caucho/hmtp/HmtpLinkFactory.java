@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import com.caucho.bam.BamException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.actor.AbstractActorSender;
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.client.LinkConnection;

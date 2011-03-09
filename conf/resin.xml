@@ -112,9 +112,11 @@
           <allow-servlet-el/>
         </prologue>
 
-        <!-- enable persistent sessions -->
         <session-config>
-          <use-persistent-store/>
+	  <!--
+	     - enable persistent sessions
+             - <use-persistent-store/>
+	    -->
           <enable-url-rewriting>false</enable-url-rewriting>
         </session-config>
      

@@ -30,6 +30,8 @@
 package com.caucho.cloud.bam;
 
 import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.manager.BamManager;
+import com.caucho.bam.manager.SimpleBamManager;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.AbstractResinSubSystem;
 import com.caucho.env.service.ResinSystem;
@@ -54,8 +56,9 @@ public class BamSystem extends AbstractResinSubSystem
   private String _address;
   
   private final ResinSystem _resinSystem;
-  private final HempBrokerManager _brokerManager;
+  private final HempBrokerManager _hempBrokerManager;
   private final HempBroker _broker;
+  private final BamManager _brokerManager;
   
   private ServerAuthManager _linkManager;
   
@@ -71,14 +74,15 @@ public class BamSystem extends AbstractResinSubSystem
     
     _address = address;
     
-    _brokerManager = new HempBrokerManager(_resinSystem);
+    _hempBrokerManager = new HempBrokerManager(_resinSystem);
 
-    _broker = new HempBroker(_brokerManager, getAddress());
+    _broker = new HempBroker(_hempBrokerManager, getAddress());
+    _brokerManager = new SimpleBamManager(_broker);
 
     if (getAddress() != null)
-      _brokerManager.addBroker(getAddress(), _broker);
+      _hempBrokerManager.addBroker(getAddress(), _broker);
     
-    _brokerManager.addBroker("resin.caucho", _broker);
+    _hempBrokerManager.addBroker("resin.caucho", _broker);
   }
   
   public static BamSystem createAndAddService(String address)
@@ -109,6 +113,11 @@ public class BamSystem extends AbstractResinSubSystem
   public ManagedBroker getBroker()
   {
     return _broker;
+  }
+  
+  public BamManager getBrokerManager()
+  {
+    return _brokerManager;
   }
   
   public void setDomainManager(DomainManager manager)

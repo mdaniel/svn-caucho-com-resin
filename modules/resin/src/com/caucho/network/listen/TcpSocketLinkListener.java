@@ -656,7 +656,7 @@ public class TcpSocketLinkListener
     return _keepaliveTimeMax;
   }
   
-  protected void setKeepaliveConnectionTimeMaxMillis(long timeout)
+  public void setKeepaliveConnectionTimeMaxMillis(long timeout)
   {
     _keepaliveTimeMax = timeout;
   }
@@ -681,7 +681,7 @@ public class TcpSocketLinkListener
 
   public void setKeepaliveTimeout(Period period)
   {
-    _keepaliveTimeout = period.getPeriod();
+    setKeepaliveTimeoutMillis(period.getPeriod());
   }
 
   public long getKeepaliveTimeout()
@@ -689,7 +689,7 @@ public class TcpSocketLinkListener
     return _keepaliveTimeout;
   }
   
-  protected void setKeepaliveTimeoutMillis(long timeout)
+  public void setKeepaliveTimeoutMillis(long timeout)
   {
     _keepaliveTimeout = timeout;
   }
@@ -1026,7 +1026,7 @@ public class TcpSocketLinkListener
     if (_serverSocket.isJni()) {
       SocketPollService pollService = SocketPollService.getCurrent();
         
-      if (pollService != null) {
+      if (pollService != null && _isKeepaliveSelectEnable) {
         _selectManager = pollService.getSelectManager();
       }
       
@@ -1324,7 +1324,10 @@ public class TcpSocketLinkListener
     // boolean isSelectManager = getServer().isSelectManagerEnabled();
 
     if (_isKeepaliveSelectEnable && _selectManager != null) {
-      timeout = getBlockingTimeoutForSelect();
+      long selectTimeout = getBlockingTimeoutForSelect();
+      
+      if (selectTimeout < timeout)
+        timeout = selectTimeout;
     }
 
     if (getSocketTimeout() < timeout)

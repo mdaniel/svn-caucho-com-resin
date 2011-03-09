@@ -40,7 +40,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.broker.AbstractBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
@@ -80,10 +80,10 @@ public class JmtpServlet extends GenericServlet {
   {
     WebSocketServletRequest wsRequest = (WebSocketServletRequest) request;
 
-    Actor actor;
+    ActorHolder actor;
 
     try {
-      actor = (Actor) _actorClass.newInstance();
+      actor = (ActorHolder) _actorClass.newInstance();
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -94,7 +94,7 @@ public class JmtpServlet extends GenericServlet {
   }
 
   static class Listener extends AbstractWebSocketListener {
-    private Actor _actor;
+    private ActorHolder _actor;
     private MessageStream _actorStream;
 
     private InputStream _is;
@@ -106,7 +106,7 @@ public class JmtpServlet extends GenericServlet {
     private JmtpMailbox _jmtpMailbox;
     private JmtpBroker _jmtpBroker;
 
-    Listener(Actor actor)
+    Listener(ActorHolder actor)
     {
       _actor = actor;
       

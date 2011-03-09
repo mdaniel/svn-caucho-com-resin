@@ -37,7 +37,7 @@ import com.caucho.bam.broker.Broker;
 /**
  * Primary stream handling all message packets.
  *
- * {@link com.caucho.bam.actor.Actor Actors} send packets to the 
+ * {@link com.caucho.bam.actor.ActorHolder Actors} send packets to the 
  * {@link com.caucho.bam.broker.Broker} for delivery to other Actors.
  *
  * Messages are divided into two groups:
@@ -49,7 +49,7 @@ import com.caucho.bam.broker.Broker;
 public interface MessageStream
 {
   /**
-   * Returns the address of the {@link com.caucho.bam.actor.Actor} at the end
+   * Returns the address of the {@link com.caucho.bam.actor.ActorHolder} at the end
    * of the stream.
    */
   public String getAddress();
@@ -69,7 +69,7 @@ public interface MessageStream
   //
   
   /**
-   * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
+   * Sends a unidirectional message to an {@link com.caucho.bam.actor.ActorHolder},
    * addressed by the Actor's address.
    * 
    * @param to the target actor's address
@@ -79,7 +79,7 @@ public interface MessageStream
   public void message(String to, String from, Serializable payload);
   
   /**
-   * Sends a message error to an {@link com.caucho.bam.actor.Actor},
+   * Sends a message error to an {@link com.caucho.bam.actor.ActorHolder},
    * addressed by the Actor's address.  Actor protocols may choose to send
    * error messages if a message fails for some reason.
    *

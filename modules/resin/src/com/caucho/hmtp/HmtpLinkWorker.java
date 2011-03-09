@@ -34,7 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.stream.MessageStream;
 
 /**
@@ -51,7 +51,7 @@ public class HmtpLinkWorker implements Runnable {
   private HmtpWebSocketWriter _toLinkStream;
   private HmtpWebSocketReader _in;
 
-  public HmtpLinkWorker(Actor actor, InputStream is, OutputStream os)
+  public HmtpLinkWorker(ActorHolder actor, InputStream is, OutputStream os)
     throws IOException
   {
     _actorStream = actor.getActorStream();

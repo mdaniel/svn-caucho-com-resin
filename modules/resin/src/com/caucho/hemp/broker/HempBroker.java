@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.bam.BamError;
-import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.broker.AbstractManagedBroker;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
@@ -565,7 +565,7 @@ public class HempBroker extends AbstractManagedBroker
     if (p > 0) {
       String owner = address.substring(0, p);
 
-      Actor actor = null;
+      ActorHolder actor = null;
 
       /*
       if (actor != null) {
@@ -605,7 +605,7 @@ public class HempBroker extends AbstractManagedBroker
   {
     InjectManager beanManager = InjectManager.getCurrent();
 
-    Actor actor = (Actor) beanManager.getReference(bean);
+    ActorHolder actor = (ActorHolder) beanManager.getReference(bean);
 
     actor.setBroker(this);
 
@@ -624,7 +624,7 @@ public class HempBroker extends AbstractManagedBroker
 
     actor.setAddress(address);
 
-    Actor bamActor = actor;
+    ActorHolder bamActor = actor;
 
     Mailbox mailbox;
     
@@ -647,7 +647,7 @@ public class HempBroker extends AbstractManagedBroker
   {
     InjectManager beanManager = InjectManager.getCurrent();
 
-    Actor actor = (Actor) beanManager.getReference(bean);
+    ActorHolder actor = (ActorHolder) beanManager.getReference(bean);
 
     actor.setBroker(this);
 
@@ -663,7 +663,7 @@ public class HempBroker extends AbstractManagedBroker
 
     int threadMax = bamService.threadMax();
 
-    Actor bamActor = actor;
+    ActorHolder bamActor = actor;
     Mailbox mailbox = null;
     // queue
     if (threadMax > 0) {
@@ -691,7 +691,7 @@ public class HempBroker extends AbstractManagedBroker
     _actorStreamMap.clear();
   }
 
-  private String getAddress(Actor actor, Annotation []annList)
+  private String getAddress(ActorHolder actor, Annotation []annList)
   {
     com.caucho.remote.BamService bamAnn = findActor(annList);
 

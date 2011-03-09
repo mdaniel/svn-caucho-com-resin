@@ -305,6 +305,11 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   {
     _loadBalanceRecoverTime = timeout;
   }
+  
+  public long getLoadBalanceRecoverTime()
+  {
+    return _loadBalanceRecoverTime;
+  }
 
   /**
    * Returns the time in milliseconds for the slow start throttling.

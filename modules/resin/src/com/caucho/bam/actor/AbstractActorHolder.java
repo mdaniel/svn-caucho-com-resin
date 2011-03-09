@@ -27,68 +27,82 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.stream;
+package com.caucho.bam.actor;
 
-import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
+import com.caucho.bam.stream.MessageStream;
 
 
 /**
- * NullActorStream always ignores messages and returns errors for RPC calls.
+ * Abstract implementation of a BAM actor.
  */
-public class NullActor extends NullMessageStream implements ActorHolder
+abstract public class AbstractActorHolder implements ActorHolder
 {
+  private Broker _broker;
   private Mailbox _mailbox;
-  
-  public NullActor()
-  {
-    this("null");
-    Thread.dumpStack();
-  }
-  
-  public NullActor(String address)
-  {
-    super();
-    
-    setAddress(address);
-  }
-  
-  public NullActor(String address, Broker broker)
-  {
-    super();
-    
-    setAddress(address);
-    setBroker(broker);
-  }
 
+  /**
+   * Returns the stream to the Actor from the link so
+   * messages from other Actors can be delivered.
+   */
+  @Override
+  abstract public MessageStream getActorStream();
+
+  @Override
+  public String getAddress()
+  {
+    return getActorStream().getAddress();
+  }
+  
   @Override
   public void setAddress(String address)
   {
-    super.setAddress(address);
+    throw new UnsupportedOperationException(getClass().getName());
   }
-
+  /**
+   * The stream to the link is used by the Actor to send messages to
+   * all other Actors in the system.
+   */
   @Override
-  public MessageStream getActorStream()
+  public Broker getBroker()
   {
-    return this;
+    return _broker;
   }
 
+  /**
+   * The stream to the link is used by the Actor to send messages to
+   * all other Actors in the system.
+   */
   @Override
   public void setBroker(Broker broker)
   {
-    super.setBroker(broker);
+    _broker = broker;
   }
 
+  /**
+   * The stream to the link is used by the Actor to send messages to
+   * all other Actors in the system.
+   */
   @Override
   public Mailbox getMailbox()
   {
     return _mailbox;
   }
 
+  /**
+   * The stream to the link is used by the Actor to send messages to
+   * all other Actors in the system.
+   */
   @Override
   public void setMailbox(Mailbox mailbox)
   {
     _mailbox = mailbox;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getActorStream().getAddress() + "]";
   }
 }

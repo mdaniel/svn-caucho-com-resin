@@ -92,7 +92,7 @@ abstract public class AbstractActorSender implements ActorSender {
   //
 
   /**
-   * Sends a unidirectional message to an {@link com.caucho.bam.actor.Actor},
+   * Sends a unidirectional message to an {@link com.caucho.bam.actor.ActorHolder},
    * addressed by the Actor's address.
    *
    * @param to the target actor's address

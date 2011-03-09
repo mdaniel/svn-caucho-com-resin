@@ -147,6 +147,18 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   @Description("The configured load balance weight.  Weights over 100 will get more traffic and weights less than 100 will get less traffic")
   public int getWeight();
 
+  /**
+   * Returns the timeout for an idle socket that is connected to the target
+   * server. If the socket is not used within the timeout period the idle
+   * connection is closed.
+   */
+  @Description("The configured timeout for an idle socket that is connected" +
+               " to the target server. If the socket is not" +
+               " used within the timeout period the idle" +
+               " connection is closed")
+  @Units("milliseconds")
+  public long getClusterIdleTime();
+
   //
   // State attributes
   //

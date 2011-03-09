@@ -84,7 +84,7 @@ class HmtpLinkActor extends ServerLinkActor {
     ClusterServer clusterServer = findServerByAddress(address);
     
     if (clusterServer != null)
-      clusterServer.getServerPool().wake();
+      clusterServer.getClusterSocketPool().wake();
   }
 
   private ClusterServer findServerByAddress(String address)
