@@ -805,7 +805,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
     long timeout = getListener().getKeepaliveTimeout();
     long expires = timeout + Alarm.getCurrentTimeActual();
-    System.out.println("TO2: " + timeout);
+
     do {
       try {
         long delta = expires - Alarm.getCurrentTimeActual();
@@ -813,18 +813,17 @@ public class TcpSocketLink extends AbstractSocketLink
           delta = 0;
         
         if (getReadStream().fillWithTimeout(delta) > 0) {
-          System.out.println("READ:");
           return RequestState.REQUEST;
         }
+        break;
       } catch (SocketTimeoutException e) {
         log.log(Level.FINEST, e.toString(), e);
       } catch (IOException e) {
         log.log(Level.FINEST, e.toString(), e);
         break;
       }
-      System.out.println("LOOP:" + (expires - Alarm.getCurrentTimeActual()));
     } while (Alarm.getCurrentTimeActual() < expires);
-    System.out.println("CLOSE:");
+
     close();
 
     return RequestState.EXIT;

@@ -647,6 +647,7 @@ if ($is_refresh) {
 <body>
 
 <?
+  
 if ($user_principal) {
 ?>
 <div id="status-bar">
