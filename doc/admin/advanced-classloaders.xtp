@@ -71,7 +71,7 @@ files loading them.</p>
 <p>Configures a jar library, <var>WEB-INF/lib</var>-style class loader.</p>
 
 <p>The library-loader will add jar files in its path to the current classpath.
-Jar files are recognized wihen they have a filename extension of
+Jar files are recognized when they have a filename extension of
 <code>.jar</code> or <code>.zip</code>.</p>
 
 <deftable-childtags>
