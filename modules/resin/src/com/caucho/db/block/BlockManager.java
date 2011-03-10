@@ -59,6 +59,8 @@ public final class BlockManager
   private final byte []_storeMask = new byte[8192];
   private LongKeyLruCache<Block> _blockCache;
   
+  private boolean _isEnableMmap = true;
+  
   private final AtomicLong _blockWriteCount = new AtomicLong();
   private final AtomicLong _blockReadCount = new AtomicLong();
 
@@ -141,6 +143,16 @@ public final class BlockManager
   {
     if (minCapacity > 1024 * 1024 / BlockStore.BLOCK_SIZE)
       _blockCache = _blockCache.setCapacity(minCapacity);
+  }
+  
+  public boolean isEnableMmap()
+  {
+    return _isEnableMmap;
+  }
+  
+  public void setEnableMmap(boolean isEnable)
+  {
+    _isEnableMmap = isEnable;
   }
 
   /**

@@ -21,6 +21,9 @@ r_proxy-cache = element (proxy-cache|cache) {
 
   & r_enable?
 
+  & (attribute enable-mmap { r_boolean-Type }
+     | element enable-mmap { r_boolean-Type })?
+
   & (attribute enable-range { r_boolean-Type }
      | element enable-range { r_boolean-Type })?
 

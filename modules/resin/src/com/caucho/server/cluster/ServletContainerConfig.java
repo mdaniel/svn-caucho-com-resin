@@ -341,6 +341,12 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   {
     _servletContainer.setShutdownWaitMax(waitTime);
   }
+  
+  @Configurable
+  public void setInvocationCacheSize(int count)
+  {
+    _servletContainer.getInvocationServer().setInvocationCacheSize(count);
+  }
 
   /**
    * Sets the maximum thread-based keepalive

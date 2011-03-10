@@ -91,6 +91,10 @@ public class AbstractProxyCache
   public void setEntries(int entries)
   {
   }
+  
+  public void setMmap(boolean isEnable)
+  {
+  }
 
   /**
    * Sets the path to the cache directory (backwards compatibility).

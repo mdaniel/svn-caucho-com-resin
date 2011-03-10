@@ -211,7 +211,7 @@ public class BlockStore {
   public static BlockStore create(Path path)
     throws IOException, SQLException
   {
-    return create(path, true);
+    return create(path, BlockManager.getBlockManager().isEnableMmap());
   }
 
   /**
