@@ -29,22 +29,16 @@
 
 package com.caucho.server.security;
 
+import java.io.IOException;
+import java.security.Principal;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.http.CauchoRequest;
-import com.caucho.server.session.SessionImpl;
-import com.caucho.util.LruCache;
-
-import javax.annotation.PostConstruct;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Backwards compatibility

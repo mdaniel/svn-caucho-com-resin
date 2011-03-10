@@ -36,6 +36,7 @@ import com.caucho.loader.SimpleLoader;
 import com.caucho.util.FreeList;
 import com.caucho.util.IntMap;
 import com.caucho.util.LruCache;
+import com.caucho.util.WeakLruCache;
 import com.caucho.vfs.Path;
 
 import java.lang.ref.SoftReference;
@@ -111,10 +112,10 @@ public class Global extends ESBase {
 
   // bean wrapping
 
-  private final static LruCache<Class,ESBase> _staticWraps
-    = new LruCache<Class,ESBase>(256);
-  private final static LruCache<Class,ESBase> _staticClassWraps
-    = new LruCache<Class,ESBase>(256);
+  private final static WeakLruCache<Class,ESBase> _staticWraps
+    = new WeakLruCache<Class,ESBase>(256);
+  private final static WeakLruCache<Class,ESBase> _staticClassWraps
+    = new WeakLruCache<Class,ESBase>(256);
 
   // cache
 

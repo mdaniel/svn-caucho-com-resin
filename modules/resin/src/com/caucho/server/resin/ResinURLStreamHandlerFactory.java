@@ -38,11 +38,19 @@ import java.net.URLStreamHandlerFactory;
 
 public class ResinURLStreamHandlerFactory implements URLStreamHandlerFactory
 {
-  private static URLStreamHandler _urlStreamHandler;
+  private static ResinURLStreamHandlerFactory _factory
+    = new ResinURLStreamHandlerFactory();
+  
+  private static URLStreamHandler _urlStreamHandler
+    = new ResinURLStreamHandler();
 
-  public ResinURLStreamHandlerFactory()
+  private ResinURLStreamHandlerFactory()
   {
-    _urlStreamHandler = new ResinURLStreamHandler();
+  }
+  
+  public static URLStreamHandlerFactory create()
+  {
+    return _factory;
   }
 
   @Override
@@ -53,16 +61,16 @@ public class ResinURLStreamHandlerFactory implements URLStreamHandlerFactory
 
     return null;
   }
-}
 
-class ResinURLStreamHandler extends URLStreamHandler
-{
-  @Override
-  protected URLConnection openConnection(URL url)
-    throws IOException
+  static class ResinURLStreamHandler extends URLStreamHandler
   {
-    WebApp webApp = WebApp.getCurrent();
+    @Override
+    protected URLConnection openConnection(URL url)
+      throws IOException
+    {
+      WebApp webApp = WebApp.getCurrent();
 
-    return webApp.getResource(url);
+      return webApp.getResource(url);
+    }
   }
 }

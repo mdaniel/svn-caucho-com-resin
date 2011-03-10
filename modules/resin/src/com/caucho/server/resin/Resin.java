@@ -199,7 +199,7 @@ public class Resin
     initEnvironment();
 
     try {
-      URL.setURLStreamHandlerFactory(new ResinURLStreamHandlerFactory());
+      URL.setURLStreamHandlerFactory(ResinURLStreamHandlerFactory.create());
     } catch (java.lang.Error e) {
       //operation permitted once per jvm; catching for harness.
     }

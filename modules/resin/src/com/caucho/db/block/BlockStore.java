@@ -1643,7 +1643,6 @@ public class BlockStore {
       return;
 
     log.finer(this + " closing");
-
     if (_blockManager != null) {
       _blockManager.freeStore(this);
     }
@@ -1660,6 +1659,15 @@ public class BlockStore {
     if (_blockManager != null) {
       _blockManager.freeStoreId(id);
     }
+  }
+  
+  @Override
+  public void finalize()
+    throws Throwable
+  {
+    super.finalize();
+    
+    close();
   }
 
   // debugging stuff.

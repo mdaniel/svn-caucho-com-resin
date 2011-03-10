@@ -86,6 +86,7 @@ public class BlockReadWrite {
     _store = store;
     _blockManager = store.getBlockManager();
     _path = path;
+    _isEnableMmap = _blockManager.isEnableMmap();
 
     if (path == null)
       throw new NullPointerException();
@@ -212,7 +213,7 @@ public class BlockReadWrite {
     throws IOException
   {
     RandomAccessWrapper wrapper;
-
+    
     synchronized (_fileLock) {
       while (_fileSize < blockAddress + length) {
         _fileSize += FILE_SIZE_INCREMENT;
@@ -315,7 +316,7 @@ public class BlockReadWrite {
         
         if (_isEnableMmap)
           file = path.openMemoryMappedFile(_fileSize);
-        
+
         if (file != null) {
           _isMmap = true;
           RandomAccessStream oldMmap = _mmapFile.getAndSet(file);
@@ -325,7 +326,7 @@ public class BlockReadWrite {
         }
         else 
           file = path.openRandomAccess();
-
+        
         wrapper = new RandomAccessWrapper(file);
       }
     }

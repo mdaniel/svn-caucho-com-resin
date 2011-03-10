@@ -65,7 +65,6 @@ import com.caucho.util.L10N;
 public class EntityManagerJtaProxy
   implements EntityManager, java.io.Serializable, HandleAware
 {
-  private static final Logger log = Logger.getLogger(EntityManagerJtaProxy.class.getName());
   private static final L10N L = new L10N(EntityManagerJtaProxy.class);
   
   private final PersistenceUnitManager _persistenceUnit;
@@ -342,7 +341,7 @@ public class EntityManagerJtaProxy
 
     try {
       if (_ut.getStatus() == Status.STATUS_NO_TRANSACTION)
-        throw new TransactionRequiredException("persist must be called within transaction.");
+        throw new TransactionRequiredException(L.l("persist must be called within transaction."));
     } catch (SystemException e) {
       throw new RuntimeException(e);
     }
@@ -392,7 +391,7 @@ public class EntityManagerJtaProxy
 
     try {
       if (_ut.getStatus() == Status.STATUS_NO_TRANSACTION)
-        throw new TransactionRequiredException("persist must be called within transaction.");
+        throw new TransactionRequiredException(L.l("remove must be called within transaction."));
     } catch (SystemException e) {
       throw new RuntimeException(e);
     }
@@ -421,7 +420,7 @@ public class EntityManagerJtaProxy
 
     try {
       if (_ut.getStatus() == Status.STATUS_NO_TRANSACTION)
-        throw new TransactionRequiredException("persist must be called within transaction.");
+        throw new TransactionRequiredException(L.l("refresh must be called within transaction."));
     } catch (SystemException e) {
       throw new RuntimeException(e);
     }

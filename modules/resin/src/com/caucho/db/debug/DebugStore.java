@@ -29,24 +29,18 @@
 
 package com.caucho.db.debug;
 
+import java.io.IOException;
+
 import com.caucho.db.block.BlockStore;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
 /**
  * Manager for a basic Java-based database.
  */
 public class DebugStore {
-  private static final Logger log = Log.open(DebugStore.class);
-  private static final L10N L = new L10N(DebugStore.class);
-
   Path _path;
   BlockStore _store;
   
@@ -55,7 +49,7 @@ public class DebugStore {
   {
     _path = path;
 
-    _store = BlockStore.create(path);
+    _store = BlockStore.create(path, false);
   }
 
   public static void main(String []args)

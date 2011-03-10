@@ -57,7 +57,12 @@ abstract public class AbstractMessageStream implements MessageStream
   @Override
   public String getAddress()
   {
-    return getClass().getSimpleName() + "@" + getBroker().getAddress();
+    Broker broker = getBroker();
+    
+    if (broker != null)
+      return getClass().getSimpleName() + "@" + getBroker().getAddress();
+    else
+      return getClass().getSimpleName() + "@";
   }
   
   @Override

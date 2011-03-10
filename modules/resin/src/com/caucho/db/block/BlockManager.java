@@ -287,6 +287,11 @@ public final class BlockManager
     // Find any matching block in the process of being written
     return store.getWriter().copyDirtyBlock(blockId, block);
   }
+  
+  public void clear()
+  {
+    _blockCache.clear();
+  }
 
   //
   // management/statistics
