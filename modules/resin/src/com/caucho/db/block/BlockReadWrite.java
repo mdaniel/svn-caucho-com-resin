@@ -32,6 +32,7 @@ package com.caucho.db.block;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,7 +62,9 @@ public class BlockReadWrite {
 
   private Object _fileLock = new Object();
 
-  private RandomAccessStream _mmapFile;
+  private AtomicReference<RandomAccessStream> _mmapFile
+    = new AtomicReference<RandomAccessStream>();
+  
   private boolean _isEnableMmap = true;
   private boolean _isMmap = false;
   
@@ -246,14 +249,11 @@ public class BlockReadWrite {
     throws IOException
   {
     // limit number of active row files
-    
-    boolean isAcquire = false;
 
     if (! isPriority && ! _isMmap) {
       try {
         Thread.interrupted();
         _rowFileSemaphore.acquire();
-        isAcquire = true;
       } catch (InterruptedException e) {
         log.log(Level.FINE, e.toString(), e);
 
@@ -307,7 +307,7 @@ public class BlockReadWrite {
       Path path = _path;
 
       if (path != null) {
-        RandomAccessStream mmapFile = _mmapFile;
+        RandomAccessStream mmapFile = _mmapFile.get();
         
         if (mmapFile != null && mmapFile.getLength() == _fileSize) {
           return new RandomAccessWrapper(mmapFile);
@@ -318,7 +318,10 @@ public class BlockReadWrite {
         
         if (file != null) {
           _isMmap = true;
-          _mmapFile = file;
+          RandomAccessStream oldMmap = _mmapFile.getAndSet(file);
+          
+          if (oldMmap != null)
+            oldMmap.close();
         }
         else 
           file = path.openRandomAccess();
@@ -348,7 +351,7 @@ public class BlockReadWrite {
       return;
     }
 
-    if (wrapper.getFile() != _mmapFile) {
+    if (wrapper.getFile() != _mmapFile.get()) {
       wrapper.close();
     }
   }
@@ -362,7 +365,7 @@ public class BlockReadWrite {
     if (! isPriority && ! _isMmap)
       _rowFileSemaphore.release();
 
-    if (wrapper.getFile() != _mmapFile) {
+    if (wrapper.getFile() != _mmapFile.get()) {
       wrapper.close();
     }
   }
@@ -374,6 +377,15 @@ public class BlockReadWrite {
   {
     _path = null;
 
+    RandomAccessStream mmap = _mmapFile.getAndSet(null);
+    
+    if (mmap != null) {
+      try {
+        mmap.close();
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
     RandomAccessWrapper wrapper = null;
 
     /*

@@ -46,7 +46,6 @@ public class StdoutLog extends RotateLog {
    */
   public StdoutLog()
   {
-    Thread.dumpStack();
     // setTimestamp("[%Y/%m/%d %H:%M:%S.%s] ");
   }
 
