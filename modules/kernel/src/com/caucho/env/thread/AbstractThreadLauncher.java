@@ -45,6 +45,7 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
 
   private static final int DEFAULT_THREAD_MAX = 8192;
   private static final int DEFAULT_IDLE_MIN = 1;
+  private static final int DEFAULT_IDLE_MAX = DEFAULT_THREAD_MAX;
 
   private static final long DEFAULT_IDLE_TIMEOUT = 120000L;
   
@@ -52,6 +53,7 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
 
   private int _threadMax = DEFAULT_THREAD_MAX;
   private int _idleMin = DEFAULT_IDLE_MIN;
+  private int _idleMax = DEFAULT_IDLE_MAX;
   private long _idleTimeout = DEFAULT_IDLE_TIMEOUT;
 
   //
@@ -143,6 +145,29 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   public int getIdleMin()
   {
     return _idleMin;
+  }
+
+  /**
+   * Sets the maximum number of idle threads.
+   */
+  public void setIdleMax(int max)
+  {
+    if (_threadMax < max)
+      throw new ConfigException(L.l("IdleMax ({0}) must be less than ThreadMax ({1})", max, _threadMax));
+    if (max <= 0)
+      throw new ConfigException(L.l("IdleMax ({0}) must be greater than 0.", max));
+
+    _idleMax = max;
+
+    update();
+  }
+
+  /**
+   * Gets the maximum number of idle threads.
+   */
+  public int getIdleMax()
+  {
+    return _idleMax;
   }
   
   /**
@@ -241,7 +266,8 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     long idleExpire = _threadIdleExpireTime.get();
 
     // if idle queue is full and the expire is set, return and exit
-    if (_idleMin < _idleCount.get() && idleExpire < now) {
+    if (_idleMin < _idleCount.get()
+        && (idleExpire < now || _idleMax < _idleCount.get())) {
       long nextIdleExpire = now + _idleTimeout;
       
       return _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire);

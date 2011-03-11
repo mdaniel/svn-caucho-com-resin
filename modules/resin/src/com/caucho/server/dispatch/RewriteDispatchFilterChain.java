@@ -77,8 +77,16 @@ public class RewriteDispatchFilterChain implements FilterChain {
     HttpServletResponse res = (HttpServletResponse) response;
 
     try {
+      String queryString = req.getQueryString();
+      
+      // server/1u24
+      String url = _url;
+      
+      if (queryString != null)
+        url = url + "?" + queryString;
+      
       RequestDispatcherImpl disp
-        = (RequestDispatcherImpl) req.getRequestDispatcher(_url);
+        = (RequestDispatcherImpl) req.getRequestDispatcher(url);
 
       disp.dispatch(request, response);
     } catch (FileNotFoundException e) {

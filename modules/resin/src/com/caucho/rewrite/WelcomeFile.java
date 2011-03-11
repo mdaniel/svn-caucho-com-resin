@@ -126,10 +126,13 @@ public class WelcomeFile extends AbstractDispatchRule
     if (welcomeUri == null) {
       return next;
     }
-    
+
+    // server/1u24
+    /*
     if (queryString != null) {
       welcomeUri = welcomeUri + '?' + queryString;
     }
+    */
 
     if (DispatcherType.INCLUDE.equals(type))
       return new RewriteIncludeFilterChain(next, welcomeUri);

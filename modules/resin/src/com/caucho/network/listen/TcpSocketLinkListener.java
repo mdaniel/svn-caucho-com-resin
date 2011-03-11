@@ -76,6 +76,8 @@ public class TcpSocketLinkListener
 
   private static final Logger log
     = Logger.getLogger(TcpSocketLinkListener.class.getName());
+  
+  private static final int ACCEPT_IDLE_MAX = 32;
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
@@ -199,6 +201,7 @@ public class TcpSocketLinkListener
     }
     
     _launcher = new SocketLinkThreadLauncher(this);
+    _launcher.setIdleMax(ACCEPT_IDLE_MAX);
   }
 
   /**
@@ -458,7 +461,7 @@ public class TcpSocketLinkListener
     if (maxSpare < 1)
       throw new ConfigException(L.l("accept-thread-max must be at least 1."));
 
-    // _idleThreadMax = maxSpare;
+    _launcher.setIdleMax(maxSpare);
   }
 
   /**
@@ -466,9 +469,7 @@ public class TcpSocketLinkListener
    */
   public int getAcceptThreadMax()
   {
-    // return _idleThreadMax;
-    
-    return -1;
+    return _launcher.getIdleMax();
   }
 
   /**

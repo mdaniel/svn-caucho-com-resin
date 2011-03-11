@@ -195,12 +195,6 @@ public class AccessLogWriter extends AbstractRolloverLog
       ptr = next;
     }
 
-    try {
-      flushStream();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
     return true;
   }
 
@@ -258,9 +252,17 @@ public class AccessLogWriter extends AbstractRolloverLog
   }
 
   class LogWriterTask extends TaskWorker {
+    @Override
     public long runTask()
     {
-      flushBuffer();
+      while (flushBuffer()) {
+      }
+
+      try {
+        flushStream();
+      } catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
       
       return -1;
     }

@@ -139,7 +139,7 @@ public class Table extends BlockStore {
 
   Table(Database database, String name, Row row, Constraint constraints[])
   {
-    super(database, name, null);
+    super(database, name, null, database.getBlockManager().isEnableMmap());
 
     _row = row;
     _constraints = constraints;

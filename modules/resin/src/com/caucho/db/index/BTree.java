@@ -1913,7 +1913,7 @@ public final class BTree {
     db.setPath(path);
     db.init();
 
-    BlockStore store = new BlockStore(db, "test", null);
+    BlockStore store = new BlockStore(db, "test", null, false);
     store.create();
 
     Block block = store.allocateIndexBlock();

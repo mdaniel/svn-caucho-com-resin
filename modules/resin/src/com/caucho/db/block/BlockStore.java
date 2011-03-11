@@ -166,9 +166,16 @@ public class BlockStore {
 
   private final Lifecycle _lifecycle = new Lifecycle();
   
-  public BlockStore(Database database, String name, ReadWriteLock tableLock)
+  public BlockStore(Database database, 
+                    String name, 
+                    ReadWriteLock tableLock,
+                    boolean isMmap)
   {
-    this(database, name, tableLock, database.getPath().lookup(name + ".db"));
+    this(database,
+         name, 
+         tableLock, 
+         database.getPath().lookup(name + ".db"),
+         isMmap);
   }
 
   /**
@@ -182,7 +189,8 @@ public class BlockStore {
   public BlockStore(Database database, 
                     String name,
                     ReadWriteLock rowLock,
-                    Path path)
+                    Path path,
+                    boolean isEnableMmap)
   {
     _database = database;
     _blockManager = _database.getBlockManager();
@@ -194,7 +202,7 @@ public class BlockStore {
     if (path == null)
       throw new NullPointerException();
     
-    _readWrite = new BlockReadWrite(this, path);
+    _readWrite = new BlockReadWrite(this, path, isEnableMmap);
     
     _writer = new BlockWriter(this);
 
@@ -211,22 +219,25 @@ public class BlockStore {
   public static BlockStore create(Path path)
     throws IOException, SQLException
   {
-    return create(path, BlockManager.getBlockManager().isEnableMmap());
+    BlockManager blockManager = BlockManager.getBlockManager();
+    
+    if (blockManager != null)
+      return create(path, blockManager.isEnableMmap());
+    else
+      return create(path, true);
   }
 
   /**
    * Creates an independent store.
    */
-  public static BlockStore create(Path path, boolean isEnableMmap)
+  public static BlockStore create(Path path, boolean isMmap)
     throws IOException, SQLException
   {
     Database db = new Database();
     db.init();
 
-    BlockStore store = new BlockStore(db, "temp", null, path);
+    BlockStore store = new BlockStore(db, "temp", null, path, isMmap);
     
-    store.setEnableMmap(isEnableMmap);
-
     if (path.canRead())
       store.init();
     else
@@ -237,7 +248,6 @@ public class BlockStore {
   
   public void setEnableMmap(boolean isEnable)
   {
-    _readWrite.setEnableMmap(isEnable);
   }
 
   /**

@@ -77,8 +77,10 @@ public class TempFileManager
         log.warning(L.l("Removal of old temp file '{0}' failed. Please check permissions.",
                                       storePath.getNativePath()));
       }
+      
+      boolean isMmap = false;
     
-      _store = new BlockStore(database, name, null, storePath);
+      _store = new BlockStore(database, name, null, storePath, isMmap);
       _store.setFlushDirtyBlocksOnCommit(false);
       _store.create();
     } catch (Exception e) {

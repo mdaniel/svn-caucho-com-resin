@@ -81,20 +81,18 @@ public class BlockReadWrite {
    * @param lock the table lock
    * @param path the path to the files
    */
-  public BlockReadWrite(BlockStore store, Path path)
+  public BlockReadWrite(BlockStore store, 
+                        Path path,
+                        boolean isEnableMmap)
   {
     _store = store;
     _blockManager = store.getBlockManager();
     _path = path;
-    _isEnableMmap = _blockManager.isEnableMmap();
+
+    _isEnableMmap = isEnableMmap;
 
     if (path == null)
       throw new NullPointerException();
-  }
-  
-  public void setEnableMmap(boolean isEnable)
-  {
-    _isEnableMmap = isEnable;
   }
 
   /**
@@ -300,7 +298,7 @@ public class BlockReadWrite {
     if (wrapper != null) {
       file = wrapper.getFile();
       
-      if (_mmapFile != null && file.getLength() != _fileSize)
+      if (_mmapFile.get() != null && file.getLength() != _fileSize)
         file = null;
     }
 
@@ -395,9 +393,7 @@ public class BlockReadWrite {
     if (ref != null)
       wrapper = ref.get();
       */
-    wrapper = _cachedRowFile.allocate();
-
-    if (wrapper != null) {
+    while ((wrapper = _cachedRowFile.allocate()) != null) {
       try {
         wrapper.close();
       } catch (Throwable e) {
