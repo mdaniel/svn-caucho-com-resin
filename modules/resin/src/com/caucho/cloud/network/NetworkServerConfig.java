@@ -44,7 +44,7 @@ public class NetworkServerConfig {
   private NetworkListenSystem _listenService;
   
   private ContainerProgram _listenerDefaults = new ContainerProgram();
-  private boolean _isKeepaliveSelectEnable;
+  private boolean _isKeepaliveSelectEnable = true;
 
   /**
    * Creates a new servlet server.
@@ -183,6 +183,7 @@ public class NetworkServerConfig {
   private void applyPortDefaults(TcpSocketLinkListener port)
   {
     _listenerDefaults.configure(port);
+    
     port.setKeepaliveSelectEnable(isKeepaliveSelectEnable());
   }
 }

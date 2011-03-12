@@ -63,8 +63,6 @@ public class ErrorFilterChain implements FilterChain {
   {
     _errorCode = errorCode;
     _message = message;
-    System.out.println("MSG: " + message);
-    Thread.dumpStack();
   }
 
   /**
@@ -88,6 +86,7 @@ public class ErrorFilterChain implements FilterChain {
       res.sendError(_errorCode);
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _errorCode + "]";

@@ -40,6 +40,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
 import com.caucho.config.Configurable;
+import com.caucho.server.dispatch.ForwardFilterChain;
 import com.caucho.server.dispatch.RewriteDispatchFilterChain;
 import com.caucho.server.dispatch.RewriteIncludeFilterChain;
 import com.caucho.server.webapp.WebApp;
@@ -136,6 +137,8 @@ public class WelcomeFile extends AbstractDispatchRule
 
     if (DispatcherType.INCLUDE.equals(type))
       return new RewriteIncludeFilterChain(next, welcomeUri);
+    else if (DispatcherType.FORWARD.equals(type))
+      return new ForwardFilterChain(welcomeUri);
     else
       return new RewriteDispatchFilterChain(welcomeUri);
   }

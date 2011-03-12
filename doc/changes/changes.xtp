@@ -13,6 +13,8 @@
 
 <s2 title="4.0.16 - snapshot">
 <ul>
+<li>rewrite-dispatch: normalization of rewrite order so rewrites always occur before filters</li>
+<li>server: add server information to 404 error pages (#4433, rep by Alex Sharaz)</li>
 <li>server: invocation-cache-size wasn't properly configurable (#4428, rep by R. Ranjan)</li>
 <li>cluster: cluster/network timings split from load-balance configuration (#4429, rep by Dmitri Kolpakov)</li>
 <li>cluster-cache: mismatched message/query replication for data actor (#4425, rep by Dmitri Kolpakov)</li>

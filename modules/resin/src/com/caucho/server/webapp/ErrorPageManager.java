@@ -504,30 +504,7 @@ public class ErrorPageManager {
 
       out.println("</pre></code>");
 
-      Server server = _server;
-      String version = null;
-
-      if (server == null) {
-      }
-      else if (server.getServerHeader() != null) {
-        version = server.getServerHeader();
-      }
-      else if (CauchoSystem.isTesting()) {
-      }
-      else
-        version = VersionFactory.getFullVersion();
-
-      if (version != null) {
-        out.println("<p /><hr />");
-        out.println("<small>");
-
-        out.println(version);
-
-        if (server != null)
-          out.println("Server: '" + server.getServerId() + "'");
-
-        out.println("</small>");
-      }
+      printVersion(out);
 
       out.println("</body></html>");
     }
@@ -542,12 +519,11 @@ public class ErrorPageManager {
 
       out.println("<pre><code>");
       out.println("Date: " + QDate.formatISO8601(Alarm.getCurrentTime()));
-      if (Resin.getCurrent() != null)
-        out.println("Server: '" + Resin.getCurrent().getServerId() + "'");
-
+      
       out.println("</code></pre>");
+      
+      printVersion(out);
 
-      out.println("</html>");
       out.println("</body></html>");
     }
 
@@ -558,6 +534,35 @@ public class ErrorPageManager {
     }
 
     out.close();
+  }
+  
+  private void printVersion(PrintWriter out)
+    throws IOException
+  {
+    Server server = _server;
+    String version = null;
+
+    if (server == null) {
+    }
+    else if (server.getServerHeader() != null) {
+      version = server.getServerHeader();
+    }
+    else if (CauchoSystem.isTesting()) {
+    }
+    else
+      version = VersionFactory.getFullVersion();
+
+    if (version != null) {
+      out.println("<p /><hr />");
+      out.println("<small>");
+
+      out.println(version);
+
+      if (server != null)
+        out.println("Server: '" + server.getServerId() + "'");
+
+      out.println("</small>");
+    }
   }
 
   private String getServletName(ServletRequest request)
@@ -653,28 +658,8 @@ public class ErrorPageManager {
                         escapeHtml(request.getPageURI())));
       }
 
-      Server server = _server;
+      printVersion(out);
       
-      String version = null;
-      if (server == null) {
-      }
-      else if (server != null
-               && server.getServerHeader() != null) {
-        version = server.getServerHeader();
-      }
-      else if (CauchoSystem.isTesting()) {
-      }
-      else
-        version = VersionFactory.getFullVersion();
-
-      if (version != null) {
-        out.println("<p /><hr />");
-        out.println("<small>");
-
-        out.println(version);
-
-        out.println("</small>");
-      }
       out.println("</body></html>");
 
       String userAgent = request.getHeader("User-Agent");

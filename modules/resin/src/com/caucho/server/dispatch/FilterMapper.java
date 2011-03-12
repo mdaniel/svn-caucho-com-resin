@@ -137,8 +137,8 @@ public class FilterMapper {
   /**
    * Fills in the invocation.
    */
-  public void buildDispatchChain(Invocation invocation,
-                                 FilterChain chain)
+  public FilterChain buildDispatchChain(Invocation invocation,
+                                        FilterChain chain)
     throws ServletException
   {
     synchronized (_filterMap) {
@@ -185,6 +185,8 @@ public class FilterMapper {
     }
 
     invocation.setFilterChain(chain);
+    
+    return chain;
   }
 
   /**

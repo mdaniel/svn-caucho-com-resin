@@ -1096,6 +1096,9 @@ public final class InjectManager
   @Override
   public <T> AnnotatedType<T> createAnnotatedType(Class<T> cl)
   {
+    if (cl == null)
+      throw new NullPointerException();
+    
     AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(cl);
     
     // TCK:
@@ -1165,6 +1168,9 @@ public final class InjectManager
    */
   public <T> ManagedBeanImpl<T> createManagedBean(Class<T> cl)
   {
+    if (cl == null)
+      throw new NullPointerException();
+    
     AnnotatedType<T> type = createAnnotatedType(cl);
     
     AnnotatedType<T> extType = getExtensionManager().processAnnotatedType(type);

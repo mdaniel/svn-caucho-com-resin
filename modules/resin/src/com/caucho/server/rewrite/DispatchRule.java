@@ -102,12 +102,16 @@ public class DispatchRule
   {
     String uriArg = null;
     
+    /*
     if (queryString == null)
       uriArg = uri;
     else if (uri.indexOf('?') >= 0)
       uriArg = uri + "&" + queryString;
     else
       uriArg = uri + "?" + queryString;
+      */
+    
+    uriArg = uri;
 
     /*
     if (_isAbsolute)

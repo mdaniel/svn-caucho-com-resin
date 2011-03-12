@@ -2660,9 +2660,11 @@ public class WebApp extends ServletContextImpl
 
       _securityBuilder = _constraintManager.getFilterBuilder();
       
+      /*
       if (_securityBuilder != null) {
         _filterMapper.addTopFilter(_securityBuilder);
       }
+      */
 
       if (_server != null)
         _cache = _server.getProxyCache();
@@ -3400,6 +3402,8 @@ public class WebApp extends ServletContextImpl
           _filterMapper.buildDispatchChain(invocation, chain);
           chain = invocation.getFilterChain();
 
+          chain = applyWelcomeFile(DispatcherType.REQUEST, invocation, chain);
+
           if (_requestRewriteDispatch != null) {
             FilterChain newChain
               = _requestRewriteDispatch.map(DispatcherType.REQUEST,
@@ -3416,16 +3420,16 @@ public class WebApp extends ServletContextImpl
           chain = invocation.getFilterChain();
            */
           
-          chain = applyWelcomeFile(invocation, chain);
-
           entry = new FilterChainEntry(chain, invocation);
           chain = entry.getFilterChain();
 
           if (isCache)
             _filterChainCache.put(invocation.getContextURI(), entry);
         }
+        
+        chain = buildSecurity(chain, invocation);
 
-        chain = createWebAppFilterChain(chain, invocation);
+        chain = createWebAppFilterChain(chain, invocation, true);
 
         invocation.setFilterChain(chain);
         invocation.setPathInfo(entry.getPathInfo());
@@ -3461,11 +3465,13 @@ public class WebApp extends ServletContextImpl
     }
   }
   
-  private FilterChain applyWelcomeFile(Invocation invocation, FilterChain chain)
-    throws ServletException
-  {
+  private FilterChain applyWelcomeFile(DispatcherType type,
+                                       Invocation invocation, 
+                                       FilterChain chain)
+  throws ServletException
+{
     if (_welcomeFile != null) {
-      chain = _welcomeFile.map(DispatcherType.REQUEST,
+      chain = _welcomeFile.map(type,
                                invocation.getContextURI(),
                                invocation.getQueryString(),
                                chain, chain);
@@ -3475,7 +3481,8 @@ public class WebApp extends ServletContextImpl
   }
   
   FilterChain createWebAppFilterChain(FilterChain chain,
-                                      Invocation invocation)
+                                      Invocation invocation,
+                                      boolean isTop)
   {
     // the cache must be outside of the WebAppFilterChain because
     // the CacheListener in ServletInvocation needs the top to
@@ -3500,7 +3507,7 @@ public class WebApp extends ServletContextImpl
     // webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
     chain = webAppChain;
 
-    if (getAccessLog() != null)
+    if (getAccessLog() != null && isTop)
       chain = new AccessLogFilterChain(chain, this);
     
     return chain;
@@ -3573,11 +3580,7 @@ public class WebApp extends ServletContextImpl
     // buildDispatchInvocation(invocation, _dispatchFilterMapper);
     buildDispatchInvocation(invocation, _filterMapper);
     
-    if (_securityBuilder != null) {
-      // server/1ksa
-      // _dispatchFilterMapper.addTopFilter(_securityBuilder);
-      invocation.setFilterChain(_securityBuilder.build(invocation.getFilterChain(), invocation));
-    }
+    buildSecurity(invocation);
   }
 
   /**
@@ -3608,25 +3611,28 @@ public class WebApp extends ServletContextImpl
       }
       else {
         chain = _servletMapper.mapServlet(invocation);
-
-        if (_includeRewriteDispatch != null
-            && filterMapper == _includeFilterMapper) {
-          chain = _includeRewriteDispatch.map(DispatcherType.INCLUDE,
-                                              invocation.getContextURI(),
-                                              invocation.getQueryString(),
-                                              chain);
+        chain = filterMapper.buildDispatchChain(invocation, chain);
+        
+        if (filterMapper == _includeFilterMapper) {
+          chain = applyWelcomeFile(DispatcherType.INCLUDE, invocation, chain);
+          
+          if (_includeRewriteDispatch != null) {
+            chain = _includeRewriteDispatch.map(DispatcherType.INCLUDE,
+                                                invocation.getContextURI(),
+                                                invocation.getQueryString(),
+                                                chain);
+          }
         }
-        else if (_forwardRewriteDispatch != null
-                 && filterMapper == _forwardFilterMapper) {
-          chain = _forwardRewriteDispatch.map(DispatcherType.FORWARD,
-                                              invocation.getContextURI(),
-                                              invocation.getQueryString(),
-                                              chain);
+        else if (filterMapper == _forwardFilterMapper) {
+          chain = applyWelcomeFile(DispatcherType.FORWARD, invocation, chain);
+          
+          if (_forwardRewriteDispatch != null) {
+            chain = _forwardRewriteDispatch.map(DispatcherType.FORWARD,
+                                                invocation.getContextURI(),
+                                                invocation.getQueryString(),
+                                                chain);
+          }
         }
-
-        filterMapper.buildDispatchChain(invocation, chain);
-
-        chain = invocation.getFilterChain();
 
         /* server/10gw - #3111 */
         /*
@@ -3648,6 +3654,23 @@ public class WebApp extends ServletContextImpl
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  private void buildSecurity(Invocation invocation)
+  {
+    invocation.setFilterChain(buildSecurity(invocation.getFilterChain(), invocation));
+  }
+  
+  private FilterChain buildSecurity(FilterChain chain, Invocation invocation)
+  {
+    if (_securityBuilder != null) {
+      // server/1ksa
+      // _dispatchFilterMapper.addTopFilter(_securityBuilder);
+      return _securityBuilder.build(chain, invocation);
+    }
+    
+    
+    return chain;
   }
 
   /**

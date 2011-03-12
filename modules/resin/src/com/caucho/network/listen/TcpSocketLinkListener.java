@@ -1027,7 +1027,7 @@ public class TcpSocketLinkListener
     if (_serverSocket.isJni()) {
       SocketPollService pollService = SocketPollService.getCurrent();
         
-      if (pollService != null && _isKeepaliveSelectEnable) {
+      if (pollService != null && isKeepaliveSelectEnabled()) {
         _selectManager = pollService.getSelectManager();
       }
       
@@ -1324,7 +1324,7 @@ public class TcpSocketLinkListener
 
     // boolean isSelectManager = getServer().isSelectManagerEnabled();
 
-    if (_isKeepaliveSelectEnable && _selectManager != null) {
+    if (isKeepaliveSelectEnabled() && _selectManager != null) {
       long selectTimeout = getBlockingTimeoutForSelect();
       
       if (selectTimeout < timeout)
