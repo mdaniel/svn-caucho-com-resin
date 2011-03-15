@@ -10,6 +10,7 @@ package com.caucho.env.health;
  * OK:          Health check reported healthy status.  This does not imply recovery.
  * WARNING:     Health check reported warning threshold reached or critical is possible.
  * CRITICAL:    Health check reported critical status; action should be taken.
+ * FATAL:       Health check reported fatal; restart expected.
  */
 public enum HealthStatus
 {
@@ -17,4 +18,5 @@ public enum HealthStatus
   OK,
   WARNING,
   CRITICAL,
+  FATAL,
 }
