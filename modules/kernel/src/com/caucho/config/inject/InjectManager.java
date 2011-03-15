@@ -1400,7 +1400,7 @@ public final class InjectManager
       }
     }
     
-    Set<Bean<?>> set = resolve(type, qualifiers);
+    Set<Bean<?>> set = resolve(type, qualifiers, null);
 
     if (set != null)
       return (Set<Bean<?>>) set;
@@ -1426,7 +1426,9 @@ public final class InjectManager
   /**
    * Returns the web beans component with a given binding list.
    */
-  private Set<Bean<?>> resolve(Type type, Annotation []bindings)
+  private Set<Bean<?>> resolve(Type type, 
+                               Annotation []bindings,
+                               InjectionPoint ip)
   {
     if (type == null)
       throw new NullPointerException();
@@ -1452,14 +1454,15 @@ public final class InjectManager
       throw new IllegalArgumentException(L.l("'{0}' is an invalid getBeans type because it's a type variable.",
                                              baseType));
 
-    return resolveRec(baseType, bindings);
+    return resolveRec(baseType, bindings, ip);
   }
 
   /**
    * Returns the web beans component with a given binding list.
    */
   private Set<Bean<?>> resolveRec(BaseType baseType,
-                                  Annotation []qualifiers)
+                                  Annotation []qualifiers,
+                                  InjectionPoint ip)
   {
     WebComponent component = getWebComponent(baseType);
     
@@ -1510,7 +1513,7 @@ public final class InjectManager
         beanType = Object.class;
 
       HashSet<Bean<?>> set = new HashSet<Bean<?>>();
-      set.add(new InstanceBeanImpl(this, beanType, qualifiers));
+      set.add(new InstanceBeanImpl(this, beanType, qualifiers, ip));
       return set;
     }
     else if (Event.class.equals(rawType)) {
@@ -1539,7 +1542,7 @@ public final class InjectManager
     }
 
     if (_parent != null) {
-      return _parent.resolveRec(baseType, qualifiers);
+      return _parent.resolveRec(baseType, qualifiers, ip);
     }
 
     for (Annotation ann : qualifiers) {
@@ -2477,7 +2480,7 @@ public final class InjectManager
       throw new InjectionException(L.l("'{0}' is an invalid type for injection because it's a variable generic type.\n  {1}",
                                        baseType, ij));
 
-    Set<Bean<?>> set = resolveRec(baseType, qualifiers);
+    Set<Bean<?>> set = resolveRec(baseType, qualifiers, ij);
 
     if (set == null || set.size() == 0) {
       if (InjectionPoint.class.equals(type))
@@ -4278,8 +4281,12 @@ public final class InjectManager
       if (env == null) {
         if (parentEnv != null)
           env = new DependentCreationalContext<T>(bean, parentEnv, ip);
-        else
+        else {
           env = new OwnerCreationalContext<T>(bean);
+          
+          if (ip != null)
+            env = new DependentCreationalContext<T>(bean, env, ip);
+        }
       }
       
       instance = bean.create(env);

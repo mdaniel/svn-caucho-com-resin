@@ -88,7 +88,9 @@ public class NetworkServerConfig {
   public void setKeepaliveSelectEnable(boolean isEnable)
   {
     _isKeepaliveSelectEnable = isEnable;
-    getClusterListener().setKeepaliveSelectEnable(isEnable);
+    
+    if (getClusterListener() != null)
+      getClusterListener().setKeepaliveSelectEnable(isEnable);
   }
   
   public boolean isKeepaliveSelectEnable()

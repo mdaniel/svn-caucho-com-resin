@@ -53,13 +53,15 @@ public class InstanceBeanImpl<T> implements Bean<T>
 
   InstanceBeanImpl(InjectManager beanManager,
                    Type type,
-                   Annotation []bindings)
+                   Annotation []bindings,
+                   InjectionPoint injectionPoint)
   {
     _beanManager = beanManager;
     _type = type;
     _bindings = bindings;
 
-    _instance = new InstanceImpl(_beanManager, _type, _bindings);
+    _instance = new InstanceImpl(_beanManager, _type, _bindings,
+                                 injectionPoint);
   }
 
   public Class getBeanClass()

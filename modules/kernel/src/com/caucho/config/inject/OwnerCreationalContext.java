@@ -28,6 +28,7 @@
 package com.caucho.config.inject;
 
 import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 import com.caucho.inject.Module;
 

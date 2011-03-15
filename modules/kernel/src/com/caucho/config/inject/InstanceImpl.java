@@ -56,10 +56,12 @@ public final class InstanceImpl<T> implements Instance<T>, Serializable
   private transient long _version;
   private transient Set<Bean<?>> _beanSet;
   private transient ReferenceFactory<T> _factory;
+  private transient InjectionPoint _injectionPoint;
 
   InstanceImpl(InjectManager beanManager,
                Type type,
-               Annotation []bindings)
+               Annotation []bindings,
+               InjectionPoint injectionPoint)
   {
     _cdiManager = beanManager;
     _type = type;
@@ -67,11 +69,14 @@ public final class InstanceImpl<T> implements Instance<T>, Serializable
 
     _beanSet = beanManager.getBeans(type, bindings);
     _version = beanManager.getVersion();
+    
+    _injectionPoint = injectionPoint;
   }
 
   /**
    * Returns an instance of the selected bean
    */
+  @Override
   public T get()
   {
     if (_factory == null) {
@@ -83,8 +88,9 @@ public final class InstanceImpl<T> implements Instance<T>, Serializable
         throw _cdiManager.unsatisfiedException(_type, _qualifiers);
     }
 
-    if (_factory != null)
-      return (T) _factory.create(null, null, null);
+    if (_factory != null) {
+      return (T) _factory.create(null, null, _injectionPoint);
+    }
     else
       return null;
   }
@@ -95,7 +101,7 @@ public final class InstanceImpl<T> implements Instance<T>, Serializable
   @Override
   public Instance<T> select(Annotation ... bindings)
   {
-    return new InstanceImpl<T>(_cdiManager, _type, bindings);
+    return new InstanceImpl<T>(_cdiManager, _type, bindings, _injectionPoint);
   }
 
   /**
@@ -108,7 +114,7 @@ public final class InstanceImpl<T> implements Instance<T>, Serializable
     if (bindings == null || bindings.length == 0)
       bindings = _qualifiers;
     
-    return new InstanceImpl<U>(_cdiManager, subtype, bindings);
+    return new InstanceImpl<U>(_cdiManager, subtype, bindings, _injectionPoint);
   }
 
   /**
@@ -118,12 +124,16 @@ public final class InstanceImpl<T> implements Instance<T>, Serializable
   public <U extends T> Instance<U> select(TypeLiteral<U> subtype,
                                           Annotation... bindings)
   {
-    return new InstanceImpl<U>(_cdiManager, subtype.getType(), bindings);
+    return new InstanceImpl<U>(_cdiManager, subtype.getType(), 
+                               bindings, 
+                               _injectionPoint);
   }
 
+  @Override
   public Iterator<T> iterator()
   {
-    return new InstanceIterator(_cdiManager, getBeanSet().iterator());
+    return new InstanceIterator(_cdiManager,
+                                getBeanSet().iterator());
   }
 
   @Override
@@ -150,7 +160,10 @@ public final class InstanceImpl<T> implements Instance<T>, Serializable
 
   private Object readResolve()
   {
-    return new InstanceImpl(InjectManager.create(), _type, _qualifiers);
+    return new InstanceImpl(InjectManager.create(), 
+                            _type, 
+                            _qualifiers,
+                            _injectionPoint);
   }
   
   @Override
