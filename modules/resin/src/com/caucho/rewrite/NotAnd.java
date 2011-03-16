@@ -80,6 +80,7 @@ public class NotAnd implements RequestPredicate {
    *
    * @param request the servlet request to test
    */
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     for (RequestPredicate predicate : _predicates) {
