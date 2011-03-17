@@ -5,6 +5,6 @@
     -->
   
   <servlet-mapping url-pattern="/websocket"
-                   servlet-class="example.WebSocketServlet"/>
+                   servlet-class="example.HelloWebSocketServlet"/>
   
 </web-app>
