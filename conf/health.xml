@@ -11,8 +11,8 @@
     <enabled>true</enabled>
     <startup-delay>15m</startup-delay>
     <period>5m</period>
-    <recheckPeriod>15s</recheckPeriod>
-    <recheckMax>5</recheckMax>
+    <recheck-period>15s</recheck-period>
+    <recheck-max>5</recheck-max>
   </health:HealthSystem>
 
   <!--
@@ -39,11 +39,11 @@
     -->
   
   <health:MemoryTenuredHealthCheck>
-    <memoryFreeMin>1m</memoryFreeMin>
+    <memory-free-min>1m</memory-free-min>
   </health:MemoryTenuredHealthCheck>
   
   <health:MemoryPermGenHealthCheck>
-    <memoryFreeMin>1m</memoryFreeMin>
+    <memory-free-min>1m</memory-free-min>
   </health:MemoryPermGenHealthCheck>
   
   <health:DumpHeap>
@@ -59,9 +59,9 @@
     -->
 
   <health:CpuHealthCheck>
-    <warningThreshold>95</warningThreshold>
+    <warning-threshold>95</warning-threshold>
     <!--
-       - <criticalThreshold>99</criticalThreshold>
+       - <critical-threshold>99</critical-threshold>
       -->
   </health:CpuHealthCheck>
   
