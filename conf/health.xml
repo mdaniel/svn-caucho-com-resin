@@ -14,28 +14,26 @@
     <recheck-period>15s</recheck-period>
     <recheck-max>5</recheck-max>
   </health:HealthSystem>
-
-  <!--
-     - Restart on critical health if retries fail
-    -->
   
   <health:Restart>
     <health:IfHealthFatal/>
-    <health:IfRechecked/>
-  </health:Restart>
-  
-  <health:Restart>
-    <health:IfCriticalRechecked time="15m"/>
   </health:Restart>
 
   <!--
-     - Restart immediately if deadlock is detected
+     - Restart on critical if the problem persists for 5 min.
+    -->
+  <health:Restart>
+    <health:IfCriticalRechecked time="5m"/>
+  </health:Restart>
+
+  <!--
+     - Checks for JVM-detected deadlocks.
     -->
   
   <health:JvmDeadlockHealthCheck/>
 
   <!--
-     - Dump heap and restart if memory pools are critically low 
+     - heap memory checks
     -->
   
   <health:MemoryTenuredHealthCheck>
@@ -45,6 +43,10 @@
   <health:MemoryPermGenHealthCheck>
     <memory-free-min>1m</memory-free-min>
   </health:MemoryPermGenHealthCheck>
+
+  <!--
+     - Dump heap if memory pools are critically low 
+    -->
   
   <health:DumpHeap>
     <health:Or>
