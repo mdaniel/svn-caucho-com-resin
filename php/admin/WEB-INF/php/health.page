@@ -90,7 +90,7 @@ function display_health_status($s)
     print_ok("");
     echo "&nbsp;$label";
   }
-  else if ($health->Status == "CRITICAL") {
+  else if ($health->Status == "CRITICAL" || $health->Status == "FATAL") {
     print_fail("&nbsp;$label");
   }
   else {
@@ -111,7 +111,7 @@ function display_health_status($s)
       echo "</td>";
       echo "<td>";
 
-      if ($s_health->Status == "CRITICAL") {
+      if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
         print_fail("&nbsp;" . $s_health->Name);
       }
       else if ($s_health->Status == "OK") {
@@ -165,7 +165,7 @@ function display_health_status_graph($s)
     print_ok("");
     echo " $label";
   }
-  else if ($health->Status == "CRITICAL") {
+  else if ($health->Status == "CRITICAL" || $health->Status == "FATAL") {
     print_fail(" $label");
   }
   else {
@@ -187,7 +187,7 @@ function display_health_status_graph($s)
       echo "</td>";
       echo "<td>";
 
-      if ($s_health->Status == "CRITICAL") {
+      if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
         print_fail(" " . $s_health->Name);
       }
       else if ($s_health->Status == "OK") {
@@ -355,7 +355,7 @@ function display_heartbeat()
         print_ok("");
         echo " health " . $s_health->Status;
       }
-      else if ($s_health->Status == "CRITICAL") {
+      else if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
         print_fail("health " . $s_health->Status);
       }
       else {
@@ -386,7 +386,7 @@ function display_heartbeat()
             print_ok("");
             echo $name;
           }
-          else if ($s_health->Status == "CRITICAL") {
+          else if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
             print_fail($name);
           }
           else {
