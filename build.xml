@@ -25,7 +25,7 @@
       <param name="artifact.jar" value="resin-ant.jar"/>
     </antcall>
   </target>
-
+  <!--
   <target name="netbeans" depends="init">
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="netbeans"/>
@@ -58,7 +58,7 @@
       </fileset>
     </jar>
   </target>
-
+  -->
   <target name="resin-eclipselink" depends="eclipselink">
     <copy file="modules/eclipselink/dist/resin-eclipselink.jar"
           todir="${resin.lib}"/>
@@ -301,7 +301,7 @@
       <param name="artifact.jar" value="resin-maven-plugin.jar"/>
     </antcall>
   </target>
-  
+  <!--
   <target name="netbeans-plugin" depends="init">
     <property name="artifact.name" value="netbeans"/>
     <property name="jar.name" value="resin-netbeans-plugin"/>
@@ -338,7 +338,7 @@
     </jar>
 	  
   </target>
-  
+  -->  
   <target name="portlet" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="portlet"/>
@@ -848,7 +848,7 @@
      <exec executable="autoconf"/>
   </target>
 
-  <target name="maven-dist" depends="init, compile, ant, maven-plugin, artifacts, netbeans, resin.dist.jar">
+  <target name="maven-dist" depends="init, compile, ant, maven-plugin, artifacts, resin.dist.jar">
     <property name="maven" value="${maven.root}/com/caucho/"/>
     
     <antcall target="maven2-jar" inheritRefs="true">
@@ -898,13 +898,14 @@
       <param name="maven.name" value="resin-maven-plugin"/>
     </antcall>
 
+    <!--
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="netbeans"/>
       <param name="module.ext" value="nbm"/>
       <param name="jar.name" value="resin-netbeans.nbm"/>
       <param name="maven.name" value="resin-netbeans"/>
     </antcall>
-
+-->
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="spring"/>
       <param name="jar.name" value="resin-spring.jar"/>

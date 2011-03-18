@@ -3,14 +3,14 @@
 <product>resin</product>
 <title>Resin Security</title>
 <description>
-Resin has a comprehensive security framework for application authentication, 
+<p>Resin has a comprehensive security framework for application authentication, 
 authorization and transport level SSL based security. Authentication capabilities include 
 built-in support for security data stored in XML files, the database, JAAS, LDAP or 
 properties files, HTTP basic authentication, form based authentication and 
 HTTP password digests. The authorization features include traditional role based security 
 as well as robust conditionals based-on cookies, HTTP headers, locale, IP address and 
 the like. The security framework also supports single sign-on shared across multiple 
-web applications.
+web applications.</p>
 </description>
 </header>
 <body>

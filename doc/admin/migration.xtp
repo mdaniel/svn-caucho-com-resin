@@ -3,10 +3,10 @@
   <product>resin</product>
   <title>Migrating to Resin 4.0</title>
   <description>
-    Resin 4.0 introduced a number of new features and capabilities over
+    <p>Resin 4.0 introduced a number of new features and capabilities over
     earlier versions of Resin. Along with these changes, configuration and
     some operating semantics changed. Certain configuration was deprecated
-    and should be removed or rewritten using newer constructs.
+    and should be removed or rewritten using newer constructs.</p>
   </description>
 </header>
 <body>
