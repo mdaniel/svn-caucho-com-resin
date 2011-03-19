@@ -14,7 +14,7 @@
 
 <localtoc/>
 
-<s1 title="&lt;scheduled-task>"> version="Resin 3.1.6">
+<s1 title="&lt;scheduled-task>" version="Resin 3.1.6">
 
 <p>&lt;scheduled-task> schedules a job to be executed at specific times
 or after specific delays.  The times can be specified by a cron syntax or
