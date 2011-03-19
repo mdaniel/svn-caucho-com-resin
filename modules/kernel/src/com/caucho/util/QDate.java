@@ -393,6 +393,9 @@ public class QDate {
    */
   public void setMonth(int month)
   {
+    if (month < 0 || DAYS_IN_MONTH.length <= month)
+      return;
+     
     _month = month;
     
     if (DAYS_IN_MONTH[month] <= _dayOfMonth)

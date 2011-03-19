@@ -46,6 +46,7 @@ import com.caucho.bam.MessageError;
 import com.caucho.bam.Query;
 import com.caucho.bam.QueryError;
 import com.caucho.bam.QueryResult;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.util.L10N;
 
@@ -69,8 +70,8 @@ public class BamSkeleton<S>
     = new HashMap<Class<?>, Method>();
   private final HashMap<Class<?>, Method> _messageErrorHandlers
     = new HashMap<Class<?>, Method>();
-  private final HashMap<Class<?>, Method> _queryHandlers
-    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, QueryInvoker> _queryHandlers
+    = new HashMap<Class<?>, QueryInvoker>();
   private final HashMap<Class<?>, Method> _queryResultHandlers
     = new HashMap<Class<?>, Method>();
   private final HashMap<Class<?>, Method> _queryErrorHandlers
@@ -190,13 +191,13 @@ public class BamSkeleton<S>
 
   public void query(S actor,
                     MessageStream fallback,
-                    MessageStream broker,
+                    Broker broker,
                     long id,
                     String to,
                     String from,
                     Serializable payload)
   {
-    Method handler;
+    QueryInvoker handler;
 
     if (payload != null)
       handler = _queryHandlers.get(payload.getClass());
@@ -211,7 +212,7 @@ public class BamSkeleton<S>
       }
 
       try {
-        handler.invoke(actor, id, to, from, payload);
+        handler.invoke(actor, broker, id, to, from, payload);
       }
       catch (RuntimeException e) {
         // broker.queryError(id, from, to, payload, ActorError.create(e));
@@ -360,8 +361,14 @@ public class BamSkeleton<S>
                                this, payloadType.getName(), method));
 
         method.setAccessible(true);
-
-        _queryHandlers.put(payloadType, method);
+        
+        if (method.getParameterTypes().length == 1)
+          _queryHandlers.put(payloadType, new QueryShortMethodInvoker(method));
+        else if (method.getParameterTypes().length == 4)
+          _queryHandlers.put(payloadType, new QueryMethodInvoker(method));
+        else 
+          throw new IllegalStateException(String.valueOf(method));
+        
         continue;
       }
 
@@ -413,24 +420,21 @@ public class BamSkeleton<S>
 
     Class<?> []paramTypes = method.getParameterTypes();
 
-    if (paramTypes.length != 4
-        || ! long.class.equals(paramTypes[0])
-        || ! String.class.equals(paramTypes[1])
-        || ! String.class.equals(paramTypes[2])
-        || ! Serializable.class.isAssignableFrom(paramTypes[3])) {
+    if (paramTypes.length == 1
+        && Serializable.class.isAssignableFrom(paramTypes[0]))
+      return paramTypes[0];
+    else if (paramTypes.length == 4
+             && long.class.equals(paramTypes[0])
+             && String.class.equals(paramTypes[1])
+             && String.class.equals(paramTypes[2])
+             && Serializable.class.isAssignableFrom(paramTypes[3])) {
+      return paramTypes[3];
+    }
+    else {
       throw new BamException(method + " is an invalid "
                              + " @" + annotationType.getSimpleName()
                              + " because queries require (long, String, String, MyPayload)");
     }
-    /*
-    else if (! void.class.equals(method.getReturnType())) {
-      throw new ActorException(method + " is an invalid @"
-                             + annotationType.getSimpleName()
-                             + " because queries must return void");
-    }
-    */
-
-    return paramTypes[3];
   }
 
   private Class<?> getQueryErrorPayloadType(Class<? extends Annotation> annotationType, Method method)
@@ -461,8 +465,63 @@ public class BamSkeleton<S>
     return paramTypes[3];
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _cl.getName() + "]";
+  }
+  
+  abstract static class QueryInvoker {
+    abstract public void invoke(Object actor,
+                                Broker broker,
+                                long id, 
+                                String to, 
+                                String from,
+                                Serializable payload)
+    throws IllegalAccessException, InvocationTargetException;
+  }
+  
+  static class QueryMethodInvoker extends QueryInvoker {
+    private final Method _method;
+    
+    QueryMethodInvoker(Method method)
+    {
+      _method = method;
+    }
+
+    @Override
+    public void invoke(Object actor,
+                       Broker broker,
+                       long id, 
+                       String to, 
+                       String from,
+                       Serializable payload)
+      throws IllegalAccessException, InvocationTargetException
+    {
+      _method.invoke(actor, id, to, from, payload);
+    }
+  }
+  
+  static class QueryShortMethodInvoker extends QueryInvoker {
+    private final Method _method;
+    
+    QueryShortMethodInvoker(Method method)
+    {
+      _method = method;
+    }
+
+    @Override
+    public void invoke(Object actor,
+                       Broker broker,
+                       long id, 
+                       String to, 
+                       String from,
+                       Serializable payload)
+      throws IllegalAccessException, InvocationTargetException
+    {
+      Object result = _method.invoke(actor, payload);
+      
+      broker.queryResult(id, from, to, (Serializable) result);
+    }
   }
 }
