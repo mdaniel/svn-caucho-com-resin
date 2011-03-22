@@ -77,6 +77,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the key for this entry in the Cache.
    */
+  @Override
   public final Object getKey()
   {
     return _key;
@@ -185,6 +186,13 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
                                     CacheConfig config,
                                     long idleTimeout)
     throws IOException;
+
+  /**
+   * Sets the value by an input stream
+   */
+  abstract public boolean compareAndPut(long version, 
+                                        HashKey value, 
+                                        CacheConfig config);
 
   /**
    * Remove the value

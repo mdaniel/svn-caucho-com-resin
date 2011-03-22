@@ -58,6 +58,8 @@ public class BootServerConfig implements SchemaBean
   private String _address = "127.0.0.1";
   private int _port = -1;
   private boolean _isSecure;
+  
+  private boolean _isDynamic;
 
   private ContainerProgram _serverProgram
     = new ContainerProgram();
@@ -132,6 +134,19 @@ public class BootServerConfig implements SchemaBean
   {
     return _isSecure;
   }
+
+  /**
+   * Marks the server as a dynamic server
+   */
+  public void setDynamic(boolean isDynamic)
+  {
+    _isDynamic = isDynamic;
+  }
+  
+  public boolean isDynamic()
+  {
+    return _isDynamic;
+  }
   
   public void addBuilderProgram(ConfigProgram program)
   {
@@ -156,11 +171,19 @@ public class BootServerConfig implements SchemaBean
     if (pod.getServerLength() >= 64) {
       throw new ConfigException(L.l("The server cannot be added to the current pod because it would be more than 64 servers to the pod."));
     }
-    
-    _cloudServer = pod.createStaticServer(getId(), 
-                                          getAddress(),
-                                          getPort(),
-                                          isSecure());
+
+    if (isDynamic()) {
+      _cloudServer = pod.findServer(getId());
+      
+      if (_cloudServer == null)
+        throw new IllegalStateException(L.l("Dynamic server '{0}' is expected to exist here.",
+                                            getId()));
+    } else {
+      _cloudServer = pod.createStaticServer(getId(), 
+                                            getAddress(),
+                                            getPort(),
+                                            isSecure());
+    }
     
     _cloudServer.putData(new ClusterServerProgram(_serverProgram));
   }
@@ -175,4 +198,5 @@ public class BootServerConfig implements SchemaBean
   {
     return getClass().getSimpleName() + "[" + _id + "]";
   }
+
 }

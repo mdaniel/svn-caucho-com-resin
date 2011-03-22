@@ -77,12 +77,12 @@ public class FileCacheEntry extends DistCacheEntry {
   /**
    * Fills the value with a stream
    */
-  //@Override
+  @Override
   public Object get(CacheConfig config)
   {
     long now = Alarm.getCurrentTime();
   
-  return _manager.get(this, config, now);
+    return _manager.get(this, config, now);
   }
 
   /**
@@ -114,6 +114,15 @@ public class FileCacheEntry extends DistCacheEntry {
     throws IOException
   {
     return _manager.putStream(this, is, config, idleTimeout);
+  }
+
+  /**
+   * Sets the current value
+   */
+  @Override
+  public boolean compareAndPut(long version, HashKey value, CacheConfig config)
+  {
+    return _manager.compareAndPut(this, version, value, config);
   }
 
   /**

@@ -54,6 +54,7 @@ import javax.cache.CacheStatistics;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
+import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
@@ -63,8 +64,11 @@ import com.caucho.server.distcache.DataStore;
 import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.MnodeStore;
+import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.vfs.StreamSource;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Implements the distributed cache
@@ -471,6 +475,14 @@ abstract public class AbstractCache extends AbstractMap
 
     return (cacheEntry != null) ? cacheEntry.peek() : null;
   }
+  
+  /**
+   * Returns the hash of the given key
+   */
+  public HashKey getKeyHash(Object key)
+  {
+    return getDistCacheEntry(key).getKeyHash();
+  }
 
   /**
    * Returns the object with the given key, checking the backing
@@ -509,6 +521,11 @@ abstract public class AbstractCache extends AbstractMap
    */
   @Override
   public ExtCacheEntry getExtCacheEntry(Object key)
+  {
+    return getDistCacheEntry(key).getMnodeValue(_config);
+  }
+  
+  public ExtCacheEntry getExtCacheEntry(HashKey key)
   {
     return getDistCacheEntry(key).getMnodeValue(_config);
   }
@@ -602,6 +619,13 @@ abstract public class AbstractCache extends AbstractMap
     return true;
   }
 
+  public void compareAndPut(HashKey key, HashKey value, long version)
+  {
+    getDistCacheEntry(key).compareAndPut(version, value, _config);
+    
+    notifyPut(key);
+  }
+
   /**
    * Removes the entry from the cache.
    *
@@ -631,6 +655,14 @@ abstract public class AbstractCache extends AbstractMap
 
     return false;
   }
+  
+  /**
+   * Returns the entry for the given key, returning the live item.
+   */
+  public ExtCacheEntry getLiveCacheEntry(Object key)
+  {
+    return getDistCacheEntry(key);
+  }
 
   /**
    * Returns the CacheKeyEntry for the given key.
@@ -646,6 +678,14 @@ abstract public class AbstractCache extends AbstractMap
     }
 
     return cacheEntry;
+  }
+
+  /**
+   * Returns the CacheKeyEntry for the given key.
+   */
+  protected DistCacheEntry getDistCacheEntry(HashKey key)
+  {
+    return _manager.getCacheEntry(key, _config);
   }
 
   /**
@@ -1015,6 +1055,28 @@ abstract public class AbstractCache extends AbstractMap
     setPersistenceMode(result);
   }
   
+  public boolean loadData(HashKey valueHash, WriteStream os)
+    throws IOException
+  {
+    return getDataBacking().loadData(valueHash, os);
+  }
+
+  public boolean saveData(HashKey valueHash, StreamSource source, int length)
+    throws IOException
+  {
+    return getDataBacking().saveData(valueHash, source, length);
+  }
+
+  public boolean isDataAvailable(HashKey valueKey)
+  {
+    return getDataBacking().isDataAvailable(valueKey);
+  }
+  
+  private CacheDataBacking getDataBacking()
+  {
+    return _manager.getDataBacking();
+  }
+
   //
   // QA
   //

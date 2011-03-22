@@ -129,6 +129,14 @@ public class Resin
   private String _serverId = "default";
   private final boolean _isWatchdog;
   
+  private String _dynamicJoinCluster;
+  
+  private String _dynamicAddress;
+  private int _dynamicPort;
+  
+  private String _user;
+  private String _password;
+  
   private ResinArgs _args;
 
   private Path _resinHome;
@@ -635,19 +643,65 @@ public class Resin
   }
 
   /**
-   * Sets the server id.
+   * Sets the cluster for a dynamic cluster join.
    */
-  public void setDynamicServer(String clusterId, String address, int port)
+  public void setJoinCluster(String clusterId)
   {
-    String id = address + ":" + port;
+    _dynamicJoinCluster = clusterId;
+  }
+  
+  /**
+   * Returns the cluster to join for a dynamic cluster join.
+   */
+  public String getJoinCluster()
+  {
+    return _dynamicJoinCluster;
+  }
 
-    /*
-    _dynCluster = clusterId;
-    _dynAddress = address;
-    _dynPort = port;
-*/
-    if (_serverId == null)
-      setServerId(id);
+  /**
+   * Sets the IP cluster address for the dynamic server.
+   */
+  public void setServerAddress(String address)
+  {
+    _dynamicAddress= address;
+  }
+  
+  public String getServerAddress()
+  {
+    return _dynamicAddress;
+  }
+
+  /**
+   * Sets the TCP cluster port for the dynamic server.
+   */
+  public void setServerPort(int port)
+  {
+    _dynamicPort = port;
+  }
+  
+  public int getServerPort()
+  {
+    return _dynamicPort;
+  }
+  
+  public void setUser(String user)
+  {
+    _user = user;
+  }
+  
+  public String getUser()
+  {
+    return _user;
+  }
+  
+  public void setPassword(String password)
+  {
+    _password = password;
+  }
+  
+  public String getPassword()
+  {
+    return _password;
   }
 
   /**
@@ -1128,14 +1182,25 @@ public class Resin
     
     BootServerConfig bootServer = bootResin.findServer(_serverId);
     
+    String clusterId = "";
+    
+    if (_dynamicJoinCluster != null) {
+      CloudServer cloudServer = joinCluster(bootResin.getCloudSystem());
+
+      if (cloudServer != null)
+        clusterId = cloudServer.getCluster().getId(); 
+    }
+    
     if (bootServer == null) {
-      BootClusterConfig clusterConfig = bootResin.findCluster("");
+      BootClusterConfig clusterConfig;
+      
+      clusterConfig = bootResin.findCluster(clusterId);
       
       if (clusterConfig != null) {
       }
       else if (bootResin.getClusterList().size() == 0) {
         clusterConfig = bootResin.createCluster();
-        clusterConfig.setId("");
+        clusterConfig.setId(clusterId);
         clusterConfig.init();
       }
       else {
@@ -1151,7 +1216,11 @@ public class Resin
       */
       
       bootServer = clusterConfig.createServer();
-      bootServer.setId("");
+      bootServer.setId(getServerId());
+      
+      if (_dynamicJoinCluster != null)
+        bootServer.setDynamic(true);
+      
       bootServer.init();
       clusterConfig.addServer(bootServer);
       // bootServer.configureServer();
@@ -1208,6 +1277,11 @@ public class Resin
       throw new ConfigException(L().l("{0} does not support multiple <server> instances in a cluster.\nFor clustered servers, please use Resin Professional with a valid license.",
                                     this));
     }
+  }
+  
+  protected CloudServer joinCluster(CloudSystem system)
+  {
+    throw new ConfigException(L().l("-join requires Resin Professional"));
   }
   
   public ServletContainerConfig getServletContainerConfig()

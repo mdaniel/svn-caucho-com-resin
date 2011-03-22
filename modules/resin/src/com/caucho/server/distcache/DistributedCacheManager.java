@@ -36,6 +36,7 @@ import java.security.MessageDigest;
 
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.util.HashKey;
 
 /**
@@ -54,6 +55,11 @@ abstract public class DistributedCacheManager
    * Gets a cache key entry
    */
   abstract public DistCacheEntry getCacheEntry(Object key, CacheConfig config);
+
+  /**
+   * Gets a cache key entry
+   */
+  abstract public DistCacheEntry getCacheEntry(HashKey key, CacheConfig config);
 
   /**
    * Sets a cache entry
@@ -82,6 +88,8 @@ abstract public class DistributedCacheManager
    */
   abstract public boolean remove(HashKey hashKey);
 
+  abstract public CacheDataBacking getDataBacking();
+  
   /**
    * For QA
    */

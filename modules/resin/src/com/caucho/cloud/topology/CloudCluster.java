@@ -171,6 +171,19 @@ public class CloudCluster
     else
       return null;
   }
+
+  /**
+   * Returns the pod with the given index.
+   */
+  public CloudPod findPod(String id)
+  {
+    for (CloudPod pod : _podList) {
+      if (pod != null && id.equals(pod.getId()))
+        return pod;
+    }
+    
+    return null;
+  }
   
   /**
    * Creates a new pod

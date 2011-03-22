@@ -83,7 +83,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     _clusterBacking = new AbstractCacheClusterBacking();
   }
   
-  protected CacheDataBacking getDataBacking()
+  @Override
+  public CacheDataBacking getDataBacking()
   {
     return _dataBacking;
   }
@@ -110,6 +111,23 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
     while (cacheEntry == null) {
       cacheEntry = createCacheEntry(key, hashKey);
+
+      cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
+    }
+
+    return cacheEntry;
+  }
+
+  /**
+   * Returns the key entry.
+   */
+  @Override
+  public final E getCacheEntry(HashKey hashKey, CacheConfig config)
+  {
+    E cacheEntry = _entryCache.get(hashKey);
+
+    while (cacheEntry == null) {
+      cacheEntry = createCacheEntry(null, hashKey);
 
       cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
     }
@@ -437,6 +455,52 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     getClusterBacking().putCluster(key, valueHash, cacheHash, mnodeValue);
 
     return mnodeValue;
+  }
+
+  public boolean compareAndPut(E entry,
+                               long version,
+                               HashKey valueHash, 
+                               CacheConfig config)
+  {
+    HashKey key = entry.getKeyHash();
+    MnodeValue mnodeValue = loadMnodeValue(entry);
+
+    HashKey oldValueHash = (mnodeValue != null
+                            ? mnodeValue.getValueHashKey()
+                            : null);
+    long oldVersion = mnodeValue != null ? mnodeValue.getVersion() : 0;
+    
+    if (version <= oldVersion)
+      return false;
+
+    if (valueHash != null && valueHash.equals(oldValueHash)) {
+      return true;
+    }
+
+    HashKey cacheHash = config.getCacheKey();
+
+    long idleTimeout = config.getIdleTimeout();
+    
+    // add 25% window for update efficiency
+    idleTimeout = idleTimeout * 5L / 4;
+
+    int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
+
+    mnodeValue = putLocalValue(entry, version + 1,
+                               valueHash, null, cacheHash,
+                               config.getFlags(),
+                               config.getExpireTimeout(),
+                               idleTimeout,
+                               config.getLeaseTimeout(),
+                               config.getLocalReadTimeout(),
+                               leaseOwner);
+
+    if (mnodeValue == null)
+      return false;
+
+    getClusterBacking().putCluster(key, valueHash, cacheHash, mnodeValue);
+
+    return true;
   }
 
   final E getLocalEntry(HashKey key)

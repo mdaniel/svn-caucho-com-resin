@@ -136,9 +136,15 @@ public final class MnodeValue implements ExtCacheEntry {
       _valueRef = new SoftReference<Object>(value);
   }
 
+  @Override
+  public HashKey getKeyHash()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   /**
    * Returns the last access time.
    */
+  @Override
   public long getLastAccessTime()
   {
     return _lastAccessTime;
@@ -171,6 +177,7 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns the last update time.
    */
+  @Override
   public long getLastUpdateTime()
   {
     return _lastUpdateTime;
@@ -179,6 +186,7 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns the expiration time
    */
+  @Override
   public final long getExpirationTime()
   {
     return _lastUpdateTime + _expireTimeout;
@@ -229,6 +237,7 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns the lease owner
    */
+  @Override
   public final int getLeaseOwner()
   {
     return _leaseOwner;
@@ -277,6 +286,7 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns the idle timeout for this entry.
    */
+  @Override
   public long getIdleTimeout()
   {
     return _idleTimeout;
@@ -307,6 +317,7 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns the timeout for a lease of the cache entry
    */
+  @Override
   public long getLeaseTimeout()
   {
     return _leaseTimeout;
@@ -329,6 +340,7 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns true if the value is null
    */
+  @Override
   public boolean isValueNull()
   {
     return _valueHash == null;
@@ -417,6 +429,7 @@ public final class MnodeValue implements ExtCacheEntry {
    * Implements a method required by the interface that should never be
    * called>
    */
+  @Override
   public Object getKey()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -426,31 +439,37 @@ public final class MnodeValue implements ExtCacheEntry {
    * Implements a method required by the interface that should never be
    * called>
    */
+  @Override
   public Object setValue(Object value)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public long getCreationTime()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public boolean isValid()
   {
     return (! isEntryExpired(Alarm.getCurrentTime()));
   }
 
+  @Override
   public long getCost()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public int getHits()
   {
     return _hits;
   }
 
+  @Override
   public String toString()
   {
     return (getClass().getSimpleName()

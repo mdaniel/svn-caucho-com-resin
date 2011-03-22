@@ -46,6 +46,14 @@ public class HashKey {
     _hash = hash;
   }
   
+  public static HashKey create(byte []hash)
+  {
+    if (hash != null)
+      return new HashKey(hash);
+    else
+      return null;
+  }
+  
   public byte []getHash()
   {
     return _hash;

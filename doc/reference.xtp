@@ -3046,7 +3046,7 @@ a &lt;host-name&gt; to set the canonical name for the host.</p>
 
   &lt;root-directory&gt;/opt/www/www.foo.com&lt;/root-directory&gt;
 
-  &lt;web-app id="/" document-directory="webapps/ROOT"&gt;
+  &lt;web-app id="/" root-directory="webapps/ROOT"&gt;
     
   &lt;/web-app&gt;
   ...
@@ -10698,7 +10698,7 @@ using the Apache htdocs directory to serve pages.</p>
 
 <example>
 &lt;host id=''&gt;
-  &lt;web-app id='/apache' document-directory='/usr/local/apache/htdocs'&gt;
+  &lt;web-app id='/apache' root-directory='/usr/local/apache/htdocs'&gt;
 
   ...
 
@@ -10709,11 +10709,11 @@ using the Apache htdocs directory to serve pages.</p>
 root directory. </p>
 
 <example>
-  &lt;web-app id='/' document-directory='C:/inetpub/wwwroot'&gt;
+  &lt;web-app id='/' root-directory='C:/inetpub/wwwroot'&gt;
 </example>
 
 <p>When the <var>web-app</var> is specified with a <var>url-regexp</var>,
-<var>document-directory</var> can use replacement variables (<var>$2</var>).</p>
+<var>root-directory</var> can use replacement variables (<var>$2</var>).</p>
 
 <p>In the following, each user gets his or her own independent
 application using <var>~user</var>.</p>
@@ -10722,7 +10722,7 @@ application using <var>~user</var>.</p>
 &lt;host id=''&gt;
 
   &lt;web-app url-regexp='/~([^/]*)'
-           document-directory='/home/$1/public_html'&gt;
+           root-directory='/home/$1/public_html'&gt;
 
     ...
 
@@ -10876,7 +10876,7 @@ element web-app-deploy {
 
 <p>The web-app-deploy can override configuration for an expanded war with
 a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
-&lt;document-directory&gt; is used to match web-apps.</p>
+&lt;root-directory&gt; is used to match web-apps.</p>
 
 <example title="Example: resin.xml overriding web.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -10885,7 +10885,7 @@ a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
 
 &lt;web-app-deploy path="webapps"&gt;
   &lt;web-app context-path="/wiki"
-              document-directory="wiki"&gt;
+              root-directory="wiki"&gt;
     &lt;context-param database="jdbc/wiki"&gt;
   &lt;/web-app&gt;
 &lt;/web-app-deploy&gt;

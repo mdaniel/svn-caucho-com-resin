@@ -78,6 +78,8 @@ public final class ClusterServer {
   private String _address = "127.0.0.1";
   private int _port = -1;
   private boolean _isSSL;
+  
+  private boolean _isRemotePod;
 
   //
   // config parameters
@@ -142,8 +144,10 @@ public final class ClusterServer {
     // _ports.add(_clusterPort);
     
     // XXX: active isn't quite right here
-    if (cloudServer.getPod() != networkService.getSelfServer().getPod())
+    if (cloudServer.getPod() != networkService.getSelfServer().getPod()) {
+      _isRemotePod = true;
       _isHeartbeatActive.set(true);
+    }
 
     StringBuilder sb = new StringBuilder();
 
@@ -721,6 +725,11 @@ public final class ClusterServer {
     return String.format("%02x:%s", index, targetCluster);
   }
 
+  public boolean isRemotePod()
+  {
+    return _isRemotePod;
+  }
+  
   /**
    * Test if the server is active, i.e. has received an active message.
    */

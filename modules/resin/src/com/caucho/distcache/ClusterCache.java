@@ -30,6 +30,8 @@
 package com.caucho.distcache;
 
 import com.caucho.config.Configurable;
+import com.caucho.util.HashKey;
+
 import javax.inject.Singleton;
 
 /**

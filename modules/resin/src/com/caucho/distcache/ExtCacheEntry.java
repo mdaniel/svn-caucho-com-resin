@@ -34,10 +34,15 @@ import javax.cache.CacheEntry;
 import com.caucho.util.HashKey;
 
 /**
- * Provides additional informationabout an entry in a {@link javax.cache.Cache}.
+ * Provides additional information about an entry in a {@link javax.cache.Cache}.
  */
 public interface ExtCacheEntry extends CacheEntry
 {
+  /**
+   * Returns the key hash for the current entry.
+   */
+  public HashKey getKeyHash();
+  
   /**
    * Returns true for a null entry
    */
@@ -46,6 +51,7 @@ public interface ExtCacheEntry extends CacheEntry
   /**
    * Returns the item's value
    */
+  @Override
   public Object getValue();
 
   /**
@@ -68,5 +74,6 @@ public interface ExtCacheEntry extends CacheEntry
    */
   public int getLeaseOwner();
 
+  @Override
   public boolean isValid();
 }

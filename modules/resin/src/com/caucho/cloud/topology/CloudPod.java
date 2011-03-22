@@ -268,6 +268,18 @@ public class CloudPod
   /**
    * Creates a new dynamic server
    */
+  public CloudServer createDynamicServer(int index,
+                                         String id,
+                                         String address,
+                                         int port,
+                                         boolean isSecure)
+  {
+    return createServer(index, id, address, port, isSecure, false);
+  }
+  
+  /**
+   * Creates a new dynamic server
+   */
   public CloudServer createDynamicServer(String id,
                                          String address,
                                          int port,
@@ -287,7 +299,6 @@ public class CloudPod
   {
     int index;
     CloudServer server;
-    boolean isSSL = false;
     
     synchronized (_serverList) {
       if (findServer(id) != null)
@@ -301,11 +312,34 @@ public class CloudPod
                                                findServer(address, port)));
       
       index = findFirstFreeIndex();
-      
+   
+      server = createServer(index, id, address, port, isSecure, isStatic);
+    }
+    
+    return server;
+  }
+  
+  /**
+   * Creates a new server
+   */
+  private CloudServer createServer(int index,
+                                   String id,
+                                   String address,
+                                   int port,
+                                   boolean isSecure,
+                                   boolean isStatic)
+  {
+    CloudServer server;
+    boolean isSSL = false;
+    
+    synchronized (_serverList) {
       if (index <= 2)
         server = new TriadServer(id, this, index, address, port, isSSL, isStatic);
       else
         server = new CloudServer(id, this, index, address, port, isSSL, isStatic);
+      
+      if (index < _serverList.size() && _serverList.get(index) != null)
+        return null;
   
       _serverList.set(index, server);
       _servers = _serverList.toArray();
