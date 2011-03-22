@@ -71,11 +71,13 @@ import com.caucho.vfs.Path;
 /**
  * Standard XML behavior for META-INF/beans.xml
  */
+// TODO Add a map to inject scan manager to store root->beans.xml
+// TODO adding setRootOverrride(Path to root, Path to beans.xml) calls from
+// inject manager.
 @Module
-public class XmlStandardPlugin implements Extension
-{
+public class XmlStandardPlugin implements Extension {
   private static final L10N L = new L10N(XmlStandardPlugin.class);
-  
+
   private static final String SCHEMA = "com/caucho/config/cfg/resin-beans.rnc";
 
   private InjectManager _cdiManager;
@@ -99,7 +101,7 @@ public class XmlStandardPlugin implements Extension
 
   public void addRoot(Path root)
   {
-    if (! _paths.contains(root)) {
+    if (!_paths.contains(root)) {
       _pendingPaths.add(root);
     }
   }
@@ -113,7 +115,7 @@ public class XmlStandardPlugin implements Extension
       for (Path root : paths) {
         configureRoot(root);
       }
-      
+
       for (int i = 0; i < _pendingBeans.size(); i++) {
         BeansConfig config = _pendingBeans.get(i);
 
@@ -130,32 +132,30 @@ public class XmlStandardPlugin implements Extension
       throw ConfigException.create(e);
     }
   }
-  
-  private void configureRoot(Path root)
-    throws IOException
+
+  private void configureRoot(Path root) throws IOException
   {
+    // TODO Process from beans.xml map instead.
     configurePath(root.lookup("META-INF/beans.xml"));
     configurePath(root.lookup("META-INF/resin-beans.xml"));
 
     if (root.getFullPath().endsWith("WEB-INF/classes/")) {
       configurePath(root.lookup("../beans.xml"));
       configurePath(root.lookup("../resin-beans.xml"));
-    }
-    else if (! root.lookup("META-INF/beans.xml").canRead()
-             && ! root.lookup("META-INF/resin-beans.xml").canRead()) {
+    } else if (!root.lookup("META-INF/beans.xml").canRead()
+        && !root.lookup("META-INF/resin-beans.xml").canRead()) {
       // ejb/11h0
       configurePath(root.lookup("beans.xml"));
       configurePath(root.lookup("resin-beans.xml"));
-      
+
     }
   }
 
-  private void configurePath(Path beansPath)
-    throws IOException
+  private void configurePath(Path beansPath) throws IOException
   {
     if (beansPath.canRead() && beansPath.getLength() > 0) {
       // ioc/0041 - tck allows empty beans.xml
-      
+
       BeansConfig beans = new BeansConfig(_cdiManager, beansPath);
 
       beansPath.setUserPath(beansPath.getURL());
@@ -178,7 +178,7 @@ public class XmlStandardPlugin implements Extension
 
     if (type == null)
       return;
-    
+
     if (type.isAnnotationPresent(XmlCookie.class))
       return;
 
@@ -189,26 +189,25 @@ public class XmlStandardPlugin implements Extension
 
     // XXX: managed by ResinStandardPlugin
     /*
-    if (type.isAnnotationPresent(Stateful.class)
-        || type.isAnnotationPresent(Stateless.class)
-        || type.isAnnotationPresent(MessageDriven.class)) {
-      event.veto();
-    }
-    */
+     * if (type.isAnnotationPresent(Stateful.class) ||
+     * type.isAnnotationPresent(Stateless.class) ||
+     * type.isAnnotationPresent(MessageDriven.class)) { event.veto(); }
+     */
   }
-  
+
   @LazyExtension
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public void processTarget(@Observes ProcessInjectionTarget<?> event)
   {
     AnnotatedType<?> type = event.getAnnotatedType();
-    
+
     XmlCookie cookie = type.getAnnotation(XmlCookie.class);
-    
+
     if (cookie != null) {
-      InjectionTarget target = _cdiManager.getXmlInjectionTarget(cookie.value());
-      
+      InjectionTarget target = _cdiManager
+          .getXmlInjectionTarget(cookie.value());
+
       event.setInjectionTarget(target);
-      
     }
   }
 
@@ -228,7 +227,7 @@ public class XmlStandardPlugin implements Extension
 
     Annotated annotated = event.getAnnotated();
     Bean<?> bean = event.getBean();
-    
+
     if (isStartup(annotated)) {
       _pendingService.add(new StartupItem(bean, annotated));
     }
@@ -236,27 +235,27 @@ public class XmlStandardPlugin implements Extension
 
   public void processAfterValidation(@Observes AfterDeploymentValidation event)
   {
-    ArrayList<StartupItem> startupBeans
-      = new ArrayList<StartupItem>(_pendingService);
-    
+    ArrayList<StartupItem> startupBeans = new ArrayList<StartupItem>(
+        _pendingService);
+
     _pendingService.clear();
-    
+
     ArrayList<Bean<?>> runningBeans = new ArrayList<Bean<?>>();
-    
+
     Bean<?> bean;
-    
+
     while ((bean = nextStartup(startupBeans, runningBeans)) != null) {
       CreationalContext<?> env = _cdiManager.createCreationalContext(bean);
 
       Object value = _cdiManager.getReference(bean, bean.getBeanClass(), env);
-      
+
       if (value instanceof ScopeProxy)
         ((ScopeProxy) value).__caucho_getDelegate();
-      
+
       if (bean instanceof ScheduleBean) {
         ((ScheduleBean) bean).scheduleTimers(value);
       }
-      
+
       if (value instanceof HandleAware && bean instanceof PassivationCapable) {
         String id = ((PassivationCapable) bean).getId();
 
@@ -264,56 +263,55 @@ public class XmlStandardPlugin implements Extension
       }
     }
   }
-  
+
   private Bean<?> nextStartup(ArrayList<StartupItem> startupBeans,
-                              ArrayList<Bean<?>> runningBeans)
+      ArrayList<Bean<?>> runningBeans)
   {
     if (startupBeans.size() == 0)
       return null;
-    
+
     for (StartupItem item : startupBeans) {
       Bean<?> bean = item.getBean();
-      
+
       DependsOn dependsOn = item.getAnnotated().getAnnotation(DependsOn.class);
-      
+
       if (dependsOn == null || isStarted(runningBeans, dependsOn)) {
         startupBeans.remove(item);
         runningBeans.add(bean);
-      
+
         return bean;
       }
     }
-    
+
     StringBuilder sb = new StringBuilder();
-    
+
     for (StartupItem item : startupBeans) {
       sb.append("\n  " + item.getBean());
     }
-    
-    throw new ConfigException(L.l("@DependsOn circularity {0}",
-                                  sb));
+
+    throw new ConfigException(L.l("@DependsOn circularity {0}", sb));
   }
-  
+
   private boolean isStarted(ArrayList<Bean<?>> runningBeans, DependsOn depends)
   {
     for (String dep : depends.value()) {
-      if (! isStarted(runningBeans, dep))
+      if (!isStarted(runningBeans, dep))
         return false;
     }
-    
+
     return true;
   }
-  
+
   private boolean isStarted(ArrayList<Bean<?>> runningBeans, String dep)
   {
     for (Bean<?> bean : runningBeans) {
       String name = bean.getName();
       String className = bean.getBeanClass().getSimpleName();
-      
+
       if (dep.equals(name) || dep.equals(className))
         return true;
     }
-    
+
     return false;
   }
 
@@ -353,22 +351,22 @@ public class XmlStandardPlugin implements Extension
   {
     return getClass().getSimpleName() + "[]";
   }
-  
+
   static class StartupItem {
     private Bean<?> _bean;
     private Annotated _annotated;
-    
+
     public StartupItem(Bean<?> bean, Annotated annotated)
     {
       _bean = bean;
       _annotated = annotated;
     }
-    
+
     public Bean<?> getBean()
     {
       return _bean;
     }
-    
+
     public Annotated getAnnotated()
     {
       return _annotated;

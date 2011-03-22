@@ -29,18 +29,25 @@
 
 package com.caucho.loader.enhancer;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.URL;
-import java.util.*;
-import java.util.logging.*;
-import java.util.zip.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import com.caucho.bytecode.ByteCodeClassMatcher;
 import com.caucho.bytecode.ByteCodeClassScanner;
 import com.caucho.inject.Module;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.CharBuffer;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Jar;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
 /**
  * Interface for a scan manager
@@ -49,7 +56,7 @@ import com.caucho.vfs.*;
 public class ScanManager {
   private static final Logger log
     = Logger.getLogger(ScanManager.class.getName());
-  
+
   private final ScanListener []_listeners;
 
   public ScanManager(ArrayList<ScanListener> listeners)
@@ -72,7 +79,7 @@ public class ScanManager {
     if (root.getPath().endsWith(".jar") && ! (root instanceof JarPath)) {
       root = JarPath.create(root);
     }
-    
+
     ScanListener []listeners = new ScanListener[_listeners.length];
 
     boolean hasListener = false;
@@ -86,11 +93,11 @@ public class ScanManager {
     if (! hasListener) {
       return;
     }
-    
+
     ByteCodeClassScanner scanner = new ByteCodeClassScanner();
-    
+
     String packagePath = null;
-    
+
     if (packageRoot != null)
       packagePath = packageRoot.replace('.', '/');
 
@@ -100,7 +107,7 @@ public class ScanManager {
       
       JarByteCodeMatcher matcher
         = new JarByteCodeMatcher(loader, root, packageRoot, listeners);
-    
+
       scanForJarClasses(jar, packageRoot,
                         scanner, matcher);
     }
@@ -109,10 +116,10 @@ public class ScanManager {
         = new PathByteCodeMatcher(loader, root, packageRoot, listeners);
       
       Path scanRoot = root;
-      
+
       if (packagePath != null)
         scanRoot = scanRoot.lookup(packagePath);
-      
+
       scanForClasses(root, scanRoot, scanner, matcher);
     }
   }
@@ -128,7 +135,7 @@ public class ScanManager {
           if (name.indexOf(':') >= 0) {
             continue;
           }
-          
+
           scanForClasses(root, path.lookup(name), classScanner, matcher);
         }
 
@@ -164,7 +171,7 @@ public class ScanManager {
 
     try {
       zipFile = jar.getZipFile();
-      
+
       if (zipFile == null)
         return;
 

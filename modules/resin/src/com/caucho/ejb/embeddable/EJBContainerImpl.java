@@ -157,7 +157,7 @@ public class EJBContainerImpl extends EJBContainer {
         manager.setScannableRoots(_moduleRoots);
       }
       
-      _classLoader.scanRoot();
+      _classLoader.addScanRoot();
       _application.start();
     }
     catch (MalformedURLException e) {

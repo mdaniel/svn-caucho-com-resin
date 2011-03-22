@@ -60,68 +60,69 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 /**
- * Embeddable Resin context for testing of bean container components (CDI managed beans, EJBs, JPA) in an 
- * environment that mirrors a production runtime but without the overhead of the Resin server. The 
- * ResinBeanContainer can be embedded into any Java SE environment, including a JUnit test. Note, the
- * bean container does not support Servlet-based APIs. In order to test the web tier, <code>ResinEmbed</code> 
- * should be used.
- *
+ * Embeddable Resin context for testing of bean container components (CDI
+ * managed beans, EJBs, JPA) in an environment that mirrors a production runtime
+ * but without the overhead of the Resin server. The ResinBeanContainer can be
+ * embedded into any Java SE environment, including a JUnit test. Note, the bean
+ * container does not support Servlet-based APIs. In order to test the web tier,
+ * <code>ResinEmbed</code> should be used.
+ * 
  * <code><pre>
  * static void main(String []args)
  * {
  *   ResinBeanContainer beans = new ResinBeanContainer();
- *
+ * 
  *   beans.addModule("test.jar");
  *   beans.start();
- *
+ * 
  *   RequestContext req = beans.beginRequest();
  *   try {
  *     MyMain main = beans.getInstance(MyMain.class);
- *
+ * 
  *     main.main(args);
  *   } finally {
  *     req.close();
  *   }
- *
+ * 
  *   beans.close();
  * }
  * </pre></code>
- *
+ * 
  * <h2>Configuration File</h2>
- *
+ * 
  * The optional configuration file for the ResinContext allows the same
  * environment and bean configuration as the resin-web.xml, but without the
  * servlet-specific configuration.
- *
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * &lt;beans xmlns="http://caucho.com/ns/resin"
  *              xmlns:resin="urn:java:com.caucho.resin">
- *
+ * 
  *    &lt;resin:import path="${__DIR__}/my-include.xml"/>
- *
+ * 
  *    &lt;database name="my-database">
  *      &lt;driver ...>
  *        ...
  *      &lt;/driver>
  *    &lt;/database>
- *
+ * 
  *    &lt;mypkg:MyBean xmlns:mypkg="urn:java:com.mycom.mypkg">
  *      &lt;my-property>my-data&lt;/my-property>
  *    &lt;/mypkg:MyBean>
  * &lt;/beans>
- * </code></pre>
+ * </code>
+ * </pre>
  */
 // TODO Add JNDI look-up and well as direct access to JNDI/CDI beans manager.
-public class ResinBeanContainer
-{
+public class ResinBeanContainer {
   private static final L10N L = new L10N(ResinBeanContainer.class);
   private static final String SCHEMA = "com/caucho/resin/resin-context.rnc";
-  
+
   private EnvironmentClassLoader _classLoader;
   private InjectManager _cdiManager;
 
-  private ThreadLocal<BeanContainerRequest> _localContext
-    = new ThreadLocal<BeanContainerRequest>();
+  private ThreadLocal<BeanContainerRequest> _localContext = new ThreadLocal<BeanContainerRequest>();
 
   /**
    * Creates a new Resin context.
@@ -130,7 +131,7 @@ public class ResinBeanContainer
   {
     _classLoader = EnvironmentClassLoader.create("resin-context");
     _cdiManager = InjectManager.create(_classLoader);
-    
+
     // ioc/0b07
     _cdiManager.replaceContext(new RequestScope());
     _cdiManager.replaceContext(ThreadContext.getContext());
@@ -140,7 +141,7 @@ public class ResinBeanContainer
 
     try {
       thread.setContextClassLoader(_classLoader);
-      
+
       // ioc/0p62
       EjbManager.create(_classLoader);
       // XXX: currently this would cause a scanning of the class-path even
@@ -151,34 +152,35 @@ public class ResinBeanContainer
 
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
-      
+
       Environment.addCloseListener(this);
 
-      _cdiManager.addManagedBean(_cdiManager.createManagedBean(ResinCdiProducer.class));
+      _cdiManager.addManagedBean(_cdiManager
+          .createManagedBean(ResinCdiProducer.class));
 
-      Class<?> resinValidatorClass = ResinCdiProducer.createResinValidatorProducer();
-      
+      Class<?> resinValidatorClass = ResinCdiProducer
+          .createResinValidatorProducer();
+
       if (_cdiManager != null)
-        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinValidatorClass));
+        _cdiManager.addManagedBean(_cdiManager
+            .createManagedBean(resinValidatorClass));
 
-      _classLoader.scanRoot();
+      _classLoader.addScanRoot();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
 
-  // TODO Should this be protected instead of public?
   public void setId(String id)
   {
     _classLoader.setId(id);
   }
 
-  // TODO Should this be protected instead of public?
   public InjectManager getCdiManager()
   {
     return _cdiManager;
   }
-  
+
   /**
    * Adds a new module (jar or exploded classes directory)
    */
@@ -188,39 +190,38 @@ public class ResinBeanContainer
 
     if (modulePath.endsWith(".jar")) {
       _classLoader.addJar(path);
-    }
-    else {
+    } else {
       CompilingLoader loader = new CompilingLoader(_classLoader);
       loader.setPath(path);
       loader.init();
     }
   }
-  
+
   /**
    * Adds a package as module root.
    * 
-   * @param packageName the name of the package to be treated as a virtual
-   * module root.
+   * @param packageName
+   *          the name of the package to be treated as a virtual module root.
    */
   // TODO Should this be protected instead of public?
   public void addPackageModule(String modulePath, String packageName)
   {
     Path root = Vfs.lookup(modulePath);
-    
+
     try {
       URL url = new URL(root.getURL());
-    
+
       _classLoader.addScanPackage(url, packageName);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
   }
-  
+
   /**
    * Adds a package in the classpath as module root.
    * 
-   * @param packageName the name of the package to be treated as a virtual
-   * module root.
+   * @param packageName
+   *          the name of the package to be treated as a virtual module root.
    */
   // TODO Should this be protected instead of public?
   public void addPackageModule(String packageName)
@@ -280,10 +281,11 @@ public class ResinBeanContainer
   }
 
   /**
-   * Adds a Resin beans configuration file, allowing creation of
-   * databases or bean configuration.
-   *
-   * @param pathName URL/path to the configuration file
+   * Adds a Resin beans configuration file, allowing creation of databases or
+   * bean configuration.
+   * 
+   * @param pathName
+   *          URL/path to the configuration file
    */
   public void addBeansXml(String pathName)
   {
@@ -303,7 +305,7 @@ public class ResinBeanContainer
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
   // TODO Should this be protected instead of public?
   public void addResourceRoot(Path path)
   {
@@ -312,8 +314,7 @@ public class ResinBeanContainer
   }
 
   /**
-   * Sets the work directory for Resin to use when generating temporary
-   * files.
+   * Sets the work directory for Resin to use when generating temporary files.
    */
   public void setWorkDirectory(String path)
   {
@@ -332,7 +333,7 @@ public class ResinBeanContainer
       thread.setContextClassLoader(_classLoader);
 
       _classLoader.start();
-      
+
       _cdiManager.update();
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -340,13 +341,15 @@ public class ResinBeanContainer
   }
 
   /**
-   * Returns a new instance of the given type with optional bindings. If
-   * the type is a managed bean, it will be injected before returning.
-   *
-   * @param className the className of the bean to instantiate
-   * @param qualifier optional @Qualifier annotations to select the bean
+   * Returns a new instance of the given type with optional bindings. If the
+   * type is a managed bean, it will be injected before returning.
+   * 
+   * @param className
+   *          the className of the bean to instantiate
+   * @param qualifier
+   *          optional @Qualifier annotations to select the bean
    */
-  public Object getInstance(String className, Annotation ...qualifiers)
+  public Object getInstance(String className, Annotation... qualifiers)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -368,7 +371,7 @@ public class ResinBeanContainer
    * Returns a new instance of the given type with optional qualifiers.
    */
   @SuppressWarnings("unchecked")
-  public <T> T getInstance(Class<T> type, Annotation ...qualifiers)
+  public <T> T getInstance(Class<T> type, Annotation... qualifiers)
   {
     if (type == null)
       throw new NullPointerException();
@@ -400,10 +403,11 @@ public class ResinBeanContainer
   }
 
   /**
-   * Returns an instance of the bean with the given name.
-   * If the type is a managed bean, it will be injected before returning.
-   *
-   * @param name the @Named of the bean to instantiate
+   * Returns an instance of the bean with the given name. If the type is a
+   * managed bean, it will be injected before returning.
+   * 
+   * @param name
+   *          the @Named of the bean to instantiate
    */
   public Object getBeanByName(String name)
   {
@@ -429,15 +433,15 @@ public class ResinBeanContainer
 
   /**
    * Executes code in the Resin bean classloader and creates a request scope.
-   *
+   * 
    * <code><pre>
    * resinBean.request (new Runnable() {
    *   doMyCode();
    * });
    * </pre></code>
-   *
+   * 
    * @return the RequestContext which must be passed to
-   *    <code>completeContext</code>
+   *         <code>completeContext</code>
    */
   public void request(Runnable runnable)
   {
@@ -447,12 +451,13 @@ public class ResinBeanContainer
 
     BeanContainerRequest oldContext = _localContext.get();
 
-    BeanContainerRequest context = new BeanContainerRequest(this, oldLoader, oldContext);
+    BeanContainerRequest context = new BeanContainerRequest(this, oldLoader,
+        oldContext);
 
     thread.setContextClassLoader(_classLoader);
 
     _localContext.set(context);
-    
+
     try {
       runnable.run();
     } finally {
@@ -461,24 +466,24 @@ public class ResinBeanContainer
   }
 
   /**
-   * Enters the Resin context and begins a new request on the thread. The
-   * the returned context must be passed to the completeRequest. To ensure
-   * the request is properly closed, use the following pattern:
-   *
+   * Enters the Resin context and begins a new request on the thread. The the
+   * returned context must be passed to the completeRequest. To ensure the
+   * request is properly closed, use the following pattern:
+   * 
    * <code><pre>
    * ResinContext resinContext = ...;
-   *
+   * 
    * RequestContext cxt = resinContext.beginRequest();
-   *
+   * 
    * try {
    *    // ... actions inside the Resin request context
    * } finally {
    *   resinContext.completeRequest(cxt);
    * }
    * </pre></code>
-   *
+   * 
    * @return the RequestContext which must be passed to
-   *    <code>completeContext</code>
+   *         <code>completeContext</code>
    */
   public BeanContainerRequest beginRequest()
   {
@@ -488,7 +493,8 @@ public class ResinBeanContainer
 
     BeanContainerRequest oldContext = _localContext.get();
 
-    BeanContainerRequest context = new BeanContainerRequest(this, oldLoader, oldContext);
+    BeanContainerRequest context = new BeanContainerRequest(this, oldLoader,
+        oldContext);
 
     thread.setContextClassLoader(_classLoader);
 

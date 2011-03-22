@@ -42,39 +42,38 @@ import com.caucho.resin.ResinBeanContainer;
  * 
  * TODO Add more Javadoc since this is a public API.
  */
-// TODO The container is not being shutdown properly, so some pre-destroy call-backs may not
-// happen. Add a JVM shutdown hook or register to listen when JUnit finishes running all the tests?
+// TODO Put the entire test in a session context?
 public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
   private Class<?> _testClass;
+  private String _testClassModule;
 
   private ResinBeanContainer _beanContainer;
   private ResinBeanConfiguration _beanConfiguration;
 
-  public ResinBeanContainerRunner(Class<?> testClass)
-    throws Throwable
+  public ResinBeanContainerRunner(Class<?> testClass) throws Throwable
   {
     super(testClass);
 
     _testClass = testClass;
+    _testClassModule = getTestClassModule(_testClass);
 
     _beanConfiguration = testClass.getAnnotation(ResinBeanConfiguration.class);
   }
 
   @Override
-  protected Object createTest()
-    throws Exception
+  protected Object createTest() throws Exception
   {
     InjectManager manager = getResinContext().getInstance(InjectManager.class);
 
     // Make the test class a CDI bean, but do not actually register it with CDI.
     return manager.createTransientObject(_testClass);
-  }  
-  
+  }
+
   @Override
   protected void runChild(FrameworkMethod method, RunNotifier notifier)
   {
     ResinBeanContainer beanContainer = getResinContext();
-    
+
     // Each method is treated as a separate HTTP request.
     BeanContainerRequest request = beanContainer.beginRequest();
 
@@ -90,12 +89,7 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
     if (_beanContainer == null) {
       _beanContainer = new ResinBeanContainer();
 
-      // TODO Make sure this is system-independent. Use java.io.tmpdir, path.separator, 
-      // user.dir, user.home, instead?      
-      String userName = System.getProperty("user.name");
-      String workDir = "file:/tmp/" + userName;
-
-      _beanContainer.setWorkDirectory(workDir);
+      _beanContainer.setWorkDirectory(System.getProperty("java.io.tmpdir"));
 
       if (_beanConfiguration != null) {
         for (String module : _beanConfiguration.modules()) {
@@ -107,9 +101,32 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
         }
       }
 
+      // TODO For test class-path, set the beans.xml to use (to bean container).
+      // delegate call to inject manager.
+
       _beanContainer.start();
     }
 
     return _beanContainer;
+  }
+
+  private String getTestClassModule(final Class<?> testClass)
+  {
+    String testClassName = testClass.getName().replace('.', '/') + ".class";
+    String packageName = Thread.currentThread().getContextClassLoader()
+        .getResource(testClassName).toString();
+
+    // Strip the class-name off the end...
+    packageName = packageName.substring(0, packageName.indexOf(testClassName));
+
+    // Strip off '!' in case of jar and zip files...
+    if (packageName.indexOf('!') != -1) {
+      packageName = packageName.substring(packageName.indexOf('!'));
+    }
+
+    // Strip protocol part of URL...
+    packageName = packageName.substring(packageName.indexOf("file:") + 5);
+
+    return packageName;
   }
 }

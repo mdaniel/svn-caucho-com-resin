@@ -615,19 +615,19 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    * Tells the classloader to scan the root classpath.
    */
   @Override
-  public void scanRoot()
+  public void addScanRoot()
   {
-    super.scanRoot();
+    super.addScanRoot();
 
-    scanRoot(getParent());
+    addScanRoot(getParent());
   }
   
-  private void scanRoot(ClassLoader loader)
+  private void addScanRoot(ClassLoader loader)
   {
     if (loader == null)
       return;
     
-    scanRoot(loader.getParent());
+    addScanRoot(loader.getParent());
 
     if (loader instanceof URLClassLoader) {
       URLClassLoader urlParent = (URLClassLoader) loader;

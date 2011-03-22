@@ -87,8 +87,6 @@ class InjectScanClass implements ScanClass
   
   private boolean _isObserves;
   
-  private boolean _isVeto;
-  
   InjectScanClass(String className, InjectScanManager manager)
   {
     _className = className;

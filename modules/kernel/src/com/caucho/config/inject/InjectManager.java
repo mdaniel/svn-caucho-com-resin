@@ -296,6 +296,9 @@ public final class InjectManager
   private ArrayList<Path> _pendingPathList
     = new ArrayList<Path>();
 
+  private ConcurrentHashMap<Path, String[]> _beansXMLOverrides 
+    = new ConcurrentHashMap<Path, String[]>();
+  
   private ArrayList<AnnotatedType<?>> _pendingAnnotatedTypes
     = new ArrayList<AnnotatedType<?>>();
 
@@ -638,6 +641,16 @@ public final class InjectManager
     _pendingPathList.add(path);
   }
 
+  public void addBeansXmlOverride(Path path, String[] beansXmlLocations)
+  {
+    _beansXMLOverrides.put(path, beansXmlLocations);
+  }
+  
+  public String[] getBeansXmlOverride(Path path)
+  {
+    return _beansXMLOverrides.get(path);
+  }  
+  
   public void setDeploymentTypes(ArrayList<Class<?>> deploymentList)
   {
     _deploymentMap.clear();
@@ -3073,7 +3086,7 @@ public final class InjectManager
   public <X> void discoverBean(AnnotatedType<X> beanType)
   {
     Class<X> cl;
-    
+
     // ioc/07fb
     cl = beanType.getJavaClass();
     

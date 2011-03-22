@@ -33,7 +33,7 @@
 	<classpathentry kind="lib" path="modules/ext/trang.jar"/>
 	<classpathentry kind="lib" path="modules/ext/webservices-api.jar"/>
 	<classpathentry kind="lib" path="modules/ext/webservices-extra-api.jar"/>
-	<classpathentry kind="lib" path="modules/ext/junit-4.7.jar"/>
+	<classpathentry kind="lib" path="modules/ext/junit-4.7.jar" sourcepath="C:/Documents and Settings/reza/.m2/repository/junit/junit/4.7/junit-4.7-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="modules/ext/eclipselink.jar"/>
 	<classpathentry kind="lib" path="modules/ext/validation-api-1.0.0.GA.jar"/>

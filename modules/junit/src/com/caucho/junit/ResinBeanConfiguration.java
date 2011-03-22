@@ -37,18 +37,37 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Configures the Resin bean container for a given JUnit test.
- * 
- *  TODO Add more Javadoc since this is a public API.
+ * <p>
+ * Creates a Resin bean container custom configuration for a given JUnit test.
+ * </p>
+ * <p>
+ * If no beans.xml files are specified, the default META-INF/beans.xml will be
+ * loaded. If one or more beans.xml files are specified, the default beans.xml
+ * file will be ignored. An array of beans.xml files may be specified. Multiple
+ * beans.xml are combined together to create the final test configuration.
+ * </p>
+ * <p>
+ * If no persistence.xml file is specified, the default persistence.xml will be
+ * loaded. If a persistence.xml file is specified, the default file will be
+ * ignored in favor of the specified JPA configuration.
+ * </p>
+ * <p>
+ * Unless otherwise specified, files are loaded from the class-path. You can
+ * explicitly specify that a file is loaded from the class-path by using the
+ * 'classpath:' prefix (e.g. classpath:META-INF/beans.xml). You may specify that
+ * a file is loaded from the file-system using the 'file:' prefix (e.g.
+ * file:web/WEB-INF/beans.xml). Note that you can use either absolute or
+ * relative file paths (e.g. file:web/WEB-INF/beans.xml or
+ * file:/workspace/projectabc/tests/test123/web/WEB-INF/beans.xml).
+ * </p>
  */
 @Documented
 @Retention(RUNTIME)
-@Target({TYPE})
+@Target({ TYPE })
 public @interface ResinBeanConfiguration {
-  String []modules() default {};
+  String[] modules() default {};
 
-  String []beansXml() default {};
-  /*
+  String[] beansXml() default {};
+
   String persistenceXml() default "";
-  */
 }
