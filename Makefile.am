@@ -55,13 +55,20 @@ install	:
 			echo "-------------------------------------------------------";\
 		else\
 			cp conf/resin.xml $(resin_conf)/resin.xml; \
-	  fi;\
+		fi;\
 		if test -f "$(resin_conf)/app-default.xml"; then\
 			echo "-------------------------------------------------------";\
 			echo "Will not overwrite $(resin_conf)/app-default.xml";\
 			echo "-------------------------------------------------------";\
 		else\
 			cp conf/app-default.xml $(resin_conf)/app-default.xml; \
+		fi;\
+		if test -f "$(resin_conf)/health.xml"; then\
+			echo "-------------------------------------------------------";\
+			echo "Will not overwrite $(resin_conf)/health.xml";\
+			echo "-------------------------------------------------------";\
+		else\
+			cp conf/health.xml $(resin_conf)/health.xml; \
 		fi;\
 	fi
 	(cd modules/c/src; $(MAKE) install)
