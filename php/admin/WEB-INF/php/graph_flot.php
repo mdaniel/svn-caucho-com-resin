@@ -32,7 +32,7 @@ $g_label_width = 180;
 
 function stat_graph_regexp($canvas, $width, $height,
                            $start, $end, $pattern, $label = "bottom",
-                           $mbean_server = null)
+                           $mbean_server = null, $ticks = null)
 {
   global $g_mbean_server;
 
@@ -56,11 +56,11 @@ function stat_graph_regexp($canvas, $width, $height,
   sort($names);
 
   stat_graph($canvas, $width, $height, $start, $end, $names,
-             $label, $mbean_server);
+             $label, $mbean_server, $ticks);
 }
 
 function stat_graph($canvas, $width, $height, $start, $end, $names,
-                    $legend = "bottom", $mbean_server = null)
+                    $legend = "bottom", $mbean_server = null, $ticks = null)
 {
   global $g_mbean_server;
 
@@ -133,20 +133,40 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
 
     $i++;
   }
+  
+  $labelWidth = 40;
+  
+  echo "ticks = [];\n"
+  if ($ticks) {
+	  $i = 0;
+	  foreach ($ticks as $tick) {
+	  	echo "ticks[$i] = '" . $tick . "';\n";
+	  	$i++;
+	  }
+	  $labelWidth = 60;
+  }
 
   echo '$.plot($("#' . $canvas . '"), graphs,';
   echo '{ ';
   echo 'xaxis: { mode:"time" }, ';
-  echo "yaxis: {labelWidth:40,tickFormatter: function(val, axis) {\n";
-  echo "  if (val >= 1e9)\n";
-  echo "    return (val / 1e9).toFixed(1) + 'G';\n";
-  echo "  if (val >= 1e6)\n";
-  echo "    return (val / 1e6).toFixed(1) + 'M';\n";
-  echo "  if (val >= 1e3)\n";
-  echo "    return (val / 1e3).toFixed(1) + 'k';\n";
-  echo "  return val.toFixed(axis.tickDecimals);\n";
-  echo "  }";
-  echo "}, \n";
+  echo "yaxis: {labelWidth:$labelWidth,tickFormatter: function(val, axis) {\n";
+  echo "  if (ticks.length > 0) {\n";
+  echo "    if (val >= ticks.length)\n";
+  echo "      return '';\n";
+  echo "    if (val % 1 > 0)\n";
+  echo "      return '';\n";
+  echo "    return ticks[val];\n";
+  echo "  } else { \n"
+  echo "    if (val >= 1e9)\n";
+  echo "      return (val / 1e9).toFixed(1) + 'G';\n";
+  echo "    if (val >= 1e6)\n";
+  echo "      return (val / 1e6).toFixed(1) + 'M';\n";
+  echo "    if (val >= 1e3)\n";
+  echo "      return (val / 1e3).toFixed(1) + 'k';\n";
+  echo "    return val.toFixed(axis.tickDecimals);\n";
+  echo "  }\n";
+  echo "}\n";
+  echo "},\n";
   echo 'series: { lines: { lineWidth:1 }}, ';
   echo 'legend: { container: "#' . $canvas . '-legend" }, ';
   echo '});' . "\n";

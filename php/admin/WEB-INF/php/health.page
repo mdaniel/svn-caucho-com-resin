@@ -67,7 +67,7 @@ function display_health_status($s)
       
   $is_health = $health;
 
-  $message = $health->Message;
+  $message = $health->Status;
 
   echo "<table border='0'>";
   echo "<tr><th colspan='3'>";
@@ -83,18 +83,11 @@ function display_health_status($s)
   $label = $si . " - " . $s->Name;
 
   if (! $health) {
-    print_fail("&nbsp;$label");
+    print_fail($label);
     $message = " : cannot connect to server $label";
   }
-  else if ($health->Status == "OK") {
-    print_ok("");
-    echo "&nbsp;$label";
-  }
-  else if ($health->Status == "CRITICAL" || $health->Status == "FATAL") {
-    print_fail("&nbsp;$label");
-  }
   else {
-    echo $label;
+    print_health($health->Status, $label);
   }
 
   echo "</td><td>";
@@ -111,15 +104,7 @@ function display_health_status($s)
       echo "</td>";
       echo "<td>";
 
-      if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
-        print_fail("&nbsp;" . $s_health->Name);
-      }
-      else if ($s_health->Status == "OK") {
-        print_ok(""); echo "&nbsp;" . $s_health->Name;
-      }
-      else {
-        print_warn("&nbsp;" . $s_health->Name);
-      }
+      print_health($s_health->Status, $s_health->Name);
 
       echo "</td>";
       echo "<td>";
@@ -161,50 +146,15 @@ function display_health_status_graph($s)
   if (! $health) {
     echo "n/a " . $label;
   }
-  else if ($health->Status == "OK") {
-    print_ok("");
-    echo " $label";
-  }
-  else if ($health->Status == "CRITICAL" || $health->Status == "FATAL") {
-    print_fail(" $label");
-  }
   else {
-    echo $label;
+  	print_health($health->Status, $label);
   }
 
   echo "</td><td>";
 
-  echo $health->Message;
+  echo $health->Status;
 
   echo "</td></tr>";
-
-  /*
-  if ($mbean_server && $health) {
-    $health_list = $mbean_server->query("resin:type=HealthCheck,*");
-    foreach ($health_list as $s_health) {
-      echo "<tr class='toggle-sw_health_${si}'>";
-      echo "<td>";
-      echo "</td>";
-      echo "<td>";
-
-      if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
-        print_fail(" " . $s_health->Name);
-      }
-      else if ($s_health->Status == "OK") {
-        print_ok(""); echo " " . $s_health->Name;
-      }
-      else {
-        print_warn(" " . $s_health->Name);
-      }
-
-      echo "</td>";
-      echo "<td>";
-      echo $s_health->Message;
-      echo "</td>";
-      echo "</tr>";
-    }
-  }
-*/
 
   echo "<tr class='toggle-sw_health_${si}'>";
   echo "<td colspan='3' id='health_${si}-legend'>";
@@ -228,9 +178,14 @@ function display_health_graph($mbean_server, $si)
 
     $height = 100;
     $width = 500;
-
+    
+    $health_system = $mbean_server->lookup("resin:type=HealthSystem");
+    if ($health_system) {
+			$status_names = $health_system->HealthStatusNames;
+    }
+    
     stat_graph_regexp("health_${si}", $width, $height, $start, $end,
-                      "/^$si\|Resin\|Health/", "none", $mbean_server);
+                      "/^$si\|Resin\|Health/", "none", $mbean_server, $status_names);
   }
 }
 
@@ -346,20 +301,13 @@ function display_heartbeat()
       if ($s_health) {
         echo "<span id='sw_${server}' class='switch'></span>";
       }
-      echo "</td><td>";
+      echo "</td><td nowrap>";
 
       if (! $s_health) {
         echo "n/a";
       }
-      else if ($s_health->Status == "OK") {
-        print_ok("");
-        echo " health " . $s_health->Status;
-      }
-      else if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
-        print_fail("health " . $s_health->Status);
-      }
       else {
-        echo  "health " . $s_health->Status;
+      	print_health($s_health->Status, "Health " . $s_health->Status);
       }
       
       echo "</td>";
@@ -382,16 +330,9 @@ function display_heartbeat()
           $msg = $s_health->Message;
 
           echo "<tr><td>";
-          if ($s_health->Status == "OK") {
-            print_ok("");
-            echo $name;
-          }
-          else if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
-            print_fail($name);
-          }
-          else {
-            print_warn($name);
-          }
+          
+          print_health($s_health->Status, $s_health->Name);
+          
           echo "</td>";
           echo "<td>";
           echo $msg;

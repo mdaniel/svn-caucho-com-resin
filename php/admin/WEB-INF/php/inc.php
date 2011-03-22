@@ -1169,17 +1169,22 @@ function server_find_by_index($g_mbean_server, $index)
     
 function print_ok($message)
 {
-  echo "<span style='color:#00c000'>&#x2713;$message</span>";
+  echo "<span style='color:#00c000'>&#x2713;</span>&nbsp;$message";
 }
     
 function print_fail($message)
 {
-  echo "<span style='color:#c00000'>&#x2717;$message</span>";
+  echo "<span style='color:#c00000'>&#x2717;&nbsp;$message</span>";
 }
     
 function print_warn($message)
 {
-  echo "<span style='color:#cc8811'>?$message</span>";
+  echo "<span style='color:#cc8811'>!&nbsp;$message</span>";
+}
+
+function print_unknown($message)
+{
+  echo "<span style='color:#909090'>?&nbsp;$message</span>";
 }
 
 function print_check_or_x($status)
@@ -1189,6 +1194,25 @@ function print_check_or_x($status)
   }
   else {
     echo "<span style='color:#c00000'>&#x2717;</span>";
+  }
+}
+
+function print_health($status, $message)
+{
+  if ($status == "OK") {
+    print_ok($message);
+  }
+  else if ($status == "CRITICAL" || $status == "FATAL") {
+    print_fail($message);
+  }
+  else if ($status == "WARNING") {
+    print_warn($message);
+  }
+  else if ($status == "UNKNOWN") {
+    print_unknown($message);
+  }
+  else {
+    echo $message;
   }
 }
 

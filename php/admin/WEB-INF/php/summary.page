@@ -644,17 +644,12 @@ function display_health_status()
   if (! $health) {
     echo "n/a";
   }
-  else if ($health->Status == "OK") {
-    print_ok("");
-    echo " health " . $health->Status;
-  }
-  else if ($health->Status == "CRITICAL" || $health->Status == "FATAL") {
-    print_fail("health " . $health->Status);
+  if (! $health) {
+    echo "n/a";
   }
   else {
-    echo  "health " . $health->Status;
+    print_health($health->Status, "Health " . $health->Status);
   }
-
   echo "</td></tr>";
 
   if ($g_mbean_server && $health) {
@@ -665,16 +660,8 @@ function display_health_status()
       echo "</td>";
       echo "<td>";
 
-      if ($s_health->Status == "CRITICAL" || $s_health->Status == "FATAL") {
-        print_fail(" " . $s_health->Name);
-      }
-      else if ($s_health->Status == "OK") {
-        print_ok(""); echo " " . $s_health->Name;
-      }
-      else {
-        print_warn(" " . $s_health->Name);
-      }
-
+      print_health($s_health->Status, "Health " . $s_health->Name);
+      
       echo "</td>";
       echo "<td>";
       echo $s_health->Message;
@@ -704,8 +691,13 @@ function display_health_graph()
     $height = 150;
     $width = 400;
 
+    $health_system = $mbean_server->lookup("resin:type=HealthSystem");
+    if ($health_system) {
+			$status_names = $health_system->HealthStatusNames;
+    }
+    
     stat_graph_regexp("health", $width, $height, $start, $end,
-                      "/^$si\|Resin\|Health/", "right");
+                      "/^$si\|Resin\|Health/", "right", $mbean_server, $status_names);
   }
 }
 
