@@ -396,7 +396,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
-    mnodeValue = putLocalValue(entry, version + 1,
+    mnodeValue = putLocalValue(entry, 
+                               getNewVersion(version),
                                valueHash, value, cacheKey,
                                config.getFlags(),
                                config.getExpireTimeout(),
@@ -439,8 +440,10 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     idleTimeout = idleTimeout * 5L / 4;
 
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
+    
+    long newVersion = getNewVersion(version);
 
-    mnodeValue = putLocalValue(entry, version + 1,
+    mnodeValue = putLocalValue(entry, newVersion,
                                valueHash, null, cacheHash,
                                config.getFlags(),
                                config.getExpireTimeout(),
@@ -469,7 +472,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                             ? mnodeValue.getValueHashKey()
                             : null);
     long oldVersion = mnodeValue != null ? mnodeValue.getVersion() : 0;
-    
+
     if (version <= oldVersion)
       return false;
 
@@ -485,8 +488,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     idleTimeout = idleTimeout * 5L / 4;
 
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
-
-    mnodeValue = putLocalValue(entry, version + 1,
+    
+    mnodeValue = putLocalValue(entry, getNewVersion(version),
                                valueHash, null, cacheHash,
                                config.getFlags(),
                                config.getExpireTimeout(),
@@ -494,7 +497,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                config.getLeaseTimeout(),
                                config.getLocalReadTimeout(),
                                leaseOwner);
-
+    
     if (mnodeValue == null)
       return false;
 
@@ -725,7 +728,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                              : config.getLocalReadTimeout());
     int leaseOwner = (mnodeValue != null ? mnodeValue.getLeaseOwner() : -1);
 
-    mnodeValue = putLocalValue(entry, version + 1, null, null, cacheKey,
+    mnodeValue = putLocalValue(entry, 
+                               getNewVersion(version),
+                               null, null, cacheKey,
                                flags,
                                expireTimeout, idleTimeout,
                                leaseTimeout, localReadTimeout,
@@ -760,7 +765,11 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     long localReadTimeout = mnodeValue != null ? mnodeValue.getLocalReadTimeout() : -1;
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
-    mnodeValue = putLocalValue(entry, version + 1, null, null, cacheKey,
+    mnodeValue = putLocalValue(entry,
+                               getNewVersion(version),
+                               null, 
+                               null, 
+                               cacheKey,
                                flags,
                                expireTimeout, idleTimeout,
                                leaseTimeout, localReadTimeout, leaseOwner);
@@ -1054,6 +1063,18 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     } finally {
       out.close();
     }
+  }
+  
+  private long getNewVersion(long version)
+  {
+    long newVersion = version + 1;
+
+    long now = Alarm.getCurrentTime();
+  
+    if (newVersion < now)
+      return now;
+    else
+      return newVersion;
   }
 
   /**

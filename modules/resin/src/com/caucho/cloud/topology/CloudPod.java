@@ -363,27 +363,38 @@ public class CloudPod
   
   public CloudServer removeDynamicServer(String name)
   {
+    CloudServer server = findServer(name);
+    
+    if (server != null)
+      return removeDynamicServer(server.getIndex());
+    
+    return null;
+  }
+  
+  public CloudServer removeDynamicServer(int index)
+  {
     CloudServer removedServer = null;
     
     synchronized (_serverList) {
-      for (int i = 0; i < _serverList.size(); i++) {
-        CloudServer server = _serverList.get(i);
-        
-        if (name.equals(server.getId())) {
-          
-          if (server.isStatic())
-            throw new IllegalStateException(L.l("{0} must be dynamic for removeDynamicServer",
-                                                server));
-          
-          // _serverList.set(i, null);
-          
-          removedServer = server;
-        }
-      }
+      if (_serverList.size() <= index)
+        return null;
       
+      CloudServer server = _serverList.get(index);
+        
+      if (server.isStatic())
+        throw new IllegalStateException(L.l("{0} must be dynamic for removeDynamicServer",
+                                            server));
+          
+      _serverList.set(index, null);
+          
+      removedServer = server;
+
       while (_serverList.size() > 0
              && _serverList.get(_serverList.size() - 1) == null) {
         _serverList.remove(_serverList.size() - 1);
+        
+        if (_serverList.size() <= _maxIndex)
+          _maxIndex = _serverList.size() - 1; 
       }
     
       _servers = _serverList.toArray();

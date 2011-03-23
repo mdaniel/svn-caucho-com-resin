@@ -148,6 +148,8 @@ public final class ClusterServer {
       _isRemotePod = true;
       _isHeartbeatActive.set(true);
     }
+    
+    _stateTimestamp.set(Alarm.getCurrentTime());
 
     StringBuilder sb = new StringBuilder();
 
