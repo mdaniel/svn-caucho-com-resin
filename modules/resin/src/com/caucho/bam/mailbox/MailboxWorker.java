@@ -69,7 +69,11 @@ public class MailboxWorker extends TaskWorker
         if (log.isLoggable(Level.FINEST))
           log.finest(this + " dequeue " + packet);
 
-        _queue.dispatch(packet);
+        try {
+          _queue.dispatch(packet);
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     
       return -1;
