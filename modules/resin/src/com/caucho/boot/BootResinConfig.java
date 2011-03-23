@@ -199,6 +199,19 @@ public class BootResinConfig implements EnvironmentBean
   /**
    * Finds a server.
    */
+  public WatchdogClient findShutdownClient()
+  {
+    for (WatchdogClient client : _watchdogMap.values()) {
+      if (client != null)
+        return client;
+    }
+    
+    return null;
+  }
+
+  /**
+   * Finds a server.
+   */
   public void addClient(WatchdogClient client)
   {
     _watchdogMap.put(client.getId(), client);
@@ -244,7 +257,7 @@ public class BootResinConfig implements EnvironmentBean
     }
 
     WatchdogConfig config = cluster.createServer();
-    config.setId(address + "-" + port);
+    config.setId(args.getDynamicServerId());
     config.setDynamic(true);
     config.setAddress(address);
     config.setPort(port);

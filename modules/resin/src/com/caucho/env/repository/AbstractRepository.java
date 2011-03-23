@@ -83,6 +83,11 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   {
     checkForUpdate();
   }
+  
+  public void stop()
+  {
+    
+  }
 
   /**
    * Returns the .git repository tag

@@ -11,7 +11,13 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.16 - snapshot">
+<s2 title="4.0.17 - snapshot">
+<ul>
+<li>cluster: add -join-cluster for dynamic server support</li>
+</ul>
+</s2>
+
+<s2 title="4.0.16 - Mar 17, 2011">
 <ul>
 <li>rewrite-dispatch: normalization of rewrite order so rewrites always occur before filters</li>
 <li>server: add server information to 404 error pages (#4433, rep by Alex Sharaz)</li>

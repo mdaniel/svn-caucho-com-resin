@@ -35,6 +35,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
+import com.caucho.bam.BamException;
+import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.packet.Message;
 import com.caucho.bam.packet.MessageError;
@@ -179,6 +181,16 @@ public class MultiworkerMailbox implements Mailbox, Closeable
                        String from,
                        Serializable query)
   {
+    if (! _lifecycle.isActive()) {
+      BamException exn = new RemoteConnectionFailedException(L.l("{0} is closed",
+                                                                 this));
+      exn.fillInStackTrace();
+      
+      getBroker().queryError(id, from, to, query,
+                             BamError.create(exn));
+      return;
+    }
+
     enqueue(new Query(id, to, from, query));
   }
 

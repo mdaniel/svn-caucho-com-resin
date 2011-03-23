@@ -53,7 +53,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   private final AtomicBoolean _isReadUpdate = new AtomicBoolean();
 
   private final AtomicReference<MnodeValue> _mnodeValue
-    = new AtomicReference<MnodeValue>();
+    = new AtomicReference<MnodeValue>(MnodeValue.NULL);
 
   public DistCacheEntry(Object key,
                         HashKey keyHash,
@@ -112,12 +112,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
    */
   public final HashKey getCacheHash()
   {
-    MnodeValue value = getMnodeValue();
-
-    if (value != null)
-      return value.getCacheHashKey();
-    else
-      return null;
+    return getMnodeValue().getCacheHashKey();
   }
 
   /**
@@ -227,6 +222,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
     return _mnodeValue.compareAndSet(oldMnodeValue, mnodeValue);
   }
 
+  @Override
   public HashKey getValueHashKey()
   {
     return getMnodeValue().getValueHashKey();

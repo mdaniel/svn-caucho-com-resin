@@ -175,18 +175,18 @@ class WatchdogManager implements AlarmListener {
     readConfig(_args);
     
     WatchdogChild server = null;
+    
+    String serverId = _args.getServerId();
 
     if (_args.isDynamicServer()) {
-      String serverId = _args.getDynamicAddress() + "-"
-                        + _args.getDynamicPort();
-      server = _watchdogMap.get(serverId);
+      serverId = _args.getDynamicServerId();
     }
-    else
-      server = _watchdogMap.get(_args.getServerId());
+      
+    server = _watchdogMap.get(_args.getServerId());
 
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
-                                            _args.getServerId()));
+                                            serverId));
     
     JniBoot boot = new JniBoot();
     Path logDirectory = getLogDirectory();
@@ -426,7 +426,7 @@ class WatchdogManager implements AlarmListener {
       String serverId = args.getServerId();
 
       if (args.isDynamicServer())
-        serverId = args.getDynamicAddress() + "-" + args.getDynamicPort();
+        serverId = args.getDynamicServerId();
 
       WatchdogChild watchdog = _watchdogMap.get(serverId);
 
@@ -552,7 +552,7 @@ class WatchdogManager implements AlarmListener {
       }
 
       server = cluster.createServer();
-      serverId = address + "-" + port;
+      serverId = args.getDynamicServerId();
       server.setId(serverId);
       server.setAddress(address);
       server.setPort(port);

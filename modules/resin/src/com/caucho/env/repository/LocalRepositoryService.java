@@ -92,4 +92,10 @@ public class LocalRepositoryService extends AbstractResinSubSystem
     
     _admin = new LocalRepositoryAdmin(this);
   }
+  
+  @Override
+  public void stop()
+  {
+    _fileRepository.stop();
+  }
 }

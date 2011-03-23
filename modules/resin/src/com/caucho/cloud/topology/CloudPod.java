@@ -392,11 +392,11 @@ public class CloudPod
       while (_serverList.size() > 0
              && _serverList.get(_serverList.size() - 1) == null) {
         _serverList.remove(_serverList.size() - 1);
-        
-        if (_serverList.size() <= _maxIndex)
-          _maxIndex = _serverList.size() - 1; 
       }
-    
+      
+      if (_serverList.size() <= _maxIndex)
+        _maxIndex = _serverList.size() - 1; 
+      
       _servers = _serverList.toArray();
     }
 

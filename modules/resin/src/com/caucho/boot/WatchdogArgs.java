@@ -42,6 +42,7 @@ import javax.management.ObjectName;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -53,7 +54,6 @@ class WatchdogArgs
   private static final Logger log
     = Logger.getLogger(WatchdogArgs.class.getName());
 
-  private String []_rawArgv;
   private Path _javaHome;
   private Path _resinHome;
   private Path _rootDirectory;
@@ -85,8 +85,6 @@ class WatchdogArgs
     if (isTop)
       setLogLevel(logLevel);
 
-    _rawArgv = argv;
-    
     _resinHome = calculateResinHome();
     _rootDirectory = calculateResinRoot(_resinHome);
 
@@ -153,12 +151,31 @@ class WatchdogArgs
 
   String getDynamicAddress()
   {
-    return _dynamicAddress;
+    if (_dynamicAddress != null)
+      return _dynamicAddress;
+    else {
+      try {
+        return InetAddress.getLocalHost().getHostAddress();
+      } catch (Exception e) {
+        return null;
+      }
+    }
   }
 
   int getDynamicPort()
   {
-    return _dynamicPort;
+    if (_dynamicPort > 0)
+      return _dynamicPort;
+    else
+      return 6830;
+  }
+  
+  String getDynamicServerId()
+  {
+    if (_serverId != null)
+      return _serverId;
+    else
+      return "dyn-" + getDynamicAddress() + "-" + getDynamicPort();
   }
 
   boolean isVerbose()
@@ -315,19 +332,10 @@ class WatchdogArgs
         resinConf = argv[i + 1];
         i++;
       }
-      else if ("-dynamic-server".equals(arg)
-               || "--dynamic-server".equals(arg)) {
-        String []str = argv[i + 1].split(":");
-
-        if (str.length != 3) {
-          System.out.println(L().l("-dynamic server requires 'cluster:address:port' at '{0}'", argv[i + 1]));
-          System.exit(1);
-        }
-
+      else if ("-join-cluster".equals(arg)
+               || "--join-cluster".equals(arg)) {
         _isDynamicServer = true;
-        _dynamicCluster = str[0];
-        _dynamicAddress = str[1];
-        _dynamicPort = Integer.parseInt(str[2]);
+        _dynamicCluster = argv[i + 1];
 
         i++;
       }

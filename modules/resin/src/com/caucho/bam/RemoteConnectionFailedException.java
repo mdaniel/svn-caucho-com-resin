@@ -49,8 +49,6 @@ public class RemoteConnectionFailedException
   public RemoteConnectionFailedException(Throwable e)
   {
     super(e.toString(), e);
-    
-    Thread.dumpStack();
   }
 
   public RemoteConnectionFailedException(String msg, Throwable e)
@@ -82,7 +80,7 @@ public class RemoteConnectionFailedException
       return error;
 
     return new BamError(BamError.TYPE_CANCEL,
-                          BamError.REMOTE_CONNECTION_FAILED,
-                          getMessage());
+                        BamError.REMOTE_CONNECTION_FAILED,
+                        getMessage());
   }
 }

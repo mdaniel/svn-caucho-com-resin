@@ -435,6 +435,10 @@ public class Resin
           setRootDirectory(_args.getRootDirectory());
         
         _pingSocket = _args.getPingSocket();
+        
+        setJoinCluster(_args.getJoinCluster());
+        setServerAddress(_args.getServerAddress());
+        setServerPort(_args.getServerPort());
       }
       
       if (getRootDirectory() == null)

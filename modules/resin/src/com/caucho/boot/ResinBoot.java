@@ -157,6 +157,10 @@ public class ResinBoot {
     else {
       _client = bootManager.findClient(_args.getServerId());
     }
+    
+    if (_client == null && _args.isShutdown()) {
+      _client = bootManager.findShutdownClient();
+    }
 
     if (_client == null) {
       throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",

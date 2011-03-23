@@ -430,12 +430,20 @@ public class Server
    */
   public ActorSender createAdminClient(String uid)
   {
+    return createAdminClient(uid, null);
+  }
+  
+  /**
+   * Creates a bam client to the admin.
+   */
+  public ActorSender createAdminClient(String uid, String resource)
+  {
     String address = uid + "@" + getAdminBroker().getAddress();
 
     NullMessageStream stream = new NullMessageStream(address, getAdminBroker());
     
     SimpleActorSender sender 
-      = new SimpleActorSender(stream, getAdminBroker(), address, null);
+      = new SimpleActorSender(stream, getAdminBroker(), address, resource);
     
     return sender;
   }

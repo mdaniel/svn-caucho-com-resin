@@ -61,7 +61,7 @@ class WatchdogClient
 
   private static final long BAM_TIMEOUT = 3 * 60 * 1000; //3 minutes
 
-  public static final String WATCHDOG_address = "watchdog@admin.resin.caucho";
+  public static final String WATCHDOG_ADDRESS = "watchdog@admin.resin.caucho";
 
   private final BootResinConfig _bootManager;
   private String _id = "";
@@ -199,7 +199,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_address, new WatchdogStatusQuery());
+        conn.query(WATCHDOG_ADDRESS, new WatchdogStatusQuery());
 
       if (status.isSuccess())
         return status.getMessage();
@@ -245,7 +245,7 @@ class WatchdogClient
       conn = getConnection();
 
       ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_address, new WatchdogStartQuery(argv), BAM_TIMEOUT);
+        conn.query(WATCHDOG_ADDRESS, new WatchdogStartQuery(argv), BAM_TIMEOUT);
 
       if (status.isSuccess())
         return;
@@ -270,7 +270,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_address, new WatchdogStopQuery(getId()), BAM_TIMEOUT);
+        conn.query(WATCHDOG_ADDRESS, new WatchdogStopQuery(getId()), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog stop failed because of '{1}'",
@@ -289,7 +289,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_address, new WatchdogKillQuery(getId()), BAM_TIMEOUT);
+        conn.query(WATCHDOG_ADDRESS, new WatchdogKillQuery(getId()), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog kill failed because of '{1}'",
@@ -326,7 +326,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_address, new WatchdogShutdownQuery(), BAM_TIMEOUT);
+        conn.query(WATCHDOG_ADDRESS, new WatchdogShutdownQuery(), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog shutdown failed because of '{1}'",

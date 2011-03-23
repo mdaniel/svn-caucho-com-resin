@@ -115,6 +115,12 @@ public class RepositoryService extends AbstractResinSubSystem
   }
   
   @Override
+  public void stop()
+  {
+    _repository.stop();
+  }
+  
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _repository + "]";

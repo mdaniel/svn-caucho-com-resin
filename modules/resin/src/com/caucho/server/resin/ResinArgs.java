@@ -63,7 +63,9 @@ class ResinArgs
   
   private Socket _pingSocket;
   
-  private DynamicServer _dynServer;
+  private String _joinCluster;
+  private String _serverAddress;
+  private int _serverPort;
 
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
@@ -198,9 +200,19 @@ class ResinArgs
     return _stage;
   }
   
-  public DynamicServer getDynamicServer()
+  public String getJoinCluster()
   {
-    return _dynServer;
+    return _joinCluster;
+  }
+  
+  public String getServerAddress()
+  {
+    return _serverAddress;
+  }
+  
+  public int getServerPort()
+  {
+    return _serverPort;
   }
   
   public boolean isDumpHeapOnExit()
@@ -265,32 +277,13 @@ class ResinArgs
         i += 1;
       }
       else if (i + 1 < len
-               && (argv[i].equals("-dynamic-server")
-                   || argv[i].equals("--dynamic-server"))) {
-        String []values = argv[i + 1].split(":");
-
-        if (values.length == 3) {
-          String clusterId = values[0];
-          String address = values[1];
-          int port = Integer.parseInt(values[2]);
-
-          _dynServer = new DynamicServer(clusterId, address, port);
-        } else {
-          System.out.println("-dynamic-server requires 'cluster:address:port' at '" + argv[i + 1] + "'");
-
-          System.exit(66);
-        }
-
-        i += 2;
-      }
-      else if (i + 1 < len
-               && (argv[i].equals("-server")
-                   || argv[i].equals("--server"))) {
+          && (argv[i].equals("-server")
+              || argv[i].equals("--server"))) {
         _serverId = argv[i + 1];
-        
+   
         if (_serverId.equals(""))
           _serverId = "default";
-        
+   
         i += 2;
       }
       else if (argv[i].equals("-resin-home")
@@ -313,6 +306,27 @@ class ResinArgs
         JniCauchoSystem.create().initJniBackground();
         // windows service
         i += 1;
+      }
+      else if (i + 1 < len
+          && (argv[i].equals("-join-cluster")
+              || argv[i].equals("--join-cluster"))) {
+        _joinCluster = argv[i + 1];
+   
+        i += 2;
+      }
+      else if (i + 1 < len
+          && (argv[i].equals("-server-address")
+              || argv[i].equals("--server-address"))) {
+        _serverAddress = argv[i + 1];
+   
+        i += 2;
+      }
+      else if (i + 1 < len
+          && (argv[i].equals("-server-port")
+              || argv[i].equals("--server-port"))) {
+        _serverPort= Integer.parseInt(argv[i + 1]);
+   
+        i += 2;
       }
       else if (argv[i].equals("-version")
                || argv[i].equals("--version")) {

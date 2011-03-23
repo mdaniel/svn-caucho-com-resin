@@ -489,7 +489,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
     
-    mnodeValue = putLocalValue(entry, getNewVersion(version),
+    mnodeValue = putLocalValue(entry, version,
                                valueHash, null, cacheHash,
                                config.getFlags(),
                                config.getExpireTimeout(),

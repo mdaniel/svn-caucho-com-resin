@@ -271,6 +271,12 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   public void addWatchdogPort(int port)
   {
   }
+  
+  @Configurable
+  public void setDynamicServerEnable(boolean isEnable)
+  {
+    
+  }
 
   /**
    * Sets the minimum free memory after a GC
