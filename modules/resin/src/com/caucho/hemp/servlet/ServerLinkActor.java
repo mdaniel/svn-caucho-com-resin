@@ -100,7 +100,7 @@ public class ServerLinkActor extends SimpleActor
   {
     String uid = query.getUid();
     Object credentials = query.getCredentials();
-  
+
     try {
       _authManager.authenticate(query.getUid(), credentials, ipAddress);
     } catch (BamException e) {

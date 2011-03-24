@@ -192,7 +192,7 @@ public class HmtpRequest extends AbstractProtocolConnection
     if (isUnidir) {
       _proxyBroker = new ServerGatewayBroker(broker,
                                              _clientManager, 
-                                               _linkActor.getActorStream());
+                                             _linkActor.getActorStream());
     }
     else {
       _proxyBroker = new ServerProxyBroker(broker,
@@ -210,7 +210,7 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     do {
       Broker broker = _proxyBroker;
-      
+
       if (! in.readPacket(broker)) {
         return false;
       }

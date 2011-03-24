@@ -31,6 +31,7 @@ package com.caucho.server.resin;
 
 import java.util.ArrayList;
 
+import com.caucho.cloud.security.SecurityService;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -106,6 +107,16 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   public void addClusterDefault(ContainerProgram program)
   {
     _clusterDefaults.add(program);
+  }
+  
+  /**
+   * Sets the resin system key
+   */
+  @Configurable
+  public void setResinSystemAuthKey(String key)
+  {
+    SecurityService security = SecurityService.getCurrent();
+    security.setSignatureSecret(key);
   }
 
   @Configurable
