@@ -47,22 +47,27 @@ import com.caucho.vfs.Path;
  * The web beans container for a given environment.
  */
 class InjectScanManager implements ScanListener {
-  private static final Logger log = Logger.getLogger(InjectScanManager.class
-      .getName());
+  private static final Logger log
+    = Logger.getLogger(InjectScanManager.class.getName());
 
   private InjectManager _injectManager;
 
-  private final HashMap<Path, ScanRootContext> _scanRootMap = new HashMap<Path, ScanRootContext>();
+  private final HashMap<Path, ScanRootContext> _scanRootMap
+    = new HashMap<Path, ScanRootContext>();
 
-  private final ArrayList<ScanRootContext> _pendingScanRootList = new ArrayList<ScanRootContext>();
+  private final ArrayList<ScanRootContext> _pendingScanRootList
+    = new ArrayList<ScanRootContext>();
 
-  private final ConcurrentHashMap<String, InjectScanClass> _scanClassMap = new ConcurrentHashMap<String, InjectScanClass>();
+  private final ConcurrentHashMap<String, InjectScanClass> _scanClassMap
+    = new ConcurrentHashMap<String, InjectScanClass>();
 
-  private final ConcurrentHashMap<NameKey, AnnType> _annotationMap = new ConcurrentHashMap<NameKey, AnnType>();
+  private final ConcurrentHashMap<NameKey, AnnType> _annotationMap
+    = new ConcurrentHashMap<NameKey, AnnType>();
 
   private boolean _isCustomExtension;
 
-  private ArrayList<InjectScanClass> _pendingScanClassList = new ArrayList<InjectScanClass>();
+  private ArrayList<InjectScanClass> _pendingScanClassList
+    = new ArrayList<InjectScanClass>();
 
   InjectScanManager(InjectManager injectManager)
   {
@@ -98,8 +103,8 @@ class InjectScanManager implements ScanListener {
 
   public ArrayList<ScanRootContext> getPendingScanRootList()
   {
-    ArrayList<ScanRootContext> contextList = new ArrayList<ScanRootContext>(
-        _pendingScanRootList);
+    ArrayList<ScanRootContext> contextList
+      = new ArrayList<ScanRootContext>(_pendingScanRootList);
 
     _pendingScanRootList.clear();
 
@@ -113,7 +118,7 @@ class InjectScanManager implements ScanListener {
 
   public void addDiscoveredClass(InjectScanClass injectScanClass)
   {
-    if (!_pendingScanClassList.contains(injectScanClass)) {
+    if (! _pendingScanClassList.contains(injectScanClass)) {
       _pendingScanClassList.add(injectScanClass);
     }
   }
@@ -123,8 +128,8 @@ class InjectScanManager implements ScanListener {
    */
   public void discover()
   {
-    ArrayList<InjectScanClass> pendingScanClassList = new ArrayList<InjectScanClass>(
-        _pendingScanClassList);
+    ArrayList<InjectScanClass> pendingScanClassList
+      = new ArrayList<InjectScanClass>(_pendingScanClassList);
 
     _pendingScanClassList.clear();
 
@@ -157,12 +162,12 @@ class InjectScanManager implements ScanListener {
       scanRoot = scanRoot.lookup(packageRoot.replace('.', '/'));
     }
 
-    if (beansXmlOverride != null) {
-      if ((packageRoot != null) && !scanRoot.lookup("beans.xml").canRead()) {
+    if (true || beansXmlOverride != null) {
+      if ((packageRoot != null) && ! scanRoot.lookup("beans.xml").canRead()) {
         return false;
-      } else if (!(root.lookup("META-INF/beans.xml").canRead() || (root
-          .getFullPath().endsWith("WEB-INF/classes/") && root.lookup(
-          "../beans.xml").canRead()))) {
+      } else if (!(root.lookup("META-INF/beans.xml").canRead() 
+                 || (root.getFullPath().endsWith("WEB-INF/classes/")
+                     && root.lookup("../beans.xml").canRead()))) {
         return false;
       }
     }
@@ -188,8 +193,10 @@ class InjectScanManager implements ScanListener {
    * Checks if the class can be a simple class
    */
   @Override
-  public ScanClass scanClass(Path root, String packageRoot, String className,
-      int modifiers)
+  public ScanClass scanClass(Path root, 
+                             String packageRoot,
+                             String className,
+                             int modifiers)
   {
     // ioc/0j0k - package private allowed
 
@@ -229,7 +236,7 @@ class InjectScanManager implements ScanListener {
    * Loads an annotation for scanning.
    */
   public AnnType loadAnnotation(char[] buffer, int offset, int length)
-      throws ClassNotFoundException
+    throws ClassNotFoundException
   {
     NameKey key = new NameKey(buffer, offset, length);
 
