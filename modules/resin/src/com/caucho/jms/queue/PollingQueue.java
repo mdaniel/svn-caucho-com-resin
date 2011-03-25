@@ -65,14 +65,12 @@ abstract public class PollingQueue<E> extends AbstractQueue<E>
     _pollPeriod = period.getPeriod();
   }
 
-  @Override
   protected void startPoll()
   {
     _isPolling = true;
     _alarm.queue(_pollPeriod);
   }
 
-  @Override
   protected void stopPoll()
   {
     _isPolling = false;
