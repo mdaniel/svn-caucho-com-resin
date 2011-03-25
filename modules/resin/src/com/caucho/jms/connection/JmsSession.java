@@ -1299,7 +1299,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     void commit()
       throws JMSException
     {
-        _queue.acknowledge(_message.getJMSMessageID());
+      _queue.acknowledge(_message.getJMSMessageID());
     }
 
     @Override

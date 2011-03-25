@@ -317,7 +317,7 @@ public class SelectorParser  {
       
       // jms/21ei
       if (peekToken() != '-' && peekToken() != '+')
-        return new UnarySelector('-', parseTerm(true));
+	  return parseTerm(true);
       else
         return new UnarySelector('-', parseUnary());
       
