@@ -32,6 +32,7 @@ package com.caucho.jms.queue;
 /**
  * A message exception.
  */
+@SuppressWarnings("serial")
 public class MessageException extends RuntimeException {
   /**
    * Null message exception

@@ -159,11 +159,13 @@ abstract public class AbstractDestination<E>
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  /*
   public E receive(long timeout)
     throws MessageException
   {
     return null;
   }
+  */
 
   /**
    * Returns true if the queue has at least one message available

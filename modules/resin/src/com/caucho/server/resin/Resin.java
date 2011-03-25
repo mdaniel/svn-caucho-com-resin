@@ -1094,10 +1094,6 @@ public class Resin
         configureRoot(bootResin);
         
         configureServer();
-        
-        if (! isWatchdog()) {
-          addServices();
-        }
       }
       
     } catch (Exception e) {
@@ -1246,7 +1242,7 @@ public class Resin
     DeployControllerService.createAndAddService();
     
     initRepository();
-    
+   
     _servletContainer = createServer(networkService);
 
     if (_args != null && _args.getStage() != null)
@@ -1254,6 +1250,10 @@ public class Resin
     
     NetworkListenSystem.createAndAddService(_selfServer);
     
+    if (! isWatchdog()) {
+      addServices();
+    }
+     
     ServletService.createAndAddService(_servletContainer);
     
     ResinConfig resinConfig = new ResinConfig(this);

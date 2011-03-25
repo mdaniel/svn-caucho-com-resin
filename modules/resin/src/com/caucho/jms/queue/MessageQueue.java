@@ -12,7 +12,7 @@ public interface MessageQueue<E>
   public void send(String msgId,
                    E msg,
                    int priority,
-                   long expires)
+                   long expireTime)
     throws MessageException;
   
   /**
@@ -21,6 +21,14 @@ public interface MessageQueue<E>
    * or the timeout occurs.
    */
   public QueueEntry<E> receiveEntry(long expireTime, boolean isAutoAck)
+    throws MessageException;
+  
+  /**
+   * Synchronous/blocking message receiving.
+   * Listen for a message from the queue, until a message is received
+   * or the time expires occurs.
+   */
+  public E receive(long expireTime, boolean isAutoAck)
     throws MessageException;
   
   /**

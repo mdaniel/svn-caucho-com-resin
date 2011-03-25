@@ -314,7 +314,12 @@ public class SelectorParser  {
       return new UnarySelector(token, parseUnary());
     case '-':
       scanToken();
-      return new UnarySelector('-', parseUnary());
+      
+      // jms/21ei
+      if (peekToken() != '-' && peekToken() != '+')
+        return new UnarySelector('-', parseTerm(true));
+      else
+        return new UnarySelector('-', parseUnary());
       
     default:
       return parseTerm(false);

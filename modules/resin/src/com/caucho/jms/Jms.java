@@ -124,6 +124,56 @@ public class Jms
     }
   }
 
+  public Message receive(Destination dest, long timeout)
+  {
+    Session session = null;
+    MessageConsumer consumer = null;
+    
+    try {
+      session = getSession();
+
+      consumer = session.createConsumer(dest);
+
+      return consumer.receive(timeout);
+    } catch (JMSException e) {
+      throw new RuntimeException(e);
+    } finally {
+      try {
+        if (consumer != null)
+          consumer.close();
+      } catch (JMSException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+      
+      freeSession(session);
+    }
+  }
+
+  public Message receiveNoWait(Destination dest)
+  {
+    Session session = null;
+    MessageConsumer consumer = null;
+    
+    try {
+      session = getSession();
+
+      consumer = session.createConsumer(dest);
+
+      return consumer.receiveNoWait();
+    } catch (JMSException e) {
+      throw new RuntimeException(e);
+    } finally {
+      try {
+        if (consumer != null)
+          consumer.close();
+      } catch (JMSException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+      
+      freeSession(session);
+    }
+  }
+
   /**
    * Creates an auto-ack session.
    */

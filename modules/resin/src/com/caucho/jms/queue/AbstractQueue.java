@@ -39,11 +39,8 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.jms.ObjectMessage;
-import javax.jms.TextMessage;
 
 import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
 
 /**
  * Implements an abstract queue.
@@ -51,7 +48,6 @@ import com.caucho.util.L10N;
 abstract public class AbstractQueue<E> extends AbstractDestination<E>
   implements javax.jms.Queue, MessageQueue<E>, BlockingQueue<E>
 {
-  private static final L10N L = new L10N(AbstractQueue.class);
   private static final Logger log
     = Logger.getLogger(AbstractQueue.class.getName());
 
@@ -174,33 +170,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
    * Receives a message, blocking until expireTime if no message is
    * available.
    */
-  public E receive()
-    throws MessageException
-  {
-    long expireTime;
-    
-    if (Alarm.isTest())
-      expireTime = Alarm.getCurrentTimeActual() + 120000L;
-    else
-      expireTime = Long.MAX_VALUE / 2;
-    
-    return receive(expireTime, true);
-  }
-
-  /**
-   * Receives a message, blocking until expireTime if no message is
-   * available.
-   */
-  public E receive(long expireTime)
-    throws MessageException
-  {
-    return receive(expireTime, true);
-  }
-
-  /**
-   * Receives a message, blocking until expireTime if no message is
-   * available.
-   */
+  @Override
   public E receive(long expireTime,
                    boolean isAutoAcknowledge)
     throws MessageException
@@ -228,6 +198,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
     return 0;
   }
 
+  @Override
   public Iterator<E> iterator()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -236,13 +207,14 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   /**
    * Adds the item to the queue, waiting if necessary
    */
+  @Override
   public boolean offer(E message, long timeout, TimeUnit unit)
   {
     int priority = 0;
 
     timeout = unit.toMillis(timeout);
 
-    long expires = Alarm.getCurrentTimeActual() + timeout;
+    long expires = Alarm.getCurrentTime() + timeout;
 
     send(generateMessageID(), message, priority, expires);
 
@@ -266,24 +238,12 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   {
     long msTimeout = unit.toMillis(timeout);
     
-    long expireTime = msTimeout + Alarm.getCurrentTimeActual();
+    long expireTime = msTimeout + Alarm.getCurrentTime();
     
-    E payload = receive(expireTime);
+    E payload = receive(expireTime, true);
 
     try {
-      if (payload == null)
-        return null;
-      else if (payload instanceof ObjectMessage)
-        return (E) ((ObjectMessage) payload).getObject();
-      else if (payload instanceof TextMessage)
-        return (E) ((TextMessage) payload).getText();
-      else
-        return payload;
-      /*
-      else
-        throw new MessageException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
-                                       payload));
-                                       */
+      return payload;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -318,13 +278,31 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   @Override
   public int drainTo(Collection<? super E> c)
   {
-    throw new UnsupportedOperationException();
+    int count = 0;
+    
+    E msg;
+    
+    while ((msg = poll()) != null) {
+      c.add(msg);
+      count++;
+    }
+    
+    return count;
   }
 
   @Override
   public int drainTo(Collection<? super E> c, int max)
   {
-    throw new UnsupportedOperationException();
+    int count = 0;
+    
+    E msg;
+    
+    while (count < max && (msg = poll()) != null) {
+      c.add(msg);
+      count++;
+    }
+    
+    return count;
   }
 
   //
@@ -380,10 +358,11 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   {
     synchronized (this) {
       _listenerFailCount++;
-      _listenerFailLastTime = Alarm.getCurrentTimeActual();
+      _listenerFailLastTime = Alarm.getCurrentTime();
     }
   }
 
+  /*
   protected void startPoll()
   {
   }
@@ -391,12 +370,13 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   protected void stopPoll()
   {
   }
+  */
 
   @PreDestroy
   @Override
   public void close()
   {
-    stopPoll();
+    // stopPoll();
 
     super.close();
   }

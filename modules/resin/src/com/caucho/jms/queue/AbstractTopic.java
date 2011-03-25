@@ -73,18 +73,17 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
   }
 
   @Override
-  public void send(String msgId, E msg, int priority, long expires)
+  public void send(String msgId, E msg, int priority, long expireTime)
     throws MessageException
   {
-    send(msgId, msg, priority, expires, null);
+    send(msgId, msg, priority, expireTime, null);
   }
 
   /**
    * Polls the next message from the store.  If no message is available,
    * wait for the timeout.
    */
-  @Override
-  public E receive(long timeout)
+  public E receive(long expireTime, boolean isAutoCommit)
   {
     throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
   }
@@ -135,11 +134,14 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
     offer(value, Integer.MAX_VALUE, TimeUnit.SECONDS);
   }
 
+  @Override
   public E poll(long timeout, TimeUnit unit)
   {
     long msTimeout = unit.toMillis(timeout);
 
-    E payload = receive(msTimeout);
+    long expireTime = msTimeout + Alarm.getCurrentTime();
+    
+    E payload = receive(expireTime, true);
 
     try {
       if (payload == null)

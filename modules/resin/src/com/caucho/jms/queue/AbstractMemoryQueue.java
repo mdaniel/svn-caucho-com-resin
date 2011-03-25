@@ -144,6 +144,9 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
                          QueueEntrySelector selector) 
     throws MessageException
   {
+    if (Alarm.isTest())
+      expireTime += Alarm.getCurrentTimeActual() - Alarm.getCurrentTime();
+
     _receiverCount.incrementAndGet();
     
     try {
