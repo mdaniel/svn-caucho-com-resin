@@ -151,12 +151,11 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
   echo 'xaxis: { mode:"time" }, ';
   echo "yaxis: {labelWidth:$labelWidth,tickFormatter: function(val, axis) {\n";
   echo "  if (ticks.length > 0) {\n";
-  echo "    if (val >= ticks.length)\n";
+  echo "    if (val >= ticks.length || val < 0 || val % 1 > 0)\n";
   echo "      return '';\n";
-  echo "    if (val % 1 > 0)\n";
-  echo "      return '';\n";
-  echo "    return ticks[val];\n";
-  echo "  } else { \n"
+  echo "    else\n"
+  echo "      return ticks[val];\n";
+  echo "  } else {\n"
   echo "    if (val >= 1e9)\n";
   echo "      return (val / 1e9).toFixed(1) + 'G';\n";
   echo "    if (val >= 1e6)\n";
