@@ -178,7 +178,8 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
       _receiverCount.decrementAndGet();  
     }
   }
-  
+
+  @Override
   public EntryCallback<E> addMessageCallback(MessageCallback<E> callback,
                                              boolean isAutoAck)
   {
@@ -192,6 +193,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
     return entryCallback;
   }
 
+  @Override
   public void removeMessageCallback(EntryCallback<E> callback)
   {
     ListenEntryCallback listenerCallback
@@ -289,6 +291,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   /**
    * Returns the queue size
    */
+  @Override
   public int getQueueSize()
   {
     int count = 0;

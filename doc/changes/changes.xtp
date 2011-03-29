@@ -13,6 +13,8 @@
 
 <s2 title="4.0.17 - snapshot">
 <ul>
+<li>cloud: removed obsolete HmtpRequest logging (#4461, rep by TJ Wallace)</li>
+<li>session: change default serialization to "java" instead of "hessian"</li>
 <li>cluster: add -join-cluster for dynamic server support</li>
 </ul>
 </s2>

@@ -43,6 +43,7 @@ import com.caucho.jms.queue.MessageException;
 import com.caucho.jms.queue.QueueEntry;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
+import com.caucho.util.Hex;
 import com.caucho.vfs.Path;
 
 /**
@@ -79,6 +80,17 @@ public class FileQueueImpl<E extends Serializable>
   public FileQueueImpl()
   {
     _store = FileQueueStore.create();
+  }
+
+  public FileQueueImpl(byte []queueHash)
+  {
+    this();
+    
+    setName(Hex.toHex(queueHash, 0, 8));
+
+    _queueIdHash = queueHash;
+
+    init();
   }
 
   public FileQueueImpl(String name)
@@ -150,19 +162,21 @@ public class FileQueueImpl<E extends Serializable>
     try {
       // calculate a unique hash for the queue
       
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      if (_queueIdHash == null) {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-      String env = Environment.getEnvironmentName();
+        String env = Environment.getEnvironmentName();
 
-      digest.update(env.getBytes());
-      
-      if (Server.getCurrent() != null)
-        digest.update(Server.getCurrent().getServerId().getBytes());
-      
-      digest.update(getClass().getSimpleName().getBytes());
-      digest.update(getName().getBytes());
+        digest.update(env.getBytes());
 
-      _queueIdHash = digest.digest();
+        if (Server.getCurrent() != null)
+          digest.update(Server.getCurrent().getServerId().getBytes());
+
+        digest.update(getClass().getSimpleName().getBytes());
+        digest.update(getName().getBytes());
+
+        _queueIdHash = digest.digest();
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

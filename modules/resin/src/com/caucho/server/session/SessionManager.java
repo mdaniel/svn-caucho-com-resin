@@ -160,7 +160,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   // If true, serialization errors should not be logged
   // XXX: changed for JSF
   private boolean _ignoreSerializationErrors = true;
-  private boolean _isHessianSerialization = true;
+  private boolean _isHessianSerialization = false;
   private SerializerFactory _hessianFactory;
   private boolean _isSerializeCollectionType = true;
 

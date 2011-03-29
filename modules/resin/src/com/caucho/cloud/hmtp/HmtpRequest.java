@@ -161,13 +161,6 @@ public class HmtpRequest extends AbstractProtocolConnection
     InputStream rawIs = is;
     
     is.skip(len - 1);
-    
-    if (log.isLoggable(Level.FINEST)) {
-      HessianDebugInputStream dIs
-        = new HessianDebugInputStream(is, log, Level.FINEST);
-      // dIs.startStreaming();
-      rawIs = dIs;
-    }
 
     _hmtpReader = new HmtpWebSocketReader(rawIs);
 
