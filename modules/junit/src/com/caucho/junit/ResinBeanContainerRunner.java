@@ -90,6 +90,7 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
       _beanContainer = new ResinBeanContainer();
 
       _beanContainer.setWorkDirectory(System.getProperty("java.io.tmpdir"));
+      _beanContainer.setModule(_testClassModule);
 
       if (_beanConfiguration != null) {
         for (String module : _beanConfiguration.modules()) {
@@ -100,9 +101,6 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
           _beanContainer.addBeansXml(conf);
         }
       }
-
-      // TODO For test class-path, set the beans.xml to use (to bean container).
-      // delegate call to inject manager.
 
       _beanContainer.start();
     }

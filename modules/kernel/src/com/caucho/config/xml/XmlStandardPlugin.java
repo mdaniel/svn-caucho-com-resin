@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.ejb.DependsOn;
 import javax.ejb.Startup;
@@ -71,9 +72,6 @@ import com.caucho.vfs.Path;
 /**
  * Standard XML behavior for META-INF/beans.xml
  */
-// TODO Add a map to inject scan manager to store root->beans.xml
-// TODO adding setRootOverrride(Path to root, Path to beans.xml) calls from
-// inject manager.
 @Module
 public class XmlStandardPlugin implements Extension {
   private static final L10N L = new L10N(XmlStandardPlugin.class);
@@ -135,19 +133,25 @@ public class XmlStandardPlugin implements Extension {
 
   private void configureRoot(Path root) throws IOException
   {
-    // TODO Process from beans.xml map instead.
-    configurePath(root.lookup("META-INF/beans.xml"));
-    configurePath(root.lookup("META-INF/resin-beans.xml"));
+    List<Path> beansXmlOverride = _cdiManager.getBeansXmlOverride(root);
 
-    if (root.getFullPath().endsWith("WEB-INF/classes/")) {
-      configurePath(root.lookup("../beans.xml"));
-      configurePath(root.lookup("../resin-beans.xml"));
-    } else if (!root.lookup("META-INF/beans.xml").canRead()
-        && !root.lookup("META-INF/resin-beans.xml").canRead()) {
-      // ejb/11h0
-      configurePath(root.lookup("beans.xml"));
-      configurePath(root.lookup("resin-beans.xml"));
+    if (beansXmlOverride == null) {
+      configurePath(root.lookup("META-INF/beans.xml"));
+      configurePath(root.lookup("META-INF/resin-beans.xml"));
 
+      if (root.getFullPath().endsWith("WEB-INF/classes/")) {
+        configurePath(root.lookup("../beans.xml"));
+        configurePath(root.lookup("../resin-beans.xml"));
+      } else if (!root.lookup("META-INF/beans.xml").canRead()
+          && !root.lookup("META-INF/resin-beans.xml").canRead()) {
+        // ejb/11h0
+        configurePath(root.lookup("beans.xml"));
+        configurePath(root.lookup("resin-beans.xml"));
+      }
+    } else {
+      for (Path beansXMLPath : beansXmlOverride) {
+        configurePath(beansXMLPath);
+      }
     }
   }
 

@@ -40,7 +40,6 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
@@ -124,6 +123,9 @@ public class ResinBeanContainer {
 
   private ThreadLocal<BeanContainerRequest> _localContext = new ThreadLocal<BeanContainerRequest>();
 
+  // Path to the current module (typically the current directory)
+  private Path _modulePath;
+
   /**
    * Creates a new Resin context.
    */
@@ -180,6 +182,11 @@ public class ResinBeanContainer {
   {
     return _cdiManager;
   }
+  
+  public void setModule(String modulePath)
+  {
+    _modulePath = Vfs.lookup(modulePath);    
+  }  
 
   /**
    * Adds a new module (jar or exploded classes directory)
@@ -203,7 +210,6 @@ public class ResinBeanContainer {
    * @param packageName
    *          the name of the package to be treated as a virtual module root.
    */
-  // TODO Should this be protected instead of public?
   public void addPackageModule(String modulePath, String packageName)
   {
     Path root = Vfs.lookup(modulePath);
@@ -223,7 +229,6 @@ public class ResinBeanContainer {
    * @param packageName
    *          the name of the package to be treated as a virtual module root.
    */
-  // TODO Should this be protected instead of public?
   public void addPackageModule(String packageName)
   {
     try {
@@ -289,24 +294,9 @@ public class ResinBeanContainer {
    */
   public void addBeansXml(String pathName)
   {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(_classLoader);
-
-      Path path = Vfs.lookup(pathName);
-
-      ContextConfig context = new ContextConfig(_cdiManager, path);
-
-      Config config = new Config();
-      config.configure(context, path, SCHEMA);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
+    _cdiManager.addBeansXmlOverride(_modulePath, Vfs.lookup(pathName));
   }
 
-  // TODO Should this be protected instead of public?
   public void addResourceRoot(Path path)
   {
     ResourceLoader loader = new ResourceLoader(_classLoader, path);
@@ -527,7 +517,6 @@ public class ResinBeanContainer {
     }
   }
 
-  // TODO Should this be protected instead of public?
   public ClassLoader getClassLoader()
   {
     return _classLoader;

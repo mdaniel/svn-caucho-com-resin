@@ -62,7 +62,6 @@ import javax.annotation.sql.DataSourceDefinition;
 import javax.annotation.sql.DataSourceDefinitions;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
-import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
@@ -149,7 +148,6 @@ import com.caucho.loader.EnvironmentApply;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.naming.Jndi;
 import com.caucho.util.Alarm;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
@@ -164,7 +162,7 @@ import com.caucho.vfs.Vfs;
 @SuppressWarnings("serial")
 public final class InjectManager
   implements BeanManager, EnvironmentListener,
-             java.io.Serializable, HandleAware
+             Serializable, HandleAware
 {
   private static final L10N L = new L10N(InjectManager.class);
   private static final Logger log
@@ -296,8 +294,8 @@ public final class InjectManager
   private ArrayList<Path> _pendingPathList
     = new ArrayList<Path>();
 
-  private ConcurrentHashMap<Path, String[]> _beansXMLOverrides 
-    = new ConcurrentHashMap<Path, String[]>();
+  private ConcurrentHashMap<Path, List<Path>> _beansXMLOverrides 
+    = new ConcurrentHashMap<Path, List<Path>>();
   
   private ArrayList<AnnotatedType<?>> _pendingAnnotatedTypes
     = new ArrayList<AnnotatedType<?>>();
@@ -641,12 +639,20 @@ public final class InjectManager
     _pendingPathList.add(path);
   }
 
-  public void addBeansXmlOverride(Path path, String[] beansXmlLocations)
+  public void addBeansXmlOverride(Path path, Path beansXmlPath)
   {
-    _beansXMLOverrides.put(path, beansXmlLocations);
+    List<Path> beansXmlPaths = _beansXMLOverrides.get(path);
+
+    if (beansXmlPaths == null) {
+      beansXmlPaths = new ArrayList<Path>();
+    }
+
+    beansXmlPaths.add(beansXmlPath);
+
+    _beansXMLOverrides.put(path, beansXmlPaths);
   }
   
-  public String[] getBeansXmlOverride(Path path)
+  public List<Path> getBeansXmlOverride(Path path)
   {
     return _beansXMLOverrides.get(path);
   }  
@@ -1245,6 +1251,7 @@ public final class InjectManager
     if (bean != null)
       addBeanImpl(bean, process.getAnnotated());
   }
+
   /**
    * Adds a new bean definition to the manager
    */

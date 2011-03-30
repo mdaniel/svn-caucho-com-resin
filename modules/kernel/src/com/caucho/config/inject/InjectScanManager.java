@@ -33,6 +33,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -154,7 +155,7 @@ class InjectScanManager implements ScanListener {
   public boolean isRootScannable(Path root, String packageRoot)
   {
     ScanRootContext context = _scanRootMap.get(root);
-    String[] beansXmlOverride = _injectManager.getBeansXmlOverride(root);
+    List<Path> beansXmlOverride = _injectManager.getBeansXmlOverride(root);
 
     Path scanRoot = root;
 
@@ -162,8 +163,9 @@ class InjectScanManager implements ScanListener {
       scanRoot = scanRoot.lookup(packageRoot.replace('.', '/'));
     }
 
-    if (true || beansXmlOverride != null) {
-      if ((packageRoot != null) && ! scanRoot.lookup("beans.xml").canRead()) {
+    if (beansXmlOverride == null) {
+      // TODO Should resin-beans.xml be included in this check?
+      if ((packageRoot != null) && !scanRoot.lookup("beans.xml").canRead()) {
         return false;
       } else if (!(root.lookup("META-INF/beans.xml").canRead() 
                  || (root.getFullPath().endsWith("WEB-INF/classes/")
