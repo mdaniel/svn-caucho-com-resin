@@ -27,34 +27,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.broker;
+package com.caucho.cloud.topology;
 
-import com.caucho.bam.actor.ActorClientFactory;
-import com.caucho.bam.actor.ActorSender;
-import com.caucho.bam.actor.SimpleActorSender;
-import com.caucho.bam.stream.NullActor;
-import com.caucho.bam.stream.NullMessageStream;
-import com.caucho.util.L10N;
+/**
+ * Represents the current state of a cloud server.
+ */
+public enum CloudServerState {
+  UNKNOWN {
+    
+  },
+  
+  CLOSED {
+    
+  },
+  
+  DISABLED {
+    @Override
+    public CloudServerState onHeartbeatStart()
+    {
+      return DISABLED;
+    }
+    
+    @Override
+    public CloudServerState onHeartbeatStop()
+    {
+      return DISABLED;
+    }
+  },
+  
+  HEARTBEAT_FAILED {
+    
+  },
+  
+  ACTIVE {
+    
+  };
 
-public class LocalActorFactoryImpl implements ActorClientFactory
-{
-  private static final L10N L = new L10N(LocalActorFactoryImpl.class);
-
-  private HempBroker _broker = HempBroker.getCurrent();
-
-  public LocalActorFactoryImpl()
+  public CloudServerState onHeartbeatStart()
   {
-    if (_broker == null)
-      throw new NullPointerException(L.l("no local broker is available"));
+    return ACTIVE;
   }
-
-  @Override
-  public ActorSender createClient(String uid, String resource)
+  
+  public CloudServerState onHeartbeatStop()
   {
-    NullActor actor = new NullActor(uid, _broker);
-    
-    SimpleActorSender client = new SimpleActorSender(actor, _broker, uid, resource);
-    
-    return client;
+    return CLOSED;
   }
 }

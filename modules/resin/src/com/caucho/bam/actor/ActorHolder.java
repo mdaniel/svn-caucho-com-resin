@@ -53,7 +53,7 @@ import com.caucho.bam.stream.MessageStream;
  */
 public interface ActorHolder
 {
-  public MessageStream getActorStream();
+  public Actor getActor();
   
   public String getAddress();
   

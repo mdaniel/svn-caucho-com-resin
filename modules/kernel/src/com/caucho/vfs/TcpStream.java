@@ -192,11 +192,19 @@ class TcpStream extends StreamImpl {
     InputStream is = _is;
     
     if (is != null) {
-      int len = is.read(buf, offset, length);
+      int len;
+      
+      try {
+        len = is.read(buf, offset, length);
+      } catch (SocketException e) {
+        log.log(Level.FINER, e.toString(), e);
+
+        len = -1;
+      }
       
       if (len < 0)
         close();
-      
+    
       return len;
     }
     else

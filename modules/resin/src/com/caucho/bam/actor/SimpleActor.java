@@ -40,23 +40,19 @@ import com.caucho.bam.stream.MessageStream;
 public class SimpleActor extends AbstractMessageStream
   implements ManagedActor, ActorHolder
 {
-  private final SkeletonMessageStreamFilter<?> _skeleton;
+  private final SkeletonActorFilter<?> _skeleton;
   private final SimpleActorSender _sender;
   
   private String _address;
   private Broker _broker;
   private Mailbox _mailbox;
-  
-  private MessageStream _actorStream;
 
   public SimpleActor()
   {
     _address = getClass().getSimpleName() + "@localhost";
     
-    _skeleton = new SkeletonMessageStreamFilter(this, this);
+    _skeleton = new SkeletonActorFilter(this, this);
     _sender = new SimpleActorSender(_skeleton);
-    
-    setActorStream(_sender.getActorStream());
   }
 
   public SimpleActor(String address, Broker broker)
@@ -102,18 +98,20 @@ public class SimpleActor extends AbstractMessageStream
    * the Broker.
    */
   @Override
-  public MessageStream getActorStream()
+  public Actor getActor()
   {
-    return _actorStream;
+    return _sender.getActor();
   }
   
   /**
    * Returns the stream to the actor for broker-forwarded messages.
    */
-  public void setActorStream(MessageStream actorStream)
+  /*
+  public void setActor(Actor actorStream)
   {
-    _actorStream = actorStream;
+    // _actor = actorStream;
   }
+  */
   
 
   /**

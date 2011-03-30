@@ -39,7 +39,7 @@ import com.caucho.bam.stream.MessageStream;
  * returns query errors for RPC packets, and ignores unknown packets
  * for messages and presence announcement.
  *
- * Most developers will use {@link com.caucho.bam.actor.SkeletonMessageStreamFilter}
+ * Most developers will use {@link com.caucho.bam.actor.SkeletonActorFilter}
  * or {@link com.caucho.bam.actor.SimpleActor} because those classes use
  * introspection with {@link com.caucho.bam.Message @Message} annotations
  * to simplify Actor development.

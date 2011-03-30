@@ -768,6 +768,8 @@ public final class ClusterServer {
       return false;
     
     _stateTimestamp.set(now);
+    
+    _cloudServer.onHeartbeatStart();
 
     if (_clusterSocketPool != null)
       _clusterSocketPool.notifyHeartbeatStart();
@@ -795,6 +797,8 @@ public final class ClusterServer {
     _stateTimestamp.set(Alarm.getCurrentTime());
 
     log.warning(this + " notify-heartbeat-stop");
+    
+    _cloudServer.onHeartbeatStop();
 
     if (_clusterSocketPool != null)
       _clusterSocketPool.notifyHeartbeatStop();

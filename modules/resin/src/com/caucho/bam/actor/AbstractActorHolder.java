@@ -47,12 +47,12 @@ abstract public class AbstractActorHolder implements ActorHolder
    * messages from other Actors can be delivered.
    */
   @Override
-  abstract public MessageStream getActorStream();
+  abstract public Actor getActor();
 
   @Override
   public String getAddress()
   {
-    return getActorStream().getAddress();
+    return getActor().getAddress();
   }
   
   @Override
@@ -103,6 +103,6 @@ abstract public class AbstractActorHolder implements ActorHolder
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getActorStream().getAddress() + "]";
+    return getClass().getSimpleName() + "[" + getActor().getAddress() + "]";
   }
 }

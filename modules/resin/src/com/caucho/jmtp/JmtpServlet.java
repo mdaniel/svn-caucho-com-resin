@@ -121,7 +121,7 @@ public class JmtpServlet extends GenericServlet {
       _jmtpMailbox = new JmtpMailbox(this);
       
       _actor.setBroker(new JmtpBroker(this));
-      _actorStream = _actor.getActorStream();
+      _actorStream = _actor.getActor();
     }
 
     @Override

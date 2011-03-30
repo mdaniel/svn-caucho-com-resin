@@ -43,7 +43,7 @@ public class LocalActorSender extends SimpleActorSender {
     super(broker, uid);
   }
  
-  public LocalActorSender(MessageStream next,
+  public LocalActorSender(Actor next,
                           ManagedBroker broker)
   {
     super(next, broker);

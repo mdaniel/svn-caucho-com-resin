@@ -216,7 +216,7 @@ abstract public class AbstractActorSender implements ActorSender {
   {
     long qId = getQueryManager().nextQueryId();
     
-    getQueryManager().addQueryCallback(qId, callback); // getTimeout());
+    getQueryManager().addQueryCallback(qId, callback, getTimeout());
     
     getBroker().query(qId, to, getAddress(), payload);
   }

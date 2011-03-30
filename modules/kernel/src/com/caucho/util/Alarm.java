@@ -409,6 +409,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   /**
    * Runs the alarm.  This is only called from the worker thread.
    */
+  @Override
   public void run()
   {
     try {
@@ -503,8 +504,15 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      while ((alarm = _heap.extractAlarm(getCurrentTime())) != null) {
-        alarm.run();
+      long now = getCurrentTime();
+      
+      while ((alarm = _heap.extractAlarm(now)) != null) {
+
+        try {
+          alarm.run();
+        } catch (Throwable e) {
+          e.printStackTrace();
+        }
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -530,6 +538,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       setPriority(Thread.MAX_PRIORITY);
     }
 
+    @Override
     public void run()
     {
       int idleCount = 0;

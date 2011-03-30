@@ -54,7 +54,7 @@ public class HmtpLinkWorker implements Runnable {
   public HmtpLinkWorker(ActorHolder actor, InputStream is, OutputStream os)
     throws IOException
   {
-    _actorStream = actor.getActorStream();
+    _actorStream = actor.getActor();
     
     _is = is;
     _os = os;

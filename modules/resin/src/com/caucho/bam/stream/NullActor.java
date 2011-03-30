@@ -29,6 +29,7 @@
 
 package com.caucho.bam.stream;
 
+import com.caucho.bam.actor.Actor;
 import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
@@ -37,7 +38,7 @@ import com.caucho.bam.mailbox.Mailbox;
 /**
  * NullActorStream always ignores messages and returns errors for RPC calls.
  */
-public class NullActor extends NullMessageStream implements ActorHolder
+public class NullActor extends NullMessageStream implements Actor, ActorHolder
 {
   private Mailbox _mailbox;
   
@@ -67,13 +68,7 @@ public class NullActor extends NullMessageStream implements ActorHolder
   {
     super.setAddress(address);
   }
-
-  @Override
-  public MessageStream getActorStream()
-  {
-    return this;
-  }
-
+  
   @Override
   public void setBroker(Broker broker)
   {
@@ -90,5 +85,11 @@ public class NullActor extends NullMessageStream implements ActorHolder
   public void setMailbox(Mailbox mailbox)
   {
     _mailbox = mailbox;
+  }
+
+  @Override
+  public Actor getActor()
+  {
+    return this;
   }
 }

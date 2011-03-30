@@ -278,7 +278,7 @@ class WatchdogManager implements AlarmListener {
       broker.setAllowNullAdminAuthenticator(true);
       */
 
-      broker.createAgent(service.getActorStream());
+      broker.createAgent(service.getActor());
 
       ResinSystem.getCurrent().start();
 

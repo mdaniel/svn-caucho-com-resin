@@ -56,6 +56,8 @@ public interface ManagedActor extends Actor
   
   public void setBroker(Broker broker);
   
+  public Actor getActor();
+  
   public Mailbox getMailbox();
   
   public void setMailbox(Mailbox mailbox);

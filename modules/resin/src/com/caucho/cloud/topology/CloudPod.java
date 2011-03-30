@@ -63,6 +63,8 @@ public class CloudPod
   private TriadDispatcher<CloudServer> _serverDispatcher
     = new TriadDispatcher<CloudServer>();
   
+  private boolean _isSelf;
+  
   private int _maxIndex = -1;
 
   /**
@@ -123,6 +125,26 @@ public class CloudPod
   public final CloudSystem getSystem()
   {
     return getCluster().getSystem();
+  }
+  
+  public final boolean isSelf()
+  {
+    return _isSelf;
+  }
+  
+  final void setSelf(boolean isSelf)
+  {
+    _isSelf = isSelf;
+  }
+  
+  public CloudServer getServer(int index)
+  {
+    CloudServer []servers = getServerList();
+    
+    if (index < servers.length)
+      return servers[index];
+    else
+      return null;
   }
 
   public CloudServer []getServerList()
@@ -412,7 +434,14 @@ public class CloudPod
     
     return removedServer;
   }
-  
+
+  void onServerStateChange(CloudServer server)
+  {
+    for (CloudServerListener listener : _listeners) {
+      listener.onServerStateChange(server);
+    }
+  }
+
   //
   // dispatcher
   //

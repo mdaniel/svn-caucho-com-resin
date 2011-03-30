@@ -45,6 +45,11 @@ public class AbstractCloudServerListener implements CloudServerListener {
   }
   
   @Override
+  public void onServerStateChange(CloudServer server)
+  {
+  }
+  
+  @Override
   public void onTriadAdd(TriadServer server)
   {
   }

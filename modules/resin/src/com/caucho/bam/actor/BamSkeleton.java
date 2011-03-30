@@ -53,7 +53,7 @@ import com.caucho.util.L10N;
 /**
  * The Skeleton introspects and dispatches messages for a
  * {@link com.caucho.bam.actor.SimpleActor}
- * or {@link com.caucho.bam.actor.SkeletonMessageStreamFilter}.
+ * or {@link com.caucho.bam.actor.SkeletonActorFilter}.
  */
 public class BamSkeleton<S>
 {

@@ -38,6 +38,8 @@ public interface CloudServerListener {
   
   public void onServerRemove(CloudServer server);
   
+  public void onServerStateChange(CloudServer server);
+  
   public void onTriadAdd(TriadServer server);
   
   public void onTriadRemove(TriadServer server);

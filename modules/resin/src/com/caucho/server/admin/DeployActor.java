@@ -115,8 +115,8 @@ public class DeployActor extends SimpleActor
 
     setBroker(getBroker());
     MultiworkerMailbox mailbox
-      = new MultiworkerMailbox(getActorStream().getAddress(), 
-                               getActorStream(), getBroker(), 2);
+      = new MultiworkerMailbox(getActor().getAddress(), 
+                               getActor(), getBroker(), 2);
     
     getBroker().addMailbox(mailbox);
   }

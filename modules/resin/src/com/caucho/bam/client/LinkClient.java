@@ -29,6 +29,7 @@
 
 package com.caucho.bam.client;
 
+import com.caucho.bam.actor.Actor;
 import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.SimpleActorSender;
@@ -63,13 +64,13 @@ public class LinkClient {
     PassthroughBroker inboundBroker = new PassthroughBroker();
     PassthroughBroker outboundBroker = new PassthroughBroker();
     
-    MessageStream inboundStream = actor.getActorStream();
+    Actor inboundStream = actor.getActor();
     SimpleActorSender sender = new SimpleActorSender(inboundStream, 
                                                      outboundBroker);
     
     _sender = sender;
     
-    Mailbox inboundMailbox = createInboundMailbox(sender.getActorStream(),
+    Mailbox inboundMailbox = createInboundMailbox(sender.getActor(),
                                                   outboundBroker);
     
     inboundBroker.setMailbox(inboundMailbox);

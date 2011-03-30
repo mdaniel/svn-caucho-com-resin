@@ -44,6 +44,7 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.manager.BamManager;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.stream.NullActor;
 import com.caucho.bam.stream.NullMessageStream;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.ClusterServer;
@@ -440,10 +441,10 @@ public class Server
   {
     String address = uid + "@" + getAdminBroker().getAddress();
 
-    NullMessageStream stream = new NullMessageStream(address, getAdminBroker());
+    NullActor actor = new NullActor(address, getAdminBroker());
     
     SimpleActorSender sender 
-      = new SimpleActorSender(stream, getAdminBroker(), address, resource);
+      = new SimpleActorSender(actor, getAdminBroker(), address, resource);
     
     return sender;
   }

@@ -59,6 +59,7 @@ public class SimpleBamManager implements BamManager
       throw new NullPointerException();
   }
   
+  @Override
   public ManagedBroker getBroker()
   {
     return _broker;
@@ -92,7 +93,9 @@ public class SimpleBamManager implements BamManager
     actor.setAddress(address);
     actor.setBroker(getBroker());
     
-    Mailbox mailbox = createMailbox(address, actor, MailboxType.DEFAULT);
+    Mailbox mailbox = createMailbox(address, 
+                                    actor.getActor(), 
+                                    MailboxType.DEFAULT);
     actor.setMailbox(mailbox);
     
     addMailbox(mailbox);
@@ -176,5 +179,11 @@ public class SimpleBamManager implements BamManager
     addMailbox(mailbox);
     
     return mailbox;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getBroker().getAddress() + "]";
   }
 }

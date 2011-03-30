@@ -71,6 +71,8 @@ public class CloudServer {
   
   private boolean _isSelf;
   
+  private CloudServerState _state = CloudServerState.UNKNOWN;
+  
   private final ConcurrentHashMap<Class<?>,Object> _dataMap
     = new ConcurrentHashMap<Class<?>,Object>();
 
@@ -195,6 +197,16 @@ public class CloudServer {
   public void setSelf(boolean isSelf)
   {
     _isSelf = isSelf;
+    
+    _pod.setSelf(isSelf);
+  }
+  
+  /**
+   * Returns the servers current state.
+   */
+  public CloudServerState getState()
+  {
+    return _state;
   }
   
   //
@@ -258,6 +270,52 @@ public class CloudServer {
     return _isSSL;
   }
   
+  //
+  // state transitions
+  //
+  
+
+  public void onHeartbeatStart()
+  {
+    CloudServerState oldState;
+    
+    synchronized (this) {
+      oldState = _state;
+      
+      _state = oldState.onHeartbeatStart();
+    }
+    
+    if (_state != oldState)
+      updateState();
+  }
+
+  public void onHeartbeatStop()
+  {
+    CloudServerState oldState;
+    
+    synchronized (this) {
+      oldState = _state;
+      
+      _state = oldState.onHeartbeatStop();
+    }
+    
+    if (_state != oldState)
+      updateState();
+  }
+
+  public void setState(CloudServerState state)
+  {
+    if (_pod.isSelf())
+      throw new IllegalStateException();
+    
+    _state = state;
+  }
+  
+  private void updateState()
+  {
+    _pod.onServerStateChange(this);
+  }
+
   //
   // data
   //

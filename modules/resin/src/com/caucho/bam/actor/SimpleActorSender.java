@@ -35,19 +35,21 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.bam.query.QueryActorFilter;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
 import com.caucho.bam.query.QueryManager;
-import com.caucho.bam.query.QueryMessageStreamFilter;
-import com.caucho.bam.stream.AbstractMessageStream;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.WeakAlarm;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's address as the "from" parameter.
  */
 public class SimpleActorSender implements ActorSender {
-  private MessageStream _actorStream;
+  private Actor _actor;
   private Broker _broker;
   private String _clientAddress;
 
@@ -57,28 +59,28 @@ public class SimpleActorSender implements ActorSender {
 
   public SimpleActorSender(String address, Broker broker)
   {
-    this((MessageStream) null, broker);
+    this((Actor) null, broker);
     
     _clientAddress = address;
   }
   
-  public SimpleActorSender(MessageStream next)
+  public SimpleActorSender(Actor next)
   {
     this(next, next.getBroker());
   }
   
-  public SimpleActorSender(MessageStream next, Broker broker)
+  public SimpleActorSender(Actor next, Broker broker)
   {
     if (next == null)
-      next = new DefaultActorStream();
+      next = new DefaultActor();
     
-    _actorStream = new QueryMessageStreamFilter(next, _queryManager);
+    _actor = new QueryActorFilter(next, _queryManager);
     _broker = broker;
     
     _clientAddress  = next.getAddress();
   }
   
-  public SimpleActorSender(MessageStream next,
+  public SimpleActorSender(Actor next,
                            ManagedBroker broker,
                            String uid, 
                            String resource)
@@ -86,12 +88,12 @@ public class SimpleActorSender implements ActorSender {
     this(next, broker);
     
     Mailbox mailbox = new MultiworkerMailbox(next.getAddress(),
-                                             _actorStream,
+                                             _actor,
                                              broker, 
                                              1);
 
-    _actorStream = broker.createClient(mailbox, uid, resource);
-    _clientAddress = _actorStream.getAddress();
+    MessageStream stream = broker.createClient(mailbox, uid, resource);
+    _clientAddress = stream.getAddress();
   }
   
   public SimpleActorSender(ManagedBroker broker,
@@ -104,15 +106,15 @@ public class SimpleActorSender implements ActorSender {
                            String uid, 
                            String resource)
   {
-    this((MessageStream) null, broker);
+    this((Actor) null, broker);
     
     Mailbox mailbox = new MultiworkerMailbox(null,
-                                             _actorStream,
+                                             _actor,
                                              broker, 
                                              1);
 
-    _actorStream = broker.createClient(mailbox, uid, resource);
-    _clientAddress = _actorStream.getAddress();
+    MessageStream stream = broker.createClient(mailbox, uid, resource);
+    _clientAddress = stream.getAddress();
   }
 
   /**
@@ -121,17 +123,19 @@ public class SimpleActorSender implements ActorSender {
   @Override
   public String getAddress()
   {
-    return getActorStream().getAddress();
+    if (_actor != null)
+      return _actor.getAddress();
+    else
+      return _clientAddress;
   }
 
   //
   // streams
   //
 
-  public MessageStream getActorStream()
+  public Actor getActor()
   {
-    return _actorStream;
-    
+    return _actor;
   }
   /**
    * The underlying, low-level stream to the link
@@ -209,19 +213,7 @@ public class SimpleActorSender implements ActorSender {
   public Serializable query(String to,
                             Serializable payload)
   {
-    Broker broker = getBroker();
-
-    if (broker == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.nextQueryId();
-    
-    QueryFuture future
-      = _queryManager.addQueryFuture(id, to, getAddress(), payload, _timeout);
-
-    broker.query(id, to, getAddress(), payload);
-
-    return future.get();
+    return query(to, payload, _timeout);
   }
 
   /**
@@ -255,7 +247,7 @@ public class SimpleActorSender implements ActorSender {
       = _queryManager.addQueryFuture(id, to, getAddress(), payload, timeout);
 
     linkStream.query(id, to, getAddress(), payload);
-
+    
     return future.get();
   }
 
@@ -281,6 +273,30 @@ public class SimpleActorSender implements ActorSender {
                     Serializable payload,
                     QueryCallback callback)
   {
+    query(to, payload, callback, _timeout);
+  }
+
+  /**
+   * Sends a query information call (get) to an actor,
+   * providing a callback to receive the result or error.
+   *
+   * The target actor of a <code>queryGet</code> acts as a service and the
+   * caller acts as a client.  Because BAM Actors are symmetrical, all
+   * Actors can act as services and clients for different RPC calls.
+   *
+   * The target actor MUST send a <code>queryResult</code> or
+   * <code>queryError</code> to the client using the same <code>id</code>,
+   * because RPC clients rely on a response.
+   *
+   * @param to the target actor's address
+   * @param payload the query payload
+   * @param callback the application's callback for the result
+   */
+  public void query(String to,
+                    Serializable payload,
+                    QueryCallback callback,
+                    long timeout)
+  {
     MessageStream linkStream = getBroker();
 
     if (linkStream == null)
@@ -288,8 +304,8 @@ public class SimpleActorSender implements ActorSender {
 
     long id = _queryManager.nextQueryId();
     
-    _queryManager.addQueryCallback(id, callback);
-
+    _queryManager.addQueryCallback(id, callback, timeout);
+    
     linkStream.query(id, to, getAddress(), payload);
   }
 
@@ -304,18 +320,19 @@ public class SimpleActorSender implements ActorSender {
   /**
    * Closes the client
    */
+  @Override
   public void close()
   {
-    // _queryMap.close();
+    _queryManager.close();
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getActorStream() + "]";
+    return getClass().getSimpleName() + "[" + getActor() + "]";
   }
   
-  class DefaultActorStream extends AbstractMessageStream {
+  class DefaultActor extends AbstractActor {
     @Override
     public String getAddress()
     {

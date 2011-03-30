@@ -185,12 +185,12 @@ public class HmtpRequest extends AbstractProtocolConnection
     if (isUnidir) {
       _proxyBroker = new ServerGatewayBroker(broker,
                                              _clientManager, 
-                                             _linkActor.getActorStream());
+                                             _linkActor.getActor());
     }
     else {
       _proxyBroker = new ServerProxyBroker(broker,
                                            _clientManager, 
-                                           _linkActor.getActorStream());
+                                           _linkActor.getActor());
     }
 
     return dispatchHmtp();

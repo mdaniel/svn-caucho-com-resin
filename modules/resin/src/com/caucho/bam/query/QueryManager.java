@@ -38,6 +38,8 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.BamException;
 import com.caucho.bam.TimeoutException;
 import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.WeakAlarm;
 
 /**
  * QueryCallbackManager is used to generate query ids and to wait
@@ -47,6 +49,11 @@ public class QueryManager {
   private final AtomicLong _qId = new AtomicLong();
 
   private final QueryMap _queryMap = new QueryMap();
+  
+  private AlarmListener _listener = new TimeoutAlarmListener();
+  private Alarm _alarm = new WeakAlarm(_listener);
+  
+  private long _timeout = 15 * 60 * 1000L;
 
   public QueryManager()
   {
@@ -55,6 +62,21 @@ public class QueryManager {
   public QueryManager(long seed)
   {
     _qId.set(seed);
+  }
+  
+  public boolean isEmpty()
+  {
+    return _queryMap.isEmpty();
+  }
+  
+  public long getTimeout()
+  {
+    return _timeout;
+  }
+  
+  public void setTimeout(long timeout)
+  {
+    _timeout = timeout;
   }
 
   /**
@@ -71,9 +93,21 @@ public class QueryManager {
    * @param id the unique query identifier
    * @param callback the application's callback for the result
    */
-  public void addQueryCallback(long id, QueryCallback callback)
+  public void addQueryCallback(long id, 
+                               QueryCallback callback,
+                               long timeout)
   {
-    _queryMap.add(id, callback);
+    _queryMap.add(id, callback, timeout);
+
+    Alarm alarm = _alarm;
+
+    long expireTime = timeout + Alarm.getCurrentTime();
+    
+    if (alarm != null 
+        && (! alarm.isQueued() 
+            || expireTime < alarm.getWakeTime())) {
+      alarm.queueAt(expireTime);
+    }
   }
 
   /**
@@ -86,9 +120,9 @@ public class QueryManager {
                                     long timeout)
   {
     QueryFutureImpl future
-    = new QueryFutureImpl(id, to, from, payload, timeout);
+      = new QueryFutureImpl(id, to, from, payload, timeout);
 
-    _queryMap.add(id, future);
+    _queryMap.add(id, future, timeout);
 
     return future;
   }
@@ -138,6 +172,24 @@ public class QueryManager {
       return false;
   }
 
+  /**
+   * 
+   */
+  void checkTimeout(long now)
+  {
+    _queryMap.checkTimeout(now);
+  }
+
+  public void close()
+  {
+    Alarm alarm = _alarm;
+    _alarm = null;
+    
+    if (alarm != null)
+      alarm.dequeue();
+  }
+
+  
   @Override
   public String toString()
   {
@@ -148,12 +200,50 @@ public class QueryManager {
     private final QueryItem []_entries = new QueryItem[128];
     private final int _mask = _entries.length - 1;
 
-    void add(long id, QueryCallback callback)
+    boolean isEmpty()
     {
+      for (QueryItem item : _entries) {
+        if (item != null)
+          return false;
+      }
+      
+      return true;
+    }
+
+    void checkTimeout(long now)
+    {
+      for (QueryItem item : _entries) {
+        QueryItem next;
+        
+        while (item != null) {
+          next = item.getNext();
+          
+          if (item._expires < now) {
+            item = remove(item.getId());
+            
+            if (item != null) {
+              QueryCallback cb = item._callback;
+              
+              Exception exn = new TimeoutException();
+              BamError error = BamError.create(exn);
+              
+              cb.onQueryError(null, null, null, error);
+            }
+          }
+          
+          item = next;
+        }
+      }
+    }
+    
+    void add(long id, QueryCallback callback, long timeout)
+    {
+      long expires = timeout + Alarm.getCurrentTime();
+      
       int hash = (int) (id & _mask);
 
       synchronized (_entries) {
-        _entries[hash] = new QueryItem(id, callback, _entries[hash]);
+        _entries[hash] = new QueryItem(id, callback, expires, _entries[hash]);
       }
     }
 
@@ -163,20 +253,24 @@ public class QueryManager {
 
       synchronized (_entries) {
         QueryItem prev = null;
+        QueryItem next = null;
 
         for (QueryItem ptr = _entries[hash];
              ptr != null;
-             ptr = ptr.getNext()) {
+             ptr = next) {
+          next = ptr.getNext();
+          
           if (id == ptr.getId()) {
             if (prev != null)
-              prev.setNext(ptr.getNext());
+              prev.setNext(next);
             else
-              _entries[hash] = ptr.getNext();
+              _entries[hash] = next;
 
             return ptr;
           }
 
           prev = ptr;
+          ptr = next;
         }
 
         return null;
@@ -187,13 +281,15 @@ public class QueryManager {
   static final class QueryItem {
     private final long _id;
     private final QueryCallback _callback;
+    private final long _expires;
 
     private QueryItem _next;
 
-    QueryItem(long id, QueryCallback callback, QueryItem next)
+    QueryItem(long id, QueryCallback callback, long expires, QueryItem next)
     {
       _id = id;
       _callback = callback;
+      _expires = expires;
       _next = next;
     }
 
@@ -210,6 +306,11 @@ public class QueryManager {
     final void setNext(QueryItem next)
     {
       _next = next;
+    }
+    
+    final long getExpires()
+    {
+      return _expires;
     }
 
     void onQueryResult(String to, String from, Serializable value)
@@ -334,5 +435,22 @@ public class QueryManager {
               + ",from=" + _from
               + ",payload=" + _payload + "]");
     }
+  }
+  
+  class TimeoutAlarmListener implements AlarmListener {
+    @Override
+    public void handleAlarm(Alarm alarm)
+    {
+      try {
+        long now = Alarm.getCurrentTime();
+        
+        checkTimeout(now);
+      } finally {
+        if (_alarm == alarm && ! isEmpty()) {
+          alarm.queue(getTimeout());
+        }
+      }
+    }
+    
   }
 }

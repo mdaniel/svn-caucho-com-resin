@@ -39,6 +39,7 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.stream.NullActor;
 import com.caucho.bam.stream.NullMessageStream;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hmtp.HmtpClient;
@@ -100,7 +101,7 @@ public class BamModule extends AbstractQuercusModule
       if (resource.indexOf('/') == 0)
         resource = resource.substring(1);
       
-      NullMessageStream stream = new NullMessageStream(address, broker);
+      NullActor stream = new NullActor(address, broker);
 
       connection = new SimpleActorSender(stream, broker, address, resource);
       env.addCleanup(new BamConnectionResource(connection));

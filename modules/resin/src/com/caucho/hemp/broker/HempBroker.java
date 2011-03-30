@@ -630,12 +630,12 @@ public class HempBroker extends AbstractManagedBroker
     
     // queue
     if (threadMax > 0) {
-      MessageStream actorStream = bamActor.getActorStream();
+      MessageStream actorStream = bamActor.getActor();
       mailbox = new MultiworkerMailbox(address, actorStream, this, threadMax);
       // bamActor.setActorStream(actorStream);
     }
     else {
-      mailbox = new PassthroughMailbox(address, bamActor.getActorStream(), this);
+      mailbox = new PassthroughMailbox(address, bamActor.getActor(), this);
     }
 
     addMailbox(mailbox);
@@ -667,7 +667,7 @@ public class HempBroker extends AbstractManagedBroker
     Mailbox mailbox = null;
     // queue
     if (threadMax > 0) {
-      MessageStream actorStream = bamActor.getActorStream();
+      MessageStream actorStream = bamActor.getActor();
       mailbox = new MultiworkerMailbox(address, actorStream, this, threadMax);
       bamActor.setMailbox(mailbox);
     }

@@ -30,11 +30,9 @@
 package com.caucho.bam.actor;
 
 import java.io.Serializable;
-import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.stream.MessageStream;
 
 /**
  * Base ActorStream implementation using introspection and
@@ -54,14 +52,14 @@ import com.caucho.bam.stream.MessageStream;
  * public void myMessage(String to, String from, MyPayload payload);
  * </pre></code>
  */
-public class SkeletonMessageStreamFilter<T> implements MessageStream
+public class SkeletonActorFilter<T> implements Actor
 {
   private final BamSkeleton<T> _skeleton;
   private final T _actor;
   
-  private final MessageStream _next;
+  private final Actor _next;
 
-  public SkeletonMessageStreamFilter(MessageStream next, T actor)
+  public SkeletonActorFilter(Actor next, T actor)
   {
     if (next == null)
       throw new IllegalStateException("next is a required argument");
