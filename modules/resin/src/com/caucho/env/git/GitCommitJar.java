@@ -246,6 +246,9 @@ public class GitCommitJar {
 
   public void close()
   {
+    if (_jar != null)
+      _jar.closeJar();
+
     if (_tempJar != null) {
       try {
         _tempJar.remove();
