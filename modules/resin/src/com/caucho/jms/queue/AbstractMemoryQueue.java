@@ -180,8 +180,8 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   }
 
   @Override
-  public EntryCallback<E> addMessageCallback(MessageCallback<E> callback,
-                                             boolean isAutoAck)
+  public void addMessageCallback(MessageCallback<E> callback,
+                                 boolean isAutoAck)
   {
     _listenerCount.incrementAndGet();
     
@@ -189,23 +189,36 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
       = new ListenEntryCallback(callback, isAutoAck);
 
     listen(entryCallback);
-
-    return entryCallback;
   }
 
   @Override
-  public void removeMessageCallback(EntryCallback<E> callback)
+  public void removeMessageCallback(MessageCallback<E> callback)
   {
-    ListenEntryCallback listenerCallback
-      = (ListenEntryCallback) callback;
-
-    listenerCallback.close();
+    ListenEntryCallback listenerCallback = null;
 
     synchronized (_queueLock) {
-      _callbackList.remove(listenerCallback);
+      for (int i = _callbackList.size() - 1; i >= 0; i--) {
+        EntryCallback cb = _callbackList.get(i);
+        
+        if (cb.getMessageCallback() == callback) {
+          listenerCallback = (ListenEntryCallback) cb;
+          
+          if (listenerCallback._callback == callback) {
+            _callbackList.remove(listenerCallback);
+            
+            break;
+          }
+          else {
+            listenerCallback = null;
+          }
+        }
+      }
     }
-    
-    _listenerCount.decrementAndGet();
+
+    if (listenerCallback != null) {
+      listenerCallback.close();
+      _listenerCount.decrementAndGet();
+    }
   }
 
   //
@@ -218,15 +231,6 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
 
   protected void readPayload(QE entry)
   {
-  }
-  
-  public void removeMessageCallback(MessageCallback callback)
-  {
-    /*
-    synchronized (_callbackList) {
-      _callbackList.remove(callback);
-    }
-    */
   }
     
   /**
@@ -241,7 +245,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
       acknowledge(entry);
   }
 
-  public boolean listen(EntryCallback<E> callback)
+  protected boolean listen(EntryCallback<E> callback)
     throws MessageException
   {
     QE entry = null;
@@ -566,6 +570,11 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
       _thread = Thread.currentThread();
     }
     
+    public MessageCallback<E> getMessageCallback()
+    {
+      return null;
+    }
+    
     public boolean entryReceived(QueueEntry<E> entry)
     {
       _entry = entry;
@@ -611,6 +620,12 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
       _classLoader = Thread.currentThread().getContextClassLoader();
     }
     
+    public MessageCallback<E> getMessageCallback()
+    {
+      return _callback;
+    }
+    
+    @Override
     public boolean entryReceived(QueueEntry<E> entry)
     {
       _entry = entry;
@@ -620,6 +635,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
       return false;
     }
 
+    @Override
     public void run()
     {
       Thread thread = Thread.currentThread();

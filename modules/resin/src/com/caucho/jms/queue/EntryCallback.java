@@ -32,8 +32,10 @@ package com.caucho.jms.queue;
 /**
  * Listener for queue message available
  */
-public interface EntryCallback<E>
+interface EntryCallback<E>
 {
+  MessageCallback<E> getMessageCallback();
+  
   /**
    * Notifies a listener that a message is available from the queue.
    *
@@ -44,6 +46,6 @@ public interface EntryCallback<E>
    * 
    * @return true for autoAck, false for non-autoAck
    */
-  public boolean entryReceived(QueueEntry<E> entry);
+  boolean entryReceived(QueueEntry<E> entry);
 }
 

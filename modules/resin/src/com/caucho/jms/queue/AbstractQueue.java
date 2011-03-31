@@ -118,7 +118,8 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
     return null;//receiveEntry(timeout, isAutoAck, null);
   }
   
-  public QueueEntry<E> receiveEntry(long expireTime, boolean isAutoAck, 
+  public QueueEntry<E> receiveEntry(long expireTime,
+                                    boolean isAutoAck, 
                                     QueueEntrySelector selector)
     throws MessageException
   {
@@ -129,8 +130,8 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
    * Adds the callback to the listening list.
    */
   @Override
-  public EntryCallback<E> addMessageCallback(MessageCallback<E> callback,
-                                             boolean isAutoAck)
+  public void addMessageCallback(MessageCallback<E> callback,
+                                 boolean isAutoAck)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -139,7 +140,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
    * Removes the callback from the listening list.
    */
   @Override
-  public void removeMessageCallback(EntryCallback<E> entryCallback)
+  public void removeMessageCallback(MessageCallback<E> entryCallback)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -175,7 +176,17 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
                    boolean isAutoAcknowledge)
     throws MessageException
   {
-    QueueEntry<E> entry = receiveEntry(expireTime, isAutoAcknowledge);
+    return receive(expireTime, isAutoAcknowledge, null);
+  }
+  
+  public E receive(long expireTime,
+                   boolean isAutoAcknowledge,
+                   QueueEntrySelector selector)
+    throws MessageException
+  {
+    QueueEntry<E> entry = receiveEntry(expireTime, 
+                                       isAutoAcknowledge,
+                                       selector);
 
     if (entry != null)
       return entry.getPayload();

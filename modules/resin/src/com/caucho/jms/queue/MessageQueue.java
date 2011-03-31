@@ -20,7 +20,8 @@ public interface MessageQueue<E>
    * Listen for a message from the queue, until a message is received
    * or the timeout occurs.
    */
-  public QueueEntry<E> receiveEntry(long expireTime, boolean isAutoAck)
+  public QueueEntry<E> receiveEntry(long expireTime,
+                                    boolean isAutoAck)
     throws MessageException;
   
   /**
@@ -28,21 +29,22 @@ public interface MessageQueue<E>
    * Listen for a message from the queue, until a message is received
    * or the time expires occurs.
    */
-  public E receive(long expireTime, boolean isAutoAck)
+  public E receive(long expireTime,
+                   boolean isAutoAck)
     throws MessageException;
   
   /**
    * Registers a message callback with the queue.  Each message callback
    * will receive messages one at a time until the messages complete.
    */
-  public EntryCallback<E> addMessageCallback(MessageCallback<E> messageCallback,
-                                             boolean isAutoAck)
+  public void addMessageCallback(MessageCallback<E> messageCallback,
+                                 boolean isAutoAck)
     throws MessageException;
 
   /**
    * Removes the callback when messages are done listening
    */
-  public void removeMessageCallback(EntryCallback<E> entryCallback);
+  public void removeMessageCallback(MessageCallback<E> entryCallback);
     
   /**
    * Rollback a message read

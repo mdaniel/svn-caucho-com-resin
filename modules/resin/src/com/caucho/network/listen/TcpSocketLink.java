@@ -886,7 +886,8 @@ public class TcpSocketLink extends AbstractSocketLink
     getReadStream().init(_socket.getStream(), null);
 
     if (log.isLoggable(Level.FINE)) {
-      log.fine(dbgId() + "starting connection " + this + ", total=" + _listener.getConnectionCount());
+      log.fine(dbgId() + "starting connection " + this
+               + ", total=" + _listener.getConnectionCount());
     }
   }
   
@@ -1247,7 +1248,8 @@ public class TcpSocketLink extends AbstractSocketLink
 
     if (log.isLoggable(Level.FINER)) {
       if (port != null)
-        log.finer(dbgId() + "closing connection " + this + ", total=" + port.getConnectionCount());
+        log.finer(dbgId() + "closing connection " + this
+                  + ", total=" + port.getConnectionCount());
       else
         log.finer(dbgId() + "closing connection " + this);
     }

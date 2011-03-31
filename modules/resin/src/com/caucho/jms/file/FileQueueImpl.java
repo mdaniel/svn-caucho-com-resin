@@ -31,16 +31,10 @@ package com.caucho.jms.file;
 
 import java.io.Serializable;
 import java.security.MessageDigest;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.jms.Topic;
 
-import com.caucho.jms.connection.JmsSession;
-import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.queue.AbstractMemoryQueue;
-import com.caucho.jms.queue.MessageException;
-import com.caucho.jms.queue.QueueEntry;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Hex;
@@ -210,6 +204,7 @@ public class FileQueueImpl<E extends Serializable>
     return entry;
   }
 
+  @Override
   protected void readPayload(FileQueueEntry<E> entry)
   {
     E payload = entry.getPayload();
@@ -233,8 +228,11 @@ public class FileQueueImpl<E extends Serializable>
   /**
    * Callback from startup
    */
-  protected void addEntry(long id, String msgId, long leaseTimeout,
-                          int priority, long expireTime,
+  protected void addEntry(long id,
+                          String msgId,
+                          long leaseTimeout,
+                          int priority,
+                          long expireTime,
                           E payload)
   {
     FileQueueEntry<E> entry

@@ -44,7 +44,6 @@ import com.caucho.jms.message.ObjectMessageImpl;
 import com.caucho.jms.message.TextMessageImpl;
 import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.jms.queue.AbstractQueue;
-import com.caucho.jms.queue.EntryCallback;
 import com.caucho.jms.queue.MessageCallback;
 import com.caucho.jms.queue.MessageException;
 import com.caucho.jms.queue.QueueEntry;
@@ -72,7 +71,6 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   private ClassLoader _listenerClassLoader;
 
   private MessageConsumerCallback _messageCallback;
-  private EntryCallback<E> _entryCallback;
 
   private String _messageSelector;
   protected Selector _selector;
@@ -344,7 +342,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
 
     MessageImpl msg = null;
     try {
-      MessageCallback<E> callback = _messageCallback;
+      // MessageCallback<E> callback = _messageCallback;
       
       // XXX: not correct with new model
 
@@ -402,7 +400,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
     if (callback != null) {
       boolean isAutoAcknowledge = _isAutoAcknowledge;
       
-      _entryCallback = _queue.addMessageCallback(callback, isAutoAcknowledge);
+      _queue.addMessageCallback(callback, isAutoAcknowledge);
     }    
   }
 
@@ -421,11 +419,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   public void stop()
     throws JMSException
   {
-    EntryCallback callback = _entryCallback;
-    _entryCallback = null;
-
-    if (callback != null)
-      _queue.removeMessageCallback(callback);
+    _queue.removeMessageCallback(_messageCallback);
 
     /*
     synchronized (_consumerLock) {
@@ -452,7 +446,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
     }
     
     // _queue.removeMessageAvailableListener(this);
-    _session.removeConsumer(this);    
+    _session.removeConsumer(this);
   }
 
   @Override

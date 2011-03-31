@@ -1543,6 +1543,9 @@ public class TcpSocketLinkListener
       startConn = new TcpSocketLink(connId, this, socket);
     }
     
+    _activeConnectionSet.add(startConn);
+    _activeConnectionCount.incrementAndGet();
+    
     return startConn;
   }
 
