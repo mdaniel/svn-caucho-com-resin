@@ -33,27 +33,20 @@ import org.netbeans.spi.server.ServerWizardProvider;
 import org.openide.WizardDescriptor;
 import org.openide.WizardDescriptor.InstantiatingIterator;
 import org.openide.WizardDescriptor.Panel;
-import org.openide.util.ChangeSupport;
-import org.openide.util.HelpCtx;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class ResinWizardProvider implements ServerWizardProvider
-{
+public class ResinWizardProvider implements ServerWizardProvider {
 
-  private final static Logger log
-    = Logger.getLogger(ResinWizardProvider.class.getName());
+  private final static Logger log = Logger.getLogger(ResinWizardProvider.class.getName());
   private static ResinWizardProvider _instance;
   private NewResinWizardPanels _instantiatingIterator;
   private static PluginL10N L = new PluginL10N(ResinWizardProvider.class);
 
-  public final static ResinWizardProvider getInstance()
-  {
+  public final static ResinWizardProvider getInstance() {
 
     if (_instance == null) {
       _instance = new ResinWizardProvider();
@@ -62,27 +55,23 @@ public class ResinWizardProvider implements ServerWizardProvider
     return _instance;
   }
 
-  private ResinWizardProvider()
-  {
+  private ResinWizardProvider() {
     log.finest("creating a new instance of "
-      + ResinWizardProvider.class.getName());
+            + ResinWizardProvider.class.getName());
   }
 
   // ------------------------------------------------------------------------
   // ServerWizardProvider interface implementation
   // ------------------------------------------------------------------------
   @Override
-  public String getDisplayName()
-  {
+  public String getDisplayName() {
     return "Resin";
   }
 
   @Override
-  public InstantiatingIterator getInstantiatingIterator()
-  {
+  public InstantiatingIterator getInstantiatingIterator() {
     if (_instantiatingIterator == null) {
-      _instantiatingIterator
-        = new NewResinWizardPanels(new AddResinServerPanel());
+      _instantiatingIterator = new NewResinWizardPanels(new AddResinServerPanel());
     }
 
     return _instantiatingIterator;
@@ -90,16 +79,13 @@ public class ResinWizardProvider implements ServerWizardProvider
 }
 
 class NewResinWizardPanels<Data> extends WizardDescriptor.ArrayIterator
-  implements InstantiatingIterator
-{
+        implements InstantiatingIterator {
 
-  private final static Logger log
-    = Logger.getLogger(NewResinWizardPanels.class.getName());
+  private final static Logger log = Logger.getLogger(NewResinWizardPanels.class.getName());
   private final AddResinServerPanel _addResinServerPanel;
   private WizardDescriptor _wizardDescriptor;
 
-  public NewResinWizardPanels(AddResinServerPanel addResinServerPanel)
-  {
+  public NewResinWizardPanels(AddResinServerPanel addResinServerPanel) {
     super(new Panel[]{addResinServerPanel.getWizardDescriptorPanel()});
     _addResinServerPanel = addResinServerPanel;
 
@@ -108,51 +94,32 @@ class NewResinWizardPanels<Data> extends WizardDescriptor.ArrayIterator
 
   @Override
   public Set instantiate()
-    throws IOException
-  {
+          throws IOException {
     String displayName = (String) _wizardDescriptor.getProperty(
-      "ServInstWizard_displayName");
+            "ServInstWizard_displayName");
     String home = _addResinServerPanel.getHome();
     String root = _addResinServerPanel.getRoot();
     String host = _addResinServerPanel.getHost();
     String address = _addResinServerPanel.getAddress();
     int port = _addResinServerPanel.getPort();
-    String user = _addResinServerPanel.getUser();
-    String password = _addResinServerPanel.getPassword();
-    String conf;
-
-    if (_addResinServerPanel.isUsingPluginConfiguration()) {
-      conf = _addResinServerPanel.getConf();
-      FileOutputStream out = new FileOutputStream(conf);
-      InputStream in = Thread.currentThread()
-        .getContextClassLoader()
-        .getResourceAsStream("com/caucho/netbeans/resources/hot-deploy.xml");
-      byte[] buffer = new byte[1024];
-      int len;
-
-      while ((len = in.read(buffer)) > 0) {
-        out.write(buffer, 0, len);
-      }
-
-      out.flush();
-      out.close();
-    }
-    else {
-      conf = _addResinServerPanel.getConf();
-    }
+    String user = "";//_addResinServerPanel.getUser();
+    String password = "";//_addResinServerPanel.getPassword();
+    String conf = "";
+    String webapps = _addResinServerPanel.getWebapps();
 
     ResinInstance resin = new ResinInstance(displayName,
-                                            home,
-                                            root,
-                                            host,
-                                            address,
-                                            port,
-                                            user,
-                                            password,
-                                            conf);
+            home,
+            root,
+            host,
+            address,
+            port,
+            user,
+            password,
+            conf,
+            webapps);
 
     ServerInstance server = ResinInstanceProvider.getInstance().instantiate(
-      resin);
+            resin);
     resin.setServerInstance(server);
 
     HashSet result = new HashSet();
@@ -162,23 +129,20 @@ class NewResinWizardPanels<Data> extends WizardDescriptor.ArrayIterator
   }
 
   @Override
-  public Panel current()
-  {
-    _addResinServerPanel.initPluginConfFileName();
+  public Panel current() {
+//    _addResinServerPanel.initPluginConfFileName();
     return super.current();
   }
 
   @Override
-  public void initialize(WizardDescriptor wd)
-  {
+  public void initialize(WizardDescriptor wd) {
     //org.netbeans.modules.server.ui.wizard.AddServerInstanceWizard.
     _wizardDescriptor = wd;
     _addResinServerPanel.setWizardDescriptor(wd);
   }
 
   @Override
-  public void uninitialize(WizardDescriptor wd)
-  {
+  public void uninitialize(WizardDescriptor wd) {
     _wizardDescriptor = null;
   }
 }

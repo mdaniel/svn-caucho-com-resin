@@ -178,11 +178,11 @@ public class ResinProcess
     int serverPort = _resinConfiguration.getServerPort();
     int debugPort = _resinConfiguration.getDebugPort();
     File resinHome = _resinConfiguration.getResinHome();
-    File resinConf = _resinConfiguration.getResinConf();
+    //File resinConf = _resinConfiguration.getResinConf();
     String serverId = _resinConfiguration.getServerId();
     String address = _resinConfiguration.getResinInstance().getAddress();
-    String user = _resinConfiguration.getResinInstance().getUser();
-    String password = _resinConfiguration.getResinInstance().getPassword();
+    //String user = _resinConfiguration.getResinInstance().getUser();
+    //String password = _resinConfiguration.getResinInstance().getPassword();
     int port = _resinConfiguration.getResinInstance().getPort();
     log.info("Resin starting on " + serverPort);
     if (!isPortFree(serverPort)) {
@@ -213,16 +213,16 @@ public class ResinProcess
     }
 
     StringBuilder args = new StringBuilder();
-    args.append("-Ddeploy.username=").append(user);
-    args.append(" -Ddeploy.password=").append(password);
-    args.append(" -Dserver.address=").append(address);
-    args.append(" -Dserver.port=").append(port);
+    //args.append("-Ddeploy.username=").append(user);
+    //args.append(" -Ddeploy.password=").append(password);
+    //args.append(" -Dserver.address=").append(address);
+    //args.append(" -Dserver.port=").append(port);
 
     args.append(" -jar ");
     args.append('"').append(resinHome.getPath()).append("/lib/resin.jar\" ");
 
     args.append(" -resin-home \"" + resinHome + "\"");
-    args.append(" -conf \"" + resinConf.getPath() + "\"");
+    //args.append(" -conf \"" + resinConf.getPath() + "\"");
     args.append(" console");
 
     if (_isDebug) {

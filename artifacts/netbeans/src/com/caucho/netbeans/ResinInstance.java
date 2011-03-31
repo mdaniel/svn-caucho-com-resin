@@ -40,19 +40,12 @@ import org.netbeans.api.server.properties.InstanceProperties;
 import org.netbeans.spi.server.ServerInstanceImplementation;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.util.Lookup;
-import org.openide.util.lookup.AbstractLookup;
 
 import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.URL_ATTR;
 import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.USERNAME_ATTR;
 import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.PASSWORD_ATTR;
 import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.DISPLAY_NAME_ATTR;
-import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.REMOVE_FORBIDDEN;
 import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.HTTP_PORT_NUMBER;
-import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.STARTUP_TIMEOUT;
-import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.SHUTDOWN_TIMEOUT;
-import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.REGISTERED_WITHOUT_UI;
-import static org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties.DEPLOYMENT_TIMEOUT;
 
 public class ResinInstance implements ServerInstanceImplementation {
 
@@ -71,6 +64,7 @@ public class ResinInstance implements ServerInstanceImplementation {
   private String _user = "deploy";
   private String _password = "deploy";
   private String _conf;
+  private String _webapps = "webapps";
 
   public ResinInstance(InstanceProperties properties) {
     _instanceProperties = properties;
@@ -84,9 +78,10 @@ public class ResinInstance implements ServerInstanceImplementation {
     _user = properties.getString(USERNAME_ATTR, "admin");
     _password = properties.getString(PASSWORD_ATTR, "deploy");
     _conf = properties.getString("conf", null);
+    _webapps = properties.getString("webapps", null);
   }
 
-  public ResinInstance(String displayName, String home, String root, String host, String address, int port, String user, String password, String conf) {
+  public ResinInstance(String displayName, String home, String root, String host, String address, int port, String user, String password, String conf, String webapps) {
     _displayName = displayName;
     _home = home;
     _root = root;
@@ -96,6 +91,7 @@ public class ResinInstance implements ServerInstanceImplementation {
     _user = user;
     _password = password;
     _conf = conf;
+    _webapps = webapps;
     _url = createUrl(home, root, host, address, port, displayName);
   }
 
@@ -110,6 +106,7 @@ public class ResinInstance implements ServerInstanceImplementation {
     properties.putString(USERNAME_ATTR, _user);
     properties.putString(PASSWORD_ATTR, _password);
     properties.putString("conf", _conf);
+    properties.putString("webapps", _webapps);
     properties.putInt(HTTP_PORT_NUMBER, _port);
   }
 
@@ -209,6 +206,14 @@ public class ResinInstance implements ServerInstanceImplementation {
 
   public String getUrl() {
     return _url;
+  }
+
+  public String getWebapps() {
+    return _webapps;
+  }
+
+  public void setWebapps(String webapps) {
+    _webapps = webapps;
   }
 
   @Override

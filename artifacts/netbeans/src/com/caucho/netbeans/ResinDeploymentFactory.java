@@ -28,7 +28,6 @@
  */
 package com.caucho.netbeans;
 
-import org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties;
 
 import javax.enterprise.deploy.shared.factories.DeploymentFactoryManager;
 import javax.enterprise.deploy.spi.DeploymentManager;

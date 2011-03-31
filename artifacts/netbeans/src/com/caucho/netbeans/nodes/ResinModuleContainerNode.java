@@ -41,7 +41,6 @@ import org.openide.util.actions.SystemAction;
 
 import javax.enterprise.deploy.shared.ModuleType;
 import java.awt.*;
-import org.openide.util.lookup.Lookups;
 
 /**
  * Node that represents a container, holder of J2EE modules of the same type

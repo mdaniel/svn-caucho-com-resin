@@ -116,6 +116,14 @@ public class ResinConfiguration
     return new File(_resin.getHome());
   }
 
+  public File getResinRoot() {
+    return new File(_resin.getRoot());
+  }
+
+  public File getWebapps() {
+    return new File(_resin.getWebapps());
+  }
+
   public String getServerId()
   {
     return _serverId;
