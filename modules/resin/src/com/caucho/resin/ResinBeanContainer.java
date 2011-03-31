@@ -41,7 +41,6 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.ejb.manager.EjbManager;
@@ -50,7 +49,6 @@ import com.caucho.inject.ThreadContext;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.ResourceLoader;
 import com.caucho.server.webbeans.ResinCdiProducer;
@@ -116,7 +114,6 @@ import com.caucho.vfs.Vfs;
 // TODO Add JNDI look-up and well as direct access to JNDI/CDI beans manager.
 public class ResinBeanContainer {
   private static final L10N L = new L10N(ResinBeanContainer.class);
-  private static final String SCHEMA = "com/caucho/resin/resin-context.rnc";
 
   private EnvironmentClassLoader _classLoader;
   private InjectManager _cdiManager;
@@ -526,31 +523,6 @@ public class ResinBeanContainer {
   public String toString()
   {
     return getClass().getName() + "[]";
-  }
-
-  private class ContextConfig extends BeansConfig implements EnvironmentBean {
-    ContextConfig(InjectManager manager, Path root)
-    {
-      super(manager, root);
-    }
-
-    public ClassLoader getClassLoader()
-    {
-      return _classLoader;
-    }
-
-    @SuppressWarnings("unused")
-    public SystemContext createSystem()
-    {
-      return new SystemContext();
-    }
-  }
-
-  private class SystemContext implements EnvironmentBean {
-    public ClassLoader getClassLoader()
-    {
-      return ClassLoader.getSystemClassLoader();
-    }
   }
 
   private class RequestScope implements Context {

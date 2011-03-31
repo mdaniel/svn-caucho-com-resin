@@ -66,6 +66,7 @@ import com.caucho.config.inject.ScheduleBean;
 import com.caucho.config.inject.SingletonHandle;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.Module;
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -150,16 +151,16 @@ public class XmlStandardPlugin implements Extension {
       }
     } else {
       for (Path beansXMLPath : beansXmlOverride) {
-        configurePath(beansXMLPath);
+        configureXmlOverridePath(beansXMLPath);
       }
     }
   }
 
   private void configurePath(Path beansPath) throws IOException
-  {
-    if (beansPath.canRead() && beansPath.getLength() > 0) {
+  {   
+    if (beansPath.canRead() && beansPath.getLength() > 0) {      
       // ioc/0041 - tck allows empty beans.xml
-
+      
       BeansConfig beans = new BeansConfig(_cdiManager, beansPath);
 
       beansPath.setUserPath(beansPath.getURL());
@@ -169,6 +170,14 @@ public class XmlStandardPlugin implements Extension {
       _pendingBeans.add(beans);
     }
   }
+  
+  private void configureXmlOverridePath(Path beansPath) throws IOException
+  {
+    ContextConfig context = new ContextConfig(_cdiManager, beansPath);
+
+    Config config = new Config();
+    config.configure(context, beansPath, SCHEMA);
+  }  
 
   public void addConfiguredBean(String className)
   {
@@ -200,7 +209,7 @@ public class XmlStandardPlugin implements Extension {
   }
 
   @LazyExtension
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({ "unchecked" })
   public void processTarget(@Observes ProcessInjectionTarget<?> event)
   {
     AnnotatedType<?> type = event.getAnnotatedType();
@@ -376,4 +385,29 @@ public class XmlStandardPlugin implements Extension {
       return _annotated;
     }
   }
+  
+  private class ContextConfig extends BeansConfig implements EnvironmentBean {
+    ContextConfig(InjectManager manager, Path root)
+    {
+      super(manager, root);
+    }
+
+    public ClassLoader getClassLoader()
+    {
+      return Thread.currentThread().getContextClassLoader();
+    }
+
+    @SuppressWarnings("unused")
+    public SystemContext createSystem()
+    {
+      return new SystemContext();
+    }
+  }
+
+  private class SystemContext implements EnvironmentBean {
+    public ClassLoader getClassLoader()
+    {
+      return ClassLoader.getSystemClassLoader();
+    }
+  }  
 }

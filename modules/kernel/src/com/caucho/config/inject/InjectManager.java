@@ -640,7 +640,7 @@ public final class InjectManager
   }
 
   public void addBeansXmlOverride(Path path, Path beansXmlPath)
-  {
+  {  
     List<Path> beansXmlPaths = _beansXMLOverrides.get(path);
 
     if (beansXmlPaths == null) {
