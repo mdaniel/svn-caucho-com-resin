@@ -33,10 +33,13 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.jms.queue.MessageTopicSubscriber;
+
 /**
  * Implements a memory queue.
  */
 public class MemorySubscriberQueue<E> extends MemoryQueueImpl<E>
+  implements MessageTopicSubscriber<E>
 {
   private static final Logger log
     = Logger.getLogger(MemorySubscriberQueue.class.getName());
@@ -56,7 +59,7 @@ public class MemorySubscriberQueue<E> extends MemoryQueueImpl<E>
                    E msg,
                    int priority,
                    long timeout,
-                   Object publisher)
+                   String publisher)
   {
     if (_isNoLocal && _publisher == publisher)
       return;
@@ -64,7 +67,7 @@ public class MemorySubscriberQueue<E> extends MemoryQueueImpl<E>
     if (log.isLoggable(Level.FINE))
       log.fine(this + " send message " + msg);
 
-    super.send(msgId, msg, priority, timeout);
+    super.send(msgId, msg, priority, timeout, publisher);
   }
 
 }

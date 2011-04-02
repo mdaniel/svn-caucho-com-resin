@@ -73,7 +73,9 @@ import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.jms.queue.AbstractQueue;
 import com.caucho.jms.queue.AbstractTopic;
 import com.caucho.util.Alarm;
+import com.caucho.util.Base64;
 import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
 import com.caucho.util.ThreadTask;
 
 /**
@@ -116,10 +118,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   
   private volatile boolean _isClosed;
   private volatile boolean _hasMessage;
+  
+  private String _publisherId;
 
   public JmsSession(ConnectionImpl connection,
-                     boolean isTransacted, int ackMode,
-                     boolean isXA)
+                    boolean isTransacted, int ackMode,
+                    boolean isXA)
     throws JMSException
   {
     _classLoader = Thread.currentThread().getContextClassLoader();
@@ -130,6 +134,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     
     _isTransacted = isTransacted;
     _acknowledgeMode = ackMode;
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append("jms:");
+    Base64.encode(sb, RandomUtil.getRandomLong());
+    
+    _publisherId = sb.toString();
 
     if (isTransacted)
       _acknowledgeMode = 0;
@@ -193,6 +203,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     throws JMSException
   {
     return _connection.getClientID();
+  }
+  
+  public String getPublisherId()
+  {
+    return _publisherId;
   }
 
   /**
@@ -613,7 +628,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       */
     }
 
-    AbstractQueue<?> queue = topicImpl.createSubscriber(this, name, noLocal);
+    AbstractQueue<?> queue = topicImpl.createSubscriber(getPublisherId(), name, noLocal);
 
     TopicSubscriberImpl consumer;
     consumer = new TopicSubscriberImpl(this, topicImpl, queue,
@@ -987,7 +1002,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (log.isLoggable(Level.FINE))
         log.fine(queue + " sending " + message);
 
-      queue.send(message.getJMSMessageID(), message, priority, expireTime, this);
+      queue.send(message.getJMSMessageID(),
+                 message, 
+                 priority, 
+                 expireTime, 
+                 getPublisherId());
     }
   }
 
@@ -1264,7 +1283,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       _queue.send(_message.getJMSMessageID(),
                   _message,
                   _message.getJMSPriority(),
-                  _expires);
+                  _expires,
+                  getPublisherId());
     }
 
     void rollback()

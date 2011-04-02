@@ -72,17 +72,17 @@ public class MemoryTopicImpl<E> extends AbstractTopic<E>
                    E payload,
                    int priority,
                    long timeout,
-                   Object publisher)
+                   String publisherId)
     throws MessageException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {
       _subscriptionList.get(i).send(msgId, payload, priority, timeout,
-                                    publisher);
+                                    publisherId);
     }
   }
 
   @Override
-  public AbstractQueue<E> createSubscriber(Object publisher,
+  public AbstractQueue<E> createSubscriber(String publisher,
                                            String name,
                                            boolean noLocal)
   {

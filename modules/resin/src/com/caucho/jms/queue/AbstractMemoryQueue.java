@@ -100,7 +100,8 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   public void send(String msgId,
                    E payload,
                    int priority,
-                   long expireTime)
+                   long expireTime,
+                   String publisherId)
     throws MessageException
   {
     QE entry = writeEntry(msgId, payload, priority, expireTime);

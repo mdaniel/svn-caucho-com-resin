@@ -195,7 +195,8 @@ public class JdbcQueue<E> extends PollingQueue<E> {
   public void send(String msgId,
                    E payload,
                    int priority,
-                   long expireTime)
+                   long expireTime,
+                   String publisherId)
     throws MessageException
   {
     // JdbcMessage jdbcMessage = _jdbcManager.getJdbcMessage();

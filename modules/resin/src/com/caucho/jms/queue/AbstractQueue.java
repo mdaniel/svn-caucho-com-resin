@@ -85,30 +85,6 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   }
 
   /**
-   * Sends a message to the queue
-   */
-  @Override
-  public void send(String msgId,
-                   E msg,
-                   int priority,
-                   long expireTime)
-    throws MessageException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public void send(String msgId,
-                   E msg,
-                   int priority,
-                   long expireTime,
-                   Object publisher)
-    throws MessageException
-  {
-    send(msgId, msg, priority, expireTime);
-  }
-
-  /**
    * Primary message receiving, registers a callback for any new
    * message.
    */
@@ -227,7 +203,9 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
 
     long expires = Alarm.getCurrentTime() + timeout;
 
-    send(generateMessageID(), message, priority, expires);
+    String publisherId = null;
+    
+    send(generateMessageID(), message, priority, expires, publisherId);
 
     return true;
   }

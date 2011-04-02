@@ -101,9 +101,9 @@ public class FileTopicImpl<E> extends AbstractTopic<E>
   }
 
   @Override
-  public AbstractQueue<E> createSubscriber(Object publisher,
-                                        String name,
-                                        boolean noLocal)
+  public AbstractQueue<E> createSubscriber(String publisher,
+                                           String name,
+                                           boolean noLocal)
   {
     AbstractQueue<E> queue;
 
@@ -142,7 +142,7 @@ public class FileTopicImpl<E> extends AbstractTopic<E>
                    E payload,
                    int priority,
                    long timeout,
-                   Object publisher)
+                   String publisher)
     throws MessageException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {

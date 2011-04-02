@@ -12,7 +12,8 @@ public interface MessageQueue<E>
   public void send(String msgId,
                    E msg,
                    int priority,
-                   long expireTime)
+                   long expireTime,
+                   String publisherId)
     throws MessageException;
   
   /**

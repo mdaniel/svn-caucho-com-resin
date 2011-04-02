@@ -140,20 +140,11 @@ abstract public class AbstractDestination<E>
   /**
    * Sends a message to the queue
    */
-  abstract public void send(String msgId,
-                            E msg,
-                            int priority,
-                            long expires)
-    throws MessageException;
-
-  /**
-   * Sends a message to the queue
-   */
   public void send(String msgId,
                    E msg,
                    int priority,
                    long expires,
-                   Object publisher)
+                   String publisherId)
     throws MessageException
   {
     throw new UnsupportedOperationException(getClass().getName());

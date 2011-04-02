@@ -29,10 +29,13 @@
 
 package com.caucho.util;
 
+import java.io.Serializable;
+
 /**
  * Creates hashes for the identifiers.
  */
-public class HashKey {
+@SuppressWarnings("serial")
+public class HashKey implements Serializable {
   private final byte []_hash;
   
   /**

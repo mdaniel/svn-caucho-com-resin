@@ -72,13 +72,6 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
     _admin.register();
   }
 
-  @Override
-  public void send(String msgId, E msg, int priority, long expireTime)
-    throws MessageException
-  {
-    send(msgId, msg, priority, expireTime, null);
-  }
-
   /**
    * Polls the next message from the store.  If no message is available,
    * wait for the timeout.
@@ -88,9 +81,9 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
     throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
   }
 
-  public abstract AbstractQueue<E> createSubscriber(Object publisher,
-                                                 String name,
-                                                 boolean noLocal);
+  public abstract AbstractQueue<E> createSubscriber(String publisher,
+                                                    String name,
+                                                    boolean noLocal);
 
   public abstract void closeSubscriber(AbstractQueue<E> subscriber);
 
@@ -103,6 +96,7 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
     return 0;
   }
 
+  @Override
   public Iterator<E> iterator()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -111,6 +105,7 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
   /**
    * Adds the item to the queue, waiting if necessary
    */
+  @Override
   public boolean offer(E value, long timeout, TimeUnit unit)
   {
     int priority = 0;
@@ -118,17 +113,21 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
     timeout = unit.toMillis(timeout);
 
     long expires = Alarm.getCurrentTime() + timeout;
+    
+    String publisherId = null;
 
-    send(generateMessageID(), value, priority, expires);
+    send(generateMessageID(), value, priority, expires, publisherId);
 
     return true;
   }
 
+  @Override
   public boolean offer(E value)
   {
     return offer(value, 0, TimeUnit.SECONDS);
   }
 
+  @Override
   public void put(E value)
   {
     offer(value, Integer.MAX_VALUE, TimeUnit.SECONDS);
@@ -143,48 +142,40 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
     
     E payload = receive(expireTime, true);
 
-    try {
-      if (payload == null)
-        return null;
-      else if (payload instanceof ObjectMessage)
-        return (E) ((ObjectMessage) payload).getObject();
-      else if (payload instanceof TextMessage)
-        return (E) ((TextMessage) payload).getText();
-      else if (payload instanceof Serializable)
-        return payload;
-      else
-        throw new MessageException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
-                                       payload));
-    } catch (JMSException e) {
-      throw new MessageException(e);
-    }
+    return payload;
   }
 
+  @Override
   public int remainingCapacity()
   {
     return Integer.MAX_VALUE;
   }
 
+  @Override
   public E peek()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public E poll()
   {
     return poll(0, TimeUnit.MILLISECONDS);
   }
 
+  @Override
   public E take()
   {
     return poll(Integer.MAX_VALUE, TimeUnit.SECONDS);
   }
 
+  @Override
   public int drainTo(Collection c)
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public int drainTo(Collection c, int max)
   {
     throw new UnsupportedOperationException();

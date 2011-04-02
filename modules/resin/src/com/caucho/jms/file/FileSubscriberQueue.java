@@ -32,11 +32,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.jms.memory.MemoryQueueImpl;
+import com.caucho.jms.queue.MessageTopicSubscriber;
 
 /**
  * Implements a file queue.
  */
 public class FileSubscriberQueue<E> extends MemoryQueueImpl<E>
+  implements MessageTopicSubscriber<E>
 {
   private static final Logger log
            = Logger.getLogger(FileSubscriberQueue.class.getName());
@@ -45,11 +47,16 @@ public class FileSubscriberQueue<E> extends MemoryQueueImpl<E>
   private Object _publisher;
   private boolean _isNoLocal;
 
-  FileSubscriberQueue(FileTopicImpl<E> topic, Object publisher, boolean noLocal)
+  FileSubscriberQueue(FileTopicImpl<E> topic, 
+                      String publisher, 
+                      boolean noLocal)
   {
     _topic = topic;
     _publisher = publisher;
     _isNoLocal = noLocal;
+    
+    if (noLocal && publisher == null)
+      throw new IllegalStateException();
   }
 
   @Override
@@ -57,15 +64,15 @@ public class FileSubscriberQueue<E> extends MemoryQueueImpl<E>
                    E msg,
                    int priority,
                    long timeout,
-                   Object publisher)
+                   String publisherId)
   {
-    if (_isNoLocal && _publisher == publisher)
+    if (_isNoLocal && _publisher.equals(publisherId))
       return;
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " send message " + msg);
 
-    super.send(msgId, msg, priority, timeout);
+    super.send(msgId, msg, priority, timeout, publisherId);
   }
 
   public String toString()
