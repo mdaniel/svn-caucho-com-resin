@@ -556,7 +556,7 @@ public class WebApp extends ServletContextImpl
       _invocationDependency.add(_controller);
 
       _cdiManager = InjectManager.create(_classLoader);
-      _cdiManager.addPath(getRootDirectory().lookup("WEB-INF/beans.xml"));
+      _cdiManager.addXmlPath(getRootDirectory().lookup("WEB-INF/beans.xml"));
       _cdiManager.addExtension(new WebAppInjectExtension(_cdiManager, this));
 
       _jspApplicationContext = new JspApplicationContextImpl(this);

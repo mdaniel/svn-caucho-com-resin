@@ -82,8 +82,10 @@ public class XmlStandardPlugin implements Extension {
   private InjectManager _cdiManager;
   private HashSet<String> _configuredBeans = new HashSet<String>();
 
-  private ArrayList<Path> _paths = new ArrayList<Path>();
-  private ArrayList<Path> _pendingPaths = new ArrayList<Path>();
+  private ArrayList<Path> _roots = new ArrayList<Path>();
+  private ArrayList<Path> _pendingRoots = new ArrayList<Path>();
+  
+  private ArrayList<Path> _pendingXml = new ArrayList<Path>();
 
   private ArrayList<BeansConfig> _pendingBeans = new ArrayList<BeansConfig>();
 
@@ -100,20 +102,34 @@ public class XmlStandardPlugin implements Extension {
 
   public void addRoot(Path root)
   {
-    if (!_paths.contains(root)) {
-      _pendingPaths.add(root);
+    if (!_roots.contains(root)) {
+      _pendingRoots.add(root);
     }
+  }
+  
+  public void addXmlPath(Path xmlPath)
+  {
+    if (! _pendingXml.contains(xmlPath))
+      _pendingXml.add(xmlPath);
   }
 
   public void beforeDiscovery(@Observes BeforeBeanDiscovery event)
   {
-    ArrayList<Path> paths = new ArrayList<Path>(_pendingPaths);
-    _pendingPaths.clear();
+    ArrayList<Path> paths = new ArrayList<Path>(_pendingRoots);
+    _pendingRoots.clear();
+    
+    ArrayList<Path> xmlPaths = new ArrayList<Path>(_pendingXml);
+    _pendingXml.clear();
 
     try {
       for (Path root : paths) {
         configureRoot(root);
       }
+      
+      for (Path xml : xmlPaths) {
+        configurePath(xml);
+      }
+      
 
       for (int i = 0; i < _pendingBeans.size(); i++) {
         BeansConfig config = _pendingBeans.get(i);

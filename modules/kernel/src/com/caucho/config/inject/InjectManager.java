@@ -291,9 +291,6 @@ public final class InjectManager
   private boolean _isUpdateNeeded = true;
   private boolean _isAfterValidationNeeded = true;
 
-  private ArrayList<Path> _pendingPathList
-    = new ArrayList<Path>();
-
   private ConcurrentHashMap<Path, List<Path>> _beansXMLOverrides 
     = new ConcurrentHashMap<Path, List<Path>>();
   
@@ -634,13 +631,18 @@ public final class InjectManager
     _parent = parent;
   }
 
-  public void addPath(Path path)
+  public void addXmlPath(Path path)
   {
-    _pendingPathList.add(path);
+    _isUpdateNeeded = true;
+
+    _xmlExtension.addXmlPath(path);
   }
 
   public void addBeansXmlOverride(Path path, Path beansXmlPath)
-  {  
+  {
+    if (path == null)
+      throw new NullPointerException();
+    
     List<Path> beansXmlPaths = _beansXMLOverrides.get(path);
 
     if (beansXmlPaths == null) {
