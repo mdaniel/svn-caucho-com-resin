@@ -11,6 +11,7 @@
 
   <property name="install" location="${basedir}/"/>
 
+  <property name="artifacts" location="${basedir}/artifacts"/>
   <property name="resin.artifacts" location="${resindir}/artifacts"/>
 
   <property name="resin.modules" location="${resindir}/modules"/>
