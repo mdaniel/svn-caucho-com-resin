@@ -31,6 +31,7 @@ package com.caucho.config;
 
 import com.caucho.el.StackELResolver;
 import com.caucho.el.SystemPropertiesResolver;
+import com.caucho.jmx.MBeanAttributeResolver;
 import com.caucho.config.el.CandiConfigResolver;
 import com.caucho.config.el.ConfigContextResolver;
 
@@ -95,6 +96,7 @@ public class ConfigELContext extends ELContext {
     _stackResolver.push(new ConfigPropertiesResolver());
     _stackResolver.push(new CandiConfigResolver());
     _stackResolver.push(new ConfigContextResolver());
+    _stackResolver.push(new MBeanAttributeResolver());
     
     EL_CONTEXT = new ConfigELContext();
   }

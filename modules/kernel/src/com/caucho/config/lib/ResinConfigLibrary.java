@@ -32,10 +32,13 @@ package com.caucho.config.lib;
 import com.caucho.config.Config;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.jmx.Jmx;
 import com.caucho.naming.Jndi;
 
 import java.lang.reflect.*;
 import java.util.logging.*;
+
+import javax.management.*;
 
 /**
  * Library of static config functions.
@@ -68,7 +71,17 @@ public class ResinConfigLibrary {
   {
     return Jndi.lookup(jndiName);
   }
-
+  
+  public static ObjectName mbean(String name)
+  {
+    try {
+      return Jmx.getObjectName(name);
+    } catch (MalformedObjectNameException e) {
+      log().log(Level.FINEST, e.toString(), e);
+      return null;
+    }
+  }
+  
   public static void configure(InjectManager webBeans)
   {
     try {
