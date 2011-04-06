@@ -257,8 +257,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   {
     MnodeValue mnodeValue = loadMnodeValue(entry);
 
-    if (mnodeValue == null)
+    if (mnodeValue == null) {
       reloadValue(entry, config, now);
+    }
     else if (isLocalReadValid(mnodeValue, now)) {
     }
     else { // if (! isLazy) {
@@ -570,7 +571,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     HashKey key = cacheEntry.getKeyHash();
     MnodeValue mnodeValue = cacheEntry.getMnodeValue();
 
-    if (mnodeValue == null) {
+    if (mnodeValue == null || mnodeValue.isImplicitNull()) {
       MnodeValue newMnodeValue = getDataBacking().loadLocalEntryValue(key);
 
       cacheEntry.compareAndSet(null, newMnodeValue);

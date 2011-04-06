@@ -59,7 +59,10 @@ public enum LifecycleState {
     public boolean isStarting() { return true; }
   },
   
-  STANDBY,
+  STANDBY {
+    @Override
+    public boolean isAllowStopFromRestart() { return true; }
+  },
   
   STOPPED_IDLE {
     @Override
@@ -85,11 +88,15 @@ public enum LifecycleState {
     public boolean isActive() { return true; }
     @Override
     public boolean isRunnable() { return true; }
+    @Override
+    public boolean isAllowStopFromRestart() { return true; }
   },
   
   FAILED {
     @Override
     public boolean isError() { return true; }
+    @Override
+    public boolean isAllowStopFromRestart() { return true; }
   },
   
   STOPPING {
@@ -204,6 +211,11 @@ public enum LifecycleState {
   public boolean isAfterStopping()
   {
     return STOPPING.ordinal() <= ordinal();
+  }
+
+  public boolean isAllowStopFromRestart()
+  {
+    return false;
   }
 
   public boolean isStopped()

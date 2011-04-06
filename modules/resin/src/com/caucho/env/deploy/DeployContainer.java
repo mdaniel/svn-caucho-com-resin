@@ -306,7 +306,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
     _deployListGenerator.generateController(name, controllerList);
     
     C bestController = null;
-    
+
     for (C controller : controllerList) {
       if (bestController == null)
         bestController = controller;
@@ -319,11 +319,13 @@ public class DeployContainer<C extends DeployControllerApi<?>>
     if (bestController == null)
       return null;
     
+    /*
     for (C controller : controllerList) {
       bestController.merge((DeployControllerApi) controller);
     }
+    */
     
-    bestController = _deployListGenerator.mergeController(bestController, name);
+    _deployListGenerator.mergeController(bestController, name);
     
     return addController(bestController);
   }
@@ -438,6 +440,7 @@ public class DeployContainer<C extends DeployControllerApi<?>>
     return (Match<C,String>) ControllerIdMatch.MATCH;
   }
 
+  @Override
   public String toString()
   {
     return "DeployContainer$" + System.identityHashCode(this) + "[]";

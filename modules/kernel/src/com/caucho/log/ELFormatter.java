@@ -140,17 +140,7 @@ public class ELFormatter extends MessageFormatter {
       if (base != null || ! (property instanceof String))
         return null;
 
-      if ("log".equals(property)) {
-        env.setPropertyResolved(true);
-
-        return _logRecord;
-      }
-      else if ("request".equals(property)) {
-        env.setPropertyResolved(true);
-
-        return ThreadRequestFactory.getCurrentHttpRequest();
-      }
-      else if ("cookie".equals(property)) {
+      if ("cookie".equals(property)) {
         env.setPropertyResolved(true);
 
         HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
@@ -164,6 +154,16 @@ public class ELFormatter extends MessageFormatter {
 
         return null;
       }
+      else if ("log".equals(property)) {
+        env.setPropertyResolved(true);
+
+        return _logRecord;
+      }
+      else if ("request".equals(property)) {
+        env.setPropertyResolved(true);
+
+        return ThreadRequestFactory.getCurrentHttpRequest();
+      }
       else if ("session".equals(property)) {
         env.setPropertyResolved(true);
 
@@ -176,6 +176,11 @@ public class ELFormatter extends MessageFormatter {
         }
 
         return null;
+      }
+      else if ("thread".equals(property)) {
+        env.setPropertyResolved(true);
+
+        return Thread.currentThread().getName();
       }
 
       return null;

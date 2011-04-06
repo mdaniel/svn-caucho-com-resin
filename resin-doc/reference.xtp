@@ -4502,6 +4502,11 @@ with the other logging configuration.</p>
   <td></td>
 </tr>
 <tr>
+  <td>format</td>
+  <td>An EL expression string to format the current output line.</td>
+  <td></td>
+</tr>
+<tr>
   <td>formatter</td>
   <td>Configures a custom java.util.logging.Formatter to format
 the output.</td>
@@ -7808,6 +7813,40 @@ element resin:message {
 </example>
 
 </defun> <!-- resin:message -->
+
+<defun title="&lt;resin:MovedPermanently>" name="resin:MovedPermanently">
+<javadoc class="com.caucho.rewrite.MovedPermanently"/>
+
+<description>
+<p>
+  Send an HTTP redirect to a new URL specified by <em>target</em>.
+</p>
+</description>
+
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>regexp</td>
+  <td>The regular expression of the URL to match.</td>
+</tr>
+<tr>
+  <td>target</td>
+  <td>The target to which to redirect the request.</td>
+</tr>
+</attributes>
+
+<example title="Flipping elements of a path with a MovedPermanently">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:MovedPermanently regexp='^/([^/]+)/([^/]+)' target='/$2/$1'/>
+  
+&lt;/web-app>
+</example>
+</defun> <!-- movedPermanently -->
 
 <defun title="&lt;resin:Not>" name="resin:Not">
 <javadoc class="com.caucho.rewrite.Not"/>

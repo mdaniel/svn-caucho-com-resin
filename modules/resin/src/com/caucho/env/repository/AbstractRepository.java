@@ -334,17 +334,15 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
 
       RepositoryTagMap newDeployTagMap
         = new RepositoryTagMap(this, repositoryTagMap, newTagMap);
+      
+      // #4450 - always return a value
 
-      if (_tagMap == repositoryTagMap) {
-        return newDeployTagMap;
-      }
+      return newDeployTagMap;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RepositoryException(e);
     }
-
-    return null;
   }
 
   /**

@@ -224,6 +224,11 @@ with the other logging configuration.</p>
   <td></td>
 </tr>
 <tr>
+  <td>format</td>
+  <td>An EL expression string to <a href="#Format-String">format</a> the current output.</td>
+  <td></td>
+</tr>
+<tr>
   <td>formatter</td>
   <td>Configures a custom java.util.logging.Formatter to format
 the output.</td>
@@ -494,25 +499,72 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 <a javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
  object.</p>
 
-<example title="log format string">
+<example title="Example: log format string">
 
-&lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
+&lt;log-handler name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
      format=" ${log.level} ${log.loggerName} ${log.message}"/&gt;
 
 </example>
 
 <deftable title="log EL variable 'log' is a LogRecord">
-<tr><th>Accessor</th><th>Value
-</th></tr><tr><td>${log.level}</td><td>The level of the log record
-</td></tr><tr><td>${log.name}</td><td>The source loggers name
-</td></tr><tr><td>${log.shortName}</td><td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"
-</td></tr><tr><td>${log.message}</td><td>The message, with no formatting or localization
-</td></tr><tr><td>${log.millis}</td><td>event time in milliseconds since 1970
-</td></tr><tr><td>${log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
-</td></tr><tr><td>${log.thrown}</td><td>Get any <a javadoc="java.lang.Throwable"/> associated with the logging request
-</td></tr></deftable>
+<tr>
+  <th>Accessor</th>
+  <th>Value</th>
+</tr>
+<tr>
+  <td>${log.level}</td>
+  <td>The level of the log record</td>
+</tr>
+<tr>
+  <td>${log.name}</td>
+  <td>The source loggers name</td>
+</tr>
+<tr>
+  <td>${log.shortName}</td>
+  <td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"</td>
+</tr>
+<tr>
+  <td>${log.message}</td>
+  <td>The message, with no formatting or localization</td>
+</tr>
+<tr>
+  <td>${log.millis}</td>
+  <td>event time in milliseconds since 1970</td>
+</tr>
+<tr>
+  <td>${log.sourceClassName}</td>
+  <td>Get the name of the class that issued the logging request (may not be available at runtime)</td>
+</tr>
+<tr>
+  <td>${log.sourceMethodName}</td>
+  <td>Get the name of the method that issued the logging request (may not be available at runtime)</td>
+</tr>
+<tr>
+  <td>${log.threadID}</td>
+  <td>Get an <var>int</var> identifier of the thread where the logging request originated</td>
+</tr>
+<tr>
+  <td>${log.thrown}</td>
+  <td>Get any <a javadoc="java.lang.Throwable"/> associated with the logging request
+  </td>
+</tr>
+<tr>
+  <td>${thread}</td>
+  <td>The name of the current thread.</td>
+</tr>  
+<tr>
+  <td>${request}</td>
+  <td>The servlet request value.</td>
+</tr>  
+<tr>
+  <td>${session}</td>
+  <td>The servlet session.</td>
+</tr>  
+<tr>
+  <td>${cookie['JSESSIONID']}</td>
+  <td>The value of a request cookie.</td>
+</tr>  
+</deftable>
 
 <p>You can also use the <a href="config-el.xtp">Environment EL variables</a> in your format string:</p>
 

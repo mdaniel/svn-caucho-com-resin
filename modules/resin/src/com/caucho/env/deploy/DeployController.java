@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
@@ -70,7 +71,7 @@ abstract public class DeployController<I extends DeployInstance>
     = StartManualRedeployManualStrategy.STRATEGY;
 
   protected final Lifecycle _lifecycle;
-
+  
   private DeployControllerAlarm<DeployController<I>> _alarm;
 
   private DeployTagItem _deployTagItem;
@@ -246,6 +247,19 @@ abstract public class DeployController<I extends DeployInstance>
   public long getRedeployCheckInterval()
   {
     return _redeployCheckInterval;
+  }
+
+  /**
+   * Sets the delay time waiting for a restart
+   */
+  public void setActiveWaitTimeMillis(long wait)
+  {
+    _waitForActiveTimeout = wait;
+  }
+  
+  public long getActiveWaitTime()
+  {
+    return _waitForActiveTimeout;
   }
 
   /**
@@ -448,6 +462,14 @@ abstract public class DeployController<I extends DeployInstance>
     else
       return null;
   }
+  
+  @Override
+  public I getActiveDeployInstance()
+  {
+    _lifecycle.waitForActive(getActiveWaitTime());
+    
+    return getDeployInstanceImpl();
+  }
 
   /**
    * Returns the current instance.
@@ -543,7 +565,7 @@ abstract public class DeployController<I extends DeployInstance>
       return null;
     else if (_strategy != null) {
       I instance = _strategy.request(this);
-      
+
       return instance;
     }
     else
@@ -576,7 +598,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   final I restartImpl()
   {
-    if (! _lifecycle.isStopped() && ! _lifecycle.isInit())
+    if (_lifecycle.isAllowStopFromRestart())
       stopImpl();
 
     return startImpl();
@@ -659,19 +681,21 @@ abstract public class DeployController<I extends DeployInstance>
         log.log(Level.SEVERE, e.toString(), e);
       }
     } finally {
-      if (isActive) {
-        _lifecycle.toActive();
-        
-        onActive();
-      }
-      else
-        _lifecycle.toError();
-      
-      onStartComplete();
+      if (isStarting) {
+        if (isActive) {
+          _lifecycle.toActive();
 
-      // server/
-      if (loader instanceof DynamicClassLoader)
-        ((DynamicClassLoader) loader).clearModified();
+          onActive();
+        }
+        else
+          _lifecycle.toError();
+
+        onStartComplete();
+
+        // server/
+        if (loader instanceof DynamicClassLoader)
+          ((DynamicClassLoader) loader).clearModified();
+      }
 
       thread.setContextClassLoader(oldLoader);
     }

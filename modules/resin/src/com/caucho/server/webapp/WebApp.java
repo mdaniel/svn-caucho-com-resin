@@ -3218,6 +3218,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns true if the webApp has been modified.
    */
+  @Override
   public boolean isModified()
   {
     // server/13l8
@@ -3235,6 +3236,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns true if the webApp has been modified.
    */
+  @Override
   public boolean isModifiedNow()
   {
     // force check

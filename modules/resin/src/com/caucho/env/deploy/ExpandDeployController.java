@@ -595,7 +595,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     
     if (getArchivePath() != null)
       _depend.add(new Depend(getArchivePath()));
-    
+
     String value = _repositorySpi.getTagContentHash(getId());
     _depend.add(new RepositoryDependency(getId(), value));
     

@@ -7,34 +7,30 @@
   <property name="resindir" location="${basedir}/../resin"/>
   -->
   <property name="resindir" location="."/>
-  <property name="prodir" location="${basedir}/../pro"/>
+  <property name="prodir" location="${resindir}/../pro"/>
 
   <property name="install" location="${basedir}/"/>
-  <property name="resin.install" location="${resindir}/"/>
 
-  <property name="modules" location="${basedir}/modules"/>
-  <property name="resin.modules" location="${resindir}/modules"/>
-
-  <property name="artifacts" location="${basedir}/artifacts"/>
   <property name="resin.artifacts" location="${resindir}/artifacts"/>
 
-  <property name="src" location="${basedir}/src"/>
+  <property name="resin.modules" location="${resindir}/modules"/>
+  <property name="modules" location="${basedir}/modules"/>
+  <property name="src" location="${resindir}/src"/>
   <property name="ext" location="${resindir}/modules/ext"/>
   <property name="maven.lib" location="${resindir}/maven-lib"/>
-  <property name="doc" location="${resindir}/doc"/>
+  <property name="resin.doc" location="${resindir}/resin-doc"/>
 
-  <property name="build" location="${install}/build"/>
+  <property name="build" location="${resindir}/build"/>
 
-  <property name="lib" location="${install}/lib"/>
-  <property name="resin.lib" location="${resin.install}/lib"/>
+  <property name="lib" location="${resindir}/lib"/>
+  <property name="resin.lib" location="${resindir}/lib"/>
 
   <property name="resin.http" value="8080"/>
   <property name="resin.https" value="8443"/>
 
   <property name="clientlib" location="${install}/clientlib"/>
 
-  <property name="dist" location="${install}/dist"/>
-  <property name="resin.dist" location="${resin.install}/dist"/>
+  <property name="dist" location="${resindir}/dist"/>
 
   <property name="javac.verbose" value="off"/>
   <property name="javac.debug" value="on"/>
@@ -105,7 +101,7 @@
       <isset property="version"/>
     </condition>
     <property name="maven.m2" value="m2-snapshot"/>
-    <property name="maven.root" value="${resin.dist}/${maven.m2}"/>
+    <property name="maven.root" value="${dist}/${maven.m2}"/>
 
     <!--nversion must be a nubmer, used with eclipse-plugin-->
     <condition property="nversion" value="${version}">
@@ -115,6 +111,7 @@
     
     <property name="version" value="4.0.s${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
+    <property name="dist.build" location="${dist}/${dist.name}"/>
 
     <mkdir dir="${build}"/>
     <mkdir dir="${build}/webapps"/>
@@ -128,8 +125,8 @@
   </target>
 
   <target name="version">
-    <copy file="${modules}/resin/src/com/caucho/Version.tmpl"
-          tofile="${modules}/resin/src/com/caucho/Version.java"
+    <copy file="${resin.modules}/resin/src/com/caucho/Version.tmpl"
+          tofile="${resin.modules}/resin/src/com/caucho/Version.java"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -139,8 +136,8 @@
       </filterset>
     </copy>
 
-    <copy file="${modules}/c/src/common/version.h.in"
-          tofile="${modules}/c/src/common/version.h"
+    <copy file="${resin.modules}/c/src/common/version.h.in"
+          tofile="${resin.modules}/c/src/common/version.h"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -192,7 +189,7 @@
         <dirset dir="${resin.modules}">
            <include name="*/classes"/>
         </dirset>
-        <dirset dir="${modules}">
+        <dirset dir="${resin.modules}">
            <include name="*/classes"/>
         </dirset>
         <fileset dir="${ext}">
@@ -221,11 +218,11 @@
      - artifact compile
     -->
   <target name="artifact">
-    <property name="artifact.src" value="${artifacts}/${artifact.name}/src"/>
-    <property name="artifact.maven" value="${artifacts}/${artifact.name}/maven2"/>
-    <property name="artifact.build" value="${artifacts}/${artifact.name}/classes"/>
-    <property name="artifact.dist" value="${artifacts}/${artifact.name}/dist"/>
-    <property name="artifact.lib" value="${artifacts}/${artifact.name}/lib"/>
+    <property name="artifact.src" value="${resin.artifacts}/${artifact.name}/src"/>
+    <property name="artifact.maven" value="${resin.artifacts}/${artifact.name}/maven2"/>
+    <property name="artifact.build" value="${resin.artifacts}/${artifact.name}/classes"/>
+    <property name="artifact.dist" value="${resin.artifacts}/${artifact.name}/dist"/>
+    <property name="artifact.lib" value="${resin.artifacts}/${artifact.name}/lib"/>
     <property name="artifact.ext" value="jar"/>
     <property name="artifact.jar" value="resin-${artifact.name}.${artifact.ext}"/>
 
@@ -270,7 +267,7 @@
            excludes="**/.svn/**"
            memoryMaximumSize="${javac.memoryMaximumSize}">
       <classpath>
-        <dirset dir="${modules}">
+        <dirset dir="${resin.modules}">
           <include name="*/classes"/>
        </dirset>
         <fileset dir="${artifacts}/${artifact.name}">
@@ -300,8 +297,8 @@
 
   <target name="csharp" depends="init">
     <property name="module.name" value="csharp"/>
-    <property name="module.src" value="${modules}/${module.name}/src"/>
-    <property name="module.build" value="${modules}/${module.name}/classes"/>
+    <property name="module.src" value="${resin.modules}/${module.name}/src"/>
+    <property name="module.build" value="${resin.modules}/${module.name}/classes"/>
     <property name="module.dist" value="${lib}"/>
 
     <mkdir dir="${module.build}" />
@@ -358,15 +355,15 @@
 
       <java classname="com.caucho.xtpdoc.Printer" fork="true" 
             output="${build}/pdf/@{name}/@{name}.tex" logError="true"
-            dir="${doc}">
+            dir="${doc.src}">
         <jvmarg value="-Djava.awt.headless=true"/>
-        <arg file="${doc}/@{name}.xml"/>
+        <arg file="${doc.src}/@{name}.xml"/>
         <classpath>
           <pathelement location="${java.home}/../lib/tools.jar"/>
-          <dirset dir="${modules}">
+          <dirset dir="${resin.modules}">
             <include name="*/classes"/>
           </dirset>
-          <fileset dir="${modules}/ext">
+          <fileset dir="${resin.modules}/ext">
             <include name="**/*.jar"/>
           </fileset>
         </classpath>
@@ -390,7 +387,7 @@
     <mkdir dir="${build}/pdf/images"/>
 
     <apply executable="convert" dir="." dest="${build}/pdf/images">
-      <fileset dir="${doc}/images">
+      <fileset dir="${doc.src}/images">
         <include name="*.gif" />
         <include name="*.jpg" />
         <include name="*.png" />
@@ -417,7 +414,7 @@
             <include name="*.jar" />
           </fileset>
        </classpath>
-       <arg line="${modules}/resin/classes/com/caucho/server/resin/resin.rnc"/>
+       <arg line="${resin.modules}/resin/classes/com/caucho/server/resin/resin.rnc"/>
        <arg line="xsd/resin.xsd"/>
     </java>
     
@@ -427,7 +424,7 @@
             <include name="*.jar" />
           </fileset>
        </classpath>
-       <arg line="${modules}/resin/classes/com/caucho/server/webapp/resin-web-xml.rnc"/>
+       <arg line="${resin.modules}/resin/classes/com/caucho/server/webapp/resin-web-xml.rnc"/>
        <arg line="xsd/resin-web-xml.xsd"/>
     </java>
   </target>
@@ -443,23 +440,21 @@
 
     <property file="${artifact.src}/module.properties"/>
 
-    <mkdir dir="${resin.dist}/${dist.name}/project-jars"/>
+    <mkdir dir="${dist.build}/project-jars"/>
     
-    <copy tofile="${resin.dist}/${dist.name}/project-jars/resin-${artifact.name}-${version}.jar"
+    <copy tofile="${dist.build}/project-jars/resin-${artifact.name}-${version}.jar"
           file="${artifact.dist}/${artifact.jar}"/>
   </target>
 	  
   <target name="resin.dist.jar"
           depends="compile">
-    <property name="dist.name" value="${shortproduct}-${version}"/>
-
-    <mkdir dir="${dist}/${dist.name}/lib"/>
-    <mkdir dir="${dist}/${dist.name}/compat"/>
+    <mkdir dir="${dist.build}/lib"/>
+    <mkdir dir="${dist.build}/compat"/>
 
     <!--
        - javaee-16.jar
       -->
-    <jar destfile="${dist}/${dist.name}/lib/javaee-16.jar">
+    <jar destfile="${dist.build}/lib/javaee-16.jar">
       <fileset dir="${resin.modules}/ejb/classes">
         <exclude name="**/.*"/>
       </fileset>
@@ -511,7 +506,7 @@
     <!--
        - resin.jar
       -->
-    <jar destfile="${dist}/${dist.name}/lib/resin.jar"
+    <jar destfile="${dist.build}/lib/resin.jar"
          manifest="${resin.modules}/resin/src/manifest">
       <fileset dir="${resin.modules}/resin/classes">
         <exclude name="**/.*"/>
@@ -590,17 +585,15 @@
   
   <target name="resin.dist.build" 
           depends="compile, configure, resin.dist.jar">
-    <property name="dist.name" value="${shortproduct}-${version}"/>
-
-    <mkdir dir="${dist}/${dist.name}"/>
+    <mkdir dir="${dist.build}"/>
     
     <copy tofile="${install}/conf/resin.xml.orig"
-          file="${resin.install}/conf/resin.xml"/>
+          file="${resindir}/conf/resin.xml"/>
 
-    <copy todir="${dist}/${dist.name}"
+    <copy todir="${dist.build}"
           preservelastmodified="true"
           overwrite="true">
-      <fileset dir="${resin.install}">
+      <fileset dir="${resindir}">
         <exclude name="**/*~"/>
         <exclude name="**/.cvsignore"/>
         <exclude name="**/.svnignore"/>
@@ -692,17 +685,17 @@
       </fileset>
     </copy>
 
-    <copy todir="${dist}/${dist.name}/webapp-jars"
+    <copy todir="${dist.build}/webapp-jars"
           preservelastmodified="true"
           overwrite="true">
-      <fileset dir="${resin.install}/lib">
+      <fileset dir="${resindir}/lib">
         <include name="slf4j-api-1.6.1.jar"/>
         <include name="hibernate-validator-4.0.2.GA.jar"/>
       </fileset>
     </copy>
 
-    <copy todir="${resin.dist}/${dist.name}/doc/resin-doc">
-      <fileset dir="${resin.install}/doc">
+    <copy todir="${dist.build}/doc/resin-doc">
+      <fileset dir="${resin.doc}">
         <exclude name="**/*~"/>
         <exclude name="**/.cvsignore"/>
         <exclude name="**/.svnignore"/>
@@ -712,8 +705,8 @@
       </fileset>
     </copy>
     
-    <copy todir="${dist}/${dist.name}/doc">
-      <fileset dir="${resin.install}/php">
+    <copy todir="${dist.build}/doc">
+      <fileset dir="${resindir}/php">
         <exclude name="**/*~"/>
         <exclude name="**/.cvsignore"/>
         <exclude name="**/.svnignore"/>
@@ -726,30 +719,8 @@
       </fileset>
     </copy>
 
-    <!--
-    <copy todir="${dist}/${dist.name}/plugins"
-          preservelastmodified="true"
-          overwrite="true">
-      <fileset dir="${resin.install}/lib">
-        <include name="resin-ant.jar"/>
-        <include name="resin-richfaces.jar"/>
-        <include name="netbeans-plugin.nbm"/>
-      </fileset>
-    </copy>
-    -->
-
-    <!--
-    <copy todir="${dist}/${dist.name}/ext-webapp-lib"
-          preservelastmodified="true"
-          overwrite="true">
-      <fileset dir="${resin.install}/lib">
-        <include name="resin-support.jar"/>
-      </fileset>
-    </copy>
-    -->
-
     <chmod perm="ugo+rx">
-      <fileset dir="${dist}/${dist.name}">
+      <fileset dir="${dist.build}">
         <include name="configure"/>
         <include name="bin/resin.sh"/>
         <include name="bin/start.bat"/>
@@ -764,20 +735,20 @@
     
     <antcall target="resin.artifacts.dist" inheritRefs="true"/>
 
-    <mkdir dir="${dist}/${dist.name}/licenses"/>
-    <mkdir dir="${dist}/${dist.name}/project-jars"/>
-    <mkdir dir="${dist}/${dist.name}/webapp-jars"/>
-    <mkdir dir="${dist}/${dist.name}/endorsed"/>
-    <mkdir dir="${dist}/${dist.name}/keys"/>
-    <mkdir dir="${dist}/${dist.name}/ext-lib"/>
+    <mkdir dir="${dist.build}/licenses"/>
+    <mkdir dir="${dist.build}/project-jars"/>
+    <mkdir dir="${dist.build}/webapp-jars"/>
+    <mkdir dir="${dist.build}/endorsed"/>
+    <mkdir dir="${dist.build}/keys"/>
+    <mkdir dir="${dist.build}/ext-lib"/>
     <!--
-    <mkdir dir="${dist}/${dist.name}/ext-webapp-lib"/>
+    <mkdir dir="${dist.build}/${dist.name}/ext-webapp-lib"/>
+    <mkdir dir="${dist.build}/ivy2"/>
     -->
-    <mkdir dir="${dist}/${dist.name}/ivy2"/>
     <!--
-    <mkdir dir="${dist}/${dist.name}/plugins"/>
+    <mkdir dir="${dist.build}/${dist.name}/plugins"/>
       -->
-    <mkdir dir="${dist}/${dist.name}/log"/>
+    <mkdir dir="${dist.build}/log"/>
   </target>
   
   <target name="dist.package" depends="init">
@@ -862,7 +833,7 @@
       <zipfileset dir="${dist}">
         <patternset refid="dist"/>
       </zipfileset>
-      <zipfileset dir="${dist}" filemode="775">
+      <zipfileset dir="${dist.build}" filemode="775">
         <patternset refid="dist.bin"/>
       </zipfileset>
     </zip>
@@ -993,7 +964,7 @@
   </target>
     
   <target name="maven2-module">
-    <property name="module.dir" value="${modules}"/>
+    <property name="module.dir" value="${resin.modules}"/>
     <property name="module.src" value="${module.dir}/${module.name}/src"/>
     <property name="jar.name" value="${module.name}.${module.ext}"/>
     <property name="maven.name" value="resin-${module.name}"/>
@@ -1104,20 +1075,20 @@
   </target>
 
   <target name="dist.configure.make" depends="dist">
-    <exec dir="${dist}/${dist.name}" executable="./configure">
+    <exec dir="${dist.build}" executable="./configure">
       <arg value="--prefix=/opt/resin"/>
     </exec>
 
-    <exec dir="${dist}/${dist.name}" executable="make"/>
+    <exec dir="${dist.build}" executable="make"/>
   </target>
 
   <target name="dist.rpm" depends="dist.configure.make">
-    <exec dir="${dist}/${dist.name}" executable="checkinstall">
+    <exec dir="${dist.build}" executable="checkinstall">
       <arg line="-R --install=no --fstrans=yes -y" />
     </exec>
 
     <copy todir="${dist}">
-      <fileset dir="${dist}/RPMS">
+      <fileset dir="${dist.build}/RPMS">
         <include name="**/*.rpm"/>
       </fileset>
     </copy>
@@ -1128,13 +1099,13 @@
     -->
   
   <target name="debian-libexec" depends="init">
-    <property name="libexec" value="${resin.dist}/libexec"/>
+    <property name="libexec" value="${dist.build}/libexec"/>
     
     <delete dir="${libexec}"/>
     <mkdir dir="${libexec}"/>
     
     <copy todir="${libexec}" preservelastmodified="true">
-      <fileset dir="${resin.install}">
+      <fileset dir="${resindir}">
 	<include name="automake/*"/>
 	<include name="configure.ac"/>
 	<include name="configure"/>
@@ -1209,7 +1180,7 @@
     <copy todir="dist-debian/etc/resin"
           preservelastmodified="true"
           overwrite="true">
-      <fileset dir="${resin.install}/conf">
+      <fileset dir="${resindir}/conf">
         <!--
         <include name="admin-users.xml"/>
         -->
@@ -1218,7 +1189,7 @@
     </copy>
     
     <copy tofile="dist-debian/etc/resin/resin.xml"
-          file="${resin.install}/conf/resin.xml.in"
+          file="${resindir}/conf/resin.xml.in"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -1228,7 +1199,7 @@
     </copy>
     
     <copy tofile="dist-debian/etc/init.d/resin"
-          file="${resin.install}/init.d/resin.in"
+          file="${resindir}/init.d/resin.in"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -1254,7 +1225,7 @@
     <copy todir="dist-debian/usr/share/${shortproduct}-${version}"
           preservelastmodified="true"
           overwrite="true">
-      <fileset dir="${dist}/${shortproduct}-${version}">
+      <fileset dir="${dist.build}">
         <include name="lib/activation.jar"/>
         <!--
         <include name="lib/jaxstream-15.jar"/>
@@ -1276,13 +1247,13 @@
         <include name="lib/webservices.LICENSE"/>
       </fileset>
       
-      <fileset dir="${resin.install}">
+      <fileset dir="${resindir}">
         <include name="bin/resin.sh"/>
         <include name="bin/start.bat"/>
         <include name="bin/stop.bat"/>
       </fileset>
       
-      <fileset dir="${resin.install}/dist/libexec">
+      <fileset dir="${resindir}/dist/libexec">
         <include name="**"/>
         <exclude name="aclocal.m4"/>
         <exclude name="automake"/>
@@ -1317,7 +1288,7 @@
     <copy todir="dist-debian/var/www"
           preservelastmodified="true"
           overwrite="true">
-      <fileset dir="${dist}/${shortproduct}-${version}">
+      <fileset dir="${dist.build}">
         <include name="doc/**"/>
       </fileset>
     </copy>
@@ -1449,7 +1420,7 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete>
-      <fileset dir="${modules}">
+      <fileset dir="${resin.modules}">
         <include name="*/classes/**"/>
         <include name="*/dist/**"/>
       </fileset>

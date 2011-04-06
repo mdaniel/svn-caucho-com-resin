@@ -213,17 +213,18 @@ public class HostExpandDeployGenerator
    * Adds configuration to the current controller
    */
   @Override
-  protected HostController mergeController(HostController controller,
-                                           String key)
+  protected void mergeController(HostController controller,
+                                 String key)
   {
     try {
       Path expandDirectory = getExpandDirectory();
       Path rootDirectory = controller.getRootDirectory();
 
-      if (! expandDirectory.equals(rootDirectory.getParent()))
-        return controller;
+      if (! expandDirectory.equals(rootDirectory.getParent())) {
+        return;
+      }
 
-      controller = super.mergeController(controller, key);
+      super.mergeController(controller, key);
       
       controller.setStartupMode(getStartupMode());
     
@@ -239,8 +240,6 @@ public class HostExpandDeployGenerator
       
       controller.setConfigException(e);
     }
-
-    return controller;
   }
   
   @Override

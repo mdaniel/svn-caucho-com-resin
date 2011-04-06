@@ -242,7 +242,8 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
 
     if (baseMethod == null)
       throw new IllegalStateException(L.l("{0} does not have a matching base method in {1}",
-                                          method));
+                                          method,
+                                          getBeanType()));
     // XXX: merge annotations
     _annotatedMethods.add(baseMethod);
   }

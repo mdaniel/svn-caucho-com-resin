@@ -35,6 +35,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.deploy.DeployControllerApi;
+import com.caucho.env.deploy.DeployControllerType;
 import com.caucho.env.deploy.ExpandVersion;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -87,6 +89,12 @@ public class WebAppVersioningController extends WebAppController {
   public boolean isVersioning()
   {
     return true;
+  }
+  
+  @Override
+  public DeployControllerType getControllerType()
+  {
+    return DeployControllerType.VERSIONING;
   }
 
   @Override
@@ -191,6 +199,14 @@ public class WebAppVersioningController extends WebAppController {
     
     return isModified;
   }
+  
+  @Override
+  public void merge(DeployControllerApi<WebApp> oldControllerV)
+  {
+    if (_primaryController != null)
+      _primaryController.merge(oldControllerV);
+  }
+
   
   public boolean updateVersion()
   {

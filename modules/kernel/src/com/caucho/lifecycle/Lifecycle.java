@@ -323,20 +323,19 @@ public final class Lifecycle {
     else if (state.isAfterActive())
       return false;
     
-    long waitEnd = Alarm.getCurrentTime() + timeout;
+    // server/1d2j
+    long waitEnd = Alarm.getCurrentTimeActual() + timeout;
 
     synchronized (this) {
       while ((state = _state.get()).isBeforeActive()
-             && Alarm.getCurrentTime() < waitEnd) {
+             && Alarm.getCurrentTimeActual() < waitEnd) {
         if (state.isActive())
           return true;
         else if (state.isAfterActive())
           return false;
-        else if (Alarm.isTest())
-          return false;
 
         try {
-          long delta = waitEnd - Alarm.getCurrentTime();
+          long delta = waitEnd - Alarm.getCurrentTimeActual();
           
           if (delta > 0) {
             wait(delta);
@@ -392,6 +391,14 @@ public final class Lifecycle {
   public boolean isFailed()
   {
     return getState().isError();
+  }
+
+  /**
+   * True if a stop for a restart would be allowed.
+   */
+  public boolean isAllowStopFromRestart()
+  {
+    return getState().isAllowStopFromRestart();
   }
 
   /**
@@ -538,7 +545,7 @@ public final class Lifecycle {
   public boolean toFail()
   {
     LifecycleState state;
-    
+
     do {
       state = _state.get();
       

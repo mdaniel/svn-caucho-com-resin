@@ -480,8 +480,8 @@ public class PropertyField extends AbstractField {
     else
       columnType = getColumn().getType();
 
-    if (columnType instanceof ArrayType)
-      out.print(((ArrayType) columnType).getPrimitiveArrayTypeName());
+    if (columnType instanceof AmberArrayType)
+      out.print(((AmberArrayType) columnType).getPrimitiveArrayTypeName());
     else
       out.print(getJavaTypeName());
     out.print(" " + var + " = ");
@@ -495,8 +495,8 @@ public class PropertyField extends AbstractField {
     out.println(";");
 
     // jpa/1417 as a negative test.
-    if (columnType instanceof ArrayType) {
-      ArrayType arrayType = (ArrayType) columnType;
+    if (columnType instanceof AmberArrayType) {
+      AmberArrayType arrayType = (AmberArrayType) columnType;
       String primitiveType = arrayType.getPrimitiveArrayTypeName();
 
       out.print(getJavaTypeName() + " " + var + "_temp = null;");

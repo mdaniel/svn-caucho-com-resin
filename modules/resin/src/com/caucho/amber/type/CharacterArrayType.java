@@ -39,7 +39,7 @@ import java.sql.SQLException;
 /**
  * The type of a property.
  */
-public class CharacterArrayType extends ArrayType {
+public class CharacterArrayType extends AmberArrayType {
   private static final L10N L = new L10N(CharacterArrayType.class);
 
   private CharacterArrayType()

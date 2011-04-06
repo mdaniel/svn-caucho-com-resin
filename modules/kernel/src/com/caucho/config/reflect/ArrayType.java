@@ -75,7 +75,7 @@ public class ArrayType extends BaseType implements GenericArrayType
     if (type instanceof ArrayType) {
       ArrayType aType = (ArrayType) type;
 
-      return _componentType.equals(aType.getGenericComponentType());
+      return getGenericComponentType().equals(aType.getGenericComponentType());
     }
     else
       return false;
@@ -97,7 +97,7 @@ public class ArrayType extends BaseType implements GenericArrayType
   @Override
   public int hashCode()
   {
-    return 17 + 37 * _componentType.hashCode();
+    return 17 + 37 * getGenericComponentType().hashCode();
   }
 
   @Override
@@ -108,7 +108,7 @@ public class ArrayType extends BaseType implements GenericArrayType
     else if (o instanceof GenericArrayType) {
       GenericArrayType type = (GenericArrayType) o;
 
-      return _componentType.equals(type.getGenericComponentType());
+      return getGenericComponentType().equals(type.getGenericComponentType());
     }
     else
       return false;

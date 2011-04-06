@@ -45,17 +45,11 @@ public class JavaSessionDeserializer extends SessionDeserializer {
   
   private ObjectInputStream _in;
 
-  public JavaSessionDeserializer(InputStream is)
-    throws IOException
-  {
-    this(is, Thread.currentThread().getContextClassLoader());
-  }
-
   public JavaSessionDeserializer(InputStream is,
                                  ClassLoader loader)
     throws IOException
   {
-    _in = new ContextObjectInputStream(is);
+    _in = new ContextObjectInputStream(is, loader);
   }
   
   public int readInt()
@@ -87,13 +81,12 @@ public class JavaSessionDeserializer extends SessionDeserializer {
   static class ContextObjectInputStream extends ObjectInputStream {
     private ClassLoader _loader;
     
-    ContextObjectInputStream(InputStream is)
+    ContextObjectInputStream(InputStream is, ClassLoader loader)
       throws IOException
     {
       super(is);
 
-      Thread thread = Thread.currentThread();
-      _loader = thread.getContextClassLoader();
+      _loader = loader;
     }
 
     @Override

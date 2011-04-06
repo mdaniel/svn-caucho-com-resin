@@ -429,8 +429,8 @@
   </target>
 
   <target name="version">
-    <copy file="${modules}/kernel/src/com/caucho/Version.tmpl"
-          tofile="${modules}/kernel/src/com/caucho/Version.java"
+    <copy file="${resin.modules}/kernel/src/com/caucho/Version.tmpl"
+          tofile="${resin.modules}/kernel/src/com/caucho/Version.java"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -440,8 +440,8 @@
       </filterset>
     </copy>
 
-    <copy file="${modules}/c/src/common/version.h.in"
-          tofile="${modules}/c/src/common/version.h"
+    <copy file="${resin.modules}/c/src/common/version.h.in"
+          tofile="${resin.modules}/c/src/common/version.h"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -451,8 +451,8 @@
       </filterset>
     </copy>
 
-    <copy file="${modules}/csharp/src/common/Version.cs.in"
-          tofile="${modules}/csharp/src/common/Version.cs"
+    <copy file="${resin.modules}/csharp/src/common/Version.cs.in"
+          tofile="${resin.modules}/csharp/src/common/Version.cs"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -756,7 +756,7 @@
     <mkdir dir="${build}/pdf/images"/>
 
     <apply executable="convert" dir="." dest="${build}/pdf/images">
-      <fileset dir="${doc}/images">
+      <fileset dir="${doc.src}/images">
         <include name="*.gif" />
         <include name="*.jpg" />
         <include name="*.png" />
@@ -1050,10 +1050,10 @@
     <mkdir dir="${dist}/${quercus.dist.name}/WEB-INF/licenses"/>
 
     <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/resin.jar"
-          file="${resin.dist}/${dist.name}/lib/resin.jar"/>
+          file="${dist.build}/lib/resin.jar"/>
 
     <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/javaee-16.jar"
-          file="${resin.dist}/${dist.name}/lib/javaee-16.jar"/>
+          file="${dist.build}/lib/javaee-16.jar"/>
 
     <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/cdi-16.jar"
           file="${resin.lib}/cdi-16.jar"/>
@@ -1062,19 +1062,19 @@
           file="${resin.lib}/javamail-141.jar"/>
           
     <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/web.xml"
-          file="${resin.install}/php/quercus-war/WEB-INF/web.xml"/>
+          file="${resindir}/php/quercus-war/WEB-INF/web.xml"/>
     
     <copy tofile="${dist}/${quercus.dist.name}/images/caucho-white.jpg"
-          file="${resin.install}/php/quercus-war/images/caucho-white.jpg"/>
+          file="${resindir}/php/quercus-war/images/caucho-white.jpg"/>
 
     <copy tofile="${dist}/${quercus.dist.name}/images/dragonfly-tiny.png"
-          file="${resin.install}/php/quercus-war/images/dragonfly-tiny.png"/>
+          file="${resindir}/php/quercus-war/images/dragonfly-tiny.png"/>
 
     <copy tofile="${dist}/${quercus.dist.name}/index.php"
-          file="${resin.install}/php/quercus-war/index.php"/>
+          file="${resindir}/php/quercus-war/index.php"/>
 
     <copy tofile="${dist}/${quercus.dist.name}/README"
-          file="${resin.install}/php/quercus-war/README"/>
+          file="${resindir}/php/quercus-war/README"/>
 
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${dist}/${quercus.dist.name}">
@@ -1152,7 +1152,7 @@
 
     <delete dir="${install}/logs"/>
     <delete dir="${install}/bin"/>
-    <delete dir="${install}/doc/WEB-INF"/>
+    <delete dir="${install}/resin-doc/WEB-INF"/>
     <delete dir="${install}/cache"/>
     <delete dir="${install}/php/quercus-war/WEB-INF/lib"/>
   </target>

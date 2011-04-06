@@ -405,6 +405,11 @@ public final class MnodeValue implements ExtCacheEntry {
   {
     return _isImplicitNull;
   }
+  
+  public boolean isUnloadedValue()
+  {
+    return this == NULL;
+  }
 
   /**
    * Compares values

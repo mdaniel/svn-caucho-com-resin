@@ -154,15 +154,13 @@ public class ResinBeanContainer {
 
       Environment.addCloseListener(this);
 
-      _cdiManager.addManagedBean(_cdiManager
-          .createManagedBean(ResinCdiProducer.class));
+      _cdiManager.addManagedBean(_cdiManager.createManagedBean(ResinCdiProducer.class));
 
-      Class<?> resinValidatorClass = ResinCdiProducer
-          .createResinValidatorProducer();
+      Class<?> resinValidatorClass
+        = ResinCdiProducer.createResinValidatorProducer();
 
-      if (_cdiManager != null)
-        _cdiManager.addManagedBean(_cdiManager
-            .createManagedBean(resinValidatorClass));
+      if (_cdiManager != null && resinValidatorClass != null)
+        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinValidatorClass));
 
       _classLoader.addScanRoot();
     } finally {

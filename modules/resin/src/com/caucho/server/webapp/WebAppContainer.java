@@ -992,7 +992,7 @@ public class WebAppContainer
           webApp = controller.request();
         else
           webApp = controller.subrequest();
-        
+
         if (webApp == null) {
           return null;
         }

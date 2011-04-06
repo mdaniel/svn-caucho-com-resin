@@ -78,6 +78,11 @@ public interface DeployControllerApi<I extends DeployInstance>
    * Returns the current instance.
    */
   public I getDeployInstance();
+
+  /**
+   * Returns the current instance, waiting for active.
+   */
+  public I getActiveDeployInstance();
   
   //
   // state transition operations

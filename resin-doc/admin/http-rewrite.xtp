@@ -272,6 +272,10 @@ successful and unsuccessful matches are logged.
   <td>Load balance to a cluster of backend Resin servers.</td>
 </tr>
 <tr>
+  <td><a config-tag="resin:MovedPermanently">&lt;resin:MovedPermanently></a></td>
+  <td>Send a HTTP redirect to a new URL specified by <em>target</em>.</td>
+</tr>
+<tr>
   <td><a config-tag="resin:Redirect">&lt;resin:Redirect></a></td>
   <td>Send a HTTP redirect to a new URL specified by <em>target</em>.</td>
 </tr>

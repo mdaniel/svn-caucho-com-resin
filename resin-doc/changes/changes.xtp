@@ -13,6 +13,17 @@
 
 <s2 title="4.0.17 - snapshot">
 <ul>
+<li>proxy-cache: issue with include, and filter and wrapped output (#4437, rep by Haley)</li>
+<li>vfs: update http: normalization to use query-string verbatim (#4427, rep by Deepak Jadhav)</li>
+<li>candi: ResinBeanContainer standalone (#4434)</li>
+<li>log: add ${thread} to log formatting (#4459, rep by Keith Fetterman)</li>
+<li>deploy: issues with merging versioned webapps with explicity &lt;web-app> (#4444, rep by Keith Fetterman)</li>
+<li>deploy: restart timing issue with .war alarm, request and slow start (#4474, rep by Mattias Jiderhamn)</li>
+<li>ejb: stateless matching of varargs to API (#4466, rep by andreaskaltenbach)</li>
+<li>repository: repository tag-map timing issue (#4450)</li>
+<li>session: Java deserialization not using proper classloader (#4475, rep by Keith Fetterman)</li>
+<li>install: config/health.xml location issues (#4443)</li>
+<li>install: doc/resin-doc location fixed for make install (#4445, rep by Bill Au)</li>
 <li>cloud: removed obsolete HmtpRequest logging (#4461, rep by TJ Wallace)</li>
 <li>session: change default serialization to "java" instead of "hessian"</li>
 <li>cluster: add -join-cluster for dynamic server support</li>

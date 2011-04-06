@@ -313,27 +313,25 @@ public class WebAppSingleDeployGenerator
    * Merges the controllers.
    */
   @Override
-  public WebAppController mergeController(WebAppController controller,
-                                          String name)
+  public void mergeController(WebAppController controller, String name)
   {
-    // if directory matches, merge the two controllers.  The
-    // last controller has priority.
     if (controller.getRootDirectory().equals(_controller.getRootDirectory())) {
+      // if directory matches, merge the two controllers.  The
+      // last controller has priority.
       // server/1h10
       controller.setContextPath(_controller.getContextPath());
       
       controller.setDynamicDeploy(false);
       
       controller.merge(_controller);
-      
-      return controller;
     }
-    // else if the names don't match, return the new controller
-    else if (! _controller.isNameMatch(name))
-      return controller;
-    // otherwise, the single deploy overrides
-    else
-      return _controller;
+    else if (! _controller.isNameMatch(name)) {
+      // else if the names don't match, return the new controller
+    }
+    else {
+      // otherwise, the single deploy overrides
+      // return _controller;
+    }
   }
 
   /**

@@ -281,6 +281,7 @@ public class WebAppExpandDeployGenerator
                              contextPath);
 
     controller.setArchivePath(archivePath);
+
     controller.setWarName(key);
 
     controller.setParentWebApp(_parent);
@@ -308,17 +309,18 @@ public class WebAppExpandDeployGenerator
    * Returns the current array of webApp entries.
    */
   @Override
-  protected WebAppController mergeController(WebAppController controller,
+  protected void mergeController(WebAppController controller,
                                              String key)
   {
     try {
       Path expandDirectory = getExpandDirectory();
       Path rootDirectory = controller.getRootDirectory();
 
-      if (! expandDirectory.equals(rootDirectory.getParent()))
-        return controller;
+      if (! expandDirectory.equals(rootDirectory.getParent())) {
+        return;
+      }
 
-      controller = super.mergeController(controller, key);
+      super.mergeController(controller, key);
 
       if (controller.getArchivePath() == null) {
         String archiveName = rootDirectory.getTail() + ".war";
@@ -354,8 +356,6 @@ public class WebAppExpandDeployGenerator
       log.log(Level.WARNING, e.toString(), e);
       controller.setConfigException(e);
     }
-
-    return controller;
   }
   
   @Override

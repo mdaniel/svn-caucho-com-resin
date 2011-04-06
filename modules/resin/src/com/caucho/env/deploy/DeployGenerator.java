@@ -240,9 +240,8 @@ abstract public class DeployGenerator<E extends DeployControllerApi<?>>
    * Merges the entry with other matching entries, returning the
    * new entry.
    */
-  protected E mergeController(E controller, String name)
+  protected void mergeController(E controller, String name)
   {
-    return controller;
   }
 
   /**

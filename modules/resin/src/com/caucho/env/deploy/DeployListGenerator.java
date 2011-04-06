@@ -167,13 +167,11 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
    * Merges with other matching entries.
    */
   @Override
-  protected E mergeController(E controller, String key)
+  protected void mergeController(E controller, String key)
   {
     for (int i = 0; i < _generatorList.size(); i++) {
-      controller = _generatorList.get(i).mergeController(controller, key);
+      _generatorList.get(i).mergeController(controller, key);
     }
-
-    return controller;
   }
   
   /**

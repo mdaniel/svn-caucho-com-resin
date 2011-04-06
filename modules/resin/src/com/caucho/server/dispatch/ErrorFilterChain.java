@@ -63,6 +63,7 @@ public class ErrorFilterChain implements FilterChain {
   {
     _errorCode = errorCode;
     _message = message;
+    Thread.dumpStack();
   }
 
   /**

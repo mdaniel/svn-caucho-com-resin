@@ -120,6 +120,7 @@ public class HttpPath extends FilesystemPath {
     int length = userPath.length();
     int colon = userPath.indexOf(':');
     int slash = userPath.indexOf('/');
+    int query = userPath.indexOf('?');
 
     // parent handles scheme:xxx
     if (colon != -1 && (colon < slash || slash == -1))
@@ -130,12 +131,31 @@ public class HttpPath extends FilesystemPath {
       return schemeWalk(userPath, newAttributes, userPath, 0);
 
       // /path
-    else if (slash == 0)
+    else if (slash == 0) {
+      String queryString = "";
+      if (query >= 0) {
+        queryString = userPath.substring(query);
+        userPath = userPath.substring(0, query);
+      }
+      
       newPath = normalizePath("/", userPath, 0, '/');
-
+      
+      if (query >= 0)
+        newPath += queryString;
+    }
       // path
-    else
+    else {
+      String queryString = "";
+      if (query >= 0) {
+        queryString = userPath.substring(query);
+        userPath = userPath.substring(0, query);
+      }
+      
       newPath = normalizePath(_pathname, userPath, 0, '/');
+      
+      if (query >= 0)
+        newPath += queryString;
+    }
 
     // XXX: does missing root here cause problems with restrictions?
     return _root.fsWalk(userPath, newAttributes, newPath);
