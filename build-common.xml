@@ -187,7 +187,7 @@
            excludes="**/.svn/**"
            memoryMaximumSize="${javac.memoryMaximumSize}">
       <classpath>
-        <dirset dir="${resin.modules}">
+        <dirset dir="${modules}">
            <include name="*/classes"/>
         </dirset>
         <dirset dir="${resin.modules}">
