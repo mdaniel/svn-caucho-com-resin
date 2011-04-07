@@ -110,6 +110,16 @@ public class HeapDump {
     throw new ConfigException(L.l("HeapDump requires Resin Professional"));
   }
 
+  /**
+   * Writes a text value of the heap dump to an output stream.
+   * Extended also write instance counts
+   */
+  public void writeExtendedHeapDump(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException(L.l("HeapDump requires Resin Professional"));
+  }
+
   public void logHeapDump(Logger log,
                           Level level)
   {

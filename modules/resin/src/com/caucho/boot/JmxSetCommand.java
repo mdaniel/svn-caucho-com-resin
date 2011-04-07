@@ -24,47 +24,24 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package com.caucho.util;
+package com.caucho.boot;
 
-import java.util.logging.*;
-import java.io.*;
+import com.caucho.util.L10N;
 
-/**
- * convenience methods for io
- */
-public class IoUtil {
-  private static final Logger log
-    = Logger.getLogger(IoUtil.class.getName());
+public class JmxSetCommand extends JmxCommand
+{
+  private static final L10N L = new L10N(JmxSetCommand.class);
 
-  public static void close(InputStream is)
+  @Override
+  public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
-    try {
-      if (is != null)
-        is.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
   }
 
-  public static void close(OutputStream os)
+  @Override
+  public void usage()
   {
-    try {
-      if (os != null)
-        os.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-  }
-
-  public static void close(Closeable res) {
-    try {
-      if (res != null)
-        res.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
   }
 }

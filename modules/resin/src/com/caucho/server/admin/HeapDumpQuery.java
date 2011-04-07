@@ -24,47 +24,35 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package com.caucho.util;
+package com.caucho.server.admin;
 
-import java.util.logging.*;
-import java.io.*;
+@SuppressWarnings("serial")
+public class HeapDumpQuery implements java.io.Serializable
+{
 
-/**
- * convenience methods for io
- */
-public class IoUtil {
-  private static final Logger log
-    = Logger.getLogger(IoUtil.class.getName());
+  private boolean _raw;
 
-  public static void close(InputStream is)
+  @SuppressWarnings("unused")
+  public HeapDumpQuery()
   {
-    try {
-      if (is != null)
-        is.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
   }
 
-  public static void close(OutputStream os)
+  public HeapDumpQuery(boolean raw)
   {
-    try {
-      if (os != null)
-        os.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
+    _raw = raw;
   }
 
-  public static void close(Closeable res) {
-    try {
-      if (res != null)
-        res.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
+  public boolean isRaw()
+  {
+    return _raw;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

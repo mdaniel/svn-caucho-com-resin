@@ -24,47 +24,23 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package com.caucho.util;
+package com.caucho.server.admin;
 
-import java.util.logging.*;
-import java.io.*;
+@SuppressWarnings("serial")
+public class ThreadDumpQuery implements java.io.Serializable
+{
 
-/**
- * convenience methods for io
- */
-public class IoUtil {
-  private static final Logger log
-    = Logger.getLogger(IoUtil.class.getName());
-
-  public static void close(InputStream is)
+  @SuppressWarnings("unused")
+  public ThreadDumpQuery()
   {
-    try {
-      if (is != null)
-        is.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
   }
 
-  public static void close(OutputStream os)
+  @Override
+  public String toString()
   {
-    try {
-      if (os != null)
-        os.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-  }
-
-  public static void close(Closeable res) {
-    try {
-      if (res != null)
-        res.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
+    return getClass().getSimpleName() + "[]";
   }
 }

@@ -65,7 +65,7 @@ class WatchdogArgs
   private boolean _isVerbose;
   private boolean _isHelp;
   private StartMode _startMode;
-  
+
   private ArrayList<String> _tailArgs = new ArrayList<String>();
 
   private boolean _isDynamicServer;
@@ -103,7 +103,7 @@ class WatchdogArgs
   {
     return _argv;
   }
-  
+
   Path getJavaHome()
   {
     return _javaHome;
@@ -169,7 +169,7 @@ class WatchdogArgs
     else
       return 6830;
   }
-  
+
   String getDynamicServerId()
   {
     if (_serverId != null)
@@ -242,25 +242,35 @@ class WatchdogArgs
   {
     return _startMode == StartMode.WATCHDOG;
   }
-  
+
   StartMode getStartMode()
   {
     return _startMode;
   }
-  
+
   public ArrayList<String> getTailArgs()
   {
     return _tailArgs;
   }
-  
+
   public String getArg(String arg)
   {
     for (int i = 0; i + 1 < _argv.length; i++) {
       if (_argv[i].equals(arg) || _argv[i].equals("-" + arg))
         return _argv[i + 1];
     }
-    
+
     return null;
+  }
+
+  public boolean hasOption(String option)
+  {
+    for (String arg : _argv) {
+      if (option.equals(arg))
+        return true;
+    }
+
+    return false;
   }
 
   public ResinELContext getELContext()
@@ -407,22 +417,46 @@ class WatchdogArgs
         _startMode = StartMode.DEPLOY;
       }
       else if ("deploy-copy".equals(arg) || "copy".equals(arg)) {
-        _startMode = StartMode.COPY;
+        _startMode = StartMode.DEPLOY_COPY;
+      }
+      else if ("deploy-copy".equals(arg) || "copy".equals(arg)) {
+        _startMode = StartMode.DEPLOY_COPY;
       }
       else if ("deploy-list".equals(arg) || "list".equals(arg)) {
-        _startMode = StartMode.LIST;
+        _startMode = StartMode.DEPLOY_LIST;
       }
       else if ("deploy-restart".equals(arg) || "restart-webapp".equals(arg)) {
-        _startMode = StartMode.RESTART_WEBAPP;
+        _startMode = StartMode.DEPLOY_RESTART;
       }
       else if ("deploy-start".equals(arg) || "start-webapp".equals(arg)) {
-        _startMode = StartMode.START_WEBAPP;
+        _startMode = StartMode.DEPLOY_START;
       }
       else if ("deploy-stop".equals(arg) || "stop-webapp".equals(arg)) {
-        _startMode = StartMode.STOP_WEBAPP;
+        _startMode = StartMode.DEPLOY_STOP;
+      }
+      else if ("disable".equals(arg)) {
+        _startMode = StartMode.DISABLE;
+      }
+      else if ("enable".equals(arg)) {
+        _startMode = StartMode.ENABLE;
       }
       else if ("gui".equals(arg)) {
         _startMode = StartMode.GUI;
+      }
+      else if ("heap-dump".equals(arg)) {
+        _startMode = StartMode.HEAP_DUMP;
+      }
+      else if ("jmx-get".equals(arg)) {
+        _startMode = StartMode.JMX_GET;
+      }
+      else if ("jmx-call".equals(arg)) {
+        _startMode = StartMode.JMX_INVOKE;
+      }
+      else if ("jmx-list".equals(arg)) {
+        _startMode = StartMode.JMX_LIST;
+      }
+      else if ("jmx-set".equals(arg)) {
+        _startMode = StartMode.JMX_SET;
       }
       else if ("jspc".equals(arg)) {
         _startMode = StartMode.JSPC;
@@ -430,8 +464,17 @@ class WatchdogArgs
       else if ("kill".equals(arg)) {
         _startMode = StartMode.KILL;
       }
+      else if ("log-level".equals(arg)) {
+        _startMode = StartMode.LOG_LEVEL;
+      }
+      else if ("profile".equals(arg)) {
+        _startMode = StartMode.PROFILE;
+      }
       else if ("restart".equals(arg)) {
         _startMode = StartMode.RESTART;
+      }
+      else if ("thread-dump".equals(arg)) {
+        _startMode = StartMode.THREAD_DUMP;
       }
       else if ("shutdown".equals(arg)) {
         _startMode = StartMode.SHUTDOWN;
@@ -820,20 +863,30 @@ class WatchdogArgs
 
   enum StartMode {
     CONSOLE,
-    COPY,
     DEPLOY,
+    DEPLOY_COPY,
+    DEPLOY_LIST,
+    DEPLOY_RESTART,
+    DEPLOY_START,
+    DEPLOY_STOP,
+    DISABLE,
+    ENABLE,
     GUI,
+    HEAP_DUMP,
+    JMX_INVOKE,
+    JMX_GET,
+    JMX_LIST,
+    JMX_SET,
     JSPC,
     KILL,
-    LIST,
+    LOG_LEVEL,
+    PROFILE,
     RESTART,
-    RESTART_WEBAPP,
+    THREAD_DUMP,
     SHUTDOWN,
     START,
-    START_WEBAPP,
     STATUS,
     STOP,
-    STOP_WEBAPP,
     UNDEPLOY,
     WATCHDOG,
   };

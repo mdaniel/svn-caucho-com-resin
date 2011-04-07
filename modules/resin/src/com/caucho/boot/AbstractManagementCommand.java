@@ -30,44 +30,19 @@
 package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
-import com.caucho.env.repository.CommitBuilder;
 import com.caucho.network.listen.TcpSocketLinkListener;
-import com.caucho.server.admin.Management;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
-  private static final L10N L = new L10N(AbstractRepositoryCommand.class);
+public abstract class AbstractManagementCommand extends AbstractBootCommand {
+  private static final L10N L = new L10N(AbstractManagementCommand.class);
   
   @Override
   public abstract void doCommand(WatchdogArgs args,
                         WatchdogClient client);
 
-  protected final void fillInVersion(CommitBuilder commit, String version) {
-    String []parts = version.split("\\.");
-    if (parts.length < 2)
-      throw new ConfigException(L.l(
-        "erroneous version '{0}'. Version expected in format %d.%d[.%d[.%s]]",
-        version));
-
-    int major = Integer.parseInt(parts[0]);
-    int minor = Integer.parseInt(parts[1]);
-    int micro = 0;
-
-    if (parts.length > 2)
-      micro = Integer.parseInt(parts[2]);
-
-    String qualifier = null;
-
-    if (parts.length == 4)
-      qualifier = parts[3];
-
-    commit.version(major, minor, micro, qualifier);
-  }
-  
-  protected WebAppDeployClient getDeployClient(WatchdogArgs args,
-                                             WatchdogClient client)
+  protected ManagerClient getManagerClient(WatchdogArgs args,
+                                           WatchdogClient client)
   {
     String address = args.getArg("-address");
 
@@ -79,10 +54,11 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
     String portArg = args.getArg("-port");
 
     try {
-    if (portArg != null && !portArg.isEmpty())
-      port = Integer.parseInt(portArg);
+      if (portArg != null && !portArg.isEmpty())
+        port = Integer.parseInt(portArg);
     } catch (NumberFormatException e) {
-      NumberFormatException e1 = new NumberFormatException("-port argument is not a number '" + portArg + "'");
+      NumberFormatException e1 = new NumberFormatException(
+        "-port argument is not a number '" + portArg + "'");
       e1.setStackTrace(e.getStackTrace());
 
       throw e;
@@ -95,18 +71,11 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
       throw new ConfigException(L.l("HTTP listener {0}:{1} was not found",
                                     address, port));
     }
-    
+
     String user = args.getArg("-user");
     String password = args.getArg("-password");
-    
-    /*
-    if (user == null) {
-      user = "";
-      password = client.getResinSystemAuthKey();
-    }
-    */
-    
-    return new WebAppDeployClient(address, port, user, password);
+
+    return new ManagerClient(address, port, user, password);
   }
   
   private int findPort(WatchdogClient client)

@@ -51,6 +51,17 @@ public class ThreadDump
   {
   }
 
+  /**
+   * This method should only be called by a ManagerActor in
+   * response to a remote request for thread dump
+   *
+   * @return String representation of thread dump
+   */
+  public static String getThreadDump()
+  {
+    return _threadDump.threadDumpImpl();
+  }
+
   public static void dumpThreads()
   {
     long timeout = 3600L * 1000L;
@@ -69,7 +80,7 @@ public class ThreadDump
     }
   }
 
-  private void threadDumpImpl()
+  private String threadDumpImpl()
   {
     ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
@@ -86,8 +97,12 @@ public class ThreadDump
     buildThreads(sb, info, Thread.State.WAITING, false);
     buildThreads(sb, info, Thread.State.TIMED_WAITING, false);
     buildThreads(sb, info, null, false);
-    
-    log.info(sb.toString());
+
+    String threadDump = sb.toString();
+
+    log.info(threadDump);
+
+    return threadDump;
   }
 
   private void buildThreads(StringBuilder sb,
