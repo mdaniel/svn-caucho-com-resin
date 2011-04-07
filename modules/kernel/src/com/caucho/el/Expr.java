@@ -108,6 +108,8 @@ public abstract class Expr extends ValueExpression {
   final static int DOUBLE_OBJ = FLOAT_OBJ + 1;
   
   final static int STRING = DOUBLE_OBJ + 1;
+  
+  final static int MATCHES = STRING + 1;
 
   final static IntMap _typeMap = new IntMap();
 

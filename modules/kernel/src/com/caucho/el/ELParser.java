@@ -241,6 +241,7 @@ public class ELParser
         case Expr.LE: case Expr.GT: case Expr.GE:
         case Expr.ADD: case Expr.SUB:
         case Expr.MUL: case Expr.DIV: case Expr.MOD:
+        case Expr.MATCHES:
           throw new ELParseException(L.l("Invalid method expression `{0}'",
                                          _string));
         }
@@ -269,6 +270,7 @@ public class ELParser
 
       case Expr.EQ: case Expr.NE: case Expr.LT:
       case Expr.LE: case Expr.GT: case Expr.GE:
+      case Expr.MATCHES:
         left = parseCmpExpr(token, left, parseTerm());
         break;
 
@@ -310,6 +312,7 @@ public class ELParser
       case Expr.EQ: case Expr.NE:
       case Expr.LT: case Expr.GT:
       case Expr.LE: case Expr.GE:
+      case Expr.MATCHES:
         right = parseCmpExpr(token, right, parseTerm());
         break;
 
@@ -347,6 +350,7 @@ public class ELParser
       case Expr.EQ: case Expr.NE:
       case Expr.LT: case Expr.GT:
       case Expr.LE: case Expr.GE:
+      case Expr.MATCHES:
         right = parseCmpExpr(token, right, parseTerm());
         break;
 
@@ -378,6 +382,7 @@ public class ELParser
       case Expr.EQ: case Expr.NE:
       case Expr.GT: case Expr.LT:
       case Expr.LE: case Expr.GE:
+      case Expr.MATCHES:
         left = CmpExpr.create(code, left, right);
 
         code = token;
@@ -793,8 +798,10 @@ public class ELParser
       ch = read();
       if (ch == '=')
         return Expr.EQ;
+      else if (ch == '~')
+        return Expr.MATCHES;
       else
-        throw error(L.l("expected '==' at '={0}'", badChar(ch)));
+        throw error(L.l("expected '==' or '=~' at '={0}'", badChar(ch)));
       
     case '&':
       ch = read();
@@ -874,6 +881,8 @@ public class ELParser
           return Expr.AND;
         else if (name.equals("or"))
           return Expr.OR;
+        else if (name.equals("matches"))
+          return Expr.MATCHES;
         else
           throw error(L.l("expected binary operation at `{0}'", name));
       }

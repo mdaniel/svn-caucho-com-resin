@@ -79,6 +79,8 @@ public class CmpExpr extends AbstractBooleanExpr {
       return new EqExpr(left, right);
     case NE:
       return new NeExpr(left, right);
+    case MATCHES:
+      return new MatchesExpr(left, right);
     }
 
     return new CmpExpr(op, left, right);
