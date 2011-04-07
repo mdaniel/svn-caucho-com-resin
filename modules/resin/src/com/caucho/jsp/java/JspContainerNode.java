@@ -434,6 +434,28 @@ public abstract class JspContainerNode extends JspNode {
     else
       return null;
   }
+  
+  /**
+   * True if the node has scripting element (i.e. not counting rtexpr values)
+   */
+  public boolean isSingleExpression()
+  {
+    for (int i = 0; _children != null && i < _children.size(); i++) {
+      JspNode node = _children.get(i);
+      
+      if (node instanceof JspExpression) {
+        continue;
+      }
+      
+      if (node.isStatic() && node.getStaticText().trim().length() == 0) {
+        continue;
+      }
+      
+      return false;
+    }
+    
+    return true;
+  }
 
   /**
    * Returns true if the children are static.

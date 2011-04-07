@@ -174,20 +174,20 @@ namespace Caucho
       StringBuilder arguments = new StringBuilder();
 
       arguments.Append("-Xrs -jar ");
-      arguments.Append("\"" + _resinHome + "\\lib\\resin.jar\" ");
-      arguments.Append("-resin-home \"").Append(_resinHome).Append("\" ");
-      arguments.Append("-root-directory \"").Append(_rootDirectory).Append("\" ");
+      arguments.Append("\"" + _resinHome + "\\lib\\resin.jar\"");
+      arguments.Append(" -resin-home \"").Append(_resinHome).Append("\" ");
+      arguments.Append(" -root-directory \"").Append(_rootDirectory).Append("\" ");
       if (ResinArgs.Server != null)
-        arguments.Append("-server ").Append(ResinArgs.Server).Append(' ');
+        arguments.Append(" -server ").Append(ResinArgs.Server);
       else if (ResinArgs.DynamicServer != null)
-        arguments.Append("-dynamic-server ").Append(ResinArgs.DynamicServer).Append(' ');
+        arguments.Append(" -dynamic-server ").Append(ResinArgs.DynamicServer);
 
       if (command != null)
-        arguments.Append(command);
+        arguments.Append(' ').Append(command);
       else if (ResinArgs.RawArgs.Count == 1)
-        arguments.Append("gui");
+        arguments.Append(' ').Append("gui");
 
-      arguments.Append(ResinArgs.ResinArguments).Append(' ');
+      arguments.Append(' ').Append(ResinArgs.ResinArguments);
 
       startInfo.Arguments = arguments.ToString();
 

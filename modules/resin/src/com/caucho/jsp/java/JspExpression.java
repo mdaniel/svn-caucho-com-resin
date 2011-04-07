@@ -98,13 +98,14 @@ public class JspExpression extends JspNode {
    *
    * @param out the output writer for the generated java.
    */
+  @Override
   public void generate(JspJavaWriter out)
     throws Exception
   {
     int length = _text.length();
 
     out.print("out.print((");
-
+    
     // when an expression ends with '// comment', the code needs a
     // newline so following code doesn't become part of the comment
     boolean hasSlashes = false;
@@ -131,5 +132,36 @@ public class JspExpression extends JspNode {
     //  _endLine = -1;
     
     out.println("));");
+  }
+
+  String generateValue()
+  {
+    // when an expression ends with '// comment', the code needs a
+    // newline so following code doesn't become part of the comment
+    boolean hasSlashes = false;
+    
+    StringBuilder sb = new StringBuilder();
+    int length = _text.length();
+
+    for (int i = 0; i < length; i++) {
+      char ch = _text.charAt(i);
+
+      if (ch == '/' && i + 1 < length && _text.charAt(i + 1) == '/')
+        hasSlashes = true;
+
+      // destLine needs incrementing for newlines
+      if (ch == '\n') {
+        hasSlashes = false;
+        sb.append("\n");
+      }
+      else { 
+        sb.append(ch);
+      }
+    }
+  
+    if (hasSlashes)
+      sb.append("\n");
+  
+    return sb.toString();
   }
 }

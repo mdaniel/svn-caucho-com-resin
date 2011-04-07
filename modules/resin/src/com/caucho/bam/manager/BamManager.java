@@ -29,11 +29,13 @@
 
 package com.caucho.bam.manager;
 
+import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.Agent;
 import com.caucho.bam.actor.ManagedActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
+import com.caucho.bam.query.QuerySender;
 import com.caucho.bam.stream.MessageStream;
 
 
@@ -82,4 +84,6 @@ public interface BamManager
   public Mailbox createClient(Mailbox next,
                               String uid,
                               String resource);
+  
+  public ActorSender createClient(String uid, String resource);
 }

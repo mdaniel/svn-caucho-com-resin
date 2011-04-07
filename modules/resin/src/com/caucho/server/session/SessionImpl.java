@@ -990,6 +990,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    * Callback when the session is removed from the session cache, generally
    * because the session cache is full.
    */
+  @Override
   public void removeEvent()
   {
     synchronized (this) {
@@ -1002,8 +1003,6 @@ public class SessionImpl implements HttpSession, CacheListener {
                       this,
                       _useCount));
     }
-
-    boolean isValid = _isValid;
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " remove");
@@ -1028,7 +1027,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       return;
     */
 
-    ArrayList listeners = _manager.getListeners();
+    ArrayList<HttpSessionListener> listeners = _manager.getListeners();
 
     if (listeners != null) {
       HttpSessionEvent event = new HttpSessionEvent(this);

@@ -91,8 +91,8 @@ public class GtExpr extends AbstractBooleanExpr {
       return a.compareTo(b) > 0;
     }
 
-    if (aType == Double.class || aType == Float.class ||
-        bType == Double.class || bType == Float.class) {
+    if (aType == Double.class || aType == Float.class
+        || bType == Double.class || bType == Float.class) {
       double a = toDouble(aObj, env);
       double b = toDouble(bObj, env);
 
@@ -107,10 +107,18 @@ public class GtExpr extends AbstractBooleanExpr {
     }
     
     if (aObj instanceof Number || bObj instanceof Number) {
-      long a = toLong(aObj, env);
-      long b = toLong(bObj, env);
+      if (aObj instanceof String || bObj instanceof String) {
+        double a = toDouble(aObj, env);
+        double b = toDouble(bObj, env);
 
-      return a > b;
+        return a > b;
+      }
+      else {
+        long a = toLong(aObj, env);
+        long b = toLong(bObj, env);
+
+        return a > b;
+      }
     }
 
     if (aObj instanceof String || bObj instanceof String) {

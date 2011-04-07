@@ -86,6 +86,9 @@ public class Forward extends AbstractRegexpDispatchRule
                                  String uri,
                                  String queryString)
   {
+    // server/1kna
+    queryString = null;
+    
     if (_target != null)
       uri = matcher.replaceAll(_target);
 

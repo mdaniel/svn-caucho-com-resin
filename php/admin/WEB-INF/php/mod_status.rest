@@ -21,7 +21,10 @@ $thread = $g_mbean_server->lookup("resin:type=ThreadPool");
 $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
 $stat = $g_mbean_server->lookup("resin:type=StatService");
 
-$period = $stat->getSamplePeriod() / 1000;
+if (! $stat) {
+  echo "mod_status requires Resin Professional";
+  return;
+}
 
 $start_time = $runtime->StartTime;
 

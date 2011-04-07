@@ -407,8 +407,11 @@ public class BeanELResolver extends ELResolver {
           else
             continue;
 
+	  // jsp/30ci
+	  /*
           if (_propMap.get(propName) != null)
             continue;
+	  */
 
           _propMap.put(propName, new BeanProperty(baseClass,
                                                   propName,

@@ -943,7 +943,7 @@ public class Environment {
 
         cl.newInstance();
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        log().log(Level.FINE, e.toString(), e);
       }
 
       /*

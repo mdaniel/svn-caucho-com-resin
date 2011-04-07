@@ -796,9 +796,14 @@ public abstract class Expr extends ValueExpression {
       return 0;
     else if (value instanceof String) {
       try {
-	return Long.parseLong((String) value);
+        String string = (String) value;
+        
+        if (string.indexOf('.') >= 0)
+          return (long) Double.parseDouble(string);
+        else
+          return Long.parseLong(string);
       } catch (Exception e) {
-	throw new ELException(e);
+        throw new ELException(e);
       }
     }
     else if (value instanceof Character) {

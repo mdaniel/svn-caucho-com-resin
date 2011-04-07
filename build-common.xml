@@ -442,7 +442,7 @@
     <property file="${artifact.src}/module.properties"/>
 
     <mkdir dir="${dist.build}/project-jars"/>
-    
+
     <copy tofile="${dist.build}/project-jars/resin-${artifact.name}-${version}.jar"
           file="${artifact.dist}/${artifact.jar}"/>
   </target>
@@ -532,18 +532,21 @@
       <fileset dir="${resin.modules}/eclipselink/classes">
         <exclude name="**/.*"/>
       </fileset>    	
-    	
+    <!--	
       <fileset dir="${resin.artifacts}/ant/classes">
         <exclude name="**/.*"/>
-      </fileset>    	
+      </fileset>
+      -->
     </jar>
   </target>
 
   <target name="resin.artifacts.dist" depends="init">
+    <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="ant"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
+    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>

@@ -13,6 +13,19 @@
 
 <s2 title="4.0.17 - snapshot">
 <ul>
+<li>webapp: webapp restart/session close timing issues (#4471, rep by jiucal)</li>
+<li>rewrite: Forward with target="/foo?q=2" caused duplicate query param (#4431, rep by mhixson)</li>
+<li>install: make install updates (#4468, rep by silent)</li>
+<li>openssl: connection must close if SSL_write fails (#4476, rep by Keith Paulson)</li>
+<li>boot: ResinActor should not be started when Resin called directly (#4440)</li>
+<li>proxy-cache: inappropriate warning on included cache (#4472, rep by Keith Fetterman)</li>
+<li>jsp: special case jsp:fragments with single jsp:element (#4463, rep by imaniyar)</li>
+<li>maven: EnvInit was improperly logged (#4481, rep by ccwf)</li>
+<li>jsp-el: resolve introspection conflict between getFoo() and getFoo(i) (#4462, rep by jhartline)</li>
+<li>dist: deprecated resin-ant tasks. The command-line should be used instead (#4447)</li>
+<li>startup: resin.exe space issues with -conf (#4448, rep by pmorrow)</li>
+<li>resin-admin: mod_status requires Resin Pro (#4454)</li>
+<li>el: conversion issues from string '1.0' to long (#4482)</li>
 <li>proxy-cache: issue with include, and filter and wrapped output (#4437, rep by Haley)</li>
 <li>vfs: update http: normalization to use query-string verbatim (#4427, rep by Deepak Jadhav)</li>
 <li>candi: ResinBeanContainer standalone (#4434)</li>

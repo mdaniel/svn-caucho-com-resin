@@ -41,6 +41,9 @@ public class ResinWarningHandler implements WarningHandler
   ResinWarningHandler(ResinActor resinActor)
   {
     _resinActor = resinActor;
+    
+    if (resinActor == null)
+      throw new NullPointerException();
   }
   
   /**

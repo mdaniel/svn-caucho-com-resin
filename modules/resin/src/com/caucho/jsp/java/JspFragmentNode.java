@@ -198,6 +198,12 @@ abstract public class JspFragmentNode extends JspContainerNode
       else if (node._filename.equals(_filename))
         throw node.error(L.l("Fragments may not contain scripting elements"));
     }
+    
+    if (isSingleExpression()) {
+      JspNode node = findScriptingNode();
+      
+      return ((JspExpression) node).generateValue();
+    }
 
     _gen.addFragment(this);
     

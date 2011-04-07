@@ -439,14 +439,7 @@ public class Server
    */
   public ActorSender createAdminClient(String uid, String resource)
   {
-    String address = uid + "@" + getAdminBroker().getAddress();
-
-    NullActor actor = new NullActor(address, getAdminBroker());
-    
-    SimpleActorSender sender 
-      = new SimpleActorSender(actor, getAdminBroker(), address, resource);
-    
-    return sender;
+    return getAdminBrokerManager().createClient(uid, resource);
   }
 
   /**

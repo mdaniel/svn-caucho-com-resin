@@ -4451,11 +4451,15 @@ public class WebApp extends ServletContextImpl
     {
       HttpSession session = se.getSession();
       
-      SessionContextContainer candiContainer
-        = (SessionContextContainer) session.getAttribute("resin.candi.scope");
+      try {
+        SessionContextContainer candiContainer
+          = (SessionContextContainer) session.getAttribute("resin.candi.scope");
       
-      if (candiContainer != null)
-        candiContainer.close();
+        if (candiContainer != null)
+          candiContainer.close();
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
     }
   }
   
