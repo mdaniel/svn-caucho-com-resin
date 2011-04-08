@@ -57,17 +57,28 @@ import com.caucho.util.Crc64;
  */
 @Service
 @Admin
-@Named("resinAdmin")
+@Named("resin-admin-authenticator")
 @Default
 @CauchoDeployment  
 @SuppressWarnings("serial")
 public class AdminAuthenticator extends XmlAuthenticator
 {
   private String _remoteCookie;
+  private boolean _isComplete;
   
 
   public AdminAuthenticator()
   {
+  }
+  
+  public boolean isComplete()
+  {
+    return _isComplete;
+  }
+  
+  public void setComplete(boolean isComplete)
+  {
+    _isComplete = true;
   }
   
   /**

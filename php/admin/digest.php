@@ -31,8 +31,13 @@ if (! empty($digest_attempt)) {
     else if (empty($digest_username))
       $validation_error = "Username is required";
     else {
+      /*
       $passwordDigest = new Java("com.caucho.server.security.PasswordDigest");
       $digest = $passwordDigest->getPasswordDigest($digest_username, $digest_password1, $digest_realm);
+      */
+      $salt = pack("CCCC", mt_rand(), mt_rand(), mt_rand(), mt_rand());
+      $sha = sha1($digest_password1 . $salt);
+      $digest = "{SSHA}" . base64_encode(pack("H*", $sha) . $salt);
   }
 }
 else {

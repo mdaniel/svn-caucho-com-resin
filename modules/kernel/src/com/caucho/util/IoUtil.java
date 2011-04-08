@@ -59,10 +59,11 @@ public class IoUtil {
     }
   }
 
-  public static void close(Closeable res) {
+  public static void close(Writer os)
+  {
     try {
-      if (res != null)
-        res.close();
+      if (os != null)
+        os.close();
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     }

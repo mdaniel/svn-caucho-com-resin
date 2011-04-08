@@ -40,7 +40,12 @@ if ($GLOBAL["error"]) {
 
 $digest_username = null;
 
-include "digest.php";
+
+$auth = java_bean("resin-admin-authenticator");
+
+if (! $auth || ! $auth->isComplete()) {
+  include "digest.php";
+}
 
 if (! empty($digest)) {
   admin_init();

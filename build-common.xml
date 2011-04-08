@@ -16,14 +16,16 @@
 
   <property name="resin.modules" location="${resindir}/modules"/>
   <property name="modules" location="${basedir}/modules"/>
+
   <property name="src" location="${resindir}/src"/>
   <property name="ext" location="${resindir}/modules/ext"/>
   <property name="maven.lib" location="${resindir}/maven-lib"/>
   <property name="resin.doc" location="${resindir}/resin-doc"/>
 
-  <property name="build" location="${resindir}/build"/>
+  <property name="build" location="${basedir}/build"/>
+  <property name="resin.build" location="${resindir}/build"/>
 
-  <property name="lib" location="${resindir}/lib"/>
+  <property name="lib" location="${basedir}/lib"/>
   <property name="resin.lib" location="${resindir}/lib"/>
 
   <property name="resin.http" value="8080"/>
@@ -31,7 +33,8 @@
 
   <property name="clientlib" location="${install}/clientlib"/>
 
-  <property name="dist" location="${resindir}/dist"/>
+  <property name="dist" location="${basedir}/dist"/>
+  <property name="resin.dist" location="${resindir}/dist"/>
 
   <property name="javac.verbose" value="off"/>
   <property name="javac.debug" value="on"/>
@@ -1424,7 +1427,7 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete>
-      <fileset dir="${resin.modules}">
+      <fileset dir="${modules}">
         <include name="*/classes/**"/>
         <include name="*/dist/**"/>
       </fileset>

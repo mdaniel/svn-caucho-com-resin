@@ -36,7 +36,22 @@ function display_deploy_form($mbean_server)
   }
   else {
     $disabled = "disabled='true'";
-    echo "<div class='warn'>Actions can only be performed over a secure connection (SSL)</div>";
+    echo "<div class='warn'>Actions can only be performed over a secure connection (SSL).";
+
+    $host = $_SERVER["SERVER_NAME"];
+    $port = $_SERVER["SERVER_PORT"];
+    $uri = $_SERVER["REQUEST_URI"];
+
+    if ($port == 8080) {
+      $url = htmlspecialchars("https://${host}:8443$uri");
+    }
+    else {
+      $url = htmlspecialchars("https://$host$uri");
+    }
+
+    echo " Try <a href='$url'>$url</a>";
+
+    echo "</div>";
   }
 
 ?>

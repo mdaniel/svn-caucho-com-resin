@@ -13,6 +13,9 @@
 
 <s2 title="4.0.17 - snapshot">
 <ul>
+<li>resin-admin: include link to SSL on deploy page when accessing non-ssl (#4455)</li>
+<li>resin-admin: hide user/password generation when user exists (#4486, rep by Keith Fetterman)</li>
+<li>resin-admin: use {SSHA} for generated password</li>
 <li>webapp: webapp restart/session close timing issues (#4471, rep by jiucal)</li>
 <li>rewrite: Forward with target="/foo?q=2" caused duplicate query param (#4431, rep by mhixson)</li>
 <li>install: make install updates (#4468, rep by silent)</li>

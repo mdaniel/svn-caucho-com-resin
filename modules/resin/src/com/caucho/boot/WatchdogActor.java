@@ -61,9 +61,9 @@ public class WatchdogActor extends SimpleActor
   public void sendShutdown()
   {
     getBroker().query(1,
-                          "resin@admin.resin.caucho",
-                          "watchdog@admin.resin.caucho",
-                          new WatchdogStopQuery(""));
+                      "resin@admin.resin.caucho",
+                      "watchdog@admin.resin.caucho",
+                      new WatchdogStopQuery(""));
   }
   
   @Message

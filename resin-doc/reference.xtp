@@ -9570,6 +9570,11 @@ been called</td>
   <td>java</td>
 </tr>
 <tr>
+  <td>serialize-collection-type</td>
+  <td>For hessian serialization, ignore the collection type when serializing lists (disable for some Hibernate lists)</td>
+  <td>true</td>
+</tr>
+<tr>
   <td>save-mode</td>
   <td>When to save sessions, one of "before-headers", "after-request", or "on-shutdown"</td>
   <td>after-request</td>

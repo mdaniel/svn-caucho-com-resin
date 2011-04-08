@@ -46,19 +46,19 @@ import com.caucho.util.Utf8;
  * </pre>
  */
 public class JsonOutput {
-  private static final byte []NULL = new byte[] { 'n', 'u', 'l', 'l' };
-  private static final byte []TRUE = new byte[] { 't', 'r', 'u', 'e' };
-  private static final byte []FALSE = new byte[] { 'f', 'a', 'l', 's', 'e' };
+  private static final char []NULL = new char[] { 'n', 'u', 'l', 'l' };
+  private static final char []TRUE = new char[] { 't', 'r', 'u', 'e' };
+  private static final char []FALSE = new char[] { 'f', 'a', 'l', 's', 'e' };
 
   private JsonSerializerFactory _factory = new JsonSerializerFactory();
   
-  private OutputStream _os;
+  private PrintWriter _os;
   
   public JsonOutput()
   {
   }
 
-  public JsonOutput(OutputStream os)
+  public JsonOutput(PrintWriter os)
   {
     init(os);
   }
@@ -66,7 +66,7 @@ public class JsonOutput {
   /**
    * Initialize the output with a new underlying stream.
    */
-  public void init(OutputStream os)
+  public void init(PrintWriter os)
   {
     _os = os;
   }
@@ -74,7 +74,7 @@ public class JsonOutput {
   public void writeObject(Serializable value)
     throws IOException
   {
-    OutputStream os = _os;
+    PrintWriter os = _os;
 
     if (value == null) {
       os.write(NULL, 0, 4);
@@ -89,7 +89,7 @@ public class JsonOutput {
   public void writeNull()
     throws IOException
   {
-    OutputStream os = _os;
+    PrintWriter os = _os;
     
     os.write(NULL, 0, 4);
   }
@@ -97,7 +97,7 @@ public class JsonOutput {
   public void writeBoolean(boolean value)
     throws IOException
   {
-    OutputStream os = _os;
+    PrintWriter os = _os;
     
     if (value)
       os.write(TRUE, 0, 4);
@@ -120,7 +120,7 @@ public class JsonOutput {
   public void writeString(String v)
     throws IOException
   {
-    OutputStream os = _os;
+    PrintWriter os = _os;
     
     if (v == null) {
       os.write(NULL, 0, 4);
@@ -128,20 +128,21 @@ public class JsonOutput {
     }
     
     os.write('"');
-    int len = v.length();
-    for (int i = 0; i < len; i++) {
+
+    int length = v.length();
+    for (int i = 0; i < length; i++) {
       char ch = v.charAt(i);
 
       writeChar(os, ch);
     }
-    
+
     os.write('"');
   }
 
   public void writeString(char []v, int offset, int length)
     throws IOException
   {
-    OutputStream os = _os;
+    PrintWriter os = _os;
     
     os.write('"');
 
@@ -154,7 +155,7 @@ public class JsonOutput {
     os.write('"');
   }
 
-  private void writeChar(OutputStream os, char ch)
+  private void writeChar(PrintWriter os, char ch)
     throws IOException
   {
     switch (ch) {
@@ -195,7 +196,7 @@ public class JsonOutput {
       os.write('"');
       break;
     default:
-      Utf8.write(os, ch);
+      os.write(ch);
       break;
     }
   }
@@ -247,7 +248,7 @@ public class JsonOutput {
   private void writeStringValue(String s)
     throws IOException
   {
-    OutputStream os = _os;
+    PrintWriter os = _os;
     
     int len = s.length();
 
