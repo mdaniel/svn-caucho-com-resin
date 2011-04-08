@@ -29,7 +29,11 @@
 
 package com.caucho.boot;
 
+import com.caucho.config.types.Period;
+import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
+
+import java.util.logging.Level;
 
 public class LogLevelCommand extends AbstractManagementCommand
 {
@@ -38,10 +42,50 @@ public class LogLevelCommand extends AbstractManagementCommand
   @Override
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
+    String level = args.getDefaultArg();
+
+    if (level == null) {
+      usage();
+
+      return;
+    }
+
+    Level logLevel = null;
+
+    try {
+      logLevel = Level.parse(level.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      System.err.println(e.getMessage());
+      System.err.println();
+
+      usage();
+
+      return;
+    }
+
+    long period = 1000 * 60;
+
+    String time = args.getArg("-effective-time");
+
+    if (time != null)
+      period = Period.toPeriod(time);
+
+    ManagerClient manager = getManagerClient(args, client);
+
+    String message = manager.setLogLevel(logLevel, period);
+
+    System.out.println(message);
   }
 
   @Override
   public void usage()
   {
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] log-level -user <user> -password <password> [-effective-time <time-period>] <level>"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("description:"));
+    System.err.println(L.l("   sets level for root logger to <level> (severe, warning, info, config, fine, finer, finest)"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("options:"));
+    System.err.println(L.l("   -effective-time            : specifies new level effective time (default 60s). e.g. 5s"));
   }
 }
