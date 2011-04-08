@@ -32,13 +32,12 @@ import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
-import com.caucho.cloud.deploy.RemoveTagQuery;
-import com.caucho.env.repository.CommitBuilder;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 
 import java.io.Serializable;
+import java.util.logging.Level;
 
 /**
  * Deploy Client API
@@ -46,10 +45,6 @@ import java.io.Serializable;
 public class ManagerClient
 {
   private static final L10N L = new L10N(ManagerClient.class);
-
-  public static final String USER_ATTRIBUTE = "user";
-  public static final String MESSAGE_ATTRIBUTE = "message";
-  public static final String VERSION_ATTRIBUTE = "version";
 
   private static final long MANAGER_TIMEOUT = 600 * 1000L;
 
@@ -121,6 +116,13 @@ public class ManagerClient
   public String doHeapDump(boolean raw)
   {
     HeapDumpQuery query = new HeapDumpQuery(raw);
+
+    return (String) query(query);
+  }
+
+  public String setLogLevel(Level logLevel, long period)
+  {
+    LogLevelQuery query = new LogLevelQuery(logLevel, period);
 
     return (String) query(query);
   }

@@ -34,18 +34,16 @@ import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.jmx.Jmx;
 import com.caucho.profile.HeapDump;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.resin.MemoryAdmin;
 import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.MemoryPoolAdapter;
 import com.caucho.util.ThreadDump;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.io.File;
@@ -65,10 +63,12 @@ public class ManagerActor extends SimpleActor
     = Logger.getLogger(ManagerActor.class.getName());
 
   private static final L10N L = new L10N(ManagerActor.class);
+  private static ClassLoader _systemClassLoader;
 
   private Server _server;
   private MBeanServer _mBeanServer;
   private File _hprofDir;
+  private Level _defaultLevel;
 
   private AtomicBoolean _isInit = new AtomicBoolean();
 
@@ -147,7 +147,7 @@ public class ManagerActor extends SimpleActor
     return result;
   }
 
-  public String doRawHeapDump()
+  private String doRawHeapDump()
   {
     try {
       ObjectName name = new ObjectName(
@@ -196,7 +196,7 @@ public class ManagerActor extends SimpleActor
     }
   }
 
-  public String getProHeapDump()
+  private String getProHeapDump()
   {
     try {
       HeapDump dump = HeapDump.create();
@@ -215,5 +215,78 @@ public class ManagerActor extends SimpleActor
 
       return e.getMessage();
     }
+  }
+
+  @Query
+  public String setLogLevel(long id,
+                            String to,
+                            String from,
+                            LogLevelQuery query)
+  {
+    final Level newLevel = query.getLevel();
+    final long time = query.getPeriod();
+    String result = null;
+    try {
+      if (_defaultLevel == null) {
+        _defaultLevel = getDefaultLoggerLevel();
+      }
+
+      AlarmListener listener = new AlarmListener()
+      {
+        @Override
+        public void handleAlarm(Alarm alarm)
+        {
+          setDefaultLoggerLevel(_defaultLevel);
+        }
+      };
+
+      Alarm alarm = new Alarm("log-level", listener, time);
+
+      setDefaultLoggerLevel(newLevel);
+
+      result = L.l("Log level is set to `{0}'. Effective {1} seconds.",
+                   newLevel,
+                   (time / 1000));
+    } catch (Exception e) {
+      log.log(Level.INFO, e.getMessage(), e);
+
+      result = e.getMessage();
+    }
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }
+
+  private void setDefaultLoggerLevel(final Level level)
+  {
+    final Logger logger = Logger.getLogger("");
+    final Thread thread = Thread.currentThread();
+    final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_systemClassLoader);
+      logger.setLevel(level);
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
+  }
+
+  private Level getDefaultLoggerLevel() {
+    final Logger logger = Logger.getLogger("");
+    final Thread thread = Thread.currentThread();
+    final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_systemClassLoader);
+
+      return logger.getLevel();
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
+  }
+
+  static {
+    _systemClassLoader = ClassLoader.getSystemClassLoader();
   }
 }
