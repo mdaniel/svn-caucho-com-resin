@@ -53,6 +53,8 @@ import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,7 +70,7 @@ public class ManagerActor extends SimpleActor
   private Server _server;
   private MBeanServer _mBeanServer;
   private File _hprofDir;
-  private Level _defaultLevel;
+  private Map<String, Level> _defaultLevels = new HashMap<String, Level>();
 
   private AtomicBoolean _isInit = new AtomicBoolean();
 
@@ -223,28 +225,28 @@ public class ManagerActor extends SimpleActor
                             String from,
                             LogLevelQuery query)
   {
+    final String logger = query.getLogger();
     final Level newLevel = query.getLevel();
     final long time = query.getPeriod();
     String result = null;
     try {
-      if (_defaultLevel == null) {
-        _defaultLevel = getDefaultLoggerLevel();
-      }
+      final Level oldLevel = getLoggerLevel(logger);
 
       AlarmListener listener = new AlarmListener()
       {
         @Override
         public void handleAlarm(Alarm alarm)
         {
-          setDefaultLoggerLevel(_defaultLevel);
+          setLoggerLevel(logger, oldLevel);
         }
       };
 
-      Alarm alarm = new Alarm("log-level", listener, time);
+      new Alarm("log-level", listener, time);
 
-      setDefaultLoggerLevel(newLevel);
+      setLoggerLevel(logger, newLevel);
 
-      result = L.l("Log level is set to `{0}'. Effective {1} seconds.",
+      result = L.l("Log {0}.level is set to `{1}'. Effective {2} seconds.",
+                   (logger.isEmpty() ? "{root}" : logger),
                    newLevel,
                    (time / 1000));
     } catch (Exception e) {
@@ -258,9 +260,9 @@ public class ManagerActor extends SimpleActor
     return result;
   }
 
-  private void setDefaultLoggerLevel(final Level level)
+  private void setLoggerLevel(final String name, final Level level)
   {
-    final Logger logger = Logger.getLogger("");
+    final Logger logger = Logger.getLogger(name);
     final Thread thread = Thread.currentThread();
     final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -272,15 +274,22 @@ public class ManagerActor extends SimpleActor
     }
   }
 
-  private Level getDefaultLoggerLevel() {
-    final Logger logger = Logger.getLogger("");
+  private synchronized Level getLoggerLevel(String name) {
+    Level level = _defaultLevels.get(name);
+    if (level != null)
+      return level;
+
+    final Logger logger = Logger.getLogger(name);
     final Thread thread = Thread.currentThread();
     final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     try {
       thread.setContextClassLoader(_systemClassLoader);
 
-      return logger.getLevel();
+      level = logger.getLevel();
+      _defaultLevels.put(name, level);
+
+      return level;
     } finally {
       thread.setContextClassLoader(loader);
     }

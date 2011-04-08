@@ -34,14 +34,20 @@ import java.util.logging.Level;
 @SuppressWarnings("serial")
 public class LogLevelQuery implements java.io.Serializable
 {
-
+  private String _logger;
   private Level _level;
   private long _period;
 
-  public LogLevelQuery(Level level, long time)
+  public LogLevelQuery(String logger, Level level, long time)
   {
+    _logger = logger;
     _level = level;
     _period = time;
+  }
+
+  public String getLogger()
+  {
+    return _logger;
   }
 
   public Level getLevel()

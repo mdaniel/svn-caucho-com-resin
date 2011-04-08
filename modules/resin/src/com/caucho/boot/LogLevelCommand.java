@@ -50,7 +50,7 @@ public class LogLevelCommand extends AbstractManagementCommand
       return;
     }
 
-    Level logLevel = null;
+    Level logLevel;
 
     try {
       logLevel = Level.parse(level.toUpperCase());
@@ -65,14 +65,19 @@ public class LogLevelCommand extends AbstractManagementCommand
 
     long period = 1000 * 60;
 
-    String time = args.getArg("-effective-time");
+    String time = args.getArg("-enable-time");
 
     if (time != null)
       period = Period.toPeriod(time);
 
+    String logger = args.getArg("-log-name");
+
+    if (logger == null)
+      logger = "";
+
     ManagerClient manager = getManagerClient(args, client);
 
-    String message = manager.setLogLevel(logLevel, period);
+    String message = manager.setLogLevel(logger, logLevel, period);
 
     System.out.println(message);
   }
@@ -80,12 +85,13 @@ public class LogLevelCommand extends AbstractManagementCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] log-level -user <user> -password <password> [-effective-time <time-period>] <level>"));
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] log-level -user <user> -password <password> [-effective-time <time-period>] [-log-name <name>] <level>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   sets level for root logger to <level> (severe, warning, info, config, fine, finer, finest)"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
-    System.err.println(L.l("   -effective-time            : specifies new level effective time (default 60s). e.g. 5s"));
+    System.err.println(L.l("   -log-name            : specifies name of the logger. Defaults to root logger"));
+    System.err.println(L.l("   -enable-time         : specifies new level effective time (default 60s). e.g. 5s"));
   }
 }
