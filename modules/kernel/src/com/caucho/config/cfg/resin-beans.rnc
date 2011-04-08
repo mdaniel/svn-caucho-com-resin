@@ -9,6 +9,8 @@ r_beans = element beans {
   r_env-Content
 
   & r_alternatives*
+
+  & element system { r_env-Content }*
 }
 
 r_alternatives = element alternatives {

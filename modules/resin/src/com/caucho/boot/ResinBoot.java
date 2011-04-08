@@ -46,7 +46,6 @@ import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import org.apache.tools.ant.types.LogLevel;
 
 /**
  * ResinBoot is the main bootstrap class for Resin.  It parses the

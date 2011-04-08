@@ -258,7 +258,6 @@ public class SessionBeanImpl<X,T>
           // ioc/0b26
         }
         else {
-          System.out.println("TYPES: " + _types + " " + beanType);
           throw new ConfigException(L.l("{0}.{1} is an invalid @Observes method because @Observes must be in the @Local API.",
                                         beanMethod.getDeclaringType().getJavaClass().getSimpleName(),
                                         beanMethod.getJavaMember().getName()));

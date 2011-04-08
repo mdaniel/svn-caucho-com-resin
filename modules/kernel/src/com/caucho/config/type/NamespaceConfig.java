@@ -73,6 +73,7 @@ import com.caucho.config.core.ResinIf;
 import com.caucho.config.core.ResinImport;
 import com.caucho.config.core.ResinLog;
 import com.caucho.config.core.ResinSet;
+import com.caucho.config.core.ResinSystemConfig;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.PropertyStringProgram;
@@ -234,6 +235,7 @@ class NamespaceConfig {
     addBean("log", ResinLog.class);
     addBean("message", ResinLog.class);
     addBean("set", ResinSet.class);
+    addBean("system", ResinSystemConfig.class);
     
     addBean("value", "com.caucho.config.type.ValueType");
   }
