@@ -800,10 +800,8 @@ public abstract class Expr extends ValueExpression {
       try {
         String string = (String) value;
         
-        if (string.indexOf('.') >= 0)
-          return (long) Double.parseDouble(string);
-        else
-          return Long.parseLong(string);
+        // jsp/32a2
+        return Long.parseLong(string);
       } catch (Exception e) {
         throw new ELException(e);
       }

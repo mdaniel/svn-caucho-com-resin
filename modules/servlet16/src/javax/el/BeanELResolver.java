@@ -407,15 +407,21 @@ public class BeanELResolver extends ELResolver {
           else
             continue;
 
-	  // jsp/30ci
-	  /*
-          if (_propMap.get(propName) != null)
-            continue;
-	  */
+          // jsp/30ci
+          BeanProperty oldProp = _propMap.get(propName);
 
-          _propMap.put(propName, new BeanProperty(baseClass,
-                                                  propName,
-                                                  method));
+          if (oldProp != null) {
+            _propMap.put(propName, new BeanProperty(baseClass,
+                                                    propName,
+                                                    method,
+                                                    oldProp.getWriteMethod()));
+          }
+          else {
+            _propMap.put(propName, new BeanProperty(baseClass,
+                                                    propName,
+                                                    method,
+                                                    null));
+          }
         }
       } catch (IntrospectionException e) {
         throw new ELException(e);
@@ -437,6 +443,7 @@ public class BeanELResolver extends ELResolver {
     private Class<?> _base;
     private PropertyDescriptor _descriptor;
     private Method _readMethod;
+    private Method _writeMethod;
     
     public BeanProperty(Class<?> baseClass,
                         PropertyDescriptor descriptor)
@@ -456,19 +463,22 @@ public class BeanELResolver extends ELResolver {
 
       if (_readMethod != null)
         _readMethod.setAccessible(true);
+      
+      _writeMethod = descriptor.getWriteMethod();
 
       initDescriptor();
     }
     
     private BeanProperty(Class<?> baseClass,
                          String name,
-                         Method getter)
+                         Method getter,
+                         Method setter)
     {
       try {
         _base = baseClass;
         
         if (getter != null && ! void.class.equals(getter.getReturnType()))
-          _descriptor = new PropertyDescriptor(name, getter, null);
+          _descriptor = new PropertyDescriptor(name, getter, setter);
         else
           _descriptor = new PropertyDescriptor(name, null, null);
 
@@ -479,7 +489,9 @@ public class BeanELResolver extends ELResolver {
         }
 
         if (_readMethod != null)
-          getter.setAccessible(true);
+          _readMethod.setAccessible(true);
+        
+        _writeMethod = setter;
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
@@ -517,7 +529,7 @@ public class BeanELResolver extends ELResolver {
 
     public Method getWriteMethod()
     {
-      return _descriptor.getWriteMethod();
+      return _writeMethod;
     }
 
     public boolean isReadOnly()
