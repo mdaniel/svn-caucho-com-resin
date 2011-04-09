@@ -30,6 +30,7 @@
 package com.caucho.jms.connection;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,7 +78,8 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   private boolean _noLocal;
   private boolean _isAutoAcknowledge;
 
-  private volatile boolean _isClosed;
+  private AtomicBoolean _isActive = new AtomicBoolean();
+  private AtomicBoolean _isClosed = new AtomicBoolean();
 
   MessageConsumerImpl(JmsSession session,
                       AbstractQueue<E> queue,
@@ -115,7 +117,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   protected AbstractDestination<E> getDestination()
     throws JMSException
   {
-    if (_isClosed || _session.isClosed())
+    if (_isClosed.get() || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDestination(): MessageConsumer is closed."));
 
     return _queue;
@@ -127,7 +129,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   public boolean getNoLocal()
     throws JMSException
   {
-    if (_isClosed || _session.isClosed())
+    if (_isClosed.get() || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getNoLocal(): MessageConsumer is closed."));
 
     return _noLocal;
@@ -139,7 +141,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   public MessageListener getMessageListener()
     throws JMSException
   {
-    if (_isClosed || _session.isClosed())
+    if (_isClosed.get() || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getNoLocal(): MessageConsumer is closed."));
 
     return _messageListener;
@@ -148,6 +150,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   /**
    * Sets the message listener
    */
+  @Override
   public void setMessageListener(MessageListener listener)
     throws JMSException
   {
@@ -160,7 +163,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   public void setMessageListener(MessageListener listener, long pollInterval)
     throws JMSException
   {
-    if (_isClosed || _session.isClosed())
+    if (_isClosed.get() || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("setMessageListener(): MessageConsumer is closed."));
 
     _messageListener = listener;
@@ -181,7 +184,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   public String getMessageSelector()
     throws JMSException
   {
-    if (_isClosed || _session.isClosed())
+    if (_isClosed.get() || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getMessageSelector(): MessageConsumer is closed."));
 
     return _messageSelector;
@@ -201,10 +204,10 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   public boolean isActive()
     throws JMSException
   {
-    if (_isClosed || _session.isClosed())
+    if (_isClosed.get() || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("isActive(): MessageConsumer is closed."));
 
-    return _session.isActive() && ! _isClosed;
+    return _session.isActive() && ! _isClosed.get();
   }
 
   /**
@@ -212,7 +215,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
    */
   public boolean isClosed()
   {
-    return _isClosed || _session.isClosed();
+    return _isClosed.get() || _session.isClosed();
   }
 
   /**
@@ -261,7 +264,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   protected Message receiveImpl(long timeout)
     throws JMSException
   {
-    if (_isClosed || _session.isClosed())
+    if (isClosed())
       throw new javax.jms.IllegalStateException(L.l("receiveNoWait(): MessageConsumer is closed."));
 
     if (Long.MAX_VALUE / 2 < timeout || timeout < 0)
@@ -409,6 +412,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
    */
   public void start()
   {
+    _isActive.set(true);
     addMessageCallback();
   }  
   
@@ -419,6 +423,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   public void stop()
     throws JMSException
   {
+    _isActive.set(false);
     _queue.removeMessageCallback(_messageCallback);
 
     /*
@@ -431,15 +436,12 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   /**
    * Closes the consumer.
    */
+  @Override
   public void close()
     throws JMSException
   {
-    synchronized (this) {
-      if (_isClosed)
-        return;
-
-      _isClosed = true;
-    }
+    if (_isClosed.getAndSet(true))
+      return;
 
     if (_queue instanceof TemporaryQueueImpl) {    
       ((TemporaryQueueImpl)_queue).removeMessageConsumer();
@@ -463,6 +465,11 @@ public class MessageConsumerImpl<E> implements MessageConsumer
     {
       _listener = listener;
       _classLoader = Thread.currentThread().getContextClassLoader();
+    }
+    
+    public boolean isClosed()
+    {
+      return MessageConsumerImpl.this.isClosed() || ! _isActive.get();
     }
 
     @Override

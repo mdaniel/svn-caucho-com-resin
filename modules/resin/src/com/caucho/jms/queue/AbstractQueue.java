@@ -102,6 +102,15 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
     return receiveEntry(expireTime, isAutoAck);
   }
   
+  public void receive(long expireTime,
+                      boolean isAutoAck, 
+                      QueueEntrySelector selector,
+                      MessageCallback callback)
+    throws MessageException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
   /**
    * Adds the callback to the listening list.
    */

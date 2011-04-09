@@ -473,6 +473,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     
     addConsumer(consumer);
+    
+    if (isActive())
+      consumer.start();
 
     return consumer;
   }
