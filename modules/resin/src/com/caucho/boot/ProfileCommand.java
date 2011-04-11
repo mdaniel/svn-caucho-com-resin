@@ -29,19 +29,49 @@
 
 package com.caucho.boot;
 
+import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
-public class ProfileCommand extends AbstractRepositoryCommand
+public class ProfileCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(ProfileCommand.class);
 
   @Override
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
+    long activeTime = 5 * 1000; // 5 seconds
+    String activeTimeArg = args.getArg("-active-time");
+
+    if (activeTimeArg != null)
+      activeTime = Long.parseLong(activeTimeArg);
+
+    long period = 10;// sampling period
+    String periodArg = args.getArg("-sampling-rate");
+    if (periodArg != null)
+      period = Long.parseLong(periodArg);
+
+    int depth = 16;
+    String depthArg = args.getArg("-depth");
+    if (depthArg != null)
+      depth = Integer.parseInt(depthArg);
+
+    ManagerClient manager = getManagerClient(args, client);
+    String result = manager.profile(activeTime, period, depth);
+
+    System.out.println(result);
   }
 
   @Override
   public void usage()
   {
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] profile -user <user> -password <password> [-active-time <time>] [-sampling-rate <rate>] [-depth <depth>]"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("description:"));
+    System.err.println(L.l("   activates resin internal provider (Pro version only)"));
+    System.err.println(L.l(""));
+    System.err.println(L.l("options:"));
+    System.err.println(L.l("   -active-time    : specifies profiling time span in ms (defaults to 5000 - 5 sec.)" ));
+    System.err.println(L.l("   -sampling-rate  : specifies sampling rate (defaults to 10ms)"));
+    System.err.println(L.l("   -depth          : specifies stack trace depth (use smaller number (8) for smaller impact, larger – for more information). Defauts to 16."));
   }
 }

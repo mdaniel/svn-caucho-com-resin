@@ -65,7 +65,7 @@ public class LogLevelCommand extends AbstractManagementCommand
 
     long period = 1000 * 60;
 
-    String time = args.getArg("-enable-time");
+    String time = args.getArg("-active-time");
 
     if (time != null)
       period = Period.toPeriod(time);
@@ -85,13 +85,13 @@ public class LogLevelCommand extends AbstractManagementCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] log-level -user <user> -password <password> [-effective-time <time-period>] [-log-name <name>] <level>"));
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] log-level -user <user> -password <password> [-active-time <time-period>] [-log-name <name>] <level>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   sets level for root logger to <level> (severe, warning, info, config, fine, finer, finest)"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -log-name            : specifies name of the logger. Defaults to root logger"));
-    System.err.println(L.l("   -enable-time         : specifies new level effective time (default 60s). e.g. 5s"));
+    System.err.println(L.l("   -active-time         : specifies new level active time (default 60s). e.g. 5s"));
   }
 }

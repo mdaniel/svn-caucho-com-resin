@@ -27,42 +27,24 @@
  * @author Alex Rojkov
  */
 
-package com.caucho.server.admin;
+package com.caucho.profile;
 
-import java.util.logging.Level;
+import java.util.ArrayList;
 
-@SuppressWarnings("serial")
-public class LogLevelQuery implements java.io.Serializable
+public class ProfileEntry
 {
-  private String _logger;
-  private Level _level;
-  private long _period;
-
-  public LogLevelQuery(String logger, Level level, long period)
+  public String getDescription()
   {
-    _logger = logger;
-    _level = level;
-    _period = period;
+    throw new AbstractMethodError();
   }
 
-  public String getLogger()
+  public long getCount()
   {
-    return _logger;
+    throw new AbstractMethodError();
   }
 
-  public Level getLevel()
+  public ArrayList<? extends StackEntry> getStackTrace()
   {
-    return _level;
-  }
-
-  public long getPeriod()
-  {
-    return _period;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
+    throw new AbstractMethodError();
   }
 }

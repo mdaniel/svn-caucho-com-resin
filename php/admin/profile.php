@@ -5,7 +5,7 @@
 
 require_once "WEB-INF/php/inc.php";
 
-$profile = @new Java("com.caucho.profile.Profile");
+$profile = @new Java("com.caucho.profile.ProProfile");
 
 $mbeanServer = new MBeanServer();
 
@@ -180,7 +180,7 @@ function do_partition_profile($entries)
              && $stackTrace[0]->methodName == "socketAccept") {
       $partition["accept"][] = $info;
     }
-    else if ($stackTrace[0]->className == "com.caucho.profile.Profile"
+    else if ($stackTrace[0]->className == "com.caucho.profile.ProProfile"
              && $stackTrace[0]->methodName == "nativeProfile") {
       $partition["resin"][] = $info;
     }

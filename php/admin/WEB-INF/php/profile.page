@@ -9,7 +9,7 @@ if (! admin_init()) {
   return;
 }
 
-$profile = @new Java("com.caucho.profile.Profile");
+$profile = @new Java("com.caucho.profile.ProProfile");
 
 if ($profile) {
   if ($_POST['action'] == 'stop') {
@@ -308,7 +308,7 @@ function do_partition_profile($entries)
              && $stackTrace[0]->methodName == "socketAccept") {
       $partition["accept"][] = $info;
     }
-    else if ($stackTrace[0]->className == "com.caucho.profile.Profile"
+    else if ($stackTrace[0]->className == "com.caucho.profile.ProProfile"
              && $stackTrace[0]->methodName == "nativeProfile") {
       $partition["resin"][] = $info;
     }

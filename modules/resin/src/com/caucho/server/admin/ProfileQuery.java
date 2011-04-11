@@ -29,35 +29,33 @@
 
 package com.caucho.server.admin;
 
-import java.util.logging.Level;
-
 @SuppressWarnings("serial")
-public class LogLevelQuery implements java.io.Serializable
+public class ProfileQuery implements java.io.Serializable
 {
-  private String _logger;
-  private Level _level;
-  private long _period;
+  private long _activeTime; // active time in milliseconds
+  private long _period; //sampling period
+  private int _depth;
 
-  public LogLevelQuery(String logger, Level level, long period)
+  public ProfileQuery(long activeTime, long period, int depth)
   {
-    _logger = logger;
-    _level = level;
+    _activeTime = activeTime;
     _period = period;
+    _depth = depth;
   }
 
-  public String getLogger()
+  public long getActiveTime()
   {
-    return _logger;
-  }
-
-  public Level getLevel()
-  {
-    return _level;
+    return _activeTime;
   }
 
   public long getPeriod()
   {
     return _period;
+  }
+
+  public int getDepth()
+  {
+    return _depth;
   }
 
   @Override

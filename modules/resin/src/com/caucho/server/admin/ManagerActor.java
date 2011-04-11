@@ -36,6 +36,9 @@ import com.caucho.cloud.bam.BamSystem;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.profile.HeapDump;
+import com.caucho.profile.Profile;
+import com.caucho.profile.ProfileEntry;
+import com.caucho.profile.StackEntry;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -50,7 +53,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -198,27 +204,6 @@ public class ManagerActor extends SimpleActor
     }
   }
 
-  private String getProHeapDump()
-  {
-    try {
-      HeapDump dump = HeapDump.create();
-      StringWriter buffer = new StringWriter();
-      PrintWriter writer = new PrintWriter(buffer);
-      dump.writeExtendedHeapDump(writer);
-      writer.flush();
-
-      return buffer.toString();
-    } catch (ConfigException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-
-      return e.getMessage();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-
-      return e.getMessage();
-    }
-  }
-
   @Query
   public String setLogLevel(long id,
                             String to,
@@ -245,7 +230,7 @@ public class ManagerActor extends SimpleActor
 
       setLoggerLevel(logger, newLevel);
 
-      result = L.l("Log {0}.level is set to `{1}'. Effective {2} seconds.",
+      result = L.l("Log {0}.level is set to `{1}'. Active time {2} seconds.",
                    (logger.isEmpty() ? "{root}" : logger),
                    newLevel,
                    (time / 1000));
@@ -254,6 +239,106 @@ public class ManagerActor extends SimpleActor
 
       result = e.getMessage();
     }
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }
+
+  @Query
+  public String profile(long id, String to, String from, ProfileQuery query)
+  {
+    Profile profile = Profile.createProfile();
+
+    if (profile.isActive()) {
+      return "Profile is still active";
+    }
+
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+    Calendar startedAt = new GregorianCalendar();
+    startedAt.setTimeInMillis(Alarm.getCurrentTime());
+
+    profile.setPeriod(query.getPeriod());
+    profile.setDepth(query.getDepth());
+    final long activeTime = query.getActiveTime();
+    final long period = query.getPeriod();
+
+    profile.start();
+
+    Calendar interruptedAt = null;
+
+    Object lock = new Object();
+    synchronized (lock) {
+      try {
+        lock.wait(activeTime);
+      } catch (InterruptedException e) {
+        interruptedAt = new GregorianCalendar();
+      }
+    }
+
+    profile.stop();
+
+    StringWriter buffer = new StringWriter();
+    PrintWriter out = new PrintWriter(buffer);
+
+    ProfileEntry[] entries = profile.getResults();
+
+    if (entries == null || entries.length == 0) {
+      out.println("Profile returned no entries.");
+    }
+    else {
+      if (interruptedAt == null) {
+        out.print(L.l("Profile started at {0}. Active for a total of {1}ms.",
+                      dateFormat.format(startedAt.getTime()),
+                      activeTime));
+      }
+      else {
+        out.print(L.l("Profile started at {0}, interruped at {1}.",
+                      dateFormat.format(startedAt.getTime()),
+                      dateFormat.format(interruptedAt.getTime())));
+      }
+
+      out.println(L.l(" Sampling rate {0}ms. Depth {1}.",
+                      period,
+                      String.valueOf(query.getDepth())));
+
+      double totalTicks = 0;
+      for (ProfileEntry entry : entries) {
+        totalTicks += entry.getCount();
+      }
+
+      final double sampleTicks = profile.getTicks();
+      double totalPercent = 0d;
+
+      out.println("   % time  |time self(s)|   % sum    | Method Call");
+
+      for (ProfileEntry entry : entries) {
+        double timePercent = (double)100 * (double) entry.getCount()
+                             / sampleTicks;
+        double selfPercent = (double) 100 * (double) entry.getCount()
+                             / totalTicks;
+        totalPercent += selfPercent;
+
+        out.println(String.format("%10.3f | %10.3f | %10.3f | %s",
+                                  timePercent,
+                                  (float)entry.getCount() * period * 0.001,
+                                  totalPercent,
+                                  entry.getDescription()));
+
+      }
+
+      for (ProfileEntry entry : entries) {
+        out.println(entry.getDescription());
+        ArrayList<? extends StackEntry> stackEntries = entry.getStackTrace();
+        for (StackEntry stackEntry : stackEntries) {
+          out.println("  " + stackEntry.getDescription());
+        }
+      }
+    }
+
+    out.flush();
+    String result = buffer.toString();
 
     getBroker().queryResult(id, from, to, result);
 
@@ -292,6 +377,27 @@ public class ManagerActor extends SimpleActor
       return level;
     } finally {
       thread.setContextClassLoader(loader);
+    }
+  }
+
+  private String getProHeapDump()
+  {
+    try {
+      HeapDump dump = HeapDump.create();
+      StringWriter buffer = new StringWriter();
+      PrintWriter writer = new PrintWriter(buffer);
+      dump.writeExtendedHeapDump(writer);
+      writer.flush();
+
+      return buffer.toString();
+    } catch (ConfigException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+
+      return e.getMessage();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+
+      return e.getMessage();
     }
   }
 

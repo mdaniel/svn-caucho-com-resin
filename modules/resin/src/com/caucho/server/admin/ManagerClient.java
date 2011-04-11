@@ -127,6 +127,12 @@ public class ManagerClient
     return (String) query(query);
   }
 
+  public String profile(long activeTime, long period, int depth) {
+    ProfileQuery query = new ProfileQuery(activeTime, period, depth);
+
+    return (String)query(query);
+  }
+
   protected Serializable query(Serializable query)
   {
     try {
