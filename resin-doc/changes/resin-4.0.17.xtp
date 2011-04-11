@@ -1,0 +1,40 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.17 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.16 has primarily been a bug-fix release.</p>
+
+</s1>
+
+<s1 title="Web Profile TCK">
+
+<ul>
+<li>EL - pass</li>
+<li>EJB - pass</li>
+<li>JDBC - pass</li>
+<li>JPA - pass</li>
+<li>JSF - pass</li>
+<li>JSP - pass</li>
+<li>JSR-299 (CDI) - pass</li>
+<li>JSR-330 (javax.inject) - pass</li>
+<li>JSTL - pass</li>
+<li>JTA - pass</li>
+<li>Servlet - pass</li>
+</ul>
+
+</s1>
+
+<s1 title="Health Check Updates">
+
+</s1>
+
+</body>
+</document>
