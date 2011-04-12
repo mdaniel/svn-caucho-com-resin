@@ -3019,6 +3019,8 @@ public final class InjectManager
     for (AnnotatedType<?> type : types) {
       discoverBeanImpl(type);
     }
+    
+    _extensionManager.processPendingEvents();
   }
 
   void discoverScanClass(InjectScanClass scanClass)

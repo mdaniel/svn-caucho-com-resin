@@ -75,6 +75,7 @@ import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.Module;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -98,6 +99,9 @@ public class ExtensionManager
   
   private HashMap<Class<?>,ExtensionItem> _extensionMap
     = new HashMap<Class<?>,ExtensionItem>();
+  
+  private ConcurrentArrayList<PendingEvent> _pendingEventList
+    = new ConcurrentArrayList<PendingEvent>(PendingEvent.class);
   
   private boolean _isCustomExtension;
 
@@ -281,6 +285,9 @@ public class ExtensionManager
     BaseType baseType = cdi.createTargetBaseType(processBean.getClass());
     baseType = baseType.fill(cdi.createTargetBaseType(bean.getBeanClass()));
     
+    _pendingEventList.add(new PendingEvent(processBean, baseType));
+    
+    /*
     getEventManager().fireExtensionEvent(processBean, baseType);
 
     if (processBean instanceof ProcessBeanImpl<?>
@@ -288,6 +295,9 @@ public class ExtensionManager
       return null;
     else
       return processBean.getBean();
+      */
+    
+    return processBean.getBean();
   }
 
   @Module
@@ -299,13 +309,19 @@ public class ExtensionManager
     
     BaseType baseType = cdi.createTargetBaseType(event.getClass());
     baseType = baseType.fill(cdi.createTargetBaseType(bean.getBeanClass()));
+
+    _pendingEventList.add(new PendingEvent(event, baseType));
     
+    /*
     getEventManager().fireExtensionEvent(event, baseType);
 
     if (event.isVeto())
       return null;
     else
       return event.getBean();
+      */
+    
+    return event.getBean();
   }
 
   @Module
@@ -319,12 +335,18 @@ public class ExtensionManager
     BaseType baseType = cdi.createTargetBaseType(event.getClass());
     baseType = baseType.fill(cdi.createTargetBaseType(bean.getBeanClass()));
     
+    _pendingEventList.add(new PendingEvent(event, baseType));
+    
+    /*
     getEventManager().fireExtensionEvent(event, baseType);
 
     if (event.isVeto())
       return null;
     else
       return event.getBean();
+      */
+    
+    return event.getBean();
   }
 
   @Module
@@ -342,12 +364,18 @@ public class ExtensionManager
     baseType = baseType.fill(cdi.createTargetBaseType(method.getBaseType()),
                              cdi.createTargetBaseType(producerBean.getBeanClass()));
     
+    _pendingEventList.add(new PendingEvent(event, baseType));
+    
+    /*
     getEventManager().fireExtensionEvent(event, baseType);
 
     if (event.isVeto())
       return null;
     else
       return event.getBean();
+      */
+    
+    return event.getBean();
   }
 
   @Module
@@ -364,12 +392,27 @@ public class ExtensionManager
     baseType = baseType.fill(cdi.createTargetBaseType(field.getBaseType()),
                              cdi.createTargetBaseType(bean.getProducerBean().getBeanClass()));
     
+    _pendingEventList.add(new PendingEvent(event, baseType));
+    
+    /*
     getEventManager().fireExtensionEvent(event, baseType);
 
     if (event.isVeto())
       return null;
     else
       return event.getBean();
+      */
+    
+    return event.getBean();
+  }
+  
+  public void processPendingEvents()
+  {
+    while (_pendingEventList.size() > 0) {
+      PendingEvent event = _pendingEventList.remove(0);
+      
+      getEventManager().fireExtensionEvent(event.getEvent(), event.getType());
+    }
   }
 
   /**
@@ -680,6 +723,27 @@ public class ExtensionManager
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _extension + "," + _method.getName() + "]";
+    }
+  }
+  
+  static class PendingEvent {
+    private Object _event;
+    private BaseType _type;
+    
+    PendingEvent(Object event, BaseType type)
+    {
+      _event = event;
+      _type = type;
+    }
+    
+    public Object getEvent()
+    {
+      return _event;
+    }
+    
+    public BaseType getType()
+    {
+      return _type;
     }
   }
 }

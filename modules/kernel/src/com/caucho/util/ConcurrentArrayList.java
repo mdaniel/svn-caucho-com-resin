@@ -166,14 +166,14 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
     }
   }
   
-  public Object remove(int index)
+  public E remove(int index)
   {
     synchronized (_list) {
       Object value = _list.remove(index);
       
       updateArray();
       
-      return value;
+      return (E) value;
     }
   }
   
