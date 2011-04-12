@@ -112,5 +112,26 @@ categorizing meters into drill-downs.</p>
 
 </s1>
 
+<s1 title="(CLI) Resin command line updates">
+<p>Resin 4.0.17 introduces commands to produce thread and heap dumps, change log
+levels and profile applications. Documentation for an updated CLI interface
+can be viewed with <code>java -jar lib/resin.jar help</code>. Documentation for
+a particular command can be viewed with <code>java -jar lib/resin.jar help &lt;command></code>
+</p>
+<p>Commands added in release 4.0.17 are <code>thread-dump, heap-dump, log-level, profile</code></p>
+</s1>
+
+<s1 title="Eclipse plugin updates">
+<p>Eclipse plugin has undergone significant updates, with configuration, deployment
+and debugging reworked. Added option for remote deployment. Bugs #4417, #4418 are resolved.</p>
+<p>Removing the older version of plugin is necessary for a smooth update. Procedure
+for complete removal of the plugin is outlined at http://bugs.caucho.com/view.php?id=4417</p>
+</s1>
+
+<s1 title="NetBeans plugin updates">
+<p>Updates to NetBeans plugin resolve bug #3936 and changes deployment option to
+exploded web-app directory deploy.</p>
+</s1>
+
 </body>
 </document>

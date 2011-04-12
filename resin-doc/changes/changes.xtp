@@ -13,6 +13,10 @@
 
 <s2 title="4.0.17 - snapshot">
 <ul>
+<li>netbeans: fixed installation issues and change deployment options to deploy to an exploded web-apps directory</li>
+<li>eclipse: fixed "Debugging does not work with 4.0.15 version of the Eclipse plugin" bug (#4417, rep by stoty)</li>
+<li>eclipse: fixed "Eclipse plug-in won't install" bug (#4418, rep by adamzr)</li>
+<li>resin: added thread-dump, heap-dump, log-level and profile commands.</li>
 <li>el: add mbean function for JMX attribute access</li>
 <li>el: add =~ for regular expression matching</li>
 <li>resin-admin: include link to SSL on deploy page when accessing non-ssl (#4455)</li>

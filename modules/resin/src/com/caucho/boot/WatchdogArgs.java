@@ -565,6 +565,7 @@ class WatchdogArgs
   {
     System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
     System.err.println(L().l("       java -jar resin.jar [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
+    System.err.println(L().l("       java -jar resin.jar [-options] [thread-dump | heap-dump | log-level | profile]"));
     System.err.println(L().l("       java -jar resin.jar help <command>"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
