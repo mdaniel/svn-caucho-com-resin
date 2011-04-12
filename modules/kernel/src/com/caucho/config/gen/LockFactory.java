@@ -44,7 +44,8 @@ import com.caucho.inject.Module;
  */
 @Module
 public class LockFactory<X> extends AbstractAspectFactory<X> {
-  private ConcurrencyManagementType _concurrencyManagement = ConcurrencyManagementType.CONTAINER;
+  private ConcurrencyManagementType _concurrencyManagement
+    = ConcurrencyManagementType.CONTAINER;
   private LockType _classLockType;
   private AccessTimeout _classAccessTimeout;
 

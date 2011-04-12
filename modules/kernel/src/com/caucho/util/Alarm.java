@@ -90,6 +90,9 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
   protected Alarm(String name)
   {
+    if (_coordinatorThread == null)
+      throw new IllegalStateException("Alarm cannot be instantiated because Resin is running inside a foreign classloader."
+                                      + "\n  " + Alarm.class.getClassLoader());
     _name = name;
 
     addEnvironmentListener();

@@ -33,6 +33,8 @@ import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.spi.Context;
@@ -113,6 +115,8 @@ import com.caucho.vfs.Vfs;
  */
 // TODO Add JNDI look-up and well as direct access to JNDI/CDI beans manager.
 public class ResinBeanContainer {
+  private static final Logger log
+    = Logger.getLogger(ResinBeanContainer.class.getName());
   private static final L10N L = new L10N(ResinBeanContainer.class);
 
   private EnvironmentClassLoader _classLoader;
@@ -154,7 +158,10 @@ public class ResinBeanContainer {
 
       Environment.addCloseListener(this);
 
-      _cdiManager.addManagedBean(_cdiManager.createManagedBean(ResinCdiProducer.class));
+      Class<?> resinCdiProducer = getResinCdiProducerClass();
+      
+      if (resinCdiProducer != null)
+        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinCdiProducer));
 
       Class<?> resinValidatorClass
         = ResinCdiProducer.createResinValidatorProducer();
@@ -520,6 +527,21 @@ public class ResinBeanContainer {
   public ClassLoader getClassLoader()
   {
     return _classLoader;
+  }
+  
+  private Class<?> getResinCdiProducerClass()
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+      return Class.forName("com.caucho.server.webbeans.ResinCdiProducer",
+                           false,
+                           loader);
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      return null;
+    }
   }
 
   @Override

@@ -500,9 +500,13 @@ public class MessageConsumerImpl<E> implements MessageConsumer
           try {
             thread.setContextClassLoader(_classLoader);
 
+            _session.acquireListenSemaphore();
+            
             _listener.onMessage(message);
           } finally {
             thread.setContextClassLoader(oldLoader);
+            
+            _session.releaseListenSemaphore();
 
             // XXX: commit/rollback?
             if (_session.getTransacted())

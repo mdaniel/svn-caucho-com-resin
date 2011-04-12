@@ -25,20 +25,8 @@
   <dependencies>
     <dependency>
       <groupId>com.caucho</groupId>
-      <artifactId>resin-javaee</artifactId>
+      <artifactId>resin-javaee16</artifactId>
       <version>@VERSION@</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-hessian</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>osgi_R4_core</artifactId>
-      <version>1.0</version>
     </dependency>
     
     <dependency>

@@ -408,10 +408,17 @@ public class MessageImpl implements Message, java.io.Serializable
   /**
    * Returns a boolean property with the given name.
    */
+  @Override
   public boolean getBooleanProperty(String name)
     throws JMSException
   {
-    return ObjectConverter.toBoolean(getObjectProperty(name));
+    // jms/214f - TCK
+    Object value = getObjectProperty(name);
+    
+    if (value != null)
+      return ObjectConverter.toBoolean(value);
+    else
+      return false;
   }
 
   /**

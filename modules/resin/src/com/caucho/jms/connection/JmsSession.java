@@ -31,6 +31,7 @@ package com.caucho.jms.connection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -120,6 +121,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   private volatile boolean _hasMessage;
   
   private String _publisherId;
+  
+  private Semaphore _listenSemaphore = new Semaphore(1);
 
   public JmsSession(ConnectionImpl connection,
                     boolean isTransacted, int ackMode,
@@ -738,7 +741,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   {
     _xid = null;
 
-    if (! _isTransacted && ! _isXA)
+    // jms/2552
+    if (! _isTransacted && ! isXA)
       throw new IllegalStateException(L.l("commit() can only be called on a transacted session."));
 
     _isXA = false;
@@ -1177,6 +1181,24 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     throws XAException
   {
     return null;
+  }
+
+  public void acquireListenSemaphore()
+  {
+    try {
+      _listenSemaphore.acquire();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void releaseListenSemaphore()
+  {
+    try {
+      _listenSemaphore.release();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**

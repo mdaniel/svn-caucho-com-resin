@@ -863,7 +863,7 @@
     </antcall>
 
     <antcall target="maven2-jar" inheritRefs="true">
-      <param name="maven.name" value="resin-javaee"/>
+      <param name="maven.name" value="resin-javaee16"/>
       <param name="jar" value="${dist}/${dist.name}/lib/javaee-16.jar"/>
       <param name="pom.xml" value="${modules}/javaee/maven2/pom.xml"/>
       <param name="ivy.xml" value="${modules}/javaee/maven2/ivy.xml"/>

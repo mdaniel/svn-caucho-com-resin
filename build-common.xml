@@ -451,7 +451,7 @@
   </target>
 	  
   <target name="resin.dist.jar"
-          depends="compile">
+          depends="compile,junit">
     <mkdir dir="${dist.build}/lib"/>
     <mkdir dir="${dist.build}/compat"/>
 
