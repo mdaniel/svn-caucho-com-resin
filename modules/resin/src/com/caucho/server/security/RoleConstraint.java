@@ -79,10 +79,10 @@ public class RoleConstraint extends AbstractConstraint {
       String role = _roles[i];
       
       if (role.equals("*"))
-        return AuthorizationResult.ALLOW;
+        return AuthorizationResult.DEFAULT_ALLOW;
 
       if (request.isUserInRole(role))
-        return AuthorizationResult.ALLOW;
+        return AuthorizationResult.DEFAULT_ALLOW;
     }
 
     return AuthorizationResult.DENY;
