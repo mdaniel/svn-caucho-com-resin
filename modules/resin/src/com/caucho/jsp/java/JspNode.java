@@ -889,8 +889,9 @@ public abstract class JspNode {
         objValue = attr.getStaticText();
       else {
         String str = "_jsp_str_" + _gen.uniqueId();
-        out.println("String " + str + " = " + attr.generateValue() + ";");
-        out.println(obj + "." + method.getName() + "(" + stringToValue(type, str) + ");");
+        out.printClass(type);
+        out.println(" " + str + " = " + attr.generateValue(type) + ";");
+        out.println(obj + "." + method.getName() + "(" + str + ");");
         return;
       }
     }

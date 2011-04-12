@@ -141,6 +141,9 @@ public class JspExpression extends JspNode {
     boolean hasSlashes = false;
     
     StringBuilder sb = new StringBuilder();
+    
+    sb.append("String.valueOf(");
+    
     int length = _text.length();
 
     for (int i = 0; i < length; i++) {
@@ -161,6 +164,8 @@ public class JspExpression extends JspNode {
   
     if (hasSlashes)
       sb.append("\n");
+    
+    sb.append(")");
   
     return sb.toString();
   }
