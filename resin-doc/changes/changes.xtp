@@ -13,6 +13,8 @@
 
 <s2 title="4.0.17 - snapshot">
 <ul>
+<li>el: add mbean function for JMX attribute access</li>
+<li>el: add =~ for regular expression matching</li>
 <li>resin-admin: include link to SSL on deploy page when accessing non-ssl (#4455)</li>
 <li>resin-admin: hide user/password generation when user exists (#4486, rep by Keith Fetterman)</li>
 <li>resin-admin: use {SSHA} for generated password</li>

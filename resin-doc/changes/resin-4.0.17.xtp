@@ -34,6 +34,82 @@
 
 <s1 title="Health Check Updates">
 
+<p>Enhancements to the health check system continue with the following new
+command available.</p>
+
+<ul>
+ <li>&lt;health:IfFlapping> - predicate that qualifies an action to match on 
+ frequent state changes.</li>
+ 
+ <li>&lt;health:IfCron> - predicate that qualifies an action to match if the 
+ current time is in an active range configured using cron-style syntax.</li>
+ 
+ <li>&lt;health:IfExpr> - predicate that qualifies an action to match on the 
+ evaluation of a JSP EL expression.</li>
+ 
+ <li>&lt;health:ExprHealthCheck> - check that evaluates one or more JSP EL 
+ expressions to a health status.</li>
+ 
+ <li>&lt;health:ExecCommand> - action that executes a shell command.</li>
+</ul>
+
+<p>&lt;health:IfExpr> and &lt;health:ExprHealthCheck> work well in combination 
+with enhancements made to EL syntax that enables JMX access and regular 
+expression evaluation.</p>
+
+<example title="Example: JMX access and regular expressions in EL">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:health="urn:java:com.caucho.health">
+
+  &lt;health:SendMail>
+   &lt;to>admin@yourdomain.com&lt;/to>
+    &lt;health:Not>
+      &lt;health:IfExpr test="${mbean('java.lang:type=Runtime').BootClassPath =~ '.*resource-16.jar.*'}"/>
+    &lt;/health:Not>
+  &lt;/health:SendMail>
+ 
+&lt;/cluster>
+</example>
+
+<p>In this example, the mbean('java.lang:type=Runtime') function looks up an 
+MBean in JMX, and '.BootClassPath' retrieves the attribute value.  The 
+=~ operator matches the value to a regular expression.  &lt;health:Not> 
+qualifies the predicate to match on a failure.  This is a useful check to 
+alert if a required jar is not present in the boot classpath.</p>
+
+</s1>
+
+<s1 title="JMX Meter Updates">
+
+<p>A number of previously hard-coded JMX meters are now setup in health.xml.  
+Meters provide graphing in /resin-admin.  Any numeric MBean attribute can be 
+graphed using the new &lt;health:JmxMeter> or &lt;health:JmxDeltaMeter> 
+elements.</p>
+
+<example title="Example: JMX meters in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:health="urn:java:com.caucho.health">
+
+  &lt;health:JmxMeter>
+    &lt;name>JVM|Thread|JVM Thread Count&lt;/name>
+    &lt;objectName>java.lang:type=Threading&lt;/objectName>
+    &lt;attribute>ThreadCount&lt;/attribute>
+  &lt;/health:JmxMeter>
+
+  &lt;health:JmxDeltaMeter>
+    &lt;name>JVM|Compilation|Compilation Time&lt;/name>
+    &lt;objectName>java.lang:type=Compilation&lt;/objectName>
+    &lt;attribute>TotalCompilationTime&lt;/attribute>
+  &lt;/health:JmxDeltaMeter>
+
+&lt;/cluster>
+</example>
+
+<p>JmxMeter graphs the current value, while JmxDelta meter graphs 
+the different between the current and previous values.  /resin-admin uses the 
+pipe | character in the &lt;name> attribute to enhance the UI by 
+categorizing meters into drill-downs.</p>
+
 </s1>
 
 </body>
