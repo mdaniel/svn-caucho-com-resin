@@ -124,13 +124,6 @@
       <param name="module.jar" value="resin-compat.jar"/>
     </antcall>
   </target>
-     
-  <target name="junit" depends="init">
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="junit"/>
-      <param name="module.jar" value="resin-junit.jar"/>
-    </antcall>
-  </target>
 
   <target name="eclipselink" depends="init">
     <antcall target="module" inheritRefs="true">

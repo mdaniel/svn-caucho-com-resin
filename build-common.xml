@@ -960,6 +960,13 @@
     <copy tofile="${dist}/${shortproduct}-4_0-snap-src.tar.gz"
           file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
   </target>
+     
+  <target name="junit" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="junit"/>
+      <param name="module.jar" value="resin-junit.jar"/>
+    </antcall>
+  </target>
 
   <target name="maven2-artifact">
     <property name="jar.name" value="${module.name}.jar"/>
