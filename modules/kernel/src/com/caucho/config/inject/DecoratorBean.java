@@ -50,6 +50,7 @@ import javax.interceptor.Interceptor;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.reflect.AnnotatedFieldImpl;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -251,6 +252,11 @@ public class DecoratorBean<T> implements Decorator<T>
     if (_type.isAnnotationPresent(Interceptor.class))
       throw new ConfigException(L.l("{0} is an invalid @Delegate because it has an @Interceptor annotation.",
                                     _type.getName()));
+    
+    if (Modifier.isFinal(_type.getModifiers())) {
+      throw new ConfigException(L.l("{0} is an invalid @Decorator because it is a final class.",
+                                    _type.getName()));
+    }
   }
 
   protected void introspect()
@@ -303,6 +309,16 @@ public class DecoratorBean<T> implements Decorator<T>
         // ioc/0i5g, ioc/0i3r
         if (baseType.isAssignableFrom(delegateType)) {
           _typeSet.add(type);
+          
+          for (Method method : baseType.getRawClass().getMethods()) {
+            Method implMethod = AnnotatedTypeUtil.findMethod(selfType.getRawClass().getMethods(), method);
+            
+            if (implMethod != null && Modifier.isFinal(implMethod.getModifiers())) {
+              throw new ConfigException(L.l("'{0}.{1}' is an invalid decorator method because it is final.",
+                                            implMethod.getDeclaringClass().getName(),
+                                            implMethod.getName()));
+            }
+          }
         }
         else if (isDeclaredInterface(selfType, baseType)){
           // ioc/0i5a
@@ -327,55 +343,6 @@ public class DecoratorBean<T> implements Decorator<T>
     }
     
     return false;
-  }
-
-  private void introspectDelegateField()
-  {
-    if (_delegateField == null) {
-      for (Field field : _type.getDeclaredFields()) {
-        if (Modifier.isStatic(field.getModifiers()))
-          continue;
-
-        if (! field.isAnnotationPresent(Delegate.class))
-          continue;
-
-        Class<?> fieldType = field.getType();
-
-        /*
-        if (! fieldType.isInterface()) {
-          throw new ConfigException(L.l("{0}.{1} is an invalid @Delegate field because its type '{2}' is not an interface",
-                                        _type.getName(),
-                                        field.getName(),
-                                        fieldType.getName()));
-        }
-        */
-
-        for (Class<?> iface : _type.getInterfaces()) {
-          if (Serializable.class.equals(iface))
-            continue;
-          
-          if (! iface.isAssignableFrom(fieldType)) {
-            throw new ConfigException(L.l("{0}.{1} is an invalid @Delegate field because {2} does not implement the API {3}",
-                                          _type.getName(),
-                                          field.getName(),
-                                          fieldType.getName(),
-                                          iface.getName()));
-          }
-        }
-
-        if (_delegateField != null) {
-          throw new ConfigException(L.l("{0}: @Decorator field '{1}' conflicts with earlier field '{2}'.  A decorator must have exactly one delegate field.",
-                                        _type.getName(),
-                                        _delegateField,
-                                        field.getName()));
-        }
-
-        field.setAccessible(true);
-        _delegateField = field;
-
-        introspectBindingTypes(field.getAnnotations());
-      }
-    }
   }
 
   protected void introspectBindingTypes(Annotation []annList)

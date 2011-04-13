@@ -241,6 +241,17 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   {
     return _injectionTarget.getInjectionPoints();
   }
+  
+  public boolean validate()
+  {
+    if (_injectionTarget instanceof InjectionTargetBuilder) {
+      ((InjectionTargetBuilder) _injectionTarget).validate();
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
 
   /*
   public Set<Bean<?>> getProducerBeans()

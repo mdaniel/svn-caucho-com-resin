@@ -1792,21 +1792,26 @@ public final class InjectManager
     
     if (bean instanceof CdiStatefulBean)
       isPassivating = true;
+    
+    if (bean instanceof ManagedBeanImpl
+        && ((ManagedBeanImpl) bean).validate()) {
+    }
 
+    // System.out.println("VALID: " + bean);
     for (InjectionPoint ip : bean.getInjectionPoints()) {
       ReferenceFactory<?> factory = validateInjectionPoint(ip);
-      
+
       if (ip.isDelegate() && ! (bean instanceof Decorator))
         throw new ConfigException(L.l("'{0}' is an invalid delegate because {1} is not a Decorator.",
                                       ip.getMember().getName(),
                                       bean));
-      
+
       RuntimeException exn = validatePassivation(ip);
-      
+
       if (exn != null && ! factory.isProducer())
         throw exn;
     }
-    
+
     if (isNormalScope(bean.getScope())) {
       validateNormal(bean);
     }
@@ -1844,7 +1849,8 @@ public final class InjectManager
                                                 ip.getType(),
                                                 bean));
         else
-          exn = new ConfigException(L.l("'{0}' is an invalid injection point of type {1} ({2}) because it's not serializable for {3}",
+          exn = new ConfigException(L.l("'{0}.{1}' is an invalid injection point of type {2} ({3}) because it's not serializable for {4}",
+                                        bean.getBeanClass().getName(),
                                         ip.getMember().getName(),
                                         ip.getType(),
                                         prodBean,
@@ -2820,6 +2826,26 @@ public final class InjectManager
     DecoratorEntry<X> entry = new DecoratorEntry<X>(this, decorator, baseType);
     
     _decoratorList.add(entry);
+    
+    for (Type type : decorator.getDecoratedTypes()) {
+      if (type instanceof Class<?>) {
+        Class<?> cl = (Class<?>) type;
+      
+        if (Object.class.equals(cl)
+            || Serializable.class.equals(cl)) {
+          continue;
+        }
+        
+        String javaClassName = cl.getName();
+      
+        InjectScanClass scanClass = getScanManager().getScanClass(javaClassName);
+
+        if (scanClass != null && ! scanClass.isRegistered()) {
+          discoverScanClass(scanClass);
+        }
+      }
+    }
+    processPendingAnnotatedTypes();
 
     return entry;
   }
@@ -2839,29 +2865,29 @@ public final class InjectManager
    */
   public List<Decorator<?>> resolveDecorators(Class<?> type)
   {
-    HashSet<Type> types = new HashSet<Type>();                                  
-    types.add(type);                                                            
+    HashSet<Type> types = new HashSet<Type>();
+    types.add(type);
 
-    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();            
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
-    boolean isQualifier = false;                                                
+    boolean isQualifier = false;
 
     for (Annotation ann : type.getAnnotations()) {
       if (isQualifier(ann.annotationType())) {
-        bindingList.add(ann);                                                   
+        bindingList.add(ann);
 
         if (! Named.class.equals(ann.annotationType())) {
-          isQualifier = true;                                                   
+          isQualifier = true;
         }
       }
     }
 
     if (! isQualifier)
-      bindingList.add(DefaultLiteral.DEFAULT);                                  
-    bindingList.add(AnyLiteral.ANY);                                            
+      bindingList.add(DefaultLiteral.DEFAULT);
+    bindingList.add(AnyLiteral.ANY);
 
-    Annotation []bindings = new Annotation[bindingList.size()];                 
-    bindingList.toArray(bindings);                                              
+    Annotation []bindings = new Annotation[bindingList.size()];
+    bindingList.toArray(bindings);
 
     List<Decorator<?>> decorators = resolveDecorators(types, bindings);
     

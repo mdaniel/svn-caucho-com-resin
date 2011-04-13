@@ -175,10 +175,17 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     if (_producer == null) {
       _producer = build();
       
+      // bind();
       // validate(getBean());
     }
     
     return _producer.getInjectionPoints();
+  }
+  
+  public void validate()
+  {
+    bind();
+    validate(getBean());
   }
   
   public void bind()
@@ -803,7 +810,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     }
   }
   
-  private void validate(Bean<?> bean)
+  void validate(Bean<?> bean)
   {
     if (bean == null)
       return;
@@ -941,6 +948,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
         throw new AmbiguousResolutionException(loc + e.getMessage(), e);
       } catch (UnsatisfiedResolutionException e) {
         String loc = getLocation(_field);
+        
+        System.out.println("RESOLUTION: " + _field + " " + e);
         
         throw new UnsatisfiedResolutionException(loc + e.getMessage(), e);
       } catch (IllegalProductException e) {
