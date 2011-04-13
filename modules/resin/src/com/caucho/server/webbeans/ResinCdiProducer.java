@@ -156,6 +156,7 @@ public class ResinCdiProducer
     }
   }
   
+  /*
   @Produces
   @CauchoDeployment
   @ContextDependent
@@ -163,6 +164,7 @@ public class ResinCdiProducer
   {
     return injectionPoint.getBean();
   }
+  */
 
   /**
    * Adds the bean validation producer to CDI. This uses reflection in case
