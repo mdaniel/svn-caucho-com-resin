@@ -221,8 +221,11 @@ public class HmtpRequest extends AbstractProtocolConnection
     HmtpLinkActor linkActor = _linkActor;
     _linkActor = null;
 
-    MessageStream linkStream = _toLinkBroker;
+    Broker linkBroker = _toLinkBroker;
     _toLinkBroker = null;
+    
+    if (linkBroker != null)
+      linkBroker.close();
 
     if (linkActor != null) {
       linkActor.onCloseConnection();

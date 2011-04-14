@@ -93,4 +93,9 @@ abstract public class AbstractBroker
   {
     return false;
   }
+  
+  @Override
+  public void close()
+  {
+  }
 }

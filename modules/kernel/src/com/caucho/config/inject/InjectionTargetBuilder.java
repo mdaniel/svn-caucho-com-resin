@@ -949,8 +949,6 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       } catch (UnsatisfiedResolutionException e) {
         String loc = getLocation(_field);
         
-        System.out.println("RESOLUTION: " + _field + " " + e);
-        
         throw new UnsatisfiedResolutionException(loc + e.getMessage(), e);
       } catch (IllegalProductException e) {
         String loc = getLocation(_field);

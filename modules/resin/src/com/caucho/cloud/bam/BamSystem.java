@@ -142,6 +142,12 @@ public class BamSystem extends AbstractResinSubSystem
   }
   
   @Override
+  public void stop()
+  {
+    _broker.close();
+  }
+  
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _address + "]";

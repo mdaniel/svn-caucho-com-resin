@@ -685,10 +685,20 @@ public class HempBroker extends AbstractManagedBroker
 
     for (String alias : _aliasList)
       _manager.removeBroker(alias);
+    
+    ArrayList<Mailbox> mailboxes = new ArrayList<Mailbox>(_actorMap.values());
 
     _actorMap.clear();
     _actorCache.clear();
     _actorStreamMap.clear();
+    
+    for (Mailbox mailbox : mailboxes) {
+      try {
+        mailbox.close();
+      } catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
   }
 
   private String getAddress(ActorHolder actor, Annotation []annList)

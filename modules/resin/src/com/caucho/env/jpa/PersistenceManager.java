@@ -345,7 +345,7 @@ public class PersistenceManager
 
       ArrayList<PersistenceUnitManager> pUnitList
         = new ArrayList<PersistenceUnitManager>();
-      
+
       synchronized (_persistenceUnitMap) {
         pUnitList.addAll(_persistenceUnitMap.values());
       }

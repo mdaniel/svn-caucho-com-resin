@@ -59,6 +59,15 @@ public class PassthroughBroker extends AbstractBroker
     _mailbox = mailbox;
   }
   
+  public void close()
+  {
+    Mailbox mailbox = _mailbox;
+    _mailbox = null;
+    
+    if (mailbox != null)
+      mailbox.close();
+  }
+  
   @Override
   public String toString()
   {

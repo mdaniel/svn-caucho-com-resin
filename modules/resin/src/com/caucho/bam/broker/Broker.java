@@ -61,4 +61,9 @@ public interface Broker extends MessageStream
    * Removes a mailbox (optional operation).
    */
   public void removeMailbox(Mailbox mailbox);
+  
+  /**
+   * Close the Broker
+   */
+  public void close();
 }

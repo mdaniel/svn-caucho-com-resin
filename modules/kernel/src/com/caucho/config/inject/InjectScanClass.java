@@ -257,7 +257,9 @@ class InjectScanClass implements ScanClass
     }
   }
   
-  private boolean isMatch(char []buffer, int offset, int length,
+  private boolean isMatch(char []buffer, 
+                          int offset,
+                          int length,
                           char []matchBuffer)
   {
     if (length != matchBuffer.length)

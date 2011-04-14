@@ -39,6 +39,7 @@ import com.caucho.config.DependencyBean;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 import com.caucho.vfs.Vfs;
@@ -47,7 +48,7 @@ import com.caucho.vfs.Vfs;
  * The Resin class represents the top-level container for Resin.
  * It exactly matches the &lt;resin> tag in the resin.xml
  */
-public class BootResinConfig implements SchemaBean, DependencyBean
+public class BootResinConfig implements SchemaBean, DependencyBean, EnvironmentBean
 {
   private Resin _resin;
 
@@ -71,6 +72,11 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   public CloudSystem getCloudSystem()
   {
     return _resin.getCloudSystem();
+  }
+  
+  public ClassLoader getClassLoader()
+  {
+    return _resin.getClassLoader();
   }
 
   /**
@@ -116,6 +122,7 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   public void setResinSystemAuthKey(String key)
   {
     SecurityService security = SecurityService.getCurrent();
+
     security.setSignatureSecret(key);
   }
 
