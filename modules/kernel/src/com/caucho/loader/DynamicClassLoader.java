@@ -88,7 +88,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private final static URL []NULL_URL_ARRAY = new URL[0];
 
   private static long _globalDependencyCheckInterval = 2000L;
-  private static boolean _isJarCacheEnabled;
+  private static boolean _isJarCacheEnabled = true;
 
   private String _id;
 
@@ -1782,7 +1782,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     URL url = _resourceCache.get(name);
-
+    
     if (url == NULL_URL)
       return null;
     else if (url != null)
@@ -1814,7 +1814,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       Loader loader = loaders.get(i);
 
       url = loader.getResource(name);
-
+      
       if (url != null) {
         _resourceCache.put(name, url);
 

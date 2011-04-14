@@ -74,8 +74,8 @@ public class SystemClassLoader
     // #4420 - major performance for Spring-like startup if preScan is disabled
     // preScan = "false";
     
-    if (preScan == null || ! "false".equals(preScan))
-      DynamicClassLoader.setJarCacheEnabled(true);
+    if ("false".equals(preScan))
+      DynamicClassLoader.setJarCacheEnabled(false);
 
     String smallmem = System.getProperty("caucho.smallmem");
     

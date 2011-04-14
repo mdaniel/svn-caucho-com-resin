@@ -198,8 +198,9 @@ public class FileSetType {
     return false;
   }
 
+  @Override
   public String toString()
   {
-    return "FileSetType[]";
+    return "FileSetType[" + _dir + "]";
   }
 }

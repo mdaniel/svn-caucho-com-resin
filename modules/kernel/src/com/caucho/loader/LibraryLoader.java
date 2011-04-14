@@ -216,6 +216,8 @@ public class LibraryLoader extends JarListLoader {
   @Override
   protected void destroy()
   {
+    super.destroy();
+    
     clearJars();
   }
 

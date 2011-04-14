@@ -224,8 +224,8 @@ public final class Block implements SyncCacheListener {
         
         clearDirty();
       } else {
-        if (log.isLoggable(Level.FINEST))
-          log.finest("read db-block " + this);
+        if (log.isLoggable(Level.ALL))
+          log.log(Level.ALL, "read db-block " + this);
         
         clearDirty();
         
@@ -444,8 +444,8 @@ public final class Block implements SyncCacheListener {
         int dirtyMin = (int) dirty;
 
         if (dirtyMin < dirtyMax) {
-          if (log.isLoggable(Level.FINEST))
-            log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
+          if (log.isLoggable(Level.ALL))
+            log.log(Level.ALL, "write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
 
           boolean isPriority = false;
 
