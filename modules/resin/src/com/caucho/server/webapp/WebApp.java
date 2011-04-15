@@ -2052,7 +2052,7 @@ public class WebApp extends ServletContextImpl
     if (! hasListener(listener.getListenerClass())) {
       _listeners.add(listener);
       
-      //jsp/18n
+      // jsp/18n, server/12t7
       if (_lifecycle.isStarting() || _lifecycle.isActive()) {
         addListenerObject(listener.createListenerObject(), true);
       }
@@ -3005,7 +3005,7 @@ public class WebApp extends ServletContextImpl
 
     for (String className : pendingClasses) {
       Class<?> cl = _classLoader.loadClass(className);
-
+      
       if (ServletContextListener.class.isAssignableFrom(cl))
         listeners.add(cl);
       else if (ServletContextAttributeListener.class.isAssignableFrom(cl))
@@ -3024,7 +3024,26 @@ public class WebApp extends ServletContextImpl
         filters.add(cl);
     }
 
+    // server/12t7
     for (Class<?> listenerClass : listeners) {
+      if (! isAttributeListener(listenerClass))
+        continue;
+      
+      WebListener webListener
+        = listenerClass.getAnnotation(WebListener.class);
+
+      if (webListener != null) {
+        ListenerConfig listener = new ListenerConfig();
+        listener.setListenerClass(listenerClass);
+
+        addListener(listener);
+      }
+    }
+
+    for (Class<?> listenerClass : listeners) {
+      if (isAttributeListener(listenerClass))
+        continue;
+      
       WebListener webListener
         = listenerClass.getAnnotation(WebListener.class);
 
@@ -3058,6 +3077,14 @@ public class WebApp extends ServletContextImpl
       if (servletSecurity != null)
         addServletSecurity(servletClass, servletSecurity);
     }
+  }
+  
+  private boolean isAttributeListener(Class<?> cl)
+  {
+    if (ServletContextAttributeListener.class.isAssignableFrom(cl))
+      return true;
+    else
+      return false;
   }
 
   public WebAppAdmin getAdmin()

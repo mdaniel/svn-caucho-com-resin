@@ -37,6 +37,9 @@
   </resin:AdminAuthenticator>
 
   <!--
+     - For clustered systems, create a password in place of "changeme"
+     - and uncomment the <resin-system-auth-key>.
+     -
      - <resin-system-auth-key>changeme</resin-system-auth-key>
     -->
 

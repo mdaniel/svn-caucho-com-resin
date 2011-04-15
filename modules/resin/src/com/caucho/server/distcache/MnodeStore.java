@@ -85,7 +85,9 @@ public class MnodeStore implements AlarmListener {
   private long _startupLastUpdateTime;
 
   private Alarm _alarm;
-  private long _expireReaperTimeout = 60 * 60 * 1000L;
+  
+  // private long _expireReaperTimeout = 60 * 60 * 1000L;
+  private long _expireReaperTimeout = 15 * 60 * 1000L;
 
   public MnodeStore(Path path, String serverName)
     throws Exception
@@ -642,8 +644,6 @@ public class MnodeStore implements AlarmListener {
 
       if (count > 0)
         log.finer(this + " expired " + count + " old data");
-
-      // System.out.println(this + " EXPIRE: " + count);
     } catch (Exception e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);

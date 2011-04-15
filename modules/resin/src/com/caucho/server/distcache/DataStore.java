@@ -70,8 +70,9 @@ public class DataStore {
   private final String _tableName;
   private final String _mnodeTableName;
 
-  // remove unused data after 1 hour
-  private long _expireTimeout = 60 * 60L * 1000L;
+  // remove unused data after 15 minutes
+  // private long _expireTimeout = 60 * 60L * 1000L;
+  private long _expireTimeout = 15 * 60L * 1000L;
 
   private DataSource _dataSource;
 
@@ -513,8 +514,9 @@ public class DataStore {
         while (rs.next()) {
           long oid = rs.getLong(2);
           
-          if (oid > 0)
+          if (oid > 0) {
             rs.updateLong(1, expires);
+          }
           else {
             try {
               notifyOrphan(rs.getBytes(3));
