@@ -963,6 +963,7 @@
      
   <target name="junit" depends="init">
     <antcall target="module" inheritRefs="true">
+      <param name="modules" value="${resin.modules}"/>
       <param name="module.name" value="junit"/>
       <param name="module.jar" value="resin-junit.jar"/>
     </antcall>
@@ -972,8 +973,8 @@
     <property name="jar.name" value="${module.name}.jar"/>
     
     <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.dir" value="${artifacts}"/>
-      <param name="jar" value="${artifacts}/${module.name}/dist/${jar.name}"/>
+      <param name="module.dir" value="${resin.artifacts}"/>
+      <param name="jar" value="${resin.artifacts}/${module.name}/dist/${jar.name}"/>
     </antcall>
   </target>
     
