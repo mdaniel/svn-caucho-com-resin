@@ -753,7 +753,7 @@
     <mkdir dir="${build}/pdf/images"/>
 
     <apply executable="convert" dir="." dest="${build}/pdf/images">
-      <fileset dir="${doc.src}/images">
+      <fileset dir="${resin.doc}/images">
         <include name="*.gif" />
         <include name="*.jpg" />
         <include name="*.png" />
@@ -769,7 +769,7 @@
     
     <copy todir="${build}/pdf/images"
 	  overwrite='true'>
-      <fileset dir="${doc}/images">
+      <fileset dir="${resin.doc}/images">
         <include name="**/*.pdf"/>
       </fileset>
     </copy>
