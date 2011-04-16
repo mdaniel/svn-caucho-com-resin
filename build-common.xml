@@ -1269,7 +1269,7 @@
         <include name="bin/stop.bat"/>
       </fileset>
       
-      <fileset dir="${resindir}/dist/libexec">
+      <fileset dir="${dist.build}/libexec">
         <include name="**"/>
         <exclude name="aclocal.m4"/>
         <exclude name="automake"/>
