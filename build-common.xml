@@ -840,7 +840,8 @@
       <zipfileset dir="${dist}">
         <patternset refid="dist"/>
       </zipfileset>
-      <zipfileset dir="${dist.build}" filemode="775">
+      
+      <zipfileset dir="${dist}" filemode="775">
         <patternset refid="dist.bin"/>
       </zipfileset>
     </zip>

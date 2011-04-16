@@ -861,13 +861,13 @@
       <param name="pom.xml" value="${modules}/javaee/maven2/pom.xml"/>
       <param name="ivy.xml" value="${modules}/javaee/maven2/ivy.xml"/>
     </antcall>
-
+<!--
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="ant"/>
       <param name="jar.name" value="resin-ant.jar"/>
       <param name="maven.name" value="resin-ant"/>
     </antcall>
-<!--
+
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="eclipse"/>
       <param name="jar.name"
