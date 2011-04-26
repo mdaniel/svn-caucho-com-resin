@@ -1,0 +1,108 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Health Meters</title>
+  <description>
+  <p>Health meters are a simple way to create visually pleasing graphs in 
+  /resin-admin.</p>
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Configuration">
+
+<s2 title="health.xml">
+
+<p>Meters are configured as part of <b>health.xml</b> using 
+<a href="../admin/config-candi.xtp">CanDI</a> to create and update Java 
+objects.  Refer to <a href="../admin/health-checking.xtp#Configuration">health 
+checking configuration</a> for a full description of health.xml.  Resin 
+4.0.17 and later includes a full compliemnt of pre-configured JMX meters 
+in health.xml.</p>
+
+<example title="Example: importing health.xml into resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin">
+  &lt;cluster-default>  
+    ...
+    &lt;!--
+       - Admin services
+      -->
+    &lt;resin:DeployService/>
+    
+    &lt;resin:if test="${resin.professional}">
+      &lt;resin:AdminServices/>
+    &lt;/resin:if>
+
+    &lt;!--
+       - Configuration for the health monitoring system
+      -->
+    &lt;resin:if test="${resin.professional}">
+      &lt;resin:import path="${__DIR__}/health.xml" optional="true"/>
+    &lt;/resin:if>
+    ...
+  &lt;/cluster-default>
+&lt;/resin>
+</example>
+
+<p>Note: <code>&lt;resin:AdminServices/></code> (or more precisely just 
+<code>&lt;resin:StatsService/></code>) is required to support health meters
+and graphing.</p>
+
+</s2>
+
+<s2 title="Meter names">
+
+<p>Health meters are named using a concatenation of keys separated by pipe (|) 
+characters, loosely organized from least specific to most specific.  Since 
+meter statistics are shared between each member in a Resin cluster, Resin will 
+automatically prefix each meter name with the cluster node index to insure 
+the name is unique between cluster members.</p>
+
+<p>The pipe character in the name provides a secondary benefit of helping to 
+enhance the /resin-admin UI by categorizing meters into drill downs.  
+Consider the following example.</p>
+
+<example title="Example: meter naming">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:JmxDeltaMeter>
+    &lt;name>JVM|Compilation|Compilation Time&lt;/name>
+    &lt;object-name>java.lang:type=Compilation&lt;/object-name>
+    &lt;attribute>TotalCompilationTime&lt;/attribute>
+  &lt;/health:JmxDeltaMeter>
+
+&lt;/cluster>
+</example>
+
+<p>In this example, <code>JVM|Compilation|Compilation Time</code> provides 
+the base of the name.  For cluster node index 0, Resin prefixes the name 
+with <code>00|</code>.  /resin-admin will then use the cluster index and first 
+two keys to create drill downs to logically organized meters for display.</p>
+
+<figure src="health-meters.png"/>
+
+</s2>
+
+</s1>
+
+<s1 title="JMX meters">
+
+<p>Virtually any local numeric JMX MBean attribute can be graphed using 
+JMX meters.</p>
+
+<include-defun name="health:JmxMeter"/>
+
+<include-defun name="health:JmxDeltaMeter"/>
+
+</s1>
+
+</body>
+
+</document>

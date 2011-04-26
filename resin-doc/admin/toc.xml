@@ -1,6 +1,6 @@
 <navigation threaded="true">
   
-  <item link="index.xtp" title="admin">
+  <item link="index.xtp" title="admin/configuration">
     
     <item link="starting-resin.xtp" title="Starting Resin">
       
@@ -114,6 +114,16 @@
        
        -->
            
+    </item>
+    
+    
+    <item link="health.xtp" title="Health">
+    
+      <item link="health-checking.xtp" title="Health Checking"
+            description="Health checks, conditions, and remediation actions"/>
+      <item link="health-meters.xtp" title="Meters"
+            description="Statistic graphing with meters"/>
+            
     </item>
 
     <item link="logging.xtp" title="Logging"

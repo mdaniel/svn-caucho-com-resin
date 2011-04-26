@@ -145,6 +145,13 @@ public abstract class Section extends ContainerNode {
     return defun;
   }
 
+  public IncludeDefun createIncludeDefun()
+  {
+    IncludeDefun includeDefun = new IncludeDefun(getDocument());
+    addItem(includeDefun);
+    return includeDefun;
+  }
+
   public DefinitionList createDl()
   {
     DefinitionList list = new DefinitionList(getDocument());
