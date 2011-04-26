@@ -32,6 +32,6 @@ package com.caucho.config.type;
 /**
  * Bean implementing control flow
  */
-public interface FlowBean
+public interface FlowBean extends EnvBean
 {
 }

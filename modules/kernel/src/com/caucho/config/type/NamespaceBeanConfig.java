@@ -33,8 +33,6 @@ import com.caucho.config.ConfigException;
 
 public class NamespaceBeanConfig {
   private TypeFactory _factory;
-  private String _ns;
-  private boolean _isDefault;
 
   private String _name;
   private String _className;
@@ -45,8 +43,6 @@ public class NamespaceBeanConfig {
   NamespaceBeanConfig(TypeFactory factory, String ns, boolean isDefault)
   {
     _factory = factory;
-    _ns = ns;
-    _isDefault = isDefault;
     _loader = Thread.currentThread().getContextClassLoader();
   }
 

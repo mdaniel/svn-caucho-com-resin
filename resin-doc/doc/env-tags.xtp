@@ -1306,8 +1306,8 @@ for JNDI-based application configuration.</p>
 
 <p>Some application beans prefer to retrieve configuration data from JNDI,
 including String, Integer, and Double constants.  env-entry configures
-that data in the current context.  As with other Resin configuration, the
-value can use JSP-EL expressions.</p>
+that data in the current context.  The
+value can not use JSP-EL expressions.</p>
 
 <deftable title="&lt;env-entry> attributes">
 <tr>

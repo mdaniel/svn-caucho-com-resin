@@ -92,6 +92,8 @@ public class EjbBean<X> extends DescriptionGroupConfig
   private static final L10N L = new L10N(EjbBean.class);
   private final EjbConfig _ejbConfig;
   private final String _ejbModuleName;
+  
+  private EjbJar _jar;
 
   private ClassLoader _loader;
 
@@ -220,6 +222,16 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public String getModuleName()
   {
     return _ejbModuleName;
+  }
+  
+  public EjbJar getJar()
+  {
+    return _jar;
+  }
+  
+  public void setJar(EjbJar jar)
+  {
+    _jar = jar;
   }
 
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)

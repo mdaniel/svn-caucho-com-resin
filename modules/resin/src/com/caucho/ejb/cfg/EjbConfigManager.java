@@ -233,7 +233,7 @@ public class EjbConfigManager extends EjbConfig {
 
     Environment.addDependency(path);
 
-    EjbJar ejbJar = new EjbJar(this, ejbModuleName);
+    EjbJar ejbJar = new EjbJar(this, ejbModuleName, path);
 
     try {
       if (log.isLoggable(Level.FINE))

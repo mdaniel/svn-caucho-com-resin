@@ -43,6 +43,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.inject.Module;
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -50,7 +51,7 @@ import com.caucho.vfs.Path;
  * Configuration for a classloader root containing webbeans
  */
 @Module
-public class BeansConfig {
+public class BeansConfig implements EnvironmentBean {
   private static final L10N L = new L10N(BeansConfig.class);
   private InjectManager _injectManager;
   private Path _root;
@@ -95,6 +96,7 @@ public class BeansConfig {
   /**
    * Returns the owning classloader.
    */
+  @Override
   public ClassLoader getClassLoader()
   {
     return getContainer().getClassLoader();

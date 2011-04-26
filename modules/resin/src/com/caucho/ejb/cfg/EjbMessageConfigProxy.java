@@ -45,9 +45,11 @@ public class EjbMessageConfigProxy extends EjbBeanConfigProxy {
   /**
    * Creates a new message bean configuration.
    */
-  public EjbMessageConfigProxy(EjbConfig config, String ejbModuleName)
+  public EjbMessageConfigProxy(EjbConfig config, 
+                               EjbJar jar, 
+                               String ejbModuleName)
   {
-    super(config, ejbModuleName);
+    super(config, jar, ejbModuleName);
   }
 
   /**
@@ -57,6 +59,9 @@ public class EjbMessageConfigProxy extends EjbBeanConfigProxy {
   @Override
   public void configure()
   {
+    if (isSkip())
+      return;
+    
     EjbBean<?> oldBean = getConfig().getBeanConfig(getEjbName());
 
     if (oldBean == null) {

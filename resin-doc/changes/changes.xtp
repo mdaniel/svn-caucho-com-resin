@@ -11,7 +11,16 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.17 - snapshot">
+<s2 title="4.0.18 - snapshot">
+<ul>
+<li>hessian: send-collection-type should always send java.util types (#4489, rep by Keith Fetterman)</li>
+<li>ioc: resin:message not properly initialized (#4496, rep by Keith Fetterman)</li>
+<li>ioc: env-entry does not use EL - doc update (#4516, rep by mnsh)</li>
+<li>ejb: ejb-ee jar with &lt;entity> should be skipped w/o fatal error (#4503, rep by Rick Mann)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.17 - Apr 15, 2011">
 <ul>
 <li>candi: jar order dependency for ProcessManagedBean (#4493, rep by andreaskaltenbach)</li>
 <li>security: order dependency between user-role and transport guarantee (#4495, rep by Keith Fetterman)</li>

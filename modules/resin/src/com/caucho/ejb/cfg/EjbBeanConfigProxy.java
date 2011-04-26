@@ -43,6 +43,7 @@ import com.caucho.vfs.PersistentDependency;
  */
 public class EjbBeanConfigProxy implements DependencyBean {
   private final EjbConfig _config;
+  private final EjbJar _jar;
   private final String _ejbModuleName;
 
   private String _ejbName;
@@ -60,9 +61,12 @@ public class EjbBeanConfigProxy implements DependencyBean {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbBeanConfigProxy(EjbConfig config, String ejbModuleName)
+  public EjbBeanConfigProxy(EjbConfig config,
+                            EjbJar jar,
+                            String ejbModuleName)
   {
     _config = config;
+    _jar = jar;
     _ejbModuleName = ejbModuleName;
   }
 
@@ -134,6 +138,14 @@ public class EjbBeanConfigProxy implements DependencyBean {
   public Class<?> getEjbClass()
   {
     return _ejbClass;
+  }
+  
+  public boolean isSkip()
+  {
+    if (_jar != null)
+      return _jar.isSkip();
+    else
+      return false;
   }
 
   /**

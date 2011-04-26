@@ -27,51 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.core;
-
-import java.util.logging.Logger;
-
-import javax.annotation.PostConstruct;
-
-import com.caucho.config.type.EnvBean;
-import com.caucho.util.CharBuffer;
+package com.caucho.config.type;
 
 /**
- * Logs an EL value.
+ * Bean implementing an environment capability, like resin:message
  */
-public class ResinLog {
-  private String _name = "com.caucho.config.core.ResinLog";
-  private CharBuffer _text = new CharBuffer();
-
-  public ResinLog()
-  {
-  }
-
-  /**
-   * Sets the log name.
-   */
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  /**
-   * The value to be logged.
-   */
-  public void addText(String text)
-  {
-    _text.append(text);
-  }
-
-  /**
-   * Initialization logs the data.
-   */
-  @PostConstruct
-  public void init()
-  {
-    Logger log = Logger.getLogger(_name);
-
-    log.info(_text.toString());
-  }
+public interface EnvBean
+{
 }
-

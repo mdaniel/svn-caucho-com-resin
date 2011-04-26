@@ -50,6 +50,8 @@ abstract public class ConfigType<T>
 {
   private static final L10N L = new L10N(ConfigType.class);
   
+  private boolean _isEnvBean;
+  
   /**
    * Returns the Java type.
    */
@@ -336,6 +338,22 @@ abstract public class ConfigType<T>
   public boolean isInlineType(ConfigType<?> type)
   {
     return false;
+  }
+
+  /**
+   * Returns true for an environment bean.
+   */
+  public boolean isEnvBean()
+  {
+    return _isEnvBean;
+  }
+
+  /**
+   * Returns true for an environment bean.
+   */
+  public void setEnvBean(boolean isEnvBean)
+  {
+    _isEnvBean = isEnvBean;
   }
 
   @Override

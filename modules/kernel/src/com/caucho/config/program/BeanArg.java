@@ -34,12 +34,10 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.InjectionPointImpl;
 import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.inject.Module;
 
@@ -65,6 +63,9 @@ public class BeanArg<T> extends Arg<T> {
     _bindings = bindings;
     
     _ip = ip;
+    
+    System.out.println("ARG: " + type);
+    Thread.dumpStack();
   }
 
   @Override

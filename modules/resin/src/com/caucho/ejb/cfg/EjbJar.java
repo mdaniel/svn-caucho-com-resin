@@ -32,6 +32,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.Signature;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -43,14 +44,20 @@ public class EjbJar extends DescriptionGroupConfig {
   private static final L10N L = new L10N(EjbJar.class);
 
   private final EjbConfig _config;
+  
   private String _ejbModuleName;
+  private Path _rootPath;
 
   private boolean _isMetadataComplete;
+  private boolean _isSkip;
 
-  public EjbJar(EjbConfig config, String ejbModuleName)
+  public EjbJar(EjbConfig config, 
+                String ejbModuleName,
+                Path rootPath)
   {
     _config = config;
     _ejbModuleName = ejbModuleName;
+    _rootPath = rootPath;
   }
 
   public String getModuleName()
@@ -70,6 +77,16 @@ public class EjbJar extends DescriptionGroupConfig {
   public void setSchemaLocation(String value)
   {
   }
+  
+  public void setSkip(boolean isSkip)
+  {
+    _isSkip = isSkip;
+  }
+  
+  public boolean isSkip()
+  {
+    return _isSkip;
+  }
 
   public void setMetadataComplete(boolean isMetadataComplete)
   {
@@ -84,7 +101,7 @@ public class EjbJar extends DescriptionGroupConfig {
   public EjbEnterpriseBeans createEnterpriseBeans()
     throws ConfigException
   {
-    return new EjbEnterpriseBeans(_config, _ejbModuleName);
+    return new EjbEnterpriseBeans(_config, this, _ejbModuleName);
   }
 
   public InterceptorsConfig createInterceptors()
@@ -111,6 +128,11 @@ public class EjbJar extends DescriptionGroupConfig {
 
   public void setBooleanLiteral(BooleanLiteral literal)
   {
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _rootPath.getFullPath() + "]";
   }
 
   public static class MethodPermission {

@@ -40,6 +40,7 @@ import java.lang.reflect.Modifier;
 /**
  * Represents a named method call on an object.
  */
+@SuppressWarnings("serial")
 public class MethodExpr extends Expr {
   private Expr _expr;
   private String _methodName;
@@ -81,7 +82,7 @@ public class MethodExpr extends Expr {
       Method method = findMethod(aObj.getClass());
 
       if (method != null) {
-        Class []params = method.getParameterTypes();
+        Class<?> []params = method.getParameterTypes();
 
         for (int j = 0; j < params.length; j++) {
           objs[j] = evalArg(params[j], _args[j], env);
@@ -102,7 +103,7 @@ public class MethodExpr extends Expr {
     }
   }
   
-  private Method findMethod(Class type)
+  private Method findMethod(Class<?> type)
   {
     if (type == null)
       return null;
@@ -116,7 +117,7 @@ public class MethodExpr extends Expr {
         if (! Modifier.isPublic(method.getModifiers()))
           continue;
         
-        Class []params = method.getParameterTypes();
+        Class<?> []params = method.getParameterTypes();
         
         if (method.getName().equals(_methodName) &&
             params.length == _args.length)
@@ -124,7 +125,7 @@ public class MethodExpr extends Expr {
       }
     }
     
-    Class []interfaces = type.getInterfaces();
+    Class<?> []interfaces = type.getInterfaces();
     for (int i = 0; i < interfaces.length; i++) {
       Method method = findMethod(interfaces[i]);
       if (method != null)
@@ -134,7 +135,7 @@ public class MethodExpr extends Expr {
     return findMethod(type.getSuperclass());
   }
   
-  static Object evalArg(Class cl, Expr expr, ELContext env)
+  static Object evalArg(Class<?> cl, Expr expr, ELContext env)
     throws ELException
   {
     Marshall marshall = Marshall.create(cl);

@@ -53,9 +53,11 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbSessionConfigProxy(EjbConfig config, String ejbModuleName)
+  public EjbSessionConfigProxy(EjbConfig config,
+                               EjbJar jar,
+                               String ejbModuleName)
   {
-    super(config, ejbModuleName);
+    super(config, jar, ejbModuleName);
   }
   
   public void setSessionType(String sessionType)
@@ -74,6 +76,9 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   @Override
   public void configure()
   {
+    if (isSkip())
+      return;
+    
     if (! _isConfigured.compareAndSet(false, true))
       return;
     

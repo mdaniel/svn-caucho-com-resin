@@ -111,6 +111,11 @@ public abstract class Attribute {
     return false;
   }
   
+  public boolean isAssignableFrom(ConfigType<?> type)
+  {
+    return true;
+  }
+  
   /**
    * Sets the value of the attribute as text
    */

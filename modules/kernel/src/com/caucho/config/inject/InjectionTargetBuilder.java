@@ -610,6 +610,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       throw new ConfigException(L.l("{0} is an invalid managed bean because its constructor has an @Observes parameter",
                                     getAnnotatedType().getJavaClass().getName()));
     }
+    
+    System.out.println("ARG: " + param + " " + this);
 
     return new BeanArg<X>(getBeanManager(),
                           param.getBaseType(), 

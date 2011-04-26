@@ -28,31 +28,54 @@
 
 package com.caucho.ejb.cfg;
 
+import java.util.logging.Logger;
+
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.util.L10N;
+
 /**
  * Configuration for an ejb bean.
  */
 public class EjbEnterpriseBeans {
+  private static final L10N L = new L10N(EjbEnterpriseBeans.class);
+  private static final Logger log
+    = Logger.getLogger(EjbEnterpriseBeans.class.getName());
+  
   private final EjbConfig _config;
+  private final EjbJar _jar;
   private final String _ejbModuleName;
 
-  public EjbEnterpriseBeans(EjbConfig config, String ejbModuleName)
+  public EjbEnterpriseBeans(EjbConfig config, 
+                            EjbJar jar,
+                            String ejbModuleName)
   {
     _config = config;
+    _jar = jar;
     _ejbModuleName = ejbModuleName;
   }
 
   public EjbSessionConfigProxy createSession()
   {
-    return new EjbSessionConfigProxy(_config, _ejbModuleName);
+    return new EjbSessionConfigProxy(_config, _jar, _ejbModuleName);
   }
 
   public EjbBeanConfigProxy createEjbBean()
   {
-    return new EjbBeanConfigProxy(_config, _ejbModuleName);
+    return new EjbBeanConfigProxy(_config, _jar, _ejbModuleName);
   }
 
   public EjbMessageConfigProxy createMessageDriven()
   {
-    return new EjbMessageConfigProxy(_config, _ejbModuleName);
+    return new EjbMessageConfigProxy(_config, _jar, _ejbModuleName);
+  }
+  
+  public void addBuilderProgram(ConfigProgram program)
+  {
+    if (! _jar.isSkip()) {
+      _jar.setSkip(true);
+      
+      log.warning(L.l("Skipping EJB jar '{0}' jar because of unknown EJB lite config {1}",
+                      _jar, program));
+    }
   }
 }

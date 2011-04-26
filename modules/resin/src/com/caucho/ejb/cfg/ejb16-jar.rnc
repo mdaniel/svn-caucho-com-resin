@@ -39,6 +39,8 @@ ejb16_after-completion-method = element after-completion-method {
   ejb16_named-method-Type
 }
 
+ejb16_any-Group = text | (attribute * {string} | element * { ejb16_any-Group })*
+
 ejb16_application-exception = element application-exception {
   attribute id { string }?,
   ejb16_exception-class,
@@ -223,43 +225,7 @@ ejb16_enterprise-beans = element enterprise-beans {
 }
 
 ejb16_entity = element entity {
-  attribute id { string }?,
-
-  javaee_description-Group,
-
-  ejb16_ejb-name,
-
-  ejb16_mapped-name?,
-
-  ejb16_home?,
-
-  ejb16_remote?,
-
-  ejb16_local-home?,
-
-  ejb16_local?,
-
-  ejb16_ejb-class,
-
-  ejb16_persistence-type,
-
-  ejb16_prim-key-class,
-
-  ejb16_reentrant,
-
-  ejb16_cmp-version?,
-
-  ejb16_abstract-schema-name?,
-
-  ejb16_cmp-field*,
-
-  ejb16_primkey-field?,
-
-  ejb16_ejb_env,
-
-  ejb16_security-identity?,
-
-  ejb16_query*
+  ejb16_any-Group
 }
 
 ejb16_exception-class = element exception-class {

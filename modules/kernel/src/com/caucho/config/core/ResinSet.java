@@ -32,12 +32,13 @@ package com.caucho.config.core;
 import javax.annotation.PostConstruct;
 
 import com.caucho.config.Config;
+import com.caucho.config.type.EnvBean;
 import com.caucho.naming.Jndi;
 
 /**
  * Sets an EL value.
  */
-public class ResinSet {
+public class ResinSet implements EnvBean {
   private String _jndiName;
   private String _var;
   
@@ -127,6 +128,24 @@ public class ResinSet {
       }
       */
     }
+  }
+  
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append(getClass().getSimpleName()).append("[");
+    
+    if (_var != null)
+      sb.append(_var);
+    
+    if (_jndiName != null)
+      sb.append(",jndi=").append(_jndiName);
+    
+    sb.append("]");
+    
+    return sb.toString();
   }
 }
 

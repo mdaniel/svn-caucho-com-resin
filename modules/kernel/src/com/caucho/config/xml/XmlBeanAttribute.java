@@ -101,6 +101,8 @@ public class XmlBeanAttribute extends Attribute {
 
     String pkg = uri.substring("uri:java:".length());
 
+    // ioc/13jm
+    /*
     Class<?> cl = TypeFactory.loadClass(pkg, localName);
 
     if (cl == null) {
@@ -108,6 +110,23 @@ public class XmlBeanAttribute extends Attribute {
 
       if (type != null)
         return type.create(parent, qName);
+
+      throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
+                                    pkg, localName, qName));
+    }
+    */
+    
+    // ioc/13jm
+    ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(qName);
+    
+    System.out.println("TYP: " + type + " " + qName);
+    if (type != null) {
+      return type.create(parent, qName);
+    }
+    
+    Class<?> cl = TypeFactory.loadClass(pkg, localName);
+
+    if (cl == null) {
 
       throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
                                     pkg, localName, qName));
@@ -143,10 +162,16 @@ public class XmlBeanAttribute extends Attribute {
 
       config.init();
     }
+    else {
+      ConfigType<?> childType = TypeFactory.getType(beanChild);
+      
+      childType.setProperty(beanChild, XmlConfigContext.TEXT, value);
+      
+      childType.init(beanChild);
+    }
 
     setValue(bean, name, beanChild);
   }
-
 
   /**
    * Sets the value of the attribute

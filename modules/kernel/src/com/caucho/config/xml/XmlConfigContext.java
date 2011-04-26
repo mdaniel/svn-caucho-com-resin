@@ -90,7 +90,7 @@ public class XmlConfigContext {
   private final static Logger log
     = Logger.getLogger(XmlConfigContext.class.getName());
 
-  private final static QName TEXT = new QName("#text");
+  public final static QName TEXT = new QName("#text");
   private final static Object NULL = new Object();
 
   private static ThreadLocal<XmlConfigContext> _currentBuilder
@@ -485,12 +485,14 @@ public class XmlConfigContext {
     Attribute attrStrategy;
 
     attrStrategy = type.getAttribute(qName);
+    
     if (attrStrategy == null) {
       attrStrategy = type.getDefaultAttribute(qName);
     }
 
-    if (attrStrategy != null)
+    if (attrStrategy != null) {
       return attrStrategy;
+    }
 
     if (childNode instanceof Element || childNode instanceof Attr) {
       String localName = qName.getLocalName();
@@ -672,7 +674,9 @@ public class XmlConfigContext {
     childBean = configureChildBean(childBean, childBeanType,
                                    childNode, attrStrategy);
 
-    attrStrategy.setValue(bean, qName, childBean);
+    if (! childBeanType.isEnvBean()) {
+      attrStrategy.setValue(bean, qName, childBean);
+    }
   }
 
   private Object configureChildBean(Object childBean,
